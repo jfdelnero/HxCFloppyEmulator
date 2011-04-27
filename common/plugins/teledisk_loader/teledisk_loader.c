@@ -227,12 +227,12 @@ int RLEExpander(unsigned char *src,unsigned char *dst,int blocklen)
 int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
-	unsigned int i,skew,k;
+	unsigned int i;
 	unsigned int file_offset;
-	int totaltracksize;
 	unsigned long tracklen;
-	int gap3len,interleave,rpm;
-	int sectorsize,Compress,numberoftrack,sidenumber;
+	unsigned char interleave,skew,trackformat;
+	unsigned short rpm,sectorsize;
+	int Compress,numberoftrack,sidenumber;
 	unsigned short * datalen;
 	CYLINDER* currentcylinder;
 	SIDE* currentside;
@@ -246,11 +246,9 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	unsigned char * ptr;
 	unsigned long filesize;
 	SECTORCONFIG  * sectorconfig;
-	unsigned char * trackdata;
 	unsigned char * fileimage;
 	unsigned long fileimage_buffer_offset;
-	int trackformat,rlen;
-	int bitsize;
+	int rlen;
 	floppycontext->hxc_printf(MSG_DEBUG,"TeleDisk_libLoad_DiskFile %s",imgfile);
 	
 	f=fopen(imgfile,"rb");
@@ -438,7 +436,6 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	floppycontext->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), gap3:%d,rpm:%d bitrate:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm,floppydisk->floppyBitRate);
 	
 	tracklen=(floppydisk->floppyBitRate/(rpm/60))/4;
-	//trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 
 	//////////////////////////////////
 	fileimage_buffer_offset=file_offset;
@@ -460,12 +457,10 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		if(td_track_header->PhysSide&0x80)
 		{
 			trackformat=ISOFORMAT_SD;
-			bitsize=4;
 		}
 		else
 		{
 			trackformat=ISOFORMAT_DD;
-			bitsize=2;
 		}
 		
 		floppycontext->hxc_printf(MSG_DEBUG,"------------- Track:%d, Side:%d, Number of Sector:%d -------------",td_track_header->PhysCyl,sidenumber,td_track_header->SecPerTrk);
@@ -486,13 +481,6 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		}
 
 		currentcylinder->floppyRPM=rpm;
-		if(!currentcylinder->sides[sidenumber])
-		{
-			currentcylinder->sides[sidenumber]=malloc(sizeof(SIDE));
-			memset(currentcylinder->sides[sidenumber],0,sizeof(SIDE));
-		}
-		currentside=currentcylinder->sides[sidenumber];					
-		currentside->number_of_sector=floppydisk->floppySectorPerTrack;
 
 		////////////////////crc track header///////////////////
 		CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0xA097,0x0000);
@@ -507,10 +495,6 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		}
 		////////////////////////////////////////////////////////
 
-		trackdata=0;
-		totaltracksize=0;
-		currentside->number_of_sector=0;
-		currentside->tracklen=tracklen*8;
 		sectorconfig=(SECTORCONFIG  *)malloc(sizeof(SECTORCONFIG)*td_track_header->SecPerTrk);
 		memset(sectorconfig,0,sizeof(SECTORCONFIG)*td_track_header->SecPerTrk);
 		for ( i=0;i < td_track_header->SecPerTrk;i++ )
@@ -522,6 +506,10 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 			sectorconfig[i].head=td_sector_header->Side;
 			sectorconfig[i].sector=td_sector_header->SNum;
 			sectorconfig[i].sectorsize=128<<td_sector_header->SLen;
+			sectorconfig[i].bitrate=floppydisk->floppyBitRate;
+			sectorconfig[i].gap3=255;
+			sectorconfig[i].trackencoding=trackformat;
+
 			
 			if(td_sector_header->Syndrome & 0x04)
 			{
@@ -538,10 +526,8 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 			{
 				sectorconfig[i].missingdataaddressmark=1;
 			}
-
-			trackdata=realloc(trackdata,totaltracksize + (sectorconfig[i].sectorsize));
-			memset(&trackdata[totaltracksize],0,sectorconfig[i].sectorsize);
-
+			
+			sectorconfig[i].input_data=malloc(sectorconfig[i].sectorsize);
 			if  ( (td_sector_header->Syndrome & 0x30) == 0 && (td_sector_header->SLen & 0xf8) == 0 )
 			{			
 				//fileimage_buffer_offset=fileimage_buffer_offset+sizeof(unsigned short);
@@ -550,59 +536,24 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 				memcpy(&tempdata,&fileimage[fileimage_buffer_offset],(*datalen)+2);
 				fileimage_buffer_offset=fileimage_buffer_offset+(*datalen)+2;
 				
-				rlen=RLEExpander(tempdata,&trackdata[totaltracksize],(int)datalen);
+				rlen=RLEExpander(tempdata,sectorconfig[i].input_data,(int)datalen);
 			}
 			else
 			{
-				memset(&trackdata[totaltracksize],0,sectorconfig[i].sectorsize);
+				memset(sectorconfig[i].input_data,0,sectorconfig[i].sectorsize);
 			}
 
-			totaltracksize=totaltracksize + (sectorconfig[i].sectorsize);
-
-			currentside->number_of_sector++;
 			floppycontext->hxc_printf(MSG_DEBUG,"track:%d, side:%d, sector:%d, sectorsize:%d, flag:%.2x",sectorconfig[i].cylinder,sectorconfig[i].head,sectorconfig[i].sector,sectorconfig[i].sectorsize,td_sector_header->Syndrome);
 		}
 
-		currentside->tracklen=tracklen*8;
+		currentside=tg_generatetrackEx((unsigned short)td_track_header->SecPerTrk,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,2500 | NO_SECTOR_UNDER_INDEX);
+		currentcylinder->sides[sidenumber]=currentside;
 
-		currentside->flakybitsbuffer=0;			
-		currentside->timingbuffer=0;
-		currentside->databuffer=0;
-		currentside->indexbuffer=0;
-
-		currentside->bitrate=floppydisk->floppyBitRate;
-
-		if(trackformat==ISOFORMAT_DD || trackformat==IBMFORMAT_DD)
-			currentside->track_encoding=ISOIBM_MFM_ENCODING;
-		else
-			currentside->track_encoding=ISOIBM_FM_ENCODING;
-
-		k=fillindex(currentside->tracklen-1,currentside,2500,FALSE,1);
-
-		gap3len=84;			
-		while((bitsize*ISOIBMGetTrackSize(trackformat,currentside->number_of_sector,sectorsize,gap3len,sectorconfig)>=(int)(tracklen-(tracklen-(k>>3)))) && (gap3len>3))
+		for ( i=0;i < td_track_header->SecPerTrk;i++ )
 		{
-			gap3len--;
+			if(sectorconfig[i].input_data)
+				free(sectorconfig[i].input_data);
 		}
-
-		if((bitsize*ISOIBMGetTrackSize(trackformat,currentside->number_of_sector,sectorsize,gap3len,sectorconfig))>(int)tracklen)
-		{
-			tracklen=(ISOIBMGetTrackSize(trackformat,currentside->number_of_sector,sectorsize,gap3len,sectorconfig)*bitsize);
-		}
-
-		currentside->tracklen=tracklen*8;
-
-		currentside->databuffer=malloc(tracklen);
-		memset(currentside->databuffer,0,tracklen);
-
-		currentside->indexbuffer=malloc(tracklen);
-		memset(currentside->indexbuffer,0,tracklen);						
-		fillindex(currentside->tracklen-1,currentside,2500,TRUE,1);
-
-		BuildISOTrack(floppycontext,trackformat,currentside->number_of_sector,1,sectorsize,td_track_header->PhysCyl,sidenumber,gap3len,trackdata,currentside->databuffer,&tracklen,interleave,0,(SECTORCONFIG*)sectorconfig);
-
-		free(trackdata);
-		trackdata=0;
 		free(sectorconfig);
 
 		td_track_header=(TELEDISK_TRACK_HEADER  *)&fileimage[fileimage_buffer_offset];
