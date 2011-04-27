@@ -102,22 +102,21 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	FILE * f;
 	d88_fileheader fileheader;
 	d88_sector sectorheader;
-	int i,j,rpm;
+	int i,j;
+	unsigned short rpm;
+	unsigned char gap3len,tracktype,side,interleave;
 	SECTORCONFIG* sectorconfig;
 	CYLINDER* currentcylinder;
 	SIDE* currentside;
-	int gap3len,tracktype,bitrate,side;
-	unsigned char * track_data;
-	int interleave,indexfile;
-	unsigned long tracklen,k;
-	int track_size;
+	unsigned int bitrate;
+	int indexfile;
+	unsigned long tracklen;
 	int number_of_track,number_of_sector;
 	unsigned long track_offset;
 	char * indexstr;
 	char str_file[512];
 	int basefileptr;
 	int totalfilesize,truetotalfilesize,partcount;
-	int bitsize;
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"D88_libLoad_DiskFile %s",imgfile);
 
@@ -210,21 +209,18 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			tracktype=IBMFORMAT_SD;
 			bitrate=250000;
 			side=2;
-			bitsize=4;
 			break; 
 		case 0x10: // 2DD
 			floppycontext->hxc_printf(MSG_INFO_1,"DD disk");
 			tracktype=IBMFORMAT_DD;
 			bitrate=250000;
 			side=2;	
-			bitsize=2;
 			break;
 		case 0x20: // 2HD
 			floppycontext->hxc_printf(MSG_INFO_1,"HD disk");
 			tracktype=IBMFORMAT_DD;
 			bitrate=500000;
 			side=2;	
-			bitsize=2;
 			break;
 		default:
 			side=2;
@@ -289,22 +285,16 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			if(sectorheader.density&0x40)
 			{
 				tracktype=IBMFORMAT_SD;
-				bitsize=4;
-
 			}
 			else
 			{
 				tracktype=IBMFORMAT_DD;
-				bitsize=2;
-
 			}
 
 
 			sectorconfig=(SECTORCONFIG*)malloc(sizeof(SECTORCONFIG)*number_of_sector);
 			memset(sectorconfig,0,sizeof(SECTORCONFIG)*number_of_sector);
 
-			track_data=0;
-			track_size=0;
 			j=0;
 			do
 			{
@@ -321,21 +311,23 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					ftell(f)
 					);
 			
-
-				track_size=track_size+sectorheader.sector_length;
-				track_data=realloc(track_data,track_size);
-				fread(&track_data[track_size-sectorheader.sector_length],sectorheader.sector_length,1,f); 
-			
+				
 				sectorconfig[j].cylinder=sectorheader.cylinder;
 				sectorconfig[j].head=sectorheader.head;
 				sectorconfig[j].sector=sectorheader.sector_id;
 				sectorconfig[j].sectorsize=sectorheader.sector_length;
-					
+				sectorconfig[j].gap3=255;
+				sectorconfig[j].trackencoding=tracktype;
+				sectorconfig[j].input_data=malloc(sectorheader.sector_length);
+				sectorconfig[j].bitrate=floppydisk->floppyBitRate;
+			
+				fread(sectorconfig[j].input_data,sectorheader.sector_length,1,f); 
+				
 				if(sectorheader.sector_status)
 				{
 					sectorconfig[j].use_alternate_header_crc=0x1;
 				}
-								
+
 				//	sectorconfig[j].baddatacrc=1;
 
 				// fread datas
@@ -353,68 +345,17 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
 			}
 	//
-			currentcylinder->floppyRPM=rpm;
-			currentcylinder->sides[i&1]=malloc(sizeof(SIDE));
-			currentside=currentcylinder->sides[i&1];
-			memset(currentcylinder->sides[i&1],0,sizeof(SIDE));
-
-			gap3len=84;
-
-			tracklen=(bitrate/(rpm/60))/4;
-
-			currentside->number_of_sector=number_of_sector;
-			currentside->tracklen=tracklen*8;
-			currentside->bitrate=bitrate;
-
-			if(tracktype==IBMFORMAT_DD)
-				currentside->track_encoding=ISOIBM_MFM_ENCODING;
-			else
-				currentside->track_encoding=ISOIBM_FM_ENCODING;
-
-			currentside->databuffer=NULL;
-			currentside->flakybitsbuffer=NULL;				
-			currentside->timingbuffer=NULL;
+			currentcylinder->floppyRPM=rpm;			
 			
-			k=fillindex(currentside->tracklen-8,currentside,2500,FALSE,1);
-
-			while((bitsize*ISOIBMGetTrackSize(tracktype,currentside->number_of_sector,512,gap3len,sectorconfig)>=(int)(tracklen-(tracklen-(k>>3)))) && (gap3len>3))
+			currentside=tg_generatetrackEx((unsigned short)number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,tracktype,2500 | NO_SECTOR_UNDER_INDEX);
+			currentcylinder->sides[i&1]=currentside;
+			
+			for(j=0;j<number_of_sector;j++)
 			{
-				gap3len--;
+				if(sectorconfig[j].input_data)
+					free(sectorconfig[j].input_data);
 			}
 
-			if((bitsize*ISOIBMGetTrackSize(tracktype,currentside->number_of_sector,512,gap3len,sectorconfig))>(int)tracklen)
-			{
-				tracklen=(ISOIBMGetTrackSize(tracktype,currentside->number_of_sector,512,gap3len,sectorconfig)*bitsize);
-			}
-
-			currentside->tracklen=tracklen*8;
-
-			currentside->databuffer=malloc(tracklen);
-			memset(currentside->databuffer,0,tracklen);
-											
-			currentside->indexbuffer=malloc(tracklen);
-			memset(currentside->indexbuffer,0,tracklen);
-			
-			fillindex(currentside->tracklen-1,currentside,2500,TRUE,1);
-
-		//	tracklen=ISOIBMGetTrackSize(IBMFORMAT_DD,number_of_sector,512,gap3len,sectorconfig)*2;
-								
-			BuildISOTrack(floppycontext,
-						tracktype,
-						currentside->number_of_sector,
-						1,
-						512,
-						i>>1,
-						i&1,
-						gap3len,
-						track_data,
-						currentside->databuffer,
-						&(tracklen),
-						interleave,
-						0,
-						sectorconfig);
-
-			free(track_data);
 			free(sectorconfig);
 
 		}
@@ -445,15 +386,15 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				currentside->bitrate=bitrate;
 
 				currentside->databuffer=NULL;
-				currentside->flakybitsbuffer=NULL;				
+				currentside->flakybitsbuffer=NULL;
 				currentside->timingbuffer=NULL;
 
 				currentside->databuffer=malloc(tracklen);
 				memset(currentside->databuffer,0x55,tracklen);
 
-				currentside->flakybitsbuffer=malloc(tracklen);				
+				currentside->flakybitsbuffer=malloc(tracklen);
 				memset(currentside->flakybitsbuffer,0xFF,tracklen);
-					
+
 				currentside->indexbuffer=malloc(tracklen);
 				memset(currentside->indexbuffer,0,tracklen);
 
