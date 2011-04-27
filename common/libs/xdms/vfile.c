@@ -25,7 +25,7 @@
 //
 */
 #include <string.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include "vfile.h"
 
 HXCFILE * HXC_fopen(const char * filename, const char * mode)
