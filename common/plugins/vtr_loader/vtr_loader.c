@@ -168,12 +168,8 @@ int VTR_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			
 			fread( hfetrack,tracklen,1,f);
 
-			floppydisk->tracks[i]=(CYLINDER*)malloc(sizeof(CYLINDER));
+			floppydisk->tracks[i]=allocCylinderEntry(300,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[i];
-			currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-			currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-			memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
-			currentcylinder->floppyRPM=header.floppyRPM;
 			
 
 		/*	floppycontext->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
