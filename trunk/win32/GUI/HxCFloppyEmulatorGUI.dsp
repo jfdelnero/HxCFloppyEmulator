@@ -779,6 +779,90 @@ SOURCE=..\..\common\plugins\ti99v9t9_loader\ti99v9t9_loader.c
 SOURCE=..\..\common\plugins\ti99v9t9_loader\ti99v9t9_loader.h
 # End Source File
 # End Group
+# Begin Group "DMK"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\dmk_loader\dmk_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\dmk_loader\dmk_loader.h
+# End Source File
+# End Group
+# Begin Group "D81"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\d81_loader\d81_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\d81_loader\d81_loader.h
+# End Source File
+# End Group
+# Begin Group "ACORNADF"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\acornadf_loader\acornadf_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\acornadf_loader\acornadf_loader.h
+# End Source File
+# End Group
+# Begin Group "VEGASDSK"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\vegasdsk_loader\vegasdsk_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\vegasdsk_loader\vegasdsk_loader.h
+# End Source File
+# End Group
+# Begin Group "CamputersLynxLDF"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\camputerslynxldf_loader\camputerslynxldf_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\camputerslynxldf_loader\camputerslynxldf_loader.h
+# End Source File
+# End Group
+# Begin Group "EXTADF"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\extadf_loader\extadf_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\extadf_loader\extadf_loader.h
+# End Source File
+# End Group
+# Begin Group "OLDEXTADF"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\oldextadf_loader\oldextadf_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\oldextadf_loader\oldextadf_loader.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\..\common\plugins\common\amiga_track.c
@@ -1443,6 +1527,14 @@ SOURCE=..\..\common\afi_file_writer.c
 # Begin Source File
 
 SOURCE=..\..\common\cpcdsk_file_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\extended_hfe_file_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\extended_hfe_file_writer.h
 # End Source File
 # Begin Source File
 
