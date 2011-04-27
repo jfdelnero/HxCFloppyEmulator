@@ -254,6 +254,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		rawfileconfig.sidecfg=TWOSIDESFLOPPY;
 		rawfileconfig.interleave=1;
 		rawfileconfig.firstidsector=1;
+		rawfileconfig.fillvalue=0xF6;
+		rawfileconfig.autogap3=0xFF;
 
 		// Perform application initialization:
 		if (!InitInstance (hInstance, nCmdShow)) 
