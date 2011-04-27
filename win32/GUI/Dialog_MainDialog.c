@@ -72,6 +72,7 @@
 #include "afi_file_writer.h"
 #include "mfm_file_writer.h"
 #include "hfe_file_writer.h"
+#include "extended_hfe_file_writer.h"
 #include "raw_file_writer.h"
 #include "vtrucco_file_writer.h"
 #include "cpcdsk_file_writer.h"
@@ -224,6 +225,7 @@ BOOL CALLBACK DialogMainDialog(
 					{
 					case 1:
 						write_HFE_file(flopemu,thefloppydisk,filename,hwif->interface_mode,hwif->double_step);
+						//write_EXTHFE_file(flopemu,thefloppydisk,filename,hwif->interface_mode,hwif->double_step);
 						break;
 						
 					case 2:
