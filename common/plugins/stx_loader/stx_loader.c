@@ -140,9 +140,8 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	FILE * f;
 	unsigned int i,j,k,l,t,t2,debug_i,o;
-	int trackformat;
-	int interleave;
-	int gap3len;
+	unsigned char trackformat;
+	unsigned char interleave;
 	unsigned short temp_val;
 	unsigned short index_sync;
 	unsigned char numberoftrackperside;
@@ -163,7 +162,6 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	int tracksize;
 	char tempstring[512];
 	int presenceside[2];
-	int finalsize;
 	int numberofweaksector;
 	int lastindex;
 	int weaksectortotalsize;
@@ -172,7 +170,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	sectorcfg * sectorcfgs;
 	unsigned char CRC16_High;
 	unsigned char CRC16_Low;
-
+	
 	CYLINDER* currentcylinder;
 	SIDE* currentside;
 	
@@ -233,10 +231,12 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyNumberOfTrack=numberoftrackperside;
 		floppydisk->floppyiftype=ATARIST_DD_FLOPPYMODE;
 		floppydisk->floppyBitRate=250000;
-
+		
 		//STXFloppylist[floppyid]->floppyRPM=300;
 		//STXFloppylist[floppyid]->floppyBitRate=250000;
 		
+		
+		trackformat=ISOFORMAT_DD;
 		
 		sprintf(tempstring,"File header :");
 		for(debug_i=0;debug_i<sizeof(pasti_fileheader);debug_i++)
@@ -276,21 +276,21 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				
 				tracknumber=trackheader.track_code&0x7F;
 				sidenumber=trackheader.track_code>>7;
-
+				
 				trackmode=0;
 				if(trackheader.unknowvalue&0x40)
 				{
 					trackmode=1;
 				}
-
+				
 				numberofweaksector=0;
 				weaksectortotalsize=0;
 				tracksize=0;
-
+				
 				switch(trackmode)
 				{
-				//track contenant uniquement les informations secteurs
-				// -> encodage "standard"
+					//track contenant uniquement les informations secteurs
+					// -> encodage "standard"
 				case 0:
 					floppycontext->hxc_printf(MSG_DEBUG,"READ SECTOR track");
 					if(trackheader.numberofsector)
@@ -298,14 +298,14 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						sector=malloc(sizeof(pasti_sector)*trackheader.numberofsector);
 						sectorconfig=(SECTORCONFIG *) malloc(sizeof(SECTORCONFIG)* trackheader.numberofsector);
 						memset(sectorconfig,0,sizeof(SECTORCONFIG)* trackheader.numberofsector);
-
+						
 						// lecture de l'ensemble des descripteurs de secteur
 						for(j=0;j<(trackheader.numberofsector);j++)
 						{
 							fread( &sector[j], sizeof(pasti_sector), 1, f ); 
-						
+							
 							sectorconfig[j].use_alternate_data_crc=0;
-						
+							
 							sectorconfig[j].missingdataaddressmark=0;
 							sectorconfig[j].use_alternate_datamark=0;
 							sectorconfig[j].use_alternate_addressmark=0;
@@ -314,41 +314,44 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							sectorconfig[j].sector=sector[j].sector_num;
 							sectorconfig[j].use_alternate_header_crc=0x2;
 							sectorconfig[j].header_crc=sector[j].header_crc;
-						
+							sectorconfig[j].gap3=255;
+							sectorconfig[j].bitrate=floppydisk->floppyBitRate;
+							sectorconfig[j].trackencoding=trackformat;
+							
 							
 							sectorconfig[j].sectorsize=0;
 							switch(sector[j].sector_size)
 							{
-								case 00:
-									sectorconfig[j].sectorsize=128;
+							case 00:
+								sectorconfig[j].sectorsize=128;
 								break;
-								case 01:
-									sectorconfig[j].sectorsize=256;
-									break;
-								case 02:	
-									sectorconfig[j].sectorsize=512;
-									break;
-								case 03: 
-									sectorconfig[j].sectorsize=1024;
-									break;
-								case 04:
-									sectorconfig[j].sectorsize=2048;
-									break;
-								case 05:
-									sectorconfig[j].sectorsize=4096;
-									break;
-								case 06:
-									sectorconfig[j].sectorsize=8192;
-									break;
-								case 07: 
-									sectorconfig[j].sectorsize=16384;
-									break;
-								default:
-									//tempdata[j]=02;
-									break;
+							case 01:
+								sectorconfig[j].sectorsize=256;
+								break;
+							case 02:	
+								sectorconfig[j].sectorsize=512;
+								break;
+							case 03: 
+								sectorconfig[j].sectorsize=1024;
+								break;
+							case 04:
+								sectorconfig[j].sectorsize=2048;
+								break;
+							case 05:
+								sectorconfig[j].sectorsize=4096;
+								break;
+							case 06:
+								sectorconfig[j].sectorsize=8192;
+								break;
+							case 07: 
+								sectorconfig[j].sectorsize=16384;
+								break;
+							default:
+								//tempdata[j]=02;
+								break;
 							}
 							tracksize=tracksize+sectorconfig[j].sectorsize;
-						
+							
 							// debug //
 							sprintf(tempstring,"Sector:%.2d Size:%.8d Cylcode:%.2d HeadCode:%d SectorCode:%.2d Size:%d",j,sectorconfig[j].sectorsize,sectorconfig[j].cylinder,sectorconfig[j].head,sectorconfig[j].sector,sectorconfig[j].sectorsize);
 							sprintf(&tempstring[strlen(tempstring)]," Sector header:");
@@ -362,21 +365,21 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							}
 							floppycontext->hxc_printf(MSG_DEBUG,"%s",tempstring);
 							//////////
-
-		
+							
+							
 							if((sector[j].FDC_status&0x88)==0x88)
 							{
 								numberofweaksector++;
 								weaksectortotalsize=weaksectortotalsize+sectorconfig[j].sectorsize;
 							}
-
-						
+							
+							
 						}
 						
 					}
-
+					
 					//position des donnees
-
+					
 					trackpos=ftell(f)+ weaksectortotalsize;
 					fseek(f,trackpos,SEEK_SET);
 					
@@ -395,11 +398,13 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						fseek(f,sector[j].sector_pos,SEEK_CUR);
 						
 						fread(&temptrack[o],sectorconfig[j].sectorsize,1,f);
+						sectorconfig[j].input_data=&temptrack[o];
+						
 						o=o+sectorconfig[j].sectorsize;
 					}
-
+					
 					interleave=1;
-
+					
 					// Allocation track
 					
 					if(!floppydisk->tracks[tracknumber])
@@ -411,25 +416,14 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*2);
 						memset(currentcylinder->sides,0,sizeof(SIDE*)*2);
 					}
-
-					currentcylinder->number_of_side++;
-					currentcylinder->sides[sidenumber]=malloc(sizeof(SIDE));
-					memset(currentcylinder->sides[sidenumber],0,sizeof(SIDE));
-					currentside=currentcylinder->sides[sidenumber]; 
-					currentside->track_encoding=ISOIBM_MFM_ENCODING;
-					tracklen=(DEFAULT_DD_BITRATE/(DEFAULT_DD_RPM/60)/4);
-
-					currentside->tracklen=tracklen;
-					if(!trackheader.numberofsector)
-						currentside->tracklen=tracklen;
-					currentside->databuffer=malloc(currentside->tracklen);
-					currentside->indexbuffer=malloc(currentside->tracklen);
-					currentside->flakybitsbuffer=malloc(currentside->tracklen);
-					currentside->timingbuffer=malloc(currentside->tracklen*sizeof(unsigned long));
 					
-					memset(currentside->databuffer,0,currentside->tracklen);
-					memset(currentside->indexbuffer,0,currentside->tracklen);
-					memset(currentside->flakybitsbuffer,0,currentside->tracklen);
+					currentcylinder->number_of_side++;
+					currentcylinder->sides[sidenumber]=tg_generatetrackEx(floppydisk->floppySectorPerTrack,(SECTORCONFIG *)&sectorconfig,interleave,0,floppydisk->floppyBitRate,300,trackformat,2500);
+					currentside=currentcylinder->sides[sidenumber]; 
+					
+					currentside->flakybitsbuffer=malloc(currentside->tracklen/8);
+					currentside->timingbuffer=malloc((currentside->tracklen/8)*sizeof(unsigned long));					
+					memset(currentside->flakybitsbuffer,0,currentside->tracklen/8);
 					
 					// bitrate
 					currentside->bitrate=VARIABLEBITRATE;
@@ -437,34 +431,11 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					{
 						currentside->timingbuffer[k]=DEFAULT_DD_BITRATE;
 					}
-
+					
 					// encodage track
 					//
 					trackformat=ISOFORMAT_DD;
 					if(trackheader.numberofsector==11) trackformat=ISOFORMAT_DD11S;
-					
-					gap3len=0x80;
-					while((gap3len!=0) && ((int)(currentside->tracklen/2)<ISOIBMGetTrackSize(trackformat,trackheader.numberofsector,512,gap3len,sectorconfig)))
-					{
-						gap3len--;
-					};
-					
-					
-					finalsize=BuildISOTrack(floppycontext,
-						trackformat,
-						trackheader.numberofsector,
-						1,
-						512,
-						trackheader.track_code&0x7F,
-						trackheader.track_code>>7,
-						gap3len,
-						temptrack,
-						currentside->databuffer,
-						&currentside->tracklen,
-						interleave,
-						0,
-						sectorconfig);
-					
 					
 					// generation flakey bits
 					for(j=0;j<(trackheader.numberofsector);j++)
@@ -479,8 +450,6 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								currentside->flakybitsbuffer[sectorconfig[j].startdataindex+64+k]=0xFF;
 								//	currentside->timingbuffer[sectorconfig[j].startdataindex+64+k]=currentside->timingbuffer[sectorconfig[j].startdataindex+64+k]*2;
 							}
-							
-							
 						}
 					}
 					if(trackheader.numberofsector)
@@ -488,146 +457,147 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						free(sectorconfig);
 						free(sector);
 					}
-
-						free(temptrack);
+					
+					
+					free(temptrack);
 					
 					break;
-
-
-				///////////////////////////////////////////////////////////////////////////////////////////////
-				///////////////////////////////////////////////////////////////////////////////////////////////
-				///////////////////////////////////////////////////////////////////////////////////////////////
-				///////////////////////////////////track data+sectors datas////////////////////////////////////
-				///////////////////////////////////////////////////////////////////////////////////////////////
+					
+					
+					///////////////////////////////////////////////////////////////////////////////////////////////
+					///////////////////////////////////////////////////////////////////////////////////////////////
+					///////////////////////////////////////////////////////////////////////////////////////////////
+					///////////////////////////////////track data+sectors datas////////////////////////////////////
+					///////////////////////////////////////////////////////////////////////////////////////////////
 				case 1:
 					floppycontext->hxc_printf(MSG_DEBUG,"READTRACK track");
-
-
-						// allocation buffers secteurs
-                        if(trackheader.numberofsector)
-                        {
-                            sector=malloc(sizeof(pasti_sector)*trackheader.numberofsector);
-                            sectorconfig=(SECTORCONFIG *) malloc(sizeof(SECTORCONFIG)* trackheader.numberofsector);
-                            real_sector_size_list=(int *) malloc(sizeof(int)* trackheader.numberofsector);
-                            //sectorheader_index=(int *) malloc(sizeof(int)* trackheader.numberofsector);
-                            sectordata_index=(int *) malloc(sizeof(int)* trackheader.numberofsector*2);
+					
+					
+					// allocation buffers secteurs
+					if(trackheader.numberofsector)
+					{
+						sector=malloc(sizeof(pasti_sector)*trackheader.numberofsector);
+						sectorconfig=(SECTORCONFIG *) malloc(sizeof(SECTORCONFIG)* trackheader.numberofsector);
+						real_sector_size_list=(int *) malloc(sizeof(int)* trackheader.numberofsector);
+						//sectorheader_index=(int *) malloc(sizeof(int)* trackheader.numberofsector);
+						sectordata_index=(int *) malloc(sizeof(int)* trackheader.numberofsector*2);
                         
-                            sectorcfgs=(sectorcfg*)malloc(sizeof(sectorcfg)* trackheader.numberofsector);
-                            memset(sectorcfgs,0,sizeof(sectorcfg)*trackheader.numberofsector);
-                        }
-                        else
-                        {
-                            sector=0;
-                            sectorconfig=0;
-                            real_sector_size_list=0;
-                            sectorheader_index=0;
-                            sectordata_index=0;
-                            sectorcfgs=0;
-                        }
+						sectorcfgs=(sectorcfg*)malloc(sizeof(sectorcfg)* trackheader.numberofsector);
+						memset(sectorcfgs,0,sizeof(sectorcfg)*trackheader.numberofsector);
+					}
+					else
+					{
+						sector=0;
+						sectorconfig=0;
+						real_sector_size_list=0;
+						sectorheader_index=0;
+						sectordata_index=0;
+						sectorcfgs=0;
+					}
+					
+					
+					for(j=0;j<(unsigned int)(trackheader.numberofsector*2);j++)
+					{
+						sectordata_index[j]=-1;
+					}
+					
+					// lecture de l'ensemble des descripteurs de secteur
+					for(j=0;j<(trackheader.numberofsector);j++)
+					{
+						fread( &sector[j], sizeof(pasti_sector), 1, f ); 
+					}
+					
+					// analyse configuration secteurs
+					// calcul taille secteur
+					for(j=0;j<(trackheader.numberofsector);j++)
+					{
+						sectorconfig[j].use_alternate_data_crc=0;
                         
-                        
-						for(j=0;j<(unsigned int)(trackheader.numberofsector*2);j++)
-                        {
-                            sectordata_index[j]=-1;
-                        }
-                        
-						// lecture de l'ensemble des descripteurs de secteur
-                        for(j=0;j<(trackheader.numberofsector);j++)
-                        {
-                            fread( &sector[j], sizeof(pasti_sector), 1, f ); 
-                        }
-                
-                        // analyse configuration secteurs
-						// calcul taille secteur
-						for(j=0;j<(trackheader.numberofsector);j++)
-                        {
-                            sectorconfig[j].use_alternate_data_crc=0;
-                        
-                            sectorconfig[j].missingdataaddressmark=0;
-                            sectorconfig[j].head=sector[j].side_num;
-                            sectorconfig[j].cylinder=sector[j].track_num;
-                            sectorconfig[j].sector=sector[j].sector_num;
-                            sectorconfig[j].use_alternate_header_crc=0x2;
-                            sectorconfig[j].header_crc=sector[j].header_crc;
-                            
-                           
-                            sectorconfig[j].sectorsize=0;
-                            switch(sector[j].sector_size)
-                            {
-                                case 00:
-                                    sectorconfig[j].sectorsize=128;
-                                break;
-                                case 01:
-                                    sectorconfig[j].sectorsize=256;
-                                    break;
-                                case 02:    
-                                    sectorconfig[j].sectorsize=512;
-                                    break;
-                                case 03: 
-                                    sectorconfig[j].sectorsize=1024;
-                                    break;
-                                case 04:
-                                    sectorconfig[j].sectorsize=2048;
-                                    break;
-                                case 05:
-                                    sectorconfig[j].sectorsize=4096;
-                                    break;
-                                case 06:
-                                    sectorconfig[j].sectorsize=8192;
-                                    break;
-                                case 07: 
-                                    sectorconfig[j].sectorsize=16384;
-                                    break;
-                                default:
-                                    //tempdata[j]=02;
-                                    break;
-                            }
-                            tracksize=tracksize+sectorconfig[j].sectorsize;
-                        
-
-                            if(j+1<trackheader.numberofsector)
-                            {
-                                real_sector_size_list[j]=sectorconfig[j].sectorsize;//(sector[j+1].sector_pos)-(sector[j].sector_pos);
-                            }
-                            else
-                            {
-                                real_sector_size_list[j]=sectorconfig[j].sectorsize;//(trackheader.tracksize-((sizeof(pasti_sector)*trackheader.numberofsector)+sizeof(trackheader)))-(sector[j].sector_pos);
-                            }
-
-
-                            sectorcfgs[j].weakdata_offset=weaksectortotalsize;
-                            sectorcfgs[j].size=real_sector_size_list[j];
-
-                            if((sector[j].FDC_status&0x88)==0x88)
-                            {
-                                numberofweaksector++;
-                        
-                                weaksectortotalsize=weaksectortotalsize+sectorconfig[j].sectorsize;//real_sector_size_list[j];//sectorconfig[j].sectorsize;
-                            }
-                                
-                            
-                            // debug //
-                            sprintf(tempstring,"Sector:%.2d Size:%.8d Cylcode:%.2d HeadCode:%d SectorCode:%.2d Size:%d Real_Size:%d",j,sectorconfig[j].sectorsize,sectorconfig[j].cylinder,sectorconfig[j].head,sectorconfig[j].sector,sectorconfig[j].sectorsize,real_sector_size_list[j]);
-                            sprintf(&tempstring[strlen(tempstring)]," Sector header:");
-                            for(debug_i=0;debug_i<sizeof(pasti_sector);debug_i++) 
-                            {   
-                                sprintf(&tempstring[strlen(tempstring)],"%.2X",*(((unsigned char*)&sector[j])+debug_i));
-                                if(debug_i==3 || debug_i==5 ||  debug_i==7 || debug_i==8 || debug_i==9 || debug_i==10 || debug_i==11 || debug_i==13 || debug_i==15)
-                                {
-                                    sprintf(&tempstring[strlen(tempstring)]," ");
-                                }
-                            }
-                            floppycontext->hxc_printf(MSG_DEBUG,"%s",tempstring);
-                            //////////
-
-                            
-                        
-                        }
-
-						trackpos=ftell(f)+ weaksectortotalsize;
+						sectorconfig[j].missingdataaddressmark=0;
+						sectorconfig[j].head=sector[j].side_num;
+						sectorconfig[j].cylinder=sector[j].track_num;
+						sectorconfig[j].sector=sector[j].sector_num;
+						sectorconfig[j].use_alternate_header_crc=0x2;
+						sectorconfig[j].header_crc=sector[j].header_crc;
 						
-		
-
+						
+						sectorconfig[j].sectorsize=0;
+						switch(sector[j].sector_size)
+						{
+						case 00:
+							sectorconfig[j].sectorsize=128;
+							break;
+						case 01:
+							sectorconfig[j].sectorsize=256;
+							break;
+						case 02:    
+							sectorconfig[j].sectorsize=512;
+							break;
+						case 03: 
+							sectorconfig[j].sectorsize=1024;
+							break;
+						case 04:
+							sectorconfig[j].sectorsize=2048;
+							break;
+						case 05:
+							sectorconfig[j].sectorsize=4096;
+							break;
+						case 06:
+							sectorconfig[j].sectorsize=8192;
+							break;
+						case 07: 
+							sectorconfig[j].sectorsize=16384;
+							break;
+						default:
+							//tempdata[j]=02;
+							break;
+						}
+						tracksize=tracksize+sectorconfig[j].sectorsize;
+                        
+						
+						if(j+1<trackheader.numberofsector)
+						{
+							real_sector_size_list[j]=sectorconfig[j].sectorsize;//(sector[j+1].sector_pos)-(sector[j].sector_pos);
+						}
+						else
+						{
+							real_sector_size_list[j]=sectorconfig[j].sectorsize;//(trackheader.tracksize-((sizeof(pasti_sector)*trackheader.numberofsector)+sizeof(trackheader)))-(sector[j].sector_pos);
+						}
+						
+						
+						sectorcfgs[j].weakdata_offset=weaksectortotalsize;
+						sectorcfgs[j].size=real_sector_size_list[j];
+						
+						if((sector[j].FDC_status&0x88)==0x88)
+						{
+							numberofweaksector++;
+							
+							weaksectortotalsize=weaksectortotalsize+sectorconfig[j].sectorsize;//real_sector_size_list[j];//sectorconfig[j].sectorsize;
+						}
+						
+						
+						// debug //
+						sprintf(tempstring,"Sector:%.2d Size:%.8d Cylcode:%.2d HeadCode:%d SectorCode:%.2d Size:%d Real_Size:%d",j,sectorconfig[j].sectorsize,sectorconfig[j].cylinder,sectorconfig[j].head,sectorconfig[j].sector,sectorconfig[j].sectorsize,real_sector_size_list[j]);
+						sprintf(&tempstring[strlen(tempstring)]," Sector header:");
+						for(debug_i=0;debug_i<sizeof(pasti_sector);debug_i++) 
+						{   
+							sprintf(&tempstring[strlen(tempstring)],"%.2X",*(((unsigned char*)&sector[j])+debug_i));
+							if(debug_i==3 || debug_i==5 ||  debug_i==7 || debug_i==8 || debug_i==9 || debug_i==10 || debug_i==11 || debug_i==13 || debug_i==15)
+							{
+								sprintf(&tempstring[strlen(tempstring)]," ");
+							}
+						}
+						floppycontext->hxc_printf(MSG_DEBUG,"%s",tempstring);
+						//////////
+						
+						
+                        
+					}
+					
+					trackpos=ftell(f)+ weaksectortotalsize;
+					
+					
+					
 					fseek(f,trackpos,SEEK_SET);
 					
 					if(trackheader.unknowvalue&0x80)
@@ -640,21 +610,21 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					//trackpos=trackpos+2;
 					fread( &temp_val, sizeof(unsigned short), 1, f ); 
 					floppycontext->hxc_printf(MSG_DEBUG,"READTRACK datas size %x",temp_val);
-
+					
 					//trackpos=trackpos+temp_val;
 					temptrack=(unsigned char*)malloc(temp_val);
-
+					
 					tracklen=temp_val;
 					
 					if(temptrack)
 					{
 						fread( temptrack, temp_val, 1, f ); 
-
+						
 						temptrack2=(unsigned char*)malloc(temp_val*2);
 						tempclock=(unsigned char*)malloc(temp_val*2);
 						memset(tempclock,0xFF,temp_val*2);
 						memset(temptrack2,0,temp_val*2);
-
+						
 						t=0;
 						t2=0;
 						l=0;
@@ -662,13 +632,13 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						{
 							if((temptrack[l]==0xA1) && (temptrack[l+1]==0xA1) && ((temptrack[l+2]==0xFB) || (temptrack[l+2]==0xFE)))
 							{
-
+								
 								if( (temptrack[l+2]==0xFB))
-								floppycontext->hxc_printf(MSG_DEBUG,"[%x] header",l);
+									floppycontext->hxc_printf(MSG_DEBUG,"[%x] header",l);
 								sectordata_index[t]=l-1;
 								t++;
 							}
-
+							
 							if((temptrack[l]==0xA1) && (temptrack[l+1]==0xA1) && (temptrack[l+2]==0xFE))
 							{
 								
@@ -685,12 +655,12 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								t2++;
 							}
 							l++;
-	
+							
 						}
-
+						
 						floppycontext->hxc_printf(MSG_DEBUG,"%d <A1 A1 FB>   %d <A1 A1 FE>",t,t2);
-
-									
+						
+						
 						lastindex=0;
 						memcpy(temptrack2,temptrack,temp_val);
 						for(j=0;j<(unsigned int)(trackheader.numberofsector*2);j++)
@@ -701,29 +671,29 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								
 								//memcpy(&temptrack2[lastindex],&temptrack[lastindex],sectordata_index[j]-lastindex);
 								lastindex=sectordata_index[j];
-
+								
 								if(temptrack[lastindex+3]==0xFE)
 								{
 									if(temptrack[lastindex]!=0xA1)
 									{
-
+										
 										for(t=0;t<12;t++)
 										{
-										//	temptrack2[lastindex-1-t]=0;
+											//	temptrack2[lastindex-1-t]=0;
 										}
 										temptrack2[lastindex]=0xA1;
-										tempclock[lastindex]=0x0A;
+										tempclock[lastindex]= 0x0A;
 										lastindex++;
 										temptrack2[lastindex]=0xA1;
-										tempclock[lastindex]=0x0A;
+										tempclock[lastindex]= 0x0A;
 										lastindex++;
 										temptrack2[lastindex]=0xA1;
-										tempclock[lastindex]=0x0A;
+										tempclock[lastindex]= 0x0A;
 										lastindex++;
-
+										
 										temptrack2[lastindex]=0xFE;
 										lastindex++;
-
+										
 										temptrack2[lastindex]=sectorconfig[j/2].cylinder;
 										lastindex++;
 										temptrack2[lastindex]=sectorconfig[j/2].head;
@@ -736,21 +706,21 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 										lastindex++;
 										temptrack2[lastindex]=(sectorconfig[j/2].header_crc>>8)&0xff;
 										lastindex++;
-
+										
 									}
 								}
 								else
 								{
-
+									
 									if(temptrack[lastindex+3]==0xFB)
 									{
 										if(temptrack[lastindex]!=0xA1)
 										{
 											
-
+											
 											for(t=0;t<12;t++)
 											{
-											//	temptrack2[lastindex-1-t]=0;
+												//	temptrack2[lastindex-1-t]=0;
 											}										
 											temptrack2[lastindex]=0xA1;
 											tempclock[lastindex]=0x0A;
@@ -761,254 +731,210 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 											temptrack2[lastindex]=0xA1;
 											tempclock[lastindex]=0x0A;
 											lastindex++;
-
+											
 											temptrack2[lastindex]=0xFB;
 											lastindex++;
-
+											
 											sectorcfgs[j/2].trackoffset=lastindex;
-
-
+											
+											
 											fseek(f,trackpos,SEEK_SET);
 											fseek(f,sector[j/2].sector_pos,SEEK_CUR);
-
+											
 											floppycontext->hxc_printf(MSG_DEBUG,"read %d bytes of data sector at %x",real_sector_size_list[j/2],ftell(f));
 											fread(&temptrack2[lastindex],real_sector_size_list[j/2],1,f);
 											lastindex=lastindex+real_sector_size_list[j/2];
-
-
+											
+											
 											//02 CRC The CRC of the data 
 											CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,0x1021,0xFFFF);
-					
-											for(t=0;t<(unsigned int)(real_sector_size_list[j/2]+4);t++)  CRC16_Update(&CRC16_High,&CRC16_Low, temptrack2[lastindex-(real_sector_size_list[j/2]+4)+t],(unsigned char*)&crctable);
-					
 											
-
+											for(t=0;t<(unsigned int)(real_sector_size_list[j/2]+4);t++)  CRC16_Update(&CRC16_High,&CRC16_Low, temptrack2[lastindex-(real_sector_size_list[j/2]+4)+t],(unsigned char*)&crctable);
+											
+											
+											
 											temptrack2[lastindex]=CRC16_High;
 											lastindex++;
 											
 											temptrack2[lastindex]=CRC16_Low;
 											
-
+											
 											if((sector[j/2].FDC_status&0x8)==0x8)
 											{
 												//temptrack2[lastindex]=CRC16_Low+2;
 											}
 											lastindex++;
-
+											
 											//lastindex=lastindex-real_sector_size_list[j/2];
 											//lastindex++;
-
-
+											
+											
 											floppycontext->hxc_printf(MSG_DEBUG,"data crc result: %.2X%.2X  %d bytes",CRC16_High,CRC16_Low,real_sector_size_list[j/2]+4);
-
-
+											
+											
 										}
 									}
-
+									
 								}
 							}
 						}
-///////////
-					if(!floppydisk->tracks[tracknumber])
-					{
-						floppydisk->tracks[tracknumber]=(CYLINDER*)malloc(sizeof(CYLINDER));
-						currentcylinder=floppydisk->tracks[tracknumber];
-						currentcylinder->number_of_side=0;
+						///////////
+						if(!floppydisk->tracks[tracknumber])
+						{
+							floppydisk->tracks[tracknumber]=(CYLINDER*)malloc(sizeof(CYLINDER));
+							currentcylinder=floppydisk->tracks[tracknumber];
+							currentcylinder->number_of_side=0;
+							
+							currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*2);
+							memset(currentcylinder->sides,0,sizeof(SIDE*)*2);
+						}
 						
-						currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*2);
-						memset(currentcylinder->sides,0,sizeof(SIDE*)*2);
-					}
-
-					currentcylinder->number_of_side++;
-					currentcylinder->sides[sidenumber]=malloc(sizeof(SIDE));
-					currentside=currentcylinder->sides[sidenumber]; 
-					memset(currentcylinder->sides[sidenumber],0,sizeof(SIDE));
-					
+						currentcylinder->number_of_side++;
+						currentcylinder->sides[sidenumber]=malloc(sizeof(SIDE));
+						currentside=currentcylinder->sides[sidenumber]; 
+						memset(currentcylinder->sides[sidenumber],0,sizeof(SIDE));
 						
-					currentside->track_encoding=ISOIBM_MFM_ENCODING;
-					currentside->tracklen=tracklen*2;//(DEFAULT_DD_BITRATE/(DEFAULT_DD_RPM/60)/4);
-					if(!trackheader.numberofsector)
-						currentside->tracklen=tracklen*2;
-					currentside->databuffer=malloc(currentside->tracklen);
-					currentside->indexbuffer=malloc(currentside->tracklen);
-					currentside->flakybitsbuffer=malloc(currentside->tracklen);
-					currentside->timingbuffer=malloc(currentside->tracklen*sizeof(unsigned long));
-					
-					memset(currentside->databuffer,0,currentside->tracklen);
-					memset(currentside->indexbuffer,0,currentside->tracklen);
-					memset(currentside->flakybitsbuffer,0,currentside->tracklen);
-					
-					// bitrate
-					currentside->bitrate=VARIABLEBITRATE;
-					for(k=0;k<currentside->tracklen;k++)
-					{
-						currentside->timingbuffer[k]=DEFAULT_DD_BITRATE;
-					}
-
-					if(trackheader.unknowvalue&0x80)
-					{
+						
+						currentside->track_encoding=ISOIBM_MFM_ENCODING;
+						currentside->tracklen=tracklen*2;//(DEFAULT_DD_BITRATE/(DEFAULT_DD_RPM/60)/4);
+						if(!trackheader.numberofsector)
+							currentside->tracklen=tracklen*2;
+						currentside->databuffer=malloc(currentside->tracklen);
+						currentside->indexbuffer=malloc(currentside->tracklen);
+						currentside->flakybitsbuffer=malloc(currentside->tracklen);
+						currentside->timingbuffer=malloc(currentside->tracklen*sizeof(unsigned long));
+						
+						memset(currentside->databuffer,0,currentside->tracklen);
+						memset(currentside->indexbuffer,0,currentside->tracklen);
+						memset(currentside->flakybitsbuffer,0,currentside->tracklen);
+						
+						// bitrate
+						currentside->bitrate=VARIABLEBITRATE;
+						for(k=0;k<currentside->tracklen;k++)
+						{
+							currentside->timingbuffer[k]=DEFAULT_DD_BITRATE;
+						}
+						
+						if(trackheader.unknowvalue&0x80)
+						{
 							tempclock[index_sync]=0x14;
 							temptrack2[index_sync]=0xc2;
-					}	
-
-
-					BuildCylinder(currentside->databuffer,
-						currentside->tracklen,
-						tempclock,
-						temptrack2,
-						lastindex);
-
-
-					for(j=0;j<(trackheader.numberofsector);j++)
-					{
-					
-
-
-						for(l=(sectorcfgs[j].trackoffset*2);l<((sectorcfgs[j].trackoffset*2)+(sectorcfgs[j].size*2));l++)
+						}	
+						
+						
+						BuildCylinder(currentside->databuffer,
+							currentside->tracklen,
+							tempclock,
+							temptrack2,
+							lastindex);
+						
+						
+						for(j=0;j<(trackheader.numberofsector);j++)
 						{
-							currentside->timingbuffer[l]=(unsigned long)(((float)(sectorcfgs[j].size*8)/(float)sector[j].sector_speed_timing)*(float)1000000);
-						}
-
-						if((sector[j].FDC_status&0x88)==0x88)
-						{
-
-
-		
-
-							fseek(f,trackpos-weaksectortotalsize,SEEK_SET);
-							fseek(f,sectorcfgs[j].weakdata_offset,SEEK_CUR);
-
-							fread(temptrack,sectorcfgs[j].size,1,f);
-							//currentside->databuffer	
+							
+							
 							
 							for(l=(sectorcfgs[j].trackoffset*2);l<((sectorcfgs[j].trackoffset*2)+(sectorcfgs[j].size*2));l++)
 							{
-								if(!(l&1))
-								{
-									if(!(temptrack[l>>1]&0x80))
-									{
-
-										currentside->databuffer[l]=currentside->databuffer[l]&(~0xC0);
-										currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0xC0);
-									}
-
-									if(!(temptrack[l>>1]&0x40))
-									{
-										currentside->databuffer[l]=currentside->databuffer[l]&(~0x30);
-										currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x30);
-									}
-
-									if(!(temptrack[l>>1]&0x20))
-									{
-										currentside->databuffer[l]=currentside->databuffer[l]&(~0x0C);
-										currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x0C);
-									}
-
-									if(!(temptrack[l>>1]&0x10))
-									{
-										currentside->databuffer[l]=currentside->databuffer[l]&(~0x03);
-										currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x03);
-
-									}
-
-
-
-								}
-								else
-								{
-
-									if(!(temptrack[l>>1]&0x8))
-									{
-
-										currentside->databuffer[l]=currentside->databuffer[l]&(~0xC0);
-										currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0xC0);
-									}
-
-									if(!(temptrack[l>>1]&0x4))
-									{
-										currentside->databuffer[l]=currentside->databuffer[l]&(~0x30);
-										currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x30);
-									}
-
-									if(!(temptrack[l>>1]&0x2))
-									{
-										currentside->databuffer[l]=currentside->databuffer[l]&(~0x0C);
-										currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x0C);
-									}
-
-									if(!(temptrack[l>>1]&0x1))
-									{
-										currentside->databuffer[l]=currentside->databuffer[l]&(~0x03);
-										currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x03);
-
-									}
-
-
-								}
-							//	
+								currentside->timingbuffer[l]=(unsigned long)(((float)(sectorcfgs[j].size*8)/(float)sector[j].sector_speed_timing)*(float)1000000);
 							}
-
+							
+							if((sector[j].FDC_status&0x88)==0x88)
+							{
+								fseek(f,trackpos-weaksectortotalsize,SEEK_SET);
+								fseek(f,sectorcfgs[j].weakdata_offset,SEEK_CUR);
+								
+								fread(temptrack,sectorcfgs[j].size,1,f);
+								//currentside->databuffer	
+								
+								for(l=(sectorcfgs[j].trackoffset*2);l<((sectorcfgs[j].trackoffset*2)+(sectorcfgs[j].size*2));l++)
+								{
+									if(!(l&1))
+									{
+										if(!(temptrack[l>>1]&0x80))
+										{
+											
+											currentside->databuffer[l]=currentside->databuffer[l]&(~0xC0);
+											currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0xC0);
+										}
+										
+										if(!(temptrack[l>>1]&0x40))
+										{
+											currentside->databuffer[l]=currentside->databuffer[l]&(~0x30);
+											currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x30);
+										}
+										
+										if(!(temptrack[l>>1]&0x20))
+										{
+											currentside->databuffer[l]=currentside->databuffer[l]&(~0x0C);
+											currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x0C);
+										}
+										
+										if(!(temptrack[l>>1]&0x10))
+										{
+											currentside->databuffer[l]=currentside->databuffer[l]&(~0x03);
+											currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x03);
+											
+										}
+										
+									}
+									else
+									{
+										
+										if(!(temptrack[l>>1]&0x8))
+										{
+											
+											currentside->databuffer[l]=currentside->databuffer[l]&(~0xC0);
+											currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0xC0);
+										}
+										
+										if(!(temptrack[l>>1]&0x4))
+										{
+											currentside->databuffer[l]=currentside->databuffer[l]&(~0x30);
+											currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x30);
+										}
+										
+										if(!(temptrack[l>>1]&0x2))
+										{
+											currentside->databuffer[l]=currentside->databuffer[l]&(~0x0C);
+											currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x0C);
+										}
+										
+										if(!(temptrack[l>>1]&0x1))
+										{
+											currentside->databuffer[l]=currentside->databuffer[l]&(~0x03);
+											currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x03);
+											
+										}
+										
+										
+									}
+									//	
+								}
+								
+							}
 						}
-					}
-					
-					////////
-
+						
+						////////
+						
 						free(temptrack2);
 						free(tempclock);
 						
-
+						
 						free(temptrack);
 					}
-
+					
 					break;
 				}
-
-
-				
-/*
-
-  if(!trackheader.numberofsector)
-				{
-					tracksize=temp_val;
-					tempclock=(char*)malloc(tracksize);
-					memset(tempclock,0xFF,tracksize);		
-				}
-				
-				
-				
-				
-*/				
-				/*
-				if(trackheader.numberofsector)
-				{
-					
-				}
-				else
-				{
-								
-					fread( temptrack, tracksize, 1, f ); 
-					
-					BuildCylinder(currentside->databuffer,
-						currentside->tracklen,
-						tempclock,
-						temptrack,
-						tracksize);
-					
-					free(tempclock);
-				
-					free(temptrack);
-	
-				}*/
-				
-				fseek(f,trackheaderpos,SEEK_SET);
-					
+											
+				fseek(f,trackheaderpos,SEEK_SET);	
 				fseek(f,trackheader.tracksize,SEEK_CUR);	
 				
 				
 			}
 			
 			}
-
+			
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 			{
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
@@ -1018,8 +944,6 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						if(floppydisk->tracks[j]->sides[i])
 						{
 							currentside=floppydisk->tracks[j]->sides[i];
-							currentside->tracklen=currentside->tracklen*8;
-
 							if(currentside->indexbuffer)
 								fillindex(currentside->tracklen-32,currentside,2500,TRUE,1);
 						}
