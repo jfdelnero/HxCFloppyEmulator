@@ -36,11 +36,15 @@
 
 typedef int (*ISVALIDDISKFILE) (void* floppycontext,char * imgfile);
 typedef int (*LOADDISKFILE)(void* floppycontext,void * floppydisk,char * imgfile,void * parameters);
+typedef int (*WRITEDISKFILE)(void* floppycontext,void * floppydisk,char * imgfile,void * parameters);
+typedef int (*GETPLUGININFOS)(void* floppycontext,void * floppydisk,void * pluginsinfos);
 
 typedef struct plugins_ptr_
 {
 	ISVALIDDISKFILE libIsValidDiskFile;
 	LOADDISKFILE	libLoad_DiskFile;
+	WRITEDISKFILE	libWrite_DiskFile;
+	GETPLUGININFOS	libGetPluginInfos;
 }plugins_ptr;
 
 
