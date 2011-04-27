@@ -254,9 +254,12 @@ SECTORCONFIG * extractsector(HXCFLOPPYEMULATOR* floppycontext,unsigned char *dat
 			tabsector[j].startsectorindex=0;
 			tabsector[j].use_alternate_datamark=0;
 			tabsector[j].use_alternate_addressmark=0;
-
+			tabsector[j].gap3=255;
+			tabsector[j].bitrate=DEFAULT_DD_BITRATE;
+			tabsector[j].trackencoding=IBMFORMAT_DD;
 			
 			memcpy(&data[k],&inputtrack[i+sizeof(mfmformatsect)],sectorsize);
+			tabsector[j].input_data=&data[k];
 			k=k+sectorsize;
 			j++;
 
@@ -286,10 +289,10 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 	char* trackdata;
 	unsigned char* trackdatatab;
 	int tracklen;
-	int gap3len,interleave,rpm;
-	int sectorsize;
 	int tracksize;
 	int numberofsector;
+	unsigned short sectorsize,rpm;
+	unsigned char interleave,gap3len;
 	CYLINDER* currentcylinder;
 	SIDE* currentside;
 	SECTORCONFIG * sectlist;
@@ -313,15 +316,15 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 		fileheader=(oricdsk_fileheader *) malloc(256);
 		fread(fileheader,256,1,f);
 		sectorsize=256; // OricDSK file support only 256bytes/sector floppies.
-		gap3len=40;
+		gap3len=255;
 		interleave=1;	
 		rpm=300; // normal rpm
 		
 		
-		floppydisk->floppyNumberOfTrack=fileheader->number_of_tracks;
-		floppydisk->floppyNumberOfSide=fileheader->number_of_side;
+		floppydisk->floppyNumberOfTrack=(unsigned short)fileheader->number_of_tracks;
+		floppydisk->floppyNumberOfSide=(unsigned char)fileheader->number_of_side;
 		floppydisk->floppyBitRate=250000;
-		floppydisk->floppyiftype=ATARIST_DD_FLOPPYMODE;
+		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		
 		floppycontext->hxc_printf(MSG_DEBUG,"%d tracks, %d side",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide);
 		
@@ -339,7 +342,7 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 			{
 				mfmformat=0;
 				geometrie=0;
-				floppydisk->floppySectorPerTrack=fileheader->number_of_sectors_geometrie;
+				floppydisk->floppySectorPerTrack=(unsigned short)fileheader->number_of_sectors_geometrie;
 				floppycontext->hxc_printf(MSG_DEBUG,"OricDSK_libLoad_DiskFile ORICDISK %d tracks %d sides %d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
 			}
 			else
@@ -374,38 +377,15 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 						currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
 						currentcylinder->floppyRPM=rpm;
 					}
-					
-					
-					currentcylinder->sides[i]=malloc(sizeof(SIDE));
-					memset(currentcylinder->sides[i],0,sizeof(SIDE));
-					currentside=currentcylinder->sides[i];
-					
-					currentside->number_of_sector=floppydisk->floppySectorPerTrack;
-					currentside->tracklen=tracklen;
-					
-					currentside->databuffer=malloc(tracklen);
-					memset(currentside->databuffer,0,tracklen);
-					
-					currentside->flakybitsbuffer=0;
-					
-					currentside->timingbuffer=0;
-					currentside->bitrate=DEFAULT_DD_BITRATE;
-					
-					currentside->indexbuffer=malloc(tracklen);
-					memset(currentside->indexbuffer,0,tracklen);
 
-					file_offset=((j*(sectorsize*currentside->number_of_sector))+
-						(sectorsize*(currentside->number_of_sector)*floppydisk->floppyNumberOfTrack*i))+256;
+					file_offset=((j*(sectorsize*floppydisk->floppySectorPerTrack))+
+						(sectorsize*(floppydisk->floppySectorPerTrack)*floppydisk->floppyNumberOfTrack*i))+256;
 					
 					fseek (f , file_offset , SEEK_SET); 
-					fread(trackdata,sectorsize*currentside->number_of_sector,1,f);
+					fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
 					
-					BuildISOTrack(floppycontext,IBMFORMAT_DD,currentside->number_of_sector,1,sectorsize,j,i,gap3len,trackdata,trackdata,&currentside->tracklen,0,0,NULL);
-
-					currentside->tracklen=currentside->tracklen*8;
-
-					fillindex(currentside->tracklen-1,currentside,2500,TRUE,1);
-					
+					currentcylinder->sides[i]=tg_generatetrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,1,0,floppydisk->floppyBitRate,currentcylinder->floppyRPM,IBMFORMAT_DD,gap3len,2500|NO_SECTOR_UNDER_INDEX);
+					currentside=currentcylinder->sides[i];					
 				}
 				
 			}
@@ -423,7 +403,7 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 			{
 				floppydisk->tracks[j]=(CYLINDER*)malloc(sizeof(CYLINDER));
 				currentcylinder=floppydisk->tracks[j];
-				currentcylinder->number_of_side=fileheader->number_of_side;
+				currentcylinder->number_of_side=(unsigned char)fileheader->number_of_side;
 				currentcylinder->floppyRPM=rpm;
 				
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
@@ -448,51 +428,21 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 						floppycontext->hxc_printf(MSG_DEBUG,"------------------ Track %d, side %d -------------------",j,i);	
 						currentcylinder=floppydisk->tracks[j];
 						
-						currentcylinder->sides[i]=malloc(sizeof(SIDE));
-						memset(currentcylinder->sides[i],0,sizeof(SIDE));
-						currentside=currentcylinder->sides[i];
-						
-						//plus tard currentside->number_of_sector=floppydisk->floppySectorPerTrack;
-						currentside->tracklen=tracklen;
-						
-						//alloc data buffer
-						currentside->databuffer=malloc(tracklen);
-						memset(currentside->databuffer,0,tracklen);
-						
-						currentside->flakybitsbuffer=0;						
-						
-						currentside->timingbuffer=0;
-						currentside->bitrate=DEFAULT_DD_BITRATE;
-						currentside->track_encoding=ISOIBM_MFM_ENCODING;
-
-						
-						// generation index
-						currentside->indexbuffer=malloc(tracklen);
-						memset(currentside->indexbuffer,0,tracklen);
-
-						//
-
 						file_offset=(i*floppydisk->floppyNumberOfTrack*tracksize)+(j*tracksize)+256;
 						
-						trackdata=(unsigned char *) malloc(tracksize);
-						
+						trackdata=(unsigned char *) malloc(tracksize);						
 						fseek (f , file_offset , SEEK_SET); 
 						fread(trackdata,tracksize,1,f);
 												
 						trackdatatab=(unsigned char*)malloc(256*1024);
 						sectlist=extractsector(floppycontext,trackdatatab,trackdata,tracksize,&numberofsector);
 						
-						BuildISOTrack(floppycontext,IBMFORMAT_DD,numberofsector,1,sectorsize,j,i,gap3len,trackdatatab,currentside->databuffer,&currentside->tracklen,0,0,sectlist);
+						currentcylinder->sides[i]=tg_generatetrackEx(floppydisk->floppySectorPerTrack,sectlist,interleave,(unsigned char)(j*2),DEFAULT_DD_BITRATE,rpm,IBMFORMAT_DD,2500|NO_SECTOR_UNDER_INDEX);
+						currentside=currentcylinder->sides[i];
 						
-						currentside->tracklen=currentside->tracklen*8;
-
-						fillindex(currentside->tracklen-1,currentside,2500,TRUE,1);
-
 						free(trackdatatab);
 						free(sectlist);
 						free(trackdata);
-						
-						
 					}
 				}
 				break;
@@ -515,27 +465,7 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 					for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 					{	
 						floppycontext->hxc_printf(MSG_DEBUG,"------------------ Track %d, side %d -------------------",j,i);	
-						currentcylinder->sides[i]=malloc(sizeof(SIDE));
-						memset(currentcylinder->sides[i],0,sizeof(SIDE));
-						currentside=currentcylinder->sides[i];
 						
-						// plus tard currentside->number_of_sector=floppydisk->floppySectorPerTrack;
-						
-						// alloc buffer data
-						currentside->tracklen=tracklen;
-						currentside->databuffer=malloc(tracklen);
-						memset(currentside->databuffer,0,tracklen);
-						
-						currentside->flakybitsbuffer=0;					
-						
-						currentside->timingbuffer=0;
-						currentside->bitrate=DEFAULT_DD_BITRATE;
-						currentside->track_encoding=ISOIBM_MFM_ENCODING;
-						
-						// generation index
-						currentside->indexbuffer=malloc(tracklen);
-						memset(currentside->indexbuffer,0,tracklen);
-
 						file_offset=(i*floppydisk->floppyNumberOfTrack*tracksize)+(j*tracksize)+256;
 						
 						trackdata=(unsigned char *) malloc(tracksize);
@@ -546,11 +476,7 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 						trackdatatab=(unsigned char*)malloc(256*1024);
 						sectlist=extractsector(floppycontext,trackdatatab,trackdata,tracksize,&numberofsector);
 
-						BuildISOTrack(floppycontext,IBMFORMAT_DD,numberofsector,1,sectorsize,j,i,gap3len,trackdatatab,currentside->databuffer,&currentside->tracklen,0,0,sectlist);
-						
-						currentside->tracklen=currentside->tracklen*8;
-						
-						fillindex(currentside->tracklen-1,currentside,2500,TRUE,1);
+						currentcylinder->sides[i]=tg_generatetrackEx(floppydisk->floppySectorPerTrack,sectlist,interleave,(unsigned char)(j*2),DEFAULT_DD_BITRATE,rpm,IBMFORMAT_DD,2500|NO_SECTOR_UNDER_INDEX);
 
 						free(trackdatatab);
 						free(sectlist);
