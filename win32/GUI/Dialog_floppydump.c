@@ -104,7 +104,6 @@ typedef struct trackmode_
 
 
 static floppydumperparams fdparams;
-static BYTE *trackbuffer;
 static HANDLE h = INVALID_HANDLE_VALUE;
 
 trackmode tm[]=
@@ -220,10 +219,11 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 	SECTORCONFIG* sectorconfig;
 	floppydumperparams * params;
 	unsigned char * tempstr;
-	unsigned char * trackbuffer;
-	unsigned char b;
-	int tracksize,retry,gap3len,trackformat;
-	unsigned long rotationtime,rpm,bitrate,tracklen;
+	unsigned char b,interleave;
+	int retry;
+	unsigned char trackformat;
+	unsigned short rpm;
+	unsigned long rotationtime,bitrate;
 	unsigned long total_size,numberofsector_read,number_of_bad_sector;
 	
 	CYLINDER* currentcylinder;
@@ -236,9 +236,9 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 	
 	tempstr=(char*)malloc(1024);
 	
-	trackbuffer=0;
-	tracksize=0;
-	
+
+	interleave=1;
+
 	if(checkversion())
 	{
 		if(opendevice(params->drive))
@@ -276,7 +276,7 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 			
 			params->floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*params->floppydisk->floppyNumberOfTrack);
 			
-			rpm=60000/(rotationtime/1000);
+			rpm=(unsigned short)(60000/(rotationtime/1000));
 			
 			params->flopemu->hxc_printf(MSG_DEBUG,"Drive RPM: %d",rpm);
 			sprintf(tempstr,"Drive RPM: %d",rpm);
@@ -302,9 +302,7 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 				{
 					
 					currentcylinder->floppyRPM=rpm;
-					currentcylinder->sides[j]=malloc(sizeof(SIDE));
-					memset(currentcylinder->sides[j],0,sizeof(SIDE));
-					currentside=currentcylinder->sides[j];
+
 					
 					seek(i*params->double_step, j);
 					
@@ -322,12 +320,12 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 						if(tm[m].encoding_mode)
 						{
 							sp.flags=FD_OPTION_MFM;
-							trackformat=ISOFORMAT_DD;
+							trackformat=IBMFORMAT_DD;
 						}
 						else
 						{
 							sp.flags=0x00;
-							trackformat=ISOFORMAT_SD;
+							trackformat=IBMFORMAT_SD;
 						}
 						
 						sp.head=j;
@@ -385,7 +383,7 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 
 					for(k=0;k<sr->count;k++)
 					{
-						params->flopemu->hxc_printf(MSG_DEBUG,"Sector %.2d, Track ID: %.3d, Head ID:%d, Size: %d bytes, Bitrate:%dkbits/s, %s",sr->Header[k].sector,sr->Header[k].cyl,sr->Header[k].head,128<<sr->Header[k].size,bitrate/1000,trackformat==ISOFORMAT_SD?"FM":"MFM");
+						params->flopemu->hxc_printf(MSG_DEBUG,"Sector %.2d, Track ID: %.3d, Head ID:%d, Size: %d bytes, Bitrate:%dkbits/s, %s",sr->Header[k].sector,sr->Header[k].cyl,sr->Header[k].head,128<<sr->Header[k].size,bitrate/1000,trackformat==IBMFORMAT_SD?"FM":"MFM");
 						
 						
 						if(tm[m].encoding_mode)
@@ -412,12 +410,20 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 							rwp.datalen=128;
 						}
 						
+						sectorconfig[k].cylinder=sr->Header[k].cyl;
+						sectorconfig[k].head=sr->Header[k].head;
+						sectorconfig[k].sector=sr->Header[k].sector;
+						sectorconfig[k].sectorsize=(128<<sr->Header[k].size);
+						sectorconfig[k].gap3=255;
+						sectorconfig[k].trackencoding=trackformat;
+						sectorconfig[k].input_data=malloc(sectorconfig[k].sectorsize);
+						sectorconfig[k].bitrate=bitrate;
+
 						retry=5;
-						trackbuffer=realloc(trackbuffer,tracksize+(128<<sr->Header[k].size));
 						do
 						{
 							retry--;
-						}while(!DeviceIoControl(h, IOCTL_FDCMD_READ_DATA, &rwp, sizeof rwp, &trackbuffer[tracksize], 128<<sr->Header[k].size, &ret, NULL) && retry);
+						}while(!DeviceIoControl(h, IOCTL_FDCMD_READ_DATA, &rwp, sizeof rwp,sectorconfig[k].input_data, sectorconfig[k].sectorsize, &ret, NULL) && retry);
 						if(!retry)
 						{	
 							DeviceIoControl(h, IOCTL_FD_GET_RESULT,0, 0, &cmdr, sizeof(FD_CMD_RESULT), &ret, NULL);
@@ -429,47 +435,25 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 						total_size=total_size+(128<<sr->Header[k].size);
 						numberofsector_read++;
 
-						sectorconfig[k].cylinder=sr->Header[k].cyl;
-						sectorconfig[k].head=sr->Header[k].head;
-						sectorconfig[k].sector=sr->Header[k].sector;
-						sectorconfig[k].sectorsize=(128<<sr->Header[k].size);
-						
-						
-						tracksize=tracksize+(128<<sr->Header[k].size);
-
 						sprintf(tempstr,"%d Sector(s) Read, %d bytes, %d Bad sector(s)",numberofsector_read,total_size,number_of_bad_sector);
 						SetDlgItemText(params->windowshwd,IDC_EDIT2,tempstr);
 
 					}
-					
-					currentside->number_of_sector=sr->count;
-					currentside->bitrate=bitrate;
-					
-					tracklen=(bitrate/(rpm/60))/4;
+				
+			
+					currentside=tg_generatetrackEx((unsigned short)sr->count,sectorconfig,interleave,0,bitrate,rpm,trackformat,2500 | NO_SECTOR_UNDER_INDEX);
 
-					currentside->tracklen=tracklen;
-					
-					currentside->databuffer=malloc(currentside->tracklen);
-					memset(currentside->databuffer,0,currentside->tracklen);
-					
-					currentside->flakybitsbuffer=0;
-					
-					currentside->timingbuffer=0;
-					currentside->indexbuffer=malloc(currentside->tracklen);
-					memset(currentside->indexbuffer,0,currentside->tracklen);						
-					fillindex(currentside->tracklen-1,currentside,2500,TRUE,1);
-					
-					gap3len=20;
-					
-					BuildISOTrack(params->flopemu,trackformat,currentside->number_of_sector,1,512,j,i,gap3len,trackbuffer,currentside->databuffer,&currentside->tracklen,0,0,sectorconfig);
-					
+					currentcylinder->sides[j]=currentside;
+										
 					sprintf(tempstr,"Track %d side %d: %d sectors, %dkbits/s, %s",i,j,sr->count,bitrate/1000,trackformat==ISOFORMAT_SD?"FM":"MFM");
 					SetDlgItemText(params->windowshwd,IDC_EDIT1,tempstr);
 					
+					for(k=0;k<sr->count;k++)
+					{
+						free(sectorconfig[k].input_data);
+					}
+
 					free(sectorconfig);
-					free(trackbuffer);
-					trackbuffer=0;
-					tracksize=0;
 				}
 			}
 			
