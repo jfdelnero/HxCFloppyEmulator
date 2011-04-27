@@ -95,7 +95,6 @@ int Ensoniq_mirage_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 					
 					fclose(f);
 					
-
 					if(filesize%((5*1024) + (1*512)) )
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non Ensoniq mirage file - bad file size !");
@@ -119,8 +118,6 @@ int Ensoniq_mirage_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 	return LOADER_BADPARAMETER;
 }
 
-
-
 int Ensoniq_mirage_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	
@@ -130,11 +127,11 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 	unsigned int file_offset;
 	char* trackdata;
 	int tracklen;
-	int gap3len,interleave,rpm;
-	int sectorsize;
-	int numberofsector;
+	unsigned char  gap3len,interleave;
+	unsigned char  trackformat;
+	unsigned short sectorsize,rpm;
+	unsigned short numberofsector;
 	CYLINDER* currentcylinder;
-	SIDE* currentside;
 	SECTORCONFIG  sectorconfig[6];
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"Ensoniq_mirage_libLoad_DiskFile %s",imgfile);
@@ -158,6 +155,8 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 		sectorsize=1024;
 		gap3len=30;
 		interleave=1;
+		trackformat=ISOFORMAT_DD;
+
 		floppydisk->floppyNumberOfSide=1;
 		floppydisk->floppySectorPerTrack=6;
 		floppydisk->floppyNumberOfTrack=(filesize/(((numberofsector-1)*1024)+512)) / floppydisk->floppyNumberOfSide;
@@ -178,16 +177,11 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 			{
-				
-				floppydisk->tracks[j]=(CYLINDER*)malloc(sizeof(CYLINDER));
+				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 				currentcylinder=floppydisk->tracks[j];
-				currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-				currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-				memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
 				
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
-					
 					memset(sectorconfig,0,sizeof(SECTORCONFIG)*6);
 					for(k=0;k<6;k++)
 					{
@@ -195,43 +189,19 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 						sectorconfig[k].cylinder=j;
 						sectorconfig[k].sector=k;
 						sectorconfig[k].sectorsize=1024;
+						sectorconfig[k].bitrate=floppydisk->floppyBitRate;
+						sectorconfig[k].gap3=gap3len;
+						sectorconfig[k].trackencoding=trackformat;
+						sectorconfig[k].input_data=&trackdata[k*1024];
 					}
 					sectorconfig[numberofsector-1].sectorsize=512;
 
-					currentcylinder->floppyRPM=rpm;
-					
-					currentcylinder->sides[i]=malloc(sizeof(SIDE));
-					memset(currentcylinder->sides[i],0,sizeof(SIDE));
-					currentside=currentcylinder->sides[i];
-					
-					currentside->number_of_sector=floppydisk->floppySectorPerTrack;
-					currentside->tracklen=tracklen;
-					
-					currentside->databuffer=malloc(currentside->tracklen);
-					memset(currentside->databuffer,0,currentside->tracklen);
-					
-					currentside->flakybitsbuffer=0;
-					
-					currentside->timingbuffer=0;
-					currentside->bitrate=DEFAULT_DD_BITRATE;
-					currentside->track_encoding=ISOIBM_MFM_ENCODING;
-
-					currentside->indexbuffer=malloc(currentside->tracklen);
-					memset(currentside->indexbuffer,0,currentside->tracklen);						
-
 					file_offset=( (((numberofsector-1)*1024)+512) * floppydisk->floppyNumberOfSide * j ) +
 						        ( (((numberofsector-1)*1024)+512) * i );
-					
 					fseek (f , file_offset , SEEK_SET);
-					
 					fread(trackdata,(((numberofsector-1)*1024)+512),1,f);
 					
-					BuildISOTrack(floppycontext,ISOFORMAT_DD,currentside->number_of_sector,1,sectorsize,j,i,gap3len,trackdata,currentside->databuffer,&currentside->tracklen,interleave,0,(SECTORCONFIG*)&sectorconfig);
-
-					currentside->tracklen=currentside->tracklen*8;
-
-					fillindex(currentside->tracklen-1,currentside,2500,TRUE,1);
-
+					currentcylinder->sides[i]=tg_generatetrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,2500);
 				}
 			}
 
