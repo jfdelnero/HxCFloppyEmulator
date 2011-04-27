@@ -256,10 +256,9 @@ int TI99PC99_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	unsigned int filesize;
 	unsigned int i,j;
 	unsigned int file_offset;
-	char* trackdata;
-	char* trackclk;
-
-	int rpm;
+	unsigned char* trackdata;
+	unsigned char* trackclk;
+	unsigned short rpm;
 	int fmmode,tracklen,numberoftrack,numberofside;
 	CYLINDER* currentcylinder;
 	SIDE* currentside;
@@ -341,11 +340,8 @@ int TI99PC99_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
 				
-			floppydisk->tracks[j]=(CYLINDER*)malloc(sizeof(CYLINDER));
+			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
-			currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-			currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-			memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
 				
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
