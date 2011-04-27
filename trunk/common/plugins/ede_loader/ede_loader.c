@@ -166,12 +166,9 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned int i,j;
 	int k;
 	unsigned int file_offset;
-	char* trackdata;
-	int tracklen;
-	int gap3len,interleave,rpm;
-	int sectorsize;
+	unsigned char gap3len,interleave;
+	unsigned short rpm,sectorsize;
 	CYLINDER* currentcylinder;
-	SIDE* currentside;
 	unsigned char header_buffer[512];
 	int header_offset;
 	int blocknum;
@@ -180,6 +177,8 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned char * floppy_buffer;
 	int floppy_buffer_size;
 	int floppy_buffer_index;
+	unsigned char trackformat;
+	unsigned char skew;
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"EDE_libLoad_DiskFile %s",imgfile);
 	
@@ -203,7 +202,8 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		sectorsize=512; 
 		rpm=300;
-
+		trackformat=ISOFORMAT_DD;
+		skew=0;
 		switch(header_buffer[0x1FF])
 		{
 			case 0x02:
@@ -226,6 +226,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				floppydisk->floppySectorPerTrack=10;
 				gap3len=40;
 				interleave=1;
+				skew=2;
 				break;
 
 			case 0x04:
@@ -241,27 +242,32 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 			case 0xcb:
 				floppycontext->hxc_printf(MSG_INFO_0,"ASR-10 HD format");
+				floppydisk->floppyiftype=IBMPC_HD_FLOPPYMODE;
 				header_offset=0x60;
 				floppydisk->floppyBitRate=500000;
 				floppydisk->floppyNumberOfTrack=80;
 				floppydisk->floppyNumberOfSide=2;
-				floppydisk->floppySectorPerTrack=19;
+				floppydisk->floppySectorPerTrack=20;
 				gap3len=40;
 				interleave=1;
+				skew=2;
 				break;
 
 			case 0xcc: 
 				floppycontext->hxc_printf(MSG_INFO_0,"TS-10/12 HD format");
+				floppydisk->floppyiftype=IBMPC_HD_FLOPPYMODE;
 				header_offset=0x60;
 				floppydisk->floppyBitRate=500000;
 				floppydisk->floppyNumberOfTrack=80;
 				floppydisk->floppyNumberOfSide=2;
-				floppydisk->floppySectorPerTrack=19;
+				floppydisk->floppySectorPerTrack=20;
 				gap3len=40;
 				interleave=1;
+				skew=2;
 				break;
 
 			case 0x07:
+				floppydisk->floppyiftype=IBMPC_DD_FLOPPYMODE;
 				floppycontext->hxc_printf(MSG_INFO_0,"TS-10/12 DD format");
 				header_offset=0xA0;
 				floppydisk->floppyBitRate=250000;
@@ -270,6 +276,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				floppydisk->floppySectorPerTrack=10;
 				gap3len=40;
 				interleave=1;
+				skew=2;
 				break;
 
 			default:
@@ -321,63 +328,26 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		
 		floppycontext->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
-		tracklen=(floppydisk->floppyBitRate/(rpm/60))/4;
-		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-			
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
 				
-			floppydisk->tracks[j]=(CYLINDER*)malloc(sizeof(CYLINDER));
+			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
-			currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-			currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-			memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
 				
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
-					
-				currentcylinder->floppyRPM=rpm;
-					
-				currentcylinder->sides[i]=malloc(sizeof(SIDE));
-				memset(currentcylinder->sides[i],0,sizeof(SIDE));
-				currentside=currentcylinder->sides[i];
-					
-				currentside->number_of_sector=floppydisk->floppySectorPerTrack;
-				currentside->tracklen=tracklen;
-					
-				currentside->databuffer=malloc(currentside->tracklen);
-				memset(currentside->databuffer,0,currentside->tracklen);
-					
-				currentside->flakybitsbuffer=0;
-					
-				currentside->timingbuffer=0;
-				currentside->bitrate=floppydisk->floppyBitRate;
-				currentside->track_encoding=ISOIBM_MFM_ENCODING;
-
-				currentside->indexbuffer=malloc(currentside->tracklen);
-				memset(currentside->indexbuffer,0,currentside->tracklen);						
-
-				file_offset=(sectorsize*(j*currentside->number_of_sector*floppydisk->floppyNumberOfSide))+
-						(sectorsize*(currentside->number_of_sector)*i);
-							
-				BuildISOTrack(floppycontext,ISOFORMAT_DD,currentside->number_of_sector,0,sectorsize,j,i,gap3len,&floppy_buffer[file_offset],currentside->databuffer,&currentside->tracklen,interleave,0,NULL);
-				
-				currentside->tracklen=currentside->tracklen*8;
-
-				fillindex(currentside->tracklen-1,currentside,2500,TRUE,1);
-
-				}
+				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
+						(sectorsize*(floppydisk->floppySectorPerTrack)*i);
+						
+				currentcylinder->sides[i]=tg_generatetrack(&floppy_buffer[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500);
 			}
+		}
 
-			free(trackdata);
-			
-			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		
-			fclose(f);
+		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		fclose(f);
+		free(floppy_buffer);
 
-			free(floppy_buffer);
-
-			return LOADER_NOERROR;	
+		return LOADER_NOERROR;	
 	}
 
 	floppycontext->hxc_printf(MSG_ERROR,"BAD EDE file!");
