@@ -192,50 +192,64 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,310,142,55,10
 END
 
-IDD_DIALOG_CONFIG DIALOG DISCARDABLE  0, 0, 330, 143
+IDD_DIALOG_CONFIG DIALOG DISCARDABLE  0, 0, 330, 175
 STYLE DS_ABSALIGN | DS_SYSMODAL | DS_MODALFRAME | DS_CENTER | WS_POPUP | 
     WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "SDCard HxC Floppy Emulator settings"
 FONT 8, "MS Sans Serif"
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,281,121,42,14
-    GROUPBOX        "HFE file interface mode",IDC_STATIC,202,7,121,61
+    DEFPUSHBUTTON   "OK",IDOK,263,153,59,14
+    GROUPBOX        "HFE file interface mode",IDC_STATIC,225,7,98,64
     CONTROL         "Auto",IDC_AUTO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    210,39,31,10
-    DEFPUSHBUTTON   "Save",IDSAVE,296,51,25,14
-    DEFPUSHBUTTON   "Load",IDLOAD,296,35,25,14
-    COMBOBOX        IDC_COMBO1,209,21,75,80,CBS_DROPDOWNLIST | CBS_SORT | 
+                    230,41,31,10
+    DEFPUSHBUTTON   "Save",IDSAVE,291,53,31,14
+    DEFPUSHBUTTON   "Load",IDLOAD,291,38,31,14
+    COMBOBOX        IDC_COMBO1,230,21,91,80,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Double Step",IDC_DOUBLESTEP,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,209,53,55,10
-    GROUPBOX        "User interface",IDC_STATIC,16,21,74,90
-    GROUPBOX        "Standby",IDC_STATIC,96,21,91,57
+                    WS_TABSTOP,230,54,55,10
+    GROUPBOX        "User interface",IDC_STATIC,12,19,74,85
+    GROUPBOX        "Standby",IDC_STATIC,96,19,91,57
     CONTROL         "Disable disk drive selector",IDC_DISABLE_DISKB_SELECTOR,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,98,91,98,10
-    DEFPUSHBUTTON   "Save config file",IDSAVE_HXCFECFG,79,118,60,14
-    DEFPUSHBUTTON   "Load config file",IDLOAD_HXCFECFG,16,118,59,14
+    DEFPUSHBUTTON   "Save config file",IDSAVE_HXCFECFG,264,131,59,14
+    DEFPUSHBUTTON   "Load config file",IDLOAD_HXCFECFG,264,116,59,14
     CONTROL         "Slider1",IDC_SLIDER_LCDBACKLIGHT,"msctls_trackbar32",
-                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,102,42,51,9
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,102,40,51,9
     CONTROL         "Slider1",IDC_SLIDER_STANDBY,"msctls_trackbar32",
-                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,102,63,51,9
-    EDITTEXT        IDC_EDIT1,157,40,24,12,ES_AUTOHSCROLL | ES_READONLY
-    EDITTEXT        IDC_EDIT2,157,61,24,12,ES_AUTOHSCROLL | ES_READONLY
-    LTEXT           "Device standby",IDC_STATIC,99,52,52,9
-    LTEXT           "Backlight standby",IDC_STATIC,99,32,58,9
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,102,61,51,9
+    EDITTEXT        IDC_EDIT1,157,38,24,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT2,157,59,24,12,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Device standby",IDC_STATIC,99,50,52,9
+    LTEXT           "Backlight standby",IDC_STATIC,99,30,58,9
     CONTROL         "Slider1",IDC_SLIDER_STEP_SOUND,"msctls_trackbar32",
-                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,22,65,60,9
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,18,63,60,9
     CONTROL         "Load last loaded floppy",IDC_LOADLASTFLOPPY,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,98,81,89,10
-    LTEXT           "Head step sound",IDC_STATIC,23,56,62,9
+    LTEXT           "Head step sound",IDC_STATIC,19,54,62,9
     CONTROL         "Slider1",IDC_SLIDER_SCROLLTXTSPEED,"msctls_trackbar32",
-                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,22,90,60,9
-    LTEXT           "Scroll text speed",IDC_STATIC,23,81,62,9
-    GROUPBOX        "SD HxC Floppy Emulator settings",IDC_STATIC,7,7,192,128
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,18,88,60,9
+    LTEXT           "Scroll text speed",IDC_STATIC,19,79,62,9
+    GROUPBOX        "SD HxC Floppy Emulator settings",IDC_STATIC,7,7,214,160
     CONTROL         "Enable auto boot mode",IDC_AUTOBOOTMODE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,98,101,89,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,12,142,89,10
     CONTROL         "Slider1",IDC_SLIDER_UI_SOUND,"msctls_trackbar32",
-                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,22,41,60,9
-    LTEXT           "UI sound",IDC_STATIC,34,33,40,9
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,18,39,60,9
+    LTEXT           "UI sound",IDC_STATIC,30,31,40,9
+    CONTROL         "Force loading AUTOBOOT.HFE at power up",
+                    IDC_AUTOBOOTPWRUP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    12,153,156,10
+    CONTROL         "Force loading STARTUPA.HFE into the drive A at power up",
+                    IDC_STARTUPAPWRUP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    12,108,204,10
+    CONTROL         "Force loading STARTUPB.HFE into the drive B at power up",
+                    IDC_STARTUPBPWRUP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    12,119,204,10
+    CONTROL         "Enable index Pre incrementing",
+                    IDC_AUTOBOOTMODEINDEXPREINC,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,105,142,111,10
+    GROUPBOX        "AUTO BOOT Mode / File Selector software startup",
+                    IDC_STATIC,7,133,214,34
 END
 
 ID_DIALOG_LOGS DIALOG DISCARDABLE  0, 0, 407, 165
@@ -250,51 +264,60 @@ BEGIN
     DEFPUSHBUTTON   "Set log file",ID_SETLOGFILE,51,143,47,14
 END
 
-IDD_RAWFILECONFIG DIALOG DISCARDABLE  0, 0, 303, 133
+IDD_RAWFILECONFIG DIALOG DISCARDABLE  0, 0, 329, 151
 STYLE DS_ABSALIGN | DS_SYSMODAL | DS_MODALFRAME | DS_CENTER | WS_POPUP | 
     WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "RAW File format configuration"
 FONT 8, "MS Sans Serif"
 BEGIN
-    DEFPUSHBUTTON   "Load RAW file",IDLOADRAWFILE,224,7,72,14
-    PUSHBUTTON      "Cancel",IDCANCELRAWFILE,224,79,72,14
-    COMBOBOX        IDC_SECTORSIZE,93,75,57,52,CBS_DROPDOWN | WS_VSCROLL | 
+    DEFPUSHBUTTON   "Load RAW file",IDLOADRAWFILE,250,7,72,14
+    PUSHBUTTON      "Cancel",IDCANCELRAWFILE,250,79,72,14
+    COMBOBOX        IDC_SECTORSIZE,115,75,57,52,CBS_DROPDOWN | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Sectors size:",IDC_STATIC,93,65,59,8
-    LTEXT           "Track type:",IDC_STATIC,14,12,59,8
-    COMBOBOX        IDC_TRACKTYPE,14,23,55,68,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    LTEXT           "Sectors size:",IDC_STATIC,115,65,59,8
+    LTEXT           "Track type:",IDC_STATIC,9,12,59,8
+    COMBOBOX        IDC_TRACKTYPE,9,23,55,68,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    EDITTEXT        IDC_NUMBEROFTRACK,93,23,48,13,ES_AUTOHSCROLL
-    LTEXT           "Number of track:",IDC_STATIC,93,14,59,8
+    EDITTEXT        IDC_NUMBEROFTRACK,115,23,48,13,ES_AUTOHSCROLL
+    LTEXT           "Number of track:",IDC_STATIC,115,14,59,8
     CONTROL         "Two sides floppy",IDC_SIDE1ENABLE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,13,42,69,10
-    LTEXT           "Sectors per track:",IDC_STATIC,164,13,59,8
-    EDITTEXT        IDC_NBOFSECTORS,154,105,48,13,ES_AUTOHSCROLL
-    LTEXT           "Total sector:",IDC_STATIC,154,95,39,8
-    EDITTEXT        IDC_TOTALSIZE,224,105,48,13,ES_AUTOHSCROLL
-    LTEXT           "Total size:",IDC_STATIC,224,95,32,8
-    DEFPUSHBUTTON   "Save config",IDSAVECONFIG,224,43,72,14
-    DEFPUSHBUTTON   "Load config",IDLOADCONFIG,224,58,72,14
-    EDITTEXT        IDC_RPM,164,48,48,13,ES_AUTOHSCROLL
-    LTEXT           "RPM:",IDC_STATIC,164,40,46,8
-    LTEXT           "Bitrate:",IDC_STATIC,164,64,30,8
-    EDITTEXT        IDC_BITRATE,164,74,48,13,ES_AUTOHSCROLL
+                    BS_AUTOCHECKBOX | WS_TABSTOP,9,39,69,10
+    LTEXT           "Sectors per track:",IDC_STATIC,186,13,59,8
+    EDITTEXT        IDC_NBOFSECTORS,220,124,48,13,ES_AUTOHSCROLL
+    LTEXT           "Total sector:",IDC_STATIC,219,114,39,8
+    EDITTEXT        IDC_TOTALSIZE,273,124,48,13,ES_AUTOHSCROLL
+    LTEXT           "Total size:",IDC_STATIC,273,114,32,8
+    DEFPUSHBUTTON   "Save config",IDSAVECONFIG,250,43,72,14
+    DEFPUSHBUTTON   "Load config",IDLOADCONFIG,250,58,72,14
+    EDITTEXT        IDC_RPM,186,48,48,13,ES_AUTOHSCROLL
+    LTEXT           "RPM:",IDC_STATIC,186,40,46,8
+    LTEXT           "Bitrate:",IDC_STATIC,186,64,30,8
+    EDITTEXT        IDC_BITRATE,186,74,48,13,ES_AUTOHSCROLL
     CONTROL         "",IDC_SIDE0FIRST,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    13,73,8,8
-    EDITTEXT        IDC_GAP3LEN,13,105,25,13,ES_AUTOHSCROLL
-    LTEXT           "GAP3 lenght:",IDC_STATIC,12,95,44,8
-    EDITTEXT        IDC_SECTORPERTRACK,164,23,48,13,ES_AUTOHSCROLL
-    LTEXT           "Interleave:",IDC_STATIC,61,95,37,8
-    EDITTEXT        IDC_INTERLEAVE,60,105,25,13,ES_AUTOHSCROLL
-    CONTROL         "Reverse side",IDC_REVERSESIDE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,13,52,57,10
-    DEFPUSHBUTTON   "Create Empty Floppy",ID_MAKEEMPTYFLOPPY,224,22,72,14
-    LTEXT           "tracks of a side grouped in the file",IDC_STATIC,26,66,
+                    9,81,8,8
+    EDITTEXT        IDC_GAP3LEN,10,124,25,13,ES_AUTOHSCROLL
+    LTEXT           "GAP3 lenght:",IDC_STATIC,9,114,44,8
+    EDITTEXT        IDC_SECTORPERTRACK,186,23,48,13,ES_AUTOHSCROLL
+    LTEXT           "Interleave:",IDC_STATIC,102,114,37,8
+    EDITTEXT        IDC_INTERLEAVE,102,124,25,13,ES_AUTOHSCROLL
+    CONTROL         "Inter side sector numbering",
+                    IDC_INTERSIDESECTORNUMBERING,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,9,61,101,10
+    DEFPUSHBUTTON   "Create Empty Floppy",ID_MAKEEMPTYFLOPPY,250,22,72,14
+    LTEXT           "Tracks of a side grouped in the file",IDC_STATIC,21,73,
                     44,24
-    LTEXT           "Sector ID start:",IDC_STATIC,94,40,59,8
-    EDITTEXT        IDC_SECTORIDSTART,94,49,48,13,ES_AUTOHSCROLL
-    LTEXT           "Skew:",IDC_STATIC,107,95,37,8
-    EDITTEXT        IDC_SKEW,107,105,25,13,ES_AUTOHSCROLL
+    LTEXT           "Sector ID start:",IDC_STATIC,116,40,59,8
+    EDITTEXT        IDC_SECTORIDSTART,116,49,48,13,ES_AUTOHSCROLL
+    LTEXT           "Skew:",IDC_STATIC,140,114,22,8
+    EDITTEXT        IDC_SKEW,140,124,25,13,ES_AUTOHSCROLL
+    CONTROL         "Auto GAP3",IDC_AUTAGAP3,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,9,100,51,10
+    LTEXT           "Format value",IDC_STATIC,56,114,42,8
+    EDITTEXT        IDC_FORMATVALUE,56,124,25,13,ES_AUTOHSCROLL
+    CONTROL         "Reverse side",IDC_REVERSESIDE2,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,9,50,57,10
+    CONTROL         "Side Based",IDC_SIDESKEW,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,166,126,52,10
 END
 
 ID_DIALOG_LICENSE DIALOG DISCARDABLE  0, 0, 358, 212
@@ -472,7 +495,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 323
         TOPMARGIN, 7
-        BOTTOMMARGIN, 135
+        BOTTOMMARGIN, 167
     END
 
     ID_DIALOG_LOGS, DIALOG
@@ -486,9 +509,9 @@ BEGIN
     IDD_RAWFILECONFIG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 296
+        RIGHTMARGIN, 322
         TOPMARGIN, 7
-        BOTTOMMARGIN, 126
+        BOTTOMMARGIN, 144
     END
 
     ID_DIALOG_LICENSE, DIALOG
