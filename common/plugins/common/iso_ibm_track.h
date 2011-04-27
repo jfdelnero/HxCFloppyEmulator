@@ -28,12 +28,20 @@
 #define DEFAULT_DD_BITRATE 250000
 #define DEFAULT_DD_RPM 300
 
+typedef struct track_generator_
+{
+	unsigned long last_bit_offset;
+	
+	unsigned short mfm_last_bit;
+}track_generator;
+
+
+
 typedef struct SECTORCONFIG_
 {
-	unsigned int   head;
-	unsigned int   sector;
-	unsigned int   cylinder;
-
+	unsigned char   head;
+	unsigned char   sector;
+	unsigned char   cylinder;
 
 	unsigned int   sectorsize;
 
@@ -42,10 +50,10 @@ typedef struct SECTORCONFIG_
 
 	unsigned char  missingdataaddressmark;
 
-	unsigned char  use_alternate_header_crc;	 //0x1 -> Bad crc  , 0x2 alternate crc
+	unsigned char  use_alternate_header_crc;	//0x1 -> Bad crc  , 0x2 alternate crc
 	unsigned short data_crc;
 
-	unsigned char  use_alternate_data_crc;	//0x1 -> Bad crc  , 0x2 alternate crc
+	unsigned char  use_alternate_data_crc;		//0x1 -> Bad crc  , 0x2 alternate crc
 	unsigned short header_crc;
 
 	unsigned char  use_alternate_datamark;
@@ -57,6 +65,14 @@ typedef struct SECTORCONFIG_
 	unsigned long startsectorindex;
 	unsigned long startdataindex;
 
+	unsigned char  trackencoding;
+
+	unsigned char  gap3;
+
+	unsigned int   bitrate;
+
+	unsigned char * input_data;
+	unsigned char fill_byte;
 }SECTORCONFIG;
 
 typedef struct isoibm_config_
@@ -125,11 +141,18 @@ typedef struct isoibm_config_
 	
 }isoibm_config;
 
+
+
+
+
+
+
 #define IBMFORMAT_SD 0x1
 #define IBMFORMAT_DD 0x2
 #define ISOFORMAT_SD 0x3
 #define ISOFORMAT_DD 0x4
 #define ISOFORMAT_DD11S 0x5
+#define AMIGAFORMAT_DD  0x6
 
 static isoibm_config formatstab[]=
 {    //     I         --gap4a --i sync --     index mark      --  gap1 --h sync -- --d sync --    add mark            -- gap2 --
@@ -281,6 +304,36 @@ static isoibm_config formatstab[]=
 		
 	},	
 	{	
+		AMIGAFORMAT_DD,
+		
+		0x4E,00, // post index gap4 config
+		
+		0x00,00, // index sync config 
+		
+		0x00,0x00,0,// index mark coding
+		0x00,0x00,0, 
+		
+		0x4E,00, // gap1 config
+		
+		0xFF,02, // h sync config
+		
+		0x00,12, // d sync config
+		
+		0xA1,0x0A,2,// address mark coding (0x4489 0x4489)
+		0xFF,0xFF,0,
+		
+		0x4E,22, // gap2 config
+		
+		0xA1,0x0A,3,// data mark coding
+		0xFB,0xFF,1,
+		
+		0x4E,5,  // gap3 config
+		
+		0x4E,0xFF // gap4 config
+		
+	},	
+
+{	
 		0,
 		
 		0x4E,00, // post index gap4 config
@@ -312,7 +365,15 @@ static isoibm_config formatstab[]=
 
 int BuildCylinder(unsigned char * mfm_buffer,int mfm_size,unsigned char * track_clk,unsigned char * track_data,int track_size);
 void BuildFMCylinder(char * buffer,int fmtracksize,char * bufferclk,char * track,int size);
-int BuildISOTrack(HXCFLOPPYEMULATOR* floppycontext,int TRACKTYPE,unsigned int numberofsector,unsigned char startidsector,unsigned int sectorsize,unsigned int tracknumber,unsigned int sidenumber,unsigned int gap3len,unsigned char* datain,unsigned char * mfmdata,unsigned long * mfmsizebuffer,int interleave,int skew,SECTORCONFIG * sectorconfigtab);
 
-int ISOIBMGetTrackSize(int TRACKTYPE,unsigned int numberofsector,unsigned int sectorsize,unsigned int gap3len,SECTORCONFIG * sectorconfigtab);
+void getMFMcode(track_generator *tg,unsigned char data,unsigned char clock,unsigned char * dstbuf);
+void getFMcode (track_generator *tg,unsigned char data,unsigned char clock,unsigned char * dstbuf);
+int  pushTrackCode(track_generator *tg,unsigned char data,unsigned char clock,SIDE * side,unsigned char trackencoding);
 
+void          tg_initTrackEncoder(track_generator *tg);
+unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackencoding,unsigned int bitrate,unsigned int numberofsector,SECTORCONFIG * sectorconfigtab,unsigned long * track_period);
+void          tg_addSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * currentside);
+void          tg_completeTrack(track_generator *tg, SIDE * currentside,unsigned char trackencoding);
+SIDE *		  tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short numberofsector,unsigned char trackencoding,unsigned int bitrate,SECTORCONFIG * sectorconfigtab);
+SIDE *        tg_generatetrack(unsigned char * sectors_data,unsigned short sector_size,unsigned short number_of_sector,unsigned char track,unsigned char side,unsigned char sectorid,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned char gap3,int indexlen);
+SIDE *        tg_generatetrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorconfigtab,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,int indexlen);
