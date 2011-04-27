@@ -317,8 +317,8 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			if(ci2.type == ciitFDD)
 			{
 				floppydisk->floppySectorPerTrack=0;
-				floppydisk->floppyNumberOfSide=(ci2.maxhead-ci2.minhead)+1;
-				floppydisk->floppyNumberOfTrack=ci2.maxcylinder+1;
+				floppydisk->floppyNumberOfSide=(unsigned char)(ci2.maxhead-ci2.minhead)+1;
+				floppydisk->floppyNumberOfTrack=(unsigned char)ci2.maxcylinder+1;
 				floppydisk->floppyBitRate=250000;
 				rpm=300;
 				floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
@@ -499,7 +499,7 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							pCAPSUnlockTrack(img,i, j);
 							
 							if(floppydisk->floppySectorPerTrack<ti.sectorcnt )
-								floppydisk->floppySectorPerTrack=ti.sectorcnt;
+								floppydisk->floppySectorPerTrack=(unsigned short)ti.sectorcnt;
 							
 							currentside->number_of_sector=ti.sectorcnt;
 
