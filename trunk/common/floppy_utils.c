@@ -85,6 +85,17 @@ unsigned long us2index(unsigned long startindex,SIDE * track,unsigned long us,un
 unsigned long fillindex(unsigned long startindex,SIDE * track,unsigned long us,unsigned char fill,char fillorder)
 {
 	
-	return us2index(startindex,track,us,fill,fillorder);
+	return us2index(startindex,track,us&0xFFFFFF,fill,fillorder);
 }
 
+CYLINDER* allocCylinderEntry(unsigned short rpm,unsigned char number_of_side)
+{
+	CYLINDER* cyl;
+
+	cyl=(CYLINDER*)malloc(sizeof(CYLINDER));
+	cyl->floppyRPM=rpm;
+	cyl->number_of_side=number_of_side;
+	cyl->sides=(SIDE**)malloc(sizeof(SIDE*)*number_of_side);
+	memset(cyl->sides,0,sizeof(SIDE*)*number_of_side);
+	return cyl;
+}
