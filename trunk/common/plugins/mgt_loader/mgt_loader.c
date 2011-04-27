@@ -126,12 +126,13 @@ int MGT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned int filesize;
 	unsigned int i,j;
 	unsigned int file_offset;
-	char* trackdata;
+	unsigned char* trackdata;
 	int tracklen;
-	int gap3len,interleave,rpm;
-	int sectorsize;
+	unsigned char  gap3len,interleave;
+	unsigned short sectorsize,rpm;
+	unsigned char  skew,trackformat;
+
 	CYLINDER* currentcylinder;
-	SIDE* currentside;
 	
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"MGT_libLoad_DiskFile %s",imgfile);
@@ -156,10 +157,12 @@ int MGT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppySectorPerTrack=10;
 		gap3len=35;
 		interleave=1;
+		skew=0;
+
 		break;
 
 	default:
-
+	
 		fclose(f);
 		floppycontext->hxc_printf(MSG_ERROR,"Bad file size:  %d bytes !",filesize);
 		return LOADER_BADFILE;
@@ -169,82 +172,42 @@ int MGT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	if(filesize!=0)
 	{		
-		
 		sectorsize=512; // st file support only 512bytes/sector floppies.
+
 		// read the first sector
-		if(1)
-		{
-
-			floppydisk->floppyBitRate=250000;
-			floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-
-			rpm=300; // normal rpm
+		floppydisk->floppyBitRate=250000;
+		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
+		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		trackformat=ISOFORMAT_DD;
+		rpm=300; // normal rpm
 			
-			floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
+		floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 				
-			tracklen=(DEFAULT_DD_BITRATE/(rpm/60))/4;
-			trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+		tracklen=(DEFAULT_DD_BITRATE/(rpm/60))/4;
+		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 			
-			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-			{
+		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+		{	
+			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+			currentcylinder=floppydisk->tracks[j];
 				
-				floppydisk->tracks[j]=(CYLINDER*)malloc(sizeof(CYLINDER));
-				currentcylinder=floppydisk->tracks[j];
-				currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-				currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-				memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
-				
-				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-				{
+			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+			{										
+				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
+							(sectorsize*(floppydisk->floppySectorPerTrack)*i);
+				fseek (f , file_offset , SEEK_SET);
+				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
 					
-					currentcylinder->floppyRPM=rpm;
-					
-					currentcylinder->sides[i]=malloc(sizeof(SIDE));
-					memset(currentcylinder->sides[i],0,sizeof(SIDE));
-					currentside=currentcylinder->sides[i];
-					
-					currentside->number_of_sector=floppydisk->floppySectorPerTrack;
-					currentside->tracklen=tracklen;
-					
-					currentside->databuffer=malloc(currentside->tracklen);
-					memset(currentside->databuffer,0,currentside->tracklen);
-					
-					currentside->flakybitsbuffer=0;
-					
-					currentside->timingbuffer=0;
-					currentside->bitrate=DEFAULT_DD_BITRATE;
-					currentside->track_encoding=ISOIBM_MFM_ENCODING;
-
-					currentside->indexbuffer=malloc(currentside->tracklen);
-					memset(currentside->indexbuffer,0,currentside->tracklen);						
-
-					file_offset=(sectorsize*(j*currentside->number_of_sector*floppydisk->floppyNumberOfSide))+
-						(sectorsize*(currentside->number_of_sector)*i);
-					
-					fseek (f , file_offset , SEEK_SET);
-					
-					fread(trackdata,sectorsize*currentside->number_of_sector,1,f);
-					
-		
-					BuildISOTrack(floppycontext,ISOFORMAT_DD,currentside->number_of_sector,1,sectorsize,j,i,gap3len,trackdata,currentside->databuffer,&currentside->tracklen,interleave,0,NULL);
-
-					currentside->tracklen=currentside->tracklen*8;
-
-					fillindex(currentside->tracklen-1,currentside,2500,TRUE,1);
-				}
+				currentcylinder->sides[i]=tg_generatetrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500|NO_SECTOR_UNDER_INDEX);
 			}
-
-			free(trackdata);
-			
-			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		
-			fclose(f);
-			return LOADER_NOERROR;
-
 		}
+
+		free(trackdata);
+			
+		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		
 		fclose(f);
-		return LOADER_FILECORRUPT;
+		return LOADER_NOERROR;
 	}
 	
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
