@@ -40,6 +40,10 @@
 		unsigned char interleave;
 		unsigned char firstidsector;
 		unsigned char skew;
+		unsigned char autogap3;
+		unsigned char fillvalue;
+		unsigned char intersidesectornumbering;
+		unsigned char sideskew;
 	}cfgrawfile;
 
 	enum
