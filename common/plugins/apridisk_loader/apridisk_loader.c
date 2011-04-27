@@ -103,19 +103,15 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	FILE * f;
 	apridisk_data_record * data_record;
 	apridisk_compressed_data * compressed_dataitem;
-	unsigned int i,j,rpm;
+	unsigned int i,j;
 	SECTORCONFIG* sectorconfig;
 	CYLINDER* currentcylinder;
 	SIDE* currentside;
-	
-	int gap3len;
-	int tracklen,interleave;
-	
-	unsigned char* trackdatatemp;
-	int trackdatatempsize;
-	
+	unsigned short rpm;
+	unsigned char  interleave;
+		
 	int number_of_track,number_of_sector;
-	int totalfilesize;
+	int totalfilesize,k;
 	unsigned char * file_buffer;
 	int fileindex,newtrack;
 	
@@ -159,11 +155,8 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		for(j=0;j<=1;j++)
 		{
 			number_of_sector=0;
-			trackdatatemp=0;
-			trackdatatempsize=0;
 			sectorconfig=0;
 			fileindex=128;
-			gap3len=80;
 			rpm=600;
 			newtrack=0;
 			interleave=1;
@@ -212,34 +205,33 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 						sectorconfig[number_of_sector].cylinder=i;
 						sectorconfig[number_of_sector].head=j;
 						sectorconfig[number_of_sector].sector=data_record->sector;
+						sectorconfig[number_of_sector].trackencoding=IBMFORMAT_DD;
+						sectorconfig[number_of_sector].bitrate=floppydisk->floppyBitRate;
+						sectorconfig[number_of_sector].gap3=255;
+						
 						switch(data_record->compression)
 						{
 						case DATA_NOT_COMPRESSED:
-							sectorconfig[number_of_sector].sectorsize=data_record->data_size;
-							
-							trackdatatemp=realloc(trackdatatemp,trackdatatempsize+data_record->data_size);
-							
-							memcpy(&trackdatatemp[trackdatatempsize],&file_buffer[fileindex],data_record->data_size);
+							sectorconfig[number_of_sector].sectorsize=data_record->data_size;							
+							sectorconfig[number_of_sector].input_data=malloc(data_record->data_size);
+							memcpy(sectorconfig[number_of_sector].input_data,&file_buffer[fileindex],data_record->data_size);
 							fileindex=fileindex+data_record->data_size;
-							
-							trackdatatempsize=trackdatatempsize+data_record->data_size;
 							break;
 							
 						case DATA_COMPRESSED:
 							compressed_dataitem=(apridisk_compressed_data *)&file_buffer[fileindex];
 							
 							sectorconfig[number_of_sector].sectorsize=compressed_dataitem->count;
-							
-							trackdatatemp=realloc(trackdatatemp,trackdatatempsize+compressed_dataitem->count);
-							
-							memset(&trackdatatemp[trackdatatempsize],compressed_dataitem->byte,compressed_dataitem->count);
+							sectorconfig[number_of_sector].input_data=malloc(compressed_dataitem->count);
+
+							memset(sectorconfig[number_of_sector].input_data,compressed_dataitem->byte,compressed_dataitem->count);
 							fileindex=fileindex+data_record->data_size;
-							trackdatatempsize=trackdatatempsize+compressed_dataitem->count;
 							
 							break;
 							
 						default:
 							floppycontext->hxc_printf(MSG_ERROR,"Unknow compression id (%.4x) !",data_record->compression);
+							sectorconfig[number_of_sector].input_data=0;
 							break;
 						}
 					
@@ -278,76 +270,35 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 			}
 			
 		}while(fileindex<totalfilesize);
-		
-		if(number_of_sector)
+
+		if(newtrack)
 		{
-			if(newtrack)
-			{
-				floppydisk->tracks=(CYLINDER**)realloc(floppydisk->tracks,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-				floppydisk->tracks[i]=(CYLINDER*)malloc(sizeof(CYLINDER));
-				memset(floppydisk->tracks[i],0,sizeof(CYLINDER));
-			}
+			floppydisk->tracks=(CYLINDER**)realloc(floppydisk->tracks,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			floppydisk->tracks[i]=(CYLINDER*)malloc(sizeof(CYLINDER));
+			memset(floppydisk->tracks[i],0,sizeof(CYLINDER));
+		}
 
-			currentcylinder=floppydisk->tracks[floppydisk->floppyNumberOfTrack-1];
-			currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-			currentcylinder->sides=(SIDE**)realloc(currentcylinder->sides,sizeof(SIDE*)*currentcylinder->number_of_side);
-			//memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
-			
-			currentcylinder->floppyRPM=rpm;
-			currentcylinder->sides[j]=malloc(sizeof(SIDE));
-			currentside=currentcylinder->sides[j];
-			memset(currentcylinder->sides[j],0,sizeof(SIDE));
-			
-			tracklen=(floppydisk->floppyBitRate/(rpm/60))/4;
-			currentside->number_of_sector=number_of_sector;
-			currentside->tracklen=tracklen;
-			
-			currentside->databuffer=malloc(tracklen);
-			memset(currentside->databuffer,0,tracklen);
-			
-			currentside->flakybitsbuffer=0;
-			
-			currentside->timingbuffer=0;
-			currentside->bitrate=DEFAULT_DD_BITRATE;
-			currentside->track_encoding=ISOIBM_MFM_ENCODING;
-			
-			currentside->indexbuffer=malloc(tracklen);
-			memset(currentside->indexbuffer,0,tracklen);
-			
-			while((gap3len!=0) && ((int)(currentside->tracklen/2)<ISOIBMGetTrackSize(IBMFORMAT_DD,number_of_sector,512,gap3len,sectorconfig)))
-			{
-				gap3len--;
-			};
-			
-			
-			BuildISOTrack(floppycontext,
-				IBMFORMAT_DD,
-				currentside->number_of_sector,
-				1,
-				512,
-				i,
-				j,
-				gap3len,
-				trackdatatemp,
-				currentside->databuffer,
-				&(currentside->tracklen),
-				interleave,
-				0,
-				sectorconfig);
-			
-			free(sectorconfig);
-
-			currentside->tracklen=currentside->tracklen*8;
-
-			fillindex(currentside->tracklen-1,currentside,2500,TRUE,1);
-
-			}
+		currentcylinder=floppydisk->tracks[floppydisk->floppyNumberOfTrack-1];
+		currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
+		currentcylinder->sides=(SIDE**)realloc(currentcylinder->sides,sizeof(SIDE*)*currentcylinder->number_of_side);
+		//memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
 		
+		currentcylinder->floppyRPM=rpm;
+
+		currentside=tg_generatetrackEx((unsigned short)number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,IBMFORMAT_DD,2500 | NO_SECTOR_UNDER_INDEX);
+		if(currentcylinder->number_of_side>j)
+			currentcylinder->sides[j]=currentside;
+
+		for(k=0;k<number_of_sector;k++)
+		{
+			free(sectorconfig[k].input_data);
+		}
+
+		if(number_of_sector)
+				free(sectorconfig);
+
 		}
 		
-		free(trackdatatemp);
-		trackdatatemp=0;
-		trackdatatempsize=0;
 		number_of_sector=0;
 	}
 	
