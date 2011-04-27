@@ -165,6 +165,12 @@ BOOL CALLBACK DialogRAWFileSettings(
 				rawfileconfig.rpm=GetDlgItemInt(hwndDlg,IDC_RPM,NULL,0);
 				rawfileconfig.gap3=GetDlgItemInt(hwndDlg,IDC_GAP3LEN,NULL,0);
 				rawfileconfig.firstidsector=GetDlgItemInt(hwndDlg,IDC_SECTORIDSTART,NULL,0);
+				rawfileconfig.fillvalue=GetDlgItemInt(hwndDlg,IDC_FORMATVALUE,NULL,0);
+				rawfileconfig.intersidesectornumbering=0;
+				if(SendDlgItemMessage(hwndDlg,IDC_INTERSIDESECTORNUMBERING,BM_GETCHECK,0,0))
+				{
+					rawfileconfig.intersidesectornumbering=0xFF;
+				}
 
 				t=SendDlgItemMessage(hwndDlg, IDC_SECTORSIZE, CB_GETCURSEL, 0, 0);
 				if(t>255) t=255;
@@ -195,8 +201,18 @@ BOOL CALLBACK DialogRAWFileSettings(
 				{
 					rawfileconfig.sidecfg=rawfileconfig.sidecfg|SIDE0_FIRST;
 				}
-
 				
+				rawfileconfig.sideskew=0xFF;
+				if(!SendDlgItemMessage(hwndDlg,IDC_SIDESKEW,BM_GETCHECK,0,0))
+				{
+					rawfileconfig.sideskew=0x00;
+				}				
+
+				rawfileconfig.autogap3=0;
+				if(SendDlgItemMessage(hwndDlg,IDC_AUTAGAP3,BM_GETCHECK,0,0))
+				{
+					rawfileconfig.autogap3=0xFF;
+				}				
 				sprintf(demo->buffertext,"    Loading floppy   ");
 		
 				sprintf(demo->bufferfilename,"");	
@@ -231,6 +247,25 @@ BOOL CALLBACK DialogRAWFileSettings(
 					rawfileconfig.bitrate=GetDlgItemInt(hwndDlg,IDC_BITRATE,NULL,0);
 					rawfileconfig.rpm=GetDlgItemInt(hwndDlg,IDC_RPM,NULL,0);
 					rawfileconfig.gap3=GetDlgItemInt(hwndDlg,IDC_GAP3LEN,NULL,0);
+					rawfileconfig.autogap3=0;
+					if(SendDlgItemMessage(hwndDlg,IDC_AUTAGAP3,BM_GETCHECK,0,0))
+					{
+						rawfileconfig.autogap3=0xFF;
+					}	
+					
+					rawfileconfig.sideskew=0xFF;
+					if(!SendDlgItemMessage(hwndDlg,IDC_SIDESKEW,BM_GETCHECK,0,0))
+					{
+						rawfileconfig.sideskew=0x00;
+					}				
+					
+					rawfileconfig.intersidesectornumbering=0x00;
+					if(SendDlgItemMessage(hwndDlg,IDC_INTERSIDESECTORNUMBERING,BM_GETCHECK,0,0))
+					{
+						rawfileconfig.intersidesectornumbering=0xFF;
+					}
+
+					rawfileconfig.fillvalue=GetDlgItemInt(hwndDlg,IDC_FORMATVALUE,NULL,0);
 					rawfileconfig.firstidsector=GetDlgItemInt(hwndDlg,IDC_SECTORIDSTART,NULL,0);
 
 					t=SendDlgItemMessage(hwndDlg, IDC_SECTORSIZE, CB_GETCURSEL, 0, 0);
@@ -303,6 +338,7 @@ BOOL CALLBACK DialogRAWFileSettings(
 							SetDlgItemInt(hwndDlg,IDC_INTERLEAVE,rawfileconfig.interleave,0);
 							SetDlgItemInt(hwndDlg,IDC_SKEW,rawfileconfig.skew,0);
 							SetDlgItemInt(hwndDlg,IDC_SECTORIDSTART,rawfileconfig.firstidsector,0);
+							SetDlgItemInt(hwndDlg,IDC_FORMATVALUE,rawfileconfig.fillvalue,0);
 							
 							old_bitrate=rawfileconfig.bitrate;
 							old_rpm=rawfileconfig.rpm;
@@ -311,6 +347,9 @@ BOOL CALLBACK DialogRAWFileSettings(
 							SendDlgItemMessage(hwndDlg,IDC_SIDE0FIRST ,BM_SETCHECK,rawfileconfig.sidecfg&SIDE0_FIRST?BST_CHECKED:BST_UNCHECKED,0);
 							SendDlgItemMessage(hwndDlg, IDC_TRACKTYPE, CB_SETCURSEL, rawfileconfig.tracktype, 0);
 							SendDlgItemMessage(hwndDlg, IDC_SECTORSIZE, CB_SETCURSEL, rawfileconfig.sectorsize, 0);
+							SendDlgItemMessage(hwndDlg,IDC_AUTAGAP3,BM_SETCHECK,rawfileconfig.autogap3?BST_CHECKED:BST_UNCHECKED,0);
+							SendDlgItemMessage(hwndDlg,IDC_SIDESKEW,BM_SETCHECK,rawfileconfig.sideskew?BST_CHECKED:BST_UNCHECKED,0);
+							SendDlgItemMessage(hwndDlg,IDC_INTERSIDESECTORNUMBERING,BM_SETCHECK,rawfileconfig.intersidesectornumbering?BST_CHECKED:BST_UNCHECKED,0);
 						}
 						else
 						{
@@ -333,14 +372,29 @@ BOOL CALLBACK DialogRAWFileSettings(
 			
 			temp_rawfileconfig.bitrate=GetDlgItemInt(hwndDlg,IDC_BITRATE,NULL,0);
 			temp_rawfileconfig.rpm=GetDlgItemInt(hwndDlg,IDC_RPM,NULL,0);
-			temp_rawfileconfig.gap3=GetDlgItemInt(hwndDlg,IDC_GAP3LEN,NULL,0);
+			if(SendDlgItemMessage(hwndDlg,IDC_AUTAGAP3,BM_GETCHECK,0,0))
+			{
+				EnableWindow(GetDlgItem(hwndDlg, IDC_GAP3LEN),FALSE);
+				rawfileconfig.autogap3=0xFF;
+				SetDlgItemText(hwndDlg,IDC_GAP3LEN,"AUTO");
+			}
+			else
+			{
+				EnableWindow(GetDlgItem(hwndDlg, IDC_GAP3LEN),TRUE);
+				if(rawfileconfig.autogap3==0xFF)
+				{
+					SetDlgItemInt(hwndDlg,IDC_GAP3LEN,50,0);
+				}
+				rawfileconfig.autogap3=0x00;
+				temp_rawfileconfig.gap3=GetDlgItemInt(hwndDlg,IDC_GAP3LEN,NULL,0);
+			}
 			temp_rawfileconfig.interleave=GetDlgItemInt(hwndDlg,IDC_INTERLEAVE,NULL,0);
 			temp_rawfileconfig.skew=GetDlgItemInt(hwndDlg,IDC_SKEW,NULL,0);
 			temp_rawfileconfig.numberoftrack=GetDlgItemInt(hwndDlg,IDC_NUMBEROFTRACK,NULL,0);
 			temp_rawfileconfig.sectorpertrack=GetDlgItemInt(hwndDlg,IDC_SECTORPERTRACK,NULL,0);
 			temp_rawfileconfig.firstidsector=GetDlgItemInt(hwndDlg,IDC_SECTORIDSTART,NULL,0);
 
-			t=SendDlgItemMessage(hwndDlg, IDC_SECTORSIZE, CB_GETCURSEL, 0, 0);
+			t=SendDlgItemMessage(hwndDlg, IDC_SECTORSIZE, CB_GETCURSEL,  0, 0);
 			if(t>255) t=255;
 			temp_rawfileconfig.sectorsize=(unsigned char)t;
 			t=SendDlgItemMessage(hwndDlg, IDC_TRACKTYPE, CB_GETCURSEL, 0, 0);
@@ -439,6 +493,7 @@ BOOL CALLBACK DialogRAWFileSettings(
 				SetDlgItemInt(hwndDlg,IDC_INTERLEAVE,rawfileconfig.interleave,0);
 				SetDlgItemInt(hwndDlg,IDC_SKEW,rawfileconfig.skew,0);
 				SetDlgItemInt(hwndDlg,IDC_SECTORIDSTART,rawfileconfig.firstidsector,0);
+				SetDlgItemInt(hwndDlg,IDC_FORMATVALUE,rawfileconfig.fillvalue,0);
 				
 				old_bitrate=rawfileconfig.bitrate;
 				old_rpm=rawfileconfig.rpm;
@@ -446,7 +501,13 @@ BOOL CALLBACK DialogRAWFileSettings(
 				SendDlgItemMessage(hwndDlg,IDC_SIDE1ENABLE,BM_SETCHECK,rawfileconfig.sidecfg&TWOSIDESFLOPPY?BST_CHECKED:BST_UNCHECKED,0);
 				SendDlgItemMessage(hwndDlg,IDC_REVERSESIDE,BM_SETCHECK,rawfileconfig.sidecfg&SIDE_INVERTED?BST_CHECKED:BST_UNCHECKED,0);
 				SendDlgItemMessage(hwndDlg,IDC_SIDE0FIRST ,BM_SETCHECK,rawfileconfig.sidecfg&SIDE0_FIRST?BST_CHECKED:BST_UNCHECKED,0);
-						
+				
+				SendDlgItemMessage(hwndDlg,IDC_AUTAGAP3,BM_SETCHECK,rawfileconfig.autogap3?BST_CHECKED:BST_UNCHECKED,0);		
+
+				SendDlgItemMessage(hwndDlg,IDC_SIDESKEW,BM_SETCHECK,rawfileconfig.sideskew?BST_CHECKED:BST_UNCHECKED,0);		
+
+				
+				SendDlgItemMessage(hwndDlg,IDC_INTERSIDESECTORNUMBERING,BM_SETCHECK,rawfileconfig.intersidesectornumbering?BST_CHECKED:BST_UNCHECKED,0);		
 
 				i=0;
 				do
