@@ -121,12 +121,11 @@ int EMUII_RAW_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile
 int EMUII_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
-	unsigned int i;
-	CYLINDER* currentcylinder;
-	SIDE* currentside;
-	unsigned char sector_data[0xE00];
-	int tracknumber,sidenumber;
-	
+	unsigned short i;
+	CYLINDER*      currentcylinder;
+	SIDE*          currentside;
+	unsigned char  sector_data[0xE00];
+	unsigned short tracknumber,sidenumber;
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"EMUII_RAW_libLoad_DiskFile %s",imgfile);
 	
@@ -165,12 +164,8 @@ int EMUII_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 
 		if(!floppydisk->tracks[tracknumber])
 		{
-			floppydisk->tracks[tracknumber]=(CYLINDER*)malloc(sizeof(CYLINDER));
+			floppydisk->tracks[tracknumber]=allocCylinderEntry(300,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[tracknumber];
-			currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-			currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-			memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
-			currentcylinder->floppyRPM=300;
 		}
 			
 
