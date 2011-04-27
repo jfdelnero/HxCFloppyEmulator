@@ -24,7 +24,7 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 */
-#include <malloc.h>
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -62,13 +62,13 @@ int write_vtrucco_file(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * f
 		memset(FILEHEADER,0xFF,512);
 		sprintf((char*)&FILEHEADER->HEADERSIGNATURE,"VTrucco");
 
-		FILEHEADER->number_of_track=floppy->floppyNumberOfTrack;
-		FILEHEADER->number_of_side=floppy->floppyNumberOfSide;
+		FILEHEADER->number_of_track=(unsigned char)floppy->floppyNumberOfTrack;
+		FILEHEADER->number_of_side=(unsigned char)floppy->floppyNumberOfSide;
 		FILEHEADER->bitRate=floppy->floppyBitRate/1000;
 		FILEHEADER->floppyRPM=0;//floppy->floppyRPM;
 		if(forceifmode==-1)
 		{
-			FILEHEADER->floppyinterfacemode=floppy->floppyiftype;
+			FILEHEADER->floppyinterfacemode=(unsigned char)floppy->floppyiftype;
 		}
 		else
 		{
