@@ -52,6 +52,7 @@
 #include "hxc_floppy_emulator.h"
 #include "internal_floppy.h"
 #include "floppy_loader.h"
+#include "floppy_utils.h"
 
 #include "../common/amiga_track.h"
 
@@ -432,16 +433,11 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 			{
 				
-				floppydisk->tracks[j]=(CYLINDER*)malloc(sizeof(CYLINDER));
+				floppydisk->tracks[j]=allocCylinderEntry(DEFAULT_AMIGA_RPM,floppydisk->floppyNumberOfSide);
 				currentcylinder=floppydisk->tracks[j];
-				currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-				currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-				memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
-						
+										
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
-
-					currentcylinder->floppyRPM=DEFAULT_AMIGA_RPM;
 
 					currentcylinder->sides[i]=malloc(sizeof(SIDE));
 					currentside=currentcylinder->sides[i];
