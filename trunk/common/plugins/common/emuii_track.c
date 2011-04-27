@@ -227,7 +227,7 @@ int BuildEmuIITrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,un
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"BuildISOTrack : No enough space on this track !");
+		floppycontext->hxc_printf(MSG_ERROR,"BuildEmuIITrack : No enough space on this track !");
 		return finalsize;
 	}
 	
