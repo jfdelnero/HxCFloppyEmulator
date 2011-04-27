@@ -66,6 +66,7 @@ typedef struct {
   unsigned int key;
   unsigned int offset;
   unsigned char DAM;
+  unsigned char density;
   unsigned int size;
 } JV3SectorsOffsets;
 
