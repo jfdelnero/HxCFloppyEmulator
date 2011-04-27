@@ -129,13 +129,12 @@ int Prophet_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 	unsigned int filesize;
 	unsigned int i,j,k;
 	unsigned int file_offset;
-	char* trackdata;
-	int tracklen;
-	int gap3len,interleave,rpm;
-	int sectorsize;
-	int numberofsector;
+	unsigned char* trackdata;
+	unsigned char gap3len,interleave;
+	unsigned short rpm,sectorsize;
+	unsigned short numberofsector;
+	unsigned char trackformat;
 	CYLINDER* currentcylinder;
-	SIDE* currentside;
 	SECTORCONFIG  sectorconfig[6];
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"Prophet_libLoad_DiskFile %s",imgfile);
@@ -159,6 +158,7 @@ int Prophet_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 		sectorsize=1024;
 		gap3len=40;
 		interleave=1;
+		trackformat=ISOFORMAT_DD;
 		floppydisk->floppyNumberOfSide=1;
 		floppydisk->floppySectorPerTrack=6;
 		floppydisk->floppyNumberOfTrack=(filesize/(((numberofsector-1)*1024)+256)) / floppydisk->floppyNumberOfSide;
@@ -180,17 +180,12 @@ int Prophet_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 			
 			floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 				
-			tracklen=(DEFAULT_DD_BITRATE/(rpm/60))/4;
 			trackdata=(unsigned char*)malloc(((numberofsector-1)*1024)+512);
-
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 			{
 				
-				floppydisk->tracks[j]=(CYLINDER*)malloc(sizeof(CYLINDER));
+				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 				currentcylinder=floppydisk->tracks[j];
-				currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-				currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-				memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
 				
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
@@ -202,43 +197,19 @@ int Prophet_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 						sectorconfig[k].cylinder=j;
 						sectorconfig[k].sector=k;
 						sectorconfig[k].sectorsize=1024;
+						sectorconfig[k].bitrate=floppydisk->floppyBitRate;
+						sectorconfig[k].gap3=gap3len;
+						sectorconfig[k].trackencoding=trackformat;
+						sectorconfig[k].input_data=&trackdata[k*1024];
 					}
 					sectorconfig[numberofsector-1].sectorsize=256;
 
-					currentcylinder->floppyRPM=rpm;
-					
-					currentcylinder->sides[i]=malloc(sizeof(SIDE));
-					memset(currentcylinder->sides[i],0,sizeof(SIDE));
-					currentside=currentcylinder->sides[i];
-					
-					currentside->number_of_sector=floppydisk->floppySectorPerTrack;
-					currentside->tracklen=tracklen;
-					
-					currentside->databuffer=malloc(currentside->tracklen);
-					memset(currentside->databuffer,0,currentside->tracklen);
-					
-					currentside->flakybitsbuffer=0;
-					
-					currentside->timingbuffer=0;
-					currentside->bitrate=DEFAULT_DD_BITRATE;
-					currentside->track_encoding=ISOIBM_MFM_ENCODING;
-
-					currentside->indexbuffer=malloc(currentside->tracklen);
-					memset(currentside->indexbuffer,0,currentside->tracklen);						
-
-
 					file_offset=( (((numberofsector-1)*1024)+256) * floppydisk->floppyNumberOfSide * j ) +
 						        ( (((numberofsector-1)*1024)+256) * i );
-					
 					fseek (f , file_offset , SEEK_SET);
+					fread(trackdata,(((numberofsector-1)*1024)+256),1,f);		
 					
-					fread(trackdata,(((numberofsector-1)*1024)+256),1,f);
-					
-					BuildISOTrack(floppycontext,ISOFORMAT_DD,currentside->number_of_sector,1,sectorsize,j,i,gap3len,trackdata,currentside->databuffer,&currentside->tracklen,interleave,0,(SECTORCONFIG*)&sectorconfig);
-
-					currentside->tracklen=currentside->tracklen*8;
-
-					fillindex(currentside->tracklen-1,currentside,2500,TRUE,1);					
+					currentcylinder->sides[i]=tg_generatetrackEx(floppydisk->floppySectorPerTrack,(SECTORCONFIG *)&sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,2500);
 				}
 			}
 
