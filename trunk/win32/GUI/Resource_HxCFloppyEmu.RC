@@ -1,0 +1,557 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "windows.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+#include "resource.h"
+#include "../../common/version.h"
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// French (France) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_FRA)
+#ifdef _WIN32
+LANGUAGE LANG_FRENCH, SUBLANG_FRENCH
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON2               ICON    DISCARDABLE     "MAINICON.ICO"
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+1 VERSIONINFO
+ FILEVERSION FILE_VERSION
+ PRODUCTVERSION FILE_VERSION
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x29L
+#else
+ FILEFLAGS 0x28L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040c04b0"
+        BEGIN
+            VALUE "Comments", "HxC2001\0"
+            VALUE "CompanyName", "HxC2001 / Jean-Francois DEL NERO\0"
+            VALUE "FileDescription", "HxCFloppyEmulator\0"
+            VALUE "FileVersion", STR_FILE_VERSION
+            VALUE "InternalName", "dev\0"
+            VALUE "LegalCopyright", "HxC2001 / Jean-Francois DEL NERO\0"
+            VALUE "LegalTrademarks", "HxC2001 (HxC2001 / Jean-Francois DEL NERO) \0"
+            VALUE "OriginalFilename", "HxCFloppyEmulator.exe\0"
+            VALUE "PrivateBuild", "Develop\0"
+            VALUE "ProductName", "HxC2001\0"
+            VALUE "ProductVersion", STR_FILE_VERSION
+            VALUE "SpecialBuild", STR_DATE
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x40c, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE MOVEABLE PURE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE MOVEABLE PURE 
+BEGIN
+    "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""windows.h""\r\n"
+    "#undef APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""resource.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE MOVEABLE PURE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+ID_DIALOG_ABOUT DIALOG DISCARDABLE  0, 0, 246, 105
+STYLE DS_ABSALIGN | DS_SYSMODAL | DS_MODALFRAME | DS_CENTER | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "About "
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",ID_OK,209,82,30,14
+    LTEXT           "HxCFloppyEmulator",-1,33,12,76,10,SS_SUNKEN
+    LTEXT           "Copyright © 2006-2010",-1,10,34,80,8
+    LTEXT           "DEL NERO Jean François",-1,10,45,129,9
+    ICON            IDI_ICON2,-1,9,10,20,20
+    LTEXT           "PowerOfAsm / HxC2001",-1,10,56,93,9
+    PUSHBUTTON      "Website",IDC_BUTTON1,6,65,108,14
+    PUSHBUTTON      "Under GPL License",IDC_BUTTONLICENSE,120,82,82,14
+    PUSHBUTTON      "Latest release notes",IDC_RELEASENOTES,6,82,108,14
+    LTEXT           STR_FILE_VERSION2,-1,33,23,80,8
+END
+
+IDD_DIALOG_STATS DIALOG DISCARDABLE  0, 0, 408, 175
+STYLE DS_ABSALIGN | DS_SYSMODAL | DS_MODALFRAME | DS_CENTER | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "USB HxC Floppy Emulator settings and status"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,368,44,32,14
+    CONTROL         "Slider1",IDC_SLIDER1,"msctls_trackbar32",TBS_BOTH | 
+                    TBS_NOTICKS | WS_TABSTOP,13,75,118,15
+    EDITTEXT        IDC_MAXSETTLE,72,108,49,15,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Max settle time:",IDC_STATIC,14,111,54,11
+    EDITTEXT        IDC_MINSETTLE,72,124,49,15,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Min settle time:",IDC_STATIC,14,128,52,11
+    EDITTEXT        IDC_PACKETSIZE,72,92,49,15,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Packet size:",IDC_STATIC,14,94,49,11
+    LTEXT           "USB packet size setting",IDC_STATIC,31,65,87,8
+    EDITTEXT        IDC_DATASENT,202,94,79,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Data sent:",IDC_STATIC,165,97,34,8
+    EDITTEXT        IDC_DATATHROUGHPUT,202,78,79,14,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    LTEXT           "Data throughput:",IDC_STATIC,145,81,54,8
+    LTEXT           "Packet sent:",IDC_STATIC,159,113,41,8
+    EDITTEXT        IDC_NBOFPACKET,202,110,79,14,ES_AUTOHSCROLL | 
+                    ES_READONLY | ES_NUMBER
+    EDITTEXT        IDC_NBOFSYNCLOST,202,126,79,14,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    LTEXT           "Sync lost:",IDC_STATIC,167,129,32,8
+    PUSHBUTTON      "Reset",IDC_BUTTON_RESET,233,146,50,14
+    CONTROL         "Slider1",IDC_PRIORITYSLIDER,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,66,145,66,15
+    LTEXT           "Process priority:",IDC_STATIC,14,147,53,8
+    LTEXT           "USB statistics",IDC_STATIC,211,65,50,8
+    EDITTEXT        IDC_USBHXCFE_STATUS,70,21,209,14,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    LTEXT           "Status :",IDC_STATIC,17,22,34,8
+    CONTROL         "DS0",IDC_RADIO_DS0,"Button",BS_AUTORADIOBUTTON,300,18,
+                    57,10
+    GROUPBOX        "Drive ID setting",IDC_STATIC,295,7,68,88
+    CONTROL         "DS1",IDC_RADIO_DS1,"Button",BS_AUTORADIOBUTTON,300,28,
+                    57,10
+    CONTROL         "DS2",IDC_RADIO_DS2,"Button",BS_AUTORADIOBUTTON,300,39,
+                    57,10
+    CONTROL         "DS3",IDC_RADIO_DS3,"Button",BS_AUTORADIOBUTTON,300,49,
+                    57,10
+    CONTROL         "Disable drive",IDC_DISABLE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,300,76,57,10
+    CONTROL         "Twisted cable",IDC_TWISTED,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,300,62,57,10
+    GROUPBOX        "USB statistics and settings",IDC_STATIC,7,51,282,116
+    GROUPBOX        "USB HxC Floppy Emulator status",IDC_STATIC,7,7,282,38
+    DEFPUSHBUTTON   "Save",IDSAVE,368,29,32,14
+    DEFPUSHBUTTON   "Load",IDLOAD,368,14,32,14
+    GROUPBOX        "Mode",IDC_STATIC,295,97,105,70
+    CONTROL         "Auto",IDC_AUTO_USB,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,310,128,31,10
+    COMBOBOX        IDC_COMBO_USBIFMODE,308,110,75,80,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Double Step",IDC_DOUBLESTEP_USB,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,310,142,55,10
+END
+
+IDD_DIALOG_CONFIG DIALOG DISCARDABLE  0, 0, 330, 143
+STYLE DS_ABSALIGN | DS_SYSMODAL | DS_MODALFRAME | DS_CENTER | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "SDCard HxC Floppy Emulator settings"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,281,121,42,14
+    GROUPBOX        "HFE file interface mode",IDC_STATIC,202,7,121,61
+    CONTROL         "Auto",IDC_AUTO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    210,39,31,10
+    DEFPUSHBUTTON   "Save",IDSAVE,296,51,25,14
+    DEFPUSHBUTTON   "Load",IDLOAD,296,35,25,14
+    COMBOBOX        IDC_COMBO1,209,21,75,80,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Double Step",IDC_DOUBLESTEP,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,209,53,55,10
+    GROUPBOX        "User interface",IDC_STATIC,16,21,74,90
+    GROUPBOX        "Standby",IDC_STATIC,96,21,91,57
+    CONTROL         "Disable disk drive selector",IDC_DISABLE_DISKB_SELECTOR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,98,91,98,10
+    DEFPUSHBUTTON   "Save config file",IDSAVE_HXCFECFG,79,118,60,14
+    DEFPUSHBUTTON   "Load config file",IDLOAD_HXCFECFG,16,118,59,14
+    CONTROL         "Slider1",IDC_SLIDER_LCDBACKLIGHT,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,102,42,51,9
+    CONTROL         "Slider1",IDC_SLIDER_STANDBY,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,102,63,51,9
+    EDITTEXT        IDC_EDIT1,157,40,24,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_EDIT2,157,61,24,12,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Device standby",IDC_STATIC,99,52,52,9
+    LTEXT           "Backlight standby",IDC_STATIC,99,32,58,9
+    CONTROL         "Slider1",IDC_SLIDER_STEP_SOUND,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,22,65,60,9
+    CONTROL         "Load last loaded floppy",IDC_LOADLASTFLOPPY,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,98,81,89,10
+    LTEXT           "Head step sound",IDC_STATIC,23,56,62,9
+    CONTROL         "Slider1",IDC_SLIDER_SCROLLTXTSPEED,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,22,90,60,9
+    LTEXT           "Scroll text speed",IDC_STATIC,23,81,62,9
+    GROUPBOX        "SD HxC Floppy Emulator settings",IDC_STATIC,7,7,192,128
+    CONTROL         "Enable auto boot mode",IDC_AUTOBOOTMODE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,98,101,89,10
+    CONTROL         "Slider1",IDC_SLIDER_UI_SOUND,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,22,41,60,9
+    LTEXT           "UI sound",IDC_STATIC,34,33,40,9
+END
+
+ID_DIALOG_LOGS DIALOG DISCARDABLE  0, 0, 407, 165
+STYLE DS_ABSALIGN | DS_SYSMODAL | DS_MODALFRAME | DS_CENTER | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Logs"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "Close",ID_CLOSE,7,143,39,14
+    EDITTEXT        IDC_LOGS,7,7,388,132,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    WS_VSCROLL
+    DEFPUSHBUTTON   "Set log file",ID_SETLOGFILE,51,143,47,14
+END
+
+IDD_RAWFILECONFIG DIALOG DISCARDABLE  0, 0, 303, 133
+STYLE DS_ABSALIGN | DS_SYSMODAL | DS_MODALFRAME | DS_CENTER | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "RAW File format configuration"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "Load RAW file",IDLOADRAWFILE,224,7,72,14
+    PUSHBUTTON      "Cancel",IDCANCELRAWFILE,224,79,72,14
+    COMBOBOX        IDC_SECTORSIZE,93,75,57,52,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "Sectors size:",IDC_STATIC,93,65,59,8
+    LTEXT           "Track type:",IDC_STATIC,14,12,59,8
+    COMBOBOX        IDC_TRACKTYPE,14,23,55,68,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_NUMBEROFTRACK,93,23,48,13,ES_AUTOHSCROLL
+    LTEXT           "Number of track:",IDC_STATIC,93,14,59,8
+    CONTROL         "Two sides floppy",IDC_SIDE1ENABLE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,42,69,10
+    LTEXT           "Sectors per track:",IDC_STATIC,164,13,59,8
+    EDITTEXT        IDC_NBOFSECTORS,154,105,48,13,ES_AUTOHSCROLL
+    LTEXT           "Total sector:",IDC_STATIC,154,95,39,8
+    EDITTEXT        IDC_TOTALSIZE,224,105,48,13,ES_AUTOHSCROLL
+    LTEXT           "Total size:",IDC_STATIC,224,95,32,8
+    DEFPUSHBUTTON   "Save config",IDSAVECONFIG,224,43,72,14
+    DEFPUSHBUTTON   "Load config",IDLOADCONFIG,224,58,72,14
+    EDITTEXT        IDC_RPM,164,48,48,13,ES_AUTOHSCROLL
+    LTEXT           "RPM:",IDC_STATIC,164,40,46,8
+    LTEXT           "Bitrate:",IDC_STATIC,164,64,30,8
+    EDITTEXT        IDC_BITRATE,164,74,48,13,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SIDE0FIRST,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    13,73,8,8
+    EDITTEXT        IDC_GAP3LEN,13,105,25,13,ES_AUTOHSCROLL
+    LTEXT           "GAP3 lenght:",IDC_STATIC,12,95,44,8
+    EDITTEXT        IDC_SECTORPERTRACK,164,23,48,13,ES_AUTOHSCROLL
+    LTEXT           "Interleave:",IDC_STATIC,61,95,37,8
+    EDITTEXT        IDC_INTERLEAVE,60,105,25,13,ES_AUTOHSCROLL
+    CONTROL         "Reverse side",IDC_REVERSESIDE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,13,52,57,10
+    DEFPUSHBUTTON   "Create Empty Floppy",ID_MAKEEMPTYFLOPPY,224,22,72,14
+    LTEXT           "tracks of a side grouped in the file",IDC_STATIC,26,66,
+                    44,24
+    LTEXT           "Sector ID start:",IDC_STATIC,94,40,59,8
+    EDITTEXT        IDC_SECTORIDSTART,94,49,48,13,ES_AUTOHSCROLL
+    LTEXT           "Skew:",IDC_STATIC,107,95,37,8
+    EDITTEXT        IDC_SKEW,107,105,25,13,ES_AUTOHSCROLL
+END
+
+ID_DIALOG_LICENSE DIALOG DISCARDABLE  0, 0, 358, 212
+STYLE DS_ABSALIGN | DS_SYSMODAL | DS_MODALFRAME | DS_CENTER | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "License"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "Close",ID_CLOSE,312,191,39,14
+    EDITTEXT        IDC_LICENSE,7,7,344,180,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    WS_VSCROLL
+END
+
+IDD_CREATEFILESYSTEM DIALOG DISCARDABLE  0, 0, 239, 50
+STYLE DS_ABSALIGN | DS_SYSMODAL | DS_MODALFRAME | DS_CENTER | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Create a File System based floppy"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "Inject directory",IDBUILDFS,176,7,56,14
+    PUSHBUTTON      "Cancel",IDCANCELRAWFILE,176,29,56,14
+    LTEXT           "File system type:",-1,14,12,59,8
+    COMBOBOX        IDC_FSTYPE,13,22,146,68,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+END
+
+IDD_BATCHCONVERT DIALOGEX 0, 0, 275, 141
+STYLE DS_ABSALIGN | DS_SYSMODAL | DS_MODALFRAME | DS_CENTER | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Batch converter"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Convert",IDBATCHCONV,105,114,72,14
+    PUSHBUTTON      "Cancel",IDCANCELRAWFILE,207,114,56,14
+    LTEXT           "Target file format:",-1,12,10,59,8
+    COMBOBOX        IDC_FFTYPE,13,19,180,68,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_SOURCEDIR,13,46,179,12,ES_AUTOHSCROLL | NOT 
+                    WS_TABSTOP
+    LTEXT           "Source directory:",-1,13,36,59,8
+    LTEXT           "Target directory:",-1,13,61,101,8
+    EDITTEXT        IDC_DESTDIR,13,70,179,12,ES_AUTOHSCROLL | NOT WS_TABSTOP
+    PUSHBUTTON      "Select",IDSELECTSOURCEDIR,207,46,56,12
+    PUSHBUTTON      "Select",IDSELECTDESTINATIONDIR,207,70,56,12
+    EDITTEXT        IDC_CONVERTSTATUS,13,90,249,14,ES_AUTOHSCROLL | 
+                    ES_READONLY,WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE
+END
+
+IDD_DIALOG_MAINDIALOG DIALOGEX 0, 0, 222, 235
+STYLE WS_CHILD | WS_BORDER
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL         153,IDC_STATIC,"Static",SS_BITMAP,0,0,20,20
+    PUSHBUTTON      "Load",IDC_BUTTON_LOAD,7,7,67,22
+    PUSHBUTTON      "Create FS Floppy",IDC_BUTTON_CREATEFLOPPY,7,73,67,22
+    PUSHBUTTON      "Export",IDC_BUTTON_EXPORT,7,96,67,22
+    PUSHBUTTON      "Load Raw image",IDC_BUTTON_LOADRAW,7,29,67,22
+    PUSHBUTTON      "Batch converter",IDC_BUTTON_CONVERT,7,51,67,22
+    EDITTEXT        IDC_EDIT_TRACKPOS,10,199,66,12,ES_READONLY | NOT 
+                    WS_BORDER,WS_EX_TRANSPARENT
+    EDITTEXT        IDC_EDIT_STATUS,7,185,207,12,ES_READONLY,
+                    WS_EX_TRANSPARENT
+    CONTROL         "Slider2",IDC_SLIDER_TRACKPOS,"msctls_trackbar32",
+                    TBS_AUTOTICKS | TBS_BOTH | TBS_ENABLESELRANGE | 
+                    WS_BORDER | WS_TABSTOP,7,212,207,15
+    LTEXT           "Load a floppy file image",IDC_STATIC_MAIN01,77,8,118,19,
+                    SS_CENTERIMAGE,WS_EX_TRANSPARENT
+    LTEXT           "Load a custom raw floppy image / create a custom floppy",
+                    IDC_STATIC_MAIN02,77,30,137,19,0,WS_EX_TRANSPARENT
+    LTEXT           "Convert multiple floppy file image.",IDC_STATIC_MAIN03,
+                    77,52,137,19,SS_CENTERIMAGE,WS_EX_TRANSPARENT
+    LTEXT           "Create a DOS/AmigaDOS file system based floppy disk.",
+                    IDC_STATIC_MAIN04,77,75,117,19,0,WS_EX_TRANSPARENT
+    LTEXT           "Export/save the loaded file image",IDC_STATIC_MAIN05,77,
+                    97,137,19,SS_CENTERIMAGE,WS_EX_TRANSPARENT
+    PUSHBUTTON      "SD HxC Floppy Emulator settings",IDC_BUTTON_SDCONFIG,7,
+                    118,67,22,BS_MULTILINE
+    PUSHBUTTON      "USB HxC Floppy Emulator settings",IDC_BUTTON_USBCONFIG,
+                    7,140,67,22,BS_MULTILINE
+    LTEXT           "Configure the SDCard HxC Floppy Emulator",
+                    IDC_STATIC_MAIN06,77,121,119,19,0,WS_EX_TRANSPARENT
+    LTEXT           "Configure the USB HxC Floppy Emulator",
+                    IDC_STATIC_MAIN07,77,142,118,19,0,WS_EX_TRANSPARENT
+    PUSHBUTTON      "Floppy disk dump",IDC_BUTTON_FLOPPYDUMP,7,163,67,22,
+                    BS_MULTILINE
+    LTEXT           "Read a real disk",IDC_STATIC_MAIN08,77,169,118,9,0,
+                    WS_EX_TRANSPARENT
+END
+
+IDD_DIALOG_FLOPPYDUMP DIALOG DISCARDABLE  0, 0, 298, 103
+STYLE DS_ABSALIGN | DS_SYSMODAL | DS_MODALFRAME | DS_CENTER | WS_POPUP | 
+    WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Floppy disk dump"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,233,80,58,14
+    DEFPUSHBUTTON   "Read Disk",IDLOAD_READDISK,105,80,59,14
+    CONTROL         "Double step",IDC_DOUBLESTEP_DUMP,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,80,54,10
+    GROUPBOX        "Dump setting",IDC_STATIC,7,7,94,89
+    CONTROL         "Drive A:",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,13,21,
+                    41,10
+    CONTROL         "Drive B:",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,13,33,
+                    41,10
+    GROUPBOX        "Status",IDC_STATIC,105,7,184,59
+    EDITTEXT        IDC_EDIT1,110,19,174,15,ES_AUTOHSCROLL
+    EDITTEXT        IDC_NUMBEROFTRACK_DUMP,71,64,24,12,ES_AUTOHSCROLL
+    LTEXT           "Number of tracks:",IDC_STATIC,9,65,57,8
+    CONTROL         "Double sided",IDC_DOUBLESIDE_DUMP,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,52,57,10
+    EDITTEXT        IDC_EDIT2,110,42,174,15,ES_AUTOHSCROLL
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU1 MENU DISCARDABLE 
+BEGIN
+    POPUP "Floppy image"
+    BEGIN
+        MENUITEM "Load",                        ID_LOAD_LOAD
+        MENUITEM "Load custom RAW file/Create custom floppy", 
+                                                ID_IMAGES_LOADRAWFILE
+        MENUITEM "Create DOS/AmigaDOS disk",    ID_IMAGES_CREATEFILESYSTEM
+        MENUITEM "Export disk/Save As",         ID_DISK_EXPORT
+        MENUITEM "Batch convert files images",  ID_IMAGES_CONVERT
+        MENUITEM "Dump a Floppy disk",          ID_FLOPPYIMAGE_DUMPAFLOPPYDISK
+
+    END
+    POPUP "Settings"
+    BEGIN
+        MENUITEM "SDCard HxC FLoppy Emulator settings", ID_DRIVE_SETTINGS
+        MENUITEM "USB HxC Floppy Emulator settings", ID_INFOS_USBSTATS
+    END
+    POPUP "Log"
+    BEGIN
+        MENUITEM "Log",                         ID_INFOS_SETLOGFILE
+    END
+    POPUP "About"
+    BEGIN
+        MENUITEM "HxCFloppyEmulator",           ID_ABOUT_HXCFLOPPYEMULATOR
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    ID_DIALOG_ABOUT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 239
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 98
+    END
+
+    IDD_DIALOG_STATS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 400
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 167
+    END
+
+    IDD_DIALOG_CONFIG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 323
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 135
+    END
+
+    ID_DIALOG_LOGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 400
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 158
+    END
+
+    IDD_RAWFILECONFIG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 296
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 126
+    END
+
+    ID_DIALOG_LICENSE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 351
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 205
+    END
+
+    IDD_CREATEFILESYSTEM, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 232
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 43
+    END
+
+    IDD_BATCHCONVERT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 268
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 134
+    END
+
+    IDD_DIALOG_MAINDIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 214
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 228
+    END
+
+    IDD_DIALOG_FLOPPYDUMP, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 291
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 95
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BITMAP7             BITMAP  DISCARDABLE     "floppy.bmp"
+#endif    // French (France) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
