@@ -51,6 +51,8 @@
 #include "internal_floppy.h"
 #include "crc.h"
 #include "iso_ibm_track.h"
+#include "floppy_utils.h"
+#include "math.h"
 
 
 unsigned short MFM_tab[]=
@@ -126,6 +128,200 @@ unsigned short CLK_tab[]=
 	0xFFD5,0xFFD7,0xFFDD,0xFFDF,0xFFF5,0xFFF7,0xFFFD,0xFFFF
 };
 
+typedef struct gap3conf_
+{
+	unsigned char  trackmode;
+	unsigned short sectorsize;
+	unsigned char numberofsector;
+	unsigned char gap3;
+}gap3conf;
+
+
+
+static gap3conf std_gap3_tab[]=
+{ 
+	{IBMFORMAT_DD, 256 ,0x12,0x0C},
+	{IBMFORMAT_DD, 256 ,0x10,0x32},
+	{IBMFORMAT_DD, 512 ,0x08,0x50},
+	{IBMFORMAT_DD, 512 ,0x09,0x50},
+	{IBMFORMAT_DD, 1024,0x04,0xF0},
+	{IBMFORMAT_DD, 2048,0x02,0xF0},
+	{IBMFORMAT_DD, 4096,0x01,0xF0},
+	{IBMFORMAT_DD, 256 ,0x1A,0x36},
+	{IBMFORMAT_DD, 512 ,0x0F,0x54},
+	{IBMFORMAT_DD, 512 ,0x12,0x6C},
+	{IBMFORMAT_DD, 1024,0x08,0x74},
+	{IBMFORMAT_DD, 2048,0x04,0xF0},
+	{IBMFORMAT_DD, 4096,0x02,0xF0},
+	{IBMFORMAT_DD, 8192,0x01,0xF0},
+	{IBMFORMAT_DD, 512 ,0x24,0x53},
+
+	//8"FM
+	{IBMFORMAT_SD, 128 ,0x1A,0x1B},
+	{IBMFORMAT_SD, 256 ,0x0F,0x2A},
+	{IBMFORMAT_SD, 512 ,0x08,0x3A},
+	{IBMFORMAT_SD,1024 ,0x04,0x8A},
+	{IBMFORMAT_SD,2048 ,0x02,0xF8},
+	{IBMFORMAT_SD,4096 ,0x01,0xF8},
+
+	//8"MFM
+	{IBMFORMAT_DD, 256 ,0x1A,0x36},
+	{IBMFORMAT_DD, 512 ,0x0F,0x54},
+	{IBMFORMAT_DD,1024 ,0x08,0x74},
+	{IBMFORMAT_DD,2048 ,0x04,0xF8},
+	{IBMFORMAT_DD,4096 ,0x02,0xF8},
+	{IBMFORMAT_DD,8192 ,0x01,0xF8},
+
+	//5"FM
+	{IBMFORMAT_SD, 128 ,0x12,0x09},
+	{IBMFORMAT_SD, 128 ,0x10,0x19},
+	{IBMFORMAT_SD, 256 ,0x08,0x30},
+	{IBMFORMAT_SD, 512 ,0x04,0x87},
+	{IBMFORMAT_SD,1024 ,0x02,0xF8},
+	{IBMFORMAT_SD,2048 ,0x01,0xF8},
+
+	//5"MFM
+	{IBMFORMAT_DD, 256 ,0x12,0x0C},
+	{IBMFORMAT_DD, 256 ,0x10,0x32},
+	{IBMFORMAT_DD, 512 ,0x08,0x50},
+	{IBMFORMAT_DD, 512 ,0x09,0x40},
+	{IBMFORMAT_DD, 512 ,0x0A,0x10},
+	{IBMFORMAT_DD,1024 ,0x04,0xF0},
+	{IBMFORMAT_DD,2048 ,0x02,0xF8},
+	{IBMFORMAT_DD,4096 ,0x01,0xF8},
+///////
+
+	{ISOFORMAT_DD, 256 ,0x12,0x0C},
+	{ISOFORMAT_DD, 256 ,0x10,0x32},
+	{ISOFORMAT_DD, 512 ,0x08,0x50},
+	{ISOFORMAT_DD, 512 ,0x09,0x50},
+	{ISOFORMAT_DD, 1024,0x04,0xF0},
+	{ISOFORMAT_DD, 2048,0x02,0xF0},
+	{ISOFORMAT_DD, 4096,0x01,0xF0},
+	{ISOFORMAT_DD, 256 ,0x1A,0x36},
+	{ISOFORMAT_DD, 512 ,0x0F,0x54},
+	{ISOFORMAT_DD, 512 ,0x12,0x6C},
+	{ISOFORMAT_DD, 1024,0x08,0x74},
+	{ISOFORMAT_DD, 2048,0x04,0xF0},
+	{ISOFORMAT_DD, 4096,0x02,0xF0},
+	{ISOFORMAT_DD, 8192,0x01,0xF0},
+	{ISOFORMAT_DD, 512, 0x24,0x53},
+
+	//8"FM
+	{ISOFORMAT_SD, 128 ,0x1A,0x1B},
+	{ISOFORMAT_SD, 256 ,0x0F,0x2A},
+	{ISOFORMAT_SD, 512 ,0x08,0x3A},
+	{ISOFORMAT_SD,1024 ,0x04,0x8A},
+	{ISOFORMAT_SD,2048 ,0x02,0xF8},
+	{ISOFORMAT_SD,4096 ,0x01,0xF8},
+
+	//8"MFM
+	{ISOFORMAT_DD, 256 ,0x1A,0x36},
+	{ISOFORMAT_DD, 512 ,0x0F,0x54},
+	{ISOFORMAT_DD,1024 ,0x08,0x74},
+	{ISOFORMAT_DD,2048 ,0x04,0xF8},
+	{ISOFORMAT_DD,4096 ,0x02,0xF8},
+	{ISOFORMAT_DD,8192 ,0x01,0xF8},
+
+	//5"FM
+	{ISOFORMAT_SD, 128 ,0x12,0x09},
+	{ISOFORMAT_SD, 128 ,0x10,0x19},
+	{ISOFORMAT_SD, 256 ,0x08,0x30},
+	{ISOFORMAT_SD, 512 ,0x04,0x87},
+	{ISOFORMAT_SD,1024 ,0x02,0xF8},
+	{ISOFORMAT_SD,2048 ,0x01,0xF8},
+
+	//5"MFM
+	{ISOFORMAT_DD, 256 ,0x12,0x0C},
+	{ISOFORMAT_DD, 256 ,0x10,0x32},
+	{ISOFORMAT_DD, 512 ,0x08,0x50},
+	{ISOFORMAT_DD, 512 ,0x09,0x40},
+	{ISOFORMAT_DD, 512 ,0x0A,0x10},
+	{ISOFORMAT_DD,1024 ,0x04,0xF0},
+	{ISOFORMAT_DD,2048 ,0x02,0xF8},
+	{ISOFORMAT_DD,4096 ,0x01,0xF8},
+
+	{0xFF,0xFFFF,0xFF,0xFF}
+};
+
+
+
+
+
+
+void getMFMcode(track_generator *tg,unsigned char data,unsigned char clock,unsigned char * dstbuf)
+{
+	unsigned short mfm_code;
+	mfm_code = MFM_tab[data] & CLK_tab[clock] & tg->mfm_last_bit;
+	tg->mfm_last_bit=~(MFM_tab[data]<<15);		
+	dstbuf[1]=mfm_code&0xFF;
+	dstbuf[0]=mfm_code>>8;
+
+	return;
+}
+
+void getFMcode(track_generator *tg,unsigned char data,unsigned char clock,unsigned char * dstbuf)
+{
+	unsigned long * fm_code;
+	unsigned char k,i;
+			
+	fm_code=(unsigned long *)dstbuf;
+
+	*fm_code=0;
+	for(k=0;k<4;k++)
+	{
+		*fm_code=*fm_code>>8;
+
+		////////////////////////////////////
+		// data
+		for(i=0;i<2;i++)
+		{
+			if(data&(0x80>>(i+(k*2)) ))
+			{	// 0x10 
+				// 00010001)
+				*fm_code=*fm_code | ((0x10>>(i*4))<<24);
+			}
+		}
+
+		// clock
+		for(i=0;i<2;i++)
+		{
+			if(clock&(0x80>>(i+(k*2)) ))
+			{	// 0x40 
+				// 01000100)
+				*fm_code=*fm_code | ((0x40>>(i*4))<<24);
+			}
+		}
+	}
+	
+	return;
+}
+
+
+int pushTrackCode(track_generator *tg,unsigned char data,unsigned char clock,SIDE * side,unsigned char trackencoding)
+{
+	
+	switch(trackencoding)
+	{
+		case IBMFORMAT_SD:
+		case ISOFORMAT_SD:
+			getFMcode(tg,data,clock,&side->databuffer[tg->last_bit_offset/8]);
+			tg->last_bit_offset=tg->last_bit_offset+(4*8);
+		break;
+
+		case IBMFORMAT_DD:
+		case ISOFORMAT_DD:
+		case ISOFORMAT_DD11S:
+			getMFMcode(tg,data,clock,&side->databuffer[tg->last_bit_offset/8]);
+			tg->last_bit_offset=tg->last_bit_offset+(2*8);
+		break;
+
+		default:
+		break;
+	}
+	return 0;
+}
+
 
 // Fast Bin to MFM converter
 int BuildCylinder(unsigned char * mfm_buffer,int mfm_size,unsigned char * track_clk,unsigned char * track_data,int track_size)
@@ -165,89 +361,100 @@ int BuildCylinder(unsigned char * mfm_buffer,int mfm_size,unsigned char * track_
 	return track_size;
 }
 
-// mfm encoder
-/*
-void BuildCylinder(char * buffer,int mfmtracksize,char * bufferclk,char * track,int size)
-{
-	int i,j,l,m,s;
-	unsigned char byte;
-	int lastbit;
-	
-	// Clean up
-	for(i=0;i<(mfmtracksize);i++)
-	{
-		buffer[i]=0x00;
-	}
 
-	j=0;
-	s=0;
+// Fast Bin to MFM converter
+void FastMFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_data,int size)
+{
+	unsigned short i,l;
+	unsigned char  byte;
+	unsigned short lastbit;
+	unsigned short mfm_code;
+	unsigned char * mfm_buffer;
+
+	mfm_buffer=&side->databuffer[tg->last_bit_offset/8];
 
 	// MFM Encoding
-	lastbit=0;
+	lastbit=tg->mfm_last_bit;
+	i=0;
 	for(l=0;l<size;l++)
 	{
-		byte=track[l];
-		for(m=0;m<8;m++)
+		byte =track_data[l];
+		mfm_code = MFM_tab[byte] & lastbit;
+
+		mfm_buffer[i++]=mfm_code>>8;
+		mfm_buffer[i++]=mfm_code&0xFF;
+
+		lastbit=~(MFM_tab[byte]<<15);		
+	}
+
+	tg->mfm_last_bit=lastbit;
+	tg->last_bit_offset=tg->last_bit_offset+(i*8);
+
+	return;
+}
+
+// Fast Bin to FM converter
+void FastFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_data,int size)
+{
+	unsigned short j,l;
+	unsigned char  i,k;
+	unsigned char  byte;
+	unsigned char * fm_buffer;
+
+	fm_buffer=&side->databuffer[tg->last_bit_offset/8];
+
+	j=0;
+	for(l=0;l<size;l++)
+	{
+		byte=track_data[l];
+			
+		for(k=0;k<4;k++)
 		{
-			if(byte&(0x80>>m))
+			fm_buffer[j]=0x44;
+			////////////////////////////////////
+			// data
+			for(i=0;i<2;i++)
 			{
-				buffer[j]=buffer[j]|((0x40)>>s);		
-				s=s+2;
-				if(s==8)
-				{
-					s=0;
-					j++;
-					if(j<mfmtracksize) buffer[j]=0;
-					
+				if(byte&(0x80>>(i+(k*2)) ))
+				{	// 0x10 
+					// 00010001)
+					fm_buffer[j]=fm_buffer[j] | (0x10>>(i*4));
 				}
 			}
-			else
-			{
-				if(bufferclk[l]&(0x80>>m))
-				{
-					if(lastbit)
-					{
-						buffer[j]=buffer[j]|((0x00)>>s);
-						
-						s=s+2;
-						if(s==8)
-						{
-							s=0;
-							j++;
-							if(j<mfmtracksize) buffer[j]=0;
-						}
-					}
-					else
-					{
-						buffer[j]=buffer[j]|((0x80)>>s);
-										
-						s=s+2;
-						if(s==8)
-						{
-							s=0;
-							j++;
-							if(j<mfmtracksize) buffer[j]=0;
-						}
-					}
-				}
-				else
-				{
-					buffer[j]=buffer[j]|((0x00)>>s);
-					
-					s=s+2;
-					if(s==8)
-					{
-						s=0;
-						j++;
-						if(j<mfmtracksize) buffer[j]=0;
-					}
-				}
-			}
-			lastbit=byte&(0x80>>m);
+
+			j++;
 		}
 	}
+	
+	tg->last_bit_offset=tg->last_bit_offset+(j*8);
+	
+	return;
 }
-*/
+
+
+
+void FastMFMFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_data,int size,unsigned char trackencoding)
+{
+	
+	switch(trackencoding)
+	{
+		case IBMFORMAT_SD:
+		case ISOFORMAT_SD:
+			FastFMgenerator(tg,side,track_data,size);
+		break;
+
+		case IBMFORMAT_DD:
+		case ISOFORMAT_DD:
+		case ISOFORMAT_DD11S:
+			FastMFMgenerator(tg,side,track_data,size);
+		break;
+
+		default:
+		break;
+	}
+	return;
+}
+
 
 // FM encoder
 void BuildFMCylinder(char * buffer,int fmtracksize,char * bufferclk,char * track,int size)
@@ -341,8 +548,6 @@ unsigned char* compute_interleave_tab(unsigned char interleave,unsigned char ske
 	unsigned char *interleave_tab;
 	unsigned char *allocated_tab;
 
-
-
 	interleave_tab=(unsigned char *)malloc(numberofsector*sizeof(unsigned char));
 	if(numberofsector)
 	{
@@ -373,443 +578,689 @@ unsigned char* compute_interleave_tab(unsigned char interleave,unsigned char ske
 	return interleave_tab;
 }
 
-int BuildISOTrack(HXCFLOPPYEMULATOR* floppycontext,int TRACKTYPE,unsigned int numberofsector,unsigned char startidsector,unsigned int sectorsize,unsigned int tracknumber,unsigned int sidenumber,unsigned int gap3len,unsigned char* datain,unsigned char * mfmdata,unsigned long * mfmsizebuffer,int interleave,int skew,SECTORCONFIG * sectorconfigtab)
+
+int searchgap3value(unsigned int numberofsector,SECTORCONFIG * sectorconfigtab)
 {
-	unsigned int i,j,k,l,t;
-	unsigned char CRC16_High;
-	unsigned char CRC16_Low;
+	unsigned int i,j;
+	unsigned char gap3;
+
+	gap3=0xFF;
+	j=0;
+	do
+	{
+		i=0;
+		while( (i<numberofsector) && ( (std_gap3_tab[j].trackmode==sectorconfigtab[i].trackencoding) && (std_gap3_tab[j].sectorsize==sectorconfigtab[i].sectorsize) && (std_gap3_tab[j].numberofsector==numberofsector)) )
+		{
+			i++;
+		}
+
+		if(i==numberofsector)
+		{
+			gap3=std_gap3_tab[j].gap3;
+			return gap3;
+		}
+		j++;
+	}while((i<numberofsector) && (std_gap3_tab[j].trackmode!=0xFF) && gap3==0xFF);
+
+	return -1;
+}
+void tg_initTrackEncoder(track_generator *tg)
+{
+	memset(tg,0,sizeof(track_generator));
+	tg->mfm_last_bit=0xFFFF;
+}
+
+unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackencoding,unsigned int bitrate,unsigned int numberofsector,SECTORCONFIG * sectorconfigtab,unsigned long * track_period)
+{
+	unsigned int i,j;
+	unsigned long tck_period;
 	isoibm_config * configptr;
-	unsigned char *tempdata;
-	unsigned char *tempclock;
-	unsigned long finalsize;
-	unsigned long indexbuffer;
-	unsigned long totaldatasize;
-	unsigned long current_buffer_size;
-	unsigned long header_size;
-	unsigned long datapart_size;
+	unsigned long total_track_size,sector_size;
+	unsigned char gap3;
 
-	unsigned char * interleave_tab;
-	unsigned char crctable[32];
-	configptr=NULL;
+	configptr=0;
+	tck_period=0;
 	i=0;
-	while (formatstab[i].indexformat!=TRACKTYPE &&  formatstab[i].indexformat!=0)
-	{
-		i++;
-	};
 
-	configptr=&formatstab[i];
-	totaldatasize=0;
-	if(sectorconfigtab)
+	configptr=&formatstab[trackencoding-1];
+
+	total_track_size=configptr->len_gap4a+configptr->len_isync+configptr->len_indexmarkp1+configptr->len_indexmarkp2 + \
+					 configptr->len_gap1;
+
+	switch(trackencoding)
 	{
-		sectorsize=0;
-		for(j=0;j<numberofsector;j++)
-		{
-			totaldatasize=totaldatasize+(sectorconfigtab[j].sectorsize);
-		}
+		case IBMFORMAT_SD:
+		case ISOFORMAT_SD:
+			total_track_size=total_track_size*4;
+			break;
+
+		case IBMFORMAT_DD:
+		case ISOFORMAT_DD:
+		case ISOFORMAT_DD11S:
+			total_track_size=total_track_size*2;
+			break;
+
+		default:
+			total_track_size=total_track_size*2;
+			break;
 	}
+	
+	if(total_track_size)
+ 		tck_period=tck_period+(100000/(bitrate/(total_track_size*4)));
 
-	finalsize=configptr->len_gap4a+configptr->len_isync+configptr->len_indexmarkp1+configptr->len_indexmarkp2 + \
-			  configptr->len_gap1 +  \
-			  numberofsector*(configptr->len_ssync+configptr->len_addrmarkp1+configptr->len_addrmarkp2 +6 +configptr->len_gap2 +configptr->len_dsync+configptr->len_datamarkp1+configptr->len_datamarkp2+sectorsize+2+gap3len) +\
-			  totaldatasize;
 
-	indexbuffer=0;
-	current_buffer_size=*mfmsizebuffer/2;
-	if(TRACKTYPE==IBMFORMAT_SD)
+	for(j=0;j<numberofsector;j++)
 	{
-		current_buffer_size=*mfmsizebuffer/4;
-	}
-
-	interleave_tab=compute_interleave_tab((unsigned char)interleave,(unsigned char)skew,(unsigned short)numberofsector);
-
-
-	if(finalsize<=current_buffer_size)
-	{
-		j=0;
-		tempdata=(char *)malloc((*mfmsizebuffer/2)+1);
-		tempclock=(char *)malloc((*mfmsizebuffer/2)+1);
-		
-		//gap4a (post index gap4)
-		for(k=0;k<configptr->len_gap4a;k++)
+		// if gap3 is set to "to be computed" we consider it as zero for the moment...
+		if(sectorconfigtab[j].gap3==255)
 		{
-				tempdata[j]=configptr->data_gap4a;
-				tempclock[j]=0xFF;
-				j++;
-		}
-
-		//i sync
-		for(k=0;k<configptr->len_isync;k++)
-		{
-				tempdata[j]=configptr->data_isync;
-				tempclock[j]=0xFF;
-				j++;
-		}
-
-
-		// index mark
-		for(k=0;k<configptr->len_indexmarkp1;k++)
-		{
-				tempdata[j]=configptr->data_indexmarkp1;
-				tempclock[j]=configptr->clock_indexmarkp1;
-				j++;
-		}
-		for(k=0;k<configptr->len_indexmarkp2;k++)
-		{
-				tempdata[j]=configptr->data_indexmarkp2;
-				tempclock[j]=configptr->clock_indexmarkp2;
-				j++;
-		}
-
-
-		// gap1
-		for(k=0;k<configptr->len_gap1;k++)
-		{
-				tempdata[j]=configptr->data_gap1;
-				tempclock[j]=0xFF;
-				j++;
-		}
-
-		// sectors
-		for(l=0;l<numberofsector;l++)
-		{
-
-				if(sectorconfigtab)
-				{
-					sectorconfigtab[interleave_tab[l]].startsectorindex=j*2;
-				}
-
-			
-				// sync
-				for(k=0;k<configptr->len_ssync;k++)
-				{
-						tempdata[j]=configptr->data_ssync;
-						tempclock[j]=0xFF;
-						j++;
-				}
-
-				header_size=0;
-				// add mark
-				for(k=0;k<configptr->len_addrmarkp1;k++)
-				{
-					tempdata[j]=configptr->data_addrmarkp1;
-					tempclock[j]=configptr->clock_addrmarkp1;
-					j++;
-					header_size++;	
-				}
-
-				for(k=0;k<configptr->len_addrmarkp2;k++)
-				{
-
-						if(sectorconfigtab)
-						{
-							if(sectorconfigtab[interleave_tab[l]].use_alternate_addressmark)
-							{
-								tempdata[j]=sectorconfigtab[interleave_tab[l]].alternate_addressmark;
-								tempclock[j]=configptr->clock_addrmarkp2;
-								j++;
-								header_size++;
-							}
-							else
-							{
-								tempdata[j]=configptr->data_addrmarkp2;
-								tempclock[j]=configptr->clock_addrmarkp2;
-								j++;
-								header_size++;
-							}
-						}
-						else
-						{
-							tempdata[j]=configptr->data_addrmarkp2;
-							tempclock[j]=configptr->clock_addrmarkp2;
-							j++;
-							header_size++;
-						}
-				}
-
-				// track number
-				tempdata[j]=tracknumber;
-				tempclock[j]=0xFF;
-				if(sectorconfigtab)
-				{
-					tempdata[j]=sectorconfigtab[interleave_tab[l]].cylinder;
-				}
-				j++;
-				header_size++;
-
-
-				//01 Side # The side number this is (0 or 1) 
-				tempdata[j]=sidenumber;
-				tempclock[j]=0xff;
-				if(sectorconfigtab)
-				{
-					tempdata[j]=sectorconfigtab[interleave_tab[l]].head;
-				}
-				j++;
-				header_size++;
-			
-				//01 Sector # The sector number 
-				if(sectorconfigtab)
-				{
-					tempdata[j]=sectorconfigtab[interleave_tab[l]].sector;
-					tempclock[j]=0xFF;
-				}
-				else
-				{
-					tempdata[j]=interleave_tab[l]+startidsector;
-					tempclock[j]=0xFF;
-				}
-				j++;
-				header_size++;
-			
-
-				if(sectorconfigtab)
-				{
-					sectorsize=sectorconfigtab[interleave_tab[l]].sectorsize;
-				}
-
-			
-				//01 02 Sector size: 02=512. (00=128, 01=256, 02=512, 03=1024) 
-				switch(sectorsize)
-				{
-					case 128:
-						tempdata[j]=00;
-					break;
-					case 256:
-						tempdata[j]=01;
-					break;
-					case 512:
-						tempdata[j]=02;
-					break;
-					case 1024:
-						tempdata[j]=03;
-					break;
-					case 2048:
-						tempdata[j]=04;
-					break;
-					case 4096:
-						tempdata[j]=05;
-					break;
-					case 8192:
-						tempdata[j]=06;
-					break;
-					case 16384:
-						tempdata[j]=07;
-					break;
-					default:
-						tempdata[j]=02;
-					break;
-				}
-				tempclock[j]=0xFF;
-				
-				if(sectorconfigtab)
-				{
-					if(sectorconfigtab[interleave_tab[l]].use_alternate_sector_size_id)
-					{
-						tempdata[j]=sectorconfigtab[interleave_tab[l]].alternate_sector_size_id;
-					}
-				}
-				j++;
-				header_size++;
-
-				//02 CRC The sector Header CRC
-				CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,0x1021,0xFFFF);
-				for(t=0;t<header_size;t++)  CRC16_Update(&CRC16_High,&CRC16_Low, tempdata[j-header_size+t],(unsigned char*)&crctable );
-				
-				tempdata[j]=CRC16_High;
-				tempclock[j]=0xFF;
-				j++;
-			
-				tempdata[j]=CRC16_Low;
-				tempclock[j]=0xFF;
-				if(sectorconfigtab)
-				{
-					if(sectorconfigtab[interleave_tab[l]].use_alternate_header_crc&0x2)
-					{
-						// alternate crc
-						tempdata[j]=(sectorconfigtab[interleave_tab[l]].header_crc&0xFF);
-						tempdata[j-1]=(sectorconfigtab[interleave_tab[l]].header_crc>>8)&0xFF; // generate bad header crc	
-					}
-					else
-					{	
-						//bad crc
-						if(sectorconfigtab[interleave_tab[l]].use_alternate_header_crc&0x1)
-						{
-							tempdata[j]=tempdata[j-1]^0xFF;
-							tempdata[j-1]=tempdata[j]^0xFF;
-						}
-					}
-
-					
-				}
-				j++;
-
-
-				// gap2
-				for(k=0;k<configptr->len_gap2;k++)
-				{
-						tempdata[j]=configptr->data_gap2;
-						tempclock[j]=0xFF;
-						j++;
-				}
-
-				// sync
-				for(k=0;k<configptr->len_dsync;k++)
-				{
-						tempdata[j]=configptr->data_dsync;
-						tempclock[j]=0xFF;
-						j++;
-				}
-			
-				datapart_size=0;
-				// data mark
-				for(k=0;k<configptr->len_datamarkp1;k++)
-				{
-						tempdata[j]=configptr->data_datamarkp1;
-						tempclock[j]=configptr->clock_datamarkp1;
-						j++;
-						datapart_size++;
-				}
-				for(k=0;k<configptr->len_datamarkp2;k++)
-				{
-
-						if(sectorconfigtab)
-						{
-							if(sectorconfigtab[interleave_tab[l]].use_alternate_datamark)
-							{
-								tempdata[j]=sectorconfigtab[interleave_tab[l]].alternate_datamark;
-								tempclock[j]=configptr->clock_datamarkp2;
-								j++;
-								datapart_size++;
-
-							}
-							else
-							{
-								tempdata[j]=configptr->data_datamarkp2;
-								tempclock[j]=configptr->clock_datamarkp2;
-								j++;
-								datapart_size++;
-							}
-						}
-						else
-						{
-							tempdata[j]=configptr->data_datamarkp2;
-							tempclock[j]=configptr->clock_datamarkp2;
-							j++;
-							datapart_size++;
-						}
-				}
-
-				if(sectorconfigtab)
-				{
-					sectorconfigtab[interleave_tab[l]].startdataindex=j*2;
-				}
-
-
-				if(!sectorconfigtab)
-				{
-					//Data  
-					for(i=0;i<sectorsize;i++)
-					{
-						tempdata[j]=datain[(interleave_tab[l]*sectorsize)+i];
-						tempclock[j]=0xFF;
-						j++;
-						datapart_size++;
-					}
-				
-				}
-				else
-				{
-					
-					i=0;
-					indexbuffer=0;
-					while(i<interleave_tab[l])
-					{
-						indexbuffer=indexbuffer+sectorconfigtab[i].sectorsize;
-						i++;
-					}
-
-					for(i=0;i<sectorsize;i++)
-					{
-						tempdata[j]=datain[(indexbuffer)+i];
-						tempclock[j]=0xFF;
-						j++;
-						datapart_size++;
-					}
-					indexbuffer=indexbuffer+sectorsize;
-				}
-				
-				//02 CRC The CRC of the data 
-				CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,0x1021,0xFFFF);
-				
-				for(t=0;t<datapart_size;t++)  CRC16_Update(&CRC16_High,&CRC16_Low, tempdata[j-(datapart_size)+t],(unsigned char*)&crctable );
-				
-				tempdata[j]=CRC16_High;
-				tempclock[j]=0xFF;
-				j++;
-				
-				tempdata[j]=CRC16_Low;
-				tempclock[j]=0xFF;
-				if(sectorconfigtab)
-				{
-
-					if(sectorconfigtab[interleave_tab[l]].use_alternate_data_crc&0x2)
-					{
-						// alternate crc
-						tempdata[j]=(sectorconfigtab[interleave_tab[l]].data_crc&0xFF);
-						tempdata[j-1]=(sectorconfigtab[interleave_tab[l]].data_crc>>8)&0xFF; // generate bad header crc	
-					}
-					else
-					{	
-						//bad crc
-						if(sectorconfigtab[interleave_tab[l]].use_alternate_data_crc&0x1)
-						{
-							tempdata[j]=tempdata[j-1]^0xFF;
-							tempdata[j-1]=tempdata[j]^0xFF;
-						}
-					}
-
-				}
-				j++;
-				
-				//gap3
-				for(k=0;k<gap3len;k++)
-				{
-						tempdata[j]=configptr->data_gap3;
-						tempclock[j]=0xFF;
-						j++;
-				}
-
-
-		}
-
-		if(j<=current_buffer_size)
-		{	
-			for(i=j;i<(current_buffer_size+1);i++)
-			{	
-				tempdata[i]=configptr->data_gap4b;
-				tempclock[i]=0xFF;
-			}
-		}
-
-		if((TRACKTYPE!=IBMFORMAT_SD) && (TRACKTYPE!=ISOFORMAT_SD))		
-		{
-			BuildCylinder(mfmdata,*mfmsizebuffer,tempclock,tempdata,(*mfmsizebuffer)/2);
+			gap3=0;
 		}
 		else
 		{
-			BuildFMCylinder(mfmdata,*mfmsizebuffer,tempclock,tempdata,(*mfmsizebuffer)/4);
+			gap3=sectorconfigtab[j].gap3;
+		}
+		configptr=&formatstab[sectorconfigtab[j].trackencoding-1];
+		sector_size=(configptr->len_ssync+configptr->len_addrmarkp1+configptr->len_addrmarkp2 +6 +configptr->len_gap2 +configptr->len_dsync+configptr->len_datamarkp1+configptr->len_datamarkp2+2+gap3);
+		sector_size=sector_size+sectorconfigtab[j].sectorsize+2;
+
+		switch(sectorconfigtab[j].trackencoding)
+		{
+			case IBMFORMAT_SD:
+			case ISOFORMAT_SD:
+				sector_size=sector_size*4;
+				break;
+
+			case IBMFORMAT_DD:
+			case ISOFORMAT_DD:
+			case ISOFORMAT_DD11S:
+				sector_size=sector_size*2;
+				break;
+
+			default:
+				sector_size=sector_size*2;
+				break;
 		}
 
-		if(interleave_tab) free(interleave_tab);
-		free(tempdata);
-		free(tempclock);
-		return 0;
-	 }
-	 else
-	 {
-		if(interleave_tab) free(interleave_tab);
-		floppycontext->hxc_printf(MSG_ERROR,"BuildISOTrack : No enough space on this track !");
-		return finalsize;
-	 }
+		total_track_size=total_track_size+sector_size;
 
+		tck_period=tck_period+(10000000/((sectorconfigtab[0].bitrate*100)/(sector_size*4)));
+
+	}
+	
+	if(track_period)
+		*track_period=tck_period;
+
+	total_track_size=total_track_size*8;
+
+	return total_track_size;
+}
+
+SIDE * tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short numberofsector,unsigned char trackencoding,unsigned int bitrate,SECTORCONFIG * sectorconfigtab)
+{
+	SIDE * currentside;
+	int variable_param,tracklen;
+	unsigned int i;
+	unsigned long   startindex;
+
+	startindex=tg->last_bit_offset/8;
+
+	currentside=(SIDE*)malloc(sizeof(SIDE));
+	memset(currentside,0,sizeof(SIDE));
+				
+	currentside->number_of_sector=numberofsector;
+
+	tracklen=tracksize/8;
+	if(tracksize&7) tracklen++;
+
+	currentside->tracklen=tracksize;
+
+	if(numberofsector)
+	{
+		//////////////////////////////
+		// bitrate buffer allocation
+		variable_param=0;
+		currentside->bitrate=sectorconfigtab[0].bitrate;
+		i=0;
+		while(i<currentside->number_of_sector && !variable_param)
+		{
+			if(sectorconfigtab[i].bitrate!=sectorconfigtab[0].bitrate)
+			{
+				variable_param=1;
+				currentside->bitrate=VARIABLEBITRATE;
+
+				currentside->timingbuffer=malloc(tracklen*sizeof(unsigned long));
+				memset(currentside->timingbuffer,0,tracklen*sizeof(unsigned long));
+			}
+			i++;
+		}
+		///////////////////////////////////////////
+		// track encoding code buffer allocation
+		variable_param=0;
+		currentside->track_encoding=sectorconfigtab[0].trackencoding;
+		i=0;
+		while(i<currentside->number_of_sector && !variable_param)
+		{
+			if(sectorconfigtab[i].trackencoding!=sectorconfigtab[0].trackencoding)
+			{
+				variable_param=1;
+				currentside->track_encoding=VARIABLEENCODING;
+
+				currentside->track_encoding_buffer=malloc(tracklen*sizeof(unsigned char));
+				memset(currentside->track_encoding_buffer,0,tracklen*sizeof(unsigned char));
+			}
+			i++;
+		}
+	}
+	else
+	{
+		currentside->bitrate=bitrate;
+		currentside->track_encoding=trackencoding;
+	}
+
+	/////////////////////////////
+	// data buffer allocation
+	currentside->databuffer=malloc(tracklen);
+	memset(currentside->databuffer,0,tracklen);
+					
+	currentside->flakybitsbuffer=0;
+					
+	/////////////////////////////
+	// index buffer allocation
+	currentside->indexbuffer=malloc(tracklen);
+	memset(currentside->indexbuffer,0,tracklen);
+	
+	if(numberofsector)
+	{
+		//gap4a (post index gap4)
+		for(i=0;i<formatstab[trackencoding-1].len_gap4a;i++)
+		{
+			pushTrackCode(tg,formatstab[trackencoding-1].data_gap4a,0xFF,currentside,trackencoding);
+		}
+
+		//i sync
+		for(i=0;i<formatstab[trackencoding-1].len_isync;i++)
+		{
+			pushTrackCode(tg,formatstab[trackencoding-1].data_isync,0xFF,currentside,trackencoding);
+		}
+
+		// index mark
+		for(i=0;i<formatstab[trackencoding-1].len_indexmarkp1;i++)
+		{
+			pushTrackCode(tg,formatstab[trackencoding-1].data_indexmarkp1,formatstab[trackencoding-1].clock_indexmarkp1,currentside,trackencoding);
+		}
+		
+		for(i=0;i<formatstab[trackencoding-1].len_indexmarkp2;i++)
+		{
+			pushTrackCode(tg,formatstab[trackencoding-1].data_indexmarkp2,formatstab[trackencoding-1].clock_indexmarkp2,currentside,trackencoding);
+		}
+
+		// gap1
+		for(i=0;i<formatstab[trackencoding-1].len_gap1;i++)
+		{
+			pushTrackCode(tg,formatstab[trackencoding-1].data_gap1,0xFF,currentside,trackencoding);
+		}
+	}
+
+	currentside->tracklen=tracksize;
+
+	switch(trackencoding)
+	{
+		case IBMFORMAT_SD:
+		case ISOFORMAT_SD:
+			currentside->track_encoding=ISOIBM_FM_ENCODING;
+		break;
+
+		case ISOFORMAT_DD11S:
+		case IBMFORMAT_DD:
+		case ISOFORMAT_DD:
+			currentside->track_encoding=ISOIBM_MFM_ENCODING;
+		break;
+		
+		default:
+			currentside->track_encoding=ISOIBM_MFM_ENCODING;
+		break;
+	}
+
+	// fill timing & encoding buffer
+	if(currentside->timingbuffer)
+	{
+		for(i=startindex;i<(tg->last_bit_offset/8);i++)
+		{
+			currentside->timingbuffer[i]=sectorconfigtab[0].bitrate;
+		}
+	}
+
+	if(currentside->track_encoding_buffer)
+	{
+		for(i=startindex;i<(tg->last_bit_offset/8);i++)
+		{
+			currentside->track_encoding_buffer[i]=currentside->track_encoding;
+		}
+	}
+
+	return currentside;
+}
+
+void tg_addSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * currentside)
+{
+
+	unsigned short  i;
+	unsigned char   c,trackencoding,trackenc;
+	unsigned char   CRC16_High;
+	unsigned char   CRC16_Low;
+	unsigned char   crctable[32];
+	unsigned long   startindex,j;
+
+	startindex=tg->last_bit_offset/8;
+	
+	sectorconfig->startsectorindex=tg->last_bit_offset/8;
+	trackencoding=sectorconfig->trackencoding-1;
+			
+	// sync
+	for(i=0;i<formatstab[trackencoding].len_ssync;i++)
+	{
+		pushTrackCode(tg,formatstab[trackencoding].data_ssync,0xFF,currentside,sectorconfig->trackencoding);
+	}
+
+	CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,0x1021,0xFFFF);
+	// add mark
+	for(i=0;i<formatstab[trackencoding].len_addrmarkp1;i++)
+	{
+		pushTrackCode(tg,formatstab[trackencoding].data_addrmarkp1,formatstab[trackencoding].clock_addrmarkp1,currentside,sectorconfig->trackencoding);
+		CRC16_Update(&CRC16_High,&CRC16_Low, formatstab[trackencoding].data_addrmarkp1,(unsigned char*)&crctable);
+	}
+
+	if(sectorconfig->use_alternate_addressmark)
+	{
+		for(i=0;i<formatstab[trackencoding].len_addrmarkp2;i++)
+		{
+			pushTrackCode(tg,sectorconfig->alternate_addressmark,formatstab[trackencoding].clock_addrmarkp2,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->alternate_addressmark,(unsigned char*)&crctable );
+		}
+	}
+	else
+	{
+		for(i=0;i<formatstab[trackencoding].len_addrmarkp2;i++)
+		{
+			pushTrackCode(tg,formatstab[trackencoding].data_addrmarkp2,formatstab[trackencoding].clock_addrmarkp2,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, formatstab[trackencoding].data_addrmarkp2,(unsigned char*)&crctable );
+		}
+	}
+
+	// track number
+	pushTrackCode(tg,sectorconfig->cylinder,0xFF,currentside,sectorconfig->trackencoding);
+	CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->cylinder,(unsigned char*)&crctable );
+
+	//01 Side # The side number this is (0 or 1) 
+	pushTrackCode(tg,sectorconfig->head,  0xFF,currentside,sectorconfig->trackencoding);
+	CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->head,(unsigned char*)&crctable );
+			
+	//01 Sector # The sector number 
+	pushTrackCode(tg,sectorconfig->sector,0xFF,currentside,sectorconfig->trackencoding);
+	CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->sector,(unsigned char*)&crctable );
+			
+	//01 Sector size: 02=512. (00=128, 01=256, 02=512, 03=1024) 
+	if(sectorconfig->use_alternate_sector_size_id)
+	{
+		c=sectorconfig->alternate_sector_size_id;
+	}
+	else
+	{	
+		c=0;
+		while(((unsigned int)(128<<(unsigned int)c)!=sectorconfig->sectorsize) && c<8)
+		{
+			c++;
+		}
+	}
+	pushTrackCode(tg,c,0xFF,currentside,sectorconfig->trackencoding);
+	CRC16_Update(&CRC16_High,&CRC16_Low, c,(unsigned char*)&crctable );
+
+	//02 CRC The sector Header CRC
+	if(sectorconfig->use_alternate_header_crc&0x2)
+	{
+		pushTrackCode(tg, (unsigned char) (sectorconfig->header_crc&0xFF),    0xFF,currentside,sectorconfig->trackencoding);
+		pushTrackCode(tg, (unsigned char)((sectorconfig->header_crc>>8)&0xFF),0xFF,currentside,sectorconfig->trackencoding);
+	}
+	else
+	{
+		//bad crc
+		if(sectorconfig->use_alternate_header_crc&0x1)
+		{
+			pushTrackCode(tg,(unsigned char)(CRC16_High^0x13),0xFF,currentside,sectorconfig->trackencoding);
+			pushTrackCode(tg,(unsigned char)(CRC16_Low ^0x17),0xFF,currentside,sectorconfig->trackencoding);
+		}
+		else
+		{
+			pushTrackCode(tg,CRC16_High,0xFF,currentside,sectorconfig->trackencoding);
+			pushTrackCode(tg,CRC16_Low,0xFF,currentside,sectorconfig->trackencoding);
+		}
+
+	}
+	
+	// gap2
+	for(i=0;i<formatstab[trackencoding].len_gap2;i++)
+	{
+		pushTrackCode(tg,formatstab[trackencoding].data_gap2,0xFF,currentside,sectorconfig->trackencoding);
+	}
+
+	// sync
+	for(i=0;i<formatstab[trackencoding].len_dsync;i++)
+	{
+		pushTrackCode(tg,formatstab[trackencoding].data_dsync,0xFF,currentside,sectorconfig->trackencoding);
+	}
+			
+	//02 CRC The CRC of the data 
+	CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,0x1021,0xFFFF);
+
+	// data mark
+	for(i=0;i<formatstab[trackencoding].len_datamarkp1;i++)
+	{
+		pushTrackCode(tg,formatstab[trackencoding].data_datamarkp1,formatstab[trackencoding].clock_datamarkp1,currentside,sectorconfig->trackencoding);
+		CRC16_Update(&CRC16_High,&CRC16_Low, formatstab[trackencoding].data_datamarkp1,(unsigned char*)&crctable );
+	}
+
+	if(sectorconfig->use_alternate_datamark)
+	{
+		for(i=0;i<formatstab[trackencoding].len_datamarkp2;i++)
+		{
+			pushTrackCode(tg,sectorconfig->alternate_datamark,formatstab[trackencoding].clock_datamarkp2,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->alternate_datamark,(unsigned char*)&crctable );
+		}
+	}
+	else
+	{
+		for(i=0;i<formatstab[trackencoding].len_datamarkp2;i++)
+		{
+			pushTrackCode(tg,formatstab[trackencoding].data_datamarkp2,formatstab[trackencoding].clock_datamarkp2,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, formatstab[trackencoding].data_datamarkp2,(unsigned char*)&crctable );
+		}
+	}
+		
+	sectorconfig->startdataindex=tg->last_bit_offset/8;
+	if(sectorconfig->input_data)
+	{
+		FastMFMFMgenerator(tg,currentside,sectorconfig->input_data,sectorconfig->sectorsize,sectorconfig->trackencoding);
+
+		// data crc			
+		for(i=0;i<sectorconfig->sectorsize;i++)
+		{
+			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->input_data[i],(unsigned char*)&crctable );
+		}
+	}
+	else
+	{
+		for(i=0;i<sectorconfig->sectorsize;i++)
+		{
+			pushTrackCode(tg,sectorconfig->fill_byte,0xFF,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->fill_byte,(unsigned char*)&crctable );
+		}
+	}
+
+
+	if(sectorconfig->use_alternate_data_crc&0x2)
+	{
+		// alternate crc
+		pushTrackCode(tg,(unsigned char)(sectorconfig->data_crc&0xFF),     0xFF,currentside,sectorconfig->trackencoding);
+		pushTrackCode(tg,(unsigned char)((sectorconfig->data_crc>>8)&0xFF),0xFF,currentside,sectorconfig->trackencoding);
+	}
+	else
+	{	
+		//bad crc
+		if(sectorconfig->use_alternate_data_crc&0x1)
+		{
+			pushTrackCode(tg,(unsigned char)(CRC16_High^0x21),0xFF,currentside,sectorconfig->trackencoding);
+			pushTrackCode(tg,(unsigned char)(CRC16_Low ^0x20),0xFF,currentside,sectorconfig->trackencoding);
+		}
+		else
+		{
+			pushTrackCode(tg,CRC16_High,0xFF,currentside,sectorconfig->trackencoding);
+			pushTrackCode(tg,CRC16_Low ,0xFF,currentside,sectorconfig->trackencoding);
+		}
+	}
+					
+	//gap3
+	if(sectorconfig->gap3!=255)
+	{
+		for(i=0;i<sectorconfig->gap3;i++)
+		{
+			pushTrackCode(tg,formatstab[trackencoding].data_gap3,0xFF,currentside,sectorconfig->trackencoding);
+		}
+	}
+
+
+	// fill timing & encoding buffer
+	if(currentside->timingbuffer)
+	{
+		for(j=startindex;j<(tg->last_bit_offset/8);j++)
+		{
+			currentside->timingbuffer[j]=sectorconfig->bitrate;
+		}
+	}
+
+	switch(trackencoding)
+	{
+		case IBMFORMAT_SD:
+		case ISOFORMAT_SD:
+			trackenc=ISOIBM_FM_ENCODING;
+		break;
+
+		case ISOFORMAT_DD11S:
+		case IBMFORMAT_DD:
+		case ISOFORMAT_DD:
+			trackenc=ISOIBM_MFM_ENCODING;
+		break;
+		
+		default:
+			trackenc=ISOIBM_MFM_ENCODING;
+		break;
+	}
+
+	if(currentside->track_encoding_buffer)
+	{
+		for(j=startindex;j<(tg->last_bit_offset/8);j++)
+		{
+			currentside->track_encoding_buffer[j]=trackenc;
+		}
+	}
+
+	currentside->number_of_sector++;
+}
+
+void tg_completeTrack(track_generator *tg, SIDE * currentside,unsigned char trackencoding)
+{
+	int tracklen,trackoffset;
+	unsigned int startindex,i;
+
+	tracklen=currentside->tracklen/8;
+	if(currentside->tracklen&7) tracklen++;
+
+	startindex=tg->last_bit_offset/8;
+	trackoffset=startindex;
+	while(trackoffset<tracklen)
+	{
+		pushTrackCode(tg,formatstab[trackencoding].data_gap4b,0xFF,currentside,trackencoding);
+		trackoffset=tg->last_bit_offset/8;
+	}
+
+	// fill timing & encoding buffer
+	if(currentside->timingbuffer)
+	{
+		for(i=startindex;i<(tg->last_bit_offset/8);i++)
+		{
+			currentside->timingbuffer[i]=currentside->timingbuffer[startindex-1];
+		}
+	}
+
+	if(currentside->track_encoding_buffer)
+	{
+		for(i=startindex;i<(tg->last_bit_offset/8);i++)
+		{
+			currentside->track_encoding_buffer[i]=currentside->track_encoding_buffer[startindex-1];
+		}
+	}
+}
+
+SIDE * tg_generatetrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorconfigtab,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,int indexlen)
+{
+	unsigned short i;
+	unsigned long tracksize;
+	unsigned long track_period,wanted_trackperiod,indexperiod;
+	unsigned char * interleavetab;
+	unsigned char gap3tocompute;
+	unsigned long gap3period,computedgap3;
+	int gap3;
+
+	track_generator tg;
+	SIDE * currentside;
+
+	// compute the sectors interleaving.
+	interleavetab=compute_interleave_tab(interleave,skew,number_of_sector);
+
+	tg_initTrackEncoder(&tg);
+
+	// get minimum track size
+	tracksize=tg_computeMinTrackSize(&tg,trackencoding,bitrate,number_of_sector,sectorconfigtab,&track_period);
+	
+	wanted_trackperiod=(100000*60)/rpm;
+	
+	
+	// compute the adjustable gap3 lenght
+	// how many gap3 we need to compute ?
+	gap3tocompute=0;
+	for(i=0;i<number_of_sector;i++)
+	{
+		// if gap3 not set...
+		if(sectorconfigtab[i].gap3==0xFF)
+		{
+			gap3tocompute++;
+		}
+
+	}
+
+	indexperiod=0;
+	if(indexlen&NO_SECTOR_UNDER_INDEX)
+	{
+		indexperiod=(indexlen&0xFFFFFF)/10;
+	}
+
+
+	//first try : get a standard value...
+	if(gap3tocompute==number_of_sector)
+	{
+		gap3=searchgap3value(number_of_sector,sectorconfigtab);
+		if(gap3!=-1)
+		{
+
+			for(i=0;i<number_of_sector;i++)
+			{
+				sectorconfigtab[i].gap3=(unsigned char)gap3;
+			}
+			gap3tocompute=0;
+		}
+
+	}
+	// compute the dispatched the gap3 period
+	gap3period=0;
+	if(gap3tocompute && (wanted_trackperiod>(track_period+indexperiod)))
+	{
+		gap3period=wanted_trackperiod-(track_period+indexperiod);
+		gap3period=gap3period/gap3tocompute;
+
+
+		// set the right gap3 lenght according to the sector bitrate
+		for(i=0;i<number_of_sector;i++)
+		{
+			// if gap3 not set...
+			if(sectorconfigtab[i].gap3==0xFF)
+			{	
+				// TODO: make integer this...
+				computedgap3=(unsigned long)floor((float)gap3period*(float)((float)sectorconfigtab[i].bitrate/(float)100000));
+
+				switch(sectorconfigtab[i].trackencoding)
+				{
+					case IBMFORMAT_SD:
+					case ISOFORMAT_SD:
+						computedgap3=computedgap3/(2*8);
+					break;
+
+					case ISOFORMAT_DD11S:
+					case IBMFORMAT_DD:
+					case ISOFORMAT_DD:
+						computedgap3=computedgap3/(1*8);
+					break;
+				}
+
+				if(computedgap3>200) 
+					computedgap3=200;
+				sectorconfigtab[i].gap3=(unsigned char)computedgap3;
+
+				//floppycontext->hxc_printf(MSG_DEBUG,"Sector:%d Computed Gap:%d",sectorconfigtab[i].sector, computedgap3);
+			}
+		}
+	}
+
+	// recompute the track size with the new gap settings.
+	tracksize=tg_computeMinTrackSize(&tg,trackencoding,bitrate,number_of_sector,sectorconfigtab,&track_period);
+	
+
+	// adjust the track lenght to get the right rpm.
+	if(wanted_trackperiod>track_period)
+	{
+		tracksize=tracksize+((((wanted_trackperiod-track_period) * (bitrate/4) )/(12500)));
+	}
+
+	// align the track size
+	if(tracksize&0x1F)
+	{
+		tracksize=(tracksize&(~0x1F))+0x20;
+	}
+
+
+	// alloc the track...
+	currentside=tg_initTrack(&tg,tracksize,number_of_sector,trackencoding,bitrate,sectorconfigtab);
+
+	// and write all sectors to it...
+	for(i=0;i<number_of_sector;i++)
+	{
+		tg_addSectorToTrack(&tg,&sectorconfigtab[interleavetab[i]],currentside);
+	}
+
+	// "close" the track : extend/add post gap..
+	tg_completeTrack(&tg,currentside,trackencoding);
+
+	fillindex(currentside->tracklen-8,currentside,indexlen,1,1);
+
+	if(interleavetab) free(interleavetab);
+	
+	return currentside;
+}
+
+
+
+SIDE * tg_generatetrack(unsigned char * sectors_data,unsigned short sector_size,unsigned short number_of_sector,unsigned char track,unsigned char side,unsigned char sectorid,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned char gap3, int indexlen)
+{
+	unsigned short i;
+	SIDE * currentside;
+	SECTORCONFIG * sectorconfigtab;
+
+	sectorconfigtab=malloc(sizeof(SECTORCONFIG)*number_of_sector);
+	memset(sectorconfigtab,0,sizeof(SECTORCONFIG)*number_of_sector);
+
+	for(i=0;i<number_of_sector;i++)
+	{
+		sectorconfigtab[i].cylinder=track;
+		sectorconfigtab[i].head=side;
+		sectorconfigtab[i].bitrate=bitrate;//+(10000*i);
+		sectorconfigtab[i].gap3=gap3;
+		sectorconfigtab[i].input_data=&sectors_data[sector_size*i];
+		sectorconfigtab[i].sectorsize=sector_size;
+		sectorconfigtab[i].trackencoding=trackencoding;
+		sectorconfigtab[i].sector=sectorid+i;
+	}
+
+	currentside=tg_generatetrackEx(number_of_sector,sectorconfigtab,interleave,skew,bitrate,rpm,trackencoding,indexlen);
+	free(sectorconfigtab);
+
+	return currentside;
 }
