@@ -101,6 +101,10 @@ typedef struct sdhxcfecfgfile_
 	unsigned char load_last_floppy;
 	unsigned char buzzer_step_duration;  // 0xD8 <> 0xFF
     unsigned char lcd_scroll_speed;
+	unsigned char startup_mode; // 0x01 -> In normal mode auto load STARTUPA.HFE at power up
+								// 0x02 -> In normal mode auto load STARTUPB.HFE at power up
+								// 0x04 -> In slot mode use slot 0 at power up (ignore index)
+								// 0x08 -> Pre increment index when inserting the sdcard (no button/lcd mode)
 }sdhxcfecfgfile;
 
 
@@ -273,6 +277,27 @@ BOOL CALLBACK DialogSettings(
 						else
 							SendDlgItemMessage(hwndDlg,IDC_AUTOBOOTMODE,BM_SETCHECK,BST_UNCHECKED,0);
 
+						if(filecfg->startup_mode&0x1)
+							SendDlgItemMessage(hwndDlg,IDC_STARTUPAPWRUP,BM_SETCHECK,BST_CHECKED,0);
+						else
+							SendDlgItemMessage(hwndDlg,IDC_STARTUPAPWRUP,BM_SETCHECK,BST_UNCHECKED,0);
+
+						if(filecfg->startup_mode&0x2)
+							SendDlgItemMessage(hwndDlg,IDC_STARTUPBPWRUP,BM_SETCHECK,BST_CHECKED,0);
+						else
+							SendDlgItemMessage(hwndDlg,IDC_STARTUPBPWRUP,BM_SETCHECK,BST_UNCHECKED,0);
+
+						if(filecfg->startup_mode&0x4)
+							SendDlgItemMessage(hwndDlg,IDC_AUTOBOOTPWRUP,BM_SETCHECK,BST_CHECKED,0);
+						else
+							SendDlgItemMessage(hwndDlg,IDC_AUTOBOOTPWRUP,BM_SETCHECK,BST_UNCHECKED,0);
+
+						if(filecfg->startup_mode&0x8)
+							SendDlgItemMessage(hwndDlg,IDC_AUTOBOOTMODEINDEXPREINC,BM_SETCHECK,BST_CHECKED,0);
+						else
+							SendDlgItemMessage(hwndDlg,IDC_AUTOBOOTMODEINDEXPREINC,BM_SETCHECK,BST_UNCHECKED,0);
+
+
 
 						backlight_tmr=filecfg->back_light_tmr;
 						SendDlgItemMessage(hwndDlg,IDC_SLIDER_LCDBACKLIGHT, TBM_SETPOS, TRUE,(int)backlight_tmr);
@@ -348,6 +373,18 @@ BOOL CALLBACK DialogSettings(
 						filecfg->step_sound=0xFF;
 
 					filecfg->lcd_scroll_speed=64+((255-64)) - (unsigned char)SendDlgItemMessage(hwndDlg,IDC_SLIDER_SCROLLTXTSPEED, TBM_GETPOS, 0,0);
+					
+
+					filecfg->startup_mode=0;
+
+					if(SendDlgItemMessage(hwndDlg,IDC_STARTUPAPWRUP,BM_GETCHECK,BST_CHECKED,0))
+						filecfg->startup_mode=filecfg->startup_mode|0x1;
+					if(SendDlgItemMessage(hwndDlg,IDC_STARTUPBPWRUP,BM_GETCHECK,BST_CHECKED,0))
+						filecfg->startup_mode=filecfg->startup_mode|0x2;
+					if(SendDlgItemMessage(hwndDlg,IDC_AUTOBOOTPWRUP,BM_GETCHECK,BST_CHECKED,0))
+						filecfg->startup_mode=filecfg->startup_mode|0x4;
+					if(SendDlgItemMessage(hwndDlg,IDC_AUTOBOOTMODEINDEXPREINC,BM_GETCHECK,BST_CHECKED,0))
+						filecfg->startup_mode=filecfg->startup_mode|0x8;
 					
 					fwrite(filebuffer,8*1024,1,cfg_file);
 					fclose(cfg_file);
