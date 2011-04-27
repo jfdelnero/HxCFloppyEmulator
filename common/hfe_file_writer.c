@@ -27,7 +27,6 @@
 
 #define FASTWRITE 1
 
-#include <malloc.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -197,7 +196,7 @@ int write_HFE_file(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filen
 		memset(FILEHEADER,0xFF,512);
 		sprintf((char*)&FILEHEADER->HEADERSIGNATURE,"HXCPICFE");
 
-		FILEHEADER->number_of_track=floppy->floppyNumberOfTrack;
+		FILEHEADER->number_of_track=(unsigned char)floppy->floppyNumberOfTrack;
 		FILEHEADER->number_of_side=floppy->floppyNumberOfSide;
 		if(floppy->floppyBitRate!=VARIABLEBITRATE)
 		{
@@ -211,7 +210,7 @@ int write_HFE_file(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filen
 
 		if(forceifmode==-1)
 		{
-			FILEHEADER->floppyinterfacemode=floppy->floppyiftype;
+			FILEHEADER->floppyinterfacemode=(unsigned char)floppy->floppyiftype;
 		}
 		else
 		{
