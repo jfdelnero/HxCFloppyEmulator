@@ -84,7 +84,7 @@ JV3SectorsOffsets *JV3_bsearch(unsigned int key, JV3SectorsOffsets *base, size_t
 	return (JV3SectorsOffsets*) bsearch (&aux, base, num, sizeof(JV3SectorsOffsets), JV3_compare);
 }
 
-int JV3_disk_geometry(JV3SectorHeader JV3SH[], unsigned int *NumberofSides, unsigned int *SectorsperTrack, unsigned int *NumberofTracks, unsigned int *SectorSize, unsigned int *StartIdSector, unsigned int *NumberofEntries) {
+unsigned int JV3_disk_geometry(JV3SectorHeader JV3SH[], unsigned char *NumberofSides, unsigned short *SectorsperTrack, unsigned short *NumberofTracks, unsigned short *SectorSize, unsigned char *StartIdSector, unsigned short *NumberofEntries) {
 	int i, total_data = 0;
 
 	*StartIdSector = 255;
@@ -151,39 +151,38 @@ JV3SectorsOffsets *JV3_offset(JV3SectorHeader JV3SH[], unsigned int NumberofSide
 	offset = ftell(jv3_file);
 	SO = (JV3SectorsOffsets *) malloc(sizeof(JV3SectorsOffsets)*NumberofEntries);
 	for (i=0; i<JV3_HEADER_MAX; i++) {
-		if (JV3SH[i].track != JV3_FREE) {
+		if (JV3SH[i].track != JV3_FREE) 
+		{
 			SO[pos].key = JV3SH[i].track << 16 | JV3SH[i].sector << 8 | gbn(JV3SH[i].flags, JV3_SIDE);
 			SO[pos].offset = offset;
-		        switch (gbn(JV3SH[i].flags, JV3_SIZE)) {
+		    	
+			switch (gbn(JV3SH[i].flags, JV3_SIZE)) 
+			{
 				case JV3_SIZE_USED_256:
+					SO[pos].size = 256;
 					offset += 256;
 					break;
 				case JV3_SIZE_USED_128:
+					SO[pos].size = 128;
 					offset += 128;
 					break;
 				case JV3_SIZE_USED_1024:
+					SO[pos].size = 1024;
 					offset += 1024;
 					break;
 				case JV3_SIZE_USED_512:
+					SO[pos].size = 512;
 					offset += 512;
 					break;
-            		}
-			switch (gbn(JV3SH[i].flags, JV3_SIZE)) {
-				case JV3_SIZE_USED_256:
-					SO[pos].size = 256;
-					break;
-				case JV3_SIZE_USED_128:
-					SO[pos].size = 128;
-					break;
-				case JV3_SIZE_USED_1024:
-					SO[pos].size = 1024;
-					break;
-				case JV3_SIZE_USED_512:
-					SO[pos].size = 512;
-					break;
 			}
-			if (gbn(JV3SH[i].flags, JV3_DENSITY)) {         		/* Double density */
-				switch (gbn(JV3SH[i].flags, JV3_DAM)) {
+			
+			if (gbn(JV3SH[i].flags, JV3_DENSITY)) 
+			{         		/* Double density */
+				
+				SO[pos].density=0xFF;
+
+				switch (gbn(JV3SH[i].flags, JV3_DAM))
+				{
 					case JV3_DAM_FB_DD:
 						SO[pos].DAM = 0xFB;
 						break;
@@ -191,8 +190,13 @@ JV3SectorsOffsets *JV3_offset(JV3SectorHeader JV3SH[], unsigned int NumberofSide
 						SO[pos].DAM = 0xF8;
 						break;
 				}
-			} else {
-				switch (gbn(JV3SH[i].flags, JV3_DAM)) {    	 	/* Single density */
+			} 
+			else 
+			{
+				SO[pos].density=0x00;
+
+				switch (gbn(JV3SH[i].flags, JV3_DAM)) /* Single density */
+				{    	 	
 					case JV3_DAM_FB_SD:
 						SO[pos].DAM = 0xFB;
 						break;
@@ -207,7 +211,11 @@ JV3SectorsOffsets *JV3_offset(JV3SectorHeader JV3SH[], unsigned int NumberofSide
 						break;
 				}
   			}
-        	} else {
+        } 
+		else 
+		{
+			//SO[pos].density=0x00;
+
 			switch (gbn(JV3SH[i].flags, JV3_SIZE)) {
 				case JV3_SIZE_FREE_256:
 					offset += 256;
@@ -231,7 +239,9 @@ JV3SectorsOffsets *JV3_offset(JV3SectorHeader JV3SH[], unsigned int NumberofSide
 int JV3_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	int pathlen, offset1, offset2;
-	unsigned int NumberOfSide, SectorPerTrack, NumberOfTrack, StartIdSector, total_data, SectorSize, NumberOfEntries;
+	unsigned short SectorPerTrack, NumberOfTrack, SectorSize, NumberOfEntries;
+	unsigned int   total_data;
+	unsigned char  StartIdSector,NumberOfSide;
 	char * filepath;
 	FILE *f;
 	JV3SectorHeader sh[JV3_HEADER_MAX];
@@ -258,7 +268,7 @@ int JV3_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 						return LOADER_ACCESSERROR;
 					}					
 					fread(sh, sizeof(JV3SectorHeader), JV3_HEADER_MAX, f);
-       					if ((total_data = JV3_disk_geometry(sh, &NumberOfSide, &SectorPerTrack, &NumberOfTrack, &SectorSize, &StartIdSector, &NumberOfEntries)) != 0)
+       				if ((total_data = JV3_disk_geometry(sh, &NumberOfSide, &SectorPerTrack, &NumberOfTrack, &SectorSize, &StartIdSector, &NumberOfEntries)) != 0)
 					{
 						offset1 = ftell(f);
 						fseek (f , 0 , SEEK_END);
@@ -299,16 +309,15 @@ int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j,k;
-	char* trackdata;
-	unsigned int SectorSize, NumberofEntries, StartIdSector;
-	int tracklen;
-	int gap3len,interleave,rpm;
-	int bitrate;
+	unsigned int i,j,k,bitrate;
+	unsigned short SectorSize, NumberofEntries;
+	unsigned char  gap3len,interleave,StartIdSector;
+	unsigned short rpm;
+	unsigned char  trackformat;
+	unsigned short sector_found;
 
-	SECTORCONFIG* sectorconfig;
-	CYLINDER* currentcylinder;
-	SIDE* currentside;
+	SECTORCONFIG*	sectorconfig;
+	CYLINDER*		currentcylinder;
 
 	JV3SectorHeader sh[JV3_HEADER_MAX];
 	JV3SectorsOffsets *pOffset, *SectorsOffsets;
@@ -331,14 +340,21 @@ int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(filesize!=0)
 	{
 		fread(sh, sizeof(JV3SectorHeader), JV3_HEADER_MAX, f);
+
 		JV3_disk_geometry(sh, &floppydisk->floppyNumberOfSide, &floppydisk->floppySectorPerTrack, &floppydisk->floppyNumberOfTrack, &SectorSize, &StartIdSector, &NumberofEntries);
-		fread(&write_protected, sizeof(write_protected), 1, f);                                                                                 // just to jump this infomation
+		
+		fread(&write_protected, sizeof(write_protected), 1, f);                                                                         // just to jump this infomation
+
+
 		SectorsOffsets = JV3_offset(sh, floppydisk->floppyNumberOfSide, floppydisk->floppySectorPerTrack, floppydisk->floppyNumberOfTrack, NumberofEntries, f);
+
 		qsort(SectorsOffsets, NumberofEntries, sizeof(JV3SectorsOffsets), JV3_compare);
+
 		bitrate=250000;
 		rpm=300;
 		interleave=3;
-		gap3len=20;
+		gap3len=255;
+		trackformat=IBMFORMAT_SD;
 
 		floppydisk->floppyBitRate=bitrate;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
@@ -349,71 +365,73 @@ int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		sectorconfig=(SECTORCONFIG*)malloc(sizeof(SECTORCONFIG)*floppydisk->floppySectorPerTrack);
 		memset(sectorconfig,0,sizeof(SECTORCONFIG)*floppydisk->floppySectorPerTrack);
 
-		tracklen=(bitrate/(rpm/60))/4;
-		trackdata=(unsigned char*)malloc(SectorSize*floppydisk->floppySectorPerTrack);
-
+		
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
 
-			floppydisk->tracks[j]=(CYLINDER*)malloc(sizeof(CYLINDER));
+			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
-
-			currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-			currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-			memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
 
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
 				inc = 0;                                    // used to build track data
-
-				floppydisk->tracks[j]->floppyRPM=rpm;
-
-				floppydisk->tracks[j]->sides[i]=malloc(sizeof(SIDE));
-				memset(floppydisk->tracks[j]->sides[i],0,sizeof(SIDE));
-				currentside=floppydisk->tracks[j]->sides[i];
-
-				currentside->number_of_sector=floppydisk->floppySectorPerTrack;
-				currentside->tracklen=tracklen;
-
-				currentside->databuffer=malloc(currentside->tracklen);
-				memset(currentside->databuffer,0,currentside->tracklen);
-
-				currentside->flakybitsbuffer=0;
-
-				currentside->timingbuffer=0;
-				currentside->bitrate=bitrate;
-				currentside->track_encoding=ISOIBM_MFM_ENCODING;
-
-				currentside->indexbuffer=malloc(currentside->tracklen);
-				memset(currentside->indexbuffer,0,currentside->tracklen);
-
 				memset(sectorconfig,0,sizeof(SECTORCONFIG)*floppydisk->floppySectorPerTrack);
-
+				sector_found=0;
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
 				{
 					pOffset = JV3_bsearch(j<<16|(k+StartIdSector)<<8|i, SectorsOffsets, NumberofEntries);
-			    		if (pOffset == NULL) {
+				
+		    		if (pOffset == NULL) 
+					{
 						inc += SectorSize;
-                      				sectorconfig[k].sectorsize=SectorSize;
-					} else {
-						sectorconfig[k].sectorsize=pOffset->size;
+					} 
+					else 
+					{
+						
+						sectorconfig[sector_found].sectorsize=pOffset->size;
+						sectorconfig[sector_found].input_data=malloc(sectorconfig[k].sectorsize);
+						memset(sectorconfig[sector_found].input_data,0,sectorconfig[k].sectorsize);
+
 						fseek(f, pOffset->offset, SEEK_SET);
-						fread(&trackdata[inc],pOffset->size,1,f);
+						fread(sectorconfig[sector_found].input_data,pOffset->size,1,f);
+						
 						inc += pOffset->size;
-						if (pOffset->DAM != 0xFB) {
-							sectorconfig[k].use_alternate_datamark=1;
-							sectorconfig[k].alternate_datamark=pOffset->DAM;
+						
+						if (pOffset->DAM != 0xFB) 
+						{
+							sectorconfig[sector_found].use_alternate_datamark=1;
+							sectorconfig[sector_found].alternate_datamark=pOffset->DAM;
 						}
+						
+						if(pOffset->density)
+						{
+							sectorconfig[sector_found].trackencoding=IBMFORMAT_DD;
+							if(!k) trackformat=IBMFORMAT_DD;
+						}
+						else
+						{
+							sectorconfig[sector_found].trackencoding=IBMFORMAT_SD;
+							if(!k) trackformat=IBMFORMAT_SD;
+						}
+
+						sectorconfig[sector_found].cylinder=j;
+						sectorconfig[sector_found].head=i;
+						sectorconfig[sector_found].sector=k+StartIdSector;
+						sectorconfig[sector_found].bitrate=floppydisk->floppyBitRate;
+						sectorconfig[sector_found].gap3=gap3len;
+
+						sector_found++;
+
 					}
-					sectorconfig[k].cylinder=j;
-					sectorconfig[k].head=i;
-					sectorconfig[k].sector=k+StartIdSector;
+
+
 				}
-				BuildISOTrack(floppycontext,IBMFORMAT_DD,currentside->number_of_sector,1,SectorSize,j,i,gap3len,trackdata,currentside->databuffer,&currentside->tracklen,interleave,0,sectorconfig);
+				currentcylinder->sides[i]=tg_generatetrackEx(sector_found,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,2500|NO_SECTOR_UNDER_INDEX);
 
-				currentside->tracklen=currentside->tracklen*8;
-
-				fillindex(currentside->tracklen-1,currentside,2500,TRUE,1);
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+				{
+					free(sectorconfig[k].input_data);
+				}
 
 			}
 		}
