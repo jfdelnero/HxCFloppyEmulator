@@ -59,6 +59,31 @@
 
 extern unsigned char bit_inverter[];
 
+char * trackencodingcode[]=
+{
+	"ISOIBM_MFM_ENCODING",
+	"AMIGA_MFM_ENCODING",
+	"ISOIBM_FM_ENCODING",
+	"EMU_FM_ENCODING",
+	"UNKNOWN_ENCODING"
+};
+
+
+char * interfacemodecode[]=
+{
+	"IBMPC_DD_FLOPPYMODE",
+	"IBMPC_HD_FLOPPYMODE",
+	"ATARIST_DD_FLOPPYMODE",
+	"ATARIST_HD_FLOPPYMODE",
+	"AMIGA_DD_FLOPPYMODE",
+	"AMIGA_HD_FLOPPYMODE",
+	"CPC_DD_FLOPPYMODE",
+	"GENERIC_SHUGART_DD_FLOPPYMODE",
+	"IBMPC_ED_FLOPPYMODE",
+	"MSX2_DD_FLOPPYMODE",
+	"C64_DD_FLOPPYMODE",
+	"EMU_SHUGART_FLOPPYMODE"
+};
 
 
 int HFE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
@@ -81,7 +106,7 @@ int HFE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				sprintf(filepath,"%s",imgfile);
 				strlower(filepath);
 
-				if(strstr( filepath,".hfe" )!=NULL)
+				if(1)
 				{
 
 					f=fopen(imgfile,"rb");
@@ -152,12 +177,13 @@ int HFE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyiftype=header.floppyinterfacemode;
 
 
-		floppycontext->hxc_printf(MSG_DEBUG,"HFE File : %d track, %d side, %d bit/s, %d sectors, mode %d",
+		floppycontext->hxc_printf(MSG_DEBUG,"HFE File : %d track, %d side, %d bit/s, %d sectors, interface mode %s, track encoding:%s",
 			floppydisk->floppyNumberOfTrack,
 			floppydisk->floppyNumberOfSide,
 			floppydisk->floppyBitRate,
 			floppydisk->floppySectorPerTrack,
-			floppydisk->floppyiftype);
+			floppydisk->floppyiftype<0xC?interfacemodecode[floppydisk->floppyiftype]:"Unknow!",
+			(header.track_encoding&(~3))?trackencodingcode[4]:trackencodingcode[header.track_encoding&0x3]);
 
         trackoffsetlist=(pictrack*)malloc(sizeof(pictrack)* header.number_of_track);
         memset(trackoffsetlist,0,sizeof(pictrack)* header.number_of_track);
