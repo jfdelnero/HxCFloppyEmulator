@@ -16,5 +16,9 @@ typedef struct sdhxcfecfgfile_
 	unsigned char load_last_floppy;
 	unsigned char buzzer_step_duration;
     unsigned char lcd_scroll_speed;
+	unsigned char startup_mode; // 0x01 -> In normal mode auto load STARTUPA.HFE
+								// 0x02 -> In normal mode auto load STARTUPB.HFE
+								// 0x04 -> In slot mode use slot 0 at power up (ignore index)
+								// 0x08 -> Pre increment index when inserting the sdcard (no button/lcd mode)
 }sdhxcfecfgfile;
 
