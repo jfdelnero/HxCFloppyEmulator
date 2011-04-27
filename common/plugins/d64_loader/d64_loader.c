@@ -113,8 +113,8 @@ int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned int i,j,k;
 	char* trackdata;
 	int tracklen;
-	int rpm;
-	int sectorsize;
+	unsigned short rpm;
+	unsigned short sectorsize;
 	CYLINDER* currentcylinder;
 	SIDE* currentside;
 	unsigned char * errormap;
@@ -253,18 +253,13 @@ int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		
 		trackdata=(unsigned char*)malloc(sectorsize*tracklistpos[j].number_of_sector);
 
-		floppydisk->tracks[j]=(CYLINDER*)malloc(sizeof(CYLINDER));
-		currentcylinder=floppydisk->tracks[j];
-		currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-		currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-		memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
-				
+		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+		currentcylinder=floppydisk->tracks[j];				
+		
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 		{
 					
 			tracklen=(tracklistpos[j].bitrate/(rpm/60))/4;
-
-			currentcylinder->floppyRPM=rpm;
 				
 			currentcylinder->sides[i]=malloc(sizeof(SIDE));
 			memset(currentcylinder->sides[i],0,sizeof(SIDE));
