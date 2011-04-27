@@ -44,6 +44,7 @@
 #define CALLINGMETHOD
 
 #define VARIABLEBITRATE					-1
+#define VARIABLEENCODING   			    -1
 
 #define ISOIBM_MFM_ENCODING				0x00
 #define AMIGA_MFM_ENCODING				0x01
@@ -60,6 +61,8 @@ typedef struct SIDE_
 	unsigned long * timingbuffer;		// buffer bitrate de la piste.
 	unsigned char * flakybitsbuffer;    // si = 0 pas de flakey/weak bits.
 	unsigned char * indexbuffer;		// buffer signal index 1->activé 0->désactivé
+	unsigned char * track_encoding_buffer;		// buffer code codage
+	
 	
 	unsigned char   track_encoding;
 
@@ -68,8 +71,8 @@ typedef struct SIDE_
 
 typedef struct CYLINDER_
 {
-	unsigned int	floppyRPM;			// rotation par minute (informatif/optionnel)
-	unsigned int	number_of_side;
+	unsigned short	floppyRPM;			// rotation par minute (informatif/optionnel)
+	unsigned char	number_of_side;
 	SIDE	**		sides;
 }CYLINDER;
 
@@ -77,11 +80,11 @@ typedef struct FLOPPY_
 {
 	unsigned int	floppyBitRate;
 	
-	unsigned int	floppyNumberOfSide;
-	unsigned int	floppyNumberOfTrack;
-	unsigned int	floppySectorPerTrack;
+	unsigned char	floppyNumberOfSide;
+	unsigned short	floppyNumberOfTrack;
+	unsigned short	floppySectorPerTrack;
 	
-	unsigned int	floppyiftype;
+	unsigned short	floppyiftype;
 
 	CYLINDER	**	tracks;
 }FLOPPY;
