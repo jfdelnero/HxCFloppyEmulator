@@ -123,20 +123,21 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	FILE * f;
 	unsigned char fileheader[5];
 //	MFMTRACKIMG trackdesc;
-	unsigned int i,j,k,trackcount,headcount;
+	unsigned int i,j,trackcount,headcount;
 	SECTORCONFIG* sectorconfig;
 	CYLINDER* currentcylinder;
 	SIDE* currentside;
-	int gap3len,tracktype,bitrate;
+	int bitrate;
 	unsigned long tracklen;
 	unsigned char * sectormap;
 	unsigned char * sectorcylmap;
 	unsigned char * sectorheadmap;
 	unsigned char * track_data;
 	imd_trackheader trackcfg;
-	int sectorsize;
+	unsigned short sectorsize;
+	unsigned char interleave,tracktype;
+	unsigned short rpm;
 	unsigned char sectordatarecordcode,cdata;
-	int bitsize;
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"IMD_libLoad_DiskFile %s",imgfile);
 	
@@ -158,7 +159,7 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		}while(getc(f)!=0x1A);
 
 		
-
+		// recuperation de la geometries du disque
 		trackcount=0;
 		headcount=0;
 		do
@@ -243,7 +244,8 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			floppydisk->floppySectorPerTrack,
 			floppydisk->floppyiftype);
 
-
+		interleave=1;
+		rpm=300;
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 		memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
@@ -254,7 +256,7 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		}while(getc(f)!=0x1A);
 
 
-		for(i=0;i<floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide;i++)
+		for(i=0;i<(unsigned int)(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide);i++)
 		{			
 
 			if(fread(&trackcfg,sizeof(trackcfg),1,f))
@@ -300,40 +302,30 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					case 0x00:
 						tracktype=IBMFORMAT_SD;
 						bitrate=500000;
-						bitsize=4;
 						break;
 					case 0x01:
 						tracktype=IBMFORMAT_SD;
 						bitrate=300000;
-						bitsize=4;
-
 						break;
 					case 0x02:
 						tracktype=IBMFORMAT_SD;
 						bitrate=250000;
-						bitsize=4;
 						break;
 					case 0x03:
 						tracktype=IBMFORMAT_DD;
 						bitrate=500000;
-						bitsize=2;
-
 						break;
 					case 0x04:
 						tracktype=IBMFORMAT_DD;
 						bitrate=300000;
-						bitsize=2;
-
 						break;
 					case 0x05:
 						tracktype=IBMFORMAT_DD;
 						bitrate=250000;
-						bitsize=2;
 						break;
 					default:
 						tracktype=IBMFORMAT_DD;
 						bitrate=250000;
-						bitsize=2;
 				}
 
 
@@ -356,40 +348,61 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						break;
 						case 0x01:
 							fread(&track_data[j*sectorsize],1,sectorsize,f);
+							sectorconfig[j].input_data=&track_data[j*sectorsize];
+							sectorconfig[j].use_alternate_datamark=0x00;
+							sectorconfig[j].alternate_datamark=0xFB;
 						break;
 						case 0x02:
 							fread(&cdata,1,1,f);
 							memset(&track_data[j*sectorsize],cdata,sectorsize);
+							sectorconfig[j].input_data=&track_data[j*sectorsize];
+							sectorconfig[j].use_alternate_datamark=0x00;
+							sectorconfig[j].alternate_datamark=0xFB;
 						break;
 						case 0x03:
 							fread(&track_data[j*sectorsize],1,sectorsize,f);
-							sectorconfig[j].missingdataaddressmark=1;
+							sectorconfig[j].input_data=&track_data[j*sectorsize];
+							sectorconfig[j].use_alternate_datamark=1;
+							sectorconfig[j].alternate_datamark=0xF8;
+
 						break;
 						case 0x04:
 							fread(&cdata,1,1,f);
 							memset(&track_data[j*sectorsize],cdata,sectorsize);
-							sectorconfig[j].missingdataaddressmark=1;
+							sectorconfig[j].input_data=&track_data[j*sectorsize];
+							sectorconfig[j].use_alternate_datamark=1;
+							sectorconfig[j].alternate_datamark=0xF8;
+
 						break;
 						case 0x05:
 							fread(&track_data[j*sectorsize],1,sectorsize,f);
+							sectorconfig[j].input_data=&track_data[j*sectorsize];
 							sectorconfig[j].use_alternate_data_crc=0x1;
+							sectorconfig[j].alternate_datamark=0xFB;
 						break;
 						case 0x06:
 							fread(&cdata,1,1,f);
 							memset(&track_data[j*sectorsize],cdata,sectorsize);
+							sectorconfig[j].input_data=&track_data[j*sectorsize];
 							sectorconfig[j].use_alternate_data_crc=0x1;
+							sectorconfig[j].alternate_datamark=0xFB;
+							sectorconfig[j].use_alternate_datamark=0x00;
 						break;
 						case 0x07:
 							fread(&track_data[j*sectorsize],1,sectorsize,f);
-							sectorconfig[j].missingdataaddressmark=1;
+							sectorconfig[j].input_data=&track_data[j*sectorsize];
+							sectorconfig[j].use_alternate_datamark=1;
+							sectorconfig[j].alternate_datamark=0xF8;
 							sectorconfig[j].use_alternate_data_crc=0x1;
 						break;
 						case 0x08:
 							fread(&cdata,1,1,f);
 							memset(&track_data[j*sectorsize],cdata,sectorsize);
-							sectorconfig[j].missingdataaddressmark=1;
+							sectorconfig[j].input_data=&track_data[j*sectorsize];
+							sectorconfig[j].use_alternate_datamark=1;
+							sectorconfig[j].alternate_datamark=0xF8;
 							sectorconfig[j].use_alternate_data_crc=0x1;
-
+							
 						break;
 						default:
 							break;
@@ -400,8 +413,12 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					sectorconfig[j].head=sectorheadmap[j]&0xF;
 					sectorconfig[j].sector=sectormap[j];
 					sectorconfig[j].sectorsize=128<<trackcfg.sector_size_code;
+					sectorconfig[j].bitrate=bitrate;
+					sectorconfig[j].gap3=255;
+					sectorconfig[j].trackencoding=tracktype;
 				}
 
+				floppydisk->floppyBitRate=bitrate;
 				
 				if(!floppydisk->tracks[trackcfg.physical_cylinder])
 				{
@@ -414,64 +431,15 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					//currentcylinder->floppyRPM=header.floppyRPM;
 				}
 				
-				currentcylinder->sides[trackcfg.physical_head&0xF]=malloc(sizeof(SIDE));
-				memset(currentcylinder->sides[trackcfg.physical_head&0xF],0,sizeof(SIDE));
-				currentside=currentcylinder->sides[trackcfg.physical_head&0xF];
-						
-				currentside->number_of_sector=trackcfg.number_of_sector;
-			
-				tracklen=((bitrate/(300/60))/4);//*(bitsize/2);
-				currentside->tracklen=tracklen*8;
+				currentside=tg_generatetrackEx((unsigned short)trackcfg.number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,tracktype,2500 | NO_SECTOR_UNDER_INDEX);
+				currentcylinder->sides[trackcfg.physical_head&0xF]=currentside;
 
-				currentside->flakybitsbuffer=0;										
-				currentside->timingbuffer=0;
 				
-				floppydisk->floppyBitRate=bitrate;
-				currentside->bitrate=bitrate;
-				if(tracktype==IBMFORMAT_DD)
-					currentside->track_encoding=ISOIBM_MFM_ENCODING;
-				else
-					currentside->track_encoding=ISOIBM_FM_ENCODING;
-
-					
-				k=fillindex(currentside->tracklen-8,currentside,2500,FALSE,1);
-
-				gap3len=84;			
-				while((bitsize*ISOIBMGetTrackSize(tracktype,currentside->number_of_sector,sectorsize,gap3len,sectorconfig)>=(int)(tracklen-(tracklen-(k>>3)))) && (gap3len>3))
+				for(j=0;j<trackcfg.number_of_sector;j++)
 				{
-					gap3len--;
-				}
-
-				if((bitsize*ISOIBMGetTrackSize(tracktype,currentside->number_of_sector,sectorsize,gap3len,sectorconfig))>(int)tracklen)
-				{
-					tracklen=(ISOIBMGetTrackSize(tracktype,currentside->number_of_sector,sectorsize,gap3len,sectorconfig)*bitsize);
+					floppycontext->hxc_printf(MSG_DEBUG,"Sector:%d %x %x %x",sectorconfig[j].sector,sectorconfig[j].alternate_datamark,sectorconfig[j].alternate_sector_size_id,tracktype);		
 				}
 				
-				currentside->tracklen=tracklen*8;
-
-				currentside->indexbuffer=malloc(tracklen);
-				memset(currentside->indexbuffer,0,tracklen);		
-				fillindex(currentside->tracklen-1,currentside,2500,TRUE,1);
-
-				currentside->databuffer=malloc(tracklen);
-				memset(currentside->databuffer,0,tracklen);
-
-
-				BuildISOTrack(floppycontext,
-					tracktype,
-					trackcfg.number_of_sector,
-					1,
-					512,
-					trackcfg.physical_cylinder,
-					trackcfg.physical_head&0xF,
-					gap3len,
-					track_data,
-					currentside->databuffer,
-					&tracklen,
-					0,
-					0,
-					sectorconfig);
-
 				free(track_data);
 				free(sectorheadmap);
 				free(sectorcylmap);
