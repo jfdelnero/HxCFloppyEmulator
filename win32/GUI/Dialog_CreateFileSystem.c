@@ -114,7 +114,8 @@ extern FLOPPY * thefloppydisk;
 		FS_2_88MB_MSDOS_FAT12,
 		FS_3_38MB_MSDOS_FAT12,
 		FS_4_23MB_ATARI_FAT12,
-		FS_6_78MB_MSDOS_FAT12
+		FS_6_78MB_MSDOS_FAT12,
+		FS_16MB_MSDOS_FAT12
 	};
 
 
@@ -145,9 +146,9 @@ extern FLOPPY * thefloppydisk;
 		{ FS_1_44MB_MSDOS_FAT12,              "3\"5        1.44MB DSHD FAT12",".fat1440"},
 		{ FS_1_68MB_MSDOS_FAT12,              "3\"5        1.68MB DSHD FAT12",".fat1680"},
 		{ FS_2_88MB_MSDOS_FAT12,              "3\"5        2.88MB DSED FAT12",".fat2880"},
-		{ FS_3_38MB_MSDOS_FAT12,              "3\"5        3.38MB DSHD FAT12 ",".fat3381"},
+		{ FS_3_38MB_MSDOS_FAT12,              "3\"5        3.38MB DSHD FAT12",".fat3381"},
 		
-	//	{ FS_6_78MB_MSDOS_FAT12,"6.78MB MS DOS FAT12 (HD)",".fat6789"},
+		{ FS_6_78MB_MSDOS_FAT12,              "3\"5        6.78MB DSHD FAT12",".fat6789"},
 
 		{ FS_360KB_ATARI_FAT12,               "3\"5        360KB SSDD Atari FAT12",".fatst360"},
 		{ FS_720KB_ATARI_FAT12,               "3\"5        720KB DSDD Atari FAT12",".fatst"},
