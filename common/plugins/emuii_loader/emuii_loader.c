@@ -200,7 +200,7 @@ int EMUII_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,
 	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 	memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
-	for(i=0;i<floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide;i++)
+	for(i=0;i<(unsigned int)(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide);i++)
 	{			
 
 		tracknumber=i>>1;
@@ -225,12 +225,8 @@ int EMUII_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,
 
 		if(!floppydisk->tracks[tracknumber])
 		{
-			floppydisk->tracks[tracknumber]=(CYLINDER*)malloc(sizeof(CYLINDER));
+			floppydisk->tracks[tracknumber]=allocCylinderEntry(300,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[tracknumber];
-			currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-			currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-			memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
-			currentcylinder->floppyRPM=300;
 		}
 			
 
