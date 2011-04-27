@@ -848,7 +848,7 @@ int InjectFloppyImg(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,HWINTER
 
 	final_buffer=(unsigned char*) malloc(BUFFERSIZE);
 	final_randombuffer=(unsigned char*) malloc(BUFFERSIZE);
-	hwif->number_of_track=floppydisk->floppyNumberOfTrack;
+	hwif->number_of_track=(unsigned char)floppydisk->floppyNumberOfTrack;
 	for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
 	{
 
@@ -925,7 +925,7 @@ int InjectFloppyImg(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,HWINTER
 	}
 
 
-	hwif->interface_mode=floppydisk->floppyiftype;
+	hwif->interface_mode=(unsigned char)floppydisk->floppyiftype;
 	hwif->floppychanged=1;
 
 	free(final_randombuffer);
