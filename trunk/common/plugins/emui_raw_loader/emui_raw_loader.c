@@ -165,12 +165,8 @@ int EMUI_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 
 		if(!floppydisk->tracks[tracknumber])
 		{
-			floppydisk->tracks[tracknumber]=(CYLINDER*)malloc(sizeof(CYLINDER));
+			floppydisk->tracks[tracknumber]=allocCylinderEntry(300,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[tracknumber];
-			currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-			currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-			memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
-			currentcylinder->floppyRPM=300;
 		}
 			
 
