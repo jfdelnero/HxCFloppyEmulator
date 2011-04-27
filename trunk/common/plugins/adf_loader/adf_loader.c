@@ -51,6 +51,7 @@
 #include "hxc_floppy_emulator.h"
 #include "internal_floppy.h"
 #include "floppy_loader.h"
+#include "floppy_utils.h"
 
 #include "../common/amiga_track.h"
 #include "adf_loader.h"
@@ -60,7 +61,10 @@
 int ADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	int pathlen;
+	FILE * f;
 	char * filepath;
+	unsigned int filesize;
+
 	floppycontext->hxc_printf(MSG_DEBUG,"ADF_libIsValidDiskFile %s",imgfile);
 	if(imgfile)
 	{
@@ -77,6 +81,25 @@ int ADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"ADF file !");
 					free(filepath);
+
+					f=fopen(imgfile,"rb");
+					if(f==NULL) 
+					{
+						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+						return LOADER_ACCESSERROR;
+					}
+
+					fseek (f , 0 , SEEK_END); 
+					filesize=ftell(f);
+					fseek (f , 0 , SEEK_SET); 
+					fclose(f);
+
+					if(filesize%(512*11))
+					{
+						floppycontext->hxc_printf(MSG_DEBUG,"non ADF file ! Bad file size!");
+						return LOADER_BADFILE;
+					}
+
 					return LOADER_ISVALID;
 				}
 				else
@@ -129,7 +152,10 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	floppydisk->floppySectorPerTrack=11;
 	floppydisk->floppyNumberOfSide=2;
-	floppydisk->floppyNumberOfTrack=80;
+	if((filesize/(512*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))<80)
+		floppydisk->floppyNumberOfTrack=80;
+	else
+		floppydisk->floppyNumberOfTrack=filesize/(512*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide);
 	floppydisk->floppyBitRate=250000;
 	floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
 	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
@@ -141,18 +167,11 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
 			
-		floppydisk->tracks[j]=(CYLINDER*)malloc(sizeof(CYLINDER));
+		floppydisk->tracks[j]=allocCylinderEntry(DEFAULT_AMIGA_RPM,floppydisk->floppyNumberOfSide);
 		currentcylinder=floppydisk->tracks[j];
 		
-		currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-		currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-		memset(floppydisk->tracks[j]->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
-		
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-		{
-			
-			currentcylinder->floppyRPM=DEFAULT_AMIGA_RPM;
-			
+		{	
 			currentcylinder->sides[i]=malloc(sizeof(SIDE));
 			memset(currentcylinder->sides[i],0,sizeof(SIDE));
 				
