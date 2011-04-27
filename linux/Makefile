@@ -28,7 +28,8 @@ DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosf
                   hfe_loader.o imd_loader.o afi_loader.o sap_loader.o libsap.o jv1_loader.o vtr_loader.o d88_loader.o hdm_loader.o\
                   ti99pc99_loader.o apridisk_loader.o ede_loader.o fd_loader.o vdk_loader.o dpx_loader.o mgt_loader.o emax_loader.o\
                   ensoniq_mirage_loader.o sad_loader.o jv3_loader.o stt_loader.o prophet_loader.o teledisk_loader.o td0_lzss.o\
-                  emuii_raw_loader.o emuii_loader.o emui_raw_loader.o jvc_loader.o dim_loader.o ti99v9t9_loader.o
+                  emuii_raw_loader.o emuii_loader.o emui_raw_loader.o jvc_loader.o dim_loader.o ti99v9t9_loader.o d81_loader.o  acornadf_loader.o \
+                  camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o
 
 
 all: $(EXEC)
@@ -123,6 +124,15 @@ crctable.o : ../common/plugins/copyqm_loader/crctable.c   ../common/plugins/copy
 adf_loader.o : ../common/plugins/adf_loader/adf_loader.c ../common/plugins/adf_loader/adf_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+extadf_loader.o : ../common/plugins/extadf_loader/extadf_loader.c ../common/plugins/extadf_loader/extadf_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+oldextadf_loader.o : ../common/plugins/oldextadf_loader/oldextadf_loader.c ../common/plugins/oldextadf_loader/oldextadf_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+acornadf_loader.o : ../common/plugins/acornadf_loader/acornadf_loader.c ../common/plugins/acornadf_loader/acornadf_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
 cpcdsk_loader.o : ../common/plugins/cpcdsk_loader/cpcdsk_loader.c ../common/plugins/cpcdsk_loader/cpcdsk_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
@@ -150,6 +160,9 @@ img_loader.o : ../common/plugins/img_loader/img_loader.c ../common/plugins/img_l
 d64_loader.o : ../common/plugins/d64_loader/d64_loader.c ../common/plugins/d64_loader/d64_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+d81_loader.o : ../common/plugins/d81_loader/d81_loader.c ../common/plugins/d81_loader/d81_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
 d88_loader.o : ../common/plugins/d88_loader/d88_loader.c ../common/plugins/d88_loader/d88_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
@@ -165,10 +178,19 @@ mfm_loader.o : ../common/plugins/mfm_loader/mfm_loader.c ../common/plugins/mfm_l
 smc_loader.o : ../common/plugins/smc_loader/snes_smc_loader.c ../common/plugins/smc_loader/snes_smc_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+camputerslynxldf_loader.o : ../common/plugins/camputerslynxldf_loader/camputerslynxldf_loader.c ../common/plugins/camputerslynxldf_loader/camputerslynxldf_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+vegasdsk_loader.o : ../common/plugins/vegasdsk_loader/vegasdsk_loader.c ../common/plugins/vegasdsk_loader/vegasdsk_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
 jv1_loader.o : ../common/plugins/jv1_loader/jv1_loader.c ../common/plugins/jv1_loader/jv1_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 jv3_loader.o : ../common/plugins/jv3_loader/jv3_loader.c ../common/plugins/jv3_loader/jv3_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+dmk_loader.o : ../common/plugins/dmk_loader/dmk_loader.c ../common/plugins/dmk_loader/dmk_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 sap_loader.o : ../common/plugins/sap_loader/sap_loader.c ../common/plugins/sap_loader/sap_loader.h
