@@ -52,6 +52,7 @@
 #include "hxc_floppy_emulator.h"
 #include "internal_floppy.h"
 #include "floppy_loader.h"
+#include "floppy_utils.h"
 
 #include "../common/amiga_track.h"
 
@@ -64,6 +65,7 @@
 
 
 HXCFLOPPYEMULATOR* global_floppycontext;
+extern int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * folder,char * file);
 
 int CPCFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
@@ -314,16 +316,12 @@ int CPCFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 			{
 				
-				floppydisk->tracks[j]=(CYLINDER*)malloc(sizeof(CYLINDER));
-				currentcylinder=floppydisk->tracks[j];
-				currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-				currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-				memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
+				
+				floppydisk->tracks[j]=allocCylinderEntry(300,floppydisk->floppyNumberOfSide);
+				currentcylinder=floppydisk->tracks[j];				
 						
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
-
-					currentcylinder->floppyRPM=DEFAULT_AMIGA_RPM;
 
 					currentcylinder->sides[i]=malloc(sizeof(SIDE));
 					currentside=currentcylinder->sides[i];
