@@ -24,7 +24,7 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 */
-#include <malloc.h>
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -68,7 +68,7 @@ int write_MFM_file(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filen
 		}
 
 		mfmheader.floppyRPM=0;//floppy->floppyRPM;
-		mfmheader.floppyiftype=floppy->floppyiftype;
+		mfmheader.floppyiftype=(unsigned char)floppy->floppyiftype;
 		mfmheader.mfmtracklistoffset=sizeof(mfmheader);
 		fwrite(&mfmheader,sizeof(mfmheader),1,hxcmfmfile);
 		
