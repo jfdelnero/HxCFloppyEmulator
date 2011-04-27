@@ -99,6 +99,12 @@ int floppy_unload(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk)
 				floppydisk->tracks[j]->sides[i]->timingbuffer=0;
 			}
 
+			if(floppydisk->tracks[j]->sides[i]->track_encoding_buffer)
+			{
+				free(floppydisk->tracks[j]->sides[i]->track_encoding_buffer);
+				floppydisk->tracks[j]->sides[i]->track_encoding_buffer=0;
+			}			
+			
 			free(floppydisk->tracks[j]->sides[i]);
 		}
 
