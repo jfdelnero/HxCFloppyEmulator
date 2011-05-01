@@ -128,6 +128,78 @@ unsigned short CLK_tab[]=
 	0xFFD5,0xFFD7,0xFFDD,0xFFDF,0xFFF5,0xFFF7,0xFFFD,0xFFFF
 };
 
+unsigned char even_tab[]=
+{
+	0x00,0x01,0x00,0x01,0x02,0x03,0x02,0x03,
+	0x00,0x01,0x00,0x01,0x02,0x03,0x02,0x03,
+	0x04,0x05,0x04,0x05,0x06,0x07,0x06,0x07,
+	0x04,0x05,0x04,0x05,0x06,0x07,0x06,0x07,
+	0x00,0x01,0x00,0x01,0x02,0x03,0x02,0x03,
+	0x00,0x01,0x00,0x01,0x02,0x03,0x02,0x03,
+	0x04,0x05,0x04,0x05,0x06,0x07,0x06,0x07,
+	0x04,0x05,0x04,0x05,0x06,0x07,0x06,0x07,
+	0x08,0x09,0x08,0x09,0x0A,0x0B,0x0A,0x0B,
+	0x08,0x09,0x08,0x09,0x0A,0x0B,0x0A,0x0B,
+	0x0C,0x0D,0x0C,0x0D,0x0E,0x0F,0x0E,0x0F,
+	0x0C,0x0D,0x0C,0x0D,0x0E,0x0F,0x0E,0x0F,
+	0x08,0x09,0x08,0x09,0x0A,0x0B,0x0A,0x0B,
+	0x08,0x09,0x08,0x09,0x0A,0x0B,0x0A,0x0B,
+	0x0C,0x0D,0x0C,0x0D,0x0E,0x0F,0x0E,0x0F,
+	0x0C,0x0D,0x0C,0x0D,0x0E,0x0F,0x0E,0x0F,
+	0x00,0x01,0x00,0x01,0x02,0x03,0x02,0x03,
+	0x00,0x01,0x00,0x01,0x02,0x03,0x02,0x03,
+	0x04,0x05,0x04,0x05,0x06,0x07,0x06,0x07,
+	0x04,0x05,0x04,0x05,0x06,0x07,0x06,0x07,
+	0x00,0x01,0x00,0x01,0x02,0x03,0x02,0x03,
+	0x00,0x01,0x00,0x01,0x02,0x03,0x02,0x03,
+	0x04,0x05,0x04,0x05,0x06,0x07,0x06,0x07,
+	0x04,0x05,0x04,0x05,0x06,0x07,0x06,0x07,
+	0x08,0x09,0x08,0x09,0x0A,0x0B,0x0A,0x0B,
+	0x08,0x09,0x08,0x09,0x0A,0x0B,0x0A,0x0B,
+	0x0C,0x0D,0x0C,0x0D,0x0E,0x0F,0x0E,0x0F,
+	0x0C,0x0D,0x0C,0x0D,0x0E,0x0F,0x0E,0x0F,
+	0x08,0x09,0x08,0x09,0x0A,0x0B,0x0A,0x0B,
+	0x08,0x09,0x08,0x09,0x0A,0x0B,0x0A,0x0B,
+	0x0C,0x0D,0x0C,0x0D,0x0E,0x0F,0x0E,0x0F,
+	0x0C,0x0D,0x0C,0x0D,0x0E,0x0F,0x0E,0x0F,
+};
+
+unsigned char odd_tab[]=
+{
+	0x00,0x00,0x01,0x01,0x00,0x00,0x01,0x01,
+	0x02,0x02,0x03,0x03,0x02,0x02,0x03,0x03,
+	0x00,0x00,0x01,0x01,0x00,0x00,0x01,0x01,
+	0x02,0x02,0x03,0x03,0x02,0x02,0x03,0x03,
+	0x04,0x04,0x05,0x05,0x04,0x04,0x05,0x05,
+	0x06,0x06,0x07,0x07,0x06,0x06,0x07,0x07,
+	0x04,0x04,0x05,0x05,0x04,0x04,0x05,0x05,
+	0x06,0x06,0x07,0x07,0x06,0x06,0x07,0x07,
+	0x00,0x00,0x01,0x01,0x00,0x00,0x01,0x01,
+	0x02,0x02,0x03,0x03,0x02,0x02,0x03,0x03,
+	0x00,0x00,0x01,0x01,0x00,0x00,0x01,0x01,
+	0x02,0x02,0x03,0x03,0x02,0x02,0x03,0x03,
+	0x04,0x04,0x05,0x05,0x04,0x04,0x05,0x05,
+	0x06,0x06,0x07,0x07,0x06,0x06,0x07,0x07,
+	0x04,0x04,0x05,0x05,0x04,0x04,0x05,0x05,
+	0x06,0x06,0x07,0x07,0x06,0x06,0x07,0x07,
+	0x08,0x08,0x09,0x09,0x08,0x08,0x09,0x09,
+	0x0A,0x0A,0x0B,0x0B,0x0A,0x0A,0x0B,0x0B,
+	0x08,0x08,0x09,0x09,0x08,0x08,0x09,0x09,
+	0x0A,0x0A,0x0B,0x0B,0x0A,0x0A,0x0B,0x0B,
+	0x0C,0x0C,0x0D,0x0D,0x0C,0x0C,0x0D,0x0D,
+	0x0E,0x0E,0x0F,0x0F,0x0E,0x0E,0x0F,0x0F,
+	0x0C,0x0C,0x0D,0x0D,0x0C,0x0C,0x0D,0x0D,
+	0x0E,0x0E,0x0F,0x0F,0x0E,0x0E,0x0F,0x0F,
+	0x08,0x08,0x09,0x09,0x08,0x08,0x09,0x09,
+	0x0A,0x0A,0x0B,0x0B,0x0A,0x0A,0x0B,0x0B,
+	0x08,0x08,0x09,0x09,0x08,0x08,0x09,0x09,
+	0x0A,0x0A,0x0B,0x0B,0x0A,0x0A,0x0B,0x0B,
+	0x0C,0x0C,0x0D,0x0D,0x0C,0x0C,0x0D,0x0D,
+	0x0E,0x0E,0x0F,0x0F,0x0E,0x0E,0x0F,0x0F,
+	0x0C,0x0C,0x0D,0x0D,0x0C,0x0C,0x0D,0x0D,
+	0x0E,0x0E,0x0F,0x0F,0x0E,0x0E,0x0F,0x0F
+};
+
 typedef struct gap3conf_
 {
 	unsigned char  trackmode;
@@ -244,11 +316,6 @@ static gap3conf std_gap3_tab[]=
 	{0xFF,0xFFFF,0xFF,0xFF}
 };
 
-
-
-
-
-
 void getMFMcode(track_generator *tg,unsigned char data,unsigned char clock,unsigned char * dstbuf)
 {
 	unsigned short mfm_code;
@@ -312,6 +379,7 @@ int pushTrackCode(track_generator *tg,unsigned char data,unsigned char clock,SID
 		case IBMFORMAT_DD:
 		case ISOFORMAT_DD:
 		case ISOFORMAT_DD11S:
+		case AMIGAFORMAT_DD:
 			getMFMcode(tg,data,clock,&side->databuffer[tg->last_bit_offset/8]);
 			tg->last_bit_offset=tg->last_bit_offset+(2*8);
 		break;
@@ -393,6 +461,51 @@ void FastMFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_data
 	return;
 }
 
+// Fast Amiga Bin to MFM converter
+void FastAmigaMFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_data,int size)
+{
+	unsigned short i,l;
+	unsigned char  byte;
+	unsigned short lastbit;
+	unsigned short mfm_code;
+	unsigned char * mfm_buffer;
+
+	mfm_buffer=&side->databuffer[tg->last_bit_offset/8];
+
+	// MFM Encoding
+	lastbit=tg->mfm_last_bit;
+	i=0;
+
+	for(l=0;l<size;l=l+2)
+	{
+		byte =(odd_tab[track_data[l]]<<4) | odd_tab[track_data[l+1]];
+		mfm_code = MFM_tab[byte] & lastbit;
+
+		mfm_buffer[i++]=mfm_code>>8;
+		mfm_buffer[i++]=mfm_code&0xFF;
+
+		lastbit=~(MFM_tab[byte]<<15);		
+	}
+
+
+	for(l=0;l<size;l=l+2)
+	{
+		byte =(even_tab[track_data[l]]<<4) | even_tab[track_data[l+1]];
+		mfm_code = MFM_tab[byte] & lastbit;
+
+		mfm_buffer[i++]=mfm_code>>8;
+		mfm_buffer[i++]=mfm_code&0xFF;
+
+		lastbit=~(MFM_tab[byte]<<15);		
+	}
+
+	tg->mfm_last_bit=lastbit;
+	tg->last_bit_offset=tg->last_bit_offset+(i*8);
+
+	return;
+}
+
+
 // Fast Bin to FM converter
 void FastFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_data,int size)
 {
@@ -447,6 +560,10 @@ void FastMFMFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_da
 		case ISOFORMAT_DD:
 		case ISOFORMAT_DD11S:
 			FastMFMgenerator(tg,side,track_data,size);
+		break;
+
+		case AMIGAFORMAT_DD:
+			FastAmigaMFMgenerator(tg,side,track_data,size);
 		break;
 
 		default:
@@ -842,7 +959,7 @@ SIDE * tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short n
 	return currentside;
 }
 
-void tg_addSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * currentside)
+void tg_addISOSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * currentside)
 {
 
 	unsigned short  i;
@@ -1065,6 +1182,193 @@ void tg_addSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * 
 	}
 
 	currentside->number_of_sector++;
+}
+////////////////////////
+//
+// Amiga Sector
+// Gap :  0xFF 0xFF
+// Sync : 0xA1 0xA1 (Clock 0x0A 0x0A)
+//  ->Sector ID : 0xFF(B3) TR(B2) SE(B1) 11-SE(B0)
+//  Sector ID (even B3) 
+//  Sector ID (even B2)
+//  Sector ID (even B1)
+//  Sector ID (even B0)
+//  Sector ID (odd  B3)
+//  Sector ID (odd  B2)
+//  Sector ID (odd  B1)
+//  Sector ID (odd  B0)
+//  Gap - 16 bytes (0x00)
+//  -> Header CRC
+//  Header CRC (odd B3)
+//  Header CRC (odd B2)
+//  Header CRC (odd B1)
+//  Header CRC (odd B0)
+//  Header CRC (even B3)
+//  Header CRC (even B2)
+//  Header CRC (even B1)
+//  Header CRC (even B0)
+//  Data CRC (odd B3)
+//  Data CRC (odd B2)
+//  Data CRC (odd B1)
+//  Data CRC (odd B0)
+//  Data CRC (even B3)
+//  Data CRC (even B2)
+//  Data CRC (even B1)
+//  Data CRC (even B0)
+//  Data ( even and odd) 
+
+void tg_addAmigaSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * currentside)
+{
+
+	unsigned short  i;
+	unsigned char   c,trackencoding,trackenc;
+	unsigned char   CRC16_High;
+	unsigned char   CRC16_Low;
+	unsigned char   crctable[32];
+	unsigned long   startindex,j;
+	unsigned char   header[4];
+	unsigned char   headerparity[2];
+	unsigned char   sectorparity[2];
+
+	startindex=tg->last_bit_offset/8;
+	
+	sectorconfig->startsectorindex=tg->last_bit_offset/8;
+	trackencoding=sectorconfig->trackencoding-1;
+			
+	// sync
+	for(i=0;i<formatstab[trackencoding].len_ssync;i++)
+	{
+		pushTrackCode(tg,formatstab[trackencoding].data_ssync,0xFF,currentside,sectorconfig->trackencoding);
+	}
+
+	// add mark
+	for(i=0;i<formatstab[trackencoding].len_addrmarkp1;i++)
+	{
+		pushTrackCode(tg,formatstab[trackencoding].data_addrmarkp1,formatstab[trackencoding].clock_addrmarkp1,currentside,sectorconfig->trackencoding);
+		CRC16_Update(&CRC16_High,&CRC16_Low, formatstab[trackencoding].data_addrmarkp1,(unsigned char*)&crctable);
+	}
+
+	headerparity[0]=0;
+	headerparity[1]=0;
+
+	header[0]=0xFF;
+	header[1]=(sectorconfig->cylinder<<1) | (sectorconfig->head&1);
+	header[2]=sectorconfig->sector;
+	header[3]=11-sectorconfig->sector;
+	
+	pushTrackCode(tg,(unsigned char)(( odd_tab[header[0]]<<4)|( odd_tab[header[1]])),0xFF,currentside,sectorconfig->trackencoding);
+	pushTrackCode(tg,(unsigned char)(( odd_tab[header[2]]<<4)|( odd_tab[header[3]])),0xFF,currentside,sectorconfig->trackencoding);
+	pushTrackCode(tg,(unsigned char)((even_tab[header[0]]<<4)|(even_tab[header[1]])),0xFF,currentside,sectorconfig->trackencoding);
+	pushTrackCode(tg,(unsigned char)((even_tab[header[2]]<<4)|(even_tab[header[3]])),0xFF,currentside,sectorconfig->trackencoding);
+
+	headerparity[0]^=( odd_tab[header[0]]<<4)|( odd_tab[header[1]]);
+	headerparity[1]^=( odd_tab[header[2]]<<4)|( odd_tab[header[3]]);
+	headerparity[0]^=(even_tab[header[0]]<<4)|(even_tab[header[1]]);
+	headerparity[1]^=(even_tab[header[2]]<<4)|(even_tab[header[3]]);
+
+	// gap2
+	for(i=0;i<formatstab[trackencoding].len_gap2;i++)
+	{
+		pushTrackCode(tg,formatstab[trackencoding].data_gap2,0xFF,currentside,sectorconfig->trackencoding);
+	}
+
+	for(i=0;i<formatstab[trackencoding].len_gap2;i=i+2)
+	{
+		headerparity[0]^=formatstab[trackencoding].data_gap2;
+		headerparity[1]^=formatstab[trackencoding].data_gap2;
+	}
+
+	pushTrackCode(tg,0x00,0xFF,currentside,sectorconfig->trackencoding);
+	pushTrackCode(tg,0x00,0xFF,currentside,sectorconfig->trackencoding);
+	pushTrackCode(tg,(unsigned char)((even_tab[headerparity[0]]<<4)|(even_tab[headerparity[1]])),0xFF,currentside,sectorconfig->trackencoding);
+	pushTrackCode(tg,(unsigned char)(( odd_tab[headerparity[0]]<<4)|( odd_tab[headerparity[1]])),0xFF,currentside,sectorconfig->trackencoding);
+
+	sectorparity[0]=0;
+	sectorparity[1]=0;
+	if(sectorconfig->input_data)
+	{
+		for(i=0;i<sectorconfig->sectorsize;i=i+2)
+		{
+			sectorparity[0]^=sectorconfig->input_data[i+0];
+			sectorparity[1]^=sectorconfig->input_data[i+1];
+		}	
+	}
+
+	pushTrackCode(tg,0x00,0xFF,currentside,sectorconfig->trackencoding);
+	pushTrackCode(tg,0x00,0xFF,currentside,sectorconfig->trackencoding);
+	pushTrackCode(tg,(unsigned char)((even_tab[sectorparity[0]]<<4)|(even_tab[sectorparity[1]])),0xFF,currentside,sectorconfig->trackencoding);
+	pushTrackCode(tg,(unsigned char)(( odd_tab[sectorparity[0]]<<4)|( odd_tab[sectorparity[1]])),0xFF,currentside,sectorconfig->trackencoding);
+
+	sectorconfig->startdataindex=tg->last_bit_offset/8;
+	if(sectorconfig->input_data)
+	{
+		FastMFMFMgenerator(tg,currentside,sectorconfig->input_data,sectorconfig->sectorsize,sectorconfig->trackencoding);
+
+		// data crc			
+		for(i=0;i<sectorconfig->sectorsize;i++)
+		{
+			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->input_data[i],(unsigned char*)&crctable );
+		}
+	}
+	else
+	{
+		for(i=0;i<sectorconfig->sectorsize;i++)
+		{
+			pushTrackCode(tg,sectorconfig->fill_byte,0xFF,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->fill_byte,(unsigned char*)&crctable );
+		}
+	}
+					
+	//gap3
+	if(sectorconfig->gap3!=255)
+	{
+		for(i=0;i<sectorconfig->gap3;i++)
+		{
+			pushTrackCode(tg,formatstab[trackencoding].data_gap3,0xFF,currentside,sectorconfig->trackencoding);
+		}
+	}
+
+	// fill timing & encoding buffer
+	if(currentside->timingbuffer)
+	{
+		for(j=startindex;j<(tg->last_bit_offset/8);j++)
+		{
+			currentside->timingbuffer[j]=sectorconfig->bitrate;
+		}
+	}
+
+	trackenc=AMIGA_MFM_ENCODING;
+
+	if(currentside->track_encoding_buffer)
+	{
+		for(j=startindex;j<(tg->last_bit_offset/8);j++)
+		{
+			currentside->track_encoding_buffer[j]=trackenc;
+		}
+	}
+
+	currentside->number_of_sector++;
+}
+
+void tg_addSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * currentside)
+{
+
+	switch(sectorconfig->trackencoding)
+	{
+
+		case IBMFORMAT_SD:
+		case IBMFORMAT_DD:
+		case ISOFORMAT_SD:
+		case ISOFORMAT_DD:
+		case ISOFORMAT_DD11S:
+			tg_addISOSectorToTrack(tg,sectorconfig,currentside);
+			break;
+
+		case AMIGAFORMAT_DD:
+			tg_addAmigaSectorToTrack(tg,sectorconfig,currentside);
+			break;
+
+	}
 }
 
 void tg_completeTrack(track_generator *tg, SIDE * currentside,unsigned char trackencoding)
