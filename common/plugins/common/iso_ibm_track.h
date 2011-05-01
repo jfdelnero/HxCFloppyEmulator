@@ -315,19 +315,19 @@ static isoibm_config formatstab[]=
 		
 		0x4E,00, // gap1 config
 		
-		0xFF,02, // h sync config
+		0x00,02, // h sync config
 		
 		0x00,12, // d sync config
 		
 		0xA1,0x0A,2,// address mark coding (0x4489 0x4489)
 		0xFF,0xFF,0,
 		
-		0x4E,22, // gap2 config
+		0x00,16, // gap2 config
 		
-		0xA1,0x0A,3,// data mark coding
-		0xFB,0xFF,1,
+		0xA1,0x0A,0,// data mark coding
+		0xFB,0xFF,0,
 		
-		0x4E,5,  // gap3 config
+		0x00,0,  // gap3 config
 		
 		0x4E,0xFF // gap4 config
 		
