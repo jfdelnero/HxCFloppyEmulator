@@ -52,8 +52,7 @@
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
-#include "../common/amiga_track.h"
-
+#include "../common/iso_ibm_track.h"
 #include "dms_loader.h"
 
 #include "./libs/xdms/vfile.h"
@@ -104,16 +103,15 @@ int DMS_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 int DMS_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	unsigned int filesize;
-	unsigned int i,j,k;
+	unsigned int i,j;
 	unsigned int file_offset;
-	char* trackdata;
-	int tracklen;
+	unsigned short sectorsize;
+	unsigned char gap3len,skew,trackformat,interleave;
 	HXCFILE * fo;
 	char* flatimg;
 	int retxdms;
 	CYLINDER* currentcylinder;
-	SIDE* currentside;
-	
+
 	
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"DMS_libLoad_DiskFile %s",imgfile);
@@ -135,16 +133,18 @@ int DMS_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	if(fo!=0)
 	{		
+		sectorsize=512;
+		interleave=1;
+		gap3len=0;
+		skew=0;
+		trackformat=AMIGAFORMAT_DD;
 		floppydisk->floppySectorPerTrack=11;
 		floppydisk->floppyNumberOfSide=2;
 		floppydisk->floppyNumberOfTrack=(filesize/(512*2*11));
-		floppydisk->floppyBitRate=250000;
+		floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
 		floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-		
-		tracklen=(DEFAULT_AMIGA_BITRATE/(DEFAULT_AMIGA_RPM/60))/4;
-		trackdata=(unsigned char*)malloc(512*floppydisk->floppySectorPerTrack);
-		
+				
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
 
@@ -153,44 +153,14 @@ int DMS_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{	
-				currentcylinder->sides[i]=malloc(sizeof(SIDE));
-				currentside=currentcylinder->sides[i];
+								
+				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
+							(sectorsize*(floppydisk->floppySectorPerTrack)*i);
 				
-				memset(currentside,0,sizeof(SIDE));
-				
-				currentside->number_of_sector=floppydisk->floppySectorPerTrack;
-				currentside->tracklen=tracklen;
-				
-				currentside->databuffer=malloc(currentside->tracklen);
-				memset(currentside->databuffer,0,currentside->tracklen);
-				
-				currentside->flakybitsbuffer=0;
-				
-				currentside->indexbuffer=malloc(currentside->tracklen);
-				memset(currentside->indexbuffer,0,currentside->tracklen);
-				
-				for(k=currentside->tracklen-710;k<currentside->tracklen;k++)
-				{
-					currentside->indexbuffer[k]=0xFF;
-				}
-				
-				currentside->timingbuffer=0;
-				currentside->bitrate=DEFAULT_AMIGA_BITRATE;
-				currentside->track_encoding=AMIGA_MFM_ENCODING;	
-				
-				file_offset=(512*(j*currentside->number_of_sector*2))+
-					(512*(currentside->number_of_sector)*i);
-				
-				memcpy(trackdata,&flatimg[file_offset],512*currentside->number_of_sector);
-				
-				BuildAmigaTrack(trackdata,currentside->databuffer,tracklen,j,i,11);
-				
-				currentside->tracklen=currentside->tracklen*8;
+				currentcylinder->sides[i]=tg_generatetrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500);
 				
 			}
 		}
-
-		free(trackdata);
 		
 		floppycontext->hxc_printf(MSG_INFO_1,"DMS Loader : tracks file successfully loaded and encoded!");
 		HXC_fclose(fo);
