@@ -26,7 +26,10 @@
 */
 #define DEFAULT_HD_BITRATE 500000
 #define DEFAULT_DD_BITRATE 250000
+#define DEFAULT_AMIGA_BITRATE 253360
+
 #define DEFAULT_DD_RPM 300
+#define DEFAULT_AMIGA_RPM 300
 
 typedef struct track_generator_
 {
