@@ -53,7 +53,10 @@
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
-#include "../common/amiga_track.h"
+#include "../common/crc.h"
+#include "../common/iso_ibm_track.h"
+
+
 #include "adf_loader.h"
 
 #include "../common/os_api.h"
@@ -115,20 +118,16 @@ int ADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	return LOADER_BADPARAMETER;
 }
 
-
-
-
 int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j,k;
+	unsigned int i,j;
 	unsigned int file_offset;
 	char* trackdata;
-	int	tracklen;
+	unsigned char gap3len,skew,trackformat,interleave;
+	unsigned short sectorsize;
 	CYLINDER* currentcylinder;
-	SIDE* currentside;
-	
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"ADF_libLoad_DiskFile %s",imgfile);
 	
@@ -152,18 +151,24 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	floppydisk->floppySectorPerTrack=11;
 	floppydisk->floppyNumberOfSide=2;
+
 	if((filesize/(512*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))<80)
 		floppydisk->floppyNumberOfTrack=80;
 	else
 		floppydisk->floppyNumberOfTrack=filesize/(512*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide);
-	floppydisk->floppyBitRate=250000;
+	
+	floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
 	floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
 	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-		
-	tracklen=(DEFAULT_AMIGA_BITRATE/(DEFAULT_AMIGA_RPM/60))/4;
-		
-	trackdata=(unsigned char*)malloc(512*floppydisk->floppySectorPerTrack);
-		
+
+	sectorsize=512;
+	interleave=1;
+	gap3len=0;
+	skew=0;
+	trackformat=AMIGAFORMAT_DD;
+
+	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
 			
@@ -171,44 +176,13 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		currentcylinder=floppydisk->tracks[j];
 		
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-		{	
-			currentcylinder->sides[i]=malloc(sizeof(SIDE));
-			memset(currentcylinder->sides[i],0,sizeof(SIDE));
-				
-			currentside=floppydisk->tracks[j]->sides[i];
-				
-
-			currentside->number_of_sector=floppydisk->floppySectorPerTrack;
-			currentside->tracklen=tracklen;
-				
-			currentside->databuffer=malloc(currentside->tracklen);
-			memset(currentside->databuffer,0,currentside->tracklen);
-				
-			currentside->flakybitsbuffer=0;
-			
-			currentside->indexbuffer=malloc(currentside->tracklen);
-			memset(currentside->indexbuffer,0,currentside->tracklen);
-			
-			for(k=currentside->tracklen-710;k<currentside->tracklen;k++)
-			{
-				currentside->indexbuffer[k]=0xFF;
-			}
-				
-			currentside->timingbuffer=0;
-			currentside->bitrate=DEFAULT_AMIGA_BITRATE;
-			currentside->track_encoding=AMIGA_MFM_ENCODING;
-				
-			file_offset=(512*(j*currentside->number_of_sector*2))+
-					(512*(currentside->number_of_sector)*i);
-				
+		{				
+			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
+				        (sectorsize*(floppydisk->floppySectorPerTrack)*i);
 			fseek (f , file_offset , SEEK_SET);
-			
-			fread(trackdata,512*currentside->number_of_sector,1,f);
-			
-			BuildAmigaTrack(trackdata,currentside->databuffer,tracklen,j,i,11);
+			fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
 
-			currentside->tracklen=currentside->tracklen*8;
-			
+			currentcylinder->sides[i]=tg_generatetrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500);
 		}
 	}
 
