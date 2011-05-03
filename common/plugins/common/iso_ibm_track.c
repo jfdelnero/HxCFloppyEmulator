@@ -1221,7 +1221,7 @@ void tg_addAmigaSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SI
 {
 
 	unsigned short  i;
-	unsigned char   c,trackencoding,trackenc;
+	unsigned char   trackencoding,trackenc;
 	unsigned char   CRC16_High;
 	unsigned char   CRC16_Low;
 	unsigned char   crctable[32];
@@ -1280,42 +1280,41 @@ void tg_addAmigaSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SI
 
 	pushTrackCode(tg,0x00,0xFF,currentside,sectorconfig->trackencoding);
 	pushTrackCode(tg,0x00,0xFF,currentside,sectorconfig->trackencoding);
-	pushTrackCode(tg,(unsigned char)((even_tab[headerparity[0]]<<4)|(even_tab[headerparity[1]])),0xFF,currentside,sectorconfig->trackencoding);
-	pushTrackCode(tg,(unsigned char)(( odd_tab[headerparity[0]]<<4)|( odd_tab[headerparity[1]])),0xFF,currentside,sectorconfig->trackencoding);
+	pushTrackCode(tg,(unsigned char)headerparity[0],0xFF,currentside,sectorconfig->trackencoding);
+	pushTrackCode(tg,(unsigned char)headerparity[1],0xFF,currentside,sectorconfig->trackencoding);
 
 	sectorparity[0]=0;
 	sectorparity[1]=0;
 	if(sectorconfig->input_data)
 	{
-		for(i=0;i<sectorconfig->sectorsize;i=i+2)
+		for(i=0;i<sectorconfig->sectorsize;i=i+4)
 		{
-			sectorparity[0]^=sectorconfig->input_data[i+0];
-			sectorparity[1]^=sectorconfig->input_data[i+1];
-		}	
+			sectorparity[0]^=(odd_tab[sectorconfig->input_data[i]]<<4) | odd_tab[sectorconfig->input_data[i+1]];
+			sectorparity[1]^=(odd_tab[sectorconfig->input_data[i+2]]<<4) | odd_tab[sectorconfig->input_data[i+3]];
+		}
+
+		for(i=0;i<sectorconfig->sectorsize;i=i+4)
+		{
+			sectorparity[0]^=(even_tab[sectorconfig->input_data[i]]<<4) | even_tab[sectorconfig->input_data[i+1]];
+			sectorparity[1]^=(even_tab[sectorconfig->input_data[i+2]]<<4) | even_tab[sectorconfig->input_data[i+3]];
+		}		
 	}
 
 	pushTrackCode(tg,0x00,0xFF,currentside,sectorconfig->trackencoding);
 	pushTrackCode(tg,0x00,0xFF,currentside,sectorconfig->trackencoding);
-	pushTrackCode(tg,(unsigned char)((even_tab[sectorparity[0]]<<4)|(even_tab[sectorparity[1]])),0xFF,currentside,sectorconfig->trackencoding);
-	pushTrackCode(tg,(unsigned char)(( odd_tab[sectorparity[0]]<<4)|( odd_tab[sectorparity[1]])),0xFF,currentside,sectorconfig->trackencoding);
+	pushTrackCode(tg,(unsigned char)sectorparity[0],0xFF,currentside,sectorconfig->trackencoding);
+	pushTrackCode(tg,(unsigned char)sectorparity[1],0xFF,currentside,sectorconfig->trackencoding);
 
 	sectorconfig->startdataindex=tg->last_bit_offset/8;
 	if(sectorconfig->input_data)
 	{
 		FastMFMFMgenerator(tg,currentside,sectorconfig->input_data,sectorconfig->sectorsize,sectorconfig->trackencoding);
-
-		// data crc			
-		for(i=0;i<sectorconfig->sectorsize;i++)
-		{
-			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->input_data[i],(unsigned char*)&crctable );
-		}
 	}
 	else
 	{
 		for(i=0;i<sectorconfig->sectorsize;i++)
 		{
 			pushTrackCode(tg,sectorconfig->fill_byte,0xFF,currentside,sectorconfig->trackencoding);
-			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->fill_byte,(unsigned char*)&crctable );
 		}
 	}
 					
