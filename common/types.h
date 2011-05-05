@@ -16,5 +16,12 @@ typedef unsigned int		uint32_t;
 # define __uint32_t_defined
 #endif
 
+
+#ifndef FALSE
 #define FALSE 0x00
+#endif
+
+#ifndef TRUE
 #define TRUE  0xFF
+#endif
+
