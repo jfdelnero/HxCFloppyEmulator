@@ -347,7 +347,7 @@ int RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				else
 					curskew=(unsigned char)(j*skew);
 
-				floppydisk->tracks[j]->sides[i]=tg_generatetrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,(unsigned char)firstsectorid,interleave,(unsigned char)(curskew),floppydisk->floppyBitRate,rpm,tracktype,gap3len,2500|NO_SECTOR_UNDER_INDEX);
+				floppydisk->tracks[j]->sides[i]=tg_generatetrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,(unsigned char)firstsectorid,interleave,(unsigned char)(curskew),floppydisk->floppyBitRate,rpm,tracktype,gap3len,2500|NO_SECTOR_UNDER_INDEX,-2500);
 			}
 		}
 	}

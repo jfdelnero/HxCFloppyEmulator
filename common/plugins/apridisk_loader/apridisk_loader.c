@@ -285,7 +285,7 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		
 		currentcylinder->floppyRPM=rpm;
 
-		currentside=tg_generatetrackEx((unsigned short)number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,IBMFORMAT_DD,2500 | NO_SECTOR_UNDER_INDEX);
+		currentside=tg_generatetrackEx((unsigned short)number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,IBMFORMAT_DD,2500 | NO_SECTOR_UNDER_INDEX,-2500);
 		if(currentcylinder->number_of_side>j)
 			currentcylinder->sides[j]=currentside;
 

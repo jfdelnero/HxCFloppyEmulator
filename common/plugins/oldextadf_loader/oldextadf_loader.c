@@ -53,7 +53,7 @@
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
-#include "../common/amiga_track.h"
+#include "../common/iso_ibm_track.h"
 #include "oldextadf_loader.h"
 
 #include "../common/os_api.h"
@@ -126,7 +126,7 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 	FILE * f;
 	unsigned int filesize;
 	unsigned int i,j,k;
-	char* trackdata;
+	unsigned char* trackdata;
 	int	tracklen;
 	CYLINDER* currentcylinder;
 	SIDE* currentside;
@@ -135,6 +135,9 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 	unsigned char header[12];
 	unsigned char * tracktable;
 	unsigned int trackindex,tracksize;
+
+	unsigned char gap3len,skew,trackformat,interleave;
+	unsigned short sectorsize;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"OLDEXTADF_libLoad_DiskFile %s",imgfile);
 	
@@ -172,6 +175,12 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 	trackindex=0;
 
 	floppydisk->floppyNumberOfTrack=numberoftrack>>1;
+
+	sectorsize=512;
+	interleave=1;
+	gap3len=0;
+	skew=0;
+	trackformat=AMIGAFORMAT_DD;
 
 	floppydisk->floppySectorPerTrack=-1;
 	floppydisk->floppyNumberOfSide=2;
@@ -235,11 +244,6 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 					}
 					else
 					{
-						currentside->tracklen=tracklen;	
-						currentside->databuffer=malloc(currentside->tracklen);
-						memset(currentside->databuffer,0,currentside->tracklen);
-						currentside->indexbuffer=malloc(currentside->tracklen);
-						memset(currentside->indexbuffer,0,currentside->tracklen);
 
 						trackdata=(unsigned char*)malloc(tracksize);
 
@@ -247,11 +251,9 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 
 						fread(trackdata,tracksize,1,f);
 
-						BuildAmigaTrack(trackdata,currentside->databuffer,tracklen,j,i,tracksize/512);
+						currentcylinder->sides[i]=tg_generatetrack(trackdata,sectorsize,(unsigned short)(tracksize/sectorsize),(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500,-11360);
 
 						free(trackdata);
-						currentside->number_of_sector=tracksize/512;
-
 					}
 				}
 				else

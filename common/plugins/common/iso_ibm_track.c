@@ -1404,7 +1404,7 @@ void tg_completeTrack(track_generator *tg, SIDE * currentside,unsigned char trac
 	}
 }
 
-SIDE * tg_generatetrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorconfigtab,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,int indexlen)
+SIDE * tg_generatetrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorconfigtab,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,int indexlen,int indexpos)
 {
 	unsigned short i;
 	unsigned long tracksize;
@@ -1505,7 +1505,7 @@ SIDE * tg_generatetrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 
 	// recompute the track size with the new gap settings.
 	tracksize=tg_computeMinTrackSize(&tg,trackencoding,bitrate,number_of_sector,sectorconfigtab,&track_period);
-	
+
 
 	// adjust the track lenght to get the right rpm.
 	if(wanted_trackperiod>track_period)
@@ -1532,16 +1532,23 @@ SIDE * tg_generatetrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 	// "close" the track : extend/add post gap..
 	tg_completeTrack(&tg,currentside,trackencoding);
 
-	fillindex(currentside->tracklen-8,currentside,indexlen,1,1);
+	if(indexlen & REVERTED_INDEX)
+	{
+		fillindex(indexpos,currentside,indexlen,1,1);
+	}
+	else
+	{
+		fillindex(indexpos,currentside,indexlen,1,0);
+	}
 
 	if(interleavetab) free(interleavetab);
-	
+
 	return currentside;
 }
 
 
 
-SIDE * tg_generatetrack(unsigned char * sectors_data,unsigned short sector_size,unsigned short number_of_sector,unsigned char track,unsigned char side,unsigned char sectorid,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned char gap3, int indexlen)
+SIDE * tg_generatetrack(unsigned char * sectors_data,unsigned short sector_size,unsigned short number_of_sector,unsigned char track,unsigned char side,unsigned char sectorid,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned char gap3, int indexlen,int indexpos)
 {
 	unsigned short i;
 	SIDE * currentside;
@@ -1562,7 +1569,7 @@ SIDE * tg_generatetrack(unsigned char * sectors_data,unsigned short sector_size,
 		sectorconfigtab[i].sector=sectorid+i;
 	}
 
-	currentside=tg_generatetrackEx(number_of_sector,sectorconfigtab,interleave,skew,bitrate,rpm,trackencoding,indexlen);
+	currentside=tg_generatetrackEx(number_of_sector,sectorconfigtab,interleave,skew,bitrate,rpm,trackencoding,indexlen,indexpos);
 	free(sectorconfigtab);
 
 	return currentside;

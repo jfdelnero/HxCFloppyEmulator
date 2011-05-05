@@ -207,7 +207,7 @@ int MFM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 			currentside->tracklen=currentside->tracklen*8;
 
-			fillindex(currentside->tracklen-1,currentside,2500,TRUE,1);
+			fillindex(0,currentside,2500,TRUE,1);
 		}			
 	
 		fclose(f);
