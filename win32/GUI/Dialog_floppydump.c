@@ -441,7 +441,7 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 					}
 				
 			
-					currentside=tg_generatetrackEx((unsigned short)sr->count,sectorconfig,interleave,0,bitrate,rpm,trackformat,2500 | NO_SECTOR_UNDER_INDEX);
+					currentside=tg_generatetrackEx((unsigned short)sr->count,sectorconfig,interleave,0,bitrate,rpm,trackformat,2500 | NO_SECTOR_UNDER_INDEX,-2500);
 
 					currentcylinder->sides[j]=currentside;
 										
