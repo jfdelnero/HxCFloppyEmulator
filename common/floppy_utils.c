@@ -82,10 +82,21 @@ unsigned long us2index(unsigned long startindex,SIDE * track,unsigned long us,un
 	}
 };
 
-unsigned long fillindex(unsigned long startindex,SIDE * track,unsigned long us,unsigned char fill,char fillorder)
+unsigned long fillindex(int startindex,SIDE * track,unsigned long us,unsigned char fill,char fillorder)
 {
-	
-	return us2index(startindex,track,us&0xFFFFFF,fill,fillorder);
+	int start_index;
+
+	if(startindex>=0)
+	{
+		start_index=us2index(0,track,startindex,0,0);
+	}
+	else
+	{
+		start_index=us2index(0,track,-startindex,0,1);
+	}
+
+
+	return us2index(start_index,track,us&0xFFFFFF,fill,fillorder);
 }
 
 CYLINDER* allocCylinderEntry(unsigned short rpm,unsigned char number_of_side)
