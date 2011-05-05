@@ -347,7 +347,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	//
 			currentcylinder->floppyRPM=rpm;			
 			
-			currentside=tg_generatetrackEx((unsigned short)number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,tracktype,2500 | NO_SECTOR_UNDER_INDEX);
+			currentside=tg_generatetrackEx((unsigned short)number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,tracktype,2500 | NO_SECTOR_UNDER_INDEX,-2500);
 			currentcylinder->sides[i&1]=currentside;
 			
 			for(j=0;j<number_of_sector;j++)
@@ -398,7 +398,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				currentside->indexbuffer=malloc(tracklen);
 				memset(currentside->indexbuffer,0,tracklen);
 
-				fillindex(currentside->tracklen-8,currentside,2500,TRUE,1);
+				fillindex(0,currentside,2500,TRUE,1);
 
 		}
 

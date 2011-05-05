@@ -333,7 +333,7 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 					
 					//
 					currentcylinder->floppyRPM=rpm;
-					currentcylinder->sides[s]=tg_generatetrackEx(trackheader.number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,300,IBMFORMAT_DD,2500|NO_SECTOR_UNDER_INDEX);
+					currentcylinder->sides[s]=tg_generatetrackEx(trackheader.number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,300,IBMFORMAT_DD,2500|NO_SECTOR_UNDER_INDEX,-2500);
 					
 					for(j=0;j<trackheader.number_of_sector;j++)
 					{
@@ -478,7 +478,7 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 					{
 						currentside=floppydisk->tracks[j]->sides[i];
 						if(currentside->indexbuffer)
-							fillindex(currentside->tracklen-1,currentside,2500,TRUE,1);
+							fillindex(0,currentside,2500,TRUE,1);
 					}
 				}					
 			}
