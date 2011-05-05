@@ -426,7 +426,7 @@ int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 
 				}
-				currentcylinder->sides[i]=tg_generatetrackEx(sector_found,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,2500|NO_SECTOR_UNDER_INDEX);
+				currentcylinder->sides[i]=tg_generatetrackEx(sector_found,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,2500|NO_SECTOR_UNDER_INDEX,-2500);
 
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
 				{

@@ -235,7 +235,7 @@ int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 			
 		}	
 
-		currentcylinder->sides[i]=tg_generatetrackEx(10,(SECTORCONFIG *)&sectorconfig,5,0,floppydisk->floppyBitRate,rpm,ISOFORMAT_SD,2500);
+		currentcylinder->sides[i]=tg_generatetrackEx(10,(SECTORCONFIG *)&sectorconfig,5,0,floppydisk->floppyBitRate,rpm,ISOFORMAT_SD,2500,-2500);
 
 		for(k=0;k<10;k++)
 		{
@@ -272,7 +272,7 @@ int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 				sectorconfig[k].input_data=&floppy_data[k*256];
 			}
 
-			currentcylinder->sides[i]=tg_generatetrackEx(floppydisk->floppySectorPerTrack,(SECTORCONFIG *)&sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,2500);
+			currentcylinder->sides[i]=tg_generatetrackEx(floppydisk->floppySectorPerTrack,(SECTORCONFIG *)&sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,2500,-2500);
 		}
 	}
 

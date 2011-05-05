@@ -53,7 +53,7 @@
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
-#include "../common/amiga_track.h"
+#include "../common/iso_ibm_track.h"
 #include "extadf_loader.h"
 
 #include "../common/os_api.h"
@@ -135,6 +135,9 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 	unsigned char header[12];
 	unsigned char * tracktable;
 	unsigned int trackindex,tracksize;
+
+	unsigned char gap3len,skew,trackformat,interleave;
+	unsigned short sectorsize;
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"EXTADF_libLoad_DiskFile %s",imgfile);
 	
@@ -174,6 +177,12 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 	floppydisk->floppyNumberOfTrack=numberoftrack>>1;
 	if(numberoftrack&1) floppydisk->floppyNumberOfTrack++;
 
+	sectorsize=512;
+	interleave=1;
+	gap3len=0;
+	skew=0;
+	trackformat=AMIGAFORMAT_DD;
+
 	floppydisk->floppySectorPerTrack=-1;
 	floppydisk->floppyNumberOfSide=2;
 	floppydisk->floppyBitRate=250000;
@@ -192,17 +201,6 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 		
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 		{	
-			currentcylinder->sides[i]=malloc(sizeof(SIDE));
-			memset(currentcylinder->sides[i],0,sizeof(SIDE));
-				
-			currentside=floppydisk->tracks[j]->sides[i];
-				
-			currentside->flakybitsbuffer=0;
-	
-			currentside->timingbuffer=0;
-			currentside->bitrate=DEFAULT_AMIGA_BITRATE;
-			currentside->track_encoding=AMIGA_MFM_ENCODING;
-				
 
 			if(trackindex<numberoftrack)
 			{
@@ -218,7 +216,18 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 					if(tracktable[(12*trackindex)+3]==1)
 					{
 
-						
+						currentcylinder->sides[i]=malloc(sizeof(SIDE));
+						memset(currentcylinder->sides[i],0,sizeof(SIDE));
+							
+						currentside=floppydisk->tracks[j]->sides[i];
+							
+						currentside->flakybitsbuffer=0;
+				
+						currentside->timingbuffer=0;
+						currentside->bitrate=DEFAULT_AMIGA_BITRATE;
+						currentside->track_encoding=AMIGA_MFM_ENCODING;
+									
+
 						currentside->tracklen=tracksize;
 						currentside->databuffer=malloc(currentside->tracklen);
 						memset(currentside->databuffer,0,currentside->tracklen);
@@ -240,23 +249,15 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 								  tracktable[(12*trackindex)+6] * 0x100     + \
 								  tracktable[(12*trackindex)+7];
 						
-
-						currentside->tracklen=tracklen;	
-						currentside->databuffer=malloc(currentside->tracklen);
-						memset(currentside->databuffer,0,currentside->tracklen);
-						currentside->indexbuffer=malloc(currentside->tracklen);
-						memset(currentside->indexbuffer,0,currentside->tracklen);
-
 						trackdata=(unsigned char*)malloc(tracksize);
 
 						floppycontext->hxc_printf(MSG_DEBUG,"[%.3d:%.1X] Reading DOS track at 0x%.8x, Size : 0x%.8x",j,i,ftell(f),tracksize);
 
 						fread(trackdata,tracksize,1,f);
 
-						BuildAmigaTrack(trackdata,currentside->databuffer,tracklen,j,i,tracksize/512);
+						currentcylinder->sides[i]=tg_generatetrack(trackdata,sectorsize,(unsigned short)(tracksize/sectorsize),(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500,-11360);
 
 						free(trackdata);
-						currentside->number_of_sector=tracksize/512;
 
 					}
 				}
