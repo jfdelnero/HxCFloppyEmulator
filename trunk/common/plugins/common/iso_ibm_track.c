@@ -1574,3 +1574,93 @@ SIDE * tg_generatetrack(unsigned char * sectors_data,unsigned short sector_size,
 
 	return currentside;
 }
+
+SIDE * tg_alloctrack(unsigned int bitrate,unsigned char trackencoding,unsigned short rpm,unsigned int tracksize,int indexlen,int indexpos,unsigned char buffertoalloc)
+{
+	SIDE * currentside;
+	unsigned int tracklen;
+	unsigned int i;
+
+	currentside=(SIDE*)malloc(sizeof(SIDE));
+	memset(currentside,0,sizeof(SIDE));
+				
+	currentside->number_of_sector=0;
+
+	tracklen=tracksize/8;
+	if(tracksize&7) tracklen++;
+
+	currentside->tracklen=tracksize;
+
+	//////////////////////////////
+	// bitrate buffer allocation
+	currentside->bitrate=bitrate;
+
+	if(buffertoalloc & TG_ALLOCTRACK_ALLOCTIMIMGBUFFER)
+	{
+		currentside->bitrate=VARIABLEBITRATE;
+		currentside->timingbuffer=malloc(tracklen*sizeof(unsigned long));
+		for(i=0;i<tracklen;i++)
+		{
+			currentside->timingbuffer[i]=bitrate;
+		}
+	}
+
+		
+	///////////////////////////////////////////
+	// track encoding code buffer allocation
+	currentside->track_encoding=trackencoding;
+	if(buffertoalloc & TG_ALLOCTRACK_ALLOCENCODINGBUFFER)
+	{
+		currentside->track_encoding=VARIABLEENCODING;
+		currentside->track_encoding_buffer=malloc(tracklen*sizeof(unsigned char));
+
+		for(i=0;i<tracklen;i++)
+		{
+			currentside->track_encoding_buffer[i]=trackencoding;
+		}
+	}
+
+	///////////////////////////////////////////
+	// track flakey bits allocation
+	if(buffertoalloc & TG_ALLOCTRACK_ALLOCFLAKEYBUFFER)
+	{
+		currentside->flakybitsbuffer=malloc(tracklen*sizeof(unsigned char));
+		
+		if(buffertoalloc & TG_ALLOCTRACK_UNFORMATEDBUFFER )
+		{
+			memset(currentside->flakybitsbuffer,0xFF,tracklen*sizeof(unsigned char));
+		}
+		else
+		{
+			memset(currentside->flakybitsbuffer,0x00,tracklen*sizeof(unsigned char));
+		}
+	}
+	
+	/////////////////////////////
+	// data buffer allocation
+	currentside->databuffer=malloc(tracklen);
+	memset(currentside->databuffer,0,tracklen);
+	if(buffertoalloc & TG_ALLOCTRACK_RANDOMIZEDATABUFFER)
+	{
+		for(i=0;i<tracklen;i++)
+		{
+			currentside->databuffer[i]=rand();
+		}
+	}
+
+	/////////////////////////////
+	// index buffer allocation
+	currentside->indexbuffer=malloc(tracklen);
+	memset(currentside->indexbuffer,0,tracklen);
+
+	if(indexlen & REVERTED_INDEX)
+	{
+		fillindex(indexpos,currentside,indexlen,1,1);
+	}
+	else
+	{
+		fillindex(indexpos,currentside,indexlen,1,0);
+	}
+
+	return currentside;
+}

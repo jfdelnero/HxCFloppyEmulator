@@ -58,6 +58,8 @@
 
 #include "../common/os_api.h"
 
+#include "../common/iso_ibm_track.h"
+
 int MFM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	int pathlen;
@@ -169,45 +171,22 @@ int MFM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 			if(!floppydisk->tracks[trackdesc.track_number])
 			{
-				floppydisk->tracks[trackdesc.track_number]=(CYLINDER*)malloc(sizeof(CYLINDER));
+				floppydisk->tracks[trackdesc.track_number]=allocCylinderEntry(header.floppyRPM,floppydisk->floppyNumberOfSide);
 				currentcylinder=floppydisk->tracks[trackdesc.track_number];
-				currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-				currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-				memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
-								
-				currentcylinder->floppyRPM=header.floppyRPM;
 			}
 			
 
 			floppycontext->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
-			trackdesc.track_number,
-			trackdesc.side_number,
-			trackdesc.mfmtrackoffset,
-			trackdesc.mfmtracksize);
+												trackdesc.track_number,
+												trackdesc.side_number,
+												trackdesc.mfmtrackoffset,
+												trackdesc.mfmtracksize);
 
-
-			currentcylinder->sides[trackdesc.side_number]=malloc(sizeof(SIDE));
-			memset(currentcylinder->sides[trackdesc.side_number],0,sizeof(SIDE));
+			currentcylinder->sides[trackdesc.side_number]=tg_alloctrack(floppydisk->floppyBitRate,UNKNOWN_ENCODING,currentcylinder->floppyRPM,trackdesc.mfmtracksize*8,2500,-2500,0x00);
 			currentside=currentcylinder->sides[trackdesc.side_number];
-					
 			currentside->number_of_sector=floppydisk->floppySectorPerTrack;
-			currentside->tracklen=trackdesc.mfmtracksize;
 					
-			currentside->databuffer=malloc(currentside->tracklen);
-			fread(currentside->databuffer,currentside->tracklen,1,f);
-					
-			currentside->flakybitsbuffer=0;
-		
-			currentside->timingbuffer=0;
-			currentside->bitrate=floppydisk->floppyBitRate;
-			currentside->track_encoding=UNKNOWN_ENCODING;
-
-			currentside->indexbuffer=malloc(currentside->tracklen);
-			memset(currentside->indexbuffer,0,currentside->tracklen);
-
-			currentside->tracklen=currentside->tracklen*8;
-
-			fillindex(0,currentside,2500,TRUE,1);
+			fread(currentside->databuffer,currentside->tracklen/8,1,f);					
 		}			
 	
 		fclose(f);

@@ -325,7 +325,6 @@ int TI99PC99_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		floppydisk->floppyNumberOfTrack=numberoftrack;
 		floppydisk->floppyNumberOfSide=numberofside;
 		floppydisk->floppySectorPerTrack=-1;
-		//floppydisk->floppyBitRate=250000;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 			
@@ -333,7 +332,6 @@ int TI99PC99_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 			
 		floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
 				
-		//tracklen=(DEFAULT_DD_BITRATE/(rpm/60))/4;
 		trackdata=(unsigned char*)malloc(tracklen);
 		trackclk=(unsigned char*)malloc(tracklen);
 			
@@ -346,35 +344,19 @@ int TI99PC99_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
 					
-				currentcylinder->floppyRPM=rpm;
-					
-				currentcylinder->sides[i]=malloc(sizeof(SIDE));
-				memset(currentcylinder->sides[i],0,sizeof(SIDE));
-				currentside=currentcylinder->sides[i];
-					
-				currentside->number_of_sector=floppydisk->floppySectorPerTrack;
 				if(fmmode)
 				{	
-					currentside->track_encoding=ISOIBM_FM_ENCODING;
-					currentside->tracklen=tracklen*4;
+					floppydisk->tracks[j]->sides[i]=tg_alloctrack(floppydisk->floppyBitRate,ISOIBM_FM_ENCODING ,currentcylinder->floppyRPM,tracklen*4*8,2500,-2500,0x00);
+
 				}
 				else
 				{
-					currentside->track_encoding=ISOIBM_MFM_ENCODING;
-					currentside->tracklen=tracklen*2;
+					floppydisk->tracks[j]->sides[i]=tg_alloctrack(floppydisk->floppyBitRate,ISOIBM_MFM_ENCODING,currentcylinder->floppyRPM,tracklen*2*8,2500,-2500,0x00);
 				}
-
-				currentside->databuffer=malloc(currentside->tracklen);
-				memset(currentside->databuffer,0,currentside->tracklen);
-					
-				currentside->flakybitsbuffer=0;
+				currentside=currentcylinder->sides[i];
 				
-				currentside->timingbuffer=0;
-				currentside->bitrate=DEFAULT_DD_BITRATE;
-
-				currentside->indexbuffer=malloc(currentside->tracklen);
-				memset(currentside->indexbuffer,0,currentside->tracklen);						
-
+				currentside->number_of_sector=floppydisk->floppySectorPerTrack;
+					
 				file_offset=(tracklen*j)+(tracklen*numberoftrack*(i&1));					
 				fseek (f , file_offset , SEEK_SET);
 					
@@ -385,18 +367,14 @@ int TI99PC99_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 				if(fmmode)
 				{
 					patchtrackFM(trackdata,trackclk,tracklen);
-					BuildFMCylinder(currentside->databuffer,currentside->tracklen,trackclk,trackdata,tracklen);
+					BuildFMCylinder(currentside->databuffer,currentside->tracklen/8,trackclk,trackdata,tracklen);
 
 				}
 				else
 				{
 					patchtrackMFM(trackdata,trackclk,tracklen);
-					BuildCylinder(currentside->databuffer,currentside->tracklen,trackclk,trackdata,tracklen);
+					BuildCylinder(currentside->databuffer,currentside->tracklen/8,trackclk,trackdata,tracklen);
 				}
-
-				currentside->tracklen=currentside->tracklen*8;
-
-				fillindex(0,currentside,2500,TRUE,1);
 
 			}
 
