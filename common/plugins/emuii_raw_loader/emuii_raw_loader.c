@@ -56,6 +56,8 @@
 #include "../common/emuii_track.h"
 #include "emuii_raw_loader.h"
 
+#include "../common/iso_ibm_track.h"
+
 #include "../common/os_api.h"
 
 int EMUII_RAW_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
@@ -175,32 +177,13 @@ int EMUII_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 			(0xE00*tracknumber*2)+(sidenumber*0xE00),
 			0xE00);
 
+		currentcylinder->sides[sidenumber]=tg_alloctrack(floppydisk->floppyBitRate,EMU_FM_ENCODING,currentcylinder->floppyRPM,((floppydisk->floppyBitRate/5)*2),2000,-2000,0x00);
+		currentside=currentcylinder->sides[sidenumber];					
+		currentside->number_of_sector=floppydisk->floppySectorPerTrack;
 
-			currentcylinder->sides[sidenumber]=malloc(sizeof(SIDE));
-			memset(currentcylinder->sides[sidenumber],0,sizeof(SIDE));
-			currentside=currentcylinder->sides[sidenumber];
-					
-			currentside->number_of_sector=floppydisk->floppySectorPerTrack;
-			currentside->tracklen=((floppydisk->floppyBitRate/5)*2)/8;
-					
-			currentside->databuffer=malloc(currentside->tracklen);
 			
-			BuildEmuIITrack(floppycontext,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,2);
+		BuildEmuIITrack(floppycontext,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,2);
 			
-			currentside->flakybitsbuffer=0;
-										
-			currentside->timingbuffer=0;
-			currentside->bitrate=floppydisk->floppyBitRate;
-			currentside->track_encoding=EMU_FM_ENCODING;
-
-			currentside->indexbuffer=malloc(currentside->tracklen);
-			memset(currentside->indexbuffer,0,currentside->tracklen);
-
-
-			currentside->tracklen=currentside->tracklen*8;
-
-			fillindex(0,currentside,2000,TRUE,0);
-		
 	}			
 	
 	fclose(f);

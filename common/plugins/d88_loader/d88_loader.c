@@ -104,10 +104,9 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	d88_sector sectorheader;
 	int i,j;
 	unsigned short rpm;
-	unsigned char gap3len,tracktype,side,interleave;
+	unsigned char tracktype,side,interleave;
 	SECTORCONFIG* sectorconfig;
 	CYLINDER* currentcylinder;
-	SIDE* currentside;
 	unsigned int bitrate;
 	int indexfile;
 	unsigned long tracklen;
@@ -338,17 +337,12 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 			if(!floppydisk->tracks[i>>1])
 			{
-				floppydisk->tracks[i>>1]=(CYLINDER*)malloc(sizeof(CYLINDER));
+				floppydisk->tracks[i>>1]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 				currentcylinder=floppydisk->tracks[i>>1];
-				currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-				currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-				memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
 			}
 	//
-			currentcylinder->floppyRPM=rpm;			
-			
-			currentside=tg_generatetrackEx((unsigned short)number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,tracktype,2500 | NO_SECTOR_UNDER_INDEX,-2500);
-			currentcylinder->sides[i&1]=currentside;
+			currentcylinder->floppyRPM=rpm;
+			currentcylinder->sides[i&1]=tg_generatetrackEx((unsigned short)number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,tracktype,2500 | NO_SECTOR_UNDER_INDEX,-2500);
 			
 			for(j=0;j<number_of_sector;j++)
 			{
@@ -365,41 +359,13 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 				if(!floppydisk->tracks[i>>1])
 				{
-					floppydisk->tracks[i>>1]=(CYLINDER*)malloc(sizeof(CYLINDER));
+					floppydisk->tracks[i>>1]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 					currentcylinder=floppydisk->tracks[i>>1];
-					currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-					currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-					memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
 				}
 
+				tracklen=((bitrate/(rpm/60))/4)*8;
 				currentcylinder->floppyRPM=rpm;
-				currentcylinder->sides[i&1]=malloc(sizeof(SIDE));
-				currentside=currentcylinder->sides[i&1];
-				memset(currentcylinder->sides[i&1],0,sizeof(SIDE));
-
-				gap3len=84;
-
-				tracklen=(bitrate/(rpm/60))/4;
-
-				currentside->number_of_sector=number_of_sector;
-				currentside->tracklen=tracklen*8;
-				currentside->bitrate=bitrate;
-
-				currentside->databuffer=NULL;
-				currentside->flakybitsbuffer=NULL;
-				currentside->timingbuffer=NULL;
-
-				currentside->databuffer=malloc(tracklen);
-				memset(currentside->databuffer,0x55,tracklen);
-
-				currentside->flakybitsbuffer=malloc(tracklen);
-				memset(currentside->flakybitsbuffer,0xFF,tracklen);
-
-				currentside->indexbuffer=malloc(tracklen);
-				memset(currentside->indexbuffer,0,tracklen);
-
-				fillindex(0,currentside,2500,TRUE,1);
-
+				currentcylinder->sides[i&1]=tg_alloctrack(floppydisk->floppyBitRate,ISOIBM_MFM_ENCODING,currentcylinder->floppyRPM,tracklen,2500,-2500,TG_ALLOCTRACK_ALLOCFLAKEYBUFFER|TG_ALLOCTRACK_RANDOMIZEDATABUFFER|TG_ALLOCTRACK_UNFORMATEDBUFFER);
 		}
 
 		i++;

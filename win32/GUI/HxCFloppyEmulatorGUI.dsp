@@ -70,7 +70,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "..\d30104\\" /I "..\..\common\includes" /I "..\..\win32" /I "..\..\common\ftdi_floppyemulator" /I "..\..\common\\" /I "..\..\common\dms_loader\xdms-1.3.2\src" /I "..\..\common\plugins\amigadosfs_loader\adflib\Lib\Win32\\" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "IPF_SUPPORT" /FR /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "..\d30104\\" /I "..\..\common\includes" /I "..\..\win32" /I "..\..\common\ftdi_floppyemulator" /I "..\..\common\\" /I "..\..\common\dms_loader\xdms-1.3.2\src" /I "..\..\common\plugins\amigadosfs_loader\adflib\Lib\Win32\\" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
@@ -863,14 +863,6 @@ SOURCE=..\..\common\plugins\oldextadf_loader\oldextadf_loader.c
 SOURCE=..\..\common\plugins\oldextadf_loader\oldextadf_loader.h
 # End Source File
 # End Group
-# Begin Source File
-
-SOURCE=..\..\common\plugins\common\amiga_track.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\common\amiga_track.h
-# End Source File
 # Begin Source File
 
 SOURCE=..\..\common\plugins\common\crc.c

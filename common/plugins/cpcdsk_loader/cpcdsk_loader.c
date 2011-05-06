@@ -240,11 +240,8 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 					
 					if(!floppydisk->tracks[t])
 					{
-						floppydisk->tracks[t]=(CYLINDER*)malloc(sizeof(CYLINDER));
+						floppydisk->tracks[t]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 						currentcylinder=floppydisk->tracks[t];
-						currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-						currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-						memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
 					}
 					
 
@@ -380,40 +377,13 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 
 					if(!floppydisk->tracks[t])
 					{
-						floppydisk->tracks[t]=(CYLINDER*)malloc(sizeof(CYLINDER));
+						floppydisk->tracks[t]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 						currentcylinder=floppydisk->tracks[t];
-						currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-						currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-						memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
 					}
 
-					currentcylinder->floppyRPM=rpm;
-					currentcylinder->sides[s]=malloc(sizeof(SIDE));
-					currentside=currentcylinder->sides[s];
-					memset(currentcylinder->sides[s],0,sizeof(SIDE));
-					
-					tracklen=(DEFAULT_DD_BITRATE/(rpm/60))/4;
-					currentside->bitrate=DEFAULT_DD_BITRATE;
-					currentside->track_encoding=ISOIBM_MFM_ENCODING;
-
-					currentside->number_of_sector=0;
-					
-					
-					currentside->databuffer=malloc(tracklen);
-					memset(currentside->databuffer,0,tracklen);
-					
-					currentside->flakybitsbuffer=0;
-					
-					currentside->indexbuffer=malloc(tracklen);
-					memset(currentside->indexbuffer,0,tracklen);
-					
-					currentside->timingbuffer=0;
-					currentside->bitrate=DEFAULT_DD_BITRATE;
-					currentside->tracklen=tracklen*8;
-
+					tracklen=((DEFAULT_DD_BITRATE/(rpm/60))/4)*8;
+					currentcylinder->sides[s]=tg_alloctrack(floppydisk->floppyBitRate,ISOIBM_MFM_ENCODING,currentcylinder->floppyRPM,tracklen,2500,-2500,TG_ALLOCTRACK_RANDOMIZEDATABUFFER);
 				}
-				
-				
 			}
 			else
 			{
@@ -429,58 +399,17 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 		{
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
-				
-				
 				if(!floppydisk->tracks[j])
 				{
-					floppydisk->tracks[j]=(CYLINDER*)malloc(sizeof(CYLINDER));
+					floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 					currentcylinder=floppydisk->tracks[j];
-					currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-					currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*floppydisk->tracks[j]->number_of_side);
-					memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
 				}
 				
 				if(!floppydisk->tracks[j]->sides[i])
-				{
-					
-					floppydisk->tracks[j]->sides[i]=malloc(sizeof(SIDE));
-					memset(floppydisk->tracks[j]->sides[i],0,sizeof(SIDE));
-					currentside=floppydisk->tracks[j]->sides[i];
-					
-					tracklen=(DEFAULT_DD_BITRATE/(rpm/60))/4;
-					currentside->number_of_sector=0;
-					currentside->tracklen=tracklen;
-					currentside->bitrate=DEFAULT_DD_BITRATE;
-					
-					currentside->databuffer=malloc(tracklen);
-					currentside->flakybitsbuffer=malloc(tracklen);
-					memset(currentside->databuffer,0,tracklen);
-					memset(currentside->flakybitsbuffer,0xFF,tracklen);
-					
-					currentside->indexbuffer=malloc(tracklen);
-					memset(currentside->indexbuffer,0,tracklen);
-					
-					currentside->timingbuffer=0;
-					currentside->bitrate=DEFAULT_DD_BITRATE;
-					currentside->tracklen=currentside->tracklen*8;
+				{					
+					tracklen=((DEFAULT_DD_BITRATE/(rpm/60))/4)*8;
+					floppydisk->tracks[j]->sides[i]=tg_alloctrack(floppydisk->floppyBitRate,ISOIBM_MFM_ENCODING,currentcylinder->floppyRPM,tracklen,2500,-2500,TG_ALLOCTRACK_ALLOCFLAKEYBUFFER|TG_ALLOCTRACK_RANDOMIZEDATABUFFER|TG_ALLOCTRACK_UNFORMATEDBUFFER);
 				}
-			}
-		}
-		
-		
-		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-		{
-			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-			{		
-				if(floppydisk->tracks[j])
-				{
-					if(floppydisk->tracks[j]->sides[i])
-					{
-						currentside=floppydisk->tracks[j]->sides[i];
-						if(currentside->indexbuffer)
-							fillindex(0,currentside,2500,TRUE,1);
-					}
-				}					
 			}
 		}
 
