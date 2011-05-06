@@ -380,3 +380,10 @@ void          tg_completeTrack(track_generator *tg, SIDE * currentside,unsigned 
 SIDE *		  tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short numberofsector,unsigned char trackencoding,unsigned int bitrate,SECTORCONFIG * sectorconfigtab);
 SIDE *        tg_generatetrack(unsigned char * sectors_data,unsigned short sector_size,unsigned short number_of_sector,unsigned char track,unsigned char side,unsigned char sectorid,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned char gap3,int indexlen,int indexpos);
 SIDE *        tg_generatetrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorconfigtab,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,int indexlen,int indexpos);
+SIDE *        tg_alloctrack(unsigned int bitrate,unsigned char trackencoding,unsigned short rpm,unsigned int tracksize,int indexlen,int indexpos,unsigned char buffertoalloc);
+
+#define       TG_ALLOCTRACK_ALLOCTIMIMGBUFFER 0x01
+#define       TG_ALLOCTRACK_ALLOCFLAKEYBUFFER 0x02
+#define       TG_ALLOCTRACK_ALLOCENCODINGBUFFER 0x04
+#define       TG_ALLOCTRACK_RANDOMIZEDATABUFFER 0x08
+#define       TG_ALLOCTRACK_UNFORMATEDBUFFER 0x10

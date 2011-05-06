@@ -391,7 +391,7 @@ int DMK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					
 				currentside=DMKpatchtrack(floppycontext,trackdata, trackclk,idam_offset_table,dmk_h.track_len-128,&tracktotalsize, &dmk_h);
 				currentcylinder->sides[i]=currentside;
-				fillindex(0,currentside,2500,TRUE,1);
+				fillindex(-2500,currentside,2500,TRUE,1);
 
 			}
 		}
