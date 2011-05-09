@@ -64,6 +64,7 @@
 #include "afi_file_writer.h"
 #include "mfm_file_writer.h"
 #include "hfe_file_writer.h"
+#include "extended_hfe_file_writer.h"
 #include "raw_file_writer.h"
 #include "vtrucco_file_writer.h"
 #include "cpcdsk_file_writer.h"
@@ -362,7 +363,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				}
 
 				if(fileselector(hWnd,1,0,filename,"Export disk/Save As",
-					"HFE file (SDCard HxC Floppy Emulator file format)\0*.hfe\0VTR file (VTrucco Floppy Emulator file format)\0*.vtr\0MFM file (MFM/FM track file format)\0*.mfm\0AFI file (Advanced File image format)\0*.afi\0IMG file (RAW Sector file format)\0*.img\0CPC DSK file\0*.dsk\0IMD file\0*.imd\0\0",
+					"HFE file (SDCard HxC Floppy Emulator file format)\0*.hfe\0VTR file (VTrucco Floppy Emulator file format)\0*.vtr\0MFM file (MFM/FM track file format)\0*.mfm\0AFI file (Advanced File image format)\0*.afi\0IMG file (RAW Sector file format)\0*.img\0CPC DSK file\0*.dsk\0IMD file\0*.imd\0HFE file (Rev 2 - Experimental)\0*.hfe\0\0",
 					"*.hfe",&extpos,3)
 					)
 				{
@@ -397,6 +398,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						write_IMD_file(flopemu,thefloppydisk,filename);
 						break;
 
+					case 8:
+						write_EXTHFE_file(flopemu,thefloppydisk,filename,hwif->interface_mode,hwif->double_step);
+						break;
 
 					}
 				}
