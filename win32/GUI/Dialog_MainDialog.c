@@ -217,7 +217,7 @@ BOOL CALLBACK DialogMainDialog(
 				}
 				//strcat(filename,".mfm");
 				if(fileselector(hwndDlg,1,0,filename,"Export disk/Save As",
-					"HFE file (SDCard HxC Floppy Emulator file format)\0*.hfe\0VTR file (VTrucco Floppy Emulator file format)\0*.vtr\0MFM file (MFM/FM track file format)\0*.mfm\0AFI file (Advanced File image format)\0*.afi\0IMG file (RAW Sector file format)\0*.img\0CPC DSK file\0*.dsk\0IMD file\0*.imd\0\0",
+					"HFE file (SDCard HxC Floppy Emulator file format)\0*.hfe\0VTR file (VTrucco Floppy Emulator file format)\0*.vtr\0MFM file (MFM/FM track file format)\0*.mfm\0AFI file (Advanced File image format)\0*.afi\0IMG file (RAW Sector file format)\0*.img\0CPC DSK file\0*.dsk\0IMD file\0*.imd\0HFE file (Rev 2 - Experimental)\0*.hfe\0\0",
 					"*.hfe",&extpos,3)
 					)
 				{
@@ -250,6 +250,10 @@ BOOL CALLBACK DialogMainDialog(
 
 					case 7:
 						write_IMD_file(flopemu,thefloppydisk,filename);
+						break;
+					
+					case 8:
+						write_EXTHFE_file(flopemu,thefloppydisk,filename,hwif->interface_mode,hwif->double_step);
 						break;
 
 

@@ -76,6 +76,7 @@
 
 #include "mfm_file_writer.h"
 #include "hfe_file_writer.h"
+#include "extended_hfe_file_writer.h"
 #include "afi_file_writer.h"
 #include "raw_file_writer.h"
 #include "vtrucco_file_writer.h"
@@ -115,7 +116,8 @@ extern HWINTERFACE * hwif;
 		FF_AFI,
 		FF_VTR,
 		FF_RAW,
-		FF_IMD
+		FF_IMD,
+		FF_EHFE
 	};
 
 	ff_type ff_type_list[]=
@@ -126,6 +128,7 @@ extern HWINTERFACE * hwif;
 		{ FF_VTR,"VTR - VTrucco Floppy Emulator file format"},
 		{ FF_RAW,"RAW - RAW sectors file format"},
 		{ FF_IMD,"IMD - IMD sectors file format"},
+		{ FF_EHFE,"HFE - Rev 2 - Experimental"},
 		{ -1,""}			
 	};
 
@@ -216,6 +219,13 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 				case FF_IMD:
 					strcat(destinationfile,".imd");
 					ret=write_IMD_file(flopemu,thefloppydisk,destinationfile);
+				break;
+				case FF_EHFE:
+					strcat(destinationfile,".hfe");
+					if(demo->autoselectmode)
+						ret=write_EXTHFE_file(flopemu,thefloppydisk,destinationfile,-1,hwif->double_step);
+					else
+						ret=write_EXTHFE_file(flopemu,thefloppydisk,destinationfile,hwif->interface_mode,hwif->double_step);
 				break;
 
 
@@ -406,6 +416,13 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 						case FF_IMD:
 							strcat(destinationfile,".imd");
 							ret=write_IMD_file(flopemu,thefloppydisk,destinationfile);
+							break;
+						case FF_EHFE:
+							strcat(destinationfile,".hfe");
+							if(demo->autoselectmode)
+							ret=write_EXTHFE_file(flopemu,thefloppydisk,destinationfile,-1,hwif->double_step);
+							else
+							ret=write_EXTHFE_file(flopemu,thefloppydisk,destinationfile,hwif->interface_mode,hwif->double_step);
 							break;
 
 
