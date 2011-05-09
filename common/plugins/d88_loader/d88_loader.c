@@ -158,11 +158,19 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	while((!feof(f)) && (partcount<256) && (totalfilesize<truetotalfilesize))
 	{
 		fread(&fileheader,sizeof(fileheader),1,f);
-		floppycontext->hxc_printf(MSG_INFO_1,"%s",fileheader.name);
+		if(fileheader.file_size)
+		{
+			floppycontext->hxc_printf(MSG_INFO_1,"%s",fileheader.name);
 
-		fseek(f,fileheader.file_size-sizeof(fileheader),SEEK_CUR);
-		totalfilesize=totalfilesize+fileheader.file_size;
-		partcount++;
+			fseek(f,fileheader.file_size-sizeof(fileheader),SEEK_CUR);
+			totalfilesize=totalfilesize+fileheader.file_size;
+			partcount++;
+		}
+		else
+		{
+			truetotalfilesize=totalfilesize;
+			fseek(f,truetotalfilesize,SEEK_SET);
+		}
 	}
 
 	if((totalfilesize!=ftell(f)) || partcount==256)
