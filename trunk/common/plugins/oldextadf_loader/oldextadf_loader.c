@@ -125,11 +125,10 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 {
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j,k;
+	unsigned int i,j;
 	unsigned char* trackdata;
 	int	tracklen;
 	CYLINDER* currentcylinder;
-	SIDE* currentside;
 	unsigned int numberoftrack;
 	
 	unsigned char header[12];
@@ -184,7 +183,7 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 
 	floppydisk->floppySectorPerTrack=-1;
 	floppydisk->floppyNumberOfSide=2;
-	floppydisk->floppyBitRate=250000;
+	floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
 	floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
 	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 		
@@ -200,18 +199,7 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 		
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 		{	
-			currentcylinder->sides[i]=malloc(sizeof(SIDE));
-			memset(currentcylinder->sides[i],0,sizeof(SIDE));
-				
-			currentside=floppydisk->tracks[j]->sides[i];
-				
-			currentside->flakybitsbuffer=0;
-	
-			currentside->timingbuffer=0;
-			currentside->bitrate=DEFAULT_AMIGA_BITRATE;
-			currentside->track_encoding=AMIGA_MFM_ENCODING;
-				
-
+								
 			if(trackindex<numberoftrack)
 			{
 
@@ -224,30 +212,27 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 					if(tracktable[(4*trackindex)+0] || tracktable[(4*trackindex)+1] )
 					{
 
-						
-						currentside->tracklen=tracksize+2;
-
-						currentside->databuffer=malloc(currentside->tracklen);
-						memset(currentside->databuffer,0,currentside->tracklen);
-						currentside->indexbuffer=malloc(currentside->tracklen);
-						memset(currentside->indexbuffer,0,currentside->tracklen);
 
 						floppycontext->hxc_printf(MSG_DEBUG,"[%.3d:%.1X] Reading Non-DOS track at 0x%.8x, Size : 0x%.8x",j,i,ftell(f),tracksize);
 
-						currentside->databuffer[0]=tracktable[(4*trackindex)+0];
-						currentside->databuffer[1]=tracktable[(4*trackindex)+1];
-						fread(&currentside->databuffer[2],tracksize,1,f);
+						currentcylinder->sides[i]=tg_alloctrack(DEFAULT_AMIGA_BITRATE,AMIGA_MFM_ENCODING,DEFAULT_AMIGA_RPM,(tracksize+2)*8,2500,-11360,0x00);
+	
+						currentcylinder->sides[i]->databuffer[0]=tracktable[(4*trackindex)+0];
+						currentcylinder->sides[i]->databuffer[1]=tracktable[(4*trackindex)+1];
+
+						fread(&currentcylinder->sides[i]->databuffer[2],tracksize,1,f);
 						
-						currentside->number_of_sector=floppydisk->floppySectorPerTrack;
+						currentcylinder->sides[i]->number_of_sector=floppydisk->floppySectorPerTrack;
 
 
 					}
 					else
 					{
 
-						trackdata=(unsigned char*)malloc(tracksize);
 
 						floppycontext->hxc_printf(MSG_DEBUG,"[%.3d:%.1X] Reading DOS track at 0x%.8x, Size : 0x%.8x",j,i,ftell(f),tracksize);
+
+						trackdata=(unsigned char*)malloc(tracksize);
 
 						fread(trackdata,tracksize,1,f);
 
@@ -257,40 +242,18 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 					}
 				}
 				else
-				{
-
+				{					
 					floppycontext->hxc_printf(MSG_DEBUG,"[%.3d:%.1X] Null Size track!",j,i);
-					
-					currentside->tracklen=tracklen;	
-					currentside->databuffer=malloc(currentside->tracklen);
-					memset(currentside->databuffer,0,currentside->tracklen);
-					currentside->indexbuffer=malloc(currentside->tracklen);
-					memset(currentside->indexbuffer,0,currentside->tracklen);
-
+					currentcylinder->sides[i]=tg_alloctrack(DEFAULT_AMIGA_BITRATE,AMIGA_MFM_ENCODING,DEFAULT_AMIGA_RPM,(tracklen)*8,2500,-11360,0x00);
 				}
-
-
-
 			}
 			else
 			{
 				floppycontext->hxc_printf(MSG_DEBUG,"[%.3d:%.1X] No track!",j,i);
-				currentside->tracklen=tracklen;	
-				currentside->databuffer=malloc(currentside->tracklen);
-				memset(currentside->databuffer,0,currentside->tracklen);
-				currentside->indexbuffer=malloc(currentside->tracklen);
-				memset(currentside->indexbuffer,0,currentside->tracklen);
+				currentcylinder->sides[i]=tg_alloctrack(DEFAULT_AMIGA_BITRATE,AMIGA_MFM_ENCODING,DEFAULT_AMIGA_RPM,(tracklen)*8,2500,-11360,0x00);
 			}
 			
 			
-			for(k=currentside->tracklen-710;k<currentside->tracklen;k++)
-			{
-				currentside->indexbuffer[k]=0xFF;
-			}
-			
-
-			currentside->tracklen=currentside->tracklen*8;
-
 			trackindex++;
 			
 		}
