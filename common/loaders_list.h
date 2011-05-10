@@ -80,6 +80,7 @@
 #include "../common/plugins/camputerslynxldf_loader/camputerslynxldf_loader.h"
 #include "../common/plugins/extadf_loader/extadf_loader.h"
 #include "../common/plugins/oldextadf_loader/oldextadf_loader.h"
+#include "../common/plugins/fdi_loader/fdi_loader.h"
 
 const plugins_ptr staticplugins[]=
 {
@@ -87,6 +88,7 @@ const plugins_ptr staticplugins[]=
 	{(ISVALIDDISKFILE)ADZ_libIsValidDiskFile,(LOADDISKFILE)ADZ_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)EXTADF_libIsValidDiskFile,(LOADDISKFILE)EXTADF_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)OLDEXTADF_libIsValidDiskFile,(LOADDISKFILE)OLDEXTADF_libLoad_DiskFile,0,0},
+	{(ISVALIDDISKFILE)FDI_libIsValidDiskFile,(LOADDISKFILE)FDI_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)ADF_libIsValidDiskFile,(LOADDISKFILE)ADF_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)ACORNADF_libIsValidDiskFile,(LOADDISKFILE)ACORNADF_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)CPCDSK_libIsValidDiskFile,(LOADDISKFILE)CPCDSK_libLoad_DiskFile,0,0},
