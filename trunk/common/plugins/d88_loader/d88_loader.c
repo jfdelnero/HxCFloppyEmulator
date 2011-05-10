@@ -77,7 +77,7 @@ int D88_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				sprintf(filepath,"%s",imgfile);
 				strlwr(filepath);
 
-				if(strstr( filepath,".d88" )!=NULL)
+				if(strstr( filepath,".d88" ) || strstr( filepath,".d77" ) || strstr( filepath,".88d" ) || strstr( filepath,".d8u" ) || strstr( filepath,".2d" )|| strstr( filepath,".d68" ) )
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"D88 file !");
 					free(filepath);
