@@ -218,20 +218,27 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			side=2;
 			break; 
 		case 0x10: // 2DD
-			floppycontext->hxc_printf(MSG_INFO_1,"DD disk");
+			floppycontext->hxc_printf(MSG_INFO_1,"2DD disk");
 			tracktype=IBMFORMAT_DD;
 			bitrate=250000;
 			side=2;	
 			break;
 		case 0x20: // 2HD
-			floppycontext->hxc_printf(MSG_INFO_1,"HD disk");
+			floppycontext->hxc_printf(MSG_INFO_1,"2HD disk");
 			tracktype=IBMFORMAT_DD;
 			bitrate=500000;
 			side=2;	
 			break;
+		case 0x40: // 1DD
+			floppycontext->hxc_printf(MSG_INFO_1,"1DD disk");
+			tracktype=IBMFORMAT_DD;
+			bitrate=250000;
+			side=1;	
+			break;
+
 		default:
 			side=2;
-			floppycontext->hxc_printf(MSG_ERROR,"unknow disk !");
+			floppycontext->hxc_printf(MSG_ERROR,"unknow disk: %.2X !",fileheader.media_flag);
 			fclose(f);
 			return LOADER_BADFILE;
 			break;
@@ -279,6 +286,9 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	floppycontext->hxc_printf(MSG_INFO_1,"%d tracks, %d Side(s)\n",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide);
 	
+	if(side==1)
+		number_of_track=number_of_track*2;
+
 	i=0;
 	do
 	{
@@ -376,15 +386,26 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				currentcylinder->sides[i&1]=tg_alloctrack(floppydisk->floppyBitRate,ISOIBM_MFM_ENCODING,currentcylinder->floppyRPM,tracklen,2500,-2500,TG_ALLOCTRACK_ALLOCFLAKEYBUFFER|TG_ALLOCTRACK_RANDOMIZEDATABUFFER|TG_ALLOCTRACK_UNFORMATEDBUFFER);
 		}
 
-		i++;
+		if(side==2)
+		{
+			i++;
+			floppycontext->hxc_printf(MSG_DEBUG,"Track %d offset: 0x%X",i,track_offset);
+			fseek(f,basefileptr + sizeof(d88_fileheader)  + (i * sizeof(unsigned long)),SEEK_SET);
+		}
+		else
+		{
+			i=i+2;
+			floppycontext->hxc_printf(MSG_DEBUG,"Track %d offset: 0x%X",i>>1,track_offset);
+			fseek(f,basefileptr + sizeof(d88_fileheader)  + ((i>>1) * sizeof(unsigned long)),SEEK_SET);
+		}
 
-		fseek(f,basefileptr + sizeof(d88_fileheader)  + (i * sizeof(unsigned long)),SEEK_SET);
+		
 		fread(&track_offset,sizeof(unsigned long),1,f);
-		floppycontext->hxc_printf(MSG_DEBUG,"Track %d offset: 0x%X",i,track_offset);
-
+	
 	}while(i<number_of_track);
 
-	floppydisk->floppyNumberOfTrack=i/2;
+	if(side==2)
+		floppydisk->floppyNumberOfTrack=i/2;
 
 		
 	fclose(f);	
