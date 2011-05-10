@@ -863,6 +863,22 @@ SOURCE=..\..\common\plugins\oldextadf_loader\oldextadf_loader.c
 SOURCE=..\..\common\plugins\oldextadf_loader\oldextadf_loader.h
 # End Source File
 # End Group
+# Begin Group "FDI"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fdi_loader\fdi_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fdi_loader\fdi_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fdi_loader\fdi_loader.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\..\common\plugins\common\crc.c
