@@ -63,7 +63,7 @@ typedef struct fdi_header_
 	unsigned short number_of_cylinders;
 	unsigned short number_of_heads;
 	unsigned short diskdescription_offset;
-	unsigned short datadescription_offset;
+	unsigned short data_offset;
 	unsigned short additionnal_infos_len;
 }fdi_header;
 
@@ -79,8 +79,8 @@ typedef struct fdi_sector_header_
 {
 	unsigned char  cylinder_number;
 	unsigned char  head_number;
-	unsigned char  sector_size;
 	unsigned char  sector_number;
+	unsigned char  sector_size;
 	unsigned char  flags;
 	unsigned short sector_offset;
 }fdi_sector_header;
