@@ -124,8 +124,8 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	FILE * f;
 	unsigned int  i,j,k,file_size;
-	unsigned char gap3len,interleave;
-	unsigned short sectorsize,rpm;
+	unsigned char interleave;
+	unsigned short rpm;
 	int number_of_track,number_of_side,number_of_sectorpertrack;
 	unsigned char tempsector[256];
 	unsigned char trackformat;
@@ -174,8 +174,6 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	number_of_sectorpertrack=-1;
 
 	rpm=300;
-	sectorsize=256; // TRD file support only 256bytes/sector floppies.
-	gap3len=50;
 	interleave=1;
 	skew=0;
 
