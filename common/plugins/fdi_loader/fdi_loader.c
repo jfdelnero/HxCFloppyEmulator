@@ -123,20 +123,21 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 {
 	
 	FILE * f;
-	unsigned int i,j;
-	unsigned int file_offset;
-	unsigned char* trackdata;
+	unsigned int  i,j,k,file_size;
 	unsigned char gap3len,interleave;
 	unsigned short sectorsize,rpm;
 	int number_of_track,number_of_side,number_of_sectorpertrack;
 	unsigned char tempsector[256];
 	unsigned char trackformat;
 	unsigned char skew;
-
+	unsigned int  trackoffset,tempoffset,file_offset;
+	SECTORCONFIG* sectorconfig;
 	CYLINDER* currentcylinder;
 
 	fdi_header f_header;
-	
+	fdi_track_header track_header;
+	fdi_sector_header sector_header;
+
 	floppycontext->hxc_printf(MSG_DEBUG,"FDI_libLoad_DiskFile %s",imgfile);
 	
 	f=fopen(imgfile,"rb");
@@ -146,6 +147,10 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		return LOADER_ACCESSERROR;
 	}
 	
+
+	fseek(f,0,SEEK_END);
+	file_size=ftell(f);
+	fseek(f,0,SEEK_SET);
 
 	fread(&f_header,sizeof(fdi_header),1,f);
 
@@ -157,20 +162,23 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	}
 
 	fseek(f,f_header.diskdescription_offset,SEEK_SET);
-	fread(tempsector,f_header.datadescription_offset - f_header.diskdescription_offset,1,f);
+	fread(tempsector,f_header.data_offset - f_header.diskdescription_offset,1,f);
 	floppycontext->hxc_printf(MSG_INFO_1,"Disk:%s",tempsector);
 
-return LOADER_BADFILE;
 
+	trackoffset=f_header.additionnal_infos_len+0xE;
+	fseek(f,trackoffset,SEEK_SET);
 
 	number_of_track=f_header.number_of_cylinders;
-	number_of_side= f_header.number_of_heads;
+	number_of_side =f_header.number_of_heads;
+	number_of_sectorpertrack=-1;
 
 	rpm=300;
 	sectorsize=256; // TRD file support only 256bytes/sector floppies.
 	gap3len=50;
 	interleave=1;
 	skew=0;
+
 	floppydisk->floppyBitRate=250000;
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 	floppydisk->floppyNumberOfTrack=number_of_track;
@@ -179,8 +187,7 @@ return LOADER_BADFILE;
 	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 	trackformat=IBMFORMAT_DD;		
 	floppycontext->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
-			
-	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+		
 			
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{	
@@ -189,14 +196,68 @@ return LOADER_BADFILE;
 				
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 		{
+			fread(&track_header,sizeof(fdi_track_header),1,f);
+			floppycontext->hxc_printf(MSG_DEBUG,"[%d:%d] %d sectors, Track Offset :0x%x:",j,i,track_header.number_of_sectors,track_header.track_offset+f_header.data_offset);
+
+			sectorconfig=(SECTORCONFIG*)malloc(sizeof(SECTORCONFIG)*track_header.number_of_sectors);
+			memset(sectorconfig,0,sizeof(SECTORCONFIG)*track_header.number_of_sectors);
+			
+			for(k=0;k<track_header.number_of_sectors;k++)
+			{
+				fread(&sector_header,sizeof(fdi_sector_header),1,f);
+
+				file_offset=f_header.data_offset+track_header.track_offset+sector_header.sector_offset;
+
+				floppycontext->hxc_printf(MSG_DEBUG,"[%d:%d] Cyl:%d,Head:%d,Sec:%d,Size:%d,Flags:0x%.2X,Offset:0x%.8x",
+					j,i,sector_header.cylinder_number,                                                                                                   
+					sector_header.head_number,
+					sector_header.sector_number,
+					128<<sector_header.sector_size,
+					sector_header.flags,
+					file_offset
+					);
+
+				tempoffset=ftell(f);
+
+				sectorconfig[k].cylinder=sector_header.cylinder_number;
+				sectorconfig[k].head=sector_header.head_number;
+				sectorconfig[k].sector=sector_header.sector_number;
+				sectorconfig[k].sectorsize=128<<sector_header.sector_size;
+				sectorconfig[k].gap3=255;
+				sectorconfig[k].fill_byte=246;
+				sectorconfig[k].bitrate=floppydisk->floppyBitRate;
+				sectorconfig[k].trackencoding=trackformat;
+				
+				if(!(sector_header.flags&0x1F))
+				{
+					sectorconfig[k].use_alternate_data_crc=0xFF;
+					sectorconfig[k].data_crc=0xAAAA;
+				}
+
+				if(sector_header.flags&0x80)
+				{
+					sectorconfig[k].alternate_datamark=0xF8;
+					sectorconfig[k].use_alternate_datamark=1;
+				}
+				
+				if(file_offset<file_size)
+				{
+					sectorconfig[k].input_data=malloc(sectorconfig[k].sectorsize);
+					fseek(f,file_offset,SEEK_SET);
+					fread(sectorconfig[k].input_data,sectorconfig[k].sectorsize,1,f);
+				}
+
+				fseek(f,tempoffset,SEEK_SET);
+				
+			}
 					
-			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-						(sectorsize*(floppydisk->floppySectorPerTrack)*i);			
-					
-			fseek (f , file_offset , SEEK_SET);
-			fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
-					
-			currentcylinder->sides[i]=tg_generatetrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)0,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2000,-2000);
+			currentcylinder->sides[i]=tg_generatetrackEx(track_header.number_of_sectors,sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,2500|NO_SECTOR_UNDER_INDEX,-2500);
+
+			for(k=0;k<track_header.number_of_sectors;k++)
+			{
+				free(sectorconfig[k].input_data);
+			}
+			free(sectorconfig);
 		}
 	}
 			
