@@ -81,6 +81,9 @@
 #include "../common/plugins/extadf_loader/extadf_loader.h"
 #include "../common/plugins/oldextadf_loader/oldextadf_loader.h"
 #include "../common/plugins/fdi_loader/fdi_loader.h"
+#include "../common/plugins/adl_loader/adl_loader.h"
+#include "../common/plugins/ssd_dsd_loader/ssd_dsd_loader.h"
+
 
 const plugins_ptr staticplugins[]=
 {
@@ -141,5 +144,7 @@ const plugins_ptr staticplugins[]=
 	{(ISVALIDDISKFILE)EMUI_RAW_libIsValidDiskFile,(LOADDISKFILE)EMUI_RAW_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)CAMPUTERSLYNX_libIsValidDiskFile,(LOADDISKFILE)CAMPUTERSLYNX_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)VEGASDSK_libIsValidDiskFile,(LOADDISKFILE)VEGASDSK_libLoad_DiskFile,0,0},
+	{(ISVALIDDISKFILE)ADL_libIsValidDiskFile,(LOADDISKFILE)ADL_libLoad_DiskFile,0,0},
+	{(ISVALIDDISKFILE)DSD_libIsValidDiskFile,(LOADDISKFILE)DSD_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)-1,(LOADDISKFILE)-1,(WRITEDISKFILE)-1,(GETPLUGININFOS)-1}
 };
