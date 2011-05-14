@@ -142,6 +142,7 @@
 #define IDC_DOUBLESTEP_DUMP             1121
 #define IDC_NUMBEROFTRACK_DUMP          1122
 #define IDC_DOUBLESIDE_DUMP             1123
+#define IDC_RETRY                       1124
 #define ID_DRIVE_DS0                    40028
 #define ID_DRIVE_DS1                    40029
 #define ID_DRIVE_DS2                    40030
