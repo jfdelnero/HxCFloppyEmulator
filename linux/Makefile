@@ -29,7 +29,7 @@ DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosf
                   ti99pc99_loader.o apridisk_loader.o ede_loader.o fd_loader.o vdk_loader.o dpx_loader.o mgt_loader.o emax_loader.o\
                   ensoniq_mirage_loader.o sad_loader.o jv3_loader.o stt_loader.o prophet_loader.o teledisk_loader.o td0_lzss.o\
                   emuii_raw_loader.o emuii_loader.o emui_raw_loader.o jvc_loader.o dim_loader.o ti99v9t9_loader.o d81_loader.o  acornadf_loader.o \
-                  camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o
+                  camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o fdi_loader.o ssd_dsd_loader.o adl_loader.o
 
 
 all: $(EXEC)
@@ -202,6 +202,15 @@ fd_loader.o : ../common/plugins/fd_loader/fd_loader.c ../common/plugins/fd_loade
 ipf_loader.o : ../common/plugins/ipf_loader/ipf_loader.c ../common/plugins/ipf_loader/ipf_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+fdi_loader.o : ../common/plugins/fdi_loader/fdi_loader.c ../common/plugins/fdi_loader/fdi_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+adl_loader.o : ../common/plugins/adl_loader/adl_loader.c ../common/plugins/adl_loader/adl_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+ssd_dsd_loader.o : ../common/plugins/ssd_dsd_loader/ssd_dsd_loader.c ../common/plugins/ssd_dsd_loader/ssd_dsd_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+	
 fat12floppy_loader.o : ../common/plugins/fat12floppy_loader/fat12floppy_loader.c ../common/plugins/fat12floppy_loader/fat12floppy_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 fat12.o : ../common/plugins/fat12floppy_loader/fat12.c ../common/plugins/fat12floppy_loader/fat12.h
