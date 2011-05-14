@@ -879,6 +879,30 @@ SOURCE=..\..\common\plugins\fdi_loader\fdi_loader.c
 SOURCE=..\..\common\plugins\fdi_loader\fdi_loader.h
 # End Source File
 # End Group
+# Begin Group "BBC_SSD_DSD"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\ssd_dsd_loader\ssd_dsd_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\ssd_dsd_loader\ssd_dsd_loader.h
+# End Source File
+# End Group
+# Begin Group "BBC_ADL"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\adl_loader\adl_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\adl_loader\adl_loader.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\..\common\plugins\common\crc.c
