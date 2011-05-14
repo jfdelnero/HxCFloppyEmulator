@@ -80,6 +80,11 @@ extern HWINTERFACE * hwif;
 extern guicontext * demo;
 extern HXCFLOPPYEMULATOR * flopemu;
 
+static BITMAPINFO * bmapinfo;
+unsigned int xsize,ysize;
+static RECT myRect;
+unsigned char * mapfloppybuffer;
+
 typedef struct floppydumperparams_
 {
 	HXCFLOPPYEMULATOR * flopemu;
@@ -92,6 +97,7 @@ typedef struct floppydumperparams_
 	int number_of_side;
 	int double_step;
 	int status;
+	int retry;
 }floppydumperparams;
 
 typedef struct trackmode_
@@ -208,10 +214,21 @@ static int seek(int cyl, int head)
 	return 1;
 }
 
+void splashscreen(HWND  hwndDlg,unsigned char * buffer)
+{
+	HDC hdc;	
+
+	hdc=GetDC(hwndDlg);
+	GetClientRect(hwndDlg,&myRect);
+	StretchDIBits(hdc,16,210,xsize,ysize,0,0,xsize,ysize,buffer,bmapinfo,0,SRCCOPY);
+	ReleaseDC(hwndDlg,hdc);
+
+}
+
 DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 {
 	unsigned int i,j,k,m,n,ret;
-	int l;
+	int l,o,p;
 	FD_SCAN_PARAMS sp;
 	FD_SCAN_RESULT *sr;
 	FD_READ_WRITE_PARAMS rwp;
@@ -289,7 +306,43 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 			
 			sprintf(tempstr,"Starting reading disk...");
 			SetDlgItemText(params->windowshwd,IDC_EDIT1,tempstr);
+
+			for(i=0;i<params->floppydisk->floppyNumberOfTrack;i++)
+			{
+
+				if(i<100)
+				{
+					for(j=0;j<params->floppydisk->floppyNumberOfSide;j++)
+					{
+
+						l=0;
+						o=i*xsize*4;
+						if(j)
+						{
+							o=o+xsize*4*100;
+						}
+				
+						l=xsize;
+						while(l)
+						{
+							mapfloppybuffer[o++]=0x55;
+							mapfloppybuffer[o++]=0x55;
+							mapfloppybuffer[o]=0x55;
+							if(i&1)
+								mapfloppybuffer[o]=0xA5;
+							o++;
+
+							o++;	
+							l--;
+						}
+					}
+				}
+			}
+
+				
 			
+
+
 			for(i=0;i<params->floppydisk->floppyNumberOfTrack;i++)
 			{
 				params->floppydisk->tracks[i]=(CYLINDER*)malloc(sizeof(CYLINDER));
@@ -381,6 +434,36 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 						sr->count--;
 					}
 
+					if(i<100)
+					{
+						l=0;
+						o=i*xsize*4;
+						if(j)
+						{
+							o=o+xsize*4*100;
+						}
+						for(k=0;k<sr->count;k++)
+						{
+							l=4<<(sr->Header[k].size);
+							while(l)
+							{
+								mapfloppybuffer[o++]=0xFF;
+								mapfloppybuffer[o++]=0xFF;
+								mapfloppybuffer[o++]=0xFF;
+								o++;	
+								l--;
+							}
+							o=o+8;
+						}
+
+						l=0;
+						o=i*xsize*4;
+						if(j)
+						{
+							o=o+xsize*4*100;
+						}
+					}
+
 					for(k=0;k<sr->count;k++)
 					{
 						params->flopemu->hxc_printf(MSG_DEBUG,"Sector %.2d, Track ID: %.3d, Head ID:%d, Size: %d bytes, Bitrate:%dkbits/s, %s",sr->Header[k].sector,sr->Header[k].cyl,sr->Header[k].head,128<<sr->Header[k].size,bitrate/1000,trackformat==IBMFORMAT_SD?"FM":"MFM");
@@ -419,16 +502,65 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 						sectorconfig[k].input_data=malloc(sectorconfig[k].sectorsize);
 						sectorconfig[k].bitrate=bitrate;
 
-						retry=5;
+						p=o;
+						retry=params->retry;
 						do
 						{
 							retry--;
+
+							if(i<100)
+							{
+								o=p;
+								l=4<<(sr->Header[k].size);
+								while(l)
+								{
+									mapfloppybuffer[o++]=0x00;
+									mapfloppybuffer[o++]=0xFF;
+									mapfloppybuffer[o++]=0xFF;
+									o++;	
+									l--;
+								}
+								o=o+8;
+							}
+
 						}while(!DeviceIoControl(h, IOCTL_FDCMD_READ_DATA, &rwp, sizeof rwp,sectorconfig[k].input_data, sectorconfig[k].sectorsize, &ret, NULL) && retry);
+						
 						if(!retry)
 						{	
 							DeviceIoControl(h, IOCTL_FD_GET_RESULT,0, 0, &cmdr, sizeof(FD_CMD_RESULT), &ret, NULL);
 							params->flopemu->hxc_printf(MSG_DEBUG,"Read Error ! ST0: %.2x, ST1: %.2x, ST2: %.2x",cmdr.st0,cmdr.st1,cmdr.st2);
 							number_of_bad_sector++;
+
+							o=p;
+							l=4<<(sr->Header[k].size);
+							while(l)
+							{
+								mapfloppybuffer[o++]=0x00;
+								mapfloppybuffer[o++]=0x00;
+								mapfloppybuffer[o++]=0xFF;
+								o++;	
+								l--;
+							}
+							o=o+8;
+
+						}
+						else
+						{
+							if(i<100)
+							{
+
+								o=p;
+								l=4<<(sr->Header[k].size);
+								while(l)
+								{
+									mapfloppybuffer[o++]=0x00;
+									mapfloppybuffer[o++]=0xFF;
+									mapfloppybuffer[o++]=0x00;
+									o++;	
+									l--;
+								}
+								o=o+8;
+							}
 						}
 					
 						
@@ -551,6 +683,7 @@ BOOL CALLBACK DialogFloppyDump(
 					fdparams.double_step=1;
 					fdparams.number_of_side=1;
 					fdparams.number_of_track=GetDlgItemInt(hwndDlg,IDC_NUMBEROFTRACK_DUMP,NULL,0);
+					fdparams.retry=GetDlgItemInt(hwndDlg,IDC_RETRY,NULL,0);
 					fdparams.status=1;
 
 					if(SendDlgItemMessage(hwndDlg,IDC_RADIO1,BM_GETCHECK,0,0))
@@ -593,29 +726,51 @@ BOOL CALLBACK DialogFloppyDump(
 			}
 			else
 			{
+				xsize=460;
+				ysize=200;
+
+				mapfloppybuffer=malloc(xsize*ysize*4);
+				memset(mapfloppybuffer,0,xsize*ysize*4);
+
+				bmapinfo = (BITMAPINFO *) malloc((sizeof(BITMAPINFO) + sizeof(RGBQUAD) * 255));
+				memset(bmapinfo,0,(sizeof(BITMAPINFO) + sizeof(RGBQUAD) * 255));
+				bmapinfo->bmiHeader.biSize=sizeof(bmapinfo->bmiHeader);
+				bmapinfo->bmiHeader.biWidth=xsize;
+				bmapinfo->bmiHeader.biHeight=-(long)(ysize);
+				bmapinfo->bmiHeader.biPlanes=1;
+				bmapinfo->bmiHeader.biBitCount=32;
+				bmapinfo->bmiHeader.biCompression=BI_RGB;
 
 				SendDlgItemMessage(hwndDlg,IDC_DOUBLESIDE_DUMP,BM_SETCHECK,BST_CHECKED,0);
 				SendDlgItemMessage(hwndDlg,IDC_RADIO1,BM_SETCHECK,BST_CHECKED,0);
 				SetDlgItemInt(hwndDlg,IDC_NUMBEROFTRACK_DUMP,80,0);
+				SetDlgItemInt(hwndDlg,IDC_RETRY,10,0);
 				memset(&fdparams,0,sizeof(fdparams));
 				sprintf(tempstr,"%d Sector(s) Read, %d bytes, %d Bad sector(s)",0,0,0);
 				SetDlgItemText(hwndDlg,IDC_EDIT2,tempstr);
+				
+				splashscreen(hwndDlg,mapfloppybuffer);
+
+				SetTimer(hwndDlg,33,250,NULL);
 			}
-			//SetTimer(hwndDlg,34,500,NULL);
 			break;
 			
 		case WM_CLOSE:
 			if(!fdparams.status)
 			{
-				//KillTimer(hwndDlg,34);
+				KillTimer(hwndDlg,33);
+				free(mapfloppybuffer);
 				nbinstance=0;
+
 				DestroyWindow(hwndDlg);
 			}
 			break;
 			
-			
 		case WM_TIMER:
-			break;
+			splashscreen(hwndDlg,mapfloppybuffer);
+		break;
+			
+		
 			
 		default:
 			return FALSE;
