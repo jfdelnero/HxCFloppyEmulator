@@ -34,13 +34,13 @@ DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosf
 
 all: $(EXEC)
 
-hxcfloppyemulator_convert:      hxcfloppyemu_convert.o floppy_loader.o floppy_utils.o linux_api.o amiga_track.o emuii_track.o crc.o iso_ibm_track.o gcr_track.o mfm_file_writer.o hfe_file_writer.o afi_file_writer.o cpcdsk_file_writer.o raw_file_writer.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ)
+hxcfloppyemulator_convert:      hxcfloppyemu_convert.o floppy_loader.o floppy_utils.o linux_api.o emuii_track.o crc.o iso_ibm_track.o gcr_track.o mfm_file_writer.o hfe_file_writer.o afi_file_writer.o cpcdsk_file_writer.o raw_file_writer.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ)
 	$(CC) -o $@    $^ $(LDFLAGS) -DFTDILIB
 
-hxcfloppyemulator_d2xx: hxcfloppyemu.o floppy_loader.o floppy_utils.o linux_api.o ftdi_d2xxmode.o amiga_track.o emuii_track.o crc.o iso_ibm_track.o gcr_track.o mfm_file_writer.o hfe_file_writer.o afi_file_writer.o cpcdsk_file_writer.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(FTDIFLOPPYEMU) libftd2xx.a.0.4.13
+hxcfloppyemulator_d2xx: hxcfloppyemu.o floppy_loader.o floppy_utils.o linux_api.o ftdi_d2xxmode.o emuii_track.o crc.o iso_ibm_track.o gcr_track.o mfm_file_writer.o hfe_file_writer.o afi_file_writer.o cpcdsk_file_writer.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(FTDIFLOPPYEMU) libftd2xx.a.0.4.13
 	$(CC) -o $@    $^ $(LDFLAGS)
 
-hxcfloppyemulator:      hxcfloppyemu.o floppy_loader.o floppy_utils.o linux_api.o ftdi_libftdimode.o amiga_track.o emuii_track.o crc.o iso_ibm_track.o gcr_track.o mfm_file_writer.o hfe_file_writer.o afi_file_writer.o cpcdsk_file_writer.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(FTDIFLOPPYEMU) /usr/local/lib/libftdi.so.1
+hxcfloppyemulator:      hxcfloppyemu.o floppy_loader.o floppy_utils.o linux_api.o ftdi_libftdimode.o emuii_track.o crc.o iso_ibm_track.o gcr_track.o mfm_file_writer.o hfe_file_writer.o afi_file_writer.o cpcdsk_file_writer.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(FTDIFLOPPYEMU) /usr/local/lib/libftdi.so.1
 	$(CC) -o $@    $^ $(LDFLAGS) -DFTDILIB
 
 hxcfloppyemu_convert.o: hxcfloppyemu_convert.c
@@ -80,9 +80,6 @@ cpcdsk_file_writer.o : ../common/cpcdsk_file_writer.c ../common/cpcdsk_file_writ
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 sector_extractor.o : ../common/sector_extractor.c ../common/sector_extractor.h
-	$(CC) -o $@ -c $< $(CFLAGS)
-
-amiga_track.o: ../common/plugins/common/amiga_track.c ../common/plugins/common/amiga_track.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 emuii_track.o: ../common/plugins/common/emuii_track.c ../common/plugins/common/emuii_track.h
