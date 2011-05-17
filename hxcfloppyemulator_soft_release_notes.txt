@@ -47,6 +47,8 @@ Major update:
    - Retry parameter.
    - Floppy disk sectors layout view.
 -> MacOsX xtools support correction.
+
+And many others corrections and improvements :-)
 *********************************************************/
 
 /*********************************************************
