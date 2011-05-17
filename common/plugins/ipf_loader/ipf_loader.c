@@ -55,7 +55,6 @@
 #include "floppy_utils.h"
 
 #include "ipf_loader.h"
-//#include "./libs/capslib/capsimage.h"
 
 #define BYTE char 
 #define WORD short
@@ -63,10 +62,7 @@
 #define LIB_TYPE 1
 #define LIB_USER 1
 #include "./libs/capslib/Comtype.h"
-#include "./libs/capslib/ComLib.h"
-#include "./libs/capslib/CapsFDC.h"
 #include "./libs/capslib/CapsAPI.h"
-#include "./libs/capslib/CapsLib.h"
 
 #include "../common/os_api.h"
 
