@@ -154,12 +154,12 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 		floppydisk->floppyNumberOfTrack=40;
 		floppydisk->floppyNumberOfSide=1;
 		floppydisk->floppySectorPerTrack=10;
-		floppydisk->floppyBitRate=500000;
+		floppydisk->floppyBitRate=250000;
 		gap3len=255;
 		interleave=1;
 		
 			
-		trackformat=IBMFORMAT_SD;
+		trackformat=IBMFORMAT_DD;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 		floppycontext->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
