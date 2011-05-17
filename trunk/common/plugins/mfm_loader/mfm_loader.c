@@ -58,7 +58,7 @@
 
 #include "../common/os_api.h"
 
-#include "../common/iso_ibm_track.h"
+#include "../common/track_generator.h"
 
 int MFM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

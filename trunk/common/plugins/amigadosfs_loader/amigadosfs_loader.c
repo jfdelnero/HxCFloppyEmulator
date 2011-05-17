@@ -54,7 +54,7 @@
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
-#include "../common/iso_ibm_track.h"
+#include "../common/track_generator.h"
 
 #include "amigadosfs_loader.h"
 

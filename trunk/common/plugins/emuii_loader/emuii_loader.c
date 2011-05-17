@@ -55,7 +55,7 @@
 
 #include "../common/crc.h"
 #include "../common/emuii_track.h"
-#include "../common/iso_ibm_track.h"
+#include "../common/track_generator.h"
 
 #include "emuii_loader.h"
 
