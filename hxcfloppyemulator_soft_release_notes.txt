@@ -9,10 +9,44 @@
 ----------------------------------------------------- http://hxc2001.free.fr --
 -------------------------------------------------------------------------------
 
-
 /*********************************************************
-26/04/2011: HxCFloppyEmulator 1.6.5.1b
+17/05/2011: HxCFloppyEmulator 1.6.8.0
 
+Major update:
+
+-> New track generator implemented : 
+   - Better implementation.
+   - More powerful API
+   - Less memory usage
+   - Multi format support : ISO, IBM, Amiga.
+   - Variable bitrate support.   
+   - Auto GAP3 calculation.
+-> Use of the new track generator for Most of file loaders: 
+   - Code clean up.
+   - Code size optimization.
+-> New files Support : *.ADF Amiga/UAE Extended ADF file format (old and new format)
+-> New files Support : *.ADF Acorn  file format
+-> New files Support : *.SSD/*.DSD Acorn BBC file format.
+-> New files Support : *.ADL Acorn BBC file format.
+-> New files Support : *.D77/*.88D/*.D8U/*.2D/*.D68
+-> New files Support : *.FDI file format. (Zx Spectrum...)
+-> New files Support : *.LDF (CamputersLynx) file format. (Beta)
+-> New files Support : *.D81 file format (C64+1581). (Beta)
+-> New files Support : *.DMK file format (TRS-80)
+-> New files Support : *.vegasdsk file format ("Tavernier" / Vegas 6809)
+-> D88 files Support : 1DD format support
+-> Ensoniq file support: skew, interleave corrected.
+-> Fat12 floppy generator : Random Serial number.
+-> JV3 files support : MFM track support corrected.
+-> Index timing corrected.
+-> RAW file loader window :
+   - New parameter : Skew, Auto Gap
+-> SDCard Settings window :
+   - New boot mode parameters.
+-> Floppy dump :
+   - Retry parameter.
+   - Floppy disk sectors layout view.
+-> MacOsX xtools support correction.
 *********************************************************/
 
 /*********************************************************
