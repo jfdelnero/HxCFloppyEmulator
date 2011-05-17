@@ -510,7 +510,7 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							currentside->indexbuffer=malloc(len);
 							memset(currentside->indexbuffer,0,len);
 									
-							fillindex(0,currentside,2500,TRUE,0);
+							fillindex(-11000,currentside,2000,TRUE,0);
 							//fillindex(0,currentside,3200,0);
 
 						}

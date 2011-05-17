@@ -54,7 +54,7 @@
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/iso_ibm_track.h"
+#include "../common/track_generator.h"
 
 #include "sad_loader.h"
 #include "sad_fileformat.h"

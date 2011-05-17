@@ -55,7 +55,7 @@
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/iso_ibm_track.h"
+#include "../common/track_generator.h"
 
 #include "fat12floppy_loader.h"
 
@@ -193,6 +193,10 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 		else
 			memset(flatimg,0x00,512);
 
+		for(i=0;i<4;i++)
+		{
+			flatimg[i+0x27]=rand();
+		}
 		fatconfig.sectorsize=configlist[i].sectorsize;
 		fatconfig.clustersize=configlist[i].clustersize;
 		fatconfig.reservedsector=configlist[i].reserved_sector;
