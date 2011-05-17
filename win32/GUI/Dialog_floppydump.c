@@ -57,7 +57,7 @@
 #include "hxc_floppy_emulator.h"
 #include "internal_floppy.h"
 #include "floppy_loader.h"
-#include "../../../../common/iso_ibm_track.h"
+#include "../../../../common/track_generator.h"
 
 #include "./usb_floppyemulator/usb_hxcfloppyemulator.h"
 #include "../../../../common/plugins/raw_loader/raw_loader.h"

@@ -55,7 +55,7 @@
 
 #include "../common/emuii_track.h"
 #include "emui_raw_loader.h"
-#include "../common/iso_ibm_track.h"
+#include "../common/track_generator.h"
 
 #include "../common/os_api.h"
 

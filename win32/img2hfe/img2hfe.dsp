@@ -866,14 +866,46 @@ SOURCE=..\..\common\plugins\extadf_loader\extadf_loader.c
 SOURCE=..\..\common\plugins\extadf_loader\extadf_loader.h
 # End Source File
 # End Group
+# Begin Group "DSD"
+
+# PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\common\plugins\common\amiga_track.c
+SOURCE=..\..\common\plugins\ssd_dsd_loader\ssd_dsd_loader.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\plugins\common\amiga_track.h
+SOURCE=..\..\common\plugins\ssd_dsd_loader\ssd_dsd_loader.h
 # End Source File
+# End Group
+# Begin Group "ADL"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\adl_loader\adl_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\adl_loader\adl_loader.h
+# End Source File
+# End Group
+# Begin Group "FDI"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fdi_loader\fdi_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fdi_loader\fdi_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fdi_loader\fdi_loader.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\..\common\plugins\common\crc.c
@@ -908,11 +940,11 @@ SOURCE=..\..\common\plugins\common\gcr_track.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\plugins\common\iso_ibm_track.c
+SOURCE=..\..\common\plugins\common\track_generator.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\plugins\common\ISO_IBM_track.h
+SOURCE=..\..\common\plugins\common\track_generator.h
 # End Source File
 # End Group
 # Begin Group "libs"
