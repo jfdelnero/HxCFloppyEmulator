@@ -108,6 +108,11 @@ int BuildEmuIITrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,un
 	unsigned long sectorsize;
 	unsigned char track_num;
 	
+	unsigned long buffersize;
+
+
+	buffersize=*fmsizebuffer/8;
+
 	sectorsize=3584;
 
 	switch(trackformat)
@@ -121,7 +126,7 @@ int BuildEmuIITrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,un
 		break;
 	}	
 	
-	current_buffer_size=*fmsizebuffer/4;
+	current_buffer_size=buffersize/4;
 	finalsize=20 + 10 +8 + 6 + sectorsize + 2 + 2 + 20;
 	
 	if(finalsize<=current_buffer_size)
@@ -129,11 +134,11 @@ int BuildEmuIITrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,un
 		
 		j=0;
 		
-		tempdata=(char *)malloc((*fmsizebuffer/4)+1);
-		tempclock=(char *)malloc((*fmsizebuffer/4)+1);
+		tempdata=(char *)malloc((buffersize/4)+1);
+		tempclock=(char *)malloc((buffersize/4)+1);
 		
-		memset(tempclock,0xFF,(*fmsizebuffer/4)+1);
-		memset(tempdata, 0xFF,(*fmsizebuffer/4)+1);
+		memset(tempclock,0xFF,(buffersize/4)+1);
+		memset(tempdata, 0xFF,(buffersize/4)+1);
 		
 		/////////////////////////////////////////////////////////////////////////////////////////////
 		//Track GAP
@@ -219,7 +224,7 @@ int BuildEmuIITrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,un
 			}
 		}
 		
-		BuildFMCylinder(fmdata,*fmsizebuffer,tempclock,tempdata,(*fmsizebuffer)/4);
+		BuildFMCylinder(fmdata,buffersize,tempclock,tempdata,(buffersize)/4);
 		
 		free(tempdata);
 		free(tempclock);
