@@ -1382,10 +1382,9 @@ void tg_completeTrack(track_generator *tg, SIDE * currentside,unsigned char trac
 	trackoffset=startindex;
 	while(trackoffset<tracklen)
 	{
-		pushTrackCode(tg,formatstab[trackencoding].data_gap4b,0xFF,currentside,trackencoding);
+		pushTrackCode(tg,formatstab[trackencoding-1].data_gap4b,0xFF,currentside,trackencoding);
 		trackoffset=tg->last_bit_offset/8;
 	}
-
 	// fill timing & encoding buffer
 	if(currentside->timingbuffer)
 	{
