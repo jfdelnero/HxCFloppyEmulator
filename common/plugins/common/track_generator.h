@@ -332,7 +332,7 @@ static isoibm_config formatstab[]=
 		
 		0x00,0,  // gap3 config
 		
-		0x4E,0xFF // gap4 config
+		0xFF,0xFF // gap4 config
 		
 	},	
 
