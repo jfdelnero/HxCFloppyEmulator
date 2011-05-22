@@ -10,6 +10,14 @@
 -------------------------------------------------------------------------------
 
 /*********************************************************
+22/05/2011: HxCFloppyEmulator 1.6.8.1
+
+-> Amiga/UAE Extended ADF file (new format) loader : crash corrected (Bitrate corrected).
+-> All Amiga loader (IPF,ADF,DMS...) : Index timing adjusted.
+-> Track encoder : Amiga track post gap corrected.
+*********************************************************/
+
+/*********************************************************
 17/05/2011: HxCFloppyEmulator 1.6.8.0
 
 Major update:
