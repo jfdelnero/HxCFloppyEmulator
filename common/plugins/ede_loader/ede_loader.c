@@ -105,6 +105,10 @@ int EDE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 						switch(header_buffer[0x1FF])
 						{
 
+							case 0x01:
+								floppycontext->hxc_printf(MSG_INFO_0,"Mirage (DD) format");
+							break;
+
 							case 0x02:
 								floppycontext->hxc_printf(MSG_INFO_0,"SQ-80 (DD) format");
 							break;
@@ -163,9 +167,8 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j;
+	unsigned int i,j,l;
 	int k;
-	unsigned int file_offset;
 	unsigned char gap3len,interleave;
 	unsigned short rpm,sectorsize;
 	CYLINDER* currentcylinder;
@@ -174,11 +177,12 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	int blocknum;
 	int number_of_block;
 	unsigned char bitmask;
-	unsigned char * floppy_buffer;
-	int floppy_buffer_size;
 	int floppy_buffer_index;
 	unsigned char trackformat;
 	unsigned char skew;
+	SECTORCONFIG  * sectorconfig;
+	unsigned int sectorsizelayout[32];
+	unsigned int sectoridlayout[32];
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"EDE_libLoad_DiskFile %s",imgfile);
 	
@@ -206,6 +210,23 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		skew=0;
 		switch(header_buffer[0x1FF])
 		{
+
+			case 0x01:
+				floppycontext->hxc_printf(MSG_INFO_0,"Mirage (DD) format");
+				header_offset=0xA0;
+				sectorsize=1024; 
+				floppydisk->floppyBitRate=250000;
+				floppydisk->floppyNumberOfTrack=80;
+				floppydisk->floppyNumberOfSide=1;
+				floppydisk->floppySectorPerTrack=6;
+				gap3len=255;
+				interleave=1;
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
+				for(k=1;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k-1;
+				sectoridlayout[0]=5;
+				sectorsizelayout[0]=512;
+				break;
+
 			case 0x02:
 				floppycontext->hxc_printf(MSG_INFO_0,"SQ-80 (DD) format");
 				header_offset=0xA0;
@@ -215,6 +236,8 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				floppydisk->floppySectorPerTrack=10;
 				gap3len=40;
 				interleave=1;
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k;
 				break;
 
 			case 0x03:
@@ -227,6 +250,8 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				gap3len=40;
 				interleave=1;
 				skew=2;
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k;
 				break;
 
 			case 0x04:
@@ -238,6 +263,8 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				floppydisk->floppySectorPerTrack=10;
 				gap3len=40;
 				interleave=1;
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k;
 				break;
 
 			case 0xcb:
@@ -251,6 +278,8 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				gap3len=40;
 				interleave=1;
 				skew=2;
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k;
 				break;
 
 			case 0xcc: 
@@ -264,6 +293,8 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				gap3len=40;
 				interleave=1;
 				skew=2;
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k;
 				break;
 
 			case 0x07:
@@ -277,6 +308,8 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				gap3len=40;
 				interleave=1;
 				skew=2;
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k;
 				break;
 
 			default:
@@ -287,42 +320,13 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		}
 
 		number_of_block=floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide*floppydisk->floppySectorPerTrack;
-		floppy_buffer_size=number_of_block*sectorsize;
-		floppy_buffer=(unsigned char *) malloc(floppy_buffer_size);
-		memset(floppy_buffer,0,floppy_buffer_size);
-		
+
+		sectorconfig=malloc(sizeof(SECTORCONFIG) * floppydisk->floppySectorPerTrack);
+		memset(sectorconfig,0,sizeof(SECTORCONFIG) * floppydisk->floppySectorPerTrack);
+
 		floppy_buffer_index=0;
 		blocknum=0;
 		bitmask=0x80;
-
-		do
-		{
-			if(!(header_buffer[header_offset]&bitmask))
-			{
-				fread(&floppy_buffer[floppy_buffer_index],sectorsize,1,f);
-				floppy_buffer_index=floppy_buffer_index+sectorsize;
-			}
-			else
-			{
-				for(k=0;k<(sectorsize/2);k++)
-				{
-					floppy_buffer[floppy_buffer_index+(k*2)]=0x6D;
-					floppy_buffer[floppy_buffer_index+(k*2)+1]=0xB6;
-				}
-				floppy_buffer_index=floppy_buffer_index+sectorsize;
-			}
-
-			bitmask=bitmask>>1;
-
-			if(!bitmask)
-			{
-				header_offset++;
-				bitmask=0x80;
-			}
-
-			blocknum++;
-
-		}while(blocknum<number_of_block);
 
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 		
@@ -336,17 +340,69 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
-				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-						(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-						
-				currentcylinder->sides[i]=tg_generatetrack(&floppy_buffer[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500,-2500);
+
+				memset(sectorconfig,0,sizeof(SECTORCONFIG)*floppydisk->floppySectorPerTrack);
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+				{
+					sectorconfig[k].head=i;
+					sectorconfig[k].cylinder=j;
+					sectorconfig[k].sector=sectoridlayout[k];
+					sectorconfig[k].sectorsize=sectorsizelayout[k];
+					sectorconfig[k].bitrate=floppydisk->floppyBitRate;
+					sectorconfig[k].gap3=gap3len;
+					sectorconfig[k].trackencoding=trackformat;
+					sectorconfig[k].input_data=malloc(sectorsize);
+					memset(sectorconfig[k].input_data,0,sectorsize);
+
+					if(blocknum<number_of_block)
+					{
+						if(!(header_buffer[header_offset]&bitmask))
+						{
+							floppycontext->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d File offset: 0x%.8x",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize,ftell(f));
+							fread(sectorconfig[k].input_data,sectorsize,1,f);
+						}
+						else
+						{
+							floppycontext->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d File offset:----------",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize);
+							for(l=0;l<(sectorconfig[k].sectorsize/2);l++)
+							{
+								sectorconfig[k].input_data[(l*2)]=0x6D;
+								sectorconfig[k].input_data[(l*2)+1]=0xB6;
+							}
+						}
+						bitmask=bitmask>>1;
+						if(!bitmask)
+						{
+							header_offset++;
+							bitmask=0x80;
+						}
+						blocknum++;
+					}
+					else
+					{
+						floppycontext->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize);
+						for(l=0;l<(sectorconfig[k].sectorsize/2);l++)
+						{
+							sectorconfig[k].input_data[(l*2)]=0x6D;
+							sectorconfig[k].input_data[(l*2)+1]=0xB6;
+						}
+					}
+				}
+					
+				currentcylinder->sides[i]=tg_generatetrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,2500,-2500);
+
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+				{
+					free(sectorconfig[k].input_data);
+				}
 			}
 		}
 
+		free(sectorconfig);
+
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		fclose(f);
-		free(floppy_buffer);
-
+		
 		return LOADER_NOERROR;	
 	}
 
