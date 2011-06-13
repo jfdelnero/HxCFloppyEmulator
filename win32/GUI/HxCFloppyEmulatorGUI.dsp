@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib Comdlg32.lib advapi32.lib mod32.lib /nologo /subsystem:windows /machine:I386 /out:"Release/HxCFloppyEmulator.exe"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib Comdlg32.lib advapi32.lib microintro/mod32.lib /nologo /subsystem:windows /machine:I386 /out:"Release/HxCFloppyEmulator.exe"
 
 !ELSEIF  "$(CFG)" == "HxCFloppyEmulatorGUI - Win32 Debug"
 
@@ -947,6 +947,46 @@ SOURCE=..\..\common\plugins\common\track_generator.h
 # Begin Group "GUI"
 
 # PROP Default_Filter ""
+# Begin Group "microintro"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\microintro\packer\lzw.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\microintro\packer\lzw.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\microintro\microintro.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\microintro\microintro.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\microintro\mod32.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\microintro\packer\pack.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\microintro\packer\pack.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\microintro\packer\rle.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\microintro\packer\rle.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=.\Dialog_about.c
@@ -1057,14 +1097,6 @@ SOURCE=.\loader.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\microintro.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\microintro.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\plateforms.h
 # End Source File
 # Begin Source File
@@ -1074,14 +1106,6 @@ SOURCE=.\resource.h
 # Begin Source File
 
 SOURCE=.\Resource_HxCFloppyEmu.RC
-# End Source File
-# Begin Source File
-
-SOURCE=.\rle.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\rle.h
 # End Source File
 # Begin Source File
 
