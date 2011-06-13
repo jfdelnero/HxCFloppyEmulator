@@ -129,6 +129,10 @@ unsigned short xsize,ysize;
 				case IDC_RELEASENOTES:
 					ShellExecute(NULL, "open", "http://hxc2001.free.fr/floppy_drive_emulator/hxcfloppyemulator_soft_release_notes.txt", NULL, NULL, SW_SHOWNORMAL);
 					break;
+				case IDC_SUPPORT:
+					ShellExecute(NULL, "open", "http://torlus.com/floppy/forum", NULL, NULL, SW_SHOWNORMAL);
+					break;
+
 				default:;
 			}
 		break;
@@ -145,6 +149,9 @@ unsigned short xsize,ysize;
 				ysize=200;
 
 				ui_context=uintro_init(xsize,ysize);
+
+				memset(buffer1,0,sizeof(buffer1));
+				memset(buffer2,0,sizeof(buffer2));
 
 				nbinstance=1;
 				bmapinfo = (BITMAPINFO *) malloc((sizeof(BITMAPINFO) + sizeof(RGBQUAD) * 255));

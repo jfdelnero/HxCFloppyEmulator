@@ -42,6 +42,7 @@
 #define IDC_RELEASENOTES                1060
 #define IDC_MINSETTLE                   1061
 #define IDC_BUTTON_LOADRAW              1061
+#define IDC_SUPPORT                     1061
 #define IDC_PACKETSIZE                  1062
 #define IDC_BUTTON_CONVERT              1062
 #define IDC_PRIORITYSLIDER              1063

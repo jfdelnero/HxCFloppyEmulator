@@ -168,26 +168,27 @@ uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 	ui_context->blurbuffer=(unsigned long *)malloc(ui_context->xsize*ui_context->ysize*sizeof(unsigned long));
 	memset(ui_context->blurbuffer,0,ui_context->xsize*ui_context->ysize*sizeof(unsigned long));
 
-	bitmap_sob_bmp->unpacked_data=(unsigned long *)mi_unpack(bitmap_sob_bmp->data,bitmap_sob_bmp->csize ,bitmap_sob_bmp->data, bitmap_sob_bmp->size);
-	convert8b16b(&bitmap_sob_bmp,0xFFFF);
+	bitmap_sob_bmp->unpacked_data=mi_unpack(bitmap_sob_bmp->data,bitmap_sob_bmp->csize ,bitmap_sob_bmp->data, bitmap_sob_bmp->size);
+	convert8b16b(bitmap_sob_bmp,(unsigned short)0xFFFF);
 
+	srand(GetTickCount());
 
 	switch(rand()&3)
 	{
 		case 0:
-			data_maktone_class_cracktro15_mod->unpacked_data=(unsigned long *)mi_unpack(data_maktone_class_cracktro15_mod->data,data_maktone_class_cracktro15_mod->csize ,data_maktone_class_cracktro15_mod->data, data_maktone_class_cracktro15_mod->size);
+			data_maktone_class_cracktro15_mod->unpacked_data=mi_unpack(data_maktone_class_cracktro15_mod->data,data_maktone_class_cracktro15_mod->csize ,data_maktone_class_cracktro15_mod->data, data_maktone_class_cracktro15_mod->size);
 			InitModule(NULL,buffer1,16,data_maktone_class_cracktro15_mod->unpacked_data);
 		break;
 		case 1:
-			data_jozz_cognition_mod->unpacked_data=(unsigned long *)mi_unpack(data_jozz_cognition_mod->data,data_jozz_cognition_mod->csize ,data_jozz_cognition_mod->data, data_jozz_cognition_mod->size);
+			data_jozz_cognition_mod->unpacked_data=mi_unpack(data_jozz_cognition_mod->data,data_jozz_cognition_mod->csize ,data_jozz_cognition_mod->data, data_jozz_cognition_mod->size);
 			InitModule(NULL,buffer1,16,data_jozz_cognition_mod->unpacked_data);
 		break;
 		case 2:
-			data_zandax_supplydas_booze_mod->unpacked_data=(unsigned long *)mi_unpack(data_zandax_supplydas_booze_mod->data,data_zandax_supplydas_booze_mod->csize ,data_zandax_supplydas_booze_mod->data, data_zandax_supplydas_booze_mod->size);
+			data_zandax_supplydas_booze_mod->unpacked_data=mi_unpack(data_zandax_supplydas_booze_mod->data,data_zandax_supplydas_booze_mod->csize ,data_zandax_supplydas_booze_mod->data, data_zandax_supplydas_booze_mod->size);
 			InitModule(NULL,buffer1,16,data_zandax_supplydas_booze_mod->unpacked_data);
 		break;
 		case 3:
-			data_vim_not_again_mod->unpacked_data=(unsigned long *)mi_unpack(data_vim_not_again_mod->data,data_vim_not_again_mod->csize ,data_vim_not_again_mod->data, data_vim_not_again_mod->size);
+			data_vim_not_again_mod->unpacked_data=mi_unpack(data_vim_not_again_mod->data,data_vim_not_again_mod->csize ,data_vim_not_again_mod->data, data_vim_not_again_mod->size);
 			InitModule(NULL,buffer1,16,data_vim_not_again_mod->unpacked_data);
 		break;
 
@@ -294,7 +295,7 @@ void uintro_getnextframe_starfield(uintro_context * democontext)
 			t=t+(((democontext->blurbuffer[j*(democontext->xsize)+i-1]>>16)&0xFF) + (democontext->blurbuffer[j*democontext->xsize+i-1]>>8 &0xFF) + (democontext->blurbuffer[j*democontext->xsize+i-1] &0xFF))/3;
 			t=t+(((democontext->blurbuffer[j*(democontext->xsize)+i-2]>>16)&0xFF) + (democontext->blurbuffer[j*democontext->xsize+i-2]>>8 &0xFF) + (democontext->blurbuffer[j*democontext->xsize+i-2] &0xFF))/3;
 			
-			t=t/4;
+			t=t/6;
 
 			democontext->blurbuffer[(j)*(democontext->xsize)+i]=t<<16|t<<8|t;
 
@@ -321,7 +322,8 @@ void uintro_getnextframe_starfield(uintro_context * democontext)
 		if(democontext->blurbuffer[i])
 		{
 
-			democontext->framebuffer[i]=((255/((democontext->blurbuffer[i])&0xFF)) * democontext->framebuffer[i])&0xFF;
+			//democontext->framebuffer[i]=((255/((democontext->blurbuffer[i])&0xFF)) * democontext->framebuffer[i])&0xFF;
+			democontext->framebuffer[i]=democontext->blurbuffer[i];
 		}
 
 	}
