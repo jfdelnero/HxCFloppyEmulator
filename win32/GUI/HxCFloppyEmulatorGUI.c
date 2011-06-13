@@ -50,7 +50,7 @@
 #include <time.h>
 
 #include <mmsystem.h>
-#include "mod32.h"
+//#include "mod32.h"
 #include <math.h>
 
 #include "resource.h"

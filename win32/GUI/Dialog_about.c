@@ -50,9 +50,8 @@
 
 #include <mmsystem.h>
 
-#include "mod32.h"
-#include "microintro.h"
-#include "themod.h"
+#include "microintro\microintro.h"
+
 
 #include "resource.h"
 #include "mainrouts.h"
@@ -98,7 +97,7 @@ unsigned short xsize,ysize;
 		break;
 	
 		case	MM_WOM_DONE:
-			GiveMeSamples(((struct wavehdr_tag *)lParam)->lpData,sizeof(buffer2));
+			uintro_getnext_soundsample(ui_context,((struct wavehdr_tag *)lParam)->lpData,sizeof(buffer2));
 			waveOutWrite(shwd,(struct wavehdr_tag *)lParam,sizeof(pwhOut2));
 		break;
 
@@ -114,7 +113,7 @@ unsigned short xsize,ysize;
   
 					waveOutUnprepareHeader(shwd,&pwhOut1,sizeof(WAVEHDR));
 					waveOutUnprepareHeader(shwd,&pwhOut2,sizeof(WAVEHDR));
-					CLOSEMODSYS();
+//					CLOSEMODSYS();
 
 					waveOutClose(shwd);
 					nbinstance=0;
@@ -142,8 +141,8 @@ unsigned short xsize,ysize;
 			}
 			else
 			{
-				xsize=180;
-				ysize=110;
+				xsize=320;
+				ysize=200;
 
 				ui_context=uintro_init(xsize,ysize);
 
@@ -159,7 +158,7 @@ unsigned short xsize,ysize;
 
 				if(waveOutGetNumDevs()!=0)
 				{
-					InitModule(NULL,buffer1,sizeof(buffer1),(char*)&themod);
+//					InitModule(NULL,buffer1,sizeof(buffer1),(char*)&themod);
 					pwfx.wFormatTag=1;
 					pwfx.nChannels=2;
 					pwfx.nSamplesPerSec=44100;//SAMPLERATE;
@@ -202,7 +201,7 @@ unsigned short xsize,ysize;
 			waveOutUnprepareHeader(shwd,&pwhOut1,sizeof(WAVEHDR));
 			waveOutUnprepareHeader(shwd,&pwhOut2,sizeof(WAVEHDR));
 			
-			CLOSEMODSYS();
+//			CLOSEMODSYS();
 
 			waveOutClose(shwd);
 			uintro_deinit(ui_context);
