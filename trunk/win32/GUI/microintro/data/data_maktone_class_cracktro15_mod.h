@@ -1,7 +1,7 @@
 //////////////////////////////
 //
 //
-// Created by Binary2Header V0.5
+// Created by Binary2Header V0.6
 // (c) HxC2001
 // (c) PowerOfAsm
 //
