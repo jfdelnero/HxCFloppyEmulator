@@ -83,6 +83,7 @@
 #include "../common/plugins/fdi_loader/fdi_loader.h"
 #include "../common/plugins/adl_loader/adl_loader.h"
 #include "../common/plugins/ssd_dsd_loader/ssd_dsd_loader.h"
+#include "../common/plugins/krz_loader/krz_loader.h"
 
 
 const plugins_ptr staticplugins[]=
@@ -127,6 +128,7 @@ const plugins_ptr staticplugins[]=
 	{(ISVALIDDISKFILE)D88_libIsValidDiskFile,(LOADDISKFILE)D88_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)HDM_libIsValidDiskFile,(LOADDISKFILE)HDM_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)snes_smc_libIsValidDiskFile,(LOADDISKFILE)snes_smc_libLoad_DiskFile,0,0},
+	{(ISVALIDDISKFILE)KRZ_libIsValidDiskFile,(LOADDISKFILE)KRZ_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)DMK_libIsValidDiskFile,(LOADDISKFILE)DMK_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)TI99PC99_libIsValidDiskFile,(LOADDISKFILE)TI99PC99_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)TI99V9T9_libIsValidDiskFile,(LOADDISKFILE)TI99V9T9_libLoad_DiskFile,0,0},
