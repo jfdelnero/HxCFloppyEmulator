@@ -14,7 +14,7 @@
 
 -> New files Support : Kurzweil KRZ file support.
 -> New files Support : EDE EDM (Ensoniq Mirage) file image support.
--> New "About" window ;).
+-> a new "About" window ;).
 *********************************************************/
 
 /*********************************************************
