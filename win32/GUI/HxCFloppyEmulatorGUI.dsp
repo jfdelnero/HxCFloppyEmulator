@@ -903,6 +903,18 @@ SOURCE=..\..\common\plugins\adl_loader\adl_loader.c
 SOURCE=..\..\common\plugins\adl_loader\adl_loader.h
 # End Source File
 # End Group
+# Begin Group "KRZ"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\krz_loader\krz_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\krz_loader\krz_loader.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\..\common\plugins\common\crc.c
