@@ -10,6 +10,14 @@
 -------------------------------------------------------------------------------
 
 /*********************************************************
+15/06/2011: HxCFloppyEmulator 1.6.9.0
+
+-> New files Support : Kurzweil KRZ file support.
+-> New files Support : EDE EDM (Ensoniq Mirage) file image support.
+-> New "About" window ;).
+*********************************************************/
+
+/*********************************************************
 22/05/2011: HxCFloppyEmulator 1.6.8.1
 
 -> Amiga/UAE Extended ADF file (new format) loader : crash corrected (Bitrate corrected).
