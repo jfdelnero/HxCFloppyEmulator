@@ -44,6 +44,7 @@ typedef struct SECTORCONFIG_
 {
 	unsigned char   head;
 	unsigned char   sector;
+	unsigned char   sectorsleft;
 	unsigned char   cylinder;
 
 	unsigned int   sectorsize;

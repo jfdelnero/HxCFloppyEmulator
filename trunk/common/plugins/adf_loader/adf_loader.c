@@ -123,6 +123,7 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	FILE * f;
 	unsigned int filesize;
 	unsigned int i,j;
+	unsigned short rpm;
 	unsigned int file_offset;
 	char* trackdata;
 	unsigned char gap3len,skew,trackformat,interleave;
@@ -149,7 +150,17 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		return LOADER_BADFILE;
 	}
 	
-	floppydisk->floppySectorPerTrack=11;
+	if(filesize<100*11*2*512)
+	{
+		floppydisk->floppySectorPerTrack=11;
+		rpm=DEFAULT_AMIGA_RPM;
+	}
+	else
+	{
+		floppydisk->floppySectorPerTrack=22;
+		rpm=DEFAULT_AMIGA_RPM/2;
+	}
+
 	floppydisk->floppyNumberOfSide=2;
 
 	if((filesize/(512*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))<80)
@@ -172,7 +183,7 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
 			
-		floppydisk->tracks[j]=allocCylinderEntry(DEFAULT_AMIGA_RPM,floppydisk->floppyNumberOfSide);
+		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 		currentcylinder=floppydisk->tracks[j];
 		
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)

@@ -1254,7 +1254,7 @@ void tg_addAmigaSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SI
 	header[0]=0xFF;
 	header[1]=(sectorconfig->cylinder<<1) | (sectorconfig->head&1);
 	header[2]=sectorconfig->sector;
-	header[3]=11-sectorconfig->sector;
+	header[3]=sectorconfig->sectorsleft;
 	
 	pushTrackCode(tg,(unsigned char)(( odd_tab[header[0]]<<4)|( odd_tab[header[1]])),0xFF,currentside,sectorconfig->trackencoding);
 	pushTrackCode(tg,(unsigned char)(( odd_tab[header[2]]<<4)|( odd_tab[header[3]])),0xFF,currentside,sectorconfig->trackencoding);
@@ -1566,6 +1566,7 @@ SIDE * tg_generatetrack(unsigned char * sectors_data,unsigned short sector_size,
 		sectorconfigtab[i].sectorsize=sector_size;
 		sectorconfigtab[i].trackencoding=trackencoding;
 		sectorconfigtab[i].sector=sectorid+i;
+		sectorconfigtab[i].sectorsleft=number_of_sector-i; // Used in Amiga tracks.
 	}
 
 	currentside=tg_generatetrackEx(number_of_sector,sectorconfigtab,interleave,skew,bitrate,rpm,trackencoding,indexlen,indexpos);
