@@ -62,7 +62,7 @@
 
 #include "../common/os_api.h"
 
-int msx_imggetfloppyconfig(unsigned char * filename,unsigned char * img,unsigned int filesize,unsigned short  *numberoftrack,unsigned char *numberofside,unsigned short *numberofsectorpertrack,unsigned char *gap3len,unsigned char *interleave,unsigned short *rpm, unsigned int *bitrate)
+int msx_imggetfloppyconfig(unsigned char * filename,unsigned char * img,unsigned int filesize,unsigned short  *numberoftrack,unsigned char *numberofside,unsigned short *numberofsectorpertrack,unsigned short *sectorsize,unsigned char *gap3len,unsigned char *interleave,unsigned short *rpm, unsigned int *bitrate)
 {
 	int i;
 	int imgmode,nbofside_img;
@@ -93,7 +93,7 @@ int msx_imggetfloppyconfig(unsigned char * filename,unsigned char * img,unsigned
 		*gap3len=60;
 		*interleave=1;
 		*bitrate=250000;
-		
+		*sectorsize=512;		
 		
 		numberofsector=uimg[0x13]+(uimg[0x14]*256);
 		*numberoftrack=(numberofsector/(*numberofsectorpertrack*(*numberofside)));
@@ -120,6 +120,7 @@ int msx_imggetfloppyconfig(unsigned char * filename,unsigned char * img,unsigned
 				*interleave=msxfileformats[i].interleave;
 				*rpm=msxfileformats[i].RPM;
 				*bitrate=msxfileformats[i].bitrate;
+				*sectorsize=msxfileformats[i].sectorsize;
 				conffound=1;
 			}
 			i++;
@@ -259,6 +260,7 @@ int MSX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			&floppydisk->floppyNumberOfTrack,
 			&floppydisk->floppyNumberOfSide,
 			&floppydisk->floppySectorPerTrack,
+			&sectorsize,
 			&gap3len,
 			&interleave,
 			&rpm,
@@ -292,7 +294,7 @@ int MSX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					
 					fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
 					
-					currentcylinder->sides[i]=tg_generatetrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500,-2500);
+					currentcylinder->sides[i]=tg_generatetrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500|NO_SECTOR_UNDER_INDEX,-2500);
 				}
 			}
 			
