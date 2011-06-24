@@ -437,7 +437,7 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 						trackdatatab=(unsigned char*)malloc(256*1024);
 						sectlist=extractsector(floppycontext,trackdatatab,trackdata,tracksize,&numberofsector);
 						
-						currentcylinder->sides[i]=tg_generatetrackEx(floppydisk->floppySectorPerTrack,sectlist,interleave,(unsigned char)(j*2),DEFAULT_DD_BITRATE,rpm,IBMFORMAT_DD,2500|NO_SECTOR_UNDER_INDEX,-2500);
+						currentcylinder->sides[i]=tg_generatetrackEx((unsigned short)numberofsector,sectlist,interleave,(unsigned char)(j*2),DEFAULT_DD_BITRATE,rpm,IBMFORMAT_DD,2500|NO_SECTOR_UNDER_INDEX,-2500);
 						currentside=currentcylinder->sides[i];
 						
 						free(trackdatatab);
@@ -476,7 +476,7 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 						trackdatatab=(unsigned char*)malloc(256*1024);
 						sectlist=extractsector(floppycontext,trackdatatab,trackdata,tracksize,&numberofsector);
 
-						currentcylinder->sides[i]=tg_generatetrackEx(floppydisk->floppySectorPerTrack,sectlist,interleave,(unsigned char)(j*2),DEFAULT_DD_BITRATE,rpm,IBMFORMAT_DD,2500|NO_SECTOR_UNDER_INDEX,-2500);
+						currentcylinder->sides[i]=tg_generatetrackEx((unsigned short)numberofsector,sectlist,interleave,(unsigned char)(j*2),DEFAULT_DD_BITRATE,rpm,IBMFORMAT_DD,2500|NO_SECTOR_UNDER_INDEX,-2500);
 
 						free(trackdatatab);
 						free(sectlist);

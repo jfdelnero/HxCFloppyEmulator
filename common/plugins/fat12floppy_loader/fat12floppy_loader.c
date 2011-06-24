@@ -74,12 +74,12 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfi
 	char * filepath;
 	int i;
 	struct stat staterep;
-
+	
 	floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile %s",imgfile);
 	if(imgfile)
 	{
 		stat(imgfile,&staterep);
-
+		
 		if(staterep.st_mode&S_IFDIR)
 		{
 			pathlen=strlen(imgfile);
@@ -91,16 +91,49 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfi
 				{
 					sprintf(filepath,"%s",imgfile);
 					strlower(filepath);
-
+					
 					i=0;
-					while(!strstr( filepath,configlist[i].dirext) && strlen(configlist[i].dirext))
+					while( (strlen(configlist[i].dirext) && ( !strstr( &filepath[strlen(filepath)-(strlen(configlist[i].dirext)+1)],configlist[i].dirext)) || (strlen(configlist[i].dirext) && !configlist[i].dir)))
 					{
 						i++;
 					}
-
+					
 					if(strlen(configlist[i].dirext))				
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY file !");
+						floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY file ! (Dir , %s)",configlist[i].dirext);
+						free(filepath);
+						return LOADER_ISVALID;
+					}
+					else
+					{
+						floppycontext->hxc_printf(MSG_DEBUG,"non FAT12FLOPPY file !");
+						free(filepath);
+						return LOADER_BADFILE;
+					}
+				}
+			}		
+		}
+		else
+		{
+			pathlen=strlen(imgfile);
+			if(pathlen!=0)
+			{
+				
+				filepath=malloc(pathlen+1);
+				if(filepath!=0)
+				{
+					sprintf(filepath,"%s",imgfile);
+					strlower(filepath);
+					
+					i=0;
+					while((strlen(configlist[i].dirext) && ( !strstr(configlist[i].dirext, &filepath[strlen(filepath)-(strlen(configlist[i].dirext)+1)])) || (strlen(configlist[i].dirext) && !configlist[i].dir)))
+					{
+						i++;
+					}
+					
+					if(strlen(configlist[i].dirext))				
+					{
+						floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY file ! (File , %s)",configlist[i].dirext);
 						free(filepath);
 						return LOADER_ISVALID;
 					}
@@ -113,14 +146,8 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfi
 				}
 			}
 		}
-		else
-		{
-				floppycontext->hxc_printf(MSG_DEBUG,"non FAT12FLOPPY file ! (it's not a directory)");
-				return LOADER_BADFILE;
-		}
-
 	}
-
+	
 	return LOADER_BADPARAMETER;
 }
 
@@ -131,7 +158,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 	unsigned int i,j;
 	unsigned int file_offset;
 	unsigned char * flatimg;
-	unsigned char   gap3len,interleave;
+	unsigned char   gap3len,interleave,dirmode;
 	unsigned short  sectorsize,rpm;
 	int numberofcluster;
 	unsigned long   fatposition;
@@ -151,7 +178,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 	if(!parameters)
 	{
 		i=0;
-		while(!strstr( imgfile,configlist[i].dirext) && strlen(configlist[i].dirext))
+		while(!strstr( &imgfile[strlen(imgfile)-(strlen(configlist[i].dirext)+1)],configlist[i].dirext) && strlen(configlist[i].dirext))
 		{
 			i++;
 		}
@@ -166,6 +193,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 
 	}
 		
+	dirmode=configlist[i].dir;
 	floppydisk->floppyNumberOfTrack=configlist[i].number_of_track;
 	floppydisk->floppyNumberOfSide=configlist[i].number_of_side;
 	floppydisk->floppySectorPerTrack=configlist[i].number_of_sectorpertrack;
@@ -210,8 +238,6 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 
 		fatbs=(fat_boot_sector*)flatimg;
 
-
-
 		fatbs->BPB_BytsPerSec=fatconfig.sectorsize; //Nombre d'octets par secteur;
 		fatbs->BPB_SecPerClus=fatconfig.clustersize; //Nombre de secteurs par cluster (1, 2, 4, 8, 16, 32, 64 ou 128).
 		fatbs->BPB_RsvdSecCnt=fatconfig.reservedsector; //Nombre de secteur réservé en comptant le secteur de boot (32 par défaut pour FAT32, 1 par défaut pour FAT12/16).
@@ -236,9 +262,19 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 		
 		numberofcluster=(fatconfig.nbofsector-(dataposition/fatconfig.sectorsize))/fatconfig.clustersize;
 
-		if(ScanFileAndAddToFAT(floppycontext,imgfile,"*.*",&flatimg[fatposition],&flatimg[rootposition],&flatimg[dataposition],0,&fatconfig,numberofcluster))
+		if(dirmode)
 		{
-			return LOADER_BADFILE;
+			if(ScanFileAndAddToFAT(floppycontext,imgfile,"*.*",&flatimg[fatposition],&flatimg[rootposition],&flatimg[dataposition],0,&fatconfig,numberofcluster))
+			{
+				return LOADER_BADFILE;
+			}
+		}
+		else
+		{
+			if(ScanFileAndAddToFAT(floppycontext,imgfile,0    ,&flatimg[fatposition],&flatimg[rootposition],&flatimg[dataposition],0,&fatconfig,numberofcluster))
+			{
+				return LOADER_BADFILE;
+			}
 		}
 
 		flatimg[fatposition+0]=fatbs->BPB_Media;
@@ -263,7 +299,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 		return LOADER_INTERNALERROR;
 	}
 	
-	sectorsize=512;
+	sectorsize=fatconfig.sectorsize;
 	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);			
 				
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
