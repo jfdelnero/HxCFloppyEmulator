@@ -101,6 +101,7 @@ Change-Line Support       NO       NO       NO
 typedef struct _fat12config
 {
 	char * dirext;
+	int dir;
 	int number_of_track;
 	int number_of_side;
 	int number_of_sectorpertrack;
@@ -121,34 +122,36 @@ typedef struct _fat12config
 
 fat12config configlist[]=
 {
-	{".fatst902",82,2,11,300,250000,0,3,2,ATARIST_DD_FLOPPYMODE,ISOFORMAT_DD11S,0xF9,2,512,112,1},
-	{".fatst160",  40 ,1,9,300,250000,0,84,1,ATARIST_DD_FLOPPYMODE,ISOFORMAT_DD,0xF9,2,512,112,1},
-	{".fatst360",80 ,1,9,300,250000,0,84,1,ATARIST_DD_FLOPPYMODE,ISOFORMAT_DD,0xF9,2,512,112,1},// Atari ST 3.5" SS
-	{".fatst",  80 ,2,9,300,250000,0,84,1,ATARIST_DD_FLOPPYMODE,ISOFORMAT_DD,0xF9,2,512,112,1},// Atari ST 3.5" 
-	{".fat160a",40 ,1,8,300,250000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFE,1,512,64,1},  //5.25" Single sided, 40 tracks per side, 8 sectors per track (160K). Also used for 8". 300 RPM
-	{".fat160b",40 ,1,8,360,300000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFE,1,512,64,1},  //5.25" Single sided, 40 tracks per side, 8 sectors per track (160K). Also used for 8". 360 RPM
-	{".fat180a",40 ,1,9,300,250000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFC,1,512,64,1},  //5.25" Single sided, 40 tracks per side, 9 sectors per track (180K) 300 RPM
-	{".fat180b",40 ,1,9,360,300000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFC,1,512,64,1},  //5.25" Single sided, 40 tracks per side, 9 sectors per track (180K) 360 RPM
-	{".fat250" ,77 ,1,26,300,250000,win95_bootsector,24,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_SD,0xFE,4,128,68,1},  //8" Single sided, 77 tracks per side, 26 sectors per track (250K) 
-	{".fat500" ,77 ,2,26,300,250000,win95_bootsector,24,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_SD,0xFD,4,128,68,4},  //8" Double sided, 77 tracks per side, 26 sectors per track (500K) 
-	{".fat1232" ,77 ,2,8,300,250000,win95_bootsector,24,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_SD,0xFE,1,1024,192,1},  //8" Double sided, 77 tracks per side, 26 sectors per track (1232K) 
-	{".fat320ssa", 80 ,1,8,300,250000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFA,2,512,112,1}, //5.25" Single sided, 80 tracks per side, 8 sectors per track (320K) 300 RPM
-	{".fat320ssb", 80 ,1,8,360,300000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFA,2,512,112,1}, //5.25" Single sided, 80 tracks per side, 8 sectors per track (320K) 360 RPM
-	{".fat320dsa", 40 ,2,8,300,250000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFF,2,512,112,1}, //5.25" Double sided, 40 tracks per side, 8 sectors per track (320K) 300 RPM
-	{".fat320dsb", 40 ,2,8,360,300000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFF,2,512,112,1}, //5.25" Double sided, 40 tracks per side, 8 sectors per track (320K) 360 RPM
-	{".fat360a",40 ,2,9,300,250000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFD,2,512,112,1},  //5.25" Double sided, 40 tracks per side, 9 sectors per track (360K). Also used for 8". 300 RPM
-	{".fat360b",40 ,2,9,360,300000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFD,2,512,112,1},  //5.25" Double sided, 40 tracks per side, 9 sectors per track (360K). Also used for 8". 360 RPM
-	{".fat640", 80 ,2,8,300,250000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFB,2,512,112,1},  // 3.5" Double sided, 80 tracks per side, 8 sectors per track (640K)
-	{".fat720", 80 ,2,9,300,250000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xF9,2,512,112,1},  // 3.5" Double sided, 80 tracks per side, 9 sectors per track (720K)
-	{".fat1200_8i",80 ,2,15,300,500000,win95_bootsector,84,1,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xFE,2,512,112,1}, //8" Double Sided, 80 tracks per side, 15 sectors per track (1.2MB)
-	{".fat1200",80 ,2,15,300,500000,msdos_bootsector,84,1,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xF9,1,512,224,1}, //5.25" Double Sided, 80 tracks per side, 15 sectors per track (1.2MB)
-	{".fat1440",80 ,2,18,300,500000,win95_bootsector,84,1,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xF0,1,512,224,1}, //3.5" Double Sided, 80 tracks per side, 18 sectors per track (1.44MB)
-	{".fat1680",80 ,2,21,300,500000,win95_bootsector,14,2,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xF0,1,512,224,1}, //3.5" Double Sided, 80 tracks per side, 21 sectors per track (1.68MB)
-	{".fat2880",80 ,2,36,300,1000000,win95_bootsector,84,1,IBMPC_ED_FLOPPYMODE,IBMFORMAT_DD,0xF0,2,512,240,1},//3.5" Double Sided, 80 tracks per side, 36 sectors per track (2.88MB)
-	{".fat3381",127,2,26,240,500000,win95_bootsector,14,2,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xF0,2,512,224,1},
-	{".fat6789",255,2,27,240,500000,win95_bootsector,14,2,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xF0,4,512,112,1},
-	{".fatbigst",127,2,27,75,250000,0,84,2,ATARIST_DD_FLOPPYMODE,ISOFORMAT_DD,0xF9,2,512,112,1},
-	{".fatmonsterst",254,2,17,200,250000,0,35,1,ATARIST_DD_FLOPPYMODE,ISOFORMAT_DD,0xF9,2,512,112,1},
-	{".fatbig",127,2,24,100,500000,msdos_bootsector,84,2,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xF0,2,512,112,1},
-	{"",80,2,9,300,250000,0,0xF9,2,512,112,1}
+	{".fatst902",0xFF,82,2,11,300,250000,0,3,2,ATARIST_DD_FLOPPYMODE,ISOFORMAT_DD11S,0xF9,2,512,112,1},
+	{".fatst160",0xFF,  40 ,1,9,300,250000,0,84,1,ATARIST_DD_FLOPPYMODE,ISOFORMAT_DD,0xF9,2,512,112,1},
+	{".fatst360",0xFF,80 ,1,9,300,250000,0,84,1,ATARIST_DD_FLOPPYMODE,ISOFORMAT_DD,0xF9,2,512,112,1},// Atari ST 3.5" SS
+	{".fatst",0xFF,  80 ,2,9,300,250000,0,84,1,ATARIST_DD_FLOPPYMODE,ISOFORMAT_DD,0xF9,2,512,112,1},// Atari ST 3.5" 
+	{".fat160a",0xFF,40 ,1,8,300,250000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFE,1,512,64,1},  //5.25" Single sided, 40 tracks per side, 8 sectors per track (160K). Also used for 8". 300 RPM
+	{".fat160b",0xFF,40 ,1,8,360,300000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFE,1,512,64,1},  //5.25" Single sided, 40 tracks per side, 8 sectors per track (160K). Also used for 8". 360 RPM
+	{".fat180a",0xFF,40 ,1,9,300,250000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFC,1,512,64,1},  //5.25" Single sided, 40 tracks per side, 9 sectors per track (180K) 300 RPM
+	{".fat180b",0xFF,40 ,1,9,360,300000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFC,1,512,64,1},  //5.25" Single sided, 40 tracks per side, 9 sectors per track (180K) 360 RPM
+	{".fat250" ,0xFF,77 ,1,26,300,250000,win95_bootsector,24,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_SD,0xFE,4,128,68,1},  //8" Single sided, 77 tracks per side, 26 sectors per track (250K) 
+	{".fat500" ,0xFF,77 ,2,26,300,250000,win95_bootsector,24,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_SD,0xFD,4,128,68,4},  //8" Double sided, 77 tracks per side, 26 sectors per track (500K) 
+	{".fat1232",0xFF,77 ,2,8,300,250000,win95_bootsector,24,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_SD,0xFE,1,1024,192,1},  //8" Double sided, 77 tracks per side, 26 sectors per track (1232K) 
+	{".fat320ssa",0xFF, 80 ,1,8,300,250000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFA,2,512,112,1}, //5.25" Single sided, 80 tracks per side, 8 sectors per track (320K) 300 RPM
+	{".fat320ssb",0xFF, 80 ,1,8,360,300000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFA,2,512,112,1}, //5.25" Single sided, 80 tracks per side, 8 sectors per track (320K) 360 RPM
+	{".fat320dsa",0xFF, 40 ,2,8,300,250000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFF,2,512,112,1}, //5.25" Double sided, 40 tracks per side, 8 sectors per track (320K) 300 RPM
+	{".fat320dsb",0xFF, 40 ,2,8,360,300000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFF,2,512,112,1}, //5.25" Double sided, 40 tracks per side, 8 sectors per track (320K) 360 RPM
+	{".fat360a",0xFF,40 ,2,9,300,250000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFD,2,512,112,1},  //5.25" Double sided, 40 tracks per side, 9 sectors per track (360K). Also used for 8". 300 RPM
+	{".fat360b",0xFF,40 ,2,9,360,300000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFD,2,512,112,1},  //5.25" Double sided, 40 tracks per side, 9 sectors per track (360K). Also used for 8". 360 RPM
+	{".fat640",0xFF, 80 ,2,8,300,250000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xFB,2,512,112,1},  // 3.5" Double sided, 80 tracks per side, 8 sectors per track (640K)
+	{".fat720",0xFF, 80 ,2,9,300,250000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xF9,2,512,112,1},  // 3.5" Double sided, 80 tracks per side, 9 sectors per track (720K)
+	{".fat720pc",0xFF, 250 ,2,9,300,250000,win95_bootsector,84,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xF9,2,512,112,1},  // 3.5" Double sided, 160 tracks per side, 9 sectors per track (1440K)
+	{".fat1200_8i",0xFF,80 ,2,15,300,500000,win95_bootsector,84,1,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xFE,2,512,112,1}, //8" Double Sided, 80 tracks per side, 15 sectors per track (1.2MB)
+	{".fat1200",0xFF,80 ,2,15,300,500000,msdos_bootsector,84,1,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xF9,1,512,224,1}, //5.25" Double Sided, 80 tracks per side, 15 sectors per track (1.2MB)
+	{".fat1440",0xFF,80 ,2,18,300,500000,win95_bootsector,84,1,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xF0,1,512,224,1}, //3.5" Double Sided, 80 tracks per side, 18 sectors per track (1.44MB)
+	{".fat1680",0xFF,80 ,2,21,300,500000,win95_bootsector,14,2,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xF0,1,512,224,1}, //3.5" Double Sided, 80 tracks per side, 21 sectors per track (1.68MB)
+	{".fat2880",0xFF,80 ,2,36,300,1000000,win95_bootsector,84,1,IBMPC_ED_FLOPPYMODE,IBMFORMAT_DD,0xF0,2,512,240,1},//3.5" Double Sided, 80 tracks per side, 36 sectors per track (2.88MB)
+	{".fat3381",0xFF,127,2,26,240,500000,win95_bootsector,14,2,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xF0,2,512,224,1},
+	{".fat6789",0xFF,255,2,27,240,500000,win95_bootsector,14,2,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xF0,4,512,112,1},
+	{".fatbigst",0xFF,127,2,27,75,250000,0,84,2,ATARIST_DD_FLOPPYMODE,ISOFORMAT_DD,0xF9,2,512,112,1},
+	{".fatmonsterst",0xFF,254,2,17,200,250000,0,35,1,ATARIST_DD_FLOPPYMODE,ISOFORMAT_DD,0xF9,2,512,112,1},
+	{".fatbig",0xFF,127,2,24,100,500000,msdos_bootsector,84,2,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xF0,2,512,112,1},
+	{".krz",0x00,80 ,2,18,300,500000,win95_bootsector,84,1,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xF0,1,512,224,1}, //3.5" Double Sided, 80 tracks per side, 18 sectors per track (1.44MB)
+	{"",0xFF,80,2,9,300,250000,0,0xF9,2,512,112,1}
 };

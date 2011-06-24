@@ -934,6 +934,10 @@ SIDE * tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short n
 			currentside->track_encoding=ISOIBM_MFM_ENCODING;
 		break;
 		
+		case AMIGAFORMAT_DD:
+			currentside->track_encoding=AMIGA_MFM_ENCODING;
+		break;
+
 		default:
 			currentside->track_encoding=ISOIBM_MFM_ENCODING;
 		break;
