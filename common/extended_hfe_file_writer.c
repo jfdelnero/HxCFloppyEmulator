@@ -204,7 +204,7 @@ int write_EXTHFE_file(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * fi
 	{
 		FILEHEADER=(picfileformatextheader *) malloc(512);
 		memset(FILEHEADER,0xFF,512);
-		sprintf((char*)&FILEHEADER->HEADERSIGNATURE,"HXCPICFE");
+		memcpy(&FILEHEADER->HEADERSIGNATURE,"HXCPICFE",8);
 
 		FILEHEADER->number_of_track=(unsigned char)floppy->floppyNumberOfTrack;
 		FILEHEADER->number_of_side=floppy->floppyNumberOfSide;
