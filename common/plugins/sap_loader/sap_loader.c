@@ -113,7 +113,7 @@ int SAP_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	unsigned int i,j;
+	unsigned int i,j,k;
 	unsigned char* trackdata;
 	unsigned char gap3len,interleave;
 	unsigned char skew;
@@ -123,7 +123,8 @@ int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned char trackformat;
 	int floppyformat;
 	sapID sapid;
-
+	sapsector_t sapsector;
+	SECTORCONFIG  sectorconfig[SAP_NSECTS];
 	CYLINDER* currentcylinder;
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"SAP_libLoad_DiskFile %s",imgfile);
@@ -135,7 +136,7 @@ int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		return -1;
 	}
 
-	gap3len=50;
+	gap3len=255;
 	interleave=1;
 	skew=0;
 
@@ -175,6 +176,7 @@ int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			
 	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 			
+	memset(sectorconfig,0,sizeof(SECTORCONFIG)*SAP_NSECTS);
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
 				
@@ -183,9 +185,32 @@ int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 		{
-			sap_ReadSectorEx(sapid,j,1,SAP_NSECTS, trackdata);
-			
-			currentcylinder->sides[i]=tg_generatetrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500,-2500);
+
+			for(k=0;k<SAP_NSECTS;k++)
+			{
+				sap_ReadSector(sapid, j, k+1, &sapsector);
+				floppycontext->hxc_printf(MSG_DEBUG,"[%.2d:%.2d]: Sect %.2d, Track %.2d, Format: 0x%.2x, Protect 0x%.2x",j,k,sapsector.sector,sapsector.track,sapsector.format,sapsector.protection);
+				sectorconfig[k].bitrate=250000;
+				sectorconfig[k].gap3=255;
+				sectorconfig[k].head=0;
+				sectorconfig[k].trackencoding=trackformat;
+				sectorconfig[k].sector=sapsector.sector;
+				sectorconfig[k].cylinder=sapsector.track;
+				sectorconfig[k].sectorsize=sectorsize;
+				sectorconfig[k].input_data=malloc(sectorconfig[k].sectorsize);
+				memcpy(sectorconfig[k].input_data,sapsector.data,sectorconfig[k].sectorsize);
+			}
+
+			currentcylinder->sides[i]=tg_generatetrackEx(SAP_NSECTS,(SECTORCONFIG *)&sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,2500|NO_SECTOR_UNDER_INDEX,-2500);
+
+			for(k=0;k<SAP_NSECTS;k++)
+			{
+				if(sectorconfig[k].input_data)
+				{
+					free(sectorconfig[k].input_data);
+					sectorconfig[k].input_data=0;
+				}
+			}
 		}
 	}
 

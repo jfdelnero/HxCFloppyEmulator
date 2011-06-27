@@ -130,14 +130,9 @@ BOOL CALLBACK DialogRAWFileSettings(
 		switch (wmEvent)
 		{
 		case BN_CLICKED:
-			
 			break;
 			
 		case EN_CHANGE: //-> appellé a chaque modification d'une boite edit
-
-		
-
-
 			break;
 		}
 		switch (wmId)
@@ -399,6 +394,7 @@ BOOL CALLBACK DialogRAWFileSettings(
 			temp_rawfileconfig.sectorsize=(unsigned char)t;
 			t=SendDlgItemMessage(hwndDlg, IDC_TRACKTYPE, CB_GETCURSEL, 0, 0);
 			if(t>255) t=255;
+			if(t<0) t=0;
 			temp_rawfileconfig.tracktype=t;
 
 
