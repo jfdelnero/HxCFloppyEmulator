@@ -169,7 +169,9 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 	unsigned char tracktype;
 	FATCONFIG fatconfig;
 	CYLINDER* currentcylinder;
-//	FILE * f;
+	struct stat staterep;
+
+	//	FILE * f;
 
 	fat_boot_sector * fatbs;
 
@@ -190,7 +192,6 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 		{
 			i++;
 		}
-
 	}
 		
 	dirmode=configlist[i].dir;
@@ -261,6 +262,10 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 		dataposition=(((fatconfig.reservedsector)+(fatconfig.numberoffat*fatconfig.nbofsectorperfat))*fatconfig.sectorsize)+(32*fatconfig.numberofrootentries);		
 		
 		numberofcluster=(fatconfig.nbofsector-(dataposition/fatconfig.sectorsize))/fatconfig.clustersize;
+
+		stat(imgfile,&staterep);
+		if(!(staterep.st_mode&S_IFDIR))
+				dirmode=0x00;
 
 		if(dirmode)
 		{
