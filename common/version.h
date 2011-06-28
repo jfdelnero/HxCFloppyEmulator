@@ -1,7 +1,7 @@
-#define FILE_VERSION        1,6,9,2
-#define STR_FILE_VERSION   "1,6,9,2a\0"
-#define STR_FILE_VERSION2  "1.6.9.2a"
-#define STR_DATE           "24/06/2011\0"
+#define FILE_VERSION        1,6,9,4
+#define STR_FILE_VERSION   "1,6,9,4a\0"
+#define STR_FILE_VERSION2  "1.6.9.4a"
+#define STR_DATE           "28/06/2011\0"
 #define NOMFENETRE    "HxCFloppyEmulator "##STR_FILE_VERSION2
 
 #define FILEVER        FILE_VERSION

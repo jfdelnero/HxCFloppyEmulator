@@ -126,7 +126,7 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfi
 					strlower(filepath);
 					
 					i=0;
-					while((strlen(configlist[i].dirext) && ( !strstr(configlist[i].dirext, &filepath[strlen(filepath)-(strlen(configlist[i].dirext)+1)])) || (strlen(configlist[i].dirext) && !configlist[i].dir)))
+					while((strlen(configlist[i].dirext) && ( !strstr(configlist[i].dirext, &filepath[strlen(filepath)-(strlen(configlist[i].dirext)+1)])) || (strlen(configlist[i].dirext) && configlist[i].dir)))
 					{
 						i++;
 					}
