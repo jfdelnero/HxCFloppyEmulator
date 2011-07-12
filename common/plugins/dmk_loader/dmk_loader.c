@@ -104,16 +104,53 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					fread(&dmk_h,sizeof(dmk_header),1,f);
 
 					fclose(f);
-					filesize=filesize-sizeof(dmk_header);
+					
 
 					if(dmk_h.track_len)
 					{
-						if(filesize%dmk_h.track_len)
+						if(!dmk_h.track_len)
 						{
 							floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad file size !");
 							free(filepath);
 							return LOADER_BADFILE;
 						}
+						else
+						{
+							if(((filesize-sizeof(dmk_header))%dmk_h.track_len))
+							{
+								floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad file size !");
+								free(filepath);
+								return LOADER_BADFILE;
+							}
+						}
+
+						if(	
+								( (dmk_h.write_protected!=0xFF) && (dmk_h.write_protected!=0x00) )
+							
+							||
+							
+								( (dmk_h.rsvd_2[0]!=0x00 && dmk_h.rsvd_2[0]!=0x12) ||
+								  (dmk_h.rsvd_2[1]!=0x00 && dmk_h.rsvd_2[1]!=0x34) ||
+								  (dmk_h.rsvd_2[2]!=0x00 && dmk_h.rsvd_2[2]!=0x56) ||
+								  (dmk_h.rsvd_2[3]!=0x00 && dmk_h.rsvd_2[3]!=0x78) )
+							
+							||
+
+								(dmk_h.track_number<30 || dmk_h.track_number>90)
+
+							||
+								
+								( (dmk_h.track_len>0x2940) || (dmk_h.track_len<0xB00) )
+
+							)
+						{
+							floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad header !");
+							free(filepath);
+							return LOADER_BADFILE;
+						}
+
+						 
+
 					}
 					else
 					{
@@ -342,12 +379,10 @@ int DMK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return LOADER_ACCESSERROR;
 	}
-
 	
 	fseek (f , 0 , SEEK_END); 
 	filesize=ftell(f);
 	fseek (f , 0 , SEEK_SET); 
-
 
 	if(filesize!=0)
 	{		
