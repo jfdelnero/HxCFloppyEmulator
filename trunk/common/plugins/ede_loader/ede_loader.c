@@ -230,14 +230,17 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			case 0x02:
 				floppycontext->hxc_printf(MSG_INFO_0,"SQ-80 (DD) format");
 				header_offset=0xA0;
+				sectorsize=1024; 
 				floppydisk->floppyBitRate=250000;
 				floppydisk->floppyNumberOfTrack=80;
 				floppydisk->floppyNumberOfSide=2;
-				floppydisk->floppySectorPerTrack=10;
-				gap3len=40;
+				floppydisk->floppySectorPerTrack=6;
+				gap3len=255;
 				interleave=1;
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
-				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k;
+				for(k=1;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k-1;
+				sectoridlayout[0]=5;
+				sectorsizelayout[0]=512;
 				break;
 
 			case 0x03:
