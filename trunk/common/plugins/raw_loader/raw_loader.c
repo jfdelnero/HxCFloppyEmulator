@@ -69,33 +69,7 @@ int RAW_libIsValidFormat(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * imgformat
 	int tracklendiv;
 	
 
-	switch(imgformatcfg->sectorsize)
-	{
-		case SECTORSIZE_128:
-			sectorsize=128;
-		break;
-		case SECTORSIZE_256:
-			sectorsize=256;
-		break;
-		case SECTORSIZE_512:
-			sectorsize=512;
-		break;
-		case SECTORSIZE_1024:
-			sectorsize=1024;
-		break;
-		case SECTORSIZE_2048:
-			sectorsize=2048;
-		break;
-		case SECTORSIZE_4096:
-			sectorsize=4096;
-		break;
-		case SECTORSIZE_8192:
-			sectorsize=8192;
-		break;
-		case SECTORSIZE_16384:
-			sectorsize=16384;
-		break;
-	}
+	sectorsize=128<<(imgformatcfg->sectorsize&7);
 	
 	if(imgformatcfg->autogap3)
 		gap3len=255;
@@ -187,34 +161,7 @@ int RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	}	
 
 	
-	switch(imgformatcfg->sectorsize)
-	{
-		case SECTORSIZE_128:
-			sectorsize=128;
-		break;
-		case SECTORSIZE_256:
-			sectorsize=256;
-		break;
-		case SECTORSIZE_512:
-			sectorsize=512;
-		break;
-		case SECTORSIZE_1024:
-			sectorsize=1024;
-		break;
-		case SECTORSIZE_2048:
-			sectorsize=2048;
-		break;
-		case SECTORSIZE_4096:
-			sectorsize=4096;
-		break;
-		case SECTORSIZE_8192:
-			sectorsize=8192;
-		break;
-		case SECTORSIZE_16384:
-			sectorsize=16384;
-		break;
-	}
-
+	sectorsize=128<<(imgformatcfg->sectorsize&7);
 
 	if(!imgformatcfg->autogap3)
 		gap3len=(unsigned char)imgformatcfg->gap3;

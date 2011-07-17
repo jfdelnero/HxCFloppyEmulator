@@ -62,21 +62,6 @@
 
 	}track_type;
 
-
-	enum
-	{
-		SECTORSIZE_128,
-		SECTORSIZE_256,
-		SECTORSIZE_512,
-		SECTORSIZE_1024,
-		SECTORSIZE_2048,
-		SECTORSIZE_4096,
-		SECTORSIZE_8192,
-		SECTORSIZE_16384
-	};
-
-
-
 	typedef struct sectorsize_type_
 	{
 		int id;

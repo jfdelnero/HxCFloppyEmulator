@@ -211,36 +211,7 @@ SECTORCONFIG * extractsector(HXCFLOPPYEMULATOR* floppycontext,unsigned char *dat
 		{
 		
 			floppycontext->hxc_printf(MSG_DEBUG,"Sector found ! %.4x",i);
-			switch(testsector->bytes)
-			{
-			case 00:
-				sectorsize=128;
-				break;
-			case 01:
-				sectorsize=256;
-				break;
-			case 02:
-				sectorsize=512;
-				break;
-			case 03:
-				sectorsize=1024;
-				break;
-			case 04:
-				sectorsize=2048;
-				break;
-			case 05:
-				sectorsize=4096;
-				break;
-			case 06:
-				sectorsize=8192;
-				break;
-			case 07:
-				sectorsize=16384;
-				break;
-			default:
-				sectorsize=512;
-				break;
-			}
+			sectorsize=128<<(testsector->bytes&7);
 
 			tabsector[j].head=testsector->head;
 			tabsector[j].sector=testsector->sector;

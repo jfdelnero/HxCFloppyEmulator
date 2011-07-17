@@ -160,7 +160,7 @@ int snes_smc_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 								free(filepath);
 							}
 
-							if(!fileok) floppycontext->hxc_printf(MSG_INFO_1,"unknow file type !");
+							if(!fileok) floppycontext->hxc_printf(MSG_ERROR,"unknow file type !");
 				
 						}
 
