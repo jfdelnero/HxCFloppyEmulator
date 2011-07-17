@@ -265,41 +265,10 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 							sectorconfig[j].cylinder=sector.track;
 							sectorconfig[j].head=sector.side;
 							sectorconfig[j].sector=sector.sector_id;
-							sectorconfig[j].sectorsize=sector.sector_size_code;
-							switch(sectorconfig[j].sectorsize)
-							{
-							case 00:
-								sectorconfig[j].sectorsize=128;
-								break;
-							case 01:
-								sectorconfig[j].sectorsize=256;
-								break;
-							case 02:
-								sectorconfig[j].sectorsize=512;
-								break;
-							case 03:
-								sectorconfig[j].sectorsize=1024;
-								break;
-							case 04:
-								sectorconfig[j].sectorsize=2048;
-								break;
-							case 05:
-								sectorconfig[j].sectorsize=4096;
-								break;
-							case 06:
-								sectorconfig[j].sectorsize=8192;
-								break;
-							case 07:
-								sectorconfig[j].sectorsize=16384;
-								break;
-							default:
-								sectorconfig[j].sectorsize=512;
-								break;
-							}
-							
+							sectorconfig[j].sectorsize=128<<(sector.sector_size_code&7);
 							sectorconfig[j].input_data=malloc(sectorconfig[j].sectorsize);
 
-							fseek (f , trackposition+0x100+sectorposition/*sizeof(trackheader)+(sizeof(sector)*j)*/, SEEK_SET); 
+							fseek (f, trackposition+0x100+sectorposition/*sizeof(trackheader)+(sizeof(sector)*j)*/, SEEK_SET); 
 							fread(sectorconfig[j].input_data,sectorconfig[j].sectorsize,1,f);
 							
 							sectorposition=sectorposition+sectorconfig[j].sectorsize;
