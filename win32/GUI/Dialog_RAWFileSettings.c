@@ -86,14 +86,14 @@ cfgrawfile rawfileconfig;
 
 	sectorsize_type sectorsize_type_list[]=
 	{
-		{ SECTORSIZE_128,"128"},
-		{ SECTORSIZE_256,"256"},
-		{ SECTORSIZE_512,"512"},
-		{ SECTORSIZE_1024,"1024"},
-		{ SECTORSIZE_2048,"2048"},
-		{ SECTORSIZE_4096,"4096"},
-		{ SECTORSIZE_8192,"8192"},
-		{ SECTORSIZE_16384,"16384"},		
+		{ 128,"128"},
+		{ 256,"256"},
+		{ 512,"512"},
+		{ 1024,"1024"},
+		{ 2048,"2048"},
+		{ 4096,"4096"},
+		{ 8192,"8192"},
+		{ 16384,"16384"},		
 		{ -1,""}			
 	};
 
@@ -117,10 +117,10 @@ BOOL CALLBACK DialogRAWFileSettings(
 	int i,t;
 	cfgrawfile temp_rawfileconfig;
 	static int old_bitrate,new_bitrate,old_rpm,new_rpm;
+	int sectorsize;
 	FILE* fpf_file;
 	wmId    = LOWORD(wParam); 
 	wmEvent = HIWORD(wParam); 
-
 
 	switch (message) 
 	{
@@ -407,36 +407,16 @@ BOOL CALLBACK DialogRAWFileSettings(
 
 			totalsector=totalsector*GetDlgItemInt(hwndDlg,IDC_SECTORPERTRACK,NULL,0);
 			totalsector=totalsector*GetDlgItemInt(hwndDlg,IDC_NUMBEROFTRACK,NULL,0);
+			
+			sectorsize=SendDlgItemMessage(hwndDlg, IDC_SECTORSIZE, CB_GETCURSEL, 0, 0);
 
-			switch(SendDlgItemMessage(hwndDlg, IDC_SECTORSIZE, CB_GETCURSEL, 0, 0))
+			if(sectorsize>0 && sectorsize<=16384)
 			{
-			case SECTORSIZE_128:
-				totalsize=totalsector*128;
-				break;
-			case SECTORSIZE_256:
-				totalsize=totalsector*256;
-				break;
-			case SECTORSIZE_512:
-				totalsize=totalsector*512;
-				break;
-			case SECTORSIZE_1024:
-				totalsize=totalsector*1024;
-				break;
-			case SECTORSIZE_2048:
-				totalsize=totalsector*2048;
-				break;
-			case SECTORSIZE_4096:
-				totalsize=totalsector*4096;
-				break;
-			case SECTORSIZE_8192:
-				totalsize=totalsector*8192;
-				break;
-			case SECTORSIZE_16384:
-				totalsize=totalsector*16384;
-				break;
-			default:
+				totalsize=totalsector*sectorsize;
+			}
+			else
+			{
 				totalsize=0;
-				break;
 			}
 	
 
