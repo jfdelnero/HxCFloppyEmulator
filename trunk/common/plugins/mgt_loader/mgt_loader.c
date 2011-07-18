@@ -127,7 +127,6 @@ int MGT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned int i,j;
 	unsigned int file_offset;
 	unsigned char* trackdata;
-	int tracklen;
 	unsigned char  gap3len,interleave;
 	unsigned short sectorsize,rpm;
 	unsigned char  skew,trackformat;
@@ -183,7 +182,6 @@ int MGT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			
 		floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 				
-		tracklen=(DEFAULT_DD_BITRATE/(rpm/60))/4;
 		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 			
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)

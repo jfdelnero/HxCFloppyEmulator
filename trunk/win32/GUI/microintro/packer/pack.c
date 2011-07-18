@@ -21,76 +21,6 @@
 #include "lzw.h"
 #include "rle.h"
 
-unsigned char mi_pack(unsigned char * bufferin, unsigned long sizein,unsigned char * bufferout, int * sizeout)
-{
-	unsigned char* buffer;
-	unsigned char* buffer2;
-	unsigned long  newsize;
-	unsigned long  newsize2;
-	unsigned long  newsize3;
-	int mode;
-
-
-	buffer=(unsigned char*)malloc(sizein*10);
-	buffer2=(unsigned char*)malloc(sizein*10);
-
-//	rlepack(bufferin,sizein,buffer2,&newsize2);
-	//lzw_compress(bufferin,buffer2,sizein,&newsize);
-
-	lzw_compress(bufferin,buffer,sizein,&newsize3);
-
-	mode=0;
-	if(sizein<=newsize3 ) mode = 0; //rien
-//	if(newsize2<sizein && newsize2< newsize) mode=1; //rle
-	//if(newsize<sizein && newsize< newsize2) mode=2; //lzw
-	else mode =2;
-  //  if(newsize3<sizein && newsize3< newsize2 && newsize3< newsize) mode=3; //lzw+rle*/
-//mode=2;
-//printf("mode : %d\n",mode);
-	switch(mode)
-	{
-
-	case 0:
-		memcpy((buffer2+1),bufferin,sizein);
-		buffer2[0]=0x0;
-		memcpy(bufferout,buffer2,sizein+1);
-		*sizeout=sizein+1;
-		break;
-		
-		case 1:
-			rlepack(bufferin,sizein,buffer+1,(int*)&newsize);
-			buffer[0]=0x2;
-			memcpy(bufferout,buffer,newsize+1);
-			*sizeout=newsize+1;
-		break;
-
-		case 2:
-			lzw_compress(bufferin,buffer+1,sizein,(int*)&newsize);
-			buffer[0]=0x1;
-			memcpy(bufferout,buffer,newsize+1);
-			*sizeout=newsize+1;
-		break;
-
-		case 3:
-			rlepack(bufferin,sizein,buffer2,(int*)&newsize);
-			lzw_compress(buffer2,buffer+1,newsize,(int*)&newsize2);
-			buffer[0]=0x3;
-			memcpy(bufferout,buffer,newsize2+1);
-			*sizeout=newsize2+1;
-
-			break;
-
-
-	}
-
-//	free(buffer);
-	free(buffer2);
-
-return 0;
-};
-
-
-
 unsigned char * mi_unpack(unsigned char * bufferin, unsigned long sizein,unsigned char * bufferout, unsigned long sizeout)
 {
 	unsigned char* buffer;
@@ -104,5 +34,5 @@ unsigned char * mi_unpack(unsigned char * bufferin, unsigned long sizein,unsigne
 		memcpy(buffer,bufferin+1,sizeout);
 	}
 
-return  buffer;
+	return  buffer;
 };

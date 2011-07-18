@@ -174,6 +174,7 @@ int RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	skew=imgformatcfg->skew;
 
 	floppydisk->floppyNumberOfTrack=(unsigned short)imgformatcfg->numberoftrack;
+	
 	if((imgformatcfg->sidecfg&TWOSIDESFLOPPY) || (imgformatcfg->sidecfg&SIDE_INVERTED))
 	{
 		floppydisk->floppyNumberOfSide=2;
@@ -182,6 +183,7 @@ int RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	{
 		floppydisk->floppyNumberOfSide=1;
 	}
+	
 	floppydisk->floppySectorPerTrack=imgformatcfg->sectorpertrack;
 
 	floppydisk->floppyBitRate=bitrate;
@@ -199,6 +201,7 @@ int RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		rpm,
 		bitrate
 		);
+
 	switch(imgformatcfg->tracktype)
 	{
 		case FM_TRACK_TYPE:

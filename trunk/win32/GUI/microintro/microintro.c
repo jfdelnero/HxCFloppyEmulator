@@ -1,3 +1,48 @@
+/*
+//
+// Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011 Jean-François DEL NERO
+//
+// This file is part of HxCFloppyEmulator.
+//
+// HxCFloppyEmulator may be used and distributed without restriction provided
+// that this copyright statement is not removed from the file and that any
+// derivative work contains the original copyright notice and the associated
+// disclaimer.
+//
+// HxCFloppyEmulator is free software; you can redistribute it
+// and/or modify  it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// HxCFloppyEmulator is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//   See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with HxCFloppyEmulator; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+//
+*/
+///////////////////////////////////////////////////////////////////////////////////
+//-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
+//-----------H----H--X----X-----CCCCC----22222----0000-----0000------11----------//
+//----------H----H----X-X-----C--------------2---0----0---0----0--1--1-----------//
+//---------HHHHHH-----X------C----------22222---0----0---0----0-----1------------//
+//--------H----H----X--X----C----------2-------0----0---0----0-----1-------------//
+//-------H----H---X-----X---CCCCC-----222222----0000-----0000----1111------------//
+//-------------------------------------------------------------------------------//
+//----------------------------------------------------- http://hxc2001.free.fr --//
+///////////////////////////////////////////////////////////////////////////////////
+// File : microintro.c
+// Contains: About dialog animation
+//
+// Written by:	DEL NERO Jean Francois
+//
+// Change History (most recent first):
+///////////////////////////////////////////////////////////////////////////////////
+
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
@@ -23,8 +68,6 @@ typedef struct scrolltab_
 	int speed;
 	int offset;
 }scrolltab;
-
-
 
 scrolltab scroll[]=
 {
@@ -316,45 +359,6 @@ void uintro_getnextframe(uintro_context * democontext)
 		k++;
 	}
 
-
-
-	
-	/*ptr1=democontext->blurbuffer;
-	ptr2=democontext->framebuffer;
-
-	for(i=0;i<democontext->xsize*democontext->ysize;i++)
-	{
-		if(democontext->blurbuffer[i])
-		{
-			t=(democontext->blurbuffer[i]>>16 + (democontext->blurbuffer[i]>>8 &0xFF) + (democontext->blurbuffer[i] &0xFF))/3;
-			democontext->blurbuffer[i]=democontext->blurbuffer[i]-0x010101;
-		}
-
-	}*/
-	
-	
-	/*	
-	for(i=2;i<democontext->xsize;i++)
-	{
-		for(j=1;j<democontext->ysize-1;j++)
-		{
-			t=(((democontext->blurbuffer[(j-1)*(democontext->xsize)+i]>>16)&0xFF) + (democontext->blurbuffer[(j-1)*democontext->xsize+i]>>8 &0xFF) + (democontext->blurbuffer[(j-1)*democontext->xsize+i] &0xFF))/3;
-			t=t+(((democontext->blurbuffer[(j+1)*(democontext->xsize)+i]>>16)&0xFF) + (democontext->blurbuffer[(j+1)*democontext->xsize+i]>>8 &0xFF) + (democontext->blurbuffer[(j+1)*democontext->xsize+i] &0xFF))/3;
-			t=t+(((democontext->blurbuffer[j*(democontext->xsize)+i-1]>>16)&0xFF) + (democontext->blurbuffer[j*democontext->xsize+i-1]>>8 &0xFF) + (democontext->blurbuffer[j*democontext->xsize+i-1] &0xFF))/3;
-			t=t+(((democontext->blurbuffer[j*(democontext->xsize)+i-2]>>16)&0xFF) + (democontext->blurbuffer[j*democontext->xsize+i-2]>>8 &0xFF) + (democontext->blurbuffer[j*democontext->xsize+i-2] &0xFF))/3;
-			
-			t=t/6;
-
-			democontext->blurbuffer[(j)*(democontext->xsize)+i]=t<<16|t<<8|t;
-
-		}
-	}
-	*/	
-	
-
-
-
-
 }
 
 
@@ -364,7 +368,6 @@ void uintro_deinit(uintro_context * democontext)
 	if(data_jozz_cognition_mod->unpacked_data) free(data_jozz_cognition_mod->unpacked_data);
 	if(data_zandax_supplydas_booze_mod->unpacked_data) free(data_zandax_supplydas_booze_mod->unpacked_data);
 	if(data_vim_not_again_mod->unpacked_data) free(data_vim_not_again_mod->unpacked_data);
-
 
 	data_jozz_cognition_mod->unpacked_data=0;
 	data_maktone_class_cracktro15_mod->unpacked_data=0;
