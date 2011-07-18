@@ -308,7 +308,6 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				tracktype=IBMFORMAT_DD;
 			}
 
-
 			sectorconfig=(SECTORCONFIG*)malloc(sizeof(SECTORCONFIG)*number_of_sector);
 			memset(sectorconfig,0,sizeof(SECTORCONFIG)*number_of_sector);
 
@@ -320,6 +319,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				{
 					sectorheader.sector_length=128 * (1 << sectorheader.sector_size);
 				}
+
 				floppycontext->hxc_printf(MSG_INFO_1,"Cylinder:%.3d, Size:%.1d, Sector ID:%.3d, Status:0x%.2x, File offset:0x%.6x",
 					sectorheader.cylinder,
 					sectorheader.sector_length,
@@ -327,8 +327,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					sectorheader.sector_status,
 					ftell(f)
 					);
-			
-				
+
 				sectorconfig[j].cylinder=sectorheader.cylinder;
 				sectorconfig[j].head=sectorheader.head;
 				sectorconfig[j].sector=sectorheader.sector_id;
@@ -373,17 +372,17 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		}
 		else
 		{
-				floppycontext->hxc_printf(MSG_INFO_1,"Unformated track:%.3d",i);
+			floppycontext->hxc_printf(MSG_INFO_1,"Unformated track:%.3d",i);
 
-				if(!floppydisk->tracks[i>>1])
-				{
-					floppydisk->tracks[i>>1]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-					currentcylinder=floppydisk->tracks[i>>1];
-				}
+			if(!floppydisk->tracks[i>>1])
+			{
+				floppydisk->tracks[i>>1]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+				currentcylinder=floppydisk->tracks[i>>1];
+			}
 
-				tracklen=((bitrate/(rpm/60))/4)*8;
-				currentcylinder->floppyRPM=rpm;
-				currentcylinder->sides[i&1]=tg_alloctrack(floppydisk->floppyBitRate,ISOIBM_MFM_ENCODING,currentcylinder->floppyRPM,tracklen,2500,-2500,TG_ALLOCTRACK_ALLOCFLAKEYBUFFER|TG_ALLOCTRACK_RANDOMIZEDATABUFFER|TG_ALLOCTRACK_UNFORMATEDBUFFER);
+			tracklen=((bitrate/(rpm/60))/4)*8;
+			currentcylinder->floppyRPM=rpm;
+			currentcylinder->sides[i&1]=tg_alloctrack(floppydisk->floppyBitRate,ISOIBM_MFM_ENCODING,currentcylinder->floppyRPM,tracklen,2500,-2500,TG_ALLOCTRACK_ALLOCFLAKEYBUFFER|TG_ALLOCTRACK_RANDOMIZEDATABUFFER|TG_ALLOCTRACK_UNFORMATEDBUFFER);
 		}
 
 		if(side==2)

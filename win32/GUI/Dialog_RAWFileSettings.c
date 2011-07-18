@@ -339,11 +339,11 @@ BOOL CALLBACK DialogRAWFileSettings(
 							old_rpm=rawfileconfig.rpm;
 							SendDlgItemMessage(hwndDlg,IDC_SIDE1ENABLE,BM_SETCHECK,rawfileconfig.sidecfg&TWOSIDESFLOPPY?BST_CHECKED:BST_UNCHECKED,0);
 							SendDlgItemMessage(hwndDlg,IDC_REVERSESIDE,BM_SETCHECK,rawfileconfig.sidecfg&SIDE_INVERTED?BST_CHECKED:BST_UNCHECKED,0);
-							SendDlgItemMessage(hwndDlg,IDC_SIDE0FIRST ,BM_SETCHECK,rawfileconfig.sidecfg&SIDE0_FIRST?BST_CHECKED:BST_UNCHECKED,0);
-							SendDlgItemMessage(hwndDlg, IDC_TRACKTYPE, CB_SETCURSEL, rawfileconfig.tracktype, 0);
-							SendDlgItemMessage(hwndDlg, IDC_SECTORSIZE, CB_SETCURSEL, rawfileconfig.sectorsize, 0);
-							SendDlgItemMessage(hwndDlg,IDC_AUTAGAP3,BM_SETCHECK,rawfileconfig.autogap3?BST_CHECKED:BST_UNCHECKED,0);
-							SendDlgItemMessage(hwndDlg,IDC_SIDESKEW,BM_SETCHECK,rawfileconfig.sideskew?BST_CHECKED:BST_UNCHECKED,0);
+							SendDlgItemMessage(hwndDlg,IDC_SIDE0FIRST, BM_SETCHECK,rawfileconfig.sidecfg&SIDE0_FIRST?BST_CHECKED:BST_UNCHECKED,0);
+							SendDlgItemMessage(hwndDlg,IDC_TRACKTYPE,  CB_SETCURSEL, rawfileconfig.tracktype, 0);
+							SendDlgItemMessage(hwndDlg,IDC_SECTORSIZE, CB_SETCURSEL, rawfileconfig.sectorsize, 0);
+							SendDlgItemMessage(hwndDlg,IDC_AUTAGAP3,   BM_SETCHECK,rawfileconfig.autogap3?BST_CHECKED:BST_UNCHECKED,0);
+							SendDlgItemMessage(hwndDlg,IDC_SIDESKEW,   BM_SETCHECK,rawfileconfig.sideskew?BST_CHECKED:BST_UNCHECKED,0);
 							SendDlgItemMessage(hwndDlg,IDC_INTERSIDESECTORNUMBERING,BM_SETCHECK,rawfileconfig.intersidesectornumbering?BST_CHECKED:BST_UNCHECKED,0);
 						}
 						else
