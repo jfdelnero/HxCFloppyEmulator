@@ -64,18 +64,13 @@
 
 int pc_imggetfloppyconfig(unsigned char * img,unsigned int filesize,unsigned short *numberoftrack,unsigned char *numberofside,unsigned short *numberofsectorpertrack,unsigned char *gap3len,unsigned char *interleave,unsigned short *rpm, unsigned int *bitrate,unsigned short * ifmode)
 {
-int i;
-
-//unsigned int numberofsector;
-unsigned char * uimg;
-int conffound,numberofsector;
-
+	int i;
+	unsigned char * uimg;
+	int conffound,numberofsector;
+	
+	conffound=0;
 	uimg=(unsigned char *)img;
 	
-	conffound=0;
-uimg=(unsigned char *)img;
-	
-	conffound=0;
 	if(uimg[0x18]<24 && uimg[0x18]>7)
 	{
 				
@@ -126,26 +121,25 @@ uimg=(unsigned char *)img;
 
 	if(conffound==0)
 	{
-	i=0;
-	do
-	{
-		
-		if(pcimgfileformats[i].filesize==filesize)
+		i=0;
+		do
 		{
-			*numberoftrack=pcimgfileformats[i].numberoftrack;
-			*numberofsectorpertrack=pcimgfileformats[i].sectorpertrack;
-			*numberofside=pcimgfileformats[i].numberofside;
-			*gap3len=pcimgfileformats[i].gap3len;
-			*interleave=pcimgfileformats[i].interleave;
-			*rpm=pcimgfileformats[i].RPM;
-			*bitrate=pcimgfileformats[i].bitrate;
-			*ifmode=pcimgfileformats[i].interface_mode;
-			conffound=1;
-		}
-		i++;
+			
+			if(pcimgfileformats[i].filesize==filesize)
+			{
+				*numberoftrack=pcimgfileformats[i].numberoftrack;
+				*numberofsectorpertrack=pcimgfileformats[i].sectorpertrack;
+				*numberofside=pcimgfileformats[i].numberofside;
+				*gap3len=pcimgfileformats[i].gap3len;
+				*interleave=pcimgfileformats[i].interleave;
+				*rpm=pcimgfileformats[i].RPM;
+				*bitrate=pcimgfileformats[i].bitrate;
+				*ifmode=pcimgfileformats[i].interface_mode;
+				conffound=1;
+			}
+			i++;
 
-	}while(pcimgfileformats[i].filesize!=0 && conffound==0);
-	
+		}while(pcimgfileformats[i].filesize!=0 && conffound==0);	
 	}
 	return conffound;
 }
@@ -189,7 +183,6 @@ int IMG_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 						floppycontext->hxc_printf(MSG_DEBUG,"non IMG file - bad file size !");
 						return LOADER_BADFILE;
 					}
-
 
 					i=0;
 					conffound=0;
