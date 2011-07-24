@@ -151,14 +151,40 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 		rpm=300;
 
 		// read the first sector
-		floppydisk->floppyNumberOfTrack=40;
-		floppydisk->floppyNumberOfSide=1;
-		floppydisk->floppySectorPerTrack=10;
-		floppydisk->floppyBitRate=250000;
+		switch(filesize)
+		{
+			case 40*1*10*512:
+				floppydisk->floppyNumberOfTrack=40;
+				floppydisk->floppyNumberOfSide=1;
+				floppydisk->floppySectorPerTrack=10;
+				floppydisk->floppyBitRate=250000;
+				break;
+
+			case 80*1*10*512:
+				floppydisk->floppyNumberOfTrack=80;
+				floppydisk->floppyNumberOfSide=1;
+				floppydisk->floppySectorPerTrack=10;
+				floppydisk->floppyBitRate=250000;
+				break;
+
+			case 80*2*10*512:
+				floppydisk->floppyNumberOfTrack=80;
+				floppydisk->floppyNumberOfSide=2;
+				floppydisk->floppySectorPerTrack=10;
+				floppydisk->floppyBitRate=250000;
+				break;
+
+			default:
+				floppydisk->floppyNumberOfTrack=40;
+				floppydisk->floppyNumberOfSide=1;
+				floppydisk->floppySectorPerTrack=10;
+				floppydisk->floppyBitRate=250000;
+				break;
+		}
+
 		gap3len=255;
-		interleave=1;
-		
-			
+		interleave=2;
+					
 		trackformat=IBMFORMAT_DD;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
@@ -178,7 +204,7 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 				fseek (f , file_offset , SEEK_SET);
 				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);		
 				
-				currentcylinder->sides[i]=tg_generatetrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500| NO_SECTOR_UNDER_INDEX,-2500);
+				currentcylinder->sides[i]=tg_generatetrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500| NO_SECTOR_UNDER_INDEX,-2500);
 			}
 		}
 			
