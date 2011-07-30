@@ -84,6 +84,7 @@
 #include "../common/plugins/adl_loader/adl_loader.h"
 #include "../common/plugins/ssd_dsd_loader/ssd_dsd_loader.h"
 #include "../common/plugins/krz_loader/krz_loader.h"
+#include "../common/plugins/w30_loader/w30_loader.h"
 
 
 const plugins_ptr staticplugins[]=
@@ -105,6 +106,7 @@ const plugins_ptr staticplugins[]=
 	{(ISVALIDDISKFILE)MFM_libIsValidDiskFile,(LOADDISKFILE)MFM_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)OricDSK_libIsValidDiskFile,(LOADDISKFILE)OricDSK_libLoad_DiskFile,0,0},	
 	{(ISVALIDDISKFILE)ST_libIsValidDiskFile,(LOADDISKFILE)ST_libLoad_DiskFile,0,0},
+	{(ISVALIDDISKFILE)W30_libIsValidDiskFile,(LOADDISKFILE)W30_libLoad_DiskFile,0,0},
 	#ifdef IPF_SUPPORT
 	{(ISVALIDDISKFILE)IPF_libIsValidDiskFile,(LOADDISKFILE)IPF_libLoad_DiskFile,0,0},
 	#endif
