@@ -35,8 +35,8 @@
 //-------------------------------------------------------------------------------//
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
-// File : fd_DiskFile.c
-// Contains: ST floppy image loader and plugins interfaces
+// File : fd_loader.c
+// Contains: Thomson FD floppy image loader and plugins interfaces
 //
 // Written by:	DEL NERO Jean Francois
 //
@@ -150,7 +150,7 @@ int FD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,cha
 	filesize=ftell(f);
 	fseek (f , 0 , SEEK_SET); 
 	
-	sectorsize=256; // st file support only 512bytes/sector floppies.
+	sectorsize=256; // FD file support only 256bytes/sector floppies.
 	// read the first sector
 	switch(filesize)
 	{

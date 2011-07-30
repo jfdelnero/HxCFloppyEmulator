@@ -915,6 +915,18 @@ SOURCE=..\..\common\plugins\krz_loader\krz_loader.c
 SOURCE=..\..\common\plugins\krz_loader\krz_loader.h
 # End Source File
 # End Group
+# Begin Group "W30"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\w30_loader\w30_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\w30_loader\w30_loader.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\..\common\plugins\common\crc.c

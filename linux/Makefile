@@ -30,7 +30,7 @@ DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosf
                   ensoniq_mirage_loader.o sad_loader.o jv3_loader.o stt_loader.o prophet_loader.o teledisk_loader.o td0_lzss.o\
                   emuii_raw_loader.o emuii_loader.o emui_raw_loader.o jvc_loader.o dim_loader.o ti99v9t9_loader.o d81_loader.o  acornadf_loader.o \
                   camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o fdi_loader.o ssd_dsd_loader.o adl_loader.o \
-                  krz_loader.o
+                  krz_loader.o w30_loader.o
 
 
 all: $(EXEC)
@@ -239,6 +239,9 @@ emax_loader.o : ../common/plugins/emax_loader/emax_loader.c ../common/plugins/em
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 ensoniq_mirage_loader.o : ../common/plugins/ensoniq_mirage_loader/ensoniq_mirage_loader.c ../common/plugins/ensoniq_mirage_loader/ensoniq_mirage_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+w30_loader.o : ../common/plugins/w30_loader/w30_loader.c ../common/plugins/w30_loader/w30_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 prophet_loader.o : ../common/plugins/prophet_loader/prophet_loader.c ../common/plugins/prophet_loader/prophet_loader.h
