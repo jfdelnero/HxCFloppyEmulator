@@ -23,8 +23,8 @@ unsigned long us2index(unsigned long startindex,SIDE * track,unsigned long us,un
 				freq=track->timingbuffer[startindex>>3];
 				startindex++;
 				if(startindex>=track->tracklen) startindex=0;
-
-				time=time+(((1000000000/2)/freq)*1);
+				if(freq)
+					time=time+(((1000000000/2)/freq)*1);
 			}while(us>(time/1000));
 			return startindex;
 		}
@@ -37,7 +37,8 @@ unsigned long us2index(unsigned long startindex,SIDE * track,unsigned long us,un
 				if(fill)track->indexbuffer[startindex>>3]=0xFF;
 				startindex++;
 				if(startindex>=track->tracklen) startindex=0;
-				time=time+(((1000000000/2)/freq)*1);
+				if(freq)
+					time=time+(((1000000000/2)/freq)*1);
 			}while(us>(time/1000));
 			return startindex;
 		}
@@ -57,8 +58,8 @@ unsigned long us2index(unsigned long startindex,SIDE * track,unsigned long us,un
 					startindex--;
 				else
 					startindex=track->tracklen-1;
-				
-				time=time+(((1000000000/2)/freq)*1);
+				if(freq)
+					time=time+(((1000000000/2)/freq)*1);
 			}while(us>(time/1000));
 			return startindex;
 		}
@@ -74,8 +75,8 @@ unsigned long us2index(unsigned long startindex,SIDE * track,unsigned long us,un
 					startindex--;
 				else
 					startindex=track->tracklen-1;
-
-				time=time+(((1000000000/2)/freq)*1);
+				if(freq)
+					time=time+(((1000000000/2)/freq)*1);
 			}while(us>(time/1000));
 			return startindex;
 		}

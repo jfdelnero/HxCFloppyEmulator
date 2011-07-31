@@ -69,7 +69,19 @@ void randomizebuffer(HWINTERFACE* hw_context,unsigned char * buffer,unsigned cha
 	{
 		if(randombuffer[i])
 		{
-			buffer[i]=buffer[i] | ( hw_context->randomlut[rand()&0x3FF] & randombuffer[i] );
+			buffer[i]=(buffer[i] & ~randombuffer[i]) | ( hw_context->randomlut[rand()&0x3FF] & randombuffer[i] );
+			if((buffer[i]&3)==0x03)
+				buffer[i]=buffer[i]^0x2;
+
+			if((buffer[i]&0xC)==0x0C)
+				buffer[i]=buffer[i]^0x8;
+
+			if((buffer[i]&0x30)==0x30)
+				buffer[i]=buffer[i]^0x20;
+
+			if((buffer[i]&0xC0)==0xC0)
+				buffer[i]=buffer[i]^0x80;
+
 		}
 		i++;
 	}while(i<bufferlen);
@@ -846,14 +858,14 @@ int InjectFloppyImg(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,HWINTER
 			free(hwif->precalcusbtrack[i].randomusbtrack);
 	}
 
-	final_buffer=(unsigned char*) malloc(BUFFERSIZE);
-	final_randombuffer=(unsigned char*) malloc(BUFFERSIZE);
+	//final_buffer=(unsigned char*) malloc(BUFFERSIZE);
+	//final_randombuffer=(unsigned char*) malloc(BUFFERSIZE);
 	hwif->number_of_track=(unsigned char)floppydisk->floppyNumberOfTrack;
 	for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
 	{
 
-			memset(final_buffer,0,BUFFERSIZE);
-			memset(final_randombuffer,0,BUFFERSIZE);
+			//memset(final_buffer,0,BUFFERSIZE);
+			//memset(final_randombuffer,0,BUFFERSIZE);
 
 			if(floppydisk->tracks[i]->number_of_side==2)
 			{
@@ -869,8 +881,8 @@ int InjectFloppyImg(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,HWINTER
 				floppydisk->tracks[i]->sides[0]->timingbuffer,
 				floppydisk->tracks[i]->sides[1]->bitrate,
 				floppydisk->tracks[i]->sides[1]->timingbuffer,
-				final_buffer,
-				final_randombuffer,
+				&final_buffer,
+				&final_randombuffer,
 				0,
 				0, 
 				0, 
@@ -891,8 +903,8 @@ int InjectFloppyImg(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,HWINTER
 				floppydisk->tracks[i]->sides[0]->timingbuffer,
 				floppydisk->tracks[i]->sides[0]->bitrate,
 				floppydisk->tracks[i]->sides[0]->timingbuffer,
-				final_buffer,
-				final_randombuffer,
+				&final_buffer,
+				&final_randombuffer,
 				0,
 				0, 
 				0, 
@@ -910,7 +922,12 @@ int InjectFloppyImg(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,HWINTER
 
 
 			floppycontext->hxc_printf(MSG_DEBUG,"USB Track %d Size: %d bytes",i,final_buffer_len);
-
+			
+			if(final_randombuffer)
+				free(final_randombuffer);
+			if(final_buffer)
+				free(final_buffer);
+			
 			#ifdef DEBUGVB
 				sprintf(fdebug_name,"usb_track_%d.bin",i);
 				fdebug=(FILE*) fopen(fdebug_name,"w+b");
@@ -928,8 +945,7 @@ int InjectFloppyImg(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,HWINTER
 	hwif->interface_mode=(unsigned char)floppydisk->floppyiftype;
 	hwif->floppychanged=1;
 
-	free(final_randombuffer);
-	free(final_buffer);
+
 	
 	floppycontext->hxc_printf(MSG_INFO_0,"Starting emulation...");
 	hwif->start_emulation=1;
