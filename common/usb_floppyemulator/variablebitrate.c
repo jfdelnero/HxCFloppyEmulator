@@ -63,12 +63,115 @@ void adjustrand(unsigned char * d, unsigned char * r)
 		t=t>>2;
 	}
 }
-int GetNewTrackRevolution(HXCFLOPPYEMULATOR* floppycontext,unsigned char * index_h0,unsigned char * datah0,unsigned int lendatah0,unsigned char * datah1,unsigned int lendatah1,unsigned char * randomh0,unsigned char * randomh1,long fixedbitrateh0,unsigned long * timeh0,long fixedbitrateh1,unsigned long * timeh1,unsigned char * finalbuffer,unsigned char * randomfinalbuffer,unsigned char readysignal,unsigned char diskchange,unsigned char writeprotect,unsigned char amigaready,unsigned char selectconfig)
+
+
+unsigned char * realloc_buffer(unsigned char * buffer,unsigned long numberofbit,unsigned int factor)
+{
+	unsigned long i,j,k,l;
+	unsigned long newsize;
+	unsigned char * ptr;
+
+
+	newsize=(numberofbit*factor);
+
+	if(newsize&0x7)
+	{
+		ptr=malloc(((numberofbit*factor)/8)+1);
+		memset(ptr,0,((numberofbit*factor)/8)+1);
+	}
+	else
+	{
+		ptr=malloc(((numberofbit*factor)/8));
+		memset(ptr,0,((numberofbit*factor)/8));
+	}
+
+	l=0;
+	k=0;
+	j=0;
+
+	for(l=0;l<factor;l++)
+	{
+		for(i=0;i<numberofbit;i++)
+		{
+			if( (buffer[k>>3]>>(0x7-(k&0x7)))&1)
+			{
+				ptr[j>>3]=ptr[j>>3]|(0x80>>(j&0x7));
+			}
+			//else
+			//{
+			//	ptr[j>>3]=ptr[j>>3]&(~((0x80)>>(j&0x7)));
+			//}
+
+			j++;
+			if(j>=newsize) j=0;
+
+			k++;
+			if(k>=numberofbit) k=0;
+
+		}
+	}
+
+	return ptr;
+}
+
+
+unsigned long * realloc_time_buffer(unsigned long * buffer,unsigned long numberofbit,unsigned int factor)
+{
+	unsigned long i,k,l;
+	unsigned long newsize,nbelement;
+	unsigned long * ptr;
+
+
+	
+
+	if((numberofbit*factor)&0x7)
+	{
+		newsize=(((numberofbit*factor)/8)+1);
+		ptr=malloc((newsize+16)*sizeof(unsigned long));
+		memset(ptr,0,(newsize+16)*sizeof(unsigned long));
+		nbelement=(((numberofbit)/8)+1);
+	}
+	else
+	{
+		newsize=((numberofbit*factor)/8);
+		ptr=malloc((newsize+16)*sizeof(unsigned long));
+		memset(ptr,0,(newsize+16)*sizeof(unsigned long));
+		nbelement=(((numberofbit)/8));
+	}
+
+	l=0;
+	k=0;
+
+	for(l=0;l<factor;l++)
+	{
+		for(i=0;i<nbelement;i++)
+		{
+			ptr[k]=buffer[i];
+			k++;
+		}
+	}
+
+	l=newsize-1;
+	i=nbelement-1;
+	while(i && l && !ptr[l])
+	{
+		ptr[l]=buffer[i];
+		l--;
+		i--;
+	}
+	return ptr;
+}
+
+int GetNewTrackRevolution(HXCFLOPPYEMULATOR* floppycontext,unsigned char * index_h0,unsigned char * datah0,unsigned int lendatah0,unsigned char * datah1,unsigned int lendatah1,unsigned char * randomh0,unsigned char * randomh1,long fixedbitrateh0,unsigned long * timeh0,long fixedbitrateh1,unsigned long * timeh1,unsigned char ** finalbuffer_param,unsigned char ** randomfinalbuffer_param,unsigned char readysignal,unsigned char diskchange,unsigned char writeprotect,unsigned char amigaready,unsigned char selectconfig)
 {
 	unsigned long i,k,j;
 	unsigned long head0speed;
 	unsigned long head1speed;
-	
+
+	unsigned long finalsizebuffer;
+	unsigned char * finalbuffer;
+	unsigned char * randomfinalbuffer;
+
 	long tick_offset_h0;
 	long tick_offset_h1;
 	
@@ -94,29 +197,56 @@ int GetNewTrackRevolution(HXCFLOPPYEMULATOR* floppycontext,unsigned char * index
 	int lencode_track0_error=0;
 	int lencode_track1_error=0;
 	
-	int numberofpart,indexstart,newzoneindex;
+	int numberofpart,indexstart,newzoneindex,sizefactor;
+	
 
 #ifdef DEBUGVB
 	floppycontext->hxc_printf(MSG_DEBUG,"********************************************************************");
 #endif 
 
+	sizefactor=1;
+	if( (lendatah0&7) || (lendatah1&7) )
+	{
+		sizefactor=8;	
+	}
 
-	if(lendatah0&7)
-		lendatah0=(lendatah0/8)+1;
-	else
-		lendatah0=(lendatah0/8);
 
-	if(lendatah1&7)
-		lendatah1=(lendatah1/8)+1;
-	else
-		lendatah1=(lendatah1/8);
+	datah0=realloc_buffer(datah0,lendatah0,sizefactor);
+	datah1=realloc_buffer(datah1,lendatah1,sizefactor);
+	index_h0=realloc_buffer(index_h0,lendatah0,sizefactor);
 
+	if(randomh0)
+		randomh0=realloc_buffer(randomh0,lendatah0,sizefactor);
+	if(randomh1)
+		randomh1=realloc_buffer(randomh1,lendatah1,sizefactor);
+
+	if(timeh0)
+		timeh0=realloc_time_buffer(timeh0,lendatah0,sizefactor);
+	
+	if(timeh1)
+		timeh1=realloc_time_buffer(timeh1,lendatah1,sizefactor);
+
+	lendatah0=((lendatah0*sizefactor)/8);
+	lendatah1=((lendatah1*sizefactor)/8);
 
 	trackzoneindex0=0;
 	head0speed=0;
 	
 	trackzoneindex1=0;
 	head1speed=0;
+
+	if(lendatah0>lendatah1)
+		finalsizebuffer=(lendatah0*2)+(32000*sizefactor);
+	else
+		finalsizebuffer=(lendatah1*2)+(32000*sizefactor);
+	
+	finalbuffer=malloc(finalsizebuffer);
+	memset(finalbuffer,0,finalsizebuffer);
+	randomfinalbuffer=malloc(finalsizebuffer);
+	memset(randomfinalbuffer,0,finalsizebuffer);
+
+	*finalbuffer_param=finalbuffer;
+	*randomfinalbuffer_param=randomfinalbuffer;
 
 	/////////////////////////////////////////////////////////////
 	// delimitation des zones de bitrate
@@ -828,6 +958,21 @@ int GetNewTrackRevolution(HXCFLOPPYEMULATOR* floppycontext,unsigned char * index
 		
 				
 		}while(!((trackparthead0index>=numberofzoneh0 && trackparthead1index>=numberofzoneh1) && (!lencode_track1 && !lencode_track0)));
+		
+		free(datah0);
+		free(datah1);
+		free(index_h0);
+
+		if(randomh0)
+			free(randomh0);
+		if(randomh1)
+			free(randomh1);
+		
+		if(timeh0)
+			free(timeh0);
+		
+		if(timeh1)
+			free(timeh1);
 		
 		return k;
 }
