@@ -37,7 +37,9 @@
 #include "cpld_opcodes.h"
 
 #define BITRATEBLOCKSIZE 128
+
 //#define DEBUGVB 1
+
 trackzone trackzonebuffer_0[2048*2];
 trackzone trackzonebuffer_1[2048*2];
 
