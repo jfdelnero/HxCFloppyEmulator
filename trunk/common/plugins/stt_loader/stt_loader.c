@@ -251,6 +251,9 @@ int STT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			currentside=tg_generatetrackEx((unsigned short)STTTRACKHEADER.number_of_sectors,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,2500 | NO_SECTOR_UNDER_INDEX,-2500);
 			currentcylinder->sides[i]=currentside;
 
+			currentside->bitrate=(long)(250000*(float)((float)(currentside->tracklen/2)/(float)50000));
+
+
 			for(k=0;k<STTTRACKHEADER.number_of_sectors;k++)
 			{
 				if(sectorconfig[k].input_data)
