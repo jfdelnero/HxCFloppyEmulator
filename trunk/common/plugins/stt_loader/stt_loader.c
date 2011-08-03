@@ -206,62 +206,83 @@ int STT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			fseek (f, file_track_list_offset, SEEK_SET); 
 			fread((void*)&STTTRACKOFFSET,sizeof(stt_track_offset),1,f);
 			file_track_list_offset=file_track_list_offset+sizeof(stt_track_offset);
+
+			floppycontext->hxc_printf(MSG_DEBUG,"Current Track Offset : 0x%.8X, Size: 0x%.8X, Next File Track List Offset : 0x%.8X",STTTRACKOFFSET.track_offset,STTTRACKOFFSET.track_size,file_track_list_offset);
 			
 			fseek (f, STTTRACKOFFSET.track_offset, SEEK_SET); 
 
 			fread((void*)&STTTRACKHEADER,sizeof(stt_track_header),1,f);
-			floppycontext->hxc_printf(MSG_INFO_1,"Track: %d, Side: %d, Number of sector: %d, Tracks Flags:0x%.8x, Sector Flags:0x%.8x",j,i,STTTRACKHEADER.number_of_sectors,STTTRACKHEADER.tracks_flags,STTTRACKHEADER.sectors_flags);
 
-			trackformat=ISOFORMAT_DD;
-			if(STTTRACKHEADER.number_of_sectors==11 || STTTRACKHEADER.number_of_sectors==12)
+			if(!memcmp(&STTTRACKHEADER.stt_track_signature,"TRCK",4))
 			{
-				trackformat=ISOFORMAT_DD11S;
-			}
 
-			sectorconfig=malloc(sizeof(SECTORCONFIG)*STTTRACKHEADER.number_of_sectors);
-			memset(sectorconfig,0,sizeof(SECTORCONFIG)*STTTRACKHEADER.number_of_sectors);
-			for(k=0;k<STTTRACKHEADER.number_of_sectors;k++)
-			{
-				fread((void*)&STTSECTOR,sizeof(stt_sector),1,f);
+				floppycontext->hxc_printf(MSG_INFO_1,"Track: %d, Side: %d, Number of sector: %d, Tracks Flags:0x%.8x, Sector Flags:0x%.8x",j,i,STTTRACKHEADER.number_of_sectors,STTTRACKHEADER.tracks_flags,STTTRACKHEADER.sectors_flags);
+
+				trackformat=ISOFORMAT_DD;
+				if(STTTRACKHEADER.number_of_sectors==11 || STTTRACKHEADER.number_of_sectors==12)
+				{
+					trackformat=ISOFORMAT_DD11S;
+				}
+
+				sectorconfig=malloc(sizeof(SECTORCONFIG)*STTTRACKHEADER.number_of_sectors);
+				memset(sectorconfig,0,sizeof(SECTORCONFIG)*STTTRACKHEADER.number_of_sectors);
+				for(k=0;k<STTTRACKHEADER.number_of_sectors;k++)
+				{
+					fread((void*)&STTSECTOR,sizeof(stt_sector),1,f);
 				
-				floppycontext->hxc_printf(MSG_INFO_1,"Sector id: %d, Side id: %d, Track id: %d, Sector size:%d",STTSECTOR.sector_nb_id,STTSECTOR.side_nb_id,STTSECTOR.track_nb_id,STTSECTOR.data_len);
+					floppycontext->hxc_printf(MSG_INFO_1,"Sector id: %d, Side id: %d, Track id: %d, Sector size:%d",STTSECTOR.sector_nb_id,STTSECTOR.side_nb_id,STTSECTOR.track_nb_id,STTSECTOR.data_len);
 	
-				sectorconfig[k].sector=STTSECTOR.sector_nb_id;
-				sectorconfig[k].head=STTSECTOR.side_nb_id;
-				sectorconfig[k].sectorsize=STTSECTOR.data_len;
-				sectorconfig[k].use_alternate_sector_size_id=1;
-				sectorconfig[k].alternate_sector_size_id=STTSECTOR.sector_len_code;
-				sectorconfig[k].cylinder=STTSECTOR.track_nb_id;
-				//sectorconfig[k].use_alternate_header_crc=0x2;
-				sectorconfig[k].header_crc=(STTSECTOR.crc_byte_1<<8) | STTSECTOR.crc_byte_2;
-				sectorconfig[k].trackencoding=trackformat;
-				sectorconfig[k].gap3=255;
-				sectorconfig[k].bitrate=floppydisk->floppyBitRate;
-								
-				file_offset=ftell(f);
-				
-				sectorconfig[k].input_data=malloc(STTSECTOR.data_len);
-				fseek (f, STTSECTOR.data_offset + STTTRACKOFFSET.track_offset, SEEK_SET); 
-				fread(sectorconfig[k].input_data,STTSECTOR.data_len,1,f);
-		
-				fseek (f, file_offset, SEEK_SET); 
-
-			}
+					sectorconfig[k].sector=STTSECTOR.sector_nb_id;
+					sectorconfig[k].head=STTSECTOR.side_nb_id;
+					sectorconfig[k].sectorsize=STTSECTOR.data_len;
+					sectorconfig[k].use_alternate_sector_size_id=1;
+					sectorconfig[k].alternate_sector_size_id=STTSECTOR.sector_len_code;
+					sectorconfig[k].cylinder=STTSECTOR.track_nb_id;
+					//sectorconfig[k].use_alternate_header_crc=0x2;
+					sectorconfig[k].header_crc=(STTSECTOR.crc_byte_1<<8) | STTSECTOR.crc_byte_2;
+					sectorconfig[k].trackencoding=trackformat;
+					sectorconfig[k].gap3=255;
+					sectorconfig[k].bitrate=floppydisk->floppyBitRate;
+									
+					file_offset=ftell(f);
 					
-			currentside=tg_generatetrackEx((unsigned short)STTTRACKHEADER.number_of_sectors,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,2500 | NO_SECTOR_UNDER_INDEX,-2500);
-			currentcylinder->sides[i]=currentside;
+					sectorconfig[k].input_data=malloc(STTSECTOR.data_len);
+					fseek (f, STTSECTOR.data_offset + STTTRACKOFFSET.track_offset, SEEK_SET); 
+					fread(sectorconfig[k].input_data,STTSECTOR.data_len,1,f);
+			
+					fseek (f, file_offset, SEEK_SET); 
 
-			currentside->bitrate=(long)(250000*(float)((float)(currentside->tracklen/2)/(float)50000));
+				}
+					
+				currentside=tg_generatetrackEx((unsigned short)STTTRACKHEADER.number_of_sectors,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,2500 | NO_SECTOR_UNDER_INDEX,-2500);
+				currentcylinder->sides[i]=currentside;
+
+				currentside->bitrate=(long)(250000*(float)((float)(currentside->tracklen/2)/(float)50000));
 
 
-			for(k=0;k<STTTRACKHEADER.number_of_sectors;k++)
-			{
-				if(sectorconfig[k].input_data)
-					free(sectorconfig[k].input_data);
+				for(k=0;k<STTTRACKHEADER.number_of_sectors;k++)
+				{
+					if(sectorconfig[k].input_data)
+						free(sectorconfig[k].input_data);
+				}
+
+				free(sectorconfig);
 			}
+			else
+			{				
+				floppycontext->hxc_printf(MSG_INFO_1,"Bad track Header !? : Track: %d, Side: %d",j,i);
+				trackformat=ISOFORMAT_DD;
 
-			free(sectorconfig);
-	
+				STTTRACKHEADER.number_of_sectors=0;
+
+				sectorconfig=malloc(sizeof(SECTORCONFIG));
+				memset(sectorconfig,0,sizeof(SECTORCONFIG));
+				currentside=tg_generatetrackEx((unsigned short)STTTRACKHEADER.number_of_sectors,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,2500 | NO_SECTOR_UNDER_INDEX,-2500);														
+		
+				currentcylinder->sides[i]=currentside;
+
+				free(sectorconfig);
+			}
 		}
 	}
 			
