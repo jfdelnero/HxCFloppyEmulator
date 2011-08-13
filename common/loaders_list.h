@@ -85,7 +85,7 @@
 #include "../common/plugins/ssd_dsd_loader/ssd_dsd_loader.h"
 #include "../common/plugins/krz_loader/krz_loader.h"
 #include "../common/plugins/w30_loader/w30_loader.h"
-
+#include "../common/plugins/fei_loader/fei_loader.h"
 
 const plugins_ptr staticplugins[]=
 {
@@ -150,5 +150,6 @@ const plugins_ptr staticplugins[]=
 	{(ISVALIDDISKFILE)CAMPUTERSLYNX_libIsValidDiskFile,(LOADDISKFILE)CAMPUTERSLYNX_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)ADL_libIsValidDiskFile,(LOADDISKFILE)ADL_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)DSD_libIsValidDiskFile,(LOADDISKFILE)DSD_libLoad_DiskFile,0,0},
+	{(ISVALIDDISKFILE)FEI_libIsValidDiskFile,(LOADDISKFILE)FEI_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)-1,(LOADDISKFILE)-1,(WRITEDISKFILE)-1,(GETPLUGININFOS)-1}
 };
