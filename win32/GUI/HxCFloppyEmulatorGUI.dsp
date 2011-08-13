@@ -927,6 +927,18 @@ SOURCE=..\..\common\plugins\w30_loader\w30_loader.c
 SOURCE=..\..\common\plugins\w30_loader\w30_loader.h
 # End Source File
 # End Group
+# Begin Group "FEI"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fei_loader\fei_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fei_loader\fei_loader.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\..\common\plugins\common\crc.c
