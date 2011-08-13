@@ -273,16 +273,19 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 							
 							sectorposition=sectorposition+sectorconfig[j].sectorsize;
 							
-							if(sector.fdc_status_reg1&0x20 && !sector.fdc_status_reg2&0x20)
+							// ID part CRC ERROR ?
+							if((sector.fdc_status_reg1&0x20) && !(sector.fdc_status_reg2&0x20))
 							{
 								sectorconfig[j].use_alternate_header_crc=0x1;
 							}
 							
-							if(sector.fdc_status_reg2&0x20)
+							// Data part CRC ERROR ?
+							if((sector.fdc_status_reg1&0x20) &&  (sector.fdc_status_reg2&0x20))
 							{
 								sectorconfig[j].use_alternate_data_crc=0x1;
 							}
 							
+							// Deleted Data Address Mark ?
 							if(sector.fdc_status_reg2&0x40)
 							{
 								sectorconfig[j].use_alternate_datamark=1;
@@ -293,7 +296,7 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 							sectorconfig[j].gap3=gap3len;
 							sectorconfig[j].trackencoding=IBMFORMAT_DD;
 							
-							floppycontext->hxc_printf(MSG_DEBUG,"%d:%d track id:%d side id:%d sector id %d sector size:%d bad crc:%d sreg1:%x sreg2:%x",trackheader.track_number,trackheader.side_number,sector.track,sector.side,sector.sector_id,sectorconfig[j].sectorsize,sectorconfig[j].use_alternate_data_crc,sector.fdc_status_reg1,sector.fdc_status_reg2);
+							floppycontext->hxc_printf(MSG_DEBUG,"%d:%d track id:%d side id:%d sector id %d sector size (id):%d sector size :%d bad crc:%d sreg1:%x sreg2:%x",trackheader.track_number,trackheader.side_number,sector.track,sector.side,sector.sector_id,sectorconfig[j].sectorsize,sector.data_lenght,sectorconfig[j].use_alternate_data_crc,sector.fdc_status_reg1,sector.fdc_status_reg2);
 						}
 					}
 					

@@ -1668,3 +1668,47 @@ SIDE * tg_alloctrack(unsigned int bitrate,unsigned char trackencoding,unsigned s
 
 	return currentside;
 }
+
+
+
+unsigned long * tg_allocsubtrack_long(unsigned int tracksize,unsigned long initvalue)
+{
+	unsigned int tracklen;
+	unsigned int i;
+	unsigned long * ptr;
+
+	tracklen=tracksize/8;
+	if(tracksize&7) tracklen++;
+
+	ptr=malloc(tracklen*sizeof(unsigned long));
+	if(ptr)
+	{
+		for(i=0;i<tracklen;i++)
+		{
+			ptr[i]=initvalue;
+		}
+	}
+	
+	return ptr;
+}
+
+unsigned char * tg_allocsubtrack_char(unsigned int tracksize,unsigned char initvalue)
+{
+	unsigned int tracklen;
+	unsigned int i;
+	unsigned char * ptr;
+
+	tracklen=tracksize/8;
+	if(tracksize&7) tracklen++;
+
+	ptr=malloc(tracklen*sizeof(unsigned char));
+	if(ptr)
+	{
+		for(i=0;i<tracklen;i++)
+		{
+			ptr[i]=initvalue;
+		}
+	}
+	
+	return ptr;
+}
