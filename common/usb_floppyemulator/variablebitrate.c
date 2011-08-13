@@ -124,8 +124,6 @@ unsigned long * realloc_time_buffer(unsigned long * buffer,unsigned long numbero
 	unsigned long * ptr;
 
 
-	
-
 	if((numberofbit*factor)&0x7)
 	{
 		newsize=(((numberofbit*factor)/8)+1);
@@ -400,10 +398,10 @@ int GetNewTrackRevolution(HXCFLOPPYEMULATOR* floppycontext,unsigned char * index
 		}
 		else
 		{
-				trackzonebuffer_temp[newzoneindex].bitrate=trackzonebuffer_0[i].bitrate;
-				trackzonebuffer_temp[newzoneindex].start=indexstart;
-				trackzonebuffer_temp[newzoneindex].end=trackzonebuffer_0[i].end;
-				newzoneindex++;
+			trackzonebuffer_temp[newzoneindex].bitrate=trackzonebuffer_0[i].bitrate;
+			trackzonebuffer_temp[newzoneindex].start=indexstart;
+			trackzonebuffer_temp[newzoneindex].end=trackzonebuffer_0[i].end;
+			newzoneindex++;
 		}
 		
 		i++;
@@ -436,10 +434,10 @@ int GetNewTrackRevolution(HXCFLOPPYEMULATOR* floppycontext,unsigned char * index
 		}
 		else
 		{
-				trackzonebuffer_temp[newzoneindex].bitrate=trackzonebuffer_1[i].bitrate;
-				trackzonebuffer_temp[newzoneindex].start=indexstart;
-				trackzonebuffer_temp[newzoneindex].end=trackzonebuffer_1[i].end;
-				newzoneindex++;
+			trackzonebuffer_temp[newzoneindex].bitrate=trackzonebuffer_1[i].bitrate;
+			trackzonebuffer_temp[newzoneindex].start=indexstart;
+			trackzonebuffer_temp[newzoneindex].end=trackzonebuffer_1[i].end;
+			newzoneindex++;
 		}
 		
 		i++;
@@ -484,79 +482,79 @@ int GetNewTrackRevolution(HXCFLOPPYEMULATOR* floppycontext,unsigned char * index
 	i=0;
 	do
 	{		
-			time_base=(float)FLOPPYEMUFREQ/((float)trackzonebuffer_0[i].bitrate);
-			bloclen=(trackzonebuffer_0[i].end-trackzonebuffer_0[i].start)+1;
+		time_base=(float)FLOPPYEMUFREQ/((float)trackzonebuffer_0[i].bitrate);
+		bloclen=(trackzonebuffer_0[i].end-trackzonebuffer_0[i].start)+1;
 
-			trackzonebuffer_0[i].code1=(unsigned char)floor(time_base);
+		trackzonebuffer_0[i].code1=(unsigned char)floor(time_base);
 			
-			if(time_base-trackzonebuffer_0[i].code1)
-			{
-				trackzonebuffer_0[i].code1lenint=(int)((time_base-trackzonebuffer_0[i].code1)*bloclen);
+		if(time_base-trackzonebuffer_0[i].code1)
+		{
+			trackzonebuffer_0[i].code1lenint=(int)((time_base-trackzonebuffer_0[i].code1)*bloclen);
 
-				trackzonebuffer_0[i].code2=(unsigned char)ceil(time_base);
-				trackzonebuffer_0[i].code2lenint=(int)((trackzonebuffer_0[i].code2-time_base)*bloclen);
+			trackzonebuffer_0[i].code2=(unsigned char)ceil(time_base);
+			trackzonebuffer_0[i].code2lenint=(int)((trackzonebuffer_0[i].code2-time_base)*bloclen);
+		}
+		else
+		{
+			trackzonebuffer_0[i].code1lenint=0;
+			trackzonebuffer_0[i].code2lenint=bloclen;
+		}
+			
+		//correction:
+		if((trackzonebuffer_0[i].code2lenint+trackzonebuffer_0[i].code1lenint)!=bloclen)
+		{
+			if(trackzonebuffer_0[i].code2lenint<trackzonebuffer_0[i].code1lenint)
+			{
+				trackzonebuffer_0[i].code2lenint++;
 			}
 			else
-			{
-				trackzonebuffer_0[i].code1lenint=0;
-				trackzonebuffer_0[i].code2lenint=bloclen;
+			{	
+				trackzonebuffer_0[i].code1lenint++;
 			}
+		}
 			
-			//correction:
-			if((trackzonebuffer_0[i].code2lenint+trackzonebuffer_0[i].code1lenint)!=bloclen)
-			{
-				if(trackzonebuffer_0[i].code2lenint<trackzonebuffer_0[i].code1lenint)
-				{
-					trackzonebuffer_0[i].code2lenint++;
-				}
-				else
-				{	
-					trackzonebuffer_0[i].code1lenint++;
-				}
-			}
-			
-			i++;
+		i++;
+
 	}while(i<=trackzoneindex0);
 	
 	// head 1
 	i=0;
 	do
 	{
-			time_base=(float)FLOPPYEMUFREQ/((float)trackzonebuffer_1[i].bitrate);
-			bloclen=(trackzonebuffer_1[i].end-trackzonebuffer_1[i].start)+1;
+		time_base=(float)FLOPPYEMUFREQ/((float)trackzonebuffer_1[i].bitrate);
+		bloclen=(trackzonebuffer_1[i].end-trackzonebuffer_1[i].start)+1;
 
-			trackzonebuffer_1[i].code1=(unsigned char)floor(time_base);
+		trackzonebuffer_1[i].code1=(unsigned char)floor(time_base);
 			
-			if(time_base-trackzonebuffer_1[i].code1)
+		if(time_base-trackzonebuffer_1[i].code1)
+		{
+			trackzonebuffer_1[i].code1lenint=(int)((time_base-trackzonebuffer_1[i].code1)*bloclen);
+
+			trackzonebuffer_1[i].code2=(unsigned char)ceil(time_base);
+			trackzonebuffer_1[i].code2lenint=(int)((trackzonebuffer_1[i].code2-time_base)*bloclen);
+
+		}
+		else
+		{
+			trackzonebuffer_1[i].code1lenint=0;
+			trackzonebuffer_1[i].code2lenint=bloclen;
+		}
+
+		//correction:
+		if((trackzonebuffer_1[i].code2lenint+trackzonebuffer_1[i].code1lenint)!=bloclen)
+		{
+			if(trackzonebuffer_1[i].code2lenint<trackzonebuffer_1[i].code1lenint)
 			{
-				trackzonebuffer_1[i].code1lenint=(int)((time_base-trackzonebuffer_1[i].code1)*bloclen);
-
-				trackzonebuffer_1[i].code2=(unsigned char)ceil(time_base);
-				trackzonebuffer_1[i].code2lenint=(int)((trackzonebuffer_1[i].code2-time_base)*bloclen);
-
+				trackzonebuffer_1[i].code2lenint++;
 			}
 			else
-			{
-				trackzonebuffer_1[i].code1lenint=0;
-				trackzonebuffer_1[i].code2lenint=bloclen;
+			{	
+				trackzonebuffer_1[i].code1lenint++;
 			}
+		}
 
-			//correction:
-			if((trackzonebuffer_1[i].code2lenint+trackzonebuffer_1[i].code1lenint)!=bloclen)
-			{
-				if(trackzonebuffer_1[i].code2lenint<trackzonebuffer_1[i].code1lenint)
-				{
-					trackzonebuffer_1[i].code2lenint++;
-				}
-				else
-				{	
-					trackzonebuffer_1[i].code1lenint++;
-				}
-			}
+		i++;
 
-			
-
-			i++;
 	}while(i<=trackzoneindex1);
 	
 	/////////////////////////////////////////////////////////////
@@ -674,29 +672,31 @@ int GetNewTrackRevolution(HXCFLOPPYEMULATOR* floppycontext,unsigned char * index
 	inserttimecode=0;
 	do
 	{
-
 		// opcode d'index a inserer ?
-		if((index_h0[i] && !currentindex) || (!index_h0[i] && currentindex))
+		if(i<lendatah0)
 		{
-			finalbuffer[k]=SETINDEX_H0_OPCODE | SETINDEX_H1_OPCODE;
-			k++;
+			if((index_h0[i] && !currentindex) || (!index_h0[i] && currentindex))
+			{
+				finalbuffer[k]=SETINDEX_H0_OPCODE | SETINDEX_H1_OPCODE;
+				k++;
 
-			if(index_h0[i])
-				finalbuffer[k]=1;
-			else
-				finalbuffer[k]=0;
-			finalbuffer[k]=finalbuffer[k] | ((readysignal<<1)&0x2);
-			finalbuffer[k]=finalbuffer[k] | ((diskchange<<2)&0x4);
-			finalbuffer[k]=finalbuffer[k] | ((writeprotect<<3)&0x8);
-			finalbuffer[k]=finalbuffer[k] | ((amigaready<<4)&0x10);
-			finalbuffer[k]=finalbuffer[k] | ((selectconfig<<5)&0xE0);
-			k++;
-	
-			if(index_h0[i])
-				currentindex=1;
-			else
-				currentindex=0;
-
+				if(index_h0[i])
+				{
+					finalbuffer[k]=1;
+					currentindex=1;
+				}
+				else
+				{
+					finalbuffer[k]=0;
+					currentindex=0;
+				}
+				finalbuffer[k]=finalbuffer[k] | ((readysignal<<1)&0x2);
+				finalbuffer[k]=finalbuffer[k] | ((diskchange<<2)&0x4);
+				finalbuffer[k]=finalbuffer[k] | ((writeprotect<<3)&0x8);
+				finalbuffer[k]=finalbuffer[k] | ((amigaready<<4)&0x10);
+				finalbuffer[k]=finalbuffer[k] | ((selectconfig<<5)&0xE0);
+				k++;					
+			}
 		}
 
 		if(((!lencode_track0) && (!lencode_track1)) && (trackpartbuffer_0[trackparthead0index].code==trackpartbuffer_1[trackparthead1index].code) )
@@ -718,7 +718,7 @@ int GetNewTrackRevolution(HXCFLOPPYEMULATOR* floppycontext,unsigned char * index
 		else
 		{
 
-		// faut t'il configurer le bitrate en face 0 ? (changement de zone de bitrate)		
+			// faut t'il configurer le bitrate en face 0 ? (changement de zone de bitrate)		
 			if(!lencode_track0)
 			{
 				if(trackparthead0index<numberofzoneh0)
@@ -761,7 +761,7 @@ int GetNewTrackRevolution(HXCFLOPPYEMULATOR* floppycontext,unsigned char * index
 
 		}
 
-		// faut t'il configurer les bitrates (programmation periodique)
+		// faut t'il configurer les bitrates (programmation periodique) ?
 		if(!inserttimecode)
 		{
 			inserttimecode=GRANULA;
@@ -821,7 +821,7 @@ int GetNewTrackRevolution(HXCFLOPPYEMULATOR* floppycontext,unsigned char * index
 				datah1tmp=datah1[j];
 				if(randomh1)
 				{
-					randomh1tmp=randomh1[i];
+					randomh1tmp=randomh1[j];
 				}
 
 				adjustrand(&datah1tmp, &randomh1tmp);
@@ -870,113 +870,110 @@ int GetNewTrackRevolution(HXCFLOPPYEMULATOR* floppycontext,unsigned char * index
 		{
 			if(deltatick>=0) // track h0 plus lente
 			{
-					// track 0 plus loin que trask 1 (bitrate track 0 < bitrate track 1)
-					// inserer nop sur track 0
-					// compense h0
+				// track 0 plus loin que trask 1 (bitrate track 0 < bitrate track 1)
+				// inserer nop sur track 0
+				// compense h0
 					
-					datah1tmp=0;
-					randomh1tmp=0;
+				datah1tmp=0;
+				randomh1tmp=0;
 
-					if(j<lendatah1)
-					{
-						datah1tmp=datah1[j];
-						if(randomh1)
-						randomh1tmp=randomh1[j];
-					}
-					else
-					{
-						datah1tmp=NOP_H1_OPCODE|NOP_H0_OPCODE;
-					}
+				if(j<lendatah1)
+				{
+					datah1tmp=datah1[j];
+					if(randomh1)
+					randomh1tmp=randomh1[j];
+				}
+				else
+				{
+					datah1tmp=NOP_H1_OPCODE|NOP_H0_OPCODE;
+				}
 		
 
-					finalbuffer[k]=(NOP_H0_OPCODE) | (datah1tmp>>4); 
-					randomfinalbuffer[k]=(randomh1tmp>>4); 
-					k++;
-					finalbuffer[k]=(NOP_H0_OPCODE) | (datah1tmp&0x0f); 
-					randomfinalbuffer[k]=(randomh1tmp&0x0f); 
-					k++;
+				finalbuffer[k]=(NOP_H0_OPCODE) | (datah1tmp>>4); 
+				randomfinalbuffer[k]=(randomh1tmp>>4); 
+				k++;
+				finalbuffer[k]=(NOP_H0_OPCODE) | (datah1tmp&0x0f); 
+				randomfinalbuffer[k]=(randomh1tmp&0x0f); 
+				k++;
 
-					tick_offset_h1=tick_offset_h1+((speedcfg_track1)*4);
+				tick_offset_h1=tick_offset_h1+((speedcfg_track1)*4);
 					
-					if(lencode_track1)
-					{
-						lencode_track1--;
-						lencode_track1_error=0;
-						j++;
-					}
-					else
-					{
-						lencode_track1_error++;
-					}		
+				if(lencode_track1)
+				{
+					lencode_track1--;
+					lencode_track1_error=0;
+					j++;
+				}
+				else
+				{
+					lencode_track1_error++;
+				}		
 			}
 			else					
 			{
-					//(4*3) 00000000000000000000
-					//(4*6) 1N1N1N1N1N1N1N1N1N1N
+				//(4*3) 00000000000000000000
+				//(4*6) 1N1N1N1N1N1N1N1N1N1N
 				
-					// track 1 plus loin que trask 0 (bitrate track 1 < bitrate track 0)
-					// inserer nop sur track 1
-					// compense h1
+				// track 1 plus loin que trask 0 (bitrate track 1 < bitrate track 0)
+				// inserer nop sur track 1
+				// compense h1
 						
-						datah0tmp=0;
-						randomh0tmp=0;
+				datah0tmp=0;
+				randomh0tmp=0;
 
-						if(i<lendatah0)
-						{
-							datah0tmp=datah0[i];
-							if(randomh0)
-							{
-								randomh0tmp=randomh0[i];
-							}
-						}
-						else
-						{
-							datah0tmp=NOP_H1_OPCODE|NOP_H0_OPCODE;
-						}
+				if(i<lendatah0)
+				{
+					datah0tmp=datah0[i];
+					if(randomh0)
+					{
+						randomh0tmp=randomh0[i];
+					}
+				}
+				else
+				{
+					datah0tmp=NOP_H1_OPCODE|NOP_H0_OPCODE;
+				}
 						
-						finalbuffer[k]=(datah0tmp&0xf0) | (NOP_H1_OPCODE); 
-						randomfinalbuffer[k]=(randomh0tmp&0xf0); 
-						k++;
-						finalbuffer[k]=((datah0tmp<<4)&0xf0) | (NOP_H1_OPCODE); 
-						randomfinalbuffer[k]=((randomh0tmp<<4)&0xf0); 
-						k++;
+				finalbuffer[k]=(datah0tmp&0xf0) | (NOP_H1_OPCODE); 
+				randomfinalbuffer[k]=(randomh0tmp&0xf0); 
+				k++;
+				finalbuffer[k]=((datah0tmp<<4)&0xf0) | (NOP_H1_OPCODE); 
+				randomfinalbuffer[k]=((randomh0tmp<<4)&0xf0); 
+				k++;
 
-						tick_offset_h0=tick_offset_h0+((speedcfg_track0)*4);
+				tick_offset_h0=tick_offset_h0+((speedcfg_track0)*4);
 
-						if(lencode_track0)
-						{
-							lencode_track0--;
-							lencode_track0_error=0;
-							i++;
-						}
-						else
-						{
-							lencode_track0_error++;
-						}
-						
+				if(lencode_track0)
+				{
+					lencode_track0--;
+					lencode_track0_error=0;
+					i++;
+				}
+				else
+				{
+					lencode_track0_error++;
+				}		
 			}
 		}
-//	}
+						
+	}while(!((trackparthead0index>=numberofzoneh0 && trackparthead1index>=numberofzoneh1) && (!lencode_track1 && !lencode_track0)));
 		
-				
-		}while(!((trackparthead0index>=numberofzoneh0 && trackparthead1index>=numberofzoneh1) && (!lencode_track1 && !lencode_track0)));
-		
-		free(datah0);
-		free(datah1);
-		free(index_h0);
+	free(datah0);
+	free(datah1);
+	free(index_h0);
 
-		if(randomh0)
-			free(randomh0);
-		if(randomh1)
-			free(randomh1);
+	if(randomh0)
+		free(randomh0);
+	if(randomh1)
+		free(randomh1);
 		
-		if(timeh0)
-			free(timeh0);
+	if(timeh0)
+		free(timeh0);
 		
-		if(timeh1)
-			free(timeh1);
+	if(timeh1)
+		free(timeh1);
 		
-		return k;
+	return k;
 }
 
 
