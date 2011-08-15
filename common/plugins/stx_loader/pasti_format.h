@@ -43,7 +43,7 @@ typedef struct pasti_trackheader_
  unsigned long  tracksize;
  unsigned long  unused1;
  unsigned short numberofsector;
- unsigned short unknowvalue;
+ unsigned short flags;
  unsigned short Tvalue;
  unsigned char  track_code;
  unsigned char  unused2;
