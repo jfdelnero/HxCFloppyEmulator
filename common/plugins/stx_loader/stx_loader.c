@@ -259,25 +259,29 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			{
 				//lecture descripteur track
 				trackheaderpos=ftell(f);
-				fread( &trackheader, sizeof(trackheader), 1, f ); 
+				fread( &trackheader, sizeof(trackheader), 1, f );
 				
 				// debug //
-				sprintf(tempstring,"\nn°%.3d ",i);
-				sprintf(&tempstring[strlen(tempstring)],"T:%d S:%d Sectors:%d ",trackheader.track_code&0x7F,trackheader.track_code>>7,trackheader.numberofsector);
-				sprintf(&tempstring[strlen(tempstring)],"Size:%d ",trackheader.tracksize);
-				sprintf(&tempstring[strlen(tempstring)],"Track header:");
+				floppycontext->hxc_printf(MSG_DEBUG,"------ Track Header %.3d Offset 0x%.8X ------",i,trackheaderpos);
+				floppycontext->hxc_printf(MSG_DEBUG,"Track %.3d",trackheader.track_code&0x7F);
+				floppycontext->hxc_printf(MSG_DEBUG,"Side %.3d" ,trackheader.track_code>>7);
+				floppycontext->hxc_printf(MSG_DEBUG,"Number of Sector %.3d" ,trackheader.numberofsector);
+				floppycontext->hxc_printf(MSG_DEBUG,"Track Size : 0x%.8X" ,trackheader.tracksize);
+				floppycontext->hxc_printf(MSG_DEBUG,"Track header:");
+				tempstring[0]=0;
 				for(debug_i=0;debug_i<sizeof(trackheader);debug_i++)
 				{
 					sprintf(&tempstring[strlen(tempstring)],"%.2X ",*(((unsigned char*)&trackheader)+debug_i));
 				}
 				floppycontext->hxc_printf(MSG_DEBUG,"%s",tempstring);
+				floppycontext->hxc_printf(MSG_DEBUG,"---------------------------------------------");
 				//////////
 				
 				tracknumber=trackheader.track_code&0x7F;
 				sidenumber=trackheader.track_code>>7;
 				
 				trackmode=0;
-				if(trackheader.unknowvalue&0x40)
+				if(trackheader.flags&0x40)
 				{
 					trackmode=1;
 				}
@@ -306,56 +310,101 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							{
 								
 								// Chargement du descripteur de secteur.
-								fseek(f,sectorlistoffset + (sizeof(pasti_sector)*j) ,SEEK_SET);
-								fread( &sector[j], sizeof(pasti_sector), 1, f ); 
-							
-								sectorconfig[j].use_alternate_data_crc=0;
-							
-								sectorconfig[j].missingdataaddressmark=0;
-								sectorconfig[j].use_alternate_datamark=0;
-								sectorconfig[j].use_alternate_addressmark=0;
-								sectorconfig[j].head=sector[j].side_num;
-								sectorconfig[j].cylinder=sector[j].track_num;
-								sectorconfig[j].sector=sector[j].sector_num;
-								sectorconfig[j].use_alternate_header_crc=0x2;
-								sectorconfig[j].header_crc=sector[j].header_crc;
-								sectorconfig[j].gap3=255;
-								sectorconfig[j].bitrate=floppydisk->floppyBitRate;
-								sectorconfig[j].trackencoding=trackformat;
 								
-								sectorconfig[j].sectorsize=0;
-								sectorconfig[j].sectorsize=128<<sector[j].sector_size;
+								if(trackheader.flags&0x01)
+								{
 
-						
-								///////////////////////////// debug ///////////////////////////////
-								sprintf(tempstring,"Sector:%.2d Size:%.8d Cylcode:%.2d HeadCode:%d SectorCode:%.2d Size:%d",j,sectorconfig[j].sectorsize,sectorconfig[j].cylinder,sectorconfig[j].head,sectorconfig[j].sector,sectorconfig[j].sectorsize);
-								sprintf(&tempstring[strlen(tempstring)]," Sector header:");
-								for(debug_i=0;debug_i<sizeof(pasti_sector);debug_i++) 
-								{	
-									sprintf(&tempstring[strlen(tempstring)],"%.2X",*(((unsigned char*)&sector[j])+debug_i));
-									if(debug_i==3 || debug_i==5 ||  debug_i==7 || debug_i==8 || debug_i==9 || debug_i==10 || debug_i==11 || debug_i==13 || debug_i==15)
+									fseek(f,sectorlistoffset + (sizeof(pasti_sector)*j) ,SEEK_SET);
+									fread( &sector[j], sizeof(pasti_sector), 1, f ); 
+								
+							
+									sectorconfig[j].use_alternate_data_crc=0;
+							
+									sectorconfig[j].missingdataaddressmark=0;
+									sectorconfig[j].use_alternate_datamark=0;
+									sectorconfig[j].use_alternate_addressmark=0;
+									sectorconfig[j].head=sector[j].side_num;
+									sectorconfig[j].cylinder=sector[j].track_num;
+									sectorconfig[j].sector=sector[j].sector_num;
+									sectorconfig[j].use_alternate_header_crc=0x2;
+									sectorconfig[j].header_crc=sector[j].header_crc;
+									sectorconfig[j].gap3=255;
+									sectorconfig[j].bitrate=floppydisk->floppyBitRate;
+									sectorconfig[j].trackencoding=trackformat;
+									
+									sectorconfig[j].sectorsize=0;
+									sectorconfig[j].sectorsize=128<<sector[j].sector_size;
+
+							
+									///////////////////////////// debug ///////////////////////////////
+									floppycontext->hxc_printf(MSG_DEBUG,"------ Sector Header %.3d - Offset 0x%.8X ------",j,sectorlistoffset + (sizeof(pasti_sector)*j));
+									floppycontext->hxc_printf(MSG_DEBUG,"Track: %.3d",sector[j].track_num);
+									floppycontext->hxc_printf(MSG_DEBUG,"Side: %.3d" ,sector[j].side_num);
+									floppycontext->hxc_printf(MSG_DEBUG,"Sector ID: %.3d" ,sector[j].sector_num);
+									floppycontext->hxc_printf(MSG_DEBUG,"Sector size: 0x%.2X (%d bytes)" ,sector[j].sector_size,128<<sector[j].sector_size);
+									floppycontext->hxc_printf(MSG_DEBUG,"Sector Flags: 0x%.2X" ,sector[j].sector_flags);
+									floppycontext->hxc_printf(MSG_DEBUG,"Sector FDC Status: 0x%.2X" ,sector[j].FDC_status);
+									floppycontext->hxc_printf(MSG_DEBUG,"Sector Header CRC : 0x%.4X" ,sector[j].header_crc);
+									floppycontext->hxc_printf(MSG_DEBUG,"Sector data Offset: 0x%.8X" ,sector[j].sector_pos);
+									floppycontext->hxc_printf(MSG_DEBUG,"Index-Sector Timing: %d" ,sector[j].sector_pos_timing);
+									floppycontext->hxc_printf(MSG_DEBUG,"Read Sector Timing: %d" ,sector[j].sector_speed_timing);
+									floppycontext->hxc_printf(MSG_DEBUG,"Sector header:");
+									tempstring[0]=0;
+									for(debug_i=0;debug_i<sizeof(pasti_sector);debug_i++) 
+									{	
+										sprintf(&tempstring[strlen(tempstring)],"%.2X",*(((unsigned char*)&sector[j])+debug_i));
+										if(debug_i==3 || debug_i==5 ||  debug_i==7 || debug_i==8 || debug_i==9 || debug_i==10 || debug_i==11 || debug_i==13 || debug_i==15)
+										{
+											sprintf(&tempstring[strlen(tempstring)]," ");
+										}
+									}
+									floppycontext->hxc_printf(MSG_DEBUG,"%s",tempstring);
+									floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
+
+									///////////////////////////// debug ///////////////////////////////
+								
+								
+									if((sector[j].FDC_status&0x88)==0x88)
 									{
-										sprintf(&tempstring[strlen(tempstring)]," ");
+										numberofweaksector++;
+										weaksectortotalsize=weaksectortotalsize+sectorconfig[j].sectorsize;
 									}
 								}
-								floppycontext->hxc_printf(MSG_DEBUG,"%s",tempstring);
-								///////////////////////////// debug ///////////////////////////////
-							
-							
-								if((sector[j].FDC_status&0x88)==0x88)
+								else
 								{
-									numberofweaksector++;
-									weaksectortotalsize=weaksectortotalsize+sectorconfig[j].sectorsize;
+									sector[j].sector_pos=(512*j);
+									sectorconfig[j].use_alternate_data_crc=0;
+							
+									sectorconfig[j].missingdataaddressmark=0;
+									sectorconfig[j].use_alternate_datamark=0;
+									sectorconfig[j].use_alternate_addressmark=0;
+									sectorconfig[j].head=trackheader.track_code>>7;
+									sectorconfig[j].cylinder=trackheader.track_code&0x7F;
+									sectorconfig[j].sector=j+1;
+									sectorconfig[j].use_alternate_header_crc=0x0;
+									sectorconfig[j].gap3=255;
+									sectorconfig[j].bitrate=floppydisk->floppyBitRate;
+									sectorconfig[j].trackencoding=trackformat;
+									sectorconfig[j].sectorsize=512;
+
+
+									///////////////////////////// debug ///////////////////////////////
+									floppycontext->hxc_printf(MSG_DEBUG,"------ Sector %.3d : No Header / unprotected-------");
+									floppycontext->hxc_printf(MSG_DEBUG,"Track: %.3d",sectorconfig[j].cylinder);
+									floppycontext->hxc_printf(MSG_DEBUG,"Side: %.3d" ,sectorconfig[j].head);
+									floppycontext->hxc_printf(MSG_DEBUG,"Sector ID: %.3d" ,sectorconfig[j].sector);
+									floppycontext->hxc_printf(MSG_DEBUG,"Sector size: %d bytes" ,sectorconfig[j].sectorsize);
+									floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
+
 								}
 							}
-						
 						}
 					
 						// Calcul de la position des donnees					
 						trackpos=ftell(f)+ weaksectortotalsize;
 						fseek(f,trackpos,SEEK_SET);
 					
-						if(trackheader.unknowvalue&0x80)
+						if(trackheader.flags&0x80)
 						{
 							fread( &temp_val, sizeof(unsigned short), 1, f ); 
 							floppycontext->hxc_printf(MSG_DEBUG,"Unknow value %x",temp_val);
@@ -364,6 +413,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						// lecture des secteurs
 						for(j=0;j<trackheader.numberofsector;j++)
 						{
+							floppycontext->hxc_printf(MSG_DEBUG,"Reading Sector data %d Header at: 0x%.8X",j,trackpos + sector[j].sector_pos);
 							fseek(f,trackpos + sector[j].sector_pos,SEEK_SET);	
 							sectorconfig[j].input_data=malloc(sectorconfig[j].sectorsize);
 							fread(sectorconfig[j].input_data,sectorconfig[j].sectorsize,1,f);
@@ -523,7 +573,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 													
 						fseek(f,trackpos,SEEK_SET);
 					
-						if(trackheader.unknowvalue&0x80)
+						if(trackheader.flags&0x80)
 						{
 							//trackpos=trackpos+2;
 							fread( &index_sync, sizeof(unsigned short), 1, f ); 
@@ -707,7 +757,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							currentcylinder->sides[sidenumber]=tg_alloctrack(DEFAULT_DD_BITRATE,ISOIBM_MFM_ENCODING,300,tracklen*2*8,2500,-2500,TG_ALLOCTRACK_ALLOCTIMIMGBUFFER|TG_ALLOCTRACK_ALLOCFLAKEYBUFFER);
 							currentside=currentcylinder->sides[sidenumber];
 														
-							if(trackheader.unknowvalue&0x80)
+							if(trackheader.flags&0x80)
 							{
 								tempclock[index_sync]=0x14;
 								temptrack2[index_sync]=0xc2;
