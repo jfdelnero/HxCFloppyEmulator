@@ -366,7 +366,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						}
 						else
 						{
-							floppycontext->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d File offset:----------",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize);
+							floppycontext->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d File offset: ----------",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize);
 							for(l=0;l<(sectorconfig[k].sectorsize/2);l++)
 							{
 								sectorconfig[k].input_data[(l*2)]=0x6D;

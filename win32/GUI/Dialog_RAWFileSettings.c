@@ -409,16 +409,7 @@ BOOL CALLBACK DialogRAWFileSettings(
 			totalsector=totalsector*GetDlgItemInt(hwndDlg,IDC_NUMBEROFTRACK,NULL,0);
 			
 			sectorsize=SendDlgItemMessage(hwndDlg, IDC_SECTORSIZE, CB_GETCURSEL, 0, 0);
-
-			if(sectorsize>0 && sectorsize<=16384)
-			{
-				totalsize=totalsector*sectorsize;
-			}
-			else
-			{
-				totalsize=0;
-			}
-	
+			totalsize=totalsector*(128<<sectorsize);
 
 			if(RAW_libIsValidFormat(flopemu,&temp_rawfileconfig)==LOADER_ISVALID &&
 			   (temp_rawfileconfig.bitrate<=1000000) && (temp_rawfileconfig.bitrate>=50000) &&
@@ -445,8 +436,6 @@ BOOL CALLBACK DialogRAWFileSettings(
 
 			//old_bitrate=new_bitrate;
 			//old_rpm=temp_rawfileconfig.rpm;
-
-
 
 			SetDlgItemInt(hwndDlg,IDC_NBOFSECTORS,totalsector,0);
 			SetDlgItemInt(hwndDlg,IDC_TOTALSIZE,totalsize,0);
