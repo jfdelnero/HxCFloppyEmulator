@@ -251,7 +251,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		rawfileconfig.sectorpertrack=9;
 		rawfileconfig.rpm=300;
 		rawfileconfig.sectorsize=2;//SECTORSIZE_512;
-		rawfileconfig.tracktype=MFM_TRACK_TYPE;
+		rawfileconfig.tracktype=MFMIBM_TRACK_TYPE;
 		rawfileconfig.sidecfg=TWOSIDESFLOPPY;
 		rawfileconfig.interleave=1;
 		rawfileconfig.firstidsector=1;

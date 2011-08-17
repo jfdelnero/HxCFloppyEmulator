@@ -62,6 +62,8 @@
 
 #include "../common/os_api.h"
 
+#define PASTI_DBG 1
+
 int STX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	int pathlen;
@@ -139,7 +141,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 {
 	
 	FILE * f;
-	unsigned int i,j,k,l,t,t2,debug_i;
+	unsigned int i,j,k,l,t,t2;
 	unsigned char trackformat;
 	unsigned char interleave;
 	unsigned short temp_val;
@@ -160,7 +162,6 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned char * tempclock;
 	int trackpos,trackheaderpos;
 	int tracksize;
-	char tempstring[512];
 	int presenceside[2];
 	int numberofweaksector;
 	int lastindex;
@@ -175,6 +176,12 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	CYLINDER* currentcylinder;
 	SIDE* currentside;
 	
+#ifdef PASTI_DBG
+	char tempstring[512];
+	unsigned int debug_i;
+#endif
+
+
 	floppycontext->hxc_printf(MSG_DEBUG,"STX_libLoad_DiskFile %s",imgfile);
 	
 	f=fopen(imgfile,"rb");
@@ -238,7 +245,8 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		
 		
 		trackformat=ISOFORMAT_DD;
-		
+
+#ifdef PASTI_DBG
 		sprintf(tempstring,"File header :");
 		for(debug_i=0;debug_i<sizeof(pasti_fileheader);debug_i++)
 		{
@@ -247,9 +255,10 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		sprintf(&tempstring[strlen(tempstring)],"\n");
 		
 		floppycontext->hxc_printf(MSG_DEBUG,"%s",tempstring);
+
 		floppycontext->hxc_printf(MSG_DEBUG,"Number of track : %d (%d), Number of side: %d\n",numberoftrack,numberoftrackperside,numberofside);
 		floppycontext->hxc_printf(MSG_DEBUG,"Tracks :");
-		
+#endif		
 		if(floppydisk->floppyNumberOfTrack)
 		{
 			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
@@ -261,7 +270,8 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				trackheaderpos=ftell(f);
 				fread( &trackheader, sizeof(trackheader), 1, f );
 				
-				// debug //
+				///////////////////////////// debug ///////////////////////////////
+#ifdef PASTI_DBG
 				floppycontext->hxc_printf(MSG_DEBUG,"------ Track Header %.3d Offset 0x%.8X ------",i,trackheaderpos);
 				floppycontext->hxc_printf(MSG_DEBUG,"Track %.3d",trackheader.track_code&0x7F);
 				floppycontext->hxc_printf(MSG_DEBUG,"Side %.3d" ,trackheader.track_code>>7);
@@ -275,7 +285,8 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				}
 				floppycontext->hxc_printf(MSG_DEBUG,"%s",tempstring);
 				floppycontext->hxc_printf(MSG_DEBUG,"---------------------------------------------");
-				//////////
+#endif
+				///////////////////////////// debug ///////////////////////////////
 				
 				tracknumber=trackheader.track_code&0x7F;
 				sidenumber=trackheader.track_code>>7;
@@ -297,8 +308,9 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					//track contenant uniquement les informations secteurs
 					// -> encodage "standard"
 					case 0:
-
+#ifdef PASTI_DBG
 						floppycontext->hxc_printf(MSG_DEBUG,"READ SECTOR track");
+#endif 
 						if(trackheader.numberofsector)
 						{
 							sector=malloc(sizeof(pasti_sector)*trackheader.numberofsector);
@@ -309,15 +321,13 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							for(j=0;j<(trackheader.numberofsector);j++)
 							{
 								
-								// Chargement du descripteur de secteur.
-								
+								// Chargement du descripteur de secteur.						
 								if(trackheader.flags&0x01)
 								{
 
 									fseek(f,sectorlistoffset + (sizeof(pasti_sector)*j) ,SEEK_SET);
 									fread( &sector[j], sizeof(pasti_sector), 1, f ); 
-								
-							
+
 									sectorconfig[j].use_alternate_data_crc=0;
 							
 									sectorconfig[j].missingdataaddressmark=0;
@@ -337,6 +347,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 							
 									///////////////////////////// debug ///////////////////////////////
+#ifdef PASTI_DBG
 									floppycontext->hxc_printf(MSG_DEBUG,"------ Sector Header %.3d - Offset 0x%.8X ------",j,sectorlistoffset + (sizeof(pasti_sector)*j));
 									floppycontext->hxc_printf(MSG_DEBUG,"Track: %.3d",sector[j].track_num);
 									floppycontext->hxc_printf(MSG_DEBUG,"Side: %.3d" ,sector[j].side_num);
@@ -360,7 +371,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 									}
 									floppycontext->hxc_printf(MSG_DEBUG,"%s",tempstring);
 									floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
-
+#endif
 									///////////////////////////// debug ///////////////////////////////
 								
 								
@@ -389,12 +400,15 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 
 									///////////////////////////// debug ///////////////////////////////
-									floppycontext->hxc_printf(MSG_DEBUG,"------ Sector %.3d : No Header / unprotected-------");
+#ifdef PASTI_DBG
+									floppycontext->hxc_printf(MSG_DEBUG,"------ Sector %.3d : No Header / unprotected -------",j);
 									floppycontext->hxc_printf(MSG_DEBUG,"Track: %.3d",sectorconfig[j].cylinder);
 									floppycontext->hxc_printf(MSG_DEBUG,"Side: %.3d" ,sectorconfig[j].head);
 									floppycontext->hxc_printf(MSG_DEBUG,"Sector ID: %.3d" ,sectorconfig[j].sector);
 									floppycontext->hxc_printf(MSG_DEBUG,"Sector size: %d bytes" ,sectorconfig[j].sectorsize);
-									floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
+									floppycontext->hxc_printf(MSG_DEBUG,"---------------------------------------------------");
+#endif
+									///////////////////////////// debug ///////////////////////////////
 
 								}
 							}
@@ -407,13 +421,17 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						if(trackheader.flags&0x80)
 						{
 							fread( &temp_val, sizeof(unsigned short), 1, f ); 
+#ifdef PASTI_DBG
 							floppycontext->hxc_printf(MSG_DEBUG,"Unknow value %x",temp_val);
+#endif
 						}
 					
 						// lecture des secteurs
 						for(j=0;j<trackheader.numberofsector;j++)
 						{
-							floppycontext->hxc_printf(MSG_DEBUG,"Reading Sector data %d Header at: 0x%.8X",j,trackpos + sector[j].sector_pos);
+#ifdef PASTI_DBG
+							floppycontext->hxc_printf(MSG_DEBUG,"Reading Sector data %d at: 0x%.8X",j,trackpos + sector[j].sector_pos);
+#endif
 							fseek(f,trackpos + sector[j].sector_pos,SEEK_SET);	
 							sectorconfig[j].input_data=malloc(sectorconfig[j].sectorsize);
 							fread(sectorconfig[j].input_data,sectorconfig[j].sectorsize,1,f);
@@ -425,6 +443,8 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						if(!floppydisk->tracks[tracknumber])
 						{
 							floppydisk->tracks[tracknumber]=(CYLINDER*)malloc(sizeof(CYLINDER));
+							memset(floppydisk->tracks[tracknumber],0,sizeof(CYLINDER));
+							floppydisk->tracks[tracknumber]->floppyRPM=300;
 							currentcylinder=floppydisk->tracks[tracknumber];
 							currentcylinder->number_of_side=0;
 						
@@ -553,7 +573,9 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								weaksectortotalsize=weaksectortotalsize+sectorconfig[j].sectorsize;//real_sector_size_list[j];//sectorconfig[j].sectorsize;
 							}
 				
-							////////////////// debug ////////////////////////
+							///////////////////////////// debug ///////////////////////////////
+#ifdef PASTI_DBG
+							
 							sprintf(tempstring,"Sector:%.2d Size:%.8d Cylcode:%.2d HeadCode:%d SectorCode:%.2d Size:%d Real_Size:%d",j,sectorconfig[j].sectorsize,sectorconfig[j].cylinder,sectorconfig[j].head,sectorconfig[j].sector,sectorconfig[j].sectorsize,real_sector_size_list[j]);
 							sprintf(&tempstring[strlen(tempstring)]," Sector header:");
 							for(debug_i=0;debug_i<sizeof(pasti_sector);debug_i++) 
@@ -565,7 +587,8 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								}
 							}
 							floppycontext->hxc_printf(MSG_DEBUG,"%s",tempstring);
-							//////////////////////////////////////////////
+#endif
+							///////////////////////////// debug ///////////////////////////////
 					
 						}
 					
@@ -577,12 +600,17 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						{
 							//trackpos=trackpos+2;
 							fread( &index_sync, sizeof(unsigned short), 1, f ); 
+							#ifdef PASTI_DBG
 							floppycontext->hxc_printf(MSG_DEBUG,"Index sync pos %x",temp_val);
+							#endif
 						}
 					
 						//trackpos=trackpos+2;
 						fread( &temp_val, sizeof(unsigned short), 1, f ); 
+
+						#ifdef PASTI_DBG
 						floppycontext->hxc_printf(MSG_DEBUG,"READTRACK datas size %x",temp_val);
+						#endif
 					
 						//trackpos=trackpos+temp_val;
 						temptrack=(unsigned char*)malloc(temp_val);
@@ -789,62 +817,65 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 									
 									for(l=(sectorcfgs[j].trackoffset*2);l<((sectorcfgs[j].trackoffset*2)+(sectorcfgs[j].size*2));l++)
 									{
-										if(!(l&1))
+										if(l<(unsigned int)(tracklen*2))
 										{
-											if(!(temptrack[l>>1]&0x80))
+											if(!(l&1))
+											{
+												if(!(temptrack[l>>1]&0x80))
+												{
+													
+													currentside->databuffer[l]=currentside->databuffer[l]&(~0xC0);
+													currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0xC0);
+												}
+												
+												if(!(temptrack[l>>1]&0x40))
+												{
+													currentside->databuffer[l]=currentside->databuffer[l]&(~0x30);
+													currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x30);
+												}
+												
+												if(!(temptrack[l>>1]&0x20))
+												{
+													currentside->databuffer[l]=currentside->databuffer[l]&(~0x0C);
+													currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x0C);
+												}
+												
+												if(!(temptrack[l>>1]&0x10))
+												{
+													currentside->databuffer[l]=currentside->databuffer[l]&(~0x03);
+													currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x03);
+													
+												}
+												
+											}
+											else
 											{
 												
-												currentside->databuffer[l]=currentside->databuffer[l]&(~0xC0);
-												currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0xC0);
-											}
-											
-											if(!(temptrack[l>>1]&0x40))
-											{
-												currentside->databuffer[l]=currentside->databuffer[l]&(~0x30);
-												currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x30);
-											}
-											
-											if(!(temptrack[l>>1]&0x20))
-											{
-												currentside->databuffer[l]=currentside->databuffer[l]&(~0x0C);
-												currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x0C);
-											}
-											
-											if(!(temptrack[l>>1]&0x10))
-											{
-												currentside->databuffer[l]=currentside->databuffer[l]&(~0x03);
-												currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x03);
+												if(!(temptrack[l>>1]&0x8))
+												{
+													
+													currentside->databuffer[l]=currentside->databuffer[l]&(~0xC0);
+													currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0xC0);
+												}
 												
-											}
-											
-										}
-										else
-										{
-											
-											if(!(temptrack[l>>1]&0x8))
-											{
+												if(!(temptrack[l>>1]&0x4))
+												{
+													currentside->databuffer[l]=currentside->databuffer[l]&(~0x30);
+													currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x30);
+												}
 												
-												currentside->databuffer[l]=currentside->databuffer[l]&(~0xC0);
-												currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0xC0);
-											}
-											
-											if(!(temptrack[l>>1]&0x4))
-											{
-												currentside->databuffer[l]=currentside->databuffer[l]&(~0x30);
-												currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x30);
-											}
-											
-											if(!(temptrack[l>>1]&0x2))
-											{
-												currentside->databuffer[l]=currentside->databuffer[l]&(~0x0C);
-												currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x0C);
-											}
-											
-											if(!(temptrack[l>>1]&0x1))
-											{
-												currentside->databuffer[l]=currentside->databuffer[l]&(~0x03);
-												currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x03);
+												if(!(temptrack[l>>1]&0x2))
+												{
+													currentside->databuffer[l]=currentside->databuffer[l]&(~0x0C);
+													currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x0C);
+												}
 												
+												if(!(temptrack[l>>1]&0x1))
+												{
+													currentside->databuffer[l]=currentside->databuffer[l]&(~0x03);
+													currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l]|(0x03);
+													
+												}
 											}
 										}
 									}
