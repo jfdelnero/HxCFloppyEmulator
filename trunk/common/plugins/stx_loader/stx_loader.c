@@ -172,6 +172,8 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned char CRC16_High;
 	unsigned char CRC16_Low;
 	int sectorlistoffset;
+	int weaksectoroffset;
+	unsigned char * weaksectorbuffer;
 	
 	CYLINDER* currentcylinder;
 	SIDE* currentside;
@@ -314,6 +316,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						if(trackheader.numberofsector)
 						{
 							sector=malloc(sizeof(pasti_sector)*trackheader.numberofsector);
+							memset(sector,0,sizeof(pasti_sector)*trackheader.numberofsector);
 							sectorconfig=(SECTORCONFIG *) malloc(sizeof(SECTORCONFIG)* trackheader.numberofsector);
 							memset(sectorconfig,0,sizeof(SECTORCONFIG)* trackheader.numberofsector);
 													
@@ -415,9 +418,13 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						}
 					
 						// Calcul de la position des donnees					
+						weaksectoroffset=ftell(f);
 						trackpos=ftell(f)+ weaksectortotalsize;
 						fseek(f,trackpos,SEEK_SET);
-					
+
+						
+										
+
 						if(trackheader.flags&0x80)
 						{
 							fread( &temp_val, sizeof(unsigned short), 1, f ); 
@@ -470,11 +477,26 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						{
 							if((sector[j].FDC_status&0x88)==0x88)
 							{
-								for(k=0;k<16;k++)
+								///////////////////////////// debug ///////////////////////////////
+#ifdef PASTI_DBG
+								floppycontext->hxc_printf(MSG_DEBUG,"----------- Flakey Buffer - Sector %.3d -----------",j);
+								floppycontext->hxc_printf(MSG_DEBUG,"File Offset: 0x%.8X Size : %d Bytes",weaksectoroffset,128<<sector[j].sector_size);
+								floppycontext->hxc_printf(MSG_DEBUG,"---------------------------------------------------");
+#endif
+								///////////////////////////// debug ///////////////////////////////
+
+								weaksectorbuffer=malloc(128<<sector[j].sector_size);
+								if(weaksectorbuffer)
 								{
-									//currentside->databuffer[sectorconfig[j].startdataindex+64+k]=0;
-									currentside->flakybitsbuffer[sectorconfig[j].startdataindex+64+k]=0xFF;
-									//	currentside->timingbuffer[sectorconfig[j].startdataindex+64+k]=currentside->timingbuffer[sectorconfig[j].startdataindex+64+k]*2;
+									fseek(f,weaksectoroffset,SEEK_SET);
+									fread(weaksectorbuffer,128<<sector[j].sector_size,1,f);
+
+									for(k=0;(k<(unsigned int)(128<<sector[j].sector_size));k++)
+									{
+										currentside->flakybitsbuffer[sectorconfig[j].startdataindex+k]=~weaksectorbuffer[k];
+									}
+									free(weaksectorbuffer);
+									weaksectoroffset=weaksectoroffset+(128<<sector[j].sector_size);
 								}
 							}
 						}
@@ -505,10 +527,17 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						if(trackheader.numberofsector)
 						{
 							sector=malloc(sizeof(pasti_sector)*trackheader.numberofsector);
+							memset(sector,0,sizeof(pasti_sector)*trackheader.numberofsector);
+
 							sectorconfig=(SECTORCONFIG *) malloc(sizeof(SECTORCONFIG)* trackheader.numberofsector);
+							memset(sectorconfig,0,sizeof(SECTORCONFIG)* trackheader.numberofsector);
+
 							real_sector_size_list=(int *) malloc(sizeof(int)* trackheader.numberofsector);
+							memset(real_sector_size_list,0,sizeof(int)* trackheader.numberofsector);
+
 							//sectorheader_index=(int *) malloc(sizeof(int)* trackheader.numberofsector);
 							sectordata_index=(int *) malloc(sizeof(int)* trackheader.numberofsector*3);
+							memset(sectordata_index,0,sizeof(int)* trackheader.numberofsector*3);
                         
 							sectorcfgs=(sectorcfg*)malloc(sizeof(sectorcfg)* trackheader.numberofsector);
 							memset(sectorcfgs,0,sizeof(sectorcfg)*trackheader.numberofsector);
