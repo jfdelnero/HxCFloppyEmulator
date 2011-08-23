@@ -111,3 +111,18 @@ CYLINDER* allocCylinderEntry(unsigned short rpm,unsigned char number_of_side)
 	memset(cyl->sides,0,sizeof(SIDE*)*number_of_side);
 	return cyl;
 }
+
+
+
+
+void savebuffer(unsigned char * name,unsigned char * buffer, int size)
+{
+	FILE * f;
+
+	f=fopen(name,"w+b");
+	if(f)
+	{
+		fwrite(buffer,size,1,f);
+		fclose(f);
+	}
+}
