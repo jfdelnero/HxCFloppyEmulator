@@ -129,12 +129,6 @@ int STX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 }
 
 
-typedef struct sectorcfg_
-{
-int size;
-unsigned int trackoffset;
-int weakdata_offset;
-}sectorcfg;
 
 unsigned char getchunk(unsigned char c)
 {
@@ -153,6 +147,10 @@ unsigned char getchunk(unsigned char c)
 	return r;
 }
 
+
+////////////////////////////////////////////////////
+// Scan a track and make an sectors position list
+////////////////////////////////////////////////////
 int * getSectorHeaderOffset(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackbuffer,int buffersize,int numsector)
 {
 	int * offsetlist;
@@ -187,6 +185,11 @@ int * getSectorHeaderOffset(HXCFLOPPYEMULATOR* floppycontext,unsigned char * tra
 	return offsetlist;
 }
 
+
+/////////////////////////////////////////////////////////////////
+// This function try to found index/data mark and path them.
+// Used on tracks without sector.
+/////////////////////////////////////////////////////////////////
 void patchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackbuffer,unsigned char * trackclock,int buffersize,int tracknum)
 {
 	int lastindex;
@@ -226,7 +229,9 @@ void patchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackbuffer,uns
 
 }
 
-
+/////////////////////////////////////////////////////////////////
+// This function patch the track with a sector header and data
+/////////////////////////////////////////////////////////////////
 void addsector(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackbuffer,unsigned char * trackclock,unsigned int buffersize,unsigned int * offsetlist,int numsector,SECTORCONFIG * sector)
 {
 	unsigned int lastindex,shoff,doff;
@@ -240,11 +245,11 @@ void addsector(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackbuffer,unsi
 	if(!numsector)
 	{
 		
-		lastindex=offsetlist[numsector]; 
-
+		lastindex=offsetlist[numsector]%buffersize; 
+		
 		shoff=lastindex;
 
-		sector[numsector].startsectorindex=lastindex;
+		sector[numsector].startsectorindex=lastindex*2;
 
 		//trackbuffer[lastindex-1]=0x00;
 		trackbuffer[lastindex]=0xA1;
@@ -299,7 +304,7 @@ void addsector(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackbuffer,unsi
 				lastindex=(lastindex+1)%buffersize;
 
 
-				sector[numsector].startdataindex=lastindex;
+				sector[numsector].startdataindex=lastindex*2;
 
 				for(i=0;i<sector[numsector].sectorsize;i++)
 				{
@@ -312,13 +317,13 @@ void addsector(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackbuffer,unsi
 	else
 	{
 
-		if(offsetlist[numsector]>(sector[numsector-1].startdataindex+sector[numsector-1].sectorsize))
+		if(offsetlist[numsector]>((sector[numsector-1].startdataindex/2)+sector[numsector-1].sectorsize))
 		{
 			lastindex=offsetlist[numsector]-2;
 		}
 		else
 		{
-			lastindex=sector[numsector-1].startsectorindex+3;
+			lastindex=(sector[numsector-1].startsectorindex/2)+3;
 		}
 
 		i=0;
@@ -327,12 +332,6 @@ void addsector(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackbuffer,unsi
 			i++;
 			lastindex=(lastindex+1)%buffersize;
 		};		
-
-/*		if(sector[numsector].cylinder==103)
-		{
-			lastindex=offsetlist[numsector];
-			lastindex=offsetlist[numsector];
-		}*/
 
 		if(i==(sector[numsector-1].sectorsize+64))
 		{
@@ -347,7 +346,7 @@ void addsector(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackbuffer,unsi
 
 		if(lastindex!=0xFFFFFFFF)
 		{
-			sector[numsector].startsectorindex=lastindex;
+			sector[numsector].startsectorindex=lastindex*2;
 
 			//trackbuffer[lastindex-1]=0x00;
 			trackbuffer[lastindex]=0xA1;
@@ -399,7 +398,7 @@ void addsector(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackbuffer,unsi
 				trackbuffer[lastindex]=0xFB;
 				lastindex=(lastindex+1)%buffersize;
 
-				sector[numsector].startdataindex=lastindex;
+				sector[numsector].startdataindex=lastindex*2;
 
 				for(i=0;i<sector[numsector].sectorsize;i++)
 				{
@@ -449,11 +448,10 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	int tracksize;
 	int presenceside[2];
 	int numberofweaksector;
-	int lastindex;
+	unsigned int lastindex;
 	int weaksectortotalsize;
 	int tracklen;
 	unsigned char crctable[32];
-	sectorcfg * sectorcfgs;
 	unsigned char CRC16_High;
 	unsigned char CRC16_Low;
 	int sectorlistoffset;
@@ -709,13 +707,10 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							}
 						}
 					
-						// Calcul de la position des donnees					
+						// Calcul de la position des donnees
 						weaksectoroffset=ftell(f);
 						trackpos=ftell(f)+ weaksectortotalsize;
 						fseek(f,trackpos,SEEK_SET);
-
-						
-										
 
 						if(trackheader.flags&0x80)
 						{
@@ -785,14 +780,26 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 									for(k=0;(k<(unsigned int)(128<<sector[j].sector_size)*2);k=k+2)
 									{
-										currentside->flakybitsbuffer[sectorconfig[j].startdataindex+k+0]=getchunk((unsigned char)((~weaksectorbuffer[k/2])>>4));
-										currentside->flakybitsbuffer[sectorconfig[j].startdataindex+k+1]=getchunk((unsigned char)(~weaksectorbuffer[k/2]));
+										currentside->flakybitsbuffer[(sectorconfig[j].startdataindex+k+0)%(currentside->tracklen/8)]=getchunk((unsigned char)((~weaksectorbuffer[k/2])>>4));
+										currentside->flakybitsbuffer[(sectorconfig[j].startdataindex+k+1)%(currentside->tracklen/8)]=getchunk((unsigned char)(~weaksectorbuffer[k/2]));
 									}
 									free(weaksectorbuffer);
 									weaksectoroffset=weaksectoroffset+(128<<sector[j].sector_size);
 
 								}
 							}
+						}
+						
+
+						for(j=0;j<(trackheader.numberofsector);j++)
+						{
+							for(l=(sectorconfig[j].startdataindex);l<((sectorconfig[j].startdataindex)+(sectorconfig[j].sectorsize*2));l++)
+							{
+								if(sector[j].sector_speed_timing)
+									currentside->timingbuffer[l%(currentside->tracklen/8)]=(unsigned long)(((float)(sectorconfig[j].sectorsize*8)/(float)sector[j].sector_speed_timing)*(float)1000000);
+								else
+									currentside->timingbuffer[l%(currentside->tracklen/8)]=floppydisk->floppyBitRate;
+							}			
 						}
 						
 						if(trackheader.numberofsector)
@@ -825,17 +832,12 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 							sectorconfig=(SECTORCONFIG *) malloc(sizeof(SECTORCONFIG)* trackheader.numberofsector);
 							memset(sectorconfig,0,sizeof(SECTORCONFIG)* trackheader.numberofsector);
-
-							sectorcfgs=(sectorcfg*)malloc(sizeof(sectorcfg)* trackheader.numberofsector);
-							memset(sectorcfgs,0,sizeof(sectorcfg)*trackheader.numberofsector);
 						}
 						else
 						{
 							sector=0;
 							sectorconfig=0;
 							sectorheader_index=0;
-				
-							sectorcfgs=0;
 						}
 										
 						// lecture de l'ensemble des descripteurs de secteur
@@ -865,10 +867,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 							sectorconfig[j].alternate_sector_size_id=sector[j].sector_size;
 							tracksize=tracksize+sectorconfig[j].sectorsize;
-                        					
-							sectorcfgs[j].weakdata_offset=weaksectortotalsize;
-							sectorcfgs[j].size=sectorconfig[j].sectorsize;
-						
+
 							if((sector[j].FDC_status&0x88)==0x88)
 							{
 								numberofweaksector++;
@@ -950,14 +949,10 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						{
 							fread( temptrack, tracklen, 1, f ); 
 							memset(tempclock,0xFF,tracklen);
-						
-							//if(i==32) savebuffer("test_i.bin",temptrack,tracklen);
 
 							sectordata_index=getSectorHeaderOffset(floppycontext,temptrack,tracklen,trackheader.numberofsector);
-						
-						
+												
 							lastindex=0;
-							//if(i==158) savebuffer("test_i.bin",temptrack,tracklen);
 
 							for(j=0;j<(unsigned int)(trackheader.numberofsector);j++)
 							{
@@ -973,14 +968,10 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								fread(sectorconfig[j].input_data,sectorconfig[j].sectorsize,1,f);
 							}
 
-
-							//savebuffer("test_i2.bin",temptrack,tracklen);
 							for(j=0;j<trackheader.numberofsector;j++)
 							{
 								addsector(floppycontext,temptrack,tempclock,tracklen,sectordata_index,j,sectorconfig);
 							}
-							//savebuffer("test_o2.bin",temptrack,tracklen);
-							//savebuffer("test_c2.bin",tempclock,tracklen);
 
 							if(!trackheader.numberofsector)
 								patchtrack(floppycontext,temptrack,tempclock,tracklen,i);
@@ -990,42 +981,36 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							{																
 								if(sectorconfig[j].startdataindex!=-1 && sectorconfig[j].sectorsize)
 								{
-									lastindex=sectorconfig[j].startdataindex-4;
+									lastindex=(sectorconfig[j].startdataindex/2)-4;
 
-									if(temptrack[lastindex+3]==0xFB)
+									if(temptrack[(lastindex+3)%tracklen]==0xFB)
 									{																												
 										//02 CRC The CRC of the data 
 										CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,0x1021,0xFFFF);
 												
 										for(t=0;t<(int)(sectorconfig[j].sectorsize+4);t++)
 										{
-											if(lastindex+t<tracklen)
-												CRC16_Update(&CRC16_High,&CRC16_Low, temptrack[lastindex+t],(unsigned char*)&crctable);
+												CRC16_Update(&CRC16_High,&CRC16_Low, temptrack[(lastindex+t)%tracklen],(unsigned char*)&crctable);
 										}
 												
-										lastindex=lastindex+sectorconfig[j].sectorsize+4;
-										if(lastindex<tracklen)
+										lastindex=(lastindex+sectorconfig[j].sectorsize+4)%tracklen;
+
+										if(!((sector[j].FDC_status&0x8)==0x8))
 										{
-											if(!((sector[j].FDC_status&0x8)==0x8))
-											{
-												temptrack[lastindex]=CRC16_High;
-												lastindex++;
+											temptrack[lastindex]=CRC16_High;
+											lastindex=(lastindex+1)%tracklen;
 													
-												temptrack[lastindex]=CRC16_Low;
-												lastindex++;	
-											}
-											else
-											{
-												CRC16_High=temptrack[lastindex];
-												lastindex++;
-													
-												CRC16_Low =temptrack[lastindex];
-												lastindex++;	
-											}
+											temptrack[lastindex]=CRC16_Low;
+											lastindex=(lastindex+1)%tracklen;
 										}
 										else
 										{
-											floppycontext->hxc_printf(MSG_DEBUG,"Track overflow !!!");	
+											CRC16_High=temptrack[lastindex];
+											lastindex=(lastindex+1)%tracklen;
+
+											CRC16_Low =temptrack[lastindex];
+											lastindex=(lastindex+1)%tracklen;
+
 										}
 																	
 										floppycontext->hxc_printf(MSG_DEBUG," - sectordata_index[0x%.4X]=0x%.8X , data crc result: %.2X%.2X  %d bytes",j,sectorconfig[j].startsectorindex,CRC16_High,CRC16_Low,sectorconfig[j].sectorsize+4);
@@ -1033,8 +1018,6 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								}
 							}
 						
-							//if(i==32) savebuffer("test_o.bin",temptrack,tracklen);
-							///////////
 							if(!floppydisk->tracks[tracknumber])
 							{
 								floppydisk->tracks[tracknumber]=allocCylinderEntry(300,2);
@@ -1057,7 +1040,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								tracklen);
 							
 
-							// generation flakey bits
+							//  flakey bits generation
 							for(j=0;j<(trackheader.numberofsector);j++)
 							{
 								if((sector[j].FDC_status&0x88)==0x88)
@@ -1078,9 +1061,10 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 										for(k=0;(k<((unsigned int)(128<<sector[j].sector_size)*2));k=k+2)
 										{
-											currentside->flakybitsbuffer[sectorcfgs[j].trackoffset+k+0]=getchunk((unsigned char)((~weaksectorbuffer[k/2])>>4));
-											currentside->flakybitsbuffer[sectorcfgs[j].trackoffset+k+1]=getchunk((unsigned char)(~weaksectorbuffer[k/2]));
+											currentside->flakybitsbuffer[((sectorconfig[j].startdataindex)+k+0)%(currentside->tracklen/8)]=getchunk((unsigned char)((~weaksectorbuffer[k/2])>>4));
+											currentside->flakybitsbuffer[((sectorconfig[j].startdataindex)+k+1)%(currentside->tracklen/8)]=getchunk((unsigned char)(~weaksectorbuffer[k/2]));
 										}
+
 										free(weaksectorbuffer);
 										weaksectoroffset=weaksectoroffset+(128<<sector[j].sector_size);
 									}
@@ -1090,14 +1074,15 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						
 							for(j=0;j<(trackheader.numberofsector);j++)
 							{
-								for(l=(sectorcfgs[j].trackoffset*2);l<((sectorcfgs[j].trackoffset*2)+(sectorcfgs[j].size*2));l++)
+								for(l=(sectorconfig[j].startdataindex);l<((sectorconfig[j].startdataindex)+(sectorconfig[j].sectorsize*2));l++)
 								{
-									if(l<(currentside->tracklen/8))
-										currentside->timingbuffer[l]=(unsigned long)(((float)(sectorcfgs[j].size*8)/(float)sector[j].sector_speed_timing)*(float)1000000);
-								}
-			
+									if(sector[j].sector_speed_timing)
+										currentside->timingbuffer[l%(currentside->tracklen/8)]=(unsigned long)(((float)(sectorconfig[j].sectorsize*8)/(float)sector[j].sector_speed_timing)*(float)1000000);
+									else
+										currentside->timingbuffer[l%(currentside->tracklen/8)]=250000;
+								}			
 							}
-									
+	
 							free(tempclock);	
 							free(temptrack);
 
@@ -1109,9 +1094,6 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								}
 							}
 							
-							if(sectorcfgs)
-								free(sectorcfgs);
-
 							if(sector)
 								free(sector);
 
