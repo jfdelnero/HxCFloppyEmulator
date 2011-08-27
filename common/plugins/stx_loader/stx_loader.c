@@ -958,11 +958,6 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							sectordata_index=getSectorHeaderOffset(floppycontext,temptrack,tracklen,trackheader.numberofsector);
 
 							
-							if(i==79*2)
-							{
-								savebuffer("test01_in.bin",temptrack,tracklen);
-								savebuffer("test01clk_in.bin",tempclock,tracklen);
-							}
 
 							lastindex=0;
 
@@ -1050,12 +1045,6 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								tempclock,
 								temptrack,
 								tracklen);
-							
-							if(i==79*2)
-							{
-								savebuffer("test01.bin",temptrack,tracklen);
-								savebuffer("test01clk.bin",tempclock,tracklen);
-							}
 
 							//  flakey bits generation
 							for(j=0;j<(trackheader.numberofsector);j++)
