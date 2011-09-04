@@ -10,6 +10,26 @@
 -------------------------------------------------------------------------------
 
 /*********************************************************
+04/09/2011: HxCFloppyEmulator 1.6.11.6
+
+-> New files Support : Roland W30 file image support.
+-> BUG : HFE writer buffer overflow corrected.
+-> SAP Thomson file support Enhanced.
+-> STT Atari ST file support : Track signature check added.
+-> Pasti / STX Atari ST file support : Support enhanced, lots of bugs corrected.
+-> CamputersLynx LDF file format : CamputerLynx support corrected. (Tested by John Koushappas).
+-> Amiga ADF file support : HD disk support.
+-> CPC/Spectrum DSK file support: CRC Error handling corrected.
+-> DMK file support: DMK file format detection enhanced.
+-> Ensoniq SQ-80 : Ensoniq SQ-80 disk format corrected.
+-> IPF File format (http://www.softpres.org/)
+   - unaligned track size support added.
+-> MSX File format : 16*2*256*80 file image support added.
+-> TI99 V9T9 format : Start sector id corrected.
+-> USB support layer : unaligned track size support added, some bugs corrected.
+*********************************************************/
+
+/*********************************************************
 15/06/2011: HxCFloppyEmulator 1.6.9.0
 
 -> New files Support : Kurzweil KRZ file support.
