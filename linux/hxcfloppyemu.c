@@ -115,44 +115,42 @@ int main(int argc, char* argv[])
 	int select_line;
 	int stop;
 	char c;
-
-
+	
+	
 	printf("HxC Floppy Emulator : USB Floppy image file loader\n");
-	printf("Copyright (C) 2006-2009 Jean-Francois DEL NERO\n");
-    	printf("This program comes with ABSOLUTELY NO WARRANTY\n");
-    	printf("This is free software, and you are welcome to redistribute it\n");
-    	printf("under certain conditions;\n\n");
-
-
+	printf("Copyright (C) 2006-2011 Jean-Francois DEL NERO\n");
+    printf("This program comes with ABSOLUTELY NO WARRANTY\n");
+    printf("This is free software, and you are welcome to redistribute it\n");
+    printf("under certain conditions;\n\n");
+	
 	flopemu=(HXCFLOPPYEMULATOR*)malloc(sizeof(HXCFLOPPYEMULATOR));	
 	flopemu->hxc_printf=&CUI_affiche;
 	
 	initHxCFloppyEmulator(flopemu);
-
-		
+	
 	if(argv[1])
 	{
 		thefloppydisk=(FLOPPY *)malloc(sizeof(FLOPPY));
 		memset(thefloppydisk,0,sizeof(FLOPPY));
-
+		
 		ret=floppy_load(flopemu,thefloppydisk,argv[1]);
-
-
+		
+		
 		if(ret!=LOADER_NOERROR)
 		{
 			switch(ret)
 			{
-				case LOADER_UNSUPPORTEDFILE:
-					printf("Load error!: Image file not yet supported!\n");
+			case LOADER_UNSUPPORTEDFILE:
+				printf("Load error!: Image file not yet supported!\n");
 				break;
-				case LOADER_FILECORRUPT:
-					printf("Load error!: File corrupted ? Read error ?\n");
+			case LOADER_FILECORRUPT:
+				printf("Load error!: File corrupted ? Read error ?\n");
 				break;
-				case LOADER_ACCESSERROR:
-					printf("Load error!:  Read file error!\n");
+			case LOADER_ACCESSERROR:
+				printf("Load error!:  Read file error!\n");
 				break;
-				default:
-					printf("Load error! error %d\n",ret);
+			default:
+				printf("Load error! error %d\n",ret);
 				break;
 			}
 			free(thefloppydisk);
@@ -160,32 +158,31 @@ int main(int argc, char* argv[])
 		else
 		{
 			//write_MFM_file(flopemu,thefloppydisk,"d:\\test.mfm");
-      			struct sched_param p;
+			struct sched_param p;
+			
 			p.sched_priority = sched_get_priority_max(SCHED_FIFO);
 			if(sched_setscheduler(0,SCHED_FIFO,&p)==-1)
 			{
 				printf("Cannot change the process priority!!!\n");
-			}
-
-                        
-
+			}	
+			
 			hwif=(HWINTERFACE *)malloc(sizeof(HWINTERFACE));
 			memset(hwif,0,sizeof(HWINTERFACE));
-
-                        stop=0;
-                        packetsize=3072;
-                        select_line=0;  // DS0
+			
+			stop=0;
+			packetsize=3072;
+			select_line=0;  // DS0
 			if(!(HW_CPLDFloppyEmulator_init(flopemu,hwif)<0))
 			{
-
+				
 				nonblock(NB_ENABLE);
-
+				
 				InjectFloppyImg(flopemu,thefloppydisk,hwif);
 				printf("\nControl keys : 0,1,2,3=Change select line +,-=change usb packet size q=quit\n");
 				do
 				{
-                                        hwif->usbstats.packetsize=packetsize;
-                                        hwif->drive_select_source=select_line;
+					hwif->usbstats.packetsize=packetsize;
+					hwif->drive_select_source=select_line;
 					trackpos=hwif->current_track;
 					if(trackpos!=old_trackpos)
 					{
@@ -194,54 +191,52 @@ int main(int argc, char* argv[])
 					}
 					if(kbhit())
 					{
-                                          c=fgetc(stdin);
-                                          switch(c)
-                                          {
-					   case '0':
-                                               select_line=0;
-						printf("Switching to DS0.\n");
-                                           break;
-					   case '1':
-                                               select_line=1;
-						printf("Switching to DS1.\n");
-                                           break;
-					   case '2':
-                                               select_line=2;
-						printf("Switching to DS2.\n");
-                                           break;
-					   case '3':
-                                               select_line=3;
-						printf("Switching to DS3.\n");
-                                           break;
-
-					   case '+':
-                                               if(packetsize<4096) packetsize=packetsize+128;
-						printf("Change USB packet size : %d\n",packetsize);
-                                           break;
-
-					   case '-':
-                                               if(packetsize>256) packetsize=packetsize-128;				
-						printf("Change USB packet size : %d\n",packetsize);
-                                           break;
-
-                                           case 'q':
-                                                stop=1;
-                                           break;
-
-                                           default:
-                                           break;
-
-                                          }
-                                          
-                                        }
-
-
+						c=fgetc(stdin);
+						switch(c)
+						{
+						case '0':
+							select_line=0;
+							printf("Switching to DS0.\n");
+							break;
+						case '1':
+							select_line=1;
+							printf("Switching to DS1.\n");
+							break;
+						case '2':
+							select_line=2;
+							printf("Switching to DS2.\n");
+							break;
+						case '3':
+							select_line=3;
+							printf("Switching to DS3.\n");
+							break;
+							
+						case '+':
+							if(packetsize<4096) packetsize=packetsize+128;
+							printf("Change USB packet size : %d\n",packetsize);
+							break;
+							
+						case '-':
+							if(packetsize>256) packetsize=packetsize-128;				
+							printf("Change USB packet size : %d\n",packetsize);
+							break;
+							
+						case 'q':
+							stop=1;
+							break;
+							
+						default:
+							break;
+							
+						}
+						
+					}
+	
 					usleep(10000);//hxc_pause(10);
+
 				}while(!stop);
-
-
+								
 				nonblock(NB_DISABLE);
-
 			}
 		}
 	}
@@ -249,8 +244,8 @@ int main(int argc, char* argv[])
 	{
 		printf("Syntax: %s [image-file]\n",argv[0]);
 	}
-
-
+	
+	
 	free(flopemu);
 	return 0;
 }
