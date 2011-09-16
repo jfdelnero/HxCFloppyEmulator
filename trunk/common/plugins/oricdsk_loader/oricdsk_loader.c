@@ -177,7 +177,7 @@ int issector(mfmformatsect * sector)
 		return 0;
 	}
 
-	if(sector->dataam2!=0xFB)
+	if((sector->dataam2!=0xFB) && (sector->dataam2!=0xF8))
 	{
 		return 0;
 	}
@@ -223,7 +223,10 @@ SECTORCONFIG * extractsector(HXCFLOPPYEMULATOR* floppycontext,unsigned char *dat
 			tabsector[j].missingdataaddressmark=0;
 			tabsector[j].startdataindex=0;
 			tabsector[j].startsectorindex=0;
-			tabsector[j].use_alternate_datamark=0;
+			
+			tabsector[j].use_alternate_datamark=0xFF;
+			tabsector[j].alternate_datamark=testsector->dataam2;
+
 			tabsector[j].use_alternate_addressmark=0;
 			tabsector[j].gap3=255;
 			tabsector[j].bitrate=DEFAULT_DD_BITRATE;
