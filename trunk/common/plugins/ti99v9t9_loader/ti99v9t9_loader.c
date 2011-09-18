@@ -91,7 +91,7 @@ int TI99V9T9_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				filesize=ftell(f);
 				fseek (f , 0 , SEEK_SET);
 
-				fclose(f);		
+				fclose(f);
 
 				if(filesize!=92160 && filesize!=92160*2 )//&& filesize!=92160*4)
 				{
@@ -130,7 +130,7 @@ int TI99V9T9_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	unsigned char* trackdata;
 	unsigned char trackformat;
 	unsigned short rpm;
-	int fmmode,tracklen,numberoftrack,numberofside;
+	int fmmode,numberoftrack,numberofside;
 	CYLINDER* currentcylinder;
 
 
@@ -149,7 +149,7 @@ int TI99V9T9_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 
 	if(filesize!=0)
 	{		
-			
+
 		fmmode=0;
 
 		if(filesize!=92160 && filesize!=92160*2 && filesize!=92160*4)
@@ -161,37 +161,37 @@ int TI99V9T9_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		switch(filesize)
 		{
 		case 92160:
+			floppydisk->floppySectorPerTrack=9;
 			numberofside=1;
 			numberoftrack=40;
 			floppydisk->floppyBitRate=250000;
+			fmmode=1;
 			break;
 
 		case 92160*2:
-			numberofside=2;
+			floppydisk->floppySectorPerTrack=18;
+			numberofside=1;
 			numberoftrack=40;
 			floppydisk->floppyBitRate=250000;
+			fmmode=0;
 			break;
 
 		case 92160*4:
-			tracklen=6872;
-			fmmode=0;
+			floppydisk->floppySectorPerTrack=18;
 			numberofside=2;
 			numberoftrack=40;
 			floppydisk->floppyBitRate=250000;
+			fmmode=0;
 			break;
 		}
 
-		
 		sectorsize=256;
 		floppydisk->floppyNumberOfTrack=numberoftrack;
 		floppydisk->floppyNumberOfSide=numberofside;
-		floppydisk->floppySectorPerTrack=9;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		rpm=300; // normal rpm
-		fmmode=1;
-		tracklen=3253;
 		skew=6;
-		gap3len=45;
+		gap3len=255;
 		interleave=4;
 
 
@@ -203,37 +203,37 @@ int TI99V9T9_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		{
 			trackformat=IBMFORMAT_DD;
 		}
-			
+
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);			
 			
 		floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
 
 		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-		
-					
+
+
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
-				
+
 			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
-				
+
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-			{		
+			{
 				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 							(sectorsize*(floppydisk->floppySectorPerTrack)*i);
 
 				fseek (f , file_offset , SEEK_SET);
 				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
-					
-				currentcylinder->sides[i]=tg_generatetrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(j*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500,-2500);
+
+				currentcylinder->sides[i]=tg_generatetrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(j*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500 | NO_SECTOR_UNDER_INDEX,-2500);
 			}
 
 		}
-		
+
 		free(trackdata);
-		
+
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		
+
 		fclose(f);
 		return LOADER_NOERROR;
 	}
