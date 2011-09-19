@@ -212,16 +212,12 @@ int JVC_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			}
 		}
 
-			free(trackdata);
+		free(trackdata);
 			
-			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
-			fclose(f);
-			return LOADER_NOERROR;
-
-
 		fclose(f);
-		return LOADER_FILECORRUPT;
+		return LOADER_NOERROR;
 	}
 	
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
