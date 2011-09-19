@@ -61,6 +61,22 @@
 #include "../common/os_api.h"
 
 
+typedef struct ti99_vib
+{
+		char    name[10];			  // volume name (10 characters, pad with spaces)
+		unsigned char totsecsMSB;     // disk length in sectors (big-endian) (usually 360, 720 or 1440)
+		unsigned char totsecsLSB;
+		unsigned char secspertrack;   // sectors per track (usually 9 (FM) or 18 (MFM))
+		unsigned char id[3];          // String "DSK"
+		unsigned char protection;     // 'P' if disk is protected, ' ' otherwise.
+		unsigned char tracksperside;  // tracks per side (usually 40)
+		unsigned char sides;          // sides (1 or 2)
+		unsigned char density;        // 0,1 (FM) or 2,3,4 (MFM)
+		unsigned char res[36];        // Empty for traditional disks, or up to 3 directory pointers
+		unsigned char abm[200];       // allocation bitmap: a 1 for each sector in use (sector 0 is LSBit of byte 0,
+									  // sector 7 is MSBit of byte 0, sector 8 is LSBit of byte 1, etc.)
+} ti99_vib;
+
 int TI99V9T9_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	int filesize;
@@ -93,7 +109,7 @@ int TI99V9T9_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 				fclose(f);
 
-				if(filesize!=92160 && filesize!=92160*2 )//&& filesize!=92160*4)
+				if((filesize%256))//&& filesize!=92160*4)
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non TI99 V9T9 file - bad file size !");
 					return LOADER_BADFILE;
@@ -130,9 +146,9 @@ int TI99V9T9_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	unsigned char* trackdata;
 	unsigned char trackformat;
 	unsigned short rpm;
-	int fmmode,numberoftrack,numberofside;
+	int fmmode,numberoftrack,numberofside,totsecs;
 	CYLINDER* currentcylinder;
-
+	ti99_vib vib;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"TI99V9T9_libLoad_DiskFile %s",imgfile);
 
@@ -149,40 +165,204 @@ int TI99V9T9_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 
 	if(filesize!=0)
 	{		
+		floppydisk->floppySectorPerTrack=9;
 
-		fmmode=0;
+		numberofside=1;
+		numberoftrack=40;
+		skew=6;
+		interleave=4;
 
-		if(filesize!=92160 && filesize!=92160*2 && filesize!=92160*4)
+		floppydisk->floppyBitRate=250000;
+		fmmode=1;
+
+
+		fread(&vib,sizeof(ti99_vib),1,f);
+		fseek (f , 0 , SEEK_SET);
+
+
+		// If we have read the sector successfully, let us parse it
+		totsecs = (vib.totsecsMSB << 8) | vib.totsecsLSB;
+		floppydisk->floppySectorPerTrack = vib.secspertrack;
+		if (floppydisk->floppySectorPerTrack == 0)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non TI99 V9T9 file !");
-			return LOADER_BADFILE;
+			// Some images might be like this, because the original SSSD
+			// TI controller always assumes 9.
+			floppydisk->floppySectorPerTrack = 9;
 		}
 
-		switch(filesize)
+		switch(floppydisk->floppySectorPerTrack)
 		{
-		case 92160:
+			case 8:
+				skew=0;
+				interleave=3;
+				break;
+			case 9:
+				skew=6;
+				interleave=4;
+				break;
+			case 16:
+				skew=0;
+				interleave=9;
+				break;
+			case 18:
+				skew=0;
+				interleave=5;
+				break;
+			case 36:
+				skew=0;
+				interleave=11;
+				break;
+
+		}
+
+
+		
+		numberoftrack = vib.tracksperside;
+		
+		if (numberoftrack == 0)
+		{
+			// Some images are like this, because the original SSSD TI controller
+			// always assumes 40.
+			numberoftrack = 40;
+		}
+		
+		numberofside = vib.sides;     
+		
+		if (numberofside == 0)
+		{
+			// Some images are like this, because the original SSSD TI controller
+			// always assumes that tracks beyond 40 are on side 2. */
+			numberofside = totsecs / (floppydisk->floppySectorPerTrack * numberoftrack);
+		}
+		
+		floppydisk->floppyBitRate=250000;
+		fmmode=1;
+
+		switch(vib.density)
+		{
+			case 0:
+			case 1:
+				floppydisk->floppyBitRate=250000;
+				fmmode=1;
+				break;
+			case 2:
+				floppydisk->floppyBitRate=250000;
+				fmmode=0;
+				break;
+			case 3:
+				floppydisk->floppyBitRate=500000;
+				fmmode=0;
+				break;
+		}
+		
+		// check that the format makes sense
+		if (((floppydisk->floppySectorPerTrack * numberoftrack * numberofside) == totsecs)
+			&& ((vib.density <= 4) && (totsecs >= 2))
+			&& (filesize == (unsigned int)totsecs*256))
+		{
+		}
+		else
+		{
 			floppydisk->floppySectorPerTrack=9;
 			numberofside=1;
 			numberoftrack=40;
 			floppydisk->floppyBitRate=250000;
 			fmmode=1;
-			break;
+			skew=6;
+			interleave=4;
 
-		case 92160*2:
-			floppydisk->floppySectorPerTrack=18;
-			numberofside=1;
-			numberoftrack=40;
-			floppydisk->floppyBitRate=250000;
-			fmmode=0;
-			break;
+			switch(filesize)
+			{
+			case 1*40*9*256:
+				numberofside=1;
+				numberoftrack=40;
+				floppydisk->floppySectorPerTrack=9;
+				floppydisk->floppyBitRate=250000;
+				fmmode=1;
+				skew=6;
+				interleave=4;
+				break;
 
-		case 92160*4:
-			floppydisk->floppySectorPerTrack=18;
-			numberofside=2;
-			numberoftrack=40;
-			floppydisk->floppyBitRate=250000;
-			fmmode=0;
-			break;
+			case 2*40*9*256:
+				// 180kbytes: either DSSD or 18-sector-per-track SSDD.
+				// We assume DSSD since DSSD is more common and is supported by
+				// the original TI SD disk controller.
+				numberofside=2;
+  				numberoftrack=40;
+				floppydisk->floppySectorPerTrack=9;
+				floppydisk->floppyBitRate=250000;
+				fmmode=1;
+				skew=6;
+				interleave=4;
+				break;
+
+  			case 1*40*16*256:
+  				// 160kbytes: 16-sector-per-track SSDD (standard format for TI
+  				// DD disk controller prototype, and the TI hexbus disk
+  				// controller?) */
+				numberofside=1;
+				numberoftrack = 40;
+  				floppydisk->floppySectorPerTrack=16;
+				floppydisk->floppyBitRate=250000;
+  				fmmode=0;
+				skew=0;
+				interleave=9;
+				break;
+
+  			case 2*40*16*256:
+				// 320kbytes: 16-sector-per-track DSDD (standard format for TI
+				// DD disk controller prototype, and TI hexbus disk
+				// controller?)
+				numberofside=2;
+				numberoftrack = 40;
+  				floppydisk->floppySectorPerTrack=16;
+				floppydisk->floppyBitRate=250000;
+  				fmmode=0;
+				skew=0;
+				interleave=9;
+				break;
+
+  			case 2*40*18*256:
+				//  360kbytes: 18-sector-per-track DSDD (standard format for most
+				// third-party DD disk controllers, but reportedly not supported by
+				// the original TI DD disk controller prototype)
+				numberofside=2;
+				numberoftrack = 40;
+  				floppydisk->floppySectorPerTrack=18;
+				floppydisk->floppyBitRate=250000;
+  				fmmode=0;
+				skew=0;
+				interleave=5;
+				break;
+
+  			case 2*80*18*256:
+				// 720kbytes: 18-sector-per-track 80-track DSDD (Myarc only)
+				numberofside=2;
+				numberoftrack = 80;
+  				floppydisk->floppySectorPerTrack=18;
+				floppydisk->floppyBitRate=250000;
+  				fmmode=0;
+				skew=0;
+				interleave=5;
+				break;
+
+			case 2*80*36*256:
+				// 1.44Mbytes: DSHD (Myarc only)
+				numberofside=2;
+				numberoftrack = 80;
+  				floppydisk->floppySectorPerTrack=36;
+				floppydisk->floppyBitRate=500000;
+  				fmmode=0;
+				skew=0;
+				interleave=11;
+				break;
+			
+			default:
+				floppycontext->hxc_printf(MSG_DEBUG,"non TI99 V9T9 file !");
+				return LOADER_BADFILE;
+				break;
+
+			}
 		}
 
 		sectorsize=256;
@@ -190,18 +370,16 @@ int TI99V9T9_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		floppydisk->floppyNumberOfSide=numberofside;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		rpm=300; // normal rpm
-		skew=6;
-		gap3len=255;
-		interleave=4;
-
 
 		if(fmmode)
 		{	
 			trackformat=IBMFORMAT_SD;
+			gap3len=45;
 		}
 		else
 		{
 			trackformat=IBMFORMAT_DD;
+			gap3len=24;
 		}
 
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);			
@@ -209,7 +387,6 @@ int TI99V9T9_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
 
 		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
@@ -219,8 +396,14 @@ int TI99V9T9_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
-				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-							(sectorsize*(floppydisk->floppySectorPerTrack)*i);
+				if(i==0)
+				{
+					file_offset=(j*floppydisk->floppySectorPerTrack)*sectorsize;					
+				}
+				else
+				{
+					file_offset=( ( (2*floppydisk->floppyNumberOfTrack) - 1 - j )*floppydisk->floppySectorPerTrack)*sectorsize;
+				}
 
 				fseek (f , file_offset , SEEK_SET);
 				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
