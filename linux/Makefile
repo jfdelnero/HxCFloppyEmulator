@@ -30,7 +30,7 @@ DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosf
                   ensoniq_mirage_loader.o sad_loader.o jv3_loader.o stt_loader.o prophet_loader.o teledisk_loader.o td0_lzss.o\
                   emuii_raw_loader.o emuii_loader.o emui_raw_loader.o jvc_loader.o dim_loader.o ti99v9t9_loader.o d81_loader.o  acornadf_loader.o \
                   camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o fdi_loader.o ssd_dsd_loader.o adl_loader.o \
-                  krz_loader.o w30_loader.o fei_loader.o
+                  krz_loader.o w30_loader.o fei_loader.o svd_loader.o
 
 
 all: $(EXEC)
@@ -171,6 +171,9 @@ scl_loader.o : ../common/plugins/scl_loader/scl_loader.c ../common/plugins/scl_l
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 mfm_loader.o : ../common/plugins/mfm_loader/mfm_loader.c ../common/plugins/mfm_loader/mfm_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+svd_loader.o : ../common/plugins/svd_loader/svd_loader.c ../common/plugins/svd_loader/svd_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 smc_loader.o : ../common/plugins/smc_loader/snes_smc_loader.c ../common/plugins/smc_loader/snes_smc_loader.h
