@@ -86,6 +86,7 @@
 #include "../common/plugins/krz_loader/krz_loader.h"
 #include "../common/plugins/w30_loader/w30_loader.h"
 #include "../common/plugins/fei_loader/fei_loader.h"
+#include "../common/plugins/svd_loader/svd_loader.h"
 
 const plugins_ptr staticplugins[]=
 {
@@ -110,6 +111,7 @@ const plugins_ptr staticplugins[]=
 	#ifdef IPF_SUPPORT
 	{(ISVALIDDISKFILE)IPF_libIsValidDiskFile,(LOADDISKFILE)IPF_libLoad_DiskFile,0,0},
 	#endif
+	{(ISVALIDDISKFILE)TI99V9T9_libIsValidDiskFile,(LOADDISKFILE)TI99V9T9_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)AMIGADOSFSDK_libIsValidDiskFile,(LOADDISKFILE)AMIGADOSFSDK_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)Prophet_libIsValidDiskFile,(LOADDISKFILE)Prophet_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)IMG_libIsValidDiskFile,(LOADDISKFILE)IMG_libLoad_DiskFile,0,0},
@@ -127,6 +129,7 @@ const plugins_ptr staticplugins[]=
 	{(ISVALIDDISKFILE)JV1_libIsValidDiskFile,(LOADDISKFILE)JV1_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)JV3_libIsValidDiskFile,(LOADDISKFILE)JV3_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)JVC_libIsValidDiskFile,(LOADDISKFILE)JVC_libLoad_DiskFile,0,0},
+	{(ISVALIDDISKFILE)SVD_libIsValidDiskFile,(LOADDISKFILE)SVD_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)D88_libIsValidDiskFile,(LOADDISKFILE)D88_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)HDM_libIsValidDiskFile,(LOADDISKFILE)HDM_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)snes_smc_libIsValidDiskFile,(LOADDISKFILE)snes_smc_libLoad_DiskFile,0,0},
@@ -134,7 +137,6 @@ const plugins_ptr staticplugins[]=
 	{(ISVALIDDISKFILE)VEGASDSK_libIsValidDiskFile,(LOADDISKFILE)VEGASDSK_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)DMK_libIsValidDiskFile,(LOADDISKFILE)DMK_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)TI99PC99_libIsValidDiskFile,(LOADDISKFILE)TI99PC99_libLoad_DiskFile,0,0},
-	{(ISVALIDDISKFILE)TI99V9T9_libIsValidDiskFile,(LOADDISKFILE)TI99V9T9_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)ApriDisk_libIsValidDiskFile,(LOADDISKFILE)ApriDisk_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)EDE_libIsValidDiskFile,(LOADDISKFILE)EDE_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)FD_libIsValidDiskFile,(LOADDISKFILE)FD_libLoad_DiskFile,0,0},
