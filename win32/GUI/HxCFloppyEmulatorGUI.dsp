@@ -939,6 +939,18 @@ SOURCE=..\..\common\plugins\fei_loader\fei_loader.c
 SOURCE=..\..\common\plugins\fei_loader\fei_loader.h
 # End Source File
 # End Group
+# Begin Group "SVD"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\svd_loader\svd_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\svd_loader\svd_loader.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\..\common\plugins\common\crc.c
