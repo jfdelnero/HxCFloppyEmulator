@@ -18,7 +18,7 @@ ADFLIBOBJ= adf_hd.o adf_disk.o adf_raw.o adf_bitm.o adf_dump.o\
 
 XDMSLIBOBJ= getbits.o crc_csum.o maketbl.o pfile.o getbits.o tables.o u_deep.o u_heavy.o u_init.o u_medium.o u_quick.o u_rle.o
 
-ZLIBOBJ=adler32.o compress.o crc32.o deflate.o gzio.o infback.o inffast.o inflate.o inftrees.o trees.o uncompr.o zutil.o
+ZLIBOBJ=adler32.o compress.o crc32.o deflate.o gzlib.o gzread.o gzwrite.o gzclose.o infback.o inffast.o inflate.o inftrees.o trees.o uncompr.o zutil.o
 
 FTDIFLOPPYEMU=usb_hxcfloppyemulator.o variablebitrate.o
 
@@ -342,29 +342,36 @@ u_rle.o : ../common/libs/xdms/xdms-1.3.2/src/u_rle.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 
-adler32.o : ../common/libs/zlib/zlib123/adler32.c
+adler32.o : ../common/libs/zlib/adler32.c
 	$(CC) -o $@ -c $< $(CFLAGS)
-compress.o : ../common/libs/zlib/zlib123/compress.c
+compress.o : ../common/libs/zlib/compress.c
 	$(CC) -o $@ -c $< $(CFLAGS)
-crc32.o : ../common/libs/zlib/zlib123/crc32.c
+crc32.o : ../common/libs/zlib/crc32.c
 	$(CC) -o $@ -c $< $(CFLAGS)
-deflate.o : ../common/libs/zlib/zlib123/deflate.c
+deflate.o : ../common/libs/zlib/deflate.c
 	$(CC) -o $@ -c $< $(CFLAGS)
-gzio.o : ../common/libs/zlib/zlib123/gzio.c
+gzlib.o : ../common/libs/zlib/gzlib.c
 	$(CC) -o $@ -c $< $(CFLAGS)
-infback.o : ../common/libs/zlib/zlib123/infback.c
+gzread.o : ../common/libs/zlib/gzread.c
 	$(CC) -o $@ -c $< $(CFLAGS)
-inffast.o : ../common/libs/zlib/zlib123/inffast.c
+gzwrite.o : ../common/libs/zlib/gzwrite.c
 	$(CC) -o $@ -c $< $(CFLAGS)
-inflate.o : ../common/libs/zlib/zlib123/inflate.c
+gzclose.o : ../common/libs/zlib/gzclose.c
 	$(CC) -o $@ -c $< $(CFLAGS)
-inftrees.o : ../common/libs/zlib/zlib123/inftrees.c
+
+infback.o : ../common/libs/zlib/infback.c
 	$(CC) -o $@ -c $< $(CFLAGS)
-trees.o : ../common/libs/zlib/zlib123/trees.c
+inffast.o : ../common/libs/zlib/inffast.c
 	$(CC) -o $@ -c $< $(CFLAGS)
-uncompr.o : ../common/libs/zlib/zlib123/uncompr.c
+inflate.o : ../common/libs/zlib/inflate.c
 	$(CC) -o $@ -c $< $(CFLAGS)
-zutil.o : ../common/libs/zlib/zlib123/zutil.c
+inftrees.o : ../common/libs/zlib/inftrees.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+trees.o : ../common/libs/zlib/trees.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+uncompr.o : ../common/libs/zlib/uncompr.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+zutil.o : ../common/libs/zlib/zutil.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 
