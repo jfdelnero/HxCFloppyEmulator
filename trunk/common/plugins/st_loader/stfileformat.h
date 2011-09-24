@@ -26,12 +26,12 @@
 */
 typedef struct stfileformats_t_
 {
-unsigned int filesize;
-int numberoftrack;
-int sectorpertrack;
-int numberofside;
-int gap3len;
-int interleave;
+	unsigned int filesize;
+	int numberoftrack;
+	int sectorpertrack;
+	int numberofside;
+	int gap3len;
+	int interleave;
 }stfileformats_t;
 
 static stfileformats_t stfileformats[]=

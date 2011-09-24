@@ -87,6 +87,8 @@
 #include "../common/plugins/w30_loader/w30_loader.h"
 #include "../common/plugins/fei_loader/fei_loader.h"
 #include "../common/plugins/svd_loader/svd_loader.h"
+#include "../common/plugins/imz_loader/imz_loader.h"
+#include "../common/plugins/gkh_loader/gkh_loader.h"
 
 const plugins_ptr staticplugins[]=
 {
@@ -104,6 +106,7 @@ const plugins_ptr staticplugins[]=
 	{(ISVALIDDISKFILE)CopyQm_libIsValidDiskFile,(LOADDISKFILE)CopyQm_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)TeleDisk_libIsValidDiskFile,(LOADDISKFILE)TeleDisk_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)MSA_libIsValidDiskFile,(LOADDISKFILE)MSA_libLoad_DiskFile,0,0},
+	{(ISVALIDDISKFILE)IMZ_libIsValidDiskFile,(LOADDISKFILE)IMZ_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)MFM_libIsValidDiskFile,(LOADDISKFILE)MFM_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)OricDSK_libIsValidDiskFile,(LOADDISKFILE)OricDSK_libLoad_DiskFile,0,0},	
 	{(ISVALIDDISKFILE)ST_libIsValidDiskFile,(LOADDISKFILE)ST_libLoad_DiskFile,0,0},
@@ -139,6 +142,7 @@ const plugins_ptr staticplugins[]=
 	{(ISVALIDDISKFILE)TI99PC99_libIsValidDiskFile,(LOADDISKFILE)TI99PC99_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)ApriDisk_libIsValidDiskFile,(LOADDISKFILE)ApriDisk_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)EDE_libIsValidDiskFile,(LOADDISKFILE)EDE_libLoad_DiskFile,0,0},
+	{(ISVALIDDISKFILE)GKH_libIsValidDiskFile,(LOADDISKFILE)GKH_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)FD_libIsValidDiskFile,(LOADDISKFILE)FD_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)VDK_libIsValidDiskFile,(LOADDISKFILE)VDK_libLoad_DiskFile,0,0},
 	{(ISVALIDDISKFILE)DPX_libIsValidDiskFile,(LOADDISKFILE)DPX_libLoad_DiskFile,0,0},

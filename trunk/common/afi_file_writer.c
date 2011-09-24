@@ -35,7 +35,7 @@
 #include "afi_file_writer.h"
 
 #include "plugins/common/crc.h"
-#include "./libs/zlib/zlib123/zlib.h"
+#include "./libs/zlib/zlib.h"
 
 AFI_DATACODE datacode[]={
 	{AFI_DATA_MFM,AFI_DATA_TYPE_MFM},
