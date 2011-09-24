@@ -56,7 +56,7 @@
 #include "afi_file_writer.h"
 
 #include "../common/crc.h"
-#include "./libs/zlib/zlib123/zlib.h"
+#include "./libs/zlib/zlib.h"
 
 #include "../common/os_api.h"
 

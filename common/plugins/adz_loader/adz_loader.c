@@ -56,7 +56,7 @@
 
 #include "adz_loader.h"
 
-#include "./libs/zlib/zlib123/zlib.h"
+#include "./libs/zlib/zlib.h"
 
 #include "../common/os_api.h"
 
