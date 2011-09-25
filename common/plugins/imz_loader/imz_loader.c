@@ -196,13 +196,12 @@ int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			)
 	{		
 		sectorsize=512;
-		interleave=1;
+
 		gap3len=0;
 		skew=0;
 		trackformat=IBMFORMAT_DD;
 
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-		
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
@@ -211,14 +210,13 @@ int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
-								
 				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 							(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-				
+
 				currentcylinder->sides[i]=tg_generatetrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500,-11150);
 			}
 		}
-		
+
 		floppycontext->hxc_printf(MSG_INFO_1,"IMZ Loader : tracks file successfully loaded and encoded!");
 		free(flatimg);
 		return 0;
