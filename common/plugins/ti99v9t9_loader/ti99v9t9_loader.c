@@ -77,7 +77,7 @@ typedef struct ti99_vib
 									  // sector 7 is MSBit of byte 0, sector 8 is LSBit of byte 1, etc.)
 } ti99_vib;
 
-int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * numberofsector,char * skew,char * interleave,int * density,int * bitrate,short * sectorsize)
+int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * numberofsector,char * skewside0,char * skewside1,char * interleave,int * density,int * bitrate,short * sectorsize)
 {
 	int totsecs,filesize;
 	ti99_vib vib;
@@ -85,7 +85,8 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 	*sectorsize=256;
 	*numberofside=1;
 	*numberoftrack=40;
-	*skew=6;
+	*skewside0=3;
+	*skewside1=6;
 	*interleave=4;
 	
 	*bitrate=250000;
@@ -111,23 +112,28 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 	switch(*numberofsector)
 	{
 		case 8:
-			*skew=0;
+			*skewside0=0;
+			*skewside1=0;
 			*interleave=3;
 			break;
 		case 9:
-			*skew=6;
+			*skewside0=3;
+			*skewside1=6;
 			*interleave=4;
 			break;
 		case 16:
-			*skew=0;
+			*skewside0=0;
+			*skewside1=0;
 			*interleave=9;
 			break;	
 		case 18:
-			*skew=0;
+			*skewside0=0;
+			*skewside1=0;
 			*interleave=5;
 			break;
 		case 36:
-			*skew=0;
+			*skewside0=0;
+			*skewside1=0;
 			*interleave=11;
 			break;
 	}
@@ -183,7 +189,8 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 		*numberoftrack=40;
 		*bitrate=250000;
 		*density=1;
-		*skew=6;
+		*skewside0=3;
+		*skewside1=6;
 		*interleave=4;
 		
 		switch(filesize)
@@ -194,7 +201,8 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 				*numberofsector=9;
 				*bitrate=250000;
 				*density=1;
-				*skew=6;
+				*skewside0=3;
+				*skewside1=6;
 				*interleave=4;
 				break;
 				
@@ -207,7 +215,8 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 				*numberofsector=9;
 				*bitrate=250000;
 				*density=1;
-				*skew=6;
+				*skewside0=3;
+				*skewside1=6;
 				*interleave=4;
 				break;
 				
@@ -220,7 +229,8 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 				*numberofsector=16;
 				*bitrate=250000;
 				*density=2;
-				*skew=0;
+				*skewside0=0;
+				*skewside1=0;
 				*interleave=9;
 				break;
 				
@@ -233,7 +243,8 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 				*numberofsector=16;
 				*bitrate=250000;
 				*density=2;
-				*skew=0;
+				*skewside0=0;
+				*skewside1=0;
 				*interleave=9;
 				break;
 				
@@ -246,7 +257,8 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 				*numberofsector=18;
 				*bitrate=250000;
 				*density=2;
-				*skew=0;
+				*skewside0=0;
+				*skewside1=0;
 				*interleave=5;
 				break;
 				
@@ -257,7 +269,8 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 				*numberofsector=18;
 				*bitrate=250000;
 				*density=2;
-				*skew=0;
+				*skewside0=0;
+				*skewside1=0;
 				*interleave=5;
 				break;
 				
@@ -268,7 +281,8 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 				*numberofsector=36;
 				*bitrate=500000;
 				*density=2;
-				*skew=0;
+				*skewside0=0;
+				*skewside1=0;
 				*interleave=11;
 				break;
 				
@@ -287,7 +301,7 @@ int TI99V9T9_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	FILE * f;
 	char * filepath;
 	short numberoftrack,numberofsector;
-	char skew,interleave,numberofside;
+	char skew0,skew1,interleave,numberofside;
 	int density;
 	short sectorsize;
 	unsigned int bitrate;
@@ -309,7 +323,7 @@ int TI99V9T9_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				return LOADER_ACCESSERROR;
 			}
 
-			ret=getDiskGeometry(f,&numberoftrack,&numberofside,&numberofsector,&skew,&interleave,&density,&bitrate,&sectorsize);
+			ret=getDiskGeometry(f,&numberoftrack,&numberofside,&numberofsector,&skew0,&skew1,&interleave,&density,&bitrate,&sectorsize);
 			
 			fclose(f);
 
@@ -361,7 +375,7 @@ int TI99V9T9_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	unsigned int filesize;
 	unsigned short i,j,sectorsize;
 	unsigned int file_offset;
-	unsigned char skew,interleave,gap3len;
+	unsigned char skew0,skew1,skew,interleave,gap3len;
 	unsigned char* trackdata;
 	unsigned char trackformat;
 	unsigned short rpm;
@@ -381,19 +395,19 @@ int TI99V9T9_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	filesize=ftell(f);
 	fseek (f , 0 , SEEK_SET);
 
-	if(getDiskGeometry(f,&floppydisk->floppyNumberOfTrack,&floppydisk->floppyNumberOfSide,&floppydisk->floppySectorPerTrack,&skew,&interleave,&density,&floppydisk->floppyBitRate,&sectorsize))
+	if(getDiskGeometry(f,&floppydisk->floppyNumberOfTrack,&floppydisk->floppyNumberOfSide,&floppydisk->floppySectorPerTrack,&skew0,&skew1,&interleave,&density,&floppydisk->floppyBitRate,&sectorsize))
 	{		
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		rpm=300; // normal rpm
 
 		if(density==1)
 		{	
-			trackformat=IBMFORMAT_SD;
+			trackformat=ISOFORMAT_SD;
 			gap3len=45;
 		}
 		else
 		{
-			trackformat=IBMFORMAT_DD;
+			trackformat=ISOFORMAT_DD;
 			gap3len=24;
 		}
 
@@ -412,12 +426,17 @@ int TI99V9T9_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 			{
 				if(i==0)
 				{
-					file_offset=(j*floppydisk->floppySectorPerTrack)*sectorsize;					
+					file_offset=(j*floppydisk->floppySectorPerTrack)*sectorsize;	
+					skew=skew0;
 				}
 				else
 				{
-					file_offset=( ( (2*floppydisk->floppyNumberOfTrack) - 1 - j )*floppydisk->floppySectorPerTrack)*sectorsize;
+					file_offset=(  floppydisk->floppyNumberOfTrack      *floppydisk->floppySectorPerTrack*sectorsize)+
+								(((floppydisk->floppyNumberOfTrack-1)-j)*floppydisk->floppySectorPerTrack*sectorsize);
+					skew=skew1;
 				}
+
+				floppycontext->hxc_printf(MSG_DEBUG,"Read track [%.3d:%.1X] : Offset:%.8X Size:%d*%d",j,i,file_offset,floppydisk->floppySectorPerTrack,sectorsize);
 
 				fseek (f , file_offset , SEEK_SET);
 				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
