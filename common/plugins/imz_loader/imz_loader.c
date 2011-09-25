@@ -57,15 +57,22 @@
 #include "imz_loader.h"
 
 #include "./libs/zlib/zlib.h"
+#include "./libs/zlib/contrib/minizip/unzip.h"
 
 #include "../common/os_api.h"
 
 #define UNPACKBUFFER 128*1024
 
+extern int pc_imggetfloppyconfig(unsigned char * img,unsigned int filesize,unsigned short *numberoftrack,unsigned char *numberofside,unsigned short *numberofsectorpertrack,unsigned char *gap3len,unsigned char *interleave,unsigned short *rpm, unsigned int *bitrate,unsigned short * ifmode);
+
 int IMZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
+	int pathlen,err;
 	char * filepath;
+	unzFile uf;
+	unz_file_info file_info;
+	char filename_inzip[256];
+
 	floppycontext->hxc_printf(MSG_DEBUG,"IMZ_libIsValidDiskFile %s",imgfile);
 	if(imgfile)
 	{
@@ -80,7 +87,24 @@ int IMZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				
 				if((strstr( filepath,".imz" )!=NULL))
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"IMZ file !");
+
+					uf=unzOpen (imgfile);
+					if (!uf)
+					{
+						floppycontext->hxc_printf(MSG_ERROR,"unzOpen: Error while reading the file!");
+						free(filepath);
+						return LOADER_BADFILE;
+					}
+
+					err = unzGetCurrentFileInfo(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
+					if (err!=UNZ_OK)
+					{
+						unzClose(uf);
+						return LOADER_BADFILE;
+					}
+
+					unzClose(uf);
+					floppycontext->hxc_printf(MSG_DEBUG,"IMZ file : %s (%d bytes) !",filename_inzip,file_info.uncompressed_size);
 					free(filepath);
 					return LOADER_ISVALID;
 				}
@@ -106,59 +130,83 @@ int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned int file_offset;
 	unsigned short sectorsize;
 	unsigned char gap3len,skew,trackformat,interleave;
+	char filename_inzip[256];
 	char* flatimg;
-	gzFile file;
-	int err;
-	
+	int err=UNZ_OK;
+	unzFile uf;
+	unz_file_info file_info;
 	CYLINDER* currentcylinder;
+	unsigned short rpm;
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"IMZ_libLoad_DiskFile %s",imgfile);
 	
-	file = gzopen(imgfile, "rb");
-	if (!file)
+	uf=unzOpen (imgfile);
+	if (!uf)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"gzopen: Error while reading the file!");
-		return -1;
+		floppycontext->hxc_printf(MSG_ERROR,"unzOpen: Error while reading the file!");
+		return LOADER_BADFILE;
 	}
 	
-	i=0;
-	filesize=0;
-	flatimg=(char*)malloc(UNPACKBUFFER);
-	do
-	{
-		err=gzread(file, flatimg+filesize,UNPACKBUFFER );
-		filesize=filesize+err;
-		flatimg=(char *)realloc(flatimg,filesize+UNPACKBUFFER);
-		i++;
-	}while(err>0);
-	
-	gzclose(file);
+	unzGoToFirstFile(uf);
 
+    err = unzGetCurrentFileInfo(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
+	if (err!=UNZ_OK)
+    {
+		unzClose(uf);
+		return LOADER_BADFILE;
+	}
+
+	err=unzOpenCurrentFile(uf);
+	if (err!=UNZ_OK)
+    {
+		unzClose(uf);
+		return LOADER_BADFILE;
+	}
+
+	filesize=file_info.uncompressed_size;
+	flatimg=(char*)malloc(filesize);
 	if(!flatimg)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Unpack error!");
 		return LOADER_BADFILE;
 	}	
 	
-	if(flatimg)
+	err=unzReadCurrentFile  (uf, flatimg, filesize);
+	if (err<0)
+	{
+		floppycontext->hxc_printf(MSG_ERROR,"error %d with zipfile in unzReadCurrentFile",err);
+		unzClose(uf);
+		free(flatimg);
+		return LOADER_BADFILE;
+	}
+	
+	unzClose(uf);
+
+	if(pc_imggetfloppyconfig(
+			flatimg,
+			filesize,
+			&floppydisk->floppyNumberOfTrack,
+			&floppydisk->floppyNumberOfSide,
+			&floppydisk->floppySectorPerTrack,
+			&gap3len,
+			&interleave,
+			&rpm,
+			&floppydisk->floppyBitRate,
+			&floppydisk->floppyiftype)==1
+			)
 	{		
 		sectorsize=512;
 		interleave=1;
 		gap3len=0;
 		skew=0;
-		trackformat=AMIGAFORMAT_DD;
+		trackformat=IBMFORMAT_DD;
 
-		floppydisk->floppySectorPerTrack=11;
-		floppydisk->floppyNumberOfSide=2;
-		floppydisk->floppyNumberOfTrack=(filesize/(512*2*floppydisk->floppySectorPerTrack));
-		floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
-		floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 		
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
-			floppydisk->tracks[j]=allocCylinderEntry(DEFAULT_AMIGA_RPM,floppydisk->floppyNumberOfSide);
+			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
 			
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
@@ -167,14 +215,15 @@ int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 							(sectorsize*(floppydisk->floppySectorPerTrack)*i);
 				
-				currentcylinder->sides[i]=tg_generatetrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500,-11150);
+				currentcylinder->sides[i]=tg_generatetrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500,-11150);
 			}
 		}
 		
 		floppycontext->hxc_printf(MSG_INFO_1,"IMZ Loader : tracks file successfully loaded and encoded!");
+		free(flatimg);
 		return 0;
 	}
-
+	free(flatimg);
 	return LOADER_BADFILE;
 }
 
