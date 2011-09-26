@@ -127,7 +127,7 @@ int patchtrackFM(unsigned char * trackdata, unsigned char * trackclk,int trackle
 				trackdata[i+6]=CRC16_Low;
 
 
-				j=0;
+				j=12;
 				do
 				{
 					if((trackdata[i+j]==0xFB) || (trackdata[i+j]==0xF8))
@@ -368,7 +368,6 @@ int TI99PC99_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 				{
 					patchtrackFM(trackdata,trackclk,tracklen);
 					BuildFMCylinder(currentside->databuffer,currentside->tracklen/8,trackclk,trackdata,tracklen);
-
 				}
 				else
 				{
