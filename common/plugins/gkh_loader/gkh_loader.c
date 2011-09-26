@@ -182,7 +182,7 @@ int GKH_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyBitRate=250000;
 		rpm=300;
 		
-		trackformat=ISOFORMAT_DD;
+		trackformat=IBMFORMAT_DD;
 		
 		skew=2;
 		startid=0;
