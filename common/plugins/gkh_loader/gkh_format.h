@@ -2,7 +2,7 @@
 
 typedef struct gkh_header_
 {
-	unsigned long  header_tag;   //"TDDF"
+	unsigned long  header_tag;   // "TDDF"
 	unsigned char  type;         // I
 	unsigned char  version;		 // 0x01
 	unsigned short numberoftags;
@@ -11,7 +11,7 @@ typedef struct gkh_header_
 
 typedef struct image_type_tag_
 {
-	unsigned char  tagtype;      //0x0A
+	unsigned char  tagtype;      // 0x0A
 	unsigned char  datatype;     // I
 	unsigned short nboftrack;		
 	unsigned short nbofheads;
@@ -21,7 +21,7 @@ typedef struct image_type_tag_
 
 typedef struct image_location_tag_
 {
-	unsigned char  tagtype;      //0x0A
+	unsigned char  tagtype;      // 0x0B
 	unsigned char  datatype;     // I
 	unsigned long  longword1;
 	unsigned long  fileoffset;
