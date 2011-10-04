@@ -70,7 +70,7 @@ int GKH_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	gkh_header header;
 	FILE * f;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile %s",imgfile);
+	floppycontext->hxc_printf(MSG_DEBUG,"GKH_libIsValidDiskFile %s",imgfile);
 	if(imgfile)
 	{
 		pathlen=strlen(imgfile);
@@ -222,7 +222,7 @@ int GKH_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		return LOADER_NOERROR;	
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"BAD EDE file!");
+	floppycontext->hxc_printf(MSG_ERROR,"BAD GKH file!");
 	fclose(f);
 	return LOADER_BADFILE;
 }
