@@ -197,7 +197,6 @@ int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	{		
 		sectorsize=512;
 
-		gap3len=0;
 		skew=0;
 		trackformat=IBMFORMAT_DD;
 
