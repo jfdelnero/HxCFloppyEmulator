@@ -10,6 +10,17 @@
 -------------------------------------------------------------------------------
 
 /*********************************************************
+09/10/2011: HxCFloppyEmulator 1.6.11.15
+
+-> zlib updated : zlib 1.2.5
+-> New files Support : Winimage *.IMZ file. 
+-> New files Support : *.GHK (Ensoniq EPS) file image support.
+-> Oric DSK : Deleted address mark support added!
+-> TI99/4A TI99PC99 loader : sector search function corrected.
+-> TI99 V9T9 format : New disk geometry supported, double sided disk support corrected.
+*********************************************************/
+
+/*********************************************************
 04/09/2011: HxCFloppyEmulator 1.6.11.6
 
 -> New files Support : Roland W30 file image support.
