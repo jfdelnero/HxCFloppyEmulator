@@ -107,7 +107,7 @@ typedef enum {
 /* function prototypes for ALL svd format versions	*/
 /********************************************************/
 
-int svd_read_20header(int, int *, int *, int *, int *, int *);
+/*int svd_read_20header(int, int *, int *, int *, int *, int *);
 int svd_read_20(int, struct floppy *);
 int svd_dump_20(struct floppy *, int);
 
@@ -117,6 +117,6 @@ int svd_dump_15(struct floppy *, int);
 
 int svd_read_12header(int, int *, int *);
 int svd_read_12(int, struct floppy *);
-int svd_dump_12(struct floppy *, int);
+int svd_dump_12(struct floppy *, int);*/
 
 
