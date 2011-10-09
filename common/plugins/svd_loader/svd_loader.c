@@ -154,6 +154,14 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	floppycontext->hxc_printf(MSG_DEBUG,"JVC_libLoad_DiskFile %s",imgfile);
 	
+	gap3len=255;
+	interleave=1;
+	skew=1;
+	file_offset=0;
+	trackdata=0;
+	sectorsize=512;
+	trackformat=0;
+
 	f=fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
@@ -298,7 +306,7 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							case AGCR6x2:
 							case AGCR5x3:
 							{
-								int i;
+								//int i;
 /*
 								for (i=0; i < 3; i++) {
 								THIS_SECTOR.hdrprolog[i] = blockbuf[indexptr++];
@@ -336,22 +344,6 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						sectorindex++;
 					}
 				}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-
 
 				fseek (f , file_offset , SEEK_SET);
 						

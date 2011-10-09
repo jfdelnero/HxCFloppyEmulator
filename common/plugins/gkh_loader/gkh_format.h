@@ -28,3 +28,4 @@ typedef struct image_location_tag_
 }image_location_tag;
 
 #pragma pack()
+
