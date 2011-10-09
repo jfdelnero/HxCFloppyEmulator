@@ -27,5 +27,3 @@
 int GKH_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile);
 int GKH_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters);
 
-
-

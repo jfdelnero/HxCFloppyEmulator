@@ -942,6 +942,50 @@ SOURCE=..\..\common\plugins\fei_loader\fei_loader.c
 SOURCE=..\..\common\plugins\fei_loader\fei_loader.h
 # End Source File
 # End Group
+# Begin Group "GKH"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\gkh_loader\gkh_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\gkh_loader\gkh_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\gkh_loader\gkh_loader.h
+# End Source File
+# End Group
+# Begin Group "SVD"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\svd_loader\svd.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\svd_loader\svd_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\svd_loader\svd_loader.h
+# End Source File
+# End Group
+# Begin Group "IMZ"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\imz_loader\imz_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\imz_loader\imz_loader.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\..\common\plugins\common\crc.c
@@ -989,97 +1033,89 @@ SOURCE=..\..\common\plugins\common\track_generator.h
 # Begin Group "zlib"
 
 # PROP Default_Filter ""
+# Begin Group "MINIZIP"
+
+# PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\adler32.c
+SOURCE=..\..\common\libs\zlib\contrib\minizip\ioapi.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\compress.c
+SOURCE=..\..\common\libs\zlib\contrib\minizip\iowin32.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\crc32.c
+SOURCE=..\..\common\libs\zlib\contrib\minizip\mztools.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\crc32.h
+SOURCE=..\..\common\libs\zlib\contrib\minizip\unzip.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\deflate.c
+SOURCE=..\..\common\libs\zlib\contrib\minizip\zip.c
+# End Source File
+# End Group
+# Begin Source File
+
+SOURCE=..\..\common\libs\zlib\adler32.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\deflate.h
+SOURCE=..\..\common\libs\zlib\compress.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\gzio.c
+SOURCE=..\..\common\libs\zlib\crc32.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\infback.c
+SOURCE=..\..\common\libs\zlib\deflate.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\inffast.c
+SOURCE=..\..\common\libs\zlib\gzclose.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\inffast.h
+SOURCE=..\..\common\libs\zlib\gzlib.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\inffixed.h
+SOURCE=..\..\common\libs\zlib\gzread.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\inflate.c
+SOURCE=..\..\common\libs\zlib\gzwrite.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\inflate.h
+SOURCE=..\..\common\libs\zlib\infback.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\inftrees.c
+SOURCE=..\..\common\libs\zlib\inffast.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\inftrees.h
+SOURCE=..\..\common\libs\zlib\inflate.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\trees.c
+SOURCE=..\..\common\libs\zlib\inftrees.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\trees.h
+SOURCE=..\..\common\libs\zlib\trees.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\uncompr.c
+SOURCE=..\..\common\libs\zlib\uncompr.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\libs\zlib\zlib123\zconf.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\libs\zlib\zlib123\zconf.in.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\libs\zlib\zlib123\zlib.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\libs\zlib\zlib123\zutil.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\libs\zlib\zlib123\zutil.h
+SOURCE=..\..\common\libs\zlib\zutil.c
 # End Source File
 # End Group
 # Begin Group "xdms"
