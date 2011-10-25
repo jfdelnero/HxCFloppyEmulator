@@ -72,15 +72,13 @@ int SAP_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		pathlen=strlen(imgfile);
 		if(pathlen!=0)
 		{
-			filepath=malloc(pathlen+1);
+			filepath=strdup(imgfile);
 			if(filepath!=0)
 			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-				
+				strlower(filepath);	
 				if(strstr( filepath,".sap" )!=NULL)
 				{
-					sapid=sap_OpenArchive(filepath, &floppyformat);
+					sapid=sap_OpenArchive(imgfile, &floppyformat);
 					if(sapid!=SAP_ERROR)
 					{
 						sap_CloseArchive(sapid);
