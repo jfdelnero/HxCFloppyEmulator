@@ -71,6 +71,7 @@ int VTR_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	if(imgfile)
 	{
+
 		pathlen=strlen(imgfile);
 		if(pathlen!=0)
 		{
