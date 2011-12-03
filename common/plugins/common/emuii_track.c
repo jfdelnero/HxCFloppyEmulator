@@ -48,7 +48,7 @@
 #include <stdio.h>
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "crc.h"
 #include "emuii_track.h"
 
