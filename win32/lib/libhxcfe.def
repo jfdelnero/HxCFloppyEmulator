@@ -1,9 +1,9 @@
 LIBRARY   LIBHXCFE
 EXPORTS
-   hxcfe_init @1
-   hxcfe_set_outputfunc @2
-   hxcfe_getversion @3
-   hxcfe_deinit @4
+   hxcfe_init				@1
+   hxcfe_set_outputfunc		@2
+   hxcfe_getversion			@3
+   hxcfe_deinit				@4
 
    hxcfe_getcontainerid		@20
    hxcfe_select_container	@21
@@ -16,17 +16,20 @@ EXPORTS
    hxcfe_setTrackInterleave	@52
    hxcfe_setTrackSkew		@53
    hxcfe_setTrackBitrate	@54
+   hxcfe_setIndexPosition	@55
+   hxcfe_setIndexLength		@56
 
-   hxcfe_addSector			@60
-   hxcfe_setSectorGap3		@61
-   hxcfe_setSectorSizeID	@62
-   hxcfe_setSectorFill		@63
-   hxcfe_setSectorEncoding  @64
-   hxcfe_setSectorDataCRC   @65
-   hxcfe_setSectorHeaderCRC	@66
-   hxcfe_setSectorDataMark  @67
-   hxcfe_popTrack			@68
-   hxcfe_get_floppy			@69
+   hxcfe_addSector			@70
+   hxcfe_setSectorBitrate   @71
+   hxcfe_setSectorGap3		@72
+   hxcfe_setSectorSizeID	@73
+   hxcfe_setSectorFill		@74
+   hxcfe_setSectorEncoding  @75
+   hxcfe_setSectorDataCRC   @76
+   hxcfe_setSectorHeaderCRC	@77
+   hxcfe_setSectorDataMark  @78
+   hxcfe_popTrack			@79
+   hxcfe_get_floppy			@80
 
 
 

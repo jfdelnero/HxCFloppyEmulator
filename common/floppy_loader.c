@@ -470,6 +470,10 @@ FBuilder* hxcfe_init_floppy(HXCFLOPPYEMULATOR* floppycontext,int nb_of_track,int
 			fb->fb_stack[0].interleave=1;
 			fb->fb_stack[0].rpm=300;
 
+			fb->fb_stack[0].indexlen=2500;
+			fb->fb_stack[0].indexpos=-2500;
+			fb->fb_stack[0].sectorunderindex=0;
+
 			fb->fb_stack[0].bitrate=250000;
 			fb->fb_stack[0].sectorconfig.bitrate=fb->fb_stack[0].bitrate;
 			fb->fb_stack[0].sectorconfig.fill_byte=0xF6;
@@ -529,6 +533,19 @@ int hxcfe_setTrackSkew(FBuilder* fb,int skew)
 	return HXCFE_NOERROR;
 }
 
+int hxcfe_setIndexPosition(FBuilder* fb,int position,int allowsector)
+{
+	fb->fb_stack[fb->fb_stack_pointer].indexpos=position;
+	return HXCFE_NOERROR;
+}
+
+int hxcfe_setIndexLength(FBuilder* fb,int length)
+{
+	fb->fb_stack[fb->fb_stack_pointer].indexlen=length;
+	return HXCFE_NOERROR;
+}
+
+
 int hxcfe_addSector(FBuilder* fb,int sectornumber,int side,int track,unsigned char * buffer,int size)
 {
 	if(fb->fb_stack[fb->fb_stack_pointer].numberofsector<0x400)
@@ -544,7 +561,10 @@ int hxcfe_addSector(FBuilder* fb,int sectornumber,int side,int track,unsigned ch
 		fb->fb_stack[fb->fb_stack_pointer].sectortab[fb->fb_stack[fb->fb_stack_pointer].numberofsector].sectorsize=size;
 
 		if(buffer)
-			fb->fb_stack[fb->fb_stack_pointer].sectortab[fb->fb_stack[fb->fb_stack_pointer].numberofsector].input_data=buffer;
+		{
+			fb->fb_stack[fb->fb_stack_pointer].sectortab[fb->fb_stack[fb->fb_stack_pointer].numberofsector].input_data=malloc(size);
+			memcpy(fb->fb_stack[fb->fb_stack_pointer].sectortab[fb->fb_stack[fb->fb_stack_pointer].numberofsector].input_data,buffer,size);
+		}
 		else
 			fb->fb_stack[fb->fb_stack_pointer].sectortab[fb->fb_stack[fb->fb_stack_pointer].numberofsector].input_data=0;
 
@@ -611,6 +631,8 @@ int hxcfe_popTrack (FBuilder* fb)
 {
 	CYLINDER* currentcylinder;
 	fb_track_state * current_fb_track_state;
+	int i;
+	unsigned long sui_flag;
 
 	if(fb->fb_stack_pointer)
 	{
@@ -620,8 +642,11 @@ int hxcfe_popTrack (FBuilder* fb)
 			fb->floppydisk->tracks[current_fb_track_state->track_number]=allocCylinderEntry(current_fb_track_state->rpm,2);
 		
 		currentcylinder=fb->floppydisk->tracks[current_fb_track_state->track_number];
-						
-		//currentcylinder->sides[i]=tg_generatetrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500,-2500);
+		sui_flag=0;
+	
+		if(!current_fb_track_state->sectorunderindex)
+				sui_flag=NO_SECTOR_UNDER_INDEX;
+		
 		currentcylinder->sides[current_fb_track_state->side_number]=tg_generatetrackEx((unsigned short)current_fb_track_state->numberofsector,
 																						current_fb_track_state->sectortab,
 																						current_fb_track_state->interleave,
@@ -629,7 +654,14 @@ int hxcfe_popTrack (FBuilder* fb)
 																						current_fb_track_state->bitrate,
 																						current_fb_track_state->rpm,
 																						current_fb_track_state->type,
-																						2500/* | NO_SECTOR_UNDER_INDEX*/,-2500);
+																						current_fb_track_state->indexlen|sui_flag,current_fb_track_state->indexpos);
+
+		for(i=0;i<current_fb_track_state->numberofsector;i++)
+		{
+			if(current_fb_track_state->sectortab[i].input_data)
+				free(current_fb_track_state->sectortab[i].input_data);
+		}
+
 		fb->fb_stack_pointer--;
 		return HXCFE_NOERROR;
 	}
