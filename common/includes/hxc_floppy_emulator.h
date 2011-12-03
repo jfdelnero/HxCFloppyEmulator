@@ -24,31 +24,139 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 */
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// HxCFloppyEmulator Descriptor
-//
-//
 
+#include "internal_floppy.h"
+#include "../plugins/common/track_generator.h"
+#include "plugins_id.h"
 
-// msg output level
+//////////////////////////////////////////////////////////
+// Output Message  level
 #define MSG_INFO_0 0
 #define MSG_INFO_1 1
 #define MSG_WARNING 2
 #define MSG_ERROR 3
 #define MSG_DEBUG 4
-
-
-
-
+// Output functions 
 typedef int (*HXCPRINTF_FUNCTION)(int MSGTYPE,char * string, ...);
 typedef int (*DISPLAYTRACKPOS_FUNCTION)(unsigned int current,unsigned int total);
+//////////////////////////////////////////////////////////
+
+#define HXCFE_VALIDFILE			1
+#define HXCFE_NOERROR			0 
+#define HXCFE_ACCESSERROR		-1
+#define HXCFE_BADFILE			-2
+#define HXCFE_FILECORRUPTED		-3 
+#define HXCFE_BADPARAMETER		-4
+#define HXCFE_INTERNALERROR		-5
+#define HXCFE_UNSUPPORTEDFILE	-6
 
 typedef struct HXCFLOPPYEMULATOR_
 {
 	HXCPRINTF_FUNCTION hxc_printf;
 	DISPLAYTRACKPOS_FUNCTION hxc_settrackpos;
+	unsigned char CONTAINERTYPE[16];
 }HXCFLOPPYEMULATOR;
 
-int initHxCFloppyEmulator(HXCFLOPPYEMULATOR* floppycontext);
 
+////////////////////////////////////////////////////////////////////////////////////////////
+// Init Function
+
+HXCFLOPPYEMULATOR* hxcfe_init(void);
+int hxcfe_getversion(HXCFLOPPYEMULATOR* floppycontext,char * version,unsigned int * size1,char *copyright,unsigned int * size2);
+int hxcfe_set_outputfunc(HXCFLOPPYEMULATOR* floppycontext,HXCPRINTF_FUNCTION hxc_printf);
+void hxcfe_deinit(HXCFLOPPYEMULATOR* hxcfe);
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// File image functions
+
+int hxcfe_getcontainerid(HXCFLOPPYEMULATOR* floppycontext,int index,char * id,char * desc);
+int hxcfe_select_container(HXCFLOPPYEMULATOR* floppycontext,char * container);
+
+FLOPPY * hxcfe_floppy_load(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int * err_ret);
+int hxcfe_floppy_unload(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk);
+int hxcfe_floppy_export(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,char* imgname);
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// Custom Image/floppy generation functions
+
+#define STACK_SIZE 0x400
+
+typedef struct fb_track_state_
+{
+	SECTORCONFIG sectorconfig;
+	int track_number;
+	unsigned char side_number;
+	unsigned char interleave;
+	unsigned char skew;
+	unsigned char type;
+	unsigned short rpm;
+	int bitrate;
+
+	int numberofsector;
+	SECTORCONFIG sectortab[STACK_SIZE];
+
+	int sc_stack_pointer;
+	SECTORCONFIG sc_stack[STACK_SIZE];
+}fb_track_state;
+
+typedef struct FBuilder_
+{
+	FLOPPY * floppydisk;
+	int fb_stack_pointer;
+	fb_track_state * fb_stack;
+}FBuilder;
+
+FBuilder* hxcfe_init_floppy(HXCFLOPPYEMULATOR* floppycontext,int nb_of_track,int nb_of_side);
+
+int	hxcfe_pushTrack (FBuilder*,unsigned int rpm,int number,int side,int type);
+int hxcfe_setTrackInterleave(FBuilder*,int interleave);
+int hxcfe_setTrackSkew(FBuilder*,int skew);
+
+int hxcfe_setTrackBitrate(FBuilder*,int bitrate);
+
+int hxcfe_addSector(FBuilder* fb,int sectornumber,int side,int track,unsigned char * buffer,int size);
+
+int hxcfe_setSectorGap3(FBuilder* fb,unsigned char Gap3);
+int hxcfe_setSectorSizeID(FBuilder* fb,unsigned char sectorsizeid);
+int hxcfe_setSectorFill(FBuilder*,unsigned char fill);
+
+int hxcfe_setSectorEncoding(FBuilder*,int encoding);
+
+int hxcfe_setSectorDataCRC(FBuilder*,unsigned short crc);
+int hxcfe_setSectorHeaderCRC(FBuilder*,unsigned short crc);
+
+int hxcfe_setSectorDataMark(FBuilder*,unsigned char datamark);
+
+int hxcfe_popTrack (FBuilder* fb);
+
+FLOPPY* hxcfe_get_floppy(FBuilder* fb);
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// Floppy functions
+
+
+#define IBMPC_DD_FLOPPYMODE				0x00
+#define IBMPC_HD_FLOPPYMODE				0x01
+#define ATARIST_DD_FLOPPYMODE			0x02
+#define ATARIST_HD_FLOPPYMODE			0x03
+#define AMIGA_DD_FLOPPYMODE				0x04
+#define AMIGA_HD_FLOPPYMODE				0x05
+#define CPC_DD_FLOPPYMODE				0x06
+#define GENERIC_SHUGART_DD_FLOPPYMODE	0x07
+#define IBMPC_ED_FLOPPYMODE				0x08
+#define MSX2_DD_FLOPPYMODE				0x09
+#define C64_DD_FLOPPYMODE				0x0A
+#define EMU_SHUGART_FLOPPYMODE			0x0B
+
+enum {
+	DOUBLESTEP = 1,
+	INTERFACEMODE = 2
+};
+
+enum {
+	SET = 0,
+	GET = 1
+};
+
+int hxcfe_floppy_getset_params(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,unsigned char dir,unsigned short param,void * value);
 

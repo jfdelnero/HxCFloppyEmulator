@@ -25,19 +25,18 @@
 //
 */
 // loader return code
-#define LOADER_ISVALID			1
-#define LOADER_NOERROR			0 
-#define LOADER_ACCESSERROR		-1
-#define LOADER_BADFILE			-2
-#define LOADER_FILECORRUPT		-3 
-#define LOADER_BADPARAMETER		-4
-#define LOADER_INTERNALERROR	-5
-#define LOADER_UNSUPPORTEDFILE	-6
+
+enum {
+	GETPLUGINID = 1,
+	GETDESCRIPTION = 2,
+	GETFUNCPTR = 3,
+	GETEXTENSION = 4
+};
 
 typedef int (*ISVALIDDISKFILE) (void* floppycontext,char * imgfile);
 typedef int (*LOADDISKFILE)(void* floppycontext,void * floppydisk,char * imgfile,void * parameters);
 typedef int (*WRITEDISKFILE)(void* floppycontext,void * floppydisk,char * imgfile,void * parameters);
-typedef int (*GETPLUGININFOS)(void* floppycontext,void * floppydisk,void * pluginsinfos);
+typedef int (*GETPLUGININFOS)(void* floppycontext,unsigned long infotype,void * returnvalue);
 
 typedef struct plugins_ptr_
 {
@@ -48,6 +47,4 @@ typedef struct plugins_ptr_
 }plugins_ptr;
 
 
-int floppy_load(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,char* imgname);
-int floppy_unload(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk);
-
+int libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue,const char * pluginid,const char * plugindesc,plugins_ptr * pluginfunc,const char * fileext);
