@@ -48,9 +48,8 @@
 #include <stdio.h>
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "crc.h"
-#include "track_generator.h"
 #include "floppy_utils.h"
 #include "math.h"
 
