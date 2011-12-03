@@ -25,10 +25,4 @@
 //
 */
 
-int ADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile);
-int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters);
-
-
-
-
-
+int ADF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue);

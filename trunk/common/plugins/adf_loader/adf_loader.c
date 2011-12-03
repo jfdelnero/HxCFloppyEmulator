@@ -49,12 +49,10 @@
 
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
 
 
 #include "adf_loader.h"
@@ -89,7 +87,7 @@ int ADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					if(f==NULL) 
 					{
 						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 					}
 
 					fseek (f , 0 , SEEK_END); 
@@ -100,22 +98,22 @@ int ADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					if(filesize%(512*11))
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non ADF file ! Bad file size!");
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 
-					return LOADER_ISVALID;
+					return HXCFE_VALIDFILE;
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non ADF file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -129,27 +127,27 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned char gap3len,skew,trackformat,interleave;
 	unsigned short sectorsize;
 	CYLINDER* currentcylinder;
-	
+
 	floppycontext->hxc_printf(MSG_DEBUG,"ADF_libLoad_DiskFile %s",imgfile);
-	
+
 	f=fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
-	
+	fseek (f , 0 , SEEK_SET);
+
 	if(!filesize)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Bad file size : %d !",filesize);
 		fclose(f);
-		return LOADER_BADFILE;
+		return HXCFE_BADFILE;
 	}
-	
+
 	if(filesize<100*11*2*512)
 	{
 		floppydisk->floppySectorPerTrack=11;
@@ -167,7 +165,7 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyNumberOfTrack=80;
 	else
 		floppydisk->floppyNumberOfTrack=filesize/(512*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide);
-	
+
 	floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
 	floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
 	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
@@ -182,14 +180,14 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
-			
+
 		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 		currentcylinder=floppydisk->tracks[j];
-		
+
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-		{				
+		{
 			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-				        (sectorsize*(floppydisk->floppySectorPerTrack)*i);
+					(sectorsize*(floppydisk->floppySectorPerTrack)*i);
 			fseek (f , file_offset , SEEK_SET);
 			fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
 
@@ -198,10 +196,34 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	}
 
 	free(trackdata);
-	
+
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 	fclose(f);
-	return LOADER_NOERROR;	
+	return HXCFE_NOERROR;
 }
 
+int ADF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
 
+	const char plug_id[]="AMIGA_ADF";
+	const char plug_desc[]="AMIGA ADF Loader";
+	const char plug_ext[]="adf";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	ADF_libIsValidDiskFile,
+		(LOADDISKFILE)		ADF_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	ADF_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
