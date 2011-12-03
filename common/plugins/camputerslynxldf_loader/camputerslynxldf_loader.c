@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "camputerslynxldf_loader.h"
 
@@ -84,7 +84,7 @@ int CAMPUTERSLYNX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * img
 					if(f==NULL) 
 					{
 						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 					}
 					
 					fseek (f , 0 , SEEK_END); 
@@ -96,24 +96,24 @@ int CAMPUTERSLYNX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * img
 					if(filesize&0x1FF)
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non LDF file - bad file size !");
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 
 					floppycontext->hxc_printf(MSG_DEBUG,"LDF file !");
 					free(filepath);
-					return LOADER_ISVALID;
+					return HXCFE_VALIDFILE;
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non LDF file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -138,7 +138,7 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	fseek (f , 0 , SEEK_END); 
@@ -236,13 +236,39 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 		fclose(f);
-		return LOADER_NOERROR;
+		return HXCFE_NOERROR;
 
 	}
 	
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	fclose(f);
-	return LOADER_BADFILE;
+	return HXCFE_BADFILE;
+}
+
+int CAMPUTERSLYNX_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="CAMPUTERSLYNX";
+	const char plug_desc[]="CAMPUTERSLYNX Loader";
+	const char plug_ext[]="ldf";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	CAMPUTERSLYNX_libIsValidDiskFile,
+		(LOADDISKFILE)		CAMPUTERSLYNX_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	CAMPUTERSLYNX_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
 }
 
 

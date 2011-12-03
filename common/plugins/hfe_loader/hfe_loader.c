@@ -48,12 +48,12 @@
 #include <stdio.h>
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "hfe_loader.h"
-#include "hfe_file_writer.h"
+#include "hfe_format.h"
 
 #include "../common/os_api.h"
 
@@ -85,7 +85,6 @@ char * interfacemodecode[]=
 	"EMU_SHUGART_FLOPPYMODE"
 };
 
-
 int HFE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	int pathlen;
@@ -112,7 +111,7 @@ int HFE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					f=fopen(imgfile,"rb");
 					if(f==NULL) 
 					{
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 					}
 					fread(&header,sizeof(header),1,f);
 					fclose(f);
@@ -121,26 +120,26 @@ int HFE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"HFE file !");
 						free(filepath);
-						return LOADER_ISVALID;
+						return HXCFE_VALIDFILE;
 					}
 					else
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non HFE file !");
 						free(filepath);
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non HFE file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 int HFE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -162,7 +161,7 @@ int HFE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	fread(&header,sizeof(header),1,f);
@@ -280,11 +279,66 @@ int HFE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		free(trackoffsetlist);
 	
 		fclose(f);
-		return LOADER_NOERROR;
+		return HXCFE_NOERROR;
 	}	
 	
 	fclose(f);	
 	floppycontext->hxc_printf(MSG_ERROR,"bad header");
-	return LOADER_BADFILE;
+	return HXCFE_BADFILE;
 }
 
+int HFE_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename);
+
+int HFE_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="HXC_HFE";
+	const char plug_desc[]="SD Card HxCFE HFE file Loader";
+	const char plug_ext[]="hfe";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	HFE_libIsValidDiskFile,
+		(LOADDISKFILE)		HFE_libLoad_DiskFile,
+		(WRITEDISKFILE)		HFE_libWrite_DiskFile,
+		(GETPLUGININFOS)	HFE_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
+
+int EXTHFE_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename);
+
+int EXTHFE_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="HXC_EXTHFE";
+	const char plug_desc[]="SD Card HxCFE EXTENDED HFE file Loader";
+	const char plug_ext[]="hfe";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	0,
+		(LOADDISKFILE)		0,
+		(WRITEDISKFILE)		EXTHFE_libWrite_DiskFile,
+		(GETPLUGININFOS)	EXTHFE_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}

@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "prophet_loader.h"
 
@@ -86,7 +86,7 @@ int Prophet_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					if(f==NULL) 
 					{
 						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 					}
 					
 					fseek (f , 0 , SEEK_END);
@@ -99,25 +99,25 @@ int Prophet_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					if((filesize%((5*1024) + (1*256))) || ( ((filesize/( (5*1024) + (1*256) ) )!=80) && ((filesize/( (5*1024) + (1*256) ) )!=160) ) )
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non Prophet file - bad file size !");
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 
 
 					floppycontext->hxc_printf(MSG_DEBUG,"Prophet file !");
 					free(filepath);
-					return LOADER_ISVALID;
+					return HXCFE_VALIDFILE;
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non Prophet file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 	
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -143,7 +143,7 @@ int Prophet_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	fseek (f , 0 , SEEK_END); 
@@ -218,14 +218,40 @@ int Prophet_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
 			fclose(f);
-			return LOADER_NOERROR;
+			return HXCFE_NOERROR;
 
 		}
 		fclose(f);
-		return LOADER_FILECORRUPT;
+		return HXCFE_FILECORRUPTED;
 	}
 
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	fclose(f);
-	return LOADER_BADFILE;
+	return HXCFE_BADFILE;
+}
+
+int Prophet_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="PROPHET2000";
+	const char plug_desc[]="PROPHET 2000 Loader";
+	const char plug_ext[]="img";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	Prophet_libIsValidDiskFile,
+		(LOADDISKFILE)		Prophet_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	Prophet_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
 }

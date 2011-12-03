@@ -50,7 +50,7 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
@@ -114,25 +114,25 @@ int IPF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					free(filepath);
 					if(init_caps_lib())
 					{
-						return LOADER_ISVALID;
+						return HXCFE_VALIDFILE;
 					}
 					else
 					{
 						floppycontext->hxc_printf(MSG_ERROR,"No Caps lib available!");
-						return LOADER_INTERNALERROR;
+						return HXCFE_INTERNALERROR;
 					}
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non IPF file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 unsigned long trackcopy(unsigned char * dest,unsigned char * src,unsigned long overlap,unsigned long tracklen,unsigned char nooverlap)
@@ -240,7 +240,7 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	fseek (f , 0 , SEEK_END); 
@@ -265,14 +265,14 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"Memory error!");
 			fclose(f);
-			return LOADER_INTERNALERROR;
+			return HXCFE_INTERNALERROR;
 		}	
 	}
 	else
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"0 byte file!");
 		fclose(f);
-		return LOADER_BADFILE;
+		return HXCFE_BADFILE;
 	}
 	
 	fclose(f);
@@ -557,12 +557,40 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		free(fileimg);
 		
 		floppycontext->hxc_printf(MSG_INFO_1,"IPF Loader : tracks file successfully loaded and encoded!");
-		return LOADER_NOERROR;
+		return HXCFE_NOERROR;
 		
 		
 	}
 	
 	
-	return LOADER_INTERNALERROR;
+	return HXCFE_INTERNALERROR;
 }
+
+int IPF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="SPS_IPF";
+	const char plug_desc[]="SPS IPF Loader";
+	const char plug_ext[]="ipf";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	IPF_libIsValidDiskFile,
+		(LOADDISKFILE)		IPF_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	IPF_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
+
+
 #endif

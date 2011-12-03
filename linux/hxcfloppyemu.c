@@ -38,8 +38,6 @@
 #include <time.h>
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
-#include "floppy_loader.h"
 #include "./usb_floppyemulator/usb_hxcfloppyemulator.h"
 
 #include "mfm_file_writer.h"
@@ -136,17 +134,17 @@ int main(int argc, char* argv[])
 		ret=floppy_load(flopemu,thefloppydisk,argv[1]);
 		
 		
-		if(ret!=LOADER_NOERROR)
+		if(ret!=HXCFE_NOERROR)
 		{
 			switch(ret)
 			{
-			case LOADER_UNSUPPORTEDFILE:
+			case HXCFE_UNSUPPORTEDFILE:
 				printf("Load error!: Image file not yet supported!\n");
 				break;
-			case LOADER_FILECORRUPT:
+			case HXCFE_FILECORRUPTED:
 				printf("Load error!: File corrupted ? Read error ?\n");
 				break;
-			case LOADER_ACCESSERROR:
+			case HXCFE_ACCESSERROR:
 				printf("Load error!:  Read file error!\n");
 				break;
 			default:

@@ -92,940 +92,36 @@ LINK32=link.exe
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
-# Begin Group "Plugins"
-
-# PROP Default_Filter ""
-# Begin Group "ADF"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\adf_loader\adf_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\adf_loader\adf_loader.h
-# End Source File
-# End Group
-# Begin Group "DMS"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\dms_loader\dms_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\dms_loader\dms_loader.h
-# End Source File
-# End Group
-# Begin Group "amigadosfs_loader"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\amigadosfs_loader\amigadosfs_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\amigadosfs_loader\amigadosfs_loader.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\amigadosfs_loader\stdboot3.h
-# End Source File
-# End Group
-# Begin Group "IPF"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\ipf_loader\ipf_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\ipf_loader\ipf_loader.h
-# End Source File
-# End Group
-# Begin Group "ST"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\st_loader\st_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\st_loader\st_loader.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\st_loader\stfileformat.h
-# End Source File
-# End Group
-# Begin Group "STX"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\stx_loader\pasti_format.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\stx_loader\stx_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\stx_loader\stx_loader.h
-# End Source File
-# End Group
-# Begin Group "CPCDSK"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\cpcdsk_loader\cpcdsk_format.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\cpcdsk_loader\cpcdsk_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\cpcdsk_loader\cpcdsk_loader.h
-# End Source File
-# End Group
-# Begin Group "IMGPC"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\img_loader\img_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\img_loader\img_loader.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\img_loader\pcimgfileformat.h
-# End Source File
-# End Group
-# Begin Group "CopyQM"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\copyqm_loader\copyqm_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\copyqm_loader\copyqm_loader.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\copyqm_loader\crctable.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\copyqm_loader\crctable.h
-# End Source File
-# End Group
-# Begin Group "MSA"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\msa_loader\msa_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\msa_loader\msa_loader.h
-# End Source File
-# End Group
-# Begin Group "OricDSK"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\oricdsk_loader\oricdsk_format.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\oricdsk_loader\oricdsk_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\oricdsk_loader\oricdsk_loader.h
-# End Source File
-# End Group
-# Begin Group "MFM"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\mfm_loader\mfm_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\mfm_loader\mfm_loader.h
-# End Source File
-# End Group
-# Begin Group "FATDK"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\fat12floppy_loader\fat12.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\fat12floppy_loader\fat12.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\fat12floppy_loader\fat12floppy_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\fat12floppy_loader\fat12floppy_loader.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\fat12floppy_loader\fat12formats.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\fat12floppy_loader\fatlib.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\fat12floppy_loader\fatlib.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\fat12floppy_loader\pcbootsector.h
-# End Source File
-# End Group
-# Begin Group "SMC"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\smc_loader\snes_smc_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\smc_loader\snes_smc_loader.h
-# End Source File
-# End Group
-# Begin Group "ADZ"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\adz_loader\adz_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\adz_loader\adz_loader.h
-# End Source File
-# End Group
-# Begin Group "MSX"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\msx_loader\msx_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\msx_loader\msx_loader.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\msx_loader\msxfileformat.h
-# End Source File
-# End Group
-# Begin Group "HFE"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\hfe_loader\hfe_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\hfe_loader\hfe_loader.h
-# End Source File
-# End Group
-# Begin Group "IMD"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\imd_loader\imd_format.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\imd_loader\imd_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\imd_loader\imd_loader.h
-# End Source File
-# End Group
-# Begin Group "AFI"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\afi_loader\afi_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\afi_loader\afi_loader.h
-# End Source File
-# End Group
-# Begin Group "D64"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\d64_loader\d64_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\d64_loader\d64_loader.h
-# End Source File
-# End Group
-# Begin Group "CPCFS"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\cpcfs_loader\cpcfs_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\cpcfs_loader\cpcfs_loader.h
-# End Source File
-# End Group
-# Begin Group "TRD"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\trd_loader\trd_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\trd_loader\trd_loader.h
-# End Source File
-# End Group
-# Begin Group "SCL"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\scl_loader\scl_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\scl_loader\scl_loader.h
-# End Source File
-# End Group
-# Begin Group "D88"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\d88_loader\d88_format.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\d88_loader\d88_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\d88_loader\d88_loader.h
-# End Source File
-# End Group
-# Begin Group "JV1"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\jv1_loader\jv1_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\jv1_loader\jv1_loader.h
-# End Source File
-# End Group
-# Begin Group "RAW"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\raw_loader\raw_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\raw_loader\raw_loader.h
-# End Source File
-# End Group
-# Begin Group "SAP"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\sap_loader\sap_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\sap_loader\sap_loader.h
-# End Source File
-# End Group
-# Begin Group "VTR"
-
-# PROP Default_Filter "VTR"
-# Begin Source File
-
-SOURCE=..\..\common\plugins\vtr_loader\vtr_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\vtr_loader\vtr_loader.h
-# End Source File
-# End Group
-# Begin Group "HDM"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\hdm_loader\hdm_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\hdm_loader\hdm_loader.h
-# End Source File
-# End Group
-# Begin Group "TI99PC99"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\ti99pc99_loader\ti99pc99_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\ti99pc99_loader\ti99pc99_loader.h
-# End Source File
-# End Group
-# Begin Group "ApriDisk"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\apridisk_loader\apridisk_format.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\apridisk_loader\apridisk_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\apridisk_loader\apridisk_loader.h
-# End Source File
-# End Group
-# Begin Group "EDE"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\ede_loader\ede_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\ede_loader\ede_loader.h
-# End Source File
-# End Group
-# Begin Group "FD"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\fd_loader\fd_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\fd_loader\fd_loader.h
-# End Source File
-# End Group
-# Begin Group "VDK"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\vdk_loader\vdk_format.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\vdk_loader\vdk_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\vdk_loader\vdk_loader.h
-# End Source File
-# End Group
-# Begin Group "DPX"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\dpx_loader\dpx_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\dpx_loader\dpx_loader.h
-# End Source File
-# End Group
-# Begin Group "Ensoniq_Mirage"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\ensoniq_mirage_loader\ensoniq_mirage_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\ensoniq_mirage_loader\ensoniq_mirage_loader.h
-# End Source File
-# End Group
-# Begin Group "Emax"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\emax_loader\emax_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\emax_loader\emax_loader.h
-# End Source File
-# End Group
-# Begin Group "MGT"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\mgt_loader\mgt_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\mgt_loader\mgt_loader.h
-# End Source File
-# End Group
-# Begin Group "SAD"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\sad_loader\sad_fileformat.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\sad_loader\sad_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\sad_loader\sad_loader.h
-# End Source File
-# End Group
-# Begin Group "JV3"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\jv3_loader\jv3_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\jv3_loader\jv3_loader.h
-# End Source File
-# End Group
-# Begin Group "STT"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\stt_loader\stt_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\stt_loader\stt_loader.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\stt_loader\sttfileformat.h
-# End Source File
-# End Group
-# Begin Group "Prophet"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\prophet_loader\prophet_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\prophet_loader\prophet_loader.h
-# End Source File
-# End Group
-# Begin Group "TeleDisk"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\teledisk_loader\td0_lzss.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\teledisk_loader\td0_lzss.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\teledisk_loader\teledisk_format.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\teledisk_loader\teledisk_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\teledisk_loader\teledisk_loader.h
-# End Source File
-# End Group
-# Begin Group "EmuII_RAW"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\emuii_raw_loader\emuii_raw_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\emuii_raw_loader\emuii_raw_loader.h
-# End Source File
-# End Group
-# Begin Group "EmuII"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\emuii_loader\emuii_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\emuii_loader\emuii_loader.h
-# End Source File
-# End Group
-# Begin Group "EmuI_RAW"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\emui_raw_loader\emui_raw_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\emui_raw_loader\emui_raw_loader.h
-# End Source File
-# End Group
-# Begin Group "JVC"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\jvc_loader\jvc_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\jvc_loader\jvc_loader.h
-# End Source File
-# End Group
-# Begin Group "DIM"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\dim_loader\dim_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\dim_loader\dim_loader.h
-# End Source File
-# End Group
-# Begin Group "TI99V9T9"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\ti99v9t9_loader\ti99v9t9_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\ti99v9t9_loader\ti99v9t9_loader.h
-# End Source File
-# End Group
-# Begin Group "DMK"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\dmk_loader\dmk_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\dmk_loader\dmk_loader.h
-# End Source File
-# End Group
-# Begin Group "D81"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\d81_loader\d81_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\d81_loader\d81_loader.h
-# End Source File
-# End Group
-# Begin Group "ACORNADF"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\acornadf_loader\acornadf_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\acornadf_loader\acornadf_loader.h
-# End Source File
-# End Group
-# Begin Group "VEGASDSK"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\vegasdsk_loader\vegasdsk_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\vegasdsk_loader\vegasdsk_loader.h
-# End Source File
-# End Group
-# Begin Group "CamputersLynxLDF"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\camputerslynxldf_loader\camputerslynxldf_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\camputerslynxldf_loader\camputerslynxldf_loader.h
-# End Source File
-# End Group
-# Begin Group "EXTADF"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\extadf_loader\extadf_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\extadf_loader\extadf_loader.h
-# End Source File
-# End Group
-# Begin Group "OLDEXTADF"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\oldextadf_loader\oldextadf_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\oldextadf_loader\oldextadf_loader.h
-# End Source File
-# End Group
-# Begin Group "FDI"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\fdi_loader\fdi_format.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\fdi_loader\fdi_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\fdi_loader\fdi_loader.h
-# End Source File
-# End Group
-# Begin Group "BBC_SSD_DSD"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\ssd_dsd_loader\ssd_dsd_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\ssd_dsd_loader\ssd_dsd_loader.h
-# End Source File
-# End Group
-# Begin Group "BBC_ADL"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\adl_loader\adl_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\adl_loader\adl_loader.h
-# End Source File
-# End Group
-# Begin Group "KRZ"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\krz_loader\krz_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\krz_loader\krz_loader.h
-# End Source File
-# End Group
-# Begin Group "W30"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\w30_loader\w30_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\w30_loader\w30_loader.h
-# End Source File
-# End Group
-# Begin Group "FEI"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\fei_loader\fei_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\fei_loader\fei_loader.h
-# End Source File
-# End Group
-# Begin Group "SVD"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\svd_loader\svd_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\svd_loader\svd_loader.h
-# End Source File
-# End Group
-# Begin Group "IMZ"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\imz_loader\imz_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\imz_loader\imz_loader.h
-# End Source File
-# End Group
-# Begin Group "GKH"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\..\common\plugins\gkh_loader\gkh_format.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\gkh_loader\gkh_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\gkh_loader\gkh_loader.h
-# End Source File
-# End Group
-# Begin Source File
-
-SOURCE=..\..\common\plugins\common\crc.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\common\crc.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\common\emuii_track.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\common\emuii_track.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\floppy_utils.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\includes\floppy_utils.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\common\gcr_track.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\common\gcr_track.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\common\track_generator.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\plugins\common\track_generator.h
-# End Source File
-# End Group
 # Begin Group "GUI"
 
 # PROP Default_Filter ""
 # Begin Group "microintro"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\microintro\data\data_bmp_hxc2001_bmp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\microintro\data\data_bmp_sob_bmp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\microintro\data\data_jozz_cognition_mod.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\microintro\data\data_maktone_class_cracktro15_mod.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\microintro\data\data_vim_not_again_mod.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\microintro\data\data_zandax_supplydas_booze_mod.h
+# End Source File
 # Begin Source File
 
 SOURCE=.\microintro\packer\lzw.c
@@ -1137,6 +233,10 @@ SOURCE=.\Dialog_RAWFileSettings.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\Dialog_sdhxcfe_filecfg.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\Dialog_stats.c
 # End Source File
 # Begin Source File
@@ -1170,6 +270,10 @@ SOURCE=.\loader.c
 # Begin Source File
 
 SOURCE=.\loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\mainrouts.h
 # End Source File
 # Begin Source File
 
@@ -1276,6 +380,10 @@ SOURCE=..\..\common\libs\zlib\contrib\minizip\zip.c
 # Begin Source File
 
 SOURCE=..\..\common\libs\zlib\contrib\minizip\zip.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\libs\zlib\contrib\minizip\zlib.h
 # End Source File
 # End Group
 # Begin Source File
@@ -1644,11 +752,19 @@ SOURCE=..\..\common\libs\xdms\vfile.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\..\common\libs\capslib\CapsAPI.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ipf\capslibloader.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\ipf\capslibloader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\libs\capslib\Comtype.h
 # End Source File
 # End Group
 # Begin Group "CPCFSLIB"
@@ -1716,69 +832,1004 @@ SOURCE=..\..\common\libs\libsap\libsap.h
 # End Source File
 # End Group
 # End Group
+# Begin Group "HxCFE"
+
+# PROP Default_Filter ""
+# Begin Group "Plugins"
+
+# PROP Default_Filter ""
+# Begin Group "ADF"
+
+# PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\..\common\afi_file_writer.c
+SOURCE=..\..\common\plugins\adf_loader\adf_loader.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\cpcdsk_file_writer.c
+SOURCE=..\..\common\plugins\adf_loader\adf_loader.h
+# End Source File
+# End Group
+# Begin Group "DMS"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\dms_loader\dms_loader.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\extended_hfe_file_writer.c
+SOURCE=..\..\common\plugins\dms_loader\dms_loader.h
+# End Source File
+# End Group
+# Begin Group "amigadosfs_loader"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\amigadosfs_loader\amigadosfs_loader.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\extended_hfe_file_writer.h
+SOURCE=..\..\common\plugins\amigadosfs_loader\amigadosfs_loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\amigadosfs_loader\stdboot3.h
+# End Source File
+# End Group
+# Begin Group "IPF"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\ipf_loader\capslibloader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\ipf_loader\ipf_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\ipf_loader\ipf_loader.h
+# End Source File
+# End Group
+# Begin Group "ST"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\st_loader\st_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\st_loader\st_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\st_loader\stfileformat.h
+# End Source File
+# End Group
+# Begin Group "STX"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\stx_loader\pasti_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\stx_loader\stx_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\stx_loader\stx_loader.h
+# End Source File
+# End Group
+# Begin Group "CPCDSK"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\cpcdsk_loader\cpcdsk_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\cpcdsk_loader\cpcdsk_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\cpcdsk_loader\cpcdsk_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\cpcdsk_loader\cpcdsk_writer.c
+# End Source File
+# End Group
+# Begin Group "IMGPC"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\img_loader\img_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\img_loader\img_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\img_loader\pcimgfileformat.h
+# End Source File
+# End Group
+# Begin Group "CopyQM"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\copyqm_loader\copyqm_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\copyqm_loader\copyqm_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\copyqm_loader\crctable.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\copyqm_loader\crctable.h
+# End Source File
+# End Group
+# Begin Group "MSA"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\msa_loader\msa_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\msa_loader\msa_loader.h
+# End Source File
+# End Group
+# Begin Group "OricDSK"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\oricdsk_loader\oricdsk_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\oricdsk_loader\oricdsk_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\oricdsk_loader\oricdsk_loader.h
+# End Source File
+# End Group
+# Begin Group "MFM"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\mfm_loader\mfm_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\mfm_loader\mfm_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\mfm_loader\mfm_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\mfm_loader\mfm_writer.c
+# End Source File
+# End Group
+# Begin Group "FATDK"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fat12floppy_loader\fat12.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fat12floppy_loader\fat12.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fat12floppy_loader\fat12floppy_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fat12floppy_loader\fat12floppy_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fat12floppy_loader\fat12formats.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fat12floppy_loader\fatlib.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fat12floppy_loader\fatlib.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fat12floppy_loader\pcbootsector.h
+# End Source File
+# End Group
+# Begin Group "SMC"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\smc_loader\snes_smc_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\smc_loader\snes_smc_loader.h
+# End Source File
+# End Group
+# Begin Group "ADZ"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\adz_loader\adz_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\adz_loader\adz_loader.h
+# End Source File
+# End Group
+# Begin Group "MSX"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\msx_loader\msx_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\msx_loader\msx_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\msx_loader\msxfileformat.h
+# End Source File
+# End Group
+# Begin Group "HFE"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\hfe_loader\exthfe_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\hfe_loader\hfe_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\hfe_loader\hfe_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\hfe_loader\hfe_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\hfe_loader\hfe_writer.c
+# End Source File
+# End Group
+# Begin Group "IMD"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\imd_loader\imd_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\imd_loader\imd_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\imd_loader\imd_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\imd_loader\imd_writer.c
+# End Source File
+# End Group
+# Begin Group "AFI"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\afi_loader\afi_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\afi_loader\afi_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\afi_loader\afi_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\afi_loader\afi_writer.c
+# End Source File
+# End Group
+# Begin Group "D64"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\d64_loader\d64_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\d64_loader\d64_loader.h
+# End Source File
+# End Group
+# Begin Group "CPCFS"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\cpcfs_loader\cpcfs_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\cpcfs_loader\cpcfs_loader.h
+# End Source File
+# End Group
+# Begin Group "TRD"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\trd_loader\trd_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\trd_loader\trd_loader.h
+# End Source File
+# End Group
+# Begin Group "SCL"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\scl_loader\scl_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\scl_loader\scl_loader.h
+# End Source File
+# End Group
+# Begin Group "D88"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\d88_loader\d88_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\d88_loader\d88_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\d88_loader\d88_loader.h
+# End Source File
+# End Group
+# Begin Group "JV1"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\jv1_loader\jv1_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\jv1_loader\jv1_loader.h
+# End Source File
+# End Group
+# Begin Group "RAW"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\raw_loader\raw_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\raw_loader\raw_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\raw_loader\raw_writer.c
+# End Source File
+# End Group
+# Begin Group "SAP"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\sap_loader\sap_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\sap_loader\sap_loader.h
+# End Source File
+# End Group
+# Begin Group "VTR"
+
+# PROP Default_Filter "VTR"
+# Begin Source File
+
+SOURCE=..\..\common\plugins\vtr_loader\vtr_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\vtr_loader\vtr_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\vtr_loader\vtr_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\vtr_loader\vtr_writer.c
+# End Source File
+# End Group
+# Begin Group "HDM"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\hdm_loader\hdm_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\hdm_loader\hdm_loader.h
+# End Source File
+# End Group
+# Begin Group "TI99PC99"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\ti99pc99_loader\ti99pc99_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\ti99pc99_loader\ti99pc99_loader.h
+# End Source File
+# End Group
+# Begin Group "ApriDisk"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\apridisk_loader\apridisk_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\apridisk_loader\apridisk_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\apridisk_loader\apridisk_loader.h
+# End Source File
+# End Group
+# Begin Group "EDE"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\ede_loader\ede_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\ede_loader\ede_loader.h
+# End Source File
+# End Group
+# Begin Group "FD"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fd_loader\fd_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fd_loader\fd_loader.h
+# End Source File
+# End Group
+# Begin Group "VDK"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\vdk_loader\vdk_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\vdk_loader\vdk_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\vdk_loader\vdk_loader.h
+# End Source File
+# End Group
+# Begin Group "DPX"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\dpx_loader\dpx_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\dpx_loader\dpx_loader.h
+# End Source File
+# End Group
+# Begin Group "Ensoniq_Mirage"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\ensoniq_mirage_loader\ensoniq_mirage_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\ensoniq_mirage_loader\ensoniq_mirage_loader.h
+# End Source File
+# End Group
+# Begin Group "Emax"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\emax_loader\emax_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\emax_loader\emax_loader.h
+# End Source File
+# End Group
+# Begin Group "MGT"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\mgt_loader\mgt_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\mgt_loader\mgt_loader.h
+# End Source File
+# End Group
+# Begin Group "SAD"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\sad_loader\sad_fileformat.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\sad_loader\sad_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\sad_loader\sad_loader.h
+# End Source File
+# End Group
+# Begin Group "JV3"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\jv3_loader\jv3_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\jv3_loader\jv3_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\jv3_loader\jv3_loader.h
+# End Source File
+# End Group
+# Begin Group "STT"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\stt_loader\stt_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\stt_loader\stt_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\stt_loader\sttfileformat.h
+# End Source File
+# End Group
+# Begin Group "Prophet"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\prophet_loader\prophet_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\prophet_loader\prophet_loader.h
+# End Source File
+# End Group
+# Begin Group "TeleDisk"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\teledisk_loader\td0_lzss.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\teledisk_loader\td0_lzss.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\teledisk_loader\teledisk_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\teledisk_loader\teledisk_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\teledisk_loader\teledisk_loader.h
+# End Source File
+# End Group
+# Begin Group "EmuII_RAW"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\emuii_raw_loader\emuii_raw_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\emuii_raw_loader\emuii_raw_loader.h
+# End Source File
+# End Group
+# Begin Group "EmuII"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\emuii_loader\emuii_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\emuii_loader\emuii_loader.h
+# End Source File
+# End Group
+# Begin Group "EmuI_RAW"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\emui_raw_loader\emui_raw_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\emui_raw_loader\emui_raw_loader.h
+# End Source File
+# End Group
+# Begin Group "JVC"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\jvc_loader\jvc_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\jvc_loader\jvc_loader.h
+# End Source File
+# End Group
+# Begin Group "DIM"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\dim_loader\dim_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\dim_loader\dim_loader.h
+# End Source File
+# End Group
+# Begin Group "TI99V9T9"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\ti99v9t9_loader\ti99v9t9_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\ti99v9t9_loader\ti99v9t9_loader.h
+# End Source File
+# End Group
+# Begin Group "DMK"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\dmk_loader\dmk_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\dmk_loader\dmk_loader.h
+# End Source File
+# End Group
+# Begin Group "D81"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\d81_loader\d81_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\d81_loader\d81_loader.h
+# End Source File
+# End Group
+# Begin Group "ACORNADF"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\acornadf_loader\acornadf_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\acornadf_loader\acornadf_loader.h
+# End Source File
+# End Group
+# Begin Group "VEGASDSK"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\vegasdsk_loader\vegasdsk_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\vegasdsk_loader\vegasdsk_loader.h
+# End Source File
+# End Group
+# Begin Group "CamputersLynxLDF"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\camputerslynxldf_loader\camputerslynxldf_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\camputerslynxldf_loader\camputerslynxldf_loader.h
+# End Source File
+# End Group
+# Begin Group "EXTADF"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\extadf_loader\extadf_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\extadf_loader\extadf_loader.h
+# End Source File
+# End Group
+# Begin Group "OLDEXTADF"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\oldextadf_loader\oldextadf_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\oldextadf_loader\oldextadf_loader.h
+# End Source File
+# End Group
+# Begin Group "FDI"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fdi_loader\fdi_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fdi_loader\fdi_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fdi_loader\fdi_loader.h
+# End Source File
+# End Group
+# Begin Group "BBC_SSD_DSD"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\ssd_dsd_loader\ssd_dsd_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\ssd_dsd_loader\ssd_dsd_loader.h
+# End Source File
+# End Group
+# Begin Group "BBC_ADL"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\adl_loader\adl_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\adl_loader\adl_loader.h
+# End Source File
+# End Group
+# Begin Group "KRZ"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\krz_loader\krz_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\krz_loader\krz_loader.h
+# End Source File
+# End Group
+# Begin Group "W30"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\w30_loader\w30_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\w30_loader\w30_loader.h
+# End Source File
+# End Group
+# Begin Group "FEI"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fei_loader\fei_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\fei_loader\fei_loader.h
+# End Source File
+# End Group
+# Begin Group "SVD"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\svd_loader\svd.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\svd_loader\svd_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\svd_loader\svd_loader.h
+# End Source File
+# End Group
+# Begin Group "IMZ"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\imz_loader\imz_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\imz_loader\imz_loader.h
+# End Source File
+# End Group
+# Begin Group "GKH"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\gkh_loader\gkh_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\gkh_loader\gkh_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\gkh_loader\gkh_loader.h
+# End Source File
+# End Group
+# Begin Source File
+
+SOURCE=..\..\common\plugins\common\crc.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\common\crc.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\common\emuii_track.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\common\emuii_track.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\floppy_utils.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\includes\floppy_utils.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\common\gcr_track.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\common\gcr_track.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\common\track_generator.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\common\track_generator.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\..\common\floppy_loader.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\hfe_file_writer.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\imd_file_writer.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\imd_file_writer.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\mfm_file_writer.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\raw_file_writer.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\sector_extractor.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\vtrucco_file_writer.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\win32\WIN32_API.c
-# End Source File
-# End Group
-# Begin Group "Header Files"
-
-# PROP Default_Filter "h;hpp;hxx;hm;inl"
-# Begin Source File
-
-SOURCE=..\..\common\afi_file_writer.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\hfe_file_writer.h
+SOURCE=..\..\common\includes\floppy_loader.h
 # End Source File
 # Begin Source File
 
@@ -1794,11 +1845,11 @@ SOURCE=..\..\common\loaders_list.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\mfm_file_writer.h
+SOURCE=..\..\common\includes\plugins_id.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\raw_file_writer.h
+SOURCE=..\..\common\sector_extractor.c
 # End Source File
 # Begin Source File
 
@@ -1808,13 +1859,38 @@ SOURCE=..\..\common\sector_extractor.h
 
 SOURCE=..\..\common\types.h
 # End Source File
+# End Group
 # Begin Source File
 
-SOURCE=..\..\common\version.h
+SOURCE=..\..\win32\WIN32_API.c
+# End Source File
+# End Group
+# Begin Group "Header Files"
+
+# PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE="C:\Program Files\Microsoft Visual Studio\VC98\Include\BASETSD.H"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\vtrucco_file_writer.h
+SOURCE=.\fdrawcmd.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\d30104\ftd2xx.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\licensetxt.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\os_api.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\version.h
 # End Source File
 # Begin Source File
 

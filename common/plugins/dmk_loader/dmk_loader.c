@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "dmk_loader.h"
 
@@ -112,7 +112,7 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 						{
 							floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad file size !");
 							free(filepath);
-							return LOADER_BADFILE;
+							return HXCFE_BADFILE;
 						}
 						else
 						{
@@ -120,7 +120,7 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 							{
 								floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad file size !");
 								free(filepath);
-								return LOADER_BADFILE;
+								return HXCFE_BADFILE;
 							}
 						}
 
@@ -146,7 +146,7 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 						{
 							floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad header !");
 							free(filepath);
-							return LOADER_BADFILE;
+							return HXCFE_BADFILE;
 						}
 
 						 
@@ -156,12 +156,12 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad file size !");
 						free(filepath);					
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 
 					floppycontext->hxc_printf(MSG_DEBUG,"DMK file !");
 					free(filepath);
-					return LOADER_ISVALID;
+					return HXCFE_VALIDFILE;
 
 
 				}
@@ -170,18 +170,18 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				{
 					free(filepath);
 					floppycontext->hxc_printf(MSG_DEBUG,"DMK file !");
-					return LOADER_ISVALID;
+					return HXCFE_VALIDFILE;
 				}
 
 				floppycontext->hxc_printf(MSG_DEBUG,"non DMK file !");
 				free(filepath);
-				return LOADER_BADFILE;
+				return HXCFE_BADFILE;
 
 			}
 		}
 	}
 	
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -377,7 +377,7 @@ int DMK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	fseek (f , 0 , SEEK_END); 
@@ -436,10 +436,37 @@ int DMK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
 		fclose(f);
-		return LOADER_NOERROR;
+		return HXCFE_NOERROR;
 	}
 
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	fclose(f);
-	return LOADER_BADFILE;
+	return HXCFE_BADFILE;
 }
+
+int DMK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="TRS80_DMK";
+	const char plug_desc[]="TRS80 DMK Loader";
+	const char plug_ext[]="dmk";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	DMK_libIsValidDiskFile,
+		(LOADDISKFILE)		DMK_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	DMK_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
+

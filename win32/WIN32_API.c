@@ -28,7 +28,6 @@
 #include <stdio.h>
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
 #include "..\common\usb_floppyemulator\usb_hxcfloppyemulator.h"
 
 #include "win32_api.h"

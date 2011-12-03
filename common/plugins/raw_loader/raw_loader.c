@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "raw_loader.h"
 
@@ -108,7 +108,7 @@ int RAW_libIsValidFormat(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * imgformat
 	};
 
 	if(rpm==0) 
-		return LOADER_BADPARAMETER;
+		return HXCFE_BADPARAMETER;
 
 
 	tracklen=((bitrate*60)/rpm)/tracklendiv;
@@ -117,11 +117,11 @@ int RAW_libIsValidFormat(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * imgformat
 	
 	//if(finaltracksize<=tracklen)
 	{
-		return LOADER_ISVALID;
+		return HXCFE_VALIDFILE;
 	}
 	//else
 	{
-	//	return LOADER_BADPARAMETER;
+	//	return HXCFE_BADPARAMETER;
 	}
 }
 
@@ -309,5 +309,34 @@ int RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 
 
-	return LOADER_NOERROR;
+	return HXCFE_NOERROR;
 }
+
+int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename);
+
+int RAW_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="RAW_LOADER";
+	const char plug_desc[]="RAW Sector loader";
+	const char plug_ext[]="img";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	0,//RAW_libIsValidDiskFile,
+		(LOADDISKFILE)		RAW_libLoad_DiskFile,
+		(WRITEDISKFILE)		RAW_libWrite_DiskFile,
+		(GETPLUGININFOS)	RAW_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
+

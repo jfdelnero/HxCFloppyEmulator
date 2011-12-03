@@ -52,9 +52,8 @@
 #include "resource.h"
 
 #include "Dialog_license.h"
-#include "licensetxt.h"
 
-
+extern const char licensetxt[];
 ////////////////////////////////////////////////////////////////////////// 
 //
 //  Gestion Boite de dialogue Log

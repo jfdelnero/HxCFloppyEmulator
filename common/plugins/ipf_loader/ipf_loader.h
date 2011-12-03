@@ -26,7 +26,6 @@
 */
 #ifdef IPF_SUPPORT 
 
-int IPF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile);
-int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters);
+int IPF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue);
 
 #endif

@@ -57,18 +57,7 @@
 #include "mainrouts.h"
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
-#include "floppy_loader.h"
 #include "./usb_floppyemulator/usb_hxcfloppyemulator.h"
-
-#include "afi_file_writer.h"
-#include "mfm_file_writer.h"
-#include "hfe_file_writer.h"
-#include "extended_hfe_file_writer.h"
-#include "raw_file_writer.h"
-#include "vtrucco_file_writer.h"
-#include "cpcdsk_file_writer.h"
-#include "imd_file_writer.h"
 
 #include "win32_api.h"
 
@@ -104,6 +93,7 @@ HWINTERFACE * hwif;
 HXCFLOPPYEMULATOR * flopemu;
 FLOPPY * thefloppydisk;
 CRITICAL_SECTION log_cs;
+char * fileselector_plugin[]={PLUGIN_HXC_HFE,PLUGIN_VTR_IMG,PLUGIN_HXC_MFM,PLUGIN_HXC_AFI,PLUGIN_RAW_LOADER,PLUGIN_AMSTRADCPC_DSK,PLUGIN_IMD_IMG,PLUGIN_HXC_EXTHFE};
 
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
@@ -161,11 +151,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	InitializeCriticalSection(&log_cs);
 
-	flopemu=(HXCFLOPPYEMULATOR*)malloc(sizeof(HXCFLOPPYEMULATOR));
-	memset(flopemu,0,sizeof(HXCFLOPPYEMULATOR));
-	flopemu->hxc_printf=&CUI_affiche;
-	initHxCFloppyEmulator(flopemu);
-	
+	flopemu=hxcfe_init();	
+	hxcfe_set_outputfunc(flopemu,CUI_affiche);
+
 	thefloppydisk=0;
 
 	hwif=(HWINTERFACE *)malloc(sizeof(HWINTERFACE));
@@ -271,7 +259,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		if(getfilename(lpCmdLine,filename))
 		{
 			sprintf(demo->buffertext,"    Loading floppy   ");
-			loadfloppy(filename,0,0);
+			loadfloppy(filename);
 		}
 
 		///////////////////////////////////////
@@ -331,7 +319,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		DragQueryFile((HDROP)wParam, 0, (char*)filename, 1024);
 		sprintf(demo->buffertext,"    Loading floppy   ");
 		sprintf(demo->bufferfilename,"");
-		loadfloppy(filename,0,0);
+		loadfloppy(filename);
 		break;	
 		
 	case WM_COMMAND:	//Action sur un menu
@@ -368,40 +356,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					)
 				{
 
-					switch(extpos)
+					if(hxcfe_select_container(flopemu,fileselector_plugin[extpos-1])==HXCFE_NOERROR)
 					{
-					case 1:
-						write_HFE_file(flopemu,thefloppydisk,filename,hwif->interface_mode,hwif->double_step);
-						break;
-
-					case 2:
-						write_vtrucco_file(flopemu,thefloppydisk,filename,hwif->interface_mode);
-						break;
-
-					case 3:
-						write_MFM_file(flopemu,thefloppydisk,filename);
-						break;
-
-					case 4:
-						write_AFI_file(flopemu,thefloppydisk,filename);
-						break;
-
-					case 5:
-						write_RAW_file(flopemu,thefloppydisk,filename);
-						break;
-
-					case 6:
-						write_CPCDSK_file(flopemu,thefloppydisk,filename);
-						break;
-
-					case 7:
-						write_IMD_file(flopemu,thefloppydisk,filename);
-						break;
-
-					case 8:
-						write_EXTHFE_file(flopemu,thefloppydisk,filename,hwif->interface_mode,hwif->double_step);
-						break;
-
+						//write_HFE_file(flopemu,thefloppydisk,filename,hwif->interface_mode,hwif->double_step);
+						hxcfe_floppy_export(flopemu,thefloppydisk,filename);
 					}
 				}
 			}
@@ -423,7 +381,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				sprintf(demo->buffertext,"    Loading floppy   ");
 				sprintf(demo->bufferfilename,"");
-				loadfloppy(filename,0,0);
+				loadfloppy(filename);
 			}
 			break;
 
@@ -459,7 +417,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				filename2[strlen(filename2)-1]=0;
 				sprintf(demo->buffertext,"    Loading floppy   ");
 				
-				if(loadfloppy(filename2,0,0)!=LOADER_NOERROR)
+				if(loadfloppy(filename2)!=HXCFE_NOERROR)
 				{
 					sprintf(demo->buffertext,"      Load error!    ");
 				}

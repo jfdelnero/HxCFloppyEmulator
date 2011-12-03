@@ -49,13 +49,13 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/emuii_track.h"
 #include "emui_raw_loader.h"
-#include "../common/track_generator.h"
+
 
 #include "../common/os_api.h"
 
@@ -84,7 +84,7 @@ int EMUI_RAW_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					f=fopen(imgfile,"rb");
 					if(f==NULL) 
 					{
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 					}
 
 					fseek (f , 0 , SEEK_END); 
@@ -97,26 +97,26 @@ int EMUI_RAW_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"EmuI raw file !");
 						free(filepath);
-						return LOADER_ISVALID;
+						return HXCFE_VALIDFILE;
 					}
 					else
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non EmuI raw file !");
 						free(filepath);
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non EmuI raw file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 int EMUI_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -135,7 +135,7 @@ int EMUI_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	floppydisk->floppyNumberOfTrack=35;
@@ -186,6 +186,32 @@ int EMUI_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	}			
 	
 	fclose(f);
-	return LOADER_NOERROR;
+	return HXCFE_NOERROR;
+}
+
+int EMUI_RAW_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="EMULATORI";
+	const char plug_desc[]="E-mu Emulator I dsk Loader";
+	const char plug_ext[]="emufd";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	EMUI_RAW_libIsValidDiskFile,
+		(LOADDISKFILE)		EMUI_RAW_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	EMUI_RAW_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
 }
 

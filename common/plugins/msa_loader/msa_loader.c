@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "msa_loader.h"
 
@@ -89,7 +89,7 @@ int MSA_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 						{
 							floppycontext->hxc_printf(MSG_DEBUG,"MSA file !");
 							free(filepath);
-							return LOADER_ISVALID;
+							return HXCFE_VALIDFILE;
 						}
 					}
 					
@@ -97,13 +97,13 @@ int MSA_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 				floppycontext->hxc_printf(MSG_DEBUG,"non MSA file !");
 				free(filepath);
-				return LOADER_BADFILE;
+				return HXCFE_BADFILE;
 				
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -134,7 +134,7 @@ int MSA_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	fseek (f , 0 , SEEK_END); 
@@ -186,7 +186,7 @@ int MSA_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						{
 							if(l+j>extractfilesize)
 							{
-								return LOADER_FILECORRUPT;
+								return HXCFE_FILECORRUPTED;
 							}
 							
 							flatimg[l+j]=tmpbuffer[k];
@@ -205,7 +205,7 @@ int MSA_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							
 							if(l+j+len>extractfilesize)
 							{
-								return LOADER_FILECORRUPT;
+								return HXCFE_FILECORRUPTED;
 							}
 							else
 							{
@@ -292,10 +292,35 @@ int MSA_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			
 			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		}
-		return LOADER_NOERROR;
+		return HXCFE_NOERROR;
 	}
 	
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
-	return LOADER_BADFILE;
+	return HXCFE_BADFILE;
 }
 
+int MSA_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="ATARIST_MSA";
+	const char plug_desc[]="ATARI ST MSA Loader";
+	const char plug_ext[]="msa";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	MSA_libIsValidDiskFile,
+		(LOADDISKFILE)		MSA_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	MSA_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}

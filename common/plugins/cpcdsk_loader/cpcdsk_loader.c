@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "cpcdsk_loader.h"
 #include "cpcdsk_format.h"
@@ -86,7 +86,7 @@ int CPCDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					{
 						free(filepath);
 						floppycontext->hxc_printf(MSG_ERROR,"Cannot open the file !");
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 					}
 					fread(&fileheader,sizeof(fileheader),1,f);
 					fclose(f);
@@ -99,12 +99,12 @@ int CPCDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 						)
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"CPC Dsk file !");
-						return LOADER_ISVALID;
+						return HXCFE_VALIDFILE;
 					}
 					else
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non CPC Dsk file !(bad header)");
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 					
 				}
@@ -112,13 +112,13 @@ int CPCDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non CPC Dsk file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 	
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -152,7 +152,7 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	fseek (f , 0 , SEEK_END); 
@@ -180,7 +180,7 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 			{
 				floppycontext->hxc_printf(MSG_ERROR,"non CPC Dsk : Bad header!\n");
 				fclose(f);
-				return LOADER_BADFILE;
+				return HXCFE_BADFILE;
 			}
 		}
 		tracksizetab=0;
@@ -389,11 +389,39 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 		//if(sectorconfig) free(sectorconfig);
 		
 		fclose(f);
-		return LOADER_NOERROR;
+		return HXCFE_NOERROR;
 	}
 	
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	fclose(f);
-	return LOADER_BADFILE;
+	return HXCFE_BADFILE;
+}
+
+int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename);
+
+int CPCDSK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="AMSTRADCPC_DSK";
+	const char plug_desc[]="Amstrad CPC DSK Loader";
+	const char plug_ext[]="dsk";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	CPCDSK_libIsValidDiskFile,
+		(LOADDISKFILE)		CPCDSK_libLoad_DiskFile,
+		(WRITEDISKFILE)		CPCDSK_libWrite_DiskFile,
+		(GETPLUGININFOS)	CPCDSK_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
 }
 

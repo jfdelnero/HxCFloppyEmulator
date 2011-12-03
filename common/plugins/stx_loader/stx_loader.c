@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 #include "../common/includes/floppy_utils.h"
 #include "stx_loader.h"
 
@@ -90,7 +90,7 @@ int STX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					if(f==NULL) 
 					{
 						free(filepath);
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 					}
 				
 					fileheader=(pasti_fileheader*)malloc(sizeof(pasti_fileheader));
@@ -104,14 +104,14 @@ int STX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					{
 						free(fileheader);
 						floppycontext->hxc_printf(MSG_DEBUG,"non STX file (bad header)!");
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 
 					}
 					else
 					{
 						free(fileheader);
 						floppycontext->hxc_printf(MSG_DEBUG,"STX file !");
-						return LOADER_ISVALID;
+						return HXCFE_VALIDFILE;
 					}
 					
 				}
@@ -119,13 +119,13 @@ int STX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non STX file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -476,7 +476,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"Image Info: %s\n",imgfile);
@@ -1138,17 +1138,43 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		free(fileheader);
 
-		floppycontext->hxc_printf(MSG_INFO_0,"Pasti image londing done!");
+		floppycontext->hxc_printf(MSG_INFO_0,"Pasti image loading done!");
 
-		return LOADER_NOERROR;
+		return HXCFE_NOERROR;
 	}
 	else
 	{
 		free(fileheader);
 		floppycontext->hxc_printf(MSG_ERROR,"non STX/pasti image (bad header)",imgfile);
-		return LOADER_BADFILE;
+		return HXCFE_BADFILE;
 	}
 	
-	return LOADER_INTERNALERROR;
+	return HXCFE_INTERNALERROR;
+}
+
+int STX_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="ATARIST_STX";
+	const char plug_desc[]="Atari ST STX/Pasti Loader";
+	const char plug_ext[]="stx";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	STX_libIsValidDiskFile,
+		(LOADDISKFILE)		STX_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	STX_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
 }
 

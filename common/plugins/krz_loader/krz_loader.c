@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "krz_loader.h"
 
@@ -88,7 +88,7 @@ int KRZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					if(f==NULL)
 					{
 						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 					}
 
 					fseek (f , 0 , SEEK_END);
@@ -99,19 +99,19 @@ int KRZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 					floppycontext->hxc_printf(MSG_DEBUG,"Kurzweil KRZ file !");
 					free(filepath);
-					return LOADER_ISVALID;
+					return HXCFE_VALIDFILE;
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non Kurzweil KRZ file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -202,7 +202,7 @@ int KRZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		if(ScanFileAndAddToFAT(floppycontext,imgfile,0,&flatimg[fatposition],&flatimg[rootposition],&flatimg[dataposition],0,&fatconfig,numberofcluster))
 		{
-			return LOADER_BADFILE;
+			return HXCFE_BADFILE;
 		}
 		memcpy(&flatimg[((fatconfig.reservedsector)+(fatconfig.nbofsectorperfat))*fatconfig.sectorsize],&flatimg[fatposition],fatconfig.nbofsectorperfat*fatconfig.sectorsize);
 
@@ -210,7 +210,7 @@ int KRZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	}
 	else
 	{
-		return LOADER_INTERNALERROR;
+		return HXCFE_INTERNALERROR;
 	}
 
 
@@ -234,7 +234,34 @@ int KRZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	free(flatimg);
 
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-	return LOADER_NOERROR;
+	return HXCFE_NOERROR;
 }
 	
+int KRZ_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="KURZWEIL_KRZ";
+	const char plug_desc[]="KURZWEIL KRZ Loader";
+	const char plug_ext[]="krz";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	KRZ_libIsValidDiskFile,
+		(LOADDISKFILE)		KRZ_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	KRZ_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
+
+
 

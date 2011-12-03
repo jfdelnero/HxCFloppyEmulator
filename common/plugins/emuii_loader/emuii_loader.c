@@ -49,13 +49,13 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
 #include "../common/emuii_track.h"
-#include "../common/track_generator.h"
+
 
 #include "emuii_loader.h"
 
@@ -114,7 +114,7 @@ int EMUII_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					if(f==NULL) 
 					{
 						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 					}
 					
 					fseek (f , 0 , SEEK_END);
@@ -126,19 +126,19 @@ int EMUII_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 					floppycontext->hxc_printf(MSG_DEBUG,"EMUII file !");
 					free(filepath);
-					return LOADER_ISVALID;
+					return HXCFE_VALIDFILE;
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non EMUII file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 	
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -174,14 +174,14 @@ int EMUII_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,
 	if(f_os==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open os file %s !",os_filename);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	f_eii=fopen(imgfile,"rb");
 	if(f_eii==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	floppydisk->floppyNumberOfTrack=80;
@@ -247,6 +247,32 @@ int EMUII_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,
 	
 	fclose(f_eii);
 	fclose(f_os);
-	return LOADER_NOERROR;
+	return HXCFE_NOERROR;
 
 }
+
+int EMUII_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+	const char plug_id[]="EMULATORII_EMUII";
+	const char plug_desc[]="E-mu Emulator II *.eii Loader";
+	const char plug_ext[]="eii";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	EMUII_libIsValidDiskFile,
+		(LOADDISKFILE)		EMUII_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	EMUII_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
+

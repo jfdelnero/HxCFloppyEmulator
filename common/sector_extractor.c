@@ -4,7 +4,6 @@
 #include <stdlib.h>
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
 #include "sector_extractor.h"
 #include "plugins/common/crc.h"
 

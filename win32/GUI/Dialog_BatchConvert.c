@@ -62,25 +62,13 @@
 #include "Dialog_CreateFileSystem.h"
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
-#include "floppy_loader.h"
 #include "./usb_floppyemulator/usb_hxcfloppyemulator.h"
 
-#include "../../common/plugins/amigadosfs_loader/amigadosfs_loader.h"
-#include "../../common/plugins/fat12floppy_loader/fat12floppy_loader.h"
+//#include "../../common/plugins/amigadosfs_loader/amigadosfs_loader.h"
+//#include "../../common/plugins/fat12floppy_loader/fat12floppy_loader.h"
 
 
 #include "fileselector.h"
-
-
-
-#include "mfm_file_writer.h"
-#include "hfe_file_writer.h"
-#include "extended_hfe_file_writer.h"
-#include "afi_file_writer.h"
-#include "raw_file_writer.h"
-#include "vtrucco_file_writer.h"
-#include "imd_file_writer.h"
 
 
 #include "win32_api.h"
@@ -93,7 +81,8 @@ extern HWINTERFACE * hwif;
 	{
 		int id;
 		char * name;
-
+		char * plug_id;
+		char * ext;
 	}ff_type;
 
 
@@ -111,7 +100,7 @@ extern HWINTERFACE * hwif;
 
 	enum
 	{
-		FF_HFE,
+		FF_HFE=0,
 		FF_MFM,
 		FF_AFI,
 		FF_VTR,
@@ -122,14 +111,14 @@ extern HWINTERFACE * hwif;
 
 	ff_type ff_type_list[]=
 	{
-		{ FF_HFE,"HFE - SDCard HxC Floppy Emulator file format"},
-		{ FF_MFM,"MFM - MFM/FM track file format"},
-		{ FF_AFI,"AFI - Advanced file image format"},
-		{ FF_VTR,"VTR - VTrucco Floppy Emulator file format"},
-		{ FF_RAW,"RAW - RAW sectors file format"},
-		{ FF_IMD,"IMD - IMD sectors file format"},
-		{ FF_EHFE,"HFE - Rev 2 - Experimental"},
-		{ -1,""}			
+		{ FF_HFE,"HFE - SDCard HxC Floppy Emulator file format",PLUGIN_HXC_HFE,".hfe"},
+		{ FF_MFM,"MFM - MFM/FM track file format",PLUGIN_HXC_MFM,".mfm"},
+		{ FF_AFI,"AFI - Advanced file image format",PLUGIN_HXC_AFI,".afi"},
+		{ FF_VTR,"VTR - VTrucco Floppy Emulator file format",PLUGIN_VTR_IMG,".vtr"},
+		{ FF_RAW,"RAW - RAW sectors file format",PLUGIN_RAW_IMG,".img"},
+		{ FF_IMD,"IMD - IMD sectors file format",PLUGIN_IMD_IMG,".imd"},
+		{ FF_EHFE,"HFE - Rev 2 - Experimental",PLUGIN_HXC_EXTHFE,".hfe"},
+		{ -1,"",0,0}			
 	};
 
 
@@ -138,24 +127,23 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 	int i,j,filenb,ret;
 	char *destinationfile,*tempstr;
 	FLOPPY * thefloppydisk;
+	
 	filenb=0;
 	while(filelist[filenb])
 	{		
-		thefloppydisk=(FLOPPY*)malloc(sizeof(FLOPPY));
-		memset(thefloppydisk,0,sizeof(FLOPPY));
-
-		ret=floppy_load(floppycontext,thefloppydisk,filelist[filenb]);
-		if(ret!=LOADER_NOERROR)
+		hxcfe_select_container(floppycontext,"AUTOSELECT");
+		thefloppydisk=hxcfe_floppy_load(floppycontext,filelist[filenb],&ret);
+		if(ret!=HXCFE_NOERROR || !thefloppydisk)
 		{
 			switch(ret)
 			{
-				case LOADER_UNSUPPORTEDFILE:
+				case HXCFE_UNSUPPORTEDFILE:
 					printf("Load error!: Image file not yet supported!\n");
 				break;
-				case LOADER_FILECORRUPT:
+				case HXCFE_FILECORRUPTED:
 					printf("Load error!: File corrupted ? Read error ?\n");
 				break;
-				case LOADER_ACCESSERROR:
+				case HXCFE_ACCESSERROR:
 					printf("Load error!:  Read file error!\n");
 				break;
 				default:
@@ -186,53 +174,18 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 				destinationfile[i]='_';
 			}
 			ret=1;
-			switch(output_file_format)
-			{
-				case FF_HFE:
-					strcat(destinationfile,".hfe");
-					if(demo->autoselectmode)
-						ret=write_HFE_file(flopemu,thefloppydisk,destinationfile,-1,hwif->double_step);
-					else
-						ret=write_HFE_file(flopemu,thefloppydisk,destinationfile,hwif->interface_mode,hwif->double_step);
-				break;
-				case FF_AFI:
-					strcat(destinationfile,".afi");
-					ret=write_AFI_file(flopemu,thefloppydisk,destinationfile);
-				break;
+			
+			strcat(destinationfile,ff_type_list[output_file_format].ext);
 
-				case FF_MFM:
-					strcat(destinationfile,".mfm");
-					ret=write_MFM_file(flopemu,thefloppydisk,destinationfile);
-				break;
-
-				case FF_RAW:
-					strcat(destinationfile,".img");
-					ret=write_RAW_file(flopemu,thefloppydisk,destinationfile);
-				break;
-				case FF_VTR:
-					strcat(destinationfile,".vtr");
-					if(demo->autoselectmode)
-						ret=write_HFE_file(flopemu,thefloppydisk,destinationfile,-1,hwif->double_step);
-					else
-						ret=write_HFE_file(flopemu,thefloppydisk,destinationfile,hwif->interface_mode,hwif->double_step);
-				break;
-				case FF_IMD:
-					strcat(destinationfile,".imd");
-					ret=write_IMD_file(flopemu,thefloppydisk,destinationfile);
-				break;
-				case FF_EHFE:
-					strcat(destinationfile,".hfe");
-					if(demo->autoselectmode)
-						ret=write_EXTHFE_file(flopemu,thefloppydisk,destinationfile,-1,hwif->double_step);
-					else
-						ret=write_EXTHFE_file(flopemu,thefloppydisk,destinationfile,hwif->interface_mode,hwif->double_step);
-				break;
-
-
+			ret=hxcfe_select_container(floppycontext,ff_type_list[output_file_format].plug_id);
+			if(!ret)
+			{			
+				hxcfe_floppy_getset_params(floppycontext,thefloppydisk,SET,DOUBLESTEP,&hwif->double_step);
+				hxcfe_floppy_getset_params(floppycontext,thefloppydisk,SET,INTERFACEMODE,&hwif->interface_mode);
+				ret=hxcfe_floppy_export(floppycontext,thefloppydisk,destinationfile);
 			}
-						
-						
-			floppy_unload(floppycontext,thefloppydisk);
+
+			hxcfe_floppy_unload(floppycontext,thefloppydisk);
 
 
 			tempstr=(char*)malloc(1024);
@@ -261,14 +214,13 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 
 		}
 		
-		free(thefloppydisk);
-
 		free(filelist[filenb]);
 		filenb++;
 	}	
 
 	return 0;
 }
+
 int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * destfolder,char * file,int output_file_format,batchconverterparams * params)
 {
 	long hfindfile;
@@ -291,178 +243,125 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 			if(!params->abort)
 			{
 
-
-			if(FindFileData.isdirectory)
-			{
-				if(strcmp(".",FindFileData.filename)!=0 && strcmp("..",FindFileData.filename)!=0)
+				if(FindFileData.isdirectory)
 				{
-					destinationfolder=malloc(strlen(FindFileData.filename)+strlen(destfolder)+2);
-					sprintf(destinationfolder,"%s\\%s",destfolder,FindFileData.filename);
-
-					printf("Creating directory %s\n",destinationfolder);
-					mkdir(destinationfolder);
-
-					fullpath=malloc(strlen(FindFileData.filename)+strlen(folder)+2+9);
-		            sprintf(fullpath,"%s\\%s",folder,FindFileData.filename);
-
-					floppycontext->hxc_printf(MSG_INFO_1,"Entering directory %s",FindFileData.filename);
-
-					tempstr=(char*)malloc(1024);
-					sprintf(tempstr,"Entering directory %s",FindFileData.filename);
-					SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
-
-					if(browse_and_convert_directory(floppycontext,fullpath,destinationfolder,file,output_file_format,params))
+					if(strcmp(".",FindFileData.filename)!=0 && strcmp("..",FindFileData.filename)!=0)
 					{
-						free(destinationfolder);
-						free(fullpath);
-						free(tempstr);
-						find_close(hfindfile);
-						return 1;
-					}
-					free(destinationfolder);
-					free(fullpath);
-					floppycontext->hxc_printf(MSG_INFO_1,"Leaving directory %s",FindFileData.filename);
-					
-					sprintf(tempstr,"Leaving directory %s",FindFileData.filename);
-					SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
-					free(tempstr);
-					
-				}
-			}
-			else
-			{			
-				floppycontext->hxc_printf(MSG_INFO_1,"converting file %s, %dB",FindFileData.filename,FindFileData.size);
-				if(FindFileData.size)
-				{
+						destinationfolder=malloc(strlen(FindFileData.filename)+strlen(destfolder)+2);
+						sprintf(destinationfolder,"%s\\%s",destfolder,FindFileData.filename);
 
-					fullpath=malloc(strlen(FindFileData.filename)+strlen(folder)+2+9);
-		            sprintf(fullpath,"%s\\%s",folder,FindFileData.filename);
+						printf("Creating directory %s\n",destinationfolder);
+						mkdir(destinationfolder);
 
-					thefloppydisk=(FLOPPY*)malloc(sizeof(FLOPPY));
-					memset(thefloppydisk,0,sizeof(FLOPPY));
+						fullpath=malloc(strlen(FindFileData.filename)+strlen(folder)+2+9);
+						sprintf(fullpath,"%s\\%s",folder,FindFileData.filename);
 
-					ret=floppy_load(floppycontext,thefloppydisk,fullpath);
-		            free(fullpath);
-					if(ret!=LOADER_NOERROR)
-					{
-						switch(ret)
-						{
-							case LOADER_UNSUPPORTEDFILE:
-								printf("Load error!: Image file not yet supported!\n");
-							break;
-							case LOADER_FILECORRUPT:
-								printf("Load error!: File corrupted ? Read error ?\n");
-							break;
-							case LOADER_ACCESSERROR:
-								printf("Load error!:  Read file error!\n");
-							break;
-							default:
-								printf("Load error! error %d\n",ret);
-							break;
-						}
-
-					}
-					else
-					{
-						destinationfile=malloc(strlen(FindFileData.filename)+strlen(destfolder)+2+99);
-					    sprintf(destinationfile,"%s\\%s",destfolder,FindFileData.filename);
-						i=strlen(destinationfile);
-						do
-						{
-							i--;
-						}while(i && destinationfile[i]!='.');
-
-						if(i)
-						{
-                          destinationfile[i]='_';
-						}
-					
-					    //printf("Creating file %s\n",destinationfile);
-
-						ret=1;
-						switch(output_file_format)
-						{
-						case FF_HFE:
-							strcat(destinationfile,".hfe");
-							if(demo->autoselectmode)
-							ret=write_HFE_file(flopemu,thefloppydisk,destinationfile,-1,hwif->double_step);
-							else
-							ret=write_HFE_file(flopemu,thefloppydisk,destinationfile,hwif->interface_mode,hwif->double_step);
-							break;
-
-						case FF_AFI:
-							strcat(destinationfile,".afi");
-							ret=write_AFI_file(flopemu,thefloppydisk,destinationfile);
-							break;
-
-						case FF_MFM:
-							strcat(destinationfile,".mfm");
-							ret=write_MFM_file(flopemu,thefloppydisk,destinationfile);
-							break;
-
-						case FF_RAW:
-							strcat(destinationfile,".img");
-							ret=write_RAW_file(flopemu,thefloppydisk,destinationfile);
-							break;
-
-						case FF_VTR:
-							strcat(destinationfile,".vtr");
-							if(demo->autoselectmode)
-							ret=write_vtrucco_file(flopemu,thefloppydisk,destinationfile,-1);
-							else
-							ret=write_vtrucco_file(flopemu,thefloppydisk,destinationfile,hwif->interface_mode);
-
-							break;
-						case FF_IMD:
-							strcat(destinationfile,".imd");
-							ret=write_IMD_file(flopemu,thefloppydisk,destinationfile);
-							break;
-						case FF_EHFE:
-							strcat(destinationfile,".hfe");
-							if(demo->autoselectmode)
-							ret=write_EXTHFE_file(flopemu,thefloppydisk,destinationfile,-1,hwif->double_step);
-							else
-							ret=write_EXTHFE_file(flopemu,thefloppydisk,destinationfile,hwif->interface_mode,hwif->double_step);
-							break;
-
-
-						}
-						
-						
-						floppy_unload(floppycontext,thefloppydisk);
-
+						floppycontext->hxc_printf(MSG_INFO_1,"Entering directory %s",FindFileData.filename);
 
 						tempstr=(char*)malloc(1024);
-						
-						i=strlen(destinationfile);
-						do
-						{
-							i--;
-						}while(i && destinationfile[i]!='\\');
+						sprintf(tempstr,"Entering directory %s",FindFileData.filename);
+						SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
 
-						if(!ret)
+						if(browse_and_convert_directory(floppycontext,fullpath,destinationfolder,file,output_file_format,params))
 						{
-							sprintf(tempstr,"%s created",&destinationfile[i]);
-							SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
-							params->numberoffileconverted++;
+							free(destinationfolder);
+							free(fullpath);
+							free(tempstr);
+							find_close(hfindfile);
+							return 1;
+						}
+						free(destinationfolder);
+						free(fullpath);
+						floppycontext->hxc_printf(MSG_INFO_1,"Leaving directory %s",FindFileData.filename);
+						
+						sprintf(tempstr,"Leaving directory %s",FindFileData.filename);
+						SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
+						free(tempstr);
+						
+					}
+				}
+				else
+				{			
+					floppycontext->hxc_printf(MSG_INFO_1,"converting file %s, %dB",FindFileData.filename,FindFileData.size);
+					if(FindFileData.size)
+					{
+
+						fullpath=malloc(strlen(FindFileData.filename)+strlen(folder)+2+9);
+						sprintf(fullpath,"%s\\%s",folder,FindFileData.filename);
+
+						thefloppydisk=hxcfe_floppy_load(floppycontext,fullpath,&ret);
+						free(fullpath);
+						if(ret!=HXCFE_NOERROR || !thefloppydisk)
+						{
+							switch(ret)
+							{
+								case HXCFE_UNSUPPORTEDFILE:
+									printf("Load error!: Image file not yet supported!\n");
+								break;
+								case HXCFE_FILECORRUPTED:
+									printf("Load error!: File corrupted ? Read error ?\n");
+								break;
+								case HXCFE_ACCESSERROR:
+									printf("Load error!:  Read file error!\n");
+								break;
+								default:
+									printf("Load error! error %d\n",ret);
+								break;
+							}
+
 						}
 						else
 						{
-							sprintf(tempstr,"Error cannot create %s",&destinationfile[i]);
-							SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
+							destinationfile=malloc(strlen(FindFileData.filename)+strlen(destfolder)+2+99);
+							sprintf(destinationfile,"%s\\%s",destfolder,FindFileData.filename);
+							i=strlen(destinationfile);
+							do
+							{
+								i--;
+							}while(i && destinationfile[i]!='.');
+
+							if(i)
+							{
+							  destinationfile[i]='_';
+							}
+						
+							//printf("Creating file %s\n",destinationfile);
+
+							ret=1;
+
+							hxcfe_select_container(flopemu,ff_type_list[output_file_format].plug_id);
+							strcat(destinationfile,ff_type_list[output_file_format].ext);							
+							
+							hxcfe_floppy_unload(floppycontext,thefloppydisk);
+
+							tempstr=(char*)malloc(1024);
+							
+							i=strlen(destinationfile);
+							do
+							{
+								i--;
+							}while(i && destinationfile[i]!='\\');
+
+							if(!ret)
+							{
+								sprintf(tempstr,"%s created",&destinationfile[i]);
+								SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
+								params->numberoffileconverted++;
+							}
+							else
+							{
+								sprintf(tempstr,"Error cannot create %s",&destinationfile[i]);
+								SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
+							}
+
+							free(destinationfile);
+							free(tempstr);
+					
 						}
-
-						free(destinationfile);
-						free(tempstr);
-				
-
-					}
-					free(thefloppydisk);
-
-				}	
-			}
+					}	
+				}
 			
-			bbool=find_next_file(hfindfile,folder,file,&FindFileData);	
+				bbool=find_next_file(hfindfile,folder,file,&FindFileData);	
 			}
 		}
 		
@@ -556,73 +455,19 @@ BOOL CALLBACK DialogBatchConvert(
 	switch (message) 
 	{
 		
-	case WM_DROPFILES:
-		nboffile=DragQueryFile((HDROP)wParam, -1, NULL, 0);
-		if(nboffile)
-		{
-			filelist=malloc(sizeof(char*)*(nboffile+1));
-			memset(filelist,0,sizeof(char*)*(nboffile+1));
-			for(i=0;i<nboffile;i++)
+		case WM_DROPFILES:
+			nboffile=DragQueryFile((HDROP)wParam, -1, NULL, 0);
+			if(nboffile)
 			{
-				DragQueryFile((HDROP)wParam, i, filename, 1024);
-				filelist[i]=malloc(strlen(filename)+1);
-				sprintf(filelist[i],"%s",filename);
-			}
-
-			threadparams=(batchconverterparams*)malloc(sizeof(batchconverterparams));
-			memset(threadparams,0,sizeof(batchconverterparams));
-			threadparams->abort=0;
-			threadparams->windowshwd=hwndDlg;
-			threadparams->fileformat=SendDlgItemMessage(hwndDlg, IDC_FFTYPE, CB_GETCURSEL, 0, 0);
-			threadparams->flopemu=flopemu;
-			GetDlgItemText(hwndDlg,IDC_DESTDIR,(char*)threadparams->destdir,1024);
-			threadparams->filelist=filelist;
-			if(strlen(threadparams->destdir))
-			{
-				EnableWindow(GetDlgItem(hwndDlg, IDBATCHCONV),FALSE);
-				//BatchConverterThreadProc(threadparams);
-				DragAcceptFiles(hwndDlg,FALSE);
-				CreateThread(NULL,0,&DragandDropConvertThreadProc,threadparams,0,&sit);
-			}
-		}
-		break;
-
-	case WM_COMMAND:
-		switch (wmId)
-		{
-		case IDSELECTSOURCEDIR:
-				memset(&binf,0,sizeof(BROWSEINFO));
-				binf.hwndOwner=hwndDlg;
-				binf.pszDisplayName="Select a source folder";
-				binf.lpszTitle="Select a folder to convert";
-				binf.pszDisplayName=foldername;
-				Item=SHBrowseForFolder(&binf);
-				if(Item)
+				filelist=malloc(sizeof(char*)*(nboffile+1));
+				memset(filelist,0,sizeof(char*)*(nboffile+1));
+				for(i=0;i<nboffile;i++)
 				{
-					if(SHGetPathFromIDList(Item,foldername))
-					{
-						SetDlgItemText(hwndDlg,IDC_SOURCEDIR,foldername);						
-					}
+					DragQueryFile((HDROP)wParam, i, filename, 1024);
+					filelist[i]=malloc(strlen(filename)+1);
+					sprintf(filelist[i],"%s",filename);
 				}
-			break;
 
-		case IDSELECTDESTINATIONDIR:
-				memset(&binf,0,sizeof(BROWSEINFO));
-				binf.hwndOwner=hwndDlg;
-				binf.pszDisplayName="Select a target folder";
-				binf.lpszTitle="Select the target folder";
-				binf.pszDisplayName=foldername;
-				Item=SHBrowseForFolder(&binf);
-				if(Item)
-				{
-					if(SHGetPathFromIDList(Item,foldername))
-					{					
-						SetDlgItemText(hwndDlg,IDC_DESTDIR,foldername);
-					}
-				}
-			break;
-
-		case IDBATCHCONV:
 				threadparams=(batchconverterparams*)malloc(sizeof(batchconverterparams));
 				memset(threadparams,0,sizeof(batchconverterparams));
 				threadparams->abort=0;
@@ -630,27 +475,83 @@ BOOL CALLBACK DialogBatchConvert(
 				threadparams->fileformat=SendDlgItemMessage(hwndDlg, IDC_FFTYPE, CB_GETCURSEL, 0, 0);
 				threadparams->flopemu=flopemu;
 				GetDlgItemText(hwndDlg,IDC_DESTDIR,(char*)threadparams->destdir,1024);
-				GetDlgItemText(hwndDlg,IDC_SOURCEDIR,(char*)&threadparams->sourcedir,1024);
-				if(strlen(threadparams->sourcedir) && strlen(threadparams->destdir))
+				threadparams->filelist=filelist;
+				if(strlen(threadparams->destdir))
 				{
 					EnableWindow(GetDlgItem(hwndDlg, IDBATCHCONV),FALSE);
 					//BatchConverterThreadProc(threadparams);
-					CreateThread(NULL,0,&BatchConverterThreadProc,threadparams,0,&sit);
+					DragAcceptFiles(hwndDlg,FALSE);
+					CreateThread(NULL,0,&DragandDropConvertThreadProc,threadparams,0,&sit);
 				}
-			break;
-			
-		case IDCANCELRAWFILE:
-			if(threadparams)
-			threadparams->abort=1;
-			nbinstance=0;
-			DestroyWindow(hwndDlg);
+			}
 			break;
 
-		default:
-			break;
+		case WM_COMMAND:
+			switch (wmId)
+			{
+				case IDSELECTSOURCEDIR:
+					memset(&binf,0,sizeof(BROWSEINFO));
+					binf.hwndOwner=hwndDlg;
+					binf.pszDisplayName="Select a source folder";
+					binf.lpszTitle="Select a folder to convert";
+					binf.pszDisplayName=foldername;
+					Item=SHBrowseForFolder(&binf);
+					if(Item)
+					{
+						if(SHGetPathFromIDList(Item,foldername))
+						{
+							SetDlgItemText(hwndDlg,IDC_SOURCEDIR,foldername);						
+						}
+					}
+				break;
 
-		}
-		break;
+				case IDSELECTDESTINATIONDIR:
+					memset(&binf,0,sizeof(BROWSEINFO));
+					binf.hwndOwner=hwndDlg;
+					binf.pszDisplayName="Select a target folder";
+					binf.lpszTitle="Select the target folder";
+					binf.pszDisplayName=foldername;
+					Item=SHBrowseForFolder(&binf);
+					if(Item)
+					{
+						if(SHGetPathFromIDList(Item,foldername))
+						{					
+							SetDlgItemText(hwndDlg,IDC_DESTDIR,foldername);
+						}
+					}
+				break;
+
+				case IDBATCHCONV:
+					threadparams=(batchconverterparams*)malloc(sizeof(batchconverterparams));
+					memset(threadparams,0,sizeof(batchconverterparams));
+					threadparams->abort=0;
+					threadparams->windowshwd=hwndDlg;
+					threadparams->fileformat=SendDlgItemMessage(hwndDlg, IDC_FFTYPE, CB_GETCURSEL, 0, 0);
+					threadparams->flopemu=flopemu;
+					GetDlgItemText(hwndDlg,IDC_DESTDIR,(char*)threadparams->destdir,1024);
+					GetDlgItemText(hwndDlg,IDC_SOURCEDIR,(char*)&threadparams->sourcedir,1024);
+					if(strlen(threadparams->sourcedir) && strlen(threadparams->destdir))
+					{
+						EnableWindow(GetDlgItem(hwndDlg, IDBATCHCONV),FALSE);
+						//BatchConverterThreadProc(threadparams);
+						CreateThread(NULL,0,&BatchConverterThreadProc,threadparams,0,&sit);
+					}
+				break;
+				
+				case IDCANCELRAWFILE:
+					if(threadparams)
+					threadparams->abort=1;
+					nbinstance=0;
+					DestroyWindow(hwndDlg);
+				break;
+
+				default:
+				
+				break;
+
+			}
+	
+			break;
 
 		case WM_INITDIALOG:
 			if(nbinstance!=0)
