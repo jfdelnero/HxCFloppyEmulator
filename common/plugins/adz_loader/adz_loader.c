@@ -48,11 +48,11 @@
 #include <stdio.h>
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
-#include "../common/track_generator.h"
+
 
 #include "adz_loader.h"
 
@@ -61,6 +61,7 @@
 #include "../common/os_api.h"
 
 #define UNPACKBUFFER 128*1024
+
 
 int ADZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
@@ -82,19 +83,19 @@ int ADZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"ADZ file !");
 					free(filepath);
-					return LOADER_ISVALID;
+					return HXCFE_VALIDFILE;
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non ADZ file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 	
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -109,7 +110,7 @@ int ADZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	char* flatimg;
 	gzFile file;
 	int err;
-	
+
 	CYLINDER* currentcylinder;
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"ADZ_libLoad_DiskFile %s",imgfile);
@@ -137,11 +138,11 @@ int ADZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(!flatimg)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Unpack error!");
-		return LOADER_BADFILE;
+		return HXCFE_BADFILE;
 	}	
 	
 	if(flatimg)
-	{		
+	{
 		sectorsize=512;
 		interleave=1;
 		gap3len=0;
@@ -163,18 +164,43 @@ int ADZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
-								
+
 				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 							(sectorsize*(floppydisk->floppySectorPerTrack)*i);
 				
 				currentcylinder->sides[i]=tg_generatetrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500,-11150);
 			}
 		}
-		
+
 		floppycontext->hxc_printf(MSG_INFO_1,"ADZ Loader : tracks file successfully loaded and encoded!");
 		return 0;
 	}
 
-	return LOADER_BADFILE;
+	return HXCFE_BADFILE;
 }
 
+int ADZ_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="AMIGA_ADZ";
+	const char plug_desc[]="AMIGA ADZ Loader";
+	const char plug_ext[]="adz";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	ADZ_libIsValidDiskFile,
+		(LOADDISKFILE)		ADZ_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	ADZ_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
