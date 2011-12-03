@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "acornadf_loader.h"
 
@@ -84,7 +84,7 @@ int ACORNADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					if(f==NULL) 
 					{
 						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 					}
 					
 					fseek (f , 0 , SEEK_END); 
@@ -96,24 +96,24 @@ int ACORNADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					if(filesize&0x3FF)
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non Acorn ADF file - bad file size !");
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 
 					floppycontext->hxc_printf(MSG_DEBUG,"Acorn ADF file !");
 					free(filepath);
-					return LOADER_ISVALID;
+					return HXCFE_VALIDFILE;
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non Acorn ADF file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -138,7 +138,7 @@ int ACORNADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	fseek (f , 0 , SEEK_END); 
@@ -198,13 +198,38 @@ int ACORNADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 		fclose(f);
-		return LOADER_NOERROR;
+		return HXCFE_NOERROR;
 
 	}
 	
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	fclose(f);
-	return LOADER_BADFILE;
+	return HXCFE_BADFILE;
 }
 
+int ACORNADF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="ACORN_ADF";
+	const char plug_desc[]="ACORN ADF Loader";
+	const char plug_ext[]="adf";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	ACORNADF_libIsValidDiskFile,
+		(LOADDISKFILE)		ACORNADF_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	ACORNADF_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
 
