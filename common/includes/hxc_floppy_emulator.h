@@ -92,6 +92,10 @@ typedef struct fb_track_state_
 	unsigned short rpm;
 	int bitrate;
 
+	int indexlen;
+	int indexpos;
+	int sectorunderindex;
+
 	int numberofsector;
 	SECTORCONFIG sectortab[STACK_SIZE];
 
@@ -112,9 +116,14 @@ int	hxcfe_pushTrack (FBuilder*,unsigned int rpm,int number,int side,int type);
 int hxcfe_setTrackInterleave(FBuilder*,int interleave);
 int hxcfe_setTrackSkew(FBuilder*,int skew);
 
+int hxcfe_setIndexPosition(FBuilder*,int position,int allowsector);
+int hxcfe_setIndexLength(FBuilder*,int Length);
+
 int hxcfe_setTrackBitrate(FBuilder*,int bitrate);
 
 int hxcfe_addSector(FBuilder* fb,int sectornumber,int side,int track,unsigned char * buffer,int size);
+
+int hxcfe_setSectorBitrate(FBuilder* fb,int bitrate);
 
 int hxcfe_setSectorGap3(FBuilder* fb,unsigned char Gap3);
 int hxcfe_setSectorSizeID(FBuilder* fb,unsigned char sectorsizeid);
@@ -133,7 +142,6 @@ FLOPPY* hxcfe_get_floppy(FBuilder* fb);
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Floppy functions
-
 
 #define IBMPC_DD_FLOPPYMODE				0x00
 #define IBMPC_HD_FLOPPYMODE				0x01

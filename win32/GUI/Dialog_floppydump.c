@@ -45,36 +45,14 @@
 
 #include <windows.h>
 #include <commctrl.h>
-
 #include <stdio.h>
-#include <time.h>
 
 #include "resource.h"
 #include "mainrouts.h"
-
 #include "Dialog_config.h"
-
 #include "hxc_floppy_emulator.h"
-
-#include "./usb_floppyemulator/usb_hxcfloppyemulator.h"
-#include "../../../../common/plugins/raw_loader/raw_loader.h"
-
-#include "floppy_utils.h"
-#include "plateforms.h"
-
-
-
-#include "fileselector.h"
-
-#include "soft_cfg_file.h"
-
 #include "fdrawcmd.h"
-#include "loader.h"
 
-#include "types.h"
-
-extern HWINTERFACE * hwif;
-extern guicontext * demo;
 extern HXCFLOPPYEMULATOR * flopemu;
 
 static BITMAPINFO * bmapinfo;
@@ -107,7 +85,6 @@ typedef struct trackmode_
 
 
 static floppydumperparams fdparams;
-static HANDLE h = INVALID_HANDLE_VALUE;
 
 trackmode tm[]=
 {
@@ -129,6 +106,7 @@ static int checkversion(void)
 {
 	DWORD version = 0;
 	DWORD ret;
+	HANDLE h;
 
 	h = CreateFile("\\\\.\\fdrawcmd", GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 	if (h == INVALID_HANDLE_VALUE)
@@ -144,12 +122,12 @@ static int checkversion(void)
 	return version;
 }
 
-static void closedevice(void)
+static void closedevice(HANDLE h)
 {
-		DWORD ret;
+	DWORD ret;
+	
 	if (h == INVALID_HANDLE_VALUE)
 		return;
-
 
 	if (!DeviceIoControl(h, IOCTL_FD_UNLOCK_FDC, 0,0, 0, 0, &ret, NULL)) {
 		printf("IOCTL_FD_UNLOCK_FDC failed err=%d\n", GetLastError());
@@ -158,7 +136,7 @@ static void closedevice(void)
 	CloseHandle(h);
 }
 
-static int opendevice(int drive)
+HANDLE opendevice(int drive)
 {
 	HANDLE h;
 	DWORD ret;
@@ -176,28 +154,27 @@ static int opendevice(int drive)
 	b = 2; // 250Kbps
 	if (!DeviceIoControl(h, IOCTL_FD_SET_DATA_RATE, &b, sizeof b, NULL, 0, &ret, NULL)) {
 		printf("IOCTL_FD_SET_DATA_RATE=%d failed err=%d\n", b, GetLastError());
-		closedevice();
+		closedevice(h);
 		return 0;
 	}
 
 	b = 0;
 	if (!DeviceIoControl(h, IOCTL_FD_SET_DISK_CHECK, &b, sizeof b, NULL, 0, &ret, NULL)) {
 		printf("IOCTL_FD_SET_DISK_CHECK=%d failed err=%d\n", b, GetLastError());
-		closedevice();
+		closedevice(h);
 		return 0;
 	}
-
 
 	if (!DeviceIoControl(h, IOCTL_FD_LOCK_FDC, 0,0, 0, 0, &ret, NULL)) {
 		printf("IOCTL_FD_LOCK_FDC=%d failed err=%d\n", b, GetLastError());
-		closedevice();
+		closedevice(h);
 		return 0;
 	}
 
-	return 1;
+	return h;
 }
 
-static int seek(int cyl, int head)
+static int seek(HANDLE h,int cyl, int head)
 {
 	FD_SEEK_PARAMS sp;
 	DWORD ret;
@@ -219,43 +196,43 @@ void splashscreen(HWND  hwndDlg,unsigned char * buffer)
 	GetClientRect(hwndDlg,&myRect);
 	StretchDIBits(hdc,16,210,xsize,ysize,0,0,xsize,ysize,buffer,bmapinfo,0,SRCCOPY);
 	ReleaseDC(hwndDlg,hdc);
-
 }
 
 DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 {
-	unsigned int i,j,k,m,n,ret;
+	unsigned int k,m,n,ret;
+	int i,j;
 	int l,o,p;
 	FD_SCAN_PARAMS sp;
 	FD_SCAN_RESULT *sr;
 	FD_READ_WRITE_PARAMS rwp;
 	FD_CMD_RESULT cmdr;
-	SECTORCONFIG* sectorconfig;
+	HXCFLOPPYEMULATOR *hxcfe;
+	FBuilder* fb;
 	floppydumperparams * params;
 	unsigned char * tempstr;
-	unsigned char b,interleave;
+	unsigned char b;
 	int retry;
+	HANDLE h;
 	unsigned char trackformat;
 	unsigned short rpm;
 	unsigned long rotationtime,bitrate;
 	unsigned long total_size,numberofsector_read,number_of_bad_sector;
-	
-	CYLINDER* currentcylinder;
-	SIDE* currentside;
-	
+	unsigned char * sector_data;
+	int sectordata_size;
 	
 	params=(floppydumperparams*)lpParameter;
 	
-	params->flopemu->hxc_printf(MSG_DEBUG,"Starting Floppy dump...");
+	hxcfe=params->flopemu;
+
+	hxcfe->hxc_printf(MSG_DEBUG,"Starting Floppy dump...");
 	
 	tempstr=(char*)malloc(1024);
 	
-
-	interleave=1;
-
 	if(checkversion())
 	{
-		if(opendevice(params->drive))
+		h=opendevice(params->drive);
+		if(h)
 		{
 
 			total_size=0;
@@ -263,14 +240,13 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 			number_of_bad_sector=0;
 
 			sr=malloc(sizeof(FD_ID_HEADER)*256 + 1);
-			
-			params->floppydisk->floppyBitRate=VARIABLEBITRATE;
-			
-			params->floppydisk->floppyNumberOfSide=params->number_of_side;
-			params->floppydisk->floppyNumberOfTrack=params->number_of_track;
-			params->floppydisk->floppySectorPerTrack=-1;
+						
+			fb=hxcfe_init_floppy(hxcfe,params->number_of_track,params->number_of_side);
+			hxcfe_setSectorFill(fb,0xF6);
+			hxcfe_setIndexPosition(fb,-2500,0);
+			hxcfe_setIndexLength(fb,2500);
 
-			seek(0, 0);
+			seek(h,0, 0);
 
 			sprintf(tempstr,"Checking drive RPM...");
 			SetDlgItemText(params->windowshwd,IDC_EDIT1,tempstr);
@@ -280,19 +256,17 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 			{
 				sprintf(tempstr,"Error during RPM checking :%d ",GetLastError());
 				SetDlgItemText(params->windowshwd,IDC_EDIT1,tempstr);
-				params->flopemu->hxc_printf(MSG_DEBUG,"Leaving Floppy dump: IOCTL_FD_GET_TRACK_TIME error %d...",GetLastError());
-				closedevice();
+				hxcfe->hxc_printf(MSG_DEBUG,"Leaving Floppy dump: IOCTL_FD_GET_TRACK_TIME error %d...",GetLastError());
+				closedevice(h);
 				free(tempstr);
 
 				params->status=0;
 				return 0;
 			}
-			
-			params->floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*params->floppydisk->floppyNumberOfTrack);
-			
+				
 			rpm=(unsigned short)(60000/(rotationtime/1000));
 			
-			params->flopemu->hxc_printf(MSG_DEBUG,"Drive RPM: %d",rpm);
+			hxcfe->hxc_printf(MSG_DEBUG,"Drive RPM: %d",rpm);
 			sprintf(tempstr,"Drive RPM: %d",rpm);
 			SetDlgItemText(params->windowshwd,IDC_EDIT1,tempstr);
 			
@@ -304,12 +278,12 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 			sprintf(tempstr,"Starting reading disk...");
 			SetDlgItemText(params->windowshwd,IDC_EDIT1,tempstr);
 
-			for(i=0;i<params->floppydisk->floppyNumberOfTrack;i++)
+			for(i=0;i<params->number_of_track;i++)
 			{
 
 				if(i<100)
 				{
-					for(j=0;j<params->floppydisk->floppyNumberOfSide;j++)
+					for(j=0;j<params->number_of_side;j++)
 					{
 
 						l=0;
@@ -336,26 +310,15 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 				}
 			}
 
-				
-			
-
-
-			for(i=0;i<params->floppydisk->floppyNumberOfTrack;i++)
+			for(i=0;i<params->number_of_track;i++)
 			{
-				params->floppydisk->tracks[i]=(CYLINDER*)malloc(sizeof(CYLINDER));
-				currentcylinder=params->floppydisk->tracks[i];
-				currentcylinder->number_of_side=params->floppydisk->floppyNumberOfSide;
-				currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-				memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
 				
-				for(j=0;j<params->floppydisk->floppyNumberOfSide;j++)
+				for(j=0;j<params->number_of_side;j++)
 				{
 					
-					currentcylinder->floppyRPM=rpm;
+					seek(h,i*params->double_step, j);
 
-					
-					seek(i*params->double_step, j);
-					
+										
 					l=0;
 					do
 					{
@@ -385,14 +348,14 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 						if (!DeviceIoControl(h, IOCTL_FD_SET_DATA_RATE, &b, sizeof b, NULL, 0, &ret, NULL)) 
 						{
 							printf("IOCTL_FD_SET_DATA_RATE=%d failed err=%d\n", b, GetLastError());
-							closedevice();
+							closedevice(h);
 							params->status=0;
 							return 0;
 						}
 						
 						if (!DeviceIoControl(h, IOCTL_FD_SCAN_TRACK, &sp, sizeof sp, sr, sizeof(FD_ID_HEADER)*256 + 1, &ret, NULL))
 						{
-							params->flopemu->hxc_printf(MSG_DEBUG,"IOCTL_FD_SCAN_TRACK error %d ...",GetLastError());
+							hxcfe->hxc_printf(MSG_DEBUG,"IOCTL_FD_SCAN_TRACK error %d ...",GetLastError());
 						}
 						
 						if(sr->count)
@@ -415,12 +378,10 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 						l++;
 					}while(l<8 && !sr->count);
 					
-					sectorconfig=(SECTORCONFIG*)malloc(sizeof(SECTORCONFIG)*sr->count);
-					memset(sectorconfig,0,sizeof(SECTORCONFIG)*sr->count);
 					
-					params->flopemu->hxc_printf(MSG_DEBUG,"Track %d side %d: %d sectors found : ",i,j,sr->count);
+					hxcfe->hxc_printf(MSG_DEBUG,"Track %d side %d: %d sectors found : ",i,j,sr->count);
 					
-					seek(i*params->double_step, j);
+					seek(h,i*params->double_step, j);
 					
 					if( sr->Header[0].cyl==sr->Header[sr->count-1].cyl && 
 						sr->Header[0].head==sr->Header[sr->count-1].head && 
@@ -461,11 +422,14 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 						}
 					}
 
+					hxcfe_pushTrack (fb,rpm,i,j,trackformat);
+					hxcfe_setTrackBitrate(fb,bitrate);
+
+
 					for(k=0;k<sr->count;k++)
 					{
-						params->flopemu->hxc_printf(MSG_DEBUG,"Sector %.2d, Track ID: %.3d, Head ID:%d, Size: %d bytes, Bitrate:%dkbits/s, %s",sr->Header[k].sector,sr->Header[k].cyl,sr->Header[k].head,128<<sr->Header[k].size,bitrate/1000,trackformat==IBMFORMAT_SD?"FM":"MFM");
-						
-						
+						hxcfe->hxc_printf(MSG_DEBUG,"Sector %.2d, Track ID: %.3d, Head ID:%d, Size: %d bytes, Bitrate:%dkbits/s, %s",sr->Header[k].sector,sr->Header[k].cyl,sr->Header[k].head,128<<sr->Header[k].size,bitrate/1000,trackformat==IBMFORMAT_SD?"FM":"MFM");
+
 						if(tm[m].encoding_mode)
 						{
 							rwp.flags=FD_OPTION_MFM;
@@ -490,14 +454,9 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 							rwp.datalen=128;
 						}
 						
-						sectorconfig[k].cylinder=sr->Header[k].cyl;
-						sectorconfig[k].head=sr->Header[k].head;
-						sectorconfig[k].sector=sr->Header[k].sector;
-						sectorconfig[k].sectorsize=(128<<sr->Header[k].size);
-						sectorconfig[k].gap3=255;
-						sectorconfig[k].trackencoding=trackformat;
-						sectorconfig[k].input_data=malloc(sectorconfig[k].sectorsize);
-						sectorconfig[k].bitrate=bitrate;
+						sectordata_size=(128<<(sr->Header[k].size&0x7));
+						sector_data=malloc(sectordata_size);
+						memset(sector_data,0,sectordata_size);
 
 						p=o;
 						retry=params->retry;
@@ -520,12 +479,23 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 								o=o+8;
 							}
 
-						}while(!DeviceIoControl(h, IOCTL_FDCMD_READ_DATA, &rwp, sizeof rwp,sectorconfig[k].input_data, sectorconfig[k].sectorsize, &ret, NULL) && retry);
-						
+						}while(!DeviceIoControl(h, IOCTL_FDCMD_READ_DATA, &rwp, sizeof rwp,sector_data, sectordata_size, &ret, NULL) && retry);
+
+						hxcfe_setSectorBitrate(fb,bitrate);
+						hxcfe_setSectorGap3(fb,255);
+						hxcfe_setSectorEncoding(fb,trackformat);
+						hxcfe_addSector(fb,
+										sr->Header[k].sector,
+										sr->Header[k].head,
+										sr->Header[k].cyl,
+										sector_data,sectordata_size);
+
+						free(sector_data);
+
 						if(!retry)
 						{	
 							DeviceIoControl(h, IOCTL_FD_GET_RESULT,0, 0, &cmdr, sizeof(FD_CMD_RESULT), &ret, NULL);
-							params->flopemu->hxc_printf(MSG_DEBUG,"Read Error ! ST0: %.2x, ST1: %.2x, ST2: %.2x",cmdr.st0,cmdr.st1,cmdr.st2);
+							hxcfe->hxc_printf(MSG_DEBUG,"Read Error ! ST0: %.2x, ST1: %.2x, ST2: %.2x",cmdr.st0,cmdr.st1,cmdr.st2);
 							number_of_bad_sector++;
 
 							o=p;
@@ -561,7 +531,7 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 						}
 					
 						
-						total_size=total_size+(128<<sr->Header[k].size);
+						total_size=total_size+sectordata_size;
 						numberofsector_read++;
 
 						sprintf(tempstr,"%d Sector(s) Read, %d bytes, %d Bad sector(s)",numberofsector_read,total_size,number_of_bad_sector);
@@ -569,58 +539,43 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 
 					}
 				
-			
-					currentside=tg_generatetrackEx((unsigned short)sr->count,sectorconfig,interleave,0,bitrate,rpm,trackformat,2500 | NO_SECTOR_UNDER_INDEX,-2500);
+					hxcfe_popTrack(fb);
 
-					currentcylinder->sides[j]=currentside;
-										
 					sprintf(tempstr,"Track %d side %d: %d sectors, %dkbits/s, %s",i,j,sr->count,bitrate/1000,trackformat==ISOFORMAT_SD?"FM":"MFM");
 					SetDlgItemText(params->windowshwd,IDC_EDIT1,tempstr);
-					
-					for(k=0;k<sr->count;k++)
-					{
-						free(sectorconfig[k].input_data);
-					}
 
-					free(sectorconfig);
 				}
 			}
-			
-			closedevice();
+
+			closedevice(h);
+
+			params->floppydisk=hxcfe_get_floppy(fb);
 
 			sprintf(tempstr,"Done !");
 			SetDlgItemText(params->windowshwd,IDC_EDIT1,tempstr);
 			sprintf(tempstr,"%d Sector(s) Read, %d bytes, %d Bad sector(s)",numberofsector_read,total_size,number_of_bad_sector);
 			SetDlgItemText(params->windowshwd,IDC_EDIT2,tempstr);
-					
-			params->flopemu->hxc_printf(MSG_DEBUG,"Done ! %d sectors read, %d bad sector(s), %d bytes read",numberofsector_read,number_of_bad_sector,total_size);
-		
-			//loadfloppy("Floppy Dump",params->floppydisk,0);
 
+			hxcfe->hxc_printf(MSG_DEBUG,"Done ! %d sectors read, %d bad sector(s), %d bytes read",numberofsector_read,number_of_bad_sector,total_size);
 
 			free(tempstr);
-			
 
-			
-			params->flopemu->hxc_printf(MSG_DEBUG,"Leaving Floppy dump...");
-			
+			hxcfe->hxc_printf(MSG_DEBUG,"Leaving Floppy dump...");
+
 			params->status=0;
 			return 0;
-
 		}
-	
 	}
 
 	sprintf(tempstr,"Error while opening fdrawcmd, see: http://simonowen.com/fdrawcmd");
 	SetDlgItemText(params->windowshwd,IDC_EDIT1,tempstr);
-	
+
 	free(tempstr);
 
-	params->flopemu->hxc_printf(MSG_DEBUG,"Leaving Floppy dump...");
-	
+	hxcfe->hxc_printf(MSG_DEBUG,"Leaving Floppy dump...");
+
 	params->status=0;
-	return 0;
-	
+	return 0;	
 }
 
 
@@ -710,12 +665,9 @@ BOOL CALLBACK DialogFloppyDump(
 			default:;
 			break;
 
-		}
-		
-		
+		}		
 		break;
-		
-		
+
 		case WM_INITDIALOG:
 			if(nbinstance!=0)
 			{
