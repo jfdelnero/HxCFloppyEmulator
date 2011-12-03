@@ -50,11 +50,9 @@
 #include <time.h>
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
-
-#include "../common/track_generator.h"
 
 #include "amigadosfs_loader.h"
 
@@ -67,19 +65,20 @@
 
 HXCFLOPPYEMULATOR* global_floppycontext;
 
+
 int AMIGADOSFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	
+
 	int pathlen;
 	char * filepath;
-    struct stat staterep;
+	struct stat staterep;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile %s",imgfile);
 	if(imgfile)
 	{
 		pathlen=strlen(imgfile);
 		if(pathlen!=0)
-		{		
+		{
 			stat(imgfile,&staterep);
 
 			if(staterep.st_mode&S_IFDIR)
@@ -94,25 +93,25 @@ int AMIGADOSFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgf
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK file !");
 						free(filepath);
-						return LOADER_ISVALID;
+						return HXCFE_VALIDFILE;
 					}
 					else
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non AMIGADOSFSDK file ! (.amigados missing)");
 						free(filepath);
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 				}
 			}
 			else
 			{
 				floppycontext->hxc_printf(MSG_DEBUG,"non AMIGADOSFSDK file ! (it's not a directory)");
-				return LOADER_BADFILE;
+				return HXCFE_BADFILE;
 			}
 		}
 		floppycontext->hxc_printf(MSG_DEBUG,"0 byte string ?");
 	}
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 
 
 }
@@ -144,8 +143,8 @@ int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * f
 	unsigned char * fullpath;//,*fileimg;
 	int size,filesize;
 	RETCODE  rc;
-	
-	hfindfile=find_first_file(folder,file, &FindFileData); 
+
+	hfindfile=find_first_file(folder,file, &FindFileData);
 	if(hfindfile!=-1)
 	{
 		bbool=TRUE;
@@ -158,14 +157,14 @@ int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * f
 					if(adfCountFreeBlocks(adfvolume)>4)
 					{
 						floppycontext->hxc_printf(MSG_INFO_1,"Adding directory %s",FindFileData.filename);
-						rc=adfCreateDir(adfvolume,adfvolume->curDirPtr,FindFileData.filename); 
+						rc=adfCreateDir(adfvolume,adfvolume->curDirPtr,FindFileData.filename);
 						if(rc==RC_OK)
 						{
 							floppycontext->hxc_printf(MSG_INFO_1,"entering directory %s",FindFileData.filename);
 							rc=adfChangeDir(adfvolume, FindFileData.filename);
 							if(rc==RC_OK)
 							{
-								
+
 								fullpath=malloc(strlen(FindFileData.filename)+strlen(folder)+2);
 								sprintf(fullpath,"%s\\%s",folder,FindFileData.filename);
 
@@ -194,9 +193,9 @@ int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * f
 					else
 					{
 						floppycontext->hxc_printf(MSG_ERROR,"Cannot Add a directory ! : no more free block!!!");
-					    return 1;
+						return 1;
 					}
-					
+
 				}
 			}
 			else
@@ -219,14 +218,14 @@ int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * f
 									filesize=ftell(ftemp);
 									fseek(ftemp,0,SEEK_SET);
 									do
-									{					
+									{
 										if(filesize>=512)
 										{
-											size=512;		
+											size=512;
 										}
 										else
 										{
-                                            size=filesize;
+											size=filesize;
 										}
 										fread(&tempbuffer,size,1,ftemp);
 
@@ -242,7 +241,7 @@ int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * f
 										filesize=filesize-512;
 
 									}while( (filesize>0) && (byte_written==size));
-								
+
 
 									/*fileimg=(unsigned char*)malloc(filesize);
 									memset(fileimg,0,filesize);
@@ -264,7 +263,7 @@ int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * f
 						}
 						else
 						{
-                             floppycontext->hxc_printf(MSG_ERROR,"Error : Cannot create %s, %dB!!!",FindFileData.filename,FindFileData.size);
+							floppycontext->hxc_printf(MSG_ERROR,"Error : Cannot create %s, %dB!!!",FindFileData.filename,FindFileData.size);
 							 return 1;
 						}
 				}
@@ -276,7 +275,7 @@ int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * f
 			}
 			bbool=find_next_file(hfindfile,folder,file,&FindFileData);
 		}
-		
+
 	}
 	else printf("Error FindFirstFile\n");
 
@@ -308,10 +307,10 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 //	FILE * debugadf;
 	int rc;
 	CYLINDER* currentcylinder;
-  
+
 	numberoftrack=80;
 	numberofsectorpertrack=11;
-	
+
 	floppycontext->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libLoad_DiskFile %s",imgfile);
 
 	stat(imgfile,&repstate);
@@ -351,7 +350,7 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 
 			if(ts)
 			{
-				reptime.year=ts->tm_year;         /* since 1900 */
+				reptime.year=ts->tm_year;	/* since 1900 */
 				reptime.mon=ts->tm_mon+1;
 				reptime.day=ts->tm_mday;
 				reptime.hour=ts->tm_hour;
@@ -373,7 +372,7 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 			free(repname);
 
 			if (rc==RC_OK)
-			{					
+			{
 				adfvolume = adfMount(adfdevice, 0, 0);
 				if(adfvolume)
 				{
@@ -386,17 +385,17 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 					if(ScanFile(floppycontext,adfvolume,imgfile,"*.*"))
 					{
 								floppycontext->hxc_printf(MSG_DEBUG,"ScanFile error!");
-								return LOADER_INTERNALERROR;
+								return HXCFE_INTERNALERROR;
 					}
 					flatimg2=(unsigned char*)malloc(flatimgsize);
 					memcpy(flatimg2,flatimg,flatimgsize);
-					adfUnMountDev(adfdevice);			
+					adfUnMountDev(adfdevice);
 					/*////////
 					debugadf=fopen("d:\\debug.adf","wb");
 					if(debugadf)
 					{
-					   fwrite(flatimg2,flatimgsize,1,debugadf);
-					   fclose(debugadf);
+						fwrite(flatimg2,flatimgsize,1,debugadf);
+						fclose(debugadf);
 					}
 					//////////*/
 
@@ -404,23 +403,23 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 				else
 				{
 					floppycontext->hxc_printf(MSG_ERROR,"adflib: adfMount error!");
-					return LOADER_INTERNALERROR;
+					return HXCFE_INTERNALERROR;
 				}
 			}
 			else
 			{
 				floppycontext->hxc_printf(MSG_ERROR,"adflib: Error while creating the virtual floppy!");
-				return LOADER_INTERNALERROR;
+				return HXCFE_INTERNALERROR;
 			}
 		}
 		else
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"adflib: adfCreateMemoryDumpDevice error!");
-			return LOADER_INTERNALERROR;
+			return HXCFE_INTERNALERROR;
 		}
 
 		if(flatimg2)
-		{		
+		{
 			sectorsize=512;
 			interleave=1;
 			gap3len=0;
@@ -436,32 +435,56 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 			{
-				
+
 				floppydisk->tracks[j]=allocCylinderEntry(DEFAULT_AMIGA_RPM,floppydisk->floppyNumberOfSide);
 				currentcylinder=floppydisk->tracks[j];
-										
+
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-				{	
+				{
 					file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 								(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-					
+
 					currentcylinder->sides[i]=tg_generatetrack(&flatimg2[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500,-11150);
 				}
 			}
 
 			free(flatimg2);
 			floppycontext->hxc_printf(MSG_INFO_1,"AMIGADOSFSDK Loader : tracks file successfully loaded and encoded!");
-			return LOADER_NOERROR;
+			return HXCFE_NOERROR;
 		}
-			
+
 		floppycontext->hxc_printf(MSG_ERROR,"flatimg==0 !?");
-		return LOADER_INTERNALERROR;
+		return HXCFE_INTERNALERROR;
 	}
 	else
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"not a directory !");
-		return LOADER_BADFILE;
+		return HXCFE_BADFILE;
 	}
 }
 
+int AMIGADOSFSDK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
 
+	const char plug_id[]="AMIGA_FS";
+	const char plug_desc[]="AMIGA FS Loader";
+	const char plug_ext[]="amigados";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	AMIGADOSFSDK_libIsValidDiskFile,
+		(LOADDISKFILE)		AMIGADOSFSDK_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	AMIGADOSFSDK_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
