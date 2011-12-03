@@ -25,21 +25,6 @@
 //
 */
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Floppy Descriptor
-//
-//
-#define IBMPC_DD_FLOPPYMODE				0x00
-#define IBMPC_HD_FLOPPYMODE				0x01
-#define ATARIST_DD_FLOPPYMODE			0x02
-#define ATARIST_HD_FLOPPYMODE			0x03
-#define AMIGA_DD_FLOPPYMODE				0x04
-#define AMIGA_HD_FLOPPYMODE				0x05
-#define CPC_DD_FLOPPYMODE				0x06
-#define GENERIC_SHUGART_DD_FLOPPYMODE	0x07
-#define IBMPC_ED_FLOPPYMODE				0x08
-#define MSX2_DD_FLOPPYMODE				0x09
-#define C64_DD_FLOPPYMODE				0x0A
-#define EMU_SHUGART_FLOPPYMODE			0x0B
 
 #define CALLINGMETHOD
 
@@ -51,7 +36,6 @@
 #define ISOIBM_FM_ENCODING				0x02
 #define EMU_FM_ENCODING					0x03
 #define UNKNOWN_ENCODING				0xFF
-
 
 typedef struct SIDE_
 {
@@ -85,6 +69,7 @@ typedef struct FLOPPY_
 	unsigned short	floppySectorPerTrack;
 	
 	unsigned short	floppyiftype;
+	unsigned char	double_step;
 
 	CYLINDER	**	tracks;
 }FLOPPY;
