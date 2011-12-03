@@ -7,17 +7,8 @@
 #include <direct.h>
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
-#include "floppy_loader.h"
 #include "licensetxt.h"
 #include "./usb_floppyemulator/usb_hxcfloppyemulator.h"
-
-#include "mfm_file_writer.h"
-#include "hfe_file_writer.h"
-#include "afi_file_writer.h"
-#include "raw_file_writer.h"
-#include "vtrucco_file_writer.h"
-#include "cpcdsk_file_writer.h"
 
 #include "win32_api.h"
 
@@ -101,17 +92,17 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 			        ret=floppy_load(floppycontext,thefloppydisk,fullpath);
 		            free(fullpath);
 
-					if(ret!=LOADER_NOERROR)
+					if(ret!=HXCFE_NOERROR)
 					{
 						switch(ret)
 						{
-							case LOADER_UNSUPPORTEDFILE:
+							case HXCFE_UNSUPPORTEDFILE:
 								printf("Load error!: Image file not yet supported!\n");
 							break;
-							case LOADER_FILECORRUPT:
+							case HXCFE_FILECORRUPTED:
 								printf("Load error!: File corrupted ? Read error ?\n");
 							break;
-							case LOADER_ACCESSERROR:
+							case HXCFE_ACCESSERROR:
 								printf("Load error!:  Read file error!\n");
 							break;
 							default:
@@ -195,8 +186,8 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 
 int main(int argc, char* argv[])
 {
-	printf("HxC Floppy Emulator : Floppy image file converter V1.3\n");
-	printf("Copyright (C) 2006-2010 Jean-Francois DEL NERO\n");
+	printf("HxC Floppy Emulator : Floppy image file converter V2.0\n");
+	printf("Copyright (C) 2006-2011 Jean-Francois DEL NERO\n");
     printf("This program comes with ABSOLUTELY NO WARRANTY\n");
     printf("This is free software, and you are welcome to redistribute it\n");
     printf("under certain conditions; use the -lic option for details.\n\n");

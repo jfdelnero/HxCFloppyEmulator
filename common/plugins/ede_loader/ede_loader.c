@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "ede_loader.h"
 
@@ -91,7 +91,7 @@ int EDE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					if(f==NULL) 
 					{
 						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 					}
 
 
@@ -135,29 +135,29 @@ int EDE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 							default:
 								floppycontext->hxc_printf(MSG_ERROR,"Unknow format : %x !",header_buffer[0x1FF]);
-								return LOADER_BADFILE;
+								return HXCFE_BADFILE;
 								break;
 						}
 					}
 					else
 					{
 						floppycontext->hxc_printf(MSG_ERROR,"Bad header !!");
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 
-					return LOADER_ISVALID;
+					return HXCFE_VALIDFILE;
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non EDE file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 	
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -190,7 +190,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	fseek (f , 0 , SEEK_END); 
@@ -318,7 +318,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			default:
 				floppycontext->hxc_printf(MSG_ERROR,"Unknow format : %x !",header_buffer[0x1FF]);
 				fclose(f);
-				return LOADER_BADFILE;
+				return HXCFE_BADFILE;
 			break;
 		}
 
@@ -406,10 +406,37 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		fclose(f);
 		
-		return LOADER_NOERROR;	
+		return HXCFE_NOERROR;	
 	}
 
 	floppycontext->hxc_printf(MSG_ERROR,"BAD EDE file!");
 	fclose(f);
-	return LOADER_BADFILE;
+	return HXCFE_BADFILE;
 }
+
+int EDE_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="ENSONIQ_EDE";
+	const char plug_desc[]="ENSONIQ EDE Loader";
+	const char plug_ext[]="ede";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	EDE_libIsValidDiskFile,
+		(LOADDISKFILE)		EDE_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	EDE_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
+

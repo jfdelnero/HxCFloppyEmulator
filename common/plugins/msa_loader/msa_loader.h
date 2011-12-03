@@ -25,7 +25,4 @@
 //
 */
 
-int MSA_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile);
-int MSA_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters);
-
-
+int MSA_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue);

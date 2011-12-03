@@ -59,7 +59,7 @@
 	{
 		int id;
 		char * name;
-
+		int tracktype;
 	}track_type;
 
 	typedef struct sectorsize_type_
@@ -68,17 +68,9 @@
 		char * name;
 
 	}sectorsize_type;
-
-
 	
 	#define TWOSIDESFLOPPY 0x02
 	#define SIDE_INVERTED 0x04
 	#define SIDE0_FIRST 0x08
 
-
-
-int RAW_libIsValidFormat(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * imgformatcfg);
-int RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,cfgrawfile * imgformatcfg);
-
-
-
+int RAW_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue);

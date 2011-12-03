@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "ensoniq_mirage_loader.h"
 
@@ -86,7 +86,7 @@ int Ensoniq_mirage_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 					if(f==NULL) 
 					{
 						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 					}
 					
 					fseek (f , 0 , SEEK_END);
@@ -98,24 +98,24 @@ int Ensoniq_mirage_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 					if(filesize%((5*1024) + (1*512)) )
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non Ensoniq mirage file - bad file size !");
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 
 					floppycontext->hxc_printf(MSG_DEBUG,"Ensoniq mirage file !");
 					free(filepath);
-					return LOADER_ISVALID;
+					return HXCFE_VALIDFILE;
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non Ensoniq mirage file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 	
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 int Ensoniq_mirage_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -140,7 +140,7 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	fseek (f , 0 , SEEK_END); 
@@ -210,14 +210,41 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
 			fclose(f);
-			return LOADER_NOERROR;
+			return HXCFE_NOERROR;
 
 		}
 		fclose(f);
-		return LOADER_FILECORRUPT;
+		return HXCFE_FILECORRUPTED;
 	}
 	
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	fclose(f);
-	return LOADER_BADFILE;
+	return HXCFE_BADFILE;
 }
+
+int Ensoniq_mirage_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="ENSONIQ_EDM";
+	const char plug_desc[]="Ensoniq mirage EDM Loader";
+	const char plug_ext[]="edm";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	Ensoniq_mirage_libIsValidDiskFile,
+		(LOADDISKFILE)		Ensoniq_mirage_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	Ensoniq_mirage_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
+

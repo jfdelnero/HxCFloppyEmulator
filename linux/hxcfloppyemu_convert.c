@@ -38,41 +38,10 @@
 #include <time.h>
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
-#include "floppy_loader.h"
-
-#include "mfm_file_writer.h"
-#include "afi_file_writer.h"
-#include "hfe_file_writer.h"
-#include "raw_file_writer.h"
-#include "cpcdsk_file_writer.h"
-
-
-
-//#include "win32_api.h"
-
-
-
-HXCFLOPPYEMULATOR * flopemu;
-
-#define NB_ENABLE 1
-#define NB_DISABLE 0
-
-
-enum
-{
-    TYPE_HFE = 1,
-    TYPE_AFI,
-    TYPE_CPCDSK,
-    TYPE_RAW,
-    TYPE_MFM,
-};
-
-
 
 int CUI_affiche(int MSGTYPE,char * chaine, ...)
 {
-	//if(MSGTYPE!=MSG_DEBUG)
+	if(MSGTYPE!=MSG_DEBUG)
 	{
 		va_list marker;
 		va_start( marker, chaine );     
@@ -85,32 +54,31 @@ int CUI_affiche(int MSGTYPE,char * chaine, ...)
     return 0;
 }
 
-int gettype(char * str_type)
-{
-	
+char * gettype(char * str_type)
+{	
 	if(!strcmp(str_type,"-HFE"))
 	{
-		return TYPE_HFE;	
+		return PLUGIN_HXC_HFE;	
 	}
 
 	if(!strcmp(str_type,"-AFI"))
 	{
-		return TYPE_AFI;	
+		return PLUGIN_HXC_AFI;	
 	}
 
 	if(!strcmp(str_type,"-CPCDSK"))
 	{
-		return TYPE_CPCDSK;	
+		return PLUGIN_AMSTRADCPC_DSK;	
 	}
 
 	if(!strcmp(str_type,"-RAW"))
 	{
-		return TYPE_RAW;	
+		return PLUGIN_RAW_LOADER;	
 	}
 
 	if(!strcmp(str_type,"-MFM"))
 	{
-		return TYPE_MFM;
+		return PLUGIN_HXC_MFM;
 	}
 
 	return 0;
@@ -120,7 +88,8 @@ int gettype(char * str_type)
 
 void get_filename(char * path,char * filename)
 {
-int i,done;
+	int i,done;
+	
 	i=strlen(path);
 	done=0;
 	while(i && !done)
@@ -132,8 +101,6 @@ int i,done;
 			done=1;
 			i++;
 		}
-		
-
 	}
 
 	sprintf(filename,"%s",&path[i]);
@@ -146,7 +113,7 @@ int i,done;
 			filename[i]='_';
 		}
 
-	i++;
+		i++;
 	}
 	
 	return;
@@ -154,93 +121,58 @@ int i,done;
 
 int main(int argc, char* argv[])
 {
-	FLOPPY * thefloppydisk;
 	int ret;
-	unsigned char old_trackpos,trackpos;
-	int packetsize;
-	int select_line;
-	int stop,output_file_type;
-	char c;
 	char filename[512];
+	char * output_file_type;
 
+	FLOPPY * floppydisk;
+	HXCFLOPPYEMULATOR* hxcfe;
+
+	hxcfe=hxcfe_init();
+	hxcfe_set_outputfunc(hxcfe,&CUI_affiche);
 
 	printf("HxC Floppy Emulator : Floppy image file converter\n");
 	printf("Copyright (C) 2006-2011 Jean-Francois DEL NERO\n");
-    	printf("This program comes with ABSOLUTELY NO WARRANTY\n");
-    	printf("This is free software, and you are welcome to redistribute it\n");
-    	printf("under certain conditions;\n\n");
-
-
-	flopemu=(HXCFLOPPYEMULATOR*)malloc(sizeof(HXCFLOPPYEMULATOR));	
-	flopemu->hxc_printf=&CUI_affiche;
-	
-	initHxCFloppyEmulator(flopemu);
-
+   	printf("This program comes with ABSOLUTELY NO WARRANTY\n");
+   	printf("This is free software, and you are welcome to redistribute it\n");
+   	printf("under certain conditions;\n\n");
 		
 	if(argv[1] && argv[2])
 	{
-
 		output_file_type=gettype(argv[2]);
-			
 		if(output_file_type)
 		{
-			thefloppydisk=(FLOPPY *)malloc(sizeof(FLOPPY));
-			memset(thefloppydisk,0,sizeof(FLOPPY));
-
-			ret=floppy_load(flopemu,thefloppydisk,argv[1]);
-
-
-			if(ret!=LOADER_NOERROR)
+			hxcfe_select_container(hxcfe,"AUTOSELECT");
+			floppydisk=hxcfe_floppy_load(hxcfe,argv[1],&ret);
+			
+			if(ret!=HXCFE_NOERROR || !floppydisk)
 			{
 				switch(ret)
 				{
-					case LOADER_UNSUPPORTEDFILE:
+					case HXCFE_UNSUPPORTEDFILE:
 						printf("Load error!: Image file not yet supported!\n");
 					break;
-					case LOADER_FILECORRUPT:
+					case HXCFE_FILECORRUPTED:
 						printf("Load error!: File corrupted ? Read error ?\n");
 					break;
-					case LOADER_ACCESSERROR:
+					case HXCFE_ACCESSERROR:
 						printf("Load error!:  Read file error!\n");
 					break;
 					default:
 						printf("Load error! error %d\n",ret);
 					break;
 				}
-				free(thefloppydisk);
 			}
 			else
 			{
-
 				get_filename(argv[1],filename);
+				strcat(filename,".hfe");
+				
+				hxcfe_select_container(hxcfe,output_file_type);
 
-				switch(output_file_type)
-				{
-					case TYPE_HFE:
-						strcat(filename,".hfe");
-						write_HFE_file(flopemu,thefloppydisk,filename,-1,0);
-					break;
-					case TYPE_AFI:
-						strcat(filename,".afi");
-						write_AFI_file(flopemu,thefloppydisk,filename);
-					break;
-					case TYPE_CPCDSK:
-						strcat(filename,".dsk");
-						write_CPCDSK_file(flopemu,thefloppydisk,filename);
-					break;
-					case TYPE_RAW:
-						strcat(filename,".img");
-						write_RAW_file(flopemu,thefloppydisk,filename);
-					break;
-					case TYPE_MFM:
-						strcat(filename,".mfm");
-						write_MFM_file(flopemu,thefloppydisk,filename);
-					break;
-				}
-
-				//
-  
-			
+				hxcfe_floppy_export(hxcfe,floppydisk,filename);
+				
+				hxcfe_floppy_unload(hxcfe,floppydisk);
 			}
 		}
 		else
@@ -253,8 +185,8 @@ int main(int argc, char* argv[])
 		printf("Syntax: %s [image-file] [-HFE/-AFI/-CPCDSK/-RAW/-MFM]\n",argv[0]);
 	}
 
-
-	free(flopemu);
+	hxcfe_deinit(hxcfe);
+	
 	return 0;
 }
 

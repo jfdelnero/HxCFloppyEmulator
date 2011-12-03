@@ -50,12 +50,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "fat12floppy_loader.h"
 
@@ -65,7 +65,6 @@
 #include "fat12formats.h"
 
 #include "fatlib.h"
-
 
 
 int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
@@ -102,13 +101,13 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfi
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY file ! (Dir , %s)",configlist[i].dirext);
 						free(filepath);
-						return LOADER_ISVALID;
+						return HXCFE_VALIDFILE;
 					}
 					else
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non FAT12FLOPPY file !");
 						free(filepath);
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 				}
 			}		
@@ -135,20 +134,20 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfi
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY file ! (File , %s)",configlist[i].dirext);
 						free(filepath);
-						return LOADER_ISVALID;
+						return HXCFE_VALIDFILE;
 					}
 					else
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non FAT12FLOPPY file !");
 						free(filepath);
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 				}
 			}
 		}
 	}
 	
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -271,14 +270,14 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 		{
 			if(ScanFileAndAddToFAT(floppycontext,imgfile,"*.*",&flatimg[fatposition],&flatimg[rootposition],&flatimg[dataposition],0,&fatconfig,numberofcluster))
 			{
-				return LOADER_BADFILE;
+				return HXCFE_BADFILE;
 			}
 		}
 		else
 		{
 			if(ScanFileAndAddToFAT(floppycontext,imgfile,0    ,&flatimg[fatposition],&flatimg[rootposition],&flatimg[dataposition],0,&fatconfig,numberofcluster))
 			{
-				return LOADER_BADFILE;
+				return HXCFE_BADFILE;
 			}
 		}
 
@@ -301,7 +300,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 	}
 	else
 	{
-		return LOADER_INTERNALERROR;
+		return HXCFE_INTERNALERROR;
 	}
 	
 	sectorsize=fatconfig.sectorsize;
@@ -325,7 +324,32 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 	free(flatimg);
 			
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-	return LOADER_NOERROR;
+	return HXCFE_NOERROR;
 }
 	
+int FAT12FLOPPY_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="FAT12FLOPPY";
+	const char plug_desc[]="FAT12/MS DOS Loader";
+	const char plug_ext[]="fat";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	FAT12FLOPPY_libIsValidDiskFile,
+		(LOADDISKFILE)		FAT12FLOPPY_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	FAT12FLOPPY_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
 

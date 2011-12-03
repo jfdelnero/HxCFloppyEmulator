@@ -57,8 +57,6 @@
 #include "Dialog_CreateFileSystem.h"
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
-#include "floppy_loader.h"
 #include "./usb_floppyemulator/usb_hxcfloppyemulator.h"
 
 #include "../../common/plugins/amigadosfs_loader/amigadosfs_loader.h"
@@ -224,7 +222,7 @@ BOOL CALLBACK DialogCreateFileSystem(
 
 						if(thefloppydisk)
 						{
-							floppy_unload(flopemu,thefloppydisk);
+							hxcfe_floppy_unload(flopemu,thefloppydisk);
 						}
 						else
 						{
@@ -245,30 +243,30 @@ BOOL CALLBACK DialogCreateFileSystem(
 
 							if(fs_type_list[i].format_code)
 							{
-								ret=FAT12FLOPPY_libLoad_DiskFile(flopemu,thefloppydisk,foldername,fs_type_list[i].format_code);
+								//ret=FAT12FLOPPY_libLoad_DiskFile(flopemu,thefloppydisk,foldername,fs_type_list[i].format_code);
 							}
 							else
 							{
-								ret=AMIGADOSFSDK_libLoad_DiskFile(flopemu,thefloppydisk,foldername,0);
+								//ret=AMIGADOSFSDK_libLoad_DiskFile(flopemu,thefloppydisk,foldername,0);
 							}
 
 						}
 						else
 						{
-							ret=LOADER_UNSUPPORTEDFILE;
+							ret=HXCFE_UNSUPPORTEDFILE;
 						}
 
-						if(ret!=LOADER_NOERROR)
+						if(ret!=HXCFE_NOERROR)
 						{
 							switch(ret)
 							{
-								case LOADER_UNSUPPORTEDFILE:
+								case HXCFE_UNSUPPORTEDFILE:
 									sprintf(demo->buffertext,"      Load error!\n\n\n\n    Image file not\n    yet supported!");
 									break;
-								case LOADER_FILECORRUPT:
+								case HXCFE_FILECORRUPTED:
 									sprintf(demo->buffertext,"      Load error!\n\n\n\n   File corrupted ?\n    Read error ?");
 									break;
-								case LOADER_ACCESSERROR:
+								case HXCFE_ACCESSERROR:
 									sprintf(demo->buffertext,"      Load error!\n  Read file error!");
 									break;
 								default:

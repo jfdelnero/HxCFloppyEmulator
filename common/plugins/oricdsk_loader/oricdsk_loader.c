@@ -49,17 +49,18 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "oricdsk_loader.h"
 #include "oricdsk_format.h"
 
 #include "../common/os_api.h"
+
 
 int OricDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
@@ -84,7 +85,7 @@ int OricDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					f=fopen(imgfile,"rb");
 					if(f==NULL) 
 					{
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 					}
 					fread(fileheader,10,1,f);
 					fclose(f);
@@ -95,12 +96,12 @@ int OricDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					    !strcmp(fileheader,"ORICDISK"))
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"OricDSK file !");
-						return LOADER_ISVALID;
+						return HXCFE_VALIDFILE;
 					}
 					else
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non OricDSK file (bad header)!");
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 
 				}
@@ -108,13 +109,13 @@ int OricDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non OricDSK file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -278,7 +279,7 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	fseek (f , 0 , SEEK_END); 
@@ -321,7 +322,7 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 			}
 			else
 			{
-				return LOADER_BADFILE;
+				return HXCFE_BADFILE;
 			}
 		}
 		
@@ -468,13 +469,38 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		fclose(f);
 		
-		return LOADER_NOERROR;
+		return HXCFE_NOERROR;
 		
 	}
 
 	fclose(f);
 	
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
-	return LOADER_BADFILE;
+	return HXCFE_BADFILE;
 }
 
+int OricDSK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="ORIC_DSK";
+	const char plug_desc[]="ORIC DSK Loader";
+	const char plug_ext[]="dsk";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	OricDSK_libIsValidDiskFile,
+		(LOADDISKFILE)		OricDSK_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	OricDSK_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}

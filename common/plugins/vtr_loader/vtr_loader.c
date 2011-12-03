@@ -48,12 +48,12 @@
 #include <stdio.h>
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "vtr_loader.h"
-#include "vtrucco_file_writer.h"
+#include "vtr_format.h"
 
 #include "../common/os_api.h"
 
@@ -78,7 +78,7 @@ int VTR_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			f=fopen(imgfile,"rb");
 			if(f==NULL) 
 			{
-				return LOADER_ACCESSERROR;
+				return HXCFE_ACCESSERROR;
 			}
 			fread(&header,sizeof(header),1,f);
 			fclose(f);
@@ -86,17 +86,17 @@ int VTR_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			if( !strncmp(header.HEADERSIGNATURE,"VTrucco",7))
 			{
 				floppycontext->hxc_printf(MSG_DEBUG,"VTrucco file !");
-				return LOADER_ISVALID;
+				return HXCFE_VALIDFILE;
 			}
 			else
 			{
 				floppycontext->hxc_printf(MSG_DEBUG,"non VTrucco file !");
-				return LOADER_BADFILE;
+				return HXCFE_BADFILE;
 			}				
 		}
 	}
 	
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 int VTR_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -118,7 +118,7 @@ int VTR_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	fread(&header,sizeof(header),1,f);
@@ -225,11 +225,39 @@ int VTR_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		free(trackoffsetlist);
 	
 		fclose(f);
-		return LOADER_NOERROR;
+		return HXCFE_NOERROR;
 	}	
 	
 	fclose(f);	
 	floppycontext->hxc_printf(MSG_ERROR,"bad header");
-	return LOADER_BADFILE;
+	return HXCFE_BADFILE;
+}
+
+int VTR_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename);
+
+int VTR_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="VTR_IMG";
+	const char plug_desc[]="VTR IMG Loader";
+	const char plug_ext[]="vtr";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	VTR_libIsValidDiskFile,
+		(LOADDISKFILE)		VTR_libLoad_DiskFile,
+		(WRITEDISKFILE)		VTR_libWrite_DiskFile,
+		(GETPLUGININFOS)	VTR_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
 }
 

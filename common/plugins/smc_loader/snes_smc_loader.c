@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "snes_smc_loader.h"
 #include "../fat12floppy_loader/fat12floppy_loader.h"
@@ -124,14 +124,14 @@ int snes_smc_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 						floppycontext->hxc_printf(MSG_DEBUG,"SMC/SMD file !");
 						free(fileheader);
 						fclose(f);
-						return LOADER_ISVALID;
+						return HXCFE_VALIDFILE;
 					}
 					else
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non SMC/SMD file !");
 						free(fileheader);
 						fclose(f);
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 					
 				}
@@ -169,26 +169,26 @@ int snes_smc_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 						floppycontext->hxc_printf(MSG_DEBUG,"SMC/SMD file !");
 						free(fileheader);
 						fclose(f);
-						return LOADER_ISVALID;
+						return HXCFE_VALIDFILE;
 					}
 					else
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non SMC/SMD file !");
 						free(fileheader);
 						fclose(f);
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 				}
 				
 			}
 			fclose(f);
-			return LOADER_INTERNALERROR;
+			return HXCFE_INTERNALERROR;
 		}
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 		
 	}
 	
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -200,4 +200,29 @@ int snes_smc_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	return FAT12FLOPPY_libLoad_DiskFile(floppycontext,floppydisk,imgfile,".fat4572");
 }
 	
+int snes_smc_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="SNES_SMC";
+	const char plug_desc[]="Super famicom SMC Loader";
+	const char plug_ext[]="smc";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	snes_smc_libIsValidDiskFile,
+		(LOADDISKFILE)		snes_smc_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	snes_smc_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
 

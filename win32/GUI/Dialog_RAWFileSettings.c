@@ -55,8 +55,6 @@
 #include "Dialog_RAWFileSettings.h"
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
-#include "floppy_loader.h"
 #include "./usb_floppyemulator/usb_hxcfloppyemulator.h"
 
 
@@ -69,6 +67,7 @@
 extern HWINTERFACE * hwif;
 extern guicontext * demo;
 extern HXCFLOPPYEMULATOR * flopemu;
+extern FLOPPY * thefloppydisk;
 
 cfgrawfile rawfileconfig;
 
@@ -76,12 +75,12 @@ cfgrawfile rawfileconfig;
 
 	track_type track_type_list[]=
 	{
-		{ FM_TRACK_TYPE,"FM"},
-		{ FMIBM_TRACK_TYPE,"IBM FM"},
-		{ MFM_TRACK_TYPE,"MFM"},
-		{ MFMIBM_TRACK_TYPE,"IBM MFM"},
+		{ FM_TRACK_TYPE,"FM",ISOFORMAT_SD},
+		{ FMIBM_TRACK_TYPE,"IBM FM",IBMFORMAT_SD},
+		{ MFM_TRACK_TYPE,"MFM",ISOFORMAT_DD},
+		{ MFMIBM_TRACK_TYPE,"IBM MFM",IBMFORMAT_DD},
 		//{ GCR_TRACK_TYPE,"GCR"},
-		{ -1,""}
+		{ -1,"",0}
 	};
 
 	sectorsize_type sectorsize_type_list[]=
@@ -96,7 +95,6 @@ cfgrawfile rawfileconfig;
 		{ 16384,"16384"},		
 		{ -1,""}			
 	};
-
 
 
 ////////////////////////////////////////////////////////////////////////// 
@@ -125,33 +123,34 @@ BOOL CALLBACK DialogRAWFileSettings(
 	switch (message) 
 	{
 		
-	case WM_COMMAND:
-		
-		switch (wmEvent)
-		{
-		case BN_CLICKED:
-			break;
+		case WM_COMMAND:
 			
-		case EN_CHANGE: //-> appellé a chaque modification d'une boite edit
-			break;
-		}
+			switch (wmEvent)
+			{
+				case BN_CLICKED:
+					break;
+					
+				case EN_CHANGE: //-> appellé a chaque modification d'une boite edit
+					break;
+			}
+
 		switch (wmId)
 		{
 			
 
-		case ID_MAKEEMPTYFLOPPY:
-		case IDLOADRAWFILE:
-			sprintf(filename,"*.*");
-			i=0;
+			case ID_MAKEEMPTYFLOPPY:
+			case IDLOADRAWFILE:
+				sprintf(filename,"*.*");
+				i=0;
 
 
-			if(wmId==IDLOADRAWFILE)
-			{
-				if(!fileselector(hwndDlg,0,0,filename,"Load image file","All raw disk image types\0*.*\0\0","*.*",0,1))
+				if(wmId==IDLOADRAWFILE)
 				{
-						break;
+					if(!fileselector(hwndDlg,0,0,filename,"Load image file","All raw disk image types\0*.*\0\0","*.*",0,1))
+					{
+							break;
+					}
 				}
-			}
 
 		
 				rawfileconfig.numberoftrack=GetDlgItemInt(hwndDlg,IDC_NUMBEROFTRACK,NULL,0);
@@ -210,16 +209,23 @@ BOOL CALLBACK DialogRAWFileSettings(
 				}				
 				sprintf(demo->buffertext,"    Loading floppy   ");
 		
-				sprintf(demo->bufferfilename,"");	
+				sprintf(demo->bufferfilename,"");
+
+				if(thefloppydisk)
+				{
+			
+					hxcfe_floppy_unload(flopemu,thefloppydisk);
+					thefloppydisk=0;
+				}
+			
 				if(wmId==IDLOADRAWFILE)
 				{
-					loadfloppy(filename,0,&rawfileconfig);
+					//loadfloppy(filename,0,&rawfileconfig);
 				}
 				else
 				{
-					loadfloppy(0,0,&rawfileconfig);
+					loadrawfile(flopemu,&rawfileconfig);
 				}
-
 
 				nbinstance=0;
 				KillTimer(hwndDlg,34);
@@ -324,7 +330,6 @@ BOOL CALLBACK DialogRAWFileSettings(
 							fread(&rawfileconfig,sizeof(cfgrawfile),1,fpf_file);
 							fclose(fpf_file);
 
-
 							SetDlgItemInt(hwndDlg,IDC_NUMBEROFTRACK,rawfileconfig.numberoftrack,0);
 							SetDlgItemInt(hwndDlg,IDC_RPM,rawfileconfig.rpm,0);
 							SetDlgItemInt(hwndDlg,IDC_BITRATE,rawfileconfig.bitrate,0);
@@ -411,7 +416,7 @@ BOOL CALLBACK DialogRAWFileSettings(
 			sectorsize=SendDlgItemMessage(hwndDlg, IDC_SECTORSIZE, CB_GETCURSEL, 0, 0);
 			totalsize=totalsector*(128<<sectorsize);
 
-			if(RAW_libIsValidFormat(flopemu,&temp_rawfileconfig)==LOADER_ISVALID &&
+			if(
 			   (temp_rawfileconfig.bitrate<=1000000) && (temp_rawfileconfig.bitrate>=50000) &&
 			   (temp_rawfileconfig.rpm<=600) && (temp_rawfileconfig.rpm>=50) &&
 			   (GetDlgItemInt(hwndDlg,IDC_NUMBEROFTRACK,NULL,0)<=256) && (GetDlgItemInt(hwndDlg,IDC_NUMBEROFTRACK,NULL,0)>=1) &&

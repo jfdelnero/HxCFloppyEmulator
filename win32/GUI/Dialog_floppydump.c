@@ -55,9 +55,6 @@
 #include "Dialog_config.h"
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
-#include "floppy_loader.h"
-#include "../../../../common/track_generator.h"
 
 #include "./usb_floppyemulator/usb_hxcfloppyemulator.h"
 #include "../../../../common/plugins/raw_loader/raw_loader.h"
@@ -598,7 +595,7 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 					
 			params->flopemu->hxc_printf(MSG_DEBUG,"Done ! %d sectors read, %d bad sector(s), %d bytes read",numberofsector_read,number_of_bad_sector,total_size);
 		
-			loadfloppy("Floppy Dump",params->floppydisk,0);
+			//loadfloppy("Floppy Dump",params->floppydisk,0);
 
 
 			free(tempstr);

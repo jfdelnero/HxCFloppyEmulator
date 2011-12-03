@@ -49,11 +49,11 @@
 
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
-#include "../common/track_generator.h"
+
 #include "oldextadf_loader.h"
 
 #include "../common/os_api.h"
@@ -86,7 +86,7 @@ int OLDEXTADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile
 					if(f==NULL)
 					{
 						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 					}
 
 					fseek (f , 0 , SEEK_END); 
@@ -99,23 +99,23 @@ int OLDEXTADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile
 					if(!strcmp(header,"UAE--ADF"))
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"Extended ADF file (old version)!");
-						return LOADER_ISVALID;
+						return HXCFE_VALIDFILE;
 
 					}
 
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non Old Extended ADF file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -144,7 +144,7 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	fseek (f , 0 , SEEK_END); 
@@ -155,7 +155,7 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Bad file size : %d !",filesize);
 		fclose(f);
-		return LOADER_BADFILE;
+		return HXCFE_BADFILE;
 	}
 	
 
@@ -263,7 +263,32 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 	fclose(f);
 
-	return LOADER_NOERROR;	
+	return HXCFE_NOERROR;	
 }
 
+int OLDEXTADF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="AMIGA_OLDEXTADF";
+	const char plug_desc[]="AMIGA OLD EXTENDED ADF Loader";
+	const char plug_ext[]="adf";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	OLDEXTADF_libIsValidDiskFile,
+		(LOADDISKFILE)		OLDEXTADF_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	OLDEXTADF_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
 

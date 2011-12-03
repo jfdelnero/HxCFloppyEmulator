@@ -49,17 +49,19 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "imd_loader.h"
 #include "imd_format.h"
 
 #include "../common/os_api.h"
+
+
 int IMD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	int pathlen;
@@ -86,7 +88,7 @@ int IMD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					f=fopen(imgfile,"rb");
 					if(f==NULL) 
 					{
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 					}
 					fread(&fileheader,4,1,f);
 					fileheader[4]=0;
@@ -96,26 +98,26 @@ int IMD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"IMD file !");
 						free(filepath);
-						return LOADER_ISVALID;
+						return HXCFE_VALIDFILE;
 					}
 					else
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non IMD file !");
 						free(filepath);
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non IMD file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -145,7 +147,7 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 
 	fread(&fileheader,sizeof(fileheader),1,f);
@@ -477,11 +479,38 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		}			
 	
 		fclose(f);
-		return LOADER_NOERROR;
+		return HXCFE_NOERROR;
 	}	
 	
 	fclose(f);	
 	floppycontext->hxc_printf(MSG_ERROR,"bad header");
-	return LOADER_BADFILE;
+	return HXCFE_BADFILE;
 }
 
+int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename);
+
+int IMD_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="IMD_IMG";
+	const char plug_desc[]="ImageDisk IMD file Loader";
+	const char plug_ext[]="imd";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	IMD_libIsValidDiskFile,
+		(LOADDISKFILE)		IMD_libLoad_DiskFile,
+		(WRITEDISKFILE)		IMD_libWrite_DiskFile,
+		(GETPLUGININFOS)	IMD_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
