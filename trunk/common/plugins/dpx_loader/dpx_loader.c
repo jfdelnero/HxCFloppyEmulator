@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "dpx_loader.h"
 
@@ -86,7 +86,7 @@ int DPX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					if(f==NULL) 
 					{
 						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 					}
 					
 					fseek (f , 0 , SEEK_END);
@@ -99,24 +99,24 @@ int DPX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					if(filesize%((5*1024) + (1*512)) )
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non DPX file - bad file size !");
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 
 					floppycontext->hxc_printf(MSG_DEBUG,"DPX file !");
 					free(filepath);
-					return LOADER_ISVALID;
+					return HXCFE_VALIDFILE;
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non DPX file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 	
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -144,7 +144,7 @@ int DPX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	fseek (f , 0 , SEEK_END); 
@@ -218,14 +218,41 @@ int DPX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
 			fclose(f);
-			return LOADER_NOERROR;
+			return HXCFE_NOERROR;
 
 		}
 		fclose(f);
-		return LOADER_FILECORRUPT;
+		return HXCFE_FILECORRUPTED;
 	}
 	
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	fclose(f);
-	return LOADER_BADFILE;
+	return HXCFE_BADFILE;
 }
+
+int DPX_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="OBERHEIM_DPX";
+	const char plug_desc[]="Oberheim DPX Loader";
+	const char plug_ext[]="dpx";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	DPX_libIsValidDiskFile,
+		(LOADDISKFILE)		DPX_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	DPX_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
+

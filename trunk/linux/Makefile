@@ -32,18 +32,19 @@ DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosf
                   ensoniq_mirage_loader.o sad_loader.o jv3_loader.o stt_loader.o prophet_loader.o teledisk_loader.o td0_lzss.o\
                   emuii_raw_loader.o emuii_loader.o emui_raw_loader.o jvc_loader.o dim_loader.o ti99v9t9_loader.o d81_loader.o  acornadf_loader.o \
                   camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o fdi_loader.o ssd_dsd_loader.o adl_loader.o \
-                  krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o
+                  krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o
 
+DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o
 
 all: $(EXEC)
 
-hxcfloppyemulator_convert:      hxcfloppyemu_convert.o floppy_loader.o floppy_utils.o linux_api.o emuii_track.o crc.o track_generator.o gcr_track.o mfm_file_writer.o hfe_file_writer.o afi_file_writer.o cpcdsk_file_writer.o raw_file_writer.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ)
+hxcfloppyemulator_convert:      hxcfloppyemu_convert.o floppy_loader.o floppy_utils.o linux_api.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ)
 	$(CC) -o $@    $^ $(LDFLAGS) -DFTDILIB
 
-hxcfloppyemulator_d2xx: hxcfloppyemu.o floppy_loader.o floppy_utils.o linux_api.o ftdi_d2xxmode.o emuii_track.o crc.o track_generator.o gcr_track.o mfm_file_writer.o hfe_file_writer.o afi_file_writer.o cpcdsk_file_writer.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(FTDIFLOPPYEMU) libftd2xx.a.0.4.13
+hxcfloppyemulator_d2xx: hxcfloppyemu.o floppy_loader.o floppy_utils.o linux_api.o ftdi_d2xxmode.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(FTDIFLOPPYEMU) libftd2xx.a.0.4.13
 	$(CC) -o $@    $^ $(LDFLAGS)
 
-hxcfloppyemulator:      hxcfloppyemu.o floppy_loader.o floppy_utils.o linux_api.o ftdi_libftdimode.o emuii_track.o crc.o track_generator.o gcr_track.o mfm_file_writer.o hfe_file_writer.o afi_file_writer.o cpcdsk_file_writer.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(FTDIFLOPPYEMU) /usr/local/lib/libftdi.so.1
+hxcfloppyemulator:      hxcfloppyemu.o floppy_loader.o floppy_utils.o linux_api.o ftdi_libftdimode.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(FTDIFLOPPYEMU) /usr/local/lib/libftdi.so.1
 	$(CC) -o $@    $^ $(LDFLAGS) -DFTDILIB
 
 hxcfloppyemu_convert.o: hxcfloppyemu_convert.c
@@ -65,21 +66,6 @@ usb_hxcfloppyemulator.o : ../common/usb_floppyemulator/usb_hxcfloppyemulator.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 variablebitrate.o : ../common/usb_floppyemulator/variablebitrate.c
-	$(CC) -o $@ -c $< $(CFLAGS)
-
-mfm_file_writer.o : ../common/mfm_file_writer.c ../common/mfm_file_writer.h
-	$(CC) -o $@ -c $< $(CFLAGS)
-
-hfe_file_writer.o : ../common/hfe_file_writer.c ../common/hfe_file_writer.h
-	$(CC) -o $@ -c $< $(CFLAGS)
-
-raw_file_writer.o : ../common/raw_file_writer.c ../common/raw_file_writer.h
-	$(CC) -o $@ -c $< $(CFLAGS)
-
-afi_file_writer.o : ../common/afi_file_writer.c ../common/afi_file_writer.h
-	$(CC) -o $@ -c $< $(CFLAGS)
-
-cpcdsk_file_writer.o : ../common/cpcdsk_file_writer.c ../common/cpcdsk_file_writer.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 sector_extractor.o : ../common/sector_extractor.c ../common/sector_extractor.h
@@ -115,9 +101,18 @@ ti99v9t9_loader.o : ../common/plugins/ti99v9t9_loader/ti99v9t9_loader.c ../commo
 imd_loader.o : ../common/plugins/imd_loader/imd_loader.c ../common/plugins/imd_loader/imd_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+imd_writer.o : ../common/plugins/imd_loader/imd_writer.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+	
 hfe_loader.o : ../common/plugins/hfe_loader/hfe_loader.c ../common/plugins/hfe_loader/hfe_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
+	
+hfe_writer.o : ../common/plugins/hfe_loader/hfe_writer.c
+	$(CC) -o $@ -c $< $(CFLAGS)
 
+exthfe_writer.o : ../common/plugins/hfe_loader/exthfe_writer.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+	
 copyqm_loader.o : ../common/plugins/copyqm_loader/copyqm_loader.c  ../common/plugins/copyqm_loader/crctable.c ../common/plugins/copyqm_loader/copyqm_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
@@ -137,6 +132,9 @@ acornadf_loader.o : ../common/plugins/acornadf_loader/acornadf_loader.c ../commo
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 cpcdsk_loader.o : ../common/plugins/cpcdsk_loader/cpcdsk_loader.c ../common/plugins/cpcdsk_loader/cpcdsk_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+cpcdsk_writer.o : ../common/plugins/cpcdsk_loader/cpcdsk_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 msa_loader.o : ../common/plugins/msa_loader/msa_loader.c ../common/plugins/msa_loader/msa_loader.h
@@ -160,6 +158,12 @@ stx_loader.o : ../common/plugins/stx_loader/stx_loader.c ../common/plugins/stx_l
 img_loader.o : ../common/plugins/img_loader/img_loader.c ../common/plugins/img_loader/img_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+raw_loader.o : ../common/plugins/raw_loader/raw_loader.c ../common/plugins/raw_loader/raw_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+raw_writer.o : ../common/plugins/raw_loader/raw_writer.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
 imz_loader.o : ../common/plugins/imz_loader/imz_loader.c ../common/plugins/imz_loader/imz_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
@@ -179,6 +183,9 @@ scl_loader.o : ../common/plugins/scl_loader/scl_loader.c ../common/plugins/scl_l
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 mfm_loader.o : ../common/plugins/mfm_loader/mfm_loader.c ../common/plugins/mfm_loader/mfm_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+mfm_writer.o : ../common/plugins/mfm_loader/mfm_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 svd_loader.o : ../common/plugins/svd_loader/svd_loader.c ../common/plugins/svd_loader/svd_loader.h
@@ -234,6 +241,9 @@ oricdsk_loader.o : ../common/plugins/oricdsk_loader/oricdsk_loader.c ../common/p
 afi_loader.o : ../common/plugins/afi_loader/afi_loader.c ../common/plugins/afi_loader/afi_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+afi_writer.o : ../common/plugins/afi_loader/afi_writer.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
 amigadosfs_loader.o : ../common/plugins/amigadosfs_loader/amigadosfs_loader.c ../common/plugins/amigadosfs_loader/amigadosfs_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
@@ -267,6 +277,9 @@ td0_lzss.o : ../common/plugins/teledisk_loader/td0_lzss.c ../common/plugins/tele
 vtr_loader.o : ../common/plugins/vtr_loader/vtr_loader.c ../common/plugins/vtr_loader/vtr_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+vtr_writer.o : ../common/plugins/vtr_loader/vtr_writer.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+	
 vdk_loader.o : ../common/plugins/vdk_loader/vdk_loader.c ../common/plugins/vdk_loader/vdk_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 

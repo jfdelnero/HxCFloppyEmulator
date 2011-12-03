@@ -1,1 +1,2 @@
-int loadfloppy(char *filename,FLOPPY * floppydisk,cfgrawfile * cfgrawfile);
+int loadfloppy(char *filename);
+int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc);

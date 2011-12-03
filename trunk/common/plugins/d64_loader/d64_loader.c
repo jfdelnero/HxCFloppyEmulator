@@ -48,7 +48,7 @@
 #include <stdio.h>
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
@@ -65,7 +65,6 @@ typedef struct d64trackpos_
 	int bitrate;
 	int fileoffset;
 }d64trackpos;
-
 
 
 int D64_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
@@ -88,19 +87,19 @@ int D64_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"D64 file !");
 					free(filepath);
-					return LOADER_ISVALID;
+					return HXCFE_VALIDFILE;
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non D64 file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -129,7 +128,7 @@ int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 
 	fseek (f , 0 , SEEK_END);
@@ -179,7 +178,7 @@ int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			// not supported !
 			floppycontext->hxc_printf(MSG_ERROR,"Unsupported D64 file size ! (%d Bytes)",filesize);
 			fclose(f);
-			return LOADER_UNSUPPORTEDFILE;
+			return HXCFE_UNSUPPORTEDFILE;
 			
 			break;
 	}
@@ -300,5 +299,31 @@ int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
 	fclose(f);
-	return LOADER_NOERROR;
+	return HXCFE_NOERROR;
+}
+
+int D64_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="C64_D64";
+	const char plug_desc[]="C64 D64 file image loader";
+	const char plug_ext[]="d64";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	D64_libIsValidDiskFile,
+		(LOADDISKFILE)		D64_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	D64_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
 }

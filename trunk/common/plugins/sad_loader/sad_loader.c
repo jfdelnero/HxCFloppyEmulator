@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "sad_loader.h"
 #include "sad_fileformat.h"
@@ -79,7 +79,7 @@ int SAD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			if(f==NULL) 
 			{
 				floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-				return LOADER_ACCESSERROR;
+				return HXCFE_ACCESSERROR;
 			}
 
 			fread(&sadh,sizeof(SAD_HEADER),1,f);
@@ -89,19 +89,19 @@ int SAD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			if(!strncmp(sadh.abSignature,SAD_SIGNATURE,sizeof SAD_SIGNATURE - 1))
 			{
 				floppycontext->hxc_printf(MSG_DEBUG,"SAD file !");
-				return LOADER_ISVALID;
+				return HXCFE_VALIDFILE;
 
 			}
 			else
 			{
 				floppycontext->hxc_printf(MSG_DEBUG,"non SAD file !");
-				return LOADER_BADFILE;
+				return HXCFE_BADFILE;
 			}
 			
 		}
 	}
 	
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -125,7 +125,7 @@ int SAD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	fread(&sadh,sizeof(SAD_HEADER),1,f);
@@ -133,7 +133,7 @@ int SAD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	{
 		fclose(f);
 		floppycontext->hxc_printf(MSG_DEBUG,"non SAD file !");
-		return LOADER_BADFILE;
+		return HXCFE_BADFILE;
 	}
 
 	floppydisk->floppyNumberOfTrack=sadh.bTracks;
@@ -176,5 +176,32 @@ int SAD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
 	fclose(f);
-	return LOADER_NOERROR;
+	return HXCFE_NOERROR;
 }
+
+int SAD_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="SAMCOUPE_SAD";
+	const char plug_desc[]="SAM COUPE SAD Loader";
+	const char plug_ext[]="sad";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	SAD_libIsValidDiskFile,
+		(LOADDISKFILE)		SAD_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	SAD_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
+

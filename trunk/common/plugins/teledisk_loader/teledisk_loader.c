@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "teledisk_loader.h"
 
@@ -81,7 +81,7 @@ int TeleDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			if(f==NULL) 
 			{
 				floppycontext->hxc_printf(MSG_ERROR,"Cannot open the file!");
-				return LOADER_ACCESSERROR;
+				return HXCFE_ACCESSERROR;
 			}
 
 			memset(&td_header,0,sizeof(td_header));
@@ -94,7 +94,7 @@ int TeleDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"bad header tag !");
 					fclose(f);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 
 				CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0xA097,0x0000);
@@ -108,21 +108,21 @@ int TeleDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"bad header crc !");
 					fclose(f);
-     				return LOADER_BADFILE;
+     				return HXCFE_BADFILE;
 				}
 
 				floppycontext->hxc_printf(MSG_DEBUG,"it's a Tele disk file!");
 				fclose(f);
-				return LOADER_ISVALID;
+				return HXCFE_VALIDFILE;
 			}
 	
 			floppycontext->hxc_printf(MSG_DEBUG,"bad header tag !");
 			fclose(f);
-     		return LOADER_BADFILE;
+     		return HXCFE_BADFILE;
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -255,7 +255,7 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 
 	fseek(f,0,SEEK_END);
@@ -264,7 +264,7 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"0 byte file !");
 		fclose(f);
-		return LOADER_BADFILE;
+		return HXCFE_BADFILE;
 	}
 	fseek(f,0,SEEK_SET);
 
@@ -274,7 +274,7 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Malloc error !");
 		fclose(f);
-		return LOADER_INTERNALERROR;
+		return HXCFE_INTERNALERROR;
 	}
 	memset(fileimage,0,filesize+512);
 	fread(fileimage,filesize,1,f);
@@ -288,7 +288,7 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"bad header tag !");
 		free(fileimage);
-		return LOADER_BADFILE;
+		return HXCFE_BADFILE;
 	}
 
 	CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0xA097,0x0000);
@@ -302,7 +302,7 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"bad header crc !");
 		free(fileimage);
-		return LOADER_BADFILE;
+		return HXCFE_BADFILE;
 	}
 
 	floppycontext->hxc_printf(MSG_INFO_1,"Teledisk version : %d",td_header->TDVer);
@@ -310,7 +310,7 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Unsupported version !");
 		free(fileimage);
-		return LOADER_BADFILE;
+		return HXCFE_BADFILE;
 	}
 
 	Compress=0;
@@ -565,8 +565,32 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 
 	free(fileimage);
 		
-	return LOADER_NOERROR;
+	return HXCFE_NOERROR;
 }
 
+int TeleDisk_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
 
+	const char plug_id[]="TELEDISK_TD0";
+	const char plug_desc[]="TELEDISK TD0 Loader";
+	const char plug_ext[]="td0";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	TeleDisk_libIsValidDiskFile,
+		(LOADDISKFILE)		TeleDisk_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	TeleDisk_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
 

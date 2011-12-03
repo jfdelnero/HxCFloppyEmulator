@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------------//
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
-// File : trd_DiskFile.c
+// File : trd_loader.c
 // Contains: IMG floppy image loader and plugins interfaces
 //
 // Written by:	DEL NERO Jean Francois
@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "trd_loader.h"
 
@@ -80,19 +80,19 @@ int TRD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"TRD file !");
 					free(filepath);
-					return LOADER_ISVALID;
+					return HXCFE_VALIDFILE;
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non TRD file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -120,7 +120,7 @@ int TRD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	fseek (f , 0 , SEEK_END); 
@@ -173,7 +173,7 @@ int TRD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				default:
 					floppycontext->hxc_printf(MSG_ERROR,"Unsupported TRD file size ! (%d Bytes)",filesize);
 					fclose(f);
-					return LOADER_UNSUPPORTEDFILE;
+					return HXCFE_UNSUPPORTEDFILE;
 					break;
 			}
 
@@ -214,7 +214,7 @@ int TRD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					// not supported !
 					floppycontext->hxc_printf(MSG_ERROR,"Unsupported TRD file size ! (%d Bytes)",filesize);
 					fclose(f);
-					return LOADER_UNSUPPORTEDFILE;
+					return HXCFE_UNSUPPORTEDFILE;
 					break;
 			}
 			break;
@@ -258,7 +258,32 @@ int TRD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 	fclose(f);
-	return LOADER_NOERROR;
+	return HXCFE_NOERROR;
 }
 			
 
+int TRD_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="ZXSPECTRUM_TRD";
+	const char plug_desc[]="Zx Spectrum TRD Loader";
+	const char plug_ext[]="trd";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	TRD_libIsValidDiskFile,
+		(LOADDISKFILE)		TRD_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	TRD_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}

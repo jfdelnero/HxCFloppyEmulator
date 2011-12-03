@@ -25,10 +25,4 @@
 //
 */
 
-int OLDEXTADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile);
-int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters);
-
-
-
-
-
+int OLDEXTADF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue);

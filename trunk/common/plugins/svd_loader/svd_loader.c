@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "svd_loader.h"
 
@@ -94,38 +94,38 @@ int SVD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 						if (sscanf(linebuffer,"%d.%d",&major,&minor) != 2) 
 						{
 							floppycontext->hxc_printf(MSG_DEBUG,"Bad code version !");
-							return(LOADER_BADFILE);
+							return(HXCFE_BADFILE);
 						}
 					
 						if((major==2 && minor==0) ||(major==1 && minor==2) ||(major==1 && minor==5))
 						{
 							free(filepath);
-							return LOADER_ISVALID;
+							return HXCFE_VALIDFILE;
 						}
 						else
 						{
 							floppycontext->hxc_printf(MSG_DEBUG,"Bad code version !");
 							free(filepath);
-							return LOADER_BADFILE;
+							return HXCFE_BADFILE;
 						}
 					}
 					
 					floppycontext->hxc_printf(MSG_DEBUG,"Access error !");
 					free(filepath);
-					return LOADER_ACCESSERROR;
+					return HXCFE_ACCESSERROR;
 					
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non SVD file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 	
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -166,7 +166,7 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	fseek (f , 0 , SEEK_END); 
@@ -178,33 +178,33 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if (sscanf(linebuffer,"%d.%d",&major,&minor) != 2) 
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"Bad code version !");
-		return(LOADER_BADFILE);
+		return(HXCFE_BADFILE);
 	}
 
 	// number of sector per track
 	fgets(linebuffer,sizeof(linebuffer),f);					
 	if (sscanf(linebuffer,"%d",&sectorpertrack) != 1) 
-		return(LOADER_BADFILE);
+		return(HXCFE_BADFILE);
 	
 	// number of tracks
 	fgets(linebuffer,sizeof(linebuffer),f);					
 	if (sscanf(linebuffer,"%d",&numberoftrack) != 1) 
-		return(LOADER_BADFILE);
+		return(HXCFE_BADFILE);
 	
 	// number of sides
 	fgets(linebuffer,sizeof(linebuffer),f);					
 	if (sscanf(linebuffer,"%d",&numberofside) != 1) 
-		return(LOADER_BADFILE);
+		return(HXCFE_BADFILE);
 
 	// sector size
 	fgets(linebuffer,sizeof(linebuffer),f);					
 	if (sscanf(linebuffer,"%d",&sectsize) != 1) 
-		return(LOADER_BADFILE);
+		return(HXCFE_BADFILE);
 
 	// write protect
 	fgets(linebuffer,sizeof(linebuffer),f);					
 	if (sscanf(linebuffer,"%d",&wprot) != 1) 
-		return(LOADER_BADFILE);
+		return(HXCFE_BADFILE);
 
 	floppydisk->floppyNumberOfTrack=numberoftrack;
 	floppydisk->floppyNumberOfSide=numberofside;
@@ -363,11 +363,38 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
 		fclose(f);
-		return LOADER_NOERROR;
+		return HXCFE_NOERROR;
 
 	}
 	
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	fclose(f);
-	return LOADER_BADFILE;
+	return HXCFE_BADFILE;
 }
+
+int SVD_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="SVD";
+	const char plug_desc[]="SVD Loader";
+	const char plug_ext[]="svd";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	SVD_libIsValidDiskFile,
+		(LOADDISKFILE)		SVD_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	SVD_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
+

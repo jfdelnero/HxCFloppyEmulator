@@ -245,6 +245,10 @@ SOURCE=..\..\common\plugins\cpcdsk_loader\cpcdsk_loader.c
 
 SOURCE=..\..\common\plugins\cpcdsk_loader\cpcdsk_loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\cpcdsk_loader\cpcdsk_writer.c
+# End Source File
 # End Group
 # Begin Group "IMGPC"
 
@@ -303,11 +307,19 @@ SOURCE=..\..\common\plugins\oricdsk_loader\oricdsk_loader.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\..\common\plugins\mfm_loader\mfm_format.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\common\plugins\mfm_loader\mfm_loader.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\common\plugins\mfm_loader\mfm_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\mfm_loader\mfm_writer.c
 # End Source File
 # End Group
 # Begin Group "MSX"
@@ -381,10 +393,18 @@ SOURCE=..\..\common\plugins\imd_loader\imd_loader.c
 
 SOURCE=..\..\common\plugins\imd_loader\imd_loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\imd_loader\imd_writer.c
+# End Source File
 # End Group
 # Begin Group "HFE"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\hfe_loader\hfe_format.h
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\common\plugins\hfe_loader\hfe_loader.c
@@ -392,6 +412,10 @@ SOURCE=..\..\common\plugins\hfe_loader\hfe_loader.c
 # Begin Source File
 
 SOURCE=..\..\common\plugins\hfe_loader\hfe_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\hfe_loader\hfe_writer.c
 # End Source File
 # End Group
 # Begin Group "AFI"
@@ -477,10 +501,18 @@ SOURCE=..\..\common\plugins\raw_loader\raw_loader.c
 
 SOURCE=..\..\common\plugins\raw_loader\raw_loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\raw_loader\raw_writer.c
+# End Source File
 # End Group
 # Begin Group "VTR"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\plugins\vtr_loader\vtr_format.h
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\common\plugins\vtr_loader\vtr_loader.c
@@ -488,6 +520,10 @@ SOURCE=..\..\common\plugins\vtr_loader\vtr_loader.c
 # Begin Source File
 
 SOURCE=..\..\common\plugins\vtr_loader\vtr_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\plugins\vtr_loader\vtr_writer.c
 # End Source File
 # End Group
 # Begin Group "D88"
@@ -1401,39 +1437,7 @@ SOURCE=..\..\common\libs\libsap\libsap.h
 # End Group
 # Begin Source File
 
-SOURCE=..\..\common\afi_file_writer.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\afi_file_writer.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\cpcdsk_file_writer.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\cpcdsk_file_writer.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\extended_hfe_file_writer.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\extended_hfe_file_writer.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\common\floppy_loader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\hfe_file_writer.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\hfe_file_writer.h
 # End Source File
 # Begin Source File
 
@@ -1445,31 +1449,11 @@ SOURCE=..\..\common\loaders_list.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\mfm_file_writer.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\raw_file_writer.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\raw_file_writer.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\common\sector_extractor.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\common\sector_extractor.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\vtrucco_file_writer.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\vtrucco_file_writer.h
 # End Source File
 # Begin Source File
 

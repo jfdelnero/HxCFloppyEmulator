@@ -30,7 +30,6 @@
 
 //#define DEBUGVB 1
 
-#include "internal_floppy.h"
 #include "hxc_floppy_emulator.h"
 #include "usb_hxcfloppyemulator.h"
 

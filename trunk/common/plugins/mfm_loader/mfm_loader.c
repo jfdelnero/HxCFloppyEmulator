@@ -49,16 +49,16 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "mfm_loader.h"
-#include "mfm_file_writer.h"
-
+#include "mfm_format.h"
 #include "../common/os_api.h"
 
-#include "../common/track_generator.h"
+
+
 
 int MFM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
@@ -86,7 +86,7 @@ int MFM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					f=fopen(imgfile,"rb");
 					if(f==NULL) 
 					{
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 					}
 					fread(&header,sizeof(header),1,f);
 					fclose(f);
@@ -95,26 +95,26 @@ int MFM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"MFM file !");
 						free(filepath);
-						return LOADER_ISVALID;
+						return HXCFE_VALIDFILE;
 					}
 					else
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non MFM file !");
 						free(filepath);
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non MFM file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 int MFM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -133,7 +133,7 @@ int MFM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 
@@ -163,7 +163,7 @@ int MFM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 
 		for(i=0;i<(unsigned int)(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide);i++)
-		{			
+		{
 
 			fseek(f,(header.mfmtracklistoffset)+(i*sizeof(trackdesc)),SEEK_SET);
 			fread(&trackdesc,sizeof(trackdesc),1,f);
@@ -185,16 +185,43 @@ int MFM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			currentcylinder->sides[trackdesc.side_number]=tg_alloctrack(floppydisk->floppyBitRate,UNKNOWN_ENCODING,currentcylinder->floppyRPM,trackdesc.mfmtracksize*8,2500,-2500,0x00);
 			currentside=currentcylinder->sides[trackdesc.side_number];
 			currentside->number_of_sector=floppydisk->floppySectorPerTrack;
-					
-			fread(currentside->databuffer,currentside->tracklen/8,1,f);					
-		}			
-	
+
+			fread(currentside->databuffer,currentside->tracklen/8,1,f);
+		}
+
 		fclose(f);
-		return LOADER_NOERROR;
-	}	
-	
-	fclose(f);	
+		return HXCFE_NOERROR;
+	}
+
+	fclose(f);
 	floppycontext->hxc_printf(MSG_ERROR,"bad header");
-	return LOADER_BADFILE;
+	return HXCFE_BADFILE;
 }
 
+int MFM_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename);
+
+int MFM_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="HXCMFM_IMG";
+	const char plug_desc[]="HXC MFM IMG Loader";
+	const char plug_ext[]="mfm";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	MFM_libIsValidDiskFile,
+		(LOADDISKFILE)		MFM_libLoad_DiskFile,
+		(WRITEDISKFILE)		MFM_libWrite_DiskFile,
+		(GETPLUGININFOS)	MFM_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}

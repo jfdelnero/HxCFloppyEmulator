@@ -48,11 +48,9 @@
 #include <stdio.h>
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
-#include "../common/track_generator.h"
 #include "dms_loader.h"
 
 #include "./libs/xdms/vfile.h"
@@ -62,6 +60,7 @@
 #include "./libs/xdms/xdms-1.3.2/src/crc_csum.h"
 
 #include "../common/os_api.h"
+
 
 int DMS_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
@@ -83,19 +82,19 @@ int DMS_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"DMS file !");
 					free(filepath);
-					return LOADER_ISVALID;
+					return HXCFE_VALIDFILE;
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non DMS file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -124,7 +123,7 @@ int DMS_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"XDMS: Error %d while reading the file!",retxdms);
 		HXC_fclose(fo);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 	
@@ -164,9 +163,35 @@ int DMS_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		
 		floppycontext->hxc_printf(MSG_INFO_1,"DMS Loader : tracks file successfully loaded and encoded!");
 		HXC_fclose(fo);
-		return LOADER_NOERROR;
+		return HXCFE_NOERROR;
 	}
 	
 	floppycontext->hxc_printf(MSG_ERROR,"DMS file access error!");
-	return LOADER_ACCESSERROR;
+	return HXCFE_ACCESSERROR;
+}
+
+int DMS_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="AMIGA_DMS";
+	const char plug_desc[]="AMIGA DMS Loader";
+	const char plug_ext[]="dms";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	DMS_libIsValidDiskFile,
+		(LOADDISKFILE)		DMS_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	DMS_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
 }

@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "vdk_loader.h"
 #include "vdk_format.h"
@@ -93,18 +93,18 @@ int VDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			if(filesize%256)
 			{
 				floppycontext->hxc_printf(MSG_DEBUG,"non VDK file !");
-				return LOADER_BADFILE;
+				return HXCFE_BADFILE;
 			}
 
 			floppycontext->hxc_printf(MSG_DEBUG,"VDK file !");
-			return LOADER_ISVALID;
+			return HXCFE_VALIDFILE;
 		}
 
 		floppycontext->hxc_printf(MSG_DEBUG,"non VDK file !");
-		return LOADER_BADFILE;	
+		return HXCFE_BADFILE;	
 	}
 	
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -127,7 +127,7 @@ int VDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 
 	
@@ -144,7 +144,7 @@ int VDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"non VDK file !");
 		fclose(f);
-		return LOADER_BADFILE;
+		return HXCFE_BADFILE;
 	}
 		
 			
@@ -192,5 +192,32 @@ int VDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
 	fclose(f);
-	return LOADER_NOERROR;
+	return HXCFE_NOERROR;
 }
+
+int VDK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="DRAGON3264_VDK";
+	const char plug_desc[]="DRAGON32 & 64 VDK Loader";
+	const char plug_ext[]="vdk";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	VDK_libIsValidDiskFile,
+		(LOADDISKFILE)		VDK_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	VDK_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
+

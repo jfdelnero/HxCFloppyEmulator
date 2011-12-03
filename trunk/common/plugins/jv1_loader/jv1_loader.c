@@ -49,18 +49,16 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "jv1_loader.h"
 
 #include "../common/os_api.h"
-
-
 
 int JV1_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
@@ -81,7 +79,7 @@ int JV1_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				if(f==NULL) 
 				{
 					floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return LOADER_ACCESSERROR;
+						return HXCFE_ACCESSERROR;
 				}
 					
 				fseek (f , 0 , SEEK_END); 
@@ -97,7 +95,7 @@ int JV1_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"JV1 file !");
 					free(filepath);
-					return LOADER_ISVALID;
+					return HXCFE_VALIDFILE;
 				}
 				else
 				{
@@ -105,18 +103,18 @@ int JV1_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"JV1 file !");
 						free(filepath);
-						return LOADER_ISVALID;
+						return HXCFE_VALIDFILE;
 					}
 
 					floppycontext->hxc_printf(MSG_DEBUG,"non JV1 file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -143,7 +141,7 @@ int JV1_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 
 	fseek (f , 0 , SEEK_END);
@@ -216,12 +214,37 @@ int JV1_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 			fclose(f);
-			return LOADER_NOERROR;
+			return HXCFE_NOERROR;
 	}
 
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	fclose(f);
-	return LOADER_BADFILE;
+	return HXCFE_BADFILE;
 }
 
 
+int JV1_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="TRS80_JV1";
+	const char plug_desc[]="TRS80 JV1 Loader";
+	const char plug_ext[]="jv1";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	JV1_libIsValidDiskFile,
+		(LOADDISKFILE)		JV1_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	JV1_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}

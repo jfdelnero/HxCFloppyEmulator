@@ -13,8 +13,6 @@
 #include "soft_cfg_file.h"
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
-#include "floppy_loader.h"
 #include "./usb_floppyemulator/usb_hxcfloppyemulator.h"
 #include "fileselector.h"
 

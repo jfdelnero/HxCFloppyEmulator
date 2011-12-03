@@ -31,7 +31,7 @@
 #include <time.h>
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "fat12.h"
 #include "fatlib.h"

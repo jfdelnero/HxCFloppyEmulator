@@ -24,8 +24,5 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 */
-int SAP_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile);
-int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters);
 
-
-
+int SAP_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue);

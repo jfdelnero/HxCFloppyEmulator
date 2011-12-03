@@ -33,7 +33,6 @@
 #include "hxc_floppy_emulator.h"
 
 #include "variablebitrate.h"
-#include "internal_floppy.h"
 #include "cpld_opcodes.h"
 
 #define BITRATEBLOCKSIZE 128

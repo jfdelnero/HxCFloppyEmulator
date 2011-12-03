@@ -50,7 +50,7 @@
 #include <time.h>
 
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
@@ -65,6 +65,7 @@
 
 HXCFLOPPYEMULATOR* global_floppycontext;
 extern int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * folder,char * file);
+
 
 int CPCFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
@@ -93,25 +94,25 @@ int CPCFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"CPCFSDK file !");
 						free(filepath);
-						return LOADER_ISVALID;
+						return HXCFE_VALIDFILE;
 					}
 					else
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non CPCFSDK file ! (.cpcfs missing)");
 						free(filepath);
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 				}
 			}
 			else
 			{
 				floppycontext->hxc_printf(MSG_DEBUG,"non CPCFSDK file ! (it's not a directory)");
-				return LOADER_BADFILE;
+				return HXCFE_BADFILE;
 			}
 		}
 		floppycontext->hxc_printf(MSG_DEBUG,"0 byte string ?");
 	}
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 
 
 }
@@ -125,7 +126,32 @@ int ScanCpcFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char 
 
 int CPCFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-		return LOADER_BADFILE;
+		return HXCFE_BADFILE;
 }
 
 
+int CPCFSDK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="CPC_FS";
+	const char plug_desc[]="Amstrad CPC FS Loader";
+	const char plug_ext[]="cpcfs";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	CPCFSDK_libIsValidDiskFile,
+		(LOADDISKFILE)		CPCFSDK_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	CPCFSDK_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}

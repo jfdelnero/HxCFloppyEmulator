@@ -49,12 +49,12 @@
 
 #include "types.h"
 #include "hxc_floppy_emulator.h"
-#include "internal_floppy.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "../common/crc.h"
-#include "../common/track_generator.h"
+
 
 #include "fdi_loader.h"
 #include "fdi_format.h"
@@ -93,28 +93,28 @@ int FDI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 						{
 							floppycontext->hxc_printf(MSG_DEBUG,"FDI file !");
 							free(filepath);
-							return LOADER_ISVALID;
+							return HXCFE_VALIDFILE;
 						}
 
 						floppycontext->hxc_printf(MSG_DEBUG,"non FDI file !");
 						free(filepath);
-						return LOADER_BADFILE;
+						return HXCFE_BADFILE;
 					}
 
 					free(filepath);
-					return LOADER_ACCESSERROR;
+					return HXCFE_ACCESSERROR;
 				}
 				else
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non FDI file !");
 					free(filepath);
-					return LOADER_BADFILE;
+					return HXCFE_BADFILE;
 				}
 			}
 		}
 	}
 
-	return LOADER_BADPARAMETER;
+	return HXCFE_BADPARAMETER;
 }
 
 
@@ -144,7 +144,7 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-		return LOADER_ACCESSERROR;
+		return HXCFE_ACCESSERROR;
 	}
 	
 
@@ -158,7 +158,7 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Bad FDI file !");
 		fclose(f);
-		return LOADER_BADFILE;
+		return HXCFE_BADFILE;
 	}
 
 	fseek(f,f_header.diskdescription_offset,SEEK_SET);
@@ -263,7 +263,33 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 	fclose(f);
-	return LOADER_NOERROR;
+	return HXCFE_NOERROR;
 }
 			
+
+int FDI_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	const char plug_id[]="ZXSPECTRUM_FDI";
+	const char plug_desc[]="ZX SPECTRUM FDI Loader";
+	const char plug_ext[]="fdi";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	FDI_libIsValidDiskFile,
+		(LOADDISKFILE)		FDI_libLoad_DiskFile,
+		(WRITEDISKFILE)		0,
+		(GETPLUGININFOS)	FDI_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
 

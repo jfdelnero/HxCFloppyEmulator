@@ -25,7 +25,4 @@
 //
 */
 
-int STX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile);
-int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters);
-
-
+int STX_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue);
