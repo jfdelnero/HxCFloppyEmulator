@@ -39,6 +39,7 @@
 // Output functions 
 typedef int (*HXCPRINTF_FUNCTION)(int MSGTYPE,char * string, ...);
 typedef int (*DISPLAYTRACKPOS_FUNCTION)(unsigned int current,unsigned int total);
+
 //////////////////////////////////////////////////////////
 
 #define HXCFE_VALIDFILE			1
@@ -75,6 +76,9 @@ int hxcfe_select_container(HXCFLOPPYEMULATOR* floppycontext,char * container);
 FLOPPY * hxcfe_floppy_load(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int * err_ret);
 int hxcfe_floppy_unload(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk);
 int hxcfe_floppy_export(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,char* imgname);
+
+int hxcfe_getNumberOfTrack(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
+int hxcfe_getNumberOfSide(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Custom Image/floppy generation functions
@@ -139,6 +143,30 @@ int hxcfe_setSectorDataMark(FBuilder*,unsigned char datamark);
 int hxcfe_popTrack (FBuilder* fb);
 
 FLOPPY* hxcfe_get_floppy(FBuilder* fb);
+
+int hxcfe_getfloppysize(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,int * nbsector);
+
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+typedef struct SECTORSEARCH_
+{
+	HXCFLOPPYEMULATOR* hxcfe;
+	FLOPPY *fp;
+	int bitoffset;
+	int cur_track;
+	int cur_side;
+}SECTORSEARCH;
+
+
+
+SECTORSEARCH* hxcfe_init_sectorsearch(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
+SECTORCONFIG* hxcfe_getnextsector(SECTORSEARCH* ss,int track,int side);
+SECTORCONFIG* hxcfe_searchsector(SECTORSEARCH* ss,int track,int side,int id);
+int hxcfe_getsectorsize(SECTORSEARCH* ss,SECTORCONFIG* sc);
+unsigned char * hxcfe_getsectordata(SECTORSEARCH* ss,SECTORCONFIG* sc);
+int hxcfe_readsectordata(SECTORSEARCH* ss,int track,int side,int sector,int numberofsector,int sectorsize,unsigned char * buffer);
+void hxcfe_free_sectorconfig(SECTORSEARCH* ss,SECTORCONFIG* sc);
+void hxcfe_deinit_sectorsearch(SECTORSEARCH* ss);
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Floppy functions

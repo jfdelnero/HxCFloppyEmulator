@@ -175,8 +175,158 @@ int bitslookingfor(unsigned char * input_data,unsigned long intput_data_size,uns
 #define LOOKFOR_ADDM 0x02
 #define ENDOFTRACK 0x03
 #define EXTRACTSECTORINFO 0x04
+#define ENDOFSECTOR 0x05
 
 unsigned short sectorsize[]={128,256,512,1024,2048,4096,8192,16384};
+
+int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFIG * sector,int track_offset)
+{
+	int bit_offset_bak,bit_offset,old_bit_offset;
+	int sector_size;
+	unsigned char mfm_buffer[32];
+	unsigned char tmp_buffer[32];
+	unsigned char * tmp_sector;
+	unsigned char CRC16_High;
+	unsigned char CRC16_Low;
+	int sector_extractor_sm;
+	int number_of_sector;
+	int k;
+	unsigned char crctable[32];
+	
+	memset(sector,0,sizeof(SECTORCONFIG));
+	
+	bit_offset=track_offset;
+
+	number_of_sector=0;
+	
+	sector_extractor_sm=LOOKFOR_GAP1;
+
+	do
+	{
+		switch(sector_extractor_sm)
+		{
+			case LOOKFOR_GAP1:
+				
+				mfm_buffer[0]=0x44;
+				mfm_buffer[1]=0x89;
+				mfm_buffer[2]=0x44;
+				mfm_buffer[3]=0x89;
+				mfm_buffer[4]=0x44;
+				mfm_buffer[5]=0x89;
+
+				bit_offset=bitslookingfor(track->databuffer,track->tracklen,mfm_buffer,6*8,bit_offset);
+						
+				if(bit_offset!=-1)
+				{		
+					sector_extractor_sm=LOOKFOR_ADDM;
+				}
+				else
+				{
+					sector_extractor_sm=ENDOFTRACK;
+				}
+			break;
+
+			case LOOKFOR_ADDM:
+				mfmtobin(track->databuffer,track->tracklen,tmp_buffer,3+7,bit_offset,0);
+				if(tmp_buffer[3]==0xFE)
+				{
+					CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
+					for(k=0;k<3+7;k++)  
+					{
+						CRC16_Update(&CRC16_High,&CRC16_Low, tmp_buffer[k],(unsigned char*)crctable );
+					}
+				
+					if(!CRC16_High && !CRC16_Low)
+					{ // crc ok !!! 
+						number_of_sector++;
+ 						floppycontext->hxc_printf(MSG_DEBUG,"Valid MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
+						old_bit_offset=bit_offset;
+						mfm_buffer[0]=0x44;
+						mfm_buffer[1]=0x89;
+						mfm_buffer[2]=0x44;
+						mfm_buffer[3]=0x89;
+						mfm_buffer[4]=0x44;
+						mfm_buffer[5]=0x89;
+						
+						bit_offset++;
+						sector_size = sectorsize[tmp_buffer[7]&0x7];
+						bit_offset_bak=bit_offset;
+						bit_offset=bitslookingfor(track->databuffer,track->tracklen,mfm_buffer,6*8,bit_offset);
+						
+						//sectors->number_of_sector++;
+						
+						sector->cylinder = tmp_buffer[4];
+						sector->head = tmp_buffer[5];
+						sector->sector = tmp_buffer[6];
+						sector->sectorsize = sectorsize[tmp_buffer[7]&0x7];
+						sector->trackencoding = IBMFORMAT_DD;
+						//sectors->sectorlist[sectors->number_of_sector-1]->type
+
+						if(bit_offset==-1)
+						{
+							bit_offset=bit_offset_bak;
+						}
+
+						if((bit_offset!=-1) && (bit_offset-old_bit_offset<(88+10)*8))
+						{
+
+							tmp_sector=(unsigned char*)malloc(3+1+sector_size+2);
+							memset(tmp_sector,0,3+1+sector_size+2);
+							mfmtobin(track->databuffer,track->tracklen,tmp_sector,3+1+sector_size+2,bit_offset,0);
+
+							CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
+							for(k=0;k<3+1+sector_size+2;k++)  
+							{
+								CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
+							}
+				
+							if(!CRC16_High && !CRC16_Low)
+							{ // crc ok !!! 
+								floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
+							}
+							else
+							{
+								floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
+							}
+
+							sector->input_data=(unsigned char*)malloc(sector_size);
+							memcpy(sector->input_data,&tmp_sector[4],sector_size);
+							free(tmp_sector);
+
+							bit_offset=bit_offset+(sector_size*2);
+						}
+											
+					}
+					else
+					{
+						bit_offset++;
+						sector_extractor_sm=ENDOFSECTOR;
+					}
+				}
+				else
+				{
+					bit_offset++;
+					sector_extractor_sm=ENDOFSECTOR;
+				}
+						
+					
+				sector_extractor_sm=ENDOFSECTOR;
+			break;
+
+			case ENDOFTRACK:
+			
+			break;
+
+			default:
+				sector_extractor_sm=ENDOFTRACK;
+			break;
+
+		}
+	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+
+	return bit_offset;
+}
+
 
 int analysis_and_extract_sector_MFM(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,sect_track * sectors)
 {
@@ -323,6 +473,7 @@ int analysis_and_extract_sector_MFM(HXCFLOPPYEMULATOR* floppycontext,SIDE * trac
 
 	return number_of_sector;
 }
+
 
 void sortbuffer(unsigned char * buffer,unsigned char * outbuffer,int size)
 {
@@ -769,4 +920,184 @@ int analysis_and_extract_sector_EMUIIFM(HXCFLOPPYEMULATOR* floppycontext,SIDE * 
 	}while(	sector_extractor_sm!=ENDOFTRACK);
 
 	return number_of_sector;
+}
+
+SECTORSEARCH* hxcfe_init_sectorsearch(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp)
+{
+	SECTORSEARCH* ss;
+
+	ss = (SECTORSEARCH*) malloc(sizeof(SECTORSEARCH));
+	memset(ss,0,sizeof(SECTORSEARCH));
+
+	ss->fp=fp;
+	ss->bitoffset=0;	
+	ss->cur_side=0;
+	ss->cur_track=0;
+	ss->hxcfe=floppycontext;
+
+	return ss;
+}
+
+SECTORCONFIG* hxcfe_getnextsector(SECTORSEARCH* ss,int track,int side)
+{
+	SECTORCONFIG * sc;
+	int bitoffset;
+
+	if((ss->bitoffset==-1) || (ss->cur_side!=side) || (ss->cur_track!=track))
+		bitoffset=0;
+	else
+		bitoffset=ss->bitoffset;
+
+	ss->cur_track=track;
+	ss->cur_side=side;
+
+	sc=(SECTORCONFIG *) malloc(sizeof(SECTORCONFIG));
+	
+	bitoffset=get_next_MFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+
+	ss->bitoffset=bitoffset;
+
+	if(bitoffset!=-1)
+		return sc;
+	else
+	{
+		free(sc);
+		return 0;
+	}
+}
+
+SECTORCONFIG* hxcfe_searchsector(SECTORSEARCH* ss,int track,int side,int id)
+{
+	SECTORCONFIG * sc;
+	int bitoffset;
+
+	bitoffset=0;
+	sc=(SECTORCONFIG *) malloc(sizeof(SECTORCONFIG));
+	do
+	{
+		bitoffset=get_next_MFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+	}while(bitoffset!=-1 && (sc->sector!=id));
+
+	ss->bitoffset=bitoffset;
+
+	if(bitoffset!=-1)
+		return sc;
+	else
+	{
+		free(sc);
+		return 0;
+	}
+}
+
+int hxcfe_getsectorsize(SECTORSEARCH* ss,SECTORCONFIG* sc)
+{
+	return sc->sectorsize;
+}
+
+unsigned char * hxcfe_getsectordata(SECTORSEARCH* ss,SECTORCONFIG* sc)
+{
+	return sc->input_data;
+}
+
+int hxcfe_getfloppysize(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,int * nbsector)
+{
+	SECTORSEARCH* ss;
+	SECTORCONFIG* sc;
+	int floppysize;
+	int nbofsector;
+	int track;
+	int side;
+
+	floppysize=0;
+	nbofsector=0;
+
+	ss=hxcfe_init_sectorsearch(floppycontext,fp);
+	if(ss)
+	{
+		for(track=0;track<fp->floppyNumberOfTrack;track++)
+		{
+			for(side=0;side<fp->floppyNumberOfSide;side++)
+			{
+				do
+				{
+					sc=hxcfe_getnextsector(ss,track,side);
+					if(sc)
+					{
+						floppysize=floppysize+sc->sectorsize;
+						nbofsector++;
+					}
+					hxcfe_free_sectorconfig(ss,sc);
+				}while(sc);
+			}
+		}
+	}
+
+	if(nbsector)
+		*nbsector=nbofsector;
+
+	hxcfe_deinit_sectorsearch(ss);
+	return floppysize;
+
+}
+
+int hxcfe_readsectordata(SECTORSEARCH* ss,int track,int side,int sector,int numberofsector,int sectorsize,unsigned char * buffer)
+{
+	SECTORCONFIG * sc;
+	int bitoffset;
+	int nbsectorread;
+	bitoffset=0;
+	
+	ss->bitoffset=0;
+	ss->cur_track=track;
+	ss->cur_side=side;
+	nbsectorread=0;
+
+	sc=(SECTORCONFIG *) malloc(sizeof(SECTORCONFIG));
+	memset(sc,0,sizeof(SECTORCONFIG));
+	do
+	{
+		bitoffset=get_next_MFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+
+		if(bitoffset!=-1 && ((sc->sector>=sector) && (sc->sector < ( sector + numberofsector )) ) )
+		{
+			if(sc->input_data)
+			{
+				memcpy(&buffer[sectorsize*(sc->sector-sector)],sc->input_data,sectorsize);
+				nbsectorread++;
+				free(sc->input_data);
+				sc->input_data=0;
+			}
+		}
+		else
+		{
+			if(sc->input_data)
+			{
+				free(sc->input_data);
+				sc->input_data=0;
+			}
+		}
+
+	}while((nbsectorread<numberofsector) && (bitoffset!=-1));
+
+	ss->bitoffset=bitoffset;
+	
+	return nbsectorread;
+}
+
+
+void hxcfe_free_sectorconfig(SECTORSEARCH* ss,SECTORCONFIG* sc)
+{
+	if(sc)
+	{
+		if(sc->input_data)
+			free(sc->input_data);
+		free(sc);
+	}
+}
+
+
+void hxcfe_deinit_sectorsearch(SECTORSEARCH* ss)
+{
+	if(ss)
+		free(ss);
 }
