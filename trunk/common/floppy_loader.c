@@ -491,6 +491,17 @@ FBuilder* hxcfe_init_floppy(HXCFLOPPYEMULATOR* floppycontext,int nb_of_track,int
 	return fb;
 }
 
+int hxcfe_getNumberOfTrack(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp)
+{
+	return fp->floppyNumberOfTrack;
+}
+
+int hxcfe_getNumberOfSide(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp)
+{
+	return fp->floppyNumberOfSide;
+}
+
+
 int hxcfe_pushTrack (FBuilder* fb,unsigned int rpm,int number,int side,int type)
 {
 	if(fb->fb_stack_pointer<(STACK_SIZE-1))
