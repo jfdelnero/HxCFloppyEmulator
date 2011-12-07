@@ -10,7 +10,10 @@ EXPORTS
    hxcfe_floppy_load		@22
    hxcfe_floppy_unload		@23
    hxcfe_floppy_export		@24
-
+   hxcfe_getNumberOfTrack	@25
+   hxcfe_getNumberOfSide	@26
+   hxcfe_getfloppysize		@27
+   
    hxcfe_init_floppy		@50
    hxcfe_pushTrack			@51
    hxcfe_setTrackInterleave	@52
@@ -31,8 +34,16 @@ EXPORTS
    hxcfe_popTrack			@79
    hxcfe_get_floppy			@80
 
-
-
+   hxcfe_init_sectorsearch		@100
+   hxcfe_getnextsector			@101
+   hxcfe_searchsector			@102
+   hxcfe_getsectorsize			@103
+   hxcfe_getsectordata			@104
+   hxcfe_readsectordata			@105
+   hxcfe_free_sectorconfig		@106
+   hxcfe_deinit_sectorsearch	@107
+   
+   
    ;hxcfe_floppy_scansectors @100
    ;hxcfe_floppy_readsectors @101
    ;hxcfe_floppy_writesectors @102

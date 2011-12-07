@@ -112,10 +112,12 @@ int loadfloppy(char *filename)
 int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc)
 {
 	FBuilder* fb;
-	unsigned int i,j,k;
+	unsigned int i,j,k,t;
 	int ret;
 	int oldifmode;
 
+	char *test;
+	SECTORSEARCH* ss;
 	if(thefloppydisk)
 		hxcfe_floppy_unload(flopemu,thefloppydisk);
 
@@ -161,6 +163,16 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc)
 	}
 
 	thefloppydisk=hxcfe_get_floppy(fb);
+	/*t=hxcfe_getfloppysize(floppycontext,thefloppydisk,0);
+
+	test=malloc(512*18);
+
+	ss=hxcfe_init_sectorsearch(floppycontext,thefloppydisk);
+	t=hxcfe_readsectordata(ss,0,0,1,5,512,test);
+
+	hxcfe_deinit_sectorsearch(ss);*/
+
+
 	if(thefloppydisk)
 		ret=HXCFE_NOERROR;
 
