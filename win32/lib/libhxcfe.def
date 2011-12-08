@@ -13,6 +13,7 @@ EXPORTS
    hxcfe_getNumberOfTrack	@25
    hxcfe_getNumberOfSide	@26
    hxcfe_getfloppysize		@27
+   hxcfe_floppy_getset_params @28
    
    hxcfe_init_floppy		@50
    hxcfe_pushTrack			@51
