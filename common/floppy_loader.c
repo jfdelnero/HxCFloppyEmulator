@@ -684,7 +684,52 @@ int hxcfe_popTrack (FBuilder* fb)
 
 FLOPPY* hxcfe_get_floppy(FBuilder* fb)
 {
+	int bitrate,trackencoding;
+	int i,j;
 	FLOPPY *f;
+	
+	bitrate=fb->floppydisk->tracks[0]->sides[0]->bitrate;
+	trackencoding=fb->floppydisk->tracks[0]->sides[0]->track_encoding;
+	for(j=0;j<fb->floppydisk->floppyNumberOfTrack;j++)
+	{
+		for(i=0;i<fb->floppydisk->tracks[j]->number_of_side;i++)
+		{
+			if(fb->floppydisk->tracks[j]->sides[i])
+			{
+				if(bitrate!=fb->floppydisk->tracks[j]->sides[i]->bitrate)
+				{
+					bitrate=-1;
+				}
+			}
+			else
+			{
+				if(i==1)
+				{
+					fb->floppydisk->tracks[j]->number_of_side--;
+				}
+				else
+				{
+					fb->floppydisk->tracks[j]->sides[i]=tg_generatetrack(0,
+																		0,
+																		0,
+																		0,
+																		0,
+																		0,
+																		1,
+																		1,
+																		bitrate,
+																		fb->floppydisk->tracks[j]->floppyRPM,
+																		(unsigned char)trackencoding,
+																		255,
+																		fb->fb_stack[0].indexlen,
+																		fb->fb_stack[0].indexpos);
+				}
+			}
+
+		}
+	}
+	fb->floppydisk->floppyBitRate=bitrate;
+
 	f=fb->floppydisk;
 	free(fb->fb_stack);
 	free(fb);

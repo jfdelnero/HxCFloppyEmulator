@@ -53,37 +53,32 @@ int getbit(unsigned char * input_data,int bit_offset)
 
 int mfmtobin(unsigned char * input_data,int intput_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit)
 {
-	int i;
-	int bitshift;
+	int i,j;
+	unsigned char b,c1,c2;
 	
 	i=0;
-	bitshift=0;
+	b=0x80;
+	j=bit_offset>>3;
 	do
 	{
 
-		switch( getbit(input_data,bit_offset) | getbit(input_data,bit_offset+1)<<1 )
-		{
-			case 0x0:
-				decod_data[i]=decod_data[i]&(~(0x01<<(0x7-bitshift)));
-				break;
-			case 0x1:
-				decod_data[i]=decod_data[i]&(~(0x01<<(0x7-bitshift)));
-				break;
-			case 0x2:
-				decod_data[i]=decod_data[i]|(0x01<<(0x7-bitshift));
-				break;
-			case 0x3:
-				decod_data[i]=decod_data[i]&(~(0x01<<(0x7-bitshift)));
-				break;
-		}
+		c1=input_data[j] & (0x80>>(bit_offset&7));
+		bit_offset++;
+		if(!(bit_offset&7)) j++;
 
-		bitshift++;
-		bit_offset=bit_offset+2;
-		if(bitshift==8)
+		c2=input_data[j] & (0x80>>(bit_offset&7));
+		bit_offset++;
+		if(!(bit_offset&7)) j++;
+
+		if( c2 && !c1 )
+			decod_data[i] = decod_data[i] | b;
+		else
+			decod_data[i] = decod_data[i] & ~b;
+
+		b=b>>1;
+		if(!b)
 		{
-			bitshift=0;
-			// exchange quartet
-			//decod_data[i]= ((decod_data[i]&0xF)<<4) | ((decod_data[i]&0xF0)>>4);
+			b=0x80;
 			i++;
 		}
 
@@ -131,6 +126,89 @@ int fmtobin(unsigned char * input_data,int intput_data_size,unsigned char * deco
 	return 0;
 }
 
+
+int bitslookingfor(unsigned char * input_data,unsigned long intput_data_size,unsigned char * chr_data,unsigned long chr_data_size,unsigned long bit_offset)
+{
+	unsigned long i,j,trackoffset,cnt,k,starti;
+	unsigned char stringtosearch[8][128];
+	unsigned char prev;
+	unsigned long tracksize;
+	int found;
+	int bitoffset;
+
+	memset(stringtosearch,0,8*128);
+
+	cnt=(chr_data_size>>3);
+	if(chr_data_size&7)
+		cnt++;
+
+	for(i=0;i<8;i++)
+	{
+		prev=0;
+		for(j=0;j<cnt;j++)
+		{
+			stringtosearch[i][j]=prev | (chr_data[j]>>i);
+			prev=chr_data[j]<<(8-i);
+		}
+		stringtosearch[i][j]=prev;
+		
+	}
+	
+
+	found=0;
+	starti=bit_offset&7;
+	trackoffset=bit_offset>>3;
+	
+	tracksize=intput_data_size>>3;
+	if(intput_data_size&7) tracksize++;
+
+	tracksize=tracksize - (chr_data_size>>3);
+	if(chr_data_size&7) tracksize--;
+
+	do
+	{
+	
+		for(i=starti;i<8;i++)
+		{
+			k=trackoffset;
+			j=0;
+			if( ( stringtosearch[i][j] == (input_data[k]&(0xFF>>i)) ) && ( stringtosearch[i][cnt] == (input_data[k+cnt]&(0xFF<<(8-i))) ) )
+			{
+				j++;
+				k++;
+				while( ( j < (cnt-1) ) && ( stringtosearch[i][j] == input_data[k] )  )
+				{
+					j++;
+					k++;
+				}
+				
+				if( j == (cnt-1) )
+				{
+					found=0xFF;
+					bitoffset=(trackoffset<<3) + i;
+					i=8;
+				}
+
+			}
+
+		}
+
+		trackoffset++;
+
+		starti=0;
+
+	}while(!found && (trackoffset<tracksize));
+
+	//bit_offset--;
+
+	if(!found)
+	{
+		bitoffset=-1;
+	}
+	return bitoffset;
+}
+
+/*
 int bitslookingfor(unsigned char * input_data,unsigned long intput_data_size,unsigned char * chr_data,unsigned long chr_data_size,unsigned long bit_offset)
 {
 	unsigned long i,c,chr_data_offset;
@@ -165,11 +243,10 @@ int bitslookingfor(unsigned char * input_data,unsigned long intput_data_size,uns
 	{
 		bit_offset=-1;
 	}
-
-
-
 	return bit_offset;
 }
+*/
+
 
 #define LOOKFOR_GAP1 0x01
 #define LOOKFOR_ADDM 0x02

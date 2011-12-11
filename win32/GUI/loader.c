@@ -112,16 +112,19 @@ int loadfloppy(char *filename)
 int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc)
 {
 	FBuilder* fb;
-	unsigned int i,j,k,t;
+	unsigned int i,j,k,t,nbside;
 	int ret;
 	int oldifmode;
+
 
 	char *test;
 	SECTORSEARCH* ss;
 	if(thefloppydisk)
 		hxcfe_floppy_unload(flopemu,thefloppydisk);
 
-	fb=hxcfe_init_floppy(floppycontext,rfc->numberoftrack,rfc->sidecfg);
+	nbside=(rfc->sidecfg)&2?2:1;
+
+	fb=hxcfe_init_floppy(floppycontext,rfc->numberoftrack,nbside);
 
 	hxcfe_setTrackInterleave(fb,rfc->interleave);	
 	hxcfe_setSectorFill(fb,rfc->fillvalue);
@@ -136,7 +139,7 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc)
 
 	for(i=0;i<rfc->numberoftrack;i++)
 	{
-		for(j=0;j<rfc->sidecfg;j++)
+		for(j=0;j<nbside;j++)
 		{
 			// prepare a new track.
 			hxcfe_pushTrack(fb,rfc->rpm,i,j,track_type_list[rfc->tracktype].tracktype);
