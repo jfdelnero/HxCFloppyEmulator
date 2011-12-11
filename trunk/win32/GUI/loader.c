@@ -68,12 +68,12 @@ int loadfloppy(char *filename)
 	int i;
 	int oldifmode;
 
-	hxcfe_floppy_unload(flopemu,thefloppydisk);
+	hxcfe_floppyUnload(flopemu,thefloppydisk);
 	thefloppydisk=0;
 
-	hxcfe_select_container(flopemu,"AUTOSELECT");
+	hxcfe_selectContainer(flopemu,"AUTOSELECT");
 		
-	thefloppydisk=hxcfe_floppy_load(flopemu,filename,&ret);
+	thefloppydisk=hxcfe_floppyLoad(flopemu,filename,&ret);
 		
 	demo->loadstatus=ret;
 
@@ -112,19 +112,17 @@ int loadfloppy(char *filename)
 int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc)
 {
 	FBuilder* fb;
-	unsigned int i,j,k,t,nbside;
+	unsigned int i,j,k,nbside;
 	int ret;
 	int oldifmode;
 
 
-	char *test;
-	SECTORSEARCH* ss;
 	if(thefloppydisk)
-		hxcfe_floppy_unload(flopemu,thefloppydisk);
+		hxcfe_floppyUnload(flopemu,thefloppydisk);
 
 	nbside=(rfc->sidecfg)&2?2:1;
 
-	fb=hxcfe_init_floppy(floppycontext,rfc->numberoftrack,nbside);
+	fb=hxcfe_initFloppy(floppycontext,rfc->numberoftrack,nbside);
 
 	hxcfe_setTrackInterleave(fb,rfc->interleave);	
 	hxcfe_setSectorFill(fb,rfc->fillvalue);
@@ -165,7 +163,7 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc)
 		}
 	}
 
-	thefloppydisk=hxcfe_get_floppy(fb);
+	thefloppydisk=hxcfe_getFloppy(fb);
 	/*t=hxcfe_getfloppysize(floppycontext,thefloppydisk,0);
 
 	test=malloc(512*18);

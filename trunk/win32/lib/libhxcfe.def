@@ -1,21 +1,21 @@
 LIBRARY   LIBHXCFE
 EXPORTS
    hxcfe_init				@1
-   hxcfe_set_outputfunc		@2
-   hxcfe_getversion			@3
+   hxcfe_setOutputFunc		@2
+   hxcfe_getVersion			@3
    hxcfe_deinit				@4
 
-   hxcfe_getcontainerid		@20
-   hxcfe_select_container	@21
-   hxcfe_floppy_load		@22
-   hxcfe_floppy_unload		@23
-   hxcfe_floppy_export		@24
+   hxcfe_getContainerId		@20
+   hxcfe_selectContainer	@21
+   hxcfe_floppyLoad			@22
+   hxcfe_floppyUnload		@23
+   hxcfe_floppyExport		@24
    hxcfe_getNumberOfTrack	@25
    hxcfe_getNumberOfSide	@26
-   hxcfe_getfloppysize		@27
-   hxcfe_floppy_getset_params @28
+   hxcfe_getFloppySize		@27
+   hxcfe_floppyGetSetParams @28
    
-   hxcfe_init_floppy		@50
+   hxcfe_initFloppy			@50
    hxcfe_pushTrack			@51
    hxcfe_setTrackInterleave	@52
    hxcfe_setTrackSkew		@53
@@ -33,20 +33,14 @@ EXPORTS
    hxcfe_setSectorHeaderCRC	@77
    hxcfe_setSectorDataMark  @78
    hxcfe_popTrack			@79
-   hxcfe_get_floppy			@80
+   hxcfe_getFloppy			@80
 
-   hxcfe_init_sectorsearch		@100
-   hxcfe_getnextsector			@101
-   hxcfe_searchsector			@102
-   hxcfe_getsectorsize			@103
-   hxcfe_getsectordata			@104
-   hxcfe_readsectordata			@105
-   hxcfe_free_sectorconfig		@106
-   hxcfe_deinit_sectorsearch	@107
-   
-   
-   ;hxcfe_floppy_scansectors @100
-   ;hxcfe_floppy_readsectors @101
-   ;hxcfe_floppy_writesectors @102
-   ;hxcfe_floppy_format       @103
+   hxcfe_initSectorSearch		@100
+   hxcfe_getNextSector			@101
+   hxcfe_searchSector			@102
+   hxcfe_getSectorSize			@103
+   hxcfe_getSectorData			@104
+   hxcfe_readSectorData			@105
+   hxcfe_freeSectorConfig		@106
+   hxcfe_deinitSectorSearch		@107
    

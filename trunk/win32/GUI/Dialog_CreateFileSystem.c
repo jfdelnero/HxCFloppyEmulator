@@ -222,7 +222,7 @@ BOOL CALLBACK DialogCreateFileSystem(
 
 						if(thefloppydisk)
 						{
-							hxcfe_floppy_unload(flopemu,thefloppydisk);
+							hxcfe_floppyUnload(flopemu,thefloppydisk);
 						}
 						else
 						{
