@@ -29,18 +29,8 @@
 #include "../plugins/common/track_generator.h"
 #include "plugins_id.h"
 
-//////////////////////////////////////////////////////////
-// Output Message  level
-#define MSG_INFO_0 0
-#define MSG_INFO_1 1
-#define MSG_WARNING 2
-#define MSG_ERROR 3
-#define MSG_DEBUG 4
-// Output functions 
-typedef int (*HXCPRINTF_FUNCTION)(int MSGTYPE,char * string, ...);
-typedef int (*DISPLAYTRACKPOS_FUNCTION)(unsigned int current,unsigned int total);
-
-//////////////////////////////////////////////////////////
+///////////////////////////////////
+// Functions return error codes
 
 #define HXCFE_VALIDFILE			1
 #define HXCFE_NOERROR			0 
@@ -51,6 +41,11 @@ typedef int (*DISPLAYTRACKPOS_FUNCTION)(unsigned int current,unsigned int total)
 #define HXCFE_INTERNALERROR		-5
 #define HXCFE_UNSUPPORTEDFILE	-6
 
+// Output functions 
+typedef int (*HXCPRINTF_FUNCTION)(int MSGTYPE,char * string, ...);
+typedef int (*DISPLAYTRACKPOS_FUNCTION)(unsigned int current,unsigned int total);
+
+
 typedef struct HXCFLOPPYEMULATOR_
 {
 	HXCPRINTF_FUNCTION hxc_printf;
@@ -59,28 +54,42 @@ typedef struct HXCFLOPPYEMULATOR_
 }HXCFLOPPYEMULATOR;
 
 
-////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////
 // Init Function
 
 HXCFLOPPYEMULATOR* hxcfe_init(void);
-int hxcfe_getversion(HXCFLOPPYEMULATOR* floppycontext,char * version,unsigned int * size1,char *copyright,unsigned int * size2);
-int hxcfe_set_outputfunc(HXCFLOPPYEMULATOR* floppycontext,HXCPRINTF_FUNCTION hxc_printf);
 void hxcfe_deinit(HXCFLOPPYEMULATOR* hxcfe);
 
-////////////////////////////////////////////////////////////////////////////////////////////
+int hxcfe_getVersion(HXCFLOPPYEMULATOR* floppycontext,char * version,unsigned int * size1,char *copyright,unsigned int * size2);
+
+////////////////////////////////////////////
+// stdio printf functions
+
+// Output Message  level
+#define MSG_INFO_0 0
+#define MSG_INFO_1 1
+#define MSG_WARNING 2
+#define MSG_ERROR 3
+#define MSG_DEBUG 4
+
+
+int hxcfe_setOutputFunc(HXCFLOPPYEMULATOR* floppycontext,HXCPRINTF_FUNCTION hxc_printf);
+
+
+////////////////////////////////////////////
 // File image functions
 
-int hxcfe_getcontainerid(HXCFLOPPYEMULATOR* floppycontext,int index,char * id,char * desc);
-int hxcfe_select_container(HXCFLOPPYEMULATOR* floppycontext,char * container);
+int hxcfe_getContainerId(HXCFLOPPYEMULATOR* floppycontext,int index,char * id,char * desc);
+int hxcfe_selectContainer(HXCFLOPPYEMULATOR* floppycontext,char * container);
 
-FLOPPY * hxcfe_floppy_load(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int * err_ret);
-int hxcfe_floppy_unload(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk);
-int hxcfe_floppy_export(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,char* imgname);
+FLOPPY * hxcfe_floppyLoad(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int * err_ret);
+int hxcfe_floppyUnload(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk);
+int hxcfe_floppyExport(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,char* imgname);
 
 int hxcfe_getNumberOfTrack(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
 int hxcfe_getNumberOfSide(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
 
-////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////
 // Custom Image/floppy generation functions
 
 #define STACK_SIZE 0x400
@@ -114,40 +123,41 @@ typedef struct FBuilder_
 	fb_track_state * fb_stack;
 }FBuilder;
 
-FBuilder* hxcfe_init_floppy(HXCFLOPPYEMULATOR* floppycontext,int nb_of_track,int nb_of_side);
+FBuilder* hxcfe_initFloppy(HXCFLOPPYEMULATOR* floppycontext,int nb_of_track,int nb_of_side);
 
 int	hxcfe_pushTrack (FBuilder*,unsigned int rpm,int number,int side,int type);
-int hxcfe_setTrackInterleave(FBuilder*,int interleave);
-int hxcfe_setTrackSkew(FBuilder*,int skew);
+int hxcfe_setTrackInterleave (FBuilder*,int interleave);
+int hxcfe_setTrackSkew (FBuilder*,int skew);
 
-int hxcfe_setIndexPosition(FBuilder*,int position,int allowsector);
-int hxcfe_setIndexLength(FBuilder*,int Length);
+int hxcfe_setIndexPosition (FBuilder*,int position,int allowsector);
+int hxcfe_setIndexLength (FBuilder*,int Length);
 
-int hxcfe_setTrackBitrate(FBuilder*,int bitrate);
+int hxcfe_setTrackBitrate (FBuilder*,int bitrate);
 
-int hxcfe_addSector(FBuilder* fb,int sectornumber,int side,int track,unsigned char * buffer,int size);
+int hxcfe_addSector (FBuilder* fb,int sectornumber,int side,int track,unsigned char * buffer,int size);
 
-int hxcfe_setSectorBitrate(FBuilder* fb,int bitrate);
+int hxcfe_setSectorBitrate (FBuilder* fb,int bitrate);
 
-int hxcfe_setSectorGap3(FBuilder* fb,unsigned char Gap3);
-int hxcfe_setSectorSizeID(FBuilder* fb,unsigned char sectorsizeid);
-int hxcfe_setSectorFill(FBuilder*,unsigned char fill);
+int hxcfe_setSectorGap3 (FBuilder* fb,unsigned char Gap3);
+int hxcfe_setSectorSizeID (FBuilder* fb,unsigned char sectorsizeid);
+int hxcfe_setSectorFill (FBuilder*,unsigned char fill);
 
-int hxcfe_setSectorEncoding(FBuilder*,int encoding);
+int hxcfe_setSectorEncoding (FBuilder*,int encoding);
 
-int hxcfe_setSectorDataCRC(FBuilder*,unsigned short crc);
-int hxcfe_setSectorHeaderCRC(FBuilder*,unsigned short crc);
+int hxcfe_setSectorDataCRC (FBuilder*,unsigned short crc);
+int hxcfe_setSectorHeaderCRC (FBuilder*,unsigned short crc);
 
-int hxcfe_setSectorDataMark(FBuilder*,unsigned char datamark);
+int hxcfe_setSectorDataMark (FBuilder*,unsigned char datamark);
 
 int hxcfe_popTrack (FBuilder* fb);
 
-FLOPPY* hxcfe_get_floppy(FBuilder* fb);
+FLOPPY* hxcfe_getFloppy (FBuilder* fb);
 
-int hxcfe_getfloppysize(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,int * nbsector);
+int hxcfe_getfloppysize (HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,int * nbsector);
 
-//
-////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////
+// Read Sector functions
+
 typedef struct SECTORSEARCH_
 {
 	HXCFLOPPYEMULATOR* hxcfe;
@@ -159,17 +169,17 @@ typedef struct SECTORSEARCH_
 
 
 
-SECTORSEARCH* hxcfe_init_sectorsearch(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
-SECTORCONFIG* hxcfe_getnextsector(SECTORSEARCH* ss,int track,int side);
-SECTORCONFIG* hxcfe_searchsector(SECTORSEARCH* ss,int track,int side,int id);
-int hxcfe_getsectorsize(SECTORSEARCH* ss,SECTORCONFIG* sc);
-unsigned char * hxcfe_getsectordata(SECTORSEARCH* ss,SECTORCONFIG* sc);
-int hxcfe_readsectordata(SECTORSEARCH* ss,int track,int side,int sector,int numberofsector,int sectorsize,unsigned char * buffer);
-void hxcfe_free_sectorconfig(SECTORSEARCH* ss,SECTORCONFIG* sc);
-void hxcfe_deinit_sectorsearch(SECTORSEARCH* ss);
+SECTORSEARCH* hxcfe_initSectorSearch(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
+SECTORCONFIG* hxcfe_getNextSector(SECTORSEARCH* ss,int track,int side);
+SECTORCONFIG* hxcfe_searchSector(SECTORSEARCH* ss,int track,int side,int id);
+int hxcfe_getSectorSize(SECTORSEARCH* ss,SECTORCONFIG* sc);
+unsigned char * hxcfe_getSectorData(SECTORSEARCH* ss,SECTORCONFIG* sc);
+int hxcfe_readSectorData(SECTORSEARCH* ss,int track,int side,int sector,int numberofsector,int sectorsize,unsigned char * buffer);
+void hxcfe_freeSectorConfig(SECTORSEARCH* ss,SECTORCONFIG* sc);
+void hxcfe_deinitSectorSearch(SECTORSEARCH* ss);
 
-////////////////////////////////////////////////////////////////////////////////////////////
-// Floppy functions
+////////////////////////////////////////////
+// Floppy interfaces setting functions.
 
 #define IBMPC_DD_FLOPPYMODE				0x00
 #define IBMPC_HD_FLOPPYMODE				0x01
@@ -194,5 +204,5 @@ enum {
 	GET = 1
 };
 
-int hxcfe_floppy_getset_params(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,unsigned char dir,unsigned short param,void * value);
+int hxcfe_floppyGetSetParams(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,unsigned char dir,unsigned short param,void * value);
 

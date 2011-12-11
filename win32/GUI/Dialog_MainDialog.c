@@ -201,11 +201,11 @@ BOOL CALLBACK DialogMainDialog(
 							"*.hfe",&extpos,3)
 							)
 						{
-							if(hxcfe_select_container(flopemu,fileselector_plugin[extpos-1])==HXCFE_NOERROR)
+							if(hxcfe_selectContainer(flopemu,fileselector_plugin[extpos-1])==HXCFE_NOERROR)
 							{
-								hxcfe_floppy_getset_params(flopemu,thefloppydisk,SET,DOUBLESTEP,&hwif->double_step);
-								hxcfe_floppy_getset_params(flopemu,thefloppydisk,SET,INTERFACEMODE,&hwif->interface_mode);
-								hxcfe_floppy_export(flopemu,thefloppydisk,filename);
+								hxcfe_floppyGetSetParams(flopemu,thefloppydisk,SET,DOUBLESTEP,&hwif->double_step);
+								hxcfe_floppyGetSetParams(flopemu,thefloppydisk,SET,INTERFACEMODE,&hwif->interface_mode);
+								hxcfe_floppyExport(flopemu,thefloppydisk,filename);
 							}
 						}
 					}

@@ -214,7 +214,7 @@ BOOL CALLBACK DialogRAWFileSettings(
 				if(thefloppydisk)
 				{
 			
-					hxcfe_floppy_unload(flopemu,thefloppydisk);
+					hxcfe_floppyUnload(flopemu,thefloppydisk);
 					thefloppydisk=0;
 				}
 			

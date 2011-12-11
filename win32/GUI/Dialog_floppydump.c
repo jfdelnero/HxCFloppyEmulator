@@ -241,7 +241,7 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 
 			sr=malloc(sizeof(FD_ID_HEADER)*256 + 1);
 						
-			fb=hxcfe_init_floppy(hxcfe,params->number_of_track,params->number_of_side);
+			fb=hxcfe_initFloppy(hxcfe,params->number_of_track,params->number_of_side);
 			hxcfe_setSectorFill(fb,0xF6);
 			hxcfe_setIndexPosition(fb,-2500,0);
 			hxcfe_setIndexLength(fb,2500);
@@ -549,7 +549,7 @@ DWORD WINAPI DumpThreadProc( LPVOID lpParameter)
 
 			closedevice(h);
 
-			params->floppydisk=hxcfe_get_floppy(fb);
+			params->floppydisk=hxcfe_getFloppy(fb);
 
 			sprintf(tempstr,"Done !");
 			SetDlgItemText(params->windowshwd,IDC_EDIT1,tempstr);
