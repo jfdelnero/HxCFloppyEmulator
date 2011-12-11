@@ -72,14 +72,14 @@ HXCFLOPPYEMULATOR* hxcfe_init(void)
 	return hxcfe;
 }
 
-int hxcfe_set_outputfunc(HXCFLOPPYEMULATOR* floppycontext,HXCPRINTF_FUNCTION hxc_printf)
+int hxcfe_setOutputFunc(HXCFLOPPYEMULATOR* floppycontext,HXCPRINTF_FUNCTION hxc_printf)
 {	
 	floppycontext->hxc_printf=hxc_printf;
 
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_getversion(HXCFLOPPYEMULATOR* floppycontext,char * version,unsigned int * size1,char *copyright,unsigned int * size2)
+int hxcfe_getVersion(HXCFLOPPYEMULATOR* floppycontext,char * version,unsigned int * size1,char *copyright,unsigned int * size2)
 {	
 	if(version && size1)
 	{
@@ -122,14 +122,14 @@ void hxcfe_deinit(HXCFLOPPYEMULATOR* hxcfe)
 
 ////////////////////////////////////////////////////////////////////////
 
-int hxcfe_select_container(HXCFLOPPYEMULATOR* floppycontext,char * container)
+int hxcfe_selectContainer(HXCFLOPPYEMULATOR* floppycontext,char * container)
 {
 	sprintf(floppycontext->CONTAINERTYPE,container);
 
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_getcontainerid(HXCFLOPPYEMULATOR* floppycontext,int index,char * id,char * desc)
+int hxcfe_getContainerId(HXCFLOPPYEMULATOR* floppycontext,int index,char * id,char * desc)
 {
 	int i;
 
@@ -153,7 +153,7 @@ int hxcfe_getcontainerid(HXCFLOPPYEMULATOR* floppycontext,int index,char * id,ch
 	return HXCFE_BADPARAMETER;
 }
 
-FLOPPY * hxcfe_floppy_load(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int * err_ret)
+FLOPPY * hxcfe_floppyLoad(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int * err_ret)
 {
 	int i;
 	int ret;
@@ -262,7 +262,7 @@ FLOPPY * hxcfe_floppy_load(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int * 
 }
 
 
-int hxcfe_floppy_unload(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk)
+int hxcfe_floppyUnload(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk)
 {
 	unsigned int i,j;
 
@@ -313,7 +313,7 @@ int hxcfe_floppy_unload(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk)
 	return 0;
 }
 
-int hxcfe_floppy_export(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,char* imgname)
+int hxcfe_floppyExport(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,char* imgname)
 {
 	int i,ret;
 	char plugin_id[16];
@@ -357,7 +357,7 @@ int hxcfe_floppy_export(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,char
 
 ////////////////////////////////////////////////////////////////////////
 
-int hxcfe_floppy_getset_params(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,unsigned char dir,unsigned short param,void * value)
+int hxcfe_floppyGetSetParams(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,unsigned char dir,unsigned short param,void * value)
 {
 	int ret;
 
@@ -436,7 +436,7 @@ int libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,voi
 	return HXCFE_BADPARAMETER;
 }
 
-FBuilder* hxcfe_init_floppy(HXCFLOPPYEMULATOR* floppycontext,int nb_of_track,int nb_of_side)
+FBuilder* hxcfe_initFloppy(HXCFLOPPYEMULATOR* floppycontext,int nb_of_track,int nb_of_side)
 {
 	FBuilder* fb;
 
@@ -682,7 +682,7 @@ int hxcfe_popTrack (FBuilder* fb)
 }
 
 
-FLOPPY* hxcfe_get_floppy(FBuilder* fb)
+FLOPPY* hxcfe_getFloppy(FBuilder* fb)
 {
 	int bitrate,trackencoding;
 	int i,j;

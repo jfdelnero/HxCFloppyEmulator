@@ -131,8 +131,8 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 	filenb=0;
 	while(filelist[filenb])
 	{		
-		hxcfe_select_container(floppycontext,"AUTOSELECT");
-		thefloppydisk=hxcfe_floppy_load(floppycontext,filelist[filenb],&ret);
+		hxcfe_selectContainer(floppycontext,"AUTOSELECT");
+		thefloppydisk=hxcfe_floppyLoad(floppycontext,filelist[filenb],&ret);
 		if(ret!=HXCFE_NOERROR || !thefloppydisk)
 		{
 			switch(ret)
@@ -177,15 +177,15 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 			
 			strcat(destinationfile,ff_type_list[output_file_format].ext);
 
-			ret=hxcfe_select_container(floppycontext,ff_type_list[output_file_format].plug_id);
+			ret=hxcfe_selectContainer(floppycontext,ff_type_list[output_file_format].plug_id);
 			if(!ret)
 			{			
-				hxcfe_floppy_getset_params(floppycontext,thefloppydisk,SET,DOUBLESTEP,&hwif->double_step);
-				hxcfe_floppy_getset_params(floppycontext,thefloppydisk,SET,INTERFACEMODE,&hwif->interface_mode);
-				ret=hxcfe_floppy_export(floppycontext,thefloppydisk,destinationfile);
+				hxcfe_floppyGetSetParams(floppycontext,thefloppydisk,SET,DOUBLESTEP,&hwif->double_step);
+				hxcfe_floppyGetSetParams(floppycontext,thefloppydisk,SET,INTERFACEMODE,&hwif->interface_mode);
+				ret=hxcfe_floppyExport(floppycontext,thefloppydisk,destinationfile);
 			}
 
-			hxcfe_floppy_unload(floppycontext,thefloppydisk);
+			hxcfe_floppyUnload(floppycontext,thefloppydisk);
 
 
 			tempstr=(char*)malloc(1024);
@@ -289,7 +289,7 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 						fullpath=malloc(strlen(FindFileData.filename)+strlen(folder)+2+9);
 						sprintf(fullpath,"%s\\%s",folder,FindFileData.filename);
 
-						thefloppydisk=hxcfe_floppy_load(floppycontext,fullpath,&ret);
+						thefloppydisk=hxcfe_floppyLoad(floppycontext,fullpath,&ret);
 						free(fullpath);
 						if(ret!=HXCFE_NOERROR || !thefloppydisk)
 						{
@@ -329,10 +329,10 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 
 							ret=1;
 
-							hxcfe_select_container(flopemu,ff_type_list[output_file_format].plug_id);
+							hxcfe_selectContainer(flopemu,ff_type_list[output_file_format].plug_id);
 							strcat(destinationfile,ff_type_list[output_file_format].ext);							
 							
-							hxcfe_floppy_unload(floppycontext,thefloppydisk);
+							hxcfe_floppyUnload(floppycontext,thefloppydisk);
 
 							tempstr=(char*)malloc(1024);
 							

@@ -152,7 +152,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	InitializeCriticalSection(&log_cs);
 
 	flopemu=hxcfe_init();	
-	hxcfe_set_outputfunc(flopemu,CUI_affiche);
+	hxcfe_setOutputFunc(flopemu,CUI_affiche);
 
 	thefloppydisk=0;
 
@@ -356,10 +356,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					)
 				{
 
-					if(hxcfe_select_container(flopemu,fileselector_plugin[extpos-1])==HXCFE_NOERROR)
+					if(hxcfe_selectContainer(flopemu,fileselector_plugin[extpos-1])==HXCFE_NOERROR)
 					{
 						//write_HFE_file(flopemu,thefloppydisk,filename,hwif->interface_mode,hwif->double_step);
-						hxcfe_floppy_export(flopemu,thefloppydisk,filename);
+						hxcfe_floppyExport(flopemu,thefloppydisk,filename);
 					}
 				}
 			}
