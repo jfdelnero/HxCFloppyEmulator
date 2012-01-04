@@ -229,6 +229,14 @@ SOURCE=.\loader.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\log.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=.\log_gui.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\main.cxx
 # End Source File
 # Begin Source File

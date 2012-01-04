@@ -62,6 +62,7 @@
 #include "rawfile_loader_window.h"
 #include "sdhxcfecfg_window.h"
 #include "usbhxcfecfg_window.h"
+#include "log_gui.h"
 
 #include "soft_cfg_file.h"
 
@@ -108,21 +109,6 @@ main_button_list  txt_buttons_main[]=
 	{0,"Floppy disk dump","Read a real disk"}
 };
 
-
-int CUI_affiche(int MSGTYPE,char * chaine, ...)
-{
-	//if(MSGTYPE!=MSG_DEBUG)
-	{
-		va_list marker;
-		va_start( marker, chaine );     
-		
-		vprintf(chaine,marker);
-		printf("\n");
-				
-		va_end( marker ); 
-	}
-    return 0;
-}
 
 
 void beepcb(Fl_Widget *, void *) {
@@ -171,6 +157,10 @@ void menu_clicked(Fl_Widget * w, void * fc_ptr)
 		case 7:
 			mw->fdump_window->window->show();
 		break;
+		case 8:
+			mw->log_box->show();
+		break;
+
 	}
 
 }
@@ -205,6 +195,10 @@ void bt_clicked(Fl_Widget * w, void * fc_ptr)
 		case 7:
 			mw->fdump_window->window->show();
 		break;
+		case 8:
+			mw->log_box->show();
+		break;
+
 	}
 
 }
@@ -357,7 +351,7 @@ Fl_Menu_Item menutable[] = {
     {"USB HxC Floppy Emulator settings",	FL_ALT+'s',menu_clicked,(void*)6},
     {0},
   {"&Log",FL_F+3,0,0,FL_SUBMENU},
-    {"&Log",	FL_ALT+'l'},
+    {"&Log",	FL_ALT+'l',menu_clicked,(void*)8},
     {0},
   {"&About",0,0,0,FL_SUBMENU},
   {"&HxCFloppyEmulator",	FL_ALT+'h',create_about_window,0},
@@ -538,58 +532,112 @@ void cb_ok(class Fl_Button *,void *)
 
 
 }
+////////////////////////////////////////////////////////////
 
+class Fl_DND_Box : public Fl_Box
+{
+    public:
 
-int Main_Window::handle(int event) {
-	switch(event) 
-	{
-         case FL_DND_ENTER:
-			evt = event;
-			return 1;
+        static void callback_deferred(void *v)
+        {
+            Fl_DND_Box *w = (Fl_DND_Box*)v;
 
-         case FL_DND_DRAG:
-			evt = event;
-			return 1;
+            w->do_callback();
+        }
 
-         case FL_DND_LEAVE:
-			 evt = event;
-			return 1;
+        Fl_DND_Box(int X, int Y, int W, int H, const char *L = 0)
+                : Fl_Box(X,Y,W,H,L), evt(FL_NO_EVENT), evt_txt(0), evt_len(0)
+        {
+            labeltype(FL_NO_LABEL);
+            box(FL_NO_BOX);
+            clear_visible_focus();
+        }
 
-         case FL_DND_RELEASE:
-		//	Fl::event_inside(this);
-			evt = event;
-			return 1;
-
-		 case FL_PASTE:
-            evt = event;
-
-            // make a copy of the DND payload
-            evt_len = Fl::event_length();
-
-			if(evt_txt)
+        virtual ~Fl_DND_Box()
+        {
             delete [] evt_txt;
+        }
 
-            evt_txt = new char[evt_len];
-            strcpy(evt_txt, Fl::event_text());
+        int event()
+        {
+            return evt;
+        }
 
-            // If there is a callback registered, call it.
-            // The callback must access Fl::event_text() to
-            // get the string or file path that was dropped.
-            // Note that do_callback() is not called directly.
-            // Instead it will be executed by the FLTK main-loop
-            // once we have finished handling the DND event.
-            // This allows caller to popup a window or change widget focus.
-           // if(callback() && ((when() & FL_WHEN_RELEASE) || (when() & FL_WHEN_CHANGED)))
-           //    Fl::add_timeout(0.0, Main_Window::callback_deferred, (void*)this);
-           return 1;
+        const char* event_text()
+        {
+            return evt_txt;
+        }
 
-		default:
-			break;
+        int event_length()
+        {
+            return evt_len;
+        }
 
-	}
-	return Fl_Window::handle(event);
+        int handle(int e)
+        {
+            switch(e)
+            {
+                case FL_DND_ENTER:
+                case FL_DND_RELEASE:
+                case FL_DND_LEAVE:
+                case FL_DND_DRAG:
+                    evt = e;
+                    return 1;
 
+
+                case FL_PASTE:
+                    evt = e;
+
+                    // make a copy of the DND payload
+                    evt_len = Fl::event_length();
+
+                    //delete [] evt_txt;
+
+                    evt_txt = new char[evt_len];
+                    strcpy(evt_txt, Fl::event_text());
+
+                    // If there is a callback registered, call it.
+                    // The callback must access Fl::event_text() to
+                    // get the string or file path that was dropped.
+                    // Note that do_callback() is not called directly.
+                    // Instead it will be executed by the FLTK main-loop
+                    // once we have finished handling the DND event.
+                    // This allows caller to popup a window or change widget focus.
+                    if(callback() && ((when() & FL_WHEN_RELEASE) || (when() & FL_WHEN_CHANGED)))
+                        Fl::add_timeout(0.0, Fl_DND_Box::callback_deferred, (void*)this);
+                    return 1;
+            }
+
+            return Fl_Box::handle(e);
+        }
+
+    protected:
+        // The event which caused Fl_DND_Box to execute its callback
+        int evt;
+
+        char *evt_txt;
+        int evt_len;
+};
+
+// Widget that displays the image
+Fl_Box *box = (Fl_Box*)0;
+
+
+
+
+void dnd_open(const char *urls)
+{
+	loadfloppy((char*)urls);
 }
+
+void dnd_cb(Fl_Widget *o, void *v)
+{
+    Fl_DND_Box *dnd = (Fl_DND_Box*)o;
+
+    if(dnd->event() == FL_PASTE)
+        dnd_open(dnd->event_text());
+}
+////////////////////////////////////////////////////////////
 
 static void tick_mw(void *v) {
 	Main_Window *window;
@@ -669,7 +717,9 @@ Main_Window::Main_Window()
 	txtindex=0;
 	i=0;
 	evt_txt=0;
-	
+
+	Fl::scheme("gtk+");
+
 	Fl_Group group(0,0,WINDOW_XSIZE,392);
 
 	group.image(new Fl_Tiled_Image(new Fl_BMP_Image("floppy.bmp")));
@@ -720,6 +770,11 @@ Main_Window::Main_Window()
     Fl_Menu_Bar menubar(0,0,WINDOW_XSIZE,24); 
 	menubar.menu(menutable);
 
+// Fl_DND_Box is constructed with the same dimensions and at the same position as Fl_Scroll
+	Fl_DND_Box *o = new Fl_DND_Box(0, 0,WINDOW_XSIZE, 400, 0);
+	o->callback(dnd_cb);
+
+
 	end();
 	label(NOMFENETRE);
 	//show(argc, argv);
@@ -756,6 +811,8 @@ Main_Window::Main_Window()
 	rawloader_window->numin_interleave->value(1);
 	rawloader_window->numin_skew->value(0);
 
+	this->log_box=new Log_box();
+
 	backlight_tmr=20;
 	standby_tmr=20;
 	lcd_scroll=150;
@@ -773,6 +830,7 @@ Main_Window::Main_Window()
 	this->usbcfg_window=new usbhxcfecfg_window();
 	usbcfg_window->choice_ifmode->menu(if_choices);
 	usbcfg_window->slider_process_priority->scrollvalue(0,1,0,5);
+
 
 	txtindex=0;
 	tick_mw(this);

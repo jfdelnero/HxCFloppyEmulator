@@ -84,6 +84,10 @@ void raw_loader_window_bt_createemptyfloppy(Fl_Button* bt, void*)
 
 	memset(&rfc,0,sizeof(rfc));
 	rfc.autogap3=0xff;
+	if(rlw->chk_twosides->value())
+		rfc.sidecfg=2;
+	else
+		rfc.sidecfg=1;
 	rfc.bitrate=rlw->innum_bitrate->value();
 	rfc.fillvalue=rlw->numin_formatvalue->value();
 	rfc.numberoftrack=rlw->innum_nbtrack->value();
