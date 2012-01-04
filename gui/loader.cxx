@@ -85,6 +85,7 @@ int loadfloppy(char *filename)
 	if(ret!=HXCFE_NOERROR || !thefloppydisk)
 	{
 		thefloppydisk=0;
+		gui_context->bufferfilename[0]=0;
 	}
 	else
 	{	

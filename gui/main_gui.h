@@ -11,7 +11,7 @@ class Main_Window : public Fl_Window {
 	Fl_Button *button_usbhxcfesettings;
 	Fl_Button *button_floppydump;
 
-
+	
 	Fl_Box*  o;
 	Fl_Window *window;
 
@@ -30,6 +30,8 @@ class Main_Window : public Fl_Window {
 	sdhxcfecfg_window * sdcfg_window;
 	usbhxcfecfg_window * usbcfg_window;
 
+	Log_box * log_box;
+
 	int	xsize;
 	int	ysize;
 	int	xpos_size;
@@ -46,7 +48,7 @@ class Main_Window : public Fl_Window {
 
 	Fl_Text_Buffer* buf;
 
-	virtual handle(int event);
+	//virtual handle(int event);
 	Main_Window();
 	~Main_Window();
 
