@@ -1,4 +1,4 @@
-/*<
+/*
 //
 // Copyright (C) 2006, 2007, 2008, 2009 Jean-François DEL NERO
 //

@@ -30,6 +30,7 @@ extern "C"
 #include "rawfile_loader_window.h"
 #include "sdhxcfecfg_window.h"
 #include "usbhxcfecfg_window.h"
+#include "log_gui.h"
 #include "main_gui.h"
 
 HXCFLOPPYEMULATOR * flopemu;
@@ -37,6 +38,8 @@ FLOPPY * thefloppydisk;
 HWINTERFACE * hwif;
 
 guicontext * gui_context;
+
+extern int CUI_affiche(int MSGTYPE,char * chaine, ...);
 
 	track_type track_type_list[]=
 	{
@@ -58,7 +61,7 @@ int main(int argc, char **argv) {
 
 		thefloppydisk=0;
 		flopemu=hxcfe_init();
-
+		hxcfe_setOutputFunc(flopemu,CUI_affiche);
 		hwif=(HWINTERFACE *)malloc(sizeof(HWINTERFACE));
 		memset(hwif,0,sizeof(HWINTERFACE));
 		HW_CPLDFloppyEmulator_init(flopemu,hwif);
