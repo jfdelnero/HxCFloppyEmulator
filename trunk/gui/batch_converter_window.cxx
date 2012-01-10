@@ -2,6 +2,8 @@
 
 #include "batch_converter_window.h"
 
+#include "fl_dnd_box.h"
+
 void batch_converter_window::cb_bt_cancel_i(Fl_Button* o, void*) {
   ((Fl_Window*)(o->parent()))->hide();
 }
@@ -12,7 +14,7 @@ void batch_converter_window::cb_bt_cancel(Fl_Button* o, void* v) {
 batch_converter_window::batch_converter_window() {
   { window = new Fl_Double_Window(413, 244);
     window->user_data((void*)(this));
-    { choice_file_format = new Fl_Choice(19, 26, 271, 23, "Target file format :");
+    { choice_file_format = new Fl_Choice(19, 26, 381, 23, "Target file format :");
       choice_file_format->down_box(FL_BORDER_BOX);
       choice_file_format->labelsize(12);
       choice_file_format->textsize(12);
@@ -28,19 +30,26 @@ batch_converter_window::batch_converter_window() {
       strin_dst_dir->textsize(12);
       strin_dst_dir->align(FL_ALIGN_TOP_LEFT);
     } // Fl_Input* strin_dst_dir
-    { strout_convert_status = new Fl_Output(19, 171, 376, 30);
+    { strout_convert_status = new Fl_Output(19, 171, 381, 30);
       strout_convert_status->box(FL_PLASTIC_UP_BOX);
       strout_convert_status->align(FL_ALIGN_TOP_LEFT);
     } // Fl_Output* strout_convert_status
-    { bt_select_src = new Fl_Button(305, 70, 90, 25, "Select");
+    { bt_select_src = new Fl_Button(304, 69, 95, 25, "Select");
+      bt_select_src->callback((Fl_Callback*)batch_converter_window_bt_select_src);
     } // Fl_Button* bt_select_src
-    { bt_select_dst = new Fl_Button(305, 127, 90, 25, "Select");
+    { bt_select_dst = new Fl_Button(304, 124, 95, 25, "Select");
+      bt_select_dst->callback((Fl_Callback*)batch_converter_window_bt_select_dst);
     } // Fl_Button* bt_select_dst
-    { bt_convert = new Fl_Button(155, 210, 105, 25, "Convert");
+    { bt_convert = new Fl_Button(190, 210, 100, 25, "Convert");
+      bt_convert->callback((Fl_Callback*)batch_converter_window_bt_convert);
     } // Fl_Button* bt_convert
-    { bt_cancel = new Fl_Button(290, 210, 105, 25, "Cancel");
+    { bt_cancel = new Fl_Button(300, 210, 100, 25, "Cancel");
       bt_cancel->callback((Fl_Callback*)cb_bt_cancel);
     } // Fl_Button* bt_cancel
+
+	Fl_DND_Box *o = new Fl_DND_Box(0, 0,413, 244, 0);
+	o->callback(dnd_bc_cb);
+
     window->end();
   } // Fl_Double_Window* window
 }

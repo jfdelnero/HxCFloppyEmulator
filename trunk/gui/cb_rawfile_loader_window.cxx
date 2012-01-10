@@ -88,16 +88,16 @@ void raw_loader_window_bt_createemptyfloppy(Fl_Button* bt, void*)
 		rfc.sidecfg=2;
 	else
 		rfc.sidecfg=1;
-	rfc.bitrate=rlw->innum_bitrate->value();
-	rfc.fillvalue=rlw->numin_formatvalue->value();
-	rfc.numberoftrack=rlw->innum_nbtrack->value();
-	rfc.gap3=rlw->numin_gap3->value();
-	rfc.firstidsector=rlw->innum_sectoridstart->value();
-	rfc.interleave=rlw->numin_interleave->value();
-	rfc.sectorpertrack=rlw->innum_sectorpertrack->value();
-	rfc.rpm=rlw->innum_rpm->value();
+	rfc.bitrate=(unsigned long)rlw->innum_bitrate->value();
+	rfc.fillvalue=(unsigned char)rlw->numin_formatvalue->value();
+	rfc.numberoftrack=(unsigned long)rlw->innum_nbtrack->value();
+	rfc.gap3=(unsigned long)rlw->numin_gap3->value();
+	rfc.firstidsector=(unsigned char)rlw->innum_sectoridstart->value();
+	rfc.interleave=(unsigned char)rlw->numin_interleave->value();
+	rfc.sectorpertrack=(unsigned char)rlw->innum_sectorpertrack->value();
+	rfc.rpm=(unsigned long)rlw->innum_rpm->value();
 	rfc.sectorsize=128<<(rlw->choice_sectorsize->value());
-	rfc.skew=rlw->numin_skew->value();
+	rfc.skew=(unsigned char)rlw->numin_skew->value();
 
 	loadrawfile(flopemu,&rfc);
 

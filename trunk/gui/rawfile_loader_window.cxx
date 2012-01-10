@@ -113,16 +113,15 @@ rawfile_loader_window::rawfile_loader_window() {
       o->labelsize(12);
       o->callback((Fl_Callback*)raw_loader_window_bt_loadrawfile, (void*)(this));
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(452, 50, 95, 30, "Create Empty Floppy");
-      o->color((Fl_Color)FL_LIGHT2);
+    { Fl_Button* o = new Fl_Button(452, 47, 95, 30, "Create Empty Floppy");
       o->labelsize(12);
       o->callback((Fl_Callback*)raw_loader_window_bt_createemptyfloppy, (void*)(this));
       o->align(FL_ALIGN_WRAP);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(452, 80, 95, 30, "Save config");
+    { Fl_Button* o = new Fl_Button(452, 79, 95, 30, "Save config");
       o->labelsize(12);
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(452, 110, 95, 30, "Load config");
+    { Fl_Button* o = new Fl_Button(452, 111, 95, 30, "Load config");
       o->labelsize(12);
     } // Fl_Button* o
     { Fl_Button* o = new Fl_Button(452, 145, 95, 30, "Cancel");

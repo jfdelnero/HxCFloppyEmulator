@@ -69,5 +69,9 @@ int main(int argc, char **argv) {
 
 		Main_Window * mw;
 		mw=new Main_Window();
+		return 0;
 	}
+
+	
+	return -1;
 }
