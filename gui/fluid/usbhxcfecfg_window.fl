@@ -1,0 +1,125 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0110 
+header_name {.h} 
+code_name {.cxx}
+class usbhxcfecfg_window {open
+} {
+  Function {usbhxcfecfg_window()} {open
+  } {
+    Fl_Window window {
+      label {USB HxC Floppy Emulator settings and status} open
+      xywh {270 114 573 252} type Double visible
+    } {
+      Fl_Group {} {
+        label {USB HxC Floppy Emulator status} open
+        xywh {15 17 390 63} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+      } {
+        Fl_Output strout_usbhfestatus {
+          label Status
+          xywh {75 42 295 25} labelsize 12
+        }
+      }
+      Fl_Group {} {
+        label {USB statistics and settings} open
+        xywh {15 87 390 150} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+      } {
+        Fl_Value_Output valout_packetsize {
+          label {Packet size}
+          xywh {108 112 82 20} labelsize 12 textsize 12
+        }
+        Fl_Output strout_maxsettletime {
+          label {Max settle time}
+          xywh {108 134 82 20} labelsize 12 textsize 12
+        }
+        Fl_Output strout_minsettletime {
+          label {Min settle time}
+          xywh {108 155 82 20} labelsize 12 textsize 12
+        }
+        Fl_Slider slider_process_priority {
+          label {Process priority}
+          xywh {108 177 82 20} type {Horz Knob} labelsize 12 align 4
+        }
+        Fl_Value_Output valout_synclost {
+          label {Sync lost}
+          xywh {295 178 82 20} labelsize 12 textsize 12
+        }
+        Fl_Output strout_packetsent {
+          label {Packet sent}
+          xywh {295 156 82 20} labelsize 12 textsize 12
+        }
+        Fl_Output strout_datasent {
+          label {Data sent}
+          xywh {295 134 82 20} labelsize 12 textsize 12
+        }
+        Fl_Output strout_datathroughput {
+          label {Data throughput}
+          xywh {295 112 82 20} labelsize 12 textsize 12
+        }
+        Fl_Button {} {
+          label Reset
+          xywh {295 207 85 20}
+        }
+      }
+      Fl_Group {} {
+        label {Drive ID setting} open
+        xywh {410 17 105 109} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL labelsize 12 align 21
+      } {
+        Fl_Round_Button rbt_ds2 {
+          label DS2
+          xywh {415 59 25 25} type Radio down_box ROUND_DOWN_BOX labelsize 12
+        }
+        Fl_Round_Button rbt_ds3 {
+          label MTRON
+          xywh {415 73 25 25} type Radio down_box ROUND_DOWN_BOX labelsize 12
+        }
+        Fl_Check_Button chk_twistedcable {
+          label {Twisted cable}
+          xywh {415 87 25 25} down_box DOWN_BOX labelsize 12
+        }
+        Fl_Check_Button chk_disabledrive {
+          label {Disable drive}
+          xywh {415 101 25 25} down_box DOWN_BOX labelsize 12
+        }
+        Fl_Round_Button rbt_ds0 {
+          label DS0
+          xywh {415 34 25 25} type Radio down_box ROUND_DOWN_BOX labelsize 12
+        }
+        Fl_Round_Button rbt_ds1 {
+          label DS1
+          xywh {415 47 25 25} type Radio down_box ROUND_DOWN_BOX labelsize 12
+        }
+      }
+      Fl_Group {} {
+        label Mode open
+        xywh {410 128 105 109} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL labelsize 12 align 21
+      } {
+        Fl_Check_Button chk_autoifmode {
+          label Auto
+          xywh {415 198 25 25} down_box DOWN_BOX labelsize 12
+        }
+        Fl_Check_Button chk_doublestep {
+          label {Double Step}
+          xywh {415 212 25 25} down_box DOWN_BOX labelsize 12
+        }
+        Fl_Choice choice_ifmode {open
+          xywh {415 152 95 20} down_box BORDER_BOX labelsize 12 textsize 12
+        } {}
+      }
+      Fl_Button {} {
+        label Load
+        xywh {520 17 45 25}
+      }
+      Fl_Button {} {
+        label Save
+        xywh {520 47 45 25}
+      }
+      Fl_Button {} {
+        label OK
+        callback {((Fl_Window*)(o->parent()))->hide();}
+        xywh {520 77 45 25}
+      }
+    }
+    code {tick_usb(this);} {selected
+    }
+  }
+} 
