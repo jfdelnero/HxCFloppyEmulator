@@ -1,0 +1,120 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0110 
+header_name {.h} 
+code_name {.cxx}
+class sdhxcfecfg_window {open
+} {
+  Function {sdhxcfecfg_window()} {open
+  } {
+    Fl_Window window {
+      label {SDCard HxC Floppy Emulator settings} open
+      xywh {167 127 492 267} type Double labelsize 12 visible
+    } {
+      Fl_Group {} {
+        label {SD HxC Floppy Emulator settings} open
+        xywh {5 -1 315 260} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
+      } {
+        Fl_Group {} {
+          label {User interface} open
+          xywh {15 39 135 120} box SHADOW_BOX labeltype EMBOSSED_LABEL labelsize 10 align 5
+        } {
+          Fl_Slider slider_uisound_level {
+            label {UI Sound}
+            tooltip {Sound level} xywh {25 59 105 15} type {Horz Knob} labelsize 12 align 1
+          }
+          Fl_Slider slider_stepsound_level {
+            label {Head step sound}
+            tooltip {Track change sound level} xywh {25 94 105 15} type {Horz Knob} labelsize 12 align 1
+          }
+          Fl_Slider slider_scrolltxt_speed {
+            label {Scroll text speed}
+            tooltip {Filename scrolling speed (used if the filename has more than 16 characters)} xywh {25 129 105 15} type {Horz Knob} labelsize 12 align 1
+          }
+        }
+        Fl_Group {} {
+          label Standby open
+          xywh {155 39 145 75} box SHADOW_BOX labeltype EMBOSSED_LABEL labelsize 10 align 5
+        } {
+          Fl_Value_Slider valslider_device_standby_timeout {
+            label {Device standby}
+            xywh {167 89 120 15} type {Horz Knob} labelsize 12 align 1
+          }
+          Fl_Value_Slider valslider_device_backlight_timeout {
+            label {Backlight standby}
+            xywh {167 60 120 15} type {Horz Knob} labelsize 12 align 1
+          }
+        }
+        Fl_Check_Button chk_loadlastloaded {
+          label {Load last loaded floppy}
+          xywh {155 114 25 25} down_box DOWN_BOX labelsize 12
+        }
+        Fl_Check_Button chk_disabediskdriveselector {
+          label {Disable disk drive selector}
+          xywh {155 134 25 25} down_box DOWN_BOX labelsize 12
+        }
+        Fl_Check_Button chk_force_loading_startupa {
+          label {Force loading STARTUPA.HFE into the drive A at power up}
+          xywh {15 164 25 15} down_box DOWN_BOX labelsize 11
+        }
+        Fl_Check_Button chk_force_loading_startupb {
+          label {Force loading STARTUPB.HFE into the drive B at power up}
+          xywh {15 179 25 21} down_box DOWN_BOX labelsize 11
+        }
+        Fl_Group {} {
+          label {AUTO BOOT Mode / File Selector software startup} open
+          xywh {5 204 315 55} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
+        } {
+          Fl_Check_Button chk_enable_autoboot_mode {
+            label {Enable auto boot mode}
+            xywh {9 214 25 25} down_box DOWN_BOX labelsize 11
+          }
+          Fl_Check_Button chk_force_loading_autoboot {
+            label {Force loading AUTOBOOT.HFE at power up}
+            xywh {9 234 25 25} down_box DOWN_BOX labelsize 12
+          }
+          Fl_Check_Button chk_preindex {
+            label {Enable index Pre incrementing}
+            xywh {150 215 25 25} down_box DOWN_BOX labelsize 11
+          }
+        }
+      }
+      Fl_Group {} {
+        label {HFE file interfacemode} open
+        xywh {325 -1 160 105} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
+      } {
+        Fl_Check_Button chk_hfr_autoifmode {
+          label Auto
+          xywh {335 54 25 25} down_box DOWN_BOX labelsize 12
+        }
+        Fl_Check_Button chk_hfe_doublestep {
+          label {Double Step}
+          xywh {335 72 25 22} down_box DOWN_BOX labelsize 12
+        }
+        Fl_Button {} {
+          label Load
+          xywh {425 59 50 17} labelsize 12
+        }
+        Fl_Button {} {
+          label Save
+          xywh {425 76 50 16} labelsize 12
+        }
+        Fl_Choice choice_hfeifmode {open
+          xywh {335 24 140 20} down_box BORDER_BOX labelsize 12 textsize 12
+        } {}
+      }
+      Fl_Button {} {
+        label {Load config file}
+        xywh {395 173 90 25} labelsize 12
+      }
+      Fl_Button {} {
+        label {Save config file}
+        xywh {395 199 90 25} labelsize 12
+      }
+      Fl_Button {} {
+        label OK
+        callback {((Fl_Window*)(o->parent()))->hide();} selected
+        xywh {395 234 90 25} labelsize 12
+      }
+    }
+  }
+} 
