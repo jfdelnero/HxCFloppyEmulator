@@ -201,11 +201,35 @@ SOURCE=.\about_gui.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cb_batch_converter_window.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=.\cb_batch_converter_window.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\cb_rawfile_loader_window.cxx
 # End Source File
 # Begin Source File
 
 SOURCE=.\cb_rawfile_loader_window.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\cb_usbhxcfecfg_window.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=.\cb_usbhxcfecfg_window.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\fl_dnd_box.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=.\fl_dnd_box.h
 # End Source File
 # Begin Source File
 
@@ -259,6 +283,14 @@ SOURCE=.\msg_txt.h
 
 SOURCE=.\soft_cfg_file.cxx
 # End Source File
+# Begin Source File
+
+SOURCE=.\WIN32_API.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\WIN32_API.h
+# End Source File
 # End Group
 # Begin Group "FTDI_FloppyEmulator"
 
@@ -292,10 +324,6 @@ SOURCE=..\common\usb_floppyemulator\variablebitrate.c
 SOURCE=..\common\usb_floppyemulator\variablebitrate.h
 # End Source File
 # End Group
-# Begin Source File
-
-SOURCE=..\win32\WIN32_API.c
-# End Source File
 # End Group
 # Begin Group "Header Files"
 

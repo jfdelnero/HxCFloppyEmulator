@@ -2,6 +2,8 @@
 
 #include "usbhxcfecfg_window.h"
 
+extern void tick_usb(void *v);
+
 void usbhxcfecfg_window::cb_OK_i(Fl_Button* o, void*) {
   ((Fl_Window*)(o->parent()))->hide();
 }
@@ -128,4 +130,5 @@ usbhxcfecfg_window::usbhxcfecfg_window() {
     } // Fl_Button* o
     window->end();
   } // Fl_Double_Window* window
+  tick_usb(this);
 }

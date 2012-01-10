@@ -7,13 +7,11 @@
 #include <FL/Fl_Check_Button.H>
 extern void raw_loader_window_datachanged(Fl_Widget*, void*);
 #include <FL/Fl_Value_Input.H>
-//extern void raw_loader_window_datachanged(Fl_Value_Input*, void*);
 #include <FL/Fl_Output.H>
 #include <FL/Fl_Button.H>
 extern void raw_loader_window_bt_loadrawfile(Fl_Button*, void*);
 extern void raw_loader_window_bt_createemptyfloppy(Fl_Button*, void*);
 #include <FL/Fl_Choice.H>
-//extern void raw_loader_window_datachanged(Fl_Choice*, void*);
 
 class rawfile_loader_window {
 public:
