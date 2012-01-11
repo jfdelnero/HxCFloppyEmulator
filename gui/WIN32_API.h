@@ -31,13 +31,13 @@ typedef struct threadinit_
 {
 	THREADFUNCTION thread;
 	HXCFLOPPYEMULATOR * hxcfloppyemulatorcontext;
-	HWINTERFACE * hwcontext;
+	void * hwcontext;
 }threadinit;
 
 int getlistoffile(char * directorypath,char *** filelist);
 char * getcurrentdirectory(char *currentdirectory,int buffersize);
 int loaddiskplugins(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,char *pluginpath);
-int hxc_createthread(HXCFLOPPYEMULATOR* floppycontext,HWINTERFACE* hwcontext,THREADFUNCTION thread,int priority);
+int hxc_createthread(HXCFLOPPYEMULATOR* floppycontext,void* hwcontext,THREADFUNCTION thread,int priority);
 //int createthread(HXCFLOPPYEMULATOR* floppycontext,THREADFUNCTION thread,int priority);
 unsigned long hxc_createevent(HXCFLOPPYEMULATOR* floppycontext,unsigned char id);
 

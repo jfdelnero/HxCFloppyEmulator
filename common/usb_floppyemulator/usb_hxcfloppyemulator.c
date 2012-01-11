@@ -806,7 +806,7 @@ int HW_CPLDFloppyEmulator_init(HXCFLOPPYEMULATOR* floppycontext,HWINTERFACE * hw
 		hwif->drive_select_source=0;
 		
 		hxc_createevent(floppycontext,0);
-		hxc_createthread(floppycontext,hwif,&ftdichiplistener,1);		
+		hxc_createthread(floppycontext,hwif,&ftdichiplistener,1);
 	}
 	else
 	{
