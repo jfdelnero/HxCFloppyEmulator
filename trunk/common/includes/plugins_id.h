@@ -62,3 +62,5 @@
 #define	PLUGIN_BBC_ADL				"BBC_ADL"
 #define	PLUGIN_BBC_SSD_DSD			"BBC_SSD_DSD"
 #define	PLUGIN_FEI					"FEI"
+
+#define	PLUGIN_AUTOSELECT			"AUTOSELECT"

@@ -16,7 +16,6 @@ extern "C"
 	#include "hxc_floppy_emulator.h"
 	#include "../usb_floppyemulator/usb_hxcfloppyemulator.h"
 	#include "os_api.h"
-
 }
 
 
@@ -208,7 +207,7 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 
 						tempstr=(unsigned char*)malloc(1024);
 						sprintf((char*)tempstr,"Entering directory %s",FindFileData.filename);
-						//SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
+						params->windowshwd->strout_convert_status->value((const char*)tempstr);
 
 						if(browse_and_convert_directory(floppycontext,(char*)fullpath,destinationfolder,file,output_file_format,params))
 						{
@@ -223,7 +222,7 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 						floppycontext->hxc_printf(MSG_INFO_1,"Leaving directory %s",FindFileData.filename);
 						
 						sprintf((char*)tempstr,"Leaving directory %s",FindFileData.filename);
-						//SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
+						params->windowshwd->strout_convert_status->value((const char*)tempstr);
 						free(tempstr);
 						
 					}
@@ -256,7 +255,6 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 									printf("Load error! error %d\n",ret);
 								break;
 							}
-
 						}
 						else
 						{
@@ -274,13 +272,18 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 							}
 						
 							//printf("Creating file %s\n",destinationfile);
-
-							ret=1;
-
-							hxcfe_selectContainer(flopemu,ff_type_list[output_file_format].plug_id);
 							strcat(destinationfile,ff_type_list[output_file_format].ext);							
-							
+
+							ret=hxcfe_selectContainer(floppycontext,ff_type_list[output_file_format].plug_id);
+							if(!ret)
+							{			
+								//	hxcfe_floppyGetSetParams(floppycontext,thefloppydisk,SET,DOUBLESTEP,&hwif->double_step);
+								//	hxcfe_floppyGetSetParams(floppycontext,thefloppydisk,SET,INTERFACEMODE,&hwif->interface_mode);
+								ret=hxcfe_floppyExport(floppycontext,thefloppydisk,destinationfile);
+							}
+
 							hxcfe_floppyUnload(floppycontext,thefloppydisk);
+							hxcfe_selectContainer(floppycontext,PLUGIN_AUTOSELECT);
 
 							tempstr=(unsigned char*)malloc(1024);
 							
@@ -293,13 +296,13 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 							if(!ret)
 							{
 								sprintf((char*)tempstr,"%s created",&destinationfile[i]);
-								//SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
+								params->windowshwd->strout_convert_status->value((const char*)tempstr);
 								params->numberoffileconverted++;
 							}
 							else
 							{
 								sprintf((char*)tempstr,"Error cannot create %s",&destinationfile[i]);
-								//SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
+								params->windowshwd->strout_convert_status->value((const char*)tempstr);
 							}
 
 							free(destinationfile);
@@ -321,54 +324,76 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 	return 0;
 }
 
-
-
-/*DWORD WINAPI BatchConverterThreadProc( LPVOID lpParameter)
+int convertthread(void* floppycontext,void* hw_context)
 {
+	
+	HXCFLOPPYEMULATOR* floppyem;
+	batch_converter_window *bcw;
+	batchconverterparams bcparams;
 	char * tempstr;
-	batchconverterparams * params;
 
-	params=(batchconverterparams*)lpParameter;
-	SetThreadPriority(GetCurrentThread(),IDLE_PRIORITY_CLASS);
+	floppyem=(HXCFLOPPYEMULATOR*)floppycontext;
+	bcw=(batch_converter_window *)hw_context;
+
+	memset(&bcparams,0,sizeof(batchconverterparams));
+	strcat((char*)&bcparams.sourcedir,bcw->strin_src_dir->value());
+	strcat((char*)&bcparams.destdir,bcw->strin_dst_dir->value());
+	bcparams.windowshwd=bcw;
 	
-	params->numberoffileconverted=0;
-	browse_and_convert_directory(params->flopemu,params->sourcedir,params->destdir,"*.*",params->fileformat,params);
-
-	tempstr=(char*)malloc(1024);
-	sprintf(tempstr,"%d files converted!",params->numberoffileconverted);
-	SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
-	free(tempstr);
-	EnableWindow(GetDlgItem(params->windowshwd, IDBATCHCONV),TRUE);
-
-
-	return 0;	
-}*/
-
-/*DWORD WINAPI DragandDropConvertThreadProc( LPVOID lpParameter)
-{
-	char * tempstr;
-	batchconverterparams * params;
-
-	params=(batchconverterparams*)lpParameter;
-	SetThreadPriority(GetCurrentThread(),IDLE_PRIORITY_CLASS);
+	if(strlen(bcparams.sourcedir) && strlen(bcparams.destdir))
+	{
 	
-	params->numberoffileconverted=0;
-	draganddropconvert(params->flopemu,params->filelist,params->destdir,params->fileformat,params);
+		browse_and_convert_directory(	flopemu,
+										bcparams.sourcedir,
+										bcparams.destdir,
+										"*.*",
+										bcw->choice_file_format->value(),
+										&bcparams);
 
-	tempstr=(char*)malloc(1024);
-	sprintf(tempstr,"%d files converted!",params->numberoffileconverted);
-	SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
-
-
-	EnableWindow(GetDlgItem(params->windowshwd, IDBATCHCONV),TRUE);
-	DragAcceptFiles(params->windowshwd,TRUE);
-
-	free(params->filelist);
-	free(params);
+		tempstr=(char*)malloc(1024);
+		sprintf(tempstr,"%d files converted!",bcparams.numberoffileconverted);
+		bcparams.windowshwd->strout_convert_status->value((const char*)tempstr);
+		free(tempstr);
+	}
 	
+	bcw->bt_convert->activate();
 	return 0;
-}*/
+}
 
+int draganddropconvertthread(void* floppycontext,void* hw_context)
+{
+	
+	HXCFLOPPYEMULATOR* floppyem;
+	batch_converter_window *bcw;
+	batchconverterparams bcparams;
+	char * tempstr;
+
+	floppyem=(HXCFLOPPYEMULATOR*)floppycontext;
+	bcw=(batch_converter_window *)hw_context;
+
+	memset(&bcparams,0,sizeof(batchconverterparams));
+	strcat((char*)&bcparams.sourcedir,bcw->strin_src_dir->value());
+	strcat((char*)&bcparams.destdir,bcw->strin_dst_dir->value());
+	bcparams.windowshwd=bcw;
+	
+	if(strlen(bcparams.destdir))
+	{
+	
+/*		draganddropconvert(	flopemu,
+							char ** filelist,
+							bcparams.destdir,
+							bcw->choice_file_format->value(),
+							&bcparams)*/
+
+		tempstr=(char*)malloc(1024);
+		sprintf(tempstr,"%d files converted!",bcparams.numberoffileconverted);
+		bcparams.windowshwd->strout_convert_status->value((const char*)tempstr);
+		free(tempstr);
+	}
+	
+	bcw->bt_convert->activate();
+	return 0;
+}
 
 
 int select_dir(char * title,char * str) 
@@ -411,20 +436,8 @@ void batch_converter_window_bt_convert(Fl_Button* bt, void*)
 
 	dw=((Fl_Window*)(bt->parent()));
 	bcw=(batch_converter_window *)dw->user_data();
-
-
-/*	totalsector=(int)(rlw->innum_nbtrack->value() * 	rlw->innum_sectorpertrack->value());
-	if(rlw->chk_twosides->value())
-		totalsector=totalsector*2;
-
-	sprintf((char*)temp,"%d",totalsector);
-
-	rlw->strout_totalsector->value((const char*)temp);
-	totalsize=totalsector * (128<<rlw->choice_sectorsize->value());
-	sprintf((char*)temp,"%d",totalsize);
-	rlw->strout_totalsize->value((const char*)temp);*/
-
-
+	bcw->bt_convert->deactivate();
+	hxc_createthread(flopemu,bcw,&convertthread,1);
 }
 
 void batch_converter_window_bt_select_src(Fl_Button* bt, void*)
@@ -467,8 +480,18 @@ void dnd_bc_conv(const char *urls)
 
 void dnd_bc_cb(Fl_Widget *o, void *v)
 {
+	batch_converter_window *bcw;
+	Fl_Window *dw;
     Fl_DND_Box *dnd = (Fl_DND_Box*)o;
 
+	dw=((Fl_Window*)(o->parent()));
+	bcw=(batch_converter_window *)dw->user_data();
+
     if(dnd->event() == FL_PASTE)
-        dnd_bc_conv(dnd->event_text());
+	{
+//        dnd_bc_conv(dnd->event_text());
+		bcw->bt_convert->deactivate();
+		hxc_createthread(flopemu,bcw,&draganddropconvertthread,1);
+
+	}
 }
