@@ -24,7 +24,12 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 */
+
+
 typedef int (*THREADFUNCTION) (void* floppyemulator,void* hwemulator);
+
+int hxc_createthread(HXCFLOPPYEMULATOR* floppycontext,void* hwcontext,THREADFUNCTION thread,int priority);
+
 
 int getlistoffile(unsigned char * directorypath,unsigned char *** filelist);
 char * getcurrentdirectory(char *currentdirectory,int buffersize);
