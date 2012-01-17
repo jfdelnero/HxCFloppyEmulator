@@ -233,6 +233,14 @@ SOURCE=.\cb_usbhxcfecfg_window.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\fileselector.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=.\fileselector.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\fl_dnd_box.cxx
 # End Source File
 # Begin Source File
