@@ -217,6 +217,14 @@ SOURCE=.\cb_rawfile_loader_window.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cb_sdhxcfecfg_window.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=.\cb_sdhxcfecfg_window.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\cb_usbhxcfecfg_window.cxx
 # End Source File
 # Begin Source File
