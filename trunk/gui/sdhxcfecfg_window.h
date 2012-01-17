@@ -6,10 +6,15 @@
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Slider.H>
+extern void sdhxcfecfg_window_datachanged(Fl_Slider*, void*);
 #include <FL/Fl_Value_Slider.H>
+extern void sdhxcfecfg_window_datachanged(Fl_Value_Slider*, void*);
 #include <FL/Fl_Check_Button.H>
+extern void sdhxcfecfg_window_datachanged(Fl_Check_Button*, void*);
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Choice.H>
+extern void sdhxcfecfg_window_bt_load(Fl_Button*, void*);
+extern void sdhxcfecfg_window_bt_save(Fl_Button*, void*);
 
 class sdhxcfecfg_window {
 public:
