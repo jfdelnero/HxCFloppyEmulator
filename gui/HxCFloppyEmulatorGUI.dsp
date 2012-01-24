@@ -209,6 +209,14 @@ SOURCE=.\cb_batch_converter_window.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cb_floppy_dump_window.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=.\cb_floppy_dump_window.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\cb_rawfile_loader_window.cxx
 # End Source File
 # Begin Source File
