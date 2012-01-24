@@ -7,7 +7,7 @@ class floppy_dump_window {open
   Function {floppy_dump_window()} {open
   } {
     Fl_Window window {
-      label {Floppy disk dump} open selected
+      label {Floppy disk dump} open
       xywh {102 121 474 427} type Double visible
     } {
       Fl_Group {} {
@@ -52,12 +52,14 @@ class floppy_dump_window {open
       }
       Fl_Button {} {
         label OK
-        callback cb_ok
+        user_data this
+        callback floppy_dump_ok
         xywh {215 130 80 25}
       }
       Fl_Button {} {
         label {Read Disk}
-        callback cb_read_disk
+        user_data this
+        callback floppy_dump_window_bt_read selected
         xywh {315 130 80 25}
       }
       Fl_Group {} {
