@@ -68,6 +68,7 @@ trackmode tm[]=
 
 };
 
+floppydumperparams fdp;
 
 
 static int checkversion(void)
@@ -543,7 +544,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 	}
 
 	sprintf(tempstr,"Error while opening fdrawcmd, see: http://simonowen.com/fdrawcmd");
-	params->windowshwd->current_status->value(tempstr);
+	params->windowshwd->global_status->value(tempstr);
 
 	free(tempstr);
 
@@ -560,7 +561,7 @@ void floppy_dump_window_bt_read(Fl_Button* bt, void*)
 	char tempstr[512];
 	floppy_dump_window *fdw;
 	Fl_Window *dw;
-	floppydumperparams fdp;
+	
 	dw=((Fl_Window*)(bt->parent()));
 	fdw=(floppy_dump_window *)dw->user_data();
 	
