@@ -247,6 +247,20 @@ int bitslookingfor(unsigned char * input_data,unsigned long intput_data_size,uns
 }
 */
 
+void sortbuffer(unsigned char * buffer,unsigned char * outbuffer,int size)
+{
+	int i;
+	unsigned short * word_outbuffer,w;
+
+	word_outbuffer=(unsigned short *)outbuffer;
+	for(i=0;i<(size/2);i++)
+	{
+		w=(biteven[buffer[i]]<<1)| (biteven[buffer[i+(size/2)]]);
+		word_outbuffer[i]=(w>>8) | (w<<8);
+	}
+
+}
+
 
 #define LOOKFOR_GAP1 0x01
 #define LOOKFOR_ADDM 0x02
@@ -266,15 +280,12 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 	unsigned char CRC16_High;
 	unsigned char CRC16_Low;
 	int sector_extractor_sm;
-	int number_of_sector;
 	int k;
 	unsigned char crctable[32];
 	
 	memset(sector,0,sizeof(SECTORCONFIG));
 	
 	bit_offset=track_offset;
-
-	number_of_sector=0;
 	
 	sector_extractor_sm=LOOKFOR_GAP1;
 
@@ -315,7 +326,6 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 				
 					if(!CRC16_High && !CRC16_Low)
 					{ // crc ok !!! 
-						number_of_sector++;
  						floppycontext->hxc_printf(MSG_DEBUG,"Valid MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
 						old_bit_offset=bit_offset;
 						mfm_buffer[0]=0x44;
@@ -329,15 +339,12 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 						sector_size = sectorsize[tmp_buffer[7]&0x7];
 						bit_offset_bak=bit_offset;
 						bit_offset=bitslookingfor(track->databuffer,track->tracklen,mfm_buffer,6*8,bit_offset);
-						
-						//sectors->number_of_sector++;
-						
+												
 						sector->cylinder = tmp_buffer[4];
 						sector->head = tmp_buffer[5];
 						sector->sector = tmp_buffer[6];
 						sector->sectorsize = sectorsize[tmp_buffer[7]&0x7];
 						sector->trackencoding = IBMFORMAT_DD;
-						//sectors->sectorlist[sectors->number_of_sector-1]->type
 
 						if(bit_offset==-1)
 						{
@@ -404,6 +411,105 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 	return bit_offset;
 }
 
+
+int get_next_AMIGAMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFIG * sector_conf,int track_offset)
+{
+	int bit_offset,old_bit_offset;
+	int sector_size;
+	unsigned char mfm_buffer[32];
+	unsigned char tmp_buffer[32];
+	unsigned char sector[544];
+	unsigned char temp_sector[512];
+	int sector_extractor_sm;
+	
+	memset(sector,0,sizeof(SECTORCONFIG));
+	
+	bit_offset=track_offset;
+	
+	sector_extractor_sm=LOOKFOR_GAP1;
+
+	do
+	{
+		switch(sector_extractor_sm)
+		{
+			case LOOKFOR_GAP1:
+
+				mfm_buffer[0]=0xAA;
+				mfm_buffer[1]=0xAA;
+				mfm_buffer[2]=0x44;
+				mfm_buffer[3]=0x89;
+				mfm_buffer[4]=0x44;
+				mfm_buffer[5]=0x89;
+
+				bit_offset=bitslookingfor(track->databuffer,track->tracklen,mfm_buffer,6*8,bit_offset);
+						
+				if(bit_offset!=-1)
+				{		
+					sector_extractor_sm=LOOKFOR_ADDM;
+				}
+				else
+				{
+					sector_extractor_sm=ENDOFTRACK;
+				}
+			break;
+
+			case LOOKFOR_ADDM:
+				bit_offset=bit_offset-(8*2);
+				mfmtobin(track->databuffer,track->tracklen,sector,544,bit_offset,0);
+				sortbuffer(&sector[4],tmp_buffer,4);
+			    memcpy(&sector[4],tmp_buffer,4);
+
+				if(tmp_buffer[0]==0xFF)
+				{
+
+					sortbuffer(&sector[24],tmp_buffer,4);
+					memcpy(&sector[24],tmp_buffer,4);
+					
+					sortbuffer(&sector[32],temp_sector,512);		
+					memcpy(&sector[32],temp_sector,512);
+					sector_size=512;
+					floppycontext->hxc_printf(MSG_DEBUG,"Valid Amiga MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",sector[5]>>1,sector[5]&1,sector[6],sector_size);
+					old_bit_offset=bit_offset;
+						
+					sector_conf->cylinder=sector[5]>>1;
+					sector_conf->head=sector[5]&1;
+					sector_conf->sector=sector[6];
+					sector_conf->sectorsize=sector_size;
+					sector_conf->trackencoding = AMIGAFORMAT_DD;
+				
+					if(1)
+					{ // crc ok !!! 
+					//	floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
+					}
+
+					sector_conf->input_data=(unsigned char*)malloc(sector_size);
+					memcpy(sector_conf->input_data,&sector[32],sector_size);
+
+					bit_offset=bit_offset+(sector_size*2);
+											
+				}
+				else
+				{
+					bit_offset=bit_offset+(8*2)+1;
+					sector_extractor_sm=ENDOFSECTOR;
+				}
+
+				sector_extractor_sm=ENDOFSECTOR;
+			break;
+
+			case ENDOFTRACK:
+			
+			break;
+
+			default:
+				sector_extractor_sm=ENDOFTRACK;
+			break;
+
+		}
+	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+
+	return bit_offset;
+}
 
 int analysis_and_extract_sector_MFM(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,sect_track * sectors)
 {
@@ -552,19 +658,6 @@ int analysis_and_extract_sector_MFM(HXCFLOPPYEMULATOR* floppycontext,SIDE * trac
 }
 
 
-void sortbuffer(unsigned char * buffer,unsigned char * outbuffer,int size)
-{
-	int i;
-	unsigned short * word_outbuffer,w;
-
-	word_outbuffer=(unsigned short *)outbuffer;
-	for(i=0;i<(size/2);i++)
-	{
-		w=(biteven[buffer[i]]<<1)| (biteven[buffer[i+(size/2)]]);
-		word_outbuffer[i]=(w>>8) | (w<<8);
-	}
-
-}
 
 int analysis_and_extract_sector_AMIGAMFM(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,sect_track * sectors)
 {
@@ -1015,7 +1108,7 @@ SECTORSEARCH* hxcfe_initSectorSearch(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp
 	return ss;
 }
 
-SECTORCONFIG* hxcfe_getNextSector(SECTORSEARCH* ss,int track,int side)
+SECTORCONFIG* hxcfe_getNextSector(SECTORSEARCH* ss,int track,int side,int type)
 {
 	SECTORCONFIG * sc;
 	int bitoffset;
@@ -1030,7 +1123,24 @@ SECTORCONFIG* hxcfe_getNextSector(SECTORSEARCH* ss,int track,int side)
 
 	sc=(SECTORCONFIG *) malloc(sizeof(SECTORCONFIG));
 	
-	bitoffset=get_next_MFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+	switch(type)
+	{
+		case ISOIBM_MFM_ENCODING:
+			bitoffset=get_next_MFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+		break;
+		case AMIGA_MFM_ENCODING:
+			bitoffset=get_next_AMIGAMFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+		break;
+		case ISOIBM_FM_ENCODING:
+			bitoffset=-1;
+		break;
+		case EMU_FM_ENCODING:
+			bitoffset=-1;
+		break;
+		default:
+			bitoffset=-1;
+		break;
+	}
 
 	ss->bitoffset=bitoffset;
 
@@ -1043,7 +1153,7 @@ SECTORCONFIG* hxcfe_getNextSector(SECTORSEARCH* ss,int track,int side)
 	}
 }
 
-SECTORCONFIG* hxcfe_searchSector(SECTORSEARCH* ss,int track,int side,int id)
+SECTORCONFIG* hxcfe_searchSector(SECTORSEARCH* ss,int track,int side,int id,int type)
 {
 	SECTORCONFIG * sc;
 	int bitoffset;
@@ -1053,6 +1163,25 @@ SECTORCONFIG* hxcfe_searchSector(SECTORSEARCH* ss,int track,int side,int id)
 	do
 	{
 		bitoffset=get_next_MFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+
+		switch(type)
+		{
+			case ISOIBM_MFM_ENCODING:
+				bitoffset=get_next_MFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+			break;
+			case AMIGA_MFM_ENCODING:
+				bitoffset=get_next_AMIGAMFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+			break;
+			case ISOIBM_FM_ENCODING:
+				bitoffset=-1;
+			break;
+			case EMU_FM_ENCODING:
+				bitoffset=-1;
+			break;
+			default:
+				bitoffset=-1;
+			break;
+		}
 	}while(bitoffset!=-1 && (sc->sector!=id));
 
 	ss->bitoffset=bitoffset;
@@ -1084,9 +1213,21 @@ int hxcfe_getFloppySize(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,int * nbsect
 	int nbofsector;
 	int track;
 	int side;
+	int i,type,secfound,t;
+	int typetab[8];
 
 	floppysize=0;
 	nbofsector=0;
+
+	type=0;
+	secfound=0;
+
+	i=0;
+	typetab[i++]=ISOIBM_MFM_ENCODING;
+	typetab[i++]=AMIGA_MFM_ENCODING;
+	typetab[i++]=ISOIBM_FM_ENCODING;
+	typetab[i++]=EMU_FM_ENCODING;
+	typetab[i++]=-1;
 
 	ss=hxcfe_initSectorSearch(floppycontext,fp);
 	if(ss)
@@ -1095,16 +1236,35 @@ int hxcfe_getFloppySize(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,int * nbsect
 		{
 			for(side=0;side<fp->floppyNumberOfSide;side++)
 			{
-				do
-				{
-					sc=hxcfe_getNextSector(ss,track,side);
-					if(sc)
+				secfound=0;
+				type=0;
+
+				do{
+					do
 					{
-						floppysize=floppysize+sc->sectorsize;
-						nbofsector++;
+						sc=hxcfe_getNextSector(ss,track,side,typetab[type]);
+						if(sc)
+						{
+							floppysize=floppysize+sc->sectorsize;
+							nbofsector++;
+							secfound=1;
+						}
+						hxcfe_freeSectorConfig(ss,sc);
+					}while(sc);
+
+					if(!secfound)
+					{
+						type++;
 					}
-					hxcfe_freeSectorConfig(ss,sc);
-				}while(sc);
+
+				}while(type<4 && !secfound);
+
+				if(secfound)
+				{
+					t=typetab[0];
+					typetab[0]=typetab[type];
+					typetab[type]=t;
+				}
 			}
 		}
 	}
@@ -1117,7 +1277,7 @@ int hxcfe_getFloppySize(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,int * nbsect
 
 }
 
-int hxcfe_readSectorData(SECTORSEARCH* ss,int track,int side,int sector,int numberofsector,int sectorsize,unsigned char * buffer)
+int hxcfe_readSectorData(SECTORSEARCH* ss,int track,int side,int sector,int numberofsector,int sectorsize,int type,unsigned char * buffer)
 {
 	SECTORCONFIG * sc;
 	int bitoffset;
@@ -1133,7 +1293,25 @@ int hxcfe_readSectorData(SECTORSEARCH* ss,int track,int side,int sector,int numb
 	memset(sc,0,sizeof(SECTORCONFIG));
 	do
 	{
-		bitoffset=get_next_MFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+		switch(type)
+		{
+			case ISOIBM_MFM_ENCODING:
+				bitoffset=get_next_MFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+			break;
+			case AMIGA_MFM_ENCODING:
+				bitoffset=get_next_AMIGAMFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+			break;
+			case ISOIBM_FM_ENCODING:
+				bitoffset=-1;
+			break;
+			case EMU_FM_ENCODING:
+				bitoffset=-1;
+			break;
+			default:
+				bitoffset=-1;
+			break;
+		}
+
 
 		if(bitoffset!=-1 && ((sc->sector>=sector) && (sc->sector < ( sector + numberofsector )) ) )
 		{

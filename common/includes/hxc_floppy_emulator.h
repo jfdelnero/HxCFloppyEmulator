@@ -170,11 +170,11 @@ typedef struct SECTORSEARCH_
 
 
 SECTORSEARCH* hxcfe_initSectorSearch(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
-SECTORCONFIG* hxcfe_getNextSector(SECTORSEARCH* ss,int track,int side);
-SECTORCONFIG* hxcfe_searchSector(SECTORSEARCH* ss,int track,int side,int id);
+SECTORCONFIG* hxcfe_getNextSector(SECTORSEARCH* ss,int track,int side,int type);
+SECTORCONFIG* hxcfe_searchSector(SECTORSEARCH* ss,int track,int side,int id,int type);
 int hxcfe_getSectorSize(SECTORSEARCH* ss,SECTORCONFIG* sc);
 unsigned char * hxcfe_getSectorData(SECTORSEARCH* ss,SECTORCONFIG* sc);
-int hxcfe_readSectorData(SECTORSEARCH* ss,int track,int side,int sector,int numberofsector,int sectorsize,unsigned char * buffer);
+int hxcfe_readSectorData(SECTORSEARCH* ss,int track,int side,int sector,int numberofsector,int sectorsize,int type,unsigned char * buffer);
 void hxcfe_freeSectorConfig(SECTORSEARCH* ss,SECTORCONFIG* sc);
 void hxcfe_deinitSectorSearch(SECTORSEARCH* ss);
 
