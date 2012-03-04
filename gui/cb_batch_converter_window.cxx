@@ -1,3 +1,48 @@
+/*
+//
+// Copyright (C) 2006-2012 Jean-François DEL NERO
+//
+// This file is part of HxCFloppyEmulator.
+//
+// HxCFloppyEmulator may be used and distributed without restriction provided
+// that this copyright statement is not removed from the file and that any
+// derivative work contains the original copyright notice and the associated
+// disclaimer.
+//
+// HxCFloppyEmulator is free software; you can redistribute it
+// and/or modify  it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// HxCFloppyEmulator is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//   See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with HxCFloppyEmulator; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+//
+*/
+///////////////////////////////////////////////////////////////////////////////////
+//-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
+//-----------H----H--X----X-----CCCCC----22222----0000-----0000------11----------//
+//----------H----H----X-X-----C--------------2---0----0---0----0--1--1-----------//
+//---------HHHHHH-----X------C----------22222---0----0---0----0-----1------------//
+//--------H----H----X--X----C----------2-------0----0---0----0-----1-------------//
+//-------H----H---X-----X---CCCCC-----222222----0000-----0000----1111------------//
+//-------------------------------------------------------------------------------//
+//----------------------------------------------------- http://hxc2001.free.fr --//
+///////////////////////////////////////////////////////////////////////////////////
+// File : cb_batch_converter_window.cxx
+// Contains: Batch converter window
+//
+// Written by:	DEL NERO Jean Francois
+//
+// Change History (most recent first):
+///////////////////////////////////////////////////////////////////////////////////
+
 #include "batch_converter_window.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -428,11 +473,8 @@ int select_dir(char * title,char * str)
 
 void batch_converter_window_bt_convert(Fl_Button* bt, void*)
 {
-	int totalsector,totalsize;
-	int temp[256];
 	batch_converter_window *bcw;
 	Fl_Window *dw;
-
 
 	dw=((Fl_Window*)(bt->parent()));
 	bcw=(batch_converter_window *)dw->user_data();
@@ -442,7 +484,6 @@ void batch_converter_window_bt_convert(Fl_Button* bt, void*)
 
 void batch_converter_window_bt_select_src(Fl_Button* bt, void*)
 {
-	char * dir;
 	char dirstr[512];
 	batch_converter_window *bcw;
 	Fl_Window *dw;
@@ -458,7 +499,6 @@ void batch_converter_window_bt_select_src(Fl_Button* bt, void*)
 
 void batch_converter_window_bt_select_dst(Fl_Button* bt, void*)
 {
-	char * dir;
 	char dirstr[512];
 	batch_converter_window *bcw;
 	Fl_Window *dw;
@@ -482,14 +522,14 @@ void dnd_bc_cb(Fl_Widget *o, void *v)
 {
 	batch_converter_window *bcw;
 	Fl_Window *dw;
-    Fl_DND_Box *dnd = (Fl_DND_Box*)o;
+	Fl_DND_Box *dnd = (Fl_DND_Box*)o;
 
 	dw=((Fl_Window*)(o->parent()));
 	bcw=(batch_converter_window *)dw->user_data();
 
-    if(dnd->event() == FL_PASTE)
+	if(dnd->event() == FL_PASTE)
 	{
-//        dnd_bc_conv(dnd->event_text());
+//	dnd_bc_conv(dnd->event_text());
 		bcw->bt_convert->deactivate();
 		hxc_createthread(flopemu,bcw,&draganddropconvertthread,1);
 

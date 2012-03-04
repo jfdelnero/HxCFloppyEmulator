@@ -89,7 +89,6 @@ void hxc_pause(int ms)
 	Sleep(ms);
 }
 
-
 int hxc_createthread(HXCFLOPPYEMULATOR* floppycontext,void* hwcontext,THREADFUNCTION thread,int priority)
 {
 	DWORD sit;

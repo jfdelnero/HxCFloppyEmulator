@@ -120,9 +120,11 @@ rawfile_loader_window::rawfile_loader_window() {
     } // Fl_Button* o
     { Fl_Button* o = new Fl_Button(452, 79, 95, 30, "Save config");
       o->labelsize(12);
+      o->callback((Fl_Callback*)raw_loader_window_bt_savecfg, (void*)(this));
     } // Fl_Button* o
     { Fl_Button* o = new Fl_Button(452, 111, 95, 30, "Load config");
       o->labelsize(12);
+      o->callback((Fl_Callback*)raw_loader_window_bt_loadcfg, (void*)(this));
     } // Fl_Button* o
     { Fl_Button* o = new Fl_Button(452, 145, 95, 30, "Cancel");
       o->labelsize(12);
