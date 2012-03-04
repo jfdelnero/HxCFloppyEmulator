@@ -8,7 +8,7 @@ class rawfile_loader_window {open
   } {
     Fl_Window window {
       label {RAW File format configuration}
-      user_data this open selected
+      user_data this open
       xywh {63 94 559 229} type Double visible
     } {
       Fl_Check_Button chk_twosides {
@@ -120,15 +120,19 @@ class rawfile_loader_window {open
       Fl_Button {} {
         label {Create Empty Floppy}
         user_data this
-        callback raw_loader_window_bt_createemptyfloppy
+        callback raw_loader_window_bt_createemptyfloppy selected
         xywh {452 47 95 30} labelsize 12 align 128
       }
       Fl_Button {} {
         label {Save config}
+        user_data this
+        callback raw_loader_window_bt_savecfg
         xywh {452 79 95 30} labelsize 12
       }
       Fl_Button {} {
         label {Load config}
+        user_data this
+        callback raw_loader_window_bt_loadcfg
         xywh {452 111 95 30} labelsize 12
       }
       Fl_Button {} {
