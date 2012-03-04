@@ -50,11 +50,20 @@
 #include <sys/stat.h>
 #include <direct.h>
 
+
+#include <FL/Fl.H>
+#include <FL/Fl_Window.H>
+#include <FL/Fl_Box.H>
+#include <FL/filename.H>
+#include <FL/Fl_Button.H>
+#include <FL/Fl_Menu_Bar.H>
+#include <FL/Fl_Progress.H>
+#include <FL/Fl_Text_Display.H>
 #include <FL/Fl_File_Browser.H>
 #include <FL/Fl_File_Chooser.H>
 #include <FL/Fl_Native_File_Chooser.H>
+#include <FL/Fl_Timer.H>
 
-#include "fl_dnd_box.h"
 
 #include <windows.h>
 
@@ -115,6 +124,33 @@ trackmode tm[]=
 
 floppydumperparams fdp;
 
+
+void tick_dump(void *v) {
+	floppy_dump_window *window;
+	Fl_Window *dw;
+	unsigned char * ptr1;
+	int i,j,k;
+
+	window=(floppy_dump_window *)v;
+
+	window->make_current();
+	//uintro_getnextframe(window->ui_context);
+
+	ptr1=mapfloppybuffer;
+	k=0;
+	j=0;
+	/*for(i=0;i<460*200;i++)
+	{
+		ptr1[j++]=ptr1[k+2];
+		ptr1[j++]=ptr1[k+1];
+		ptr1[j++]=ptr1[k+0];
+		k=k+4;
+	}*/
+
+	fl_draw_image((unsigned char *)ptr1, 8, 210, 460, 200, 3, 0);
+
+	Fl::repeat_timeout(0.04, tick_dump, v);  
+}
 
 static int checkversion(void)
 {
@@ -557,7 +593,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 						numberofsector_read++;
 
 						sprintf(tempstr,"%d Sector(s) Read, %d bytes, %d Bad sector(s)",numberofsector_read,total_size,number_of_bad_sector);
-						params->windowshwd->global_status->value(tempstr);
+						params->windowshwd->current_status->value(tempstr);
 
 					}
 				
