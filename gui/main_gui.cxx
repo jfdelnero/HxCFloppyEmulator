@@ -99,6 +99,8 @@ extern "C"
 #include "main_gui.h"
 #include "mainrouts.h"
 
+#include "cb_floppy_dump_window.h"
+
 Fl_File_Browser		*files;
 Fl_Shared_Image		*image = 0;
 
@@ -111,6 +113,9 @@ extern guicontext * gui_context;
 extern HWINTERFACE * hwif;
 int backlight_tmr,standby_tmr,step_sound,ui_sound,lcd_scroll;
 unsigned int txtindex;
+
+extern int xsize,ysize;
+extern unsigned char*mapfloppybuffer;
 
 typedef struct main_button_list_
 {
@@ -635,9 +640,9 @@ static void tick_mw(void *v) {
 			window->track_pos->value((float)hwif->current_track);
 		}
 	}
-  
+
 	Fl::repeat_timeout(0.10, tick_mw, v);
-  
+
 }
 
 Main_Window::Main_Window()
@@ -669,25 +674,25 @@ Main_Window::Main_Window()
 	}
 
 	file_name_txt = new Fl_Output(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*i++), WINDOW_XSIZE-(BUTTON_XPOS*2), 25);
-    file_name_txt->labelsize(12);
-    file_name_txt->textsize(12);
-    file_name_txt->align(FL_ALIGN_TOP_LEFT);
+	file_name_txt->labelsize(12);
+	file_name_txt->textsize(12);
+	file_name_txt->align(FL_ALIGN_TOP_LEFT);
 	file_name_txt->value("No disk loaded.");
 	file_name_txt->box(FL_PLASTIC_UP_BOX);
 
 	track_pos_str = new Fl_Output(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*i++)-10, WINDOW_XSIZE-(BUTTON_XPOS*2), 25);
-    track_pos_str->labelsize(12);
-    track_pos_str->textsize(12);
-    track_pos_str->align(FL_ALIGN_TOP_LEFT);
+	track_pos_str->labelsize(12);
+	track_pos_str->textsize(12);
+	track_pos_str->align(FL_ALIGN_TOP_LEFT);
 	track_pos_str->box(FL_PLASTIC_UP_BOX);
-	
+
 	track_pos = new Fl_Progress(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*i++)-18, WINDOW_XSIZE-(BUTTON_XPOS*2), 25);
 	track_pos->box(FL_THIN_UP_BOX);
 	track_pos->selection_color((Fl_Color)137);
 	track_pos->minimum(0);
 	track_pos->maximum(255);
 	track_pos->value(0);
-	
+
 	track_pos->box(FL_PLASTIC_UP_BOX);
 
 	group.end();
@@ -697,7 +702,7 @@ Main_Window::Main_Window()
 		
 	menutable[1].user_data_=fc_load;
 	menutable[4].user_data_=fc_save;
-    Fl_Menu_Bar menubar(0,0,WINDOW_XSIZE,24); 
+	Fl_Menu_Bar menubar(0,0,WINDOW_XSIZE,24); 
 	menubar.menu(menutable);
 
 // Fl_DND_Box is constructed with the same dimensions and at the same position as Fl_Scroll
@@ -710,13 +715,24 @@ Main_Window::Main_Window()
 	//show(argc, argv);
 	show();
 
-    tick_main(this);
-	
+	tick_main(this);
+
 	user_data((void*)(this));
-	
+
 	load_last_cfg();
 
 	this->fdump_window=new floppy_dump_window();
+	this->fdump_window->double_sided->value(1);
+	this->fdump_window->double_step->value(0);
+	this->fdump_window->number_of_retry->value(10);
+	this->fdump_window->number_of_track->value(80);
+	this->fdump_window->sel_drive_a->value(1);
+	this->fdump_window->sel_drive_b->value(0);
+	xsize=460;
+	ysize=200;
+	mapfloppybuffer=(unsigned char*)malloc(xsize*ysize*4);
+	memset(mapfloppybuffer,0,xsize*ysize*4);
+	tick_dump(this->fdump_window);
 	
 	this->batchconv_window=new batch_converter_window();
 	batchconv_window->choice_file_format->menu(format_choices);
@@ -767,8 +783,6 @@ Main_Window::Main_Window()
 
 //	Fl::dnd_text_ops(1);
 	Fl::run();
-	
-	
 }
 
 
