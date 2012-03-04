@@ -201,6 +201,10 @@ SOURCE=.\about_gui.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\basename.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=.\cb_batch_converter_window.cxx
 # End Source File
 # Begin Source File
@@ -348,6 +352,10 @@ SOURCE=..\common\usb_floppyemulator\variablebitrate.c
 SOURCE=..\common\usb_floppyemulator\variablebitrate.h
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=.\hxcfloppy.rc
+# End Source File
 # End Group
 # Begin Group "Header Files"
 

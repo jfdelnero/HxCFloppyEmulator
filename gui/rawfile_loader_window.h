@@ -11,6 +11,8 @@ extern void raw_loader_window_datachanged(Fl_Widget*, void*);
 #include <FL/Fl_Button.H>
 extern void raw_loader_window_bt_loadrawfile(Fl_Button*, void*);
 extern void raw_loader_window_bt_createemptyfloppy(Fl_Button*, void*);
+extern void raw_loader_window_bt_savecfg(Fl_Button*, void*);
+extern void raw_loader_window_bt_loadcfg(Fl_Button*, void*);
 #include <FL/Fl_Choice.H>
 
 class rawfile_loader_window {
