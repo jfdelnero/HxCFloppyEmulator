@@ -128,28 +128,16 @@ floppydumperparams fdp;
 void tick_dump(void *v) {
 	floppy_dump_window *window;
 	Fl_Window *dw;
-	unsigned char * ptr1;
-	int i,j,k;
 
 	window=(floppy_dump_window *)v;
 
-	window->make_current();
-	//uintro_getnextframe(window->ui_context);
-
-	ptr1=mapfloppybuffer;
-	k=0;
-	j=0;
-	/*for(i=0;i<460*200;i++)
+	if(window->window->shown())
 	{
-		ptr1[j++]=ptr1[k+2];
-		ptr1[j++]=ptr1[k+1];
-		ptr1[j++]=ptr1[k+0];
-		k=k+4;
-	}*/
+		window->window->make_current();
+		fl_draw_image((unsigned char *)mapfloppybuffer, 8, 210, 460, 200, 3, 0);
+	}
 
-	fl_draw_image((unsigned char *)ptr1, 8, 210, 460, 200, 3, 0);
-
-	Fl::repeat_timeout(0.04, tick_dump, v);  
+	Fl::repeat_timeout(0.02, tick_dump, v);  
 }
 
 static int checkversion(void)
@@ -239,17 +227,6 @@ static int seek(HANDLE h,int cyl, int head)
 	return 1;
 }
 
-void splashscreen(HWND  hwndDlg,unsigned char * buffer)
-{
-/*	HDC hdc;	
-
-	hdc=GetDC(hwndDlg);
-	GetClientRect(hwndDlg,&myRect);
-	StretchDIBits(hdc,16,210,xsize,ysize,0,0,xsize,ysize,buffer,bmapinfo,0,SRCCOPY);
-	ReleaseDC(hwndDlg,hdc);*/
-}
-
-//int draganddropconvertthread(void* floppycontext,void* hw_context)
 int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 {
 	int xsize,ysize;
@@ -280,7 +257,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 	
 	hxcfe=params->flopemu;
 
-	xsize=320;
+	xsize=460;
 	ysize=200;
 	hxcfe->hxc_printf(MSG_DEBUG,"Starting Floppy dump...");
 	
@@ -345,10 +322,10 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 					{
 
 						l=0;
-						o=i*xsize*4;
+						o=i*xsize*3;
 						if(j)
 						{
-							o=o+xsize*4*100;
+							o=o+xsize*3*100;
 						}
 				
 						l=xsize;
@@ -361,7 +338,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 								mapfloppybuffer[o]=0xA5;
 							o++;
 
-							o++;	
+							//o++;	
 							l--;
 						}
 					}
@@ -453,10 +430,10 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 					if(i<100)
 					{
 						l=0;
-						o=i*xsize*4;
+						o=i*xsize*3;
 						if(j)
 						{
-							o=o+xsize*4*100;
+							o=o+xsize*3*100;
 						}
 						for(k=0;k<sr->count;k++)
 						{
@@ -466,17 +443,17 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 								mapfloppybuffer[o++]=0xFF;
 								mapfloppybuffer[o++]=0xFF;
 								mapfloppybuffer[o++]=0xFF;
-								o++;	
+								//o++;	
 								l--;
 							}
-							o=o+8;
+							o=o+6;
 						}
 
 						l=0;
-						o=i*xsize*4;
+						o=i*xsize*3;
 						if(j)
 						{
-							o=o+xsize*4*100;
+							o=o+xsize*3*100;
 						}
 					}
 
@@ -528,13 +505,13 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 								l=4<<(sr->Header[k].size);
 								while(l)
 								{
+									mapfloppybuffer[o++]=0xFF;
+									mapfloppybuffer[o++]=0xFF;
 									mapfloppybuffer[o++]=0x00;
-									mapfloppybuffer[o++]=0xFF;
-									mapfloppybuffer[o++]=0xFF;
-									o++;	
+									//o++;	
 									l--;
 								}
-								o=o+8;
+								o=o+6;
 							}
 
 						}while(!DeviceIoControl(h, IOCTL_FDCMD_READ_DATA, &rwp, sizeof rwp,sector_data, sectordata_size, &ret, NULL) && retry);
@@ -560,13 +537,13 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 							l=4<<(sr->Header[k].size);
 							while(l)
 							{
-								mapfloppybuffer[o++]=0x00;
-								mapfloppybuffer[o++]=0x00;
 								mapfloppybuffer[o++]=0xFF;
-								o++;	
+								mapfloppybuffer[o++]=0x00;
+								mapfloppybuffer[o++]=0x00;
+								//o++;
 								l--;
 							}
-							o=o+8;
+							o=o+6;
 
 						}
 						else
@@ -581,10 +558,10 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 									mapfloppybuffer[o++]=0x00;
 									mapfloppybuffer[o++]=0xFF;
 									mapfloppybuffer[o++]=0x00;
-									o++;	
+									//o++;	
 									l--;
 								}
-								o=o+8;
+								o=o+6;
 							}
 						}
 					
@@ -607,6 +584,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 			closedevice(h);
 
 			params->floppydisk=hxcfe_getFloppy(fb);
+			load_floppy(params->floppydisk);
 
 			sprintf(tempstr,"Done !");
 			params->windowshwd->global_status->value(tempstr);

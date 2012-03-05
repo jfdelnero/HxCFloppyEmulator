@@ -21,9 +21,11 @@ floppy_dump_window::floppy_dump_window() {
       o->end();
     } // Fl_Group* o
     { sel_drive_a = new Fl_Round_Button(25, 25, 25, 25, "Drive A:");
+      sel_drive_a->type(102);
       sel_drive_a->down_box(FL_ROUND_DOWN_BOX);
     } // Fl_Round_Button* sel_drive_a
     { sel_drive_b = new Fl_Round_Button(25, 45, 25, 25, "Drive B:");
+      sel_drive_b->type(102);
       sel_drive_b->down_box(FL_ROUND_DOWN_BOX);
     } // Fl_Round_Button* sel_drive_b
     { double_sided = new Fl_Check_Button(25, 65, 25, 25, "Double sided");
