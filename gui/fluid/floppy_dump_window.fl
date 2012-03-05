@@ -8,7 +8,7 @@ class floppy_dump_window {open
   } {
     Fl_Window window {
       label {Floppy disk dump} open
-      xywh {102 121 474 427} type Double visible
+      xywh {102 121 474 427} type Double hide
     } {
       Fl_Group {} {
         label {Dump setting} open
@@ -25,11 +25,11 @@ class floppy_dump_window {open
       }
       Fl_Round_Button sel_drive_a {
         label {Drive A:}
-        xywh {25 25 25 25} down_box ROUND_DOWN_BOX
+        xywh {25 25 25 25} type Radio down_box ROUND_DOWN_BOX
       }
       Fl_Round_Button sel_drive_b {
-        label {Drive B:}
-        xywh {25 45 25 25} down_box ROUND_DOWN_BOX
+        label {Drive B:} selected
+        xywh {25 45 25 25} type Radio down_box ROUND_DOWN_BOX
       }
       Fl_Check_Button double_sided {
         label {Double sided}
@@ -59,7 +59,7 @@ class floppy_dump_window {open
       Fl_Button {} {
         label {Read Disk}
         user_data this
-        callback floppy_dump_window_bt_read selected
+        callback floppy_dump_window_bt_read
         xywh {315 130 80 25}
       }
       Fl_Group {} {

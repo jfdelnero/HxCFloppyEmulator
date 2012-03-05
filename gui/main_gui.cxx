@@ -256,7 +256,7 @@ void load_file_image(Fl_Widget * w, void * fc_ptr)
 		default:
 		{
 			//printf("PICKED: %s\n", fnfc.filename());
-			loadfloppy((char*)fnfc.filename());
+			load_floppy_image((char*)fnfc.filename());
 			break; // FILE CHOSEN
 		}
 	}
@@ -563,7 +563,7 @@ void cb_ok(class Fl_Button *,void *)
 
 void dnd_open(const char *urls)
 {
-	loadfloppy((char*)urls);
+	load_floppy_image((char*)urls);
 }
 
 void dnd_cb(Fl_Widget *o, void *v)
