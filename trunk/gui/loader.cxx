@@ -66,9 +66,41 @@ extern HWINTERFACE * hwif;
 extern track_type track_type_list[];
 
 extern char * basename (const char *name);
-     
 
-int loadfloppy(char *filename)
+int load_floppy(FLOPPY * floppydisk)
+{
+	int ret;
+	int i;
+	int oldifmode;
+
+	hxcfe_floppyUnload(flopemu,thefloppydisk);
+	thefloppydisk=0;
+	thefloppydisk=floppydisk;
+
+	ret=HXCFE_NOERROR;
+	gui_context->loadstatus=ret;
+
+	if(ret!=HXCFE_NOERROR || !thefloppydisk)
+	{
+		thefloppydisk=0;
+		gui_context->bufferfilename[0]=0;
+	}
+	else
+	{
+		oldifmode=hwif->interface_mode;
+		InjectFloppyImg(flopemu,thefloppydisk,hwif);
+		if(!gui_context->autoselectmode)
+		{	// keep the old interface mode
+			hwif->interface_mode=oldifmode;
+		};
+
+		sprintf(gui_context->bufferfilename,"Floppy Dump");
+	}
+
+	return ret;
+}
+
+int load_floppy_image(char *filename)
 {
 	int ret;
 	int i;
@@ -111,7 +143,7 @@ int loadfloppy(char *filename)
 		{
 			sprintf(gui_context->bufferfilename,"Empty Floppy");
 		}
-	}	
+	}
 
 	return ret;
 }

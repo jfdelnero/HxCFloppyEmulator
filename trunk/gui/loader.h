@@ -25,5 +25,6 @@
 		int tracktype;
 	}track_type;
 
-int loadfloppy(char *filename);
+int load_floppy_image(char *filename);
+int load_floppy(FLOPPY * floppydisk);
 int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file);
