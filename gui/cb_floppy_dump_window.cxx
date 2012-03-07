@@ -125,11 +125,10 @@ trackmode tm[]=
 floppydumperparams fdp;
 
 
-void tick_dump(void *v) {
+void tick_dump(void *w) {
 	floppy_dump_window *window;
-	Fl_Window *dw;
 
-	window=(floppy_dump_window *)v;
+	window=(floppy_dump_window *)w;
 
 	if(window->window->shown())
 	{
@@ -137,7 +136,7 @@ void tick_dump(void *v) {
 		fl_draw_image((unsigned char *)mapfloppybuffer, 8, 210, 460, 200, 3, 0);
 	}
 
-	Fl::repeat_timeout(0.02, tick_dump, v);  
+	Fl::repeat_timeout(0.02, tick_dump, w);  
 }
 
 static int checkversion(void)
@@ -655,9 +654,12 @@ void floppy_dump_window_bt_read(Fl_Button* bt, void*)
 	hxc_createthread(flopemu,&fdp,&DumpThreadProc,1);
 }
 
-void floppy_dump_ok(Fl_Button*, void*)
+void floppy_dump_ok(Fl_Button*, void* w)
 {
-
-
+	floppy_dump_window *fdw;
+	
+	fdw=(floppy_dump_window *)w;
+	
+	fdw->window->hide();
 }
 

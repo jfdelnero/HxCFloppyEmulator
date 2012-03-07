@@ -86,6 +86,8 @@
 
 #include "fl_dnd_box.h"
 
+#include "resource.h"
+
 extern "C"
 {
 	#include "hxc_floppy_emulator.h"
@@ -656,6 +658,8 @@ Main_Window::Main_Window()
 	Fl::scheme("gtk+");
 
 	Fl_Group group(0,0,WINDOW_XSIZE,392);
+	
+	this->icon((char *)LoadIcon(fl_display, MAKEINTRESOURCE(101)));
 
 	group.image(new Fl_Tiled_Image(new Fl_BMP_Image("floppy.bmp")));
 	group.align(FL_ALIGN_TEXT_OVER_IMAGE);

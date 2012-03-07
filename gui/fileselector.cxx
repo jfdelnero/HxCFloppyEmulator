@@ -2,12 +2,15 @@
 #include <FL/Fl_File_Chooser.H>
 #include <FL/Fl_Native_File_Chooser.H>
 
-int fileselector(char * title,char * str,char *filter,int save,int dir)
+int fileselector(char * title,char * str,char *filename,char *filter,int save,int dir)
 {
 	char * path;
 	Fl_Native_File_Chooser fnfc;
   
 	fnfc.title(title);
+	
+	fnfc.options(Fl_Native_File_Chooser::SAVEAS_CONFIRM|Fl_Native_File_Chooser::NEW_FOLDER);
+
 	if(!dir)
 	{
 		if(save)
@@ -22,7 +25,13 @@ int fileselector(char * title,char * str,char *filter,int save,int dir)
 		else
 			fnfc.type(Fl_Native_File_Chooser::BROWSE_DIRECTORY);
 	}
+
 	fnfc.filter(filter);
+
+	if(filename)	
+	{
+		fnfc.preset_file(filename);
+	}
 
 	// Show native chooser
 	switch ( fnfc.show() ) {
