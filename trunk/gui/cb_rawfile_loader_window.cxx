@@ -152,7 +152,7 @@ void raw_loader_window_bt_loadrawfile(Fl_Button* bt, void*)
 	sprintf((char*)temp,"%d",totalsize);
 	rlw->strout_totalsize->value((const char*)temp);
 
-	if(!fileselector("Select raw file",(char*)file,"*.img",0,0))
+	if(!fileselector("Select raw file",(char*)file,0,"*.img",0,0))
 	{	
 		loadrawfile(flopemu,&rfc,file);
 		dw->hide();
@@ -200,7 +200,7 @@ void raw_loader_window_bt_savecfg(Fl_Button* bt, void*)
 	dw=((Fl_Window*)(bt->parent()));
 	rlw=(rawfile_loader_window *)dw->user_data();
 
-	if(!fileselector("Save config file",(char*)file,"*.fpf",1,0))
+	if(!fileselector("Save config file",(char*)file,"floppy_profile.fpf","*.fpf",1,0))
 	{
 		getWindowState(rlw,&rfc);
 
@@ -226,7 +226,7 @@ void raw_loader_window_bt_loadcfg(Fl_Button* bt, void*)
 	dw=((Fl_Window*)(bt->parent()));
 	rlw=(rawfile_loader_window *)dw->user_data();
 
-	if(!fileselector("Load config file",(char*)file,"*.fpf",0,0))
+	if(!fileselector("Load config file",(char*)file,"*.fpf","*.fpf",0,0))
 	{
 		fpf_file=fopen(file,"rb");
 		if(fpf_file)
