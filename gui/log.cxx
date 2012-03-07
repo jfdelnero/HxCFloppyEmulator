@@ -214,6 +214,7 @@ void savelog_log(Fl_Widget *w, void * t)
 	fnfc.title("Set log file...");
 	fnfc.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	fnfc.filter("log file\t*.log\n");
+	fnfc.preset_file("hxclog.log");
 
 	// Show native chooser
 	switch ( fnfc.show() ) 

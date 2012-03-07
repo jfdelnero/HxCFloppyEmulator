@@ -308,49 +308,53 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				tracktype=IBMFORMAT_DD;
 			}
 
-			sectorconfig=(SECTORCONFIG*)malloc(sizeof(SECTORCONFIG)*number_of_sector);
-			memset(sectorconfig,0,sizeof(SECTORCONFIG)*number_of_sector);
-
-			j=0;
-			do
+			sectorconfig=0;
+			if(number_of_sector)
 			{
+				sectorconfig=(SECTORCONFIG*)malloc(sizeof(SECTORCONFIG)*number_of_sector);
+				memset(sectorconfig,0,sizeof(SECTORCONFIG)*number_of_sector);
 
-				if(!sectorheader.sector_length)
+				j=0;
+				do
 				{
-					sectorheader.sector_length=128 * (1 << sectorheader.sector_size);
-				}
 
-				floppycontext->hxc_printf(MSG_INFO_1,"Cylinder:%.3d, Size:%.1d, Sector ID:%.3d, Status:0x%.2x, File offset:0x%.6x",
-					sectorheader.cylinder,
-					sectorheader.sector_length,
-					sectorheader.sector_id,
-					sectorheader.sector_status,
-					ftell(f)
-					);
+					if(!sectorheader.sector_length)
+					{
+						sectorheader.sector_length=128 * (1 << sectorheader.sector_size);
+					}
 
-				sectorconfig[j].cylinder=sectorheader.cylinder;
-				sectorconfig[j].head=sectorheader.head;
-				sectorconfig[j].sector=sectorheader.sector_id;
-				sectorconfig[j].sectorsize=sectorheader.sector_length;
-				sectorconfig[j].gap3=255;
-				sectorconfig[j].trackencoding=tracktype;
-				sectorconfig[j].input_data=malloc(sectorheader.sector_length);
-				sectorconfig[j].bitrate=floppydisk->floppyBitRate;
-			
-				fread(sectorconfig[j].input_data,sectorheader.sector_length,1,f); 
-				
-				if(sectorheader.sector_status)
-				{
-					sectorconfig[j].use_alternate_header_crc=0x1;
-				}
+					floppycontext->hxc_printf(MSG_INFO_1,"Cylinder:%.3d, Size:%.1d, Sector ID:%.3d, Status:0x%.2x, File offset:0x%.6x",
+						sectorheader.cylinder,
+						sectorheader.sector_length,
+						sectorheader.sector_id,
+						sectorheader.sector_status,
+						ftell(f)
+						);
 
-				//	sectorconfig[j].baddatacrc=1;
+					sectorconfig[j].cylinder=sectorheader.cylinder;
+					sectorconfig[j].head=sectorheader.head;
+					sectorconfig[j].sector=sectorheader.sector_id;
+					sectorconfig[j].sectorsize=sectorheader.sector_length;
+					sectorconfig[j].gap3=255;
+					sectorconfig[j].trackencoding=tracktype;
+					sectorconfig[j].input_data=malloc(sectorheader.sector_length);
+					sectorconfig[j].bitrate=floppydisk->floppyBitRate;
 
-				// fread datas
-				fread(&sectorheader,sizeof(d88_sector),1,f); 
-				
-				j++;
-			}while(j<number_of_sector);
+					fread(sectorconfig[j].input_data,sectorheader.sector_length,1,f); 
+
+					if(sectorheader.sector_status)
+					{
+						sectorconfig[j].use_alternate_header_crc=0x1;
+					}
+
+					//	sectorconfig[j].baddatacrc=1;
+
+					// fread datas
+					fread(&sectorheader,sizeof(d88_sector),1,f); 
+
+					j++;
+				}while(j<number_of_sector);
+			}
 
 			if(!floppydisk->tracks[i>>1])
 			{
@@ -367,7 +371,8 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					free(sectorconfig[j].input_data);
 			}
 
-			free(sectorconfig);
+			if(sectorconfig)
+				free(sectorconfig);
 
 		}
 		else
