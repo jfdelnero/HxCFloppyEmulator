@@ -7,7 +7,7 @@ class batch_converter_window {open
   Function {batch_converter_window()} {open
   } {
     Fl_Window window {open
-      xywh {567 304 413 244} type Double visible
+      xywh {567 304 413 244} type Double hide
     } {
       Fl_Choice choice_file_format {
         label {Target file format :} open
@@ -31,7 +31,7 @@ class batch_converter_window {open
       }
       Fl_Button bt_select_dst {
         label Select
-        callback batch_converter_window_bt_select_dst selected
+        callback batch_converter_window_bt_select_dst
         xywh {304 124 95 25}
       }
       Fl_Button bt_convert {
@@ -41,7 +41,7 @@ class batch_converter_window {open
       }
       Fl_Button bt_cancel {
         label Cancel
-        callback {((Fl_Window*)(o->parent()))->hide();}
+        callback batch_converter_window_bt_cancel selected
         xywh {300 210 100 25}
       }
     }

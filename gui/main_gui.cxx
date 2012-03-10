@@ -81,6 +81,7 @@
 #include "sdhxcfecfg_window.h"
 #include "usbhxcfecfg_window.h"
 #include "log_gui.h"
+#include "about_gui.h"
 
 #include "soft_cfg_file.h"
 
@@ -97,7 +98,7 @@ extern "C"
 
 #include "loader.h"
 
-#include "about_gui.h"
+
 #include "main_gui.h"
 #include "mainrouts.h"
 
@@ -190,7 +191,9 @@ void menu_clicked(Fl_Widget * w, void * fc_ptr)
 		case 8:
 			mw->log_box->show();
 		break;
-
+		case 9:
+			mw->about_window->show();
+		break;
 	}
 
 }
@@ -227,6 +230,9 @@ void bt_clicked(Fl_Widget * w, void * fc_ptr)
 		break;
 		case 8:
 			mw->log_box->show();
+		break;
+		case 9:
+			mw->about_window->show();
 		break;
 
 	}
@@ -269,6 +275,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 {
 	int i;
 	Fl_Native_File_Chooser fnfc;
+	unsigned char deffilename[512];
 	
 	const char * plugid_lst[]=
 	{
@@ -287,8 +294,19 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 	}
 	else
 	{
+		
+		sprintf((char*)deffilename,"%s",gui_context->bufferfilename);
+		i=0;
+		while(deffilename[i]!=0)
+		{
+			if(deffilename[i]=='.')deffilename[i]='_';
+			i++;
+		}
+
 		fnfc.title("Export disk/Save As");
+		fnfc.preset_file((char*)deffilename);
 		fnfc.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
+		fnfc.options(Fl_Native_File_Chooser::SAVEAS_CONFIRM|Fl_Native_File_Chooser::NEW_FOLDER);
 		fnfc.filter("HFE file (SDCard HxC Floppy Emulator file format)\t*.hfe\n"
 					"VTR file (VTrucco Floppy Emulator file format)\t*.vtr\n"
 					"MFM file (MFM/FM track file format)\t*.mfm\n"
@@ -303,15 +321,9 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 		// Show native chooser
 		switch ( fnfc.show() ) {
 			case -1:
-			{
-				//printf("ERROR: %s\n", fnfc.errmsg());
 				break; // ERROR
-			}
 			case 1:
-			{
-				//printf("CANCEL\n");
 				break; // CANCEL
-			}
 			default:
 			{
 				i=fnfc.filter_value();
@@ -384,7 +396,7 @@ Fl_Menu_Item menutable[] = {
     {"&Log",	FL_ALT+'l',menu_clicked,(void*)8},
     {0},
   {"&About",0,0,0,FL_SUBMENU},
-  {"&HxCFloppyEmulator",	FL_ALT+'h',create_about_window,0},
+  {"&HxCFloppyEmulator",	FL_ALT+'h',menu_clicked,(void*)9},
     {0},
   {0}
 };
@@ -751,6 +763,8 @@ Main_Window::Main_Window()
 	rawloader_window->choice_sectorsize->value(2);
 	rawloader_window->choice_tracktype->menu(track_type_choices);
 	rawloader_window->choice_tracktype->value(3);
+	rawloader_window->chk_twosides->value(1);
+	rawloader_window->chk_autogap3->value(1);
 	rawloader_window->innum_rpm->value(300);
 	rawloader_window->innum_sectoridstart->value(1);
 	rawloader_window->innum_bitrate->value(250000);
@@ -781,6 +795,7 @@ Main_Window::Main_Window()
 	usbcfg_window->choice_ifmode->menu(if_choices);
 	usbcfg_window->slider_process_priority->scrollvalue(0,1,0,5);
 
+	this->about_window=new About_box();
 
 	txtindex=0;
 	tick_mw(this);

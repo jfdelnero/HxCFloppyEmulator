@@ -2,15 +2,6 @@
 
 #include "batch_converter_window.h"
 
-#include "fl_dnd_box.h"
-
-void batch_converter_window::cb_bt_cancel_i(Fl_Button* o, void*) {
-  ((Fl_Window*)(o->parent()))->hide();
-}
-void batch_converter_window::cb_bt_cancel(Fl_Button* o, void* v) {
-  ((batch_converter_window*)(o->parent()->user_data()))->cb_bt_cancel_i(o,v);
-}
-
 batch_converter_window::batch_converter_window() {
   { window = new Fl_Double_Window(413, 244);
     window->user_data((void*)(this));
@@ -44,12 +35,8 @@ batch_converter_window::batch_converter_window() {
       bt_convert->callback((Fl_Callback*)batch_converter_window_bt_convert);
     } // Fl_Button* bt_convert
     { bt_cancel = new Fl_Button(300, 210, 100, 25, "Cancel");
-      bt_cancel->callback((Fl_Callback*)cb_bt_cancel);
+      bt_cancel->callback((Fl_Callback*)batch_converter_window_bt_cancel);
     } // Fl_Button* bt_cancel
-
-	Fl_DND_Box *o = new Fl_DND_Box(0, 0,413, 244, 0);
-	o->callback(dnd_bc_cb);
-
     window->end();
   } // Fl_Double_Window* window
 }
