@@ -55,8 +55,7 @@ class About_box : public Fl_Window {
 	  uintro_context * ui_context;
 
 	  About_box();
-	  virtual void hide();
-		~About_box();
+	~About_box();
 
 };
 

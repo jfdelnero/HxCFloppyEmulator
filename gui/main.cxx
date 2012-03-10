@@ -77,6 +77,7 @@ extern "C"
 #include "sdhxcfecfg_window.h"
 #include "usbhxcfecfg_window.h"
 #include "log_gui.h"
+#include "about_gui.h"
 #include "main_gui.h"
 
 HXCFLOPPYEMULATOR * flopemu;
@@ -111,7 +112,6 @@ int main(int argc, char **argv) {
 		hwif=(HWINTERFACE *)malloc(sizeof(HWINTERFACE));
 		memset(hwif,0,sizeof(HWINTERFACE));
 		HW_CPLDFloppyEmulator_init(flopemu,hwif);
-
 
 		Main_Window * mw;
 		mw=new Main_Window();

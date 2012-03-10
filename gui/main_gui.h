@@ -10,17 +10,14 @@ class Main_Window : public Fl_Window {
 	Fl_Button *button_sdhxcfesettings;
 	Fl_Button *button_usbhxcfesettings;
 	Fl_Button *button_floppydump;
-
 	
 	Fl_Box*  o;
 	Fl_Window *window;
-
 
 	int evt;
 
     char *evt_txt;
     int evt_len;
-
 
   public:
 	batch_converter_window *batchconv_window;
@@ -29,8 +26,8 @@ class Main_Window : public Fl_Window {
 	rawfile_loader_window *rawloader_window;
 	sdhxcfecfg_window * sdcfg_window;
 	usbhxcfecfg_window * usbcfg_window;
-
 	Log_box * log_box;
+	About_box *about_window;
 
 	int	xsize;
 	int	ysize;

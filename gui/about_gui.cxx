@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006, 2007, 2008, 2009 Jean-François DEL NERO
+// Copyright (C) 2006 - 2012 Jean-François DEL NERO
 //
 // This file is part of HxCFloppyEmulator.
 //
@@ -73,21 +73,24 @@ static void tick(void *v) {
 
   window=(About_box *)v;
 
-  window->make_current();
-  uintro_getnextframe(window->ui_context);
-
-  ptr1=(unsigned char*)window->ui_context->framebuffer;
-  k=0;
-  j=0;
-  for(i=0;i<window->xsize*window->ysize;i++)
+  if(window->shown())
   {
-	  ptr1[j++]=ptr1[k+2];
-	  ptr1[j++]=ptr1[k+1];
-	  ptr1[j++]=ptr1[k+0];
-	  k=k+4;
-  }
+	  window->make_current();
+	  uintro_getnextframe(window->ui_context);
+
+	  ptr1=(unsigned char*)window->ui_context->framebuffer;
+	  k=0;
+	  j=0;
+	  for(i=0;i<window->xsize*window->ysize;i++)
+	  {
+		  ptr1[j++]=ptr1[k+2];
+		  ptr1[j++]=ptr1[k+1];
+		  ptr1[j++]=ptr1[k+0];
+		  k=k+4;
+	  }
   
-  fl_draw_image((unsigned char *)window->ui_context->framebuffer, window->xpos_size, window->ypos_size, window->xsize, window->ysize, 3, 0);
+	  fl_draw_image((unsigned char *)window->ui_context->framebuffer, window->xpos_size, window->ypos_size, window->xsize, window->ysize, 3, 0);
+  }
 
   Fl::repeat_timeout(0.02, tick, v);
   
@@ -97,11 +100,8 @@ static void tick(void *v) {
 
 void close(Fl_Widget *w, void * t)
 {
-
-	delete(w->window());
+	w->parent()->hide();
 }
-
-
 
 void create_license_window(Fl_Widget *, void *) 
 {
@@ -124,17 +124,6 @@ void OpenURLInBrowser(Fl_Widget *,void* u)
 		sprintf(commandString, "ibrowse:ibrowse %s", url);
 		system(commandString);
 	#endif
-}
-
-void create_about_window(Fl_Widget *, void *) 
-{
-	new About_box();
-	return ;
-}
-
-void About_box::hide()
-{
-	delete(this);
 }
 
 About_box::~About_box()
@@ -179,7 +168,6 @@ About_box::About_box()
 
 	this->end();
 	this->label(NOMFENETRE);
-	this->show();
 
     tick(this);
 	
