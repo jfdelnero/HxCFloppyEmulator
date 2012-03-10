@@ -43,7 +43,7 @@
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "batch_converter_window.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -63,55 +63,15 @@ extern "C"
 	#include "os_api.h"
 }
 
+#include "batch_converter_window.h"
+#include "cb_batch_converter_window.h"
 
 
 #include "loader.h"
 
 extern HXCFLOPPYEMULATOR * flopemu;
+batchconverterparams bcparams;
 
-	typedef struct ff_type_
-	{
-		int id;
-		char * name;
-		char * plug_id;
-		char * ext;
-	}ff_type;
-
-	typedef struct batchconverterparams_
-	{
-		HXCFLOPPYEMULATOR * flopemu;
-		//HWND windowshwd;
-		batch_converter_window *windowshwd;
-		char sourcedir[1024];
-		char destdir[1024];
-		char **filelist;
-		int fileformat;
-		unsigned long numberoffileconverted;
-		int abort;
-	}batchconverterparams;
-
-	enum
-	{
-		FF_HFE=0,
-		FF_MFM,
-		FF_AFI,
-		FF_VTR,
-		FF_RAW,
-		FF_IMD,
-		FF_EHFE
-	};
-
-	ff_type ff_type_list[]=
-	{
-		{ FF_HFE,"HFE - SDCard HxC Floppy Emulator file format",PLUGIN_HXC_HFE,".hfe"},
-		{ FF_MFM,"MFM - MFM/FM track file format",PLUGIN_HXC_MFM,".mfm"},
-		{ FF_AFI,"AFI - Advanced file image format",PLUGIN_HXC_AFI,".afi"},
-		{ FF_VTR,"VTR - VTrucco Floppy Emulator file format",PLUGIN_VTR_IMG,".vtr"},
-		{ FF_RAW,"RAW - RAW sectors file format",PLUGIN_RAW_IMG,".img"},
-		{ FF_IMD,"IMD - IMD sectors file format",PLUGIN_IMD_IMG,".imd"},
-		{ FF_EHFE,"HFE - Rev 2 - Experimental",PLUGIN_HXC_EXTHFE,".hfe"},
-		{ -1,"",0,0}			
-	};
 
 
 int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * destfolder,int output_file_format,batchconverterparams * params)
@@ -374,7 +334,6 @@ int convertthread(void* floppycontext,void* hw_context)
 	
 	HXCFLOPPYEMULATOR* floppyem;
 	batch_converter_window *bcw;
-	batchconverterparams bcparams;
 	char * tempstr;
 
 	floppyem=(HXCFLOPPYEMULATOR*)floppycontext;
@@ -512,6 +471,18 @@ void batch_converter_window_bt_select_dst(Fl_Button* bt, void*)
 	}
 }
 
+void batch_converter_window_bt_cancel(Fl_Button* bt, void*)
+{
+	batch_converter_window *bcw;
+	Fl_Window *dw;
+
+	dw=((Fl_Window*)(bt->parent()));
+	bcw=(batch_converter_window *)dw->user_data();
+	
+	bcparams.abort=0xFF;
+
+	bcw->window->hide();
+}
 
 void dnd_bc_conv(const char *urls)
 {

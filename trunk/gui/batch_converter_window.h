@@ -11,6 +11,7 @@
 extern void batch_converter_window_bt_select_src(Fl_Button*, void*);
 extern void batch_converter_window_bt_select_dst(Fl_Button*, void*);
 extern void batch_converter_window_bt_convert(Fl_Button*, void*);
+extern void batch_converter_window_bt_cancel(Fl_Button*, void*);
 
 class batch_converter_window {
 public:
@@ -24,8 +25,5 @@ public:
   Fl_Button *bt_select_dst;
   Fl_Button *bt_convert;
   Fl_Button *bt_cancel;
-private:
-  void cb_bt_cancel_i(Fl_Button*, void*);
-  static void cb_bt_cancel(Fl_Button*, void*);
 };
 #endif
