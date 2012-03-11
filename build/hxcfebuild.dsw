@@ -39,6 +39,66 @@ Package=<4>
 
 ###############################################################################
 
+Project: "vfd lib"=..\vfd_hxc\trunk\src\lib\vfdlib.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "vfd gui"=..\vfd_hxc\trunk\src\gui\vfdwin.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ADFOpus ADFLib staticlib"=..\AdfOpus_hxc\trunk\ADFOpusSrc\ADFLib\staticlib.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ADFOpus xDMS"=..\AdfOpus_hxc\trunk\ADFOpusSrc\xdms\xDMS.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ADFOpus"=..\AdfOpus_hxc\trunk\ADFOpusSrc\ADFOpus.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Global:
 
 Package=<5>
