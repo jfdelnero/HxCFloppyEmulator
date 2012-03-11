@@ -1,0 +1,71 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0110 
+header_name {.h} 
+code_name {.cxx}
+class floppy_dump_window {open
+} {
+  Function {floppy_dump_window()} {open
+  } {
+    Fl_Window window {
+      label {Floppy disk dump} open
+      xywh {102 121 474 427} type Double hide
+    } {
+      Fl_Group {} {
+        label {Dump setting} open
+        xywh {5 5 155 180} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+      } {
+        Fl_Value_Input number_of_track {
+          label {Number of tracks}
+          xywh {115 90 35 25} labelsize 12 textsize 12
+        }
+        Fl_Value_Input number_of_retry {
+          label Retry
+          xywh {115 155 35 25} labelsize 12 textsize 12
+        }
+      }
+      Fl_Round_Button sel_drive_a {
+        label {Drive A:}
+        xywh {25 25 25 25} type Radio down_box ROUND_DOWN_BOX
+      }
+      Fl_Round_Button sel_drive_b {
+        label {Drive B:} selected
+        xywh {25 45 25 25} type Radio down_box ROUND_DOWN_BOX
+      }
+      Fl_Check_Button double_sided {
+        label {Double sided}
+        xywh {25 65 25 25} down_box DOWN_BOX
+      }
+      Fl_Check_Button double_step {
+        label {Double step}
+        xywh {15 120 25 25} down_box DOWN_BOX
+      }
+      Fl_Group {} {
+        label Status open
+        xywh {165 5 305 90} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL align 21
+      } {
+        Fl_Output global_status {
+          xywh {175 25 280 25} labelsize 12 textsize 12
+        }
+        Fl_Output current_status {
+          xywh {175 55 280 25} labelsize 12 textsize 12
+        }
+      }
+      Fl_Button {} {
+        label OK
+        user_data this
+        callback floppy_dump_ok
+        xywh {215 130 80 25}
+      }
+      Fl_Button {} {
+        label {Read Disk}
+        user_data this
+        callback floppy_dump_window_bt_read
+        xywh {315 130 80 25}
+      }
+      Fl_Group {} {
+        label {Floppy Map} open
+        xywh {5 190 465 230} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+      } {}
+    }
+  }
+} 
