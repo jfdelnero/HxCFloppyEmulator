@@ -17,6 +17,10 @@ Folder libhxcfe
 HxC Floppy Emulator library
 (Windows, Linux, MacOsX)
 -------------------------------------------------------------------------------
+Folder HxCFloppyEmulator_cmdline
+HxC Floppy Emulator command line software
+(Windows, Linux, MacOsX)
+-------------------------------------------------------------------------------
 Folder HxCFloppyEmulator_software
 HxC Floppy Emulator GUI software
 (Windows, Linux & MacOsX soon)
