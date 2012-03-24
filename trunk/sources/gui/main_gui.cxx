@@ -283,7 +283,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 		{PLUGIN_VTR_IMG},
 		{PLUGIN_HXC_MFM},
 		{PLUGIN_HXC_AFI},
-		{PLUGIN_RAW_IMG},
+		{PLUGIN_RAW_LOADER},
 		{PLUGIN_AMSTRADCPC_DSK},
 		{PLUGIN_HXC_EXTHFE}
 	};
