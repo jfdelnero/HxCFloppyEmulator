@@ -1,3 +1,47 @@
+/*
+//
+// Copyright (C) 2006 - 2012 Jean-François DEL NERO
+//
+// This file is part of the HxCFloppyEmulator library
+//
+// HxCFloppyEmulator may be used and distributed without restriction provided
+// that this copyright statement is not removed from the file and that any
+// derivative work contains the original copyright notice and the associated
+// disclaimer.
+//
+// HxCFloppyEmulator is free software; you can redistribute it
+// and/or modify  it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// HxCFloppyEmulator is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//   See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with HxCFloppyEmulator; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+//
+*/
+///////////////////////////////////////////////////////////////////////////////////
+//-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
+//-----------H----H--X----X-----CCCCC----22222----0000-----0000------11----------//
+//----------H----H----X-X-----C--------------2---0----0---0----0--1--1-----------//
+//---------HHHHHH-----X------C----------22222---0----0---0----0-----1------------//
+//--------H----H----X--X----C----------2-------0----0---0----0-----1-------------//
+//-------H----H---X-----X---CCCCC-----222222----0000-----0000----1111------------//
+//-------------------------------------------------------------------------------//
+//----------------------------------------------------- http://hxc2001.free.fr --//
+///////////////////////////////////////////////////////////////////////////////////
+// File : sector_extractor.c
+// Contains: ISO/IBM sector reader
+//
+// Written by:	DEL NERO Jean Francois
+//
+// Change History (most recent first):
+///////////////////////////////////////////////////////////////////////////////////
 
 #include <string.h>
 #include <stdio.h>
@@ -131,66 +175,67 @@ int bitslookingfor(unsigned char * input_data,unsigned long intput_data_size,uns
 {
 	unsigned long i,j,trackoffset,cnt,k,starti;
 	unsigned char stringtosearch[8][128];
+	unsigned char mask[8][128];
+
 	unsigned char prev;
 	unsigned long tracksize;
 	int found;
 	int bitoffset;
 
 	memset(stringtosearch,0,8*128);
+	memset(mask,0xFF,8*128);
 
 	cnt=(chr_data_size>>3);
 	if(chr_data_size&7)
 		cnt++;
 
+	// Prepare strings & mask ( input string shifted 7 times...)
 	for(i=0;i<8;i++)
 	{
 		prev=0;
+		
+		mask[i][0]=0xFF>>i;
 		for(j=0;j<cnt;j++)
 		{
 			stringtosearch[i][j]=prev | (chr_data[j]>>i);
 			prev=chr_data[j]<<(8-i);
 		}
 		stringtosearch[i][j]=prev;
+		mask[i][cnt-1]=0xFF<<(8-i);
 		
 	}
 	
-
 	found=0;
-	starti=bit_offset&7;
-	trackoffset=bit_offset>>3;
+	starti = bit_offset & 7;
+	trackoffset = bit_offset >> 3;
 	
-	tracksize=intput_data_size>>3;
-	if(intput_data_size&7) tracksize++;
+	tracksize = intput_data_size >> 3;
+	if( intput_data_size & 7 ) tracksize++;
 
-	tracksize=tracksize - (chr_data_size>>3);
-	if(chr_data_size&7) tracksize--;
+	tracksize= tracksize - ( chr_data_size >> 3 );
+	if( chr_data_size & 7 ) tracksize--;
 
+	// Scan the track data...
 	do
 	{
 	
 		for(i=starti;i<8;i++)
 		{
-			k=trackoffset;
+			k = trackoffset;
 			j=0;
-			if( ( stringtosearch[i][j] == (input_data[k]&(0xFF>>i)) ) && ( stringtosearch[i][cnt] == (input_data[k+cnt]&(0xFF<<(8-i))) ) )
+
+			while( ( j < cnt ) && ( ( stringtosearch[i][j] & mask[i][j] ) == ( input_data[k] & mask[i][j] ) )  )
 			{
 				j++;
 				k++;
-				while( ( j < (cnt-1) ) && ( stringtosearch[i][j] == input_data[k] )  )
-				{
-					j++;
-					k++;
-				}
-				
-				if( j == (cnt-1) )
-				{
-					found=0xFF;
-					bitoffset=(trackoffset<<3) + i;
-					i=8;
-				}
-
 			}
-
+				
+			if( j == cnt )
+			{
+				found=0xFF;
+				bitoffset = ( trackoffset << 3 ) + i;
+				i=8;
+			}
 		}
 
 		trackoffset++;
@@ -199,53 +244,15 @@ int bitslookingfor(unsigned char * input_data,unsigned long intput_data_size,uns
 
 	}while(!found && (trackoffset<tracksize));
 
-	//bit_offset--;
-
 	if(!found)
 	{
 		bitoffset=-1;
 	}
+
 	return bitoffset;
 }
 
-/*
-int bitslookingfor(unsigned char * input_data,unsigned long intput_data_size,unsigned char * chr_data,unsigned long chr_data_size,unsigned long bit_offset)
-{
-	unsigned long i,c,chr_data_offset;
-	unsigned char current_data_bit;
-	unsigned char stringtosearch[128];
 
-	for(i=0;i<chr_data_size;i++)
-	{
-		stringtosearch[i]=chr_data[i>>3]>>(0x7-(i&0x7));
-	}
-
-	intput_data_size=intput_data_size-chr_data_size;
-	do
-	{
-		chr_data_offset=0;
-		i=bit_offset;
-		c=chr_data_size;
-		do
-		{
-			current_data_bit=((input_data[i>>3]>>(0x7-(i&0x7)) ) ^ stringtosearch[chr_data_offset]);
-			chr_data_offset++;
-			i++;		
-			c--;
-		}while(c && (!(current_data_bit&0x1)));
-		
-		bit_offset++;
-
-	}while(c && (bit_offset<intput_data_size));
-
-	bit_offset--;
-	if(c)
-	{
-		bit_offset=-1;
-	}
-	return bit_offset;
-}
-*/
 
 void sortbuffer(unsigned char * buffer,unsigned char * outbuffer,int size)
 {
@@ -822,14 +829,13 @@ int analysis_and_extract_sector_FM(HXCFLOPPYEMULATOR* floppycontext,SIDE * track
 					{
 						CRC16_Update(&CRC16_High,&CRC16_Low, tmp_buffer[k],(unsigned char*)crctable );
 					}
-				
+
 					if(!CRC16_High && !CRC16_Low)
 					{ // crc ok !!! 
-						bit_offset=bit_offset+7*8;
+						bit_offset = bit_offset + ( 7 * 8 );
 						number_of_sector++;
 						floppycontext->hxc_printf(MSG_DEBUG,"Valid FM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[1],tmp_buffer[2],tmp_buffer[3],sectorsize[tmp_buffer[4]&0x7]);
 						old_bit_offset=bit_offset;
-
 
 						sector_size = sectorsize[tmp_buffer[4]&0x7];
 						//11111011
@@ -837,9 +843,9 @@ int analysis_and_extract_sector_FM(HXCFLOPPYEMULATOR* floppycontext,SIDE * track
 						fm_buffer[1]=0x11;
 						fm_buffer[2]=0x14;
 						fm_buffer[3]=0x55;
-						if((unsigned int)(bit_offset+100*8)<track->tracklen)
-							bit_offset=bitslookingfor(track->databuffer,bit_offset+100*8 ,fm_buffer,4*8,bit_offset);
-						else
+						//if((unsigned int)(bit_offset+ (100*8) )<track->tracklen)
+							//bit_offset=bitslookingfor(track->databuffer,bit_offset+100*8 ,fm_buffer,4*8,bit_offset);
+						//else
 							bit_offset=bitslookingfor(track->databuffer,track->tracklen,fm_buffer,4*8,bit_offset);
 
 						if((bit_offset-old_bit_offset>((88+10)*8*2)) || bit_offset==-1)
@@ -866,37 +872,36 @@ int analysis_and_extract_sector_FM(HXCFLOPPYEMULATOR* floppycontext,SIDE * track
 							//sectors->sectorlist[sectors->number_of_sector-1]->type
 
 
-								tmp_sector=(unsigned char*)malloc(1+sector_size+2);
-								memset(tmp_sector,0,1+sector_size+2);
-								fmtobin(track->databuffer,track->tracklen,tmp_sector,1+sector_size+2,bit_offset+(0*8),0);
+							tmp_sector=(unsigned char*)malloc(1+sector_size+2);
+							memset(tmp_sector,0,1+sector_size+2);
+							fmtobin(track->databuffer,track->tracklen,tmp_sector,1+sector_size+2,bit_offset+(0*8),0);
 
-								CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
-								for(k=0;k<1+sector_size+2;k++)  
-								{
-									CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
-								}
-					
-								if(!CRC16_High && !CRC16_Low)
-								{ // crc ok !!! 
-									floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
-								}
-								else
-								{
-									floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
-								}
+							CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
+							for(k=0;k<1+sector_size+2;k++)  
+							{
+								CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
+							}
 
-								sectors->sectorlist[sectors->number_of_sector-1]->buffer=(unsigned char*)malloc(sector_size);
-								memcpy(sectors->sectorlist[sectors->number_of_sector-1]->buffer,&tmp_sector[1],sector_size);
-								free(tmp_sector);
+							if(!CRC16_High && !CRC16_Low)
+							{ // crc ok !!! 
+								floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
+							}
+							else
+							{
+								floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
+							}
 
-								bit_offset=bit_offset+(((sector_size+2)*4)*8);
-						
+							sectors->sectorlist[sectors->number_of_sector-1]->buffer=(unsigned char*)malloc(sector_size);
+							memcpy(sectors->sectorlist[sectors->number_of_sector-1]->buffer,&tmp_sector[1],sector_size);
+							free(tmp_sector);
+
+							bit_offset=bit_offset+(((sector_size+2)*4)*8);
+
 						}
 						else
 						{
 							bit_offset=old_bit_offset+1;
 							floppycontext->hxc_printf(MSG_DEBUG,"No data!");
-
 						}
 					}
 					else
@@ -910,7 +915,7 @@ int analysis_and_extract_sector_FM(HXCFLOPPYEMULATOR* floppycontext,SIDE * track
 					sector_extractor_sm=LOOKFOR_GAP1;
 					bit_offset++;
 				}
-						
+
 				sector_extractor_sm=LOOKFOR_GAP1;
 			break;
 
@@ -972,7 +977,7 @@ int analysis_and_extract_sector_EMUIIFM(HXCFLOPPYEMULATOR* floppycontext,SIDE * 
 
 				
 				bit_offset=bitslookingfor(track->databuffer,track->tracklen,fm_buffer,8*8,bit_offset);
-						
+
 				if(bit_offset!=-1)
 				{		
 					sector_extractor_sm=LOOKFOR_ADDM;
