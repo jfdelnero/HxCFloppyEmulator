@@ -184,7 +184,6 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 		else
 			hxcfe_setSectorGap3(fb,(unsigned char)rfc->gap3);
 
-		hxcfe_setSectorGap3(fb,(unsigned char)rfc->gap3);
 		hxcfe_setTrackBitrate(fb,rfc->bitrate);
 
 		for(i=0;i<rfc->numberoftrack;i++)

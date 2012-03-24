@@ -77,6 +77,7 @@ void getWindowState(rawfile_loader_window *rlw,cfgrawfile *rfc)
 	rfc->rpm=(unsigned long)rlw->innum_rpm->value();
 	rfc->sectorsize=rlw->choice_sectorsize->value();
 	rfc->skew=(unsigned char)rlw->numin_skew->value();
+	rfc->tracktype=rlw->choice_tracktype->value();
 }
 
 void setWindowState(rawfile_loader_window *rlw,cfgrawfile *rfc)
