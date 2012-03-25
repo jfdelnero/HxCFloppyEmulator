@@ -81,58 +81,41 @@ typedef struct dim_header_
 
 int DIM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
 	FILE * f;
 	dim_header header;
-	floppycontext->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	
+	floppycontext->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile");
+	
+	if( checkfileext(imgfile,"dim") )
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+
+		f=fopen(imgfile,"rb");
+		if(f==NULL) 
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-				
-				if(strstr( filepath,".dim" )!=NULL)
-				{
-
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return HXCFE_ACCESSERROR;
-					}
-					
-					fread(&header,sizeof(dim_header),1,f);
-
-					fclose(f);
-					
-
-					if(	header.id_header==0x4242)
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"DIM file !");
-						free(filepath);
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non DIM file ! Bad header!");
-						free(filepath);
-						return HXCFE_BADFILE;
-					}
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non DIM file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			return HXCFE_ACCESSERROR;
 		}
+			
+		fread(&header,sizeof(dim_header),1,f);
+
+		fclose(f);
+					
+
+		if(	header.id_header==0x4242)
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"DIM file !");
+			return HXCFE_VALIDFILE;
+		}
+		else
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"non DIM file ! Bad header!");
+			return HXCFE_BADFILE;
+		}
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non DIM file !");
+		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;

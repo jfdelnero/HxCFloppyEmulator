@@ -103,56 +103,36 @@ unsigned short filecheckcrc(FILE * f,unsigned long fileoffset,unsigned long size
 
 int AFI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
 	FILE *f;
 	AFIIMG header;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"AFI_libIsValidDiskFile %s",imgfile);
+	floppycontext->hxc_printf(MSG_DEBUG,"AFI_libIsValidDiskFile");
 
-	if(imgfile)
+	if(checkfileext(imgfile,"afi"))
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+
+		f=fopen(imgfile,"rb");
+		if(f==NULL)
+			return HXCFE_ACCESSERROR;
+
+		fread(&header,sizeof(header),1,f);
+		fclose(f);
+
+		if( !strcmp(header.afi_img_tag,AFI_IMG_TAG) )
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-
-				if(strstr( filepath,".afi" )!=NULL)
-				{
-
-					f=fopen(imgfile,"rb");
-					if(f==NULL)
-					{
-						return HXCFE_ACCESSERROR;
-					}
-					fread(&header,sizeof(header),1,f);
-					fclose(f);
-
-					if( !strcmp(header.afi_img_tag,AFI_IMG_TAG))
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"AFI file !");
-						free(filepath);
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non AFI file !");
-						free(filepath);
-						return HXCFE_BADFILE;
-					}
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non AFI file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_DEBUG,"AFI file !");
+			return HXCFE_VALIDFILE;
 		}
+		else
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"non AFI file !");
+			return HXCFE_BADFILE;
+		}
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non AFI file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

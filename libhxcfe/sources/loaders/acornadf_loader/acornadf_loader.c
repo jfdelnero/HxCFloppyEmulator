@@ -59,57 +59,35 @@
 
 int ACORNADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	unsigned int filesize;
-	char * filepath;
-	FILE *f;
-	floppycontext->hxc_printf(MSG_DEBUG,"ACORNADF_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	int filesize;
+
+	floppycontext->hxc_printf(MSG_DEBUG,"ACORNADF_libIsValidDiskFile");
+
+	if( checkfileext(imgfile,"adf") )
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+
+		filesize=getfilesize(imgfile);
+		if(filesize<0) 
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-
-				if(strstr( filepath,".adf" )!=NULL)
-				{
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return HXCFE_ACCESSERROR;
-					}
-					
-					fseek (f , 0 , SEEK_END); 
-					filesize=ftell(f);
-					fseek (f , 0 , SEEK_SET); 
-					
-					fclose(f);
-
-					if(filesize&0x3FF)
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non Acorn ADF file - bad file size !");
-						return HXCFE_BADFILE;
-					}
-
-					floppycontext->hxc_printf(MSG_DEBUG,"Acorn ADF file !");
-					free(filepath);
-					return HXCFE_VALIDFILE;
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non Acorn ADF file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			return HXCFE_ACCESSERROR;
 		}
-	}
+			
+		if(filesize&0x3FF)
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"non Acorn ADF file - bad file size !");
+			return HXCFE_BADFILE;
+		}
 
+		floppycontext->hxc_printf(MSG_DEBUG,"Acorn ADF file !");
+		return HXCFE_VALIDFILE;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non Acorn ADF file !");
+		return HXCFE_BADFILE;
+	}
+	
 	return HXCFE_BADPARAMETER;
 }
 

@@ -59,48 +59,28 @@
 
 int MSA_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
 	FILE * f;
 	unsigned char signature[3];
-	floppycontext->hxc_printf(MSG_DEBUG,"MSA_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+
+	floppycontext->hxc_printf(MSG_DEBUG,"MSA_libIsValidDiskFile");
+
+	if(checkfileext(imgfile,"msa"))
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+		f=fopen(imgfile,"rb");
+		if(f)
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
+			fread(signature,3,1,f);
+			fclose(f);
+			if(signature[0]==0x0E && signature[1]==0x0F && signature[2]==0x00)
 			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-
-				if(strstr( filepath,".msa" )!=NULL)
-				{
-					f=fopen(imgfile,"rb");
-					if(f)
-					{
-						fread(signature,3,1,f);
-						fclose(f);
-						if(signature[0]==0x0E && signature[1]==0x0F && signature[2]==0x00)
-						{
-							floppycontext->hxc_printf(MSG_DEBUG,"MSA file !");
-							free(filepath);
-							return HXCFE_VALIDFILE;
-						}
-					}
-					
-				}
-
-				floppycontext->hxc_printf(MSG_DEBUG,"non MSA file !");
-				free(filepath);
-				return HXCFE_BADFILE;
-				
+				floppycontext->hxc_printf(MSG_DEBUG,"MSA file !");
+				return HXCFE_VALIDFILE;
 			}
-		}
+		}				
 	}
 
-	return HXCFE_BADPARAMETER;
+	floppycontext->hxc_printf(MSG_DEBUG,"non MSA file !");
+	return HXCFE_BADFILE;
 }
 
 

@@ -59,35 +59,17 @@
 
 int JVC_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
+	floppycontext->hxc_printf(MSG_DEBUG,"JVC_libIsValidDiskFile");
 
-	floppycontext->hxc_printf(MSG_DEBUG,"JVC_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	if( checkfileext(imgfile,"jvc") )
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
-		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-				
-				if(strstr( filepath,".jvc" )!=NULL)
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"JVC file !");
-					free(filepath);
-					return HXCFE_VALIDFILE;
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non JVC file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
-		}
+		floppycontext->hxc_printf(MSG_DEBUG,"JVC file !");
+		return HXCFE_VALIDFILE;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non JVC file !");
+		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;

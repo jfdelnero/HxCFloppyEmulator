@@ -69,7 +69,7 @@ int TeleDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	TELEDISK_HEADER td_header;
 	unsigned char * ptr;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"TeleDisk_libIsValidDiskFile %s",imgfile);
+	floppycontext->hxc_printf(MSG_DEBUG,"TeleDisk_libIsValidDiskFile");
 	if(imgfile)
 	{
 		pathlen=strlen(imgfile);

@@ -59,34 +59,17 @@
 
 int HDM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
-	floppycontext->hxc_printf(MSG_DEBUG,"HDM_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
-	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
-		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
+	floppycontext->hxc_printf(MSG_DEBUG,"HDM_libIsValidDiskFile");
 
-				if((strstr( filepath,".hdm" )!=NULL) || (strstr( filepath,".xdf" )!=NULL))
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"HDM file !");
-					free(filepath);
-					return HXCFE_VALIDFILE;
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non HDM file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
-		}
+	if(checkfileext(imgfile,"hdm") || checkfileext(imgfile,"xdf"))
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"HDM file !");
+		return HXCFE_VALIDFILE;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non HDM file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

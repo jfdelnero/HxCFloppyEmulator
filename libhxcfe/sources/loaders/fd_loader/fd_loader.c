@@ -59,59 +59,33 @@
 
 int FD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
-	FILE * f;
-	unsigned int filesize;
+	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"fd_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	floppycontext->hxc_printf(MSG_DEBUG,"fd_libIsValidDiskFile");
+	if( checkfileext(imgfile,"fd") )
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+		filesize=getfilesize(imgfile);
+		if(filesize<0) 
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-				
-				if(strstr( filepath,".fd" )!=NULL)
-				{
-
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return HXCFE_ACCESSERROR;
-					}
-					
-					fseek (f , 0 , SEEK_END); 
-					filesize=ftell(f);
-					fseek (f , 0 , SEEK_SET); 
-					fclose(f);
-
-					if((filesize==327680) || (filesize==655360))
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"TO8D FD file !");
-						free(filepath);
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non TO8D FD file ! - bad file size! ");
-						free(filepath);
-						return HXCFE_BADFILE;
-					}
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non TO8D FD file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			return HXCFE_ACCESSERROR;
 		}
+			
+		if((filesize==327680) || (filesize==655360))
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"TO8D FD file !");
+			return HXCFE_VALIDFILE;
+		}
+		else
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"non TO8D FD file ! - bad file size! ");
+			return HXCFE_BADFILE;
+		}
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non TO8D FD file !");
+		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;

@@ -59,51 +59,32 @@
 
 int VEGASDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen,filesize;
-	char * filepath;
 	unsigned char buffer[256];
 	FILE * f;
-	floppycontext->hxc_printf(MSG_DEBUG,"EMAX_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+
+	floppycontext->hxc_printf(MSG_DEBUG,"VEGASDSK_libIsValidDiskFile");
+
+	if( checkfileext(imgfile,"veg") || checkfileext(imgfile,"vegasdsk") )
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+
+		f=fopen(imgfile,"rb");
+		if(f==NULL) 
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-				
-				if((strstr( filepath,".vegasdsk" )!=NULL) || (strstr( filepath,".veg" )!=NULL))
-				{
-
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return HXCFE_ACCESSERROR;
-					}
-					
-					fseek (f , 0 , SEEK_END);
-					filesize=ftell(f);
-					fseek (f , 256*(3-1) , SEEK_SET);
-					fread(buffer,256,1,f);
-
-					fclose(f);
-
-					floppycontext->hxc_printf(MSG_DEBUG,"Vegas DSK file ! %d tracks %d sectors/tracks",buffer[0x26]+1,buffer[0x27]+1);
-					free(filepath);
-					return HXCFE_VALIDFILE;
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non Vegas DSK file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			return HXCFE_ACCESSERROR;
 		}
+			
+		fseek (f , 256*(3-1) , SEEK_SET);
+		fread(buffer,256,1,f);
+
+		fclose(f);
+		floppycontext->hxc_printf(MSG_DEBUG,"Vegas DSK file ! %d tracks %d sectors/tracks",buffer[0x26]+1,buffer[0x27]+1);
+		return HXCFE_VALIDFILE;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non Vegas DSK file !");
+		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;

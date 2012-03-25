@@ -234,67 +234,54 @@ JV3SectorsOffsets *JV3_offset(JV3SectorHeader JV3SH[], unsigned int NumberofSide
 
 int JV3_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen, offset1, offset2;
+	int offset1, offset2;
 	unsigned short SectorPerTrack, NumberOfTrack, SectorSize, NumberOfEntries;
 	unsigned int   total_data;
 	unsigned char  StartIdSector,NumberOfSide;
-	char * filepath;
 	FILE *f;
 	JV3SectorHeader sh[JV3_HEADER_MAX];
 
-	floppycontext->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
-	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
-		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
+	floppycontext->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile");
 
-				if(strstr( filepath,".dsk" )!=NULL || strstr( filepath,".jv3" )!=NULL)
-				{
-					
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return HXCFE_ACCESSERROR;
-					}					
-					fread(sh, sizeof(JV3SectorHeader), JV3_HEADER_MAX, f);
-       				if ((total_data = JV3_disk_geometry(sh, &NumberOfSide, &SectorPerTrack, &NumberOfTrack, &SectorSize, &StartIdSector, &NumberOfEntries)) != 0)
-					{
-						offset1 = ftell(f);
-						fseek (f , 0 , SEEK_END);
-						offset2 = ftell(f); 
-						fclose(f);
-						free(filepath);
-						if (total_data == (unsigned int)(offset2 - offset1 -1)) {
-							floppycontext->hxc_printf(MSG_DEBUG,"JV3 file !");
-							return HXCFE_VALIDFILE;
-						} else {
-							floppycontext->hxc_printf(MSG_DEBUG,"non JV3 file !");
-							return HXCFE_BADFILE;
-						}
-					}
-					else
-					{
-						fclose(f);
-						free(filepath);
-						floppycontext->hxc_printf(MSG_DEBUG,"non JV3 file !");
-						return HXCFE_BADFILE;
-					}
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non JV3 file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
+	if( checkfileext(imgfile,"jv3") ||
+		checkfileext(imgfile,"dsk")
+		)
+	{
+
+		f=fopen(imgfile,"rb");
+		if(f==NULL) 
+		{
+			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			return HXCFE_ACCESSERROR;
+		}					
+		
+		fread(sh, sizeof(JV3SectorHeader), JV3_HEADER_MAX, f);
+       	if ((total_data = JV3_disk_geometry(sh, &NumberOfSide, &SectorPerTrack, &NumberOfTrack, &SectorSize, &StartIdSector, &NumberOfEntries)) != 0)
+		{
+			offset1 = ftell(f);
+			fseek (f , 0 , SEEK_END);
+			offset2 = ftell(f); 
+			fclose(f);
+
+			if (total_data == (unsigned int)(offset2 - offset1 -1)) {
+				floppycontext->hxc_printf(MSG_DEBUG,"JV3 file !");
+				return HXCFE_VALIDFILE;
+			} else {
+				floppycontext->hxc_printf(MSG_DEBUG,"non JV3 file !");
+				return HXCFE_BADFILE;
 			}
 		}
+		else
+		{
+			fclose(f);
+			floppycontext->hxc_printf(MSG_DEBUG,"non JV3 file !");
+			return HXCFE_BADFILE;
+		}
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non JV3 file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

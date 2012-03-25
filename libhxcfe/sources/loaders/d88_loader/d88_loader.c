@@ -58,37 +58,23 @@
 
 int D88_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
+	floppycontext->hxc_printf(MSG_DEBUG,"D88_libIsValidDiskFile");
 
-	floppycontext->hxc_printf(MSG_DEBUG,"D88_libIsValidDiskFile %s",imgfile);
-
-	if(imgfile)
+	if( checkfileext(imgfile,"d88") || 
+		checkfileext(imgfile,"d77") ||
+		checkfileext(imgfile,"88d") ||
+		checkfileext(imgfile,"d8u") ||
+		checkfileext(imgfile,"2d")	||
+		checkfileext(imgfile,"d68") )
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
-		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlwr(filepath);
-
-				if(strstr( filepath,".d88" ) || strstr( filepath,".d77" ) || strstr( filepath,".88d" ) || strstr( filepath,".d8u" ) || strstr( filepath,".2d" )|| strstr( filepath,".d68" ) )
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"D88 file !");
-					free(filepath);
-					return HXCFE_VALIDFILE;
-				}
-					
-			}
-			else
-			{
-				floppycontext->hxc_printf(MSG_DEBUG,"non D88 file !");
-				free(filepath);
-				return HXCFE_BADFILE;
-			}
-		}
+		floppycontext->hxc_printf(MSG_DEBUG,"D88 file !");
+		return HXCFE_VALIDFILE;
+	}
+				
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non D88 file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

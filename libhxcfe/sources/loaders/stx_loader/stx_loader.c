@@ -64,63 +64,39 @@
 
 int STX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
 	FILE * f;
 	pasti_fileheader * fileheader;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"STX_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	floppycontext->hxc_printf(MSG_DEBUG,"STX_libIsValidDiskFile");
+
+	if(checkfileext(imgfile,"stx"))
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
-		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-
-				if(strstr( filepath,".stx" )!=NULL)
-				{
-
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						free(filepath);
-						return HXCFE_ACCESSERROR;
-					}
+		f=fopen(imgfile,"rb");
+		if(f==NULL)
+			return HXCFE_ACCESSERROR;
 				
-					fileheader=(pasti_fileheader*)malloc(sizeof(pasti_fileheader));
-					fread( fileheader, sizeof(pasti_fileheader), 1, f );    
+		fileheader=(pasti_fileheader*)malloc(sizeof(pasti_fileheader));
+		fread( fileheader, sizeof(pasti_fileheader), 1, f );    
 
-					fclose(f);
+		fclose(f);
 
-					free(filepath);
-
-					if(strcmp(fileheader->headertag,"RSY"))
-					{
-						free(fileheader);
-						floppycontext->hxc_printf(MSG_DEBUG,"non STX file (bad header)!");
-						return HXCFE_BADFILE;
-
-					}
-					else
-					{
-						free(fileheader);
-						floppycontext->hxc_printf(MSG_DEBUG,"STX file !");
-						return HXCFE_VALIDFILE;
-					}
-					
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non STX file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+		if(strcmp(fileheader->headertag,"RSY"))
+		{
+			free(fileheader);
+			floppycontext->hxc_printf(MSG_DEBUG,"non STX file (bad header)!");
+			return HXCFE_BADFILE;
 		}
+		else
+		{
+			free(fileheader);
+			floppycontext->hxc_printf(MSG_DEBUG,"STX file !");
+			return HXCFE_VALIDFILE;
+		}				
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non STX file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

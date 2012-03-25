@@ -57,56 +57,33 @@
 
 int ADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	FILE * f;
-	char * filepath;
-	unsigned int filesize;
+	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"ADF_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	floppycontext->hxc_printf(MSG_DEBUG,"ADF_libIsValidDiskFile");
+
+	if(checkfileext(imgfile,"adf"))
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+		floppycontext->hxc_printf(MSG_DEBUG,"%s is an ADF file !",imgfile);
+
+		filesize=getfilesize(imgfile);
+		if(filesize<0) 
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-
-				if(strstr( filepath,".adf" )!=NULL)
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"ADF file !");
-					free(filepath);
-
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return HXCFE_ACCESSERROR;
-					}
-
-					fseek (f , 0 , SEEK_END); 
-					filesize=ftell(f);
-					fseek (f , 0 , SEEK_SET); 
-					fclose(f);
-
-					if(filesize%(512*11))
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non ADF file ! Bad file size!");
-						return HXCFE_BADFILE;
-					}
-
-					return HXCFE_VALIDFILE;
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non ADF file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			return HXCFE_ACCESSERROR;
 		}
+
+		if(filesize%(512*11))
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"non ADF file ! Bad file size!");
+			return HXCFE_BADFILE;
+		}
+
+		return HXCFE_VALIDFILE;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non ADF file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

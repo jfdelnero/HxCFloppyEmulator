@@ -68,34 +68,17 @@ typedef struct d64trackpos_
 
 int D64_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
-	floppycontext->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	floppycontext->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile");
+
+	if(checkfileext(imgfile,"d64"))
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
-		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-				
-				if(strstr( filepath,".d64" )!=NULL)
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"D64 file !");
-					free(filepath);
-					return HXCFE_VALIDFILE;
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non D64 file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
-		}
+		floppycontext->hxc_printf(MSG_DEBUG,"D64 file !");
+		return HXCFE_VALIDFILE;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non D64 file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

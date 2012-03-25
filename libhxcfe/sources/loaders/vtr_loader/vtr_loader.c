@@ -59,17 +59,14 @@ extern unsigned char bit_inverter[];
 
 int VTR_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
 	FILE *f;
 	vtrucco_picfileformatheader header;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"VTR_libIsValidDiskFile %s",imgfile);
+	floppycontext->hxc_printf(MSG_DEBUG,"VTR_libIsValidDiskFile");
 
 	if(imgfile)
 	{
-
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+		if(strlen(imgfile))
 		{
 			f=fopen(imgfile,"rb");
 			if(f==NULL) 

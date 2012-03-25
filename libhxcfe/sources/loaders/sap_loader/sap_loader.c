@@ -60,45 +60,32 @@
 
 int SAP_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen,floppyformat;
-	char * filepath;
+	int floppyformat;
 	sapID sapid;
-	floppycontext->hxc_printf(MSG_DEBUG,"SAP_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+
+	floppycontext->hxc_printf(MSG_DEBUG,"SAP_libIsValidDiskFile");
+
+	if(checkfileext(imgfile,"sap"))
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+
+		sapid=sap_OpenArchive(imgfile, &floppyformat);
+		if(sapid!=SAP_ERROR)
 		{
-			filepath=strdup(imgfile);
-			if(filepath!=0)
-			{
-				strlower(filepath);	
-				if(strstr( filepath,".sap" )!=NULL)
-				{
-					sapid=sap_OpenArchive(imgfile, &floppyformat);
-					if(sapid!=SAP_ERROR)
-					{
-						sap_CloseArchive(sapid);
-						floppycontext->hxc_printf(MSG_DEBUG,"SAP file !");
-						free(filepath);
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non SAP file !");
-						free(filepath);
-						return HXCFE_BADFILE;
-					}
-					
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non SAP file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			sap_CloseArchive(sapid);
+			floppycontext->hxc_printf(MSG_DEBUG,"SAP file !");
+			return HXCFE_VALIDFILE;
 		}
+		else
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"non SAP file !");
+			return HXCFE_BADFILE;
+		}
+			
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non SAP file !");
+		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;

@@ -62,14 +62,13 @@ int ApriDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	FILE * f;
 	int pathlen;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk_libIsValidDiskFile %s",imgfile);
+	floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk_libIsValidDiskFile");
 
 	if(imgfile)
 	{
 		pathlen=strlen(imgfile);
 		if(pathlen!=0)
 		{
-
 			f=fopen(imgfile,"r+b");
 			if(f)
 			{

@@ -61,67 +61,45 @@
 
 int SVD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
 	char   linebuffer[80];
 	int major,minor;
-	FILE * f;
-	floppycontext->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
-	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
-		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-				
-				if(strstr( filepath,".svd" )!=NULL)
-				{
-					
-					f=fopen(imgfile,"r");
-					if(f)
-					{
-						fgets(linebuffer,sizeof(linebuffer),f);					
-						fclose(f);
+	FILE *f;
 
-						if (sscanf(linebuffer,"%d.%d",&major,&minor) != 2) 
-						{
-							floppycontext->hxc_printf(MSG_DEBUG,"Bad code version !");
-							return(HXCFE_BADFILE);
-						}
-					
-						if((major==2 && minor==0) ||(major==1 && minor==2) ||(major==1 && minor==5))
-						{
-							free(filepath);
-							return HXCFE_VALIDFILE;
-						}
-						else
-						{
-							floppycontext->hxc_printf(MSG_DEBUG,"Bad code version !");
-							free(filepath);
-							return HXCFE_BADFILE;
-						}
-					}
-					
-					floppycontext->hxc_printf(MSG_DEBUG,"Access error !");
-					free(filepath);
-					return HXCFE_ACCESSERROR;
-					
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non SVD file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
+	floppycontext->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile");
+	if( checkfileext(imgfile,"svd") )
+	{
+		f=fopen(imgfile,"r");
+		if(f)
+		{
+			fgets(linebuffer,sizeof(linebuffer),f);					
+			fclose(f);
+
+			if (sscanf(linebuffer,"%d.%d",&major,&minor) != 2) 
+			{
+				floppycontext->hxc_printf(MSG_DEBUG,"Bad code version !");
+				return(HXCFE_BADFILE);
+			}
+			
+			if((major==2 && minor==0) ||(major==1 && minor==2) ||(major==1 && minor==5))
+			{
+				return HXCFE_VALIDFILE;
+			}
+			else
+			{
+				floppycontext->hxc_printf(MSG_DEBUG,"Bad code version !");
+				return HXCFE_BADFILE;
 			}
 		}
+					
+		floppycontext->hxc_printf(MSG_DEBUG,"Access error !");
+		return HXCFE_ACCESSERROR;
+					
 	}
-	
-	return HXCFE_BADPARAMETER;
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non SVD file !");
+		return HXCFE_BADFILE;
+	}
 }
 
 

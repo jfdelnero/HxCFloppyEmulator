@@ -64,14 +64,12 @@ int snes_smc_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	FILE * f;
 	unsigned char * fileheader;
-	char * filepath;
 	int fileok;
 	
 	fileok=1;
-	floppycontext->hxc_printf(MSG_DEBUG,"snes_smc_libIsValidDiskFile %s",imgfile);
+	floppycontext->hxc_printf(MSG_DEBUG,"snes_smc_libIsValidDiskFile");
 	if(imgfile)
 	{
-		
 		f=fopen(imgfile,"r+b");
 		if(f)
 		{
@@ -80,8 +78,7 @@ int snes_smc_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			{
 				fread(fileheader,1,512,f);
 				if( fileheader[8]==0xaa && fileheader[9]==0xbb )
-				{
-					
+				{					
 					switch(fileheader[10])
 					{
 					case 1:
@@ -137,25 +134,15 @@ int snes_smc_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 						}
 						else
 						{
-							filepath=malloc(strlen(imgfile)+1);
-							if(filepath!=0)
+							if( ! checkfileext(imgfile,"smc") )
 							{
-								sprintf(filepath,"%s",imgfile);
-								strlwr(filepath);
-								if(!strstr( filepath,".smc" ))
-								{
-									fileok=0;
-								}
-								else
-								{
-									floppycontext->hxc_printf(MSG_INFO_1,"File type : Super Pro Fighter SMC?");
-								}
-
-								free(filepath);
+								floppycontext->hxc_printf(MSG_ERROR,"unknow file type !");
+								fileok=0;
 							}
-
-							if(!fileok) floppycontext->hxc_printf(MSG_ERROR,"unknow file type !");
-				
+							else
+							{
+								floppycontext->hxc_printf(MSG_INFO_1,"File type : Super Pro Fighter SMC?");
+							}
 						}
 
 					if(fileok)

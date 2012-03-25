@@ -74,58 +74,42 @@ typedef struct dmk_header_
 
 int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	unsigned int filesize;
-	char * filepath;
+	int filesize;
 	dmk_header dmk_h;
 	FILE *f;
-	floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile %s",imgfile);
+
+	floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile");
 	if(imgfile)
 	{
-
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+		f=fopen(imgfile,"r+b");
+		if(f)
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
+			fseek (f , 0 , SEEK_END);
+			filesize=ftell(f);
+			fseek (f , 0 , SEEK_SET);
+			fread(&dmk_h,sizeof(dmk_header),1,f);
 
-				f=fopen(imgfile,"r+b");
-				if(f)
-				{
-					fseek (f , 0 , SEEK_END);
-					filesize=ftell(f);
-					fseek (f , 0 , SEEK_SET);
-					fread(&dmk_h,sizeof(dmk_header),1,f);
-
-					fclose(f);
+			fclose(f);
 					
 
-					if(dmk_h.track_len)
+			if(dmk_h.track_len)
+			{
+				if(!dmk_h.track_len)
+				{
+					floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad file size !");
+					return HXCFE_BADFILE;
+				}
+				else
+				{
+					if(((filesize-sizeof(dmk_header))%dmk_h.track_len))
 					{
-						if(!dmk_h.track_len)
-						{
-							floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad file size !");
-							free(filepath);
-							return HXCFE_BADFILE;
-						}
-						else
-						{
-							if(((filesize-sizeof(dmk_header))%dmk_h.track_len))
-							{
-								floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad file size !");
-								free(filepath);
-								return HXCFE_BADFILE;
-							}
-						}
+						floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad file size !");
+						return HXCFE_BADFILE;
+					}
+				}
 
-						if(	
-								( (dmk_h.write_protected!=0xFF) && (dmk_h.write_protected!=0x00) )
-							
-							||
-							
+				if(	
+					( (dmk_h.write_protected!=0xFF) && (dmk_h.write_protected!=0x00) )	||
 								( (dmk_h.rsvd_2[0]!=0x00 && dmk_h.rsvd_2[0]!=0x12) ||
 								  (dmk_h.rsvd_2[1]!=0x00 && dmk_h.rsvd_2[1]!=0x34) ||
 								  (dmk_h.rsvd_2[2]!=0x00 && dmk_h.rsvd_2[2]!=0x56) ||
@@ -140,42 +124,33 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 								( (dmk_h.track_len>0x2940) || (dmk_h.track_len<0xB00) )
 
 							)
-						{
-							floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad header !");
-							free(filepath);
-							return HXCFE_BADFILE;
-						}
+				{
+					floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad header !");
+					return HXCFE_BADFILE;
+				}
 
 						 
 
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad file size !");
-						free(filepath);					
-						return HXCFE_BADFILE;
-					}
-
-					floppycontext->hxc_printf(MSG_DEBUG,"DMK file !");
-					free(filepath);
-					return HXCFE_VALIDFILE;
-
-
-				}
-				
-				if(strstr( filepath,".dmk" )!=NULL)
-				{
-					free(filepath);
-					floppycontext->hxc_printf(MSG_DEBUG,"DMK file !");
-					return HXCFE_VALIDFILE;
-				}
-
-				floppycontext->hxc_printf(MSG_DEBUG,"non DMK file !");
-				free(filepath);
-				return HXCFE_BADFILE;
-
 			}
+			else
+			{
+				floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad file size !");
+				return HXCFE_BADFILE;
+			}
+
+			floppycontext->hxc_printf(MSG_DEBUG,"DMK file !");
+			return HXCFE_VALIDFILE;
 		}
+
+		if(checkfileext( imgfile,"dmk"))
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"DMK file !");
+			return HXCFE_VALIDFILE;
+		}
+
+		floppycontext->hxc_printf(MSG_DEBUG,"non DMK file !");
+		return HXCFE_BADFILE;
+
 	}
 	
 	return HXCFE_BADPARAMETER;

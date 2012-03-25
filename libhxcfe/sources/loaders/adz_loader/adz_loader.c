@@ -62,34 +62,26 @@
 
 int ADZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
-	floppycontext->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	floppycontext->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile");
+
+	if(checkfileext(imgfile,"adz") || checkfileext(imgfile,"gz"))
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+		if(checkfileext(imgfile,"gz"))
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
+			if( !strstr(getfilenamebase(imgfile,0),".adf.gz") ) 
 			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-				
-				if((strstr( filepath,".adz" )!=NULL) || (strstr( filepath,".adf.gz" )!=NULL))
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"ADZ file !");
-					free(filepath);
-					return HXCFE_VALIDFILE;
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non ADZ file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
+				floppycontext->hxc_printf(MSG_DEBUG,"non ADZ file !");
+				return HXCFE_BADFILE;
 			}
 		}
+
+		floppycontext->hxc_printf(MSG_DEBUG,"ADZ file !");
+		return HXCFE_VALIDFILE;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non ADZ file !");
+		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;
