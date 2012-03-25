@@ -60,55 +60,36 @@
 
 int FDI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
 	FILE *f;
-	char * filepath;
 	fdi_header f_header;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile %s",imgfile);
-	
-	if(imgfile)
+	floppycontext->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile");
+
+	if( checkfileext(imgfile,"fdi") )
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+	
+		f=fopen(imgfile,"rb");
+		if(f)
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
+			fread(&f_header,sizeof(fdi_header),1,f);
+			fclose(f);
+
+			if(f_header.signature[0]=='F' && f_header.signature[1]=='D' && f_header.signature[2]=='I')
 			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-				
-				if(strstr( filepath,".fdi" )!=NULL)
-				{
-					f=fopen(imgfile,"rb");
-					if(f)
-					{
-						fread(&f_header,sizeof(fdi_header),1,f);
-						fclose(f);
-
-						if(f_header.signature[0]=='F' && f_header.signature[1]=='D' && f_header.signature[2]=='I')
-						{
-							floppycontext->hxc_printf(MSG_DEBUG,"FDI file !");
-							free(filepath);
-							return HXCFE_VALIDFILE;
-						}
-
-						floppycontext->hxc_printf(MSG_DEBUG,"non FDI file !");
-						free(filepath);
-						return HXCFE_BADFILE;
-					}
-
-					free(filepath);
-					return HXCFE_ACCESSERROR;
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non FDI file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
+				floppycontext->hxc_printf(MSG_DEBUG,"FDI file !");
+				return HXCFE_VALIDFILE;
 			}
+
+			floppycontext->hxc_printf(MSG_DEBUG,"non FDI file !");
+			return HXCFE_BADFILE;
 		}
+
+		return HXCFE_ACCESSERROR;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non FDI file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

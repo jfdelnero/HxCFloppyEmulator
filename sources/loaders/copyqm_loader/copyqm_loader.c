@@ -64,7 +64,7 @@ int CopyQm_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	unsigned char checksum;
 	FILE * f;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile %s",imgfile);
+	floppycontext->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile");
 	if(imgfile)
 	{
 		pathlen=strlen(imgfile);

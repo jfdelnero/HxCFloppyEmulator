@@ -58,59 +58,37 @@
 
 int EXTADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
 	FILE * f;
-	char * filepath;
-	unsigned int filesize;
 	unsigned char header[12];
 
-	floppycontext->hxc_printf(MSG_DEBUG,"EXTADF_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	floppycontext->hxc_printf(MSG_DEBUG,"EXTADF_libIsValidDiskFile");
+
+	if( checkfileext(imgfile,"adf") )
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+
+		f=fopen(imgfile,"rb");
+		if(f==NULL) 
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-
-				if(strstr( filepath,".adf" )!=NULL)
-				{
-					free(filepath);
-
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return HXCFE_ACCESSERROR;
-					}
-
-					fseek (f , 0 , SEEK_END); 
-					filesize=ftell(f);
-					fseek (f , 0 , SEEK_SET); 
-
-					fread(header,12,1,f);
-					fclose(f);
-					header[8]=0;
-					if(!strcmp(header,"UAE-1ADF"))
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"Extended ADF file (new version)!");
-						return HXCFE_VALIDFILE;
-
-					}
-
-					return HXCFE_BADFILE;
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non Extended ADF file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			return HXCFE_ACCESSERROR;
 		}
+
+		fread(header,12,1,f);
+		fclose(f);
+
+		header[8]=0;
+		if(!strcmp(header,"UAE-1ADF"))
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"Extended ADF file (new version)!");
+			return HXCFE_VALIDFILE;
+		}
+
+		return HXCFE_BADFILE;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non Extended ADF file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

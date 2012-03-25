@@ -59,34 +59,17 @@
 
 int TRD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
-	floppycontext->hxc_printf(MSG_DEBUG,"TRD_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
-	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
-		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
+	floppycontext->hxc_printf(MSG_DEBUG,"TRD_libIsValidDiskFile");
 
-				if(strstr( filepath,".trd" )!=NULL)
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"TRD file !");
-					free(filepath);
-					return HXCFE_VALIDFILE;
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non TRD file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
-		}
+	if(checkfileext(imgfile,"trd"))
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"TRD file !");
+		return HXCFE_VALIDFILE;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non TRD file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

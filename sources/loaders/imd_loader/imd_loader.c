@@ -60,57 +60,37 @@
 
 int IMD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
 	FILE *f;
 	unsigned char fileheader[5];
 
-	floppycontext->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile %s",imgfile);
+	floppycontext->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile");
 
-	if(imgfile)
+	if(checkfileext(imgfile,"imd"))
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+
+		f=fopen(imgfile,"rb");
+		if(f==NULL) 
+			return HXCFE_ACCESSERROR;
+
+		fread(&fileheader,4,1,f);
+		fileheader[4]=0;
+		fclose(f);
+
+		if( !strcmp(fileheader,"IMD "))
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-
-				if(strstr( filepath,".imd" )!=NULL)
-				{fileheader[4];
-
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						return HXCFE_ACCESSERROR;
-					}
-					fread(&fileheader,4,1,f);
-					fileheader[4]=0;
-					fclose(f);
-
-					if( !strcmp(fileheader,"IMD "))
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"IMD file !");
-						free(filepath);
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non IMD file !");
-						free(filepath);
-						return HXCFE_BADFILE;
-					}
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non IMD file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_DEBUG,"IMD file !");
+			return HXCFE_VALIDFILE;
 		}
+		else
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"non IMD file !");
+			return HXCFE_BADFILE;
+		}
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non IMD file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

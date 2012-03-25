@@ -60,59 +60,43 @@
 
 int CPCDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
 	cpcdsk_fileheader fileheader;
 	FILE * f;
-	floppycontext->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+
+	floppycontext->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile");
+
+	if(checkfileext(imgfile,"dsk"))
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+	
+		f=fopen(imgfile,"rb");
+		if(f==NULL) 
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-				
-				if(strstr( filepath,".dsk" )!=NULL)
-				{
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						free(filepath);
-						floppycontext->hxc_printf(MSG_ERROR,"Cannot open the file !");
-						return HXCFE_ACCESSERROR;
-					}
-					fread(&fileheader,sizeof(fileheader),1,f);
-					fclose(f);
-					
-					free(filepath);
-					fileheader.headertag[34]=0;
-					if( !strncmp(fileheader.headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",16) ||
-						!strncmp(fileheader.headertag,"MV - CPCEMU Disk-File\r\nDisk-Info\r\n",11) ||
-						!strncmp(fileheader.headertag,"MV - CPC",8) 
-						)
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"CPC Dsk file !");
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non CPC Dsk file !(bad header)");
-						return HXCFE_BADFILE;
-					}
-					
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non CPC Dsk file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_ERROR,"Cannot open the file !");
+			return HXCFE_ACCESSERROR;
 		}
+
+		fread(&fileheader,sizeof(fileheader),1,f);
+		fclose(f);
+					
+		fileheader.headertag[34]=0;
+		if( !strncmp(fileheader.headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",16) ||
+			!strncmp(fileheader.headertag,"MV - CPCEMU Disk-File\r\nDisk-Info\r\n",11) ||
+			!strncmp(fileheader.headertag,"MV - CPC",8) 
+			)
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"CPC Dsk file !");
+			return HXCFE_VALIDFILE;
+		}
+		else
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"non CPC Dsk file !(bad header)");
+			return HXCFE_BADFILE;
+		}
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non CPC Dsk file !");
+		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;

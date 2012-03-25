@@ -71,55 +71,37 @@ unsigned char dir_entry[34] =
 
 int SCL_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
 	char sclsignature[8];
 	FILE * f;
-	floppycontext->hxc_printf(MSG_DEBUG,"SCL_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	
+	floppycontext->hxc_printf(MSG_DEBUG,"SCL_libIsValidDiskFile");
+
+	if(checkfileext(imgfile,"scl"))
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+		f=fopen(imgfile,"rb");
+		if(f==NULL) 
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-
-				if(strstr( filepath,".scl" )!=NULL)
-				{
-
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						free(filepath);
-						floppycontext->hxc_printf(MSG_ERROR,"Cannot open the file !");
-						return HXCFE_ACCESSERROR;
-					}
-					fread(&sclsignature,8,1,f);
-					fclose(f);
-
-					if(!strncmp(sclsignature, "SINCLAIR", 8))
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"Sinclair SCL file !");
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-
-						floppycontext->hxc_printf(MSG_DEBUG,"non Sinclair SCL file !(bad header)");
-						return HXCFE_BADFILE;
-					}
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non Sinclair SCL file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_ERROR,"Cannot open the file !");
+			return HXCFE_ACCESSERROR;
 		}
+		fread(&sclsignature,8,1,f);
+		fclose(f);
+
+		if(!strncmp(sclsignature, "SINCLAIR", 8))
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"Sinclair SCL file !");
+			return HXCFE_VALIDFILE;
+		}
+		else
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"non Sinclair SCL file !(bad header)");
+			return HXCFE_BADFILE;
+		}
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non Sinclair SCL file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

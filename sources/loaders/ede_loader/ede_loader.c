@@ -59,97 +59,74 @@
 
 int EDE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
 	unsigned char header_buffer[512];
 	FILE * f;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	floppycontext->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile");
+
+	if(	checkfileext(imgfile,"ede") || 
+		checkfileext(imgfile,"eda") || 
+		checkfileext(imgfile,"eds") || 
+		checkfileext(imgfile,"edt")
+		)
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+
+		floppycontext->hxc_printf(MSG_DEBUG,"EDE file !");
+
+		f=fopen(imgfile,"rb");
+		if(f==NULL) 
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
+			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			return HXCFE_ACCESSERROR;
+		}
+
+		fread(header_buffer,0x200,1,f);
+
+		fclose(f);
+		if((header_buffer[0]==0x0D) && (header_buffer[1]==0x0A))
+		{
+			switch(header_buffer[0x1FF])
 			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-				
-				if(strstr( filepath,".ed" )!=NULL)
-				{
-					free(filepath);
-					
-					floppycontext->hxc_printf(MSG_DEBUG,"EDE file !");
-
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return HXCFE_ACCESSERROR;
-					}
-
-
-					fread(header_buffer,0x200,1,f);
-
-					fclose(f);
-					if((header_buffer[0]==0x0D) && (header_buffer[1]==0x0A))
-					{
-
-	
-						switch(header_buffer[0x1FF])
-						{
-
-							case 0x01:
-								floppycontext->hxc_printf(MSG_INFO_0,"Mirage (DD) format");
-							break;
-
-							case 0x02:
-								floppycontext->hxc_printf(MSG_INFO_0,"SQ-80 (DD) format");
-							break;
-
-							case 0x03:
-								floppycontext->hxc_printf(MSG_INFO_0,"EPS (DD) format");
-								break;
-
-							case 0x04:
-								floppycontext->hxc_printf(MSG_INFO_0,"VFX-SD (DD) format");
-							break;
-
-							case 0xcb:
-								floppycontext->hxc_printf(MSG_INFO_0,"ASR-10 HD format");
-								break;
-
-							case 0xcc: 
-								floppycontext->hxc_printf(MSG_INFO_0,"TS-10/12 HD format");
-								break;
-
-							case 0x07:
-								floppycontext->hxc_printf(MSG_INFO_0,"TS-10/12 DD format");
-								break;
-
-							default:
-								floppycontext->hxc_printf(MSG_ERROR,"Unknow format : %x !",header_buffer[0x1FF]);
-								return HXCFE_BADFILE;
-								break;
-						}
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_ERROR,"Bad header !!");
-						return HXCFE_BADFILE;
-					}
-
-					return HXCFE_VALIDFILE;
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non EDE file !");
-					free(filepath);
+				case 0x01:
+					floppycontext->hxc_printf(MSG_INFO_0,"Mirage (DD) format");
+				break;
+				case 0x02:
+					floppycontext->hxc_printf(MSG_INFO_0,"SQ-80 (DD) format");
+				break;
+				case 0x03:
+					floppycontext->hxc_printf(MSG_INFO_0,"EPS (DD) format");
+				break;
+				case 0x04:
+					floppycontext->hxc_printf(MSG_INFO_0,"VFX-SD (DD) format");
+				break;
+				case 0xcb:
+					floppycontext->hxc_printf(MSG_INFO_0,"ASR-10 HD format");
+				break;
+				case 0xcc: 
+					floppycontext->hxc_printf(MSG_INFO_0,"TS-10/12 HD format");
+				break;
+				case 0x07:
+					floppycontext->hxc_printf(MSG_INFO_0,"TS-10/12 DD format");
+				break;
+				default:
+					floppycontext->hxc_printf(MSG_ERROR,"Unknow format : %x !",header_buffer[0x1FF]);
 					return HXCFE_BADFILE;
-				}
+				break;
 			}
 		}
+
+		else
+		{
+			floppycontext->hxc_printf(MSG_ERROR,"Bad header !!");
+			return HXCFE_BADFILE;
+		}
+
+		return HXCFE_VALIDFILE;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non EDE file !");
+		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;

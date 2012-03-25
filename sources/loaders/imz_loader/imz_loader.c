@@ -65,55 +65,36 @@ extern int pc_imggetfloppyconfig(unsigned char * img,unsigned int filesize,unsig
 
 int IMZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen,err;
-	char * filepath;
+	int err;
 	unzFile uf;
 	unz_file_info file_info;
 	char filename_inzip[256];
 
-	floppycontext->hxc_printf(MSG_DEBUG,"IMZ_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	floppycontext->hxc_printf(MSG_DEBUG,"IMZ_libIsValidDiskFile");
+	if( checkfileext(imgfile,"imz"))
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+		uf=unzOpen (imgfile);
+		if (!uf)
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-				
-				if((strstr( filepath,".imz" )!=NULL))
-				{
-
-					uf=unzOpen (imgfile);
-					if (!uf)
-					{
-						floppycontext->hxc_printf(MSG_ERROR,"unzOpen: Error while reading the file!");
-						free(filepath);
-						return HXCFE_BADFILE;
-					}
-
-					err = unzGetCurrentFileInfo(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
-					if (err!=UNZ_OK)
-					{
-						unzClose(uf);
-						return HXCFE_BADFILE;
-					}
-
-					unzClose(uf);
-					floppycontext->hxc_printf(MSG_DEBUG,"IMZ file : %s (%d bytes) !",filename_inzip,file_info.uncompressed_size);
-					free(filepath);
-					return HXCFE_VALIDFILE;
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non IMZ file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_ERROR,"unzOpen: Error while reading the file!");
+			return HXCFE_BADFILE;
 		}
+
+		err = unzGetCurrentFileInfo(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
+		if (err!=UNZ_OK)
+		{
+			unzClose(uf);
+			return HXCFE_BADFILE;
+		}
+
+		unzClose(uf);
+		floppycontext->hxc_printf(MSG_DEBUG,"IMZ file : %s (%d bytes) !",filename_inzip,file_info.uncompressed_size);
+		return HXCFE_VALIDFILE;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non IMZ file !");
+		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;

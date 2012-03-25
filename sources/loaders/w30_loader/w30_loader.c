@@ -59,59 +59,35 @@
 
 int W30_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
-	FILE * f;
-	unsigned int filesize;
+	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	floppycontext->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile");
+
+	if( checkfileext(imgfile,"w30"))
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+
+		filesize=getfilesize(imgfile);
+		if(filesize<0) 
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-				
-				if(strstr( filepath,".w30" )!=NULL)
-				{
-
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return HXCFE_ACCESSERROR;
-					}
-					
-					fseek (f , 0 , SEEK_END); 
-					filesize=ftell(f);
-					fseek (f , 0 , SEEK_SET); 
-					fclose(f);
-
-					if(filesize==737280)
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"W30 file !");
-						free(filepath);
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non W30 file ! - bad file size! ");
-						free(filepath);
-						return HXCFE_BADFILE;
-					}
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non W30 file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			return HXCFE_ACCESSERROR;
 		}
+					
+		if(filesize==737280)
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"W30 file !");
+			return HXCFE_VALIDFILE;
+		}
+		else
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"non W30 file ! - bad file size! ");
+			return HXCFE_BADFILE;
+		}
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non W30 file !");
+		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;

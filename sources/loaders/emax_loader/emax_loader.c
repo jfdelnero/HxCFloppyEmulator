@@ -87,50 +87,30 @@
 
 int EMAX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen,filesize;
-	char * filepath;
-	FILE * f;
-	floppycontext->hxc_printf(MSG_DEBUG,"EMAX_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	int filesize;
+	
+	floppycontext->hxc_printf(MSG_DEBUG,"EMAX_libIsValidDiskFile");
+
+	if( checkfileext(imgfile,"em1") ||
+		checkfileext(imgfile,"em2") ||
+		checkfileext(imgfile,"emx")
+		)
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+
+		filesize=getfilesize(imgfile);
+		if(filesize<0) 
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-				
-				if((strstr( filepath,".em1" )!=NULL) || (strstr( filepath,".em2" )!=NULL) || (strstr( filepath,".emx" )!=NULL))
-				{
-
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return HXCFE_ACCESSERROR;
-					}
-					
-					fseek (f , 0 , SEEK_END);
-					filesize=ftell(f);
-					fseek (f , 0 , SEEK_SET);
-					
-					fclose(f);
-
-
-					floppycontext->hxc_printf(MSG_DEBUG,"Emax file !");
-					free(filepath);
-					return HXCFE_VALIDFILE;
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non Emax file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			return HXCFE_ACCESSERROR;
 		}
+
+		floppycontext->hxc_printf(MSG_DEBUG,"Emax file !");
+		return HXCFE_VALIDFILE;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non Emax file !");
+		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;

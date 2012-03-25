@@ -60,57 +60,40 @@
 
 int GKH_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
 	gkh_header header;
 	FILE * f;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"GKH_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	floppycontext->hxc_printf(MSG_DEBUG,"GKH_libIsValidDiskFile");
+
+	if( checkfileext(imgfile,"gkh"))
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+			
+		f=fopen(imgfile,"rb");
+		if(f==NULL) 
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-				
-				if(strstr( filepath,".gkh" )!=NULL)
-				{
-					free(filepath);
-					
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return HXCFE_ACCESSERROR;
-					}
-
-					fread(&header,sizeof(header),1,f);
-
-					fclose(f);
-					if(!memcmp(&header.header_tag,"TDDFI",5))
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"GKH file !");
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_ERROR,"Bad header !!");
-						return HXCFE_BADFILE;
-					}
-
-					return HXCFE_VALIDFILE;
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non GKH file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			return HXCFE_ACCESSERROR;
 		}
+
+		fread(&header,sizeof(header),1,f);
+		fclose(f);
+
+		if(!memcmp(&header.header_tag,"TDDFI",5))
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"GKH file !");
+		}
+		else
+		{
+			floppycontext->hxc_printf(MSG_ERROR,"Bad header !!");
+			return HXCFE_BADFILE;
+		}
+
+		return HXCFE_VALIDFILE;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non GKH file !");
+		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;

@@ -130,82 +130,53 @@ int msx_imggetfloppyconfig(unsigned char * filename,unsigned char * img,unsigned
 
 int MSX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen,conffound,i;
-	unsigned int filesize;
-	char * filepath;
-	FILE * f;
+	int conffound,i;
+	int filesize;
 	
-	floppycontext->hxc_printf(MSG_DEBUG,"MSX_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	floppycontext->hxc_printf(MSG_DEBUG,"MSX_libIsValidDiskFile");
+
+	if( checkfileext(imgfile,"img") || checkfileext(imgfile,"dsk") )
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+
+		filesize=getfilesize(imgfile);
+		if(filesize<0) 
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-
-				if(strstr( filepath,".img" )!=NULL || strstr( filepath,".dsk" )!=NULL)
-				{
-
-					free(filepath);
-
-
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return HXCFE_ACCESSERROR;
-					}
-					
-					fseek (f , 0 , SEEK_END); 
-					filesize=ftell(f);
-					fseek (f , 0 , SEEK_SET); 
-					
-					fclose(f);
-					
-
-					if(filesize&0x1FF)
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non MSX IMG file - bad file size !");
-						return HXCFE_BADFILE;
-					}
-
-
-					i=0;
-					conffound=0;
-					do
-					{
-							
-						if(msxfileformats[i].filesize==filesize)
-						{
-							conffound=1;
-						}
-						i++;
-
-					}while(msxfileformats[i].filesize!=0 && conffound==0);
-
-					if(conffound)
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"MSX IMG file !");
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non MSX IMG file - bad file size !");
-						return HXCFE_BADFILE;
-					}
-					return HXCFE_VALIDFILE;
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non MSX IMG file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			return HXCFE_ACCESSERROR;
 		}
+		
+		if(filesize&0x1FF)
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"non MSX IMG file - bad file size !");
+			return HXCFE_BADFILE;
+		}
+
+		i=0;
+		conffound=0;
+		do
+		{							
+			if((int)msxfileformats[i].filesize==filesize)
+			{
+				conffound=1;
+			}
+			i++;
+		}while(msxfileformats[i].filesize!=0 && conffound==0);
+
+		if(conffound)
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"MSX IMG file !");
+		}
+		else
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"non MSX IMG file - bad file size !");
+			return HXCFE_BADFILE;
+		}
+		return HXCFE_VALIDFILE;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non MSX IMG file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

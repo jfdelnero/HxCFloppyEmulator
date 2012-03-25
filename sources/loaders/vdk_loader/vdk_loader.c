@@ -62,7 +62,7 @@ int VDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	vdk_header vdk_h;
 	FILE * f;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"VDK_libIsValidDiskFile %s",imgfile);
+	floppycontext->hxc_printf(MSG_DEBUG,"VDK_libIsValidDiskFile");
 	if(imgfile)
 	{
 

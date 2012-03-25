@@ -60,55 +60,39 @@
 
 int OricDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
 	FILE *f;
 	unsigned char fileheader[10];
-	floppycontext->hxc_printf(MSG_DEBUG,"OricDSK_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+
+	floppycontext->hxc_printf(MSG_DEBUG,"OricDSK_libIsValidDiskFile");
+
+	if(checkfileext(imgfile,"dsk"))
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+		f=fopen(imgfile,"rb");
+		if(f==NULL) 
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-
-				if(strstr( filepath,".dsk" )!=NULL)
-				{
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						return HXCFE_ACCESSERROR;
-					}
-					fread(fileheader,10,1,f);
-					fclose(f);
-					
-					free(filepath);
-					fileheader[8]=0;
-					if( !strcmp(fileheader,"MFM_DISK") ||
-					    !strcmp(fileheader,"ORICDISK"))
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"OricDSK file !");
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non OricDSK file (bad header)!");
-						return HXCFE_BADFILE;
-					}
-
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non OricDSK file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			return HXCFE_ACCESSERROR;
 		}
+		fread(fileheader,10,1,f);
+		fclose(f);
+					
+		fileheader[8]=0;
+		if( !strcmp(fileheader,"MFM_DISK") ||
+		    !strcmp(fileheader,"ORICDISK"))
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"OricDSK file !");
+			return HXCFE_VALIDFILE;
+		}
+		else
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"non OricDSK file (bad header)!");
+			return HXCFE_BADFILE;
+		}
+
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non OricDSK file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

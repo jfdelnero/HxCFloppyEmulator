@@ -62,13 +62,12 @@ int SAD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	FILE * f;
 	SAD_HEADER sadh;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"SAD_libIsValidDiskFile %s",imgfile);
+	floppycontext->hxc_printf(MSG_DEBUG,"SAD_libIsValidDiskFile");
 	if(imgfile)
 	{
 		pathlen=strlen(imgfile);
 		if(pathlen!=0)
 		{
-			
 				
 			f=fopen(imgfile,"rb");
 			if(f==NULL) 
@@ -85,7 +84,6 @@ int SAD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			{
 				floppycontext->hxc_printf(MSG_DEBUG,"SAD file !");
 				return HXCFE_VALIDFILE;
-
 			}
 			else
 			{

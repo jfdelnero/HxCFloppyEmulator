@@ -60,59 +60,32 @@
 
 int EMUII_RAW_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen,filesize;
-	char * filepath;
-	FILE *f;
+	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"MFM_libIsValidDiskFile %s",imgfile);
+	floppycontext->hxc_printf(MSG_DEBUG,"MFM_libIsValidDiskFile");
 
-	if(imgfile)
+	if( checkfileext(imgfile,"emuiifd") || checkfileext(imgfile,"sp1200fd") )
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+
+		filesize=getfilesize(imgfile);
+		if(filesize<0) 
+			return HXCFE_ACCESSERROR;
+
+		if(filesize==(0xE00*2*80))
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-
-				if((strstr( filepath,".emuiifd" )!=NULL) || (strstr( filepath,".sp1200fd" )!=NULL))
-				{
-
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						return HXCFE_ACCESSERROR;
-					}
-
-					fseek (f , 0 , SEEK_END); 
-					filesize=ftell(f);
-					fseek (f , 0 , SEEK_SET); 
-					
-					fclose(f);
-					
-					if(filesize==(0xE00*2*80))
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"EmuII/SP1200 raw file !");
-						free(filepath);
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non EmuII/SP1200 raw file !");
-						free(filepath);
-						return HXCFE_BADFILE;
-					}
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non EmuII raw file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_DEBUG,"EmuII/SP1200 raw file !");
+			return HXCFE_VALIDFILE;
 		}
+		else
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"non EmuII/SP1200 raw file !");
+			return HXCFE_BADFILE;
+		}
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non EmuII raw file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

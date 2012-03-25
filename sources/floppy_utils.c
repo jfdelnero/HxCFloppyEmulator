@@ -51,6 +51,8 @@
 #include "libhxcfe.h"
 #include "floppy_loader.h"
 
+#include "os_api.h"
+
 unsigned long us2index(unsigned long startindex,SIDE * track,unsigned long us,unsigned char fill,char fillorder)
 {
 	uint32_t time,freq;
@@ -166,4 +168,172 @@ void savebuffer(unsigned char * name,unsigned char * buffer, int size)
 		fwrite(buffer,size,1,f);
 		fclose(f);
 	}
+}
+
+
+char * getfilenamebase(char * fullpath,char * filenamebase)
+{
+	int len,i;
+
+	len=strlen(fullpath);
+
+	i=0;
+	if(len)
+	{
+		i=len-1;
+		while(i &&	(fullpath[i]!='\\' && fullpath[i]!='/' && fullpath[i]!=':') )
+		{
+			i--;
+		}
+
+		if( fullpath[i]=='\\' || fullpath[i]=='/' || fullpath[i]==':' )
+		{
+			i++;
+		}
+
+		if(i>len)
+		{
+			i=len;
+		}
+	}
+
+	if(filenamebase)
+	{
+		strcpy(filenamebase,&fullpath[i]);
+	}
+
+	return &fullpath[i];
+}
+
+char * getfilenameext(char * fullpath,char * filenameext)
+{
+	char * filename;
+	int len,i;
+	
+	filename=getfilenamebase(fullpath,0);
+
+	len=strlen(filename);
+
+	i=0;
+	if(len)
+	{
+		i=len-1;
+
+		while(i &&	( filename[i] != '.' ) )
+		{
+			i--;
+		}
+
+		if( filename[i] == '.' )
+		{
+			i++;
+		}
+		else
+		{
+			i=len;
+		}
+
+		if(i>len)
+		{
+			i=len;
+		}
+	}
+
+	if(filenameext)
+	{
+		strcpy(filenameext,&filename[i]);
+	}
+
+	return &filename[i];	
+}
+
+int getfilenamewext(char * fullpath,char * filenamewext)
+{
+	char * filename;
+	char * ext;
+	int len;
+	
+	filename=getfilenamebase(fullpath,0);
+	ext=getfilenameext(fullpath,0);
+
+	len=ext-filename;
+
+	
+	if(len && filename[len-1]=='.')
+	{
+		len--;
+	}
+
+	if(filenamewext)
+	{
+		memcpy(filenamewext,filename,len);
+		filenamewext[len]=0;
+	}
+	
+	return len;	
+}
+
+int getpathfolder(char * fullpath,char * folder)
+{
+	int len;
+	char * filenameptr;
+	
+	filenameptr=getfilenamebase(fullpath,0);
+
+	len=filenameptr-fullpath;
+
+	if(folder)
+	{
+		memcpy(folder,fullpath,len);
+		folder[len]=0;
+	}
+	
+	return len;
+}
+
+int checkfileext(char * path,char *ext)
+{
+	char pathext[16];
+	char srcext[16];
+
+	if(path && ext)
+	{
+
+		if( ( strlen(getfilenameext(path,0)) < 16 )  && ( strlen(ext) < 16 ))
+		{
+			getfilenameext(path,(char*)&pathext);
+			strlower(pathext);
+			
+			strcpy((char*)srcext,ext);
+			strlower(srcext);
+
+			if(!strcmp(pathext,srcext))
+			{
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+int getfilesize(char * path)
+{
+	int filesize;
+	FILE * f;
+
+	filesize=-1;
+
+	if(path)
+	{
+		f=fopen(path,"rb");
+		if(f)
+		{
+			fseek (f , 0 , SEEK_END); 
+			filesize=ftell(f);
+
+			fclose(f);
+		}
+	}
+
+	return filesize;
 }

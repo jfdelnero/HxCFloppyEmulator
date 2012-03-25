@@ -295,71 +295,57 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 int TI99V9T9_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	FILE * f;
-	char * filepath;
 	short numberoftrack,numberofsector;
 	char skew0,skew1,interleave,numberofside;
 	int density;
 	short sectorsize;
 	unsigned int bitrate;
 	int ret;
-	floppycontext->hxc_printf(MSG_DEBUG,"TI99V9T9_libIsValidDiskFile %s",imgfile);
+	
+	floppycontext->hxc_printf(MSG_DEBUG,"TI99V9T9_libIsValidDiskFile");
 	if(imgfile)
 	{
-
-		filepath=malloc(strlen(imgfile)+1);
-		if(filepath!=0)
+		f=fopen(imgfile,"rb");
+		if(f==NULL)
 		{
-			sprintf(filepath,"%s",imgfile);
-			strlower(filepath);
+			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			return HXCFE_ACCESSERROR;
+		}
 
-			f=fopen(imgfile,"rb");
-			if(f==NULL)
-			{
-				floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-				return HXCFE_ACCESSERROR;
-			}
-
-			ret=getDiskGeometry(f,&numberoftrack,&numberofside,&numberofsector,&skew0,&skew1,&interleave,&density,&bitrate,&sectorsize);
+		ret=getDiskGeometry(f,&numberoftrack,&numberofside,&numberofsector,&skew0,&skew1,&interleave,&density,&bitrate,&sectorsize);
 			
-			fclose(f);
+		fclose(f);
 
-			switch(ret)
-			{
-				case 1:
+		switch(ret)
+		{
+			case 1:
+				floppycontext->hxc_printf(MSG_DEBUG,"V9T9 file !");
+				return HXCFE_VALIDFILE;
+				break;
+
+			case 2:
+				
+				if( checkfileext(imgfile,"v9t9") || checkfileext(imgfile,"pc99") )
+				{
 					floppycontext->hxc_printf(MSG_DEBUG,"V9T9 file !");
-					free(filepath);
 					return HXCFE_VALIDFILE;
-					break;
-
-				case 2:
-					if(strstr( filepath,".v9t9" )!=NULL || strstr( filepath,".pc99" )!=NULL)
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"V9T9 file !");
-						free(filepath);
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non TI99 V9T9 file!");
-						free(filepath);
-						return HXCFE_BADFILE;
-					}
-					break;
-
-				default:
+				}
+				else
+				{
 					floppycontext->hxc_printf(MSG_DEBUG,"non TI99 V9T9 file!");
-					free(filepath);
 					return HXCFE_BADFILE;
-					break;
+				}
+				break;
 
-			}
+			default:
+				floppycontext->hxc_printf(MSG_DEBUG,"non TI99 V9T9 file!");
+				return HXCFE_BADFILE;
+				break;
 
 		}
-		
-		floppycontext->hxc_printf(MSG_DEBUG,"Internal error!");
-		return HXCFE_INTERNALERROR;
 
-	}
+	}		
+	
 	return HXCFE_BADPARAMETER;
 }
 

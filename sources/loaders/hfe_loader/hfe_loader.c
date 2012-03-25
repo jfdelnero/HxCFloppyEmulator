@@ -87,56 +87,36 @@ char * interfacemodecode[]=
 
 int HFE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
 	FILE *f;
 	picfileformatheader header;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"HFE_libIsValidDiskFile %s",imgfile);
+	floppycontext->hxc_printf(MSG_DEBUG,"HFE_libIsValidDiskFile");
 
 	if(imgfile)
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+		f=fopen(imgfile,"rb");
+		if(f==NULL) 
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-
-				if(1)
-				{
-
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						return HXCFE_ACCESSERROR;
-					}
-					fread(&header,sizeof(header),1,f);
-					fclose(f);
-
-					if( !strcmp(header.HEADERSIGNATURE,"HXCPICFE"))
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"HFE file !");
-						free(filepath);
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non HFE file !");
-						free(filepath);
-						return HXCFE_BADFILE;
-					}
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non HFE file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			return HXCFE_ACCESSERROR;
 		}
+		fread(&header,sizeof(header),1,f);
+		fclose(f);
+
+		if( !strcmp(header.HEADERSIGNATURE,"HXCPICFE"))
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"HFE file !");
+			return HXCFE_VALIDFILE;
+		}
+		else
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"non HFE file !");
+			return HXCFE_BADFILE;
+		}
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non HFE file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

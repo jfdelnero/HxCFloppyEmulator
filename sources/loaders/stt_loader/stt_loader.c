@@ -61,61 +61,44 @@
 
 int STT_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen,filesize;
-	char * filepath;
+	int filesize;
 	FILE * f;
 	stt_header STTHEADER;
-	floppycontext->hxc_printf(MSG_DEBUG,"STT_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	
+	floppycontext->hxc_printf(MSG_DEBUG,"STT_libIsValidDiskFile");
+
+	if( checkfileext(imgfile,"stt") )
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+		f=fopen(imgfile,"rb");
+		if(f==NULL) 
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-				
-				if(strstr( filepath,".stt" )!=NULL)
-				{
-
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-						return HXCFE_ACCESSERROR;
-					}
-					
-					fseek (f , 0 , SEEK_END); 
-					filesize=ftell(f);
-					fseek (f , 0 , SEEK_SET); 
-					
-					STTHEADER.stt_signature=0;
-					fread(&STTHEADER,sizeof(stt_header),1,f);
-
-					fclose(f);
-					
-					
-					if(STTHEADER.stt_signature!=0x4D455453) //"STEM"
-					{
-						free(filepath);
-						floppycontext->hxc_printf(MSG_DEBUG,"non STT IMG file - bad signature !");
-						return HXCFE_BADFILE;
-					}
-
-					floppycontext->hxc_printf(MSG_DEBUG,"STT file !");
-					free(filepath);
-					return HXCFE_VALIDFILE;
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non STT file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			return HXCFE_ACCESSERROR;
 		}
+					
+		fseek (f , 0 , SEEK_END); 
+		filesize=ftell(f);
+		fseek (f , 0 , SEEK_SET); 
+					
+		STTHEADER.stt_signature=0;
+		fread(&STTHEADER,sizeof(stt_header),1,f);
+
+		fclose(f);
+					
+					
+		if(STTHEADER.stt_signature!=0x4D455453) //"STEM"
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"non STT IMG file - bad signature !");
+			return HXCFE_BADFILE;
+		}
+
+		floppycontext->hxc_printf(MSG_DEBUG,"STT file !");
+		return HXCFE_VALIDFILE;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non STT file !");
+		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;

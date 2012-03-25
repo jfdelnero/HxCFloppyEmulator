@@ -60,56 +60,35 @@
 
 int MFM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
-	int pathlen;
-	char * filepath;
 	FILE *f;
 	MFMIMG header;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"MFM_libIsValidDiskFile %s",imgfile);
+	floppycontext->hxc_printf(MSG_DEBUG,"MFM_libIsValidDiskFile");
 
-	if(imgfile)
+	if(checkfileext(imgfile,"mfm"))
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+		f=fopen(imgfile,"rb");
+		if(f==NULL) 
+			return HXCFE_ACCESSERROR;
+
+		fread(&header,sizeof(header),1,f);
+		fclose(f);
+
+		if( !strcmp(header.headername,"HXCMFM"))
 		{
-			filepath=malloc(pathlen+1);
-			if(filepath!=0)
-			{
-				sprintf(filepath,"%s",imgfile);
-				strlower(filepath);
-
-				if(strstr( filepath,".mfm" )!=NULL)
-				{
-
-					f=fopen(imgfile,"rb");
-					if(f==NULL) 
-					{
-						return HXCFE_ACCESSERROR;
-					}
-					fread(&header,sizeof(header),1,f);
-					fclose(f);
-
-					if( !strcmp(header.headername,"HXCMFM"))
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"MFM file !");
-						free(filepath);
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non MFM file !");
-						free(filepath);
-						return HXCFE_BADFILE;
-					}
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non MFM file !");
-					free(filepath);
-					return HXCFE_BADFILE;
-				}
-			}
+			floppycontext->hxc_printf(MSG_DEBUG,"MFM file !");
+			return HXCFE_VALIDFILE;
 		}
+		else
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"non MFM file !");
+			return HXCFE_BADFILE;
+		}
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"non MFM file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
