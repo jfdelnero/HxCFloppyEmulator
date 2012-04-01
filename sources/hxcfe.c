@@ -36,9 +36,11 @@
 
 #include "libhxcfe.h"
 
+int verbose;
+
 int CUI_affiche(int MSGTYPE,char * chaine, ...)
 {
-	if(MSGTYPE!=MSG_DEBUG)
+	if(MSGTYPE!=MSG_DEBUG || verbose)
 	{
 		va_list marker;
 		va_start( marker, chaine );     
@@ -50,43 +52,6 @@ int CUI_affiche(int MSGTYPE,char * chaine, ...)
 	}
     return 0;
 }
-
-char * gettype(char * str_type,char *ext)
-{	
-	if(!strcmp(str_type,"-HFE"))
-	{
-		strcpy(ext,".hfe");
-		return PLUGIN_HXC_HFE;	
-	}
-
-	if(!strcmp(str_type,"-AFI"))
-	{
-		strcpy(ext,".afi");
-		return PLUGIN_HXC_AFI;	
-	}
-
-	if(!strcmp(str_type,"-CPCDSK"))
-	{
-		strcpy(ext,".dsk");
-		return PLUGIN_AMSTRADCPC_DSK;	
-	}
-
-	if(!strcmp(str_type,"-RAW"))
-	{
-		strcpy(ext,".raw");
-		return PLUGIN_RAW_LOADER;	
-	}
-
-	if(!strcmp(str_type,"-MFM"))
-	{
-		strcpy(ext,".mfm");
-		return PLUGIN_HXC_MFM;
-	}
-
-	return 0;
-}
-
-
 
 void get_filename(char * path,char * filename)
 {
@@ -121,15 +86,275 @@ void get_filename(char * path,char * filename)
 	return;
 }
 
+int isOption(int argc, char* argv[],char * paramtosearch,char * argtoparam)
+{
+	int param=1;
+	int i,j;
+
+	char option[512];
+
+	memset(option,0,512);
+	while(param<=argc)
+	{
+		if(argv[param])
+		{			
+			if(argv[param][0]=='-')
+			{
+				memset(option,0,512);
+
+				j=0;
+				i=1;
+				while( argv[param][i] && argv[param][i]!=':')
+				{
+					option[j]=argv[param][i];
+					i++;
+					j++;
+				}
+
+				if( !strcmp(option,paramtosearch) )
+				{
+					if(argtoparam)
+					{
+						if(argv[param][i]==':')
+						{	
+							i++;
+							j=0;
+							while( argv[param][i] )
+							{
+								argtoparam[j]=argv[param][i];
+								i++;
+								j++;
+							}
+							argtoparam[j]=0;
+							return 1;
+						}
+						else
+						{
+							return -1;
+						}
+					}
+					else
+					{
+						return 1;
+					}
+				}
+			}
+		}
+		param++;
+	}
+	
+	return 0;
+}
+
+void printhelp(char* argv[])
+{
+	printf("Options:\n");
+	printf("  -help \t\t\t: This help\n");
+	printf("  -license\t\t\t: Print the license\n");
+	printf("  -verbose\t\t\t: Verbose mode\n");
+	printf("  -modulelist\t\t\t: List modules in the libhxcfe [FORMAT]\n");
+	printf("  -interfacelist\t\t: Floppy interfaces mode list [INTERFACE_MODE]\n");
+	printf("  -finput:[filename]\t\t: Input file image \n");
+	printf("  -conv:[FORMAT] \t\t: Convert the input file\n");
+	printf("  -ifmode:[INTERFACE_MODE]\t: Select the floppy interface mode\n");
+	printf("\n");
+}
+
+void printlibmodule(HXCFLOPPYEMULATOR* hxcfe)
+{
+	
+	int i,j;
+	int numberofloader;
+	const char* ptr;
+
+	printf("---------------------------------------------------------------------------\n");
+	printf("-                   libhxcfe file type support list                       -\n");
+	printf("---------------------------------------------------------------------------\n");
+	printf("MODULE ID          ACCESS    DESCRIPTION                         Extension\n\n");
+	
+	i=0;
+	numberofloader=hxcfe_numberOfLoader(hxcfe);
+	while(i<numberofloader)
+	{
+		ptr=hxcfe_getLoaderName(hxcfe,i);
+		printf("%s",ptr );
+		for(j=0;j<(int)(20-strlen(ptr));j++) printf(" ");
+		
+		printf("(%c%c)",hxcfe_getLoaderAccess(hxcfe,i)&1?'R':' ',hxcfe_getLoaderAccess(hxcfe,i)&2?'W':' ');
+		
+		ptr=hxcfe_getLoaderDesc(hxcfe,i);
+		printf(" :  %s",ptr);
+		
+		for(j=0;j<(int)(38-strlen(ptr));j++) printf(" ");
+		printf("(*.%s)\n",hxcfe_getLoaderExt(hxcfe,i));
+		i++;
+	}
+	
+	printf("\n%d Loaders\n\n",hxcfe_numberOfLoader(hxcfe));
+
+}
+
+void printinterfacemode(HXCFLOPPYEMULATOR* hxcfe)
+{
+	
+	int i,j;
+	int numberofifmode;
+	const char* ptr;
+
+	printf("---------------------------------------------------------------------------\n");
+	printf("-                        Interface mode list                              -\n");
+	printf("---------------------------------------------------------------------------\n");
+	printf("Interface ID                  (code)   DESCRIPTION                         \n\n");
+
+	i=0;
+	numberofifmode=0;
+	while(hxcfe_getFloppyInterfaceModeName(hxcfe,i))
+	{
+		ptr=hxcfe_getFloppyInterfaceModeName(hxcfe,i);
+		printf("%s",ptr );
+		for(j=0;j<(int)(30-strlen(ptr));j++) printf(" ");
+		
+		printf("(0x%.2X)",i);
+		
+		ptr=hxcfe_getFloppyInterfaceModeDesc(hxcfe,i);
+		printf(" : %s\n",ptr);
+		i++;
+	}
+	
+	printf("\n%d Modes\n\n",i);
+
+}
+
+
+int convertfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char * outfile,char * outformat,int ifmode)
+{
+	int loaderid;
+	int ret;
+	FLOPPY * floppydisk;
+
+	loaderid=hxcfe_autoSelectLoader(hxcfe,infile,0);
+	if(loaderid>=0)
+	{
+		floppydisk=hxcfe_floppyLoad(hxcfe,infile,loaderid,&ret);
+				
+		if(ret!=HXCFE_NOERROR || !floppydisk)
+		{
+			switch(ret)
+			{
+				case HXCFE_UNSUPPORTEDFILE:
+					printf("Load error!: Image file not yet supported!\n");
+				break;
+				case HXCFE_FILECORRUPTED:
+					printf("Load error!: File corrupted ? Read error ?\n");
+				break;
+				case HXCFE_ACCESSERROR:
+					printf("Load error!:  Read file error!\n");
+				break;
+				default:
+					printf("Load error! error %d\n",ret);
+				break;
+			}
+		}
+		else
+		{
+			if(ifmode<0)
+			{
+				ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
+			}
+
+			loaderid=hxcfe_getLoaderID(hxcfe,outformat);
+			if(loaderid>=0)
+			{
+				hxcfe_floppySetInterfaceMode(hxcfe,floppydisk,ifmode);
+				hxcfe_floppyExport(hxcfe,floppydisk,outfile,loaderid);
+			}
+			else
+			{
+				printf("Cannot Find the Loader %s ! Please use the -modulelist option to see possible values.\n",outformat);
+			}
+		
+			hxcfe_floppyUnload(hxcfe,floppydisk);
+		}
+	}
+
+	return 0;
+}
+
+int infofile(HXCFLOPPYEMULATOR* hxcfe,char * infile)
+{
+	int loaderid;
+	int ret;
+	FLOPPY * floppydisk;
+	int ifmode,nbofsector;
+
+	printf("---------------------------------------------------------------------------\n");
+	printf("-                        File informations                                -\n");
+	printf("---------------------------------------------------------------------------\n");
+
+	printf("File: %s\n",infile);
+
+	loaderid=hxcfe_autoSelectLoader(hxcfe,infile,0);
+	if(loaderid>=0)
+	{
+		floppydisk=hxcfe_floppyLoad(hxcfe,infile,loaderid,&ret);
+				
+		if(ret!=HXCFE_NOERROR || !floppydisk)
+		{
+			switch(ret)
+			{
+				case HXCFE_UNSUPPORTEDFILE:
+					printf("Load error!: Image file not yet supported!\n");
+				break;
+				case HXCFE_FILECORRUPTED:
+					printf("Load error!: File corrupted ? Read error ?\n");
+				break;
+				case HXCFE_ACCESSERROR:
+					printf("Load error!:  Read file error!\n");
+				break;
+				default:
+					printf("Load error! error %d\n",ret);
+				break;
+			}
+		}
+		else
+		{
+			ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
+			printf("\n");
+			printf("File type : %s - %s\n",hxcfe_getLoaderName(hxcfe,loaderid),hxcfe_getLoaderDesc(hxcfe,loaderid));
+			printf("Floppy interface mode : %s\n",hxcfe_getFloppyInterfaceModeName(hxcfe,ifmode),hxcfe_getFloppyInterfaceModeDesc(hxcfe,ifmode));
+			printf("Number of Track : %d\n",hxcfe_getNumberOfTrack(hxcfe,floppydisk) );
+			printf("Number of Side : %d\n",hxcfe_getNumberOfSide(hxcfe,floppydisk) );
+			printf("Total Size : %d Bytes, ",hxcfe_getFloppySize (hxcfe,floppydisk,&nbofsector)); 
+			printf("Number of sectors : %d",nbofsector); 
+			
+
+			ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
+
+			//loaderid=hxcfe_getLoaderID(hxcfe,outformat);
+		
+			hxcfe_floppyUnload(hxcfe,floppydisk);
+
+			printf("\n");
+		}
+	}
+
+	return 0;
+}
+
+
 int main(int argc, char* argv[])
 {
-	int ret;
 	char filename[512];
-	char ext[16];
-	char * output_file_type;
+	char ofilename[512];
+	char outputformat[512];
+	char temp[512];
+	int loaderid;
 
-	FLOPPY * floppydisk;
+	int interfacemode;
+
 	HXCFLOPPYEMULATOR* hxcfe;
+
+	verbose=0;
 
 	hxcfe=hxcfe_init();
 	hxcfe_setOutputFunc(hxcfe,&CUI_affiche);
@@ -139,55 +364,108 @@ int main(int argc, char* argv[])
    	printf("This program comes with ABSOLUTELY NO WARRANTY\n");
    	printf("This is free software, and you are welcome to redistribute it\n");
    	printf("under certain conditions;\n\n");
-		
-	if(argv[1] && argv[2])
+	
+	printf("libhxcfe version : %s\n\n",hxcfe_getVersion(hxcfe));
+	
+	// License print...
+	if(isOption(argc,argv,"license",0)>0)
 	{
-		output_file_type=gettype(argv[2],(char*)&ext);
-		if(output_file_type)
-		{
-			hxcfe_selectContainer(hxcfe,"AUTOSELECT");
-			floppydisk=hxcfe_floppyLoad(hxcfe,argv[1],&ret);
-			
-			if(ret!=HXCFE_NOERROR || !floppydisk)
-			{
-				switch(ret)
-				{
-					case HXCFE_UNSUPPORTEDFILE:
-						printf("Load error!: Image file not yet supported!\n");
-					break;
-					case HXCFE_FILECORRUPTED:
-						printf("Load error!: File corrupted ? Read error ?\n");
-					break;
-					case HXCFE_ACCESSERROR:
-						printf("Load error!:  Read file error!\n");
-					break;
-					default:
-						printf("Load error! error %d\n",ret);
-					break;
-				}
-			}
-			else
-			{
-				get_filename(argv[1],filename);
-				strcat(filename,ext);
-				
-				hxcfe_selectContainer(hxcfe,output_file_type);
-
-				hxcfe_floppyExport(hxcfe,floppydisk,filename);
-				
-				hxcfe_floppyUnload(hxcfe,floppydisk);
-			}
-		}
-		else
-		{
-			printf("Syntax: %s [image-file] [-HFE/-AFI/-CPCDSK/-RAW/-MFM]\n",argv[0]);
-		}
-	}
-	else
-	{
-		printf("Syntax: %s [image-file] [-HFE/-AFI/-CPCDSK/-RAW/-MFM]\n",argv[0]);
+		printf("License :\n%s\n\n",hxcfe_getLicense(hxcfe));
 	}
 
+	// Verbose option...
+	if(isOption(argc,argv,"verbose",0)>0)
+	{
+		printf("verbose mode\n");
+		verbose=1;
+	}
+
+	// help option...
+	if(isOption(argc,argv,"help",0)>0)
+	{
+		printhelp(argv);
+	}
+
+	memset(filename,0,sizeof(filename));
+
+	// Input file name option
+	if(isOption(argc,argv,"finput",(char*)&filename)>0)
+	{
+		printf("Input file : %s\n",filename);
+	}
+
+	// Output file name option
+	memset(ofilename,0,512);
+	isOption(argc,argv,"foutput",(char*)&ofilename);
+
+	// Module list option
+	if(isOption(argc,argv,"modulelist",0)>0)
+	{
+		printlibmodule(hxcfe);
+	}
+
+	// Interface mode list option
+	if(isOption(argc,argv,"interfacelist",0)>0)
+	{
+		printinterfacemode(hxcfe);
+	}
+
+	// Interface mode option
+	interfacemode=-1;
+	if(isOption(argc,argv,"ifmode",(char*)&temp)>0)
+	{
+		interfacemode=hxcfe_getFloppyInterfaceModeID(hxcfe,temp);
+		if(interfacemode<0)
+		{
+			printf("Unknown Interface mode ! : %s\n",temp);
+			printf("Please use the -interfacelist option for possible interface modes.\n\n");
+			hxcfe_deinit(hxcfe);
+			return -1;
+		}
+
+	}
+
+
+	if(isOption(argc,argv,"infos",0)>0)
+	{
+		infofile(hxcfe,filename);
+	}
+
+	// Convert a file ?
+	if(isOption(argc,argv,"conv",0)>0)
+	{
+		strcpy(outputformat,PLUGIN_HXC_HFE);
+		isOption(argc,argv,"conv",(char*)&outputformat);
+
+		loaderid=hxcfe_getLoaderID(hxcfe,outputformat);
+		if(loaderid>=0)
+		{
+			if(!strlen(ofilename))
+			{
+				get_filename(filename,ofilename);
+				strcat(ofilename,".");
+				strcat(ofilename,hxcfe_getLoaderExt(hxcfe,loaderid));
+			}
+
+			printf("Output file : %s\n",ofilename);
+
+		}
+
+		convertfile(hxcfe,filename,ofilename,outputformat,interfacemode);
+	}
+
+
+	if( (isOption(argc,argv,"help",0)<=0) && 
+		(isOption(argc,argv,"license",0)<=0) &&
+		(isOption(argc,argv,"modulelist",0)<=0) &&
+		(isOption(argc,argv,"interfacelist",0)<=0) &&
+		(isOption(argc,argv,"conv",0)<=0) &&
+		(isOption(argc,argv,"infos",0)<=0 )
+		)
+	{
+		printhelp(argv);
+	}
+	
 	hxcfe_deinit(hxcfe);
 	
 	return 0;
