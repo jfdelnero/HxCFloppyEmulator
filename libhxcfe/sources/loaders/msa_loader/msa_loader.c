@@ -279,9 +279,9 @@ int MSA_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int MSA_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="ATARIST_MSA";
-	const char plug_desc[]="ATARI ST MSA Loader";
-	const char plug_ext[]="msa";
+	static const char plug_id[]="ATARIST_MSA";
+	static const char plug_desc[]="ATARI ST MSA Loader";
+	static const char plug_ext[]="msa";
 
 	plugins_ptr plug_funcs=
 	{

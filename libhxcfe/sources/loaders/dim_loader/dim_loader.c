@@ -224,9 +224,9 @@ int DIM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int DIM_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="ATARIST_DIM";
-	const char plug_desc[]="ATARI ST DIM Loader";
-	const char plug_ext[]="dim";
+	static const char plug_id[]="ATARIST_DIM";
+	static const char plug_desc[]="ATARI ST DIM Loader";
+	static const char plug_ext[]="dim";
 
 	plugins_ptr plug_funcs=
 	{

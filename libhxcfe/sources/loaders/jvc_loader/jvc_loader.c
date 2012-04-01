@@ -206,9 +206,9 @@ int JVC_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int JVC_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="TRS80_JVC";
-	const char plug_desc[]="TRS80 JVC Loader";
-	const char plug_ext[]="jvc";
+	static const char plug_id[]="TRS80_JVC";
+	static const char plug_desc[]="TRS80 JVC Loader";
+	static const char plug_ext[]="jvc";
 
 	plugins_ptr plug_funcs=
 	{

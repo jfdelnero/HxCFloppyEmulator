@@ -215,9 +215,9 @@ int KRZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int KRZ_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="KURZWEIL_KRZ";
-	const char plug_desc[]="KURZWEIL KRZ Loader";
-	const char plug_ext[]="krz";
+	static const char plug_id[]="KURZWEIL_KRZ";
+	static const char plug_desc[]="KURZWEIL KRZ Loader";
+	static const char plug_ext[]="krz";
 
 	plugins_ptr plug_funcs=
 	{

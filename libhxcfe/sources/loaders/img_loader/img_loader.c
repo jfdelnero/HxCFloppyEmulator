@@ -285,9 +285,9 @@ int IMG_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int IMG_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="RAW_IMG";
-	const char plug_desc[]="IBM PC IMG Loader";
-	const char plug_ext[]="img";
+	static const char plug_id[]="RAW_IMG";
+	static const char plug_desc[]="IBM PC IMG Loader";
+	static const char plug_ext[]="img";
 
 	plugins_ptr plug_funcs=
 	{

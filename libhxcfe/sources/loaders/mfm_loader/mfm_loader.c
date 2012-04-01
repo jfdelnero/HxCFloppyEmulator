@@ -180,9 +180,9 @@ int MFM_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 int MFM_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="HXCMFM_IMG";
-	const char plug_desc[]="HXC MFM IMG Loader";
-	const char plug_ext[]="mfm";
+	static const char plug_id[]="HXCMFM_IMG";
+	static const char plug_desc[]="HXC MFM IMG Loader";
+	static const char plug_ext[]="mfm";
 
 	plugins_ptr plug_funcs=
 	{

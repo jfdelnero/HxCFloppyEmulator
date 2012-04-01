@@ -510,9 +510,9 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 int AFI_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="HXC_AFI";
-	const char plug_desc[]="HxC AFI file loader";
-	const char plug_ext[]="afi";
+	static const char plug_id[]="HXC_AFI";
+	static const char plug_desc[]="HxC AFI file loader";
+	static const char plug_ext[]="afi";
 
 	plugins_ptr plug_funcs=
 	{

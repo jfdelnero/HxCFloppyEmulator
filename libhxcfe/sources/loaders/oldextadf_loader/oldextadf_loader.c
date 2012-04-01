@@ -244,9 +244,9 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 int OLDEXTADF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="AMIGA_OLDEXTADF";
-	const char plug_desc[]="AMIGA OLD EXTENDED ADF Loader";
-	const char plug_ext[]="adf";
+	static const char plug_id[]="AMIGA_OLDEXTADF";
+	static const char plug_desc[]="AMIGA OLD EXTENDED ADF Loader";
+	static const char plug_ext[]="adf";
 
 	plugins_ptr plug_funcs=
 	{

@@ -468,9 +468,9 @@ int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 int IMD_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="IMD_IMG";
-	const char plug_desc[]="ImageDisk IMD file Loader";
-	const char plug_ext[]="imd";
+	static const char plug_id[]="IMD_IMG";
+	static const char plug_desc[]="ImageDisk IMD file Loader";
+	static const char plug_ext[]="imd";
 
 	plugins_ptr plug_funcs=
 	{

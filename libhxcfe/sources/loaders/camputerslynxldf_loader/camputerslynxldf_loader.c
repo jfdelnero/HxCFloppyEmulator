@@ -224,9 +224,9 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 int CAMPUTERSLYNX_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="CAMPUTERSLYNX";
-	const char plug_desc[]="CAMPUTERSLYNX Loader";
-	const char plug_ext[]="ldf";
+	static const char plug_id[]="CAMPUTERSLYNX";
+	static const char plug_desc[]="CAMPUTERSLYNX Loader";
+	static const char plug_ext[]="ldf";
 
 	plugins_ptr plug_funcs=
 	{

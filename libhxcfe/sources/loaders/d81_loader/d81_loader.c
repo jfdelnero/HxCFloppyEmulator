@@ -176,9 +176,9 @@ int D81_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int D81_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="C64_D81";
-	const char plug_desc[]="C64 D81 Loader";
-	const char plug_ext[]="d81";
+	static const char plug_id[]="C64_D81";
+	static const char plug_desc[]="C64 D81 Loader";
+	static const char plug_ext[]="d81";
 
 	plugins_ptr plug_funcs=
 	{

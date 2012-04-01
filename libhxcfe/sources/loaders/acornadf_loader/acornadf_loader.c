@@ -185,9 +185,9 @@ int ACORNADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 int ACORNADF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="ACORN_ADF";
-	const char plug_desc[]="ACORN ADF Loader";
-	const char plug_ext[]="adf";
+	static const char plug_id[]="ACORN_ADF";
+	static const char plug_desc[]="ACORN ADF Loader";
+	static const char plug_ext[]="adf";
 
 	plugins_ptr plug_funcs=
 	{

@@ -164,9 +164,9 @@ int HDM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int HDM_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="X68000_HDM";
-	const char plug_desc[]="X68000 HDM file Loader";
-	const char plug_ext[]="hdm";
+	static const char plug_id[]="X68000_HDM";
+	static const char plug_desc[]="X68000 HDM file Loader";
+	static const char plug_ext[]="hdm";
 
 	plugins_ptr plug_funcs=
 	{

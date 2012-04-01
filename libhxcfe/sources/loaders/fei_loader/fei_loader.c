@@ -186,9 +186,9 @@ int FEI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int FEI_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="FEI";
-	const char plug_desc[]="FEI Loader";
-	const char plug_ext[]="fei";
+	static const char plug_id[]="FEI";
+	static const char plug_desc[]="FEI Loader";
+	static const char plug_ext[]="fei";
 
 	plugins_ptr plug_funcs=
 	{

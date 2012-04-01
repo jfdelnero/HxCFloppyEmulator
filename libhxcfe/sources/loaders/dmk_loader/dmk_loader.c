@@ -195,7 +195,7 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 		trackformat=ISOFORMAT_SD;
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"----------------------------");
+	floppycontext->hxc_printf(MSG_DEBUG,"----------------------------");
 
 	while(idamoffset[k] && k<64)
 	{
@@ -394,7 +394,7 @@ int DMK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				fread(trackdata,dmk_h.track_len-128,1,f);
 				memset(trackclk,0xFF,dmk_h.track_len-128);
 				
-				floppycontext->hxc_printf(MSG_INFO_1,"Track %d Side %d Tracklen %d TTableOffset:0x%.8x",j,i,dmk_h.track_len,file_offset);
+				floppycontext->hxc_printf(MSG_DEBUG,"Track %d Side %d Tracklen %d TTableOffset:0x%.8x",j,i,dmk_h.track_len,file_offset);
 					
 				currentside=DMKpatchtrack(floppycontext,trackdata, trackclk,idam_offset_table,dmk_h.track_len-128,&tracktotalsize, &dmk_h);
 				currentcylinder->sides[i]=currentside;
@@ -419,9 +419,9 @@ int DMK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int DMK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="TRS80_DMK";
-	const char plug_desc[]="TRS80 DMK Loader";
-	const char plug_ext[]="dmk";
+	static const char plug_id[]="TRS80_DMK";
+	static const char plug_desc[]="TRS80 DMK Loader";
+	static const char plug_ext[]="dmk";
 
 	plugins_ptr plug_funcs=
 	{

@@ -206,9 +206,9 @@ int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int IMZ_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="RAW_IMZ";
-	const char plug_desc[]="IBM PC IMZ Loader";
-	const char plug_ext[]="imz";
+	static const char plug_id[]="RAW_IMZ";
+	static const char plug_desc[]="IBM PC IMZ Loader";
+	static const char plug_ext[]="imz";
 
 	plugins_ptr plug_funcs=
 	{

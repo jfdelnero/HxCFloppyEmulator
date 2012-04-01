@@ -178,9 +178,9 @@ int FD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,cha
 int FD_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="THOMSON_FD";
-	const char plug_desc[]="THOMSON FD Loader";
-	const char plug_ext[]="fd";
+	static const char plug_id[]="THOMSON_FD";
+	static const char plug_desc[]="THOMSON FD Loader";
+	static const char plug_ext[]="fd";
 
 	plugins_ptr plug_funcs=
 	{

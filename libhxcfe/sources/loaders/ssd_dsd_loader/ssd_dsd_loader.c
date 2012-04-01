@@ -180,9 +180,9 @@ int DSD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int DSD_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="BBC_SSD_DSD";
-	const char plug_desc[]="BBC SSD & DSD floppy image loader";
-	const char plug_ext[]="dsd";
+	static const char plug_id[]="BBC_SSD_DSD";
+	static const char plug_desc[]="BBC SSD & DSD floppy image loader";
+	static const char plug_ext[]="dsd";
 
 	plugins_ptr plug_funcs=
 	{

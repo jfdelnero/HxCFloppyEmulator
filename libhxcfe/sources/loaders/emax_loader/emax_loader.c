@@ -293,9 +293,9 @@ int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,c
 int EMAX_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="EMAX_EM";
-	const char plug_desc[]="EMAX EM1 & EM2 Loader";
-	const char plug_ext[]="em1";
+	static const char plug_id[]="EMAX_EM";
+	static const char plug_desc[]="EMAX EM1 & EM2 Loader";
+	static const char plug_ext[]="em1";
 
 	plugins_ptr plug_funcs=
 	{

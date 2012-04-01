@@ -465,9 +465,9 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 int AMIGADOSFSDK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="AMIGA_FS";
-	const char plug_desc[]="AMIGA FS Loader";
-	const char plug_ext[]="amigados";
+	static const char plug_id[]="AMIGA_FS";
+	static const char plug_desc[]="AMIGA FS Loader";
+	static const char plug_ext[]="amigados";
 
 	plugins_ptr plug_funcs=
 	{

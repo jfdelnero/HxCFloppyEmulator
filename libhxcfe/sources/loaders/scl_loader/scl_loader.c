@@ -290,9 +290,9 @@ int SCL_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int SCL_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="ZXSPECTRUM_SCL";
-	const char plug_desc[]="ZX SPECTRUM SCL Loader";
-	const char plug_ext[]="scl";
+	static const char plug_id[]="ZXSPECTRUM_SCL";
+	static const char plug_desc[]="ZX SPECTRUM SCL Loader";
+	static const char plug_ext[]="scl";
 
 	plugins_ptr plug_funcs=
 	{

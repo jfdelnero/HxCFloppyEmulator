@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------------//
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
-// File : D88_loader.c
+// File : d88_loader.c
 // Contains: D88 floppy image loader.
 //
 // Written by:	DEL NERO Jean Francois
@@ -403,9 +403,9 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int D88_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="NEC_D88";
-	const char plug_desc[]="NEC D88 Loader";
-	const char plug_ext[]="d88";
+	static const char plug_id[]="NEC_D88";
+	static const char plug_desc[]="NEC D88 Loader";
+	static const char plug_ext[]="d88";
 
 	plugins_ptr plug_funcs=
 	{

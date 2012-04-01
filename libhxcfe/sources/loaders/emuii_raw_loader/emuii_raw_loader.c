@@ -164,9 +164,9 @@ int EMUII_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 int EMUII_RAW_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="EMULATORII";
-	const char plug_desc[]="E-mu Emulator II / SP1200 dsk Loader";
-	const char plug_ext[]="emuiifd";
+	static const char plug_id[]="EMULATORII";
+	static const char plug_desc[]="E-mu Emulator II / SP1200 dsk Loader";
+	static const char plug_ext[]="emuiifd";
 
 	plugins_ptr plug_funcs=
 	{

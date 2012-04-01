@@ -167,9 +167,9 @@ int W30_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int W30_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="ROLAND_W30";
-	const char plug_desc[]="Roland W30 file Loader";
-	const char plug_ext[]="w30";
+	static const char plug_id[]="ROLAND_W30";
+	static const char plug_desc[]="Roland W30 file Loader";
+	static const char plug_ext[]="w30";
 
 	plugins_ptr plug_funcs=
 	{

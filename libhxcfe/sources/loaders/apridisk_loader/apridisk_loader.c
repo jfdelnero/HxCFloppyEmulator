@@ -363,9 +363,9 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 int ApriDisk_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="APRIDISK";
-	const char plug_desc[]="APRIDISK Loader";
-	const char plug_ext[]="dsk";
+	static const char plug_id[]="APRIDISK";
+	static const char plug_desc[]="APRIDISK Loader";
+	static const char plug_ext[]="dsk";
 
 	plugins_ptr plug_funcs=
 	{

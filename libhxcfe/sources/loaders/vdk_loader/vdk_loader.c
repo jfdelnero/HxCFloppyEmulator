@@ -193,9 +193,9 @@ int VDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int VDK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="DRAGON3264_VDK";
-	const char plug_desc[]="DRAGON32 & 64 VDK Loader";
-	const char plug_ext[]="vdk";
+	static const char plug_id[]="DRAGON3264_VDK";
+	static const char plug_desc[]="DRAGON32 & 64 VDK Loader";
+	static const char plug_ext[]="vdk";
 
 	plugins_ptr plug_funcs=
 	{

@@ -349,9 +349,9 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int SVD_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="SVD";
-	const char plug_desc[]="SVD Loader";
-	const char plug_ext[]="svd";
+	static const char plug_id[]="SVD";
+	static const char plug_desc[]="SVD Loader";
+	static const char plug_ext[]="svd";
 
 	plugins_ptr plug_funcs=
 	{

@@ -281,9 +281,9 @@ int MSX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int MSX_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="MSX_DSK";
-	const char plug_desc[]="MSX DSK Loader";
-	const char plug_ext[]="dsk";
+	static const char plug_id[]="MSX_DSK";
+	static const char plug_desc[]="MSX DSK Loader";
+	static const char plug_ext[]="dsk";
 
 	plugins_ptr plug_funcs=
 	{

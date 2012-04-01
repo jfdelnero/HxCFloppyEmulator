@@ -1129,9 +1129,9 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int STX_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="ATARIST_STX";
-	const char plug_desc[]="Atari ST STX/Pasti Loader";
-	const char plug_ext[]="stx";
+	static const char plug_id[]="ATARIST_STX";
+	static const char plug_desc[]="Atari ST STX/Pasti Loader";
+	static const char plug_ext[]="stx";
 
 	plugins_ptr plug_funcs=
 	{

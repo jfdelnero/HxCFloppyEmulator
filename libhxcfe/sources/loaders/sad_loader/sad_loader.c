@@ -175,9 +175,9 @@ int SAD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int SAD_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="SAMCOUPE_SAD";
-	const char plug_desc[]="SAM COUPE SAD Loader";
-	const char plug_ext[]="sad";
+	static const char plug_id[]="SAMCOUPE_SAD";
+	static const char plug_desc[]="SAM COUPE SAD Loader";
+	static const char plug_ext[]="sad";
 
 	plugins_ptr plug_funcs=
 	{

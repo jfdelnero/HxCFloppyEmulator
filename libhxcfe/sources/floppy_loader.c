@@ -59,10 +59,6 @@
 
 int dummy_output(int MSGTYPE,char * chaine, ...)
 {
-	if(MSGTYPE!=MSG_DEBUG)
-	{
-	
-	}
     return 0;
 }
 
@@ -70,6 +66,7 @@ int dummy_trackpos(unsigned int current,unsigned int total)
 {
     return 0;
 }
+
 ////////////////////////////////////////////////////////////////////////
 
 HXCFLOPPYEMULATOR* hxcfe_init(void)
@@ -98,35 +95,14 @@ int hxcfe_setOutputFunc(HXCFLOPPYEMULATOR* floppycontext,HXCPRINTF_FUNCTION hxc_
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_getVersion(HXCFLOPPYEMULATOR* floppycontext,char * version,unsigned int * size1,char *copyright,unsigned int * size2)
-{	
-	if(version && size1)
-	{
-		if(*size1>= strlen(STR_FILE_VERSION2))
-		{
-			sprintf(version,STR_FILE_VERSION2);
-		}
-		else
-		{
-			*size1=strlen(STR_FILE_VERSION2);
-			return HXCFE_BADPARAMETER;
-		}
-	}
+const char * hxcfe_getVersion(HXCFLOPPYEMULATOR* floppycontext)
+{
+	return STR_FILE_VERSION2;
+}
 
-	if(copyright && size2)
-	{
-		if(*size2>= strlen(licensetxt))
-		{
-			sprintf(copyright,licensetxt);
-		}
-		else
-		{
-			*size2=strlen(licensetxt);
-			return HXCFE_BADPARAMETER;
-		}
-	}
-
-	return HXCFE_NOERROR;
+const char * hxcfe_getLicense(HXCFLOPPYEMULATOR* floppycontext)
+{
+	return licensetxt;
 }
 
 void hxcfe_deinit(HXCFLOPPYEMULATOR* hxcfe)
@@ -141,42 +117,208 @@ void hxcfe_deinit(HXCFLOPPYEMULATOR* hxcfe)
 
 ////////////////////////////////////////////////////////////////////////
 
-int hxcfe_selectContainer(HXCFLOPPYEMULATOR* floppycontext,char * container)
-{
-	sprintf(floppycontext->CONTAINERTYPE,container);
-
-	return HXCFE_NOERROR;
-}
-
-int hxcfe_getContainerId(HXCFLOPPYEMULATOR* floppycontext,int index,char * id,char * desc)
+int hxcfe_checkLoaderID(HXCFLOPPYEMULATOR* floppycontext,int moduleID)
 {
 	int i;
 
 	i=0;
-	while( (staticplugins[i]!=(GETPLUGININFOS)-1) && (i<index))
+	do
 	{
 		i++;
-	}
+	}while((staticplugins[i]!=(GETPLUGININFOS)-1) && i<moduleID);
 
-	if((staticplugins[i]!=(GETPLUGININFOS)-1) && i==index)
+	if(staticplugins[i]==(GETPLUGININFOS)-1)
 	{
-		if(id)
-			staticplugins[i](floppycontext,GETPLUGINID,id);
-
-		if(desc)
-			staticplugins[i](floppycontext,GETDESCRIPTION,desc);
-
+		return HXCFE_BADPARAMETER;
+	}
+	else
+	{	
 		return HXCFE_NOERROR;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
-FLOPPY * hxcfe_floppyLoad(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int * err_ret)
+int hxcfe_numberOfLoader(HXCFLOPPYEMULATOR* floppycontext)
+{
+	int i;
+
+	i=0;
+	do
+	{
+		i++;
+	}while((staticplugins[i]!=(GETPLUGININFOS)-1));
+
+	return i;
+}
+
+
+int hxcfe_getLoaderID(HXCFLOPPYEMULATOR* floppycontext,char * container)
 {
 	int i;
 	int ret;
-	char plugin_id[16];
+	char * plugin_id;
+
+	ret=0;
+	i=0;
+	do
+	{
+		if(staticplugins[i])
+		{
+			ret=staticplugins[i](floppycontext,GETPLUGINID,&plugin_id);
+			if((ret==HXCFE_NOERROR)  && !strcmp(container,plugin_id))
+			{
+				return i;
+			}
+		}
+
+		i++;
+	}while(staticplugins[i]!=(GETPLUGININFOS)-1);
+		
+	floppycontext->hxc_printf(MSG_DEBUG,"hxcfe_searchContainer : Plugin %s not found !",container);
+
+	return -1;
+}
+
+int hxcfe_getLoaderAccess(HXCFLOPPYEMULATOR* floppycontext,int moduleID)
+{
+	int ret;
+	plugins_ptr func_ptr;
+
+	if(hxcfe_checkLoaderID(floppycontext,moduleID)==HXCFE_NOERROR)
+	{
+		ret=staticplugins[moduleID](floppycontext,GETFUNCPTR,&func_ptr);
+		if(ret==HXCFE_NOERROR)
+		{
+			if(func_ptr.libLoad_DiskFile)
+				ret=ret | 0x01;
+			if(func_ptr.libWrite_DiskFile)
+				ret=ret | 0x02;
+
+			return ret;
+		}
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_ERROR,"Bad module ID : %x !",moduleID);
+	}
+
+	return ret;
+}
+
+const char* hxcfe_getLoaderDesc(HXCFLOPPYEMULATOR* floppycontext,int moduleID)
+{
+	int ret;
+	plugins_ptr func_ptr;
+	char * desc;
+
+	if(hxcfe_checkLoaderID(floppycontext,moduleID)==HXCFE_NOERROR)
+	{
+		ret=staticplugins[moduleID](floppycontext,GETFUNCPTR,&func_ptr);
+		if(ret==HXCFE_NOERROR)
+		{
+			staticplugins[moduleID](floppycontext,GETDESCRIPTION,&desc);
+			return desc;
+		}
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_ERROR,"Bad module ID : %x !",moduleID);
+	}
+
+	return 0;
+}
+
+const char* hxcfe_getLoaderName(HXCFLOPPYEMULATOR* floppycontext,int moduleID)
+{
+	int ret;
+	plugins_ptr func_ptr;
+	char * desc;
+
+	if(hxcfe_checkLoaderID(floppycontext,moduleID)==HXCFE_NOERROR)
+	{
+		ret=staticplugins[moduleID](floppycontext,GETFUNCPTR,&func_ptr);
+		if(ret==HXCFE_NOERROR)
+		{
+			staticplugins[moduleID](floppycontext,GETPLUGINID,&desc);
+			return desc;
+		}
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_ERROR,"Bad module ID : %x !",moduleID);
+	}
+
+	return 0;
+}
+
+const char* hxcfe_getLoaderExt(HXCFLOPPYEMULATOR* floppycontext,int moduleID)
+{
+	int ret;
+	plugins_ptr func_ptr;
+	char * desc;
+
+	if(hxcfe_checkLoaderID(floppycontext,moduleID)==HXCFE_NOERROR)
+	{
+		ret=staticplugins[moduleID](floppycontext,GETFUNCPTR,&func_ptr);
+		if(ret==HXCFE_NOERROR)
+		{
+			staticplugins[moduleID](floppycontext,GETEXTENSION,&desc);
+			return desc;
+		}
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_ERROR,"Bad module ID : %x !",moduleID);
+	}
+
+	return 0;
+}
+
+int hxcfe_autoSelectLoader(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int moduleID)
+{
+	int i;
+	int ret;
+	plugins_ptr func_ptr;
+
+	floppycontext->hxc_printf(MSG_INFO_0,"Checking %s",imgname);
+
+	i=moduleID;
+	do
+	{
+		if(staticplugins[i])
+		{
+			ret=staticplugins[i](floppycontext,GETFUNCPTR,&func_ptr);
+			if(ret==HXCFE_NOERROR)
+			{
+				if(func_ptr.libIsValidDiskFile)
+				{
+					ret=func_ptr.libIsValidDiskFile(floppycontext,imgname);
+					if(ret==HXCFE_VALIDFILE)
+					{						
+						floppycontext->hxc_printf(MSG_INFO_0,"File loader found : %s (%s)",hxcfe_getLoaderName(floppycontext,i),hxcfe_getLoaderDesc(floppycontext,i));
+						return i;
+					}
+					else
+					{
+						floppycontext->hxc_printf(MSG_DEBUG,"libIsValidDiskFile n%d return %d",i,ret);
+					}
+				}
+			}
+		}
+
+		i++;
+	}while(staticplugins[i]!=(GETPLUGININFOS)-1);
+		
+	floppycontext->hxc_printf(MSG_ERROR,"No loader support the file %s !",imgname);
+	
+	ret=HXCFE_UNSUPPORTEDFILE;
+
+	return -1;
+}
+
+
+FLOPPY * hxcfe_floppyLoad(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int moduleID,int * err_ret)
+{
+	int ret;
 	FLOPPY * newfloppy;
 	plugins_ptr func_ptr;
 
@@ -184,100 +326,43 @@ FLOPPY * hxcfe_floppyLoad(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int * e
 
 	newfloppy=0;
 
-	if(!strncmp(floppycontext->CONTAINERTYPE,"AUTOSELECT",16))
+	if(hxcfe_checkLoaderID(floppycontext,moduleID)==HXCFE_NOERROR)
 	{
-		i=0;
-		do
+		ret=staticplugins[moduleID](floppycontext,GETFUNCPTR,&func_ptr);
+		if(ret==HXCFE_NOERROR)
 		{
-			if(staticplugins[i])
+			ret=func_ptr.libIsValidDiskFile(floppycontext,imgname);
+			if(ret==HXCFE_VALIDFILE)
 			{
-				ret=staticplugins[i](floppycontext,GETFUNCPTR,&func_ptr);
-				if(ret==HXCFE_NOERROR)
+				newfloppy=malloc(sizeof(FLOPPY));
+				memset(newfloppy,0,sizeof(FLOPPY));
+				floppycontext->hxc_printf(MSG_INFO_0,"file loader found!");
+				ret=func_ptr.libLoad_DiskFile(floppycontext,newfloppy,imgname,0);
+				if(ret!=HXCFE_NOERROR)
 				{
-					if(func_ptr.libIsValidDiskFile)
-					{
-						ret=func_ptr.libIsValidDiskFile(floppycontext,imgname);
-						if(ret==HXCFE_VALIDFILE)
-						{						
-							newfloppy=malloc(sizeof(FLOPPY));
-							memset(newfloppy,0,sizeof(FLOPPY));
-
-							floppycontext->hxc_printf(MSG_INFO_0,"file loader found!");
-							ret=func_ptr.libLoad_DiskFile(floppycontext,newfloppy,imgname,0);
-							if(ret!=HXCFE_NOERROR)
-							{
-								free(newfloppy);
-								newfloppy=0;
-							}
-							if(err_ret) *err_ret=ret;
-											
-							return newfloppy;
-						}
-						floppycontext->hxc_printf(MSG_DEBUG,"libIsValidDiskFile n%d return %d",i,ret);
-					}
+					free(newfloppy);
+					newfloppy=0;
 				}
+
+				if(err_ret) *err_ret=ret;
+
+				return newfloppy;
 			}
-
-			i++;
-		}while(staticplugins[i]!=(GETPLUGININFOS)-1);
-		
-		floppycontext->hxc_printf(MSG_ERROR,"no loader support the file %s !",imgname);
-		
-		ret=HXCFE_UNSUPPORTEDFILE;
-
-		if(err_ret) *err_ret=ret;
-		return newfloppy;
-	}
-	else
-	{
-		i=0;
-		do
-		{
-			if(staticplugins[i])
+			else
 			{
-				ret=staticplugins[i](floppycontext,GETPLUGINID,&plugin_id);
-				if(!strcmp(floppycontext->CONTAINERTYPE,plugin_id))
-				{
-					ret=staticplugins[i](floppycontext,GETFUNCPTR,&func_ptr);
-					if(ret==HXCFE_NOERROR)
-					{
-						ret=func_ptr.libIsValidDiskFile(floppycontext,imgname);
-						if(ret==HXCFE_VALIDFILE)
-						{
-							newfloppy=malloc(sizeof(FLOPPY));
-							memset(newfloppy,0,sizeof(FLOPPY));
-
-							floppycontext->hxc_printf(MSG_INFO_0,"file loader found!");
-							ret=func_ptr.libLoad_DiskFile(floppycontext,newfloppy,imgname,0);
-							if(ret!=HXCFE_NOERROR)
-							{
-								free(newfloppy);
-								newfloppy=0;
-							}
-
-							if(err_ret) *err_ret=ret;
-
-							return newfloppy;
-						}
-						else
-						{
-							floppycontext->hxc_printf(MSG_ERROR,"%s refuse the file %s (%d)!",plugin_id,imgname,ret);
-							if(err_ret) *err_ret=ret;
-							return newfloppy;
-						}
-					}
-				}
+				floppycontext->hxc_printf(MSG_ERROR,"%s refuse the file %s (%d)!",hxcfe_getLoaderName(floppycontext,moduleID),imgname,ret);
+				if(err_ret) *err_ret=ret;
+				return newfloppy;
 			}
-
-			i++;
-		}while(staticplugins[i]!=(GETPLUGININFOS)-1);
-		
-		floppycontext->hxc_printf(MSG_ERROR,"Plugin %s not found !",floppycontext->CONTAINERTYPE);
-
-		ret=HXCFE_BADPARAMETER;
-		if(err_ret) *err_ret=ret;
-		return newfloppy;
+		}
 	}
+		
+	floppycontext->hxc_printf(MSG_ERROR,"Bad plugin ID : 0x%x",moduleID);
+
+	ret=HXCFE_BADPARAMETER;
+	if(err_ret) *err_ret=ret;
+	return newfloppy;
+
 }
 
 
@@ -332,45 +417,30 @@ int hxcfe_floppyUnload(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk)
 	return 0;
 }
 
-int hxcfe_floppyExport(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,char* imgname)
+int hxcfe_floppyExport(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,char* imgname,int moduleID)
 {
-	int i,ret;
-	char plugin_id[16];
+	int ret;
 	plugins_ptr func_ptr;
 
-	i=0;
-	do
+	if(hxcfe_checkLoaderID(floppycontext,moduleID)==HXCFE_NOERROR)
 	{
-		if(staticplugins[i])
+		ret=staticplugins[moduleID](floppycontext,GETFUNCPTR,&func_ptr);
+		if(ret==HXCFE_NOERROR)
 		{
-			ret=staticplugins[i](floppycontext,GETPLUGINID,&plugin_id);
-			if(!strcmp(floppycontext->CONTAINERTYPE,plugin_id))
+			if(func_ptr.libWrite_DiskFile)
 			{
-				ret=staticplugins[i](floppycontext,GETFUNCPTR,&func_ptr);
-				if(ret==HXCFE_NOERROR)
-				{
-					if(func_ptr.libWrite_DiskFile)
-					{
-						ret=func_ptr.libWrite_DiskFile(floppycontext,newfloppy,imgname,0);
-						return ret;
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_ERROR,"No export support in %s!",plugin_id);
-						return HXCFE_UNSUPPORTEDFILE;
-					}
-				}
-				else
-				{
-
-				}
+				ret=func_ptr.libWrite_DiskFile(floppycontext,newfloppy,imgname,0);
+				return ret;
+			}
+			else
+			{
+				floppycontext->hxc_printf(MSG_ERROR,"No export support in %s!",hxcfe_getLoaderName(floppycontext,moduleID) );
+				return HXCFE_UNSUPPORTEDFILE;
 			}
 		}
-
-		i++;
-	}while(staticplugins[i]!=(GETPLUGININFOS)-1);
+	}
 		
-	floppycontext->hxc_printf(MSG_ERROR,"Plugin %s not found !",floppycontext->CONTAINERTYPE);
+	floppycontext->hxc_printf(MSG_ERROR,"Bad plugin ID : 0x%x",moduleID);
 	return HXCFE_BADPARAMETER;
 }
 
@@ -423,6 +493,34 @@ int hxcfe_floppyGetSetParams(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy
 	return ret;
 }
 
+int hxcfe_floppyGetInterfaceMode(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy)
+{
+	return newfloppy->floppyiftype;
+}
+
+int hxcfe_floppySetInterfaceMode(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,int ifmode)
+{
+
+	if(hxcfe_getFloppyInterfaceModeName(floppycontext,ifmode))
+	{
+		newfloppy->floppyiftype=ifmode;
+		return HXCFE_NOERROR;
+	}
+
+	return HXCFE_BADPARAMETER;
+}
+
+int hxcfe_floppyGetDoubleStep(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy)
+{
+	return newfloppy->double_step;
+}
+
+int hxcfe_floppySetDoubleStep(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,int doublestep)
+{
+	newfloppy->double_step=doublestep;
+	return HXCFE_NOERROR;
+}
+
 int libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue,const char * pluginid,const char * plugindesc,plugins_ptr * pluginfunc,const char * fileext)
 {
 	if(returnvalue)
@@ -430,11 +528,11 @@ int libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,voi
 		switch(infotype)
 		{	
 			case GETPLUGINID:
-				memcpy(returnvalue,pluginid,strlen(pluginid)+1);
+				*(char**)(returnvalue)=(char*)pluginid;
 				break;
 			
 			case GETDESCRIPTION:
-				memcpy(returnvalue,plugindesc,strlen(plugindesc)+1);
+				*(char**)(returnvalue)=(char*)plugindesc;
 				break;
 			
 			case GETFUNCPTR:
@@ -442,7 +540,7 @@ int libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,voi
 				break;
 
 			case GETEXTENSION:
-				memcpy(returnvalue,fileext,strlen(fileext)+1);
+				*(char**)(returnvalue)=(char*)fileext;
 				break;
 				
 			default:

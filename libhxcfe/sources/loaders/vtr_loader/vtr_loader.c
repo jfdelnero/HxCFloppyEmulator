@@ -231,9 +231,9 @@ int VTR_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 int VTR_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="VTR_IMG";
-	const char plug_desc[]="VTR IMG Loader";
-	const char plug_ext[]="vtr";
+	static const char plug_id[]="VTR_IMG";
+	static const char plug_desc[]="VTR IMG Loader";
+	static const char plug_ext[]="vtr";
 
 	plugins_ptr plug_funcs=
 	{

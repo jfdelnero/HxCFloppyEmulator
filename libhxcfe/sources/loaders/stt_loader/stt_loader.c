@@ -275,9 +275,9 @@ int STT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int STT_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="ATARIST_STT";
-	const char plug_desc[]="ATARI ST STT Loader";
-	const char plug_ext[]="stt";
+	static const char plug_id[]="ATARIST_STT";
+	static const char plug_desc[]="ATARI ST STT Loader";
+	static const char plug_ext[]="stt";
 
 	plugins_ptr plug_funcs=
 	{
