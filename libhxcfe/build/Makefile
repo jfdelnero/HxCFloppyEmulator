@@ -40,7 +40,7 @@ DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_w
 
 all: $(EXEC)
 
-libhxcfe.a: floppy_loader.o floppy_utils.o linux_api.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ)
+libhxcfe.a: floppy_loader.o floppy_utils.o floppy_ifmode.o linux_api.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ)
 	$(AR) r $@    $^ 
 	cp $@ ../../../build
 
@@ -48,6 +48,9 @@ libhxcfe.so: floppy_loader.o floppy_utils.o linux_api.o emuii_track.o crc.o trac
 	$(CC) -o $@    $^ $(LDFLAGS)
 		
 floppy_loader.o: $(BASEDIR)/floppy_loader.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+floppy_ifmode.o: $(BASEDIR)/floppy_ifmode.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 floppy_utils.o: $(BASEDIR)/floppy_utils.c
