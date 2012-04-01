@@ -272,9 +272,9 @@ int HFE_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 int HFE_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="HXC_HFE";
-	const char plug_desc[]="SD Card HxCFE HFE file Loader";
-	const char plug_ext[]="hfe";
+	static const char plug_id[]="HXC_HFE";
+	static const char plug_desc[]="SD Card HxCFE HFE file Loader";
+	static const char plug_ext[]="hfe";
 
 	plugins_ptr plug_funcs=
 	{
@@ -300,9 +300,9 @@ int EXTHFE_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 int EXTHFE_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="HXC_EXTHFE";
-	const char plug_desc[]="SD Card HxCFE EXTENDED HFE file Loader";
-	const char plug_ext[]="hfe";
+	static const char plug_id[]="HXC_EXTHFE";
+	static const char plug_desc[]="SD Card HxCFE EXTENDED HFE file Loader";
+	static const char plug_ext[]="hfe";
 
 	plugins_ptr plug_funcs=
 	{

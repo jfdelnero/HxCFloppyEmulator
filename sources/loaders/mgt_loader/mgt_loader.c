@@ -192,9 +192,9 @@ int MGT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int MGT_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="SAMCOUPE_MGT";
-	const char plug_desc[]="SAM COUPE MGT Loader";
-	const char plug_ext[]="mgt";
+	static const char plug_id[]="SAMCOUPE_MGT";
+	static const char plug_desc[]="SAM COUPE MGT Loader";
+	static const char plug_ext[]="mgt";
 
 	plugins_ptr plug_funcs=
 	{

@@ -205,9 +205,9 @@ int DPX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int DPX_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="OBERHEIM_DPX";
-	const char plug_desc[]="Oberheim DPX Loader";
-	const char plug_ext[]="dpx";
+	static const char plug_id[]="OBERHEIM_DPX";
+	static const char plug_desc[]="Oberheim DPX Loader";
+	static const char plug_ext[]="dpx";
 
 	plugins_ptr plug_funcs=
 	{

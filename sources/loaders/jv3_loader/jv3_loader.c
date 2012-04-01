@@ -435,9 +435,9 @@ int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int JV3_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="TRS80_JV3";
-	const char plug_desc[]="TRS80 JV3 Loader";
-	const char plug_ext[]="jv3";
+	static const char plug_id[]="TRS80_JV3";
+	static const char plug_desc[]="TRS80 JV3 Loader";
+	static const char plug_ext[]="jv3";
 
 	plugins_ptr plug_funcs=
 	{

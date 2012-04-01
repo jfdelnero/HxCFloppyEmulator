@@ -155,9 +155,9 @@ int DMS_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int DMS_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="AMIGA_DMS";
-	const char plug_desc[]="AMIGA DMS Loader";
-	const char plug_ext[]="dms";
+	static const char plug_id[]="AMIGA_DMS";
+	static const char plug_desc[]="AMIGA DMS Loader";
+	static const char plug_ext[]="dms";
 
 	plugins_ptr plug_funcs=
 	{

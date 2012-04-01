@@ -197,9 +197,9 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 int Ensoniq_mirage_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="ENSONIQ_EDM";
-	const char plug_desc[]="Ensoniq mirage EDM Loader";
-	const char plug_ext[]="edm";
+	static const char plug_id[]="ENSONIQ_EDM";
+	static const char plug_desc[]="Ensoniq mirage EDM Loader";
+	static const char plug_ext[]="edm";
 
 	plugins_ptr plug_funcs=
 	{

@@ -265,9 +265,9 @@ int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 int VEGASDSK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="VEGAS6809";
-	const char plug_desc[]="VEGAS6809 image Loader";
-	const char plug_ext[]="veg";
+	static const char plug_id[]="VEGAS6809";
+	static const char plug_desc[]="VEGAS6809 image Loader";
+	static const char plug_ext[]="veg";
 
 	plugins_ptr plug_funcs=
 	{

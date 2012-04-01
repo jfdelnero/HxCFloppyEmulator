@@ -203,9 +203,9 @@ int Prophet_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 int Prophet_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="PROPHET2000";
-	const char plug_desc[]="PROPHET 2000 Loader";
-	const char plug_ext[]="img";
+	static const char plug_id[]="PROPHET2000";
+	static const char plug_desc[]="PROPHET 2000 Loader";
+	static const char plug_ext[]="img";
 
 	plugins_ptr plug_funcs=
 	{

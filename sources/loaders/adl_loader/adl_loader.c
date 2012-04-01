@@ -171,9 +171,9 @@ int ADL_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int ADL_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="BBC_ADL";
-	const char plug_desc[]="BBC ADL floppy image loader";
-	const char plug_ext[]="adl";
+	static const char plug_id[]="BBC_ADL";
+	static const char plug_desc[]="BBC ADL floppy image loader";
+	static const char plug_ext[]="adl";
 
 	plugins_ptr plug_funcs=
 	{

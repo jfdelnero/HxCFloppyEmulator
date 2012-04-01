@@ -209,9 +209,9 @@ int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int SAP_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="THOMSONTO8D_SAP";
-	const char plug_desc[]="THOMSON TO8D SAP Loader";
-	const char plug_ext[]="sap";
+	static const char plug_id[]="THOMSONTO8D_SAP";
+	static const char plug_desc[]="THOMSON TO8D SAP Loader";
+	static const char plug_ext[]="sap";
 
 	plugins_ptr plug_funcs=
 	{

@@ -383,9 +383,9 @@ int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 int CPCDSK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="AMSTRADCPC_DSK";
-	const char plug_desc[]="Amstrad CPC DSK Loader";
-	const char plug_ext[]="dsk";
+	static const char plug_id[]="AMSTRADCPC_DSK";
+	static const char plug_desc[]="Amstrad CPC DSK Loader";
+	static const char plug_ext[]="dsk";
 
 	plugins_ptr plug_funcs=
 	{

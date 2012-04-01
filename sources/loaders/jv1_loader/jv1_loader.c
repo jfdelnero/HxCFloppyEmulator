@@ -200,9 +200,9 @@ int JV1_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int JV1_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="TRS80_JV1";
-	const char plug_desc[]="TRS80 JV1 Loader";
-	const char plug_ext[]="jv1";
+	static const char plug_id[]="TRS80_JV1";
+	static const char plug_desc[]="TRS80 JV1 Loader";
+	static const char plug_ext[]="jv1";
 
 	plugins_ptr plug_funcs=
 	{

@@ -569,9 +569,9 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 int TeleDisk_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="TELEDISK_TD0";
-	const char plug_desc[]="TELEDISK TD0 Loader";
-	const char plug_ext[]="td0";
+	static const char plug_id[]="TELEDISK_TD0";
+	static const char plug_desc[]="TELEDISK TD0 Loader";
+	static const char plug_ext[]="td0";
 
 	plugins_ptr plug_funcs=
 	{

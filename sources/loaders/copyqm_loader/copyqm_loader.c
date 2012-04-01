@@ -379,9 +379,9 @@ int CopyQm_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 int CopyQm_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="COPYQM";
-	const char plug_desc[]="COPYQM IMG Loader";
-	const char plug_ext[]="dsk";
+	static const char plug_id[]="COPYQM";
+	static const char plug_desc[]="COPYQM IMG Loader";
+	static const char plug_ext[]="dsk";
 
 	plugins_ptr plug_funcs=
 	{

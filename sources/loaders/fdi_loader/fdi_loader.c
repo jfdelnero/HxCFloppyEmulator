@@ -248,9 +248,9 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int FDI_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="ZXSPECTRUM_FDI";
-	const char plug_desc[]="ZX SPECTRUM FDI Loader";
-	const char plug_ext[]="fdi";
+	static const char plug_id[]="ZXSPECTRUM_FDI";
+	static const char plug_desc[]="ZX SPECTRUM FDI Loader";
+	static const char plug_ext[]="fdi";
 
 	plugins_ptr plug_funcs=
 	{

@@ -4,9 +4,9 @@ EXPORTS
    hxcfe_setOutputFunc		@2
    hxcfe_getVersion			@3
    hxcfe_deinit				@4
+   hxcfe_getLicense			@5
 
-   hxcfe_getContainerId		@20
-   hxcfe_selectContainer	@21
+   hxcfe_autoSelectLoader   @21
    hxcfe_floppyLoad			@22
    hxcfe_floppyUnload		@23
    hxcfe_floppyExport		@24
@@ -14,7 +14,20 @@ EXPORTS
    hxcfe_getNumberOfSide	@26
    hxcfe_getFloppySize		@27
    hxcfe_floppyGetSetParams @28
-   
+   hxcfe_floppyGetInterfaceMode @29
+   hxcfe_floppySetInterfaceMode @30
+   hxcfe_floppyGetDoubleStep @31
+   hxcfe_floppySetDoubleStep @32
+   hxcfe_numberOfLoader		@33
+   hxcfe_getLoaderID		@34
+   hxcfe_getLoaderAccess	@35
+   hxcfe_getLoaderDesc		@36
+   hxcfe_getLoaderName		@37
+   hxcfe_getLoaderExt		@38
+   hxcfe_getFloppyInterfaceModeID @39
+   hxcfe_getFloppyInterfaceModeName	@40
+   hxcfe_getFloppyInterfaceModeDesc @41
+
    hxcfe_initFloppy			@50
    hxcfe_pushTrack			@51
    hxcfe_setTrackInterleave	@52

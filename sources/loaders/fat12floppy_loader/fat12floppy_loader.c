@@ -317,9 +317,9 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 int FAT12FLOPPY_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="FAT12FLOPPY";
-	const char plug_desc[]="FAT12/MS DOS Loader";
-	const char plug_ext[]="fat";
+	static const char plug_id[]="FAT12FLOPPY";
+	static const char plug_desc[]="FAT12/MS DOS Loader";
+	static const char plug_ext[]="fat";
 
 	plugins_ptr plug_funcs=
 	{

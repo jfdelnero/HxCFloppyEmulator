@@ -287,9 +287,9 @@ int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int D64_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="C64_D64";
-	const char plug_desc[]="C64 D64 file image loader";
-	const char plug_ext[]="d64";
+	static const char plug_id[]="C64_D64";
+	static const char plug_desc[]="C64 D64 file image loader";
+	static const char plug_ext[]="d64";
 
 	plugins_ptr plug_funcs=
 	{

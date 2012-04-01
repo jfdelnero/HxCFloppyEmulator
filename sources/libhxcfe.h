@@ -60,7 +60,8 @@ typedef struct HXCFLOPPYEMULATOR_
 HXCFLOPPYEMULATOR* hxcfe_init(void);
 void hxcfe_deinit(HXCFLOPPYEMULATOR* hxcfe);
 
-int hxcfe_getVersion(HXCFLOPPYEMULATOR* floppycontext,char * version,unsigned int * size1,char *copyright,unsigned int * size2);
+const char * hxcfe_getVersion(HXCFLOPPYEMULATOR* floppycontext);
+const char * hxcfe_getLicense(HXCFLOPPYEMULATOR* floppycontext);
 
 ////////////////////////////////////////////
 // stdio printf functions
@@ -78,13 +79,18 @@ int hxcfe_setOutputFunc(HXCFLOPPYEMULATOR* floppycontext,HXCPRINTF_FUNCTION hxc_
 
 ////////////////////////////////////////////
 // File image functions
+int			hxcfe_numberOfLoader(HXCFLOPPYEMULATOR* floppycontext);
+int			hxcfe_getLoaderID(HXCFLOPPYEMULATOR* floppycontext,char * container);
+int			hxcfe_getLoaderAccess(HXCFLOPPYEMULATOR* floppycontext,int moduleID);
+const char* hxcfe_getLoaderDesc(HXCFLOPPYEMULATOR* floppycontext,int moduleID);
+const char* hxcfe_getLoaderName(HXCFLOPPYEMULATOR* floppycontext,int moduleID);
+const char* hxcfe_getLoaderExt(HXCFLOPPYEMULATOR* floppycontext,int moduleID);
 
-int hxcfe_getContainerId(HXCFLOPPYEMULATOR* floppycontext,int index,char * id,char * desc);
-int hxcfe_selectContainer(HXCFLOPPYEMULATOR* floppycontext,char * container);
 
-FLOPPY * hxcfe_floppyLoad(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int * err_ret);
+int hxcfe_autoSelectLoader(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int moduleID);
+FLOPPY * hxcfe_floppyLoad(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int moduleID,int * err_ret);
 int hxcfe_floppyUnload(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk);
-int hxcfe_floppyExport(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,char* imgname);
+int hxcfe_floppyExport(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,char* imgname,int moduleID);
 
 int hxcfe_getNumberOfTrack(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
 int hxcfe_getNumberOfSide(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
@@ -153,7 +159,7 @@ int hxcfe_popTrack (FBuilder* fb);
 
 FLOPPY* hxcfe_getFloppy (FBuilder* fb);
 
-int hxcfe_getfloppysize (HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,int * nbsector);
+int hxcfe_getFloppySize(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,int * nbsector);
 
 ////////////////////////////////////////////
 // Read Sector functions
@@ -193,6 +199,8 @@ void hxcfe_deinitSectorSearch(SECTORSEARCH* ss);
 #define MSX2_DD_FLOPPYMODE				0x09
 #define C64_DD_FLOPPYMODE				0x0A
 #define EMU_SHUGART_FLOPPYMODE			0x0B
+#define S950_DD_FLOPPYMODE				0x0C
+#define S950_HD_FLOPPYMODE				0x0D
 
 enum {
 	DOUBLESTEP = 1,
@@ -206,3 +214,13 @@ enum {
 
 int hxcfe_floppyGetSetParams(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,unsigned char dir,unsigned short param,void * value);
 
+int hxcfe_floppyGetInterfaceMode(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy);
+int hxcfe_floppySetInterfaceMode(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,int ifmode);
+
+int hxcfe_floppyGetDoubleStep(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy);
+int hxcfe_floppySetDoubleStep(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,int doublestep);
+
+int hxcfe_getFloppyInterfaceModeID(HXCFLOPPYEMULATOR* floppycontext,char * ifmode);
+
+const char * hxcfe_getFloppyInterfaceModeName(HXCFLOPPYEMULATOR* floppycontext,int ifmodeid);
+const char * hxcfe_getFloppyInterfaceModeDesc(HXCFLOPPYEMULATOR* floppycontext,int ifmodeid);

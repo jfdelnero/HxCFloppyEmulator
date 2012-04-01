@@ -226,9 +226,9 @@ int EMUII_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,
 
 int EMUII_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
-	const char plug_id[]="EMULATORII_EMUII";
-	const char plug_desc[]="E-mu Emulator II *.eii Loader";
-	const char plug_ext[]="eii";
+	static const char plug_id[]="EMULATORII_EMUII";
+	static const char plug_desc[]="E-mu Emulator II *.eii Loader";
+	static const char plug_ext[]="eii";
 
 	plugins_ptr plug_funcs=
 	{

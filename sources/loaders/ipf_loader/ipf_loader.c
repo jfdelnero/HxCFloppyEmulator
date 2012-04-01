@@ -550,9 +550,9 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int IPF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="SPS_IPF";
-	const char plug_desc[]="SPS IPF Loader";
-	const char plug_ext[]="ipf";
+	static const char plug_id[]="SPS_IPF";
+	static const char plug_desc[]="SPS IPF Loader";
+	static const char plug_ext[]="ipf";
 
 	plugins_ptr plug_funcs=
 	{

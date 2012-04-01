@@ -184,9 +184,9 @@ int snes_smc_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 int snes_smc_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="SNES_SMC";
-	const char plug_desc[]="Super famicom SMC Loader";
-	const char plug_ext[]="smc";
+	static const char plug_id[]="SNES_SMC";
+	static const char plug_desc[]="Super famicom SMC Loader";
+	static const char plug_ext[]="smc";
 
 	plugins_ptr plug_funcs=
 	{

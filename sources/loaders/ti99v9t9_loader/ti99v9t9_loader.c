@@ -444,9 +444,9 @@ int TI99V9T9_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 int TI99V9T9_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="TI994A_V9T9";
-	const char plug_desc[]="TI99 4A V9T9 Loader";
-	const char plug_ext[]="v9t9";
+	static const char plug_id[]="TI994A_V9T9";
+	static const char plug_desc[]="TI99 4A V9T9 Loader";
+	static const char plug_ext[]="v9t9";
 
 	plugins_ptr plug_funcs=
 	{

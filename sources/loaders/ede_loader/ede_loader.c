@@ -389,9 +389,9 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int EDE_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="ENSONIQ_EDE";
-	const char plug_desc[]="ENSONIQ EDE Loader";
-	const char plug_ext[]="ede";
+	static const char plug_id[]="ENSONIQ_EDE";
+	static const char plug_desc[]="ENSONIQ EDE Loader";
+	static const char plug_ext[]="ede";
 
 	plugins_ptr plug_funcs=
 	{

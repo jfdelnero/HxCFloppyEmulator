@@ -312,9 +312,9 @@ int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 int RAW_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="RAW_LOADER";
-	const char plug_desc[]="RAW Sector loader";
-	const char plug_ext[]="img";
+	static const char plug_id[]="RAW_LOADER";
+	static const char plug_desc[]="RAW Sector loader";
+	static const char plug_ext[]="img";
 
 	plugins_ptr plug_funcs=
 	{

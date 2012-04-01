@@ -462,9 +462,9 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 int OricDSK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="ORIC_DSK";
-	const char plug_desc[]="ORIC DSK Loader";
-	const char plug_ext[]="dsk";
+	static const char plug_id[]="ORIC_DSK";
+	static const char plug_desc[]="ORIC DSK Loader";
+	static const char plug_ext[]="dsk";
 
 	plugins_ptr plug_funcs=
 	{

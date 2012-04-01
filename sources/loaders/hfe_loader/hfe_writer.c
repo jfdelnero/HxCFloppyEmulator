@@ -33,7 +33,6 @@
 
 #include "libhxcfe.h"
 
-
 #include "hfe_loader.h"
 #include "hfe_format.h"
 
@@ -211,6 +210,9 @@ int HFE_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 		
 		FILEHEADER->floppyinterfacemode=(unsigned char)floppy->floppyiftype;
 
+		floppycontext->hxc_printf(MSG_INFO_1,"Floppy interface mode %s (%s)",	hxcfe_getFloppyInterfaceModeName(floppycontext,FILEHEADER->floppyinterfacemode),
+																			hxcfe_getFloppyInterfaceModeDesc(floppycontext,FILEHEADER->floppyinterfacemode) );
+
 		FILEHEADER->track_encoding=0;
 		FILEHEADER->formatrevision=0;
 		FILEHEADER->track_list_offset=1;
@@ -257,8 +259,6 @@ int HFE_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 					else
 						mfmsize2=mfmsize2/8;
 				}
-
-
 
 				if(mfmsize2>mfmsize) mfmsize=mfmsize2;
 			

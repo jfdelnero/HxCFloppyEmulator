@@ -208,9 +208,9 @@ int GKH_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int GKH_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="ENSONIQ_GKH";
-	const char plug_desc[]="ENSONIQ GKH Loader";
-	const char plug_ext[]="gkh";
+	static const char plug_id[]="ENSONIQ_GKH";
+	static const char plug_desc[]="ENSONIQ GKH Loader";
+	static const char plug_ext[]="gkh";
 
 	plugins_ptr plug_funcs=
 	{

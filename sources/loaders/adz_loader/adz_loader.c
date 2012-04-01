@@ -171,9 +171,9 @@ int ADZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 int ADZ_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	const char plug_id[]="AMIGA_ADZ";
-	const char plug_desc[]="AMIGA ADZ Loader";
-	const char plug_ext[]="adz";
+	static const char plug_id[]="AMIGA_ADZ";
+	static const char plug_desc[]="AMIGA ADZ Loader";
+	static const char plug_ext[]="adz";
 
 	plugins_ptr plug_funcs=
 	{

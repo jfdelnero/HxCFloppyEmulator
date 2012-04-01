@@ -35,118 +35,97 @@
 //-------------------------------------------------------------------------------//
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
-// File : cpcfs_loader.c
-// Contains: CPCFSDK floppy image loader
+// File : floppy_ifmode.c
+// Contains: Floppy Interface functions
 //
 // Written by:	DEL NERO Jean Francois
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
-#include <sys/stat.h>
-#include <time.h>
+
 
 #include "libhxcfe.h"
-
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
-#include "cpcfs_loader.h"
 
-#include "os_api.h"
+typedef struct interfacemode_
+{
+	int ifmodeid;
+	const char* ifmodename;
+	const char* ifmodedesc;
+}interfacemode;
 
-HXCFLOPPYEMULATOR* global_floppycontext;
-extern int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * folder,char * file);
+interfacemode interfacemodelist[]=
+{
+	{IBMPC_DD_FLOPPYMODE,			"IBMPC_DD_FLOPPYMODE",			"PC Interface (720KB/DD Disk)" },
+	{IBMPC_HD_FLOPPYMODE,			"IBMPC_HD_FLOPPYMODE",			"PC Interface (1.44MB/HD Disk)" },
+	{ATARIST_DD_FLOPPYMODE,			"ATARIST_DD_FLOPPYMODE",		"Atari Interface (720KB/DD Disk)" },
+	{ATARIST_HD_FLOPPYMODE,			"ATARIST_HD_FLOPPYMODE",		"Atari Interface (1.44MB/HD Disk)" },
+	{AMIGA_DD_FLOPPYMODE,			"AMIGA_DD_FLOPPYMODE",			"Amiga Interface (880KB/DD)" },
+	{AMIGA_HD_FLOPPYMODE,			"AMIGA_HD_FLOPPYMODE",			"Amiga Interface (1.76MB/HD)" },
+	{CPC_DD_FLOPPYMODE,				"CPC_DD_FLOPPYMODE",			"Amstrad CPC Interface" },
+	{GENERIC_SHUGART_DD_FLOPPYMODE,	"GENERIC_SHUGART_DD_FLOPPYMODE","Shugart Interface" },
+	{IBMPC_ED_FLOPPYMODE,			"IBMPC_ED_FLOPPYMODE",			"PC Interface (2.88MB/ED Disk)" },
+	{MSX2_DD_FLOPPYMODE,			"MSX2_DD_FLOPPYMODE",			"MSX Interface" },
+	{C64_DD_FLOPPYMODE,				"C64_DD_FLOPPYMODE",			"C64 Interface" },
+	{EMU_SHUGART_FLOPPYMODE,		"EMU_SHUGART_FLOPPYMODE",		"E-mu Interface" },
+	{S950_DD_FLOPPYMODE,			"S950_DD_FLOPPYMODE",			"Akai S900/S950 Interface (800KB/DD Disk)" },
+	{S950_HD_FLOPPYMODE,			"S950_HD_FLOPPYMODE",			"Akai S950 Interface (1.6MB/HD Disk)" },
+	{-1,"",	""},
+};
 
+int hxcfe_getFloppyInterfaceModeID(HXCFLOPPYEMULATOR* floppycontext,char * ifmode)
+{
+	int i;
 
-int CPCFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+	i=0;
+
+	while( strcmp( interfacemodelist[i].ifmodename , ifmode ) && ( interfacemodelist[i].ifmodeid >= 0 ) )
+	{
+		i++;
+	}
+
+	return interfacemodelist[i].ifmodeid;
+
+}
+
+const char * hxcfe_getFloppyInterfaceModeName(HXCFLOPPYEMULATOR* floppycontext,int ifmodeid)
 {
 	
-	int pathlen;
-	char * filepath;
-    struct stat staterep;
+	int i;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"CPCFSDK_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	i=0;
+
+	while( ( interfacemodelist[i].ifmodeid != ifmodeid ) && ( interfacemodelist[i].ifmodeid >= 0 ) )
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
-		{		
-			stat(imgfile,&staterep);
-
-			if(staterep.st_mode&S_IFDIR)
-			{
-				filepath=malloc(pathlen+1);
-				if(filepath!=0)
-				{
-					sprintf(filepath,"%s",imgfile);
-					strlower(filepath);
-
-					if(strstr( filepath,".cpcfs" )!=NULL)
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"CPCFSDK file !");
-						free(filepath);
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non CPCFSDK file ! (.cpcfs missing)");
-						free(filepath);
-						return HXCFE_BADFILE;
-					}
-				}
-			}
-			else
-			{
-				floppycontext->hxc_printf(MSG_DEBUG,"non CPCFSDK file ! (it's not a directory)");
-				return HXCFE_BADFILE;
-			}
-		}
-		floppycontext->hxc_printf(MSG_DEBUG,"0 byte string ?");
+		i++;
 	}
-	return HXCFE_BADPARAMETER;
 
+	if( interfacemodelist[i].ifmodeid <0 )
+		return NULL;
+	else
+		return interfacemodelist[i].ifmodename;
 
 }
 
-
-int ScanCpcFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * folder,char * file)
+const char * hxcfe_getFloppyInterfaceModeDesc(HXCFLOPPYEMULATOR* floppycontext,int ifmodeid)
 {
+	int i;
 
-	return 0;
-}
+	i=0;
 
-int CPCFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
-{
-		return HXCFE_BADFILE;
-}
-
-
-int CPCFSDK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
-{
-
-	static const char plug_id[]="CPC_FS";
-	static const char plug_desc[]="Amstrad CPC FS Loader";
-	static const char plug_ext[]="cpcfs";
-
-	plugins_ptr plug_funcs=
+	while( ( interfacemodelist[i].ifmodeid != ifmodeid ) && ( interfacemodelist[i].ifmodeid >= 0 ) )
 	{
-		(ISVALIDDISKFILE)	CPCFSDK_libIsValidDiskFile,
-		(LOADDISKFILE)		CPCFSDK_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	CPCFSDK_libGetPluginInfo
-	};
+		i++;
+	}
 
-	return libGetPluginInfo(
-			floppycontext,
-			infotype,
-			returnvalue,
-			plug_id,
-			plug_desc,
-			&plug_funcs,
-			plug_ext
-			);
+	if( interfacemodelist[i].ifmodeid <0 )
+		return NULL;
+	else
+		return interfacemodelist[i].ifmodedesc;
 }
