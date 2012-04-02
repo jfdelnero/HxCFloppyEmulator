@@ -185,13 +185,13 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 				{
 					case 1:
 						// dummy/empty track side 0. 
-						currentcylinder->sides[0]=tg_generatetrack(trackdata,sectorsize,0 ,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,ISOFORMAT_DD,gap3len,2500| NO_SECTOR_UNDER_INDEX,-2500);
+						currentcylinder->sides[0]=tg_generateTrack(trackdata,sectorsize,0 ,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,ISOFORMAT_DD,gap3len,2500| NO_SECTOR_UNDER_INDEX,-2500);
 						// first track to side 1
-						currentcylinder->sides[1]=tg_generatetrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500| NO_SECTOR_UNDER_INDEX,-2500);
+						currentcylinder->sides[1]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500| NO_SECTOR_UNDER_INDEX,-2500);
 					break;
 
 					case 2:
-						currentcylinder->sides[i]=tg_generatetrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500| NO_SECTOR_UNDER_INDEX,-2500);
+						currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500| NO_SECTOR_UNDER_INDEX,-2500);
 					break;
 				}
 			}
@@ -200,8 +200,8 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 		// add a dummy track...
 		floppydisk->tracks[floppydisk->floppyNumberOfTrack]=allocCylinderEntry(rpm,2);
 		currentcylinder=floppydisk->tracks[j];
-		currentcylinder->sides[0]=tg_generatetrack(trackdata,sectorsize,0 ,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,ISOFORMAT_DD,gap3len,2500| NO_SECTOR_UNDER_INDEX,-2500);
-		currentcylinder->sides[1]=tg_generatetrack(trackdata,sectorsize,0 ,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,ISOFORMAT_DD,gap3len,2500| NO_SECTOR_UNDER_INDEX,-2500);
+		currentcylinder->sides[0]=tg_generateTrack(trackdata,sectorsize,0 ,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,ISOFORMAT_DD,gap3len,2500| NO_SECTOR_UNDER_INDEX,-2500);
+		currentcylinder->sides[1]=tg_generateTrack(trackdata,sectorsize,0 ,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,ISOFORMAT_DD,gap3len,2500| NO_SECTOR_UNDER_INDEX,-2500);
 		floppydisk->floppyNumberOfTrack++;
 
 		// 2 sides floppy mode forced.

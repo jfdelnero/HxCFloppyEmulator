@@ -364,7 +364,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					}
 				}
 					
-				currentcylinder->sides[i]=tg_generatetrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,2500,-2500);
+				currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,2500,-2500);
 
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
 				{

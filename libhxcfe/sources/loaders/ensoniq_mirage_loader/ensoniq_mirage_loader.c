@@ -173,7 +173,7 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 					fseek (f , file_offset , SEEK_SET);
 					fread(trackdata,(((numberofsector-1)*1024)+512),1,f);
 					
-					currentcylinder->sides[i]=tg_generatetrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,2500,-2500);
+					currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,2500,-2500);
 				}
 			}
 

@@ -423,7 +423,7 @@ int TI99V9T9_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 				fseek (f , file_offset , SEEK_SET);
 				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
 
-				currentcylinder->sides[i]=tg_generatetrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(j*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500 | NO_SECTOR_UNDER_INDEX,-2500);
+				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(j*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500 | NO_SECTOR_UNDER_INDEX,-2500);
 			}
 
 		}

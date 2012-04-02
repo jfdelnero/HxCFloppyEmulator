@@ -277,7 +277,7 @@ int SCL_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		{
 			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 						(sectorsize*(floppydisk->floppySectorPerTrack)*i);			
-			currentcylinder->sides[i]=tg_generatetrack(&trd_image[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2000,-2000);
+			currentcylinder->sides[i]=tg_generateTrack(&trd_image[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2000,-2000);
 		}
 	}
 			

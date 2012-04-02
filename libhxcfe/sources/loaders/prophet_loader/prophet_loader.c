@@ -179,7 +179,7 @@ int Prophet_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 					fseek (f , file_offset , SEEK_SET);
 					fread(trackdata,(((numberofsector-1)*1024)+256),1,f);		
 					
-					currentcylinder->sides[i]=tg_generatetrackEx(floppydisk->floppySectorPerTrack,(SECTORCONFIG *)&sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,2500,-2500);
+					currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,(SECTORCONFIG *)&sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,2500,-2500);
 				}
 			}
 

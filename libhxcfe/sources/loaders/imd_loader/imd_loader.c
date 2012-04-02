@@ -409,7 +409,7 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					//currentcylinder->floppyRPM=header.floppyRPM;
 				}
 				
-				currentside=tg_generatetrackEx((unsigned short)trackcfg.number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,tracktype,2500 | NO_SECTOR_UNDER_INDEX,-2500);
+				currentside=tg_generateTrackEx((unsigned short)trackcfg.number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,tracktype,2500 | NO_SECTOR_UNDER_INDEX,-2500);
 				currentcylinder->sides[trackcfg.physical_head&0xF]=currentside;
 
 				

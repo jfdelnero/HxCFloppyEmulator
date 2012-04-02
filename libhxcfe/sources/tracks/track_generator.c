@@ -1406,7 +1406,7 @@ void tg_completeTrack(track_generator *tg, SIDE * currentside,unsigned char trac
 	}
 }
 
-SIDE * tg_generatetrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorconfigtab,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,int indexlen,int indexpos)
+SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorconfigtab,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,int indexlen,int indexpos)
 {
 	unsigned short i;
 	unsigned long tracksize;
@@ -1550,7 +1550,7 @@ SIDE * tg_generatetrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 
 
 
-SIDE * tg_generatetrack(unsigned char * sectors_data,unsigned short sector_size,unsigned short number_of_sector,unsigned char track,unsigned char side,unsigned char sectorid,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned char gap3, int indexlen,int indexpos)
+SIDE * tg_generateTrack(unsigned char * sectors_data,unsigned short sector_size,unsigned short number_of_sector,unsigned char track,unsigned char side,unsigned char sectorid,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned char gap3, int indexlen,int indexpos)
 {
 	unsigned short i;
 	SIDE * currentside;
@@ -1572,7 +1572,7 @@ SIDE * tg_generatetrack(unsigned char * sectors_data,unsigned short sector_size,
 		sectorconfigtab[i].sectorsleft=number_of_sector-i; // Used in Amiga tracks.
 	}
 
-	currentside=tg_generatetrackEx(number_of_sector,sectorconfigtab,interleave,skew,bitrate,rpm,trackencoding,indexlen,indexpos);
+	currentside=tg_generateTrackEx(number_of_sector,sectorconfigtab,interleave,skew,bitrate,rpm,trackencoding,indexlen,indexpos);
 	free(sectorconfigtab);
 
 	return currentside;

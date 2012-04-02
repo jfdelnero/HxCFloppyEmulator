@@ -183,7 +183,7 @@ int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				memcpy(sectorconfig[k].input_data,sapsector.data,sectorconfig[k].sectorsize);
 			}
 
-			currentcylinder->sides[i]=tg_generatetrackEx(SAP_NSECTS,(SECTORCONFIG *)&sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,2500|NO_SECTOR_UNDER_INDEX,-2500);
+			currentcylinder->sides[i]=tg_generateTrackEx(SAP_NSECTS,(SECTORCONFIG *)&sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,2500|NO_SECTOR_UNDER_INDEX,-2500);
 
 			for(k=0;k<SAP_NSECTS;k++)
 			{

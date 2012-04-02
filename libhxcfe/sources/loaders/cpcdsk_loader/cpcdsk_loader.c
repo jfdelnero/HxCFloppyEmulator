@@ -283,7 +283,7 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 					
 					//
 					currentcylinder->floppyRPM=rpm;
-					currentcylinder->sides[s]=tg_generatetrackEx(trackheader.number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,300,IBMFORMAT_DD,2500|NO_SECTOR_UNDER_INDEX,-2500);
+					currentcylinder->sides[s]=tg_generateTrackEx(trackheader.number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,300,IBMFORMAT_DD,2500|NO_SECTOR_UNDER_INDEX,-2500);
 					
 					for(j=0;j<trackheader.number_of_sector;j++)
 					{
