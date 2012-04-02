@@ -274,6 +274,7 @@ void load_file_image(Fl_Widget * w, void * fc_ptr)
 void save_file_image(Fl_Widget * w, void * fc_ptr) 
 {
 	int i;
+	int loaderid;
 	Fl_Native_File_Chooser fnfc;
 	unsigned char deffilename[512];
 	
@@ -327,11 +328,14 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 			default:
 			{
 				i=fnfc.filter_value();
-				if(hxcfe_selectContainer(flopemu,(char*)plugid_lst[i])==HXCFE_NOERROR)
+				
+				loaderid=hxcfe_getLoaderID(flopemu,(char*)plugid_lst[i]);
+				
+				if(loaderid>=0)
 				{
 	//				hxcfe_floppyGetSetParams(flopemu,thefloppydisk,SET,DOUBLESTEP,&hwif->double_step);
 	//				hxcfe_floppyGetSetParams(flopemu,thefloppydisk,SET,INTERFACEMODE,&hwif->interface_mode);
-					hxcfe_floppyExport(flopemu,thefloppydisk,(char*)fnfc.filename());
+					hxcfe_floppyExport(flopemu,thefloppydisk,(char*)fnfc.filename(),loaderid);
 				}
 
 				//printf("PICKED: %s\n", fnfc.filename());

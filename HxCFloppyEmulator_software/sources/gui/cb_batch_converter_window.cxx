@@ -79,93 +79,97 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 	int i,j,filenb,ret;
 	char *destinationfile,*tempstr;
 	FLOPPY * thefloppydisk;
+	int loaderid;
 	
 	filenb=0;
 	while(filelist[filenb])
 	{		
-		hxcfe_selectContainer(floppycontext,"AUTOSELECT");
-		thefloppydisk=hxcfe_floppyLoad(floppycontext,filelist[filenb],&ret);
-		if(ret!=HXCFE_NOERROR || !thefloppydisk)
-		{
-			switch(ret)
-			{
-				case HXCFE_UNSUPPORTEDFILE:
-					printf("Load error!: Image file not yet supported!\n");
-				break;
-				case HXCFE_FILECORRUPTED:
-					printf("Load error!: File corrupted ? Read error ?\n");
-				break;
-				case HXCFE_ACCESSERROR:
-					printf("Load error!:  Read file error!\n");
-				break;
-				default:
-					printf("Load error! error %d\n",ret);
-				break;
-			}
-		}
-		else
+		loaderid=hxcfe_autoSelectLoader(floppycontext,filelist[filenb],0);
+		if(loaderid>=0)
 		{
 
-			j=strlen(filelist[filenb]);
-			while(filelist[filenb][j]!='\\' && j)
+			thefloppydisk=hxcfe_floppyLoad(floppycontext,filelist[filenb],loaderid,&ret);
+			if(ret!=HXCFE_NOERROR || !thefloppydisk)
 			{
-				j--;
-			}
-			if(filelist[filenb][j]=='\\') j++;
-			destinationfile=(char*)malloc(strlen(&filelist[filenb][j])+strlen(destfolder)+2+99);
-			sprintf(destinationfile,"%s\\%s",destfolder,&filelist[filenb][j]);
-			i=strlen(destinationfile);
-			
-			do
-			{
-				i--;
-			}while(i && destinationfile[i]!='.');
-
-			if(i)
-			{
-				destinationfile[i]='_';
-			}
-			ret=1;
-			
-			strcat(destinationfile,ff_type_list[output_file_format].ext);
-
-			ret=hxcfe_selectContainer(floppycontext,ff_type_list[output_file_format].plug_id);
-			if(!ret)
-			{			
-			//	hxcfe_floppyGetSetParams(floppycontext,thefloppydisk,SET,DOUBLESTEP,&hwif->double_step);
-			//	hxcfe_floppyGetSetParams(floppycontext,thefloppydisk,SET,INTERFACEMODE,&hwif->interface_mode);
-				ret=hxcfe_floppyExport(floppycontext,thefloppydisk,destinationfile);
-			}
-
-			hxcfe_floppyUnload(floppycontext,thefloppydisk);
-
-
-			tempstr=(char*)malloc(1024);
-						
-			i=strlen(destinationfile);
-			do
-			{
-				i--;
-			}while(i && destinationfile[i]!='\\');
-
-			if(!ret)
-			{
-				sprintf(tempstr,"%s created",&destinationfile[i]);
-				//SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
-				params->numberoffileconverted++;
+				switch(ret)
+				{
+					case HXCFE_UNSUPPORTEDFILE:
+						printf("Load error!: Image file not yet supported!\n");
+					break;
+					case HXCFE_FILECORRUPTED:
+						printf("Load error!: File corrupted ? Read error ?\n");
+					break;
+					case HXCFE_ACCESSERROR:
+						printf("Load error!:  Read file error!\n");
+					break;
+					default:
+						printf("Load error! error %d\n",ret);
+					break;
+				}
 			}
 			else
 			{
-				sprintf(tempstr,"Error cannot create %s",&destinationfile[i]);
-				//SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
-			}
 
-			free(destinationfile);
-			free(tempstr);
+				j=strlen(filelist[filenb]);
+				while(filelist[filenb][j]!='\\' && j)
+				{
+					j--;
+				}
+				if(filelist[filenb][j]=='\\') j++;
+				destinationfile=(char*)malloc(strlen(&filelist[filenb][j])+strlen(destfolder)+2+99);
+				sprintf(destinationfile,"%s\\%s",destfolder,&filelist[filenb][j]);
+				i=strlen(destinationfile);
 				
+				do
+				{
+					i--;
+				}while(i && destinationfile[i]!='.');
 
-		}
-		
+				if(i)
+				{
+					destinationfile[i]='_';
+				}
+				ret=1;
+				
+				strcat(destinationfile,ff_type_list[output_file_format].ext);
+
+				loaderid=hxcfe_getLoaderID(floppycontext,ff_type_list[output_file_format].plug_id);
+				if(ret>=0)
+				{			
+				//	hxcfe_floppyGetSetParams(floppycontext,thefloppydisk,SET,DOUBLESTEP,&hwif->double_step);
+				//	hxcfe_floppyGetSetParams(floppycontext,thefloppydisk,SET,INTERFACEMODE,&hwif->interface_mode);
+					ret=hxcfe_floppyExport(floppycontext,thefloppydisk,destinationfile,loaderid);
+				}
+
+				hxcfe_floppyUnload(floppycontext,thefloppydisk);
+
+
+				tempstr=(char*)malloc(1024);
+							
+				i=strlen(destinationfile);
+				do
+				{
+					i--;
+				}while(i && destinationfile[i]!='\\');
+
+				if(!ret)
+				{
+					sprintf(tempstr,"%s created",&destinationfile[i]);
+					//SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
+					params->numberoffileconverted++;
+				}
+				else
+				{
+					sprintf(tempstr,"Error cannot create %s",&destinationfile[i]);
+					//SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
+				}
+
+				free(destinationfile);
+				free(tempstr);
+					
+
+			}
+		}		
 		free(filelist[filenb]);
 		filenb++;
 	}	
@@ -184,7 +188,7 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 	FLOPPY * thefloppydisk;
 	unsigned char * fullpath;
 	unsigned char * tempstr;
-
+	int loaderid;
 
 	hfindfile=find_first_file(folder,file, &FindFileData); 
 	if(hfindfile!=-1)
@@ -241,7 +245,13 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 						fullpath=(unsigned char*)malloc(strlen(FindFileData.filename)+strlen(folder)+2+9);
 						sprintf((char*)fullpath,"%s\\%s",folder,FindFileData.filename);
 
-						thefloppydisk=hxcfe_floppyLoad(floppycontext,(char*)fullpath,&ret);
+						loaderid=hxcfe_autoSelectLoader(floppycontext,(char*)fullpath,0);
+						if(loaderid>=0)
+						{
+							thefloppydisk=hxcfe_floppyLoad(floppycontext,(char*)fullpath,loaderid,&ret);
+						}
+						else
+							ret=loaderid;
 						free(fullpath);
 						if(ret!=HXCFE_NOERROR || !thefloppydisk)
 						{
@@ -278,17 +288,19 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 						
 							//printf("Creating file %s\n",destinationfile);
 							strcat(destinationfile,ff_type_list[output_file_format].ext);							
-
-							ret=hxcfe_selectContainer(floppycontext,ff_type_list[output_file_format].plug_id);
-							if(!ret)
-							{			
+							
+							loaderid=hxcfe_getLoaderID(floppycontext,ff_type_list[output_file_format].plug_id);
+							if(loaderid>=0)
+							{
 								//	hxcfe_floppyGetSetParams(floppycontext,thefloppydisk,SET,DOUBLESTEP,&hwif->double_step);
 								//	hxcfe_floppyGetSetParams(floppycontext,thefloppydisk,SET,INTERFACEMODE,&hwif->interface_mode);
-								ret=hxcfe_floppyExport(floppycontext,thefloppydisk,destinationfile);
+								ret=hxcfe_floppyExport(floppycontext,thefloppydisk,destinationfile,loaderid);
 							}
+							else
+								ret=loaderid;
+
 
 							hxcfe_floppyUnload(floppycontext,thefloppydisk);
-							hxcfe_selectContainer(floppycontext,PLUGIN_AUTOSELECT);
 
 							tempstr=(unsigned char*)malloc(1024);
 							
