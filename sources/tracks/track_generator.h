@@ -379,8 +379,8 @@ unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackenco
 void          tg_addSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * currentside);
 void          tg_completeTrack(track_generator *tg, SIDE * currentside,unsigned char trackencoding);
 SIDE *		  tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short numberofsector,unsigned char trackencoding,unsigned int bitrate,SECTORCONFIG * sectorconfigtab);
-SIDE *        tg_generatetrack(unsigned char * sectors_data,unsigned short sector_size,unsigned short number_of_sector,unsigned char track,unsigned char side,unsigned char sectorid,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned char gap3,int indexlen,int indexpos);
-SIDE *        tg_generatetrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorconfigtab,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,int indexlen,int indexpos);
+SIDE *        tg_generateTrack(unsigned char * sectors_data,unsigned short sector_size,unsigned short number_of_sector,unsigned char track,unsigned char side,unsigned char sectorid,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned char gap3,int indexlen,int indexpos);
+SIDE *        tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorconfigtab,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,int indexlen,int indexpos);
 SIDE *        tg_alloctrack(unsigned int bitrate,unsigned char trackencoding,unsigned short rpm,unsigned int tracksize,int indexlen,int indexpos,unsigned char buffertoalloc);
 
 unsigned long * tg_allocsubtrack_long(unsigned int tracksize,unsigned long initvalue);

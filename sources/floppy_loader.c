@@ -775,7 +775,7 @@ int hxcfe_popTrack (FBuilder* fb)
 		if(!current_fb_track_state->sectorunderindex)
 				sui_flag=NO_SECTOR_UNDER_INDEX;
 		
-		currentcylinder->sides[current_fb_track_state->side_number]=tg_generatetrackEx((unsigned short)current_fb_track_state->numberofsector,
+		currentcylinder->sides[current_fb_track_state->side_number]=tg_generateTrackEx((unsigned short)current_fb_track_state->numberofsector,
 																						current_fb_track_state->sectortab,
 																						current_fb_track_state->interleave,
 																						current_fb_track_state->skew,
@@ -826,7 +826,7 @@ FLOPPY* hxcfe_getFloppy(FBuilder* fb)
 				}
 				else
 				{
-					fb->floppydisk->tracks[j]->sides[i]=tg_generatetrack(0,
+					fb->floppydisk->tracks[j]->sides[i]=tg_generateTrack(0,
 																		0,
 																		0,
 																		0,

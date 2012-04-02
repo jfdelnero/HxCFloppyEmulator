@@ -181,7 +181,7 @@ int DPX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					
 					fread(trackdata,(((numberofsector-1)*1024)+512),1,f);
 					
-					currentcylinder->sides[i]=tg_generatetrackEx(floppydisk->floppySectorPerTrack,sectorconfig,1,0,floppydisk->floppyBitRate,rpm,trackformat,2500,-2500);
+					currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,1,0,floppydisk->floppyBitRate,rpm,trackformat,2500,-2500);
 				}
 			}
 
