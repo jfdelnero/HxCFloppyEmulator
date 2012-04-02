@@ -105,13 +105,17 @@ int load_floppy_image(char *filename)
 	int ret;
 	int i;
 	int oldifmode;
+	int loaderid;
 
 	hxcfe_floppyUnload(flopemu,thefloppydisk);
 	thefloppydisk=0;
 
-	hxcfe_selectContainer(flopemu,"AUTOSELECT");
+	ret=-1;
+
+	loaderid=hxcfe_autoSelectLoader(flopemu,filename,0);
 		
-	thefloppydisk=hxcfe_floppyLoad(flopemu,filename,&ret);
+	if(loaderid>=0)
+		thefloppydisk=hxcfe_floppyLoad(flopemu,filename,loaderid,&ret);
 		
 	gui_context->loadstatus=ret;
 
