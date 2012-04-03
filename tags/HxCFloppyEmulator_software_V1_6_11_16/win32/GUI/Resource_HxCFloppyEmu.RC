@@ -121,14 +121,14 @@ FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",ID_OK,6,123,54,14
     LTEXT           "HxCFloppyEmulator",-1,33,12,76,10,SS_SUNKEN
-    LTEXT           "Copyright © 2006-2011",-1,10,34,80,8
+    LTEXT           "Copyright © 2006-2012",-1,10,34,80,8
     LTEXT           "DEL NERO Jean François",-1,10,45,129,9
     ICON            IDI_ICON2,-1,9,10,20,20
     LTEXT           "PowerOfAsm / HxC2001",-1,10,56,93,9
     PUSHBUTTON      "Website",IDC_BUTTON1,6,66,108,14
     PUSHBUTTON      "Under GPL License",IDC_BUTTONLICENSE,6,108,108,14
     PUSHBUTTON      "Latest release notes",IDC_RELEASENOTES,6,94,108,14
-    LTEXT           STR_FILE_VERSION2,-1,33,23,80,8
+    LTEXT           "1.6.11.16",-1,33,23,80,8
     PUSHBUTTON      "Support Forum",IDC_SUPPORT,6,80,108,14
 END
 

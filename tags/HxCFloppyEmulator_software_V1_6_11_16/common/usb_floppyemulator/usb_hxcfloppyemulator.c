@@ -257,7 +257,13 @@ int FillBuffer(HXCFLOPPYEMULATOR* floppycontext,HWINTERFACE* hw_context,unsigned
 			floppypin34=1;
 			break;
 
-		
+		case S950_HD_FLOPPYMODE: 
+			amigaready=0;
+			floppypin2=1;
+			floppypin34=1;
+			 break;
+	
+		case S950_DD_FLOPPYMODE: 
 		case GENERIC_SHUGART_DD_FLOPPYMODE: 
 		case EMU_SHUGART_FLOPPYMODE: 
 			amigaready=0;
