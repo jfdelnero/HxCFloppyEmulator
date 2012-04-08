@@ -91,9 +91,12 @@
 #include "./loaders/svd_loader/svd_loader.h"
 #include "./loaders/imz_loader/imz_loader.h"
 #include "./loaders/gkh_loader/gkh_loader.h"
+#include "./loaders/kryofluxstream_loader/kryofluxstream_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
+	(GETPLUGININFOS)KryoFluxStream_libGetPluginInfo,
+
 	(GETPLUGININFOS)DMS_libGetPluginInfo,
 	(GETPLUGININFOS)ADZ_libGetPluginInfo,
 	(GETPLUGININFOS)EXTADF_libGetPluginInfo,
