@@ -2,6 +2,16 @@
 
 #include "batch_converter_window.h"
 
+extern "C"
+{
+	#include "libhxcfe.h"
+	#include "../usb_floppyemulator/usb_hxcfloppyemulator.h"
+	#include "os_api.h"
+}
+
+#include "cb_batch_converter_window.h"
+#include "fl_dnd_box.h"
+
 batch_converter_window::batch_converter_window() {
   { window = new Fl_Double_Window(413, 244);
     window->user_data((void*)(this));
@@ -37,6 +47,10 @@ batch_converter_window::batch_converter_window() {
     { bt_cancel = new Fl_Button(300, 210, 100, 25, "Cancel");
       bt_cancel->callback((Fl_Callback*)batch_converter_window_bt_cancel);
     } // Fl_Button* bt_cancel
+
+	Fl_DND_Box *o = new Fl_DND_Box(0, 0,413, 244, 0);
+	o->callback(dnd_bc_cb);
+
     window->end();
   } // Fl_Double_Window* window
 }
