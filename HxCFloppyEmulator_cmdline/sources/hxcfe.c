@@ -156,6 +156,7 @@ void printhelp(char* argv[])
 	printf("  -interfacelist\t\t: Floppy interfaces mode list [INTERFACE_MODE]\n");
 	printf("  -finput:[filename]\t\t: Input file image \n");
 	printf("  -conv:[FORMAT] \t\t: Convert the input file\n");
+	printf("  -infos\t\t\t: Print informations about the input file\n");
 	printf("  -ifmode:[INTERFACE_MODE]\t: Select the floppy interface mode\n");
 	printf("\n");
 }
@@ -224,7 +225,6 @@ void printinterfacemode(HXCFLOPPYEMULATOR* hxcfe)
 	printf("\n%d Modes\n\n",i);
 
 }
-
 
 int convertfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char * outfile,char * outformat,int ifmode)
 {
@@ -326,12 +326,11 @@ int infofile(HXCFLOPPYEMULATOR* hxcfe,char * infile)
 			printf("Number of Side : %d\n",hxcfe_getNumberOfSide(hxcfe,floppydisk) );
 			printf("Total Size : %d Bytes, ",hxcfe_getFloppySize (hxcfe,floppydisk,&nbofsector)); 
 			printf("Number of sectors : %d",nbofsector); 
-			
 
 			ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
 
 			//loaderid=hxcfe_getLoaderID(hxcfe,outformat);
-		
+
 			hxcfe_floppyUnload(hxcfe,floppydisk);
 
 			printf("\n");
@@ -465,9 +464,9 @@ int main(int argc, char* argv[])
 	{
 		printhelp(argv);
 	}
-	
+
 	hxcfe_deinit(hxcfe);
-	
+
 	return 0;
 }
 
