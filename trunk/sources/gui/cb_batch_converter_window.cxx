@@ -72,7 +72,24 @@ extern "C"
 extern HXCFLOPPYEMULATOR * flopemu;
 batchconverterparams bcparams;
 
+typedef struct s_param_bc_params_
+{
+	const char * files;
+	batch_converter_window * bcw;
+}s_param_bc_params;
 
+
+	ff_type ff_type_list[]=
+	{
+		{ FF_HFE,"HFE - SDCard HxC Floppy Emulator file format",PLUGIN_HXC_HFE,".hfe"},
+		{ FF_MFM,"MFM - MFM/FM track file format",PLUGIN_HXC_MFM,".mfm"},
+		{ FF_AFI,"AFI - Advanced file image format",PLUGIN_HXC_AFI,".afi"},
+		{ FF_VTR,"VTR - VTrucco Floppy Emulator file format",PLUGIN_VTR_IMG,".vtr"},
+		{ FF_RAW,"RAW - RAW sectors file format",PLUGIN_RAW_LOADER,".img"},
+		{ FF_IMD,"IMD - IMD sectors file format",PLUGIN_IMD_IMG,".imd"},
+		{ FF_EHFE,"HFE - Rev 2 - Experimental",PLUGIN_HXC_EXTHFE,".hfe"},
+		{ -1,"",0,0}			
+	};
 
 int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * destfolder,int output_file_format,batchconverterparams * params)
 {
@@ -170,7 +187,6 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 
 			}
 		}		
-		free(filelist[filenb]);
 		filenb++;
 	}	
 
@@ -383,29 +399,83 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 	batch_converter_window *bcw;
 	batchconverterparams bcparams;
 	char * tempstr;
+	s_param_bc_params * bcparams2;
+	int filecount,i,j,k;
+	char ** filelist;
 
 	floppyem=(HXCFLOPPYEMULATOR*)floppycontext;
-	bcw=(batch_converter_window *)hw_context;
+	bcparams2=(s_param_bc_params *)hw_context;
+	bcw=bcparams2->bcw;
 
 	memset(&bcparams,0,sizeof(batchconverterparams));
 	strcat((char*)&bcparams.sourcedir,bcw->strin_src_dir->value());
 	strcat((char*)&bcparams.destdir,bcw->strin_dst_dir->value());
 	bcparams.windowshwd=bcw;
+
 	
-	if(strlen(bcparams.destdir))
+	filecount=0;
+	i=0;
+	while(bcparams2->files[i])
+	{
+		if(bcparams2->files[i]==0xA)
+		{
+			filecount++;
+		}
+		i++;
+	}
+
+	filecount++;
+
+	filelist =(char **) malloc(sizeof(char *) * (filecount + 1) );
+	memset(filelist,0,sizeof(char *) * (filecount + 1) );
+
+
+	i=0;
+	j=0;
+	k=0;
+	do
+	{
+		while(bcparams2->files[i]!=0 && bcparams2->files[i]!=0xA)
+		{
+			i++;
+		};
+
+		filelist[k] = (char*)malloc((i-j)+3);
+		memset( filelist[k] , 0 , (i-j)+3 );
+		memcpy( filelist[k] , &bcparams2->files[j] , (i-j));
+		i++;
+		j=i;
+
+		k++;
+
+	}while(k<filecount);
+
+
+	if(filecount)
 	{
 	
-/*		draganddropconvert(	flopemu,
-							char ** filelist,
+		draganddropconvert(	flopemu,
+							filelist,
 							bcparams.destdir,
 							bcw->choice_file_format->value(),
-							&bcparams)*/
+							&bcparams);
 
 		tempstr=(char*)malloc(1024);
 		sprintf(tempstr,"%d files converted!",bcparams.numberoffileconverted);
 		bcparams.windowshwd->strout_convert_status->value((const char*)tempstr);
 		free(tempstr);
+
+		k=0;
+		while(filelist[k])
+		{
+			free(filelist[k]);
+			k++;
+		}
+
+
 	}
+
+	free(filelist);
 	
 	bcw->bt_convert->activate();
 	return 0;
@@ -501,20 +571,32 @@ void dnd_bc_conv(const char *urls)
 	//loadfloppy((char*)urls);
 }
 
+
+
+
 void dnd_bc_cb(Fl_Widget *o, void *v)
 {
 	batch_converter_window *bcw;
 	Fl_Window *dw;
 	Fl_DND_Box *dnd = (Fl_DND_Box*)o;
-
+	
+	s_param_bc_params * bcparams;
+	
 	dw=((Fl_Window*)(o->parent()));
 	bcw=(batch_converter_window *)dw->user_data();
 
 	if(dnd->event() == FL_PASTE)
 	{
-//	dnd_bc_conv(dnd->event_text());
 		bcw->bt_convert->deactivate();
-		hxc_createthread(flopemu,bcw,&draganddropconvertthread,1);
+		
+		bcparams=(s_param_bc_params *)malloc(sizeof(s_param_bc_params *));
+		memset(bcparams,0,sizeof(s_param_bc_params));
+		
+		bcparams->bcw=bcw;
+		bcparams->files=dnd->event_text();
+
+
+		hxc_createthread(flopemu,bcparams,&draganddropconvertthread,1);
 
 	}
 }

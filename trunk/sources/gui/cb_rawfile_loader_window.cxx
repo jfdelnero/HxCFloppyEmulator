@@ -59,6 +59,11 @@ extern "C"
 
 extern HXCFLOPPYEMULATOR * flopemu;
 
+#define TWOSIDESFLOPPY 0x02
+#define SIDE_INVERTED 0x04
+#define SIDE0_FIRST 0x08
+
+
 void getWindowState(rawfile_loader_window *rlw,cfgrawfile *rfc)
 {
 	memset(rfc,0,sizeof(cfgrawfile));
@@ -67,6 +72,26 @@ void getWindowState(rawfile_loader_window *rlw,cfgrawfile *rfc)
 		rfc->sidecfg=2;
 	else
 		rfc->sidecfg=1;
+
+	if(rlw->chk_twosides->value())
+		rfc->sidecfg=rfc->sidecfg|TWOSIDESFLOPPY;
+
+	if(rlw->chk_reversesides->value())
+		rfc->sidecfg=rfc->sidecfg|SIDE_INVERTED;
+
+	if(rlw->chk_side0track_first->value())
+		rfc->sidecfg=rfc->sidecfg|SIDE0_FIRST;
+
+	if(rlw->chk_sidebasedskew->value())
+		rfc->sideskew=0xFF;
+	else
+		rfc->sideskew=0x00;
+
+	if(rlw->chk_intersidesectornum->value())
+		rfc->intersidesectornumbering=0xff;
+	else
+		rfc->intersidesectornumbering=0x00;
+
 	rfc->bitrate=(unsigned long)rlw->innum_bitrate->value();
 	rfc->fillvalue=(unsigned char)rlw->numin_formatvalue->value();
 	rfc->numberoftrack=(unsigned long)rlw->innum_nbtrack->value();
@@ -87,10 +112,30 @@ void setWindowState(rawfile_loader_window *rlw,cfgrawfile *rfc)
 	else
 		rlw->chk_autogap3->value(0);
 
-	if(rfc->sidecfg==2)
+	if(rfc->sidecfg&TWOSIDESFLOPPY)
 		rlw->chk_twosides->value(1);
 	else
 		rlw->chk_twosides->value(0);
+
+	if(rfc->sidecfg&SIDE_INVERTED)
+		rlw->chk_reversesides->value(1);
+	else
+		rlw->chk_reversesides->value(0);
+
+	if(rfc->sidecfg&SIDE0_FIRST)
+		rlw->chk_side0track_first->value(1);
+	else
+		rlw->chk_side0track_first->value(0);
+
+	if(rfc->sideskew)
+		rlw->chk_sidebasedskew->value(1);
+	else
+		rlw->chk_sidebasedskew->value(0);
+
+	if(rfc->intersidesectornumbering)
+		rlw->chk_intersidesectornum->value(1);
+	else
+		rlw->chk_intersidesectornum->value(0);
 
 	rlw->innum_bitrate->value(rfc->bitrate);
 	rlw->numin_formatvalue->value(rfc->fillvalue);
@@ -101,7 +146,10 @@ void setWindowState(rawfile_loader_window *rlw,cfgrawfile *rfc)
 	rlw->innum_sectorpertrack->value(rfc->sectorpertrack);
 	rlw->innum_rpm->value(rfc->rpm);
 	rlw->choice_sectorsize->value(rfc->sectorsize);
+	rlw->choice_tracktype->value(rfc->tracktype);
 	rlw->numin_skew->value(rfc->skew);
+	
+	
 }
 
 void raw_loader_window_datachanged(Fl_Widget* w, void*)
@@ -124,6 +172,15 @@ void raw_loader_window_datachanged(Fl_Widget* w, void*)
 	totalsize=totalsector * (128<<rlw->choice_sectorsize->value());
 	sprintf((char*)temp,"%d",totalsize);
 	rlw->strout_totalsize->value((const char*)temp);
+
+	if(!rlw->chk_autogap3->value())
+	{
+		rlw->numin_gap3->activate();
+	}
+	else
+	{
+		rlw->numin_gap3->deactivate();
+	}
 }
 
 void raw_loader_window_bt_loadrawfile(Fl_Button* bt, void*)
@@ -211,6 +268,7 @@ void raw_loader_window_bt_savecfg(Fl_Button* bt, void*)
 			fprintf(fpf_file,"FPF_V0.1");
 			fwrite(&rfc,sizeof(cfgrawfile),1,fpf_file);
 			fclose(fpf_file);
+			raw_loader_window_datachanged(bt, 0);
 		}
 	}
 }
@@ -237,6 +295,7 @@ void raw_loader_window_bt_loadcfg(Fl_Button* bt, void*)
 			{
 				fread(&rfc,sizeof(cfgrawfile),1,fpf_file);
 				setWindowState(rlw,&rfc);
+				raw_loader_window_datachanged(bt, 0);
 			}
 			fclose(fpf_file);
 		}
