@@ -1474,6 +1474,22 @@ SOURCE=..\sources\loaders\prophet_loader\prophet_loader.c
 SOURCE=..\sources\loaders\prophet_loader\prophet_loader.h
 # End Source File
 # End Group
+# Begin Group "KryoFlux_Stream"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\kryofluxstream_loader\kryofluxstream_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\kryofluxstream_loader\kryofluxstream_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\kryofluxstream_loader\kryofluxstream_loader.h
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 
