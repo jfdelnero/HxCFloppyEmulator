@@ -137,7 +137,6 @@ void set_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 			sdcfgw->chk_disabediskdriveselector->set();
 		else
 			sdcfgw->chk_disabediskdriveselector->clear();
-
 			
 		if(filecfg->load_last_floppy)
 			sdcfgw->chk_loadlastloaded->clear();
@@ -155,8 +154,6 @@ void set_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 		sdcfgw->slider_stepsound_level->value(0xFF-filecfg->buzzer_step_duration);
 		
 		sdcfgw->slider_scrolltxt_speed->value(64+((255-64)) - filecfg->lcd_scroll_speed);
-
-		filecfg->startup_mode=0;
 
 		if(filecfg->startup_mode&0x1)
 			sdcfgw->chk_force_loading_startupa->set();

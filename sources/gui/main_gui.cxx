@@ -528,6 +528,8 @@ Fl_Menu_Item if_choices[]=
 	{ "IBM PC 720kB",0,format_choice_cb,(void*)IBMPC_DD_FLOPPYMODE},
 	{ "IBM PC 1.44MB",0,format_choice_cb,(void*)IBMPC_HD_FLOPPYMODE},
 	{ "IBM PC 2.88MB",0,format_choice_cb,(void*)IBMPC_ED_FLOPPYMODE},
+	{ "AKAI S900/S950 DD",0,format_choice_cb,(void*)S950_DD_FLOPPYMODE},
+	{ "AKAI S950 HD",0,format_choice_cb,(void*)S950_HD_FLOPPYMODE},
 	{ "Amstrad CPC",0,format_choice_cb,(void*)CPC_DD_FLOPPYMODE},
 	{ "MSX 2",0,format_choice_cb,(void*)MSX2_DD_FLOPPYMODE},
 	{ "Generic Shugart",0,format_choice_cb,(void*)GENERIC_SHUGART_DD_FLOPPYMODE},
@@ -778,7 +780,7 @@ Main_Window::Main_Window()
 	rawloader_window->numin_gap3->value(84);
 	rawloader_window->numin_interleave->value(1);
 	rawloader_window->numin_skew->value(0);
-
+	raw_loader_window_datachanged(rawloader_window->numin_skew, 0);
 	this->log_box=new Log_box();
 
 	backlight_tmr=20;

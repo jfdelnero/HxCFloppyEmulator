@@ -32,14 +32,6 @@
 		FF_EHFE
 	};
 
-	ff_type ff_type_list[]=
-	{
-		{ FF_HFE,"HFE - SDCard HxC Floppy Emulator file format",PLUGIN_HXC_HFE,".hfe"},
-		{ FF_MFM,"MFM - MFM/FM track file format",PLUGIN_HXC_MFM,".mfm"},
-		{ FF_AFI,"AFI - Advanced file image format",PLUGIN_HXC_AFI,".afi"},
-		{ FF_VTR,"VTR - VTrucco Floppy Emulator file format",PLUGIN_VTR_IMG,".vtr"},
-		{ FF_RAW,"RAW - RAW sectors file format",PLUGIN_RAW_IMG,".img"},
-		{ FF_IMD,"IMD - IMD sectors file format",PLUGIN_IMD_IMG,".imd"},
-		{ FF_EHFE,"HFE - Rev 2 - Experimental",PLUGIN_HXC_EXTHFE,".hfe"},
-		{ -1,"",0,0}			
-	};
+
+
+void dnd_bc_cb(Fl_Widget *o, void *v);
