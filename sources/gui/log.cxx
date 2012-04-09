@@ -306,6 +306,9 @@ Log_box::Log_box()
 
 	gui_context->logfile=0;
 
+	memset(&logsfifo,0,sizeof(logfifo));
+	old_index=0;
+
 	tick_log(this);
 	this->end();
 	this->label("Logs");
