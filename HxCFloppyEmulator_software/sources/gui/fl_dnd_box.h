@@ -59,7 +59,7 @@ class Fl_DND_Box : public Fl_Box
 
                     //delete [] evt_txt;
 
-                    evt_txt = new char[evt_len];
+                    evt_txt = new char[evt_len+1];
                     strcpy(evt_txt, Fl::event_text());
 
                     // If there is a callback registered, call it.
