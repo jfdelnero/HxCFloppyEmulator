@@ -99,6 +99,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "ADFOpus zLib"=..\AdfOpus_hxc\trunk\ADFOpusSrc\Zlib\Zlib.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "ADFOpus"=..\AdfOpus_hxc\trunk\ADFOpusSrc\ADFOpus.dsp - Package Owner=<4>
 
 Package=<5>
