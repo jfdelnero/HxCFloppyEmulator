@@ -598,7 +598,7 @@ int GetNewTrackRevolution(HXCFLOPPYEMULATOR* floppycontext,unsigned char * index
 		{
 			trackpartbuffer_1[j].code=trackzonebuffer_1[i].code1;
 			trackpartbuffer_1[j].len=trackzonebuffer_1[i].code2lenint;
-			if(j<2047)
+			if(j<2047*2)
 				j++;
 			else
 				floppycontext->hxc_printf(MSG_ERROR,"GetNewTrackRevolution : trackpartbuffer_1 overrun !");
@@ -608,7 +608,7 @@ int GetNewTrackRevolution(HXCFLOPPYEMULATOR* floppycontext,unsigned char * index
 		{
 			trackpartbuffer_1[j].code=trackzonebuffer_1[i].code2;
 			trackpartbuffer_1[j].len=trackzonebuffer_1[i].code1lenint;
-			if(j<2047)
+			if(j<2047*2)
 				j++;
 			else
 				floppycontext->hxc_printf(MSG_ERROR,"GetNewTrackRevolution : trackpartbuffer_1 overrun !");
