@@ -1479,6 +1479,14 @@ SOURCE=..\sources\loaders\prophet_loader\prophet_loader.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\sources\loaders\kryofluxstream_loader\kryofluxstream.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\kryofluxstream_loader\kryofluxstream.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\loaders\kryofluxstream_loader\kryofluxstream_format.h
 # End Source File
 # Begin Source File
