@@ -58,13 +58,9 @@
 
 #include "kryofluxstream_loader.h"
 #include "kryofluxstream_format.h"
+#include "kryofluxstream.h"
 
 #include "os_api.h"
-
-
-#define KF_MCLOCK 48054857,14 //(((18432000 * 73) / 14) / 2)
-#define KF_SCLOCK ((float)KF_MCLOCK / (float)2)
-#define KF_ICLOCK (KF_MCLOCK / 16)
 
 int KryoFluxStream_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
@@ -138,7 +134,7 @@ int KryoFluxStream_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 				if(f)
 				{
 					fread(&oob,sizeof(s_oob_header),1,f);
-					if(oob.Sign==OOB_SIGN && ( oob.Type>=1 && oob.Type<=4 ) )
+					if( ( oob.Sign == OOB_SIGN ) && ( oob.Type>=1 && oob.Type<=4 ) )
 					{
 						found=1;
 					}
@@ -175,7 +171,6 @@ void settrackbit(unsigned char * dstbuffer,unsigned char byte,int bitoffset,int 
 
 		i++;
 	}
-
 }
 
 void computehistogram(unsigned long *indata,int size,unsigned long *outdata)
@@ -398,232 +393,50 @@ SIDE* ScanAndDecodeStream(int initalvalue,unsigned long * track,int size,short r
 
 SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm)
 {
-	s_oob_header		* oob;
-	s_oob_StreamRead	* streamRead;
-	s_oob_StreamEnd		* streamEnd;
-	s_oob_DiskIndex		* diskIndex;
-
-	unsigned long * cellstream;
-	unsigned long cell_value;
 	double mck;
 	double sck;
 	double ick;
 	int cellpos;
-	s_oob_DiskIndex  tabindex[16];
-	int nbindex;
-	char * tempstr;
-	int inc0B;
 	int bitrate;
 	unsigned long * histo;
-	int streamend;
-	int filesize,offset;
-	FILE * f;
-	unsigned char * kfstreambuffer;
 	SIDE* currentside;
 	
+	s_track_dump *track_dump;
 #ifdef KFSTREAMDBG
 	floppycontext->hxc_printf(MSG_DEBUG,"decodestream %s",file);
 #endif
 
-	f=fopen(file,"rb");
-	if(f)
+	currentside=0;
+
+	track_dump=DecodeKFStreamFile(floppycontext,file);
+	if(track_dump)
 	{
-		fseek(f,0,SEEK_END);
-		filesize=ftell(f);
-		fseek(f,0,SEEK_SET);
-
-		kfstreambuffer=malloc(filesize);
-
-		fread(kfstreambuffer,filesize,1,f);
-
-		fclose(f);
-
-		cellstream=(unsigned long*)malloc(filesize*sizeof(unsigned long));
-		memset(cellstream,0,filesize*sizeof(unsigned long));
-
+	
 		mck=((18432000 * 73) / 14) / 2;
 		sck=mck/2;
 		ick=mck/16;
 
-		cell_value=0;
-		offset=0;
-		nbindex=0;
-		cellpos=0;
-		streamend=0;
-		do
-		{
-			switch(kfstreambuffer[offset])
-			{
-				case 0x00:
-				case 0x01:
-				case 0x02:
-				case 0x03:
-				case 0x04:
-				case 0x05:
-				case 0x06:
-				case 0x07:
-					cell_value = kfstreambuffer[offset] << 8;
-					offset++;
-					cell_value = cell_value | kfstreambuffer[offset];
-					offset++;
-
-					if(inc0B)
-					{
-						cell_value=cell_value+ 0x10000;
-						inc0B=0;
-					}
-					cellstream[cellpos++]=cell_value;
-	
-				break;
-				
-				// Nop
-				case 0x0A:
-					offset++;
-				case 0x09:
-					offset++;
-				case 0x08:
-					offset++;
-				break;
-				//
-				
-				//0x0B 	Overflow16 	1 	Next cell value is increased by 0×10000 (16-bits). Decoding of *this* cell should continue at next stream position
-				case 0x0B:
-					inc0B=1;
-					offset++;
-				break;
-
-				//0x0C 	Value16 	3 	New cell value: Upper 8 bits are offset+1 in the stream, lower 8-bits are offset+2 
-				case 0x0C:
-					offset++;
-					cell_value = kfstreambuffer[offset] << 8;
-					offset++;
-					cell_value = cell_value | kfstreambuffer[offset];
-					offset++;
-
-					if(inc0B)
-					{
-						cell_value=cell_value+ 0x10000;
-						inc0B=0;
-					}
-					cellstream[cellpos++]=cell_value;
-				break;
-
-				case 0x0D:
-					oob=(s_oob_header*)&kfstreambuffer[offset];
-
-#ifdef KFSTREAMDBG
-					floppycontext->hxc_printf(MSG_DEBUG,"OOB 0x%.2x 0x%.2x Size:0x%.4x",oob->Sign,oob->Type,oob->Size);
-#endif
-
-					switch(oob->Type)
-					{
-						case 0x01:
-#ifdef KFSTREAMDBG
-							floppycontext->hxc_printf(MSG_DEBUG,"---Stream Read---");
-#endif
-
-							streamRead=	(s_oob_StreamRead*) &kfstreambuffer[offset + sizeof(s_oob_header) ];
-
-#ifdef KFSTREAMDBG
-							floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X TrTime: 0x%.8X",streamRead->StreamPosition,streamRead->TrTime);
-#endif
-							break;
-
-						case 0x02:
-#ifdef KFSTREAMDBG
-							floppycontext->hxc_printf(MSG_DEBUG,"---Index--- : %d sp:%d",nbindex,cellpos);
-#endif
-
-							diskIndex=	(s_oob_DiskIndex*) &kfstreambuffer[offset + sizeof(s_oob_header) ];
-
-#ifdef KFSTREAMDBG
-							floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X SysClk: 0x%.8X Timer: 0x%.8X",diskIndex->StreamPosition,diskIndex->SysClk,diskIndex->Timer);
-#endif
-
-							tabindex[nbindex].StreamPosition=diskIndex->StreamPosition;
-							tabindex[nbindex].SysClk=diskIndex->SysClk;
-							tabindex[nbindex].Timer=diskIndex->Timer;
-							if(nbindex)
-							{
-#ifdef KFSTREAMDBG
-								floppycontext->hxc_printf(MSG_DEBUG,"Delta : %d Rpm : %f ",tabindex[nbindex].SysClk-tabindex[nbindex-1].SysClk,(float)(ick*(float)60)/(float)(tabindex[nbindex].SysClk-tabindex[nbindex-1].SysClk));
-#endif
-							}
-							nbindex++;
-							break;
-
-						case 0x03:
-#ifdef KFSTREAMDBG
-							floppycontext->hxc_printf(MSG_DEBUG,"---Stream End---");
-#endif
-							streamEnd=	(s_oob_StreamEnd*) &kfstreambuffer[offset + sizeof(s_oob_header) ];
-#ifdef KFSTREAMDBG							
-							floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X Result: 0x%.8X",streamEnd->StreamPosition,streamEnd->Result);
-#endif
-							break;
-
-						case 0x04:
-#ifdef KFSTREAMDBG
-							floppycontext->hxc_printf(MSG_DEBUG,"---String---");
-#endif
-							tempstr=malloc(oob->Size+1);
-							memset(tempstr,0,oob->Size+1);
-							memcpy(tempstr,&kfstreambuffer[offset + sizeof(s_oob_header)],oob->Size);
-#ifdef KFSTREAMDBG
-							floppycontext->hxc_printf(MSG_DEBUG,"String : %s",tempstr);
-#endif
-		
-							free(tempstr);	
-							break;
-
-						case 0x0D:
-							streamend=1;
-						break;
-
-						default:
-							floppycontext->hxc_printf(MSG_DEBUG,"Unknown OOB : 0x%.2x 0x%.2x Size:0x%.4x",oob->Sign,oob->Type,oob->Size);
-							break;
-
-					}
-					offset=offset+oob->Size + sizeof(s_oob_header);
-				break;
-				
-				default:
-					cell_value = kfstreambuffer[offset];
-
-					if(inc0B)
-					{
-						cell_value=cell_value+ 0x10000;
-						inc0B=0;
-					}
-					cellstream[cellpos++]=cell_value;
-					offset++;
-				break;
-			}
-
-		}while( (offset<filesize) && !streamend);
-
-		if(nbindex>2)
+		if(track_dump->nb_of_index>2)
 		{
 			histo=(unsigned long*)malloc(65536* sizeof(unsigned long));
 			
-			cellpos=tabindex[0].StreamPosition;
+			cellpos=track_dump->index_evt_tab[0].dump_offset;
 			
-			computehistogram(&cellstream[cellpos],tabindex[1].StreamPosition-tabindex[0].StreamPosition,histo);
+			computehistogram(&track_dump->track_dump[cellpos],track_dump->index_evt_tab[1].dump_offset-track_dump->index_evt_tab[0].dump_offset,histo);
 
 			bitrate=detectpeaks(floppycontext,histo);
 
-			*rpm=(int)((float)(ick*(float)60)/(float)(tabindex[1].SysClk-tabindex[0].SysClk));
+			*rpm=(int)((float)(ick*(float)60)/(float)(track_dump->index_evt_tab[1].clk-track_dump->index_evt_tab[0].clk));
 
 			floppycontext->hxc_printf(MSG_DEBUG,"Track %s : %d RPM, Bitrate: %d",getfilenamebase(file,0),*rpm,(int)(24027428/bitrate) );
 
-			currentside=ScanAndDecodeStream(bitrate,&cellstream[cellpos],tabindex[1].StreamPosition-tabindex[0].StreamPosition,*rpm);			
+			currentside=ScanAndDecodeStream(bitrate,&track_dump->track_dump[cellpos],track_dump->index_evt_tab[1].dump_offset-track_dump->index_evt_tab[0].dump_offset,*rpm);			
 
 			free(histo);
+			
 		}
 
-		free(cellstream);
-		free(kfstreambuffer);
+		FreeStream(track_dump);
 	}
 
 	return currentside;
@@ -677,7 +490,6 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 
 			}
 
-
 			filepath = malloc( strlen(imgfile) + 32 );
 
 			doublestep=1;
@@ -700,7 +512,6 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 
 			do
 			{
-					
 				sprintf(filepath,"%s%s%.2d.%d.raw",folder,fname,track,side);
 				f=fopen(filepath,"rb");
 				if(f)
@@ -722,7 +533,6 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 					side = 0;
 					track=track+doublestep;
 				}
-
 			}while(track<84);
 
 			if(!found)
