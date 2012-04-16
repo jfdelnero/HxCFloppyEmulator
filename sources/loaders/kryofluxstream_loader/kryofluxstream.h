@@ -14,7 +14,7 @@ typedef struct s_track_dump_
 }s_track_dump;
 
 
-s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file);
+s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,float timecoef);
 void FreeStream(s_track_dump* trackdump);
 
 

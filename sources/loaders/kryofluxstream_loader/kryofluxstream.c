@@ -59,7 +59,7 @@
 
 #include "os_api.h"
 
-s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file)
+s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,float timecoef)
 {
 	unsigned long i;
 	s_oob_header		* oob;
@@ -136,7 +136,7 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file)
 							cell_value=cell_value+ 0x10000;
 							inc0B=0;
 						}
-						cellstream[cellpos++]=cell_value;
+						cellstream[cellpos++]=(unsigned long)((float)cell_value * timecoef);
 	
 					break;
 				
@@ -169,7 +169,7 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file)
 							cell_value=cell_value+ 0x10000;
 							inc0B=0;
 						}
-						cellstream[cellpos++]=cell_value;
+						cellstream[cellpos++]=(unsigned long)((float)cell_value * timecoef);
 					break;
 
 					case 0x0D:
@@ -259,7 +259,7 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file)
 							cell_value=cell_value+ 0x10000;
 							inc0B=0;
 						}
-						cellstream[cellpos++]=cell_value;
+						cellstream[cellpos++]=(unsigned long)((float)cell_value * timecoef);
 						offset++;
 					break;
 				}
@@ -277,7 +277,7 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file)
 			for(i=0;i<nbindex;i++)
 			{
 				track_dump->index_evt_tab[i].dump_offset=tabindex[i].StreamPosition;
-				track_dump->index_evt_tab[i].clk=tabindex[i].SysClk;
+				track_dump->index_evt_tab[i].clk=(unsigned long)((float)tabindex[i].SysClk * timecoef);
 			}
 			track_dump->nb_of_index=nbindex;
 		}

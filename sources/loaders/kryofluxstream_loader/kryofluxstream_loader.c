@@ -202,6 +202,10 @@ int detectpeaks(HXCFLOPPYEMULATOR* floppycontext,unsigned long *histogram)
 	int total;
 	int nbval;
 
+	int total250k;
+	int total300k;
+	int total500k;
+
 	int ret;
 
 	stathisto * stattab;
@@ -242,27 +246,36 @@ int detectpeaks(HXCFLOPPYEMULATOR* floppycontext,unsigned long *histogram)
 	floppycontext->hxc_printf(MSG_DEBUG,"----------------------");
 #endif
 	
+	total250k=0;
+	total300k=0;
+	total500k=0;
+
 	i=0;
 	while(i<nbval)
 	{
-		if(stattab[i].occurence>512)
-			break;
+		ret=stattab[i].val;
+
+		if(ret<107 && ret>=87)
+			total250k=total250k+stattab[i].occurence;
+
+		if(ret<87 && ret>68)
+			total300k=total300k+stattab[i].occurence;
+
+		if(ret<55 && ret>42)
+			total500k=total500k+stattab[i].occurence;
+
 		i++;
 	}
 
-	if(i<nbval)
-		ret=stattab[i].val;
-	else
-		ret=96;
+	if(total500k>2048)
+		return 48;
 
-	if(ret<107 && ret>=87)
-		return 96;
-
-	if(ret<87 && ret>68)
+	if(total300k>2048)
 		return 80;
 
-	if(ret<55 && ret>42)
-		return 48;
+	if(total250k>2048)
+		return 96;
+
 
 	free(stattab);
 
@@ -287,9 +300,9 @@ int getcell(int * pumpcharge,int value,int centralvalue)
 		{
 			*pumpcharge=*pumpcharge-1;
 				
-			if(*pumpcharge<(centralvalue-(int)((float)centralvalue*0.2)) )
+			if(*pumpcharge< ( centralvalue - ( ( centralvalue * 20 ) / 100 ) ) )
 			{
-				*pumpcharge=(centralvalue-(int)((float)centralvalue*0.2));
+				*pumpcharge = ( centralvalue - ( ( centralvalue * 20 ) / 100 ) );
 			}
 			
 			return (int)(fdiv+1);
@@ -298,9 +311,9 @@ int getcell(int * pumpcharge,int value,int centralvalue)
 		{
 			*pumpcharge=*pumpcharge+1;
 
-			if(*pumpcharge>(centralvalue+(int)((float)centralvalue*0.2)) )
+			if(*pumpcharge> ( centralvalue + ( ( centralvalue * 20 ) / 100 ) ) )
 			{
-				*pumpcharge=(centralvalue+(int)((float)centralvalue*0.2));
+				*pumpcharge= ( centralvalue + ( ( centralvalue * 20 ) / 100 ) ) ;
 			}
 
 			return (int)(fdiv);
@@ -312,18 +325,189 @@ int getcell(int * pumpcharge,int value,int centralvalue)
 	}	
 }
 
-SIDE* ScanAndDecodeStream(int initalvalue,unsigned long * track,int size,short rpm)
+typedef struct s_match_
 {
+	int yes;
+	int no;
+	unsigned long offset;
+}s_match;
+
+
+void exchange(s_match *  table, int a, int b)
+{
+    s_match temp;
+	temp = table[a];
+    table[a] = table[b];
+    table[b] = temp;
+}
+
+void quickSort(s_match * table, int start, int end)
+{
+    int left = start-1;
+    int right = end+1;
+    const int pivot = table[start].yes;
+
+    if(start >= end)
+        return;
+
+    while(1)
+    {
+        do right--; while(table[right].yes > pivot);
+        do left++; while(table[left].yes < pivot);
+
+        if(left < right)
+            exchange(table, left, right);
+        else break;
+    }
+
+    quickSort(table, start, right);
+    quickSort(table, right+1, end);
+}
+
+char* AnalyzeAndFoundOverLap(HXCFLOPPYEMULATOR* floppycontext,s_track_dump* td,int centralvalue,int *start,int *end)
+{
+	#define NUMBEROFTRY 1024
+	#define PERCENTERROR 5
+
+	unsigned char * valid_page1;
+	int time1,time2;
+	unsigned long i,j,k,l,c;
+	s_match * matchtab;
+	int nb_pulses,nb_flakey_pulses;
+
+	matchtab=malloc(sizeof(s_match) * NUMBEROFTRY );
+	memset(matchtab,0,sizeof(s_match) * NUMBEROFTRY );
+
+	for(k=0;k<NUMBEROFTRY;k++)
+	{
+		if(k&1)
+			matchtab[k].offset= ( td->index_evt_tab[1].dump_offset - ( k>>1 ) );
+		else
+			matchtab[k].offset= ( td->index_evt_tab[1].dump_offset + ( k>>1 ) );
+
+	}
+
+	for(k=0;k<NUMBEROFTRY;k++)
+	{
+		j=matchtab[k].offset;
+		i=td->index_evt_tab[0].dump_offset;
+
+		c = ( td->index_evt_tab[1].dump_offset - td->index_evt_tab[0].dump_offset ) + (NUMBEROFTRY*2);
+
+		time1 = td->track_dump[i];
+		time2 = td->track_dump[j];
+
+		do
+		{
+			if( 
+				( time2 <= ( time1 + ( ( time1 * PERCENTERROR ) / 100 ) ) ) &&
+				( time2 >= ( time1 - ( ( time1 * PERCENTERROR ) / 100 ) ) )    )
+			{
+				matchtab[k].yes++;
+				time1 = td->track_dump[++i];
+				time2 = td->track_dump[++j];
+			}
+			else
+			{
+				if(time1<time2)
+				{
+					time1 = time1 + td->track_dump[++i];
+				}
+				else
+				{
+					time2 = time2 + td->track_dump[++j];
+				}
+				matchtab[k].no++;
+			}
+
+		}while(--c);
+
+		if(matchtab[k].no<10)
+			k=NUMBEROFTRY;
+	}
+
+	quickSort(matchtab, 0, NUMBEROFTRY-1);
+
+	nb_pulses = ( td->index_evt_tab[1].dump_offset - td->index_evt_tab[0].dump_offset ) +
+				( matchtab[NUMBEROFTRY-1].offset - td->index_evt_tab[1].dump_offset );
+
+	*start=matchtab[NUMBEROFTRY-1].offset;
+	*end=matchtab[NUMBEROFTRY-1].offset + nb_pulses;
+	nb_flakey_pulses = 0;
+
+	valid_page1 = malloc( nb_pulses * sizeof(char) );
+	if(valid_page1)
+	{
+		memset(valid_page1,0, nb_pulses * sizeof(char) );
+
+		j= matchtab[NUMBEROFTRY-1].offset;
+		i= td->index_evt_tab[0].dump_offset;
+
+		l=0;
+		c = nb_pulses;
+
+		time1 = td->track_dump[i];
+		time2 = td->track_dump[j];
+
+		do
+		{
+			if( 
+				( time2 <= ( time1 + ( ( time1 * PERCENTERROR ) / 100 ) ) ) &&
+				( time2 >= ( time1 - ( ( time1 * PERCENTERROR ) / 100 ) ) )    )
+			{
+				
+						
+				time1 = td->track_dump[++i];
+				time2 = td->track_dump[++j];
+
+				c--;
+			}
+			else
+			{
+				if(time1<time2)
+				{
+					valid_page1[i - td->index_evt_tab[0].dump_offset]=-1;
+					time1 = time1 + td->track_dump[++i];
+
+					c--;
+				}
+				else
+				{
+					valid_page1[i - td->index_evt_tab[0].dump_offset]=-1;
+					time2 = time2 + td->track_dump[++j];
+				}
+
+				nb_flakey_pulses++;
+			}
+
+		}while(c);
+	}
+
+
+	floppycontext->hxc_printf(MSG_DEBUG,"Track Len: %d pulses - Track overlap : %d - Flakey/weak bits : %d",
+								nb_pulses,
+								matchtab[NUMBEROFTRY-1].offset-td->index_evt_tab[1].dump_offset,
+								nb_flakey_pulses);
+	
+	free(matchtab);
+
+	return valid_page1;
+}
+
+
+SIDE* ScanAndDecodeStream(int initalvalue,unsigned long * track,char * flakey,int size,short rpm)
+{
+#define TEMPBUFSIZE 256*1024
 	int pumpcharge;
-	int i;
+	int i,j;
 	unsigned long value;
-	int nbcell;
 	int cellcode;
 	int centralvalue;
 	int bitrate;
 
 	int bitoffset;
 	unsigned char *outtrack;
+	unsigned char *flakeytrack;
 	unsigned long *trackbitrate;
 	
 	SIDE* hxcfe_track;
@@ -342,56 +526,85 @@ SIDE* ScanAndDecodeStream(int initalvalue,unsigned long * track,int size,short r
 		i++;
 	}while(i<size);
 
-	nbcell=0;
-	i=0;
-	do
-	{
-		value=track[i];
-		nbcell=nbcell+getcell(&pumpcharge,value,centralvalue);
-
-		i++;
-	}while(i<size);
-
-#define TEMPBUFSIZE 400000
 	outtrack=(unsigned char*)malloc(TEMPBUFSIZE);
+	flakeytrack=(unsigned char*)malloc(TEMPBUFSIZE);
 	trackbitrate=(unsigned long*)malloc(TEMPBUFSIZE*sizeof(unsigned long));
 	memset(outtrack,0,TEMPBUFSIZE);
+	memset(flakeytrack,0,TEMPBUFSIZE);
 	memset(trackbitrate,0,TEMPBUFSIZE*sizeof(unsigned long));
+
+	for(i=0;i<TEMPBUFSIZE;i++)
+	{
+		trackbitrate[i] = 250000; //(int)(24027428/centralvalue);
+	}
 
 	bitoffset=0;
 	i=0;
 	do
 	{
-		value=track[i];
+		value = track[i];
 		
-		cellcode=getcell(&pumpcharge,value,centralvalue);
-		
-		bitoffset=bitoffset+cellcode;
+		cellcode = getcell(&pumpcharge,value,centralvalue);
+
+		bitoffset = bitoffset + cellcode;
 
 		settrackbit(outtrack,0xFF,bitoffset,1);
 
-		if(bitoffset>nbcell) 
-		{
-//			for(;;);
-		}
+		/*if(flakey[i]<0)
+			settrackbit(flakeytrack,0xFF,bitoffset,1);*/
+
+		//trackbitrate[bitoffset>>3]=(int)(24027428/pumpcharge);
+
 		i++;
 	}while(i<size);
 
-	bitrate=(int)(24027428/centralvalue ); //KF_SCLOCK) );
-	hxcfe_track = tg_alloctrack(bitrate,ISOFORMAT_DD,rpm,nbcell,2500,0,0);
+	i=0;
+	do
+	{
+
+		j=0;
+		bitrate=0;
+		while(i+j<size && j<256)
+		{
+			bitrate = ( bitrate + trackbitrate[i+j] ) / 2;
+			j++;
+		}
+
+		j=0;
+		while(i+j<size && j<256)
+		{
+			//trackbitrate[i+j] = bitrate;
+			j++;
+		}
+
+		i = i + 256;
+
+	}while(i<size);
+
+	bitrate=(int)( 24027428 / centralvalue );
+	hxcfe_track = tg_alloctrack(bitrate,ISOFORMAT_DD,rpm,bitoffset,2500,0,TG_ALLOCTRACK_ALLOCFLAKEYBUFFER|TG_ALLOCTRACK_ALLOCTIMIMGBUFFER);
 	
-	if(nbcell&7)
-		memcpy(hxcfe_track->databuffer,outtrack,(nbcell/8)+1);
+	if(bitoffset&7)
+	{
+		memcpy(hxcfe_track->databuffer,outtrack,(bitoffset>>3)+1);
+		memcpy(hxcfe_track->flakybitsbuffer,flakeytrack,(bitoffset>>3)+1);
+		memcpy(hxcfe_track->timingbuffer,trackbitrate,((bitoffset>>3)+1) * sizeof(unsigned long));
+	}
 	else
-		memcpy(hxcfe_track->databuffer,outtrack,(nbcell/8));
+	{
+		memcpy(hxcfe_track->databuffer,outtrack,bitoffset>>3);
+		memcpy(hxcfe_track->flakybitsbuffer,flakeytrack,bitoffset>>3);
+		memcpy(hxcfe_track->timingbuffer,trackbitrate,(bitoffset>>3)* sizeof(unsigned long));
+	}
 
 	free(outtrack);
+	free(flakeytrack);
 	free(trackbitrate);
 
 	return hxcfe_track;
 }
 
-SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm)
+SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,float timecoef)
 {
 	double mck;
 	double sck;
@@ -401,6 +614,10 @@ SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm)
 	unsigned long * histo;
 	SIDE* currentside;
 	
+	char * flakeytab;
+	int start,end;
+
+	int i,j;
 	s_track_dump *track_dump;
 #ifdef KFSTREAMDBG
 	floppycontext->hxc_printf(MSG_DEBUG,"decodestream %s",file);
@@ -408,7 +625,7 @@ SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm)
 
 	currentside=0;
 
-	track_dump=DecodeKFStreamFile(floppycontext,file);
+	track_dump=DecodeKFStreamFile(floppycontext,file,timecoef);
 	if(track_dump)
 	{
 	
@@ -429,10 +646,24 @@ SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm)
 			*rpm=(int)((float)(ick*(float)60)/(float)(track_dump->index_evt_tab[1].clk-track_dump->index_evt_tab[0].clk));
 
 			floppycontext->hxc_printf(MSG_DEBUG,"Track %s : %d RPM, Bitrate: %d",getfilenamebase(file,0),*rpm,(int)(24027428/bitrate) );
+			
+			flakeytab=AnalyzeAndFoundOverLap(floppycontext,track_dump,bitrate,&start,&end);
 
-			currentside=ScanAndDecodeStream(bitrate,&track_dump->track_dump[cellpos],track_dump->index_evt_tab[1].dump_offset-track_dump->index_evt_tab[0].dump_offset,*rpm);			
+			currentside=ScanAndDecodeStream(bitrate,&track_dump->track_dump[start],flakeytab,(end-start),*rpm);
 
 			free(histo);
+			free(flakeytab);
+
+			/*j=currentside->tracklen/8;
+			if(currentside->tracklen&7) j++;
+			for(i=0;i<j;i++)
+			{
+				floppycontext->hxc_printf(MSG_DEBUG,"D:%.2X\tM:%.2X\tBR:%.8d\tI:%.2X",
+						currentside->databuffer[i],
+						currentside->flakybitsbuffer[i],
+						currentside->timingbuffer[i],
+						currentside->indexbuffer[i]);
+			}*/
 			
 		}
 
@@ -449,7 +680,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 	char * folder;
 	char fname[512];
 	int mintrack,maxtrack;
-	int minside,maxside;
+	int minside,maxside,singleside;
 	short rpm;
 	unsigned short i,j;
 	int doublestep;
@@ -461,6 +692,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 	s_oob_header oob;
 	SIDE * curside;
 	int nbtrack,nbside;
+	float timecoef;
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"KryoFluxStream_libLoad_DiskFile");
 	
@@ -500,6 +732,33 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 				doublestep=2;
 				fclose(f);
 			}
+
+			singleside=0;
+			sprintf(filepath,"%s%s",folder,"singleside");
+			f=fopen(filepath,"rb");
+			if(f)
+			{
+				singleside=1;
+				fclose(f);
+			}
+
+			timecoef=1;
+			sprintf(filepath,"%s%s",folder,"rpm360rpm300");
+			f=fopen(filepath,"rb");
+			if(f)
+			{
+				timecoef=(float)1.2;
+				fclose(f);
+			}
+
+			sprintf(filepath,"%s%s",folder,"rpm300rpm360");
+			f=fopen(filepath,"rb");
+			if(f)
+			{
+				timecoef=(float)0.833;
+				fclose(f);
+			}
+
 			
 			track=0;
 			side=0;
@@ -543,6 +802,8 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 			}
 
 			nbside=(maxside-minside)+1;
+			if(singleside)
+				nbside = 1;
 			nbtrack=(maxtrack-mintrack)+1;
 			nbtrack=nbtrack/doublestep;
 
@@ -563,7 +824,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 				{					
 					sprintf(filepath,"%s%s%.2d.%d.raw",folder,fname,j,i);
 					
-					curside=decodestream(floppycontext,filepath,&rpm);
+					curside=decodestream(floppycontext,filepath,&rpm,timecoef);
 
 					if(!floppydisk->tracks[j/doublestep])
 					{
