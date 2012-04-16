@@ -306,11 +306,16 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						sectorheader.sector_length=128 * (1 << sectorheader.sector_size);
 					}
 
-					floppycontext->hxc_printf(MSG_INFO_1,"Cylinder:%.3d, Size:%.1d, Sector ID:%.3d, Status:0x%.2x, File offset:0x%.6x",
+					floppycontext->hxc_printf(MSG_INFO_1,"Cylinder:%.3d, Head:%d, Size:%.1d (%d), Sector ID:%.3d, Status:0x%.2x, Density: %d, Deleted Data: %d, File offset:0x%.6x",
 						sectorheader.cylinder,
+						sectorheader.head,
 						sectorheader.sector_length,
+						sectorheader.sector_size,
 						sectorheader.sector_id,
 						sectorheader.sector_status,
+						sectorheader.density,
+						sectorheader.deleted_data,
+						
 						ftell(f)
 						);
 
