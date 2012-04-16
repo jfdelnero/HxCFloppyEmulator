@@ -1097,15 +1097,38 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			
 		for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
 		{
-			if(!floppydisk->tracks[i]->sides[0])
+			if(floppydisk->tracks[i])
 			{
-				floppydisk->tracks[i]->sides[0]=tg_generateTrack(0,512,0 ,(unsigned char)i,(unsigned char)0,1,interleave,(unsigned char)(0),250000,currentcylinder->floppyRPM,ISOFORMAT_DD,255,2500| NO_SECTOR_UNDER_INDEX,-2500);
+				if(!floppydisk->tracks[i]->sides[0])
+				{
+					floppydisk->tracks[i]->sides[0]=tg_generateTrack(0,512,0 ,(unsigned char)i,(unsigned char)0,1,interleave,(unsigned char)(0),250000,currentcylinder->floppyRPM,ISOFORMAT_DD,255,2500| NO_SECTOR_UNDER_INDEX,-2500);
+				}
+
+
+				if(floppydisk->tracks[i]->number_of_side==2)
+				{
+					if(!floppydisk->tracks[i]->sides[1])
+					{
+						floppydisk->tracks[i]->sides[1]=tg_generateTrack(0,512,0 ,(unsigned char)i,(unsigned char)1,1,interleave,(unsigned char)(0),250000,currentcylinder->floppyRPM,ISOFORMAT_DD,255,2500| NO_SECTOR_UNDER_INDEX,-2500);
+					}
+				}
 			}
-
-
-			if(!floppydisk->tracks[i]->sides[1])
+			else
 			{
-				floppydisk->tracks[i]->sides[1]=tg_generateTrack(0,512,0 ,(unsigned char)i,(unsigned char)1,1,interleave,(unsigned char)(0),250000,currentcylinder->floppyRPM,ISOFORMAT_DD,255,2500| NO_SECTOR_UNDER_INDEX,-2500);
+				floppydisk->tracks[i]=(CYLINDER*)malloc(sizeof(CYLINDER));
+				memset(floppydisk->tracks[i],0,sizeof(CYLINDER));
+				floppydisk->tracks[i]->floppyRPM=300;
+				currentcylinder=floppydisk->tracks[i];
+				currentcylinder->number_of_side=2;
+					
+				currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*2);
+				memset(currentcylinder->sides,0,sizeof(SIDE*)*2);
+				floppydisk->tracks[i]->sides[0]=tg_generateTrack(0,512,0 ,(unsigned char)i,(unsigned char)0,1,interleave,(unsigned char)(0),250000,currentcylinder->floppyRPM,ISOFORMAT_DD,255,2500| NO_SECTOR_UNDER_INDEX,-2500);
+
+				if(floppydisk->tracks[i]->number_of_side==2)
+				{
+					floppydisk->tracks[i]->sides[1]=tg_generateTrack(0,512,0 ,(unsigned char)i,(unsigned char)1,1,interleave,(unsigned char)(0),250000,currentcylinder->floppyRPM,ISOFORMAT_DD,255,2500| NO_SECTOR_UNDER_INDEX,-2500);
+				}
 			}
 
 		}
