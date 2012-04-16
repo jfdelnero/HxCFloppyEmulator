@@ -101,6 +101,7 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 	filenb=0;
 	while(filelist[filenb])
 	{		
+
 		loaderid=hxcfe_autoSelectLoader(floppycontext,filelist[filenb],0);
 		if(loaderid>=0)
 		{
@@ -172,13 +173,13 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 				if(!ret)
 				{
 					sprintf(tempstr,"%s created",&destinationfile[i]);
-					//SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
+					params->windowshwd->strout_convert_status->value((const char*)tempstr);
 					params->numberoffileconverted++;
 				}
 				else
 				{
 					sprintf(tempstr,"Error cannot create %s",&destinationfile[i]);
-					//SetDlgItemText(params->windowshwd,IDC_CONVERTSTATUS,tempstr);
+					params->windowshwd->strout_convert_status->value((const char*)tempstr);
 				}
 
 				free(destinationfile);
