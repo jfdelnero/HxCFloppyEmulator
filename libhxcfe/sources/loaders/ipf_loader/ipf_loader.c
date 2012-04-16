@@ -61,8 +61,8 @@
 #define DWORD long
 #define LIB_TYPE 1
 #define LIB_USER 1
-#include "./libs/capslib/Comtype.h"
-#include "./libs/capslib/CapsAPI.h"
+#include "./thirdpartylibs/capslib/Comtype.h"
+#include "./thirdpartylibs/capslib/CapsAPI.h"
 
 #include "capslibloader.h"
 
