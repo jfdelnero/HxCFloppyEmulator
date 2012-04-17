@@ -15,7 +15,19 @@ Package=<4>
 
 ###############################################################################
 
-Project: "hxcfe_cmd"=..\HxCFloppyEmulator_cmdline\trunk\build\hxcfe.dsp - Package Owner=<4> 
+Project: "libusbhxcfe"=..\libusbhxcfe\trunk\build\libusbhxcfe.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "hxcfe"=..\HxCFloppyEmulator_cmdline\trunk\build\hxcfe.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -51,7 +63,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "vfd lib"=..\vfd_hxc\trunk\src\lib\vfdlib.dsp - Package Owner=<4>
+Project: "lib"=..\vfd_hxc\trunk\src\lib\vfdlib.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -63,7 +75,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "vfd gui"=..\vfd_hxc\trunk\src\gui\vfdwin.dsp - Package Owner=<4>
+Project: "gui"=..\vfd_hxc\trunk\src\gui\vfdwin.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -75,7 +87,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ADFOpus ADFLib staticlib"=..\AdfOpus_hxc\trunk\ADFOpusSrc\ADFLib\staticlib.dsp - Package Owner=<4>
+Project: "staticlib"=..\AdfOpus_hxc\trunk\ADFOpusSrc\ADFLib\staticlib.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -87,7 +99,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ADFOpus xDMS"=..\AdfOpus_hxc\trunk\ADFOpusSrc\xdms\xDMS.dsp - Package Owner=<4>
+Project: "xDMS"=..\AdfOpus_hxc\trunk\ADFOpusSrc\xdms\xDMS.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -96,10 +108,9 @@ Package=<5>
 Package=<4>
 {{{
 }}}
-
 ###############################################################################
 
-Project: "ADFOpus zLib"=..\AdfOpus_hxc\trunk\ADFOpusSrc\Zlib\Zlib.dsp - Package Owner=<4>
+Project: "Zlib"=..\AdfOpus_hxc\trunk\ADFOpusSrc\Zlib\Zlib.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
