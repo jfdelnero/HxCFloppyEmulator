@@ -72,7 +72,7 @@
 extern "C"
 {
 	#include "libhxcfe.h"
-	#include "../usb_floppyemulator/usb_hxcfloppyemulator.h"
+	#include "usb_hxcfloppyemulator.h"
 }
 
 
