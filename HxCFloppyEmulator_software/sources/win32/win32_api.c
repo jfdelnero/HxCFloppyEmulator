@@ -28,7 +28,7 @@
 #include <stdio.h>
 
 #include "libhxcfe.h"
-#include "usb_floppyemulator/usb_hxcfloppyemulator.h"
+#include "usb_hxcfloppyemulator.h"
 
 #include "win32_api.h"
 
@@ -40,7 +40,7 @@ DWORD WINAPI ThreadProc( LPVOID lpParameter)
 	threadinit *threadinitptr;
 	THREADFUNCTION thread;
 	HXCFLOPPYEMULATOR* floppycontext;
-	HWINTERFACE* hw_context;
+	USBHXCFE * hw_context;
 
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 
