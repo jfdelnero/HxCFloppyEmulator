@@ -35,6 +35,7 @@
 #include <time.h>
 
 #include "libhxcfe.h"
+#include "usb_hxcfloppyemulator.h"
 
 int verbose;
 
@@ -156,8 +157,11 @@ void printhelp(char* argv[])
 	printf("  -interfacelist\t\t: Floppy interfaces mode list [INTERFACE_MODE]\n");
 	printf("  -finput:[filename]\t\t: Input file image \n");
 	printf("  -conv:[FORMAT] \t\t: Convert the input file\n");
+	printf("  -usb:[DRIVE] \t\t: start the usb floppy emulator\n");
 	printf("  -infos\t\t\t: Print informations about the input file\n");
 	printf("  -ifmode:[INTERFACE_MODE]\t: Select the floppy interface mode\n");
+	printf("  -singlestep\t: Force the single step mode\n");
+	printf("  -doublestep\t: Force the double step mode\n");
 	printf("\n");
 }
 
@@ -280,6 +284,78 @@ int convertfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char * outfile,char * out
 	return 0;
 }
 
+int usbload(HXCFLOPPYEMULATOR* hxcfe,char * infile,int drive,int doublestep,int ifmode)
+{
+	int loaderid;
+	int ret;
+	FLOPPY * floppydisk;
+	USBHXCFE * usbfe;
+
+	printf("Starting usb emulation - %s\n",infile);
+
+	usbfe=libusbhxcfe_init(hxcfe);
+	if(usbfe)
+	{			
+		loaderid=hxcfe_autoSelectLoader(hxcfe,infile,0);
+		if(loaderid>=0)
+		{
+			floppydisk=hxcfe_floppyLoad(hxcfe,infile,loaderid,&ret);
+				
+			if(ret!=HXCFE_NOERROR || !floppydisk)
+			{
+				switch(ret)
+				{
+					case HXCFE_UNSUPPORTEDFILE:
+						printf("Load error!: Image file not yet supported!\n");
+					break;
+					case HXCFE_FILECORRUPTED:
+						printf("Load error!: File corrupted ? Read error ?\n");
+					break;
+					case HXCFE_ACCESSERROR:
+						printf("Load error!:  Read file error!\n");
+					break;
+					default:
+						printf("Load error! error %d\n",ret);
+					break;
+				}
+			}
+			else
+			{
+				if(ifmode<0)
+				{
+					ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
+				}
+
+				if(doublestep<0)
+				{
+					doublestep=hxcfe_floppyGetDoubleStep(hxcfe,floppydisk);
+				}
+
+				drive=drive&3;
+				libusbhxcfe_setInterfaceMode(hxcfe,usbfe,ifmode,doublestep,drive);
+				libusbhxcfe_loadFloppy(hxcfe,usbfe,floppydisk);
+
+				printf("Interface mode : %s\n",hxcfe_getFloppyInterfaceModeName(hxcfe,ifmode));
+				printf("Select line : %d\n",drive);
+				printf("Double Step : %s\n",doublestep?"yes":"no");
+
+				printf("type q and enter to quit\n");
+				do
+				{
+				}while(getchar()!='q');
+
+				libusbhxcfe_ejectFloppy(hxcfe,usbfe);
+					
+				libusbhxcfe_deInit(hxcfe,usbfe);
+				hxcfe_floppyUnload(hxcfe,floppydisk);
+			}
+		}
+	}
+
+	return 0;
+}
+
+
 int infofile(HXCFLOPPYEMULATOR* hxcfe,char * infile)
 {
 	int loaderid;
@@ -348,12 +424,13 @@ int main(int argc, char* argv[])
 	char outputformat[512];
 	char temp[512];
 	int loaderid;
-
 	int interfacemode;
+	int doublestep;
 
 	HXCFLOPPYEMULATOR* hxcfe;
 
 	verbose=0;
+	doublestep=-1;
 
 	hxcfe=hxcfe_init();
 	hxcfe_setOutputFunc(hxcfe,&CUI_affiche);
@@ -421,9 +498,7 @@ int main(int argc, char* argv[])
 			hxcfe_deinit(hxcfe);
 			return -1;
 		}
-
 	}
-
 
 	if(isOption(argc,argv,"infos",0)>0)
 	{
@@ -453,12 +528,28 @@ int main(int argc, char* argv[])
 		convertfile(hxcfe,filename,ofilename,outputformat,interfacemode);
 	}
 
+	if(isOption(argc,argv,"singlestep",0)>0)
+	{
+		doublestep=0;
+	}
+
+	if(isOption(argc,argv,"doublestep",0)>0)
+	{
+		doublestep=0xFF;
+	}
+
+	// Input file name option
+	if(isOption(argc,argv,"usb",(char*)&temp)>0)
+	{
+		usbload(hxcfe,filename,temp[0]-'0',doublestep,interfacemode);
+	}
 
 	if( (isOption(argc,argv,"help",0)<=0) && 
 		(isOption(argc,argv,"license",0)<=0) &&
 		(isOption(argc,argv,"modulelist",0)<=0) &&
 		(isOption(argc,argv,"interfacelist",0)<=0) &&
 		(isOption(argc,argv,"conv",0)<=0) &&
+		(isOption(argc,argv,"usb",0)<=0) &&
 		(isOption(argc,argv,"infos",0)<=0 )
 		)
 	{
