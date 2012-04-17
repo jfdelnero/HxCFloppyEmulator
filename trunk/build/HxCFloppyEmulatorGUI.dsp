@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir "..\..\..\build\"
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /GX /Os /Ob2 /I "..\sources" /I "..\sources\usb_floppyemulator\win32" /I "..\sources\gui" /I "..\sources\thirdpartylibs\fltk\fltk-1.3.x\\" /I "..\..\..\libhxcfe\trunk\sources" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /FR /FD /c
+# ADD CPP /nologo /MD /GX /Os /Ob2 /I "..\sources" /I "..\sources\usb_floppyemulator\win32" /I "..\sources\gui" /I "..\sources\thirdpartylibs\fltk\fltk-1.3.x\\" /I "..\..\..\libhxcfe\trunk\sources" /I "..\..\..\libusbhxcfe\trunk\sources" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /FR /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40c /d "NDEBUG"
@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 winmm.lib fltk.lib comctl32.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib libhxcfe.lib /nologo /subsystem:windows /machine:I386 /nodefaultlib:"libcd" /libpath:"..\sources\thirdpartylibs\fltk\fltk-1.3.x\lib" /libpath:"..\..\..\build"
+# ADD LINK32 winmm.lib fltk.lib comctl32.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib libhxcfe.lib  libusbhxcfe.lib /nologo /subsystem:windows /machine:I386 /nodefaultlib:"libcd" /libpath:"..\sources\thirdpartylibs\fltk\fltk-1.3.x\lib" /libpath:"..\..\..\build"
 # SUBTRACT LINK32 /nodefaultlib
 
 !ELSEIF  "$(CFG)" == "HxCFloppyEmulatorGUI - Win32 Debug"
@@ -70,7 +70,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir "..\..\..\build\"
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\sources" /I "..\sources\usb_floppyemulator\win32" /I "..\sources\gui" /I "..\sources\thirdpartylibs\fltk\fltk-1.3.x\\" /I "..\..\..\libhxcfe\trunk\sources" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\sources" /I "..\sources\usb_floppyemulator\win32" /I "..\sources\gui" /I "..\sources\thirdpartylibs\fltk\fltk-1.3.x\\" /I "..\..\..\libhxcfe\trunk\sources" /I "..\..\..\libusbhxcfe\trunk\sources" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
@@ -81,7 +81,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 winmm.lib fltkd.lib comctl32.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib libhxcfe.lib /nologo /stack:0x186a0,0x186a0 /subsystem:windows /debug /machine:I386 /nodefaultlib:"libcd" /pdbtype:sept /libpath:"..\sources\thirdpartylibs\fltk\fltk-1.3.x\lib" /libpath:"..\..\..\build"
+# ADD LINK32 winmm.lib fltkd.lib comctl32.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib libhxcfe.lib  libusbhxcfe.lib /nologo /stack:0x186a0,0x186a0 /subsystem:windows /debug /machine:I386 /nodefaultlib:"libcd" /pdbtype:sept /libpath:"..\sources\thirdpartylibs\fltk\fltk-1.3.x\lib" /libpath:"..\..\..\build"
 
 !ENDIF 
 
@@ -318,42 +318,6 @@ SOURCE=..\sources\win32\win32_api.c
 # Begin Source File
 
 SOURCE=..\sources\win32_api.h
-# End Source File
-# End Group
-# Begin Group "FTDI_FloppyEmulator"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\sources\usb_floppyemulator\cpld_opcodes.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\sources\usb_floppyemulator\win32\ftdi.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\sources\usb_floppyemulator\win32\ftdi.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\sources\usb_floppyemulator\usb_hxcfloppyemulator.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\sources\usb_floppyemulator\usb_hxcfloppyemulator.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\sources\usb_floppyemulator\variablebitrate.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\sources\usb_floppyemulator\variablebitrate.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\sources\usb_floppyemulator\win32\ftd2xx.lib
 # End Source File
 # End Group
 # Begin Source File

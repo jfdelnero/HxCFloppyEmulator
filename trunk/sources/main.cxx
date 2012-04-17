@@ -66,7 +66,7 @@
 extern "C"
 {
 	#include "libhxcfe.h"
-	#include "../usb_floppyemulator/usb_hxcfloppyemulator.h"
+	#include "usb_hxcfloppyemulator.h"
 }
 
 #include "gui_struct.h"
@@ -82,7 +82,7 @@ extern "C"
 
 HXCFLOPPYEMULATOR * flopemu;
 FLOPPY * thefloppydisk;
-HWINTERFACE * hwif;
+USBHXCFE * usbhxcfe;
 
 guicontext * gui_context;
 
@@ -109,10 +109,9 @@ int main(int argc, char **argv) {
 		thefloppydisk=0;
 		flopemu=hxcfe_init();
 		hxcfe_setOutputFunc(flopemu,CUI_affiche);
-		hwif=(HWINTERFACE *)malloc(sizeof(HWINTERFACE));
-		memset(hwif,0,sizeof(HWINTERFACE));
-		HW_CPLDFloppyEmulator_init(flopemu,hwif);
-
+		
+		usbhxcfe=libusbhxcfe_init(flopemu);
+		
 		Main_Window * mw;
 		mw=new Main_Window();
 

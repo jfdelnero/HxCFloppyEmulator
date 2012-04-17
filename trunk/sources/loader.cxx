@@ -52,16 +52,17 @@
 extern "C"
 {
 	#include "libhxcfe.h"
-	#include "./usb_floppyemulator/usb_hxcfloppyemulator.h"
+	#include "usb_hxcfloppyemulator.h"
 //	#include "../../common/plugins/raw_loader/raw_loader.h"
 }
 
 #include "loader.h"
 
 extern HXCFLOPPYEMULATOR * flopemu;
+extern USBHXCFE * usbhxcfe;
+
 extern FLOPPY * thefloppydisk;
 extern guicontext * gui_context;
-extern HWINTERFACE * hwif;
 
 extern track_type track_type_list[];
 
@@ -87,11 +88,13 @@ int load_floppy(FLOPPY * floppydisk)
 	}
 	else
 	{
-		oldifmode=hwif->interface_mode;
-		InjectFloppyImg(flopemu,thefloppydisk,hwif);
+		oldifmode=libusbhxcfe_getInterfaceMode(flopemu,usbhxcfe);
+		libusbhxcfe_setInterfaceMode(flopemu,usbhxcfe,thefloppydisk->floppyiftype,thefloppydisk->double_step,0);
+		libusbhxcfe_loadFloppy(flopemu,usbhxcfe,thefloppydisk);
+
 		if(!gui_context->autoselectmode)
 		{	// keep the old interface mode
-			hwif->interface_mode=oldifmode;
+			//hwif->interface_mode=oldifmode;
 		};
 
 		sprintf(gui_context->bufferfilename,"Floppy Dump");
@@ -126,11 +129,13 @@ int load_floppy_image(char *filename)
 	}
 	else
 	{	
-		oldifmode=hwif->interface_mode;
-		InjectFloppyImg(flopemu,thefloppydisk,hwif);
+//		oldifmode=hwif->interface_mode;
+
+		libusbhxcfe_setInterfaceMode(flopemu,usbhxcfe,thefloppydisk->floppyiftype,thefloppydisk->double_step,0);
+		libusbhxcfe_loadFloppy(flopemu,usbhxcfe,thefloppydisk);
 		if(!gui_context->autoselectmode)
 		{	// keep the old interface mode
-			hwif->interface_mode=oldifmode;
+			//hwif->interface_mode=oldifmode;
 		};
 			
 		if(filename)
@@ -243,11 +248,12 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 
 		gui_context->loadstatus=ret;
 
-		oldifmode=hwif->interface_mode;
-		InjectFloppyImg(flopemu,thefloppydisk,hwif);
+		//oldifmode=hwif->interface_mode;
+		libusbhxcfe_setInterfaceMode(flopemu,usbhxcfe,thefloppydisk->floppyiftype,thefloppydisk->double_step,0);
+		libusbhxcfe_loadFloppy(flopemu,usbhxcfe,thefloppydisk);
 		if(!gui_context->autoselectmode)
 		{	// keep the old interface mode
-			hwif->interface_mode=oldifmode;
+			//hwif->interface_mode=oldifmode;
 		};
 
 		if(f)

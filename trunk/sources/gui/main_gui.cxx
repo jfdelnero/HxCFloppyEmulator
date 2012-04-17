@@ -92,7 +92,7 @@
 extern "C"
 {
 	#include "libhxcfe.h"
-	#include "./usb_floppyemulator/usb_hxcfloppyemulator.h"
+	#include "usb_hxcfloppyemulator.h"
 	#include "version.h"
 }
 
@@ -113,7 +113,7 @@ Fl_Box *box = (Fl_Box*)0;
 extern FLOPPY * thefloppydisk;
 extern HXCFLOPPYEMULATOR * flopemu;
 extern guicontext * gui_context;
-extern HWINTERFACE * hwif;
+extern USBHXCFE * usbhxcfe;
 int backlight_tmr,standby_tmr,step_sound,ui_sound,lcd_scroll;
 unsigned int txtindex;
 
@@ -649,16 +649,13 @@ static void tick_mw(void *v) {
 			
 	if(thefloppydisk)
 	{
-		if(hwif)
-		{
-			sprintf(tempstr,"Track %d/%d",hwif->current_track,thefloppydisk->floppyNumberOfTrack);
-			window->track_pos_str->value((const char*)tempstr);
+		sprintf(tempstr,"Track %d/%d",libusbhxcfe_getCurTrack(flopemu,usbhxcfe),thefloppydisk->floppyNumberOfTrack);
 
-			window->track_pos->minimum(0);
-
-			window->track_pos->maximum(thefloppydisk->floppyNumberOfTrack);
-			window->track_pos->value((float)hwif->current_track);
-		}
+		window->track_pos_str->value((const char*)tempstr);
+		window->track_pos->minimum(0);
+		window->track_pos->maximum(thefloppydisk->floppyNumberOfTrack);
+		window->track_pos->value((float)libusbhxcfe_getCurTrack(flopemu,usbhxcfe));
+		
 	}
 
 	Fl::repeat_timeout(0.10, tick_mw, v);

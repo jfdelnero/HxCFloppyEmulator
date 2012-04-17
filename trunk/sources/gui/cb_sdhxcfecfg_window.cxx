@@ -54,14 +54,12 @@
 extern "C"
 {
 	#include "libhxcfe.h"
-	#include "../usb_floppyemulator/usb_hxcfloppyemulator.h"
+	#include "usb_hxcfloppyemulator.h"
 }
 
 #include "loader.h"
 
 extern HXCFLOPPYEMULATOR * flopemu;
-extern HWINTERFACE * hwif;
-
 
 unsigned char filebuffer[8*1024];
 

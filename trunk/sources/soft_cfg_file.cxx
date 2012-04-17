@@ -12,7 +12,7 @@
 #include "soft_cfg_file.h"
 
 #include "libhxcfe.h"
-#include "./usb_floppyemulator/usb_hxcfloppyemulator.h"
+#include "usb_hxcfloppyemulator.h"
 
 typedef struct laststate_
 {
@@ -25,8 +25,7 @@ typedef struct laststate_
 }laststate;
 
 
-extern HWINTERFACE * hwif;
-//extern guicontext * demo;
+//extern HWINTERFACE * hwif;
 extern guicontext * gui_context;
 unsigned char cfg_file_buffer[4*1024];
 
@@ -61,16 +60,16 @@ int load_last_cfg()
 		fread(lastst,sizeof(cfg_file_buffer),1,f);
 		fclose(f);
 
-		hwif->usbstats.packetsize=lastst->usb_packet_size;
-		hwif->drive_select_source=lastst->drive_select_source;
-		hwif->interface_mode=lastst->interface_mode;
-		hwif->double_step=lastst->double_step;
+//		hwif->usbstats.packetsize=lastst->usb_packet_size;
+//		hwif->drive_select_source=lastst->drive_select_source;
+//		hwif->interface_mode=lastst->interface_mode;
+//		hwif->double_step=lastst->double_step;
 		gui_context->autoselectmode=lastst->autoselectmode;
 		gui_context->twistedcable=lastst->twistedcable;
 	}
 	else
 	{
-		hwif->usbstats.packetsize=1792;
+		//hwif->usbstats.packetsize=1792;
 	}
 	return 0;
 };
@@ -104,12 +103,12 @@ int save_cfg()
 	f=fopen(executablepath,"wb");
 	if(f)
 	{
-		lastst->usb_packet_size=hwif->usbstats.packetsize;
-		lastst->drive_select_source=hwif->drive_select_source;
-		lastst->interface_mode=hwif->interface_mode;
-		lastst->autoselectmode=gui_context->autoselectmode;
-		lastst->twistedcable=gui_context->twistedcable;
-		lastst->double_step=hwif->double_step;
+	//	lastst->usb_packet_size=hwif->usbstats.packetsize;
+	//	lastst->drive_select_source=hwif->drive_select_source;
+	//	lastst->interface_mode=hwif->interface_mode;
+	//	lastst->autoselectmode=gui_context->autoselectmode;
+	//	lastst->twistedcable=gui_context->twistedcable;
+	//	lastst->double_step=hwif->double_step;
 		fwrite(lastst,sizeof(cfg_file_buffer),1,f);
 		fclose(f);
 	}

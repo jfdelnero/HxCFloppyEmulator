@@ -54,13 +54,13 @@
 extern "C"
 {
 	#include "libhxcfe.h"
-	#include "../usb_floppyemulator/usb_hxcfloppyemulator.h"
+	#include "usb_hxcfloppyemulator.h"
 }
 
 #include "loader.h"
 
 extern HXCFLOPPYEMULATOR * flopemu;
-extern HWINTERFACE * hwif;
+extern USBHXCFE * usbhxcfe;
 
 
 /*platform platformlist[]=
@@ -87,43 +87,46 @@ void tick_usb(void *v) {
 	unsigned long datathroughput;
 	unsigned long period;
 	float packetpersecond;
+	USBStats stats;
+	int status;
 	usbhxcfecfg_window *window;
 	
 	window=(usbhxcfecfg_window *)v;
 	
-	sprintf(tempstr,"%d (%d p/s)",hwif->usbstats.totalpacketsent,hwif->usbstats.packetsent);
-	hwif->usbstats.packetsent=0;
+	status=libusbhxcfe_getStats(flopemu,usbhxcfe,&stats,0);
+
+	sprintf(tempstr,"%d (%d p/s)",stats.totalpacketsent,stats.packetsent);
+	stats.packetsent=0;
 	window->strout_packetsent->value((const char*)tempstr);				
 			
-	window->valout_synclost->value(hwif->usbstats.synclost);
+	window->valout_synclost->value(stats.synclost);
 
-	if(hwif->usbstats.totaldataout<(1024*1024))
+	if(stats.totaldataout<(1024*1024))
 	{			
-		sprintf(tempstr,"%d bytes",hwif->usbstats.totaldataout);
+		sprintf(tempstr,"%d bytes",stats.totaldataout);
 	}
 	else
 	{
-		if(hwif->usbstats.totaldataout<(1024*1024*1024))
+		if(stats.totaldataout<(1024*1024*1024))
 		{
-			sprintf(tempstr,"%4.2f MB",(float)(hwif->usbstats.totaldataout)/(float)(1024*1024));
+			sprintf(tempstr,"%4.2f MB",(float)(stats.totaldataout)/(float)(1024*1024));
 		}
 		else
 		{
-			sprintf(tempstr,"%4.2f GB",(float)(hwif->usbstats.totaldataout)/(float)(1024*1024*1024));
+			sprintf(tempstr,"%4.2f GB",(float)(stats.totaldataout)/(float)(1024*1024*1024));
 		}				
 	}
 	window->strout_datasent->value((const char*)tempstr);
 				
 				
-	datathroughput=hwif->usbstats.dataout;
-	sprintf(tempstr,"%d bytes/second",hwif->usbstats.dataout);
+	datathroughput=stats.dataout;
+	sprintf(tempstr,"%d bytes/second",stats.dataout);
 	window->strout_datathroughput->value((const char*)tempstr);
-	hwif->usbstats.dataout=0;
 				
 				
-	if(hwif->usbstats.packetsize)
+	if(stats.packetsize)
 	{
-		packetpersecond=(float)datathroughput/(float)hwif->usbstats.packetsize;
+		packetpersecond=(float)datathroughput/(float)stats.packetsize;
 		if(packetpersecond)
 		{
 			period=(unsigned long)(1000/(float)packetpersecond);
@@ -140,170 +143,75 @@ void tick_usb(void *v) {
 	sprintf(tempstr,"%d ms",period);
 	window->strout_minsettletime->value((const char*)tempstr);
 
-
-	if(hwif)
+	switch(status)
 	{
-		switch(hwif->status)
-		{
-			case STATUS_ERROR:
-				window->strout_usbhfestatus->value((const char*)"FTDI D2XX Driver not installed!");
-			break;
+		case STATUS_ERROR:
+			window->strout_usbhfestatus->value((const char*)"FTDI D2XX Driver not installed!");
+		break;
 
-			case STATUS_LOOKINGFOR:
-				window->strout_usbhfestatus->value((const char*)"USB HxC Floppy Emulator not detected!");
-			break;
+		case STATUS_LOOKINGFOR:
+			window->strout_usbhfestatus->value((const char*)"USB HxC Floppy Emulator not detected!");
+		break;
 
-			case STATUS_ONLINE:
-				window->strout_usbhfestatus->value((const char*)"USB HxC Floppy Emulator ready!");
-			break;
+		case STATUS_ONLINE:
+			window->strout_usbhfestatus->value((const char*)"USB HxC Floppy Emulator ready!");
+		break;
 
-			default:
-				window->strout_usbhfestatus->value((const char*)"Unknow status !");
-			break;
+		default:
+			window->strout_usbhfestatus->value((const char*)"Unknow status !");
+		break;
 					
-		}
+	}
 
-		switch(hwif->drive_select_source&0x3)
-		{
-			case 0:
-				window->rbt_ds0->set();
-				window->rbt_ds1->clear();
-				window->rbt_ds2->clear();
-				window->rbt_ds3->clear();
 
-			break;
-			case 1:
-				window->rbt_ds0->clear();
-				window->rbt_ds1->set();
-				window->rbt_ds2->clear();
-				window->rbt_ds3->clear();
-			break;
-			case 2:
-				window->rbt_ds0->clear();
-				window->rbt_ds1->clear();
-				window->rbt_ds2->set();
-				window->rbt_ds3->clear();
-			break;
-			case 3:
-				window->rbt_ds0->clear();
-				window->rbt_ds1->clear();
-				window->rbt_ds2->clear();
-				window->rbt_ds3->set();
-			break;
-		}
+	switch( libusbhxcfe_getDrive(flopemu,usbhxcfe) & 0x3 )
+	{
+		case 0:
+			window->rbt_ds0->set();
+			window->rbt_ds1->clear();
+			window->rbt_ds2->clear();
+			window->rbt_ds3->clear();
+		break;
+
+		case 1:
+			window->rbt_ds0->clear();
+			window->rbt_ds1->set();
+			window->rbt_ds2->clear();
+			window->rbt_ds3->clear();
+		break;
+		
+		case 2:
+			window->rbt_ds0->clear();
+			window->rbt_ds1->clear();
+			window->rbt_ds2->set();
+			window->rbt_ds3->clear();
+		break;
+		case 3:
+			window->rbt_ds0->clear();
+			window->rbt_ds1->clear();
+			window->rbt_ds2->clear();
+			window->rbt_ds3->set();
+		break;
+	}
 			
-		if(hwif->drive_select_source>3)
-		{
-			window->chk_disabledrive->set();
-		}
-		else
-		{
-			window->chk_disabledrive->clear();
-		}
-/*
-		if(demo->autoselectmode)
-		{
-			SendDlgItemMessage(hwndDlg,IDC_AUTO_USB,BM_SETCHECK,BST_CHECKED,0);
-			i=0;
-			j=0;
-			do
-			{
-				if(hwif->interface_mode==platformlist[i].id)
-				{
-					j=i;
-				}
-				i++;
-			}while(platformlist[i].id!=-1);
-				
-			EnableWindow(GetDlgItem(hwndDlg, IDC_COMBO_USBIFMODE),FALSE);
-				
-			if(!demo->twistedcable)
-			{
-				SendDlgItemMessage(hwndDlg,IDC_TWISTED,BM_SETCHECK,BST_UNCHECKED,0);
-				SetDlgItemText(hwndDlg,IDC_RADIO_DS0,platformlist[j].selectline0_name);
-				SetDlgItemText(hwndDlg,IDC_RADIO_DS1,platformlist[j].selectline1_name);
-				SetDlgItemText(hwndDlg,IDC_RADIO_DS2,platformlist[j].selectline2_name);
-				SetDlgItemText(hwndDlg,IDC_RADIO_DS3,platformlist[j].selectline3_name);
-			}
-			else
-			{
-				SendDlgItemMessage(hwndDlg,IDC_TWISTED,BM_SETCHECK,BST_CHECKED,0);
-				SetDlgItemText(hwndDlg,IDC_RADIO_DS0,platformlist[j].selectline3_name);
-				SetDlgItemText(hwndDlg,IDC_RADIO_DS1,platformlist[j].selectline2_name);
-				SetDlgItemText(hwndDlg,IDC_RADIO_DS2,platformlist[j].selectline1_name);
-				SetDlgItemText(hwndDlg,IDC_RADIO_DS3,platformlist[j].selectline0_name);
-			}
-
-			i=0;
-			do
-			{
-				SendDlgItemMessage(hwndDlg,IDC_COMBO_USBIFMODE,  CB_GETLBTEXT, (WORD)i, (LONG)tempstr);
-				
-				if(!strcmp(tempstr,platformlist[j].name))
-				{
-					SendDlgItemMessage(hwndDlg, IDC_COMBO_USBIFMODE, CB_SETCURSEL, i, 0);
-				}
-				i++;
-			}while(platformlist[i].id!=-1);
-	
-		}
-		else
-		{
-			SendDlgItemMessage(hwndDlg,IDC_AUTO_USB,BM_SETCHECK,BST_UNCHECKED,0);
-			EnableWindow(GetDlgItem(hwndDlg, IDC_COMBO_USBIFMODE),TRUE);
-			i=0;
-			do
-			{
-				i++;
-			}while(platformlist[i].id!=-1 && (platformlist[i].id!=hwif->interface_mode));
-				
-			if(!demo->twistedcable)
-			{
-				SendDlgItemMessage(hwndDlg,IDC_TWISTED,BM_SETCHECK,BST_UNCHECKED,0);
-				SetDlgItemText(hwndDlg,IDC_RADIO_DS0,platformlist[i].selectline0_name);
-				SetDlgItemText(hwndDlg,IDC_RADIO_DS1,platformlist[i].selectline1_name);
-				SetDlgItemText(hwndDlg,IDC_RADIO_DS2,platformlist[i].selectline2_name);
-				SetDlgItemText(hwndDlg,IDC_RADIO_DS3,platformlist[i].selectline3_name);
-			}
-			else
-			{
-				SendDlgItemMessage(hwndDlg,IDC_TWISTED,BM_SETCHECK,BST_CHECKED,0);
-				SetDlgItemText(hwndDlg,IDC_RADIO_DS0,platformlist[i].selectline3_name);
-				SetDlgItemText(hwndDlg,IDC_RADIO_DS1,platformlist[i].selectline2_name);
-				SetDlgItemText(hwndDlg,IDC_RADIO_DS2,platformlist[i].selectline1_name);
-				SetDlgItemText(hwndDlg,IDC_RADIO_DS3,platformlist[i].selectline0_name);
-			}
-
-			j=SendDlgItemMessage(hwndDlg, IDC_COMBO_USBIFMODE, CB_GETCURSEL, 0, 0);
-			SendDlgItemMessage(hwndDlg,IDC_COMBO_USBIFMODE,  CB_GETLBTEXT, (WORD)j, (LONG)tempstr);
-
-			i=0;
-			do
-			{
-				if(!strcmp(tempstr,platformlist[i].name))
-				{		
-					hwif->interface_mode=platformlist[i].id;
-				}
-				i++;
-			}while(platformlist[i].id!=-1);
-				
-		}
-
-		*/
-		if(hwif->double_step)
-		{
-			window->chk_doublestep->set();
-		}
-		else
-		{
-			window->chk_doublestep->clear();
-		}
-
+	if( libusbhxcfe_getDrive(flopemu,usbhxcfe) >3)
+	{
+		window->chk_disabledrive->set();
 	}
 	else
 	{
-		window->strout_usbhfestatus->value((const char*)"Hardware-software interface not initialized");
+		window->chk_disabledrive->clear();
 	}
+
+	if(libusbhxcfe_getDoubleStep(flopemu,usbhxcfe))
+	{
+		window->chk_doublestep->set();
+	}
+	else
+	{
+		window->chk_doublestep->clear();
+	}
+
 
 	Fl::repeat_timeout(0.50, tick_usb, v);
 }
