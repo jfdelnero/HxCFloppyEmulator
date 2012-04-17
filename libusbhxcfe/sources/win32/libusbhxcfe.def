@@ -1,0 +1,12 @@
+LIBRARY   LIBUSBHXCFE
+EXPORTS
+	libusbhxcfe_init				@1	
+	libusbhxcfe_deInit				@2
+	libusbhxcfe_loadFloppy			@3
+	libusbhxcfe_ejectFloppy			@4
+	libusbhxcfe_getStats			@5
+	libusbhxcfe_setInterfaceMode	@6
+	libusbhxcfe_getInterfaceMode	@7
+	libusbhxcfe_getDoubleStep		@8
+	libusbhxcfe_getDrive			@9
+	libusbhxcfe_getCurTrack			@10
