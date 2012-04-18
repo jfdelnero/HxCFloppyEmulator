@@ -246,9 +246,12 @@ int BuildEmuIITrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,un
 
 		if((j/8)<=current_buffer_size)
 		{	
-			for(i=(j/8);i<(current_buffer_size+1);i++)
+			for(i=j;i<(current_buffer_size*8);i=i+8)
 			{	
-				setbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,8);
+				if(j+8<(current_buffer_size*8))
+					setbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,8);
+				else
+					setbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,(current_buffer_size*8)-j);
 			}
 		}
 
