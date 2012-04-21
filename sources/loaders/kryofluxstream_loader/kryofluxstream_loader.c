@@ -367,7 +367,7 @@ void quickSort(s_match * table, int start, int end)
 char* AnalyzeAndFoundOverLap(HXCFLOPPYEMULATOR* floppycontext,s_track_dump* td,int centralvalue,int *start,int *end)
 {
 	#define NUMBEROFTRY 1024
-	#define PERCENTERROR 5
+	#define PERCENTERROR 15
 
 	unsigned char * valid_page1;
 	int time1,time2;
@@ -550,10 +550,10 @@ SIDE* ScanAndDecodeStream(int initalvalue,unsigned long * track,char * flakey,in
 
 		settrackbit(outtrack,0xFF,bitoffset,1);
 
-		/*if(flakey[i]<0)
-			settrackbit(flakeytrack,0xFF,bitoffset,1);*/
+		if(flakey[i]<0)
+			settrackbit(flakeytrack,0xFF,bitoffset,1);
 
-		//trackbitrate[bitoffset>>3]=(int)(24027428/pumpcharge);
+		trackbitrate[bitoffset>>3]=(int)(24027428/pumpcharge);
 
 		i++;
 	}while(i<size);
@@ -573,7 +573,7 @@ SIDE* ScanAndDecodeStream(int initalvalue,unsigned long * track,char * flakey,in
 		j=0;
 		while(i+j<size && j<256)
 		{
-			//trackbitrate[i+j] = bitrate;
+			trackbitrate[i+j] = bitrate;
 			j++;
 		}
 
@@ -582,7 +582,7 @@ SIDE* ScanAndDecodeStream(int initalvalue,unsigned long * track,char * flakey,in
 	}while(i<size);
 
 	bitrate=(int)( 24027428 / centralvalue );
-	hxcfe_track = tg_alloctrack(bitrate,ISOFORMAT_DD,rpm,bitoffset,2500,0,TG_ALLOCTRACK_ALLOCFLAKEYBUFFER|TG_ALLOCTRACK_ALLOCTIMIMGBUFFER);
+	hxcfe_track = tg_alloctrack(bitrate,ISOFORMAT_DD,rpm,bitoffset,3000,-3000,TG_ALLOCTRACK_ALLOCFLAKEYBUFFER|TG_ALLOCTRACK_ALLOCTIMIMGBUFFER);
 	
 	if(bitoffset&7)
 	{
@@ -616,9 +616,9 @@ SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,floa
 	
 	char * flakeytab;
 	int start,end;
-
-	int i,j;
 	s_track_dump *track_dump;
+	//int i,j;
+	
 #ifdef KFSTREAMDBG
 	floppycontext->hxc_printf(MSG_DEBUG,"decodestream %s",file);
 #endif

@@ -1094,7 +1094,8 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			}
 			
 		}
-			
+
+
 		for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
 		{
 			if(floppydisk->tracks[i])
@@ -1119,7 +1120,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				memset(floppydisk->tracks[i],0,sizeof(CYLINDER));
 				floppydisk->tracks[i]->floppyRPM=300;
 				currentcylinder=floppydisk->tracks[i];
-				currentcylinder->number_of_side=2;
+				currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
 					
 				currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*2);
 				memset(currentcylinder->sides,0,sizeof(SIDE*)*2);

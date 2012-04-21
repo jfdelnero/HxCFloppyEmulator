@@ -1504,6 +1504,14 @@ SOURCE=..\sources\loaders\kryofluxstream_loader\kryofluxstream_loader.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\sources\tracks\display_track.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\display_track.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\tracks\emuii_track.c
 # End Source File
 # Begin Source File

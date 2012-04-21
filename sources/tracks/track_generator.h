@@ -68,6 +68,7 @@ typedef struct SECTORCONFIG_
 
 	unsigned long startsectorindex;
 	unsigned long startdataindex;
+	unsigned long endsectorindex;
 
 	unsigned char  trackencoding;
 

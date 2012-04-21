@@ -57,3 +57,6 @@ EXPORTS
    hxcfe_freeSectorConfig		@106
    hxcfe_deinitSectorSearch		@107
    
+   hxcfe_td_init				@120
+   hxcfe_td_draw_track			@121
+   hxcfe_td_deinit				@122
