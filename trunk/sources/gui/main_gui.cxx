@@ -77,6 +77,7 @@
 #include "batch_converter_window.h"
 #include "filesystem_generator_window.h"
 #include "floppy_dump_window.h"
+#include "floppy_infos_window.h"
 #include "rawfile_loader_window.h"
 #include "sdhxcfecfg_window.h"
 #include "usbhxcfecfg_window.h"
@@ -103,6 +104,7 @@ extern "C"
 #include "mainrouts.h"
 
 #include "cb_floppy_dump_window.h"
+#include "cb_floppy_infos_window.h"
 
 Fl_File_Browser		*files;
 Fl_Shared_Image		*image = 0;
@@ -119,6 +121,7 @@ unsigned int txtindex;
 
 extern int xsize,ysize;
 extern unsigned char*mapfloppybuffer;
+extern unsigned char*floppyinfobuffer;
 
 typedef struct main_button_list_
 {
@@ -194,6 +197,10 @@ void menu_clicked(Fl_Widget * w, void * fc_ptr)
 		case 9:
 			mw->about_window->show();
 		break;
+		case 10:
+			mw->infos_window->window->show();
+		break;
+
 	}
 
 }
@@ -391,6 +398,8 @@ Fl_Menu_Item menutable[] = {
     {"&Export disk/Save As",	FL_ALT+'e', save_file_image, 0},
     {"Batch convert files images",	FL_ALT+'o', menu_clicked,(void*)2},
 	{"Dump a Floppy disk",	FL_ALT+'o', menu_clicked,(void*)7},
+	{"Show floppy infos",	FL_ALT+'i', menu_clicked,(void*)10},
+
     {0},
   {"&Settings",FL_F+2,0,0,FL_SUBMENU},
     {"SDCard HxC FLoppy Emulator settings",	FL_ALT+'l',menu_clicked,(void*)5},
@@ -753,6 +762,16 @@ Main_Window::Main_Window()
 	memset(mapfloppybuffer,0,xsize*ysize*4);
 	tick_dump(this->fdump_window);
 	
+	this->infos_window=new floppy_infos_window();	
+	floppyinfobuffer=(unsigned char*)malloc(xsize*ysize*4);
+	memset(floppyinfobuffer,0,xsize*ysize*4);
+	tick_infos(this->infos_window);
+	//this->infos_window->x_offset->scrollvalue(0,0.05,0,1600);
+	this->infos_window->x_offset->bounds(0.0, 100);
+	this->infos_window->x_time->scrollvalue(300,1,1,1000);
+	this->infos_window->y_time->scrollvalue(16,1,2,64);
+
+
 	this->batchconv_window=new batch_converter_window();
 	batchconv_window->choice_file_format->menu(format_choices);
 	batchconv_window->choice_file_format->value(0);
