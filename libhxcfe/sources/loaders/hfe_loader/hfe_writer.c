@@ -185,6 +185,11 @@ int HFE_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	factor=1;// factor=1-> 50% duty cycle  // factor=2-> 25% duty cycle 
 	floppycontext->hxc_printf(MSG_INFO_1,"Write HFE file %s for the standalone emulator.",filename);
 
+	if(!floppy->floppyNumberOfTrack)
+	{
+		floppycontext->hxc_printf(MSG_ERROR,"Cannot create zero track HFE file");
+		return -1;
+	}
 	ramfile=0;
 	ramfile_size=0;
 	
@@ -281,7 +286,7 @@ int HFE_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 			i++;
 		};
 
-        rfwrite(offsettrack,512*tracklistlen,1,hxcpicfile);
+		rfwrite(offsettrack,512*tracklistlen,1,hxcpicfile);
 
 		i=0;
 		while(i<(FILEHEADER->number_of_track))
