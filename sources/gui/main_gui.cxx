@@ -87,6 +87,7 @@
 #include "soft_cfg_file.h"
 
 #include "fl_dnd_box.h"
+#include "fl_mouse_box.h"
 
 #include "win32\resource.h"
 
@@ -733,12 +734,11 @@ Main_Window::Main_Window()
 	Fl_Menu_Bar menubar(0,0,WINDOW_XSIZE,24); 
 	menubar.menu(menutable);
 
-// Fl_DND_Box is constructed with the same dimensions and at the same position as Fl_Scroll
+	// Fl_DND_Box is constructed with the same dimensions and at the same position as Fl_Scroll
 	Fl_DND_Box *o = new Fl_DND_Box(0, 0,WINDOW_XSIZE, 400, 0);
 	o->callback(dnd_cb);
-
-
 	end();
+
 	label(NOMFENETRE);
 	//show(argc, argv);
 	show();
@@ -749,6 +749,8 @@ Main_Window::Main_Window()
 
 	load_last_cfg();
 
+	//////////////////////////////////////////////
+	// Floppy dump window
 	this->fdump_window=new floppy_dump_window();
 	this->fdump_window->double_sided->value(1);
 	this->fdump_window->double_step->value(0);
@@ -762,24 +764,31 @@ Main_Window::Main_Window()
 	memset(mapfloppybuffer,0,xsize*ysize*4);
 	tick_dump(this->fdump_window);
 	
+	//////////////////////////////////////////////
+	// Floppy view window
 	this->infos_window=new floppy_infos_window();	
 	floppyinfobuffer=(unsigned char*)malloc(xsize*ysize*4);
 	memset(floppyinfobuffer,0,xsize*ysize*4);
 	tick_infos(this->infos_window);
-	//this->infos_window->x_offset->scrollvalue(0,0.05,0,1600);
 	this->infos_window->x_offset->bounds(0.0, 100);
 	this->infos_window->x_time->scrollvalue(300,1,1,1000);
 	this->infos_window->y_time->scrollvalue(16,1,2,64);
+	this->infos_window->track_view_bt->value(1);
 
-
+	//////////////////////////////////////////////
+	// Batch convert window
 	this->batchconv_window=new batch_converter_window();
 	batchconv_window->choice_file_format->menu(format_choices);
 	batchconv_window->choice_file_format->value(0);
 
+	//////////////////////////////////////////////
+	// File system window
 	this->fs_window=new filesystem_generator_window();
 	fs_window->choice_filesystype->menu(fs_choices);
 	fs_window->choice_filesystype->value(0);
 
+	//////////////////////////////////////////////
+	// Raw floppy window
 	this->rawloader_window=new rawfile_loader_window();
 	rawloader_window->choice_sectorsize->menu(sectorsize_choices);
 	rawloader_window->choice_sectorsize->value(2);
@@ -797,8 +806,13 @@ Main_Window::Main_Window()
 	rawloader_window->numin_interleave->value(1);
 	rawloader_window->numin_skew->value(0);
 	raw_loader_window_datachanged(rawloader_window->numin_skew, 0);
+
+	//////////////////////////////////////////////
+	// Log window
 	this->log_box=new Log_box();
 
+	//////////////////////////////////////////////
+	// SD FE CFG window
 	backlight_tmr=20;
 	standby_tmr=20;
 	lcd_scroll=150;
@@ -812,11 +826,15 @@ Main_Window::Main_Window()
 	sdcfg_window->slider_uisound_level->scrollvalue(ui_sound,1,0,128);
 	sdcfg_window->valslider_device_backlight_timeout->scrollvalue(backlight_tmr,1,0,256);
 	sdcfg_window->valslider_device_standby_timeout->scrollvalue(standby_tmr,1,0,256);
-	
+
+	//////////////////////////////////////////////
+	// USB FE CFG window
 	this->usbcfg_window=new usbhxcfecfg_window();
 	usbcfg_window->choice_ifmode->menu(if_choices);
 	usbcfg_window->slider_process_priority->scrollvalue(0,1,0,5);
 
+	//////////////////////////////////////////////
+	// About window
 	this->about_window=new About_box();
 
 	txtindex=0;
