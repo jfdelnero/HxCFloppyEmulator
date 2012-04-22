@@ -59,4 +59,6 @@ EXPORTS
    
    hxcfe_td_init				@120
    hxcfe_td_draw_track			@121
-   hxcfe_td_deinit				@122
+   hxcfe_td_draw_disk			@122
+   hxcfe_td_deinit				@123
+
