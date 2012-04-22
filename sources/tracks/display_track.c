@@ -55,6 +55,7 @@
 
 #include "display_track.h"
 
+#include "font.h"
 
 s_trackdisplay * hxcfe_td_init(HXCFLOPPYEMULATOR* floppycontext,unsigned long xsize,unsigned long ysize,unsigned long x_us,unsigned long y_us,unsigned long x_start_us)
 {
@@ -87,32 +88,133 @@ typedef struct s_col_
 }s_col;
 #pragma pack()
 
+
+struct s_sectorlist_ * getlastelement(struct s_sectorlist_ * element)
+{
+	while(element->next_element);//element->)
+	{
+		element=element->next_element;
+	}
+
+	return element;
+}
+
+struct s_sectorlist_ * addelement(struct s_sectorlist_ * element,void *object)
+{
+	while(element->next_element);//element->)
+	{
+		element=element->next_element;
+	}
+
+	element->next_element=malloc(sizeof(struct s_sectorlist_));
+	memset(element->next_element,0,sizeof(struct s_sectorlist_));
+
+	return element->next_element;
+}
+
+void freelist(struct s_sectorlist_ * element)
+{
+	struct s_sectorlist_ * nextelement;
+
+	nextelement=element->next_element;
+	free(element);
+	if(nextelement)
+		freelist(nextelement);
+	
+	return;
+}
+
 double getOffsetTiming(SIDE *currentside,int offset,double timingoffset,int start)
 {
-	int i,bitrate;
+	int i,j,bitrate;
 
 	i=start;
-	//timingoffset=0;
+	j=start%currentside->tracklen;
 
 	do
 	{
 		if(currentside->bitrate==VARIABLEBITRATE)
-			bitrate=currentside->timingbuffer[i>>3];
+			bitrate=currentside->timingbuffer[j>>3];
 		else
 			bitrate=currentside->bitrate;
 
 		timingoffset = timingoffset + ((double)(500000)/(double)bitrate);
 		i++;
+		j=(j+1)%currentside->tracklen;
 	}while(i<offset);
 
 	return timingoffset;
+}
+
+void putchar8x8(s_trackdisplay *td,int x_pos,int y_pos,unsigned char c,unsigned long color,int vertical)
+{
+	int charoffset;
+	int xpos,ypos;
+	int i,j;
+	s_col * col;
+
+	charoffset=(c&0x7F)*8;
+
+	for(j=0;j<8;j++) // y
+	{
+
+		for(i=0;i<8;i++) // x
+		{
+			if( font8x8[charoffset + j ] & (0x01<<(i&7)) )
+			{
+				if(vertical)
+				{
+					xpos=(x_pos + j);
+					ypos=(y_pos + (8-i));
+				}
+				else
+				{
+					xpos=(x_pos + i);
+					ypos=(y_pos + j);
+				}
+
+				if(xpos>=0 && xpos<td->xsize)
+				{
+					if(ypos>=0 && ypos<td->ysize)
+					{
+						col=(s_col *)&td->framebuffer[(td->xsize*ypos) + xpos];
+						col->blue=col->blue/2;
+						col->red=col->red/2;
+						col->green=col->green/2;
+					}
+				}
+			}
+		}
+	}
+}
+
+void putstring8x8(s_trackdisplay *td,int x_pos,int y_pos,unsigned char * str,unsigned long color,int vertical)
+{
+	int i;
+
+	i=0;
+
+	while(str[i])
+	{
+
+		if(vertical)
+		{
+			putchar8x8(td,x_pos,y_pos-(i*8),str[i],0x00000000,vertical);
+		}
+		else
+		{
+			putchar8x8(td,x_pos+(i*8),y_pos,str[i],0x00000000,vertical);
+		}
+		i++;
+	}
+
 }
 
 void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY * floppydisk,int track,int side,double timingoffset_offset, int TRACKTYPE)
 {
 	int tracksize;
 	int i,j,old_i;
-	
+	char tempstr[512];	
 	double timingoffset;
 	double timingoffset2;
 	int xpos,xpos2;
@@ -151,15 +253,19 @@ void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY 
 						timingoffset = getOffsetTiming(currentside,sc->startsectorindex,timingoffset,old_i);
 						old_i = sc->startsectorindex;
 						xpos = (int)( ( timingoffset - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
-						timingoffset2 = getOffsetTiming(currentside,sc->endsectorindex,timingoffset,old_i);
-						//old_i=sc->endsectorindex;
+						
+						if(sc->endsectorindex<sc->startsectorindex)
+							timingoffset2 = getOffsetTiming(currentside,sc->startsectorindex+ ((tracksize - sc->startsectorindex) + sc->endsectorindex),timingoffset,old_i);
+						else
+							timingoffset2 = getOffsetTiming(currentside,sc->endsectorindex,timingoffset,old_i);
+						
 						xpos2 = (int)( ( timingoffset2 - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
 
 						for(i=xpos;i<xpos2;i++)
 						{
 							if(i>=0)
 							{
-								if( (i<td->xsize) )
+								if( (i<td->xsize) && i>=0)
 								{
 									if(sc->use_alternate_data_crc)
 									{
@@ -167,7 +273,7 @@ void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY 
 										{
 											col=(s_col *)&td->framebuffer[(td->xsize*j) + i];
 											col->blue=3*col->blue/4;
-											col->green=3*col->red/4;
+											col->green=3*col->green/4;
 										}
 									}
 									else
@@ -187,6 +293,70 @@ void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY 
 							}
 						}
 
+						for(j=50;j<(td->ysize-10);j++)
+						{
+							if( (xpos<td->xsize) && xpos>=0)
+							{
+								if(j&8)
+								{
+									if(sc->use_alternate_data_crc)
+									{
+										col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos];
+										col->blue=3*col->blue/8;
+										col->green=3*col->green/8;
+									}
+									else
+									{
+										col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos];
+										col->blue=3*col->blue/8;
+										col->red=3*col->red/8;
+									}
+								}
+							}
+						}
+				
+						sprintf(tempstr,"---- %.3d Bytes",sc->sectorsize);
+						switch(sc->trackencoding)
+						{
+						case ISOFORMAT_SD:
+							sprintf(tempstr,"FM   %.3d Bytes",sc->sectorsize);
+							break;
+						case ISOFORMAT_DD:
+							sprintf(tempstr,"MFM  %.3d Bytes",sc->sectorsize);
+							break;
+						case AMIGAFORMAT_DD:
+							sprintf(tempstr,"AMFM %.3d Bytes",sc->sectorsize);
+							break;
+						}
+
+						putstring8x8(td,xpos,200,tempstr,0x000,1);
+
+						sprintf(tempstr,"T:%.2d H:%d S:%.3d",sc->cylinder,sc->head,sc->sector);
+						putstring8x8(td,xpos+8,200,tempstr,0x000,1);
+
+						for(j=50;j<(td->ysize-10);j++)
+						{
+							if( ((xpos2-1)<td->xsize) && xpos2>=0 )
+							{
+								if(!(j&8))
+								{
+									if(sc->use_alternate_data_crc)
+									{
+										col=(s_col *)&td->framebuffer[(td->xsize*j) + (xpos2-1)];
+										col->blue=3*col->blue/8;
+										col->green=3*col->green/8;
+									}
+									else
+									{
+										col=(s_col *)&td->framebuffer[(td->xsize*j) + (xpos2-1)];
+										col->blue=3*col->blue/8;
+										col->red=3*col->red/8;
+									}
+								}
+							}
+						}
+
+
 						hxcfe_freeSectorConfig(ss,sc);
 					}
 				}while(sc);
@@ -194,7 +364,6 @@ void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY 
 				hxcfe_deinitSectorSearch(ss);
 
 				loop++;
-
 			}
 		}
 		else
@@ -202,7 +371,6 @@ void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY 
 	}while(!endfill);
 
 }
-
 
 void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY * floppydisk,int track,int side)
 {
@@ -222,7 +390,6 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	s_col * col;
 
 	currentside=floppydisk->tracks[track]->sides[side];
-
 
 	tracksize=currentside->tracklen;
 	
@@ -262,11 +429,23 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 					bitrate=currentside->bitrate;
 				
 				xpos= (int)( timingoffset / ((double)td->x_us/(double)td->xsize) );
-				ypos=td->ysize - (int)( ((double)(interbit * 1000000 )/ (double) bitrate) / (double)((double)td->y_us/(double)td->ysize));
+				ypos= td->ysize - (int)( ( (double) ((interbit+1) * 500000) / (double) bitrate ) / (double)((double)td->y_us/(double)td->ysize));
 
 				if( (xpos<td->xsize) && (ypos<td->ysize) && ypos>=0 )
 				{
 					td->framebuffer[(td->xsize*ypos) + xpos]++;
+
+					ypos--;
+					if( (ypos<td->ysize) && ypos>=0 )
+					{
+						td->framebuffer[(td->xsize*ypos) + xpos]++;
+					}
+					ypos=ypos+2;
+					if( (ypos<td->ysize) && ypos>=0 )
+					{
+						td->framebuffer[(td->xsize*ypos) + xpos]++;
+					}
+
 				}
 
 				if(xpos>td->xsize)
@@ -311,9 +490,13 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 		}
 		else
 		{
-			col->green=255 - (col->red + 40);
-			col->blue=255 - (col->red + 40);
-			col->red=255 - (col->red + 40);
+			col->green=255 - (col->red );
+			col->blue=255 - (col->red );
+			col->red=255 - (col->red );
+			
+			col->green=col->green/2;
+			col->blue=col->blue/2;
+			col->red=col->red/2;
 		}
 	}
 
@@ -411,10 +594,108 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	}while(!endfill);
 
 	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,ISOIBM_MFM_ENCODING);
-	//display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,AMIGA_MFM_ENCODING);
+	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,AMIGA_MFM_ENCODING);
 	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,ISOIBM_FM_ENCODING);
 	//display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,EMU_FM_ENCODING);
 }
+
+void plot(s_trackdisplay *td,int x,int y,unsigned long color)
+{
+	if(x>=0 && x<td->xsize)
+	{
+		if(y>=0 && y<td->ysize)
+		{
+			td->framebuffer[(td->xsize*y)+x]=color;
+		}
+	}
+}
+
+void circle(s_trackdisplay *td,int x_centre,int y_centre,int r,unsigned long color)
+{
+	int x;
+	int y;
+	int d;
+
+	x=0;
+	y=r;
+	d=r-1;
+
+	while(y>=x)
+	{
+		
+        plot(td, x+x_centre, y+y_centre , color);
+        plot(td, y+x_centre, x+y_centre , color);
+        plot(td, -x+x_centre, y+y_centre  , color);
+        plot(td, -y+x_centre, x+y_centre  , color);
+        plot(td, x+x_centre, -y+y_centre  , color);
+        plot(td, y+x_centre, -x+y_centre  , color);
+        plot(td, -x+x_centre, -y+y_centre  , color);
+        plot(td, -y+x_centre, -x+y_centre  , color);
+
+		if (d >= 2*x)
+		{
+			d = d - ( 2 * x ) -1;
+            x = x+1;
+
+		}
+		else
+		{
+			if(d <= 2*(r-y))
+			{
+                d = d+2*y-1;
+                y = y-1;     
+			}
+			else
+			{
+                d = d+2*(y-x-1);
+                y = y-1;
+                x = x+1;
+			}
+		}
+	}
+}
+
+
+
+void hxcfe_td_draw_disk(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY * floppydisk)
+{
+	int tracksize;
+	int i,old_i;
+	int track,side;
+	SIDE * currentside;
+	unsigned long color;
+	int y_pos,x_pos_1,x_pos_2;
+	int numberoftrack;
+	float track_ep,t;
+
+	track=0;
+	side=0;
+	currentside=floppydisk->tracks[track]->sides[side];
+
+	tracksize=currentside->tracklen;
+	
+	old_i=0;
+	i=0;
+
+	numberoftrack=80;
+	y_pos = td->ysize/2;
+	x_pos_1 = td->xsize/4;
+	x_pos_2 = td->xsize - (td->xsize/4);
+
+	track_ep=(float)( (td->ysize-(y_pos)) - 10 ) /(float) numberoftrack;
+	t=0;
+
+	for(i=25;i<(td->ysize-(y_pos));i++)
+	{
+		color=0xFF1133+(((int)t)<<2);
+		if(i&2) color=0xFFFF00;
+		else color=0x00FFFF;
+		t=t+track_ep;
+		circle(td,x_pos_1,y_pos,i,color);
+		circle(td,x_pos_2,y_pos,i,color);
+	}
+}
+
 
 void hxcfe_td_deinit(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td)
 {

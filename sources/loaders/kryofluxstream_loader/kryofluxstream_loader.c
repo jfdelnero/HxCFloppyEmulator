@@ -156,7 +156,7 @@ int KryoFluxStream_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 	return HXCFE_BADPARAMETER;
 }
 
-void settrackbit(unsigned char * dstbuffer,unsigned char byte,int bitoffset,int size)
+void settrackbit(unsigned char * dstbuffer,int dstsize,unsigned char byte,int bitoffset,int size)
 {
 	int i,j,k;
 
@@ -165,9 +165,9 @@ void settrackbit(unsigned char * dstbuffer,unsigned char byte,int bitoffset,int 
 	for(j=0;j<size;j++)
 	{
 		if(byte&((0x80)>>(j&7)))
-			dstbuffer[i>>3]=dstbuffer[i>>3]|( (0x80>>(i&7)));
+			dstbuffer[(i>>3)]=dstbuffer[(i>>3)]|( (0x80>>(i&7)));
 		else
-			dstbuffer[i>>3]=dstbuffer[i>>3]&(~(0x80>>(i&7)));
+			dstbuffer[(i>>3)]=dstbuffer[(i>>3)]&(~(0x80>>(i&7)));
 
 		i++;
 	}
@@ -506,6 +506,7 @@ SIDE* ScanAndDecodeStream(int initalvalue,unsigned long * track,char * flakey,in
 	int bitrate;
 
 	int bitoffset;
+	int tracksize;
 	unsigned char *outtrack;
 	unsigned char *flakeytrack;
 	unsigned long *trackbitrate;
@@ -529,6 +530,7 @@ SIDE* ScanAndDecodeStream(int initalvalue,unsigned long * track,char * flakey,in
 	outtrack=(unsigned char*)malloc(TEMPBUFSIZE);
 	flakeytrack=(unsigned char*)malloc(TEMPBUFSIZE);
 	trackbitrate=(unsigned long*)malloc(TEMPBUFSIZE*sizeof(unsigned long));
+
 	memset(outtrack,0,TEMPBUFSIZE);
 	memset(flakeytrack,0,TEMPBUFSIZE);
 	memset(trackbitrate,0,TEMPBUFSIZE*sizeof(unsigned long));
@@ -548,12 +550,12 @@ SIDE* ScanAndDecodeStream(int initalvalue,unsigned long * track,char * flakey,in
 
 		bitoffset = bitoffset + cellcode;
 
-		settrackbit(outtrack,0xFF,bitoffset,1);
+		settrackbit(outtrack,TEMPBUFSIZE,0xFF,bitoffset,1);
 
 		if(flakey[i]<0)
-			settrackbit(flakeytrack,0xFF,bitoffset,1);
+			settrackbit(flakeytrack,TEMPBUFSIZE,0xFF,bitoffset,1);
 
-		trackbitrate[bitoffset>>3]=(int)(24027428/pumpcharge);
+		trackbitrate[(bitoffset>>3)]=(int)(24027428/pumpcharge);
 
 		i++;
 	}while(i<size);
@@ -564,38 +566,42 @@ SIDE* ScanAndDecodeStream(int initalvalue,unsigned long * track,char * flakey,in
 
 		j=0;
 		bitrate=0;
-		while(i+j<size && j<256)
+		while(((i+j)<size) && j<128)
 		{
-			bitrate = ( bitrate + trackbitrate[i+j] ) / 2;
+			bitrate = ( bitrate + trackbitrate[(i+j)] );
 			j++;
 		}
+		bitrate=bitrate/128;
 
 		j=0;
-		while(i+j<size && j<256)
+		while(((i+j)<size) && j<128)
 		{
-			trackbitrate[i+j] = bitrate;
+			trackbitrate[(i+j)] = bitrate;
 			j++;
 		}
 
-		i = i + 256;
+		i = i + 128;
 
 	}while(i<size);
 
 	bitrate=(int)( 24027428 / centralvalue );
 	hxcfe_track = tg_alloctrack(bitrate,ISOFORMAT_DD,rpm,bitoffset,3000,-3000,TG_ALLOCTRACK_ALLOCFLAKEYBUFFER|TG_ALLOCTRACK_ALLOCTIMIMGBUFFER);
+
 	
 	if(bitoffset&7)
 	{
-		memcpy(hxcfe_track->databuffer,outtrack,(bitoffset>>3)+1);
-		memcpy(hxcfe_track->flakybitsbuffer,flakeytrack,(bitoffset>>3)+1);
-		memcpy(hxcfe_track->timingbuffer,trackbitrate,((bitoffset>>3)+1) * sizeof(unsigned long));
+		tracksize = ( bitoffset >> 3 ) + 1;
 	}
 	else
 	{
-		memcpy(hxcfe_track->databuffer,outtrack,bitoffset>>3);
-		memcpy(hxcfe_track->flakybitsbuffer,flakeytrack,bitoffset>>3);
-		memcpy(hxcfe_track->timingbuffer,trackbitrate,(bitoffset>>3)* sizeof(unsigned long));
+		tracksize = ( bitoffset >> 3 );
 	}
+
+	if( tracksize >= TEMPBUFSIZE ) tracksize = TEMPBUFSIZE - 1;
+
+	memcpy(hxcfe_track->databuffer,outtrack,tracksize);
+	memcpy(hxcfe_track->flakybitsbuffer,flakeytrack,tracksize);
+	memcpy(hxcfe_track->timingbuffer,trackbitrate, tracksize * sizeof(unsigned long));
 
 	free(outtrack);
 	free(flakeytrack);

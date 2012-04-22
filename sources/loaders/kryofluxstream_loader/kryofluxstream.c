@@ -267,19 +267,25 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,fl
 			}while( (offset<filesize) && !streamend);
 
 			track_dump->nb_of_pulses=cellpos;
-			track_dump->track_dump=malloc( track_dump->nb_of_pulses * sizeof(unsigned long) ); 
-			memcpy(track_dump->track_dump, cellstream, track_dump->nb_of_pulses * sizeof(unsigned long) );
+			if(track_dump->nb_of_pulses)
+			{
+				track_dump->track_dump=malloc( track_dump->nb_of_pulses * sizeof(unsigned long) ); 
+				memcpy(track_dump->track_dump, cellstream, track_dump->nb_of_pulses * sizeof(unsigned long) );
+			}
 			free(cellstream);
 			free(kfstreambuffer);
 
-			track_dump->index_evt_tab=malloc(sizeof(s_index_evt)*nbindex);
-			memset(track_dump->index_evt_tab,0,sizeof(s_index_evt)*nbindex);
-			for(i=0;i<nbindex;i++)
+			if(nbindex)
 			{
-				track_dump->index_evt_tab[i].dump_offset=tabindex[i].StreamPosition;
-				track_dump->index_evt_tab[i].clk=(unsigned long)((float)tabindex[i].SysClk * timecoef);
+				track_dump->index_evt_tab=malloc(sizeof(s_index_evt)*nbindex);
+				memset(track_dump->index_evt_tab,0,sizeof(s_index_evt)*nbindex);
+				for(i=0;i<nbindex;i++)
+				{
+					track_dump->index_evt_tab[i].dump_offset=tabindex[i].StreamPosition;
+					track_dump->index_evt_tab[i].clk=(unsigned long)((float)tabindex[i].SysClk * timecoef);
+				}
+				track_dump->nb_of_index=nbindex;
 			}
-			track_dump->nb_of_index=nbindex;
 		}
 		else
 		{
