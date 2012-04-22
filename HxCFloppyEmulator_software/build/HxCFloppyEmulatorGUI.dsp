@@ -277,6 +277,10 @@ SOURCE=..\sources\gui\fl_dnd_box.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\sources\gui\fl_mouse_box.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\gui\gui_struct.h
 # End Source File
 # Begin Source File

@@ -23,6 +23,7 @@ public:
   Fl_Output *y_pos;
   Fl_Output *object_txt;
   Fl_Output *global_status;
+  Fl_Group *floppy_map_disp;
   Fl_Value_Slider *x_time;
   Fl_Value_Slider *y_time;
   Fl_Value_Slider *x_offset;
