@@ -319,13 +319,13 @@ void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY 
 						switch(sc->trackencoding)
 						{
 						case ISOFORMAT_SD:
-							sprintf(tempstr,"FM   %.3d Bytes",sc->sectorsize);
+							sprintf(tempstr,"FM   %.3dB DM:%.2Xh",sc->sectorsize,sc->alternate_datamark);
 							break;
 						case ISOFORMAT_DD:
-							sprintf(tempstr,"MFM  %.3d Bytes",sc->sectorsize);
+							sprintf(tempstr,"MFM  %.3dB DM:%.2Xh",sc->sectorsize,sc->alternate_datamark);
 							break;
 						case AMIGAFORMAT_DD:
-							sprintf(tempstr,"AMFM %.3d Bytes",sc->sectorsize);
+							sprintf(tempstr,"AMFM %.3dB ",sc->sectorsize);
 							break;
 						}
 
