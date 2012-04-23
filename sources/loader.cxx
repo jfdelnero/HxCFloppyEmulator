@@ -183,56 +183,60 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 			memset(trackbuffer,rfc->fillvalue,(128<<rfc->sectorsize)*rfc->sectorpertrack);
 		}
 
+		sprintf(gui_context->bufferfilename,"");
+		thefloppydisk=0;
 		fb=hxcfe_initFloppy(floppycontext,rfc->numberoftrack,nbside);
-
-		hxcfe_setTrackInterleave(fb,rfc->interleave);	
-		hxcfe_setSectorFill(fb,rfc->fillvalue);
-
-		if(rfc->autogap3)
-			hxcfe_setSectorGap3(fb,255);
-		else
-			hxcfe_setSectorGap3(fb,(unsigned char)rfc->gap3);
-
-		hxcfe_setTrackBitrate(fb,rfc->bitrate);
-
-		for(i=0;i<rfc->numberoftrack;i++)
+		if(fb)
 		{
-			for(j=0;j<nbside;j++)
+			hxcfe_setTrackInterleave(fb,rfc->interleave);	
+			hxcfe_setSectorFill(fb,rfc->fillvalue);
+
+			if(rfc->autogap3)
+				hxcfe_setSectorGap3(fb,255);
+			else
+				hxcfe_setSectorGap3(fb,(unsigned char)rfc->gap3);
+
+			hxcfe_setTrackBitrate(fb,rfc->bitrate);
+
+			for(i=0;i<rfc->numberoftrack;i++)
 			{
-				// prepare a new track.
-				hxcfe_pushTrack(fb,rfc->rpm,i,j,track_type_list[rfc->tracktype].tracktype);
-				
-				// Set the skew
-				if(rfc->sideskew)
+				for(j=0;j<nbside;j++)
 				{
-					hxcfe_setTrackSkew(fb,(unsigned char)(((i<<1)|(j&1))*rfc->skew) );
-				}
-				else
-				{
-					hxcfe_setTrackSkew(fb,(unsigned char)i*rfc->skew);
-				}
-
-
-				if(f)
-				{
-					fread(trackbuffer,(128<<rfc->sectorsize)*rfc->sectorpertrack,1,f);
-				}
-
-				// add all sectors
-				for(k=0;k<rfc->sectorpertrack;k++)
-				{
-					if(f)
-						hxcfe_addSector(fb,rfc->firstidsector+k,j,i,&trackbuffer[k*(128<<rfc->sectorsize)],128<<rfc->sectorsize);
+					// prepare a new track.
+					hxcfe_pushTrack(fb,rfc->rpm,i,j,track_type_list[rfc->tracktype].tracktype);
+					
+					// Set the skew
+					if(rfc->sideskew)
+					{
+						hxcfe_setTrackSkew(fb,(unsigned char)(((i<<1)|(j&1))*rfc->skew) );
+					}
 					else
-						hxcfe_addSector(fb,rfc->firstidsector+k,j,i,0,128<<rfc->sectorsize);
+					{
+						hxcfe_setTrackSkew(fb,(unsigned char)i*rfc->skew);
+					}
+
+
+					if(f)
+					{
+						fread(trackbuffer,(128<<rfc->sectorsize)*rfc->sectorpertrack,1,f);
+					}
+
+					// add all sectors
+					for(k=0;k<rfc->sectorpertrack;k++)
+					{
+						if(f)
+							hxcfe_addSector(fb,rfc->firstidsector+k,j,i,&trackbuffer[k*(128<<rfc->sectorsize)],128<<rfc->sectorsize);
+						else
+							hxcfe_addSector(fb,rfc->firstidsector+k,j,i,0,128<<rfc->sectorsize);
+					}
+
+					// generate the track
+					hxcfe_popTrack(fb);
 				}
-
-				// generate the track
-				hxcfe_popTrack(fb);
 			}
-		}
 
-		thefloppydisk=hxcfe_getFloppy(fb);
+			thefloppydisk=hxcfe_getFloppy(fb);
+		}
 		/*t=hxcfe_getfloppysize(floppycontext,thefloppydisk,0);
 
 		test=malloc(512*18);
@@ -244,22 +248,24 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 
 
 		if(thefloppydisk)
+		{
 			ret=HXCFE_NOERROR;
 
-		gui_context->loadstatus=ret;
+			gui_context->loadstatus=ret;
 
-		//oldifmode=hwif->interface_mode;
-		libusbhxcfe_setInterfaceMode(flopemu,usbhxcfe,thefloppydisk->floppyiftype,thefloppydisk->double_step,0);
-		libusbhxcfe_loadFloppy(flopemu,usbhxcfe,thefloppydisk);
-		if(!gui_context->autoselectmode)
-		{	// keep the old interface mode
-			//hwif->interface_mode=oldifmode;
-		};
+			//oldifmode=hwif->interface_mode;
+			libusbhxcfe_setInterfaceMode(flopemu,usbhxcfe,thefloppydisk->floppyiftype,thefloppydisk->double_step,0);
+			libusbhxcfe_loadFloppy(flopemu,usbhxcfe,thefloppydisk);
+			if(!gui_context->autoselectmode)
+			{	// keep the old interface mode
+				//hwif->interface_mode=oldifmode;
+			};
 
-		if(f)
-			sprintf(gui_context->bufferfilename,basename(file));
-		else
-			sprintf(gui_context->bufferfilename,"Empty Floppy");
+			if(f)
+				sprintf(gui_context->bufferfilename,basename(file));
+			else
+				sprintf(gui_context->bufferfilename,"Empty Floppy");
+		}
 
 		if(f)
 		{
