@@ -245,7 +245,7 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 			i=(idamoffset[k]&0x3FFF)-0x80;
 			do
 			{
-				if((trackdata[i+j]==0xFB && trackdata[i+j+trackstep]==0xFB)|| (trackdata[i+j]==0xF8 && trackdata[i+j+trackstep]==0xF8)|| (trackdata[i+j]==0xFA && trackdata[i+j+trackstep]==0xFA))
+				if((trackdata[i+j]==0xF8 && trackdata[i+j+trackstep]==0xF8) || (trackdata[i+j]==0xF9 && trackdata[i+j+trackstep]==0xF9)|| (trackdata[i+j]==0xFA && trackdata[i+j+trackstep]==0xFA)|| (trackdata[i+j]==0xFB && trackdata[i+j+trackstep]==0xFB))
 				{
 					trackclk[i+j+0]=0xC7;
 					trackclk[i+j+trackstep]=0xC7;
