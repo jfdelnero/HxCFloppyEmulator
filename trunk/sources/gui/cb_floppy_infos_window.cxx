@@ -103,6 +103,12 @@ void update_graph(floppy_infos_window * w)
 		{
 			if(thefloppydisk)
 			{
+				if(w->track_number_slide->value()>=thefloppydisk->floppyNumberOfTrack)
+					w->track_number_slide->value(thefloppydisk->floppyNumberOfTrack-1);
+				
+				if(w->side_number_slide->value()>=thefloppydisk->floppyNumberOfSide)
+					w->side_number_slide->value(thefloppydisk->floppyNumberOfSide-1);
+
 				w->track_number_slide->scrollvalue((int)w->track_number_slide->value(),1,0,thefloppydisk->floppyNumberOfTrack);
 				w->side_number_slide->scrollvalue((int)w->side_number_slide->value(),1,0,thefloppydisk->floppyNumberOfSide);
 				
