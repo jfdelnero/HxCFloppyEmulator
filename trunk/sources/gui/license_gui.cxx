@@ -43,20 +43,6 @@
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
 
-
-#include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Box.H>
-#include <FL/filename.H>
-#include <FL/Fl_Button.H>
-#include <FL/Fl_Menu_Bar.H>
-#include <FL/Fl_Progress.H>
-#include <FL/Fl_Text_Display.H>
-#include <FL/Fl_Timer.H>
-#include <FL/Fl_Text_Buffer.H>
-#include <FL/Fl_Text_Display.H>
-
-
 #include <errno.h>
 #include <malloc.h>
 #include <stdio.h>
@@ -65,6 +51,7 @@
 #include <stdarg.h> 
 #include <time.h>
 
+#include "fl_includes.h"
 #include "licensetxt.h"
 
 extern "C"
@@ -77,11 +64,8 @@ extern "C"
 
 void close_license(Fl_Widget *w, void * t)
 {
-
 	delete(w->window());
 }
-
-
 
 void License_box::hide()
 {
@@ -91,7 +75,6 @@ void License_box::hide()
 License_box::~License_box()
 {
 }
-
 
 License_box::License_box()
   : Fl_Window(600,400)
@@ -111,13 +94,10 @@ License_box::License_box()
 	button_ok=new Fl_Button(xsize-100, ysize-35, 80, 30, "OK" ); // Fl_Button* o
 	button_ok->callback(close_license,0);
 
-
 	this->end();
 	this->label(NOMFENETRE);
 	this->show();
 
-
 	return ;
-
 }
 

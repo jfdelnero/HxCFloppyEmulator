@@ -8,6 +8,7 @@
 #include <FL/Fl_Input.H>
 #include <FL/Fl_Output.H>
 #include <FL/Fl_Button.H>
+
 extern void batch_converter_window_bt_select_src(Fl_Button*, void*);
 extern void batch_converter_window_bt_select_dst(Fl_Button*, void*);
 extern void batch_converter_window_bt_convert(Fl_Button*, void*);

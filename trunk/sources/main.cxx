@@ -43,25 +43,7 @@
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
 
-
-#include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Box.H>
-#include <FL/filename.H>
-#include <FL/Fl_Button.H>
-#include <FL/Fl_Menu_Bar.H>
-#include <FL/Fl_Progress.H>
-#include <FL/Fl_Text_Display.H>
-#include <FL/Fl_Tiled_Image.H>
-#include <FL/Fl_File_Browser.H>
-#include <FL/Fl_File_Chooser.H>
-
-#include <FL/Fl_File_Icon.H>
-#include <FL/Fl_Shared_Image.H>
-#include <FL/Fl_BMP_Image.H>
-
-#include <FL/fl_ask.H>
-
+#include "fl_includes.h"
 
 extern "C"
 {
@@ -69,7 +51,8 @@ extern "C"
 	#include "usb_hxcfloppyemulator.h"
 }
 
-#include "gui_struct.h"
+#include "main.h"
+
 #include "batch_converter_window.h"
 #include "filesystem_generator_window.h"
 #include "floppy_dump_window.h"
@@ -81,44 +64,21 @@ extern "C"
 #include "about_gui.h"
 #include "main_gui.h"
 
-HXCFLOPPYEMULATOR * flopemu;
-FLOPPY * thefloppydisk;
-USBHXCFE * usbhxcfe;
-
-guicontext * gui_context;
+s_gui_context * guicontext;
 
 extern int CUI_affiche(int MSGTYPE,char * chaine, ...);
 
-	track_type track_type_list[]=
+int main(int argc, char **argv)
+{
+	guicontext=(s_gui_context *)malloc(sizeof(s_gui_context));
+	if(guicontext)
 	{
-		{ FM_TRACK_TYPE,"FM",ISOFORMAT_SD},
-		{ FMIBM_TRACK_TYPE,"IBM FM",IBMFORMAT_SD},
-		{ MFM_TRACK_TYPE,"MFM",ISOFORMAT_DD},
-		{ MFMIBM_TRACK_TYPE,"IBM MFM",IBMFORMAT_DD},
-		//{ GCR_TRACK_TYPE,"GCR"},
-		{ -1,"",0}
-	};
+		memset(guicontext,0,sizeof(s_gui_context));
 
-
-int main(int argc, char **argv) {
-
-	gui_context=(guicontext *)malloc(sizeof(guicontext));
-	if(gui_context)
-	{
-		memset(gui_context,0,sizeof(guicontext));
-
-		thefloppydisk=0;
-		flopemu=hxcfe_init();
-		hxcfe_setOutputFunc(flopemu,CUI_affiche);
-		
-		usbhxcfe=libusbhxcfe_init(flopemu);
-		
 		Main_Window * mw;
 		mw=new Main_Window();
 
 		return 0;
-	}
-
-	
+	}	
 	return -1;
 }
