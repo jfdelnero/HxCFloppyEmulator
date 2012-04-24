@@ -56,8 +56,9 @@ extern "C"
 }
 
 #include "loader.h"
+#include "main.h"
 
-extern HXCFLOPPYEMULATOR * flopemu;
+extern s_gui_context * guicontext;
 
 #define TWOSIDESFLOPPY 0x02
 #define SIDE_INVERTED 0x04
@@ -212,7 +213,7 @@ void raw_loader_window_bt_loadrawfile(Fl_Button* bt, void*)
 
 	if(!fileselector("Select raw file",(char*)file,0,"*.img",0,0))
 	{	
-		loadrawfile(flopemu,&rfc,file);
+		loadrawfile(guicontext->hxcfe,&rfc,file);
 		dw->hide();
 	}
 }
@@ -241,7 +242,7 @@ void raw_loader_window_bt_createemptyfloppy(Fl_Button* bt, void*)
 
 	getWindowState(rlw,&rfc);
 
-	loadrawfile(flopemu,&rfc,NULL);
+	loadrawfile(guicontext->hxcfe,&rfc,NULL);
 
 	dw->hide();
 }

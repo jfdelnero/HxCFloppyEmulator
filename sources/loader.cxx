@@ -47,22 +47,15 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "mainrouts.h"
-
 extern "C"
 {
 	#include "libhxcfe.h"
 	#include "usb_hxcfloppyemulator.h"
-//	#include "../../common/plugins/raw_loader/raw_loader.h"
 }
-
+#include "main.h"
 #include "loader.h"
 
-extern HXCFLOPPYEMULATOR * flopemu;
-extern USBHXCFE * usbhxcfe;
-
-extern FLOPPY * thefloppydisk;
-extern guicontext * gui_context;
+extern s_gui_context * guicontext;
 
 extern track_type track_type_list[];
 
@@ -71,33 +64,32 @@ extern char * basename (const char *name);
 int load_floppy(FLOPPY * floppydisk)
 {
 	int ret;
-	int i;
 	int oldifmode;
 
-	hxcfe_floppyUnload(flopemu,thefloppydisk);
-	thefloppydisk=0;
-	thefloppydisk=floppydisk;
+	hxcfe_floppyUnload(guicontext->hxcfe,guicontext->loadedfloppy);
+	guicontext->loadedfloppy=0;
+	guicontext->loadedfloppy=floppydisk;
 
 	ret=HXCFE_NOERROR;
-	gui_context->loadstatus=ret;
+	guicontext->loadstatus=ret;
 
-	if(ret!=HXCFE_NOERROR || !thefloppydisk)
+	if(ret!=HXCFE_NOERROR || !guicontext->loadedfloppy)
 	{
-		thefloppydisk=0;
-		gui_context->bufferfilename[0]=0;
+		guicontext->loadedfloppy=0;
+		guicontext->bufferfilename[0]=0;
 	}
 	else
 	{
-		oldifmode=libusbhxcfe_getInterfaceMode(flopemu,usbhxcfe);
-		libusbhxcfe_setInterfaceMode(flopemu,usbhxcfe,thefloppydisk->floppyiftype,thefloppydisk->double_step,0);
-		libusbhxcfe_loadFloppy(flopemu,usbhxcfe,thefloppydisk);
+		oldifmode=libusbhxcfe_getInterfaceMode(guicontext->hxcfe,guicontext->usbhxcfe);
+		libusbhxcfe_setInterfaceMode(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy->floppyiftype,guicontext->loadedfloppy->double_step,0);
+		libusbhxcfe_loadFloppy(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy);
 
-		if(!gui_context->autoselectmode)
+		if(!guicontext->autoselectmode)
 		{	// keep the old interface mode
 			//hwif->interface_mode=oldifmode;
 		};
 
-		sprintf(gui_context->bufferfilename,"Floppy Dump");
+		sprintf(guicontext->bufferfilename,"Floppy Dump");
 	}
 
 	return ret;
@@ -110,30 +102,30 @@ int load_floppy_image(char *filename)
 	int oldifmode;
 	int loaderid;
 
-	hxcfe_floppyUnload(flopemu,thefloppydisk);
-	thefloppydisk=0;
+	hxcfe_floppyUnload(guicontext->hxcfe,guicontext->loadedfloppy);
+	guicontext->loadedfloppy=0;
 
 	ret=-1;
 
-	loaderid=hxcfe_autoSelectLoader(flopemu,filename,0);
+	loaderid=hxcfe_autoSelectLoader(guicontext->hxcfe,filename,0);
 		
 	if(loaderid>=0)
-		thefloppydisk=hxcfe_floppyLoad(flopemu,filename,loaderid,&ret);
+		guicontext->loadedfloppy=hxcfe_floppyLoad(guicontext->hxcfe,filename,loaderid,&ret);
 		
-	gui_context->loadstatus=ret;
+	guicontext->loadstatus=ret;
 
-	if(ret!=HXCFE_NOERROR || !thefloppydisk)
+	if(ret!=HXCFE_NOERROR || !guicontext->loadedfloppy)
 	{
-		thefloppydisk=0;
-		gui_context->bufferfilename[0]=0;
+		guicontext->loadedfloppy=0;
+		guicontext->bufferfilename[0]=0;
 	}
 	else
 	{	
 //		oldifmode=hwif->interface_mode;
 
-		libusbhxcfe_setInterfaceMode(flopemu,usbhxcfe,thefloppydisk->floppyiftype,thefloppydisk->double_step,0);
-		libusbhxcfe_loadFloppy(flopemu,usbhxcfe,thefloppydisk);
-		if(!gui_context->autoselectmode)
+		libusbhxcfe_setInterfaceMode(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy->floppyiftype,guicontext->loadedfloppy->double_step,0);
+		libusbhxcfe_loadFloppy(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy);
+		if(!guicontext->autoselectmode)
 		{	// keep the old interface mode
 			//hwif->interface_mode=oldifmode;
 		};
@@ -146,11 +138,11 @@ int load_floppy_image(char *filename)
 				i--;
 			}
 			if(filename[i]=='\\') i++;
-			sprintf(gui_context->bufferfilename,"%s",&filename[i]);
+			sprintf(guicontext->bufferfilename,"%s",&filename[i]);
 		}
 		else
 		{
-			sprintf(gui_context->bufferfilename,"Empty Floppy");
+			sprintf(guicontext->bufferfilename,"Empty Floppy");
 		}
 	}
 
@@ -172,8 +164,8 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 
 	if(f || file==NULL)
 	{
-		if(thefloppydisk)
-			hxcfe_floppyUnload(flopemu,thefloppydisk);
+		if(guicontext->loadedfloppy)
+			hxcfe_floppyUnload(guicontext->hxcfe,guicontext->loadedfloppy);
 
 		nbside=(rfc->sidecfg)&2?2:1;
 
@@ -183,8 +175,8 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 			memset(trackbuffer,rfc->fillvalue,(128<<rfc->sectorsize)*rfc->sectorpertrack);
 		}
 
-		sprintf(gui_context->bufferfilename,"");
-		thefloppydisk=0;
+		sprintf(guicontext->bufferfilename,"");
+		guicontext->loadedfloppy=0;
 		fb=hxcfe_initFloppy(floppycontext,rfc->numberoftrack,nbside);
 		if(fb)
 		{
@@ -235,8 +227,9 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 				}
 			}
 
-			thefloppydisk=hxcfe_getFloppy(fb);
+			guicontext->loadedfloppy=hxcfe_getFloppy(fb);
 		}
+
 		/*t=hxcfe_getfloppysize(floppycontext,thefloppydisk,0);
 
 		test=malloc(512*18);
@@ -247,24 +240,24 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 		hxcfe_deinit_sectorsearch(ss);*/
 
 
-		if(thefloppydisk)
+		if(guicontext->loadedfloppy)
 		{
 			ret=HXCFE_NOERROR;
 
-			gui_context->loadstatus=ret;
+			guicontext->loadstatus=ret;
 
 			//oldifmode=hwif->interface_mode;
-			libusbhxcfe_setInterfaceMode(flopemu,usbhxcfe,thefloppydisk->floppyiftype,thefloppydisk->double_step,0);
-			libusbhxcfe_loadFloppy(flopemu,usbhxcfe,thefloppydisk);
-			if(!gui_context->autoselectmode)
+			libusbhxcfe_setInterfaceMode(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy->floppyiftype,guicontext->loadedfloppy->double_step,0);
+			libusbhxcfe_loadFloppy(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy);
+			if(!guicontext->autoselectmode)
 			{	// keep the old interface mode
 				//hwif->interface_mode=oldifmode;
 			};
 
 			if(f)
-				sprintf(gui_context->bufferfilename,basename(file));
+				sprintf(guicontext->bufferfilename,basename(file));
 			else
-				sprintf(gui_context->bufferfilename,"Empty Floppy");
+				sprintf(guicontext->bufferfilename,"Empty Floppy");
 		}
 
 		if(f)

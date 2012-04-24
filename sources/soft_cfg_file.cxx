@@ -7,12 +7,12 @@
 
 #include <sys/stat.h>
 
-#include "mainrouts.h"
-
 #include "soft_cfg_file.h"
 
 #include "libhxcfe.h"
 #include "usb_hxcfloppyemulator.h"
+
+#include "main.h"
 
 typedef struct laststate_
 {
@@ -24,9 +24,7 @@ typedef struct laststate_
 	unsigned int double_step;
 }laststate;
 
-
-//extern HWINTERFACE * hwif;
-extern guicontext * gui_context;
+extern s_gui_context * guicontext;
 unsigned char cfg_file_buffer[4*1024];
 
 int load_last_cfg()
@@ -64,8 +62,8 @@ int load_last_cfg()
 //		hwif->drive_select_source=lastst->drive_select_source;
 //		hwif->interface_mode=lastst->interface_mode;
 //		hwif->double_step=lastst->double_step;
-		gui_context->autoselectmode=lastst->autoselectmode;
-		gui_context->twistedcable=lastst->twistedcable;
+		guicontext->autoselectmode=lastst->autoselectmode;
+		guicontext->twistedcable=lastst->twistedcable;
 	}
 	else
 	{

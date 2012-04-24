@@ -66,7 +66,6 @@
 #include <stdarg.h> 
 #include <time.h>
 
-#include "mainrouts.h"
 #include "log_gui.h"
 
 extern "C"
@@ -75,6 +74,9 @@ extern "C"
 	#include "usb_hxcfloppyemulator.h"
 }
 
+#include "main.h"
+
+extern s_gui_context * guicontext;
 
 #define LOGFIFOSIZE 256
 #define LOGSTRINGSIZE 1024
@@ -87,7 +89,6 @@ typedef struct logfifo_
 
 logfifo logsfifo;
 char * logs_buffer;
-extern guicontext * gui_context;
 
 
 int CUI_affiche(int MSGTYPE,char * chaine, ...)
@@ -174,9 +175,9 @@ int CUI_affiche(int MSGTYPE,char * chaine, ...)
 	}
 	
 	
-	if(gui_context->logfile)
+	if(guicontext->logfile)
 	{
-		debugfile=fopen(gui_context->logfile,"a");
+		debugfile=fopen(guicontext->logfile,"a");
 		if(debugfile)
 		{
 			switch(MSGTYPE)
@@ -229,15 +230,15 @@ void savelog_log(Fl_Widget *w, void * t)
 		}
 		default:
 		{
-			if(gui_context->logfile)
+			if(guicontext->logfile)
 			{
-				logfile=gui_context->logfile;
-				gui_context->logfile=0;
+				logfile=guicontext->logfile;
+				guicontext->logfile=0;
 				free(logfile);
 			}
 			logfile=(char*)malloc(1024);
 			sprintf(logfile,"%s",(char*)fnfc.filename());
-			gui_context->logfile=logfile;
+			guicontext->logfile=logfile;
 			break;
 		}
 	}
@@ -304,7 +305,7 @@ Log_box::Log_box()
 	button_savelog=new Fl_Button(10+80, ysize-35, 80, 30, "Set log file" );
 	button_savelog->callback(savelog_log,0);
 
-	gui_context->logfile=0;
+	guicontext->logfile=0;
 
 	memset(&logsfifo,0,sizeof(logfifo));
 	old_index=0;

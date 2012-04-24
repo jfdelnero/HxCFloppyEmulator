@@ -50,10 +50,7 @@
 #include <sys/stat.h>
 #include <direct.h>
 
-#include <FL/Fl_File_Browser.H>
-#include <FL/Fl_File_Chooser.H>
-#include <FL/Fl_Native_File_Chooser.H>
-
+#include "fl_includes.h"
 #include "fl_dnd_box.h"
 
 extern "C"
@@ -63,14 +60,14 @@ extern "C"
 	#include "os_api.h"
 }
 
+#include "main.h"
 #include "batch_converter_window.h"
 #include "cb_batch_converter_window.h"
-
-
 #include "loader.h"
 
-extern HXCFLOPPYEMULATOR * flopemu;
 batchconverterparams bcparams;
+
+extern s_gui_context * guicontext;
 
 typedef struct s_param_bc_params_
 {
@@ -376,7 +373,7 @@ int convertthread(void* floppycontext,void* hw_context)
 	if(strlen(bcparams.sourcedir) && strlen(bcparams.destdir))
 	{
 	
-		browse_and_convert_directory(	flopemu,
+		browse_and_convert_directory(	guicontext->hxcfe,
 										bcparams.sourcedir,
 										bcparams.destdir,
 										"*.*",
@@ -455,7 +452,7 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 	if(filecount)
 	{
 	
-		draganddropconvert(	flopemu,
+		draganddropconvert(	guicontext->hxcfe,
 							filelist,
 							bcparams.destdir,
 							bcw->choice_file_format->value(),
@@ -521,7 +518,7 @@ void batch_converter_window_bt_convert(Fl_Button* bt, void*)
 	dw=((Fl_Window*)(bt->parent()));
 	bcw=(batch_converter_window *)dw->user_data();
 	bcw->bt_convert->deactivate();
-	hxc_createthread(flopemu,bcw,&convertthread,1);
+	hxc_createthread(guicontext->hxcfe,bcw,&convertthread,1);
 }
 
 void batch_converter_window_bt_select_src(Fl_Button* bt, void*)
@@ -597,7 +594,7 @@ void dnd_bc_cb(Fl_Widget *o, void *v)
 		bcparams->files=dnd->event_text();
 
 
-		hxc_createthread(flopemu,bcparams,&draganddropconvertthread,1);
+		hxc_createthread(guicontext->hxcfe,bcparams,&draganddropconvertthread,1);
 
 	}
 }

@@ -25,17 +25,6 @@
 //
 */
 
-#include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Box.H>
-#include <FL/filename.H>
-#include <FL/Fl_Button.H>
-#include <FL/Fl_Menu_Bar.H>
-#include <FL/Fl_Progress.H>
-#include <FL/Fl_Text_Display.H>
-#include <FL/Fl_Timer.H>
-
-
 #include <errno.h>
 #include <malloc.h>
 #include <stdio.h>
@@ -51,49 +40,41 @@ extern "C"
 	#include "version.h"
 }
 
+#include "fl_includes.h"
+
 #include "about_gui.h"
 #include "license_gui.h"
 
-void open_license_window(Fl_Widget *, void *) 
+
+static void tick(void *v) 
 {
-
-}
-
-//#define BUTTON_XPOS 5
-//#define BUTTON_YPOS 50
-//#define BUTTON_XSIZE 120
-//#define BUTTON_YSIZE 25
-
-
-
-static void tick(void *v) {
-  About_box *window;
-  unsigned char * ptr1;
-  int i,j,k;
-
-  window=(About_box *)v;
-
-  if(window->shown())
-  {
-	  window->make_current();
-	  uintro_getnextframe(window->ui_context);
-
-	  ptr1=(unsigned char*)window->ui_context->framebuffer;
-	  k=0;
-	  j=0;
-	  for(i=0;i<window->xsize*window->ysize;i++)
-	  {
-		  ptr1[j++]=ptr1[k+2];
-		  ptr1[j++]=ptr1[k+1];
-		  ptr1[j++]=ptr1[k+0];
-		  k=k+4;
-	  }
-  
-	  fl_draw_image((unsigned char *)window->ui_context->framebuffer, window->xpos_size, window->ypos_size, window->xsize, window->ysize, 3, 0);
-  }
-
-  Fl::repeat_timeout(0.02, tick, v);
-  
+	About_box *window;
+	unsigned char * ptr1;
+	int i,j,k;
+	
+	window=(About_box *)v;
+	
+	if(window->shown())
+	{
+		window->make_current();
+		uintro_getnextframe(window->ui_context);
+		
+		ptr1=(unsigned char*)window->ui_context->framebuffer;
+		k=0;
+		j=0;
+		for(i=0;i<window->xsize*window->ysize;i++)
+		{
+			ptr1[j++]=ptr1[k+2];
+			ptr1[j++]=ptr1[k+1];
+			ptr1[j++]=ptr1[k+0];
+			k=k+4;
+		}
+		
+		fl_draw_image((unsigned char *)window->ui_context->framebuffer, window->xpos_size, window->ypos_size, window->xsize, window->ysize, 3, 0);
+	}
+	
+	Fl::repeat_timeout(0.02, tick, v);
+	
 }
 
 
@@ -171,14 +152,6 @@ About_box::About_box()
 
     tick(this);
 	
-  return ;
-
- }
-
-
-
-
-//
-// End of "$Id: hello.cxx 6102 2008-04-21 19:54:34Z matt $".
-//
+	return ;
+}
 

@@ -59,8 +59,6 @@ extern "C"
 
 #include "loader.h"
 
-extern HXCFLOPPYEMULATOR * flopemu;
-
 unsigned char filebuffer[8*1024];
 
 
