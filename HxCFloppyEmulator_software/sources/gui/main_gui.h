@@ -1,4 +1,12 @@
 
+typedef struct main_button_list_
+{
+	Fl_Button * button;
+	char * label;
+	char * desc;
+}main_button_list;
+
+
 // Main class...
 class Main_Window : public Fl_Window {
   
@@ -40,7 +48,6 @@ class Main_Window : public Fl_Window {
 	Fl_File_Chooser		*fc_load;
 	Fl_File_Chooser		*fc_save;
 
-	//Fl_Text_Display* file_name_txt;
 	Fl_Output* file_name_txt;
 	Fl_Progress* track_pos;
 	Fl_Output* track_pos_str;
@@ -50,7 +57,9 @@ class Main_Window : public Fl_Window {
 	//virtual handle(int event);
 	Main_Window();
 	~Main_Window();
-
 };
 
-
+void load_file_image_pb(Fl_Widget * widget, void * ptr);
+void menu_clicked(Fl_Widget * w, void * fc_ptr);
+void save_file_image(Fl_Widget * w, void * fc_ptr);
+void format_choice_cb(Fl_Widget *, void *v);

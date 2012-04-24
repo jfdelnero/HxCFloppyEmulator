@@ -50,21 +50,7 @@
 #include <sys/stat.h>
 #include <direct.h>
 
-#include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Box.H>
-#include <FL/filename.H>
-#include <FL/Fl_Button.H>
-#include <FL/Fl_Menu_Bar.H>
-#include <FL/Fl_Progress.H>
-#include <FL/Fl_Text_Display.H>
-#include <FL/Fl_File_Browser.H>
-#include <FL/Fl_File_Chooser.H>
-#include <FL/Fl_Native_File_Chooser.H>
-#include <FL/Fl_Timer.H>
-
-
-#include <windows.h>
+#include "fl_includes.h"
 
 extern "C"
 {
@@ -75,13 +61,11 @@ extern "C"
 	#include "thirdpartylibs/fdrawcmd/fdrawcmd.h"
 }
 
-
+#include "main.h"
 #include "loader.h"
 #include "fl_mouse_box.h"
 
-unsigned char * floppyinfobuffer;
-extern HXCFLOPPYEMULATOR * flopemu;
-extern FLOPPY * thefloppydisk;
+extern s_gui_context * guicontext;
 
 void update_graph(floppy_infos_window * w)
 {
@@ -98,29 +82,29 @@ void update_graph(floppy_infos_window * w)
 	{
 		w->window->make_current();
 		
-		td=hxcfe_td_init(flopemu,disp_xsize,disp_ysize,(int)(w->x_time->value()*1000),(int)w->y_time->value(),(int)(w->x_offset->value()*1000));
+		td=hxcfe_td_init(guicontext->hxcfe,disp_xsize,disp_ysize,(int)(w->x_time->value()*1000),(int)w->y_time->value(),(int)(w->x_offset->value()*1000));
 		if(td)
 		{
-			if(thefloppydisk)
+			if(guicontext->loadedfloppy)
 			{
-				if(w->track_number_slide->value()>=thefloppydisk->floppyNumberOfTrack)
-					w->track_number_slide->value(thefloppydisk->floppyNumberOfTrack-1);
+				if(w->track_number_slide->value()>=guicontext->loadedfloppy->floppyNumberOfTrack)
+					w->track_number_slide->value(guicontext->loadedfloppy->floppyNumberOfTrack-1);
 				
-				if(w->side_number_slide->value()>=thefloppydisk->floppyNumberOfSide)
-					w->side_number_slide->value(thefloppydisk->floppyNumberOfSide-1);
+				if(w->side_number_slide->value()>=guicontext->loadedfloppy->floppyNumberOfSide)
+					w->side_number_slide->value(guicontext->loadedfloppy->floppyNumberOfSide-1);
 
-				w->track_number_slide->scrollvalue((int)w->track_number_slide->value(),1,0,thefloppydisk->floppyNumberOfTrack);
-				w->side_number_slide->scrollvalue((int)w->side_number_slide->value(),1,0,thefloppydisk->floppyNumberOfSide);
+				w->track_number_slide->scrollvalue((int)w->track_number_slide->value(),1,0,guicontext->loadedfloppy->floppyNumberOfTrack);
+				w->side_number_slide->scrollvalue((int)w->side_number_slide->value(),1,0,guicontext->loadedfloppy->floppyNumberOfSide);
 				
 				if(w->track_view_bt->value())
 				{
-					hxcfe_td_draw_track(flopemu,td,thefloppydisk,(int)w->track_number_slide->value(),(int)w->side_number_slide->value());
+					hxcfe_td_draw_track(guicontext->hxcfe,td,guicontext->loadedfloppy,(int)w->track_number_slide->value(),(int)w->side_number_slide->value());
 				}
 				else
 				{
 					if(w->disc_view_bt->value())
 					{
-						hxcfe_td_draw_disk(flopemu,td,thefloppydisk);
+						hxcfe_td_draw_disk(guicontext->hxcfe,td,guicontext->loadedfloppy);
 					}
 				}
 
@@ -136,7 +120,7 @@ void update_graph(floppy_infos_window * w)
 				}
 
 				fl_draw_image((unsigned char *)td->framebuffer, w->floppy_map_disp->x(), w->floppy_map_disp->y(), td->xsize, td->ysize, 3, 0);
-				hxcfe_td_deinit(flopemu,td);
+				hxcfe_td_deinit(guicontext->hxcfe,td);
 			}
 		}
 	}

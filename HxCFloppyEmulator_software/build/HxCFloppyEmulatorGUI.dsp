@@ -325,7 +325,7 @@ SOURCE=..\sources\gui\main_gui.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\sources\msg_txt.h
+SOURCE=..\sources\gui\msg_txt.h
 # End Source File
 # Begin Source File
 

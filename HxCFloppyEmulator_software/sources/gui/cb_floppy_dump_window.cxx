@@ -50,22 +50,7 @@
 #include <sys/stat.h>
 #include <direct.h>
 
-
-#include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Box.H>
-#include <FL/filename.H>
-#include <FL/Fl_Button.H>
-#include <FL/Fl_Menu_Bar.H>
-#include <FL/Fl_Progress.H>
-#include <FL/Fl_Text_Display.H>
-#include <FL/Fl_File_Browser.H>
-#include <FL/Fl_File_Chooser.H>
-#include <FL/Fl_Native_File_Chooser.H>
-#include <FL/Fl_Timer.H>
-
-
-#include <windows.h>
+#include "fl_includes.h"
 
 extern "C"
 {
@@ -75,11 +60,10 @@ extern "C"
 	#include "thirdpartylibs/fdrawcmd/fdrawcmd.h"
 }
 
-
 #include "loader.h"
+#include "main.h"
 
-unsigned char * mapfloppybuffer;
-extern HXCFLOPPYEMULATOR * flopemu;
+extern s_gui_context * guicontext;
 
 typedef struct floppydumperparams_
 {
@@ -133,7 +117,7 @@ void tick_dump(void *w) {
 	if(window->window->shown())
 	{
 		window->window->make_current();
-		fl_draw_image((unsigned char *)mapfloppybuffer, 8, 210, 460, 200, 3, 0);
+		fl_draw_image(guicontext->mapfloppybuffer, 8, 210, 460, 200, 3, 0);
 	}
 
 	Fl::repeat_timeout(0.02, tick_dump, w);  
@@ -330,11 +314,11 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 						l=xsize;
 						while(l)
 						{
-							mapfloppybuffer[o++]=0x55;
-							mapfloppybuffer[o++]=0x55;
-							mapfloppybuffer[o]=0x55;
+							guicontext->mapfloppybuffer[o++]=0x55;
+							guicontext->mapfloppybuffer[o++]=0x55;
+							guicontext->mapfloppybuffer[o]=0x55;
 							if(i&1)
-								mapfloppybuffer[o]=0xA5;
+								guicontext->mapfloppybuffer[o]=0xA5;
 							o++;
 
 							//o++;	
@@ -439,9 +423,9 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 							l=4<<(sr->Header[k].size);
 							while(l)
 							{
-								mapfloppybuffer[o++]=0xFF;
-								mapfloppybuffer[o++]=0xFF;
-								mapfloppybuffer[o++]=0xFF;
+								guicontext->mapfloppybuffer[o++]=0xFF;
+								guicontext->mapfloppybuffer[o++]=0xFF;
+								guicontext->mapfloppybuffer[o++]=0xFF;
 								//o++;	
 								l--;
 							}
@@ -504,9 +488,9 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 								l=4<<(sr->Header[k].size);
 								while(l)
 								{
-									mapfloppybuffer[o++]=0xFF;
-									mapfloppybuffer[o++]=0xFF;
-									mapfloppybuffer[o++]=0x00;
+									guicontext->mapfloppybuffer[o++]=0xFF;
+									guicontext->mapfloppybuffer[o++]=0xFF;
+									guicontext->mapfloppybuffer[o++]=0x00;
 									//o++;	
 									l--;
 								}
@@ -536,9 +520,9 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 							l=4<<(sr->Header[k].size);
 							while(l)
 							{
-								mapfloppybuffer[o++]=0xFF;
-								mapfloppybuffer[o++]=0x00;
-								mapfloppybuffer[o++]=0x00;
+								guicontext->mapfloppybuffer[o++]=0xFF;
+								guicontext->mapfloppybuffer[o++]=0x00;
+								guicontext->mapfloppybuffer[o++]=0x00;
 								//o++;
 								l--;
 							}
@@ -554,9 +538,9 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 								l=4<<(sr->Header[k].size);
 								while(l)
 								{
-									mapfloppybuffer[o++]=0x00;
-									mapfloppybuffer[o++]=0xFF;
-									mapfloppybuffer[o++]=0x00;
+									guicontext->mapfloppybuffer[o++]=0x00;
+									guicontext->mapfloppybuffer[o++]=0xFF;
+									guicontext->mapfloppybuffer[o++]=0x00;
 									//o++;	
 									l--;
 								}
@@ -645,13 +629,13 @@ void floppy_dump_window_bt_read(Fl_Button* bt, void*)
 	fdp.retry=(int)fdw->number_of_retry->value();
 	fdp.number_of_track=(int)fdw->number_of_track->value();
 
-	fdp.flopemu=flopemu;
+	fdp.flopemu=guicontext->hxcfe;
 	
 	sprintf(tempstr,"%d Sector(s) Read, %d bytes, %d Bad sector(s)",0,0,0);
 	fdw->current_status->value(tempstr);
 
 	//fdw->deactivate();
-	hxc_createthread(flopemu,&fdp,&DumpThreadProc,1);
+	hxc_createthread(guicontext->hxcfe,&fdp,&DumpThreadProc,1);
 }
 
 void floppy_dump_ok(Fl_Button*, void* w)

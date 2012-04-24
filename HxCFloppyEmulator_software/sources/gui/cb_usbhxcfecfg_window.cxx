@@ -56,30 +56,10 @@ extern "C"
 	#include "libhxcfe.h"
 	#include "usb_hxcfloppyemulator.h"
 }
-
+#include "main.h"
 #include "loader.h"
 
-extern HXCFLOPPYEMULATOR * flopemu;
-extern USBHXCFE * usbhxcfe;
-
-
-/*platform platformlist[]=
-{
-	{ AMIGA_DD_FLOPPYMODE,"Amiga","DS0","DS1","DS2","MTRON"},
-	{ AMIGA_HD_FLOPPYMODE,"Amiga HD","DS0","DS1","DS2","MTRON"},
-	{ ATARIST_DD_FLOPPYMODE,"Atari ST","D0SEL","D1SEL","-","MTRON"},
-	{ ATARIST_HD_FLOPPYMODE,"Atari ST HD","D0SEL","D1SEL","-","MTRON"},
-	{ IBMPC_DD_FLOPPYMODE,"IBM PC 720kB","MOTEA","DRVSB","DRVSA","MOTEB"},
-	{ IBMPC_HD_FLOPPYMODE,"IBM PC 1.44MB","MOTEA","DRVSB","DRVSA","MOTEB"},
-	{ IBMPC_ED_FLOPPYMODE,"IBM PC 2.88MB","MOTEA","DRVSB","DRVSA","MOTEB"},
-	{ CPC_DD_FLOPPYMODE,"Amstrad CPC","Drive Select 0","Drive Select 1","-","MOTOR ON"},
-	{ MSX2_DD_FLOPPYMODE,"MSX 2","DS0","DS1","DS2","MTRON"},
-	{ GENERIC_SHUGART_DD_FLOPPYMODE,"Generic Shugart","DS0","DS1","DS2","MTRON"},
-	{ EMU_SHUGART_FLOPPYMODE,"Emu Shugart","DS0","DS1","DS2","MTRON"},
-	{ C64_DD_FLOPPYMODE,"C64 1541","NA","NA","NA","NA"},
-	{ -1,"?","DS0","DS1","DS2","MTRON"}
-};*/
-
+extern s_gui_context * guicontext;
 
 void tick_usb(void *v) {
 	char tempstr[512];
@@ -93,7 +73,7 @@ void tick_usb(void *v) {
 	
 	window=(usbhxcfecfg_window *)v;
 	
-	status=libusbhxcfe_getStats(flopemu,usbhxcfe,&stats,0);
+	status=libusbhxcfe_getStats(guicontext->hxcfe,guicontext->usbhxcfe,&stats,0);
 
 	sprintf(tempstr,"%d (%d p/s)",stats.totalpacketsent,stats.packetsent);
 	stats.packetsent=0;
@@ -164,7 +144,7 @@ void tick_usb(void *v) {
 	}
 
 
-	switch( libusbhxcfe_getDrive(flopemu,usbhxcfe) & 0x3 )
+	switch( libusbhxcfe_getDrive(guicontext->hxcfe,guicontext->usbhxcfe) & 0x3 )
 	{
 		case 0:
 			window->rbt_ds0->set();
@@ -194,7 +174,7 @@ void tick_usb(void *v) {
 		break;
 	}
 			
-	if( libusbhxcfe_getDrive(flopemu,usbhxcfe) >3)
+	if( libusbhxcfe_getDrive(guicontext->hxcfe,guicontext->usbhxcfe) >3)
 	{
 		window->chk_disabledrive->set();
 	}
@@ -203,7 +183,7 @@ void tick_usb(void *v) {
 		window->chk_disabledrive->clear();
 	}
 
-	if(libusbhxcfe_getDoubleStep(flopemu,usbhxcfe))
+	if(libusbhxcfe_getDoubleStep(guicontext->hxcfe,guicontext->usbhxcfe))
 	{
 		window->chk_doublestep->set();
 	}
