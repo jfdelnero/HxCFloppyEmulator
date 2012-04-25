@@ -60,15 +60,17 @@ extern "C"
 
 extern s_gui_context * guicontext;
 
-#define TWOSIDESFLOPPY 0x02
-#define SIDE_INVERTED 0x04
-#define SIDE0_FIRST 0x08
 
 
 void getWindowState(rawfile_loader_window *rlw,cfgrawfile *rfc)
 {
 	memset(rfc,0,sizeof(cfgrawfile));
-	rfc->autogap3=0xff;
+	
+	if(rlw->chk_autogap3->value())
+		rfc->autogap3=0xff;
+	else
+		rfc->autogap3=0x00;
+
 	if(rlw->chk_twosides->value())
 		rfc->sidecfg=2;
 	else

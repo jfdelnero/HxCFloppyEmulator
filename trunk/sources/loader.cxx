@@ -157,6 +157,8 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 	int ret;
 	int oldifmode;
 	unsigned char * trackbuffer;
+	int sectornumber;
+	int offset;
 
 	f=0;
 	if(file)
@@ -192,10 +194,19 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 
 			for(i=0;i<rfc->numberoftrack;i++)
 			{
+				sectornumber=rfc->firstidsector;
+
 				for(j=0;j<nbside;j++)
 				{
+
+					if(!rfc->intersidesectornumbering)
+						sectornumber=rfc->firstidsector;
+
 					// prepare a new track.
-					hxcfe_pushTrack(fb,rfc->rpm,i,j,track_type_list[rfc->tracktype].tracktype);
+					if( ( rfc->sidecfg & SIDE_INVERTED ) && nbside==2)
+						hxcfe_pushTrack(fb,rfc->rpm,i,1-j,track_type_list[rfc->tracktype].tracktype);
+					else
+						hxcfe_pushTrack(fb,rfc->rpm,i,j,track_type_list[rfc->tracktype].tracktype);
 					
 					// Set the skew
 					if(rfc->sideskew)
@@ -207,9 +218,27 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 						hxcfe_setTrackSkew(fb,(unsigned char)i*rfc->skew);
 					}
 
-
 					if(f)
 					{
+						memset(trackbuffer,rfc->fillvalue,(128<<rfc->sectorsize)*rfc->sectorpertrack);
+
+						if(rfc->sidecfg & SIDE0_FIRST )
+						{
+							offset = 0;
+							if(j)
+							{
+								offset = (128<<rfc->sectorsize) * rfc->sectorpertrack * rfc->numberoftrack;
+							}
+							
+							offset += (128<<rfc->sectorsize) * rfc->sectorpertrack * i;
+						}
+						else
+						{
+							offset  = (128<<rfc->sectorsize) * rfc->sectorpertrack * i * nbside;
+							offset += (128<<rfc->sectorsize) * rfc->sectorpertrack * j;
+						}
+						
+						fseek(f,offset,SEEK_SET);
 						fread(trackbuffer,(128<<rfc->sectorsize)*rfc->sectorpertrack,1,f);
 					}
 
@@ -217,9 +246,11 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 					for(k=0;k<rfc->sectorpertrack;k++)
 					{
 						if(f)
-							hxcfe_addSector(fb,rfc->firstidsector+k,j,i,&trackbuffer[k*(128<<rfc->sectorsize)],128<<rfc->sectorsize);
+							hxcfe_addSector(fb,sectornumber,j,i,&trackbuffer[k*(128<<rfc->sectorsize)],128<<rfc->sectorsize);
 						else
-							hxcfe_addSector(fb,rfc->firstidsector+k,j,i,0,128<<rfc->sectorsize);
+							hxcfe_addSector(fb,sectornumber,j,i,0,128<<rfc->sectorsize);
+
+						sectornumber++;
 					}
 
 					// generate the track
