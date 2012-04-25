@@ -60,7 +60,7 @@
 #include "os_api.h"
 #include "tracks/crc.h"
 
-#define PASTI_DBG 1
+//#define PASTI_DBG 1
 
 int STX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
@@ -853,7 +853,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							}
 				
 							///////////////////////////// debug ///////////////////////////////
-#ifndef PASTI_DBG
+#ifdef PASTI_DBG
 							
 							sprintf(tempstring,"Sector:%.2d Size:%.8d Cylcode:%.2d HeadCode:%d SectorCode:%.2d Size:%d",j,sectorconfig[j].sectorsize,sectorconfig[j].cylinder,sectorconfig[j].head,sectorconfig[j].sector,sectorconfig[j].sectorsize);
 							sprintf(&tempstring[strlen(tempstring)]," Sector header:");
@@ -1096,6 +1096,26 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		}
 
 
+		floppydisk->floppyNumberOfSide=1;
+		for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
+		{
+			if(floppydisk->tracks[i])
+			{
+				if(floppydisk->tracks[i]->number_of_side==2)
+				{
+					floppydisk->floppyNumberOfSide=2;
+				}
+			}
+		}
+
+		for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
+		{
+			if(floppydisk->tracks[i])
+			{
+				floppydisk->tracks[i]->number_of_side=floppydisk->tracks[i]->number_of_side;
+			}
+		}
+
 		for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
 		{
 			if(floppydisk->tracks[i])
@@ -1105,8 +1125,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					floppydisk->tracks[i]->sides[0]=tg_generateTrack(0,512,0 ,(unsigned char)i,(unsigned char)0,1,interleave,(unsigned char)(0),250000,currentcylinder->floppyRPM,ISOFORMAT_DD,255,2500| NO_SECTOR_UNDER_INDEX,-2500);
 				}
 
-
-				if(floppydisk->tracks[i]->number_of_side==2)
+				if( floppydisk->floppyNumberOfSide == 2 )
 				{
 					if(!floppydisk->tracks[i]->sides[1])
 					{
@@ -1119,6 +1138,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				floppydisk->tracks[i]=(CYLINDER*)malloc(sizeof(CYLINDER));
 				memset(floppydisk->tracks[i],0,sizeof(CYLINDER));
 				floppydisk->tracks[i]->floppyRPM=300;
+
 				currentcylinder=floppydisk->tracks[i];
 				currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
 					
