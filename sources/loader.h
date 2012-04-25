@@ -1,3 +1,7 @@
+	#define TWOSIDESFLOPPY 0x02
+	#define SIDE_INVERTED 0x04
+	#define SIDE0_FIRST 0x08
+
 	typedef struct cfgrawfile_
 	{
 		unsigned char sectorpertrack;
