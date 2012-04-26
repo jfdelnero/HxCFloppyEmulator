@@ -54,6 +54,7 @@
 #include "floppy_utils.h"
 
 #include "ti99v9t9_loader.h"
+#include "ti99v9t9_writer.h"
 
 #include "os_api.h"
 
@@ -452,7 +453,7 @@ int TI99V9T9_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long inf
 	{
 		(ISVALIDDISKFILE)	TI99V9T9_libIsValidDiskFile,
 		(LOADDISKFILE)		TI99V9T9_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		TI99V9T9_libWrite_DiskFile,
 		(GETPLUGININFOS)	TI99V9T9_libGetPluginInfo
 	};
 
