@@ -1359,7 +1359,7 @@ SECTORCONFIG* hxcfe_searchSector(SECTORSEARCH* ss,int track,int side,int id,int 
 	sc=(SECTORCONFIG *) malloc(sizeof(SECTORCONFIG));
 	do
 	{
-		bitoffset=get_next_MFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+		//bitoffset=get_next_MFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
 
 		switch(type)
 		{

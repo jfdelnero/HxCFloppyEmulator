@@ -1257,6 +1257,14 @@ SOURCE=..\sources\loaders\ti99v9t9_loader\ti99v9t9_loader.c
 
 SOURCE=..\sources\loaders\ti99v9t9_loader\ti99v9t9_loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\ti99v9t9_loader\ti99v9t9_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\ti99v9t9_loader\ti99v9t9_writer.h
+# End Source File
 # End Group
 # Begin Group "DMK"
 
