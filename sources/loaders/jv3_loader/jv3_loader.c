@@ -372,8 +372,8 @@ int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					{
 						
 						sectorconfig[sector_found].sectorsize=pOffset->size;
-						sectorconfig[sector_found].input_data=malloc(sectorconfig[k].sectorsize);
-						memset(sectorconfig[sector_found].input_data,0,sectorconfig[k].sectorsize);
+						sectorconfig[sector_found].input_data=malloc(sectorconfig[sector_found].sectorsize);
+						memset(sectorconfig[sector_found].input_data,0,sectorconfig[sector_found].sectorsize);
 
 						fseek(f, pOffset->offset, SEEK_SET);
 						fread(sectorconfig[sector_found].input_data,pOffset->size,1,f);
@@ -389,12 +389,12 @@ int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						if(pOffset->density)
 						{
 							sectorconfig[sector_found].trackencoding=IBMFORMAT_DD;
-							if(!k) trackformat=IBMFORMAT_DD;
+							if(!sector_found) trackformat=IBMFORMAT_DD;
 						}
 						else
 						{
 							sectorconfig[sector_found].trackencoding=IBMFORMAT_SD;
-							if(!k) trackformat=IBMFORMAT_SD;
+							if(!sector_found) trackformat=IBMFORMAT_SD;
 						}
 
 						sectorconfig[sector_found].cylinder=j;
