@@ -1059,3 +1059,14 @@ int libusbhxcfe_getCurTrack(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif)
 	}
 	return 0;
 }
+
+int libusbhxcfe_setUSBBufferSize(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,int size)
+{
+	if(hwif)
+	{
+		if(size>=512 && size<=4096)
+			hwif->usbstats.packetsize=size;
+	}
+	return 0;
+
+}
