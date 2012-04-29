@@ -84,6 +84,7 @@ typedef struct s_param_bc_params_
 		{ FF_VTR,"VTR - VTrucco Floppy Emulator file format",PLUGIN_VTR_IMG,".vtr"},
 		{ FF_RAW,"RAW - RAW sectors file format",PLUGIN_RAW_LOADER,".img"},
 		{ FF_IMD,"IMD - IMD sectors file format",PLUGIN_IMD_IMG,".imd"},
+		{ FF_V9T9,"TI99/4A V9T9 sectors file format",PLUGIN_TI994A_V9T9,".dsk"},
 		{ FF_EHFE,"HFE - Rev 2 - Experimental",PLUGIN_HXC_EXTHFE,".hfe"},
 		{ -1,"",0,0}			
 	};
@@ -109,16 +110,16 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 				switch(ret)
 				{
 					case HXCFE_UNSUPPORTEDFILE:
-						printf("Load error!: Image file not yet supported!\n");
+						//printf("Load error!: Image file not yet supported!\n");
 					break;
 					case HXCFE_FILECORRUPTED:
-						printf("Load error!: File corrupted ? Read error ?\n");
+						//printf("Load error!: File corrupted ? Read error ?\n");
 					break;
 					case HXCFE_ACCESSERROR:
-						printf("Load error!:  Read file error!\n");
+						//printf("Load error!:  Read file error!\n");
 					break;
 					default:
-						printf("Load error! error %d\n",ret);
+						//printf("Load error! error %d\n",ret);
 					break;
 				}
 			}
@@ -150,17 +151,21 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 
 				loaderid=hxcfe_getLoaderID(floppycontext,ff_type_list[output_file_format].plug_id);
 				if(ret>=0)
-				{			
-				//	hxcfe_floppyGetSetParams(floppycontext,thefloppydisk,SET,DOUBLESTEP,&hwif->double_step);
-				//	hxcfe_floppyGetSetParams(floppycontext,thefloppydisk,SET,INTERFACEMODE,&hwif->interface_mode);
+				{	
+					if(!guicontext->autoselectmode)
+					{
+						hxcfe_floppySetInterfaceMode(guicontext->hxcfe,thefloppydisk,guicontext->interfacemode);
+					}
+					
+					hxcfe_floppySetDoubleStep(guicontext->hxcfe,thefloppydisk,guicontext->doublestep);
+
 					ret=hxcfe_floppyExport(floppycontext,thefloppydisk,destinationfile,loaderid);
 				}
 
 				hxcfe_floppyUnload(floppycontext,thefloppydisk);
 
-
 				tempstr=(char*)malloc(1024);
-							
+
 				i=strlen(destinationfile);
 				do
 				{
@@ -181,8 +186,6 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 
 				free(destinationfile);
 				free(tempstr);
-					
-
 			}
 		}		
 		filenb++;
@@ -272,16 +275,16 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 							switch(ret)
 							{
 								case HXCFE_UNSUPPORTEDFILE:
-									printf("Load error!: Image file not yet supported!\n");
+									//printf("Load error!: Image file not yet supported!\n");
 								break;
 								case HXCFE_FILECORRUPTED:
-									printf("Load error!: File corrupted ? Read error ?\n");
+									//printf("Load error!: File corrupted ? Read error ?\n");
 								break;
 								case HXCFE_ACCESSERROR:
-									printf("Load error!:  Read file error!\n");
+									//printf("Load error!:  Read file error!\n");
 								break;
 								default:
-									printf("Load error! error %d\n",ret);
+									//printf("Load error! error %d\n",ret);
 								break;
 							}
 						}
@@ -306,8 +309,13 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 							loaderid=hxcfe_getLoaderID(floppycontext,ff_type_list[output_file_format].plug_id);
 							if(loaderid>=0)
 							{
-								//	hxcfe_floppyGetSetParams(floppycontext,thefloppydisk,SET,DOUBLESTEP,&hwif->double_step);
-								//	hxcfe_floppyGetSetParams(floppycontext,thefloppydisk,SET,INTERFACEMODE,&hwif->interface_mode);
+								if(!guicontext->autoselectmode)
+								{
+									hxcfe_floppySetInterfaceMode(guicontext->hxcfe,thefloppydisk,guicontext->interfacemode);
+								}
+								
+								hxcfe_floppySetDoubleStep(guicontext->hxcfe,thefloppydisk,guicontext->doublestep);
+
 								ret=hxcfe_floppyExport(floppycontext,thefloppydisk,destinationfile,loaderid);
 							}
 							else
@@ -337,27 +345,25 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 							}
 
 							free(destinationfile);
-							free(tempstr);
-					
+							free(tempstr);				
 						}
 					}	
 				}
-			
+
 				bbool=find_next_file(hfindfile,folder,file,&FindFileData);	
 			}
 		}
-		
+
 	}
-	else printf("Error FindFirstFile\n");
-	
+
 	find_close(hfindfile);
-	
+
 	return 0;
 }
 
 int convertthread(void* floppycontext,void* hw_context)
 {
-	
+
 	HXCFLOPPYEMULATOR* floppyem;
 	batch_converter_window *bcw;
 	char * tempstr;
@@ -369,10 +375,10 @@ int convertthread(void* floppycontext,void* hw_context)
 	strcat((char*)&bcparams.sourcedir,bcw->strin_src_dir->value());
 	strcat((char*)&bcparams.destdir,bcw->strin_dst_dir->value());
 	bcparams.windowshwd=bcw;
-	
+
 	if(strlen(bcparams.sourcedir) && strlen(bcparams.destdir))
 	{
-	
+
 		browse_and_convert_directory(	guicontext->hxcfe,
 										bcparams.sourcedir,
 										bcparams.destdir,
@@ -385,7 +391,7 @@ int convertthread(void* floppycontext,void* hw_context)
 		bcparams.windowshwd->strout_convert_status->value((const char*)tempstr);
 		free(tempstr);
 	}
-	
+
 	bcw->bt_convert->activate();
 	return 0;
 }
@@ -410,7 +416,7 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 	strcat((char*)&bcparams.destdir,bcw->strin_dst_dir->value());
 	bcparams.windowshwd=bcw;
 
-	
+
 	filecount=0;
 	i=0;
 	while(bcparams2->files[i])
@@ -426,7 +432,6 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 
 	filelist =(char **) malloc(sizeof(char *) * (filecount + 1) );
 	memset(filelist,0,sizeof(char *) * (filecount + 1) );
-
 
 	i=0;
 	j=0;
@@ -469,8 +474,6 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 			free(filelist[k]);
 			k++;
 		}
-
-
 	}
 
 	free(filelist);
@@ -479,12 +482,11 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 	return 0;
 }
 
-
 int select_dir(char * title,char * str) 
 {
 	char * dir;
 	Fl_Native_File_Chooser fnfc;
-  
+
 	fnfc.title(title);
 	fnfc.type(Fl_Native_File_Chooser::BROWSE_DIRECTORY);
 	fnfc.filter("\t*.*\n");
@@ -499,7 +501,7 @@ int select_dir(char * title,char * str)
 			break; // CANCEL
 		}
 		default:
-		{			
+		{
 			dir=(char*)fnfc.filename();
 			sprintf(str,"%s",dir);
 			return 0;
@@ -569,9 +571,6 @@ void dnd_bc_conv(const char *urls)
 	//loadfloppy((char*)urls);
 }
 
-
-
-
 void dnd_bc_cb(Fl_Widget *o, void *v)
 {
 	batch_converter_window *bcw;
@@ -586,10 +585,10 @@ void dnd_bc_cb(Fl_Widget *o, void *v)
 	if(dnd->event() == FL_PASTE)
 	{
 		bcw->bt_convert->deactivate();
-		
+
 		bcparams=(s_param_bc_params *)malloc(sizeof(s_param_bc_params *));
 		memset(bcparams,0,sizeof(s_param_bc_params));
-		
+
 		bcparams->bcw=bcw;
 		bcparams->files=dnd->event_text();
 

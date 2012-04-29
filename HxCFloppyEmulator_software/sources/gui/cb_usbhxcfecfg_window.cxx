@@ -63,7 +63,6 @@ extern s_gui_context * guicontext;
 
 void tick_usb(void *v) {
 	char tempstr[512];
-//	unsigned long packetsize;
 	unsigned long datathroughput;
 	unsigned long period;
 	float packetpersecond;
@@ -99,8 +98,8 @@ void tick_usb(void *v) {
 	window->strout_datasent->value((const char*)tempstr);
 				
 				
-	datathroughput=stats.dataout;
-	sprintf(tempstr,"%d bytes/second",stats.dataout);
+	datathroughput=stats.dataout * 2;
+	sprintf(tempstr,"%d bytes/second",datathroughput);
 	window->strout_datathroughput->value((const char*)tempstr);
 				
 				
@@ -143,55 +142,88 @@ void tick_usb(void *v) {
 					
 	}
 
-
-	switch( libusbhxcfe_getDrive(guicontext->hxcfe,guicontext->usbhxcfe) & 0x3 )
-	{
-		case 0:
-			window->rbt_ds0->set();
-			window->rbt_ds1->clear();
-			window->rbt_ds2->clear();
-			window->rbt_ds3->clear();
-		break;
-
-		case 1:
-			window->rbt_ds0->clear();
-			window->rbt_ds1->set();
-			window->rbt_ds2->clear();
-			window->rbt_ds3->clear();
-		break;
-		
-		case 2:
-			window->rbt_ds0->clear();
-			window->rbt_ds1->clear();
-			window->rbt_ds2->set();
-			window->rbt_ds3->clear();
-		break;
-		case 3:
-			window->rbt_ds0->clear();
-			window->rbt_ds1->clear();
-			window->rbt_ds2->clear();
-			window->rbt_ds3->set();
-		break;
-	}
-			
-	if( libusbhxcfe_getDrive(guicontext->hxcfe,guicontext->usbhxcfe) >3)
-	{
-		window->chk_disabledrive->set();
-	}
-	else
-	{
-		window->chk_disabledrive->clear();
-	}
-
-	if(libusbhxcfe_getDoubleStep(guicontext->hxcfe,guicontext->usbhxcfe))
-	{
-		window->chk_doublestep->set();
-	}
-	else
-	{
-		window->chk_doublestep->clear();
-	}
-
-
 	Fl::repeat_timeout(0.50, tick_usb, v);
+}
+
+void usbifcfg_window_datachanged(Fl_Widget * w,void *)
+{
+	usbhxcfecfg_window *usbcfgw;
+	Fl_Widget* tw;
+
+	tw=w;
+	do
+	{
+		tw=tw->parent();
+		usbcfgw=(usbhxcfecfg_window *)tw->user_data();
+	}while(!usbcfgw);
+
+	if(usbcfgw->chk_twistedcable->value())
+	{
+		if(usbcfgw->rbt_ds0->value())
+			guicontext->driveid=3;
+		if(usbcfgw->rbt_ds1->value())
+			guicontext->driveid=2;
+		if(usbcfgw->rbt_ds2->value())
+			guicontext->driveid=1;
+		if(usbcfgw->rbt_ds3->value())
+			guicontext->driveid=0;
+	}
+	else
+	{
+		if(usbcfgw->rbt_ds3->value())
+			guicontext->driveid=3;
+		if(usbcfgw->rbt_ds2->value())
+			guicontext->driveid=2;
+		if(usbcfgw->rbt_ds1->value())
+			guicontext->driveid=1;
+		if(usbcfgw->rbt_ds0->value())
+			guicontext->driveid=0;
+	}
+
+	if(usbcfgw->chk_disabledrive->value())
+		guicontext->driveid=guicontext->driveid | 0x4 ;
+	else
+		guicontext->driveid=guicontext->driveid & ~0x4 ;
+
+	libusbhxcfe_setInterfaceMode(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->interfacemode,guicontext->doublestep,guicontext->driveid);
+	libusbhxcfe_setUSBBufferSize(guicontext->hxcfe,guicontext->usbhxcfe, (int)usbcfgw->slider_usbpacket_size->value() );
+}
+
+void ifcfg2_window_datachanged(Fl_Widget * w,void *)
+{
+	usbhxcfecfg_window *usbcfgw;
+	Fl_Widget* tw;
+
+	tw=w;
+	do
+	{
+		tw=tw->parent();
+		usbcfgw=(usbhxcfecfg_window *)tw->user_data();
+	}while(!usbcfgw);
+
+	if(!usbcfgw->chk_autoifmode->value())
+	{
+		guicontext->autoselectmode = 0x00;
+	}
+	else
+	{
+		guicontext->autoselectmode = 0xFF;
+	}
+
+	if(!usbcfgw->chk_doublestep->value())
+	{
+		guicontext->doublestep = 0x00;
+	}
+	else
+	{
+		guicontext->doublestep = 0xFF;
+	}
+
+}
+
+void resetusbstat_bt(Fl_Button *w,void *)
+{
+	USBStats stats;
+
+	libusbhxcfe_getStats(guicontext->hxcfe,guicontext->usbhxcfe,&stats,1);
 }

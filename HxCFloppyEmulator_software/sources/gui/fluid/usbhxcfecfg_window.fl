@@ -8,85 +8,97 @@ class usbhxcfecfg_window {open
   } {
     Fl_Window window {
       label {USB HxC Floppy Emulator settings and status} open
-      xywh {270 114 573 252} type Double visible
+      xywh {343 284 572 242} type Double visible
     } {
       Fl_Group {} {
         label {USB HxC Floppy Emulator status} open
-        xywh {15 17 390 63} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+        xywh {5 17 400 63} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {
         Fl_Output strout_usbhfestatus {
           label Status
-          xywh {75 42 295 25} labelsize 12
+          xywh {65 42 315 25} labelsize 12
         }
       }
       Fl_Group {} {
         label {USB statistics and settings} open
-        xywh {15 87 390 150} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+        xywh {5 87 400 150} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {
-        Fl_Value_Output valout_packetsize {
-          label {Packet size}
-          xywh {108 112 82 20} labelsize 12 textsize 12
-        }
         Fl_Output strout_maxsettletime {
           label {Max settle time}
-          xywh {108 134 82 20} labelsize 12 textsize 12
+          xywh {96 134 107 20} labelsize 12 textsize 12
         }
         Fl_Output strout_minsettletime {
           label {Min settle time}
-          xywh {108 155 82 20} labelsize 12 textsize 12
-        }
-        Fl_Slider slider_process_priority {
-          label {Process priority}
-          xywh {108 177 82 20} type {Horz Knob} labelsize 12 align 4
+          xywh {96 156 107 20} labelsize 12 textsize 12
         }
         Fl_Value_Output valout_synclost {
           label {Sync lost}
-          xywh {295 178 82 20} labelsize 12 textsize 12
+          xywh {307 178 93 20} labelsize 12 textsize 12
         }
         Fl_Output strout_packetsent {
           label {Packet sent}
-          xywh {295 156 82 20} labelsize 12 textsize 12
+          xywh {307 156 93 20} labelsize 12 textsize 12
         }
         Fl_Output strout_datasent {
           label {Data sent}
-          xywh {295 134 82 20} labelsize 12 textsize 12
+          xywh {307 134 93 20} labelsize 12 textsize 12
         }
         Fl_Output strout_datathroughput {
           label {Data throughput}
-          xywh {295 112 82 20} labelsize 12 textsize 12
+          xywh {307 112 93 20} labelsize 12 textsize 12
         }
         Fl_Button {} {
           label Reset
-          xywh {295 207 85 20}
+          user_data this
+          callback resetusbstat_bt
+          xywh {307 211 93 20}
+        }
+        Fl_Value_Slider slider_usbpacket_size {
+          label {Packet size}
+          user_data this
+          callback usbifcfg_window_datachanged
+          xywh {96 112 107 20} type Horizontal labelsize 12 align 4 textsize 12
         }
       }
       Fl_Group {} {
         label {Drive ID setting} open
-        xywh {410 17 105 109} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL labelsize 12 align 21
+        xywh {410 17 105 114} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL labelsize 12 align 21
       } {
         Fl_Round_Button rbt_ds2 {
           label DS2
-          xywh {415 59 25 25} type Radio down_box ROUND_DOWN_BOX labelsize 12
+          user_data this
+          callback usbifcfg_window_datachanged
+          xywh {415 61 25 25} type Radio down_box ROUND_DOWN_BOX labelsize 12
         }
         Fl_Round_Button rbt_ds3 {
           label MTRON
-          xywh {415 73 25 25} type Radio down_box ROUND_DOWN_BOX labelsize 12
+          user_data this
+          callback usbifcfg_window_datachanged
+          xywh {415 75 25 25} type Radio down_box ROUND_DOWN_BOX labelsize 12
         }
         Fl_Check_Button chk_twistedcable {
           label {Twisted cable}
-          xywh {415 87 25 25} down_box DOWN_BOX labelsize 12
+          user_data this
+          callback usbifcfg_window_datachanged
+          xywh {415 90 25 25} down_box DOWN_BOX labelsize 12
         }
         Fl_Check_Button chk_disabledrive {
           label {Disable drive}
-          xywh {415 101 25 25} down_box DOWN_BOX labelsize 12
+          user_data this
+          callback usbifcfg_window_datachanged
+          xywh {415 106 25 25} down_box DOWN_BOX labelsize 12
         }
         Fl_Round_Button rbt_ds0 {
           label DS0
-          xywh {415 34 25 25} type Radio down_box ROUND_DOWN_BOX labelsize 12
+          user_data this
+          callback usbifcfg_window_datachanged
+          xywh {415 31 25 25} type Radio down_box ROUND_DOWN_BOX labelsize 12
         }
         Fl_Round_Button rbt_ds1 {
           label DS1
-          xywh {415 47 25 25} type Radio down_box ROUND_DOWN_BOX labelsize 12
+          user_data this
+          callback usbifcfg_window_datachanged
+          xywh {415 46 25 25} type Radio down_box ROUND_DOWN_BOX labelsize 12
         }
       }
       Fl_Group {} {
@@ -95,13 +107,19 @@ class usbhxcfecfg_window {open
       } {
         Fl_Check_Button chk_autoifmode {
           label Auto
-          xywh {415 198 25 25} down_box DOWN_BOX labelsize 12
+          user_data this
+          callback ifcfg2_window_datachanged
+          xywh {415 198 25 25} down_box DOWN_BOX labelsize 12 when 1
         }
         Fl_Check_Button chk_doublestep {
           label {Double Step}
-          xywh {415 212 25 25} down_box DOWN_BOX labelsize 12
+          user_data this
+          callback ifcfg2_window_datachanged
+          xywh {415 212 25 25} down_box DOWN_BOX labelsize 12 when 1
         }
-        Fl_Choice choice_ifmode {open
+        Fl_Choice choice_ifmode {
+          user_data this
+          callback ifcfg2_window_datachanged open selected
           xywh {415 152 95 20} down_box BORDER_BOX labelsize 12 textsize 12
         } {}
       }
@@ -119,7 +137,6 @@ class usbhxcfecfg_window {open
         xywh {520 77 45 25}
       }
     }
-    code {tick_usb(this);} {selected
-    }
+    code {tick_usb(this);} {}
   }
 } 

@@ -29,6 +29,7 @@
 		FF_VTR,
 		FF_RAW,
 		FF_IMD,
+		FF_V9T9,
 		FF_EHFE
 	};
 

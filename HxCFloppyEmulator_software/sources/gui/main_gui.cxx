@@ -222,6 +222,8 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 		{PLUGIN_HXC_AFI},
 		{PLUGIN_RAW_LOADER},
 		{PLUGIN_AMSTRADCPC_DSK},
+		{PLUGIN_IMD_IMG},
+		{PLUGIN_TI994A_V9T9},
 		{PLUGIN_HXC_EXTHFE}
 	};
 
@@ -249,7 +251,9 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"MFM file (MFM/FM track file format)\t*.mfm\n"
 					"AFI file (Advanced File image format)\t*.afi\n"
 					"IMG file (RAW Sector file format)\t*.img\n"
-					"CPC DSK file\0*.dsk\0IMD file\t*.imd\n"
+					"CPC DSK file\t*.dsk\n"
+					"IMD file\t*.imd\n"
+					"TI99/4A V9T9 DSK file\t*.dsk\n"
 					"HFE file (Rev 2 - Experimental)\t*.hfe\n");
 
 
@@ -268,9 +272,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 				loaderid=hxcfe_getLoaderID(guicontext->hxcfe,(char*)plugid_lst[i]);
 				
 				if(loaderid>=0)
-				{
-	//				hxcfe_floppyGetSetParams(guicontext->hxcfe,thefloppydisk,SET,DOUBLESTEP,&hwif->double_step);
-	//				hxcfe_floppyGetSetParams(guicontext->hxcfe,thefloppydisk,SET,INTERFACEMODE,&hwif->interface_mode);
+				{				
 					hxcfe_floppyExport(guicontext->hxcfe,guicontext->loadedfloppy,(char*)fnfc.filename(),loaderid);
 				}
 				break; // FILE CHOSEN
@@ -300,16 +302,36 @@ void fc_callback(Fl_File_Chooser * fc, void *)
 
 #define WINDOW_XSIZE 341
 
+void sync_if_config()
+{
+	if(guicontext->loadedfloppy)
+	{
+		if(guicontext->autoselectmode)
+		{
+			guicontext->interfacemode = hxcfe_floppyGetInterfaceMode(guicontext->hxcfe,guicontext->loadedfloppy);
+		}
+		else
+		{
+			hxcfe_floppySetInterfaceMode(guicontext->hxcfe,guicontext->loadedfloppy,guicontext->interfacemode);
+		}
+		hxcfe_floppySetDoubleStep(guicontext->hxcfe,guicontext->loadedfloppy,guicontext->doublestep);
+	}
 
-void format_choice_cb(Fl_Widget *, void *v) {
-  //cursor = (Fl_Cursor)(long)v;
-  //cursor_slider->value(cursor);
-  //fl_cursor(cursor,fg,bg);
+	if(guicontext->usbhxcfe)
+		libusbhxcfe_setInterfaceMode(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->interfacemode,guicontext->doublestep,guicontext->driveid);
+}
+
+void format_choice_cb(Fl_Widget *, void *v) 
+{
+	guicontext->interfacemode =  (int)v;
+
+	sync_if_config();
 }
 
 void dnd_open(const char *urls)
 {
 	load_floppy_image((char*)urls);
+	
 }
 
 void dnd_cb(Fl_Widget *o, void *v)
@@ -387,6 +409,59 @@ static void tick_mw(void *v) {
 		window->track_pos->value((float)libusbhxcfe_getCurTrack(guicontext->hxcfe,guicontext->usbhxcfe));
 	}
 
+	if(guicontext->autoselectmode)
+	{
+		if(!window->sdcfg_window->chk_hfr_autoifmode->value())
+			window->sdcfg_window->chk_hfr_autoifmode->value(1);
+		if(!window->usbcfg_window->chk_autoifmode->value())
+			window->usbcfg_window->chk_autoifmode->value(1);
+
+		window->usbcfg_window->choice_ifmode->deactivate();
+		window->sdcfg_window->choice_hfeifmode->deactivate();
+
+		i=0;
+		while( if_choices[i].text && ((int)if_choices[i].user_data_ != guicontext->interfacemode))
+		{
+			i++;
+		}
+		window->usbcfg_window->choice_ifmode->value(i);
+		window->sdcfg_window->choice_hfeifmode->value(i);
+	}
+	else
+	{
+		if(window->sdcfg_window->chk_hfr_autoifmode->value())
+			window->sdcfg_window->chk_hfr_autoifmode->value(0);
+		if(window->usbcfg_window->chk_autoifmode->value())
+			window->usbcfg_window->chk_autoifmode->value(0);
+
+		i=0;
+		while( if_choices[i].text && ((int)if_choices[i].user_data_ != guicontext->interfacemode))
+		{
+			i++;
+		}
+		window->usbcfg_window->choice_ifmode->value(i);
+		window->sdcfg_window->choice_hfeifmode->value(i);
+
+
+		window->usbcfg_window->choice_ifmode->activate();
+		window->sdcfg_window->choice_hfeifmode->activate();
+	}
+
+	if(guicontext->doublestep)
+	{
+		if(!window->sdcfg_window->chk_hfe_doublestep->value())
+			window->sdcfg_window->chk_hfe_doublestep->value(1);
+		if(!window->usbcfg_window->chk_doublestep->value())
+			window->usbcfg_window->chk_doublestep->value(1);
+	}
+	else
+	{
+		if(window->sdcfg_window->chk_hfe_doublestep->value())
+			window->sdcfg_window->chk_hfe_doublestep->value(0);
+		if(window->usbcfg_window->chk_doublestep->value())
+			window->usbcfg_window->chk_doublestep->value(0);
+	}
+
 	Fl::repeat_timeout(0.10, tick_mw, v);
 
 }
@@ -398,8 +473,13 @@ Main_Window::Main_Window()
 	txtindex=0;
 	i=0;
 	evt_txt=0;
+	USBStats stats;
 
 	guicontext->loadedfloppy=0;
+	guicontext->autoselectmode=0xFF;
+	guicontext->driveid=0x00;
+	guicontext->doublestep=0x00;
+	guicontext->interfacemode=GENERIC_SHUGART_DD_FLOPPYMODE;
 	guicontext->hxcfe=hxcfe_init();
 	hxcfe_setOutputFunc(guicontext->hxcfe,CUI_affiche);
 		
@@ -553,13 +633,18 @@ Main_Window::Main_Window()
 
 	//////////////////////////////////////////////
 	// USB FE CFG window
+
+	libusbhxcfe_getStats(guicontext->hxcfe,guicontext->usbhxcfe,&stats,0);
 	this->usbcfg_window=new usbhxcfecfg_window();
 	usbcfg_window->choice_ifmode->menu(if_choices);
-	usbcfg_window->slider_process_priority->scrollvalue(0,1,0,5);
+	usbcfg_window->slider_usbpacket_size->scrollvalue(stats.packetsize,128,512,4096-(512-128));
+	usbcfg_window->rbt_ds0->value(1);
 
 	//////////////////////////////////////////////
 	// About window
 	this->about_window=new About_box();
+
+	sync_if_config();
 
 	txtindex=0;
 	tick_mw(this);

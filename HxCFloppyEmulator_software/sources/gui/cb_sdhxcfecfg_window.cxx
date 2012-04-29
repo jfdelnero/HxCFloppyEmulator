@@ -57,10 +57,13 @@ extern "C"
 	#include "usb_hxcfloppyemulator.h"
 }
 
+#include "main.h"
 #include "loader.h"
 
 unsigned char filebuffer[8*1024];
 
+extern s_gui_context * guicontext;
+extern Fl_Menu_Item if_choices[];
 
 void fill_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 {
@@ -103,7 +106,6 @@ void fill_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 		filecfg->step_sound=0xFF;
 
 	filecfg->lcd_scroll_speed=64+((255-64)) - (unsigned char)sdcfgw->slider_scrolltxt_speed->value();
-					
 
 	filecfg->startup_mode=0;
 
@@ -115,7 +117,6 @@ void fill_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 		filecfg->startup_mode=filecfg->startup_mode|0x4;
 	if(sdcfgw->chk_preindex->value())
 		filecfg->startup_mode=filecfg->startup_mode|0x8;
-
 }
 
 void set_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
@@ -186,9 +187,9 @@ void sdhxcfecfg_window_datachanged(Fl_Widget* w, void*)
 		sdcfgw=(sdhxcfecfg_window *)tw->user_data();
 	}while(!sdcfgw);
 
-	fill_cfg(sdcfgw,(sdhxcfecfgfile *)&filebuffer);			
-}
+	fill_cfg(sdcfgw,(sdhxcfecfgfile *)&filebuffer);
 
+}
 
 void sdhxcfecfg_window_bt_load(Fl_Button* bt, void*)
 {
@@ -235,3 +236,46 @@ void sdhxcfecfg_window_bt_save(Fl_Button* bt, void*)
 	}
 }
 
+void save_ifcfg_window_bt(Fl_Button * bt,void *)
+{
+
+}
+
+void load_ifcfg_window_bt(Fl_Button * bt,void *)
+{
+
+}
+
+void ifcfg_window_datachanged(Fl_Widget * w,void * bt)
+{
+
+	sdhxcfecfg_window *sdcfgw;
+	Fl_Widget* tw;
+
+	tw=w;
+	do
+	{
+		tw=tw->parent();
+		sdcfgw=(sdhxcfecfg_window *)tw->user_data();
+	}while(!sdcfgw);
+
+
+	if(!sdcfgw->chk_hfr_autoifmode->value())
+	{
+		guicontext->autoselectmode = 0x00;
+	}
+	else
+	{
+		guicontext->autoselectmode = 0xFF;
+	}
+
+	if(!sdcfgw->chk_hfe_doublestep->value())
+	{
+		guicontext->doublestep = 0x00;
+	}
+	else
+	{
+		guicontext->doublestep = 0xFF;
+	}
+
+}
