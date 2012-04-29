@@ -118,26 +118,29 @@ sdhxcfecfg_window::sdhxcfecfg_window() {
       { chk_hfr_autoifmode = new Fl_Check_Button(335, 54, 25, 25, "Auto");
         chk_hfr_autoifmode->down_box(FL_DOWN_BOX);
         chk_hfr_autoifmode->labelsize(12);
-        chk_hfr_autoifmode->user_data((void*)(this));
+        chk_hfr_autoifmode->callback((Fl_Callback*)ifcfg_window_datachanged, (void*)(this));
+		chk_hfr_autoifmode->when(FL_WHEN_CHANGED);
       } // Fl_Check_Button* chk_hfr_autoifmode
       { chk_hfe_doublestep = new Fl_Check_Button(335, 72, 25, 22, "Double Step");
         chk_hfe_doublestep->down_box(FL_DOWN_BOX);
         chk_hfe_doublestep->labelsize(12);
-        chk_hfe_doublestep->user_data((void*)(this));
+        chk_hfe_doublestep->callback((Fl_Callback*)ifcfg_window_datachanged, (void*)(this));
+		chk_hfe_doublestep->when(FL_WHEN_CHANGED);
       } // Fl_Check_Button* chk_hfe_doublestep
       { Fl_Button* o = new Fl_Button(425, 59, 50, 17, "Load");
         o->labelsize(12);
-        o->user_data((void*)(this));
+        o->callback((Fl_Callback*)load_ifcfg_window_bt, (void*)(this));
       } // Fl_Button* o
       { Fl_Button* o = new Fl_Button(425, 76, 50, 16, "Save");
         o->labelsize(12);
-        o->user_data((void*)(this));
+        o->callback((Fl_Callback*)save_ifcfg_window_bt, (void*)(this));
       } // Fl_Button* o
       { choice_hfeifmode = new Fl_Choice(335, 24, 140, 20);
         choice_hfeifmode->down_box(FL_BORDER_BOX);
         choice_hfeifmode->labelsize(12);
         choice_hfeifmode->textsize(12);
-        choice_hfeifmode->user_data((void*)(this));
+        choice_hfeifmode->callback((Fl_Callback*)ifcfg_window_datachanged, (void*)(this));
+        choice_hfeifmode->when(FL_WHEN_RELEASE);
       } // Fl_Choice* choice_hfeifmode
       o->end();
     } // Fl_Group* o
