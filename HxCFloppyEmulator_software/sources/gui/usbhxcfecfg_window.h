@@ -9,8 +9,10 @@
 #include <FL/Fl_Value_Output.H>
 #include <FL/Fl_Slider.H>
 #include <FL/Fl_Button.H>
+extern void resetusbstat_bt(Fl_Button*, void*);
 #include <FL/Fl_Round_Button.H>
 #include <FL/Fl_Check_Button.H>
+extern void usbifcfg_window_datachanged(Fl_Widget*, void*);
 #include <FL/Fl_Choice.H>
 
 class usbhxcfecfg_window {
