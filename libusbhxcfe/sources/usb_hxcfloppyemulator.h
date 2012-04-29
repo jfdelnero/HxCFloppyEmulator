@@ -108,6 +108,7 @@ int libusbhxcfe_loadFloppy(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,FLOP
 int libusbhxcfe_ejectFloppy(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif);
 int libusbhxcfe_getStats(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,USBStats* stats,int clear);
 int libusbhxcfe_setInterfaceMode(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,int interfacemode,int doublestep,int drive);
+int libusbhxcfe_setUSBBufferSize(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,int size);
 int libusbhxcfe_getInterfaceMode(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif);
 int libusbhxcfe_getDoubleStep(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif);
 int libusbhxcfe_getDrive(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif);

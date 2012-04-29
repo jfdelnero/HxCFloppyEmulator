@@ -10,3 +10,5 @@ EXPORTS
 	libusbhxcfe_getDoubleStep		@8
 	libusbhxcfe_getDrive			@9
 	libusbhxcfe_getCurTrack			@10
+	libusbhxcfe_setUSBBufferSize	@11
+
