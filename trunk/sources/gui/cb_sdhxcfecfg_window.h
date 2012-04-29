@@ -1,5 +1,6 @@
 
 void sdhxcfecfg_window_datachanged(Fl_Widget* w, void*);
+int getInterfaceSetting(sdhxcfecfg_window *sdcfgw);
 
 #pragma pack(1)
 typedef struct sdhxcfecfgfile_

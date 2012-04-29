@@ -109,32 +109,37 @@ class sdhxcfecfg_window {open
         Fl_Check_Button chk_hfr_autoifmode {
           label Auto
           user_data this
+          callback ifcfg_window_datachanged
           xywh {335 54 25 25} down_box DOWN_BOX labelsize 12
         }
         Fl_Check_Button chk_hfe_doublestep {
           label {Double Step}
           user_data this
+          callback ifcfg_window_datachanged
           xywh {335 72 25 22} down_box DOWN_BOX labelsize 12
         }
         Fl_Button {} {
           label Load
           user_data this
+          callback load_ifcfg_window_bt
           xywh {425 59 50 17} labelsize 12
         }
         Fl_Button {} {
           label Save
           user_data this
+          callback save_ifcfg_window_bt
           xywh {425 76 50 16} labelsize 12
         }
         Fl_Choice choice_hfeifmode {
-          user_data this open
-          xywh {335 24 140 20} down_box BORDER_BOX labelsize 12 textsize 12
+          user_data this
+          callback ifcfg_window_datachanged open selected
+          xywh {335 24 140 20} down_box BORDER_BOX labelsize 12 when 1 textsize 12
         } {}
       }
       Fl_Button {} {
         label {Load config file}
         user_data this
-        callback sdhxcfecfg_window_bt_load selected
+        callback sdhxcfecfg_window_bt_load
         xywh {395 173 90 25} labelsize 12
       }
       Fl_Button {} {

@@ -43,6 +43,7 @@ Fl_Menu_Item format_choices[]=
 	{ "VTR - VTrucco Floppy Emulator file format",0,format_choice_cb,(void*)PLUGIN_VTR_IMG},
 	{ "RAW - RAW sectors file format",0,format_choice_cb,(void*)PLUGIN_RAW_IMG},
 	{ "IMD - IMD sectors file format",0,format_choice_cb,(void*)PLUGIN_IMD_IMG},
+	{ "V9T9- TI99/4A sectors file format",0,format_choice_cb,(void*)PLUGIN_TI994A_V9T9},
 	{ "HFE - Rev 2 - Experimental",0,format_choice_cb,(void*)PLUGIN_HXC_EXTHFE},
 	{0}
 };
@@ -155,7 +156,7 @@ Fl_Menu_Item if_choices[]=
 	{ "Generic Shugart",0,format_choice_cb,(void*)GENERIC_SHUGART_DD_FLOPPYMODE},
 	{ "Emu Shugart",0,format_choice_cb,(void*)EMU_SHUGART_FLOPPYMODE},
 	{ "C64 1541",0,format_choice_cb,(void*)C64_DD_FLOPPYMODE},
-
+	{ 0,0,0,(void*)0},
 	{0}
 };
 
