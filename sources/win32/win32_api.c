@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011 Jean-François DEL NERO
+// Copyright (C) 2006 - 2012 Jean-François DEL NERO
 //
 // This file is part of HxCFloppyEmulator.
 //
@@ -24,6 +24,7 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 */
+
 #include <windows.h>
 #include <stdio.h>
 
@@ -52,8 +53,6 @@ DWORD WINAPI ThreadProc( LPVOID lpParameter)
 
 	return 0;
 }
-
-
 
 unsigned long  hxc_createevent(HXCFLOPPYEMULATOR* floppycontext,unsigned char id)
 {
@@ -149,114 +148,4 @@ char * getcurrentdirectory(char *currentdirectory,int buffersize)
 
 	return 0;
 }
-
-long find_first_file(char *folder,char *file,filefoundinfo* fileinfo)
-{
-	HANDLE hfindfile;
-	char *folderstr;
-	WIN32_FIND_DATA FindFileData;
-
-	if(file)
-	{
-		folderstr=(char *) malloc(strlen(folder)+strlen(file)+2);
-		sprintf((char *)folderstr,"%s\\%s",folder,file);
-	}
-	else
-	{
-		folderstr=(char *) malloc(strlen(folder)+1);
-		sprintf((char *)folderstr,"%s",folder);
-	}
-
-	hfindfile=FindFirstFile(folderstr, &FindFileData); 
-	if(hfindfile!=INVALID_HANDLE_VALUE)
-	{
-		sprintf(fileinfo->filename,"%s",FindFileData.cFileName);
-
-		fileinfo->isdirectory=0;
-
-		if(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-		{
-			fileinfo->isdirectory=1;
-		}
-		
-		fileinfo->size=FindFileData.nFileSizeLow;
-		free(folderstr);
-		return (long)hfindfile;
-	}
-	else
-	{
-		free(folderstr);
-		return -1;
-	}
-	
-return 0;
-}
-
-long find_next_file(long handleff,char *folder,char *file,filefoundinfo* fileinfo)
-{
-	WIN32_FIND_DATA FindFileData;
-	long ret;
-
-	ret=FindNextFile((HANDLE)handleff,&FindFileData);
-	if(ret)
-	{
-		sprintf(fileinfo->filename,"%s",FindFileData.cFileName);
-
-		fileinfo->isdirectory=0;
-
-		if(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-		{
-			fileinfo->isdirectory=1;
-		}
-		
-		fileinfo->size=FindFileData.nFileSizeLow;
-	}
-	
-	return ret;
-}
-
-long find_close(long handle)
-{
-	FindClose((void*)handle);
-	return 0;
-}
-
-
-char * strupper(char * str)
-{
-	int i;
-	
-	i=0;
-	while(str[i])
-	{
-	
-		if(str[i]>='a' && str[i]<='z')
-		{
-			str[i]=str[i]+('A'-'a');
-		}
-		i++;
-	}
-
-	return str;
-}
-
-
-char * strlower(char * str)
-{
-	int i;
-	
-	i=0;
-	while(str[i])
-	{
-	
-		if(str[i]>='A' && str[i]<='Z')
-		{
-			str[i]=str[i]+('a'-'A');
-		}
-		i++;
-	}
-
-	return str;
-}
-
 

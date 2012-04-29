@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011 Jean-François DEL NERO
+// Copyright (C) 2006 - 2012 Jean-François DEL NERO
 //
 // This file is part of HxCFloppyEmulator.
 //
@@ -24,7 +24,7 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 */
-//#define CALLINGMETHOD __cdecl
+
 typedef int (CALLINGMETHOD *THREADFUNCTION) (void* floppyemulator,void* hwemulator);
 
 typedef struct threadinit_
@@ -38,25 +38,10 @@ int getlistoffile(char * directorypath,char *** filelist);
 char * getcurrentdirectory(char *currentdirectory,int buffersize);
 int loaddiskplugins(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,char *pluginpath);
 int hxc_createthread(HXCFLOPPYEMULATOR* floppycontext,void* hwcontext,THREADFUNCTION thread,int priority);
-//int createthread(HXCFLOPPYEMULATOR* floppycontext,THREADFUNCTION thread,int priority);
 unsigned long hxc_createevent(HXCFLOPPYEMULATOR* floppycontext,unsigned char id);
 
 int hxc_waitevent(HXCFLOPPYEMULATOR* floppycontext,int id,int timeout);
 int hxc_setevent(HXCFLOPPYEMULATOR* floppycontext,unsigned char id);
 unsigned long hxc_create_ftdi_event(HXCFLOPPYEMULATOR* floppycontext,unsigned char id);
 void hxc_pause(int ms);
-
-typedef struct filefoundinfo_
-{
-	int isdirectory;
-	char filename[256];
-	int size;
-}filefoundinfo;
-
-long find_close(long handleff);
-long find_next_file(long handleff,char *folder,char *file,filefoundinfo* fileinfo);
-long find_first_file(char *folder,char *file,filefoundinfo* fileinfo);
-
-char * strupper(char * str);
-
 
