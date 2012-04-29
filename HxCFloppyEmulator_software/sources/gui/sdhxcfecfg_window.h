@@ -12,7 +12,10 @@ extern void sdhxcfecfg_window_datachanged(Fl_Value_Slider*, void*);
 #include <FL/Fl_Check_Button.H>
 extern void sdhxcfecfg_window_datachanged(Fl_Check_Button*, void*);
 #include <FL/Fl_Button.H>
+extern void load_ifcfg_window_bt(Fl_Button*, void*);
+extern void save_ifcfg_window_bt(Fl_Button*, void*);
 #include <FL/Fl_Choice.H>
+extern void ifcfg_window_datachanged(Fl_Widget*, void*);
 extern void sdhxcfecfg_window_bt_load(Fl_Button*, void*);
 extern void sdhxcfecfg_window_bt_save(Fl_Button*, void*);
 
