@@ -3,7 +3,6 @@
 #include "usbhxcfecfg_window.h"
 
 extern void tick_usb(void *v);
-
 void usbhxcfecfg_window::cb_OK_i(Fl_Button* o, void*) {
   ((Fl_Window*)(o->parent()))->hide();
 }
@@ -62,11 +61,12 @@ usbhxcfecfg_window::usbhxcfecfg_window() {
         strout_datathroughput->labelsize(12);
         strout_datathroughput->textsize(12);
       } // Fl_Output* strout_datathroughput
-      { new Fl_Button(295, 207, 85, 20, "Reset");
+      { Fl_Button* o = new Fl_Button(295, 207, 85, 20, "Reset");
+        o->callback((Fl_Callback*)resetusbstat_bt, (void*)(this));
       } // Fl_Button* o
       o->end();
     } // Fl_Group* o
-    { Fl_Group* o = new Fl_Group(410, 17, 105, 109, "Drive ID setting");
+    { Fl_Group* o = new Fl_Group(410, 17, 105, 113, "Drive ID setting");
       o->box(FL_ENGRAVED_FRAME);
       o->labeltype(FL_ENGRAVED_LABEL);
       o->labelsize(12);
@@ -85,7 +85,7 @@ usbhxcfecfg_window::usbhxcfecfg_window() {
         chk_twistedcable->down_box(FL_DOWN_BOX);
         chk_twistedcable->labelsize(12);
       } // Fl_Check_Button* chk_twistedcable
-      { chk_disabledrive = new Fl_Check_Button(415, 101, 25, 25, "Disable drive");
+      { chk_disabledrive = new Fl_Check_Button(415, 103, 25, 25, "Disable drive");
         chk_disabledrive->down_box(FL_DOWN_BOX);
         chk_disabledrive->labelsize(12);
       } // Fl_Check_Button* chk_disabledrive
@@ -93,6 +93,7 @@ usbhxcfecfg_window::usbhxcfecfg_window() {
         rbt_ds0->type(102);
         rbt_ds0->down_box(FL_ROUND_DOWN_BOX);
         rbt_ds0->labelsize(12);
+        rbt_ds0->callback((Fl_Callback*)usbifcfg_window_datachanged);
       } // Fl_Round_Button* rbt_ds0
       { rbt_ds1 = new Fl_Round_Button(415, 47, 25, 25, "DS1");
         rbt_ds1->type(102);
@@ -109,15 +110,18 @@ usbhxcfecfg_window::usbhxcfecfg_window() {
       { chk_autoifmode = new Fl_Check_Button(415, 198, 25, 25, "Auto");
         chk_autoifmode->down_box(FL_DOWN_BOX);
         chk_autoifmode->labelsize(12);
+        chk_autoifmode->callback((Fl_Callback*)usbifcfg_window_datachanged, (void*)(this));
       } // Fl_Check_Button* chk_autoifmode
       { chk_doublestep = new Fl_Check_Button(415, 212, 25, 25, "Double Step");
         chk_doublestep->down_box(FL_DOWN_BOX);
         chk_doublestep->labelsize(12);
+        chk_doublestep->callback((Fl_Callback*)usbifcfg_window_datachanged, (void*)(this));
       } // Fl_Check_Button* chk_doublestep
       { choice_ifmode = new Fl_Choice(415, 152, 95, 20);
         choice_ifmode->down_box(FL_BORDER_BOX);
         choice_ifmode->labelsize(12);
         choice_ifmode->textsize(12);
+        choice_ifmode->callback((Fl_Callback*)usbifcfg_window_datachanged, (void*)(this));
       } // Fl_Choice* choice_ifmode
       o->end();
     } // Fl_Group* o
