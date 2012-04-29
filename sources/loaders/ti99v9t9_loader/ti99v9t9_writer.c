@@ -47,7 +47,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,
 	int density;
 	int interleave;
 	int file_offset;
-	int sectorsize;
+	unsigned int sectorsize;
 	unsigned char * diskimage;
 	int error;
 	SECTORSEARCH* ss;
