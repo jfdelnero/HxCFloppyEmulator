@@ -58,17 +58,18 @@ extern "C"
 extern s_gui_context * guicontext;
 
 extern track_type track_type_list[];
-
 extern char * basename (const char *name);
+extern void sync_if_config();
 
 int load_floppy(FLOPPY * floppydisk)
 {
 	int ret;
-	int oldifmode;
 
 	hxcfe_floppyUnload(guicontext->hxcfe,guicontext->loadedfloppy);
 	guicontext->loadedfloppy=0;
 	guicontext->loadedfloppy=floppydisk;
+
+	sync_if_config();
 
 	ret=HXCFE_NOERROR;
 	guicontext->loadstatus=ret;
@@ -80,14 +81,7 @@ int load_floppy(FLOPPY * floppydisk)
 	}
 	else
 	{
-		oldifmode=libusbhxcfe_getInterfaceMode(guicontext->hxcfe,guicontext->usbhxcfe);
-		libusbhxcfe_setInterfaceMode(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy->floppyiftype,guicontext->loadedfloppy->double_step,0);
 		libusbhxcfe_loadFloppy(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy);
-
-		if(!guicontext->autoselectmode)
-		{	// keep the old interface mode
-			//hwif->interface_mode=oldifmode;
-		};
 
 		sprintf(guicontext->bufferfilename,"Floppy Dump");
 	}
@@ -99,7 +93,6 @@ int load_floppy_image(char *filename)
 {
 	int ret;
 	int i;
-	int oldifmode;
 	int loaderid;
 
 	hxcfe_floppyUnload(guicontext->hxcfe,guicontext->loadedfloppy);
@@ -121,15 +114,10 @@ int load_floppy_image(char *filename)
 	}
 	else
 	{	
-//		oldifmode=hwif->interface_mode;
+		sync_if_config();
 
-		libusbhxcfe_setInterfaceMode(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy->floppyiftype,guicontext->loadedfloppy->double_step,0);
 		libusbhxcfe_loadFloppy(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy);
-		if(!guicontext->autoselectmode)
-		{	// keep the old interface mode
-			//hwif->interface_mode=oldifmode;
-		};
-			
+		
 		if(filename)
 		{
 			i=strlen(filename);
@@ -155,7 +143,6 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 	FILE * f;
 	unsigned int i,j,k,nbside;
 	int ret;
-	int oldifmode;
 	unsigned char * trackbuffer;
 	int sectornumber;
 	int offset;
@@ -270,20 +257,15 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 
 		hxcfe_deinit_sectorsearch(ss);*/
 
+		sync_if_config();
+
+		libusbhxcfe_loadFloppy(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy);
 
 		if(guicontext->loadedfloppy)
 		{
 			ret=HXCFE_NOERROR;
 
 			guicontext->loadstatus=ret;
-
-			//oldifmode=hwif->interface_mode;
-			libusbhxcfe_setInterfaceMode(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy->floppyiftype,guicontext->loadedfloppy->double_step,0);
-			libusbhxcfe_loadFloppy(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy);
-			if(!guicontext->autoselectmode)
-			{	// keep the old interface mode
-				//hwif->interface_mode=oldifmode;
-			};
 
 			if(f)
 				sprintf(guicontext->bufferfilename,basename(file));

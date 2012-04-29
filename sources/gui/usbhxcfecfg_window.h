@@ -7,27 +7,27 @@
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Output.H>
 #include <FL/Fl_Value_Output.H>
-#include <FL/Fl_Slider.H>
 #include <FL/Fl_Button.H>
 extern void resetusbstat_bt(Fl_Button*, void*);
+#include <FL/Fl_Value_Slider.H>
 #include <FL/Fl_Round_Button.H>
 #include <FL/Fl_Check_Button.H>
 extern void usbifcfg_window_datachanged(Fl_Widget*, void*);
 #include <FL/Fl_Choice.H>
+extern void ifcfg2_window_datachanged(Fl_Widget*, void*);
 
 class usbhxcfecfg_window {
 public:
   usbhxcfecfg_window();
   Fl_Double_Window *window;
   Fl_Output *strout_usbhfestatus;
-  Fl_Value_Output *valout_packetsize;
   Fl_Output *strout_maxsettletime;
   Fl_Output *strout_minsettletime;
-  Fl_Slider *slider_process_priority;
   Fl_Value_Output *valout_synclost;
   Fl_Output *strout_packetsent;
   Fl_Output *strout_datasent;
   Fl_Output *strout_datathroughput;
+  Fl_Value_Slider *slider_usbpacket_size;
   Fl_Round_Button *rbt_ds2;
   Fl_Round_Button *rbt_ds3;
   Fl_Check_Button *chk_twistedcable;

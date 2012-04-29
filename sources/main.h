@@ -8,8 +8,11 @@ typedef struct s_gui_context_
 
 	int loadstatus;
 
+	unsigned char driveid;
 	unsigned char autoselectmode;
+	unsigned char doublestep;
 	unsigned char twistedcable;
+	int interfacemode;
 
 	HXCFLOPPYEMULATOR * hxcfe;
 	FLOPPY * loadedfloppy;
@@ -26,9 +29,4 @@ typedef struct s_gui_context_
 	int xsize,ysize;
 	unsigned char * mapfloppybuffer;
 
-	//signed char * floppyinfobuffer;
-
 }s_gui_context;
-
-
-
