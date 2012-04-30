@@ -157,7 +157,7 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 }
 
 
-SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, unsigned char * trackclk,unsigned short * idamoffset,unsigned int tracklen,unsigned long * tracktotalsize, dmk_header *dmkh)
+SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, unsigned char * trackclk,unsigned short * idamoffset,unsigned int tracklen,unsigned long * tracktotalsize, dmk_header *dmkh,int s)
 {
 	int i,j,l;
 	unsigned int nbofsector,lastptr,lastdensity,tracksize,bitrate,k;
@@ -165,6 +165,8 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 	unsigned char trackformat;
 	unsigned int  final_tracklen;
 	unsigned char trackstep;
+
+	int sectorbegin;
 	SIDE* currentside;
 	track_generator tg;
 	
@@ -177,6 +179,7 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 		trackstep=0;
 	}
 
+	memset(trackclk,0xFF,tracklen);
 
 	nbofsector=0;
 	k=0;
@@ -199,6 +202,7 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 
 	while(idamoffset[k] && k<64)
 	{
+		floppycontext->hxc_printf(MSG_DEBUG,"IDAM Code : 0x%.4X",idamoffset[k]);
 		if(idamoffset[k]&0x8000)
 		{
 			
@@ -226,7 +230,52 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 			   j++;
 			}while(j<64);
 
-			while((lastptr<(unsigned int)((idamoffset[k]&0x3FFF)-0x80-6)) && lastptr<tracklen)
+			sectorbegin=((idamoffset[k]&0x3FFF)-0x80);
+			if(sectorbegin) sectorbegin--;
+			j=3;
+			while(sectorbegin && j && (trackdata[sectorbegin]==0xA1))
+			{
+				trackclk[sectorbegin]=0x0A;
+				j--;
+				sectorbegin--;
+			}
+			
+			j=12;
+			while(sectorbegin && j && (trackdata[sectorbegin]==0x00))
+			{
+				j--;
+				sectorbegin--;
+			}
+
+			j=512;
+			while(sectorbegin && j && (trackdata[sectorbegin]==0x4E))
+			{
+				j--;
+				sectorbegin--;
+			}
+
+			if(sectorbegin && trackdata[sectorbegin]==0xFC) sectorbegin--;
+			j=3;
+			while(sectorbegin && j && (trackdata[sectorbegin]==0xC2))
+			{
+				trackclk[sectorbegin]=0x0A;
+				j--;
+				sectorbegin--;
+			}
+			j=12;
+			while(sectorbegin && j && (trackdata[sectorbegin]==0x00))
+			{
+				j--;
+				sectorbegin--;
+			}
+			j=512;
+			while(sectorbegin && j && (trackdata[sectorbegin]==0x4E))
+			{
+				j--;
+				sectorbegin--;
+			}
+
+			while((lastptr<=(unsigned int)sectorbegin) && lastptr<tracklen)
 			{
 				track_density[lastptr]=lastdensity;
 				lastptr++;
@@ -236,8 +285,6 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"FM  %.4X",idamoffset[k]);
-		
 			trackclk[(idamoffset[k]&0x3FFF)-0x80+0]=0xC7;
 			trackclk[(idamoffset[k]&0x3FFF)-0x80+trackstep]=0xC7;
 
@@ -245,8 +292,10 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 			i=(idamoffset[k]&0x3FFF)-0x80;
 			do
 			{
+				l=-1;
 				if((trackdata[i+j]==0xF8 && trackdata[i+j+trackstep]==0xF8) || (trackdata[i+j]==0xF9 && trackdata[i+j+trackstep]==0xF9)|| (trackdata[i+j]==0xFA && trackdata[i+j+trackstep]==0xFA)|| (trackdata[i+j]==0xFB && trackdata[i+j+trackstep]==0xFB))
 				{
+					l=j;
 					trackclk[i+j+0]=0xC7;
 					trackclk[i+j+trackstep]=0xC7;
 					j=64;
@@ -255,24 +304,60 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 			   j++;
 			}while(j<64);
 			
-			while((lastptr<((unsigned int)(idamoffset[k]&0x3FFF)-0x80-6)) && lastptr<tracklen)
+			sectorbegin=((idamoffset[k]&0x3FFF)-0x80);
+			if(sectorbegin) sectorbegin--;
+			
+			j=12;
+			while(sectorbegin && j && (trackdata[sectorbegin]==0x00))
+			{
+				j--;
+				sectorbegin--;
+			}
+
+			j=512;
+			while(sectorbegin && j && (trackdata[sectorbegin]==0xFF))
+			{
+				j--;
+				sectorbegin--;
+			}
+
+			if(sectorbegin && trackdata[sectorbegin]==0xFC)
+			{
+				trackclk[sectorbegin]=0xD7;
+				sectorbegin--;
+			}
+			if(sectorbegin && trackdata[sectorbegin]==0xFC)
+			{
+				trackclk[sectorbegin]=0xD7;
+				sectorbegin--;
+			}
+
+			j=12;
+			while(sectorbegin && j && (trackdata[sectorbegin]==0x00))
+			{
+				j--;
+				sectorbegin--;
+			}
+
+			while((lastptr<(unsigned int)sectorbegin) && lastptr<tracklen)
 			{
 				track_density[lastptr]=lastdensity;
 				lastptr++;
 			}
-			lastdensity=ISOFORMAT_SD;			
+
+			lastdensity=ISOFORMAT_SD;
+
+			floppycontext->hxc_printf(MSG_DEBUG,"FM  %.4X - %.4X",idamoffset[k],l);
 		}
 		
 		k++;
 	};
-
 
 	while(lastptr<tracklen)
 	{
 		track_density[lastptr]=lastdensity;
 		lastptr++;
 	}
-
 
 	final_tracklen=0;
 	k=0;
@@ -300,6 +385,16 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 	}
 	if(tracksize&0x1F) tracksize=(tracksize&(~0x1F))+0x20;
 
+	/*{
+		unsigned char fname[512];
+		sprintf(fname,"t_%.2dc.bin",s);
+		savebuffer(fname,trackclk, tracklen);
+		sprintf(fname,"t_%.2dd.bin",s);
+		savebuffer(fname,trackdata, tracklen);
+		sprintf(fname,"t_%.2db.bin",s);
+		savebuffer(fname,track_density, tracklen);
+	}*/
+	
 	currentside=tg_initTrack(&tg,tracksize,0,trackformat,DEFAULT_DD_BITRATE,0);
 	currentside->number_of_sector=k;
 	k=0;
@@ -317,7 +412,6 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 		}
 
 	}while(k<tracklen);
-
 
 	free(track_density);
 
@@ -396,7 +490,7 @@ int DMK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				
 				floppycontext->hxc_printf(MSG_DEBUG,"Track %d Side %d Tracklen %d TTableOffset:0x%.8x",j,i,dmk_h.track_len,file_offset);
 					
-				currentside=DMKpatchtrack(floppycontext,trackdata, trackclk,idam_offset_table,dmk_h.track_len-128,&tracktotalsize, &dmk_h);
+				currentside=DMKpatchtrack(floppycontext,trackdata, trackclk,idam_offset_table,dmk_h.track_len-128,&tracktotalsize, &dmk_h,j);
 				currentcylinder->sides[i]=currentside;
 				fillindex(-2500,currentside,2500,TRUE,1);
 
