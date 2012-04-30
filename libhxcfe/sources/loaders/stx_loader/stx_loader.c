@@ -1010,8 +1010,11 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 														
 							if(trackheader.flags&0x80)
 							{
-								tempclock[index_sync]=0x14;
-								temptrack[index_sync]=0xc2;
+								if(index_sync<tracklen)
+								{
+									tempclock[index_sync]=0x14;
+									temptrack[index_sync]=0xc2;
+								}
 							}	
 							
 							BuildCylinder(currentside->databuffer,
