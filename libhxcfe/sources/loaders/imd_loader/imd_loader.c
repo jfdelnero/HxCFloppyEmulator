@@ -280,6 +280,10 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					case 0x00:
 						tracktype=IBMFORMAT_SD;
 						bitrate=500000;
+						if(trackcfg.number_of_sector==26)
+						{
+							rpm=360;
+						}
 						break;
 					case 0x01:
 						tracktype=IBMFORMAT_SD;
@@ -443,7 +447,7 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						
 				currentside->number_of_sector=0;
 			
-				tracklen=((250000/(300/60))/4);
+				tracklen=((250000/(rpm/60))/4);
 
 				currentside->databuffer=malloc(tracklen);
 				memset(currentside->databuffer,0,tracklen);
