@@ -78,7 +78,7 @@ extern "C"
 
 extern s_gui_context * guicontext;
 
-#define LOGFIFOSIZE 256
+#define LOGFIFOSIZE 1024
 #define LOGSTRINGSIZE 1024
 typedef struct logfifo_
 {
@@ -101,79 +101,47 @@ int CUI_affiche(int MSGTYPE,char * chaine, ...)
 	
 	if(!logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)])
 	{
-		logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)]=(unsigned char*)malloc(LOGSTRINGSIZE);
-		memset(logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],0,LOGSTRINGSIZE);
-		_vsnprintf(test_temp,LOGSTRINGSIZE,chaine,marker);
-		
-		switch(MSGTYPE)
-		{
-			
-		case MSG_INFO_0:
-			_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE,"INFO 0 : %s",test_temp);
-			break;
-			
-		case MSG_INFO_1:
-			_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE,"INFO 1 : %s",test_temp);
-			break;
-			
-		case MSG_WARNING:
-			_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE,"WARNING: %s",test_temp);
-			break;
-			
-		case MSG_ERROR:
-			_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE,"ERROR  : %s",test_temp);
-			break;
-			
-		case MSG_DEBUG:
-			_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE,"DEBUG  : %s",test_temp);
-			break;
-			
-		default:
-			break;
-		}
-		
-		
-		logsfifo.in=logsfifo.in+1;
-	}
-	else
-	{
-		memset(logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],0,LOGSTRINGSIZE);
-		_vsnprintf(test_temp,LOGSTRINGSIZE,chaine,marker);
-		
-		switch(MSGTYPE)
-		{
-			
-		case MSG_INFO_0:
-			_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE,"INFO 0 : %s",test_temp);
-			break;
-			
-		case MSG_INFO_1:
-			_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE,"INFO 1 : %s",test_temp);
-			break;
-			
-		case MSG_WARNING:
-			_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE,"WARNING: %s",test_temp);
-			break;
-			
-		case MSG_ERROR:
-			_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE,"ERROR  : %s",test_temp);
-			break;
-			
-		case MSG_DEBUG:
-			_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE,"DEBUG  : %s",test_temp);
-			break;
-			
-		default:
-			break;
-		}
-		
-		logsfifo.in=(logsfifo.in+1)&(LOGFIFOSIZE-1);
-		logsfifo.out=(logsfifo.out+1)&(LOGFIFOSIZE-1);
-		
-		
-		
+		logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)]=(unsigned char*)malloc(LOGSTRINGSIZE+1);
 	}
 	
+	if(logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)])
+	{
+		memset(logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],0,LOGSTRINGSIZE+1);
+		_vsnprintf(test_temp,LOGSTRINGSIZE,chaine,marker);
+		logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)][LOGSTRINGSIZE]=0;
+		
+		switch(MSGTYPE)
+		{
+			
+			case MSG_INFO_0:
+				_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE-9,"INFO 0 : %s",test_temp);
+				break;
+				
+			case MSG_INFO_1:
+				_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE-9,"INFO 1 : %s",test_temp);
+				break;
+				
+			case MSG_WARNING:
+				_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE-9,"WARNING: %s",test_temp);
+				break;
+				
+			case MSG_ERROR:
+				_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE-9,"ERROR  : %s",test_temp);
+				break;
+				
+			case MSG_DEBUG:
+				_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE-9,"DEBUG  : %s",test_temp);
+				break;
+			
+			default:
+				break;
+		}
+
+		logsfifo.in=(logsfifo.in + 1) & (LOGFIFOSIZE-1);
+		
+		if(logsfifo.in == logsfifo.out)
+			logsfifo.out=(logsfifo.out + 1) & (LOGFIFOSIZE-1);
+	}	
 	
 	if(guicontext->logfile)
 	{
@@ -249,7 +217,6 @@ void savelog_log(Fl_Widget *w, void * t)
 Log_box::~Log_box()
 {
 }
-
 
 static void tick_log(void *v) {
 	
