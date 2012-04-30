@@ -75,6 +75,7 @@ int KryoFluxStream_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 	
 	if(imgfile)
 	{
+		memset(&staterep,0,sizeof(struct stat));
 		if(!stat(imgfile,&staterep))
 		{
 			if(staterep.st_mode&S_IFDIR)

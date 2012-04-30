@@ -72,6 +72,7 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfi
 	floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile");
 	if(imgfile)
 	{
+		memset(&staterep,0,sizeof(struct stat));
 		if(!stat(imgfile,&staterep))
 		{
 		

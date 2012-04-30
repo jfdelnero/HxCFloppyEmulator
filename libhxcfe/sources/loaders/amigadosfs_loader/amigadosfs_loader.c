@@ -78,6 +78,7 @@ int AMIGADOSFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgf
 		pathlen=strlen(imgfile);
 		if(pathlen!=0)
 		{
+			memset(&staterep,0,sizeof(struct stat));
 			stat(imgfile,&staterep);
 
 			if(staterep.st_mode&S_IFDIR)

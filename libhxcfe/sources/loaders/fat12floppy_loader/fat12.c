@@ -218,8 +218,6 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 						fullpath=malloc(strlen(folder)+1);
 						sprintf(fullpath,"%s",folder);
 					}
-
-
 					
 					stat(fullpath,&repstate);
 					ts=localtime(&repstate.st_ctime);
