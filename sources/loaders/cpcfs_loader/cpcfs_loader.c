@@ -75,6 +75,7 @@ int CPCFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		pathlen=strlen(imgfile);
 		if(pathlen!=0)
 		{		
+			memset(&staterep,0,sizeof(struct stat));
 			stat(imgfile,&staterep);
 
 			if(staterep.st_mode&S_IFDIR)
