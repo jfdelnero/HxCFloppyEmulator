@@ -129,7 +129,7 @@ int System24_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		floppydisk->floppySectorPerTrack= 5 + 1 + 1;
 		gap3len = 50;
 
-		floppydisk->floppyiftype = ATARIST_DD_FLOPPYMODE;
+		floppydisk->floppyiftype = IBMPC_HD_FLOPPYMODE;
 		floppydisk->floppyBitRate = DEFAULT_HD_BITRATE;
 		trackformat=ISOFORMAT_DD;
 			
