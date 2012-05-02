@@ -86,6 +86,7 @@ int load_floppy(FLOPPY * floppydisk)
 		sprintf(guicontext->bufferfilename,"Floppy Dump");
 	}
 
+	guicontext->updatefloppyinfos++;
 	return ret;
 }
 
@@ -133,6 +134,8 @@ int load_floppy_image(char *filename)
 			sprintf(guicontext->bufferfilename,"Empty Floppy");
 		}
 	}
+	
+	guicontext->updatefloppyinfos++;
 
 	return ret;
 }
@@ -280,6 +283,7 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 		}
 	}	
 
+	guicontext->updatefloppyinfos++;
 
 	return ret;
 }

@@ -29,4 +29,7 @@ typedef struct s_gui_context_
 	int xsize,ysize;
 	unsigned char * mapfloppybuffer;
 
+	s_trackdisplay * td;
+	int updatefloppyinfos;
+
 }s_gui_context;

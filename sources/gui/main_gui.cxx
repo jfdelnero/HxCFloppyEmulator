@@ -202,6 +202,7 @@ void load_file_image(Fl_Widget * w, void * fc_ptr)
 		default:
 		{
 			load_floppy_image((char*)fnfc.filename());
+			guicontext->updatefloppyinfos++;
 			break; // FILE CHOSEN
 		}
 	}
@@ -331,7 +332,7 @@ void format_choice_cb(Fl_Widget *, void *v)
 void dnd_open(const char *urls)
 {
 	load_floppy_image((char*)urls);
-	
+	guicontext->updatefloppyinfos++;
 }
 
 void dnd_cb(Fl_Widget *o, void *v)
@@ -577,7 +578,9 @@ Main_Window::Main_Window()
 	this->infos_window->x_time->scrollvalue(300,1,1,1000);
 	this->infos_window->y_time->scrollvalue(16,1,2,64);
 	this->infos_window->track_view_bt->value(1);
+	guicontext->td=hxcfe_td_init(guicontext->hxcfe,this->infos_window->floppy_map_disp->w(),this->infos_window->floppy_map_disp->h());
 	tick_infos(this->infos_window);
+	guicontext->updatefloppyinfos++;
 	
 	//////////////////////////////////////////////
 	// Batch convert window
