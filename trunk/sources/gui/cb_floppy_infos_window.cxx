@@ -82,9 +82,11 @@ void update_graph(floppy_infos_window * w)
 	{
 		w->window->make_current();
 		
-		td=hxcfe_td_init(guicontext->hxcfe,disp_xsize,disp_ysize,(int)(w->x_time->value()*1000),(int)w->y_time->value(),(int)(w->x_offset->value()*1000));
+		td=guicontext->td;
 		if(td)
 		{
+			hxcfe_td_setparams(guicontext->hxcfe,td,(int)(w->x_time->value()*1000),(int)w->y_time->value(),(int)(w->x_offset->value()*1000));
+
 			if(guicontext->loadedfloppy)
 			{
 				if(w->track_number_slide->value()>=guicontext->loadedfloppy->floppyNumberOfTrack)
@@ -120,7 +122,6 @@ void update_graph(floppy_infos_window * w)
 				}
 
 				fl_draw_image((unsigned char *)td->framebuffer, w->floppy_map_disp->x(), w->floppy_map_disp->y(), td->xsize, td->ysize, 3, 0);
-				hxcfe_td_deinit(guicontext->hxcfe,td);
 			}
 		}
 	}
@@ -128,13 +129,27 @@ void update_graph(floppy_infos_window * w)
 
 void tick_infos(void *w) {
 	
-	floppy_infos_window *window;
-	
+	s_trackdisplay * td;
+	floppy_infos_window *window;	
 	window=(floppy_infos_window *)w;
 	
-	update_graph(window);
-	
-	Fl::repeat_timeout(2, tick_infos, w);  
+	if(window->window->shown())
+	{
+		window->window->make_current();
+		td=guicontext->td;
+		if(td)
+		{
+			if(guicontext->updatefloppyinfos)
+			{
+				guicontext->updatefloppyinfos=0;
+				update_graph(window);
+			}
+
+			fl_draw_image((unsigned char *)td->framebuffer, window->floppy_map_disp->x(), window->floppy_map_disp->y(), td->xsize, td->ysize, 3, 0);
+		}
+	}
+				
+	Fl::repeat_timeout(0.1, tick_infos, w);  
 }
 
 int InfosThreadProc(void* floppycontext,void* hw_context)
