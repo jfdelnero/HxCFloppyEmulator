@@ -92,6 +92,7 @@
 #include "./loaders/imz_loader/imz_loader.h"
 #include "./loaders/gkh_loader/gkh_loader.h"
 #include "./loaders/kryofluxstream_loader/kryofluxstream_loader.h"
+#include "./loaders/system24_loader/system24_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -165,5 +166,6 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)ADL_libGetPluginInfo,
 	(GETPLUGININFOS)DSD_libGetPluginInfo,
 	(GETPLUGININFOS)FEI_libGetPluginInfo,
+	(GETPLUGININFOS)System24_libGetPluginInfo,
 	(GETPLUGININFOS)-1
 };

@@ -1506,6 +1506,18 @@ SOURCE=..\sources\loaders\kryofluxstream_loader\kryofluxstream_loader.c
 SOURCE=..\sources\loaders\kryofluxstream_loader\kryofluxstream_loader.h
 # End Source File
 # End Group
+# Begin Group "S24"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\system24_loader\system24_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\system24_loader\system24_loader.h
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 
