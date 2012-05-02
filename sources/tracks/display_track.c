@@ -57,7 +57,7 @@
 
 #include "font.h"
 
-s_trackdisplay * hxcfe_td_init(HXCFLOPPYEMULATOR* floppycontext,unsigned long xsize,unsigned long ysize,unsigned long x_us,unsigned long y_us,unsigned long x_start_us)
+s_trackdisplay * hxcfe_td_init(HXCFLOPPYEMULATOR* floppycontext,unsigned long xsize,unsigned long ysize)
 {
 	s_trackdisplay * td;
 	
@@ -70,12 +70,23 @@ s_trackdisplay * hxcfe_td_init(HXCFLOPPYEMULATOR* floppycontext,unsigned long xs
 	td->framebuffer=malloc(td->xsize*td->ysize*sizeof(unsigned long));
 	memset(td->framebuffer,0,td->xsize*td->ysize*sizeof(unsigned long));
 
-	td->x_us=x_us;
-	td->y_us=y_us;
+	td->x_us=200*1000;
+	td->y_us=64;
 
-	td->x_start_us=x_start_us;
+	td->x_start_us=0;
 
 	return td;
+}
+
+void hxcfe_td_setparams(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,unsigned long x_us,unsigned long y_us,unsigned long x_start_us)
+{
+	if(td)
+	{
+		td->x_us=x_us;
+		td->y_us=y_us;
+
+		td->x_start_us=x_start_us;
+	}
 }
 
 #pragma pack(1)
@@ -217,7 +228,8 @@ void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY 
 	char tempstr[512];	
 	double timingoffset;
 	double timingoffset2;
-	int xpos,xpos2;
+	double timingoffset3;
+	int xpos,xpos2,xpos3;
 	int endfill,loop;
 	s_col * col;
 	SECTORSEARCH* ss;
@@ -258,9 +270,17 @@ void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY 
 							timingoffset2 = getOffsetTiming(currentside,sc->startsectorindex+ ((tracksize - sc->startsectorindex) + sc->endsectorindex),timingoffset,old_i);
 						else
 							timingoffset2 = getOffsetTiming(currentside,sc->endsectorindex,timingoffset,old_i);
-						
+
+						xpos3 = -1;
+						if( ( sc->startdataindex > sc->startsectorindex ) && ( sc->startdataindex < sc->endsectorindex ) )
+						{
+							timingoffset3 = getOffsetTiming(currentside,sc->startdataindex,timingoffset,old_i);
+							xpos3 = (int)( ( timingoffset3 - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
+						}
+
 						xpos2 = (int)( ( timingoffset2 - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
 
+						// Main block
 						for(i=xpos;i<xpos2;i++)
 						{
 							if(i>=0)
@@ -292,7 +312,8 @@ void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY 
 								}
 							}
 						}
-
+						
+						// Left Line
 						for(j=50;j<(td->ysize-10);j++)
 						{
 							if( (xpos<td->xsize) && xpos>=0)
@@ -315,6 +336,32 @@ void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY 
 							}
 						}
 				
+
+
+						// Data Line
+						for(j=50;j<(td->ysize-10);j++)
+						{
+							if( (xpos3<td->xsize) && xpos3>=0)
+							{
+								if(!(j&7))
+								{
+									if(sc->use_alternate_data_crc)
+									{
+										col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos3];
+										col->blue=3*col->blue/16;
+										col->green=3*col->green/16;
+									}
+									else
+									{
+										col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos3];
+										col->blue=3*col->blue/16;
+										col->red=3*col->red/16;
+									}
+								}
+							}
+						}
+
+
 						sprintf(tempstr,"---- %.3d Bytes",sc->sectorsize);
 						switch(sc->trackencoding)
 						{
@@ -329,11 +376,12 @@ void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY 
 							break;
 						}
 
-						putstring8x8(td,xpos,200,tempstr,0x000,1);
+						putstring8x8(td,xpos,225,tempstr,0x000,1);
 
-						sprintf(tempstr,"T:%.2d H:%d S:%.3d",sc->cylinder,sc->head,sc->sector);
-						putstring8x8(td,xpos+8,200,tempstr,0x000,1);
+						sprintf(tempstr,"T:%.2d H:%d S:%.3d CRC:%.4X",sc->cylinder,sc->head,sc->sector,sc->data_crc);
+						putstring8x8(td,xpos+8,225,tempstr,0x000,1);
 
+						// Right Line
 						for(j=50;j<(td->ysize-10);j++)
 						{
 							if( ((xpos2-1)<td->xsize) && xpos2>=0 )
@@ -395,6 +443,9 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	
 	old_i=0;
 	i=0;
+
+	memset(td->framebuffer,0,td->xsize*td->ysize*sizeof(unsigned long));
+
 
 	timingoffset = ( getOffsetTiming(currentside,tracksize,0,0));
 

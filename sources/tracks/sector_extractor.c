@@ -395,6 +395,8 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 								CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
 							}
 
+							sector->data_crc= ( tmp_sector[k-2]<<8 ) | tmp_sector[k-1] ;
+
 							if(!CRC16_High && !CRC16_Low)
 							{ // crc ok !!! 
 								floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
@@ -657,6 +659,8 @@ int get_next_FM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFI
 							{
 								CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
 							}
+
+							sector->data_crc= ( tmp_sector[k-2]<<8 ) | tmp_sector[k-1] ;
 
 							if(!CRC16_High && !CRC16_Low)
 							{ // crc ok !!! 
