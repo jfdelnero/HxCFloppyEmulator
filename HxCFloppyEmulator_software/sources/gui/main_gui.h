@@ -19,6 +19,7 @@ class Main_Window : public Fl_Window {
 	Fl_Button *button_usbhxcfesettings;
 	Fl_Button *button_floppydump;
 	
+
 	Fl_Box*  o;
 	Fl_Window *window;
 
@@ -51,8 +52,6 @@ class Main_Window : public Fl_Window {
 	Fl_Output* file_name_txt;
 	Fl_Progress* track_pos;
 	Fl_Output* track_pos_str;
-
-	Fl_Text_Buffer* buf;
 
 	//virtual handle(int event);
 	Main_Window();
