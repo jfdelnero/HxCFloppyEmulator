@@ -11,7 +11,6 @@ extern "C"
 
 #include "cb_floppy_infos_window.h"
 #include "fl_mouse_box.h"
-
 floppy_infos_window::floppy_infos_window() {
   { window = new Fl_Double_Window(1003, 670, "Visual Floppy disk");
     window->user_data((void*)(this));
@@ -32,26 +31,25 @@ floppy_infos_window::floppy_infos_window() {
       } // Fl_Value_Slider* side_number_slide
       o->end();
     } // Fl_Group* o
-    { Fl_Group* o = new Fl_Group(570, 502, 394, 166, "Status");
+    { Fl_Group* o = new Fl_Group(570, 501, 394, 167, "Status");
       o->box(FL_ENGRAVED_FRAME);
       o->labeltype(FL_ENGRAVED_LABEL);
       o->align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE);
-      { x_pos = new Fl_Output(580, 523, 180, 25);
+      { x_pos = new Fl_Output(580, 525, 180, 25);
         x_pos->labelsize(12);
         x_pos->textsize(12);
       } // Fl_Output* x_pos
-      { y_pos = new Fl_Output(760, 523, 194, 25);
+      { y_pos = new Fl_Output(760, 525, 194, 25);
         y_pos->labelsize(12);
         y_pos->textsize(12);
       } // Fl_Output* y_pos
-      { object_txt = new Fl_Output(580, 574, 374, 87);
-        object_txt->labelsize(12);
-        object_txt->textsize(12);
-      } // Fl_Output* object_txt
-      { global_status = new Fl_Output(580, 549, 374, 24);
+      { global_status = new Fl_Output(580, 551, 374, 24);
         global_status->labelsize(12);
         global_status->textsize(12);
       } // Fl_Output* global_status
+      { object_txt = new Fl_Text_Display(580, 576, 375, 89);
+        object_txt->user_data((void*)(this));
+      } // Fl_Text_Display* object_txt
       o->end();
     } // Fl_Group* o
     { Fl_Button* o = new Fl_Button(969, 504, 30, 163, "OK");

@@ -579,6 +579,9 @@ Main_Window::Main_Window()
 	this->infos_window->y_time->scrollvalue(16,1,2,64);
 	this->infos_window->track_view_bt->value(1);
 	guicontext->td=hxcfe_td_init(guicontext->hxcfe,this->infos_window->floppy_map_disp->w(),this->infos_window->floppy_map_disp->h());
+	this->infos_window->buf=new Fl_Text_Buffer;
+	this->infos_window->object_txt->buffer(this->infos_window->buf);
+
 	tick_infos(this->infos_window);
 	guicontext->updatefloppyinfos++;
 	
