@@ -27,6 +27,7 @@ EXPORTS
    hxcfe_getFloppyInterfaceModeID @39
    hxcfe_getFloppyInterfaceModeName	@40
    hxcfe_getFloppyInterfaceModeDesc @41
+   hxcfe_getTrackEncodingName	@42
 
    hxcfe_initFloppy			@50
    hxcfe_pushTrack			@51

@@ -52,13 +52,31 @@
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
-
 typedef struct interfacemode_
 {
 	int ifmodeid;
 	const char* ifmodename;
 	const char* ifmodedesc;
 }interfacemode;
+
+typedef struct trackmode_
+{
+	int trackmodeid;
+	const char* trackmodename;
+	const char* trackmodedesc;
+}trackmode;
+
+
+
+trackmode trackmodelist[]=
+{
+	{ISOIBM_MFM_ENCODING,		"ISOIBM_MFM_ENCODING",	"" },
+	{AMIGA_MFM_ENCODING,		"AMIGA_MFM_ENCODING",	"" },
+	{ISOIBM_FM_ENCODING,		"ISOIBM_FM_ENCODING",	"" },
+	{EMU_FM_ENCODING,			"EMU_FM_ENCODING",		"" },
+	{UNKNOWN_ENCODING,			"UNKNOWN_ENCODING",		"" },
+	{-1,"",	""},
+};
 
 interfacemode interfacemodelist[]=
 {
@@ -78,6 +96,9 @@ interfacemode interfacemodelist[]=
 	{S950_HD_FLOPPYMODE,			"S950_HD_FLOPPYMODE",			"Akai S950 Interface (1.6MB/HD Disk)" },
 	{-1,"",	""},
 };
+
+
+
 
 int hxcfe_getFloppyInterfaceModeID(HXCFLOPPYEMULATOR* floppycontext,char * ifmode)
 {
@@ -128,4 +149,24 @@ const char * hxcfe_getFloppyInterfaceModeDesc(HXCFLOPPYEMULATOR* floppycontext,i
 		return NULL;
 	else
 		return interfacemodelist[i].ifmodedesc;
+}
+
+
+const char * hxcfe_getTrackEncodingName(HXCFLOPPYEMULATOR* floppycontext,int trackencodingid)
+{
+	
+	int i;
+
+	i=0;
+
+	while( ( trackmodelist[i].trackmodeid != trackencodingid ) && ( trackmodelist[i].trackmodeid >= 0 ) )
+	{
+		i++;
+	}
+
+	if( trackmodelist[i].trackmodeid <0 )
+		return NULL;
+	else
+		return trackmodelist[i].trackmodename;
+
 }
