@@ -29,19 +29,20 @@ class floppy_infos_window {open
       }
       Fl_Group {} {
         label Status open
-        xywh {570 502 394 166} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL align 21
+        xywh {570 501 394 167} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL align 21
       } {
         Fl_Output x_pos {
-          xywh {580 523 180 25} labelsize 12 textsize 12
+          xywh {580 525 180 25} labelsize 12 textsize 12
         }
         Fl_Output y_pos {
-          xywh {760 523 194 25} labelsize 12 textsize 12
-        }
-        Fl_Output object_txt {
-          xywh {580 574 374 87} labelsize 12 textsize 12
+          xywh {760 525 194 25} labelsize 12 textsize 12
         }
         Fl_Output global_status {
-          xywh {580 549 374 24} labelsize 12 textsize 12
+          xywh {580 551 374 24} labelsize 12 textsize 12
+        }
+        Fl_Text_Display object_txt {
+          user_data this
+          xywh {580 576 375 89}
         }
       }
       Fl_Button {} {
@@ -51,11 +52,11 @@ class floppy_infos_window {open
         xywh {969 504 30 163}
       }
       Fl_Group floppy_map_disp {
-        label {Floppy Map} open
+        label {Floppy Map} open selected
         xywh {0 1 1000 500} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {}
       Fl_Group {} {
-        label View open selected
+        label View open
         xywh {253 502 314 167} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {
         Fl_Value_Slider x_time {
