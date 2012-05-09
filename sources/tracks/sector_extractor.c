@@ -356,9 +356,11 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 						sector->head = tmp_buffer[5];
 						sector->sector = tmp_buffer[6];
 						sector->sectorsize = sectorsize[tmp_buffer[7]&0x7];
+						sector->alternate_sector_size_id = tmp_buffer[7];
 						sector->trackencoding = ISOFORMAT_DD;
 						sector->alternate_datamark=0x00;
 						sector->use_alternate_datamark=0xFF;
+						sector->header_crc = ( tmp_buffer[k-2]<<8 ) | tmp_buffer[k-1] ;
 
 
 						bit_offset++;
@@ -621,8 +623,11 @@ int get_next_FM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFI
 						sector->head=tmp_buffer[2];
 						sector->sector=tmp_buffer[3];
 						sector->sectorsize=sectorsize[tmp_buffer[4]&0x7];
+						sector->alternate_sector_size_id = tmp_buffer[4];
 						sector->trackencoding = ISOFORMAT_SD;
+						sector->header_crc = ( tmp_buffer[k-2]<<8 ) | tmp_buffer[k-1] ;
 						sector_size = sector->sectorsize;
+
 
 //;01000100 01010101 00010001 00010100 01[s]010101
 //;            1   1    1   1    1   0       1   1   -- FB
