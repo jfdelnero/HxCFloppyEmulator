@@ -415,6 +415,7 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				
 				currentside=tg_generateTrackEx((unsigned short)trackcfg.number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,tracktype,2500 | NO_SECTOR_UNDER_INDEX,-2500);
 				currentcylinder->sides[trackcfg.physical_head&0xF]=currentside;
+				currentcylinder->floppyRPM=rpm;
 
 				
 				for(j=0;j<trackcfg.number_of_sector;j++)
@@ -455,13 +456,15 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				currentside->tracklen=tracklen*8;
 
 			}
-		
-		}			
-	
+
+		}
+
+
+
 		fclose(f);
 		return HXCFE_NOERROR;
 	}	
-	
+
 	fclose(f);	
 	floppycontext->hxc_printf(MSG_ERROR,"bad header");
 	return HXCFE_BADFILE;
