@@ -578,6 +578,8 @@ Main_Window::Main_Window()
 	this->infos_window->x_time->scrollvalue(300,1,1,1000);
 	this->infos_window->y_time->scrollvalue(16,1,2,64);
 	this->infos_window->track_view_bt->value(1);
+	this->infos_window->disc_view_bt->value(0);
+	this->infos_window->disc_view_bt->deactivate();
 	guicontext->td=hxcfe_td_init(guicontext->hxcfe,this->infos_window->floppy_map_disp->w(),this->infos_window->floppy_map_disp->h());
 	this->infos_window->buf=new Fl_Text_Buffer;
 	this->infos_window->object_txt->buffer(this->infos_window->buf);
