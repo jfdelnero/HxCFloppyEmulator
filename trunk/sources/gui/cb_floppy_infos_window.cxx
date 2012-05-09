@@ -67,6 +67,8 @@ extern "C"
 
 extern s_gui_context * guicontext;
 
+char fullstr[256*1024];
+
 void update_graph(floppy_infos_window * w)
 {
 	s_trackdisplay * td;
@@ -229,6 +231,7 @@ void disk_infos_window_callback(Fl_Widget *o, void *v)
 
 void mouse_di_cb(Fl_Widget *o, void *v)
 {
+	unsigned int i;
 	floppy_infos_window *fiw;
 	Fl_Window *dw;
 	Fl_Mouse_Box *dnd = (Fl_Mouse_Box*)o;
@@ -236,6 +239,11 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 	double stepperpix_y;
 	int xpos,ypos;
 	char str[512];
+	char str2[512];
+	int track,side;
+
+	unsigned char c;
+	s_sectorlist * sl;
 	int disp_xsize,disp_ysize,disp_xpos,disp_ypos;
 	
 	dw=((Fl_Window*)(o->parent()));
@@ -266,5 +274,132 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 		fiw->x_pos->value(str);
 		sprintf(str,"y position : %.3f us",	ypos*stepperpix_y);
 		fiw->y_pos->value(str);
+
+		fiw->buf->remove(0,fiw->buf->length());
+
+		ypos = disp_ysize - ypos;
+
+		fiw->object_txt->textsize(9);
+		fiw->object_txt->textfont(FL_SCREEN);
+
+		sl=guicontext->td->sl;
+		fullstr[0]=0;
+
+		while(sl)
+		{
+			if(sl->sectorconfig)
+			{
+				fullstr[0]=0;
+				if( ( xpos>=sl->x_pos1 && xpos<=sl->x_pos2 ) && 
+					( ypos>=(sl->y_pos1) && ypos<=(sl->y_pos2) ) )
+				{					
+
+					switch(sl->sectorconfig->trackencoding)
+					{
+						case ISOFORMAT_SD:
+							sprintf(str,"FM   ");
+						break;
+						case ISOFORMAT_DD:
+							sprintf(str,"MFM  ");
+						break;
+						case AMIGAFORMAT_DD:
+							sprintf(str,"AMFM ");
+						break;
+						default:
+							sprintf(str,"Unknow ");
+						break;
+					}
+					fiw->buf->append((char*)str);
+	
+					sprintf(str,"Sector ID %.3d - Size %.5d - Size ID 0x%.2x - Track ID %.3d - Side ID %.3d\n",
+						sl->sectorconfig->sector,
+						sl->sectorconfig->sectorsize,
+						sl->sectorconfig->alternate_sector_size_id,
+						sl->sectorconfig->cylinder,
+						sl->sectorconfig->head);
+					fiw->buf->append((char*)str);
+
+					sprintf(str,"DataMark:0x%.2X - Head CRC 0x%.4X - Data CRC 0x%.4X (%s)\n",
+						sl->sectorconfig->alternate_datamark,
+						sl->sectorconfig->header_crc,
+						sl->sectorconfig->data_crc,sl->sectorconfig->use_alternate_data_crc?"BAD CRC!":"Ok");
+					fiw->buf->append((char*)str);
+
+					for(i=0;i<sl->sectorconfig->sectorsize;i++)
+					{
+						if(!(i&0xF))
+						{
+							if(i)
+							{
+								str2[16]=0;
+								strcat(fullstr,"| ");
+								strcat(fullstr,str2);
+							}
+
+							sprintf(str,"\n0x%.4X | ",i);
+							strcat(fullstr,str);
+						}
+
+						sprintf(str,"%.2X ",sl->sectorconfig->input_data[i]);
+						strcat(fullstr,str);				
+
+						c='.';
+						if( (sl->sectorconfig->input_data[i]>=32 && sl->sectorconfig->input_data[i]<=126) )
+							c=sl->sectorconfig->input_data[i];
+
+						str2[i&0xF]=c;
+
+					}
+
+					str2[16]=0;
+					strcat(fullstr,"| ");
+					strcat(fullstr,str2);
+					strcat(fullstr,"\n\n");
+
+					fiw->buf->append((char*)fullstr);					
+					
+					fiw->object_txt->buffer(fiw->buf);
+				}
+			}
+
+			sl = sl->next_element;
+		}
+
+		if(guicontext->loadedfloppy)
+		{
+			track=(int)fiw->track_number_slide->value();
+			side=(int)fiw->side_number_slide->value();
+
+			sprintf(str,"Track RPM : %d RPM - ",guicontext->loadedfloppy->tracks[track]->floppyRPM);
+			strcat(fullstr,str);
+				
+			if(guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate==-1)
+			{
+				sprintf(str,"Bitrate : VARIABLE\n");
+			}
+			else
+			{
+				sprintf(str,"Bitrate : %d bit/s\n",guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate);
+			}
+			strcat(fullstr,str);
+
+			sprintf(str,"Track format : %s\n",hxcfe_getTrackEncodingName(guicontext->hxcfe,guicontext->loadedfloppy->tracks[track]->sides[side]->track_encoding));
+			strcat(fullstr,str);
+			sprintf(str,"Track len : %d cells\n",guicontext->loadedfloppy->tracks[track]->sides[side]->tracklen);
+			strcat(fullstr,str);
+			sprintf(str,"Number of side : %d\n",guicontext->loadedfloppy->tracks[track]->number_of_side);
+			strcat(fullstr,str);
+
+			sprintf(str,"Interface mode: %s - %s\n",
+				hxcfe_getFloppyInterfaceModeName(guicontext->hxcfe,guicontext->interfacemode),
+				hxcfe_getFloppyInterfaceModeDesc(guicontext->hxcfe,guicontext->interfacemode));
+			
+			strcat(fullstr,str);
+
+			fiw->buf->append((char*)fullstr);
+
+			fiw->object_txt->buffer(fiw->buf);
+		}
+
 	}
 }
