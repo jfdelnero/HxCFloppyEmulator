@@ -59,6 +59,8 @@
 
 #include "os_api.h"
 
+//#define KFSTREAMDBG 1
+
 s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,float timecoef)
 {
 	unsigned long i;
@@ -83,11 +85,16 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,fl
 	unsigned long cellpos;
 	unsigned long streamend;
 
-	int inc0B;
+	unsigned long overflowvalue;
 
 	unsigned long filesize;
 
+	unsigned long totalcell,totalstreampos;
 	track_dump=malloc(sizeof(s_track_dump));
+
+	overflowvalue=0;
+	totalcell = 0;
+	totalstreampos = 0;
 
 	if(track_dump)
 	{
@@ -131,29 +138,36 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,fl
 						cell_value = cell_value | kfstreambuffer[offset];
 						offset++;
 
-						if(inc0B)
-						{
-							cell_value=cell_value+ 0x10000;
-							inc0B=0;
-						}
+						cell_value = cell_value + overflowvalue;
+
+
+						overflowvalue = 0;
+
 						cellstream[cellpos++]=(unsigned long)((float)cell_value * timecoef);
-	
+						totalcell = totalcell + cell_value;
+						totalstreampos++;
 					break;
 				
 					// Nop
 					case 0x0A:
-						offset++;
+						offset=offset+3;
+						totalstreampos++;
+					break;
 					case 0x09:
-						offset++;
+						offset=offset+2;
+						totalstreampos++;
+					break;
 					case 0x08:
-						offset++;
+						offset=offset+1;
+						totalstreampos++;
 					break;
 						//
 						
 					//0x0B 	Overflow16 	1 	Next cell value is increased by 0×10000 (16-bits). Decoding of *this* cell should continue at next stream position
 					case 0x0B:
-						inc0B=1;
+						overflowvalue = overflowvalue + 0x10000;
 						offset++;
+						totalstreampos++;
 					break;
 
 					//0x0C 	Value16 	3 	New cell value: Upper 8 bits are offset+1 in the stream, lower 8-bits are offset+2 
@@ -164,12 +178,12 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,fl
 						cell_value = cell_value | kfstreambuffer[offset];
 						offset++;
 
-						if(inc0B)
-						{
-							cell_value=cell_value+ 0x10000;
-							inc0B=0;
-						}
+						cell_value = cell_value + overflowvalue;
+						overflowvalue=0;
+
 						cellstream[cellpos++]=(unsigned long)((float)cell_value * timecoef);
+						totalcell = totalcell + cell_value;
+						totalstreampos++;
 					break;
 
 					case 0x0D:
@@ -209,7 +223,7 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,fl
 								if(nbindex)
 								{
 		#ifdef KFSTREAMDBG
-									floppycontext->hxc_printf(MSG_DEBUG,"Delta : %d Rpm : %f ",tabindex[nbindex].SysClk-tabindex[nbindex-1].SysClk,(float)(ick*(float)60)/(float)(tabindex[nbindex].SysClk-tabindex[nbindex-1].SysClk));
+									//floppycontext->hxc_printf(MSG_DEBUG,"Delta : %d Rpm : %f ",tabindex[nbindex].SysClk-tabindex[nbindex-1].SysClk,(float)(ick*(float)60)/(float)(tabindex[nbindex].SysClk-tabindex[nbindex-1].SysClk));
 		#endif
 								}
 								nbindex++;
@@ -248,19 +262,21 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,fl
 								break;
 
 						}
-						offset=offset+oob->Size + sizeof(s_oob_header);
+						if(!streamend)
+							offset=offset+oob->Size + sizeof(s_oob_header);
+						totalstreampos++;
 					break;
 				
 					default:
 						cell_value = kfstreambuffer[offset];
 
-						if(inc0B)
-						{
-							cell_value=cell_value+ 0x10000;
-							inc0B=0;
-						}
+						cell_value = cell_value + overflowvalue;
+						overflowvalue=0;
+
 						cellstream[cellpos++]=(unsigned long)((float)cell_value * timecoef);
+						totalcell = totalcell + cell_value;
 						offset++;
+						totalstreampos++;
 					break;
 				}
 

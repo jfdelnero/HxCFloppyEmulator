@@ -229,7 +229,9 @@ const char * hxcfe_getTrackEncodingName(HXCFLOPPYEMULATOR* floppycontext,int tra
 
 typedef struct s_sectorlist_
 {
-	void * sectorconfig;
+	SECTORCONFIG * sectorconfig;
+	int x_pos1,y_pos1;
+	int x_pos2,y_pos2;
 	struct s_sectorlist_ * next_element;
 }s_sectorlist;
 
@@ -240,12 +242,14 @@ typedef struct s_trackdisplay_
 	int x_start_us;
 	unsigned long * framebuffer;
 
-	struct s_sectorlist_ * sector_list;
+	s_sectorlist * sl;
+
 }s_trackdisplay;
 
 s_trackdisplay * hxcfe_td_init(HXCFLOPPYEMULATOR* floppycontext,unsigned long xsize,unsigned long ysize);
 void hxcfe_td_setparams(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,unsigned long x_us,unsigned long y_us,unsigned long x_start_us);
 void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY * floppydisk,int track,int side);
+s_sectorlist * hxcfe_td_getlastsectorlist(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td);
 void hxcfe_td_draw_disk(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY * floppydisk);
 void hxcfe_td_deinit(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td);
 

@@ -221,7 +221,7 @@ void putstring8x8(s_trackdisplay *td,int x_pos,int y_pos,unsigned char * str,uns
 
 }
 
-void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY * floppydisk,int track,int side,double timingoffset_offset, int TRACKTYPE)
+s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY * floppydisk,int track,int side,double timingoffset_offset, int TRACKTYPE)
 {
 	int tracksize;
 	int i,j,old_i;
@@ -235,11 +235,15 @@ void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY 
 	SECTORSEARCH* ss;
 	SECTORCONFIG* sc;
 	SIDE * currentside;
+	s_sectorlist * sl,*oldsl;
 
 	old_i=0;
 	timingoffset=0;//timingoffset_offset;
 	loop=0;
 	endfill=0;
+
+	sl=td->sl;
+	oldsl=0;
 
 	currentside=floppydisk->tracks[track]->sides[side];
 	tracksize=currentside->tracklen;
@@ -262,6 +266,13 @@ void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY 
 					sc=hxcfe_getNextSector(ss,track,side,TRACKTYPE);
 					if(sc)
 					{
+
+						oldsl = sl;
+						sl=malloc(sizeof(s_sectorlist));
+						memset(sl,0,sizeof(s_sectorlist));
+
+						sl->next_element = oldsl;
+
 						timingoffset = getOffsetTiming(currentside,sc->startsectorindex,timingoffset,old_i);
 						old_i = sc->startsectorindex;
 						xpos = (int)( ( timingoffset - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
@@ -279,6 +290,13 @@ void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY 
 						}
 
 						xpos2 = (int)( ( timingoffset2 - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
+
+						sl->x_pos1=xpos;
+						sl->y_pos1=50;
+						sl->x_pos2=xpos2;
+						sl->y_pos2=td->ysize-10;
+
+						sl->sectorconfig=sc;
 
 						// Main block
 						for(i=xpos;i<xpos2;i++)
@@ -405,7 +423,7 @@ void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY 
 						}
 
 
-						hxcfe_freeSectorConfig(ss,sc);
+						//hxcfe_freeSectorConfig(ss,sc);
 					}
 				}while(sc);
 
@@ -418,6 +436,9 @@ void display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY 
 			endfill=1;
 	}while(!endfill);
 
+	td->sl=sl;
+	
+	return sl;
 }
 
 void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY * floppydisk,int track,int side)
@@ -434,8 +455,31 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	int bitrate;
 	int xpos,ypos;
 	int endfill;
+	s_sectorlist * sl,*oldsl;
 	SIDE * currentside;
 	s_col * col;
+
+	sl=td->sl;
+	while(sl)
+	{
+
+		oldsl = sl->next_element;
+		//sl = sl->next_element;
+		
+		if(sl->sectorconfig)
+		{
+			if(sl->sectorconfig->input_data)
+			{
+				free(sl->sectorconfig->input_data);
+			}
+			free(sl->sectorconfig);
+		}
+		free(sl);
+
+		sl = oldsl;
+	}
+	td->sl=0;
+
 
 	currentside=floppydisk->tracks[track]->sides[side];
 
@@ -446,9 +490,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 
 	memset(td->framebuffer,0,td->xsize*td->ysize*sizeof(unsigned long));
 
-
 	timingoffset = ( getOffsetTiming(currentside,tracksize,0,0));
-
 
 	timingoffset2=( timingoffset * td->x_start_us ) / (100 * 1000);
 	timingoffset=0;
@@ -647,7 +689,14 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,ISOIBM_MFM_ENCODING);
 	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,AMIGA_MFM_ENCODING);
 	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,ISOIBM_FM_ENCODING);
+
+
 	//display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,EMU_FM_ENCODING);
+}
+
+s_sectorlist * hxcfe_td_getlastsectorlist(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td)
+{
+	return td->sl;
 }
 
 void plot(s_trackdisplay *td,int x,int y,unsigned long color)

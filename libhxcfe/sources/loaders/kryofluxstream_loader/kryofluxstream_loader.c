@@ -62,6 +62,8 @@
 
 #include "os_api.h"
 
+#define BASEINDEX 1
+
 int KryoFluxStream_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	int found,track,side;
@@ -367,33 +369,48 @@ void quickSort(s_match * table, int start, int end)
 
 char* AnalyzeAndFoundOverLap(HXCFLOPPYEMULATOR* floppycontext,s_track_dump* td,int centralvalue,int *start,int *end)
 {
-	#define NUMBEROFTRY 1024
-	#define PERCENTERROR 15
+	#define NUMBEROFTRY 1536
+	#define PERCENTERROR 20
 
 	unsigned char * valid_page1;
 	int time1,time2;
 	unsigned long i,j,k,l,c;
 	s_match * matchtab;
 	int nb_pulses,nb_flakey_pulses;
+	int number_of_entry;
 
-	matchtab=malloc(sizeof(s_match) * NUMBEROFTRY );
-	memset(matchtab,0,sizeof(s_match) * NUMBEROFTRY );
+	unsigned long tracktimeoffset_1,tracktimeoffset_2;
+	int index_pos;
+	int pourcent_error;
 
-	for(k=0;k<NUMBEROFTRY;k++)
+	index_pos=BASEINDEX;
+
+	number_of_entry = NUMBEROFTRY;
+	if( ( td->index_evt_tab[index_pos+1].dump_offset + ( number_of_entry / 2 ) ) >= td->nb_of_pulses )
+	{
+		number_of_entry = ( (td->index_evt_tab[index_pos+1].dump_offset - td->index_evt_tab[index_pos].dump_offset) ) / 2;
+	}
+
+	matchtab=malloc(sizeof(s_match) * number_of_entry );
+	memset(matchtab,0,sizeof(s_match) * number_of_entry );
+
+	for(k=0;k<number_of_entry;k++)
 	{
 		if(k&1)
-			matchtab[k].offset= ( td->index_evt_tab[1].dump_offset - ( k>>1 ) );
+			matchtab[k].offset= ( td->index_evt_tab[index_pos+1].dump_offset - ( k>>1 ) );
 		else
-			matchtab[k].offset= ( td->index_evt_tab[1].dump_offset + ( k>>1 ) );
+			matchtab[k].offset= ( td->index_evt_tab[index_pos+1].dump_offset + ( k>>1 ) );
 
 	}
 
-	for(k=0;k<NUMBEROFTRY;k++)
+	pourcent_error = PERCENTERROR;
+
+	for(k=0;k<number_of_entry;k++)
 	{
 		j=matchtab[k].offset;
-		i=td->index_evt_tab[0].dump_offset;
+		i=td->index_evt_tab[index_pos].dump_offset;
 
-		c = ( td->index_evt_tab[1].dump_offset - td->index_evt_tab[0].dump_offset ) + (NUMBEROFTRY*2);
+		c = ( td->index_evt_tab[index_pos+1].dump_offset - td->index_evt_tab[index_pos].dump_offset ) + (number_of_entry*2);
 
 		time1 = td->track_dump[i];
 		time2 = td->track_dump[j];
@@ -401,12 +418,15 @@ char* AnalyzeAndFoundOverLap(HXCFLOPPYEMULATOR* floppycontext,s_track_dump* td,i
 		do
 		{
 			if( 
-				( time2 <= ( time1 + ( ( time1 * PERCENTERROR ) / 100 ) ) ) &&
-				( time2 >= ( time1 - ( ( time1 * PERCENTERROR ) / 100 ) ) )    )
+				( time2 <= ( time1 + ( ( time1 * pourcent_error ) / 100 ) ) ) &&
+				( time2 >= ( time1 - ( ( time1 * pourcent_error ) / 100 ) ) )    )
 			{
 				matchtab[k].yes++;
 				time1 = td->track_dump[++i];
 				time2 = td->track_dump[++j];
+
+				pourcent_error = PERCENTERROR;
+
 			}
 			else
 			{
@@ -419,21 +439,26 @@ char* AnalyzeAndFoundOverLap(HXCFLOPPYEMULATOR* floppycontext,s_track_dump* td,i
 					time2 = time2 + td->track_dump[++j];
 				}
 				matchtab[k].no++;
+				pourcent_error = 3;
+
 			}
 
 		}while(--c);
 
 		if(matchtab[k].no<10)
-			k=NUMBEROFTRY;
+			k=number_of_entry;
 	}
 
-	quickSort(matchtab, 0, NUMBEROFTRY-1);
+	quickSort(matchtab, 0, number_of_entry-1);
 
-	nb_pulses = ( td->index_evt_tab[1].dump_offset - td->index_evt_tab[0].dump_offset ) +
-				( matchtab[NUMBEROFTRY-1].offset - td->index_evt_tab[1].dump_offset );
+	nb_pulses = ( td->index_evt_tab[index_pos+1].dump_offset - td->index_evt_tab[index_pos].dump_offset ) +
+				( matchtab[number_of_entry-1].offset - td->index_evt_tab[index_pos+1].dump_offset );
 
-	*start=matchtab[NUMBEROFTRY-1].offset;
-	*end=matchtab[NUMBEROFTRY-1].offset + nb_pulses;
+	*start=matchtab[number_of_entry-1].offset;
+	*end=matchtab[number_of_entry-1].offset + nb_pulses;
+	if(*end>= td->nb_of_pulses) *end=td->nb_of_pulses-1;
+	if(*start>= td->nb_of_pulses) *start=td->nb_of_pulses-1;
+
 	nb_flakey_pulses = 0;
 
 	valid_page1 = malloc( nb_pulses * sizeof(char) );
@@ -441,25 +466,36 @@ char* AnalyzeAndFoundOverLap(HXCFLOPPYEMULATOR* floppycontext,s_track_dump* td,i
 	{
 		memset(valid_page1,0, nb_pulses * sizeof(char) );
 
-		j= matchtab[NUMBEROFTRY-1].offset;
-		i= td->index_evt_tab[0].dump_offset;
+		j= matchtab[number_of_entry-1].offset;
+		i= td->index_evt_tab[index_pos].dump_offset;
+
+		tracktimeoffset_1 = 0;
+		tracktimeoffset_2 = 0;
 
 		l=0;
 		c = nb_pulses;
 
+		pourcent_error = PERCENTERROR;
 		time1 = td->track_dump[i];
 		time2 = td->track_dump[j];
+
+		tracktimeoffset_1 = time1;
+		tracktimeoffset_2 = time2;
 
 		do
 		{
 			if( 
-				( time2 <= ( time1 + ( ( time1 * PERCENTERROR ) / 100 ) ) ) &&
-				( time2 >= ( time1 - ( ( time1 * PERCENTERROR ) / 100 ) ) )    )
+				( time2 <= ( time1 + ( ( time1 * pourcent_error ) / 100 ) ) ) &&
+				( time2 >= ( time1 - ( ( time1 * pourcent_error ) / 100 ) ) )    )
 			{
 				
-						
 				time1 = td->track_dump[++i];
 				time2 = td->track_dump[++j];
+
+				tracktimeoffset_1 = tracktimeoffset_1 + time1;
+				tracktimeoffset_2 = tracktimeoffset_2 + time2;
+
+				pourcent_error = PERCENTERROR;
 
 				c--;
 			}
@@ -467,16 +503,22 @@ char* AnalyzeAndFoundOverLap(HXCFLOPPYEMULATOR* floppycontext,s_track_dump* td,i
 			{
 				if(time1<time2)
 				{
-					valid_page1[i - td->index_evt_tab[0].dump_offset]=-1;
+					valid_page1[i - td->index_evt_tab[index_pos].dump_offset]=-1;
 					time1 = time1 + td->track_dump[++i];
+
+					tracktimeoffset_1 = tracktimeoffset_1 + td->track_dump[i];
 
 					c--;
 				}
 				else
 				{
-					valid_page1[i - td->index_evt_tab[0].dump_offset]=-1;
+					valid_page1[i - td->index_evt_tab[index_pos].dump_offset]=-1;
 					time2 = time2 + td->track_dump[++j];
+
+					tracktimeoffset_2 = tracktimeoffset_2 + td->track_dump[j];
 				}
+
+				pourcent_error = 3;
 
 				nb_flakey_pulses++;
 			}
@@ -487,7 +529,7 @@ char* AnalyzeAndFoundOverLap(HXCFLOPPYEMULATOR* floppycontext,s_track_dump* td,i
 
 	floppycontext->hxc_printf(MSG_DEBUG,"Track Len: %d pulses - Track overlap : %d - Flakey/weak bits : %d",
 								nb_pulses,
-								matchtab[NUMBEROFTRY-1].offset-td->index_evt_tab[1].dump_offset,
+								matchtab[number_of_entry-1].offset-td->index_evt_tab[index_pos+1].dump_offset,
 								nb_flakey_pulses);
 	
 	free(matchtab);
@@ -623,8 +665,13 @@ SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,floa
 	
 	char * flakeytab;
 	int start,end;
+
 	s_track_dump *track_dump;
 	//int i,j;
+
+	int index_pos;
+
+	index_pos=BASEINDEX;
 	
 #ifdef KFSTREAMDBG
 	floppycontext->hxc_printf(MSG_DEBUG,"decodestream %s",file);
@@ -644,13 +691,13 @@ SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,floa
 		{
 			histo=(unsigned long*)malloc(65536* sizeof(unsigned long));
 			
-			cellpos=track_dump->index_evt_tab[0].dump_offset;
+			cellpos=track_dump->index_evt_tab[index_pos].dump_offset;
 			
-			computehistogram(&track_dump->track_dump[cellpos],track_dump->index_evt_tab[1].dump_offset-track_dump->index_evt_tab[0].dump_offset,histo);
+			computehistogram(&track_dump->track_dump[cellpos],track_dump->index_evt_tab[index_pos+1].dump_offset-track_dump->index_evt_tab[index_pos].dump_offset,histo);
 
 			bitrate=detectpeaks(floppycontext,histo);
 
-			*rpm=(int)((float)(ick*(float)60)/(float)(track_dump->index_evt_tab[1].clk-track_dump->index_evt_tab[0].clk));
+			*rpm=(int)((float)(ick*(float)60)/(float)(track_dump->index_evt_tab[index_pos+1].clk-track_dump->index_evt_tab[index_pos].clk));
 
 			floppycontext->hxc_printf(MSG_DEBUG,"Track %s : %d RPM, Bitrate: %d",getfilenamebase(file,0),*rpm,(int)(24027428/bitrate) );
 			

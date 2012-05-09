@@ -63,3 +63,5 @@ EXPORTS
    hxcfe_td_draw_disk			@122
    hxcfe_td_deinit				@123
    hxcfe_td_setparams			@124
+   hxcfe_td_getlastsectorlist	@125
+
