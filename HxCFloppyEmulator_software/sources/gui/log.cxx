@@ -237,7 +237,7 @@ static void tick_log(void *v) {
 			if(logsfifo.fifotab[i&(LOGFIFOSIZE-1)])
 			{
 				window->buf->append((char*)(const char*)logsfifo.fifotab[i&(LOGFIFOSIZE-1)]);	
-				window->buf->append((char*)"\r\n");
+				window->buf->append((char*)"\n");
 			}
 			i=(i+1)&(LOGFIFOSIZE-1);
 		}while(logsfifo.in!=i);

@@ -362,6 +362,10 @@ SOURCE=..\sources\win32\win32_api.h
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # Begin Source File
 
+SOURCE=..\sources\win32\icon2.ico
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\win32\mainicon.ico
 # End Source File
 # End Group
