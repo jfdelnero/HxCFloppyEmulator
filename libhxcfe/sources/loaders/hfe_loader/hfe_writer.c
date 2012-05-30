@@ -36,6 +36,8 @@
 #include "hfe_loader.h"
 #include "hfe_format.h"
 
+#include "os_api.h"
+
 unsigned char * ramfile;
 int ramfile_size;
 
@@ -408,11 +410,11 @@ int HFE_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
  
 #ifdef FASTWRITE
-		hxcpicfile=fopen(filename,"wb");
+		hxcpicfile=hxc_fopen(filename,"wb");
 		if(hxcpicfile)
 		{
 			fwrite(ramfile,ramfile_size,1,hxcpicfile);
-			fclose(hxcpicfile);
+			hxc_fclose(hxcpicfile);
 		}
 		else
 		{

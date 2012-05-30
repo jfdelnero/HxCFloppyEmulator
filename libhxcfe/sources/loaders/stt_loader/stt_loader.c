@@ -69,7 +69,7 @@ int STT_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	if( checkfileext(imgfile,"stt") )
 	{
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -83,7 +83,7 @@ int STT_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		STTHEADER.stt_signature=0;
 		fread(&STTHEADER,sizeof(stt_header),1,f);
 
-		fclose(f);
+		hxc_fclose(f);
 					
 					
 		if(STTHEADER.stt_signature!=0x4D455453) //"STEM"
@@ -127,7 +127,7 @@ int STT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"STT_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -144,7 +144,7 @@ int STT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(STTHEADER.stt_signature!=0x4D455453) //"STEM"
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"non STT IMG file - bad signature !");
-		fclose(f);
+		hxc_fclose(f);
 
 		return HXCFE_BADFILE;
 	}
@@ -267,7 +267,7 @@ int STT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
-	fclose(f);
+	hxc_fclose(f);
 	return HXCFE_NOERROR;
 
 }

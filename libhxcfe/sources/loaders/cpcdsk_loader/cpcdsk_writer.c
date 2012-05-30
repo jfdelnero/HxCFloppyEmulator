@@ -36,6 +36,8 @@
 
 #include "tracks/sector_extractor.h"
 
+#include "os_api.h"
+
 unsigned char  size_to_code(unsigned long size)
 {
 
@@ -91,7 +93,7 @@ int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 	floppycontext->hxc_printf(MSG_INFO_1,"Write CPCDSK file %s...",filename);
 
 	log_str=0;
-	cpcdskfile=fopen(filename,"wb");
+	cpcdskfile=hxc_fopen(filename,"wb");
 	if(cpcdskfile)
 	{
 		memset(disk_info_block,0,0x100);
@@ -243,7 +245,7 @@ int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 		fseek(cpcdskfile,0,SEEK_SET);
 		fwrite(&disk_info_block,0x100,1,cpcdskfile);
 
-		fclose(cpcdskfile);
+		hxc_fclose(cpcdskfile);
 	}
 	
 	return 0;

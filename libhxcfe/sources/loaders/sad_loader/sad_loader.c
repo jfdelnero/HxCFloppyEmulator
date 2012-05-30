@@ -56,6 +56,8 @@
 #include "sad_loader.h"
 #include "sad_fileformat.h"
 
+#include "os_api.h"
+
 int SAD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	int pathlen;
@@ -69,7 +71,7 @@ int SAD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		if(pathlen!=0)
 		{
 				
-			f=fopen(imgfile,"rb");
+			f=hxc_fopen(imgfile,"rb");
 			if(f==NULL) 
 			{
 				floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -78,7 +80,7 @@ int SAD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 			fread(&sadh,sizeof(SAD_HEADER),1,f);
 			
-			fclose(f);
+			hxc_fclose(f);
 					
 			if(!strncmp(sadh.abSignature,SAD_SIGNATURE,sizeof SAD_SIGNATURE - 1))
 			{
@@ -114,7 +116,7 @@ int SAD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"SAD_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -124,7 +126,7 @@ int SAD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	fread(&sadh,sizeof(SAD_HEADER),1,f);
 	if(strncmp(sadh.abSignature,SAD_SIGNATURE,sizeof SAD_SIGNATURE - 1))
 	{
-		fclose(f);
+		hxc_fclose(f);
 		floppycontext->hxc_printf(MSG_DEBUG,"non SAD file !");
 		return HXCFE_BADFILE;
 	}
@@ -168,7 +170,7 @@ int SAD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
-	fclose(f);
+	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }
 

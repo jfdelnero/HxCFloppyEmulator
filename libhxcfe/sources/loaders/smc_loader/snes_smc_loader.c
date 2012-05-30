@@ -58,6 +58,8 @@
 
 #include "../fat12floppy_loader/fat12.h"
 
+#include "os_api.h"
+
 extern unsigned char msdos_bootsector;
 
 int snes_smc_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
@@ -70,7 +72,7 @@ int snes_smc_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	floppycontext->hxc_printf(MSG_DEBUG,"snes_smc_libIsValidDiskFile");
 	if(imgfile)
 	{
-		f=fopen(imgfile,"r+b");
+		f=hxc_fopen(imgfile,"r+b");
 		if(f)
 		{
 			fileheader=(unsigned char*)malloc(512);
@@ -114,14 +116,14 @@ int snes_smc_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"SMC/SMD file !");
 						free(fileheader);
-						fclose(f);
+						hxc_fclose(f);
 						return HXCFE_VALIDFILE;
 					}
 					else
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non SMC/SMD file !");
 						free(fileheader);
-						fclose(f);
+						hxc_fclose(f);
 						return HXCFE_BADFILE;
 					}
 					
@@ -149,20 +151,20 @@ int snes_smc_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"SMC/SMD file !");
 						free(fileheader);
-						fclose(f);
+						hxc_fclose(f);
 						return HXCFE_VALIDFILE;
 					}
 					else
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"non SMC/SMD file !");
 						free(fileheader);
-						fclose(f);
+						hxc_fclose(f);
 						return HXCFE_BADFILE;
 					}
 				}
 				
 			}
-			fclose(f);
+			hxc_fclose(f);
 			return HXCFE_INTERNALERROR;
 		}
 		return HXCFE_ACCESSERROR;

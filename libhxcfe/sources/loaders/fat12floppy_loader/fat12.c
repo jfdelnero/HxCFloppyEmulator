@@ -245,7 +245,7 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 						entry->DIR_WrtTime= 0;
 					}
 
-					ftemp=fopen(fullpath,"rb");
+					ftemp=hxc_fopen(fullpath,"rb");
 					if(ftemp)
 					{
 						do
@@ -256,7 +256,7 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 								floppycontext->hxc_printf(MSG_ERROR,"Error while adding this file ! : No more cluster free !");
 								free(fullpath);
 								find_close(hfindfile);
-								fclose(ftemp);
+								hxc_fclose(ftemp);
 								return 1;
 							}
 							memset(&datatable[(fatclusternb-2)*fatconfig->sectorsize*fatconfig->clustersize],0x00,fatconfig->sectorsize*fatconfig->clustersize);
@@ -269,7 +269,7 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 							lefttoread=lefttoread-(fatconfig->sectorsize*fatconfig->clustersize);
 						}while(lefttoread>0);
 						
-						fclose(ftemp);
+						hxc_fclose(ftemp);
 					}
 					else
 					{

@@ -1565,6 +1565,14 @@ SOURCE=..\sources\floppy_utils.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\sources\fs.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\fs.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\win32\libhxcfe.def
 # End Source File
 # Begin Source File

@@ -68,13 +68,13 @@ int IMD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	if(checkfileext(imgfile,"imd"))
 	{
 
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 			return HXCFE_ACCESSERROR;
 
 		fread(&fileheader,4,1,f);
 		fileheader[4]=0;
-		fclose(f);
+		hxc_fclose(f);
 
 		if( !strcmp(fileheader,"IMD "))
 		{
@@ -119,7 +119,7 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"IMD_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -461,11 +461,11 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 
 
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_NOERROR;
 	}	
 
-	fclose(f);	
+	hxc_fclose(f);	
 	floppycontext->hxc_printf(MSG_ERROR,"bad header");
 	return HXCFE_BADFILE;
 }

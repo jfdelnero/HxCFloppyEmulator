@@ -162,7 +162,7 @@ void savebuffer(unsigned char * name,unsigned char * buffer, int size)
 {
 	FILE * f;
 
-	f=fopen(name,"w+b");
+	f=hxc_fopen(name,"w+b");
 	if(f)
 	{
 		fwrite(buffer,size,1,f);
@@ -325,7 +325,7 @@ int getfilesize(char * path)
 
 	if(path)
 	{
-		f=fopen(path,"rb");
+		f=hxc_fopen(path,"rb");
 		if(f)
 		{
 			fseek (f , 0 , SEEK_END); 

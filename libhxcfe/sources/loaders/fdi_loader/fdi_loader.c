@@ -68,11 +68,11 @@ int FDI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	if( checkfileext(imgfile,"fdi") )
 	{
 	
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f)
 		{
 			fread(&f_header,sizeof(fdi_header),1,f);
-			fclose(f);
+			hxc_fclose(f);
 
 			if(f_header.signature[0]=='F' && f_header.signature[1]=='D' && f_header.signature[2]=='I')
 			{
@@ -118,7 +118,7 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	floppycontext->hxc_printf(MSG_DEBUG,"FDI_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -135,7 +135,7 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(f_header.signature[0]!='F' || f_header.signature[1]!='D' || f_header.signature[2]!='I')
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Bad FDI file !");
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_BADFILE;
 	}
 
@@ -240,7 +240,7 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
-	fclose(f);
+	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }
 			

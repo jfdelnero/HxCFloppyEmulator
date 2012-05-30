@@ -78,14 +78,14 @@ int SCL_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	if(checkfileext(imgfile,"scl"))
 	{
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"Cannot open the file !");
 			return HXCFE_ACCESSERROR;
 		}
 		fread(&sclsignature,8,1,f);
-		fclose(f);
+		hxc_fclose(f);
 
 		if(!strncmp(sclsignature, "SINCLAIR", 8))
 		{
@@ -152,7 +152,7 @@ int SCL_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"SCL_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -163,7 +163,7 @@ int SCL_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(strncmp(sclsignature, "SINCLAIR", 8))
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"non Sinclair SCL file !(bad header)");
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_BADFILE;
 	}
 
@@ -183,7 +183,7 @@ int SCL_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(!trd_image)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Malloc error !");
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_INTERNALERROR;
 	}
 	
@@ -205,7 +205,7 @@ int SCL_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		if (lsb2ui(tmp) < size) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"File too long to fit in the image *trd_free=%u < size=%u",lsb2ui(tmp),size);
-			fclose(f);
+			hxc_fclose(f);
 			free(trd_image);
 			return HXCFE_INTERNALERROR;
 		}
@@ -213,7 +213,7 @@ int SCL_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		if (*trd_files > 127) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"Image File full!");
-			fclose(f);
+			hxc_fclose(f);
 			free(trd_image);
 			return HXCFE_INTERNALERROR;
 		}
@@ -249,7 +249,7 @@ int SCL_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		}
 
 	}
-	fclose(f);
+	hxc_fclose(f);
 
 	rpm=300;
 	sectorsize=256; // SCL file support only 256bytes/sector floppies.

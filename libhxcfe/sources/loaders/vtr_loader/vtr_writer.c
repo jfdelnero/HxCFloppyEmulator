@@ -35,6 +35,8 @@
 #include "vtr_loader.h"
 #include "vtr_format.h"
 
+#include "os_api.h"
+
 extern unsigned char bit_inverter[];
 
 int VTR_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
@@ -55,7 +57,7 @@ int VTR_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 	floppycontext->hxc_printf(MSG_INFO_1,"Write vtrucco-HFE file %s for the standalone emulator.",filename);
 
-	hxcpicfile=fopen(filename,"wb");
+	hxcpicfile=hxc_fopen(filename,"wb");
 
 	if(hxcpicfile)
 	{
@@ -211,7 +213,7 @@ int VTR_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 		free(offsettrack);
 
-        fclose(hxcpicfile);
+        hxc_fclose(hxcpicfile);
 		
 		floppycontext->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
 

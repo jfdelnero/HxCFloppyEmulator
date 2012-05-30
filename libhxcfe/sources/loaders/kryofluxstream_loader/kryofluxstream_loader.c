@@ -91,7 +91,7 @@ int KryoFluxStream_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 				do
 				{					
 					sprintf(filepath,"%s\\track%.2d.%d.raw",imgfile,track,side);
-					f=fopen(filepath,"rb");
+					f=hxc_fopen(filepath,"rb");
 					if(f)
 					{
 						fread(&oob,sizeof(s_oob_header),1,f);
@@ -99,7 +99,7 @@ int KryoFluxStream_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 						{
 							found=1;
 						}
-						fclose(f);
+						hxc_fclose(f);
 					}
 					side++;
 					if(side>1) 
@@ -133,7 +133,7 @@ int KryoFluxStream_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 					return HXCFE_BADFILE;
 				}
 
-				f=fopen(imgfile,"rb");
+				f=hxc_fopen(imgfile,"rb");
 				if(f)
 				{
 					fread(&oob,sizeof(s_oob_header),1,f);
@@ -141,7 +141,7 @@ int KryoFluxStream_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 					{
 						found=1;
 					}
-					fclose(f);
+					hxc_fclose(f);
 
 					if(found)
 					{
@@ -780,37 +780,37 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 
 			doublestep=1;
 			sprintf(filepath,"%s%s",folder,"doublestep");
-			f=fopen(filepath,"rb");
+			f=hxc_fopen(filepath,"rb");
 			if(f)
 			{
 				doublestep=2;
-				fclose(f);
+				hxc_fclose(f);
 			}
 
 			singleside=0;
 			sprintf(filepath,"%s%s",folder,"singleside");
-			f=fopen(filepath,"rb");
+			f=hxc_fopen(filepath,"rb");
 			if(f)
 			{
 				singleside=1;
-				fclose(f);
+				hxc_fclose(f);
 			}
 
 			timecoef=1;
 			sprintf(filepath,"%s%s",folder,"rpm360rpm300");
-			f=fopen(filepath,"rb");
+			f=hxc_fopen(filepath,"rb");
 			if(f)
 			{
 				timecoef=(float)1.2;
-				fclose(f);
+				hxc_fclose(f);
 			}
 
 			sprintf(filepath,"%s%s",folder,"rpm300rpm360");
-			f=fopen(filepath,"rb");
+			f=hxc_fopen(filepath,"rb");
 			if(f)
 			{
 				timecoef=(float)0.833;
-				fclose(f);
+				hxc_fclose(f);
 			}
 
 			
@@ -826,7 +826,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 			do
 			{
 				sprintf(filepath,"%s%s%.2d.%d.raw",folder,fname,track,side);
-				f=fopen(filepath,"rb");
+				f=hxc_fopen(filepath,"rb");
 				if(f)
 				{
 					fread(&oob,sizeof(s_oob_header),1,f);
@@ -838,7 +838,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 						if(maxside<side) maxside=side;
 						found=1;
 					}
-					fclose(f);
+					hxc_fclose(f);
 				}
 				side++;
 				if(side>1) 

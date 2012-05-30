@@ -66,7 +66,7 @@ int EXTADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	if( checkfileext(imgfile,"adf") )
 	{
 
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -74,7 +74,7 @@ int EXTADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		}
 
 		fread(header,12,1,f);
-		fclose(f);
+		hxc_fclose(f);
 
 		header[8]=0;
 		if(!strcmp(header,"UAE-1ADF"))
@@ -116,7 +116,7 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"EXTADF_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -130,7 +130,7 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 	if(!filesize)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Bad file size : %d !",filesize);
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_BADFILE;
 	}
 	
@@ -235,7 +235,7 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 
 	if(tracktable)	free(tracktable);
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-	fclose(f);
+	hxc_fclose(f);
 
 	return HXCFE_NOERROR;	
 }

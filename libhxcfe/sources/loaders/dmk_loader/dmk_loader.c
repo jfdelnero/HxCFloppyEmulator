@@ -81,7 +81,7 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile");
 	if(imgfile)
 	{
-		f=fopen(imgfile,"r+b");
+		f=hxc_fopen(imgfile,"r+b");
 		if(f)
 		{
 			fseek (f , 0 , SEEK_END);
@@ -89,7 +89,7 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			fseek (f , 0 , SEEK_SET);
 			fread(&dmk_h,sizeof(dmk_header),1,f);
 
-			fclose(f);
+			hxc_fclose(f);
 					
 
 			if(dmk_h.track_len)
@@ -235,7 +235,7 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 			j=3;
 			while(sectorbegin && j && (trackdata[sectorbegin]==0xA1))
 			{
-				trackclk[sectorbegin]=0x0A;
+				//trackclk[sectorbegin]=0x0A;
 				j--;
 				sectorbegin--;
 			}
@@ -439,7 +439,7 @@ int DMK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	floppycontext->hxc_printf(MSG_DEBUG,"DMK_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -501,12 +501,12 @@ int DMK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_NOERROR;
 	}
 
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
-	fclose(f);
+	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 

@@ -102,7 +102,7 @@ int EMUII_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"EMUII_RAW_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -157,7 +157,7 @@ int EMUII_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 			
 	}			
 	
-	fclose(f);
+	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }
 

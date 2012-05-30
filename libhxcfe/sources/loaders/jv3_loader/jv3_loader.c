@@ -248,7 +248,7 @@ int JV3_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		)
 	{
 
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -261,7 +261,7 @@ int JV3_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			offset1 = ftell(f);
 			fseek (f , 0 , SEEK_END);
 			offset2 = ftell(f); 
-			fclose(f);
+			hxc_fclose(f);
 
 			if (total_data == (unsigned int)(offset2 - offset1 -1)) {
 				floppycontext->hxc_printf(MSG_DEBUG,"JV3 file !");
@@ -273,7 +273,7 @@ int JV3_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		}
 		else
 		{
-			fclose(f);
+			hxc_fclose(f);
 			floppycontext->hxc_printf(MSG_DEBUG,"non JV3 file !");
 			return HXCFE_BADFILE;
 		}
@@ -309,7 +309,7 @@ int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	floppycontext->hxc_printf(MSG_DEBUG,"JV3_libLoad_DiskFile %s",imgfile);
 
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -423,12 +423,12 @@ int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		free(SectorsOffsets);
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_NOERROR;
 	}
 
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
-	fclose(f);
+	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 

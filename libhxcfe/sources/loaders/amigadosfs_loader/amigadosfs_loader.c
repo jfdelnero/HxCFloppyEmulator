@@ -211,7 +211,7 @@ int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * f
 								fullpath=malloc(strlen(FindFileData.filename)+strlen(folder)+2);
 								sprintf(fullpath,"%s\\%s",folder,FindFileData.filename);
 
-								ftemp=fopen(fullpath,"rb");
+								ftemp=hxc_fopen(fullpath,"rb");
 								if(ftemp)
 								{
 									fseek(ftemp,0,SEEK_END);
@@ -234,7 +234,7 @@ int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * f
 										{
 											floppycontext->hxc_printf(MSG_ERROR,"Error while writting the file %s. No more free block ?",FindFileData.filename);
 											adfCloseFile(adffile);
-											fclose(ftemp);
+											hxc_fclose(ftemp);
 											free(fullpath);
 											return 1;
 										}
@@ -250,7 +250,7 @@ int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * f
 									free(fileimg);*/
 
 									adfCloseFile(adffile);
-									fclose(ftemp);
+									hxc_fclose(ftemp);
 									free(fullpath);
 								}
 								else
@@ -391,11 +391,11 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 					memcpy(flatimg2,flatimg,flatimgsize);
 					adfUnMountDev(adfdevice);
 					/*////////
-					debugadf=fopen("d:\\debug.adf","wb");
+					debugadf=hxc_fopen("d:\\debug.adf","wb");
 					if(debugadf)
 					{
 						fwrite(flatimg2,flatimgsize,1,debugadf);
-						fclose(debugadf);
+						hxc_fclose(debugadf);
 					}
 					//////////*/
 

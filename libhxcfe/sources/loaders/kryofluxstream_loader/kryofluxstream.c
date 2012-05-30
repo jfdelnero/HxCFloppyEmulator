@@ -100,7 +100,7 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,fl
 	{
 		memset(track_dump,0,sizeof(s_track_dump));
 
-		f=fopen(file,"rb");
+		f=hxc_fopen(file,"rb");
 		if(f)
 		{
 			fseek(f,0,SEEK_END);
@@ -111,7 +111,7 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,fl
 
 			fread(kfstreambuffer,filesize,1,f);
 
-			fclose(f);
+			hxc_fclose(f);
 
 			cellstream=(unsigned long*)malloc(filesize*sizeof(unsigned long));
 			memset(cellstream,0,filesize*sizeof(unsigned long));

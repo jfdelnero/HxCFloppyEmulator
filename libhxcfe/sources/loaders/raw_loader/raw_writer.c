@@ -33,6 +33,8 @@
 #include "raw_loader.h"
 
 #include "tracks/sector_extractor.h"
+
+#include "os_api.h"
   
 int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
 {	
@@ -47,7 +49,7 @@ int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 	track_type_id=0;
 	log_str=0;
-	rawfile=fopen(filename,"wb");
+	rawfile=hxc_fopen(filename,"wb");
 	if(rawfile)
 	{
 		for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
@@ -152,7 +154,7 @@ int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 			}
 		}	
 
-		fclose(rawfile);
+		hxc_fclose(rawfile);
 	}
 	
 	return 0;

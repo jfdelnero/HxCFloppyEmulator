@@ -106,7 +106,7 @@ int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	floppycontext->hxc_printf(MSG_DEBUG,"D64_libLoad_DiskFile %s",imgfile);
 
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -159,7 +159,7 @@ int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		default:
 			// not supported !
 			floppycontext->hxc_printf(MSG_ERROR,"Unsupported D64 file size ! (%d Bytes)",filesize);
-			fclose(f);
+			hxc_fclose(f);
 			return HXCFE_UNSUPPORTEDFILE;
 			
 			break;
@@ -280,7 +280,7 @@ int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
-	fclose(f);
+	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }
 

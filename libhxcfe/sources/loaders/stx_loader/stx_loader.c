@@ -71,14 +71,14 @@ int STX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	if(checkfileext(imgfile,"stx"))
 	{
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL)
 			return HXCFE_ACCESSERROR;
 				
 		fileheader=(pasti_fileheader*)malloc(sizeof(pasti_fileheader));
 		fread( fileheader, sizeof(pasti_fileheader), 1, f );    
 
-		fclose(f);
+		hxc_fclose(f);
 
 		if(strcmp(fileheader->headertag,"RSY"))
 		{
@@ -446,7 +446,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	floppycontext->hxc_printf(MSG_DEBUG,"STX_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);

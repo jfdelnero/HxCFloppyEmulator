@@ -66,11 +66,11 @@ int MSA_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	if(checkfileext(imgfile,"msa"))
 	{
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f)
 		{
 			fread(signature,3,1,f);
-			fclose(f);
+			hxc_fclose(f);
 			if(signature[0]==0x0E && signature[1]==0x0F && signature[2]==0x00)
 			{
 				floppycontext->hxc_printf(MSG_DEBUG,"MSA file !");
@@ -107,7 +107,7 @@ int MSA_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"MSA_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -204,7 +204,7 @@ int MSA_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				i++;
 			}while(i<(unsigned int)(numberoftrack*(numberofside)));
 			
-			fclose(f);
+			hxc_fclose(f);
 			
 			floppydisk->floppyNumberOfTrack=numberoftrack;
 			floppydisk->floppyNumberOfSide=numberofside;

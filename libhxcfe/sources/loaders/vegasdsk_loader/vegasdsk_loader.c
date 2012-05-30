@@ -67,7 +67,7 @@ int VEGASDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	if( checkfileext(imgfile,"veg") || checkfileext(imgfile,"vegasdsk") )
 	{
 
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -77,7 +77,7 @@ int VEGASDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		fseek (f , 256*(3-1) , SEEK_SET);
 		fread(buffer,256,1,f);
 
-		fclose(f);
+		hxc_fclose(f);
 		floppycontext->hxc_printf(MSG_DEBUG,"Vegas DSK file ! %d tracks %d sectors/tracks",buffer[0x26]+1,buffer[0x27]+1);
 		return HXCFE_VALIDFILE;
 	}
@@ -113,7 +113,7 @@ int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 
 	floppycontext->hxc_printf(MSG_DEBUG,"VEGASDSK_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -258,7 +258,7 @@ int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
-	fclose(f);
+	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }
 

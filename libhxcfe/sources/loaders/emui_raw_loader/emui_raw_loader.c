@@ -103,7 +103,7 @@ int EMUI_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"EMUI_RAW_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -157,7 +157,7 @@ int EMUI_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 			BuildEmuIITrack(floppycontext,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,1);
 	}			
 	
-	fclose(f);
+	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }
 

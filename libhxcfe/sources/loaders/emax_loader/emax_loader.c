@@ -140,7 +140,7 @@ int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,c
 
 	floppycontext->hxc_printf(MSG_DEBUG,"EMAX_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -166,10 +166,10 @@ int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,c
 	}
 	sprintf(&os_filename[i],"emaxos.emx");
 
-	f2=fopen(os_filename,"rb");
+	f2=hxc_fopen(os_filename,"rb");
 	if(f2==NULL) 
 	{	
-		fclose(f);
+		hxc_fclose(f);
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open os file %s !",os_filename);
 		return HXCFE_ACCESSERROR;
 	}
@@ -210,8 +210,8 @@ int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,c
 			if (strncmp(fhdr, hdr, EMAXUTIL_HDRLEN)!=0)
 			{
 				floppycontext->hxc_printf(MSG_ERROR,"Wrong version: disk says %s", fhdr);
-				fclose(f);
-				fclose(f2);
+				hxc_fclose(f);
+				hxc_fclose(f2);
 				return HXCFE_BADFILE;
 			} 
 
@@ -274,19 +274,19 @@ int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,c
 			
 			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
-			fclose(f);
-			fclose(f2);
+			hxc_fclose(f);
+			hxc_fclose(f2);
 			return HXCFE_NOERROR;
 
 		}
-		fclose(f);
-		fclose(f2);
+		hxc_fclose(f);
+		hxc_fclose(f2);
 		return HXCFE_FILECORRUPTED;
 	}
 	
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
-	fclose(f);
-	fclose(f2);
+	hxc_fclose(f);
+	hxc_fclose(f2);
 	return HXCFE_BADFILE;
 }
 

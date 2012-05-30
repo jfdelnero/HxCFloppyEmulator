@@ -276,11 +276,11 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 		memcpy(&flatimg[((fatconfig.reservedsector)+(fatconfig.nbofsectorperfat))*fatconfig.sectorsize],&flatimg[fatposition],fatconfig.nbofsectorperfat*fatconfig.sectorsize);			
 
 
-	/*	f=fopen("test.img","wb");
+	/*	f=hxc_fopen("test.img","wb");
 		if(f) 
 		{
 			fwrite(flatimg,dksize,1,f);
-			fclose(f);
+			hxc_fclose(f);
 		}
 */
 

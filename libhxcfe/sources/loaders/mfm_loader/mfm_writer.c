@@ -31,9 +31,10 @@
 
 #include "libhxcfe.h"
 
-
 #include "mfm_loader.h"
 #include "mfm_format.h"
+
+#include "os_api.h"
 
 int MFM_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
 {	
@@ -50,7 +51,7 @@ int MFM_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 	floppycontext->hxc_printf(MSG_INFO_1,"Write MFM file %s...",filename);
 
-	hxcmfmfile=fopen(filename,"wb");
+	hxcmfmfile=hxc_fopen(filename,"wb");
 	if(hxcmfmfile)
 	{
 
@@ -148,7 +149,7 @@ int MFM_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 		free(offsettrack);
 
-		fclose(hxcmfmfile);
+		hxc_fclose(hxcmfmfile);
 
 		return 0;
 	}
