@@ -55,6 +55,8 @@
 
 #include "raw_loader.h"
 
+#include "os_api.h"
+
 int RAW_libIsValidFormat(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * imgformatcfg)
 {
 	unsigned int tracktype;
@@ -139,7 +141,7 @@ int RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"RAW_libLoad_DiskFile %s",imgfile);
 		
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -298,7 +300,7 @@ int RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	}
 
 	free(trackdata);
-	if(f) fclose(f);
+	if(f) hxc_fclose(f);
 
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 

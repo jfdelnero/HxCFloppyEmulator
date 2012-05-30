@@ -67,13 +67,13 @@ int OricDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	if(checkfileext(imgfile,"dsk"))
 	{
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
 			return HXCFE_ACCESSERROR;
 		}
 		fread(fileheader,10,1,f);
-		fclose(f);
+		hxc_fclose(f);
 					
 		fileheader[8]=0;
 		if( !strcmp(fileheader,"MFM_DISK") ||
@@ -255,7 +255,7 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"OricDSK_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -447,13 +447,13 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 		}
 		
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		fclose(f);
+		hxc_fclose(f);
 		
 		return HXCFE_NOERROR;
 		
 	}
 
-	fclose(f);
+	hxc_fclose(f);
 	
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	return HXCFE_BADFILE;

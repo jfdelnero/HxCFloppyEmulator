@@ -143,14 +143,14 @@ int EMUII_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,
 	}
 	sprintf(&os_filename[i],"emuiios.emuiifd");
 
-	f_os=fopen(os_filename,"rb");
+	f_os=hxc_fopen(os_filename,"rb");
 	if(f_os==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open os file %s !",os_filename);
 		return HXCFE_ACCESSERROR;
 	}
 	
-	f_eii=fopen(imgfile,"rb");
+	f_eii=hxc_fopen(imgfile,"rb");
 	if(f_eii==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -218,8 +218,8 @@ int EMUII_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,
 			
 	}			
 	
-	fclose(f_eii);
-	fclose(f_os);
+	hxc_fclose(f_eii);
+	hxc_fclose(f_os);
 	return HXCFE_NOERROR;
 
 }

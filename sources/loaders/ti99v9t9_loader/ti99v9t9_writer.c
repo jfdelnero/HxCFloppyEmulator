@@ -35,6 +35,7 @@
 
 #include "tracks/sector_extractor.h"
 
+#include "os_api.h"
 
 int TI99V9T9_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
 {	
@@ -206,11 +207,11 @@ int TI99V9T9_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,
 
 			if(!error)
 			{
-				ti99v9t9file=fopen(filename,"wb");
+				ti99v9t9file=hxc_fopen(filename,"wb");
 				if(ti99v9t9file)
 				{
 					fwrite(diskimage,imagesize,1,ti99v9t9file);
-					fclose(ti99v9t9file);
+					hxc_fclose(ti99v9t9file);
 				}
 				else
 				{

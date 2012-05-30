@@ -56,6 +56,8 @@
 #include "apridisk_loader.h"
 #include "apridisk_format.h"
 
+#include "os_api.h"
+
 int ApriDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	unsigned char HeaderBuffer[128];
@@ -69,11 +71,11 @@ int ApriDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		pathlen=strlen(imgfile);
 		if(pathlen!=0)
 		{
-			f=fopen(imgfile,"r+b");
+			f=hxc_fopen(imgfile,"r+b");
 			if(f)
 			{
 				fread(HeaderBuffer,1,128,f);
-				fclose(f);
+				hxc_fclose(f);
 
 				if(!strcmp(APRIDISK_HeaderString,HeaderBuffer))
 				{
@@ -113,7 +115,7 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);

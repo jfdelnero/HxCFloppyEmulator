@@ -68,11 +68,11 @@ int SVD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	floppycontext->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile");
 	if( checkfileext(imgfile,"svd") )
 	{
-		f=fopen(imgfile,"r");
+		f=hxc_fopen(imgfile,"r");
 		if(f)
 		{
 			fgets(linebuffer,sizeof(linebuffer),f);					
-			fclose(f);
+			hxc_fclose(f);
 
 			if (sscanf(linebuffer,"%d.%d",&major,&minor) != 2) 
 			{
@@ -136,7 +136,7 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	sectorsize=512;
 	trackformat=0;
 
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -336,13 +336,13 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_NOERROR;
 
 	}
 	
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
-	fclose(f);
+	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 

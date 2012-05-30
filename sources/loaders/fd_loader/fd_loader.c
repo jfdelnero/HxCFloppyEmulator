@@ -107,7 +107,7 @@ int FD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,cha
 
 	floppycontext->hxc_printf(MSG_DEBUG,"fd_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -130,7 +130,7 @@ int FD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,cha
 		break;
 		default:
 			floppycontext->hxc_printf(MSG_DEBUG,"non TO8D FD file ! - bad file size! ");
-			fclose(f);
+			hxc_fclose(f);
 			return HXCFE_BADFILE;
 		break;
 	}
@@ -171,7 +171,7 @@ int FD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,cha
 
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
-	fclose(f);
+	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }
 

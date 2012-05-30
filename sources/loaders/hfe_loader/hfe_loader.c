@@ -94,13 +94,13 @@ int HFE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	if(imgfile)
 	{
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
 			return HXCFE_ACCESSERROR;
 		}
 		fread(&header,sizeof(header),1,f);
-		fclose(f);
+		hxc_fclose(f);
 
 		if( !strcmp(header.HEADERSIGNATURE,"HXCPICFE"))
 		{
@@ -137,7 +137,7 @@ int HFE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	floppycontext->hxc_printf(MSG_DEBUG,"HFE_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -258,11 +258,11 @@ int HFE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		
 		free(trackoffsetlist);
 	
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_NOERROR;
 	}	
 	
-	fclose(f);	
+	hxc_fclose(f);	
 	floppycontext->hxc_printf(MSG_ERROR,"bad header");
 	return HXCFE_BADFILE;
 }

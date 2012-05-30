@@ -56,6 +56,8 @@
 
 #include "ipf_loader.h"
 
+#include "os_api.h"
+
 #define BYTE char 
 #define WORD short
 #define DWORD long
@@ -217,7 +219,7 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"IPF_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -245,18 +247,18 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		else
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"Memory error!");
-			fclose(f);
+			hxc_fclose(f);
 			return HXCFE_INTERNALERROR;
 		}	
 	}
 	else
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"0 byte file!");
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_BADFILE;
 	}
 	
-	fclose(f);
+	hxc_fclose(f);
 	
 	cvi.type = LIB_TYPE;
 	pCAPSGetVersionInfo (&cvi, 0);

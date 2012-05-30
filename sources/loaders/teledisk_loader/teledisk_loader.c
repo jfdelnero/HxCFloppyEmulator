@@ -60,6 +60,8 @@
 
 #include "tracks/crc.h"
 
+#include "os_api.h"
+
 int TeleDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	int pathlen,i;
@@ -75,23 +77,27 @@ int TeleDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		pathlen=strlen(imgfile);
 		if(pathlen!=0)
 		{			
-			f=fopen(imgfile,"rb");
+			f=hxc_fopen(imgfile,"rb");
 			if(f==NULL) 
 			{
 				floppycontext->hxc_printf(MSG_ERROR,"Cannot open the file!");
 				return HXCFE_ACCESSERROR;
 			}
+			
+			fseek(f,0,SEEK_SET);
 
-			memset(&td_header,0,sizeof(td_header));
-			fread( &td_header, sizeof(td_header), 1, f );  
+			memset(&td_header,0,sizeof(TELEDISK_HEADER));
+			fread( &td_header, sizeof(TELEDISK_HEADER), 1, f );  
 
-			if(ftell(f)==sizeof(td_header))
+			i=ftell(f);
+
+			if(ftell(f)==sizeof(TELEDISK_HEADER))
 			{
 
 				if ( ((td_header.TXT[0]!='t') || (td_header.TXT[1]!='d')) && ((td_header.TXT[0]!='T') || (td_header.TXT[1]!='D'))) 
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"bad header tag !");
-					fclose(f);
+					hxc_fclose(f);
 					return HXCFE_BADFILE;
 				}
 
@@ -105,17 +111,17 @@ int TeleDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				if(td_header.CRC!=((CRC16_High<<8)|CRC16_Low))
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"bad header crc !");
-					fclose(f);
+					hxc_fclose(f);
      				return HXCFE_BADFILE;
 				}
 
 				floppycontext->hxc_printf(MSG_DEBUG,"it's a Tele disk file!");
-				fclose(f);
+				hxc_fclose(f);
 				return HXCFE_VALIDFILE;
 			}
 	
 			floppycontext->hxc_printf(MSG_DEBUG,"bad header tag !");
-			fclose(f);
+			hxc_fclose(f);
      		return HXCFE_BADFILE;
 		}
 	}
@@ -249,7 +255,7 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	int rlen;
 	floppycontext->hxc_printf(MSG_DEBUG,"TeleDisk_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -261,7 +267,7 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	if(!filesize)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"0 byte file !");
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_BADFILE;
 	}
 	fseek(f,0,SEEK_SET);
@@ -271,12 +277,12 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	if(!fileimage)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Malloc error !");
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_INTERNALERROR;
 	}
 	memset(fileimage,0,filesize+512);
 	fread(fileimage,filesize,1,f);
-	fclose(f);
+	hxc_fclose(f);
 
 
 	td_header=(TELEDISK_HEADER*)&fileimage[fileimage_buffer_offset];
@@ -454,11 +460,11 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 
 		if(td_track_header->PhysSide&0x80)
 		{
-			trackformat=ISOFORMAT_SD;
+			trackformat=IBMFORMAT_SD;
 		}
 		else
 		{
-			trackformat=ISOFORMAT_DD;
+			trackformat=IBMFORMAT_DD;
 		}
 		
 		floppycontext->hxc_printf(MSG_DEBUG,"------------- Track:%d, Side:%d, Number of Sector:%d -------------",td_track_header->PhysCyl,sidenumber,td_track_header->SecPerTrk);

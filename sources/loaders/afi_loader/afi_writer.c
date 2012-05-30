@@ -38,6 +38,8 @@
 
 #include "tracks/crc.h"
 
+#include "os_api.h"
+
 AFI_DATACODE datacode[]={
 	{AFI_DATA_MFM,AFI_DATA_TYPE_MFM},
 	{AFI_DATA_INDEX,AFI_DATA_TYPE_INDEX},
@@ -156,9 +158,11 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 	compressdata=1;
 
+	floppy->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
+
 	floppycontext->hxc_printf(MSG_INFO_1,"Write AFI file %s...",filename);
 
-	hxcafifile=fopen(filename,"wb");
+	hxcafifile=hxc_fopen(filename,"wb");
 	if(hxcafifile)
 	{
 		tempcrc=0x0000;
@@ -405,7 +409,7 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 		fseek(hxcafifile,temp_fileptr,SEEK_SET);
 
 		free(track_list);
-		fclose(hxcafifile);
+		hxc_fclose(hxcafifile);
 
 		return 0;
 	}

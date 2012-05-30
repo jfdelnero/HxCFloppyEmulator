@@ -55,6 +55,8 @@
 #include "vtr_loader.h"
 #include "vtr_format.h"
 
+#include "os_api.h"
+
 extern unsigned char bit_inverter[];
 
 int VTR_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
@@ -68,13 +70,13 @@ int VTR_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	{
 		if(strlen(imgfile))
 		{
-			f=fopen(imgfile,"rb");
+			f=hxc_fopen(imgfile,"rb");
 			if(f==NULL) 
 			{
 				return HXCFE_ACCESSERROR;
 			}
 			fread(&header,sizeof(header),1,f);
-			fclose(f);
+			hxc_fclose(f);
 
 			if( !strncmp(header.HEADERSIGNATURE,"VTrucco",7))
 			{
@@ -107,7 +109,7 @@ int VTR_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	floppycontext->hxc_printf(MSG_DEBUG,"VTR_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -217,11 +219,11 @@ int VTR_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		
 		free(trackoffsetlist);
 	
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_NOERROR;
 	}	
 	
-	fclose(f);	
+	hxc_fclose(f);	
 	floppycontext->hxc_printf(MSG_ERROR,"bad header");
 	return HXCFE_BADFILE;
 }

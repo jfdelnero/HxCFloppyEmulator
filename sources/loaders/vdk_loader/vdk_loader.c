@@ -56,6 +56,8 @@
 #include "vdk_loader.h"
 #include "vdk_format.h"
 
+#include "os_api.h"
+
 int VDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	int filesize;
@@ -66,7 +68,7 @@ int VDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	if(imgfile)
 	{
 
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -79,7 +81,7 @@ int VDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		
 		fread(&vdk_h,sizeof(vdk_header),1,f);
 		
-		fclose(f);
+		hxc_fclose(f);
 		
 		if(vdk_h.signature==0x6B64)
 		{
@@ -118,7 +120,7 @@ int VDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"VDK_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -138,7 +140,7 @@ int VDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if((vdk_h.signature!=0x6B64) || ((filesize-vdk_h.header_size)%256))
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"non VDK file !");
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_BADFILE;
 	}
 		
@@ -186,7 +188,7 @@ int VDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
-	fclose(f);
+	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }
 

@@ -37,6 +37,8 @@
 #include "imd_format.h"
 #include "tracks/sector_extractor.h"
 
+#include "os_api.h"
+
 extern unsigned char size_to_code(unsigned long size);
 
 int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
@@ -65,7 +67,7 @@ int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	floppycontext->hxc_printf(MSG_INFO_1,"Write IMD file %s...",filename);
 
 	log_str=0;
-	imdfile=fopen(filename,"wb");
+	imdfile=hxc_fopen(filename,"wb");
 	if(imdfile)
 	{
 
@@ -240,7 +242,7 @@ int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 		}	
 
 
-		fclose(imdfile);
+		hxc_fclose(imdfile);
 	}
 	
 	return 0;

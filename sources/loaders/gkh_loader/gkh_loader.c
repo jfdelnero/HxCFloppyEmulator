@@ -68,7 +68,7 @@ int GKH_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	if( checkfileext(imgfile,"gkh"))
 	{
 			
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -76,7 +76,7 @@ int GKH_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		}
 
 		fread(&header,sizeof(header),1,f);
-		fclose(f);
+		hxc_fclose(f);
 
 		if(!memcmp(&header.header_tag,"TDDFI",5))
 		{
@@ -121,7 +121,7 @@ int GKH_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	floppycontext->hxc_printf(MSG_DEBUG,"GKH_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -195,13 +195,13 @@ int GKH_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		free(trackdata);
 
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		fclose(f);
+		hxc_fclose(f);
 		
 		return HXCFE_NOERROR;	
 	}
 
 	floppycontext->hxc_printf(MSG_ERROR,"BAD GKH file!");
-	fclose(f);
+	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 

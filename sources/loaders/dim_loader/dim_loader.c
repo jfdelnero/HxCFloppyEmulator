@@ -89,7 +89,7 @@ int DIM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	if( checkfileext(imgfile,"dim") )
 	{
 
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -98,7 +98,7 @@ int DIM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			
 		fread(&header,sizeof(dim_header),1,f);
 
-		fclose(f);
+		hxc_fclose(f);
 					
 
 		if(	header.id_header==0x4242)
@@ -139,7 +139,7 @@ int DIM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"DIM_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -212,11 +212,11 @@ int DIM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 	
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_NOERROR;
 
 	}
-	fclose(f);
+	hxc_fclose(f);
 	
 	return HXCFE_FILECORRUPTED;
 }

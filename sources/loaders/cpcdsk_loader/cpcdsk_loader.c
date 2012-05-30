@@ -68,7 +68,7 @@ int CPCDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	if(checkfileext(imgfile,"dsk"))
 	{
 	
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"Cannot open the file !");
@@ -76,7 +76,7 @@ int CPCDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		}
 
 		fread(&fileheader,sizeof(fileheader),1,f);
-		fclose(f);
+		hxc_fclose(f);
 					
 		fileheader.headertag[34]=0;
 		if( !strncmp(fileheader.headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",16) ||
@@ -129,7 +129,7 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"CPCDSK_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -160,7 +160,7 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 			else
 			{
 				floppycontext->hxc_printf(MSG_ERROR,"non CPC Dsk : Bad header!\n");
-				fclose(f);
+				hxc_fclose(f);
 				return HXCFE_BADFILE;
 			}
 		}
@@ -369,12 +369,12 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 		if(tracksizetab) free(tracksizetab);
 		//if(sectorconfig) free(sectorconfig);
 		
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_NOERROR;
 	}
 	
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
-	fclose(f);
+	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 

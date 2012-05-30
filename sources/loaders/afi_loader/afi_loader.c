@@ -111,12 +111,12 @@ int AFI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	if(checkfileext(imgfile,"afi"))
 	{
 
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL)
 			return HXCFE_ACCESSERROR;
 
 		fread(&header,sizeof(header),1,f);
-		fclose(f);
+		hxc_fclose(f);
 
 		if( !strcmp(header.afi_img_tag,AFI_IMG_TAG) )
 		{
@@ -157,7 +157,7 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	floppycontext->hxc_printf(MSG_DEBUG,"AFI_libLoad_DiskFile %s",imgfile);
 
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -174,7 +174,7 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		if(filecheckcrc(f,0,sizeof(AFIIMG)))
 		{
 				floppycontext->hxc_printf(MSG_ERROR,"bad header CRC !");
-				fclose(f);
+				hxc_fclose(f);
 				return HXCFE_BADFILE;
 		}
 
@@ -274,7 +274,7 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			if(filecheckcrc(f,header.track_list_offset+tracklistoffset[i],(track.number_of_data_chunk*sizeof(unsigned long))+sizeof(AFITRACK)+sizeof(unsigned short)))
 			{
 				floppycontext->hxc_printf(MSG_ERROR,"bad track CRC !");
-				fclose(f);
+				hxc_fclose(f);
 				return HXCFE_BADFILE;
 			}
 
@@ -324,7 +324,7 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				if(filecheckcrc(f,header.track_list_offset+tracklistoffset[i]+datalistoffset[j],sizeof(AFIDATA)+datablock.packed_size+sizeof(unsigned short)))
 				{
 					floppycontext->hxc_printf(MSG_ERROR,"bad data CRC !");
-					fclose(f);
+					hxc_fclose(f);
 					return HXCFE_BADFILE;
 				}
 
@@ -455,7 +455,7 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							do
 							{
 								k++;
-							}while((currentside->flakybitsbuffer[k-1]==currentside->flakybitsbuffer[k]) && !currentside->flakybitsbuffer[k] && k<currentside->tracklen);
+							}while(k<currentside->tracklen && (currentside->flakybitsbuffer[k-1]==currentside->flakybitsbuffer[k]) && !currentside->flakybitsbuffer[k]);
 
 							if(k==currentside->tracklen)
 							{
@@ -496,11 +496,11 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			}
 		}
 
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_NOERROR;
 	}
 
-	fclose(f);
+	hxc_fclose(f);
 	floppycontext->hxc_printf(MSG_ERROR,"bad header");
 	return HXCFE_BADFILE;
 }

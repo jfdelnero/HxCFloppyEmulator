@@ -51,6 +51,10 @@ long find_close(long handleff);
 long find_next_file(long handleff,char *folder,char *file,filefoundinfo* fileinfo);
 long find_first_file(char *folder,char *file,filefoundinfo* fileinfo);
 
+int hxc_open (const char *filename, int flags, ...);
+FILE *hxc_fopen (const char *filename, const char *mode);
+int hxc_fclose(FILE * f);
+
 
 char * strupper(char * str);
 char * strlower(char * str);

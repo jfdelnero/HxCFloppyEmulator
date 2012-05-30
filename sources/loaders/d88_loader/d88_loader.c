@@ -56,6 +56,8 @@
 #include "d88_loader.h"
 #include "d88_format.h"
 
+#include "os_api.h"
+
 int D88_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	floppycontext->hxc_printf(MSG_DEBUG,"D88_libIsValidDiskFile");
@@ -121,7 +123,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	}
 
 
-	f=fopen(str_file,"rb");
+	f=hxc_fopen(str_file,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -160,7 +162,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	{
 		// bad total size ! 
 		floppycontext->hxc_printf(MSG_ERROR,"Bad D88 file size !",imgfile);
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_BADFILE;
 	}
 	floppycontext->hxc_printf(MSG_INFO_1,"%d floppy in this file.",partcount);
@@ -172,7 +174,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(indexfile>=partcount)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"bad selection index (%d). there are only %d disk(s) in this file!",indexfile,partcount);
-		fclose(f);
+		hxc_fclose(f);
 		return HXCFE_ACCESSERROR;
 	}
 	
@@ -222,7 +224,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		default:
 			side=2;
 			floppycontext->hxc_printf(MSG_ERROR,"unknow disk: %.2X !",fileheader.media_flag);
-			fclose(f);
+			hxc_fclose(f);
 			return HXCFE_BADFILE;
 			break;
 	}
@@ -400,7 +402,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyNumberOfTrack=i/2;
 
 		
-	fclose(f);	
+	hxc_fclose(f);	
 	//floppycontext->hxc_printf(MSG_ERROR,"bad header");
 	return HXCFE_NOERROR;
 }

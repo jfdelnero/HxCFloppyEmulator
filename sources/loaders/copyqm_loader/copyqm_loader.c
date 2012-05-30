@@ -56,6 +56,8 @@
 #include "copyqm_loader.h"
 #include "crctable.h"
 
+#include "os_api.h"
+
 int CopyQm_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	int pathlen;
@@ -70,7 +72,7 @@ int CopyQm_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		pathlen=strlen(imgfile);
 		if(pathlen!=0)
 		{			
-			f=fopen(imgfile,"rb");
+			f=hxc_fopen(imgfile,"rb");
 			if(f==NULL) 
 			{
 				floppycontext->hxc_printf(MSG_ERROR,"Cannot open the file!");
@@ -85,7 +87,7 @@ int CopyQm_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				if ( fileheader[0] != 'C' || fileheader[1] != 'Q' ) 
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"bad header tag !");
-					fclose(f);
+					hxc_fclose(f);
 					free(fileheader);
 					return HXCFE_BADFILE;
 				}
@@ -99,19 +101,19 @@ int CopyQm_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				if ( checksum != 0 ) 
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"bad header checksum !");
-					fclose(f);
+					hxc_fclose(f);
 					free(fileheader);
 					return HXCFE_BADFILE;
 				}
 					
 				floppycontext->hxc_printf(MSG_DEBUG,"it's an copyqm file!");
-				fclose(f);
+				hxc_fclose(f);
 				free(fileheader);
 				return HXCFE_VALIDFILE;
 			}
 	
 			floppycontext->hxc_printf(MSG_DEBUG,"bad header tag !");
-			fclose(f);
+			hxc_fclose(f);
 			free(fileheader);
      		return HXCFE_BADFILE;
 		}
@@ -144,7 +146,7 @@ int CopyQm_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 
 	floppycontext->hxc_printf(MSG_DEBUG,"CopyQm_libLoad_DiskFile %s",imgfile);
 	
-	f=fopen(imgfile,"rb");
+	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
@@ -169,14 +171,14 @@ int CopyQm_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"bad header checksum !");
 			free(fileheader);
-			fclose(f);
+			hxc_fclose(f);
 			return HXCFE_BADFILE;
 		}
 		if ( fileheader[0] != 'C' || fileheader[1] != 'Q' ) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"bad header tag !");
 			free(fileheader);
-			fclose(f);
+			hxc_fclose(f);
 			return HXCFE_BADFILE;
 		}
 
@@ -251,7 +253,7 @@ int CopyQm_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"file corrupt!");
 			free(fileheader);
-			fclose(f);
+			hxc_fclose(f);
 			return HXCFE_FILECORRUPTED;
 		}
 			
@@ -261,7 +263,7 @@ int CopyQm_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"malloc error!");
 			free(fileheader);
-			fclose(f);
+			hxc_fclose(f);
 			return HXCFE_INTERNALERROR;
 		}
 
@@ -285,7 +287,7 @@ int CopyQm_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 					{
 						free(flatimg);
 						free(fileheader);
-			            fclose(f);
+			            hxc_fclose(f);
 						return HXCFE_FILECORRUPTED;
 					}
 				} 
@@ -324,7 +326,7 @@ int CopyQm_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 							{
 								free(flatimg);
 								free(fileheader);
-								fclose(f);
+								hxc_fclose(f);
 								return HXCFE_FILECORRUPTED;
 							}
 						}
@@ -340,7 +342,7 @@ int CopyQm_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 			}
 			}*/
 		free(fileheader);
-		fclose(f);
+		hxc_fclose(f);
 		
 		gap3len=255;
 		interleave=1;
