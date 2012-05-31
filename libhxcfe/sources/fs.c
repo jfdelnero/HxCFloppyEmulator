@@ -45,10 +45,16 @@
 
 
 #include <assert.h>
-#include <stdio.h>
-#include <limits.h>
 #include <errno.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <limits.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <time.h>
 
 #ifdef WIN32
 # include <windows.h>
@@ -57,6 +63,8 @@
 #else
 # include <unistd.h>
 #endif
+
+#include "win32_api.h"
 
 #ifdef WIN32
 
@@ -102,7 +110,7 @@ int hxc_open (const char *filename, int flags, ...)
 
 #else
 
-    local_name = ToLocale (filename);
+    local_name = (const char *)ToLocale (filename);
 
     if (local_name == NULL)
     {
@@ -130,7 +138,6 @@ FILE *hxc_fopen (const char *filename, const char *mode)
 
 	// Try the classic way (ascii path)	
 	stream = fopen(filename,mode);
-	
 
 	if( ( stream == NULL ) && (errno == ENOENT) )
 	{
@@ -200,4 +207,162 @@ FILE *hxc_fopen (const char *filename, const char *mode)
 int hxc_fclose(FILE * f)
 {
 	return fclose(f);
+}
+
+
+int hxc_statex( const char *filename, struct stat *buf)
+{
+	
+
+#if defined (WIN32)
+	wchar_t wpath[MAX_PATH+1];
+
+	if( convertpath(filename, wpath) < 0 )
+		return -1;
+
+    return _wstat (wpath,(struct _stat *) buf);
+#else
+	int res;
+    const char *local_name;
+	
+	local_name = ToLocale( filename );
+
+    if( local_name != NULL )
+    {                       : 
+		res = lstat( local_name, buf );
+        LocaleFree( local_name );
+        return res;
+    }
+    
+	errno = ENOENT;
+
+    return -1;
+#endif
+
+}
+
+int hxc_stat( const char *filename, struct stat *buf)
+{
+    return hxc_statex( filename, buf );
+}
+
+long find_first_file(char *folder,char *file,filefoundinfo* fileinfo)
+{
+	HANDLE hfindfile;
+	char *folderstr;
+	WIN32_FIND_DATAW FindFileData;
+	wchar_t wpath[MAX_PATH+1];
+
+	if(file)
+	{
+		folderstr=(char *) malloc(strlen(folder)+strlen(file)+2);
+		sprintf((char *)folderstr,"%s\\%s",folder,file);
+	}
+	else
+	{
+		folderstr=(char *) malloc(strlen(folder)+1);
+		sprintf((char *)folderstr,"%s",folder);
+	}
+
+	convertpath (folderstr, wpath);
+	hfindfile=FindFirstFileW(wpath, &FindFileData); 
+	if(hfindfile!=INVALID_HANDLE_VALUE)
+	{
+		WideCharToMultiByte(CP_UTF8,0,FindFileData.cFileName,-1,fileinfo->filename,sizeof(fileinfo->filename),NULL,NULL);
+		//sprintf(fileinfo->filename,"%s",FindFileData.cFileName);
+
+		fileinfo->isdirectory=0;
+
+		if(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+		{
+			fileinfo->isdirectory=1;
+		}
+		
+		fileinfo->size=FindFileData.nFileSizeLow;
+		free(folderstr);
+		return (long)hfindfile;
+	}
+	else
+	{
+		free(folderstr);
+		return -1;
+	}
+	
+	return 0;
+}
+
+long find_next_file(long handleff,char *folder,char *file,filefoundinfo* fileinfo)
+{
+	WIN32_FIND_DATAW FindFileData;
+	long ret;
+
+	ret=FindNextFileW((HANDLE)handleff,&FindFileData);
+	if(ret)
+	{
+		WideCharToMultiByte(CP_UTF8,0,FindFileData.cFileName,-1,fileinfo->filename,sizeof(fileinfo->filename),NULL,NULL);
+		//sprintf(fileinfo->filename,"%s",FindFileData.cFileName);
+
+		fileinfo->isdirectory=0;
+
+		if(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+		{
+			fileinfo->isdirectory=1;
+		}
+		
+		fileinfo->size=FindFileData.nFileSizeLow;
+	}
+	
+	return ret;
+}
+
+long find_close(long handle)
+{
+	FindClose((void*)handle);
+	return 0;
+}
+
+int getlistoffile(unsigned char * directorypath,unsigned char *** filelist)
+{
+	int numberoffile;
+	char ** filepathtab;
+	
+	HANDLE findfilehandle;
+	WIN32_FIND_DATA FindFileData;
+
+	filepathtab=0;
+	numberoffile=0;
+
+	findfilehandle=FindFirstFile(directorypath,&FindFileData);
+	if(findfilehandle!=INVALID_HANDLE_VALUE)
+	{
+		
+		do
+		{
+			filepathtab=(char **) realloc(filepathtab,sizeof(char*)*(numberoffile+1));
+			filepathtab[numberoffile]=(char*)malloc(strlen(FindFileData.cFileName)+1);
+			strcpy(filepathtab[numberoffile],FindFileData.cFileName);
+			numberoffile++;	
+		}while(FindNextFile(findfilehandle,&FindFileData));
+				
+		FindClose(findfilehandle);
+	}
+	*filelist=filepathtab;
+
+	return numberoffile;
+}
+
+
+char * getcurrentdirectory(char *currentdirectory,int buffersize)
+{
+	memset(currentdirectory,0,buffersize);
+	if(GetModuleFileName(GetModuleHandle(NULL),currentdirectory,buffersize))
+	{
+		if(strrchr(currentdirectory,'\\'))
+		{
+			*((char*)strrchr(currentdirectory,'\\'))=0;
+			return currentdirectory;
+		}
+	}
+
+	return 0;
 }
