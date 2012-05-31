@@ -79,7 +79,7 @@ int AMIGADOSFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgf
 		if(pathlen!=0)
 		{
 			memset(&staterep,0,sizeof(struct stat));
-			stat(imgfile,&staterep);
+			hxc_stat(imgfile,&staterep);
 
 			if(staterep.st_mode&S_IFDIR)
 			{
@@ -313,7 +313,7 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 
 	floppycontext->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libLoad_DiskFile %s",imgfile);
 
-	stat(imgfile,&repstate);
+	hxc_stat(imgfile,&repstate);
 	ts=localtime(&repstate.st_ctime);
 	if(repstate.st_mode&S_IFDIR)
 	{

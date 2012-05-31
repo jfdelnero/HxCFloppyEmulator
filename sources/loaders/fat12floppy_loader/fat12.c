@@ -219,7 +219,7 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 						sprintf(fullpath,"%s",folder);
 					}
 					
-					stat(fullpath,&repstate);
+					hxc_stat(fullpath,&repstate);
 					ts=localtime(&repstate.st_ctime);
 					if(ts)
 					{
@@ -232,7 +232,7 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 						entry->DIR_CrtTime= 0;
 					}
 
-					stat(fullpath,&repstate);
+					hxc_stat(fullpath,&repstate);
 					ts=localtime(&repstate.st_mtime);
 					if(ts)
 					{

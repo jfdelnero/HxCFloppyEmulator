@@ -106,7 +106,7 @@ uLong filetime(f, tmzip, dt)
     if (name[len - 1] == '/')
       name[len - 1] = '\0';
     /* not all systems allow stat'ing a file with / appended */
-    if (stat(name,&s)==0)
+    if (hxc_stat(name,&s)==0)
     {
       tm_t = s.st_mtime;
       ret = 1;
