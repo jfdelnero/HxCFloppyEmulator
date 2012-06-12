@@ -44,7 +44,7 @@ typedef struct picfileformatheader_
 	unsigned char track0s0_altencoding;
 	unsigned char track0s0_encoding;
 	unsigned char track0s1_altencoding;
-	unsigned char track0s1_encoding;	
+	unsigned char track0s1_encoding;
 }picfileformatheader;
 
 
@@ -72,6 +72,10 @@ typedef struct picfileformatextheader_
 	unsigned short track_list_offset;
 	unsigned char write_allowed;
 	unsigned char single_step;
+	unsigned char track0s0_altencoding;
+	unsigned char track0s0_encoding;
+	unsigned char track0s1_altencoding;
+	unsigned char track0s1_encoding;
 }picfileformatextheader;
 
 
