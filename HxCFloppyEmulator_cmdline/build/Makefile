@@ -24,6 +24,9 @@ hxcfloppyemulator_d2xx: hxcfloppyemu.o floppy_loader.o floppy_utils.o linux_api.
 
 #hxcfe:      hxcfe.o linux_api.o  $(FTDIFLOPPYEMU) $(DISKLOADERPLUGINS_IPF) /usr/local/lib/libftdi.so.1
 
+hxcfeconv:      hxcfe.o linux_api.o ../../../build/libhxcfe.a
+	$(CC) -o $@    $^ $(LDFLAGS)
+
 hxcfe:      hxcfe.o linux_api.o ../../../build/libhxcfe.a
 	$(CC) -o $@    $^ $(LDFLAGS) -DFTDILIB
 

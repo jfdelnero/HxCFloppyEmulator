@@ -35,7 +35,10 @@
 #include <time.h>
 
 #include "libhxcfe.h"
+
+#ifdef USBHXCFE_SUPPORT
 #include "usb_hxcfloppyemulator.h"
+#endif
 
 int verbose;
 
@@ -285,7 +288,8 @@ int convertfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char * outfile,char * out
 }
 
 int usbload(HXCFLOPPYEMULATOR* hxcfe,char * infile,int drive,int doublestep,int ifmode)
-{
+{   
+    #ifdef USBHXCFE_SUPPORT    
 	int loaderid;
 	int ret;
 	FLOPPY * floppydisk;
@@ -351,7 +355,9 @@ int usbload(HXCFLOPPYEMULATOR* hxcfe,char * infile,int drive,int doublestep,int 
 			}
 		}
 	}
-
+#else
+    printf("No USB HxC Floppy Emulator Support !\n");
+#endif
 	return 0;
 }
 
