@@ -88,7 +88,7 @@ int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 		{
 			for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
 			{
-				sprintf(tmp_str,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,ftell(imdfile));
+				sprintf(tmp_str,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(imdfile));
 
 				log_str=0;
 				log_str=realloc(log_str,strlen(tmp_str)+1);

@@ -93,9 +93,9 @@ int adddatablock(FILE* f,int typecode,int compressdata,unsigned char* data,int d
 	}
 
 	memset(&afidata,0,sizeof(AFIDATA));
-	sprintf((char*)&afidata.afi_data_tag,AFI_DATA_TAG);
+	strcpy((char*)&afidata.afi_data_tag,AFI_DATA_TAG);
 	afidata.TYPEIDCODE=datacode[i].idcode;
-	sprintf((char*)&afidata.type_tag,datacode[i].idcodetag);
+	strcpy((char*)&afidata.type_tag,datacode[i].idcodetag);
 	afidata.nb_bits_per_element=bitsperelement;
 	if(compressdata)
 	{

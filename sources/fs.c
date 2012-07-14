@@ -60,13 +60,17 @@
 # include <windows.h>
 # include <io.h>
 # include <fcntl.h>
+#include "win32_api.h"
 #else
+# include "libhxcfe.h"
+# include "os_api.h"
 # include <unistd.h>
 #endif
 
-#include "win32_api.h"
+
 
 #ifdef WIN32
+
 
 int convertpath (const char * path, wchar_t * wpath)
 {
@@ -110,7 +114,8 @@ int hxc_open (const char *filename, int flags, ...)
 
 #else
 
-    local_name = (const char *)ToLocale (filename);
+    local_name = filename;
+    //local_name = (const char *)ToLocale (filename);
 
     if (local_name == NULL)
     {
@@ -120,7 +125,7 @@ int hxc_open (const char *filename, int flags, ...)
 
     int fd = open (local_name, flags, mode);
 
-    LocaleFree (local_name);
+    //LocaleFree (local_name);
     return fd;
 
 #endif
@@ -153,9 +158,11 @@ FILE *hxc_fopen (const char *filename, const char *mode)
 				case 'r':
 					rwflags = O_RDONLY;
 					break;
+   	#ifdef O_BINARY                 
 				case 'b':
 					oflags |= O_BINARY;
 					break;
+    #endif
 				case 'a':
 					rwflags = O_WRONLY;
 					oflags |= O_CREAT;
@@ -225,12 +232,12 @@ int hxc_statex( const char *filename, struct stat *buf)
 	int res;
     const char *local_name;
 	
-	local_name = ToLocale( filename );
+	local_name = filename;//ToLocale( filename );
 
     if( local_name != NULL )
-    {                       : 
+    {
 		res = lstat( local_name, buf );
-        LocaleFree( local_name );
+       // LocaleFree( local_name );
         return res;
     }
     
@@ -248,7 +255,9 @@ int hxc_stat( const char *filename, struct stat *buf)
 
 long find_first_file(char *folder,char *file,filefoundinfo* fileinfo)
 {
-	HANDLE hfindfile;
+#if defined (WIN32)
+	
+    HANDLE hfindfile;
 	char *folderstr;
 	WIN32_FIND_DATAW FindFileData;
 	wchar_t wpath[MAX_PATH+1];
@@ -287,14 +296,18 @@ long find_first_file(char *folder,char *file,filefoundinfo* fileinfo)
 		free(folderstr);
 		return -1;
 	}
+
+#endif
 	
 	return 0;
 }
 
 long find_next_file(long handleff,char *folder,char *file,filefoundinfo* fileinfo)
 {
+    long ret;
+#if defined (WIN32)
 	WIN32_FIND_DATAW FindFileData;
-	long ret;
+
 
 	ret=FindNextFileW((HANDLE)handleff,&FindFileData);
 	if(ret)
@@ -311,13 +324,18 @@ long find_next_file(long handleff,char *folder,char *file,filefoundinfo* fileinf
 		
 		fileinfo->size=FindFileData.nFileSizeLow;
 	}
-	
+#else
+    ret=0;
+#endif
+    
 	return ret;
 }
 
 long find_close(long handle)
 {
+#if defined (WIN32)    
 	FindClose((void*)handle);
+#endif     
 	return 0;
 }
 
@@ -325,7 +343,8 @@ int getlistoffile(unsigned char * directorypath,unsigned char *** filelist)
 {
 	int numberoffile;
 	char ** filepathtab;
-	
+
+#if defined (WIN32) 
 	HANDLE findfilehandle;
 	WIN32_FIND_DATA FindFileData;
 
@@ -347,7 +366,10 @@ int getlistoffile(unsigned char * directorypath,unsigned char *** filelist)
 		FindClose(findfilehandle);
 	}
 	*filelist=filepathtab;
-
+#else
+    numberoffile = 0;
+#endif 
+    
 	return numberoffile;
 }
 
@@ -355,6 +377,7 @@ int getlistoffile(unsigned char * directorypath,unsigned char *** filelist)
 char * getcurrentdirectory(char *currentdirectory,int buffersize)
 {
 	memset(currentdirectory,0,buffersize);
+#if defined (WIN32) 
 	if(GetModuleFileName(GetModuleHandle(NULL),currentdirectory,buffersize))
 	{
 		if(strrchr(currentdirectory,'\\'))
@@ -363,6 +386,7 @@ char * getcurrentdirectory(char *currentdirectory,int buffersize)
 			return currentdirectory;
 		}
 	}
+#endif
 
 	return 0;
 }

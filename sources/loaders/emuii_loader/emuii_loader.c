@@ -131,7 +131,7 @@ int EMUII_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,
 
 	floppycontext->hxc_printf(MSG_DEBUG,"EMUII_libLoad_DiskFile %s",imgfile);
 	
-	sprintf(os_filename,imgfile);
+	strcpy(os_filename,imgfile);
 	i=strlen(os_filename)-1;
 	while(i && (os_filename[i]!='\\') && (os_filename[i]!='/') )
 	{

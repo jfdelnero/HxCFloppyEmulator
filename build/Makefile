@@ -34,9 +34,9 @@ DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosf
                   ensoniq_mirage_loader.o sad_loader.o jv3_loader.o stt_loader.o prophet_loader.o teledisk_loader.o td0_lzss.o\
                   emuii_raw_loader.o emuii_loader.o emui_raw_loader.o jvc_loader.o dim_loader.o ti99v9t9_loader.o d81_loader.o  acornadf_loader.o \
                   camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o fdi_loader.o ssd_dsd_loader.o adl_loader.o \
-                  krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o
+                  krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o system24_loader.o kryofluxstream_loader.o kryofluxstream.o
 
-DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o
+DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o
 
 all: $(EXEC)
 
@@ -90,6 +90,9 @@ ti99pc99_loader.o : $(BASEDIR)/loaders/ti99pc99_loader/ti99pc99_loader.c $(BASED
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 ti99v9t9_loader.o : $(BASEDIR)/loaders/ti99v9t9_loader/ti99v9t9_loader.c $(BASEDIR)/loaders/ti99v9t9_loader/ti99v9t9_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+ti99v9t9_writer.o : $(BASEDIR)/loaders/ti99v9t9_loader/ti99v9t9_writer.c $(BASEDIR)/loaders/ti99v9t9_loader/ti99v9t9_writer.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 imd_loader.o : $(BASEDIR)/loaders/imd_loader/imd_loader.c $(BASEDIR)/loaders/imd_loader/imd_loader.h
@@ -298,12 +301,23 @@ emui_raw_loader.o : $(BASEDIR)/loaders/emui_raw_loader/emui_raw_loader.c $(BASED
 fei_loader.o : $(BASEDIR)/loaders/fei_loader/fei_loader.c $(BASEDIR)/loaders/fei_loader/fei_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+system24_loader.o : $(BASEDIR)/loaders/system24_loader/system24_loader.c $(BASEDIR)/loaders/system24_loader/system24_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
 
 vfile.o : $(BASEDIR)/thirdpartylibs/xdms/vfile.c $(BASEDIR)/thirdpartylibs/xdms/vfile.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 adz_loader.o : $(BASEDIR)/loaders/adz_loader/adz_loader.c $(BASEDIR)/loaders/adz_loader/adz_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
+
+
+kryofluxstream_loader.o : $(BASEDIR)/loaders/kryofluxstream_loader/kryofluxstream_loader.c $(BASEDIR)/loaders/kryofluxstream_loader/kryofluxstream_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+kryofluxstream.o : $(BASEDIR)/loaders/kryofluxstream_loader/kryofluxstream.c $(BASEDIR)/loaders/kryofluxstream_loader/kryofluxstream.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+
 
 adf_hd.o : $(BASEDIR)/thirdpartylibs/adflib/Lib/adf_hd.c
 	$(CC) -o $@ -c $< $(CFLAGS)

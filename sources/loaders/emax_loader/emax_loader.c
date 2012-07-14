@@ -153,7 +153,7 @@ int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,c
 	
 	numberofsector=10;
 	
-	sprintf(os_filename,imgfile);
+    strcpy(os_filename,imgfile);
 	i=strlen(os_filename)-1;
 	while(i && (os_filename[i]!='\\') && (os_filename[i]!='/') )
 	{

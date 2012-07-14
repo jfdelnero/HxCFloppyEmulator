@@ -47,7 +47,6 @@
 #include <string.h>
 #include <stdio.h>
 
-
 #include "libhxcfe.h"
 #include "floppy_loader.h"
 #include "floppy_utils.h"

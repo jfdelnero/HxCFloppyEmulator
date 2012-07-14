@@ -145,8 +145,8 @@ USHORT Process_File(char *iname, HXCFILE *fo, USHORT cmd, USHORT opt, USHORT PCR
 		printf(" Creation date : %s",ctime(&date));
 		printf(" Lowest track in archive : %d\n",from);
 		printf(" Highest track in archive : %d\n",to);
-		printf(" Packed data size : %u\n",pkfsize);
-		printf(" Unpacked data size : %u\n",unpkfsize);
+		printf(" Packed data size : %u\n",(unsigned int)pkfsize);
+		printf(" Unpacked data size : %u\n",(unsigned int)unpkfsize);
 		printf(" Disk type of archive : ");
 
 		/*  The original DMS from SDS software (DMS up to 1.11) used other values    */
