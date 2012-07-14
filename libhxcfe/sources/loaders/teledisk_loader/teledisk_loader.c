@@ -540,7 +540,7 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 				memcpy(&tempdata,&fileimage[fileimage_buffer_offset],(*datalen)+2);
 				fileimage_buffer_offset=fileimage_buffer_offset+(*datalen)+2;
 				
-				rlen=RLEExpander(tempdata,sectorconfig[i].input_data,(int)datalen);
+				rlen=RLEExpander(tempdata,sectorconfig[i].input_data,(int)*datalen);
 			}
 			else
 			{

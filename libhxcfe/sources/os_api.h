@@ -26,6 +26,11 @@
 */
 
 
+#ifndef stat
+#include <sys/stat.h>
+#endif
+
+
 typedef int (*THREADFUNCTION) (void* floppyemulator,void* hwemulator);
 
 int hxc_createthread(HXCFLOPPYEMULATOR* floppycontext,void* hwcontext,THREADFUNCTION thread,int priority);
