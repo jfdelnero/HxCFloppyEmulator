@@ -8,7 +8,8 @@ main_button_list  txt_buttons_main[]=
 	{0,"Export","Export/save the loaded file image"},
 	{0,"SD HxC Floppy\nEmulator settings","Configure the SD HxC Floppy Emulator"},
 	{0,"USB HxC Floppy\nEmulator settings","Configure the USB HxC Floppy Emulator"},
-	{0,"Floppy disk dump","Read a real disk"}
+	{0,"Floppy disk dump","Read a real disk"},
+	{0,"Track Analyzer","Low level tracks viewer"}
 };
 
 Fl_Menu_Item menutable[] = {
@@ -17,9 +18,9 @@ Fl_Menu_Item menutable[] = {
     {"Load custom RAW file/Create custom floppy",	FL_ALT+'r',menu_clicked,(void*)1},
     {"&Create DOS/AmigaDOS disk",	FL_ALT+'c',	menu_clicked,(void*)3},
     {"&Export disk/Save As",	FL_ALT+'e', save_file_image, 0},
-    {"Batch convert files images",	FL_ALT+'o', menu_clicked,(void*)2},
-	{"Dump a Floppy disk",	FL_ALT+'o', menu_clicked,(void*)7},
-	{"Show floppy infos",	FL_ALT+'i', menu_clicked,(void*)10},
+    {"Batch convert files images",	FL_ALT+'b', menu_clicked,(void*)2},
+	{"Dump a Floppy disk",	FL_ALT+'d', menu_clicked,(void*)7},
+	{"Track Analyzer",	FL_ALT+'a', menu_clicked,(void*)10},
 
     {0},
   {"&Settings",FL_F+2,0,0,FL_SUBMENU},
