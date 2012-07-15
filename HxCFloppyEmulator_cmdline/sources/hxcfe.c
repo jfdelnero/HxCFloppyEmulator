@@ -289,7 +289,7 @@ int convertfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char * outfile,char * out
 
 int usbload(HXCFLOPPYEMULATOR* hxcfe,char * infile,int drive,int doublestep,int ifmode)
 {   
-    #ifdef USBHXCFE_SUPPORT    
+#ifdef USBHXCFE_SUPPORT    
 	int loaderid;
 	int ret;
 	FLOPPY * floppydisk;
