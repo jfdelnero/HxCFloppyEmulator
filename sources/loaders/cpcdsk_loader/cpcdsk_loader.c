@@ -370,6 +370,9 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 		//if(sectorconfig) free(sectorconfig);
 		
 		hxc_fclose(f);
+
+		hxcfe_sanityCheck(floppycontext,floppydisk);
+
 		return HXCFE_NOERROR;
 	}
 	

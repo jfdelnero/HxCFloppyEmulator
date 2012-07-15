@@ -132,8 +132,6 @@ int FEI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			rpm=300;
 		}
 	}
-	
-	
 
 	floppycontext->hxc_printf(MSG_DEBUG,"FEI File : %d track, %d side, %d bit/s, %d sectors, mode %d",
 		floppydisk->floppyNumberOfTrack,

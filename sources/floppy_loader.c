@@ -857,3 +857,181 @@ FLOPPY* hxcfe_getFloppy(FBuilder* fb)
 
 	return f;
 }
+
+FLOPPY* hxcfe_sanityCheck(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk)
+{
+	int numberoftrack,truenumberoftrack;
+	int numberofside,oldnumberofside,truenumberofside;
+	int needanewpass,defaultbitrate,defaultrpm;
+	SIDE	**		tmpsides;
+	SIDE * currentside;
+
+	if(floppydisk)
+	{
+		// Check track parameter.
+		truenumberoftrack = 0;
+		
+		if(floppydisk->floppyNumberOfTrack>256) 
+		{
+			floppydisk->floppyNumberOfTrack=256;
+			floppycontext->hxc_printf(MSG_WARNING,"Sanity Checker : More than 256 tracks?!? - fixed to 256. Please Check the Loader !");
+		}
+
+		if(!floppydisk->floppyNumberOfSide)
+		{
+			floppycontext->hxc_printf(MSG_WARNING,"Sanity Checker : 0 Side?!? - fixed to 1. Please Check the Loader !");
+			floppydisk->floppyNumberOfSide = 1;
+		}
+		
+		if(floppydisk->floppyNumberOfSide>2)
+		{
+			floppycontext->hxc_printf(MSG_WARNING,"Sanity Checker : more than 2 Sides (%d) ?!? - fixed to 2. Please Check the Loader !",floppydisk->floppyNumberOfSide);
+			floppydisk->floppyNumberOfSide = 2;
+		}
+
+		if(floppydisk->floppyBitRate!=-1)
+		{
+			if(floppydisk->floppyBitRate > 1000000)
+			{
+				floppycontext->hxc_printf(MSG_WARNING,"Sanity Checker : Over 1MBit/s ?!? - fixed to 1MB/S. Please Check the Loader !");
+				floppydisk->floppyBitRate = 1000000;
+			}
+
+			if(floppydisk->floppyBitRate < 25000)
+			{
+				floppycontext->hxc_printf(MSG_WARNING,"Sanity Checker : Under 25kBit/s ?!? - fixed to 250KB/S. Please Check the Loader !");
+				floppydisk->floppyBitRate = 250000;
+			}
+			defaultbitrate = floppydisk->floppyBitRate;
+		}
+		else
+		{
+			defaultbitrate = 250000;
+		}
+
+		defaultrpm = 300;
+		numberofside = floppydisk->floppyNumberOfSide;
+		
+		if(!floppydisk->tracks)
+		{
+			floppycontext->hxc_printf(MSG_WARNING,"Sanity Checker : No track allocated ? Please Check the Loader !");
+			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		}
+		
+		numberoftrack = floppydisk->floppyNumberOfTrack;
+		while( floppydisk->tracks[truenumberoftrack] && (truenumberoftrack<numberoftrack) )
+		{
+			truenumberoftrack++;
+		}
+
+		if( truenumberoftrack != numberoftrack)
+		{
+			truenumberoftrack=0;
+			while( truenumberoftrack<numberoftrack )
+			{
+				if(!floppydisk->tracks[truenumberoftrack] )
+				{	
+					floppycontext->hxc_printf(MSG_WARNING,"Sanity Checker :  Track entry %d missing !",truenumberoftrack);
+					floppydisk->tracks[truenumberoftrack] = allocCylinderEntry(0,floppydisk->floppyNumberOfSide);
+				}
+				truenumberoftrack++;
+			}
+		}
+
+		do
+		{
+			needanewpass = 0;
+			numberofside = floppydisk->floppyNumberOfSide;
+			truenumberoftrack=0;
+			while( truenumberoftrack<numberoftrack )
+			{
+				truenumberofside=0;
+				while(truenumberofside<numberofside)
+				{
+					if(floppydisk->tracks[truenumberoftrack]->number_of_side != numberofside)
+					{
+						floppycontext->hxc_printf(MSG_WARNING,"Sanity Checker :  Bad number of side (%d should be %d) at Track entry %d",floppydisk->tracks[truenumberoftrack]->number_of_side,numberofside,truenumberoftrack);
+						if(floppydisk->tracks[truenumberoftrack]->number_of_side < numberofside )
+						{
+							tmpsides = floppydisk->tracks[truenumberoftrack]->sides;
+							oldnumberofside = floppydisk->tracks[truenumberoftrack]->number_of_side;
+							// Realloc buffer
+							floppydisk->tracks[truenumberoftrack]->number_of_side = numberofside;
+							floppydisk->tracks[truenumberoftrack]->sides=(SIDE**)malloc(sizeof(SIDE*)*numberofside);
+							memset(floppydisk->tracks[truenumberoftrack]->sides,0,sizeof(SIDE*)*numberofside);
+
+							if(tmpsides && oldnumberofside)
+								floppydisk->tracks[truenumberoftrack]->sides[0] = tmpsides[0];
+						}
+						else
+						{
+							if(floppydisk->tracks[truenumberoftrack]->number_of_side <= 2)
+								floppydisk->floppyNumberOfSide = floppydisk->tracks[truenumberoftrack]->number_of_side;
+							else
+							{
+								floppycontext->hxc_printf(MSG_WARNING,"Sanity Checker : track %d - more than 2 Sides (%d) ?!? - fixed to 2. Please Check the Loader !",truenumberoftrack,floppydisk->floppyNumberOfSide);
+								floppydisk->tracks[truenumberoftrack]->number_of_side = 2;
+							}
+
+							needanewpass = 1;
+						}
+					}
+					truenumberofside++;
+				}
+				truenumberoftrack++;
+			}
+		}while(needanewpass);
+		
+		numberoftrack = floppydisk->floppyNumberOfTrack;
+		numberofside = floppydisk->floppyNumberOfSide;
+		truenumberoftrack=0;
+		while( truenumberoftrack<numberoftrack )
+		{
+			truenumberofside=0;
+			while(truenumberofside<numberofside)
+			{
+
+				currentside=floppydisk->tracks[truenumberoftrack]->sides[truenumberofside];
+
+				if(!currentside)
+				{
+					currentside=(SIDE*)malloc(sizeof(SIDE));
+					memset(currentside,0,sizeof(SIDE));
+				}
+
+				floppydisk->tracks[truenumberoftrack]->sides[truenumberofside]=currentside;
+
+				if(!currentside->databuffer)
+				{
+					floppycontext->hxc_printf(MSG_WARNING,"Sanity Checker :  Track %d/Side %d not allocated ?!?",truenumberoftrack,truenumberofside);
+					if(truenumberofside)
+					{
+						if(floppydisk->tracks[truenumberoftrack]->sides[0]->tracklen)
+						{
+							currentside->tracklen = floppydisk->tracks[truenumberoftrack]->sides[0]->tracklen;
+						}
+						else
+							currentside->tracklen = 12500*8;
+					}
+					else
+						currentside->tracklen = 12500*8;
+
+					currentside->databuffer=malloc(currentside->tracklen/8);
+					memset(currentside->databuffer,0x01,currentside->tracklen/8);
+					currentside->indexbuffer=malloc(currentside->tracklen/8);
+					memset(currentside->indexbuffer,0x00,currentside->tracklen/8);
+					if(floppydisk->floppyBitRate!=-1)
+						currentside->bitrate=floppydisk->floppyBitRate;
+					else
+						currentside->bitrate=250000;
+					fillindex(0,currentside,2500,1,0);
+
+				}
+				truenumberofside++;
+			}
+			truenumberoftrack++;
+		}
+	}
+	return floppydisk;
+}

@@ -237,6 +237,8 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 	hxc_fclose(f);
 
+	hxcfe_sanityCheck(floppycontext,floppydisk);
+
 	return HXCFE_NOERROR;	
 }
 
