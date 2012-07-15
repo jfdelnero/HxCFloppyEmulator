@@ -309,7 +309,7 @@ int TI99V9T9_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"TI99V9T9_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
@@ -320,33 +320,33 @@ int TI99V9T9_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		switch(ret)
 		{
 			case 1:
-				floppycontext->hxc_printf(MSG_DEBUG,"V9T9 file !");
+				floppycontext->hxc_printf(MSG_DEBUG,"TI99V9T9_libIsValidDiskFile : V9T9 file !");
 				return HXCFE_VALIDFILE;
 				break;
 
 			case 2:
-				
+
 				if( checkfileext(imgfile,"v9t9") || checkfileext(imgfile,"pc99") )
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"V9T9 file !");
+					floppycontext->hxc_printf(MSG_DEBUG,"TI99V9T9_libIsValidDiskFile : V9T9 file !");
 					return HXCFE_VALIDFILE;
 				}
 				else
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non TI99 V9T9 file!");
+					floppycontext->hxc_printf(MSG_DEBUG,"TI99V9T9_libIsValidDiskFile : non TI99 V9T9 file!");
 					return HXCFE_BADFILE;
 				}
 				break;
 
 			default:
-				floppycontext->hxc_printf(MSG_DEBUG,"non TI99 V9T9 file!");
+				floppycontext->hxc_printf(MSG_DEBUG,"TI99V9T9_libIsValidDiskFile : non TI99 V9T9 file!");
 				return HXCFE_BADFILE;
 				break;
 
 		}
 
-	}		
-	
+	}
+
 	return HXCFE_BADPARAMETER;
 }
 
@@ -379,12 +379,12 @@ int TI99V9T9_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	fseek (f , 0 , SEEK_SET);
 
 	if(getDiskGeometry(f,&floppydisk->floppyNumberOfTrack,&floppydisk->floppyNumberOfSide,&floppydisk->floppySectorPerTrack,&skew0,&skew1,&interleave,&density,&floppydisk->floppyBitRate,&sectorsize))
-	{		
+	{
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		rpm=300; // normal rpm
 
 		if(density==1)
-		{	
+		{
 			trackformat=ISOFORMAT_SD;
 			gap3len=45;
 		}

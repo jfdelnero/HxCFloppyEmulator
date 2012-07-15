@@ -73,16 +73,16 @@ int KRZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		filesize=getfilesize(imgfile);
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"KRZ_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"Kurzweil KRZ file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"KRZ_libIsValidDiskFile : Kurzweil KRZ file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non Kurzweil KRZ file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"KRZ_libIsValidDiskFile : non Kurzweil KRZ file !");
 		return HXCFE_BADFILE;
 	}
 	

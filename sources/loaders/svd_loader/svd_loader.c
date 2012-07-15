@@ -71,43 +71,40 @@ int SVD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		f=hxc_fopen(imgfile,"r");
 		if(f)
 		{
-			fgets(linebuffer,sizeof(linebuffer),f);					
+			fgets(linebuffer,sizeof(linebuffer),f);
 			hxc_fclose(f);
 
-			if (sscanf(linebuffer,"%d.%d",&major,&minor) != 2) 
+			if (sscanf(linebuffer,"%d.%d",&major,&minor) != 2)
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"Bad code version !");
+				floppycontext->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : Bad code version !");
 				return(HXCFE_BADFILE);
 			}
-			
+
 			if((major==2 && minor==0) ||(major==1 && minor==2) ||(major==1 && minor==5))
 			{
 				return HXCFE_VALIDFILE;
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"Bad code version !");
+				floppycontext->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : Bad code version !");
 				return HXCFE_BADFILE;
 			}
 		}
-					
-		floppycontext->hxc_printf(MSG_DEBUG,"Access error !");
+
+		floppycontext->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : Access error !");
 		return HXCFE_ACCESSERROR;
-					
+
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non SVD file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : non SVD file !");
 		return HXCFE_BADFILE;
 	}
 }
 
-
-
-
 int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	
+
 	FILE * f;
 	unsigned int filesize;
 	unsigned int i,j,k,skew;
@@ -127,7 +124,7 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	int sectorindex;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"JVC_libLoad_DiskFile %s",imgfile);
-	
+
 	gap3len=255;
 	interleave=1;
 	skew=1;
@@ -137,47 +134,47 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	trackformat=0;
 
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
-	
+	fseek (f , 0 , SEEK_SET);
+
 	// code version
-	fgets(linebuffer,sizeof(linebuffer),f);					
-	if (sscanf(linebuffer,"%d.%d",&major,&minor) != 2) 
+	fgets(linebuffer,sizeof(linebuffer),f);
+	if (sscanf(linebuffer,"%d.%d",&major,&minor) != 2)
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"Bad code version !");
 		return(HXCFE_BADFILE);
 	}
 
 	// number of sector per track
-	fgets(linebuffer,sizeof(linebuffer),f);					
-	if (sscanf(linebuffer,"%d",&sectorpertrack) != 1) 
+	fgets(linebuffer,sizeof(linebuffer),f);
+	if (sscanf(linebuffer,"%d",&sectorpertrack) != 1)
 		return(HXCFE_BADFILE);
-	
+
 	// number of tracks
-	fgets(linebuffer,sizeof(linebuffer),f);					
-	if (sscanf(linebuffer,"%d",&numberoftrack) != 1) 
+	fgets(linebuffer,sizeof(linebuffer),f);
+	if (sscanf(linebuffer,"%d",&numberoftrack) != 1)
 		return(HXCFE_BADFILE);
-	
+
 	// number of sides
-	fgets(linebuffer,sizeof(linebuffer),f);					
-	if (sscanf(linebuffer,"%d",&numberofside) != 1) 
+	fgets(linebuffer,sizeof(linebuffer),f);
+	if (sscanf(linebuffer,"%d",&numberofside) != 1)
 		return(HXCFE_BADFILE);
 
 	// sector size
-	fgets(linebuffer,sizeof(linebuffer),f);					
-	if (sscanf(linebuffer,"%d",&sectsize) != 1) 
+	fgets(linebuffer,sizeof(linebuffer),f);
+	if (sscanf(linebuffer,"%d",&sectsize) != 1)
 		return(HXCFE_BADFILE);
 
 	// write protect
-	fgets(linebuffer,sizeof(linebuffer),f);					
-	if (sscanf(linebuffer,"%d",&wprot) != 1) 
+	fgets(linebuffer,sizeof(linebuffer),f);
+	if (sscanf(linebuffer,"%d",&wprot) != 1)
 		return(HXCFE_BADFILE);
 
 	floppydisk->floppyNumberOfTrack=numberoftrack;
@@ -189,13 +186,13 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	if(filesize!=0)
 	{
-			
+
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
-				
+
 			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
-				
+
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
 
@@ -209,7 +206,7 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				sectorconfig=malloc(sizeof(SECTORCONFIG) * sectorpertrack);
 				memset(sectorconfig,0,sizeof(SECTORCONFIG) * sectorpertrack);
 
-				for (sector = 0; sector < sectorpertrack; sector++) 
+				for (sector = 0; sector < sectorpertrack; sector++)
 				{
 					int	sectortype = blockbuf[indexptr++];
 
@@ -226,7 +223,7 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						/* there is a "standard" amount of data per header field in the	*/
 						/* track header...each format needs to advance the indexpr right.*/
 
-						switch(SVD_SECTOR_TYPE(sectortype)) 
+						switch(SVD_SECTOR_TYPE(sectortype))
 						{
 							case WD_FM:
 							case WD_MFM:
@@ -320,7 +317,7 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				}
 
 				fseek (f , file_offset , SEEK_SET);
-						
+
 				Sector_attribute_flag=0;
 				for(k=0;k<11;k++)
 				{
@@ -333,14 +330,14 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		}
 
 		free(trackdata);
-			
+
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		
+
 		hxc_fclose(f);
 		return HXCFE_NOERROR;
 
 	}
-	
+
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;

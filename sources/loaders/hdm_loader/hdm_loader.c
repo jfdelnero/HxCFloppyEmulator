@@ -63,19 +63,17 @@ int HDM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	if(checkfileext(imgfile,"hdm") || checkfileext(imgfile,"xdf"))
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"HDM file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"HDM_libIsValidDiskFile : HDM file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non HDM file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"HDM_libIsValidDiskFile : non HDM file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
-
-
 
 int HDM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {

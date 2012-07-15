@@ -67,11 +67,11 @@ int GKH_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	if( checkfileext(imgfile,"gkh"))
 	{
-			
+
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"GKH_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
@@ -80,11 +80,11 @@ int GKH_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		if(!memcmp(&header.header_tag,"TDDFI",5))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"GKH file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"GKH_libIsValidDiskFile : GKH file !");
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Bad header !!");
+			floppycontext->hxc_printf(MSG_ERROR,"GKH_libIsValidDiskFile : Bad header !!");
 			return HXCFE_BADFILE;
 		}
 
@@ -92,18 +92,16 @@ int GKH_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non GKH file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"GKH_libIsValidDiskFile : non GKH file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 
-
-
 int GKH_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	
+
 	FILE * f;
 	unsigned int i,j;
 	unsigned char gap3len,interleave,startid;

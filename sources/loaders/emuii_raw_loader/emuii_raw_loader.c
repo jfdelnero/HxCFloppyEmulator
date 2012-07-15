@@ -62,7 +62,7 @@ int EMUII_RAW_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"MFM_libIsValidDiskFile");
+	floppycontext->hxc_printf(MSG_DEBUG,"EMUII_RAW_libIsValidDiskFile");
 
 	if( checkfileext(imgfile,"emuiifd") || checkfileext(imgfile,"sp1200fd") )
 	{
@@ -73,18 +73,18 @@ int EMUII_RAW_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile
 
 		if(filesize==(0xE00*2*80))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"EmuII/SP1200 raw file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"EMUII_RAW_libIsValidDiskFile : EmuII/SP1200 raw file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non EmuII/SP1200 raw file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"EMUII_RAW_libIsValidDiskFile : non EmuII/SP1200 raw file !");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non EmuII raw file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"EMUII_RAW_libIsValidDiskFile : non EmuII raw file !");
 		return HXCFE_BADFILE;
 	}
 

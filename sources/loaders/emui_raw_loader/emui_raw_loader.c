@@ -73,18 +73,18 @@ int EMUI_RAW_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					
 		if(filesize==(0xE00*35))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"EmuI raw file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"EMUI_RAW_libIsValidDiskFile : EmuI raw file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non EmuI raw file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"EMUI_RAW_libIsValidDiskFile : non EmuI raw file !");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non EmuI raw file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"EMUI_RAW_libIsValidDiskFile : non EmuI raw file !");
 		return HXCFE_BADFILE;
 	}
 	

@@ -68,7 +68,7 @@ int OLDEXTADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"OLDEXTADF_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
@@ -78,7 +78,7 @@ int OLDEXTADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile
 		header[8]=0;
 		if(!strcmp(header,"UAE--ADF"))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"Extended ADF file (old version)!");
+			floppycontext->hxc_printf(MSG_DEBUG,"OLDEXTADF_libIsValidDiskFile : Extended ADF file (old version)!");
 			return HXCFE_VALIDFILE;
 		}
 
@@ -86,15 +86,12 @@ int OLDEXTADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non Old Extended ADF file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"OLDEXTADF_libIsValidDiskFile : non Old Extended ADF file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
-
-
-
 
 int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
@@ -105,7 +102,7 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 	int	tracklen;
 	CYLINDER* currentcylinder;
 	unsigned int numberoftrack;
-	
+
 	unsigned char header[12];
 	unsigned char * tracktable;
 	unsigned int trackindex,tracksize;

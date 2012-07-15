@@ -71,23 +71,23 @@ int JV1_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			filesize=getfilesize(imgfile);
 			if(filesize<0) 
 			{
-				floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+				floppycontext->hxc_printf(MSG_ERROR,"JV1_libIsValidDiskFile : Cannot open %s !",imgfile);
 				return HXCFE_ACCESSERROR;
 			}
 
 			if( filesize%(10*1*256) )
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"non JV1 file !");
+				floppycontext->hxc_printf(MSG_DEBUG,"JV1_libIsValidDiskFile : non JV1 file !");
 				return HXCFE_BADFILE;
 			}
 
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"JV1 file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"JV1_libIsValidDiskFile : JV1 file !");
 		return HXCFE_VALIDFILE;
 	}
 
-	floppycontext->hxc_printf(MSG_DEBUG,"non JV1 file !");
+	floppycontext->hxc_printf(MSG_DEBUG,"JV1_libIsValidDiskFile : non JV1 file !");
 	return HXCFE_BADFILE;
 }
 

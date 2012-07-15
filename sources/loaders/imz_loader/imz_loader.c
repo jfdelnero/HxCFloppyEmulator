@@ -76,7 +76,7 @@ int IMZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		uf=unzOpen (imgfile);
 		if (!uf)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"unzOpen: Error while reading the file!");
+			floppycontext->hxc_printf(MSG_ERROR,"IMZ_libIsValidDiskFile : unzOpen: Error while reading the file!");
 			return HXCFE_BADFILE;
 		}
 
@@ -88,15 +88,15 @@ int IMZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		}
 
 		unzClose(uf);
-		floppycontext->hxc_printf(MSG_DEBUG,"IMZ file : %s (%d bytes) !",filename_inzip,file_info.uncompressed_size);
+		floppycontext->hxc_printf(MSG_DEBUG,"IMZ_libIsValidDiskFile : IMZ file : %s (%d bytes) !",filename_inzip,file_info.uncompressed_size);
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non IMZ file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"IMZ_libIsValidDiskFile : non IMZ file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 

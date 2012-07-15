@@ -80,7 +80,7 @@ int TeleDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			f=hxc_fopen(imgfile,"rb");
 			if(f==NULL) 
 			{
-				floppycontext->hxc_printf(MSG_ERROR,"Cannot open the file!");
+				floppycontext->hxc_printf(MSG_ERROR,"TeleDisk_libIsValidDiskFile : Cannot open %s !",imgfile);
 				return HXCFE_ACCESSERROR;
 			}
 			
@@ -96,7 +96,7 @@ int TeleDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 				if ( ((td_header.TXT[0]!='t') || (td_header.TXT[1]!='d')) && ((td_header.TXT[0]!='T') || (td_header.TXT[1]!='D'))) 
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"bad header tag !");
+					floppycontext->hxc_printf(MSG_DEBUG,"TeleDisk_libIsValidDiskFile : bad header tag !");
 					hxc_fclose(f);
 					return HXCFE_BADFILE;
 				}
@@ -115,12 +115,12 @@ int TeleDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
      				return HXCFE_BADFILE;
 				}
 
-				floppycontext->hxc_printf(MSG_DEBUG,"it's a Tele disk file!");
+				floppycontext->hxc_printf(MSG_DEBUG,"TeleDisk_libIsValidDiskFile : it's a Tele disk file!");
 				hxc_fclose(f);
 				return HXCFE_VALIDFILE;
 			}
 	
-			floppycontext->hxc_printf(MSG_DEBUG,"bad header tag !");
+			floppycontext->hxc_printf(MSG_DEBUG,"TeleDisk_libIsValidDiskFile : bad header tag !");
 			hxc_fclose(f);
      		return HXCFE_BADFILE;
 		}
@@ -205,13 +205,13 @@ int RLEExpander(unsigned char *src,unsigned char *dst,int blocklen)
 				
 				while(uCount)
 				{
-                        memcpy(s2, s1, uBlock);
+						memcpy(s2, s1, uBlock);
 						rlen=rlen+uBlock;
 						s2=s2+uBlock;
 						uCount--;
 				}
 
-                s1=s1 + uBlock;
+				s1=s1 + uBlock;
 				len2=len2-uBlock;
 			}
 
@@ -258,7 +258,7 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		floppycontext->hxc_printf(MSG_ERROR,"TeleDisk_libLoad_DiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -266,7 +266,7 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	filesize=ftell(f);
 	if(!filesize)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"0 byte file !");
+		floppycontext->hxc_printf(MSG_ERROR,"TeleDisk_libLoad_DiskFile : 0 byte file !");
 		hxc_fclose(f);
 		return HXCFE_BADFILE;
 	}
@@ -276,7 +276,7 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	fileimage=(unsigned char*)malloc(filesize+512);
 	if(!fileimage)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Malloc error !");
+		floppycontext->hxc_printf(MSG_ERROR,"TeleDisk_libLoad_DiskFile : Malloc error !");
 		hxc_fclose(f);
 		return HXCFE_INTERNALERROR;
 	}
@@ -290,7 +290,7 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 
 	if ( ((td_header->TXT[0]!='t') || (td_header->TXT[1]!='d')) && ((td_header->TXT[0]!='T') || (td_header->TXT[1]!='D'))) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"bad header tag !");
+		floppycontext->hxc_printf(MSG_ERROR,"TeleDisk_libLoad_DiskFile : bad header tag !");
 		free(fileimage);
 		return HXCFE_BADFILE;
 	}
@@ -304,15 +304,15 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 				
 	if(td_header->CRC!=((CRC16_High<<8)|CRC16_Low))
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"bad header crc !");
+		floppycontext->hxc_printf(MSG_ERROR,"TeleDisk_libLoad_DiskFile : bad header crc !");
 		free(fileimage);
 		return HXCFE_BADFILE;
 	}
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Teledisk version : %d",td_header->TDVer);
+	floppycontext->hxc_printf(MSG_INFO_1,"TeleDisk_libLoad_DiskFile : Teledisk version : %d",td_header->TDVer);
 	if((td_header->TDVer>21) || (td_header->TDVer<10))
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Unsupported version !");
+		floppycontext->hxc_printf(MSG_ERROR,"TeleDisk_libLoad_DiskFile : Unsupported version !");
 		free(fileimage);
 		return HXCFE_BADFILE;
 	}
@@ -320,13 +320,13 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	Compress=0;
 	if(((td_header->TXT[0]=='T') && (td_header->TXT[1]=='D')))
 	{
-		floppycontext->hxc_printf(MSG_INFO_1,"Normal compression");
+		floppycontext->hxc_printf(MSG_INFO_1,"TeleDisk_libLoad_DiskFile : Normal compression");
 		Compress=0;
 	}
 
 	if(((td_header->TXT[0]=='t') && (td_header->TXT[1]=='d')))
 	{
-		floppycontext->hxc_printf(MSG_INFO_1,"Advanced compression");
+		floppycontext->hxc_printf(MSG_INFO_1,"TeleDisk_libLoad_DiskFile : Advanced compression");
 		fileimage=unpack(fileimage,filesize);
 		Compress=1;
 	}
@@ -359,13 +359,13 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		}
 
 
-		floppycontext->hxc_printf(MSG_INFO_1,"Creation date: %.2d/%.2d/%.4d %.2d:%.2d:%.2d",td_comment->bDay,\
+		floppycontext->hxc_printf(MSG_INFO_1,"TeleDisk_libLoad_DiskFile : Creation date: %.2d/%.2d/%.4d %.2d:%.2d:%.2d",td_comment->bDay,\
 																							td_comment->bMon+1,\
 																							td_comment->bYear+1900,\
 																							td_comment->bHour,\
 																							td_comment->bMin,\
 																							td_comment->bSec);
-		floppycontext->hxc_printf(MSG_INFO_1,"Comment: %s",tempdata);
+		floppycontext->hxc_printf(MSG_INFO_1,"TeleDisk_libLoad_DiskFile : Comment: %s",tempdata);
 
 	}
 

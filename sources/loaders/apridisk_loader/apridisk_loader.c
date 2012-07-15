@@ -79,12 +79,12 @@ int ApriDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 				if(!strcmp(APRIDISK_HeaderString,HeaderBuffer))
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk file !");
+					floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk_libIsValidDiskFile : ApriDisk file !");
 					return HXCFE_VALIDFILE;
 				}
 				else
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk file !");
+					floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk_libIsValidDiskFile : ApriDisk file !");
 					return HXCFE_BADFILE;
 				}
 			}

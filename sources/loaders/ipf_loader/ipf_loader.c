@@ -98,20 +98,20 @@ int IPF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	if(checkfileext(imgfile,"ipf"))
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"IPF file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"IPF_libIsValidDiskFile : IPF file !");
 		if(init_caps_lib())
 		{
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"No Caps lib available!");
+			floppycontext->hxc_printf(MSG_ERROR,"IPF_libIsValidDiskFile : No Caps lib available!");
 			return HXCFE_INTERNALERROR;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non IPF file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"IPF_libIsValidDiskFile : non IPF file !");
 		return HXCFE_BADFILE;
 	}
 

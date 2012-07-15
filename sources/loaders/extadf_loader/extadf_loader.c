@@ -69,7 +69,7 @@ int EXTADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"EXTADF_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
@@ -79,7 +79,7 @@ int EXTADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		header[8]=0;
 		if(!strcmp(header,"UAE-1ADF"))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"Extended ADF file (new version)!");
+			floppycontext->hxc_printf(MSG_DEBUG,"EXTADF_libIsValidDiskFile : Extended ADF file (new version)!");
 			return HXCFE_VALIDFILE;
 		}
 
@@ -87,7 +87,7 @@ int EXTADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non Extended ADF file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"EXTADF_libIsValidDiskFile : non Extended ADF file !");
 		return HXCFE_BADFILE;
 	}
 

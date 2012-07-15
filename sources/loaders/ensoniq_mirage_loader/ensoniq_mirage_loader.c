@@ -68,25 +68,25 @@ int Ensoniq_mirage_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 		filesize=getfilesize(imgfile);
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"Ensoniq_mirage_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 					
 		if(filesize%((5*1024) + (1*512)) )
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non Ensoniq mirage file - bad file size !");
+			floppycontext->hxc_printf(MSG_DEBUG,"Ensoniq_mirage_libIsValidDiskFile : non Ensoniq mirage file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"Ensoniq mirage file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"Ensoniq_mirage_libIsValidDiskFile : Ensoniq mirage file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non Ensoniq mirage file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"Ensoniq_mirage_libIsValidDiskFile : non Ensoniq mirage file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 

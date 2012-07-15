@@ -66,13 +66,13 @@ int getfloppyconfig(unsigned char * img,unsigned int filesize,unsigned short *nu
 	unsigned short numberofsector;
 	unsigned char  * uimg;
 	unsigned char  conffound;
-	
+
 	uimg=(unsigned char *)img;
-	
+
 	conffound=0;
 	if(uimg[0x18]<24 && uimg[0x18]>8)
 	{
-		
+
 		*numberofsectorpertrack=uimg[0x18];
 		*numberofside=uimg[0x1A];
 
@@ -94,26 +94,26 @@ int getfloppyconfig(unsigned char * img,unsigned int filesize,unsigned short *nu
 				*gap3len=3;
 			break;
 		}
-	
+
 		numberofsector=uimg[0x13]+(uimg[0x14]*256);
 		if(*numberofsectorpertrack && *numberofside )
 		{
 			*numberoftrack=(numberofsector/(*numberofsectorpertrack*(*numberofside)));
-			
+
 			if((unsigned int)((*numberofsectorpertrack) * (*numberoftrack) * (*numberofside) *512)==filesize)
 			{
 				conffound=1;
 			}
 		}
-		
+
 	}
-	
+
 	if(!conffound)
 	{
 		i=0;
 		do
 		{
-			
+
 			if(stfileformats[i].filesize==filesize)
 			{
 				*numberoftrack=stfileformats[i].numberoftrack;
@@ -124,7 +124,7 @@ int getfloppyconfig(unsigned char * img,unsigned int filesize,unsigned short *nu
 				conffound=1;
 			}
 			i++;
-			
+
 		}while(stfileformats[i].filesize!=0 && conffound==0);
 
 		if(!conffound)
@@ -160,13 +160,13 @@ int getfloppyconfig(unsigned char * img,unsigned int filesize,unsigned short *nu
 									*gap3len=3;
 								break;
 							}
-							
+
 							conffound=1;
 
 
 							return conffound;
 						}
-					}					
+					}
 				}
 			}
 		}
@@ -184,35 +184,33 @@ int ST_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	if(checkfileext(imgfile,"st"))
 	{
 		filesize=getfilesize(imgfile);
-		if(filesize<0) 
+		if(filesize<0)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"ST_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
-			
+
 		if(filesize&0x1FF)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non ST IMG file - bad file size !");
+			floppycontext->hxc_printf(MSG_DEBUG,"ST_libIsValidDiskFile : non ST IMG file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"ST file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"ST_libIsValidDiskFile : ST file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non ST file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"ST_libIsValidDiskFile : non ST file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 
-
-
 int ST_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	
+
 	FILE * f;
 	unsigned int filesize;
 	unsigned int file_offset;
@@ -223,24 +221,24 @@ int ST_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,cha
 	unsigned short rpm;
 	unsigned short sectorsize;
 	CYLINDER* currentcylinder;
-	
+
 	floppycontext->hxc_printf(MSG_DEBUG,"ST_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
-	
-	
+	fseek (f , 0 , SEEK_SET);
+
+
 	if(filesize!=0)
-	{		
-		
+	{
+
 		sectorsize=512; // st file support only 512bytes/sector floppies.
 		// read the first sector
 		trackdata=(unsigned char*)malloc(sectorsize);
@@ -255,7 +253,7 @@ int ST_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,cha
 			&interleave)==1
 			)
 		{
-			
+
 			free(trackdata);
 
 			if(floppydisk->floppySectorPerTrack<15)
@@ -276,23 +274,23 @@ int ST_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,cha
 				gap3len=3;
 				trackformat=ISOFORMAT_DD11S;
 			}
-			
+
 			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			
+
 			rpm=300; // normal rpm
-			
-			floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d bitrate:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm,floppydisk->floppyBitRate);	
+
+			floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d bitrate:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm,floppydisk->floppyBitRate);
 			trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-			
+
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 			{
-				
+
 				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 				currentcylinder=floppydisk->tracks[j];
-								
+
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
-					
+
 					file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 						        (sectorsize*(floppydisk->floppySectorPerTrack)*i);
 					fseek (f , file_offset , SEEK_SET);
@@ -303,7 +301,7 @@ int ST_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,cha
 			}
 
 			free(trackdata);
-			
+
 			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 			hxc_fclose(f);
 			return HXCFE_NOERROR;
@@ -312,7 +310,7 @@ int ST_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,cha
 		hxc_fclose(f);
 		return HXCFE_FILECORRUPTED;
 	}
-	
+
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;

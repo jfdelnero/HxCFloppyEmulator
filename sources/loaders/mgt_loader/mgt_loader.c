@@ -71,23 +71,23 @@ int MGT_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		filesize=getfilesize(imgfile);
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"MGT_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}					
 
 		if(filesize&0x1FF)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non MGT file - bad file size !");
+			floppycontext->hxc_printf(MSG_DEBUG,"MGT_libIsValidDiskFile : non MGT file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"MGT file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"MGT_libIsValidDiskFile : MGT file !");
 	
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non MGT file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"MGT_libIsValidDiskFile : non MGT file !");
 		return HXCFE_BADFILE;
 	}	
 	return HXCFE_BADPARAMETER;

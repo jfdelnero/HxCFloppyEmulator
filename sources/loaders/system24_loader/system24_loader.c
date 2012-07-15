@@ -63,32 +63,32 @@ int System24_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"ST_libIsValidDiskFile");
+	floppycontext->hxc_printf(MSG_DEBUG,"System24_libIsValidDiskFile");
 
 	if(checkfileext(imgfile,"s24"))
 	{
 		filesize=getfilesize(imgfile);
-		if(filesize<0) 
+		if(filesize<0)
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
-			
+
 		if(filesize != ( 80 * 2 * ( ( 2048 * 5 ) + 1024 + 256 ) ) )
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non System 24 file - bad file size !");
+			floppycontext->hxc_printf(MSG_DEBUG,"System24_libIsValidDiskFile : non System 24 file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"S24 file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"System24_libIsValidDiskFile : S24 file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non S24 file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"System24_libIsValidDiskFile : non S24 file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 
@@ -96,7 +96,7 @@ int System24_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 int System24_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	
+
 	FILE * f;
 	unsigned int filesize;
 	unsigned int file_offset;
@@ -109,21 +109,21 @@ int System24_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	SECTORCONFIG  * sectorconfig;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"System24_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
-	
+	fseek (f , 0 , SEEK_SET);
+
 	if(filesize== ( 80 * 2 * ( ( 2048 * 5 ) + 1024 + 256 ) ) )
-	{		
-	
+	{
+
 		floppydisk->floppyNumberOfTrack=80;
 		floppydisk->floppyNumberOfSide=2;
 		floppydisk->floppySectorPerTrack= 5 + 1 + 1;
@@ -132,25 +132,25 @@ int System24_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		floppydisk->floppyiftype = IBMPC_HD_FLOPPYMODE;
 		floppydisk->floppyBitRate = DEFAULT_HD_BITRATE;
 		trackformat=ISOFORMAT_DD;
-			
+
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			
+
 		rpm=300; // normal rpm
 
 		sectorconfig=malloc(sizeof(SECTORCONFIG) * floppydisk->floppySectorPerTrack);
 		memset(sectorconfig,0,sizeof(SECTORCONFIG) * floppydisk->floppySectorPerTrack);
-			
+
 		trackdata=(unsigned char*)malloc(( ( 2048 * 5 ) + 1024 + 256 ));
-			
+
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
-				
+
 			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
-								
+
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
-				
+
 				file_offset=( j *  ( ( ( 2048 * 5 ) + 1024 + 256 ) * 2 ) ) +
 					        ( i *  ( ( 2048 * 5 ) + 1024 + 256 ) );
 
@@ -196,20 +196,20 @@ int System24_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		}
 
 		free(trackdata);
-			
+
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		hxc_fclose(f);
 		return HXCFE_NOERROR;
 
 	}
-	
+
 	hxc_fclose(f);
 
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 
 	return HXCFE_BADFILE;
 }
-	
+
 int System24_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 

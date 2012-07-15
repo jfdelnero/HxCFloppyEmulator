@@ -120,18 +120,18 @@ int AFI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		if( !strcmp(header.afi_img_tag,AFI_IMG_TAG) )
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"AFI file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"AFI_libIsValidDiskFile : AFI file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non AFI file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"AFI_libIsValidDiskFile : non AFI file !");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non AFI file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"AFI_libIsValidDiskFile : non AFI file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -160,20 +160,18 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		floppycontext->hxc_printf(MSG_ERROR,"AFI_libLoad_DiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-
 
 	fread(&header,sizeof(header),1,f);
 
 	if(!strcmp(header.afi_img_tag,AFI_IMG_TAG))
 	{
 
-
 		if(filecheckcrc(f,0,sizeof(AFIIMG)))
 		{
-				floppycontext->hxc_printf(MSG_ERROR,"bad header CRC !");
+				floppycontext->hxc_printf(MSG_ERROR,"AFI_libLoad_DiskFile : bad header CRC !");
 				hxc_fclose(f);
 				return HXCFE_BADFILE;
 		}
@@ -186,7 +184,6 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyNumberOfSide=afiinfo.end_side+1;
 		floppydisk->floppySectorPerTrack=-1;
 		floppydisk->floppyiftype=ATARIST_DD_FLOPPYMODE;
-
 
 		switch(afiinfo.platformtype_code)
 		{

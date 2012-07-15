@@ -76,11 +76,11 @@ int FDI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 			if(f_header.signature[0]=='F' && f_header.signature[1]=='D' && f_header.signature[2]=='I')
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"FDI file !");
+				floppycontext->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile : FDI file !");
 				return HXCFE_VALIDFILE;
 			}
 
-			floppycontext->hxc_printf(MSG_DEBUG,"non FDI file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile : non FDI file !");
 			return HXCFE_BADFILE;
 		}
 
@@ -88,7 +88,7 @@ int FDI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non FDI file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile : non FDI file !");
 		return HXCFE_BADFILE;
 	}
 

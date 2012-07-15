@@ -67,33 +67,31 @@ int W30_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	{
 
 		filesize=getfilesize(imgfile);
-		if(filesize<0) 
+		if(filesize<0)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"W30_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
-					
+
 		if(filesize==737280)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"W30 file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile : W30 file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non W30 file ! - bad file size! ");
+			floppycontext->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile : non W30 file ! - bad file size! ");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non W30 file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile : non W30 file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
-
-
 
 int W30_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
@@ -108,20 +106,20 @@ int W30_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	CYLINDER* currentcylinder;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"W30_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
-	
+	fseek (f , 0 , SEEK_SET);
+
 	sectorsize=512; // wd30 file support only 512bytes/sector floppies.
-	
+
 	gap3len=255;
 	interleave=1;
 	skew=0;
@@ -134,24 +132,24 @@ int W30_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 	rpm=300; // normal rpm
-			
+
 	floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
-				
+
 	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-			
+
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
-				
+
 		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 		currentcylinder=floppydisk->tracks[j];
-			
+
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 		{
 			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 				        (sectorsize*(floppydisk->floppySectorPerTrack)*i);
 			fseek (f , file_offset , SEEK_SET);
 			fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
-					
+
 			currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,2500,-2500);
 		}
 	}

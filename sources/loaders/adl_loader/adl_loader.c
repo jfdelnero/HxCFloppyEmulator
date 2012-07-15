@@ -68,22 +68,22 @@ int ADL_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		filesize=getfilesize(imgfile);
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"ADL_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
 		if(filesize&0x1FF)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non Acorn BBC ADL IMG file - bad file size !");
+			floppycontext->hxc_printf(MSG_DEBUG,"ADL_libIsValidDiskFile : non Acorn BBC ADL IMG file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"Acorn BBC ADL file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"ADL_libIsValidDiskFile : Acorn BBC ADL file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non Acorn BBC ADL file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"ADL_libIsValidDiskFile : non Acorn BBC ADL file !");
 		return HXCFE_BADFILE;
 	}
 	

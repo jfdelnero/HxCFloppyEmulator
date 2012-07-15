@@ -251,7 +251,7 @@ int JV3_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"JV3_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}					
 		
@@ -264,23 +264,23 @@ int JV3_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			hxc_fclose(f);
 
 			if (total_data == (unsigned int)(offset2 - offset1 -1)) {
-				floppycontext->hxc_printf(MSG_DEBUG,"JV3 file !");
+				floppycontext->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile : JV3 file !");
 				return HXCFE_VALIDFILE;
 			} else {
-				floppycontext->hxc_printf(MSG_DEBUG,"non JV3 file !");
+				floppycontext->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile : non JV3 file !");
 				return HXCFE_BADFILE;
 			}
 		}
 		else
 		{
 			hxc_fclose(f);
-			floppycontext->hxc_printf(MSG_DEBUG,"non JV3 file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile : non JV3 file !");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non JV3 file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile : non JV3 file !");
 		return HXCFE_BADFILE;
 	}
 

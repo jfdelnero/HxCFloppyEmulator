@@ -81,7 +81,7 @@ int SCL_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open the file !");
+			floppycontext->hxc_printf(MSG_ERROR,"SCL_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 		fread(&sclsignature,8,1,f);
@@ -89,18 +89,18 @@ int SCL_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		if(!strncmp(sclsignature, "SINCLAIR", 8))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"Sinclair SCL file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"SCL_libIsValidDiskFile : Sinclair SCL file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non Sinclair SCL file !(bad header)");
+			floppycontext->hxc_printf(MSG_DEBUG,"SCL_libIsValidDiskFile : non Sinclair SCL file !(bad header)");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non Sinclair SCL file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"SCL_libIsValidDiskFile : non Sinclair SCL file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -109,8 +109,8 @@ int SCL_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 unsigned int lsb2ui(unsigned char *mem)
 {
-  return (mem[0] + (mem[1] * 256) + (mem[2] * 256 * 256)
-          + (mem[3] * 256 * 256 * 256));
+	return (mem[0] + (mem[1] * 256) + (mem[2] * 256 * 256)
+			+ (mem[3] * 256 * 256 * 256));
 }
 
 
@@ -155,7 +155,7 @@ int SCL_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		floppycontext->hxc_printf(MSG_ERROR,"SCL_libLoad_DiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 	
@@ -168,7 +168,7 @@ int SCL_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	}
 
 	fread(&number_of_blocks,1,1,f);
-	floppycontext->hxc_printf(MSG_DEBUG,"%d block(s) in the file",number_of_blocks);
+	floppycontext->hxc_printf(MSG_DEBUG,"SCL_libLoad_DiskFile : %d block(s) in the file",number_of_blocks);
 	
 	for (i=0; i < number_of_blocks; i++)
 	{
@@ -182,7 +182,7 @@ int SCL_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	trd_image=(unsigned char*)malloc(number_of_track*number_of_side*number_of_sectorpertrack*256);
 	if(!trd_image)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Malloc error !");
+		floppycontext->hxc_printf(MSG_ERROR,"SCL_libLoad_DiskFile : Malloc error !");
 		hxc_fclose(f);
 		return HXCFE_INTERNALERROR;
 	}
@@ -204,7 +204,7 @@ int SCL_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		size=block_headers[i][13];
 		if (lsb2ui(tmp) < size) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"File too long to fit in the image *trd_free=%u < size=%u",lsb2ui(tmp),size);
+			floppycontext->hxc_printf(MSG_ERROR,"SCL_libLoad_DiskFile : File too long to fit in the image *trd_free=%u < size=%u",lsb2ui(tmp),size);
 			hxc_fclose(f);
 			free(trd_image);
 			return HXCFE_INTERNALERROR;
@@ -212,7 +212,7 @@ int SCL_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		if (*trd_files > 127) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Image File full!");
+			floppycontext->hxc_printf(MSG_ERROR,"SCL_libLoad_DiskFile : Image File full!");
 			hxc_fclose(f);
 			free(trd_image);
 			return HXCFE_INTERNALERROR;
@@ -282,7 +282,7 @@ int SCL_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	}
 			
 	free(trd_image);		
-	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+	floppycontext->hxc_printf(MSG_INFO_1,"SCL_libLoad_DiskFile : track file successfully loaded and encoded!");
 	return HXCFE_NOERROR;
 }
 			
