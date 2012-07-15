@@ -63,7 +63,7 @@ int W30_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"w30"))
+	if( checkfileext(imgfile,"w30") || checkfileext(imgfile,"s50"))
 	{
 
 		filesize=getfilesize(imgfile);

@@ -1159,6 +1159,8 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		free(fileheader);
 
+		hxcfe_sanityCheck(floppycontext,floppydisk);
+
 		floppycontext->hxc_printf(MSG_INFO_0,"Pasti image loading done!");
 
 		return HXCFE_NOERROR;

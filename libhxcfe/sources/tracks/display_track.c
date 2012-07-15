@@ -368,11 +368,13 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 										col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos3];
 										col->blue=3*col->blue/16;
 										col->green=3*col->green/16;
+										col->red=3*col->red/4;
 									}
 									else
 									{
 										col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos3];
 										col->blue=3*col->blue/16;
+										col->green=3*col->green/4;
 										col->red=3*col->red/16;
 									}
 								}

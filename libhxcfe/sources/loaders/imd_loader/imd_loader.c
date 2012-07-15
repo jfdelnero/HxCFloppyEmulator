@@ -459,9 +459,10 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		}
 
-
-
 		hxc_fclose(f);
+		
+		hxcfe_sanityCheck(floppycontext,floppydisk);
+
 		return HXCFE_NOERROR;
 	}	
 

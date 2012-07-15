@@ -48,3 +48,6 @@ typedef struct plugins_ptr_
 
 
 int libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue,const char * pluginid,const char * plugindesc,plugins_ptr * pluginfunc,const char * fileext);
+
+FLOPPY* hxcfe_sanityCheck(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk);
+

@@ -403,6 +403,9 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		
 	hxc_fclose(f);	
+
+	hxcfe_sanityCheck(floppycontext,floppydisk);
+
 	//floppycontext->hxc_printf(MSG_ERROR,"bad header");
 	return HXCFE_NOERROR;
 }

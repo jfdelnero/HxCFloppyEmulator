@@ -568,7 +568,9 @@ int TeleDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 	free(fileimage);
-		
+
+	hxcfe_sanityCheck(floppycontext,floppydisk);
+
 	return HXCFE_NOERROR;
 }
 

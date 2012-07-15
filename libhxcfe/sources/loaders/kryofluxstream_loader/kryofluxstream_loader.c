@@ -894,7 +894,9 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 
 			free( folder );
 			free( filepath );
-	
+
+			hxcfe_sanityCheck(floppycontext,floppydisk);
+
 			return HXCFE_NOERROR;
 		}
 	}

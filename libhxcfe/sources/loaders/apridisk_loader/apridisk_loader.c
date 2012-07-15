@@ -357,7 +357,7 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 
 	free(file_buffer);
 
-
+	hxcfe_sanityCheck(floppycontext,floppydisk);
 
 	return HXCFE_NOERROR;
 }

@@ -175,7 +175,6 @@ int HFE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 		memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
-
 		for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
 		{			
 
@@ -237,6 +236,25 @@ int HFE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				currentside->bitrate=floppydisk->floppyBitRate;
 
 				currentside->track_encoding=header.track_encoding;
+
+				if( i == 0 )
+				{
+					if ( j == 0 )
+					{
+						if(!header.track0s0_altencoding)
+						{
+							currentside->track_encoding = header.track0s0_encoding;
+						}
+					}
+					else
+					{
+						if(!header.track0s1_altencoding)
+						{
+							currentside->track_encoding = header.track0s1_encoding;
+						}
+					}
+				}
+				
 
 				nbofblock=(currentside->tracklen/256);
 				for(k=0;k<nbofblock;k++)
