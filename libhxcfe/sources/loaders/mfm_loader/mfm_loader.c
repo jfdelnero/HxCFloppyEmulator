@@ -76,18 +76,18 @@ int MFM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		if( !strcmp(header.headername,"HXCMFM"))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"MFM file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"MFM_libIsValidDiskFile : MFM file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non MFM file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"MFM_libIsValidDiskFile : non MFM file !");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non MFM file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"MFM_libIsValidDiskFile : non MFM file !");
 		return HXCFE_BADFILE;
 	}
 

@@ -68,7 +68,7 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfi
 {
 	int i,found;
 	struct stat staterep;
-	
+
 	floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile");
 	if(imgfile)
 	{
@@ -89,15 +89,15 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfi
 					}
 					i++;
 				}while( strlen(configlist[i].dirext) && !found );
-						
-				if(found)				
+
+				if(found)
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY file ! (Dir , %s)",configlist[i].dirext);
+					floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : FAT12FLOPPY file ! (Dir , %s)",configlist[i].dirext);
 					return HXCFE_VALIDFILE;
 				}
 				else
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non FAT12FLOPPY file !");
+					floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : non FAT12FLOPPY file !");
 					return HXCFE_BADFILE;
 				}
 			}
@@ -114,23 +114,22 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfi
 					}
 					i++;
 				}while( strlen(configlist[i].dirext) && !found );
-			
-						
-				if(found)				
+
+				if(found)
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY file ! (File , %s)",configlist[i].dirext);
+					floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : FAT12FLOPPY file ! (File , %s)",configlist[i].dirext);
 					return HXCFE_VALIDFILE;
 				}
 				else
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non FAT12FLOPPY file !");
+					floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : non FAT12FLOPPY file !");
 					return HXCFE_BADFILE;
 				}
 			}
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non FAT12FLOPPY file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : non FAT12FLOPPY file !");
 			return HXCFE_BADFILE;
 		}
 	}

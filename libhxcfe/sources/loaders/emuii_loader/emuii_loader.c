@@ -98,16 +98,16 @@ int EMUII_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		filesize=getfilesize(imgfile);
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"EMUII_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 				
-		floppycontext->hxc_printf(MSG_DEBUG,"EMUII file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"EMUII_libIsValidDiskFile : EMUII file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non EMUII file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"EMUII_libIsValidDiskFile : non EMUII file !");
 		return HXCFE_BADFILE;
 	}
 	

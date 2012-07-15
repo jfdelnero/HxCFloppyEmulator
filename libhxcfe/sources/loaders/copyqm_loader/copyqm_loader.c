@@ -75,7 +75,7 @@ int CopyQm_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			f=hxc_fopen(imgfile,"rb");
 			if(f==NULL) 
 			{
-				floppycontext->hxc_printf(MSG_ERROR,"Cannot open the file!");
+				floppycontext->hxc_printf(MSG_ERROR,"CopyQm_libIsValidDiskFile : Cannot open %s !",imgfile);
 				return HXCFE_ACCESSERROR;
 			}
 			
@@ -86,7 +86,7 @@ int CopyQm_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 				if ( fileheader[0] != 'C' || fileheader[1] != 'Q' ) 
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"bad header tag !");
+					floppycontext->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile : bad header tag !");
 					hxc_fclose(f);
 					free(fileheader);
 					return HXCFE_BADFILE;
@@ -100,19 +100,19 @@ int CopyQm_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				}
 				if ( checksum != 0 ) 
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"bad header checksum !");
+					floppycontext->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile : bad header checksum !");
 					hxc_fclose(f);
 					free(fileheader);
 					return HXCFE_BADFILE;
 				}
 					
-				floppycontext->hxc_printf(MSG_DEBUG,"it's an copyqm file!");
+				floppycontext->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile : it's an copyqm file!");
 				hxc_fclose(f);
 				free(fileheader);
 				return HXCFE_VALIDFILE;
 			}
 	
-			floppycontext->hxc_printf(MSG_DEBUG,"bad header tag !");
+			floppycontext->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile : bad header tag !");
 			hxc_fclose(f);
 			free(fileheader);
      		return HXCFE_BADFILE;
@@ -149,7 +149,7 @@ int CopyQm_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		floppycontext->hxc_printf(MSG_ERROR,"CopyQm_libLoad_DiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 	

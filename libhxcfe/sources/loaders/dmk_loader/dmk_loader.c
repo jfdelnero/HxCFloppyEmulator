@@ -96,14 +96,14 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			{
 				if(!dmk_h.track_len)
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad file size !");
+					floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad file size !");
 					return HXCFE_BADFILE;
 				}
 				else
 				{
 					if(((filesize-sizeof(dmk_header))%dmk_h.track_len))
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad file size !");
+						floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad file size !");
 						return HXCFE_BADFILE;
 					}
 				}
@@ -125,7 +125,7 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 							)
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad header !");
+					floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad header !");
 					return HXCFE_BADFILE;
 				}
 
@@ -134,21 +134,21 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"non DMK file ! bad file size !");
+				floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad file size !");
 				return HXCFE_BADFILE;
 			}
 
-			floppycontext->hxc_printf(MSG_DEBUG,"DMK file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : DMK file !");
 			return HXCFE_VALIDFILE;
 		}
 
 		if(checkfileext( imgfile,"dmk"))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"DMK file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : DMK file !");
 			return HXCFE_VALIDFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"non DMK file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file !");
 		return HXCFE_BADFILE;
 
 	}

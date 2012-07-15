@@ -92,7 +92,7 @@ int DIM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"DIM_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 			
@@ -103,25 +103,23 @@ int DIM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		if(	header.id_header==0x4242)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"DIM file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile : DIM file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non DIM file ! Bad header!");
+			floppycontext->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile : non DIM file ! Bad header!");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non DIM file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile : non DIM file !");
 		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;
 }
-
-
 
 int DIM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {

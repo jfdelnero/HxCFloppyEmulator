@@ -67,12 +67,12 @@ int DMS_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	if(checkfileext(imgfile,"dms"))
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"DMS file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"DMS_libIsValidDiskFile : DMS file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non DMS file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"DMS_libIsValidDiskFile : non DMS file !");
 		return HXCFE_BADFILE;
 	}
 

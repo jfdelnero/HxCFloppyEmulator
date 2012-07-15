@@ -104,18 +104,18 @@ int HFE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		if( !strcmp(header.HEADERSIGNATURE,"HXCPICFE"))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"HFE file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"HFE_libIsValidDiskFile : HFE file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non HFE file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"HFE_libIsValidDiskFile : non HFE file !");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non HFE file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"HFE_libIsValidDiskFile : non HFE file !");
 		return HXCFE_BADFILE;
 	}
 

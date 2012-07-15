@@ -74,7 +74,7 @@ int SAD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			f=hxc_fopen(imgfile,"rb");
 			if(f==NULL) 
 			{
-				floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+				floppycontext->hxc_printf(MSG_ERROR,"SAD_libIsValidDiskFile : Cannot open %s !",imgfile);
 				return HXCFE_ACCESSERROR;
 			}
 
@@ -84,12 +84,12 @@ int SAD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					
 			if(!strncmp(sadh.abSignature,SAD_SIGNATURE,sizeof SAD_SIGNATURE - 1))
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"SAD file !");
+				floppycontext->hxc_printf(MSG_DEBUG,"SAD_libIsValidDiskFile : SAD file !");
 				return HXCFE_VALIDFILE;
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"non SAD file !");
+				floppycontext->hxc_printf(MSG_DEBUG,"SAD_libIsValidDiskFile : non SAD file !");
 				return HXCFE_BADFILE;
 			}
 			
@@ -119,7 +119,7 @@ int SAD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		floppycontext->hxc_printf(MSG_ERROR,"SAD_libLoad_DiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 	
@@ -127,7 +127,7 @@ int SAD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(strncmp(sadh.abSignature,SAD_SIGNATURE,sizeof SAD_SIGNATURE - 1))
 	{
 		hxc_fclose(f);
-		floppycontext->hxc_printf(MSG_DEBUG,"non SAD file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"SAD_libLoad_DiskFile : non SAD file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -146,7 +146,7 @@ int SAD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	rpm=300; // normal rpm
 	
-	floppycontext->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
+	floppycontext->hxc_printf(MSG_INFO_1,"SAD_libLoad_DiskFile : %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 			
 	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 			
@@ -168,7 +168,7 @@ int SAD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	free(trackdata);
 			
-	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+	floppycontext->hxc_printf(MSG_INFO_1,"SAD_libLoad_DiskFile : track file successfully loaded and encoded!");
 		
 	hxc_fclose(f);
 	return HXCFE_NOERROR;

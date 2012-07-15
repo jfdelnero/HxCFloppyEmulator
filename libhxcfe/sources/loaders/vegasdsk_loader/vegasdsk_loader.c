@@ -68,25 +68,25 @@ int VEGASDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	{
 
 		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL) 
+		if(f==NULL)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"VEGASDSK_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
-			
+
 		fseek (f , 256*(3-1) , SEEK_SET);
 		fread(buffer,256,1,f);
 
 		hxc_fclose(f);
-		floppycontext->hxc_printf(MSG_DEBUG,"Vegas DSK file ! %d tracks %d sectors/tracks",buffer[0x26]+1,buffer[0x27]+1);
+		floppycontext->hxc_printf(MSG_DEBUG,"VEGASDSK_libIsValidDiskFile : Vegas DSK file ! %d tracks %d sectors/tracks",buffer[0x26]+1,buffer[0x27]+1);
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non Vegas DSK file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"VEGASDSK_libIsValidDiskFile : non Vegas DSK file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 
@@ -94,7 +94,7 @@ int VEGASDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	
+
 	FILE * f;
 	unsigned int filesize;
 	unsigned int i,j,k;
@@ -112,25 +112,25 @@ int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	SECTORCONFIG  sectorconfig[30];
 
 	floppycontext->hxc_printf(MSG_DEBUG,"VEGASDSK_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	
+
 	fseek (f , 256*(3-1) , SEEK_SET);
 	fread(buffer,256,1,f);
 
-	fseek (f , 0 , SEEK_SET); 
-	
+	fseek (f , 0 , SEEK_SET);
+
 	gap3len=255;
-	
-	
+
+
 	switch(buffer[0x27])
 	{
 		case 10:
@@ -182,16 +182,16 @@ int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	floppydisk->floppyNumberOfTrack=buffer[0x26]+1;
 
 
-			
-		
+
+
 	floppydisk->floppyBitRate=250000;
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			
+
 	rpm=300; // normal rpm
-			
+
 	floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
-	
+
 	j=0;
 	floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 	currentcylinder=floppydisk->tracks[j];
@@ -210,8 +210,8 @@ int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 			sectorconfig[k].trackencoding=ISOFORMAT_SD;
 			sectorconfig[k].input_data=malloc(sectorconfig[k].sectorsize);
 			fread(sectorconfig[k].input_data,256,1,f);
-			
-		}	
+
+		}
 
 		currentcylinder->sides[i]=tg_generateTrackEx(10,(SECTORCONFIG *)&sectorconfig,5,0,floppydisk->floppyBitRate,rpm,ISOFORMAT_SD,2500,-2500);
 
@@ -226,13 +226,13 @@ int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	floppy_data=malloc(floppydisk->floppySectorPerTrack*sectorsize);
 
 	for(j=1;j<floppydisk->floppyNumberOfTrack;j++)
-	{	
+	{
 		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 		currentcylinder=floppydisk->tracks[j];
-				
+
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 		{
-					
+
 			file_offset=offset+ ( (((floppydisk->floppySectorPerTrack)*256)) * floppydisk->floppyNumberOfSide * (j-1) ) +
 				                ( (((floppydisk->floppySectorPerTrack)*256)) * i );
 			fread(floppy_data,floppydisk->floppySectorPerTrack*sectorsize,1,f);
@@ -257,7 +257,7 @@ int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	free(floppy_data);
 
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		
+
 	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }

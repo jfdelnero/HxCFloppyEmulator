@@ -154,13 +154,13 @@ int IMG_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		filesize=getfilesize(imgfile);
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"IMG_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
 		if(filesize&0x1FF)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non IMG file - bad file size !");
+			floppycontext->hxc_printf(MSG_DEBUG,"IMG_libIsValidDiskFile : non IMG file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
@@ -177,16 +177,16 @@ int IMG_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		if(!conffound)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non IMG file - bad file size !");
+			floppycontext->hxc_printf(MSG_DEBUG,"IMG_libIsValidDiskFile : non IMG file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"IMG file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"IMG_libIsValidDiskFile : IMG file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non IMG file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"IMG_libIsValidDiskFile : non IMG file !");
 		return HXCFE_BADFILE;
 	}
 

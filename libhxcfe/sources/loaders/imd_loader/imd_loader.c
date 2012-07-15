@@ -78,18 +78,18 @@ int IMD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		if( !strcmp(fileheader,"IMD "))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"IMD file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile : IMD file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non IMD file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile : non IMD file !");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non IMD file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile : non IMD file !");
 		return HXCFE_BADFILE;
 	}
 

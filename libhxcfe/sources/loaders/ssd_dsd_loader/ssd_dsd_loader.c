@@ -67,27 +67,27 @@ int DSD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	{
 
 		filesize=getfilesize(imgfile);
-		if(filesize<0) 
+		if(filesize<0)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"DSD_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
-										
+
 		if(filesize&0x1FF)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non Acorn BBC DSD/SSD IMG file - bad file size !");
+			floppycontext->hxc_printf(MSG_DEBUG,"DSD_libIsValidDiskFile : non Acorn BBC DSD/SSD IMG file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"Acorn BBC DSD/SSD file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"DSD_libIsValidDiskFile : Acorn BBC DSD/SSD file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non Acorn BBC DSD/SSD file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"DSD_libIsValidDiskFile : non Acorn BBC DSD/SSD file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 
@@ -95,7 +95,7 @@ int DSD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 int DSD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	
+
 	FILE * f;
 	unsigned int filesize;
 	unsigned int file_offset;
@@ -106,39 +106,39 @@ int DSD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned short rpm;
 	unsigned short sectorsize;
 	CYLINDER* currentcylinder;
-	
+
 	floppycontext->hxc_printf(MSG_DEBUG,"DSD_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
-	
+	fseek (f , 0 , SEEK_SET);
+
 	if(filesize!=0)
-	{				
-		sectorsize=256; 
+	{
+		sectorsize=256;
 		floppydisk->floppyNumberOfTrack=80;
 		floppydisk->floppyNumberOfSide=2;
 		floppydisk->floppySectorPerTrack=10;
 		gap3len=255;
 		interleave=2;
 		skew=2;
-		rpm=300; // normal rpm	
+		rpm=300; // normal rpm
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		floppydisk->floppyBitRate=DEFAULT_DD_BITRATE;
 		trackformat=ISOFORMAT_SD;
 
-		if(strstr( imgfile,".dsd" )!=NULL) 
+		if(strstr( imgfile,".dsd" )!=NULL)
 		{
 			floppydisk->floppyNumberOfSide=2;
 		}
-		
+
 		if(strstr( imgfile,".ssd" )!=NULL)
 		{
 			floppydisk->floppyNumberOfSide=1;
@@ -146,17 +146,17 @@ int DSD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
-		floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d bitrate:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm,floppydisk->floppyBitRate);	
+		floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d bitrate:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm,floppydisk->floppyBitRate);
 		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-			
+
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
-			
+
 			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
-								
+
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-			{					
+			{
 				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 					        (sectorsize*(floppydisk->floppySectorPerTrack)*i);
 				fseek (f , file_offset , SEEK_SET);
@@ -167,7 +167,7 @@ int DSD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		}
 
 		free(trackdata);
-			
+
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		hxc_fclose(f);
 		return HXCFE_NOERROR;

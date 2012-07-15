@@ -63,12 +63,12 @@ int JVC_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	if( checkfileext(imgfile,"jvc") )
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"JVC file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"JVC_libIsValidDiskFile : JVC file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non JVC file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"JVC_libIsValidDiskFile : non JVC file !");
 		return HXCFE_BADFILE;
 	}
 	
@@ -87,7 +87,6 @@ typedef struct jvc_header_
 
 int JVC_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	
 	FILE * f;
 	unsigned int filesize;
 	unsigned int i,j,k,skew;

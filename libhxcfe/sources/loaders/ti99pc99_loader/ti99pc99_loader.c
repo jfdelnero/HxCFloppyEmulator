@@ -63,24 +63,24 @@ int TI99PC99_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile");
+	floppycontext->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile : TI99PC99_libIsValidDiskFile");
 	if(imgfile)
 	{
 
 		filesize=getfilesize(imgfile);
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"TI99PC99_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return -1;
 		}
 				
 		if(filesize%3253 && filesize%6872)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non TI99 PC99 file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile : non TI99 PC99 file !");
 			return HXCFE_BADFILE;
 		}
 			
-		floppycontext->hxc_printf(MSG_DEBUG,"TI99 PC99 file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile : TI99 PC99 file !");
 		return HXCFE_VALIDFILE;
 		
 	}

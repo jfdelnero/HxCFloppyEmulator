@@ -69,29 +69,27 @@ int DPX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		filesize=getfilesize(imgfile);
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"DPX_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
 		if(filesize%((5*1024) + (1*512)) )
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non DPX file - bad file size !");
+			floppycontext->hxc_printf(MSG_DEBUG,"DPX_libIsValidDiskFile : non DPX file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"DPX file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"DPX_libIsValidDiskFile : DPX file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non DPX file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"DPX_libIsValidDiskFile : non DPX file !");
 		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;
 }
-
-
 
 int DPX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {

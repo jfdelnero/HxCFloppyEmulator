@@ -73,17 +73,15 @@ int MSA_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			hxc_fclose(f);
 			if(signature[0]==0x0E && signature[1]==0x0F && signature[2]==0x00)
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"MSA file !");
+				floppycontext->hxc_printf(MSG_DEBUG,"MSA_libIsValidDiskFile : MSA file !");
 				return HXCFE_VALIDFILE;
 			}
-		}				
+		}
 	}
 
-	floppycontext->hxc_printf(MSG_DEBUG,"non MSA file !");
+	floppycontext->hxc_printf(MSG_DEBUG,"MSA_libIsValidDiskFile : non MSA file !");
 	return HXCFE_BADFILE;
 }
-
-
 
 int MSA_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {

@@ -67,27 +67,27 @@ int FD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		filesize=getfilesize(imgfile);
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"FD_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
-			
+
 		if((filesize==327680) || (filesize==655360))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"TO8D FD file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"FD_libIsValidDiskFile : TO8D FD file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non TO8D FD file ! - bad file size! ");
+			floppycontext->hxc_printf(MSG_DEBUG,"FD_libIsValidDiskFile : non TO8D FD file ! - bad file size! ");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non TO8D FD file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"FD_libIsValidDiskFile : non TO8D FD file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 

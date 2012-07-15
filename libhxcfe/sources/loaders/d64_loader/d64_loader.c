@@ -72,23 +72,20 @@ int D64_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	if(checkfileext(imgfile,"d64"))
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"D64 file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile : D64 file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non D64 file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile : non D64 file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-
-
 int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
 	FILE * f;
 	unsigned int filesize;
 	unsigned int i,j,k;

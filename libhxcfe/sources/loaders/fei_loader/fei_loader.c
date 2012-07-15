@@ -73,12 +73,12 @@ int FEI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		if(filesize<0) 
 			return HXCFE_ACCESSERROR;
 
-		floppycontext->hxc_printf(MSG_DEBUG,"FEI file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"FEI_libIsValidDiskFile : FEI file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non FEI file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"FEI_libIsValidDiskFile : non FEI file !");
 		return HXCFE_BADFILE;
 	}
 

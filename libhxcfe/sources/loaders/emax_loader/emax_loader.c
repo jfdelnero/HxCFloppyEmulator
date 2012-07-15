@@ -100,23 +100,21 @@ int EMAX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		filesize=getfilesize(imgfile);
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"EMAX_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"Emax file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"EMAX_libIsValidDiskFile : Emax file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non Emax file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"EMAX_libIsValidDiskFile : non Emax file !");
 		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;
 }
-
-
 
 int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {

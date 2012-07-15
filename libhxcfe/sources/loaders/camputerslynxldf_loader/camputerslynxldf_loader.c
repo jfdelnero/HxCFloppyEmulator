@@ -70,25 +70,25 @@ int CAMPUTERSLYNX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * img
 
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"CAMPUTERSLYNX_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
 		if(filesize&0x1FF)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non LDF file - bad file size !");
+			floppycontext->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libIsValidDiskFile : non LDF file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"LDF file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libIsValidDiskFile : LDF file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non LDF file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libIsValidDiskFile : non LDF file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 
@@ -113,7 +113,7 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		floppycontext->hxc_printf(MSG_ERROR,"CAMPUTERSLYNX_libLoad_DiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 	

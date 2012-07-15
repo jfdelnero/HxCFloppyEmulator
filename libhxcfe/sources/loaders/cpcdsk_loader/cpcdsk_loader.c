@@ -71,7 +71,7 @@ int CPCDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open the file !");
+			floppycontext->hxc_printf(MSG_ERROR,"CPCDSK_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
@@ -84,18 +84,18 @@ int CPCDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			!strncmp(fileheader.headertag,"MV - CPC",8) 
 			)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"CPC Dsk file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile : CPC Dsk file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non CPC Dsk file !(bad header)");
+			floppycontext->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile : non CPC Dsk file !(bad header)");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non CPC Dsk file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile : non CPC Dsk file !");
 		return HXCFE_BADFILE;
 	}
 	

@@ -72,26 +72,24 @@ int SAP_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		if(sapid!=SAP_ERROR)
 		{
 			sap_CloseArchive(sapid);
-			floppycontext->hxc_printf(MSG_DEBUG,"SAP file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"SAP_libIsValidDiskFile : SAP file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non SAP file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"SAP_libIsValidDiskFile : non SAP file !");
 			return HXCFE_BADFILE;
 		}
-			
+
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non SAP file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"SAP_libIsValidDiskFile : non SAP file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
-
-
 
 int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
@@ -108,7 +106,7 @@ int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	sapsector_t sapsector;
 	SECTORCONFIG  sectorconfig[SAP_NSECTS];
 	CYLINDER* currentcylinder;
-	
+
 	floppycontext->hxc_printf(MSG_DEBUG,"SAP_libLoad_DiskFile %s",imgfile);
 
 	sapid=sap_OpenArchive(imgfile, &floppyformat);
@@ -147,24 +145,24 @@ int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		break;
 
 	}
-		
+
 	floppydisk->floppyBitRate=250000;
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 	rpm=300; // normal rpm
-	
-			
+
+
 	floppycontext->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track,%d bytes/sector gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,sectorsize,gap3len,interleave,rpm);
-			
+
 	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-			
+
 	memset(sectorconfig,0,sizeof(SECTORCONFIG)*SAP_NSECTS);
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
-				
+
 		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 		currentcylinder=floppydisk->tracks[j];
-				
+
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 		{
 
@@ -197,13 +195,13 @@ int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	}
 
 	free(trackdata);
-		
+
 	sap_CloseArchive(sapid);
 
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		
+
 	return HXCFE_NOERROR;
-	
+
 }
 
 int SAP_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)

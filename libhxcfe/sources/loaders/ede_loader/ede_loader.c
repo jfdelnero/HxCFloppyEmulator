@@ -71,12 +71,12 @@ int EDE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		)
 	{
 
-		floppycontext->hxc_printf(MSG_DEBUG,"EDE file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile : EDE file !");
 
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			floppycontext->hxc_printf(MSG_ERROR,"EDE_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
@@ -88,28 +88,28 @@ int EDE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			switch(header_buffer[0x1FF])
 			{
 				case 0x01:
-					floppycontext->hxc_printf(MSG_INFO_0,"Mirage (DD) format");
+					floppycontext->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : Mirage (DD) format");
 				break;
 				case 0x02:
-					floppycontext->hxc_printf(MSG_INFO_0,"SQ-80 (DD) format");
+					floppycontext->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : SQ-80 (DD) format");
 				break;
 				case 0x03:
-					floppycontext->hxc_printf(MSG_INFO_0,"EPS (DD) format");
+					floppycontext->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : EPS (DD) format");
 				break;
 				case 0x04:
-					floppycontext->hxc_printf(MSG_INFO_0,"VFX-SD (DD) format");
+					floppycontext->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : VFX-SD (DD) format");
 				break;
 				case 0xcb:
-					floppycontext->hxc_printf(MSG_INFO_0,"ASR-10 HD format");
+					floppycontext->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : ASR-10 HD format");
 				break;
 				case 0xcc: 
-					floppycontext->hxc_printf(MSG_INFO_0,"TS-10/12 HD format");
+					floppycontext->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : TS-10/12 HD format");
 				break;
 				case 0x07:
-					floppycontext->hxc_printf(MSG_INFO_0,"TS-10/12 DD format");
+					floppycontext->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : TS-10/12 DD format");
 				break;
 				default:
-					floppycontext->hxc_printf(MSG_ERROR,"Unknow format : %x !",header_buffer[0x1FF]);
+					floppycontext->hxc_printf(MSG_ERROR,"EDE_libIsValidDiskFile : Unknow format : %x !",header_buffer[0x1FF]);
 					return HXCFE_BADFILE;
 				break;
 			}
@@ -117,7 +117,7 @@ int EDE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		else
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Bad header !!");
+			floppycontext->hxc_printf(MSG_ERROR,"EDE_libIsValidDiskFile : Bad header !!");
 			return HXCFE_BADFILE;
 		}
 
@@ -125,7 +125,7 @@ int EDE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non EDE file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile : non EDE file !");
 		return HXCFE_BADFILE;
 	}
 	

@@ -91,13 +91,13 @@ int AMIGADOSFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgf
 
 					if(strstr( filepath,".amigados" )!=NULL)
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK file !");
+						floppycontext->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : AMIGADOSFSDK file !");
 						free(filepath);
 						return HXCFE_VALIDFILE;
 					}
 					else
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non AMIGADOSFSDK file ! (.amigados missing)");
+						floppycontext->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : non AMIGADOSFSDK file ! (.amigados missing)");
 						free(filepath);
 						return HXCFE_BADFILE;
 					}
@@ -105,15 +105,13 @@ int AMIGADOSFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgf
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"non AMIGADOSFSDK file ! (it's not a directory)");
+				floppycontext->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : non AMIGADOSFSDK file ! (it's not a directory)");
 				return HXCFE_BADFILE;
 			}
 		}
-		floppycontext->hxc_printf(MSG_DEBUG,"0 byte string ?");
+		floppycontext->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : 0 byte string ?");
 	}
 	return HXCFE_BADPARAMETER;
-
-
 }
 
 void adlib_printerror(char * msg)

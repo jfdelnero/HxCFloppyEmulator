@@ -70,24 +70,22 @@ int ADZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		{
 			if( !strstr(getfilenamebase(imgfile,0),".adf.gz") ) 
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"non ADZ file !");
+				floppycontext->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile : non ADZ file !");
 				return HXCFE_BADFILE;
 			}
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"ADZ file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile : ADZ file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non ADZ file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile : non ADZ file !");
 		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;
 }
-
-
 
 int ADZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
