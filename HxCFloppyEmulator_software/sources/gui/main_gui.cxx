@@ -169,13 +169,11 @@ void bt_clicked(Fl_Widget * w, void * fc_ptr)
 		case 7:
 			mw->fdump_window->window->show();
 		break;
-		case 8:
-			mw->log_box->show();
-		break;
-		case 9:
-			mw->about_window->show();
-		break;
 
+		case 8:
+			mw->infos_window->window->show();
+		break;
+		
 	}
 
 }
@@ -468,7 +466,7 @@ static void tick_mw(void *v) {
 }
 
 Main_Window::Main_Window()
-  : Fl_Window(WINDOW_XSIZE,392)
+  : Fl_Window(WINDOW_XSIZE,428)
 {
 	int i;		
 	txtindex=0;
@@ -496,7 +494,7 @@ Main_Window::Main_Window()
 	group.image(new Fl_Tiled_Image(new Fl_BMP_Image("floppy.bmp")));
 	group.align(FL_ALIGN_TEXT_OVER_IMAGE);
 
-	for(i=0;i<8;i++)
+	for(i=0;i<9;i++)
 	{
 		txt_buttons_main[i].button = new Fl_Button(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*i), BUTTON_XSIZE, BUTTON_YSIZE, txt_buttons_main[i].label);
 		txt_buttons_main[i].button->labelsize(12);
@@ -505,7 +503,7 @@ Main_Window::Main_Window()
 		Fl_Box *box = new Fl_Box(FL_NO_BOX,BUTTON_XPOS+BUTTON_XSIZE,BUTTON_YPOS+(BUTTON_YSIZE/4)+(BUTTON_YSTEP*i),BUTTON_XSIZE*4,BUTTON_YSIZE/2,txt_buttons_main[i].desc);
 		box->align(FL_ALIGN_INSIDE|FL_ALIGN_LEFT);
 		//box->labelfont(FL_BOLD);
-		box->labelsize(11);
+		box->labelsize(12);
 		box->labeltype(FL_EMBOSSED_LABEL);
 	}
 
@@ -638,6 +636,7 @@ Main_Window::Main_Window()
 	sdcfg_window->slider_uisound_level->scrollvalue(guicontext->ui_sound,1,0,128);
 	sdcfg_window->valslider_device_backlight_timeout->scrollvalue(guicontext->backlight_tmr,1,0,256);
 	sdcfg_window->valslider_device_standby_timeout->scrollvalue(guicontext->standby_tmr,1,0,256);
+	sdcfg_window->chk_loadlastloaded->set();
 
 	//////////////////////////////////////////////
 	// USB FE CFG window
