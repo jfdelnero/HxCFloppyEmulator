@@ -223,7 +223,7 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 						destinationfolder=(char*)malloc(strlen(FindFileData.filename)+strlen(destfolder)+2);
 						sprintf(destinationfolder,"%s\\%s",destfolder,FindFileData.filename);
 
-						printf("Creating directory %s\n",destinationfolder);
+						//printf("Creating directory %s\n",destinationfolder);
 						mkdir(destinationfolder);
 
 						fullpath=(unsigned char*)malloc(strlen(FindFileData.filename)+strlen(folder)+2+9);
@@ -302,10 +302,10 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 							{
 							  destinationfile[i]='_';
 							}
-						
+
 							//printf("Creating file %s\n",destinationfile);
 							strcat(destinationfile,ff_type_list[output_file_format].ext);							
-							
+
 							loaderid=hxcfe_getLoaderID(floppycontext,ff_type_list[output_file_format].plug_id);
 							if(loaderid>=0)
 							{
@@ -313,7 +313,7 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 								{
 									hxcfe_floppySetInterfaceMode(guicontext->hxcfe,thefloppydisk,guicontext->interfacemode);
 								}
-								
+
 								hxcfe_floppySetDoubleStep(guicontext->hxcfe,thefloppydisk,guicontext->doublestep);
 
 								ret=hxcfe_floppyExport(floppycontext,thefloppydisk,destinationfile,loaderid);
@@ -345,9 +345,9 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 							}
 
 							free(destinationfile);
-							free(tempstr);				
+							free(tempstr);
 						}
-					}	
+					}
 				}
 
 				bbool=find_next_file(hfindfile,folder,file,&FindFileData);	

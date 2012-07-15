@@ -6,7 +6,7 @@ main_button_list  txt_buttons_main[]=
 	{0,"Batch converter","Convert multiple floppy file image."},
 	{0,"Create FS Floppy","Create a DOS/AmigaDOS\nfile system based floppy disk."},
 	{0,"Export","Export/save the loaded file image"},
-	{0,"SD HxC Floppy\nEmulator settings","Configure the SDCard HxC Floppy Emulator"},
+	{0,"SD HxC Floppy\nEmulator settings","Configure the SD HxC Floppy Emulator"},
 	{0,"USB HxC Floppy\nEmulator settings","Configure the USB HxC Floppy Emulator"},
 	{0,"Floppy disk dump","Read a real disk"}
 };
@@ -23,7 +23,7 @@ Fl_Menu_Item menutable[] = {
 
     {0},
   {"&Settings",FL_F+2,0,0,FL_SUBMENU},
-    {"SDCard HxC FLoppy Emulator settings",	FL_ALT+'l',menu_clicked,(void*)5},
+    {"SD HxC FLoppy Emulator settings",	FL_ALT+'l',menu_clicked,(void*)5},
     {"USB HxC Floppy Emulator settings",	FL_ALT+'s',menu_clicked,(void*)6},
     {0},
   {"&Log",FL_F+3,0,0,FL_SUBMENU},
@@ -37,7 +37,7 @@ Fl_Menu_Item menutable[] = {
 
 Fl_Menu_Item format_choices[]=
 {
-	{ "HFE - SDCard HxC Floppy Emulator file format",0,format_choice_cb,(void*)PLUGIN_HXC_HFE},
+	{ "HFE - SD HxC Floppy Emulator file format",0,format_choice_cb,(void*)PLUGIN_HXC_HFE},
 	{ "MFM - MFM/FM track file format",0,format_choice_cb,(void*)PLUGIN_HXC_MFM},
 	{ "AFI - Advanced file image format",0,format_choice_cb,(void*)PLUGIN_HXC_AFI},
 	{ "VTR - VTrucco Floppy Emulator file format",0,format_choice_cb,(void*)PLUGIN_VTR_IMG},

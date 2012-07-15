@@ -504,7 +504,7 @@ Main_Window::Main_Window()
 
 		Fl_Box *box = new Fl_Box(FL_NO_BOX,BUTTON_XPOS+BUTTON_XSIZE,BUTTON_YPOS+(BUTTON_YSIZE/4)+(BUTTON_YSTEP*i),BUTTON_XSIZE*4,BUTTON_YSIZE/2,txt_buttons_main[i].desc);
 		box->align(FL_ALIGN_INSIDE|FL_ALIGN_LEFT);
-		box->labelfont(FL_BOLD);
+		//box->labelfont(FL_BOLD);
 		box->labelsize(11);
 		box->labeltype(FL_EMBOSSED_LABEL);
 	}
