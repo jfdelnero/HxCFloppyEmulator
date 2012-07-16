@@ -26,9 +26,11 @@ hxcfloppyemulator_d2xx: hxcfloppyemu.o floppy_loader.o floppy_utils.o linux_api.
 
 hxcfeconv:      hxcfe.o linux_api.o ../../../build/libhxcfe.a
 	$(CC) -o $@    $^ $(LDFLAGS)
+	cp $@ ../../../build
 
 hxcfe:      hxcfe.o linux_api.o ../../../build/libhxcfe.a
 	$(CC) -o $@    $^ $(LDFLAGS) -DFTDILIB
+	cp $@ ../../../build
 
 hxcfe.o: ../sources/hxcfe.c 
 	$(CC) -o $@ -c $< $(CFLAGS)
