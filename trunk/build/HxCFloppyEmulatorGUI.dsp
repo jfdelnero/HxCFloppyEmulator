@@ -281,7 +281,7 @@ SOURCE=..\sources\gui\fl_mouse_box.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\sources\fs.c
+SOURCE=..\sources\fs.cxx
 # End Source File
 # Begin Source File
 
