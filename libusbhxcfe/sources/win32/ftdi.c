@@ -26,16 +26,23 @@
 */
 #include "libhxcfe.h"
 
+#ifdef WIN32
 #include <windows.h>
+#endif
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#ifdef WIN32
 #include <conio.h> 
 #include <ftd2xx.h>
 #include <winioctl.h>
+#endif
 
 #include "ftdi.h"
 
+#ifdef WIN32
 typedef FT_STATUS (WINAPI * FT_OPEN)(int deviceNumber,	FT_HANDLE *pHandle);
 //extern  FT_OPEN pFT_Open;
 
@@ -72,9 +79,11 @@ FT_SETUSBPARAMETERS pFT_SetUSBParameters;
 FT_SETLATENCYTIMER pFT_SetLatencyTimer;
 FT_SETEVENTNOTIFICATION pFT_SetEventNotification;
 FT_CLOSE pFT_Close;
+#endif
 
 int ftdi_load_lib (HXCFLOPPYEMULATOR* floppycontext)
 {
+#ifdef WIN32    
     HMODULE h;
 
     h = LoadLibrary ("ftd2xx.dll");
@@ -106,12 +115,14 @@ int ftdi_load_lib (HXCFLOPPYEMULATOR* floppycontext)
 			floppycontext->hxc_printf(MSG_ERROR,"Error while loading FTDI library! library not found !");
 			return -1;
 	}
-	return 0;
+    #endif   
+	return -1;
 }
 
 
 int open_ftdichip(unsigned long * ftdihandle)
 {
+#ifdef WIN32
 	int i;
 	
 	i=0;
@@ -125,51 +136,59 @@ int open_ftdichip(unsigned long * ftdihandle)
 		i++;
 	}while(i<4);
 
+    #endif
 	*ftdihandle=0;
+    
 	return -1;	
 }
 
 int close_ftdichip(unsigned long ftdihandle)
 {
+#ifdef WIN32    
 	if(pFT_Close((FT_HANDLE*)ftdihandle)!=FT_OK)
 	{
 		return -1;
 	}
+#endif
 	return 0;
 }
 
 int purge_ftdichip(unsigned long ftdihandle,unsigned long buffer)
 {
+#ifdef WIN32    
 	if(pFT_Purge((FT_HANDLE*)ftdihandle,buffer)!=FT_OK)
 	{
 		return -1;
 	}
-
+#endif
 	return 0;
 }
 
 int setusbparameters_ftdichip(unsigned long ftdihandle,unsigned long buffersizetx,unsigned long buffersizerx)
 {
+#ifdef WIN32    
 	if(pFT_SetUSBParameters ((FT_HANDLE*)ftdihandle,buffersizerx,buffersizetx)!=FT_OK)
 	{
 		return -1;
 	}
-	
+#endif
 	return 0;
 }
 
 int setlatencytimer_ftdichip(unsigned long ftdihandle,unsigned char latencytimer_ms)
 {
+#ifdef WIN32    
 	if(pFT_SetLatencyTimer ((FT_HANDLE*)ftdihandle,latencytimer_ms)!=FT_OK)
 	{
 		return -1;
 	}
-	
+#endif
 	return 0;
 }
 
 int write_ftdichip(unsigned long ftdihandle,unsigned char * buffer,unsigned int size)
 {
+#ifdef WIN32    
 	int dwWritten;
 	
 	if(pFT_Write ((FT_HANDLE*)ftdihandle, buffer, size,&dwWritten)!=FT_OK)
@@ -178,34 +197,49 @@ int write_ftdichip(unsigned long ftdihandle,unsigned char * buffer,unsigned int 
 	}
 
 	return dwWritten;
+#else
+    return -1;
+#endif
 }
 
 int read_ftdichip(unsigned long ftdihandle,unsigned char * buffer,unsigned int size)
 {
+#ifdef WIN32    
 	int returnvalue;
 	if(pFT_Read((FT_HANDLE*)ftdihandle,buffer,size,&returnvalue)!=FT_OK)
 	{
 		return -1;
 	}
 	return returnvalue;
+#else
+    return -1;
+#endif
 }
 
 int getfifostatus_ftdichip(unsigned long ftdihandle,int * txlevel,int *rxlevel,unsigned long * event)
 {
+#ifdef WIN32    
 	if(pFT_GetStatus((FT_HANDLE*)ftdihandle,rxlevel,txlevel,event)!=FT_OK)
 	{
 		return -1;
 	}
-	
+
 	return 0;
+#else
+    return -1;
+#endif
 }
 
 int seteventnotification_ftdichip(unsigned long ftdihandle,unsigned long eventmask,void * event)
 {
+#ifdef WIN32
 	if(pFT_SetEventNotification((FT_HANDLE*)ftdihandle,eventmask,event)!=FT_OK)
 	{
 		return -1;
 	}
 	return 0;
+#else
+    return -1;
+#endif
 }
 /////////////
