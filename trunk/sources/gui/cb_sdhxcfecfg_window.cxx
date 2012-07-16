@@ -59,7 +59,7 @@ extern "C"
 
 #include "main.h"
 #include "loader.h"
-
+#include "fs.h"
 unsigned char filebuffer[8*1024];
 
 extern s_gui_context * guicontext;
@@ -203,11 +203,11 @@ void sdhxcfecfg_window_bt_load(Fl_Button* bt, void*)
 	
 	if(!fileselector("Select config file",(char*)temp,"*.cfg","*.cfg",0,0))
 	{
-		f=fopen((char*)temp,"r+b");
+		f=hxc_fopen((char*)temp,"r+b");
 		if(f)
 		{
 			fread(filebuffer,8*1024,1,f);
-			fclose(f);
+			hxc_fclose(f);
 			set_cfg(sdcfgw,(sdhxcfecfgfile *)&filebuffer);
 		}
 	}
@@ -227,11 +227,11 @@ void sdhxcfecfg_window_bt_save(Fl_Button* bt, void*)
 
 	if(!fileselector("Select config file",(char*)temp,"HXCSDFE.CFG","*.cfg",1,0))
 	{
-		f=fopen((char*)temp,"w+b");
+		f=hxc_fopen((char*)temp,"w+b");
 		if(f)
 		{
 			fwrite(filebuffer,8*1024,1,f);
-			fclose(f);
+			hxc_fclose(f);
 		}
 	}
 }

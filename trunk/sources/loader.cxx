@@ -54,6 +54,7 @@ extern "C"
 }
 #include "main.h"
 #include "loader.h"
+#include "fs.h"
 
 extern s_gui_context * guicontext;
 
@@ -152,7 +153,7 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 
 	f=0;
 	if(file)
-		f=fopen(file,"r+b");
+		f=hxc_fopen(file,"r+b");
 
 	if(f || file==NULL)
 	{
@@ -279,7 +280,7 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 		if(f)
 		{
 			free(trackbuffer);
-			fclose(f);
+			hxc_fclose(f);
 		}
 	}	
 

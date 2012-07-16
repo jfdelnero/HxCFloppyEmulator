@@ -13,6 +13,7 @@
 #include "usb_hxcfloppyemulator.h"
 
 #include "main.h"
+#include "fs.h"
 
 typedef struct laststate_
 {
@@ -37,7 +38,7 @@ int load_last_cfg()
 	lastst=(laststate *)&cfg_file_buffer;
 
 	memset(cfg_file_buffer,0,sizeof(cfg_file_buffer));
-	
+
 	GetModuleFileName(NULL,executablepath,512);
 
 	i=strlen(executablepath);
@@ -52,11 +53,11 @@ int load_last_cfg()
 	sprintf(&executablepath[i],"config.dat");
 
 
-	f=fopen(executablepath,"rb");
+	f=hxc_fopen(executablepath,"rb");
 	if(f)
 	{
 		fread(lastst,sizeof(cfg_file_buffer),1,f);
-		fclose(f);
+		hxc_fclose(f);
 
 //		hwif->usbstats.packetsize=lastst->usb_packet_size;
 //		hwif->drive_select_source=lastst->drive_select_source;
@@ -98,7 +99,7 @@ int save_cfg()
 	sprintf(&executablepath[i],"config.dat");
 
 
-	f=fopen(executablepath,"wb");
+	f=hxc_fopen(executablepath,"wb");
 	if(f)
 	{
 	//	lastst->usb_packet_size=hwif->usbstats.packetsize;
@@ -108,7 +109,7 @@ int save_cfg()
 	//	lastst->twistedcable=gui_context->twistedcable;
 	//	lastst->double_step=hwif->double_step;
 		fwrite(lastst,sizeof(cfg_file_buffer),1,f);
-		fclose(f);
+		hxc_fclose(f);
 	}
 	return 0;
 };
