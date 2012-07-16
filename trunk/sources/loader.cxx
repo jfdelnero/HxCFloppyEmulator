@@ -272,9 +272,9 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 			guicontext->loadstatus=ret;
 
 			if(f)
-				sprintf(guicontext->bufferfilename,basename(file));
+				strcpy(guicontext->bufferfilename,basename(file));
 			else
-				sprintf(guicontext->bufferfilename,"Empty Floppy");
+				strcpy(guicontext->bufferfilename,"Empty Floppy");
 		}
 
 		if(f)

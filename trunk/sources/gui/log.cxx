@@ -59,7 +59,6 @@
 #include <FL/Fl_Native_File_Chooser.H>
 
 #include <errno.h>
-#include <malloc.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -90,6 +89,10 @@ typedef struct logfifo_
 logfifo logsfifo;
 char * logs_buffer;
 
+#ifndef WIN32
+#define _vsnprintf vsnprintf
+#define _snprintf snprintf
+#endif
 
 int CUI_affiche(int MSGTYPE,char * chaine, ...)
 {
@@ -107,7 +110,9 @@ int CUI_affiche(int MSGTYPE,char * chaine, ...)
 	if(logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)])
 	{
 		memset(logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],0,LOGSTRINGSIZE+1);
+
 		_vsnprintf(test_temp,LOGSTRINGSIZE,chaine,marker);
+
 		logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)][LOGSTRINGSIZE]=0;
 
 		switch(MSGTYPE)

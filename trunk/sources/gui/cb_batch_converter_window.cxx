@@ -48,8 +48,9 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <direct.h>
-
+#ifdef WIN32
+    #include <direct.h>
+#endif 
 #include "fl_includes.h"
 #include "fl_dnd_box.h"
 
@@ -149,7 +150,7 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 				
 				strcat(destinationfile,ff_type_list[output_file_format].ext);
 
-				loaderid=hxcfe_getLoaderID(floppycontext,ff_type_list[output_file_format].plug_id);
+				loaderid=hxcfe_getLoaderID(floppycontext,(char*)ff_type_list[output_file_format].plug_id);
 				if(ret>=0)
 				{	
 					if(!guicontext->autoselectmode)
@@ -224,12 +225,16 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 						sprintf(destinationfolder,"%s\\%s",destfolder,FindFileData.filename);
 
 						//printf("Creating directory %s\n",destinationfolder);
+#ifdef WIN32
 						mkdir(destinationfolder);
+#else
+                        mkdir(destinationfolder,0x777);
+#endif
 
 						fullpath=(unsigned char*)malloc(strlen(FindFileData.filename)+strlen(folder)+2+9);
 						sprintf((char*)fullpath,"%s\\%s",folder,FindFileData.filename);
 
-						floppycontext->hxc_printf(MSG_INFO_1,"Entering directory %s",FindFileData.filename);
+						floppycontext->hxc_printf(MSG_INFO_1,(char*)"Entering directory %s",FindFileData.filename);
 
 						tempstr=(unsigned char*)malloc(1024);
 						sprintf((char*)tempstr,"Entering directory %s",FindFileData.filename);
@@ -245,7 +250,7 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 						}
 						free(destinationfolder);
 						free(fullpath);
-						floppycontext->hxc_printf(MSG_INFO_1,"Leaving directory %s",FindFileData.filename);
+						floppycontext->hxc_printf(MSG_INFO_1,(char*)"Leaving directory %s",FindFileData.filename);
 						
 						sprintf((char*)tempstr,"Leaving directory %s",FindFileData.filename);
 						params->windowshwd->strout_convert_status->value((const char*)tempstr);
@@ -255,7 +260,7 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 				}
 				else
 				{			
-					floppycontext->hxc_printf(MSG_INFO_1,"converting file %s, %dB",FindFileData.filename,FindFileData.size);
+					floppycontext->hxc_printf(MSG_INFO_1,(char*)"converting file %s, %dB",FindFileData.filename,FindFileData.size);
 					if(FindFileData.size)
 					{
 
@@ -306,7 +311,7 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 							//printf("Creating file %s\n",destinationfile);
 							strcat(destinationfile,ff_type_list[output_file_format].ext);							
 
-							loaderid=hxcfe_getLoaderID(floppycontext,ff_type_list[output_file_format].plug_id);
+							loaderid=hxcfe_getLoaderID(floppycontext,(char*)ff_type_list[output_file_format].plug_id);
 							if(loaderid>=0)
 							{
 								if(!guicontext->autoselectmode)
@@ -382,12 +387,12 @@ int convertthread(void* floppycontext,void* hw_context)
 		browse_and_convert_directory(	guicontext->hxcfe,
 										bcparams.sourcedir,
 										bcparams.destdir,
-										"*.*",
+										(char*)"*.*",
 										bcw->choice_file_format->value(),
 										&bcparams);
 
 		tempstr=(char*)malloc(1024);
-		sprintf(tempstr,"%d files converted!",bcparams.numberoffileconverted);
+		sprintf(tempstr,"%d files converted!",(int)bcparams.numberoffileconverted);
 		bcparams.windowshwd->strout_convert_status->value((const char*)tempstr);
 		free(tempstr);
 	}
@@ -464,7 +469,7 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 							&bcparams);
 
 		tempstr=(char*)malloc(1024);
-		sprintf(tempstr,"%d files converted!",bcparams.numberoffileconverted);
+		sprintf(tempstr,"%d files converted!",(int)bcparams.numberoffileconverted);
 		bcparams.windowshwd->strout_convert_status->value((const char*)tempstr);
 		free(tempstr);
 

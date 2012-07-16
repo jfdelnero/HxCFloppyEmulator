@@ -26,7 +26,6 @@
 */
 
 #include <errno.h>
-#include <malloc.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -120,13 +119,13 @@ About_box::About_box()
 	o->box(FL_DOWN_BOX);
 
 	button_wesite=		new Fl_Button(5, 110, 180, 25, "Website");
-	button_wesite->callback(OpenURLInBrowser,"http://hxc2001.free.fr/floppy_drive_emulator");
+	button_wesite->callback(OpenURLInBrowser,(void*)"http://hxc2001.free.fr/floppy_drive_emulator");
 
 	button_forum=		new Fl_Button(5, 110+25, 180, 25, "Support Forum");
-	button_forum->callback(OpenURLInBrowser,"http://torlus.com/floppy/forum");
+	button_forum->callback(OpenURLInBrowser,(void*)"http://torlus.com/floppy/forum");
 
 	button_releasenotes=new Fl_Button(5, 110+25*2, 180, 25, "Latest release notes");
-	button_releasenotes->callback(OpenURLInBrowser,"http://hxc2001.free.fr/floppy_drive_emulator/hxcfloppyemulator_soft_release_notes.txt");
+	button_releasenotes->callback(OpenURLInBrowser,(void*)"http://hxc2001.free.fr/floppy_drive_emulator/hxcfloppyemulator_soft_release_notes.txt");
 
 	button_license=		new Fl_Button(5, 110+25*3, 180, 25, "Under GPL License");
 	button_license->callback(create_license_window,0);
