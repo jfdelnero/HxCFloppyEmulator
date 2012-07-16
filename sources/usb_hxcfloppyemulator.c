@@ -367,7 +367,7 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 	int we_ret;
 	int init_failed,ftdierror;
 	int i;
-	unsigned long RxBytes,TxBytes;
+	int RxBytes,TxBytes;
 	unsigned char * srambuffer;
 	unsigned char * srambuffer2;
 	unsigned char * input_buffer;
