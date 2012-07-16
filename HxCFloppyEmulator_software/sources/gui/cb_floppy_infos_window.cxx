@@ -48,7 +48,6 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <direct.h>
 
 #include "fl_includes.h"
 
@@ -58,7 +57,6 @@ extern "C"
 	#include "tracks/display_track.h"
 	#include "usb_hxcfloppyemulator.h"
 	#include "os_api.h"
-	#include "thirdpartylibs/fdrawcmd/fdrawcmd.h"
 }
 
 #include "main.h"
@@ -135,8 +133,8 @@ void update_graph(floppy_infos_window * w)
 				w->global_status->value(tempstr);
 
 				sprintf(tempstr,"Track RPM tag : %d\nBitrate flag : %d\nTrack encoding flag : %x\n",
-					guicontext->loadedfloppy->tracks[track]->floppyRPM,
-					guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate,
+					(int)guicontext->loadedfloppy->tracks[track]->floppyRPM,
+					(int)guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate,
 					guicontext->loadedfloppy->tracks[track]->sides[side]->track_encoding
 					);
 				
@@ -151,12 +149,12 @@ void update_graph(floppy_infos_window * w)
 				}
 				else
 				{
-					sprintf(tempstr,"Bitrate : %d bit/s\n",guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate);
+					sprintf(tempstr,"Bitrate : %d bit/s\n",(int)guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate);
 				}
 				w->buf->append((char*)tempstr);
 				sprintf(tempstr,"Track format : %s\n",hxcfe_getTrackEncodingName(guicontext->hxcfe,guicontext->loadedfloppy->tracks[track]->sides[side]->track_encoding));
 				w->buf->append((char*)tempstr);
-				sprintf(tempstr,"Track len : %d cells\n",guicontext->loadedfloppy->tracks[track]->sides[side]->tracklen);
+				sprintf(tempstr,"Track len : %d cells\n",(int)guicontext->loadedfloppy->tracks[track]->sides[side]->tracklen);
 				w->buf->append((char*)tempstr);
 				sprintf(tempstr,"Number of side : %d\n",guicontext->loadedfloppy->tracks[track]->number_of_side);
 				w->buf->append((char*)tempstr);	
@@ -379,13 +377,13 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 			}
 			else
 			{
-				sprintf(str,"Bitrate : %d bit/s\n",guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate);
+				sprintf(str,"Bitrate : %d bit/s\n",(int)guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate);
 			}
 			strcat(fullstr,str);
 
 			sprintf(str,"Track format : %s\n",hxcfe_getTrackEncodingName(guicontext->hxcfe,guicontext->loadedfloppy->tracks[track]->sides[side]->track_encoding));
 			strcat(fullstr,str);
-			sprintf(str,"Track len : %d cells\n",guicontext->loadedfloppy->tracks[track]->sides[side]->tracklen);
+			sprintf(str,"Track len : %d cells\n",(int)guicontext->loadedfloppy->tracks[track]->sides[side]->tracklen);
 			strcat(fullstr,str);
 			sprintf(str,"Number of side : %d\n",guicontext->loadedfloppy->tracks[track]->number_of_side);
 			strcat(fullstr,str);

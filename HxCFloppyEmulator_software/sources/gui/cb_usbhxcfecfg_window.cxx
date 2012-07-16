@@ -74,7 +74,7 @@ void tick_usb(void *v) {
 	
 	status=libusbhxcfe_getStats(guicontext->hxcfe,guicontext->usbhxcfe,&stats,0);
 
-	sprintf(tempstr,"%d (%d p/s)",stats.totalpacketsent,stats.packetsent);
+	sprintf(tempstr,"%d (%d p/s)",(int)stats.totalpacketsent,(int)stats.packetsent);
 	stats.packetsent=0;
 	window->strout_packetsent->value((const char*)tempstr);				
 			
@@ -82,7 +82,7 @@ void tick_usb(void *v) {
 
 	if(stats.totaldataout<(1024*1024))
 	{			
-		sprintf(tempstr,"%d bytes",stats.totaldataout);
+		sprintf(tempstr,"%d bytes",(int)stats.totaldataout);
 	}
 	else
 	{
@@ -99,7 +99,7 @@ void tick_usb(void *v) {
 				
 				
 	datathroughput=stats.dataout * 2;
-	sprintf(tempstr,"%d bytes/second",datathroughput);
+	sprintf(tempstr,"%d bytes/second",(int)datathroughput);
 	window->strout_datathroughput->value((const char*)tempstr);
 				
 				
@@ -116,10 +116,10 @@ void tick_usb(void *v) {
 		}
 	}
 				
-	sprintf(tempstr,"%d ms",period*2);
+	sprintf(tempstr,"%d ms",(int)period*2);
 	window->strout_maxsettletime->value((const char*)tempstr);
 				
-	sprintf(tempstr,"%d ms",period);
+	sprintf(tempstr,"%d ms",(int)period);
 	window->strout_minsettletime->value((const char*)tempstr);
 
 	switch(status)

@@ -46,12 +46,13 @@
 #include "fl_includes.h"
 
 #include <errno.h>
-#include <malloc.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h> 
 #include <time.h>
+#include <stdint.h>
+
 
 #include "batch_converter_window.h"
 #include "filesystem_generator_window.h"
@@ -65,7 +66,11 @@
 
 #include "soft_cfg_file.h"
 #include "fl_dnd_box.h"
+
+#ifdef win32
 #include "win32\resource.h"
+#define intptr_t int
+#endif
 
 extern "C"
 {
@@ -86,6 +91,19 @@ extern "C"
 extern int CUI_affiche(int MSGTYPE,char * chaine, ...);
 extern s_gui_context * guicontext;
 
+const char * plugid_lst[]=
+{
+    PLUGIN_HXC_HFE,
+    PLUGIN_VTR_IMG,
+    PLUGIN_HXC_MFM,
+    PLUGIN_HXC_AFI,
+    PLUGIN_RAW_LOADER,
+    PLUGIN_AMSTRADCPC_DSK,
+    PLUGIN_IMD_IMG,
+    PLUGIN_TI994A_V9T9,
+    PLUGIN_HXC_EXTHFE
+};
+
 static void tick_main(void *v) {
 	
 	Main_Window *window;
@@ -97,10 +115,10 @@ static void tick_main(void *v) {
 
 void menu_clicked(Fl_Widget * w, void * fc_ptr) 
 {	
-	int i;
+	intptr_t i;
 	Main_Window *mw;
 	Fl_Window *dw;
-	i=(int)fc_ptr;
+	i=(intptr_t)fc_ptr;
 
 	dw=((Fl_Window*)(w->parent()));
 	mw=(Main_Window *)dw->user_data();
@@ -141,10 +159,10 @@ void menu_clicked(Fl_Widget * w, void * fc_ptr)
 
 void bt_clicked(Fl_Widget * w, void * fc_ptr) 
 {	
-	int i;
+	intptr_t i;
 	Main_Window *mw;
 	Fl_Window *dw;
-	i=(int)fc_ptr;
+	i=(intptr_t)fc_ptr;
 
 	dw=((Fl_Window*)(w->parent()->parent()));
 	mw=(Main_Window *)dw->user_data();
@@ -206,6 +224,9 @@ void load_file_image(Fl_Widget * w, void * fc_ptr)
 	}
 }
 
+
+
+
 void save_file_image(Fl_Widget * w, void * fc_ptr) 
 {
 	int i;
@@ -213,18 +234,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 	Fl_Native_File_Chooser fnfc;
 	unsigned char deffilename[512];
 	
-	const char * plugid_lst[]=
-	{
-		{PLUGIN_HXC_HFE},
-		{PLUGIN_VTR_IMG},
-		{PLUGIN_HXC_MFM},
-		{PLUGIN_HXC_AFI},
-		{PLUGIN_RAW_LOADER},
-		{PLUGIN_AMSTRADCPC_DSK},
-		{PLUGIN_IMD_IMG},
-		{PLUGIN_TI994A_V9T9},
-		{PLUGIN_HXC_EXTHFE}
-	};
+
 
 	if(!guicontext->loadedfloppy)
 	{
@@ -322,7 +332,7 @@ void sync_if_config()
 
 void format_choice_cb(Fl_Widget *, void *v) 
 {
-	guicontext->interfacemode =  (int)v;
+	guicontext->interfacemode =  (intptr_t)v;
 
 	sync_if_config();
 }
@@ -419,7 +429,7 @@ static void tick_mw(void *v) {
 		window->sdcfg_window->choice_hfeifmode->deactivate();
 
 		i=0;
-		while( if_choices[i].text && ((int)if_choices[i].user_data_ != guicontext->interfacemode))
+		while( if_choices[i].text && ((intptr_t)if_choices[i].user_data_ != guicontext->interfacemode))
 		{
 			i++;
 		}
@@ -434,7 +444,7 @@ static void tick_mw(void *v) {
 			window->usbcfg_window->chk_autoifmode->value(0);
 
 		i=0;
-		while( if_choices[i].text && ((int)if_choices[i].user_data_ != guicontext->interfacemode))
+		while( if_choices[i].text && ((intptr_t)if_choices[i].user_data_ != guicontext->interfacemode))
 		{
 			i++;
 		}
@@ -489,8 +499,9 @@ Main_Window::Main_Window()
 
 	Fl_Group group(0,0,WINDOW_XSIZE,392);
 	
+#ifdef WIN32
 	this->icon((char *)LoadIcon(fl_display, MAKEINTRESOURCE(101)));
-
+#endif
 	group.image(new Fl_Tiled_Image(new Fl_BMP_Image("floppy.bmp")));
 	group.align(FL_ALIGN_TEXT_OVER_IMAGE);
 

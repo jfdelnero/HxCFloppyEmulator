@@ -201,7 +201,7 @@ void sdhxcfecfg_window_bt_load(Fl_Button* bt, void*)
 	dw=((Fl_Window*)(bt->parent()));
 	sdcfgw=(sdhxcfecfg_window *)dw->user_data();
 	
-	if(!fileselector("Select config file",(char*)temp,"*.cfg","*.cfg",0,0))
+	if(!fileselector((char*)"Select config file",(char*)temp,(char*)"*.cfg",(char*)"*.cfg",0,0))
 	{
 		f=hxc_fopen((char*)temp,"r+b");
 		if(f)
@@ -225,7 +225,7 @@ void sdhxcfecfg_window_bt_save(Fl_Button* bt, void*)
 
 	fill_cfg(sdcfgw,(sdhxcfecfgfile *)&filebuffer);
 
-	if(!fileselector("Select config file",(char*)temp,"HXCSDFE.CFG","*.cfg",1,0))
+	if(!fileselector((char*)"Select config file",(char*)temp,(char*)"HXCSDFE.CFG",(char*)"*.cfg",1,0))
 	{
 		f=hxc_fopen((char*)temp,"w+b");
 		if(f)

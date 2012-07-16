@@ -48,7 +48,6 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <direct.h>
 
 #include "fl_includes.h"
 
@@ -57,7 +56,9 @@ extern "C"
 	#include "libhxcfe.h"
 	#include "usb_hxcfloppyemulator.h"
 	#include "os_api.h"
+#ifdef WIN32
 	#include "thirdpartylibs/fdrawcmd/fdrawcmd.h"
+#endif
 }
 
 #include "loader.h"
@@ -125,6 +126,7 @@ void tick_dump(void *w) {
 
 static int checkversion(void)
 {
+#ifdef WIN32
 	DWORD version = 0;
 	DWORD ret;
 	HANDLE h;
@@ -141,11 +143,16 @@ static int checkversion(void)
 		return 0;
 	}
 	return version;
+#else
+    return 0;
+#endif
+    
 }
 
-
+#ifdef WIN32  
 static void closedevice(HANDLE h)
 {
+  
 	DWORD ret;
 	
 	if (h == INVALID_HANDLE_VALUE)
@@ -156,10 +163,14 @@ static void closedevice(HANDLE h)
 	}
 
 	CloseHandle(h);
-}
 
+}
+#endif
+
+#ifdef WIN32 
 HANDLE opendevice(int drive)
 {
+    
 	HANDLE h;
 	DWORD ret;
 	BYTE b;
@@ -195,9 +206,12 @@ HANDLE opendevice(int drive)
 
 	return h;
 }
+#endif
 
+#ifdef WIN32 
 static int seek(HANDLE h,int cyl, int head)
 {
+   
 	FD_SEEK_PARAMS sp;
 	DWORD ret;
 
@@ -209,9 +223,11 @@ static int seek(HANDLE h,int cyl, int head)
 	}
 	return 1;
 }
+#endif
 
 int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 {
+#ifdef WIN32    
 	int xsize,ysize;
 
 	unsigned int k,m,n;
@@ -593,6 +609,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 	hxcfe->hxc_printf(MSG_DEBUG,"Leaving Floppy dump...");
 
 	params->status=0;
+#endif 
 	return 0;	
 }
 
