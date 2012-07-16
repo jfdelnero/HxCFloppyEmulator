@@ -281,6 +281,14 @@ SOURCE=..\sources\gui\fl_mouse_box.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\sources\fs.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\fs.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\gui\gui_struct.h
 # End Source File
 # Begin Source File

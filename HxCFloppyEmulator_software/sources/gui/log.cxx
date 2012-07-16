@@ -63,7 +63,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdarg.h> 
+#include <stdarg.h>
 #include <time.h>
 
 #include "log_gui.h"
@@ -73,7 +73,7 @@ extern "C"
 	#include "libhxcfe.h"
 	#include "usb_hxcfloppyemulator.h"
 }
-
+#include "fs.h"
 #include "main.h"
 
 extern s_gui_context * guicontext;
@@ -95,57 +95,57 @@ int CUI_affiche(int MSGTYPE,char * chaine, ...)
 {
 	FILE * debugfile;
 	char test_temp[LOGSTRINGSIZE];
-	
+
 	va_list marker;
-	va_start( marker, chaine );     
-	
+	va_start( marker, chaine );
+
 	if(!logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)])
 	{
 		logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)]=(unsigned char*)malloc(LOGSTRINGSIZE+1);
 	}
-	
+
 	if(logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)])
 	{
 		memset(logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],0,LOGSTRINGSIZE+1);
 		_vsnprintf(test_temp,LOGSTRINGSIZE,chaine,marker);
 		logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)][LOGSTRINGSIZE]=0;
-		
+
 		switch(MSGTYPE)
 		{
-			
+
 			case MSG_INFO_0:
 				_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE-9,"INFO 0 : %s",test_temp);
 				break;
-				
+
 			case MSG_INFO_1:
 				_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE-9,"INFO 1 : %s",test_temp);
 				break;
-				
+
 			case MSG_WARNING:
 				_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE-9,"WARNING: %s",test_temp);
 				break;
-				
+
 			case MSG_ERROR:
 				_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE-9,"ERROR  : %s",test_temp);
 				break;
-				
+
 			case MSG_DEBUG:
 				_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE-9,"DEBUG  : %s",test_temp);
 				break;
-			
+
 			default:
 				break;
 		}
 
 		logsfifo.in=(logsfifo.in + 1) & (LOGFIFOSIZE-1);
-		
+
 		if(logsfifo.in == logsfifo.out)
 			logsfifo.out=(logsfifo.out + 1) & (LOGFIFOSIZE-1);
-	}	
-	
+	}
+
 	if(guicontext->logfile)
 	{
-		debugfile=fopen(guicontext->logfile,"a");
+		debugfile=hxc_fopen(guicontext->logfile,"a");
 		if(debugfile)
 		{
 			switch(MSGTYPE)
@@ -158,15 +158,15 @@ int CUI_affiche(int MSGTYPE,char * chaine, ...)
 			}
 			vfprintf(debugfile,chaine,marker);
 			fprintf(debugfile,"\n");
-			
-			fclose(debugfile);		
+
+			hxc_fclose(debugfile);
 		}
 	}
-	
-	
-	va_end( marker ); 
-	
-    return 0;
+
+
+	va_end( marker );
+
+	return 0;
 }
 
 
@@ -179,14 +179,14 @@ void savelog_log(Fl_Widget *w, void * t)
 {
 	char * logfile;
 	Fl_Native_File_Chooser fnfc;
-	
+
 	fnfc.title("Set log file...");
 	fnfc.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
 	fnfc.filter("log file\t*.log\n");
 	fnfc.preset_file("hxclog.log");
 
 	// Show native chooser
-	switch ( fnfc.show() ) 
+	switch ( fnfc.show() )
 	{
 		case -1:
 		{
@@ -210,7 +210,7 @@ void savelog_log(Fl_Widget *w, void * t)
 			break;
 		}
 	}
-	
+
 }
 
 
@@ -219,12 +219,12 @@ Log_box::~Log_box()
 }
 
 static void tick_log(void *v) {
-	
+
 	Log_box *window;
 	int i;
-	
+
 	window=(Log_box *)v;
-	
+
 	if(logsfifo.in!=window->old_index)
 	{
 
@@ -233,16 +233,16 @@ static void tick_log(void *v) {
 		window->buf->remove(0,window->buf->length());
 		i=logsfifo.out;
 		do
-		{	
+		{
 			if(logsfifo.fifotab[i&(LOGFIFOSIZE-1)])
 			{
-				window->buf->append((char*)(const char*)logsfifo.fifotab[i&(LOGFIFOSIZE-1)]);	
+				window->buf->append((char*)(const char*)logsfifo.fifotab[i&(LOGFIFOSIZE-1)]);
 				window->buf->append((char*)"\n");
 			}
 			i=(i+1)&(LOGFIFOSIZE-1);
 		}while(logsfifo.in!=i);
-				
-		
+
+
 		window->txt_displ->buffer(window->buf);
 		window->txt_displ->scroll(window->buf->count_lines(0,window->buf->length()),0);
 
@@ -280,7 +280,7 @@ Log_box::Log_box()
 	tick_log(this);
 	this->end();
 	this->label("Logs");
- 	
+
 	return ;
 
 }
