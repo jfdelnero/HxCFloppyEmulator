@@ -50,15 +50,15 @@
 
 #include "microintro.h"
 #include "mod32.h"
-#include "packer\pack.h"
+#include "packer/pack.h"
 
-#include "data\data_bmp_sob_bmp.h"
-#include "data\data_bmp_hxc2001_bmp.h"
+#include "data/data_bmp_sob_bmp.h"
+#include "data/data_bmp_hxc2001_bmp.h"
 
-#include "data\data_jozz_cognition_mod.h"
-#include "data\data_maktone_class_cracktro15_mod.h"
-#include "data\data_vim_not_again_mod.h"
-#include "data\data_zandax_supplydas_booze_mod.h"
+#include "data/data_jozz_cognition_mod.h"
+#include "data/data_maktone_class_cracktro15_mod.h"
+#include "data/data_vim_not_again_mod.h"
+#include "data/data_zandax_supplydas_booze_mod.h"
 
 typedef struct scrolltab_
 {
@@ -210,25 +210,34 @@ uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 	bitmap_hxc2001_bmp->unpacked_data=mi_unpack(bitmap_hxc2001_bmp->data,bitmap_hxc2001_bmp->csize ,bitmap_hxc2001_bmp->data, bitmap_hxc2001_bmp->size);
 	convert8b16b(bitmap_hxc2001_bmp,(unsigned short)0xFFFF);
 
+#ifdef WIN32    
 	srand(GetTickCount());
-
+#endif
 	switch(rand()&3)
 	{
 		case 0:
 			data_maktone_class_cracktro15_mod->unpacked_data=mi_unpack(data_maktone_class_cracktro15_mod->data,data_maktone_class_cracktro15_mod->csize ,data_maktone_class_cracktro15_mod->data, data_maktone_class_cracktro15_mod->size);
+#ifdef WIN32
 			InitModule(NULL,buffer1,16,data_maktone_class_cracktro15_mod->unpacked_data);
+#endif
 		break;
 		case 1:
 			data_jozz_cognition_mod->unpacked_data=mi_unpack(data_jozz_cognition_mod->data,data_jozz_cognition_mod->csize ,data_jozz_cognition_mod->data, data_jozz_cognition_mod->size);
+#ifdef WIN32            
 			InitModule(NULL,buffer1,16,data_jozz_cognition_mod->unpacked_data);
+#endif
 		break;
 		case 2:
 			data_zandax_supplydas_booze_mod->unpacked_data=mi_unpack(data_zandax_supplydas_booze_mod->data,data_zandax_supplydas_booze_mod->csize ,data_zandax_supplydas_booze_mod->data, data_zandax_supplydas_booze_mod->size);
+#ifdef WIN32
 			InitModule(NULL,buffer1,16,data_zandax_supplydas_booze_mod->unpacked_data);
+#endif
 		break;
 		case 3:
 			data_vim_not_again_mod->unpacked_data=mi_unpack(data_vim_not_again_mod->data,data_vim_not_again_mod->csize ,data_vim_not_again_mod->data, data_vim_not_again_mod->size);
+#ifdef WIN32
 			InitModule(NULL,buffer1,16,data_vim_not_again_mod->unpacked_data);
+#endif
 		break;
 
 	}
@@ -239,7 +248,9 @@ uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 
 void uintro_getnext_soundsample(uintro_context * democontext,unsigned char* buffer,int size)
 {
+#ifdef WIN32
 	GiveMeSamples(buffer,size);
+#endif
 }
 
 

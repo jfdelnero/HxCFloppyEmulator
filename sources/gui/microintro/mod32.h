@@ -1,3 +1,4 @@
+#ifdef WIN32
 #include <windows.h>
 
 #ifndef __include_mod32_h
@@ -20,3 +21,5 @@ void WINAPI InitModule(char *pfile,char *pbuffer,unsigned long sizebuffer,char *
 void WINAPI GiveMeSamples(char * pbuffer,unsigned long bufize);
 
 #endif
+#endif
+

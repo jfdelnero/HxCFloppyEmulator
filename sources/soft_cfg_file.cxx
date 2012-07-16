@@ -1,10 +1,11 @@
-
+#ifdef WIN32
 #include <windows.h>
 #include <commctrl.h>
+#endif
 
 #include <stdio.h>
 #include <time.h>
-
+#include <string.h>
 #include <sys/stat.h>
 
 #include "soft_cfg_file.h"
@@ -38,9 +39,9 @@ int load_last_cfg()
 	lastst=(laststate *)&cfg_file_buffer;
 
 	memset(cfg_file_buffer,0,sizeof(cfg_file_buffer));
-
+#ifdef WIN32
 	GetModuleFileName(NULL,executablepath,512);
-
+#endif
 	i=strlen(executablepath);
 	while(i && executablepath[i]!='\\')
 	{
@@ -84,9 +85,9 @@ int save_cfg()
 	lastst=(laststate *)&cfg_file_buffer;
 
 	memset(&cfg_file_buffer,0,sizeof(laststate));
-
+#ifdef WIN32
 	GetModuleFileName(NULL,executablepath,512);
-
+#endif
 	i=strlen(executablepath);
 	while(i && executablepath[i]!='\\')
 	{

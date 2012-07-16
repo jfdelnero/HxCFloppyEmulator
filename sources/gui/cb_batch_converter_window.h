@@ -15,9 +15,9 @@
 	typedef struct ff_type_
 	{
 		int id;
-		char * name;
-		char * plug_id;
-		char * ext;
+		const char * name;
+		const char * plug_id;
+		const char * ext;
 	}ff_type;
 
 

@@ -25,7 +25,7 @@
 	typedef struct track_type_
 	{
 		int id;
-		char * name;
+		const char * name;
 		int tracktype;
 	}track_type;
 
