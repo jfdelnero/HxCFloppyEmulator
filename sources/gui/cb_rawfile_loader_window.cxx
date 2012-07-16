@@ -57,7 +57,7 @@ extern "C"
 
 #include "loader.h"
 #include "main.h"
-
+#include "fs.h"
 
 extern s_gui_context * guicontext;
 
@@ -265,12 +265,12 @@ void raw_loader_window_bt_savecfg(Fl_Button* bt, void*)
 	{
 		getWindowState(rlw,&rfc);
 
-		fpf_file=fopen(file,"wb");
+		fpf_file=hxc_fopen(file,"wb");
 		if(fpf_file)
 		{
 			fprintf(fpf_file,"FPF_V0.1");
 			fwrite(&rfc,sizeof(cfgrawfile),1,fpf_file);
-			fclose(fpf_file);
+			hxc_fclose(fpf_file);
 			raw_loader_window_datachanged(bt, 0);
 		}
 	}
@@ -290,7 +290,7 @@ void raw_loader_window_bt_loadcfg(Fl_Button* bt, void*)
 
 	if(!fileselector("Load config file",(char*)file,"*.fpf","*.fpf",0,0))
 	{
-		fpf_file=fopen(file,"rb");
+		fpf_file=hxc_fopen(file,"rb");
 		if(fpf_file)
 		{
 			fread(header,sizeof(header),1,fpf_file);
@@ -300,7 +300,7 @@ void raw_loader_window_bt_loadcfg(Fl_Button* bt, void*)
 				setWindowState(rlw,&rfc);
 				raw_loader_window_datachanged(bt, 0);
 			}
-			fclose(fpf_file);
+			hxc_fclose(fpf_file);
 		}
 	}
 }
