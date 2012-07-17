@@ -139,7 +139,8 @@ unsigned long hxc_createevent(HXCFLOPPYEMULATOR* floppycontext,unsigned char id)
 	eventtab[id]=(EVENT_HANDLE*)malloc(sizeof(EVENT_HANDLE));
 	pthread_mutex_init(&eventtab[id]->eMutex, NULL);
 	pthread_cond_init(&eventtab[id]->eCondVar, NULL);
-	return (unsigned long)eventtab[id];#endif
+	return (unsigned long)eventtab[id];
+#endif
 }
 
 int hxc_waitevent(HXCFLOPPYEMULATOR* floppycontext,int id,int timeout)
