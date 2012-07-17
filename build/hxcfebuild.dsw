@@ -3,6 +3,18 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
+Project: "libhxcadaptor"=..\libhxcadaptor\trunk\build\libhxcadaptor.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "libhxcfe"=..\libhxcfe\trunk\build\libhxcfe.dsp - Package Owner=<4>
 
 Package=<5>
