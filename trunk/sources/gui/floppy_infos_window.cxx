@@ -6,7 +6,6 @@ extern "C"
 {
 	#include "libhxcfe.h"
 	#include "usb_hxcfloppyemulator.h"
-	#include "os_api.h"
 }
 
 #include "cb_floppy_infos_window.h"

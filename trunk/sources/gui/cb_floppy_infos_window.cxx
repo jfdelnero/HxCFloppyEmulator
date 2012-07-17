@@ -56,7 +56,6 @@ extern "C"
 	#include "libhxcfe.h"
 	#include "tracks/display_track.h"
 	#include "usb_hxcfloppyemulator.h"
-	#include "os_api.h"
 }
 
 #include "main.h"

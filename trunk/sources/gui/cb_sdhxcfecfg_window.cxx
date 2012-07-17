@@ -55,11 +55,12 @@ extern "C"
 {
 	#include "libhxcfe.h"
 	#include "usb_hxcfloppyemulator.h"
+	#include "libhxcadaptor.h"
 }
 
 #include "main.h"
 #include "loader.h"
-#include "fs.h"
+
 unsigned char filebuffer[8*1024];
 
 extern s_gui_context * guicontext;
