@@ -67,8 +67,8 @@ s_trackdisplay * hxcfe_td_init(HXCFLOPPYEMULATOR* floppycontext,unsigned long xs
 	td->xsize=xsize;
 	td->ysize=ysize;
 	
-	td->framebuffer=malloc(td->xsize*td->ysize*sizeof(unsigned long));
-	memset(td->framebuffer,0,td->xsize*td->ysize*sizeof(unsigned long));
+	td->framebuffer=malloc(td->xsize*td->ysize*sizeof(unsigned int));
+	memset(td->framebuffer,0,td->xsize*td->ysize*sizeof(unsigned int));
 
 	td->x_us=200*1000;
 	td->y_us=64;
@@ -157,7 +157,7 @@ double getOffsetTiming(SIDE *currentside,int offset,double timingoffset,int star
 	return timingoffset;
 }
 
-void putchar8x8(s_trackdisplay *td,int x_pos,int y_pos,unsigned char c,unsigned long color,int vertical)
+void putchar8x8(s_trackdisplay *td,int x_pos,int y_pos,unsigned char c,unsigned int color,int vertical)
 {
 	int charoffset;
 	int xpos,ypos;
@@ -199,7 +199,7 @@ void putchar8x8(s_trackdisplay *td,int x_pos,int y_pos,unsigned char c,unsigned 
 	}
 }
 
-void putstring8x8(s_trackdisplay *td,int x_pos,int y_pos,unsigned char * str,unsigned long color,int vertical)
+void putstring8x8(s_trackdisplay *td,int x_pos,int y_pos,unsigned char * str,unsigned int color,int vertical)
 {
 	int i;
 
@@ -490,7 +490,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	old_i=0;
 	i=0;
 
-	memset(td->framebuffer,0,td->xsize*td->ysize*sizeof(unsigned long));
+	memset(td->framebuffer,0,td->xsize*td->ysize*sizeof(unsigned int));
 
 	timingoffset = ( getOffsetTiming(currentside,tracksize,0,0));
 
@@ -701,7 +701,7 @@ s_sectorlist * hxcfe_td_getlastsectorlist(HXCFLOPPYEMULATOR* floppycontext,s_tra
 	return td->sl;
 }
 
-void plot(s_trackdisplay *td,int x,int y,unsigned long color)
+void plot(s_trackdisplay *td,int x,int y,unsigned int color)
 {
 	if(x>=0 && x<td->xsize)
 	{
@@ -712,7 +712,7 @@ void plot(s_trackdisplay *td,int x,int y,unsigned long color)
 	}
 }
 
-void circle(s_trackdisplay *td,int x_centre,int y_centre,int r,unsigned long color)
+void circle(s_trackdisplay *td,int x_centre,int y_centre,int r,unsigned int color)
 {
 	int x;
 	int y;
@@ -765,7 +765,7 @@ void hxcfe_td_draw_disk(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOP
 	int i,old_i;
 	int track,side;
 	SIDE * currentside;
-	unsigned long color;
+	unsigned int color;
 	int y_pos,x_pos_1,x_pos_2;
 	int numberoftrack;
 	float track_ep,t;

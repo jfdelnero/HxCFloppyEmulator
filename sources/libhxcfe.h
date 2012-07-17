@@ -240,7 +240,7 @@ typedef struct s_trackdisplay_
 	int xsize,ysize;
 	int x_us,y_us;
 	int x_start_us;
-	unsigned long * framebuffer;
+	unsigned int * framebuffer;
 
 	s_sectorlist * sl;
 
