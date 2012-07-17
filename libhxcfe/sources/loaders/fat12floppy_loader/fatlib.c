@@ -25,10 +25,7 @@ int initFATPartion(int fattype,int numberofsector,FATPARTITION * fatpart)
 		fatpart->FATType=fattype;
 		fatpart->rawdata=(unsigned char*)malloc(numberofsector*512);
 		memset(fatpart->rawdata,0xF6,numberofsector*512);
-
-
-
-
+        
 	}
 	return 0;
 }
