@@ -46,11 +46,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#ifdef WIN32
-    #include <direct.h>
-#endif 
 #include "fl_includes.h"
 #include "fl_dnd_box.h"
 
@@ -225,11 +220,7 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 						sprintf(destinationfolder,"%s\\%s",destfolder,FindFileData.filename);
 
 						//printf("Creating directory %s\n",destinationfolder);
-#ifdef WIN32
-						mkdir(destinationfolder);
-#else
-                        mkdir(destinationfolder,0x777);
-#endif
+						hxc_mkdir(destinationfolder);
 
 						fullpath=(unsigned char*)malloc(strlen(FindFileData.filename)+strlen(folder)+2+9);
 						sprintf((char*)fullpath,"%s\\%s",folder,FindFileData.filename);
