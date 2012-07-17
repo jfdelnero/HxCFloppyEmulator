@@ -1,5 +1,5 @@
-#SUBDIRS = ../libhxcadaptor/trunk/build/ ../libhxcfe/trunk/build/ ../libusbhxcfe/trunk/build/ ../HxCFloppyEmulator_cmdline/trunk/build/ ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.3.x/ ../HxCFloppyEmulator_software/trunk/build/
-SUBDIRS = ../libhxcadaptor/trunk/build/ ../libhxcfe/trunk/build/ ../libusbhxcfe/trunk/build/ ../HxCFloppyEmulator_cmdline/trunk/build/ 
+SUBDIRS = ../libhxcadaptor/trunk/build/ ../libhxcfe/trunk/build/ ../libusbhxcfe/trunk/build/ ../HxCFloppyEmulator_cmdline/trunk/build/ ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.3.x/ ../HxCFloppyEmulator_software/trunk/build/
+#SUBDIRS = ../libhxcadaptor/trunk/build/ ../libhxcfe/trunk/build/ ../libusbhxcfe/trunk/build/ ../HxCFloppyEmulator_cmdline/trunk/build/ 
 all: $(SUBDIRS)
 
 $(SUBDIRS):
