@@ -1,4 +1,4 @@
-# Microsoft Developer Studio Project File - Name="sssss" - Package Owner=<4>
+# Microsoft Developer Studio Project File - Name="libhxcadaptor" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
@@ -41,7 +41,8 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\..\..\build\Release_libhxcadaptor"
 # PROP Target_Dir "..\..\..\build\"
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c  /I "..\..\..\libusbhxcfe\trunk\sources" /I "..\..\..\libhxcfe\trunk\sources"
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\..\libusbhxcfe\trunk\sources" /I "..\..\..\libhxcfe\trunk\sources" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
+# SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x40c /d "NDEBUG"
 # ADD RSC /l 0x40c /d "NDEBUG"
 BSC32=bscmake.exe
@@ -63,8 +64,9 @@ LIB32=link.exe -lib
 # PROP Output_Dir "..\..\..\build\"
 # PROP Intermediate_Dir "..\..\..\build\Debug_libhxcadaptor"
 # PROP Target_Dir "..\..\..\build\"
-# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ  /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ  /c /I "..\..\..\libusbhxcfe\trunk\sources" /I "..\..\..\libhxcfe\trunk\sources"
+# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\..\..\libusbhxcfe\trunk\sources" /I "..\..\..\libhxcfe\trunk\sources" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FD /GZ /c
+# SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x40c /d "_DEBUG"
 # ADD RSC /l 0x40c /d "_DEBUG"
 BSC32=bscmake.exe
@@ -74,7 +76,7 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
-!ENDIF
+!ENDIF 
 
 # Begin Target
 

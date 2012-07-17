@@ -48,9 +48,15 @@
 #include <sys/stat.h>
 #include <ctype.h>
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdarg.h>
+
 #ifdef WIN32
 	#include <windows.h>
 #else
+	#include <sys/time.h>
 	#include <pthread.h>
 	#include <sched.h>
 #endif
@@ -64,10 +70,14 @@
 #ifdef WIN32
 	HANDLE eventtab[256];
 #else
+	typedef struct _EVENT_HANDLE{
+		pthread_cond_t eCondVar;
+		pthread_mutex_t eMutex;
+		int iVar;
+	} EVENT_HANDLE;
+
 	EVENT_HANDLE * eventtab[256];
 #endif
-
-
 
 #ifdef WIN32
 
@@ -94,7 +104,7 @@ void * ThreadProc( void *lpParameter)
 	threadinit *threadinitptr;
 	THREADFUNCTION thread;
 	HXCFLOPPYEMULATOR* floppycontext;
-	HWINTERFACE* hw_context;
+	USBHXCFE * hw_context;
 
 	threadinitptr=(threadinit*)lpParameter;
 	thread=threadinitptr->thread;
@@ -105,8 +115,6 @@ void * ThreadProc( void *lpParameter)
 	return 0;
 }
 #endif
-
-
 
 int hxc_setevent(HXCFLOPPYEMULATOR* floppycontext,unsigned char id)
 {
@@ -120,7 +128,6 @@ int hxc_setevent(HXCFLOPPYEMULATOR* floppycontext,unsigned char id)
 
 unsigned long hxc_createevent(HXCFLOPPYEMULATOR* floppycontext,unsigned char id)
 {
-
 #ifdef WIN32
 
 	eventtab[id]=CreateEvent(NULL,FALSE,FALSE,NULL);
@@ -230,7 +237,7 @@ int hxc_createthread(HXCFLOPPYEMULATOR* floppycontext,void* hwcontext,THREADFUNC
 }
 
 #ifndef WIN32
-void strlwr(char *string)
+/*void strlwr(char *string)
 {
 	int i;
 
@@ -240,7 +247,7 @@ void strlwr(char *string)
 		string[i] = tolower(string[i]);
 		i++;
 	}
-}
+}*/
 #endif
 
 char * strupper(char * str)
@@ -261,7 +268,6 @@ char * strupper(char * str)
 	return str;
 }
 
-
 char * strlower(char * str)
 {
 	int i;
@@ -279,4 +285,3 @@ char * strlower(char * str)
 
 	return str;
 }
-
