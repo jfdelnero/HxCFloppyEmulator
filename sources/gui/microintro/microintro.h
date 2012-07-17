@@ -1,3 +1,4 @@
+
 typedef struct uintro_context_
 {
 	unsigned short xsize;
@@ -7,9 +8,9 @@ typedef struct uintro_context_
 	unsigned short sprite_xsize;
 	unsigned short sprite_ysize;
 
-	unsigned long * framebuffer;
-	unsigned long * background;
-	unsigned long * blurbuffer;
+	unsigned int * framebuffer;
+	unsigned int * background;
+	unsigned int * blurbuffer;
 	float f1,f2;
 	unsigned long tick;
 	unsigned char part;
