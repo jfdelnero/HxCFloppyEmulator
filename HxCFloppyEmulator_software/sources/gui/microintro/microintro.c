@@ -92,7 +92,7 @@ scrolltab scroll[]=
 	{-1,0,0,0,0}
 };
 
-void putsprite(uintro_context * democontext,unsigned int x,unsigned int y,unsigned long * buffer,unsigned int sx,unsigned int sy,unsigned long * sprite)
+void putsprite(uintro_context * democontext,unsigned int x,unsigned int y,unsigned int * buffer,unsigned int sx,unsigned int sy,unsigned int * sprite)
 {
 	
 	static int t3=0;
@@ -135,14 +135,14 @@ void putsprite(uintro_context * democontext,unsigned int x,unsigned int y,unsign
 void convert8b16b(bmaptype * img,unsigned short transcolor)
 {
 	int i,j;
-	unsigned long * newbuffer;
+	unsigned int * newbuffer;
 	unsigned char palletteindex;
 	unsigned char r,v,b;
 
 	switch(img->type)
 	{
 	case 9:
-		newbuffer=malloc(img->Ysize*img->Xsize*sizeof(unsigned long ));
+		newbuffer=malloc(img->Ysize*img->Xsize*sizeof(unsigned int ));
 		for(i=0;i<img->Ysize;i++)
 		{
 			for(j=0;j<img->Xsize;j++)
@@ -164,7 +164,7 @@ void convert8b16b(bmaptype * img,unsigned short transcolor)
 
 		break;
 	case 1:
-		newbuffer=malloc(img->Ysize*img->Xsize*sizeof(unsigned long ));
+		newbuffer=malloc(img->Ysize*img->Xsize*sizeof(unsigned int ));
 		for(i=0;i<((img->Ysize*img->Xsize)/8);i++)
 		{
 			for(j=0;j<8;j++)
@@ -197,12 +197,12 @@ uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 
 	ui_context->tick=0;
 
-	ui_context->framebuffer=(unsigned long *)malloc(ui_context->xsize*ui_context->ysize*sizeof(unsigned long));
-	memset(ui_context->framebuffer,0,ui_context->xsize*ui_context->ysize*sizeof(unsigned long));
+	ui_context->framebuffer=(unsigned int *)malloc(ui_context->xsize*ui_context->ysize*sizeof(unsigned int));
+	memset(ui_context->framebuffer,0,ui_context->xsize*ui_context->ysize*sizeof(unsigned int));
 
 
-	ui_context->blurbuffer=(unsigned long *)malloc(ui_context->xsize*ui_context->ysize*sizeof(unsigned long));
-	memset(ui_context->blurbuffer,0,ui_context->xsize*ui_context->ysize*sizeof(unsigned long));
+	ui_context->blurbuffer=(unsigned int *)malloc(ui_context->xsize*ui_context->ysize*sizeof(unsigned int));
+	memset(ui_context->blurbuffer,0,ui_context->xsize*ui_context->ysize*sizeof(unsigned int));
 
 	bitmap_sob_bmp->unpacked_data=mi_unpack(bitmap_sob_bmp->data,bitmap_sob_bmp->csize ,bitmap_sob_bmp->data, bitmap_sob_bmp->size);
 	convert8b16b(bitmap_sob_bmp,(unsigned short)0xFFFF);
@@ -259,9 +259,9 @@ void colorize(bmaptype * bitmaptype)
 	int i,j;
 	static float f1=0,f2=0,f3=0;
 	static float f1s=0,f2s=0,f3s=0;
-	unsigned long * ptr;
+	unsigned int * ptr;
 	unsigned char r,v,b;
-	ptr=(unsigned long *)bitmaptype->unpacked_data;
+	ptr=(unsigned int *)bitmaptype->unpacked_data;
 
 	f1=f1s;
 	f2=f2s;
@@ -324,7 +324,7 @@ void uintro_getnextframe(uintro_context * democontext)
 			democontext->blurbuffer,
 			bitmap_hxc2001_bmp->Xsize,
 			bitmap_hxc2001_bmp->Ysize,
-			(unsigned long*)bitmap_hxc2001_bmp->unpacked_data);
+			(unsigned int*)bitmap_hxc2001_bmp->unpacked_data);
 			
 	democontext->f1=democontext->f1+(float)0.11;
 	democontext->f2=democontext->f2+(float)0.09;
