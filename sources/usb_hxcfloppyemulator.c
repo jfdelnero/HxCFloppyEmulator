@@ -53,7 +53,7 @@
 #include "usb_hxcfloppyemulator.h"
 
 #include "ftdi.h"
-#include "os_api.h"
+#include "libhxcadaptor.h"
 #include "variablebitrate.h"
 
 // fonction permettant de changer l'etat des signaux ready, dskchg et de source de selection
@@ -1068,5 +1068,4 @@ int libusbhxcfe_setUSBBufferSize(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwi
 			hwif->usbstats.packetsize=size;
 	}
 	return 0;
-
 }

@@ -3,7 +3,7 @@ CC=gcc
 AR=ar
 
 BASEDIR=../sources
-INCLUDES = -I$(BASEDIR)/ -I ../../../libhxcfe/trunk/sources -I ../sources/win32
+INCLUDES = -I$(BASEDIR)/ -I ../../../libhxcfe/trunk/sources -I ../sources/win32 -I ../../../libhxcadaptor/trunk/sources
 
 
 CFLAGS=-O3 $(INCLUDES)
