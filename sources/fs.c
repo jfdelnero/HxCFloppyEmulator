@@ -306,21 +306,24 @@ long find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 	DIR * dir;
 	struct stat fileStat;
 	char * tmpstr;
+        
 	dir = opendir (folder);
 	if(dir)
 	{
 		d = readdir (dir);
 		if(d)
-		{
-			tmpstr = malloc (strlen(folder) + strlen(d->d_name) +2 );
+		{			
+            tmpstr = malloc (strlen(folder) + strlen(d->d_name) + 4 );
 			if(tmpstr)
 			{
 				strcpy(tmpstr,folder);
-				strcat(tmpstr,"\\");
+				strcat(tmpstr,"/");
 				strcat(tmpstr,d->d_name);
 
-				if(!lstat (tmpstr, &fileStat))
+				memset(&fileStat,0,sizeof(struct stat));
+                if(!lstat (tmpstr, &fileStat))
 				{
+                            
 					if ( S_ISDIR ( fileStat.st_mode ) )
 						fileinfo->isdirectory=1;
 					else
@@ -329,13 +332,12 @@ long find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 					fileinfo->size=fileStat.st_size;
 
 					strncpy(fileinfo->filename,d->d_name,256);
-
 					
 					free(tmpstr);
 					return (long)dir;
 				}
-
-				free(tmpstr);
+				
+                free(tmpstr);
 			}
 			
 			closedir (dir);
@@ -382,15 +384,18 @@ long find_next_file(long handleff, char *folder, char *file, filefoundinfo* file
 	struct stat fileStat;
 	char * tmpstr;
 
+    
 	dir = (DIR*) handleff;
 	d = readdir (dir);
-	if(d)
+    	
+    ret = 0;
+    if(d)
 	{
-		tmpstr = malloc (strlen(folder) + strlen(d->d_name) +2 );
+		tmpstr = malloc (strlen(folder) + strlen(d->d_name) + 4 );
 		if(tmpstr)
 		{
 			strcpy(tmpstr,folder);
-			strcat(tmpstr,"\\");
+			strcat(tmpstr,"/");
 			strcat(tmpstr,d->d_name);
 
 			if(!lstat (tmpstr, &fileStat))
@@ -403,16 +408,14 @@ long find_next_file(long handleff, char *folder, char *file, filefoundinfo* file
 				fileinfo->size=fileStat.st_size;
 				strncpy(fileinfo->filename,d->d_name,256);
 		
+                ret = 1;
 				free(tmpstr);
-				return (long)dir;
+				return ret;
 			}
 
 			free(tmpstr);
 		}
-			
-		closedir (dir);
-		dir=0;						
-	}
+    }
 
 #endif
 
@@ -447,12 +450,11 @@ char * getcurrentdirectory(char *currentdirectory,int buffersize)
 #else
 
 #if defined (OSX)
-
-	if (_NSGetExecutablePath(currentdirectory, &buffersize) == 0)
+    if (_NSGetExecutablePath(currentdirectory, &buffersize) == 0)
 	{
-		if(strrchr(currentdirectory,'\\'))
+		if(strrchr(currentdirectory,'/'))
 		{
-			*((char*)strrchr(currentdirectory,'\\')) = 0;
+			*((char*)strrchr(currentdirectory,'/')) = 0;
 			return currentdirectory;
 		}
 	}
@@ -470,7 +472,7 @@ int hxc_mkdir(char * folder)
 #ifdef WIN32
 	mkdir(folder);
 #else
-	mkdir(folder,0x777);
+	mkdir(folder,0777);
 #endif
 	return 0;
 }
