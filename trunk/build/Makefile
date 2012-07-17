@@ -3,10 +3,10 @@ CC=gcc
 CPP=g++
 
 ifdef IPF_LIB_SUPPORT
-    CFLAGS=-O3 -I ../../../libhxcfe/trunk/sources	-I . -I ../sources/ -I ../sources/gui -I ../sources/thirdpartylibs/fltk/fltk-1.3.x/ -I ../../../libusbhxcfe/trunk/sources  -I ../../../libhxcadaptor/trunk/sources -I ../sources/gui/microintro -DIPF_SUPPORT
+    CFLAGS=-O3 -I ../../../libhxcfe/trunk/sources -I . -I ../sources/ -I ../sources/gui -I ../sources/thirdpartylibs/fltk/fltk-1.3.x/ -I ../../../libusbhxcfe/trunk/sources  -I ../../../libhxcadaptor/trunk/sources -I ../sources/gui/microintro -DIPF_SUPPORT -DOSX
     DISKLOADERPLUGINS_IPF= ipf_loader.o libcapsimage.so.2.0
 else
-    CFLAGS=-O3 -I ../sources -I ../../../libhxcfe/trunk/sources -I ../sources/  -I ../sources/gui -I ../sources/thirdpartylibs/fltk/fltk-1.3.x/ -I ../../../libusbhxcfe/trunk/sources -I ../../../libhxcadaptor/trunk/sources -I ../sources/gui/microintro/
+    CFLAGS=-O3 -I ../sources -I ../../../libhxcfe/trunk/sources -I ../sources/  -I ../sources/gui -I ../sources/thirdpartylibs/fltk/fltk-1.3.x/ -I ../../../libusbhxcfe/trunk/sources -I ../../../libhxcadaptor/trunk/sources -I ../sources/gui/microintro/ -DOSX
     DISKLOADERPLUGINS_IPF=
 endif
 
