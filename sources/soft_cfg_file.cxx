@@ -11,6 +11,7 @@
 #include "soft_cfg_file.h"
 
 #include "libhxcfe.h"
+
 #include "usb_hxcfloppyemulator.h"
 
 #include "main.h"
@@ -43,9 +44,9 @@ int load_last_cfg()
 	lastst=(laststate *)&cfg_file_buffer;
 
 	memset(cfg_file_buffer,0,sizeof(cfg_file_buffer));
-#ifdef WIN32
-	GetModuleFileName(NULL,executablepath,512);
-#endif
+
+	getcurrentdirectory(executablepath,512);
+
 	i=strlen(executablepath);
 	while(i && executablepath[i]!='\\')
 	{
@@ -89,9 +90,9 @@ int save_cfg()
 	lastst=(laststate *)&cfg_file_buffer;
 
 	memset(&cfg_file_buffer,0,sizeof(laststate));
-#ifdef WIN32
-	GetModuleFileName(NULL,executablepath,512);
-#endif
+
+	getcurrentdirectory(executablepath,512);
+
 	i=strlen(executablepath);
 	while(i && executablepath[i]!='\\')
 	{
