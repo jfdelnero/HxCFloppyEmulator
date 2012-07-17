@@ -119,7 +119,7 @@ About_box::About_box()
 	o->box(FL_DOWN_BOX);
 
 	button_wesite=		new Fl_Button(5, 110, 180, 25, "Website");
-	button_wesite->callback(OpenURLInBrowser,(void*)"http://hxc2001.free.fr/floppy_drive_emulator");
+	button_wesite->callback(OpenURLInBrowser,(void*)"http://www.hxc2001.com/");
 
 	button_forum=		new Fl_Button(5, 110+25, 180, 25, "Support Forum");
 	button_forum->callback(OpenURLInBrowser,(void*)"http://torlus.com/floppy/forum");
@@ -135,7 +135,7 @@ About_box::About_box()
 
 	o = new Fl_Box(200, 13, 320+6, 200+6);
 	o->box(FL_UP_BOX);// Fl_Box* o
-	o = new Fl_Box(5, 45, 180, 60, "Copyright © 2006-2011\nDEL NERO Jean François\nPowerOfAsm / HxC2001");
+	o = new Fl_Box(5, 45, 180, 60, "Copyright © 2006-2012\nDEL NERO Jean François\nPowerOfAsm / HxC2001");
 	o->box(FL_DOWN_BOX);
 
 	xpos_size=200+3;
