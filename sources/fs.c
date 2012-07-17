@@ -59,8 +59,15 @@
 #	include <windows.h>
 #	include <io.h>
 #	include <fcntl.h>
+#	include <direct.h>
 #else
 #	include <unistd.h>
+#	include <dirent.h>
+
+#ifdef	OSX
+#	include <mach-o/dyld.h>
+#endif
+
 #endif
 
 
@@ -294,6 +301,54 @@ long find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 		return -1;
 	}
 
+#else
+	struct dirent *d;
+	DIR * dir;
+	struct stat fileStat;
+	char * tmpstr;
+	dir = opendir (folder);
+	if(dir)
+	{
+		d = readdir (dir);
+		if(d)
+		{
+			tmpstr = malloc (strlen(folder) + strlen(d->d_name) +2 );
+			if(tmpstr)
+			{
+				strcpy(tmpstr,folder);
+				strcat(tmpstr,"\\");
+				strcat(tmpstr,d->d_name);
+
+				if(!lstat (tmpstr, &fileStat))
+				{
+					if ( S_ISDIR ( fileStat.st_mode ) )
+						fileinfo->isdirectory=1;
+					else
+						fileinfo->isdirectory=0;
+
+					fileinfo->size=fileStat.st_size;
+
+					strncpy(fileinfo->filename,d->d_name,256);
+
+					
+					free(tmpstr);
+					return (long)dir;
+				}
+
+				free(tmpstr);
+			}
+			
+			closedir (dir);
+			dir=0;
+						
+		}
+
+		closedir (dir);
+		dir=0;
+	}
+
+	return (long)dir;
+
 #endif
 
 	return 0;
@@ -322,7 +377,43 @@ long find_next_file(long handleff, char *folder, char *file, filefoundinfo* file
 		fileinfo->size = FindFileData.nFileSizeLow;
 	}
 #else
-	ret = 0;
+	struct dirent *d;
+	DIR * dir;
+	struct stat fileStat;
+	char * tmpstr;
+
+	dir = (DIR*) handleff;
+	d = readdir (dir);
+	if(d)
+	{
+		tmpstr = malloc (strlen(folder) + strlen(d->d_name) +2 );
+		if(tmpstr)
+		{
+			strcpy(tmpstr,folder);
+			strcat(tmpstr,"\\");
+			strcat(tmpstr,d->d_name);
+
+			if(!lstat (tmpstr, &fileStat))
+			{
+				if ( S_ISDIR ( fileStat.st_mode ) )
+					fileinfo->isdirectory=1;
+				else
+					fileinfo->isdirectory=0;
+
+				fileinfo->size=fileStat.st_size;
+				strncpy(fileinfo->filename,d->d_name,256);
+		
+				free(tmpstr);
+				return (long)dir;
+			}
+
+			free(tmpstr);
+		}
+			
+		closedir (dir);
+		dir=0;						
+	}
+
 #endif
 
 	return ret;
@@ -332,44 +423,14 @@ long find_close(long handle)
 {
 #if defined (WIN32)
 	FindClose((void*)handle);
+#else
+	DIR * dir;
+	dir = (DIR*) handle;
+	if(dir)
+		closedir(dir);
 #endif
 	return 0;
 }
-
-int getlistoffile(unsigned char * directorypath,unsigned char *** filelist)
-{
-	int numberoffile;
-	char ** filepathtab;
-
-#if	defined (WIN32)
-	HANDLE findfilehandle;
-	WIN32_FIND_DATA FindFileData;
-
-	filepathtab = 0;
-	numberoffile = 0;
-
-	findfilehandle=FindFirstFile(directorypath,&FindFileData);
-	if(findfilehandle!=INVALID_HANDLE_VALUE)
-	{
-
-		do
-		{
-			filepathtab = (char **) realloc(filepathtab,sizeof(char*)*(numberoffile+1));
-			filepathtab[numberoffile] = (char*)malloc(strlen(FindFileData.cFileName)+1);
-			strcpy(filepathtab[numberoffile],FindFileData.cFileName);
-			numberoffile++;
-		}while(FindNextFile(findfilehandle,&FindFileData));
-
-		FindClose(findfilehandle);
-	}
-	*filelist=filepathtab;
-#else
-	numberoffile = 0;
-#endif
-
-	return numberoffile;
-}
-
 
 char * getcurrentdirectory(char *currentdirectory,int buffersize)
 {
@@ -383,7 +444,33 @@ char * getcurrentdirectory(char *currentdirectory,int buffersize)
 			return currentdirectory;
 		}
 	}
+#else
+
+#if defined (OSX)
+
+	if (_NSGetExecutablePath(currentdirectory, &buffersize) == 0)
+	{
+		if(strrchr(currentdirectory,'\\'))
+		{
+			*((char*)strrchr(currentdirectory,'\\')) = 0;
+			return currentdirectory;
+		}
+	}
 #endif
 
+
+#endif
+
+	return 0;
+}
+
+int hxc_mkdir(char * folder)
+{
+
+#ifdef WIN32
+	mkdir(folder);
+#else
+	mkdir(folder,0x777);
+#endif
 	return 0;
 }
