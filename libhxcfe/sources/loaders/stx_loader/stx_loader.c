@@ -57,7 +57,7 @@
 
 #include "pasti_format.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 #include "tracks/crc.h"
 
 //#define PASTI_DBG 1

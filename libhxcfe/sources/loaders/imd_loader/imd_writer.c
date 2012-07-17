@@ -37,7 +37,7 @@
 #include "imd_format.h"
 #include "tracks/sector_extractor.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 extern unsigned char size_to_code(unsigned long size);
 

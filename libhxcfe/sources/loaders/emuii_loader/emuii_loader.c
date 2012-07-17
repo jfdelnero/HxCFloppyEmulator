@@ -57,7 +57,7 @@
 
 #include "emuii_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 #define SCTR_SIZE 512
 #define HEADS 2

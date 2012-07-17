@@ -56,7 +56,7 @@
 #include "mfm_loader.h"
 #include "mfm_format.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int MFM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

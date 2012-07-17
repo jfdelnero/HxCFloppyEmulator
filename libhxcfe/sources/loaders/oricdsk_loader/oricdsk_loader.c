@@ -56,7 +56,7 @@
 #include "oricdsk_loader.h"
 #include "oricdsk_format.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int OricDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

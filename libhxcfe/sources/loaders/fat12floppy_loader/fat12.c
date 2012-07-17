@@ -36,7 +36,7 @@
 #include "fat12.h"
 #include "fatlib.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 
 

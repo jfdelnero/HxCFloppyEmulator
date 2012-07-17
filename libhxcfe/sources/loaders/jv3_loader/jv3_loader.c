@@ -56,7 +56,7 @@
 #include "jv3_loader.h"
 #include "jv3_format.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 unsigned char* compute_interleave_tab(unsigned char interleave,unsigned short numberofsector);
 

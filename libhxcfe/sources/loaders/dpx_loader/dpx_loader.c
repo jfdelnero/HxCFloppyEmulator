@@ -55,7 +55,7 @@
 
 #include "dpx_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int DPX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

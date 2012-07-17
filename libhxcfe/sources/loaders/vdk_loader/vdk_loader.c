@@ -56,7 +56,7 @@
 #include "vdk_loader.h"
 #include "vdk_format.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int VDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

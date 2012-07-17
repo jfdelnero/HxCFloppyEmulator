@@ -57,7 +57,7 @@
 
 #include "pcimgfileformat.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int pc_imggetfloppyconfig(unsigned char * img,unsigned int filesize,unsigned short *numberoftrack,unsigned char *numberofside,unsigned short *numberofsectorpertrack,unsigned char *gap3len,unsigned char *interleave,unsigned short *rpm, unsigned int *bitrate,unsigned short * ifmode)
 {

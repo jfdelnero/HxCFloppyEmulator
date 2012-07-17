@@ -34,7 +34,7 @@
 #include "mfm_loader.h"
 #include "mfm_format.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int MFM_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
 {	

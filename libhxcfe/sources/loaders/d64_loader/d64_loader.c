@@ -56,7 +56,7 @@
 
 #include "d64_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 typedef struct d64trackpos_
 {

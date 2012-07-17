@@ -55,7 +55,7 @@
 
 #include "raw_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int RAW_libIsValidFormat(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * imgformatcfg)
 {

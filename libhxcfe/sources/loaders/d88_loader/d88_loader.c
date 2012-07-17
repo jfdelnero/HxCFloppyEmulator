@@ -56,7 +56,7 @@
 #include "d88_loader.h"
 #include "d88_format.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int D88_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

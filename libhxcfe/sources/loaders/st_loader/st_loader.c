@@ -57,7 +57,7 @@
 
 #include "stfileformat.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int getfloppyconfig(unsigned char * img,unsigned int filesize,unsigned short *numberoftrack,unsigned char *numberofside,unsigned short *numberofsectorpertrack,unsigned char *gap3len,unsigned char *interleave)
 {

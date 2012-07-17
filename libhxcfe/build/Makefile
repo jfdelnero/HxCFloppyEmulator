@@ -3,7 +3,7 @@ CC=gcc
 AR=ar
 
 BASEDIR=../sources
-INCLUDES = -I$(BASEDIR)/
+INCLUDES = -I$(BASEDIR)/ -I ../../../libhxcadaptor/trunk/sources
 
 ifdef IPF_LIB_SUPPORT
     CFLAGS=-O3 $(INCLUDES) -DIPF_SUPPORT
@@ -40,11 +40,11 @@ DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_w
 
 all: $(EXEC)
 
-libhxcfe.a: floppy_loader.o floppy_utils.o floppy_ifmode.o linux_api.o fs.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o display_track.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ)
+libhxcfe.a: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o display_track.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ)
 	$(AR) r $@    $^ 
 	cp $@ ../../../build
 
-libhxcfe.so: floppy_loader.o floppy_utils.o linux_api.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ)
+libhxcfe.so: floppy_loader.o floppy_utils.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ)
 	$(CC) -o $@    $^ $(LDFLAGS)
 		
 floppy_loader.o: $(BASEDIR)/floppy_loader.c
@@ -54,12 +54,6 @@ floppy_ifmode.o: $(BASEDIR)/floppy_ifmode.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 floppy_utils.o: $(BASEDIR)/floppy_utils.c
-	$(CC) -o $@ -c $< $(CFLAGS)
-
-linux_api.o: $(BASEDIR)/linux/linux_api.c
-	$(CC) -o $@ -c $< $(CFLAGS)
-
-fs.o: $(BASEDIR)/fs.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 sector_extractor.o : $(BASEDIR)/tracks/sector_extractor.c $(BASEDIR)/tracks/sector_extractor.h

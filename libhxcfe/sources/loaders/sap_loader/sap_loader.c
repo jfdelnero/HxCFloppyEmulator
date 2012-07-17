@@ -56,7 +56,7 @@
 #include "thirdpartylibs/libsap/libsap.h"
 #include "sap_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int SAP_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

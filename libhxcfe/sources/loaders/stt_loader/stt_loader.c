@@ -57,7 +57,7 @@
 
 #include "sttfileformat.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int STT_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

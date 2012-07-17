@@ -56,7 +56,7 @@
 #include "ti99v9t9_loader.h"
 #include "ti99v9t9_writer.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 typedef struct ti99_vib
 {

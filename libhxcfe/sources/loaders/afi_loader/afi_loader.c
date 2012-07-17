@@ -58,7 +58,7 @@
 #include "thirdpartylibs/zlib/zlib.h"
 #include "tracks/crc.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 unsigned short filecheckcrc(FILE * f,unsigned long fileoffset,unsigned long size)
 {

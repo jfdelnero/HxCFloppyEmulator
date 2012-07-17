@@ -56,7 +56,7 @@
 #include "sad_loader.h"
 #include "sad_fileformat.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int SAD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

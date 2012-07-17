@@ -57,7 +57,7 @@
 #include "thirdpartylibs/zlib/zlib.h"
 #include "thirdpartylibs/zlib/contrib/minizip/unzip.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 #define UNPACKBUFFER 128*1024
 

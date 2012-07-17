@@ -56,7 +56,7 @@
 #include "imd_loader.h"
 #include "imd_format.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int IMD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

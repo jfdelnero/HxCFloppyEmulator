@@ -56,7 +56,7 @@
 #include "apridisk_loader.h"
 #include "apridisk_format.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int ApriDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

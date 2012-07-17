@@ -55,7 +55,7 @@
 
 #include "krz_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 #include "../fat12floppy_loader/fat12.h"
 

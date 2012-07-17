@@ -56,7 +56,7 @@
 
 #include "ipf_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 #define BYTE char 
 #define WORD short

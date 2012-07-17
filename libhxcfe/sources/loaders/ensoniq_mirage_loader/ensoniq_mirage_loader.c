@@ -55,7 +55,7 @@
 
 #include "ensoniq_mirage_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int Ensoniq_mirage_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

@@ -55,7 +55,7 @@
 
 #include "msa_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int MSA_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

@@ -55,7 +55,7 @@
 
 #include "trd_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int TRD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

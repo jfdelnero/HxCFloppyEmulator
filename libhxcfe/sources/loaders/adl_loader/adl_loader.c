@@ -55,7 +55,7 @@
 
 #include "adl_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int ADL_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

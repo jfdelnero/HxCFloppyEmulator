@@ -56,7 +56,7 @@
 #include "cpcdsk_loader.h"
 #include "cpcdsk_format.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int CPCDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

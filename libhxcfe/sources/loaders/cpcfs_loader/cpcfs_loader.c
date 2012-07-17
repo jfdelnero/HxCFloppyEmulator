@@ -56,7 +56,7 @@
 
 #include "cpcfs_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 HXCFLOPPYEMULATOR* global_floppycontext;
 extern int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * folder,char * file);

@@ -56,7 +56,7 @@
 #include "fdi_loader.h"
 #include "fdi_format.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int FDI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
