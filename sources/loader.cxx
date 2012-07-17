@@ -51,10 +51,11 @@ extern "C"
 {
 	#include "libhxcfe.h"
 	#include "usb_hxcfloppyemulator.h"
+	#include "libhxcadaptor.h"
 }
 #include "main.h"
 #include "loader.h"
-#include "fs.h"
+
 
 extern s_gui_context * guicontext;
 

@@ -58,7 +58,7 @@ extern "C"
 {
 	#include "libhxcfe.h"
 	#include "usb_hxcfloppyemulator.h"
-	#include "os_api.h"
+	#include "libhxcadaptor.h"
 }
 
 #include "main.h"

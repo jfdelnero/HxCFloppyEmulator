@@ -55,7 +55,7 @@ extern "C"
 {
 	#include "libhxcfe.h"
 	#include "usb_hxcfloppyemulator.h"
-	#include "os_api.h"
+	#include "libhxcadaptor.h"
 #ifdef WIN32
 	#include "thirdpartylibs/fdrawcmd/fdrawcmd.h"
 #endif

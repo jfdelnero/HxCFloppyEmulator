@@ -14,7 +14,11 @@
 #include "usb_hxcfloppyemulator.h"
 
 #include "main.h"
-#include "fs.h"
+
+extern "C"
+{
+	#include "libhxcadaptor.h"
+}
 
 typedef struct laststate_
 {
