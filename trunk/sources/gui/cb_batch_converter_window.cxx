@@ -61,6 +61,12 @@ extern "C"
 #include "cb_batch_converter_window.h"
 #include "loader.h"
 
+#ifdef WIN32
+#define SEPARTOR '\\'
+#else
+#define SEPARTOR '/'
+#endif
+
 batchconverterparams bcparams;
 
 extern s_gui_context * guicontext;
@@ -123,13 +129,13 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 			{
 
 				j=strlen(filelist[filenb]);
-				while(filelist[filenb][j]!='\\' && j)
+				while(filelist[filenb][j]!=SEPARTOR && j)
 				{
 					j--;
 				}
-				if(filelist[filenb][j]=='\\') j++;
+				if(filelist[filenb][j]==SEPARTOR) j++;
 				destinationfile=(char*)malloc(strlen(&filelist[filenb][j])+strlen(destfolder)+2+99);
-				sprintf(destinationfile,"%s\\%s",destfolder,&filelist[filenb][j]);
+				sprintf(destinationfile,"%s%c%s",destfolder,SEPARTOR,&filelist[filenb][j]);
 				i=strlen(destinationfile);
 				
 				do
@@ -166,7 +172,7 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 				do
 				{
 					i--;
-				}while(i && destinationfile[i]!='\\');
+				}while(i && destinationfile[i]!=SEPARTOR);
 
 				if(!ret)
 				{
@@ -217,13 +223,13 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 					if(strcmp(".",FindFileData.filename)!=0 && strcmp("..",FindFileData.filename)!=0)
 					{
 						destinationfolder=(char*)malloc(strlen(FindFileData.filename)+strlen(destfolder)+2);
-						sprintf(destinationfolder,"%s\\%s",destfolder,FindFileData.filename);
+						sprintf(destinationfolder,"%s%c%s",destfolder,SEPARTOR,FindFileData.filename);
 
 						//printf("Creating directory %s\n",destinationfolder);
 						hxc_mkdir(destinationfolder);
 
 						fullpath=(unsigned char*)malloc(strlen(FindFileData.filename)+strlen(folder)+2+9);
-						sprintf((char*)fullpath,"%s\\%s",folder,FindFileData.filename);
+						sprintf((char*)fullpath,"%s%c%s",folder,SEPARTOR,FindFileData.filename);
 
 						floppycontext->hxc_printf(MSG_INFO_1,(char*)"Entering directory %s",FindFileData.filename);
 
@@ -256,7 +262,7 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 					{
 
 						fullpath=(unsigned char*)malloc(strlen(FindFileData.filename)+strlen(folder)+2+9);
-						sprintf((char*)fullpath,"%s\\%s",folder,FindFileData.filename);
+						sprintf((char*)fullpath,"%s%c%s",folder,SEPARTOR,FindFileData.filename);
 
 						loaderid=hxcfe_autoSelectLoader(floppycontext,(char*)fullpath,0);
 						if(loaderid>=0)
@@ -287,7 +293,7 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 						else
 						{
 							destinationfile=(char*)malloc(strlen(FindFileData.filename)+strlen(destfolder)+2+99);
-							sprintf(destinationfile,"%s\\%s",destfolder,FindFileData.filename);
+							sprintf(destinationfile,"%s%c%s",destfolder,SEPARTOR,FindFileData.filename);
 							i=strlen(destinationfile);
 							do
 							{
@@ -326,7 +332,7 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 							do
 							{
 								i--;
-							}while(i && destinationfile[i]!='\\');
+							}while(i && destinationfile[i]!=SEPARTOR);
 
 							if(!ret)
 							{
