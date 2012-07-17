@@ -55,7 +55,7 @@
 
 #include "dmk_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 typedef struct dmk_header_
 {

@@ -58,7 +58,7 @@
 
 #include "../fat12floppy_loader/fat12.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 extern unsigned char msdos_bootsector;
 

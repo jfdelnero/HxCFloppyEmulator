@@ -36,7 +36,7 @@
 
 #include "tracks/sector_extractor.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 unsigned char  size_to_code(unsigned long size)
 {

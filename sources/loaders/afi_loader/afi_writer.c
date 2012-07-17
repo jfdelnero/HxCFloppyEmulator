@@ -38,7 +38,7 @@
 
 #include "tracks/crc.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 AFI_DATACODE datacode[]={
 	{AFI_DATA_MFM,AFI_DATA_TYPE_MFM},

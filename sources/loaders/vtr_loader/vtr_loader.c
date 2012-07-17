@@ -55,7 +55,7 @@
 #include "vtr_loader.h"
 #include "vtr_format.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 extern unsigned char bit_inverter[];
 

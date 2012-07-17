@@ -55,7 +55,7 @@
 
 #include "dim_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 #pragma pack(1)
 typedef struct dim_header_

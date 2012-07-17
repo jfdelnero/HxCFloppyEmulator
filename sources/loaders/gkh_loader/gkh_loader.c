@@ -56,7 +56,7 @@
 #include "gkh_loader.h"
 #include "gkh_format.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int GKH_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

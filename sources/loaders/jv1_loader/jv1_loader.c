@@ -55,7 +55,7 @@
 
 #include "jv1_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int JV1_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

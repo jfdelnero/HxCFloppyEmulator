@@ -55,7 +55,7 @@
 
 #include "ede_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int EDE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

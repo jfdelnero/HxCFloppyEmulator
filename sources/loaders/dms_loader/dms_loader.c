@@ -59,7 +59,7 @@
 #include "thirdpartylibs/xdms/xdms-1.3.2/src/pfile.h"
 #include "thirdpartylibs/xdms/xdms-1.3.2/src/crc_csum.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int DMS_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

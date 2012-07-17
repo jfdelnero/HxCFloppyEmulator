@@ -56,7 +56,7 @@
 #include "tracks/emuii_track.h"
 #include "emuii_raw_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int EMUII_RAW_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

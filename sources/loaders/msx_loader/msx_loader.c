@@ -56,7 +56,7 @@
 #include "msx_loader.h"
 #include "msxfileformat.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int msx_imggetfloppyconfig(unsigned char * filename,unsigned char * img,unsigned int filesize,unsigned short  *numberoftrack,unsigned char *numberofside,unsigned short *numberofsectorpertrack,unsigned short *sectorsize,unsigned char *gap3len,unsigned char *interleave,unsigned short *rpm, unsigned int *bitrate)
 {

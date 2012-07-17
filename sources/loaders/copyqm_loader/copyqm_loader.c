@@ -56,7 +56,7 @@
 #include "copyqm_loader.h"
 #include "crctable.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int CopyQm_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

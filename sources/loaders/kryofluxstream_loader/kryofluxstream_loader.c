@@ -60,7 +60,7 @@
 #include "kryofluxstream_format.h"
 #include "kryofluxstream.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 #define BASEINDEX 1
 

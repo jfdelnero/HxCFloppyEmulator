@@ -55,7 +55,7 @@
 
 #include "acornadf_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int ACORNADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

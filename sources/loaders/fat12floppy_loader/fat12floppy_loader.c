@@ -56,7 +56,7 @@
 
 #include "fat12floppy_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 #include "fat12.h"
 #include "fat12formats.h"

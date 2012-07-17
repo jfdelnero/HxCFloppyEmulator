@@ -54,7 +54,7 @@
 
 #include "extadf_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int EXTADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

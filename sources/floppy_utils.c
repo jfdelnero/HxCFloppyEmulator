@@ -51,7 +51,7 @@
 #include "libhxcfe.h"
 #include "floppy_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 unsigned long us2index(unsigned long startindex,SIDE * track,unsigned long us,unsigned char fill,char fillorder)
 {

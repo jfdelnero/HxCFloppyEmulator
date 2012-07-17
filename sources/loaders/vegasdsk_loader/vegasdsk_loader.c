@@ -55,7 +55,7 @@
 
 #include "vegasdsk_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int VEGASDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

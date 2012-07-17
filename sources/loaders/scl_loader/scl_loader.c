@@ -55,7 +55,7 @@
 
 #include "scl_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 unsigned char dir_entry[34] =
 	{

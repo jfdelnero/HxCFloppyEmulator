@@ -35,7 +35,7 @@
 
 #include "tracks/sector_extractor.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int TI99V9T9_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
 {	

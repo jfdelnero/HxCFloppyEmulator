@@ -55,7 +55,7 @@
 
 #include "mgt_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int MGT_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {

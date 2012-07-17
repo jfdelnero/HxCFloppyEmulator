@@ -56,7 +56,7 @@
 
 #include "amigadosfs_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 #include "thirdpartylibs/adflib/Lib/adflib.h"
 #include "stdboot3.h"

@@ -36,7 +36,7 @@
 #include "hfe_loader.h"
 #include "hfe_format.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 unsigned char * ramfile;
 int ramfile_size;

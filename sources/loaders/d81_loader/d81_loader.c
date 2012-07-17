@@ -55,7 +55,7 @@
 
 #include "d81_loader.h"
 
-#include "os_api.h"
+#include "libhxcadaptor.h"
 
 int D81_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
