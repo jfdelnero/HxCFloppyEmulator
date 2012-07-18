@@ -221,6 +221,14 @@ SOURCE=..\sources\gui\cb_batch_converter_window.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\sources\gui\cb_filesystem_generator_window.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\gui\cb_filesystem_generator_window.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\gui\cb_floppy_dump_window.cxx
 # End Source File
 # Begin Source File
