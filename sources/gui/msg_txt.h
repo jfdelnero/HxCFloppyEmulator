@@ -49,79 +49,43 @@ Fl_Menu_Item format_choices[]=
 	{0}
 };
 
-enum
-{
-	FS_720KB_ATARI_FAT12=0,
-	FS_902KB_ATARI_FAT12,
-	FS_360KB_ATARI_FAT12,
-	FS_880KB_AMIGADOS,
-	
-	FS_5P25_300RPM_160KB_MSDOS_FAT12,
-	FS_5P25_360RPM_160KB_MSDOS_FAT12,
-	
-	FS_5P25_300RPM_180KB_MSDOS_FAT12,
-	FS_5P25_360RPM_180KB_MSDOS_FAT12,
-		
-	FS_5P25_SS_300RPM_320KB_MSDOS_FAT12,
-	FS_5P25_SS_360RPM_320KB_MSDOS_FAT12,
-		
-	FS_5P25_DS_300RPM_320KB_MSDOS_FAT12,
-	FS_5P25_DS_360RPM_320KB_MSDOS_FAT12,
-		
-	FS_5P25_DS_300RPM_360KB_MSDOS_FAT12,
-	FS_5P25_DS_360RPM_360KB_MSDOS_FAT12,
-		
-	FS_3P5_DS_300RPM_640KB_MSDOS_FAT12,
-		
-	FS_720KB_MSDOS_FAT12,
-		
-	FS_5P25_300RPM_1200KB_MSDOS_FAT12,
-		
-	FS_1_44MB_MSDOS_FAT12,
-	FS_1_68MB_MSDOS_FAT12,
-	FS_2_88MB_MSDOS_FAT12,
-	FS_3_38MB_MSDOS_FAT12,
-	FS_4_23MB_ATARI_FAT12,
-	FS_6_78MB_MSDOS_FAT12,
-	FS_16MB_MSDOS_FAT12
-};
 
 Fl_Menu_Item fs_choices[]=
 {
-	{ "5\"25 & 8\" 160KB SSDD 300RPM FAT12",0,format_choice_cb,(void*)FS_5P25_300RPM_160KB_MSDOS_FAT12},
-	{ "5\"25 & 8\" 160KB SSDD 360RPM FAT12",0,format_choice_cb,(void*)FS_5P25_360RPM_160KB_MSDOS_FAT12},
+	{ "5\"25 & 8\" 160KB SSDD 300RPM FAT12",0,fs_choice_cb,(void*)FS_5P25_300RPM_160KB_MSDOS_FAT12},
+	{ "5\"25 & 8\" 160KB SSDD 360RPM FAT12",0,fs_choice_cb,(void*)FS_5P25_360RPM_160KB_MSDOS_FAT12},
 
-	{ "5\"25       180KB SSDD 300RPM FAT12",0,format_choice_cb,(void*)FS_5P25_300RPM_180KB_MSDOS_FAT12},
-	{ "5\"25       180KB SSDD 360RPM FAT12",0,format_choice_cb,(void*)FS_5P25_360RPM_180KB_MSDOS_FAT12},
+	{ "5\"25       180KB SSDD 300RPM FAT12",0,fs_choice_cb,(void*)FS_5P25_300RPM_180KB_MSDOS_FAT12},
+	{ "5\"25       180KB SSDD 360RPM FAT12",0,fs_choice_cb,(void*)FS_5P25_360RPM_180KB_MSDOS_FAT12},
 
-	{ "5\"25       320KB SSDD 300RPM FAT12",0,format_choice_cb,(void*)FS_5P25_SS_300RPM_320KB_MSDOS_FAT12},
-	{ "5\"25       320KB SSDD 360RPM FAT12",0,format_choice_cb,(void*)FS_5P25_SS_360RPM_320KB_MSDOS_FAT12},
+	{ "5\"25       320KB SSDD 300RPM FAT12",0,fs_choice_cb,(void*)FS_5P25_SS_300RPM_320KB_MSDOS_FAT12},
+	{ "5\"25       320KB SSDD 360RPM FAT12",0,fs_choice_cb,(void*)FS_5P25_SS_360RPM_320KB_MSDOS_FAT12},
 
-	{ "5\"25       320KB DSDD 300RPM FAT12",0,format_choice_cb,(void*)FS_5P25_DS_300RPM_320KB_MSDOS_FAT12},
-	{ "5\"25       320KB DSDD 360RPM FAT12",0,format_choice_cb,(void*)FS_5P25_DS_360RPM_320KB_MSDOS_FAT12},
+	{ "5\"25       320KB DSDD 300RPM FAT12",0,fs_choice_cb,(void*)FS_5P25_DS_300RPM_320KB_MSDOS_FAT12},
+	{ "5\"25       320KB DSDD 360RPM FAT12",0,fs_choice_cb,(void*)FS_5P25_DS_360RPM_320KB_MSDOS_FAT12},
 
-	{ "5\"25 & 8\" 360KB DSDD 300RPM FAT12",0,format_choice_cb,(void*)FS_5P25_DS_300RPM_360KB_MSDOS_FAT12},
-	{ "5\"25 & 8\" 360KB DSDD 360RPM FAT12",0,format_choice_cb,(void*)FS_5P25_DS_360RPM_360KB_MSDOS_FAT12},
+	{ "5\"25 & 8\" 360KB DSDD 300RPM FAT12",0,fs_choice_cb,(void*)FS_5P25_DS_300RPM_360KB_MSDOS_FAT12},
+	{ "5\"25 & 8\" 360KB DSDD 360RPM FAT12",0,fs_choice_cb,(void*)FS_5P25_DS_360RPM_360KB_MSDOS_FAT12},
 
-	{ "3\"5        640KB DSDD FAT12",0,format_choice_cb,(void*)FS_3P5_DS_300RPM_640KB_MSDOS_FAT12},
+	{ "3\"5        640KB DSDD FAT12",0,fs_choice_cb,(void*)FS_3P5_DS_300RPM_640KB_MSDOS_FAT12},
 		
-	{ "3\"5        720KB DSDD FAT12 ",0,format_choice_cb,(void*)FS_720KB_MSDOS_FAT12},
+	{ "3\"5        720KB DSDD FAT12 ",0,fs_choice_cb,(void*)FS_720KB_MSDOS_FAT12},
 
-	{ "5\"25       1.2MB DSHD FAT12",0,format_choice_cb,(void*)FS_5P25_300RPM_1200KB_MSDOS_FAT12},
+	{ "5\"25       1.2MB DSHD FAT12",0,fs_choice_cb,(void*)FS_5P25_300RPM_1200KB_MSDOS_FAT12},
 
-	{ "3\"5        1.44MB DSHD FAT12",0,format_choice_cb,(void*)FS_1_44MB_MSDOS_FAT12},
-	{ "3\"5        1.68MB DSHD FAT12",0,format_choice_cb,(void*)FS_1_68MB_MSDOS_FAT12},
-	{ "3\"5        2.88MB DSED FAT12",0,format_choice_cb,(void*)FS_2_88MB_MSDOS_FAT12},
-	{ "3\"5        3.38MB DSHD FAT12",0,format_choice_cb,(void*)FS_3_38MB_MSDOS_FAT12},
+	{ "3\"5        1.44MB DSHD FAT12",0,fs_choice_cb,(void*)FS_1_44MB_MSDOS_FAT12},
+	{ "3\"5        1.68MB DSHD FAT12",0,fs_choice_cb,(void*)FS_1_68MB_MSDOS_FAT12},
+	{ "3\"5        2.88MB DSED FAT12",0,fs_choice_cb,(void*)FS_2_88MB_MSDOS_FAT12},
+	{ "3\"5        3.38MB DSHD FAT12",0,fs_choice_cb,(void*)FS_3_38MB_MSDOS_FAT12},
 		
-	{ "3\"5        6.78MB DSHD FAT12",0,format_choice_cb,(void*)FS_6_78MB_MSDOS_FAT12},
+	{ "3\"5        6.78MB DSHD FAT12",0,fs_choice_cb,(void*)FS_6_78MB_MSDOS_FAT12},
 
-	{ "3\"5        360KB SSDD Atari FAT12",0,format_choice_cb,(void*)FS_360KB_ATARI_FAT12},
-	{ "3\"5        720KB DSDD Atari FAT12",0,format_choice_cb,(void*)FS_720KB_ATARI_FAT12},
-	{ "3\"5        902KB DSDD Atari FAT12",0,format_choice_cb,(void*)FS_902KB_ATARI_FAT12},
-	{ "3\"5        4.23MB DSDD Atari FAT12",0,format_choice_cb,(void*)FS_4_23MB_ATARI_FAT12},
+	{ "3\"5        360KB SSDD Atari FAT12",0,fs_choice_cb,(void*)FS_360KB_ATARI_FAT12},
+	{ "3\"5        720KB DSDD Atari FAT12",0,fs_choice_cb,(void*)FS_720KB_ATARI_FAT12},
+	{ "3\"5        902KB DSDD Atari FAT12",0,fs_choice_cb,(void*)FS_902KB_ATARI_FAT12},
+	{ "3\"5        4.23MB DSDD Atari FAT12",0,fs_choice_cb,(void*)FS_4_23MB_ATARI_FAT12},
 
-	{ "3\"5        880KB DSDD AmigaDOS",0,format_choice_cb,(void*)FS_880KB_AMIGADOS},
+	{ "3\"5        880KB DSDD AmigaDOS",0,fs_choice_cb,(void*)FS_880KB_AMIGADOS},
 		
 
 	{0}			

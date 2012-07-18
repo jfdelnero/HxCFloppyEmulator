@@ -10,21 +10,31 @@ void filesystem_generator_window::cb_bt_cancel(Fl_Button* o, void* v) {
 }
 
 filesystem_generator_window::filesystem_generator_window() {
-  { window = new Fl_Double_Window(352, 73, "Create a File System based floppy");
+  { window = new Fl_Double_Window(479, 102, "Create a File System based floppy");
     window->user_data((void*)(this));
-    { bt_injectdir = new Fl_Button(255, 10, 90, 25, "Inject directory");
+    { bt_injectdir = new Fl_Button(380, 14, 90, 25, "Create Disk");
       bt_injectdir->labelsize(12);
+      bt_injectdir->callback((Fl_Callback*)filesystem_generator_window_bt_injectdir);
     } // Fl_Button* bt_injectdir
-    { bt_cancel = new Fl_Button(255, 40, 90, 25, "Cancel");
+    { bt_cancel = new Fl_Button(380, 66, 90, 25, "Cancel");
       bt_cancel->labelsize(12);
       bt_cancel->callback((Fl_Callback*)cb_bt_cancel);
     } // Fl_Button* bt_cancel
-    { choice_filesystype = new Fl_Choice(5, 25, 240, 25, "File system type :");
+    { choice_filesystype = new Fl_Choice(5, 19, 370, 25, "File system type :");
       choice_filesystype->down_box(FL_BORDER_BOX);
       choice_filesystype->labelsize(12);
       choice_filesystype->textsize(12);
       choice_filesystype->align(FL_ALIGN_TOP_LEFT);
     } // Fl_Choice* choice_filesystype
+    { bt_selectdir = new Fl_Button(380, 40, 90, 25, "Select directory");
+      bt_selectdir->labelsize(12);
+      bt_selectdir->callback((Fl_Callback*)filesystem_generator_window_bt_selectdir);
+    } // Fl_Button* bt_selectdir
+    { input_folder = new Fl_Input(5, 63, 370, 25, "Root folder ");
+      input_folder->labelsize(12);
+      input_folder->textsize(12);
+      input_folder->align(FL_ALIGN_TOP_LEFT);
+    } // Fl_Input* input_folder
     window->end();
   } // Fl_Double_Window* window
 }
