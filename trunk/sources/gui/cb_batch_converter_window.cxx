@@ -61,6 +61,8 @@ extern "C"
 #include "cb_batch_converter_window.h"
 #include "loader.h"
 
+#include "fileselector.h"
+
 #ifdef WIN32
 #define SEPARTOR '\\'
 #else
@@ -483,36 +485,6 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 	bcw->bt_convert->activate();
 	return 0;
 }
-
-int select_dir(char * title,char * str) 
-{
-	char * dir;
-	Fl_Native_File_Chooser fnfc;
-
-	fnfc.title(title);
-	fnfc.type(Fl_Native_File_Chooser::BROWSE_DIRECTORY);
-	fnfc.filter("\t*.*\n");
-	// Show native chooser
-	switch ( fnfc.show() ) {
-		case -1:
-		{
-			break; // ERROR
-		}
-		case 1:
-		{
-			break; // CANCEL
-		}
-		default:
-		{
-			dir=(char*)fnfc.filename();
-			sprintf(str,"%s",dir);
-			return 0;
-			break; // FILE CHOSEN
-		}
-	}
-	return -1;
-}
-
 
 void batch_converter_window_bt_convert(Fl_Button* bt, void*)
 {
