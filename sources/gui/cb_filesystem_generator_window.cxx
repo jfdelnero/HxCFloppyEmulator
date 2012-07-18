@@ -46,6 +46,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifndef WIN32
+#include <stdint.h>
+#endif
+
 #include "fl_includes.h"
 #include "fl_dnd_box.h"
 
@@ -64,11 +69,16 @@ extern "C"
 
 extern s_gui_context * guicontext;
 
-static int s=0;
+#ifdef WIN32
+#define intptr_t int
+#endif
+
+
+static intptr_t s=0;
 
 void fs_choice_cb(Fl_Widget *, void *v)
 {
-	s=(int)v;
+	s=(intptr_t)v;
 }
 
 void filesystem_generator_window_bt_injectdir(Fl_Button* bt, void*)
