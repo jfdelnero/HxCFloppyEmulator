@@ -257,7 +257,7 @@ int hxc_stat( const char *filename, struct stat *buf)
  return hxc_statex(filename,buf);
 }
 
-long find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
+long hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 {
 #if defined (WIN32)
 
@@ -356,7 +356,7 @@ long find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 	return 0;
 }
 
-long find_next_file(long handleff, char *folder, char *file, filefoundinfo* fileinfo)
+long hxc_find_next_file(long handleff, char *folder, char *file, filefoundinfo* fileinfo)
 {
 	long ret;
 #if defined (WIN32)
@@ -422,7 +422,7 @@ long find_next_file(long handleff, char *folder, char *file, filefoundinfo* file
 	return ret;
 }
 
-long find_close(long handle)
+long hxc_find_close(long handle)
 {
 #if defined (WIN32)
 	FindClose((void*)handle);
@@ -435,7 +435,7 @@ long find_close(long handle)
 	return 0;
 }
 
-char * getcurrentdirectory(char *currentdirectory,int buffersize)
+char * hxc_getcurrentdirectory(char *currentdirectory,int buffersize)
 {
 	memset(currentdirectory,0,buffersize);
 #if defined (WIN32)

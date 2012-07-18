@@ -27,8 +27,8 @@ int hxc_createthread(HXCFLOPPYEMULATOR* floppycontext,void* hwcontext,THREADFUNC
 #ifndef WIN32
 //void strlwr(char *string)
 #endif
-char * strupper(char * str);
-char * strlower(char * str);
+char * hxc_strupper(char * str);
+char * hxc_strlower(char * str);
 
 /////////////// File functions ////////////////
 
@@ -42,11 +42,11 @@ int hxc_fclose(FILE * f);
 #endif
 int hxc_stat( const char *filename, struct stat *buf);
 
-long find_first_file(char *folder,char *file,filefoundinfo* fileinfo);
-long find_next_file(long handleff,char *folder,char *file,filefoundinfo* fileinfo);
-long find_close(long handle);
+long hxc_find_first_file(char *folder,char *file,filefoundinfo* fileinfo);
+long hxc_find_next_file(long handleff,char *folder,char *file,filefoundinfo* fileinfo);
+long hxc_find_close(long handle);
 
 int  hxc_mkdir(char * folder);
 
-char * getcurrentdirectory(char *currentdirectory,int buffersize);
+char * hxc_getcurrentdirectory(char *currentdirectory,int buffersize);
 
