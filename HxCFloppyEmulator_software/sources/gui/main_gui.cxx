@@ -58,6 +58,8 @@
 
 #include "batch_converter_window.h"
 #include "filesystem_generator_window.h"
+#include "cb_filesystem_generator_window.h"
+
 #include "floppy_dump_window.h"
 #include "floppy_infos_window.h"
 #include "rawfile_loader_window.h"
