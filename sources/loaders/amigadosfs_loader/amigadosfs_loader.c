@@ -87,7 +87,7 @@ int AMIGADOSFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgf
 				if(filepath!=0)
 				{
 					sprintf(filepath,"%s",imgfile);
-					strlower(filepath);
+					hxc_strlower(filepath);
 
 					if(strstr( filepath,".amigados" )!=NULL)
 					{
@@ -142,7 +142,7 @@ int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * f
 	int size,filesize;
 	RETCODE  rc;
 
-	hfindfile=find_first_file(folder,file, &FindFileData);
+	hfindfile=hxc_find_first_file(folder,file, &FindFileData);
 	if(hfindfile!=-1)
 	{
 		bbool=TRUE;
@@ -271,13 +271,13 @@ int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * f
 					return 1;
 				}
 			}
-			bbool=find_next_file(hfindfile,folder,file,&FindFileData);
+			bbool=hxc_find_next_file(hfindfile,folder,file,&FindFileData);
 		}
 
 	}
 	else printf("Error FindFirstFile\n");
 
-	find_close(hfindfile);
+	hxc_find_close(hfindfile);
 	return 0;
 }
 
