@@ -1035,3 +1035,89 @@ FLOPPY* hxcfe_sanityCheck(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk)
 	}
 	return floppydisk;
 }
+
+
+fs_config fs_config_table[]=
+{
+	{"fatst",		"",FS_720KB_ATARI_FAT12,0},
+	{"fatst902",	"",FS_902KB_ATARI_FAT12,0},
+	{"fatst360",	"",FS_360KB_ATARI_FAT12,0},
+	{"amigados",	"3\"5        880KB DSDD AmigaDOS",FS_880KB_AMIGADOS,1},
+	
+	{"fat160a",		"5\"25 & 8\" 160KB SSDD 300RPM FAT12",FS_5P25_300RPM_160KB_MSDOS_FAT12,0},
+	{"fat160b",		"5\"25 & 8\" 160KB SSDD 360RPM FAT12",FS_5P25_360RPM_160KB_MSDOS_FAT12,0},
+	
+	{"fat180a",		"5\"25       180KB SSDD 300RPM FAT12",FS_5P25_300RPM_180KB_MSDOS_FAT12,0},
+	{"fat180b",		"5\"25       180KB SSDD 360RPM FAT12",FS_5P25_360RPM_180KB_MSDOS_FAT12,0},
+		
+	{"fat320ssa",	"5\"25       320KB SSDD 300RPM FAT12",FS_5P25_SS_300RPM_320KB_MSDOS_FAT12,0},
+	{"fat320ssb",	"5\"25       320KB SSDD 360RPM FAT12",FS_5P25_SS_360RPM_320KB_MSDOS_FAT12,0},
+		
+	{"fat320dsa",	"5\"25       320KB DSDD 300RPM FAT12",FS_5P25_DS_300RPM_320KB_MSDOS_FAT12,0},
+	{"fat320dsb",	"5\"25       320KB DSDD 360RPM FAT12",FS_5P25_DS_360RPM_320KB_MSDOS_FAT12,0},
+		
+	{"fat360a",		"5\"25 & 8\" 360KB DSDD 300RPM FAT12",FS_5P25_DS_300RPM_360KB_MSDOS_FAT12,0},
+	{"fat360b",		"5\"25 & 8\" 360KB DSDD 360RPM FAT12",FS_5P25_DS_360RPM_360KB_MSDOS_FAT12,0},
+		
+	{"fat640",		"3\"5        640KB DSDD FAT12",FS_3P5_DS_300RPM_640KB_MSDOS_FAT12,0},
+		
+	{"fat720",		"3\"5        720KB DSDD FAT12",FS_720KB_MSDOS_FAT12,0},
+		
+	{"fat1200",		"5\"25       1.2MB DSHD FAT12",FS_5P25_300RPM_1200KB_MSDOS_FAT12,0},
+		
+	{"fat1440",		"3\"5        1.44MB DSHD FAT12",FS_1_44MB_MSDOS_FAT12,0},
+	{"fat1680",		"3\"5        1.68MB DSHD FAT12",FS_1_68MB_MSDOS_FAT12,0},
+	{"fat2880",		"3\"5        2.88MB DSED FAT12",FS_2_88MB_MSDOS_FAT12,0},
+	{"fat3381",		"3\"5        3.38MB DSHD FAT12",FS_3_38MB_MSDOS_FAT12,0},
+	{"fatbigst",	"3\"5        4.23MB DSDD Atari FAT12",FS_4_23MB_ATARI_FAT12,0},
+	{"fat6789",		"3\"5        6.78MB DSHD FAT12",FS_6_78MB_MSDOS_FAT12,0},
+	{"fatbig",		"",FS_16MB_MSDOS_FAT12,0},
+	{0,0,0,0}
+};
+
+
+FLOPPY * hxcfe_generateFloppy(HXCFLOPPYEMULATOR* floppycontext,char* path,int fsID,int * err_ret)
+{
+	int ret;
+	FLOPPY * newfloppy;
+	plugins_ptr func_ptr;
+	int moduleID;
+	int i;
+
+	floppycontext->hxc_printf(MSG_INFO_0,"Create file system (source path : %s) ...",path);
+
+	newfloppy=0;
+	moduleID = hxcfe_getLoaderID (floppycontext,PLUGIN_FAT12FLOPPY);
+
+	i=0;
+	while(fs_config_table[i].name && (fs_config_table[i].fsID != fsID))
+	{
+
+		i++;
+	}
+
+	if(hxcfe_checkLoaderID(floppycontext,moduleID)==HXCFE_NOERROR && fs_config_table[i].name)
+	{
+		ret=staticplugins[moduleID](floppycontext,GETFUNCPTR,&func_ptr);
+		if(ret==HXCFE_NOERROR)
+		{
+			newfloppy=malloc(sizeof(FLOPPY));
+			memset(newfloppy,0,sizeof(FLOPPY));
+			floppycontext->hxc_printf(MSG_INFO_0,"file loader found!");
+			ret=func_ptr.libLoad_DiskFile(floppycontext,newfloppy,path,fs_config_table[i].name);
+			if(ret!=HXCFE_NOERROR)
+			{
+				free(newfloppy);
+				newfloppy=0;
+			}
+			if(err_ret) *err_ret=ret;
+			return newfloppy;
+		}
+	}
+
+	floppycontext->hxc_printf(MSG_ERROR,"Bad plugin ID : 0x%x",moduleID);
+
+	ret=HXCFE_BADPARAMETER;
+	if(err_ret) *err_ret=ret;
+	return newfloppy;
+}
