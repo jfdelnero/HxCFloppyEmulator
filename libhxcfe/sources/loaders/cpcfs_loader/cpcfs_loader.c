@@ -84,7 +84,7 @@ int CPCFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				if(filepath!=0)
 				{
 					sprintf(filepath,"%s",imgfile);
-					strlower(filepath);
+					hxc_strlower(filepath);
 
 					if(strstr( filepath,".cpcfs" )!=NULL)
 					{

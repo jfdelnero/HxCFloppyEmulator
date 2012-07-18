@@ -302,10 +302,10 @@ int checkfileext(char * path,char *ext)
 		if( ( strlen(getfilenameext(path,0)) < 16 )  && ( strlen(ext) < 16 ))
 		{
 			getfilenameext(path,(char*)&pathext);
-			strlower(pathext);
+			hxc_strlower(pathext);
 			
 			strcpy((char*)srcext,ext);
-			strlower(srcext);
+			hxc_strlower(srcext);
 
 			if(!strcmp(pathext,srcext))
 			{

@@ -125,7 +125,7 @@ int KryoFluxStream_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 			else
 			{
 				getfilenamebase(imgfile,(char*)&filename);
-				strlower((char*)&filename);
+				hxc_strlower((char*)&filename);
 				found=0;
 
 				if(!strstr(filename,".0.raw") && !strstr(filename,".1.raw") )
