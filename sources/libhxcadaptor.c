@@ -186,12 +186,23 @@ int hxc_waitevent(HXCFLOPPYEMULATOR* floppycontext,int id,int timeout)
 #endif
 }
 
+#ifndef WIN32
+void hxc_msleep (unsigned int ms) {
+    int microsecs;
+    struct timeval tv;
+    microsecs = ms * 1000;
+    tv.tv_sec  = microsecs / 1000000;
+    tv.tv_usec = microsecs % 1000000;
+    select (0, NULL, NULL, NULL, &tv);  
+}
+#endif
+
 void hxc_pause(int ms)
 {
 #ifdef WIN32
-
+	Sleep(ms);
 #else
-	sleep(1);
+	hxc_msleep(ms);
 #endif
 }
 
@@ -250,7 +261,7 @@ int hxc_createthread(HXCFLOPPYEMULATOR* floppycontext,void* hwcontext,THREADFUNC
 }*/
 #endif
 
-char * strupper(char * str)
+char * hxc_strupper(char * str)
 {
 	int i;
 
@@ -268,7 +279,7 @@ char * strupper(char * str)
 	return str;
 }
 
-char * strlower(char * str)
+char * hxc_strlower(char * str)
 {
 	int i;
 
