@@ -45,7 +45,7 @@ int load_last_cfg()
 
 	memset(cfg_file_buffer,0,sizeof(cfg_file_buffer));
 
-	getcurrentdirectory(executablepath,512);
+	hxc_getcurrentdirectory(executablepath,512);
 
 	i=strlen(executablepath);
 	while(i && executablepath[i]!='\\')
@@ -91,7 +91,7 @@ int save_cfg()
 
 	memset(&cfg_file_buffer,0,sizeof(laststate));
 
-	getcurrentdirectory(executablepath,512);
+	hxc_getcurrentdirectory(executablepath,512);
 
 	i=strlen(executablepath);
 	while(i && executablepath[i]!='\\')
