@@ -209,7 +209,7 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 	unsigned char * tempstr;
 	int loaderid;
 
-	hfindfile=find_first_file(folder,file, &FindFileData); 
+	hfindfile=hxc_find_first_file(folder,file, &FindFileData); 
 	if(hfindfile!=-1)
 	{
 		bbool=1;
@@ -242,7 +242,7 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 							free(destinationfolder);
 							free(fullpath);
 							free(tempstr);
-							find_close(hfindfile);
+							hxc_find_close(hfindfile);
 							return 1;
 						}
 						free(destinationfolder);
@@ -352,13 +352,13 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 					}
 				}
 
-				bbool=find_next_file(hfindfile,folder,file,&FindFileData);	
+				bbool=hxc_find_next_file(hfindfile,folder,file,&FindFileData);	
 			}
 		}
 
 	}
 
-	find_close(hfindfile);
+	hxc_find_close(hfindfile);
 
 	return 0;
 }
