@@ -253,3 +253,55 @@ s_sectorlist * hxcfe_td_getlastsectorlist(HXCFLOPPYEMULATOR* floppycontext,s_tra
 void hxcfe_td_draw_disk(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY * floppydisk);
 void hxcfe_td_deinit(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td);
 
+////////////////////////////////////////////
+// File system functions
+
+FLOPPY * hxcfe_generateFloppy(HXCFLOPPYEMULATOR* floppycontext,char* path,int fsID,int * err_ret);
+
+enum
+{
+	FS_720KB_ATARI_FAT12=0,
+	FS_902KB_ATARI_FAT12,
+	FS_360KB_ATARI_FAT12,
+	FS_880KB_AMIGADOS,
+	
+	FS_5P25_300RPM_160KB_MSDOS_FAT12,
+	FS_5P25_360RPM_160KB_MSDOS_FAT12,
+	
+	FS_5P25_300RPM_180KB_MSDOS_FAT12,
+	FS_5P25_360RPM_180KB_MSDOS_FAT12,
+		
+	FS_5P25_SS_300RPM_320KB_MSDOS_FAT12,
+	FS_5P25_SS_360RPM_320KB_MSDOS_FAT12,
+		
+	FS_5P25_DS_300RPM_320KB_MSDOS_FAT12,
+	FS_5P25_DS_360RPM_320KB_MSDOS_FAT12,
+		
+	FS_5P25_DS_300RPM_360KB_MSDOS_FAT12,
+	FS_5P25_DS_360RPM_360KB_MSDOS_FAT12,
+		
+	FS_3P5_DS_300RPM_640KB_MSDOS_FAT12,
+		
+	FS_720KB_MSDOS_FAT12,
+		
+	FS_5P25_300RPM_1200KB_MSDOS_FAT12,
+		
+	FS_1_44MB_MSDOS_FAT12,
+	FS_1_68MB_MSDOS_FAT12,
+	FS_2_88MB_MSDOS_FAT12,
+	FS_3_38MB_MSDOS_FAT12,
+	FS_4_23MB_ATARI_FAT12,
+	FS_6_78MB_MSDOS_FAT12,
+	FS_16MB_MSDOS_FAT12
+};
+
+typedef struct _fs_config
+{
+
+	char * name;
+	char * desc;
+	int		fsID;
+	int		type;
+}fs_config;
+
+extern fs_config fs_config_table[];

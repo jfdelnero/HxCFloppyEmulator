@@ -65,3 +65,5 @@ EXPORTS
    hxcfe_td_setparams			@124
    hxcfe_td_getlastsectorlist	@125
 
+
+   hxcfe_generateFloppy			@150
