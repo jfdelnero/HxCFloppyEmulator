@@ -63,7 +63,7 @@ int W30_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"w30") || checkfileext(imgfile,"s50"))
+	if( checkfileext(imgfile,"w30") || checkfileext(imgfile,"s50") || checkfileext(imgfile,"s33") || checkfileext(imgfile,"s55") )
 	{
 
 		filesize=getfilesize(imgfile);
@@ -75,18 +75,18 @@ int W30_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		if(filesize==737280)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile : W30 file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile : W30/S50/S330/S550 file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile : non W30 file ! - bad file size! ");
+			floppycontext->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile : non W30/S50/S330/S550 file ! - bad file size! ");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile : non W30 file !");
+		floppycontext->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile : non W30/S50/S330/S550 file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -118,7 +118,7 @@ int W30_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	filesize=ftell(f);
 	fseek (f , 0 , SEEK_SET);
 
-	sectorsize=512; // wd30 file support only 512bytes/sector floppies.
+	sectorsize=512; // w30/S330/S50/S550 file support only 512bytes/sector floppies.
 
 	gap3len=255;
 	interleave=1;
