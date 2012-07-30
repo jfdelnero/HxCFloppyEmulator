@@ -143,12 +143,12 @@ typedef struct isoibm_config_
 
 	unsigned char	data_gap4b;
 	unsigned int	len_gap4b;
-	
+
+	unsigned char	track_id;
+	unsigned char	side_id;
+	unsigned char	sector_id;
+	unsigned char	sector_size_id;
 }isoibm_config;
-
-
-
-
 
 
 
@@ -158,6 +158,7 @@ typedef struct isoibm_config_
 #define ISOFORMAT_DD 0x4
 #define ISOFORMAT_DD11S 0x5
 #define AMIGAFORMAT_DD  0x6
+#define TYCOMFORMAT_SD  0x7
 
 static isoibm_config formatstab[]=
 {    //     I         --gap4a --i sync --     index mark      --  gap1 --h sync -- --d sync --    add mark            -- gap2 --
@@ -187,7 +188,9 @@ static isoibm_config formatstab[]=
 		
 		0xFF,84, // gap3 config
 		
-		0xFF,255 // gap4 config
+		0xFF,255, // gap4 config
+
+		0xFF,0xFF,0xFF,0xFF // Track - Side - Sector - Size
 	},
 	
 	
@@ -217,7 +220,9 @@ static isoibm_config formatstab[]=
 		
 		0x4E,84, // gap3 config
 		
-		0x4E,255 // gap4 config
+		0x4E,255, // gap4 config
+		
+		0xFF,0xFF,0xFF,0xFF // Track - Side - Sector - Size
 		
 	},
 	
@@ -247,7 +252,9 @@ static isoibm_config formatstab[]=
 		
 		0xFF,84, // gap3 config
 		
-		0xFF,255 // gap4 config
+		0xFF,255, // gap4 config
+
+		0xFF,0xFF,0xFF,0xFF // Track - Side - Sector - Size
 		
 	},
 	
@@ -276,7 +283,9 @@ static isoibm_config formatstab[]=
 		0xFB,0xFF,1,
 		
 		0x4E,84, // gap3 config
-		0x4E,255 // gap4 config
+		0x4E,255, // gap4 config
+
+		0xFF,0xFF,0xFF,0xFF // Track - Side - Sector - Size
 		
 	},	
 	{	
@@ -305,7 +314,9 @@ static isoibm_config formatstab[]=
 		
 		0x4E,5,  // gap3 config
 		
-		0x4E,0xFF // gap4 config
+		0x4E,0xFF, // gap4 config
+
+		0xFF,0xFF,0xFF,0xFF // Track - Side - Sector - Size
 		
 	},	
 	{	
@@ -334,10 +345,43 @@ static isoibm_config formatstab[]=
 		
 		0x00,0,  // gap3 config
 		
-		0xFF,0xFF // gap4 config
+		0xFF,0xFF, // gap4 config
+
+		0xFF,0xFF,0xFF,0xFF // Track - Side - Sector - Size
 		
 	},	
 
+	{	
+		TYCOMFORMAT_SD,
+		
+		0xFF,00, // post index gap4 config
+		
+		0x00,00, // index sync config 
+		
+		0x00,0x00,0,// index mark coding
+		0xFC,0xD7,1,
+		
+		0xFF,16, // gap1 config
+		
+		0x00,04, // h sync config
+		
+		0x00,04, // d sync config
+		
+		0x00,0x00,0,// address mark coding
+		0xFE,0xC7,1,
+		
+		0xFF,6, // gap2 config
+		
+		0x00,0x00,0,// data mark coding
+		0xFB,0xC7,1,
+		
+		0xFF,84, // gap3 config
+		
+		0xFF,255, // gap4 config
+
+		0xFF,0x00,0xFF,0x00 // Track - Side - Sector - Size
+		
+	},
 {	
 		0,
 		
@@ -364,7 +408,9 @@ static isoibm_config formatstab[]=
 		
 		0x4E,84,
 		
-		0x4E,255
+		0x4E,255,
+
+		0xFF,0xFF,0xFF,0xFF // Track - Side - Sector - Size
 		}
 };
 

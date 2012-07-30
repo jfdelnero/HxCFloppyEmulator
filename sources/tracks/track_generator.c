@@ -371,6 +371,7 @@ int pushTrackCode(track_generator *tg,unsigned char data,unsigned char clock,SID
 	{
 		case IBMFORMAT_SD:
 		case ISOFORMAT_SD:
+		case TYCOMFORMAT_SD:
 			getFMcode(tg,data,clock,&side->databuffer[tg->last_bit_offset/8]);
 			tg->last_bit_offset=tg->last_bit_offset+(4*8);
 		break;
@@ -552,6 +553,7 @@ void FastMFMFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_da
 	{
 		case IBMFORMAT_SD:
 		case ISOFORMAT_SD:
+		case TYCOMFORMAT_SD:
 			FastFMgenerator(tg,side,track_data,size);
 		break;
 
@@ -626,7 +628,7 @@ int ISOIBMGetTrackSize(int TRACKTYPE,unsigned int numberofsector,unsigned int se
 {
 	unsigned int i,j;
 	isoibm_config * configptr;
-	unsigned long finalsize;
+	unsigned long finalsize,headersize;
 	unsigned long totaldatasize;
 
 
@@ -648,9 +650,16 @@ int ISOIBMGetTrackSize(int TRACKTYPE,unsigned int numberofsector,unsigned int se
 		}
 	}
 
+	headersize = 0;
+
+	if(configptr->sector_id) headersize++;
+	if(configptr->sector_size_id) headersize++;
+	if(configptr->side_id) headersize++;
+	if(configptr->track_id) headersize++;
+
 	finalsize=configptr->len_gap4a+configptr->len_isync+configptr->len_indexmarkp1+configptr->len_indexmarkp2 + \
 			  configptr->len_gap1 +  \
-			  numberofsector*(configptr->len_ssync+configptr->len_addrmarkp1+configptr->len_addrmarkp2 +6 +configptr->len_gap2 +configptr->len_dsync+configptr->len_datamarkp1+configptr->len_datamarkp2+sectorsize+2+gap3len) +\
+			  numberofsector*( configptr->len_ssync + configptr->len_addrmarkp1 + configptr->len_addrmarkp2 + headersize + 2 +configptr->len_gap2 + configptr->len_dsync + configptr->len_datamarkp1 + configptr->len_datamarkp2 + sectorsize + 2 + gap3len) +\
 			  totaldatasize;
 
 	return finalsize;
@@ -731,7 +740,7 @@ unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackenco
 	unsigned int i,j;
 	unsigned long tck_period;
 	isoibm_config * configptr;
-	unsigned long total_track_size,sector_size;
+	unsigned long total_track_size,sector_size,track_size;
 	unsigned char gap3;
 
 	configptr=0;
@@ -747,6 +756,7 @@ unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackenco
 	{
 		case IBMFORMAT_SD:
 		case ISOFORMAT_SD:
+		case TYCOMFORMAT_SD:
 			total_track_size=total_track_size*4;
 			break;
 
@@ -777,30 +787,41 @@ unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackenco
 			gap3=sectorconfigtab[j].gap3;
 		}
 		configptr=&formatstab[sectorconfigtab[j].trackencoding-1];
-		sector_size=(configptr->len_ssync+configptr->len_addrmarkp1+configptr->len_addrmarkp2 +6 +configptr->len_gap2 +configptr->len_dsync+configptr->len_datamarkp1+configptr->len_datamarkp2+2+gap3);
-		sector_size=sector_size+sectorconfigtab[j].sectorsize+2;
+	
+		sector_size = sectorconfigtab[j].sectorsize;
+		if(sectorconfigtab[j].trackencoding == TYCOMFORMAT_SD)
+			sector_size = 128;
+
+		track_size=(configptr->len_ssync+configptr->len_addrmarkp1+configptr->len_addrmarkp2 + 2 +configptr->len_gap2 +configptr->len_dsync+configptr->len_datamarkp1+configptr->len_datamarkp2+2+gap3);
+		track_size=track_size+sector_size + 2;
+
+		if(configptr->sector_id) track_size++;
+		if(configptr->sector_size_id) track_size++;
+		if(configptr->side_id) track_size++;
+		if(configptr->track_id) track_size++;
 
 		switch(sectorconfigtab[j].trackencoding)
 		{
 			case IBMFORMAT_SD:
 			case ISOFORMAT_SD:
-				sector_size=sector_size*4;
+			case TYCOMFORMAT_SD:
+				track_size=track_size*4;
 				break;
 
 			case IBMFORMAT_DD:
 			case ISOFORMAT_DD:
 			case ISOFORMAT_DD11S:
-				sector_size=sector_size*2;
+				track_size=track_size*2;
 				break;
 
 			default:
-				sector_size=sector_size*2;
+				track_size=track_size*2;
 				break;
 		}
 
-		total_track_size=total_track_size+sector_size;
+		total_track_size=total_track_size+track_size;
 
-		tck_period=tck_period+(10000000/((sectorconfigtab[0].bitrate*100)/(sector_size*4)));
+		tck_period=tck_period+(10000000/((sectorconfigtab[0].bitrate*100)/(track_size*4)));
 
 	}
 	
@@ -924,6 +945,7 @@ SIDE * tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short n
 	{
 		case IBMFORMAT_SD:
 		case ISOFORMAT_SD:
+		case TYCOMFORMAT_SD:
 			currentside->track_encoding=ISOIBM_FM_ENCODING;
 		break;
 
@@ -970,7 +992,7 @@ void tg_addISOSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE
 	unsigned char   CRC16_High;
 	unsigned char   CRC16_Low;
 	unsigned char   crctable[32];
-	unsigned long   startindex,j;
+	unsigned long   startindex,j,sectorsize;
 
 	startindex=tg->last_bit_offset/8;
 	
@@ -1009,32 +1031,49 @@ void tg_addISOSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE
 	}
 
 	// track number
-	pushTrackCode(tg,sectorconfig->cylinder,0xFF,currentside,sectorconfig->trackencoding);
-	CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->cylinder,(unsigned char*)&crctable );
+	if(formatstab[trackencoding].track_id)
+	{
+		pushTrackCode(tg,sectorconfig->cylinder,0xFF,currentside,sectorconfig->trackencoding);
+		CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->cylinder,(unsigned char*)&crctable );
+	}
 
 	//01 Side # The side number this is (0 or 1) 
-	pushTrackCode(tg,sectorconfig->head,  0xFF,currentside,sectorconfig->trackencoding);
-	CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->head,(unsigned char*)&crctable );
+	if(formatstab[trackencoding].side_id)
+	{
+		pushTrackCode(tg,sectorconfig->head,  0xFF,currentside,sectorconfig->trackencoding);
+		CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->head,(unsigned char*)&crctable );
+	}
 			
 	//01 Sector # The sector number 
-	pushTrackCode(tg,sectorconfig->sector,0xFF,currentside,sectorconfig->trackencoding);
-	CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->sector,(unsigned char*)&crctable );
-			
-	//01 Sector size: 02=512. (00=128, 01=256, 02=512, 03=1024) 
-	if(sectorconfig->use_alternate_sector_size_id)
+	if(formatstab[trackencoding].sector_id)
 	{
-		c=sectorconfig->alternate_sector_size_id;
+		pushTrackCode(tg,sectorconfig->sector,0xFF,currentside,sectorconfig->trackencoding);
+		CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->sector,(unsigned char*)&crctable );
 	}
-	else
-	{	
-		c=0;
-		while(((unsigned int)(128<<(unsigned int)c)!=sectorconfig->sectorsize) && c<8)
+			
+	
+	//01 Sector size: 02=512. (00=128, 01=256, 02=512, 03=1024) 
+	
+	sectorsize = 128;
+
+	if(formatstab[trackencoding].sector_size_id)
+	{
+		sectorsize = sectorconfig->sectorsize;
+		if(sectorconfig->use_alternate_sector_size_id)
 		{
-			c++;
+			c=sectorconfig->alternate_sector_size_id;
 		}
+		else
+		{	
+			c=0;
+			while(((unsigned int)(128<<(unsigned int)c) != sectorsize ) && c<8)
+			{
+				c++;
+			}
+		}
+		pushTrackCode(tg,c,0xFF,currentside,sectorconfig->trackencoding);
+		CRC16_Update(&CRC16_High,&CRC16_Low, c,(unsigned char*)&crctable );
 	}
-	pushTrackCode(tg,c,0xFF,currentside,sectorconfig->trackencoding);
-	CRC16_Update(&CRC16_High,&CRC16_Low, c,(unsigned char*)&crctable );
 
 	//02 CRC The sector Header CRC
 	if(sectorconfig->use_alternate_header_crc&0x2)
@@ -1100,17 +1139,17 @@ void tg_addISOSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE
 	sectorconfig->startdataindex=tg->last_bit_offset/8;
 	if(sectorconfig->input_data)
 	{
-		FastMFMFMgenerator(tg,currentside,sectorconfig->input_data,sectorconfig->sectorsize,sectorconfig->trackencoding);
+		FastMFMFMgenerator(tg,currentside,sectorconfig->input_data,sectorsize,sectorconfig->trackencoding);
 
 		// data crc			
-		for(i=0;i<sectorconfig->sectorsize;i++)
+		for(i=0;i<sectorsize;i++)
 		{
 			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->input_data[i],(unsigned char*)&crctable );
 		}
 	}
 	else
 	{
-		for(i=0;i<sectorconfig->sectorsize;i++)
+		for(i=0;i<sectorsize;i++)
 		{
 			pushTrackCode(tg,sectorconfig->fill_byte,0xFF,currentside,sectorconfig->trackencoding);
 			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->fill_byte,(unsigned char*)&crctable );
@@ -1162,6 +1201,7 @@ void tg_addISOSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE
 	{
 		case IBMFORMAT_SD:
 		case ISOFORMAT_SD:
+		case TYCOMFORMAT_SD:
 			trackenc=ISOIBM_FM_ENCODING;
 		break;
 
@@ -1363,6 +1403,7 @@ void tg_addSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * 
 		case ISOFORMAT_SD:
 		case ISOFORMAT_DD:
 		case ISOFORMAT_DD11S:
+		case TYCOMFORMAT_SD:
 			tg_addISOSectorToTrack(tg,sectorconfig,currentside);
 			break;
 
@@ -1486,6 +1527,7 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 				{
 					case IBMFORMAT_SD:
 					case ISOFORMAT_SD:
+					case TYCOMFORMAT_SD:
 						computedgap3=computedgap3/(2*8);
 					break;
 

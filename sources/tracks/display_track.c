@@ -528,17 +528,29 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 
 				if( (xpos<td->xsize) && (ypos<td->ysize) && ypos>=0 )
 				{
-					td->framebuffer[(td->xsize*ypos) + xpos]++;
+					if(td->x_us>1000)
+					{
+						td->framebuffer[(td->xsize*ypos) + xpos]++;
 
-					ypos--;
-					if( (ypos<td->ysize) && ypos>=0 )
-					{
-						td->framebuffer[(td->xsize*ypos) + xpos]++;
+						ypos--;
+						if( (ypos<td->ysize) && ypos>=0 )
+						{
+							td->framebuffer[(td->xsize*ypos) + xpos]++;
+						}
+						ypos=ypos+2;
+						if( (ypos<td->ysize) && ypos>=0 )
+						{
+							td->framebuffer[(td->xsize*ypos) + xpos]++;
+						}
 					}
-					ypos=ypos+2;
-					if( (ypos<td->ysize) && ypos>=0 )
+					else
 					{
-						td->framebuffer[(td->xsize*ypos) + xpos]++;
+
+						for(ypos= td->ysize - 40 ; ypos > (td->ysize - 250) ; ypos--)
+						{
+							td->framebuffer[(td->xsize*ypos) + xpos]=255;
+						}
+
 					}
 
 				}
@@ -691,6 +703,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,ISOIBM_MFM_ENCODING);
 	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,AMIGA_MFM_ENCODING);
 	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,ISOIBM_FM_ENCODING);
+	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,TYCOM_FM_ENCODING);
 
 
 	//display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,EMU_FM_ENCODING);
@@ -724,34 +737,34 @@ void circle(s_trackdisplay *td,int x_centre,int y_centre,int r,unsigned int colo
 
 	while(y>=x)
 	{
-		
-        plot(td, x+x_centre, y+y_centre , color);
-        plot(td, y+x_centre, x+y_centre , color);
-        plot(td, -x+x_centre, y+y_centre  , color);
-        plot(td, -y+x_centre, x+y_centre  , color);
-        plot(td, x+x_centre, -y+y_centre  , color);
-        plot(td, y+x_centre, -x+y_centre  , color);
-        plot(td, -x+x_centre, -y+y_centre  , color);
-        plot(td, -y+x_centre, -x+y_centre  , color);
+
+		plot(td, x+x_centre, y+y_centre , color);
+		plot(td, y+x_centre, x+y_centre , color);
+		plot(td, -x+x_centre, y+y_centre  , color);
+		plot(td, -y+x_centre, x+y_centre  , color);
+		plot(td, x+x_centre, -y+y_centre  , color);
+		plot(td, y+x_centre, -x+y_centre  , color);
+		plot(td, -x+x_centre, -y+y_centre  , color);
+		plot(td, -y+x_centre, -x+y_centre  , color);
 
 		if (d >= 2*x)
 		{
 			d = d - ( 2 * x ) -1;
-            x = x+1;
+			x = x+1;
 
 		}
 		else
 		{
 			if(d <= 2*(r-y))
 			{
-                d = d+2*y-1;
-                y = y-1;     
+				d = d+2*y-1;
+				y = y-1;
 			}
 			else
 			{
-                d = d+2*(y-x-1);
-                y = y-1;
-                x = x+1;
+				d = d+2*(y-x-1);
+				y = y-1;
+				x = x+1;
 			}
 		}
 	}

@@ -35,6 +35,7 @@
 #define AMIGA_MFM_ENCODING				0x01
 #define ISOIBM_FM_ENCODING				0x02
 #define EMU_FM_ENCODING					0x03
+#define TYCOM_FM_ENCODING				0x04
 #define UNKNOWN_ENCODING				0xFF
 
 typedef struct SIDE_
