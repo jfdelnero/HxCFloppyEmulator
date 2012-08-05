@@ -735,7 +735,7 @@ void tg_initTrackEncoder(track_generator *tg)
 	tg->mfm_last_bit=0xFFFF;
 }
 
-unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackencoding,unsigned int bitrate,unsigned int numberofsector,SECTORCONFIG * sectorconfigtab,unsigned long * track_period)
+unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackencoding,unsigned int bitrate,unsigned int numberofsector,SECTORCONFIG * sectorconfigtab,unsigned int pregaplen,unsigned long * track_period)
 {
 	unsigned int i,j;
 	unsigned long tck_period;
@@ -749,7 +749,7 @@ unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackenco
 
 	configptr=&formatstab[trackencoding-1];
 
-	total_track_size=configptr->len_gap4a+configptr->len_isync+configptr->len_indexmarkp1+configptr->len_indexmarkp2 + \
+	total_track_size=(configptr->len_gap4a+pregaplen)+configptr->len_isync+configptr->len_indexmarkp1+configptr->len_indexmarkp2 + \
 					 configptr->len_gap1;
 
 	switch(trackencoding)
@@ -833,7 +833,7 @@ unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackenco
 	return total_track_size;
 }
 
-SIDE * tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short numberofsector,unsigned char trackencoding,unsigned int bitrate,SECTORCONFIG * sectorconfigtab)
+SIDE * tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short numberofsector,unsigned char trackencoding,unsigned int bitrate,SECTORCONFIG * sectorconfigtab,unsigned short pregap)
 {
 	SIDE * currentside;
 	int variable_param,tracklen;
@@ -910,7 +910,7 @@ SIDE * tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short n
 	if(numberofsector)
 	{
 		//gap4a (post index gap4)
-		for(i=0;i<formatstab[trackencoding-1].len_gap4a;i++)
+		for(i=0;i< ( formatstab[trackencoding-1].len_gap4a + pregap );i++)
 		{
 			pushTrackCode(tg,formatstab[trackencoding-1].data_gap4a,0xFF,currentside,trackencoding);
 		}
@@ -1447,7 +1447,7 @@ void tg_completeTrack(track_generator *tg, SIDE * currentside,unsigned char trac
 	}
 }
 
-SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorconfigtab,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,int indexlen,int indexpos)
+SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorconfigtab,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned short pregap,int indexlen,int indexpos)
 {
 	unsigned short i;
 	unsigned long tracksize;
@@ -1466,10 +1466,9 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 	tg_initTrackEncoder(&tg);
 
 	// get minimum track size
-	tracksize=tg_computeMinTrackSize(&tg,trackencoding,bitrate,number_of_sector,sectorconfigtab,&track_period);
+	tracksize=tg_computeMinTrackSize(&tg,trackencoding,bitrate,number_of_sector,sectorconfigtab,pregap,&track_period);
 	
 	wanted_trackperiod=(100000*60)/rpm;
-	
 	
 	// compute the adjustable gap3 lenght
 	// how many gap3 we need to compute ?
@@ -1481,7 +1480,6 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 		{
 			gap3tocompute++;
 		}
-
 	}
 
 	indexperiod=0;
@@ -1489,7 +1487,6 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 	{
 		indexperiod=(indexlen&0xFFFFFF)/10;
 	}
-
 
 	//first try : get a standard value...
 	if(gap3tocompute==number_of_sector)
@@ -1504,15 +1501,14 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 			}
 			gap3tocompute=0;
 		}
-
 	}
+
 	// compute the dispatched the gap3 period
 	gap3period=0;
 	if(gap3tocompute && (wanted_trackperiod>(track_period+indexperiod)))
 	{
 		gap3period=wanted_trackperiod-(track_period+indexperiod);
 		gap3period=gap3period/gap3tocompute;
-
 
 		// set the right gap3 lenght according to the sector bitrate
 		for(i=0;i<number_of_sector;i++)
@@ -1548,8 +1544,7 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 	}
 
 	// recompute the track size with the new gap settings.
-	tracksize=tg_computeMinTrackSize(&tg,trackencoding,bitrate,number_of_sector,sectorconfigtab,&track_period);
-
+	tracksize=tg_computeMinTrackSize(&tg,trackencoding,bitrate,number_of_sector,sectorconfigtab,pregap,&track_period);
 
 	// adjust the track lenght to get the right rpm.
 	if(wanted_trackperiod>track_period)
@@ -1563,9 +1558,8 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 		tracksize=(tracksize&(~0x1F))+0x20;
 	}
 
-
 	// alloc the track...
-	currentside=tg_initTrack(&tg,tracksize,number_of_sector,trackencoding,bitrate,sectorconfigtab);
+	currentside=tg_initTrack(&tg,tracksize,number_of_sector,trackencoding,bitrate,sectorconfigtab,pregap);
 
 	// and write all sectors to it...
 	for(i=0;i<number_of_sector;i++)
@@ -1592,7 +1586,7 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 
 
 
-SIDE * tg_generateTrack(unsigned char * sectors_data,unsigned short sector_size,unsigned short number_of_sector,unsigned char track,unsigned char side,unsigned char sectorid,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned char gap3, int indexlen,int indexpos)
+SIDE * tg_generateTrack(unsigned char * sectors_data,unsigned short sector_size,unsigned short number_of_sector,unsigned char track,unsigned char side,unsigned char sectorid,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned char gap3,unsigned short pregap, int indexlen,int indexpos)
 {
 	unsigned short i;
 	SIDE * currentside;
@@ -1614,7 +1608,7 @@ SIDE * tg_generateTrack(unsigned char * sectors_data,unsigned short sector_size,
 		sectorconfigtab[i].sectorsleft=number_of_sector-i; // Used in Amiga tracks.
 	}
 
-	currentside=tg_generateTrackEx(number_of_sector,sectorconfigtab,interleave,skew,bitrate,rpm,trackencoding,indexlen,indexpos);
+	currentside=tg_generateTrackEx(number_of_sector,sectorconfigtab,interleave,skew,bitrate,rpm,trackencoding,pregap,indexlen,indexpos);
 	free(sectorconfigtab);
 
 	return currentside;

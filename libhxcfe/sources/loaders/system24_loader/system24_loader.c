@@ -191,7 +191,7 @@ int System24_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 				ptr = ptr + sectorconfig[k].sectorsize;
 				k++;
 
-				currentcylinder->sides[i]=tg_generateTrackEx(7,sectorconfig,1,0,500000,300,trackformat,2500|NO_SECTOR_UNDER_INDEX,-2500);
+				currentcylinder->sides[i]=tg_generateTrackEx(7,sectorconfig,1,0,500000,300,trackformat,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
 			}
 		}
 

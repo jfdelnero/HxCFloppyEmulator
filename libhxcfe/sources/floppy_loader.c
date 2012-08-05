@@ -617,7 +617,11 @@ int hxcfe_getNumberOfSide(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp)
 	return fp->floppyNumberOfSide;
 }
 
-
+int hxcfe_setTrackPreGap (FBuilder* fb,unsigned short pregap)
+{
+	fb->fb_stack[fb->fb_stack_pointer].pregap=pregap;
+	return HXCFE_NOERROR;
+}
 int hxcfe_pushTrack (FBuilder* fb,unsigned int rpm,int number,int side,int type)
 {
 	if(fb->fb_stack_pointer<(STACK_SIZE-1))
@@ -630,7 +634,6 @@ int hxcfe_pushTrack (FBuilder* fb,unsigned int rpm,int number,int side,int type)
 		fb->fb_stack[fb->fb_stack_pointer].track_number=number;
 		fb->fb_stack[fb->fb_stack_pointer].type=type;
 		fb->fb_stack[fb->fb_stack_pointer].sectorconfig.trackencoding=type;
-		
 		fb->fb_stack[fb->fb_stack_pointer].numberofsector=0;
 		
 		fb->fb_stack[fb->fb_stack_pointer].sc_stack_pointer=0;
@@ -781,6 +784,7 @@ int hxcfe_popTrack (FBuilder* fb)
 																						current_fb_track_state->bitrate,
 																						current_fb_track_state->rpm,
 																						current_fb_track_state->type,
+																						current_fb_track_state->pregap,
 																						current_fb_track_state->indexlen|sui_flag,current_fb_track_state->indexpos);
 
 		for(i=0;i<current_fb_track_state->numberofsector;i++)
@@ -841,6 +845,7 @@ FLOPPY* hxcfe_getFloppy(FBuilder* fb)
 																			fb->floppydisk->tracks[j]->floppyRPM,
 																			(unsigned char)trackencoding,
 																			255,
+																			0,
 																			fb->fb_stack[0].indexlen,
 																			fb->fb_stack[0].indexpos);
 					}
