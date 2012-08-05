@@ -36,6 +36,7 @@ EXPORTS
    hxcfe_setTrackBitrate	@54
    hxcfe_setIndexPosition	@55
    hxcfe_setIndexLength		@56
+   hxcfe_setTrackPreGap		@57
 
    hxcfe_addSector			@70
    hxcfe_setSectorBitrate   @71

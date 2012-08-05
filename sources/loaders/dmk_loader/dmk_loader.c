@@ -395,7 +395,7 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 		savebuffer(fname,track_density, tracklen);
 	}*/
 	
-	currentside=tg_initTrack(&tg,tracksize,0,trackformat,DEFAULT_DD_BITRATE,0);
+	currentside=tg_initTrack(&tg,tracksize,0,trackformat,DEFAULT_DD_BITRATE,0,0);
 	currentside->number_of_sector=k;
 	k=0;
 	do

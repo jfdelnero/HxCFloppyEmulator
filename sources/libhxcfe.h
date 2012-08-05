@@ -109,6 +109,7 @@ typedef struct fb_track_state_
 	unsigned char skew;
 	unsigned char type;
 	unsigned short rpm;
+	unsigned short pregap;
 	int bitrate;
 
 	int indexlen;
@@ -134,6 +135,8 @@ FBuilder* hxcfe_initFloppy(HXCFLOPPYEMULATOR* floppycontext,int nb_of_track,int 
 int	hxcfe_pushTrack (FBuilder*,unsigned int rpm,int number,int side,int type);
 int hxcfe_setTrackInterleave (FBuilder*,int interleave);
 int hxcfe_setTrackSkew (FBuilder*,int skew);
+
+int hxcfe_setTrackPreGap (FBuilder* fb,unsigned short pregap);
 
 int hxcfe_setIndexPosition (FBuilder*,int position,int allowsector);
 int hxcfe_setIndexLength (FBuilder*,int Length);
