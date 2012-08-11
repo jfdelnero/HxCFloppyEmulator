@@ -87,7 +87,7 @@ void update_graph(floppy_infos_window * w)
 		td=guicontext->td;
 		if(td)
 		{
-			hxcfe_td_setparams(guicontext->hxcfe,td,(int)(w->x_time->value()*1000),(int)w->y_time->value(),(int)(w->x_offset->value()*1000));
+			hxcfe_td_setparams(guicontext->hxcfe,td,(int)(w->x_time->value()),(int)w->y_time->value(),(int)(w->x_offset->value()*1000));
 
 			if(guicontext->loadedfloppy)
 			{
@@ -166,6 +166,21 @@ void update_graph(floppy_infos_window * w)
 
 				w->object_txt->buffer(w->buf);
 			}
+			else
+			{
+				ptr1=(unsigned char*)td->framebuffer;
+				k=0;
+				j=0;
+				for(i=0;i<td->xsize*td->ysize;i++)
+				{
+					ptr1[j++]=0xFF;//ptr1[k+0];
+					ptr1[j++]=0xFF;//ptr1[k+1];
+					ptr1[j++]=0xFF;//ptr1[k+2];
+					k=k+4;
+				}
+
+				fl_draw_image((unsigned char *)td->framebuffer, w->floppy_map_disp->x(), w->floppy_map_disp->y(), td->xsize, td->ysize, 3, 0);
+			}
 		}
 	}
 }
@@ -222,7 +237,24 @@ void disk_infos_window_callback(Fl_Widget *o, void *v)
 {
 	floppy_infos_window *window;
 	
-	window=((floppy_infos_window*)(o->user_data()));	
+	window=((floppy_infos_window*)(o->user_data()));
+
+	if(window->x_time->value()>1000)
+	{
+		window->x_time->step(1000);
+	}
+	else
+	{
+		if(window->x_time->value()>100)
+		{
+			window->x_time->step(64);
+		}
+		else
+		{
+			window->x_time->step(1);
+		}
+
+	}
 	update_graph(window);
 }
 
@@ -253,7 +285,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 	if(dnd->event() == FL_ENTER)
 	{
-		stepperpix_x=(fiw->x_time->value()*1000)/disp_xsize;
+		stepperpix_x=(fiw->x_time->value())/disp_xsize;
 		stepperpix_y=(fiw->y_time->value())/(double)disp_ysize;
 
 		xpos=Fl::event_x() - disp_xpos;
