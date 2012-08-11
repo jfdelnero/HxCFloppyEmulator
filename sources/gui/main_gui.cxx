@@ -285,7 +285,12 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 				loaderid=hxcfe_getLoaderID(guicontext->hxcfe,(char*)plugid_lst[i]);
 				
 				if(loaderid>=0)
-				{				
+				{
+					if(!guicontext->autoselectmode)
+					{
+						hxcfe_floppySetInterfaceMode(guicontext->hxcfe,guicontext->loadedfloppy,guicontext->interfacemode);
+					}
+					hxcfe_floppySetDoubleStep(guicontext->hxcfe,guicontext->loadedfloppy,guicontext->doublestep);
 					hxcfe_floppyExport(guicontext->hxcfe,guicontext->loadedfloppy,(char*)fnfc.filename(),loaderid);
 				}
 				break; // FILE CHOSEN
@@ -482,7 +487,10 @@ static void tick_mw(void *v) {
 Main_Window::Main_Window()
   : Fl_Window(WINDOW_XSIZE,428)
 {
-	int i;		
+	int i;
+	Fl_RGB_Image *fl_i;
+	char * data;
+	
 	txtindex=0;
 	i=0;
 	evt_txt=0;
@@ -506,8 +514,21 @@ Main_Window::Main_Window()
 #ifdef WIN32
 	this->icon((char *)LoadIcon(fl_display, MAKEINTRESOURCE(101)));
 #endif
-	group.image(new Fl_Tiled_Image(new Fl_BMP_Image("floppy.bmp")));
+	//fl_i = new Fl_Image(100,100,1);
+//	fl_i->draw_empty(100,100);//data((char*)malloc(100*100),1);
+	//data = fl_i->data;
+
+	data =(char*) malloc(100*100*4);
+
+	for(i=0;i<100*100*4;i++)
+		data[i]=rand();
+	//group.image(new Fl_Tiled_Image(fl_i));
+	//group.image(new Fl_Tiled_Image(new Fl_BMP_Image("floppy.bmp")));
+	
+	fl_i = new Fl_RGB_Image((const unsigned char *)data ,100,100,32,100*4);
+	//group.image(fl_i);
 	group.align(FL_ALIGN_TEXT_OVER_IMAGE);
+
 
 	for(i=0;i<9;i++)
 	{
@@ -588,7 +609,7 @@ Main_Window::Main_Window()
 	// Floppy view window
 	this->infos_window=new floppy_infos_window();	
 	this->infos_window->x_offset->bounds(0.0, 100);
-	this->infos_window->x_time->scrollvalue(300,1,1,1000);
+	this->infos_window->x_time->scrollvalue(300*1000,1,1,1000*1000);
 	this->infos_window->y_time->scrollvalue(16,1,2,64);
 	this->infos_window->track_view_bt->value(1);
 	this->infos_window->disc_view_bt->value(0);
