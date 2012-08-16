@@ -19,6 +19,7 @@
 		unsigned char fillvalue;
 		unsigned char intersidesectornumbering;
 		unsigned char sideskew;
+		unsigned long pregap;
 	}cfgrawfile;
 
 

@@ -93,14 +93,14 @@ Fl_Menu_Item fs_choices[]=
 
 Fl_Menu_Item sectorsize_choices[]=
 {
-	{ "128",0,raw_loader_window_datachanged,(void*)128},
-	{ "256",0,raw_loader_window_datachanged,(void*)256},
-	{ "512",0,raw_loader_window_datachanged,(void*)512},
-	{ "1024",0,raw_loader_window_datachanged,(void*)1024},
-	{ "2048",0,raw_loader_window_datachanged,(void*)2048},
-	{ "4096",0,raw_loader_window_datachanged,(void*)4096},
-	{ "8192",0,raw_loader_window_datachanged,(void*)8192},
-	{ "16384",0,raw_loader_window_datachanged,(void*)16384},
+	{ "128 Bytes",0,raw_loader_window_datachanged,(void*)128},
+	{ "256 Bytes",0,raw_loader_window_datachanged,(void*)256},
+	{ "512 Bytes",0,raw_loader_window_datachanged,(void*)512},
+	{ "1024 Bytes",0,raw_loader_window_datachanged,(void*)1024},
+	{ "2048 Bytes",0,raw_loader_window_datachanged,(void*)2048},
+	{ "4096 Bytes",0,raw_loader_window_datachanged,(void*)4096},
+	{ "8192 Bytes",0,raw_loader_window_datachanged,(void*)8192},
+	{ "16384 Bytes",0,raw_loader_window_datachanged,(void*)16384},
 	{0}
 };
 
@@ -132,6 +132,13 @@ Fl_Menu_Item track_type_choices[]=
 	{ "MFM",0,raw_loader_window_datachanged,(void*)ISOFORMAT_DD},
 	{ "IBM MFM",0,raw_loader_window_datachanged,(void*)IBMFORMAT_DD},
 	{ "TYCOM FM",0,raw_loader_window_datachanged,(void*)TYCOMFORMAT_SD},
+	{0}
+};
+
+Fl_Menu_Item nbside_choices[]=
+{
+	{ "1 Side",0,raw_loader_window_datachanged,(void*)1},
+	{ "2 Sides",0,raw_loader_window_datachanged,(void*)2},
 	{0}
 };
 

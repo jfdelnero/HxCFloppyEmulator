@@ -638,9 +638,11 @@ Main_Window::Main_Window()
 	this->rawloader_window=new rawfile_loader_window();
 	rawloader_window->choice_sectorsize->menu(sectorsize_choices);
 	rawloader_window->choice_sectorsize->value(2);
+	rawloader_window->choice_numberofside->menu(nbside_choices);
+	rawloader_window->choice_sectorsize->value(1);
 	rawloader_window->choice_tracktype->menu(track_type_choices);
 	rawloader_window->choice_tracktype->value(3);
-	rawloader_window->chk_twosides->value(1);
+	rawloader_window->choice_numberofside->value(1);
 	rawloader_window->chk_autogap3->value(1);
 	rawloader_window->innum_rpm->value(300);
 	rawloader_window->innum_sectoridstart->value(1);

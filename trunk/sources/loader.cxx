@@ -177,6 +177,8 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 			hxcfe_setTrackInterleave(fb,rfc->interleave);	
 			hxcfe_setSectorFill(fb,rfc->fillvalue);
 
+			hxcfe_setTrackPreGap(fb, rfc->pregap);
+
 			if(rfc->autogap3)
 				hxcfe_setSectorGap3(fb,255);
 			else
