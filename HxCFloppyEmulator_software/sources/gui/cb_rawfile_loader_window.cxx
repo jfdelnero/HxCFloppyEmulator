@@ -72,12 +72,12 @@ void getWindowState(rawfile_loader_window *rlw,cfgrawfile *rfc)
 	else
 		rfc->autogap3=0x00;
 
-	if(rlw->chk_twosides->value())
+	if(rlw->choice_numberofside->value())
 		rfc->sidecfg=2;
 	else
 		rfc->sidecfg=1;
 
-	if(rlw->chk_twosides->value())
+	if(rlw->choice_numberofside->value())
 		rfc->sidecfg=rfc->sidecfg|TWOSIDESFLOPPY;
 
 	if(rlw->chk_reversesides->value())
@@ -107,6 +107,7 @@ void getWindowState(rawfile_loader_window *rlw,cfgrawfile *rfc)
 	rfc->sectorsize=rlw->choice_sectorsize->value();
 	rfc->skew=(unsigned char)rlw->numin_skew->value();
 	rfc->tracktype=rlw->choice_tracktype->value();
+	rfc->pregap=(unsigned long)rlw->numin_pregap->value();
 }
 
 void setWindowState(rawfile_loader_window *rlw,cfgrawfile *rfc)
@@ -117,9 +118,9 @@ void setWindowState(rawfile_loader_window *rlw,cfgrawfile *rfc)
 		rlw->chk_autogap3->value(0);
 
 	if(rfc->sidecfg&TWOSIDESFLOPPY)
-		rlw->chk_twosides->value(1);
+		rlw->choice_numberofside->value(1);
 	else
-		rlw->chk_twosides->value(0);
+		rlw->choice_numberofside->value(0);
 
 	if(rfc->sidecfg&SIDE_INVERTED)
 		rlw->chk_reversesides->value(1);
@@ -152,7 +153,7 @@ void setWindowState(rawfile_loader_window *rlw,cfgrawfile *rfc)
 	rlw->choice_sectorsize->value(rfc->sectorsize);
 	rlw->choice_tracktype->value(rfc->tracktype);
 	rlw->numin_skew->value(rfc->skew);
-	
+	rlw->numin_pregap->value(rfc->pregap);
 	
 }
 
@@ -167,7 +168,7 @@ void raw_loader_window_datachanged(Fl_Widget* w, void*)
 	rlw=(rawfile_loader_window *)dw->user_data();
 
 	totalsector=(int)(rlw->innum_nbtrack->value() * 	rlw->innum_sectorpertrack->value());
-	if(rlw->chk_twosides->value())
+	if(rlw->choice_numberofside->value())
 		totalsector=totalsector*2;
 
 	sprintf((char*)temp,"%d",totalsector);
@@ -204,7 +205,7 @@ void raw_loader_window_bt_loadrawfile(Fl_Button* bt, void*)
 	getWindowState(rlw,&rfc);
 
 	totalsector=(int)(rlw->innum_nbtrack->value() * 	rlw->innum_sectorpertrack->value());
-	if(rlw->chk_twosides->value())
+	if(rlw->choice_numberofside->value())
 		totalsector=totalsector*2;
 
 	sprintf((char*)temp,"%d",totalsector);
@@ -233,7 +234,7 @@ void raw_loader_window_bt_createemptyfloppy(Fl_Button* bt, void*)
 	rlw=(rawfile_loader_window *)dw->user_data();
 
 	totalsector=(int)(rlw->innum_nbtrack->value() * 	rlw->innum_sectorpertrack->value());
-	if(rlw->chk_twosides->value())
+	if(rlw->choice_numberofside->value())
 		totalsector=totalsector*2;
 
 	sprintf((char*)temp,"%d",totalsector);
@@ -296,6 +297,7 @@ void raw_loader_window_bt_loadcfg(Fl_Button* bt, void*)
 			fread(header,sizeof(header),1,fpf_file);
 			if( !strncmp(header,"FPF_V0.1",sizeof(header)) )
 			{
+				memset(&rfc,0,sizeof(cfgrawfile));
 				fread(&rfc,sizeof(cfgrawfile),1,fpf_file);
 				setWindowState(rlw,&rfc);
 				raw_loader_window_datachanged(bt, 0);
