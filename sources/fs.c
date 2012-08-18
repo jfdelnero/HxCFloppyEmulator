@@ -341,19 +341,23 @@ long hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 			}
 			
 			closedir (dir);
-			dir=0;
+			dir=-1;
 						
 		}
 
 		closedir (dir);
-		dir=0;
+		dir=-1;
+	}
+	else
+	{
+		dir=-1;
 	}
 
 	return (long)dir;
 
 #endif
 
-	return 0;
+	return -1;
 }
 
 long hxc_find_next_file(long handleff, char *folder, char *file, filefoundinfo* fileinfo)
@@ -383,7 +387,6 @@ long hxc_find_next_file(long handleff, char *folder, char *file, filefoundinfo* 
 	DIR * dir;
 	struct stat fileStat;
 	char * tmpstr;
-
     
 	dir = (DIR*) handleff;
 	d = readdir (dir);
@@ -449,7 +452,7 @@ char * hxc_getcurrentdirectory(char *currentdirectory,int buffersize)
 	}
 #else
 
-#if defined (OSX)
+	#if defined (OSX)
     if (_NSGetExecutablePath(currentdirectory, &buffersize) == 0)
 	{
 		if(strrchr(currentdirectory,'/'))
@@ -458,8 +461,7 @@ char * hxc_getcurrentdirectory(char *currentdirectory,int buffersize)
 			return currentdirectory;
 		}
 	}
-#endif
-
+	#endif
 
 #endif
 
