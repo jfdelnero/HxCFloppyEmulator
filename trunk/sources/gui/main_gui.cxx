@@ -629,7 +629,7 @@ Main_Window::Main_Window()
 	// File system window
 	this->fs_window=new filesystem_generator_window();
 	fs_window->choice_filesystype->menu(fs_choices);
-	fs_window->choice_filesystype->value(0);
+	fs_window->choice_filesystype->value(11);
 
 	//////////////////////////////////////////////
 	// Raw floppy window
