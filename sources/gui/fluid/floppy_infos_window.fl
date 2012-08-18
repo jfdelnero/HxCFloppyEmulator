@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0110 
+version 1.0300 
 header_name {.h} 
 code_name {.cxx}
 class floppy_infos_window {open
@@ -8,7 +8,7 @@ class floppy_infos_window {open
   } {
     Fl_Window window {
       label {Visual Floppy disk} open
-      xywh {30 40 1003 670} type Double hide
+      xywh {499 15 1003 670} type Double visible
     } {
       Fl_Group {} {
         label Track open
@@ -52,19 +52,13 @@ class floppy_infos_window {open
         xywh {969 504 30 163}
       }
       Fl_Group floppy_map_disp {
-        label {Floppy Map} open selected
+        label {Floppy Map} open
         xywh {0 1 1000 500} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {}
       Fl_Group {} {
         label View open
         xywh {155 502 300 167} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {
-        Fl_Value_Slider x_time {
-          label {full x time scale (ms)}
-          user_data this
-          callback disk_infos_window_callback
-          xywh {160 522 288 20} type {Horz Knob} labelsize 12 textsize 12
-        }
         Fl_Value_Slider y_time {
           label {full y time scale (us)}
           user_data this
@@ -88,6 +82,12 @@ class floppy_infos_window {open
           user_data this
           callback disk_infos_window_callback
           xywh {340 640 64 4} type Radio down_box ROUND_DOWN_BOX
+        }
+        Fl_Slider x_time {
+          label {full x time scale}
+          user_data this
+          callback disk_infos_window_callback selected
+          xywh {160 520 288 20} type Horizontal labelsize 12
         }
       }
     }

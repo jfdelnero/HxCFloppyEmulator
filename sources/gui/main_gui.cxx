@@ -71,6 +71,7 @@
 #include "soft_cfg_file.h"
 #include "fl_dnd_box.h"
 
+
 #ifdef WIN32
 #include "win32\resource.h"
 #define intptr_t int
@@ -78,6 +79,13 @@
 
 extern "C"
 {
+	#include "microintro/data/data_bmp_hxc2001_backgnd_bmp.h"
+	#include "microintro/data/data_COPYING_FULL.h"
+	
+	#include "microintro/packer/pack.h"
+
+	extern void convert8b24b(bmaptype * img,unsigned short transcolor);
+
 	#include "libhxcfe.h"
 	#include "usb_hxcfloppyemulator.h"
 	#include "version.h"
@@ -94,6 +102,8 @@ extern "C"
 
 extern int CUI_affiche(int MSGTYPE,char * chaine, ...);
 extern s_gui_context * guicontext;
+
+char * license_txt;
 
 const char * plugid_lst[]=
 {
@@ -488,8 +498,6 @@ Main_Window::Main_Window()
   : Fl_Window(WINDOW_XSIZE,428)
 {
 	int i;
-	Fl_RGB_Image *fl_i;
-	char * data;
 	
 	txtindex=0;
 	i=0;
@@ -505,7 +513,6 @@ Main_Window::Main_Window()
 	hxcfe_setOutputFunc(guicontext->hxcfe,CUI_affiche);
 		
 	guicontext->usbhxcfe=libusbhxcfe_init(guicontext->hxcfe);
-		
 
 	Fl::scheme("gtk+");
 
@@ -514,21 +521,11 @@ Main_Window::Main_Window()
 #ifdef WIN32
 	this->icon((char *)LoadIcon(fl_display, MAKEINTRESOURCE(101)));
 #endif
-	//fl_i = new Fl_Image(100,100,1);
-//	fl_i->draw_empty(100,100);//data((char*)malloc(100*100),1);
-	//data = fl_i->data;
 
-	data =(char*) malloc(100*100*4);
-
-	for(i=0;i<100*100*4;i++)
-		data[i]=rand();
-	//group.image(new Fl_Tiled_Image(fl_i));
-	//group.image(new Fl_Tiled_Image(new Fl_BMP_Image("floppy.bmp")));
-	
-	fl_i = new Fl_RGB_Image((const unsigned char *)data ,100,100,32,100*4);
-	//group.image(fl_i);
+	bitmap_hxc2001_backgnd_bmp->unpacked_data=mi_unpack(bitmap_hxc2001_backgnd_bmp->data,bitmap_hxc2001_backgnd_bmp->csize ,bitmap_hxc2001_backgnd_bmp->data, bitmap_hxc2001_backgnd_bmp->size);
+	convert8b24b(bitmap_hxc2001_backgnd_bmp,0x00);
+	group.image(new Fl_Tiled_Image(new Fl_RGB_Image((const unsigned char*)bitmap_hxc2001_backgnd_bmp->unpacked_data,bitmap_hxc2001_backgnd_bmp->Xsize, bitmap_hxc2001_backgnd_bmp->Ysize, 3, 0)));
 	group.align(FL_ALIGN_TEXT_OVER_IMAGE);
-
 
 	for(i=0;i<9;i++)
 	{
@@ -540,7 +537,8 @@ Main_Window::Main_Window()
 		box->align(FL_ALIGN_INSIDE|FL_ALIGN_LEFT);
 		//box->labelfont(FL_BOLD);
 		box->labelsize(12);
-		box->labeltype(FL_EMBOSSED_LABEL);
+		//box->labeltype(FL_EMBOSSED_LABEL);
+		box->labeltype(FL_ENGRAVED_LABEL);
 	}
 
 	file_name_txt = new Fl_Output(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*i++), WINDOW_XSIZE-(BUTTON_XPOS*2), 25);
@@ -639,7 +637,7 @@ Main_Window::Main_Window()
 	rawloader_window->choice_sectorsize->menu(sectorsize_choices);
 	rawloader_window->choice_sectorsize->value(2);
 	rawloader_window->choice_numberofside->menu(nbside_choices);
-	rawloader_window->choice_sectorsize->value(1);
+	rawloader_window->choice_numberofside->value(1);
 	rawloader_window->choice_tracktype->menu(track_type_choices);
 	rawloader_window->choice_tracktype->value(3);
 	rawloader_window->choice_numberofside->value(1);
@@ -664,8 +662,8 @@ Main_Window::Main_Window()
 	guicontext->backlight_tmr = 20;
 	guicontext->standby_tmr = 20;
 	guicontext->lcd_scroll = 150;
-	guicontext->step_sound = 0xD8;
-	guicontext->ui_sound = 0x60;
+	guicontext->step_sound = 0xE8;
+	guicontext->ui_sound = 0x40;
 
 	this->sdcfg_window=new sdhxcfecfg_window();
 	sdcfg_window->choice_hfeifmode->menu(if_choices);
@@ -689,6 +687,11 @@ Main_Window::Main_Window()
 	// About window
 	this->about_window=new About_box();
 
+	data_COPYING_FULL->unpacked_data=mi_unpack(data_COPYING_FULL->data,data_COPYING_FULL->csize ,data_COPYING_FULL->data, data_COPYING_FULL->size);
+	
+	license_txt=(char*)data_COPYING_FULL->unpacked_data;
+
+	
 	sync_if_config();
 
 	txtindex=0;
