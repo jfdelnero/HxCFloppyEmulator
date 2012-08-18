@@ -98,7 +98,8 @@ char * logs_buffer;
 int CUI_affiche(int MSGTYPE,char * chaine, ...)
 {
 	FILE * debugfile;
-	char test_temp[LOGSTRINGSIZE];
+	char lineheader[16];
+	char fullline[LOGSTRINGSIZE];
 
 	va_list marker;
 	va_start( marker, chaine );
@@ -108,40 +109,38 @@ int CUI_affiche(int MSGTYPE,char * chaine, ...)
 		logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)]=(unsigned char*)malloc(LOGSTRINGSIZE+1);
 	}
 
+	switch(MSGTYPE)
+	{
+		case MSG_INFO_0:
+			_snprintf(lineheader,sizeof(lineheader),"INFO 0 : ");
+		break;
+		case MSG_INFO_1:
+			_snprintf(lineheader,sizeof(lineheader),"INFO 1 : ");
+		break;
+		case MSG_WARNING:
+			_snprintf(lineheader,sizeof(lineheader),"WARNING: ");
+		break;
+		case MSG_ERROR:
+			_snprintf(lineheader,sizeof(lineheader),"ERROR  : ");
+		break;
+		case MSG_DEBUG:
+			_snprintf(lineheader,sizeof(lineheader),"DEBUG  : ");
+		break;
+		default:
+			_snprintf(lineheader,sizeof(lineheader),"UNKNOW MESSAGE TYPE: ");
+		break;
+	}
+
+	_vsnprintf(fullline,LOGSTRINGSIZE-sizeof(lineheader),chaine,marker);
+
 	if(logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)])
 	{
 		memset(logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],0,LOGSTRINGSIZE+1);
 
-		_vsnprintf(test_temp,LOGSTRINGSIZE,chaine,marker);
-
 		logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)][LOGSTRINGSIZE]=0;
 
-		switch(MSGTYPE)
-		{
-
-			case MSG_INFO_0:
-				_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE-9,"INFO 0 : %s",test_temp);
-				break;
-
-			case MSG_INFO_1:
-				_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE-9,"INFO 1 : %s",test_temp);
-				break;
-
-			case MSG_WARNING:
-				_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE-9,"WARNING: %s",test_temp);
-				break;
-
-			case MSG_ERROR:
-				_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE-9,"ERROR  : %s",test_temp);
-				break;
-
-			case MSG_DEBUG:
-				_snprintf((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],LOGSTRINGSIZE-9,"DEBUG  : %s",test_temp);
-				break;
-
-			default:
-				break;
-		}
+		strcpy((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],lineheader);
+		strcat((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],fullline);
 
 		logsfifo.in=(logsfifo.in + 1) & (LOGFIFOSIZE-1);
 
@@ -154,17 +153,9 @@ int CUI_affiche(int MSGTYPE,char * chaine, ...)
 		debugfile=hxc_fopen(guicontext->logfile,"a");
 		if(debugfile)
 		{
-			switch(MSGTYPE)
-			{
-			case MSG_DEBUG:
-				fprintf(debugfile,"DEBUG: ");
-				break;
-			default:
-				break;
-			}
-			vfprintf(debugfile,chaine,marker);
+			fprintf(debugfile,lineheader);
+			fprintf(debugfile,fullline);
 			fprintf(debugfile,"\n");
-
 			hxc_fclose(debugfile);
 		}
 	}
