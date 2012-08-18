@@ -32,10 +32,10 @@
 #include <stdarg.h> 
 #include <time.h>
 
-
 extern "C"
 {
 	#include "libhxcfe.h"
+	#include "usb_hxcfloppyemulator.h"
 	#include "version.h"
 }
 
@@ -43,6 +43,10 @@ extern "C"
 
 #include "about_gui.h"
 #include "license_gui.h"
+
+#include "main.h"
+
+extern s_gui_context * guicontext;
 
 
 static void tick(void *v) 
@@ -115,7 +119,9 @@ About_box::~About_box()
 About_box::About_box()
   : Fl_Window(530,240)
 {
-	o = new Fl_Box(40, 15, 180-40+5, 25, "HxCFLoppyEmulator");
+	
+
+	o = new Fl_Box(5, 15, 180, 25, "HxC FLoppy Emulator");
 	o->box(FL_DOWN_BOX);
 
 	button_wesite=		new Fl_Button(5, 110, 180, 25, "Website");
@@ -135,7 +141,7 @@ About_box::About_box()
 
 	o = new Fl_Box(200, 13, 320+6, 200+6);
 	o->box(FL_UP_BOX);// Fl_Box* o
-	o = new Fl_Box(5, 45, 180, 60, "Copyright © 2006-2012\nDEL NERO Jean François\nPowerOfAsm / HxC2001");
+	o = new Fl_Box(5, 45, 180, 60, "Copyright © 2006-2012\nJean-François DEL NERO\n(©) HxC2001");
 	o->box(FL_DOWN_BOX);
 
 	xpos_size=200+3;
@@ -146,8 +152,14 @@ About_box::About_box()
 
 	ui_context=uintro_init(xsize,ysize);
 
+	
+
 	this->end();
-	this->label(NOMFENETRE);
+
+	windowname[0]=0;
+	strcpy(windowname,NOMFENETRE" - libhxcfe v");
+	strcat(windowname,hxcfe_getVersion(guicontext->hxcfe));
+	this->label(windowname);
 
     tick(this);
 	

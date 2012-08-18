@@ -1,8 +1,8 @@
  HxC Floppy Emulator - A generic/universal floppy disk drive emulator
- Copyright (C) 2006-2011  Jean-François DEL NERO / HxC2001
+ Copyright (C) 2006-2012  Jean-François DEL NERO / HxC2001
 
- contact: hxc2001( a t )free.fr
- website: http://hxc2001.free.fr/floppy_drive_emulator 
+ contact: hxc2001( a t )hxc2001.com
+ website: http://www.hxc2001.com  /  http://hxc2001.free.fr/floppy_drive_emulator 
  forum:   http://www.torlus.com/floppy/forum 
 
  HxCFloppyEmulator may be used and distributed without restriction provided
@@ -63,7 +63,6 @@
   xdms is licensed under PUBLIC DOMAIN. Read xdms.txt.
 
  -----------------------------------------------------------------------------------------------
-
   LibSAP
   Version 0.9.4
   Copyright (C) 2000-2003 Eric Botcazou
@@ -82,11 +81,58 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  -----------------------------------------------------------------------------------------------
-  ZLIB DATA COMPRESSION LIBRARY
-  zlib 1.2.3 is a general purpose data compression library.
+ -----------------------------------------------------------------------------------------------
+                             FLTK License
+                           December 11, 2001
 
-  (C) 1995-2004 Jean-loup Gailly and Mark Adler
+The FLTK library and included programs are provided under the terms
+of the GNU Library General Public License (LGPL) with the following
+exceptions:
+
+    1. Modifications to the FLTK configure script, config
+       header file, and makefiles by themselves to support
+       a specific platform do not constitute a modified or
+       derivative work.
+
+      The authors do request that such modifications be
+      contributed to the FLTK project - send all contributions
+      through the "Software Trouble Report" on the following page:
+ 
+           http://www.fltk.org/str.php
+
+    2. Widgets that are subclassed from FLTK widgets do not
+       constitute a derivative work.
+
+    3. Static linking of applications and widgets to the
+       FLTK library does not constitute a derivative work
+       and does not require the author to provide source
+       code for the application or widget, use the shared
+       FLTK libraries, or link their applications or
+       widgets against a user-supplied version of FLTK.
+
+       If you link the application or widget to a modified
+       version of FLTK, then the changes to FLTK must be
+       provided under the terms of the LGPL in sections
+       1, 2, and 4.
+
+    4. You do not have to provide a copy of the FLTK license
+       with programs that are linked to the FLTK library, nor
+       do you have to identify the FLTK license in your
+       program or documentation as required by section 6
+       of the LGPL.
+
+       However, programs must still identify their use of FLTK.
+       The following example statement can be included in user
+       documentation to satisfy this requirement:
+
+           [program/widget] is based in part on the work of
+           the FLTK project (http://www.fltk.org).
+
+ -----------------------------------------------------------------------------------------------
+  ZLIB DATA COMPRESSION LIBRARY
+  zlib 1.2.5 is a general purpose data compression library.
+
+  (C) 1995-2010 Jean-loup Gailly and Mark Adler
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -105,13 +151,16 @@
   3. This notice may not be removed or altered from any source distribution.
 
   Jean-loup Gailly        Mark Adler
-  jloup(a t)gzip.org          madler(a t)alumni.caltech.edu
+  jloup@gzip.org          madler@alumni.caltech.edu
 
- If you use the zlib library in a product, we would appreciate *not*
- receiving lengthy legal documents to sign. The sources are provided
- for free but without warranty of any kind.  The library has been
- entirely written by Jean-loup Gailly and Mark Adler; it does not
- include third-party code.
+If you use the zlib library in a product, we would appreciate *not* receiving
+lengthy legal documents to sign.  The sources are provided for free but without
+warranty of any kind.  The library has been entirely written by Jean-loup
+Gailly and Mark Adler; it does not include third-party code.
+
+If you redistribute modified sources, we would appreciate that you include in
+the file ChangeLog history information documenting your changes.  Please read
+the FAQ for more information on the distribution of modified source versions.
 
  -----------------------------------------------------------------------------------------------
 
