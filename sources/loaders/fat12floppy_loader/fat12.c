@@ -293,7 +293,7 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 		}
 		
 	}
-	else printf("Error FindFirstFile\n");
+	else floppycontext->hxc_printf(MSG_ERROR,"Error FindFirstFile !");
 	
 	hxc_find_close(hfindfile);
 	
