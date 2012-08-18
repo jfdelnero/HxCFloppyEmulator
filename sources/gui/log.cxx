@@ -153,8 +153,8 @@ int CUI_affiche(int MSGTYPE,char * chaine, ...)
 		debugfile=hxc_fopen(guicontext->logfile,"a");
 		if(debugfile)
 		{
-			fprintf(debugfile,lineheader);
-			fprintf(debugfile,fullline);
+			fprintf(debugfile,"%s",lineheader);
+			fprintf(debugfile,"%s",fullline);
 			fprintf(debugfile,"\n");
 			hxc_fclose(debugfile);
 		}
