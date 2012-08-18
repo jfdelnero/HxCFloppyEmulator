@@ -44,6 +44,7 @@ class About_box : public Fl_Window {
   Fl_Box*  o;
   Fl_Window *window;
 
+  char windowname[128];
 
   public:
 	  int	xsize;

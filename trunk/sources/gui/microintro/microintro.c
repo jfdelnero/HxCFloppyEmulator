@@ -183,6 +183,69 @@ void convert8b16b(bmaptype * img,unsigned short transcolor)
 	}
 }
 
+void convert8b24b(bmaptype * img,unsigned short transcolor)
+{
+	int i,j;
+	unsigned char * newbuffer;
+	unsigned char palletteindex;
+	unsigned char r,v,b;
+
+	switch(img->type)
+	{
+	case 9:
+		newbuffer=malloc(img->Ysize*img->Xsize*3);
+		for(i=0;i<img->Ysize;i++)
+		{
+			for(j=0;j<img->Xsize;j++)
+			{
+				// 11111 000000 11111
+				palletteindex=img->unpacked_data[3*256+((i*img->Xsize)+j)];
+				
+				
+				b=img->unpacked_data[palletteindex*3];
+				v=img->unpacked_data[palletteindex*3+1];
+				r=img->unpacked_data[palletteindex*3+2];
+
+				newbuffer[((i*img->Xsize)*3)+j*3+0]=r;
+				newbuffer[((i*img->Xsize)*3)+j*3+1]=v;
+				newbuffer[((i*img->Xsize)*3)+j*3+2]=b;
+
+			}
+		}
+		free(img->unpacked_data);
+		img->unpacked_data=(unsigned char*)newbuffer;
+
+		break;
+	case 1:
+		newbuffer=malloc(img->Ysize*img->Xsize*3);
+		for(i=0;i<((img->Ysize*img->Xsize)/8);i++)
+		{
+			for(j=0;j<8;j++)
+			{
+
+				if(img->unpacked_data[i]&(0x80>>j))
+				{
+					newbuffer[(i*8)*3+(j*3)+0]=0xFF;
+					newbuffer[(i*8)*3+(j*3)+1]=0xFF;
+					newbuffer[(i*8)*3+(j*3)+2]=0xFF;
+				}
+				else
+				{
+					newbuffer[(i*8)*3+(j*3)+0]=0x00;
+					newbuffer[(i*8)*3+(j*3)+1]=0x00;
+					newbuffer[(i*8)*3+(j*3)+2]=0x00;
+				}
+			
+			}
+			
+		}
+
+		free(img->unpacked_data);
+		img->unpacked_data=(unsigned char*)newbuffer;
+		break;
+	}
+}
+
 
 uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 {
