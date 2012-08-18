@@ -102,7 +102,7 @@ void tick_usb(void *v) {
 	sprintf(tempstr,"%d bytes/second",(int)datathroughput);
 	window->strout_datathroughput->value((const char*)tempstr);
 				
-				
+	period=0;	
 	if(stats.packetsize)
 	{
 		packetpersecond=(float)datathroughput/(float)stats.packetsize;
