@@ -2,15 +2,17 @@
 CC=gcc
 AR=ar
 
+UNAME := $(shell uname)
+
 BASEDIR=../sources
 INCLUDES = -I$(BASEDIR)/ -I ../../../libhxcfe/trunk/sources -I ../sources/win32 -I ../../../libhxcadaptor/trunk/sources
 
 CFLAGS=-O3 $(INCLUDES)
 LDFLAGS= -g -shared -lc -lm  -ldl
 
-ifdef __APPLE__
-CFLAGS=-O3 $(INCLUDES) -arch i386
-LDFLAGS= -g -shared -lc -lm  -ldl -arch i386
+ifeq ($(UNAME), Darwin)
+CFLAGS += -arch i386
+LDFLAGS += -arch i386
 endif
 
 EXEC=libusbhxcfe.a
