@@ -2,12 +2,19 @@
 CC=gcc
 AR=ar
 
+UNAME := $(shell uname)
+
 BASEDIR=../sources
 INCLUDES = -I$(BASEDIR)/ -I ../../../libhxcfe/trunk/sources -I ../../../libusbhxcfe/trunk/sources
 
 CFLAGS=-O3 $(INCLUDES)
-
 LDFLAGS= -g -shared -lc -lm  -ldl
+
+ifeq ($(UNAME), Darwin)
+CFLAGS += -arch i386
+LDFLAGS += -arch i386
+endif
+
 EXEC=libhxcadaptor.a
 
 all: $(EXEC)
