@@ -1,0 +1,28 @@
+mkdir HxCFloppyEmulator.app
+mkdir HxCFloppyEmulator.app/Contents
+mkdir HxCFloppyEmulator.app/Contents/Resources
+mkdir HxCFloppyEmulator.app/Contents/MacOS
+echo APPLnone > HxCFloppyEmulator.app/Contents/PkgInfo
+iconutil --convert icns --output HxCFloppyEmulator.app/Contents/Resources/icons.icns ../HxCFloppyEmulator_software/trunk/sources/mac/icons/hxcfloppyemulator.iconset/
+cp hxcfloppyemulator HxCFloppyEmulator.app/Contents/MacOS
+chmod 755 HxCFloppyEmulator.app/Contents/MacOS/hxcfloppyemulator
+cat << EOF > HxCFloppyEmulator.app/Contents/info.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+<plist version="0.9">
+<dict>
+        <key>CFBundleName</key>
+        <string>HxCFloppyEmulator</string>
+        <key>CFBundlePackageType</key>
+        <string>APPL</string>
+        <key>CFBundleVersion</key>
+        <string>59</string>
+        <key>CFBundleShortVersionString</key>
+        <string>2.0.3.0</string>
+        <key>CFBundleIconFile</key>
+        <string>icons.icns</string>
+        <key>CFBundleSignature</key>
+        <string>none</string>
+</dict>
+</plist>
+EOF
