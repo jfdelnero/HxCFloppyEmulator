@@ -26,3 +26,4 @@ cat << EOF > HxCFloppyEmulator.app/Contents/info.plist
 </dict>
 </plist>
 EOF
+hdiutil create HxCFloppyEmulator.dmg -srcfolder HxCFloppyEmulator.app -ov
