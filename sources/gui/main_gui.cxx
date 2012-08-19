@@ -582,7 +582,7 @@ Main_Window::Main_Window()
 	//show(argc, argv);
 	show();
 
-	tick_main(this);
+	//tick_main(this);
 
 	user_data((void*)(this));
 
