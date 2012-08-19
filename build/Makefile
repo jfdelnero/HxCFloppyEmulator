@@ -2,18 +2,27 @@
 CC=gcc
 AR=ar
 
+UNAME := $(shell uname)
+
 BASEDIR=../sources
 INCLUDES = -I$(BASEDIR)/ -I ../../../libhxcadaptor/trunk/sources
 
+CFLAGS=-O3 $(INCLUDES)
+DISKLOADERPLUGINS_IPF=
+
 ifdef IPF_LIB_SUPPORT
-    CFLAGS=-O3 $(INCLUDES) -DIPF_SUPPORT
+    CFLAGS=$(CFLAGS) -DIPF_SUPPORT
     DISKLOADERPLUGINS_IPF= ipf_loader.o libcapsimage.so.2.0
-else
-    CFLAGS=-O3 $(INCLUDES) 
-    DISKLOADERPLUGINS_IPF=
 endif
 
 LDFLAGS= -g -shared -lc -lm  -ldl 
+
+ifeq ($(UNAME), Darwin)
+CFLAGS += -arch i386
+LDFLAGS +=-arch i386
+endif
+
+
 EXEC=libhxcfe.a
 
 ADFLIBOBJ= adf_hd.o adf_disk.o adf_raw.o adf_bitm.o adf_dump.o\
