@@ -35,40 +35,27 @@
 #include <stdio.h>
 
 #ifdef WIN32
-#include <conio.h> 
-#include <ftd2xx.h>
-#include <winioctl.h>
+	#include <conio.h> 
+	#include <ftd2xx.h>
+	#include <winioctl.h>
 #endif
+
+#ifdef __APPLE__
+	#include <dlfcn.h>
+	#include "../macosx/ftd2xx.h"
+#endif 
 
 #include "ftdi.h"
 
-#ifdef WIN32
 typedef FT_STATUS (WINAPI * FT_OPEN)(int deviceNumber,	FT_HANDLE *pHandle);
-//extern  FT_OPEN pFT_Open;
-
 typedef FT_STATUS (WINAPI * FT_READ)( FT_HANDLE ftHandle,LPVOID lpBuffer,DWORD nBufferSize,LPDWORD lpBytesReturned);
-//extern  FT_READ pFT_Read;
-
 typedef FT_STATUS (WINAPI * FT_WRITE)(FT_HANDLE ftHandle,LPVOID lpBuffer,DWORD nBufferSize,LPDWORD lpBytesWritten);
-//extern  FT_WRITE pFT_Write;
-
 typedef FT_STATUS (WINAPI *  FT_GETSTATUS)(FT_HANDLE ftHandle,DWORD *dwRxBytes,DWORD *dwTxBytes,DWORD *dwEventDWord);
-//extern  FT_GETSTATUS pFT_GetStatus;
-///
 typedef FT_STATUS (WINAPI * FT_PURGE)(FT_HANDLE ftHandle,ULONG Mask);
-//extern  FT_PURGE pFT_Purge;
-
 typedef FT_STATUS (WINAPI * FT_SETUSBPARAMETERS)(FT_HANDLE ftHandle,ULONG ulInTransferSize,ULONG ulOutTransferSize);
-//extern  FT_SETUSBPARAMETERS pFT_SetUSBParameters;
-
 typedef FT_STATUS (WINAPI * FT_SETLATENCYTIMER)(FT_HANDLE ftHandle,UCHAR ucLatency);
-//extern  FT_SETLATENCYTIMER pFT_SetLatencyTimer;
-
 typedef FT_STATUS (WINAPI * FT_SETEVENTNOTIFICATION)(FT_HANDLE ftHandle,DWORD dwEventMask, PVOID pvArg);
-//extern  FT_SETEVENTNOTIFICATION pFT_SetEventNotification;
-
 typedef FT_STATUS (WINAPI * FT_CLOSE)(FT_HANDLE ftHandle);
-//extern  FT_CLOSE pFT_Close;
 
 FT_OPEN pFT_Open;
 FT_READ pFT_Read;
@@ -79,16 +66,16 @@ FT_SETUSBPARAMETERS pFT_SetUSBParameters;
 FT_SETLATENCYTIMER pFT_SetLatencyTimer;
 FT_SETEVENTNOTIFICATION pFT_SetEventNotification;
 FT_CLOSE pFT_Close;
-#endif
+
 
 int ftdi_load_lib (HXCFLOPPYEMULATOR* floppycontext)
 {
-#ifdef WIN32    
-    HMODULE h;
+	#ifdef WIN32    
 
-    h = LoadLibrary ("ftd2xx.dll");
-    if (h) 
-	{
+	HMODULE h;
+
+	h = LoadLibrary ("ftd2xx.dll");
+	if (h) 	{
 		pFT_Write = (FT_WRITE)GetProcAddress (h, "FT_Write");
 		pFT_Read = (FT_READ)GetProcAddress (h, "FT_Read");
 		pFT_GetStatus = (FT_GETSTATUS)GetProcAddress (h, "FT_GetStatus");
@@ -115,14 +102,48 @@ int ftdi_load_lib (HXCFLOPPYEMULATOR* floppycontext)
 			floppycontext->hxc_printf(MSG_ERROR,"Error while loading FTDI library! library not found !");
 			return -1;
 	}
-    #endif   
+
+	#endif
+
+	#ifdef __APPLE__
+	
+	void* lib_handle;
+
+	lib_handle = dlopen("libftd2xx.dylib", RTLD_LOCAL|RTLD_LAZY);
+        if (!lib_handle) {
+		floppycontext->hxc_printf(MSG_ERROR,"Error while loading FTDI library! library not found !");
+		return -1;
+        }
+
+	pFT_Write = (FT_WRITE)dlsym(lib_handle, "FT_Write");
+	pFT_Read = (FT_READ)dlsym(lib_handle, "FT_Read");
+	pFT_GetStatus = (FT_GETSTATUS)dlsym(lib_handle, "FT_GetStatus");
+	pFT_Open = (FT_OPEN)dlsym(lib_handle, "FT_Open");
+	pFT_Close = (FT_CLOSE)dlsym(lib_handle, "FT_Close");
+	pFT_Purge = (FT_PURGE)dlsym(lib_handle, "FT_Purge");
+	pFT_SetUSBParameters = (FT_SETUSBPARAMETERS)dlsym(lib_handle, "FT_SetUSBParameters");
+	pFT_SetLatencyTimer = (FT_SETLATENCYTIMER)dlsym(lib_handle, "FT_SetLatencyTimer");
+	pFT_SetEventNotification = 	(FT_SETEVENTNOTIFICATION)dlsym(lib_handle,"FT_SetEventNotification");
+			
+	if(pFT_Write &&  pFT_Read && pFT_GetStatus && pFT_Open && pFT_Purge && pFT_SetUSBParameters && pFT_SetLatencyTimer && pFT_SetEventNotification)
+	{
+		floppycontext->hxc_printf(MSG_INFO_1,"FTDI library loaded successfully!");
+		return 1;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_ERROR,"Error while loading FTDI library! Missing entry point ?");
+		return -3;
+	}
+
+	#endif
+ 
 	return -1;
 }
 
-
 int open_ftdichip(unsigned long * ftdihandle)
 {
-#ifdef WIN32
+
 	int i;
 	
 	i=0;
@@ -136,59 +157,49 @@ int open_ftdichip(unsigned long * ftdihandle)
 		i++;
 	}while(i<4);
 
-    #endif
 	*ftdihandle=0;
     
 	return -1;	
 }
 
 int close_ftdichip(unsigned long ftdihandle)
-{
-#ifdef WIN32    
+{ 
 	if(pFT_Close((FT_HANDLE*)ftdihandle)!=FT_OK)
 	{
 		return -1;
 	}
-#endif
 	return 0;
 }
 
 int purge_ftdichip(unsigned long ftdihandle,unsigned long buffer)
-{
-#ifdef WIN32    
+{ 
 	if(pFT_Purge((FT_HANDLE*)ftdihandle,buffer)!=FT_OK)
 	{
 		return -1;
 	}
-#endif
 	return 0;
 }
 
 int setusbparameters_ftdichip(unsigned long ftdihandle,unsigned long buffersizetx,unsigned long buffersizerx)
-{
-#ifdef WIN32    
+{   
 	if(pFT_SetUSBParameters ((FT_HANDLE*)ftdihandle,buffersizerx,buffersizetx)!=FT_OK)
 	{
 		return -1;
 	}
-#endif
 	return 0;
 }
 
 int setlatencytimer_ftdichip(unsigned long ftdihandle,unsigned char latencytimer_ms)
-{
-#ifdef WIN32    
+{   
 	if(pFT_SetLatencyTimer ((FT_HANDLE*)ftdihandle,latencytimer_ms)!=FT_OK)
 	{
 		return -1;
 	}
-#endif
 	return 0;
 }
 
 int write_ftdichip(unsigned long ftdihandle,unsigned char * buffer,unsigned int size)
-{
-#ifdef WIN32    
+{   
 	int dwWritten;
 	
 	if(pFT_Write ((FT_HANDLE*)ftdihandle, buffer, size,&dwWritten)!=FT_OK)
@@ -197,49 +208,34 @@ int write_ftdichip(unsigned long ftdihandle,unsigned char * buffer,unsigned int 
 	}
 
 	return dwWritten;
-#else
-    return -1;
-#endif
 }
 
 int read_ftdichip(unsigned long ftdihandle,unsigned char * buffer,unsigned int size)
-{
-#ifdef WIN32    
+{   
 	int returnvalue;
 	if(pFT_Read((FT_HANDLE*)ftdihandle,buffer,size,&returnvalue)!=FT_OK)
 	{
 		return -1;
 	}
 	return returnvalue;
-#else
-    return -1;
-#endif
 }
 
 int getfifostatus_ftdichip(unsigned long ftdihandle,int * txlevel,int *rxlevel,unsigned long * event)
-{
-#ifdef WIN32    
-	if(pFT_GetStatus((FT_HANDLE*)ftdihandle,rxlevel,txlevel,event)!=FT_OK)
+{   
+	if(pFT_GetStatus((FT_HANDLE*)ftdihandle,rxlevel,txlevel,(DWORD*)event)!=FT_OK)
 	{
 		return -1;
 	}
 
 	return 0;
-#else
-    return -1;
-#endif
 }
 
 int seteventnotification_ftdichip(unsigned long ftdihandle,unsigned long eventmask,void * event)
 {
-#ifdef WIN32
 	if(pFT_SetEventNotification((FT_HANDLE*)ftdihandle,eventmask,event)!=FT_OK)
 	{
 		return -1;
 	}
 	return 0;
-#else
-    return -1;
-#endif
 }
-/////////////
+
