@@ -1,6 +1,8 @@
 #CC=i386-pc-linux-gcc
 CC=gcc
 
+UNAME := $(shell uname)
+
 ifdef IPF_LIB_SUPPORT
     CFLAGS=-O3 -I ../../../libhxcfe/trunk/sources -I .
 else
@@ -8,6 +10,13 @@ else
 endif
 
 LDFLAGS=-lc -lm  -ldl  -lpthread
+
+ifeq ($(UNAME), Darwin)
+CFLAGS += -arch i386
+LDFLAGS += -arch i386
+endif
+
+
 EXEC=hxcfe
 
 all: $(EXEC)
