@@ -167,6 +167,16 @@ void menu_clicked(Fl_Widget * w, void * fc_ptr)
 			mw->infos_window->window->show();
 		break;
 
+		case 11:
+			Fl::scheme("none");
+		break;
+		case 12:
+			Fl::scheme("plastic");
+		break;
+		case 13:
+			Fl::scheme("gtk+");
+		break;
+
 	}
 
 }
