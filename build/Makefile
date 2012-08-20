@@ -3,7 +3,8 @@ CC=gcc
 
 UNAME := $(shell uname)
 
-CFLAGS=-O3 -I ../sources -I ../../../libhxcfe/trunk/sources
+CFLAGS=-O3 -I ../sources -I ../../../libhxcfe/trunk/sources -I ../../../libusbhxcfe/trunk/sources
+
 LDFLAGS=-lc -lm  -ldl  -lpthread
 
 ifeq ($(UNAME), Darwin)
@@ -15,12 +16,8 @@ EXEC=hxcfe
 
 all: $(EXEC)
 
-hxcfeconv:      hxcfe.o ../../../build/libhxcfe.a ../../../build/libhxcadaptor.a
+hxcfe:      hxcfe.o ../../../build/libhxcfe.a ../../../build/libhxcadaptor.a ../../../build/libusbhxcfe.a
 	$(CC) -o $@    $^ $(LDFLAGS)
-	cp $@ ../../../build
-
-hxcfe:      hxcfe.o ../../../build/libhxcfe.a ../../../build/libhxcadaptor.a
-	$(CC) -o $@    $^ $(LDFLAGS) -DFTDILIB
 	cp $@ ../../../build
 
 hxcfe.o: ../sources/hxcfe.c 
