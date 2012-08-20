@@ -3,19 +3,13 @@ CC=gcc
 
 UNAME := $(shell uname)
 
-ifdef IPF_LIB_SUPPORT
-    CFLAGS=-O3 -I ../../../libhxcfe/trunk/sources -I .
-else
-    CFLAGS=-O3 -I ../sources -I ../../../libhxcfe/trunk/sources
-endif
-
+CFLAGS=-O3 -I ../sources -I ../../../libhxcfe/trunk/sources
 LDFLAGS=-lc -lm  -ldl  -lpthread
 
 ifeq ($(UNAME), Darwin)
 CFLAGS += -arch i386
 LDFLAGS += -arch i386
 endif
-
 
 EXEC=hxcfe
 

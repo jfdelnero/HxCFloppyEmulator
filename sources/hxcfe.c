@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011 Jean-François DEL NERO
+// Copyright (C) 2006-2012 Jean-François DEL NERO
 //
 // This file is part of HxCFloppyEmulator.
 //
@@ -36,9 +36,7 @@
 
 #include "libhxcfe.h"
 
-#ifdef USBHXCFE_SUPPORT
 #include "usb_hxcfloppyemulator.h"
-#endif
 
 int verbose;
 
@@ -160,11 +158,11 @@ void printhelp(char* argv[])
 	printf("  -interfacelist\t\t: Floppy interfaces mode list [INTERFACE_MODE]\n");
 	printf("  -finput:[filename]\t\t: Input file image \n");
 	printf("  -conv:[FORMAT] \t\t: Convert the input file\n");
-	printf("  -usb:[DRIVE] \t\t: start the usb floppy emulator\n");
+	printf("  -usb:[DRIVE] \t\t\t: start the usb floppy emulator\n");
 	printf("  -infos\t\t\t: Print informations about the input file\n");
 	printf("  -ifmode:[INTERFACE_MODE]\t: Select the floppy interface mode\n");
-	printf("  -singlestep\t: Force the single step mode\n");
-	printf("  -doublestep\t: Force the double step mode\n");
+	printf("  -singlestep\t\t\t: Force the single step mode\n");
+	printf("  -doublestep\t\t\t: Force the double step mode\n");
 	printf("\n");
 }
 
@@ -289,7 +287,6 @@ int convertfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char * outfile,char * out
 
 int usbload(HXCFLOPPYEMULATOR* hxcfe,char * infile,int drive,int doublestep,int ifmode)
 {   
-#ifdef USBHXCFE_SUPPORT    
 	int loaderid;
 	int ret;
 	FLOPPY * floppydisk;
@@ -355,9 +352,6 @@ int usbload(HXCFLOPPYEMULATOR* hxcfe,char * infile,int drive,int doublestep,int 
 			}
 		}
 	}
-#else
-    printf("No USB HxC Floppy Emulator Support !\n");
-#endif
 	return 0;
 }
 
