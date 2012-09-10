@@ -88,6 +88,7 @@
 #include "./loaders/krz_loader/krz_loader.h"
 #include "./loaders/w30_loader/w30_loader.h"
 #include "./loaders/fei_loader/fei_loader.h"
+#include "./loaders/fzf_loader/fzf_loader.h"
 #include "./loaders/svd_loader/svd_loader.h"
 #include "./loaders/imz_loader/imz_loader.h"
 #include "./loaders/gkh_loader/gkh_loader.h"
@@ -153,6 +154,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)FAT12FLOPPY_libGetPluginInfo,
 	(GETPLUGININFOS)GKH_libGetPluginInfo,
 	(GETPLUGININFOS)FD_libGetPluginInfo,
+	(GETPLUGININFOS)FZF_libGetPluginInfo,
 	(GETPLUGININFOS)VDK_libGetPluginInfo,
 	(GETPLUGININFOS)DPX_libGetPluginInfo,
 	(GETPLUGININFOS)Ensoniq_mirage_libGetPluginInfo,
