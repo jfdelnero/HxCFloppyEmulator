@@ -45,14 +45,12 @@
 typedef int (*HXCPRINTF_FUNCTION)(int MSGTYPE,char * string, ...);
 typedef int (*DISPLAYTRACKPOS_FUNCTION)(unsigned int current,unsigned int total);
 
-
 typedef struct HXCFLOPPYEMULATOR_
 {
 	HXCPRINTF_FUNCTION hxc_printf;
 	DISPLAYTRACKPOS_FUNCTION hxc_settrackpos;
 	unsigned char CONTAINERTYPE[16];
 }HXCFLOPPYEMULATOR;
-
 
 ////////////////////////////////////////////
 // Init Function
@@ -73,9 +71,7 @@ const char * hxcfe_getLicense(HXCFLOPPYEMULATOR* floppycontext);
 #define MSG_ERROR 3
 #define MSG_DEBUG 4
 
-
 int hxcfe_setOutputFunc(HXCFLOPPYEMULATOR* floppycontext,HXCPRINTF_FUNCTION hxc_printf);
-
 
 ////////////////////////////////////////////
 // File image functions
@@ -86,9 +82,9 @@ const char* hxcfe_getLoaderDesc(HXCFLOPPYEMULATOR* floppycontext,int moduleID);
 const char* hxcfe_getLoaderName(HXCFLOPPYEMULATOR* floppycontext,int moduleID);
 const char* hxcfe_getLoaderExt(HXCFLOPPYEMULATOR* floppycontext,int moduleID);
 
-
 int hxcfe_autoSelectLoader(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int moduleID);
 FLOPPY * hxcfe_floppyLoad(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int moduleID,int * err_ret);
+FLOPPY * hxcfe_floppyLoadEx(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int moduleID,int * err_ret,void * parameters);
 int hxcfe_floppyUnload(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk);
 int hxcfe_floppyExport(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,char* imgname,int moduleID);
 
@@ -99,6 +95,7 @@ int hxcfe_getNumberOfSide(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
 // Custom Image/floppy generation functions
 
 #define STACK_SIZE 0x400
+#define NUMBEROFSECTOR_MAX 0x400
 
 typedef struct fb_track_state_
 {
@@ -106,6 +103,8 @@ typedef struct fb_track_state_
 	int track_number;
 	unsigned char side_number;
 	unsigned char interleave;
+	unsigned char start_sector_id;
+	unsigned int sectors_size;
 	unsigned char skew;
 	unsigned char type;
 	unsigned short rpm;
@@ -116,8 +115,10 @@ typedef struct fb_track_state_
 	int indexpos;
 	int sectorunderindex;
 
+
+	int numberofsector_min;
 	int numberofsector;
-	SECTORCONFIG sectortab[STACK_SIZE];
+	SECTORCONFIG sectortab[NUMBEROFSECTOR_MAX];
 
 	int sc_stack_pointer;
 	SECTORCONFIG sc_stack[STACK_SIZE];
@@ -131,8 +132,15 @@ typedef struct FBuilder_
 }FBuilder;
 
 FBuilder* hxcfe_initFloppy(HXCFLOPPYEMULATOR* floppycontext,int nb_of_track,int nb_of_side);
+int hxcfe_setNumberOfTrack (FBuilder* fb,unsigned short numberoftrack);
+int hxcfe_setNumberOfSide (FBuilder* fb,unsigned char numberofside);
+int hxcfe_setNumberOfSector (FBuilder* fb,unsigned short numberofsector);
+int hxcfe_setSectorSize(FBuilder* fb,int size);
+int hxcfe_setStartSectorID(FBuilder* fb,unsigned char startsectorid);
 
 int	hxcfe_pushTrack (FBuilder*,unsigned int rpm,int number,int side,int type);
+int hxcfe_pushTrackPFS (FBuilder* fb,int number,int side);
+
 int hxcfe_setTrackInterleave (FBuilder*,int interleave);
 int hxcfe_setTrackSkew (FBuilder*,int skew);
 
@@ -145,11 +153,19 @@ int hxcfe_setTrackBitrate (FBuilder*,int bitrate);
 
 int hxcfe_addSector (FBuilder* fb,int sectornumber,int side,int track,unsigned char * buffer,int size);
 
+int hxcfe_addSectors(FBuilder* fb,int side,int track,unsigned char * trackdata,int buffersize,int numberofsectors);
+
+int hxcfe_pushSector (FBuilder* fb);
+
 int hxcfe_setSectorBitrate (FBuilder* fb,int bitrate);
 
 int hxcfe_setSectorGap3 (FBuilder* fb,unsigned char Gap3);
 int hxcfe_setSectorSizeID (FBuilder* fb,unsigned char sectorsizeid);
 int hxcfe_setSectorFill (FBuilder*,unsigned char fill);
+
+int hxcfe_setSectorTrackID(FBuilder* fb,unsigned char track);
+int hxcfe_setSectorHeadID(FBuilder* fb,unsigned char head);
+int hxcfe_setSectorID(FBuilder* fb,unsigned char id);
 
 int hxcfe_setSectorEncoding (FBuilder*,int encoding);
 
@@ -158,11 +174,48 @@ int hxcfe_setSectorHeaderCRC (FBuilder*,unsigned short crc);
 
 int hxcfe_setSectorDataMark (FBuilder*,unsigned char datamark);
 
+int hxcfe_setSectorData(FBuilder* fb,unsigned char * buffer,int size);
+
+int hxcfe_popSector (FBuilder* fb);
+
 int hxcfe_popTrack (FBuilder* fb);
+
+int hxcfe_setRPM(FBuilder* fb,unsigned short rpm);
+
+unsigned short hxcfe_getCurrentNumberOfSector (FBuilder* fb);
+unsigned char  hxcfe_getCurrentNumberOfSide (FBuilder* fb);
+unsigned short hxcfe_getCurrentNumberOfTrack (FBuilder* fb);
+int            hxcfe_getCurrentSectorSize(FBuilder* fb);
+unsigned char  hxcfe_getCurrentTrackType (FBuilder* fb);
+unsigned short hxcfe_getCurrentRPM (FBuilder* fb);
 
 FLOPPY* hxcfe_getFloppy (FBuilder* fb);
 
+int hxcfe_generateDisk(FBuilder* fb,unsigned char * diskdata,int buffersize);
+
 int hxcfe_getFloppySize(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,int * nbsector);
+
+////////////////////////////////////////////
+// Raw File loader /
+
+typedef struct XmlFloppyBuilder_
+{
+	void * xml_parser;
+	void * ad;
+}XmlFloppyBuilder;
+
+XmlFloppyBuilder* hxcfe_initXmlFloppy(HXCFLOPPYEMULATOR* floppycontext);
+void hxcfe_deinitXmlFloppy(XmlFloppyBuilder* context);
+
+int         hxcfe_numberOfXmlLayout(XmlFloppyBuilder* context);
+int         hxcfe_getXmlLayoutID(XmlFloppyBuilder* context,char * container);
+const char* hxcfe_getXmlLayoutDesc(XmlFloppyBuilder* context,int moduleID);
+const char* hxcfe_getXmlLayoutName(XmlFloppyBuilder* context,int moduleID);
+
+int         hxcfe_selectXmlFloppyLayout(XmlFloppyBuilder* context,int layoutid);
+
+FLOPPY*     hxcfe_generateXmlFloppy (XmlFloppyBuilder* context,unsigned char * rambuffer,unsigned buffersize);
+FLOPPY*     hxcfe_generateXmlFileFloppy (XmlFloppyBuilder* context,char *file);
 
 ////////////////////////////////////////////
 // Read Sector functions
@@ -175,8 +228,6 @@ typedef struct SECTORSEARCH_
 	int cur_track;
 	int cur_side;
 }SECTORSEARCH;
-
-
 
 SECTORSEARCH* hxcfe_initSectorSearch(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
 SECTORCONFIG* hxcfe_getNextSector(SECTORSEARCH* ss,int track,int side,int type);
@@ -300,7 +351,6 @@ enum
 
 typedef struct _fs_config
 {
-
 	char * name;
 	char * desc;
 	int		fsID;
@@ -308,3 +358,4 @@ typedef struct _fs_config
 }fs_config;
 
 extern fs_config fs_config_table[];
+
