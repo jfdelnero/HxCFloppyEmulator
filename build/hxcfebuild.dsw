@@ -15,6 +15,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "expat"="..\libhxcfe\trunk\sources\thirdpartylibs\expat\expat-2.1.0\lib\expat_static.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "libhxcfe"=..\libhxcfe\trunk\build\libhxcfe.dsp - Package Owner=<4>
 
 Package=<5>
