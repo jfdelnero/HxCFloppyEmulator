@@ -1461,7 +1461,7 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 	SIDE * currentside;
 
 	// compute the sectors interleaving.
-	interleavetab=compute_interleave_tab(interleave,skew,number_of_sector);
+	interleavetab = compute_interleave_tab(interleave,skew,number_of_sector);
 
 	tg_initTrackEncoder(&tg);
 

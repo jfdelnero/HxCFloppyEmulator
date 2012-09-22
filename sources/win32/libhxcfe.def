@@ -28,6 +28,7 @@ EXPORTS
    hxcfe_getFloppyInterfaceModeName	@40
    hxcfe_getFloppyInterfaceModeDesc @41
    hxcfe_getTrackEncodingName	@42
+   hxcfe_floppyLoadEx			@43
 
    hxcfe_initFloppy			@50
    hxcfe_pushTrack			@51
@@ -37,6 +38,17 @@ EXPORTS
    hxcfe_setIndexPosition	@55
    hxcfe_setIndexLength		@56
    hxcfe_setTrackPreGap		@57
+   hxcfe_setNumberOfTrack	@58
+   hxcfe_setNumberOfSide	@59
+   hxcfe_setNumberOfSector	@60
+   hxcfe_setSectorSize		@61
+   hxcfe_setRPM				@62
+   hxcfe_setSectorID		@63
+   hxcfe_setSectorHeadID	@64
+   hxcfe_setSectorTrackID	@65
+   hxcfe_setSectorData		@66
+   hxcfe_pushSector			@67
+   hxcfe_popSector			@68
 
    hxcfe_addSector			@70
    hxcfe_setSectorBitrate   @71
@@ -49,6 +61,8 @@ EXPORTS
    hxcfe_setSectorDataMark  @78
    hxcfe_popTrack			@79
    hxcfe_getFloppy			@80
+   hxcfe_generateDisk		@81
+
 
    hxcfe_initSectorSearch		@100
    hxcfe_getNextSector			@101
@@ -68,3 +82,13 @@ EXPORTS
 
 
    hxcfe_generateFloppy			@150
+
+   hxcfe_initXmlFloppy			@200
+   hxcfe_numberOfXmlLayout		@201
+   hxcfe_getXmlLayoutID			@202
+   hxcfe_getXmlLayoutDesc		@203
+   hxcfe_getXmlLayoutName		@204
+   hxcfe_selectXmlFloppyLayout	@205
+   hxcfe_generateXmlFloppy		@206
+   hxcfe_generateXmlFileFloppy	@207
+   hxcfe_deinitXmlFloppy		@208
