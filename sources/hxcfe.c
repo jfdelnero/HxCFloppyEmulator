@@ -155,9 +155,11 @@ void printhelp(char* argv[])
 	printf("  -license\t\t\t: Print the license\n");
 	printf("  -verbose\t\t\t: Verbose mode\n");
 	printf("  -modulelist\t\t\t: List modules in the libhxcfe [FORMAT]\n");
+	printf("  -rawlist\t\t\t: Disk layout list [DISKLAYOUT]\n");
 	printf("  -interfacelist\t\t: Floppy interfaces mode list [INTERFACE_MODE]\n");
 	printf("  -finput:[filename]\t\t: Input file image \n");
 	printf("  -conv:[FORMAT] \t\t: Convert the input file\n");
+	printf("  -uselayout:[DISKLAYOUT] \t\t: Use the Layout [DISKLAYOUT]\n");
 	printf("  -usb:[DRIVE] \t\t\t: start the usb floppy emulator\n");
 	printf("  -infos\t\t\t: Print informations about the input file\n");
 	printf("  -ifmode:[INTERFACE_MODE]\t: Select the floppy interface mode\n");
@@ -199,6 +201,59 @@ void printlibmodule(HXCFLOPPYEMULATOR* hxcfe)
 	printf("\n%d Loaders\n\n",hxcfe_numberOfLoader(hxcfe));
 
 }
+
+
+XmlFloppyBuilder* hxcfe_initXmlFloppy(HXCFLOPPYEMULATOR* floppycontext);
+void hxcfe_deinitXmlFloppy(XmlFloppyBuilder* context);
+
+int         hxcfe_numberOfXmlLayout(XmlFloppyBuilder* context);
+int         hxcfe_getXmlLayoutID(XmlFloppyBuilder* context,char * container);
+const char* hxcfe_getXmlLayoutDesc(XmlFloppyBuilder* context,int moduleID);
+const char* hxcfe_getXmlLayoutName(XmlFloppyBuilder* context,int moduleID);
+
+int         hxcfe_selectXmlFloppyLayout(XmlFloppyBuilder* context,int layoutid);
+
+FLOPPY*     hxcfe_generateXmlFloppy (XmlFloppyBuilder* context,unsigned char * rambuffer,unsigned buffersize);
+FLOPPY*     hxcfe_generateXmlFileFloppy (XmlFloppyBuilder* context,char *file);
+
+
+void printdisklayout(HXCFLOPPYEMULATOR* hxcfe)
+{
+	
+	int i,j;
+	int numberoflayout;
+	XmlFloppyBuilder* xfb;
+	const char* ptr;
+
+	xfb = hxcfe_initXmlFloppy(hxcfe);
+
+	printf("---------------------------------------------------------------------------\n");
+	printf("-                     libhxcfe Raw Disk Layout list                       -\n");
+	printf("---------------------------------------------------------------------------\n");
+	printf("\n");
+	
+	i=0;
+	numberoflayout = hxcfe_numberOfXmlLayout(xfb);
+	while(i<numberoflayout)
+	{
+		ptr=hxcfe_getXmlLayoutName(xfb,i);
+		printf("%s",ptr );
+		for(j=0;j<(int)(20-strlen(ptr));j++) printf(" ");
+				
+		ptr=hxcfe_getXmlLayoutDesc(xfb,i);
+		printf(" :  %s",ptr);
+		
+		for(j=0;j<(int)(38-strlen(ptr));j++) printf(" ");
+		printf("\n");
+		i++;
+	}
+	
+	printf("\n%d Layout\n\n",hxcfe_numberOfXmlLayout(xfb));
+
+	hxcfe_deinitXmlFloppy(xfb);
+
+}
+
 
 void printinterfacemode(HXCFLOPPYEMULATOR* hxcfe)
 {
@@ -280,6 +335,62 @@ int convertfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char * outfile,char * out
 		
 			hxcfe_floppyUnload(hxcfe,floppydisk);
 		}
+	}
+
+	return 0;
+}
+
+int convertrawfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char * layout,char * outfile,char * outformat,int ifmode)
+{
+	int layoutid,loaderid;
+	FLOPPY * floppydisk;
+	XmlFloppyBuilder* rfb;
+
+	rfb=hxcfe_initXmlFloppy(hxcfe);
+		
+	layoutid = hxcfe_getXmlLayoutID(rfb,layout);
+
+	if(layoutid>=0)
+	{
+
+		hxcfe_selectXmlFloppyLayout(rfb,layoutid);
+		
+		if(strlen(infile))
+			floppydisk = hxcfe_generateXmlFileFloppy(rfb,infile);
+		else
+			floppydisk = hxcfe_generateXmlFloppy(rfb,0,0);
+
+		hxcfe_deinitXmlFloppy(rfb);
+				
+		if(!floppydisk)
+		{
+			printf("Load error!\n");
+		}
+		else
+		{
+			if(ifmode<0)
+			{
+				ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
+			}
+
+			loaderid=hxcfe_getLoaderID(hxcfe,outformat);
+			if(loaderid>=0)
+			{
+				hxcfe_floppySetInterfaceMode(hxcfe,floppydisk,ifmode);
+				hxcfe_floppyExport(hxcfe,floppydisk,outfile,loaderid);
+			}
+			else
+			{
+				printf("Cannot Find the Loader %s ! Please use the -modulelist option to see possible values.\n",outformat);
+			}
+		
+			hxcfe_floppyUnload(hxcfe,floppydisk);
+		}
+	}
+	else
+	{
+		printf("Layout unknown !: %s\n",layout);
+		printf("Please use the option -rawlist for the layout list.\n");
 	}
 
 	return 0;
@@ -422,6 +533,7 @@ int main(int argc, char* argv[])
 	char filename[512];
 	char ofilename[512];
 	char outputformat[512];
+	char layoutformat[128];
 	char temp[512];
 	int loaderid;
 	int interfacemode;
@@ -486,6 +598,12 @@ int main(int argc, char* argv[])
 		printinterfacemode(hxcfe);
 	}
 
+	// Interface mode list option
+	if(isOption(argc,argv,"rawlist",0)>0)
+	{
+		printdisklayout(hxcfe);
+	}
+
 	// Interface mode option
 	interfacemode=-1;
 	if(isOption(argc,argv,"ifmode",(char*)&temp)>0)
@@ -525,7 +643,14 @@ int main(int argc, char* argv[])
 
 		}
 
-		convertfile(hxcfe,filename,ofilename,outputformat,interfacemode);
+		if(isOption(argc,argv,"uselayout",(char*)&layoutformat)>0)
+		{
+			convertrawfile(hxcfe,filename,layoutformat,ofilename,outputformat,interfacemode);
+		}
+		else
+		{
+			convertfile(hxcfe,filename,ofilename,outputformat,interfacemode);
+		}
 	}
 
 	if(isOption(argc,argv,"singlestep",0)>0)
@@ -550,6 +675,7 @@ int main(int argc, char* argv[])
 		(isOption(argc,argv,"interfacelist",0)<=0) &&
 		(isOption(argc,argv,"conv",0)<=0) &&
 		(isOption(argc,argv,"usb",0)<=0) &&
+		(isOption(argc,argv,"rawlist",0)<=0) &&
 		(isOption(argc,argv,"infos",0)<=0 )
 		)
 	{
