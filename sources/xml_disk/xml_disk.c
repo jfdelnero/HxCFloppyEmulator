@@ -238,7 +238,6 @@ void charhandler(void *data, const char *s, int len)
 
 	memcpy(buffer,s,len);
 	buffer[len]=0;
-	ad->floppycontext->hxc_printf (MSG_INFO_1,">%d>%s",len, buffer);
 
 	switch(ad->current_state)
 	{
@@ -406,7 +405,6 @@ void end(void *data, const char *el)
 	AppData *ad = (AppData *) data;
 	int state;
 
-	ad->floppycontext->hxc_printf (MSG_INFO_1,"End %s", el);
 	state = getstate((char*)el, ad->current_state);
 
 	if(!ad->xmlcheck)
