@@ -306,14 +306,14 @@ long hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 	DIR * dir;
 	struct stat fileStat;
 	char * tmpstr;
-        
+
 	dir = opendir (folder);
 	if(dir)
 	{
 		d = readdir (dir);
 		if(d)
-		{			
-            tmpstr = malloc (strlen(folder) + strlen(d->d_name) + 4 );
+		{
+			tmpstr = malloc (strlen(folder) + strlen(d->d_name) + 4 );
 			if(tmpstr)
 			{
 				strcpy(tmpstr,folder);
@@ -321,9 +321,9 @@ long hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 				strcat(tmpstr,d->d_name);
 
 				memset(&fileStat,0,sizeof(struct stat));
-                if(!lstat (tmpstr, &fileStat))
+				if(!lstat (tmpstr, &fileStat))
 				{
-                            
+
 					if ( S_ISDIR ( fileStat.st_mode ) )
 						fileinfo->isdirectory=1;
 					else
@@ -332,25 +332,25 @@ long hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 					fileinfo->size=fileStat.st_size;
 
 					strncpy(fileinfo->filename,d->d_name,256);
-					
+
 					free(tmpstr);
 					return (long)dir;
 				}
-				
-                free(tmpstr);
+
+				free(tmpstr);
 			}
-			
+
 			closedir (dir);
-			dir=-1;
-						
+			dir=(DIR *)-1;
+
 		}
 
 		closedir (dir);
-		dir=-1;
+		dir=(DIR *)-1;
 	}
 	else
 	{
-		dir=-1;
+		dir=(DIR *)-1;
 	}
 
 	return (long)dir;
@@ -387,12 +387,12 @@ long hxc_find_next_file(long handleff, char *folder, char *file, filefoundinfo* 
 	DIR * dir;
 	struct stat fileStat;
 	char * tmpstr;
-    
+
 	dir = (DIR*) handleff;
 	d = readdir (dir);
-    	
-    ret = 0;
-    if(d)
+
+	ret = 0;
+	if(d)
 	{
 		tmpstr = malloc (strlen(folder) + strlen(d->d_name) + 4 );
 		if(tmpstr)
@@ -410,8 +410,8 @@ long hxc_find_next_file(long handleff, char *folder, char *file, filefoundinfo* 
 
 				fileinfo->size=fileStat.st_size;
 				strncpy(fileinfo->filename,d->d_name,256);
-		
-                ret = 1;
+
+				ret = 1;
 				free(tmpstr);
 				return ret;
 			}
@@ -453,7 +453,7 @@ char * hxc_getcurrentdirectory(char *currentdirectory,int buffersize)
 #else
 
 	#if defined (OSX)
-    if (_NSGetExecutablePath(currentdirectory, &buffersize) == 0)
+	if (_NSGetExecutablePath(currentdirectory, &buffersize) == 0)
 	{
 		if(strrchr(currentdirectory,'/'))
 		{
