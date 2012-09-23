@@ -68,19 +68,28 @@ trackpart trackpartbuffer_1[4096*2];
 
 void adjustrand(unsigned char * d, unsigned char * r)
 {
-	int i;
-	unsigned char t;
-
-	t=0xC0;
-	for(i=0;i<4;i++)
+	if ( (*d & 0xC0) == 0xC0)
 	{
-		
-		if((*d&t)==t)
-		{
-			*d=*d & (~t);
-			*r=*r | t;
-		}
-		t=t>>2;
+		*d = *d & ~0xC0;
+		*r = *r |  0xC0;
+	}
+
+	if ( (*d & 0x30) == 0x30)
+	{
+		*d = *d & ~0x30;
+		*r = *r |  0x30;
+	}
+
+	if ( (*d & 0x0C) == 0x0C)
+	{
+		*d = *d & ~0x0C;
+		*r = *r |  0x0C;
+	}
+
+	if ( (*d & 0x03) == 0x03)
+	{
+		*d = *d & ~0x03;
+		*r = *r |  0x03;
 	}
 }
 
@@ -109,25 +118,31 @@ unsigned char * realloc_buffer(unsigned char * buffer,unsigned long numberofbit,
 	k=0;
 	j=0;
 
-	for(l=0;l<factor;l++)
+	if(!(newsize&0x7) && factor == 1)
 	{
-		for(i=0;i<numberofbit;i++)
+		memcpy(ptr, buffer, numberofbit/8);
+	}
+	else
+	{
+		for(l=0;l<factor;l++)
 		{
-			if( (buffer[k>>3]>>(0x7-(k&0x7)))&1)
+			for(i=0;i<numberofbit;i++)
 			{
-				ptr[j>>3]=ptr[j>>3]|(0x80>>(j&0x7));
+				if( (buffer[k>>3]>>(0x7-(k&0x7)))&1)
+				{
+					ptr[j>>3]=ptr[j>>3]|(0x80>>(j&0x7));
+				}
+				//else
+				//{
+				//	ptr[j>>3]=ptr[j>>3]&(~((0x80)>>(j&0x7)));
+				//}
+
+				j++;
+				if(j>=newsize) j=0;
+
+				k++;
+				if(k>=numberofbit) k=0;
 			}
-			//else
-			//{
-			//	ptr[j>>3]=ptr[j>>3]&(~((0x80)>>(j&0x7)));
-			//}
-
-			j++;
-			if(j>=newsize) j=0;
-
-			k++;
-			if(k>=numberofbit) k=0;
-
 		}
 	}
 
