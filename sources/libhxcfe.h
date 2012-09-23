@@ -94,8 +94,8 @@ int hxcfe_getNumberOfSide(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
 ////////////////////////////////////////////
 // Custom Image/floppy generation functions
 
-#define STACK_SIZE 0x400
-#define NUMBEROFSECTOR_MAX 0x400
+#define STACK_SIZE 0x80
+#define NUMBEROFSECTOR_MAX 0x200
 
 typedef struct fb_track_state_
 {
@@ -115,13 +115,12 @@ typedef struct fb_track_state_
 	int indexpos;
 	int sectorunderindex;
 
-
 	int numberofsector_min;
 	int numberofsector;
 	SECTORCONFIG sectortab[NUMBEROFSECTOR_MAX];
 
 	int sc_stack_pointer;
-	SECTORCONFIG sc_stack[STACK_SIZE];
+	SECTORCONFIG sc_stack[36];
 }fb_track_state;
 
 typedef struct FBuilder_
