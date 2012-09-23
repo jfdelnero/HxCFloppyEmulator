@@ -374,7 +374,8 @@ char* AnalyzeAndFoundOverLap(HXCFLOPPYEMULATOR* floppycontext,s_track_dump* td,i
 
 	unsigned char * valid_page1;
 	int time1,time2;
-	unsigned long i,j,k,l,c;
+	unsigned long i,j,l,c;
+	long k;
 	s_match * matchtab;
 	int nb_pulses,nb_flakey_pulses;
 	int number_of_entry;
@@ -456,8 +457,8 @@ char* AnalyzeAndFoundOverLap(HXCFLOPPYEMULATOR* floppycontext,s_track_dump* td,i
 
 	*start=matchtab[number_of_entry-1].offset;
 	*end=matchtab[number_of_entry-1].offset + nb_pulses;
-	if(*end>= td->nb_of_pulses) *end=td->nb_of_pulses-1;
-	if(*start>= td->nb_of_pulses) *start=td->nb_of_pulses-1;
+	if(*end>= (long)td->nb_of_pulses) *end=td->nb_of_pulses-1;
+	if(*start>= (long)td->nb_of_pulses) *start=td->nb_of_pulses-1;
 
 	nb_flakey_pulses = 0;
 
