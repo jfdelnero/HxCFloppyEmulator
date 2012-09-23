@@ -158,8 +158,9 @@ void printhelp(char* argv[])
 	printf("  -rawlist\t\t\t: Disk layout list [DISKLAYOUT]\n");
 	printf("  -interfacelist\t\t: Floppy interfaces mode list [INTERFACE_MODE]\n");
 	printf("  -finput:[filename]\t\t: Input file image \n");
+	printf("  -foutput:[filename]\t\t: Output file image \n");
 	printf("  -conv:[FORMAT] \t\t: Convert the input file\n");
-	printf("  -uselayout:[DISKLAYOUT] \t\t: Use the Layout [DISKLAYOUT]\n");
+	printf("  -uselayout:[DISKLAYOUT]\t: Use the Layout [DISKLAYOUT]\n");
 	printf("  -usb:[DRIVE] \t\t\t: start the usb floppy emulator\n");
 	printf("  -infos\t\t\t: Print informations about the input file\n");
 	printf("  -ifmode:[INTERFACE_MODE]\t: Select the floppy interface mode\n");
