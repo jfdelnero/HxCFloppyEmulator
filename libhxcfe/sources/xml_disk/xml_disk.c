@@ -487,6 +487,8 @@ XmlFloppyBuilder* hxcfe_initXmlFloppy(HXCFLOPPYEMULATOR* floppycontext)
 
 		memset(ad->ts,0,sizeof(track_state)*256);
 
+		XML_ParserReset(rfw->xml_parser, NULL);
+
 		XML_SetUserData(rfw->xml_parser, (void *) ad);
 		XML_SetElementHandler(rfw->xml_parser, start, end);
 
@@ -527,6 +529,12 @@ int hxcfe_getXmlLayoutID(XmlFloppyBuilder* context,char * container)
 	i = 0;
 	do
 	{
+		XML_ParserReset(context->xml_parser, NULL);
+		XML_SetUserData(context->xml_parser, (void *) ad);
+		XML_SetElementHandler(context->xml_parser, start, end);
+		XML_SetCharacterDataHandler(context->xml_parser, charhandler);
+		XML_SetNamespaceDeclHandler(context->xml_parser, ns_start, ns_end);
+
 		ad->xmlcheck = 1;
 		XML_Parse(context->xml_parser, disklayout_list[i]->unpacked_data, disklayout_list[i]->size, 1);
 
@@ -536,12 +544,6 @@ int hxcfe_getXmlLayoutID(XmlFloppyBuilder* context,char * container)
 		}
 
 		memset(ad->name,0,512);
-
-		XML_ParserReset(context->xml_parser, NULL);
-		XML_SetUserData(context->xml_parser, (void *) ad);
-		XML_SetElementHandler(context->xml_parser, start, end);
-		XML_SetCharacterDataHandler(context->xml_parser, charhandler);
-		XML_SetNamespaceDeclHandler(context->xml_parser, ns_start, ns_end);
 
 		i++;
 	}while(disklayout_list[i]);
@@ -556,12 +558,13 @@ const char* hxcfe_getXmlLayoutDesc(XmlFloppyBuilder* context,int moduleID)
 	if(hxcfe_numberOfXmlLayout(context) > moduleID)
 	{
 		ad->xmlcheck = 1;
-		XML_Parse(context->xml_parser, disklayout_list[moduleID]->unpacked_data, disklayout_list[moduleID]->size, 1);
 		XML_ParserReset(context->xml_parser, NULL);
 		XML_SetUserData(context->xml_parser, (void *) ad);
 		XML_SetElementHandler(context->xml_parser, start, end);
 		XML_SetCharacterDataHandler(context->xml_parser, charhandler);
 		XML_SetNamespaceDeclHandler(context->xml_parser, ns_start, ns_end);
+
+		XML_Parse(context->xml_parser, disklayout_list[moduleID]->unpacked_data, disklayout_list[moduleID]->size, 1);
 
 		return (const char*)ad->description;
 	}
@@ -576,12 +579,13 @@ const char* hxcfe_getXmlLayoutName(XmlFloppyBuilder* context,int moduleID)
 	if(hxcfe_numberOfXmlLayout(context) > moduleID)
 	{
 		ad->xmlcheck = 1;
-		XML_Parse(context->xml_parser, disklayout_list[moduleID]->unpacked_data, disklayout_list[moduleID]->size, 1);
 		XML_ParserReset(context->xml_parser, NULL);
 		XML_SetUserData(context->xml_parser, (void *) ad);
 		XML_SetElementHandler(context->xml_parser, start, end);
 		XML_SetCharacterDataHandler(context->xml_parser, charhandler);
 		XML_SetNamespaceDeclHandler(context->xml_parser, ns_start, ns_end);
+
+		XML_Parse(context->xml_parser, disklayout_list[moduleID]->unpacked_data, disklayout_list[moduleID]->size, 1);
 
 		return (const char*)ad->name;
 	}
@@ -625,7 +629,6 @@ FLOPPY* hxcfe_generateXmlFloppy (XmlFloppyBuilder* context,unsigned char * rambu
 	
 	ad->image_data = rambuffer;
 	ad->buffer_size = buffersize;
-
 
 	XML_ParserReset(context->xml_parser, NULL);
 	XML_SetUserData(context->xml_parser, (void *) ad);
