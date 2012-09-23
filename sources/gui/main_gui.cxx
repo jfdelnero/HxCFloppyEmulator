@@ -508,7 +508,9 @@ Main_Window::Main_Window()
   : Fl_Window(WINDOW_XSIZE,428)
 {
 	int i;
-	
+	XmlFloppyBuilder* rfb;
+	char * temp;
+
 	txtindex=0;
 	i=0;
 	evt_txt=0;
@@ -662,6 +664,24 @@ Main_Window::Main_Window()
 	rawloader_window->numin_interleave->value(1);
 	rawloader_window->numin_skew->value(0);
 	raw_loader_window_datachanged(rawloader_window->numin_skew, 0);
+
+	rfb=hxcfe_initXmlFloppy(guicontext->hxcfe);
+	i = 0;
+	while(i< hxcfe_numberOfXmlLayout(rfb) )
+	{
+		temp = (char*)hxcfe_getXmlLayoutDesc(rfb,i);
+		if(temp)
+		{
+			disklayout_choices[i+1].text = (const char*)malloc(strlen(temp)+1);
+			if(disklayout_choices[i+1].text)
+				strcpy((char*)disklayout_choices[i+1].text, temp);
+		}
+		i++;
+	}
+	hxcfe_deinitXmlFloppy(rfb);
+	
+	rawloader_window->choice_disklayout->menu(disklayout_choices);
+	rawloader_window->choice_disklayout->value(0);
 
 	//////////////////////////////////////////////
 	// Log window
