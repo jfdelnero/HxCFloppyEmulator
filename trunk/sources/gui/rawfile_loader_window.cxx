@@ -93,13 +93,13 @@ rawfile_loader_window::rawfile_loader_window() {
       innum_sectorpertrack->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
       innum_sectorpertrack->align(Fl_Align(FL_ALIGN_TOP_LEFT));
     } // Fl_Value_Input* innum_sectorpertrack
-    { innum_rpm = new Fl_Value_Input(10, 99, 95, 20, "RPM :");
+    { innum_rpm = new Fl_Value_Input(10, 99, 105, 20, "RPM :");
       innum_rpm->labelsize(12);
       innum_rpm->textsize(12);
       innum_rpm->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
       innum_rpm->align(Fl_Align(FL_ALIGN_TOP_LEFT));
     } // Fl_Value_Input* innum_rpm
-    { innum_bitrate = new Fl_Value_Input(10, 59, 95, 20, "Bitrate :");
+    { innum_bitrate = new Fl_Value_Input(10, 60, 105, 20, "Bitrate :");
       innum_bitrate->labelsize(12);
       innum_bitrate->textsize(12);
       innum_bitrate->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
@@ -134,7 +134,7 @@ rawfile_loader_window::rawfile_loader_window() {
       choice_sectorsize->align(Fl_Align(FL_ALIGN_TOP_LEFT));
       choice_sectorsize->when(FL_WHEN_CHANGED);
     } // Fl_Choice* choice_sectorsize
-    { choice_tracktype = new Fl_Choice(10, 19, 95, 20, "Track type :");
+    { choice_tracktype = new Fl_Choice(10, 20, 105, 20, "Track type :");
       choice_tracktype->down_box(FL_BORDER_BOX);
       choice_tracktype->labelsize(12);
       choice_tracktype->textsize(11);
@@ -156,6 +156,14 @@ rawfile_loader_window::rawfile_loader_window() {
       choice_numberofside->align(Fl_Align(FL_ALIGN_TOP_LEFT));
       choice_numberofside->when(FL_WHEN_CHANGED);
     } // Fl_Choice* choice_numberofside
+    { choice_disklayout = new Fl_Choice(10, 176, 110, 20, "Disk Layout:");
+      choice_disklayout->down_box(FL_BORDER_BOX);
+      choice_disklayout->labelsize(12);
+      choice_disklayout->textsize(11);
+      choice_disklayout->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
+      choice_disklayout->align(Fl_Align(FL_ALIGN_TOP_LEFT));
+      choice_disklayout->when(FL_WHEN_CHANGED);
+    } // Fl_Choice* choice_disklayout
     window->end();
   } // Fl_Double_Window* window
 }

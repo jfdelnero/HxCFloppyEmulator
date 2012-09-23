@@ -43,5 +43,6 @@ public:
   Fl_Choice *choice_tracktype;
   Fl_Value_Input *numin_gap3;
   Fl_Choice *choice_numberofside;
+  Fl_Choice *choice_disklayout;
 };
 #endif

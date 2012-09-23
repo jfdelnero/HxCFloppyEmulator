@@ -9,7 +9,7 @@ class rawfile_loader_window {open
     Fl_Window window {
       label {RAW File format configuration}
       user_data this open selected
-      xywh {386 235 464 312} type Double visible
+      xywh {337 383 464 312} type Double visible
     } {
       Fl_Check_Button chk_reversesides {
         label {Reverse side}
@@ -97,13 +97,13 @@ class rawfile_loader_window {open
         label {RPM :}
         user_data this
         callback raw_loader_window_datachanged
-        xywh {10 99 95 20} labelsize 12 align 5 textsize 12
+        xywh {10 99 105 20} labelsize 12 align 5 textsize 12
       }
       Fl_Value_Input innum_bitrate {
         label {Bitrate :}
         user_data this
         callback raw_loader_window_datachanged
-        xywh {10 59 95 20} labelsize 12 align 5 textsize 12
+        xywh {10 60 105 20} labelsize 12 align 5 textsize 12
       }
       Fl_Button {} {
         label {Load RAW file}
@@ -144,7 +144,7 @@ class rawfile_loader_window {open
         label {Track type :}
         user_data this
         callback raw_loader_window_datachanged open
-        xywh {10 19 95 20} down_box BORDER_BOX labelsize 12 align 5 when 1 textsize 11
+        xywh {10 20 105 20} down_box BORDER_BOX labelsize 12 align 5 when 1 textsize 11
       } {}
       Fl_Value_Input numin_gap3 {
         label {GAP3 lenght :}
@@ -157,6 +157,12 @@ class rawfile_loader_window {open
         user_data this
         callback raw_loader_window_datachanged open
         xywh {230 20 95 20} down_box BORDER_BOX labelsize 12 align 5 when 1 textsize 11
+      } {}
+      Fl_Choice choice_disklayout {
+        label {Disk Layout:}
+        user_data this
+        callback raw_loader_window_datachanged open
+        xywh {10 176 110 20} down_box BORDER_BOX labelsize 12 align 5 when 1 textsize 11
       } {}
     }
   }
