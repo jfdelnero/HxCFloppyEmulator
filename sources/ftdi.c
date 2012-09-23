@@ -34,16 +34,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#ifdef WIN32
+#if defined(WIN32)
 	#include <conio.h> 
 	#include <ftd2xx.h>
-	#include <winioctl.h>
-#endif
-
-#ifdef __APPLE__
+	#include <winioctl.h>s
+#elif defined(__APPLE__)
 	#include <dlfcn.h>
 	#include "../macosx/ftd2xx.h"
-#endif 
+#else
+	#include "../linux/ftd2xx.h"
+#endif
+
 
 #include "ftdi.h"
 
