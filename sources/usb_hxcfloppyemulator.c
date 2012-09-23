@@ -73,7 +73,7 @@ void patchbuffer(unsigned char * buffer, unsigned long bufferlen,unsigned char p
 	}while(i<bufferlen);
 }
 
-// fonction generant des code mfm aléatoire dans un buffer MFM 
+// fonction generant des code mfm aléatoire dans un buffer MFM
 // (emulation track non formate / weak bits)
 void randomizebuffer(USBHXCFE * hw_context,unsigned char * buffer,unsigned char * randombuffer, unsigned long bufferlen)
 {
@@ -149,7 +149,7 @@ int FillBuffer(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context,unsigned c
 			trackposition=hw_context->number_of_track-1;
 			if(trackposition<0)trackposition=0;
 		}
-		
+
 
 		final_buffer_len=hw_context->precalcusbtrack[trackposition].tracklen;
 		trackptr=hw_context->precalcusbtrack[trackposition].usbtrack;
@@ -158,7 +158,7 @@ int FillBuffer(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context,unsigned c
 		// selection des bon etats pour les signaux ready et diskchg
 		// selon la machine cible
 		floppypin34=0;
-		floppypin2=0; 
+		floppypin2=0;
 		amigaready=0;
 		writeprotect=0;
 
@@ -168,22 +168,22 @@ int FillBuffer(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context,unsigned c
 		case AMIGA_HD_FLOPPYMODE: // amiga
 			amigaready=1;
 			floppypin34=1;
-		
+
 			if(hw_context->floppychanged)
 			{
-				floppypin2=1;		
-										
+				floppypin2=1;
+
 				if(l>200)
 				{
 					//hw_context->floppychanged=0;
 					if(*headmoved)
-					{	
+					{
 						*headmoved=0;
 						floppypin2=0;
 						hw_context->floppychanged=0;
 						l=0;
 					}
-					
+
 				}
 				else
 				{
@@ -195,22 +195,22 @@ int FillBuffer(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context,unsigned c
 				floppypin2=0;
 				*headmoved=0;
 			}
-			
-		
+
+
 			break;
 
 		case IBMPC_DD_FLOPPYMODE: // pc / st 720k
-		case ATARIST_DD_FLOPPYMODE: 
+		case ATARIST_DD_FLOPPYMODE:
 			amigaready=0;
 			floppypin2=0;
 			if(hw_context->floppychanged)
 			{
-				floppypin34=1;		
+				floppypin34=1;
 				writeprotect=1;
 				if(l>100)
 				{
 					if(*headmoved)
-					{	
+					{
 						*headmoved=0;
 						floppypin34=0;
 						hw_context->floppychanged=0;
@@ -230,10 +230,10 @@ int FillBuffer(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context,unsigned c
 				*headmoved=0;
 			}
 
-			
+
 			break;
 		case IBMPC_HD_FLOPPYMODE: // pc / st 1.44MB
-		case ATARIST_HD_FLOPPYMODE: 
+		case ATARIST_HD_FLOPPYMODE:
 			amigaready=0;
 			floppypin2=1;
 
@@ -241,11 +241,11 @@ int FillBuffer(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context,unsigned c
 			{
 				floppypin34=1;
 				writeprotect=1;
-				
+
 				if(l>100)
 				{
 					if(*headmoved)
-					{	
+					{
 						*headmoved=0;
 						floppypin34=0;
 						hw_context->floppychanged=0;
@@ -272,9 +272,9 @@ int FillBuffer(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context,unsigned c
 			floppypin34=1;
 			break;
 
-		
-		case GENERIC_SHUGART_DD_FLOPPYMODE: 
-		case EMU_SHUGART_FLOPPYMODE: 
+
+		case GENERIC_SHUGART_DD_FLOPPYMODE:
+		case EMU_SHUGART_FLOPPYMODE:
 			amigaready=0;
 			floppypin2=0;
 			floppypin34=1;
@@ -291,14 +291,14 @@ int FillBuffer(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context,unsigned c
 	bytecopied=0;
 	if(final_buffer_len)
 	{
-	
+
 		hw_context->trackbuffer_pos=hw_context->trackbuffer_pos % final_buffer_len;
 		if((hw_context->trackbuffer_pos+hw_context->usbstats.packetsize)<final_buffer_len)
-		{	
+		{
 			memcpy(paquetbuffer,trackptr+hw_context->trackbuffer_pos,hw_context->usbstats.packetsize);
 			randomizebuffer(hw_context,paquetbuffer,randomtrackptr+hw_context->trackbuffer_pos, hw_context->usbstats.packetsize);
-					
-			hw_context->trackbuffer_pos=hw_context->trackbuffer_pos+hw_context->usbstats.packetsize;	
+
+			hw_context->trackbuffer_pos=hw_context->trackbuffer_pos+hw_context->usbstats.packetsize;
 			bytecopied=bytecopied+hw_context->usbstats.packetsize;
 		}
 		else
@@ -326,15 +326,15 @@ int FillBuffer(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context,unsigned c
 				bytecopied++;
 			}
 		}
-		
+
 
 		hw_context->trackbuffer_pos=hw_context->trackbuffer_pos % final_buffer_len;
 
 
-		// Derniere etape on change les etat des signaux floppy 
+		// Derniere etape on change les etat des signaux floppy
 		// ready, diskchg, etc...
 
-		
+
 			/*  index_signal<=     		SRAM_DATA(0); -- change index state
 				ready_signal<=			SRAM_DATA(1);
 				diskchanged_signal<=	SRAM_DATA(2);
@@ -356,7 +356,7 @@ int FillBuffer(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context,unsigned c
 		ctrl_byte=((hw_context->drive_select_source&0x3)<<6)|((floppydisable&0x1)<<5) | (amigaready<<4)| (writeprotect<<3) | (floppypin2<<2)|(floppypin34<<1);
 		patchbuffer(paquetbuffer, bytecopied,ctrl_byte);
 	}
-	
+
 	return bytecopied;
 }
 
@@ -386,7 +386,7 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 	unsigned int floppydisable;
 	unsigned char ctrl_byte,current_track;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"thread ftdichiplistener");	
+	floppycontext->hxc_printf(MSG_DEBUG,"thread ftdichiplistener");
 	hw_handle=0;
 	headmoved=0;
 
@@ -395,7 +395,7 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 	input_buffer=(unsigned char*)malloc(SRAMSIZE);
 	if(!srambuffer || !input_buffer)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"srambuffer malloc error !");	
+		floppycontext->hxc_printf(MSG_ERROR,"srambuffer malloc error !");
 		return -1;
 	}
 
@@ -411,22 +411,22 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 	hw_context->usbstats.totaldataout=0;
 
 	rxevent=(unsigned long*)hxc_createevent(floppycontext,1);
-	
+
 	do // boucle principale
 	{
 
 		hw_context->status=STATUS_LOOKINGFOR;
 		do // boucle autodetection/initialisation de la carte
 		{
-			
-			if(hw_handle) 
+
+			if(hw_handle)
 			{// driver ftdi ouvert-> on le ferme
 				close_ftdichip(hw_handle);
 				hw_handle=0;
 			}
 			init_failed=0;
 
-			
+
 			do
 			{
 				// ouverture driver ftdi
@@ -441,7 +441,7 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 					//ok
 					//configuration du driver et du chip!
 					setusbparameters_ftdichip(hw_handle,2048,2048);
-					
+
 					//4ms de timeout pour l'envoi des data coté ft245
 					setlatencytimer_ftdichip(hw_handle,4);
 
@@ -449,7 +449,7 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 					purge_ftdichip(hw_handle,FT_PURGE_RX);
 
 					//utilisation de la methode d'attente sur evenement
-					// pour la reception 
+					// pour la reception
 					eventftdimask= FT_EVENT_RXCHAR;
 					seteventnotification_ftdichip(hw_handle,eventftdimask,rxevent);
 				}
@@ -460,7 +460,7 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 			// il faut maintenant verifier le cpld.
 
 			// hardware test
-			
+
 			// on efface la SRAM de la carte
 			memset(srambuffer,0x00,SRAMSIZE);
 			write_ftdichip(hw_handle,srambuffer,SRAMSIZE);
@@ -495,7 +495,7 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 					i++;
 				}
 				while(i<8 && !init_failed); //(on fait 8 fois l'operation)
-				
+
 			}
 			else
 			{// erreur on a reçu des donnees ?! (ancienne version du cpld ?!)
@@ -514,10 +514,10 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 		ftdierror=0;
 		do
 		{
-				
+
 			byteread=0;
 			if(checkalignement==0)
-			{		
+			{
 				bytetoread=2;
 			}
 			else
@@ -529,12 +529,12 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 			{
 				// attente de 1 ou 2 octets (bytetoread) de synchro.
 				hxc_waitevent(floppycontext,1,2000);
-				if (!getfifostatus_ftdichip(hw_handle,&TxBytes,&RxBytes,&eventftdi)) 
+				if (!getfifostatus_ftdichip(hw_handle,&TxBytes,&RxBytes,&eventftdi))
 				{
 					if((eventftdi&FT_EVENT_RXCHAR) && RxBytes)
 					{
 						byte_read=read_ftdichip(hw_handle,input_buffer,RxBytes);
-						if (byte_read>=0) 
+						if (byte_read>=0)
 						{
 							if((bytetoread==1 && RxBytes>1) ||  (bytetoread==2 && RxBytes>2))
 							{
@@ -550,7 +550,7 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 						{
 							ftdierror=1;
 						}
-							
+
 					}
 				}
 				else
@@ -558,14 +558,14 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 					ftdierror=1;
 				}
 			}while(byteread<bytetoread && (ftdierror==0));
-				
+
 			// l'alignement viens juste d'etre verifié
 			// on remet ça dans 5 tours
 			if(checkalignement==0)
 			{
 				checkalignement=5;
 			}
-				
+
 			// stop ou encore ?
 			if(hw_context->stop_emulation)
 			{
@@ -582,15 +582,15 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 			if(ftdierror==0)
 			{
 				trackpointer=0;//BytesReceived-1;
-					
+
 				if((input_buffer[trackpointer]&0x80)!=0)
 				{
 					// la tete a bougee
-					headmoved=headmoved|1; 
+					headmoved=headmoved|1;
 				}
-				
+
 				current_track=input_buffer[trackpointer]&0x7F;
-				
+
 				// stockage track courante
 				if(hw_context->double_step)
 				{
@@ -600,18 +600,18 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 				{
 					hw_context->current_track=current_track;
 				}
-							
+
 				if(hw_context->running)
 				{//Mode normal : il y a une image a envoyer
 
 					checkalignement--;
-				
+
 					// recherche des prochaines données a envoyer
 					txbuffersize=FillBuffer(floppycontext,hw_context,srambuffer,&headmoved);
-					
+
 					// recherche d'une zone sans commande au debut
-					// du buffer pour y inserer un commande de 
-					// synchro 
+					// du buffer pour y inserer un commande de
+					// synchro
 					i=2;
 					do
 					{
@@ -620,7 +620,7 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 							i=i+2;
 						}
 					}while((i<txbuffersize) && iscmd(srambuffer[i]));
-								
+
 
 					// une commande de synchro
 					// en debut de buffer
@@ -636,45 +636,45 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 						srambuffer2[i+2]=0x33;
 						srambuffer2[i+3]=current_track;
 						memcpy(&srambuffer2[i+4],&srambuffer[i],txbuffersize-(i));
-						bytetowrite=txbuffersize+(2*2);		
+						bytetowrite=txbuffersize+(2*2);
 					}
 					else
 					{
 						memcpy(&srambuffer2[2],&srambuffer[0],txbuffersize);
-						bytetowrite=txbuffersize+2;						
+						bytetowrite=txbuffersize+2;
 					}
 
 					// envois du buffer vers la carte
 					if(write_ftdichip(hw_handle,srambuffer2,bytetowrite)<0)
 					{
 						ftdierror=1;
-					}	
+					}
 
 					// gestion des stats usb
 					hw_context->usbstats.packetsent++;
 					hw_context->usbstats.totalpacketsent++;
 					hw_context->usbstats.totaldataout=hw_context->usbstats.totaldataout+bytetowrite;
 					hw_context->usbstats.dataout=hw_context->usbstats.dataout+bytetowrite;
-					
+
 				}
 				else
 				{
 					// mode "standby":
-					// pas d'image a envoyer: on fait fonctionner la 
+					// pas d'image a envoyer: on fait fonctionner la
 					// carte au ralenti
 					checkalignement--;
 					memset(srambuffer,0,hw_context->usbstats.packetsize);
 					srambuffer[0]=0xDD; // set bitrate
-					srambuffer[1]=0xF0; 
+					srambuffer[1]=0xF0;
 					srambuffer[2]=0x33; // synchro
 					srambuffer[3]=current_track;//hw_context->current_track;;
 					srambuffer[4]=0xAA;
 
-					
+
 					// selection des bon etats pour les signaux ready et diskchg
 					// selon la machine cible
 					floppypin34=0;
-					floppypin2=0; 
+					floppypin2=0;
 					amigaready=0;
 
 					switch(hw_context->interface_mode)
@@ -683,44 +683,44 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 					case AMIGA_HD_FLOPPYMODE: // amiga
 						amigaready=1;
 						floppypin34=1;
-					
+
 						if(hw_context->floppychanged)
 						{
-							floppypin2=1;		
+							floppypin2=1;
 						}
 						else
 						{
 							floppypin2=0;
 						}
-						
-					
+
+
 						break;
 
 					case IBMPC_DD_FLOPPYMODE: // pc / st 720k
-					case ATARIST_DD_FLOPPYMODE: 
+					case ATARIST_DD_FLOPPYMODE:
 						amigaready=0;
 						floppypin2=0;
 						if(hw_context->floppychanged)
 						{
-							floppypin34=1;		
-													
+							floppypin34=1;
+
 						}
 						else
 						{
 							floppypin34=0;
 						}
 
-						
+
 						break;
 					case IBMPC_HD_FLOPPYMODE: // pc / st 1.44MB
-					case ATARIST_HD_FLOPPYMODE: 
+					case ATARIST_HD_FLOPPYMODE:
 						amigaready=0;
 						floppypin2=1;
 
 						if(hw_context->floppychanged)
 						{
-							floppypin34=1;		
-													
+							floppypin34=1;
+
 						}
 						else
 						{
@@ -735,7 +735,7 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 						floppypin34=1;
 						break;
 
-					
+
 					case GENERIC_SHUGART_DD_FLOPPYMODE:
 					case EMU_SHUGART_FLOPPYMODE:
 						amigaready=0;
@@ -753,7 +753,7 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 					if(hw_context->drive_select_source>3)
 					{
 						floppydisable=1;
-					}	
+					}
 					else
 					{
 						floppydisable=0;
@@ -768,7 +768,7 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 					if(!checkalignement)
 						srambuffer[8]=0x33; // synchro
 
-					if(write_ftdichip(hw_handle,srambuffer,hw_context->usbstats.packetsize)<0) 
+					if(write_ftdichip(hw_handle,srambuffer,hw_context->usbstats.packetsize)<0)
 					{
 						ftdierror=1;
 					}
@@ -776,13 +776,13 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 					hw_context->usbstats.totalpacketsent++;
 					hw_context->usbstats.totaldataout=hw_context->usbstats.totaldataout+hw_context->usbstats.packetsize;
 					hw_context->usbstats.dataout=hw_context->usbstats.dataout+hw_context->usbstats.packetsize;
-					
+
 				}
 			}
-					
+
 		}while(!ftdierror);
 
-	
+
 	}while(1);
 
 	return 0;
@@ -804,7 +804,7 @@ USBHXCFE* libusbhxcfe_init(HXCFLOPPYEMULATOR* floppycontext)
 
 		hwif->hw_handle=0;
 
-		// generation d'une LUT pour le random MFM 
+		// generation d'une LUT pour le random MFM
 		hwif->randomlut=(unsigned char*)malloc(1024);
 		for(i=0;i<1024;i++)
 		{
@@ -824,24 +824,24 @@ USBHXCFE* libusbhxcfe_init(HXCFLOPPYEMULATOR* floppycontext)
 		hwif->start_emulation=0;
 		hwif->stop_emulation=0;
 		hwif->drive_select_source=0;
-		
+
 		hxc_createevent(floppycontext,0);
-		hxc_createthread(floppycontext,hwif,&ftdichiplistener,1);
+		hxc_createthread(floppycontext,hwif,(THREADFUNCTION)&ftdichiplistener,1);
 
 		floppycontext->hxc_printf(MSG_INFO_0,"Device ok !");
-	
-		return hwif;		
+
+		return hwif;
 	}
 	else
 	{
 		return 0;
 	}
-	
+
 }
 
 
 int libusbhxcfe_deInit(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif)
-{ 
+{
 	if(hwif)
 		free(hwif);
 	return 0;
@@ -854,7 +854,7 @@ int libusbhxcfe_loadFloppy(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,FLOP
 	unsigned short i;
 	unsigned char * final_buffer;
 	unsigned char * final_randombuffer;
-	
+
 	#ifdef DEBUGVB
 	FILE * fdebug;
 	char fdebug_name[512];
@@ -906,8 +906,8 @@ int libusbhxcfe_loadFloppy(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,FLOP
 					&final_buffer,
 					&final_randombuffer,
 					0,
-					0, 
-					0, 
+					0,
+					0,
 					0,
 					0);
 				}
@@ -928,8 +928,8 @@ int libusbhxcfe_loadFloppy(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,FLOP
 					&final_buffer,
 					&final_randombuffer,
 					0,
-					0, 
-					0, 
+					0,
+					0,
 					0,
 					0);
 
@@ -944,12 +944,12 @@ int libusbhxcfe_loadFloppy(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,FLOP
 
 
 				floppycontext->hxc_printf(MSG_DEBUG,"USB Track %d Size: %d bytes",i,final_buffer_len);
-				
+
 				if(final_randombuffer)
 					free(final_randombuffer);
 				if(final_buffer)
 					free(final_buffer);
-				
+
 				#ifdef DEBUGVB
 					sprintf(fdebug_name,"usb_track_%d.bin",i);
 					fdebug=(FILE*) fopen(fdebug_name,"w+b");
@@ -968,7 +968,7 @@ int libusbhxcfe_loadFloppy(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,FLOP
 		hwif->floppychanged=1;
 
 
-		
+
 		floppycontext->hxc_printf(MSG_INFO_0,"Starting emulation...");
 		hwif->start_emulation=1;
 	}
@@ -1007,7 +1007,7 @@ int libusbhxcfe_getStats(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,USBSta
 			memset(stats,0,sizeof(USBStats));
 		return 0;
 	}
-	
+
 }
 
 int libusbhxcfe_setInterfaceMode(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,int interfacemode,int doublestep,int drive)
