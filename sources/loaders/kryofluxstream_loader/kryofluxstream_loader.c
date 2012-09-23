@@ -374,6 +374,7 @@ char* AnalyzeAndFoundOverLap(HXCFLOPPYEMULATOR* floppycontext,s_track_dump* td,i
 
 	unsigned char * valid_page1;
 	int time1,time2;
+	int marge;
 	unsigned long i,j,l,c;
 	long k;
 	s_match * matchtab;
@@ -418,9 +419,10 @@ char* AnalyzeAndFoundOverLap(HXCFLOPPYEMULATOR* floppycontext,s_track_dump* td,i
 
 		do
 		{
+			marge = ( ( time1 * pourcent_error ) / 100 );
 			if( 
-				( time2 <= ( time1 + ( ( time1 * pourcent_error ) / 100 ) ) ) &&
-				( time2 >= ( time1 - ( ( time1 * pourcent_error ) / 100 ) ) )    )
+				( time2 <= ( time1 + marge ) ) &&
+				( time2 >= ( time1 - marge ) )    )
 			{
 				matchtab[k].yes++;
 				time1 = td->track_dump[++i];
