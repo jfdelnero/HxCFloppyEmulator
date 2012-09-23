@@ -48,13 +48,16 @@ DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosf
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o
 
+XML_DISK = xml_disk.o lzw.o pack.o rle.o
+XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
+
 all: $(EXEC)
 
-libhxcfe.a: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o display_track.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ)
+libhxcfe.a: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o display_track.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT)
 	$(AR) r $@    $^ 
 	cp $@ ../../../build
 
-libhxcfe.so: floppy_loader.o floppy_utils.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ)
+libhxcfe.so: floppy_loader.o floppy_utils.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT)
 	$(CC) -o $@    $^ $(LDFLAGS)
 		
 floppy_loader.o: $(BASEDIR)/floppy_loader.c
@@ -117,10 +120,10 @@ hfe_writer.o : $(BASEDIR)/loaders/hfe_loader/hfe_writer.c
 exthfe_writer.o : $(BASEDIR)/loaders/hfe_loader/exthfe_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 	
-copyqm_loader.o : $(BASEDIR)/loaders/copyqm_loader/copyqm_loader.c  $(BASEDIR)/loaders/copyqm_loader/crctable.c $(BASEDIR)/loaders/copyqm_loader/copyqm_loader.h
+copyqm_loader.o : $(BASEDIR)/loaders/copyqm_loader/copyqm_loader.c $(BASEDIR)/loaders/copyqm_loader/crctable.c $(BASEDIR)/loaders/copyqm_loader/copyqm_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-crctable.o : $(BASEDIR)/loaders/copyqm_loader/crctable.c   $(BASEDIR)/loaders/copyqm_loader/crctable.h
+crctable.o : $(BASEDIR)/loaders/copyqm_loader/crctable.c $(BASEDIR)/loaders/copyqm_loader/crctable.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 adf_loader.o : $(BASEDIR)/loaders/adf_loader/adf_loader.c $(BASEDIR)/loaders/adf_loader/adf_loader.h
@@ -422,10 +425,29 @@ unzip.o : $(BASEDIR)/thirdpartylibs/zlib/contrib/minizip/unzip.c
 zip.o : $(BASEDIR)/thirdpartylibs/zlib/contrib/minizip/zip.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-
-
 libsap.o : $(BASEDIR)/thirdpartylibs/libsap/libsap.c   $(BASEDIR)/thirdpartylibs/libsap/libsap.h
 	$(CC) -o $@ -c $< $(CFLAGS)
+
+xml_disk.o : ../sources/xml_disk/xml_disk.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+lzw.o : ../sources/xml_disk/packer/lzw.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+pack.o : ../sources/xml_disk/packer/pack.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+rle.o : ../sources/xml_disk/packer/rle.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+xmlparse.o : ../sources/thirdpartylibs/expat/expat-2.1.0/lib/xmlparse.c
+	$(CC) -o $@ -c $< $(CFLAGS) -DHAVE_MEMMOVE
+
+xmlrole.o : ../sources/thirdpartylibs/expat/expat-2.1.0/lib/xmlrole.c
+	$(CC) -o $@ -c $< $(CFLAGS) -DHAVE_MEMMOVE
+
+xmltok.o : ../sources/thirdpartylibs/expat/expat-2.1.0/lib/xmltok.c
+	$(CC) -o $@ -c $< $(CFLAGS) -DHAVE_MEMMOVE
 
 
 ftdi_d2xxmode.o : ftdi.c ftdi.h ftd2xx.h WinTypes.h
