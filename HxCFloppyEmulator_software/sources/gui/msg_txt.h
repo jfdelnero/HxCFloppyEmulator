@@ -147,6 +147,24 @@ Fl_Menu_Item nbside_choices[]=
 	{0}
 };
 
+Fl_Menu_Item disklayout_choices[]=
+{
+	{ "Custom Disk Layout",0,raw_loader_window_datachanged,(void*)255},
+	{ 0,0,raw_loader_window_datachanged,(void*)1},
+	{ 0,0,raw_loader_window_datachanged,(void*)2},
+	{ 0,0,raw_loader_window_datachanged,(void*)3},
+	{ 0,0,raw_loader_window_datachanged,(void*)4},
+	{ 0,0,raw_loader_window_datachanged,(void*)5},
+	{ 0,0,raw_loader_window_datachanged,(void*)6},
+	{ 0,0,raw_loader_window_datachanged,(void*)7},
+	{ 0,0,raw_loader_window_datachanged,(void*)8},
+	{ 0,0,raw_loader_window_datachanged,(void*)9},
+	{ 0,0,raw_loader_window_datachanged,(void*)10},
+	{ 0,0,raw_loader_window_datachanged,(void*)11},
+	{ 0,0,raw_loader_window_datachanged,(void*)12},
+	{0}
+};
+
 /*
 platform platformlist[]=
 {

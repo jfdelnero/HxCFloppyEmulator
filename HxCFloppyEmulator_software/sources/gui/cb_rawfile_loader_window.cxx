@@ -160,7 +160,7 @@ void setWindowState(rawfile_loader_window *rlw,cfgrawfile *rfc)
 void raw_loader_window_datachanged(Fl_Widget* w, void*)
 {
 	int totalsector,totalsize;
-	int temp[256];
+	int temp[256],v;
 	rawfile_loader_window *rlw;
 	Fl_Window *dw;
 
@@ -186,6 +186,65 @@ void raw_loader_window_datachanged(Fl_Widget* w, void*)
 	{
 		rlw->numin_gap3->deactivate();
 	}
+
+	v = rlw->choice_disklayout->value(); 
+	if(v > 0)
+	{
+
+		rlw->chk_autogap3->deactivate();
+		rlw->chk_intersidesectornum->deactivate();
+		rlw->chk_reversesides->deactivate();
+		rlw->chk_side0track_first->deactivate();
+		rlw->chk_sidebasedskew->deactivate();
+		rlw->choice_numberofside->deactivate();
+		rlw->choice_sectorsize->deactivate();
+		rlw->choice_tracktype->deactivate();
+		rlw->innum_bitrate->deactivate();
+		rlw->innum_nbtrack->deactivate();
+		rlw->innum_rpm->deactivate();
+		rlw->innum_sectoridstart->deactivate();
+		rlw->innum_sectorpertrack->deactivate();
+		rlw->numin_formatvalue->deactivate();
+		rlw->numin_gap3->deactivate();
+		rlw->numin_interleave->deactivate();
+		rlw->numin_pregap->deactivate();
+		rlw->numin_skew->deactivate();
+		rlw->strout_totalsector->deactivate();
+		rlw->strout_totalsize->deactivate();
+	}
+	else
+	{
+		rlw->chk_autogap3->activate();
+		rlw->chk_intersidesectornum->activate();
+		rlw->chk_reversesides->activate();
+		rlw->chk_side0track_first->activate();
+		rlw->chk_sidebasedskew->activate();
+		rlw->choice_numberofside->activate();
+		rlw->choice_sectorsize->activate();
+		rlw->choice_tracktype->activate();
+		rlw->innum_bitrate->activate();
+		rlw->innum_nbtrack->activate();
+		rlw->innum_rpm->activate();
+		rlw->innum_sectoridstart->activate();
+		rlw->innum_sectorpertrack->activate();
+		rlw->numin_formatvalue->activate();
+		rlw->numin_gap3->activate();
+		rlw->numin_interleave->activate();
+		rlw->numin_pregap->activate();
+		rlw->numin_skew->activate();
+		rlw->strout_totalsector->activate();
+		rlw->strout_totalsize->activate();
+
+		if(!rlw->chk_autogap3->value())
+		{
+			rlw->numin_gap3->activate();
+		}
+		else
+		{
+			rlw->numin_gap3->deactivate();
+		}
+
+	}
 }
 
 void raw_loader_window_bt_loadrawfile(Fl_Button* bt, void*)
@@ -193,9 +252,11 @@ void raw_loader_window_bt_loadrawfile(Fl_Button* bt, void*)
 	int totalsector,totalsize;
 	int temp[256];
 	char file[1024];
+	int disklayout;
 	rawfile_loader_window *rlw;
 	Fl_Window *dw;
 	cfgrawfile rfc;
+	XmlFloppyBuilder* rfb;
 
 	memset(file,0,sizeof(file));
 
@@ -217,7 +278,18 @@ void raw_loader_window_bt_loadrawfile(Fl_Button* bt, void*)
 
 	if(!fileselector((char*)"Select raw file",(char*)file,0,(char*)"*.img",0,0))
 	{	
-		loadrawfile(guicontext->hxcfe,&rfc,file);
+		disklayout = rlw->choice_disklayout->value();
+		if(disklayout>0)
+		{
+			rfb=hxcfe_initXmlFloppy(guicontext->hxcfe);
+			hxcfe_selectXmlFloppyLayout(rfb,disklayout-1);
+			load_floppy( hxcfe_generateXmlFileFloppy(rfb,file) );
+			hxcfe_deinitXmlFloppy(rfb);
+		}
+		else
+		{
+			loadrawfile(guicontext->hxcfe,&rfc,file);
+		}
 		dw->hide();
 	}
 }
@@ -229,9 +301,12 @@ void raw_loader_window_bt_createemptyfloppy(Fl_Button* bt, void*)
 	rawfile_loader_window *rlw;
 	Fl_Window *dw;
 	cfgrawfile rfc;
+	int disklayout;
+	XmlFloppyBuilder* rfb;
 
 	dw=((Fl_Window*)(bt->parent()));
 	rlw=(rawfile_loader_window *)dw->user_data();
+
 
 	totalsector=(int)(rlw->innum_nbtrack->value() * 	rlw->innum_sectorpertrack->value());
 	if(rlw->choice_numberofside->value())
@@ -246,7 +321,19 @@ void raw_loader_window_bt_createemptyfloppy(Fl_Button* bt, void*)
 
 	getWindowState(rlw,&rfc);
 
-	loadrawfile(guicontext->hxcfe,&rfc,NULL);
+	disklayout = rlw->choice_disklayout->value();
+	if(disklayout>0)
+	{
+		rfb=hxcfe_initXmlFloppy(guicontext->hxcfe);
+		hxcfe_selectXmlFloppyLayout(rfb,disklayout-1);
+		load_floppy( hxcfe_generateXmlFloppy(rfb,0,0) );
+		hxcfe_deinitXmlFloppy(rfb);
+	}
+	else
+	{
+		loadrawfile(guicontext->hxcfe,&rfc,NULL);
+	}
+
 	dw->hide();
 }
 
