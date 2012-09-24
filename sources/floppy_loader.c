@@ -1107,6 +1107,11 @@ unsigned short hxcfe_getCurrentRPM (FBuilder* fb)
 	return fb->fb_stack[fb->fb_stack_pointer].rpm;
 }
 
+int hxcfe_getCurrentSkew(FBuilder* fb)
+{
+	return fb->fb_stack[fb->fb_stack_pointer].skew;
+}
+
 int hxcfe_generateDisk(FBuilder* fb,unsigned char * diskdata,int buffersize)
 {
 	int i,j,ret;

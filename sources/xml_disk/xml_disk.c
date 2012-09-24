@@ -59,8 +59,6 @@
 typedef struct parse_stack_
 {
 	int state;
-	int number_of_sectors;
-	int sector_size;
 	int cur_track;
 }parse_stack;
 
@@ -95,6 +93,13 @@ typedef struct app_data
 
 	unsigned char * image_data;
 	int buffer_size;
+
+	int skew_per_track;
+	int skew_per_side;
+
+	int interface_mode;
+	int double_step;
+
 } AppData;
 
 int generateDisk(AppData *ad,unsigned char * diskdata,int buffersize)
@@ -122,7 +127,10 @@ int generateDisk(AppData *ad,unsigned char * diskdata,int buffersize)
 
 			if(!ad->ts[statetracknb].set)
 			{
+
 				hxcfe_pushTrack (ad->fb,rpm,i,j,type);
+
+				hxcfe_setTrackSkew(ad->fb, (hxcfe_getCurrentSkew(ad->fb) + ( ad->skew_per_track * i ) + ( j * ad->skew_per_side ))%numberofsector );
 
 				if( ( (offset + (sectorsize * numberofsector) )  > buffersize) || !diskdata )
 				{
@@ -247,6 +255,17 @@ void charhandler(void *data, const char *s, int len)
 		case DISK_LAYOUT_DESCRIPTION:
 			strcpy((char*)&ad->description,(char*)&buffer);
 		break;
+		case INTERFACE_MODE:
+			ad->interface_mode = hxcfe_getFloppyInterfaceModeID(ad->floppycontext,(char*)&buffer);
+		break;
+		case DOUBLE_STEP:
+			if(!strcmp(buffer,"on"))
+				ad->double_step = 1;
+
+			if(!strcmp(buffer,"off"))
+				ad->double_step = 0;
+		break;
+
 		case NUMBEROFTRACK:
 			if(!ad->xmlcheck)
 				hxcfe_setNumberOfTrack (ad->fb,(unsigned short)atoi(buffer));
@@ -270,6 +289,14 @@ void charhandler(void *data, const char *s, int len)
 		case SKEW:
 			if(!ad->xmlcheck)
 				hxcfe_setTrackSkew(ad->fb,atoi(buffer));
+		break;
+		case SKEW_PER_TRACK:
+			if(!ad->xmlcheck)
+				ad->skew_per_track = atoi(buffer);
+		break;
+		case SKEW_PER_SIDE:
+			if(!ad->xmlcheck)
+				ad->skew_per_side = atoi(buffer);
 		break;
 		case FORMATVALUE:
 			if(!ad->xmlcheck)
@@ -415,6 +442,8 @@ void end(void *data, const char *el)
 			case LAYOUT:
 				generateDisk(ad,ad->image_data,ad->buffer_size);
 				ad->floppy = hxcfe_getFloppy (ad->fb);
+				if(ad->interface_mode>=0)
+					hxcfe_floppySetInterfaceMode(ad->floppycontext,ad->floppy,ad->interface_mode);
 			break;
 
 			case TRACK:		
@@ -464,7 +493,9 @@ XmlFloppyBuilder* hxcfe_initXmlFloppy(HXCFLOPPYEMULATOR* floppycontext)
 			return 0;
 		}
 		memset(ad,0,sizeof(AppData));
-
+		
+		ad->interface_mode = -1;
+		
 		i=0;
 		while( disklayout_list[i])
 		{

@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!-- HxC Floppy Emulator Disk Layout -->
 <disk_layout>
-	<disk_layout_name>DOS_HD_1M44</disk_layout_name>
-	<disk_layout_description>Standard 3"5 DOS HD Floppy Disk</disk_layout_description>
+	<disk_layout_name>AKAIS950_DD_800KB</disk_layout_name>
+	<disk_layout_description>Akai S900/S950 3"5 DD Floppy Disk</disk_layout_description>
 	<prefered_file_extension>img</prefered_file_extension>
-	<interface_mode>IBMPC_HD_FLOPPYMODE</interface_mode>
-	<file_size>1474560</file_size>
+	<interface_mode>S950_DD_FLOPPYMODE</interface_mode>
+	<file_size>819200</file_size>
 	<layout>
 		<number_of_track>80</number_of_track>
 		<number_of_side>2</number_of_side>
 		<format>IBM_MFM</format>
-		<sector_per_track>18</sector_per_track>
-		<sector_size>512</sector_size>
+		<sector_per_track>5</sector_per_track>
+		<sector_size>1024</sector_size>
 		<interleave>1</interleave>
-		<formatvalue>0xF6</formatvalue>
+		<formatvalue>0x00</formatvalue>
 		<gap3>255</gap3>
-		<bitrate>500000</bitrate>
+		<bitrate>250000</bitrate>
 		<pregap>150</pregap>
 		<rpm>300</rpm>
 	</layout>
