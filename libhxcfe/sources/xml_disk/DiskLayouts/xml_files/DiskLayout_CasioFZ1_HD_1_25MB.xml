@@ -4,6 +4,7 @@
 	<disk_layout_name>CASIOFZ1_HD_1M25</disk_layout_name>
 	<disk_layout_description>Casio FZ1 3"5 HD Floppy Disk</disk_layout_description>
 	<prefered_file_extension>fz1</prefered_file_extension>
+	<interface_mode>GENERIC_SHUGART_DD_FLOPPYMODE</interface_mode>
 	<file_size>1310720</file_size>
 	<layout>
 		<number_of_track>80</number_of_track>
@@ -15,7 +16,7 @@
 		<formatvalue>0x5A</formatvalue>
 		<gap3>255</gap3>
 		<bitrate>500000</bitrate>
-		<pregap>240</pregap>
+		<pregap>150</pregap>
 		<rpm>360</rpm>
 	</layout>
 </disk_layout>

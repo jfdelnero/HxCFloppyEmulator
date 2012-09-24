@@ -4,6 +4,7 @@
 	<disk_layout_name>DOS_DD_720KB</disk_layout_name>
 	<disk_layout_description>Standard 3"5 DOS DD Floppy Disk</disk_layout_description>
 	<prefered_file_extension>img</prefered_file_extension>
+	<interface_mode>IBMPC_DD_FLOPPYMODE</interface_mode>
 	<file_size>737280</file_size>
 	<layout>
 		<number_of_track>80</number_of_track>
@@ -15,7 +16,7 @@
 		<formatvalue>0xF6</formatvalue>
 		<gap3>255</gap3>
 		<bitrate>250000</bitrate>
-		<pregap>240</pregap>
+		<pregap>150</pregap>
 		<rpm>300</rpm>
 	</layout>
 </disk_layout>

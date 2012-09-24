@@ -187,6 +187,7 @@ unsigned short hxcfe_getCurrentNumberOfTrack (FBuilder* fb);
 int            hxcfe_getCurrentSectorSize(FBuilder* fb);
 unsigned char  hxcfe_getCurrentTrackType (FBuilder* fb);
 unsigned short hxcfe_getCurrentRPM (FBuilder* fb);
+int            hxcfe_getCurrentSkew (FBuilder* fb);
 
 FLOPPY* hxcfe_getFloppy (FBuilder* fb);
 
