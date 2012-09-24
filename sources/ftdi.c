@@ -37,7 +37,7 @@
 #if defined(WIN32)
 	#include <conio.h> 
 	#include <ftd2xx.h>
-	#include <winioctl.h>s
+	#include <winioctl.h>
 #elif defined(__APPLE__)
 	#include <dlfcn.h>
 	#include "../macosx/ftd2xx.h"
@@ -76,7 +76,8 @@ int ftdi_load_lib (HXCFLOPPYEMULATOR* floppycontext)
 	HMODULE h;
 
 	h = LoadLibrary ("ftd2xx.dll");
-	if (h) 	{
+	if (h) 
+	{
 		pFT_Write = (FT_WRITE)GetProcAddress (h, "FT_Write");
 		pFT_Read = (FT_READ)GetProcAddress (h, "FT_Read");
 		pFT_GetStatus = (FT_GETSTATUS)GetProcAddress (h, "FT_GetStatus");
