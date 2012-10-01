@@ -71,7 +71,7 @@ keyword keyword_list[]=
 	{"gap3",						GAP3,						LAYOUT},
 	{"pregap",						PREGAP,						LAYOUT},
 	{"rpm",							RPM,						LAYOUT},
-	{"sectoridstart",				SECTORIDSTART,				LAYOUT},
+	{"start_sector_id",				SECTORIDSTART,				LAYOUT},
 	{"track_list",					TRACKLIST,					LAYOUT},
 	{"track",						TRACK,						TRACKLIST},
 	{"data_offset",					DATAOFFSET,					TRACK},
