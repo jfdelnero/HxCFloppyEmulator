@@ -860,7 +860,7 @@ int libusbhxcfe_loadFloppy(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,FLOP
 	char fdebug_name[512];
 	#endif
 
-	if(hwif)
+	if(hwif && floppydisk)
 	{
 		floppycontext->hxc_printf(MSG_INFO_0,"USB HxCFloppyEmulator :Convert track data...");
 		if(hwif->running)
