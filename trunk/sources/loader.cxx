@@ -209,7 +209,8 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 					}
 					else
 					{
-						hxcfe_setTrackSkew(fb,((unsigned char)i*rfc->skew)%rfc->sectorpertrack);
+						if(rfc->sectorpertrack)
+							hxcfe_setTrackSkew(fb,((unsigned char)i*rfc->skew)%rfc->sectorpertrack);
 					}
 
 					if(f)
