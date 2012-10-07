@@ -771,7 +771,7 @@ unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackenco
 			break;
 	}
 	
-	if(total_track_size)
+	if(total_track_size && bitrate)
  		tck_period=tck_period+(100000/(bitrate/(total_track_size*4)));
 
 
@@ -821,7 +821,8 @@ unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackenco
 
 		total_track_size=total_track_size+track_size;
 
-		tck_period=tck_period+(10000000/((sectorconfigtab[0].bitrate*100)/(track_size*4)));
+		if( sectorconfigtab[0].bitrate && track_size )
+			tck_period=tck_period+(10000000/((sectorconfigtab[0].bitrate*100)/(track_size*4)));
 
 	}
 	
@@ -1468,7 +1469,10 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 	// get minimum track size
 	tracksize=tg_computeMinTrackSize(&tg,trackencoding,bitrate,number_of_sector,sectorconfigtab,pregap,&track_period);
 	
-	wanted_trackperiod=(100000*60)/rpm;
+	if(rpm)
+		wanted_trackperiod=(100000*60)/rpm;
+	else
+		wanted_trackperiod=(100000*60)/300;
 	
 	// compute the adjustable gap3 lenght
 	// how many gap3 we need to compute ?
