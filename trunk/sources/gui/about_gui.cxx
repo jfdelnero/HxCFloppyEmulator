@@ -48,6 +48,105 @@ extern "C"
 
 extern s_gui_context * guicontext;
 
+static char buffer2[1024*16];
+static char buffer1[1024*16];
+
+#ifdef WIN32
+static HWAVEOUT shwd;
+static WAVEFORMATEX pwfx;
+static WAVEHDR pwhOut1;
+static WAVEHDR pwhOut2;
+uintro_context * gb_ui_context;
+int audiostarted;
+int demostate;
+
+void CALLBACK SoundHandlerProc(HWAVEOUT hwo,UINT uMsg,DWORD * dwInstance,DWORD *  dwParam1,DWORD *  dwParam2)
+{
+	if(audiostarted)
+	{
+		switch(uMsg)
+		{
+			case WOM_OPEN:
+				break;
+			case WOM_DONE:
+				uintro_getnext_soundsample(gb_ui_context,(unsigned char*)((struct wavehdr_tag *)dwParam1)->lpData,sizeof(buffer2));
+				waveOutWrite(shwd,(struct wavehdr_tag *)dwParam1,sizeof(pwhOut2));
+				break;
+			case WOM_CLOSE:
+				break;
+		}
+	}
+	return;
+}
+#endif;
+
+int startAudioOut()
+{
+	if(!audiostarted)
+	{
+		memset(buffer1,0,sizeof(buffer1));
+		memset(buffer2,0,sizeof(buffer2));
+
+		#ifdef WIN32
+
+		if(waveOutGetNumDevs()!=0)
+		{
+	//		InitModule(NULL,buffer1,sizeof(buffer1),(char*)&themod);
+			pwfx.wFormatTag=1;
+			pwfx.nChannels=2;
+			pwfx.nSamplesPerSec=44100;
+			pwfx.nAvgBytesPerSec=pwfx.nSamplesPerSec*4;
+			pwfx.nBlockAlign=4;
+			pwfx.wBitsPerSample=16;
+			pwfx.cbSize=0;
+
+			waveOutOpen(&shwd,WAVE_MAPPER,&pwfx,(unsigned long)&SoundHandlerProc,0,CALLBACK_FUNCTION);
+			pwhOut1.lpData=(char*)buffer1;
+			pwhOut1.dwBufferLength=sizeof(buffer1);
+			pwhOut1.dwFlags=0;
+			pwhOut1.dwLoops=0;
+
+			pwhOut2.lpData=(char*)buffer2;
+			pwhOut2.dwBufferLength=sizeof(buffer2);
+			pwhOut2.dwFlags=0;
+			pwhOut2.dwLoops=0;
+
+			waveOutPrepareHeader(shwd, &pwhOut1, sizeof(pwhOut1));
+			waveOutPrepareHeader(shwd, &pwhOut2, sizeof(pwhOut2));
+
+			waveOutWrite(shwd,&pwhOut1,sizeof(pwhOut1));
+			waveOutWrite(shwd,&pwhOut2,sizeof(pwhOut2));
+
+			audiostarted = 1;
+		}
+
+		#endif
+	}
+
+	return 0;
+}
+
+int stopAudioOut()
+{
+
+	if(audiostarted)
+	{
+		audiostarted = 0;
+
+		#ifdef WIN32
+		waveOutReset(shwd);
+		waveOutBreakLoop(shwd);
+		waveOutBreakLoop(shwd);
+  
+		waveOutUnprepareHeader(shwd,&pwhOut1,sizeof(WAVEHDR));
+		waveOutUnprepareHeader(shwd,&pwhOut2,sizeof(WAVEHDR));
+				
+		waveOutClose(shwd);
+		#endif
+	}
+
+	return 0;
+}
 
 static void tick(void *v) 
 {
@@ -59,6 +158,8 @@ static void tick(void *v)
 	
 	if(window->shown())
 	{
+		demostate = 1;
+		startAudioOut();
 		window->make_current();
 		uintro_getnextframe(window->ui_context);
 		
@@ -75,15 +176,25 @@ static void tick(void *v)
 		
 		fl_draw_image((unsigned char *)window->ui_context->framebuffer, window->xpos_size, window->ypos_size, window->xsize, window->ysize, 3, 0);
 	}
+	else
+	{
+		if(demostate)
+		{
+			demostate = 0;
+			uintro_reset(window->ui_context);
+		}
+		stopAudioOut();
+	}
+
 	
-	Fl::repeat_timeout(0.02, tick, v);
-	
+	Fl::repeat_timeout(0.02, tick, v);	
 }
 
 
 
 void close(Fl_Widget *w, void * t)
 {
+	stopAudioOut();
 	w->parent()->hide();
 }
 
@@ -113,6 +224,9 @@ void OpenURLInBrowser(Fl_Widget *,void* u)
 About_box::~About_box()
 {
 	Fl::remove_timeout(tick,0); 
+	
+	stopAudioOut();
+
     uintro_deinit(this->ui_context);
 }
 
@@ -151,7 +265,7 @@ About_box::About_box()
 	ysize=200;
 
 	ui_context=uintro_init(xsize,ysize);
-
+	gb_ui_context = ui_context;
 	
 
 	this->end();
@@ -161,7 +275,10 @@ About_box::About_box()
 	strcat(windowname,hxcfe_getVersion(guicontext->hxcfe));
 	this->label(windowname);
 
-    tick(this);
+	audiostarted = 0;
+	demostate = 0;
+
+	tick(this);
 	
 	return ;
 }
