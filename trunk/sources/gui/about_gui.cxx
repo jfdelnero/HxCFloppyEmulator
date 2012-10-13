@@ -51,14 +51,15 @@ extern s_gui_context * guicontext;
 static char buffer2[1024*16];
 static char buffer1[1024*16];
 
+int audiostarted;
+int demostate;
+
 #ifdef WIN32
 static HWAVEOUT shwd;
 static WAVEFORMATEX pwfx;
 static WAVEHDR pwhOut1;
 static WAVEHDR pwhOut2;
 uintro_context * gb_ui_context;
-int audiostarted;
-int demostate;
 
 void CALLBACK SoundHandlerProc(HWAVEOUT hwo,UINT uMsg,DWORD * dwInstance,DWORD *  dwParam1,DWORD *  dwParam2)
 {
