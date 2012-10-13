@@ -94,40 +94,36 @@ scrolltab scroll[]=
 
 void putsprite(uintro_context * democontext,unsigned int x,unsigned int y,unsigned int * buffer,unsigned int sx,unsigned int sy,unsigned int * sprite)
 {
-	
-	static int t3=0;
-	static float f3=0,f4,f5=0,f6=0;
+	float f4;
 	unsigned int start,i,j,t2,adr;
 	unsigned char ty;
-	static unsigned char m=0;
+
 	t2=0;
 	start=y*democontext->xsize+x;
 	j=0;
-	t3++;
-	
-	f3=f3+(float)0.5;
-	f4=f3;
-	f5=f5+(float)0.01;
-	f6=f6+(float)0.02;
 
-	if(t3>50*30){m=0;t3=0; }
-	if(t3>50*20)  m=1;
-	else if(t3>50*10)  m=2;
+	democontext->sprt_f1 = democontext->sprt_f1+(float)0.5;
+	f4 = democontext->sprt_f1;
+	democontext->sprt_f2 = democontext->sprt_f2+(float)0.01;
 
 	if(democontext->xsize<=(111+x)) t2=(111+x)-democontext->xsize;
 
 	for(j=0;j<sy;j++)
 	{
-		f4=f4+((float)sin(f5)/(float)2);
-		ty=(unsigned char)((float)cos(f4)*(float)2+(float)4);
+		f4 = f4 + ((float)sin( democontext->sprt_f2 )/(float)2);
+		ty=(unsigned char)((float)cos( f4 )*(float)2+(float)4);
+		
 		if(democontext->xsize<=(111+x+ty)) t2=(111+x+ty)-democontext->xsize;
 		else t2=0;
+
 		for(i=0;i<(sx-t2);i++) 
 		{
 			adr=(j*democontext->xsize+i+start+ty);
 			
 			if(adr<(unsigned int)(democontext->xsize*democontext->ysize))
+			{
 				buffer[adr]=sprite[j*sx+i];
+			}
 		}
 	}
 }
@@ -304,8 +300,68 @@ uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 		break;
 
 	}
-		
+	
 	return ui_context;
+}
+
+void uintro_reset(uintro_context * ui_context)
+{
+	char buffer1[16];
+
+	ui_context->col_f1 = 0;
+	ui_context->col_f2 = 0;
+	ui_context->col_f3 = 0;
+	ui_context->col_f1s = 0;
+	ui_context->col_f2s = 0;
+	ui_context->col_f3s = 0;
+
+	ui_context->f1=0;
+	ui_context->f2=0;
+
+	ui_context->sprt_f1=0;
+	ui_context->sprt_f2=0;
+
+	ui_context->tick = 0;
+
+	memset(ui_context->framebuffer,0,ui_context->xsize*ui_context->ysize*sizeof(unsigned int));
+	memset(ui_context->blurbuffer,0,ui_context->xsize*ui_context->ysize*sizeof(unsigned int));
+
+#ifdef WIN32    
+	srand(GetTickCount());
+#endif
+	switch(rand()&3)
+	{
+		case 0:
+			if(!data_maktone_class_cracktro15_mod->unpacked_data)
+				data_maktone_class_cracktro15_mod->unpacked_data=mi_unpack(data_maktone_class_cracktro15_mod->data,data_maktone_class_cracktro15_mod->csize ,data_maktone_class_cracktro15_mod->data, data_maktone_class_cracktro15_mod->size);
+#ifdef WIN32
+			InitModule(NULL,buffer1,16,data_maktone_class_cracktro15_mod->unpacked_data);
+#endif
+		break;
+		case 1:
+			if(!data_jozz_cognition_mod->unpacked_data)
+				data_jozz_cognition_mod->unpacked_data=mi_unpack(data_jozz_cognition_mod->data,data_jozz_cognition_mod->csize ,data_jozz_cognition_mod->data, data_jozz_cognition_mod->size);
+#ifdef WIN32            
+			InitModule(NULL,buffer1,16,data_jozz_cognition_mod->unpacked_data);
+#endif
+		break;
+		case 2:
+			if(!data_zandax_supplydas_booze_mod->unpacked_data)
+				data_zandax_supplydas_booze_mod->unpacked_data=mi_unpack(data_zandax_supplydas_booze_mod->data,data_zandax_supplydas_booze_mod->csize ,data_zandax_supplydas_booze_mod->data, data_zandax_supplydas_booze_mod->size);
+#ifdef WIN32
+			InitModule(NULL,buffer1,16,data_zandax_supplydas_booze_mod->unpacked_data);
+#endif
+		break;
+		case 3:
+			if(!data_vim_not_again_mod->unpacked_data)
+				data_vim_not_again_mod->unpacked_data=mi_unpack(data_vim_not_again_mod->data,data_vim_not_again_mod->csize ,data_vim_not_again_mod->data, data_vim_not_again_mod->size);
+#ifdef WIN32
+			InitModule(NULL,buffer1,16,data_vim_not_again_mod->unpacked_data);
+#endif
+		break;
+
+	}
+	
 }
 
 
@@ -317,18 +373,16 @@ void uintro_getnext_soundsample(uintro_context * democontext,unsigned char* buff
 }
 
 
-void colorize(bmaptype * bitmaptype)
+void colorize(uintro_context * democontext,bmaptype * bitmaptype)
 {
 	int i,j;
-	static float f1=0,f2=0,f3=0;
-	static float f1s=0,f2s=0,f3s=0;
 	unsigned int * ptr;
 	unsigned char r,v,b;
 	ptr=(unsigned int *)bitmaptype->unpacked_data;
 
-	f1=f1s;
-	f2=f2s;
-	f3=f3s;
+	democontext->col_f1=democontext->col_f1s;
+	democontext->col_f2=democontext->col_f2s;
+	democontext->col_f3=democontext->col_f3s;
 
 	for(i=0;i<bitmaptype->Ysize;i++)
 	{
@@ -336,31 +390,44 @@ void colorize(bmaptype * bitmaptype)
 		{
 			if(ptr[i*bitmaptype->Xsize + j])
 			{
-				r=(unsigned char)(cos(f1)*(float)120)+129;
-				v=(unsigned char)(sin(f2)*(float)120)+129;
-				b=(unsigned char)(cos(f3)*(float)120)+129;
+				r=(unsigned char)(cos(democontext->col_f1)*(float)120)+129;
+				v=(unsigned char)(sin(democontext->col_f2)*(float)120)+129;
+				b=(unsigned char)(cos(democontext->col_f3)*(float)120)+129;
 
 				ptr[i*bitmaptype->Xsize + j]=(r<<16)|(v<<8)|b;
 			}
 			
-			f1=f1+(float)0.0001;
-			f2=f2+(float)0.00011;
-			f3=f3+(float)0.000101;
+			democontext->col_f1=democontext->col_f1+(float)0.0001;
+			democontext->col_f2=democontext->col_f2+(float)0.00011;
+			democontext->col_f3=democontext->col_f3+(float)0.000101;
 
 		}
 	}
 
-	f1s=f1s+(float)0.03;
-	f2s=f2s+(float)0.033;
-	f3s=f3s+(float)0.0333;
+	democontext->col_f1s=democontext->col_f1s+(float)0.03;
+	democontext->col_f2s=democontext->col_f2s+(float)0.033;
+	democontext->col_f3s=democontext->col_f3s+(float)0.0333;
 }
 
 
 
 void uintro_getnextframe(uintro_context * democontext)
 {
-	int i,j,k,l;
+	int i,j,k,l,totalpix;
 	int x_coef_motion,y_coef_motion;
+	unsigned int * src_ptr;
+	unsigned int * dst_ptr;
+	unsigned int * framebuffer;
+	unsigned int * blurbuffer;
+	int xsize,ysize,baroffset;
+	unsigned int pix;
+	
+	xsize = democontext->xsize;
+	ysize = democontext->ysize;
+
+	totalpix = xsize * ysize;
+	framebuffer = democontext->framebuffer;
+	blurbuffer = democontext->blurbuffer;
 
 	democontext->tick++;
 	if(democontext->tick>=50)
@@ -371,16 +438,18 @@ void uintro_getnextframe(uintro_context * democontext)
 
 	k=0;
 	
-	for(i=0;i<democontext->xsize*democontext->ysize;i++)
+	for(i=0;i<totalpix;i++)
 	{
-		democontext->framebuffer[i]=0x00607080;
+		framebuffer[i]=0x00607080;
 	}
 
-	colorize(bitmap_hxc2001_bmp);
+	colorize(democontext,bitmap_hxc2001_bmp);
 	////////////////////////
 	x_coef_motion=(democontext->xsize-(bitmap_hxc2001_bmp->Xsize+5))/4;
 	y_coef_motion=(democontext->ysize-bitmap_hxc2001_bmp->Ysize)/4;
+
 	memset(democontext->blurbuffer,0,democontext->xsize*democontext->ysize*4);
+
 	putsprite(democontext,
 			(unsigned int)((float)cos(democontext->f1)*(float)x_coef_motion+((float)x_coef_motion*2)),
 			(unsigned int)((float)cos(democontext->f2)*(float)y_coef_motion+((float)y_coef_motion*2)),
@@ -388,7 +457,7 @@ void uintro_getnextframe(uintro_context * democontext)
 			bitmap_hxc2001_bmp->Xsize,
 			bitmap_hxc2001_bmp->Ysize,
 			(unsigned int*)bitmap_hxc2001_bmp->unpacked_data);
-			
+
 	democontext->f1=democontext->f1+(float)0.11;
 	democontext->f2=democontext->f2+(float)0.09;
 	////////////////////////
@@ -399,28 +468,43 @@ void uintro_getnextframe(uintro_context * democontext)
 		{
 
 			l=(((scroll[k].ysrc)*4)*bitmap_sob_bmp->Xsize);	
+			baroffset = scroll[k].offset/32;
+
 			for(i=scroll[k].ydst;i<(scroll[k].ydst+scroll[k].len);i++) 
 			{
+				src_ptr = (unsigned int*)&bitmap_sob_bmp->unpacked_data[l];
+				dst_ptr = (unsigned int*)&framebuffer[i*xsize];
 
-				for(j=0;j<democontext->xsize;j++)
+				for(j=baroffset;j<(xsize);j++)
 				{
-					if(bitmap_sob_bmp->unpacked_data[l]!=0x00 || bitmap_sob_bmp->unpacked_data[l+1]!=0xFF || bitmap_sob_bmp->unpacked_data[l+2]!=00)
-					democontext->framebuffer[(i*democontext->xsize)+((j+(scroll[k].offset/32))%320)]=bitmap_sob_bmp->unpacked_data[l]|(bitmap_sob_bmp->unpacked_data[l+1]<<8)|(bitmap_sob_bmp->unpacked_data[l+2]<<16);
-					l=l+4;
+					pix = *(src_ptr++);
+					if(pix != 0x00FF00)
+					{						
+						dst_ptr[j] = pix;
+					}
 				}
+
+				for(j=0;j<baroffset;j++)
+				{
+					pix = *(src_ptr++);
+					if(pix != 0x00FF00)
+					{						
+						dst_ptr[j] = pix;
+					}
+				}
+
+				l=l+(xsize<<2);
 			}
+
 		}
 		else
 		{
-			for(i=0;i<democontext->xsize*democontext->ysize;i++)
+			for(i=0;i<totalpix;i++)
 			{
-				if(democontext->blurbuffer[i])
+				if(blurbuffer[i])
 				{
-
-					//democontext->framebuffer[i]=((255/((democontext->blurbuffer[i])&0xFF)) * democontext->framebuffer[i])&0xFF;
-					democontext->framebuffer[i]=democontext->blurbuffer[i];
+					framebuffer[i]=blurbuffer[i];
 				}
-
 			}
 		}
 		k++;
@@ -429,7 +513,7 @@ void uintro_getnextframe(uintro_context * democontext)
 	k=0;
 	while(scroll[k].ysrc!=-1)
 	{
-		scroll[k].offset=scroll[k].offset+scroll[k].speed;
+		scroll[k].offset=(scroll[k].offset+scroll[k].speed) % (xsize*32);
 		k++;
 	}
 
