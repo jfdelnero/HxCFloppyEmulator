@@ -93,7 +93,7 @@ unsigned char bit_inverter_emuii[]=
 // FM encoder
 void BuildFMCylinder(char * buffer,int fmtracksize,char * bufferclk,char * track,int size);
 
-void setbit(unsigned char * dstbuffer,unsigned char byte,int bitoffset,int size)
+void setfieldbit(unsigned char * dstbuffer,unsigned char byte,int bitoffset,int size)
 {
 	int i,j,k;
 
@@ -163,7 +163,7 @@ int BuildEmuIITrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,un
 		//Track GAP
 		for(k=0;k<20;k++)
 		{
-			setbit(tempdata,bit_inverter_emuii[0xFF],j,8);
+			setfieldbit(tempdata,bit_inverter_emuii[0xFF],j,8);
 			j=j+8;
 		}
 
@@ -171,43 +171,43 @@ int BuildEmuIITrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,un
 		//Sector Header
 		for(k=0;k<4;k++)
 		{
-			setbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
+			setfieldbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
 		}
 
-		setbit(tempdata,bit_inverter_emuii[0xFA],j=j+8,8);
-		setbit(tempdata,bit_inverter_emuii[0x96],j=j+8,8);
-		setbit(tempdata,bit_inverter_emuii[track_num],j=j+8,8);
+		setfieldbit(tempdata,bit_inverter_emuii[0xFA],j=j+8,8);
+		setfieldbit(tempdata,bit_inverter_emuii[0x96],j=j+8,8);
+		setfieldbit(tempdata,bit_inverter_emuii[track_num],j=j+8,8);
 
 		//CRC The sector Header CRC
 		CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,0x8005,0x0000);
 		CRC16_Update(&CRC16_High,&CRC16_Low,bit_inverter_emuii[track_num],(unsigned char*)&crctable );
 
-		setbit(tempdata,CRC16_High,j=j+8,8);
-		setbit(tempdata,CRC16_Low,j=j+8,8);
+		setfieldbit(tempdata,CRC16_High,j=j+8,8);
+		setfieldbit(tempdata,CRC16_Low,j=j+8,8);
 
 		switch(trackformat)
 		{
 
 			// Emu 1
 			case 1:
-				setbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
-				setbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
+				setfieldbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
+				setfieldbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
 
 				for(k=0;k<7;k++)
-					setbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,8);
+					setfieldbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,8);
 					//tempdata[j++]=bit_inverter_emuii[0xFF];
 
 			break;
 
 			// Emu 2
 			case 2:
-				setbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
+				setfieldbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
 				for(k=0;k<7;k++)
 				{
-					setbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,8);
+					setfieldbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,8);
 				}
 
-				setbit(tempdata,bit_inverter_emuii[0xFF],j=j+4,4);
+				setfieldbit(tempdata,bit_inverter_emuii[0xFF],j=j+4,4);
 			break;
 		}
 
@@ -217,31 +217,31 @@ int BuildEmuIITrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,un
 
 		for(k=0;k<4;k++)
 		{
-			setbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
+			setfieldbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
 		}
 
-		setbit(tempdata,bit_inverter_emuii[0xFA],j=j+8,8);
-		setbit(tempdata,bit_inverter_emuii[0x96],j=j+8,8);
+		setfieldbit(tempdata,bit_inverter_emuii[0xFA],j=j+8,8);
+		setfieldbit(tempdata,bit_inverter_emuii[0x96],j=j+8,8);
 		
 		//CRC The sector data CRC
 		CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,0x8005,0x0000);
 		
 		for(k=0;k<sectorsize;k++)
 		{
-			setbit(tempdata,bit_inverter_emuii[datain[k]],j=j+8,8);
+			setfieldbit(tempdata,bit_inverter_emuii[datain[k]],j=j+8,8);
 			CRC16_Update(&CRC16_High,&CRC16_Low,bit_inverter_emuii[datain[k]],(unsigned char*)&crctable );
 		}
 
-		setbit(tempdata,CRC16_High,j=j+8,8);
-		setbit(tempdata,CRC16_Low,j=j+8,8);
+		setfieldbit(tempdata,CRC16_High,j=j+8,8);
+		setfieldbit(tempdata,CRC16_Low,j=j+8,8);
 
 
-		setbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
-		setbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
+		setfieldbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
+		setfieldbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
 
 
 		for(k=0;k<20;k++)
-			setbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,8);
+			setfieldbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,8);
 		/////////////////////////////////////////////////////////////////////////////////////////////
 
 		if((j/8)<=current_buffer_size)
@@ -249,9 +249,9 @@ int BuildEmuIITrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,un
 			for(i=j;i<(current_buffer_size*8);i=i+8)
 			{	
 				if(j+8<(current_buffer_size*8))
-					setbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,8);
+					setfieldbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,8);
 				else
-					setbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,(current_buffer_size*8)-j);
+					setfieldbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,(current_buffer_size*8)-j);
 			}
 		}
 

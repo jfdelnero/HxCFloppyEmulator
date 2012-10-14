@@ -538,6 +538,90 @@ SOURCE=..\sources\thirdpartylibs\libsap\libsap.h
 SOURCE="..\sources\thirdpartylibs\expat\expat-2.1.0\win32\bin\Release\libexpatMT.lib"
 # End Source File
 # End Group
+# Begin Group "FATIOLib"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_access.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_access.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_cache.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_cache.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_defs.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_filelib.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_filelib.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_format.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_list.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_misc.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_misc.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_opts.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_string.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_string.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_table.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_table.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_types.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_write.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_write.h
+# End Source File
+# End Group
 # End Group
 # Begin Group "loaders"
 
@@ -1617,6 +1701,18 @@ SOURCE=..\sources\xml_disk\xml_disk.c
 # Begin Source File
 
 SOURCE=..\sources\xml_disk\xml_disk.h
+# End Source File
+# End Group
+# Begin Group "fs"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\fs_manager\fs_manager.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\fs_manager\fs_manager.h
 # End Source File
 # End Group
 # Begin Source File
