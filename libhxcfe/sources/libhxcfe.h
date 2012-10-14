@@ -230,12 +230,17 @@ typedef struct SECTORSEARCH_
 }SECTORSEARCH;
 
 SECTORSEARCH* hxcfe_initSectorSearch(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
+
 SECTORCONFIG* hxcfe_getNextSector(SECTORSEARCH* ss,int track,int side,int type);
-SECTORCONFIG* hxcfe_searchSector(SECTORSEARCH* ss,int track,int side,int id,int type);
+SECTORCONFIG* hxcfe_searchSector (SECTORSEARCH* ss,int track,int side,int id,int type);
 int hxcfe_getSectorSize(SECTORSEARCH* ss,SECTORCONFIG* sc);
 unsigned char * hxcfe_getSectorData(SECTORSEARCH* ss,SECTORCONFIG* sc);
-int hxcfe_readSectorData(SECTORSEARCH* ss,int track,int side,int sector,int numberofsector,int sectorsize,int type,unsigned char * buffer);
-void hxcfe_freeSectorConfig(SECTORSEARCH* ss,SECTORCONFIG* sc);
+
+int hxcfe_readSectorData     (SECTORSEARCH* ss,int track,int side,int sector,int numberofsector,int sectorsize,int type,unsigned char * buffer);
+int hxcfe_writeSectorData    (SECTORSEARCH* ss,int track,int side,int sector,int numberofsector,int sectorsize,int type,unsigned char * buffer);
+
+void hxcfe_freeSectorConfig  (SECTORSEARCH* ss,SECTORCONFIG* sc);
+
 void hxcfe_deinitSectorSearch(SECTORSEARCH* ss);
 
 ////////////////////////////////////////////
@@ -281,6 +286,9 @@ const char * hxcfe_getFloppyInterfaceModeDesc(HXCFLOPPYEMULATOR* floppycontext,i
 const char * hxcfe_getTrackEncodingName(HXCFLOPPYEMULATOR* floppycontext,int trackencodingid);
 
 
+////////////////////////////////////////////
+// Track analyser functions
+
 typedef struct s_sectorlist_
 {
 	SECTORCONFIG * sectorconfig;
@@ -306,6 +314,13 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 s_sectorlist * hxcfe_td_getlastsectorlist(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td);
 void hxcfe_td_draw_disk(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY * floppydisk);
 void hxcfe_td_deinit(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td);
+
+////////////////////////////////////////////
+// FDC style functions
+int hxcfe_FDC_READSECTOR  (HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size);
+int hxcfe_FDC_WRITESECTOR (HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size);
+int hxcfe_FDC_FORMAT      (HXCFLOPPYEMULATOR* floppycontext,unsigned char track,unsigned char side,unsigned char nbsector,int sectorsize,int sectoridstart,int skew,int interleave,int mode);
+int hxcfe_FDC_SCANSECTOR  (HXCFLOPPYEMULATOR* floppycontext,unsigned char track,unsigned char side,int mode,unsigned char * sector,unsigned char * buffer,int buffer_size);
 
 ////////////////////////////////////////////
 // File system functions
@@ -357,5 +372,44 @@ typedef struct _fs_config
 	int		type;
 }fs_config;
 
+
+typedef struct _FSMNG
+{
+	HXCFLOPPYEMULATOR * hxcfe;
+	int fs_selected;
+}FSMNG;
+
+typedef struct FSENTRY_
+{
+
+	int isdir;
+	int size;
+	char entryname[512];
+	unsigned long flags;
+
+}FSENTRY;
+
 extern fs_config fs_config_table[];
+
+int hxcfe_getFSID(HXCFLOPPYEMULATOR* floppycontext, char * fsname);
+int	hxcfe_numberOfFS(HXCFLOPPYEMULATOR* floppycontext);
+const char* hxcfe_getFSDesc(HXCFLOPPYEMULATOR* floppycontext,int FSID);
+const char* hxcfe_getFSName(HXCFLOPPYEMULATOR* floppycontext,int FSID);
+
+FSMNG * hxcfe_initFsManager(HXCFLOPPYEMULATOR * hxcfe);
+int hxcfe_selectFS(FSMNG * fsmng, int fsid);
+
+
+int hxcfe_mountImage(FSMNG * fsmng, FLOPPY *floppy);
+int hxcfe_umountImage(FSMNG * fsmng);
+
+int hxcfe_getFirstFile(FSMNG * fsmng, FSENTRY * dirent, char * rootdir);
+int hxcfe_getNextFile(FSMNG * fsmng, FSENTRY * dirent);
+
+int hxcfe_openFile(FSMNG * fsmng, char * filename);
+int hxcfe_writeFile(FSMNG * fsmng,int filehandle,char * buffer,int size);
+int hxcfe_readFile( FSMNG * fsmng,int filehandle,char * buffer,int size);
+int hxcfe_deleteFile(FSMNG * fsmng, char * filename);
+
+void hxcfe_deinitFsManager(FSMNG * fsmng);
 

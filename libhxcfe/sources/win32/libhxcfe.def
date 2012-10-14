@@ -72,7 +72,8 @@ EXPORTS
    hxcfe_readSectorData			@105
    hxcfe_freeSectorConfig		@106
    hxcfe_deinitSectorSearch		@107
-   
+   hxcfe_writeSectorData		@108
+
    hxcfe_td_init				@120
    hxcfe_td_draw_track			@121
    hxcfe_td_draw_disk			@122
@@ -92,3 +93,9 @@ EXPORTS
    hxcfe_generateXmlFloppy		@206
    hxcfe_generateXmlFileFloppy	@207
    hxcfe_deinitXmlFloppy		@208
+
+   hxcfe_FDC_READSECTOR			@300
+   hxcfe_FDC_WRITESECTOR		@301
+   hxcfe_FDC_FORMAT				@302
+   hxcfe_FDC_SCANSECTOR			@303
+
