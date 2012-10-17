@@ -99,3 +99,26 @@ EXPORTS
    hxcfe_FDC_FORMAT				@302
    hxcfe_FDC_SCANSECTOR			@303
 
+
+   hxcfe_checkFSID				@400
+   hxcfe_initFsManager			@401
+   hxcfe_getFSID				@402
+   hxcfe_numberOfFS				@403
+   hxcfe_getFSDesc				@404
+   hxcfe_getFSName				@405
+   hxcfe_selectFS				@406
+   hxcfe_deinitFsManager		@407
+   hxcfe_mountImage				@408
+   hxcfe_umountImage			@409
+   hxcfe_openDir				@410
+   hxcfe_readDir				@411
+   hxcfe_openFile				@412
+   hxcfe_writeFile				@413
+   hxcfe_readFile				@414
+   hxcfe_deleteFile				@415
+   hxcfe_closeFile				@416
+   hxcfe_createDir				@417
+   hxcfe_removeDir				@418
+   hxcfe_fseek					@419
+   hxcfe_ftell					@420
+   hxcfe_closeDir				@421

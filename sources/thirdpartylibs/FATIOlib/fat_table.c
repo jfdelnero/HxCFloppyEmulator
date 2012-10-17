@@ -54,6 +54,9 @@
 #define FAT16_GET_16BIT_WORD(pbuf, location)        ( GET_16BIT_WORD(pbuf->ptr, location) )
 #define FAT16_SET_16BIT_WORD(pbuf, location, value) { SET_16BIT_WORD(pbuf->ptr, location, value); pbuf->dirty = 1; }
 
+#define FAT12_GET_8BIT_WORD(pbuf, location)        ( GET_8BIT_WORD(pbuf->ptr, location) )
+#define FAT12_SET_8BIT_WORD(pbuf, location, value) { SET_8BIT_WORD(pbuf->ptr, location, value); pbuf->dirty = 1; }
+
 //-----------------------------------------------------------------------------
 // fatfs_fat_init:
 //-----------------------------------------------------------------------------
@@ -198,6 +201,18 @@ int fatfs_fat_purge(struct fatfs *fs)
 //                        General FAT Table Operations
 //-----------------------------------------------------------------------------
 
+int fat12clus(int fat1,int fat2,int in)
+{
+  int fat;
+  if(in%2 == 0)
+     fat = ((fat2 & 0x0f) << 8) | fat1;
+  else
+     fat = (fat2 << 4) | ((fat1 &0x0f0) >> 4);
+ 
+  fat = fat & 0xFFF;
+
+  return fat;
+}
 //-----------------------------------------------------------------------------
 // fatfs_find_next_cluster: Return cluster number of next cluster in chain by 
 // reading FAT table and traversing it. Return 0xffffffff for end of chain.
@@ -206,49 +221,98 @@ uint32 fatfs_find_next_cluster(struct fatfs *fs, uint32 current_cluster)
 {
     uint32 fat_sector_offset, position;
     uint32 nextcluster;
+    int fat12_clusnum_part1,fat12_clusnum_part2;
     struct fat_buffer *pbuf;
+    int reload_needed;
 
     // Why is '..' labelled with cluster 0 when it should be 2 ??
     if (current_cluster == 0) 
         current_cluster = 2;
 
     // Find which sector of FAT table to read
-    if (fs->fat_type == FAT_TYPE_16)
-        fat_sector_offset = current_cluster / 256;
+
+    if (fs->fat_type == FAT_TYPE_12)
+    {
+        position = ( (current_cluster * 3) / 2 );
+        fat_sector_offset =  position / 512;
+
+        reload_needed = 0;
+        if ( position % 512 == 511)
+        {
+            // reload needed
+            reload_needed = 1;
+        }
+
+    }
     else
-        fat_sector_offset = current_cluster / 128;
+    {
+        if (fs->fat_type == FAT_TYPE_16)
+            fat_sector_offset = current_cluster / 256;
+        else
+            fat_sector_offset = current_cluster / 128;
+    }
 
     // Read FAT sector into buffer
     pbuf = fatfs_fat_read_sector(fs, fs->fat_begin_lba+fat_sector_offset);
     if (!pbuf)
         return (FAT32_LAST_CLUSTER); 
 
-    if (fs->fat_type == FAT_TYPE_16)
+
+    if (fs->fat_type == FAT_TYPE_12)
     {
         // Find 32 bit entry of current sector relating to cluster number 
-        position = (current_cluster - (fat_sector_offset * 256)) * 2; 
+        //position = (current_cluster - (fat_sector_offset * 256)) * 2; 
 
+        if(reload_needed)
+        {
+
+            fat12_clusnum_part1 = FAT12_GET_8BIT_WORD(pbuf,512);
+            pbuf = fatfs_fat_read_sector(fs, fs->fat_begin_lba+fat_sector_offset+1);
+            fat12_clusnum_part2 = FAT12_GET_8BIT_WORD(pbuf,0);
+        }
+        else
+        {
+            fat12_clusnum_part1 = FAT12_GET_8BIT_WORD(pbuf,position % 512);
+            fat12_clusnum_part2 = FAT12_GET_8BIT_WORD(pbuf,(position+1) % 512);
+        }
+
+        nextcluster = fat12clus(fat12_clusnum_part1,fat12_clusnum_part2,current_cluster);
         // Read Next Clusters value from Sector Buffer
-        nextcluster = FAT16_GET_16BIT_WORD(pbuf, (uint16)position);     
+        //nextcluster = FAT16_GET_16BIT_WORD(pbuf, (uint16)position);     
 
         // If end of chain found
-        if (nextcluster >= 0xFFF8 && nextcluster <= 0xFFFF) 
+        if (nextcluster >= 0xFF8 && nextcluster <= 0xFFF) 
             return (FAT32_LAST_CLUSTER); 
     }
     else
     {
-        // Find 32 bit entry of current sector relating to cluster number 
-        position = (current_cluster - (fat_sector_offset * 128)) * 4; 
+        if (fs->fat_type == FAT_TYPE_16)
+        {
+            // Find 32 bit entry of current sector relating to cluster number 
+            position = (current_cluster - (fat_sector_offset * 256)) * 2; 
 
-        // Read Next Clusters value from Sector Buffer
-        nextcluster = FAT32_GET_32BIT_WORD(pbuf, (uint16)position);     
+            // Read Next Clusters value from Sector Buffer
+            nextcluster = FAT16_GET_16BIT_WORD(pbuf, (uint16)position);     
 
-        // Mask out MS 4 bits (its 28bit addressing)
-        nextcluster = nextcluster & 0x0FFFFFFF;        
+            // If end of chain found
+            if (nextcluster >= 0xFFF8 && nextcluster <= 0xFFFF) 
+                return (FAT32_LAST_CLUSTER); 
+        }
+        else
+        {
+            // Find 32 bit entry of current sector relating to cluster number 
+            position = (current_cluster - (fat_sector_offset * 128)) * 4; 
 
-        // If end of chain found
-        if (nextcluster >= 0x0FFFFFF8 && nextcluster <= 0x0FFFFFFF) 
-            return (FAT32_LAST_CLUSTER); 
+            // Read Next Clusters value from Sector Buffer
+            nextcluster = FAT32_GET_32BIT_WORD(pbuf, (uint16)position);     
+
+            // Mask out MS 4 bits (its 28bit addressing)
+            nextcluster = nextcluster & 0x0FFFFFFF;        
+
+            // If end of chain found
+            if (nextcluster >= 0x0FFFFFF8 && nextcluster <= 0x0FFFFFFF) 
+                return (FAT32_LAST_CLUSTER); 
+        }
     }
 
     // Else return next cluster

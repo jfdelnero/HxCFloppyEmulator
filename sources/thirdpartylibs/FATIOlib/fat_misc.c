@@ -171,7 +171,8 @@ int fatfs_entry_sfn_only(struct fat_dir_entry *entry)
 //-----------------------------------------------------------------------------
 int fatfs_entry_is_dir(struct fat_dir_entry *entry)
 {
-    if (entry->Attr & FILE_TYPE_DIR) 
+    //if (entry->Attr & FILE_TYPE_DIR) 
+    if (entry->Attr & FILE_ATTR_DIRECTORY) 
         return 1;
     else 
         return 0;
@@ -181,7 +182,9 @@ int fatfs_entry_is_dir(struct fat_dir_entry *entry)
 //-----------------------------------------------------------------------------
 int fatfs_entry_is_file(struct fat_dir_entry *entry)
 {
-    if (entry->Attr & FILE_TYPE_FILE) 
+    //if (entry->Attr & FILE_TYPE_FILE) 
+    if (!(entry->Attr & FILE_ATTR_DIRECTORY))
+
         return 1;
     else 
         return 0;

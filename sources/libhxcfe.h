@@ -377,6 +377,20 @@ typedef struct _FSMNG
 {
 	HXCFLOPPYEMULATOR * hxcfe;
 	int fs_selected;
+
+	// Mounted Floppy disk
+	FLOPPY *fp;
+
+	// mounted disk image geometry
+	int sectorpertrack;
+	int sidepertrack;
+	int trackperdisk;
+	int sectorsize;
+
+	void * handletable[128];
+	void * dirhandletable[128];
+	
+
 }FSMNG;
 
 typedef struct FSENTRY_
@@ -403,6 +417,10 @@ int hxcfe_selectFS(FSMNG * fsmng, int fsid);
 int hxcfe_mountImage(FSMNG * fsmng, FLOPPY *floppy);
 int hxcfe_umountImage(FSMNG * fsmng);
 
+int hxcfe_openDir(FSMNG * fsmng, char * path);
+int hxcfe_readDir(FSMNG * fsmng,int dirhandle,FSENTRY * dirent);
+int hxcfe_closeDir(FSMNG * fsmng, int dirhandle);
+
 int hxcfe_getFirstFile(FSMNG * fsmng, FSENTRY * dirent, char * rootdir);
 int hxcfe_getNextFile(FSMNG * fsmng, FSENTRY * dirent);
 
@@ -410,6 +428,10 @@ int hxcfe_openFile(FSMNG * fsmng, char * filename);
 int hxcfe_writeFile(FSMNG * fsmng,int filehandle,char * buffer,int size);
 int hxcfe_readFile( FSMNG * fsmng,int filehandle,char * buffer,int size);
 int hxcfe_deleteFile(FSMNG * fsmng, char * filename);
+int hxcfe_closeFile(FSMNG * fsmng, int filehandle);
+
+int hxcfe_fseek( FSMNG * fsmng,int filehandle,long offset,int origin);
+int hxcfe_ftell( FSMNG * fsmng,int filehandle);
 
 void hxcfe_deinitFsManager(FSMNG * fsmng);
 

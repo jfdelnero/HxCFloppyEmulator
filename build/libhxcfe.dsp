@@ -1706,6 +1706,18 @@ SOURCE=..\sources\xml_disk\xml_disk.h
 # Begin Group "fs"
 
 # PROP Default_Filter ""
+# Begin Group "fs_fat12"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\fs_manager\fs_fat12\fs_fat12.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\fs_manager\fs_fat12\fs_fat12.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\sources\fs_manager\fs_manager.c

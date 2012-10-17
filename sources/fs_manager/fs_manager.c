@@ -49,6 +49,7 @@
 
 #include "libhxcfe.h"
 #include "fs_manager.h"
+#include "fs_fat12/fs_fat12.h"
 
 int hxcfe_checkFSID(HXCFLOPPYEMULATOR* floppycontext,int FSID)
 {
@@ -80,6 +81,10 @@ FSMNG * hxcfe_initFsManager(HXCFLOPPYEMULATOR * hxcfe)
 	{
 		memset(fsmng,0,sizeof(FSMNG));
 		fsmng->hxcfe = hxcfe;
+		fsmng->sectorpertrack = 9;
+		fsmng->sidepertrack = 2;
+		fsmng->trackperdisk = 80;
+		fsmng->sectorsize = 512;
 		return fsmng;
 	}
 	return 0;
@@ -144,10 +149,81 @@ const char* hxcfe_getFSName(HXCFLOPPYEMULATOR* floppycontext,int FSID)
 int hxcfe_selectFS(FSMNG * fsmng, int fsid)
 {
 	fsmng->fs_selected = fsid;
+	init_fat12(fsmng);
 	return 0;
 }
 
 void hxcfe_deinitFsManager(FSMNG * fsmng)
 {
 	free(fsmng);
+}
+
+int hxcfe_mountImage(FSMNG * fsmng, FLOPPY *floppy)
+{
+	return fat12_mountImage(fsmng, floppy);
+}
+
+int hxcfe_umountImage(FSMNG * fsmng)
+{
+	return fat12_umountImage(fsmng);
+}
+
+int hxcfe_openDir(FSMNG * fsmng, char * path)
+{
+	return fat12_openDir(fsmng,path);
+}
+
+int hxcfe_readDir(FSMNG * fsmng,int dirhandle,FSENTRY * dirent)
+{
+	return fat12_readDir(fsmng,dirhandle,dirent);
+}
+
+int hxcfe_closeDir(FSMNG * fsmng, int dirhandle)
+{
+	return fat12_closeDir(fsmng, dirhandle);
+}
+
+int hxcfe_openFile(FSMNG * fsmng, char * filename)
+{
+	return fat12_openFile(fsmng,filename);
+}
+
+int hxcfe_writeFile(FSMNG * fsmng,int filehandle,char * buffer,int size)
+{
+	return fat12_writeFile(fsmng,filehandle,buffer,size);
+}
+
+int hxcfe_readFile( FSMNG * fsmng,int filehandle,char * buffer,int size)
+{
+	return fat12_readFile( fsmng,filehandle,buffer,size);
+}
+
+int hxcfe_deleteFile(FSMNG * fsmng, char * filename)
+{
+	return fat12_deleteFile(fsmng,filename);
+}
+
+int hxcfe_closeFile(FSMNG * fsmng, int filehandle)
+{
+	return fat12_closeFile(fsmng,filehandle);
+}
+
+int hxcfe_createDir( FSMNG * fsmng,char * foldername)
+{
+	return fat12_createDir( fsmng,foldername);
+}
+
+int hxcfe_removeDir( FSMNG * fsmng,char * foldername)
+{
+	return fat12_removeDir( fsmng,foldername);
+}
+
+int hxcfe_fseek( FSMNG * fsmng,int filehandle,long offset,int origin)
+{
+	return fat12_fseek(fsmng,filehandle,offset,origin);
+}
+
+int hxcfe_ftell( FSMNG * fsmng,int filehandle)
+{
+	return fat12_ftell( fsmng,filehandle);
 }

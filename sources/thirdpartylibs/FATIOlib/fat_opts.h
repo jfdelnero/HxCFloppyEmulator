@@ -13,7 +13,7 @@
 
 // Is the processor little endian (1) or big endian (0)
 #ifndef FATFS_IS_LITTLE_ENDIAN
-    #define FATFS_IS_LITTLE_ENDIAN          0
+    #define FATFS_IS_LITTLE_ENDIAN          1
 #endif
 
 // Max filename Length 

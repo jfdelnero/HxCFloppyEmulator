@@ -16,6 +16,8 @@
 #define GET_32BIT_WORD(buffer, location)    ( ((uint32)buffer[location+3]<<24) + ((uint32)buffer[location+2]<<16) + ((uint32)buffer[location+1]<<8) + (uint32)buffer[location+0] )
 #define GET_16BIT_WORD(buffer, location)    ( ((uint16)buffer[location+1]<<8) + (uint16)buffer[location+0] )
 
+#define GET_8BIT_WORD(buffer, location)     ( (uint8)buffer[location] )
+
 #define SET_32BIT_WORD(buffer, location, value)    { buffer[location+0] = (uint8)((value)&0xFF); \
                                                   buffer[location+1] = (uint8)((value>>8)&0xFF); \
                                                   buffer[location+2] = (uint8)((value>>16)&0xFF); \
@@ -23,6 +25,9 @@
 
 #define SET_16BIT_WORD(buffer, location, value)    { buffer[location+0] = (uint8)((value)&0xFF); \
                                                   buffer[location+1] = (uint8)((value>>8)&0xFF); }
+
+#define SET_8BIT_WORD(buffer, location, value)    { buffer[location] = (uint8)((value)&0xFF); }
+
 
 //-----------------------------------------------------------------------------
 // Structures
