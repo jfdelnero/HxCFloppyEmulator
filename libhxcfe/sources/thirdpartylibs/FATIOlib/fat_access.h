@@ -50,6 +50,7 @@ struct fat_buffer
 
 typedef enum eFatType
 {
+    FAT_TYPE_12,
     FAT_TYPE_16,
     FAT_TYPE_32
 } tFatType;

@@ -166,9 +166,15 @@ int fatfs_init(struct fatfs *fs)
     {
         count_of_clusters = data_sectors / fs->sectors_per_cluster;
 
-        if(count_of_clusters < 4085) 
-            // Volume is FAT12 
-            return FAT_INIT_WRONG_FILESYS_TYPE;
+        if(count_of_clusters < 4085)
+        {
+            // Clear this FAT32 specific param
+            fs->rootdir_first_cluster = 0;
+
+            // Volume is FAT12
+            fs->fat_type = FAT_TYPE_12;
+            return FAT_INIT_OK;
+		}
         else if(count_of_clusters < 65525) 
         {
             // Clear this FAT32 specific param
@@ -194,7 +200,7 @@ int fatfs_init(struct fatfs *fs)
 //-----------------------------------------------------------------------------
 uint32 fatfs_lba_of_cluster(struct fatfs *fs, uint32 Cluster_Number)
 {
-    if (fs->fat_type == FAT_TYPE_16)
+    if ( (fs->fat_type == FAT_TYPE_16) || (fs->fat_type == FAT_TYPE_12) )
         return (fs->cluster_begin_lba + (fs->root_entry_count * 32 / FAT_SECTOR_SIZE) + ((Cluster_Number-2) * fs->sectors_per_cluster));
     else
         return ((fs->cluster_begin_lba + ((Cluster_Number-2)*fs->sectors_per_cluster)));
@@ -225,8 +231,8 @@ int fatfs_sector_reader(struct fatfs *fs, uint32 start_cluster, uint32 offset, u
     uint32 i;
     uint32 lba;
 
-    // FAT16 Root directory
-    if (fs->fat_type == FAT_TYPE_16 && start_cluster == 0)
+    // FAT12/FAT16 Root directory
+    if ( ( ( fs->fat_type == FAT_TYPE_16 ) || ( fs->fat_type == FAT_TYPE_12 ) ) && start_cluster == 0)
     {
         if (offset < fs->rootdir_sectors)
             lba = fs->lba_begin + fs->rootdir_first_sector + offset;
@@ -274,7 +280,7 @@ int fatfs_sector_reader(struct fatfs *fs, uint32 start_cluster, uint32 offset, u
 int fatfs_read_sector(struct fatfs *fs, uint32 cluster, uint32 sector, uint8 *target)
 {
     // FAT16 Root directory
-    if (fs->fat_type == FAT_TYPE_16 && cluster == 0)
+    if ( ( ( fs->fat_type == FAT_TYPE_16 ) || ( fs->fat_type == FAT_TYPE_12 ) ) && cluster == 0)
     {
         uint32 lba;
 
@@ -333,11 +339,11 @@ int fatfs_write_sector(struct fatfs *fs, uint32 cluster, uint32 sector, uint8 *t
         return 0;
 
     // FAT16 Root directory
-    if (fs->fat_type == FAT_TYPE_16 && cluster == 0)
+    if ( ( (fs->fat_type == FAT_TYPE_16) || (fs->fat_type == FAT_TYPE_12)) && cluster == 0)
     {
         uint32 lba;
 
-        // In FAT16 we cannot extend the root dir!
+        // In FAT12/FAT16 we cannot extend the root dir!
         if (sector < fs->rootdir_sectors)
             lba = fs->lba_begin + fs->rootdir_first_sector + sector;
         else
@@ -408,7 +414,7 @@ uint32 fatfs_get_file_entry(struct fatfs *fs, uint32 Cluster, char *name_to_find
 {
     uint8 item=0;
     uint16 recordoffset = 0;
-    uint8 i=0;
+    uint8 i=0,j=0,dotpos;
     int x=0;
     char *long_filename = NULL;
     char short_filename[13];
@@ -467,26 +473,39 @@ uint32 fatfs_get_file_entry(struct fatfs *fs, uint32 Cluster, char *name_to_find
                     for (i=0; i<8; i++) 
                         short_filename[i] = directoryEntry->Name[i];
 
+                    j = 7;
+                    while( short_filename[j] == ' ' && j )
+                        j--;
+
+                    dotpos = j + 1;
+                    short_filename[dotpos] = 0;
+
+
                     // Extension
+                    j=0;
                     dotRequired = 0;
                     for (i=8; i<11; i++) 
                     {
-                        short_filename[i+1] = directoryEntry->Name[i];
+                        short_filename[dotpos+j+1] = directoryEntry->Name[i];
+                        j++;
                         if (directoryEntry->Name[i] != ' ')
+                        {
                             dotRequired = 1;
+                        }
                     }
+
 
                     // Dot only required if extension present
                     if (dotRequired)
                     {
                         // If not . or .. entry
                         if (short_filename[0]!='.')
-                            short_filename[8] = '.';
-                        else
-                            short_filename[8] = ' ';
+                              short_filename[dotpos] = '.';
+                        //else
+                        //    short_filename[j+1] = ' ';
                     }
-                    else
-                        short_filename[8] = ' ';
+                    //else
+                      //  short_filename[j+1] = 0; //' ';
                     
                     // Compare names to see if they match
                     if (fatfs_compare_names(short_filename, name_to_find)) 
