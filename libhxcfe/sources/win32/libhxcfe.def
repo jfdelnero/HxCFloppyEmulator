@@ -122,3 +122,4 @@ EXPORTS
    hxcfe_fseek					@419
    hxcfe_ftell					@420
    hxcfe_closeDir				@421
+   hxcfe_createFile				@422

@@ -425,6 +425,7 @@ int hxcfe_getFirstFile(FSMNG * fsmng, FSENTRY * dirent, char * rootdir);
 int hxcfe_getNextFile(FSMNG * fsmng, FSENTRY * dirent);
 
 int hxcfe_openFile(FSMNG * fsmng, char * filename);
+int hxcfe_createFile(FSMNG * fsmng, char * filename);
 int hxcfe_writeFile(FSMNG * fsmng,int filehandle,char * buffer,int size);
 int hxcfe_readFile( FSMNG * fsmng,int filehandle,char * buffer,int size);
 int hxcfe_deleteFile(FSMNG * fsmng, char * filename);
