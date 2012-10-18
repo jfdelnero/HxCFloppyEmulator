@@ -188,6 +188,11 @@ int hxcfe_openFile(FSMNG * fsmng, char * filename)
 	return fat12_openFile(fsmng,filename);
 }
 
+int hxcfe_createFile(FSMNG * fsmng, char * filename)
+{
+	return fat12_createFile(fsmng,filename);
+}
+
 int hxcfe_writeFile(FSMNG * fsmng,int filehandle,char * buffer,int size)
 {
 	return fat12_writeFile(fsmng,filehandle,buffer,size);
