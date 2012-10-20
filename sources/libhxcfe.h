@@ -33,15 +33,15 @@
 // Functions return error codes
 
 #define HXCFE_VALIDFILE			1
-#define HXCFE_NOERROR			0 
+#define HXCFE_NOERROR			0
 #define HXCFE_ACCESSERROR		-1
 #define HXCFE_BADFILE			-2
-#define HXCFE_FILECORRUPTED		-3 
+#define HXCFE_FILECORRUPTED		-3
 #define HXCFE_BADPARAMETER		-4
 #define HXCFE_INTERNALERROR		-5
 #define HXCFE_UNSUPPORTEDFILE	-6
 
-// Output functions 
+// Output functions
 typedef int (*HXCPRINTF_FUNCTION)(int MSGTYPE,char * string, ...);
 typedef int (*DISPLAYTRACKPOS_FUNCTION)(unsigned int current,unsigned int total);
 
@@ -227,6 +227,10 @@ typedef struct SECTORSEARCH_
 	int bitoffset;
 	int cur_track;
 	int cur_side;
+
+	int nb_sector_cached;
+	SECTORCONFIG sectorcache[512];
+
 }SECTORSEARCH;
 
 SECTORSEARCH* hxcfe_initSectorSearch(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
@@ -317,6 +321,22 @@ void hxcfe_td_deinit(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td);
 
 ////////////////////////////////////////////
 // FDC style functions
+
+typedef struct _FDCCTRL
+{
+	HXCFLOPPYEMULATOR* floppycontext;
+	FLOPPY * loadedfp;
+	SECTORSEARCH * ss;
+}FDCCTRL;
+
+FDCCTRL * hxcfe_initFDC (HXCFLOPPYEMULATOR* floppycontext);
+
+int hxcfe_insertDiskFDC (FDCCTRL * fdc,FLOPPY *fp);
+int hxcfe_readSectorFDC (FDCCTRL * fdc,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size);
+int hxcfe_writeSectorFDC (FDCCTRL * fdc,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size);
+
+void hxcfe_deinitFDC (FDCCTRL * fdc);
+
 int hxcfe_FDC_READSECTOR  (HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size);
 int hxcfe_FDC_WRITESECTOR (HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size);
 int hxcfe_FDC_FORMAT      (HXCFLOPPYEMULATOR* floppycontext,unsigned char track,unsigned char side,unsigned char nbsector,int sectorsize,int sectoridstart,int skew,int interleave,int mode);
@@ -333,28 +353,28 @@ enum
 	FS_902KB_ATARI_FAT12,
 	FS_360KB_ATARI_FAT12,
 	FS_880KB_AMIGADOS,
-	
+
 	FS_5P25_300RPM_160KB_MSDOS_FAT12,
 	FS_5P25_360RPM_160KB_MSDOS_FAT12,
-	
+
 	FS_5P25_300RPM_180KB_MSDOS_FAT12,
 	FS_5P25_360RPM_180KB_MSDOS_FAT12,
-		
+
 	FS_5P25_SS_300RPM_320KB_MSDOS_FAT12,
 	FS_5P25_SS_360RPM_320KB_MSDOS_FAT12,
-		
+
 	FS_5P25_DS_300RPM_320KB_MSDOS_FAT12,
 	FS_5P25_DS_360RPM_320KB_MSDOS_FAT12,
-		
+
 	FS_5P25_DS_300RPM_360KB_MSDOS_FAT12,
 	FS_5P25_DS_360RPM_360KB_MSDOS_FAT12,
-		
+
 	FS_3P5_DS_300RPM_640KB_MSDOS_FAT12,
-		
+
 	FS_720KB_MSDOS_FAT12,
-		
+
 	FS_5P25_300RPM_1200KB_MSDOS_FAT12,
-		
+
 	FS_1_44MB_MSDOS_FAT12,
 	FS_1_68MB_MSDOS_FAT12,
 	FS_2_88MB_MSDOS_FAT12,
@@ -381,6 +401,8 @@ typedef struct _FSMNG
 	// Mounted Floppy disk
 	FLOPPY *fp;
 
+	FDCCTRL * fdc;
+
 	// mounted disk image geometry
 	int sectorpertrack;
 	int sidepertrack;
@@ -389,7 +411,6 @@ typedef struct _FSMNG
 
 	void * handletable[128];
 	void * dirhandletable[128];
-	
 
 }FSMNG;
 

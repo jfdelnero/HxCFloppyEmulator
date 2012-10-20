@@ -260,13 +260,11 @@ uint32 fatfs_find_next_cluster(struct fatfs *fs, uint32 current_cluster)
 
     if (fs->fat_type == FAT_TYPE_12)
     {
-        // Find 32 bit entry of current sector relating to cluster number 
-        //position = (current_cluster - (fat_sector_offset * 256)) * 2; 
-
+        // Read Next Clusters value from Sector Buffer
         if(reload_needed)
         {
 
-            fat12_clusnum_part1 = FAT12_GET_8BIT_WORD(pbuf,512);
+            fat12_clusnum_part1 = FAT12_GET_8BIT_WORD(pbuf,511);
             pbuf = fatfs_fat_read_sector(fs, fs->fat_begin_lba+fat_sector_offset+1);
             fat12_clusnum_part2 = FAT12_GET_8BIT_WORD(pbuf,0);
         }
@@ -277,8 +275,8 @@ uint32 fatfs_find_next_cluster(struct fatfs *fs, uint32 current_cluster)
         }
 
         nextcluster = fat12clus(fat12_clusnum_part1,fat12_clusnum_part2,current_cluster);
-        // Read Next Clusters value from Sector Buffer
-        //nextcluster = FAT16_GET_16BIT_WORD(pbuf, (uint16)position);     
+
+        //printf("%.8X - %.8X | %.2X - %.2X | %d\n",current_cluster,nextcluster,fat12_clusnum_part1,fat12_clusnum_part2,reload_needed);
 
         // If end of chain found
         if (nextcluster >= 0xFF8 && nextcluster <= 0xFFF) 

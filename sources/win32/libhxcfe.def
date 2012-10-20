@@ -94,10 +94,15 @@ EXPORTS
    hxcfe_generateXmlFileFloppy	@207
    hxcfe_deinitXmlFloppy		@208
 
-   hxcfe_FDC_READSECTOR			@300
-   hxcfe_FDC_WRITESECTOR		@301
-   hxcfe_FDC_FORMAT				@302
-   hxcfe_FDC_SCANSECTOR			@303
+   hxcfe_initFDC				@300
+   hxcfe_deinitFDC				@301
+   hxcfe_insertDiskFDC			@302
+   hxcfe_readSectorFDC			@303
+   hxcfe_writeSectorFDC			@304
+   hxcfe_FDC_READSECTOR			@305
+   hxcfe_FDC_WRITESECTOR		@306
+   hxcfe_FDC_FORMAT				@307
+   hxcfe_FDC_SCANSECTOR			@308
 
    hxcfe_checkFSID				@400
    hxcfe_initFsManager			@401

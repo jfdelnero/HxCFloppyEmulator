@@ -15,7 +15,7 @@ ifdef IPF_LIB_SUPPORT
     DISKLOADERPLUGINS_IPF= ipf_loader.o libcapsimage.so.2.0
 endif
 
-LDFLAGS= -g -shared -lc -lm  -ldl 
+LDFLAGS= -g -shared -lc -lm  -ldl
 
 ifeq ($(UNAME), Darwin)
 CFLAGS += -arch i386
@@ -29,11 +29,13 @@ ADFLIBOBJ= adf_hd.o adf_disk.o adf_raw.o adf_bitm.o adf_dump.o\
         adf_util.o adf_env.o adf_nativ.o adf_dir.o adf_file.o adf_cache.o \
         adf_link.o adf_salv.o
 
-XDMSLIBOBJ= getbits.o crc_csum.o maketbl.o pfile.o getbits.o tables.o u_deep.o u_heavy.o u_init.o u_medium.o u_quick.o u_rle.o
+XDMSLIBOBJ = getbits.o crc_csum.o maketbl.o pfile.o getbits.o tables.o u_deep.o u_heavy.o u_init.o u_medium.o u_quick.o u_rle.o
 
-ZLIBOBJ=adler32.o compress.o crc32.o deflate.o gzlib.o gzread.o gzwrite.o gzclose.o infback.o inffast.o inflate.o inftrees.o trees.o uncompr.o zutil.o
+ZLIBOBJ = adler32.o compress.o crc32.o deflate.o gzlib.o gzread.o gzwrite.o gzclose.o infback.o inffast.o inflate.o inftrees.o trees.o uncompr.o zutil.o
 
-MINIZIPOBJ=ioapi.o mztools.o unzip.o zip.o
+MINIZIPOBJ = ioapi.o mztools.o unzip.o zip.o
+
+FATIOLIB = fat_access.o fat_cache.o fat_filelib.o fat_format.o fat_misc.o fat_string.o fat_table.o fat_write.o
 
 DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosfs_loader.o vfile.o cpcdsk_loader.o \
                   msa_loader.o msx_loader.o smc_loader.o st_loader.o stx_loader.o img_loader.o dms_loader.o mfm_loader.o\
@@ -53,13 +55,13 @@ XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
 
 all: $(EXEC)
 
-libhxcfe.a: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o display_track.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT)
-	$(AR) r $@    $^ 
+libhxcfe.a: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o display_track.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB)
+	$(AR) r $@    $^
 	cp $@ ../../../build
 
-libhxcfe.so: floppy_loader.o floppy_utils.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o  $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT)
+libhxcfe.so: floppy_loader.o floppy_utils.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB)
 	$(CC) -o $@    $^ $(LDFLAGS)
-		
+
 floppy_loader.o: $(BASEDIR)/floppy_loader.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
@@ -73,6 +75,12 @@ sector_extractor.o : $(BASEDIR)/tracks/sector_extractor.c $(BASEDIR)/tracks/sect
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 display_track.o : $(BASEDIR)/tracks/display_track.c $(BASEDIR)/tracks/display_track.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+fs_manager.o : $(BASEDIR)/fs_manager/fs_manager.c $(BASEDIR)/fs_manager/fs_manager.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+fs_fat12.o : $(BASEDIR)/fs_manager/fs_fat12/fs_fat12.c $(BASEDIR)/fs_manager/fs_fat12/fs_fat12.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 emuii_track.o: $(BASEDIR)/tracks/emuii_track.c $(BASEDIR)/tracks/emuii_track.h
@@ -113,7 +121,7 @@ imd_writer.o : $(BASEDIR)/loaders/imd_loader/imd_writer.c
 	
 hfe_loader.o : $(BASEDIR)/loaders/hfe_loader/hfe_loader.c $(BASEDIR)/loaders/hfe_loader/hfe_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
-	
+
 hfe_writer.o : $(BASEDIR)/loaders/hfe_loader/hfe_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
@@ -456,6 +464,29 @@ ftdi_d2xxmode.o : ftdi.c ftdi.h ftd2xx.h WinTypes.h
 ftdi_libftdimode.o : ftdi.c ftdi.h ftd2xx.h WinTypes.h
 	$(CC) -o $@ -c $< $(CFLAGS) -DFTDILIB
 
+fat_access.o : $(BASEDIR)/thirdpartylibs/FATIOlib/fat_access.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+fat_cache.o : $(BASEDIR)/thirdpartylibs/FATIOlib/fat_cache.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+fat_filelib.o : $(BASEDIR)/thirdpartylibs/FATIOlib/fat_filelib.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+fat_format.o : $(BASEDIR)/thirdpartylibs/FATIOlib/fat_format.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+fat_misc.o : $(BASEDIR)/thirdpartylibs/FATIOlib/fat_misc.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+fat_string.o : $(BASEDIR)/thirdpartylibs/FATIOlib/fat_string.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+fat_table.o : $(BASEDIR)/thirdpartylibs/FATIOlib/fat_table.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+fat_write.o : $(BASEDIR)/thirdpartylibs/FATIOlib/fat_write.c
+	$(CC) -o $@ -c $< $(CFLAGS)
 
 clean:
 	rm -rf *.o
