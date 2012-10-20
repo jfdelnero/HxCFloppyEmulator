@@ -87,9 +87,11 @@ int fat12_mountImage(FSMNG * fsmng, FLOPPY *floppy)
 
 	fsmng->fp = floppy;
 
+
 	fsmng->trackperdisk = fsmng->fp->floppyNumberOfTrack;
 	fsmng->sectorpertrack = 9;
 	fsmng->sidepertrack = 2;
+	fsmng->sectorsize = 512;
 
 	if(fsmng->fdc)
 		hxcfe_deinitFDC (fsmng->fdc);
@@ -106,13 +108,26 @@ int fat12_mountImage(FSMNG * fsmng, FLOPPY *floppy)
 			{
 				nbsector++;
 			}
+
+			// Retry with 1024 bytes per sector
+			if(!nbsector)
+			{
+				while(hxcfe_readSectorFDC(fsmng->fdc,0,0,(unsigned char)(1+nbsector),1024,ISOIBM_MFM_ENCODING,1,(unsigned char*)sectorbuffer,sizeof(sectorbuffer)))
+				{
+					nbsector++;
+				}
+
+				if(nbsector)
+					fsmng->sectorsize = 1024;
+			}
+
 			fsmng->sectorpertrack = nbsector;
 
-			gb_fsmng->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FS : %d Sectors per track",fsmng->sectorpertrack);
+
+			gb_fsmng->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FS : %d Sectors per track (%d Bytes per sector)",fsmng->sectorpertrack,fsmng->sectorsize);
 
 			if(fsmng->sectorpertrack)
 			{
-
 				/* Attach media access functions to library*/
 				if (fl_attach_media(media_read_callback, media_write_callback) != FAT_INIT_OK)
 				{

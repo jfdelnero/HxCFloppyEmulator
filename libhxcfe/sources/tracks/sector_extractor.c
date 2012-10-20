@@ -1900,15 +1900,31 @@ int hxcfe_readSectorData(SECTORSEARCH* ss,int track,int side,int sector,int numb
 			sc = hxcfe_searchSector ( ss, track, side, sector + nbsectorread, type);
 			if(sc)
 			{
-				if(sc->input_data)
+				if(sc->sectorsize == (unsigned int)sectorsize)
 				{
-					memcpy(&buffer[sectorsize*(sc->sector-sector)],sc->input_data,sectorsize);
-					free(sc->input_data);
-					sc->input_data=0;
+					if(sc->input_data)
+					{
+						memcpy(&buffer[sectorsize*(sc->sector-sector)],sc->input_data,sectorsize);
+						free(sc->input_data);
+						sc->input_data=0;	
+					}
+
 					free(sc);
+
+					nbsectorread++;
+				}
+				else
+				{
+					if(sc->input_data)
+					{
+						free(sc->input_data);
+						sc->input_data=0;
+					}
+					free(sc);
+
+					return 0;
 				}
 
-				nbsectorread++;
 			}
 
 		}while((nbsectorread<numberofsector) && sc);
@@ -1921,89 +1937,57 @@ int hxcfe_writeSectorData(SECTORSEARCH* ss,int track,int side,int sector,int num
 {
 	SECTORCONFIG * sc;
 	int bitoffset;
-	int nbsectorread;
+	int nbsectorwrite;
 
 	bitoffset=0;
-	nbsectorread=0;
+	nbsectorwrite=0;
 
 	if ( side < ss->fp->floppyNumberOfSide && track < ss->fp->floppyNumberOfTrack )
 	{
-		ss->bitoffset=0;
-		ss->cur_track=track;
-		ss->cur_side=side;
 
-		sc=(SECTORCONFIG *) malloc(sizeof(SECTORCONFIG));
-		memset(sc,0,sizeof(SECTORCONFIG));
 		do
 		{
-			switch(type)
+			sc = hxcfe_searchSector ( ss, track, side, sector + nbsectorwrite, type);
+			if(sc)
 			{
-				case ISOIBM_MFM_ENCODING:
-					bitoffset=get_next_MFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
-				break;
-				case AMIGA_MFM_ENCODING:
-					bitoffset=get_next_AMIGAMFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
-				break;
-				case ISOIBM_FM_ENCODING:
-					bitoffset=get_next_FM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
-				break;
-				case TYCOM_FM_ENCODING:
-					bitoffset=get_next_TYCOMFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
-				break;
-				case EMU_FM_ENCODING:
-					bitoffset=-1;
-				break;
-				default:
-					bitoffset=-1;
-				break;
-			}
-
-			if(bitoffset!=-1 && ((sc->sector>=sector) && (sc->sector < ( sector + numberofsector )) ) )
-			{
-				switch(type)
+				if(((sc->sector>=sector) && (sc->sector < ( sector + numberofsector )) ) )
 				{
-					case ISOIBM_MFM_ENCODING:
-						write_MFM_sectordata(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,&buffer[sectorsize*nbsectorread],sectorsize);
-					break;
-					case AMIGA_MFM_ENCODING:
-						write_AMIGAMFM_sectordata(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,&buffer[sectorsize*nbsectorread],sectorsize);
-					break;
-					case TYCOM_FM_ENCODING:
-					case ISOIBM_FM_ENCODING:
-						write_FM_sectordata(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,&buffer[sectorsize*nbsectorread],sectorsize);
-					break;
-					case EMU_FM_ENCODING:
-					break;
-					default:
-					break;
+					switch(type)
+					{
+						case ISOIBM_MFM_ENCODING:
+							write_MFM_sectordata(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,&buffer[sectorsize*nbsectorwrite],sectorsize);
+						break;
+						case AMIGA_MFM_ENCODING:
+							write_AMIGAMFM_sectordata(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,&buffer[sectorsize*nbsectorwrite],sectorsize);
+						break;
+						case TYCOM_FM_ENCODING:
+						case ISOIBM_FM_ENCODING:
+							write_FM_sectordata(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,&buffer[sectorsize*nbsectorwrite],sectorsize);
+						break;
+						case EMU_FM_ENCODING:
+						break;
+						default:
+						break;
+					}
+					
+					nbsectorwrite++;
 				}
-
-
-				nbsectorread++;
 
 				if(sc->input_data)
 				{
 					free(sc->input_data);
 					sc->input_data=0;
 				}
-			}
-			else
-			{
-				if(sc->input_data)
-				{
-					free(sc->input_data);
-					sc->input_data=0;
-				}
+
+				free(sc);
+
 			}
 
-		}while((nbsectorread<numberofsector) && (bitoffset!=-1));
-
-		free(sc);
-
-		ss->bitoffset=bitoffset;
+		}while(( nbsectorwrite < numberofsector ) && sc);
 	}
 
-	return nbsectorread;
+	return nbsectorwrite;
+
 }
 
 
