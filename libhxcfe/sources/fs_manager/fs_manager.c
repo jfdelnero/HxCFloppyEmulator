@@ -150,7 +150,7 @@ int hxcfe_selectFS(FSMNG * fsmng, int fsid)
 {
 	fsmng->fs_selected = fsid;
 	init_fat12(fsmng);
-	return 0;
+	return HXCFE_NOERROR;
 }
 
 void hxcfe_deinitFsManager(FSMNG * fsmng)

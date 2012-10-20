@@ -492,8 +492,22 @@ uint32 fatfs_get_file_entry(struct fatfs *fs, uint32 Cluster, char *name_to_find
                         {
                             dotRequired = 1;
                         }
+                        else
+                        {
+                            short_filename[dotpos+j+1] = 0;
+                        }
                     }
 
+
+                    j = 12;
+                    while( j )
+                    {
+                        if(short_filename[j] == ' ')
+                        {
+                            short_filename[j] = 0;
+                        }
+                        j--;
+                    }
 
                     // Dot only required if extension present
                     if (dotRequired)
