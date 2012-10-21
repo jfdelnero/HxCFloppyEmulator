@@ -55,7 +55,7 @@ typedef struct sFL_FILE
     struct cluster_lookup   last_fat_lookup;
 
     // Read/Write sector buffer
-    uint8                   file_data_sector[FAT_SECTOR_SIZE];
+    uint8                   file_data_sector[MAX_FAT_SECTOR_SIZE];
     uint32                  file_data_address; 
     int                     file_data_dirty;
 

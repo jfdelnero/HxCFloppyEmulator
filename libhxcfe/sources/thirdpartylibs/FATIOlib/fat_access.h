@@ -16,7 +16,6 @@
 #define FAT_INIT_WRONG_PARTITION_TYPE       (-6)
 #define FAT_INIT_STRUCT_PACKING             (-7)
 
-#define FAT_DIR_ENTRIES_PER_SECTOR          (FAT_SECTOR_SIZE / FAT_DIR_ENTRY_SIZE)
 
 //-----------------------------------------------------------------------------
 // Function Pointers
@@ -39,7 +38,7 @@ struct fat_buffer;
 
 struct fat_buffer
 {
-    uint8                   sector[FAT_SECTOR_SIZE * FAT_BUFFER_SECTORS];
+    uint8                   sector[MAX_FAT_SECTOR_SIZE * FAT_BUFFER_SECTORS];
     uint32                  address; 
     int                     dirty;
     uint8 *                 ptr;
@@ -72,6 +71,7 @@ struct fatfs
     uint16                  reserved_sectors;
     uint8                   num_of_fats;
     tFatType                fat_type;
+    uint16                  sector_size;
 
     // Disk/Media API
     struct disk_if          disk_io;

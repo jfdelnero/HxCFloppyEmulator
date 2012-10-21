@@ -223,7 +223,7 @@ static int _create_directory(char *path)
     }
 
     // Erase new directory cluster
-    memset(file->file_data_sector, 0x00, FAT_SECTOR_SIZE);
+    memset(file->file_data_sector, 0x00, _fs.sector_size);
     for (i=0;i<_fs.sectors_per_cluster;i++)
     {
         if (!fatfs_write_sector(&_fs, file->startcluster, i, file->file_data_sector))
@@ -1041,22 +1041,22 @@ int fl_fread(void * buffer, int size, int length, void *f )
         count = file->filelength - file->bytenum;
 
     // Calculate start sector
-    sector = file->bytenum / FAT_SECTOR_SIZE;
+    sector = file->bytenum / _fs.sector_size;
 
     // Offset to start copying data from first sector
-    offset = file->bytenum % FAT_SECTOR_SIZE;
+    offset = file->bytenum % _fs.sector_size;
 
     while (bytesRead < count)
     {        
         // Read whole sector, read from media directly into target buffer
-        if ((offset == 0) && ((count - bytesRead) >= FAT_SECTOR_SIZE))
+        if ((offset == 0) && ((count - bytesRead) >= _fs.sector_size))
         {
             // Read as many sectors as possible into target buffer
-            uint32 sectorsRead = _read_sectors(file, sector, (uint8*)((uint8*)buffer + bytesRead), (count - bytesRead) / FAT_SECTOR_SIZE);        
+            uint32 sectorsRead = _read_sectors(file, sector, (uint8*)((uint8*)buffer + bytesRead), (count - bytesRead) / _fs.sector_size);
             if (sectorsRead)
             {
                 // We have upto one sector to copy
-                copyCount = FAT_SECTOR_SIZE * sectorsRead;
+                copyCount = _fs.sector_size * sectorsRead;
 
                 // Move onto next sector and reset copy offset
                 sector+= sectorsRead;
@@ -1084,7 +1084,7 @@ int fl_fread(void * buffer, int size, int length, void *f )
             }
         
             // We have upto one sector to copy
-            copyCount = FAT_SECTOR_SIZE - offset;
+            copyCount = _fs.sector_size - offset;
 
             // Only require some of this sector?
             if (copyCount > (count - bytesRead))
@@ -1279,15 +1279,15 @@ int fl_fwrite(const void * data, int size, int count, void *f )
     // Else write to current position
 
     // Calculate start sector
-    sector = file->bytenum / FAT_SECTOR_SIZE;
+    sector = file->bytenum / _fs.sector_size;
 
     // Offset to start copying data from first sector
-    offset = file->bytenum % FAT_SECTOR_SIZE;
+    offset = file->bytenum % _fs.sector_size;
 
     while (bytesWritten < length)
     {
         // Whole sector or more to be written?
-        if ((offset == 0) && ((length - bytesWritten) >= FAT_SECTOR_SIZE))
+        if ((offset == 0) && ((length - bytesWritten) >= _fs.sector_size))
         {
             uint32 sectorsWrote;
 
@@ -1303,8 +1303,8 @@ int fl_fwrite(const void * data, int size, int count, void *f )
             }
 
             // Write as many sectors as possible
-            sectorsWrote = _write_sectors(file, sector, (uint8*)(buffer + bytesWritten), (length - bytesWritten) / FAT_SECTOR_SIZE);
-            copyCount = FAT_SECTOR_SIZE * sectorsWrote;
+            sectorsWrote = _write_sectors(file, sector, (uint8*)(buffer + bytesWritten), (length - bytesWritten) / _fs.sector_size);
+            copyCount = _fs.sector_size * sectorsWrote;
 
             // Increase total read count 
             bytesWritten += copyCount;
@@ -1322,7 +1322,7 @@ int fl_fwrite(const void * data, int size, int count, void *f )
         else
         {
             // We have upto one sector to copy
-            copyCount = FAT_SECTOR_SIZE - offset;
+            copyCount = _fs.sector_size - offset;
 
             // Only require some of this sector?
             if (copyCount > (length - bytesWritten))
@@ -1336,7 +1336,7 @@ int fl_fwrite(const void * data, int size, int count, void *f )
                     fl_fflush(file);
 
                 // If we plan to overwrite the whole sector, we don't need to read it first!
-                if (copyCount != FAT_SECTOR_SIZE)
+                if (copyCount != _fs.sector_size)
                 {
                     // NOTE: This does not have succeed; if last sector of file
                     // reached, no valid data will be read in, but write will 
@@ -1344,7 +1344,7 @@ int fl_fwrite(const void * data, int size, int count, void *f )
 
                     // Get LBA of sector offset within file
                     if (!_read_sectors(file, sector, file->file_data_sector, 1))
-                        memset(file->file_data_sector, 0x00, FAT_SECTOR_SIZE);    
+                        memset(file->file_data_sector, 0x00, _fs.sector_size);    
                 }
 
                 file->file_data_address = sector;
