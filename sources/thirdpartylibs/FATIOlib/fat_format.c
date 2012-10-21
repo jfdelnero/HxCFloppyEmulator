@@ -79,7 +79,7 @@ static int fatfs_erase_sectors(struct fatfs *fs, uint32 lba, int count)
     int i;
 
     // Zero sector first
-    memset(fs->currentsector.sector, 0, FAT_SECTOR_SIZE);
+    memset(fs->currentsector.sector, 0, DEFAULT_FAT_SECTOR_SIZE);
 
     for (i=0;i<count;i++)
         if (!fs->disk_io.write_media(lba + i, fs->currentsector.sector, 1))
@@ -96,7 +96,7 @@ int fatfs_create_boot_sector(struct fatfs *fs, uint32 boot_sector_lba, uint32 vo
     int i;
     
     // Zero sector initially
-    memset(fs->currentsector.sector, 0, FAT_SECTOR_SIZE);
+    memset(fs->currentsector.sector, 0, DEFAULT_FAT_SECTOR_SIZE);
 
     // OEM Name & Jump Code
     fs->currentsector.sector[0] = 0xEB;
@@ -112,8 +112,8 @@ int fatfs_create_boot_sector(struct fatfs *fs, uint32 boot_sector_lba, uint32 vo
     fs->currentsector.sector[10] = 0x30;
     
     // Bytes per sector
-    fs->currentsector.sector[11] = (FAT_SECTOR_SIZE >> 0) & 0xFF;
-    fs->currentsector.sector[12] = (FAT_SECTOR_SIZE >> 8) & 0xFF;
+    fs->currentsector.sector[11] = (DEFAULT_FAT_SECTOR_SIZE >> 0) & 0xFF;
+    fs->currentsector.sector[12] = (DEFAULT_FAT_SECTOR_SIZE >> 8) & 0xFF;
 
     // Get sectors per cluster size for the disk
     fs->sectors_per_cluster = fatfs_calc_cluster_size(vol_sectors);
@@ -223,7 +223,7 @@ int fatfs_erase_fat(struct fatfs *fs)
     uint32 i;
 
     // Zero sector initially
-    memset(fs->currentsector.sector, 0, FAT_SECTOR_SIZE);
+    memset(fs->currentsector.sector, 0, DEFAULT_FAT_SECTOR_SIZE);
 
     // Initialise default allocate / reserved clusters
     SET_16BIT_WORD(fs->currentsector.sector, 0, 0xF8FF);
@@ -233,7 +233,7 @@ int fatfs_erase_fat(struct fatfs *fs)
         return 0;
 
     // Zero remaining FAT sectors
-    memset(fs->currentsector.sector, 0, FAT_SECTOR_SIZE);
+    memset(fs->currentsector.sector, 0, DEFAULT_FAT_SECTOR_SIZE);
     for (i=1;i<fs->fat_sectors;i++)
         if (!fs->disk_io.write_media(fs->fat_begin_lba + i, fs->currentsector.sector, 1))
             return 0;
@@ -271,7 +271,7 @@ int fatfs_format_fat16(struct fatfs *fs, uint32 volume_sectors, const char *name
 
     // For FAT16 (which this may be), rootdir_first_cluster is actuall rootdir_first_sector
     fs->rootdir_first_sector = fs->reserved_sectors + (fs->num_of_fats * fs->fat_sectors);
-    fs->rootdir_sectors = ((fs->root_entry_count * 32) + (FAT_SECTOR_SIZE - 1)) / FAT_SECTOR_SIZE;
+    fs->rootdir_sectors = ((fs->root_entry_count * 32) + (DEFAULT_FAT_SECTOR_SIZE - 1)) / DEFAULT_FAT_SECTOR_SIZE;
 
     // First FAT LBA address
     fs->fat_begin_lba = fs->lba_begin + fs->reserved_sectors;

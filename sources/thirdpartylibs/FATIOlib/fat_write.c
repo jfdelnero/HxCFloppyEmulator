@@ -93,7 +93,7 @@ int fatfs_allocate_free_space(struct fatfs *fs, int newFile, uint32 *startCluste
         fatfs_set_fs_info_next_free_cluster(fs, FAT32_LAST_CLUSTER); 
 
     // Work out size and clusters
-    clusterSize = fs->sectors_per_cluster * FAT_SECTOR_SIZE;
+    clusterSize = fs->sectors_per_cluster * fs->sector_size;
     clusterCount = (size / clusterSize);
 
     // If any left over
@@ -131,6 +131,7 @@ static int fatfs_find_free_dir_offset(struct fatfs *fs, uint32 dirCluster, int e
 {
     struct fat_dir_entry *directoryEntry;
     uint8 item=0;
+    uint8 nb_item;
     uint16 recordoffset = 0;
     uint8 i=0;
     int x=0;
@@ -148,7 +149,8 @@ static int fatfs_find_free_dir_offset(struct fatfs *fs, uint32 dirCluster, int e
         if (fatfs_sector_reader(fs, dirCluster, x++, 0)) 
         {
             // Analyse Sector
-            for (item = 0; item < FAT_DIR_ENTRIES_PER_SECTOR; item++)
+            nb_item = fs->sector_size / FAT_DIR_ENTRY_SIZE;
+            for (item = 0; item < nb_item ; item++)
             {
                 // Create the multiplier for sector access
                 recordoffset = FAT_DIR_ENTRY_SIZE * item;
@@ -238,7 +240,7 @@ static int fatfs_find_free_dir_offset(struct fatfs *fs, uint32 dirCluster, int e
                 return 0;
 
             // Erase new directory cluster
-            memset(fs->currentsector.sector, 0x00, FAT_SECTOR_SIZE);
+            memset(fs->currentsector.sector, 0x00, fs->sector_size);
             for (i=0;i<fs->sectors_per_cluster;i++)
             {
                 if (!fatfs_write_sector(fs, newCluster, i, 0))
@@ -266,6 +268,7 @@ static int fatfs_find_free_dir_offset(struct fatfs *fs, uint32 dirCluster, int e
 int fatfs_add_file_entry(struct fatfs *fs, uint32 dirCluster, char *filename, char *shortfilename, uint32 startCluster, uint32 size, int dir)
 {
     uint8 item=0;
+    uint8 nb_item;
     uint16 recordoffset = 0;
     uint8 i=0;
     uint32 x=0;
@@ -314,7 +317,8 @@ int fatfs_add_file_entry(struct fatfs *fs, uint32 dirCluster, char *filename, ch
         if (fatfs_sector_reader(fs, dirCluster, x++, 0)) 
         {
             // Analyse Sector
-            for (item = 0; item < FAT_DIR_ENTRIES_PER_SECTOR; item++)
+            nb_item = fs->sector_size / FAT_DIR_ENTRY_SIZE;
+            for (item = 0; item < nb_item ; item++)
             {
                 // Create the multiplier for sector access
                 recordoffset = FAT_DIR_ENTRY_SIZE * item;

@@ -50,11 +50,14 @@ int fatfs_init(struct fatfs *fs)
     uint32 data_sectors;
     uint32 count_of_clusters;
     uint8 valid_partition = 0;
+    uint16 sector_size;
 
     fs->currentsector.address = FAT32_INVALID_CLUSTER;
     fs->currentsector.dirty = 0;
 
     fs->next_free_cluster = 0; // Invalid
+
+    fs->sector_size = DEFAULT_FAT_SECTOR_SIZE;
 
     fatfs_fat_init(fs);
 
@@ -71,12 +74,12 @@ int fatfs_init(struct fatfs *fs)
     
     // Make Sure 0x55 and 0xAA are at end of sector
     // (this should be the case regardless of the MBR or boot sector)
-    if (fs->currentsector.sector[SIGNATURE_POSITION] != 0x55 || fs->currentsector.sector[SIGNATURE_POSITION+1] != 0xAA)
-        return FAT_INIT_INVALID_SIGNATURE;
+//    if (fs->currentsector.sector[SIGNATURE_POSITION] != 0x55 || fs->currentsector.sector[SIGNATURE_POSITION+1] != 0xAA)
+//        return FAT_INIT_INVALID_SIGNATURE;
 
     // Now check again using the access function to prove endian conversion function
-    if (GET_16BIT_WORD(fs->currentsector.sector, SIGNATURE_POSITION) != SIGNATURE_VALUE) 
-        return FAT_INIT_ENDIAN_ERROR;
+//    if (GET_16BIT_WORD(fs->currentsector.sector, SIGNATURE_POSITION) != SIGNATURE_VALUE) 
+//        return FAT_INIT_ENDIAN_ERROR;
 
     // Verify packed structures
     if (sizeof(struct fat_dir_entry) != FAT_DIR_ENTRY_SIZE)
@@ -115,8 +118,13 @@ int fatfs_init(struct fatfs *fs)
         return FAT_INIT_MEDIA_ACCESS_ERROR;
 
     // Make sure there are 512 bytes per cluster
-    if (GET_16BIT_WORD(fs->currentsector.sector, 0x0B) != FAT_SECTOR_SIZE) 
+    sector_size = GET_16BIT_WORD(fs->currentsector.sector, 0x0B);
+    if ( ( sector_size < 128 ) || ( sector_size > MAX_FAT_SECTOR_SIZE ) || ( sector_size % 128 ) )
+    {
         return FAT_INIT_INVALID_SECTOR_SIZE;
+    }
+
+    fs->sector_size = sector_size;
 
     // Load Parameters of FAT partition     
     fs->sectors_per_cluster = fs->currentsector.sector[BPB_SECPERCLUS];
@@ -135,7 +143,7 @@ int fatfs_init(struct fatfs *fs)
 
     // For FAT16 (which this may be), rootdir_first_cluster is actuall rootdir_first_sector
     fs->rootdir_first_sector = reserved_sectors + (num_of_fats * fs->fat_sectors);
-    fs->rootdir_sectors = ((fs->root_entry_count * 32) + (FAT_SECTOR_SIZE - 1)) / FAT_SECTOR_SIZE;
+    fs->rootdir_sectors = ((fs->root_entry_count * 32) + (fs->sector_size - 1)) / fs->sector_size;
 
     // First FAT LBA address
     fs->fat_begin_lba = fs->lba_begin + reserved_sectors;
@@ -143,8 +151,8 @@ int fatfs_init(struct fatfs *fs)
     // The address of the first data cluster on this volume
     fs->cluster_begin_lba = fs->fat_begin_lba + (num_of_fats * fs->fat_sectors);
 
-    if (GET_16BIT_WORD(fs->currentsector.sector, 0x1FE) != 0xAA55) // This signature should be AA55
-        return FAT_INIT_INVALID_SIGNATURE;
+//    if (GET_16BIT_WORD(fs->currentsector.sector, 0x1FE) != 0xAA55) // This signature should be AA55
+//        return FAT_INIT_INVALID_SIGNATURE;
 
     // Calculate the root dir sectors
     root_dir_sectors = ((GET_16BIT_WORD(fs->currentsector.sector, BPB_ROOTENTCNT) * 32) + (GET_16BIT_WORD(fs->currentsector.sector, BPB_BYTSPERSEC) - 1)) / GET_16BIT_WORD(fs->currentsector.sector, BPB_BYTSPERSEC);
@@ -201,7 +209,7 @@ int fatfs_init(struct fatfs *fs)
 uint32 fatfs_lba_of_cluster(struct fatfs *fs, uint32 Cluster_Number)
 {
     if ( (fs->fat_type == FAT_TYPE_16) || (fs->fat_type == FAT_TYPE_12) )
-        return (fs->cluster_begin_lba + (fs->root_entry_count * 32 / FAT_SECTOR_SIZE) + ((Cluster_Number-2) * fs->sectors_per_cluster));
+        return (fs->cluster_begin_lba + (fs->root_entry_count * 32 / fs->sector_size) + ((Cluster_Number-2) * fs->sectors_per_cluster));
     else
         return ((fs->cluster_begin_lba + ((Cluster_Number-2)*fs->sectors_per_cluster)));
 }
@@ -413,6 +421,7 @@ uint32 fatfs_get_root_cluster(struct fatfs *fs)
 uint32 fatfs_get_file_entry(struct fatfs *fs, uint32 Cluster, char *name_to_find, struct fat_dir_entry *sfEntry)
 {
     uint8 item=0;
+    uint8 nb_item;
     uint16 recordoffset = 0;
     uint8 i=0,j=0,dotpos;
     int x=0;
@@ -431,7 +440,8 @@ uint32 fatfs_get_file_entry(struct fatfs *fs, uint32 Cluster, char *name_to_find
         if (fatfs_sector_reader(fs, Cluster, x++, 0)) // If sector read was successfull
         {
             // Analyse Sector
-            for (item = 0; item < FAT_DIR_ENTRIES_PER_SECTOR; item++)
+            nb_item = fs->sector_size / FAT_DIR_ENTRY_SIZE;
+            for (item = 0; item < nb_item ; item++)
             {
                 // Create the multiplier for sector access
                 recordoffset = FAT_DIR_ENTRY_SIZE * item;
@@ -546,6 +556,7 @@ uint32 fatfs_get_file_entry(struct fatfs *fs, uint32 Cluster, char *name_to_find
 int fatfs_sfn_exists(struct fatfs *fs, uint32 Cluster, char *shortname)
 {
     uint8 item=0;
+    uint8 nb_item;
     uint16 recordoffset = 0;
     int x=0;
     struct fat_dir_entry *directoryEntry;
@@ -557,7 +568,8 @@ int fatfs_sfn_exists(struct fatfs *fs, uint32 Cluster, char *shortname)
         if (fatfs_sector_reader(fs, Cluster, x++, 0)) // If sector read was successfull
         {
             // Analyse Sector
-            for (item = 0; item < FAT_DIR_ENTRIES_PER_SECTOR; item++)
+            nb_item = fs->sector_size / FAT_DIR_ENTRY_SIZE;
+            for (item = 0; item < nb_item ; item++)
             {
                 // Create the multiplier for sector access
                 recordoffset = FAT_DIR_ENTRY_SIZE * item;
@@ -598,6 +610,7 @@ int fatfs_sfn_exists(struct fatfs *fs, uint32 Cluster, char *shortname)
 int fatfs_update_file_length(struct fatfs *fs, uint32 Cluster, char *shortname, uint32 fileLength)
 {
     uint8 item=0;
+    uint8 nb_item;
     uint16 recordoffset = 0;
     int x=0;
     struct fat_dir_entry *directoryEntry;
@@ -613,7 +626,8 @@ int fatfs_update_file_length(struct fatfs *fs, uint32 Cluster, char *shortname, 
         if (fatfs_sector_reader(fs, Cluster, x++, 0)) // If sector read was successfull
         {
             // Analyse Sector
-            for (item = 0; item < FAT_DIR_ENTRIES_PER_SECTOR; item++)
+            nb_item = fs->sector_size / FAT_DIR_ENTRY_SIZE;
+            for (item = 0; item < nb_item ; item++)
             {
                 // Create the multiplier for sector access
                 recordoffset = FAT_DIR_ENTRY_SIZE * item;
@@ -664,6 +678,7 @@ int fatfs_update_file_length(struct fatfs *fs, uint32 Cluster, char *shortname, 
 int fatfs_mark_file_deleted(struct fatfs *fs, uint32 Cluster, char *shortname)
 {
     uint8 item=0;
+    uint8 nb_item;
     uint16 recordoffset = 0;
     int x=0;
     struct fat_dir_entry *directoryEntry;
@@ -679,7 +694,8 @@ int fatfs_mark_file_deleted(struct fatfs *fs, uint32 Cluster, char *shortname)
         if (fatfs_sector_reader(fs, Cluster, x++, 0)) // If sector read was successfull
         {
             // Analyse Sector
-            for (item = 0; item < FAT_DIR_ENTRIES_PER_SECTOR; item++)
+            nb_item = fs->sector_size / FAT_DIR_ENTRY_SIZE;
+            for (item = 0; item < nb_item ; item++)
             {
                 // Create the multiplier for sector access
                 recordoffset = FAT_DIR_ENTRY_SIZE * item;
@@ -741,6 +757,7 @@ void fatfs_list_directory_start(struct fatfs *fs, struct fs_dir_list_status *dir
 int fatfs_list_directory_next(struct fatfs *fs, struct fs_dir_list_status *dirls, struct fs_dir_ent *entry)
 {
     uint8 i,item;
+    uint8 nb_item;
     uint16 recordoffset;
     struct fat_dir_entry *directoryEntry;
     char *long_filename = NULL;
@@ -757,8 +774,8 @@ int fatfs_list_directory_next(struct fatfs *fs, struct fs_dir_list_status *dirls
         // If data read OK
         if (fatfs_sector_reader(fs, dirls->cluster, dirls->sector, 0))
         {
-            // Maximum of 16 directory entries
-            for (item = dirls->offset; item < FAT_DIR_ENTRIES_PER_SECTOR; item++)
+            nb_item = fs->sector_size / FAT_DIR_ENTRY_SIZE;
+            for (item = dirls->offset; item < nb_item ; item++)
             {
                 // Increase directory offset 
                 recordoffset = FAT_DIR_ENTRY_SIZE * item;

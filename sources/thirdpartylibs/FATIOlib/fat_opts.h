@@ -64,7 +64,8 @@
 #endif
 
 // Sector size used
-#define FAT_SECTOR_SIZE                     512
+#define MAX_FAT_SECTOR_SIZE                     1024
+#define DEFAULT_FAT_SECTOR_SIZE                 512
 
 // Printf output (directory listing / debug)
 #ifndef FAT_PRINTF
