@@ -289,6 +289,7 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 	}	
 
 	guicontext->updatefloppyinfos++;
+	guicontext->updatefloppyfs++;
 
 	return ret;
 }
