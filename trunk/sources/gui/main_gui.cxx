@@ -243,6 +243,7 @@ void load_file_image(Fl_Widget * w, void * fc_ptr)
 		{
 			load_floppy_image((char*)fnfc.filename());
 			guicontext->updatefloppyinfos++;
+			guicontext->updatefloppyfs++;
 			break; // FILE CHOSEN
 		}
 	}
@@ -370,6 +371,7 @@ void dnd_open(const char *urls)
 {
 	load_floppy_image((char*)urls);
 	guicontext->updatefloppyinfos++;
+	guicontext->updatefloppyfs++;
 }
 
 void dnd_cb(Fl_Widget *o, void *v)
@@ -630,6 +632,7 @@ Main_Window::Main_Window()
 
 	tick_infos(this->infos_window);
 	guicontext->updatefloppyinfos++;
+	guicontext->updatefloppyfs++;
 	
 	//////////////////////////////////////////////
 	// Batch convert window
@@ -642,6 +645,7 @@ Main_Window::Main_Window()
 	this->fs_window=new filesystem_generator_window();
 	fs_window->choice_filesystype->menu(fs_choices);
 	fs_window->choice_filesystype->value(11);
+	tick_fs(this->fs_window);
 
 	//////////////////////////////////////////////
 	// Raw floppy window
