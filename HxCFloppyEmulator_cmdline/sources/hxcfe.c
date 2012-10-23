@@ -541,13 +541,13 @@ int displaydir(FSMNG  * fsmng,char * folder,int level)
 	FSENTRY  dirent;
 
 	dirhandle = hxcfe_openDir(fsmng,folder);
-	if ( dirhandle)
+	if ( dirhandle > 0 )
 	{
 		do
 		{
 			dir = 0;
 			ret = hxcfe_readDir(fsmng,dirhandle,&dirent);
-			if(ret>=0)
+			if(ret> 0)
 			{
 				for(i=0;i<level;i++) printf("    ");
 
@@ -666,7 +666,7 @@ int getfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 	int ret,size,i;
 	int filehandle;
 	FLOPPY * floppydisk;
-	int ifmode,nbofsector;
+	int ifmode;
 	FSMNG  * fsmng;
 
 	FILE * f;
@@ -706,8 +706,6 @@ int getfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 			printf("Floppy interface mode : %s\n",hxcfe_getFloppyInterfaceModeName(hxcfe,ifmode),hxcfe_getFloppyInterfaceModeDesc(hxcfe,ifmode));
 			printf("Number of Track : %d\n",hxcfe_getNumberOfTrack(hxcfe,floppydisk) );
 			printf("Number of Side : %d\n",hxcfe_getNumberOfSide(hxcfe,floppydisk) );
-			printf("Total Size : %d Bytes, ",hxcfe_getFloppySize (hxcfe,floppydisk,&nbofsector)); 
-			printf("Number of sectors : %d\n",nbofsector); 
 
 			ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
 
@@ -721,7 +719,7 @@ int getfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 				printf("\nGet %s\n",path); 
 
 				filehandle = hxcfe_openFile(fsmng, path);
-				if(filehandle)
+				if(filehandle > 0)
 				{
 					hxcfe_fseek( fsmng,filehandle,0,SEEK_END);
 					size = hxcfe_ftell( fsmng,filehandle);
@@ -740,10 +738,9 @@ int getfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 							i--;
 						}
 
-						if(i)
-							i++;
+						i++;
 
-						f = fopen(&path[i],"wb");
+						f = fopen(&path[i],"w+b");
 						if(f)
 						{	
 							fwrite(buffer,size,1,f);
@@ -766,8 +763,6 @@ int getfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 
 			}
 			hxcfe_floppyUnload(hxcfe,floppydisk);
-
-			
 		}
 	}
 
@@ -780,7 +775,7 @@ int putfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 	int ret,size,i;
 	int filehandle;
 	FLOPPY * floppydisk;
-	int ifmode,nbofsector;
+	int ifmode;
 	FSMNG  * fsmng;
 
 	FILE * f;
@@ -822,8 +817,6 @@ int putfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 			printf("Floppy interface mode : %s\n",hxcfe_getFloppyInterfaceModeName(hxcfe,ifmode),hxcfe_getFloppyInterfaceModeDesc(hxcfe,ifmode));
 			printf("Number of Track : %d\n",hxcfe_getNumberOfTrack(hxcfe,floppydisk) );
 			printf("Number of Side : %d\n",hxcfe_getNumberOfSide(hxcfe,floppydisk) );
-			printf("Total Size : %d Bytes, ",hxcfe_getFloppySize (hxcfe,floppydisk,&nbofsector)); 
-			printf("Number of sectors : %d\n",nbofsector); 
 
 			ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
 
@@ -864,7 +857,7 @@ int putfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 						strcpy(foutput,"/");
 						strcat(foutput,&path[i]);
 						filehandle = hxcfe_createFile(fsmng, foutput);
-						if(filehandle)
+						if(filehandle > 0)
 						{
 							printf("\nCreate %s\n",foutput); 
 							hxcfe_writeFile(fsmng,filehandle,buffer,size);
