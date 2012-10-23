@@ -297,16 +297,20 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 				params->status=0;
 				return 0;
 			}
-				
+
+			DeviceIoControl(h, IOCTL_FD_MOTOR_OFF, 0, 0, 0, 0, &ret, NULL);
+
+			Sleep(500);
+
 			rpm=(unsigned short)(60000/(rotationtime/1000));
-			
+
 			hxcfe->hxc_printf(MSG_DEBUG,"Drive RPM: %d",rpm);
 			sprintf(tempstr,"Drive RPM: %d",rpm);
 			params->windowshwd->global_status->value(tempstr);
 			
 			if(rpm>280 && rpm<320) rpm=300;
 			if(rpm>340 && rpm<380) rpm=360;
-			
+
 			bitrate=500000;
 			
 			sprintf(tempstr,"Starting reading disk...");
