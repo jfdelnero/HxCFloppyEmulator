@@ -32,4 +32,6 @@ typedef struct s_gui_context_
 	s_trackdisplay * td;
 	int updatefloppyinfos;
 
+	int updatefloppyfs;
+
 }s_gui_context;
