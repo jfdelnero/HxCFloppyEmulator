@@ -49,4 +49,3 @@ long hxc_find_close(long handle);
 int  hxc_mkdir(char * folder);
 
 char * hxc_getcurrentdirectory(char *currentdirectory,int buffersize);
-
