@@ -455,5 +455,8 @@ int hxcfe_closeFile(FSMNG * fsmng, int filehandle);
 int hxcfe_fseek( FSMNG * fsmng,int filehandle,long offset,int origin);
 int hxcfe_ftell( FSMNG * fsmng,int filehandle);
 
+int hxcfe_createDir( FSMNG * fsmng,char * foldername);
+int hxcfe_removeDir( FSMNG * fsmng,char * foldername);
+
 void hxcfe_deinitFsManager(FSMNG * fsmng);
 
