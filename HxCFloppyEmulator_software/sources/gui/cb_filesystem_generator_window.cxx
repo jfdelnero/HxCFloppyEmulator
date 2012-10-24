@@ -46,6 +46,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 #ifndef WIN32
 #include <stdint.h>
@@ -252,6 +253,7 @@ void filesystem_generator_window_bt_injectdir(Fl_Button* bt, void*)
 	floppy=hxcfe_generateFloppy(guicontext->hxcfe,(char*)fgw->input_folder->value(),s,0);
 	load_floppy(floppy);
 	guicontext->updatefloppyfs++;
+	guicontext->updatefloppyinfos++;
 }
 
 void tick_fs(void *w) {
@@ -399,19 +401,107 @@ void dnd_fs_conv(const char *urls)
 	//loadfloppy((char*)urls);
 }
 
+int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
+{
+	FILE * f;
+	int size,file_handle;
+	struct stat entry;
+	unsigned char * buffer;
+	char fullpath[1024];	
+	char srcfullpath[1024];	
+
+	long ff;
+	filefoundinfo ffi;
+
+	hxc_stat(srcpath,&entry);
+
+	if(entry.st_mode&S_IFDIR)
+	{
+		strcpy(fullpath,dstpath);
+
+		if(!hxcfe_createDir(fsmng,fullpath))
+		{
+			ff = hxc_find_first_file(srcpath,"*.*",&ffi);
+			if(ff)
+			{
+				do
+				{
+					if(ffi.isdirectory)
+					{
+						if(strcmp(ffi.filename,".") && strcmp(ffi.filename,".."))
+						{
+							sprintf(srcfullpath,srcpath);
+							strcat(srcfullpath,"\\");
+							strcat(srcfullpath,ffi.filename);
+
+							sprintf(fullpath,dstpath);
+							strcat(fullpath,"/");
+							strcat(fullpath,ffi.filename);
+							addentry(fsmng,  srcfullpath,fullpath);
+						}
+					}
+					else
+					{
+						sprintf(srcfullpath,srcpath);
+						strcat(srcfullpath,"\\");
+						strcat(srcfullpath,ffi.filename);
+
+						sprintf(fullpath,dstpath);
+						strcat(fullpath,"/");
+						strcat(fullpath,ffi.filename);
+						addentry(fsmng,  srcfullpath,fullpath);
+					}
+				}while(hxc_find_next_file(ff,srcpath,"*.*",&ffi));
+
+				hxc_find_close(ff);
+			}
+		}
+	}
+	else
+	{
+		f = hxc_fopen(srcpath,"r+b");
+		if (f)
+		{
+			fseek(f,0,SEEK_END);
+			size = ftell(f);
+			fseek(f,0,SEEK_SET);
+
+			if(size < 32 * 1024*1024 )
+			{
+				buffer =(unsigned char*) malloc(size);
+				if(buffer)
+				{
+					fread(buffer,size,1,f);
+					sprintf(fullpath,dstpath);
+					file_handle = hxcfe_createFile(fsmng,fullpath );
+					if(file_handle>0)
+					{
+						hxcfe_writeFile(fsmng,file_handle,(char*)buffer,size);
+						hxcfe_closeFile(fsmng,file_handle);
+					}
+
+					free(buffer);
+				}
+			}
+
+			hxc_fclose(f);
+		}
+	}
+
+	return 0;
+}
+
 int draganddropfsthread(void* floppycontext,void* hw_context)
 {
 
 	FSMNG  * fsmng;
-	FILE * f;
-	int size,file_handle;
 	HXCFLOPPYEMULATOR* floppyem;
 	filesystem_generator_window *fsw;
 	s_param_fs_params * fsparams2;
-	unsigned char * buffer;
 	char fullpath[1024];	
 	int filecount,i,j,k;
 	char ** filelist;
+	struct stat entry;
 
 	floppyem=(HXCFLOPPYEMULATOR*)floppycontext;
 	fsparams2=(s_param_fs_params *)hw_context;
@@ -471,34 +561,9 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 				i=0;
 				while(i < filecount)
 				{
-					f = hxc_fopen(filelist[i],"r+b");
-					if (f)
-					{
-						fseek(f,0,SEEK_END);
-						size = ftell(f);
-						fseek(f,0,SEEK_SET);
-
-						if(size < 32 * 1024*1024 )
-						{
-							buffer =(unsigned char*) malloc(size);
-							if(buffer)
-							{
-								fread(buffer,size,1,f);
-								sprintf(fullpath,"/");
-								strcat(fullpath,getfilenamebase(filelist[i],0));
-								file_handle = hxcfe_createFile(fsmng,fullpath );
-								if(file_handle>0)
-								{
-									hxcfe_writeFile(fsmng,file_handle,(char*)buffer,size);
-									hxcfe_closeFile(fsmng,file_handle);
-								}
-
-								free(buffer);
-							}
-						}
-
-						hxc_fclose(f);
-					}
+					hxc_stat(filelist[i],&entry);
+					sprintf(fullpath,"/%s",getfilenamebase(filelist[i],0));
+					addentry(fsmng,  filelist[i],fullpath);
 
 					i++;
 				}
@@ -512,6 +577,7 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 		}
 
 		guicontext->updatefloppyfs++;
+		guicontext->updatefloppyinfos++;
 		
 		k=0;
 		while(filelist[k])
