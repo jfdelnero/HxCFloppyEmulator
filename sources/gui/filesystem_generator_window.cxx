@@ -43,7 +43,7 @@ filesystem_generator_window::filesystem_generator_window() {
       fs_browser->callback((Fl_Callback*)filesystem_generator_window_browser_fs);
     } // Fl_Tree* fs_browser
 
-    Fl_DND_Box *o = new Fl_DND_Box(0, 0,413, 244, 0);
+    Fl_DND_Box *o = new Fl_DND_Box(5, 15,600, 310, 0);
     o->callback(dnd_fs_cb);
 
     window->end();
