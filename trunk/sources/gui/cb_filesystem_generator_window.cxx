@@ -609,7 +609,7 @@ void dnd_fs_cb(Fl_Widget *o, void *v)
 		if(guicontext->loadedfloppy)
 		{
 
-			fsparams=(s_param_fs_params *)malloc(sizeof(s_param_fs_params *));
+			fsparams=(s_param_fs_params *)malloc(sizeof(s_param_fs_params));
 			memset(fsparams,0,sizeof(s_param_fs_params));
 
 			fsparams->fsw=fgw;
