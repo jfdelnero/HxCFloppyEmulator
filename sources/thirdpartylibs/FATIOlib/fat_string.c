@@ -352,8 +352,8 @@ int fatfs_get_sfn_display_name(char* out, char* in)
         if (a == ' ')
             continue;
         // Make lower case if uppercase
-        else if ((a>='A') && (a<='Z'))
-            a+= 32;
+      //else if ((a>='A') && (a<='Z'))
+      //    a+= 32;
 
         *out++ = a;
         len++;

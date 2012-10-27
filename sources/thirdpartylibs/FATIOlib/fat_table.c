@@ -85,6 +85,8 @@ void fatfs_fat_init(struct fatfs *fs)
 //-----------------------------------------------------------------------------
 static int fatfs_fat_writeback(struct fatfs *fs, struct fat_buffer *pcur)
 {
+    int i;
+
     if (pcur)
     {
         // Writeback sector if changed
@@ -101,8 +103,13 @@ static int fatfs_fat_writeback(struct fatfs *fs, struct fat_buffer *pcur)
                 else
                     sectors = fs->fat_sectors - offset;
 
-                if (!fs->disk_io.write_media(pcur->address, pcur->sector, sectors))
-                    return 0;
+                i = 0;
+                while(i < fs->num_of_fats)
+                {
+                    if (!fs->disk_io.write_media(pcur->address + ( i * fs->fat_sectors ) , pcur->sector, sectors))
+                       return 0;
+                    i++;
+                }
             }
                 
             pcur->dirty = 0;

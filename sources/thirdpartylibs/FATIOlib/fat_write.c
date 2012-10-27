@@ -270,11 +270,13 @@ int fatfs_add_file_entry(struct fatfs *fs, uint32 dirCluster, char *filename, ch
     uint8 item=0;
     uint8 nb_item;
     uint16 recordoffset = 0;
-    uint8 i=0;
+    uint8 i=0,j=0;
     uint32 x=0;
     int entryCount;
     struct fat_dir_entry shortEntry;
     int dirtySector = 0;
+
+    char tmpshortname[8+3+1];
 
     uint32 dirSector = 0;
     uint8 dirOffset = 0;
@@ -287,12 +289,41 @@ int fatfs_add_file_entry(struct fatfs *fs, uint32 dirCluster, char *filename, ch
     if (!fs->disk_io.write_media)
         return 0;
 
+
 #if FATFS_INC_LFN_SUPPORT
-    // How many LFN entries are required?
-    // NOTE: We always request one LFN even if it would fit in a SFN!
-    entryCount = fatfs_lfn_entries_required(filename);
-    if (!entryCount)
-        return 0;
+    // Check if the LFN is really needed.
+    i = 0;
+    while(shortfilename[i]!=' ' && i<8)
+    {
+        tmpshortname[i] = shortfilename[i];
+        i++;
+    }
+    tmpshortname[i++] = '.';
+    j = 8;
+    while((shortfilename[j]!=' ') && j<(8+3))
+    {
+        tmpshortname[i] = shortfilename[j];
+        j++;
+        i++;
+    }
+    tmpshortname[i] = 0;
+    if(i) 
+    {
+        if(tmpshortname[i-1] == '.')
+            tmpshortname[i-1] = 0;
+    }
+
+    entryCount = 0;
+
+    if( strcmp( filename ,tmpshortname ) ) // Short name and long name differ -> LFN can be added.
+    {
+        // How many LFN entries are required?
+        // NOTE: We always request one LFN even if it would fit in a SFN!
+        entryCount = fatfs_lfn_entries_required(filename);
+    //    if (!entryCount)
+    //        return 0;
+
+    }
 #else
     entryCount = 0;    
 #endif
