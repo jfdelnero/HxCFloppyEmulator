@@ -224,6 +224,7 @@ static int _create_directory(char *path)
 
     // Erase new directory cluster
     memset(file->file_data_sector, 0x00, _fs.sector_size);
+
     for (i=0;i<_fs.sectors_per_cluster;i++)
     {
         if (!fatfs_write_sector(&_fs, file->startcluster, i, file->file_data_sector))
@@ -231,6 +232,26 @@ static int _create_directory(char *path)
             _free_file(file);
             return 0;
         }
+    }
+
+    // Add the .. and . entries
+
+    if (!fatfs_add_file_entry(&_fs, file->startcluster, "", ".          ", file->startcluster, 0, 1))
+    {
+        // Delete allocated space
+        fatfs_free_cluster_chain(&_fs, file->startcluster);
+
+        _free_file(file);
+        return 0;
+    }
+
+    if (!fatfs_add_file_entry(&_fs, file->startcluster, "", "..         ", file->parentcluster, 0, 1))
+    {
+        // Delete allocated space
+        fatfs_free_cluster_chain(&_fs, file->startcluster);
+
+        _free_file(file);
+        return 0;
     }
 
 #if FATFS_INC_LFN_SUPPORT

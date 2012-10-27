@@ -42,7 +42,6 @@
 //-----------------------------------------------------------------------------
 int fatfs_init(struct fatfs *fs)
 {
-    uint8 num_of_fats;
     uint16 reserved_sectors;
     uint32 FATSz;
     uint32 root_dir_sectors;
@@ -129,7 +128,7 @@ int fatfs_init(struct fatfs *fs)
     // Load Parameters of FAT partition     
     fs->sectors_per_cluster = fs->currentsector.sector[BPB_SECPERCLUS];
     reserved_sectors = GET_16BIT_WORD(fs->currentsector.sector, BPB_RSVDSECCNT);
-    num_of_fats = fs->currentsector.sector[BPB_NUMFATS];
+    fs->num_of_fats = fs->currentsector.sector[BPB_NUMFATS];
     fs->root_entry_count = GET_16BIT_WORD(fs->currentsector.sector, BPB_ROOTENTCNT);
 
     if(GET_16BIT_WORD(fs->currentsector.sector, BPB_FATSZ16) != 0)
@@ -142,14 +141,14 @@ int fatfs_init(struct fatfs *fs)
     fs->fs_info_sector = GET_16BIT_WORD(fs->currentsector.sector, BPB_FAT32_FSINFO);
 
     // For FAT16 (which this may be), rootdir_first_cluster is actuall rootdir_first_sector
-    fs->rootdir_first_sector = reserved_sectors + (num_of_fats * fs->fat_sectors);
+    fs->rootdir_first_sector = reserved_sectors + ((uint32)fs->num_of_fats * fs->fat_sectors);
     fs->rootdir_sectors = ((fs->root_entry_count * 32) + (fs->sector_size - 1)) / fs->sector_size;
 
     // First FAT LBA address
     fs->fat_begin_lba = fs->lba_begin + reserved_sectors;
 
     // The address of the first data cluster on this volume
-    fs->cluster_begin_lba = fs->fat_begin_lba + (num_of_fats * fs->fat_sectors);
+    fs->cluster_begin_lba = fs->fat_begin_lba + ((uint32)fs->num_of_fats * fs->fat_sectors);
 
 //    if (GET_16BIT_WORD(fs->currentsector.sector, 0x1FE) != 0xAA55) // This signature should be AA55
 //        return FAT_INIT_INVALID_SIGNATURE;
