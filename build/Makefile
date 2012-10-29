@@ -15,10 +15,12 @@ else
 endif
 
 LDFLAGS=-lc -lm  -ldl  -lpthread 
+LIBHXCFE = ../../../build/libhxcfe.a
 
 ifeq ($(UNAME), Darwin)
 CFLAGS += -DOSX -arch i386
 LDFLAGS += -framework Cocoa -arch i386
+LIBHXCFE = ../../../build/libhxcfe.dylib
 endif
 
 EXEC=hxcfloppyemulator
@@ -32,7 +34,7 @@ FLTKLIB = ../sources/thirdpartylibs/fltk/fltk-1.3.x/lib/libfltk.a ../sources/thi
 
 all: $(EXEC)
 
-hxcfloppyemulator:      main.o ../../../build/libhxcfe.a ../../../build/libusbhxcfe.a ../../../build/libhxcadaptor.a $(FLTKLIB) $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o basename.o
+hxcfloppyemulator:      main.o $(LIBHXCFE) ../../../build/libusbhxcfe.a ../../../build/libhxcadaptor.a $(FLTKLIB) $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o basename.o
 	$(CPP) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
