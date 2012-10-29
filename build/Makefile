@@ -16,14 +16,13 @@ ifdef IPF_LIB_SUPPORT
 endif
 
 LDFLAGS= -g -shared -lc -lm  -ldl
+EXEC=libhxcfe.a
 
 ifeq ($(UNAME), Darwin)
 CFLAGS += -arch i386
-LDFLAGS +=-arch i386
+LDFLAGS +=-arch i386 -dynamiclib -current_version 2.0
+EXEC=libhxcfe.dylib
 endif
-
-
-EXEC=libhxcfe.a
 
 ADFLIBOBJ= adf_hd.o adf_disk.o adf_raw.o adf_bitm.o adf_dump.o\
         adf_util.o adf_env.o adf_nativ.o adf_dir.o adf_file.o adf_cache.o \
@@ -54,6 +53,11 @@ XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
 
 all: $(EXEC)
+
+libhxcfe.dylib: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o display_track.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
+	$(CC) -o $@    $^ $(LDFLAGS)
+	cp $@ ../../../build
+
 
 libhxcfe.a: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o display_track.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB)
 	$(AR) r $@    $^
