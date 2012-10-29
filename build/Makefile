@@ -16,9 +16,15 @@ EXEC=hxcfe
 
 all: $(EXEC)
 
-hxcfe:      hxcfe.o ../../../build/libhxcfe.a ../../../build/libhxcadaptor.a ../../../build/libusbhxcfe.a
+ifeq ($(UNAME), Darwin)
+hxcfe:      hxcfe.o ../../../build/libhxcfe.dylib ../../../build/libhxcadaptor.a ../../../build/libusbhxcfe.a
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
+else
+hxcfe:      hxcfe.o ../../../build/libhxcfe.o ../../../build/libhxcadaptor.a ../../../build/libusbhxcfe.a
+	$(CC) -o $@    $^ $(LDFLAGS)
+	cp $@ ../../../build
+endif
 
 hxcfe.o: ../sources/hxcfe.c 
 	$(CC) -o $@ -c $< $(CFLAGS)
