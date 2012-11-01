@@ -1,14 +1,31 @@
+echo Creating App bundle :
+
+echo HxCFloppyEmulator
+
+mkdir hxcfe_cmdline
+mkdir hxcfe_cmdline/Frameworks
+mkdir hxcfe_cmdline/App
+cp hxcfe hxcfe_cmdline/App
+cp libhxcfe.dylib hxcfe_cmdline/Frameworks
+cp libusbhxcfe.dylib hxcfe_cmdline/Frameworks
+chmod 755 hxcfe_cmdline/App/hxcfe
+chmod 755 hxcfe_cmdline/Frameworks/libhxcfe.dylib
+chmod 755 hxcfe_cmdline/Frameworks/libusbhxcfe.dylib
+
 mkdir HxCFloppyEmulator.app
 mkdir HxCFloppyEmulator.app/Contents
 mkdir HxCFloppyEmulator.app/Contents/Resources
 mkdir HxCFloppyEmulator.app/Contents/MacOS
 mkdir HxCFloppyEmulator.app/Contents/Frameworks
+
 echo APPLnone > HxCFloppyEmulator.app/Contents/PkgInfo
 iconutil --convert icns --output HxCFloppyEmulator.app/Contents/Resources/icons.icns ../HxCFloppyEmulator_software/trunk/sources/mac/icons/hxcfloppyemulator.iconset/
 cp hxcfloppyemulator HxCFloppyEmulator.app/Contents/MacOS
 chmod 755 HxCFloppyEmulator.app/Contents/MacOS/hxcfloppyemulator
 cp libhxcfe.dylib HxCFloppyEmulator.app/Contents/Frameworks
+cp libusbhxcfe.dylib HxCFloppyEmulator.app/Contents/Frameworks
 chmod 755 HxCFloppyEmulator.app/Contents/Frameworks/libhxcfe.dylib
+chmod 755 HxCFloppyEmulator.app/Contents/Frameworks/libusbhxcfe.dylib
 cat << EOF > HxCFloppyEmulator.app/Contents/info.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
@@ -21,7 +38,7 @@ cat << EOF > HxCFloppyEmulator.app/Contents/info.plist
         <key>CFBundleVersion</key>
         <string>59</string>
         <key>CFBundleShortVersionString</key>
-        <string>2.0.3.0</string>
+        <string>2.0.6.0</string>
         <key>CFBundleIconFile</key>
         <string>icons.icns</string>
         <key>CFBundleSignature</key>
@@ -29,4 +46,5 @@ cat << EOF > HxCFloppyEmulator.app/Contents/info.plist
 </dict>
 </plist>
 EOF
-hdiutil create HxCFloppyEmulator.dmg -srcfolder HxCFloppyEmulator.app -ov
+
+hdiutil create HxCFloppyEmulator.dmg -srcfolder hxcfe_cmdline -srcfolder HxCFloppyEmulator.app -ov
