@@ -559,7 +559,7 @@ int displaydir(FSMNG  * fsmng,char * folder,int level)
 				else
 					printf(" ");
 
-				printf("%s <%d>\n",&dirent.entryname,dirent.size);
+				printf("%s <%d>\n",(char*)&dirent.entryname,dirent.size);
 
 				if(dir)
 				{	
@@ -571,7 +571,7 @@ int displaydir(FSMNG  * fsmng,char * folder,int level)
 					strcat(fullpath,dirent.entryname);
 					if( strcmp(dirent.entryname,"..") && strcmp(dirent.entryname,"."))
 					{
-						if(displaydir(fsmng,fullpath,level+1)<0)
+						if(displaydir(fsmng,(char*)fullpath,level+1)<0)
 						{
 							hxcfe_closeDir(fsmng,dirhandle);
 							return 0;
