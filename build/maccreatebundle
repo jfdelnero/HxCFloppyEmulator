@@ -47,4 +47,4 @@ cat << EOF > HxCFloppyEmulator.app/Contents/info.plist
 </plist>
 EOF
 
-hdiutil create HxCFloppyEmulator.dmg -srcfolder hxcfe_cmdline -srcfolder HxCFloppyEmulator.app -ov
+hdiutil create HxCFloppyEmulator.dmg -srcfolder hxcfe_cmdline -srcfolder HxCFloppyEmulator.app -ov -volname HxCFloppyEmulator
