@@ -79,7 +79,7 @@ void CALLBACK SoundHandlerProc(HWAVEOUT hwo,UINT uMsg,DWORD * dwInstance,DWORD *
 	}
 	return;
 }
-#endif;
+#endif
 
 int startAudioOut()
 {

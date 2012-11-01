@@ -75,6 +75,9 @@ extern s_gui_context * guicontext;
 
 #ifdef WIN32
 #define intptr_t int
+#define PATHSEPARATOR "\\"
+#else
+#define PATHSEPARATOR "/"
 #endif
 
 typedef struct s_param_fs_params_
@@ -84,7 +87,7 @@ typedef struct s_param_fs_params_
 }s_param_fs_params;
 
 
-static intptr_t s=0;
+static intptr_t s=15;
 
 void fs_choice_cb(Fl_Widget *, void *v)
 {
@@ -272,8 +275,6 @@ void tick_fs(void *w) {
 			{
 				guicontext->updatefloppyfs=0;
 				browse_floppy_disk(window);
-	//			update_graph(window);
-		//		void browse_floppy_disk(filesystem_generator_window *fgw);
 			}
 
 		}
@@ -356,8 +357,7 @@ void browse_floppy_disk(filesystem_generator_window *fgw)
 			hxcfe_selectFS(fsmng, 0);
 			hxcfe_mountImage(fsmng, guicontext->loadedfloppy);
 
-			
-			displaydir(fsmng,fgw,"/",0);
+			displaydir(fsmng,fgw,(char*)"/",0);
 
 			fgw->fs_browser->root_label("DISK");
 			fgw->fs_browser->showroot(1);
@@ -421,7 +421,7 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 
 		if(!hxcfe_createDir(fsmng,fullpath))
 		{
-			ff = hxc_find_first_file(srcpath,"*.*",&ffi);
+			ff = hxc_find_first_file(srcpath,(char*)"*.*",&ffi);
 			if(ff)
 			{
 				do
@@ -431,7 +431,7 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 						if(strcmp(ffi.filename,".") && strcmp(ffi.filename,".."))
 						{
 							sprintf(srcfullpath,srcpath);
-							strcat(srcfullpath,"\\");
+							strcat(srcfullpath,PATHSEPARATOR);
 							strcat(srcfullpath,ffi.filename);
 
 							sprintf(fullpath,dstpath);
@@ -443,7 +443,7 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 					else
 					{
 						sprintf(srcfullpath,srcpath);
-						strcat(srcfullpath,"\\");
+						strcat(srcfullpath,PATHSEPARATOR);
 						strcat(srcfullpath,ffi.filename);
 
 						sprintf(fullpath,dstpath);
@@ -451,7 +451,7 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 						strcat(fullpath,ffi.filename);
 						addentry(fsmng,  srcfullpath,fullpath);
 					}
-				}while(hxc_find_next_file(ff,srcpath,"*.*",&ffi));
+				}while(hxc_find_next_file(ff,srcpath,(char*)"*.*",&ffi));
 
 				hxc_find_close(ff);
 			}
