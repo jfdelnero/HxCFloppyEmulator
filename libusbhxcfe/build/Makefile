@@ -10,14 +10,27 @@ INCLUDES = -I$(BASEDIR)/ -I ../../../libhxcfe/trunk/sources -I ../sources/win32 
 CFLAGS=-O3 $(INCLUDES)
 LDFLAGS= -g -shared -lc -lm  -ldl
 
+EXEC=libusbhxcfe.so
+
 ifeq ($(UNAME), Darwin)
 CFLAGS += -arch i386
 LDFLAGS += -arch i386
+EXEC=libusbhxcfe.dylib
 endif
 
-EXEC=libusbhxcfe.a
+ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
+EXEC=libusbhxcfe.dll
+endif
 
 all: $(EXEC)
+
+libusbhxcfe.dll: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o
+	$(AR) r $@    $^ 
+	cp $@ ../../../build
+
+libusbhxcfe.dylib: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o
+	$(AR) r $@    $^ 
+	cp $@ ../../../build
 
 libusbhxcfe.a: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o
 	$(AR) r $@    $^ 
