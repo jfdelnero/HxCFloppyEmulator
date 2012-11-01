@@ -430,11 +430,11 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 					{
 						if(strcmp(ffi.filename,".") && strcmp(ffi.filename,".."))
 						{
-							sprintf(srcfullpath,srcpath);
+							strcpy(srcfullpath,srcpath);
 							strcat(srcfullpath,PATHSEPARATOR);
 							strcat(srcfullpath,ffi.filename);
 
-							sprintf(fullpath,dstpath);
+							strcpy(fullpath,dstpath);
 							strcat(fullpath,"/");
 							strcat(fullpath,ffi.filename);
 							addentry(fsmng,  srcfullpath,fullpath);
@@ -442,11 +442,11 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 					}
 					else
 					{
-						sprintf(srcfullpath,srcpath);
+						strcpy(srcfullpath,srcpath);
 						strcat(srcfullpath,PATHSEPARATOR);
 						strcat(srcfullpath,ffi.filename);
 
-						sprintf(fullpath,dstpath);
+						strcpy(fullpath,dstpath);
 						strcat(fullpath,"/");
 						strcat(fullpath,ffi.filename);
 						addentry(fsmng,  srcfullpath,fullpath);
@@ -472,7 +472,7 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 				if(buffer)
 				{
 					fread(buffer,size,1,f);
-					sprintf(fullpath,dstpath);
+					strcpy(fullpath,dstpath);
 					file_handle = hxcfe_createFile(fsmng,fullpath );
 					if(file_handle>0)
 					{
