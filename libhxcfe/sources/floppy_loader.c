@@ -642,7 +642,7 @@ int hxcfe_setNumberOfTrack (FBuilder* fb,unsigned short numberoftrack)
 	if( fb->floppydisk->tracks )
 	{
 		tmptracks = fb->floppydisk->tracks;
-		tmpfloppyNumberOfTrack = tmpfloppyNumberOfTrack;
+		tmpfloppyNumberOfTrack = fb->floppydisk->floppyNumberOfTrack;
 	}
 
 	fb->floppydisk->floppyNumberOfTrack = numberoftrack;
