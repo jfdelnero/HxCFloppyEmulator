@@ -49,3 +49,10 @@ long hxc_find_close(long handle);
 int  hxc_mkdir(char * folder);
 
 char * hxc_getcurrentdirectory(char *currentdirectory,int buffersize);
+
+char * hxc_getfilenamebase(char * fullpath,char * filenamebase);
+char * hxc_getfilenameext(char * fullpath,char * filenameext);
+int hxc_getfilenamewext(char * fullpath,char * filenamewext);
+int hxc_getpathfolder(char * fullpath,char * folder);
+int hxc_checkfileext(char * path,char *ext);
+int hxc_getfilesize(char * path);

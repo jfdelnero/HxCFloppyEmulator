@@ -296,3 +296,171 @@ char * hxc_strlower(char * str)
 
 	return str;
 }
+
+
+char * hxc_getfilenamebase(char * fullpath,char * filenamebase)
+{
+	int len,i;
+
+	len=strlen(fullpath);
+
+	i=0;
+	if(len)
+	{
+		i=len-1;
+		while(i &&	(fullpath[i]!='\\' && fullpath[i]!='/' && fullpath[i]!=':') )
+		{
+			i--;
+		}
+
+		if( fullpath[i]=='\\' || fullpath[i]=='/' || fullpath[i]==':' )
+		{
+			i++;
+		}
+
+		if(i>len)
+		{
+			i=len;
+		}
+	}
+
+	if(filenamebase)
+	{
+		strcpy(filenamebase,&fullpath[i]);
+	}
+
+	return &fullpath[i];
+}
+
+char * hxc_getfilenameext(char * fullpath,char * filenameext)
+{
+	char * filename;
+	int len,i;
+	
+	filename=hxc_getfilenamebase(fullpath,0);
+
+	len=strlen(filename);
+
+	i=0;
+	if(len)
+	{
+		i=len-1;
+
+		while(i &&	( filename[i] != '.' ) )
+		{
+			i--;
+		}
+
+		if( filename[i] == '.' )
+		{
+			i++;
+		}
+		else
+		{
+			i=len;
+		}
+
+		if(i>len)
+		{
+			i=len;
+		}
+	}
+
+	if(filenameext)
+	{
+		strcpy(filenameext,&filename[i]);
+	}
+
+	return &filename[i];	
+}
+
+int hxc_getfilenamewext(char * fullpath,char * filenamewext)
+{
+	char * filename;
+	char * ext;
+	int len;
+	
+	filename=hxc_getfilenamebase(fullpath,0);
+	ext=hxc_getfilenameext(fullpath,0);
+
+	len=ext-filename;
+
+	
+	if(len && filename[len-1]=='.')
+	{
+		len--;
+	}
+
+	if(filenamewext)
+	{
+		memcpy(filenamewext,filename,len);
+		filenamewext[len]=0;
+	}
+	
+	return len;	
+}
+
+int hxc_getpathfolder(char * fullpath,char * folder)
+{
+	int len;
+	char * filenameptr;
+	
+	filenameptr=hxc_getfilenamebase(fullpath,0);
+
+	len=filenameptr-fullpath;
+
+	if(folder)
+	{
+		memcpy(folder,fullpath,len);
+		folder[len]=0;
+	}
+	
+	return len;
+}
+
+int hxc_checkfileext(char * path,char *ext)
+{
+	char pathext[16];
+	char srcext[16];
+
+	if(path && ext)
+	{
+
+		if( ( strlen(hxc_getfilenameext(path,0)) < 16 )  && ( strlen(ext) < 16 ))
+		{
+			hxc_getfilenameext(path,(char*)&pathext);
+			hxc_strlower(pathext);
+			
+			strcpy((char*)srcext,ext);
+			hxc_strlower(srcext);
+
+			if(!strcmp(pathext,srcext))
+			{
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+int hxc_getfilesize(char * path)
+{
+	int filesize;
+	FILE * f;
+
+	filesize=-1;
+
+	if(path)
+	{
+		f=hxc_fopen(path,"rb");
+		if(f)
+		{
+			fseek (f , 0 , SEEK_END); 
+			filesize=ftell(f);
+
+			fclose(f);
+		}
+	}
+
+	return filesize;
+}
