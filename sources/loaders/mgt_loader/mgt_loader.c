@@ -63,12 +63,12 @@ int MGT_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"MGT_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"sad") ||
-		checkfileext(imgfile,"mgt")
+	if( hxc_checkfileext(imgfile,"sad") ||
+		hxc_checkfileext(imgfile,"mgt")
 		)
 	{
 
-		filesize=getfilesize(imgfile);
+		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"MGT_libIsValidDiskFile : Cannot open %s !",imgfile);

@@ -63,10 +63,10 @@ int DSD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"DSD_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"dsd") || checkfileext(imgfile,"ssd") )
+	if( hxc_checkfileext(imgfile,"dsd") || hxc_checkfileext(imgfile,"ssd") )
 	{
 
-		filesize=getfilesize(imgfile);
+		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0)
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"DSD_libIsValidDiskFile : Cannot open %s !",imgfile);

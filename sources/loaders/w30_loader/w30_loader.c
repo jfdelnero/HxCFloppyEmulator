@@ -63,10 +63,10 @@ int W30_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"w30") || checkfileext(imgfile,"s50") || checkfileext(imgfile,"s33") || checkfileext(imgfile,"s55") )
+	if( hxc_checkfileext(imgfile,"w30") || hxc_checkfileext(imgfile,"s50") || hxc_checkfileext(imgfile,"s33") || hxc_checkfileext(imgfile,"s55") )
 	{
 
-		filesize=getfilesize(imgfile);
+		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0)
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"W30_libIsValidDiskFile : Cannot open %s !",imgfile);

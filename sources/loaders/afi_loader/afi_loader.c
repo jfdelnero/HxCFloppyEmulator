@@ -108,7 +108,7 @@ int AFI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"AFI_libIsValidDiskFile");
 
-	if(checkfileext(imgfile,"afi"))
+	if(hxc_checkfileext(imgfile,"afi"))
 	{
 
 		f=hxc_fopen(imgfile,"rb");

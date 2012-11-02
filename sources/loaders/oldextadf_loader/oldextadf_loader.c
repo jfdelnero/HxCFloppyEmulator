@@ -63,7 +63,7 @@ int OLDEXTADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile
 
 	floppycontext->hxc_printf(MSG_DEBUG,"OLDEXTADF_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"adf") )
+	if( hxc_checkfileext(imgfile,"adf") )
 	{
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL)

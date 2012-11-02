@@ -65,7 +65,7 @@ int SAP_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"SAP_libIsValidDiskFile");
 
-	if(checkfileext(imgfile,"sap"))
+	if(hxc_checkfileext(imgfile,"sap"))
 	{
 
 		sapid=sap_OpenArchive(imgfile, &floppyformat);

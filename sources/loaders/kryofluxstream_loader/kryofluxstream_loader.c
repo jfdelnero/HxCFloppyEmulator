@@ -124,7 +124,7 @@ int KryoFluxStream_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 			}
 			else
 			{
-				getfilenamebase(imgfile,(char*)&filename);
+				hxc_getfilenamebase(imgfile,(char*)&filename);
 				hxc_strlower((char*)&filename);
 				found=0;
 
@@ -702,7 +702,7 @@ SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,floa
 
 			*rpm=(int)((float)(ick*(float)60)/(float)(track_dump->index_evt_tab[index_pos+1].clk-track_dump->index_evt_tab[index_pos].clk));
 
-			floppycontext->hxc_printf(MSG_DEBUG,"Track %s : %d RPM, Bitrate: %d",getfilenamebase(file,0),*rpm,(int)(24027428/bitrate) );
+			floppycontext->hxc_printf(MSG_DEBUG,"Track %s : %d RPM, Bitrate: %d",hxc_getfilenamebase(file,0),*rpm,(int)(24027428/bitrate) );
 			
 			flakeytab=AnalyzeAndFoundOverLap(floppycontext,track_dump,bitrate,&start,&end);
 
@@ -758,9 +758,9 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 		if(!hxc_stat(imgfile,&staterep))
 		{
 			
-			len=getpathfolder(imgfile,0);
+			len=hxc_getpathfolder(imgfile,0);
 			folder=(char*)malloc(len+1);
-			getpathfolder(imgfile,folder);
+			hxc_getpathfolder(imgfile,folder);
 
 			if(staterep.st_mode&S_IFDIR)
 			{
@@ -768,7 +768,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 			}
 			else
 			{
-				getfilenamebase(imgfile,(char*)&fname);
+				hxc_getfilenamebase(imgfile,(char*)&fname);
 				if(!strstr(fname,".0.raw") && !strstr(fname,".1.raw") )
 				{
 					free(folder);

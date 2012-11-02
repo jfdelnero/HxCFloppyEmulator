@@ -91,13 +91,13 @@ int EMAX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"EMAX_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"em1") ||
-		checkfileext(imgfile,"em2") ||
-		checkfileext(imgfile,"emx")
+	if( hxc_checkfileext(imgfile,"em1") ||
+		hxc_checkfileext(imgfile,"em2") ||
+		hxc_checkfileext(imgfile,"emx")
 		)
 	{
 
-		filesize=getfilesize(imgfile);
+		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"EMAX_libIsValidDiskFile : Cannot open %s !",imgfile);

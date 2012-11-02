@@ -135,10 +135,10 @@ int MSX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"MSX_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"img") || checkfileext(imgfile,"dsk") )
+	if( hxc_checkfileext(imgfile,"img") || hxc_checkfileext(imgfile,"dsk") )
 	{
 
-		filesize=getfilesize(imgfile);
+		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"MSX_libIsValidDiskFile : Cannot open %s !",imgfile);

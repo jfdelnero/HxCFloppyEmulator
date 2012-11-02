@@ -64,10 +64,10 @@ int EMUI_RAW_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"EMUI_RAW_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"emufd") )
+	if( hxc_checkfileext(imgfile,"emufd") )
 	{
 
-		filesize=getfilesize(imgfile);
+		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 			return HXCFE_ACCESSERROR;
 					

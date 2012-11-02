@@ -63,9 +63,9 @@ int Ensoniq_mirage_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 
 	floppycontext->hxc_printf(MSG_DEBUG,"Ensoniq_mirage_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"edm") )
+	if( hxc_checkfileext(imgfile,"edm") )
 	{
-		filesize=getfilesize(imgfile);
+		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"Ensoniq_mirage_libIsValidDiskFile : Cannot open %s !",imgfile);

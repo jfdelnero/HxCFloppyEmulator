@@ -63,10 +63,10 @@ int ACORNADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"ACORNADF_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"adf") )
+	if( hxc_checkfileext(imgfile,"adf") )
 	{
 
-		filesize=getfilesize(imgfile);
+		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"ACORNADF_libIsValidDiskFile : Cannot open %s !",imgfile);

@@ -136,7 +136,7 @@ int snes_smc_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 						}
 						else
 						{
-							if( ! checkfileext(imgfile,"smc") )
+							if( ! hxc_checkfileext(imgfile,"smc") )
 							{
 								floppycontext->hxc_printf(MSG_ERROR,"snes_smc_libIsValidDiskFile : unknow file type !");
 								fileok=0;

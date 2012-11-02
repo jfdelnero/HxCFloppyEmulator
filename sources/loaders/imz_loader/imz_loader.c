@@ -71,7 +71,7 @@ int IMZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	char filename_inzip[256];
 
 	floppycontext->hxc_printf(MSG_DEBUG,"IMZ_libIsValidDiskFile");
-	if( checkfileext(imgfile,"imz"))
+	if( hxc_checkfileext(imgfile,"imz"))
 	{
 		uf=unzOpen (imgfile);
 		if (!uf)

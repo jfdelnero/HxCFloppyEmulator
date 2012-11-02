@@ -65,7 +65,7 @@ int FDI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"fdi") )
+	if( hxc_checkfileext(imgfile,"fdi") )
 	{
 	
 		f=hxc_fopen(imgfile,"rb");

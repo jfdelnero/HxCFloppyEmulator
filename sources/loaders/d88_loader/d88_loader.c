@@ -62,12 +62,12 @@ int D88_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	floppycontext->hxc_printf(MSG_DEBUG,"D88_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"d88") || 
-		checkfileext(imgfile,"d77") ||
-		checkfileext(imgfile,"88d") ||
-		checkfileext(imgfile,"d8u") ||
-		checkfileext(imgfile,"2d")	||
-		checkfileext(imgfile,"d68") )
+	if( hxc_checkfileext(imgfile,"d88") || 
+		hxc_checkfileext(imgfile,"d77") ||
+		hxc_checkfileext(imgfile,"88d") ||
+		hxc_checkfileext(imgfile,"d8u") ||
+		hxc_checkfileext(imgfile,"2d")	||
+		hxc_checkfileext(imgfile,"d68") )
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"D88_libIsValidDiskFile : D88 file !");
 		return HXCFE_VALIDFILE;

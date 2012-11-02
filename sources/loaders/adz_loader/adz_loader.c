@@ -64,11 +64,11 @@ int ADZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	floppycontext->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile");
 
-	if(checkfileext(imgfile,"adz") || checkfileext(imgfile,"gz"))
+	if(hxc_checkfileext(imgfile,"adz") || hxc_checkfileext(imgfile,"gz"))
 	{
-		if(checkfileext(imgfile,"gz"))
+		if(hxc_checkfileext(imgfile,"gz"))
 		{
-			if( !strstr(getfilenamebase(imgfile,0),".adf.gz") ) 
+			if( !strstr(hxc_getfilenamebase(imgfile,0),".adf.gz") ) 
 			{
 				floppycontext->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile : non ADZ file !");
 				return HXCFE_BADFILE;

@@ -64,7 +64,7 @@ int VEGASDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"VEGASDSK_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"veg") || checkfileext(imgfile,"vegasdsk") )
+	if( hxc_checkfileext(imgfile,"veg") || hxc_checkfileext(imgfile,"vegasdsk") )
 	{
 
 		f=hxc_fopen(imgfile,"rb");

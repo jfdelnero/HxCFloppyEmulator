@@ -65,7 +65,7 @@ int CPCDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile");
 
-	if(checkfileext(imgfile,"dsk"))
+	if(hxc_checkfileext(imgfile,"dsk"))
 	{
 	
 		f=hxc_fopen(imgfile,"rb");

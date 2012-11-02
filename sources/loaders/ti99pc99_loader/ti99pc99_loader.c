@@ -67,7 +67,7 @@ int TI99PC99_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	if(imgfile)
 	{
 
-		filesize=getfilesize(imgfile);
+		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"TI99PC99_libIsValidDiskFile : Cannot open %s !",imgfile);

@@ -76,7 +76,7 @@ int SCL_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"SCL_libIsValidDiskFile");
 
-	if(checkfileext(imgfile,"scl"))
+	if(hxc_checkfileext(imgfile,"scl"))
 	{
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 

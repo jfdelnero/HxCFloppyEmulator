@@ -63,9 +63,9 @@ int D81_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"D81_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"d81") )
+	if( hxc_checkfileext(imgfile,"d81") )
 	{
-		filesize=getfilesize(imgfile);
+		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"D81_libIsValidDiskFile : Cannot open %s !",imgfile);

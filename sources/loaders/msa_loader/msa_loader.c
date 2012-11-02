@@ -64,7 +64,7 @@ int MSA_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"MSA_libIsValidDiskFile");
 
-	if(checkfileext(imgfile,"msa"))
+	if(hxc_checkfileext(imgfile,"msa"))
 	{
 		f=hxc_fopen(imgfile,"rb");
 		if(f)

@@ -70,7 +70,7 @@ int D64_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	floppycontext->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile");
 
-	if(checkfileext(imgfile,"d64"))
+	if(hxc_checkfileext(imgfile,"d64"))
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile : D64 file !");
 		return HXCFE_VALIDFILE;

@@ -71,10 +71,10 @@ int FZF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"FZF_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"fzf") )
+	if( hxc_checkfileext(imgfile,"fzf") )
 	{
 
-		filesize=getfilesize(imgfile);
+		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0)
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"FZF_libIsValidDiskFile : Cannot open %s !",imgfile);
@@ -213,7 +213,7 @@ int FZF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		}
 	}
 
-	getfilenamewext(imgfile,filename);
+	hxc_getfilenamewext(imgfile,filename);
 
 	//Disk name
 	for(i=0;i<12;i++)

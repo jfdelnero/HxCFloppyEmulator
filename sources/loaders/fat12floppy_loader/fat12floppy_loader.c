@@ -83,7 +83,7 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfi
 				i=0;
 				do
 				{
-					if( configlist[i].dir && checkfileext(imgfile,configlist[i].dirext))
+					if( configlist[i].dir && hxc_checkfileext(imgfile,configlist[i].dirext))
 					{
 						found=1;
 					}
@@ -108,7 +108,7 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfi
 				i=0;
 				do
 				{
-					if( !configlist[i].dir && checkfileext(imgfile,configlist[i].dirext))
+					if( !configlist[i].dir && hxc_checkfileext(imgfile,configlist[i].dirext))
 					{
 						found=1;
 					}

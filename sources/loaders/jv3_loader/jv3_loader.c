@@ -243,8 +243,8 @@ int JV3_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"jv3") ||
-		checkfileext(imgfile,"dsk")
+	if( hxc_checkfileext(imgfile,"jv3") ||
+		hxc_checkfileext(imgfile,"dsk")
 		)
 	{
 
