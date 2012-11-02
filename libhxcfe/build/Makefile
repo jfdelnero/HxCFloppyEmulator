@@ -71,8 +71,9 @@ libhxcfe.a: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o crc.o t
 	$(AR) r $@    $^
 	cp $@ ../../../build
 
-libhxcfe.so: floppy_loader.o floppy_utils.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB)
+libhxcfe.so: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o crc.o track_generator.o gcr_track.o sector_extractor.o display_track.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
+	cp $@ ../../../build
 
 floppy_loader.o: $(BASEDIR)/floppy_loader.c
 	$(CC) -o $@ -c $< $(CFLAGS)
@@ -449,7 +450,7 @@ libsap.o : $(BASEDIR)/thirdpartylibs/libsap/libsap.c   $(BASEDIR)/thirdpartylibs
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 xml_disk.o : ../sources/xml_disk/xml_disk.c
-	$(CC) -o $@ -c $< $(CFLAGS)
+	$(CC) -o $@ -c $< $(CFLAGS)  -I ../sources/thirdpartylibs/expat/expat-2.1.0/lib
 
 lzw.o : ../sources/xml_disk/packer/lzw.c
 	$(CC) -o $@ -c $< $(CFLAGS)
