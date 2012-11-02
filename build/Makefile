@@ -36,9 +36,10 @@ libusbhxcfe.a: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o
 	$(AR) r $@    $^ 
 	cp $@ ../../../build
 
-libusbhxcfe.so: usb_hxcfloppyemulator.c variablebitrate.o ftdi.o
+libusbhxcfe.so: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o
 	$(CC) -o $@    $^ $(LDFLAGS)
-		
+	cp $@ ../../../build
+
 usb_hxcfloppyemulator.o: $(BASEDIR)/usb_hxcfloppyemulator.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
