@@ -60,7 +60,6 @@ extern "C"
 extern s_gui_context * guicontext;
 
 extern track_type track_type_list[];
-extern char * basename (const char *name);
 extern void sync_if_config();
 
 int load_floppy(FLOPPY * floppydisk)
@@ -276,7 +275,7 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 			guicontext->loadstatus=ret;
 
 			if(f)
-				strcpy(guicontext->bufferfilename,basename(file));
+				strcpy(guicontext->bufferfilename,hxc_getfilenamebase(file,0));
 			else
 				strcpy(guicontext->bufferfilename,"Empty Floppy");
 		}

@@ -209,10 +209,6 @@ SOURCE=..\sources\gui\about_gui.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\sources\gui\basename.cxx
-# End Source File
-# Begin Source File
-
 SOURCE=..\sources\gui\cb_batch_converter_window.cxx
 # End Source File
 # Begin Source File
