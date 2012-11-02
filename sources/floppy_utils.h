@@ -8,11 +8,3 @@ unsigned long fillindex(int startindex,SIDE * track,unsigned long us,unsigned ch
 
 CYLINDER* allocCylinderEntry(unsigned short rpm,unsigned char number_of_side);
 void savebuffer(unsigned char * name,unsigned char * buffer, int size);
-
-char * getfilenamebase(char * fullpath,char * filenamebase);
-char * getfilenameext(char * fullpath,char * filenameext);
-int getfilenamewext(char * fullpath,char * filenamewext);
-int getpathfolder(char * fullpath,char * folder);
-int checkfileext(char * path,char *ext);
-
-int getfilesize(char * path);
