@@ -263,7 +263,7 @@ uint32 fatfs_find_next_cluster(struct fatfs *fs, uint32 current_cluster)
         fat_sector_offset =  position / fs->sector_size;
 
         reload_needed = 0;
-        if ( position % fs->sector_size == fs->sector_size-1)
+        if ( (unsigned long)(position % fs->sector_size) == (unsigned long)(fs->sector_size-1))
         {
             // reload needed
             reload_needed = 1;
@@ -395,7 +395,7 @@ int fatfs_find_blank_cluster(struct fatfs *fs, uint32 start_cluster, uint32 *fre
             fat_sector_offset =  position / fs->sector_size;
 
             reload_needed = 0;
-            if ( position % fs->sector_size == fs->sector_size-1)
+            if ( (unsigned long)(position % fs->sector_size) == (unsigned long)(fs->sector_size-1))
             {
                 // reload needed
                 reload_needed = 1;
@@ -496,7 +496,7 @@ int fatfs_fat_set_cluster(struct fatfs *fs, uint32 cluster, uint32 next_cluster)
         fat_sector_offset =  position / fs->sector_size;
 
         reload_needed = 0;
-        if ( position % fs->sector_size == (fs->sector_size-1))
+        if ( (unsigned long)(position % fs->sector_size) == (unsigned long)(fs->sector_size-1))
         {
             // reload needed
             reload_needed = 1;
