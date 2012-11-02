@@ -63,9 +63,9 @@ int ADL_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"ADL_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"adl"))
+	if( hxc_checkfileext(imgfile,"adl"))
 	{
-		filesize=getfilesize(imgfile);
+		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"ADL_libIsValidDiskFile : Cannot open %s !",imgfile);

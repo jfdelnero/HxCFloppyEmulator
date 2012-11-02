@@ -62,9 +62,9 @@ int FD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	int filesize;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"fd_libIsValidDiskFile");
-	if( checkfileext(imgfile,"fd") )
+	if( hxc_checkfileext(imgfile,"fd") )
 	{
-		filesize=getfilesize(imgfile);
+		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"FD_libIsValidDiskFile : Cannot open %s !",imgfile);

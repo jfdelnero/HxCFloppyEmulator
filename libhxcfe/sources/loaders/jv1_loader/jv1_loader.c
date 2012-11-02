@@ -63,12 +63,12 @@ int JV1_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"JV1_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"jv1") || checkfileext(imgfile,"dsk"))
+	if( hxc_checkfileext(imgfile,"jv1") || hxc_checkfileext(imgfile,"dsk"))
 	{
 	
-		if(checkfileext(imgfile,"dsk"))
+		if(hxc_checkfileext(imgfile,"dsk"))
 		{
-			filesize=getfilesize(imgfile);
+			filesize=hxc_getfilesize(imgfile);
 			if(filesize<0) 
 			{
 				floppycontext->hxc_printf(MSG_ERROR,"JV1_libIsValidDiskFile : Cannot open %s !",imgfile);

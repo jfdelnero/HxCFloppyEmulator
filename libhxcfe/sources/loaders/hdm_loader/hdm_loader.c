@@ -61,7 +61,7 @@ int HDM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	floppycontext->hxc_printf(MSG_DEBUG,"HDM_libIsValidDiskFile");
 
-	if(checkfileext(imgfile,"hdm") || checkfileext(imgfile,"xdf"))
+	if(hxc_checkfileext(imgfile,"hdm") || hxc_checkfileext(imgfile,"xdf"))
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"HDM_libIsValidDiskFile : HDM file !");
 		return HXCFE_VALIDFILE;

@@ -63,10 +63,10 @@ int DPX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"DPX_libIsValidDiskFile");
 	
-	if( checkfileext(imgfile,"dpx") )
+	if( hxc_checkfileext(imgfile,"dpx") )
 	{
 
-		filesize=getfilesize(imgfile);
+		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"DPX_libIsValidDiskFile : Cannot open %s !",imgfile);

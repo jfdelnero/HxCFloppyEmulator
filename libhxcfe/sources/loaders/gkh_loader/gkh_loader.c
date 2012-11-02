@@ -65,7 +65,7 @@ int GKH_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"GKH_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"gkh"))
+	if( hxc_checkfileext(imgfile,"gkh"))
 	{
 
 		f=hxc_fopen(imgfile,"rb");

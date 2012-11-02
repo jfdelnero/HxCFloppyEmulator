@@ -69,7 +69,7 @@ int STX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"STX_libIsValidDiskFile");
 
-	if(checkfileext(imgfile,"stx"))
+	if(hxc_checkfileext(imgfile,"stx"))
 	{
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL)

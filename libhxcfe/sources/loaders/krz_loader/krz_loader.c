@@ -67,10 +67,10 @@ int KRZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"KRZ_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"krz"))
+	if( hxc_checkfileext(imgfile,"krz"))
 	{
 
-		filesize=getfilesize(imgfile);
+		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"KRZ_libIsValidDiskFile : Cannot open %s !",imgfile);

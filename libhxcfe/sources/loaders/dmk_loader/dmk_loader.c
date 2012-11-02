@@ -142,7 +142,7 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			return HXCFE_VALIDFILE;
 		}
 
-		if(checkfileext( imgfile,"dmk"))
+		if(hxc_checkfileext( imgfile,"dmk"))
 		{
 			floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : DMK file !");
 			return HXCFE_VALIDFILE;

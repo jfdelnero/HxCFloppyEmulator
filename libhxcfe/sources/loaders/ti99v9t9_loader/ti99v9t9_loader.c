@@ -326,7 +326,7 @@ int TI99V9T9_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 			case 2:
 
-				if( checkfileext(imgfile,"v9t9") || checkfileext(imgfile,"pc99") )
+				if( hxc_checkfileext(imgfile,"v9t9") || hxc_checkfileext(imgfile,"pc99") )
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"TI99V9T9_libIsValidDiskFile : V9T9 file !");
 					return HXCFE_VALIDFILE;

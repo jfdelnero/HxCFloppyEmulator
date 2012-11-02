@@ -65,7 +65,7 @@ int OricDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"OricDSK_libIsValidDiskFile");
 
-	if(checkfileext(imgfile,"dsk"))
+	if(hxc_checkfileext(imgfile,"dsk"))
 	{
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL)

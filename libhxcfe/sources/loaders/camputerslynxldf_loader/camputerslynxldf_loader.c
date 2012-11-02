@@ -63,10 +63,10 @@ int CAMPUTERSLYNX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * img
 
 	floppycontext->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"ldf") )
+	if( hxc_checkfileext(imgfile,"ldf") )
 	{
 
-		filesize=getfilesize(imgfile);
+		filesize=hxc_getfilesize(imgfile);
 
 		if(filesize<0) 
 		{

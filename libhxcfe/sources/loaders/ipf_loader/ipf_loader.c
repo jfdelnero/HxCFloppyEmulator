@@ -96,7 +96,7 @@ int IPF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	floppycontext->hxc_printf(MSG_DEBUG,"IPF_libIsValidDiskFile");
 
-	if(checkfileext(imgfile,"ipf"))
+	if(hxc_checkfileext(imgfile,"ipf"))
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"IPF_libIsValidDiskFile : IPF file !");
 		if(init_caps_lib())

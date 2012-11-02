@@ -65,10 +65,10 @@ int FEI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"FEI_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"fei"))
+	if( hxc_checkfileext(imgfile,"fei"))
 	{
 
-		filesize=getfilesize(imgfile);
+		filesize=hxc_getfilesize(imgfile);
 
 		if(filesize<0) 
 			return HXCFE_ACCESSERROR;

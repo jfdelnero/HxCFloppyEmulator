@@ -61,7 +61,7 @@ int TRD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	floppycontext->hxc_printf(MSG_DEBUG,"TRD_libIsValidDiskFile");
 
-	if(checkfileext(imgfile,"trd"))
+	if(hxc_checkfileext(imgfile,"trd"))
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"TRD_libIsValidDiskFile : TRD file !");
 		return HXCFE_VALIDFILE;

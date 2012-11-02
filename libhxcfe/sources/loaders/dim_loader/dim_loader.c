@@ -86,7 +86,7 @@ int DIM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile");
 	
-	if( checkfileext(imgfile,"dim") )
+	if( hxc_checkfileext(imgfile,"dim") )
 	{
 
 		f=hxc_fopen(imgfile,"rb");

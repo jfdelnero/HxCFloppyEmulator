@@ -67,7 +67,7 @@ int STT_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"STT_libIsValidDiskFile");
 
-	if( checkfileext(imgfile,"stt") )
+	if( hxc_checkfileext(imgfile,"stt") )
 	{
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL)

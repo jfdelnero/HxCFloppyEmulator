@@ -66,7 +66,7 @@ int SVD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	FILE *f;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile");
-	if( checkfileext(imgfile,"svd") )
+	if( hxc_checkfileext(imgfile,"svd") )
 	{
 		f=hxc_fopen(imgfile,"r");
 		if(f)
