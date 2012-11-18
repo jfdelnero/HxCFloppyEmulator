@@ -1266,9 +1266,6 @@ void tg_addAmigaSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SI
 
 	unsigned short  i;
 	unsigned char   trackencoding,trackenc;
-	unsigned char   CRC16_High;
-	unsigned char   CRC16_Low;
-	unsigned char   crctable[32];
 	unsigned long   startindex,j;
 	unsigned char   header[4];
 	unsigned char   headerparity[2];
@@ -1289,7 +1286,6 @@ void tg_addAmigaSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SI
 	for(i=0;i<formatstab[trackencoding].len_addrmarkp1;i++)
 	{
 		pushTrackCode(tg,formatstab[trackencoding].data_addrmarkp1,formatstab[trackencoding].clock_addrmarkp1,currentside,sectorconfig->trackencoding);
-		CRC16_Update(&CRC16_High,&CRC16_Low, formatstab[trackencoding].data_addrmarkp1,(unsigned char*)&crctable);
 	}
 
 	headerparity[0]=0;
