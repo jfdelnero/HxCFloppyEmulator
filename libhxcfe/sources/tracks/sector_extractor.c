@@ -88,6 +88,8 @@ unsigned short biteven[]=
 	0x5540, 0x5541, 0x5544, 0x5545, 0x5550, 0x5551, 0x5554, 0x5555
 };
 
+extern unsigned char even_tab[];
+extern unsigned char odd_tab[];
 
 int getbit(unsigned char * input_data,int bit_offset)
 {
@@ -575,17 +577,28 @@ int get_next_AMIGAMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 {
 	int bit_offset,old_bit_offset;
 	int sector_size;
+
+	unsigned char   header[4];
+	unsigned char   headerparity[2];
+	unsigned char   sectorparity[2];
+
 	unsigned char mfm_buffer[32];
 	unsigned char tmp_buffer[32];
 	unsigned char sector_data[544];
 	unsigned char temp_sector[512];
-	int sector_extractor_sm;
+	int sector_extractor_sm,i;
 
 	memset(sector_conf,0,sizeof(SECTORCONFIG));
 
 	bit_offset=track_offset;
 
 	sector_extractor_sm=LOOKFOR_GAP1;
+
+	headerparity[0]=0;
+	headerparity[1]=0;
+
+	sectorparity[0]=0;
+	sectorparity[1]=0;
 
 	do
 	{
@@ -614,33 +627,71 @@ int get_next_AMIGAMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 
 			case LOOKFOR_ADDM:
 				bit_offset=bit_offset-(8*2);
-				sector_conf->endsectorindex=mfmtobin(track->databuffer,track->tracklen,sector_data,544,bit_offset,0);
-				sortbuffer(&sector_data[4],tmp_buffer,4);
-			    memcpy(&sector_data[4],tmp_buffer,4);
 
-				if(tmp_buffer[0]==0xFF)
+				sector_conf->endsectorindex=mfmtobin(track->databuffer,track->tracklen,sector_data,544,bit_offset,0);
+
+				memcpy(&header,&sector_data[4],4);
+				sortbuffer((unsigned char*)&header,tmp_buffer,4);
+				memcpy(&header,tmp_buffer,4);
+								
+				// Compute the header parity
+				for(i=0;i<5;i++)
+				{
+					sortbuffer(&sector_data[4+(i*4)],tmp_buffer,4);
+
+					headerparity[0]^=( odd_tab[tmp_buffer[0]]<<4)|( odd_tab[tmp_buffer[1]]);
+					headerparity[1]^=( odd_tab[tmp_buffer[2]]<<4)|( odd_tab[tmp_buffer[3]]);
+					headerparity[0]^=(even_tab[tmp_buffer[0]]<<4)|(even_tab[tmp_buffer[1]]);
+					headerparity[1]^=(even_tab[tmp_buffer[2]]<<4)|(even_tab[tmp_buffer[3]]);
+				}
+
+				sector_conf->header_crc = headerparity[1] | (headerparity[0]<<8) ;
+
+				// Is the header valid (parity ok?)
+				if( (header[0]==0xFF) && ( (headerparity[0] == sector_data[26]) && (headerparity[1] == sector_data[27]) ) )
 				{
 					sector_conf->startsectorindex=bit_offset;
 					sector_conf->startdataindex=bit_offset;
+					
+					floppycontext->hxc_printf(MSG_DEBUG,"Valid Amiga MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",header[1]>>1,header[1]&1,header[2],sector_size);
 
-					sortbuffer(&sector_data[24],tmp_buffer,4);
-					memcpy(&sector_data[24],tmp_buffer,4);
+					old_bit_offset = bit_offset;
 
-					sortbuffer(&sector_data[32],temp_sector,512);
-					memcpy(&sector_data[32],temp_sector,512);
-					sector_size=512;
-					floppycontext->hxc_printf(MSG_DEBUG,"Valid Amiga MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",sector_data[5]>>1,sector_data[5]&1,sector_data[6],sector_size);
-					old_bit_offset=bit_offset;
+					sector_size = 512;
 
-					sector_conf->cylinder=sector_data[5]>>1;
-					sector_conf->head=sector_data[5]&1;
-					sector_conf->sector=sector_data[6];
-					sector_conf->sectorsize=sector_size;
+					sortbuffer(&sector_data[32],temp_sector,sector_size);
+					memcpy(&sector_data[32],temp_sector,sector_size);
+
+					sector_conf->cylinder = header[1]>>1;
+					sector_conf->head = header[1]&1;
+					sector_conf->sector = header[2];
+					sector_conf->sectorsize = sector_size;
 					sector_conf->trackencoding = AMIGAFORMAT_DD;
 
-					if(1)
-					{ // crc ok !!!
-					//	floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
+					// Check the data parity
+					for(i=0;i<128;i++)
+					{
+						memcpy(tmp_buffer,&sector_data[32+(i*4)],4);
+
+						sectorparity[0]^=( odd_tab[tmp_buffer[0]]<<4)|( odd_tab[tmp_buffer[1]]);
+						sectorparity[1]^=( odd_tab[tmp_buffer[2]]<<4)|( odd_tab[tmp_buffer[3]]);
+						sectorparity[0]^=(even_tab[tmp_buffer[0]]<<4)|(even_tab[tmp_buffer[1]]);
+						sectorparity[1]^=(even_tab[tmp_buffer[2]]<<4)|(even_tab[tmp_buffer[3]]);
+					}
+					
+					sector_conf->data_crc = sectorparity[1] | (sectorparity[0]<<8) ;
+
+					if( ( sectorparity[0] == sector_data[30]) && ( sectorparity[1] == sector_data[31]) )
+					{
+						// parity ok !!!
+						floppycontext->hxc_printf(MSG_DEBUG,"data parity ok.");
+						sector_conf->use_alternate_data_crc = 0x00;	
+
+					}
+					else
+					{
+						floppycontext->hxc_printf(MSG_DEBUG,"data parity error!");
+						sector_conf->use_alternate_data_crc = 0xFF;
 					}
 
 					sector_conf->input_data=(unsigned char*)malloc(sector_size);
