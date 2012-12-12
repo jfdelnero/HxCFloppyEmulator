@@ -73,35 +73,6 @@ void patchbuffer(unsigned char * buffer, unsigned long bufferlen,unsigned char p
 	}while(i<bufferlen);
 }
 
-// fonction generant des code mfm aléatoire dans un buffer MFM
-// (emulation track non formate / weak bits)
-void randomizebuffer(USBHXCFE * hw_context,unsigned char * buffer,unsigned char * randombuffer, unsigned long bufferlen)
-{
-	unsigned int i;
-
-	i=0;
-	do
-	{
-		if(randombuffer[i])
-		{
-			buffer[i]=(buffer[i] & ~randombuffer[i]) | ( hw_context->randomlut[rand()&0x3FF] & randombuffer[i] );
-			if((buffer[i]&3)==0x03)
-				buffer[i]=buffer[i]^0x2;
-
-			if((buffer[i]&0xC)==0x0C)
-				buffer[i]=buffer[i]^0x8;
-
-			if((buffer[i]&0x30)==0x30)
-				buffer[i]=buffer[i]^0x20;
-
-			if((buffer[i]&0xC0)==0xC0)
-				buffer[i]=buffer[i]^0x80;
-
-		}
-		i++;
-	}while(i<bufferlen);
-}
-
 
 //permet de detecter sur un octet est une commande ou un code MFM
 unsigned char iscmd(unsigned char c)
@@ -119,6 +90,50 @@ unsigned char iscmd(unsigned char c)
 	}
 
 }
+
+// fonction generant des code mfm aléatoire dans un buffer MFM
+// (emulation track non formate / weak bits)
+void randomizebuffer(USBHXCFE * hw_context,unsigned char * buffer,unsigned char * randombuffer, unsigned long bufferlen)
+{
+	unsigned int i,j;
+	unsigned char * rand_lut;
+	unsigned rand_mask;
+	unsigned char data;
+
+	rand_lut = hw_context->randomlut;
+
+	i=0;
+	do
+	{
+		rand_mask = randombuffer[i];
+
+		if(rand_mask)
+		{
+			data = buffer[i];
+
+			if(!iscmd(data))
+			{
+				data = (data & ~rand_mask) | ( rand_lut[rand()&0x3FF] & rand_mask );
+
+				for(j=0;j<7;j++)
+				{
+					if((data & (0xC0>>j)) == (0xC0>>j))
+					{
+						data = data ^ (0x40>>j);
+					}
+				}
+
+				buffer[i] = data;
+			}
+			else
+			{
+				i++;
+			}
+		}
+		i++;
+	}while(i<bufferlen);
+}
+
 
 // fonction de generation du prochain paquet USB a envoyer
 int FillBuffer(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context,unsigned char * paquetbuffer,int * headmoved)
