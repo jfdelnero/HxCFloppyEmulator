@@ -46,6 +46,7 @@ typedef struct s_oob_StreamEnd_
 typedef struct s_oob_DiskIndex_
 {
 	unsigned long 	StreamPosition;
+	unsigned long	CellPos;
 	unsigned long 	Timer;
 	unsigned long 	SysClk;
 }s_oob_DiskIndex;

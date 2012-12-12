@@ -622,9 +622,9 @@ pulsesblock * ScanAndFindBoundaries(s_track_dump * track_dump, int blocktimeleng
 
 unsigned long ScanAndGetIndexPeriod(s_track_dump * track_dump)
 {
-	unsigned long len;
+	unsigned long len, nb_rotation;
 
-	unsigned long nb_pulses,nb_of_index,i,j;
+	unsigned long nb_pulses,nb_of_index,i,j,k;
 	unsigned long indexper[32],globalperiod;
 
 	len = 0;
@@ -636,6 +636,7 @@ unsigned long ScanAndGetIndexPeriod(s_track_dump * track_dump)
 		if(track_dump->nb_of_index > 1)
 		{
 
+			nb_rotation = 0;
 			nb_pulses = track_dump->nb_of_pulses;
 			nb_of_index = track_dump->nb_of_index;
 			if(nb_of_index > 32) nb_of_index = 32;
@@ -643,26 +644,31 @@ unsigned long ScanAndGetIndexPeriod(s_track_dump * track_dump)
 			for(j=0;j<(track_dump->nb_of_index - 1);j++)
 			{
 
-				nb_pulses = track_dump->index_evt_tab[j + 1].dump_offset - \
-							track_dump->index_evt_tab[j].dump_offset;
-
+				nb_pulses = track_dump->index_evt_tab[j + 1].cellpos - \
+							track_dump->index_evt_tab[j].cellpos;
 
 				len = 0;
-				for(i=0;i<nb_pulses;i++)
-				{
-					len = len + track_dump->track_dump[i];
-				}
 
-				indexper[j] = len;
+				k = track_dump->index_evt_tab[j].cellpos;
+				if(k + nb_pulses < track_dump->nb_of_pulses)
+				{
+					for(i=0;i<nb_pulses;i++)
+					{
+						len = len + track_dump->track_dump[i + k];
+					}
+
+					indexper[j] = len;
+					nb_rotation++;
+				}
 			}
 
 			globalperiod = 0;
-			for(j=0;j<(track_dump->nb_of_index - 1);j++)
+			for(j=0;j<(nb_rotation);j++)
 			{
 				globalperiod = globalperiod + indexper[j];
 			}
 
-			globalperiod = (unsigned long)((double)((double)globalperiod / ((double)track_dump->nb_of_index-1)));
+			globalperiod = (unsigned long)((double)((double)globalperiod / ((double)nb_rotation)));
 
 		}
 		else
@@ -1721,7 +1727,7 @@ SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,floa
 				{
 					*rpm = (short)((double)(1 * 60 * 1000) / (double)( (double)tick_to_time(track_len) / (double)100000));
 
-					if(*rpm <= 0 || *rpm > 800 )
+					if(*rpm <= 0 || *rpm > 800 || tick_to_time(track_len) < 5000000 )
 					{
 						*rpm = 300;
 
@@ -1731,20 +1737,20 @@ SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,floa
 						track_len = 0;
 						do
 						{
-							track_len = track_len + track_dump->track_dump[i];
+							track_len = track_len + track_dump->track_dump[first_index + i];
 							i++;
 						}while(i < track_dump->nb_of_pulses && track_len<time_to_tick(indexperiod));
-						overlap_tab[first_index] = i;
+						overlap_tab[first_index] = first_index + i;
 					}
 
 					histo=(unsigned long*)malloc(65536* sizeof(unsigned long));
-					
+
 					computehistogram(&track_dump->track_dump[first_index],overlap_tab[first_index] - first_index,histo);
 
 					bitrate=detectpeaks(floppycontext,histo);
 
 					floppycontext->hxc_printf(MSG_DEBUG,"Track %s : %d RPM, Bitrate: %d",hxc_getfilenamebase(file,0),*rpm,(int)(24027428/bitrate) );
-					
+
 					currentside=ScanAndDecodeStream(bitrate,track_dump,overlap_tab,first_index,*rpm);
 
 					free(histo);
@@ -1773,6 +1779,43 @@ SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,floa
 	return currentside;
 }
 
+double GetTrackPeriod(HXCFLOPPYEMULATOR* floppycontext,SIDE * curside)
+{
+	int tracklen,i;
+	double total_period;
+
+	tracklen = curside->tracklen /8;
+	if(curside->tracklen & 7)
+		tracklen++;
+
+	total_period = 0;
+	for(i=0;i<tracklen;i++)
+	{
+		total_period = total_period + (double)((double)1/(double)curside->timingbuffer[i]);
+	}
+
+	return total_period;
+}
+
+void AdjustTrackPeriod(HXCFLOPPYEMULATOR* floppycontext,SIDE * curside_S0,SIDE * curside_S1)
+{
+	int tracklen,i;
+	double period_s0,period_s1;
+
+	tracklen = curside_S1->tracklen /8;
+	if(curside_S1->tracklen & 7)
+		tracklen++;
+
+	period_s0 = GetTrackPeriod(floppycontext,curside_S0);
+	period_s1 = GetTrackPeriod(floppycontext,curside_S1);
+
+	for(i=0;i<tracklen;i++)
+	{
+		curside_S1->timingbuffer[i] = (unsigned long)((double)curside_S1->timingbuffer[i] * (period_s1/period_s0));
+	}
+}
+
+
 int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {	
 	FILE * f;
@@ -1783,9 +1826,9 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 	int minside,maxside,singleside;
 	short rpm;
 	unsigned short i,j;
+	int k,l;
 	int doublestep;
 	CYLINDER* currentcylinder;
-
 	int len;
 	int found,track,side;
 	struct stat staterep;
@@ -1793,7 +1836,10 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 	SIDE * curside;
 	int nbtrack,nbside;
 	float timecoef;
-	
+	int tracklen;
+
+	int previous_bit;
+		
 	floppycontext->hxc_printf(MSG_DEBUG,"KryoFluxStream_libLoad_DiskFile");
 	
 	if(imgfile)
@@ -1931,8 +1977,44 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 						floppydisk->tracks[j/doublestep]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 					}
 
+					tracklen = curside->tracklen /8;
+					if(curside->tracklen & 7)
+						tracklen++;
+
+					// Remove sticked data bits ...
+					previous_bit = 0;
+					for(k=0;k<tracklen;k++)
+					{
+						if(previous_bit)
+						{
+							if(curside->databuffer[k] & 0x80)
+							{
+								curside->databuffer[k-1] = curside->databuffer[k-1] ^ 0x01;
+								curside->flakybitsbuffer[k-1] =  curside->flakybitsbuffer[k-1] | (0x01);
+								curside->databuffer[k] = curside->databuffer[k] ^ 0x80;
+								curside->flakybitsbuffer[k] =  curside->flakybitsbuffer[k] | (0x80);
+							}
+						}
+
+						for(l=0;l<7;l++)
+						{
+							if((curside->databuffer[k] & (0xC0>>l)) == (0xC0>>l))
+							{
+								curside->databuffer[k] = curside->databuffer[k] ^ (0x40>>l);
+								curside->flakybitsbuffer[k] =  curside->flakybitsbuffer[k] | (0xC0>>l);
+							}
+						}
+
+						previous_bit = curside->databuffer[k] & 1;
+					}
+
 					currentcylinder=floppydisk->tracks[j/doublestep];
 					currentcylinder->sides[i]=curside;
+
+					if(i)
+					{
+						AdjustTrackPeriod(floppycontext,currentcylinder->sides[0],currentcylinder->sides[1]);
+					}
 				}
 			}
 
