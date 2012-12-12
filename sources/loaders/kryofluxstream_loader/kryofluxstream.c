@@ -74,6 +74,10 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,fl
 
 	FILE* f;
 #ifdef KFSTREAMDBG	
+	double mck;
+	double sck;
+	double ick;
+
 	char * tempstr;
 #endif
 	unsigned char * kfstreambuffer;
@@ -115,6 +119,13 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,fl
 
 			cellstream=(unsigned long*)malloc(filesize*sizeof(unsigned long));
 			memset(cellstream,0,filesize*sizeof(unsigned long));
+
+
+		#ifdef KFSTREAMDBG
+			mck=((18432000 * 73) / 14) / 2;
+			sck=mck/2;
+			ick=mck/16;
+		#endif
 
 			cell_value=0;
 			offset=0;
@@ -217,13 +228,14 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,fl
 								floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X SysClk: 0x%.8X Timer: 0x%.8X",diskIndex->StreamPosition,diskIndex->SysClk,diskIndex->Timer);
 		#endif
 
-								tabindex[nbindex].StreamPosition=diskIndex->StreamPosition;
-								tabindex[nbindex].SysClk=diskIndex->SysClk;
-								tabindex[nbindex].Timer=diskIndex->Timer;
+								tabindex[nbindex].StreamPosition = diskIndex->StreamPosition;
+								tabindex[nbindex].CellPos = cellpos;
+								tabindex[nbindex].SysClk = diskIndex->SysClk;
+								tabindex[nbindex].Timer = diskIndex->Timer;
 								if(nbindex)
 								{
 		#ifdef KFSTREAMDBG
-									//floppycontext->hxc_printf(MSG_DEBUG,"Delta : %d Rpm : %f ",tabindex[nbindex].SysClk-tabindex[nbindex-1].SysClk,(float)(ick*(float)60)/(float)(tabindex[nbindex].SysClk-tabindex[nbindex-1].SysClk));
+									floppycontext->hxc_printf(MSG_DEBUG,"Delta : %d Rpm : %f ",tabindex[nbindex].SysClk-tabindex[nbindex-1].SysClk,(float)(ick*(float)60)/(float)(tabindex[nbindex].SysClk-tabindex[nbindex-1].SysClk));
 		#endif
 								}
 								nbindex++;
@@ -297,8 +309,9 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,fl
 				memset(track_dump->index_evt_tab,0,sizeof(s_index_evt)*nbindex);
 				for(i=0;i<nbindex;i++)
 				{
-					track_dump->index_evt_tab[i].dump_offset=tabindex[i].StreamPosition;
-					track_dump->index_evt_tab[i].clk=(unsigned long)((float)tabindex[i].SysClk * timecoef);
+					track_dump->index_evt_tab[i].dump_offset = tabindex[i].StreamPosition;
+					track_dump->index_evt_tab[i].cellpos = tabindex[i].CellPos;
+					track_dump->index_evt_tab[i].clk = (unsigned long)((float)tabindex[i].SysClk * timecoef);
 				}
 				track_dump->nb_of_index=nbindex;
 			}

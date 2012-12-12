@@ -2,6 +2,7 @@
 typedef struct s_index_evt_
 {
 	unsigned long dump_offset;
+	unsigned long cellpos;
 	unsigned long clk;
 }s_index_evt;
 
