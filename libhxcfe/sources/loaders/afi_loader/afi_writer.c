@@ -46,6 +46,7 @@ AFI_DATACODE datacode[]={
 	{AFI_DATA_BITRATE,AFI_DATA_TYPE_BITRATE},
 	{AFI_DATA_PDC,AFI_DATA_TYPE_PDC},
 	{AFI_DATA_WEAKBITS,AFI_DATA_TYPE_WEAKBITS},
+	{AFI_DATA_CELL,AFI_DATA_TYPE_CELL},
 	{AFI_DATA_NONE,""}
 };
 
@@ -96,25 +97,26 @@ int adddatablock(FILE* f,int typecode,int compressdata,unsigned char* data,int d
 	strcpy((char*)&afidata.afi_data_tag,AFI_DATA_TAG);
 	afidata.TYPEIDCODE=datacode[i].idcode;
 	strcpy((char*)&afidata.type_tag,datacode[i].idcodetag);
-	afidata.nb_bits_per_element=bitsperelement;
+	afidata.nb_bits_per_element = bitsperelement;
+
 	if(compressdata)
 	{
-		actualdestbufferlen=compressBound(datalen);
-		tempcompressbuffer=(unsigned char*)malloc(actualdestbufferlen);
+		actualdestbufferlen = compressBound(datalen);
+		tempcompressbuffer = (unsigned char*)malloc(actualdestbufferlen);
 		compress2(tempcompressbuffer, &actualdestbufferlen,
              data, datalen,
              Z_BEST_COMPRESSION);
-		afidata.unpacked_size=datalen;
-		afidata.packed_size=actualdestbufferlen;
-		afidata.packer_id=AFI_COMPRESS_GZIP;
+		afidata.unpacked_size = datalen;
+		afidata.packed_size = actualdestbufferlen;
+		afidata.packer_id = AFI_COMPRESS_GZIP;
 	}
 	else
 	{
-		tempcompressbuffer=(unsigned char*)malloc(datalen);
+		tempcompressbuffer = (unsigned char*)malloc(datalen);
 		memcpy(tempcompressbuffer,data,datalen);
-		afidata.unpacked_size=datalen;
-		afidata.packed_size=datalen; // no comp	
-		afidata.packer_id=AFI_COMPRESS_NONE;
+		afidata.unpacked_size = datalen;
+		afidata.packed_size = datalen; // no comp
+		afidata.packer_id = AFI_COMPRESS_NONE;
 	}
 
 	fwrite(&afidata,sizeof(afidata),1,f);
@@ -125,6 +127,70 @@ int adddatablock(FILE* f,int typecode,int compressdata,unsigned char* data,int d
 	return afidata.packed_size;
 }
 
+unsigned long * bitrate_rle_pack(unsigned long * bitrate,unsigned long len,unsigned long * outlen)
+{
+	unsigned long i,j;
+	unsigned long nb_entry;
+	
+	unsigned long entry,cur_nb;
+
+	unsigned long * packed;
+
+
+	// 0x80 00 00 00   
+	// 1XXXXXXX 00 00 00
+
+	
+	nb_entry = 1;
+	cur_nb = 1;
+	for(i=1;i<len;i++)
+	{
+		if(bitrate[i-1] == bitrate[i] && cur_nb<0x7F)
+		{
+			cur_nb++;
+		}
+		else
+		{
+			nb_entry++;
+			cur_nb = 1;
+		}
+	}
+	nb_entry++;
+
+	j=0;
+	packed = malloc(nb_entry * sizeof(unsigned long));
+	if(packed)
+	{
+		memset(packed,0,nb_entry * sizeof(unsigned long));
+		nb_entry = 1;
+		cur_nb = 1;
+		
+		for(i=1;i<len;i++)
+		{
+			if(bitrate[i-1] == bitrate[i] && cur_nb<127)
+			{
+				cur_nb++;
+			}
+			else
+			{
+				nb_entry++;
+
+				entry = bitrate[i] & 0x00FFFFFF | ((0x80 |(cur_nb&0x7F)) << 24);
+				packed[j] = entry;
+				cur_nb = 1;
+				j++;
+			}
+		}
+	}
+
+	entry = bitrate[i-1] & 0x00FFFFFF | ((0x80 |(cur_nb&0x7F)) << 24);
+	packed[j] = entry;
+	j++;
+
+	*outlen = j;
+
+	return packed;
+}
 
 
 int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
@@ -143,7 +209,7 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 	unsigned long data_list[16];
 
-	unsigned int i,j,k,t;
+	unsigned int i,j,k,l,t;
 
 	unsigned long trackposition;
 	unsigned long dataposition;
@@ -154,7 +220,9 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 	unsigned long *tempbitratetrack;
 	unsigned char *tempweakbitstrack;
+	unsigned long *bitrate_rle_packed;
 	int block_size;
+	unsigned long bytelen,outsize;
 
 	compressdata=1;
 
@@ -171,7 +239,7 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 		memset(&afiheader,0,sizeof(AFIIMG));
 		sprintf((char*)&afiheader.afi_img_tag,AFI_IMG_TAG);
 		afiheader.header_size=sizeof(AFIIMG);
-		afiheader.version_code_minor=1;
+		afiheader.version_code_minor = 2;
 		afiheader.header_crc=getcrc(&afiheader,sizeof(afiheader)-2,0,0);
 		//------------- info -------------
 		memset(&afiinfo,0,sizeof(AFIIMGINFO));
@@ -268,14 +336,24 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 				afitrack.track_number=i;
 				afitrack.side_number=j;
 				
-				afitrack.encoding_mode=AFI_TRACKENCODING_MFM;
+				afitrack.encoding_mode = AFI_TRACKENCODING_CELLARRAY;
 
-				afitrack.nb_of_element=floppy->tracks[i]->sides[j]->tracklen/8;
-				afitrack.number_of_data_chunk=4;//-------
-				
+				bytelen = floppy->tracks[i]->sides[j]->tracklen;
+				if(bytelen&7)
+				{
+					bytelen = (bytelen >> 3) + 1;
+				}
+				else
+				{
+					bytelen = (bytelen >> 3);
+				}
+
+				afitrack.nb_of_element = floppy->tracks[i]->sides[j]->tracklen;
+				afitrack.number_of_data_chunk = 4;//-------
+
 				floppycontext->hxc_printf(MSG_DEBUG,"Track %d [%d:%d], file offset %X",t,afitrack.track_number,afitrack.side_number,track_list[t]+afiheader.track_list_offset);
 
-				track_fileptr=ftell(hxcafifile);
+				track_fileptr = ftell(hxcafifile);
 				fwrite(&afitrack,sizeof(afitrack),1,hxcafifile);
 				fwrite(&data_list,afitrack.number_of_data_chunk*sizeof(unsigned long),1,hxcafifile);
 				tempcrc=getcrc(&afitrack,sizeof(afitrack),data_list,afitrack.number_of_data_chunk*sizeof(unsigned long));
@@ -284,8 +362,7 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 				dataposition=sizeof(afitrack)+(afitrack.number_of_data_chunk*sizeof(unsigned long))+sizeof(tempcrc);
 
 				//---------------- index data ----------------
-				block_size=adddatablock(hxcafifile,AFI_DATA_INDEX,compressdata,floppy->tracks[i]->sides[j]->indexbuffer,floppy->tracks[i]->sides[j]->tracklen/8,1);
-				
+				block_size=adddatablock(hxcafifile,AFI_DATA_INDEX,compressdata,floppy->tracks[i]->sides[j]->indexbuffer,bytelen,1);
 				//--------------------------------------------
 				data_list[0]=dataposition;
 
@@ -302,8 +379,7 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 				dataposition=dataposition+sizeof(AFIDATA)+block_size+sizeof(tempcrc);
 
 				//---------------- track data ----------------
-				block_size=adddatablock(hxcafifile,AFI_DATA_MFM,compressdata,floppy->tracks[i]->sides[j]->databuffer,floppy->tracks[i]->sides[j]->tracklen/8,1);
-
+				block_size=adddatablock(hxcafifile,AFI_DATA_CELL,compressdata,floppy->tracks[i]->sides[j]->databuffer,bytelen,1);
 				//--------------------------------------------
 				data_list[1]=dataposition;
 
@@ -320,19 +396,35 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 				dataposition=dataposition+sizeof(AFIDATA)+block_size+sizeof(tempcrc);
 
 				//---------------- bitrate data ----------------
-				if(floppy->tracks[i]->sides[j]->bitrate==VARIABLEBITRATE)
-				{
-					block_size=adddatablock(hxcafifile,AFI_DATA_BITRATE,compressdata,(unsigned char*)floppy->tracks[i]->sides[j]->timingbuffer,(floppy->tracks[i]->sides[j]->tracklen*4)/8,4);
-				}
-				else
-				{
 
-					tempbitratetrack=(unsigned long *)malloc((floppy->tracks[i]->sides[j]->tracklen*4)/8);
-					for(k=0;k<floppy->tracks[i]->sides[j]->tracklen/8;k++)
+				tempbitratetrack=(unsigned long *)malloc(bytelen * 8 * sizeof(unsigned long));
+				if(tempbitratetrack)
+				{
+					if(floppy->tracks[i]->sides[j]->bitrate==VARIABLEBITRATE)
 					{
-						tempbitratetrack[k]=floppy->tracks[i]->sides[j]->bitrate;
+						for(l=0;l<bytelen;l++)
+						{
+							for(k=0;k<8;k++)
+							{
+								tempbitratetrack[(l*8)+k] = floppy->tracks[i]->sides[j]->timingbuffer[l];
+							}
+						}
 					}
-					block_size=adddatablock(hxcafifile,AFI_DATA_BITRATE,compressdata,(unsigned char*)tempbitratetrack,(floppy->tracks[i]->sides[j]->tracklen*4)/8,4);
+					else
+					{
+						for(l=0;l<bytelen;l++)
+						{
+							for(k=0;k<8;k++)
+							{
+								tempbitratetrack[(l*8)+k] = floppy->tracks[i]->sides[j]->bitrate;
+							}
+						}
+					}
+
+					bitrate_rle_packed = bitrate_rle_pack(tempbitratetrack,bytelen*8,&outsize);
+
+					block_size=adddatablock(hxcafifile,AFI_DATA_BITRATE,compressdata,(unsigned char*)bitrate_rle_packed,outsize*4,32);
+					free(bitrate_rle_packed);
 					free(tempbitratetrack);
 				}
 
@@ -354,17 +446,14 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 				//---------------- weakbits data ----------------
 				if(floppy->tracks[i]->sides[j]->flakybitsbuffer)
 				{
-					block_size=adddatablock(hxcafifile,AFI_DATA_WEAKBITS,compressdata,floppy->tracks[i]->sides[j]->flakybitsbuffer,floppy->tracks[i]->sides[j]->tracklen/8,1);
+					block_size=adddatablock(hxcafifile,AFI_DATA_WEAKBITS,compressdata,floppy->tracks[i]->sides[j]->flakybitsbuffer,bytelen,1);
 				}
 				else
 				{
-					tempweakbitstrack=(unsigned char *)malloc(floppy->tracks[i]->sides[j]->tracklen/8);
-					for(k=0;k<floppy->tracks[i]->sides[j]->tracklen/8;k++)
-					{
-						tempweakbitstrack[k]=0x00;
-					}
-					
-					block_size=adddatablock(hxcafifile,AFI_DATA_WEAKBITS,compressdata,tempweakbitstrack,floppy->tracks[i]->sides[j]->tracklen/8,1);
+					tempweakbitstrack=(unsigned char *)malloc(bytelen);
+					memset(tempweakbitstrack,0,bytelen);
+
+					block_size=adddatablock(hxcafifile,AFI_DATA_WEAKBITS,compressdata,tempweakbitstrack,bytelen,1);
 					free(tempweakbitstrack);
 				}
 				//--------------------------------------------
@@ -381,7 +470,6 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 				//////////////////////////////////////////////
 
 				dataposition=dataposition+sizeof(AFIDATA)+block_size+sizeof(tempcrc);
-
 
 				t++;
 				trackposition=trackposition+dataposition;

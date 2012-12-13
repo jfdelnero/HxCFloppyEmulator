@@ -154,7 +154,8 @@ typedef struct AFITRACK_
 enum {
 	AFI_TRACKENCODING_NONE,
 	AFI_TRACKENCODING_MFM,
-	AFI_TRACKENCODING_PDC
+	AFI_TRACKENCODING_PDC,
+	AFI_TRACKENCODING_CELLARRAY
 };
 //AFI_TRACKENCODING_MFM -> AFI_DATA_INDEX
 //                         AFI_DATA_MFM
@@ -164,6 +165,11 @@ enum {
 //AFI_TRACKENCODING_PDC -> AFI_DATA_INDEX
 //                         AFI_DATA_PDC
 //                         AFI_DATA_WEAKBITS (optional)
+
+//AFI_TRACKENCODING_CELLARRAY -> AFI_DATA_INDEX
+//                               AFI_DATA_CELL
+//                               AFI_DATA_BITRATE (rle packed)
+//                               AFI_DATA_WEAKBITS (optional)
 
 /////////////////////////////////////////////////////
 // data
@@ -192,7 +198,8 @@ enum {
 	AFI_DATA_INDEX,
 	AFI_DATA_BITRATE,
 	AFI_DATA_PDC,
-	AFI_DATA_WEAKBITS
+	AFI_DATA_WEAKBITS,
+	AFI_DATA_CELL
 };
 
 #define AFI_DATA_TYPE_MFM      "MFM_DATA"
@@ -200,6 +207,7 @@ enum {
 #define AFI_DATA_TYPE_BITRATE  "BITRATE_DATA"
 #define AFI_DATA_TYPE_PDC      "PDC_DATA"
 #define AFI_DATA_TYPE_WEAKBITS "WEAKBITS_DATA"
+#define AFI_DATA_TYPE_CELL     "CELL_DATA"
 
 typedef struct AFI_DATACODE_
 {	
