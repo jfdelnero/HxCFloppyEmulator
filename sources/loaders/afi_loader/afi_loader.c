@@ -101,6 +101,59 @@ unsigned short filecheckcrc(FILE * f,unsigned long fileoffset,unsigned long size
 	return (crc16l<<8) | crc16h;
 }
 
+unsigned long * bitrate_rle_unpack(unsigned long * packedbuffer,unsigned long len,unsigned long * outlen)
+{
+	unsigned long i,j,out_index;
+	unsigned long unpackedlen;
+	unsigned long * unpacked;
+
+	// 0x80 00 00 00   
+	// 1XXXXXXX 00 00 00
+
+	unpackedlen = 0;
+	for(i=0;i<len;i++)
+	{
+		if(packedbuffer[i] & 0x80000000)
+		{
+			unpackedlen = unpackedlen + ((packedbuffer[i]>>24)&0x7F);
+		}
+		else
+		{
+			unpackedlen++;
+		}
+	}
+
+	out_index = 0;
+	unpacked = malloc(unpackedlen * sizeof(unsigned long));
+	if(unpacked)
+	{
+		memset(unpacked,0,unpackedlen * sizeof(unsigned long));
+
+		unpackedlen = 0;
+		for(i=0;i<len;i++)
+		{
+			if(packedbuffer[i] & 0x80000000)
+			{
+				for(j=0;j<((packedbuffer[i]>>24)&0x7F);j++)
+				{
+					unpacked[out_index+j] = packedbuffer[i] & 0x00FFFFFF;
+				}
+				out_index = out_index + j;
+			}
+			else
+			{
+				unpacked[out_index] = packedbuffer[i] & 0x00FFFFFF;
+				out_index ++;
+			}
+		}
+	}
+
+	*outlen = out_index;
+
+	return unpacked;
+}
+
+
 int AFI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	FILE *f;
@@ -154,6 +207,11 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned long * datalistoffset;
 
 	unsigned char * temp_uncompressbuffer;
+	unsigned long * temp_uncompressbuffer_long;
+
+	unsigned long * temp_timing;
+
+	unsigned long bytelen;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"AFI_libLoad_DiskFile %s",imgfile);
 
@@ -302,6 +360,16 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			currentside->number_of_sector=floppydisk->floppySectorPerTrack;
 			currentside->tracklen=track.nb_of_element;
 
+			bytelen = currentside->tracklen;
+			if(bytelen&7)
+			{
+				bytelen = (bytelen >> 3) + 1;
+			}
+			else
+			{
+				bytelen = (bytelen >> 3);
+			}
+
 			currentside->track_encoding=UNKNOWN_ENCODING;
 			currentside->bitrate=250000;
 			currentside->flakybitsbuffer=0;
@@ -347,6 +415,27 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					}
 					break;
 
+
+				case AFI_DATA_CELL:
+					switch(datablock.packer_id)
+					{
+						case AFI_COMPRESS_NONE:
+							currentside->databuffer=malloc(datablock.unpacked_size);
+							fread(currentside->databuffer,datablock.unpacked_size,1,f);
+							break;
+						case AFI_COMPRESS_GZIP:
+							currentside->databuffer=malloc(datablock.unpacked_size);
+							temp_uncompressbuffer=malloc(datablock.packed_size);
+							fread(temp_uncompressbuffer,datablock.packed_size,1,f);
+							destLen=datablock.unpacked_size;
+							uncompress(currentside->databuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
+							free(temp_uncompressbuffer);
+							break;
+						default:
+						break;
+					}
+					break;
+
 				case AFI_DATA_INDEX:
 					switch(datablock.packer_id)
 					{
@@ -370,53 +459,134 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 				case AFI_DATA_BITRATE:
 					currentside->bitrate=VARIABLEBITRATE;
-					switch(datablock.packer_id)
+
+					if(track.encoding_mode == AFI_TRACKENCODING_CELLARRAY)
 					{
-						case AFI_COMPRESS_NONE:
+						switch(datablock.packer_id)
+						{
+							case AFI_COMPRESS_NONE:
 
-							currentside->timingbuffer=malloc(datablock.packed_size);
-							fread(currentside->timingbuffer,datablock.packed_size,1,f);
+								temp_timing = malloc(datablock.packed_size);
+								fread(temp_timing,datablock.packed_size,1,f);
 
-							k=0;
-							do
-							{
-								k++;
-							}while((currentside->timingbuffer[k-1]==currentside->timingbuffer[k]) && k<currentside->tracklen);
+								currentside->timingbuffer=malloc( bytelen * sizeof(unsigned long));
 
-							if(k==currentside->tracklen)
-							{
-								currentside->bitrate=currentside->timingbuffer[0];
-								free(currentside->timingbuffer);
-								currentside->timingbuffer=0;
-							}
+								for(k=0;k<bytelen;k++)
+								{
+									currentside->timingbuffer[k] = temp_timing[k*8];
+								}
+
+								k=0;
+								do
+								{
+									k++;
+								}while((currentside->timingbuffer[k-1]==currentside->timingbuffer[k]) && k< bytelen);
+
+								if(k==bytelen)
+								{
+									currentside->bitrate=currentside->timingbuffer[0];
+									free(currentside->timingbuffer);
+									currentside->timingbuffer=0;
+								}
+
+								free(temp_timing);
+
+								break;
+
+							case AFI_COMPRESS_GZIP:
 
 
+								currentside->timingbuffer=malloc(bytelen * sizeof(unsigned long));
+								
+								temp_uncompressbuffer=malloc(datablock.packed_size);
+								fread(temp_uncompressbuffer,datablock.packed_size,1,f);
+								
+								destLen=datablock.unpacked_size;
+								temp_timing = malloc(destLen);
+								uncompress((unsigned char*)temp_timing, &destLen,temp_uncompressbuffer, datablock.packed_size);
+
+								free(temp_uncompressbuffer);
+
+								temp_uncompressbuffer_long = bitrate_rle_unpack(temp_timing,destLen/4,&destLen);
+
+
+								for(k=0;k<bytelen;k++)
+								{
+									currentside->timingbuffer[k] = temp_uncompressbuffer_long[k*8];
+								}
+
+								free(temp_uncompressbuffer_long);
+
+								k=0;
+								do
+								{
+									k++;
+								}while((currentside->timingbuffer[k-1]==currentside->timingbuffer[k]) && k<currentside->tracklen);
+
+								if(k==currentside->tracklen)
+								{
+									currentside->bitrate=currentside->timingbuffer[0];
+									free(currentside->timingbuffer);
+									currentside->timingbuffer=0;
+								}
+
+								free(temp_timing);
+								break;
+							default:
 							break;
+						}
 
-						case AFI_COMPRESS_GZIP:
-							currentside->timingbuffer=malloc(datablock.unpacked_size);
-							temp_uncompressbuffer=malloc(datablock.packed_size);
-							fread(temp_uncompressbuffer,datablock.packed_size,1,f);
-							destLen=datablock.unpacked_size;
-							uncompress((unsigned char*)currentside->timingbuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
+					}
+					else
+					{
+						switch(datablock.packer_id)
+						{
+							case AFI_COMPRESS_NONE:
 
-							k=0;
-							do
-							{
-								k++;
-							}while((currentside->timingbuffer[k-1]==currentside->timingbuffer[k]) && k<currentside->tracklen);
+								currentside->timingbuffer=malloc(datablock.packed_size);
+								fread(currentside->timingbuffer,datablock.packed_size,1,f);
 
-							if(k==currentside->tracklen)
-							{
-								currentside->bitrate=currentside->timingbuffer[0];
-								free(currentside->timingbuffer);
-								currentside->timingbuffer=0;
-							}
+								k=0;
+								do
+								{
+									k++;
+								}while((currentside->timingbuffer[k-1]==currentside->timingbuffer[k]) && k<currentside->tracklen);
 
-							free(temp_uncompressbuffer);
+								if(k==currentside->tracklen)
+								{
+									currentside->bitrate=currentside->timingbuffer[0];
+									free(currentside->timingbuffer);
+									currentside->timingbuffer=0;
+								}
+
+
+								break;
+
+							case AFI_COMPRESS_GZIP:
+								currentside->timingbuffer=malloc(datablock.unpacked_size);
+								temp_uncompressbuffer=malloc(datablock.packed_size);
+								fread(temp_uncompressbuffer,datablock.packed_size,1,f);
+								destLen=datablock.unpacked_size;
+								uncompress((unsigned char*)currentside->timingbuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
+
+								k=0;
+								do
+								{
+									k++;
+								}while((currentside->timingbuffer[k-1]==currentside->timingbuffer[k]) && k<currentside->tracklen);
+
+								if(k==currentside->tracklen)
+								{
+									currentside->bitrate=currentside->timingbuffer[0];
+									free(currentside->timingbuffer);
+									currentside->timingbuffer=0;
+								}
+
+								free(temp_uncompressbuffer);
+								break;
+							default:
 							break;
-						default:
-						break;
+						}
 					}
 					break;
 
@@ -426,6 +596,7 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				case AFI_DATA_WEAKBITS:
 					switch(datablock.packer_id)
 					{
+
 						case AFI_COMPRESS_NONE:
 							currentside->flakybitsbuffer=malloc(datablock.packed_size);
 							fread(currentside->flakybitsbuffer,datablock.packed_size,1,f);
@@ -441,6 +612,7 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								currentside->flakybitsbuffer=0;
 							}
 							break;
+
 						case AFI_COMPRESS_GZIP:
 							currentside->flakybitsbuffer=malloc(datablock.unpacked_size);
 							temp_uncompressbuffer=malloc(datablock.packed_size);
@@ -478,16 +650,19 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		}
 
 
-		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+		if((header.version_code_major == 0) && header.version_code_minor == 1)
 		{
-			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 			{
-				if(floppydisk->tracks[j])
+				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
-					if(floppydisk->tracks[j]->sides[i])
+					if(floppydisk->tracks[j])
 					{
-						currentside=floppydisk->tracks[j]->sides[i];
-						currentside->tracklen=currentside->tracklen*8;
+						if(floppydisk->tracks[j]->sides[i])
+						{
+							currentside=floppydisk->tracks[j]->sides[i];
+							currentside->tracklen=currentside->tracklen*8;
+						}
 					}
 				}
 			}
