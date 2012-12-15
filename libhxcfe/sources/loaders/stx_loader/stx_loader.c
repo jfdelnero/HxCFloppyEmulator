@@ -724,7 +724,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						}
 
 						currentcylinder->number_of_side++;
-						currentcylinder->sides[sidenumber]=tg_generateTrackEx(trackheader.numberofsector,(SECTORCONFIG *)sectorconfig,interleave,0,floppydisk->floppyBitRate,300,trackformat,0,2500,-2500);
+						currentcylinder->sides[sidenumber]=tg_generateTrackEx(trackheader.numberofsector,(SECTORCONFIG *)sectorconfig,interleave,0,floppydisk->floppyBitRate,300,trackformat,0,2500,0);
 						currentside=currentcylinder->sides[sidenumber];
 
 						currentside->flakybitsbuffer=tg_allocsubtrack_char(currentside->tracklen,0x00);
@@ -1005,7 +1005,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								currentcylinder=floppydisk->tracks[tracknumber];
 							}
 
-							currentcylinder->sides[sidenumber]=tg_alloctrack(DEFAULT_DD_BITRATE,ISOIBM_MFM_ENCODING,300,tracklen*2*8,2500,-2500,TG_ALLOCTRACK_ALLOCTIMIMGBUFFER|TG_ALLOCTRACK_ALLOCFLAKEYBUFFER);
+							currentcylinder->sides[sidenumber]=tg_alloctrack(DEFAULT_DD_BITRATE,ISOIBM_MFM_ENCODING,300,tracklen*2*8,2500,0,TG_ALLOCTRACK_ALLOCTIMIMGBUFFER|TG_ALLOCTRACK_ALLOCFLAKEYBUFFER);
 							currentside=currentcylinder->sides[sidenumber];
 
 							if(trackheader.flags&0x80)
@@ -1125,14 +1125,14 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			{
 				if(!floppydisk->tracks[i]->sides[0])
 				{
-					floppydisk->tracks[i]->sides[0]=tg_generateTrack(0,512,0 ,(unsigned char)i,(unsigned char)0,1,interleave,(unsigned char)(0),250000,currentcylinder->floppyRPM,ISOFORMAT_DD,255,0,2500| NO_SECTOR_UNDER_INDEX,-2500);
+					floppydisk->tracks[i]->sides[0]=tg_generateTrack(0,512,0 ,(unsigned char)i,(unsigned char)0,1,interleave,(unsigned char)(0),250000,currentcylinder->floppyRPM,ISOFORMAT_DD,255,0,2500| NO_SECTOR_UNDER_INDEX,0);
 				}
 
 				if( floppydisk->floppyNumberOfSide == 2 )
 				{
 					if(!floppydisk->tracks[i]->sides[1])
 					{
-						floppydisk->tracks[i]->sides[1]=tg_generateTrack(0,512,0 ,(unsigned char)i,(unsigned char)1,1,interleave,(unsigned char)(0),250000,currentcylinder->floppyRPM,ISOFORMAT_DD,255,0,2500| NO_SECTOR_UNDER_INDEX,-2500);
+						floppydisk->tracks[i]->sides[1]=tg_generateTrack(0,512,0 ,(unsigned char)i,(unsigned char)1,1,interleave,(unsigned char)(0),250000,currentcylinder->floppyRPM,ISOFORMAT_DD,255,0,2500| NO_SECTOR_UNDER_INDEX,0);
 					}
 				}
 			}
@@ -1147,11 +1147,11 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 				currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*2);
 				memset(currentcylinder->sides,0,sizeof(SIDE*)*2);
-				floppydisk->tracks[i]->sides[0]=tg_generateTrack(0,512,0 ,(unsigned char)i,(unsigned char)0,1,interleave,(unsigned char)(0),250000,currentcylinder->floppyRPM,ISOFORMAT_DD,255,0,2500| NO_SECTOR_UNDER_INDEX,-2500);
+				floppydisk->tracks[i]->sides[0]=tg_generateTrack(0,512,0 ,(unsigned char)i,(unsigned char)0,1,interleave,(unsigned char)(0),250000,currentcylinder->floppyRPM,ISOFORMAT_DD,255,0,2500| NO_SECTOR_UNDER_INDEX,0);
 
 				if(floppydisk->tracks[i]->number_of_side==2)
 				{
-					floppydisk->tracks[i]->sides[1]=tg_generateTrack(0,512,0 ,(unsigned char)i,(unsigned char)1,1,interleave,(unsigned char)(0),250000,currentcylinder->floppyRPM,ISOFORMAT_DD,255,0,2500| NO_SECTOR_UNDER_INDEX,-2500);
+					floppydisk->tracks[i]->sides[1]=tg_generateTrack(0,512,0 ,(unsigned char)i,(unsigned char)1,1,interleave,(unsigned char)(0),250000,currentcylinder->floppyRPM,ISOFORMAT_DD,255,0,2500| NO_SECTOR_UNDER_INDEX,0);
 				}
 			}
 
