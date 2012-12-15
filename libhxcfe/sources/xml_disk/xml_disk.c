@@ -93,6 +93,7 @@ typedef struct app_data
 
 	unsigned char * image_data;
 	int buffer_size;
+	int track_size;
 
 	int skew_per_track;
 	int skew_per_side;
@@ -154,6 +155,57 @@ int generateDisk(AppData *ad,unsigned char * diskdata,int buffersize)
 	return HXCFE_NOERROR;
 }
 
+int dumpDisk(AppData *ad,unsigned char * diskdata,int buffersize,FLOPPY * fp)
+{
+	int i,j,ret;
+	int numberofsector,numberoftrack,numberofside,sectorsize;
+	int type;
+	int statetracknb;
+	unsigned int rpm;
+	int offset;
+
+	offset = 0;
+	sectorsize = hxcfe_getCurrentSectorSize(ad->fb);
+	numberofsector = hxcfe_getCurrentNumberOfSector(ad->fb);
+	numberoftrack = hxcfe_getCurrentNumberOfTrack(ad->fb);
+	numberofside = hxcfe_getCurrentNumberOfSide(ad->fb);
+	rpm = hxcfe_getCurrentRPM(ad->fb);
+	type = hxcfe_getCurrentTrackType(ad->fb);
+
+	for(i = 0 ; i < numberoftrack ; i++ )
+	{
+		for(j = 0 ; j < numberofside ; j++ )
+		{
+			statetracknb = (i<<1) | (j&1);
+
+			if(!ad->ts[statetracknb].set)
+			{
+
+				hxcfe_pushTrack (ad->fb,rpm,i,j,type);
+
+				hxcfe_setTrackSkew(ad->fb, (hxcfe_getCurrentSkew(ad->fb) + ( ad->skew_per_track * i ) + ( j * ad->skew_per_side ))%numberofsector );
+
+				if( ( (offset + (sectorsize * numberofsector) )  > buffersize) || !diskdata )
+				{
+					ret = hxcfe_addSectors(ad->fb,j,i,0,0,numberofsector);
+				}
+				else
+				{
+					ret = hxcfe_addSectors(ad->fb,j,i,&diskdata[offset],(sectorsize * numberofsector),numberofsector);
+				}
+
+				offset = offset + (sectorsize * numberofsector);
+				hxcfe_popTrack (ad->fb);
+			}
+			else
+			{
+				offset = ad->ts[statetracknb].base_adress + ad->ts[statetracknb].track_size;
+			}
+		}
+	}
+
+	return HXCFE_NOERROR;
+}
 
 int getnewstate(char * keyword, int currentstate)
 {
@@ -265,7 +317,12 @@ void charhandler(void *data, const char *s, int len)
 			if(!strcmp(buffer,"off"))
 				ad->double_step = 0;
 		break;
+		case FILESIZE:
 
+		break;
+/*		case TRACKSIZE:
+			ad->track_size = atoi(buffer);
+		break;*/
 		case NUMBEROFTRACK:
 			if(!ad->xmlcheck)
 				hxcfe_setNumberOfTrack (ad->fb,(unsigned short)atoi(buffer));
@@ -698,3 +755,16 @@ FLOPPY* hxcfe_generateXmlFileFloppy (XmlFloppyBuilder* context,char *file)
 
 	return 0;
 }
+
+/*int hxcfe_checkCompatibilityXmlFileFloppy (XmlFloppyBuilder* context,FLOPPY * fp)
+{
+	FLOPPY * refFloppy;
+
+	refFloppy = hxcfe_generateXmlFloppy (context,0,0);
+	if( refFloppy )
+	{
+
+		
+
+	}
+}*/
