@@ -229,7 +229,8 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 	double timingoffset;
 	double timingoffset2;
 	double timingoffset3;
-	int xpos,xpos2,xpos3;
+	int xpos_startheader,xpos_endsector,xpos_startdata;
+	int xpos_tmp;
 	int endfill,loop;
 	s_col * col;
 	SECTORSEARCH* ss;
@@ -251,15 +252,15 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 	{
 
 		timingoffset = ( getOffsetTiming(currentside,tracksize,0,0) * loop );
-		xpos= (int)( ( timingoffset - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
-		if( (xpos<td->xsize) )
+		xpos_tmp = (int)( ( timingoffset - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
+		if( xpos_tmp < td->xsize )
 		{
 
 			old_i=0;
 
 			ss=hxcfe_initSectorSearch(floppycontext,floppydisk);
 			if(ss)
-			{				
+			{
 				endfill=0;
 				do
 				{
@@ -275,38 +276,35 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 
 						timingoffset = getOffsetTiming(currentside,sc->startsectorindex,timingoffset,old_i);
 						old_i = sc->startsectorindex;
-						xpos = (int)( ( timingoffset - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
+						xpos_startheader = (int)( ( timingoffset - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
 						
 						if(sc->endsectorindex<sc->startsectorindex)
 							timingoffset2 = getOffsetTiming(currentside,sc->startsectorindex+ ((tracksize - sc->startsectorindex) + sc->endsectorindex),timingoffset,old_i);
 						else
 							timingoffset2 = getOffsetTiming(currentside,sc->endsectorindex,timingoffset,old_i);
 
-						xpos3 = -1;
-						if( ( sc->startdataindex > sc->startsectorindex ) && ( sc->startdataindex < sc->endsectorindex ) )
-						{
-							timingoffset3 = getOffsetTiming(currentside,sc->startdataindex,timingoffset,old_i);
-							xpos3 = (int)( ( timingoffset3 - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
-						}
+						timingoffset3 = getOffsetTiming(currentside,sc->startdataindex,timingoffset,old_i);
+						xpos_startdata = (int)( ( timingoffset3 - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
 
-						xpos2 = (int)( ( timingoffset2 - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
+						xpos_endsector = (int)( ( timingoffset2 - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
 
-						sl->x_pos1=xpos;
-						sl->y_pos1=50;
-						sl->x_pos2=xpos2;
-						sl->y_pos2=td->ysize-10;
+						sl->x_pos1 = xpos_startheader;
+						sl->y_pos1 = 50;
+						sl->x_pos2 = xpos_endsector;
+						sl->y_pos2 = td->ysize-10;
 
 						sl->sectorconfig=sc;
 
-						// Main block
-						for(i=xpos;i<xpos2;i++)
+						// Main Header block
+						for(i= xpos_startheader;i<xpos_startdata;i++)
 						{
 							if(i>=0)
 							{
 								if( (i<td->xsize) && i>=0)
 								{
-									if(sc->use_alternate_data_crc)
+									if( sc->use_alternate_header_crc )
 									{
+										// Bad header block -> Red
 										for(j=50;j<(td->ysize-10);j++)
 										{
 											col=(s_col *)&td->framebuffer[(td->xsize*j) + i];
@@ -316,6 +314,7 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 									}
 									else
 									{
+										// Sector ok -> Green
 										for(j=50;j<(td->ysize-10);j++)
 										{
 											col=(s_col *)&td->framebuffer[(td->xsize*j) + i];
@@ -330,23 +329,71 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 								}
 							}
 						}
+
+						// Main Data block
+						for(i = xpos_startdata;i < xpos_endsector;i++)
+						{
+							if(i>=0)
+							{
+								if( (i<td->xsize) && i>=0)
+								{
+									if(sc->startdataindex == sc->startsectorindex)
+									{
+										// Unknow size (no header) : blue 
+										for(j=50;j<(td->ysize-10);j++)
+										{
+											col=(s_col *)&td->framebuffer[(td->xsize*j) + i];
+											col->green=3*col->green/4;
+											col->red=3*col->red/4;
+										}
+									}
+									else
+									{
+										if(sc->use_alternate_data_crc)
+										{
+											// CRC error -> Red
+											for(j=50;j<(td->ysize-10);j++)
+											{
+												col=(s_col *)&td->framebuffer[(td->xsize*j) + i];
+												col->blue=3*col->blue/4;
+												col->green=3*col->green/4;
+											}
+										}
+										else
+										{
+											// Sector ok -> Green
+											for(j=50;j<(td->ysize-10);j++)
+											{
+												col=(s_col *)&td->framebuffer[(td->xsize*j) + i];
+												col->blue=3*col->blue/4;
+												col->red=3*col->red/4;
+											}
+										}
+									}
+								}
+								else
+								{
+									endfill=1;
+								}
+							}
+						}
 						
 						// Left Line
 						for(j=50;j<(td->ysize-10);j++)
 						{
-							if( (xpos<td->xsize) && xpos>=0)
+							if( (xpos_startheader < td->xsize) && xpos_startheader>=0)
 							{
 								if(j&8)
 								{
 									if(sc->use_alternate_data_crc)
 									{
-										col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos];
+										col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos_startheader];
 										col->blue=3*col->blue/8;
 										col->green=3*col->green/8;
 									}
 									else
 									{
-										col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos];
+										col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos_startheader];
 										col->blue=3*col->blue/8;
 										col->red=3*col->red/8;
 									}
@@ -355,77 +402,102 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 						}
 				
 
-
-						// Data Line
-						for(j=50;j<(td->ysize-10);j++)
+						if(sc->startdataindex != sc->startsectorindex)
 						{
-							if( (xpos3<td->xsize) && xpos3>=0)
+							// Data Line
+							for(j=50;j<(td->ysize-10);j++)
 							{
-								if(!(j&7))
+								if( (xpos_startdata<td->xsize) && xpos_startdata >=0)
 								{
-									if(sc->use_alternate_data_crc)
+									if(!(j&7))
 									{
-										col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos3];
-										col->blue=3*col->blue/16;
-										col->green=3*col->green/16;
-										col->red=3*col->red/4;
-									}
-									else
-									{
-										col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos3];
-										col->blue=3*col->blue/16;
-										col->green=3*col->green/4;
-										col->red=3*col->red/16;
+										if(sc->use_alternate_data_crc)
+										{
+											col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos_startdata];
+											col->blue=3*col->blue/16;
+											col->green=3*col->green/16;
+											col->red=3*col->red/4;
+										}
+										else
+										{
+											col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos_startdata];
+											col->blue=3*col->blue/16;
+											col->green=3*col->green/4;
+											col->red=3*col->red/16;
+										}
 									}
 								}
 							}
+
+							sprintf(tempstr,"---- %.3d Bytes",sc->sectorsize);
+
+							switch(sc->trackencoding)
+							{
+								case ISOFORMAT_SD:
+									if(sc->startdataindex != sc->endsectorindex)
+										sprintf(tempstr,"FM   %.3dB DM:%.2Xh",sc->sectorsize,sc->alternate_datamark);
+									else
+										sprintf(tempstr,"FM   %.3dB DM: ??",sc->sectorsize);
+									break;
+								case ISOFORMAT_DD:
+									if(sc->startdataindex != sc->endsectorindex)
+										sprintf(tempstr,"MFM  %.3dB DM:%.2Xh",sc->sectorsize,sc->alternate_datamark);
+									else
+										sprintf(tempstr,"MFM  %.3dB DM: ??",sc->sectorsize);
+									break;
+								case AMIGAFORMAT_DD:
+									sprintf(tempstr,"AMFM %.3dB ",sc->sectorsize);
+									break;
+							}
+
+							putstring8x8(td,xpos_startheader,225,tempstr,0x000,1);
+
+							if(sc->startdataindex != sc->endsectorindex)
+								sprintf(tempstr,"T:%.2d H:%d S:%.3d CRC:%.4X",sc->cylinder,sc->head,sc->sector,sc->data_crc);
+							else
+								sprintf(tempstr,"T:%.2d H:%d S:%.3d NO DATA?",sc->cylinder,sc->head,sc->sector);
+							putstring8x8(td,xpos_startheader+8,225,tempstr,0x000,1);
 						}
-
-
-						sprintf(tempstr,"---- %.3d Bytes",sc->sectorsize);
-						switch(sc->trackencoding)
+						else
 						{
-						case ISOFORMAT_SD:
-							sprintf(tempstr,"FM   %.3dB DM:%.2Xh",sc->sectorsize,sc->alternate_datamark);
-							break;
-						case ISOFORMAT_DD:
-							sprintf(tempstr,"MFM  %.3dB DM:%.2Xh",sc->sectorsize,sc->alternate_datamark);
-							break;
-						case AMIGAFORMAT_DD:
-							sprintf(tempstr,"AMFM %.3dB ",sc->sectorsize);
-							break;
+							sprintf(tempstr,"----");
+							switch(sc->trackencoding)
+							{
+								case ISOFORMAT_SD:
+									sprintf(tempstr,"FM   DATA ? DM:%.2Xh",sc->alternate_datamark);
+									break;
+								case ISOFORMAT_DD:
+									sprintf(tempstr,"MFM  DATA ? DM:%.2Xh",sc->alternate_datamark);
+									break;
+								case AMIGAFORMAT_DD:
+									sprintf(tempstr,"AMFM DATA ?");
+									break;
+							}
+							putstring8x8(td,xpos_startheader,225,tempstr,0x000,1);
 						}
-
-						putstring8x8(td,xpos,225,tempstr,0x000,1);
-
-						sprintf(tempstr,"T:%.2d H:%d S:%.3d CRC:%.4X",sc->cylinder,sc->head,sc->sector,sc->data_crc);
-						putstring8x8(td,xpos+8,225,tempstr,0x000,1);
 
 						// Right Line
 						for(j=50;j<(td->ysize-10);j++)
 						{
-							if( ((xpos2-1)<td->xsize) && xpos2>=0 )
+							if( ((xpos_endsector-1)<td->xsize) && xpos_endsector>=0 )
 							{
 								if(!(j&8))
 								{
 									if(sc->use_alternate_data_crc)
 									{
-										col=(s_col *)&td->framebuffer[(td->xsize*j) + (xpos2-1)];
+										col=(s_col *)&td->framebuffer[(td->xsize*j) + (xpos_endsector-1)];
 										col->blue=3*col->blue/8;
 										col->green=3*col->green/8;
 									}
 									else
 									{
-										col=(s_col *)&td->framebuffer[(td->xsize*j) + (xpos2-1)];
+										col=(s_col *)&td->framebuffer[(td->xsize*j) + (xpos_endsector-1)];
 										col->blue=3*col->blue/8;
 										col->red=3*col->red/8;
 									}
 								}
 							}
 						}
-
-
-						//hxcfe_freeSectorConfig(ss,sc);
 					}
 				}while(sc);
 
