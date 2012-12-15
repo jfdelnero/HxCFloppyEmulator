@@ -683,7 +683,7 @@ Main_Window::Main_Window()
 		i++;
 	}
 	hxcfe_deinitXmlFloppy(rfb);
-	
+
 	rawloader_window->choice_disklayout->menu(disklayout_choices);
 	rawloader_window->choice_disklayout->value(0);
 
