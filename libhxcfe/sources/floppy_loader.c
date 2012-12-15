@@ -1240,6 +1240,7 @@ FLOPPY* hxcfe_sanityCheck(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk)
 	int numberoftrack,truenumberoftrack;
 	int numberofside,oldnumberofside,truenumberofside;
 	int needanewpass,defaultbitrate,defaultrpm;
+	int i;
 	SIDE	**		tmpsides;
 	SIDE * currentside;
 
@@ -1297,9 +1298,13 @@ FLOPPY* hxcfe_sanityCheck(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk)
 		}
 
 		numberoftrack = floppydisk->floppyNumberOfTrack;
-		while( floppydisk->tracks[truenumberoftrack] && (truenumberoftrack<numberoftrack) )
+
+		for( i = 0; i < numberoftrack ; i++ )
 		{
-			truenumberoftrack++;
+			if( floppydisk->tracks[truenumberoftrack] )
+			{
+				truenumberoftrack++;
+			}
 		}
 
 		if( truenumberoftrack != numberoftrack)
