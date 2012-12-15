@@ -485,26 +485,26 @@ SIDE* ScanAndDecodeStream(int initalvalue,s_track_dump * track,unsigned long * o
 
 			j=0;
 			bitrate=0;
-			while(((i+j)<size) && j<128)
+			while(((i+j)<size) && j<64)
 			{
 				bitrate = ( bitrate + trackbitrate[(i+j)] );
 				j++;
 			}
-			bitrate=bitrate/128;
+			bitrate=bitrate/64;
 
 			j=0;
-			while(((i+j)<size) && j<128)
+			while(((i+j)<size) && j<64)
 			{
 				trackbitrate[(i+j)] = bitrate;
 				j++;
 			}
 
-			i = i + 128;
+			i = i + 64;
 
 		}while(i<size);
 
 		bitrate=(int)( 24027428 / centralvalue );
-		hxcfe_track = tg_alloctrack(bitrate,ISOFORMAT_DD,rpm,bitoffset,3000,-3000,TG_ALLOCTRACK_ALLOCFLAKEYBUFFER|TG_ALLOCTRACK_ALLOCTIMIMGBUFFER);
+		hxcfe_track = tg_alloctrack(bitrate,ISOFORMAT_DD,rpm,bitoffset,2000,0,TG_ALLOCTRACK_ALLOCFLAKEYBUFFER|TG_ALLOCTRACK_ALLOCTIMIMGBUFFER);
 
 		if(bitoffset&7)
 		{
@@ -1633,7 +1633,70 @@ unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontext,s_tra
 	return overlap_pulses_tab;
 }
 
- 
+
+unsigned long getbestindex(s_track_dump *track_dump,unsigned long * overlap_tab)
+{
+	unsigned long nb_index_compare,i,j;
+	unsigned long first_index,last_index,bad_pulses;
+
+	unsigned long bad_pulses_array[32],min_val;
+	unsigned long bestval;
+
+	bestval = 0;
+
+	if(track_dump->nb_of_index >= 4)
+	{
+		nb_index_compare = track_dump->nb_of_index - 3;
+		if(nb_index_compare > 32) nb_index_compare = 32;
+
+		memset(bad_pulses_array,0,sizeof(unsigned long) * 32);
+
+		for(i=0;i<nb_index_compare;i++)
+		{
+
+			first_index = track_dump->index_evt_tab[i].dump_offset;
+
+			if( first_index < track_dump->nb_of_pulses)
+			{
+				while( (first_index < track_dump->nb_of_pulses) && !overlap_tab[first_index])
+				{
+					first_index++;
+				}
+			}
+
+			if( first_index >= track_dump->nb_of_pulses)
+			{
+				first_index = track_dump->nb_of_pulses - 1;
+			}
+
+
+			bad_pulses = 0;
+			last_index = overlap_tab[first_index];
+
+			for(j=first_index;j<last_index;j++)
+			{
+				if(!overlap_tab[j])
+					bad_pulses++;
+			}
+			
+			bad_pulses_array[i] = bad_pulses;
+		}
+
+		min_val = bad_pulses_array[0];
+		for(i=0;i<nb_index_compare;i++)
+		{
+			if(min_val >= bad_pulses_array[i])
+			{
+				min_val = bad_pulses_array[i];
+				bestval = i;
+			}
+		}
+	}
+
+	return bestval;
+}
+
+
 SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,float timecoef)
 {
 	double mck;
@@ -1645,9 +1708,9 @@ SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,floa
 	SIDE* currentside;
 	
 	unsigned long * overlap_tab;
-	unsigned long first_index;
+	unsigned long first_index,index;
 	unsigned long track_len;
-	unsigned long i,j;
+	unsigned long i;
 
 	s_track_dump *track_dump;
 	pulsesblock * pb;
@@ -1690,15 +1753,10 @@ SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,floa
 			if(overlap_tab)
 			{
 
-				i = track_dump->nb_of_index - 1;
-				j = 0;
-				while(i && (j<4))
-				{
-					first_index = track_dump->index_evt_tab[i].dump_offset;
-					j++;
-					i--;
-				}
-			
+				index = getbestindex(track_dump,overlap_tab);
+
+				first_index = track_dump->index_evt_tab[index].dump_offset;
+		
 				if( first_index < track_dump->nb_of_pulses)
 				{
 					while((first_index < track_dump->nb_of_pulses) && !overlap_tab[first_index])
@@ -1905,14 +1963,13 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 				hxc_fclose(f);
 			}
 
-			
 			track=0;
 			side=0;
 			found=0;
-				
-			mintrack=84;
+
+			mintrack=0;
 			maxtrack=0;
-			minside=1;
+			minside=0;
 			maxside=0;
 
 			do
@@ -1924,10 +1981,10 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 					fread(&oob,sizeof(s_oob_header),1,f);
 					if(oob.Sign==OOB_SIGN)
 					{
-						if(mintrack>track) mintrack=track;
-						if(maxtrack<track) maxtrack=track;
-						if(minside>side) minside=side;
-						if(maxside<side) maxside=side;
+						if(mintrack>track) mintrack = track;
+						if(maxtrack<track) maxtrack = track;
+						if(minside>side) minside = side;
+						if(maxside<side) maxside = side;
 						found=1;
 					}
 					hxc_fclose(f);
@@ -1977,43 +2034,57 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 						floppydisk->tracks[j/doublestep]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 					}
 
-					tracklen = curside->tracklen /8;
-					if(curside->tracklen & 7)
-						tracklen++;
-
-					// Remove sticked data bits ...
-					previous_bit = 0;
-					for(k=0;k<tracklen;k++)
+					if(curside)
 					{
-						if(previous_bit)
+						tracklen = curside->tracklen /8;
+						if(curside->tracklen & 7)
+							tracklen++;
+
+						// Remove sticked data bits ...
+						previous_bit = 0;
+						for(k=0;k<tracklen;k++)
 						{
-							if(curside->databuffer[k] & 0x80)
+							if(previous_bit)
 							{
-								curside->databuffer[k-1] = curside->databuffer[k-1] ^ 0x01;
-								curside->flakybitsbuffer[k-1] =  curside->flakybitsbuffer[k-1] | (0x01);
-								curside->databuffer[k] = curside->databuffer[k] ^ 0x80;
-								curside->flakybitsbuffer[k] =  curside->flakybitsbuffer[k] | (0x80);
+								if(curside->databuffer[k] & 0x80)
+								{
+									//curside->databuffer[k-1] = curside->databuffer[k-1] ^ 0x01;
+									//curside->flakybitsbuffer[k-1] =  curside->flakybitsbuffer[k-1] | (0x01);
+									curside->databuffer[k] = curside->databuffer[k] ^ 0x80;
+									curside->flakybitsbuffer[k] =  curside->flakybitsbuffer[k] | (0x80);
+								}
 							}
+
+							for(l=0;l<7;l++)
+							{
+								if((curside->databuffer[k] & (0xC0>>l)) == (0xC0>>l))
+								{
+									curside->databuffer[k] = curside->databuffer[k] ^ (0x40>>l);
+									curside->flakybitsbuffer[k] =  curside->flakybitsbuffer[k] | (0x40>>l);
+								}
+							}
+
+							previous_bit = curside->databuffer[k] & 1;
 						}
 
-						for(l=0;l<7;l++)
-						{
-							if((curside->databuffer[k] & (0xC0>>l)) == (0xC0>>l))
-							{
-								curside->databuffer[k] = curside->databuffer[k] ^ (0x40>>l);
-								curside->flakybitsbuffer[k] =  curside->flakybitsbuffer[k] | (0xC0>>l);
-							}
-						}
-
-						previous_bit = curside->databuffer[k] & 1;
 					}
 
 					currentcylinder=floppydisk->tracks[j/doublestep];
 					currentcylinder->sides[i]=curside;
 
-					if(i)
+				}
+			}
+
+
+			// Adjust track timings. 
+			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+			{
+				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+				{					
+					curside = floppydisk->tracks[j]->sides[i];
+					if(curside && floppydisk->tracks[0]->sides[0])
 					{
-						AdjustTrackPeriod(floppycontext,currentcylinder->sides[0],currentcylinder->sides[1]);
+						AdjustTrackPeriod(floppycontext,floppydisk->tracks[0]->sides[0],curside);
 					}
 				}
 			}
