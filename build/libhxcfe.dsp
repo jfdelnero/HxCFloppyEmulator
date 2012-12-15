@@ -1363,6 +1363,10 @@ SOURCE=..\sources\loaders\ti99v9t9_loader\ti99v9t9_writer.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\sources\loaders\dmk_loader\dmk_format.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\loaders\dmk_loader\dmk_loader.c
 # End Source File
 # Begin Source File
