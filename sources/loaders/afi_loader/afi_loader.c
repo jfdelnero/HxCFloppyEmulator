@@ -241,7 +241,9 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyNumberOfTrack=afiinfo.end_track+1;
 		floppydisk->floppyNumberOfSide=afiinfo.end_side+1;
 		floppydisk->floppySectorPerTrack=-1;
-		floppydisk->floppyiftype=ATARIST_DD_FLOPPYMODE;
+		floppydisk->floppyiftype = GENERIC_SHUGART_DD_FLOPPYMODE;
+
+		floppydisk->floppyBitRate = VARIABLEBITRATE;
 
 		switch(afiinfo.platformtype_code)
 		{
@@ -345,7 +347,6 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
 				currentcylinder->floppyRPM=0;//header.floppyRPM;
 			}
-
 
 			floppycontext->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
 			track.track_number,
@@ -644,9 +645,6 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 				}
 			}
-
-			//currentside->bitrate=VARIABLEBITRATE;//floppydisk->floppyBitRate;
-
 		}
 
 
