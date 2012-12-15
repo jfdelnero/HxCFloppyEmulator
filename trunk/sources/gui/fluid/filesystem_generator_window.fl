@@ -7,36 +7,50 @@ class filesystem_generator_window {open
   Function {filesystem_generator_window()} {open
   } {
     Fl_Window window {
-      label {Create a File System based floppy} open selected
-      xywh {368 179 609 413} type Double visible
+      label {Create a File System based floppy} open
+      xywh {243 147 704 416} type Double visible
     } {
       Fl_Button bt_injectdir {
         label {Create Disk}
         callback filesystem_generator_window_bt_injectdir
-        xywh {405 340 90 25} labelsize 12
+        xywh {610 20 90 25} labelsize 12
       }
       Fl_Button bt_cancel {
-        label Cancel
-        callback {((Fl_Window*)(o->parent()))->hide();}
-        xywh {510 339 90 25} labelsize 12
+        label Close
+        callback {((Fl_Window*)(o->parent()))->hide();} selected
+        xywh {610 381 90 25} labelsize 12
       }
       Fl_Choice choice_filesystype {
         label {File system type :} open
-        xywh {5 341 370 25} down_box BORDER_BOX labelsize 12 align 5 textsize 12
+        xywh {5 20 600 25} down_box BORDER_BOX labelsize 12 align 5 textsize 12
       } {}
-      Fl_Button bt_selectdir {
-        label {Select directory}
-        callback filesystem_generator_window_bt_selectdir
-        xywh {405 381 90 25} labelsize 12
-      }
-      Fl_Input input_folder {
-        label {Root folder }
-        xywh {5 381 370 25} labelsize 12 align 5 textsize 12
-      }
       Fl_Tree fs_browser {
         label FS_Tree
         callback filesystem_generator_window_browser_fs
-        xywh {5 15 600 310} labeltype NO_LABEL
+        xywh {5 60 600 310} labeltype NO_LABEL
+      }
+      Fl_Text_Display txtout_freesize {
+        xywh {5 380 600 29}
+      }
+      Fl_Button bt_delete {
+        label Delete
+        callback filesystem_generator_window_bt_delete
+        xywh {610 150 90 25}
+      }
+      Fl_Button bt_get {
+        label {Get Files}
+        callback filesystem_generator_window_bt_getfiles
+        xywh {610 120 90 25}
+      }
+      Fl_Button bt_put {
+        label {Put Files}
+        callback filesystem_generator_window_bt_putfiles
+        xywh {610 90 90 25}
+      }
+      Fl_Button bt_createdir {
+        label {Create Dir.}
+        callback filesystem_generator_window_bt_createdir
+        xywh {610 60 90 25}
       }
     }
   }
