@@ -479,32 +479,6 @@ SIDE* ScanAndDecodeStream(int initalvalue,s_track_dump * track,unsigned long * o
 			i++;
 		}while(i<size);
 
-		i=0;
-		do
-		{
-
-			j=0;
-			bitrate=0;
-			while(((i+j)<size) && j<64)
-			{
-				bitrate = ( bitrate + trackbitrate[(i+j)] );
-				j++;
-			}
-			bitrate=bitrate/64;
-
-			j=0;
-			while(((i+j)<size) && j<64)
-			{
-				trackbitrate[(i+j)] = bitrate;
-				j++;
-			}
-
-			i = i + 64;
-
-		}while(i<size);
-
-		bitrate=(int)( 24027428 / centralvalue );
-		hxcfe_track = tg_alloctrack(bitrate,ISOFORMAT_DD,rpm,bitoffset,2000,0,TG_ALLOCTRACK_ALLOCFLAKEYBUFFER|TG_ALLOCTRACK_ALLOCTIMIMGBUFFER);
 
 		if(bitoffset&7)
 		{
@@ -515,11 +489,42 @@ SIDE* ScanAndDecodeStream(int initalvalue,s_track_dump * track,unsigned long * o
 			tracksize = ( bitoffset >> 3 );
 		}
 
+		// Bitrate Filter
+		i=0;
+		do
+		{
+
+			j=0;
+			bitrate=0;
+			while(((i+j) < tracksize ) && j<64)
+			{
+				bitrate = ( bitrate + trackbitrate[(i+j)] );
+				j++;
+			}
+
+			bitrate=bitrate/j;
+
+			j=0;
+			while(((i+j)< tracksize ) && j<64)
+			{
+				trackbitrate[(i+j)] = bitrate;
+				j++;
+			}
+
+			i = i + 64;
+
+		}while(i < tracksize );
+
+		bitrate=(int)( 24027428 / centralvalue );
+
+		hxcfe_track = tg_alloctrack(bitrate,ISOFORMAT_DD,rpm,bitoffset,2000,0,TG_ALLOCTRACK_ALLOCFLAKEYBUFFER|TG_ALLOCTRACK_ALLOCTIMIMGBUFFER);
+
 		if( tracksize >= TEMPBUFSIZE ) tracksize = TEMPBUFSIZE - 1;
 
 		memcpy(hxcfe_track->databuffer,outtrack,tracksize);
 		memcpy(hxcfe_track->flakybitsbuffer,flakeytrack,tracksize);
 		memcpy(hxcfe_track->timingbuffer,trackbitrate, tracksize * sizeof(unsigned long));
+
 		hxcfe_track->bitrate = VARIABLEBITRATE;
 
 		free(outtrack);
