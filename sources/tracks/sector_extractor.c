@@ -416,7 +416,7 @@ unsigned short sectorsize[]={128,256,512,1024,2048,4096,8192,16384};
 
 int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFIG * sector,int track_offset)
 {
-	int bit_offset_bak,bit_offset,old_bit_offset;
+	int bit_offset_bak,bit_offset,old_bit_offset,tmp_bit_offset;
 	int sector_size;
 	unsigned char mfm_buffer[32];
 	unsigned char tmp_buffer[32];
@@ -459,7 +459,7 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 			break;
 
 			case LOOKFOR_ADDM:
-				mfmtobin(track->databuffer,track->tracklen,tmp_buffer,3+7,bit_offset,0);
+				tmp_bit_offset = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,3+7,bit_offset,0);
 				if(tmp_buffer[3]==0xFE)
 				{
 					CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
@@ -468,80 +468,114 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 						CRC16_Update(&CRC16_High,&CRC16_Low, tmp_buffer[k],(unsigned char*)crctable );
 					}
 
+					sector->cylinder = tmp_buffer[4];
+					sector->head = tmp_buffer[5];
+					sector->sector = tmp_buffer[6];
+					sector->sectorsize = sectorsize[tmp_buffer[7]&0x7];
+					sector->alternate_sector_size_id = tmp_buffer[7];
+					sector->trackencoding = ISOFORMAT_DD;
+					sector->alternate_datamark=0x00;
+					sector->use_alternate_datamark=0xFF;
+					sector->header_crc = ( tmp_buffer[k-2]<<8 ) | tmp_buffer[k-1] ;
+					sector->use_alternate_header_crc = 0xFF;
+
+					sector->startsectorindex=bit_offset;
+
 					if(!CRC16_High && !CRC16_Low)
 					{ // crc ok !!!
-						sector->startsectorindex=bit_offset;
  						floppycontext->hxc_printf(MSG_DEBUG,"Valid MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
-						old_bit_offset=bit_offset;
+						sector->use_alternate_header_crc = 0;
+					}
+					else
+					{
+						floppycontext->hxc_printf(MSG_DEBUG,"Bad MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
+					}
 
-						sector->cylinder = tmp_buffer[4];
-						sector->head = tmp_buffer[5];
-						sector->sector = tmp_buffer[6];
-						sector->sectorsize = sectorsize[tmp_buffer[7]&0x7];
-						sector->alternate_sector_size_id = tmp_buffer[7];
-						sector->trackencoding = ISOFORMAT_DD;
-						sector->alternate_datamark=0x00;
+					old_bit_offset = bit_offset;
+
+					bit_offset++;
+					sector_size = sectorsize[tmp_buffer[7]&0x7];
+					bit_offset_bak = bit_offset;
+
+					mfm_buffer[0] = 0x44;
+					mfm_buffer[1] = 0x89;
+					mfm_buffer[2] = 0x44;
+					mfm_buffer[3] = 0x89;
+					mfm_buffer[4] = 0x44;
+					mfm_buffer[5] = 0x89;
+					bit_offset=bitslookingfor(track->databuffer,track->tracklen,(88+10)*8,mfm_buffer,6*8,bit_offset);
+
+					if((bit_offset!=-1))
+					{
+
+						tmp_sector=(unsigned char*)malloc(3+1+sector_size+2);
+						memset(tmp_sector,0,3+1+sector_size+2);
+
+						sector->startdataindex=bit_offset;
+						sector->endsectorindex=mfmtobin(track->databuffer,track->tracklen,tmp_sector,3+1+sector_size+2,bit_offset,0);
+						sector->alternate_datamark=tmp_sector[3];
 						sector->use_alternate_datamark=0xFF;
-						sector->header_crc = ( tmp_buffer[k-2]<<8 ) | tmp_buffer[k-1] ;
 
+						CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
+						for(k=0;k<3+1+sector_size+2;k++)
+						{
+							CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
+						}
 
+						sector->data_crc= ( tmp_sector[k-2]<<8 ) | tmp_sector[k-1] ;
+
+						if(!CRC16_High && !CRC16_Low)
+						{ // crc ok !!!
+							floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
+						}
+						else
+						{
+							floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
+							sector->use_alternate_data_crc=0xFF;
+						}
+
+						sector->input_data=(unsigned char*)malloc(sector_size);
+						memcpy(sector->input_data,&tmp_sector[4],sector_size);
+						free(tmp_sector);
+						
 						bit_offset++;
-						sector_size = sectorsize[tmp_buffer[7]&0x7];
-						bit_offset_bak=bit_offset;
-
-						mfm_buffer[0]=0x44;
-						mfm_buffer[1]=0x89;
-						mfm_buffer[2]=0x44;
-						mfm_buffer[3]=0x89;
-						mfm_buffer[4]=0x44;
-						mfm_buffer[5]=0x89;
-						bit_offset=bitslookingfor(track->databuffer,track->tracklen,(88+10)*8,mfm_buffer,6*8,bit_offset);
-
-						if(bit_offset==-1)
-						{
-							bit_offset=bit_offset_bak;
-						}
-
-						if((bit_offset!=-1))
-						{
-
-							tmp_sector=(unsigned char*)malloc(3+1+sector_size+2);
-							memset(tmp_sector,0,3+1+sector_size+2);
-							sector->startdataindex=bit_offset;
-							sector->endsectorindex=mfmtobin(track->databuffer,track->tracklen,tmp_sector,3+1+sector_size+2,bit_offset,0);
-							sector->alternate_datamark=tmp_sector[3];
-							sector->use_alternate_datamark=0xFF;
-
-
-							CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
-							for(k=0;k<3+1+sector_size+2;k++)
-							{
-								CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
-							}
-
-							sector->data_crc= ( tmp_sector[k-2]<<8 ) | tmp_sector[k-1] ;
-
-							if(!CRC16_High && !CRC16_Low)
-							{ // crc ok !!!
-								floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
-							}
-							else
-							{
-								floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
-								sector->use_alternate_data_crc=0xFF;
-							}
-
-							sector->input_data=(unsigned char*)malloc(sector_size);
-							memcpy(sector->input_data,&tmp_sector[4],sector_size);
-							free(tmp_sector);
-
-							bit_offset=bit_offset+1;//(sector_size*2);
-
-							sector_extractor_sm=ENDOFSECTOR;
-						}
 
 						sector_extractor_sm=ENDOFSECTOR;
+					}
+					else
+					{
+						sector->startdataindex = tmp_bit_offset;
+						sector->endsectorindex = tmp_bit_offset;
 
+						bit_offset = bit_offset_bak + 1;
+
+						sector_extractor_sm=ENDOFSECTOR;
+					}
+				}
+				else
+				{
+					if(tmp_buffer[3]==0xF8 || tmp_buffer[3]==0xF9 || tmp_buffer[3]==0xFA || tmp_buffer[3]==0xFB)
+					{
+						sector->startsectorindex = bit_offset;
+						sector->startdataindex = bit_offset;
+						sector->endsectorindex = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,3+7,bit_offset,0);
+ 						floppycontext->hxc_printf(MSG_DEBUG,"Data sector without sector header !?!");
+						
+						old_bit_offset=bit_offset;
+
+						sector->cylinder = 0;
+						sector->head = 0;
+						sector->sector = 0;
+						sector->sectorsize = 0;
+						sector->alternate_sector_size_id = 0;
+						sector->trackencoding = ISOFORMAT_DD;
+						sector->alternate_datamark=tmp_buffer[3];
+						sector->use_alternate_datamark= 0xFF;
+						sector->header_crc = 0;
+						bit_offset++;
+						bit_offset_bak=bit_offset;
+
+						sector_extractor_sm=ENDOFSECTOR;
 					}
 					else
 					{
@@ -549,13 +583,6 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 						sector_extractor_sm=LOOKFOR_GAP1;
 					}
 				}
-				else
-				{
-					bit_offset++;
-					sector_extractor_sm=LOOKFOR_GAP1;
-				}
-
-				sector_extractor_sm=ENDOFSECTOR;
 			break;
 
 			case ENDOFTRACK:
@@ -626,9 +653,13 @@ int get_next_AMIGAMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 			break;
 
 			case LOOKFOR_ADDM:
+				
+
 				bit_offset=bit_offset-(8*2);
 
-				sector_conf->endsectorindex=mfmtobin(track->databuffer,track->tracklen,sector_data,544,bit_offset,0);
+				sector_conf->startdataindex = mfmtobin(track->databuffer,track->tracklen,sector_data,32,bit_offset,0);
+
+				sector_conf->endsectorindex = mfmtobin(track->databuffer,track->tracklen,sector_data,544,bit_offset,0);
 
 				memcpy(&header,&sector_data[4],4);
 				sortbuffer((unsigned char*)&header,tmp_buffer,4);
@@ -651,7 +682,7 @@ int get_next_AMIGAMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 				if( (header[0]==0xFF) && ( (headerparity[0] == sector_data[26]) && (headerparity[1] == sector_data[27]) ) )
 				{
 					sector_conf->startsectorindex=bit_offset;
-					sector_conf->startdataindex=bit_offset;
+					//sector_conf->startdataindex=bit_offset;
 					
 					floppycontext->hxc_printf(MSG_DEBUG,"Valid Amiga MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",header[1]>>1,header[1]&1,header[2],sector_size);
 
@@ -705,7 +736,11 @@ int get_next_AMIGAMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 				else
 				{
 					bit_offset=bit_offset+(8*2)+1;
-					sector_extractor_sm=LOOKFOR_GAP1;
+					
+					sector_conf->use_alternate_header_crc = 0xFF;
+
+					sector_conf->endsectorindex = sector_conf->startdataindex;
+					sector_extractor_sm = LOOKFOR_GAP1;
 				}
 
 
@@ -771,31 +806,38 @@ int get_next_FM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFI
 			break;
 
 			case LOOKFOR_ADDM:
-				sector->endsectorindex=fmtobin(track->databuffer,track->tracklen,tmp_buffer,7,bit_offset,0);
+				sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_buffer,7,bit_offset,0);
 				if(tmp_buffer[0]==0xFE)
 				{
+					sector->startsectorindex=bit_offset;
+					sector->startdataindex = sector->endsectorindex;  
+
+					sector->use_alternate_header_crc = 0xFF;
+					sector->use_alternate_addressmark = 0xFF;
+					sector->alternate_datamark=0x00;
+					sector->cylinder=tmp_buffer[1];
+					sector->head=tmp_buffer[2];
+					sector->sector=tmp_buffer[3];
+					sector->sectorsize=sectorsize[tmp_buffer[4]&0x7];
+					sector->alternate_sector_size_id = tmp_buffer[4];
+					sector->trackencoding = ISOFORMAT_SD;
+
 					CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
 					for(k=0;k<7;k++)
 					{
 						CRC16_Update(&CRC16_High,&CRC16_Low, tmp_buffer[k],(unsigned char*)crctable );
 					}
 
+					sector->header_crc = ( tmp_buffer[k-2]<<8 ) | tmp_buffer[k-1] ;
+
+
 					if(!CRC16_High && !CRC16_Low)
 					{ // crc ok !!!
-						sector->startsectorindex=bit_offset;
+						sector->use_alternate_header_crc = 0x00;
 						bit_offset = bit_offset + ( 7 * 8 );
 						floppycontext->hxc_printf(MSG_DEBUG,"Valid FM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[1],tmp_buffer[2],tmp_buffer[3],sectorsize[tmp_buffer[4]&0x7]);
 						old_bit_offset=bit_offset;
 
-						sector->use_alternate_addressmark=0xFF;
-						sector->alternate_datamark=0x00;
-						sector->cylinder=tmp_buffer[1];
-						sector->head=tmp_buffer[2];
-						sector->sector=tmp_buffer[3];
-						sector->sectorsize=sectorsize[tmp_buffer[4]&0x7];
-						sector->alternate_sector_size_id = tmp_buffer[4];
-						sector->trackencoding = ISOFORMAT_SD;
-						sector->header_crc = ( tmp_buffer[k-2]<<8 ) | tmp_buffer[k-1] ;
 						sector_size = sector->sectorsize;
 
 
