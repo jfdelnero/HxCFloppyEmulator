@@ -202,7 +202,8 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			case 0x02:
 				floppycontext->hxc_printf(MSG_INFO_0,"SQ-80 (DD) format");
 				header_offset=0xA0;
-				sectorsize=1024; 
+				sectorsize=1024;
+				rpm=290;
 				floppydisk->floppyBitRate=250000;
 				floppydisk->floppyNumberOfTrack=80;
 				floppydisk->floppyNumberOfSide=2;
@@ -364,7 +365,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					}
 				}
 					
-				currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,150,2500,-2500);
+				currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,128,2500,-2500);
 
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
 				{
