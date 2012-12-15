@@ -348,42 +348,47 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						sl->sectorconfig->head);
 					fiw->buf->append((char*)str);
 
-					sprintf(str,"DataMark:0x%.2X - Head CRC 0x%.4X - Data CRC 0x%.4X (%s)\n",
+					sprintf(str,"DataMark:0x%.2X - Head CRC 0x%.4X (%s) - Data CRC 0x%.4X (%s)\n",
 						sl->sectorconfig->alternate_datamark,
-						sl->sectorconfig->header_crc,
+						sl->sectorconfig->header_crc,sl->sectorconfig->use_alternate_header_crc?"BAD CRC!":"Ok",
 						sl->sectorconfig->data_crc,sl->sectorconfig->use_alternate_data_crc?"BAD CRC!":"Ok");
 					fiw->buf->append((char*)str);
 
-					for(i=0;i<sl->sectorconfig->sectorsize;i++)
+					if(sl->sectorconfig->input_data)
 					{
-						if(!(i&0xF))
+						for(i=0;i<sl->sectorconfig->sectorsize;i++)
 						{
-							if(i)
+							if(!(i&0xF))
 							{
-								str2[16]=0;
-								strcat(fullstr,"| ");
-								strcat(fullstr,str2);
+								if(i)
+								{
+									str2[16]=0;
+									strcat(fullstr,"| ");
+									strcat(fullstr,str2);
+								}
+
+								sprintf(str,"\n0x%.4X | ",i);
+								strcat(fullstr,str);
 							}
 
-							sprintf(str,"\n0x%.4X | ",i);
-							strcat(fullstr,str);
+							sprintf(str,"%.2X ",sl->sectorconfig->input_data[i]);
+							strcat(fullstr,str);				
+
+							c='.';
+							if( (sl->sectorconfig->input_data[i]>=32 && sl->sectorconfig->input_data[i]<=126) )
+								c=sl->sectorconfig->input_data[i];
+
+							str2[i&0xF]=c;
+
 						}
-
-						sprintf(str,"%.2X ",sl->sectorconfig->input_data[i]);
-						strcat(fullstr,str);				
-
-						c='.';
-						if( (sl->sectorconfig->input_data[i]>=32 && sl->sectorconfig->input_data[i]<=126) )
-							c=sl->sectorconfig->input_data[i];
-
-						str2[i&0xF]=c;
-
+					
+						str2[16]=0;
+						strcat(fullstr,"| ");
+						strcat(fullstr,str2);
 					}
+			
+					strcat(fullstr,"\n\n");				
 
-					str2[16]=0;
-					strcat(fullstr,"| ");
-					strcat(fullstr,str2);
-					strcat(fullstr,"\n\n");
 
 					fiw->buf->append((char*)fullstr);					
 					
