@@ -290,7 +290,7 @@ unsigned long ahextoi(char * str)
 	return hexval;
 }
 
-void charhandler(void *data, const char *s, int len) 
+static void XMLCALL charhandler(void *data, const char *s, int len) 
 {
 	AppData	*ad = (AppData *) data;
 	char buffer[512];
@@ -389,7 +389,7 @@ void charhandler(void *data, const char *s, int len)
 	}
 }
 
-void start(void *data, const char *el, const char **attr)
+static void XMLCALL start(void *data, const char *el, const char **attr)
 {
 	int i;
 	int newstate;
@@ -484,7 +484,7 @@ void start(void *data, const char *el, const char **attr)
 	}
 }
 
-void end(void *data, const char *el)
+static void XMLCALL end(void *data, const char *el)
 {
 	AppData *ad = (AppData *) data;
 	int state;
@@ -522,12 +522,12 @@ void end(void *data, const char *el)
 
 }
 
-void ns_start(void *data, const char *prefix, const char *uri)
+static void XMLCALL ns_start(void *data, const char *prefix, const char *uri)
 {
 
 }
 
-void ns_end(void *data, const char *prefix)
+static void XMLCALL ns_end(void *data, const char *prefix)
 {
 
 }
