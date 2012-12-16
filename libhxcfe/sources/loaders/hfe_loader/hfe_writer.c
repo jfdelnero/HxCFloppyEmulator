@@ -212,7 +212,7 @@ int HFE_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 		else
 		{
 			if(floppy->tracks[0]->sides[0]->bitrate == VARIABLEBITRATE)
-				FILEHEADER->bitRate=(floppy->tracks[0]->sides[0]->timingbuffer[ (floppy->tracks[0]->sides[0]->tracklen/8) / 2]*factor)/1000;
+				FILEHEADER->bitRate=(unsigned short)(floppy->tracks[0]->sides[0]->timingbuffer[ (floppy->tracks[0]->sides[0]->tracklen/8) / 2]*factor)/1000;
 			else
 				FILEHEADER->bitRate=(floppy->tracks[0]->sides[0]->bitrate*factor)/1000;
 		}
