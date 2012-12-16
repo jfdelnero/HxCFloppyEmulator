@@ -316,14 +316,8 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 			{
 				for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 				{
-
 					if(!floppydisk->tracks[j])
-					{
-						floppydisk->tracks[j]=(CYLINDER*)malloc(sizeof(CYLINDER));
-						currentcylinder=floppydisk->tracks[j];
-						currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-						currentcylinder->floppyRPM=rpm;
-					}
+						floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 
 					file_offset=((j*(sectorsize*floppydisk->floppySectorPerTrack))+
 						(sectorsize*(floppydisk->floppySectorPerTrack)*floppydisk->floppyNumberOfTrack*i))+256;
@@ -347,22 +341,11 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 			{
-				floppydisk->tracks[j]=(CYLINDER*)malloc(sizeof(CYLINDER));
-				currentcylinder=floppydisk->tracks[j];
-				currentcylinder->number_of_side=(unsigned char)fileheader->number_of_side;
-				currentcylinder->floppyRPM=rpm;
-
-				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-				{
-					currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-					memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
-				}
+				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			}
 
 			switch(geometrie)
 			{
-			case 0:
-				break;
 			case 1:
 				floppycontext->hxc_printf(MSG_DEBUG,"Geometrie 1:  11111..000000!");
 				tracksize=(((filesize-256)/fileheader->number_of_side)/fileheader->number_of_tracks);
@@ -392,16 +375,12 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 				}
 				break;
 
+			case 0:
+				floppycontext->hxc_printf(MSG_DEBUG,"Geometrie 0 ?: using Geometrie 2");
 			case 2:
 				floppycontext->hxc_printf(MSG_DEBUG,"Geometrie 2:  01010101010...!");
+
 				tracksize=(((filesize-256)/fileheader->number_of_side)/fileheader->number_of_tracks);
-				for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-				{
-					floppydisk->tracks[j]=(CYLINDER*)malloc(sizeof(CYLINDER));
-					currentcylinder=floppydisk->tracks[j];
-					currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-					currentcylinder->floppyRPM=rpm;
-				}
 
 				for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 				{
@@ -411,7 +390,7 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"------------------ Track %d, side %d -------------------",j,i);
 
-						file_offset=(i*floppydisk->floppyNumberOfTrack*tracksize)+(j*tracksize)+256;
+						file_offset=(j*tracksize*floppydisk->floppyNumberOfSide) + (i*tracksize) + 256;
 
 						trackdata=(unsigned char *) malloc(tracksize);
 
