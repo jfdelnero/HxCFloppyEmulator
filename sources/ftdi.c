@@ -38,13 +38,17 @@
 	#include <conio.h> 
 	#include <ftd2xx.h>
 	#include <winioctl.h>
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) || defined(__linux__)
 	#include <dlfcn.h>
-	#include "../macosx/ftd2xx.h"
-#else
-	#include "../linux/ftd2xx.h"
 #endif
 
+#if defined(__APPLE__)
+	#include "../macosx/ftd2xx.h"
+#endif
+
+#if defined(__linux__)
+	#include "../linux/ftd2xx.h"
+#endif
 
 #include "ftdi.h"
 
@@ -107,11 +111,17 @@ int ftdi_load_lib (HXCFLOPPYEMULATOR* floppycontext)
 
 	#endif
 
-	#ifdef __APPLE__
+	#if defined(__APPLE__) || defined(__linux__)
 	
 	void* lib_handle;
 
+	
+	#if defined __APPLE__
 	lib_handle = dlopen("libftd2xx.dylib", RTLD_LOCAL|RTLD_LAZY);
+	#else
+	lib_handle = dlopen("/usr/local/lib/libftd2xx.so", RTLD_LOCAL|RTLD_LAZY);
+	#endif 
+
         if (!lib_handle) {
 		floppycontext->hxc_printf(MSG_ERROR,"Error while loading FTDI library! library not found !");
 		return -1;
