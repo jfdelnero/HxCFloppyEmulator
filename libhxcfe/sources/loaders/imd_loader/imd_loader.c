@@ -106,7 +106,6 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	CYLINDER* currentcylinder;
 	SIDE* currentside;
 	int bitrate;
-	unsigned long tracklen;
 	unsigned char * sectormap;
 	unsigned char * sectorcylmap;
 	unsigned char * sectorheadmap;
@@ -401,19 +400,14 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				}
 
 				floppydisk->floppyBitRate=bitrate;
-				
+
 				if(!floppydisk->tracks[trackcfg.physical_cylinder])
 				{
-					floppydisk->tracks[trackcfg.physical_cylinder]=(CYLINDER*)malloc(sizeof(CYLINDER));
-					currentcylinder=floppydisk->tracks[trackcfg.physical_cylinder];
-					currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-					currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-					memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
-									
-					//currentcylinder->floppyRPM=header.floppyRPM;
+					currentcylinder = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+					floppydisk->tracks[trackcfg.physical_cylinder] = currentcylinder;
 				}
 				
-				currentside=tg_generateTrackEx((unsigned short)trackcfg.number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,tracktype,0,2500 | NO_SECTOR_UNDER_INDEX,-2500);
+				currentside = tg_generateTrackEx((unsigned short)trackcfg.number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,tracktype,0,2500 | NO_SECTOR_UNDER_INDEX,-2500);
 				currentcylinder->sides[trackcfg.physical_head&0xF]=currentside;
 				currentcylinder->floppyRPM=rpm;
 
@@ -435,25 +429,15 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 				if(!floppydisk->tracks[i>>(floppydisk->floppyNumberOfSide-1)])
 				{
-					floppydisk->tracks[i>>(floppydisk->floppyNumberOfSide-1)]=(CYLINDER*)malloc(sizeof(CYLINDER));
-					currentcylinder=floppydisk->tracks[i>>(floppydisk->floppyNumberOfSide-1)];
-					currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-					currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
-					memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
+					floppydisk->tracks[i>>(floppydisk->floppyNumberOfSide-1)] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 				}
-				
-				currentcylinder->sides[i&(floppydisk->floppyNumberOfSide-1)]=malloc(sizeof(SIDE));
-				memset(currentcylinder->sides[i&(floppydisk->floppyNumberOfSide-1)],0,sizeof(SIDE));
-				currentside=currentcylinder->sides[i&(floppydisk->floppyNumberOfSide-1)];
-						
-				currentside->number_of_sector=0;
-			
-				tracklen=((250000/(rpm/60))/4);
 
-				currentside->databuffer=malloc(tracklen);
-				memset(currentside->databuffer,0,tracklen);
+				currentcylinder = floppydisk->tracks[i>>(floppydisk->floppyNumberOfSide-1)];
 
-				currentside->tracklen=tracklen*8;
+				currentcylinder->sides[i&(floppydisk->floppyNumberOfSide-1)] = tg_alloctrack(250000,ISOFORMAT_DD,rpm, ((250000/(rpm/60))/4)*8 ,2000,0,0);
+
+				currentside = currentcylinder->sides[i&(floppydisk->floppyNumberOfSide-1)];
+				memset(currentside->databuffer,0xAA,currentside->tracklen/8);
 
 			}
 
