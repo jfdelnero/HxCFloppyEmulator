@@ -319,6 +319,8 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 					if(!floppydisk->tracks[j])
 						floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 
+					currentcylinder = floppydisk->tracks[j];
+
 					file_offset=((j*(sectorsize*floppydisk->floppySectorPerTrack))+
 						(sectorsize*(floppydisk->floppySectorPerTrack)*floppydisk->floppyNumberOfTrack*i))+256;
 
