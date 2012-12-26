@@ -68,9 +68,8 @@ int pc_imggetfloppyconfig(unsigned char * img,unsigned int filesize,unsigned sho
 	conffound=0;
 	uimg=(unsigned char *)img;
 	
-	if(uimg[0x18]<24 && uimg[0x18]>7)
+	if(uimg[0x18]<24 && uimg[0x18]>7 && (uimg[0x1A]==1 || uimg[0x1A]==2) && !(filesize&0x1FF) )
 	{
-				
 		*rpm=300;
 		*numberofsectorpertrack=uimg[0x18];
 		*numberofside=uimg[0x1A];
@@ -83,18 +82,24 @@ int pc_imggetfloppyconfig(unsigned char * img,unsigned int filesize,unsigned sho
 		}
 		else
 		{
-
 			if(*numberofsectorpertrack<=21)
 			{
 				*bitrate=500000;
 				*gap3len=84;
 				*interleave=1;
 				*ifmode=IBMPC_HD_FLOPPYMODE;
+
 				if(*numberofsectorpertrack>18)
 				{
 					*gap3len=14;
 					*interleave=2;
 				}
+
+				if(*numberofsectorpertrack == 15)
+				{
+					*rpm=360;
+				}
+
 			}
 			else
 			{
@@ -103,8 +108,6 @@ int pc_imggetfloppyconfig(unsigned char * img,unsigned int filesize,unsigned sho
 				*interleave=1;
 				*ifmode=IBMPC_ED_FLOPPYMODE;
 			}
-
-
 		}
 		numberofsector=uimg[0x13]+(uimg[0x14]*256);
 		*numberoftrack=(numberofsector/(*numberofsectorpertrack*(*numberofside)));
