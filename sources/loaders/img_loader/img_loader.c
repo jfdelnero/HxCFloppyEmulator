@@ -149,7 +149,7 @@ int IMG_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 	floppycontext->hxc_printf(MSG_DEBUG,"IMG_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"stx") || hxc_checkfileext(imgfile,"ima"))
+	if(hxc_checkfileext(imgfile,"img") || hxc_checkfileext(imgfile,"ima"))
 	{
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
