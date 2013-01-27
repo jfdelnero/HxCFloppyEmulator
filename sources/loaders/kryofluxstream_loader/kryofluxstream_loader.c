@@ -341,12 +341,6 @@ typedef struct pll_stat_
 
 int getCellTiming(pll_stat * pll,int current_pulsevalue,int * badpulse,int t,int overlapval)
 {
-	//
-	// Return: 0 -> pulse in previous window ! (bad)
-	//         1 -> pulse in the current window ! (probably bad)
-	// 2 or more -> valid pulses
-	//
-
 	int blankcell;
 	int cur_pll_error,left_boundary,right_boundary,center;
 	int current_pulse_position;
@@ -367,15 +361,8 @@ int getCellTiming(pll_stat * pll,int current_pulsevalue,int * badpulse,int t,int
 	// the pulse is before the current window ?
 	if( current_pulse_position < left_boundary )
 	{
-		
-//		cur_pll_error = (pll->lastpulsephase + current_pulsevalue) - ((pll->phase + (pll->pump_charge/2)));
-
 		pll->lastpulsephase = pll->lastpulsephase + current_pulsevalue;
 		
-//		*pumpcharge = *pumpcharge - 8;
-		
-//		*window_phase = *lastpulsephase - (*pumpcharge/2);
-
 		if(badpulse)
 			*badpulse = 1;
 
@@ -691,7 +678,7 @@ unsigned long time_to_tick(unsigned long time)
 
 
 // us
-#define BLOCK_TIME 10000
+#define BLOCK_TIME 5000
 
 unsigned long GetDumpTimelength(s_track_dump * track_dump)
 {
@@ -1070,9 +1057,6 @@ unsigned long compare_block_timebased(HXCFLOPPYEMULATOR* floppycontext,s_track_d
 	src_start_index = prev_block->start_index + prev_block->number_of_pulses;
 	src_last_index  = next_block->start_index;
 
-	//if(src_last_index >= time_buffer_len)
-	//	src_last_index = time_buffer_len - 1;
-
 	i = src_start_index;
 	total_tick_source = 0;
 	while(i< src_last_index && i < td->nb_of_pulses)
@@ -1086,9 +1070,6 @@ unsigned long compare_block_timebased(HXCFLOPPYEMULATOR* floppycontext,s_track_d
 	// total time of the other block
 	dst_start_index = prev_block->overlap_offset + prev_block->overlap_size;
 	dst_last_index  = next_block->overlap_offset;
-
-	//if(dst_last_index >= time_buffer_len)
-	//	dst_last_index = time_buffer_len - 1;
 
 	i = dst_start_index;
 	total_tick_destination = 0;
@@ -1641,7 +1622,7 @@ unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontext,s_tra
 					{
 						switch(pb[block_num].state)
 						{
-							//
+
 							case MATCH_STATE:
 							case ONEMATCH_STATE:
 								if(block_num)
