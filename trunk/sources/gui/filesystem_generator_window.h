@@ -11,6 +11,11 @@ extern void filesystem_generator_window_bt_selectdir(Fl_Button*, void*);
 #include <FL/Fl_Input.H>
 #include <FL/Fl_Tree.H>
 extern void filesystem_generator_window_browser_fs(Fl_Tree*, void*);
+#include <FL/Fl_Text_Display.H>
+extern void filesystem_generator_window_bt_delete(Fl_Button*, void*);
+extern void filesystem_generator_window_bt_getfiles(Fl_Button*, void*);
+extern void filesystem_generator_window_bt_putfiles(Fl_Button*, void*);
+extern void filesystem_generator_window_bt_createdir(Fl_Button*, void*);
 
 class filesystem_generator_window {
 public:
@@ -23,8 +28,11 @@ private:
   static void cb_bt_cancel(Fl_Button*, void*);
 public:
   Fl_Choice *choice_filesystype;
-  Fl_Button *bt_selectdir;
-  Fl_Input *input_folder;
   Fl_Tree *fs_browser;
+  Fl_Text_Display *txtout_freesize;
+  Fl_Button *bt_delete;
+  Fl_Button *bt_get;
+  Fl_Button *bt_put;
+  Fl_Button *bt_createdir;
 };
 #endif

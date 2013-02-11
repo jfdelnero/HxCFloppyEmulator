@@ -137,7 +137,7 @@ char * getfilenameext(char * fullpath,char * filenameext)
 {
 	char * filename;
 	int len,i;
-	
+
 	filename=getfilenamebase(fullpath,0);
 
 	len=strlen(filename);
@@ -172,7 +172,7 @@ char * getfilenameext(char * fullpath,char * filenameext)
 		strcpy(filenameext,&filename[i]);
 	}
 
-	return &filename[i];	
+	return &filename[i];
 }
 
 int getfilenamewext(char * fullpath,char * filenamewext)
@@ -180,13 +180,13 @@ int getfilenamewext(char * fullpath,char * filenamewext)
 	char * filename;
 	char * ext;
 	int len;
-	
+
 	filename=getfilenamebase(fullpath,0);
 	ext=getfilenameext(fullpath,0);
 
 	len=ext-filename;
 
-	
+
 	if(len && filename[len-1]=='.')
 	{
 		len--;
@@ -197,15 +197,15 @@ int getfilenamewext(char * fullpath,char * filenamewext)
 		memcpy(filenamewext,filename,len);
 		filenamewext[len]=0;
 	}
-	
-	return len;	
+
+	return len;
 }
 
 int getpathfolder(char * fullpath,char * folder)
 {
 	int len;
 	char * filenameptr;
-	
+
 	filenameptr=getfilenamebase(fullpath,0);
 
 	len=filenameptr-fullpath;
@@ -215,7 +215,7 @@ int getpathfolder(char * fullpath,char * folder)
 		memcpy(folder,fullpath,len);
 		folder[len]=0;
 	}
-	
+
 	return len;
 }
 
@@ -231,7 +231,7 @@ int checkfileext(char * path,char *ext)
 		{
 			getfilenameext(path,(char*)&pathext);
 			hxc_strlower(pathext);
-			
+
 			strcpy((char*)srcext,ext);
 			hxc_strlower(srcext);
 
@@ -252,19 +252,19 @@ void filesystem_generator_window_bt_injectdir(Fl_Button* bt, void*)
 
 	dw=((Fl_Window*)(bt->parent()));
 	fgw=(filesystem_generator_window *)dw->user_data();
-	
-	floppy=hxcfe_generateFloppy(guicontext->hxcfe,(char*)fgw->input_folder->value(),s,0);
+
+	floppy=hxcfe_generateFloppy(guicontext->hxcfe,"",s,0);
 	load_floppy(floppy);
 	guicontext->updatefloppyfs++;
 	guicontext->updatefloppyinfos++;
 }
 
 void tick_fs(void *w) {
-	
+
 	s_trackdisplay * td;
-	filesystem_generator_window *window;	
+	filesystem_generator_window *window;
 	window=(filesystem_generator_window *)w;
-	
+
 	if(window->window->shown())
 	{
 		window->window->make_current();
@@ -279,8 +279,8 @@ void tick_fs(void *w) {
 
 		}
 	}
-				
-	Fl::repeat_timeout(0.1, tick_fs, w);  
+
+	Fl::repeat_timeout(0.1, tick_fs, w);
 }
 
 
@@ -314,7 +314,7 @@ int displaydir(FSMNG  * fsmng,filesystem_generator_window *fgw,char * folder,int
 				}
 
 				if(dir)
-				{	
+				{
 					if(fullpath[strlen(fullpath)-1] != '/')
 					{
 						strcat(fullpath,"/");
@@ -335,12 +335,114 @@ int displaydir(FSMNG  * fsmng,filesystem_generator_window *fgw,char * folder,int
 			{
 				return 0;
 			}
-			 
+
 
 		}while(1);
 	}
 	return 0;
 }
+
+
+int getdir(FSMNG  * fsmng,char * folder,char * dstfolder,int level)
+{
+	char fullpath[1024];
+	char fullpathdst[1024];
+	int dirhandle;
+	int ret;
+	int dir;
+	FSENTRY  dirent;
+	FILE * f;
+	int floppyfile;
+
+	unsigned char * membuf;
+
+
+	dirhandle = hxcfe_openDir(fsmng,folder);
+	if ( dirhandle > 0 )
+	{
+		do
+		{
+			dir = 0;
+			ret = hxcfe_readDir(fsmng,dirhandle,&dirent);
+			if(ret> 0)
+			{
+				if(dirent.isdir)
+				{
+					dir = 1;
+				}
+
+				strcpy(fullpathdst,dstfolder);
+
+				if(fullpathdst[strlen(fullpathdst)-1] != '\\')
+				{
+					strcat(fullpathdst,"\\");
+				}
+
+				strcat(fullpathdst,dirent.entryname);
+
+				strcpy(fullpath,folder);
+				strcat(fullpath,dirent.entryname);
+
+				if(dir)
+				{
+					if(fullpath[strlen(fullpath)-1] != '/')
+					{
+						strcat(fullpath,"/");
+					}
+
+					if( strcmp(dirent.entryname,"..") && strcmp(dirent.entryname,"."))
+					{
+						hxc_mkdir(fullpathdst);
+						if(getdir(fsmng,fullpath,fullpathdst,level+1)<0)
+						{
+							hxcfe_closeDir(fsmng,dirhandle);
+							return 0;
+						}
+					}
+
+				}
+				else
+				{
+					membuf = 0;
+					if(dirent.size)
+					{
+						membuf =(unsigned char*) malloc(dirent.size);
+						memset(membuf,0,dirent.size);
+					}
+
+					f = fopen(fullpathdst,"w+b");
+					if(f)
+					{
+						if(membuf)
+						{
+							floppyfile = hxcfe_openFile(fsmng, fullpath);
+							if(floppyfile>=0)
+							{
+								hxcfe_readFile( fsmng,floppyfile,(char*)membuf,dirent.size);
+								hxcfe_closeFile(fsmng, floppyfile);
+							}
+
+							fwrite(membuf,dirent.size,1,f);
+
+						}
+						fclose(f);
+					}
+
+					if(membuf)
+						free(membuf);
+				}
+			}
+			else
+			{
+				return 0;
+			}
+
+
+		}while(1);
+	}
+	return 0;
+}
+
 
 void browse_floppy_disk(filesystem_generator_window *fgw)
 {
@@ -350,7 +452,7 @@ void browse_floppy_disk(filesystem_generator_window *fgw)
 	fgw->fs_browser->selectmode(FL_TREE_SELECT_MULTI);
 	if(guicontext->loadedfloppy)
 	{
-		
+
 		fsmng = hxcfe_initFsManager(guicontext->hxcfe);
 		if (fsmng)
 		{
@@ -363,42 +465,58 @@ void browse_floppy_disk(filesystem_generator_window *fgw)
 			fgw->fs_browser->showroot(1);
 			fgw->fs_browser->redraw();
 			fgw->fs_browser->show_self();
-			
+
 			hxcfe_deinitFsManager(fsmng);
 		}
 	}
 }
 
-void filesystem_generator_window_bt_selectdir(Fl_Button* bt, void*)
+void filesystem_generator_window_bt_createdir(Fl_Button * bt,void *)
 {
-	char dirstr[512];
+
+}
+
+void filesystem_generator_window_bt_putfiles(Fl_Button * bt,void *)
+{
+
+}
+
+void filesystem_generator_window_bt_getfiles(Fl_Button *bt,void *)
+{
 	filesystem_generator_window *fgw;
 	Fl_Window *dw;
+	FSMNG  * fsmng;
+	char dirstr[512];
 
 
 	dw=((Fl_Window*)(bt->parent()));
 	fgw=(filesystem_generator_window *)dw->user_data();
 
-	if(!select_dir((char*)"Select source",(char*)&dirstr))
+
+	if(!select_dir((char*)"Select destination",(char*)&dirstr))
 	{
-		fgw->input_folder->value(dirstr);
+
+		fsmng = hxcfe_initFsManager(guicontext->hxcfe);
+		if (fsmng)
+		{
+			hxcfe_selectFS(fsmng, 0);
+			hxcfe_mountImage(fsmng, guicontext->loadedfloppy);
+
+			getdir(fsmng,"/",dirstr,0);
+
+			hxcfe_deinitFsManager(fsmng);
+		}
 	}
 }
 
-void filesystem_generator_bt_cancel(Fl_Button* bt, void*)
+void filesystem_generator_window_bt_delete(Fl_Button *bt,void *)
 {
-	filesystem_generator_window *fgw;
-	Fl_Window *dw;
 
-	dw=((Fl_Window*)(bt->parent()));
-	fgw=(filesystem_generator_window *)dw->user_data();
-	
-	fgw->window->hide();
 }
 
 void dnd_fs_conv(const char *urls)
 {
-	//loadfloppy((char*)urls);
+
 }
 
 int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
@@ -407,8 +525,8 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 	int size,file_handle;
 	struct stat entry;
 	unsigned char * buffer;
-	char fullpath[1024];	
-	char srcfullpath[1024];	
+	char fullpath[1024];
+	char srcfullpath[1024];
 
 	long ff;
 	filefoundinfo ffi;
@@ -498,7 +616,7 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 	HXCFLOPPYEMULATOR* floppyem;
 	filesystem_generator_window *fsw;
 	s_param_fs_params * fsparams2;
-	char fullpath[1024];	
+	char fullpath[1024];
 	int filecount,i,j,k;
 	char ** filelist;
 	struct stat entry;
@@ -568,7 +686,7 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 					i++;
 				}
 
-				
+
 				fsw->fs_browser->root_label("DISK");
 				fsw->fs_browser->showroot(1);
 
@@ -578,7 +696,8 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 
 		guicontext->updatefloppyfs++;
 		guicontext->updatefloppyinfos++;
-		
+
+
 		k=0;
 		while(filelist[k])
 		{
