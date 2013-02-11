@@ -43,119 +43,131 @@ int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	char * log_str;
 	char   tmp_str[256];
 	int sectorsize,track_type_id;
-	sect_track track;
+
+	SECTORSEARCH* ss;
+	SECTORCONFIG** sca;
 
 	floppycontext->hxc_printf(MSG_INFO_1,"Write RAW file %s...",filename);
 
 	track_type_id=0;
 	log_str=0;
+
 	rawfile=hxc_fopen(filename,"wb");
 	if(rawfile)
 	{
-		for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
+		ss=hxcfe_initSectorSearch(floppycontext,floppy);
+		if(ss)
 		{
-			for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
+			for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
 			{
-				sprintf(tmp_str,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(rawfile));
-
-				log_str=0;
-				log_str=realloc(log_str,strlen(tmp_str)+1);
-				memset(log_str,0,strlen(tmp_str)+1);
-				strcat(log_str,tmp_str);
-
-				memset(&track,0,sizeof(sect_track));
-				track.side=i;
-				track.track=j;
-
-
-				k=0;
-				do
+				for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
 				{
-					switch(track_type_id)
-					{
-						case 0:
-							nbsector=analysis_and_extract_sector_MFM(floppycontext,floppy->tracks[j]->sides[i],&track);
-						break;
-						case 1:
-							nbsector=analysis_and_extract_sector_FM(floppycontext,floppy->tracks[j]->sides[i],&track);
-						break;
-						case 2:
-							nbsector=analysis_and_extract_sector_AMIGAMFM(floppycontext,floppy->tracks[j]->sides[i],&track);
-						break;
-						case 3:
-							nbsector=analysis_and_extract_sector_EMUIIFM(floppycontext,floppy->tracks[j]->sides[i],&track);
-						break;
-					}
-					
-					if(!nbsector)
-						track_type_id=(track_type_id+1)%4;
+					sprintf(tmp_str,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(rawfile));
 
-					k++;
-						
-				}while(!nbsector && k<4);
-
-				if(track.number_of_sector)
-				{
-					sectorsize=track.sectorlist[0]->sectorsize;
-					for(l=0;l<256;l++)
-					{
-
-						k=0;
-						do
-						{
-							if(track.sectorlist[k]->sector_id==l)
-							{
-								if(track.sectorlist[k]->sectorsize!=sectorsize)
-								{
-									sectorsize=-1;	
-								}
-								if(track.sectorlist[k]->buffer)
-									fwrite(track.sectorlist[k]->buffer,track.sectorlist[k]->sectorsize,1,rawfile);
-
-								sprintf(tmp_str,"%d ",track.sectorlist[k]->sector_id);
-								log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
-								strcat(log_str,tmp_str);
-								break;
-							}
-
-							k++;
-						}while(k<track.number_of_sector);
-					
-					}
-				
-
+					log_str=0;
+					log_str=realloc(log_str,strlen(tmp_str)+1);
+					memset(log_str,0,strlen(tmp_str)+1);
+					strcat(log_str,tmp_str);
 
 					k=0;
 					do
 					{
-						free(track.sectorlist[k]->buffer);
-						free(track.sectorlist[k]);
+						switch(track_type_id)
+						{
+							case 0:
+								sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector);
+							break;
+							case 1:
+								sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector);
+							break;
+							case 2:
+								sca = hxcfe_getAllTrackSectors(ss,j,i,AMIGA_MFM_ENCODING,&nbsector);
+							break;
+							case 3:
+								sca = hxcfe_getAllTrackSectors(ss,j,i,EMU_FM_ENCODING,&nbsector);
+							break;
+							case 4:
+								sca = hxcfe_getAllTrackSectors(ss,j,i,TYCOM_FM_ENCODING,&nbsector);
+							break;
+							case 5:
+								sca = hxcfe_getAllTrackSectors(ss,j,i,MEMBRAIN_MFM_ENCODING,&nbsector);
+							break;
+
+						}
+
+						if(!nbsector)
+							track_type_id=(track_type_id+1)%6;
+
 						k++;
-					}while(k<track.number_of_sector);
+
+					}while(!nbsector && k<6);
+
+					if(nbsector)
+					{
+						sectorsize=sca[0]->sectorsize;
+						for(l=0;l<256;l++)
+						{
+
+							k=0;
+							do
+							{
+								if(sca[k]->sector==l)
+								{
+									if(sca[k]->sectorsize!=sectorsize)
+									{
+										sectorsize=-1;
+									}
+									if(sca[k]->input_data)
+										fwrite(sca[k]->input_data,sca[k]->sectorsize,1,rawfile);
+
+									sprintf(tmp_str,"%d ",sca[k]->sector);
+									log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
+									strcat(log_str,tmp_str);
+									break;
+								}
+
+								k++;
+							}while(k<nbsector);
+						}
+
+						k=0;
+						do
+						{
+							if(sca[k])
+							{
+								if(sca[k]->input_data)
+									free(sca[k]->input_data);
+								free(sca[k]);
+							}
+							k++;
+						}while(k<nbsector);
 
 
-					if(sectorsize!=-1)
-					{
-						sprintf(tmp_str,",%dB/s",sectorsize);
+						if(sectorsize!=-1)
+						{
+							sprintf(tmp_str,",%dB/s",sectorsize);
+						}
+						else
+						{
+							sprintf(tmp_str,"");
+						}
+
+						log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
+						strcat(log_str,tmp_str);
+
 					}
-					else
-					{
-						sprintf(tmp_str,"");
-					}
-			
-					log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
-					strcat(log_str,tmp_str);
+
+					floppycontext->hxc_printf(MSG_INFO_1,log_str);
+					free(log_str);
 
 				}
-
-				floppycontext->hxc_printf(MSG_INFO_1,log_str);
-				free(log_str);
-			
 			}
-		}	
+			
+			hxcfe_deinitSectorSearch(ss);
+		}
 
 		hxc_fclose(rawfile);
 	}
-	
+
 	return 0;
 }
