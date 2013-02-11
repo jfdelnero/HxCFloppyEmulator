@@ -55,11 +55,13 @@ int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 	int track_cnt;
 	int sectorlistoffset,trackinfooffset;
-	sect_track track;
 	imd_trackheader imd_th;
 
 	struct tm * ts;
 	time_t currenttime;
+
+	SECTORSEARCH* ss;
+	SECTORCONFIG** sca;
 
 //	struct DateTime reptime;
 
@@ -84,166 +86,172 @@ int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 		track_cnt=0;
 
-		for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
+		ss=hxcfe_initSectorSearch(floppycontext,floppy);
+		if(ss)
 		{
-			for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
+
+			for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
 			{
-				sprintf(tmp_str,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(imdfile));
-
-				log_str=0;
-				log_str=realloc(log_str,strlen(tmp_str)+1);
-				memset(log_str,0,strlen(tmp_str)+1);
-				strcat(log_str,tmp_str);
-
-				rec_mode=0;
-				memset(&track,0,sizeof(sect_track));
-				track.side=i;
-				track.track=j;
-				rec_mode=2;
-				nbsector=analysis_and_extract_sector_MFM(floppycontext,floppy->tracks[j]->sides[i],&track);
-				if(!nbsector)
+				for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
 				{
-					nbsector=analysis_and_extract_sector_FM(floppycontext,floppy->tracks[j]->sides[i],&track);
-					rec_mode=1;
-					if(!nbsector)
-					{
-						rec_mode=0;
-						nbsector=analysis_and_extract_sector_AMIGAMFM(floppycontext,floppy->tracks[j]->sides[i],&track);
-					}
-				}
+					sprintf(tmp_str,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(imdfile));
 
-
-				memset(&imd_th,0,sizeof(imd_trackheader));
-
-				imd_th.physical_head=i;
-
-
-				l=0;
-				while((l<track.number_of_sector) && track.sectorlist[l]->side_id==track.side)
-				{
-					l++;
-				}
-				if(l!=track.number_of_sector)
-				{
-					imd_th.physical_head=imd_th.physical_head | 0x40;
-				}
-					
-
-				l=0;
-				while((l<track.number_of_sector) && track.sectorlist[l]->track_id==track.track)
-				{
-					l++;
-				}
-				if(l!=track.number_of_sector)
-				{
-					imd_th.physical_head=imd_th.physical_head | 0x80;
-				}
-					
-				imd_th.physical_cylinder=j;
-				imd_th.number_of_sector=track.number_of_sector;
-				
-				imd_th.track_mode_code=rec_mode;
-
-				switch(floppy->tracks[j]->sides[i]->bitrate)
-				{
-					case 250000:
-						imd_th.track_mode_code=2;
-						break;
-					case 300000:
-						imd_th.track_mode_code=1;
-						break;
-					case 500000:
-						imd_th.track_mode_code=0;
-						break;
-					default:
-						imd_th.track_mode_code=2;
-						break;
-
-				}
-
-				if(rec_mode==2)
-				{
-					imd_th.track_mode_code=imd_th.track_mode_code+3;
-				}
-
-				if(track.number_of_sector)
-				{
-					imd_th.sector_size_code=size_to_code(track.sectorlist[0]->sectorsize);
-				}
-
-				trackinfooffset=ftell(imdfile);
-				fwrite(&imd_th,sizeof(imd_trackheader),1,imdfile);
-				sectorlistoffset=ftell(imdfile);
-
-				for(k=0;k<track.number_of_sector;k++)
-				{
-					sector_numbering_map[k]=track.sectorlist[k]->sector_id;
-					cylinder_numbering_map[k]=track.sectorlist[k]->track_id;
-					side_numbering_map[k]=track.sectorlist[k]->side_id;
-				}
-
-				fwrite(sector_numbering_map,imd_th.number_of_sector,1,imdfile);
-				if(imd_th.physical_head & 0x80)fwrite(cylinder_numbering_map,imd_th.number_of_sector,1,imdfile);
-				if(imd_th.physical_head & 0x40)fwrite(side_numbering_map,imd_th.number_of_sector,1,imdfile);
-
-				if(track.number_of_sector)
-				{
-			
-					k=0;
-					do
-					{
-
-
-						l=0;
-						while((l<track.sectorlist[k]->sectorsize) && track.sectorlist[k]->buffer[l]==track.sectorlist[k]->buffer[0])
-						{
-							l++;
-						}
-
-						if(l!=track.sectorlist[k]->sectorsize)
-						{
-							fputs("\1",imdfile);
-							fwrite(track.sectorlist[k]->buffer,track.sectorlist[k]->sectorsize,1,imdfile);
-						}
-						else
-						{
-							fputs("\2",imdfile);
-							fwrite(track.sectorlist[k]->buffer,1,1,imdfile);
-						}
-
-						sprintf(tmp_str,"%d ",track.sectorlist[k]->sector_id);
-						log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
-						strcat(log_str,tmp_str);
-						k++;
-			
-					}while(k<track.number_of_sector);
-	
-
-					k=0;
-					do
-					{
-						free(track.sectorlist[k]->buffer);
-						free(track.sectorlist[k]);
-						k++;
-					}while(k<track.number_of_sector);
-
-			
-					log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
+					log_str=0;
+					log_str=realloc(log_str,strlen(tmp_str)+1);
+					memset(log_str,0,strlen(tmp_str)+1);
 					strcat(log_str,tmp_str);
 
+					rec_mode=0;
+					rec_mode=2;
+
+					sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector);
+					if(!sca)
+					{
+						sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector);
+						rec_mode=1;
+						if(!nbsector)
+						{
+							rec_mode=0;
+							sca = hxcfe_getAllTrackSectors(ss,j,i,AMIGA_MFM_ENCODING,&nbsector);
+						}
+					}
+
+					memset(&imd_th,0,sizeof(imd_trackheader));
+
+					imd_th.physical_head=i;
+
+					l=0;
+					while((l<nbsector) && sca[l]->head == i )
+					{
+						l++;
+					}
+					if(l!=nbsector)
+					{
+						imd_th.physical_head=imd_th.physical_head | 0x40;
+					}
+
+
+					l=0;
+					while((l<nbsector) && sca[l]->cylinder == j)
+					{
+						l++;
+					}
+					if(l!=nbsector)
+					{
+						imd_th.physical_head=imd_th.physical_head | 0x80;
+					}
+
+					imd_th.physical_cylinder=j;
+					imd_th.number_of_sector=nbsector;
+
+					imd_th.track_mode_code=rec_mode;
+
+					switch(floppy->tracks[j]->sides[i]->bitrate)
+					{
+						case 250000:
+							imd_th.track_mode_code=2;
+							break;
+						case 300000:
+							imd_th.track_mode_code=1;
+							break;
+						case 500000:
+							imd_th.track_mode_code=0;
+							break;
+						default:
+							imd_th.track_mode_code=2;
+							break;
+					}
+
+					if(rec_mode==2)
+					{
+						imd_th.track_mode_code=imd_th.track_mode_code+3;
+					}
+
+					if(nbsector)
+					{
+						imd_th.sector_size_code=size_to_code(sca[0]->sectorsize);
+					}
+
+					trackinfooffset=ftell(imdfile);
+					fwrite(&imd_th,sizeof(imd_trackheader),1,imdfile);
+					sectorlistoffset=ftell(imdfile);
+
+					for(k=0;k<nbsector;k++)
+					{
+						sector_numbering_map[k] = sca[k]->sector;
+						cylinder_numbering_map[k] = sca[k]->cylinder;
+						side_numbering_map[k]= sca[k]->head;
+					}
+
+					fwrite(sector_numbering_map,imd_th.number_of_sector,1,imdfile);
+					if(imd_th.physical_head & 0x80)fwrite(cylinder_numbering_map,imd_th.number_of_sector,1,imdfile);
+					if(imd_th.physical_head & 0x40)fwrite(side_numbering_map,imd_th.number_of_sector,1,imdfile);
+
+					if(nbsector)
+					{
+
+						k=0;
+						do
+						{
+
+
+							l=0;
+							while((l<(int)sca[k]->sectorsize) && sca[k]->input_data[l]==sca[k]->input_data[0])
+							{
+								l++;
+							}
+
+							if(l!=(int)sca[k]->sectorsize)
+							{
+								fputs("\1",imdfile);
+								fwrite(sca[k]->input_data,sca[k]->sectorsize,1,imdfile);
+							}
+							else
+							{
+								fputs("\2",imdfile);
+								fwrite(sca[k]->input_data,1,1,imdfile);
+							}
+
+							sprintf(tmp_str,"%d ",sca[k]->sector);
+							log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
+							strcat(log_str,tmp_str);
+							k++;
+
+						}while(k<nbsector);
+
+
+						k=0;
+						do
+						{
+							if(sca[k])
+							{
+								if(sca[k]->input_data)
+									free(sca[k]->input_data);
+								free(sca[k]);
+							}
+							k++;
+						}while(k<nbsector);
+
+
+						log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
+						strcat(log_str,tmp_str);
+
+					}
+
+					track_cnt++;
+
+					floppycontext->hxc_printf(MSG_INFO_1,log_str);
+					free(log_str);
+
 				}
 
-				track_cnt++;
-
-				floppycontext->hxc_printf(MSG_INFO_1,log_str);
-				free(log_str);
-			
 			}
-		}	
 
+			hxcfe_deinitSectorSearch(ss);
+		}
 
 		hxc_fclose(imdfile);
 	}
-	
+
 	return 0;
 }
