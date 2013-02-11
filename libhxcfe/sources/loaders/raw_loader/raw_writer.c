@@ -113,7 +113,7 @@ int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 							{
 								if(sca[k]->sector==l)
 								{
-									if(sca[k]->sectorsize!=sectorsize)
+									if(sca[k]->sectorsize!=(unsigned int)sectorsize)
 									{
 										sectorsize=-1;
 									}
