@@ -84,10 +84,12 @@ int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 	int sectorsize;
 	int track_cnt;
 	int sectorlistoffset,trackinfooffset;
-	sect_track track;
 	cpcdsk_fileheader * cpcdsk_fh;
 	cpcdsk_trackheader cpcdsk_th;
 	cpcdsk_sector cpcdsk_s;
+
+	SECTORSEARCH* ss;
+	SECTORCONFIG** sca;
 
 
 	floppycontext->hxc_printf(MSG_INFO_1,"Write CPCDSK file %s...",filename);
@@ -103,150 +105,150 @@ int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 		fwrite(&disk_info_block,0x100,1,cpcdskfile);
 		track_cnt=0;
 
-		for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
+		ss=hxcfe_initSectorSearch(floppycontext,floppy);
+		
+		if(ss)
 		{
-			for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
+			for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
 			{
-				sprintf(tmp_str,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(cpcdskfile));
-
-				log_str=0;
-				log_str=realloc(log_str,strlen(tmp_str)+1);
-				memset(log_str,0,strlen(tmp_str)+1);
-				strcat(log_str,tmp_str);
-
-				rec_mode=0;
-				memset(&track,0,sizeof(sect_track));
-				track.side=i;
-				track.track=j;
-				rec_mode=2;
-				nbsector=analysis_and_extract_sector_MFM(floppycontext,floppy->tracks[j]->sides[i],&track);
-				if(!nbsector)
+				for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
 				{
-					nbsector=analysis_and_extract_sector_FM(floppycontext,floppy->tracks[j]->sides[i],&track);
-					rec_mode=1;
-					if(!nbsector)
-					{
-						rec_mode=0;
-						nbsector=analysis_and_extract_sector_AMIGAMFM(floppycontext,floppy->tracks[j]->sides[i],&track);
-					}
-				}
+					sprintf(tmp_str,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(cpcdskfile));
 
-				memset(&cpcdsk_th,0,sizeof(cpcdsk_trackheader));
-				sprintf(cpcdsk_th.headertag,"Track-Info\r\n");
-				cpcdsk_th.side_number=i;
-				cpcdsk_th.track_number=j;
-				cpcdsk_th.gap3_length=78;
-				cpcdsk_th.filler_byte=0xE5;
-				cpcdsk_th.number_of_sector=track.number_of_sector;
-				cpcdsk_th.rec_mode=rec_mode;
-
-				switch(floppy->tracks[j]->sides[i]->bitrate)
-				{
-					case 250000:
-						cpcdsk_th.datarate=1;
-						break;
-					case 500000:
-						cpcdsk_th.datarate=2;
-						break;
-					case 1000000:
-						cpcdsk_th.datarate=3;
-						break;
-					default:
-						cpcdsk_th.datarate=0;
-						break;
-
-				}
-
-
-				if(track.number_of_sector)
-				{
-					cpcdsk_th.sector_size_code=size_to_code(track.sectorlist[0]->sectorsize);
-				}
-
-				trackinfooffset=ftell(cpcdskfile);
-				fwrite(&cpcdsk_th,sizeof(cpcdsk_trackheader),1,cpcdskfile);
-				sectorlistoffset=ftell(cpcdskfile);
-
-				if(track.number_of_sector)
-				{
-					if(cpcdsk_fh->number_of_sides<(i+1))cpcdsk_fh->number_of_sides=i+1;
-					if(cpcdsk_fh->number_of_tracks<(j+1))cpcdsk_fh->number_of_tracks=j+1;
-
-
-					memset(&cpcdsk_s,0,sizeof(cpcdsk_sector));
-					for(k=0;k<track.number_of_sector;k++) 
-					{
-						fwrite(&cpcdsk_s,sizeof(cpcdsk_sector),1,cpcdskfile);
-					}
-					memset(tmp_str,0,0x100);
-					fwrite(&tmp_str,0x100-(((sizeof(cpcdsk_sector)*track.number_of_sector)+sizeof(cpcdsk_trackheader))%0x100),1,cpcdskfile);
-
-					sectorsize=track.sectorlist[0]->sectorsize;
-			
-					k=0;
-					do
-					{
-						if(track.sectorlist[k]->sectorsize!=sectorsize)
-						{
-							sectorsize=-1;	
-						}
-
-
-						cpcdsk_s.sector_id=track.sectorlist[k]->sector_id;
-						cpcdsk_s.side=track.sectorlist[k]->side_id;
-						cpcdsk_s.track=track.sectorlist[k]->track_id;
-						cpcdsk_s.sector_size_code=size_to_code(track.sectorlist[k]->sectorsize);
-						cpcdsk_s.data_lenght=track.sectorlist[k]->sectorsize;								
-						fseek(cpcdskfile,sectorlistoffset+(k*sizeof(cpcdsk_sector)),SEEK_SET);
-						fwrite(&cpcdsk_s,sizeof(cpcdsk_sector),1,cpcdskfile);
-
-						fseek(cpcdskfile,0,SEEK_END);
-						fwrite(track.sectorlist[k]->buffer,track.sectorlist[k]->sectorsize,1,cpcdskfile);
-
-						sprintf(tmp_str,"%d ",track.sectorlist[k]->sector_id);
-						log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
-						strcat(log_str,tmp_str);
-						k++;
-			
-					}while(k<track.number_of_sector);
-					
-					
-				
-
-
-					k=0;
-					do
-					{
-						free(track.sectorlist[k]->buffer);
-						free(track.sectorlist[k]);
-						k++;
-					}while(k<track.number_of_sector);
-
-
-					if(sectorsize!=-1)
-					{
-						sprintf(tmp_str,",%dB/s",sectorsize);
-					}
-			
-					log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
+					log_str=0;
+					log_str=realloc(log_str,strlen(tmp_str)+1);
+					memset(log_str,0,strlen(tmp_str)+1);
 					strcat(log_str,tmp_str);
 
+					rec_mode=0;
+					rec_mode=2;
+					sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector);
+					if(!sca)
+					{
+						sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector);
+						rec_mode=1;
+						if(!nbsector)
+						{
+							rec_mode=0;
+							sca = hxcfe_getAllTrackSectors(ss,j,i,AMIGA_MFM_ENCODING,&nbsector);
+						}
+					}
+
+					memset(&cpcdsk_th,0,sizeof(cpcdsk_trackheader));
+					sprintf(cpcdsk_th.headertag,"Track-Info\r\n");
+					cpcdsk_th.side_number=i;
+					cpcdsk_th.track_number=j;
+					cpcdsk_th.gap3_length=78;
+					cpcdsk_th.filler_byte=0xE5;
+					cpcdsk_th.number_of_sector = nbsector;
+					cpcdsk_th.rec_mode=rec_mode;
+
+					switch(floppy->tracks[j]->sides[i]->bitrate)
+					{
+						case 250000:
+							cpcdsk_th.datarate=1;
+							break;
+						case 500000:
+							cpcdsk_th.datarate=2;
+							break;
+						case 1000000:
+							cpcdsk_th.datarate=3;
+							break;
+						default:
+							cpcdsk_th.datarate=0;
+							break;
+
+					}
+
+
+					if(nbsector)
+					{
+						cpcdsk_th.sector_size_code=size_to_code(sca[0]->sectorsize);
+					}
+
+					trackinfooffset=ftell(cpcdskfile);
+					fwrite(&cpcdsk_th,sizeof(cpcdsk_trackheader),1,cpcdskfile);
+					sectorlistoffset=ftell(cpcdskfile);
+
+					if(nbsector)
+					{
+						if(cpcdsk_fh->number_of_sides<(i+1))cpcdsk_fh->number_of_sides=i+1;
+						if(cpcdsk_fh->number_of_tracks<(j+1))cpcdsk_fh->number_of_tracks=j+1;
+
+
+						memset(&cpcdsk_s,0,sizeof(cpcdsk_sector));
+						for(k=0;k<nbsector;k++) 
+						{
+							fwrite(&cpcdsk_s,sizeof(cpcdsk_sector),1,cpcdskfile);
+						}
+						memset(tmp_str,0,0x100);
+						fwrite(&tmp_str,0x100-(((sizeof(cpcdsk_sector)*nbsector)+sizeof(cpcdsk_trackheader))%0x100),1,cpcdskfile);
+
+						sectorsize=sca[0]->sectorsize;
+
+						k=0;
+						do
+						{
+							if(sca[k]->sectorsize!=sectorsize)
+							{
+								sectorsize=-1;
+							}
+
+
+							cpcdsk_s.sector_id = sca[k]->sector;
+							cpcdsk_s.side = sca[k]->head;
+							cpcdsk_s.track = sca[k]->cylinder;
+							cpcdsk_s.sector_size_code = size_to_code(sca[k]->sectorsize);
+							cpcdsk_s.data_lenght = sca[k]->sectorsize;								
+							fseek(cpcdskfile,sectorlistoffset+(k*sizeof(cpcdsk_sector)),SEEK_SET);
+							fwrite(&cpcdsk_s,sizeof(cpcdsk_sector),1,cpcdskfile);
+
+							fseek(cpcdskfile,0,SEEK_END);
+							fwrite(sca[k]->input_data,sca[k]->sectorsize,1,cpcdskfile);
+
+							sprintf(tmp_str,"%d ",sca[k]->sector);
+							log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
+							strcat(log_str,tmp_str);
+							k++;
+
+						}while(k<nbsector);
+
+						k=0;
+						do
+						{
+							free(sca[k]->input_data);
+							free(sca[k]);
+							k++;
+						}while(k<nbsector);
+
+						if(sectorsize!=-1)
+						{
+							sprintf(tmp_str,",%dB/s",sectorsize);
+						}
+
+						log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
+						strcat(log_str,tmp_str);
+
+					}
+
+					disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt]=(ftell(cpcdskfile)-trackinfooffset)/256;
+					track_cnt++;
+
+					floppycontext->hxc_printf(MSG_INFO_1,log_str);
+					free(log_str);
+
 				}
-
-				disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt]=(ftell(cpcdskfile)-trackinfooffset)/256;
-				track_cnt++;
-
-				floppycontext->hxc_printf(MSG_INFO_1,log_str);
-				free(log_str);
-			
 			}
-		}	
+
+			hxcfe_deinitSectorSearch(ss);
+
+		}
 
 		fseek(cpcdskfile,0,SEEK_SET);
 		fwrite(&disk_info_block,0x100,1,cpcdskfile);
 
 		hxc_fclose(cpcdskfile);
 	}
-	
+
 	return 0;
 }
