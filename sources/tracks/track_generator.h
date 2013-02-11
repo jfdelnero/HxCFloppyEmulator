@@ -148,6 +148,8 @@ typedef struct isoibm_config_
 	unsigned char	side_id;
 	unsigned char	sector_id;
 	unsigned char	sector_size_id;
+
+	unsigned short  crc_poly,crc_initial;
 }isoibm_config;
 
 
@@ -159,6 +161,8 @@ typedef struct isoibm_config_
 #define ISOFORMAT_DD11S 0x5
 #define AMIGAFORMAT_DD  0x6
 #define TYCOMFORMAT_SD  0x7
+#define MEMBRAINFORMAT_DD  0x8
+
 
 static isoibm_config formatstab[]=
 {    //     I         --gap4a --i sync --     index mark      --  gap1 --h sync -- --d sync --    add mark            -- gap2 --
@@ -190,7 +194,9 @@ static isoibm_config formatstab[]=
 		
 		0xFF,255, // gap4 config
 
-		0xFF,0xFF,0xFF,0xFF // Track - Side - Sector - Size
+		0xFF,0xFF,0xFF,0xFF, // Track - Side - Sector - Size
+		
+		0x1021,0xFFFF		// crc, initial value
 	},
 	
 	
@@ -222,7 +228,9 @@ static isoibm_config formatstab[]=
 		
 		0x4E,255, // gap4 config
 		
-		0xFF,0xFF,0xFF,0xFF // Track - Side - Sector - Size
+		0xFF,0xFF,0xFF,0xFF, // Track - Side - Sector - Size
+
+		0x1021,0xFFFF		// crc, initial value
 		
 	},
 	
@@ -254,7 +262,9 @@ static isoibm_config formatstab[]=
 		
 		0xFF,255, // gap4 config
 
-		0xFF,0xFF,0xFF,0xFF // Track - Side - Sector - Size
+		0xFF,0xFF,0xFF,0xFF, // Track - Side - Sector - Size
+
+		0x1021,0xFFFF		// crc, initial value
 		
 	},
 	
@@ -285,7 +295,9 @@ static isoibm_config formatstab[]=
 		0x4E,84, // gap3 config
 		0x4E,255, // gap4 config
 
-		0xFF,0xFF,0xFF,0xFF // Track - Side - Sector - Size
+		0xFF,0xFF,0xFF,0xFF, // Track - Side - Sector - Size
+
+		0x1021,0xFFFF		// crc, initial value
 		
 	},	
 	{	
@@ -316,7 +328,9 @@ static isoibm_config formatstab[]=
 		
 		0x4E,0xFF, // gap4 config
 
-		0xFF,0xFF,0xFF,0xFF // Track - Side - Sector - Size
+		0xFF,0xFF,0xFF,0xFF, // Track - Side - Sector - Size
+
+		0x1021,0xFFFF		// crc, initial value
 		
 	},	
 	{	
@@ -347,7 +361,9 @@ static isoibm_config formatstab[]=
 		
 		0xFF,0xFF, // gap4 config
 
-		0xFF,0xFF,0xFF,0xFF // Track - Side - Sector - Size
+		0xFF,0xFF,0xFF,0xFF, // Track - Side - Sector - Size
+
+		0x0000,0x0000		// crc, initial value
 		
 	},	
 
@@ -379,7 +395,42 @@ static isoibm_config formatstab[]=
 		
 		0xFF,255, // gap4 config
 
-		0xFF,0x00,0xFF,0x00 // Track - Side - Sector - Size
+		0xFF,0x00,0xFF,0x00, // Track - Side - Sector - Size
+
+		0x1021,0xFFFF		// crc, initial value
+		
+	},
+	
+	{	
+		MEMBRAINFORMAT_DD,
+		
+		0x4E,00, // post index gap4 config
+		
+		0x00,00, // index sync config 
+		
+		0x00,0x00,0,// index mark coding
+		0x00,0x00,0, 
+		
+		0x4E,32, // gap1 config
+		
+		0x00,12, // h sync config
+		
+		0x00,12, // d sync config
+		
+		0xA1,0x0A,1,// address mark coding
+		0xFE,0xFF,1,
+		
+		0x4E,22, // gap2 config
+		
+		0xA1,0x0A,1,// data mark coding
+		0xF8,0xFF,1,
+		
+		0x4E,84, // gap3 config
+		0x4E,255, // gap4 config
+
+		0xFF,0xFF,0xFF,0xFF, // Track - Side - Sector - Size
+
+		0x8005,0x0000		// crc, initial value
 		
 	},
 {	
@@ -410,28 +461,30 @@ static isoibm_config formatstab[]=
 		
 		0x4E,255,
 
-		0xFF,0xFF,0xFF,0xFF // Track - Side - Sector - Size
+		0xFF,0xFF,0xFF,0xFF, // Track - Side - Sector - Size
+
+		0x1021,0xFFFF		// crc, initial value
 		}
 };
 
-int BuildCylinder(unsigned char * mfm_buffer,int mfm_size,unsigned char * track_clk,unsigned char * track_data,int track_size);
+int  BuildCylinder(unsigned char * mfm_buffer,int mfm_size,unsigned char * track_clk,unsigned char * track_data,int track_size);
 void BuildFMCylinder(char * buffer,int fmtracksize,char * bufferclk,char * track,int size);
 
 void getMFMcode(track_generator *tg,unsigned char data,unsigned char clock,unsigned char * dstbuf);
 void getFMcode (track_generator *tg,unsigned char data,unsigned char clock,unsigned char * dstbuf);
 int  pushTrackCode(track_generator *tg,unsigned char data,unsigned char clock,SIDE * side,unsigned char trackencoding);
 
-void          tg_initTrackEncoder(track_generator *tg);
-unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackencoding,unsigned int bitrate,unsigned int numberofsector,SECTORCONFIG * sectorconfigtab,unsigned int pregaplen,unsigned long * track_period);
-void          tg_addSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * currentside);
-void          tg_completeTrack(track_generator *tg, SIDE * currentside,unsigned char trackencoding);
+void            tg_initTrackEncoder(track_generator *tg);
+unsigned long   tg_computeMinTrackSize(track_generator *tg,unsigned char trackencoding,unsigned int bitrate,unsigned int numberofsector,SECTORCONFIG * sectorconfigtab,unsigned int pregaplen,unsigned long * track_period);
+void            tg_addSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * currentside);
+void            tg_completeTrack(track_generator *tg, SIDE * currentside,unsigned char trackencoding);
 
-SIDE *		  tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short numberofsector,unsigned char trackencoding,unsigned int bitrate,SECTORCONFIG * sectorconfigtab,unsigned short pregap);
+SIDE *          tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short numberofsector,unsigned char trackencoding,unsigned int bitrate,SECTORCONFIG * sectorconfigtab,unsigned short pregap);
 
-SIDE *        tg_generateTrack(unsigned char * sectors_data,unsigned short sector_size,unsigned short number_of_sector,unsigned char track,unsigned char side,unsigned char sectorid,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned char gap3,unsigned short pregap, int indexlen,int indexpos);
-SIDE *        tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorconfigtab,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned short pregap,int indexlen,int indexpos);
+SIDE *          tg_generateTrack(unsigned char * sectors_data,unsigned short sector_size,unsigned short number_of_sector,unsigned char track,unsigned char side,unsigned char sectorid,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned char gap3,unsigned short pregap, int indexlen,int indexpos);
+SIDE *          tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorconfigtab,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned short pregap,int indexlen,int indexpos);
 
-SIDE *        tg_alloctrack(unsigned int bitrate,unsigned char trackencoding,unsigned short rpm,unsigned int tracksize,int indexlen,int indexpos,unsigned char buffertoalloc);
+SIDE *          tg_alloctrack(unsigned int bitrate,unsigned char trackencoding,unsigned short rpm,unsigned int tracksize,int indexlen,int indexpos,unsigned char buffertoalloc);
 
 unsigned long * tg_allocsubtrack_long(unsigned int tracksize,unsigned long initvalue);
 unsigned char * tg_allocsubtrack_char(unsigned int tracksize,unsigned char initvalue);
