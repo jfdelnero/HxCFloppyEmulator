@@ -68,6 +68,9 @@
 
 //#define KFSTREAMDBG 1
 
+// us
+#define BLOCK_TIME 1000
+
 HXCFLOPPYEMULATOR* floppycont;
 
 int KryoFluxStream_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
@@ -436,15 +439,12 @@ int getCellTiming(pll_stat * pll,int current_pulsevalue,int * badpulse,int t,int
 	return blankcell;
 }
 
-
-
 typedef struct s_match_
 {
 	int yes;
 	int no;
 	unsigned long offset;
 }s_match;
-
 
 void exchange(s_match *  table, int a, int b)
 {
@@ -677,8 +677,6 @@ unsigned long time_to_tick(unsigned long time)
 }
 
 
-// us
-#define BLOCK_TIME 5000
 
 unsigned long GetDumpTimelength(s_track_dump * track_dump)
 {
@@ -739,11 +737,11 @@ pulsesblock * ScanAndFindBoundaries(s_track_dump * track_dump, int blocktimeleng
 			pb[i].start_index = j;
 
 			len = 0;
-			do
+			while(len < blocklen && j < track_dump->nb_of_pulses)
 			{
 				len = len + track_dump->track_dump[j];
 				j++;
-			}while(len < blocklen && j < track_dump->nb_of_pulses);
+			};
 
 			pb[i].end_index = j;
 			pb[i].ticklenght = len;
@@ -1233,7 +1231,10 @@ int getNearestMatchedBlock(pulsesblock * pb, int dir, int currentblock,int nbblo
 
 unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontext,s_track_dump * track_dump,unsigned long indexperiod,unsigned long nbblock,pulsesblock * pb)
 {
-	unsigned long j,block_analysed;
+#ifdef SECONDPASSANALYSIS
+	unsigned long block_analysed;
+#endif
+	unsigned long j;
 	unsigned long cur_time_len;
 	unsigned long index_tickpediod,block_tickpediod;
 	unsigned long repeat_index;
@@ -1947,6 +1948,8 @@ SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,floa
 
 			// Get the index period.
 			indexperiod = ScanAndGetIndexPeriod(track_dump);
+
+			//indexperiod = 166 *1000*100;
 
 			floppycontext->hxc_printf(MSG_DEBUG,"Index period : %d ms",indexperiod / (1000*100) );
 
