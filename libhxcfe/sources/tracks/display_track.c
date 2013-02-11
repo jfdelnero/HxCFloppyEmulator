@@ -448,6 +448,12 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 								case AMIGAFORMAT_DD:
 									sprintf(tempstr,"AMFM %.3dB ",sc->sectorsize);
 									break;
+								case TYCOMFORMAT_SD:
+									sprintf(tempstr,"TYFM %.3dB ",sc->sectorsize);
+								break;
+								case MEMBRAINFORMAT_DD:
+									sprintf(tempstr,"MEMBRAIN %.3dB DM:%.2Xh",sc->sectorsize,sc->alternate_datamark);
+								break;
 							}
 
 							putstring8x8(td,xpos_startheader,225,tempstr,0x000,1);
@@ -472,6 +478,15 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 								case AMIGAFORMAT_DD:
 									sprintf(tempstr,"AMFM DATA ?");
 									break;
+
+								case TYCOMFORMAT_SD:
+									sprintf(tempstr,"TYFM DATA ? DM:%.2Xh",sc->alternate_datamark);
+								break;
+
+								case MEMBRAINFORMAT_DD:
+									sprintf(tempstr,"MEMBRAIN DATA ? DM:%.2Xh",sc->alternate_datamark);
+								break;
+
 							}
 							putstring8x8(td,xpos_startheader,225,tempstr,0x000,1);
 						}
@@ -776,6 +791,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,AMIGA_MFM_ENCODING);
 	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,ISOIBM_FM_ENCODING);
 	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,TYCOM_FM_ENCODING);
+	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,MEMBRAIN_MFM_ENCODING);
 
 
 	//display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,EMU_FM_ENCODING);
