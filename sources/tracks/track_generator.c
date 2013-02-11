@@ -380,6 +380,7 @@ int pushTrackCode(track_generator *tg,unsigned char data,unsigned char clock,SID
 		case ISOFORMAT_DD:
 		case ISOFORMAT_DD11S:
 		case AMIGAFORMAT_DD:
+		case MEMBRAINFORMAT_DD:
 			getMFMcode(tg,data,clock,&side->databuffer[tg->last_bit_offset/8]);
 			tg->last_bit_offset=tg->last_bit_offset+(2*8);
 		break;
@@ -544,8 +545,6 @@ void FastFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_data,
 	return;
 }
 
-
-
 void FastMFMFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_data,int size,unsigned char trackencoding)
 {
 	
@@ -560,6 +559,7 @@ void FastMFMFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_da
 		case IBMFORMAT_DD:
 		case ISOFORMAT_DD:
 		case ISOFORMAT_DD11S:
+		case MEMBRAINFORMAT_DD:
 			FastMFMgenerator(tg,side,track_data,size);
 		break;
 
@@ -572,7 +572,6 @@ void FastMFMFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_da
 	}
 	return;
 }
-
 
 // FM encoder
 void BuildFMCylinder(char * buffer,int fmtracksize,char * bufferclk,char * track,int size)
@@ -763,6 +762,7 @@ unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackenco
 		case IBMFORMAT_DD:
 		case ISOFORMAT_DD:
 		case ISOFORMAT_DD11S:
+		case MEMBRAINFORMAT_DD:
 			total_track_size=total_track_size*2;
 			break;
 
@@ -811,6 +811,7 @@ unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackenco
 			case IBMFORMAT_DD:
 			case ISOFORMAT_DD:
 			case ISOFORMAT_DD11S:
+			case MEMBRAINFORMAT_DD:
 				track_size=track_size*2;
 				break;
 
@@ -955,7 +956,11 @@ SIDE * tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short n
 		case ISOFORMAT_DD:
 			currentside->track_encoding=ISOIBM_MFM_ENCODING;
 		break;
-		
+
+		case MEMBRAINFORMAT_DD:
+			currentside->track_encoding=MEMBRAIN_MFM_ENCODING;
+		break;
+
 		case AMIGAFORMAT_DD:
 			currentside->track_encoding=AMIGA_MFM_ENCODING;
 		break;
@@ -1006,7 +1011,7 @@ void tg_addISOSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE
 		pushTrackCode(tg,formatstab[trackencoding].data_ssync,0xFF,currentside,sectorconfig->trackencoding);
 	}
 
-	CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,0x1021,0xFFFF);
+	CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,formatstab[trackencoding].crc_poly,formatstab[trackencoding].crc_initial);
 	// add mark
 	for(i=0;i<formatstab[trackencoding].len_addrmarkp1;i++)
 	{
@@ -1031,49 +1036,63 @@ void tg_addISOSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE
 		}
 	}
 
-	// track number
-	if(formatstab[trackencoding].track_id)
+	if(formatstab[trackencoding].indexformat==MEMBRAINFORMAT_DD)
 	{
-		pushTrackCode(tg,sectorconfig->cylinder,0xFF,currentside,sectorconfig->trackencoding);
-		CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->cylinder,(unsigned char*)&crctable );
-	}
-
-	//01 Side # The side number this is (0 or 1) 
-	if(formatstab[trackencoding].side_id)
-	{
-		pushTrackCode(tg,sectorconfig->head,  0xFF,currentside,sectorconfig->trackencoding);
-		CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->head,(unsigned char*)&crctable );
-	}
-			
-	//01 Sector # The sector number 
-	if(formatstab[trackencoding].sector_id)
-	{
-		pushTrackCode(tg,sectorconfig->sector,0xFF,currentside,sectorconfig->trackencoding);
-		CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->sector,(unsigned char*)&crctable );
-	}
-			
-	
-	//01 Sector size: 02=512. (00=128, 01=256, 02=512, 03=1024) 
-	
-	sectorsize = 128;
-
-	if(formatstab[trackencoding].sector_size_id)
-	{
-		sectorsize = sectorconfig->sectorsize;
-		if(sectorconfig->use_alternate_sector_size_id)
-		{
-			c=sectorconfig->alternate_sector_size_id;
-		}
-		else
-		{	
-			c=0;
-			while(((unsigned int)(128<<(unsigned int)c) != sectorsize ) && c<8)
-			{
-				c++;
-			}
-		}
+		c = sectorconfig->cylinder>>3;
 		pushTrackCode(tg,c,0xFF,currentside,sectorconfig->trackencoding);
 		CRC16_Update(&CRC16_High,&CRC16_Low, c,(unsigned char*)&crctable );
+
+		c = (sectorconfig->cylinder<<5) | ((sectorconfig->head&1) << 4) | (sectorconfig->sector&0xF);
+		pushTrackCode(tg,c,0xFF,currentside,sectorconfig->trackencoding);
+		CRC16_Update(&CRC16_High,&CRC16_Low, c,(unsigned char*)&crctable );
+
+		sectorsize = sectorconfig->sectorsize;
+	}
+	else
+	{
+		// track number
+		if(formatstab[trackencoding].track_id)
+		{
+			pushTrackCode(tg,sectorconfig->cylinder,0xFF,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->cylinder,(unsigned char*)&crctable );
+		}
+
+		//01 Side # The side number this is (0 or 1) 
+		if(formatstab[trackencoding].side_id)
+		{
+			pushTrackCode(tg,sectorconfig->head,  0xFF,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->head,(unsigned char*)&crctable );
+		}
+
+		//01 Sector # The sector number 
+		if(formatstab[trackencoding].sector_id)
+		{
+			pushTrackCode(tg,sectorconfig->sector,0xFF,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->sector,(unsigned char*)&crctable );
+		}
+
+		//01 Sector size: 02=512. (00=128, 01=256, 02=512, 03=1024) 
+
+		sectorsize = 128;
+
+		if(formatstab[trackencoding].sector_size_id)
+		{
+			sectorsize = sectorconfig->sectorsize;
+			if(sectorconfig->use_alternate_sector_size_id)
+			{
+				c=sectorconfig->alternate_sector_size_id;
+			}
+			else
+			{	
+				c=0;
+				while(((unsigned int)(128<<(unsigned int)c) != sectorsize ) && c<8)
+				{
+					c++;
+				}
+			}
+			pushTrackCode(tg,c,0xFF,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, c,(unsigned char*)&crctable );
+		}
 	}
 
 	//02 CRC The sector Header CRC
@@ -1111,7 +1130,7 @@ void tg_addISOSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE
 	}
 			
 	//02 CRC The CRC of the data 
-	CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,0x1021,0xFFFF);
+	CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,formatstab[trackencoding].crc_poly,formatstab[trackencoding].crc_initial);
 
 	// data mark
 	for(i=0;i<formatstab[trackencoding].len_datamarkp1;i++)
@@ -1211,7 +1230,11 @@ void tg_addISOSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE
 		case ISOFORMAT_DD:
 			trackenc=ISOIBM_MFM_ENCODING;
 		break;
-		
+
+		case MEMBRAINFORMAT_DD:
+			currentside->track_encoding = MEMBRAIN_MFM_ENCODING;
+		break;
+
 		default:
 			trackenc=ISOIBM_MFM_ENCODING;
 		break;
@@ -1401,6 +1424,7 @@ void tg_addSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * 
 		case ISOFORMAT_DD:
 		case ISOFORMAT_DD11S:
 		case TYCOMFORMAT_SD:
+		case MEMBRAINFORMAT_DD:
 			tg_addISOSectorToTrack(tg,sectorconfig,currentside);
 			break;
 
@@ -1530,6 +1554,7 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 					case ISOFORMAT_DD11S:
 					case IBMFORMAT_DD:
 					case ISOFORMAT_DD:
+					case MEMBRAINFORMAT_DD:
 						computedgap3=computedgap3/(1*8);
 					break;
 				}
@@ -1599,7 +1624,7 @@ SIDE * tg_generateTrack(unsigned char * sectors_data,unsigned short sector_size,
 	{
 		sectorconfigtab[i].cylinder=track;
 		sectorconfigtab[i].head=side;
-		sectorconfigtab[i].bitrate=bitrate;//+(10000*i);
+		sectorconfigtab[i].bitrate=bitrate;
 		sectorconfigtab[i].gap3=gap3;
 		sectorconfigtab[i].input_data=&sectors_data[sector_size*i];
 		sectorconfigtab[i].sectorsize=sector_size;
