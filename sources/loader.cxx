@@ -67,7 +67,7 @@ int load_floppy(FLOPPY * floppydisk)
 	int ret;
 
 	hxcfe_floppyUnload(guicontext->hxcfe,guicontext->loadedfloppy);
-	guicontext->loadedfloppy=0;
+
 	guicontext->loadedfloppy=floppydisk;
 
 	sync_if_config();
