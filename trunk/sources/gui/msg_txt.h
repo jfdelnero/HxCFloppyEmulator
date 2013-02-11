@@ -137,6 +137,7 @@ Fl_Menu_Item track_type_choices[]=
 	{ "MFM",0,raw_loader_window_datachanged,(void*)ISOFORMAT_DD},
 	{ "IBM MFM",0,raw_loader_window_datachanged,(void*)IBMFORMAT_DD},
 	{ "TYCOM FM",0,raw_loader_window_datachanged,(void*)TYCOMFORMAT_SD},
+	{ "MEMBRAIN MFM",0,raw_loader_window_datachanged,(void*)MEMBRAINFORMAT_DD},
 	{0}
 };
 
@@ -192,7 +193,8 @@ enum
 	MFM_TRACK_TYPE,
 	MFMIBM_TRACK_TYPE,
 	GCR_TRACK_TYPE,
-	TYCOM_TRACK_TYPE
+	TYCOM_TRACK_TYPE,
+	MEMBRAIN_TRACK_TYPE
 };
 
 
@@ -203,6 +205,7 @@ track_type track_type_list[]=
 	{ MFM_TRACK_TYPE,"MFM",ISOFORMAT_DD},
 	{ MFMIBM_TRACK_TYPE,"IBM MFM",IBMFORMAT_DD},
 	{ TYCOM_TRACK_TYPE,"TYCOM FM",TYCOMFORMAT_SD},
+	{ MEMBRAIN_TRACK_TYPE,"MEMBRAIN MFM",MEMBRAINFORMAT_DD},
 	//{ GCR_TRACK_TYPE,"GCR"},
 	{ -1,"",0}
 };
