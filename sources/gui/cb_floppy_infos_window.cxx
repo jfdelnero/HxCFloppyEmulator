@@ -321,7 +321,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 				fullstr[0]=0;
 				if( ( xpos>=sl->x_pos1 && xpos<=sl->x_pos2 ) && 
 					( ypos>=(sl->y_pos1) && ypos<=(sl->y_pos2) ) )
-				{					
+				{
 
 					switch(sl->sectorconfig->trackencoding)
 					{
@@ -333,6 +333,12 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						break;
 						case AMIGAFORMAT_DD:
 							sprintf(str,"AMFM ");
+						break;
+						case TYCOMFORMAT_SD:
+							sprintf(str,"TYCOM ");
+						break;
+						case MEMBRAINFORMAT_DD:
+							sprintf(str,"MEMBRAIN ");
 						break;
 						default:
 							sprintf(str,"Unknow ");
