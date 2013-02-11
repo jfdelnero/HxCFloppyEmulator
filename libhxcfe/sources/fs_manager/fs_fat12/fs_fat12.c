@@ -85,8 +85,10 @@ int fat12_mountImage(FSMNG * fsmng, FLOPPY *floppy)
 	media_read_callback = media_read;
 	media_write_callback = media_write;
 
-	fsmng->fp = floppy;
+	if(!floppy || !fsmng)
+		return HXCFE_BADPARAMETER;
 
+	fsmng->fp = floppy;
 
 	fsmng->trackperdisk = fsmng->fp->floppyNumberOfTrack;
 	fsmng->sectorpertrack = 9;
