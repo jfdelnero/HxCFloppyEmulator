@@ -189,7 +189,7 @@ int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 						k=0;
 						do
 						{
-							if(sca[k]->sectorsize!=sectorsize)
+							if(sca[k]->sectorsize!=(unsigned int)sectorsize)
 							{
 								sectorsize=-1;
 							}
