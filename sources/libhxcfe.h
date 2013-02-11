@@ -237,6 +237,7 @@ SECTORSEARCH* hxcfe_initSectorSearch(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp
 
 SECTORCONFIG* hxcfe_getNextSector(SECTORSEARCH* ss,int track,int side,int type);
 SECTORCONFIG* hxcfe_searchSector (SECTORSEARCH* ss,int track,int side,int id,int type);
+SECTORCONFIG** hxcfe_getAllTrackSectors(SECTORSEARCH* ss,int track,int side,int type,int * nb_sectorfound);
 int hxcfe_getSectorSize(SECTORSEARCH* ss,SECTORCONFIG* sc);
 unsigned char * hxcfe_getSectorData(SECTORSEARCH* ss,SECTORCONFIG* sc);
 
