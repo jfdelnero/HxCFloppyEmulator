@@ -208,9 +208,9 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 		else
 			memset(flatimg,0x00,512);
 
-		for(i=0;i<4;i++)
+		for(j=0;j<4;j++)
 		{
-			flatimg[i+0x27]=rand();
+			flatimg[j+0x27]=rand();
 		}
 		fatconfig.sectorsize=configlist[i].sectorsize;
 		fatconfig.clustersize=configlist[i].clustersize;
@@ -220,7 +220,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 		fatconfig.numberofrootentries=configlist[i].root_dir_entries;
 		fatconfig.nbofsector=(floppydisk->floppyNumberOfTrack*
 								(floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide));
-		fatconfig.nbofsectorperfat=((fatconfig.nbofsector-(fatconfig.reservedsector+(fatconfig.numberofrootentries/32)))/((fatconfig.sectorsize*8)/12))+1;
+		fatconfig.nbofsectorperfat=( ((fatconfig.nbofsector-(fatconfig.reservedsector+(fatconfig.numberofrootentries/32)))/fatconfig.clustersize)/((fatconfig.sectorsize*8)/12))+1;
 		//sprintf(&flatimg[CHSTOADR(0,0,0)+3],"HXC.EMU");
 
 		fatbs=(fat_boot_sector*)flatimg;
