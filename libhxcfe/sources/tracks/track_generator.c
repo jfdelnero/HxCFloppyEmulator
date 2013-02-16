@@ -1438,6 +1438,7 @@ void tg_addSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * 
 void tg_completeTrack(track_generator *tg, SIDE * currentside,unsigned char trackencoding)
 {
 	int tracklen,trackoffset;
+	unsigned char oldval,c;
 	unsigned int startindex,i;
 
 	tracklen=currentside->tracklen/8;
@@ -1450,6 +1451,31 @@ void tg_completeTrack(track_generator *tg, SIDE * currentside,unsigned char trac
 		pushTrackCode(tg,formatstab[trackencoding-1].data_gap4b,0xFF,currentside,trackencoding);
 		trackoffset=tg->last_bit_offset/8;
 	}
+
+	if((trackencoding == IBMFORMAT_SD) || (trackencoding == ISOFORMAT_SD) || (trackencoding == TYCOMFORMAT_SD))
+	{
+		// 
+		// SCAN Command FM issue workaround for some FDC  : Desync the clock at the end of the track.
+		//
+
+		oldval = 0;
+		startindex = startindex + (( (trackoffset - startindex) * 3 ) / 4); 
+		trackoffset=startindex;
+		currentside->databuffer[trackoffset] = currentside->databuffer[trackoffset] & 0x3F;
+		while(trackoffset<tracklen)
+		{
+			c = currentside->databuffer[trackoffset];
+			c = (c >> 1) | ((oldval << 7)&0x80) ;
+
+			oldval = currentside->databuffer[trackoffset];
+			currentside->databuffer[trackoffset] = c;
+
+			trackoffset++;
+		}
+
+		currentside->databuffer[trackoffset-1] = currentside->databuffer[trackoffset-1] & 0xFC;
+	}
+
 	// fill timing & encoding buffer
 	if(currentside->timingbuffer)
 	{
