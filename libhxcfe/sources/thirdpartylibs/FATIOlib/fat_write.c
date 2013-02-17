@@ -276,7 +276,7 @@ int fatfs_add_file_entry(struct fatfs *fs, uint32 dirCluster, char *filename, ch
     struct fat_dir_entry shortEntry;
     int dirtySector = 0;
 
-    char tmpshortname[8+3+1];
+    char tmpshortname[8+1+3+1];
 
     uint32 dirSector = 0;
     uint8 dirOffset = 0;
@@ -293,14 +293,14 @@ int fatfs_add_file_entry(struct fatfs *fs, uint32 dirCluster, char *filename, ch
 #if FATFS_INC_LFN_SUPPORT
     // Check if the LFN is really needed.
     i = 0;
-    while(shortfilename[i]!=' ' && i<8)
+    while(i<8 && shortfilename[i]!=' ')
     {
         tmpshortname[i] = shortfilename[i];
         i++;
     }
     tmpshortname[i++] = '.';
     j = 8;
-    while((shortfilename[j]!=' ') && j<(8+3))
+    while(j<(8+3) && (shortfilename[j]!=' ') )
     {
         tmpshortname[i] = shortfilename[j];
         j++;
