@@ -78,7 +78,7 @@ extern s_gui_context * guicontext;
  #define SEPARATOR '\\'
  #define PATHSEPARATOR "\\"
 #else
- #define SEPARTOR '/'
+ #define SEPARATOR '/'
  #define PATHSEPARATOR "/"
 #endif
 
