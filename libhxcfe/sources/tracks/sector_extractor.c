@@ -559,7 +559,7 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 						sector->startsectorindex = bit_offset;
 						sector->startdataindex = bit_offset;
 						sector->endsectorindex = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,3+7,bit_offset,0);
- 						floppycontext->hxc_printf(MSG_DEBUG,"Data sector without sector header !?!");
+ 						floppycontext->hxc_printf(MSG_DEBUG,"get_next_MFM_sector : Data sector without sector header !?!");
 						
 						old_bit_offset=bit_offset;
 
@@ -743,7 +743,7 @@ int get_next_MEMBRAIN_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 						sector->startsectorindex = bit_offset;
 						sector->startdataindex = bit_offset;
 						sector->endsectorindex = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,3+7,bit_offset,0);
- 						floppycontext->hxc_printf(MSG_DEBUG,"Data sector without sector header !?!");
+ 						floppycontext->hxc_printf(MSG_DEBUG,"get_next_MEMBRAIN_sector : Data sector without sector header !?!");
 						
 						old_bit_offset=bit_offset;
 
@@ -1587,12 +1587,14 @@ SECTORCONFIG* hxcfe_getNextSector(SECTORSEARCH* ss,int track,int side,int type)
 	ss->bitoffset=bitoffset;
 
 	if(ss->nb_sector_cached<512 && bitoffset>=0)
-	{	//Add a new cache entry
+	{
+		//Add a new cache entry
 		i=0;
 		while(i<ss->nb_sector_cached && ss->sectorcache[i].startsectorindex!=(unsigned long)bitoffset && i<512)
 		{
 			i++;
 		}
+
 		if( i<512 )
 		{
 			if(i == ss->nb_sector_cached)
