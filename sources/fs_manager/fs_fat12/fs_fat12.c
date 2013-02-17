@@ -20,19 +20,44 @@ FSMNG * gb_fsmng;
 
 void lba2chs(FSMNG * fsmng,int lba, int *track, int *head, int *sector)
 {
-	if(track)
-	{
-		*track = lba / (fsmng->sectorpertrack * fsmng->sidepertrack);
-	}
 
-	if(head)
+	if(fsmng)
 	{
-		*head = (lba / fsmng->sectorpertrack) % fsmng->sidepertrack;
-	}
+		if(track)
+		{
+			if(fsmng->sectorpertrack &&  fsmng->sidepertrack)
+			{
+				*track = lba / (fsmng->sectorpertrack * fsmng->sidepertrack);
+			}
+			else
+			{
+				*track = 0;
+			}
+		}
 
-	if(sector)
-	{
-		*sector = (lba % fsmng->sectorpertrack) + 1;
+		if(head)
+		{
+			if(fsmng->sectorpertrack && fsmng->sidepertrack)
+			{
+				*head = (lba / fsmng->sectorpertrack) % fsmng->sidepertrack;
+			}
+			else
+			{
+				*head = 0;
+			}
+		}
+
+		if(sector)
+		{
+			if(fsmng->sectorpertrack)
+			{
+				*sector = (lba % fsmng->sectorpertrack) + 1;
+			}
+			else
+			{
+				*sector = 0;
+			}
+		}
 	}
 }
 
