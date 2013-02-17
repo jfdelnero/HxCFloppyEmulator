@@ -19,8 +19,8 @@ Fl_Menu_Item menutable[] = {
     {"&Create DOS/AmigaDOS disk",	FL_ALT+'c',	menu_clicked,(void*)3},
     {"&Export disk/Save As",	FL_ALT+'e', save_file_image, 0},
     {"Batch convert files images",	FL_ALT+'b', menu_clicked,(void*)2},
-	{"Dump a Floppy disk",	FL_ALT+'d', menu_clicked,(void*)7},
-	{"Track Analyzer",	FL_ALT+'a', menu_clicked,(void*)10},
+    {"Dump a Floppy disk",	FL_ALT+'d', menu_clicked,(void*)7},
+    {"Track Analyzer",	FL_ALT+'a', menu_clicked,(void*)10},
 
     {0},
   {"&Settings",FL_F+2,0,0,FL_SUBMENU},
@@ -30,7 +30,7 @@ Fl_Menu_Item menutable[] = {
   {"&Look",FL_F+3,0,0,FL_SUBMENU},
     {"Classic",	FL_ALT+'C',menu_clicked,(void*)11},
     {"Plastic",	FL_ALT+'P',menu_clicked,(void*)12},
-	{"Gtk+",	FL_ALT+'G',menu_clicked,(void*)13},
+    {"Gtk+",	FL_ALT+'G',menu_clicked,(void*)13},
     {0},
   {"&Log",FL_F+4,0,0,FL_SUBMENU},
     {"&Log",	FL_ALT+'l',menu_clicked,(void*)8},
@@ -73,8 +73,9 @@ Fl_Menu_Item fs_choices[]=
 	{ "5\"25 & 8\" 360KB DSDD 360RPM FAT12",0,fs_choice_cb,(void*)FS_5P25_DS_360RPM_360KB_MSDOS_FAT12},
 
 	{ "3\"5        640KB DSDD FAT12",0,fs_choice_cb,(void*)FS_3P5_DS_300RPM_640KB_MSDOS_FAT12},
-		
+
 	{ "3\"5        720KB DSDD FAT12 ",0,fs_choice_cb,(void*)FS_720KB_MSDOS_FAT12},
+	{ "3\"5        2.50MB DSDD FAT12",0,fs_choice_cb,(void*)FS_2_50MB_MSDOS_FAT12},
 
 	{ "5\"25       1.2MB DSHD FAT12",0,fs_choice_cb,(void*)FS_5P25_300RPM_1200KB_MSDOS_FAT12},
 
@@ -82,7 +83,8 @@ Fl_Menu_Item fs_choices[]=
 	{ "3\"5        1.68MB DSHD FAT12",0,fs_choice_cb,(void*)FS_1_68MB_MSDOS_FAT12},
 	{ "3\"5        2.88MB DSED FAT12",0,fs_choice_cb,(void*)FS_2_88MB_MSDOS_FAT12},
 	{ "3\"5        3.38MB DSHD FAT12",0,fs_choice_cb,(void*)FS_3_38MB_MSDOS_FAT12},
-		
+	{ "3\"5        4.50MB DSHD FAT12",0,fs_choice_cb,(void*)FS_4_50MB_MSDOS_FAT12},
+
 	{ "3\"5        6.78MB DSHD FAT12",0,fs_choice_cb,(void*)FS_6_78MB_MSDOS_FAT12},
 
 	{ "3\"5        360KB SSDD Atari FAT12",0,fs_choice_cb,(void*)FS_360KB_ATARI_FAT12},
@@ -91,9 +93,8 @@ Fl_Menu_Item fs_choices[]=
 	{ "3\"5        4.23MB DSDD Atari FAT12",0,fs_choice_cb,(void*)FS_4_23MB_ATARI_FAT12},
 
 	{ "3\"5        880KB DSDD AmigaDOS",0,fs_choice_cb,(void*)FS_880KB_AMIGADOS},
-		
 
-	{0}			
+	{0}
 };
 
 Fl_Menu_Item sectorsize_choices[]=
