@@ -33,24 +33,20 @@ filesystem_generator_window::filesystem_generator_window() {
       fs_browser->labeltype(FL_NO_LABEL);
       fs_browser->callback((Fl_Callback*)filesystem_generator_window_browser_fs);
     } // Fl_Tree* fs_browser
-    { txtout_freesize = new Fl_Text_Display(5, 380, 600, 29);
-    } // Fl_Text_Display* txtout_freesize
-    { bt_delete = new Fl_Button(610, 150, 90, 25, "Delete");
+    { bt_delete = new Fl_Button(610, 90, 90, 25, "Delete");
       bt_delete->callback((Fl_Callback*)filesystem_generator_window_bt_delete);
     } // Fl_Button* bt_delete
-    { bt_get = new Fl_Button(610, 120, 90, 25, "Get Files");
+    { bt_get = new Fl_Button(610, 60, 90, 25, "Get Files");
       bt_get->callback((Fl_Callback*)filesystem_generator_window_bt_getfiles);
     } // Fl_Button* bt_get
-    { bt_put = new Fl_Button(610, 90, 90, 25, "Put Files");
-      bt_put->callback((Fl_Callback*)filesystem_generator_window_bt_putfiles);
-    } // Fl_Button* bt_put
-    { bt_createdir = new Fl_Button(610, 60, 90, 25, "Create Dir.");
-      bt_createdir->callback((Fl_Callback*)filesystem_generator_window_bt_createdir);
-    } // Fl_Button* bt_createdir
-
+    { txtout_freesize = new Fl_Output(5, 377, 600, 32);
+      txtout_freesize->labeltype(FL_NO_LABEL);
+    } // Fl_Output* txtout_freesize
+    { hlptxt = new Fl_Output(610, 132, 90, 141);
+      hlptxt->box(FL_NO_BOX);
+      hlptxt->labeltype(FL_NO_LABEL);
+    } // Fl_Output* hlptxt
     Fl_DND_Box *o = new Fl_DND_Box(5, 60, 600, 310, 0);
-    o->callback(dnd_fs_cb);
-
-    window->end();
+    o->callback(dnd_fs_cb);    window->end();
   } // Fl_Double_Window* window
 }

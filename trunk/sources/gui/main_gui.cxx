@@ -107,22 +107,22 @@ char * license_txt;
 
 const char * plugid_lst[]=
 {
-    PLUGIN_HXC_HFE,
-    PLUGIN_VTR_IMG,
-    PLUGIN_HXC_MFM,
-    PLUGIN_HXC_AFI,
-    PLUGIN_RAW_LOADER,
-    PLUGIN_AMSTRADCPC_DSK,
-    PLUGIN_IMD_IMG,
-    PLUGIN_TI994A_V9T9,
-    PLUGIN_HXC_EXTHFE
+	PLUGIN_HXC_HFE,
+	PLUGIN_VTR_IMG,
+	PLUGIN_HXC_MFM,
+	PLUGIN_HXC_AFI,
+	PLUGIN_RAW_LOADER,
+	PLUGIN_AMSTRADCPC_DSK,
+	PLUGIN_IMD_IMG,
+	PLUGIN_TI994A_V9T9,
+	PLUGIN_HXC_EXTHFE
 };
 
 static void tick_main(void *v) {
 	
 	Main_Window *window;
 	
-	window=(Main_Window *)v;	
+	window=(Main_Window *)v;
 	window->make_current();
 	Fl::repeat_timeout(0.10, tick_main, v);
 }
@@ -248,8 +248,6 @@ void load_file_image(Fl_Widget * w, void * fc_ptr)
 		}
 	}
 }
-
-
 
 
 void save_file_image(Fl_Widget * w, void * fc_ptr) 
@@ -619,7 +617,7 @@ Main_Window::Main_Window()
 	
 	//////////////////////////////////////////////
 	// Floppy view window
-	this->infos_window=new floppy_infos_window();	
+	this->infos_window=new floppy_infos_window();
 	this->infos_window->x_offset->bounds(0.0, 100);
 	this->infos_window->x_time->scrollvalue(300*1000,1,1,1000*1000);
 	this->infos_window->y_time->scrollvalue(16,1,2,64);
@@ -645,6 +643,12 @@ Main_Window::Main_Window()
 	this->fs_window=new filesystem_generator_window();
 	fs_window->choice_filesystype->menu(fs_choices);
 	fs_window->choice_filesystype->value(11);
+	fs_window->hlptxt->wrap(FL_INPUT_WRAP);
+	fs_window->hlptxt->textsize(10);
+	fs_window->hlptxt->readonly(FL_INPUT_READONLY);
+
+	fs_window->hlptxt->static_value("To add your files to the disk just Drag&Drop them on the file browser to the left !");
+
 	tick_fs(this->fs_window);
 
 	//////////////////////////////////////////////
@@ -734,8 +738,6 @@ Main_Window::Main_Window()
 //	Fl::dnd_text_ops(1);
 	Fl::run();
 }
-
-
 
 Main_Window::~Main_Window()
 {

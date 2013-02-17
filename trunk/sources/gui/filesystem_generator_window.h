@@ -7,15 +7,11 @@
 #include <FL/Fl_Button.H>
 extern void filesystem_generator_window_bt_injectdir(Fl_Button*, void*);
 #include <FL/Fl_Choice.H>
-extern void filesystem_generator_window_bt_selectdir(Fl_Button*, void*);
-#include <FL/Fl_Input.H>
 #include <FL/Fl_Tree.H>
 extern void filesystem_generator_window_browser_fs(Fl_Tree*, void*);
-#include <FL/Fl_Text_Display.H>
 extern void filesystem_generator_window_bt_delete(Fl_Button*, void*);
 extern void filesystem_generator_window_bt_getfiles(Fl_Button*, void*);
-extern void filesystem_generator_window_bt_putfiles(Fl_Button*, void*);
-extern void filesystem_generator_window_bt_createdir(Fl_Button*, void*);
+#include <FL/Fl_Output.H>
 
 class filesystem_generator_window {
 public:
@@ -29,10 +25,9 @@ private:
 public:
   Fl_Choice *choice_filesystype;
   Fl_Tree *fs_browser;
-  Fl_Text_Display *txtout_freesize;
   Fl_Button *bt_delete;
   Fl_Button *bt_get;
-  Fl_Button *bt_put;
-  Fl_Button *bt_createdir;
+  Fl_Output *txtout_freesize;
+  Fl_Output *hlptxt;
 };
 #endif
