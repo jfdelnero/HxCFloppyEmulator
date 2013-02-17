@@ -791,7 +791,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,AMIGA_MFM_ENCODING);
 	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,ISOIBM_FM_ENCODING);
 	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,TYCOM_FM_ENCODING);
-	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,MEMBRAIN_MFM_ENCODING);
+	//display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,MEMBRAIN_MFM_ENCODING);
 
 
 	//display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,EMU_FM_ENCODING);
