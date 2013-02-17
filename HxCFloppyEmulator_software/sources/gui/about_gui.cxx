@@ -246,7 +246,7 @@ About_box::About_box()
 	button_forum->callback(OpenURLInBrowser,(void*)"http://torlus.com/floppy/forum");
 
 	button_releasenotes=new Fl_Button(5, 110+25*2, 180, 25, "Latest release notes");
-	button_releasenotes->callback(OpenURLInBrowser,(void*)"http://hxc2001.free.fr/floppy_drive_emulator/hxcfloppyemulator_soft_release_notes.txt");
+	button_releasenotes->callback(OpenURLInBrowser,(void*)"http://hxc2001.com/download/floppy_drive_emulator/hxcfloppyemulator_soft_release_notes.txt");
 
 	button_license=		new Fl_Button(5, 110+25*3, 180, 25, "Under GPL License");
 	button_license->callback(create_license_window,0);
@@ -256,7 +256,7 @@ About_box::About_box()
 
 	o = new Fl_Box(200, 13, 320+6, 200+6);
 	o->box(FL_UP_BOX);// Fl_Box* o
-	o = new Fl_Box(5, 45, 180, 60, "Copyright © 2006-2012\nJean-François DEL NERO\n(©) HxC2001");
+	o = new Fl_Box(5, 45, 180, 60, "Copyright © 2006-2013\nJean-François DEL NERO\n(©) HxC2001");
 	o->box(FL_DOWN_BOX);
 
 	xpos_size=200+3;
