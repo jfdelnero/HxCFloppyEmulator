@@ -481,9 +481,9 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								do
 								{
 									k++;
-								}while((currentside->timingbuffer[k-1]==currentside->timingbuffer[k]) && k< bytelen);
+								}while( ( k < bytelen ) && (currentside->timingbuffer[k-1]==currentside->timingbuffer[k]) );
 
-								if(k==bytelen)
+								if( k == bytelen )
 								{
 									currentside->bitrate=currentside->timingbuffer[0];
 									free(currentside->timingbuffer);
@@ -498,7 +498,7 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 
 								currentside->timingbuffer=malloc(bytelen * sizeof(unsigned long));
-								
+
 								temp_uncompressbuffer=malloc(datablock.packed_size);
 								fread(temp_uncompressbuffer,datablock.packed_size,1,f);
 								
@@ -522,9 +522,9 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								do
 								{
 									k++;
-								}while((currentside->timingbuffer[k-1]==currentside->timingbuffer[k]) && k<currentside->tracklen);
+								}while( ( k < bytelen ) && (currentside->timingbuffer[k-1]==currentside->timingbuffer[k]));
 
-								if(k==currentside->tracklen)
+								if( k == bytelen )
 								{
 									currentside->bitrate=currentside->timingbuffer[0];
 									free(currentside->timingbuffer);
@@ -551,9 +551,9 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								do
 								{
 									k++;
-								}while((currentside->timingbuffer[k-1]==currentside->timingbuffer[k]) && k<currentside->tracklen);
+								}while( ( k < datablock.packed_size ) && ( currentside->timingbuffer[k-1] == currentside->timingbuffer[k] ));
 
-								if(k==currentside->tracklen)
+								if( k == datablock.packed_size )
 								{
 									currentside->bitrate=currentside->timingbuffer[0];
 									free(currentside->timingbuffer);
@@ -574,11 +574,11 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								do
 								{
 									k++;
-								}while((currentside->timingbuffer[k-1]==currentside->timingbuffer[k]) && k<currentside->tracklen);
+								}while( ( k < datablock.unpacked_size ) && ( currentside->timingbuffer[k-1] == currentside->timingbuffer[k] ) );
 
-								if(k==currentside->tracklen)
+								if( k == datablock.unpacked_size )
 								{
-									currentside->bitrate=currentside->timingbuffer[0];
+									currentside->bitrate = currentside->timingbuffer[0];
 									free(currentside->timingbuffer);
 									currentside->timingbuffer=0;
 								}
@@ -605,9 +605,9 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							do
 							{
 								k++;
-							}while((currentside->flakybitsbuffer[k-1]==currentside->flakybitsbuffer[k]) && k<currentside->tracklen);
+							}while( ( k < datablock.packed_size ) && ( currentside->flakybitsbuffer[k-1] == currentside->flakybitsbuffer[k] ) );
 
-							if(k==currentside->tracklen)
+							if( k == datablock.packed_size )
 							{
 								free(currentside->flakybitsbuffer);
 								currentside->flakybitsbuffer=0;
@@ -625,9 +625,9 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							do
 							{
 								k++;
-							}while(k<currentside->tracklen && (currentside->flakybitsbuffer[k-1]==currentside->flakybitsbuffer[k]) && !currentside->flakybitsbuffer[k]);
+							}while( ( k < datablock.unpacked_size ) && ( currentside->flakybitsbuffer[k-1] == currentside->flakybitsbuffer[k] ) && !currentside->flakybitsbuffer[k]);
 
-							if(k==currentside->tracklen)
+							if(k==datablock.unpacked_size)
 							{
 								free(currentside->flakybitsbuffer);
 								currentside->flakybitsbuffer=0;
