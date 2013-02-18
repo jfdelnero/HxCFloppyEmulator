@@ -1,0 +1,127 @@
+
+; Installation inf for FTDI Direct Driver
+;
+; Copyright (c) 2001-2005 Future Technology Devices International Ltd.
+;
+
+[Version]
+Signature="$CHICAGO$"
+Class=USB
+ClassGUID={36fc9e60-c465-11cf-8056-444553540000}
+Provider=%Ftdi%
+CatalogFile=ftd2xx.cat
+DriverVer=12/01/2005,3.01.02
+
+[SourceDisksNames]
+1=%DriversDisk%,,,
+
+[SourceDisksFiles]
+FTD2XX.sys = 1
+FTD2XX.inf = 1
+FTD2XX.dll = 1
+FTDIUNIN.exe = 1
+FTD2XXUN.ini = 1
+
+[Manufacturer]
+%Ftdi%=FtdiHw
+
+[FtdiHw]
+%USB\VID_0403&PID_6001.DeviceDesc%=FTD2XX, USB\VID_0403&PID_6001
+%USB\VID_0403&PID_6010&MI_00.DeviceDesc%=FTD2XX, USB\VID_0403&PID_6010&MI_00
+%USB\VID_0403&PID_6010&MI_01.DeviceDesc%=FTD2XX, USB\VID_0403&PID_6010&MI_01
+
+
+[ControlFlags]
+ExcludeFromSelect=*
+
+;[PreCopySection]
+;HKR,,NoSetupUI,,1
+
+[DestinationDirs]
+DefaultDestDir   = 11
+FTD2XX.Files.Ext = 10,System32\Drivers
+FTD2XX.Files.Dll = 11
+FTD2XX.Files.Exe = 11
+FTD2XX.Files.Inf = 17
+
+[DefaultInstall]
+CopyFiles=FTD2XX.Files.Ext, FTD2XX.Files.Dll, FTD2XX.Files.Exe
+AddReg=FTD2XX.AddReg, FTD2XX.UnInst
+
+;---------------------------------------------------------------;
+; For Win98 ...
+;
+
+[FTD2XX]
+CopyFiles=FTD2XX.Files.Ext, FTD2XX.Files.Dll, FTD2XX.Files.Exe, FTD2XX.Files.Inf
+AddReg=FTD2XX.AddReg, FTD2XX.UnInst
+
+[FTD2XX.HW]
+AddReg=FTD2XX.HW.AddReg
+
+[FTD2XX.AddReg]
+HKR,,DevLoader,,*ntkern
+HKR,,NTMPDriver,,FTD2XX.sys
+;HKLM,"System\CurrentControlSet\Services\FTD2XX\Parameters","MaximumTransferSize",0x10001,4096
+;HKLM,"System\CurrentControlSet\Services\FTD2XX\Parameters","DebugLevel",0x10001,2
+
+[FTD2XX.HW.AddReg]
+HKR,,"ConfigData",0x00010001,1
+
+[FTD2XX.Files.Ext]
+FTD2XX.sys
+
+[FTD2XX.Files.Dll]
+FTD2XX.dll
+
+[FTD2XX.Files.Exe]
+FTDIUNIN.exe
+FTD2XXUN.ini
+
+[FTD2XX.Files.Inf]
+FTD2XX.inf
+
+[FTD2XX.UnInst]
+HKLM,%WINUN%,"FTD2XX"
+HKLM,%WINUN%\FTD2XX , "UninstallString",,"%11%\FTDIUNIN.exe %11%\FTD2XXUN.INI"
+HKLM,%WINUN%\FTD2XX , "DisplayName",,"FTDI FTD2XX USB Drivers"
+
+
+;---------------------------------------------------------------;
+; For Win2000 ...
+;
+
+[FTD2XX.NT]
+CopyFiles=FTD2XX.Files.Ext, FTD2XX.Files.Dll, FTD2XX.Files.Exe
+AddReg=FTD2XX.AddReg, FTD2XX.UnInst
+
+[FTD2XX.NT.HW]
+AddReg=FTD2XX.NT.HW.AddReg
+
+[FTD2XX.NT.Services]
+Addservice = FTD2XX, 0x00000002, FTD2XX.AddService
+
+[FTD2XX.AddService]
+DisplayName    = %FTD2XX.SvcDesc%
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_DEMAND_START
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %10%\System32\Drivers\FTD2XX.sys
+LoadOrderGroup = Base
+
+[FTD2XX.NT.HW.AddReg]
+;HKR,,"ConfigData",0x00010001,1
+
+
+
+;---------------------------------------------------------------;
+
+[Strings]
+Ftdi="FTDI"
+USB\VID_0403&PID_6001.DeviceDesc="FTDI FT8U2XX Device"
+USB\VID_0403&PID_6010&MI_00.DeviceDesc="FT2232C Channel A"
+USB\VID_0403&PID_6010&MI_01.DeviceDesc="FT2232C Channel B"
+FTD2XX.SvcDesc="FTD2XX.SYS FT8U2XX device driver"
+WINUN="Software\Microsoft\Windows\CurrentVersion\Uninstall"
+DriversDisk="FTDI FTD2XX Drivers Disk"
+

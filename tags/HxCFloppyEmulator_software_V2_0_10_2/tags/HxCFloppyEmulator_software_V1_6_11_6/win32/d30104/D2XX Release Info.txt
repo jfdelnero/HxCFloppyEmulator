@@ -1,0 +1,70 @@
+FTDI - D2XX Driver Release Information
+======================================
+
+Version No.	Date		Changes
+
+3.01.04		15 Dec 2005	Fixed receive request deadlock problem.
+
+3.01.02		01 Dec 2005	Fixed bug where events were signalled twice.
+
+3.00.00		15 Sep 2005	Full release.
+
+3.00.00	Beta	03 May 2005	Supports FT2232C.
+
+2.00.03		10 Dec 2004	Fixed problem signalling overrun error.
+
+2.00.02		20 Oct 2004	Added FT_CyclePort.
+
+2.00.01		15 Oct 2004	Changed IOCTL base index.
+				Library supports changed IOCTL base index.
+				Fixed disconnect delay problem.
+
+1.06.18		30 Sep 2004	Supports modem control signals in FT_SetState.
+
+1.06.16		23 Jun 2004	Fixed initialization bug in WinXPSP1.
+				Fixed WHQL EEPROM compatibility problem.
+				
+1.06.14		01 Mar 2004	Supports serial numbers up to 16 chars in length.
+				Fixed bug in staged write requests.
+				
+1.06.12		30 Jan 2004	Fixed synchronization problem between open and first read.
+
+1.06.11		23 Jan 2004	Fixed problems with driver verifier.
+				Fixed disconnect with open port problem.
+				Added open by location capability.
+
+1.06.08		24 Nov 2003	Fixed problem with FT_W32_ClearCommError not reporting errors.
+				Fixed serial number problem in library.
+
+1.06.07		17 Nov 2003	Complete outstanding wait-on-event request on surprise removal.
+
+1.06.06		30 Oct 2003	Fixed bug that limited write requests to 64Kbytes.
+
+1.06.05		27 Oct 2003	Fixed bug in FT_W32_SetCommMask.
+				Added FT_ResetPort.
+
+1.06.02		18 Sep 2003	Fixed bug in FT_W32_WaitCommEvent.
+				Added FT_SetResetPipeRetryCount.
+
+1.05.12		12 June 2003	Fixed power management so that laptops can suspend.
+				Fixed bug in event notification.
+				Added FT_StopInTask and FT_RestartInTask.
+
+1.05.09		21 Mar 2003	Fixed problem with write timeout when setup by FT_W32_SetCommTimeouts.
+
+1.05.08		19 Mar 2003	Fixed power management problems.
+				FT_W32_PurgeComm purges read queue.
+				Added FT_W32_CancelIo.
+
+1.05.04		08 Nov 2002	Added FT_GetDeviceInfo.
+
+1.05.03		08 Nov 2002	Supports BM devices.
+
+1.05.01		04 October 2002	Supports USB transfer sizes up to 64Kbytes
+				Works with USB2.0 host controllers
+
+1.04.01		07 August 2002	Suspend / Resume Problem fixed with Open Devices ( Win2000 / WinXP )
+
+1.03.20		29 July 2002	Improved Support for surprise removal ( Win2000 / WinXP )
+				Version Number updated in INF file
+
