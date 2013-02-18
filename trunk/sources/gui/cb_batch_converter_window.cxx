@@ -560,7 +560,7 @@ void dnd_bc_cb(Fl_Widget *o, void *v)
 	{
 		bcw->bt_convert->deactivate();
 
-		bcparams=(s_param_bc_params *)malloc(sizeof(s_param_bc_params *));
+		bcparams=(s_param_bc_params *)malloc(sizeof(s_param_bc_params));
 		memset(bcparams,0,sizeof(s_param_bc_params));
 
 		bcparams->bcw=bcw;
