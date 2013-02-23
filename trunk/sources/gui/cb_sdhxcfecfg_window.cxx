@@ -97,6 +97,11 @@ void fill_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 	else
 		filecfg->number_of_slot=0x00;
 
+	if(sdcfgw->chk_enable_indexed_mode->value())
+		filecfg->indexed_mode=0xFF;
+	else
+		filecfg->indexed_mode=0x00;
+
 	filecfg->back_light_tmr=(unsigned char)sdcfgw->valslider_device_backlight_timeout->value();
 	filecfg->standby_tmr=(unsigned char)sdcfgw->valslider_device_standby_timeout->value();
 					
@@ -145,6 +150,11 @@ void set_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 			sdcfgw->chk_enable_autoboot_mode->set();
 		else
 			sdcfgw->chk_enable_autoboot_mode->clear();
+
+		if(filecfg->indexed_mode)
+			sdcfgw->chk_enable_indexed_mode->set();
+		else
+			sdcfgw->chk_enable_indexed_mode->clear();
 
 		sdcfgw->valslider_device_backlight_timeout->value(filecfg->back_light_tmr);
 		sdcfgw->valslider_device_standby_timeout->value(filecfg->standby_tmr);
