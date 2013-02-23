@@ -29,29 +29,36 @@
 #define word  unsigned short
 #define dword unsigned int
 
+// All structure datas are packed !
 #pragma pack(1)
 
 typedef struct MFMIMG_
 {
-	byte headername[7];
+	byte headername[7];          // "HXCMFM\0"
 
 	word number_of_track;
-	byte number_of_side;
-	
-	word floppyRPM;
-	word floppyBitRate;
+	byte number_of_side;         // Number of elements in the MFMTRACKIMG array : number_of_track * number_of_side
+
+	word floppyRPM;              // Rotation per minute.
+	word floppyBitRate;          // 250 = 250Kbits/s, 300 = 300Kbits/s...
 	byte floppyiftype;
 
-	dword mfmtracklistoffset;
+	dword mfmtracklistoffset;    // Offset of the MFMTRACKIMG array from the beginning of the file in number of bytes.
 }MFMIMG;
 
+// Right after this header, the MFMTRACKIMG array is present. 
+// Number of element in the MFMTRACKIMG array : number_of_track * number_of_side
+// Here is one MFMTRACKIMG element :
 
 typedef struct MFMTRACKIMG_
 {
 	word track_number;
 	byte side_number;
-	dword mfmtracksize;
-	dword mfmtrackoffset;	
+	dword mfmtracksize;          // MFM/FM Track size in bytes
+	dword mfmtrackoffset;        // Offset of the track data from the beginning of the file in number of bytes.
 }MFMTRACKIMG;
+
+// After this array, track datas can be found.
+// Each data byte must be sent to the floppy interface from the bit 7 to the bit 0.
 
 #pragma pack()
