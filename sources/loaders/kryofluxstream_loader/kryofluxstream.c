@@ -297,8 +297,11 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,fl
 			track_dump->nb_of_pulses=cellpos;
 			if(track_dump->nb_of_pulses)
 			{
-				track_dump->track_dump=malloc( track_dump->nb_of_pulses * sizeof(unsigned long) ); 
-				memcpy(track_dump->track_dump, cellstream, track_dump->nb_of_pulses * sizeof(unsigned long) );
+				track_dump->track_dump=malloc( track_dump->nb_of_pulses * sizeof(unsigned long) );
+				if(track_dump->track_dump)
+				{
+					memcpy(track_dump->track_dump, cellstream, track_dump->nb_of_pulses * sizeof(unsigned long) );
+				}
 			}
 			free(cellstream);
 			free(kfstreambuffer);
