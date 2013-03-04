@@ -13,7 +13,7 @@ void filesystem_generator_window::cb_bt_cancel(Fl_Button* o, void* v) {
 }
 
 filesystem_generator_window::filesystem_generator_window() {
-  { window = new Fl_Double_Window(704, 416, "Create a File System based floppy");
+  { window = new Fl_Double_Window(704, 416, "DOS Floppy Disk File Browser");
     window->user_data((void*)(this));
     { bt_injectdir = new Fl_Button(610, 20, 90, 25, "Create Disk");
       bt_injectdir->labelsize(12);
@@ -46,7 +46,14 @@ filesystem_generator_window::filesystem_generator_window() {
       hlptxt->box(FL_NO_BOX);
       hlptxt->labeltype(FL_NO_LABEL);
     } // Fl_Output* hlptxt
+    { bt_saveexport = new Fl_Button(610, 335, 90, 25, "Save/Export");
+      bt_saveexport->callback((Fl_Callback*)filesystem_generator_window_bt_saveexport);
+    } // Fl_Button* bt_saveexport
+    { bt_loadimage = new Fl_Button(610, 305, 90, 25, "Load Image");
+      bt_loadimage->callback((Fl_Callback*)filesystem_generator_window_bt_loadimage);
+    } // Fl_Button* bt_loadimage
     Fl_DND_Box *o = new Fl_DND_Box(5, 60, 600, 310, 0);
-    o->callback(dnd_fs_cb);    window->end();
+    o->callback(dnd_fs_cb);
+    window->end();
   } // Fl_Double_Window* window
 }
