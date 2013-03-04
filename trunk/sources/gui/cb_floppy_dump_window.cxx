@@ -587,7 +587,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 			closedevice(h);
 
 			params->floppydisk=hxcfe_getFloppy(fb);
-			load_floppy(params->floppydisk);
+			load_floppy(params->floppydisk,"Floppy Dump Image");
 
 			sprintf(tempstr,"Done !");
 			params->windowshwd->global_status->value(tempstr);
