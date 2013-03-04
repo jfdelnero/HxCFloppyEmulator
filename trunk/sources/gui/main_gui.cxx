@@ -256,8 +256,6 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 	int loaderid;
 	Fl_Native_File_Chooser fnfc;
 	unsigned char deffilename[512];
-	
-
 
 	if(!guicontext->loadedfloppy)
 	{
@@ -637,6 +635,10 @@ Main_Window::Main_Window()
 	this->batchconv_window=new batch_converter_window();
 	batchconv_window->choice_file_format->menu(format_choices);
 	batchconv_window->choice_file_format->value(0);
+	batchconv_window->hlptxt->wrap(FL_INPUT_WRAP);
+	batchconv_window->hlptxt->textsize(10);
+	batchconv_window->hlptxt->readonly(FL_INPUT_READONLY);
+	batchconv_window->hlptxt->static_value("To convert a large quantity of floppy images, set the source directory and the target directory (the SDCard). Drag&Drop mode : Just set the target directory and drag&drop the floppy images on this window.");
 
 	//////////////////////////////////////////////
 	// File system window
