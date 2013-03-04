@@ -3,8 +3,8 @@ main_button_list  txt_buttons_main[]=
 {
 	{0,"Load","Load a floppy file image"},
 	{0,"Load Raw image","Load a custom raw floppy image /\ncreate a custom floppy"},
-	{0,"Batch converter","Convert multiple floppy file image."},
-	{0,"Create FS Floppy","Create a DOS/AmigaDOS\nfile system based floppy disk."},
+	{0,"Batch converter","Convert multiple floppy files images."},
+	{0,"Disk Browser","Create / Browse a DOS floppy disk."},
 	{0,"Export","Export/save the loaded file image"},
 	{0,"SD HxC Floppy\nEmulator settings","Configure the SD HxC Floppy Emulator"},
 	{0,"USB HxC Floppy\nEmulator settings","Configure the USB HxC Floppy Emulator"},
