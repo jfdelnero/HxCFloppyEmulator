@@ -12,6 +12,8 @@ extern void filesystem_generator_window_browser_fs(Fl_Tree*, void*);
 extern void filesystem_generator_window_bt_delete(Fl_Button*, void*);
 extern void filesystem_generator_window_bt_getfiles(Fl_Button*, void*);
 #include <FL/Fl_Output.H>
+extern void filesystem_generator_window_bt_saveexport(Fl_Button*, void*);
+extern void filesystem_generator_window_bt_loadimage(Fl_Button*, void*);
 
 class filesystem_generator_window {
 public:
@@ -29,5 +31,7 @@ public:
   Fl_Button *bt_get;
   Fl_Output *txtout_freesize;
   Fl_Output *hlptxt;
+  Fl_Button *bt_saveexport;
+  Fl_Button *bt_loadimage;
 };
 #endif
