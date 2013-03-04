@@ -70,6 +70,8 @@ extern "C"
 
 #include "fileselector.h"
 
+void load_file_image(Fl_Widget * w, void * fc_ptr) ;
+void save_file_image(Fl_Widget * w, void * fc_ptr) ;
 
 extern s_gui_context * guicontext;
 
@@ -276,7 +278,7 @@ void filesystem_generator_window_bt_injectdir(Fl_Button* bt, void*)
 	fgw=(filesystem_generator_window *)dw->user_data();
 
 	floppy=hxcfe_generateFloppy(guicontext->hxcfe,"",s,0);
-	load_floppy(floppy);
+	load_floppy(floppy,"Disk_Image");
 	guicontext->updatefloppyfs++;
 	guicontext->updatefloppyinfos++;
 }
@@ -640,6 +642,24 @@ void filesystem_generator_window_bt_delete(Fl_Button *bt,void *)
 	guicontext->updatefloppyinfos++;
 
 }
+
+void filesystem_generator_window_bt_loadimage(Fl_Button *bt,void *)
+{
+	load_file_image(0,0); 
+}
+
+void filesystem_generator_window_bt_saveexport(Fl_Button *bt,void *)
+{
+	if(!guicontext->loadedfloppy)
+	{
+		fl_alert("No floppy image loaded !\nPlease load an image or create a disk image\n",10.0);
+	}
+	else
+	{
+		save_file_image(0,0); 
+	}
+}
+
 
 void dnd_fs_conv(const char *urls)
 {
