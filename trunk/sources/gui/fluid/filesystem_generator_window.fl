@@ -7,8 +7,8 @@ class filesystem_generator_window {open
   Function {filesystem_generator_window()} {open
   } {
     Fl_Window window {
-      label {Create a File System based floppy} open
-      xywh {387 148 704 416} type Double visible
+      label {DOS Floppy Disk File Browser} open selected
+      xywh {271 109 704 416} type Double visible
     } {
       Fl_Button bt_injectdir {
         label {Create Disk}
@@ -42,8 +42,18 @@ class filesystem_generator_window {open
       Fl_Output txtout_freesize {
         xywh {5 377 600 32} labeltype NO_LABEL
       }
-      Fl_Output hlptxt {selected
+      Fl_Output hlptxt {
         xywh {610 132 90 141} box NO_BOX labeltype NO_LABEL
+      }
+      Fl_Button bt_saveexport {
+        label {Save/Export}
+        callback filesystem_generator_window_bt_saveexport
+        xywh {610 335 90 25}
+      }
+      Fl_Button bt_loadimage {
+        label {Load Image}
+        callback filesystem_generator_window_bt_loadimage
+        xywh {610 305 90 25}
       }
     }
   }
