@@ -62,7 +62,7 @@ extern s_gui_context * guicontext;
 extern track_type track_type_list[];
 extern void sync_if_config();
 
-int load_floppy(FLOPPY * floppydisk)
+int load_floppy(FLOPPY * floppydisk,char * defaultfilename)
 {
 	int ret;
 
@@ -84,7 +84,7 @@ int load_floppy(FLOPPY * floppydisk)
 	{
 		libusbhxcfe_loadFloppy(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy);
 
-		sprintf(guicontext->bufferfilename,"Floppy Dump");
+		sprintf(guicontext->bufferfilename,defaultfilename);
 	}
 
 	guicontext->updatefloppyinfos++;
