@@ -42,7 +42,7 @@
 extern unsigned char size_to_code(unsigned long size);
 
 int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
-{	
+{
 	int i,j,k,l,nbsector;
 	FILE * imdfile;
 	char * log_str;
@@ -53,7 +53,7 @@ int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	unsigned char cylinder_numbering_map[256];
 	unsigned char side_numbering_map[256];
 
-	int track_cnt;
+	int track_cnt,bitrate;
 	int sectorlistoffset,trackinfooffset;
 	imd_trackheader imd_th;
 
@@ -101,7 +101,6 @@ int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 					memset(log_str,0,strlen(tmp_str)+1);
 					strcat(log_str,tmp_str);
 
-					rec_mode=0;
 					rec_mode=2;
 
 					sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector);
@@ -111,8 +110,8 @@ int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 						rec_mode=1;
 						if(!nbsector)
 						{
-							rec_mode=0;
-							sca = hxcfe_getAllTrackSectors(ss,j,i,AMIGA_MFM_ENCODING,&nbsector);
+							rec_mode=3;
+							sca = hxcfe_getAllTrackSectors(ss,j,i,MEMBRAIN_MFM_ENCODING,&nbsector);
 						}
 					}
 
@@ -146,7 +145,20 @@ int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 					imd_th.track_mode_code=rec_mode;
 
-					switch(floppy->tracks[j]->sides[i]->bitrate)
+					bitrate = floppy->tracks[j]->sides[i]->bitrate;
+					if(floppy->tracks[j]->sides[i]->timingbuffer)
+					{
+						bitrate = floppy->tracks[j]->sides[i]->timingbuffer[2];
+					}
+
+					if(bitrate < 550000 && bitrate > 450000)
+						bitrate = 500000;
+					if(bitrate < 350000 && bitrate > 280000)
+						bitrate = 300000;
+					if(bitrate < 280000 && bitrate > 230000)
+						bitrate = 250000;
+
+					switch(bitrate)
 					{
 						case 250000:
 							imd_th.track_mode_code=2;
@@ -165,6 +177,11 @@ int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 					if(rec_mode==2)
 					{
 						imd_th.track_mode_code=imd_th.track_mode_code+3;
+					}
+
+					if(rec_mode==3)
+					{
+						imd_th.track_mode_code=imd_th.track_mode_code+0x80;
 					}
 
 					if(nbsector)
@@ -193,8 +210,6 @@ int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 						k=0;
 						do
 						{
-
-
 							l=0;
 							while((l<(int)sca[k]->sectorsize) && sca[k]->input_data[l]==sca[k]->input_data[0])
 							{
