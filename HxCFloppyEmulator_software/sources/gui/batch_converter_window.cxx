@@ -51,6 +51,10 @@ batch_converter_window::batch_converter_window() {
       hlptxt->align(Fl_Align(37));
       hlptxt->deactivate();
     } // Fl_Output* hlptxt
+
+    Fl_DND_Box *o = new Fl_DND_Box(0, 0,413, 244, 0);
+    o->callback(dnd_bc_cb);
+
     window->end();
   } // Fl_Double_Window* window
 }
