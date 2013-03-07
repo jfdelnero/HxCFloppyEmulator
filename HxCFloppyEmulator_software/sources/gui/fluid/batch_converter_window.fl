@@ -7,8 +7,8 @@ class batch_converter_window {open
   Function {batch_converter_window()} {open
   } {
     Fl_Window window {
-      label {Floppy Disk Images Batch converter} open selected
-      xywh {363 196 411 286} type Double visible
+      label {Floppy Disk Images Batch converter} open
+      xywh {363 196 411 286} type Double hide
     } {
       Fl_Choice choice_file_format {
         label {Target file format :} open
@@ -45,8 +45,8 @@ class batch_converter_window {open
         callback batch_converter_window_bt_cancel
         xywh {300 210 100 25}
       }
-      Fl_Output hlptxt {
-        xywh {5 208 400 72} box NO_BOX align 37
+      Fl_Output hlptxt {selected
+        xywh {5 208 400 72} box NO_BOX align 37 deactivate
       }
     }
   }
