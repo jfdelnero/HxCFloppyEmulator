@@ -737,7 +737,7 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 	}
 	else
 	{
-		f = hxc_fopen(srcpath,"r+b");
+		f = hxc_fopen(srcpath,"rb");
 		if (f)
 		{
 			fseek(f,0,SEEK_END);
