@@ -553,6 +553,11 @@ void browse_floppy_disk(filesystem_generator_window *fgw)
 			
 			sprintf(statustxt,"Total size : ");
 			printsize(&statustxt[strlen(statustxt)],totalsize);
+#ifdef STANDALONEFSBROWSER
+			strcat(statustxt,", File : ");
+			strcat(statustxt,guicontext->last_loaded_image_path);
+#endif
+
 			fgw->txtout_freesize->value((const char*)statustxt);
 
 			hxcfe_deinitFsManager(fsmng);
@@ -622,6 +627,8 @@ void filesystem_generator_window_bt_delete(Fl_Button *bt,void *)
 	dw=((Fl_Window*)(bt->parent()));
 	fgw=(filesystem_generator_window *)dw->user_data();
 
+	guicontext->loaded_img_modified = 1;
+
 	fsmng = hxcfe_initFsManager(guicontext->hxcfe);
 	if (fsmng)
 	{
@@ -660,6 +667,86 @@ void filesystem_generator_window_bt_saveexport(Fl_Button *bt,void *)
 	}
 }
 
+void filesystem_generator_window_bt_close(Fl_Button *bt,void *)
+{
+	write_back_fileimage();
+
+	((Fl_Window*)(bt->parent()))->hide();
+}
+
+int write_back_fileimage()
+{
+	if(guicontext->loaded_img_modified)
+	{
+		if(strlen(guicontext->last_loaded_image_path))
+		{
+#ifdef STANDALONEFSBROWSER
+			hxcfe_floppyExport(guicontext->hxcfe,guicontext->loadedfloppy,guicontext->last_loaded_image_path,hxcfe_getLoaderID(guicontext->hxcfe,"HXC_HFE"));
+#endif
+		}
+		guicontext->loaded_img_modified = 0;
+	}
+
+	return 0;
+}
+
+int load_indexed_fileimage(int index)
+{
+#ifdef STANDALONEFSBROWSER
+	FILE * f;
+	char filename[32];
+
+	sprintf(filename,"DSKA%.4d.HFE",index);
+
+
+	write_back_fileimage();
+
+	f = hxc_fopen (filename,"rb");
+	if(f)
+	{
+		strcpy(guicontext->last_loaded_image_path,filename);
+		hxc_fclose(f);
+	}
+	else
+	{
+		index = 0;
+		sprintf(filename,"DSKA%.4d.HFE",index);
+		f = hxc_fopen (filename,"rb");
+		if(f)
+		{
+			strcpy(guicontext->last_loaded_image_path,filename);
+			fclose(f);
+		}
+		else
+		{
+			guicontext->last_loaded_image_path[0]=0;
+			index = -1;
+		}
+
+	}
+
+	if(index>=0)
+	{
+		load_floppy_image(filename);
+	}
+
+	guicontext->updatefloppyinfos++;
+	guicontext->updatefloppyfs++;
+#endif
+	return index;
+}
+
+void filesystem_generator_window_sel_disk(class Fl_Counter * cnt,void *)
+{
+	int index;
+
+	index = load_indexed_fileimage((int)cnt->value());
+	if(index<0) cnt->value(0);
+	else cnt->value(index);
+
+	guicontext->updatefloppyinfos++;
+	guicontext->updatefloppyfs++;
+}
 
 void dnd_fs_conv(const char *urls)
 {
@@ -679,6 +766,8 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 	filefoundinfo ffi;
 
 	hxc_stat(srcpath,&entry);
+
+	guicontext->loaded_img_modified = 1;
 
 	if(entry.st_mode&S_IFDIR)
 	{
