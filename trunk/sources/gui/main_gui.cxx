@@ -241,7 +241,14 @@ void load_file_image(Fl_Widget * w, void * fc_ptr)
 		}
 		default:
 		{
+#ifdef STANDALONEFSBROWSER
+			write_back_fileimage();
+#endif
 			load_floppy_image((char*)fnfc.filename());
+
+			guicontext->last_loaded_image_path[0] = 0;
+			strcat(guicontext->last_loaded_image_path,(char*)fnfc.filename());
+
 			guicontext->updatefloppyinfos++;
 			guicontext->updatefloppyfs++;
 			break; // FILE CHOSEN
@@ -589,8 +596,10 @@ Main_Window::Main_Window()
 	end();
 
 	label(NOMFENETRE);
-	//show(argc, argv);
+
+#ifndef STANDALONEFSBROWSER
 	show();
+#endif
 
 	//tick_main(this);
 
@@ -645,11 +654,28 @@ Main_Window::Main_Window()
 	this->fs_window=new filesystem_generator_window();
 	fs_window->choice_filesystype->menu(fs_choices);
 	fs_window->choice_filesystype->value(11);
+	fs_window->disk_selector->lstep(10);
+#ifndef STANDALONEFSBROWSER
+	fs_window->disk_selector->hide();
+#endif
 	fs_window->hlptxt->wrap(FL_INPUT_WRAP);
 	fs_window->hlptxt->textsize(10);
 	fs_window->hlptxt->readonly(FL_INPUT_READONLY);
 
 	fs_window->hlptxt->static_value("To add your files to the disk just Drag&Drop them on the file browser to the left !");
+	guicontext->last_loaded_image_path[0] = 0;
+	guicontext->loaded_img_modified = 0;
+#ifdef STANDALONEFSBROWSER
+	fs_window->choice_filesystype->deactivate();
+	fs_window->bt_injectdir->deactivate();
+	load_indexed_fileimage(0);
+#endif
+	fs_window->fs_browser->clear();
+	fs_window->fs_browser->selectmode(FL_TREE_SELECT_MULTI);
+	fs_window->fs_browser->root_label("/");
+	fs_window->fs_browser->showroot(1);
+	fs_window->fs_browser->redraw();
+	fs_window->fs_browser->show_self();
 
 	tick_fs(this->fs_window);
 
@@ -736,6 +762,10 @@ Main_Window::Main_Window()
 
 	txtindex=0;
 	tick_mw(this);
+
+#ifdef STANDALONEFSBROWSER
+	fs_window->window->show();
+#endif
 
 //	Fl::dnd_text_ops(1);
 	Fl::run();
