@@ -35,7 +35,7 @@ filesystem_generator_window::filesystem_generator_window() {
     { txtout_freesize = new Fl_Output(5, 377, 600, 32);
       txtout_freesize->labeltype(FL_NO_LABEL);
     } // Fl_Output* txtout_freesize
-    { hlptxt = new Fl_Output(610, 118, 90, 141);
+    { hlptxt = new Fl_Output(610, 118, 90, 128);
       hlptxt->box(FL_NO_BOX);
       hlptxt->labeltype(FL_NO_LABEL);
     } // Fl_Output* hlptxt
