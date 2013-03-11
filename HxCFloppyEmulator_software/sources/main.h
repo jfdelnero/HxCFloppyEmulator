@@ -34,4 +34,7 @@ typedef struct s_gui_context_
 
 	int updatefloppyfs;
 
+	char last_loaded_image_path[4096];
+	int loaded_img_modified;
+
 }s_gui_context;
