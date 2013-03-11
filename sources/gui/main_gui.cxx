@@ -652,6 +652,13 @@ Main_Window::Main_Window()
 	//////////////////////////////////////////////
 	// File system window
 	this->fs_window=new filesystem_generator_window();
+
+#ifdef STANDALONEFSBROWSER
+	#ifdef WIN32
+		fs_window->window->icon((char *)LoadIcon(fl_display, MAKEINTRESOURCE(101)));
+	#endif
+#endif
+
 	fs_window->choice_filesystype->menu(fs_choices);
 	fs_window->choice_filesystype->value(11);
 	fs_window->disk_selector->lstep(10);
