@@ -5,13 +5,6 @@
 
 #include "fl_dnd_box.h"
 
-void filesystem_generator_window::cb_bt_cancel_i(Fl_Button* o, void*) {
-  ((Fl_Window*)(o->parent()))->hide();
-}
-void filesystem_generator_window::cb_bt_cancel(Fl_Button* o, void* v) {
-  ((filesystem_generator_window*)(o->parent()->user_data()))->cb_bt_cancel_i(o,v);
-}
-
 filesystem_generator_window::filesystem_generator_window() {
   { window = new Fl_Double_Window(704, 416, "DOS Floppy Disk File Browser");
     window->user_data((void*)(this));
@@ -19,9 +12,9 @@ filesystem_generator_window::filesystem_generator_window() {
       bt_injectdir->labelsize(12);
       bt_injectdir->callback((Fl_Callback*)filesystem_generator_window_bt_injectdir);
     } // Fl_Button* bt_injectdir
-    { bt_cancel = new Fl_Button(610, 381, 90, 25, "Close");
+    { bt_cancel = new Fl_Button(610, 379, 90, 25, "Close");
       bt_cancel->labelsize(12);
-      bt_cancel->callback((Fl_Callback*)cb_bt_cancel);
+      bt_cancel->callback((Fl_Callback*)filesystem_generator_window_bt_close);
     } // Fl_Button* bt_cancel
     { choice_filesystype = new Fl_Choice(5, 20, 600, 25, "File system type :");
       choice_filesystype->down_box(FL_BORDER_BOX);
@@ -42,16 +35,23 @@ filesystem_generator_window::filesystem_generator_window() {
     { txtout_freesize = new Fl_Output(5, 377, 600, 32);
       txtout_freesize->labeltype(FL_NO_LABEL);
     } // Fl_Output* txtout_freesize
-    { hlptxt = new Fl_Output(610, 132, 90, 141);
+    { hlptxt = new Fl_Output(610, 118, 90, 141);
       hlptxt->box(FL_NO_BOX);
       hlptxt->labeltype(FL_NO_LABEL);
     } // Fl_Output* hlptxt
-    { bt_saveexport = new Fl_Button(610, 335, 90, 25, "Save/Export");
+    { bt_saveexport = new Fl_Button(610, 342, 90, 25, "Save/Export");
       bt_saveexport->callback((Fl_Callback*)filesystem_generator_window_bt_saveexport);
     } // Fl_Button* bt_saveexport
-    { bt_loadimage = new Fl_Button(610, 305, 90, 25, "Load Image");
+    { bt_loadimage = new Fl_Button(610, 314, 90, 25, "Load Image");
       bt_loadimage->callback((Fl_Callback*)filesystem_generator_window_bt_loadimage);
     } // Fl_Button* bt_loadimage
+    { disk_selector = new Fl_Counter(610, 290, 90, 20, "Disk Selector:");
+      disk_selector->minimum(0);
+      disk_selector->maximum(1000);
+      disk_selector->step(1);
+      disk_selector->callback((Fl_Callback*)filesystem_generator_window_sel_disk);
+      disk_selector->align(Fl_Align(FL_ALIGN_TOP));
+    } // Fl_Counter* disk_selector
     Fl_DND_Box *o = new Fl_DND_Box(5, 60, 600, 310, 0);
     o->callback(dnd_fs_cb);
     window->end();

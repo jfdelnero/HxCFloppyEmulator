@@ -6,6 +6,7 @@
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Button.H>
 extern void filesystem_generator_window_bt_injectdir(Fl_Button*, void*);
+extern void filesystem_generator_window_bt_close(Fl_Button*, void*);
 #include <FL/Fl_Choice.H>
 #include <FL/Fl_Tree.H>
 extern void filesystem_generator_window_browser_fs(Fl_Tree*, void*);
@@ -14,6 +15,8 @@ extern void filesystem_generator_window_bt_getfiles(Fl_Button*, void*);
 #include <FL/Fl_Output.H>
 extern void filesystem_generator_window_bt_saveexport(Fl_Button*, void*);
 extern void filesystem_generator_window_bt_loadimage(Fl_Button*, void*);
+#include <FL/Fl_Counter.H>
+extern void filesystem_generator_window_sel_disk(Fl_Counter*, void*);
 
 class filesystem_generator_window {
 public:
@@ -21,10 +24,6 @@ public:
   Fl_Double_Window *window;
   Fl_Button *bt_injectdir;
   Fl_Button *bt_cancel;
-private:
-  inline void cb_bt_cancel_i(Fl_Button*, void*);
-  static void cb_bt_cancel(Fl_Button*, void*);
-public:
   Fl_Choice *choice_filesystype;
   Fl_Tree *fs_browser;
   Fl_Button *bt_delete;
@@ -33,5 +32,6 @@ public:
   Fl_Output *hlptxt;
   Fl_Button *bt_saveexport;
   Fl_Button *bt_loadimage;
+  Fl_Counter *disk_selector;
 };
 #endif
