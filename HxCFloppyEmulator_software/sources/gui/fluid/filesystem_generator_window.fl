@@ -17,7 +17,7 @@ class filesystem_generator_window {open
       }
       Fl_Button bt_cancel {
         label Close
-        callback filesystem_generator_window_bt_close selected
+        callback filesystem_generator_window_bt_close
         xywh {610 379 90 25} labelsize 12
       }
       Fl_Choice choice_filesystype {
@@ -43,7 +43,7 @@ class filesystem_generator_window {open
         xywh {5 377 600 32} labeltype NO_LABEL
       }
       Fl_Output hlptxt {
-        xywh {610 118 90 141} box NO_BOX labeltype NO_LABEL
+        xywh {610 118 90 128} box NO_BOX labeltype NO_LABEL
       }
       Fl_Button bt_saveexport {
         label {Save/Export}
@@ -57,7 +57,7 @@ class filesystem_generator_window {open
       }
       Fl_Counter disk_selector {
         label {Disk Selector:}
-        callback filesystem_generator_window_sel_disk
+        callback filesystem_generator_window_sel_disk selected
         xywh {610 290 90 20} align 1 minimum 0 maximum 1000 step 1
       }
     }
