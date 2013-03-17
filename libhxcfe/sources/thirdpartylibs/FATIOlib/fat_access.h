@@ -66,6 +66,7 @@ struct fatfs
     uint16                  fs_info_sector;
     uint32                  lba_begin;
     uint32                  fat_sectors;
+    uint32                  count_of_clusters;
     uint32                  next_free_cluster;
     uint16                  root_entry_count;
     uint16                  reserved_sectors;

@@ -410,7 +410,7 @@ int fatfs_find_blank_cluster(struct fatfs *fs, uint32 start_cluster, uint32 *fre
                 fat_sector_offset = current_cluster / (fs->sector_size/4);
         }
 
-        if ( fat_sector_offset < fs->fat_sectors)
+        if ( ( fat_sector_offset < fs->fat_sectors ) && ( current_cluster < fs->count_of_clusters ) )
         {
             // Read FAT sector into buffer
             pbuf = fatfs_fat_read_sector(fs, fs->fat_begin_lba+fat_sector_offset);
