@@ -1338,7 +1338,12 @@ int fl_fwrite(const void * data, int size, int count, void *f )
             offset = 0;
 
             if (!sectorsWrote)
+            {
+                size = 0;
+                count = 0;
+                fatfs_free_cluster_chain(&_fs, file->startcluster);
                 break;
+            }
         }
         else
         {
@@ -1377,12 +1382,22 @@ int fl_fwrite(const void * data, int size, int count, void *f )
 
             // Mark buffer as dirty
             file->file_data_dirty = 1;
-        
-            // Increase total read count 
-            bytesWritten += copyCount;
 
-            // Increment file pointer
-            file->bytenum += copyCount;
+            fl_fflush(f);
+            if(!file->file_data_dirty)
+            {
+                // Increase total read count 
+                bytesWritten += copyCount;
+
+                // Increment file pointer
+                file->bytenum += copyCount;
+            }
+            else
+            {
+                size = bytesWritten;
+                count = 1;
+                break;
+            }
 
             // Move onto next sector and reset copy offset
             sector++;

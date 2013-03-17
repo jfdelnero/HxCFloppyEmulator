@@ -169,9 +169,12 @@ int fatfs_init(struct fatfs *fs)
     data_sectors = total_sectors - (GET_16BIT_WORD(fs->currentsector.sector, BPB_RSVDSECCNT) + (fs->currentsector.sector[BPB_NUMFATS] * FATSz) + root_dir_sectors);
 
     // Find out which version of FAT this is...
+    fs->count_of_clusters = 0;
     if (fs->sectors_per_cluster != 0)
     {
         count_of_clusters = data_sectors / fs->sectors_per_cluster;
+
+        fs->count_of_clusters = count_of_clusters;
 
         if(count_of_clusters < 4085)
         {
@@ -181,7 +184,7 @@ int fatfs_init(struct fatfs *fs)
             // Volume is FAT12
             fs->fat_type = FAT_TYPE_12;
             return FAT_INIT_OK;
-		}
+        }
         else if(count_of_clusters < 65525) 
         {
             // Clear this FAT32 specific param
