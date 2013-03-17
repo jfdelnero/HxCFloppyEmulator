@@ -756,7 +756,7 @@ void dnd_fs_conv(const char *urls)
 int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 {
 	FILE * f;
-	int size,file_handle,ret,dirhandle;
+	int size,file_handle,ret,dirhandle,wsize;
 	struct stat entry;
 	unsigned char * buffer;
 	char fullpath[1024];
@@ -843,8 +843,12 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 					file_handle = hxcfe_createFile(fsmng,fullpath );
 					if(file_handle>0)
 					{
-						hxcfe_writeFile(fsmng,file_handle,(char*)buffer,size);
+						wsize = hxcfe_writeFile(fsmng,file_handle,(char*)buffer,size);
 						hxcfe_closeFile(fsmng,file_handle);
+						if( wsize != size )
+						{
+							hxcfe_deleteFile(fsmng, fullpath);
+						}
 					}
 
 					free(buffer);
