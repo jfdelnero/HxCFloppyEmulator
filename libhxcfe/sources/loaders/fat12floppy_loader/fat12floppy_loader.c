@@ -202,7 +202,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 	flatimg=(char*)malloc(dksize);
 	if(flatimg!=NULL)
 	{
-		memset(flatimg,0xE6,dksize);
+		memset(flatimg,0xF6,dksize);
 		if(configlist[i].bootsector)
 			memcpy(flatimg,configlist[i].bootsector,512);
 		else
