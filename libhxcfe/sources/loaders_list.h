@@ -94,6 +94,7 @@
 #include "./loaders/gkh_loader/gkh_loader.h"
 #include "./loaders/kryofluxstream_loader/kryofluxstream_loader.h"
 #include "./loaders/system24_loader/system24_loader.h"
+#include "./loaders/apple2_nib_loader/apple2_nib_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -169,5 +170,6 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)DSD_libGetPluginInfo,
 	(GETPLUGININFOS)FEI_libGetPluginInfo,
 	(GETPLUGININFOS)System24_libGetPluginInfo,
+	(GETPLUGININFOS)Apple2_nib_libGetPluginInfo,
 	(GETPLUGININFOS)-1
 };
