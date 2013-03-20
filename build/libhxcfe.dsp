@@ -1626,6 +1626,18 @@ SOURCE=..\sources\loaders\fzf_loader\fzf_loader.c
 SOURCE=..\sources\loaders\fzf_loader\fzf_loader.h
 # End Source File
 # End Group
+# Begin Group "Apple2NIB"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\apple2_nib_loader\apple2_nib_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\apple2_nib_loader\apple2_nib_loader.h
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 
