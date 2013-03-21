@@ -606,6 +606,7 @@ Main_Window::Main_Window()
 	user_data((void*)(this));
 
 	load_last_cfg();
+	guicontext->main_window = (Main_Window *)this;
 
 	//////////////////////////////////////////////
 	// Floppy dump window
