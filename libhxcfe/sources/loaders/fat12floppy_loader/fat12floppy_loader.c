@@ -156,6 +156,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 	FATCONFIG fatconfig;
 	CYLINDER* currentcylinder;
 	struct stat staterep;
+	int pregap;
 
 	//	FILE * f;
 
@@ -189,6 +190,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 	tracktype=configlist[i].tracktype;
 	interleave=configlist[i].interleave;
 	gap3len=configlist[i].gap3;
+	pregap = configlist[i].pregap;
 	media_type=configlist[i].BPB_media;
 
 	rpm=configlist[i].rpm;
@@ -304,7 +306,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 						(sectorsize*(floppydisk->floppySectorPerTrack)*i);
 				
-			currentcylinder->sides[i]=tg_generateTrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,0,floppydisk->floppyBitRate,currentcylinder->floppyRPM,tracktype,gap3len,0,2500,-2500);
+			currentcylinder->sides[i]=tg_generateTrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,0,floppydisk->floppyBitRate,currentcylinder->floppyRPM,tracktype,gap3len,pregap,2500,-2500);
 		}
 	}
 			
