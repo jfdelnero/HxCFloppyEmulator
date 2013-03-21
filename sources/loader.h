@@ -32,4 +32,5 @@
 
 int load_floppy_image(char *filename);
 int load_floppy(FLOPPY * floppydisk,char * defaultfilename);
+FLOPPY * loadrawimage(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file,int * ret);
 int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file);

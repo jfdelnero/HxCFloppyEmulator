@@ -75,8 +75,7 @@ int main(int argc, char **argv)
 	{
 		memset(guicontext,0,sizeof(s_gui_context));
 
-		Main_Window * mw;
-		mw=new Main_Window();
+		new Main_Window();
 
 		return 0;
 	}	

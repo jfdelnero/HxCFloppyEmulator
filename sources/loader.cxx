@@ -141,25 +141,24 @@ int load_floppy_image(char *filename)
 	return ret;
 }
 
-int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
+
+FLOPPY * loadrawimage(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file,int * ret)
 {
 	FBuilder* fb;
 	FILE * f;
 	unsigned int i,j,k,nbside;
-	int ret;
 	unsigned char * trackbuffer;
 	int sectornumber;
 	int offset;
+	FLOPPY * fp;
 
 	f=0;
+	fp = 0;
 	if(file)
 		f=hxc_fopen(file,"r+b");
 
 	if(f || file==NULL)
 	{
-		if(guicontext->loadedfloppy)
-			hxcfe_floppyUnload(guicontext->hxcfe,guicontext->loadedfloppy);
-
 		nbside=(rfc->sidecfg)&2?2:1;
 
 		if(f)
@@ -168,8 +167,6 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 			memset(trackbuffer,rfc->fillvalue,(128<<rfc->sectorsize)*rfc->sectorpertrack);
 		}
 
-		sprintf(guicontext->bufferfilename,"");
-		guicontext->loadedfloppy=0;
 		fb=hxcfe_initFloppy(floppycontext,rfc->numberoftrack,nbside);
 		if(fb)
 		{
@@ -252,17 +249,36 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 				}
 			}
 
-			guicontext->loadedfloppy=hxcfe_getFloppy(fb);
+			fp = hxcfe_getFloppy(fb);
 		}
 
-		/*t=hxcfe_getfloppysize(floppycontext,thefloppydisk,0);
+		if(f)
+		{
+			free(trackbuffer);
+			hxc_fclose(f);
+		}
+	}
 
-		test=malloc(512*18);
+	*ret = 0;
 
-		ss=hxcfe_init_sectorsearch(floppycontext,thefloppydisk);
-		t=hxcfe_readsectordata(ss,0,0,1,5,512,test);
+	return fp;
+}
 
-		hxcfe_deinit_sectorsearch(ss);*/
+int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
+{
+	int ret;
+	FLOPPY * fp;
+
+	fp = loadrawimage(floppycontext,rfc,file,&ret);
+	if(fp)
+	{
+		if(guicontext->loadedfloppy)
+			hxcfe_floppyUnload(guicontext->hxcfe,guicontext->loadedfloppy);
+
+		sprintf(guicontext->bufferfilename,"");
+		guicontext->loadedfloppy=0;
+
+		guicontext->loadedfloppy = fp; 
 
 		sync_if_config();
 
@@ -274,18 +290,13 @@ int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
 
 			guicontext->loadstatus=ret;
 
-			if(f)
+			if(file)
 				strcpy(guicontext->bufferfilename,hxc_getfilenamebase(file,0));
 			else
 				strcpy(guicontext->bufferfilename,"Empty Floppy");
 		}
 
-		if(f)
-		{
-			free(trackbuffer);
-			hxc_fclose(f);
-		}
-	}	
+	}
 
 	guicontext->updatefloppyinfos++;
 	guicontext->updatefloppyfs++;
