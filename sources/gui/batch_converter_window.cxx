@@ -51,7 +51,7 @@ batch_converter_window::batch_converter_window() {
       hlptxt->align(Fl_Align(37));
       hlptxt->deactivate();
     } // Fl_Output* hlptxt
-    { chkbox_rawinputsfiles = new Fl_Check_Button(18, 102, 64, 15, "Consider Inputs files as RAW files");
+    { chkbox_rawinputsfiles = new Fl_Check_Button(18, 102, 64, 15, "Treat input files as RAW files");
       chkbox_rawinputsfiles->down_box(FL_DOWN_BOX);
       chkbox_rawinputsfiles->callback((Fl_Callback*)batch_converter_window_inputasrawfile, (void*)(this));
     } // Fl_Check_Button* chkbox_rawinputsfiles
