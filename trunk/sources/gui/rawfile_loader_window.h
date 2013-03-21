@@ -36,13 +36,14 @@ public:
   Fl_Value_Input *innum_rpm;
   Fl_Value_Input *innum_bitrate;
 private:
-  inline void cb_Cancel_i(Fl_Button*, void*);
-  static void cb_Cancel(Fl_Button*, void*);
+  inline void cb_Close_i(Fl_Button*, void*);
+  static void cb_Close(Fl_Button*, void*);
 public:
   Fl_Choice *choice_sectorsize;
   Fl_Choice *choice_tracktype;
   Fl_Value_Input *numin_gap3;
   Fl_Choice *choice_numberofside;
   Fl_Choice *choice_disklayout;
+  Fl_Output *hlptxt;
 };
 #endif
