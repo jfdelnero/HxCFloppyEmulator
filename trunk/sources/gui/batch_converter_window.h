@@ -12,6 +12,8 @@ extern void batch_converter_window_bt_select_src(Fl_Button*, void*);
 extern void batch_converter_window_bt_select_dst(Fl_Button*, void*);
 extern void batch_converter_window_bt_convert(Fl_Button*, void*);
 extern void batch_converter_window_bt_cancel(Fl_Button*, void*);
+#include <FL/Fl_Check_Button.H>
+extern void batch_converter_window_inputasrawfile(Fl_Check_Button*, void*);
 
 class batch_converter_window {
 public:
@@ -26,5 +28,6 @@ public:
   Fl_Button *bt_convert;
   Fl_Button *bt_cancel;
   Fl_Output *hlptxt;
+  Fl_Check_Button *chkbox_rawinputsfiles;
 };
 #endif
