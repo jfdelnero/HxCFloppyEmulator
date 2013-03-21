@@ -25,7 +25,7 @@ batch_converter_window::batch_converter_window() {
       strin_src_dir->textsize(12);
       strin_src_dir->align(Fl_Align(FL_ALIGN_TOP_LEFT));
     } // Fl_Input* strin_src_dir
-    { strin_dst_dir = new Fl_Input(19, 126, 271, 24, "Target directory");
+    { strin_dst_dir = new Fl_Input(19, 138, 271, 24, "Target directory");
       strin_dst_dir->labelsize(12);
       strin_dst_dir->textsize(12);
       strin_dst_dir->align(Fl_Align(FL_ALIGN_TOP_LEFT));
@@ -37,7 +37,7 @@ batch_converter_window::batch_converter_window() {
     { bt_select_src = new Fl_Button(304, 69, 95, 25, "Select");
       bt_select_src->callback((Fl_Callback*)batch_converter_window_bt_select_src);
     } // Fl_Button* bt_select_src
-    { bt_select_dst = new Fl_Button(304, 124, 95, 25, "Select");
+    { bt_select_dst = new Fl_Button(304, 137, 95, 25, "Select");
       bt_select_dst->callback((Fl_Callback*)batch_converter_window_bt_select_dst);
     } // Fl_Button* bt_select_dst
     { bt_convert = new Fl_Button(190, 210, 100, 25, "Convert");
@@ -51,6 +51,10 @@ batch_converter_window::batch_converter_window() {
       hlptxt->align(Fl_Align(37));
       hlptxt->deactivate();
     } // Fl_Output* hlptxt
+    { chkbox_rawinputsfiles = new Fl_Check_Button(18, 102, 64, 15, "Consider Inputs files as RAW files");
+      chkbox_rawinputsfiles->down_box(FL_DOWN_BOX);
+      chkbox_rawinputsfiles->callback((Fl_Callback*)batch_converter_window_inputasrawfile, (void*)(this));
+    } // Fl_Check_Button* chkbox_rawinputsfiles
 
     Fl_DND_Box *o = new Fl_DND_Box(0, 0,413, 244, 0);
     o->callback(dnd_bc_cb);
