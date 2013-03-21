@@ -2,15 +2,15 @@
 
 #include "rawfile_loader_window.h"
 
-void rawfile_loader_window::cb_Cancel_i(Fl_Button* o, void*) {
+void rawfile_loader_window::cb_Close_i(Fl_Button* o, void*) {
   ((Fl_Window*)(o->parent()))->hide();
 }
-void rawfile_loader_window::cb_Cancel(Fl_Button* o, void* v) {
-  ((rawfile_loader_window*)(o->parent()->user_data()))->cb_Cancel_i(o,v);
+void rawfile_loader_window::cb_Close(Fl_Button* o, void* v) {
+  ((rawfile_loader_window*)(o->parent()->user_data()))->cb_Close_i(o,v);
 }
 
 rawfile_loader_window::rawfile_loader_window() {
-  { window = new Fl_Double_Window(464, 312, "RAW File format configuration");
+  { window = new Fl_Double_Window(458, 351, "RAW File format configuration");
     window->user_data((void*)(this));
     { chk_reversesides = new Fl_Check_Button(333, 58, 25, 25, "Reverse side");
       chk_reversesides->down_box(FL_DOWN_BOX);
@@ -29,18 +29,18 @@ rawfile_loader_window::rawfile_loader_window() {
       chk_side0track_first->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
       chk_side0track_first->align(Fl_Align(132|FL_ALIGN_INSIDE));
     } // Fl_Check_Button* chk_side0track_first
-    { chk_autogap3 = new Fl_Check_Button(333, 239, 25, 25, "Auto GAP3");
+    { chk_autogap3 = new Fl_Check_Button(130, 210, 25, 25, "Auto GAP3");
       chk_autogap3->down_box(FL_DOWN_BOX);
       chk_autogap3->labelsize(12);
       chk_autogap3->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
     } // Fl_Check_Button* chk_autogap3
-    { numin_pregap = new Fl_Value_Input(130, 242, 95, 20, "PRE-GAP lenght :");
+    { numin_pregap = new Fl_Value_Input(230, 216, 95, 20, "PRE-GAP lenght :");
       numin_pregap->labelsize(12);
       numin_pregap->textsize(12);
       numin_pregap->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
       numin_pregap->align(Fl_Align(FL_ALIGN_TOP_LEFT));
     } // Fl_Value_Input* numin_pregap
-    { numin_formatvalue = new Fl_Value_Input(130, 285, 45, 20, "Format value");
+    { numin_formatvalue = new Fl_Value_Input(335, 174, 45, 20, "Format value");
       numin_formatvalue->labelsize(12);
       numin_formatvalue->textsize(12);
       numin_formatvalue->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
@@ -63,13 +63,13 @@ rawfile_loader_window::rawfile_loader_window() {
       chk_sidebasedskew->labelsize(12);
       chk_sidebasedskew->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
     } // Fl_Check_Button* chk_sidebasedskew
-    { strout_totalsector = new Fl_Output(130, 177, 95, 20, "Total Sector:");
+    { strout_totalsector = new Fl_Output(130, 174, 95, 20, "Total Sector:");
       strout_totalsector->labelsize(12);
       strout_totalsector->textsize(12);
       strout_totalsector->user_data((void*)(this));
       strout_totalsector->align(Fl_Align(FL_ALIGN_TOP_LEFT));
     } // Fl_Output* strout_totalsector
-    { strout_totalsize = new Fl_Output(230, 177, 95, 20, "Total Size:");
+    { strout_totalsize = new Fl_Output(230, 174, 95, 20, "Total Size:");
       strout_totalsize->labelsize(12);
       strout_totalsize->textsize(12);
       strout_totalsize->user_data((void*)(this));
@@ -105,26 +105,26 @@ rawfile_loader_window::rawfile_loader_window() {
       innum_bitrate->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
       innum_bitrate->align(Fl_Align(FL_ALIGN_TOP_LEFT));
     } // Fl_Value_Input* innum_bitrate
-    { Fl_Button* o = new Fl_Button(10, 207, 95, 30, "Load RAW file");
+    { Fl_Button* o = new Fl_Button(172, 270, 95, 30, "Load RAW file");
       o->labelsize(12);
       o->callback((Fl_Callback*)raw_loader_window_bt_loadrawfile, (void*)(this));
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(10, 242, 95, 30, "Create Empty Floppy");
+    { Fl_Button* o = new Fl_Button(274, 270, 95, 30, "Create Empty Floppy");
       o->labelsize(12);
       o->callback((Fl_Callback*)raw_loader_window_bt_createemptyfloppy, (void*)(this));
       o->align(Fl_Align(FL_ALIGN_WRAP));
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(241, 275, 100, 30, "Save config");
+    { Fl_Button* o = new Fl_Button(10, 280, 70, 20, "Save config");
       o->labelsize(12);
       o->callback((Fl_Callback*)raw_loader_window_bt_savecfg, (void*)(this));
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(355, 275, 95, 30, "Load config");
+    { Fl_Button* o = new Fl_Button(89, 280, 70, 20, "Load config");
       o->labelsize(12);
       o->callback((Fl_Callback*)raw_loader_window_bt_loadcfg, (void*)(this));
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(10, 277, 95, 30, "Cancel");
+    { Fl_Button* o = new Fl_Button(377, 270, 70, 30, "Close");
       o->labelsize(12);
-      o->callback((Fl_Callback*)cb_Cancel);
+      o->callback((Fl_Callback*)cb_Close);
     } // Fl_Button* o
     { choice_sectorsize = new Fl_Choice(230, 61, 95, 20, "Sector size :");
       choice_sectorsize->down_box(FL_BORDER_BOX);
@@ -142,7 +142,7 @@ rawfile_loader_window::rawfile_loader_window() {
       choice_tracktype->align(Fl_Align(FL_ALIGN_TOP_LEFT));
       choice_tracktype->when(FL_WHEN_CHANGED);
     } // Fl_Choice* choice_tracktype
-    { numin_gap3 = new Fl_Value_Input(230, 242, 95, 20, "GAP3 lenght :");
+    { numin_gap3 = new Fl_Value_Input(10, 215, 105, 20, "GAP3 lenght :");
       numin_gap3->labelsize(12);
       numin_gap3->textsize(12);
       numin_gap3->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
@@ -156,7 +156,7 @@ rawfile_loader_window::rawfile_loader_window() {
       choice_numberofside->align(Fl_Align(FL_ALIGN_TOP_LEFT));
       choice_numberofside->when(FL_WHEN_CHANGED);
     } // Fl_Choice* choice_numberofside
-    { choice_disklayout = new Fl_Choice(10, 176, 110, 20, "Disk Layout:");
+    { choice_disklayout = new Fl_Choice(10, 255, 150, 20, "Predefined Disk Layout:");
       choice_disklayout->down_box(FL_BORDER_BOX);
       choice_disklayout->labelsize(12);
       choice_disklayout->textsize(11);
@@ -164,6 +164,11 @@ rawfile_loader_window::rawfile_loader_window() {
       choice_disklayout->align(Fl_Align(FL_ALIGN_TOP_LEFT));
       choice_disklayout->when(FL_WHEN_CHANGED);
     } // Fl_Choice* choice_disklayout
+    { hlptxt = new Fl_Output(5, 277, 442, 72);
+      hlptxt->box(FL_NO_BOX);
+      hlptxt->align(Fl_Align(37));
+      hlptxt->deactivate();
+    } // Fl_Output* hlptxt
     window->end();
   } // Fl_Double_Window* window
 }
