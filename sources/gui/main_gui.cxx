@@ -707,6 +707,13 @@ Main_Window::Main_Window()
 	rawloader_window->numin_gap3->value(84);
 	rawloader_window->numin_interleave->value(1);
 	rawloader_window->numin_skew->value(0);
+
+	rawloader_window->hlptxt->wrap(FL_INPUT_WRAP);
+	rawloader_window->hlptxt->textsize(10);
+	rawloader_window->hlptxt->readonly(FL_INPUT_READONLY);
+
+	rawloader_window->hlptxt->static_value("To batch convert RAW files you can use the Batch Converter function and check the RAW files mode check box.");
+
 	raw_loader_window_datachanged(rawloader_window->numin_skew, 0);
 
 	rfb=hxcfe_initXmlFloppy(guicontext->hxcfe);
