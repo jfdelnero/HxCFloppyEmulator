@@ -9,7 +9,7 @@ class rawfile_loader_window {open
     Fl_Window window {
       label {RAW File format configuration}
       user_data this open selected
-      xywh {337 383 464 312} type Double visible
+      xywh {334 204 458 351} type Double visible
     } {
       Fl_Check_Button chk_reversesides {
         label {Reverse side}
@@ -33,19 +33,19 @@ class rawfile_loader_window {open
         label {Auto GAP3}
         user_data this
         callback raw_loader_window_datachanged
-        xywh {333 239 25 25} down_box DOWN_BOX labelsize 12
+        xywh {130 210 25 25} down_box DOWN_BOX labelsize 12
       }
       Fl_Value_Input numin_pregap {
         label {PRE-GAP lenght :}
         user_data this
         callback raw_loader_window_datachanged
-        xywh {130 242 95 20} labelsize 12 align 5 textsize 12
+        xywh {230 216 95 20} labelsize 12 align 5 textsize 12
       }
       Fl_Value_Input numin_formatvalue {
         label {Format value}
         user_data this
         callback raw_loader_window_datachanged
-        xywh {130 285 45 20} labelsize 12 align 5 textsize 12
+        xywh {335 174 45 20} labelsize 12 align 5 textsize 12
       }
       Fl_Value_Input numin_interleave {
         label {Interleave :}
@@ -68,12 +68,12 @@ class rawfile_loader_window {open
       Fl_Output strout_totalsector {
         label {Total Sector:}
         user_data this
-        xywh {130 177 95 20} labelsize 12 align 5 textsize 12
+        xywh {130 174 95 20} labelsize 12 align 5 textsize 12
       }
       Fl_Output strout_totalsize {
         label {Total Size:}
         user_data this
-        xywh {230 177 95 20} labelsize 12 align 5 textsize 12
+        xywh {230 174 95 20} labelsize 12 align 5 textsize 12
       }
       Fl_Value_Input innum_nbtrack {
         label {Number of Track :}
@@ -109,30 +109,30 @@ class rawfile_loader_window {open
         label {Load RAW file}
         user_data this
         callback raw_loader_window_bt_loadrawfile
-        xywh {10 207 95 30} labelsize 12
+        xywh {172 270 95 30} labelsize 12
       }
       Fl_Button {} {
         label {Create Empty Floppy}
         user_data this
         callback raw_loader_window_bt_createemptyfloppy
-        xywh {10 242 95 30} labelsize 12 align 128
+        xywh {274 270 95 30} labelsize 12 align 128
       }
       Fl_Button {} {
         label {Save config}
         user_data this
         callback raw_loader_window_bt_savecfg
-        xywh {241 275 100 30} labelsize 12
+        xywh {10 280 70 20} labelsize 12
       }
       Fl_Button {} {
         label {Load config}
         user_data this
         callback raw_loader_window_bt_loadcfg
-        xywh {355 275 95 30} labelsize 12
+        xywh {89 280 70 20} labelsize 12
       }
       Fl_Button {} {
-        label Cancel
+        label Close
         callback {((Fl_Window*)(o->parent()))->hide();}
-        xywh {10 277 95 30} labelsize 12
+        xywh {377 270 70 30} labelsize 12
       }
       Fl_Choice choice_sectorsize {
         label {Sector size :}
@@ -150,7 +150,7 @@ class rawfile_loader_window {open
         label {GAP3 lenght :}
         user_data this
         callback raw_loader_window_datachanged
-        xywh {230 242 95 20} labelsize 12 align 5 textsize 12
+        xywh {10 215 105 20} labelsize 12 align 5 textsize 12
       }
       Fl_Choice choice_numberofside {
         label {Number of side :}
@@ -159,11 +159,14 @@ class rawfile_loader_window {open
         xywh {230 20 95 20} down_box BORDER_BOX labelsize 12 align 5 when 1 textsize 11
       } {}
       Fl_Choice choice_disklayout {
-        label {Disk Layout:}
+        label {Predefined Disk Layout:}
         user_data this
         callback raw_loader_window_datachanged open
-        xywh {10 176 110 20} down_box BORDER_BOX labelsize 12 align 5 when 1 textsize 11
+        xywh {10 255 150 20} down_box BORDER_BOX labelsize 12 align 5 when 1 textsize 11
       } {}
+      Fl_Output hlptxt {
+        xywh {5 277 442 72} box NO_BOX align 37 deactivate
+      }
     }
   }
 } 
