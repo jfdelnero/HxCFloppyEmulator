@@ -37,4 +37,6 @@ typedef struct s_gui_context_
 	char last_loaded_image_path[4096];
 	int loaded_img_modified;
 
+	void * main_window;
+
 }s_gui_context;
