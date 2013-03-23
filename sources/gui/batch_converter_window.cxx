@@ -56,7 +56,7 @@ batch_converter_window::batch_converter_window() {
       chkbox_rawinputsfiles->callback((Fl_Callback*)batch_converter_window_inputasrawfile, (void*)(this));
     } // Fl_Check_Button* chkbox_rawinputsfiles
 
-    Fl_DND_Box *o = new Fl_DND_Box(0, 0,413, 244, 0);
+    Fl_DND_Box *o = new Fl_DND_Box(0, 0,413, 286, 0);
     o->callback(dnd_bc_cb);
 
     window->end();
