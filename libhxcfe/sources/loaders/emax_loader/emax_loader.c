@@ -167,9 +167,7 @@ int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,c
 	f2=hxc_fopen(os_filename,"rb");
 	if(f2==NULL) 
 	{	
-		hxc_fclose(f);
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open os file %s !",os_filename);
-		return HXCFE_ACCESSERROR;
 	}
 
 	if(filesize!=0)
@@ -196,7 +194,7 @@ int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,c
 			floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 				
 			floppy_data= malloc((SCTR_SIZE * SCTR_TRK) * TRK_CYL * HEADS);
-			memset(floppy_data,0xE6,(SCTR_SIZE * SCTR_TRK) * TRK_CYL * HEADS);
+			memset(floppy_data,0xF6,(SCTR_SIZE * SCTR_TRK) * TRK_CYL * HEADS);
 
 			sprintf (hdr, EMAXUTIL_HDR, RWDISK_VERSION, RWDISK_DATE); 
 			hdr[EMAXUTIL_HDRLEN]=0;
@@ -209,24 +207,27 @@ int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,c
 			{
 				floppycontext->hxc_printf(MSG_ERROR,"Wrong version: disk says %s", fhdr);
 				hxc_fclose(f);
-				hxc_fclose(f2);
+				if(f2)
+					hxc_fclose(f2);
 				return HXCFE_BADFILE;
 			} 
 
-
-			for(i=OS1_LOW;i<=OS1_HIGH;i++)
+			if(f2)
 			{
-				fread(&floppy_data[i*512],512,1,f2);
-			}
+				for(i=OS1_LOW;i<=OS1_HIGH;i++)
+				{
+					fread(&floppy_data[i*512],512,1,f2);
+				}
 
-			for(i=OS2_LOW;i<=OS2_HIGH;i++)
-			{
-				fread(&floppy_data[i*512],512,1,f2);
-			}
+				for(i=OS2_LOW;i<=OS2_HIGH;i++)
+				{
+					fread(&floppy_data[i*512],512,1,f2);
+				}
 
-			for(i=OS3_LOW;i<=OS3_HIGH;i++)
-			{
-				fread(&floppy_data[i*512],512,1,f2);
+				for(i=OS3_LOW;i<=OS3_HIGH;i++)
+				{
+					fread(&floppy_data[i*512],512,1,f2);
+				}
 			}
 
 			for(i=BANK_LOW;i<=BANK_HIGH;i++)
@@ -273,18 +274,21 @@ int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,c
 			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
 			hxc_fclose(f);
-			hxc_fclose(f2);
+			if(f2)
+				hxc_fclose(f2);
 			return HXCFE_NOERROR;
 
 		}
 		hxc_fclose(f);
-		hxc_fclose(f2);
+		if(f2)
+			hxc_fclose(f2);
 		return HXCFE_FILECORRUPTED;
 	}
 	
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
-	hxc_fclose(f2);
+	if(f2)
+		hxc_fclose(f2);
 	return HXCFE_BADFILE;
 }
 
