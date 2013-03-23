@@ -66,6 +66,7 @@ extern "C"
 #include "main.h"
 #include "filesystem_generator_window.h"
 #include "cb_filesystem_generator_window.h"
+#include "sdhxcfe_cfg.h"
 #include "loader.h"
 
 #include "fileselector.h"
@@ -277,8 +278,8 @@ void filesystem_generator_window_bt_injectdir(Fl_Button* bt, void*)
 	dw=((Fl_Window*)(bt->parent()));
 	fgw=(filesystem_generator_window *)dw->user_data();
 
-	floppy=hxcfe_generateFloppy(guicontext->hxcfe,"",s,0);
-	load_floppy(floppy,"Disk_Image");
+	floppy=hxcfe_generateFloppy(guicontext->hxcfe,(char*)"",s,0);
+	load_floppy(floppy,(char*)"Disk_Image");
 	guicontext->updatefloppyfs++;
 	guicontext->updatefloppyinfos++;
 }
@@ -608,7 +609,7 @@ void filesystem_generator_window_bt_getfiles(Fl_Button *bt,void *)
 			}
 			else
 			{
-				getdir(fsmng,"/",dirstr,0);
+				getdir(fsmng,(char*)"/",dirstr,0);
 			}
 
 			hxcfe_deinitFsManager(fsmng);
@@ -694,46 +695,137 @@ int load_indexed_fileimage(int index)
 {
 #ifdef STANDALONEFSBROWSER
 	FILE * f;
-	char filename[32];
+	char filename[1024];
+	int cur_index;
 
-	sprintf(filename,"DSKA%.4d.HFE",index);
+	char cur_directory[1024*4];
+	char fullpath[1024*4];
 
+	long fff_handle;
+	int ret,i;
+	filefoundinfo fi;
+	unsigned char filebuffer[8*1024];
+	sdhxcfecfgfile * filecfg;
 
-	write_back_fileimage();
+	cur_index = index;
+	
+	hxc_getcurrentdirectory(cur_directory,sizeof(cur_directory));
+	sprintf(fullpath,"%s%c%s",cur_directory,SEPARATOR,"HXCSDFE.CFG");
 
-	f = hxc_fopen (filename,"rb");
+	memset(filebuffer,0,8*1024);
+	filecfg = (sdhxcfecfgfile *)&filebuffer;
+	f=hxc_fopen((char*)fullpath,"r+b");
 	if(f)
 	{
-		strcpy(guicontext->last_loaded_image_path,filename);
+		fread(filebuffer,8*1024,1,f);
 		hxc_fclose(f);
+	}
+	
+	if(filecfg->indexed_mode)
+	{
+
+		sprintf(filename,"DSKA%.4d.HFE",cur_index);
+		sprintf(fullpath,"%s%c%s",cur_directory,SEPARATOR,filename);
+
+		write_back_fileimage();
+
+		f = hxc_fopen (fullpath,"rb");
+		if(f)
+		{
+			strcpy(guicontext->last_loaded_image_path,fullpath);
+			hxc_fclose(f);
+		}
+		else
+		{
+			cur_index = 0;
+			sprintf(filename,"DSKA%.4d.HFE",cur_index);
+			sprintf(fullpath,"%s%c%s",cur_directory,SEPARATOR,filename);
+			f = hxc_fopen (fullpath,"rb");
+			if(f)
+			{
+				strcpy(guicontext->last_loaded_image_path,fullpath);
+				fclose(f);
+			}
+			else
+			{
+				guicontext->last_loaded_image_path[0]=0;
+				cur_index = -1;
+			}
+		}
+
+		if(cur_index>=0)
+		{
+			load_floppy_image(fullpath);
+		}
+
+		guicontext->updatefloppyinfos++;
+		guicontext->updatefloppyfs++;
+
+		return cur_index;
 	}
 	else
 	{
-		index = 0;
-		sprintf(filename,"DSKA%.4d.HFE",index);
-		f = hxc_fopen (filename,"rb");
-		if(f)
+		write_back_fileimage();
+
+		hxc_getcurrentdirectory(cur_directory,sizeof(cur_directory));
+
+		fff_handle = hxc_find_first_file(cur_directory,"*.hfe",&fi);
+		if(fff_handle)
 		{
-			strcpy(guicontext->last_loaded_image_path,filename);
-			fclose(f);
+			ret = 1;
+			i = 0;
+			while( i < cur_index && ret)
+			{
+				ret = hxc_find_next_file(fff_handle,cur_directory,"*.hfe",&fi);
+				i++;
+			}
+
+			if(!ret)
+			{
+				hxc_find_close(fff_handle);
+				cur_index = 0;
+				fff_handle = hxc_find_first_file(cur_directory,"*.hfe",&fi);
+				if(fff_handle)
+				{
+					strcpy(filename,fi.filename);
+				}
+				else
+				{
+					guicontext->last_loaded_image_path[0]=0;
+					cur_index = -1;
+				}
+			}
+			else
+			{
+				strcpy(filename,fi.filename);
+			}
+
+			hxc_find_close(fff_handle);
 		}
 		else
 		{
 			guicontext->last_loaded_image_path[0]=0;
-			index = -1;
+			cur_index = -1;
 		}
 
+		if(cur_index>=0)
+		{
+			sprintf(fullpath,"%s%c%s",cur_directory,SEPARATOR,filename);
+			if(load_floppy_image(fullpath) == HXCFE_NOERROR)
+			{
+				strcpy(guicontext->last_loaded_image_path,fullpath);
+			}
+		}
+
+		guicontext->updatefloppyinfos++;
+		guicontext->updatefloppyfs++;
+
+		return cur_index;
 	}
 
-	if(index>=0)
-	{
-		load_floppy_image(filename);
-	}
-
-	guicontext->updatefloppyinfos++;
-	guicontext->updatefloppyfs++;
+#else
+	return -1;
 #endif
-	return index;
 }
 
 void filesystem_generator_window_sel_disk(class Fl_Counter * cnt,void *)
