@@ -333,6 +333,10 @@ SOURCE=..\sources\gui\msg_txt.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\sources\gui\sdhxcfe_cfg.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\soft_cfg_file.cxx
 # End Source File
 # End Group
