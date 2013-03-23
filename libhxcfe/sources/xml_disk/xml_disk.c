@@ -101,6 +101,8 @@ typedef struct app_data
 	int interface_mode;
 	int double_step;
 
+	int fill_value;
+
 } AppData;
 
 int generateDisk(AppData *ad,unsigned char * diskdata,int buffersize)
@@ -111,6 +113,7 @@ int generateDisk(AppData *ad,unsigned char * diskdata,int buffersize)
 	int statetracknb;
 	unsigned int rpm;
 	int offset;
+	unsigned char * partialbuf;
 
 	offset = 0;
 	sectorsize = hxcfe_getCurrentSectorSize(ad->fb);
@@ -133,13 +136,35 @@ int generateDisk(AppData *ad,unsigned char * diskdata,int buffersize)
 
 				hxcfe_setTrackSkew(ad->fb, (hxcfe_getCurrentSkew(ad->fb) + ( ad->skew_per_track * i ) + ( j * ad->skew_per_side ))%numberofsector );
 
-				if( ( (offset + (sectorsize * numberofsector) )  > buffersize) || !diskdata )
+				if( ( offset  >= buffersize) || !diskdata )
 				{
 					ret = hxcfe_addSectors(ad->fb,j,i,0,0,numberofsector);
 				}
 				else
 				{
-					ret = hxcfe_addSectors(ad->fb,j,i,&diskdata[offset],(sectorsize * numberofsector),numberofsector);
+
+					if(buffersize - offset >= (sectorsize * numberofsector) )
+					{
+						ret = hxcfe_addSectors(ad->fb,j,i,&diskdata[offset],(sectorsize * numberofsector),numberofsector);
+					}
+					else
+					{
+						partialbuf = malloc(sectorsize * numberofsector);
+						if(partialbuf)
+						{
+							memset(partialbuf,ad->fill_value,sectorsize * numberofsector);
+							memcpy(partialbuf,&diskdata[offset],buffersize - offset);
+
+							ret = hxcfe_addSectors(ad->fb,j,i,partialbuf,(sectorsize * numberofsector),numberofsector);
+
+							free(partialbuf);
+						}
+						else
+						{
+							ret = hxcfe_addSectors(ad->fb,j,i,0,0,numberofsector);
+						}
+
+					}
 				}
 
 				offset = offset + (sectorsize * numberofsector);
@@ -163,6 +188,7 @@ int dumpDisk(AppData *ad,unsigned char * diskdata,int buffersize,FLOPPY * fp)
 	int statetracknb;
 	unsigned int rpm;
 	int offset;
+	unsigned char * partialbuf;
 
 	offset = 0;
 	sectorsize = hxcfe_getCurrentSectorSize(ad->fb);
@@ -185,13 +211,36 @@ int dumpDisk(AppData *ad,unsigned char * diskdata,int buffersize,FLOPPY * fp)
 
 				hxcfe_setTrackSkew(ad->fb, (hxcfe_getCurrentSkew(ad->fb) + ( ad->skew_per_track * i ) + ( j * ad->skew_per_side ))%numberofsector );
 
-				if( ( (offset + (sectorsize * numberofsector) )  > buffersize) || !diskdata )
+
+				if( ( offset  >= buffersize) || !diskdata )
 				{
 					ret = hxcfe_addSectors(ad->fb,j,i,0,0,numberofsector);
 				}
 				else
 				{
-					ret = hxcfe_addSectors(ad->fb,j,i,&diskdata[offset],(sectorsize * numberofsector),numberofsector);
+
+					if(buffersize - offset >= (sectorsize * numberofsector) )
+					{
+						ret = hxcfe_addSectors(ad->fb,j,i,&diskdata[offset],(sectorsize * numberofsector),numberofsector);
+					}
+					else
+					{
+						partialbuf = malloc(sectorsize * numberofsector);
+						if(partialbuf)
+						{
+							memset(partialbuf,ad->fill_value,sectorsize * numberofsector);
+							memcpy(partialbuf,&diskdata[offset],buffersize - offset);
+
+							ret = hxcfe_addSectors(ad->fb,j,i,partialbuf,(sectorsize * numberofsector),numberofsector);
+
+							free(partialbuf);
+						}
+						else
+						{
+							ret = hxcfe_addSectors(ad->fb,j,i,0,0,numberofsector);
+						}
+
+					}
 				}
 
 				offset = offset + (sectorsize * numberofsector);
@@ -257,7 +306,7 @@ unsigned long ahextoi(char * str)
 	while(str[i])
 	{
 		c = str[i];
-		
+
 		if( ( c>='0' && c<='9' ) || ( c>='a' && c<='f' ) || ( c>='A' && c<='F' ) )
 		{
 			hexval = hexval << 4;
@@ -290,7 +339,7 @@ unsigned long ahextoi(char * str)
 	return hexval;
 }
 
-static void XMLCALL charhandler(void *data, const char *s, int len) 
+static void XMLCALL charhandler(void *data, const char *s, int len)
 {
 	AppData	*ad = (AppData *) data;
 	char buffer[512];
@@ -357,7 +406,10 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 		break;
 		case FORMATVALUE:
 			if(!ad->xmlcheck)
+			{
 				hxcfe_setSectorFill (ad->fb,(unsigned char)ahextoi(buffer));
+				ad->fill_value = ahextoi(buffer);
+			}
 		break;
 		case PREGAP:
 			if(!ad->xmlcheck)
@@ -416,17 +468,17 @@ static void XMLCALL start(void *data, const char *el, const char **attr)
 					side=0;
 					track=0;
 
-					while(attr[i] && strcmp("track_number",attr[i]) ) 
+					while(attr[i] && strcmp("track_number",attr[i]) )
 					{
 						i++;
 					}
 					if(attr[i+1])
 					{
 						track = atoi(attr[i+1]);
-					}				
+					}
 
 					i=0;
-					while(attr[i] && strcmp("side_number",attr[i]) ) 
+					while(attr[i] && strcmp("side_number",attr[i]) )
 					{
 						i++;
 					}
@@ -443,7 +495,7 @@ static void XMLCALL start(void *data, const char *el, const char **attr)
 
 				case SECTOR:
 					i=0;
-					while(attr[i] && strcmp("sector_id",attr[i]) ) 
+					while(attr[i] && strcmp("sector_id",attr[i]) )
 					{
 						i++;
 					}
@@ -453,7 +505,7 @@ static void XMLCALL start(void *data, const char *el, const char **attr)
 					}
 
 					i=0;
-					while(attr[i] && strcmp("sector_size",attr[i]) ) 
+					while(attr[i] && strcmp("sector_size",attr[i]) )
 					{
 						i++;
 					}
@@ -461,7 +513,7 @@ static void XMLCALL start(void *data, const char *el, const char **attr)
 					{
 						sectorsize = atoi(attr[i+1]);
 					}
-					
+
 					track = ad->statestack[ad->stack_ptr].cur_track;
 
 					hxcfe_pushSector(ad->fb);
@@ -503,7 +555,7 @@ static void XMLCALL end(void *data, const char *el)
 					hxcfe_floppySetInterfaceMode(ad->floppycontext,ad->floppy,ad->interface_mode);
 			break;
 
-			case TRACK:		
+			case TRACK:
 				hxcfe_popTrack (ad->fb);
 			break;
 
@@ -550,13 +602,13 @@ XmlFloppyBuilder* hxcfe_initXmlFloppy(HXCFLOPPYEMULATOR* floppycontext)
 			return 0;
 		}
 		memset(ad,0,sizeof(AppData));
-		
+
 		ad->interface_mode = -1;
-		
+
 		i=0;
 		while( disklayout_list[i])
 		{
-			if(disklayout_list[i]->unpacked_data) 
+			if(disklayout_list[i]->unpacked_data)
 			{
 				free(disklayout_list[i]->unpacked_data);
 				disklayout_list[i]->unpacked_data = 0;
@@ -598,7 +650,7 @@ void hxcfe_deinitXmlFloppy(XmlFloppyBuilder* context)
 	i=0;
 	while( disklayout_list[i])
 	{
-		if(disklayout_list[i]->unpacked_data) 
+		if(disklayout_list[i]->unpacked_data)
 		{
 			free(disklayout_list[i]->unpacked_data);
 			disklayout_list[i]->unpacked_data = 0;
@@ -688,7 +740,7 @@ int	hxcfe_numberOfXmlLayout(XmlFloppyBuilder* context)
 	i = 0;
 	while( disklayout_list[i] )
 	{
-		i++;		
+		i++;
 	}
 
 	return i;
@@ -714,7 +766,7 @@ FLOPPY* hxcfe_generateXmlFloppy (XmlFloppyBuilder* context,unsigned char * rambu
 	ad = context->ad;
 
 	ad->xmlcheck = 0;
-	
+
 	ad->image_data = rambuffer;
 	ad->buffer_size = buffersize;
 
@@ -736,24 +788,38 @@ FLOPPY* hxcfe_generateXmlFileFloppy (XmlFloppyBuilder* context,char *file)
 	FLOPPY* ret;
 	unsigned char * buffer;
 
+	ret = 0;
 	f = fopen(file,"rb");
 	if(f)
 	{
 		fseek(f,0,SEEK_END);
 		filesize = ftell(f);
-		fseek(f,0,SEEK_SET);
+		if(filesize)
+		{
+			if(filesize > 32*1024*1024)
+			{
+				filesize = 32*1024*1024;
+			}
 
-		buffer = malloc(filesize);
-		memset(buffer,0,filesize);
-		fread(buffer, filesize, 1, f);
+			fseek(f,0,SEEK_SET);
+
+			buffer = malloc(filesize);
+			if(buffer)
+			{
+				memset(buffer,0,filesize);
+
+				fread(buffer, filesize, 1, f);
+
+				ret = hxcfe_generateXmlFloppy (context,buffer,filesize);
+
+				free(buffer);
+			}
+		}
+
 		fclose(f);
-
-		ret = hxcfe_generateXmlFloppy (context,buffer,filesize);
-
-		return ret; 
 	}
 
-	return 0;
+	return ret;
 }
 
 /*int hxcfe_checkCompatibilityXmlFileFloppy (XmlFloppyBuilder* context,FLOPPY * fp)
@@ -764,7 +830,7 @@ FLOPPY* hxcfe_generateXmlFileFloppy (XmlFloppyBuilder* context,char *file)
 	if( refFloppy )
 	{
 
-		
+
 
 	}
 }*/
