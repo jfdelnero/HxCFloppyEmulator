@@ -84,7 +84,7 @@ int load_floppy(FLOPPY * floppydisk,char * defaultfilename)
 	{
 		libusbhxcfe_loadFloppy(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy);
 
-		sprintf(guicontext->bufferfilename,defaultfilename);
+		strcpy(guicontext->bufferfilename,defaultfilename);
 	}
 
 	guicontext->updatefloppyinfos++;
