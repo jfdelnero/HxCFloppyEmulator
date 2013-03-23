@@ -283,7 +283,7 @@ void raw_loader_window_bt_loadrawfile(Fl_Button* bt, void*)
 		{
 			rfb=hxcfe_initXmlFloppy(guicontext->hxcfe);
 			hxcfe_selectXmlFloppyLayout(rfb,disklayout-1);
-			load_floppy( hxcfe_generateXmlFileFloppy(rfb,file),"Raw Image");
+			load_floppy( hxcfe_generateXmlFileFloppy(rfb,(char*)file),(char*)"Raw Image");
 			hxcfe_deinitXmlFloppy(rfb);
 		}
 		else
@@ -326,7 +326,7 @@ void raw_loader_window_bt_createemptyfloppy(Fl_Button* bt, void*)
 	{
 		rfb=hxcfe_initXmlFloppy(guicontext->hxcfe);
 		hxcfe_selectXmlFloppyLayout(rfb,disklayout-1);
-		load_floppy( hxcfe_generateXmlFloppy(rfb,0,0),"Raw Image" );
+		load_floppy( hxcfe_generateXmlFloppy(rfb,0,0),(char*)"Raw Image" );
 		hxcfe_deinitXmlFloppy(rfb);
 	}
 	else
