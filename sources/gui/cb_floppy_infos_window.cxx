@@ -360,13 +360,13 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						sl->sectorconfig->data_crc,sl->sectorconfig->use_alternate_data_crc?"BAD CRC!":"Ok");
 					fiw->buf->append((char*)str);
 
-					sprintf(str,"Start Sector cell : %d, Start Sector Data cell %d, End Sector cell %d\n",
+					sprintf(str,"Start Sector cell : %lu, Start Sector Data cell %lu, End Sector cell %lu\n",
 						sl->sectorconfig->startsectorindex,
 						sl->sectorconfig->startdataindex,
 						sl->sectorconfig->endsectorindex);
 					fiw->buf->append((char*)str);
 
-					sprintf(str,"Number of cells : %d\n",
+					sprintf(str,"Number of cells : %lu\n",
 						sl->sectorconfig->endsectorindex-sl->sectorconfig->startsectorindex);
 					fiw->buf->append((char*)str);
 
