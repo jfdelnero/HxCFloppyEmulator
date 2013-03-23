@@ -50,6 +50,7 @@
 #include <string.h>
 
 #include "fileselector.h"
+#include "sdhxcfe_cfg.h"
 
 extern "C"
 {
