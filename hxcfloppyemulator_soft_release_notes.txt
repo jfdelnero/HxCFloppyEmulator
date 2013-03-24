@@ -6,8 +6,69 @@
 --------H----H----X--X----C----------2-------0----0---0----0-----1-------------
 -------H----H---X-----X---CCCCC-----222222----0000-----0000----1111------------
 -------------------------------------------------------------------------------
------------------------------------------------------ http://hxc2001.free.fr --
+--------------------------------------------------------- http://hxc2001.com --
 -------------------------------------------------------------------------------
+
+/*********************************************************
+24/03/2013: HxCFloppyEmulator 2.0.12.2
+
+- The HxC Floppy Software was completely reworked - Main changes since the version 1.6.11.16 :
+
+New Features / Changes / Issues solved :
+
+-> GUI now Based on FLTK : http://www.fltk.org/
+
+-> Windows / Mac / Linux support ( http://torlus.com/floppy/forum/viewtopic.php?f=1&t=1120  ;) )
+
+-> New library : libhxcfe -> Contains the floppy management functions (track generator/images loaders/analyser/file system layer...).
+
+-> New library : libusbhxcfe -> Contains the HxC USB Floppy Emulator support layer.
+
+-> New Integrated DOS Disk browser : Can generate / add / get / remove files from any DOS HFE files.
+
+-> New Track Viewer/Analyser : Low level floppy track is now analysed and displayed.
+
+-> "Load Raw image" : Predefined floppy disk format description in XML (based on Expat XML Parser)
+
+-> New low level Track format : TYCOM (custom FM) & MEMBRAIN (custom MFM)
+
+-> Floppy disk dump : "missing sector" issue with some FDC corrected.
+
+-> FM Track format : desync added to the end of the track to solve the SCAN command issue with some FDC.
+
+-> Disk Browser : Support of special/custom 2.5MB DD & 4.5MB HD FAT floppy disk format.
+
+-> Batch converter : It is now possible to batch convert RAW images files.
+
+-> Track pregap support/setting added.
+
+-> Some issues corrected & enhancement in the following loader : D88,JV3,DMK,IMD,AFI,EDE,OricDSK,Emax...
+
+-> New file export support : TI99/4A V9T9 file image
+
+-> New Loader : Kryoflux Stream Loader (*XX.X.raw) / analyser.
+
+-> New Loader : Sega System24 Loader (*.S24)
+
+-> New Loader : Apple 2 NIB image support added. (*.NIB)
+
+-> New Loader : Casio FZF floppy image support added.
+
+-> W30 Loader : Roland S50/S330/S550 image support added.
+
+-> HFE Files : New alternate format flags for the track 0 side 0 & side 1.
+
+-> Sanity check function added to some loader.
+
+-> And a lot of minor corrections/enhancement too.
+
+*********************************************************/
+
+/*********************************************************
+04/03/2012: HxCFloppyEmulator 1.6.11.16
+
+-> Akai S950 DD & Akai S950 HD interface mode support added (need firmware v1.6.4.4 or more)
+*********************************************************/
 
 /*********************************************************
 09/10/2011: HxCFloppyEmulator 1.6.11.15
