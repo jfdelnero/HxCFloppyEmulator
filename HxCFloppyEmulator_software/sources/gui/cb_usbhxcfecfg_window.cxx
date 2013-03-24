@@ -71,17 +71,18 @@ void tick_usb(void *v) {
 	usbhxcfecfg_window *window;
 	
 	window=(usbhxcfecfg_window *)v;
-	
+
+#ifndef STANDALONEFSBROWSER
 	status=libusbhxcfe_getStats(guicontext->hxcfe,guicontext->usbhxcfe,&stats,0);
 
 	sprintf(tempstr,"%d (%d p/s)",(int)stats.totalpacketsent,(int)stats.packetsent);
 	stats.packetsent=0;
-	window->strout_packetsent->value((const char*)tempstr);				
-			
+	window->strout_packetsent->value((const char*)tempstr);
+
 	window->valout_synclost->value(stats.synclost);
 
 	if(stats.totaldataout<(1024*1024))
-	{			
+	{
 		sprintf(tempstr,"%d bytes",(int)stats.totaldataout);
 	}
 	else
@@ -93,16 +94,16 @@ void tick_usb(void *v) {
 		else
 		{
 			sprintf(tempstr,"%4.2f GB",(float)(stats.totaldataout)/(float)(1024*1024*1024));
-		}				
+		}
 	}
 	window->strout_datasent->value((const char*)tempstr);
-				
-				
+
+
 	datathroughput=stats.dataout * 2;
 	sprintf(tempstr,"%d bytes/second",(int)datathroughput);
 	window->strout_datathroughput->value((const char*)tempstr);
-				
-	period=0;	
+
+	period=0;
 	if(stats.packetsize)
 	{
 		packetpersecond=(float)datathroughput/(float)stats.packetsize;
@@ -115,10 +116,10 @@ void tick_usb(void *v) {
 			period=0;
 		}
 	}
-				
+
 	sprintf(tempstr,"%d ms",(int)period*2);
 	window->strout_maxsettletime->value((const char*)tempstr);
-				
+
 	sprintf(tempstr,"%d ms",(int)period);
 	window->strout_minsettletime->value((const char*)tempstr);
 
@@ -139,17 +140,19 @@ void tick_usb(void *v) {
 		default:
 			window->strout_usbhfestatus->value((const char*)"Unknow status !");
 		break;
-					
+
 	}
 
+
 	Fl::repeat_timeout(0.50, tick_usb, v);
+#endif
 }
 
 void usbifcfg_window_datachanged(Fl_Widget * w,void *)
 {
 	usbhxcfecfg_window *usbcfgw;
 	Fl_Widget* tw;
-
+#ifndef STANDALONEFSBROWSER
 	tw=w;
 	do
 	{
@@ -187,13 +190,14 @@ void usbifcfg_window_datachanged(Fl_Widget * w,void *)
 
 	libusbhxcfe_setInterfaceMode(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->interfacemode,guicontext->doublestep,guicontext->driveid);
 	libusbhxcfe_setUSBBufferSize(guicontext->hxcfe,guicontext->usbhxcfe, (int)usbcfgw->slider_usbpacket_size->value() );
+#endif
 }
 
 void ifcfg2_window_datachanged(Fl_Widget * w,void *)
 {
 	usbhxcfecfg_window *usbcfgw;
 	Fl_Widget* tw;
-
+#ifndef STANDALONEFSBROWSER
 	tw=w;
 	do
 	{
@@ -218,12 +222,13 @@ void ifcfg2_window_datachanged(Fl_Widget * w,void *)
 	{
 		guicontext->doublestep = 0xFF;
 	}
-
+#endif
 }
 
 void resetusbstat_bt(Fl_Button *w,void *)
 {
 	USBStats stats;
-
+#ifndef STANDALONEFSBROWSER
 	libusbhxcfe_getStats(guicontext->hxcfe,guicontext->usbhxcfe,&stats,1);
+#endif
 }
