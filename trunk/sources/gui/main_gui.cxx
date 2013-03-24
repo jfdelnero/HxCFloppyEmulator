@@ -359,8 +359,10 @@ void sync_if_config()
 		hxcfe_floppySetDoubleStep(guicontext->hxcfe,guicontext->loadedfloppy,guicontext->doublestep);
 	}
 
+#ifndef STANDALONEFSBROWSER
 	if(guicontext->usbhxcfe)
 		libusbhxcfe_setInterfaceMode(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->interfacemode,guicontext->doublestep,guicontext->driveid);
+#endif
 }
 
 void format_choice_cb(Fl_Widget *, void *v) 
@@ -379,10 +381,10 @@ void dnd_open(const char *urls)
 
 void dnd_cb(Fl_Widget *o, void *v)
 {
-    Fl_DND_Box *dnd = (Fl_DND_Box*)o;
+	Fl_DND_Box *dnd = (Fl_DND_Box*)o;
 
-    if(dnd->event() == FL_PASTE)
-        dnd_open(dnd->event_text());
+	if(dnd->event() == FL_PASTE)
+		dnd_open(dnd->event_text());
 }
 
 static void tick_mw(void *v) {
@@ -441,7 +443,8 @@ static void tick_mw(void *v) {
 			}
 		}
 	}
-			
+
+#ifndef STANDALONEFSBROWSER
 	if(guicontext->loadedfloppy)
 	{
 		sprintf(tempstr,"Track %d/%d",libusbhxcfe_getCurTrack(guicontext->hxcfe,guicontext->usbhxcfe),guicontext->loadedfloppy->floppyNumberOfTrack);
@@ -451,11 +454,13 @@ static void tick_mw(void *v) {
 		window->track_pos->maximum(guicontext->loadedfloppy->floppyNumberOfTrack);
 		window->track_pos->value((float)libusbhxcfe_getCurTrack(guicontext->hxcfe,guicontext->usbhxcfe));
 	}
+#endif
 
 	if(guicontext->autoselectmode)
 	{
 		if(!window->sdcfg_window->chk_hfr_autoifmode->value())
 			window->sdcfg_window->chk_hfr_autoifmode->value(1);
+
 		if(!window->usbcfg_window->chk_autoifmode->value())
 			window->usbcfg_window->chk_autoifmode->value(1);
 
@@ -467,6 +472,7 @@ static void tick_mw(void *v) {
 		{
 			i++;
 		}
+
 		window->usbcfg_window->choice_ifmode->value(i);
 		window->sdcfg_window->choice_hfeifmode->value(i);
 	}
@@ -528,8 +534,10 @@ Main_Window::Main_Window()
 	guicontext->interfacemode=GENERIC_SHUGART_DD_FLOPPYMODE;
 	guicontext->hxcfe=hxcfe_init();
 	hxcfe_setOutputFunc(guicontext->hxcfe,CUI_affiche);
-		
+
+#ifndef STANDALONEFSBROWSER	
 	guicontext->usbhxcfe=libusbhxcfe_init(guicontext->hxcfe);
+#endif
 
 	Fl::scheme("gtk+");
 
@@ -757,11 +765,15 @@ Main_Window::Main_Window()
 
 	//////////////////////////////////////////////
 	// USB FE CFG window
-
+#ifndef STANDALONEFSBROWSER
 	libusbhxcfe_getStats(guicontext->hxcfe,guicontext->usbhxcfe,&stats,0);
+#endif
 	this->usbcfg_window=new usbhxcfecfg_window();
 	usbcfg_window->choice_ifmode->menu(if_choices);
+
+#ifndef STANDALONEFSBROWSER
 	usbcfg_window->slider_usbpacket_size->scrollvalue(stats.packetsize,128,512,4096-(512-128));
+#endif
 	usbcfg_window->rbt_ds0->value(1);
 
 	//////////////////////////////////////////////
