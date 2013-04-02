@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- HxC Floppy Emulator Disk Layout -->
+<disk_layout>
+	<disk_layout_name>ROLAND_DD_W30_S330_W50_S50_S550</disk_layout_name>
+	<disk_layout_description>Roland W30/S330/W50/S50/S550 DD Floppy Disk</disk_layout_description>
+	<prefered_file_extension>img</prefered_file_extension>
+	<interface_mode>GENERIC_SHUGART_DD_FLOPPYMODE</interface_mode>
+	<file_size>737280</file_size>
+	<layout>
+		<number_of_track>80</number_of_track>
+		<number_of_side>2</number_of_side>
+		<format>IBM_MFM</format>
+		<sector_per_track>9</sector_per_track>
+		<sector_size>512</sector_size>
+		<interleave>1</interleave>
+		<formatvalue>0x00</formatvalue>
+		<gap3>255</gap3>
+		<bitrate>250000</bitrate>
+		<pregap>128</pregap>
+		<rpm>300</rpm>
+	</layout>
+</disk_layout>
