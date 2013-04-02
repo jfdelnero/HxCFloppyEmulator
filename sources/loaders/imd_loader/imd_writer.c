@@ -210,21 +210,29 @@ int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 						k=0;
 						do
 						{
-							l=0;
-							while((l<(int)sca[k]->sectorsize) && sca[k]->input_data[l]==sca[k]->input_data[0])
+							if(sca[k]->input_data)
 							{
-								l++;
-							}
+								l=0;
+								while((l<(int)sca[k]->sectorsize) && sca[k]->input_data[l]==sca[k]->input_data[0])
+								{
+									l++;
+								}
 
-							if(l!=(int)sca[k]->sectorsize)
-							{
-								fputs("\1",imdfile);
-								fwrite(sca[k]->input_data,sca[k]->sectorsize,1,imdfile);
+								if(l!=(int)sca[k]->sectorsize)
+								{
+									fputs("\1",imdfile);
+									fwrite(sca[k]->input_data,sca[k]->sectorsize,1,imdfile);
+								}
+								else
+								{
+									fputs("\2",imdfile);
+									fwrite(sca[k]->input_data,1,1,imdfile);
+								}
 							}
 							else
 							{
 								fputs("\2",imdfile);
-								fwrite(sca[k]->input_data,1,1,imdfile);
+								fwrite(&sca[k]->fill_byte,1,1,imdfile);
 							}
 
 							sprintf(tmp_str,"%d ",sca[k]->sector);
