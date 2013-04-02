@@ -164,6 +164,14 @@ Fl_Menu_Item disklayout_choices[]=
 	{ 0,0,raw_loader_window_datachanged,(void*)10},
 	{ 0,0,raw_loader_window_datachanged,(void*)11},
 	{ 0,0,raw_loader_window_datachanged,(void*)12},
+	{ 0,0,raw_loader_window_datachanged,(void*)13},
+	{ 0,0,raw_loader_window_datachanged,(void*)14},
+	{ 0,0,raw_loader_window_datachanged,(void*)15},
+	{ 0,0,raw_loader_window_datachanged,(void*)16},
+	{ 0,0,raw_loader_window_datachanged,(void*)17},
+	{ 0,0,raw_loader_window_datachanged,(void*)18},
+	{ 0,0,raw_loader_window_datachanged,(void*)19},
+	{ 0,0,raw_loader_window_datachanged,(void*)20},
 	{0}
 };
 
