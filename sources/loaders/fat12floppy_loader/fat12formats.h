@@ -144,7 +144,7 @@ fat12config configlist[]=
 	{"fat720",0xFF, 80 ,2,9,300,250000,win95_bootsector,84,0,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xF9,2,512,112,1},  // 3.5" Double sided, 80 tracks per side, 9 sectors per track (720K)
 	{"fat720pc",0xFF, 250 ,2,9,300,250000,win95_bootsector,84,0,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xF9,2,512,112,1},  // 3.5" Double sided, 160 tracks per side, 9 sectors per track (1440K)
 	{"fat1200_8i",0xFF,80 ,2,15,300,500000,win95_bootsector,84,0,1,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xFE,2,512,112,1}, //8" Double Sided, 80 tracks per side, 15 sectors per track (1.2MB)
-	{"fat1200",0xFF,80 ,2,15,300,500000,msdos_bootsector,84,0,1,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xF9,1,512,224,1}, //5.25" Double Sided, 80 tracks per side, 15 sectors per track (1.2MB)
+	{"fat1200",0xFF,80 ,2,15,360,500000,msdos_bootsector,84,0,1,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xF9,1,512,224,1}, //5.25" Double Sided, 80 tracks per side, 15 sectors per track (1.2MB)
 	{"fat1440",0xFF,80 ,2,18,300,500000,win95_bootsector,84,140,1,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xF0,1,512,224,1}, //3.5" Double Sided, 80 tracks per side, 18 sectors per track (1.44MB)
 	{"fat4572",0xFF,254 ,2,18,300,500000,win95_bootsector,84,0,1,IBMPC_HD_FLOPPYMODE,IBMFORMAT_DD,0xF0,4,512,224,1}, //3.5" Double Sided, 254 tracks per side, 18 sectors per track (4.5MB)
 	{"fat2540",0xFF,254 ,2,10,300,250000,win95_bootsector,84,0,1,IBMPC_DD_FLOPPYMODE,IBMFORMAT_DD,0xF0,4,512,224,1}, //3.5" Double Sided, 254 tracks per side, 10 sectors per track (2.5MB)
