@@ -381,10 +381,34 @@ void dnd_open(const char *urls)
 
 void dnd_cb(Fl_Widget *o, void *v)
 {
+	char * dnd_str;
 	Fl_DND_Box *dnd = (Fl_DND_Box*)o;
 
 	if(dnd->event() == FL_PASTE)
-		dnd_open(dnd->event_text());
+	{
+		if(strlen(dnd->event_text()))
+		{
+			dnd_str = (char*)malloc(strlen(dnd->event_text())+1);
+			if(dnd_str)
+			{
+				strcpy(dnd_str,dnd->event_text());
+
+				if(!strncmp(dnd_str,"file://",7))
+				{
+					strcpy(dnd_str,dnd_str+7);
+				}
+
+				if(strchr(dnd_str,'\n'))
+				{
+					*strchr(dnd_str,'\n') = 0;
+				}
+
+				dnd_open(dnd_str);
+
+				free(dnd_str);
+			}
+		}
+	}
 }
 
 static void tick_mw(void *v) {
