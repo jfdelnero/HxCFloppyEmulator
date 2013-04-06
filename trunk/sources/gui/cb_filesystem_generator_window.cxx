@@ -1060,7 +1060,10 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 
 					sprintf(fullpath,"%s/%s",basepath,getfilenamebase(filelist[i],0));
 
-					addentry(fsmng,  filelist[i],fullpath);
+					if(filelist[i] && strlen(filelist[i]))
+					{
+						addentry(fsmng,  filelist[i],fullpath);
+					}
 
 					i++;
 				}
