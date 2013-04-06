@@ -38,15 +38,11 @@
 	#include <conio.h>
 	#include <ftd2xx.h>
 	#include <winioctl.h>
-#elif defined(__APPLE__) || defined(__linux__)
+#elif defined(__APPLE__)
 	#include <dlfcn.h>
-#endif
-
-#if defined(__APPLE__)
 	#include "../macosx/ftd2xx.h"
-#endif
-
-#if defined(__linux__)
+#else // __linux__
+	#include <dlfcn.h>
 	#include "../linux/ftd2xx.h"
 #endif
 
