@@ -55,7 +55,7 @@ static struct fat_list    _free_file_list;
 //-----------------------------------------------------------------------------
 
 // Macro for checking if file lib is initialised
-#define CHECK_FL_INIT()     { if (_filelib_init==0) fl_init(); }
+#define CHECK_FL_INIT()     { if (_filelib_init==0) fiol_init(); }
 
 #define FL_LOCK(a)          do { if ((a)->fl_lock) (a)->fl_lock(); } while (0)
 #define FL_UNLOCK(a)        do { if ((a)->fl_unlock) (a)->fl_unlock(); } while (0)
@@ -63,7 +63,7 @@ static struct fat_list    _free_file_list;
 //-----------------------------------------------------------------------------
 // Local Functions
 //-----------------------------------------------------------------------------
-static void                _fl_init();
+static void                _fiol_init();
 
 //-----------------------------------------------------------------------------
 // _allocate_file: Find a slot in the open files buffer for a new file
@@ -647,9 +647,9 @@ static uint32 _read_sectors(FL_FILE* file, uint32 offset, uint8 *buffer, uint32 
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-// fl_init: Initialise library
+// fiol_init: Initialise library
 //-----------------------------------------------------------------------------
-void fl_init(void)
+void fiol_init(void)
 {    
     int i;
 
@@ -663,17 +663,17 @@ void fl_init(void)
     _filelib_init = 1;
 }
 //-----------------------------------------------------------------------------
-// fl_attach_locks: 
+// fiol_attach_locks: 
 //-----------------------------------------------------------------------------
-void fl_attach_locks(struct fatfs *fs, void (*lock)(void), void (*unlock)(void))
+void fiol_attach_locks(struct fatfs *fs, void (*lock)(void), void (*unlock)(void))
 {
     fs->fl_lock = lock;
     fs->fl_unlock = unlock;
 }
 //-----------------------------------------------------------------------------
-// fl_attach_media: 
+// fiol_attach_media: 
 //-----------------------------------------------------------------------------
-int fl_attach_media(fn_diskio_read rd, fn_diskio_write wr)
+int fiol_attach_media(fn_diskio_read rd, fn_diskio_write wr)
 {
     int res;
 
@@ -694,9 +694,9 @@ int fl_attach_media(fn_diskio_read rd, fn_diskio_write wr)
     return FAT_INIT_OK;
 }
 //-----------------------------------------------------------------------------
-// fl_shutdown: Call before shutting down system
+// fiol_shutdown: Call before shutting down system
 //-----------------------------------------------------------------------------
-void fl_shutdown(void)
+void fiol_shutdown(void)
 {
     // If first call to library, initialise
     CHECK_FL_INIT();
@@ -708,7 +708,7 @@ void fl_shutdown(void)
 //-----------------------------------------------------------------------------
 // fopen: Open or Create a file for reading or writing
 //-----------------------------------------------------------------------------
-void* fl_fopen(const char *path, const char *mode)
+void* fiol_fopen(const char *path, const char *mode)
 {
     int i;
     FL_FILE* file; 
@@ -910,9 +910,9 @@ static uint32 _write_sectors(FL_FILE* file, uint32 offset, uint8 *buf, uint32 co
 }
 #endif
 //-----------------------------------------------------------------------------
-// fl_fflush: Flush un-written data to the file
+// fiol_fflush: Flush un-written data to the file
 //-----------------------------------------------------------------------------
-int fl_fflush(void *f)
+int fiol_fflush(void *f)
 {
 #if FATFS_INC_WRITE_SUPPORT
     FL_FILE *file = (FL_FILE *)f;
@@ -938,9 +938,9 @@ int fl_fflush(void *f)
     return 0;
 }
 //-----------------------------------------------------------------------------
-// fl_fclose: Close an open file
+// fiol_fclose: Close an open file
 //-----------------------------------------------------------------------------
-void fl_fclose(void *f)
+void fiol_fclose(void *f)
 {
     FL_FILE *file = (FL_FILE *)f;
 
@@ -952,7 +952,7 @@ void fl_fclose(void *f)
         FL_LOCK(&_fs);
 
         // Flush un-written data to file
-        fl_fflush(f);
+        fiol_fflush(f);
 
         // File size changed?
         if (file->filelength_changed)
@@ -980,23 +980,23 @@ void fl_fclose(void *f)
     }
 }
 //-----------------------------------------------------------------------------
-// fl_fgetc: Get a character in the stream
+// fiol_fgetc: Get a character in the stream
 //-----------------------------------------------------------------------------
-int fl_fgetc(void *f)
+int fiol_fgetc(void *f)
 {
     int res;
     uint8 data = 0;
     
-    res = fl_fread(&data, 1, 1, f);
+    res = fiol_fread(&data, 1, 1, f);
     if (res == 1)
         return (int)data;
     else
         return res;
 }
 //-----------------------------------------------------------------------------
-// fl_fgets: Get a string from a stream
+// fiol_fgets: Get a string from a stream
 //-----------------------------------------------------------------------------
-char *fl_fgets(char *s, int n, void *f)
+char *fiol_fgets(char *s, int n, void *f)
 {
     int idx = 0;
 
@@ -1006,7 +1006,7 @@ char *fl_fgets(char *s, int n, void *f)
         // While space (+space for null terminator)
         while (idx < (n-1))
         {
-            int ch = fl_fgetc(f);
+            int ch = fiol_fgetc(f);
 
             // EOF / Error?
             if (ch < 0)
@@ -1027,9 +1027,9 @@ char *fl_fgets(char *s, int n, void *f)
     return (idx > 0) ? s : 0;
 }
 //-----------------------------------------------------------------------------
-// fl_fread: Read a block of data from the file
+// fiol_fread: Read a block of data from the file
 //-----------------------------------------------------------------------------
-int fl_fread(void * buffer, int size, int length, void *f )
+int fiol_fread(void * buffer, int size, int length, void *f )
 {
     uint32 sector;
     uint32 offset;
@@ -1093,7 +1093,7 @@ int fl_fread(void * buffer, int size, int length, void *f )
             {
                 // Flush un-written data to file
                 if (file->file_data_dirty)
-                    fl_fflush(file);
+                    fiol_fflush(file);
 
                 // Get LBA of sector offset within file
                 if (!_read_sectors(file, sector, file->file_data_sector, 1))
@@ -1129,9 +1129,9 @@ int fl_fread(void * buffer, int size, int length, void *f )
     return bytesRead;
 }
 //-----------------------------------------------------------------------------
-// fl_fseek: Seek to a specific place in the file
+// fiol_fseek: Seek to a specific place in the file
 //-----------------------------------------------------------------------------
-int fl_fseek( void *f, long offset, int origin )
+int fiol_fseek( void *f, long offset, int origin )
 {
     FL_FILE *file = (FL_FILE *)f;
     int res = -1;
@@ -1198,9 +1198,9 @@ int fl_fseek( void *f, long offset, int origin )
     return res;
 }
 //-----------------------------------------------------------------------------
-// fl_fgetpos: Get the current file position
+// fiol_fgetpos: Get the current file position
 //-----------------------------------------------------------------------------
-int fl_fgetpos(void *f , uint32 * position)
+int fiol_fgetpos(void *f , uint32 * position)
 {
     FL_FILE *file = (FL_FILE *)f;
 
@@ -1217,20 +1217,20 @@ int fl_fgetpos(void *f , uint32 * position)
     return 0;
 }
 //-----------------------------------------------------------------------------
-// fl_ftell: Get the current file position
+// fiol_ftell: Get the current file position
 //-----------------------------------------------------------------------------
-long fl_ftell(void *f)
+long fiol_ftell(void *f)
 {
     uint32 pos = 0;
 
-    fl_fgetpos(f, &pos);
+    fiol_fgetpos(f, &pos);
 
     return (long)pos;
 }
 //-----------------------------------------------------------------------------
-// fl_feof: Is the file pointer at the end of the stream?
+// fiol_feof: Is the file pointer at the end of the stream?
 //-----------------------------------------------------------------------------
-int fl_feof(void *f)
+int fiol_feof(void *f)
 {
     FL_FILE *file = (FL_FILE *)f;
     int res;
@@ -1250,15 +1250,15 @@ int fl_feof(void *f)
     return res;
 }
 //-----------------------------------------------------------------------------
-// fl_fputc: Write a character to the stream
+// fiol_fputc: Write a character to the stream
 //-----------------------------------------------------------------------------
 #if FATFS_INC_WRITE_SUPPORT
-int fl_fputc(int c, void *f)
+int fiol_fputc(int c, void *f)
 {
     uint8 data = (uint8)c;
     int res;
 
-    res = fl_fwrite(&data, 1, 1, f);
+    res = fiol_fwrite(&data, 1, 1, f);
     if (res == 1)
         return c;
     else
@@ -1266,10 +1266,10 @@ int fl_fputc(int c, void *f)
 }
 #endif
 //-----------------------------------------------------------------------------
-// fl_fwrite: Write a block of data to the stream
+// fiol_fwrite: Write a block of data to the stream
 //-----------------------------------------------------------------------------
 #if FATFS_INC_WRITE_SUPPORT
-int fl_fwrite(const void * data, int size, int count, void *f )
+int fiol_fwrite(const void * data, int size, int count, void *f )
 {
     FL_FILE *file = (FL_FILE *)f;
     uint32 sector;
@@ -1317,7 +1317,7 @@ int fl_fwrite(const void * data, int size, int count, void *f )
             {
                 // Flush un-written data to file
                 if (file->file_data_dirty)
-                    fl_fflush(file);
+                    fiol_fflush(file);
 
                 file->file_data_address = 0xFFFFFFFF;
                 file->file_data_dirty = 0;
@@ -1359,7 +1359,7 @@ int fl_fwrite(const void * data, int size, int count, void *f )
             {
                 // Flush un-written data to file
                 if (file->file_data_dirty)
-                    fl_fflush(file);
+                    fiol_fflush(file);
 
                 // If we plan to overwrite the whole sector, we don't need to read it first!
                 if (copyCount != _fs.sector_size)
@@ -1383,7 +1383,7 @@ int fl_fwrite(const void * data, int size, int count, void *f )
             // Mark buffer as dirty
             file->file_data_dirty = 1;
 
-            fl_fflush(f);
+            fiol_fflush(f);
             if(!file->file_data_dirty)
             {
                 // Increase total read count 
@@ -1422,13 +1422,13 @@ int fl_fwrite(const void * data, int size, int count, void *f )
 }
 #endif
 //-----------------------------------------------------------------------------
-// fl_fputs: Write a character string to the stream
+// fiol_fputs: Write a character string to the stream
 //-----------------------------------------------------------------------------
 #if FATFS_INC_WRITE_SUPPORT
-int fl_fputs(const char * str, void *f)
+int fiol_fputs(const char * str, void *f)
 {
     int len = (int)strlen(str);
-    int res = fl_fwrite(str, 1, len, f);
+    int res = fiol_fwrite(str, 1, len, f);
 
     if (res == len)
         return len;
@@ -1437,10 +1437,10 @@ int fl_fputs(const char * str, void *f)
 }
 #endif
 //-----------------------------------------------------------------------------
-// fl_remove: Remove a file from the filesystem
+// fiol_remove: Remove a file from the filesystem
 //-----------------------------------------------------------------------------
 #if FATFS_INC_WRITE_SUPPORT
-int fl_remove( const char * filename )
+int fiol_remove( const char * filename )
 {
     FL_FILE* file;
     int res = -1;
@@ -1448,7 +1448,7 @@ int fl_remove( const char * filename )
     FL_LOCK(&_fs);
 
     // Use read_file as this will check if the file is already open!
-    file = fl_fopen((char*)filename, "r");
+    file = fiol_fopen((char*)filename, "r");
     if (file)
     {
         // Delete allocated space
@@ -1459,7 +1459,7 @@ int fl_remove( const char * filename )
             {
                 // Close the file handle (this should not write anything to the file
                 // as we have not changed the file since opening it!)
-                fl_fclose(file);
+                fiol_fclose(file);
 
                 res = 0;
             }
@@ -1472,10 +1472,10 @@ int fl_remove( const char * filename )
 }
 #endif
 //-----------------------------------------------------------------------------
-// fl_createdirectory: Create a directory based on a path
+// fiol_createdirectory: Create a directory based on a path
 //-----------------------------------------------------------------------------
 #if FATFS_INC_WRITE_SUPPORT
-int fl_createdirectory(const char *path)
+int fiol_createdirectory(const char *path)
 {
     int res;
 
@@ -1490,10 +1490,10 @@ int fl_createdirectory(const char *path)
 }
 #endif
 //-----------------------------------------------------------------------------
-// fl_listdirectory: List a directory based on a path
+// fiol_listdirectory: List a directory based on a path
 //-----------------------------------------------------------------------------
 #if FATFS_DIR_LIST_SUPPORT
-void fl_listdirectory(const char *path)
+void fiol_listdirectory(const char *path)
 {
     FL_DIR dirstat;
     int filenumber = 0;
@@ -1505,11 +1505,11 @@ void fl_listdirectory(const char *path)
 
     FAT_PRINTF(("\r\nNo.             Filename\r\n"));
 
-    if (fl_opendir(path, &dirstat))
+    if (fiol_opendir(path, &dirstat))
     {
         struct fs_dir_ent dirent;
 
-        while (fl_readdir(&dirstat, &dirent) == 0)
+        while (fiol_readdir(&dirstat, &dirent) == 0)
         {
             if (dirent.is_dir)
             {
@@ -1521,17 +1521,17 @@ void fl_listdirectory(const char *path)
             }
         }
 
-        fl_closedir(&dirstat);
+        fiol_closedir(&dirstat);
     }
 
     FL_UNLOCK(&_fs);
 }
 #endif
 //-----------------------------------------------------------------------------
-// fl_opendir: Opens a directory for listing
+// fiol_opendir: Opens a directory for listing
 //-----------------------------------------------------------------------------
 #if FATFS_DIR_LIST_SUPPORT
-FL_DIR* fl_opendir(const char* path, FL_DIR *dir)
+FL_DIR* fiol_opendir(const char* path, FL_DIR *dir)
 {
     int levels;
     int res = 1;
@@ -1560,10 +1560,10 @@ FL_DIR* fl_opendir(const char* path, FL_DIR *dir)
 }
 #endif
 //-----------------------------------------------------------------------------
-// fl_readdir: Get next item in directory
+// fiol_readdir: Get next item in directory
 //-----------------------------------------------------------------------------
 #if FATFS_DIR_LIST_SUPPORT
-int fl_readdir(FL_DIR *dirls, fl_dirent *entry)
+int fiol_readdir(FL_DIR *dirls, fl_dirent *entry)
 {
     int res = 0;
 
@@ -1580,38 +1580,38 @@ int fl_readdir(FL_DIR *dirls, fl_dirent *entry)
 }
 #endif
 //-----------------------------------------------------------------------------
-// fl_closedir: Close directory after listing
+// fiol_closedir: Close directory after listing
 //-----------------------------------------------------------------------------
 #if FATFS_DIR_LIST_SUPPORT
-int fl_closedir(FL_DIR* dir)
+int fiol_closedir(FL_DIR* dir)
 {
     // Not used
     return 0;
 }
 #endif
 //-----------------------------------------------------------------------------
-// fl_is_dir: Is this a directory?
+// fiol_is_dir: Is this a directory?
 //-----------------------------------------------------------------------------
 #if FATFS_DIR_LIST_SUPPORT
-int fl_is_dir(const char *path)
+int fiol_is_dir(const char *path)
 {
     int res = 0;
     FL_DIR dir;
 
-    if (fl_opendir(path, &dir))
+    if (fiol_opendir(path, &dir))
     {
         res = 1;
-        fl_closedir(&dir);
+        fiol_closedir(&dir);
     }
 
     return res;
 }
 #endif
 //-----------------------------------------------------------------------------
-// fl_get_fs:
+// fiol_get_fs:
 //-----------------------------------------------------------------------------
 #ifdef FATFS_INC_TEST_HOOKS
-struct fatfs* fl_get_fs(void)
+struct fatfs* fiol_get_fs(void)
 {
     return &_fs;
 }
