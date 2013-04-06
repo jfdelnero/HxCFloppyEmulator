@@ -45,7 +45,7 @@
 extern void string_test(void);
 int GetRandom(int max) { return rand() % (max + 1); }
 
-#define fl_assert(a)	assert(a)
+#define fiol_assert(a)	assert(a)
 
 //-----------------------------------------------------------------
 // Main: Test bench file to create 5 files with psuedo random
@@ -75,13 +75,13 @@ void main()
 	// Initialise
 	FAT32_InitDrive();
 
-	fl_init();
+	fiol_init();
 
-	if (fl_attach_media(FAT_ReadSector, FAT_WriteSector) != FAT_INIT_OK)
+	if (fiol_attach_media(FAT_ReadSector, FAT_WriteSector) != FAT_INIT_OK)
 		return;
 
 	// List directory
-	fl_listdirectory("C:\\");
+	fiol_listdirectory("C:\\");
 //	return ;
 
 test_start:
@@ -107,39 +107,39 @@ test_start:
 		printf("Creating File: %s [%d bytes]\n", filenames[j], fileLengths[j]);
 
 		// Create File
-		files[j] = fl_fopen(filenames[j], "w");
+		files[j] = fiol_fopen(filenames[j], "w");
 		if (files[j]!=NULL)
 		{
-			if (fl_fwrite(fileData[j], 1, fileLengths[j], files[j])!=fileLengths[j])
+			if (fiol_fwrite(fileData[j], 1, fileLengths[j], files[j])!=fileLengths[j])
 			{
 				printf("ERROR: File Write Block Failed File %s Length %d\n", filenames[j], fileLengths[j]);
-				fl_assert(0);
+				fiol_assert(0);
 			}
 		}
 		else
 		{
 			printf("ERROR: Error Creating File %s\n", filenames[j]);
-			fl_assert(0);
+			fiol_assert(0);
 		}
 
-		fl_fclose(files[j]);
+		fiol_fclose(files[j]);
 
 		// Clear buffer
 		for (i=0;i<sizeof(readBuffer);i++)
 			readBuffer[i] = 0;
 
 		// Verify File
-		readFile = fl_fopen(filenames[j], "r");
+		readFile = fiol_fopen(filenames[j], "r");
 		if (readFile!=NULL)
 		{
 			int failed = FALSE;
 
 			printf("File %s Read Check (fread whole file) [%d bytes]\n", filenames[j], fileLengths[j]);
 
-			if (fl_fread(readBuffer, 1, fileLengths[j], readFile)!=fileLengths[j])
+			if (fiol_fread(readBuffer, 1, fileLengths[j], readFile)!=fileLengths[j])
 			{
 				printf("ERROR: File %s Read Length Error %d\n", filenames[j], fileLengths[j]);
-				fl_assert(0);
+				fiol_assert(0);
 			}
 
 			for (i=0;i<fileLengths[j];i++)
@@ -149,17 +149,17 @@ test_start:
 			if (failed)
 			{
 				printf("ERROR: File %s Data Verify Failed\n", filenames[j]);
-				fl_assert(0);
+				fiol_assert(0);
 			}
 		}
-		fl_fclose(readFile);
+		fiol_fclose(readFile);
 
 		// Clear buffer
 		for (i=0;i<sizeof(readBuffer);i++)
 			readBuffer[i] = 0;
 
 		// Verify File using fgetc
-		readFile = fl_fopen(filenames[j], "r");
+		readFile = fiol_fopen(filenames[j], "r");
 		if (readFile!=NULL)
 		{
 			int failed = FALSE;
@@ -169,7 +169,7 @@ test_start:
 			i = 0;
 			while (i < fileLengths[j])
 			{
-				int res = fl_fgetc(readFile);
+				int res = fiol_fgetc(readFile);
 				if (res == -1)
 					break;
 
@@ -179,7 +179,7 @@ test_start:
 			if (i != fileLengths[j])
 			{
 				printf("ERROR: File %s Read Length Error %d\n", filenames[j], fileLengths[j]);
-				fl_assert(0);
+				fiol_assert(0);
 			}
 
 			for (i=0;i<fileLengths[j];i++)
@@ -189,17 +189,17 @@ test_start:
 			if (failed)
 			{
 				printf("ERROR: File %s Data Verify Failed\n", filenames[j]);
-				fl_assert(0);
+				fiol_assert(0);
 			}
 		}
-		fl_fclose(readFile);
+		fiol_fclose(readFile);
 
 		// Clear buffer
 		for (i=0;i<sizeof(readBuffer);i++)
 			readBuffer[i] = 0;
 
 		// Verify File chunks
-		readFile = fl_fopen(filenames[j], "r");
+		readFile = fiol_fopen(filenames[j], "r");
 		if (readFile!=NULL)
 		{
 			int failed = FALSE;
@@ -214,10 +214,10 @@ test_start:
 				if (read_length > (fileLengths[j] - i))
 					read_length = fileLengths[j] - i;
 
-				if (fl_fread(readBuffer + i, 1, read_length, readFile) != read_length)
+				if (fiol_fread(readBuffer + i, 1, read_length, readFile) != read_length)
 				{
 					printf("ERROR: File %s fread error\n", filenames[j]);
-					fl_assert(0);
+					fiol_assert(0);
 					break;
 				}
 
@@ -227,7 +227,7 @@ test_start:
 			if (i != fileLengths[j])
 			{
 				printf("ERROR: File %s Read Length Error %d\n", filenames[j], fileLengths[j]);
-				fl_assert(0);
+				fiol_assert(0);
 			}
 
 			for (i=0;i<fileLengths[j];i++)
@@ -240,27 +240,27 @@ test_start:
 			if (failed)
 			{
 				printf("ERROR: File %s Data Verify Failed at %d\n", filenames[j], i);
-				fl_assert(0);
+				fiol_assert(0);
 			}
 		}
-		fl_fclose(readFile);
+		fiol_fclose(readFile);
 
 		// Delete File
-		if (fl_remove(filenames[j])<0)
+		if (fiol_remove(filenames[j])<0)
 			printf("ERROR: Delete File %s Failed\n", filenames[j]);
 
 		// Verify file is no longer present!
-		readFile = fl_fopen(filenames[j], "r");
+		readFile = fiol_fopen(filenames[j], "r");
 		if (readFile != NULL)
 		{
 			printf("ERROR: File %s still present after delete!\n", filenames[j]);
-			fl_assert(0);
-			fl_fclose(readFile);
+			fiol_assert(0);
+			fiol_fclose(readFile);
 		}
 	}
 
 	// Create folder
-	fl_createdirectory("C:\\folder1");
+	fiol_createdirectory("C:\\folder1");
 
 #if 0
 
@@ -272,8 +272,8 @@ test_start:
 	if (!massiveData)
 	{
 		printf("ERROR: Could not allocate memory for massive array!\n");
-		fl_assert(0);
-		fl_shutdown();
+		fiol_assert(0);
+		fiol_shutdown();
 		return ;
 	}
 
@@ -282,30 +282,30 @@ test_start:
 		massiveData[x] = (BYTE)GetRandom(255);
 
 	// Remove if it already exists!
-	fl_remove("X:\\folder1\\massive file.bin");
+	fiol_remove("X:\\folder1\\massive file.bin");
 
 	timeStart = time(NULL);
 
 	// Create Large File
-	readFile = fl_fopen("X:\\folder1\\massive file.bin", "w");
+	readFile = fiol_fopen("X:\\folder1\\massive file.bin", "w");
 	if (readFile != NULL)
 	{
-		if (fl_fwrite(massiveData, 1, MASSIVE_FILE_LEN, readFile) != MASSIVE_FILE_LEN)
+		if (fiol_fwrite(massiveData, 1, MASSIVE_FILE_LEN, readFile) != MASSIVE_FILE_LEN)
 		{
 			printf("ERROR: File Write Block Failed for massive file (Length %d)\n", MASSIVE_FILE_LEN);
-			fl_assert(0);
+			fiol_assert(0);
 		}
 	}
 	else
 	{
 		printf("ERROR: Error Creating massive file\n");
-		fl_assert(0);
+		fiol_assert(0);
 	}
 
-	fl_fclose(readFile);
+	fiol_fclose(readFile);
 
 	// Verify Massive File
-	readFile = fl_fopen("X:\\folder1\\massive file.bin", "r");
+	readFile = fiol_fopen("X:\\folder1\\massive file.bin", "r");
 	if (readFile!=NULL)
 	{
 		int failed = FALSE;
@@ -320,10 +320,10 @@ test_start:
 			if (read_length > (MASSIVE_FILE_LEN - i))
 				read_length = MASSIVE_FILE_LEN - i;
 
-			if (fl_fread(readBuffer, 1, read_length, readFile) != read_length)
+			if (fiol_fread(readBuffer, 1, read_length, readFile) != read_length)
 			{
 				printf("ERROR: File massive file fread error\n");
-				fl_assert(0);
+				fiol_assert(0);
 				break;
 			}
 
@@ -331,7 +331,7 @@ test_start:
 				if ( massiveData[i+j] != (BYTE)readBuffer[j] )
 				{
 					printf("ERROR: File Massive File Data Verify Failed at %d\n", i+j);
-					fl_assert(0);
+					fiol_assert(0);
 					break;
 				}
 
@@ -341,10 +341,10 @@ test_start:
 		if (i != MASSIVE_FILE_LEN)
 		{
 			printf("ERROR: File massive file Read Length Error %d\n", MASSIVE_FILE_LEN);
-			fl_assert(0);
+			fiol_assert(0);
 		}
 	}
-	fl_fclose(readFile);
+	fiol_fclose(readFile);
 
 	timeEnd = time(NULL);
 	printf("Time taken %d seconds\n", (int)(timeEnd-timeStart));
@@ -356,40 +356,40 @@ test_start:
 	for (i=0;i<TESTFILES;i++)
 	{
 		// Create File
-		readFile = fl_fopen(testfile[i], "w");
+		readFile = fiol_fopen(testfile[i], "w");
 		if (readFile != NULL)
 			;
 		else
 		{
 			printf("ERROR: Error Creating File %s\n", testfile[i]);
-			fl_assert(0);
+			fiol_assert(0);
 		}
 
-		fl_fputc(0, readFile);
-		fl_fclose(readFile);
+		fiol_fputc(0, readFile);
+		fiol_fclose(readFile);
 
-		readFile = fl_fopen(testfile[i], "r");
+		readFile = fiol_fopen(testfile[i], "r");
 		assert(readFile);
-		fl_fclose(readFile);
+		fiol_fclose(readFile);
 	}
 
 	// List directory
-	fl_listdirectory("C:\\");
+	fiol_listdirectory("C:\\");
 
 	for (i=0;i<TESTFILES;i++)
 	{
 		// Delete File
-		if (fl_remove(testfile[i])<0)
+		if (fiol_remove(testfile[i])<0)
 		{
 			printf("ERROR: Delete File %s Failed\n", testfile[i]);
-			fl_assert(0);
+			fiol_assert(0);
 		}
 	}
 
-	fl_shutdown();
+	fiol_shutdown();
 
 	printf("\r\nCompleted\r\n");
 
 	// List directory
-	fl_listdirectory("C:\\");
+	fiol_listdirectory("C:\\");
 }

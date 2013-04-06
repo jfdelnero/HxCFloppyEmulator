@@ -34,7 +34,7 @@ Description:
 File IO Library Linkage
    Use the following API to attach the media IO functions to the File IO library.
 
-   int fl_attach_media(fn_diskio_read rd, fn_diskio_write wr)
+   int fiol_attach_media(fn_diskio_read rd, fn_diskio_write wr)
 
 
 

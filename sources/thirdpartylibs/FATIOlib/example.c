@@ -49,39 +49,39 @@ void main()
     media_init();
 
     // Initialise File IO Library
-    fl_init();
+    fiol_init();
 
     // Attach media access functions to library
-    if (fl_attach_media(media_read, media_write) != FAT_INIT_OK)
+    if (fiol_attach_media(media_read, media_write) != FAT_INIT_OK)
     {
         printf("ERROR: Media attach failed\n");
         return; 
     }
 
     // List root directory
-    fl_listdirectory("/");
+    fiol_listdirectory("/");
 
     // Create File
-    file = fl_fopen("/file.bin", "w");
+    file = fiol_fopen("/file.bin", "w");
     if (file)
     {
         // Write some data
         unsigned char data[] = { 1, 2, 3, 4 };
-        if (fl_fwrite(data, 1, sizeof(data), file) != sizeof(data))
+        if (fiol_fwrite(data, 1, sizeof(data), file) != sizeof(data))
             printf("ERROR: Write file failed\n");
     }
     else
         printf("ERROR: Create file failed\n");
 
     // Close file
-    fl_fclose(file);
+    fiol_fclose(file);
 
     // Delete File
-    if (fl_remove("/file.bin") < 0)
+    if (fiol_remove("/file.bin") < 0)
         printf("ERROR: Delete file failed\n");
 
     // List root directory
-    fl_listdirectory("/");
+    fiol_listdirectory("/");
 
-    fl_shutdown();
+    fiol_shutdown();
 }
