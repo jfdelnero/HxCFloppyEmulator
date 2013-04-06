@@ -548,6 +548,11 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 			i++;
 		};
 
+		if(!strncmp(&bcparams2->files[j],"file://",7))
+		{
+			j = j + 7;
+		}
+
 		filelist[k] = (char*)malloc((i-j)+3);
 		memset( filelist[k] , 0 , (i-j)+3 );
 		memcpy( filelist[k] , &bcparams2->files[j] , (i-j));
