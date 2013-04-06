@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006 - 2012 Jean-François DEL NERO
+// Copyright (C) 2006 - 2013 Jean-François DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
@@ -257,7 +257,7 @@ int hxc_stat( const char *filename, struct stat *buf)
  return hxc_statex(filename,buf);
 }
 
-long hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
+int hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 {
 #if defined (WIN32)
 
@@ -293,7 +293,7 @@ long hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 
 		fileinfo->size = FindFileData.nFileSizeLow;
 		free(folderstr);
-		return (long)hfindfile;
+		return (int)hfindfile;
 	}
 	else
 	{
@@ -334,7 +334,7 @@ long hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 					strncpy(fileinfo->filename,d->d_name,256);
 
 					free(tmpstr);
-					return (long)dir;
+					return (int)dir;
 				}
 
 				free(tmpstr);
@@ -353,16 +353,16 @@ long hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 		dir=(DIR *)-1;
 	}
 
-	return (long)dir;
+	return (int)dir;
 
 #endif
 
 	return -1;
 }
 
-long hxc_find_next_file(long handleff, char *folder, char *file, filefoundinfo* fileinfo)
+int hxc_find_next_file(int handleff, char *folder, char *file, filefoundinfo* fileinfo)
 {
-	long ret;
+	int ret;
 #if defined (WIN32)
 	WIN32_FIND_DATAW FindFileData;
 
@@ -425,7 +425,7 @@ long hxc_find_next_file(long handleff, char *folder, char *file, filefoundinfo* 
 	return ret;
 }
 
-long hxc_find_close(long handle)
+int hxc_find_close(int handle)
 {
 #if defined (WIN32)
 	FindClose((void*)handle);
