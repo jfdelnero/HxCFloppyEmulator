@@ -853,8 +853,7 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 	unsigned char * buffer;
 	char fullpath[1024];
 	char srcfullpath[1024];
-
-	long ff;
+	int ff;
 	filefoundinfo ffi;
 
 	hxc_stat(srcpath,&entry);
@@ -910,9 +909,12 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 						strcat(fullpath,ffi.filename);
 						addentry(fsmng,  srcfullpath,fullpath);
 					}
-				}while(hxc_find_next_file(ff,srcpath,(char*)"*.*",&ffi));
 
-				hxc_find_close(ff);
+					ret = hxc_find_next_file(ff,srcpath,(char*)"*.*",&ffi);
+
+				}while(ret);
+
+				ret = hxc_find_close(ff);
 			}
 		}
 	}
