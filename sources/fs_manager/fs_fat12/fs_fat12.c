@@ -156,7 +156,7 @@ int fat12_mountImage(FSMNG * fsmng, FLOPPY *floppy)
 			if(fsmng->sectorpertrack)
 			{
 				/* Attach media access functions to library*/
-				if (fl_attach_media(media_read_callback, media_write_callback) != FAT_INIT_OK)
+				if (fiol_attach_media(media_read_callback, media_write_callback) != FAT_INIT_OK)
 				{
 					gb_fsmng->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FS : Media attach failed");
 				}
@@ -195,7 +195,7 @@ int fat12_openDir(FSMNG * fsmng, char * path)
 	}
 	if(i == 128) return HXCFE_ACCESSERROR;
 
-	if(fl_opendir(path, dir))
+	if(fiol_opendir(path, dir))
 	{
 		fsmng->dirhandletable[i] = dir;
 		return i+1;
@@ -212,7 +212,7 @@ int fat12_readDir(FSMNG * fsmng,int dirhandle,FSENTRY * dirent)
 	{
 		if(fsmng->dirhandletable[dirhandle-1])
 		{
-			ret = fl_readdir(fsmng->dirhandletable[dirhandle-1], &entry);
+			ret = fiol_readdir(fsmng->dirhandletable[dirhandle-1], &entry);
 			if(!ret)
 			{
 				strcpy(dirent->entryname,entry.filename);
@@ -240,7 +240,7 @@ int fat12_closeDir(FSMNG * fsmng, int dirhandle)
 	{
 		if(fsmng->dirhandletable[dirhandle-1])
 		{
-			fl_closedir(fsmng->dirhandletable[dirhandle-1]);
+			fiol_closedir(fsmng->dirhandletable[dirhandle-1]);
 			free(fsmng->dirhandletable[dirhandle-1]);
 			return HXCFE_NOERROR;
 		}
@@ -260,7 +260,7 @@ int fat12_openFile(FSMNG * fsmng, char * filename)
 	}
 	if(i == 128) return HXCFE_ACCESSERROR;
 
-	file = fl_fopen(filename, "r");
+	file = fiol_fopen(filename, "r");
 	if(file)
 	{
 		fsmng->handletable[i] = file;
@@ -282,7 +282,7 @@ int fat12_createFile(FSMNG * fsmng, char * filename)
 	}
 	if(i == 128) return HXCFE_ACCESSERROR;
 
-	file = fl_fopen(filename, "wb");
+	file = fiol_fopen(filename, "wb");
 	if(file)
 	{
 		fsmng->handletable[i] = file;
@@ -299,7 +299,7 @@ int fat12_writeFile(FSMNG * fsmng,int filehandle,char * buffer,int size)
 	{
 		if(fsmng->handletable[filehandle-1])
 		{
-			byteswrite = fl_fwrite(buffer, 1, size, fsmng->handletable[filehandle-1]);
+			byteswrite = fiol_fwrite(buffer, 1, size, fsmng->handletable[filehandle-1]);
 			return byteswrite;
 		}
 	}
@@ -313,7 +313,7 @@ int fat12_readFile( FSMNG * fsmng,int filehandle,char * buffer,int size)
 	{
 		if(fsmng->handletable[filehandle-1])
 		{
-			bytesread = fl_fread(buffer, 1, size, fsmng->handletable[filehandle-1]);
+			bytesread = fiol_fread(buffer, 1, size, fsmng->handletable[filehandle-1]);
 			return bytesread;
 		}
 	}
@@ -322,7 +322,7 @@ int fat12_readFile( FSMNG * fsmng,int filehandle,char * buffer,int size)
 
 int fat12_deleteFile(FSMNG * fsmng, char * filename)
 {
-	if(fl_remove(filename)>=0)
+	if(fiol_remove(filename)>=0)
 	{
 		return HXCFE_NOERROR;
 	}
@@ -336,7 +336,7 @@ int fat12_closeFile( FSMNG * fsmng,int filehandle)
 	{
 		if(fsmng->handletable[filehandle-1])
 		{
-			fl_fclose(fsmng->handletable[filehandle-1]);
+			fiol_fclose(fsmng->handletable[filehandle-1]);
 			fsmng->handletable[filehandle] = 0;
 			return HXCFE_NOERROR;
 		}
@@ -346,7 +346,7 @@ int fat12_closeFile( FSMNG * fsmng,int filehandle)
 
 int fat12_createDir( FSMNG * fsmng,char * foldername)
 {
-	if(fl_createdirectory(foldername))
+	if(fiol_createdirectory(foldername))
 	{
 		return HXCFE_NOERROR;
 	}
@@ -364,7 +364,7 @@ int fat12_ftell( FSMNG * fsmng,int filehandle)
 	{
 		if(fsmng->handletable[filehandle-1])
 		{
-			return fl_ftell(fsmng->handletable[filehandle-1]);
+			return fiol_ftell(fsmng->handletable[filehandle-1]);
 		}
 	}
 
@@ -377,7 +377,7 @@ int fat12_fseek( FSMNG * fsmng,int filehandle,long offset,int origin)
 	{
 		if(fsmng->handletable[filehandle-1])
 		{
-			return fl_fseek(fsmng->handletable[filehandle-1],offset,origin);
+			return fiol_fseek(fsmng->handletable[filehandle-1],offset,origin);
 		}
 	}
 
