@@ -59,6 +59,7 @@
 
 #define NIB_TRACK_SIZE 6656
 
+//#define HDDD_A2_SUPPORT 1
 
 unsigned short ext_a2_bit_expander[]=
 {
@@ -141,6 +142,10 @@ int Apple2_nib_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 	CYLINDER* currentcylinder;
 
 	unsigned short pulses;
+
+#ifdef HDDD_A2_SUPPORT
+	unsigned short fm_pulses;
+#endif
 	unsigned char  data_nibble;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"Apple2_nib_libLoad_DiskFile %s",imgfile);
@@ -160,11 +165,14 @@ int Apple2_nib_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 	{
 		trackformat=ISOFORMAT_DD;
 
-		floppydisk->floppyNumberOfSide=1;
+		floppydisk->floppyNumberOfSide=2;
 		floppydisk->floppySectorPerTrack=-1;
 		floppydisk->floppyNumberOfTrack= filesize / NIB_TRACK_SIZE;
 
 		floppydisk->floppyBitRate=250000;
+#ifdef HDDD_A2_SUPPORT
+		floppydisk->floppyBitRate = floppydisk->floppyBitRate * 2;
+#endif
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
@@ -185,15 +193,39 @@ int Apple2_nib_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 			fseek (f , file_offset , SEEK_SET);
 			fread(trackdata,NIB_TRACK_SIZE,1,f);
 
+#ifdef HDDD_A2_SUPPORT
+			currentcylinder->sides[0] = tg_alloctrack(floppydisk->floppyBitRate,trackformat,rpm,NIB_TRACK_SIZE * 2 * 8 * 2,1000,0,0);
+			currentcylinder->sides[1] = tg_alloctrack(floppydisk->floppyBitRate,trackformat,rpm,NIB_TRACK_SIZE * 2 * 8 * 2,1000,0,0);
+#else
 			currentcylinder->sides[0] = tg_alloctrack(floppydisk->floppyBitRate,trackformat,rpm,NIB_TRACK_SIZE * 2 * 8,1000,0,0);
-
+			currentcylinder->sides[1] = tg_alloctrack(floppydisk->floppyBitRate,trackformat,rpm,NIB_TRACK_SIZE * 2 * 8,1000,0,0);
+#endif
 			for(i=0;i<NIB_TRACK_SIZE;i++)
 			{
 				data_nibble = trackdata[i];
 				pulses = ext_a2_bit_expander[ data_nibble ];
+
+#ifdef HDDD_A2_SUPPORT
+				// Add the FM Clocks
+				fm_pulses = ext_a2_bit_expander[pulses >> 8] | 0x2222;
+				currentcylinder->sides[0]->databuffer[(i*4)+0] = fm_pulses >> 8;
+				currentcylinder->sides[0]->databuffer[(i*4)+1] = fm_pulses &  0xFF;
+
+				// Add the FM Clocks
+				fm_pulses = ext_a2_bit_expander[pulses &  0xFF] | 0x2222;
+				currentcylinder->sides[0]->databuffer[(i*4)+2] = fm_pulses >> 8;
+				currentcylinder->sides[0]->databuffer[(i*4)+3] = fm_pulses &  0xFF;
+#else
 				currentcylinder->sides[0]->databuffer[(i*2)+0] = pulses >> 8;
 				currentcylinder->sides[0]->databuffer[(i*2)+1] = pulses &  0xFF;
+#endif
 			}
+
+#ifdef HDDD_A2_SUPPORT
+			memset(currentcylinder->sides[1]->databuffer,0xAA,NIB_TRACK_SIZE * 2 * 2);
+#else
+			memset(currentcylinder->sides[1]->databuffer,0xAA,NIB_TRACK_SIZE * 2);
+#endif
 		}
 
 		free(trackdata);
