@@ -118,23 +118,30 @@ unsigned short bit_expander[]=
 
 void addpad(unsigned char * track,int mfmsize,int tracksize)
 {
-	int i,j;
 
+	int i,j,lastindex;
+
+	lastindex = tracksize;
 	i=tracksize-1;
-	do{
-
-		i--;
-	}while(i && !track[i]);
-
-	if(i)
+	while( i > 0 && !track[i] )
 	{
-		j=i+1;
+
+		lastindex = i;
+		i--;
+	};
+
+	if( lastindex &&  (lastindex < tracksize) )
+	{
+		j= lastindex;
 		do
 		{
-			track[j++]=track[i-1];
-			if(j<tracksize)
-				track[j++]=track[i];
-		}while(j<tracksize);
+			if( lastindex >= 2 )
+				track[j++]=track[lastindex-2];
+
+			if( j < tracksize )
+				track[j++] = track[ lastindex - 1 ];
+
+		}while( j < tracksize );
 	}
 }
 
