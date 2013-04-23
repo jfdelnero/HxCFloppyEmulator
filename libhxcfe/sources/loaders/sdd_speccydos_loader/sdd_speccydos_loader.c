@@ -238,8 +238,8 @@ int SDDSpeccyDos_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
 
-					file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-						        (sectorsize*(floppydisk->floppySectorPerTrack)*i);
+					file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack))+
+						        (sectorsize*(floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfTrack)*i);
 					fseek (f , file_offset , SEEK_SET);
 					fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
 
