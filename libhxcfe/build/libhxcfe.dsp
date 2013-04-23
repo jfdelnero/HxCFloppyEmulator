@@ -1638,6 +1638,22 @@ SOURCE=..\sources\loaders\apple2_nib_loader\apple2_nib_loader.c
 SOURCE=..\sources\loaders\apple2_nib_loader\apple2_nib_loader.h
 # End Source File
 # End Group
+# Begin Group "SDDSpeccyDos"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\sdd_speccydos_loader\sdd_speccydos_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\sdd_speccydos_loader\sdd_speccydos_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\sdd_speccydos_loader\sddfileformat.h
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 
