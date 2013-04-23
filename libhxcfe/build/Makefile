@@ -50,7 +50,7 @@ DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosf
                   emuii_raw_loader.o emuii_loader.o emui_raw_loader.o jvc_loader.o dim_loader.o ti99v9t9_loader.o d81_loader.o  acornadf_loader.o \
                   camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o fdi_loader.o ssd_dsd_loader.o adl_loader.o \
                   krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o system24_loader.o kryofluxstream_loader.o kryofluxstream.o \
-                  fzf_loader.o apple2_nib_loader.o
+                  fzf_loader.o apple2_nib_loader.o sdd_speccydos_loader.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o
 
@@ -352,6 +352,9 @@ kryofluxstream.o : $(BASEDIR)/loaders/kryofluxstream_loader/kryofluxstream.c $(B
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 apple2_nib_loader.o : $(BASEDIR)/loaders/apple2_nib_loader/apple2_nib_loader.c $(BASEDIR)/loaders/apple2_nib_loader/apple2_nib_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+sdd_speccydos_loader.o : $(BASEDIR)/loaders/sdd_speccydos_loader/sdd_speccydos_loader.c $(BASEDIR)/loaders/sdd_speccydos_loader/sdd_speccydos_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 adf_hd.o : $(BASEDIR)/thirdpartylibs/adflib/Lib/adf_hd.c
