@@ -67,7 +67,8 @@ int EDE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	if(	hxc_checkfileext(imgfile,"ede") || 
 		hxc_checkfileext(imgfile,"eda") || 
 		hxc_checkfileext(imgfile,"eds") || 
-		hxc_checkfileext(imgfile,"edt")
+		hxc_checkfileext(imgfile,"edt") ||
+		hxc_checkfileext(imgfile,"edv") 
 		)
 	{
 
