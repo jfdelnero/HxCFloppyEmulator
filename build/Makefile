@@ -18,6 +18,10 @@ endif
 LDFLAGS= -g -shared -lc -lm  -ldl
 EXEC=libhxcfe.so
 
+ifeq ($(UNAME), Linux)
+CFLAGS += -fPIC
+endif
+
 ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
 LDFLAGS= -g -shared -lc -lm  -ldl
 EXEC=libhxcfe.dll
