@@ -10,6 +10,10 @@ INCLUDES = -I$(BASEDIR)/ -I ../../../libhxcfe/trunk/sources -I ../../../libusbhx
 CFLAGS=-O3 $(INCLUDES)
 LDFLAGS= -g -shared -lc -lm  -ldl
 
+ifeq ($(UNAME), Linux)
+CFLAGS += -fPIC
+endif
+
 ifeq ($(UNAME), Darwin)
 CFLAGS += -arch i386
 LDFLAGS += -arch i386
