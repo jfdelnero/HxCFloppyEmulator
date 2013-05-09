@@ -12,6 +12,10 @@ LDFLAGS= -g -shared -lc -lm  -ldl
 
 EXEC=libusbhxcfe.so
 
+ifeq ($(UNAME), Linux)
+CFLAGS += -fPIC
+endif
+
 ifeq ($(UNAME), Darwin)
 CFLAGS += -arch i386
 LDFLAGS += -arch i386 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libusbhxcfe.dylib
