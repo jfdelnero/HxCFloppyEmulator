@@ -64,12 +64,15 @@ extern "C"
 }
 
 #include "main.h"
+
 #include "filesystem_generator_window.h"
 #include "cb_filesystem_generator_window.h"
 #include "sdhxcfe_cfg.h"
 #include "loader.h"
 
 #include "fileselector.h"
+
+#include "utils.h"
 
 void load_file_image(Fl_Widget * w, void * fc_ptr) ;
 void save_file_image(Fl_Widget * w, void * fc_ptr) ;
@@ -1002,14 +1005,8 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 			i++;
 		};
 
-		if(!strncmp(&fsparams2->files[j],"file://",7))
-		{
-			j = j + 7;
-		}
+		filelist[k] = URIfilepathparser((char*)&fsparams2->files[j],i-j);
 
-		filelist[k] = (char*)malloc((i-j)+3);
-		memset( filelist[k] , 0 , (i-j)+3 );
-		memcpy( filelist[k] , &fsparams2->files[j] , (i-j));
 		i++;
 		j=i;
 
@@ -1054,7 +1051,7 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 
 
 				i=0;
-				while(i < filecount)
+				while(i < filecount && filelist[i])
 				{
 					hxc_stat(filelist[i],&entry);
 

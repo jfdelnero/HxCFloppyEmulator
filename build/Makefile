@@ -44,7 +44,7 @@ FLTKLIB = ../sources/thirdpartylibs/fltk/fltk-1.3.x/lib/libfltk.a ../sources/thi
 
 all: $(EXEC)
 
-hxcfloppyemulator: main.o  $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) $(LIBUSBHXCFE) ../../../build/libhxcadaptor.a
+hxcfloppyemulator: main.o utils.o $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) $(LIBUSBHXCFE) ../../../build/libhxcadaptor.a
 	$(CPP) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
@@ -55,6 +55,9 @@ $(LIBUSBHXCFE): ../../../build/$(LIBUSBHXCFE)
 	ln ../../../build/$(LIBUSBHXCFE)  $(LIBUSBHXCFE)
 
 main.o: ../sources/main.cxx 
+	$(CPP) -o $@ -c $< $(CFLAGS)
+
+utils.o: ../sources/utils.cxx 
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
 loader.o: ../sources/loader.cxx 

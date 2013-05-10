@@ -94,6 +94,7 @@ extern "C"
 #include "loader.h"
 #include "main_gui.h"
 #include "main.h"
+#include "utils.h"
 
 #include "cb_floppy_dump_window.h"
 #include "cb_floppy_infos_window.h"
@@ -381,7 +382,7 @@ void dnd_open(const char *urls)
 
 void dnd_cb(Fl_Widget *o, void *v)
 {
-	char * dnd_str;
+	char * dnd_str,*path;
 	Fl_DND_Box *dnd = (Fl_DND_Box*)o;
 
 	if(dnd->event() == FL_PASTE)
@@ -393,17 +394,17 @@ void dnd_cb(Fl_Widget *o, void *v)
 			{
 				strcpy(dnd_str,dnd->event_text());
 
-				if(!strncmp(dnd_str,"file://",7))
-				{
-					strcpy(dnd_str,dnd_str+7);
-				}
-
 				if(strchr(dnd_str,'\n'))
 				{
 					*strchr(dnd_str,'\n') = 0;
 				}
 
-				dnd_open(dnd_str);
+				path = URIfilepathparser((char*)dnd_str,strlen(dnd_str));
+				if(path)
+				{
+					dnd_open(path);
+					free(path);
+				}
 
 				free(dnd_str);
 			}
