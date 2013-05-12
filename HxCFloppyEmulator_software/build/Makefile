@@ -14,10 +14,14 @@ else
     DISKLOADERPLUGINS_IPF=
 endif
 
-LDFLAGS=-lc -lm  -ldl  -lpthread -Wl,-rpath=.
+LDFLAGS=-lc -lm  -ldl  -lpthread
 
 LIBHXCFE = libhxcfe.so
 LIBUSBHXCFE = libusbhxcfe.so
+
+ifeq ($(UNAME), Linux)
+LDFLAGS += -Wl,-rpath=.
+endif
 
 ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
 LIBHXCFE = libhxcfe.dll
