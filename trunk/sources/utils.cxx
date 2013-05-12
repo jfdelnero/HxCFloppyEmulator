@@ -138,6 +138,7 @@ char * URIfilepathparser(char * URI,int size)
 				path = (char*)malloc( size + 1);
 				if(path)
 				{
+					memset(path,0,size + 1);
 					strncpy(path,URI,size);
 				}
 			}
