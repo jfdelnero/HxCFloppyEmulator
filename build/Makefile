@@ -5,7 +5,7 @@ UNAME := $(shell uname)
 
 CFLAGS=-O3 -I ../sources -I ../../../libhxcfe/trunk/sources -I ../../../libusbhxcfe/trunk/sources
 
-LDFLAGS=-lc -lm  -ldl  -lpthread -Wl,-rpath=.
+LDFLAGS=-lc -lm  -ldl  -lpthread
 LIBHXCFE = libhxcfe.so
 LIBUSBHXCFE = libusbhxcfe.so
 
@@ -14,6 +14,10 @@ CFLAGS += -arch i386
 LDFLAGS += -arch i386
 LIBHXCFE= libhxcfe.dylib
 LIBUSBHXCFE= libusbhxcfe.dylib
+endif
+
+ifeq ($(UNAME), Linux)
+LDFLAGS += -Wl,-rpath=.
 endif
 
 ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
