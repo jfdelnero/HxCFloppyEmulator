@@ -13,6 +13,7 @@
 ..\..\converttools\bmptoh DiskLayout_DOS_EXDD_2_5MB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Roland_W30_S330_W50_S50_S550_DD_720KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_LinnForat9K_720KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_KorgT3_HD_1_6MB.xml -DATA
 
 move *.h ..
 

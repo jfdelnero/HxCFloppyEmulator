@@ -13,6 +13,7 @@
 #include "data_DiskLayout_DOS_EXHD_6_78MB_xml.h"
 #include "data_DiskLayout_Roland_W30_S330_W50_S50_S550_DD_720KB_xml.h"
 #include "data_DiskLayout_LinnForat9K_720KB_xml.h"
+#include "data_DiskLayout_KorgT3_HD_1_6MB_xml.h"
 
 datatype * disklayout_list[]=
 {
@@ -27,6 +28,7 @@ datatype * disklayout_list[]=
 	data_DiskLayout_Ensoniq_HD_1600KB_xml,
 	data_DiskLayout_Roland_W30_S330_W50_S50_S550_DD_720KB_xml,
 	data_DiskLayout_LinnForat9K_720KB_xml,
+	data_DiskLayout_KorgT3_HD_1_6MB_xml,
 	data_DiskLayout_DOS_ED_2_88MB_xml,
 	data_DiskLayout_DOS_EXDD_2_5MB_xml,
 	data_DiskLayout_DOS_EXHD_4_5MB_xml,
