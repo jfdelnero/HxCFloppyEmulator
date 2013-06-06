@@ -16,9 +16,9 @@
 		<skew_per_side>1</skew_per_side>
 		<skew_per_track>3</skew_per_track>
 		<formatvalue>0xF6</formatvalue>
-		<gap3>255</gap3>
+		<gap3>36</gap3>
 		<bitrate>500000</bitrate>
-		<pregap>150</pregap>
+		<pregap>80</pregap>
 		<rpm>300</rpm>
 	</layout>
 </disk_layout>
