@@ -1237,6 +1237,10 @@ SOURCE=..\sources\loaders\jv3_loader\jv3_loader.c
 
 SOURCE=..\sources\loaders\jv3_loader\jv3_loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\jv3_loader\jv3_writer.c
+# End Source File
 # End Group
 # Begin Group "STT"
 
