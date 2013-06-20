@@ -339,6 +339,14 @@ SOURCE=..\sources\gui\sdhxcfe_cfg.h
 
 SOURCE=..\sources\soft_cfg_file.cxx
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\utils.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\utils.h
+# End Source File
 # End Group
 # Begin Source File
 
