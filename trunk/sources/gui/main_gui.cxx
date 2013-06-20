@@ -116,6 +116,7 @@ const char * plugid_lst[]=
 	PLUGIN_AMSTRADCPC_DSK,
 	PLUGIN_IMD_IMG,
 	PLUGIN_TI994A_V9T9,
+	PLUGIN_TRS80_JV3,
 	PLUGIN_HXC_EXTHFE
 };
 
@@ -292,6 +293,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"CPC DSK file\t*.dsk\n"
 					"IMD file\t*.imd\n"
 					"TI99/4A V9T9 DSK file\t*.dsk\n"
+					"TRS80 JV3 file\t*.jv3\n"
 					"HFE file (Rev 2 - Experimental)\t*.hfe\n");
 
 
