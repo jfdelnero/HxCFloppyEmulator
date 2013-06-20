@@ -56,6 +56,8 @@
 #include "jv3_loader.h"
 #include "jv3_format.h"
 
+#include "jv3_writer.h"
+
 #include "libhxcadaptor.h"
 
 unsigned char* compute_interleave_tab(unsigned char interleave,unsigned short numberofsector);
@@ -446,7 +448,7 @@ int JV3_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	{
 		(ISVALIDDISKFILE)	JV3_libIsValidDiskFile,
 		(LOADDISKFILE)		JV3_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		JV3_libWrite_DiskFile,
 		(GETPLUGININFOS)	JV3_libGetPluginInfo
 	};
 
