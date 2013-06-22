@@ -15,6 +15,8 @@ enum
 	FF_VTR,
 	FF_RAW,
 	FF_IMD,
+	FF_JV3,
+	FF_DMK,
 	FF_V9T9,
 	FF_EHFE
 };

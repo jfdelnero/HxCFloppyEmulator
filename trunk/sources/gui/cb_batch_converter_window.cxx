@@ -102,6 +102,8 @@ ff_type ff_type_list[]=
 	{ FF_VTR,"VTR - VTrucco Floppy Emulator file format",PLUGIN_VTR_IMG,".vtr"},
 	{ FF_RAW,"RAW - RAW sectors file format",PLUGIN_RAW_LOADER,".img"},
 	{ FF_IMD,"IMD - IMD sectors file format",PLUGIN_IMD_IMG,".imd"},
+	{ FF_JV3,"JV3 - JV3 TRS80 file format",PLUGIN_TRS80_JV3,".jv3"},
+	{ FF_DMK,"DMK - DMK TRS80 file format",PLUGIN_TRS80_DMK,".dmk"},
 	{ FF_V9T9,"TI99/4A V9T9 sectors file format",PLUGIN_TI994A_V9T9,".dsk"},
 	{ FF_EHFE,"HFE - Rev 2 - Experimental",PLUGIN_HXC_EXTHFE,".hfe"},
 	{ -1,"",0,0}			
