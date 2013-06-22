@@ -1377,6 +1377,14 @@ SOURCE=..\sources\loaders\dmk_loader\dmk_loader.c
 
 SOURCE=..\sources\loaders\dmk_loader\dmk_loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\dmk_loader\dmk_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\dmk_loader\dmk_writer.h
+# End Source File
 # End Group
 # Begin Group "D81"
 
