@@ -294,7 +294,7 @@ int bintofm(unsigned char * track_data,int track_data_size,unsigned char * bin_d
 	return bit_offset;
 }
 
-int bitslookingfor(unsigned char * input_data,unsigned long intput_data_size,int searchlen,unsigned char * chr_data,unsigned long chr_data_size,unsigned long bit_offset)
+int searchBitStream(unsigned char * input_data,unsigned long intput_data_size,int searchlen,unsigned char * chr_data,unsigned long chr_data_size,unsigned long bit_offset)
 {
 	unsigned long i,j,trackoffset,cnt,k,starti;
 	unsigned char stringtosearch[8][128];
@@ -446,7 +446,7 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 				mfm_buffer[4]=0x44;
 				mfm_buffer[5]=0x89;
 
-				bit_offset=bitslookingfor(track->databuffer,track->tracklen,-1,mfm_buffer,6*8,bit_offset);
+				bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,mfm_buffer,6*8,bit_offset);
 
 				if(bit_offset!=-1)
 				{
@@ -503,7 +503,7 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 					mfm_buffer[3] = 0x89;
 					mfm_buffer[4] = 0x44;
 					mfm_buffer[5] = 0x89;
-					bit_offset=bitslookingfor(track->databuffer,track->tracklen,(88+10)*8,mfm_buffer,6*8,bit_offset);
+					bit_offset=searchBitStream(track->databuffer,track->tracklen,(88+10)*8,mfm_buffer,6*8,bit_offset);
 
 					if((bit_offset!=-1))
 					{
@@ -629,7 +629,7 @@ int get_next_MEMBRAIN_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 				mfm_buffer[2]=0x55;
 				mfm_buffer[3]=0x54;
 
-				bit_offset=bitslookingfor(track->databuffer,track->tracklen,-1,mfm_buffer,4*8,bit_offset);
+				bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,mfm_buffer,4*8,bit_offset);
 
 				if(bit_offset!=-1)
 				{
@@ -687,7 +687,7 @@ int get_next_MEMBRAIN_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 					mfm_buffer[1] = 0x89;
 					mfm_buffer[2] = 0x55;
 					mfm_buffer[3] = 0x4A;
-					bit_offset=bitslookingfor(track->databuffer,track->tracklen,(88+10)*8,mfm_buffer,4*8,bit_offset);
+					bit_offset=searchBitStream(track->databuffer,track->tracklen,(88+10)*8,mfm_buffer,4*8,bit_offset);
 
 					if((bit_offset!=-1))
 					{
@@ -824,7 +824,7 @@ int get_next_AMIGAMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 				mfm_buffer[4]=0x44;
 				mfm_buffer[5]=0x89;
 
-				bit_offset=bitslookingfor(track->databuffer,track->tracklen,-1,mfm_buffer,6*8,bit_offset);
+				bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,mfm_buffer,6*8,bit_offset);
 
 				if(bit_offset!=-1)
 				{
@@ -977,7 +977,7 @@ int get_next_FM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFI
 				fm_buffer[2]=0x15;
 				fm_buffer[3]=0x54;
 
-				bit_offset=bitslookingfor(track->databuffer,track->tracklen,-1,fm_buffer,4*8,bit_offset);
+				bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,4*8,bit_offset);
 
 				if(bit_offset!=-1)
 				{
@@ -1041,7 +1041,7 @@ int get_next_FM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFI
 						do
 						{
 							fm_buffer[3]=datamark[i];
-							bit_offset=bitslookingfor(track->databuffer,track->tracklen,((88+10)*8*2),fm_buffer,4*8,old_bit_offset);
+							bit_offset=searchBitStream(track->databuffer,track->tracklen,((88+10)*8*2),fm_buffer,4*8,old_bit_offset);
 							i++;
 						}while(i<4 && bit_offset==-1 );
 
@@ -1151,7 +1151,7 @@ int get_next_TYCOMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTOR
 				fm_buffer[2]=0x15;
 				fm_buffer[3]=0x54;
 
-				bit_offset=bitslookingfor(track->databuffer,track->tracklen,-1,fm_buffer,4*8,bit_offset);
+				bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,4*8,bit_offset);
 
 				if(bit_offset!=-1)
 				{
@@ -1208,7 +1208,7 @@ int get_next_TYCOMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTOR
 						do
 						{
 							fm_buffer[3]=datamark[i];
-							bit_offset=bitslookingfor(track->databuffer,track->tracklen,((88+10)*8*2),fm_buffer,4*8,old_bit_offset);
+							bit_offset=searchBitStream(track->databuffer,track->tracklen,((88+10)*8*2),fm_buffer,4*8,old_bit_offset);
 							i++;
 						}while(i<4 && bit_offset==-1 );
 
@@ -1402,7 +1402,7 @@ int analysis_and_extract_sector_EMUIIFM(HXCFLOPPYEMULATOR* floppycontext,SIDE * 
 				fm_buffer[7]=0x45;
 
 
-				bit_offset=bitslookingfor(track->databuffer,track->tracklen,-1,fm_buffer,8*8,bit_offset);
+				bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*8,bit_offset);
 
 				if(bit_offset!=-1)
 				{
@@ -1441,7 +1441,7 @@ int analysis_and_extract_sector_EMUIIFM(HXCFLOPPYEMULATOR* floppycontext,SIDE * 
 						fm_buffer[6]=0x54;
 						fm_buffer[7]=0x45;
 
-						bit_offset=bitslookingfor(track->databuffer,track->tracklen,-1,fm_buffer,8*8,bit_offset+(4*8*4));
+						bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*8,bit_offset+(4*8*4));
 
 						if((bit_offset-old_bit_offset<((88+10)*8*2)) && bit_offset!=-1)
 						{
