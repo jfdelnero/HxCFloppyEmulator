@@ -252,7 +252,8 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				floppydisk->floppyNumberOfTrack=80;
 				floppydisk->floppyNumberOfSide=2;
 				floppydisk->floppySectorPerTrack=20;
-				gap3len=40;
+				// ASR 10 GAP3 verified with an HFE image formatted from one ASR-10
+				gap3len = 36;
 				interleave=1;
 				skew=2;
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
