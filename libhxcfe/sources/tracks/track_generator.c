@@ -1461,19 +1461,26 @@ void tg_completeTrack(track_generator *tg, SIDE * currentside,unsigned char trac
 		oldval = 0;
 		startindex = startindex + (( (trackoffset - startindex) * 3 ) / 4); 
 		trackoffset=startindex;
-		currentside->databuffer[trackoffset] = currentside->databuffer[trackoffset] & 0x3F;
-		while(trackoffset<tracklen)
+		if(trackoffset<tracklen)
 		{
-			c = currentside->databuffer[trackoffset];
-			c = (c >> 1) | ((oldval << 7)&0x80) ;
+			currentside->databuffer[trackoffset] = currentside->databuffer[trackoffset] & 0x3F;
+			while(trackoffset<tracklen)
+			{
+				c = currentside->databuffer[trackoffset];
+				c = (c >> 1) | ((oldval << 7)&0x80) ;
 
-			oldval = currentside->databuffer[trackoffset];
-			currentside->databuffer[trackoffset] = c;
+				oldval = currentside->databuffer[trackoffset];
+				currentside->databuffer[trackoffset] = c;
 
-			trackoffset++;
+				trackoffset++;
+			}
+
 		}
 
-		currentside->databuffer[trackoffset-1] = currentside->databuffer[trackoffset-1] & 0xFC;
+		if(trackoffset && trackoffset<tracklen)
+		{
+			currentside->databuffer[trackoffset-1] = currentside->databuffer[trackoffset-1] & 0xFC;
+		}
 	}
 
 	// fill timing & encoding buffer
