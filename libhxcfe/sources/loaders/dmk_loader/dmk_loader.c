@@ -59,6 +59,8 @@
 
 #include "dmk_format.h"
 
+#include "dmk_writer.h"
+
 int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	int filesize;
@@ -508,7 +510,7 @@ int DMK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	{
 		(ISVALIDDISKFILE)	DMK_libIsValidDiskFile,
 		(LOADDISKFILE)		DMK_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		DMK_libWrite_DiskFile,
 		(GETPLUGININFOS)	DMK_libGetPluginInfo
 	};
 
