@@ -360,13 +360,13 @@ int bitslookingfor(unsigned char * input_data,unsigned long intput_data_size,int
 			k = trackoffset;
 			j=0;
 
-			while( ( j < cnt ) && ( ( stringtosearch[i][j] & mask[i][j] ) == ( input_data[k] & mask[i][j] ) )  )
+			while( ( j < (cnt+1) ) && ( ( stringtosearch[i][j] & mask[i][j] ) == ( input_data[k] & mask[i][j] ) )  )
 			{
 				j++;
 				k++;
 			}
 
-			if( j == cnt )
+			if( j == (cnt+1) )
 			{
 				found=0xFF;
 				bitoffset = ( trackoffset << 3 ) + i;
