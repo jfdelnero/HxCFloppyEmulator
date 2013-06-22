@@ -56,7 +56,8 @@ DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosf
                   krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o system24_loader.o kryofluxstream_loader.o kryofluxstream.o \
                   fzf_loader.o apple2_nib_loader.o sdd_speccydos_loader.o
 
-DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o jv3_writer.o
+DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
+					jv3_writer.o dmk_writer.o
 
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
@@ -248,6 +249,9 @@ jv3_writer.o : $(BASEDIR)/loaders/jv3_loader/jv3_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 dmk_loader.o : $(BASEDIR)/loaders/dmk_loader/dmk_loader.c $(BASEDIR)/loaders/dmk_loader/dmk_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+dmk_writer.o : $(BASEDIR)/loaders/dmk_loader/dmk_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 sap_loader.o : $(BASEDIR)/loaders/sap_loader/sap_loader.c $(BASEDIR)/loaders/sap_loader/sap_loader.h
