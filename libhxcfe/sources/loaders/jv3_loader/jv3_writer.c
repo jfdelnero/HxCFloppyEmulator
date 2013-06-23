@@ -114,6 +114,10 @@ int JV3_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 								case 512: flags |= jv3flags(JV3_SIZE_USED_512,JV3_SIZE); break;
 								case 1024: flags |= jv3flags(JV3_SIZE_USED_1024,JV3_SIZE); break;
 							}
+							if ((sca[k]->use_alternate_header_crc == 1) || (sca[k]->use_alternate_data_crc == 1))
+							{
+								flags |= jv3flags(1,JV3_ERROR);
+							}
 							sectorheader[sectorcount].flags = flags;
 							if (sca[k]->sectorsize > sectorsize) sectorsize = sca[k]->sectorsize;
 							
