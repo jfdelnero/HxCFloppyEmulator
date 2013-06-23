@@ -47,7 +47,7 @@
 
 #define JV3_SIZE_USED_256   0x00
 #define JV3_SIZE_USED_128   0x01
-#define JV3_SIZE_USED_1024   0x02
+#define JV3_SIZE_USED_1024  0x02
 #define JV3_SIZE_USED_512   0x03
 
 #define JV3_SIZE_FREE_256   0x03
@@ -68,4 +68,9 @@ typedef struct {
   unsigned char DAM;
   unsigned char density;
   unsigned int size;
+  unsigned int sector_id;
+  unsigned int track_id;
+  unsigned int side_id;
+  unsigned int sector_pos;
+  unsigned char bad_sector;
 } JV3SectorsOffsets;
