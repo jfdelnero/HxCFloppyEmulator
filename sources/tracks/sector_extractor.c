@@ -870,11 +870,11 @@ int get_next_AMIGAMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 					sector_conf->startsectorindex=bit_offset;
 					//sector_conf->startdataindex=bit_offset;
 					
+					sector_size = 512;
+
 					floppycontext->hxc_printf(MSG_DEBUG,"Valid Amiga MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",header[1]>>1,header[1]&1,header[2],sector_size);
 
 					old_bit_offset = bit_offset;
-
-					sector_size = 512;
 
 					sortbuffer(&sector_data[32],temp_sector,sector_size);
 					memcpy(&sector_data[32],temp_sector,sector_size);
