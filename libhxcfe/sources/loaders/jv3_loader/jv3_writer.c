@@ -134,7 +134,8 @@ int JV3_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 				case 1024: flags = JV3_FREEF | jv3flags(JV3_SIZE_FREE_1024,JV3_SIZE); break;
 				default: flags = JV3_FREE;
 			}
-			for (i = sectorcount; i < JV3_HEADER_MAX*2; i++) {
+			for (i = sectorcount; i < JV3_HEADER_MAX*2; i++)
+			{
 				sectorheader[i].track = JV3_FREE;
 				sectorheader[i].sector = JV3_FREE;
 				sectorheader[i].flags = flags;
