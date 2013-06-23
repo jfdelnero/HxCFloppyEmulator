@@ -40,64 +40,119 @@
 
 #include "libhxcadaptor.h"
 
+// Return a value that can be used in the JV3 flags field
+unsigned char jv3flags(unsigned char num,unsigned char mask)
+{
+	while(mask % 2 == 0)
+	{
+		num <<= 1;
+		mask >>= 1;
+	}
+	return num;
+}
+
+// Main writer function
 int JV3_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
 {	
-	int i,j,k,nbsector;
-	FILE * jv3dskfile;
-	char rec_mode;
+	int i,j,k;
+	int nbsector;
+	int sectorcount;
 	int sectorsize;
-	int track_cnt;
-	int sectorlistoffset,trackinfooffset;
-
+	unsigned char density;
+	unsigned char flags;
+	FILE * jv3dskfile;
+	JV3SectorHeader sectorheader[JV3_HEADER_MAX*2];  //JV3 allows for 2 sets of headers + data
+	unsigned char * sectordata[JV3_HEADER_MAX*2];
+	int sectorsizes[JV3_HEADER_MAX*2];
 	SECTORSEARCH* ss;
 	SECTORCONFIG** sca;
 
-
 	floppycontext->hxc_printf(MSG_INFO_1,"Write JV3 file %s...",filename);
 
-	jv3dskfile=hxc_fopen(filename,"wb");
+	jv3dskfile = hxc_fopen(filename,"wb");
 	if(jv3dskfile)
 	{
-		ss=hxcfe_initSectorSearch(floppycontext,floppy);
-		
+		ss = hxcfe_initSectorSearch(floppycontext,floppy);		
 		if(ss)
 		{
-			for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
+			//Create sectorheader fields
+			sectorsize = 0;
+			sectorcount = 0;
+			for(j = 0; (j < (int)floppy->floppyNumberOfTrack) && (sectorcount < JV3_HEADER_MAX*2); j++)
 			{
-				for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
+				for(i = 0; (i < (int)floppy->floppyNumberOfSide) && (sectorcount < JV3_HEADER_MAX*2); i++)
 				{	
-					rec_mode=2;
+					density = 1;
 					sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector);
 					if(!sca)
 					{
+						density = 0;
 						sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector);
-						rec_mode=1;
-						if(!nbsector)
-						{
-							rec_mode=0;
-						}
 					}
-
-					if(nbsector)
+					if(sca)
 					{
-						for(k=0;k<nbsector;k++) 
+						for(k = 0; (k < nbsector) && (sectorcount < JV3_HEADER_MAX*2); k++) 
 						{
+							sectordata[sectorcount] = sca[k]->input_data;
+							sectorsizes[sectorcount] = sca[k]->sectorsize;
+							sectorheader[sectorcount].track = sca[k]->cylinder;
+							sectorheader[sectorcount].sector = sca[k]->sector;
+							flags = 0;
+							flags |= jv3flags(density,JV3_DENSITY);
+							flags |= jv3flags(sca[k]->head,JV3_SIDE);
+							switch (sca[k]->use_alternate_datamark?sca[k]->alternate_datamark:0xfb)
+							{
+								case 0xfb: flags |= jv3flags(density?JV3_DAM_FB_DD:JV3_DAM_FB_SD,JV3_DAM); break;
+								case 0xf8: flags |= jv3flags(density?JV3_DAM_F8_DD:JV3_DAM_F8_SD,JV3_DAM); break;
+								case 0xfa: flags |= jv3flags(JV3_DAM_FA_SD,JV3_DAM); break;
+								case 0xf9: flags |= jv3flags(JV3_DAM_F9_SD,JV3_DAM); break;
+							}
+							switch (sca[k]->sectorsize)
+							{
+								case 128: flags |= jv3flags(JV3_SIZE_USED_128,JV3_SIZE); break;
+								case 256: flags |= jv3flags(JV3_SIZE_USED_256,JV3_SIZE); break;
+								case 512: flags |= jv3flags(JV3_SIZE_USED_512,JV3_SIZE); break;
+								case 1024: flags |= jv3flags(JV3_SIZE_USED_1024,JV3_SIZE); break;
+							}
+							sectorheader[sectorcount].flags = flags;
+							if (sca[k]->sectorsize > sectorsize) sectorsize = sca[k]->sectorsize;
+							
+							sectorcount++;
 						}
 
-						k=0;
-						do
-						{
-							free(sca[k]->input_data);
-							free(sca[k]);
-							k++;
-						}while(k<nbsector);
-
+						free(sca[k]);  //still using sca[k]->input_data, so free it later
 					}
 				}
 			}
 
-			hxcfe_deinitSectorSearch(ss);
+			//Fill remaining sectorheader fields with empty values
+			switch (sectorsize)
+			{
+				case 128: flags = JV3_FREEF | jv3flags(JV3_SIZE_FREE_128,JV3_SIZE); break;
+				case 256: flags = JV3_FREEF | jv3flags(JV3_SIZE_FREE_256,JV3_SIZE); break;
+				case 512: flags = JV3_FREEF | jv3flags(JV3_SIZE_FREE_512,JV3_SIZE); break;
+				case 1024: flags = JV3_FREEF | jv3flags(JV3_SIZE_FREE_1024,JV3_SIZE); break;
+				default: flags = JV3_FREE;
+			}
+			for (i = sectorcount; i < JV3_HEADER_MAX*2; i++) {
+				sectorheader[i].track = JV3_FREE;
+				sectorheader[i].sector = JV3_FREE;
+				sectorheader[i].flags = flags;
+			}
+			
+			//Finally write everything to the file
+			for(i = 0; i < sectorcount; i++)
+			{
+				if (i % JV3_HEADER_MAX == 0)  //write headers
+				{
+					fwrite(sectorheader+i,sizeof(JV3SectorHeader),JV3_HEADER_MAX,jv3dskfile);
+					fputc(0xff,jv3dskfile);  //write protect off
+				}
+				fwrite(sectordata[i],sizeof(unsigned char),sectorsizes[i],jv3dskfile);
+				free(sectordata[i]);
+			}
 
+			hxcfe_deinitSectorSearch(ss);
 		}
 
 		hxc_fclose(jv3dskfile);
