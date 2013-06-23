@@ -57,13 +57,13 @@ int JV3_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	int i,j,k;
 	int nbsector;
 	int sectorcount;
-	int sectorsize;
+	unsigned int sectorsize;
 	unsigned char density;
 	unsigned char flags;
 	FILE * jv3dskfile;
 	JV3SectorHeader sectorheader[JV3_HEADER_MAX*2];  //JV3 allows for 2 sets of headers + data
 	unsigned char * sectordata[JV3_HEADER_MAX*2];
-	int sectorsizes[JV3_HEADER_MAX*2];
+	unsigned int sectorsizes[JV3_HEADER_MAX*2];
 	SECTORSEARCH* ss;
 	SECTORCONFIG** sca;
 
@@ -82,17 +82,18 @@ int JV3_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 			{
 				for(i = 0; (i < (int)floppy->floppyNumberOfSide) && (sectorcount < JV3_HEADER_MAX*2); i++)
 				{	
-					density = 1;
-					sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector);
-					if(!sca)
-					{
-						density = 0;
-						sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector);
-					}
+
+					sca = hxcfe_getAllTrackISOSectors(ss,j,i,&nbsector);
 					if(sca)
 					{
 						for(k = 0; (k < nbsector) && (sectorcount < JV3_HEADER_MAX*2); k++) 
 						{
+							density = 0;
+							if(sca[k]->trackencoding == ISOFORMAT_DD )
+							{
+								density = 1;
+							}
+
 							sectordata[sectorcount] = sca[k]->input_data;
 							sectorsizes[sectorcount] = sca[k]->sectorsize;
 							sectorheader[sectorcount].track = sca[k]->cylinder;
@@ -102,8 +103,8 @@ int JV3_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 							flags |= jv3flags(sca[k]->head,JV3_SIDE);
 							switch (sca[k]->use_alternate_datamark?sca[k]->alternate_datamark:0xfb)
 							{
-								case 0xfb: flags |= jv3flags(density?JV3_DAM_FB_DD:JV3_DAM_FB_SD,JV3_DAM); break;
-								case 0xf8: flags |= jv3flags(density?JV3_DAM_F8_DD:JV3_DAM_F8_SD,JV3_DAM); break;
+								case 0xfb: flags |= jv3flags( (unsigned char)(density?JV3_DAM_FB_DD:JV3_DAM_FB_SD), JV3_DAM); break;
+								case 0xf8: flags |= jv3flags( (unsigned char)(density?JV3_DAM_F8_DD:JV3_DAM_F8_SD), JV3_DAM); break;
 								case 0xfa: flags |= jv3flags(JV3_DAM_FA_SD,JV3_DAM); break;
 								case 0xf9: flags |= jv3flags(JV3_DAM_F9_SD,JV3_DAM); break;
 							}
@@ -114,7 +115,7 @@ int JV3_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 								case 512: flags |= jv3flags(JV3_SIZE_USED_512,JV3_SIZE); break;
 								case 1024: flags |= jv3flags(JV3_SIZE_USED_1024,JV3_SIZE); break;
 							}
-							if ((sca[k]->use_alternate_header_crc == 1) || (sca[k]->use_alternate_data_crc == 1))
+							if ((sca[k]->use_alternate_header_crc) || (sca[k]->use_alternate_data_crc))
 							{
 								flags |= jv3flags(1,JV3_ERROR);
 							}
@@ -122,9 +123,11 @@ int JV3_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 							if (sca[k]->sectorsize > sectorsize) sectorsize = sca[k]->sectorsize;
 							
 							sectorcount++;
+
+							free(sca[k]);  //still using sca[k]->input_data, so free it later
 						}
 
-						free(sca[k]);  //still using sca[k]->input_data, so free it later
+						free(sca);
 					}
 				}
 			}
@@ -138,6 +141,7 @@ int JV3_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 				case 1024: flags = JV3_FREEF | jv3flags(JV3_SIZE_FREE_1024,JV3_SIZE); break;
 				default: flags = JV3_FREE;
 			}
+
 			for (i = sectorcount; i < JV3_HEADER_MAX*2; i++)
 			{
 				sectorheader[i].track = JV3_FREE;
