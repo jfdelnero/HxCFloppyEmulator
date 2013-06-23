@@ -474,8 +474,10 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 					sector->sectorsize = sectorsize[tmp_buffer[7]&0x7];
 					sector->alternate_sector_size_id = tmp_buffer[7];
 					sector->trackencoding = ISOFORMAT_DD;
-					sector->alternate_datamark=0x00;
-					sector->use_alternate_datamark=0xFF;
+					sector->alternate_datamark = 0x00;
+					sector->use_alternate_datamark = 0x00;
+					sector->alternate_addressmark = 0xFE;
+					sector->use_alternate_addressmark = 0xFF;
 					sector->header_crc = ( tmp_buffer[k-2]<<8 ) | tmp_buffer[k-1] ;
 					sector->use_alternate_header_crc = 0xFF;
 
@@ -511,10 +513,10 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 						tmp_sector=(unsigned char*)malloc(3+1+sector_size+2);
 						memset(tmp_sector,0,3+1+sector_size+2);
 
-						sector->startdataindex=bit_offset;
-						sector->endsectorindex=mfmtobin(track->databuffer,track->tracklen,tmp_sector,3+1+sector_size+2,bit_offset,0);
-						sector->alternate_datamark=tmp_sector[3];
-						sector->use_alternate_datamark=0xFF;
+						sector->startdataindex = bit_offset;
+						sector->endsectorindex = mfmtobin(track->databuffer,track->tracklen,tmp_sector,3+1+sector_size+2,bit_offset,0);
+						sector->alternate_datamark = tmp_sector[3];
+						sector->use_alternate_datamark = 0xFF;
 
 						CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
 						for(k=0;k<3+1+sector_size+2;k++)
@@ -522,7 +524,7 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 							CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
 						}
 
-						sector->data_crc= ( tmp_sector[k-2]<<8 ) | tmp_sector[k-1] ;
+						sector->data_crc = ( tmp_sector[k-2]<<8 ) | tmp_sector[k-1] ;
 
 						if(!CRC16_High && !CRC16_Low)
 						{ // crc ok !!!
@@ -569,7 +571,7 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 						sector->sectorsize = 0;
 						sector->alternate_sector_size_id = 0;
 						sector->trackencoding = ISOFORMAT_DD;
-						sector->alternate_datamark=tmp_buffer[3];
+						sector->alternate_datamark = tmp_buffer[3];
 						sector->use_alternate_datamark= 0xFF;
 						sector->header_crc = 0;
 						bit_offset++;
@@ -993,19 +995,23 @@ int get_next_FM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFI
 				sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_buffer,7,bit_offset,0);
 				if(tmp_buffer[0]==0xFE)
 				{
-					sector->startsectorindex=bit_offset;
+					sector->startsectorindex = bit_offset;
 					sector->startdataindex = sector->endsectorindex;  
 
-					sector->use_alternate_header_crc = 0xFF;
 					sector->use_alternate_addressmark = 0xFF;
-					sector->alternate_datamark=0x00;
-					sector->cylinder=tmp_buffer[1];
-					sector->head=tmp_buffer[2];
-					sector->sector=tmp_buffer[3];
-					sector->sectorsize=sectorsize[tmp_buffer[4]&0x7];
+					sector->alternate_addressmark = 0xFE;
+
+					sector->use_alternate_datamark = 0x00;
+					sector->alternate_datamark = 0x00;
+
+					sector->cylinder = tmp_buffer[1];
+					sector->head = tmp_buffer[2];
+					sector->sector = tmp_buffer[3];
+					sector->sectorsize = sectorsize[tmp_buffer[4]&0x7];
 					sector->alternate_sector_size_id = tmp_buffer[4];
 					sector->trackencoding = ISOFORMAT_SD;
 
+					sector->use_alternate_header_crc = 0xFF;
 					CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
 					for(k=0;k<7;k++)
 					{
@@ -1047,6 +1053,7 @@ int get_next_FM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFI
 
 						if(bit_offset != -1)
 						{
+							sector->use_alternate_datamark = 0xFF;
 							sector->alternate_datamark=0xF8 + (i-1);
 
 							tmp_sector=(unsigned char*)malloc(1+sector_size+2);
@@ -1653,6 +1660,149 @@ SECTORCONFIG** hxcfe_getAllTrackSectors(SECTORSEARCH* ss,int track,int side,int 
 				scarray[i] = sc;
 			}
 		}
+	}
+
+	return scarray;
+}
+
+
+SECTORCONFIG** hxcfe_getAllTrackISOSectors(SECTORSEARCH* ss,int track,int side,int * nb_sectorfound)
+{
+	int i,i_fm,i_mfm;
+	SECTORCONFIG * sc;
+
+	SECTORCONFIG ** sc_fm_array;
+	SECTORCONFIG ** sc_mfm_array;
+
+	SECTORCONFIG ** scarray;
+	int nb_of_sector;
+
+	nb_of_sector = 0;
+	// First : Count the number of sectors
+	do
+	{
+		sc = hxcfe_getNextSector(ss,track,side,ISOIBM_MFM_ENCODING);
+		if(sc)
+		{
+			if(sc->input_data)
+				free(sc->input_data);
+			free(sc);
+
+			nb_of_sector++;
+		}
+	}while(sc);
+
+	// FM
+	do
+	{
+		sc = hxcfe_getNextSector(ss,track,side,ISOIBM_FM_ENCODING);
+		if(sc)
+		{
+			if(sc->input_data)
+				free(sc->input_data);
+			free(sc);
+
+			nb_of_sector++;
+		}
+	}while(sc);
+
+
+	if(nb_sectorfound)
+		*nb_sectorfound = nb_of_sector;
+
+	scarray = 0;
+	if(nb_of_sector)
+	{
+		sc_mfm_array = malloc(sizeof(SECTORCONFIG *) * (nb_of_sector+1));
+		sc_fm_array  = malloc(sizeof(SECTORCONFIG *) * (nb_of_sector+1));
+		scarray = malloc(sizeof(SECTORCONFIG *) * (nb_of_sector+1));
+		if(scarray && sc_mfm_array && sc_fm_array)
+		{
+			memset(scarray     ,0,sizeof(SECTORCONFIG *) * (nb_of_sector+1));
+			memset(sc_mfm_array,0,sizeof(SECTORCONFIG *) * (nb_of_sector+1));
+			memset(sc_fm_array ,0,sizeof(SECTORCONFIG *) * (nb_of_sector+1));
+
+			i = 0;
+			do
+			{
+				sc = hxcfe_getNextSector(ss,track,side,ISOIBM_FM_ENCODING);
+				sc_fm_array[i] = sc;
+				i++;
+			}while(sc);
+
+			i = 0;
+			do
+			{
+				sc = hxcfe_getNextSector(ss,track,side,ISOIBM_MFM_ENCODING);
+				sc_mfm_array[i] = sc;
+				i++;
+			}while(sc);
+
+			i_fm = 0;
+			i_mfm = 0;
+			for(i=0;i<nb_of_sector;i++)
+			{
+				if(sc_fm_array[i_fm] && sc_mfm_array[i_mfm])
+				{
+					if(sc_fm_array[i_fm]->startsectorindex < sc_mfm_array[i_mfm]->startsectorindex)
+					{
+						scarray[i] = malloc(sizeof(SECTORCONFIG));
+						if(scarray[i])
+						{
+							memset(scarray[i],0,sizeof(SECTORCONFIG));
+							memcpy(scarray[i], sc_fm_array[i_fm], sizeof(SECTORCONFIG));
+							free(sc_fm_array[i_fm]);
+						}
+						i_fm++;
+					}
+					else
+					{
+						scarray[i] = malloc(sizeof(SECTORCONFIG));
+						if(scarray[i])
+						{
+							memset(scarray[i],0,sizeof(SECTORCONFIG));
+							memcpy(scarray[i], sc_mfm_array[i_mfm], sizeof(SECTORCONFIG));
+							free(sc_mfm_array[i_mfm]);
+						}
+						i_mfm++;
+					}
+				}
+				else
+				{
+					if(sc_fm_array[i_fm])
+					{
+						scarray[i] = malloc(sizeof(SECTORCONFIG));
+						if(scarray[i])
+						{
+							memset(scarray[i],0,sizeof(SECTORCONFIG));
+							memcpy(scarray[i], sc_fm_array[i_fm], sizeof(SECTORCONFIG));
+							free(sc_fm_array[i_fm]);
+						}
+						i_fm++;
+					}
+					else
+					{
+						if(sc_mfm_array[i_mfm])
+						{
+							scarray[i] = malloc(sizeof(SECTORCONFIG));
+							if(scarray[i])
+							{
+								memset(scarray[i],0,sizeof(SECTORCONFIG));
+								memcpy(scarray[i], sc_mfm_array[i_mfm], sizeof(SECTORCONFIG));
+								free(sc_mfm_array[i_mfm]);
+							}
+							i_mfm++;
+						}
+					}
+				}
+			}
+		}
+
+		if(sc_fm_array)
+			free(sc_fm_array);
+		if(sc_mfm_array)
+			free(sc_mfm_array);
+
 	}
 
 	return scarray;
