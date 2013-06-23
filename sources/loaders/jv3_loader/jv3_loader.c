@@ -82,6 +82,68 @@ JV3SectorsOffsets *JV3_bsearch(unsigned int key, JV3SectorsOffsets *base, size_t
 	return (JV3SectorsOffsets*) bsearch (&aux, base, num, sizeof(JV3SectorsOffsets), JV3_compare);
 }
 
+int GetFirstPos(JV3SectorsOffsets *base,int size,unsigned int track_id,unsigned int side_id)
+{
+	int i;
+	
+	i = 0;
+	while( i < size)
+	{
+		if( ( base[i].track_id == track_id ) && ( base[i].side_id == side_id ) )
+		{
+			return base[i].sector_pos;
+		}
+		i++;
+	}
+
+	return 0;
+}
+
+int GetNextPos(JV3SectorsOffsets *base,int size,unsigned int track_id,unsigned int side_id,unsigned int pos)
+{
+	int i,cur_pos;
+	
+	cur_pos = 0;
+	while( (cur_pos < size) && base[cur_pos].sector_pos != pos )
+	{
+		cur_pos++;
+	};
+
+	if(cur_pos==size)
+		return 0;
+
+	i = cur_pos + 1;
+	while( i < size)
+	{
+		if( ( base[i].track_id == track_id ) && ( base[i].side_id == side_id ) )
+		{
+			return base[i].sector_pos;
+		}
+		i++;
+	}
+
+	return 0;
+}
+
+
+JV3SectorsOffsets * GetSectorPosition(JV3SectorsOffsets *base,int size,unsigned int pos)
+{
+	int i;
+	
+	i = 0;
+	while( i < size)
+	{
+		if(base[i].sector_pos == pos)
+		{
+			return &base[i];
+		}
+		i++;
+	}
+
+	return 0;
+}
+
+
 unsigned int JV3_disk_geometry(JV3SectorHeader JV3SH[], unsigned char *NumberofSides, unsigned short *SectorsperTrack, unsigned short *NumberofTracks, unsigned short *SectorSize, unsigned char *StartIdSector, unsigned short *NumberofEntries) {
 	int i, total_data = 0;
 
@@ -143,8 +205,9 @@ unsigned int JV3_disk_geometry(JV3SectorHeader JV3SH[], unsigned char *NumberofS
 JV3SectorsOffsets *JV3_offset(JV3SectorHeader JV3SH[], unsigned int NumberofSides, unsigned int SectorsperTrack, unsigned int NumberofTracks, unsigned int NumberofEntries, FILE *jv3_file) {
 	JV3SectorsOffsets *SO;
 	unsigned int i, offset;
-	int pos;
+	int pos,sector_pos;
 
+	sector_pos = 1;
 	pos = 0;
 	offset = ftell(jv3_file);
 	SO = (JV3SectorsOffsets *) malloc(sizeof(JV3SectorsOffsets)*NumberofEntries);
@@ -153,6 +216,28 @@ JV3SectorsOffsets *JV3_offset(JV3SectorHeader JV3SH[], unsigned int NumberofSide
 		{
 			SO[pos].key = JV3SH[i].track << 16 | JV3SH[i].sector << 8 | gbn(JV3SH[i].flags, JV3_SIDE);
 			SO[pos].offset = offset;
+			SO[pos].sector_id = JV3SH[i].sector;
+			SO[pos].track_id = JV3SH[i].track;
+			SO[pos].sector_pos = sector_pos;
+
+			if(JV3SH[i].flags&JV3_ERROR)
+			{
+				SO[pos].bad_sector = 0xFF;
+			}
+			else
+			{
+				SO[pos].bad_sector = 0;
+			}
+
+			if(JV3SH[i].flags&JV3_SIDE)
+			{
+				SO[pos].side_id = 1;
+			}
+			else
+			{
+				SO[pos].side_id = 0;
+			}
+			sector_pos++;
 		    	
 			switch (gbn(JV3SH[i].flags, JV3_SIZE)) 
 			{
@@ -293,7 +378,7 @@ int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 {
 
 	FILE * f;
-	unsigned int filesize;
+	unsigned int filesize,cur_pos;
 	unsigned int i,j,k,bitrate;
 	unsigned short SectorSize, NumberofEntries;
 	unsigned char  gap3len,interleave,StartIdSector;
@@ -333,11 +418,9 @@ int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		SectorsOffsets = JV3_offset(sh, floppydisk->floppyNumberOfSide, floppydisk->floppySectorPerTrack, floppydisk->floppyNumberOfTrack, NumberofEntries, f);
 
-		qsort(SectorsOffsets, NumberofEntries, sizeof(JV3SectorsOffsets), JV3_compare);
-
 		bitrate=250000;
 		rpm=300;
-		interleave=3;
+		interleave=1;
 		gap3len=255;
 		trackformat=IBMFORMAT_SD;
 
@@ -362,10 +445,13 @@ int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				inc = 0;                                    // used to build track data
 				memset(sectorconfig,0,sizeof(SECTORCONFIG)*floppydisk->floppySectorPerTrack);
 				sector_found=0;
+
+				cur_pos = GetFirstPos(SectorsOffsets,NumberofEntries,j,i);
+
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
 				{
-					pOffset = JV3_bsearch(j<<16|(k+StartIdSector)<<8|i, SectorsOffsets, NumberofEntries);
-				
+					pOffset = GetSectorPosition(SectorsOffsets,NumberofEntries,cur_pos);
+
 		    		if (pOffset == NULL) 
 					{
 						inc += SectorSize;
@@ -399,16 +485,23 @@ int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							if(!sector_found) trackformat=IBMFORMAT_SD;
 						}
 
-						sectorconfig[sector_found].cylinder=j;
-						sectorconfig[sector_found].head=i;
-						sectorconfig[sector_found].sector=k+StartIdSector;
-						sectorconfig[sector_found].bitrate=floppydisk->floppyBitRate;
-						sectorconfig[sector_found].gap3=gap3len;
+						if(pOffset->bad_sector)
+						{
+							sectorconfig[sector_found].use_alternate_data_crc = 0x01;
+							sectorconfig[sector_found].data_crc = 0xAA55;
+						}
+
+						sectorconfig[sector_found].cylinder = pOffset->track_id;
+						sectorconfig[sector_found].head = i;
+						sectorconfig[sector_found].sector = pOffset->sector_id;
+						sectorconfig[sector_found].bitrate = floppydisk->floppyBitRate;
+						sectorconfig[sector_found].gap3 = gap3len;
 
 						sector_found++;
 
 					}
 
+					cur_pos = GetNextPos(SectorsOffsets,NumberofEntries,j,i,cur_pos);
 
 				}
 				currentcylinder->sides[i]=tg_generateTrackEx(sector_found,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
