@@ -16,7 +16,7 @@
 		<formatvalue>0xF6</formatvalue>
 		<gap3>80</gap3>
 		<bitrate>250000</bitrate>
-		<pregap>0</pregap>
+		<pregap>130</pregap>
 		<rpm>300</rpm>
 	</layout>
 </disk_layout>
