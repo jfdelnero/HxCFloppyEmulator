@@ -14,9 +14,9 @@
 		<sector_size>512</sector_size>
 		<interleave>1</interleave>
 		<formatvalue>0xF6</formatvalue>
-		<gap3>101</gap3>
+		<gap3>90</gap3>
 		<bitrate>500000</bitrate>
-		<pregap>0</pregap>
+		<pregap>150</pregap>
 		<rpm>300</rpm>
 	</layout>
 </disk_layout>
