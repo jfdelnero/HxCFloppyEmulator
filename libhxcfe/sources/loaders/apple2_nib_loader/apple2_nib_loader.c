@@ -59,7 +59,7 @@
 
 #define NIB_TRACK_SIZE 6656
 
-//#define HDDD_A2_SUPPORT 1
+#define HDDD_A2_SUPPORT 1
 
 unsigned short ext_a2_bit_expander[]=
 {
