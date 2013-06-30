@@ -1607,7 +1607,7 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 	// adjust the track lenght to get the right rpm.
 	if(wanted_trackperiod>track_period)
 	{
-		tracksize=tracksize+((((wanted_trackperiod-track_period) * (bitrate/4) )/(12500)));
+		tracksize=tracksize+((((wanted_trackperiod-track_period) * ((bitrate/4)/4) )/(12500/4)));
 	}
 
 	// align the track size
