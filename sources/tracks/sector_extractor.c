@@ -483,6 +483,11 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 
 					sector->startsectorindex=bit_offset;
 
+					if(track->timingbuffer)
+						sector->bitrate = track->timingbuffer[bit_offset/8];
+					else
+						sector->bitrate = track->bitrate;
+
 					if(!CRC16_High && !CRC16_Low)
 					{ // crc ok !!!
  						floppycontext->hxc_printf(MSG_DEBUG,"Valid MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
@@ -666,6 +671,11 @@ int get_next_MEMBRAIN_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 
 					sector->startsectorindex=bit_offset;
 
+					if(track->timingbuffer)
+						sector->bitrate = track->timingbuffer[bit_offset/8];
+					else
+						sector->bitrate = track->bitrate;
+
 					if(!CRC16_High && !CRC16_Low)
 					{ // crc ok !!!
  						floppycontext->hxc_printf(MSG_DEBUG,"Valid MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
@@ -847,6 +857,11 @@ int get_next_AMIGAMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 
 				sector_conf->endsectorindex = mfmtobin(track->databuffer,track->tracklen,sector_data,544,bit_offset,0);
 
+				if(track->timingbuffer)
+					sector_conf->bitrate = track->timingbuffer[bit_offset/8];
+				else
+					sector_conf->bitrate = track->bitrate;
+
 				memcpy(&header,&sector_data[4],4);
 				sortbuffer((unsigned char*)&header,tmp_buffer,4);
 				memcpy(&header,tmp_buffer,4);
@@ -1010,6 +1025,11 @@ int get_next_FM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFI
 					sector->sectorsize = sectorsize[tmp_buffer[4]&0x7];
 					sector->alternate_sector_size_id = tmp_buffer[4];
 					sector->trackencoding = ISOFORMAT_SD;
+
+					if(track->timingbuffer)
+						sector->bitrate = track->timingbuffer[bit_offset/8];
+					else
+						sector->bitrate = track->bitrate;
 
 					sector->use_alternate_header_crc = 0xFF;
 					CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
@@ -1198,6 +1218,10 @@ int get_next_TYCOMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTOR
 						sector->header_crc = ( tmp_buffer[k-2]<<8 ) | tmp_buffer[k-1] ;
 						sector_size = sector->sectorsize;
 
+						if(track->timingbuffer)
+							sector->bitrate = track->timingbuffer[bit_offset/8];
+						else
+							sector->bitrate = track->bitrate;
 
 //;01000100 01010101 00010001 00010100 01[s]010101
 //;            1   1    1   1    1   0       1   1   -- FB
