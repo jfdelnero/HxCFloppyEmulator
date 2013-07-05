@@ -74,7 +74,7 @@ unsigned char  size_to_code_d88(unsigned long size)
 }
 
 int D88_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
-{	
+{
 	int i,j,k,nbsector;
 	FILE * d88file;
 	char * log_str;
@@ -82,6 +82,12 @@ int D88_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	int track_cnt,density;
 	d88_fileheader d88_fh;
 	d88_sector d88_s;
+	unsigned long tracktable[164];
+
+	int mfmdd_found;
+	int mfmhd_found;
+	int fmdd_found;
+	int fmhd_found;
 
 	SECTORSEARCH* ss;
 	SECTORCONFIG** sca;
@@ -89,12 +95,21 @@ int D88_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	floppycontext->hxc_printf(MSG_INFO_1,"Write D88 file %s...",filename);
 
 	log_str=0;
+
+	mfmdd_found = 0;
+	mfmhd_found = 0;
+	fmdd_found = 0;
+	fmhd_found = 0;
+
 	d88file=hxc_fopen(filename,"wb");
 	if(d88file)
 	{
 		memset(&d88_fh,0,sizeof(d88_fileheader));
 		sprintf((char*)&d88_fh.name,"HxCFE");
 		fwrite(&d88_fh,sizeof(d88_fileheader),1,d88file);
+
+		memset(tracktable,0,sizeof(tracktable));
+		fwrite(&tracktable, sizeof(tracktable),1,d88file);
 
 		track_cnt=0;
 
@@ -112,44 +127,76 @@ int D88_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 					memset(log_str,0,strlen(tmp_str)+1);
 					strcat(log_str,tmp_str);
 
-					sca = hxcfe_getAllTrackISOSectors(ss,j,i,&nbsector);
-					if(sca)
+					if((j<<1 | i) <164)
 					{
-						for(k = 0; k < nbsector; k++) 
+						sca = hxcfe_getAllTrackISOSectors(ss,j,i,&nbsector);
+						if(sca)
 						{
 
-							memset(&d88_s,0,sizeof(d88_sector));
+							tracktable[(j<<1 | i)] = ftell(d88file);
 
-							density = 0;
-							if(sca[k]->trackencoding == ISOFORMAT_DD )
+							for(k = 0; k < nbsector; k++)
 							{
-								density = 1;
+
+								memset(&d88_s,0,sizeof(d88_sector));
+
+								density = 0;
+
+								if(sca[k]->trackencoding == ISOFORMAT_DD )
+								{
+									density = 1;
+
+									if(sca[k]->bitrate>400000)
+										mfmhd_found++;
+									else
+										mfmdd_found++;
+								}
+
+								if(	sca[k]->trackencoding == ISOFORMAT_SD )
+								{
+
+									if(sca[k]->bitrate>400000)
+										fmhd_found++;
+									else
+										fmdd_found++;
+								}
+
+								d88_s.cylinder = j;
+								d88_s.head = i;
+								d88_s.number_of_sectors = nbsector;
+								d88_s.sector_id = sca[k]->sector;
+
+								if(sca[k]->use_alternate_datamark && sca[k]->alternate_datamark == 0xF8)
+									d88_s.deleted_data = 0x10;
+
+								if(!density)
+									d88_s.density = 0x40;
+
+								d88_s.sector_size = size_to_code_d88(sca[k]->sectorsize);
+								d88_s.sector_length = sca[k]->sectorsize;
+
+								if( sca[k]->use_alternate_header_crc )
+								{
+									d88_s.sector_status = 0xA0; // ID_FLAG_CRC_ERROR_IN_ID_FIELD
+								}
+								else
+								{
+									if( sca[k]->use_alternate_data_crc )
+									{
+										d88_s.sector_status = 0xB0; // ID_FLAG_CRC_ERROR_IN_DATA_FIELD
+									}
+								}
+
+								fwrite(&d88_s,sizeof(d88_sector),1,d88file);
+
+								fwrite(sca[k]->input_data,sca[k]->sectorsize,1,d88file);
+
+								free(sca[k]->input_data);
+								free(sca[k]);
 							}
 
-							d88_s.cylinder = j;
-							d88_s.head = i;
-							d88_s.number_of_sectors = nbsector;
-							d88_s.sector_id = sca[k]->sector;
-							
-							if(sca[k]->use_alternate_datamark && sca[k]->alternate_datamark == 0xF8)
-								d88_s.deleted_data = 1;
-							
-							if(!density)
-								d88_s.density = 0x40;
-
-							d88_s.sector_size = size_to_code_d88(sca[k]->sectorsize);
-							d88_s.sector_length = sca[k]->sectorsize;
-							//d88_s.sector_status=
-
-							fwrite(&d88_s,sizeof(d88_sector),1,d88file);
-
-							fwrite(sca[k]->input_data,sca[k]->sectorsize,1,d88file);
-
-							free(sca[k]->input_data);
-							free(sca[k]);
+							free(sca);
 						}
-
-						free(sca);
 					}
 
 
@@ -163,8 +210,29 @@ int D88_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 		}
 
+		// Media flag. 00h = 2D, 10h = 2DD, 20h = 2HD.
+		if(	(mfmdd_found > mfmhd_found) && (mfmdd_found > fmdd_found) )
+		{
+			// 2DD
+			d88_fh.media_flag = 0x10;
+		}
+
+		if(	(mfmhd_found > mfmdd_found) && (mfmhd_found > fmdd_found) )
+		{
+			// 2HD
+			d88_fh.media_flag = 0x20;
+		}
+
+		if(	(fmdd_found > mfmdd_found) && (fmdd_found > mfmhd_found) )
+		{
+			// 2D
+			d88_fh.media_flag = 0x00;
+		}
+
+		d88_fh.file_size = ftell(d88file);
 		fseek(d88file,0,SEEK_SET);
 		fwrite(&d88_fh,sizeof(d88_fileheader),1,d88file);
+		fwrite(&tracktable, sizeof(tracktable),1,d88file);
 
 		hxc_fclose(d88file);
 	}

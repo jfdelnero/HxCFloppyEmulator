@@ -64,7 +64,7 @@ int D88_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	floppycontext->hxc_printf(MSG_DEBUG,"D88_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"d88") || 
+	if( hxc_checkfileext(imgfile,"d88") ||
 		hxc_checkfileext(imgfile,"d77") ||
 		hxc_checkfileext(imgfile,"88d") ||
 		hxc_checkfileext(imgfile,"d8u") ||
@@ -74,7 +74,7 @@ int D88_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		floppycontext->hxc_printf(MSG_DEBUG,"D88_libIsValidDiskFile : D88 file !");
 		return HXCFE_VALIDFILE;
 	}
-				
+
 	else
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"D88_libIsValidDiskFile : non D88 file !");
@@ -103,7 +103,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	char str_file[512];
 	int basefileptr;
 	int totalfilesize,truetotalfilesize,partcount;
-	
+
 	floppycontext->hxc_printf(MSG_DEBUG,"D88_libLoad_DiskFile %s",imgfile);
 
 	indexfile=0;
@@ -121,17 +121,17 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				indexstr[0]=0;
 			}
 		}
-	
+
 	}
 
 
 	f=hxc_fopen(str_file,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
+
 	//////////////////////////////////////////////////////
 	// sanity check
 	floppycontext->hxc_printf(MSG_INFO_1,"Floppy disk in this file :");
@@ -140,7 +140,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	fseek(f,0,SEEK_END);
 	truetotalfilesize=ftell(f);
 	fseek(f,0,SEEK_SET);
-	
+
 	totalfilesize=0;
 	while((!feof(f)) && (partcount<256) && (totalfilesize<truetotalfilesize))
 	{
@@ -162,7 +162,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	if((totalfilesize!=ftell(f)) || partcount==256)
 	{
-		// bad total size ! 
+		// bad total size !
 		floppycontext->hxc_printf(MSG_ERROR,"Bad D88 file size !",imgfile);
 		hxc_fclose(f);
 		return HXCFE_BADFILE;
@@ -170,7 +170,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	floppycontext->hxc_printf(MSG_INFO_1,"%d floppy in this file.",partcount);
 	fseek(f,0,SEEK_SET);
 	//////////////////////////////////////////////////////
-		
+
 	//////////////////////////////////////////////////////
 	// Floppy selection
 	if(indexfile>=partcount)
@@ -179,7 +179,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		hxc_fclose(f);
 		return HXCFE_ACCESSERROR;
 	}
-	
+
 	while(indexfile)
 	{
 		fread(&fileheader,sizeof(fileheader),1,f);
@@ -203,24 +203,24 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			tracktype=IBMFORMAT_SD;
 			bitrate=250000;
 			side=2;
-			break; 
+			break;
 		case 0x10: // 2DD
 			floppycontext->hxc_printf(MSG_INFO_1,"2DD disk");
 			tracktype=IBMFORMAT_DD;
 			bitrate=250000;
-			side=2;	
+			side=2;
 			break;
 		case 0x20: // 2HD
 			floppycontext->hxc_printf(MSG_INFO_1,"2HD disk");
 			tracktype=IBMFORMAT_DD;
 			bitrate=500000;
-			side=2;	
+			side=2;
 			break;
 		case 0x40: // 1DD
 			floppycontext->hxc_printf(MSG_INFO_1,"1DD disk");
 			tracktype=IBMFORMAT_DD;
 			bitrate=250000;
-			side=1;	
+			side=1;
 			break;
 
 		default:
@@ -270,9 +270,9 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	floppydisk->floppySectorPerTrack=-1; // default value
 	interleave=1;
 	rpm=300;
-	
+
 	floppycontext->hxc_printf(MSG_INFO_1,"%d tracks, %d Side(s)\n",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide);
-	
+
 	if(side==1)
 		number_of_track=number_of_track*2;
 
@@ -283,7 +283,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		{
 			fseek(f,track_offset+basefileptr,SEEK_SET);
 			fread(&sectorheader,sizeof(d88_sector),1,f);
-			
+
 			number_of_sector=sectorheader.number_of_sectors;
 			floppycontext->hxc_printf(MSG_INFO_1,"Number of sector: %d",number_of_sector);
 			if(sectorheader.density&0x40)
@@ -319,7 +319,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						sectorheader.sector_status,
 						sectorheader.density,
 						sectorheader.deleted_data,
-						
+
 						ftell(f)
 						);
 
@@ -332,17 +332,42 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					sectorconfig[j].input_data=malloc(sectorheader.sector_length);
 					sectorconfig[j].bitrate=floppydisk->floppyBitRate;
 
-					fread(sectorconfig[j].input_data,sectorheader.sector_length,1,f); 
+					fread(sectorconfig[j].input_data,sectorheader.sector_length,1,f);
 
-					if(sectorheader.sector_status)
+					if(sectorheader.deleted_data == 0x10)
 					{
-						sectorconfig[j].use_alternate_header_crc=0x1;
+						sectorconfig[j].use_alternate_datamark = 0xFF;
+						sectorconfig[j].alternate_datamark = 0xF8;
 					}
 
-					//	sectorconfig[j].baddatacrc=1;
+					switch( sectorheader.sector_status & 0xF0)
+					{
+						case 0x00:
+						// Normal
+						break;
+						case 0x10:
+							// Deleted
+							sectorconfig[j].use_alternate_datamark = 0xFF;
+							sectorconfig[j].alternate_datamark = 0xF8;
+						break;
+						case 0xA0:
+							// Bad ID CRC
+							sectorconfig[j].use_alternate_header_crc = 0x01;
+							sectorconfig[j].header_crc = 0xAA55;
+						break;
+						case 0xB0:
+							// Bad DATA CRC
+							sectorconfig[j].use_alternate_data_crc = 0x01;
+							sectorconfig[j].data_crc = 0xAA55;
+						break;
+						case 0xE0:
+						break;
+						case 0xF0:
+						break;
+					}
 
 					// fread datas
-					fread(&sectorheader,sizeof(d88_sector),1,f); 
+					fread(&sectorheader,sizeof(d88_sector),1,f);
 
 					j++;
 				}while(j<number_of_sector);
@@ -356,7 +381,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	//
 			currentcylinder->floppyRPM=rpm;
 			currentcylinder->sides[i&1]=tg_generateTrackEx((unsigned short)number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,tracktype,0,2500 | NO_SECTOR_UNDER_INDEX,-2500);
-			
+
 			for(j=0;j<number_of_sector;j++)
 			{
 				if(sectorconfig[j].input_data)
@@ -395,16 +420,16 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			fseek(f,basefileptr + sizeof(d88_fileheader)  + ((i>>1) * sizeof(unsigned long)),SEEK_SET);
 		}
 
-		
+
 		fread(&track_offset,sizeof(unsigned long),1,f);
-	
+
 	}while(i<number_of_track);
 
 	if(side==2)
 		floppydisk->floppyNumberOfTrack=i/2;
 
-		
-	hxc_fclose(f);	
+
+	hxc_fclose(f);
 
 	hxcfe_sanityCheck(floppycontext,floppydisk);
 
