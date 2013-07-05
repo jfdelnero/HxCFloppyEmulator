@@ -1017,6 +1017,14 @@ SOURCE=..\sources\loaders\d88_loader\d88_loader.c
 
 SOURCE=..\sources\loaders\d88_loader\d88_loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\d88_loader\d88_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\d88_loader\d88_writer.h
+# End Source File
 # End Group
 # Begin Group "JV1"
 
