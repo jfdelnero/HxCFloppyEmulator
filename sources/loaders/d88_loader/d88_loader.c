@@ -56,6 +56,8 @@
 #include "d88_loader.h"
 #include "d88_format.h"
 
+#include "d88_writer.h"
+
 #include "libhxcadaptor.h"
 
 int D88_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
@@ -421,7 +423,7 @@ int D88_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	{
 		(ISVALIDDISKFILE)	D88_libIsValidDiskFile,
 		(LOADDISKFILE)		D88_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		D88_libWrite_DiskFile,
 		(GETPLUGININFOS)	D88_libGetPluginInfo
 	};
 

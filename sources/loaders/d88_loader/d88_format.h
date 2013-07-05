@@ -70,9 +70,6 @@ Offset    Size          Meaning
 
 */
 
-
-
-
 #pragma pack(1)
 
 typedef struct d88_fileheader_
