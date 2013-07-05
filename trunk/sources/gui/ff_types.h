@@ -18,5 +18,6 @@ enum
 	FF_JV3,
 	FF_DMK,
 	FF_V9T9,
+	FF_D88,
 	FF_EHFE
 };
