@@ -52,6 +52,7 @@ Fl_Menu_Item format_choices[]=
 	{ "JV3 - JV3 TRS80 file format",0,format_choice_cb,(void*)PLUGIN_TRS80_JV3},
 	{ "DMK - DMK TRS80 file format",0,format_choice_cb,(void*)PLUGIN_TRS80_DMK},
 	{ "V9T9- TI99/4A sectors file format",0,format_choice_cb,(void*)PLUGIN_TI994A_V9T9},
+	{ "D88 - PC88 D88 file format",0,format_choice_cb,(void*)PLUGIN_NEC_D88},
 	{ "HFE - Rev 2 - Experimental",0,format_choice_cb,(void*)PLUGIN_HXC_EXTHFE},
 	{0}
 };

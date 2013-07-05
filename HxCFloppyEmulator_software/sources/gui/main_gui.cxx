@@ -118,6 +118,7 @@ const char * plugid_lst[]=
 	PLUGIN_TI994A_V9T9,
 	PLUGIN_TRS80_JV3,
 	PLUGIN_TRS80_DMK,
+	PLUGIN_NEC_D88,
 	PLUGIN_HXC_EXTHFE
 };
 
@@ -296,6 +297,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"TI99/4A V9T9 DSK file\t*.dsk\n"
 					"TRS80 JV3 file\t*.jv3\n"
 					"TRS80 DMK file\t*.dmk\n"
+					"PC88  D88 file\t*.d88\n"
 					"HFE file (Rev 2 - Experimental)\t*.hfe\n");
 
 
