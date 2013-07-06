@@ -175,15 +175,34 @@ int D88_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 								d88_s.sector_size = size_to_code_d88(sca[k]->sectorsize);
 								d88_s.sector_length = sca[k]->sectorsize;
 
-								if( sca[k]->use_alternate_header_crc )
+								if( sca[k]->alternate_addressmark != 0xFE )
 								{
-									d88_s.sector_status = 0xA0; // ID_FLAG_CRC_ERROR_IN_ID_FIELD
+									d88_s.sector_status = 0xE0; // NO ADDRESS MARK
 								}
 								else
 								{
-									if( sca[k]->use_alternate_data_crc )
+									if( sca[k]->use_alternate_header_crc )
 									{
-										d88_s.sector_status = 0xB0; // ID_FLAG_CRC_ERROR_IN_DATA_FIELD
+										d88_s.sector_status = 0xA0; // ID CRC ERROR
+									}
+									else
+									{
+										if( sca[k]->alternate_datamark != 0xFB && sca[k]->alternate_datamark != 0xF8 )
+										{
+											d88_s.sector_status = 0xF0; // NO DATA MARK
+										}
+										else
+										{
+											if( sca[k]->use_alternate_data_crc )
+											{
+												d88_s.sector_status = 0xB0; // DATA CRC ERROR
+											}
+											else
+											{
+												if( sca[k]->alternate_datamark == 0xF8 )
+													d88_s.sector_status = 0x10; // DELETED SECTOR
+											}
+										}
 									}
 								}
 

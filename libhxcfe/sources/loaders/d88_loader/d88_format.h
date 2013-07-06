@@ -17,10 +17,10 @@ Track 3
 ...
 
 
-Size: 688 or 672 bytes.   
+Size: 688 or 672 bytes.
 
 Offset    Size             Meaning
------------------------------------------------------------------------------------- 
+------------------------------------------------------------------------------------
 
 00h       16(CHAR)             Name/Comment.
 0Ah       10                   Reserved (00h).
@@ -44,7 +44,7 @@ Concatenation of all tracks in disk (see track table for offsets).
 Track:
 ======
 Size: variable.
-Concatenation of all sectors in track in their original order (possible 
+Concatenation of all sectors in track in their original order (possible
 interleaving).
 
 
@@ -54,7 +54,7 @@ Size: variable.
 Sector header + sector data.
 
 Offset    Size          Meaning
------------------------------------------------------------------------------------------- 
+------------------------------------------------------------------------------------------
 
 00h       1                 C (cylinder/track value of sector's id).
 01h       1                 H (head value of sector's id).
@@ -65,9 +65,21 @@ Offset    Size          Meaning
 07h       1                 Deleted data (DDAM). 0 = normal, 1 = deleted.
 08h       1                 Status (error code returned by disk bios). 00h = normal.
 09h       5                 Reserved (00h).
-0Eh       2(WORD)    Sector length in bytes. (-> end sector header) 
+0Eh       2(WORD)    Sector length in bytes. (-> end sector header)
 01h       (variable)    Sector data. See sector length field for size.
 
+
+STATUS is the returned code by the bios of the PC-98x1 :
+========================================================
+
+0x00 Normal
+0x10 Normal (Deleted)
+0xA0 ID CRC Error
+0xB0 DATA CRC Error
+0xE0 No ADDRESS Mark
+0xF0 No DATA Mark
+
+Note: sector size and data size are coded using 2 bytes with little endian.
 */
 
 #pragma pack(1)

@@ -343,7 +343,7 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					switch( sectorheader.sector_status & 0xF0)
 					{
 						case 0x00:
-						// Normal
+							// Normal
 						break;
 						case 0x10:
 							// Deleted
@@ -361,8 +361,15 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							sectorconfig[j].data_crc = 0xAA55;
 						break;
 						case 0xE0:
+							//no address mark
+							sectorconfig[j].use_alternate_addressmark = 0xFF;
+							sectorconfig[j].alternate_addressmark = 0x80;
+
 						break;
 						case 0xF0:
+							//no data mark
+							sectorconfig[j].use_alternate_datamark = 0xFF;
+							sectorconfig[j].alternate_datamark = 0x80;
 						break;
 					}
 
