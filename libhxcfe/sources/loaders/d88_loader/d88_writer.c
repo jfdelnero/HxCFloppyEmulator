@@ -89,6 +89,8 @@ int D88_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	int fmdd_found;
 	int fmhd_found;
 
+	int maxtrack;
+
 	SECTORSEARCH* ss;
 	SECTORCONFIG** sca;
 
@@ -100,6 +102,7 @@ int D88_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	mfmhd_found = 0;
 	fmdd_found = 0;
 	fmhd_found = 0;
+	maxtrack = 0;
 
 	d88file=hxc_fopen(filename,"wb");
 	if(d88file)
@@ -174,6 +177,8 @@ int D88_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 								d88_s.sector_size = size_to_code_d88(sca[k]->sectorsize);
 								d88_s.sector_length = sca[k]->sectorsize;
+								if(!sca[k]->input_data)
+									d88_s.sector_length = 0;
 
 								if( sca[k]->alternate_addressmark != 0xFE )
 								{
@@ -208,16 +213,19 @@ int D88_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 								fwrite(&d88_s,sizeof(d88_sector),1,d88file);
 
-								fwrite(sca[k]->input_data,sca[k]->sectorsize,1,d88file);
+								if(d88_s.sector_length)
+									fwrite(sca[k]->input_data,sca[k]->sectorsize,1,d88file);
 
 								free(sca[k]->input_data);
 								free(sca[k]);
 							}
 
+							if(i==0)
+								maxtrack++;
+
 							free(sca);
 						}
 					}
-
 
 					floppycontext->hxc_printf(MSG_INFO_1,log_str);
 					free(log_str);
@@ -230,20 +238,23 @@ int D88_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 		}
 
 		// Media flag. 00h = 2D, 10h = 2DD, 20h = 2HD.
-		if(	(mfmdd_found > mfmhd_found) && (mfmdd_found > fmdd_found) )
+		if(	(maxtrack >= 46) )
 		{
+			// 2DD : 300RPM, 250Kb/s, 2 sides, 80 tracks floppy format
 			// 2DD
 			d88_fh.media_flag = 0x10;
 		}
 
-		if(	(mfmhd_found > mfmdd_found) && (mfmhd_found > fmdd_found) )
+		if(	(maxtrack >= 46) && (mfmhd_found>mfmdd_found))
 		{
+			// 2HD : 360RPM, 500Kb/s, 2 sides, 77 tracks floppy format
 			// 2HD
 			d88_fh.media_flag = 0x20;
 		}
 
-		if(	(fmdd_found > mfmdd_found) && (fmdd_found > mfmhd_found) )
+		if(maxtrack < 46)
 		{
+			// 2D : 300RPM, 250Kb/s, 2 sides, 40 tracks floppy format . 
 			// 2D
 			d88_fh.media_flag = 0x00;
 		}
