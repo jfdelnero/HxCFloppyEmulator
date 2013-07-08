@@ -312,10 +312,13 @@ typedef struct s_trackdisplay_
 
 	s_sectorlist * sl;
 
+	unsigned long enabledtrackmode;
+
 }s_trackdisplay;
 
 s_trackdisplay * hxcfe_td_init(HXCFLOPPYEMULATOR* floppycontext,unsigned long xsize,unsigned long ysize);
 void hxcfe_td_setparams(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,unsigned long x_us,unsigned long y_us,unsigned long x_start_us);
+void hxcfe_td_activate_analyzer(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,int TRACKTYPE,int enable);
 void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY * floppydisk,int track,int side);
 s_sectorlist * hxcfe_td_getlastsectorlist(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td);
 void hxcfe_td_draw_disk(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY * floppydisk);
