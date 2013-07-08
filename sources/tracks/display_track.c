@@ -530,6 +530,17 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 	return sl;
 }
 
+void hxcfe_td_activate_analyzer(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,int TRACKTYPE,int enable)
+{
+	if(td && TRACKTYPE<32)
+	{
+		if(enable)
+			td->enabledtrackmode = td->enabledtrackmode | (0x00000001 << TRACKTYPE);
+		else
+			td->enabledtrackmode = td->enabledtrackmode & ( ~(0x00000001 << TRACKTYPE) );
+	}
+}
+
 void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOPPY * floppydisk,int track,int side)
 {
 	int tracksize;
@@ -787,14 +798,13 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 
 	}while(!endfill);
 
-	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,ISOIBM_MFM_ENCODING);
-	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,AMIGA_MFM_ENCODING);
-	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,ISOIBM_FM_ENCODING);
-	display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,TYCOM_FM_ENCODING);
-	//display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,MEMBRAIN_MFM_ENCODING);
-
-
-	//display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,EMU_FM_ENCODING);
+	for(i=0;i<32;i++)
+	{
+		if(td->enabledtrackmode & (0x00000001<<i) )
+		{
+			display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,i);
+		}
+	}
 }
 
 s_sectorlist * hxcfe_td_getlastsectorlist(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td)
