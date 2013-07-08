@@ -15,6 +15,7 @@
 ..\..\converttools\bmptoh DiskLayout_LinnForat9K_720KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_KorgT3_HD_1_6MB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_AtariST_DD_720KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_OS9_1280KB.xml -DATA
 
 move *.h ..
 

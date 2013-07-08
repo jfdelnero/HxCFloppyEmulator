@@ -15,6 +15,7 @@
 #include "data_DiskLayout_LinnForat9K_720KB_xml.h"
 #include "data_DiskLayout_KorgT3_HD_1_6MB_xml.h"
 #include "data_DiskLayout_AtariST_DD_720KB_xml.h"
+#include "data_DiskLayout_OS9_1280KB_xml.h"
 
 datatype * disklayout_list[]=
 {
@@ -35,6 +36,7 @@ datatype * disklayout_list[]=
 	data_DiskLayout_DOS_EXDD_2_5MB_xml,
 	data_DiskLayout_DOS_EXHD_4_5MB_xml,
 	data_DiskLayout_DOS_EXHD_6_78MB_xml,
+	data_DiskLayout_OS9_1280KB_xml,
 	0
 };
 
