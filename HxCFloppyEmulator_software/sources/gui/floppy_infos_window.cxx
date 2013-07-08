@@ -13,18 +13,18 @@ extern "C"
 floppy_infos_window::floppy_infos_window() {
   { window = new Fl_Double_Window(1003, 670, "Visual Floppy disk");
     window->user_data((void*)(this));
-    { Fl_Group* o = new Fl_Group(0, 502, 155, 166, "Track");
+    { Fl_Group* o = new Fl_Group(0, 502, 170, 93, "Track");
       o->box(FL_ENGRAVED_FRAME);
       o->labeltype(FL_EMBOSSED_LABEL);
       o->labelsize(12);
       o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-      { track_number_slide = new Fl_Value_Slider(6, 541, 139, 19, "Track number");
+      { track_number_slide = new Fl_Value_Slider(6, 522, 159, 19, "Track number");
         track_number_slide->type(1);
         track_number_slide->labelsize(12);
         track_number_slide->textsize(12);
         track_number_slide->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Value_Slider* track_number_slide
-      { side_number_slide = new Fl_Value_Slider(5, 601, 140, 19, "Side number");
+      { side_number_slide = new Fl_Value_Slider(5, 557, 160, 19, "Side number");
         side_number_slide->type(1);
         side_number_slide->labelsize(12);
         side_number_slide->textsize(12);
@@ -64,24 +64,24 @@ floppy_infos_window::floppy_infos_window() {
       floppy_map_disp->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
       floppy_map_disp->end();
     } // Fl_Group* floppy_map_disp
-    { Fl_Group* o = new Fl_Group(155, 502, 300, 167, "View");
+    { Fl_Group* o = new Fl_Group(170, 502, 285, 167, "View");
       o->box(FL_ENGRAVED_FRAME);
       o->labeltype(FL_EMBOSSED_LABEL);
       o->labelsize(12);
       o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-      { y_time = new Fl_Value_Slider(160, 557, 288, 20, "full y time scale (us)");
+      { y_time = new Fl_Value_Slider(175, 557, 273, 20, "full y time scale (us)");
         y_time->type(5);
         y_time->labelsize(12);
         y_time->textsize(12);
         y_time->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Value_Slider* y_time
-      { x_offset = new Fl_Value_Slider(160, 595, 288, 20, "x offset (% of the track len)");
+      { x_offset = new Fl_Value_Slider(175, 595, 273, 20, "x offset (% of the track len)");
         x_offset->type(5);
         x_offset->labelsize(12);
         x_offset->textsize(12);
         x_offset->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Value_Slider* x_offset
-      { track_view_bt = new Fl_Round_Button(188, 640, 64, 4, "Track view");
+      { track_view_bt = new Fl_Round_Button(213, 640, 64, 4, "Track view");
         track_view_bt->type(102);
         track_view_bt->down_box(FL_ROUND_DOWN_BOX);
         track_view_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
@@ -91,11 +91,42 @@ floppy_infos_window::floppy_infos_window() {
         disc_view_bt->down_box(FL_ROUND_DOWN_BOX);
         disc_view_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Round_Button* disc_view_bt
-      { x_time = new Fl_Slider(160, 520, 288, 20, "full x time scale");
+      { x_time = new Fl_Slider(175, 520, 273, 20, "full x time scale");
         x_time->type(1);
         x_time->labelsize(12);
         x_time->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Slider* x_time
+      o->end();
+    } // Fl_Group* o
+    { Fl_Group* o = new Fl_Group(0, 595, 170, 75, "Mode");
+      o->box(FL_ENGRAVED_FRAME);
+      o->labeltype(FL_EMBOSSED_LABEL);
+      o->labelsize(12);
+      o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
+      { iso_mfm_bt = new Fl_Light_Button(2, 615, 80, 15, "ISO MFM");
+        iso_mfm_bt->labelsize(10);
+        iso_mfm_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* iso_mfm_bt
+      { iso_fm_bt = new Fl_Light_Button(2, 630, 80, 15, "ISO FM");
+        iso_fm_bt->labelsize(10);
+        iso_fm_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* iso_fm_bt
+      { amiga_mfm_bt = new Fl_Light_Button(2, 645, 80, 15, "AMIGA MFM");
+        amiga_mfm_bt->labelsize(10);
+        amiga_mfm_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* amiga_mfm_bt
+      { membrain_bt = new Fl_Light_Button(85, 645, 75, 15, "MEMBRAIN");
+        membrain_bt->labelsize(10);
+        membrain_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* membrain_bt
+      { tycom_bt = new Fl_Light_Button(85, 630, 75, 15, "TYCOM");
+        tycom_bt->labelsize(10);
+        tycom_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* tycom_bt
+      { eemu_bt = new Fl_Light_Button(85, 615, 75, 15, "E-Emu");
+        eemu_bt->labelsize(10);
+        eemu_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* eemu_bt
       o->end();
     } // Fl_Group* o
 

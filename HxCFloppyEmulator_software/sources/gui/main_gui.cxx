@@ -675,6 +675,9 @@ Main_Window::Main_Window()
 	guicontext->td=hxcfe_td_init(guicontext->hxcfe,this->infos_window->floppy_map_disp->w(),this->infos_window->floppy_map_disp->h());
 	this->infos_window->buf=new Fl_Text_Buffer;
 	this->infos_window->object_txt->buffer(this->infos_window->buf);
+	this->infos_window->amiga_mfm_bt->value(1);
+	this->infos_window->iso_fm_bt->value(1);
+	this->infos_window->iso_mfm_bt->value(1);
 
 	tick_infos(this->infos_window);
 	guicontext->updatefloppyinfos++;
