@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2012 Jean-François DEL NERO
+// Copyright (C) 2006-2013 Jean-François DEL NERO
 //
 // This file is part of HxCFloppyEmulator.
 //
@@ -909,7 +909,7 @@ int main(int argc, char* argv[])
 	hxcfe_setOutputFunc(hxcfe,&CUI_affiche);
 
 	printf("HxC Floppy Emulator : Floppy image file converter\n");
-	printf("Copyright (C) 2006-2012 Jean-Francois DEL NERO\n");
+	printf("Copyright (C) 2006-2013 Jean-Francois DEL NERO\n");
 	printf("This program comes with ABSOLUTELY NO WARRANTY\n");
 	printf("This is free software, and you are welcome to redistribute it\n");
 	printf("under certain conditions;\n\n");
