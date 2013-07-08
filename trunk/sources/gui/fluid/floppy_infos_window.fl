@@ -8,23 +8,23 @@ class floppy_infos_window {open
   } {
     Fl_Window window {
       label {Visual Floppy disk} open
-      xywh {499 15 1003 670} type Double visible
+      xywh {88 43 1003 670} type Double hide
     } {
       Fl_Group {} {
         label Track open
-        xywh {0 502 155 166} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+        xywh {0 502 170 93} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {
         Fl_Value_Slider track_number_slide {
           label {Track number}
           user_data this
           callback disk_infos_window_callback
-          xywh {6 541 139 19} type Horizontal labelsize 12 textsize 12
+          xywh {6 522 159 19} type Horizontal labelsize 12 textsize 12
         }
         Fl_Value_Slider side_number_slide {
           label {Side number}
           user_data this
           callback disk_infos_window_callback
-          xywh {5 601 140 19} type Horizontal labelsize 12 textsize 12
+          xywh {5 557 160 19} type Horizontal labelsize 12 textsize 12
         }
       }
       Fl_Group {} {
@@ -57,25 +57,25 @@ class floppy_infos_window {open
       } {}
       Fl_Group {} {
         label View open
-        xywh {155 502 300 167} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+        xywh {170 502 285 167} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {
         Fl_Value_Slider y_time {
           label {full y time scale (us)}
           user_data this
           callback disk_infos_window_callback
-          xywh {160 557 288 20} type {Horz Knob} labelsize 12 textsize 12
+          xywh {175 557 273 20} type {Horz Knob} labelsize 12 textsize 12
         }
         Fl_Value_Slider x_offset {
           label {x offset (% of the track len)}
           user_data this
           callback disk_infos_window_callback
-          xywh {160 595 288 20} type {Horz Knob} labelsize 12 textsize 12
+          xywh {175 595 273 20} type {Horz Knob} labelsize 12 textsize 12
         }
         Fl_Round_Button track_view_bt {
           label {Track view}
           user_data this
           callback disk_infos_window_callback
-          xywh {188 640 64 4} type Radio down_box ROUND_DOWN_BOX
+          xywh {213 640 64 4} type Radio down_box ROUND_DOWN_BOX
         }
         Fl_Round_Button disc_view_bt {
           label {Disk view}
@@ -86,8 +86,49 @@ class floppy_infos_window {open
         Fl_Slider x_time {
           label {full x time scale}
           user_data this
+          callback disk_infos_window_callback
+          xywh {175 520 273 20} type Horizontal labelsize 12
+        }
+      }
+      Fl_Group {} {
+        label Mode open
+        xywh {0 595 170 75} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+      } {
+        Fl_Light_Button iso_mfm_bt {
+          label {ISO MFM}
+          user_data this
+          callback disk_infos_window_callback
+          xywh {2 615 80 15} labelsize 10
+        }
+        Fl_Light_Button iso_fm_bt {
+          label {ISO FM}
+          user_data this
+          callback disk_infos_window_callback
+          xywh {2 630 80 15} labelsize 10
+        }
+        Fl_Light_Button amiga_mfm_bt {
+          label {AMIGA MFM}
+          user_data this
+          callback disk_infos_window_callback
+          xywh {2 645 80 15} labelsize 10
+        }
+        Fl_Light_Button membrain_bt {
+          label MEMBRAIN
+          user_data this
+          callback disk_infos_window_callback
+          xywh {85 645 75 15} labelsize 10
+        }
+        Fl_Light_Button tycom_bt {
+          label TYCOM
+          user_data this
+          callback disk_infos_window_callback
+          xywh {85 630 75 15} labelsize 10
+        }
+        Fl_Light_Button eemu_bt {
+          label {E-Emu}
+          user_data this
           callback disk_infos_window_callback selected
-          xywh {160 520 288 20} type Horizontal labelsize 12
+          xywh {85 615 75 15} labelsize 10
         }
       }
     }

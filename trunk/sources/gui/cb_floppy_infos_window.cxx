@@ -87,6 +87,13 @@ void update_graph(floppy_infos_window * w)
 		td=guicontext->td;
 		if(td)
 		{
+			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,ISOIBM_MFM_ENCODING,w->iso_mfm_bt->value());
+			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,ISOIBM_FM_ENCODING,w->iso_fm_bt->value());
+			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,AMIGA_MFM_ENCODING,w->amiga_mfm_bt->value());
+			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,EMU_FM_ENCODING,w->eemu_bt->value());
+			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,MEMBRAIN_MFM_ENCODING,w->membrain_bt->value());
+			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,TYCOM_FM_ENCODING,w->tycom_bt->value());
+
 			hxcfe_td_setparams(guicontext->hxcfe,td,(int)(w->x_time->value()),(int)w->y_time->value(),(int)(w->x_offset->value()*1000));
 
 			if(guicontext->loadedfloppy)
@@ -255,6 +262,7 @@ void disk_infos_window_callback(Fl_Widget *o, void *v)
 		}
 
 	}
+
 	update_graph(window);
 }
 
