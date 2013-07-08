@@ -14,6 +14,9 @@ extern void floppy_infos_ok(Fl_Button*, void*);
 #include <FL/Fl_Round_Button.H>
 extern void disk_infos_window_callback(Fl_Round_Button*, void*);
 #include <FL/Fl_Slider.H>
+extern void disk_infos_window_callback(Fl_Slider*, void*);
+#include <FL/Fl_Light_Button.H>
+extern void disk_infos_window_callback(Fl_Light_Button*, void*);
 
 class floppy_infos_window {
 public:
@@ -31,6 +34,13 @@ public:
   Fl_Round_Button *track_view_bt;
   Fl_Round_Button *disc_view_bt;
   Fl_Slider *x_time;
+  Fl_Light_Button *iso_mfm_bt;
+  Fl_Light_Button *iso_fm_bt;
+  Fl_Light_Button *amiga_mfm_bt;
+  Fl_Light_Button *membrain_bt;
+  Fl_Light_Button *tycom_bt;
+  Fl_Light_Button *eemu_bt;
+
   Fl_Text_Buffer* buf;
   Fl_Text_Display * txt_displ;
 };
