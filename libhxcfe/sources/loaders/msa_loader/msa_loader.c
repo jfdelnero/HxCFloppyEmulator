@@ -55,6 +55,8 @@
 
 #include "msa_loader.h"
 
+#include "msa_writer.h"
+
 #include "libhxcadaptor.h"
 
 int MSA_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
@@ -161,6 +163,8 @@ int MSA_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						{
 							if(l+j>extractfilesize)
 							{
+								free(tmpbuffer);
+								hxc_fclose(f);
 								return HXCFE_FILECORRUPTED;
 							}
 							
@@ -180,6 +184,8 @@ int MSA_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							
 							if(l+j+len>extractfilesize)
 							{
+								free(tmpbuffer);
+								hxc_fclose(f);
 								return HXCFE_FILECORRUPTED;
 							}
 							else
@@ -285,7 +291,7 @@ int MSA_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	{
 		(ISVALIDDISKFILE)	MSA_libIsValidDiskFile,
 		(LOADDISKFILE)		MSA_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		MSA_libWrite_DiskFile,
 		(GETPLUGININFOS)	MSA_libGetPluginInfo
 	};
 
