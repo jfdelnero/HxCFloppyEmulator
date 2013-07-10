@@ -119,6 +119,7 @@ const char * plugid_lst[]=
 	PLUGIN_TRS80_JV3,
 	PLUGIN_TRS80_DMK,
 	PLUGIN_NEC_D88,
+	PLUGIN_ATARIST_MSA,
 	PLUGIN_HXC_EXTHFE
 };
 
@@ -298,6 +299,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"TRS80 JV3 file\t*.jv3\n"
 					"TRS80 DMK file\t*.dmk\n"
 					"PC88  D88 file\t*.d88\n"
+					"ATARI ST MSA file\t*.msa\n"
 					"HFE file (Rev 2 - Experimental)\t*.hfe\n");
 
 
