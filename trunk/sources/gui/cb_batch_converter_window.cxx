@@ -106,6 +106,7 @@ ff_type ff_type_list[]=
 	{ FF_DMK,"DMK - DMK TRS80 file format",PLUGIN_TRS80_DMK,".dmk"},
 	{ FF_V9T9,"TI99/4A V9T9 sectors file format",PLUGIN_TI994A_V9T9,".dsk"},
 	{ FF_D88, "D88 - D88 PC88 file format",PLUGIN_NEC_D88,".d88"},
+	{ FF_MSA, "MSA - ATARI ST MSA file format",PLUGIN_ATARIST_MSA,".msa"},
 	{ FF_EHFE,"HFE - Rev 2 - Experimental",PLUGIN_HXC_EXTHFE,".hfe"},
 	{ -1,"",0,0}			
 };

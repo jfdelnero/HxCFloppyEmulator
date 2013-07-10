@@ -19,5 +19,6 @@ enum
 	FF_DMK,
 	FF_V9T9,
 	FF_D88,
+	FF_MSA,
 	FF_EHFE
 };
