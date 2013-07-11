@@ -57,7 +57,7 @@ DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosf
                   fzf_loader.o apple2_nib_loader.o sdd_speccydos_loader.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
-					jv3_writer.o dmk_writer.o d88_writer.o
+					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o
 
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
@@ -171,6 +171,9 @@ cpcdsk_writer.o : $(BASEDIR)/loaders/cpcdsk_loader/cpcdsk_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 msa_loader.o : $(BASEDIR)/loaders/msa_loader/msa_loader.c $(BASEDIR)/loaders/msa_loader/msa_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+msa_writer.o : $(BASEDIR)/loaders/msa_loader/msa_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 msx_loader.o : $(BASEDIR)/loaders/msx_loader/msx_loader.c $(BASEDIR)/loaders/msx_loader/msx_loader.h
