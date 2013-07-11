@@ -37,6 +37,106 @@
 #include "libhxcadaptor.h"
 #include "types.h"
 
+unsigned short msapacktrack(unsigned char * inputtrack,int insize,unsigned char * outputtrack)
+{
+	int last_byte,bytecnt;
+	int i,j,k;
+	unsigned short fsize;
+
+	last_byte = inputtrack[0];
+	bytecnt = 1;
+	j = 2;
+	i = 1;
+	do
+	{
+		if( last_byte != inputtrack[i] )
+		{
+			if(bytecnt >= 4  )
+			{
+				// rle
+				outputtrack[j++] = 0xE5;
+				outputtrack[j++] = last_byte;
+				outputtrack[j++] = (bytecnt >> 8)&0xFF;
+				outputtrack[j++] = (bytecnt)&0xFF;
+			}
+			else
+			{
+				if(last_byte == 0xE5)
+				{
+					outputtrack[j++] = 0xE5;
+					outputtrack[j++] = last_byte; // E5
+					outputtrack[j++] = (bytecnt >> 8)&0xFF;
+					outputtrack[j++] = (bytecnt)&0xFF;
+				}
+				else
+				{
+					// direct
+					for(k=0;k<bytecnt;k++)
+					{
+						outputtrack[j++] = last_byte;
+					}
+				}
+			}
+
+			bytecnt = 1;
+		}
+		else
+		{
+			bytecnt++;
+		}
+
+		last_byte = inputtrack[i];
+		i++;
+
+	}while(i<insize);
+
+	if(bytecnt)
+	{
+		if(bytecnt >= 4  )
+		{
+			// rle
+			outputtrack[j++] = 0xE5;
+			outputtrack[j++] = last_byte;
+			outputtrack[j++] = (bytecnt >> 8)&0xFF;
+			outputtrack[j++] = (bytecnt)&0xFF;
+		}
+		else
+		{
+			if(last_byte == 0xE5)
+			{
+				outputtrack[j++] = 0xE5;
+				outputtrack[j++] = last_byte; // E5
+				outputtrack[j++] = (bytecnt >> 8)&0xFF;
+				outputtrack[j++] = (bytecnt)&0xFF;
+			}
+			else
+			{
+				// direct
+				for(k=0;k<bytecnt;k++)
+				{
+					outputtrack[j++] = last_byte;
+				}
+			}
+		}
+	}
+
+	if((j-2)>=insize)
+	{	//Packed track too big : Discard compression
+		fsize = insize + 2;
+		outputtrack[0] = (insize>>8)&0xFF;
+		outputtrack[1] = insize&0xFF;
+		memcpy(&outputtrack[2],inputtrack,insize);
+	}
+	else
+	{
+		fsize = j;
+		outputtrack[0] = ( ( j-2 ) >> 8 ) & 0xFF;
+		outputtrack[1] =  (j-2) & 0xFF;
+	}
+
+	return fsize;
+}
+
 // Main writer function
 int MSA_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
 {
@@ -48,7 +148,8 @@ int MSA_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	SECTORCONFIG* sc;
 
 	unsigned char * flat_track;
-	unsigned short track_size;
+	unsigned char * packed_track;
+	unsigned short outsize;
 	msa_header msah;
 
 	floppycontext->hxc_printf(MSG_INFO_1,"Write MSA file %s...",filename);
@@ -96,9 +197,11 @@ int MSA_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 	if(nbsector)
 	{
+		packed_track =  malloc(nbsector * 512 * 4);
 		flat_track = malloc(nbsector * 512);
-		if(flat_track)
+		if(flat_track && packed_track)
 		{
+			memset(packed_track,0,nbsector * 512 * 4);
 			memset(flat_track,0,nbsector * 512);
 
 			msadskfile = hxc_fopen(filename,"wb");
@@ -130,20 +233,22 @@ int MSA_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 								}
 							}
 
-							track_size = BIGENDIAN_WORD(k*512);
-							fwrite(&track_size,2,1,msadskfile);
-							fwrite(flat_track,nbsector*512,1,msadskfile);
+							outsize = msapacktrack(flat_track,k*512,packed_track);
+							fwrite(packed_track,outsize,1,msadskfile);
 						}
 					}
 
 					hxcfe_deinitSectorSearch(ss);
-
 				}
 
 				hxc_fclose(msadskfile);
 			}
 
-			free(flat_track);
+			if(flat_track)
+				free(flat_track);
+
+			if(packed_track)
+				free(packed_track);
 		}
 	}
 
