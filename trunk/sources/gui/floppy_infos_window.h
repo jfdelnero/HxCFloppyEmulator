@@ -40,6 +40,8 @@ public:
   Fl_Light_Button *membrain_bt;
   Fl_Light_Button *tycom_bt;
   Fl_Light_Button *eemu_bt;
+  Fl_Light_Button *apple2_32_bt;
+  Fl_Light_Button *apple2_33_bt;
 
   Fl_Text_Buffer* buf;
   Fl_Text_Display * txt_displ;
