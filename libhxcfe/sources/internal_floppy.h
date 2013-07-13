@@ -37,6 +37,8 @@
 #define EMU_FM_ENCODING					0x03
 #define TYCOM_FM_ENCODING				0x04
 #define MEMBRAIN_MFM_ENCODING			0x05
+#define APPLEII_GCR1_ENCODING			0x06
+#define APPLEII_GCR2_ENCODING			0x07
 #define UNKNOWN_ENCODING				0xFF
 
 typedef struct SIDE_

@@ -49,6 +49,8 @@
 
 #include "libhxcfe.h"
 
+#include "apple2.h"
+
 #include "crc.h"
 #include "floppy_utils.h"
 #include "math.h"
@@ -363,6 +365,31 @@ void getFMcode(track_generator *tg,unsigned char data,unsigned char clock,unsign
 	return;
 }
 
+void getDirectcode(track_generator *tg,unsigned char data,unsigned char * dstbuf)
+{
+	unsigned short * direct_code;
+	unsigned char k,i;
+
+	direct_code=(unsigned short *)dstbuf;
+
+	*direct_code=0;
+	for(k=0;k<2;k++)
+	{
+		*direct_code=*direct_code>>8;
+
+		////////////////////////////////////
+		// data
+		for(i=0;i<4;i++)
+		{
+			if(data&(0x80>>(i+(k*4)) ))
+			{
+				*direct_code=*direct_code | ((0x40>>(i*2))<<8);
+			}
+		}
+	}
+
+	return;
+}
 
 int pushTrackCode(track_generator *tg,unsigned char data,unsigned char clock,SIDE * side,unsigned char trackencoding)
 {
@@ -382,6 +409,14 @@ int pushTrackCode(track_generator *tg,unsigned char data,unsigned char clock,SID
 		case AMIGAFORMAT_DD:
 		case MEMBRAINFORMAT_DD:
 			getMFMcode(tg,data,clock,&side->databuffer[tg->last_bit_offset/8]);
+			tg->last_bit_offset=tg->last_bit_offset+(2*8);
+		break;
+
+
+		case APPLE2_GCR5A3:
+		case APPLE2_GCR6A2:
+		case DIRECT_ENCODING:
+			getDirectcode(tg,data,&side->databuffer[tg->last_bit_offset/8]);
 			tg->last_bit_offset=tg->last_bit_offset+(2*8);
 		break;
 
@@ -1430,6 +1465,11 @@ void tg_addSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * 
 
 		case AMIGAFORMAT_DD:
 			tg_addAmigaSectorToTrack(tg,sectorconfig,currentside);
+			break;
+
+		case APPLE2_GCR5A3:
+		case APPLE2_GCR6A2:
+			tg_addAppleSectorToTrack(tg,sectorconfig,currentside);
 			break;
 
 	}
