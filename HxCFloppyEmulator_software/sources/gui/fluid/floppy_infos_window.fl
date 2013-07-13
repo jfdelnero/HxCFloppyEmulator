@@ -92,43 +92,55 @@ class floppy_infos_window {open
       }
       Fl_Group {} {
         label Mode open
-        xywh {0 595 170 75} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+        xywh {0 594 170 76} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
       } {
         Fl_Light_Button iso_mfm_bt {
           label {ISO MFM}
           user_data this
           callback disk_infos_window_callback
-          xywh {2 615 80 15} labelsize 10
+          xywh {4 607 80 15} labelsize 10
         }
         Fl_Light_Button iso_fm_bt {
           label {ISO FM}
           user_data this
           callback disk_infos_window_callback
-          xywh {2 630 80 15} labelsize 10
+          xywh {4 622 80 15} labelsize 10
         }
         Fl_Light_Button amiga_mfm_bt {
           label {AMIGA MFM}
           user_data this
           callback disk_infos_window_callback
-          xywh {2 645 80 15} labelsize 10
+          xywh {4 637 80 15} labelsize 10
         }
         Fl_Light_Button membrain_bt {
           label MEMBRAIN
           user_data this
           callback disk_infos_window_callback
-          xywh {85 645 75 15} labelsize 10
+          xywh {87 637 75 15} labelsize 10
         }
         Fl_Light_Button tycom_bt {
           label TYCOM
           user_data this
           callback disk_infos_window_callback
-          xywh {85 630 75 15} labelsize 10
+          xywh {87 622 75 15} labelsize 10
         }
         Fl_Light_Button eemu_bt {
           label {E-Emu}
           user_data this
+          callback disk_infos_window_callback
+          xywh {87 607 75 15} labelsize 10
+        }
+        Fl_Light_Button apple2_32_bt {
+          label {Apple II 3.2}
+          user_data this
           callback disk_infos_window_callback selected
-          xywh {85 615 75 15} labelsize 10
+          xywh {4 652 80 15} labelsize 10
+        }
+        Fl_Light_Button apple2_33_bt {
+          label {Apple II 3.3}
+          user_data this
+          callback disk_infos_window_callback
+          xywh {87 652 75 15} labelsize 10
         }
       }
     }

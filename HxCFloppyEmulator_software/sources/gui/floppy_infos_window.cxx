@@ -98,35 +98,43 @@ floppy_infos_window::floppy_infos_window() {
       } // Fl_Slider* x_time
       o->end();
     } // Fl_Group* o
-    { Fl_Group* o = new Fl_Group(0, 595, 170, 75, "Mode");
+    { Fl_Group* o = new Fl_Group(0, 594, 170, 76, "Mode");
       o->box(FL_ENGRAVED_FRAME);
       o->labeltype(FL_EMBOSSED_LABEL);
-      o->labelsize(12);
+      o->labelsize(10);
       o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-      { iso_mfm_bt = new Fl_Light_Button(2, 615, 80, 15, "ISO MFM");
+      { iso_mfm_bt = new Fl_Light_Button(4, 607, 80, 15, "ISO MFM");
         iso_mfm_bt->labelsize(10);
         iso_mfm_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* iso_mfm_bt
-      { iso_fm_bt = new Fl_Light_Button(2, 630, 80, 15, "ISO FM");
+      { iso_fm_bt = new Fl_Light_Button(4, 622, 80, 15, "ISO FM");
         iso_fm_bt->labelsize(10);
         iso_fm_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* iso_fm_bt
-      { amiga_mfm_bt = new Fl_Light_Button(2, 645, 80, 15, "AMIGA MFM");
+      { amiga_mfm_bt = new Fl_Light_Button(4, 637, 80, 15, "AMIGA MFM");
         amiga_mfm_bt->labelsize(10);
         amiga_mfm_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* amiga_mfm_bt
-      { membrain_bt = new Fl_Light_Button(85, 645, 75, 15, "MEMBRAIN");
+      { membrain_bt = new Fl_Light_Button(87, 637, 75, 15, "MEMBRAIN");
         membrain_bt->labelsize(10);
         membrain_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* membrain_bt
-      { tycom_bt = new Fl_Light_Button(85, 630, 75, 15, "TYCOM");
+      { tycom_bt = new Fl_Light_Button(87, 622, 75, 15, "TYCOM");
         tycom_bt->labelsize(10);
         tycom_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* tycom_bt
-      { eemu_bt = new Fl_Light_Button(85, 615, 75, 15, "E-Emu");
+      { eemu_bt = new Fl_Light_Button(87, 607, 75, 15, "E-Emu");
         eemu_bt->labelsize(10);
         eemu_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* eemu_bt
+      { apple2_32_bt = new Fl_Light_Button(4, 652, 80, 15, "Apple II 3.2");
+        apple2_32_bt->labelsize(10);
+        apple2_32_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* apple2_32_bt
+      { apple2_33_bt = new Fl_Light_Button(87, 652, 75, 15, "Apple II 3.3");
+        apple2_33_bt->labelsize(10);
+        apple2_33_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* apple2_33_bt
       o->end();
     } // Fl_Group* o
 
