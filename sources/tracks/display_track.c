@@ -454,6 +454,16 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 								case MEMBRAINFORMAT_DD:
 									sprintf(tempstr,"MEMBRAIN %.3dB DM:%.2Xh",sc->sectorsize,sc->alternate_datamark);
 								break;
+								case EMUFORMAT_DD:
+									sprintf(tempstr,"E-mu %.3dB ",sc->sectorsize);
+								break;
+								case APPLE2_GCR5A3:
+									sprintf(tempstr,"Apple II 5A3 %.3dB ",sc->sectorsize);
+								break;
+								case APPLE2_GCR6A2:
+									sprintf(tempstr,"Apple II 6A2 %.3dB ",sc->sectorsize);
+								break;
+
 							}
 
 							putstring8x8(td,xpos_startheader,225,tempstr,0x000,1);
@@ -486,7 +496,15 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 								case MEMBRAINFORMAT_DD:
 									sprintf(tempstr,"MEMBRAIN DATA ? DM:%.2Xh",sc->alternate_datamark);
 								break;
-
+								case EMUFORMAT_DD:
+									sprintf(tempstr,"E-mu Data ?");
+								break;
+								case APPLE2_GCR5A3:
+									sprintf(tempstr,"Apple II 5A3 Data ?");
+								break;
+								case APPLE2_GCR6A2:
+									sprintf(tempstr,"Apple II 6A2 Data ?");
+								break;
 							}
 							putstring8x8(td,xpos_startheader,225,tempstr,0x000,1);
 						}

@@ -51,360 +51,13 @@
 #include "sector_extractor.h"
 #include "./tracks/crc.h"
 
-extern unsigned char bit_inverter_emuii[];
-unsigned short biteven[]=
-{
-	0x0000, 0x0001, 0x0004, 0x0005, 0x0010, 0x0011, 0x0014, 0x0015,
-	0x0040, 0x0041, 0x0044, 0x0045, 0x0050, 0x0051, 0x0054, 0x0055,
-	0x0100, 0x0101, 0x0104, 0x0105, 0x0110, 0x0111, 0x0114, 0x0115,
-	0x0140, 0x0141, 0x0144, 0x0145, 0x0150, 0x0151, 0x0154, 0x0155,
-	0x0400, 0x0401, 0x0404, 0x0405, 0x0410, 0x0411, 0x0414, 0x0415,
-	0x0440, 0x0441, 0x0444, 0x0445, 0x0450, 0x0451, 0x0454, 0x0455,
-	0x0500, 0x0501, 0x0504, 0x0505, 0x0510, 0x0511, 0x0514, 0x0515,
-	0x0540, 0x0541, 0x0544, 0x0545, 0x0550, 0x0551, 0x0554, 0x0555,
-	0x1000, 0x1001, 0x1004, 0x1005, 0x1010, 0x1011, 0x1014, 0x1015,
-	0x1040, 0x1041, 0x1044, 0x1045, 0x1050, 0x1051, 0x1054, 0x1055,
-	0x1100, 0x1101, 0x1104, 0x1105, 0x1110, 0x1111, 0x1114, 0x1115,
-	0x1140, 0x1141, 0x1144, 0x1145, 0x1150, 0x1151, 0x1154, 0x1155,
-	0x1400, 0x1401, 0x1404, 0x1405, 0x1410, 0x1411, 0x1414, 0x1415,
-	0x1440, 0x1441, 0x1444, 0x1445, 0x1450, 0x1451, 0x1454, 0x1455,
-	0x1500, 0x1501, 0x1504, 0x1505, 0x1510, 0x1511, 0x1514, 0x1515,
-	0x1540, 0x1541, 0x1544, 0x1545, 0x1550, 0x1551, 0x1554, 0x1555,
-	0x4000, 0x4001, 0x4004, 0x4005, 0x4010, 0x4011, 0x4014, 0x4015,
-	0x4040, 0x4041, 0x4044, 0x4045, 0x4050, 0x4051, 0x4054, 0x4055,
-	0x4100, 0x4101, 0x4104, 0x4105, 0x4110, 0x4111, 0x4114, 0x4115,
-	0x4140, 0x4141, 0x4144, 0x4145, 0x4150, 0x4151, 0x4154, 0x4155,
-	0x4400, 0x4401, 0x4404, 0x4405, 0x4410, 0x4411, 0x4414, 0x4415,
-	0x4440, 0x4441, 0x4444, 0x4445, 0x4450, 0x4451, 0x4454, 0x4455,
-	0x4500, 0x4501, 0x4504, 0x4505, 0x4510, 0x4511, 0x4514, 0x4515,
-	0x4540, 0x4541, 0x4544, 0x4545, 0x4550, 0x4551, 0x4554, 0x4555,
-	0x5000, 0x5001, 0x5004, 0x5005, 0x5010, 0x5011, 0x5014, 0x5015,
-	0x5040, 0x5041, 0x5044, 0x5045, 0x5050, 0x5051, 0x5054, 0x5055,
-	0x5100, 0x5101, 0x5104, 0x5105, 0x5110, 0x5111, 0x5114, 0x5115,
-	0x5140, 0x5141, 0x5144, 0x5145, 0x5150, 0x5151, 0x5154, 0x5155,
-	0x5400, 0x5401, 0x5404, 0x5405, 0x5410, 0x5411, 0x5414, 0x5415,
-	0x5440, 0x5441, 0x5444, 0x5445, 0x5450, 0x5451, 0x5454, 0x5455,
-	0x5500, 0x5501, 0x5504, 0x5505, 0x5510, 0x5511, 0x5514, 0x5515,
-	0x5540, 0x5541, 0x5544, 0x5545, 0x5550, 0x5551, 0x5554, 0x5555
-};
+#include "trackutils.h"
 
+#include "apple2.h"
+
+extern unsigned char bit_inverter_emuii[];
 extern unsigned char even_tab[];
 extern unsigned char odd_tab[];
-
-int getbit(unsigned char * input_data,int bit_offset)
-{
-	return ((input_data[bit_offset>>3]>>(0x7-(bit_offset&0x7))))&0x01;
-}
-
-void setbit(unsigned char * input_data,int bit_offset,int state)
-{
-	if(state)
-	{
-		input_data[bit_offset>>3] = input_data[bit_offset>>3] |  (0x80 >> ( bit_offset&0x7 ) );
-	}
-	else
-	{
-		input_data[bit_offset>>3] = input_data[bit_offset>>3] & ~(0x80 >> ( bit_offset&0x7 ) );
-	}
-
-	return;
-}
-
-
-int mfmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit)
-{
-	int i,j;
-	unsigned char b,c1,c2;
-	i=0;
-	b=0x80;
-
-	bit_offset = bit_offset%input_data_size;
-	j=bit_offset>>3;
-
-	do
-	{
-
-		c1=input_data[j] & (0x80>>(bit_offset&7));
-		bit_offset=(bit_offset+1)%input_data_size;
-		j=bit_offset>>3;
-
-		c2=input_data[j] & (0x80>>(bit_offset&7));
-		bit_offset=(bit_offset+1)%input_data_size;
-		j=bit_offset>>3;
-
-		if( c2 && !c1 )
-			decod_data[i] = decod_data[i] | b;
-		else
-			decod_data[i] = decod_data[i] & ~b;
-
-		b=b>>1;
-		if(!b)
-		{
-			b=0x80;
-			i++;
-		}
-
-	}while(i<decod_data_size);
-
-	return bit_offset;
-}
-
-int bintomfm(unsigned char * track_data,int track_data_size,unsigned char * bin_data,int bin_data_size,int bit_offset)
-{
-	int i,lastbit;
-	unsigned char b;
-	i=0;
-	b=0x80;
-
-	bit_offset = bit_offset%track_data_size;
-
-	lastbit = 0;
-	if(bit_offset)
-	{
-		if(getbit(track_data,bit_offset-1) )
-			lastbit = 1;
-	}
-	else
-	{
-		if(getbit(track_data,track_data_size-1) )
-			lastbit = 1;
-	}
-
-	do
-	{
-		if(bin_data[i] & b)
-		{
-			setbit(track_data,bit_offset,0);
-			bit_offset = (bit_offset+1)%track_data_size;
-			setbit(track_data,bit_offset,1);
-			bit_offset = (bit_offset+1)%track_data_size;
-			lastbit = 1;
-		}
-		else
-		{
-			if(lastbit)
-			{
-				setbit(track_data,bit_offset,0);
-				bit_offset = (bit_offset+1)%track_data_size;
-				setbit(track_data,bit_offset,0);
-				bit_offset = (bit_offset+1)%track_data_size;
-			}
-			else
-			{
-				setbit(track_data,bit_offset,1);
-				bit_offset = (bit_offset+1)%track_data_size;
-				setbit(track_data,bit_offset,0);
-				bit_offset = (bit_offset+1)%track_data_size;
-			}
-			lastbit = 0;
-		}
-
-		b=b>>1;
-		if(!b)
-		{
-			b=0x80;
-			i++;
-		}
-
-	}while(i<bin_data_size);
-
-	return bit_offset;
-}
-
-
-int fmtobin(unsigned char * input_data,int intput_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit)
-{
-	int i;
-	int bitshift;
-	unsigned char binbyte;
-
-	i=0;
-	bitshift=0;
-	binbyte=0;
-	do
-	{
-		//0C0D0C0D
-
-		binbyte=binbyte | (getbit(input_data,bit_offset+3)<<1) | (getbit(input_data,bit_offset+7)<<0);
-
-		bitshift=bitshift+2;
-
-		if(bitshift==8)
-		{
-			decod_data[i]=binbyte;
-			bitshift=0;
-			binbyte=0;
-			i++;
-		}
-		else
-		{
-			binbyte=binbyte<<2;
-		}
-
-		bit_offset=bit_offset+8;
-
-	}while(i<decod_data_size);
-
-	return bit_offset;
-}
-
-int bintofm(unsigned char * track_data,int track_data_size,unsigned char * bin_data,int bin_data_size,int bit_offset)
-{
-	int i;
-	unsigned char b;
-
-	i=0;
-	b=0x80;
-
-	bit_offset = bit_offset%track_data_size;
-
-	do
-	{
-		// Clock
-		setbit(track_data,bit_offset,0);
-		bit_offset = (bit_offset+1) % track_data_size;
-		setbit(track_data,bit_offset,1);
-		bit_offset = (bit_offset+1) % track_data_size;
-
-		// Data
-		if(bin_data[i] & b)
-		{
-			setbit(track_data,bit_offset,0);
-			bit_offset = (bit_offset+1) % track_data_size;
-			setbit(track_data,bit_offset,1);
-			bit_offset = (bit_offset+1) % track_data_size;
-		}
-		else
-		{
-			setbit(track_data,bit_offset,0);
-			bit_offset = (bit_offset+1) % track_data_size;
-			setbit(track_data,bit_offset,0);
-			bit_offset = (bit_offset+1) % track_data_size;
-		}
-
-		b=b>>1;
-		if(!b)
-		{
-			b=0x80;
-			i++;
-		}
-
-	}while(i<bin_data_size);
-
-	return bit_offset;
-}
-
-int searchBitStream(unsigned char * input_data,unsigned long intput_data_size,int searchlen,unsigned char * chr_data,unsigned long chr_data_size,unsigned long bit_offset)
-{
-	unsigned long i,j,trackoffset,cnt,k,starti;
-	unsigned char stringtosearch[8][128];
-	unsigned char mask[8][128];
-
-	unsigned char prev;
-	unsigned long tracksize;
-	int searchsize;
-	int t;
-	int found;
-	int bitoffset;
-
-	memset(stringtosearch,0,8*128);
-	memset(mask,0xFF,8*128);
-
-	cnt=(chr_data_size>>3);
-	if(chr_data_size&7)
-		cnt++;
-
-	// Prepare strings & mask ( input string shifted 7 times...)
-	for(i=0;i<8;i++)
-	{
-		prev=0;
-
-		mask[i][0]=0xFF>>i;
-		for(j=0;j<cnt;j++)
-		{
-			stringtosearch[i][j]=prev | (chr_data[j]>>i);
-			prev=chr_data[j]<<(8-i);
-		}
-		stringtosearch[i][j]=prev;
-		mask[i][j]=0xFF<<(8-i);
-
-	}
-
-	found=0;
-	starti = bit_offset & 7;
-	trackoffset = bit_offset >> 3;
-
-	tracksize = intput_data_size >> 3;
-	if( intput_data_size & 7 ) tracksize++;
-
-	tracksize= tracksize - ( chr_data_size >> 3 );
-	if( chr_data_size & 7 ) tracksize--;
-
-	if(searchlen>0)
-	{
-		searchsize = searchlen >> 3;
-		if( searchlen & 7 ) searchsize++;
-	}
-	else
-	{
-		searchsize = tracksize;
-	}
-
-	t=0;
-	// Scan the track data...
-	do
-	{
-
-		for(i=starti;i<8;i++)
-		{
-			k = trackoffset;
-			j=0;
-
-			while( ( j < (cnt+1) ) && ( ( stringtosearch[i][j] & mask[i][j] ) == ( input_data[k] & mask[i][j] ) )  )
-			{
-				j++;
-				k++;
-			}
-
-			if( j == (cnt+1) )
-			{
-				found=0xFF;
-				bitoffset = ( trackoffset << 3 ) + i;
-				i=8;
-			}
-		}
-
-		trackoffset++;
-		t++;
-
-		starti=0;
-
-	}while(!found && (trackoffset<tracksize) && (t<searchsize));
-
-	if(!found)
-	{
-		bitoffset=-1;
-	}
-
-	return bitoffset;
-}
-
-
-
-void sortbuffer(unsigned char * buffer,unsigned char * outbuffer,int size)
-{
-	int i;
-	unsigned short * word_outbuffer,w;
-
-	word_outbuffer=(unsigned short *)outbuffer;
-	for(i=0;i<(size/2);i++)
-	{
-		w=(biteven[buffer[i]]<<1)| (biteven[buffer[i+(size/2)]]);
-		word_outbuffer[i]=(w>>8) | (w<<8);
-	}
-
-}
-
 
 #define LOOKFOR_GAP1 0x01
 #define LOOKFOR_ADDM 0x02
@@ -1314,6 +967,184 @@ int get_next_TYCOMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTOR
 	return bit_offset;
 }
 
+int get_next_EMU_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFIG * sector,int track_offset)
+{
+
+	int bit_offset,old_bit_offset;
+	int sector_size;
+	unsigned char fm_buffer[32];
+	unsigned char tmp_buffer[32];
+	unsigned char CRC16_High;
+	unsigned char CRC16_Low;
+	int sector_extractor_sm;
+	int k;
+	unsigned char crctable[32];
+
+	bit_offset=track_offset;
+	memset(sector,0,sizeof(SECTORCONFIG));
+
+	sector_extractor_sm=LOOKFOR_GAP1;
+
+	do
+	{
+		switch(sector_extractor_sm)
+		{
+			case LOOKFOR_GAP1:
+				fm_buffer[0]=0x45;
+				fm_buffer[1]=0x45;
+				fm_buffer[2]=0x55;
+				fm_buffer[3]=0x55;
+				fm_buffer[4]=0x45;
+				fm_buffer[5]=0x54;
+				fm_buffer[6]=0x54;
+				fm_buffer[7]=0x45;
+
+				bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*8,bit_offset);
+
+				if(bit_offset!=-1)
+				{
+					sector_extractor_sm=LOOKFOR_ADDM;
+				}
+				else
+				{
+					sector_extractor_sm=ENDOFTRACK;
+				}
+			break;
+
+			case LOOKFOR_ADDM:
+
+				sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_buffer,5,bit_offset,0);
+				if((bit_inverter_emuii[tmp_buffer[0]]==0xFA) && (bit_inverter_emuii[tmp_buffer[1]]==0x96))
+				{
+					sector->startsectorindex = bit_offset;
+					sector->startdataindex = sector->endsectorindex;  
+
+					sector->use_alternate_addressmark = 0x00;
+					sector->alternate_addressmark = 0x00;
+
+					sector->use_alternate_datamark = 0x00;
+					sector->alternate_datamark = 0x00;
+
+					if(track->timingbuffer)
+						sector->bitrate = track->timingbuffer[bit_offset/8];
+					else
+						sector->bitrate = track->bitrate;
+
+					sector->use_alternate_header_crc = 0xFF;
+					CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x8005,0x0000);
+					for(k=0;k<3;k++)
+					{
+						CRC16_Update(&CRC16_High,&CRC16_Low, tmp_buffer[2+k],(unsigned char*)crctable );
+					}
+
+					sector->header_crc = ( tmp_buffer[k-2]<<8 ) | tmp_buffer[k-1] ;
+
+					if(!CRC16_High && !CRC16_Low)
+					{ // crc ok !!!
+
+						sector->use_alternate_header_crc = 0x00;
+						floppycontext->hxc_printf(MSG_DEBUG,"Valid EmuII FM sector header found - Sect:%d",bit_inverter_emuii[tmp_buffer[2]]);
+						old_bit_offset=bit_offset;
+
+						//11111011
+						fm_buffer[0]=0x45;
+						fm_buffer[1]=0x45;
+						fm_buffer[2]=0x55;
+						fm_buffer[3]=0x55;
+						fm_buffer[4]=0x45;
+						fm_buffer[5]=0x54;
+						fm_buffer[6]=0x54;
+						fm_buffer[7]=0x45;
+
+						bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*8,bit_offset+(4*8*4));
+
+						if((bit_offset-old_bit_offset<((88+10)*8*2)) && bit_offset!=-1)
+						{
+
+							sector->cylinder = bit_inverter_emuii[tmp_buffer[2]]>>1;
+							sector->head = bit_inverter_emuii[tmp_buffer[2]]&1;
+							sector->sector = 1;
+							sector_size = 0xE00;
+							sector->sectorsize = sector_size;
+							sector->trackencoding = EMUFORMAT_DD;
+
+							sector->use_alternate_datamark = 0x00;
+							sector->alternate_datamark = 0x00;
+
+							sector->startdataindex=bit_offset;						   
+							
+							sector->input_data =(unsigned char*)malloc(sector_size+2);
+							if(sector->input_data)
+							{
+								memset(sector->input_data,0,sector_size+2);
+
+								sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,sector->input_data,sector_size+2,bit_offset+(8 *8),0);
+
+								CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x8005,0x0000);
+								for(k=0;k<sector_size+2;k++)
+								{
+									CRC16_Update(&CRC16_High,&CRC16_Low, sector->input_data[k],(unsigned char*)crctable );
+								}
+
+								sector->data_crc = (sector->input_data[sector_size]<<8) | (sector->input_data[sector_size+1]);
+
+								if(!CRC16_High && !CRC16_Low)
+								{ // crc ok !!!
+									floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
+									sector->use_alternate_data_crc = 0x00;
+								}
+								else
+								{
+									floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
+									sector->use_alternate_data_crc = 0xFF;
+								}
+
+								for(k=0;k<sector_size;k++)
+								{
+									sector->input_data[k]=bit_inverter_emuii[sector->input_data[k]];
+								}
+							}
+
+							bit_offset=bit_offset+(sector_size*4);
+
+							sector_extractor_sm=ENDOFSECTOR;
+
+						}
+						else
+						{
+							bit_offset=old_bit_offset+1;
+							floppycontext->hxc_printf(MSG_DEBUG,"No data!");
+							sector_extractor_sm=ENDOFSECTOR;
+						}
+					}
+					else
+					{
+						sector_extractor_sm=LOOKFOR_GAP1;
+						bit_offset++;
+					}
+				}
+				else
+				{
+					sector_extractor_sm=LOOKFOR_GAP1;
+					bit_offset++;
+				}
+			break;
+
+			case ENDOFTRACK:
+
+			break;
+
+			default:
+				sector_extractor_sm=ENDOFTRACK;
+			break;
+
+		}
+	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+
+	return bit_offset;
+
+}
+
 int write_FM_sectordata(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFIG * sector,unsigned char * buffer,int buffersize)
 {
 	int bit_offset,i;
@@ -1592,23 +1423,30 @@ SECTORCONFIG* hxcfe_getNextSector(SECTORSEARCH* ss,int track,int side,int type)
 	switch(type)
 	{
 		case ISOIBM_MFM_ENCODING:
-			bitoffset=get_next_MFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+			bitoffset = get_next_MFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
 		case AMIGA_MFM_ENCODING:
-			bitoffset=get_next_AMIGAMFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+			bitoffset = get_next_AMIGAMFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
 		case ISOIBM_FM_ENCODING:
-			bitoffset=get_next_FM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+			bitoffset = get_next_FM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
 		case TYCOM_FM_ENCODING:
-			bitoffset=get_next_TYCOMFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+			bitoffset = get_next_TYCOMFM_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
 		case MEMBRAIN_MFM_ENCODING:
-			bitoffset=get_next_MEMBRAIN_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+			bitoffset = get_next_MEMBRAIN_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
 		case EMU_FM_ENCODING:
-			bitoffset=-1;
+			bitoffset = get_next_EMU_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
+		case APPLEII_GCR1_ENCODING:
+			bitoffset = get_next_A2GCR1_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+		break;
+		case APPLEII_GCR2_ENCODING:
+			bitoffset = get_next_A2GCR2_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+		break;
+
 		default:
 			bitoffset=-1;
 		break;
@@ -1920,6 +1758,8 @@ int hxcfe_getFloppySize(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,int * nbsect
 	typetab[i++]=TYCOM_FM_ENCODING;
 	typetab[i++]=MEMBRAIN_MFM_ENCODING;
 	typetab[i++]=EMU_FM_ENCODING;
+	typetab[i++]=APPLEII_GCR1_ENCODING;
+	typetab[i++]=APPLEII_GCR2_ENCODING;
 	typetab[i++]=-1;
 
 	ss=hxcfe_initSectorSearch(floppycontext,fp);

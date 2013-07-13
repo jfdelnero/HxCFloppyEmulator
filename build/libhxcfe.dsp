@@ -1686,10 +1686,30 @@ SOURCE=..\sources\loaders\sdd_speccydos_loader\sdd_speccydos_loader.h
 SOURCE=..\sources\loaders\sdd_speccydos_loader\sddfileformat.h
 # End Source File
 # End Group
+# Begin Group "Apple2DO"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\apple2_do_loader\apple2_do_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\apple2_do_loader\apple2_do_loader.h
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\tracks\apple2.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\apple2.h
+# End Source File
 # Begin Source File
 
 SOURCE=..\sources\tracks\display_track.c
@@ -1713,6 +1733,14 @@ SOURCE=..\sources\tracks\sector_extractor.c
 # Begin Source File
 
 SOURCE=..\sources\tracks\track_generator.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\trackutils.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\trackutils.h
 # End Source File
 # End Group
 # Begin Group "xml_disk"
