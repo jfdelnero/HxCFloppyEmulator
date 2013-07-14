@@ -653,8 +653,13 @@ void fiol_init(void)
 {    
     int i;
 
+	memset(&_files,0,sizeof(_files));
+	memset(&_free_file_list,0,sizeof(_free_file_list));
+	memset(&_open_file_list,0,sizeof(_open_file_list));
+
     fat_list_init(&_free_file_list);
     fat_list_init(&_open_file_list);
+
 
     // Add all file objects to free list
     for (i=0;i<FATFS_MAX_OPEN_FILES;i++)
