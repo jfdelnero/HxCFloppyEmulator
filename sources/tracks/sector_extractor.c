@@ -1066,7 +1066,7 @@ int get_next_EMU_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 							sector->sector = 1;
 							sector_size = 0xE00;
 							sector->sectorsize = sector_size;
-							sector->trackencoding = EMUFORMAT_DD;
+							sector->trackencoding = EMUFORMAT_SD;
 
 							sector->use_alternate_datamark = 0x00;
 							sector->alternate_datamark = 0x00;

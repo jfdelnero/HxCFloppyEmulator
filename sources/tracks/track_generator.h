@@ -162,7 +162,7 @@ typedef struct isoibm_config_
 #define AMIGAFORMAT_DD  0x6
 #define TYCOMFORMAT_SD  0x7
 #define MEMBRAINFORMAT_DD  0x8
-#define EMUFORMAT_DD  0x9
+#define EMUFORMAT_SD  0x9
 #define APPLE2_GCR5A3 0xA
 #define APPLE2_GCR6A2 0xB
 
@@ -439,7 +439,7 @@ static isoibm_config formatstab[]=
 		
 	},
 	{	
-		EMUFORMAT_DD,
+		EMUFORMAT_SD,
 		
 		0x00,00, // post index gap4 config
 		
