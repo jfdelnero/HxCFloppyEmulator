@@ -91,6 +91,8 @@ int D88_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 	int maxtrack;
 
+	int nb_valid_sector;
+
 	SECTORSEARCH* ss;
 	SECTORCONFIG** sca;
 
@@ -138,85 +140,98 @@ int D88_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 							tracktable[(j<<1 | i)] = ftell(d88file);
 
+							nb_valid_sector = 0;
 							for(k = 0; k < nbsector; k++)
 							{
-
-								memset(&d88_s,0,sizeof(d88_sector));
-
-								density = 0;
-
-								if(sca[k]->trackencoding == ISOFORMAT_DD )
+								if(sca[k]->sectorsize)
 								{
-									density = 1;
-
-									if(sca[k]->bitrate>400000)
-										mfmhd_found++;
-									else
-										mfmdd_found++;
+									nb_valid_sector++;
 								}
+							}
 
-								if(	sca[k]->trackencoding == ISOFORMAT_SD )
+							for(k = 0; k < nbsector; k++)
+							{
+								if(sca[k]->sectorsize)
 								{
+									memset(&d88_s,0,sizeof(d88_sector));
 
-									if(sca[k]->bitrate>400000)
-										fmhd_found++;
-									else
-										fmdd_found++;
-								}
+									density = 0;
 
-								d88_s.cylinder = j;
-								d88_s.head = i;
-								d88_s.number_of_sectors = nbsector;
-								d88_s.sector_id = sca[k]->sector;
-
-								if(sca[k]->use_alternate_datamark && sca[k]->alternate_datamark == 0xF8)
-									d88_s.deleted_data = 0x10;
-
-								if(!density)
-									d88_s.density = 0x40;
-
-								d88_s.sector_size = size_to_code_d88(sca[k]->sectorsize);
-								d88_s.sector_length = sca[k]->sectorsize;
-								if(!sca[k]->input_data)
-									d88_s.sector_length = 0;
-
-								if( sca[k]->alternate_addressmark != 0xFE )
-								{
-									d88_s.sector_status = 0xE0; // NO ADDRESS MARK
-								}
-								else
-								{
-									if( sca[k]->use_alternate_header_crc )
+									if(sca[k]->trackencoding == ISOFORMAT_DD )
 									{
-										d88_s.sector_status = 0xA0; // ID CRC ERROR
+										density = 1;
+
+										if(sca[k]->bitrate>400000)
+											mfmhd_found++;
+										else
+											mfmdd_found++;
+									}
+
+									if(	sca[k]->trackencoding == ISOFORMAT_SD )
+									{
+
+										if(sca[k]->bitrate>400000)
+											fmhd_found++;
+										else
+											fmdd_found++;
+									}
+
+									d88_s.cylinder = j;
+									d88_s.head = i;
+									d88_s.number_of_sectors = nb_valid_sector;
+									d88_s.sector_id = sca[k]->sector;
+
+									if(sca[k]->use_alternate_datamark && sca[k]->alternate_datamark == 0xF8)
+										d88_s.deleted_data = 0x10;
+
+									if(!density)
+										d88_s.density = 0x40;
+
+									d88_s.sector_size = size_to_code_d88(sca[k]->sectorsize);
+									d88_s.sector_length = sca[k]->sectorsize;
+									if(!sca[k]->input_data)
+										d88_s.sector_length = 0;
+
+									if( sca[k]->alternate_addressmark != 0xFE )
+									{
+										d88_s.sector_status = 0xE0; // NO ADDRESS MARK
 									}
 									else
 									{
-										if( sca[k]->alternate_datamark != 0xFB && sca[k]->alternate_datamark != 0xF8 )
+										if( sca[k]->use_alternate_header_crc )
 										{
-											d88_s.sector_status = 0xF0; // NO DATA MARK
+											d88_s.sector_status = 0xA0; // ID CRC ERROR
 										}
 										else
 										{
-											if( sca[k]->use_alternate_data_crc )
+											if( sca[k]->alternate_datamark != 0xFB && sca[k]->alternate_datamark != 0xF8 )
 											{
-												d88_s.sector_status = 0xB0; // DATA CRC ERROR
+												d88_s.sector_status = 0xF0; // NO DATA MARK
 											}
 											else
 											{
-												if( sca[k]->alternate_datamark == 0xF8 )
-													d88_s.sector_status = 0x10; // DELETED SECTOR
+												if( sca[k]->use_alternate_data_crc )
+												{
+													d88_s.sector_status = 0xB0; // DATA CRC ERROR
+												}
+												else
+												{
+													if( sca[k]->alternate_datamark == 0xF8 )
+														d88_s.sector_status = 0x10; // DELETED SECTOR
+												}
 											}
 										}
 									}
+
+									fwrite(&d88_s,sizeof(d88_sector),1,d88file);
+
+									if(d88_s.sector_length)
+										fwrite(sca[k]->input_data,sca[k]->sectorsize,1,d88file);
 								}
 
-								fwrite(&d88_s,sizeof(d88_sector),1,d88file);
+								if(sca[k]->input_data)
+									free(sca[k]->input_data);
 
-								if(d88_s.sector_length)
-									fwrite(sca[k]->input_data,sca[k]->sectorsize,1,d88file);
-
-								free(sca[k]->input_data);
 								free(sca[k]);
 							}
 
