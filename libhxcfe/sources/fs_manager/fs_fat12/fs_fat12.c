@@ -110,6 +110,8 @@ int fat12_mountImage(FSMNG * fsmng, FLOPPY *floppy)
 	media_read_callback = media_read;
 	media_write_callback = media_write;
 
+	fiol_init();
+
 	if(!floppy || !fsmng)
 		return HXCFE_BADPARAMETER;
 
@@ -242,6 +244,7 @@ int fat12_closeDir(FSMNG * fsmng, int dirhandle)
 		{
 			fiol_closedir(fsmng->dirhandletable[dirhandle-1]);
 			free(fsmng->dirhandletable[dirhandle-1]);
+			fsmng->dirhandletable[dirhandle-1] = 0;
 			return HXCFE_NOERROR;
 		}
 	}
@@ -337,7 +340,7 @@ int fat12_closeFile( FSMNG * fsmng,int filehandle)
 		if(fsmng->handletable[filehandle-1])
 		{
 			fiol_fclose(fsmng->handletable[filehandle-1]);
-			fsmng->handletable[filehandle] = 0;
+			fsmng->handletable[filehandle-1] = 0;
 			return HXCFE_NOERROR;
 		}
 	}
