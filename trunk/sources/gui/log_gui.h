@@ -32,12 +32,16 @@ class Log_box : public Fl_Window {
   Fl_Button *button_savelog;
   Fl_Button *button_ok;
   Fl_Window *window;
+
   
   public:
 	
 	int old_index;
 	Fl_Text_Buffer* buf;
 	Fl_Text_Display * txt_displ;
+
+	Fl_Light_Button * dbg_msg_bt;
+	Fl_Light_Button * log_msg_bt;
 
 	Log_box();
 	~Log_box();
