@@ -85,6 +85,8 @@ typedef struct logfifo_
 	int in;
 	int out;
 	unsigned char * fifotab[LOGFIFOSIZE];
+	int debug_msg;
+	int log_msg;
 }logfifo;
 
 logfifo logsfifo;
@@ -101,67 +103,71 @@ int CUI_affiche(int MSGTYPE,char * chaine, ...)
 	char lineheader[16];
 	char fullline[LOGSTRINGSIZE];
 
-	va_list marker;
-	va_start( marker, chaine );
-
-	if(!logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)])
+	if(((MSGTYPE == MSG_DEBUG ) && logsfifo.debug_msg) || (logsfifo.log_msg && (MSGTYPE!=MSG_DEBUG)) )
 	{
-		logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)]=(unsigned char*)malloc(LOGSTRINGSIZE+1);
-	}
+		va_list marker;
+		va_start( marker, chaine );
 
-	switch(MSGTYPE)
-	{
-		case MSG_INFO_0:
-			_snprintf(lineheader,sizeof(lineheader),"INFO 0 : ");
-		break;
-		case MSG_INFO_1:
-			_snprintf(lineheader,sizeof(lineheader),"INFO 1 : ");
-		break;
-		case MSG_WARNING:
-			_snprintf(lineheader,sizeof(lineheader),"WARNING: ");
-		break;
-		case MSG_ERROR:
-			_snprintf(lineheader,sizeof(lineheader),"ERROR  : ");
-		break;
-		case MSG_DEBUG:
-			_snprintf(lineheader,sizeof(lineheader),"DEBUG  : ");
-		break;
-		default:
-			_snprintf(lineheader,sizeof(lineheader),"UNKNOW MESSAGE TYPE: ");
-		break;
-	}
 
-	_vsnprintf(fullline,LOGSTRINGSIZE-sizeof(lineheader),chaine,marker);
-
-	if(logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)])
-	{
-		memset(logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],0,LOGSTRINGSIZE+1);
-
-		logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)][LOGSTRINGSIZE]=0;
-
-		strcpy((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],lineheader);
-		strcat((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],fullline);
-
-		logsfifo.in=(logsfifo.in + 1) & (LOGFIFOSIZE-1);
-
-		if(logsfifo.in == logsfifo.out)
-			logsfifo.out=(logsfifo.out + 1) & (LOGFIFOSIZE-1);
-	}
-
-	if(guicontext->logfile)
-	{
-		debugfile=hxc_fopen(guicontext->logfile,"a");
-		if(debugfile)
+		if(!logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)])
 		{
-			fprintf(debugfile,"%s",lineheader);
-			fprintf(debugfile,"%s",fullline);
-			fprintf(debugfile,"\n");
-			hxc_fclose(debugfile);
+			logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)]=(unsigned char*)malloc(LOGSTRINGSIZE+1);
 		}
+
+		switch(MSGTYPE)
+		{
+			case MSG_INFO_0:
+				_snprintf(lineheader,sizeof(lineheader),"INFO 0 : ");
+			break;
+			case MSG_INFO_1:
+				_snprintf(lineheader,sizeof(lineheader),"INFO 1 : ");
+			break;
+			case MSG_WARNING:
+				_snprintf(lineheader,sizeof(lineheader),"WARNING: ");
+			break;
+			case MSG_ERROR:
+				_snprintf(lineheader,sizeof(lineheader),"ERROR  : ");
+			break;
+			case MSG_DEBUG:
+				_snprintf(lineheader,sizeof(lineheader),"DEBUG  : ");
+			break;
+			default:
+				_snprintf(lineheader,sizeof(lineheader),"UNKNOW MESSAGE TYPE: ");
+			break;
+		}
+
+		_vsnprintf(fullline,LOGSTRINGSIZE-sizeof(lineheader),chaine,marker);
+
+		if(logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)])
+		{
+			memset(logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],0,LOGSTRINGSIZE+1);
+
+			logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)][LOGSTRINGSIZE]=0;
+
+			strcpy((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],lineheader);
+			strcat((char*)logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)],fullline);
+
+			logsfifo.in=(logsfifo.in + 1) & (LOGFIFOSIZE-1);
+
+			if(logsfifo.in == logsfifo.out)
+				logsfifo.out=(logsfifo.out + 1) & (LOGFIFOSIZE-1);
+		}
+
+		if(guicontext->logfile)
+		{
+			debugfile=hxc_fopen(guicontext->logfile,"a");
+			if(debugfile)
+			{
+				fprintf(debugfile,"%s",lineheader);
+				fprintf(debugfile,"%s",fullline);
+				fprintf(debugfile,"\n");
+				hxc_fclose(debugfile);
+			}
+		}
+
+
+		va_end( marker );
 	}
-
-
-	va_end( marker );
 
 	return 0;
 }
@@ -244,6 +250,10 @@ static void tick_log(void *v) {
 		window->txt_displ->scroll(window->buf->count_lines(0,window->buf->length()),0);
 
 	}
+
+	logsfifo.debug_msg = window->dbg_msg_bt->value();
+	logsfifo.log_msg = window->log_msg_bt->value();
+
 	Fl::repeat_timeout(0.40, tick_log, v);
 }
 
@@ -272,6 +282,13 @@ Log_box::Log_box()
 	guicontext->logfile=0;
 
 	memset(&logsfifo,0,sizeof(logfifo));
+
+	logsfifo.debug_msg = 0;
+	logsfifo.log_msg = 0;
+
+	dbg_msg_bt = new Fl_Light_Button(xsize - 155, ysize-35, 150, 30, "Debug");
+	log_msg_bt = new Fl_Light_Button(xsize - ((155*2)), ysize-35, 150, 30, "Info/Warning/Error");
+
 	old_index=0;
 
 	tick_log(this);
