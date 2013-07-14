@@ -32,6 +32,8 @@
 #include "crc_csum.h"
 #include "pfile.h"
 
+#include "libhxcfe.h"
+#include "libhxcadaptor.h"
 
 
 
@@ -74,7 +76,7 @@ USHORT Process_File(char *iname, HXCFILE *fo, USHORT cmd, USHORT opt, USHORT PCR
 	/* if iname is NULL, input is stdin;   if oname is NULL, output is stdout */
 
 	if (iname){
-		fi = fopen(iname,"rb");
+		fi = hxc_fopen(iname,"rb");
 		if (!fi) {
 			free(b1);
 			free(b2);
@@ -86,7 +88,7 @@ USHORT Process_File(char *iname, HXCFILE *fo, USHORT cmd, USHORT opt, USHORT PCR
 	}
 
 	if (fread(b1,1,HEADLEN,fi) != HEADLEN) {
-		if (iname) fclose(fi);
+		if (iname) hxc_fclose(fi);
 		free(b1);
 		free(b2);
 		free(text);
@@ -95,7 +97,7 @@ USHORT Process_File(char *iname, HXCFILE *fo, USHORT cmd, USHORT opt, USHORT PCR
 
 	if ( (b1[0] != 'D') || (b1[1] != 'M') || (b1[2] != 'S') || (b1[3] != '!') ) {
 		/*  Check the first 4 bytes of file to see if it is "DMS!"  */
-		if (iname) fclose(fi);
+		if (iname) hxc_fclose(fi);
 		free(b1);
 		free(b2);
 		free(text);
@@ -106,7 +108,7 @@ USHORT Process_File(char *iname, HXCFILE *fo, USHORT cmd, USHORT opt, USHORT PCR
 	/* Header CRC */
 
 	if (hcrc != CreateCRC(b1+4,(ULONG)(HEADLEN-6))) {
-		if (iname) fclose(fi);
+		if (iname) hxc_fclose(fi);
 		free(b1);
 		free(b2);
 		free(text);
@@ -206,7 +208,7 @@ USHORT Process_File(char *iname, HXCFILE *fo, USHORT cmd, USHORT opt, USHORT PCR
 
 	if (disktype == 7) {
 		/*  It's not a DMS compressed disk image, but a FMS archive  */
-		if (iname) fclose(fi);
+		if (iname) hxc_fclose(fi);
 		free(b1);
 		free(b2);
 		free(text);
@@ -253,7 +255,7 @@ USHORT Process_File(char *iname, HXCFILE *fo, USHORT cmd, USHORT opt, USHORT PCR
 	if (ret == ERR_NOTTRACK) ret = NO_PROBLEM;
 
 
-	if (iname) fclose(fi);
+	if (iname) hxc_fclose(fi);
 	
 
 	free(b1);
