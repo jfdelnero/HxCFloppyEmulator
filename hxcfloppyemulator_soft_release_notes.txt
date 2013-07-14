@@ -10,6 +10,65 @@
 -------------------------------------------------------------------------------
 
 /*********************************************************
+14 July 2013: HxCFloppyEmulator 2.0.15.0
+
+New Loader : SpeccyDos *.SDD support added
+
+New Loader : Apple 2 DOS 3.3 (*.DO) & ProDOS (*.PO) raw file image added.
+
+New Writer : HFE file with the HDDD A2 support for Apple II (http://www.bootzero.com/HDDD_A2_v1.2/HDDD_A2v1.2.html)
+
+New Writer : Atari ST MSA file.
+
+New Writer : TRS 80 *.JV3 file. (Done by David Barr ! Thanks to him :) )
+
+New Writer : TRS 80 *.DMK file.
+
+New Writer : PC88 *.D88 file.
+
+FAT12 Loader/generator : Atari ST 902KB  format corrected.
+
+FAT12 Loader/generator : Atari ST 4.23MB format corrected.
+
+HFE File Writer : Track padding function corrected.
+
+EDE File Loader : edt & edv file support added, ASR 10 gap3 adjusted to 36.
+
+JV3 File Loader : Sector interleaving correctly implemented.
+
+IMD File Writer : No allocated sector issue corrected.
+
+XDMS Lib : UTF8 path support added.
+
+LIBSAP Lib : UTF8 path support added.
+
+New Track/Sector support : GCR "6 and 2" Apple II DOS 3.3/ProDos.
+
+FAT12 Disk Browser:  Handle freeing corrected
+
+Raw Loader - Predefined raw formats added :
+- Roland W30/S330/W50/S50/S550 DD Floppy Disk.
+- OS9 1280KB Floppy Disk.
+- Linn/Forat 9000 Floppy Disk.
+- KORG T3 3"5 HD Floppy Disk.
+- Atari ST 3"5 DD Floppy Disk
+- Standard 3"5 DOS ED Floppy Disk
+- Special 2.5MB DOS EXHD Floppy Disk
+- Special 4.5MB DOS EXHD Floppy Disk.
+- Special 6.78MB DOS EXHD Floppy Disk.
+Updated:
+- Ensoniq EPS 3"5 HD Floppy Disk : Gap3 adjusted.
+- Standard 3"5 DOS HD Floppy Disk : Gap3 adjusted.
+- Standard 3"5 DOS DD Floppy Disk : Gap3 adjusted.
+
+GUI - Drag & Drop Support : URI type path support added (Linux).
+
+GUI - Track viewer window : New buttons to enable/disable track format analysis.
+
+GUI - Log window : New buttons to enable/disable logs messages.
+
+
+/*********************************************************
 24/03/2013: HxCFloppyEmulator 2.0.12.2
 
 - The HxC Floppy Software was completely reworked - Main changes since the version 1.6.11.16 :
