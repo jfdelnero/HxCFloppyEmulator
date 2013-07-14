@@ -350,7 +350,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						case MEMBRAINFORMAT_DD:
 							sprintf(str,"MEMBRAIN ");
 						break;
-						case EMUFORMAT_DD:
+						case EMUFORMAT_SD:
 							sprintf(str,"E-mu ");
 						break;
 						case APPLE2_GCR5A3:
