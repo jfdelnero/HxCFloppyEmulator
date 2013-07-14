@@ -55,6 +55,8 @@ int hxcfe_checkFSID(HXCFLOPPYEMULATOR* floppycontext,int FSID)
 {
 	int i;
 
+	floppycontext->hxc_printf(MSG_DEBUG,"hxcfe_checkFSID : %d",FSID);
+
 	i=0;
 	do
 	{
@@ -63,6 +65,7 @@ int hxcfe_checkFSID(HXCFLOPPYEMULATOR* floppycontext,int FSID)
 
 	if( !fs_config_table[i].name )
 	{
+		floppycontext->hxc_printf(MSG_DEBUG,"hxcfe_checkFSID : Error !");
 		return HXCFE_BADPARAMETER;
 	}
 	else
@@ -76,6 +79,8 @@ FSMNG * hxcfe_initFsManager(HXCFLOPPYEMULATOR * hxcfe)
 {
 	FSMNG * fsmng;
 
+	hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_initFsManager");
+
 	fsmng = malloc(sizeof(FSMNG));
 	if(fsmng)
 	{
@@ -87,12 +92,15 @@ FSMNG * hxcfe_initFsManager(HXCFLOPPYEMULATOR * hxcfe)
 		fsmng->sectorsize = 512;
 		return fsmng;
 	}
+	hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_initFsManager Error!");
 	return 0;
 }
 
 int hxcfe_getFSID(HXCFLOPPYEMULATOR* floppycontext, char * fsname)
 {
 	int i;
+
+	floppycontext->hxc_printf(MSG_DEBUG,"hxcfe_getFSID : %s",fsname);
 
 	i = 0;
 	while(fs_config_table[i].name)
@@ -115,11 +123,17 @@ int	hxcfe_numberOfFS(HXCFLOPPYEMULATOR* floppycontext)
 	{
 		i++;
 	}
+
+	floppycontext->hxc_printf(MSG_DEBUG,"hxcfe_numberOfFS : return %d",i);
+
 	return i;
 }
 
 const char* hxcfe_getFSDesc(HXCFLOPPYEMULATOR* floppycontext,int FSID)
 {
+
+	floppycontext->hxc_printf(MSG_DEBUG,"hxcfe_getFSDesc : %d",FSID);
+
 	if(hxcfe_checkFSID(floppycontext,FSID)==HXCFE_NOERROR)
 	{
 		return fs_config_table[FSID].desc;
@@ -134,6 +148,9 @@ const char* hxcfe_getFSDesc(HXCFLOPPYEMULATOR* floppycontext,int FSID)
 
 const char* hxcfe_getFSName(HXCFLOPPYEMULATOR* floppycontext,int FSID)
 {
+
+	floppycontext->hxc_printf(MSG_DEBUG,"hxcfe_getFSName : %d",FSID);
+
 	if(hxcfe_checkFSID(floppycontext,FSID)==HXCFE_NOERROR)
 	{
 		return fs_config_table[FSID].name;
@@ -146,89 +163,110 @@ const char* hxcfe_getFSName(HXCFLOPPYEMULATOR* floppycontext,int FSID)
 	return 0;
 }
 
-int hxcfe_selectFS(FSMNG * fsmng, int fsid)
+int hxcfe_selectFS(FSMNG * fsmng, int FSID)
 {
-	fsmng->fs_selected = fsid;
+
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_selectFS : %d",FSID);
+
+	fsmng->fs_selected = FSID;
 	init_fat12(fsmng);
 	return HXCFE_NOERROR;
 }
 
 void hxcfe_deinitFsManager(FSMNG * fsmng)
 {
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_deinitFsManager");
+
 	free(fsmng);
 }
 
 int hxcfe_mountImage(FSMNG * fsmng, FLOPPY *floppy)
 {
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_mountImage");
+
 	return fat12_mountImage(fsmng, floppy);
 }
 
 int hxcfe_umountImage(FSMNG * fsmng)
 {
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_umountImage");
 	return fat12_umountImage(fsmng);
 }
 
 int hxcfe_openDir(FSMNG * fsmng, char * path)
 {
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_openDir : %s",path);
 	return fat12_openDir(fsmng,path);
 }
 
 int hxcfe_readDir(FSMNG * fsmng,int dirhandle,FSENTRY * dirent)
 {
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_readDir : 0x%.8x",dirhandle);
 	return fat12_readDir(fsmng,dirhandle,dirent);
 }
 
 int hxcfe_closeDir(FSMNG * fsmng, int dirhandle)
 {
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_closeDir : 0x%.8x",dirhandle);
 	return fat12_closeDir(fsmng, dirhandle);
 }
 
 int hxcfe_openFile(FSMNG * fsmng, char * filename)
 {
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_openFile : %s",filename);
 	return fat12_openFile(fsmng,filename);
 }
 
 int hxcfe_createFile(FSMNG * fsmng, char * filename)
 {
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_createFile : %s",filename);
 	return fat12_createFile(fsmng,filename);
 }
 
 int hxcfe_writeFile(FSMNG * fsmng,int filehandle,char * buffer,int size)
 {
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_writeFile : 0x%.8x - 0x%.8x / %d bytes",filehandle,buffer,size);
 	return fat12_writeFile(fsmng,filehandle,buffer,size);
 }
 
 int hxcfe_readFile( FSMNG * fsmng,int filehandle,char * buffer,int size)
 {
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_readFile : 0x%.8x - 0x%.8x / %d bytes",filehandle,buffer,size);
 	return fat12_readFile( fsmng,filehandle,buffer,size);
 }
 
 int hxcfe_deleteFile(FSMNG * fsmng, char * filename)
 {
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_deleteFile : %s",filename);
 	return fat12_deleteFile(fsmng,filename);
 }
 
 int hxcfe_closeFile(FSMNG * fsmng, int filehandle)
 {
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_closeFile : 0x%.8x",filehandle);
 	return fat12_closeFile(fsmng,filehandle);
 }
 
 int hxcfe_createDir( FSMNG * fsmng,char * foldername)
 {
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_createDir : %s",foldername);
 	return fat12_createDir( fsmng,foldername);
 }
 
 int hxcfe_removeDir( FSMNG * fsmng,char * foldername)
 {
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_removeDir : %s",foldername);
 	return fat12_removeDir( fsmng,foldername);
 }
 
 int hxcfe_fseek( FSMNG * fsmng,int filehandle,long offset,int origin)
 {
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_fseek : 0x%.8x - 0x%.8x (%d) ",filehandle,offset,origin);
 	return fat12_fseek(fsmng,filehandle,offset,origin);
 }
 
 int hxcfe_ftell( FSMNG * fsmng,int filehandle)
 {
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_ftell : 0x%.8x",filehandle);
 	return fat12_ftell( fsmng,filehandle);
 }
