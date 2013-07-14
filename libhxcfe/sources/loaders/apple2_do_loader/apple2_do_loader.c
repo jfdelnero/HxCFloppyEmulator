@@ -63,7 +63,7 @@ int Apple2_do_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile
 
 	floppycontext->hxc_printf(MSG_DEBUG,"Apple2_do_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"do"))
+	if( hxc_checkfileext(imgfile,"do") || hxc_checkfileext(imgfile,"po"))
 	{
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0)
@@ -86,7 +86,29 @@ int Apple2_do_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile
 	return HXCFE_BADFILE;
 }
 
+unsigned char LogicalToPhysicalSectorMap_Dos33[] =
+{
+	0x00, 0x0D, 0x0B, 0x09, 0x07, 0x05, 0x03, 0x01,
+	0x0E, 0x0C, 0x0A, 0x08, 0x06, 0x04, 0x02, 0x0F
+};
 
+unsigned char PhysicalToLogicalSectorMap_Dos33[] =
+{
+	0x00, 0x07, 0x0E, 0x06, 0x0D, 0x05, 0x0C, 0x04,
+	0x0B, 0x03, 0x0A, 0x02, 0x09, 0x01, 0x08, 0x0F,
+};
+
+unsigned char LogicalToPhysicalSectorMap_ProDos[] =
+{
+	0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E,
+	0x01, 0x03, 0x05, 0x07, 0x09, 0x0B, 0x0D, 0x0F,
+};
+
+unsigned char PhysicalToLogicalSectorMap_ProDos[] =
+{
+	0x00, 0x08, 0x01, 0x09, 0x02, 0x0A, 0x03, 0x0B,
+	0x04, 0x0C, 0x05, 0x0D, 0x06, 0x0E, 0x07, 0x0F
+};
 
 int Apple2_do_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
@@ -100,11 +122,19 @@ int Apple2_do_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 	unsigned char gap3len,interleave;
 	unsigned short sectorsize,rpm;
 	unsigned int bitrate;
+	unsigned char * sector_order;
+
 
 	SECTORCONFIG* sectorconfig;
 	CYLINDER* currentcylinder;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"Apple2_do_libLoad_DiskFile %s",imgfile);
+
+	sector_order = (unsigned char *)&PhysicalToLogicalSectorMap_Dos33;
+	if(hxc_checkfileext(imgfile,"po"))
+	{
+		sector_order = (unsigned char *)&PhysicalToLogicalSectorMap_ProDos;
+	}
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
@@ -124,8 +154,8 @@ int Apple2_do_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 
             bitrate=250000;
             rpm=283;
-            interleave=3;
-            gap3len=16;
+            interleave=1;
+            gap3len=20;
 			trackformat=APPLE2_GCR6A2;
             floppydisk->floppyNumberOfSide=1;
             floppydisk->floppySectorPerTrack=16;
@@ -166,11 +196,11 @@ int Apple2_do_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 						sectorconfig[k].bitrate=floppydisk->floppyBitRate;
 						sectorconfig[k].gap3=gap3len;
 						sectorconfig[k].sectorsize=sectorsize;
-						sectorconfig[k].input_data=&trackdata[k*sectorsize];
+						sectorconfig[k].input_data=&trackdata[sector_order[k]*sectorsize];
 						sectorconfig[k].trackencoding=trackformat;
 					}
 
-					currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,200,2500,-2500);
+					currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,20,2500,-2500);
 				}
 			}
 
