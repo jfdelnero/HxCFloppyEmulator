@@ -152,7 +152,7 @@ fat12config configlist[]=
 	{"fat2880",     0xFF, 80,2,36,300,1000000,win95_bootsector,84,  0,1,  IBMPC_ED_FLOPPYMODE,   IBMFORMAT_DD,0xF0,2, 512, 240,1}, //3.5" Double Sided, 80 tracks per side, 36 sectors per track (2.88MB)
 	{"fat3381",     0xFF,127,2,26,240,500000,win95_bootsector, 14,  0,2,  IBMPC_HD_FLOPPYMODE,   IBMFORMAT_DD,0xF0,2, 512, 224,1},
 	{"fat6789",     0xFF,255,2,27,240,500000,win95_bootsector, 14,  0,2,  IBMPC_HD_FLOPPYMODE,   IBMFORMAT_DD,0xF0,4, 512, 112,1},
-	{"fatbigst",    0xFF,127,2,27, 75,250000,0,                84,  0,2,ATARIST_DD_FLOPPYMODE,   ISOFORMAT_DD,0xF9,2, 512, 112,1},
+	{"fatbigst",    0xFF,127,2,27,103,250000,0,                84,  0,2,ATARIST_DD_FLOPPYMODE,   ISOFORMAT_DD,0xF9,2, 512, 112,1},
 	{"fatmonsterst",0xFF,254,2,17,200,250000,0,                35,  0,1,ATARIST_DD_FLOPPYMODE,   ISOFORMAT_DD,0xF9,2, 512, 112,1},
 	{"fatbig",      0xFF,127,2,24,100,500000,msdos_bootsector, 84,  0,2,  IBMPC_HD_FLOPPYMODE,   IBMFORMAT_DD,0xF0,2, 512, 112,1},
 	{"krz",         0x00, 80,2,18,300,500000,win95_bootsector, 84,  0,1,  IBMPC_HD_FLOPPYMODE,   IBMFORMAT_DD,0xF0,1, 512, 224,1}, //3.5" Double Sided, 80 tracks per side, 18 sectors per track (1.44MB)
