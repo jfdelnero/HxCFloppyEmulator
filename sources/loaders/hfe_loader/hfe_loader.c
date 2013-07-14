@@ -340,3 +340,31 @@ int EXTHFE_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infot
 			plug_ext
 			);
 }
+
+int HFE_HDDD_A2_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename);
+
+int HFE_HDDD_A2_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	static const char plug_id[]="HXC_HDDD_A2_HFE";
+	static const char plug_desc[]="SD Card HxCFE HFE file Loader (HDDD A2 Support)";
+	static const char plug_ext[]="hfe";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	0,
+		(LOADDISKFILE)		0,
+		(WRITEDISKFILE)		HFE_HDDD_A2_libWrite_DiskFile,
+		(GETPLUGININFOS)	HFE_HDDD_A2_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
