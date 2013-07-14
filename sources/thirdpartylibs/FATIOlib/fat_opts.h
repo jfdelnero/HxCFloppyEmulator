@@ -23,24 +23,24 @@
 
 // Max open files (reduce to lower memory requirements)
 #ifndef FATFS_MAX_OPEN_FILES
-    #define FATFS_MAX_OPEN_FILES            1
+    #define FATFS_MAX_OPEN_FILES            512
 #endif
 
 // Number of sectors per FAT_BUFFER (min 1)
 #ifndef FAT_BUFFER_SECTORS
-    #define FAT_BUFFER_SECTORS              1
+    #define FAT_BUFFER_SECTORS              128
 #endif
 
 // Max FAT sectors to buffer (min 1)
 // (mem used is FAT_BUFFERS * FAT_BUFFER_SECTORS * FAT_SECTOR_SIZE)
 #ifndef FAT_BUFFERS
-    #define FAT_BUFFERS                     16
+    #define FAT_BUFFERS                     128
 #endif
 
 // Size of cluster chain cache (can be undefined)
 // Mem used = FAT_CLUSTER_CACHE_ENTRIES * 4 * 2
 // Improves access speed considerably
-#define FAT_CLUSTER_CACHE_ENTRIES         64
+#define FAT_CLUSTER_CACHE_ENTRIES         1024
 
 // Include support for writing files (1 / 0)? 
 #ifndef FATFS_INC_WRITE_SUPPORT
