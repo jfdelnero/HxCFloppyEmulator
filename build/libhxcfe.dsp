@@ -915,6 +915,10 @@ SOURCE=..\sources\loaders\hfe_loader\hfe_format.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\sources\loaders\hfe_loader\hfe_hddd_a2_writer.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\loaders\hfe_loader\hfe_loader.c
 # End Source File
 # Begin Source File
