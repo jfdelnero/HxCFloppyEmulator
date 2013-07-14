@@ -25,6 +25,8 @@
 #include <time.h>
 #include "libsap.h"
 
+#include "libhxcfe.h"
+#include "libhxcadaptor.h"
 
 int sap_errno;
 
@@ -594,11 +596,11 @@ static void decode_filename(unsigned char entry_data[], const char filename[], i
 
       case EXT_TYPE_BAS:
          /* differentiate ASCII from BINARY data */
-         file = fopen(filename, "rb");
+         file = hxc_fopen(filename, "rb");
          if (file) {
             if ((fgetc(file) == '\r') && (fgetc(file) == '\n'))
                entry_data[TO_DATA_TYPE] = DTYPE_ASCII;
-            fclose(file);
+            hxc_fclose(file);
          }
          break;
 
@@ -967,7 +969,7 @@ static int do_extract_file(sapID id, const char filename[], int n, unsigned char
    /* read start block */
    block = entry_data[TO_FIRST_BLOCK];
 
-   if ((file=fopen(filename, "wb")) == NULL) {
+   if ((file=hxc_fopen(filename, "wb")) == NULL) {
       sap_errno = SAP_EPERM;
       return 0;
    }
@@ -1002,7 +1004,7 @@ static int do_extract_file(sapID id, const char filename[], int n, unsigned char
    fwrite(sapsector.data, sizeof(char), end_size, file);
    size += end_size;
 
-   fclose(file);
+   hxc_fclose(file);
 
    return size;
 }
@@ -1131,7 +1133,7 @@ sapID sap_OpenArchive(const char filename[], int *format)
       return SAP_ERROR;
    }
 
-   if ((ID_FILE(id)=fopen(filename, "rb+")) == NULL) {
+   if ((ID_FILE(id)=hxc_fopen(filename, "rb+")) == NULL) {
       sap_errno = SAP_ENOENT;
       return SAP_ERROR;
    }
@@ -1141,7 +1143,7 @@ sapID sap_OpenArchive(const char filename[], int *format)
 
    /* find the format */
    if ((header[0] != SAP_FORMAT1) && (header[0] != SAP_FORMAT2)) {
-      fclose(ID_FILE(id));
+      hxc_fclose(ID_FILE(id));
       sap_errno = SAP_EBADF;
       return SAP_ERROR;
    }
@@ -1152,7 +1154,7 @@ sapID sap_OpenArchive(const char filename[], int *format)
    header[0] = 0;
 
    if (strncmp(header, sap_header, SAP_HEADER_SIZE) != 0) {
-      fclose(ID_FILE(id));
+      hxc_fclose(ID_FILE(id));
       sap_errno = SAP_EBADF;
       return SAP_ERROR;
    }
@@ -1186,7 +1188,7 @@ sapID sap_CreateArchive(const char filename[], int format)
       return SAP_ERROR;
    }
 
-   if ((ID_FILE(id)=fopen(filename, "wb")) == NULL) {
+   if ((ID_FILE(id)=hxc_fopen(filename, "wb")) == NULL) {
       sap_errno = SAP_EPERM;
       return SAP_ERROR;
    }
@@ -1244,7 +1246,7 @@ int sap_CloseArchive(sapID id)
          break;
    }
 
-   fclose(ID_FILE(id));
+   hxc_fclose(ID_FILE(id));
    ID_STATE(id) = NO_ARCHIVE;
 
    return SAP_OK;
@@ -1617,7 +1619,7 @@ int sap_AddFile(sapID id, const char filename[])
    }
 
    /* open the file */
-   if ((file=fopen(filename, "rb")) == NULL) {
+   if ((file=hxc_fopen(filename, "rb")) == NULL) {
       sap_errno = SAP_ENOENT;
       return 0;
    }
@@ -1627,7 +1629,7 @@ int sap_AddFile(sapID id, const char filename[])
       file_size++;
 
    if (file_size == 0) {
-      fclose(file);
+      hxc_fclose(file);
       sap_errno = SAP_ENFILE;
       return 0;
    }
@@ -1658,7 +1660,7 @@ int sap_AddFile(sapID id, const char filename[])
    }
 
    if ((free_n<0) && (prev_n<0)) {
-      fclose(file);
+      hxc_fclose(file);
       sap_errno = SAP_ENOSPC;
       return 0;
    }
@@ -1671,7 +1673,7 @@ int sap_AddFile(sapID id, const char filename[])
 
    if ((dskf*TO_BLOCKSIZE(ID_FORMAT(id))) < file_size) {
       sap_errno = SAP_EFBIG;
-      fclose(file);
+      hxc_fclose(file);
       return 0;
    }
 
@@ -1687,7 +1689,7 @@ int sap_AddFile(sapID id, const char filename[])
    /* update directory and FAT */
    sap_WriteSectorEx(id, 20, 1, SAP_NSECTS, trk20_data);
 
-   fclose(file);
+   hxc_fclose(file);
 
    return file_size;
 }
