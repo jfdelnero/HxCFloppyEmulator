@@ -547,7 +547,7 @@ void tg_addAppleSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SI
 	unsigned char	volume,checksum;
 
 	checksum = 0;
-	volume = 0;
+	volume = 254;
 
 	startindex=tg->last_bit_offset/8;
 

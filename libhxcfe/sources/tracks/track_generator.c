@@ -383,7 +383,7 @@ void getDirectcode(track_generator *tg,unsigned char data,unsigned char * dstbuf
 		{
 			if(data&(0x80>>(i+(k*4)) ))
 			{
-				*direct_code=*direct_code | ((0x40>>(i*2))<<8);
+				*direct_code=*direct_code | ((0x80>>(i*2))<<8);
 			}
 		}
 	}
@@ -994,6 +994,18 @@ SIDE * tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short n
 
 		case MEMBRAINFORMAT_DD:
 			currentside->track_encoding=MEMBRAIN_MFM_ENCODING;
+		break;
+
+		case EMUFORMAT_SD:
+			currentside->track_encoding=EMU_FM_ENCODING;
+		break;
+
+		case APPLE2_GCR5A3:
+			currentside->track_encoding=APPLEII_GCR1_ENCODING;
+		break;
+
+		case APPLE2_GCR6A2:
+			currentside->track_encoding=APPLEII_GCR2_ENCODING;
 		break;
 
 		case AMIGAFORMAT_DD:
