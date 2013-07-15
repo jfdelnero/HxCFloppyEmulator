@@ -255,23 +255,29 @@ void fatfs_sfn_create_entry(char *shortfilename, uint32 size, uint32 startCluste
     int i;
     int year,month,mday;
     unsigned short date; 
+
+	memset((void*)entry,0,sizeof(struct fat_dir_entry));
+
     // Copy short filename
     for (i=0;i<FAT_SFN_SIZE_FULL;i++)
         entry->Name[i] = shortfilename[i];
 
-    year = 2012 - 1900;
+    year = 1985 - 1900;
     month= 9;
-    mday = 15;
+    mday = 26;
 
     date = (((year-80) &0x7F)<<9) | ((month+1 &0xF)<<5) | (mday &0x1F);
     // Unless we have a RTC we might as well set these to 1980
     entry->CrtTimeTenth = 0x00;
-    entry->CrtTime[1] = entry->CrtTime[0] = 0x00;
-    entry->CrtDate[0] = date&0xFF;
-    entry->CrtDate[1] = (date>>8)&0xFF;
-    entry->LstAccDate[0] = date&0xFF;
-    entry->LstAccDate[1] = (date>>8)&0xFF;
-    entry->WrtTime[1] = entry->WrtTime[0] = 0x00;
+	entry->CrtTime[0] = 0x00;
+    entry->CrtTime[1] = 0x00;
+    entry->CrtDate[0] = 0x00;
+    entry->CrtDate[1] = 0x00;
+    entry->LstAccDate[0] = 0x00;
+    entry->LstAccDate[1] = 0x00;
+
+	entry->WrtTime[0] = 0x86;
+    entry->WrtTime[1] = 0x61;
     entry->WrtDate[0] = date&0xFF;
     entry->WrtDate[1] = (date>>8)&0xFF;
 
