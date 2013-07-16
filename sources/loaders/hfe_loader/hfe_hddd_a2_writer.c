@@ -162,11 +162,15 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 		{
 			FILEHEADER->track_encoding = APPLEII_HDDD_A2_GCR2_ENCODING;
 		}
-
-		if(floppy->double_step)
-			FILEHEADER->single_step=0x00;
-		else
+			
+		if( floppy->floppyNumberOfTrack	> 42 )
+		{
 			FILEHEADER->single_step=0xFF;
+		}
+		else
+		{
+			FILEHEADER->single_step=0x00;
+		}
 
 		rfwrite(FILEHEADER,512,1,hxcpicfile);
 
