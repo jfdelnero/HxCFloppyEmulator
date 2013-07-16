@@ -542,9 +542,9 @@ void tg_addAppleSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SI
 
 	unsigned short  i;
 	unsigned char   trackencoding,trackenc;
-	unsigned char   nibblebuffer[512];
+	unsigned char   sector_buffer[300];
 	unsigned long   startindex,j;
-	unsigned char	volume,checksum;
+	unsigned char	volume,checksum,nibbleval;
 
 	checksum = 0;
 	volume = 254;
@@ -598,35 +598,52 @@ void tg_addAppleSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SI
 	pushTrackCode(tg,0xAA,0xFF,currentside,DIRECT_ENCODING);
 	pushTrackCode(tg,0xAD,0xFF,currentside,DIRECT_ENCODING);
 
-
 	sectorconfig->startdataindex=tg->last_bit_offset/8;
+
+	memset(sector_buffer,0x00,300);
+
 	if(sectorconfig->input_data)
 	{
-		NybbleSector6and2( (unsigned char*)sectorconfig->input_data, (unsigned char*)&nibblebuffer);
-
-		checksum = 0;
-		for (i= 341; i >= 256; i-- )
+		for(i=0;i<256;i++)
 		{
-			pushTrackCode(tg,byte_translation_SixAndTwo[nibblebuffer[i]^checksum],0xFF,currentside,DIRECT_ENCODING);
-			checksum = nibblebuffer[i];
+			sector_buffer[i] = sectorconfig->input_data[i];
 		}
-
-		for (i=0; i < 256; i++ )
-		{
-			pushTrackCode(tg,byte_translation_SixAndTwo[nibblebuffer[i]^checksum],0xFF,currentside,DIRECT_ENCODING);
-			checksum = nibblebuffer[i];
-		}
-
-		pushTrackCode(tg,byte_translation_SixAndTwo[checksum],0xFF,currentside,DIRECT_ENCODING);
-
 	}
 	else
 	{
-
+		for(i=0;i<256;i++)
+		{
+			sector_buffer[i] = sectorconfig->fill_byte;
+		}
 	}
 
+	checksum = 0;
+	for (i = 0; i < 86; i++)
+	{
+		nibbleval  = ( (sector_buffer[i] & 0x01) << 1 );
+		nibbleval |= ( (sector_buffer[i] & 0x02) >> 1 );
+		nibbleval |= ( (sector_buffer[i + 86] & 0x01) << 3 );
+		nibbleval |= ( (sector_buffer[i + 86] & 0x02) << 1 );
+		nibbleval |= ( (sector_buffer[i + 172] & 0x01) << 5 );
+		nibbleval |= ( (sector_buffer[i + 172] & 0x02) << 3 );
+ 
+		pushTrackCode(tg,byte_translation_SixAndTwo[nibbleval ^ checksum],0xFF,currentside,DIRECT_ENCODING);
+
+		checksum = nibbleval;
+	}
+
+	for (i = 0; i < 256; i++)
+	{
+		nibbleval = (sector_buffer[i] >> 2);
+		pushTrackCode(tg,byte_translation_SixAndTwo[nibbleval ^ checksum],0xFF,currentside,DIRECT_ENCODING);
+		checksum = nibbleval;
+	}
+
+	// Push the Checksum
+	pushTrackCode(tg,byte_translation_SixAndTwo[checksum],0xFF,currentside,DIRECT_ENCODING);
+
 	// Data block end
-	pushTrackCode(tg,0xD5,0xFF,currentside,DIRECT_ENCODING);
+	pushTrackCode(tg,0xDE,0xFF,currentside,DIRECT_ENCODING);
 	pushTrackCode(tg,0xAA,0xFF,currentside,DIRECT_ENCODING);
 	pushTrackCode(tg,0xEB,0xFF,currentside,DIRECT_ENCODING);
 
@@ -638,7 +655,6 @@ void tg_addAppleSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SI
 			pushTrackCode(tg,0xFF,0xFF,currentside,sectorconfig->trackencoding);
 		}
 	}
-
 
 	// fill timing & encoding buffer
 	if(currentside->timingbuffer)
