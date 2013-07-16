@@ -137,7 +137,17 @@ void freelist(struct s_sectorlist_ * element)
 
 double getOffsetTiming(SIDE *currentside,int offset,double timingoffset,int start)
 {
-	int i,j,bitrate;
+	int i,j,bitrate,totaloffset;
+
+
+	if(offset >= start)
+	{
+		totaloffset = offset;
+	}
+	else
+	{
+		totaloffset = start + ((currentside->tracklen - start) + offset);
+	}
 
 	i=start;
 	j=start%currentside->tracklen;
@@ -152,7 +162,7 @@ double getOffsetTiming(SIDE *currentside,int offset,double timingoffset,int star
 		timingoffset = timingoffset + ((double)(500000)/(double)bitrate);
 		i++;
 		j=(j+1)%currentside->tracklen;
-	}while(i<offset);
+	}while(i<totaloffset);
 
 	return timingoffset;
 }
@@ -283,7 +293,13 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 						else
 							timingoffset2 = getOffsetTiming(currentside,sc->endsectorindex,timingoffset,old_i);
 
-						timingoffset3 = getOffsetTiming(currentside,sc->startdataindex,timingoffset,old_i);
+						if(sc->startdataindex<sc->startsectorindex)
+						{
+							timingoffset3 = getOffsetTiming(currentside,sc->startsectorindex+ ((tracksize - sc->startsectorindex) + sc->startdataindex),timingoffset,old_i);							
+						}
+						else
+							timingoffset3 = getOffsetTiming(currentside,sc->startdataindex,timingoffset,old_i);
+
 						xpos_startdata = (int)( ( timingoffset3 - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
 
 						xpos_endsector = (int)( ( timingoffset2 - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );

@@ -102,6 +102,26 @@ void setbit(unsigned char * input_data,int bit_offset,int state)
 	return;
 }
 
+int chgbitptr(int tracklen,int cur_offset,int offset)
+{
+	if( offset>=0 )
+	{
+		return (cur_offset + offset) % tracklen;
+	}
+	else
+	{
+		if(cur_offset >= -offset)
+		{
+			return cur_offset + offset;
+		}
+		else
+		{
+			return (tracklen - ( ((-offset) - cur_offset) ) ); 
+		}
+	}
+}
+
+
 int mfmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit)
 {
 	int i,j;
@@ -203,7 +223,7 @@ int bintomfm(unsigned char * track_data,int track_data_size,unsigned char * bin_
 }
 
 
-int fmtobin(unsigned char * input_data,int intput_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit)
+int fmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit)
 {
 	int i;
 	int bitshift;
@@ -216,7 +236,7 @@ int fmtobin(unsigned char * input_data,int intput_data_size,unsigned char * deco
 	{
 		//0C0D0C0D
 
-		binbyte=binbyte | (getbit(input_data,bit_offset+3)<<1) | (getbit(input_data,bit_offset+7)<<0);
+		binbyte=binbyte | (getbit(input_data,(bit_offset+3)%input_data_size)<<1) | (getbit(input_data,(bit_offset+7)%input_data_size)<<0);
 
 		bitshift=bitshift+2;
 
@@ -232,7 +252,7 @@ int fmtobin(unsigned char * input_data,int intput_data_size,unsigned char * deco
 			binbyte=binbyte<<2;
 		}
 
-		bit_offset=bit_offset+8;
+		bit_offset=(bit_offset+8)%input_data_size;
 
 	}while(i<decod_data_size);
 
@@ -285,7 +305,44 @@ int bintofm(unsigned char * track_data,int track_data_size,unsigned char * bin_d
 	return bit_offset;
 }
 
-int searchBitStream(unsigned char * input_data,unsigned long intput_data_size,int searchlen,unsigned char * chr_data,unsigned long chr_data_size,unsigned long bit_offset)
+int slowSearchBitStream(unsigned char * input_data,unsigned long input_data_size,int searchlen,unsigned char * chr_data,unsigned long chr_data_size,unsigned long bit_offset)
+{
+	unsigned long cur_startoffset;
+	unsigned long i;
+	int len;
+	
+	cur_startoffset = bit_offset;
+	len = 0;
+
+	if(searchlen<=0)
+	{
+		searchlen = input_data_size;
+	}
+
+	while( ( cur_startoffset < input_data_size ) && ( len < searchlen ) )
+	{
+		
+		i=0;
+		while( ( i < chr_data_size) && ( ( getbit(input_data,( (cur_startoffset + i) % input_data_size)) == getbit(chr_data, i % chr_data_size) ) ) )
+		{
+			i++;
+		}
+
+		if(i == chr_data_size)
+		{
+			return cur_startoffset;
+		}
+
+		cur_startoffset++;
+		len++;
+
+	}
+
+	return -1;
+}
+
+
+int searchBitStream(unsigned char * input_data,unsigned long input_data_size,int searchlen,unsigned char * chr_data,unsigned long chr_data_size,unsigned long bit_offset)
 {
 	unsigned long i,j,trackoffset,cnt,k,starti;
 	unsigned char stringtosearch[8][128];
@@ -325,8 +382,8 @@ int searchBitStream(unsigned char * input_data,unsigned long intput_data_size,in
 	starti = bit_offset & 7;
 	trackoffset = bit_offset >> 3;
 
-	tracksize = intput_data_size >> 3;
-	if( intput_data_size & 7 ) tracksize++;
+	tracksize = input_data_size >> 3;
+	if( input_data_size & 7 ) tracksize++;
 
 	tracksize= tracksize - ( chr_data_size >> 3 );
 	if( chr_data_size & 7 ) tracksize--;
@@ -342,8 +399,9 @@ int searchBitStream(unsigned char * input_data,unsigned long intput_data_size,in
 	}
 
 	t=0;
+
 	// Scan the track data...
-	do
+	while(!found && (trackoffset<tracksize) && (t<searchsize))
 	{
 
 		for(i=starti;i<8;i++)
@@ -370,11 +428,32 @@ int searchBitStream(unsigned char * input_data,unsigned long intput_data_size,in
 
 		starti=0;
 
-	}while(!found && (trackoffset<tracksize) && (t<searchsize));
+	}
 
 	if(!found)
 	{
-		bitoffset=-1;
+		if(t<searchsize)
+		{			
+			if(searchlen>0)
+			{
+				if(searchlen - (t*8) > 0)
+				{
+					bitoffset = slowSearchBitStream(input_data,input_data_size,searchlen - (t*8),chr_data,chr_data_size,trackoffset<<3 | starti);
+				}
+				else
+				{
+					bitoffset = -1;
+				}
+			}
+			else
+			{
+				bitoffset = slowSearchBitStream(input_data,input_data_size,searchlen,chr_data,chr_data_size,trackoffset<<3 | starti);
+			}
+		}
+		else
+		{
+			bitoffset = -1;
+		}
 	}
 
 	return bitoffset;
