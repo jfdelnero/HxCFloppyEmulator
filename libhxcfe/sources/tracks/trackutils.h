@@ -33,12 +33,12 @@ void setbit(unsigned char * input_data,int bit_offset,int state);
 int  mfmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit);
 int  bintomfm(unsigned char * track_data,int track_data_size,unsigned char * bin_data,int bin_data_size,int bit_offset);
 
-int  fmtobin(unsigned char * input_data,int intput_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit);
+int  fmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit);
 int  bintofm(unsigned char * track_data,int track_data_size,unsigned char * bin_data,int bin_data_size,int bit_offset);
 
-int  searchBitStream(unsigned char * input_data,unsigned long intput_data_size,int searchlen, \
+int  searchBitStream(unsigned char * input_data,unsigned long input_data_size,int searchlen, \
 					unsigned char * chr_data,unsigned long chr_data_size,unsigned long bit_offset);
 
 void sortbuffer(unsigned char * buffer,unsigned char * outbuffer,int size);
 
-
+int chgbitptr(int tracklen,int cur_offset,int offset);
