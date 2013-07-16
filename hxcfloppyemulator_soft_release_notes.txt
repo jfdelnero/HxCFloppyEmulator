@@ -10,6 +10,15 @@
 -------------------------------------------------------------------------------
 
 /*********************************************************
+16 July 2013: HxCFloppyEmulator 2.0.15.1
+
+FAT12 Loader/generator : Default file creation date set to 1985 to avoid issue with non year 2000 compatibles machines (Kawasaki JS30 robots...).
+
+Apple 2 Sectors generator : End of sector sync corrected, 6&2 GCR encoder corrected.
+
+Track viewer : Sectors on track boundary display issue corrected.
+
+/*********************************************************
 14 July 2013: HxCFloppyEmulator 2.0.15.0
 
 New Loader : SpeccyDos *.SDD support added
