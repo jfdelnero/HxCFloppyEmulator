@@ -386,8 +386,19 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						sl->sectorconfig->endsectorindex);
 					fiw->buf->append((char*)str);
 
-					sprintf(str,"Number of cells : %lu\n",
-						sl->sectorconfig->endsectorindex-sl->sectorconfig->startsectorindex);
+					if(sl->sectorconfig->startsectorindex <= sl->sectorconfig->endsectorindex)
+					{
+						sprintf(str,"Number of cells : %lu\n",
+							sl->sectorconfig->endsectorindex-sl->sectorconfig->startsectorindex);
+					}
+					else
+					{
+						track=(int)fiw->track_number_slide->value();
+						side=(int)fiw->side_number_slide->value();
+						sprintf(str,"Number of cells : %lu\n",
+							( (guicontext->loadedfloppy->tracks[track]->sides[side]->tracklen - sl->sectorconfig->startsectorindex ) + sl->sectorconfig->endsectorindex ) );
+					}
+
 					fiw->buf->append((char*)str);
 
 
