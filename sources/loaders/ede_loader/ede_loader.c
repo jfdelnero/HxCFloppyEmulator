@@ -224,7 +224,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				floppydisk->floppyNumberOfTrack=80;
 				floppydisk->floppyNumberOfSide=2;
 				floppydisk->floppySectorPerTrack=10;
-				gap3len=40;
+				gap3len=36;
 				interleave=1;
 				skew=2;
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
@@ -238,7 +238,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				floppydisk->floppyNumberOfTrack=80;
 				floppydisk->floppyNumberOfSide=2;
 				floppydisk->floppySectorPerTrack=10;
-				gap3len=40;
+				gap3len=36;
 				interleave=1;
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k;
