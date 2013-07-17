@@ -10,15 +10,16 @@
 		<number_of_track>80</number_of_track>
 		<number_of_side>2</number_of_side>
 		<format>IBM_MFM</format>
+		<start_sector_id>0</start_sector_id>
 		<sector_per_track>10</sector_per_track>
 		<sector_size>512</sector_size>
 		<interleave>1</interleave>
-		<skew_per_side>1</skew_per_side>
-		<skew_per_track>3</skew_per_track>
+		<skew_per_side>2</skew_per_side>
+		<skew_per_track>4</skew_per_track>
 		<formatvalue>0xF6</formatvalue>
-		<gap3>255</gap3>
+		<gap3>36</gap3>
 		<bitrate>250000</bitrate>
-		<pregap>150</pregap>
+		<pregap>0</pregap>
 		<rpm>300</rpm>
 	</layout>
 </disk_layout>
