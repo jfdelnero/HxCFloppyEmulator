@@ -345,7 +345,7 @@ int DMK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 			}
 
-			free(dmkdskfile);
+			free(track_buf);
 		}
 
 		hxc_fclose(dmkdskfile);
