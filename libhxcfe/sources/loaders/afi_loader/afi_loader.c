@@ -645,8 +645,12 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 				}
 			}
+
+			free(datalistoffset);
 		}
 
+		if(tracklistoffset)
+			free(tracklistoffset);
 
 		if((header.version_code_major == 0) && header.version_code_minor == 1)
 		{
