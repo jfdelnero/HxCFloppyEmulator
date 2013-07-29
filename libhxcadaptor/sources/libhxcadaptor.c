@@ -89,13 +89,18 @@ DWORD WINAPI ThreadProc( LPVOID lpParameter)
 	HXCFLOPPYEMULATOR* floppycontext;
 	USBHXCFE * hw_context;
 
-	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+	if( lpParameter )
+	{
+		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 
-	threadinitptr=(threadinit*)lpParameter;
-	thread=threadinitptr->thread;
-	floppycontext=threadinitptr->hxcfloppyemulatorcontext;
-	hw_context=threadinitptr->hwcontext;
-	thread(floppycontext,hw_context);
+		threadinitptr=(threadinit*)lpParameter;
+		thread=threadinitptr->thread;
+		floppycontext=threadinitptr->hxcfloppyemulatorcontext;
+		hw_context=threadinitptr->hwcontext;
+		thread(floppycontext,hw_context);
+
+		free(threadinitptr);
+	}
 
 	return 0;
 }
@@ -108,10 +113,16 @@ void * ThreadProc( void *lpParameter)
 	USBHXCFE * hw_context;
 
 	threadinitptr=(threadinit*)lpParameter;
-	thread=threadinitptr->thread;
-	floppycontext=threadinitptr->hxcfloppyemulatorcontext;
-	hw_context=threadinitptr->hwcontext;
-	thread(floppycontext,hw_context);
+	if( threadinitptr )
+	{
+
+		thread=threadinitptr->thread;
+		floppycontext=threadinitptr->hxcfloppyemulatorcontext;
+		hw_context=threadinitptr->hwcontext;
+		thread(floppycontext,hw_context);
+
+		free(threadinitptr);
+	}
 
 	return 0;
 }
