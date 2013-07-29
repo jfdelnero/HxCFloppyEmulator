@@ -188,19 +188,33 @@ int fat12_openDir(FSMNG * fsmng, char * path)
 	int i;
 
 	dir = malloc(sizeof(FL_DIR));
-	memset(dir,0,sizeof(FL_DIR));
-
-	i = 0;
-	while(fsmng->dirhandletable[i] && i<128)
+	if(dir)
 	{
-		i++;
-	}
-	if(i == 128) return HXCFE_ACCESSERROR;
+		memset(dir,0,sizeof(FL_DIR));
 
-	if(fiol_opendir(path, dir))
-	{
-		fsmng->dirhandletable[i] = dir;
-		return i+1;
+		i = 0;
+		while(fsmng->dirhandletable[i] && i<128)
+		{
+			i++;
+		}
+
+		if(i == 128)
+		{
+			free(dir);
+			return HXCFE_ACCESSERROR;
+		}
+
+		if(fiol_opendir(path, dir))
+		{
+			fsmng->dirhandletable[i] = dir;
+			return i+1;
+		}
+		else
+		{
+			free(dir);
+
+			return HXCFE_ACCESSERROR;
+		}
 	}
 
 	return HXCFE_ACCESSERROR;
@@ -210,6 +224,7 @@ int fat12_readDir(FSMNG * fsmng,int dirhandle,FSENTRY * dirent)
 {
 	int ret;
 	fl_dirent entry;
+
 	if(dirhandle<128)
 	{
 		if(fsmng->dirhandletable[dirhandle-1])
