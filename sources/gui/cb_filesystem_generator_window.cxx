@@ -90,7 +90,7 @@ extern s_gui_context * guicontext;
 
 typedef struct s_param_fs_params_
 {
-	const char * files;
+	char * files;
 	filesystem_generator_window * fsw;
 }s_param_fs_params;
 
@@ -260,10 +260,10 @@ int checkfileext(char * path,char *ext)
 			getfilenameext(path,(char*)&pathext);
 			hxc_strlower(pathext);
 
-			strcpy((char*)srcext,ext);
+			strncpy((char*)srcext,ext,sizeof(srcext));
 			hxc_strlower(srcext);
 
-			if(!strcmp(pathext,srcext))
+			if(!strncmp(pathext,srcext,sizeof(pathext)))
 			{
 				return 1;
 			}
@@ -341,14 +341,14 @@ int displaydir(FSMNG  * fsmng,filesystem_generator_window *fgw,char * folder,int
 					totalsize = totalsize + dirent.size;
 				}
 
-				strcpy(fullpath,folder);
-				strcat(fullpath,dirent.entryname);
+				strncpy(fullpath,folder,sizeof(fullpath));
+				strncat(fullpath,dirent.entryname,sizeof(fullpath));
 
 				if(dir)
 				{
 					if(fullpath[strlen(fullpath)-1] != '/')
 					{
-						strcat(fullpath,"/");
+						strncat(fullpath,"/",sizeof(fullpath));
 					}
 				}
 
@@ -409,23 +409,23 @@ int getdir(FSMNG  * fsmng,char * folder,char * dstfolder,int level)
 					dir = 1;
 				}
 
-				strcpy(fullpathdst,dstfolder);
+				strncpy(fullpathdst,dstfolder,sizeof(fullpathdst));
 
 				if(fullpathdst[strlen(fullpathdst)-1] != SEPARATOR)
 				{
-					strcat(fullpathdst,PATHSEPARATOR);
+					strncat(fullpathdst,PATHSEPARATOR,sizeof(fullpathdst));
 				}
 
-				strcat(fullpathdst,dirent.entryname);
+				strncat(fullpathdst,dirent.entryname,sizeof(fullpathdst));
 
-				strcpy(fullpath,folder);
-				strcat(fullpath,dirent.entryname);
+				strncpy(fullpath,folder,sizeof(fullpath));
+				strncat(fullpath,dirent.entryname,sizeof(fullpath));
 
 				if(dir)
 				{
 					if(fullpath[strlen(fullpath)-1] != '/')
 					{
-						strcat(fullpath,"/");
+						strncat(fullpath,"/",sizeof(fullpath));
 					}
 
 					if( strcmp(dirent.entryname,"..") && strcmp(dirent.entryname,"."))
@@ -497,11 +497,11 @@ int getdir(FSMNG  * fsmng,char * folder,char * dstfolder,int level)
 			hxcfe_readFile( fsmng,floppyfile,(char*)membuf,filesize);
 			hxcfe_closeFile(fsmng, floppyfile);
 
-			strcpy(fullpathdst,dstfolder);
+			strncpy(fullpathdst,dstfolder,sizeof(fullpathdst));
 
 			if(fullpathdst[strlen(fullpathdst)-1] != SEPARATOR)
 			{
-				strcat(fullpathdst,PATHSEPARATOR);
+				strncat(fullpathdst,PATHSEPARATOR,sizeof(fullpathdst));
 			}
 
 			i = strlen(folder);
@@ -510,7 +510,7 @@ int getdir(FSMNG  * fsmng,char * folder,char * dstfolder,int level)
 				i--;
 			}
 			
-			strcat(fullpathdst, &folder[i]);
+			strncat(fullpathdst, &folder[i],sizeof(fullpathdst));
 
 			f = hxc_fopen(fullpathdst,"w+b");
 			if(f)
@@ -558,8 +558,8 @@ void browse_floppy_disk(filesystem_generator_window *fgw)
 			sprintf(statustxt,"Total size : ");
 			printsize(&statustxt[strlen(statustxt)],totalsize);
 #ifdef STANDALONEFSBROWSER
-			strcat(statustxt,", File : ");
-			strcat(statustxt,guicontext->last_loaded_image_path);
+			strncat(statustxt,", File : ",sizeof(statustxt));
+			strncat(statustxt,guicontext->last_loaded_image_path,sizeof(statustxt));
 #endif
 
 			fgw->txtout_freesize->value((const char*)statustxt);
@@ -790,7 +790,7 @@ int load_indexed_fileimage(int index)
 				fff_handle = hxc_find_first_file(cur_directory,"*.hfe",&fi);
 				if(fff_handle)
 				{
-					strcpy(filename,fi.filename);
+					strncpy(filename,fi.filename,sizeof(filename));
 				}
 				else
 				{
@@ -800,7 +800,7 @@ int load_indexed_fileimage(int index)
 			}
 			else
 			{
-				strcpy(filename,fi.filename);
+				strncpy(filename,fi.filename,sizeof(filename));
 			}
 
 			hxc_find_close(fff_handle);
@@ -865,7 +865,7 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 
 	if(entry.st_mode&S_IFDIR)
 	{
-		strcpy(fullpath,dstpath);
+		strncpy(fullpath,dstpath,sizeof(fullpath));
 
 		// Is the folder already there ?
 		ret = 0;
@@ -891,25 +891,25 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 					{
 						if(strcmp(ffi.filename,".") && strcmp(ffi.filename,".."))
 						{
-							strcpy(srcfullpath,srcpath);
-							strcat(srcfullpath,PATHSEPARATOR);
-							strcat(srcfullpath,ffi.filename);
+							strncpy(srcfullpath,srcpath,sizeof(srcfullpath));
+							strncat(srcfullpath,PATHSEPARATOR,sizeof(srcfullpath));
+							strncat(srcfullpath,ffi.filename,sizeof(srcfullpath));
 
-							strcpy(fullpath,dstpath);
-							strcat(fullpath,"/");
-							strcat(fullpath,ffi.filename);
+							strncpy(fullpath,dstpath,sizeof(fullpath));
+							strncat(fullpath,"/",sizeof(fullpath));
+							strncat(fullpath,ffi.filename,sizeof(fullpath));
 							addentry(fsmng,  srcfullpath,fullpath);
 						}
 					}
 					else
 					{
-						strcpy(srcfullpath,srcpath);
-						strcat(srcfullpath,PATHSEPARATOR);
-						strcat(srcfullpath,ffi.filename);
+						strncpy(srcfullpath,srcpath,sizeof(srcfullpath));
+						strncat(srcfullpath,PATHSEPARATOR,sizeof(srcfullpath));
+						strncat(srcfullpath,ffi.filename,sizeof(srcfullpath));
 
-						strcpy(fullpath,dstpath);
-						strcat(fullpath,"/");
-						strcat(fullpath,ffi.filename);
+						strncpy(fullpath,dstpath,sizeof(fullpath));
+						strncat(fullpath,"/",sizeof(fullpath));
+						strncat(fullpath,ffi.filename,sizeof(fullpath));
 						addentry(fsmng,  srcfullpath,fullpath);
 					}
 
@@ -936,7 +936,7 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 				if(buffer)
 				{
 					fread(buffer,size,1,f);
-					strcpy(fullpath,dstpath);
+					strncpy(fullpath,dstpath,sizeof(fullpath));
 					file_handle = hxcfe_createFile(fsmng,fullpath );
 					if(file_handle>0)
 					{
@@ -977,114 +977,123 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 
 	floppyem=(HXCFLOPPYEMULATOR*)floppycontext;
 	fsparams2=(s_param_fs_params *)hw_context;
-	fsw=fsparams2->fsw;
 
-	filecount=0;
-	i=0;
-	while(fsparams2->files[i])
+	if(floppyem && fsparams2)
 	{
-		if(fsparams2->files[i]==0xA)
+		fsw=fsparams2->fsw;
+
+		filecount=0;
+		i=0;
+		while(fsparams2->files[i])
 		{
-			filecount++;
-		}
-		i++;
-	}
-
-	filecount++;
-
-	filelist =(char **) malloc(sizeof(char *) * (filecount + 1) );
-	memset(filelist,0,sizeof(char *) * (filecount + 1) );
-
-	i=0;
-	j=0;
-	k=0;
-	do
-	{
-		while(fsparams2->files[i]!=0 && fsparams2->files[i]!=0xA)
-		{
-			i++;
-		};
-
-		filelist[k] = URIfilepathparser((char*)&fsparams2->files[j],i-j);
-
-		i++;
-		j=i;
-
-		k++;
-
-	}while(k<filecount);
-
-	if(filecount)
-	{
-		if(guicontext->loadedfloppy)
-		{
-
-			// Get the base path
-			memset(basepath,0,sizeof(basepath));
-			flt_item = fsw->fs_browser->first_selected_item();
-			if(flt_item)
+			if(fsparams2->files[i]==0xA)
 			{
-				fsw->fs_browser->item_pathname((char*)&itempath, sizeof(itempath), flt_item);
-				strcpy(basepath,itempath+2);
+				filecount++;
 			}
+			i++;
+		}
 
-			fsw->fs_browser->clear();
-			fsw->fs_browser->selectmode(FL_TREE_SELECT_MULTI);
+		filecount++;
 
-			fsmng = hxcfe_initFsManager(guicontext->hxcfe);
-			if (fsmng)
+		filelist =(char **) malloc(sizeof(char *) * (filecount + 1) );
+		if( filelist )
+		{
+			memset(filelist,0,sizeof(char *) * (filecount + 1) );
+
+			i=0;
+			j=0;
+			k=0;
+			do
 			{
-				hxcfe_selectFS(fsmng, 0);
-				hxcfe_mountImage(fsmng, guicontext->loadedfloppy);
-
-
-				dirhandle = hxcfe_openDir(fsmng,basepath);
-				if ( dirhandle <= 0 )
+				while(fsparams2->files[i]!=0 && fsparams2->files[i]!=0xA)
 				{
+					i++;
+				};
+
+				filelist[k] = URIfilepathparser((char*)&fsparams2->files[j],i-j);
+
+				i++;
+				j=i;
+
+				k++;
+
+			}while(k<filecount);
+
+			if(filecount)
+			{
+				if(guicontext->loadedfloppy)
+				{
+
+					// Get the base path
 					memset(basepath,0,sizeof(basepath));
-					
-				}
-				else
-				{
-					hxcfe_closeDir(fsmng,dirhandle);
-				}
-
-
-				i=0;
-				while(i < filecount && filelist[i])
-				{
-					hxc_stat(filelist[i],&entry);
-
-					sprintf(fullpath,"%s/%s",basepath,getfilenamebase(filelist[i],0));
-
-					if(filelist[i] && strlen(filelist[i]))
+					flt_item = fsw->fs_browser->first_selected_item();
+					if(flt_item)
 					{
-						addentry(fsmng,  filelist[i],fullpath);
+						fsw->fs_browser->item_pathname((char*)&itempath, sizeof(itempath), flt_item);
+						strncpy(basepath,itempath+2,sizeof(basepath));
 					}
 
-					i++;
+					fsw->fs_browser->clear();
+					fsw->fs_browser->selectmode(FL_TREE_SELECT_MULTI);
+
+					fsmng = hxcfe_initFsManager(guicontext->hxcfe);
+					if (fsmng)
+					{
+						hxcfe_selectFS(fsmng, 0);
+						hxcfe_mountImage(fsmng, guicontext->loadedfloppy);
+
+
+						dirhandle = hxcfe_openDir(fsmng,basepath);
+						if ( dirhandle <= 0 )
+						{
+							memset(basepath,0,sizeof(basepath));
+							
+						}
+						else
+						{
+							hxcfe_closeDir(fsmng,dirhandle);
+						}
+
+
+						i=0;
+						while(i < filecount && filelist[i])
+						{
+							hxc_stat(filelist[i],&entry);
+
+							sprintf(fullpath,"%s/%s",basepath,getfilenamebase(filelist[i],0));
+
+							if(filelist[i] && strlen(filelist[i]))
+							{
+								addentry(fsmng,  filelist[i],fullpath);
+							}
+
+							i++;
+						}
+
+						fsw->fs_browser->root_label("/");
+						fsw->fs_browser->showroot(1);
+
+						hxcfe_deinitFsManager(fsmng);
+					}
 				}
 
-				fsw->fs_browser->root_label("/");
-				fsw->fs_browser->showroot(1);
+				guicontext->updatefloppyfs++;
+				guicontext->updatefloppyinfos++;
 
-				hxcfe_deinitFsManager(fsmng);
+
+				k=0;
+				while(filelist[k])
+				{
+					free(filelist[k]);
+					k++;
+				}
 			}
+
+			free(filelist);
 		}
 
-		guicontext->updatefloppyfs++;
-		guicontext->updatefloppyinfos++;
-
-
-		k=0;
-		while(filelist[k])
-		{
-			free(filelist[k]);
-			k++;
-		}
+		free(fsparams2);
 	}
-
-	free(filelist);
 	return 0;
 }
 
@@ -1105,14 +1114,24 @@ void dnd_fs_cb(Fl_Widget *o, void *v)
 	{
 		if(guicontext->loadedfloppy)
 		{
-
 			fsparams=(s_param_fs_params *)malloc(sizeof(s_param_fs_params));
-			memset(fsparams,0,sizeof(s_param_fs_params));
+			if(fsparams)
+			{
+				memset(fsparams,0,sizeof(s_param_fs_params));
 
-			fsparams->fsw=fgw;
-			fsparams->files=dnd->event_text();
+				fsparams->fsw=fgw;
 
-			hxc_createthread(guicontext->hxcfe,fsparams,&draganddropfsthread,1);
+				if(strlen(dnd->event_text()))
+				{
+					fsparams->files = (char*) malloc(strlen(dnd->event_text())+1);	
+					if(fsparams->files)
+					{
+						strcpy(fsparams->files,dnd->event_text());
+
+						hxc_createthread(guicontext->hxcfe,fsparams,&draganddropfsthread,1);
+					}
+				}
+			}
 		}
 	}
 }

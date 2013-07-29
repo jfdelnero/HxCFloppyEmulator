@@ -90,7 +90,7 @@ extern s_gui_context * guicontext;
 
 typedef struct s_param_bc_params_
 {
-	const char * files;
+	char * files;
 	batch_converter_window * bcw;
 }s_param_bc_params;
 
@@ -586,6 +586,8 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 	}
 
 	free(filelist);
+
+	free(bcparams2->files);
 	
 	bcw->bt_convert->activate();
 	return 0;
@@ -686,10 +688,16 @@ void dnd_bc_cb(Fl_Widget *o, void *v)
 		memset(bcparams,0,sizeof(s_param_bc_params));
 
 		bcparams->bcw=bcw;
-		bcparams->files=dnd->event_text();
 
+		if(strlen(dnd->event_text()))
+		{
+			bcparams->files = (char*) malloc(strlen(dnd->event_text())+1);	
+			if(bcparams->files)
+			{
+				strcpy(bcparams->files,dnd->event_text());
 
-		hxc_createthread(guicontext->hxcfe,bcparams,&draganddropconvertthread,1);
-
+				hxc_createthread(guicontext->hxcfe,bcparams,&draganddropconvertthread,1);
+			}
+		}
 	}
 }
