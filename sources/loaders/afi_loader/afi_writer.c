@@ -310,193 +310,197 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 		afitracklist.number_of_track=floppy->floppyNumberOfTrack*floppy->floppyNumberOfSide;
 
 		track_list=(unsigned long *)malloc(afitracklist.number_of_track*sizeof(unsigned long));
-		memset(track_list,0,afitracklist.number_of_track*sizeof(unsigned long));
-
-		afiheader.track_list_offset=sizeof(AFIIMG);
-		
-		fwrite(&afiheader,sizeof(afiheader),1,hxcafifile);	      //write temporary file header
-		fwrite(&afitracklist,sizeof(afitracklist),1,hxcafifile);  //write temporary track list header
-		track_listptr=ftell(hxcafifile);
-		fwrite(track_list,afitracklist.number_of_track*sizeof(unsigned long),1,hxcafifile);
-		tempcrc=getcrc(&afitracklist,sizeof(afitracklist),track_list,afitracklist.number_of_track*sizeof(unsigned long));
-		fwrite(&tempcrc,sizeof(tempcrc),1,hxcafifile);            //temporary crc
-		
-		trackposition=sizeof(afitracklist)+afitracklist.number_of_track*sizeof(unsigned long)+sizeof(tempcrc);
-		t=0;
-		for(i=0;i<floppy->floppyNumberOfTrack;i++)
+		if(track_list)
 		{
-			for(j=0;j<floppy->tracks[i]->number_of_side;j++)
+			memset(track_list,0,afitracklist.number_of_track*sizeof(unsigned long));
+
+			afiheader.track_list_offset=sizeof(AFIIMG);
+			
+			fwrite(&afiheader,sizeof(afiheader),1,hxcafifile);	      //write temporary file header
+			fwrite(&afitracklist,sizeof(afitracklist),1,hxcafifile);  //write temporary track list header
+			track_listptr=ftell(hxcafifile);
+			fwrite(track_list,afitracklist.number_of_track*sizeof(unsigned long),1,hxcafifile);
+			tempcrc=getcrc(&afitracklist,sizeof(afitracklist),track_list,afitracklist.number_of_track*sizeof(unsigned long));
+			fwrite(&tempcrc,sizeof(tempcrc),1,hxcafifile);            //temporary crc
+			
+			trackposition=sizeof(afitracklist)+afitracklist.number_of_track*sizeof(unsigned long)+sizeof(tempcrc);
+			t=0;
+			for(i=0;i<floppy->floppyNumberOfTrack;i++)
 			{
-				memset(data_list,0,sizeof(unsigned long)*16);
-				memset(&afitrack,0,sizeof(afitrack));
-				sprintf((char*)&afitrack.afi_track_tag,AFI_TRACK_TAG);
-
-				track_list[t]=trackposition;
-				
-				afitrack.track_number=i;
-				afitrack.side_number=j;
-				
-				afitrack.encoding_mode = AFI_TRACKENCODING_CELLARRAY;
-
-				bytelen = floppy->tracks[i]->sides[j]->tracklen;
-				if(bytelen&7)
+				for(j=0;j<floppy->tracks[i]->number_of_side;j++)
 				{
-					bytelen = (bytelen >> 3) + 1;
-				}
-				else
-				{
-					bytelen = (bytelen >> 3);
-				}
+					memset(data_list,0,sizeof(unsigned long)*16);
+					memset(&afitrack,0,sizeof(afitrack));
+					sprintf((char*)&afitrack.afi_track_tag,AFI_TRACK_TAG);
 
-				afitrack.nb_of_element = floppy->tracks[i]->sides[j]->tracklen;
-				afitrack.number_of_data_chunk = 4;//-------
+					track_list[t]=trackposition;
+					
+					afitrack.track_number=i;
+					afitrack.side_number=j;
+					
+					afitrack.encoding_mode = AFI_TRACKENCODING_CELLARRAY;
 
-				floppycontext->hxc_printf(MSG_DEBUG,"Track %d [%d:%d], file offset %X",t,afitrack.track_number,afitrack.side_number,track_list[t]+afiheader.track_list_offset);
-
-				track_fileptr = ftell(hxcafifile);
-				fwrite(&afitrack,sizeof(afitrack),1,hxcafifile);
-				fwrite(&data_list,afitrack.number_of_data_chunk*sizeof(unsigned long),1,hxcafifile);
-				tempcrc=getcrc(&afitrack,sizeof(afitrack),data_list,afitrack.number_of_data_chunk*sizeof(unsigned long));
-				fwrite(&tempcrc,sizeof(tempcrc),1,hxcafifile);            //temporary crc
-
-				dataposition=sizeof(afitrack)+(afitrack.number_of_data_chunk*sizeof(unsigned long))+sizeof(tempcrc);
-
-				//---------------- index data ----------------
-				block_size=adddatablock(hxcafifile,AFI_DATA_INDEX,compressdata,floppy->tracks[i]->sides[j]->indexbuffer,bytelen,1);
-				//--------------------------------------------
-				data_list[0]=dataposition;
-
-				///rewrite///
-				temp_fileptr=ftell(hxcafifile);
-				fseek(hxcafifile,track_fileptr,SEEK_SET);
-				fwrite(&afitrack,sizeof(afitrack),1,hxcafifile);
-				fwrite(&data_list,afitrack.number_of_data_chunk*sizeof(unsigned long),1,hxcafifile);
-				tempcrc=getcrc(&afitrack,sizeof(afitrack),data_list,afitrack.number_of_data_chunk*sizeof(unsigned long));
-				fwrite(&tempcrc,sizeof(tempcrc),1,hxcafifile);            //temporary crc
-				fseek(hxcafifile,temp_fileptr,SEEK_SET);
-				//////////////////////////////////////////////
-
-				dataposition=dataposition+sizeof(AFIDATA)+block_size+sizeof(tempcrc);
-
-				//---------------- track data ----------------
-				block_size=adddatablock(hxcafifile,AFI_DATA_CELL,compressdata,floppy->tracks[i]->sides[j]->databuffer,bytelen,1);
-				//--------------------------------------------
-				data_list[1]=dataposition;
-
-				///rewrite///
-				temp_fileptr=ftell(hxcafifile);
-				fseek(hxcafifile,track_fileptr,SEEK_SET);
-				fwrite(&afitrack,sizeof(afitrack),1,hxcafifile);
-				fwrite(&data_list,afitrack.number_of_data_chunk*sizeof(unsigned long),1,hxcafifile);
-				tempcrc=getcrc(&afitrack,sizeof(afitrack),data_list,afitrack.number_of_data_chunk*sizeof(unsigned long));
-				fwrite(&tempcrc,sizeof(tempcrc),1,hxcafifile);            //temporary crc
-				fseek(hxcafifile,temp_fileptr,SEEK_SET);
-				//////////////////////////////////////////////
-
-				dataposition=dataposition+sizeof(AFIDATA)+block_size+sizeof(tempcrc);
-
-				//---------------- bitrate data ----------------
-
-				tempbitratetrack=(unsigned long *)malloc(bytelen * 8 * sizeof(unsigned long));
-				if(tempbitratetrack)
-				{
-					if(floppy->tracks[i]->sides[j]->bitrate==VARIABLEBITRATE)
+					bytelen = floppy->tracks[i]->sides[j]->tracklen;
+					if(bytelen&7)
 					{
-						for(l=0;l<bytelen;l++)
-						{
-							for(k=0;k<8;k++)
-							{
-								tempbitratetrack[(l*8)+k] = floppy->tracks[i]->sides[j]->timingbuffer[l];
-							}
-						}
+						bytelen = (bytelen >> 3) + 1;
 					}
 					else
 					{
-						for(l=0;l<bytelen;l++)
-						{
-							for(k=0;k<8;k++)
-							{
-								tempbitratetrack[(l*8)+k] = floppy->tracks[i]->sides[j]->bitrate;
-							}
-						}
+						bytelen = (bytelen >> 3);
 					}
 
-					bitrate_rle_packed = bitrate_rle_pack(tempbitratetrack,bytelen*8,&outsize);
+					afitrack.nb_of_element = floppy->tracks[i]->sides[j]->tracklen;
+					afitrack.number_of_data_chunk = 4;//-------
 
-					block_size=adddatablock(hxcafifile,AFI_DATA_BITRATE,compressdata,(unsigned char*)bitrate_rle_packed,outsize*4,32);
-					free(bitrate_rle_packed);
-					free(tempbitratetrack);
+					floppycontext->hxc_printf(MSG_DEBUG,"Track %d [%d:%d], file offset %X",t,afitrack.track_number,afitrack.side_number,track_list[t]+afiheader.track_list_offset);
+
+					track_fileptr = ftell(hxcafifile);
+					fwrite(&afitrack,sizeof(afitrack),1,hxcafifile);
+					fwrite(&data_list,afitrack.number_of_data_chunk*sizeof(unsigned long),1,hxcafifile);
+					tempcrc=getcrc(&afitrack,sizeof(afitrack),data_list,afitrack.number_of_data_chunk*sizeof(unsigned long));
+					fwrite(&tempcrc,sizeof(tempcrc),1,hxcafifile);            //temporary crc
+
+					dataposition=sizeof(afitrack)+(afitrack.number_of_data_chunk*sizeof(unsigned long))+sizeof(tempcrc);
+
+					//---------------- index data ----------------
+					block_size=adddatablock(hxcafifile,AFI_DATA_INDEX,compressdata,floppy->tracks[i]->sides[j]->indexbuffer,bytelen,1);
+					//--------------------------------------------
+					data_list[0]=dataposition;
+
+					///rewrite///
+					temp_fileptr=ftell(hxcafifile);
+					fseek(hxcafifile,track_fileptr,SEEK_SET);
+					fwrite(&afitrack,sizeof(afitrack),1,hxcafifile);
+					fwrite(&data_list,afitrack.number_of_data_chunk*sizeof(unsigned long),1,hxcafifile);
+					tempcrc=getcrc(&afitrack,sizeof(afitrack),data_list,afitrack.number_of_data_chunk*sizeof(unsigned long));
+					fwrite(&tempcrc,sizeof(tempcrc),1,hxcafifile);            //temporary crc
+					fseek(hxcafifile,temp_fileptr,SEEK_SET);
+					//////////////////////////////////////////////
+
+					dataposition=dataposition+sizeof(AFIDATA)+block_size+sizeof(tempcrc);
+
+					//---------------- track data ----------------
+					block_size=adddatablock(hxcafifile,AFI_DATA_CELL,compressdata,floppy->tracks[i]->sides[j]->databuffer,bytelen,1);
+					//--------------------------------------------
+					data_list[1]=dataposition;
+
+					///rewrite///
+					temp_fileptr=ftell(hxcafifile);
+					fseek(hxcafifile,track_fileptr,SEEK_SET);
+					fwrite(&afitrack,sizeof(afitrack),1,hxcafifile);
+					fwrite(&data_list,afitrack.number_of_data_chunk*sizeof(unsigned long),1,hxcafifile);
+					tempcrc=getcrc(&afitrack,sizeof(afitrack),data_list,afitrack.number_of_data_chunk*sizeof(unsigned long));
+					fwrite(&tempcrc,sizeof(tempcrc),1,hxcafifile);            //temporary crc
+					fseek(hxcafifile,temp_fileptr,SEEK_SET);
+					//////////////////////////////////////////////
+
+					dataposition=dataposition+sizeof(AFIDATA)+block_size+sizeof(tempcrc);
+
+					//---------------- bitrate data ----------------
+
+					tempbitratetrack=(unsigned long *)malloc(bytelen * 8 * sizeof(unsigned long));
+					if(tempbitratetrack)
+					{
+						if(floppy->tracks[i]->sides[j]->bitrate==VARIABLEBITRATE)
+						{
+							for(l=0;l<bytelen;l++)
+							{
+								for(k=0;k<8;k++)
+								{
+									tempbitratetrack[(l*8)+k] = floppy->tracks[i]->sides[j]->timingbuffer[l];
+								}
+							}
+						}
+						else
+						{
+							for(l=0;l<bytelen;l++)
+							{
+								for(k=0;k<8;k++)
+								{
+									tempbitratetrack[(l*8)+k] = floppy->tracks[i]->sides[j]->bitrate;
+								}
+							}
+						}
+
+						bitrate_rle_packed = bitrate_rle_pack(tempbitratetrack,bytelen*8,&outsize);
+
+						block_size=adddatablock(hxcafifile,AFI_DATA_BITRATE,compressdata,(unsigned char*)bitrate_rle_packed,outsize*4,32);
+						free(bitrate_rle_packed);
+						free(tempbitratetrack);
+					}
+
+					//--------------------------------------------
+					data_list[2]=dataposition;
+
+					///rewrite///
+					temp_fileptr=ftell(hxcafifile);
+					fseek(hxcafifile,track_fileptr,SEEK_SET);
+					fwrite(&afitrack,sizeof(afitrack),1,hxcafifile);
+					fwrite(&data_list,afitrack.number_of_data_chunk*sizeof(unsigned long),1,hxcafifile);
+					tempcrc=getcrc(&afitrack,sizeof(afitrack),data_list,afitrack.number_of_data_chunk*sizeof(unsigned long));
+					fwrite(&tempcrc,sizeof(tempcrc),1,hxcafifile);            //temporary crc
+					fseek(hxcafifile,temp_fileptr,SEEK_SET);
+					//////////////////////////////////////////////
+
+					dataposition=dataposition+sizeof(AFIDATA)+block_size+sizeof(tempcrc);
+
+					//---------------- weakbits data ----------------
+					if(floppy->tracks[i]->sides[j]->flakybitsbuffer)
+					{
+						block_size=adddatablock(hxcafifile,AFI_DATA_WEAKBITS,compressdata,floppy->tracks[i]->sides[j]->flakybitsbuffer,bytelen,1);
+					}
+					else
+					{
+						tempweakbitstrack=(unsigned char *)malloc(bytelen);
+						memset(tempweakbitstrack,0,bytelen);
+
+						block_size=adddatablock(hxcafifile,AFI_DATA_WEAKBITS,compressdata,tempweakbitstrack,bytelen,1);
+						free(tempweakbitstrack);
+					}
+					//--------------------------------------------
+					data_list[3]=dataposition;
+
+					///rewrite///
+					temp_fileptr=ftell(hxcafifile);
+					fseek(hxcafifile,track_fileptr,SEEK_SET);
+					fwrite(&afitrack,sizeof(afitrack),1,hxcafifile);
+					fwrite(&data_list,afitrack.number_of_data_chunk*sizeof(unsigned long),1,hxcafifile);
+					tempcrc=getcrc(&afitrack,sizeof(afitrack),data_list,afitrack.number_of_data_chunk*sizeof(unsigned long));
+					fwrite(&tempcrc,sizeof(tempcrc),1,hxcafifile);            //temporary crc
+					fseek(hxcafifile,temp_fileptr,SEEK_SET);
+					//////////////////////////////////////////////
+
+					dataposition=dataposition+sizeof(AFIDATA)+block_size+sizeof(tempcrc);
+
+					t++;
+					trackposition=trackposition+dataposition;
+					
 				}
-
-				//--------------------------------------------
-				data_list[2]=dataposition;
-
-				///rewrite///
-				temp_fileptr=ftell(hxcafifile);
-				fseek(hxcafifile,track_fileptr,SEEK_SET);
-				fwrite(&afitrack,sizeof(afitrack),1,hxcafifile);
-				fwrite(&data_list,afitrack.number_of_data_chunk*sizeof(unsigned long),1,hxcafifile);
-				tempcrc=getcrc(&afitrack,sizeof(afitrack),data_list,afitrack.number_of_data_chunk*sizeof(unsigned long));
-				fwrite(&tempcrc,sizeof(tempcrc),1,hxcafifile);            //temporary crc
-				fseek(hxcafifile,temp_fileptr,SEEK_SET);
-				//////////////////////////////////////////////
-
-				dataposition=dataposition+sizeof(AFIDATA)+block_size+sizeof(tempcrc);
-
-				//---------------- weakbits data ----------------
-				if(floppy->tracks[i]->sides[j]->flakybitsbuffer)
-				{
-					block_size=adddatablock(hxcafifile,AFI_DATA_WEAKBITS,compressdata,floppy->tracks[i]->sides[j]->flakybitsbuffer,bytelen,1);
-				}
-				else
-				{
-					tempweakbitstrack=(unsigned char *)malloc(bytelen);
-					memset(tempweakbitstrack,0,bytelen);
-
-					block_size=adddatablock(hxcafifile,AFI_DATA_WEAKBITS,compressdata,tempweakbitstrack,bytelen,1);
-					free(tempweakbitstrack);
-				}
-				//--------------------------------------------
-				data_list[3]=dataposition;
-
-				///rewrite///
-				temp_fileptr=ftell(hxcafifile);
-				fseek(hxcafifile,track_fileptr,SEEK_SET);
-				fwrite(&afitrack,sizeof(afitrack),1,hxcafifile);
-				fwrite(&data_list,afitrack.number_of_data_chunk*sizeof(unsigned long),1,hxcafifile);
-				tempcrc=getcrc(&afitrack,sizeof(afitrack),data_list,afitrack.number_of_data_chunk*sizeof(unsigned long));
-				fwrite(&tempcrc,sizeof(tempcrc),1,hxcafifile);            //temporary crc
-				fseek(hxcafifile,temp_fileptr,SEEK_SET);
-				//////////////////////////////////////////////
-
-				dataposition=dataposition+sizeof(AFIDATA)+block_size+sizeof(tempcrc);
-
-				t++;
-				trackposition=trackposition+dataposition;
-				
 			}
+
+			temp_fileptr=ftell(hxcafifile);
+			tempcrc=getcrc(&afitracklist,sizeof(afitracklist),track_list,afitracklist.number_of_track*sizeof(unsigned long));
+			fseek(hxcafifile,track_listptr,SEEK_SET);
+			fwrite(track_list,afitracklist.number_of_track*sizeof(unsigned long),1,hxcafifile);
+			fwrite(&tempcrc,sizeof(tempcrc),1,hxcafifile);            //temporary crc
+			fseek(hxcafifile,temp_fileptr,SEEK_SET);
+
+			afiheader.floppyinfo_offset=ftell(hxcafifile);
+			fwrite(&afiinfo,sizeof(AFIIMGINFO),1,hxcafifile);
+			tempcrc=getcrc(&afiinfo,sizeof(AFIIMGINFO),0,0);
+			fwrite(&tempcrc,sizeof(tempcrc),1,hxcafifile);            //temporary crc
+
+
+			temp_fileptr=ftell(hxcafifile);
+			fseek(hxcafifile,0,SEEK_SET);
+			afiheader.header_crc=getcrc(&afiheader,sizeof(afiheader)-2,0,0);
+			fwrite(&afiheader,sizeof(afiheader),1,hxcafifile);	      //write temporary file header
+			fseek(hxcafifile,temp_fileptr,SEEK_SET);
+
+			free(track_list);
 		}
 
-		temp_fileptr=ftell(hxcafifile);
-		tempcrc=getcrc(&afitracklist,sizeof(afitracklist),track_list,afitracklist.number_of_track*sizeof(unsigned long));
-		fseek(hxcafifile,track_listptr,SEEK_SET);
-		fwrite(track_list,afitracklist.number_of_track*sizeof(unsigned long),1,hxcafifile);
-		fwrite(&tempcrc,sizeof(tempcrc),1,hxcafifile);            //temporary crc
-		fseek(hxcafifile,temp_fileptr,SEEK_SET);
-
-		afiheader.floppyinfo_offset=ftell(hxcafifile);
-		fwrite(&afiinfo,sizeof(AFIIMGINFO),1,hxcafifile);
-		tempcrc=getcrc(&afiinfo,sizeof(AFIIMGINFO),0,0);
-		fwrite(&tempcrc,sizeof(tempcrc),1,hxcafifile);            //temporary crc
-
-
-		temp_fileptr=ftell(hxcafifile);
-		fseek(hxcafifile,0,SEEK_SET);
-		afiheader.header_crc=getcrc(&afiheader,sizeof(afiheader)-2,0,0);
-		fwrite(&afiheader,sizeof(afiheader),1,hxcafifile);	      //write temporary file header
-		fseek(hxcafifile,temp_fileptr,SEEK_SET);
-
-		free(track_list);
 		hxc_fclose(hxcafifile);
 
 		return 0;
