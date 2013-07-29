@@ -221,6 +221,9 @@ int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 							k++;
 						}while(k<nbsector);
 
+						if(sca)
+							free(sca);
+
 						if(sectorsize!=-1)
 						{
 							sprintf(tmp_str,",%dB/s",sectorsize);

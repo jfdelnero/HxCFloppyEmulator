@@ -255,6 +255,8 @@ int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 							k++;
 						}while(k<nbsector);
 
+						if(sca)
+							free(sca);
 
 						log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
 						strcat(log_str,tmp_str);
