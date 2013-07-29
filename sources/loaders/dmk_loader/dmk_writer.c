@@ -272,11 +272,13 @@ int DMK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 								hxcfe_freeSectorConfig(ss,sca_mfm[k]);
 								k++;
 							}while(k<nbsector_mfm);
+
+							if(sca_mfm)
+								free(sca_mfm);
 						}
 
 						if(nbsector_fm)
 						{
-
 							tmp_fm_track_buf = malloc(track_size+1);
 							if(tmp_fm_track_buf)
 							{
@@ -334,6 +336,9 @@ int DMK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 								hxcfe_freeSectorConfig(ss,sca_fm[k]);
 								k++;
 							}while(k<nbsector_fm);
+
+							if(sca_fm)
+								free(sca_fm);
 						}
 
 						fwrite(&IDAMbuf,128,1,dmkdskfile);

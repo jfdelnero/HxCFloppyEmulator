@@ -79,7 +79,7 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			fread(&dmk_h,sizeof(dmk_header),1,f);
 
 			hxc_fclose(f);
-					
+
 
 			if(dmk_h.track_len)
 			{
@@ -97,19 +97,19 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					}
 				}
 
-				if(	
+				if(
 					( (dmk_h.write_protected!=0xFF) && (dmk_h.write_protected!=0x00) )	||
 								( (dmk_h.rsvd_2[0]!=0x00 && dmk_h.rsvd_2[0]!=0x12) ||
 								  (dmk_h.rsvd_2[1]!=0x00 && dmk_h.rsvd_2[1]!=0x34) ||
 								  (dmk_h.rsvd_2[2]!=0x00 && dmk_h.rsvd_2[2]!=0x56) ||
 								  (dmk_h.rsvd_2[3]!=0x00 && dmk_h.rsvd_2[3]!=0x78) )
-							
+
 							||
 
 								(dmk_h.track_number<30 || dmk_h.track_number>90)
 
 							||
-								
+
 								( (dmk_h.track_len>0x2940) || (dmk_h.track_len<0xB00) )
 
 							)
@@ -118,7 +118,7 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					return HXCFE_BADFILE;
 				}
 
-						 
+
 
 			}
 			else
@@ -141,7 +141,7 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		return HXCFE_BADFILE;
 
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 
@@ -158,10 +158,10 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 	int sectorbegin;
 	SIDE* currentside;
 	track_generator tg;
-	
+
 	lastptr=0;
 	bitrate=250000;
-	
+
 	trackstep=1;
 	if(dmkh->flags&0xC0)
 	{
@@ -194,7 +194,7 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 		floppycontext->hxc_printf(MSG_DEBUG,"IDAM Code : 0x%.4X",idamoffset[k]);
 		if(idamoffset[k]&0x8000)
 		{
-			
+
 			if((unsigned int)((idamoffset[k]&0x3FFF)-0x80-1)<tracklen)
 				trackclk[((idamoffset[k]&0x3FFF)-0x80-1)]=0x0A;
 			if((unsigned int)((idamoffset[k]&0x3FFF)-0x80-2)<tracklen)
@@ -228,7 +228,7 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 				j--;
 				sectorbegin--;
 			}
-			
+
 			j=12;
 			while(sectorbegin && j && (trackdata[sectorbegin]==0x00))
 			{
@@ -289,13 +289,13 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 					trackclk[i+j+trackstep]=0xC7;
 					j=64;
 				}
-		
+
 			   j++;
 			}while(j<64);
-			
+
 			sectorbegin=((idamoffset[k]&0x3FFF)-0x80);
 			if(sectorbegin) sectorbegin--;
-			
+
 			j=12;
 			while(sectorbegin && j && (trackdata[sectorbegin]==0x00))
 			{
@@ -338,7 +338,7 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 
 			floppycontext->hxc_printf(MSG_DEBUG,"FM  %.4X - %.4X",idamoffset[k],l);
 		}
-		
+
 		k++;
 	};
 
@@ -383,7 +383,7 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 		sprintf(fname,"t_%.2db.bin",s);
 		savebuffer(fname,track_density, tracklen);
 	}*/
-	
+
 	currentside=tg_initTrack(&tg,tracksize,0,trackformat,DEFAULT_DD_BITRATE,0,0);
 	currentside->number_of_sector=k;
 	k=0;
@@ -411,7 +411,7 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 
 int DMK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	
+
 	FILE * f;
 	unsigned int filesize;
 	unsigned int i,j;
@@ -427,69 +427,78 @@ int DMK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned short idam_offset_table[64];
 
 	floppycontext->hxc_printf(MSG_DEBUG,"DMK_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
+	fseek (f , 0 , SEEK_SET);
 
 	if(filesize!=0)
-	{		
-			
+	{
+
 		fread(&dmk_h,sizeof(dmk_h),1,f);
-		floppydisk->floppyBitRate=250000;		
+		floppydisk->floppyBitRate=250000;
 
 		numberofside=2;
 		if(dmk_h.flags&SINGLE_SIDE) numberofside--;
 
 		numberoftrack=dmk_h.track_number;
-			
+
 		floppydisk->floppyNumberOfTrack=numberoftrack;
 		floppydisk->floppyNumberOfSide=numberofside;
 		floppydisk->floppySectorPerTrack=-1;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			
+
 		rpm=300; // normal rpm
-			
+
 		floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
-				
+
 		trackdata=(unsigned char*)malloc(dmk_h.track_len+16);
 		trackclk=(unsigned char*)malloc(dmk_h.track_len+16);
-			
-		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-		{
-				
-			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-			currentcylinder=floppydisk->tracks[j];
-				
-			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-			{		
-				file_offset=sizeof(dmk_header)+((dmk_h.track_len)*(j*floppydisk->floppyNumberOfSide))+((dmk_h.track_len)*(i&1));					
-				fseek (f , file_offset , SEEK_SET);				
-				fread(&idam_offset_table,128,1,f);
-				fread(trackdata,dmk_h.track_len-128,1,f);
-				memset(trackclk,0xFF,dmk_h.track_len-128);
-				
-				floppycontext->hxc_printf(MSG_DEBUG,"Track %d Side %d Tracklen %d TTableOffset:0x%.8x",j,i,dmk_h.track_len,file_offset);
-					
-				currentside=DMKpatchtrack(floppycontext,trackdata, trackclk,idam_offset_table,dmk_h.track_len-128,&tracktotalsize, &dmk_h,j);
-				currentcylinder->sides[i]=currentside;
-				fillindex(-2500,currentside,2500,TRUE,1);
 
+		if( trackdata && trackclk )
+		{
+
+			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+			{
+
+				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+				currentcylinder=floppydisk->tracks[j];
+
+				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+				{
+					file_offset=sizeof(dmk_header)+((dmk_h.track_len)*(j*floppydisk->floppyNumberOfSide))+((dmk_h.track_len)*(i&1));
+					fseek (f , file_offset , SEEK_SET);
+					fread(&idam_offset_table,128,1,f);
+					fread(trackdata,dmk_h.track_len-128,1,f);
+					memset(trackclk,0xFF,dmk_h.track_len-128);
+
+					floppycontext->hxc_printf(MSG_DEBUG,"Track %d Side %d Tracklen %d TTableOffset:0x%.8x",j,i,dmk_h.track_len,file_offset);
+
+					currentside=DMKpatchtrack(floppycontext,trackdata, trackclk,idam_offset_table,dmk_h.track_len-128,&tracktotalsize, &dmk_h,j);
+					currentcylinder->sides[i]=currentside;
+					fillindex(-2500,currentside,2500,TRUE,1);
+
+				}
 			}
+
 		}
-		
-		free(trackdata);
-		
+
+		if(trackclk)
+			free(trackclk);
+
+		if(trackdata)
+			free(trackdata);
+
 		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		
+
 		hxc_fclose(f);
 		return HXCFE_NOERROR;
 	}
