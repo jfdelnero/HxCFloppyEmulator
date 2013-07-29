@@ -57,7 +57,7 @@ class Fl_DND_Box : public Fl_Box
                     // make a copy of the DND payload
                     evt_len = Fl::event_length();
 
-                    //delete [] evt_txt;
+                    delete [] evt_txt;
 
                     evt_txt = new char[evt_len+1];
                     strcpy(evt_txt, Fl::event_text());
