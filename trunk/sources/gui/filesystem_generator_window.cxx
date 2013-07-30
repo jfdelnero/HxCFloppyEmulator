@@ -54,6 +54,7 @@ filesystem_generator_window::filesystem_generator_window() {
     } // Fl_Counter* disk_selector
     Fl_DND_Box *o = new Fl_DND_Box(5, 60, 600, 310, 0);
     o->callback(dnd_fs_cb);
+	FATAccessInProgress = 0;
     window->end();
   } // Fl_Double_Window* window
 }

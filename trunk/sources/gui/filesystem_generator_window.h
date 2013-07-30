@@ -33,5 +33,7 @@ public:
   Fl_Button *bt_saveexport;
   Fl_Button *bt_loadimage;
   Fl_Counter *disk_selector;
+
+  int FATAccessInProgress;
 };
 #endif
