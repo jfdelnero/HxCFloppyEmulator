@@ -682,21 +682,28 @@ void dnd_bc_cb(Fl_Widget *o, void *v)
 
 	if(dnd->event() == FL_PASTE)
 	{
-		bcw->bt_convert->deactivate();
-
-		bcparams=(s_param_bc_params *)malloc(sizeof(s_param_bc_params));
-		memset(bcparams,0,sizeof(s_param_bc_params));
-
-		bcparams->bcw=bcw;
-
 		if(strlen(dnd->event_text()))
 		{
-			bcparams->files = (char*) malloc(strlen(dnd->event_text())+1);	
-			if(bcparams->files)
-			{
-				strcpy(bcparams->files,dnd->event_text());
+			bcw->bt_convert->deactivate();
 
-				hxc_createthread(guicontext->hxcfe,bcparams,&draganddropconvertthread,1);
+			bcparams=(s_param_bc_params *)malloc(sizeof(s_param_bc_params));
+			if(bcparams)
+			{
+				memset(bcparams,0,sizeof(s_param_bc_params));
+
+				bcparams->bcw = bcw;
+
+				bcparams->files = (char*) malloc(strlen(dnd->event_text())+1);
+				if(bcparams->files)
+				{
+					strcpy(bcparams->files,dnd->event_text());
+
+					hxc_createthread(guicontext->hxcfe,bcparams,&draganddropconvertthread,1);
+				}
+				else
+				{
+					free(bcparams);
+				}
 			}
 		}
 	}
