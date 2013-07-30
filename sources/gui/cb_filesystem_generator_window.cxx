@@ -112,17 +112,17 @@ void printsize(char * buffer,int size)
 
 	if(size < 1024)
 	{
-		sprintf(buffer,"%d Byte(s)",size);
+		sprintf(buffer,"%d B",size);
 	}
 	else
 	{
 		if(size < 1024*1024)
 		{
-			sprintf(buffer,"%d.%.2d KByte(s)",(size/1024),(((size-((size/1024)*1024))*100)/1024));
+			sprintf(buffer,"%d.%.2d KB",(size/1024),(((size-((size/1024)*1024))*100)/1024));
 		}
 		else
 		{
-			sprintf(buffer,"%d.%.2d MByte(s)",(size/(1024*1024)),(((size-((size/(1024*1024))*1024*1024))*100)/(1024*1024)));
+			sprintf(buffer,"%d.%.2d MB",(size/(1024*1024)),(((size-((size/(1024*1024))*1024*1024))*100)/(1024*1024)));
 		}
 	}
 }
@@ -281,10 +281,17 @@ void filesystem_generator_window_bt_injectdir(Fl_Button* bt, void*)
 	dw=((Fl_Window*)(bt->parent()));
 	fgw=(filesystem_generator_window *)dw->user_data();
 
-	floppy=hxcfe_generateFloppy(guicontext->hxcfe,(char*)"",s,0);
-	load_floppy(floppy,(char*)"Disk_Image");
-	guicontext->updatefloppyfs++;
-	guicontext->updatefloppyinfos++;
+	if(!fgw->FATAccessInProgress)
+	{
+		fgw->txtout_freesize->value(fgw->txtout_freesize->value());
+		fgw->txtout_freesize->color(FL_WHITE);
+		fgw->txtout_freesize->redraw();
+
+		floppy=hxcfe_generateFloppy(guicontext->hxcfe,(char*)"",s,0);
+		load_floppy(floppy,(char*)"Disk_Image");
+		guicontext->updatefloppyfs = 1;
+		guicontext->updatefloppyinfos++;
+	}
 }
 
 void tick_fs(void *w) {
@@ -301,8 +308,12 @@ void tick_fs(void *w) {
 		{
 			if(guicontext->updatefloppyfs)
 			{
+				if(guicontext->updatefloppyfs<0)
+					browse_floppy_disk(window,-1);
+				else
+					browse_floppy_disk(window, 1);
+
 				guicontext->updatefloppyfs=0;
-				browse_floppy_disk(window);
 			}
 
 		}
@@ -315,6 +326,7 @@ void tick_fs(void *w) {
 int displaydir(FSMNG  * fsmng,filesystem_generator_window *fgw,char * folder,int level)
 {
 	char fullpath[1024];
+	char fullpath2[1024];
 	int dirhandle;
 	int ret;
 	int dir;
@@ -354,7 +366,15 @@ int displaydir(FSMNG  * fsmng,filesystem_generator_window *fgw,char * folder,int
 
 				if( strcmp(dirent.entryname,"..") && strcmp(dirent.entryname,"."))
 				{
-					fgw->fs_browser->add((char*)&fullpath);
+
+					strcpy(fullpath2,fullpath);
+					if(strlen(fullpath) && !dir)
+					{
+						strcat(fullpath2,"            |");
+						printsize(&fullpath2[strlen(fullpath2)],dirent.size);
+						strcat(fullpath2,"|");
+					}
+					fgw->fs_browser->add((char*)&fullpath2);
 				}
 
 				if(dir)
@@ -530,7 +550,7 @@ int getdir(FSMNG  * fsmng,char * folder,char * dstfolder,int level)
 	return 0;
 }
 
-void browse_floppy_disk(filesystem_generator_window *fgw)
+void browse_floppy_disk(filesystem_generator_window *fgw,int lastoperationerror)
 {
 	FSMNG  * fsmng;
 	int totalsize;
@@ -555,14 +575,27 @@ void browse_floppy_disk(filesystem_generator_window *fgw)
 			fgw->fs_browser->show_self();
 
 			
-			sprintf(statustxt,"Total size : ");
-			printsize(&statustxt[strlen(statustxt)],totalsize);
-#ifdef STANDALONEFSBROWSER
-			strncat(statustxt,", File : ",sizeof(statustxt));
-			strncat(statustxt,guicontext->last_loaded_image_path,sizeof(statustxt));
-#endif
-
-			fgw->txtout_freesize->value((const char*)statustxt);
+			if(lastoperationerror>=0)
+			{
+				sprintf(statustxt,"| Disk size : ");
+				printsize(&statustxt[strlen(statustxt)],hxcfe_getTotalFsSpace(fsmng));
+				strcat(statustxt," | File size : ");
+				printsize(&statustxt[strlen(statustxt)],totalsize);
+				strcat(statustxt," | Left space: ");
+				printsize(&statustxt[strlen(statustxt)],hxcfe_getFreeFsSpace(fsmng));
+				strcat(statustxt," |");
+	#ifdef STANDALONEFSBROWSER
+				strncat(statustxt," File : ",sizeof(statustxt));
+				strncat(statustxt,guicontext->last_loaded_image_path,sizeof(statustxt));
+	#endif
+				fgw->txtout_freesize->value((const char*)statustxt);
+			}
+			else
+			{
+				fgw->txtout_freesize->value(fgw->txtout_freesize->value());
+				fgw->txtout_freesize->color(FL_RED);
+				fgw->txtout_freesize->redraw();
+			}
 
 			hxcfe_deinitFsManager(fsmng);
 		}
@@ -591,31 +624,41 @@ void filesystem_generator_window_bt_getfiles(Fl_Button *bt,void *)
 	dw=((Fl_Window*)(bt->parent()));
 	fgw=(filesystem_generator_window *)dw->user_data();
 
-	if(!select_dir((char*)"Select destination",(char*)&dirstr))
+	if(!fgw->FATAccessInProgress)
 	{
-		fsmng = hxcfe_initFsManager(guicontext->hxcfe);
-		if (fsmng)
+
+		fgw->txtout_freesize->color(FL_WHITE);
+		fgw->txtout_freesize->redraw();
+
+		if(!select_dir((char*)"Select destination",(char*)&dirstr))
 		{
-			hxcfe_selectFS(fsmng, 0);
-			hxcfe_mountImage(fsmng, guicontext->loadedfloppy);
-
-
-			flt_item = fgw->fs_browser->first_selected_item();
-			if(flt_item)
+			fsmng = hxcfe_initFsManager(guicontext->hxcfe);
+			if (fsmng)
 			{
-				while(flt_item)
+				hxcfe_selectFS(fsmng, 0);
+				hxcfe_mountImage(fsmng, guicontext->loadedfloppy);
+
+				flt_item = fgw->fs_browser->first_selected_item();
+				if(flt_item)
 				{
-					fgw->fs_browser->item_pathname((char*)&itempath, sizeof(itempath), flt_item);
-					getdir(fsmng,itempath+2,dirstr,0);
-					flt_item = fgw->fs_browser->next_selected_item(flt_item);
-				}
-			}
-			else
-			{
-				getdir(fsmng,(char*)"/",dirstr,0);
-			}
+					while(flt_item)
+					{
+						fgw->fs_browser->item_pathname((char*)&itempath, sizeof(itempath), flt_item);
 
-			hxcfe_deinitFsManager(fsmng);
+						if(strstr(itempath,"            |"))
+							*strstr(itempath,"            |") = 0;
+
+						getdir(fsmng,itempath+2,dirstr,0);
+						flt_item = fgw->fs_browser->next_selected_item(flt_item);
+					}
+				}
+				else
+				{
+					getdir(fsmng,(char*)"/",dirstr,0);
+				}
+
+				hxcfe_deinitFsManager(fsmng);
+			}
 		}
 	}
 }
@@ -631,32 +674,50 @@ void filesystem_generator_window_bt_delete(Fl_Button *bt,void *)
 	dw=((Fl_Window*)(bt->parent()));
 	fgw=(filesystem_generator_window *)dw->user_data();
 
-	guicontext->loaded_img_modified = 1;
-
-	fsmng = hxcfe_initFsManager(guicontext->hxcfe);
-	if (fsmng)
+	if(!fgw->FATAccessInProgress)
 	{
-		hxcfe_selectFS(fsmng, 0);
-		hxcfe_mountImage(fsmng, guicontext->loadedfloppy);
+		fgw->txtout_freesize->color(FL_WHITE);
+		fgw->txtout_freesize->redraw();
 
-		flt_item = fgw->fs_browser->first_selected_item();
-		while(flt_item)
+		guicontext->loaded_img_modified = 1;
+
+		fsmng = hxcfe_initFsManager(guicontext->hxcfe);
+		if (fsmng)
 		{
-			fgw->fs_browser->item_pathname((char*)&itempath, sizeof(itempath), flt_item);
-			hxcfe_deleteFile(fsmng, itempath+2);
-			flt_item = fgw->fs_browser->next_selected_item(flt_item);
+			hxcfe_selectFS(fsmng, 0);
+			hxcfe_mountImage(fsmng, guicontext->loadedfloppy);
+
+			flt_item = fgw->fs_browser->first_selected_item();
+			while(flt_item)
+			{
+				fgw->fs_browser->item_pathname((char*)&itempath, sizeof(itempath), flt_item);
+
+				if(strstr(itempath,"            |"))
+					*strstr(itempath,"            |") = 0;
+
+				hxcfe_deleteFile(fsmng, itempath+2);
+				flt_item = fgw->fs_browser->next_selected_item(flt_item);
+			}
+			hxcfe_deinitFsManager(fsmng);
 		}
-		hxcfe_deinitFsManager(fsmng);
+
+		guicontext->updatefloppyfs = 1;
+		guicontext->updatefloppyinfos++;
 	}
-
-	guicontext->updatefloppyfs++;
-	guicontext->updatefloppyinfos++;
-
 }
 
 void filesystem_generator_window_bt_loadimage(Fl_Button *bt,void *)
 {
-	load_file_image(0,0); 
+	Fl_Window *dw;
+	filesystem_generator_window *fgw;
+
+	dw=((Fl_Window*)(bt->parent()));
+	fgw=(filesystem_generator_window *)dw->user_data();
+
+	if(!fgw->FATAccessInProgress)
+	{
+		load_file_image(0,0); 
+	}
 }
 
 void filesystem_generator_window_bt_saveexport(Fl_Button *bt,void *)
@@ -762,7 +823,7 @@ int load_indexed_fileimage(int index)
 		}
 
 		guicontext->updatefloppyinfos++;
-		guicontext->updatefloppyfs++;
+		guicontext->updatefloppyfs = 1;
 
 		return cur_index;
 	}
@@ -821,7 +882,7 @@ int load_indexed_fileimage(int index)
 		}
 
 		guicontext->updatefloppyinfos++;
-		guicontext->updatefloppyfs++;
+		guicontext->updatefloppyfs = 1;
 
 		return cur_index;
 	}
@@ -835,12 +896,21 @@ void filesystem_generator_window_sel_disk(class Fl_Counter * cnt,void *)
 {
 	int index;
 
-	index = load_indexed_fileimage((int)cnt->value());
-	if(index<0) cnt->value(0);
-	else cnt->value(index);
+	Fl_Window *dw;
+	filesystem_generator_window *fgw;
 
-	guicontext->updatefloppyinfos++;
-	guicontext->updatefloppyfs++;
+	dw=((Fl_Window*)(cnt->parent()));
+	fgw=(filesystem_generator_window *)dw->user_data();
+
+	if(!fgw->FATAccessInProgress)
+	{
+		index = load_indexed_fileimage((int)cnt->value());
+		if(index<0) cnt->value(0);
+		else cnt->value(index);
+
+		guicontext->updatefloppyinfos++;
+		guicontext->updatefloppyfs = 1;
+	}
 }
 
 void dnd_fs_conv(const char *urls)
@@ -848,7 +918,7 @@ void dnd_fs_conv(const char *urls)
 
 }
 
-int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
+int addentry(filesystem_generator_window *fsw,FSMNG  * fsmng,  char * srcpath,char *dstpath)
 {
 	FILE * f;
 	int size,file_handle,ret,dirhandle,wsize;
@@ -856,8 +926,12 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 	unsigned char * buffer;
 	char fullpath[1024];
 	char srcfullpath[1024];
+	char progresstxt[1024];
 	int ff;
 	filefoundinfo ffi;
+
+	sprintf(progresstxt,"Adding %s ...",dstpath);
+	fsw->txtout_freesize->value(progresstxt);
 
 	hxc_stat(srcpath,&entry);
 
@@ -898,7 +972,11 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 							strncpy(fullpath,dstpath,sizeof(fullpath));
 							strncat(fullpath,"/",sizeof(fullpath));
 							strncat(fullpath,ffi.filename,sizeof(fullpath));
-							addentry(fsmng,  srcfullpath,fullpath);
+							if(addentry(fsw, fsmng, srcfullpath, fullpath)<0)
+							{
+								hxc_find_close(ff);
+								return -1;
+							}
 						}
 					}
 					else
@@ -910,7 +988,11 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 						strncpy(fullpath,dstpath,sizeof(fullpath));
 						strncat(fullpath,"/",sizeof(fullpath));
 						strncat(fullpath,ffi.filename,sizeof(fullpath));
-						addentry(fsmng,  srcfullpath,fullpath);
+						if(addentry(fsw, fsmng, srcfullpath, fullpath)<0)
+						{
+							hxc_find_close(ff);
+							return -1;
+						}
 					}
 
 					ret = hxc_find_next_file(ff,srcpath,(char*)"*.*",&ffi);
@@ -920,6 +1002,14 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 				ret = hxc_find_close(ff);
 			}
 		}
+		else
+		{
+			sprintf(progresstxt,"Cannot create folder %s !!!",fullpath);
+			fsw->txtout_freesize->value(progresstxt);
+			fsw->txtout_freesize->color(FL_RED);
+
+			return -1;
+		}
 	}
 	else
 	{
@@ -928,6 +1018,12 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 		{
 			fseek(f,0,SEEK_END);
 			size = ftell(f);
+
+			sprintf(progresstxt,"Adding %s (",dstpath);
+			printsize(&progresstxt[strlen(progresstxt)],size);
+			strcat(progresstxt,") ...");
+			fsw->txtout_freesize->value(progresstxt);
+
 			fseek(f,0,SEEK_SET);
 
 			if(size < 32 * 1024*1024 )
@@ -944,15 +1040,75 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 						hxcfe_closeFile(fsmng,file_handle);
 						if( wsize != size )
 						{
+							sprintf(progresstxt,"Error: %s Write failed !!! No more space ? ",fullpath);
+							printsize(&progresstxt[strlen(progresstxt)],size);
+							strcat(progresstxt," Needed ! ");
+
+							printsize(&progresstxt[strlen(progresstxt)],hxcfe_getFreeFsSpace(fsmng));
+							strcat(progresstxt," Free !");
+
+							fsw->txtout_freesize->value(progresstxt);
+							fsw->txtout_freesize->color(FL_RED);
+
 							hxcfe_deleteFile(fsmng, fullpath);
+
+							free(buffer);
+							hxc_fclose(f);
+
+							return -1;
 						}
+						else
+						{
+							fsw->txtout_freesize->color(FL_WHITE);
+							fsw->txtout_freesize->redraw();
+						}
+					}
+					else
+					{
+						sprintf(progresstxt,"Cannot create %s !!!",dstpath);
+						fsw->txtout_freesize->value(progresstxt);
+						fsw->txtout_freesize->color(FL_RED);
+
+						free(buffer);
+						hxc_fclose(f);
+
+						return -1;
 					}
 
 					free(buffer);
 				}
+				else
+				{
+					sprintf(progresstxt,"No enough system memory !!!");
+					fsw->txtout_freesize->value(progresstxt);
+					fsw->txtout_freesize->color(FL_RED);
+
+					hxc_fclose(f);
+					return -1;
+
+				}
+
+			}
+			else
+			{
+				sprintf(progresstxt,"File too big !!!");
+				fsw->txtout_freesize->value(progresstxt);
+				fsw->txtout_freesize->color(FL_RED);
+
+				hxc_fclose(f);
+				return -1;
+
 			}
 
 			hxc_fclose(f);
+		}
+		else
+		{
+			sprintf(progresstxt,"Cannot open source file %s !!!",srcpath);
+			fsw->txtout_freesize->value(progresstxt);
+			fsw->txtout_freesize->color(FL_RED);
+
+			return -1;
 		}
 	}
 
@@ -961,7 +1117,6 @@ int addentry(FSMNG  * fsmng,  char * srcpath,char *dstpath)
 
 int draganddropfsthread(void* floppycontext,void* hw_context)
 {
-
 	FSMNG  * fsmng;
 	HXCFLOPPYEMULATOR* floppyem;
 	filesystem_generator_window *fsw;
@@ -970,7 +1125,7 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 	char basepath[1024];
 	char itempath[512];
 	int filecount,i,j,k;
-	int dirhandle;
+	int dirhandle,ret;
 	char ** filelist;
 	struct stat entry;
 	Fl_Tree_Item * flt_item;
@@ -981,6 +1136,9 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 	if(floppyem && fsparams2)
 	{
 		fsw=fsparams2->fsw;
+
+		fsw->txtout_freesize->color(FL_WHITE);
+		fsw->txtout_freesize->redraw();
 
 		filecount=0;
 		i=0;
@@ -1055,16 +1213,17 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 						}
 
 
+						ret = 0;
 						i=0;
-						while(i < filecount && filelist[i])
+						while( ( i < filecount ) && filelist[i] && (ret >= 0))
 						{
 							hxc_stat(filelist[i],&entry);
 
 							sprintf(fullpath,"%s/%s",basepath,getfilenamebase(filelist[i],0));
 
-							if(filelist[i] && strlen(filelist[i]))
+							if(filelist[i] && strlen(filelist[i]) )
 							{
-								addentry(fsmng,  filelist[i],fullpath);
+								ret = addentry(fsw,fsmng,  filelist[i],fullpath);
 							}
 
 							i++;
@@ -1077,7 +1236,11 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 					}
 				}
 
-				guicontext->updatefloppyfs++;
+				if(ret>=0)
+					guicontext->updatefloppyfs = 1;
+				else
+					guicontext->updatefloppyfs = -1;
+
 				guicontext->updatefloppyinfos++;
 
 
@@ -1093,10 +1256,14 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 		}
 
 		free(fsparams2);
+
+		fsw->FATAccessInProgress = 0;
+		fsw->txtout_freesize->color(FL_WHITE);
+		fsw->txtout_freesize->redraw();
 	}
+
 	return 0;
 }
-
 
 void dnd_fs_cb(Fl_Widget *o, void *v)
 {
@@ -1112,27 +1279,30 @@ void dnd_fs_cb(Fl_Widget *o, void *v)
 
 	if(dnd->event() == FL_PASTE)
 	{
-		if(guicontext->loadedfloppy)
+		if(guicontext->loadedfloppy && !fgw->FATAccessInProgress)
 		{
-			fsparams=(s_param_fs_params *)malloc(sizeof(s_param_fs_params));
-			if(fsparams)
+			if(strlen(dnd->event_text()))
 			{
-				memset(fsparams,0,sizeof(s_param_fs_params));
-
-				fsparams->fsw=fgw;
-
-				if(strlen(dnd->event_text()))
+				fsparams=(s_param_fs_params *)malloc(sizeof(s_param_fs_params));
+				if(fsparams)
 				{
+					memset(fsparams,0,sizeof(s_param_fs_params));
+
+					fsparams->fsw = fgw;
+
 					fsparams->files = (char*) malloc(strlen(dnd->event_text())+1);	
 					if(fsparams->files)
 					{
 						strcpy(fsparams->files,dnd->event_text());
-
+						fgw->FATAccessInProgress = 1;
 						hxc_createthread(guicontext->hxcfe,fsparams,&draganddropfsthread,1);
+					}
+					else
+					{
+						free(fsparams);
 					}
 				}
 			}
 		}
 	}
 }
-
