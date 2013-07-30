@@ -1621,3 +1621,19 @@ struct fatfs* fiol_get_fs(void)
     return &_fs;
 }
 #endif
+
+//-----------------------------------------------------------------------------
+// fiol_getFreeSpace:
+//-----------------------------------------------------------------------------
+int fiol_getFreeSpace(void)
+{
+	return fatfs_count_free_clusters(&_fs) * (_fs.sector_size * _fs.sectors_per_cluster);
+}
+
+//-----------------------------------------------------------------------------
+// fiol_getTotalSpace:
+//-----------------------------------------------------------------------------
+int fiol_getTotalSpace(void)
+{
+	return _fs.count_of_clusters * (_fs.sector_size * _fs.sectors_per_cluster);
+}

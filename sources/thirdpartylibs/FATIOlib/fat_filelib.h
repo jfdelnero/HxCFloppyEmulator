@@ -115,6 +115,10 @@ int                 fiol_is_dir(const char *path);
 struct fatfs*       fiol_get_fs(void);
 #endif
 
+// Disk size functions
+int fiol_getFreeSpace(void);
+int fiol_getTotalSpace(void);
+
 //-----------------------------------------------------------------------------
 // Stdio file I/O names
 //-----------------------------------------------------------------------------

@@ -633,35 +633,52 @@ int fatfs_fat_add_cluster_to_chain(struct fatfs *fs, uint32 start_cluster, uint3
 //-----------------------------------------------------------------------------
 uint32 fatfs_count_free_clusters(struct fatfs *fs)
 {
-    uint32 i,j;
+    uint32 i,j,ret;
     uint32 count = 0;
     struct fat_buffer *pbuf;
 
-    for (i = 0; i < fs->fat_sectors; i++)
-    {
-        // Read FAT sector into buffer
-        pbuf = fatfs_fat_read_sector(fs, fs->fat_begin_lba + i);
-        if (!pbuf)
-            break;
+	if(fs->fat_type == FAT_TYPE_12 )
+	{
+		i = 0;
+		do
+		{
+			ret = fatfs_find_blank_cluster(fs, i,&i);
+			if(ret)
+			{
+				count++;
+				i++;
+			}
+		}while(ret);
+	}
+	else
+	{
+		for (i = 0; i < fs->fat_sectors; i++)
+		{
+			// Read FAT sector into buffer
+			pbuf = fatfs_fat_read_sector(fs, fs->fat_begin_lba + i);
+			if (!pbuf)
+				break;
 
-        for (j = 0; j < fs->sector_size; )
-        {
-            if (fs->fat_type == FAT_TYPE_16)
-            {
-                if (FAT16_GET_16BIT_WORD(pbuf, (uint16)j) == 0)
-                    count++;
+			for (j = 0; j < fs->sector_size; )
+			{
 
-                j += 2;
-            }
-            else
-            {
-                if (FAT32_GET_32BIT_WORD(pbuf, (uint16)j) == 0)
-                    count++;
+				if (fs->fat_type == FAT_TYPE_16)
+				{
+					if (FAT16_GET_16BIT_WORD(pbuf, (uint16)j) == 0)
+						count++;
 
-                j += 4;
-            }
-        }
-    }
+					j += 2;
+				}
+				else
+				{
+					if (FAT32_GET_32BIT_WORD(pbuf, (uint16)j) == 0)
+						count++;
+
+					j += 4;
+				}
+			}
+		}
+	}
 
     return count;
 } 
