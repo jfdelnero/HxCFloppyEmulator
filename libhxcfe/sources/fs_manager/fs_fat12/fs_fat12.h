@@ -1,6 +1,8 @@
 void init_fat12(FSMNG * fsmng);
 int fat12_mountImage(FSMNG * fsmng, FLOPPY *floppy);
 int fat12_umountImage(FSMNG * fsmng);
+int fat12_getFreeSpace(FSMNG * fsmng);
+int fat12_getTotalSpace(FSMNG * fsmng);
 int fat12_openFile(FSMNG * fsmng, char * filename);
 int fat12_createFile(FSMNG * fsmng, char * filename);
 int fat12_writeFile(FSMNG * fsmng,int filehandle,char * buffer,int size);

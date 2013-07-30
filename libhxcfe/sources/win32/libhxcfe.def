@@ -128,4 +128,6 @@ EXPORTS
    hxcfe_openDir				@420
    hxcfe_readDir				@421
    hxcfe_closeDir				@422
+   hxcfe_getFreeFsSpace			@423
+   hxcfe_getTotalFsSpace		@424
 

@@ -182,6 +182,16 @@ int fat12_umountImage(FSMNG * fsmng)
 	return HXCFE_NOERROR;
 }
 
+int fat12_getFreeSpace(FSMNG * fsmng)
+{
+	return fiol_getFreeSpace();
+}
+
+int fat12_getTotalSpace(FSMNG * fsmng)
+{
+	return fiol_getTotalSpace();
+}
+
 int fat12_openDir(FSMNG * fsmng, char * path)
 {
 	FL_DIR * dir;
