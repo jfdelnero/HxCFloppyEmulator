@@ -193,6 +193,18 @@ int hxcfe_umountImage(FSMNG * fsmng)
 	return fat12_umountImage(fsmng);
 }
 
+int hxcfe_getFreeFsSpace(FSMNG * fsmng)
+{
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_getFreeFsSpace");
+	return fat12_getFreeSpace( fsmng );
+}
+
+int hxcfe_getTotalFsSpace(FSMNG * fsmng)
+{
+	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_getTotalFsSpace");
+	return fat12_getTotalSpace( fsmng );
+}
+
 int hxcfe_openDir(FSMNG * fsmng, char * path)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_openDir : %s",path);

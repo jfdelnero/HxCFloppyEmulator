@@ -445,6 +445,9 @@ int hxcfe_selectFS(FSMNG * fsmng, int fsid);
 int hxcfe_mountImage(FSMNG * fsmng, FLOPPY *floppy);
 int hxcfe_umountImage(FSMNG * fsmng);
 
+int hxcfe_getFreeFsSpace(FSMNG * fsmng);
+int hxcfe_getTotalFsSpace(FSMNG * fsmng);
+
 int hxcfe_openDir(FSMNG * fsmng, char * path);
 int hxcfe_readDir(FSMNG * fsmng,int dirhandle,FSENTRY * dirent);
 int hxcfe_closeDir(FSMNG * fsmng, int dirhandle);
