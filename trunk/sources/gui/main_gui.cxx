@@ -430,7 +430,7 @@ static void tick_mw(void *v) {
 
 	window=(Main_Window *)v;
 
-	if(strlen(guicontext->bufferfilename))
+	if(guicontext->loadedfloppy && strlen(guicontext->bufferfilename))
 	{
 		sprintf(tempstr,"%s - %d track(s) %d side(s)     ",guicontext->bufferfilename,guicontext->loadedfloppy->floppyNumberOfTrack,guicontext->loadedfloppy->floppyNumberOfSide);
 
