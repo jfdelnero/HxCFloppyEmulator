@@ -242,8 +242,8 @@ SECTORCONFIG** hxcfe_getAllTrackISOSectors(SECTORSEARCH* ss,int track,int side,i
 int hxcfe_getSectorSize(SECTORSEARCH* ss,SECTORCONFIG* sc);
 unsigned char * hxcfe_getSectorData(SECTORSEARCH* ss,SECTORCONFIG* sc);
 
-int hxcfe_readSectorData     (SECTORSEARCH* ss,int track,int side,int sector,int numberofsector,int sectorsize,int type,unsigned char * buffer);
-int hxcfe_writeSectorData    (SECTORSEARCH* ss,int track,int side,int sector,int numberofsector,int sectorsize,int type,unsigned char * buffer);
+int hxcfe_readSectorData     (SECTORSEARCH* ss,int track,int side,int sector,int numberofsector,int sectorsize,int type,unsigned char * buffer,int * fdcstatus);
+int hxcfe_writeSectorData    (SECTORSEARCH* ss,int track,int side,int sector,int numberofsector,int sectorsize,int type,unsigned char * buffer,int * fdcstatus);
 
 void hxcfe_freeSectorConfig  (SECTORSEARCH* ss,SECTORCONFIG* sc);
 
@@ -337,15 +337,20 @@ typedef struct _FDCCTRL
 FDCCTRL * hxcfe_initFDC (HXCFLOPPYEMULATOR* floppycontext);
 
 int hxcfe_insertDiskFDC (FDCCTRL * fdc,FLOPPY *fp);
-int hxcfe_readSectorFDC (FDCCTRL * fdc,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size);
-int hxcfe_writeSectorFDC (FDCCTRL * fdc,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size);
+int hxcfe_readSectorFDC (FDCCTRL * fdc,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size,int * fdcstatus);
+int hxcfe_writeSectorFDC (FDCCTRL * fdc,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size,int * fdcstatus);
 
 void hxcfe_deinitFDC (FDCCTRL * fdc);
 
-int hxcfe_FDC_READSECTOR  (HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size);
-int hxcfe_FDC_WRITESECTOR (HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size);
-int hxcfe_FDC_FORMAT      (HXCFLOPPYEMULATOR* floppycontext,unsigned char track,unsigned char side,unsigned char nbsector,int sectorsize,int sectoridstart,int skew,int interleave,int mode);
-int hxcfe_FDC_SCANSECTOR  (HXCFLOPPYEMULATOR* floppycontext,unsigned char track,unsigned char side,int mode,unsigned char * sector,unsigned char * buffer,int buffer_size);
+int hxcfe_FDC_READSECTOR  (HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size,int * fdcstatus);
+int hxcfe_FDC_WRITESECTOR (HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size,int * fdcstatus);
+int hxcfe_FDC_FORMAT      (HXCFLOPPYEMULATOR* floppycontext,unsigned char track,unsigned char side,unsigned char nbsector,int sectorsize,int sectoridstart,int skew,int interleave,int mode,int * fdcstatus);
+int hxcfe_FDC_SCANSECTOR  (HXCFLOPPYEMULATOR* floppycontext,unsigned char track,unsigned char side,int mode,unsigned char * sector,unsigned char * buffer,int buffer_size,int * fdcstatus);
+
+#define FDC_NOERROR 0x00
+#define FDC_BAD_DATA_CRC 0x01
+#define FDC_NO_DATA 0x02
+#define FDC_SECTOR_NOT_FOUND 0x03
 
 ////////////////////////////////////////////
 // File system functions
