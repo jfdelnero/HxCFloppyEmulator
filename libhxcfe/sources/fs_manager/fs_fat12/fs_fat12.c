@@ -64,7 +64,7 @@ void lba2chs(FSMNG * fsmng,int lba, int *track, int *head, int *sector)
 int media_read(unsigned long sector, unsigned char *buffer, unsigned long sector_count)
 {
 	unsigned long i,c;
-	int fp_track,fp_head,fp_sector;
+	int fp_track,fp_head,fp_sector,fdcstatus;
 
 	lba2chs(gb_fsmng,sector, &fp_track,&fp_head,&fp_sector);
 	gb_fsmng->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FS : media_read, sector: 0x%.8X, sector count : %d, Track: %d, Side: %d, Sector: %d",sector,sector_count,fp_track,fp_head,fp_sector);
@@ -72,16 +72,29 @@ int media_read(unsigned long sector, unsigned char *buffer, unsigned long sector
 	for(i=0;i<sector_count;i++)
 	{
 		lba2chs(gb_fsmng,sector + i, &fp_track,&fp_head,&fp_sector);
-		hxcfe_readSectorFDC (gb_fsmng->fdc,(unsigned char)fp_track,(unsigned char)fp_head,(unsigned char)fp_sector,gb_fsmng->sectorsize,ISOIBM_MFM_ENCODING,1,&buffer[i*gb_fsmng->sectorsize],gb_fsmng->sectorsize);
-		c++;
+		if(hxcfe_readSectorFDC (gb_fsmng->fdc,(unsigned char)fp_track,(unsigned char)fp_head,(unsigned char)fp_sector,gb_fsmng->sectorsize,ISOIBM_MFM_ENCODING,1,&buffer[i*gb_fsmng->sectorsize],gb_fsmng->sectorsize,&fdcstatus) == 1)
+		{
+			if(!fdcstatus)
+			{
+				c++;
+			}
+			else
+			{
+				gb_fsmng->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FS : media_read !!! ERROR !!!, sector: 0x%.8X, sector count : %d, Track: %d, Side: %d, Sector: %d, FDC Status : 0x%.2x",sector,sector_count,fp_track,fp_head,fp_sector,fdcstatus);
+			}
+		}
 	}
-	return c;
+
+	if( c == sector_count )
+		return 1;
+	else
+		return 0;
 }
 
 int media_write(unsigned long sector, unsigned char *buffer,unsigned long sector_count)
 {
 	unsigned long i,c;
-	int fp_track,fp_head,fp_sector;
+	int fp_track,fp_head,fp_sector,fdcstatus;
 
 	lba2chs(gb_fsmng,sector, &fp_track,&fp_head,&fp_sector);
 	gb_fsmng->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FS : media_write, sector: 0x%.8X, sector count : %d, Track: %d, Side: %d, Sector: %d",sector,sector_count,fp_track,fp_head,fp_sector);
@@ -90,11 +103,23 @@ int media_write(unsigned long sector, unsigned char *buffer,unsigned long sector
 	for(i=0;i<sector_count;i++)
 	{
 		lba2chs(gb_fsmng,sector + i, &fp_track,&fp_head,&fp_sector);
-		hxcfe_writeSectorFDC (gb_fsmng->fdc,(unsigned char)fp_track,(unsigned char)fp_head,(unsigned char)fp_sector,gb_fsmng->sectorsize,ISOIBM_MFM_ENCODING,1,&buffer[i*gb_fsmng->sectorsize],gb_fsmng->sectorsize);
-		c++;
+		if(hxcfe_writeSectorFDC (gb_fsmng->fdc,(unsigned char)fp_track,(unsigned char)fp_head,(unsigned char)fp_sector,gb_fsmng->sectorsize,ISOIBM_MFM_ENCODING,1,&buffer[i*gb_fsmng->sectorsize],gb_fsmng->sectorsize,&fdcstatus) == 1)
+		{
+			if(!fdcstatus)
+			{
+				c++;
+			}
+			else
+			{
+				gb_fsmng->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FS : media_write  !!! ERROR !!!, sector: 0x%.8X, sector count : %d, Track: %d, Side: %d, Sector: %d",sector,sector_count,fp_track,fp_head,fp_sector,fdcstatus);
+			}
+		}
 	}
 
-	return c;
+	if( c == sector_count )
+		return 1;
+	else
+		return 0;
 }
 
 void init_fat12(FSMNG * fsmng)
@@ -105,7 +130,9 @@ void init_fat12(FSMNG * fsmng)
 int fat12_mountImage(FSMNG * fsmng, FLOPPY *floppy)
 {
 	unsigned char sectorbuffer[1024];
-	int nbsector;
+	int nbsector,fdcstatus,badsectorfound;
+
+	badsectorfound = 0;
 
 	media_read_callback = media_read;
 	media_write_callback = media_write;
@@ -119,7 +146,7 @@ int fat12_mountImage(FSMNG * fsmng, FLOPPY *floppy)
 
 	fsmng->trackperdisk = fsmng->fp->floppyNumberOfTrack;
 	fsmng->sectorpertrack = 9;
-	fsmng->sidepertrack = 2;
+	fsmng->sidepertrack = fsmng->fp->floppyNumberOfSide;
 	fsmng->sectorsize = 512;
 
 	if(fsmng->fdc)
@@ -131,18 +158,35 @@ int fat12_mountImage(FSMNG * fsmng, FLOPPY *floppy)
 		if(hxcfe_insertDiskFDC (fsmng->fdc,floppy) == HXCFE_NOERROR)
 		{
 			// Count the number of sector
-			nbsector = 0;
 
-			while(hxcfe_readSectorFDC(fsmng->fdc,0,0,(unsigned char)(1+nbsector),512,ISOIBM_MFM_ENCODING,1,(unsigned char*)sectorbuffer,sizeof(sectorbuffer)))
+			// Side 1 checking
+			nbsector = 0;
+			while(hxcfe_readSectorFDC(fsmng->fdc,0,1,(unsigned char)(1+nbsector),512,ISOIBM_MFM_ENCODING,1,(unsigned char*)sectorbuffer,sizeof(sectorbuffer),&fdcstatus))
 			{
+				if(fdcstatus == FDC_BAD_DATA_CRC)
+					badsectorfound++;
+				nbsector++;
+			}
+
+			if(nbsector)
+				fsmng->sidepertrack = 2;
+
+			nbsector = 0;
+			while(hxcfe_readSectorFDC(fsmng->fdc,0,0,(unsigned char)(1+nbsector),512,ISOIBM_MFM_ENCODING,1,(unsigned char*)sectorbuffer,sizeof(sectorbuffer),&fdcstatus))
+			{
+				if(fdcstatus == FDC_BAD_DATA_CRC)
+					badsectorfound++;
 				nbsector++;
 			}
 
 			// Retry with 1024 bytes per sector
 			if(!nbsector)
 			{
-				while(hxcfe_readSectorFDC(fsmng->fdc,0,0,(unsigned char)(1+nbsector),1024,ISOIBM_MFM_ENCODING,1,(unsigned char*)sectorbuffer,sizeof(sectorbuffer)))
+				while(hxcfe_readSectorFDC(fsmng->fdc,0,0,(unsigned char)(1+nbsector),1024,ISOIBM_MFM_ENCODING,1,(unsigned char*)sectorbuffer,sizeof(sectorbuffer),&fdcstatus))
 				{
+					if(fdcstatus == FDC_BAD_DATA_CRC)
+						badsectorfound++;
+
 					nbsector++;
 				}
 
@@ -155,7 +199,7 @@ int fat12_mountImage(FSMNG * fsmng, FLOPPY *floppy)
 
 			gb_fsmng->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FS : %d Sectors per track (%d Bytes per sector)",fsmng->sectorpertrack,fsmng->sectorsize);
 
-			if(fsmng->sectorpertrack)
+			if(fsmng->sectorpertrack && !badsectorfound)
 			{
 				/* Attach media access functions to library*/
 				if (fiol_attach_media(media_read_callback, media_write_callback) != FAT_INIT_OK)
