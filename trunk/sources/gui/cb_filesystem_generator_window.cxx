@@ -333,8 +333,8 @@ void tick_fs(void *w) {
 
 int displaydir(FSMNG  * fsmng,filesystem_generator_window *fgw,char * folder,int level)
 {
-	char fullpath[1024];
-	char fullpath2[1024];
+	char fullpath[512];
+	char fullpath2[512];
 	int dirhandle;
 	int ret;
 	int dir;
@@ -342,6 +342,9 @@ int displaydir(FSMNG  * fsmng,filesystem_generator_window *fgw,char * folder,int
 	FSENTRY  dirent;
 
 	totalsize = 0;
+
+	memset(fullpath,0,sizeof(fullpath));
+	memset(fullpath2,0,sizeof(fullpath2));
 
 	dirhandle = hxcfe_openDir(fsmng,folder);
 	if ( dirhandle > 0 )
@@ -382,7 +385,8 @@ int displaydir(FSMNG  * fsmng,filesystem_generator_window *fgw,char * folder,int
 						printsize(&fullpath2[strlen(fullpath2)],dirent.size);
 						strcat(fullpath2,"|");
 					}
-					fgw->fs_browser->add((char*)&fullpath2);
+
+					fgw->fs_browser->add(fullpath2);
 				}
 
 				if(dir)
@@ -654,7 +658,7 @@ void browse_floppy_disk(filesystem_generator_window *fgw,int lastoperationerror)
 					fgw->fs_browser->root_label("/");
 					fgw->fs_browser->showroot(1);
 					fgw->fs_browser->redraw();
-					fgw->fs_browser->show_self();
+					//fgw->fs_browser->show_self();
 
 
 					if(totalsize>=0)
@@ -706,7 +710,7 @@ void browse_floppy_disk(filesystem_generator_window *fgw,int lastoperationerror)
 		fgw->fs_browser->root_label("/");
 		fgw->fs_browser->showroot(1);
 		fgw->fs_browser->redraw();
-		fgw->fs_browser->show_self();
+		//fgw->fs_browser->show_self();
 
 		sprintf(statustxt,"No DOS Image Loaded !");
 		fgw->txtout_freesize->value((const char*)statustxt);
