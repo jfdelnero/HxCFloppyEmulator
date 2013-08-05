@@ -251,9 +251,17 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 		
 		numberofcluster=(fatconfig.nbofsector-(dataposition/fatconfig.sectorsize))/fatconfig.clustersize;
 
-		hxc_stat(imgfile,&staterep);
-		if(!(staterep.st_mode&S_IFDIR))
+		memset(&staterep,0,sizeof(struct stat));
+		if(strlen(imgfile))
+		{		
+			hxc_stat(imgfile,&staterep);
+			if(!(staterep.st_mode&S_IFDIR))
 				dirmode=0x00;
+		}
+		else
+		{
+			dirmode=0x00;
+		}
 
 		if(dirmode)
 		{
