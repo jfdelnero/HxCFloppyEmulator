@@ -438,7 +438,7 @@ static void tick_mw(void *v) {
 		{
 			guicontext->txtindex=0;
 		}
-				
+
 		i=0;
 		j=guicontext->txtindex;
 		do
@@ -449,7 +449,9 @@ static void tick_mw(void *v) {
 			if(j>=(int)strlen(tempstr)) j=0;
 		}while(i<(int)strlen(tempstr));
 		tempstr2[i]=0;
-		memcpy(&tempstr2[i],tempstr2,strlen(tempstr2));
+		j = strlen(tempstr2);
+		memcpy(&tempstr2[i],tempstr2,j);
+		tempstr2[i + j] = 0;
 			
 		window->file_name_txt->value((const char*)tempstr2);
 		//SetDlgItemText(hwndDlg,IDC_EDIT_STATUS,tempstr2);
