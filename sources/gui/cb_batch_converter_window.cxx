@@ -129,8 +129,12 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 
 		if(1)
 		{
+
+
 			if(!params->rawfilemode)
 				loaderid=hxcfe_autoSelectLoader(floppycontext,filelist[filenb],0);
+			else
+				loaderid = 0;
 
 			if(loaderid>=0 || params->rawfilemode)
 			{

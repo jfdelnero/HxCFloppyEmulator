@@ -80,7 +80,7 @@ License_box::License_box()
   : Fl_Window(600,400)
 {
 	int xsize,ysize;
-	
+
 	xsize=600;
 	ysize=400;
 
