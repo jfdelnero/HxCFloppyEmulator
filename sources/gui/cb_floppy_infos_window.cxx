@@ -84,6 +84,9 @@ void update_graph(floppy_infos_window * w)
 	{
 		w->window->make_current();
 		
+		w->object_txt->textsize(9);
+		w->object_txt->textfont(FL_SCREEN);
+
 		td=guicontext->td;
 		if(td)
 		{
