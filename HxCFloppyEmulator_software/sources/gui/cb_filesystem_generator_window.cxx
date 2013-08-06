@@ -719,6 +719,11 @@ void browse_floppy_disk(filesystem_generator_window *fgw,int lastoperationerror)
 				fgw->txtout_freesize->value("Some Errors found during the Image mounting ! DOS Disk ? Disk damaged ?");
 				fgw->txtout_freesize->color(FL_RED);
 				fgw->txtout_freesize->redraw();
+
+				fgw->fs_browser->root_label("/");
+				fgw->fs_browser->showroot(0);
+				fgw->fs_browser->redraw();
+
 			}
 			hxcfe_deinitFsManager(fsmng);
 		}
