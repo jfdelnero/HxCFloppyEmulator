@@ -691,19 +691,19 @@ void browse_floppy_disk(filesystem_generator_window *fgw,int lastoperationerror)
 					}
 					else
 					{
-						fgw->txtout_freesize->value("Null sized DOS image ! Invalid disk !");
+						fgw->txtout_freesize->value("Some Errors found during the Image reading ! Disk damaged ?");
 						fgw->txtout_freesize->color(FL_RED);
 						fgw->txtout_freesize->redraw();
 
 						fgw->fs_browser->root_label("/");
 						fgw->fs_browser->showroot(0);
 						fgw->fs_browser->redraw();
-					}
 
+					}
 				}
 				else
 				{
-					fgw->txtout_freesize->value("Some Errors found during the Image reading ! Disk damaged ?");
+					fgw->txtout_freesize->value("Null sized DOS image ! Invalid disk !");
 					fgw->txtout_freesize->color(FL_RED);
 					fgw->txtout_freesize->redraw();
 
