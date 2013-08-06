@@ -708,6 +708,7 @@ void fiol_shutdown(void)
 
     FL_LOCK(&_fs);
     fatfs_fat_purge(&_fs);
+	memset(&_fs,0,sizeof(struct fatfs));
     FL_UNLOCK(&_fs);
 }
 //-----------------------------------------------------------------------------

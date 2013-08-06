@@ -94,6 +94,10 @@ int fatfs_allocate_free_space(struct fatfs *fs, int newFile, uint32 *startCluste
 
     // Work out size and clusters
     clusterSize = fs->sectors_per_cluster * fs->sector_size;
+
+	if( clusterSize == 0 )
+		return 0;
+
     clusterCount = (size / clusterSize);
 
     // If any left over

@@ -219,6 +219,7 @@ int fat12_umountImage(FSMNG * fsmng)
 {
 	if(fsmng->fdc)
 	{
+		fiol_shutdown();
 		hxcfe_deinitFDC (fsmng->fdc);
 		fsmng->fdc = 0;
 	}
