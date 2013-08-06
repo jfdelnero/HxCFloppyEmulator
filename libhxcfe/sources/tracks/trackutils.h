@@ -25,7 +25,7 @@
 //
 */
 
-unsigned short biteven[];
+extern unsigned short * biteven;
 
 int  getbit(unsigned char * input_data,int bit_offset);
 void setbit(unsigned char * input_data,int bit_offset,int state);
