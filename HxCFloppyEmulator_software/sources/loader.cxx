@@ -90,6 +90,8 @@ int load_floppy(FLOPPY * floppydisk,char * defaultfilename)
 	}
 
 	guicontext->updatefloppyinfos++;
+	guicontext->updatefloppyfs++;
+
 	return ret;
 }
 
