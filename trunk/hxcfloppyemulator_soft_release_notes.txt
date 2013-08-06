@@ -10,6 +10,15 @@
 -------------------------------------------------------------------------------
 
 /*********************************************************
+06 august 2013: HxCFloppyEmulator 2.0.16.0
+
+FAT12 Loader/generator : Files size, disk size & disk free size displayed, lots of sanity checks added.
+
+TRS80 Writer : Bad free() removed. 
+
+General : Software passed with valgrind : Some memory leaks and possible issues corrected !
+
+/*********************************************************
 16 July 2013: HxCFloppyEmulator 2.0.15.1
 
 FAT12 Loader/generator : Default file creation date set to 1985 to avoid issue with non year 2000 compatibles machines (Kawasaki JS30 robots...).
