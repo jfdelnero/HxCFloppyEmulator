@@ -23,7 +23,7 @@ HxC Floppy Emulator command line software
 -------------------------------------------------------------------------------
 Folder HxCFloppyEmulator_software
 HxC Floppy Emulator GUI software
-(Windows, Linux & MacOsX soon)
+(Windows, Linux & MacOsX)
 -------------------------------------------------------------------------------
 Folder vfd_hxc
 Virtual Floppy Drive 2.1 sources patched For the SD HxC Floppy Emulator.
