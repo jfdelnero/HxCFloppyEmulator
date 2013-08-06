@@ -824,6 +824,7 @@ Main_Window::Main_Window()
 	data_COPYING_FULL->unpacked_data=mi_unpack(data_COPYING_FULL->data,data_COPYING_FULL->csize ,data_COPYING_FULL->data, data_COPYING_FULL->size);
 	
 	license_txt=(char*)data_COPYING_FULL->unpacked_data;
+	license_txt[data_COPYING_FULL->size - 1] = 0;
 
 	
 	sync_if_config();
