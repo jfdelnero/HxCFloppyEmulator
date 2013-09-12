@@ -52,7 +52,7 @@
 #include "libhxcfe.h"
 #include "usb_hxcfloppyemulator.h"
 
-#include "ftdi.h"
+#include "ftdi_api.h"
 #include "libhxcadaptor.h"
 #include "variablebitrate.h"
 
@@ -518,7 +518,6 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 			}
 
 		}while(init_failed);
-
 
 		// detection terminee
 		// on rentre dans la boucle de fonctionnement

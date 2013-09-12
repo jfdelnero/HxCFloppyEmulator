@@ -26,6 +26,7 @@
 */
 
 //#define FTDILIB 1
+//#define DEBUGMODE 1
 
 #include "libhxcfe.h"
 
@@ -46,6 +47,7 @@
 	#include "../macosx/ftd2xx.h"
 #else // __linux__
 	#include <dlfcn.h>
+	#include <errno.h>
 
 	#if defined(FTDILIB)
 		#include <ftdi.h>
@@ -55,7 +57,7 @@
 
 #endif
 
-#include "ftdi.h"
+#include "ftdi_api.h"
 
 #if !defined(FTDILIB)
 
@@ -86,6 +88,7 @@ FT_CLOSE pFT_Close;
 EVENT_HANDLE * STOP_THREAD_EVENT;
 EVENT_HANDLE * READ_THREAD_EVENT;
 int stop_thread;
+
 struct ftdi_context ftdic;
 
 typedef struct _DATA_FIFO{
@@ -198,6 +201,10 @@ int FTDIListener(struct ftdi_context *ftdihandle)
 		}
 		else
 		{
+			#ifdef DEBUGMODE
+				printf("FTDIListener : ftdi_read_data=%d\n",returnvalue);
+			#endif
+
 			stop_thread=1;
 			if(READ_THREAD_EVENT)setevent(READ_THREAD_EVENT);
 		}
@@ -321,7 +328,8 @@ int ftdi_load_lib (HXCFLOPPYEMULATOR* floppycontext)
 	
 	#else // defined(FTDILIB)
 
-		ftdi_init(&ftdic);
+		if( !ftdi_init(&ftdic) )
+		return 1;
 
 	#endif
 
@@ -341,10 +349,8 @@ int open_ftdichip(unsigned long * ftdihandle)
 
 #if defined(FTDILIB)
 
-	ret = ftdi_usb_open(&ftdic, 0x0403, 0x6001);
-	if(ret<0)
+	if( ftdi_usb_open(&ftdic, 0x0403, 0x6001) < 0 )
 	{
-		c++;
 		*ftdihandle=0;
 		return -1;
 	}
@@ -362,6 +368,8 @@ int open_ftdichip(unsigned long * ftdihandle)
 		memset(rx_fifo.BUFFER,0,BUFFERSIZE);
 
 		createlistenerthread(FTDIListener,128,&ftdic);
+
+		return 0;
 	}
 
 #else
@@ -411,11 +419,12 @@ int close_ftdichip(unsigned long ftdihandle)
 
 int purge_ftdichip(unsigned long ftdihandle,unsigned long buffer)
 {
+	int ret;
 
 #ifdef DEBUGMODE
 	printf("---purge_ftdichip---\n");
 #endif
-
+	ret = 0;
 #if defined(FTDILIB)
 
 	ftdi_usb_purge_rx_buffer((struct ftdi_context *)ftdihandle);
@@ -593,6 +602,8 @@ int getfifostatus_ftdichip(unsigned long ftdihandle,int * txlevel,int *rxlevel,u
 		*rxlevel=0;
 		*event=0;
 	}
+
+	return 0;
 
 #else
 
