@@ -241,6 +241,8 @@ int hxc_createthread(HXCFLOPPYEMULATOR* floppycontext,void* hwcontext,THREADFUNC
 
 	pthread_attr_init(&threadattrib);
 
+	pthread_attr_setinheritsched(&threadattrib, PTHREAD_EXPLICIT_SCHED);
+
 	pthread_attr_setschedpolicy(&threadattrib,SCHED_FIFO);
 	param.sched_priority = sched_get_priority_max(SCHED_FIFO);
 	/* set the new scheduling param */
