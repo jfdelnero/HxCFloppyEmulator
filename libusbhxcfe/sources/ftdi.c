@@ -51,10 +51,6 @@
 	#include <dlfcn.h>
 	#include <errno.h>
 
-	//#if defined(FTDILIB)
-	//	#include <ftdi.h>
-	//#endif
-
 	#include "../linux/ftd2xx.h"
 
 #endif
@@ -85,20 +81,20 @@ FT_CLOSE pFT_Close;
 
 #else
 
-typedef void ftdi_context
+typedef void * ftdi_context;
 
-typedef ftdi_context * ( * P_FTDI_NEW)();
-typedef int ( * P_FTDI_INIT)(ftdi_context * ftdi);
-typedef int ( * P_FTDI_USB_OPEN)(ftdi_context * ftdi, int vendor, int product);
-typedef int ( * P_FTDI_USB_CLOSE)(ftdi_context * ftdi);
-typedef int ( * P_FTDI_USB_PURGE_RX_BUFFER)(ftdi_context * ftdi);
-typedef int ( * P_FTDI_USB_PURGE_TX_BUFFER)(ftdi_context * ftdi);
-typedef int ( * P_FTDI_USB_PURGE_BUFFERS)(ftdi_context * ftdi);
-typedef int ( * P_FTDI_READ_DATA_SET_CHUNKSIZE)(ftdi_context * ftdi, unsigned int chunksize);
-typedef int ( * P_FTDI_WRITE_DATA_SET_CHUNKSIZE)(ftdi_context * ftdi, unsigned int chunksize);
-typedef int ( * P_FTDI_SET_LATENCY_TIMER)(ftdi_context * ftdi, unsigned char latency);
-typedef int ( * P_FTDI_WRITE_DATA)(ftdi_context * ftdi, unsigned char * buf, int size);
-typedef int ( * P_FTDI_READ_DATA)(ftdi_context * ftdi, unsigned char * buf, int size);
+typedef ftdi_context ( * P_FTDI_NEW)();
+typedef int ( * P_FTDI_INIT)(ftdi_context ftdi);
+typedef int ( * P_FTDI_USB_OPEN)(ftdi_context ftdi, int vendor, int product);
+typedef int ( * P_FTDI_USB_CLOSE)(ftdi_context ftdi);
+typedef int ( * P_FTDI_USB_PURGE_RX_BUFFER)(ftdi_context ftdi);
+typedef int ( * P_FTDI_USB_PURGE_TX_BUFFER)(ftdi_context ftdi);
+typedef int ( * P_FTDI_USB_PURGE_BUFFERS)(ftdi_context ftdi);
+typedef int ( * P_FTDI_READ_DATA_SET_CHUNKSIZE)(ftdi_context ftdi, unsigned int chunksize);
+typedef int ( * P_FTDI_WRITE_DATA_SET_CHUNKSIZE)(ftdi_context ftdi, unsigned int chunksize);
+typedef int ( * P_FTDI_SET_LATENCY_TIMER)(ftdi_context ftdi, unsigned char latency);
+typedef int ( * P_FTDI_WRITE_DATA)(ftdi_context ftdi, unsigned char * buf, int size);
+typedef int ( * P_FTDI_READ_DATA)(ftdi_context ftdi, unsigned char * buf, int size);
 
 P_FTDI_NEW                      p_ftdi_new;
 P_FTDI_INIT                     p_ftdi_init;
@@ -180,12 +176,12 @@ int waitevent(EVENT_HANDLE* theevent,int timeout)
 
 // --------------------------------------------------------
 
-typedef int (*RDTHREADFUNCTION) (ftdi_context * ftdihandle);
+typedef int (*RDTHREADFUNCTION) (ftdi_context ftdihandle);
 
 typedef struct listenerthreadinit_
 {
 	RDTHREADFUNCTION thread;
-	ftdi_context *ftdihandle;
+	ftdi_context ftdihandle;
 }listenerthreadinit;
 
 void * FTDIListenerThreadProc( void *lpParameter)
@@ -201,7 +197,7 @@ void * FTDIListenerThreadProc( void *lpParameter)
 	return 0;
 }
 
-int FTDIListener(ftdi_context *ftdihandle)
+int FTDIListener(ftdi_context ftdihandle)
 {
 	int returnvalue,i;
 	unsigned char * bufferptr;
@@ -243,7 +239,7 @@ int FTDIListener(ftdi_context *ftdihandle)
 	return 0;
 }
 
-int createlistenerthread(RDTHREADFUNCTION thread,int priority,ftdi_context * ftdihandle)
+int createlistenerthread(RDTHREADFUNCTION thread,int priority,ftdi_context ftdihandle)
 {
 	unsigned long sit;
 	pthread_t threadid;
@@ -360,32 +356,35 @@ int ftdi_load_lib (HXCFLOPPYEMULATOR* floppycontext)
 		lib_handle = dlopen("libftdi.so", RTLD_LOCAL|RTLD_LAZY);
 
 		if (!lib_handle) {
-			floppycontext->hxc_printf(MSG_ERROR,"Error while loading FTDI library! library not found !");
+			floppycontext->hxc_printf(MSG_ERROR,"Error while loading FTDI library! libftdi.so not found !");
 			return -1;
 		}
 
-		p_ftdi_new =       (P_FTDI_NEW) dlsym(lib_handle, "ftdi_new");
-		p_ftdi_init =      (P_FTDI_INIT)dlsym(lib_handle, "ftdi_init");
-		p_ftdi_usb_open =  (P_FTDI_USB_OPEN)dlsym(lib_handle, "ftdi_usb_open");
-		p_ftdi_usb_close = (P_FTDI_USB_CLOSE)dlsym(lib_handle, "ftdi_usb_close");
-		p_ftdi_usb_purge_rx_buffer =      (P_FTDI_USB_PURGE_RX_BUFFER)dlsym(lib_handle, "ftdi_usb_purge_rx_buffer");
-		p_ftdi_usb_purge_tx_buffer =      (P_FTDI_USB_PURGE_TX_BUFFER)dlsym(lib_handle, "ftdi_usb_purge_tx_buffer");
-		p_ftdi_usb_purge_buffers =        (P_FTDI_USB_PURGE_BUFFERS)dlsym(lib_handle, "ftdi_usb_purge_buffers");	
-		p_ftdi_read_data_set_chunksize =  (P_FTDI_READ_DATA_SET_CHUNKSIZE)dlsym(lib_handle, "ftdi_read_data_set_chunksize");
+		p_ftdi_new =                      (P_FTDI_NEW)                     dlsym(lib_handle, "ftdi_new");
+		p_ftdi_init =                     (P_FTDI_INIT)                    dlsym(lib_handle, "ftdi_init");
+		p_ftdi_usb_open =                 (P_FTDI_USB_OPEN)                dlsym(lib_handle, "ftdi_usb_open");
+		p_ftdi_usb_close =                (P_FTDI_USB_CLOSE)               dlsym(lib_handle, "ftdi_usb_close");
+		p_ftdi_usb_purge_rx_buffer =      (P_FTDI_USB_PURGE_RX_BUFFER)     dlsym(lib_handle, "ftdi_usb_purge_rx_buffer");
+		p_ftdi_usb_purge_tx_buffer =      (P_FTDI_USB_PURGE_TX_BUFFER)     dlsym(lib_handle, "ftdi_usb_purge_tx_buffer");
+		p_ftdi_usb_purge_buffers =        (P_FTDI_USB_PURGE_BUFFERS)       dlsym(lib_handle, "ftdi_usb_purge_buffers");	
+		p_ftdi_read_data_set_chunksize =  (P_FTDI_READ_DATA_SET_CHUNKSIZE) dlsym(lib_handle, "ftdi_read_data_set_chunksize");
 		p_ftdi_write_data_set_chunksize = (P_FTDI_WRITE_DATA_SET_CHUNKSIZE)dlsym(lib_handle, "ftdi_write_data_set_chunksize");
-		p_ftdi_set_latency_timer = 	      (P_FTDI_SET_LATENCY_TIMER)dlsym(lib_handle,"ftdi_set_latency_timer");
-		p_ftdi_write_data = 	          (P_FTDI_WRITE_DATA)dlsym(lib_handle,"ftdi_write_data");
-		p_ftdi_read_data =                (P_FTDI_READ_DATA)dlsym(lib_handle,"ftdi_read_data");
+		p_ftdi_set_latency_timer = 	      (P_FTDI_SET_LATENCY_TIMER)       dlsym(lib_handle, "ftdi_set_latency_timer");
+		p_ftdi_write_data = 	          (P_FTDI_WRITE_DATA)              dlsym(lib_handle, "ftdi_write_data");
+		p_ftdi_read_data =                (P_FTDI_READ_DATA)               dlsym(lib_handle, "ftdi_read_data");
 
 		if( p_ftdi_new && p_ftdi_init &&  p_ftdi_usb_open && p_ftdi_usb_close && p_ftdi_usb_purge_rx_buffer &&
 		    p_ftdi_usb_purge_tx_buffer && p_ftdi_usb_purge_buffers && p_ftdi_read_data_set_chunksize && p_ftdi_write_data_set_chunksize &&
 			p_ftdi_set_latency_timer && p_ftdi_write_data && p_ftdi_read_data)
 		{
 			ftdic = p_ftdi_new();
-			floppycontext->hxc_printf(MSG_INFO_1,"FTDI library loaded successfully!");
-			if( !ftdi_init(ftdic) )
+			if(ftdic)
 			{
-				return 1;
+				floppycontext->hxc_printf(MSG_INFO_1,"FTDI library loaded successfully!");
+				if( !ftdi_init(ftdic) )
+				{
+					return 1;
+				}
 			}
 		}
 		else
@@ -414,7 +413,7 @@ int open_ftdichip(unsigned long * ftdihandle)
 
 #if defined(FTDILIB)
 
-	if( p_ftdi_usb_open(&ftdic, 0x0403, 0x6001) < 0 )
+	if( p_ftdi_usb_open(ftdic, 0x0403, 0x6001) < 0 )
 	{
 		*ftdihandle=0;
 		return -1;
@@ -422,7 +421,7 @@ int open_ftdichip(unsigned long * ftdihandle)
 	else
 	{
 		stop_thread=0;
-		*ftdihandle=(unsigned long)(&ftdic);
+		*ftdihandle=(unsigned long)(ftdic);
 		STOP_THREAD_EVENT=createevent();
 		READ_THREAD_EVENT=0;
 		tx_fifo.ptr_in=0;
@@ -432,7 +431,7 @@ int open_ftdichip(unsigned long * ftdihandle)
 		rx_fifo.ptr_out=0;
 		memset(rx_fifo.BUFFER,0,BUFFERSIZE);
 
-		createlistenerthread(FTDIListener,128,&ftdic);
+		createlistenerthread(FTDIListener,128,ftdic);
 
 		return 0;
 	}
@@ -468,7 +467,7 @@ int close_ftdichip(unsigned long ftdihandle)
 
 	stop_thread=1;
 	waitevent(STOP_THREAD_EVENT,10000);
-	p_ftdi_usb_close((ftdi_context *)ftdihandle);
+	p_ftdi_usb_close((ftdi_context)ftdihandle);
 	destroyevent(STOP_THREAD_EVENT);
 
 #else
@@ -492,9 +491,9 @@ int purge_ftdichip(unsigned long ftdihandle,unsigned long buffer)
 	ret = 0;
 #if defined(FTDILIB)
 
-	p_ftdi_usb_purge_rx_buffer((ftdi_context *)ftdihandle);
-	p_ftdi_usb_purge_tx_buffer((ftdi_context *)ftdihandle);
-	ret=p_ftdi_usb_purge_buffers((ftdi_context *)ftdihandle);
+	p_ftdi_usb_purge_rx_buffer((ftdi_context)ftdihandle);
+	p_ftdi_usb_purge_tx_buffer((ftdi_context)ftdihandle);
+	ret=p_ftdi_usb_purge_buffers((ftdi_context)ftdihandle);
 
 	rx_fifo.ptr_in=0;
 	rx_fifo.ptr_out=0;
@@ -524,8 +523,8 @@ int setusbparameters_ftdichip(unsigned long ftdihandle,unsigned long buffersizet
 
 #if defined(FTDILIB)
 
-	p_ftdi_read_data_set_chunksize((ftdi_context *)ftdihandle, buffersizerx);
-	p_ftdi_write_data_set_chunksize((ftdi_context *)ftdihandle, buffersizetx);
+	p_ftdi_read_data_set_chunksize((ftdi_context)ftdihandle, buffersizerx);
+	p_ftdi_write_data_set_chunksize((ftdi_context)ftdihandle, buffersizetx);
 
 #else
 
@@ -547,7 +546,7 @@ int setlatencytimer_ftdichip(unsigned long ftdihandle,unsigned char latencytimer
 
 #if defined(FTDILIB)
 
-	if(p_ftdi_set_latency_timer((ftdi_context *)ftdihandle, latencytimer_ms)<0)
+	if(p_ftdi_set_latency_timer((ftdi_context)ftdihandle, latencytimer_ms)<0)
 	{
 		return -1;
 	}
@@ -574,7 +573,7 @@ int write_ftdichip(unsigned long ftdihandle,unsigned char * buffer,unsigned int 
 	
 #if defined(FTDILIB)
 
-	dwWritten=p_ftdi_write_data((ftdi_context *)ftdihandle, buffer, size);
+	dwWritten=p_ftdi_write_data((ftdi_context)ftdihandle, buffer, size);
 	if(dwWritten<0)
 	{
 		return -1;
