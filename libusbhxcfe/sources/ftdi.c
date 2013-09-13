@@ -381,7 +381,7 @@ int ftdi_load_lib (HXCFLOPPYEMULATOR* floppycontext)
 			if(ftdic)
 			{
 				floppycontext->hxc_printf(MSG_INFO_1,"FTDI library loaded successfully!");
-				if( !ftdi_init(ftdic) )
+				if( !p_ftdi_init(ftdic) )
 				{
 					return 1;
 				}
