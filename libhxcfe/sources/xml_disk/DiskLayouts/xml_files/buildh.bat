@@ -17,5 +17,6 @@
 ..\..\converttools\bmptoh DiskLayout_AtariST_DD_720KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_OS9_1280KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_GeneralMusic_GEM_S3_1600KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_GeneralMusic_GEM_WX_Expander.xml -DATA
 
 move *.h ..
