@@ -475,3 +475,6 @@ int hxcfe_removeDir( FSMNG * fsmng,char * foldername);
 
 void hxcfe_deinitFsManager(FSMNG * fsmng);
 
+// Track data/bitstream modification functions.
+SIDE * hxcfe_getSide(FLOPPY * fp,int track,int side);
+int    hxcfe_shiftTrackData(SIDE * side,long bitoffset);

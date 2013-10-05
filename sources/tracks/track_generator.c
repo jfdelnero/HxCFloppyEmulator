@@ -54,6 +54,7 @@
 #include "crc.h"
 #include "floppy_utils.h"
 #include "math.h"
+#include "trackutils.h"
 
 
 unsigned short MFM_tab[]=
@@ -1856,4 +1857,78 @@ unsigned char * tg_allocsubtrack_char(unsigned int tracksize,unsigned char initv
 	}
 	
 	return ptr;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+SIDE * hxcfe_getSide(FLOPPY * fp,int track,int side)
+{
+
+	if(fp)
+	{
+		if( ( track < fp->floppyNumberOfTrack ) && ( side < fp->floppyNumberOfSide ) )
+		{
+			if(fp->tracks)
+			{
+				if(fp->tracks[track]->sides && ( side < fp->tracks[track]->number_of_side) )
+				{
+					return fp->tracks[track]->sides[side];
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+int hxcfe_shiftTrackData(SIDE * side,long bitoffset)
+{
+	unsigned char * tmpbuffer;
+	unsigned long i,j;
+
+	if(side)
+	{
+		tmpbuffer = malloc( (side->tracklen>>3) + 1 );
+		if(tmpbuffer)
+		{
+			memset(tmpbuffer,0,(side->tracklen>>3) + 1);
+
+			for(i=0;i<side->tracklen;i++)
+			{
+				setbit(tmpbuffer,((i+bitoffset)%side->tracklen),getbit(side->databuffer,i));	
+			}
+
+			j=0;
+			if(side->tracklen&7)
+				j = 1;
+
+			memcpy(side->databuffer,tmpbuffer,(side->tracklen>>3) + j);
+			
+			////////////////////////////////////////////////////////////
+			
+			if(side->flakybitsbuffer)
+			{
+				memset(tmpbuffer,0,(side->tracklen>>3) + 1);
+
+				for(i=0;i<side->tracklen;i++)
+				{
+					setbit(tmpbuffer,((i+bitoffset)%side->tracklen),getbit(side->flakybitsbuffer,i));	
+				}
+
+				j=0;
+				if(side->tracklen&7)
+					j = 1;
+
+				memcpy(side->flakybitsbuffer,tmpbuffer,(side->tracklen>>3) + j);
+			}
+
+			////////////////////////////////////////////////////////////
+
+			free(tmpbuffer);
+			
+			return HXCFE_NOERROR;
+		}
+	}
+
+	return HXCFE_BADPARAMETER;
 }
