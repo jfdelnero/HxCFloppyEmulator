@@ -131,3 +131,5 @@ EXPORTS
    hxcfe_getFreeFsSpace			@423
    hxcfe_getTotalFsSpace		@424
 
+   hxcfe_getSide				@500
+   hxcfe_shiftTrackData			@501
