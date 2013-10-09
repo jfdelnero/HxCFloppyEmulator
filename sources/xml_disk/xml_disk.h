@@ -23,8 +23,10 @@ enum
 	NUMBEROFSECTOR,
 	SECTORSIZE,
 	INTERLEAVE,
+	INTERLEAVE_TRACK,
 	BITRATE,
 	SKEW,
+	SKEW_TRACK,
 	SKEW_PER_TRACK,
 	SKEW_PER_SIDE,
 	GAP3,
@@ -44,7 +46,9 @@ enum
 	TRACKID_SECTOR,
 	SIZEID_SECTOR,
 	SECTORDATA_SECTOR,
-	SECTORSIZE_SECTOR
+	SECTORSIZE_SECTOR,
+	TRACK_GAP3,
+	TRACK_PREGAP
 };
 
 keyword keyword_list[]=
@@ -80,6 +84,10 @@ keyword keyword_list[]=
 	{"sector_size",					SECTORSIZE_TRACK,			TRACK},
 	{"start_sector_id",				STARTSECTORID_TRACK,		TRACK},
 	{"sector_list",					SECTORLIST,					TRACK},
+	{"gap3",						TRACK_GAP3,					TRACK},
+	{"pregap",						TRACK_PREGAP,				TRACK},
+	{"skew",						SKEW_TRACK,					TRACK},
+	{"interleave",					INTERLEAVE_TRACK,			TRACK},
 	{"sector",						SECTOR,						SECTORLIST},
 	{"track_id",					TRACKID_SECTOR,				SECTOR},
 	{"size_id",						SIZEID_SECTOR,				SECTOR},

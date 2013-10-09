@@ -49,6 +49,7 @@ EXPORTS
    hxcfe_setSectorData		@66
    hxcfe_pushSector			@67
    hxcfe_popSector			@68
+   hxcfe_setTrackType		@69
 
    hxcfe_addSector			@70
    hxcfe_setSectorBitrate   @71
