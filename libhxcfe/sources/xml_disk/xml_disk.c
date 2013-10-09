@@ -389,10 +389,12 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 			if(!ad->xmlcheck)
 				hxcfe_setSectorSize(ad->fb,atoi(buffer));
 		break;
+		case INTERLEAVE_TRACK:
 		case INTERLEAVE:
 			if(!ad->xmlcheck)
 				hxcfe_setTrackInterleave(ad->fb,atoi(buffer));
 		break;
+		case SKEW_TRACK:
 		case SKEW:
 			if(!ad->xmlcheck)
 				hxcfe_setTrackSkew(ad->fb,atoi(buffer));
@@ -412,6 +414,7 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 				ad->fill_value = ahextoi(buffer);
 			}
 		break;
+		case FORMAT_TRACK:
 		case FORMAT:
 			if(!ad->xmlcheck)
 			{
@@ -429,7 +432,7 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 				{
 					ad->statestack[ad->stack_ptr].track_type = ISOFORMAT_SD;
 				}
-				
+
 				if(!strcmp(buffer,"IBM_FM"))
 				{
 					ad->statestack[ad->stack_ptr].track_type = IBMFORMAT_SD;
@@ -443,11 +446,12 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 				hxcfe_setTrackType(ad->fb,ad->statestack[ad->stack_ptr].track_type);
 			}
 		break;
-
+		case TRACK_PREGAP:
 		case PREGAP:
 			if(!ad->xmlcheck)
 				hxcfe_setTrackPreGap (ad->fb,(unsigned short)atoi(buffer));
 		break;
+		case TRACK_GAP3:
 		case GAP3:
 			if(!ad->xmlcheck)
 				hxcfe_setSectorGap3 (ad->fb,(unsigned char)atoi(buffer));
