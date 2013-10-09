@@ -136,6 +136,7 @@ int hxcfe_setNumberOfSide (FBuilder* fb,unsigned char numberofside);
 int hxcfe_setNumberOfSector (FBuilder* fb,unsigned short numberofsector);
 int hxcfe_setSectorSize(FBuilder* fb,int size);
 int hxcfe_setStartSectorID(FBuilder* fb,unsigned char startsectorid);
+int hxcfe_setTrackType(FBuilder* fb,int type);
 
 int	hxcfe_pushTrack (FBuilder*,unsigned int rpm,int number,int side,int type);
 int hxcfe_pushTrackPFS (FBuilder* fb,int number,int side);
