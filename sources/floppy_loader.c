@@ -792,6 +792,20 @@ int hxcfe_setTrackBitrate(FBuilder* fb,int bitrate)
 	return HXCFE_NOERROR;
 }
 
+int hxcfe_setTrackType(FBuilder* fb,int type)
+{
+	fb_track_state * cur_track;
+
+	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
+
+	cur_track->type = type;
+	cur_track->sectorconfig.trackencoding = type;
+	cur_track->sc_stack[fb->fb_stack[fb->fb_stack_pointer].sc_stack_pointer].trackencoding = type;
+
+	return HXCFE_NOERROR;
+
+}
+
 int hxcfe_setTrackInterleave(FBuilder* fb,int interleave)
 {
 	fb->fb_stack[fb->fb_stack_pointer].interleave = interleave;

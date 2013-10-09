@@ -59,6 +59,7 @@
 typedef struct parse_stack_
 {
 	int state;
+	int track_type;
 	int cur_track;
 }parse_stack;
 
@@ -411,6 +412,38 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 				ad->fill_value = ahextoi(buffer);
 			}
 		break;
+		case FORMAT:
+			if(!ad->xmlcheck)
+			{
+				ad->statestack[ad->stack_ptr].track_type = IBMFORMAT_DD;
+
+				if(!strcmp(buffer,"ISO_MFM"))
+				{
+					ad->statestack[ad->stack_ptr].track_type = ISOFORMAT_DD;
+				}
+				if(!strcmp(buffer,"IBM_MFM"))
+				{
+					ad->statestack[ad->stack_ptr].track_type = IBMFORMAT_DD;
+				}
+				if(!strcmp(buffer,"ISO_FM"))
+				{
+					ad->statestack[ad->stack_ptr].track_type = ISOFORMAT_SD;
+				}
+				
+				if(!strcmp(buffer,"IBM_FM"))
+				{
+					ad->statestack[ad->stack_ptr].track_type = IBMFORMAT_SD;
+				}
+
+				if(!strcmp(buffer,"AMIGA_MFM"))
+				{
+					ad->statestack[ad->stack_ptr].track_type = AMIGAFORMAT_DD;
+				}
+
+				hxcfe_setTrackType(ad->fb,ad->statestack[ad->stack_ptr].track_type);
+			}
+		break;
+
 		case PREGAP:
 			if(!ad->xmlcheck)
 				hxcfe_setTrackPreGap (ad->fb,(unsigned short)atoi(buffer));
@@ -517,6 +550,9 @@ static void XMLCALL start(void *data, const char *el, const char **attr)
 					track = ad->statestack[ad->stack_ptr].cur_track;
 
 					hxcfe_pushSector(ad->fb);
+
+					hxcfe_setSectorHeadID(ad->fb,(unsigned char)(track&1));
+					hxcfe_setSectorTrackID(ad->fb,(unsigned char)(track>>1));
 					hxcfe_setSectorID(ad->fb,(unsigned char)sector);
 					hxcfe_setSectorSize(ad->fb,sectorsize);
 					if(ad->ts[track].base_adress + ad->ts[track].track_size + sectorsize < ad->buffer_size)
@@ -623,6 +659,7 @@ XmlFloppyBuilder* hxcfe_initXmlFloppy(HXCFLOPPYEMULATOR* floppycontext)
 		ad->stack_ptr = 0;
 		memset(ad->statestack,0xFF,sizeof(int) * 32);
 		ad->statestack[0].state = ad->current_state;
+		ad->statestack[0].track_type = IBMFORMAT_DD;
 		ad->p = rfw->xml_parser;
 
 		memset(ad->ts,0,sizeof(track_state)*256);
