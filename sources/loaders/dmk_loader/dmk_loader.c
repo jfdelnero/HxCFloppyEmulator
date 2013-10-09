@@ -106,7 +106,7 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 							||
 
-								(dmk_h.track_number<10 || dmk_h.track_number>90)
+								(dmk_h.track_number==0 || dmk_h.track_number>90)
 
 							||
 
