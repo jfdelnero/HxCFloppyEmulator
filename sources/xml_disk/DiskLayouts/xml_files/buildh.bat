@@ -18,5 +18,7 @@
 ..\..\converttools\bmptoh DiskLayout_OS9_1280KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_GeneralMusic_GEM_S3_1600KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_GeneralMusic_GEM_WX_Expander.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Emax_DD_800KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Ensoniq_Mirage_440KB.xml -DATA
 
 move *.h ..
