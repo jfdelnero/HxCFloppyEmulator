@@ -165,6 +165,7 @@ typedef struct isoibm_config_
 #define EMUFORMAT_SD  0x9
 #define APPLE2_GCR5A3 0xA
 #define APPLE2_GCR6A2 0xB
+#define ARBURG_SD  0xC
 
 #define DIRECT_ENCODING 0xFE
 
