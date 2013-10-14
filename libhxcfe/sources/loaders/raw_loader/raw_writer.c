@@ -92,15 +92,17 @@ int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 							case 5:
 								sca = hxcfe_getAllTrackSectors(ss,j,i,MEMBRAIN_MFM_ENCODING,&nbsector);
 							break;
-
+							case 6:
+								sca = hxcfe_getAllTrackSectors(ss,j,i,ARBURG_ENCODING,&nbsector);
+							break;
 						}
 
 						if(!nbsector)
-							track_type_id=(track_type_id+1)%6;
+							track_type_id=(track_type_id+1)%7;
 
 						k++;
 
-					}while(!nbsector && k<6);
+					}while(!nbsector && k<7);
 
 					if(nbsector)
 					{
