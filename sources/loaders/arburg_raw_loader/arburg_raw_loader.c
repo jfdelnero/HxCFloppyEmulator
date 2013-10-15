@@ -71,7 +71,7 @@ int ARBURG_RAW_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfil
 		if(filesize<0) 
 			return HXCFE_ACCESSERROR;
 
-		if(filesize==(0x9FE*2*80))
+		if(filesize==(0xA00*2*80))
 		{
 			floppycontext->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile : Arburg raw file !");
 			return HXCFE_VALIDFILE;
@@ -97,7 +97,7 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 	unsigned short i;
 	CYLINDER*      currentcylinder;
 	SIDE*          currentside;
-	unsigned char  sector_data[0xE00];
+	unsigned char  sector_data[0xA02];
 	unsigned short tracknumber,sidenumber;
 	
 	floppycontext->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libLoad_DiskFile %s",imgfile);
@@ -132,8 +132,8 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 		tracknumber=i>>1;
 		sidenumber=i&1;
 	
-		fseek(f,i*0x9FE,SEEK_SET);
-		fread(&sector_data,0x9FE,1,f);
+		fseek(f,i*0xA00,SEEK_SET);
+		fread(&sector_data,0xA00,1,f);
 
 		if(!floppydisk->tracks[tracknumber])
 		{
@@ -145,8 +145,8 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 		floppycontext->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
 			tracknumber,
 			sidenumber,
-			(0x9FE*tracknumber*2)+(sidenumber*0x9FE),
-			0x9FE);
+			(0xA00*tracknumber*2)+(sidenumber*0xA00),
+			0xA00);
 
 		currentcylinder->sides[sidenumber]=tg_alloctrack(floppydisk->floppyBitRate,ARBURG_ENCODING,currentcylinder->floppyRPM,((floppydisk->floppyBitRate/5)*2),2000,-2000,0x00);
 		currentside=currentcylinder->sides[sidenumber];					

@@ -1272,6 +1272,7 @@ int get_next_Arburg_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORC
 					
 				}
 
+				sector->sectorsize = 0xA00; 
 				bit_offset= sector->endsectorindex;
 
 				sector_extractor_sm=ENDOFSECTOR;
