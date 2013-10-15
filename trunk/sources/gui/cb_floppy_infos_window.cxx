@@ -96,8 +96,9 @@ void update_graph(floppy_infos_window * w)
 			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,EMU_FM_ENCODING,w->eemu_bt->value());
 			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,MEMBRAIN_MFM_ENCODING,w->membrain_bt->value());
 			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,TYCOM_FM_ENCODING,w->tycom_bt->value());
-			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,APPLEII_GCR1_ENCODING,w->apple2_32_bt->value());
-			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,APPLEII_GCR2_ENCODING,w->apple2_33_bt->value());
+			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,APPLEII_GCR1_ENCODING,w->apple2_bt->value());
+			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,APPLEII_GCR2_ENCODING,w->apple2_bt->value());
+			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,ARBURG_ENCODING,w->arburg_bt->value());
 
 			hxcfe_td_setparams(guicontext->hxcfe,td,(int)(w->x_time->value()),(int)w->y_time->value(),(int)(w->x_offset->value()*1000));
 
@@ -361,6 +362,9 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						break;
 						case APPLE2_GCR6A2:
 							sprintf(str,"AppleII 6A2 ");
+						break;
+						case ARBURG_SD:
+							sprintf(str,"Arburg SD ");
 						break;
 
 						default:

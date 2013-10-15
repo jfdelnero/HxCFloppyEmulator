@@ -127,14 +127,14 @@ floppy_infos_window::floppy_infos_window() {
         eemu_bt->labelsize(10);
         eemu_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* eemu_bt
-      { apple2_32_bt = new Fl_Light_Button(4, 652, 80, 15, "Apple II 3.2");
-        apple2_32_bt->labelsize(10);
-        apple2_32_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
-      } // Fl_Light_Button* apple2_32_bt
-      { apple2_33_bt = new Fl_Light_Button(87, 652, 75, 15, "Apple II 3.3");
-        apple2_33_bt->labelsize(10);
-        apple2_33_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
-      } // Fl_Light_Button* apple2_33_bt
+      { apple2_bt = new Fl_Light_Button(4, 652, 80, 15, "Apple II");
+        apple2_bt->labelsize(10);
+        apple2_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* apple2_bt
+      { arburg_bt = new Fl_Light_Button(87, 652, 75, 15, "Arburg");
+        arburg_bt->labelsize(10);
+        arburg_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* arburg_bt
       o->end();
     } // Fl_Group* o
 
