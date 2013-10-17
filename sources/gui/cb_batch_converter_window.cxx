@@ -109,6 +109,7 @@ ff_type ff_type_list[]=
 	{ FF_MSA, "MSA - ATARI ST MSA file format",PLUGIN_ATARIST_MSA,".msa"},
 	{ FF_HDDDA2_HFE,"HFE - HDDD A2 Support",PLUGIN_HXC_HDDD_A2,".hfe"},
 	{ FF_EHFE,"HFE - Rev 2 - Experimental",PLUGIN_HXC_EXTHFE,".hfe"},
+	{ FF_ARBG,"Arburg - Arburg RAW sectors file format",PLUGIN_ARBURG,".arburgfd"},
 	{ -1,"",0,0}			
 };
 
