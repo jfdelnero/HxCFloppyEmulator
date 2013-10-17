@@ -305,6 +305,55 @@ int bintofm(unsigned char * track_data,int track_data_size,unsigned char * bin_d
 	return bit_offset;
 }
 
+int arburgsysfmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit)
+{
+	int i;
+	int bitshift;
+	unsigned char binbyte;
+
+	i=0;
+	bitshift=0;
+	binbyte=0;
+	do
+	{
+
+		if( getbit(input_data,(bit_offset+1)%input_data_size) )
+		{
+			//01 -> 0
+
+			binbyte = binbyte & 0xFE;
+
+			bit_offset=(bit_offset+2)%input_data_size;
+		}
+		else
+		{
+			//001 -> 1
+
+			binbyte = binbyte | 0x01;
+
+			bit_offset=(bit_offset+3)%input_data_size;
+		}
+
+		bitshift++;
+
+		if(bitshift==8)
+		{
+			decod_data[i]=binbyte;
+			bitshift=0;
+			binbyte=0;
+			i++;
+		}
+		else
+		{
+			binbyte=binbyte<<1;
+		}
+
+	}while(i<decod_data_size);
+
+	return bit_offset;
+}
+
+
 int slowSearchBitStream(unsigned char * input_data,unsigned long input_data_size,int searchlen,unsigned char * chr_data,unsigned long chr_data_size,unsigned long bit_offset)
 {
 	unsigned long cur_startoffset;

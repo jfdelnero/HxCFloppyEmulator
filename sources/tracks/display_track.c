@@ -482,6 +482,10 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 								case ARBURG_SD:
 									sprintf(tempstr,"Arburg SD %.3dB ",sc->sectorsize);
 								break;
+								case ARBURG_SYS:
+									sprintf(tempstr,"Arburg SYS %.3dB ",sc->sectorsize);
+								break;
+
 
 							}
 
@@ -527,6 +531,10 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 								case ARBURG_SD:
 									sprintf(tempstr,"Arburg SD Data ?");
 								break;
+								case ARBURG_SYS:
+									sprintf(tempstr,"Arburg SYS Data ?");
+								break;
+
 							}
 							putstring8x8(td,xpos_startheader,225,tempstr,0x000,1);
 						}
