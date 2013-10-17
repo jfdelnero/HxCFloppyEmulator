@@ -480,10 +480,10 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 									sprintf(tempstr,"Apple II 6A2 %.3dB ",sc->sectorsize);
 								break;
 								case ARBURG_SD:
-									sprintf(tempstr,"Arburg SD %.3dB ",sc->sectorsize);
+									sprintf(tempstr,"Arburg DATA %.3dB ",sc->sectorsize);
 								break;
 								case ARBURG_SYS:
-									sprintf(tempstr,"Arburg SYS %.3dB ",sc->sectorsize);
+									sprintf(tempstr,"Arburg SYSTEM %.3dB ",sc->sectorsize);
 								break;
 
 
@@ -529,10 +529,10 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 									sprintf(tempstr,"Apple II 6A2 Data ?");
 								break;
 								case ARBURG_SD:
-									sprintf(tempstr,"Arburg SD Data ?");
+									sprintf(tempstr,"Arburg DATA Data ?");
 								break;
 								case ARBURG_SYS:
-									sprintf(tempstr,"Arburg SYS Data ?");
+									sprintf(tempstr,"Arburg SYSTEM Data ?");
 								break;
 
 							}

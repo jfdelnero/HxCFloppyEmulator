@@ -54,6 +54,7 @@
 #include "trackutils.h"
 
 #include "apple2.h"
+#include "arburg_track.h"
 
 extern unsigned char bit_inverter_emuii[];
 extern unsigned char even_tab[];
@@ -1151,8 +1152,6 @@ int get_next_EMU_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 
 }
 
-
-
 int get_next_Arburg_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFIG * sector,int track_offset)
 {
 	/*
@@ -1272,10 +1271,10 @@ int get_next_Arburg_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORC
 					
 				}
 
-				sector->sectorsize = 0xA00; 
-				bit_offset= sector->endsectorindex;
+				sector->sectorsize = ARBURB_DATATRACK_SIZE; 
+				bit_offset = track->tracklen;
 
-				sector_extractor_sm=ENDOFSECTOR;
+				sector_extractor_sm = ENDOFSECTOR;
 			break;
 
 			case ENDOFTRACK:
@@ -1412,8 +1411,8 @@ int get_next_ArburgSyst_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SEC
 					
 				}
 
-				sector->sectorsize = 0xF00;
-				bit_offset= sector->endsectorindex;
+				sector->sectorsize = ARBURB_SYSTEMTRACK_SIZE;
+				bit_offset = track->tracklen;
 
 				sector_extractor_sm=ENDOFSECTOR;
 			break;
@@ -1734,7 +1733,7 @@ SECTORCONFIG* hxcfe_getNextSector(SECTORSEARCH* ss,int track,int side,int type)
 		case APPLEII_GCR2_ENCODING:
 			bitoffset = get_next_A2GCR2_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
-		case ARBURG_ENCODING:
+		case ARBURGDAT_ENCODING:
 			bitoffset = get_next_Arburg_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
 		case ARBURGSYS_ENCODING:
@@ -2053,7 +2052,6 @@ int hxcfe_getFloppySize(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,int * nbsect
 	typetab[i++]=EMU_FM_ENCODING;
 	typetab[i++]=APPLEII_GCR1_ENCODING;
 	typetab[i++]=APPLEII_GCR2_ENCODING;
-	typetab[i++]=ARBURG_ENCODING;
 	typetab[i++]=-1;
 
 	ss=hxcfe_initSectorSearch(floppycontext,fp);

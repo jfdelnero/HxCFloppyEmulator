@@ -190,17 +190,19 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 			fileoffset,
 			blocksize);
 
-		currentcylinder->sides[sidenumber]=tg_alloctrack(floppydisk->floppyBitRate,ARBURG_ENCODING,currentcylinder->floppyRPM,((floppydisk->floppyBitRate/5)*2),2000,-2000,0x00);
+		currentcylinder->sides[sidenumber]=tg_alloctrack(floppydisk->floppyBitRate,ARBURGDAT_ENCODING,currentcylinder->floppyRPM,256*49 * 8,2000,-2000,0x00);
 		currentside=currentcylinder->sides[sidenumber];
 		currentside->number_of_sector=floppydisk->floppySectorPerTrack;
 
 		if(i<10 || !systemdisk )
 		{
 			BuildArburgTrack(floppycontext,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,2);
+			currentside->track_encoding = ARBURGDAT_ENCODING;
 		}
 		else
 		{
 			BuildArburgSysTrack(floppycontext,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,2);
+			currentside->track_encoding = ARBURGSYS_ENCODING;
 		}
 
 	}
@@ -212,8 +214,8 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 int ARBURG_RAW_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
-	static const char plug_id[]="ARBURG_SD";
-	static const char plug_desc[]="ARBURG dsk Loader";
+	static const char plug_id[]="ARBURG";
+	static const char plug_desc[]="ARBURG RAW Loader";
 	static const char plug_ext[]="arburgfd";
 
 	plugins_ptr plug_funcs=
