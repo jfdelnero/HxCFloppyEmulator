@@ -160,6 +160,33 @@ int BuildArburgTrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,u
 
 }
 
+int pushArburgSysByte(unsigned char byte, int bitoffset, unsigned char * track,unsigned long tracksize)
+{
+	int k;
+
+	for(k=0;k<8;k++)
+	{
+		if(byte&(0x01<<k))
+		{
+			bitoffset = (bitoffset + 1) % (tracksize);
+			track[bitoffset>>3] = track[bitoffset>>3] & ~(0x80>> (bitoffset&7));
+			bitoffset = (bitoffset + 1) % (tracksize);
+			track[bitoffset>>3] = track[bitoffset>>3] & ~(0x80>> (bitoffset&7));
+			bitoffset = (bitoffset + 1) % (tracksize);
+			track[bitoffset>>3] = track[bitoffset>>3] | (0x80>> (bitoffset&7));
+		}
+		else
+		{
+			bitoffset = (bitoffset + 1) % (tracksize);
+			track[bitoffset>>3] = track[bitoffset>>3] & ~(0x80>> (bitoffset&7));
+			bitoffset = (bitoffset + 1) % (tracksize);
+			track[bitoffset>>3] = track[bitoffset>>3] | (0x80>> (bitoffset&7));
+		}
+	}
+
+	return bitoffset;
+}
+
 int BuildArburgSysTrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,unsigned int sidenumber,unsigned char* datain,unsigned char * fmdata,unsigned long * fmsizebuffer,int trackformat)
 {
 	/*
@@ -171,88 +198,50 @@ int BuildArburgSysTrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumbe
 		Sync? : OxDF Bytes (High bytes checksum)
 	*/
 
-	unsigned int i,j,k;
-	unsigned char *tempdata;
-	unsigned long finalsize;
-	unsigned long current_buffer_size;
-	
+	unsigned int k;
 	unsigned short checksum;
+	int bitoffset,newbitoffset;
 
-	unsigned long sectorsize;
-	unsigned long buffersize;
+	bitoffset = 0;
 
+	memset(fmdata, 0x44,*fmsizebuffer/8);
 
-	buffersize=*fmsizebuffer/8;
-
-	sectorsize=0xEFE;
-
-	current_buffer_size=buffersize/3;
-	finalsize=1 + sectorsize + 1 + 0xDF;
-
-	if(finalsize<=current_buffer_size)
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	//Track GAP
+	for(k=0;k<(60*8);k++)
 	{
-
-		j=0;
-
-		tempdata=(char *)malloc((buffersize/4)+1);
-
-		memset(tempdata, 0x00,(buffersize/4)+1);
-
-
-		/////////////////////////////////////////////////////////////////////////////////////////////
-		//Track GAP
-		for(k=0;k<(26*8);k++)
-		{
-			setfieldbit(tempdata,bit_inverter_emuii[0x00],j,8);
-			j=j+8;
-		}
-
-		/////////////////////////////////////////////////////////////////////////////////////////////
-		//Sector Header
-		setfieldbit(tempdata,bit_inverter_emuii[0xFF],j,8);
-		j=j+8;
-
-		/////////////////////////////////////////////////////////////////////////////////////////////
-		//Sector Data	
-
-		checksum = 0;
-		for(k=0;k<0xEFE;k++)
-		{
-			checksum = checksum + datain[k];
-			setfieldbit(tempdata,bit_inverter_emuii[datain[k]],j,8);
-			j=j+8;
-		}
-
-		/////////////////////////////////////////////////////////////////////////////////////////////
-		//Crc
-
-		setfieldbit(tempdata,bit_inverter_emuii[checksum&0xFF],j,8);
-		j=j+8;
-		setfieldbit(tempdata,bit_inverter_emuii[checksum>>8],j,8);
-		j=j+8;
-
-		if((j/8)<=current_buffer_size)
-		{	
-			for(i=j;i<(current_buffer_size*8);i=i+8)
-			{	
-				if(j+8<(current_buffer_size*8))
-					setfieldbit(tempdata,bit_inverter_emuii[checksum>>8],j,8);
-				else
-					setfieldbit(tempdata,bit_inverter_emuii[checksum>>8],j,(current_buffer_size*8)-j);
-
-				j=j+8;
-			}
-		}
-
-		BuildArburgSysCylinder(fmdata,buffersize,tempdata,(buffersize)/4);
-
-		free(tempdata);
-		return 0;
-	}
-	else
-	{
-		floppycontext->hxc_printf(MSG_ERROR,"BuildArburgSysTrack : No enough space on this track !");
-		return finalsize;
+		bitoffset = pushArburgSysByte(0x00,bitoffset,fmdata,*fmsizebuffer);
 	}
 
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	//Sector Header
+	bitoffset = pushArburgSysByte(0xFF,bitoffset,fmdata,*fmsizebuffer);
+
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	//Sector Data	
+
+	checksum = 0;
+	for(k=0;k<(ARBURB_SYSTEMTRACK_SIZE-2);k++)
+	{
+		checksum = checksum + datain[k];
+		bitoffset = pushArburgSysByte(datain[k],bitoffset,fmdata,*fmsizebuffer);
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////
+	//Checksum
+
+	// Low byte
+	bitoffset = pushArburgSysByte((unsigned char)(checksum&0xFF),bitoffset,fmdata,*fmsizebuffer);
+	// High byte
+	bitoffset = pushArburgSysByte((unsigned char)(checksum>>8),bitoffset,fmdata,*fmsizebuffer);
+
+	newbitoffset = bitoffset;
+	do
+	{
+		bitoffset = newbitoffset;
+		newbitoffset = pushArburgSysByte((unsigned char)(checksum>>8),bitoffset,fmdata,*fmsizebuffer);
+	}while(newbitoffset > bitoffset );
+
+
+	return 0;
 }

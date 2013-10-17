@@ -75,7 +75,7 @@ int ARBURG_RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 						switch(track_type_id)
 						{
 							case 0:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,ARBURG_ENCODING,&nbsector);
+								sca = hxcfe_getAllTrackSectors(ss,j,i,ARBURGDAT_ENCODING,&nbsector);
 							break;
 							case 1:
 								sca = hxcfe_getAllTrackSectors(ss,j,i,ARBURGSYS_ENCODING,&nbsector);
