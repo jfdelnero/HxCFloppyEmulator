@@ -21,5 +21,6 @@ enum
 	FF_D88,
 	FF_MSA,
 	FF_HDDDA2_HFE,
-	FF_EHFE
+	FF_EHFE,
+	FF_ARBG
 };
