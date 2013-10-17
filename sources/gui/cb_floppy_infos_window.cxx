@@ -99,6 +99,7 @@ void update_graph(floppy_infos_window * w)
 			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,APPLEII_GCR1_ENCODING,w->apple2_bt->value());
 			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,APPLEII_GCR2_ENCODING,w->apple2_bt->value());
 			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,ARBURG_ENCODING,w->arburg_bt->value());
+			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,ARBURGSYS_ENCODING,w->arburg_bt->value());
 
 			hxcfe_td_setparams(guicontext->hxcfe,td,(int)(w->x_time->value()),(int)w->y_time->value(),(int)(w->x_offset->value()*1000));
 
@@ -366,7 +367,9 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						case ARBURG_SD:
 							sprintf(str,"Arburg SD ");
 						break;
-
+						case ARBURG_SYS:
+							sprintf(str,"Arburg SYS ");
+						break;
 						default:
 							sprintf(str,"Unknow ");
 						break;
