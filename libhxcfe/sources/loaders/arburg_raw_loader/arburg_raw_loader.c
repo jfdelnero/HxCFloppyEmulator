@@ -55,6 +55,7 @@
 
 #include "tracks/arburg_track.h"
 #include "arburg_raw_loader.h"
+#include "arburg_raw_writer.h"
 
 #include "libhxcadaptor.h"
 
@@ -68,18 +69,27 @@ int ARBURG_RAW_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfil
 	{
 
 		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0) 
+		if(filesize<0)
 			return HXCFE_ACCESSERROR;
 
-		if(filesize==(0xA00*2*80))
+		if(filesize==(ARBURB_DATATRACK_SIZE*2*80))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile : Arburg raw file !");
+			floppycontext->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile : Arburg Data raw file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile : non Arburg raw file !");
-			return HXCFE_BADFILE;
+
+			if(filesize==( (ARBURB_DATATRACK_SIZE*10)+(ARBURB_SYSTEMTRACK_SIZE*70)+(ARBURB_SYSTEMTRACK_SIZE*80) ))
+			{
+				floppycontext->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile : Arburg System raw file !");
+				return HXCFE_VALIDFILE;
+			}
+			else
+			{
+				floppycontext->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile : non Arburg raw file !");
+				return HXCFE_BADFILE;
+			}
 		}
 	}
 	else
@@ -95,20 +105,37 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 {
 	FILE * f;
 	unsigned short i;
+	int filesize;
 	CYLINDER*      currentcylinder;
 	SIDE*          currentside;
-	unsigned char  sector_data[0xA02];
+	unsigned char  sector_data[ARBURB_SYSTEMTRACK_SIZE + 2];
 	unsigned short tracknumber,sidenumber;
-	
+	int systemdisk;
+	int fileoffset,blocksize;
+
 	floppycontext->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libLoad_DiskFile %s",imgfile);
-	
+
+	filesize=hxc_getfilesize(imgfile);
+
+	if(filesize<0)
+		return HXCFE_ACCESSERROR;
+
+	systemdisk = 0;
+
+	if(filesize==( (ARBURB_DATATRACK_SIZE*10)+(ARBURB_SYSTEMTRACK_SIZE*70)+(ARBURB_SYSTEMTRACK_SIZE*80) ))
+	{
+		systemdisk = 1;
+		floppycontext->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libLoad_DiskFile : Arburg Data raw file !");
+	}
+
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
+
 	floppydisk->floppyNumberOfTrack=80;
 	floppydisk->floppyNumberOfSide=2;
 	floppydisk->floppyBitRate=250000;
@@ -127,35 +154,57 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 	memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 	for(i=0;i<floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide;i++)
-	{			
+	{
 
-		tracknumber=i>>1;
-		sidenumber=i&1;
-	
-		fseek(f,i*0xA00,SEEK_SET);
-		fread(&sector_data,0xA00,1,f);
+		tracknumber = i % floppydisk->floppyNumberOfTrack;
+		if(i>=floppydisk->floppyNumberOfTrack)
+			sidenumber = 1;
+		else
+			sidenumber = 0;
+
+		if(i<10 || !systemdisk )
+		{
+			blocksize = ARBURB_DATATRACK_SIZE;
+			fileoffset = i * blocksize;
+		}
+		else
+		{
+			blocksize = ARBURB_SYSTEMTRACK_SIZE;
+			fileoffset = (10*ARBURB_DATATRACK_SIZE) + ((i-10)*blocksize);
+		}
+
+		fseek(f,fileoffset,SEEK_SET);
+		fread(&sector_data,blocksize,1,f);
 
 		if(!floppydisk->tracks[tracknumber])
 		{
 			floppydisk->tracks[tracknumber]=allocCylinderEntry(300,floppydisk->floppyNumberOfSide);
-			currentcylinder=floppydisk->tracks[tracknumber];
 		}
-			
+
+		currentcylinder=floppydisk->tracks[tracknumber];
+
 
 		floppycontext->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
 			tracknumber,
 			sidenumber,
-			(0xA00*tracknumber*2)+(sidenumber*0xA00),
-			0xA00);
+			fileoffset,
+			blocksize);
 
 		currentcylinder->sides[sidenumber]=tg_alloctrack(floppydisk->floppyBitRate,ARBURG_ENCODING,currentcylinder->floppyRPM,((floppydisk->floppyBitRate/5)*2),2000,-2000,0x00);
-		currentside=currentcylinder->sides[sidenumber];					
+		currentside=currentcylinder->sides[sidenumber];
 		currentside->number_of_sector=floppydisk->floppySectorPerTrack;
 
-		BuildArburgTrack(floppycontext,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,2);
-			
-	}			
-	
+		if(i<10 || !systemdisk )
+		{
+			BuildArburgTrack(floppycontext,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,2);
+		}
+		else
+		{
+			BuildArburgSysTrack(floppycontext,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,2);
+		}
+
+	}
+
 	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }
@@ -171,7 +220,7 @@ int ARBURG_RAW_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long i
 	{
 		(ISVALIDDISKFILE)	ARBURG_RAW_libIsValidDiskFile,
 		(LOADDISKFILE)		ARBURG_RAW_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		ARBURG_RAW_libWrite_DiskFile,
 		(GETPLUGININFOS)	ARBURG_RAW_libGetPluginInfo
 	};
 

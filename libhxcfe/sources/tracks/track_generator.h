@@ -166,6 +166,7 @@ typedef struct isoibm_config_
 #define APPLE2_GCR5A3 0xA
 #define APPLE2_GCR6A2 0xB
 #define ARBURG_SD  0xC
+#define ARBURG_SYS  0xD
 
 #define DIRECT_ENCODING 0xFE
 
@@ -572,6 +573,7 @@ static isoibm_config formatstab[]=
 
 int  BuildCylinder(unsigned char * mfm_buffer,int mfm_size,unsigned char * track_clk,unsigned char * track_data,int track_size);
 void BuildFMCylinder(char * buffer,int fmtracksize,char * bufferclk,char * track,int size);
+void BuildArburgSysCylinder(char * buffer,int fmtracksize,char * track,int size);
 
 void getMFMcode(track_generator *tg,unsigned char data,unsigned char clock,unsigned char * dstbuf);
 void getFMcode (track_generator *tg,unsigned char data,unsigned char clock,unsigned char * dstbuf);

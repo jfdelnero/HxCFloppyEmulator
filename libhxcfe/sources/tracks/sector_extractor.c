@@ -1293,6 +1293,146 @@ int get_next_Arburg_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORC
 
 }
 
+int get_next_ArburgSyst_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFIG * sector,int track_offset)
+{
+	/*
+		Arburg Track format:
+		Sync : 0xFF
+		Data : 0xEFE Bytes
+		Checksum : 1 Low Byte
+		Checksum : 1 High Byte
+		Sync? : OxDF Bytes (High bytes checksum)
+	*/
+
+	int bit_offset,k;
+	int sector_size;
+	unsigned char fm_buffer[32];
+	unsigned short checksum;
+	int sector_extractor_sm;
+
+	bit_offset=track_offset;
+	memset(sector,0,sizeof(SECTORCONFIG));
+
+	sector_extractor_sm=LOOKFOR_GAP1;
+
+	do
+	{
+		switch(sector_extractor_sm)
+		{
+			case LOOKFOR_GAP1:
+				fm_buffer[0] = 0x55;
+				fm_buffer[1] = 0x55;
+				fm_buffer[2] = 0x55;
+				fm_buffer[3] = 0x55;
+				fm_buffer[4] = 0x55;
+				fm_buffer[5] = 0x24;
+				fm_buffer[6] = 0x92;
+				fm_buffer[7] = 0x49;
+
+				bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*8,bit_offset);
+
+				if(bit_offset!=-1)
+				{
+					sector_extractor_sm=LOOKFOR_ADDM;
+				}
+				else
+				{
+					sector_extractor_sm=ENDOFTRACK;
+				}
+			break;
+
+			case LOOKFOR_ADDM:
+
+				bit_offset = chgbitptr(track->tracklen,bit_offset,8*5);
+
+				sector->use_alternate_header_crc = 0x00;
+
+				sector->startsectorindex = bit_offset;
+				sector->endsectorindex = chgbitptr(track->tracklen,bit_offset,8*5);
+				sector->startdataindex = sector->endsectorindex;  
+
+				sector->use_alternate_addressmark = 0x00;
+				sector->alternate_addressmark = 0x00;
+
+				sector->use_alternate_datamark = 0x00;
+				sector->alternate_datamark = 0x00;
+
+				if(track->timingbuffer)
+					sector->bitrate = track->timingbuffer[bit_offset/8];
+				else
+					sector->bitrate = track->bitrate;
+
+				sector->header_crc = 0x0000 ;
+
+				sector->cylinder = 0x00;
+				sector->head = 0x00;
+				sector->sector = 1;
+				sector_size = 0xF02;
+				sector->sectorsize = sector_size;
+				sector->trackencoding = ARBURG_SYS;
+
+				sector->use_alternate_datamark = 0x00;
+				sector->alternate_datamark = 0x00;
+							
+				sector->input_data =(unsigned char*)malloc(sector_size+2);
+					
+				if(sector->input_data)
+				{
+					memset(sector->input_data,0,sector_size+2);
+
+					sector->endsectorindex = arburgsysfmtobin(track->databuffer,track->tracklen,sector->input_data,sector_size,bit_offset,0);
+
+					sector->data_crc = 0x0000;
+					sector->use_alternate_data_crc = 0x00;
+
+					for(k=0;k< 1 + 0xEFE + 2;k++)
+					{
+						sector->input_data[k]=bit_inverter_emuii[sector->input_data[k + 1]];
+					}
+
+					checksum = 0;
+					for(k=0;k < 0xEFE;k++)
+					{
+						checksum = checksum + sector->input_data[k]; 
+					}
+
+					if( ((checksum & 0xFF) == sector->input_data[0xEFE]) &&  (((checksum>>8) & 0xFF) == sector->input_data[0xEFF]) ) 
+					{
+						floppycontext->hxc_printf(MSG_DEBUG,"Checksum data ok.");
+						sector->use_alternate_data_crc = 0x00;
+						sector->data_crc = sector->input_data[0xEFE];
+						sector->data_crc = sector->data_crc | (sector->input_data[0xEFF]<<8);
+					}
+					else
+					{
+						floppycontext->hxc_printf(MSG_DEBUG,"Checksum data Error !");
+						sector->use_alternate_data_crc = 0xFF;
+						sector->data_crc = sector->input_data[0xEFE];
+					}
+					
+				}
+
+				sector->sectorsize = 0xF00;
+				bit_offset= sector->endsectorindex;
+
+				sector_extractor_sm=ENDOFSECTOR;
+			break;
+
+			case ENDOFTRACK:
+
+			break;
+
+			default:
+				sector_extractor_sm=ENDOFTRACK;
+			break;
+
+		}
+	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+
+	return bit_offset;
+
+}
+
 int write_FM_sectordata(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFIG * sector,unsigned char * buffer,int buffersize)
 {
 	int bit_offset,i;
@@ -1596,6 +1736,9 @@ SECTORCONFIG* hxcfe_getNextSector(SECTORSEARCH* ss,int track,int side,int type)
 		break;
 		case ARBURG_ENCODING:
 			bitoffset = get_next_Arburg_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
+		break;
+		case ARBURGSYS_ENCODING:
+			bitoffset = get_next_ArburgSyst_sector(ss->hxcfe,ss->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
 		default:
 			bitoffset=-1;

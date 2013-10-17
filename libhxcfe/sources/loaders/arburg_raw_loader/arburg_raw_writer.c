@@ -30,14 +30,14 @@
 
 #include "libhxcfe.h"
 
-#include "raw_loader.h"
+#include "arburg_raw_loader.h"
 
 #include "tracks/sector_extractor.h"
 
 #include "libhxcadaptor.h"
-  
-int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
-{	
+
+int ARBURG_RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+{
 	int i,j,k,l,nbsector;
 	FILE * rawfile;
 	char * log_str;
@@ -47,7 +47,7 @@ int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	SECTORSEARCH* ss;
 	SECTORCONFIG** sca;
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Write RAW file %s...",filename);
+	floppycontext->hxc_printf(MSG_INFO_1,"Write Arburg RAW file %s...",filename);
 
 	track_type_id=0;
 	log_str=0;
@@ -58,9 +58,9 @@ int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 		ss=hxcfe_initSectorSearch(floppycontext,floppy);
 		if(ss)
 		{
-			for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
+			for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
 			{
-				for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
+				for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
 				{
 					sprintf(tmp_str,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(rawfile));
 
@@ -75,31 +75,19 @@ int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 						switch(track_type_id)
 						{
 							case 0:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector);
+								sca = hxcfe_getAllTrackSectors(ss,j,i,ARBURG_ENCODING,&nbsector);
 							break;
 							case 1:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector);
-							break;
-							case 2:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,AMIGA_MFM_ENCODING,&nbsector);
-							break;
-							case 3:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,EMU_FM_ENCODING,&nbsector);
-							break;
-							case 4:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,TYCOM_FM_ENCODING,&nbsector);
-							break;
-							case 5:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,MEMBRAIN_MFM_ENCODING,&nbsector);
+								sca = hxcfe_getAllTrackSectors(ss,j,i,ARBURGSYS_ENCODING,&nbsector);
 							break;
 						}
 
 						if(!nbsector)
-							track_type_id=(track_type_id+1)%6;
+							track_type_id=(track_type_id+1)%2;
 
 						k++;
 
-					}while(!nbsector && k<6);
+					}while(!nbsector && k<2);
 
 					if(nbsector)
 					{
@@ -161,7 +149,7 @@ int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 				}
 			}
-			
+
 			hxcfe_deinitSectorSearch(ss);
 		}
 

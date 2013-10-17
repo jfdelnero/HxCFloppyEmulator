@@ -659,6 +659,45 @@ void BuildFMCylinder(char * buffer,int fmtracksize,char * bufferclk,char * track
 	}
 }
 
+
+void BuildArburgSysCylinder(char * buffer,int fmtracksize,char * track,int size)
+{
+	int i,j,k,l;
+	unsigned char byte;
+	unsigned long bitoffset;
+	
+	// Clean up
+	for(i=0;i<(fmtracksize);i++)
+	{
+		buffer[i]=0x00;
+	}
+
+	j=0;
+	bitoffset = 0;
+
+	// Encoding
+	j=0;
+	for(l=0;l<size;l++)
+	{
+		byte=track[l];
+
+		for(k=0;k<8;k++)
+		{
+			if(byte&(0x80>>k))
+			{
+				bitoffset = bitoffset + 3;
+			}
+			else
+			{
+				bitoffset = bitoffset + 2;
+			}
+
+			buffer[bitoffset>>3] = buffer[bitoffset>>3] | (0x80>> (bitoffset&7));
+		}
+	}
+}
+
+
 int ISOIBMGetTrackSize(int TRACKTYPE,unsigned int numberofsector,unsigned int sectorsize,unsigned int gap3len,SECTORCONFIG * sectorconfigtab)
 {
 	unsigned int i,j;

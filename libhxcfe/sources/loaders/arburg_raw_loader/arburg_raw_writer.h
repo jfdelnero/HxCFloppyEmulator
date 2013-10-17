@@ -25,8 +25,4 @@
 //
 */
 
-#define ARBURB_DATATRACK_SIZE 0xA00
-#define ARBURB_SYSTEMTRACK_SIZE 0xF00
-
-int BuildArburgTrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,unsigned int sidenumber,unsigned char* datain,unsigned char * fmdata,unsigned long * fmsizebuffer,int trackformat);
-int BuildArburgSysTrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,unsigned int sidenumber,unsigned char* datain,unsigned char * fmdata,unsigned long * fmsizebuffer,int trackformat);
+int ARBURG_RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename);

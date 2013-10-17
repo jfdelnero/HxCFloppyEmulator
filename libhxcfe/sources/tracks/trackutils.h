@@ -36,6 +36,8 @@ int  bintomfm(unsigned char * track_data,int track_data_size,unsigned char * bin
 int  fmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit);
 int  bintofm(unsigned char * track_data,int track_data_size,unsigned char * bin_data,int bin_data_size,int bit_offset);
 
+int arburgsysfmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit);
+
 int  searchBitStream(unsigned char * input_data,unsigned long input_data_size,int searchlen, \
 					unsigned char * chr_data,unsigned long chr_data_size,unsigned long bit_offset);
 

@@ -57,7 +57,7 @@ DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosf
                   fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
-					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o
+					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o
 
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
@@ -362,6 +362,9 @@ emui_raw_loader.o : $(BASEDIR)/loaders/emui_raw_loader/emui_raw_loader.c $(BASED
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 arburg_raw_loader.o : $(BASEDIR)/loaders/arburg_raw_loader/arburg_raw_loader.c $(BASEDIR)/loaders/arburg_raw_loader/arburg_raw_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+arburg_raw_writer.o : $(BASEDIR)/loaders/arburg_raw_loader/arburg_raw_writer.c $(BASEDIR)/loaders/arburg_raw_loader/arburg_raw_writer.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 fei_loader.o : $(BASEDIR)/loaders/fei_loader/fei_loader.c $(BASEDIR)/loaders/fei_loader/fei_loader.h
