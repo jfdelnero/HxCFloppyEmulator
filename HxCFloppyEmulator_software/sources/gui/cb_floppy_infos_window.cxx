@@ -364,7 +364,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						case APPLE2_GCR6A2:
 							sprintf(str,"AppleII 6A2 ");
 						break;
-						case ARBURG_SD:
+						case ARBURG_DAT:
 							sprintf(str,"Arburg SD ");
 						break;
 						case ARBURG_SYS:
