@@ -1702,6 +1702,22 @@ SOURCE=..\sources\loaders\apple2_do_loader\apple2_do_loader.c
 SOURCE=..\sources\loaders\apple2_do_loader\apple2_do_loader.h
 # End Source File
 # End Group
+# Begin Group "Arburg"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\arburg_raw_loader\arburg_raw_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\arburg_raw_loader\arburg_raw_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\arburg_raw_loader\arburg_raw_writer.c
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 
@@ -1713,6 +1729,14 @@ SOURCE=..\sources\tracks\apple2.c
 # Begin Source File
 
 SOURCE=..\sources\tracks\apple2.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\arburg_track.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\arburg_track.h
 # End Source File
 # Begin Source File
 

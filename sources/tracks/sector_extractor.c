@@ -1228,7 +1228,7 @@ int get_next_Arburg_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORC
 				sector->sector = 1;
 				sector_size = 0xA02;
 				sector->sectorsize = sector_size;
-				sector->trackencoding = ARBURG_SD;
+				sector->trackencoding = ARBURG_DAT;
 
 				sector->use_alternate_datamark = 0x00;
 				sector->alternate_datamark = 0x00;
