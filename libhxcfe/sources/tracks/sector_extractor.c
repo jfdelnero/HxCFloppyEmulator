@@ -198,7 +198,7 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 						sector->input_data=(unsigned char*)malloc(sector_size);
 						memcpy(sector->input_data,&tmp_sector[4],sector_size);
 						free(tmp_sector);
-						
+
 						bit_offset++;
 
 						sector_extractor_sm=ENDOFSECTOR;
@@ -221,7 +221,7 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 						sector->startdataindex = bit_offset;
 						sector->endsectorindex = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,3+7,bit_offset,0);
  						floppycontext->hxc_printf(MSG_DEBUG,"get_next_MFM_sector : Data sector without sector header !?!");
-						
+
 						old_bit_offset=bit_offset;
 
 						sector->cylinder = 0;
@@ -387,7 +387,7 @@ int get_next_MEMBRAIN_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 						sector->input_data=(unsigned char*)malloc(sector_size);
 						memcpy(sector->input_data,&tmp_sector[2],sector_size);
 						free(tmp_sector);
-						
+
 						bit_offset++;
 
 						sector_extractor_sm=ENDOFSECTOR;
@@ -410,7 +410,7 @@ int get_next_MEMBRAIN_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 						sector->startdataindex = bit_offset;
 						sector->endsectorindex = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,3+7,bit_offset,0);
  						floppycontext->hxc_printf(MSG_DEBUG,"get_next_MEMBRAIN_sector : Data sector without sector header !?!");
-						
+
 						old_bit_offset=bit_offset;
 
 						sector->cylinder = 0;
@@ -521,7 +521,7 @@ int get_next_AMIGAMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 				memcpy(&header,&sector_data[4],4);
 				sortbuffer((unsigned char*)&header,tmp_buffer,4);
 				memcpy(&header,tmp_buffer,4);
-								
+
 				// Compute the header parity
 				for(i=0;i<5;i++)
 				{
@@ -539,7 +539,7 @@ int get_next_AMIGAMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 				if( (header[0]==0xFF) && ( (headerparity[0] == sector_data[26]) && (headerparity[1] == sector_data[27]) ) )
 				{
 					sector_conf->startsectorindex = start_sector_bit_offset;
-					
+
 					sector_size = 512;
 
 					floppycontext->hxc_printf(MSG_DEBUG,"Valid Amiga MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",header[1]>>1,header[1]&1,header[2],sector_size);
@@ -565,14 +565,14 @@ int get_next_AMIGAMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 						sectorparity[0]^=(even_tab[tmp_buffer[0]]<<4)|(even_tab[tmp_buffer[1]]);
 						sectorparity[1]^=(even_tab[tmp_buffer[2]]<<4)|(even_tab[tmp_buffer[3]]);
 					}
-					
+
 					sector_conf->data_crc = sectorparity[1] | (sectorparity[0]<<8) ;
 
 					if( ( sectorparity[0] == sector_data[30]) && ( sectorparity[1] == sector_data[31]) )
 					{
 						// parity ok !!!
 						floppycontext->hxc_printf(MSG_DEBUG,"data parity ok.");
-						sector_conf->use_alternate_data_crc = 0x00;	
+						sector_conf->use_alternate_data_crc = 0x00;
 
 					}
 					else
@@ -666,7 +666,7 @@ int get_next_FM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFI
 				if(tmp_buffer[0]==0xFE)
 				{
 					sector->startsectorindex = bit_offset;
-					sector->startdataindex = sector->endsectorindex;  
+					sector->startdataindex = sector->endsectorindex;
 
 					sector->use_alternate_addressmark = 0xFF;
 					sector->alternate_addressmark = 0xFE;
@@ -1024,7 +1024,7 @@ int get_next_EMU_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 				if((bit_inverter_emuii[tmp_buffer[0]]==0xFA) && (bit_inverter_emuii[tmp_buffer[1]]==0x96))
 				{
 					sector->startsectorindex = bit_offset;
-					sector->startdataindex = sector->endsectorindex;  
+					sector->startdataindex = sector->endsectorindex;
 
 					sector->use_alternate_addressmark = 0x00;
 					sector->alternate_addressmark = 0x00;
@@ -1078,8 +1078,8 @@ int get_next_EMU_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 							sector->use_alternate_datamark = 0x00;
 							sector->alternate_datamark = 0x00;
 
-							sector->startdataindex=bit_offset;						   
-							
+							sector->startdataindex=bit_offset;
+
 							sector->input_data =(unsigned char*)malloc(sector_size+2);
 							if(sector->input_data)
 							{
@@ -1208,7 +1208,7 @@ int get_next_Arburg_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORC
 
 				sector->startsectorindex = bit_offset;
 				sector->endsectorindex = chgbitptr(track->tracklen,bit_offset,8*4);
-				sector->startdataindex = sector->endsectorindex;  
+				sector->startdataindex = sector->endsectorindex;
 
 				sector->use_alternate_addressmark = 0x00;
 				sector->alternate_addressmark = 0x00;
@@ -1232,9 +1232,9 @@ int get_next_Arburg_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORC
 
 				sector->use_alternate_datamark = 0x00;
 				sector->alternate_datamark = 0x00;
-							
+
 				sector->input_data =(unsigned char*)malloc(sector_size+2);
-					
+
 				if(sector->input_data)
 				{
 					memset(sector->input_data,0,sector_size+2);
@@ -1252,10 +1252,10 @@ int get_next_Arburg_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORC
 					checksum = 0;
 					for(k=0;k < 0x9FE;k++)
 					{
-						checksum = checksum + sector->input_data[k]; 
+						checksum = checksum + sector->input_data[k];
 					}
 
-					if( ((checksum & 0xFF) == sector->input_data[0x9FE]) &&  (((checksum>>8) & 0xFF) == sector->input_data[0x9FF]) ) 
+					if( ((checksum & 0xFF) == sector->input_data[0x9FE]) &&  (((checksum>>8) & 0xFF) == sector->input_data[0x9FF]) )
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"Checksum data ok.");
 						sector->use_alternate_data_crc = 0x00;
@@ -1267,11 +1267,12 @@ int get_next_Arburg_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORC
 						floppycontext->hxc_printf(MSG_DEBUG,"Checksum data Error !");
 						sector->use_alternate_data_crc = 0xFF;
 						sector->data_crc = sector->input_data[0x9FE];
+						sector->data_crc = sector->data_crc | (sector->input_data[0x9FF]<<8);
 					}
-					
+
 				}
 
-				sector->sectorsize = ARBURB_DATATRACK_SIZE; 
+				sector->sectorsize = ARBURB_DATATRACK_SIZE;
 				bit_offset = track->tracklen;
 
 				sector_extractor_sm = ENDOFSECTOR;
@@ -1348,7 +1349,7 @@ int get_next_ArburgSyst_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SEC
 
 				sector->startsectorindex = bit_offset;
 				sector->endsectorindex = chgbitptr(track->tracklen,bit_offset,8*5);
-				sector->startdataindex = sector->endsectorindex;  
+				sector->startdataindex = sector->endsectorindex;
 
 				sector->use_alternate_addressmark = 0x00;
 				sector->alternate_addressmark = 0x00;
@@ -1372,9 +1373,9 @@ int get_next_ArburgSyst_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SEC
 
 				sector->use_alternate_datamark = 0x00;
 				sector->alternate_datamark = 0x00;
-							
+
 				sector->input_data =(unsigned char*)malloc(sector_size+2);
-					
+
 				if(sector->input_data)
 				{
 					memset(sector->input_data,0,sector_size+2);
@@ -1392,10 +1393,10 @@ int get_next_ArburgSyst_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SEC
 					checksum = 0;
 					for(k=0;k < 0xEFE;k++)
 					{
-						checksum = checksum + sector->input_data[k]; 
+						checksum = checksum + sector->input_data[k];
 					}
 
-					if( ((checksum & 0xFF) == sector->input_data[0xEFE]) &&  (((checksum>>8) & 0xFF) == sector->input_data[0xEFF]) ) 
+					if( ((checksum & 0xFF) == sector->input_data[0xEFE]) &&  (((checksum>>8) & 0xFF) == sector->input_data[0xEFF]) )
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"Checksum data ok.");
 						sector->use_alternate_data_crc = 0x00;
@@ -1407,8 +1408,9 @@ int get_next_ArburgSyst_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SEC
 						floppycontext->hxc_printf(MSG_DEBUG,"Checksum data Error !");
 						sector->use_alternate_data_crc = 0xFF;
 						sector->data_crc = sector->input_data[0xEFE];
+						sector->data_crc = sector->data_crc | (sector->input_data[0xEFF]<<8);
 					}
-					
+
 				}
 
 				sector->sectorsize = ARBURB_SYSTEMTRACK_SIZE;
@@ -2129,7 +2131,7 @@ int hxcfe_readSectorData(SECTORSEARCH* ss,int track,int side,int sector,int numb
 					{
 						memcpy(&buffer[sectorsize*(sc->sector-sector)],sc->input_data,sectorsize);
 						free(sc->input_data);
-						sc->input_data=0;	
+						sc->input_data=0;
 					}
 
 					if(sc->use_alternate_data_crc)
@@ -2208,7 +2210,7 @@ int hxcfe_writeSectorData(SECTORSEARCH* ss,int track,int side,int sector,int num
 						default:
 						break;
 					}
-					
+
 					nbsectorwrite++;
 				}
 
