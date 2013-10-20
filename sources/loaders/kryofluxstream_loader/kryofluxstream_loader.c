@@ -342,7 +342,7 @@ typedef struct pll_stat_
 	int lastpulsephase;
 }pll_stat;
 
-int getCellTiming(pll_stat * pll,int current_pulsevalue,int * badpulse,int t,int overlapval)
+int getCellTiming(pll_stat * pll,int current_pulsevalue,int * badpulse,int t,int overlapval,int phasecorrection)
 {
 	int blankcell;
 	int cur_pll_error,left_boundary,right_boundary,center;
@@ -425,7 +425,7 @@ int getCellTiming(pll_stat * pll,int current_pulsevalue,int * badpulse,int t,int
 		}
 
 		// Phase adjustement
-		pll->phase = pll->phase + (cur_pll_error/8);
+		pll->phase = pll->phase + (cur_pll_error/phasecorrection);
 	}
 
 	// next window
@@ -477,7 +477,7 @@ void quickSort(s_match * table, int start, int end)
     quickSort(table, right+1, end);
 }
 
-SIDE* ScanAndDecodeStream(int initalvalue,s_track_dump * track,unsigned long * overlap_tab,unsigned long start_index, short rpm)
+SIDE* ScanAndDecodeStream(int initalvalue,s_track_dump * track,unsigned long * overlap_tab,unsigned long start_index, short rpm,int phasecorrection)
 {
 #define TEMPBUFSIZE 256*1024
 	int pumpcharge;
@@ -546,7 +546,7 @@ SIDE* ScanAndDecodeStream(int initalvalue,s_track_dump * track,unsigned long * o
 		while(i<(int)start_index)
 		{
 			value = track->track_dump[i];
-			cellcode = getCellTiming(&pll,value,0,bitoffset,overlap_tab[i]);
+			cellcode = getCellTiming(&pll,value,0,bitoffset,overlap_tab[i],phasecorrection);
 			i++;
 		};
 
@@ -560,7 +560,7 @@ SIDE* ScanAndDecodeStream(int initalvalue,s_track_dump * track,unsigned long * o
 		{
 			value = track->track_dump[start_index + i];
 
-			cellcode = getCellTiming(&pll,value,0,bitoffset,overlap_tab[start_index + i]);
+			cellcode = getCellTiming(&pll,value,0,bitoffset,overlap_tab[start_index + i],phasecorrection);
 
 			bitoffset = bitoffset + cellcode;
 
@@ -1915,7 +1915,7 @@ unsigned long getbestindex(s_track_dump *track_dump,unsigned long * overlap_tab)
 }
 
 
-SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,float timecoef)
+SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,float timecoef,int phasecorrection)
 {
 	double mck;
 	double sck;
@@ -2043,7 +2043,7 @@ SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,floa
 						floppycontext->hxc_printf(MSG_DEBUG,"Cells analysing...");
 
 
-						currentside=ScanAndDecodeStream(bitrate,track_dump,overlap_tab,first_index,*rpm);
+						currentside=ScanAndDecodeStream(bitrate,track_dump,overlap_tab,first_index,*rpm,phasecorrection);
 						floppycontext->hxc_printf(MSG_DEBUG,"...done");
 
 						free(histo);
@@ -2137,6 +2137,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 	int tracklen;
 
 	int previous_bit;
+	int phasecorrection;
 
 	floppycont = floppycontext;
 
@@ -2206,6 +2207,15 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 				hxc_fclose(f);
 			}
 
+			phasecorrection = 8;
+			sprintf(filepath,"%s%s",folder,"pllsettings.txt");
+			f=hxc_fopen(filepath,"rb");
+			if(f)
+			{
+				fscanf(f,"%d",&phasecorrection);
+				hxc_fclose(f);
+			}
+
 			track=0;
 			side=0;
 			found=0;
@@ -2270,7 +2280,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 				{
 					sprintf(filepath,"%s%s%.2d.%d.raw",folder,fname,j,i);
 
-					curside=decodestream(floppycontext,filepath,&rpm,timecoef);
+					curside=decodestream(floppycontext,filepath,&rpm,timecoef,phasecorrection);
 
 					if(!floppydisk->tracks[j/doublestep])
 					{
