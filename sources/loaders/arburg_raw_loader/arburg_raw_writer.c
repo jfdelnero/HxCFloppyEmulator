@@ -42,7 +42,9 @@ int ARBURG_RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 	FILE * rawfile;
 	char * log_str;
 	char   tmp_str[256];
+	unsigned char blankblock[0xF02];
 	int sectorsize,track_type_id;
+	int systblockfound;
 
 	SECTORSEARCH* ss;
 	SECTORCONFIG** sca;
@@ -52,15 +54,24 @@ int ARBURG_RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 	track_type_id=0;
 	log_str=0;
 
+	systblockfound = 0;
+
+	memset(blankblock,0x00,0xF00);
+
+	if((floppy->floppyNumberOfTrack < 80) || (floppy->floppyNumberOfSide != 2) )
+	{
+		return HXCFE_BADPARAMETER;
+	}
+
 	rawfile=hxc_fopen(filename,"wb");
 	if(rawfile)
 	{
 		ss=hxcfe_initSectorSearch(floppycontext,floppy);
 		if(ss)
 		{
-			for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
+			for(i=0;i<2;i++)
 			{
-				for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
+				for(j=0;j<80;j++)
 				{
 					sprintf(tmp_str,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(rawfile));
 
@@ -79,6 +90,8 @@ int ARBURG_RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 							break;
 							case 1:
 								sca = hxcfe_getAllTrackSectors(ss,j,i,ARBURGSYS_ENCODING,&nbsector);
+								if(nbsector)
+									systblockfound = 0xFF;
 							break;
 						}
 
@@ -141,6 +154,27 @@ int ARBURG_RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 
 						log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
 						strcat(log_str,tmp_str);
+
+					}
+					else
+					{
+						floppycontext->hxc_printf(MSG_WARNING,"No Arburg block found !?!...");
+						if( ((j<10) && (i==0) ) || !systblockfound)
+						{
+							// Block Not found ?!?
+							// Put a blank data sector instead with a bad checksum...
+							memset(blankblock,0x00,0xA00);
+							for(k=0;k<0xA0;k++)
+								strcat(blankblock,">MISSING BLOCK<!");
+							fwrite(blankblock,0xA00,1,rawfile);
+						}
+						else
+						{
+							memset(blankblock,0x00,0xF00);
+							for(k=0;k<0xF0;k++)
+								strcat(blankblock,">MISSING BLOCK<!");
+							fwrite(blankblock,0xF00,1,rawfile);
+						}
 
 					}
 

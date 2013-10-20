@@ -75,7 +75,7 @@ int BuildArburgTrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,u
 	unsigned char *tempclock;
 	unsigned long finalsize;
 	unsigned long current_buffer_size;
-	
+
 	unsigned short checksum;
 
 	unsigned long sectorsize;
@@ -115,28 +115,50 @@ int BuildArburgTrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,u
 		j=j+8;
 
 		/////////////////////////////////////////////////////////////////////////////////////////////
-		//Sector Data	
+		//Sector Data
 
 		checksum = 0;
-		for(k=0;k<0x9FE;k++)
+		for(k=0;k<ARBURB_DATATRACK_SIZE-2;k++)
 		{
 			checksum = checksum + datain[k];
+		}
+
+
+		for(k=0;k<ARBURB_DATATRACK_SIZE-2;k++)
+		{
+			setfieldbit(tempdata,bit_inverter_emuii[datain[k]],j,8);
+			j=j+8;
+		}
+
+		#ifndef IGNORE_ARBURG_CHECKSUM
+
+		for(k=ARBURB_DATATRACK_SIZE-2;k<ARBURB_DATATRACK_SIZE;k++)
+		{
 			setfieldbit(tempdata,bit_inverter_emuii[datain[k]],j,8);
 			j=j+8;
 		}
 
 		/////////////////////////////////////////////////////////////////////////////////////////////
-		//Crc
+		//Checksum
+		if( ( datain[ARBURB_DATATRACK_SIZE-2] != (checksum&0xFF) ) || ( datain[ARBURB_DATATRACK_SIZE-1] != (checksum>>8) ) )
+		{
+			floppycontext->hxc_printf(MSG_WARNING,"BuildArburgTrack : Block Checksum error !");
+		}
+
+		#else
 
 		setfieldbit(tempdata,bit_inverter_emuii[checksum&0xFF],j,8);
 		j=j+8;
 		setfieldbit(tempdata,bit_inverter_emuii[checksum>>8],j,8);
 		j=j+8;
 
+		#endif
+
+
 		if((j/8)<=current_buffer_size)
-		{	
+		{
 			for(i=j;i<(current_buffer_size*8);i=i+8)
-			{	
+			{
 				if(j+8<(current_buffer_size*8))
 					setfieldbit(tempdata,bit_inverter_emuii[checksum>>8],j,8);
 				else
@@ -218,22 +240,38 @@ int BuildArburgSysTrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumbe
 	bitoffset = pushArburgSysByte(0xFF,bitoffset,fmdata,*fmsizebuffer);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
-	//Sector Data	
-
+	//Sector Data
 	checksum = 0;
 	for(k=0;k<(ARBURB_SYSTEMTRACK_SIZE-2);k++)
 	{
 		checksum = checksum + datain[k];
+	}
+
+	for(k=0;k<(ARBURB_SYSTEMTRACK_SIZE-2);k++)
+	{
 		bitoffset = pushArburgSysByte(datain[k],bitoffset,fmdata,*fmsizebuffer);
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////////////
-	//Checksum
+	#ifndef IGNORE_ARBURG_CHECKSUM
+
+	for(k=ARBURB_SYSTEMTRACK_SIZE-2;k<ARBURB_SYSTEMTRACK_SIZE;k++)
+	{
+		bitoffset = pushArburgSysByte(datain[k],bitoffset,fmdata,*fmsizebuffer);
+	}
+
+	if( ( datain[ARBURB_SYSTEMTRACK_SIZE-2] != (checksum&0xFF) ) || ( datain[ARBURB_SYSTEMTRACK_SIZE-1] != (checksum>>8) ) )
+	{
+		floppycontext->hxc_printf(MSG_WARNING,"BuildArburgSysTrack : Block Checksum error !");
+	}
+
+	#else
 
 	// Low byte
 	bitoffset = pushArburgSysByte((unsigned char)(checksum&0xFF),bitoffset,fmdata,*fmsizebuffer);
 	// High byte
 	bitoffset = pushArburgSysByte((unsigned char)(checksum>>8),bitoffset,fmdata,*fmsizebuffer);
+
+	#endif
 
 	newbitoffset = bitoffset;
 	do
