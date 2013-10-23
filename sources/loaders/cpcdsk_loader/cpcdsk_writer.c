@@ -74,7 +74,7 @@ unsigned char  size_to_code(unsigned long size)
 }
 
 int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
-{	
+{
 	int i,j,k,nbsector;
 	FILE * cpcdskfile;
 	char * log_str;
@@ -106,7 +106,7 @@ int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 		track_cnt=0;
 
 		ss=hxcfe_initSectorSearch(floppycontext,floppy);
-		
+
 		if(ss)
 		{
 			for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
@@ -177,7 +177,7 @@ int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 
 
 						memset(&cpcdsk_s,0,sizeof(cpcdsk_sector));
-						for(k=0;k<nbsector;k++) 
+						for(k=0;k<nbsector;k++)
 						{
 							fwrite(&cpcdsk_s,sizeof(cpcdsk_sector),1,cpcdskfile);
 						}
@@ -189,17 +189,41 @@ int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 						k=0;
 						do
 						{
+							memset(&cpcdsk_s,0,sizeof(cpcdsk_sector));
+
 							if(sca[k]->sectorsize!=(unsigned int)sectorsize)
 							{
 								sectorsize=-1;
 							}
 
-
 							cpcdsk_s.sector_id = sca[k]->sector;
 							cpcdsk_s.side = sca[k]->head;
 							cpcdsk_s.track = sca[k]->cylinder;
 							cpcdsk_s.sector_size_code = size_to_code(sca[k]->sectorsize);
-							cpcdsk_s.data_lenght = sca[k]->sectorsize;								
+							cpcdsk_s.data_lenght = sca[k]->sectorsize;
+
+							// ID part CRC ERROR ?
+							if(sca[k]->use_alternate_header_crc)
+							{
+								cpcdsk_s.fdc_status_reg1 |= 0x20;
+							}
+
+							// Data part CRC ERROR ?
+							if(sca[k]->use_alternate_data_crc)
+							{
+								cpcdsk_s.fdc_status_reg1 |= 0x20;
+								cpcdsk_s.fdc_status_reg2 |= 0x20;
+							}
+
+							// Deleted Data Address Mark ?
+							if(sca[k]->alternate_datamark)
+							{
+								if(sca[k]->alternate_datamark == 0xF8)
+								{
+									cpcdsk_s.fdc_status_reg2 |= 0x40;
+								}
+							}
+
 							fseek(cpcdskfile,sectorlistoffset+(k*sizeof(cpcdsk_sector)),SEEK_SET);
 							fwrite(&cpcdsk_s,sizeof(cpcdsk_sector),1,cpcdskfile);
 
