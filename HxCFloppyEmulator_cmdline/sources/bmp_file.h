@@ -43,4 +43,6 @@ typedef struct tagRGBQUAD {
 int bmp_load(char * file,bitmap_data * bdata);
 int bmpRLE8b_write(char * file,bitmap_data * bdata);
 int bmp24b_write(char * file,bitmap_data * bdata);
+int bmp16b_write(char * file,bitmap_data * bdata);
+
 
