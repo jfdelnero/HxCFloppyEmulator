@@ -607,6 +607,8 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	SIDE * currentside;
 	s_col * col;
 
+	char tmp_str[32];
+
 	sl=td->sl;
 	while(sl)
 	{
@@ -853,6 +855,9 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 			display_sectors(floppycontext,td,floppydisk,track,side,timingoffset_offset,i);
 		}
 	}
+
+	sprintf(tmp_str,"T:%.3d S:%.1d",track,side);
+	putstring8x8(td,1,1,tmp_str,0x000,0);
 }
 
 s_sectorlist * hxcfe_td_getlastsectorlist(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td)
