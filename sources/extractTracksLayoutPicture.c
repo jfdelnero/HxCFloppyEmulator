@@ -102,11 +102,16 @@ unsigned char getPixelCode(unsigned long pix,unsigned long * pal,int * nbcol)
 		}
 	}
 
-	if(i==*nbcol)
+	if(i==*nbcol && i<256)
 	{
-		pal[*nbcol] = pix;
-		*nbcol = (*nbcol+1) &0xFF;
-		return *nbcol-1;
+		if(*nbcol<256 && *nbcol>=0)
+		{
+			pal[*nbcol] = pix;
+
+			*nbcol = (*nbcol+1);
+		
+			return *nbcol-1;
+		}
 	}
 
 	return 0;
@@ -242,9 +247,15 @@ int extractTracksLayoutPic(HXCFLOPPYEMULATOR* hxcfe,char * infile)
 					get_filename(infile,ofilename);
 					strcat(ofilename,".bmp");
 
+					for(i=0;i<256;i++)
+					{
+						pal[i]=i|(i<<8)|(i<<16);
+					}
+	
 					ptrchar = malloc((td->xsize*td->ysize)*nb_row*nb_col);
 					if(ptrchar)
 					{
+						printf("Converting image...\n");
 						nbcol = 0;
 						k=0;
 						for(i=0;i< ( nb_row * td->ysize );i++)
@@ -256,15 +267,57 @@ int extractTracksLayoutPic(HXCFLOPPYEMULATOR* hxcfe,char * infile)
 							}
 						}
 
- 						printf("Writing %s...\n",ofilename);
+						if(nbcol>=256)
+						{
+							k = 0;
+							for(i=0;i< ( nb_row * td->ysize );i++)
+							{
+								for(j=0;j< ( nb_col * td->xsize );j++)
+								{
+									ptr[k] = ptr[k] & 0xF8F8F8;
+									k++;
+								}
+							}
 
-						bdata.nb_color = 8;
-						bdata.xsize = td->xsize * nb_col;
-						bdata.ysize = td->ysize * nb_row;
-						bdata.data = (unsigned long*)ptrchar;
-						bdata.palette = (unsigned char*)&pal;
+							for(i=0;i<256;i++)
+							{
+								pal[i]=i|(i<<8)|(i<<16);
+							}
 
-						bmpRLE8b_write(ofilename,&bdata);
+							nbcol = 0;
+							k=0;
+							for(i=0;i< ( nb_row * td->ysize );i++)
+							{
+								for(j=0;j< ( nb_col * td->xsize );j++)
+								{
+									ptrchar[k] = getPixelCode(ptr[k],(unsigned long*)&pal,&nbcol);
+									k++;
+								}
+							}
+						}
+
+						printf("Writing %s...\n",ofilename);
+
+						if(nbcol>=256)
+						{
+							bdata.nb_color = 16;
+							bdata.xsize = td->xsize * nb_col;
+							bdata.ysize = td->ysize * nb_row;
+							bdata.data = (unsigned long*)ptr;
+							bdata.palette = 0;
+
+							bmp16b_write(ofilename,&bdata);							
+						}
+ 						else
+						{
+							bdata.nb_color = 8;
+							bdata.xsize = td->xsize * nb_col;
+							bdata.ysize = td->ysize * nb_row;
+							bdata.data = (unsigned long*)ptrchar;
+							bdata.palette = (unsigned char*)&pal;
+
+							bmpRLE8b_write(ofilename,&bdata);
+						}
 						printf("Done!\n");
 
 						free(ptrchar);

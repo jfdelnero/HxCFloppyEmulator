@@ -315,6 +315,68 @@ int bmp24b_write(char * file,bitmap_data * bdata)
 	return 0;
 }
 
+int bmp16b_write(char * file,bitmap_data * bdata)
+{
+	FILE * f;
+	int i,j;
+	unsigned short color;
+	BITMAPFILEHEADER bitmap_header;
+	BITMAPINFOHEADER bitmap_info_header;
+	unsigned long bitmapdatalinesize;
+	unsigned char * linebuffer;
+
+	f = fopen(file,"wb");
+	if(f)
+	{
+		memset(&bitmap_header,0,sizeof(BITMAPFILEHEADER));
+
+		bitmap_header.bfType = 19778;
+		bitmap_header.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+
+		bitmapdatalinesize = bdata->xsize*2;
+
+		if(bitmapdatalinesize&0x3)
+			bitmapdatalinesize = ((bitmapdatalinesize & (~0x3)) + 0x4);
+
+		bitmap_header.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (bitmapdatalinesize*bdata->ysize);
+		fwrite(&bitmap_header,1,sizeof(BITMAPFILEHEADER),f);
+
+		memset(&bitmap_info_header,0,sizeof(BITMAPINFOHEADER));
+		bitmap_info_header.biSize = sizeof(BITMAPINFOHEADER);
+		bitmap_info_header.biBitCount = 16;
+		bitmap_info_header.biHeight = bdata->ysize;
+		bitmap_info_header.biWidth = bdata->xsize;
+		bitmap_info_header.biPlanes = 1;
+		bitmap_info_header.biSizeImage = bitmapdatalinesize*bdata->ysize;
+
+		fwrite(&bitmap_info_header,1,sizeof(BITMAPINFOHEADER),f);
+
+		linebuffer = (unsigned char *)malloc(bitmapdatalinesize);
+		memset(linebuffer,0,bitmapdatalinesize);
+
+		for(i=0;i<bdata->ysize;i++)
+		{
+			for(j=0;j<bdata->xsize;j++)
+			{
+
+				color = (unsigned short)( (bdata->data[((((bdata->ysize-1)-i))*bdata->xsize) + j]) & 0xFF)>>3;
+				color = (color<<5) | (unsigned short)( (bdata->data[((((bdata->ysize-1)-i))*bdata->xsize) + j]>>8) & 0xFF)>>3;
+				color = (color<<5) | (unsigned short)( (bdata->data[((((bdata->ysize-1)-i))*bdata->xsize) + j]>>16) & 0xFF)>>3;
+
+				linebuffer[(j*2)+0] =  color & 0xFF;
+				linebuffer[(j*2)+1] =  (color>>8) & 0xFF;
+			}
+
+			fwrite(linebuffer,1,bitmapdatalinesize,f);
+		}
+
+		free(linebuffer);
+		fclose(f);
+	}
+
+	return 0;
+}
+
 
 int packlineRLE(unsigned char * src,int size,unsigned char * dst)
 {
