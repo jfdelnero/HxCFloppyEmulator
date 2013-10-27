@@ -36,7 +36,12 @@
 
 #include "libhxcfe.h"
 
+#include "utils.h"
+
 #include "usb_hxcfloppyemulator.h"
+#include "bmp_file.h"
+
+#include "extractTracksLayoutPicture.h"
 
 int verbose;
 
@@ -45,47 +50,14 @@ int CUI_affiche(int MSGTYPE,char * chaine, ...)
 	if(MSGTYPE!=MSG_DEBUG || verbose)
 	{
 		va_list marker;
-		va_start( marker, chaine );     
-		
+		va_start( marker, chaine );
+
 		vprintf(chaine,marker);
 		printf("\n");
 
 		va_end( marker );
 	}
     return 0;
-}
-
-void get_filename(char * path,char * filename)
-{
-	int i,done;
-	
-	i=strlen(path);
-	done=0;
-	while(i && !done)
-	{
-		i--;
-		
-		if(path[i]=='/')
-		{
-			done=1;
-			i++;
-		}
-	}
-
-	sprintf(filename,"%s",&path[i]);
-
-	i=0;
-	while(filename[i])
-	{
-		if(filename[i]=='.')
-		{
-			filename[i]='_';
-		}
-
-		i++;
-	}
-	
-	return;
 }
 
 int isOption(int argc, char* argv[],char * paramtosearch,char * argtoparam)
@@ -99,7 +71,7 @@ int isOption(int argc, char* argv[],char * paramtosearch,char * argtoparam)
 	while(param<=argc)
 	{
 		if(argv[param])
-		{			
+		{
 			if(argv[param][0]=='-')
 			{
 				memset(option,0,512);
@@ -118,7 +90,7 @@ int isOption(int argc, char* argv[],char * paramtosearch,char * argtoparam)
 					if(argtoparam)
 					{
 						if(argv[param][i]==':')
-						{	
+						{
 							i++;
 							j=0;
 							while( argv[param][i] )
@@ -144,7 +116,7 @@ int isOption(int argc, char* argv[],char * paramtosearch,char * argtoparam)
 		}
 		param++;
 	}
-	
+
 	return 0;
 }
 
@@ -169,13 +141,14 @@ void printhelp(char* argv[])
 	printf("  -list\t\t\t\t: List the content of the floppy image\n");
 	printf("  -getfile:[FILE]\t\t: Get a file from the floppy image\n");
 	printf("  -putfile:[FILE]\t\t: Put a file to the floppy image\n");
+	printf("  -graphlayout\t\t\t: Extract the disk layout picture (BMP).\n");
 
 	printf("\n");
 }
 
 void printlibmodule(HXCFLOPPYEMULATOR* hxcfe)
 {
-	
+
 	int i,j;
 	int numberofloader;
 	const char* ptr;
@@ -184,7 +157,7 @@ void printlibmodule(HXCFLOPPYEMULATOR* hxcfe)
 	printf("-                   libhxcfe file type support list                       -\n");
 	printf("---------------------------------------------------------------------------\n");
 	printf("MODULE ID          ACCESS    DESCRIPTION                         Extension\n\n");
-	
+
 	i=0;
 	numberofloader=hxcfe_numberOfLoader(hxcfe);
 	while(i<numberofloader)
@@ -192,17 +165,17 @@ void printlibmodule(HXCFLOPPYEMULATOR* hxcfe)
 		ptr=hxcfe_getLoaderName(hxcfe,i);
 		printf("%s",ptr );
 		for(j=0;j<(int)(20-strlen(ptr));j++) printf(" ");
-		
+
 		printf("(%c%c)",hxcfe_getLoaderAccess(hxcfe,i)&1?'R':' ',hxcfe_getLoaderAccess(hxcfe,i)&2?'W':' ');
-		
+
 		ptr=hxcfe_getLoaderDesc(hxcfe,i);
 		printf(" :  %s",ptr);
-		
+
 		for(j=0;j<(int)(38-strlen(ptr));j++) printf(" ");
 		printf("(*.%s)\n",hxcfe_getLoaderExt(hxcfe,i));
 		i++;
 	}
-	
+
 	printf("\n%d Loaders\n\n",hxcfe_numberOfLoader(hxcfe));
 
 }
@@ -224,7 +197,7 @@ FLOPPY*     hxcfe_generateXmlFileFloppy (XmlFloppyBuilder* context,char *file);
 
 void printdisklayout(HXCFLOPPYEMULATOR* hxcfe)
 {
-	
+
 	int i,j;
 	int numberoflayout;
 	XmlFloppyBuilder* xfb;
@@ -236,7 +209,7 @@ void printdisklayout(HXCFLOPPYEMULATOR* hxcfe)
 	printf("-                     libhxcfe Raw Disk Layout list                       -\n");
 	printf("---------------------------------------------------------------------------\n");
 	printf("\n");
-	
+
 	i=0;
 	numberoflayout = hxcfe_numberOfXmlLayout(xfb);
 	while(i<numberoflayout)
@@ -244,15 +217,15 @@ void printdisklayout(HXCFLOPPYEMULATOR* hxcfe)
 		ptr=hxcfe_getXmlLayoutName(xfb,i);
 		printf("%s",ptr );
 		for(j=0;j<(int)(20-strlen(ptr));j++) printf(" ");
-				
+
 		ptr=hxcfe_getXmlLayoutDesc(xfb,i);
 		printf(" :  %s",ptr);
-		
+
 		for(j=0;j<(int)(38-strlen(ptr));j++) printf(" ");
 		printf("\n");
 		i++;
 	}
-	
+
 	printf("\n%d Layout\n\n",hxcfe_numberOfXmlLayout(xfb));
 
 	hxcfe_deinitXmlFloppy(xfb);
@@ -262,7 +235,7 @@ void printdisklayout(HXCFLOPPYEMULATOR* hxcfe)
 
 void printinterfacemode(HXCFLOPPYEMULATOR* hxcfe)
 {
-	
+
 	int i,j;
 	int numberofifmode;
 	const char* ptr;
@@ -279,14 +252,14 @@ void printinterfacemode(HXCFLOPPYEMULATOR* hxcfe)
 		ptr=hxcfe_getFloppyInterfaceModeName(hxcfe,i);
 		printf("%s",ptr );
 		for(j=0;j<(int)(30-strlen(ptr));j++) printf(" ");
-		
+
 		printf("(0x%.2X)",i);
-		
+
 		ptr=hxcfe_getFloppyInterfaceModeDesc(hxcfe,i);
 		printf(" : %s\n",ptr);
 		i++;
 	}
-	
+
 	printf("\n%d Modes\n\n",i);
 
 }
@@ -301,7 +274,7 @@ int convertfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char * outfile,char * out
 	if(loaderid>=0)
 	{
 		floppydisk=hxcfe_floppyLoad(hxcfe,infile,loaderid,&ret);
-				
+
 		if(ret!=HXCFE_NOERROR || !floppydisk)
 		{
 			switch(ret)
@@ -337,7 +310,7 @@ int convertfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char * outfile,char * out
 			{
 				printf("Cannot Find the Loader %s ! Please use the -modulelist option to see possible values.\n",outformat);
 			}
-		
+
 			hxcfe_floppyUnload(hxcfe,floppydisk);
 		}
 	}
@@ -352,21 +325,21 @@ int convertrawfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char * layout,char * o
 	XmlFloppyBuilder* rfb;
 
 	rfb=hxcfe_initXmlFloppy(hxcfe);
-		
+
 	layoutid = hxcfe_getXmlLayoutID(rfb,layout);
 
 	if(layoutid>=0)
 	{
 
 		hxcfe_selectXmlFloppyLayout(rfb,layoutid);
-		
+
 		if(strlen(infile))
 			floppydisk = hxcfe_generateXmlFileFloppy(rfb,infile);
 		else
 			floppydisk = hxcfe_generateXmlFloppy(rfb,0,0);
 
 		hxcfe_deinitXmlFloppy(rfb);
-				
+
 		if(!floppydisk)
 		{
 			printf("Load error!\n");
@@ -388,7 +361,7 @@ int convertrawfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char * layout,char * o
 			{
 				printf("Cannot Find the Loader %s ! Please use the -modulelist option to see possible values.\n",outformat);
 			}
-		
+
 			hxcfe_floppyUnload(hxcfe,floppydisk);
 		}
 	}
@@ -402,7 +375,7 @@ int convertrawfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char * layout,char * o
 }
 
 int usbload(HXCFLOPPYEMULATOR* hxcfe,char * infile,int drive,int doublestep,int ifmode)
-{   
+{
 	int loaderid;
 	int ret;
 	FLOPPY * floppydisk;
@@ -412,12 +385,12 @@ int usbload(HXCFLOPPYEMULATOR* hxcfe,char * infile,int drive,int doublestep,int 
 
 	usbfe=libusbhxcfe_init(hxcfe);
 	if(usbfe)
-	{			
+	{
 		loaderid=hxcfe_autoSelectLoader(hxcfe,infile,0);
 		if(loaderid>=0)
 		{
 			floppydisk=hxcfe_floppyLoad(hxcfe,infile,loaderid,&ret);
-				
+
 			if(ret!=HXCFE_NOERROR || !floppydisk)
 			{
 				switch(ret)
@@ -462,7 +435,7 @@ int usbload(HXCFLOPPYEMULATOR* hxcfe,char * infile,int drive,int doublestep,int 
 				}while(getchar()!='q');
 
 				libusbhxcfe_ejectFloppy(hxcfe,usbfe);
-					
+
 				libusbhxcfe_deInit(hxcfe,usbfe);
 				hxcfe_floppyUnload(hxcfe,floppydisk);
 			}
@@ -489,7 +462,7 @@ int infofile(HXCFLOPPYEMULATOR* hxcfe,char * infile)
 	if(loaderid>=0)
 	{
 		floppydisk=hxcfe_floppyLoad(hxcfe,infile,loaderid,&ret);
-				
+
 		if(ret!=HXCFE_NOERROR || !floppydisk)
 		{
 			switch(ret)
@@ -516,8 +489,8 @@ int infofile(HXCFLOPPYEMULATOR* hxcfe,char * infile)
 			printf("Floppy interface mode : %s\n",hxcfe_getFloppyInterfaceModeName(hxcfe,ifmode),hxcfe_getFloppyInterfaceModeDesc(hxcfe,ifmode));
 			printf("Number of Track : %d\n",hxcfe_getNumberOfTrack(hxcfe,floppydisk) );
 			printf("Number of Side : %d\n",hxcfe_getNumberOfSide(hxcfe,floppydisk) );
-			printf("Total Size : %d Bytes, ",hxcfe_getFloppySize (hxcfe,floppydisk,&nbofsector)); 
-			printf("Number of sectors : %d",nbofsector); 
+			printf("Total Size : %d Bytes, ",hxcfe_getFloppySize (hxcfe,floppydisk,&nbofsector));
+			printf("Number of sectors : %d",nbofsector);
 
 			ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
 
@@ -562,7 +535,7 @@ int displaydir(FSMNG  * fsmng,char * folder,int level)
 				printf("%s <%d>\n",(char*)&dirent.entryname,dirent.size);
 
 				if(dir)
-				{	
+				{
 					strcpy(fullpath,folder);
 					if(fullpath[strlen(fullpath)-1] != '/')
 					{
@@ -584,7 +557,7 @@ int displaydir(FSMNG  * fsmng,char * folder,int level)
 			{
 				return 0;
 			}
-			 
+
 
 		}while(1);
 	}
@@ -609,7 +582,7 @@ int imagedir(HXCFLOPPYEMULATOR* hxcfe,char * infile)
 	if(loaderid>=0)
 	{
 		floppydisk=hxcfe_floppyLoad(hxcfe,infile,loaderid,&ret);
-				
+
 		if(ret!=HXCFE_NOERROR || !floppydisk)
 		{
 			switch(ret)
@@ -636,12 +609,12 @@ int imagedir(HXCFLOPPYEMULATOR* hxcfe,char * infile)
 			printf("Floppy interface mode : %s\n",hxcfe_getFloppyInterfaceModeName(hxcfe,ifmode),hxcfe_getFloppyInterfaceModeDesc(hxcfe,ifmode));
 			printf("Number of Track : %d\n",hxcfe_getNumberOfTrack(hxcfe,floppydisk) );
 			printf("Number of Side : %d\n",hxcfe_getNumberOfSide(hxcfe,floppydisk) );
-			printf("Total Size : %d Bytes, ",hxcfe_getFloppySize (hxcfe,floppydisk,&nbofsector)); 
-			printf("Number of sectors : %d\n",nbofsector); 
+			printf("Total Size : %d Bytes, ",hxcfe_getFloppySize (hxcfe,floppydisk,&nbofsector));
+			printf("Number of sectors : %d\n",nbofsector);
 
 			ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
 
-			printf("\n------- Disk Tree --------\n"); 
+			printf("\n------- Disk Tree --------\n");
 			fsmng = hxcfe_initFsManager(hxcfe);
 			if (fsmng)
 			{
@@ -653,7 +626,7 @@ int imagedir(HXCFLOPPYEMULATOR* hxcfe,char * infile)
 			}
 			hxcfe_floppyUnload(hxcfe,floppydisk);
 
-			printf("\n--------------------------\n"); 
+			printf("\n--------------------------\n");
 		}
 	}
 
@@ -672,14 +645,13 @@ int getfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 	FILE * f;
 	unsigned char * buffer;
 
-
 	printf("File Image: %s\n",infile);
 
 	loaderid=hxcfe_autoSelectLoader(hxcfe,infile,0);
 	if(loaderid>=0)
 	{
 		floppydisk=hxcfe_floppyLoad(hxcfe,infile,loaderid,&ret);
-				
+
 		if(ret!=HXCFE_NOERROR || !floppydisk)
 		{
 			switch(ret)
@@ -709,14 +681,14 @@ int getfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 
 			ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
 
-			printf("\n--------------------------\n"); 
+			printf("\n--------------------------\n");
 			fsmng = hxcfe_initFsManager(hxcfe);
 			if (fsmng)
 			{
 				hxcfe_selectFS(fsmng, 0);
 				hxcfe_mountImage(fsmng, floppydisk);
 
-				printf("\nGet %s\n",path); 
+				printf("\nGet %s\n",path);
 
 				filehandle = hxcfe_openFile(fsmng, path);
 				if(filehandle > 0)
@@ -724,13 +696,13 @@ int getfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 					hxcfe_fseek( fsmng,filehandle,0,SEEK_END);
 					size = hxcfe_ftell( fsmng,filehandle);
 					hxcfe_fseek( fsmng,filehandle,0,SEEK_SET);
-					printf("Files size : %d Bytes\n",size); 
+					printf("Files size : %d Bytes\n",size);
 
 					buffer = malloc(size);
 					if(buffer)
 					{
 						hxcfe_readFile(fsmng,filehandle,buffer,size);
-						
+
 						i= strlen(path);
 
 						while(i && path[i]!='/')
@@ -742,7 +714,7 @@ int getfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 
 						f = fopen(&path[i],"w+b");
 						if(f)
-						{	
+						{
 							fwrite(buffer,size,1,f);
 							fclose(f);
 						}
@@ -754,12 +726,12 @@ int getfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 				}
 				else
 				{
-					printf("ERROR : Cannot open the file !\n"); 
+					printf("ERROR : Cannot open the file !\n");
 				}
 
 				hxcfe_deinitFsManager(fsmng);
 
-				printf("\n--------------------------\n"); 
+				printf("\n--------------------------\n");
 
 			}
 			hxcfe_floppyUnload(hxcfe,floppydisk);
@@ -790,7 +762,7 @@ int putfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 	if(loaderid>=0)
 	{
 		floppydisk=hxcfe_floppyLoad(hxcfe,infile,loaderid,&ret);
-				
+
 		if(ret!=HXCFE_NOERROR || !floppydisk)
 		{
 			switch(ret)
@@ -820,24 +792,24 @@ int putfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 
 			ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
 
-			printf("\n--------------------------\n"); 
+			printf("\n--------------------------\n");
 			fsmng = hxcfe_initFsManager(hxcfe);
 			if (fsmng)
 			{
 				hxcfe_selectFS(fsmng, 0);
 				hxcfe_mountImage(fsmng, floppydisk);
 
-				printf("\nPut %s\n",path); 
+				printf("\nPut %s\n",path);
 
-				
+
 				f = fopen(path,"rb");
 				if(f)
-				{	
+				{
 					fseek( f,0,SEEK_END);
 					size = ftell( f );
 					fseek( f,0,SEEK_SET);
 
-					printf("Files size : %d Bytes\n",size); 
+					printf("Files size : %d Bytes\n",size);
 					buffer = malloc(size);
 					if(buffer)
 					{
@@ -859,7 +831,7 @@ int putfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 						filehandle = hxcfe_createFile(fsmng, foutput);
 						if(filehandle > 0)
 						{
-							printf("\nCreate %s\n",foutput); 
+							printf("\nCreate %s\n",foutput);
 							hxcfe_writeFile(fsmng,filehandle,buffer,size);
 							hxcfe_closeFile(fsmng,filehandle);
 						}
@@ -869,14 +841,14 @@ int putfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 				}
 				else
 				{
-					printf("ERROR : Cannot open the file !\n"); 
+					printf("ERROR : Cannot open the file !\n");
 				}
 
 				hxcfe_deinitFsManager(fsmng);
 
 				hxcfe_floppyExport(hxcfe,floppydisk,infile,loaderid);
 
-				printf("\n--------------------------\n"); 
+				printf("\n--------------------------\n");
 
 			}
 
@@ -1039,14 +1011,18 @@ int main(int argc, char* argv[])
 		putfile(hxcfe,filename,filetoget);
 	}
 
-	
+	if(isOption(argc,argv,"graphlayout",0)>0)
+	{
+		extractTracksLayoutPic(hxcfe,filename);
+	}
+
 	// Input file name option
 	if(isOption(argc,argv,"usb",(char*)&temp)>0)
 	{
 		usbload(hxcfe,filename,temp[0]-'0',doublestep,interfacemode);
 	}
 
-	if( (isOption(argc,argv,"help",0)<=0) && 
+	if( (isOption(argc,argv,"help",0)<=0) &&
 		(isOption(argc,argv,"license",0)<=0) &&
 		(isOption(argc,argv,"modulelist",0)<=0) &&
 		(isOption(argc,argv,"interfacelist",0)<=0) &&
@@ -1056,7 +1032,8 @@ int main(int argc, char* argv[])
 		(isOption(argc,argv,"conv",0)<=0) &&
 		(isOption(argc,argv,"usb",0)<=0) &&
 		(isOption(argc,argv,"rawlist",0)<=0) &&
-		(isOption(argc,argv,"infos",0)<=0 )
+		(isOption(argc,argv,"infos",0)<=0 ) &&
+		(isOption(argc,argv,"graphlayout",0)<=0 )
 		)
 	{
 		printhelp(argv);
