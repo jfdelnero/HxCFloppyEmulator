@@ -1687,6 +1687,14 @@ SOURCE=..\sources\loaders\sdd_speccydos_loader\sdd_speccydos_loader.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\sources\loaders\sdd_speccydos_loader\sdd_speccydos_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\sdd_speccydos_loader\sdd_speccydos_writer.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\loaders\sdd_speccydos_loader\sddfileformat.h
 # End Source File
 # End Group
