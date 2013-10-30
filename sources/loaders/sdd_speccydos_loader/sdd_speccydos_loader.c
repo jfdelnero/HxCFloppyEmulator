@@ -54,6 +54,7 @@
 #include "floppy_utils.h"
 
 #include "sdd_speccydos_loader.h"
+#include "sdd_speccydos_writer.h"
 
 #include "sddfileformat.h"
 
@@ -274,7 +275,7 @@ int SDDSpeccyDos_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long
 	{
 		(ISVALIDDISKFILE)	SDDSpeccyDos_libIsValidDiskFile,
 		(LOADDISKFILE)		SDDSpeccyDos_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		SDDSpeccyDos_libWrite_DiskFile,
 		(GETPLUGININFOS)	SDDSpeccyDos_libGetPluginInfo
 	};
 

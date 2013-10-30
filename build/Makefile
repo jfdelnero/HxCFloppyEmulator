@@ -57,7 +57,7 @@ DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosf
                   fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
-					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o
+					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o
 
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
@@ -393,6 +393,9 @@ apple2_do_loader.o : $(BASEDIR)/loaders/apple2_do_loader/apple2_do_loader.c $(BA
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 sdd_speccydos_loader.o : $(BASEDIR)/loaders/sdd_speccydos_loader/sdd_speccydos_loader.c $(BASEDIR)/loaders/sdd_speccydos_loader/sdd_speccydos_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+sdd_speccydos_writer.o : $(BASEDIR)/loaders/sdd_speccydos_loader/sdd_speccydos_writer.c $(BASEDIR)/loaders/sdd_speccydos_loader/sdd_speccydos_writer.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 adf_hd.o : $(BASEDIR)/thirdpartylibs/adflib/Lib/adf_hd.c
