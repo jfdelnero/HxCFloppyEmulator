@@ -78,6 +78,7 @@ typedef struct SECTORCONFIG_
 
 	unsigned char * input_data;
 	unsigned char fill_byte;
+	unsigned char fill_byte_used;				// Set to indicate that the sector is filled with "fill_byte"
 }SECTORCONFIG;
 
 typedef struct isoibm_config_
