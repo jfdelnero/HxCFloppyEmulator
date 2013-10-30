@@ -235,7 +235,8 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 {
 	int tracksize;
 	int i,j,old_i;
-	char tempstr[512];	
+	char tempstr[512];
+	char tempstr2[32];
 	double timingoffset;
 	double timingoffset2;
 	double timingoffset3;
@@ -381,8 +382,16 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 											for(j=50;j<(td->ysize-10);j++)
 											{
 												col=(s_col *)&td->framebuffer[(td->xsize*j) + i];
-												col->blue=3*col->blue/4;
-												col->red=3*col->red/4;
+												if(!sc->fill_byte_used)
+												{
+													col->blue=3*col->blue/6;
+													col->red=3*col->red/6;
+												}
+												else
+												{
+													col->blue=3*col->blue/4;
+													col->red=3*col->red/4;
+												}
 											}
 										}
 									}
@@ -485,9 +494,14 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 								case ARBURG_SYS:
 									sprintf(tempstr,"Arburg SYSTEM %.3dB ",sc->sectorsize);
 								break;
-
-
 							}
+
+							if(sc->fill_byte_used)
+								sprintf(tempstr2," F:%.2Xh",sc->fill_byte);
+							else
+								sprintf(tempstr2,"");
+
+							strcat(tempstr,tempstr2);
 
 							putstring8x8(td,xpos_startheader,225,tempstr,0x000,1);
 
