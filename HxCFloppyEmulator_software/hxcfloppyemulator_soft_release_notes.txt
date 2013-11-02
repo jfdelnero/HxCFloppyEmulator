@@ -26,7 +26,7 @@ New track support : Data Arburg format.
 
 New track support : system Arburg format.
 
-New Writer : SSD Speccy DOS file.
+New Writer : SDD Speccy DOS file.
 
 /*********************************************************
 06 august 2013: HxCFloppyEmulator 2.0.16.0
