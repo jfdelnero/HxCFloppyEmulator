@@ -68,6 +68,26 @@ extern unsigned char odd_tab[];
 
 unsigned short sectorsize[]={128,256,512,1024,2048,4096,8192,16384};
 
+void checkEmptySector(SECTORCONFIG * sector)
+{
+	int k,sector_size;
+	unsigned char c;
+
+	sector_size = sector->sectorsize;
+	c = sector->input_data[0];
+	k = 0;
+	while( ( k < sector_size ) && ( c == sector->input_data[k] ) )
+	{
+		k++;
+	};
+
+	if( k == sector_size )
+	{
+		sector->fill_byte = c;
+		sector->fill_byte_used = 0xFF;
+	}
+}
+
 int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFIG * sector,int track_offset)
 {
 	int bit_offset_bak,bit_offset,old_bit_offset,tmp_bit_offset;
@@ -80,7 +100,6 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 	int sector_extractor_sm;
 	int k;
 	unsigned char crctable[32];
-	unsigned char c;
 
 	memset(sector,0,sizeof(SECTORCONFIG));
 
@@ -201,18 +220,7 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 						free(tmp_sector);
 
 						// "Empty" sector detection
-						k = 0;
-						c = sector->input_data[0];
-						while( ( k < sector_size ) && ( c == sector->input_data[k] ) )
-						{
-							k++;
-						};
-
-						if( k == sector_size )
-						{
-							sector->fill_byte = c;
-							sector->fill_byte_used = 0xFF;
-						}
+						checkEmptySector(sector);
 
 						bit_offset++;
 
@@ -286,7 +294,7 @@ int get_next_MEMBRAIN_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 	unsigned char CRC16_Low;
 	int sector_extractor_sm;
 	int k;
-	unsigned char crctable[32],c;
+	unsigned char crctable[32];
 
 	memset(sector,0,sizeof(SECTORCONFIG));
 
@@ -404,18 +412,7 @@ int get_next_MEMBRAIN_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 						free(tmp_sector);
 
 						// "Empty" sector detection
-						k = 0;
-						c = sector->input_data[0];
-						while( ( k < sector_size ) && ( c == sector->input_data[k] ) )
-						{
-							k++;
-						};
-
-						if( k == sector_size )
-						{
-							sector->fill_byte = c;
-							sector->fill_byte_used = 0xFF;
-						}
+						checkEmptySector(sector);
 
 						bit_offset++;
 
@@ -483,7 +480,7 @@ int get_next_AMIGAMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 {
 	int bit_offset,old_bit_offset;
 	int start_sector_bit_offset;
-	int sector_size,k;
+	int sector_size;
 
 	unsigned char   header[4];
 	unsigned char   headerparity[2];
@@ -493,7 +490,6 @@ int get_next_AMIGAMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 	unsigned char tmp_buffer[32];
 	unsigned char sector_data[544];
 	unsigned char temp_sector[512];
-	unsigned char c;
 	int sector_extractor_sm,i;
 
 	memset(sector_conf,0,sizeof(SECTORCONFIG));
@@ -615,18 +611,7 @@ int get_next_AMIGAMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 					memcpy(sector_conf->input_data,&sector_data[32],sector_size);
 
 					// "Empty" sector detection
-					k = 0;
-					c = sector_conf->input_data[0];
-					while( ( k < sector_size ) && ( c == sector_conf->input_data[k] ) )
-					{
-						k++;
-					};
-
-					if( k == sector_size )
-					{
-						sector_conf->fill_byte = c;
-						sector_conf->fill_byte_used = 0xFF;
-					}
+					checkEmptySector(sector_conf);
 
 					bit_offset = chgbitptr(track->tracklen,bit_offset,(8*2)+1);
 
@@ -668,7 +653,6 @@ int get_next_FM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFI
 	unsigned char * tmp_sector;
 	unsigned char CRC16_High;
 	unsigned char CRC16_Low;
-	unsigned char c;
 	int sector_extractor_sm;
 	int k,i;
 	unsigned char crctable[32];
@@ -807,18 +791,7 @@ int get_next_FM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFI
 							free(tmp_sector);
 
 							// "Empty" sector detection
-							k = 0;
-							c = sector->input_data[0];
-							while( ( k < sector_size ) && ( c == sector->input_data[k] ) )
-							{
-								k++;
-							};
-
-							if( k == sector_size )
-							{
-								sector->fill_byte = c;
-								sector->fill_byte_used = 0xFF;
-							}
+							checkEmptySector(sector);
 
 							bit_offset = chgbitptr(track->tracklen,bit_offset,1);
 
@@ -870,7 +843,6 @@ int get_next_TYCOMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTOR
 	unsigned char * tmp_sector;
 	unsigned char CRC16_High;
 	unsigned char CRC16_Low;
-	unsigned char c;
 	int sector_extractor_sm;
 	int k,i;
 	unsigned char crctable[32];
@@ -996,18 +968,7 @@ int get_next_TYCOMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTOR
 							free(tmp_sector);
 
 							// "Empty" sector detection
-							k = 0;
-							c = sector->input_data[0];
-							while( ( k < sector_size ) && ( c == sector->input_data[k] ) )
-							{
-								k++;
-							};
-
-							if( k == sector_size )
-							{
-								sector->fill_byte = c;
-								sector->fill_byte_used = 0xFF;
-							}
+							checkEmptySector(sector);
 
 							bit_offset = chgbitptr(track->tracklen,bit_offset, 1);
 
@@ -1057,7 +1018,6 @@ int get_next_EMU_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 	unsigned char tmp_buffer[32];
 	unsigned char CRC16_High;
 	unsigned char CRC16_Low;
-	unsigned char c;
 	int sector_extractor_sm;
 	int k;
 	unsigned char crctable[32];
@@ -1187,19 +1147,7 @@ int get_next_EMU_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 								}
 
 								// "Empty" sector detection
-								k = 0;
-								c = sector->input_data[0];
-								while( ( k < sector_size ) && ( c == sector->input_data[k] ) )
-								{
-									k++;
-								};
-
-								if( k == sector_size )
-								{
-									sector->fill_byte = c;
-									sector->fill_byte_used = 0xFF;
-								}
-
+								checkEmptySector(sector);
 							}
 
 							bit_offset=bit_offset+(sector_size*4);
@@ -1316,8 +1264,8 @@ int get_next_Arburg_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORC
 				sector->cylinder = 0x00;
 				sector->head = 0x00;
 				sector->sector = 1;
-				sector_size = 0xA02;
-				sector->sectorsize = sector_size;
+				sector_size = ARBURB_DATATRACK_SIZE + 2;
+				sector->sectorsize = ARBURB_DATATRACK_SIZE;
 				sector->trackencoding = ARBURG_DAT;
 
 				sector->use_alternate_datamark = 0x00;
@@ -1360,9 +1308,10 @@ int get_next_Arburg_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORC
 						sector->data_crc = sector->data_crc | (sector->input_data[0x9FF]<<8);
 					}
 
+					// "Empty" sector detection
+					checkEmptySector(sector);
 				}
 
-				sector->sectorsize = ARBURB_DATATRACK_SIZE;
 				bit_offset = track->tracklen;
 
 				sector_extractor_sm = ENDOFSECTOR;
@@ -1457,8 +1406,8 @@ int get_next_ArburgSyst_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SEC
 				sector->cylinder = 0x00;
 				sector->head = 0x00;
 				sector->sector = 1;
-				sector_size = 0xF02;
-				sector->sectorsize = sector_size;
+				sector_size = ARBURB_SYSTEMTRACK_SIZE + 2;
+				sector->sectorsize = ARBURB_SYSTEMTRACK_SIZE;
 				sector->trackencoding = ARBURG_SYS;
 
 				sector->use_alternate_datamark = 0x00;
@@ -1501,9 +1450,11 @@ int get_next_ArburgSyst_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SEC
 						sector->data_crc = sector->data_crc | (sector->input_data[0xEFF]<<8);
 					}
 
+					// "Empty" sector detection
+					checkEmptySector(sector);
+
 				}
 
-				sector->sectorsize = ARBURB_SYSTEMTRACK_SIZE;
 				bit_offset = track->tracklen;
 
 				sector_extractor_sm=ENDOFSECTOR;
