@@ -22,7 +22,11 @@ libhxcfe : Track alteration functions -> hxcfe_getSide & hxcfe_shiftTrackData fu
 
 libhxcfe : XML floppy file definition -> <track_list></track_list> Track definition fields working.
 
-New track support : Arburg format.
+New track support : Data Arburg format.
+
+New track support : system Arburg format.
+
+New Writer : SSD Speccy DOS file.
 
 /*********************************************************
 06 august 2013: HxCFloppyEmulator 2.0.16.0
