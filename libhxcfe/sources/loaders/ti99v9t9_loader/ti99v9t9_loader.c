@@ -300,7 +300,7 @@ int TI99V9T9_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	unsigned char skew0,skew1,interleave,numberofside;
 	int density;
 	unsigned short sectorsize;
-	unsigned unsigned int bitrate;
+	unsigned int bitrate;
 	int ret;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"TI99V9T9_libIsValidDiskFile");

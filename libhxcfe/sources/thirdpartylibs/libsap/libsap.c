@@ -500,7 +500,7 @@ static int get_filename(char filename[], const unsigned char entry_data[])
       return -1;
 
    /* name */
-   strncpy(filename, entry_data+TO_NAME, TO_NAME_LENGTH);
+   strncpy(filename, (char*)(entry_data+TO_NAME), TO_NAME_LENGTH);
 
    for (i=0; i<TO_NAME_LENGTH; i++) {
       if (filename[i] == 32)
@@ -1026,10 +1026,10 @@ int _ExtractDir(char buffer[], int buffer_size, int drive, int density, const un
    int format = (density == 1 ? SAP_FORMAT2 : SAP_FORMAT1);
 
    /* name of the volume */
-   strncpy(disk_name, trk20_data, TO_NAME_LENGTH);
+   strncpy(disk_name, (char*)trk20_data, TO_NAME_LENGTH);
 
    if ((disk_name[0] == 0) || (disk_name[0] == TO_TAG_FREE)) {
-      strcpy(disk_name, "No Name ");
+      strcpy((char*)disk_name, "No Name ");
    }
    else {
       disk_name[TO_NAME_LENGTH] = 0;
@@ -1652,7 +1652,7 @@ int sap_AddFile(sapID id, const char filename[])
             free_n = i;
       }
       else {
-         if (strncmp(dir_data+i*TO_DIRENTRY_LENGTH, entry_data, TO_NAME_LENGTH + TO_EXT_LENGTH) == 0) {
+         if (strncmp(dir_data+i*TO_DIRENTRY_LENGTH, (char*)entry_data, TO_NAME_LENGTH + TO_EXT_LENGTH) == 0) {
             prev_n = i;
             break;
          }
