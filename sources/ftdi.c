@@ -565,7 +565,11 @@ int setlatencytimer_ftdichip(unsigned long ftdihandle,unsigned char latencytimer
 
 int write_ftdichip(unsigned long ftdihandle,unsigned char * buffer,unsigned int size)
 {
+#if defined(FTDILIB)
 	int dwWritten;
+#else
+	unsigned int dwWritten;
+#endif
 
 #ifdef DEBUGMODE
 	printf("---write_ftdichip---\n");
@@ -596,9 +600,11 @@ int write_ftdichip(unsigned long ftdihandle,unsigned char * buffer,unsigned int 
 
 int read_ftdichip(unsigned long ftdihandle,unsigned char * buffer,unsigned int size)
 {
-	int returnvalue;
 #if defined(FTDILIB)
+	int returnvalue;
 	int nb_of_byte;
+#else
+	unsigned int returnvalue;
 #endif
 
 #ifdef DEBUGMODE
@@ -671,7 +677,7 @@ int getfifostatus_ftdichip(unsigned long ftdihandle,int * txlevel,int *rxlevel,u
 
 #else
 
-	if(pFT_GetStatus((FT_HANDLE*)ftdihandle,rxlevel,txlevel,(DWORD*)event)!=FT_OK)
+	if(pFT_GetStatus((FT_HANDLE*)ftdihandle,(unsigned int*)rxlevel,(unsigned int*)txlevel,(DWORD*)event)!=FT_OK)
 	{
 		return -1;
 	}
