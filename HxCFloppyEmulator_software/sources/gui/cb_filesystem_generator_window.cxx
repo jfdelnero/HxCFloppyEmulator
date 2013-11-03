@@ -514,7 +514,7 @@ int getdir(filesystem_generator_window *fsw,FSMNG  * fsmng,char * folder,char * 
 							floppyfile = hxcfe_openFile(fsmng, fullpath);
 							if(floppyfile>=0)
 							{
-								if(hxcfe_readFile( fsmng,floppyfile,(char*)membuf,dirent.size) != dirent.size )
+								if(hxcfe_readFile( fsmng,floppyfile,membuf,dirent.size) != dirent.size )
 								{
 									sprintf(progresstxt,"Read file %s failed !!!",fullpath);
 									fsw->txtout_freesize->value(progresstxt);
@@ -582,7 +582,7 @@ int getdir(filesystem_generator_window *fsw,FSMNG  * fsmng,char * folder,char * 
 				memset(membuf,0,filesize);
 			}
 
-			if(hxcfe_readFile( fsmng,floppyfile,(char*)membuf,filesize) != filesize )
+			if(hxcfe_readFile( fsmng,floppyfile,membuf,filesize) != filesize )
 			{
 				sprintf(progresstxt,"Read file %s failed !!!",folder);
 				fsw->txtout_freesize->value(progresstxt);
@@ -1132,7 +1132,7 @@ int addentry(filesystem_generator_window *fsw,FSMNG  * fsmng,  char * srcpath,ch
 					file_handle = hxcfe_createFile(fsmng,fullpath );
 					if(file_handle>0)
 					{
-						wsize = hxcfe_writeFile(fsmng,file_handle,(char*)buffer,size);
+						wsize = hxcfe_writeFile(fsmng,file_handle,buffer,size);
 						hxcfe_closeFile(fsmng,file_handle);
 						if( wsize != size )
 						{
