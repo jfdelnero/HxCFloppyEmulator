@@ -75,10 +75,10 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfi
 		memset(&staterep,0,sizeof(struct stat));
 		if(!hxc_stat(imgfile,&staterep))
 		{
-		
+
 			if(staterep.st_mode&S_IFDIR)
 			{
-				
+
 				found=0;
 				i=0;
 				do
@@ -180,7 +180,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 			i++;
 		}
 	}
-		
+
 	dirmode=configlist[i].dir;
 	floppydisk->floppyNumberOfTrack=configlist[i].number_of_track;
 	floppydisk->floppyNumberOfSide=configlist[i].number_of_side;
@@ -200,9 +200,9 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 
 
 	floppycontext->hxc_printf(MSG_INFO_1,"floppy size:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d, bitrate:%d, gap3: %d ",dksize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm,floppydisk->floppyBitRate,gap3len);
-	
-	flatimg=(char*)malloc(dksize);
-	if(flatimg!=NULL)
+
+	flatimg = (unsigned char*)malloc(dksize);
+	if(flatimg != NULL)
 	{
 		memset(flatimg,0xF6,dksize);
 		if(configlist[i].bootsector)
@@ -238,8 +238,8 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 		fatbs->BPB_FATSz16=fatconfig.nbofsectorperfat; //Taille d'une FAT en secteurs (0 par défaut pour FAT32).
 		fatbs->BPB_SecPerTrk=floppydisk->floppySectorPerTrack; //Sectors per track
 		fatbs->BPB_NumHeads=floppydisk->floppyNumberOfSide; //Number of heads.
-		
-		*( (unsigned short*) &flatimg[0x1FE])=0xAA55;//End of sector marker (0x55 0xAA)		
+
+		*( (unsigned short*) &flatimg[0x1FE])=0xAA55;//End of sector marker (0x55 0xAA)
 
 		fatposition=fatconfig.sectorsize*fatconfig.reservedsector;
 		memset(&flatimg[fatposition],0x00,fatconfig.numberoffat*fatconfig.nbofsectorperfat*512);
@@ -247,13 +247,13 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 		rootposition=((fatconfig.reservedsector)+(fatconfig.numberoffat*fatconfig.nbofsectorperfat))*fatconfig.sectorsize;
 		memset(&flatimg[rootposition],0x00,fatconfig.numberofrootentries*32);
 
-		dataposition=(((fatconfig.reservedsector)+(fatconfig.numberoffat*fatconfig.nbofsectorperfat))*fatconfig.sectorsize)+(32*fatconfig.numberofrootentries);		
-		
+		dataposition=(((fatconfig.reservedsector)+(fatconfig.numberoffat*fatconfig.nbofsectorperfat))*fatconfig.sectorsize)+(32*fatconfig.numberofrootentries);
+
 		numberofcluster=(fatconfig.nbofsector-(dataposition/fatconfig.sectorsize))/fatconfig.clustersize;
 
 		memset(&staterep,0,sizeof(struct stat));
 		if(strlen(imgfile))
-		{		
+		{
 			hxc_stat(imgfile,&staterep);
 			if(!(staterep.st_mode&S_IFDIR))
 				dirmode=0x00;
@@ -282,11 +282,11 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 		flatimg[fatposition+1]=0xFF;
 		flatimg[fatposition+2]=0xFF;
 
-		memcpy(&flatimg[((fatconfig.reservedsector)+(fatconfig.nbofsectorperfat))*fatconfig.sectorsize],&flatimg[fatposition],fatconfig.nbofsectorperfat*fatconfig.sectorsize);			
+		memcpy(&flatimg[((fatconfig.reservedsector)+(fatconfig.nbofsectorperfat))*fatconfig.sectorsize],&flatimg[fatposition],fatconfig.nbofsectorperfat*fatconfig.sectorsize);
 
 
 	/*	f=hxc_fopen("test.img","wb");
-		if(f) 
+		if(f)
 		{
 			fwrite(flatimg,dksize,1,f);
 			hxc_fclose(f);
@@ -299,13 +299,13 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 	{
 		return HXCFE_INTERNALERROR;
 	}
-	
+
 	sectorsize=fatconfig.sectorsize;
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);			
-				
+	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
-				
+
 		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 		currentcylinder=floppydisk->tracks[j];
 
@@ -313,17 +313,17 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 		{
 			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 						(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-				
+
 			currentcylinder->sides[i] = tg_generateTrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,0,floppydisk->floppyBitRate,currentcylinder->floppyRPM,tracktype,gap3len,(unsigned short)pregap,2500,-2500);
 		}
 	}
-			
+
 	free(flatimg);
-			
+
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 	return HXCFE_NOERROR;
 }
-	
+
 int FAT12FLOPPY_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 

@@ -95,14 +95,14 @@ int HFE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	if(imgfile)
 	{
 		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL) 
+		if(f==NULL)
 		{
 			return HXCFE_ACCESSERROR;
 		}
 		fread(&header,sizeof(header),1,f);
 		hxc_fclose(f);
 
-		if( !strcmp(header.HEADERSIGNATURE,"HXCPICFE"))
+		if( !strncmp((char*)header.HEADERSIGNATURE,"HXCPICFE",8))
 		{
 			floppycontext->hxc_printf(MSG_DEBUG,"HFE_libIsValidDiskFile : HFE file !");
 			return HXCFE_VALIDFILE;
@@ -136,17 +136,17 @@ int HFE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 
 	floppycontext->hxc_printf(MSG_DEBUG,"HFE_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
+
 	fread(&header,sizeof(header),1,f);
 
-	if(!strcmp(header.HEADERSIGNATURE,"HXCPICFE"))
+	if(!strncmp((char*)header.HEADERSIGNATURE,"HXCPICFE",8))
 	{
 
 		floppydisk->floppyNumberOfTrack=header.number_of_track;
@@ -176,7 +176,7 @@ int HFE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 		for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
-		{			
+		{
 
 			fseek(f,(trackoffsetlist[i].offset*512),SEEK_SET);
 			if(trackoffsetlist[i].track_len&0x1FF)
@@ -189,10 +189,10 @@ int HFE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			}
 
 			hfetrack=(unsigned char*)malloc( tracklen );
-			
+
 			floppycontext->hxc_printf(MSG_DEBUG,"HFE File : reading track %d, track size:%d - file offset:%.8X",
 				i,tracklen,(trackoffsetlist[i].offset*512));
-			
+
 			fread( hfetrack,tracklen,1,f);
 
 
@@ -202,7 +202,7 @@ int HFE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
 			memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
 			currentcylinder->floppyRPM=header.floppyRPM;
-			
+
 
 		/*	floppycontext->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
 			trackdesc.track_number,
@@ -221,17 +221,17 @@ int HFE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 				currentside->databuffer=malloc(currentside->tracklen);
 				memset(currentside->databuffer,0,currentside->tracklen);
-						
+
 				currentside->flakybitsbuffer=0;
-							
+
 				currentside->indexbuffer=malloc(currentside->tracklen);
 				memset(currentside->indexbuffer,0,currentside->tracklen);
-							
+
 				for(k=0;k<256;k++)
 				{
 					currentside->indexbuffer[k]=0xFF;
 				}
-						
+
 				currentside->timingbuffer=0;
 				currentside->bitrate=floppydisk->floppyBitRate;
 
@@ -254,7 +254,7 @@ int HFE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						}
 					}
 				}
-				
+
 
 				nbofblock=(currentside->tracklen/256);
 				for(k=0;k<nbofblock;k++)
@@ -270,17 +270,17 @@ int HFE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				currentside->tracklen=currentside->tracklen*8;
 
 			}
-		
+
 			free(hfetrack);
 		}
-		
+
 		free(trackoffsetlist);
-	
+
 		hxc_fclose(f);
 		return HXCFE_NOERROR;
-	}	
-	
-	hxc_fclose(f);	
+	}
+
+	hxc_fclose(f);
 	floppycontext->hxc_printf(MSG_ERROR,"bad header");
 	return HXCFE_BADFILE;
 }

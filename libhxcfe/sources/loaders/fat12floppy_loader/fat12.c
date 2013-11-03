@@ -38,7 +38,7 @@
 
 #include "libhxcadaptor.h"
 
-int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * file, char * fattable,char *entriestable,char *datatable,int parentcluster,FATCONFIG * fatconfig,int numberofcluster)
+int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * file, unsigned char * fattable,unsigned char *entriestable,unsigned char *datatable,int parentcluster,FATCONFIG * fatconfig,int numberofcluster)
 {
 	long hfindfile;
 	filefoundinfo FindFileData;
@@ -50,7 +50,7 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 	char tempstr[256];
 	int lefttoread;
 	int fatclusternb;
-	unsigned char * fullpath;
+	char * fullpath;
 	fat_directory_entry *entry;
 	fat_directory_entry *subentry;
 	int i,j;
@@ -60,7 +60,7 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 	tii=0;
 	if(strlen(folder))
 	{
-		hfindfile=hxc_find_first_file(folder,file, &FindFileData); 
+		hfindfile=hxc_find_first_file(folder,file, &FindFileData);
 		if(hfindfile!=-1)
 		{
 			bbool=1;
@@ -72,12 +72,12 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 					{
 						newentry=findfreeentry(entriestable);
 						entry=(fat_directory_entry *)newentry;
-						
+
 						memset(entry->DIR_Name,0x20,8+3);
 						sprintf((char*)tempstr,"%s",FindFileData.filename);
-						
+
 						floppycontext->hxc_printf(MSG_INFO_1,"Adding directory %s",FindFileData.filename);
-						
+
 						hxc_strupper(tempstr);
 						if(strchr(tempstr,'.'))
 						{
@@ -97,11 +97,11 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 							return 1;
 						}
 						memset(&datatable[(fatclusternb-2)*fatconfig->sectorsize*fatconfig->clustersize],0,fatconfig->sectorsize*fatconfig->clustersize);
-						
+
 						entry->DIR_FstClusLO=fatclusternb;
 						//*( (unsigned short*) &newentry[0x1A])=fatclusternb;
 						setclusterptr(fattable,fatclusternb,0xFFF);
-						
+
 						subnewentry=findfreeentry(&datatable[(fatclusternb-2)*fatconfig->sectorsize*fatconfig->clustersize]);
 						subentry=(fat_directory_entry *)subnewentry;
 
@@ -110,22 +110,22 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 						//memcpy(subnewentry,".          ",strlen(".          "));
 						subentry->DIR_Attr=0x10;
 						subentry->DIR_FstClusLO=fatclusternb;
-						
+
 						subnewentry=findfreeentry(&datatable[(fatclusternb-2)*fatconfig->sectorsize*fatconfig->clustersize]);
 						subentry=(fat_directory_entry *)subnewentry;
 						sprintf(subentry->DIR_Name,"..         ");
 						subentry->DIR_Attr=0x10;
 						subentry->DIR_FstClusLO=parentcluster;
 						//*( (unsigned short*) &subnewentry[0x1A])=parentcluster;
-						
+
 						floppycontext->hxc_printf(MSG_INFO_1,"Entering directory %s",FindFileData.filename);
 
-						fullpath=malloc(strlen(FindFileData.filename)+strlen(folder)+2);
+						fullpath = malloc(strlen(FindFileData.filename)+strlen(folder)+2);
 	#ifdef WIN32
 						sprintf(fullpath,"%s\\%s",folder,FindFileData.filename);
 	#else
 						sprintf(fullpath,"%s/%s",folder,FindFileData.filename);
-	#endif    
+	#endif
 
 
 						if(ScanFileAndAddToFAT(floppycontext,fullpath,file,fattable,&datatable[(fatclusternb-2)*fatconfig->sectorsize*fatconfig->clustersize],datatable,fatclusternb,fatconfig,numberofcluster))
@@ -137,7 +137,7 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 						free(fullpath);
 
 						floppycontext->hxc_printf(MSG_INFO_1,"Leaving directory %s",FindFileData.filename);
-						
+
 					}
 				}
 				else
@@ -165,7 +165,7 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 						}
 						i++;
 					}
-						
+
 					if(strchr(tempstr,'.'))
 					{
 
@@ -204,7 +204,7 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 						lefttoread=FindFileData.size;
 						fatclusternb=findfreecluster(fattable,numberofcluster);
 						memset(&datatable[(fatclusternb-2)*fatconfig->sectorsize*fatconfig->clustersize],0,fatconfig->sectorsize*fatconfig->clustersize);
-						
+
 						if(fatclusternb==-1)
 						{
 							floppycontext->hxc_printf(MSG_ERROR,"Cannot add this file ! : No more cluster free !");
@@ -212,7 +212,7 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 							return 1;
 						}
 						entry->DIR_FstClusLO=fatclusternb;
-						
+
 						if(file)
 						{
 							fullpath=malloc(strlen(FindFileData.filename)+strlen(folder)+2);
@@ -227,7 +227,7 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 							fullpath=malloc(strlen(folder)+1);
 							sprintf(fullpath,"%s",folder);
 						}
-						
+
 						hxc_stat(fullpath,&repstate);
 						ts=localtime(&repstate.st_ctime);
 						if(ts)
@@ -277,7 +277,7 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 								}
 								lefttoread=lefttoread-(fatconfig->sectorsize*fatconfig->clustersize);
 							}while(lefttoread>0);
-							
+
 							hxc_fclose(ftemp);
 						}
 						else
@@ -285,17 +285,17 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 							floppycontext->hxc_printf(MSG_ERROR,"Error while adding this file ! : Access error !");
 						}
 						free(fullpath);
-						
-					}	
+
+					}
 				}
-				
-				bbool=hxc_find_next_file(hfindfile,folder,file,&FindFileData);	
+
+				bbool=hxc_find_next_file(hfindfile,folder,file,&FindFileData);
 			}
-		
+
 			hxc_find_close(hfindfile);
 		}
 		else
-		{	
+		{
 			floppycontext->hxc_printf(MSG_ERROR,"Error FindFirstFile !");
 		}
 	}
@@ -303,7 +303,7 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 	{
 		floppycontext->hxc_printf(MSG_INFO_0,"Empty Path -> Empty floppy");
 	}
-	
+
 	return 0;
 }
 
@@ -311,13 +311,13 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 char * findfreeentry(char *entriestable)
 {
 	int i;
-	
+
 	i=0;
 	while(entriestable[i]!=0)
 	{
 		i=i+32;
 	}
-	
+
 	return &entriestable[i];
 }
 
@@ -336,20 +336,20 @@ int findfreecluster(char *fattable,int nbofcluster)
 			{
 				freecluster=1;
 			}
-			
+
 		}
 		else
 		{
-			
+
 			if(!fattable[i/8] && !(fattable[(i/8)+1]&0x0F))
 			{
 				freecluster=1;
 			}
 		}
-		
+
 		i=i+12;
 	}while(!freecluster && (((i-12)/12)<nbofcluster));
-	
+
 	if(((i-12)/12)<nbofcluster)
 	{
 		return (i-12)/12;
@@ -358,29 +358,29 @@ int findfreecluster(char *fattable,int nbofcluster)
 	{
 		return -1;
 	}
-	
+
 }
 
 int setclusterptr(char *fattable,int index,int ptr)
 {
 	int i;
-	
-	
+
+
 	i=index*12;
-	
+
 	if(i&7)
 	{
-		fattable[i/8]=(fattable[i/8]&0x0F)|((ptr&0xF)<<4); 
-		fattable[(i/8)+1]=((ptr>>4)&0xFF); 
+		fattable[i/8]=(fattable[i/8]&0x0F)|((ptr&0xF)<<4);
+		fattable[(i/8)+1]=((ptr>>4)&0xFF);
 	}
 	else
 	{
-		fattable[i/8]=(ptr&0xFF); 
-		fattable[(i/8)+1]=(fattable[(i/8)+1]&0xF0)|((ptr>>8)&0xF); 
+		fattable[i/8]=(ptr&0xFF);
+		fattable[(i/8)+1]=(fattable[(i/8)+1]&0xF0)|((ptr>>8)&0xF);
 	}
-	
-	
-	
+
+
+
 	return ptr;
 }
 
