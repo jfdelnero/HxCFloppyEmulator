@@ -272,6 +272,19 @@ int checkfileext(char * path,char *ext)
 	return 0;
 }
 
+char * sec_strncat(char * dst,char * src,int size)
+{
+	if(dst && src)
+	{
+		if(strlen(dst) + strlen(src) < size )
+		{
+			strncat(dst,src, size - strlen(dst) );
+		}
+	}
+
+	return dst;
+}
+
 void filesystem_generator_window_bt_injectdir(Fl_Button* bt, void*)
 {
 	filesystem_generator_window *fgw;
@@ -369,13 +382,13 @@ int displaydir(FSMNG  * fsmng,filesystem_generator_window *fgw,char * folder,int
 				}
 
 				strncpy(fullpath,folder,sizeof(fullpath));
-				strncat(fullpath,dirent.entryname,sizeof(fullpath));
+				sec_strncat(fullpath,dirent.entryname,sizeof(fullpath));
 
 				if(dir)
 				{
 					if(fullpath[strlen(fullpath)-1] != '/')
 					{
-						strncat(fullpath,"/",sizeof(fullpath));
+						sec_strncat(fullpath,"/",sizeof(fullpath));
 					}
 				}
 
@@ -467,19 +480,19 @@ int getdir(filesystem_generator_window *fsw,FSMNG  * fsmng,char * folder,char * 
 
 				if(fullpathdst[strlen(fullpathdst)-1] != SEPARATOR)
 				{
-					strncat(fullpathdst,PATHSEPARATOR,sizeof(fullpathdst));
+					sec_strncat(fullpathdst,PATHSEPARATOR,sizeof(fullpathdst));
 				}
 
-				strncat(fullpathdst,dirent.entryname,sizeof(fullpathdst));
+				sec_strncat(fullpathdst,dirent.entryname,sizeof(fullpathdst));
 
 				strncpy(fullpath,folder,sizeof(fullpath));
-				strncat(fullpath,dirent.entryname,sizeof(fullpath));
+				sec_strncat(fullpath,dirent.entryname,sizeof(fullpath));
 
 				if(dir)
 				{
 					if(fullpath[strlen(fullpath)-1] != '/')
 					{
-						strncat(fullpath,"/",sizeof(fullpath));
+						sec_strncat(fullpath,"/",sizeof(fullpath));
 					}
 
 					if( strcmp(dirent.entryname,"..") && strcmp(dirent.entryname,"."))
@@ -596,7 +609,7 @@ int getdir(filesystem_generator_window *fsw,FSMNG  * fsmng,char * folder,char * 
 
 			if(fullpathdst[strlen(fullpathdst)-1] != SEPARATOR)
 			{
-				strncat(fullpathdst,PATHSEPARATOR,sizeof(fullpathdst));
+				sec_strncat(fullpathdst,PATHSEPARATOR,sizeof(fullpathdst));
 			}
 
 			i = strlen(folder);
@@ -605,7 +618,7 @@ int getdir(filesystem_generator_window *fsw,FSMNG  * fsmng,char * folder,char * 
 				i--;
 			}
 
-			strncat(fullpathdst, &folder[i],sizeof(fullpathdst));
+			sec_strncat(fullpathdst, &folder[i],sizeof(fullpathdst));
 
 			f = hxc_fopen(fullpathdst,"w+b");
 			if(f)
@@ -677,8 +690,8 @@ void browse_floppy_disk(filesystem_generator_window *fgw,int lastoperationerror)
 							printsize(&statustxt[strlen(statustxt)],hxcfe_getFreeFsSpace(fsmng));
 							strcat(statustxt," |");
 				#ifdef STANDALONEFSBROWSER
-							strncat(statustxt," File : ",sizeof(statustxt));
-							strncat(statustxt,guicontext->last_loaded_image_path,sizeof(statustxt));
+							sec_strncat(statustxt," File : ",sizeof(statustxt));
+							sec_strncat(statustxt,guicontext->last_loaded_image_path,sizeof(statustxt));
 				#endif
 							fgw->txtout_freesize->value((const char*)statustxt);
 						}
@@ -1062,12 +1075,12 @@ int addentry(filesystem_generator_window *fsw,FSMNG  * fsmng,  char * srcpath,ch
 						if(strcmp(ffi.filename,".") && strcmp(ffi.filename,".."))
 						{
 							strncpy(srcfullpath,srcpath,sizeof(srcfullpath));
-							strncat(srcfullpath,PATHSEPARATOR,sizeof(srcfullpath));
-							strncat(srcfullpath,ffi.filename,sizeof(srcfullpath));
+							sec_strncat(srcfullpath,PATHSEPARATOR,sizeof(srcfullpath));
+							sec_strncat(srcfullpath,ffi.filename,sizeof(srcfullpath));
 
 							strncpy(fullpath,dstpath,sizeof(fullpath));
-							strncat(fullpath,"/",sizeof(fullpath));
-							strncat(fullpath,ffi.filename,sizeof(fullpath));
+							sec_strncat(fullpath,"/",sizeof(fullpath));
+							sec_strncat(fullpath,ffi.filename,sizeof(fullpath));
 							if(addentry(fsw, fsmng, srcfullpath, fullpath)<0)
 							{
 								hxc_find_close(ff);
@@ -1078,12 +1091,12 @@ int addentry(filesystem_generator_window *fsw,FSMNG  * fsmng,  char * srcpath,ch
 					else
 					{
 						strncpy(srcfullpath,srcpath,sizeof(srcfullpath));
-						strncat(srcfullpath,PATHSEPARATOR,sizeof(srcfullpath));
-						strncat(srcfullpath,ffi.filename,sizeof(srcfullpath));
+						sec_strncat(srcfullpath,PATHSEPARATOR,sizeof(srcfullpath));
+						sec_strncat(srcfullpath,ffi.filename,sizeof(srcfullpath));
 
 						strncpy(fullpath,dstpath,sizeof(fullpath));
-						strncat(fullpath,"/",sizeof(fullpath));
-						strncat(fullpath,ffi.filename,sizeof(fullpath));
+						sec_strncat(fullpath,"/",sizeof(fullpath));
+						sec_strncat(fullpath,ffi.filename,sizeof(fullpath));
 						if(addentry(fsw, fsmng, srcfullpath, fullpath)<0)
 						{
 							hxc_find_close(ff);
