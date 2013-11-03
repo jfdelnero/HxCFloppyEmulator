@@ -28,7 +28,7 @@
 #define DEFAULT_DD_RPM 300
 
 
-unsigned char * BuildGCRCylinder(int * gcrtracksize,char * track,char * nongcrpart,int size);
-int BuildGCRTrack(unsigned int numberofsector,unsigned int sectorsize,unsigned int tracknumber,unsigned int sidenumber,char* datain,unsigned char * mfmdata,unsigned long * mfmsizebuffer);
+unsigned char * BuildGCRCylinder(int * gcrtracksize,unsigned char * track,unsigned char * nongcrpart,int size);
+int BuildGCRTrack(unsigned int numberofsector,unsigned int sectorsize,unsigned int tracknumber,unsigned int sidenumber,unsigned char* datain,unsigned char * mfmdata,unsigned long * mfmsizebuffer);
 int GCRGetTrackSize(unsigned int numberofsector,unsigned int sectorsize);
 

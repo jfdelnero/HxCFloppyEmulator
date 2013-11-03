@@ -59,7 +59,7 @@ const unsigned char gcrencodingtable[16]=
 			};
 
 // GCR encoder
-unsigned char * BuildGCRCylinder(int * gcrtracksize,char * track,char * nongcrpart,int size)
+unsigned char * BuildGCRCylinder(int * gcrtracksize,unsigned char * track,unsigned char * nongcrpart,int size)
 {
 	int i,j,k,l;
 
@@ -76,11 +76,11 @@ unsigned char * BuildGCRCylinder(int * gcrtracksize,char * track,char * nongcrpa
 	{
 		if(nongcrpart[i])
 		{
-			finalsize=finalsize+(4*2);	
+			finalsize=finalsize+(4*2);
 		}
 		else
 		{
-			finalsize=finalsize+(5*2);	
+			finalsize=finalsize+(5*2);
 		}
 
 	}
@@ -113,7 +113,7 @@ unsigned char * BuildGCRCylinder(int * gcrtracksize,char * track,char * nongcrpa
 		{
 
 			gcrcode=gcrencodingtable[(byte>>shift)&0xF];
-		
+
 			for(j=0;j<5;j++)
 			{
 
@@ -128,7 +128,7 @@ unsigned char * BuildGCRCylinder(int * gcrtracksize,char * track,char * nongcrpa
 
 				shift2=shift2+2;
 				if(shift2==8)
-				{	
+				{
 					shift2=0;
 					k++;
 
@@ -152,7 +152,7 @@ unsigned char * BuildGCRCylinder(int * gcrtracksize,char * track,char * nongcrpa
 
 				shift2=shift2+2;
 				if(shift2==8)
-				{	
+				{
 					shift2=0;
 					k++;
 
@@ -183,11 +183,11 @@ int GCRGetTrackSize(unsigned int numberofsector,unsigned int sectorsize)
 
 }
 
-int BuildGCRTrack(unsigned int numberofsector,unsigned int sectorsize,unsigned int tracknumber,unsigned int sidenumber,char* datain,unsigned char * mfmdata,unsigned long * mfmsizebuffer)
+int BuildGCRTrack(unsigned int numberofsector,unsigned int sectorsize,unsigned int tracknumber,unsigned int sidenumber,unsigned char* datain,unsigned char * mfmdata,unsigned long * mfmsizebuffer)
 {
 	unsigned int i,j,k,l,t;
 	unsigned char *tempdata;
-	
+
 	unsigned char *temptrack;
 	int temptracksize;
 	unsigned char *tempnongcr;
@@ -229,28 +229,28 @@ normal 8 bytes to be understood. Once decoded, its breakdown is as follows:
 	if(finalsize<=current_buffer_size)
 	{
 		j=0;
-		tempdata= (char *)malloc((int)((*mfmsizebuffer * 0.8)+1));
-		memset(tempdata,0,(int)(*mfmsizebuffer * 0.8)+1);
-		tempnongcr=(char *)malloc((int)(*mfmsizebuffer * 0.8)+1);
-		memset(tempnongcr,0,(int)(*mfmsizebuffer * 0.8)+1);
-
-
-		// sectors
-		for(l=0;l<numberofsector;l++)
+		tempdata = (unsigned char *)malloc( current_buffer_size + 1);
+		tempnongcr = (unsigned char *)malloc( current_buffer_size + 1);
+		if(tempdata && tempnongcr)
 		{
+			memset(tempnongcr, 0, current_buffer_size + 1 );
+			memset(tempdata, 0, current_buffer_size + 1 );
 
+			// sectors
+			for(l=0;l<numberofsector;l++)
+			{
 				// sync
 				for(k=0;k<5;k++)
 				{
-						tempdata[j]=0xFF;
-						tempnongcr[j]=0xFF;
-						j++;
+					tempdata[j]=0xFF;
+					tempnongcr[j]=0xFF;
+					j++;
 				}
 
 				tempdata[j]=0x08; // $00 - header block ID ($08)
 				j++;
 				tempdata[j]=0x00; // header block checksum (EOR of $02-$05)
-				j++; 
+				j++;
 				tempdata[j]=l;    // Sector
 				j++;
 				tempdata[j]=tracknumber;  // Track
@@ -259,7 +259,7 @@ normal 8 bytes to be understood. Once decoded, its breakdown is as follows:
 				j++;
 				tempdata[j]=0x1A;  // Format ID byte #1
 				j++;
-				
+
 				tempdata[j]=0x0F;  // $0F ("off" bytes)
 				j++;
 				tempdata[j]=0x0F;  // $0F ("off" bytes)
@@ -269,18 +269,18 @@ normal 8 bytes to be understood. Once decoded, its breakdown is as follows:
 
 				for(k=0;k<9;k++) // Header gap
 				{
-						tempdata[j]=0x55;
-						tempnongcr[j]=0xFF;
-						j++;
+					tempdata[j]=0x55;
+					tempnongcr[j]=0xFF;
+					j++;
 				}
 
 				for(k=0;k<5;k++) // Data sync
 				{
-						tempdata[j]=0xFF;
-						tempnongcr[j]=0xFF;
-						j++;
+					tempdata[j]=0xFF;
+					tempnongcr[j]=0xFF;
+					j++;
 				}
-				 
+
 				tempdata[j]=0x07;  // data block ID ($07)
 				j++;
 				t=j+256;
@@ -297,38 +297,44 @@ normal 8 bytes to be understood. Once decoded, its breakdown is as follows:
 				tempdata[j]=0x00;  // $00 ("off" bytes)
 				j++;
 
-				
 				for(k=0;k<9;k++) // sector gap
 				{
-						tempdata[j]=0x55;
-						tempnongcr[j]=0xFF;
-						j++;
+					tempdata[j]=0x55;
+					tempnongcr[j]=0xFF;
+					j++;
 				}
-
-		}
-
-		temptrack=BuildGCRCylinder(&temptracksize,tempdata,tempnongcr,j);
-		if(temptrack)
-		{
-		
-			memset(mfmdata,0x22,*mfmsizebuffer);
-			
-			if(*mfmsizebuffer>=(unsigned long)temptracksize)
-			{
-				memcpy(mfmdata,temptrack,temptracksize);
-			
 			}
-			
-			free(temptrack);
-		}
 
-		free(tempdata);
-		free(tempnongcr);
-		return 0;
+			temptrack=BuildGCRCylinder(&temptracksize,tempdata,tempnongcr,j);
+			if(temptrack)
+			{
+				memset(mfmdata,0x22,*mfmsizebuffer);
+
+				if(*mfmsizebuffer>=(unsigned long)temptracksize)
+				{
+					memcpy(mfmdata,temptrack,temptracksize);
+
+				}
+				free(temptrack);
+			}
+
+			free(tempdata);
+			free(tempnongcr);
+			return 0;
+		}
+		else
+		{
+			if(tempdata)
+				free(tempdata);
+
+			if(tempnongcr)
+				free(tempnongcr);
+
+			return -1;
+		}
 	 }
 	 else
 	 {
 		return finalsize;
 	 }
-
 }
