@@ -274,7 +274,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 
 	if(!guicontext->loadedfloppy)
 	{
-		fl_alert("No floppy loaded !\nPlease drag and drop your disk file into the window\n",10.0);
+		fl_alert("No floppy loaded !\nPlease drag and drop your disk file into the window\n");
 	}
 	else
 	{
