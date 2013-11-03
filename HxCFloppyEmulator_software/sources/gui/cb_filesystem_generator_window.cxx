@@ -272,7 +272,7 @@ int checkfileext(char * path,char *ext)
 	return 0;
 }
 
-char * sec_strncat(char * dst,char * src,int size)
+char * sec_strncat(char * dst,const char * src,int size)
 {
 	if(dst && src)
 	{
@@ -826,7 +826,7 @@ void filesystem_generator_window_bt_saveexport(Fl_Button *bt,void *)
 {
 	if(!guicontext->loadedfloppy)
 	{
-		fl_alert("No floppy image loaded !\nPlease load an image or create a disk image\n",10.0);
+		fl_alert("No floppy image loaded !\nPlease load an image or create a disk image\n");
 	}
 	else
 	{
