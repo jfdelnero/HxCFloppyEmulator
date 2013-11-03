@@ -463,8 +463,8 @@ int hxcfe_getNextFile(FSMNG * fsmng, FSENTRY * dirent);
 
 int hxcfe_openFile(FSMNG * fsmng, char * filename);
 int hxcfe_createFile(FSMNG * fsmng, char * filename);
-int hxcfe_writeFile(FSMNG * fsmng,int filehandle,char * buffer,int size);
-int hxcfe_readFile(FSMNG * fsmng,int filehandle,char * buffer,int size);
+int hxcfe_writeFile(FSMNG * fsmng,int filehandle,unsigned char * buffer,int size);
+int hxcfe_readFile(FSMNG * fsmng,int filehandle,unsigned char * buffer,int size);
 int hxcfe_deleteFile(FSMNG * fsmng, char * filename);
 int hxcfe_closeFile(FSMNG * fsmng, int filehandle);
 

@@ -365,7 +365,7 @@ int fat12_createFile(FSMNG * fsmng, char * filename)
 	return HXCFE_ACCESSERROR;
 }
 
-int fat12_writeFile(FSMNG * fsmng,int filehandle,char * buffer,int size)
+int fat12_writeFile(FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
 {
 	int byteswrite;
 	if(filehandle<128)
@@ -379,7 +379,7 @@ int fat12_writeFile(FSMNG * fsmng,int filehandle,char * buffer,int size)
 	return HXCFE_ACCESSERROR;
 }
 
-int fat12_readFile( FSMNG * fsmng,int filehandle,char * buffer,int size)
+int fat12_readFile( FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
 {
 	int bytesread;
 	if(filehandle && filehandle<128)
