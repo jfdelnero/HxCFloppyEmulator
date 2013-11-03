@@ -97,7 +97,7 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 	unsigned int filesize;
 	unsigned int i,j,k;
 	unsigned int file_offset;
-	char* trackdata;
+	unsigned char* trackdata;
 	int tracklen;
 	unsigned char  gap3len,interleave;
 	unsigned char  trackformat;

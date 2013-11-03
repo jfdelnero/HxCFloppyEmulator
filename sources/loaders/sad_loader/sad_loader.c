@@ -106,7 +106,7 @@ int SAD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	FILE * f;
 	unsigned int i,j;
 	unsigned int file_offset;
-	char* trackdata;
+	unsigned char* trackdata;
 	unsigned char gap3len,interleave;
 	unsigned short rpm;
 	unsigned short sectorsize;
