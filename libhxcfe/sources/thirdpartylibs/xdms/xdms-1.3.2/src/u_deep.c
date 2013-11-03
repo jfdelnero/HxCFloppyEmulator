@@ -17,8 +17,8 @@
 #include "getbits.h"
 
 
-INLINE USHORT DecodeChar(void);
-INLINE USHORT DecodePosition(void);
+static USHORT DecodeChar(void);
+static USHORT DecodePosition(void);
 static void update(USHORT c);
 static void reconst(void);
 
@@ -98,7 +98,7 @@ USHORT Unpack_DEEP(UCHAR *in, UCHAR *out, USHORT origsize){
 
 
 
-INLINE USHORT DecodeChar(void){
+static USHORT DecodeChar(void){
 	USHORT c;
 
 	c = son[R];
@@ -117,7 +117,7 @@ INLINE USHORT DecodeChar(void){
 
 
 
-INLINE USHORT DecodePosition(void){
+static USHORT DecodePosition(void){
 	USHORT i, j, c;
 
 	i = GETBITS(8);  DROPBITS(8);
