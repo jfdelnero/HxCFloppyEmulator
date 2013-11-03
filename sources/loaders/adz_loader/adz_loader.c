@@ -68,7 +68,7 @@ int ADZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	{
 		if(hxc_checkfileext(imgfile,"gz"))
 		{
-			if( !strstr(hxc_getfilenamebase(imgfile,0),".adf.gz") ) 
+			if( !strstr(hxc_getfilenamebase(imgfile,0),".adf.gz") )
 			{
 				floppycontext->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile : non ADZ file !");
 				return HXCFE_BADFILE;
@@ -83,7 +83,7 @@ int ADZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		floppycontext->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile : non ADZ file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 
@@ -94,40 +94,40 @@ int ADZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned int file_offset;
 	unsigned short sectorsize;
 	unsigned char gap3len,skew,trackformat,interleave;
-	char* flatimg;
+	unsigned char* flatimg;
 	gzFile file;
 	int err;
 
 	CYLINDER* currentcylinder;
-	
+
 	floppycontext->hxc_printf(MSG_DEBUG,"ADZ_libLoad_DiskFile %s",imgfile);
-	
+
 	file = gzopen(imgfile, "rb");
 	if (!file)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"gzopen: Error while reading the file!");
 		return -1;
 	}
-	
+
 	i=0;
 	filesize=0;
-	flatimg=(char*)malloc(UNPACKBUFFER);
+	flatimg=(unsigned char*)malloc(UNPACKBUFFER);
 	do
 	{
 		err=gzread(file, flatimg+filesize,UNPACKBUFFER );
 		filesize=filesize+err;
-		flatimg=(char *)realloc(flatimg,filesize+UNPACKBUFFER);
+		flatimg=(unsigned char *)realloc(flatimg,filesize+UNPACKBUFFER);
 		i++;
 	}while(err>0);
-	
+
 	gzclose(file);
 
 	if(!flatimg)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Unpack error!");
 		return HXCFE_BADFILE;
-	}	
-	
+	}
+
 	if(flatimg)
 	{
 		sectorsize=512;
@@ -142,19 +142,19 @@ int ADZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
 		floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-		
+
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
 			floppydisk->tracks[j]=allocCylinderEntry(DEFAULT_AMIGA_RPM,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
-			
+
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
 
 				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 							(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-				
+
 				currentcylinder->sides[i]=tg_generateTrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-11150);
 			}
 		}

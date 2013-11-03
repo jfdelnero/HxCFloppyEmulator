@@ -110,22 +110,22 @@ int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned short sectorsize;
 	unsigned char gap3len,skew,trackformat,interleave;
 	char filename_inzip[256];
-	char* flatimg;
+	unsigned char* flatimg;
 	int err=UNZ_OK;
 	unzFile uf;
 	unz_file_info file_info;
 	CYLINDER* currentcylinder;
 	unsigned short rpm;
-	
+
 	floppycontext->hxc_printf(MSG_DEBUG,"IMZ_libLoad_DiskFile %s",imgfile);
-	
+
 	uf=unzOpen (imgfile);
 	if (!uf)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"unzOpen: Error while reading the file!");
 		return HXCFE_BADFILE;
 	}
-	
+
 	unzGoToFirstFile(uf);
 
     err = unzGetCurrentFileInfo(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
@@ -143,13 +143,13 @@ int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	}
 
 	filesize=file_info.uncompressed_size;
-	flatimg=(char*)malloc(filesize);
+	flatimg=(unsigned char*)malloc(filesize);
 	if(!flatimg)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Unpack error!");
 		return HXCFE_BADFILE;
-	}	
-	
+	}
+
 	err=unzReadCurrentFile  (uf, flatimg, filesize);
 	if (err<0)
 	{
@@ -158,7 +158,7 @@ int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		free(flatimg);
 		return HXCFE_BADFILE;
 	}
-	
+
 	unzClose(uf);
 
 	if(pc_imggetfloppyconfig(
@@ -173,7 +173,7 @@ int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			&floppydisk->floppyBitRate,
 			&floppydisk->floppyiftype)==1
 			)
-	{		
+	{
 		sectorsize=512;
 
 		skew=0;
@@ -185,7 +185,7 @@ int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		{
 			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
-			
+
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
 				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
@@ -199,6 +199,7 @@ int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		free(flatimg);
 		return 0;
 	}
+
 	free(flatimg);
 	return HXCFE_BADFILE;
 }

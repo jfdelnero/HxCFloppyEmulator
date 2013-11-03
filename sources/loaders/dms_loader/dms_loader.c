@@ -89,15 +89,12 @@ int DMS_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned short sectorsize;
 	unsigned char gap3len,skew,trackformat,interleave;
 	HXCFILE * fo;
-	char* flatimg;
+	unsigned char* flatimg;
 	int retxdms;
 	CYLINDER* currentcylinder;
 
-	
-	
 	floppycontext->hxc_printf(MSG_DEBUG,"DMS_libLoad_DiskFile %s",imgfile);
-	
-	
+
 	// ouverture et decompression du fichier dms
 	fo=HXC_fopen("","");
 	retxdms=Process_File(imgfile,fo, CMD_UNPACK, 0, 0, 0);
@@ -107,13 +104,13 @@ int DMS_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		HXC_fclose(fo);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	
+
+
 	filesize=fo->buffersize;
-	flatimg=fo->buffer;	
-	
+	flatimg=fo->buffer;
+
 	if(fo!=0)
-	{		
+	{
 		sectorsize=512;
 		interleave=1;
 		gap3len=0;
@@ -125,7 +122,7 @@ int DMS_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
 		floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-				
+
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
 
@@ -133,21 +130,21 @@ int DMS_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			currentcylinder=floppydisk->tracks[j];
 
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-			{	
-								
+			{
+
 				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 							(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-				
+
 				currentcylinder->sides[i]=tg_generateTrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-11150);
-				
+
 			}
 		}
-		
+
 		floppycontext->hxc_printf(MSG_INFO_1,"DMS Loader : tracks file successfully loaded and encoded!");
 		HXC_fclose(fo);
 		return HXCFE_NOERROR;
 	}
-	
+
 	floppycontext->hxc_printf(MSG_ERROR,"DMS file access error!");
 	return HXCFE_ACCESSERROR;
 }
