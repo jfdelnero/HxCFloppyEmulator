@@ -178,8 +178,10 @@ void lzss_update(int c)
 			if(j < TSIZE)
 				parent[j+1] = c;
 			son[c] = j;
-			c = l; } }
-	while(c = parent[c]);	// Repeat up to root
+			c = l; }
+
+			c = parent[c];
+	} while(c);	// Repeat up to root
 }
 
 /*
