@@ -99,13 +99,12 @@ int BuildEmuIITrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,un
 	unsigned char *tempclock;
 	unsigned long finalsize;
 	unsigned long current_buffer_size;
-	
+
 	unsigned char crctable[32];
 
 	unsigned long sectorsize;
 	unsigned char track_num;
 	unsigned long buffersize;
-
 
 	buffersize=*fmsizebuffer/8;
 
@@ -120,124 +119,166 @@ int BuildEmuIITrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,un
 		case 2:
 			track_num=tracknumber*2+sidenumber;
 		break;
-	}	
+	}
 
 	current_buffer_size=buffersize/4;
 	finalsize=20 + 10 +8 + 6 + sectorsize + 2 + 2 + 20;
 
 	if(finalsize<=current_buffer_size)
 	{
-
 		j=0;
 
-		tempdata=(char *)malloc((buffersize/4)+1);
-		tempclock=(char *)malloc((buffersize/4)+1);
-
-		memset(tempclock,0xFF,(buffersize/4)+1);
-		memset(tempdata, 0xFF,(buffersize/4)+1);
-
-
-		/////////////////////////////////////////////////////////////////////////////////////////////
-		//Track GAP
-		for(k=0;k<20;k++)
-		{
-			setfieldbit(tempdata,bit_inverter_emuii[0xFF],j,8);
-			j=j+8;
-		}
-
-		/////////////////////////////////////////////////////////////////////////////////////////////
-		//Sector Header
-		for(k=0;k<4;k++)
-		{
-			setfieldbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
-		}
-
-		setfieldbit(tempdata,bit_inverter_emuii[0xFA],j=j+8,8);
-		setfieldbit(tempdata,bit_inverter_emuii[0x96],j=j+8,8);
-		setfieldbit(tempdata,bit_inverter_emuii[track_num],j=j+8,8);
-
-		//CRC The sector Header CRC
-		CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,0x8005,0x0000);
-		CRC16_Update(&CRC16_High,&CRC16_Low,bit_inverter_emuii[track_num],(unsigned char*)&crctable );
-
-		setfieldbit(tempdata,CRC16_High,j=j+8,8);
-		setfieldbit(tempdata,CRC16_Low,j=j+8,8);
-
-		switch(trackformat)
+		tempdata=(unsigned char *)malloc((buffersize/4)+1);
+		tempclock=(unsigned char *)malloc((buffersize/4)+1);
+		if(tempdata && tempclock)
 		{
 
-			// Emu 1
-			case 1:
-				setfieldbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
-				setfieldbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
+			memset(tempclock,0xFF,(buffersize/4)+1);
+			memset(tempdata, 0xFF,(buffersize/4)+1);
 
-				for(k=0;k<7;k++)
-					setfieldbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,8);
+
+			/////////////////////////////////////////////////////////////////////////////////////////////
+			//Track GAP
+			for(k=0;k<20;k++)
+			{
+				setfieldbit(tempdata,bit_inverter_emuii[0xFF],j,8);
+				j=j+8;
+			}
+
+			/////////////////////////////////////////////////////////////////////////////////////////////
+			//Sector Header
+			for(k=0;k<4;k++)
+			{
+				setfieldbit(tempdata,bit_inverter_emuii[0x00],j,8);
+				j += 8;
+			}
+
+			setfieldbit(tempdata,bit_inverter_emuii[0xFA],j,8);
+			j += 8;
+			setfieldbit(tempdata,bit_inverter_emuii[0x96],j,8);
+			j += 8;
+			setfieldbit(tempdata,bit_inverter_emuii[track_num],j,8);
+			j += 8;
+
+			//CRC The sector Header CRC
+			CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,0x8005,0x0000);
+			CRC16_Update(&CRC16_High,&CRC16_Low,bit_inverter_emuii[track_num],(unsigned char*)&crctable );
+
+			setfieldbit(tempdata,CRC16_High,j,8);
+			j += 8;
+			setfieldbit(tempdata,CRC16_Low,j,8);
+			j += 8;
+
+			switch(trackformat)
+			{
+
+				// Emu 1
+				case 1:
+					setfieldbit(tempdata,bit_inverter_emuii[0x00],j,8);
+					j += 8;
+					setfieldbit(tempdata,bit_inverter_emuii[0x00],j,8);
+					j += 8;
+
+					for(k=0;k<7;k++)
+					{
+						setfieldbit(tempdata,bit_inverter_emuii[0xFF],j,8);
+						j += 8;
+					}
 					//tempdata[j++]=bit_inverter_emuii[0xFF];
 
-			break;
+				break;
 
-			// Emu 2
-			case 2:
-				setfieldbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
-				for(k=0;k<7;k++)
-				{
-					setfieldbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,8);
-				}
+				// Emu 2
+				case 2:
+					setfieldbit(tempdata,bit_inverter_emuii[0x00],j,8);
+					j += 8;
+					for(k=0;k<7;k++)
+					{
+						setfieldbit(tempdata,bit_inverter_emuii[0xFF],j,8);
+						j += 8;
+					}
 
-				setfieldbit(tempdata,bit_inverter_emuii[0xFF],j=j+4,4);
-			break;
-		}
-
-
-		/////////////////////////////////////////////////////////////////////////////////////////////
-		//Sector Data	
-
-		for(k=0;k<4;k++)
-		{
-			setfieldbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
-		}
-
-		setfieldbit(tempdata,bit_inverter_emuii[0xFA],j=j+8,8);
-		setfieldbit(tempdata,bit_inverter_emuii[0x96],j=j+8,8);
-		
-		//CRC The sector data CRC
-		CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,0x8005,0x0000);
-		
-		for(k=0;k<sectorsize;k++)
-		{
-			setfieldbit(tempdata,bit_inverter_emuii[datain[k]],j=j+8,8);
-			CRC16_Update(&CRC16_High,&CRC16_Low,bit_inverter_emuii[datain[k]],(unsigned char*)&crctable );
-		}
-
-		setfieldbit(tempdata,CRC16_High,j=j+8,8);
-		setfieldbit(tempdata,CRC16_Low,j=j+8,8);
-
-
-		setfieldbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
-		setfieldbit(tempdata,bit_inverter_emuii[0x00],j=j+8,8);
-
-
-		for(k=0;k<20;k++)
-			setfieldbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,8);
-		/////////////////////////////////////////////////////////////////////////////////////////////
-
-		if((j/8)<=current_buffer_size)
-		{	
-			for(i=j;i<(current_buffer_size*8);i=i+8)
-			{	
-				if(j+8<(current_buffer_size*8))
-					setfieldbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,8);
-				else
-					setfieldbit(tempdata,bit_inverter_emuii[0xFF],j=j+8,(current_buffer_size*8)-j);
+					setfieldbit(tempdata,bit_inverter_emuii[0xFF],j,4);
+					j += 4;
+				break;
 			}
+
+
+			/////////////////////////////////////////////////////////////////////////////////////////////
+			//Sector Data
+
+			for(k=0;k<4;k++)
+			{
+				setfieldbit(tempdata,bit_inverter_emuii[0x00],j,8);
+				j += 8;
+			}
+
+			setfieldbit(tempdata,bit_inverter_emuii[0xFA],j,8);
+			j += 8;
+			setfieldbit(tempdata,bit_inverter_emuii[0x96],j,8);
+			j += 8;
+
+			//CRC The sector data CRC
+			CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,0x8005,0x0000);
+
+			for(k=0;k<sectorsize;k++)
+			{
+				setfieldbit(tempdata,bit_inverter_emuii[datain[k]],j,8);
+				j += 8;
+				CRC16_Update(&CRC16_High,&CRC16_Low,bit_inverter_emuii[datain[k]],(unsigned char*)&crctable );
+			}
+
+			setfieldbit(tempdata,CRC16_High,j,8);
+			j += 8;
+			setfieldbit(tempdata,CRC16_Low,j,8);
+			j += 8;
+
+			setfieldbit(tempdata,bit_inverter_emuii[0x00],j,8);
+			j += 8;
+			setfieldbit(tempdata,bit_inverter_emuii[0x00],j,8);
+			j += 8;
+
+
+			for(k=0;k<20;k++)
+			{
+				setfieldbit(tempdata,bit_inverter_emuii[0xFF],j,8);
+				j += 8;
+			}
+			/////////////////////////////////////////////////////////////////////////////////////////////
+
+			if((j/8)<=current_buffer_size)
+			{
+				for(i=j;i<(current_buffer_size*8);i=i+8)
+				{
+					if(j+8<(current_buffer_size*8))
+					{
+						setfieldbit(tempdata,bit_inverter_emuii[0xFF],j,8);
+					}
+					else
+					{
+						setfieldbit(tempdata,bit_inverter_emuii[0xFF],j,(current_buffer_size*8)-j);
+					}
+
+					j = j + 8;
+				}
+			}
+
+			BuildFMCylinder(fmdata,buffersize,tempclock,tempdata,(buffersize)/4);
+
+			free(tempdata);
+			free(tempclock);
+
+			return 0;
 		}
+		else
+		{
+			if(tempdata)
+				free(tempdata);
+			if(tempclock)
+				free(tempclock);
 
-		BuildFMCylinder(fmdata,buffersize,tempclock,tempdata,(buffersize)/4);
-
-		free(tempdata);
-		free(tempclock);
-		return 0;
+			return -1;
+		}
 	}
 	else
 	{
