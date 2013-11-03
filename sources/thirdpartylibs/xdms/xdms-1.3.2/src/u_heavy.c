@@ -72,9 +72,7 @@ USHORT Unpack_HEAVY(UCHAR *in, UCHAR *out, UCHAR flags, USHORT origsize){
 	return 0;
 }
 
-
-
-INLINE USHORT decode_c(void){
+static USHORT decode_c(void){
 	USHORT i, j, m;
 
 	j = c_table[GETBITS(12)];
@@ -96,7 +94,7 @@ INLINE USHORT decode_c(void){
 
 
 
-INLINE USHORT decode_p(void){
+static USHORT decode_p(void){
 	USHORT i, j, m;
 
 	j = pt_table[GETBITS(8)];
