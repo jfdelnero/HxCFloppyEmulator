@@ -7,4 +7,4 @@ unsigned long us2index(unsigned long startindex,SIDE * track,unsigned long us,un
 unsigned long fillindex(int startindex,SIDE * track,unsigned long us,unsigned char fill,char fillorder);
 
 CYLINDER* allocCylinderEntry(unsigned short rpm,unsigned char number_of_side);
-void savebuffer(unsigned char * name,unsigned char * buffer, int size);
+void savebuffer(char * name,unsigned char * buffer, int size);

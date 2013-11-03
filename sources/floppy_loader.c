@@ -101,7 +101,7 @@ const char * hxcfe_getVersion(HXCFLOPPYEMULATOR* floppycontext)
 
 const char * hxcfe_getLicense(HXCFLOPPYEMULATOR* floppycontext)
 {
-	return licensetxt;
+	return (char*)licensetxt;
 }
 
 void hxcfe_deinit(HXCFLOPPYEMULATOR* hxcfe)

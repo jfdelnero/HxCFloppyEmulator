@@ -573,7 +573,7 @@ static isoibm_config formatstab[]=
 };
 
 int  BuildCylinder(unsigned char * mfm_buffer,int mfm_size,unsigned char * track_clk,unsigned char * track_data,int track_size);
-void BuildFMCylinder(char * buffer,int fmtracksize,char * bufferclk,char * track,int size);
+void BuildFMCylinder(unsigned char * buffer,int fmtracksize,unsigned char * bufferclk,unsigned char * track,int size);
 
 void getMFMcode(track_generator *tg,unsigned char data,unsigned char clock,unsigned char * dstbuf);
 void getFMcode (track_generator *tg,unsigned char data,unsigned char clock,unsigned char * dstbuf);

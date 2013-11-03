@@ -610,7 +610,7 @@ void FastMFMFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_da
 }
 
 // FM encoder
-void BuildFMCylinder(char * buffer,int fmtracksize,char * bufferclk,char * track,int size)
+void BuildFMCylinder(unsigned char * buffer,int fmtracksize,unsigned char * bufferclk,unsigned char * track,int size)
 {
 	int i,j,k,l;
 	unsigned char byte,clock;
