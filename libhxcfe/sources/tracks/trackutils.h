@@ -30,6 +30,8 @@ extern unsigned short biteven[];
 int  getbit(unsigned char * input_data,int bit_offset);
 void setbit(unsigned char * input_data,int bit_offset,int state);
 
+void setfieldbit(unsigned char * dstbuffer,unsigned char byte,int bitoffset,int size);
+
 int  mfmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit);
 int  bintomfm(unsigned char * track_data,int track_data_size,unsigned char * bin_data,int bin_data_size,int bit_offset);
 

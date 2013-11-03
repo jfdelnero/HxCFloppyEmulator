@@ -52,6 +52,8 @@
 #include "crc.h"
 #include "emuii_track.h"
 
+#include "trackutils.h"
+
 unsigned char bit_inverter_emuii[]=
 {
         0x00,0x80,0x40,0xC0,0x20,0xA0,0x60,0xE0,
@@ -87,30 +89,6 @@ unsigned char bit_inverter_emuii[]=
         0x0F,0x8F,0x4F,0xCF,0x2F,0xAF,0x6F,0xEF,
         0x1F,0x9F,0x5F,0xDF,0x3F,0xBF,0x7F,0xFF
 };
-
-
-
-// FM encoder
-void BuildFMCylinder(char * buffer,int fmtracksize,char * bufferclk,char * track,int size);
-
-void setfieldbit(unsigned char * dstbuffer,unsigned char byte,int bitoffset,int size)
-{
-	int i,j,k;
-
-	k=0;
-	i=bitoffset;
-	for(j=0;j<size;j++)
-	{
-		if(byte&((0x80)>>(j&7)))
-			dstbuffer[i>>3]=dstbuffer[i>>3]|( (0x80>>(i&7)));
-		else
-			dstbuffer[i>>3]=dstbuffer[i>>3]&(~(0x80>>(i&7)));
-
-		i++;
-	}
-
-}
-
 
 int BuildEmuIITrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,unsigned int sidenumber,unsigned char* datain,unsigned char * fmdata,unsigned long * fmsizebuffer,int trackformat)
 {

@@ -166,7 +166,7 @@ CYLINDER* allocCylinderEntry(unsigned short rpm,unsigned char number_of_side)
 	return cyl;
 }
 
-void savebuffer(unsigned char * name,unsigned char * buffer, int size)
+void savebuffer(char * name,unsigned char * buffer, int size)
 {
 	FILE * f;
 

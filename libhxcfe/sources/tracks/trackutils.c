@@ -102,6 +102,23 @@ void setbit(unsigned char * input_data,int bit_offset,int state)
 	return;
 }
 
+void setfieldbit(unsigned char * dstbuffer,unsigned char byte,int bitoffset,int size)
+{
+	int i,j,k;
+
+	k=0;
+	i=bitoffset;
+	for(j=0;j<size;j++)
+	{
+		if(byte&((0x80)>>(j&7)))
+			dstbuffer[i>>3] = dstbuffer[i>>3] | ( (0x80>>(i&7)));
+		else
+			dstbuffer[i>>3] = dstbuffer[i>>3] & (~(0x80>>(i&7)));
+
+		i++;
+	}
+}
+
 int chgbitptr(int tracklen,int cur_offset,int offset)
 {
 	if( offset>=0 )

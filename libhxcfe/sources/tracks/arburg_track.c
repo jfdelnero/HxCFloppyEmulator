@@ -52,12 +52,9 @@
 #include "crc.h"
 #include "arburg_track.h"
 
+#include "trackutils.h"
+
 extern unsigned char bit_inverter_emuii[];
-
-// FM encoder
-void BuildFMCylinder(char * buffer,int fmtracksize,char * bufferclk,char * track,int size);
-
-void setfieldbit(unsigned char * dstbuffer,unsigned char byte,int bitoffset,int size);
 
 int BuildArburgTrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,unsigned int sidenumber,unsigned char* datain,unsigned char * fmdata,unsigned long * fmsizebuffer,int trackformat)
 {
@@ -94,92 +91,106 @@ int BuildArburgTrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,u
 
 		j=0;
 
-		tempdata=(char *)malloc((buffersize/4)+1);
-		tempclock=(char *)malloc((buffersize/4)+1);
+		tempdata=(unsigned char *)malloc((buffersize/4)+1);
+		tempclock=(unsigned char *)malloc((buffersize/4)+1);
 
-		memset(tempclock,0xFF,(buffersize/4)+1);
-		memset(tempdata, 0x00,(buffersize/4)+1);
-
-
-		/////////////////////////////////////////////////////////////////////////////////////////////
-		//Track GAP
-		for(k=0;k<(56*8);k++)
+		if(tempdata && tempclock)
 		{
-			setfieldbit(tempdata,bit_inverter_emuii[0x00],j,8);
-			j=j+8;
-		}
 
-		/////////////////////////////////////////////////////////////////////////////////////////////
-		//Sector Header
-		setfieldbit(tempdata,bit_inverter_emuii[0xFF],j,8);
-		j=j+8;
-
-		/////////////////////////////////////////////////////////////////////////////////////////////
-		//Sector Data
-
-		checksum = 0;
-		for(k=0;k<ARBURB_DATATRACK_SIZE-2;k++)
-		{
-			checksum = checksum + datain[k];
-		}
+			memset(tempclock,0xFF,(buffersize/4)+1);
+			memset(tempdata, 0x00,(buffersize/4)+1);
 
 
-		for(k=0;k<ARBURB_DATATRACK_SIZE-2;k++)
-		{
-			setfieldbit(tempdata,bit_inverter_emuii[datain[k]],j,8);
-			j=j+8;
-		}
-
-		#ifndef IGNORE_ARBURG_CHECKSUM
-
-		for(k=ARBURB_DATATRACK_SIZE-2;k<ARBURB_DATATRACK_SIZE;k++)
-		{
-			setfieldbit(tempdata,bit_inverter_emuii[datain[k]],j,8);
-			j=j+8;
-		}
-
-		/////////////////////////////////////////////////////////////////////////////////////////////
-		//Checksum
-		if( ( datain[ARBURB_DATATRACK_SIZE-2] != (checksum&0xFF) ) || ( datain[ARBURB_DATATRACK_SIZE-1] != (checksum>>8) ) )
-		{
-			floppycontext->hxc_printf(MSG_WARNING,"BuildArburgTrack : Block Checksum error !");
-		}
-
-		#else
-
-		setfieldbit(tempdata,bit_inverter_emuii[checksum&0xFF],j,8);
-		j=j+8;
-		setfieldbit(tempdata,bit_inverter_emuii[checksum>>8],j,8);
-		j=j+8;
-
-		#endif
-
-
-		if((j/8)<=current_buffer_size)
-		{
-			for(i=j;i<(current_buffer_size*8);i=i+8)
+			/////////////////////////////////////////////////////////////////////////////////////////////
+			//Track GAP
+			for(k=0;k<(56*8);k++)
 			{
-				if(j+8<(current_buffer_size*8))
-					setfieldbit(tempdata,bit_inverter_emuii[checksum>>8],j,8);
-				else
-					setfieldbit(tempdata,bit_inverter_emuii[checksum>>8],j,(current_buffer_size*8)-j);
-
+				setfieldbit(tempdata,bit_inverter_emuii[0x00],j,8);
 				j=j+8;
 			}
+
+			/////////////////////////////////////////////////////////////////////////////////////////////
+			//Sector Header
+			setfieldbit(tempdata,bit_inverter_emuii[0xFF],j,8);
+			j=j+8;
+
+			/////////////////////////////////////////////////////////////////////////////////////////////
+			//Sector Data
+
+			checksum = 0;
+			for(k=0;k<ARBURB_DATATRACK_SIZE-2;k++)
+			{
+				checksum = checksum + datain[k];
+			}
+
+
+			for(k=0;k<ARBURB_DATATRACK_SIZE-2;k++)
+			{
+				setfieldbit(tempdata,bit_inverter_emuii[datain[k]],j,8);
+				j=j+8;
+			}
+
+			#ifndef IGNORE_ARBURG_CHECKSUM
+
+			for(k=ARBURB_DATATRACK_SIZE-2;k<ARBURB_DATATRACK_SIZE;k++)
+			{
+				setfieldbit(tempdata,bit_inverter_emuii[datain[k]],j,8);
+				j=j+8;
+			}
+
+			/////////////////////////////////////////////////////////////////////////////////////////////
+			//Checksum
+			if( ( datain[ARBURB_DATATRACK_SIZE-2] != (checksum&0xFF) ) || ( datain[ARBURB_DATATRACK_SIZE-1] != (checksum>>8) ) )
+			{
+				floppycontext->hxc_printf(MSG_WARNING,"BuildArburgTrack : Block Checksum error !");
+			}
+
+			#else
+
+			setfieldbit(tempdata,bit_inverter_emuii[checksum&0xFF],j,8);
+			j=j+8;
+			setfieldbit(tempdata,bit_inverter_emuii[checksum>>8],j,8);
+			j=j+8;
+
+			#endif
+
+
+			if((j/8)<=current_buffer_size)
+			{
+				for(i=j;i<(current_buffer_size*8);i=i+8)
+				{
+					if(j+8<(current_buffer_size*8))
+						setfieldbit(tempdata,bit_inverter_emuii[checksum>>8],j,8);
+					else
+						setfieldbit(tempdata,bit_inverter_emuii[checksum>>8],j,(current_buffer_size*8)-j);
+
+					j=j+8;
+				}
+			}
+
+			BuildFMCylinder(fmdata,buffersize,tempclock,tempdata,(buffersize)/4);
+
+			free(tempdata);
+			free(tempclock);
+			
+			return 0;
+		}
+		else
+		{
+			if(tempdata)
+				free(tempdata);
+			if(tempclock)
+				free(tempclock);
+			
+			return -1;
 		}
 
-		BuildFMCylinder(fmdata,buffersize,tempclock,tempdata,(buffersize)/4);
-
-		free(tempdata);
-		free(tempclock);
-		return 0;
 	}
 	else
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"BuildArburgTrack : No enough space on this track !");
 		return finalsize;
 	}
-
 }
 
 int pushArburgSysByte(unsigned char byte, int bitoffset, unsigned char * track,unsigned long tracksize)

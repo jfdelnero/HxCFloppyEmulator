@@ -49,7 +49,7 @@ typedef struct HXCFLOPPYEMULATOR_
 {
 	HXCPRINTF_FUNCTION hxc_printf;
 	DISPLAYTRACKPOS_FUNCTION hxc_settrackpos;
-	unsigned char CONTAINERTYPE[16];
+	char CONTAINERTYPE[16];
 }HXCFLOPPYEMULATOR;
 
 ////////////////////////////////////////////
