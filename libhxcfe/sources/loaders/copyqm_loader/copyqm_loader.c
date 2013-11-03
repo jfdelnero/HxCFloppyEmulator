@@ -165,7 +165,7 @@ int CopyQm_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 		/* Check the header checksum */
 		for ( i = 0; i < QM_HEADER_SIZE; ++i ) 
 		{
-			checksum= checksum +(unsigned char)(fileheader[i]);
+			checksum = checksum + (unsigned char)(fileheader[i]);
 		}
 		if ( checksum != 0 ) 
 		{
