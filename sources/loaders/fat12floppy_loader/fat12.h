@@ -41,10 +41,7 @@ typedef struct FATCONFIG_
 }FATCONFIG;
 
 
-int setclusterptr(char *fattable,int index,int ptr);
-int findfreecluster(char *fattable,int nbofcluster);
+int setclusterptr(unsigned char *fattable,int index,int ptr);
+int findfreecluster(unsigned char *fattable,int nbofcluster);
 unsigned char * findfreeentry(unsigned char *entriestable);
 int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * file, unsigned char * fattable,unsigned char *entriestable,unsigned char *datatable,int parentcluster,FATCONFIG * fatconfig,int numberofcluster);
-
-
-

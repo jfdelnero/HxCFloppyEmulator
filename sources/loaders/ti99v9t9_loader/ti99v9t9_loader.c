@@ -296,11 +296,11 @@ int getDiskGeometry(FILE * f,unsigned short * numberoftrack,unsigned char * numb
 int TI99V9T9_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	FILE * f;
-	short numberoftrack,numberofsector;
-	char skew0,skew1,interleave,numberofside;
+	unsigned short numberoftrack,numberofsector;
+	unsigned char skew0,skew1,interleave,numberofside;
 	int density;
-	short sectorsize;
-	unsigned int bitrate;
+	unsigned short sectorsize;
+	unsigned unsigned int bitrate;
 	int ret;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"TI99V9T9_libIsValidDiskFile");

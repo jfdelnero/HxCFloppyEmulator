@@ -118,7 +118,7 @@ int VTR_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	fread(&header,sizeof(header),1,f);
 
-	if(!strncmp(header.HEADERSIGNATURE,"VTrucco",7))
+	if(!strncmp((char*)header.HEADERSIGNATURE,"VTrucco",7))
 	{
 
 		floppydisk->floppyNumberOfTrack=header.number_of_track;

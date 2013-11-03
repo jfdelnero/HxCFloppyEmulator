@@ -307,7 +307,6 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 	return 0;
 }
 
-
 unsigned char * findfreeentry(unsigned char *entriestable)
 {
 	int i;
@@ -321,7 +320,7 @@ unsigned char * findfreeentry(unsigned char *entriestable)
 	return &entriestable[i];
 }
 
-int findfreecluster(char *fattable,int nbofcluster)
+int findfreecluster(unsigned char *fattable,int nbofcluster)
 {
 	int i;
 	int freecluster;
@@ -361,10 +360,9 @@ int findfreecluster(char *fattable,int nbofcluster)
 
 }
 
-int setclusterptr(char *fattable,int index,int ptr)
+int setclusterptr(unsigned char *fattable,int index,int ptr)
 {
 	int i;
-
 
 	i=index*12;
 
@@ -378,8 +376,6 @@ int setclusterptr(char *fattable,int index,int ptr)
 		fattable[i/8]=(ptr&0xFF);
 		fattable[(i/8)+1]=(fattable[(i/8)+1]&0xF0)|((ptr>>8)&0xF);
 	}
-
-
 
 	return ptr;
 }
