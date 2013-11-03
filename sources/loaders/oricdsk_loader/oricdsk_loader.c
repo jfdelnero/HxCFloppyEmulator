@@ -72,12 +72,14 @@ int OricDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		{
 			return HXCFE_ACCESSERROR;
 		}
+
+		memset(fileheader,0,sizeof(fileheader));
+
 		fread(fileheader,10,1,f);
 		hxc_fclose(f);
 
-		fileheader[8]=0;
-		if( !strcmp(fileheader,"MFM_DISK") ||
-		    !strcmp(fileheader,"ORICDISK"))
+		if( !strncmp((char*)fileheader,"MFM_DISK",8) ||
+		    !strncmp((char*)fileheader,"ORICDISK",8))
 		{
 			floppycontext->hxc_printf(MSG_DEBUG,"OricDSK_libIsValidDiskFile : OricDSK file !");
 			return HXCFE_VALIDFILE;

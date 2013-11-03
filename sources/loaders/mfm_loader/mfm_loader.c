@@ -68,13 +68,15 @@ int MFM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	if(hxc_checkfileext(imgfile,"mfm"))
 	{
 		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL) 
+		if(f==NULL)
 			return HXCFE_ACCESSERROR;
+
+		memset(&header,0,sizeof(MFMIMG));
 
 		fread(&header,sizeof(header),1,f);
 		hxc_fclose(f);
 
-		if( !strcmp(header.headername,"HXCMFM"))
+		if( !strncmp((char*)header.headername,"HXCMFM",6))
 		{
 			floppycontext->hxc_printf(MSG_DEBUG,"MFM_libIsValidDiskFile : MFM file !");
 			return HXCFE_VALIDFILE;
@@ -102,22 +104,23 @@ int MFM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned int i;
 	CYLINDER* currentcylinder;
 	SIDE* currentside;
-	
-	
+
+
 	floppycontext->hxc_printf(MSG_DEBUG,"MFM_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
+
+	memset(&header,0,sizeof(MFMIMG));
+	memset(&trackdesc,0,sizeof(MFMTRACKIMG));
 
 	fread(&header,sizeof(header),1,f);
 
-	
-	if(!strcmp(header.headername,"HXCMFM"))
+	if(!strncmp((char*)header.headername,"HXCMFM",6))
 	{
 
 		floppydisk->floppyNumberOfTrack=header.number_of_track;
@@ -126,7 +129,6 @@ int MFM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppySectorPerTrack=-1;
 		floppydisk->floppyiftype=ATARIST_DD_FLOPPYMODE;
 
-
 		floppycontext->hxc_printf(MSG_DEBUG,"MFM File : %d track, %d side, %d bit/s, %d sectors, mode %d",
 			floppydisk->floppyNumberOfTrack,
 			floppydisk->floppyNumberOfSide,
@@ -134,10 +136,8 @@ int MFM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			floppydisk->floppySectorPerTrack,
 			floppydisk->floppyiftype);
 
-
 		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 		memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-
 
 		for(i=0;i<(unsigned int)(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide);i++)
 		{
@@ -151,7 +151,7 @@ int MFM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				floppydisk->tracks[trackdesc.track_number]=allocCylinderEntry(header.floppyRPM,floppydisk->floppyNumberOfSide);
 				currentcylinder=floppydisk->tracks[trackdesc.track_number];
 			}
-			
+
 
 			floppycontext->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
 												trackdesc.track_number,
@@ -179,7 +179,6 @@ int MFM_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 int MFM_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="HXCMFM_IMG";
 	static const char plug_desc[]="HXC MFM IMG Loader";
 	static const char plug_ext[]="mfm";
