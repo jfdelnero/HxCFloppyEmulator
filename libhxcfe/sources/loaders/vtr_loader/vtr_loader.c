@@ -78,7 +78,7 @@ int VTR_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			fread(&header,sizeof(header),1,f);
 			hxc_fclose(f);
 
-			if( !strncmp(header.HEADERSIGNATURE,"VTrucco",7))
+			if( !strncmp((char*)header.HEADERSIGNATURE,"VTrucco",7))
 			{
 				floppycontext->hxc_printf(MSG_DEBUG,"VTR_libIsValidDiskFile : VTrucco file !");
 				return HXCFE_VALIDFILE;

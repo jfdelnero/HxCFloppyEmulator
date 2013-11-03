@@ -72,11 +72,11 @@ int OLDEXTADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile
 			return HXCFE_ACCESSERROR;
 		}
 
+		memset(header,0,sizeof(header));
 		fread(header,12,1,f);
 		hxc_fclose(f);
-	
-		header[8]=0;
-		if(!strcmp(header,"UAE--ADF"))
+
+		if(!strncmp((char*)header,"UAE--ADF",8))
 		{
 			floppycontext->hxc_printf(MSG_DEBUG,"OLDEXTADF_libIsValidDiskFile : Extended ADF file (old version)!");
 			return HXCFE_VALIDFILE;
@@ -111,17 +111,17 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 	unsigned short sectorsize;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"OLDEXTADF_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
+	fseek (f , 0 , SEEK_SET);
 
 	if(!filesize)
 	{
@@ -129,13 +129,12 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 		hxc_fclose(f);
 		return HXCFE_BADFILE;
 	}
-	
 
+	memset(header,0,sizeof(header));
 	fread(header,8,1,f);
-	
+
 	numberoftrack=0;
-	header[8]=0;
-	if(!strcmp(header,"UAE--ADF"))
+	if(!strncmp((char*)header,"UAE--ADF",8))
 	{
 		numberoftrack=160;
 		tracktable=malloc(4*numberoftrack);
@@ -158,26 +157,26 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 	floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
 	floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
 	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-		
+
 	tracklen=(DEFAULT_AMIGA_BITRATE/(DEFAULT_AMIGA_RPM/60))/4;
-		
+
 	floppycontext->hxc_printf(MSG_DEBUG,"OLD Extended ADF : %x tracks",numberoftrack);
-		
+
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
-			
+
 		floppydisk->tracks[j]=allocCylinderEntry(DEFAULT_AMIGA_RPM,floppydisk->floppyNumberOfSide);
 		currentcylinder=floppydisk->tracks[j];
-		
+
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-		{	
-								
+		{
+
 			if(trackindex<numberoftrack)
 			{
 
 				tracksize=tracktable[(4*trackindex)+2] * 0x100     + \
 						  tracktable[(4*trackindex)+3];
-				
+
 				if(tracksize)
 				{
 
@@ -188,12 +187,12 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 						floppycontext->hxc_printf(MSG_DEBUG,"[%.3d:%.1X] Reading Non-DOS track at 0x%.8x, Size : 0x%.8x",j,i,ftell(f),tracksize);
 
 						currentcylinder->sides[i]=tg_alloctrack(DEFAULT_AMIGA_BITRATE,AMIGA_MFM_ENCODING,DEFAULT_AMIGA_RPM,(tracksize+2)*8,2500,-100,0x00);
-	
+
 						currentcylinder->sides[i]->databuffer[0]=tracktable[(4*trackindex)+0];
 						currentcylinder->sides[i]->databuffer[1]=tracktable[(4*trackindex)+1];
 
 						fread(&currentcylinder->sides[i]->databuffer[2],tracksize,1,f);
-						
+
 						currentcylinder->sides[i]->number_of_sector=floppydisk->floppySectorPerTrack;
 
 
@@ -214,7 +213,7 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 					}
 				}
 				else
-				{					
+				{
 					floppycontext->hxc_printf(MSG_DEBUG,"[%.3d:%.1X] Null Size track!",j,i);
 					currentcylinder->sides[i]=tg_alloctrack(DEFAULT_AMIGA_BITRATE,AMIGA_MFM_ENCODING,DEFAULT_AMIGA_RPM,(tracklen)*8,2500,-11360,0x00);
 				}
@@ -224,10 +223,10 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 				floppycontext->hxc_printf(MSG_DEBUG,"[%.3d:%.1X] No track!",j,i);
 				currentcylinder->sides[i]=tg_alloctrack(DEFAULT_AMIGA_BITRATE,AMIGA_MFM_ENCODING,DEFAULT_AMIGA_RPM,(tracklen)*8,2500,-11360,0x00);
 			}
-			
-			
+
+
 			trackindex++;
-			
+
 		}
 	}
 
@@ -237,7 +236,7 @@ int OLDEXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 
 	hxcfe_sanityCheck(floppycontext,floppydisk);
 
-	return HXCFE_NOERROR;	
+	return HXCFE_NOERROR;
 }
 
 int OLDEXTADF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)

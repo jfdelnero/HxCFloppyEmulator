@@ -67,17 +67,17 @@ int EXTADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	{
 
 		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL) 
+		if(f==NULL)
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"EXTADF_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
+		memset(header,0,sizeof(header));
 		fread(header,12,1,f);
 		hxc_fclose(f);
 
-		header[8]=0;
-		if(!strcmp(header,"UAE-1ADF"))
+		if(!strncmp((char*)header,"UAE-1ADF",8))
 		{
 			floppycontext->hxc_printf(MSG_DEBUG,"EXTADF_libIsValidDiskFile : Extended ADF file (new version)!");
 			return HXCFE_VALIDFILE;
@@ -106,26 +106,26 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 	int	tracklen;
 	CYLINDER* currentcylinder;
 	unsigned int numberoftrack;
-	
+
 	unsigned char header[12];
 	unsigned char * tracktable;
 	unsigned int trackindex,tracksize;
 
 	unsigned char gap3len,skew,trackformat,interleave;
 	unsigned short sectorsize;
-	
+
 	floppycontext->hxc_printf(MSG_DEBUG,"EXTADF_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
+	fseek (f , 0 , SEEK_SET);
 
 	if(!filesize)
 	{
@@ -133,13 +133,12 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 		hxc_fclose(f);
 		return HXCFE_BADFILE;
 	}
-	
 
+	memset(header,0,sizeof(header));
 	fread(header,12,1,f);
-	
+
 	numberoftrack=0;
-	header[8]=0;
-	if(!strcmp(header,"UAE-1ADF"))
+	if(!strncmp((char*)header,"UAE-1ADF",8))
 	{
 		numberoftrack=header[0xB]+(header[0xA]*256);
 		tracktable=malloc(12*numberoftrack);
@@ -163,19 +162,19 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 	floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
 	floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
 	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-		
+
 	tracklen=(DEFAULT_AMIGA_BITRATE/(DEFAULT_AMIGA_RPM/60))/4;
-		
+
 	floppycontext->hxc_printf(MSG_DEBUG,"Extended ADF : %x tracks",numberoftrack);
-		
+
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
-			
+
 		floppydisk->tracks[j]=allocCylinderEntry(DEFAULT_AMIGA_RPM,floppydisk->floppyNumberOfSide);
 		currentcylinder=floppydisk->tracks[j];
-		
+
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-		{	
+		{
 
 			if(trackindex<numberoftrack)
 			{
@@ -184,7 +183,7 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 					      tracktable[(12*trackindex)+5] * 0x10000   + \
 						  tracktable[(12*trackindex)+6] * 0x100     + \
 						  tracktable[(12*trackindex)+7];
-				
+
 				if(tracksize)
 				{
 
@@ -203,7 +202,7 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 								  tracktable[(12*trackindex)+5] * 0x10000   + \
 								  tracktable[(12*trackindex)+6] * 0x100     + \
 								  tracktable[(12*trackindex)+7];
-						
+
 						trackdata=(unsigned char*)malloc(tracksize);
 
 						floppycontext->hxc_printf(MSG_DEBUG,"[%.3d:%.1X] Reading DOS track at 0x%.8x, Size : 0x%.8x",j,i,ftell(f),tracksize);
@@ -226,9 +225,9 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 			else
 			{
 				floppycontext->hxc_printf(MSG_DEBUG,"[%.3d:%.1X] No track!",j,i);
-				currentcylinder->sides[i]=tg_alloctrack(DEFAULT_AMIGA_BITRATE,AMIGA_MFM_ENCODING,DEFAULT_AMIGA_RPM,(tracklen)*8,2500,-11360,0x00);			
+				currentcylinder->sides[i]=tg_alloctrack(DEFAULT_AMIGA_BITRATE,AMIGA_MFM_ENCODING,DEFAULT_AMIGA_RPM,(tracklen)*8,2500,-11360,0x00);
 			}
-									
+
 			trackindex++;
 		}
 	}
@@ -239,7 +238,7 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 
 	hxcfe_sanityCheck(floppycontext,floppydisk);
 
-	return HXCFE_NOERROR;	
+	return HXCFE_NOERROR;
 }
 
 int EXTADF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)

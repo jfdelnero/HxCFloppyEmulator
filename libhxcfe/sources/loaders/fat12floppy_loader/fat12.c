@@ -45,8 +45,8 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 	int bbool;
 	int tii;
 	FILE * ftemp;
-	char * newentry;
-	char * subnewentry;
+	unsigned char * newentry;
+	unsigned char * subnewentry;
 	char tempstr[256];
 	int lefttoread;
 	int fatclusternb;
@@ -308,7 +308,7 @@ int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * fi
 }
 
 
-char * findfreeentry(char *entriestable)
+unsigned char * findfreeentry(unsigned char *entriestable)
 {
 	int i;
 

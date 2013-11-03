@@ -74,10 +74,11 @@ int ApriDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			f=hxc_fopen(imgfile,"r+b");
 			if(f)
 			{
+				memset(HeaderBuffer,0,sizeof(HeaderBuffer));
 				fread(HeaderBuffer,1,128,f);
 				hxc_fclose(f);
 
-				if(!strcmp(APRIDISK_HeaderString,HeaderBuffer))
+				if(!strcmp(APRIDISK_HeaderString,(char*)HeaderBuffer))
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk_libIsValidDiskFile : ApriDisk file !");
 					return HXCFE_VALIDFILE;
@@ -107,37 +108,37 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	SIDE* currentside;
 	unsigned short rpm;
 	unsigned char  interleave;
-		
+
 	int number_of_track,number_of_sector;
 	int totalfilesize,k;
 	unsigned char * file_buffer;
 	int fileindex,newtrack;
-	
+
 	floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
+
 	fseek(f,0,SEEK_END);
 	totalfilesize=ftell(f);
 	fseek(f,0,SEEK_SET);
 	file_buffer=(unsigned char *) malloc(totalfilesize);
 	memset(file_buffer,0,totalfilesize);
 	fread(file_buffer,1,totalfilesize,f);
-	
+
 	fileindex=0;
 	//////////////////////////////////////////////////////
 	// Header check
-	if(strcmp(APRIDISK_HeaderString,&file_buffer[fileindex]))
+	if(strcmp(APRIDISK_HeaderString,(char*)&file_buffer[fileindex]))
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	number_of_track=0;
 	i=0;
 
@@ -146,10 +147,10 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	floppydisk->floppyNumberOfTrack=0;
 	floppydisk->floppyNumberOfSide=0;
 	floppydisk->floppySectorPerTrack=-1; // default value
-	
+
 	for(i=0;i<128;i++)
 	{
-		
+
 		for(j=0;j<=1;j++)
 		{
 			number_of_sector=0;
@@ -161,10 +162,10 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 
 			do
 			{
-				
+
 				data_record=(apridisk_data_record *)&file_buffer[fileindex];
 				fileindex=fileindex+sizeof(apridisk_data_record);
-				
+
 				switch(data_record->item_type)
 				{
 				case DATA_RECORD_DELETED:
@@ -174,7 +175,7 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 					}
 					fileindex=fileindex+(data_record->data_size);
 					break;
-					
+
 				case DATA_RECORD_SECTOR:
 					if(data_record->header_size>sizeof(apridisk_data_record))
 					{

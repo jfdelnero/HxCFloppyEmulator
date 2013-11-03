@@ -74,28 +74,28 @@ typedef struct ti99_vib
 									  // sector 7 is MSBit of byte 0, sector 8 is LSBit of byte 1, etc.)
 } ti99_vib;
 
-int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * numberofsector,char * skewside0,char * skewside1,char * interleave,int * density,int * bitrate,short * sectorsize)
+int getDiskGeometry(FILE * f,unsigned short * numberoftrack,unsigned char * numberofside,unsigned short * numberofsector,unsigned char * skewside0,unsigned char * skewside1,unsigned char * interleave,int * density,unsigned int * bitrate,unsigned short * sectorsize)
 {
 	int totsecs,filesize;
 	ti99_vib vib;
-	
+
 	*sectorsize=256;
 	*numberofside=1;
 	*numberoftrack=40;
 	*skewside0=3;
 	*skewside1=6;
 	*interleave=4;
-	
+
 	*bitrate=250000;
 	*density=1;
-	
+
 	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
 	fseek (f , 0 , SEEK_SET);
 	fread(&vib,sizeof(ti99_vib),1,f);
 	fseek (f , 0 , SEEK_SET);
-	
-	
+
+
 	// If we have read the sector successfully, let us parse it
 	totsecs = (vib.totsecsMSB << 8) | vib.totsecsLSB;
 	*numberofsector = vib.secspertrack;
@@ -105,7 +105,7 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 		// TI controller always assumes 9.
 		*numberofsector = 9;
 	}
-	
+
 	switch(*numberofsector)
 	{
 		case 8:
@@ -122,7 +122,7 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 			*skewside0=0;
 			*skewside1=0;
 			*interleave=9;
-			break;	
+			break;
 		case 18:
 			*skewside0=0;
 			*skewside1=0;
@@ -134,27 +134,27 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 			*interleave=11;
 			break;
 	}
-	
+
 	*numberoftrack = vib.tracksperside;
-	
+
 	if (*numberoftrack == 0)
 	{
 		// Some images are like this, because the original SSSD TI controller
 		// always assumes 40.
 		*numberoftrack = 40;
 	}
-	
-	*numberofside = vib.sides;     
-	
+
+	*numberofside = vib.sides;
+
 	if (*numberofside == 0)
 	{
 		// Some images are like this, because the original SSSD TI controller
 		// always assumes that tracks beyond 40 are on side 2. */
 		*numberofside = totsecs / (*numberofsector * *numberoftrack);
 	}
-	
+
 	*bitrate=250000;
-	
+
 	*density=1;
 	switch(vib.density)
 	{
@@ -172,7 +172,7 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 			*density=2;
 			break;
 	}
-	
+
 	if (((*numberofsector * *numberoftrack * *numberofside) == totsecs)
 		&& ((vib.density <= 4) && (totsecs >= 2))
 		&& (filesize == totsecs*256) && !memcmp(vib.id, "DSK", 3))
@@ -189,7 +189,7 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 		*skewside0=3;
 		*skewside1=6;
 		*interleave=4;
-		
+
 		switch(filesize)
 		{
 			case 1*40*9*256:
@@ -202,7 +202,7 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 				*skewside1=6;
 				*interleave=4;
 				break;
-				
+
 			case 2*40*9*256:
 				// 180kbytes: either DSSD or 18-sector-per-track SSDD.
 				// We assume DSSD since DSSD is more common and is supported by
@@ -216,7 +216,7 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 				*skewside1=6;
 				*interleave=4;
 				break;
-				
+
 			case 1*40*16*256:
 				// 160kbytes: 16-sector-per-track SSDD (standard format for TI
 				// DD disk controller prototype, and the TI hexbus disk
@@ -230,7 +230,7 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 				*skewside1=0;
 				*interleave=9;
 				break;
-				
+
 			case 2*40*16*256:
 				// 320kbytes: 16-sector-per-track DSDD (standard format for TI
 				// DD disk controller prototype, and TI hexbus disk
@@ -244,7 +244,7 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 				*skewside1=0;
 				*interleave=9;
 				break;
-				
+
 			case 2*40*18*256:
 				//  360kbytes: 18-sector-per-track DSDD (standard format for most
 				// third-party DD disk controllers, but reportedly not supported by
@@ -258,7 +258,7 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 				*skewside1=0;
 				*interleave=5;
 				break;
-				
+
 			case 2*80*18*256:
 				// 720kbytes: 18-sector-per-track 80-track DSDD (Myarc only)
 				*numberofside=2;
@@ -270,7 +270,7 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 				*skewside1=0;
 				*interleave=5;
 				break;
-				
+
 			case 2*80*36*256:
 				// 1.44Mbytes: DSHD (Myarc only)
 				*numberofside=2;
@@ -282,13 +282,13 @@ int getDiskGeometry(FILE * f,short * numberoftrack,char * numberofside,short * n
 				*skewside1=0;
 				*interleave=11;
 				break;
-				
+
 			default:
 				return 0;
 				break;
 		}
 	}
-	
+
 	return 2;
 }
 
@@ -302,7 +302,7 @@ int TI99V9T9_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	short sectorsize;
 	unsigned int bitrate;
 	int ret;
-	
+
 	floppycontext->hxc_printf(MSG_DEBUG,"TI99V9T9_libIsValidDiskFile");
 	if(imgfile)
 	{
@@ -314,7 +314,7 @@ int TI99V9T9_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		}
 
 		ret=getDiskGeometry(f,&numberoftrack,&numberofside,&numberofsector,&skew0,&skew1,&interleave,&density,&bitrate,&sectorsize);
-			
+
 		hxc_fclose(f);
 
 		switch(ret)
@@ -394,7 +394,7 @@ int TI99V9T9_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 			gap3len=24;
 		}
 
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);			
+		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 		floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
 
 		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
@@ -409,7 +409,7 @@ int TI99V9T9_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 			{
 				if(i==0)
 				{
-					file_offset=(j*floppydisk->floppySectorPerTrack)*sectorsize;	
+					file_offset=(j*floppydisk->floppySectorPerTrack)*sectorsize;
 					skew=skew0;
 				}
 				else

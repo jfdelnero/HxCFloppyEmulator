@@ -717,7 +717,7 @@ int hxcfe_getXmlLayoutID(XmlFloppyBuilder* context,char * container)
 		XML_SetNamespaceDeclHandler(context->xml_parser, ns_start, ns_end);
 
 		ad->xmlcheck = 1;
-		XML_Parse(context->xml_parser, disklayout_list[i]->unpacked_data, disklayout_list[i]->size, 1);
+		XML_Parse(context->xml_parser, (char*)disklayout_list[i]->unpacked_data, disklayout_list[i]->size, 1);
 
 		if(!strcmp((char*)ad->name,container))
 		{
@@ -745,7 +745,7 @@ const char* hxcfe_getXmlLayoutDesc(XmlFloppyBuilder* context,int moduleID)
 		XML_SetCharacterDataHandler(context->xml_parser, charhandler);
 		XML_SetNamespaceDeclHandler(context->xml_parser, ns_start, ns_end);
 
-		XML_Parse(context->xml_parser, disklayout_list[moduleID]->unpacked_data, disklayout_list[moduleID]->size, 1);
+		XML_Parse(context->xml_parser, (char*)disklayout_list[moduleID]->unpacked_data, disklayout_list[moduleID]->size, 1);
 
 		return (const char*)ad->description;
 	}
@@ -766,7 +766,7 @@ const char* hxcfe_getXmlLayoutName(XmlFloppyBuilder* context,int moduleID)
 		XML_SetCharacterDataHandler(context->xml_parser, charhandler);
 		XML_SetNamespaceDeclHandler(context->xml_parser, ns_start, ns_end);
 
-		XML_Parse(context->xml_parser, disklayout_list[moduleID]->unpacked_data, disklayout_list[moduleID]->size, 1);
+		XML_Parse(context->xml_parser, (char*)disklayout_list[moduleID]->unpacked_data, disklayout_list[moduleID]->size, 1);
 
 		return (const char*)ad->name;
 	}
@@ -817,7 +817,7 @@ FLOPPY* hxcfe_generateXmlFloppy (XmlFloppyBuilder* context,unsigned char * rambu
 	XML_SetCharacterDataHandler(context->xml_parser, charhandler);
 	XML_SetNamespaceDeclHandler(context->xml_parser, ns_start, ns_end);
 
-	XML_Parse(context->xml_parser, disklayout_list[ad->layout_id]->unpacked_data, disklayout_list[ad->layout_id]->size, 1);
+	XML_Parse(context->xml_parser, (char*)disklayout_list[ad->layout_id]->unpacked_data, disklayout_list[ad->layout_id]->size, 1);
 
 	return ad->floppy;
 }

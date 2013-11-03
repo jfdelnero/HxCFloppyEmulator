@@ -40,7 +40,7 @@
 extern unsigned char bit_inverter[];
 
 int VTR_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
-{	
+{
 
 	vtrucco_pictrack * track;
 
@@ -82,14 +82,14 @@ int VTR_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 		FILEHEADER->track_list_offset=1;
 		FILEHEADER->write_protected=1;
 
-		sprintf((char*)&FILEHEADER->CREDITS,"based on original project from Jean François Del Nero HxC Floppy Emulator");
-        
+		sprintf((char*)&FILEHEADER->CREDITS,"based on original project from Jean Francois Del Nero HxC Floppy Emulator");
+
         fwrite(FILEHEADER,512,1,hxcpicfile);
 
 		tracklistlen=(((((FILEHEADER->number_of_track+1)*sizeof(vtrucco_pictrack))/512)+1));
 		offsettrack=(unsigned char*) malloc(tracklistlen*512);
 		memset(offsettrack,0xFF,tracklistlen*512);
-		
+
 		i=0;
 		trackpos=FILEHEADER->track_list_offset+tracklistlen;
 
@@ -116,7 +116,7 @@ int VTR_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 				}
 
 				if(mfmsize2>mfmsize) mfmsize=mfmsize2;
-			
+
 				track=(vtrucco_pictrack *)(offsettrack+(i*sizeof(vtrucco_pictrack)));
 				if(mfmsize*2>0xFFFF)
 				{
@@ -181,10 +181,10 @@ int VTR_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 				memset(mfmtrackfinal,0x55,tracksize*2);
 
 				memcpy(mfmtracks0,floppy->tracks[i]->sides[0]->databuffer,mfmsize);
-				
+
 				if(floppy->tracks[i]->number_of_side==2)
 					memcpy(mfmtracks1,floppy->tracks[i]->sides[1]->databuffer,mfmsize2);
-				
+
 				for(k=0;k<tracksize/256;k++)
 				{
 
@@ -199,22 +199,22 @@ int VTR_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 					}
 				}
-				
-				
+
+
 				fwrite(mfmtrackfinal,tracksize*2,1,hxcpicfile);
-					
+
 				free(mfmtracks0);
 				free(mfmtracks1);
 				free(mfmtrackfinal);
 
-		
+
 			i++;
 		}while(i<(FILEHEADER->number_of_track));
 
 		free(offsettrack);
 
         hxc_fclose(hxcpicfile);
-		
+
 		floppycontext->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
 
 		free(FILEHEADER);
