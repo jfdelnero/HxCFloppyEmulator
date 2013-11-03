@@ -102,7 +102,7 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 	FILE * f;
 	unsigned int filesize;
 	unsigned int i,j;
-	char* trackdata;
+	unsigned char* trackdata;
 	int	tracklen;
 	CYLINDER* currentcylinder;
 	unsigned int numberoftrack;

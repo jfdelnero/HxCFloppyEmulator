@@ -98,7 +98,7 @@ int DPX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned int filesize;
 	unsigned int i,j,k;
 	unsigned int file_offset;
-	char* trackdata;
+	unsigned char* trackdata;
 	int tracklen;
 	unsigned char gap3len,interleave;
 	unsigned short sectorsize,rpm;

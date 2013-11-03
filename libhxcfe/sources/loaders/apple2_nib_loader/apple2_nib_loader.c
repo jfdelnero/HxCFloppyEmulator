@@ -102,7 +102,7 @@ int Apple2_nib_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 	unsigned int filesize;
 	unsigned int i,j;
 	unsigned int file_offset;
-	char* trackdata;
+	unsigned char* trackdata;
 	unsigned char  trackformat;
 	unsigned short rpm;
 	CYLINDER* currentcylinder;

@@ -239,7 +239,7 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 	unsigned int filesize;
 	unsigned int i,j,mfmformat,geometrie;
 	unsigned int file_offset;
-	char* trackdata;
+	unsigned char* trackdata;
 	unsigned char* trackdatatab;
 	int tracklen;
 	int tracksize;
