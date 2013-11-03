@@ -1,8 +1,4 @@
 
-
-
-
-
 /* Automatically generated CRC table */
 /* polynomial: 0x104C11DB7, bit reverse algorithm */
 const unsigned long crc32r_table[256] = {
@@ -84,7 +80,7 @@ void drv_qm_update_crc( unsigned long* crc, unsigned char byte )
 }
 
 
-int get_i16( char* buf, int pos )
+int get_i16( unsigned char* buf, int pos )
 {
     unsigned char low_byte;
     unsigned char high_byte;
@@ -106,12 +102,12 @@ int get_i16( char* buf, int pos )
     return outInt;
 }
 
-unsigned int get_u16( char* buf, int pos )
+unsigned int get_u16( unsigned char* buf, int pos )
 {
     return ((unsigned int)get_i16( buf, pos )) & 0xffff;
 }
 
-unsigned long get_u32( char* buf, int pos )
+unsigned long get_u32( unsigned char* buf, int pos )
 {
     int i;
     unsigned long ret_val = 0;
