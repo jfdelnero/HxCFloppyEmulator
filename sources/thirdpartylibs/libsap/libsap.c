@@ -426,7 +426,7 @@ static int extract_dir_entry(int format, char buffer[], int buffer_size, int n, 
       /* display only comment (if any) */
       if (entry_data[TO_COMMENT]) {
          comment[0] = '\0';
-         strncat(comment, entry_data+TO_COMMENT, TO_COMMENT_LENGTH);
+         strncat(comment, (char*)(entry_data+TO_COMMENT), TO_COMMENT_LENGTH);
 
          for (i=1; i<TO_COMMENT_LENGTH; i++) {
             if (comment[i] == 18) { /* DC2 (repetition) ? */
@@ -446,13 +446,13 @@ static int extract_dir_entry(int format, char buffer[], int buffer_size, int n, 
 
    /* name */
    name[0] = 0;
-   strncat(name, entry_data+TO_NAME, TO_NAME_LENGTH);
-   clean_string(name);
+   strncat(name, (char*)(entry_data+TO_NAME), TO_NAME_LENGTH);
+   clean_string((unsigned char*)name);
 
    /* extension */
    ext[0] = 0;
-   strncat(ext, entry_data+TO_EXT, TO_EXT_LENGTH);
-   clean_string(ext);
+   strncat(ext, (char*)(entry_data+TO_EXT), TO_EXT_LENGTH);
+   clean_string((unsigned char*)ext);
 
    /* file type */
    ftype = entry_data[TO_FILE_TYPE];
@@ -476,7 +476,7 @@ static int extract_dir_entry(int format, char buffer[], int buffer_size, int n, 
    /* comment */
    comment[0] = 0;
    if (entry_data[TO_COMMENT])
-      strncat(comment, entry_data+TO_COMMENT, TO_COMMENT_LENGTH);
+      strncat(comment, (char*)(entry_data+TO_COMMENT), TO_COMMENT_LENGTH);
 
    /* display the entry */
    i = sprintf(buffer, "%-8s %-3s %c %c %-3d %-8s %s\n", name, ext, ftype, dtype, size, date, comment);
@@ -511,7 +511,7 @@ static int get_filename(char filename[], const unsigned char entry_data[])
    filename[i] = 0;
 
    /* extension */
-   strncat(filename, entry_data+TO_EXT, TO_EXT_LENGTH);
+   strncat(filename, (char*)(entry_data+TO_EXT), TO_EXT_LENGTH);
 
    for (j=0; j<TO_EXT_LENGTH; j++) {
       if (filename[i+j] == 32)
@@ -1794,7 +1794,7 @@ int sap_GetFileInfo(sapID id, const char filename[], sapfileinfo_t *info)
    /* comment */
    info->comment[0] = '\0';
    if (entry_data[TO_COMMENT])
-      strncat(info->comment, entry_data+TO_COMMENT, TO_COMMENT_LENGTH);
+      strncat(info->comment, (char*)(entry_data+TO_COMMENT), TO_COMMENT_LENGTH);
 
    return SAP_OK;
 }

@@ -66,7 +66,7 @@ int sdd_getfloppyconfig(unsigned char * img,unsigned int filesize,unsigned char 
 
 	uimg=(sddfileformats_t *)img;
 
-	if(!strncmp(uimg->SIGN,"TRKY2",4))
+	if(!strncmp((char*)uimg->SIGN,"TRKY2",5))
 	{
 		*gap3len = 64;
 		*interleave = 1;
@@ -78,7 +78,7 @@ int sdd_getfloppyconfig(unsigned char * img,unsigned int filesize,unsigned char 
 			*density = 0xFF;
 		else
 			*density = 0x00;
-		
+
 		return 1;
 	}
 	else
@@ -123,7 +123,7 @@ int SDDSpeccyDos_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgf
 			fread(buffer,256,1,f);
 
 			fclose(f);
-			
+
 			if(sdd_getfloppyconfig(
 				buffer,
 				filesize,
@@ -140,7 +140,7 @@ int SDDSpeccyDos_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgf
 			else
 			{
 				floppycontext->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile : non SDD file : Wrong boot sector signature!");
-			}			
+			}
 		}
 		else
 		{

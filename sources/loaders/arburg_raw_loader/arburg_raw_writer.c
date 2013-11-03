@@ -165,14 +165,14 @@ int ARBURG_RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 							// Put a blank data sector instead with a bad checksum...
 							memset(blankblock,0x00,0xA00);
 							for(k=0;k<0xA0;k++)
-								strcat(blankblock,">MISSING BLOCK<!");
+								strcat((char*)blankblock,">MISSING BLOCK<!");
 							fwrite(blankblock,0xA00,1,rawfile);
 						}
 						else
 						{
 							memset(blankblock,0x00,0xF00);
 							for(k=0;k<0xF0;k++)
-								strcat(blankblock,">MISSING BLOCK<!");
+								strcat((char*)blankblock,">MISSING BLOCK<!");
 							fwrite(blankblock,0xF00,1,rawfile);
 						}
 

@@ -71,7 +71,7 @@ int KRZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	{
 
 		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0) 
+		if(filesize<0)
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"KRZ_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
@@ -85,7 +85,7 @@ int KRZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		floppycontext->hxc_printf(MSG_DEBUG,"KRZ_libIsValidDiskFile : non Kurzweil KRZ file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 
@@ -130,13 +130,13 @@ int KRZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	floppycontext->hxc_printf(MSG_INFO_1,"floppy size:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",dksize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
 
-	flatimg=(char*)malloc(dksize);
+	flatimg=(unsigned char*)malloc(dksize);
 	if(flatimg!=NULL)
 	{
 		memset(flatimg,0,dksize);
 		if(pcbootsector)
 			memcpy(flatimg,&msdos_bootsector,512);
-	
+
 
 		fatconfig.sectorsize=512;
 		fatconfig.clustersize=2;
@@ -211,7 +211,7 @@ int KRZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 	return HXCFE_NOERROR;
 }
-	
+
 int KRZ_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 

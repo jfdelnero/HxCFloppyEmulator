@@ -52,12 +52,12 @@ AFI_DATACODE datacode[]={
 
 unsigned short getcrc(void * buffer1, int size1,void * buffer2, int size2)
 {
-	
+
 	unsigned char crc16l,crc16h;
 	int i;
 	unsigned char crctable[32];
 
-	CRC16_Init(&crc16h,&crc16l,(unsigned char*)crctable,0x1021,0xFFFF);	
+	CRC16_Init(&crc16h,&crc16l,(unsigned char*)crctable,0x1021,0xFFFF);
 
 	if(buffer1)
 	{
@@ -71,7 +71,7 @@ unsigned short getcrc(void * buffer1, int size1,void * buffer2, int size2)
 	{
 		for(i=0;i<size2;i++)
 		{
-			CRC16_Update(&crc16h,&crc16l,*((unsigned char*)(buffer2)+i),(unsigned char*)crctable);	
+			CRC16_Update(&crc16h,&crc16l,*((unsigned char*)(buffer2)+i),(unsigned char*)crctable);
 		}
 	}
 
@@ -131,16 +131,16 @@ unsigned long * bitrate_rle_pack(unsigned long * bitrate,unsigned long len,unsig
 {
 	unsigned long i,j;
 	unsigned long nb_entry;
-	
+
 	unsigned long entry,cur_nb;
 
 	unsigned long * packed;
 
 
-	// 0x80 00 00 00   
+	// 0x80 00 00 00
 	// 1XXXXXXX 00 00 00
 
-	
+
 	nb_entry = 1;
 	cur_nb = 1;
 	for(i=1;i<len;i++)
@@ -164,7 +164,7 @@ unsigned long * bitrate_rle_pack(unsigned long * bitrate,unsigned long len,unsig
 		memset(packed,0,nb_entry * sizeof(unsigned long));
 		nb_entry = 1;
 		cur_nb = 1;
-		
+
 		for(i=1;i<len;i++)
 		{
 			if(bitrate[i-1] == bitrate[i] && cur_nb<127)
@@ -175,7 +175,7 @@ unsigned long * bitrate_rle_pack(unsigned long * bitrate,unsigned long len,unsig
 			{
 				nb_entry++;
 
-				entry = bitrate[i] & 0x00FFFFFF | ((0x80 |(cur_nb&0x7F)) << 24);
+				entry = ( bitrate[i] & 0x00FFFFFF ) | ((0x80 |(cur_nb&0x7F)) << 24);
 				packed[j] = entry;
 				cur_nb = 1;
 				j++;
@@ -183,7 +183,7 @@ unsigned long * bitrate_rle_pack(unsigned long * bitrate,unsigned long len,unsig
 		}
 	}
 
-	entry = bitrate[i-1] & 0x00FFFFFF | ((0x80 |(cur_nb&0x7F)) << 24);
+	entry = ( bitrate[i-1] & 0x00FFFFFF ) | ((0x80 |(cur_nb&0x7F)) << 24);
 	packed[j] = entry;
 	j++;
 
@@ -194,7 +194,7 @@ unsigned long * bitrate_rle_pack(unsigned long * bitrate,unsigned long len,unsig
 
 
 int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
-{	
+{
 
 	FILE * hxcafifile;
 	AFIIMG      afiheader;
@@ -247,7 +247,7 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 		afiinfo.start_side=0;
 		afiinfo.end_side=floppy->floppyNumberOfSide-1;
-		
+
 		afiinfo.start_track=0;
 		afiinfo.end_track=floppy->floppyNumberOfTrack-1;
 
@@ -299,7 +299,7 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 				break;
 		}
 
-		
+
 		afiinfo.number_of_string=0;
 
 		floppycontext->hxc_printf(MSG_INFO_1,"%d Tracks, %d side(s)",afiinfo.end_track,afiinfo.end_side);
@@ -315,14 +315,14 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 			memset(track_list,0,afitracklist.number_of_track*sizeof(unsigned long));
 
 			afiheader.track_list_offset=sizeof(AFIIMG);
-			
+
 			fwrite(&afiheader,sizeof(afiheader),1,hxcafifile);	      //write temporary file header
 			fwrite(&afitracklist,sizeof(afitracklist),1,hxcafifile);  //write temporary track list header
 			track_listptr=ftell(hxcafifile);
 			fwrite(track_list,afitracklist.number_of_track*sizeof(unsigned long),1,hxcafifile);
 			tempcrc=getcrc(&afitracklist,sizeof(afitracklist),track_list,afitracklist.number_of_track*sizeof(unsigned long));
 			fwrite(&tempcrc,sizeof(tempcrc),1,hxcafifile);            //temporary crc
-			
+
 			trackposition=sizeof(afitracklist)+afitracklist.number_of_track*sizeof(unsigned long)+sizeof(tempcrc);
 			t=0;
 			for(i=0;i<floppy->floppyNumberOfTrack;i++)
@@ -334,10 +334,10 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 					sprintf((char*)&afitrack.afi_track_tag,AFI_TRACK_TAG);
 
 					track_list[t]=trackposition;
-					
+
 					afitrack.track_number=i;
 					afitrack.side_number=j;
-					
+
 					afitrack.encoding_mode = AFI_TRACKENCODING_CELLARRAY;
 
 					bytelen = floppy->tracks[i]->sides[j]->tracklen;
@@ -475,7 +475,7 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 					t++;
 					trackposition=trackposition+dataposition;
-					
+
 				}
 			}
 
@@ -512,5 +512,5 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 		return -1;
 	}
 
-	
+
 }
