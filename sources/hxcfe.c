@@ -486,7 +486,7 @@ int infofile(HXCFLOPPYEMULATOR* hxcfe,char * infile)
 			ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
 			printf("\n");
 			printf("File type : %s - %s\n",hxcfe_getLoaderName(hxcfe,loaderid),hxcfe_getLoaderDesc(hxcfe,loaderid));
-			printf("Floppy interface mode : %s\n",hxcfe_getFloppyInterfaceModeName(hxcfe,ifmode),hxcfe_getFloppyInterfaceModeDesc(hxcfe,ifmode));
+			printf("Floppy interface mode : %s - %s\n",hxcfe_getFloppyInterfaceModeName(hxcfe,ifmode),hxcfe_getFloppyInterfaceModeDesc(hxcfe,ifmode));
 			printf("Number of Track : %d\n",hxcfe_getNumberOfTrack(hxcfe,floppydisk) );
 			printf("Number of Side : %d\n",hxcfe_getNumberOfSide(hxcfe,floppydisk) );
 			printf("Total Size : %d Bytes, ",hxcfe_getFloppySize (hxcfe,floppydisk,&nbofsector));
@@ -606,7 +606,7 @@ int imagedir(HXCFLOPPYEMULATOR* hxcfe,char * infile)
 			ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
 			printf("\n");
 			printf("File type : %s - %s\n",hxcfe_getLoaderName(hxcfe,loaderid),hxcfe_getLoaderDesc(hxcfe,loaderid));
-			printf("Floppy interface mode : %s\n",hxcfe_getFloppyInterfaceModeName(hxcfe,ifmode),hxcfe_getFloppyInterfaceModeDesc(hxcfe,ifmode));
+			printf("Floppy interface mode : %s - %s\n",hxcfe_getFloppyInterfaceModeName(hxcfe,ifmode),hxcfe_getFloppyInterfaceModeDesc(hxcfe,ifmode));
 			printf("Number of Track : %d\n",hxcfe_getNumberOfTrack(hxcfe,floppydisk) );
 			printf("Number of Side : %d\n",hxcfe_getNumberOfSide(hxcfe,floppydisk) );
 			printf("Total Size : %d Bytes, ",hxcfe_getFloppySize (hxcfe,floppydisk,&nbofsector));
@@ -675,7 +675,7 @@ int getfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 			ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
 			printf("\n");
 			printf("File type : %s - %s\n",hxcfe_getLoaderName(hxcfe,loaderid),hxcfe_getLoaderDesc(hxcfe,loaderid));
-			printf("Floppy interface mode : %s\n",hxcfe_getFloppyInterfaceModeName(hxcfe,ifmode),hxcfe_getFloppyInterfaceModeDesc(hxcfe,ifmode));
+			printf("Floppy interface mode : %s - %s\n",hxcfe_getFloppyInterfaceModeName(hxcfe,ifmode),hxcfe_getFloppyInterfaceModeDesc(hxcfe,ifmode));
 			printf("Number of Track : %d\n",hxcfe_getNumberOfTrack(hxcfe,floppydisk) );
 			printf("Number of Side : %d\n",hxcfe_getNumberOfSide(hxcfe,floppydisk) );
 
@@ -786,7 +786,7 @@ int putfile(HXCFLOPPYEMULATOR* hxcfe,char * infile,char *path)
 			ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
 			printf("\n");
 			printf("File type : %s - %s\n",hxcfe_getLoaderName(hxcfe,loaderid),hxcfe_getLoaderDesc(hxcfe,loaderid));
-			printf("Floppy interface mode : %s\n",hxcfe_getFloppyInterfaceModeName(hxcfe,ifmode),hxcfe_getFloppyInterfaceModeDesc(hxcfe,ifmode));
+			printf("Floppy interface mode : %s - %s\n",hxcfe_getFloppyInterfaceModeName(hxcfe,ifmode),hxcfe_getFloppyInterfaceModeDesc(hxcfe,ifmode));
 			printf("Number of Track : %d\n",hxcfe_getNumberOfTrack(hxcfe,floppydisk) );
 			printf("Number of Side : %d\n",hxcfe_getNumberOfSide(hxcfe,floppydisk) );
 
