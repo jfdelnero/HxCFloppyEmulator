@@ -235,13 +235,13 @@ int hxcfe_createFile(FSMNG * fsmng, char * filename)
 	return fat12_createFile(fsmng,filename);
 }
 
-int hxcfe_writeFile(FSMNG * fsmng,int filehandle,char * buffer,int size)
+int hxcfe_writeFile(FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_writeFile : 0x%.8x - 0x%.8x / %d bytes",filehandle,buffer,size);
 	return fat12_writeFile(fsmng,filehandle,buffer,size);
 }
 
-int hxcfe_readFile( FSMNG * fsmng,int filehandle,char * buffer,int size)
+int hxcfe_readFile( FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_readFile : 0x%.8x - 0x%.8x / %d bytes",filehandle,buffer,size);
 	return fat12_readFile( fsmng,filehandle,buffer,size);
