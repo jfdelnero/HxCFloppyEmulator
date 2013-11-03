@@ -273,7 +273,7 @@ int CopyQm_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 			while ( curwritepos < image_size ) 
 			{
 				/* Read the length */
-				char lengthBuf[2];
+				unsigned char lengthBuf[2];
 				res = fread( lengthBuf, 2, 1, f );
 				if ( res != 1 ) 
 				{
