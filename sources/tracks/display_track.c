@@ -214,7 +214,7 @@ void putchar8x8(s_trackdisplay *td,int x_pos,int y_pos,unsigned char c,unsigned 
 	}
 }
 
-void putstring8x8(s_trackdisplay *td,int x_pos,int y_pos,unsigned char * str,unsigned int color,int vertical)
+void putstring8x8(s_trackdisplay *td,int x_pos,int y_pos,char * str,unsigned int color,int vertical)
 {
 	int i;
 
