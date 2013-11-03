@@ -58,7 +58,7 @@
 
 #include "libhxcadaptor.h"
 
-int msx_imggetfloppyconfig(unsigned char * filename,unsigned char * img,unsigned int filesize,unsigned short  *numberoftrack,unsigned char *numberofside,unsigned short *numberofsectorpertrack,unsigned short *sectorsize,unsigned char *gap3len,unsigned char *interleave,unsigned short *rpm, unsigned int *bitrate)
+int msx_imggetfloppyconfig(char * filename,unsigned char * img,unsigned int filesize,unsigned short  *numberoftrack,unsigned char *numberofside,unsigned short *numberofsectorpertrack,unsigned short *sectorsize,unsigned char *gap3len,unsigned char *interleave,unsigned short *rpm, unsigned int *bitrate)
 {
 	int i;
 	int imgmode,nbofside_img;

@@ -130,7 +130,7 @@ int snes_smc_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 				}
 				else
 				{
-						if(!strncmp(&fileheader[8],"SUPERUFO",8))
+						if(!strncmp((char*)&fileheader[8],"SUPERUFO",8))
 						{
 							floppycontext->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : SUPERUFO SMC");
 						}
