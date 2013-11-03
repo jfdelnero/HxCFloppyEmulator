@@ -1016,7 +1016,7 @@ unsigned long getnearestbit(unsigned long * src,unsigned long index,unsigned lon
 				}
 			}
 
-			if( (((index + *shift) - i) < buflen) && (index - i)>=0 )
+			if( ((index + *shift) - i) < buflen )
 			{
 				ret_value = dst[index + *shift - i];
 				if( ret_value )
