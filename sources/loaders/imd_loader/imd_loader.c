@@ -61,7 +61,7 @@
 int IMD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	FILE *f;
-	unsigned char fileheader[5];
+	char fileheader[5];
 
 	floppycontext->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile");
 
@@ -72,11 +72,12 @@ int IMD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		if(f==NULL)
 			return HXCFE_ACCESSERROR;
 
+		memset(fileheader,0,sizeof(fileheader));
+
 		fread(&fileheader,4,1,f);
-		fileheader[4]=0;
 		hxc_fclose(f);
 
-		if( !strcmp(fileheader,"IMD "))
+		if( !strncmp(fileheader,"IMD ",4))
 		{
 			floppycontext->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile : IMD file !");
 			return HXCFE_VALIDFILE;
@@ -99,7 +100,7 @@ int IMD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
-	unsigned char fileheader[5];
+	char fileheader[5];
 //	MFMTRACKIMG trackdesc;
 	unsigned int i,j,trackcount,headcount;
 	SECTORCONFIG* sectorconfig;
@@ -128,9 +129,11 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		return HXCFE_ACCESSERROR;
 	}
 
+	memset(fileheader,0,sizeof(fileheader));
+
 	fread(&fileheader,sizeof(fileheader),1,f);
-	fileheader[4]=0;
-	if(!strcmp(fileheader,"IMD "))
+
+	if(!strncmp(fileheader,"IMD ",4))
 	{
 
 		// recherche fin entete / comentaire(s).

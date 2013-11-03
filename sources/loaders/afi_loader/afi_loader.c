@@ -171,7 +171,7 @@ int AFI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		fread(&header,sizeof(header),1,f);
 		hxc_fclose(f);
 
-		if( !strcmp(header.afi_img_tag,AFI_IMG_TAG) )
+		if( !strncmp((char*)header.afi_img_tag,AFI_IMG_TAG,strlen(AFI_IMG_TAG)) )
 		{
 			floppycontext->hxc_printf(MSG_DEBUG,"AFI_libIsValidDiskFile : AFI file !");
 			return HXCFE_VALIDFILE;
@@ -224,7 +224,7 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	fread(&header,sizeof(header),1,f);
 
-	if(!strcmp(header.afi_img_tag,AFI_IMG_TAG))
+	if(!strncmp((char*)header.afi_img_tag,AFI_IMG_TAG,strlen(AFI_IMG_TAG)))
 	{
 
 		if(filecheckcrc(f,0,sizeof(AFIIMG)))
@@ -308,7 +308,7 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		fseek(f,header.track_list_offset,SEEK_SET);
 		fread(&trackliststruct,sizeof(trackliststruct),1,f);
-		if(strcmp(trackliststruct.afi_img_track_list_tag,AFI_TRACKLIST_TAG))
+		if(strncmp((char*)trackliststruct.afi_img_track_list_tag,AFI_TRACKLIST_TAG,strlen(AFI_TRACKLIST_TAG)))
 		{
 				floppycontext->hxc_printf(MSG_ERROR,"bad AFI_TRACKLIST_TAG");
 				return HXCFE_BADFILE;
@@ -322,7 +322,7 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 			fseek(f,header.track_list_offset+tracklistoffset[i],SEEK_SET);
 			fread(&track,sizeof(track),1,f);
-			if(strcmp(track.afi_track_tag,AFI_TRACK_TAG))
+			if(strncmp((char*)track.afi_track_tag,AFI_TRACK_TAG,strlen(AFI_TRACK_TAG)))
 			{
 				floppycontext->hxc_printf(MSG_ERROR,"bad AFI_TRACK_TAG");
 				return HXCFE_BADFILE;
@@ -376,12 +376,10 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			currentside->flakybitsbuffer=0;
 			for(j=0;j<track.number_of_data_chunk;j++)
 			{
-
-
 				fseek(f,header.track_list_offset+tracklistoffset[i]+datalistoffset[j],SEEK_SET);
 				fread(&datablock,sizeof(datablock),1,f);
 
-				if(strcmp(datablock.afi_data_tag,AFI_DATA_TAG))
+				if(strncmp((char*)datablock.afi_data_tag,AFI_DATA_TAG,strlen(AFI_DATA_TAG))
 				{
 					floppycontext->hxc_printf(MSG_ERROR,"bad AFI_DATA_TAG");
 					return HXCFE_BADFILE;

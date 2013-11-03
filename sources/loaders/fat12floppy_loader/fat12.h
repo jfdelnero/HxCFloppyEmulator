@@ -32,7 +32,7 @@ typedef struct FATCONFIG_
 	unsigned short nbofsector;
 
 	unsigned short reservedsector ;
-		
+
 	unsigned char  numberoffat;
 	unsigned short nbofsectorperfat;
 	unsigned char  clustersize;
@@ -44,7 +44,7 @@ typedef struct FATCONFIG_
 int setclusterptr(char *fattable,int index,int ptr);
 int findfreecluster(char *fattable,int nbofcluster);
 char * findfreeentry(char *entriestable);
-int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * file, char * fattable,char *entriestable,char *datatable,int parentcluster,FATCONFIG * fatconfig,int numberofcluster);
+int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * file, unsigned char * fattable,unsigned char *entriestable,unsigned char *datatable,int parentcluster,FATCONFIG * fatconfig,int numberofcluster);
 
 
 

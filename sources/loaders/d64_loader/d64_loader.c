@@ -89,7 +89,7 @@ int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	FILE * f;
 	unsigned int filesize;
 	unsigned int i,j,k;
-	char* trackdata;
+	unsigned char* trackdata;
 	int tracklen;
 	unsigned short rpm;
 	unsigned short sectorsize;
