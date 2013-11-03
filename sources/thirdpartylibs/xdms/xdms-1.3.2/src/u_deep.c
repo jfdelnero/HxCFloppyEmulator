@@ -19,7 +19,7 @@
 
 INLINE USHORT DecodeChar(void);
 INLINE USHORT DecodePosition(void);
-INLINE void update(USHORT c);
+static void update(USHORT c);
 static void reconst(void);
 
 
@@ -171,7 +171,7 @@ static void reconst(void){
 
 /* increment frequency of given code by one, and update tree */
 
-INLINE void update(USHORT c){
+static void update(USHORT c){
 	USHORT i, j, k, l;
 
 	if (freq[R] == MAX_FREQ) {
