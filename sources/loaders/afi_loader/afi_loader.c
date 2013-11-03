@@ -107,7 +107,7 @@ unsigned long * bitrate_rle_unpack(unsigned long * packedbuffer,unsigned long le
 	unsigned long unpackedlen;
 	unsigned long * unpacked;
 
-	// 0x80 00 00 00   
+	// 0x80 00 00 00
 	// 1XXXXXXX 00 00 00
 
 	unpackedlen = 0;
@@ -379,7 +379,7 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				fseek(f,header.track_list_offset+tracklistoffset[i]+datalistoffset[j],SEEK_SET);
 				fread(&datablock,sizeof(datablock),1,f);
 
-				if(strncmp((char*)datablock.afi_data_tag,AFI_DATA_TAG,strlen(AFI_DATA_TAG))
+				if(strncmp((char*)datablock.afi_data_tag,AFI_DATA_TAG,strlen(AFI_DATA_TAG)))
 				{
 					floppycontext->hxc_printf(MSG_ERROR,"bad AFI_DATA_TAG");
 					return HXCFE_BADFILE;
@@ -499,7 +499,7 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 								temp_uncompressbuffer=malloc(datablock.packed_size);
 								fread(temp_uncompressbuffer,datablock.packed_size,1,f);
-								
+
 								destLen=datablock.unpacked_size;
 								temp_timing = malloc(destLen);
 								uncompress((unsigned char*)temp_timing, &destLen,temp_uncompressbuffer, datablock.packed_size);
