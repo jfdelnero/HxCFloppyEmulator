@@ -96,7 +96,7 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned int i,j;
 	unsigned short rpm;
 	unsigned int file_offset;
-	char* trackdata;
+	unsigned char* trackdata;
 	unsigned char gap3len,skew,trackformat,interleave;
 	unsigned short sectorsize;
 	CYLINDER* currentcylinder;
@@ -149,7 +149,7 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	skew=0;
 	trackformat=AMIGAFORMAT_DD;
 
-	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+	trackdata = (unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{

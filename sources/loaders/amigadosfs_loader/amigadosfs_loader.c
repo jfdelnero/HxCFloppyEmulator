@@ -138,7 +138,7 @@ int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * f
 	FILE * ftemp;
 	unsigned char  tempbuffer[512];
 	struct File* adffile;
-	unsigned char * fullpath;//,*fileimg;
+	char * fullpath;
 	int size,filesize;
 	RETCODE  rc;
 
@@ -289,7 +289,7 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 	struct Volume * adfvolume;
 	unsigned char * flatimg;
 	unsigned char * flatimg2;
-	unsigned char * repname;
+	char * repname;
 	int flatimgsize;
 	int numberoftrack;
 	int numberofsectorpertrack;
@@ -328,7 +328,7 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 		if(adfdevice)
 		{
 
-			repname=(unsigned char *)malloc(strlen(imgfile)+1);
+			repname=(char *)malloc(strlen(imgfile)+1);
 			memset(repname,0,strlen(imgfile)+1);
 			i=strlen(imgfile);
 			if( (imgfile[i]=='\\' || imgfile[i]=='/') && i)
