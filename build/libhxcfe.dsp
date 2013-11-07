@@ -1726,6 +1726,26 @@ SOURCE=..\sources\loaders\arburg_raw_loader\arburg_raw_loader.h
 SOURCE=..\sources\loaders\arburg_raw_loader\arburg_raw_writer.c
 # End Source File
 # End Group
+# Begin Group "SCP"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\scp_loader\scp_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\scp_loader\scp_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\scp_loader\scp_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\scp_loader\scp_writer.c
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 
