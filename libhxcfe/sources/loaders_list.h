@@ -98,6 +98,7 @@
 #include "./loaders/sdd_speccydos_loader/sdd_speccydos_loader.h"
 #include "./loaders/apple2_do_loader/apple2_do_loader.h"
 #include "./loaders/arburg_raw_loader/arburg_raw_loader.h"
+#include "./loaders/scp_loader/scp_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -174,6 +175,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)DSD_libGetPluginInfo,
 	(GETPLUGININFOS)FEI_libGetPluginInfo,
 	(GETPLUGININFOS)System24_libGetPluginInfo,
+	(GETPLUGININFOS)SCP_libGetPluginInfo,
 	(GETPLUGININFOS)Apple2_nib_libGetPluginInfo,
 	(GETPLUGININFOS)Apple2_do_libGetPluginInfo,
 	(GETPLUGININFOS)SDDSpeccyDos_libGetPluginInfo,
