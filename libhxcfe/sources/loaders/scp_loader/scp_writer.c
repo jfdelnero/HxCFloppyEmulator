@@ -70,15 +70,64 @@ unsigned long update_checksum(unsigned long checksum,unsigned char * buffer,unsi
 	return checksum;
 }
 
+unsigned short getNextPulse(SIDE * track,unsigned int * offset,int * rollover)
+{
+	int i;
+	float totaltime;
+
+	*rollover = 0x00;
+
+	if(track->timingbuffer)
+	{
+		totaltime = ((float)(1000*1000*1000) / (float)(track->timingbuffer[(*offset)>>3]*2));
+	}
+	else
+	{
+		totaltime = ((float)(1000*1000*1000) / (float)(track->bitrate*2));
+	}
+
+	i=1;
+	do
+	{
+		*offset = (*offset) +1;
+
+		if( (*offset) >= track->tracklen )
+		{
+			*offset = ((*offset) % track->tracklen);
+			*rollover = 0xFF;
+		}
+
+		if( track->databuffer[(*offset)>>3] & (0x80 >> ((*offset) & 7) ) )
+		{
+			return (int)((float)totaltime/(float)25);
+		}
+		else
+		{
+			i++;
+
+			if(track->timingbuffer)
+			{
+				totaltime += ((float)(1000*1000*1000) / (float)(track->timingbuffer[(*offset)>>3]*2));
+			}
+			else
+			{
+				totaltime += ((float)(1000*1000*1000) / (float)(track->bitrate*2));
+			}
+		}
+	}while(1);
+}
+
 unsigned long write_scp_track(FILE *f,SIDE * track,unsigned long * csum,int tracknum,unsigned int revolution)
 {
-	unsigned long checksum,file_checksum,size,totalsize;
-	unsigned short * trackbuffer;
+	unsigned long checksum,file_checksum,size,offset,totalsize;
+	unsigned short trackbuffer[256];
 	unsigned int i,j;
 	unsigned long total_time;
 	char timestamp[64];
 	scp_track_header trkh;
 	int fpos;
+	unsigned int trackoffset;
+	int trackrollover;
 
 	checksum = 0;
 	file_checksum = 0;
@@ -94,61 +143,77 @@ unsigned long write_scp_track(FILE *f,SIDE * track,unsigned long * csum,int trac
 	fwrite(&trkh,sizeof(scp_track_header),1,f);
 
 	totalsize = 0;
-	size = 50000 ;
-	trackbuffer = malloc( size * sizeof(unsigned short));
-	if(trackbuffer)
+
+	memset(trackbuffer,0,sizeof(trackbuffer));
+
+	trackoffset = 0;
+	trackrollover = 0;
+
+	getNextPulse(track,&trackoffset,&trackrollover);
+
+	for(j=0;j<revolution;j++)
 	{
-		memset(trackbuffer,0,size * sizeof(unsigned short));
+		i = 0;
 
+		offset = sizeof(scp_track_header);
+		size = 0 ;
 		total_time = 0;
-		for(j=0;j<revolution;j++)
+
+		do
 		{
-			trkh.index_position[j].index_time = LITTLEENDIAN_DWORD(( (200 * 1000 * 1000) / 25 ));// LITTLEENDIAN_DWORD(total_time);
+			trackbuffer[i] = getNextPulse(track,&trackoffset,&trackrollover);
 
-			for(i=0;i<size;i++)
+			total_time += trackbuffer[i];
+
+			trackbuffer[i] = BIGENDIAN_WORD( trackbuffer[i] );
+
+			i = (i + 1) & 0xFF;
+
+			if(!(i&0xFF))
 			{
-				trackbuffer[i] = BIGENDIAN_WORD(((4000/25)) );
-
-				total_time += (4000/25);
+				fwrite(trackbuffer,sizeof(trackbuffer),1,f);
+				checksum = update_checksum(checksum,(unsigned char*)trackbuffer,sizeof(trackbuffer));
+				size = size + sizeof(trackbuffer);
 			}
+		}while(!trackrollover);
 
-			trkh.index_position[j].track_lenght = LITTLEENDIAN_DWORD(i);
-			trkh.index_position[j].track_offset = LITTLEENDIAN_DWORD((sizeof(scp_track_header) + (j * (size))));
-
-			fwrite(trackbuffer,size * sizeof(unsigned short),1,f);
-
-			totalsize += (size * sizeof(unsigned short));
-
-			checksum = update_checksum(checksum,(unsigned char*)trackbuffer,size * sizeof(unsigned short));
+		if(i)
+		{
+			fwrite(trackbuffer,i*sizeof(unsigned short),1,f);
+			checksum = update_checksum(checksum,(unsigned char*)trackbuffer,i*sizeof(unsigned short));
+			size = size + ( i * sizeof(unsigned short) );
 		}
 
+		trkh.index_position[j].index_time = LITTLEENDIAN_DWORD(total_time);
+		trkh.index_position[j].track_lenght = LITTLEENDIAN_DWORD(size);
+		trkh.index_position[j].track_offset = LITTLEENDIAN_DWORD(offset);
 
-		sprintf(timestamp,"10/15/2013 5:52:30 PM");
-		fwrite(timestamp,strlen(timestamp),1,f);
+		totalsize += size;
 
-		file_checksum = update_checksum(file_checksum,(unsigned char*)&timestamp,strlen(timestamp));
-
-		trkh.track_data_checksum = checksum;
-
-		file_checksum = update_checksum(file_checksum,(unsigned char*)&trkh,sizeof(scp_track_header));
-
-		fseek(f,fpos,SEEK_SET);
-
-		fwrite(&trkh,sizeof(scp_track_header),1,f);
-
-		fseek(f,0,SEEK_END);
-
-		file_checksum =  file_checksum + checksum;
-
-		if(csum)
-			*csum = file_checksum;
-
-		free(trackbuffer);
-
-		return totalsize;
+		offset = offset + size;
 	}
 
-	return 0;
+	sprintf(timestamp,"10/15/2013 5:52:30 PM");
+	fwrite(timestamp,strlen(timestamp),1,f);
+
+	file_checksum = update_checksum(file_checksum,(unsigned char*)&timestamp,strlen(timestamp));
+
+	trkh.track_data_checksum = checksum;
+
+	file_checksum = update_checksum(file_checksum,(unsigned char*)&trkh,sizeof(scp_track_header));
+
+	fseek(f,fpos,SEEK_SET);
+
+	fwrite(&trkh,sizeof(scp_track_header),1,f);
+
+	fseek(f,0,SEEK_END);
+
+	file_checksum =  file_checksum + checksum;
+
+	if(csum)
+		*csum = file_checksum;
+
+	return totalsize;
 }
 
 int SCP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
@@ -156,14 +221,11 @@ int SCP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	FILE * f;
 	scp_header scph;
 	unsigned long tracksoffset[83*2];
-	unsigned long cur_offset;
 	unsigned long tracklist_offset;
 
 	unsigned long file_checksum;
 	unsigned long track_checksum;
 	int i;
-
-	cur_offset =0;
 
 	f = fopen(filename,"wb");
 	if( f )
@@ -174,7 +236,7 @@ int SCP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 		scph.start_track = 0;
 		scph.end_track = (floppy->floppyNumberOfTrack * floppy->floppyNumberOfSide) - 1;
-		scph.number_of_revolution = 1;
+		scph.number_of_revolution = 2;
 		scph.disk_type = 1;
 		scph.flags = 0x01 | 0x02;
 		scph.version = 0x02;
@@ -182,18 +244,14 @@ int SCP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 		// Header
 		fwrite(&scph,sizeof(scp_header),1,f);
 
-		cur_offset += sizeof(scp_header);
-
 		file_checksum = 0;
 
 		// Track list
-		tracklist_offset = cur_offset;
+		tracklist_offset = sizeof(scp_header);
 		memset(tracksoffset,0,sizeof(tracksoffset));
 		fwrite(&tracksoffset,sizeof(tracksoffset),1,f);
 
 		file_checksum = update_checksum(file_checksum,(unsigned char*)&tracksoffset,sizeof(tracksoffset));
-
-		cur_offset += sizeof(tracksoffset);
 
 		for(i=0;i<floppy->floppyNumberOfTrack * floppy->floppyNumberOfSide;i++)
 		{
@@ -202,7 +260,7 @@ int SCP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 			tracksoffset[i] = LITTLEENDIAN_DWORD(ftell(f));
 
-			cur_offset += write_scp_track(f,floppy->tracks[i>>1]->sides[i&1],&track_checksum,i,scph.number_of_revolution);
+			write_scp_track(f,floppy->tracks[i>>1]->sides[i&1],&track_checksum,i,scph.number_of_revolution);
 
 			file_checksum = file_checksum + track_checksum;
 		}

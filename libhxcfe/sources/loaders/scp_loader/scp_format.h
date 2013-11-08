@@ -255,7 +255,6 @@ typedef struct scp_track_header_
 	unsigned char track_number;
 	scp_index_pos index_position[5];
 	unsigned long track_data_checksum;
-	//unsigned long total_lenght;
 }scp_track_header;
 
 #pragma pack()
