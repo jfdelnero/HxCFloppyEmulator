@@ -99,6 +99,7 @@
 #include "./loaders/apple2_do_loader/apple2_do_loader.h"
 #include "./loaders/arburg_raw_loader/arburg_raw_loader.h"
 #include "./loaders/scp_loader/scp_loader.h"
+#include "./loaders/bmp_loader/bmp_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -179,6 +180,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)Apple2_nib_libGetPluginInfo,
 	(GETPLUGININFOS)Apple2_do_libGetPluginInfo,
 	(GETPLUGININFOS)SDDSpeccyDos_libGetPluginInfo,
+	(GETPLUGININFOS)BMP_libGetPluginInfo,
 	(GETPLUGININFOS)ARBURG_RAW_libGetPluginInfo,
 	(GETPLUGININFOS)-1
 };
