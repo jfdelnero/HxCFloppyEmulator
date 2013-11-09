@@ -123,7 +123,9 @@ const char * plugid_lst[]=
 	PLUGIN_ATARIST_MSA,
 	PLUGIN_HXC_HDDD_A2,
 	PLUGIN_HXC_EXTHFE,
-	PLUGIN_ARBURG
+	PLUGIN_ARBURG,
+	PLUGIN_SCP,
+	PLUGIN_BMP
 };
 
 static void tick_main(void *v) {
@@ -307,6 +309,8 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"HFE file (HDDD A2 Encoding support)\t*.hfe\n"
 					"HFE file (Rev 2 - Experimental)\t*.hfe\n"
 					"Arburg file\t*.arburgfd\n"
+					"SCP file\t*.scp\n"
+					"BMP file\t*.bmp\n"
 					);
 
 
