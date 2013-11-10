@@ -59,17 +59,22 @@
 
 #include "libhxcadaptor.h"
 
+/*#define KF_MCLOCK 48054857,14 //(((18432000 * 73) / 14) / 2)
+#define KF_SCLOCK ((float)KF_MCLOCK / (float)2)
+#define KF_ICLOCK (KF_MCLOCK / 16)
+*/
+
 //#define KFSTREAMDBG 1
 
-s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,float timecoef)
+s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,FXS * fxs,char * file,float timecoef)
 {
 	unsigned long i;
 	s_oob_header		* oob;
 	s_oob_StreamRead	* streamRead;
 	s_oob_StreamEnd		* streamEnd;
 	s_oob_DiskIndex		* diskIndex;
-	s_track_dump* track_dump;
-	
+	s_track_dump		* track_dump;
+
 	s_oob_DiskIndex  tabindex[16];
 
 	FILE* f;
@@ -94,16 +99,14 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,fl
 	unsigned long filesize;
 
 	unsigned long totalcell,totalstreampos;
-	track_dump=malloc(sizeof(s_track_dump));
 
+	track_dump=0;
 	overflowvalue=0;
 	totalcell = 0;
 	totalstreampos = 0;
 
-	if(track_dump)
+	if(fxs)
 	{
-		memset(track_dump,0,sizeof(s_track_dump));
-
 		f=hxc_fopen(file,"rb");
 		if(f)
 		{
@@ -292,53 +295,22 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,char * file,fl
 					break;
 				}
 
+
 			}while( (offset<filesize) && !streamend);
 
-			track_dump->nb_of_pulses=cellpos;
-			if(track_dump->nb_of_pulses)
-			{
-				track_dump->track_dump=malloc( track_dump->nb_of_pulses * sizeof(unsigned long) );
-				if(track_dump->track_dump)
-				{
-					memcpy(track_dump->track_dump, cellstream, track_dump->nb_of_pulses * sizeof(unsigned long) );
-				}
-			}
+			hxcfe_FxStream_setResolution(fxs,41619); // 41,619 ns per tick
+
+			track_dump = hxcfe_FxStream_ImportStream(fxs,cellstream,32,cellpos);
+
 			free(cellstream);
 			free(kfstreambuffer);
 
-			if(nbindex)
+			for(i=0;i<nbindex;i++)
 			{
-				track_dump->index_evt_tab=malloc(sizeof(s_index_evt)*nbindex);
-				memset(track_dump->index_evt_tab,0,sizeof(s_index_evt)*nbindex);
-				for(i=0;i<nbindex;i++)
-				{
-					track_dump->index_evt_tab[i].dump_offset = tabindex[i].StreamPosition;
-					track_dump->index_evt_tab[i].cellpos = tabindex[i].CellPos;
-					track_dump->index_evt_tab[i].clk = (unsigned long)((float)tabindex[i].SysClk * timecoef);
-				}
-				track_dump->nb_of_index=nbindex;
+				hxcfe_FxStream_AddIndex(fxs,track_dump,tabindex[i].StreamPosition);
 			}
-		}
-		else
-		{
-			free(track_dump);
-			track_dump=0;
 		}
 	}
 
 	return track_dump;
-}
-
-void FreeStream(s_track_dump* trackdump)
-{
-	if(trackdump)
-	{
-		if(trackdump->track_dump)
-			free(trackdump->track_dump);
-
-		if(trackdump->index_evt_tab)
-			free(trackdump->index_evt_tab);
-
-		free(trackdump);
-	}
 }
