@@ -479,3 +479,55 @@ void hxcfe_deinitFsManager(FSMNG * fsmng);
 // Track data/bitstream modification functions.
 SIDE * hxcfe_getSide(FLOPPY * fp,int track,int side);
 int    hxcfe_shiftTrackData(SIDE * side,long bitoffset);
+
+//////////////////////////////////////////////////////////////////
+// Flux Stream Analyzer
+
+typedef struct s_index_evt_
+{
+	unsigned long dump_offset;
+	unsigned long cellpos;
+	unsigned long clk;
+}s_index_evt;
+
+typedef struct s_track_dump_
+{
+	unsigned long	* track_dump;
+	unsigned long	nb_of_pulses;
+	s_index_evt		index_evt_tab[32];
+	unsigned long	nb_of_index;
+}s_track_dump;
+
+typedef struct _FXS
+{
+	HXCFLOPPYEMULATOR * hxcfe;
+
+	// step resolution (ps)
+	int steptime;
+
+	int phasecorrection;
+}FXS;
+
+FXS * hxcfe_initFxStream(HXCFLOPPYEMULATOR * hxcfe);
+
+void hxcfe_FxS_setResolution(FXS * fxs,int step);
+
+void hxcfe_deinitFxStream(FXS * fxs);
+
+void hxcfe_FxStream_setResolution(FXS * fxs,int step);
+
+s_track_dump * hxcfe_FxStream_ImportStream(FXS * fxs,void * stream,int wordsize,unsigned int nbword);
+
+void hxcfe_FxStream_AddIndex(FXS * fxs,s_track_dump * std,unsigned long streamposition);
+
+int hxcfe_FxStream_GetNumberOfRevolution(FXS * fxs,s_track_dump * std);
+
+unsigned long hxcfe_FxStream_GetRevolutionPeriod(FXS * fxs,s_track_dump * std,int revolution);
+
+unsigned long hxcfe_FxStream_GetMeanRevolutionPeriod(FXS * fxs,s_track_dump * std);
+
+SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std);
+
+void hxcfe_FxStream_FreeStream(FXS * fxs,s_track_dump * stream);
+
+void AdjustTrackPeriod(HXCFLOPPYEMULATOR* floppycontext,SIDE * curside_S0,SIDE * curside_S1);

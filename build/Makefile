@@ -54,7 +54,7 @@ DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosf
                   emuii_raw_loader.o emuii_loader.o emui_raw_loader.o jvc_loader.o dim_loader.o ti99v9t9_loader.o d81_loader.o  acornadf_loader.o \
                   camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o fdi_loader.o ssd_dsd_loader.o adl_loader.o \
                   krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o system24_loader.o kryofluxstream_loader.o kryofluxstream.o \
-                  fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o
+                  fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o bmp_writer.o bmp_file.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o
@@ -64,19 +64,19 @@ XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
 
 all: $(EXEC)
 
-libhxcfe.dll: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o arburg_track.o crc.o track_generator.o trackutils.o gcr_track.o apple2.o sector_extractor.o display_track.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
+libhxcfe.dll: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o arburg_track.o crc.o track_generator.o trackutils.o gcr_track.o apple2.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
-libhxcfe.dylib: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o arburg_track.o crc.o track_generator.o trackutils.o gcr_track.o apple2.o sector_extractor.o display_track.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
+libhxcfe.dylib: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o arburg_track.o crc.o track_generator.o trackutils.o gcr_track.o apple2.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
-libhxcfe.a: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o crc.o arburg_track.o track_generator.o trackutils.o gcr_track.o apple2.o sector_extractor.o display_track.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB)
+libhxcfe.a: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o crc.o arburg_track.o track_generator.o trackutils.o gcr_track.o apple2.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB)
 	$(AR) r $@    $^
 	cp $@ ../../../build
 
-libhxcfe.so: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o crc.o arburg_track.o track_generator.o trackutils.o gcr_track.o apple2.o sector_extractor.o display_track.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
+libhxcfe.so: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o crc.o arburg_track.o track_generator.o trackutils.o gcr_track.o apple2.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
@@ -97,8 +97,11 @@ trackutils.o : $(BASEDIR)/tracks/trackutils.c $(BASEDIR)/tracks/trackutils.h
 
 apple2.o : $(BASEDIR)/tracks/apple2.c $(BASEDIR)/tracks/apple2.h
 	$(CC) -o $@ -c $< $(CFLAGS)
-	
+
 display_track.o : $(BASEDIR)/tracks/display_track.c $(BASEDIR)/tracks/display_track.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+fluxStreamAnalyzer.o : $(BASEDIR)/stream_analyzer/fluxStreamAnalyzer.c $(BASEDIR)/stream_analyzer/fluxStreamAnalyzer.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 fs_manager.o : $(BASEDIR)/fs_manager/fs_manager.c $(BASEDIR)/fs_manager/fs_manager.h
@@ -145,13 +148,22 @@ scp_loader.o : $(BASEDIR)/loaders/scp_loader/scp_loader.c $(BASEDIR)/loaders/scp
 
 scp_writer.o : $(BASEDIR)/loaders/scp_loader/scp_writer.c $(BASEDIR)/loaders/scp_loader/scp_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
-	
+
+bmp_loader.o : $(BASEDIR)/loaders/bmp_loader/bmp_loader.c $(BASEDIR)/loaders/bmp_loader/bmp_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+bmp_writer.o : $(BASEDIR)/loaders/bmp_loader/bmp_writer.c $(BASEDIR)/loaders/bmp_loader/bmp_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+bmp_file.o : $(BASEDIR)/loaders/bmp_loader/bmp_file.c $(BASEDIR)/loaders/bmp_loader/bmp_file.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
 imd_loader.o : $(BASEDIR)/loaders/imd_loader/imd_loader.c $(BASEDIR)/loaders/imd_loader/imd_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 imd_writer.o : $(BASEDIR)/loaders/imd_loader/imd_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
-	
+
 hfe_loader.o : $(BASEDIR)/loaders/hfe_loader/hfe_loader.c $(BASEDIR)/loaders/hfe_loader/hfe_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
@@ -345,7 +357,7 @@ vtr_loader.o : $(BASEDIR)/loaders/vtr_loader/vtr_loader.c $(BASEDIR)/loaders/vtr
 
 vtr_writer.o : $(BASEDIR)/loaders/vtr_loader/vtr_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
-	
+
 vdk_loader.o : $(BASEDIR)/loaders/vdk_loader/vdk_loader.c $(BASEDIR)/loaders/vdk_loader/vdk_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
