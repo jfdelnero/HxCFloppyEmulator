@@ -81,7 +81,7 @@ int SCP_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		fread(&scph, sizeof(scp_header), 1, f);
 
-		if( strncmp(scph.sign,"SCP",3) )
+		if( strncmp((char*)scph.sign,"SCP",3) )
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"SCP_libIsValidDiskFile : Bad file header !");
 			fclose(f);
