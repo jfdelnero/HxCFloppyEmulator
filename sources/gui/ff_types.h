@@ -24,6 +24,7 @@ enum
 	FF_HDDDA2_HFE,
 	FF_EHFE,
 	FF_ARBG,
+	FF_SKF,
 	FF_SCP,
 	FF_BMP
 };
