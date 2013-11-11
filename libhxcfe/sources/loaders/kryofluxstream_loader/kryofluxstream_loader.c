@@ -60,6 +60,8 @@
 #include "kryofluxstream_format.h"
 #include "kryofluxstream.h"
 
+#include "kryofluxstream_writer.h"
+
 #include "libhxcadaptor.h"
 
 int KryoFluxStream_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
@@ -439,7 +441,7 @@ int KryoFluxStream_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned lo
 	{
 		(ISVALIDDISKFILE)	KryoFluxStream_libIsValidDiskFile,
 		(LOADDISKFILE)		KryoFluxStream_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		KryoFluxStream_libWrite_DiskFile,
 		(GETPLUGININFOS)	KryoFluxStream_libGetPluginInfo
 	};
 

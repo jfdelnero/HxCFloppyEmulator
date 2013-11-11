@@ -46,9 +46,13 @@ typedef struct s_oob_StreamEnd_
 typedef struct s_oob_DiskIndex_
 {
 	unsigned long 	StreamPosition;
-	unsigned long	CellPos;
 	unsigned long 	Timer;
 	unsigned long 	SysClk;
 }s_oob_DiskIndex;
+
+#define OOBTYPE_Stream_Read 0x01  // Start of flux transition timing data block (multiple per track)
+#define OOBTYPE_Index       0x02  // Index Index signal data
+#define OOBTYPE_Stream_End  0x03  // Stream End Signifies there are no more stream read blocks (one per track)
+#define OOBTYPE_End         0x0D  // End of data (no more data to process) 
 
 #pragma pack()

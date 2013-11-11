@@ -232,7 +232,7 @@ s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,FXS * fxs,char
 		#endif
 
 								tabindex[nbindex].StreamPosition = diskIndex->StreamPosition;
-								tabindex[nbindex].CellPos = cellpos;
+								//tabindex[nbindex].CellPos = cellpos;
 								tabindex[nbindex].SysClk = diskIndex->SysClk;
 								tabindex[nbindex].Timer = diskIndex->Timer;
 								if(nbindex)
