@@ -111,6 +111,7 @@ ff_type ff_type_list[]=
 	{ FF_HDDDA2_HFE,"HFE - HDDD A2 Support",PLUGIN_HXC_HDDD_A2,".hfe"},
 	{ FF_EHFE,"HFE - Rev 2 - Experimental",PLUGIN_HXC_EXTHFE,".hfe"},
 	{ FF_ARBG,"Arburg - Arburg RAW sectors file format",PLUGIN_ARBURG,".arburgfd"},
+	{ FF_SKF,"Raw - Stream Kryoflux file format",PLUGIN_SKF,".raw"},
 	{ FF_SCP,"SCP - SCP file format",PLUGIN_SCP,".scp"},
 	{ FF_BMP,"BMP - BMP file image",PLUGIN_BMP,".bmp"},
 	{ -1,"",0,0}			
