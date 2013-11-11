@@ -323,6 +323,8 @@ int SCP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				}
 			}
 
+			fclose(f);
+
 			// Adjust track timings.
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 			{
