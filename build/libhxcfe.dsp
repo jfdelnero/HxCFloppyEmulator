@@ -1637,6 +1637,14 @@ SOURCE=..\sources\loaders\kryofluxstream_loader\kryofluxstream_loader.c
 
 SOURCE=..\sources\loaders\kryofluxstream_loader\kryofluxstream_loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\kryofluxstream_loader\kryofluxstream_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\kryofluxstream_loader\kryofluxstream_writer.h
+# End Source File
 # End Group
 # Begin Group "S24"
 
@@ -1744,6 +1752,30 @@ SOURCE=..\sources\loaders\scp_loader\scp_loader.h
 # Begin Source File
 
 SOURCE=..\sources\loaders\scp_loader\scp_writer.c
+# End Source File
+# End Group
+# Begin Group "BMP"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\bmp_loader\bmp_file.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\bmp_loader\bmp_file.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\bmp_loader\bmp_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\bmp_loader\bmp_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\bmp_loader\bmp_writer.c
 # End Source File
 # End Group
 # End Group
@@ -1873,6 +1905,18 @@ SOURCE=..\sources\fs_manager\fs_manager.c
 # Begin Source File
 
 SOURCE=..\sources\fs_manager\fs_manager.h
+# End Source File
+# End Group
+# Begin Group "fluxStreamAnalyzer"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\stream_analyzer\fluxStreamAnalyzer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\stream_analyzer\fluxStreamAnalyzer.h
 # End Source File
 # End Group
 # Begin Source File
