@@ -272,7 +272,7 @@ int checkfileext(char * path,char *ext)
 	return 0;
 }
 
-char * sec_strncat(char * dst,const char * src,int size)
+char * sec_strncat(char * dst,const char * src,unsigned int size)
 {
 	if(dst && src)
 	{
