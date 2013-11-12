@@ -26,14 +26,28 @@ New track support : Data Arburg format.
 
 New track support : system Arburg format.
 
-New Writer : SDD Speccy DOS file.
+New Writer : SSD Speccy DOS file.
+
+New Writer : Amiga ADF files.
+
+New Loader : SCP files (WIP).
+
+New Writer : SCP files (WIP).
+
+New Writer : Kryoflux raw files.
+
+New Writer : BMP file (Disk layout picture).
+
+libhxcfe : Transitions level flux analyzer functions.
+
+ADF, DMS, MSA, ST Loaders : 4 empty tracks added at the end of the disk.
 
 /*********************************************************
 06 august 2013: HxCFloppyEmulator 2.0.16.0
 
 FAT12 Loader/generator : Files size, disk size & disk free size displayed, lots of sanity checks added.
 
-TRS80 Writer : Bad free() removed. 
+TRS80 Writer : Bad free() removed.
 
 General : Software passed with valgrind : Some memory leaks and possible issues corrected !
 
@@ -170,7 +184,7 @@ New Features / Changes / Issues solved :
 09/10/2011: HxCFloppyEmulator 1.6.11.15
 
 -> zlib updated : zlib 1.2.5
--> New files Support : Winimage *.IMZ file. 
+-> New files Support : Winimage *.IMZ file.
 -> New files Support : *.GHK (Ensoniq EPS) file image support.
 -> Oric DSK : Deleted address mark support added!
 -> TI99/4A TI99PC99 loader : sector search function corrected.
@@ -218,14 +232,14 @@ New Features / Changes / Issues solved :
 
 Major update:
 
--> New track generator implemented : 
+-> New track generator implemented :
    - Better implementation.
    - More powerful API
    - Less memory usage
    - Multi format support : ISO, IBM, Amiga.
-   - Variable bitrate support.   
+   - Variable bitrate support.
    - Auto GAP3 calculation.
--> Use of the new track generator for Most of file loaders: 
+-> Use of the new track generator for Most of file loaders:
    - Code clean up.
    - Code size optimization.
 -> New files Support : *.ADF Amiga/UAE Extended ADF file format (old and new format)
@@ -265,10 +279,10 @@ And many others corrections and improvements :-)
 -> New files Support : Atari ST DIM image (*.DIM) added.
 -> New files Support : TI99 V9T9 (*.V9T9 / *.PC99) added.
 -> IPF File format (http://www.softpres.org/)
-	> overlap bug corrected  
+	> overlap bug corrected
 -> Internal : Tracklen is now the number of bit in the track.
 -> Internal/HFE generator : Track encoding code now set correctly.
--> ISO/IBM track generator : ISO FM track data mark value corrected/changed to 0xFB 
+-> ISO/IBM track generator : ISO FM track data mark value corrected/changed to 0xFB
 *********************************************************/
 
 /*********************************************************
@@ -278,7 +292,7 @@ And many others corrections and improvements :-)
 -> Floppy disk dump tool : a small GUI change.
 -> D88 file format support improved.
 -> HDM file support : gap len increased to 116.
--> FAT12 Floppy Generator enhanced : More FAT12 floppy format available, FAT geometry adjusted/corrected. 
+-> FAT12 Floppy Generator enhanced : More FAT12 floppy format available, FAT geometry adjusted/corrected.
 -> FAT12 Floppy Generator : Sources files on the PC side are now correctly closed in case of fail.
 -> E-Mu SP1200 support : E-Mu SP1200 RAW file image support added (*.sp1200fd)
 -> ISO/IBM track generator : Skew/interleave generator bug corrected.
@@ -369,29 +383,29 @@ and to Kris Van de Cappelle (EMXP developer) for the tests and EmuII technicals 
 /*********************************************************
 19/06/2010: HxCFloppyEmulator 1.3.9.4
 -> IPF File format (http://www.softpres.org/)
-	> overlap bug corrected  
--> MSX/IMG/ST : 
+	> overlap bug corrected
+-> MSX/IMG/ST :
     	> Many loader crash/bug fix
--> HFE file Writer : 
+-> HFE file Writer :
 	> Crash fix (crash if wrote a 0 track floppy image)
 *********************************************************/
 
 /*********************************************************
 19/06/2010: HxCFloppyEmulator 1.3.9.3
 -> IPF File format (http://www.softpres.org/)
-	>upgrade to the RC ipf library 6 / Include official headers  
--> USB HxC Floppy Emulator : 
+	>upgrade to the RC ipf library 6 / Include official headers
+-> USB HxC Floppy Emulator :
     	> Atari ST/STE/Falcon :"Write protect" disk change emulation implemented (disk change detection is now working correctly).
 -> TI99/4A TI99PC99 loader :
 	> FM bitrate corrected, Interface mode set to Shugart.
--> HFE file Writer : 
+-> HFE file Writer :
 	End of track padding.
 *********************************************************/
 
 /*********************************************************
 06/06/2010: HxCFloppyEmulator 1.3.9.2
 -> IPF File format (http://www.softpres.org/)
-	>upgrade to the RC ipf library 5 : New plateforms supported by this format : Atari ST, PC, ...  
+	>upgrade to the RC ipf library 5 : New plateforms supported by this format : Atari ST, PC, ...
 
 -> SD HxC Floppy Emulator settings window : new parameters added (need to upgrade the firmware to v1.1.2.0):
 	> "Head step sound" volume
@@ -415,7 +429,7 @@ and to Kris Van de Cappelle (EMXP developer) for the tests and EmuII technicals 
 -> FM sector extractor dead lock bug corrected.
 -> "Create FS FLoppy":  New floppy format : 4318KB Atari ST floppy (FAT12 - 254tracks, 17 Sectors, 2 sides)
 -> Log window: Memory leak bug corrected
--> New window: SD HxC Floppy Emulator settings window 
+-> New window: SD HxC Floppy Emulator settings window
 *********************************************************/
 
 /*********************************************************
@@ -456,8 +470,8 @@ and to Kris Van de Cappelle (EMXP developer) for the tests and EmuII technicals 
 /*********************************************************
 01/11/2009: HxCFloppyEmulator 1.3.2.0
 -> IPF Loader: Index signal generation improved.
--> USB HxC Floppy Emulator : 
-	-Variable bitrate emulation improved. 
+-> USB HxC Floppy Emulator :
+	-Variable bitrate emulation improved.
 	-Up to 4 USB Floppy Emulator can be used in the same time now.
 -> New file Support : D88 file format (PC88 floppy disks).
 *********************************************************/
@@ -491,7 +505,7 @@ and to Kris Van de Cappelle (EMXP developer) for the tests and EmuII technicals 
 /*********************************************************
 19/07/2009: HxCFloppyEmulator 1.2.1.1
 -> HFE file Writer/loader : bits reversing code optimisation.
--> Index generation : for all file format based on ISO track, the index signal timing was changed (duration of 2.5ms before the first sector) 
+-> Index generation : for all file format based on ISO track, the index signal timing was changed (duration of 2.5ms before the first sector)
 -> USB HxC Floppy Emulator : a bug was corrected regarding the index signal generation.
 -> USB HxC Floppy Emulator : interface settings now take effect even if no floppy disk are loaded.
 -> GPL license text added in the about dialog box.
@@ -500,7 +514,7 @@ and to Kris Van de Cappelle (EMXP developer) for the tests and EmuII technicals 
 
 /*********************************************************
 12/07/2009: HxCFloppyEmulator 1.2.1.0
--> New feature : new custom RAW floppy format loader GUI. 
+-> New feature : new custom RAW floppy format loader GUI.
 -> New file Support : SAP (Thomson TO8)    file image support (need beta tester).
 -> New file Support : JV1 (TRS-80 Model 1) file image support (need beta tester).
 -> internal : binary to MFM encoder speedup (MFM converter fully rewritten).
@@ -541,14 +555,14 @@ and to Kris Van de Cappelle (EMXP developer) for the tests and EmuII technicals 
 /*********************************************************
 16/02/2009: HxCFloppyEmulator 1.2.0.9
 ->  AFI File format (Advanced Floppy Image)
-	-Some memory usage optimization and bug corrected.	
+	-Some memory usage optimization and bug corrected.
 *********************************************************/
 
 
 /*********************************************************
 07/01/2009: HxCFloppyEmulator 1.2.0.8
 -> New disk image file format : AFI (Advanced Floppy Image)
-	-> Track based file format	
+	-> Track based file format
 	-> MFM / FM / GCR / RAW support
 	-> Hard sectored track supported
 	-> Variable bitrate support
@@ -575,7 +589,7 @@ and to Kris Van de Cappelle (EMXP developer) for the tests and EmuII technicals 
 
 /*********************************************************
 26/10/2008: HxCFloppyEmulator 1.2.0.5
--> IMD floppy image loader added : (http://www.classiccmp.org/dunfield/img/index.htm) 
+-> IMD floppy image loader added : (http://www.classiccmp.org/dunfield/img/index.htm)
 -> FM encoding support added.
 -> Floppy change detection bug corrected in PC mode.
 *********************************************************/
@@ -641,7 +655,7 @@ HxCFloppyEmu_CPLD_EPM7128S_250308.pof
 
 /*********************************************************
 21/02/2008: HxCFloppyEmulator 0.9.1.9
-New menu to write *.hfe file for the StandAlone version of the HXCFloppyEmulator. 
+New menu to write *.hfe file for the StandAlone version of the HXCFloppyEmulator.
 *********************************************************/
 
 
@@ -688,7 +702,7 @@ Folder naming convention:
 - DMS file support: replacement of undms by x-dms dms loader.
 - pc files to AmigaDos floppy plugin converter added
 *********************************************************/
- 
+
 
 /*********************************************************
 07/11/2007: HxCFloppyEmulator 0.9.1.1
@@ -751,7 +765,7 @@ ST_FloppyLoader.dll
 01/10/2006: HxCFloppyEmulator 0.7.1.0
 - Passage à la 0.7.1 pour corriger un bug avec les disquettes ST de 10 secteurs / par piste...
 *********************************************************/
- 
+
 
 /*********************************************************
 01/10/2006: HxCFloppyEmulator 0.7.0.0
@@ -780,7 +794,7 @@ en cours d'utilisation, ce qui n'est bien sur pas encore le cas. (support du var
 - Amélioration du loader des fichiers *.ST : plus besoin d'utiliser le fichier stfileformat.txt.
 
 - (Expérimental) Possibilité de charger des images de 1.44Mo (18 secteurs)
-et 3Mo (36 secteurs) pour ST. (triche sur la longueur des pistes-> 150 rpm et 75rpm) 
+et 3Mo (36 secteurs) pour ST. (triche sur la longueur des pistes-> 150 rpm et 75rpm)
 (le TOS 1.62 a l'air d'apprécier assez moyennement la disquette de 3Mo -> Reboot au début de la copie de la disquette ;-)  )
 
 - Correction du bug de chargement sur les fichiers images protégés en écritures.
@@ -818,7 +832,7 @@ Support des formats ST / ADF.
 
 /*********************************************************
 20/03/2006-24/03/2006: HxCFloppyEmu 0.0.0.0
-Tout début du projet : 
+Tout début du projet :
 - Mise au point de la carte sur port parallèle
 - premiers morceaux de code pour encoder les tracks d'une image ST puis ADF.
 *********************************************************/
