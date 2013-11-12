@@ -115,6 +115,7 @@ const char * plugid_lst[]=
 	PLUGIN_RAW_LOADER,
 	PLUGIN_AMSTRADCPC_DSK,
 	PLUGIN_IMD_IMG,
+	PLUGIN_AMIGA_ADF,
 	PLUGIN_TI994A_V9T9,
 	PLUGIN_TRS80_JV3,
 	PLUGIN_TRS80_DMK,
@@ -301,6 +302,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"IMG file (RAW Sector file format)\t*.img\n"
 					"CPC DSK file\t*.dsk\n"
 					"IMD file\t*.imd\n"
+					"ADF file\t*.adf\n"
 					"TI99/4A V9T9 DSK file\t*.dsk\n"
 					"TRS80 JV3 file\t*.jv3\n"
 					"TRS80 DMK file\t*.dmk\n"
