@@ -57,7 +57,8 @@ DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosf
                   fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o bmp_writer.o bmp_file.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
-					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o
+					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
+					kryofluxstream_writer.o adf_writer.o
 
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
@@ -183,6 +184,9 @@ crctable.o : $(BASEDIR)/loaders/copyqm_loader/crctable.c $(BASEDIR)/loaders/copy
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 adf_loader.o : $(BASEDIR)/loaders/adf_loader/adf_loader.c $(BASEDIR)/loaders/adf_loader/adf_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+adf_writer.o : $(BASEDIR)/loaders/adf_loader/adf_writer.c $(BASEDIR)/loaders/adf_loader/adf_writer.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 extadf_loader.o : $(BASEDIR)/loaders/extadf_loader/extadf_loader.c $(BASEDIR)/loaders/extadf_loader/extadf_loader.h
@@ -397,8 +401,10 @@ vfile.o : $(BASEDIR)/thirdpartylibs/xdms/vfile.c $(BASEDIR)/thirdpartylibs/xdms/
 adz_loader.o : $(BASEDIR)/loaders/adz_loader/adz_loader.c $(BASEDIR)/loaders/adz_loader/adz_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-
 kryofluxstream_loader.o : $(BASEDIR)/loaders/kryofluxstream_loader/kryofluxstream_loader.c $(BASEDIR)/loaders/kryofluxstream_loader/kryofluxstream_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+kryofluxstream_writer.o : $(BASEDIR)/loaders/kryofluxstream_loader/kryofluxstream_writer.c $(BASEDIR)/loaders/kryofluxstream_loader/kryofluxstream_writer.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 kryofluxstream.o : $(BASEDIR)/loaders/kryofluxstream_loader/kryofluxstream.c $(BASEDIR)/loaders/kryofluxstream_loader/kryofluxstream.h
