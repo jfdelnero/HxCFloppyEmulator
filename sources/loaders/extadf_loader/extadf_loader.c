@@ -198,21 +198,27 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 					}
 					else
 					{
-						tracksize=tracktable[(12*trackindex)+4] * 0x1000000 + \
-								  tracktable[(12*trackindex)+5] * 0x10000   + \
-								  tracktable[(12*trackindex)+6] * 0x100     + \
-								  tracktable[(12*trackindex)+7];
+						tracksize=tracktable[(12*trackindex)+8] * 0x1000000 + \
+								  tracktable[(12*trackindex)+9] * 0x10000   + \
+								  tracktable[(12*trackindex)+10] * 0x100     + \
+								  tracktable[(12*trackindex)+11];
 
-						trackdata=(unsigned char*)malloc(tracksize);
+						tracksize /= 8;
 
-						floppycontext->hxc_printf(MSG_DEBUG,"[%.3d:%.1X] Reading DOS track at 0x%.8x, Size : 0x%.8x",j,i,ftell(f),tracksize);
+						if(tracksize)
+						{
+							trackdata=(unsigned char*)malloc(tracksize);
+							if(trackdata)
+							{
+								floppycontext->hxc_printf(MSG_DEBUG,"[%.3d:%.1X] Reading DOS track at 0x%.8x, Size : 0x%.8x",j,i,ftell(f),tracksize);
 
-						fread(trackdata,tracksize,1,f);
+								fread(trackdata,tracksize,1,f);
 
-						currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,(unsigned short)(tracksize/sectorsize),(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-11150);
+								currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,(unsigned short)(tracksize/sectorsize),(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-11150);
 
-						free(trackdata);
-
+								free(trackdata);
+							}
+						}
 					}
 				}
 				else
