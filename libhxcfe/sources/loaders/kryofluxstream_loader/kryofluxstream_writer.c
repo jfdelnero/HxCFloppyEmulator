@@ -310,7 +310,7 @@ unsigned long write_kf_stream_track(char * filepath,SIDE * track,int tracknum,in
 					fwrite(&oobh,sizeof(s_oob_header),1,f);
 
 					memset(&oobdi,0,sizeof(s_oob_DiskIndex));
-					oobdi.StreamPosition = streampos + streamsize + 0x100;
+					oobdi.StreamPosition = streampos + streamsize;
 					iclk = iclk + ((totalcelllen/16) * 2);
 					oobdi.SysClk = iclk;
 					totalcelllen = 0;
