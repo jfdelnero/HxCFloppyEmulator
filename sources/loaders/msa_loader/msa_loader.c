@@ -104,35 +104,35 @@ int MSA_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned char   trackformat;
 
 	CYLINDER* currentcylinder;
-	
+
 	floppycontext->hxc_printf(MSG_DEBUG,"MSA_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
+	fseek (f , 0 , SEEK_SET);
 	if(filesize!=0)
-	{		
+	{
 		sectorsize=512; // msa file support only 512bytes/sector floppies.
-		
+
 		fread(fileheader,5*sizeof(unsigned short),1,f);
 		if(fileheader[0]==0x0E && fileheader[1]==0x0F)
 		{
 			numberoftrack=((256*fileheader[8])+fileheader[9])+1;
 			numberofside=((256*fileheader[4])+fileheader[5])+1;
 			numberofsectorpertrack=fileheader[2]*256+fileheader[3];
-			
+
 			extractfilesize=(numberofsectorpertrack*512)*(numberoftrack+1)*(numberofside);
-			
+
 			flatimg=(unsigned char*)malloc(extractfilesize);
 			memset(flatimg,0,extractfilesize);
-			
+
 			// chargement et decompression msa.
 			j=0;
 			i=0;
@@ -167,7 +167,7 @@ int MSA_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								hxc_fclose(f);
 								return HXCFE_FILECORRUPTED;
 							}
-							
+
 							flatimg[l+j]=tmpbuffer[k];
 							l++;
 							k++;
@@ -181,7 +181,7 @@ int MSA_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							k++;
 							len=len+tmpbuffer[k];
 							k++;
-							
+
 							if(l+j+len>extractfilesize)
 							{
 								free(tmpbuffer);
@@ -199,17 +199,17 @@ int MSA_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 						}
 					}while(k<filetracksize);
-					
+
 					j=j+l;
-					
+
 					free(tmpbuffer);
 				}
-				
+
 				i++;
 			}while(i<(unsigned int)(numberoftrack*(numberofside)));
-			
+
 			hxc_fclose(f);
-			
+
 			floppydisk->floppyNumberOfTrack=numberoftrack;
 			floppydisk->floppyNumberOfSide=numberofside;
 			floppydisk->floppySectorPerTrack=numberofsectorpertrack;
@@ -251,31 +251,46 @@ int MSA_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				break;
 			}
 
-			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			
+			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*(floppydisk->floppyNumberOfTrack+4));
+
 			rpm=300;
-								
+
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 			{
-				
+
 				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 				currentcylinder=floppydisk->tracks[j];
-				
+
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
 					file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 								(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-					
+
 					currentcylinder->sides[i]=tg_generateTrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,gap3len,0,2500,-2500);
 				}
 			}
+
+			// Add 4 empty tracks
+			for(j=floppydisk->floppyNumberOfTrack;j<(unsigned int)(floppydisk->floppyNumberOfTrack + 4);j++)
+			{
+				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+				currentcylinder=floppydisk->tracks[j];
+
+				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+				{
+					currentcylinder->sides[i]=tg_generateTrack(&flatimg[file_offset],sectorsize,0,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,gap3len,0,2500,-2500);
+				}
+			}
+
+			floppydisk->floppyNumberOfTrack += 4;
+
 			free(flatimg);
-			
+
 			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		}
 		return HXCFE_NOERROR;
 	}
-	
+
 	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	return HXCFE_BADFILE;
 }

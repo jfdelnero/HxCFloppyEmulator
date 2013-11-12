@@ -141,7 +141,7 @@ int ADZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyNumberOfTrack=(filesize/(512*2*floppydisk->floppySectorPerTrack));
 		floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
 		floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*(floppydisk->floppyNumberOfTrack+4));
 
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
@@ -158,6 +158,21 @@ int ADZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				currentcylinder->sides[i]=tg_generateTrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-11150);
 			}
 		}
+
+		// Add 4 empty tracks
+		for(j=floppydisk->floppyNumberOfTrack;j<(unsigned int)(floppydisk->floppyNumberOfTrack + 4);j++)
+		{
+			floppydisk->tracks[j]=allocCylinderEntry(DEFAULT_AMIGA_RPM,floppydisk->floppyNumberOfSide);
+			currentcylinder=floppydisk->tracks[j];
+
+			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+			{
+				currentcylinder->sides[i]=tg_generateTrack(&flatimg[file_offset],sectorsize,0,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-11150);
+			}
+		}
+
+		floppydisk->floppyNumberOfTrack += 4;
+
 
 		floppycontext->hxc_printf(MSG_INFO_1,"ADZ Loader : tracks file successfully loaded and encoded!");
 		return 0;

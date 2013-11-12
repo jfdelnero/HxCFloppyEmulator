@@ -53,6 +53,8 @@
 
 #include "adf_loader.h"
 
+#include "adf_writer.h"
+
 #include "libhxcadaptor.h"
 
 int ADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
@@ -66,7 +68,7 @@ int ADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		floppycontext->hxc_printf(MSG_DEBUG,"ADF_libIsValidDiskFile : %s is an ADF file !",imgfile);
 
 		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0) 
+		if(filesize<0)
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"ADF_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
@@ -141,7 +143,7 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
 	floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*(floppydisk->floppyNumberOfTrack+4));
 
 	sectorsize=512;
 	interleave=1;
@@ -168,6 +170,21 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		}
 	}
 
+	// Add 4 empty tracks
+	for(j=floppydisk->floppyNumberOfTrack;j<(unsigned int)(floppydisk->floppyNumberOfTrack + 4);j++)
+	{
+		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+		currentcylinder=floppydisk->tracks[j];
+
+		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+		{
+			currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,0,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-11150);
+		}
+	}
+
+	floppydisk->floppyNumberOfTrack += 4;
+
+
 	free(trackdata);
 
 	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
@@ -186,7 +203,7 @@ int ADF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	{
 		(ISVALIDDISKFILE)	ADF_libIsValidDiskFile,
 		(LOADDISKFILE)		ADF_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		ADF_libWrite_DiskFile,
 		(GETPLUGININFOS)	ADF_libGetPluginInfo
 	};
 
