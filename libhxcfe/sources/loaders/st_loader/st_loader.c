@@ -275,7 +275,7 @@ int ST_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,cha
 				trackformat=ISOFORMAT_DD11S;
 			}
 
-			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*(floppydisk->floppyNumberOfTrack+4));
 
 			rpm=300; // normal rpm
 
@@ -299,6 +299,20 @@ int ST_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,cha
 					currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
 				}
 			}
+
+			// Add 4 empty tracks
+			for(j=floppydisk->floppyNumberOfTrack;j<floppydisk->floppyNumberOfTrack + 4;j++)
+			{
+				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+				currentcylinder=floppydisk->tracks[j];
+
+				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+				{
+					currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,0,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
+				}
+			}
+
+			floppydisk->floppyNumberOfTrack += 4;
 
 			free(trackdata);
 
