@@ -637,6 +637,14 @@ SOURCE=..\sources\loaders\adf_loader\adf_loader.c
 
 SOURCE=..\sources\loaders\adf_loader\adf_loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\adf_loader\adf_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\adf_loader\adf_writer.h
+# End Source File
 # End Group
 # Begin Group "DMS"
 
