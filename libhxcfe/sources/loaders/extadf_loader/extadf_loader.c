@@ -109,7 +109,7 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 
 	unsigned char header[12];
 	unsigned char * tracktable;
-	unsigned int trackindex,tracksize;
+	unsigned int trackindex,tracksize,tracksize_bit;
 
 	unsigned char gap3len,skew,trackformat,interleave;
 	unsigned short sectorsize;
@@ -179,10 +179,9 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 			if(trackindex<numberoftrack)
 			{
 
-				tracksize=tracktable[(12*trackindex)+4] * 0x1000000 + \
-					      tracktable[(12*trackindex)+5] * 0x10000   + \
-						  tracktable[(12*trackindex)+6] * 0x100     + \
-						  tracktable[(12*trackindex)+7];
+				tracksize=( (unsigned int)tracktable[(12*trackindex)+5] << 16 ) | \
+						  ( (unsigned int)tracktable[(12*trackindex)+6] << 8 )  | \
+						  ( (unsigned int)tracktable[(12*trackindex)+7] );
 
 				if(tracksize)
 				{
@@ -198,12 +197,11 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 					}
 					else
 					{
-						tracksize=tracktable[(12*trackindex)+8] * 0x1000000 + \
-								  tracktable[(12*trackindex)+9] * 0x10000   + \
-								  tracktable[(12*trackindex)+10] * 0x100     + \
-								  tracktable[(12*trackindex)+11];
+						tracksize_bit=( (unsigned int)tracktable[(12*trackindex)+9]  << 16 )  | \
+									  ( (unsigned int)tracktable[(12*trackindex)+10] << 8 )   | \
+									  ( (unsigned int)tracktable[(12*trackindex)+11] );
 
-						tracksize /= 8;
+						tracksize_bit /= 8;
 
 						if(tracksize)
 						{
@@ -214,7 +212,7 @@ int EXTADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 
 								fread(trackdata,tracksize,1,f);
 
-								currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,(unsigned short)(tracksize/sectorsize),(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-11150);
+								currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,(unsigned short)(tracksize_bit/sectorsize),(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-11150);
 
 								free(trackdata);
 							}
