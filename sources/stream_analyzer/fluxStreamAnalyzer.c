@@ -1985,7 +1985,7 @@ static unsigned long getbestindex(s_track_dump *track_dump,unsigned long * overl
 
 	for(revnb = 0; revnb < nb_revolution ; revnb++)
 	{
-		if ( ( score[revnb] == bestscore ) )
+		if ( score[revnb] == bestscore )
 		{
 			first_index = track_dump->index_evt_tab[revnb].dump_offset;
 
