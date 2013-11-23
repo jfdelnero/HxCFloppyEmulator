@@ -579,6 +579,8 @@ void getMFMcode(track_generator *tg,unsigned char data,unsigned char clock,unsig
 void getFMcode (track_generator *tg,unsigned char data,unsigned char clock,unsigned char * dstbuf);
 int  pushTrackCode(track_generator *tg,unsigned char data,unsigned char clock,SIDE * side,unsigned char trackencoding);
 
+void hxcfe_freeSide(SIDE * side);
+
 void            tg_initTrackEncoder(track_generator *tg);
 unsigned long   tg_computeMinTrackSize(track_generator *tg,unsigned char trackencoding,unsigned int bitrate,unsigned int numberofsector,SECTORCONFIG * sectorconfigtab,unsigned int pregaplen,unsigned long * track_period);
 void            tg_addSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * currentside);
