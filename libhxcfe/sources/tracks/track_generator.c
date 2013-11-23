@@ -1881,6 +1881,43 @@ SIDE * hxcfe_getSide(FLOPPY * fp,int track,int side)
 	return 0;
 }
 
+void hxcfe_freeSide(SIDE * side)
+{
+	if(side)
+	{
+		if(side->databuffer)
+		{
+			free(side->databuffer);
+			side->databuffer=0;
+		}
+		if(side->flakybitsbuffer)
+		{
+			free(side->flakybitsbuffer);
+			side->flakybitsbuffer=0;
+		}
+		if(side->indexbuffer)
+		{
+			free(side->indexbuffer);
+			side->indexbuffer=0;
+		}
+		if(side->timingbuffer)
+		{
+			free(side->timingbuffer);
+			side->timingbuffer=0;
+		}
+
+		if(side->track_encoding_buffer)
+		{
+			free(side->track_encoding_buffer);
+			side->track_encoding_buffer=0;
+		}
+
+		free(side);
+	}
+
+	return;
+}
+
 int hxcfe_shiftTrackData(SIDE * side,long bitoffset)
 {
 	unsigned char * tmpbuffer;

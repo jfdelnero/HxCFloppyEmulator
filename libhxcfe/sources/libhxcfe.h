@@ -506,15 +506,20 @@ typedef struct _FXS
 	int steptime;
 
 	int phasecorrection;
+
+	int defaultbitrate;
+
 }FXS;
 
 FXS * hxcfe_initFxStream(HXCFLOPPYEMULATOR * hxcfe);
 
-void hxcfe_FxS_setResolution(FXS * fxs,int step);
-
 void hxcfe_deinitFxStream(FXS * fxs);
 
 void hxcfe_FxStream_setResolution(FXS * fxs,int step);
+
+void hxcfe_FxStream_setBitrate(FXS * fxs,int bitrate);
+
+void hxcfe_FxStream_setPhaseCorrectionFactor(FXS * fxs,int phasefactor);
 
 s_track_dump * hxcfe_FxStream_ImportStream(FXS * fxs,void * stream,int wordsize,unsigned int nbword);
 

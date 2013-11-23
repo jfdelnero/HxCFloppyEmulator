@@ -159,7 +159,7 @@ int KryoFluxStream_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 	return HXCFE_BADPARAMETER;
 }
 
-static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,float timecoef,int phasecorrection)
+static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,float timecoef,int phasecorrection,int bitrate)
 {
 	SIDE* currentside;
 
@@ -178,8 +178,12 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * r
 		track_dump=DecodeKFStreamFile(floppycontext,fxs,file,timecoef);
 		if(track_dump)
 		{
+			hxcfe_FxStream_setBitrate(fxs,bitrate);
+
+			hxcfe_FxStream_setPhaseCorrectionFactor(fxs,phasecorrection);
+
 			currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
-			
+
 			hxcfe_FxStream_FreeStream(fxs,track_dump);
 		}
 
@@ -201,7 +205,6 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 	int minside,maxside,singleside;
 	short rpm;
 	unsigned short i,j;
-	int k,l;
 	int doublestep;
 	CYLINDER* currentcylinder;
 	int len;
@@ -211,10 +214,9 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 	SIDE * curside;
 	int nbtrack,nbside;
 	float timecoef;
-	int tracklen;
 
-	int previous_bit;
 	int phasecorrection;
+	int bitrate;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"KryoFluxStream_libLoad_DiskFile");
 
@@ -290,6 +292,15 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 				hxc_fclose(f);
 			}
 
+			bitrate = 0;
+			sprintf(filepath,"%s%s",folder,"bitrate.txt");
+			f=hxc_fopen(filepath,"rb");
+			if(f)
+			{
+				fscanf(f,"%d",&bitrate);
+				hxc_fclose(f);
+			}
+
 			track=0;
 			side=0;
 			found=0;
@@ -354,46 +365,11 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 				{
 					sprintf(filepath,"%s%s%.2d.%d.raw",folder,fname,j,i);
 
-					curside=decodestream(floppycontext,filepath,&rpm,timecoef,phasecorrection);
+					curside=decodestream(floppycontext,filepath,&rpm,timecoef,phasecorrection,bitrate);
 
 					if(!floppydisk->tracks[j/doublestep])
 					{
 						floppydisk->tracks[j/doublestep]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-					}
-
-					if(curside)
-					{
-						tracklen = curside->tracklen /8;
-						if(curside->tracklen & 7)
-							tracklen++;
-
-						// Remove sticked data bits ...
-						previous_bit = 0;
-						for(k=0;k<tracklen;k++)
-						{
-							if(previous_bit)
-							{
-								if(curside->databuffer[k] & 0x80)
-								{
-									//curside->databuffer[k-1] = curside->databuffer[k-1] ^ 0x01;
-									//curside->flakybitsbuffer[k-1] =  curside->flakybitsbuffer[k-1] | (0x01);
-									curside->databuffer[k] = curside->databuffer[k] ^ 0x80;
-									curside->flakybitsbuffer[k] =  curside->flakybitsbuffer[k] | (0x80);
-								}
-							}
-
-							for(l=0;l<7;l++)
-							{
-								if((curside->databuffer[k] & (0xC0>>l)) == (0xC0>>l))
-								{
-									curside->databuffer[k] = curside->databuffer[k] ^ (0x40>>l);
-									curside->flakybitsbuffer[k] =  curside->flakybitsbuffer[k] | (0x40>>l);
-								}
-							}
-
-							previous_bit = curside->databuffer[k] & 1;
-						}
-
 					}
 
 					currentcylinder=floppydisk->tracks[j/doublestep];

@@ -378,34 +378,7 @@ int hxcfe_floppyUnload(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk)
 		{
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
-				if(floppydisk->tracks[j]->sides[i]->databuffer)
-				{
-					free(floppydisk->tracks[j]->sides[i]->databuffer);
-					floppydisk->tracks[j]->sides[i]->databuffer=0;
-				}
-				if(floppydisk->tracks[j]->sides[i]->flakybitsbuffer)
-				{
-					free(floppydisk->tracks[j]->sides[i]->flakybitsbuffer);
-					floppydisk->tracks[j]->sides[i]->flakybitsbuffer=0;
-				}
-				if(floppydisk->tracks[j]->sides[i]->indexbuffer)
-				{
-					free(floppydisk->tracks[j]->sides[i]->indexbuffer);
-					floppydisk->tracks[j]->sides[i]->indexbuffer=0;
-				}
-				if(floppydisk->tracks[j]->sides[i]->timingbuffer)
-				{
-					free(floppydisk->tracks[j]->sides[i]->timingbuffer);
-					floppydisk->tracks[j]->sides[i]->timingbuffer=0;
-				}
-
-				if(floppydisk->tracks[j]->sides[i]->track_encoding_buffer)
-				{
-					free(floppydisk->tracks[j]->sides[i]->track_encoding_buffer);
-					floppydisk->tracks[j]->sides[i]->track_encoding_buffer=0;
-				}
-
-				free(floppydisk->tracks[j]->sides[i]);
+				hxcfe_freeSide(floppydisk->tracks[j]->sides[i]);
 			}
 
 			free(floppydisk->tracks[j]->sides);
