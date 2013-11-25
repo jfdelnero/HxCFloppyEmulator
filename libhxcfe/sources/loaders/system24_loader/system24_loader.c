@@ -74,7 +74,7 @@ int System24_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			return HXCFE_ACCESSERROR;
 		}
 
-		if(filesize != ( 80 * 2 * ( ( 2048 * 5 ) + 1024 + 256 ) ) )
+		if(  ( filesize % ( 2 * ( ( 2048 * 5 ) + 1024 + 256 ) ) ) && ( filesize % ( 2 * ( 8192 + ( 1024 * 3 ) + 512 + 256 ) ) ) )
 		{
 			floppycontext->hxc_printf(MSG_DEBUG,"System24_libIsValidDiskFile : non System 24 file - bad file size !");
 			return HXCFE_BADFILE;
@@ -101,10 +101,11 @@ int System24_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	unsigned int filesize;
 	unsigned int file_offset;
 
-	unsigned short i,j,k,ptr;
+	unsigned short i,j,k,l,ptr;
 	unsigned char* trackdata;
 	unsigned char  gap3len,trackformat;
 	unsigned short rpm;
+	int tracksize;
 	CYLINDER* currentcylinder;
 	SECTORCONFIG  * sectorconfig;
 
@@ -121,42 +122,116 @@ int System24_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	filesize=ftell(f);
 	fseek (f , 0 , SEEK_SET);
 
-	if(filesize== ( 80 * 2 * ( ( 2048 * 5 ) + 1024 + 256 ) ) )
+	if(  !( filesize % ( 2 * ( ( 2048 * 5 ) + 1024 + 256 ) ) ) )
 	{
-
-		floppydisk->floppyNumberOfTrack=80;
+		tracksize = ( ( 2048 * 5 ) + 1024 + 256 );
+		floppydisk->floppyNumberOfTrack= filesize / ( 2 * tracksize );
 		floppydisk->floppyNumberOfSide=2;
 		floppydisk->floppySectorPerTrack= 5 + 1 + 1;
-		gap3len = 50;
+	}
+	else
+	{
+		if ( !( filesize % ( 2 * ( 8192 + ( 1024 * 3 ) + 512 + 256 ) ) ) )
+		{
+			tracksize = ( 8192 + ( 1024 * 3 ) + 512 + 256 );
+			floppydisk->floppyNumberOfTrack= filesize / ( 2 * tracksize );
+			floppydisk->floppyNumberOfSide=2;
+			floppydisk->floppySectorPerTrack= 1 + 3 + 1 + 1;
+		}
+		else
+		{
+			hxc_fclose(f);
 
-		floppydisk->floppyiftype = IBMPC_HD_FLOPPYMODE;
-		floppydisk->floppyBitRate = DEFAULT_HD_BITRATE;
-		trackformat=ISOFORMAT_DD;
+			floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			return HXCFE_BADFILE;
+		}
+	}
 
-		rpm=300; // normal rpm
 
-		sectorconfig=malloc(sizeof(SECTORCONFIG) * floppydisk->floppySectorPerTrack);
-		memset(sectorconfig,0,sizeof(SECTORCONFIG) * floppydisk->floppySectorPerTrack);
+	gap3len = 50;
 
-		trackdata=(unsigned char*)malloc(( ( 2048 * 5 ) + 1024 + 256 ));
+	floppydisk->floppyiftype = IBMPC_HD_FLOPPYMODE;
+	floppydisk->floppyBitRate = DEFAULT_HD_BITRATE;
+	trackformat=ISOFORMAT_DD;
 
-		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+
+	rpm=300; // normal rpm
+
+	sectorconfig=malloc(sizeof(SECTORCONFIG) * floppydisk->floppySectorPerTrack);
+	memset(sectorconfig,0,sizeof(SECTORCONFIG) * floppydisk->floppySectorPerTrack);
+
+	trackdata=(unsigned char*)malloc(tracksize);
+
+	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+	{
+
+		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+		currentcylinder=floppydisk->tracks[j];
+
+		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 		{
 
-			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-			currentcylinder=floppydisk->tracks[j];
+			file_offset=( j *  ( tracksize * 2 ) ) +
+				        ( i *  ( tracksize ) );
 
-			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+			fseek (f , file_offset , SEEK_SET);
+			fread(trackdata,tracksize,1,f);
+
+			if(tracksize == ( 8192 + ( 1024 * 3 ) + 512 + 256 ) )
 			{
+				ptr=0;
+				k=0;
+				sectorconfig[k].sector=(unsigned char)k+1;
+				sectorconfig[k].cylinder = (unsigned char)j;
+				sectorconfig[k].head = (unsigned char)i;
+				sectorconfig[k].sectorsize=8192;
+				sectorconfig[k].bitrate=floppydisk->floppyBitRate;
+				sectorconfig[k].input_data=&trackdata[ptr];
+				sectorconfig[k].trackencoding=trackformat;
+				sectorconfig[k].gap3=gap3len;
+				ptr = ptr + sectorconfig[k].sectorsize;
+				k++;
 
-				file_offset=( j *  ( ( ( 2048 * 5 ) + 1024 + 256 ) * 2 ) ) +
-					        ( i *  ( ( 2048 * 5 ) + 1024 + 256 ) );
+				for(l=0;l<3;l++)
+				{
+					sectorconfig[k].sector=(unsigned char)k+1;
+					sectorconfig[k].cylinder = (unsigned char)j;
+					sectorconfig[k].head = (unsigned char)i;
+					sectorconfig[k].sectorsize=1024;
+					sectorconfig[k].bitrate=floppydisk->floppyBitRate;
+					sectorconfig[k].input_data=&trackdata[ptr];
+					sectorconfig[k].trackencoding=trackformat;
+					sectorconfig[k].gap3=gap3len;
+					ptr = ptr + sectorconfig[k].sectorsize;
+					k++;
+				}
 
-				fseek (f , file_offset , SEEK_SET);
-				fread(trackdata,( ( 2048 * 5 ) + 1024 + 256 ),1,f);
+				sectorconfig[k].sector=(unsigned char)k+1;
+				sectorconfig[k].cylinder = (unsigned char)j;
+				sectorconfig[k].head = (unsigned char)i;
+				sectorconfig[k].sectorsize=512;
+				sectorconfig[k].bitrate=floppydisk->floppyBitRate;
+				sectorconfig[k].input_data=&trackdata[ptr];
+				sectorconfig[k].trackencoding=trackformat;
+				sectorconfig[k].gap3=gap3len;
+				ptr = ptr + sectorconfig[k].sectorsize;
+				k++;
 
+				sectorconfig[k].sector=(unsigned char)k+1;
+				sectorconfig[k].cylinder = (unsigned char)j;
+				sectorconfig[k].head = (unsigned char)i;
+				sectorconfig[k].sectorsize=256;
+				sectorconfig[k].bitrate=floppydisk->floppyBitRate;
+				sectorconfig[k].input_data=&trackdata[ptr];
+				sectorconfig[k].trackencoding=trackformat;
+				sectorconfig[k].gap3=gap3len;
+				ptr = ptr + sectorconfig[k].sectorsize;
+				k++;
+			}
+			else
+			{
 				ptr=0;
 				for(k=0;k<5;k++)
 				{
@@ -190,24 +265,18 @@ int System24_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 				sectorconfig[k].gap3=gap3len;
 				ptr = ptr + sectorconfig[k].sectorsize;
 				k++;
-
-				currentcylinder->sides[i]=tg_generateTrackEx(7,sectorconfig,1,0,500000,300,trackformat,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
 			}
+
+			currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,1,0,500000,300,trackformat,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
+
 		}
-
-		free(trackdata);
-
-		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		hxc_fclose(f);
-		return HXCFE_NOERROR;
-
 	}
 
+	free(trackdata);
+
+	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 	hxc_fclose(f);
-
-	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
-
-	return HXCFE_BADFILE;
+	return HXCFE_NOERROR;
 }
 
 int System24_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
