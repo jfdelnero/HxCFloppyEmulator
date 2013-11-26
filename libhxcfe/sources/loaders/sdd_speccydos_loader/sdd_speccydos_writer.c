@@ -42,6 +42,7 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 {
 	int i,j,k,id;
 	int nbsector;
+	unsigned int sectorsize;
 
 	FILE * sdddskfile;
 	SECTORSEARCH* ss;
@@ -50,6 +51,9 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 	unsigned char * flat_track;
 
 	floppycontext->hxc_printf(MSG_INFO_1,"Write SDD file %s...",filename);
+
+	sectorsize = 256;
+	nbsector = 0;
 
 	// Get the number of sector per track.
 	ss = hxcfe_initSectorSearch(floppycontext,floppy);
@@ -61,7 +65,7 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 			sc = hxcfe_searchSector(ss,0,0,id,ISOIBM_MFM_ENCODING);
 			if(sc)
 			{
-				if(sc->sectorsize == 512)
+				if(sc->sectorsize == sectorsize)
 				{
 					nbsector = id;
 
@@ -85,10 +89,10 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 
 	if(nbsector)
 	{
-		flat_track = malloc(nbsector * 512);
+		flat_track = malloc(nbsector * sectorsize);
 		if(flat_track)
 		{
-			memset(flat_track,0,nbsector * 512);
+			memset(flat_track,0,nbsector * sectorsize);
 
 			sdddskfile = hxc_fopen(filename,"wb");
 			if(sdddskfile)
@@ -101,7 +105,7 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 						for(j = 0; (j < (int)floppy->floppyNumberOfTrack); j++)
 						{
 
-							for(k=0;k<(512/16)*nbsector;k++)
+							for(k=0;k<(int)(sectorsize/16)*nbsector;k++)
 							{
 								memcpy(&flat_track[k*16],"<MISSINGSECTOR!>",16);
 							}
@@ -111,11 +115,11 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 								sc = hxcfe_searchSector(ss,j,i,k+1,ISOIBM_MFM_ENCODING);
 								if(sc)
 								{
-									if(sc->sectorsize == 512)
+									if(sc->sectorsize == sectorsize)
 									{
 										if(sc->input_data)
 										{
-											memcpy((void*)&flat_track[k*512],sc->input_data,sc->sectorsize);
+											memcpy((void*)&flat_track[k*sectorsize],sc->input_data,sc->sectorsize);
 											free(sc->input_data);
 										}
 										free(sc);
@@ -124,7 +128,7 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 								
 							}
 
-							fwrite(flat_track,nbsector * 512,1,sdddskfile);
+							fwrite(flat_track,nbsector * sectorsize,1,sdddskfile);
 						}
 					}
 
