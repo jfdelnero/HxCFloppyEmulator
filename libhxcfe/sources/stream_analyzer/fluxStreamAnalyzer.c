@@ -66,6 +66,8 @@
 
 //#define FLUXSTREAMDBG 1
 
+//#define SECONDPASSANALYSIS 1
+
 // us
 #define BLOCK_TIME 1000
 #define TICKFREQ 250000000 // 250Mhz tick
@@ -1253,6 +1255,149 @@ static int getNearestMatchedBlock(pulsesblock * pb, int dir, int currentblock,in
 	}
 }
 
+unsigned long searchBestOverlap(s_track_dump * track_dump, pulsesblock * src_block, unsigned long repeat_index, unsigned long tick_down_max, unsigned long tick_up_max, s_match * match_table,unsigned long * margetab, int * searchstate,int fullcompare)
+{
+	unsigned long i_down,i_up;
+	unsigned long tick_up;
+	unsigned long tick_down;
+	unsigned long mt_i;
+	unsigned long good,bad;
+	int goodblockfound;
+
+	tick_up = 0;
+	tick_down = 0;
+
+	i_up = 0;
+	i_down = 0;
+
+	memset(match_table , 0,sizeof(s_match) * track_dump->nb_of_pulses);
+
+	mt_i = 0;
+
+	if(fullcompare)
+	{
+		do
+		{
+			if(tick_up < tick_up_max)
+			{
+				if(repeat_index + i_up < track_dump->nb_of_pulses)
+				{
+					// compare the block
+					compareblock(track_dump,src_block, repeat_index + i_up,&good,&bad,margetab,0);
+
+					match_table[mt_i].yes = good;
+					match_table[mt_i].no = bad;
+					match_table[mt_i].offset = repeat_index + i_up;
+
+					tick_up = tick_up + track_dump->track_dump[repeat_index + i_up];
+					i_up++;
+
+					if(mt_i < track_dump->nb_of_pulses ) mt_i++;
+				}
+				else
+				{
+					tick_up = tick_up_max;
+				}
+			}
+
+			if(tick_down < tick_down_max)
+			{
+				if(repeat_index - i_down < track_dump->nb_of_pulses)
+				{
+					// compare the block
+					compareblock(track_dump,src_block, repeat_index - i_down,&good,&bad,margetab,0);
+
+					match_table[mt_i].yes = good;
+					match_table[mt_i].no = bad;
+					match_table[mt_i].offset = repeat_index - i_down;
+
+					tick_down = tick_down + track_dump->track_dump[repeat_index - i_down];
+					i_down++;
+
+					if(mt_i< track_dump->nb_of_pulses ) mt_i++;
+				}
+				else
+				{
+					tick_down = tick_down_max;
+				}
+			}
+
+		}while( (tick_up < tick_up_max) || (tick_down < tick_down_max) );
+
+		quickSort(match_table, 0, mt_i-1);
+	}
+	else
+	{
+		do
+		{
+
+			if(tick_up < tick_up_max)
+			{
+				if(repeat_index + i_up < track_dump->nb_of_pulses)
+				{
+					// compare the block
+					if(fastcompareblock(track_dump,src_block, repeat_index + i_up,margetab))
+					{
+						goodblockfound = 1;
+					}
+
+					tick_up = tick_up + track_dump->track_dump[repeat_index + i_up];
+					i_up++;
+				}
+				else
+				{
+					tick_up = tick_up_max;
+				}
+			}
+
+			if(tick_down < tick_down_max)
+			{
+				if(repeat_index - i_down < track_dump->nb_of_pulses)
+				{
+					// compare the block
+					if(fastcompareblock(track_dump,src_block, repeat_index - i_down,margetab))
+					{
+						goodblockfound = 1;
+					}
+
+					tick_down = tick_down + track_dump->track_dump[repeat_index - i_down];
+					i_down++;
+				}
+				else
+				{
+					tick_down = tick_down_max;
+				}
+			}
+
+		}while( !goodblockfound && ( (tick_up < tick_up_max) || (tick_down < tick_down_max) ) );
+
+		*searchstate = 0;
+		if(goodblockfound)
+		{
+			*searchstate = 2;
+		}
+
+		return 0;
+	}
+
+	// -> No offset match at 100% -> take the best one
+	*searchstate = 0;
+
+	// -> Only one offset match at 100% -> We have found the overlap
+	if( match_table[mt_i-1].no == 0 && match_table[mt_i-2].no != 0 && match_table[mt_i-1].yes )
+	{
+		*searchstate = 2;
+	}
+
+	// -> different offset match at 100%
+	if( match_table[mt_i-1].no == 0 && match_table[mt_i-2].no == 0 && match_table[mt_i-1].yes )
+	{
+		*searchstate = 1;
+	}
+
+	return mt_i;
+}
+
 static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontext,s_track_dump * track_dump,unsigned long indexperiod,unsigned long nbblock,pulsesblock * pb)
 {
 #ifdef SECONDPASSANALYSIS
@@ -1261,18 +1406,12 @@ static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontex
 	unsigned long j;
 	unsigned long cur_time_len;
 	unsigned long index_tickpediod,block_tickpediod;
-	unsigned long repeat_index;
 	int firstblock,previous_block_matched;
 
 	unsigned long good,bad;
 
-	unsigned long tick_up;
-	unsigned long tick_down;
-
 	unsigned long tick_up_max;
 	unsigned long tick_down_max;
-
-	unsigned long i_down,i_up;
 
 	unsigned long pourcent_error;
 
@@ -1281,6 +1420,8 @@ static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontex
 	unsigned char c;
 
 	int k;
+
+	int searchstate;
 
 	int previousmatchedblock;
 
@@ -1297,12 +1438,9 @@ static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontex
 	unsigned long * overlap_pulses_tab;
 
 	unsigned long * margetab,i;
-	unsigned long goodblockfound;
 
 	floppycont = floppycontext;
 	partialmatch_cnt = 0;
-
-	goodblockfound = 0;
 
 	index_tickpediod = time_to_tick(indexperiod);
 	block_tickpediod = time_to_tick(BLOCK_TIME*100);
@@ -1332,13 +1470,9 @@ static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontex
 			overlap_pulses_tab = malloc(track_dump->nb_of_pulses * sizeof(unsigned long) );
 			memset(overlap_pulses_tab,0,track_dump->nb_of_pulses * sizeof(unsigned long) );
 
-
 			/////////////////////////////////////////////////////////////////////////////////
 			// Partial analysis...
 			// Unformated track detection.
-
-			goodblockfound = 0;
-
 			block_num=0;
 			do
 			{
@@ -1358,72 +1492,22 @@ static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontex
 				tick_down_max = time_to_tick((unsigned long)((double)indexperiod * (double)0.06));
 				tick_up_max =   time_to_tick((unsigned long)((double)indexperiod * (double)0.06));
 
+				searchstate = 0;
+
 				if(j < track_dump->nb_of_pulses )
 				{
-					repeat_index  = j - 1;
-
-					tick_up = 0;
-					tick_down = 0;
-
-					i_up = 0;
-					i_down = 0;
-
-					memset(match_table , 0,sizeof(s_match) * track_dump->nb_of_pulses);
-
-					do
-					{
-
-						if(tick_up < tick_up_max)
-						{
-							if(repeat_index + i_up < track_dump->nb_of_pulses)
-							{
-								// compare the block
-								if(fastcompareblock(track_dump,&pb[block_num], repeat_index + i_up,margetab))
-								{
-									goodblockfound = 1;
-								}
-
-								tick_up = tick_up + track_dump->track_dump[repeat_index + i_up];
-								i_up++;
-							}
-							else
-							{
-								tick_up = tick_up_max;
-							}
-						}
-
-						if(tick_down < tick_down_max)
-						{
-							if(repeat_index - i_down < track_dump->nb_of_pulses)
-							{
-								// compare the block
-								if(fastcompareblock(track_dump,&pb[block_num], repeat_index - i_down,margetab))
-								{
-									goodblockfound = 1;
-								}
-
-								tick_down = tick_down + track_dump->track_dump[repeat_index - i_down];
-								i_down++;
-							}
-							else
-							{
-								tick_down = tick_down_max;
-							}
-						}
-
-					}while( !goodblockfound && ( (tick_up < tick_up_max) || (tick_down < tick_down_max) ) );
-
+					searchBestOverlap(track_dump, &pb[block_num], j - 1, tick_down_max, tick_up_max, match_table,margetab,&searchstate,0);
 				}
 
 				block_num++;
 
-			}while( !goodblockfound && ( (block_num<nbblock) && (j < track_dump->nb_of_pulses)  && !end_dump_reached));
+			}while( !searchstate && ( (block_num<nbblock) && (j < track_dump->nb_of_pulses)  && !end_dump_reached));
 
 
 			/////////////////////////////////////////////////////////////////////////////////
 			// Full analysis...
 
-			if(goodblockfound)
+			if(searchstate)
 			{
 				block_num=0;
 				do
@@ -1510,200 +1594,137 @@ static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontex
 
 						}
 
-
 						if(j < track_dump->nb_of_pulses )
 						{
-							repeat_index  = j - 1;
 
-							tick_up = 0;
-							tick_down = 0;
+							mt_i = searchBestOverlap(track_dump, &pb[block_num], j - 1, tick_down_max, tick_up_max, match_table,margetab,&searchstate,1);
 
-							i_up = 0;
-							i_down = 0;
-
-							memset(match_table , 0,sizeof(s_match) * track_dump->nb_of_pulses);
-
-							mt_i = 0;
-
-							do
+							switch(searchstate)
 							{
+								// -> Only one offset match at 100% -> We have found the overlap
+								case 2:
+									#ifdef FLUXSTREAMDBG
+										floppycontext->hxc_printf(MSG_DEBUG,"Block %d (%d index) full match with the offset %d.",block_num,pb[block_num].number_of_pulses,match_table[mt_i-1].offset);
+									#endif
 
-								if(tick_up < tick_up_max)
-								{
-									if(repeat_index + i_up < track_dump->nb_of_pulses)
+									pb[block_num].state = ONEMATCH_STATE;
+									pb[block_num].overlap_offset = match_table[mt_i-1].offset;
+									pb[block_num].overlap_size = pb[block_num].number_of_pulses;
+
+									pb[block_num].locked = 1;
+
+									previous_block_matched = 1;
+								break;
+
+								// -> different offset match at 100%
+								case 1:
+									pb[block_num].state = MULTIMATCH_STATE;
+
+									j = 0;
+									nb_of_multimatch = 0;
+
+									while(j < mt_i)
 									{
-										// compare the block
-										compareblock(track_dump,&pb[block_num], repeat_index + i_up,&good,&bad,margetab,0);
-
-										match_table[mt_i].yes = good;
-										match_table[mt_i].no = bad;
-										match_table[mt_i].offset = repeat_index + i_up;
-
-										tick_up = tick_up + track_dump->track_dump[repeat_index + i_up];
-										i_up++;
-
-										if(mt_i < track_dump->nb_of_pulses ) mt_i++;
-									}
-									else
-									{
-										tick_up = tick_up_max;
-									}
-
-								}
-
-								if(tick_down < tick_down_max)
-								{
-									if(repeat_index - i_down < track_dump->nb_of_pulses)
-									{
-										// compare the block
-										compareblock(track_dump,&pb[block_num], repeat_index - i_down,&good,&bad,margetab,0);
-
-										match_table[mt_i].yes = good;
-										match_table[mt_i].no = bad;
-										match_table[mt_i].offset = repeat_index - i_down;
-
-										tick_down = tick_down + track_dump->track_dump[repeat_index - i_down];
-										i_down++;
-
-										if(mt_i< track_dump->nb_of_pulses ) mt_i++;
-									}
-									else
-									{
-										tick_down = tick_down_max;
-									}
-								}
-
-					
-
-							}while( (tick_up < tick_up_max) || (tick_down < tick_down_max) );
-
-							quickSort(match_table, 0, mt_i-1);
-
-							// Here we can get different case
-
-							// -> Only one offset match at 100% -> We have found the overlap
-							if( match_table[mt_i-1].no == 0 && match_table[mt_i-2].no != 0 && match_table[mt_i-1].yes )
-							{
-								#ifdef FLUXSTREAMDBG
-									floppycontext->hxc_printf(MSG_DEBUG,"Block %d (%d index) full match with the offset %d.",block_num,pb[block_num].number_of_pulses,match_table[mt_i-1].offset);
-								#endif
-
-								pb[block_num].state = ONEMATCH_STATE;
-								pb[block_num].overlap_offset = match_table[mt_i-1].offset;
-								pb[block_num].overlap_size = pb[block_num].number_of_pulses;
-
-								pb[block_num].locked = 1;
-
-								previous_block_matched = 1;
-							}
-
-							// -> different offset match at 100%
-							if( match_table[mt_i-1].no == 0 && match_table[mt_i-2].no == 0 && match_table[mt_i-1].yes )
-							{
-								pb[block_num].state = MULTIMATCH_STATE;
-
-								j = 0;
-								nb_of_multimatch = 0;
-
-								while(j < mt_i)
-								{
-									if((match_table[(mt_i-j)-1].no == 0) && match_table[(mt_i-j)-1].yes)
-									{
-										nb_of_multimatch++;
-									}
-									j++;
-								}
-
-								if(block_num)
-								{
-									// check if one position match with the previous block offset
-									if( pb[block_num-1].locked )
-									{
-										j = mt_i-1;
-										do
+										if((match_table[(mt_i-j)-1].no == 0) && match_table[(mt_i-j)-1].yes)
 										{
-											j--;
-										}while(j && (match_table[j].offset != (pb[block_num-1].overlap_offset + pb[block_num-1].overlap_size)));
+											nb_of_multimatch++;
+										}
+										j++;
+									}
 
-										if(j && match_table[j].yes && !match_table[j].no && (match_table[j].offset == (pb[block_num-1].overlap_offset + pb[block_num-1].overlap_size)))
+									if(block_num)
+									{
+										// check if one position match with the previous block offset
+										if( pb[block_num-1].locked )
 										{
-											#ifdef FLUXSTREAMDBG
-												floppycontext->hxc_printf(MSG_DEBUG,"Block %d (%d index) full match with the offset %d. (M:%d)",block_num,pb[block_num].number_of_pulses,match_table[mt_i-1].offset,nb_of_multimatch);
-											#endif
+											j = mt_i-1;
+											do
+											{
+												j--;
+											}while(j && (match_table[j].offset != (pb[block_num-1].overlap_offset + pb[block_num-1].overlap_size)));
 
-											pb[block_num].overlap_offset = match_table[j].offset;
-											pb[block_num].overlap_size = pb[block_num].number_of_pulses;
+											if(j && match_table[j].yes && !match_table[j].no && (match_table[j].offset == (pb[block_num-1].overlap_offset + pb[block_num-1].overlap_size)))
+											{
+												#ifdef FLUXSTREAMDBG
+													floppycontext->hxc_printf(MSG_DEBUG,"Block %d (%d index) full match with the offset %d. (M:%d)",block_num,pb[block_num].number_of_pulses,match_table[mt_i-1].offset,nb_of_multimatch);
+												#endif
 
-											previous_block_matched = 1;
+												pb[block_num].overlap_offset = match_table[j].offset;
+												pb[block_num].overlap_size = pb[block_num].number_of_pulses;
 
-											// Lock ?
+												previous_block_matched = 1;
+
+												// Lock ?
+											}
+											else
+											{
+												#ifdef FLUXSTREAMDBG
+													floppycontext->hxc_printf(MSG_DEBUG,"Multi block match with the Block %d (%d index) (not aligned with prev block)!",block_num,pb[block_num].number_of_pulses);
+												#endif
+											}
 										}
 										else
 										{
 											#ifdef FLUXSTREAMDBG
-												floppycontext->hxc_printf(MSG_DEBUG,"Multi block match with the Block %d (%d index) (not aligned with prev block)!",block_num,pb[block_num].number_of_pulses);
+												floppycontext->hxc_printf(MSG_DEBUG,"Multi block match with the Block %d (%d index) (prev block unlocked) !",block_num,pb[block_num].number_of_pulses);
 											#endif
 										}
 									}
 									else
 									{
 										#ifdef FLUXSTREAMDBG
-											floppycontext->hxc_printf(MSG_DEBUG,"Multi block match with the Block %d (%d index) (prev block unlocked) !",block_num,pb[block_num].number_of_pulses);
+											floppycontext->hxc_printf(MSG_DEBUG,"Multi block match with the Block %d (%d index) (first block!)!",block_num,pb[block_num].number_of_pulses);
 										#endif
 									}
-								}
-								else
-								{
-									#ifdef FLUXSTREAMDBG
-										floppycontext->hxc_printf(MSG_DEBUG,"Multi block match with the Block %d (%d index) (first block!)!",block_num,pb[block_num].number_of_pulses);
-									#endif
-								}
-							}
 
-							// -> No offset match at 100% -> take the best one
-							if(match_table[mt_i-1].no && match_table[mt_i-1].yes)
-							{
+								break;
 
-								pb[block_num].state = NOMATCH_STATE;
-								pb[block_num].overlap_offset = match_table[mt_i-1].offset;
+								// -> No offset match at 100% -> take the best one
+								case 0:
+									pb[block_num].state = NOMATCH_STATE;
+									pb[block_num].overlap_offset = match_table[mt_i-1].offset;
 
-								// if the offset match with the previous block we can lock it.
-								c = 1;
+									// if the offset match with the previous block we can lock it.
+									c = 1;
 
-								if(block_num)
-								{
-									if( pb[block_num-1].locked && (pb[block_num].overlap_offset == ( pb[block_num-1].overlap_offset + pb[block_num-1].overlap_size ) ) )
+									if(block_num)
 									{
+										if( pb[block_num-1].locked && (pb[block_num].overlap_offset == ( pb[block_num-1].overlap_offset + pb[block_num-1].overlap_size ) ) )
+										{
 
-										//pb[block_num].locked = 1;
+											//pb[block_num].locked = 1;
 
-										t = detectflakeybits(track_dump,&pb[block_num],pb[block_num].overlap_offset,0,0,overlap_pulses_tab,0xFFFFFFFF,margetab);
+											t = detectflakeybits(track_dump,&pb[block_num],pb[block_num].overlap_offset,0,0,overlap_pulses_tab,0xFFFFFFFF,margetab);
 
-										pb[block_num].overlap_size = t - pb[block_num].overlap_offset;
+											pb[block_num].overlap_size = t - pb[block_num].overlap_offset;
 
+											#ifdef FLUXSTREAMDBG
+												floppycontext->hxc_printf(MSG_DEBUG,"Block %d (%d index) full match not found. Best position : %d - %d ok %d bad. - Match with the previous block !",block_num,pb[block_num].number_of_pulses,match_table[mt_i-1].offset,match_table[mt_i-1].yes,match_table[mt_i-1].no);
+												c=0;
+											#endif
+
+										}
+									}
+
+									if(c)
+									{
 										#ifdef FLUXSTREAMDBG
-											floppycontext->hxc_printf(MSG_DEBUG,"Block %d (%d index) full match not found. Best position : %d - %d ok %d bad. - Match with the previous block !",block_num,pb[block_num].number_of_pulses,match_table[mt_i-1].offset,match_table[mt_i-1].yes,match_table[mt_i-1].no);
+											floppycontext->hxc_printf(MSG_DEBUG,"Block %d (%d index) full match not found. Best position : %d - %d ok %d bad. - DOESN'T Match with the previous block !",block_num,pb[block_num].number_of_pulses,match_table[mt_i-1].offset,match_table[mt_i-1].yes,match_table[mt_i-1].no);
 											c=0;
 										#endif
+									/*	if(block_num)
+										{
+											if( pb[block_num-1].locked )
+												pb[block_num].overlap_offset = pb[block_num-1].overlap_offset + pb[block_num-1].overlap_size;
+										}
 
+										t = detectflakeybits(track_dump,&pb[block_num],pb[block_num].overlap_offset,0,0,overlap_pulses_tab,0xFFFFFFFF,margetab);
+										pb[block_num].overlap_size = t - pb[block_num].overlap_offset;*/
 									}
-								}
+								break;
 
-								if(c)
-								{
-									#ifdef FLUXSTREAMDBG
-										floppycontext->hxc_printf(MSG_DEBUG,"Block %d (%d index) full match not found. Best position : %d - %d ok %d bad. - DOESN'T Match with the previous block !",block_num,pb[block_num].number_of_pulses,match_table[mt_i-1].offset,match_table[mt_i-1].yes,match_table[mt_i-1].no);
-										c=0;
-									#endif
-								/*	if(block_num)
-									{
-										if( pb[block_num-1].locked )
-											pb[block_num].overlap_offset = pb[block_num-1].overlap_offset + pb[block_num-1].overlap_size;
-									}
-
-									t = detectflakeybits(track_dump,&pb[block_num],pb[block_num].overlap_offset,0,0,overlap_pulses_tab,0xFFFFFFFF,margetab);
-									pb[block_num].overlap_size = t - pb[block_num].overlap_offset;*/
-								}
+								default:
+								break;
 							}
 						}
 
