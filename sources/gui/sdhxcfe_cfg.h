@@ -20,5 +20,15 @@ typedef struct sdhxcfecfgfile_
 										// 0x08 -> Pre increment index when inserting the sdcard (no button/lcd mode)
 	unsigned char enable_drive_b;		// 0xFF -> Drive B Disabled
 	unsigned char indexed_mode;			// 0xFF -> Enabled, 0x00 -> Disabled.
+
+    unsigned char cfg_from_cfg_drive0;
+    unsigned char interfacemode_drive0;
+    unsigned char pin02_cfg_drive0;
+    unsigned char pin34_cfg_drive0;
+
+    unsigned char cfg_from_cfg_drive1;
+    unsigned char interfacemode_drive1;
+    unsigned char pin02_cfg_drive1;
+    unsigned char pin34_cfg_drive1;
 }sdhxcfecfgfile;
 #pragma pack()
