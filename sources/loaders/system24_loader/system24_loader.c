@@ -149,18 +149,19 @@ int System24_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	}
 
 
-	gap3len = 50;
+	gap3len = 84;
 
 	floppydisk->floppyiftype = IBMPC_HD_FLOPPYMODE;
 	floppydisk->floppyBitRate = DEFAULT_HD_BITRATE;
-	trackformat=ISOFORMAT_DD;
+	trackformat=IBMFORMAT_DD;
 
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)* ( floppydisk->floppyNumberOfTrack + 4 ));
 
-	rpm=300; // normal rpm
+	rpm=288; // normal rpm
 
-	sectorconfig=malloc(sizeof(SECTORCONFIG) * floppydisk->floppySectorPerTrack);
-	memset(sectorconfig,0,sizeof(SECTORCONFIG) * floppydisk->floppySectorPerTrack);
+
+	sectorconfig=malloc(sizeof(SECTORCONFIG) *  floppydisk->floppySectorPerTrack );
+	memset(sectorconfig,0,sizeof(SECTORCONFIG) *  floppydisk->floppySectorPerTrack );
 
 	trackdata=(unsigned char*)malloc(tracksize);
 
@@ -267,10 +268,23 @@ int System24_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 				k++;
 			}
 
-			currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,1,0,500000,300,trackformat,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
+			currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,1,0,500000,rpm,trackformat,100,2500|NO_SECTOR_UNDER_INDEX,-2500);
 
 		}
 	}
+
+	// Add 4 empty tracks
+	for(j=floppydisk->floppyNumberOfTrack;j<floppydisk->floppyNumberOfTrack + 4;j++)
+	{
+		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+		currentcylinder=floppydisk->tracks[j];
+		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+		{
+			currentcylinder->sides[i]=tg_generateTrack(trackdata,512,0,(unsigned char)j,(unsigned char)i,1,1,1,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,200,2500|NO_SECTOR_UNDER_INDEX,-2500);
+		}
+	}
+
+	floppydisk->floppyNumberOfTrack += 4;
 
 	free(trackdata);
 
