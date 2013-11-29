@@ -251,6 +251,18 @@ int D88_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		}
 	}while(number_of_track && !track_offset);
 
+	if( ( number_of_track > 60*2 ) && ( number_of_track < 80*2 ) )
+	{
+		number_of_track = 80 * 2;
+	}
+
+	if( ( number_of_track > 25*2 ) && ( number_of_track < 40*2 ) )
+	{
+		number_of_track = 40 * 2;
+	}
+
+	if( ( number_of_track & 1 )  && (side == 2) ) 
+		number_of_track++;
 
 	floppycontext->hxc_printf(MSG_INFO_1,"Number of track: %d",number_of_track);
 
