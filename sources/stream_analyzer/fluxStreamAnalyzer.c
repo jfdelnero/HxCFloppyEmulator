@@ -1328,6 +1328,8 @@ unsigned long searchBestOverlap(s_track_dump * track_dump, pulsesblock * src_blo
 	}
 	else
 	{
+		goodblockfound = 0;
+
 		do
 		{
 
