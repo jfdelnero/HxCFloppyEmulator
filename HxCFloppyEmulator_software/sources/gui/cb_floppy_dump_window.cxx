@@ -174,6 +174,7 @@ HANDLE opendevice(int drive)
 	HANDLE h;
 	DWORD ret;
 	BYTE b;
+	FD_SPECIFY_PARAMS specparams;
 
 	char drv_name[512];
 
@@ -183,6 +184,13 @@ HANDLE opendevice(int drive)
 	if (h == INVALID_HANDLE_VALUE)
 		return 0;
 
+	specparams.srt_hut = 0x0F;
+	specparams.hlt_nd = 0xFE;
+	if (!DeviceIoControl(h, IOCTL_FDCMD_SPECIFY, &specparams, sizeof(FD_SPECIFY_PARAMS), NULL, 0, &ret, NULL)) {
+		printf("IOCTL_FDCMD_SPECIFY failed err=%d\n", GetLastError());
+		closedevice(h);
+		return 0;
+	}
 
 	b = 2; // 250Kbps
 	if (!DeviceIoControl(h, IOCTL_FD_SET_DATA_RATE, &b, sizeof b, NULL, 0, &ret, NULL)) {
