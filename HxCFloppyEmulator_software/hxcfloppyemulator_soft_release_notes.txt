@@ -10,7 +10,7 @@
 -------------------------------------------------------------------------------
 
 /*********************************************************
-09 october 2013: HxCFloppyEmulator 2.0.18.0
+08 December 2013: HxCFloppyEmulator 2.0.18.4
 
 TRS80 DMK Loaded : Image Sanity check -> Minimum track number changed from 30 to 1 track.
 
@@ -22,9 +22,9 @@ libhxcfe : Track alteration functions -> hxcfe_getSide & hxcfe_shiftTrackData fu
 
 libhxcfe : XML floppy file definition -> <track_list></track_list> Track definition fields working.
 
-New track support : Data Arburg format.
+New track support : Data disk Arburg format.
 
-New track support : system Arburg format.
+New track support : System disk Arburg format.
 
 New Writer : SSD Speccy DOS file.
 
@@ -40,10 +40,25 @@ New Writer : BMP file (Disk layout picture).
 
 libhxcfe : Transitions level flux analyzer functions.
 
+libhxcfe : Generic flux stream analyzer enhanced.
+
 ADF, DMS, MSA, ST Loaders : 4 empty tracks added at the end of the disk.
 
+D88 Loader : Odd track number issue corrected.
+
+CPC EDSK writer : Some missing flag support added. (Deleted address mark & CRC flags).
+
+Sega System24 Loader : New format added ( 8192B + 3*1024B + 512B + 256B sectors).
+
+Floppy Dump : Default step rate set at 16ms.
+
+zlib updated : zlib 1.2.8
+
+Amiga/UAE Extended ADF file loader : Amiga DOS track offset loading corrected.
+
+
 /*********************************************************
-06 august 2013: HxCFloppyEmulator 2.0.16.0
+06 August 2013: HxCFloppyEmulator 2.0.16.0
 
 FAT12 Loader/generator : Files size, disk size & disk free size displayed, lots of sanity checks added.
 
