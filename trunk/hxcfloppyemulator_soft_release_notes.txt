@@ -30,9 +30,9 @@ New Writer : SSD Speccy DOS file.
 
 New Writer : Amiga ADF files.
 
-New Loader : SCP files (WIP).
+New Loader : SCP files (SuperCard Pro) (WIP).
 
-New Writer : SCP files (WIP).
+New Writer : SCP files (SuperCard Pro) (WIP).
 
 New Writer : Kryoflux raw files.
 
