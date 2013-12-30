@@ -665,7 +665,6 @@ void browse_floppy_disk(filesystem_generator_window *fgw,int lastoperationerror)
 		fsmng = hxcfe_initFsManager(guicontext->hxcfe);
 		if (fsmng)
 		{
-			hxcfe_selectFS(fsmng, 0);
 			if(hxcfe_mountImage(fsmng, guicontext->loadedfloppy) == HXCFE_NOERROR)
 			{
 				if(hxcfe_getTotalFsSpace(fsmng))
