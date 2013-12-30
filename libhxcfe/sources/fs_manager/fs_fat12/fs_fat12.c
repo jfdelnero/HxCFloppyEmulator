@@ -18,7 +18,7 @@ fn_diskio_write media_write_callback;
 HXCFLOPPYEMULATOR* floppycontext;
 FSMNG * gb_fsmng;
 
-void lba2chs(FSMNG * fsmng,int lba, int *track, int *head, int *sector)
+static void lba2chs(FSMNG * fsmng,int lba, int *track, int *head, int *sector)
 {
 
 	if(fsmng)

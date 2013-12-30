@@ -50,6 +50,7 @@
 #include "libhxcfe.h"
 #include "fs_manager.h"
 #include "fs_fat12/fs_fat12.h"
+#include "fs_amigados/fs_amigados.h"
 
 int hxcfe_checkFSID(HXCFLOPPYEMULATOR* floppycontext,int FSID)
 {
@@ -169,7 +170,12 @@ int hxcfe_selectFS(FSMNG * fsmng, int FSID)
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_selectFS : %d",FSID);
 
 	fsmng->fs_selected = FSID;
-	init_fat12(fsmng);
+
+	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		init_amigados(fsmng);
+	else
+		init_fat12(fsmng);
+
 	return HXCFE_NOERROR;
 }
 
@@ -182,103 +188,187 @@ void hxcfe_deinitFsManager(FSMNG * fsmng)
 
 int hxcfe_mountImage(FSMNG * fsmng, FLOPPY *floppy)
 {
+	int ret;
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_mountImage");
 
-	return fat12_mountImage(fsmng, floppy);
+/*	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		return amigados_mountImage(fsmng, floppy);
+	else
+		return fat12_mountImage(fsmng, floppy);*/
+
+	ret = hxcfe_selectFS(fsmng, 0);
+	ret = fat12_mountImage(fsmng, floppy);
+	if(ret == HXCFE_NOERROR)
+		return ret;
+
+	ret = hxcfe_selectFS(fsmng, FS_880KB_AMIGADOS);
+	ret = amigados_mountImage(fsmng, floppy);
+	if(ret == HXCFE_NOERROR)
+		return ret;
+
+	return ret;
+
 }
 
 int hxcfe_umountImage(FSMNG * fsmng)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_umountImage");
-	return fat12_umountImage(fsmng);
+
+	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		return amigados_umountImage(fsmng);
+	else
+		return fat12_umountImage(fsmng);
 }
 
 int hxcfe_getFreeFsSpace(FSMNG * fsmng)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_getFreeFsSpace");
-	return fat12_getFreeSpace( fsmng );
+
+	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		return amigados_getFreeSpace( fsmng );
+	else
+		return fat12_getFreeSpace( fsmng );
 }
 
 int hxcfe_getTotalFsSpace(FSMNG * fsmng)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_getTotalFsSpace");
-	return fat12_getTotalSpace( fsmng );
+
+	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		return amigados_getTotalSpace( fsmng );
+	else
+		return fat12_getTotalSpace( fsmng );
 }
 
 int hxcfe_openDir(FSMNG * fsmng, char * path)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_openDir : %s",path);
-	return fat12_openDir(fsmng,path);
+
+	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		return amigados_openDir(fsmng,path);
+	else
+		return fat12_openDir(fsmng,path);
 }
 
 int hxcfe_readDir(FSMNG * fsmng,int dirhandle,FSENTRY * dirent)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_readDir : 0x%.8x",dirhandle);
-	return fat12_readDir(fsmng,dirhandle,dirent);
+
+	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		return amigados_readDir(fsmng,dirhandle,dirent);
+	else
+		return fat12_readDir(fsmng,dirhandle,dirent);
 }
 
 int hxcfe_closeDir(FSMNG * fsmng, int dirhandle)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_closeDir : 0x%.8x",dirhandle);
-	return fat12_closeDir(fsmng, dirhandle);
+
+	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		return amigados_closeDir(fsmng, dirhandle);
+	else
+		return fat12_closeDir(fsmng, dirhandle);
+
 }
 
 int hxcfe_openFile(FSMNG * fsmng, char * filename)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_openFile : %s",filename);
-	return fat12_openFile(fsmng,filename);
+
+	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		return amigados_openFile(fsmng,filename);
+	else
+		return fat12_openFile(fsmng,filename);
 }
 
 int hxcfe_createFile(FSMNG * fsmng, char * filename)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_createFile : %s",filename);
-	return fat12_createFile(fsmng,filename);
+
+	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		return amigados_createFile(fsmng,filename);
+	else
+		return fat12_createFile(fsmng,filename);
 }
 
 int hxcfe_writeFile(FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_writeFile : 0x%.8x - 0x%.8x / %d bytes",filehandle,buffer,size);
-	return fat12_writeFile(fsmng,filehandle,buffer,size);
+
+	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		return amigados_writeFile(fsmng,filehandle,buffer,size);
+	else
+		return fat12_writeFile(fsmng,filehandle,buffer,size);
 }
 
 int hxcfe_readFile( FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_readFile : 0x%.8x - 0x%.8x / %d bytes",filehandle,buffer,size);
-	return fat12_readFile( fsmng,filehandle,buffer,size);
+
+	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		return amigados_readFile( fsmng,filehandle,buffer,size);
+	else
+		return fat12_readFile( fsmng,filehandle,buffer,size);
 }
 
 int hxcfe_deleteFile(FSMNG * fsmng, char * filename)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_deleteFile : %s",filename);
-	return fat12_deleteFile(fsmng,filename);
+
+	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		return amigados_deleteFile(fsmng,filename);
+	else
+		return fat12_deleteFile(fsmng,filename);
 }
 
 int hxcfe_closeFile(FSMNG * fsmng, int filehandle)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_closeFile : 0x%.8x",filehandle);
-	return fat12_closeFile(fsmng,filehandle);
+
+	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		return amigados_closeFile(fsmng,filehandle);
+	else
+		return fat12_closeFile(fsmng,filehandle);
 }
 
 int hxcfe_createDir( FSMNG * fsmng,char * foldername)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_createDir : %s",foldername);
-	return fat12_createDir( fsmng,foldername);
+
+	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		return amigados_createDir( fsmng,foldername);
+	else
+		return fat12_createDir( fsmng,foldername);
+
 }
 
 int hxcfe_removeDir( FSMNG * fsmng,char * foldername)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_removeDir : %s",foldername);
-	return fat12_removeDir( fsmng,foldername);
+
+	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		return amigados_removeDir( fsmng,foldername);
+	else
+		return fat12_removeDir( fsmng,foldername);
 }
 
 int hxcfe_fseek( FSMNG * fsmng,int filehandle,long offset,int origin)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_fseek : 0x%.8x - 0x%.8x (%d) ",filehandle,offset,origin);
-	return fat12_fseek(fsmng,filehandle,offset,origin);
+
+	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		return amigados_fseek(fsmng,filehandle,offset,origin);
+	else
+		return fat12_fseek(fsmng,filehandle,offset,origin);
+
 }
 
 int hxcfe_ftell( FSMNG * fsmng,int filehandle)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_ftell : 0x%.8x",filehandle);
-	return fat12_ftell( fsmng,filehandle);
+
+	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+		return amigados_ftell( fsmng,filehandle);
+	else
+		return fat12_ftell( fsmng,filehandle);
 }
