@@ -103,7 +103,7 @@ Fl_Menu_Item fs_choices[]=
 	{ "3\"5        902KB DSDD Atari FAT12",0,fs_choice_cb,(void*)FS_902KB_ATARI_FAT12},
 	{ "3\"5        4.23MB DSDD Atari FAT12",0,fs_choice_cb,(void*)FS_4_23MB_ATARI_FAT12},
 
-	//{ "3\"5        880KB DSDD AmigaDOS",0,fs_choice_cb,(void*)FS_880KB_AMIGADOS},
+	{ "3\"5        880KB DSDD AmigaDOS",0,fs_choice_cb,(void*)FS_880KB_AMIGADOS},
 
 	{0}
 };
