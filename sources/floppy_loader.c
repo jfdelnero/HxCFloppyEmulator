@@ -1458,12 +1458,15 @@ FLOPPY * hxcfe_generateFloppy(HXCFLOPPYEMULATOR* floppycontext,char* path,int fs
 	floppycontext->hxc_printf(MSG_INFO_0,"Create file system (source path : %s) ...",path);
 
 	newfloppy=0;
-	moduleID = hxcfe_getLoaderID (floppycontext,PLUGIN_FAT12FLOPPY);
+
+	if( fsID == FS_880KB_AMIGADOS )
+		moduleID = hxcfe_getLoaderID (floppycontext,PLUGIN_AMIGA_FS);
+	else
+		moduleID = hxcfe_getLoaderID (floppycontext,PLUGIN_FAT12FLOPPY);
 
 	i=0;
 	while(fs_config_table[i].name && (fs_config_table[i].fsID != fsID))
 	{
-
 		i++;
 	}
 

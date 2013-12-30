@@ -114,17 +114,17 @@ int AMIGADOSFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgf
 	return HXCFE_BADPARAMETER;
 }
 
-void adlib_printerror(char * msg)
+static void adlib_printerror(char * msg)
 {
 	global_floppycontext->hxc_printf(MSG_ERROR,"AdfLib Error: %s",msg);
 }
 
-void adlib_printwarning(char * msg)
+static void adlib_printwarning(char * msg)
 {
 	global_floppycontext->hxc_printf(MSG_WARNING,"AdfLib Warning: %s",msg);
 }
 
-void adlib_printdebug(char * msg)
+static void adlib_printdebug(char * msg)
 {
 	global_floppycontext->hxc_printf(MSG_DEBUG,"AdfLib Debug: %s",msg);
 }
@@ -380,10 +380,13 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 						floppycontext->hxc_printf(MSG_ERROR,"adflib: adfInstallBootBlock error!");
 					}
 
-					if(ScanFile(floppycontext,adfvolume,imgfile,"*.*"))
+					if(strlen(imgfile))
 					{
-								floppycontext->hxc_printf(MSG_DEBUG,"ScanFile error!");
-								return HXCFE_INTERNALERROR;
+						if(ScanFile(floppycontext,adfvolume,imgfile,"*.*"))
+						{
+							floppycontext->hxc_printf(MSG_DEBUG,"ScanFile error!");
+							return HXCFE_INTERNALERROR;
+						}
 					}
 					flatimg2=(unsigned char*)malloc(flatimgsize);
 					memcpy(flatimg2,flatimg,flatimgsize);
