@@ -133,7 +133,7 @@ int chgbitptr(int tracklen,int cur_offset,int offset)
 		}
 		else
 		{
-			return (tracklen - ( ((-offset) - cur_offset) ) ); 
+			return (tracklen - ( ((-offset) - cur_offset) ) );
 		}
 	}
 }
@@ -376,7 +376,7 @@ int slowSearchBitStream(unsigned char * input_data,unsigned long input_data_size
 	unsigned long cur_startoffset;
 	unsigned long i;
 	int len;
-	
+
 	cur_startoffset = bit_offset;
 	len = 0;
 
@@ -387,7 +387,7 @@ int slowSearchBitStream(unsigned char * input_data,unsigned long input_data_size
 
 	while( ( cur_startoffset < input_data_size ) && ( len < searchlen ) )
 	{
-		
+
 		i=0;
 		while( ( i < chr_data_size) && ( ( getbit(input_data,( (cur_startoffset + i) % input_data_size)) == getbit(chr_data, i % chr_data_size) ) ) )
 		{
@@ -407,22 +407,15 @@ int slowSearchBitStream(unsigned char * input_data,unsigned long input_data_size
 	return -1;
 }
 
-
 int searchBitStream(unsigned char * input_data,unsigned long input_data_size,int searchlen,unsigned char * chr_data,unsigned long chr_data_size,unsigned long bit_offset)
 {
-	unsigned long i,j,trackoffset,cnt,k,starti;
+	unsigned long i,j,trackoffset,cnt,starti;
 	unsigned char stringtosearch[8][128];
-	unsigned char mask[8][128];
-
 	unsigned char prev;
 	unsigned long tracksize;
 	int searchsize;
 	int t;
-	int found;
 	int bitoffset;
-
-	memset(stringtosearch,0,8*128);
-	memset(mask,0xFF,8*128);
 
 	cnt=(chr_data_size>>3);
 	if(chr_data_size&7)
@@ -432,19 +425,14 @@ int searchBitStream(unsigned char * input_data,unsigned long input_data_size,int
 	for(i=0;i<8;i++)
 	{
 		prev=0;
-
-		mask[i][0]=0xFF>>i;
 		for(j=0;j<cnt;j++)
 		{
-			stringtosearch[i][j]=prev | (chr_data[j]>>i);
-			prev=chr_data[j]<<(8-i);
+			stringtosearch[i][j]= prev | (chr_data[j]>>i);
+			prev = chr_data[j] << (8-i);
 		}
 		stringtosearch[i][j]=prev;
-		mask[i][j]=0xFF<<(8-i);
-
 	}
 
-	found=0;
 	starti = bit_offset & 7;
 	trackoffset = bit_offset >> 3;
 
@@ -465,27 +453,26 @@ int searchBitStream(unsigned char * input_data,unsigned long input_data_size,int
 	}
 
 	t=0;
-
 	// Scan the track data...
-	while(!found && (trackoffset<tracksize) && (t<searchsize))
+	while( (trackoffset<tracksize) && (t<searchsize) )
 	{
-
 		for(i=starti;i<8;i++)
 		{
-			k = trackoffset;
-			j=0;
-
-			while( ( j < (cnt+1) ) && ( ( stringtosearch[i][j] & mask[i][j] ) == ( input_data[k] & mask[i][j] ) )  )
+			j=1;
+			while( ( j < cnt ) && !( stringtosearch[i][j] ^ input_data[trackoffset + j] ) )
 			{
 				j++;
-				k++;
 			}
 
-			if( j == (cnt+1) )
-			{
-				found=0xFF;
-				bitoffset = ( trackoffset << 3 ) + i;
-				i=8;
+			if( j == cnt )
+			{	// found!
+				if( !( ( stringtosearch[i][0] ^ input_data[trackoffset] ) & (0xFF>>i) ) )
+				{
+					if( !( ( stringtosearch[i][j] ^ input_data[trackoffset + j] ) & (0xFF<<(8-i)) ) )
+					{
+						return ( trackoffset << 3 ) + i;
+					}
+				}
 			}
 		}
 
@@ -493,34 +480,31 @@ int searchBitStream(unsigned char * input_data,unsigned long input_data_size,int
 		t++;
 
 		starti=0;
-
 	}
 
-	if(!found)
+	if(t<searchsize)
 	{
-		if(t<searchsize)
-		{			
-			if(searchlen>0)
+		if(searchlen>0)
+		{
+			if(searchlen - (t*8) > 0)
 			{
-				if(searchlen - (t*8) > 0)
-				{
-					bitoffset = slowSearchBitStream(input_data,input_data_size,searchlen - (t*8),chr_data,chr_data_size,trackoffset<<3 | starti);
-				}
-				else
-				{
-					bitoffset = -1;
-				}
+				bitoffset = slowSearchBitStream(input_data,input_data_size,searchlen - (t*8),chr_data,chr_data_size,trackoffset<<3 | starti);
 			}
 			else
 			{
-				bitoffset = slowSearchBitStream(input_data,input_data_size,searchlen,chr_data,chr_data_size,trackoffset<<3 | starti);
+				bitoffset = -1;
 			}
 		}
 		else
 		{
-			bitoffset = -1;
+			bitoffset = slowSearchBitStream(input_data,input_data_size,searchlen,chr_data,chr_data_size,trackoffset<<3 | starti);
 		}
 	}
+	else
+	{
+		bitoffset = -1;
+	}
+
 
 	return bitoffset;
 }
