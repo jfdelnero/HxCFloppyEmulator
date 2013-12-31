@@ -65,19 +65,19 @@ XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
 
 all: $(EXEC)
 
-libhxcfe.dll: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o arburg_track.o crc.o track_generator.o trackutils.o gcr_track.o apple2.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
+libhxcfe.dll: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o arburg_track.o crc.o track_generator.o trackutils.o gcr_track.o apple2.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
-libhxcfe.dylib: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o arburg_track.o crc.o track_generator.o trackutils.o gcr_track.o apple2.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
+libhxcfe.dylib: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o arburg_track.o crc.o track_generator.o trackutils.o gcr_track.o apple2.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
-libhxcfe.a: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o crc.o arburg_track.o track_generator.o trackutils.o gcr_track.o apple2.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB)
+libhxcfe.a: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o crc.o arburg_track.o track_generator.o trackutils.o gcr_track.o apple2.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB)
 	$(AR) r $@    $^
 	cp $@ ../../../build
 
-libhxcfe.so: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o crc.o arburg_track.o track_generator.o trackutils.o gcr_track.o apple2.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
+libhxcfe.so: floppy_loader.o floppy_utils.o floppy_ifmode.o emuii_track.o crc.o arburg_track.o track_generator.o trackutils.o gcr_track.o apple2.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
@@ -109,6 +109,9 @@ fs_manager.o : $(BASEDIR)/fs_manager/fs_manager.c $(BASEDIR)/fs_manager/fs_manag
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 fs_fat12.o : $(BASEDIR)/fs_manager/fs_fat12/fs_fat12.c $(BASEDIR)/fs_manager/fs_fat12/fs_fat12.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+fs_amigados.o : $(BASEDIR)/fs_manager/fs_amigados/fs_amigados.c $(BASEDIR)/fs_manager/fs_amigados/fs_amigados.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 emuii_track.o: $(BASEDIR)/tracks/emuii_track.c $(BASEDIR)/tracks/emuii_track.h
@@ -507,13 +510,13 @@ zutil.o : $(BASEDIR)/thirdpartylibs/zlib/zutil.c
 	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
 
 ioapi.o : $(BASEDIR)/thirdpartylibs/zlib/contrib/minizip/ioapi.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DNOLONGFILESUPPORT
+	$(CC) -o $@ -c $< $(CFLAGS) -DNOLONGFILESUPPORT -DUSE_FILE32API -DIOAPI_NO_64
 mztools.o : $(BASEDIR)/thirdpartylibs/zlib/contrib/minizip/mztools.c
-	$(CC) -o $@ -c $< $(CFLAGS)
+	$(CC) -o $@ -c $< $(CFLAGS) -DUSE_FILE32API -DIOAPI_NO_64
 unzip.o : $(BASEDIR)/thirdpartylibs/zlib/contrib/minizip/unzip.c
-	$(CC) -o $@ -c $< $(CFLAGS)
+	$(CC) -o $@ -c $< $(CFLAGS) -DUSE_FILE32API -DIOAPI_NO_64
 zip.o : $(BASEDIR)/thirdpartylibs/zlib/contrib/minizip/zip.c
-	$(CC) -o $@ -c $< $(CFLAGS)
+	$(CC) -o $@ -c $< $(CFLAGS) -DUSE_FILE32API -DIOAPI_NO_64
 
 libsap.o : $(BASEDIR)/thirdpartylibs/libsap/libsap.c   $(BASEDIR)/thirdpartylibs/libsap/libsap.h
 	$(CC) -o $@ -c $< $(CFLAGS)

@@ -1906,6 +1906,18 @@ SOURCE=..\sources\fs_manager\fs_fat12\fs_fat12.c
 SOURCE=..\sources\fs_manager\fs_fat12\fs_fat12.h
 # End Source File
 # End Group
+# Begin Group "fs_amigados"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\fs_manager\fs_amigados\fs_amigados.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\fs_manager\fs_amigados\fs_amigados.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\sources\fs_manager\fs_manager.c

@@ -424,6 +424,11 @@ typedef struct _FSMNG
 
 	void * handletable[128];
 	void * dirhandletable[128];
+	int    dirindex[128];
+
+	void  * device;
+	void  * volume;
+	void  * internal;
 
 }FSMNG;
 

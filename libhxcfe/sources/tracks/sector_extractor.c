@@ -59,6 +59,7 @@
 extern unsigned char bit_inverter_emuii[];
 extern unsigned char even_tab[];
 extern unsigned char odd_tab[];
+extern unsigned short MFM_tab[];
 
 #define LOOKFOR_GAP1 0x01
 #define LOOKFOR_ADDM 0x02
@@ -1540,14 +1541,75 @@ int write_MFM_sectordata(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCON
 int write_AMIGAMFM_sectordata(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFIG * sector,unsigned char * buffer,int buffersize)
 {
 	int bit_offset;
-	unsigned char CRC16_High;
-	unsigned char CRC16_Low;
+	unsigned char sectorparity[2];
+	unsigned int i;
+	int l;
+	unsigned char  byte;
+	unsigned short lastbit,mfm_code;
+	unsigned char  *mfm_buffer;
+	track_generator tg;
+
+
+	sectorparity[0]=0;
+	sectorparity[1]=0;
+
+	for(i=0;i<sector->sectorsize;i=i+4)
+	{
+		sectorparity[0]^=(odd_tab[buffer[i]]<<4) | odd_tab[buffer[i+1]];
+		sectorparity[1]^=(odd_tab[buffer[i+2]]<<4) | odd_tab[buffer[i+3]];
+	}
+
+	for(i=0;i<sector->sectorsize;i=i+4)
+	{
+		sectorparity[0]^=(even_tab[buffer[i]]<<4) | even_tab[buffer[i+1]];
+		sectorparity[1]^=(even_tab[buffer[i+2]]<<4) | even_tab[buffer[i+3]];
+	}
 
 	bit_offset = sector->startdataindex;
-	bit_offset = bintomfm(track->databuffer,track->tracklen,&sector->alternate_addressmark,1,bit_offset);
-	bit_offset = bintomfm(track->databuffer,track->tracklen,buffer,buffersize,bit_offset);
-	bit_offset = bintomfm(track->databuffer,track->tracklen,&CRC16_High,1,bit_offset);
-	bit_offset = bintomfm(track->databuffer,track->tracklen,&CRC16_Low ,1,bit_offset);
+
+	bit_offset = bit_offset - (((3*8)*2));
+
+	tg_initTrackEncoder(&tg);
+
+	tg.last_bit_offset = bit_offset;
+
+	pushTrackCode(&tg,0x00,0xFF,track,sector->trackencoding);
+	pushTrackCode(&tg,(unsigned char)sectorparity[0],0xFF,track,sector->trackencoding);
+	pushTrackCode(&tg,(unsigned char)sectorparity[1],0xFF,track,sector->trackencoding);
+
+	bit_offset = tg.last_bit_offset;
+
+	mfm_buffer = &track->databuffer[bit_offset/8];
+
+	// MFM Encoding
+	lastbit = tg.mfm_last_bit;
+	i=0;
+
+	for(l=0;l<buffersize;l=l+2)
+	{
+		byte =(odd_tab[buffer[l]]<<4) | odd_tab[buffer[l+1]];
+		mfm_code = MFM_tab[byte] & lastbit;
+
+		mfm_buffer[i++]=mfm_code>>8;
+		mfm_buffer[i++]=mfm_code&0xFF;
+
+		lastbit=~(MFM_tab[byte]<<15);
+	}
+
+	for(l=0;l<buffersize;l=l+2)
+	{
+		byte =(even_tab[buffer[l]]<<4) | even_tab[buffer[l+1]];
+		mfm_code = MFM_tab[byte] & lastbit;
+
+		mfm_buffer[i++]=mfm_code>>8;
+		mfm_buffer[i++]=mfm_code&0xFF;
+
+		lastbit=~(MFM_tab[byte]<<15);
+	}
+
+	tg.mfm_last_bit = lastbit;
+	tg.last_bit_offset = tg.last_bit_offset + ( buffersize * 2 * 8 );
+	pushTrackCode(&tg,0x00,0xFF,track,sector->trackencoding);
 
 	return 0;
 }

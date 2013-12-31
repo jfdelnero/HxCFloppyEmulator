@@ -313,7 +313,7 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 
 	hxc_stat(imgfile,&repstate);
 	ts=localtime(&repstate.st_ctime);
-	if(repstate.st_mode&S_IFDIR)
+	if(repstate.st_mode&S_IFDIR || !strlen(imgfile) )
 	{
 
 		global_floppycontext=floppycontext;
