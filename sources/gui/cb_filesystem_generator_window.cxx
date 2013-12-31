@@ -783,7 +783,6 @@ void filesystem_generator_window_bt_delete(Fl_Button *bt,void *)
 		fsmng = hxcfe_initFsManager(guicontext->hxcfe);
 		if (fsmng)
 		{
-			hxcfe_selectFS(fsmng, 0);
 			hxcfe_mountImage(fsmng, guicontext->loadedfloppy);
 
 			flt_item = fgw->fs_browser->first_selected_item();
@@ -1245,7 +1244,6 @@ int getfilesthread(void* floppycontext,void* hw_context)
 		fsmng = hxcfe_initFsManager(guicontext->hxcfe);
 		if (fsmng)
 		{
-			hxcfe_selectFS(fsmng, 0);
 			hxcfe_mountImage(fsmng, guicontext->loadedfloppy);
 
 			flt_item = fsw->fs_browser->first_selected_item();
@@ -1413,9 +1411,7 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 					fsmng = hxcfe_initFsManager(guicontext->hxcfe);
 					if (fsmng)
 					{
-						hxcfe_selectFS(fsmng, 0);
 						hxcfe_mountImage(fsmng, guicontext->loadedfloppy);
-
 
 						dirhandle = hxcfe_openDir(fsmng,basepath);
 						if ( dirhandle <= 0 )
