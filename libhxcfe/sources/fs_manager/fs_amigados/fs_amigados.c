@@ -642,11 +642,17 @@ int amigados_createFile(FSMNG * fsmng, char * filename)
 int amigados_writeFile(FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
 {
 	int byteswrite;
+
+	byteswrite = 0;
+
 	if(filehandle<128)
 	{
 		if((long)fsmng->handletable[filehandle-1]!=-1)
 		{
-			byteswrite = adfWriteFile((struct File*)fsmng->handletable[filehandle-1], size, buffer);
+			if(amigados_getFreeSpace(fsmng) >= size)
+			{
+				byteswrite = adfWriteFile((struct File*)fsmng->handletable[filehandle-1], size, buffer);
+			}
 			return byteswrite;
 		}
 	}
