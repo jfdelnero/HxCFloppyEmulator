@@ -214,6 +214,7 @@ const char* hxcfe_getXmlLayoutDesc(XmlFloppyBuilder* context,int moduleID);
 const char* hxcfe_getXmlLayoutName(XmlFloppyBuilder* context,int moduleID);
 
 int         hxcfe_selectXmlFloppyLayout(XmlFloppyBuilder* context,int layoutid);
+int         hxcfe_setXmlFloppyLayoutFile(XmlFloppyBuilder* context,char * filepath);
 
 FLOPPY*     hxcfe_generateXmlFloppy (XmlFloppyBuilder* context,unsigned char * rambuffer,unsigned buffersize);
 FLOPPY*     hxcfe_generateXmlFileFloppy (XmlFloppyBuilder* context,char *file);
