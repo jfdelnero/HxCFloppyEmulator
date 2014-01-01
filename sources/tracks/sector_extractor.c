@@ -1790,19 +1790,28 @@ SECTORSEARCH* hxcfe_initSectorSearch(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp
 	ss->cur_track=0;
 	ss->hxcfe=floppycontext;
 
+	if(fp->floppyNumberOfTrack)
+	{
+		ss->track_cache = malloc(sizeof(SECTORSEARCHTRACKCACHE) * fp->floppyNumberOfTrack);
+		if(ss->track_cache)
+		{
+			memset(ss->track_cache,0,sizeof(SECTORSEARCHTRACKCACHE) * fp->floppyNumberOfTrack);
+		}
+	}
+
 	return ss;
 }
 
 SECTORCONFIG* hxcfe_getNextSector(SECTORSEARCH* ss,int track,int side,int type)
 {
 	SECTORCONFIG * sc;
+	SECTORSEARCHTRACKCACHE * trackcache;
 	int bitoffset;
 	int i;
 
 	if((ss->bitoffset==-1) || (ss->cur_side!=side) || (ss->cur_track!=track))
 	{
 		bitoffset=0;
-		ss->nb_sector_cached = 0;
 	}
 	else
 		bitoffset=ss->bitoffset;
@@ -1849,25 +1858,28 @@ SECTORCONFIG* hxcfe_getNextSector(SECTORSEARCH* ss,int track,int side,int type)
 		break;
 	}
 
-
 	ss->bitoffset=bitoffset;
 
-	if(ss->nb_sector_cached<512 && bitoffset>=0)
+	if(track<ss->fp->floppyNumberOfTrack && ss->track_cache)
 	{
-		//Add a new cache entry
-		i=0;
-		while(i<ss->nb_sector_cached && ss->sectorcache[i].startsectorindex!=(unsigned long)bitoffset && i<512)
+		trackcache = &ss->track_cache[track];
+		if(trackcache->nb_sector_cached<512 && bitoffset>=0)
 		{
-			i++;
-		}
-
-		if( i<512 )
-		{
-			if(i == ss->nb_sector_cached)
+			//Add a new cache entry
+			i=0;
+			while(i<trackcache->nb_sector_cached && trackcache->sectorcache[i].startsectorindex!=(unsigned long)bitoffset && i<512)
 			{
-				memcpy(&ss->sectorcache[i],sc,sizeof(SECTORCONFIG));
-				ss->sectorcache[i].input_data = 0;
-				ss->nb_sector_cached++;
+				i++;
+			}
+
+			if( i<512 )
+			{
+				if(i == trackcache->nb_sector_cached)
+				{
+					memcpy(&(trackcache->sectorcache[i]),sc,sizeof(SECTORCONFIG));
+					trackcache->sectorcache[i].input_data = 0;
+					trackcache->nb_sector_cached++;
+				}
 			}
 		}
 	}
@@ -2071,31 +2083,36 @@ SECTORCONFIG** hxcfe_getAllTrackISOSectors(SECTORSEARCH* ss,int track,int side,i
 SECTORCONFIG* hxcfe_searchSector(SECTORSEARCH* ss,int track,int side,int id,int type)
 {
 	SECTORCONFIG * sc;
+	SECTORSEARCHTRACKCACHE * trackcache;
 	int i;
 
-	if((ss->cur_side == side) && (ss->cur_track == track))
+	if(track<ss->fp->floppyNumberOfTrack && ss->track_cache)
 	{
+		trackcache = &ss->track_cache[track];
+
 		// Search in the cache
 		i = 0;
-		while( i < ss->nb_sector_cached )
+		while( i < trackcache->nb_sector_cached )
 		{
-			if((ss->sectorcache[i].sector == id) && (ss->sectorcache[i].cylinder == track) && (ss->sectorcache[i].head == side) )
+			if((trackcache->sectorcache[i].sector == id) && (trackcache->sectorcache[i].cylinder == track) && (trackcache->sectorcache[i].head == side) )
 			{
-				ss->bitoffset =  ss->sectorcache[i].startsectorindex;
+				ss->cur_side = side;
+				ss->cur_track = track;
+				ss->bitoffset = trackcache->sectorcache[i].startsectorindex;
 				sc = hxcfe_getNextSector(ss,track,side,type);
 				return sc;
 			}
 			i++;
 		}
+
+		ss->bitoffset = 0;
+		if(trackcache->nb_sector_cached)
+			ss->bitoffset = trackcache->sectorcache[trackcache->nb_sector_cached-1].startsectorindex+1;
 	}
 	else
 	{
-		ss->nb_sector_cached = 0;
+		ss->bitoffset = 0;
 	}
-
-	ss->bitoffset = 0;
-	if(ss->nb_sector_cached)
-		ss->bitoffset = ss->sectorcache[ss->nb_sector_cached-1].startsectorindex+1;
 
 	do
 	{
@@ -2353,7 +2370,11 @@ void hxcfe_freeSectorConfig(SECTORSEARCH* ss,SECTORCONFIG* sc)
 void hxcfe_deinitSectorSearch(SECTORSEARCH* ss)
 {
 	if(ss)
+	{
+		if(ss->track_cache) 
+			free(ss->track_cache);
 		free(ss);
+	}
 }
 
 FDCCTRL * hxcfe_initFDC (HXCFLOPPYEMULATOR* floppycontext)

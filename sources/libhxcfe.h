@@ -221,6 +221,12 @@ FLOPPY*     hxcfe_generateXmlFileFloppy (XmlFloppyBuilder* context,char *file);
 ////////////////////////////////////////////
 // Read Sector functions
 
+typedef struct SECTORSEARCHTRACKCACHE_
+{
+	int nb_sector_cached;
+	SECTORCONFIG sectorcache[512];
+}SECTORSEARCHTRACKCACHE;
+
 typedef struct SECTORSEARCH_
 {
 	HXCFLOPPYEMULATOR* hxcfe;
@@ -229,9 +235,7 @@ typedef struct SECTORSEARCH_
 	int cur_track;
 	int cur_side;
 
-	int nb_sector_cached;
-	SECTORCONFIG sectorcache[512];
-
+	SECTORSEARCHTRACKCACHE * track_cache;
 }SECTORSEARCH;
 
 SECTORSEARCH* hxcfe_initSectorSearch(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
