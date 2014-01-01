@@ -140,14 +140,6 @@ sdhxcfecfg_window::sdhxcfecfg_window() {
         chk_hfe_doublestep->callback((Fl_Callback*)ifcfg_window_datachanged, (void*)(this));
         chk_hfe_doublestep->when(FL_WHEN_CHANGED);
       } // Fl_Check_Button* chk_hfe_doublestep
-      { Fl_Button* o = new Fl_Button(425, 59, 50, 17, "Load");
-        o->labelsize(12);
-        o->callback((Fl_Callback*)load_ifcfg_window_bt, (void*)(this));
-      } // Fl_Button* o
-      { Fl_Button* o = new Fl_Button(425, 76, 50, 16, "Save");
-        o->labelsize(12);
-        o->callback((Fl_Callback*)save_ifcfg_window_bt, (void*)(this));
-      } // Fl_Button* o
       { choice_hfeifmode = new Fl_Choice(335, 24, 140, 20);
         choice_hfeifmode->down_box(FL_BORDER_BOX);
         choice_hfeifmode->labelsize(12);

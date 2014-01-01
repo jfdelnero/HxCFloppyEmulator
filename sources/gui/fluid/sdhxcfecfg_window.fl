@@ -7,11 +7,11 @@ class sdhxcfecfg_window {open
   Function {sdhxcfecfg_window()} {open
   } {
     Fl_Window window {
-      label {SDCard HxC Floppy Emulator settings} open selected
+      label {SDCard HxC Floppy Emulator settings} open
       xywh {169 231 487 292} type Double labelsize 12 visible
     } {
       Fl_Group {} {
-        label {SD HxC Floppy Emulator settings} open
+        label {SD HxC Floppy Emulator settings} open selected
         xywh {5 0 315 289} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
       } {
         Fl_Group {} {
@@ -74,7 +74,7 @@ class sdhxcfecfg_window {open
         }
         Fl_Check_Button chk_force_loading_startupb {
           label {Force loading STARTUPB.HFE into the drive B at power up}
-          user_data {this}
+          user_data this
           callback sdhxcfecfg_window_datachanged
           xywh {9 168 25 21} down_box DOWN_BOX labelsize 11
         }
@@ -128,18 +128,6 @@ class sdhxcfecfg_window {open
           user_data this
           callback ifcfg_window_datachanged
           xywh {335 72 25 22} down_box DOWN_BOX labelsize 12
-        }
-        Fl_Button {} {
-          label Load
-          user_data this
-          callback load_ifcfg_window_bt
-          xywh {425 59 50 17} labelsize 12
-        }
-        Fl_Button {} {
-          label Save
-          user_data this
-          callback save_ifcfg_window_bt
-          xywh {425 76 50 16} labelsize 12
         }
         Fl_Choice choice_hfeifmode {
           user_data this
