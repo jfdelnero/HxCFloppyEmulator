@@ -100,6 +100,7 @@
 #include "./loaders/arburg_raw_loader/arburg_raw_loader.h"
 #include "./loaders/scp_loader/scp_loader.h"
 #include "./loaders/bmp_loader/bmp_loader.h"
+#include "./loaders/xml_loader/xml_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -182,5 +183,6 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)SDDSpeccyDos_libGetPluginInfo,
 	(GETPLUGININFOS)BMP_libGetPluginInfo,
 	(GETPLUGININFOS)ARBURG_RAW_libGetPluginInfo,
+	(GETPLUGININFOS)XML_libGetPluginInfo,
 	(GETPLUGININFOS)-1
 };

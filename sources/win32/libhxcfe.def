@@ -95,6 +95,7 @@ EXPORTS
    hxcfe_generateXmlFloppy		@206
    hxcfe_generateXmlFileFloppy	@207
    hxcfe_deinitXmlFloppy		@208
+   hxcfe_setXmlFloppyLayoutFile	@209
 
    hxcfe_initFDC				@300
    hxcfe_deinitFDC				@301

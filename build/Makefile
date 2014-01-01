@@ -54,11 +54,11 @@ DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosf
                   emuii_raw_loader.o emuii_loader.o emui_raw_loader.o jvc_loader.o dim_loader.o ti99v9t9_loader.o d81_loader.o  acornadf_loader.o \
                   camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o fdi_loader.o ssd_dsd_loader.o adl_loader.o \
                   krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o system24_loader.o kryofluxstream_loader.o kryofluxstream.o \
-                  fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o bmp_writer.o bmp_file.o
+                  fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o xml_loader.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
-					kryofluxstream_writer.o adf_writer.o
+					kryofluxstream_writer.o adf_writer.o bmp_writer.o bmp_file.o xml_writer.o
 
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
@@ -145,6 +145,12 @@ ti99v9t9_loader.o : $(BASEDIR)/loaders/ti99v9t9_loader/ti99v9t9_loader.c $(BASED
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 ti99v9t9_writer.o : $(BASEDIR)/loaders/ti99v9t9_loader/ti99v9t9_writer.c $(BASEDIR)/loaders/ti99v9t9_loader/ti99v9t9_writer.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+xml_loader.o : $(BASEDIR)/loaders/xml_loader/xml_loader.c $(BASEDIR)/loaders/xml_loader/xml_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+xml_writer.o : $(BASEDIR)/loaders/xml_loader/xml_writer.c $(BASEDIR)/loaders/xml_loader/xml_writer.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 scp_loader.o : $(BASEDIR)/loaders/scp_loader/scp_loader.c $(BASEDIR)/loaders/scp_loader/scp_loader.h

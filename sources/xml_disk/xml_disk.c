@@ -51,6 +51,7 @@
 #include "libhxcfe.h"
 #include "floppy_loader.h"
 #include "floppy_utils.h"
+#include "libhxcadaptor.h"
 
 #include "xml_disk.h"
 #include "./DiskLayouts/LayoutsIndex.h"
@@ -80,6 +81,8 @@ typedef struct app_data
 	int stack_ptr;
 
 	int layout_id;
+	char * xmlfile_path[512];
+
 	parse_stack statestack[32];
 
 	FBuilder * fb;
@@ -794,15 +797,51 @@ int	hxcfe_selectXmlFloppyLayout(XmlFloppyBuilder* context,int layoutid)
 
 	if(hxcfe_numberOfXmlLayout(context) > layoutid)
 	{
+		memset((char*)&ad->xmlfile_path,0,sizeof(ad->xmlfile_path));
 		ad->layout_id = layoutid;
 		return HXCFE_NOERROR;
 	}
 	return HXCFE_BADPARAMETER;
 }
 
+int	hxcfe_setXmlFloppyLayoutFile(XmlFloppyBuilder* context,char * filepath)
+{
+	char firstline[512];
+	FILE * f;
+	AppData	*ad = (AppData *) context->ad;
+
+	if(hxc_checkfileext(filepath,"xml"))
+	{
+		f=fopen(filepath,"rb");
+		if(f)
+		{
+			memset(firstline,0,sizeof(firstline));
+			fgets(firstline,sizeof(firstline)-1,f);
+			fclose(f);
+
+			if(strstr(firstline,"<?xml version="))
+			{
+				strcpy((char*)&ad->xmlfile_path,filepath);
+				ad->layout_id = -1;
+				ad->floppycontext->hxc_printf(MSG_DEBUG,"hxcfe_setXmlFloppyLayoutFile : XML file !");
+				return HXCFE_NOERROR;
+			}
+
+			ad->floppycontext->hxc_printf(MSG_DEBUG,"hxcfe_setXmlFloppyLayoutFile : non XML file !");
+			return HXCFE_BADFILE;
+		}
+	}
+
+	return HXCFE_BADPARAMETER;
+}
+
+
 FLOPPY* hxcfe_generateXmlFloppy (XmlFloppyBuilder* context,unsigned char * rambuffer,unsigned buffersize)
 {
 	AppData *ad;
+	FILE *f;
+	int filesize;
+	char * xmlbuffer;
 
 	ad = context->ad;
 
@@ -817,7 +856,37 @@ FLOPPY* hxcfe_generateXmlFloppy (XmlFloppyBuilder* context,unsigned char * rambu
 	XML_SetCharacterDataHandler(context->xml_parser, charhandler);
 	XML_SetNamespaceDeclHandler(context->xml_parser, ns_start, ns_end);
 
-	XML_Parse(context->xml_parser, (char*)disklayout_list[ad->layout_id]->unpacked_data, disklayout_list[ad->layout_id]->size, 1);
+	if(ad->layout_id!=-1)
+	{
+		XML_Parse(context->xml_parser, (char*)disklayout_list[ad->layout_id]->unpacked_data, disklayout_list[ad->layout_id]->size, 1);
+	}
+	else
+	{
+		ad->floppy = 0;
+
+		f = fopen((char*)ad->xmlfile_path,"rb");
+		if(f)
+		{
+			fseek(f,0,SEEK_END);
+			filesize = ftell(f);
+			fseek(f,0,SEEK_SET);
+			if(filesize>0)
+			{
+				xmlbuffer = malloc(filesize + 1);
+				if(xmlbuffer)
+				{
+					memset(xmlbuffer,0,filesize + 1);
+					fread(xmlbuffer,filesize,1,f);
+					
+					XML_Parse(context->xml_parser, xmlbuffer, filesize, 1);
+					
+					free(xmlbuffer);
+				}
+			}
+
+			fclose(f);
+		}
+	}
 
 	return ad->floppy;
 }
