@@ -145,7 +145,7 @@ double getOffsetTiming(SIDE *currentside,int offset,double timingoffset,int star
 {
 	int i,j,bitrate,totaloffset;
 
-	if(offset >= start)
+	if( offset >= start )
 	{
 		totaloffset = offset;
 	}
@@ -154,20 +154,23 @@ double getOffsetTiming(SIDE *currentside,int offset,double timingoffset,int star
 		totaloffset = start + ((currentside->tracklen - start) + offset);
 	}
 
-	i=start;
-	j=start%currentside->tracklen;
+	i = start;
+	j = start%currentside->tracklen;
 
-	do
+	if(currentside->bitrate==VARIABLEBITRATE)
 	{
-		if(currentside->bitrate==VARIABLEBITRATE)
-			bitrate=currentside->timingbuffer[j>>3];
-		else
-			bitrate=currentside->bitrate;
-
-		timingoffset = timingoffset + ((double)(500000)/(double)bitrate);
-		i++;
-		j=(j+1)%currentside->tracklen;
-	}while(i<totaloffset);
+		do
+		{
+			bitrate = currentside->timingbuffer[j>>3];
+			timingoffset = timingoffset + ((double)(500000)/(double)bitrate);
+			i++;
+			j = (j+1) % currentside->tracklen;
+		}while( i < totaloffset );
+	}
+	else
+	{
+		timingoffset = timingoffset + ( ((double)(500000)/(double)currentside->bitrate) * ( totaloffset - start ) );
+	}
 
 	return timingoffset;
 }
@@ -245,6 +248,7 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 	double timingoffset;
 	double timingoffset2;
 	double timingoffset3;
+	double xresstep;
 	int xpos_startheader,xpos_endsector,xpos_startdata;
 	int xpos_tmp;
 	int endfill,loop;
@@ -253,6 +257,8 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 	SECTORCONFIG* sc;
 	SIDE * currentside;
 	s_sectorlist * sl,*oldsl;
+
+	xresstep = (double)td->x_us/(double)td->xsize;
 
 	old_i=0;
 	timingoffset=0;//timingoffset_offset;
@@ -268,7 +274,7 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 	{
 
 		timingoffset = ( getOffsetTiming(currentside,tracksize,0,0) * loop );
-		xpos_tmp = (int)( ( timingoffset - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
+		xpos_tmp = (int)( ( timingoffset - timingoffset_offset ) / xresstep );
 		if( xpos_tmp < td->xsize )
 		{
 
@@ -292,7 +298,7 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 
 						timingoffset = getOffsetTiming(currentside,sc->startsectorindex,timingoffset,old_i);
 						old_i = sc->startsectorindex;
-						xpos_startheader = (int)( ( timingoffset - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
+						xpos_startheader = (int)( ( timingoffset - timingoffset_offset ) / xresstep );
 
 						if(sc->endsectorindex<sc->startsectorindex)
 							timingoffset2 = getOffsetTiming(currentside,sc->startsectorindex+ ((tracksize - sc->startsectorindex) + sc->endsectorindex),timingoffset,old_i);
@@ -306,9 +312,9 @@ s_sectorlist * display_sectors(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *
 						else
 							timingoffset3 = getOffsetTiming(currentside,sc->startdataindex,timingoffset,old_i);
 
-						xpos_startdata = (int)( ( timingoffset3 - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
+						xpos_startdata = (int)( ( timingoffset3 - timingoffset_offset ) / xresstep );
 
-						xpos_endsector = (int)( ( timingoffset2 - timingoffset_offset ) / ((double)td->x_us/(double)td->xsize) );
+						xpos_endsector = (int)( ( timingoffset2 - timingoffset_offset ) / xresstep );
 
 						sl->x_pos1 = xpos_startheader;
 						sl->y_pos1 = 50;
@@ -622,6 +628,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	int bitrate;
 	int xpos,ypos;
 	int endfill;
+	double xresstep;
 	s_sectorlist * sl,*oldsl;
 	SIDE * currentside;
 	s_col * col;
@@ -673,10 +680,13 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	buffer_offset=i;
 	timingoffset_offset=timingoffset;
 
+	bitrate = currentside->bitrate;
+
 	tracksize=currentside->tracklen;
 	timingoffset=0;
 	interbit=0;
 	i=buffer_offset;
+	xresstep = (double)td->x_us/(double)td->xsize;
 	endfill=0;
 	do
 	{
@@ -685,12 +695,10 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 
 			if( currentside->databuffer[i>>3] & (0x80>>(i&7)) )
 			{
-				if(currentside->bitrate==VARIABLEBITRATE)
-					bitrate=currentside->timingbuffer[i>>3];
-				else
-					bitrate=currentside->bitrate;
+				if(currentside->bitrate == VARIABLEBITRATE)
+					bitrate = currentside->timingbuffer[i>>3];
 
-				xpos= (int)( timingoffset / ((double)td->x_us/(double)td->xsize) );
+				xpos= (int)( timingoffset / (xresstep) );
 				ypos= td->ysize - (int)( ( (double) ((interbit+1) * 500000) / (double) bitrate ) / (double)((double)td->y_us/(double)td->ysize));
 
 				if( (xpos<td->xsize) && (ypos<td->ysize) && ypos>=0 )
@@ -733,9 +741,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 			}
 
 			if(currentside->bitrate==VARIABLEBITRATE)
-				bitrate=currentside->timingbuffer[i>>3];
-			else
-				bitrate=currentside->bitrate;
+				bitrate = currentside->timingbuffer[i>>3];
 
 			timingoffset=timingoffset + ((double)(500000)/(double)bitrate);
 
@@ -743,7 +749,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 
 		}while(i<tracksize);
 
-		xpos= (int)( timingoffset / ((double)td->x_us/(double)td->xsize) );
+		xpos= (int)( timingoffset / xresstep );
 		if(xpos>td->xsize)
 			endfill=1;
 
@@ -789,7 +795,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 
 				timingoffset=getOffsetTiming(currentside,i,timingoffset,old_i);
 				old_i=i;
-				xpos= (int) ( timingoffset / ((double)td->x_us/(double)td->xsize) );
+				xpos= (int) ( timingoffset / xresstep );
 				if( (xpos>=td->xsize) )
 				{
 					endfill=1;
@@ -830,7 +836,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 		{
 			timingoffset=getOffsetTiming(currentside,i,timingoffset,old_i);
 			old_i=i;
-			xpos= (int)( timingoffset / ((double)td->x_us/(double)td->xsize) );
+			xpos= (int)( timingoffset / xresstep );
 
 			if( (xpos<td->xsize) )
 			{
