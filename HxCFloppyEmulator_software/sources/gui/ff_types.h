@@ -27,5 +27,6 @@ enum
 	FF_ARBG,
 	FF_SKF,
 	FF_SCP,
-	FF_BMP
+	FF_BMP,
+	FF_XML
 };

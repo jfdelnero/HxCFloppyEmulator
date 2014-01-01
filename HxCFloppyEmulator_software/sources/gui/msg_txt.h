@@ -62,6 +62,7 @@ Fl_Menu_Item format_choices[]=
 	{ "Raw - Stream Kryoflux file format",0,format_choice_cb,(void*)PLUGIN_SKF},
 	{ "SCP - SCP stream file format",0,format_choice_cb,(void*)PLUGIN_SCP},
 	{ "BMP - BMP file image",0,format_choice_cb,(void*)PLUGIN_BMP},
+	{ "XML - XML file image",0,format_choice_cb,(void*)PLUGIN_GENERIC_XML},
 	{0}
 };
 
