@@ -246,7 +246,7 @@ int XML_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 									fprintf(xmlfile,"\t\t\t\t\t\t<datamark>0x%.2X</datamark>\n",sca[s]->alternate_datamark);
 								}
 
-								fprintf(xmlfile,"\t\t\t\t\t\t<data_offset>0x%.6X</data_offset>\n",sectoffset[s]->offset);
+								fprintf(xmlfile,"\t\t\t\t\t\t<data_offset>0x%.6X</data_offset>\n",(unsigned int)sectoffset[s]->offset);
 								fprintf(xmlfile,"\t\t\t\t\t</sector>\n");
 
 								hxcfe_freeSectorConfig  (ss,sca[s]);

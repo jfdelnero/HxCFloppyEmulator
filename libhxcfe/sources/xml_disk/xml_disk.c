@@ -351,8 +351,8 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 {
 	AppData	*ad = (AppData *) data;
 	char * buffer;
-	unsigned char datamark;
-	unsigned short crc;
+	unsigned int datamark;
+	unsigned int crc;
 	int track,sectorsize,i;
 
 	buffer = malloc(len + 1);
@@ -519,21 +519,21 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 			if(!ad->xmlcheck)
 			{
 				sscanf(buffer,"0x%X",&datamark);
-				hxcfe_setSectorDataMark (ad->fb,datamark);
+				hxcfe_setSectorDataMark (ad->fb,(unsigned char)datamark);
 			}
 		break;
 		case DATACRC_SECTOR:
 			if(!ad->xmlcheck)
 			{
 				sscanf(buffer,"0x%X",&crc);
-				hxcfe_setSectorDataCRC (ad->fb,crc);
+				hxcfe_setSectorDataCRC (ad->fb,(unsigned short)crc);
 			}
 		break;
 		case HEADERCRC_SECTOR:
 			if(!ad->xmlcheck)
 			{
 				sscanf(buffer,"0x%X",&crc);
-				hxcfe_setSectorHeaderCRC (ad->fb,crc);
+				hxcfe_setSectorHeaderCRC (ad->fb,(unsigned short)crc);
 			}
 		break;
 		case SECTORDATA_SECTOR:
