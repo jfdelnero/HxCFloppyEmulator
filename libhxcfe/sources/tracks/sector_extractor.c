@@ -2166,7 +2166,7 @@ int hxcfe_getFloppySize(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp,int * nbsect
 	int track;
 	int side;
 	int i,type,secfound,t;
-	int typetab[8];
+	int typetab[16];
 
 	floppysize=0;
 	nbofsector=0;
