@@ -28,8 +28,8 @@ EXEC=libhxcfe.dll
 endif
 
 ifeq ($(UNAME), Darwin)
-CFLAGS += -arch i386
-LDFLAGS +=-arch i386 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libhxcfe.dylib
+CFLAGS += -arch i386 -mmacosx-version-min=10.5
+LDFLAGS +=-arch i386 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libhxcfe.dylib -mmacosx-version-min=10.5
 EXEC=libhxcfe.dylib
 endif
 
