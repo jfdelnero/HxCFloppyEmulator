@@ -125,7 +125,7 @@ int XML_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	int i,j,k,s;
 	FILE * xmlfile;
 	int fileoffset,nb_sectorfound;
-	int nbsect,firstsectid,sectorsize;
+	int nbsect,firstsectid,sectorsize,imagesize;
 	char trackformat[32];
 	SECTORSEARCH* ss;
 	SECTORCONFIG** sca;
@@ -135,9 +135,11 @@ int XML_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 	fileoffset = 0;
 
-	xmlfile=hxc_fopen(filename,"wb");
+	xmlfile=hxc_fopen(filename,"w+");
 	if(xmlfile)
 	{
+		imagesize = hxcfe_getFloppySize(floppycontext,floppy,0);
+
 		ss=hxcfe_initSectorSearch(floppycontext,floppy);
 		if(ss)
 		{
@@ -151,7 +153,7 @@ int XML_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 			fprintf(xmlfile,"\t<prefered_file_extension>img</prefered_file_extension>\n");
 			fprintf(xmlfile,"\t<interface_mode>GENERIC_SHUGART_DD_FLOPPYMODE</interface_mode>\n");
 
-			fprintf(xmlfile,"\t<file_size>%d</file_size>\n",hxcfe_getFloppySize(floppycontext,floppy,0));
+			fprintf(xmlfile,"\t<file_size>%d</file_size>\n",imagesize);
 
 			fprintf(xmlfile,"\t<layout>\n");
 
