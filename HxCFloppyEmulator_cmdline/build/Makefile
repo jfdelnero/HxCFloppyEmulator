@@ -10,8 +10,8 @@ LIBHXCFE = libhxcfe.so
 LIBUSBHXCFE = libusbhxcfe.so
 
 ifeq ($(UNAME), Darwin)
-CFLAGS += -arch i386
-LDFLAGS += -arch i386
+CFLAGS += -arch i386 -mmacosx-version-min=10.5
+LDFLAGS += -arch i386 -mmacosx-version-min=10.5
 LIBHXCFE= libhxcfe.dylib
 LIBUSBHXCFE= libusbhxcfe.dylib
 endif
