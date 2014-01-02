@@ -47,6 +47,13 @@ enum
 	SIZEID_SECTOR,
 	SECTORDATA_SECTOR,
 	SECTORSIZE_SECTOR,
+	DATAFILL_SECTOR,
+	DATAOFFSETSECTOR,
+	DATAMARK_SECTOR,
+	DATACRC_SECTOR,
+	HEADERCRC_SECTOR,
+	SECTORID_SECTOR,
+	SIDEID_SECTOR,
 	TRACK_GAP3,
 	TRACK_PREGAP
 };
@@ -90,8 +97,15 @@ keyword keyword_list[]=
 	{"interleave",					INTERLEAVE_TRACK,			TRACK},
 	{"sector",						SECTOR,						SECTORLIST},
 	{"track_id",					TRACKID_SECTOR,				SECTOR},
+	{"side_id",						SIDEID_SECTOR,				SECTOR},
+	{"sector_id",					SECTORID_SECTOR,			SECTOR},
 	{"size_id",						SIZEID_SECTOR,				SECTOR},
+	{"data_fill",					DATAFILL_SECTOR,			SECTOR},
+	{"datamark",					DATAMARK_SECTOR,			SECTOR},
+	{"data_crc",					DATACRC_SECTOR,				SECTOR},
+	{"header_crc",					HEADERCRC_SECTOR,			SECTOR},
 	{"sector_data",					SECTORDATA_SECTOR,			SECTOR},
 	{"sector_size",					SECTORSIZE_SECTOR,			SECTOR},
+	{"data_offset",					DATAOFFSETSECTOR,			SECTOR},
 	{0,0,0}
 };

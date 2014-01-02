@@ -96,6 +96,10 @@ typedef struct app_data
 	char * description[512];
 
 	unsigned char * image_data;
+
+	unsigned char * sector_data;
+	int sector_data_offset;
+
 	int buffer_size;
 	int track_size;
 
@@ -346,22 +350,27 @@ unsigned long ahextoi(char * str)
 static void XMLCALL charhandler(void *data, const char *s, int len)
 {
 	AppData	*ad = (AppData *) data;
-	char buffer[512];
-	int track;
+	char * buffer;
+	unsigned char datamark;
+	unsigned short crc;
+	int track,sectorsize,i;
 
+	buffer = malloc(len + 1);
+	if(!buffer) return;
+
+	memset(buffer,0,len + 1);
 	memcpy(buffer,s,len);
-	buffer[len]=0;
 
 	switch(ad->current_state)
 	{
 		case DISK_LAYOUT_NAME:
-			strcpy((char*)&ad->name,(char*)&buffer);
+			strcpy((char*)&ad->name,(char*)buffer);
 		break;
 		case DISK_LAYOUT_DESCRIPTION:
-			strcpy((char*)&ad->description,(char*)&buffer);
+			strcpy((char*)&ad->description,(char*)buffer);
 		break;
 		case INTERFACE_MODE:
-			ad->interface_mode = hxcfe_getFloppyInterfaceModeID(ad->floppycontext,(char*)&buffer);
+			ad->interface_mode = hxcfe_getFloppyInterfaceModeID(ad->floppycontext,(char*)buffer);
 		break;
 		case DOUBLE_STEP:
 			if(!strcmp(buffer,"on"))
@@ -411,6 +420,7 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 				ad->skew_per_side = atoi(buffer);
 		break;
 		case FORMATVALUE:
+		case DATAFILL_SECTOR:
 			if(!ad->xmlcheck)
 			{
 				hxcfe_setSectorFill (ad->fb,(unsigned char)ahextoi(buffer));
@@ -467,6 +477,19 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 			if(!ad->xmlcheck)
 				hxcfe_setStartSectorID(ad->fb,(unsigned char)atoi(buffer));
 		break;
+		case TRACKID_SECTOR:
+			if(!ad->xmlcheck)
+				hxcfe_setSectorTrackID(ad->fb,(unsigned char)atoi(buffer));
+		break;
+		case SIDEID_SECTOR:
+			if(!ad->xmlcheck)
+				hxcfe_setSectorHeadID(ad->fb,(unsigned char)atoi(buffer));
+		break;
+		case SECTORID_SECTOR:
+			if(!ad->xmlcheck)
+				hxcfe_setSectorID(ad->fb,(unsigned char)atoi(buffer));
+		break;
+
 		case BITRATE:
 			if(!ad->xmlcheck)
 				hxcfe_setTrackBitrate(ad->fb,atoi(buffer));
@@ -478,7 +501,80 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 				ad->ts[track].base_adress =  ahextoi(buffer);
 			}
 		break;
+		case DATAOFFSETSECTOR:
+			if(!ad->xmlcheck)
+			{
+				track = ad->statestack[ad->stack_ptr].cur_track;
+				ad->ts[track].base_adress =  ahextoi(buffer);
+
+				sectorsize = hxcfe_getCurrentSectorSize(ad->fb);
+
+				if(ad->ts[track].base_adress + ad->ts[track].track_size + sectorsize < ad->buffer_size)
+				{
+					hxcfe_setSectorData(ad->fb,&ad->image_data[ad->ts[track].base_adress + ad->ts[track].track_size],sectorsize);
+				}
+			}
+		break;
+		case DATAMARK_SECTOR:
+			if(!ad->xmlcheck)
+			{
+				sscanf(buffer,"0x%X",&datamark);
+				hxcfe_setSectorDataMark (ad->fb,datamark);
+			}
+		break;
+		case DATACRC_SECTOR:
+			if(!ad->xmlcheck)
+			{
+				sscanf(buffer,"0x%X",&crc);
+				hxcfe_setSectorDataCRC (ad->fb,crc);
+			}
+		break;
+		case HEADERCRC_SECTOR:
+			if(!ad->xmlcheck)
+			{
+				sscanf(buffer,"0x%X",&crc);
+				hxcfe_setSectorHeaderCRC (ad->fb,crc);
+			}
+		break;
+		case SECTORDATA_SECTOR:
+			if(!ad->xmlcheck)
+			{
+				sectorsize = hxcfe_getCurrentSectorSize(ad->fb);
+
+				if(!ad->sector_data)
+				{
+					ad->sector_data = malloc(sectorsize);
+					if(ad->sector_data)
+					{
+						memset(ad->sector_data,0x00,sectorsize);
+					}
+					ad->sector_data_offset = 0;
+				}
+
+				if(ad->sector_data)
+				{
+					for(i=0;i<len/2;i++)
+					{
+						if(buffer[i*2]>='A')
+							ad->sector_data[ad->sector_data_offset] = ((buffer[i*2] - 'A') + 10 ) << 4;
+						else
+							ad->sector_data[ad->sector_data_offset] = ((buffer[i*2] - '0') ) << 4;
+
+						if(buffer[(i*2)+1]>='A')
+							ad->sector_data[ad->sector_data_offset] |= ((buffer[(i*2)+1] - 'A') + 10) & 0xF;
+						else
+							ad->sector_data[ad->sector_data_offset] |= ((buffer[(i*2)+1] - '0')) & 0xF;
+
+						ad->sector_data_offset++;
+						if( ad->sector_data_offset == sectorsize )
+							ad->sector_data_offset = sectorsize - 1;
+					}
+				}
+			}
+		break;
 	}
+
+	free(buffer);
 }
 
 static void XMLCALL start(void *data, const char *el, const char **attr)
@@ -569,7 +665,6 @@ static void XMLCALL start(void *data, const char *el, const char **attr)
 					ad->ts[track].track_size +=  sectorsize;
 
 				break;
-
 			}
 		}
 	}
@@ -603,6 +698,13 @@ static void XMLCALL end(void *data, const char *el)
 			break;
 
 			case SECTOR:
+				if(ad->sector_data)
+				{
+					hxcfe_setSectorData(ad->fb,ad->sector_data,hxcfe_getCurrentSectorSize(ad->fb));
+					free(ad->sector_data);
+					ad->sector_data = 0;
+					ad->sector_data_offset = 0;
+				}
 				hxcfe_popSector(ad->fb);
 			break;
 		}
@@ -877,9 +979,9 @@ FLOPPY* hxcfe_generateXmlFloppy (XmlFloppyBuilder* context,unsigned char * rambu
 				{
 					memset(xmlbuffer,0,filesize + 1);
 					fread(xmlbuffer,filesize,1,f);
-					
+
 					XML_Parse(context->xml_parser, xmlbuffer, filesize, 1);
-					
+
 					free(xmlbuffer);
 				}
 			}

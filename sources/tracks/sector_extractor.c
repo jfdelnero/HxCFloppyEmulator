@@ -1819,6 +1819,15 @@ SECTORCONFIG* hxcfe_getNextSector(SECTORSEARCH* ss,int track,int side,int type)
 	ss->cur_track=track;
 	ss->cur_side=side;
 
+	if(!ss->fp)
+		return 0;
+
+	if(!ss->fp->tracks[track])
+		return 0;
+
+	if(!ss->fp->tracks[track]->sides[side])
+		return 0;
+
 	sc=(SECTORCONFIG *) malloc(sizeof(SECTORCONFIG));
 
 	switch(type)
@@ -2371,7 +2380,7 @@ void hxcfe_deinitSectorSearch(SECTORSEARCH* ss)
 {
 	if(ss)
 	{
-		if(ss->track_cache) 
+		if(ss->track_cache)
 			free(ss->track_cache);
 		free(ss);
 	}
