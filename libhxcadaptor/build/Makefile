@@ -15,8 +15,8 @@ CFLAGS += -fPIC
 endif
 
 ifeq ($(UNAME), Darwin)
-CFLAGS += -arch i386
-LDFLAGS += -arch i386
+CFLAGS += -arch i386 -mmacosx-version-min=10.5
+LDFLAGS += -arch i386 -mmacosx-version-min=10.5
 endif
 
 EXEC=libhxcadaptor.a
