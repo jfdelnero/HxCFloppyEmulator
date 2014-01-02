@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir "..\..\..\build\"
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LIBHXCFE_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\..\libhxcadaptor\trunk\sources" /I "..\sources\\" /I "..\sources\win32" /I "..\sources\thirdpartylibs\expat\expat-2.1.0\lib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LIBHXCFE_EXPORTS" /D "IPF_SUPPORT" /D "XML_STATIC" /FAs /FR /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /Zi /O2 /I "..\..\..\libhxcadaptor\trunk\sources" /I "..\sources\\" /I "..\sources\win32" /I "..\sources\thirdpartylibs\expat\expat-2.1.0\lib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LIBHXCFE_EXPORTS" /D "IPF_SUPPORT" /D "XML_STATIC" /FAs /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40c /d "NDEBUG"
@@ -1784,6 +1784,26 @@ SOURCE=..\sources\loaders\bmp_loader\bmp_loader.h
 # Begin Source File
 
 SOURCE=..\sources\loaders\bmp_loader\bmp_writer.c
+# End Source File
+# End Group
+# Begin Group "XML"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\xml_loader\xml_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\xml_loader\xml_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\xml_loader\xml_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\xml_loader\xml_writer.h
 # End Source File
 # End Group
 # End Group
