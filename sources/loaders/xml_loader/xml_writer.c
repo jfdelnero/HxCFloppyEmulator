@@ -187,10 +187,11 @@ int XML_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 					fprintf(xmlfile,"\t\t\t<track track_number=\"%.2d\" side_number=\"%d\">\n",j,i);
 					fprintf(xmlfile,"\t\t\t\t<data_offset>0x%.6X</data_offset>\n",fileoffset);
 
-					fprintf(xmlfile,"\t\t\t\t<sector_list>\n");
+					gettracktype(ss,j,i,&nbsect,&firstsectid,(char*)&trackformat,&sectorsize);
+					fprintf(xmlfile,"\t\t\t\t<format>%s</format>\n",trackformat);
 
 					sca = hxcfe_getAllTrackISOSectors(ss,j,i,&nb_sectorfound);
-
+					fprintf(xmlfile,"\t\t\t\t<sector_list>\n");
 
 					if(sca && nb_sectorfound)
 					{
