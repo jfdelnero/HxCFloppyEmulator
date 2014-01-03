@@ -164,6 +164,7 @@ Fl_Menu_Item nbside_choices[]=
 Fl_Menu_Item disklayout_choices[]=
 {
 	{ "Custom Disk Layout",0,raw_loader_window_datachanged,(void*)255},
+	{ "XML file Disk Layout",0,raw_loader_window_datachanged,(void*)255},
 	{ 0,0,raw_loader_window_datachanged,(void*)1},
 	{ 0,0,raw_loader_window_datachanged,(void*)2},
 	{ 0,0,raw_loader_window_datachanged,(void*)3},
