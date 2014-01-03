@@ -354,6 +354,7 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 	unsigned int datamark;
 	unsigned int crc;
 	int track,sectorsize,i;
+	int tmp_base_adress;
 
 	buffer = malloc(len + 1);
 	if(!buffer) return;
@@ -505,13 +506,13 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 			if(!ad->xmlcheck)
 			{
 				track = ad->statestack[ad->stack_ptr].cur_track;
-				ad->ts[track].base_adress =  ahextoi(buffer);
+				tmp_base_adress =  ahextoi(buffer);
 
 				sectorsize = hxcfe_getCurrentSectorSize(ad->fb);
 
-				if(ad->ts[track].base_adress + ad->ts[track].track_size + sectorsize < ad->buffer_size)
+				if(tmp_base_adress + sectorsize < ad->buffer_size)
 				{
-					hxcfe_setSectorData(ad->fb,&ad->image_data[ad->ts[track].base_adress + ad->ts[track].track_size],sectorsize);
+					hxcfe_setSectorData(ad->fb,&ad->image_data[tmp_base_adress],sectorsize);
 				}
 			}
 		break;
