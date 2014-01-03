@@ -10,6 +10,22 @@
 -------------------------------------------------------------------------------
 
 /*********************************************************
+03 January 2014: HxCFloppyEmulator 2.0.20.1
+
+Disk Browser : AmigaDOS disk support added ! Amiga Files can be read/write/deleted with the Disk Browser !
+
+New Writer : XML files -> Disk layout can now be exported into XML !
+
+New Loader : XML files -> A disk can be generated from an XML file !
+
+Raw Loader : An XML file can now be used as disk layout !
+
+General : Low level sector reader and track display speed-optimized.
+
+MacOS X : Executable now compiled with the "-mmacosx-version-min=10.5" option
+          -> Leopard,Snow Leopard,Lion,Mountain Lion & Mavericks supported.
+
+/*********************************************************
 08 December 2013: HxCFloppyEmulator 2.0.18.4
 
 TRS80 DMK Loaded : Image Sanity check -> Minimum track number changed from 30 to 1 track.
