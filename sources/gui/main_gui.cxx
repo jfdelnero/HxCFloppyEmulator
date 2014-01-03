@@ -787,9 +787,9 @@ Main_Window::Main_Window()
 		temp = (char*)hxcfe_getXmlLayoutDesc(rfb,i);
 		if(temp)
 		{
-			disklayout_choices[i+1].text = (const char*)malloc(strlen(temp)+1);
-			if(disklayout_choices[i+1].text)
-				strcpy((char*)disklayout_choices[i+1].text, temp);
+			disklayout_choices[i+2].text = (const char*)malloc(strlen(temp)+1);
+			if(disklayout_choices[i+2].text)
+				strcpy((char*)disklayout_choices[i+2].text, temp);
 		}
 		i++;
 	}

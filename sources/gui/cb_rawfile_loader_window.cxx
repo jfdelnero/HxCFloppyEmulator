@@ -43,6 +43,8 @@
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "fl_includes.h"
+
 #include "rawfile_loader_window.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -161,8 +163,11 @@ void raw_loader_window_datachanged(Fl_Widget* w, void*)
 {
 	int totalsector,totalsize;
 	int temp[256],v;
+	char file[512];
 	rawfile_loader_window *rlw;
 	Fl_Window *dw;
+	XmlFloppyBuilder* rfb;
+	int xmlload;
 
 	dw=((Fl_Window*)(w->parent()));
 	rlw=(rawfile_loader_window *)dw->user_data();
@@ -187,9 +192,75 @@ void raw_loader_window_datachanged(Fl_Widget* w, void*)
 		rlw->numin_gap3->deactivate();
 	}
 
+	xmlload = -1;
+
 	v = rlw->choice_disklayout->value(); 
 	if(v > 0)
 	{
+		if(v==1)
+		{
+			if(rlw->choice_disklayout->changed())
+			{
+				xmlload = 1;
+				if(!fileselector((char*)"Load XML file",(char*)file,(char*)"*.xml",(char*)"*.xml",0,0))
+				{
+					rfb=hxcfe_initXmlFloppy(guicontext->hxcfe);
+					if(rfb)
+					{
+						if(hxcfe_setXmlFloppyLayoutFile(rfb,file) == HXCFE_NOERROR)
+						{
+							xmlload = 0;
+							strcpy(guicontext->xml_file_path,file);
+						}
+						else
+						{
+							fl_alert("XML file verification failed !");
+						}
+
+						hxcfe_deinitXmlFloppy(rfb);
+					}
+				}
+				
+				if(xmlload>0)
+				{
+					memset(guicontext->xml_file_path,0,sizeof(guicontext->xml_file_path));
+
+					rlw->choice_disklayout->value(0);
+
+					rlw->chk_autogap3->activate();
+					rlw->chk_intersidesectornum->activate();
+					rlw->chk_reversesides->activate();
+					rlw->chk_side0track_first->activate();
+					rlw->chk_sidebasedskew->activate();
+					rlw->choice_numberofside->activate();
+					rlw->choice_sectorsize->activate();
+					rlw->choice_tracktype->activate();
+					rlw->innum_bitrate->activate();
+					rlw->innum_nbtrack->activate();
+					rlw->innum_rpm->activate();
+					rlw->innum_sectoridstart->activate();
+					rlw->innum_sectorpertrack->activate();
+					rlw->numin_formatvalue->activate();
+					rlw->numin_gap3->activate();
+					rlw->numin_interleave->activate();
+					rlw->numin_pregap->activate();
+					rlw->numin_skew->activate();
+					rlw->strout_totalsector->activate();
+					rlw->strout_totalsize->activate();
+
+					if(!rlw->chk_autogap3->value())
+					{
+						rlw->numin_gap3->activate();
+					}
+					else
+					{
+						rlw->numin_gap3->deactivate();
+					}
+
+					return;
+				}
+			}
+		}
 
 		rlw->chk_autogap3->deactivate();
 		rlw->chk_intersidesectornum->deactivate();
@@ -279,10 +350,14 @@ void raw_loader_window_bt_loadrawfile(Fl_Button* bt, void*)
 	if(!fileselector((char*)"Select raw file",(char*)file,0,(char*)"*.img",0,0))
 	{	
 		disklayout = rlw->choice_disklayout->value();
-		if(disklayout>0)
+		if(disklayout>=1)
 		{
 			rfb=hxcfe_initXmlFloppy(guicontext->hxcfe);
-			hxcfe_selectXmlFloppyLayout(rfb,disklayout-1);
+
+			if(disklayout ==  1)
+				hxcfe_setXmlFloppyLayoutFile(rfb,guicontext->xml_file_path);
+			else
+				hxcfe_selectXmlFloppyLayout(rfb,disklayout-2);
 			load_floppy( hxcfe_generateXmlFileFloppy(rfb,(char*)file),(char*)"Raw Image");
 			hxcfe_deinitXmlFloppy(rfb);
 		}
@@ -322,10 +397,13 @@ void raw_loader_window_bt_createemptyfloppy(Fl_Button* bt, void*)
 	getWindowState(rlw,&rfc);
 
 	disklayout = rlw->choice_disklayout->value();
-	if(disklayout>0)
+	if(disklayout>=1)
 	{
 		rfb=hxcfe_initXmlFloppy(guicontext->hxcfe);
-		hxcfe_selectXmlFloppyLayout(rfb,disklayout-1);
+		if(disklayout ==  1)
+			hxcfe_setXmlFloppyLayoutFile(rfb,guicontext->xml_file_path);
+		else
+			hxcfe_selectXmlFloppyLayout(rfb,disklayout-2);
 		load_floppy( hxcfe_generateXmlFloppy(rfb,0,0),(char*)"Raw Image" );
 		hxcfe_deinitXmlFloppy(rfb);
 	}

@@ -155,12 +155,15 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 					mw = (Main_Window*)guicontext->main_window;
 
 					disklayout = mw->rawloader_window->choice_disklayout->value();
-					if(disklayout>0)
+					if(disklayout>=1)
 					{
 						rfb=hxcfe_initXmlFloppy(guicontext->hxcfe);
 						if(rfb)
 						{
-							hxcfe_selectXmlFloppyLayout(rfb,disklayout-1);
+							if(disklayout ==  1)
+								hxcfe_setXmlFloppyLayoutFile(rfb,guicontext->xml_file_path);
+							else
+								hxcfe_selectXmlFloppyLayout(rfb,disklayout-2);
 							thefloppydisk = hxcfe_generateXmlFileFloppy (rfb,filelist[filenb]);
 							hxcfe_deinitXmlFloppy(rfb);
 							ret = 0;
@@ -350,12 +353,16 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 								mw = (Main_Window*)guicontext->main_window;
 
 								disklayout = mw->rawloader_window->choice_disklayout->value();
-								if(disklayout>0)
+								if(disklayout>=1)
 								{
 									rfb = hxcfe_initXmlFloppy(guicontext->hxcfe);
 									if(rfb)
 									{
-										hxcfe_selectXmlFloppyLayout(rfb,disklayout-1);
+										if(disklayout ==  1)
+											hxcfe_setXmlFloppyLayoutFile(rfb,guicontext->xml_file_path);
+										else
+											hxcfe_selectXmlFloppyLayout(rfb,disklayout-2);
+
 										thefloppydisk = hxcfe_generateXmlFileFloppy (rfb,(char*)fullpath);
 										hxcfe_deinitXmlFloppy(rfb);
 										ret = 0;
