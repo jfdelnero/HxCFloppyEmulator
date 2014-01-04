@@ -63,7 +63,8 @@ Bit 3 - TYPE, cleared if the image is a read-only type
 
 It should be noted that most images will be read-only (write protected) for emulation
 usage.  The read/write capable images contain padded space to allow the track to
-change size within the image.
+change size within the image.  Only a single revolution is needed when the TYPE bit
+is set.
 
 BYTE 0x09 is the width of the bit cell time.  Normally this is always 16 bits, but if the
 value is non-zero, then it represents the number of bits for each bit cell entry.  For
@@ -126,23 +127,36 @@ ASCII string, ie: 10/15/2013 5:52:30 PM
 ; SCP IMAGE FILE FORMAT
 ; ------------------------------------------------------------------
 ;
-; 0x00              "SCP" (ASCII CHARS)
-; 0x03              VERSION (nibbles major/minor)
-; 0x04              DISK TYPE (0=CBM, 1=AMIGA, 2=APPLE II, 3=ATARI
-;                   ST, 4=ATARI 800, 5=MAC 800, 6=360K/720K, 7=1.44MB
-; 0x05              NUMBER OF REVOLUTIONS (2=default)
-; 0x06              START TRACK (0-165)
-; 0x07              END TRACK (0-165)
-; 0x08              FLAG BITS (0=INDEX, 1=TPI, 2=RPM, 3=TYPE)
-; 0x09              WIDTH OF BIT CELL TIMES (0=16 BITS, >0=WIDTH)
-; 0x0A-0x0B         RESERVED (2 BYTES)
-; 0x0C-0x0F         32 BIT CHECKSUM OF DATA FROM 0x10-EOF
-; 0x10              OFFSET TO 1st TRACK DATA HEADER (4 bytes of 0 if track is skipped)
-; 0x14              OFFSET TO 2nd TRACK DATA HEADER (4 bytes of 0 if track is skipped)
-; 0x18              OFFSET TO 3rd TRACK DATA HEADER (4 bytes of 0 if track is skipped)
+; 0000              'SCP' (ASCII CHARS)
+; 0003              VERSION (nibbles major/minor)
+; 0004              DISK TYPE
+;                   UPPER 4 BITS ARE USED TO DEFINE A DISK CLASS (MANUFACTURER)
+;                   LOWER 4 BITS ARE USED TO DEFINE A DISK SUB-CLASS (MACHINE)
+;
+;                   MANUFACTURER BIT DEFINITIONS:
+;                   0000 = COMMODORE
+;                   0001 = ATARI
+;                   0010 = APPLE
+;                   0011 = PC
+;                   0100 = TANDY
+;                   0101 = TEXAS INSTRUMENTS
+;                   0110 = ROLAND
+;
+;					SEE DISK TYPE BIT DEFINITIONS BELOW
+;
+; 0005              NUMBER OF REVOLUTIONS (1=default)
+; 0006              START TRACK (0-165)
+; 0007              END TRACK (0-165)
+; 0008              FLAG BITS (0=INDEX, 1=BITCELL SIZE, 2=TPI, 3=RPM)
+; 0009              OFFSET FOR BIT CELL TIMES (0=16 BITS, >0=OFFSET)
+; 000A-B            RESERVED (2 BYTES)
+; 000C-F            32 BIT CHECKSUM OF DATA FROM 0x10-EOF
+; 0010              OFFSET TO 1st TRACK DATA HEADER (4 bytes of 0 if track is skipped)
+; 0014              OFFSET TO 2nd TRACK DATA HEADER (4 bytes of 0 if track is skipped)
+; 0018              OFFSET TO 3rd TRACK DATA HEADER (4 bytes of 0 if track is skipped)
 ; ....
-; 0x02A4-0x02A7     RESERVED (4 BYTES)
-; 0x02A8            START OF 1st TRACK DATA HEADER (SEE BELOW FOR STRUCTURE INFO)
+; 02A4              RESERVED (4 BYTES)
+; 02A8              START OF 1st TRACK DATA HEADER
 ;
 ; ....              END OF TRACK DATA
 ; ????              TIMESTAMP (AS ASCII STRING - ie. 7/17/2013 12:45:49 PM)
@@ -160,6 +174,51 @@ IFF_RSRVED = 0x09                  ; 3 bytes of reserved space
 IFF_CHECKSUM = 0x0C                ; 32 bit checksum of data added together starting at 0x0010 through EOF
 IFF_THOFFSET = 0x10                ; first track data header offset
 IFF_THDSTART = 0x2A8               ; start of first track data header/track data
+
+; MANUFACTURERS                      7654 3210
+man_CBM = &H0                      ; 0000 xxxx
+man_Atari = &H10                   ; 0001 xxxx
+man_Apple = &H20                   ; 0010 xxxx
+man_PC = &H40                      ; 0011 xxxx
+man_Tandy = &H21                   ; 0100 xxxx
+man_TI = &H40                      ; 0101 xxxx
+man_Roland = &H60                  ; 0110 xxxx
+
+; DISK TYPE BIT DEFINITIONS
+;
+; CBM DISK TYPES
+disk_C64 = &H0                     ; xxxx 0000
+disk_Amiga = &H4                   ; xxxx 0100
+
+; ATARI DISK TYPES
+disk_AtariFMSS = &H0               ; xxxx 0000
+disk_AtariFMDS = &H1               ; xxxx 0001
+disk_AtariFMEx = &H2               ; xxxx 0010
+disk_AtariSTSS = &H4               ; xxxx 0100
+disk_AtariSTDS = &H5               ; xxxx 0101
+
+; APPLE DISK TYPES
+disk_AppleII = &H0                 ; xxxx 0000
+disk_AppleIIPro = &H1              ; xxxx 0001
+disk_Apple400K = &H4               ; xxxx 0100
+disk_Apple800K = &H5               ; xxxx 0101
+disk_Apple144 = &H6                ; xxxx 0110
+
+; PC DISK TYPES
+disk_PC360K = &H0                  ; xxxx 0000
+disk_PC720K = &H1                  ; xxxx 0001
+disk_PC12M = &H2                   ; xxxx 0010
+disk_PC144M = &H3                  ; xxxx 0011
+
+; TANDY DISK TYPES
+disk_TRS80SS = &H0                 ; xxxx 0000
+disk_TRS80DS = &H1                 ; xxxx 0001
+
+; TI DISK TYPES
+disk_TI994A = &H0                  ; xxxx 0000
+
+; ROLAND DISK TYPES
+disk_D20 = &H0                     ; xxxx 0000
 
 
 ; ------------------------------------------------------------------
