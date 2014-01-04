@@ -64,7 +64,7 @@
 
 #define MAXPULSESKEW 10
 
-//#define FLUXSTREAMDBG 1
+#define FLUXSTREAMDBG 1
 
 #define SECONDPASSANALYSIS 1
 
@@ -1424,7 +1424,7 @@ static int GetTickCnt(s_track_dump * track_dump,unsigned int start, unsigned int
 	return ticknum;
 }
 
-static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontext,s_track_dump * track_dump,unsigned long indexperiod,unsigned long nbblock,pulsesblock * pb)
+static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontext,FXS * fxs,s_track_dump * track_dump,unsigned long indexperiod,unsigned long nbblock,pulsesblock * pb)
 {
 #ifdef SECONDPASSANALYSIS
 	unsigned long block_analysed;
@@ -1488,6 +1488,21 @@ static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontex
 
 	if(track_dump->nb_of_pulses)
 	{
+		// Only one reveolution -> No flakey bits detection : return a dummy buffer.
+		if(hxcfe_FxStream_GetNumberOfRevolution(fxs,track_dump) == 1)
+		{
+			overlap_pulses_tab = malloc(track_dump->nb_of_pulses * sizeof(unsigned long) );
+			if(overlap_pulses_tab)
+			{
+				memset(overlap_pulses_tab,0,track_dump->nb_of_pulses * sizeof(unsigned long) );
+				for(i=0;i<track_dump->nb_of_pulses;i++)
+				{
+					overlap_pulses_tab[i] = i + 1;
+				}
+			}
+			return overlap_pulses_tab;
+		}
+
 		match_table = malloc(sizeof(s_match) * track_dump->nb_of_pulses);
 		if(match_table)
 		{
@@ -2447,7 +2462,7 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 
 	hxcfe = fxs->hxcfe;
 
-	if(hxcfe_FxStream_GetNumberOfRevolution(fxs,std) >= 2)
+	if(hxcfe_FxStream_GetNumberOfRevolution(fxs,std) >= 1)
 	{
 		// Get the total track dump time length. (in 10th of nano seconds)
 		totallen = GetDumpTimelength(std);
@@ -2473,7 +2488,7 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 			hxcfe->hxc_printf(MSG_DEBUG,"Block analysing...");
 
 			// Find the blocks overlap.
-			overlap_tab = ScanAndFindRepeatedBlocks(hxcfe,std,indexperiod,nbblock,pb);
+			overlap_tab = ScanAndFindRepeatedBlocks(hxcfe,fxs,std,indexperiod,nbblock,pb);
 
 			hxcfe->hxc_printf(MSG_DEBUG,"...done");
 
