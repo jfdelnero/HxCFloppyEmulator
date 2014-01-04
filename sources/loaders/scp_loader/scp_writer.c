@@ -142,8 +142,6 @@ unsigned long write_scp_track(FILE *f,SIDE * track,unsigned long * csum,int trac
 
 	fwrite(&trkh,sizeof(scp_track_header),1,f);
 
-	totalsize = 0;
-
 	memset(trackbuffer,0,sizeof(trackbuffer));
 
 	trackoffset = 0;
@@ -151,14 +149,18 @@ unsigned long write_scp_track(FILE *f,SIDE * track,unsigned long * csum,int trac
 
 	getNextPulse(track,&trackoffset,&trackrollover);
 
+	offset = sizeof(scp_track_header);
+	total_time = 0;
+	totalsize = 0;
+
 	for(j=0;j<revolution;j++)
 	{
 		i = 0;
 
-		offset = sizeof(scp_track_header);
 		size = 0 ;
-		total_time = 0;
 
+		offset = sizeof(scp_track_header);
+		total_time = 0;
 		do
 		{
 			trackbuffer[i] = getNextPulse(track,&trackoffset,&trackrollover);
@@ -225,7 +227,7 @@ int SCP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 	unsigned long file_checksum;
 	unsigned long track_checksum;
-	int i;
+	int i,tracknumber;
 
 	f = fopen(filename,"wb");
 	if( f )
@@ -234,11 +236,71 @@ int SCP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 		strcpy((char*)&scph.sign,"SCP");
 
+		tracknumber = floppy->floppyNumberOfTrack * floppy->floppyNumberOfSide;
+
+		if(tracknumber>83*2)
+		{
+			floppycontext->hxc_printf(MSG_WARNING,"SCP_libWrite_DiskFile : Track number limited to 164 !");
+			tracknumber = 83*2;
+		}
+
 		scph.start_track = 0;
-		scph.end_track = (floppy->floppyNumberOfTrack * floppy->floppyNumberOfSide) - 1;
+		scph.end_track = tracknumber - 1;
 		scph.number_of_revolution = 2;
-		scph.disk_type = 1;
-		scph.flags = 0x01 | 0x02;
+
+		scph.disk_type = 0x15;
+
+		switch(floppy->floppyiftype)
+		{
+			case IBMPC_DD_FLOPPYMODE:
+				scph.disk_type = 0x41;
+				break;
+			case IBMPC_ED_FLOPPYMODE:
+			case IBMPC_HD_FLOPPYMODE:
+				scph.disk_type = 0x43;
+				break;
+
+			case ATARIST_DD_FLOPPYMODE:
+			case ATARIST_HD_FLOPPYMODE:
+				if(floppy->floppyNumberOfSide==2)
+					scph.disk_type = 0x15;
+				else
+					scph.disk_type = 0x14;
+				break;
+			case AMIGA_HD_FLOPPYMODE:
+			case AMIGA_DD_FLOPPYMODE:
+				scph.disk_type = 0x04;
+				break;
+
+			case C64_DD_FLOPPYMODE:
+				scph.disk_type = 0x00;
+				break;
+
+			case S950_HD_FLOPPYMODE:
+			case S950_DD_FLOPPYMODE:
+			case EMU_SHUGART_FLOPPYMODE:
+			case MSX2_DD_FLOPPYMODE:
+			case CPC_DD_FLOPPYMODE:
+			case GENERIC_SHUGART_DD_FLOPPYMODE:
+				if(floppy->floppyNumberOfSide==2)
+					scph.disk_type = 0x15;
+				else
+					scph.disk_type = 0x14;
+				break;
+		}		
+		
+		scph.flags = 0x01;
+		if(floppy->floppyNumberOfTrack>42)
+			scph.flags |= 0x02;
+
+		if(floppy->tracks[0])
+		{
+			if( floppy->tracks[0]->floppyRPM > 350 && floppy->tracks[0]->floppyRPM < 340)
+			{
+				scph.flags |= 0x04;
+			}
+		}
+
 		scph.version = 0x02;
 
 		// Header
@@ -253,7 +315,7 @@ int SCP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 		file_checksum = update_checksum(file_checksum,(unsigned char*)&tracksoffset,sizeof(tracksoffset));
 
-		for(i=0;i<floppy->floppyNumberOfTrack * floppy->floppyNumberOfSide;i++)
+		for(i=0;i<tracknumber;i++)
 		{
 
 			fseek(f,0,SEEK_END);
