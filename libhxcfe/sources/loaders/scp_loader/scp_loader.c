@@ -132,7 +132,7 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned lon
 				totallenght += trkh.index_position[i].track_lenght;
 			}
 
-			totallenght = totallenght * 2;
+			totallenght += 2;
 
 			if(totallenght)
 			{
@@ -142,16 +142,14 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned lon
 					memset(trackbuf,0,totallenght);
 
 					offset = 0;
-					for(j=0;j<2;j++)
-					{
-						for(i=0;i<revolution;i++)
-						{
-							fseek(f,foffset + trkh.index_position[i].track_offset,SEEK_SET);
-		
-							fread(&trackbuf[offset], trkh.index_position[i].track_lenght , 1, f);
 
-							offset += (trkh.index_position[i].track_lenght/2);
-						}
+					for(i=0;i<revolution;i++)
+					{
+						fseek(f,foffset + trkh.index_position[i].track_offset,SEEK_SET);
+	
+						fread(&trackbuf[offset], trkh.index_position[i].track_lenght , 1, f);
+
+						offset += (trkh.index_position[i].track_lenght/2);
 					}
 
 					for(i=0;i<totallenght/2;i++)
@@ -161,25 +159,21 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned lon
 
 					hxcfe_FxStream_setResolution(fxs,25000); // 25 ns per tick
 
-					track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf,16,totallenght/2);
+					track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf,16,(totallenght/2));
 					if(track_dump)
 					{
 						offset = 0;
-//						hxcfe_FxStream_AddIndex(fxs,track_dump,0);
-						for(j=0;j<2;j++)
-						{
-							for(i=0;i<revolution;i++)
-							{
-								offset += (trkh.index_position[i].track_lenght/2);
-								hxcfe_FxStream_AddIndex(fxs,track_dump,offset-1);
-							}
-						}
+						hxcfe_FxStream_AddIndex(fxs,track_dump,0);
 
+						for(i=0;i<revolution;i++)
+						{
+							offset += (trkh.index_position[i].track_lenght/2);
+							hxcfe_FxStream_AddIndex(fxs,track_dump,offset);
+						}
 						currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
 						
 						hxcfe_FxStream_FreeStream(fxs,track_dump);
 					}
-
 					free(trackbuf);
 				}
 			}
