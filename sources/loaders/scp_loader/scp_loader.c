@@ -103,7 +103,7 @@ int SCP_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned long foffset,short * rpm,float timecoef,int phasecorrection,int revolution)
 {
 	SIDE* currentside;
-	int totallenght,i,j,offset;
+	int totallenght,i,offset;
 
 	s_track_dump *track_dump;
 	FXS * fxs;
@@ -132,14 +132,14 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned lon
 				totallenght += trkh.index_position[i].track_lenght;
 			}
 
-			totallenght += 2;
+			totallenght++;
 
 			if(totallenght)
 			{
-				trackbuf = malloc(totallenght);
+				trackbuf = malloc(totallenght*sizeof(unsigned short));
 				if(trackbuf)
 				{
-					memset(trackbuf,0,totallenght);
+					memset(trackbuf,0,totallenght*sizeof(unsigned short));
 
 					offset = 0;
 
@@ -147,19 +147,19 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned lon
 					{
 						fseek(f,foffset + trkh.index_position[i].track_offset,SEEK_SET);
 	
-						fread(&trackbuf[offset], trkh.index_position[i].track_lenght , 1, f);
+						fread(&trackbuf[offset], (trkh.index_position[i].track_lenght*sizeof(unsigned short)) , 1, f);
 
-						offset += (trkh.index_position[i].track_lenght/2);
+						offset += (trkh.index_position[i].track_lenght);
 					}
 
-					for(i=0;i<totallenght/2;i++)
+					for(i=0;i<totallenght;i++)
 					{
 						trackbuf[i] = BIGENDIAN_WORD( trackbuf[i] );
 					}
 
 					hxcfe_FxStream_setResolution(fxs,25000); // 25 ns per tick
 
-					track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf,16,(totallenght/2));
+					track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf,16,(totallenght));
 					if(track_dump)
 					{
 						offset = 0;
@@ -167,7 +167,7 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned lon
 
 						for(i=0;i<revolution;i++)
 						{
-							offset += (trkh.index_position[i].track_lenght/2);
+							offset += (trkh.index_position[i].track_lenght);
 							hxcfe_FxStream_AddIndex(fxs,track_dump,offset);
 						}
 						currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);

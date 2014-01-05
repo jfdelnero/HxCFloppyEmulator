@@ -46,6 +46,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "libhxcfe.h"
 
@@ -128,6 +129,8 @@ unsigned long write_scp_track(FILE *f,SIDE * track,unsigned long * csum,int trac
 	int fpos;
 	unsigned int trackoffset;
 	int trackrollover;
+	time_t curtimecnt;
+	struct tm * curtime;
 
 	checksum = 0;
 	file_checksum = 0;
@@ -159,7 +162,6 @@ unsigned long write_scp_track(FILE *f,SIDE * track,unsigned long * csum,int trac
 
 		size = 0 ;
 
-		offset = sizeof(scp_track_header);
 		total_time = 0;
 		do
 		{
@@ -187,7 +189,7 @@ unsigned long write_scp_track(FILE *f,SIDE * track,unsigned long * csum,int trac
 		}
 
 		trkh.index_position[j].index_time = LITTLEENDIAN_DWORD(total_time);
-		trkh.index_position[j].track_lenght = LITTLEENDIAN_DWORD(size);
+		trkh.index_position[j].track_lenght = LITTLEENDIAN_DWORD(size/2);
 		trkh.index_position[j].track_offset = LITTLEENDIAN_DWORD(offset);
 
 		totalsize += size;
@@ -195,7 +197,11 @@ unsigned long write_scp_track(FILE *f,SIDE * track,unsigned long * csum,int trac
 		offset = offset + size;
 	}
 
-	sprintf(timestamp,"10/15/2013 5:52:30 PM");
+	time(&curtimecnt);
+	curtime = localtime(&curtimecnt);
+
+	memset(timestamp,0,sizeof(timestamp));
+	sprintf(timestamp,"%d/%d/%d %d:%d:%d",curtime->tm_mon+1,curtime->tm_mday,(curtime->tm_year+1900),curtime->tm_hour,curtime->tm_min,curtime->tm_sec);
 	fwrite(timestamp,strlen(timestamp),1,f);
 
 	file_checksum = update_checksum(file_checksum,(unsigned char*)&timestamp,strlen(timestamp));
@@ -317,7 +323,6 @@ int SCP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 		for(i=0;i<tracknumber;i++)
 		{
-
 			fseek(f,0,SEEK_END);
 
 			tracksoffset[i] = LITTLEENDIAN_DWORD(ftell(f));
