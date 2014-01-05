@@ -117,12 +117,12 @@ int SDDSpeccyDos_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgf
 			return HXCFE_BADFILE;
 		}
 
-		f = fopen(imgfile,"rb");
+		f = hxc_fopen(imgfile,"rb");
 		if(f)
 		{
 			fread(buffer,256,1,f);
 
-			fclose(f);
+			hxc_fclose(f);
 
 			if(sdd_getfloppyconfig(
 				buffer,

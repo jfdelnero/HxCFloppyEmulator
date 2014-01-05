@@ -75,12 +75,12 @@ int XML_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			return HXCFE_ACCESSERROR;
 		}
 
-		f=fopen(imgfile,"rb");
+		f=hxc_fopen(imgfile,"rb");
 		if(f)
 		{
 			memset(firstline,0,sizeof(firstline));
 			fgets(firstline,sizeof(firstline)-1,f);
-			fclose(f);
+			hxc_fclose(f);
 
 			if(strstr(firstline,"<?xml version="))
 			{

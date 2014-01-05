@@ -84,7 +84,7 @@ int SCP_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		if( strncmp((char*)scph.sign,"SCP",3) )
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"SCP_libIsValidDiskFile : Bad file header !");
-			fclose(f);
+			hxc_fclose(f);
 			return HXCFE_BADFILE;
 		}
 
@@ -229,7 +229,7 @@ int SCP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			fread(&scph,sizeof(scp_header),1,f);
 			if(strncmp((char*)&scph.sign,"SCP",3))
 			{
-				fclose(f);
+				hxc_fclose(f);
 				floppycontext->hxc_printf(MSG_DEBUG,"SCP_libLoad_DiskFile : bad Header !");
 				return HXCFE_BADFILE;
 			}
@@ -317,7 +317,7 @@ int SCP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				}
 			}
 
-			fclose(f);
+			hxc_fclose(f);
 
 			// Adjust track timings.
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
