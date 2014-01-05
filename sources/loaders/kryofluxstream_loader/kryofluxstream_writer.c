@@ -199,7 +199,7 @@ unsigned long write_kf_stream_track(char * filepath,SIDE * track,int tracknum,in
 	sprintf(fileext,"%.2d.%d.raw",tracknum,sidenum);
 	strcat(fullp,fileext);
 
-	f = fopen(fullp,"wb");
+	f = hxc_fopen(fullp,"wb");
 	if(f)
 	{
 		trackoffset = 0;
@@ -374,7 +374,7 @@ unsigned long write_kf_stream_track(char * filepath,SIDE * track,int tracknum,in
 		memset(trackbuffer,0x0D,7);
 		fwrite(&trackbuffer,7,1,f);
 
-		fclose(f);
+		hxc_fclose(f);
 	}
 
 	return 0;

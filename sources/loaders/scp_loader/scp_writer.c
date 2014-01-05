@@ -235,7 +235,7 @@ int SCP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	unsigned long track_checksum;
 	int i,tracknumber;
 
-	f = fopen(filename,"wb");
+	f = hxc_fopen(filename,"wb");
 	if( f )
 	{
 		memset(&scph,0,sizeof(scp_header));
@@ -340,7 +340,7 @@ int SCP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 		scph.file_data_checksum = LITTLEENDIAN_DWORD(file_checksum);
 		fwrite(&scph,sizeof(scp_header),1,f);
 
-		fclose(f);
+		hxc_fclose(f);
 	}
 
 

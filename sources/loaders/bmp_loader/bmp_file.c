@@ -30,6 +30,9 @@
 #include <string.h>
 #include "bmp_file.h"
 
+#include "libhxcfe.h"
+#include "libhxcadaptor.h"
+
 int bmp_load(char * file,bitmap_data * bdata)
 {
 	FILE * f;
@@ -43,7 +46,7 @@ int bmp_load(char * file,bitmap_data * bdata)
 	BITMAPINFOHEADER bitmap_info_header;
 	RGBQUAD * palette;
 
-	f=fopen(file,"rb");
+	f = hxc_fopen(file,"rb");
 	if(f)
 	{
 		fread(&bitmap_header,1,sizeof(BITMAPFILEHEADER),f);
@@ -238,18 +241,18 @@ int bmp_load(char * file,bitmap_data * bdata)
 			else
 			{
 				// non supported
-				fclose(f);
+				hxc_fclose(f);
 				return -1;
 			}
 		}
 		else
 		{
 			// non bitmap file
-			fclose(f);
+			hxc_fclose(f);
 			return -2;
 		}
 
-		fclose(f);
+		hxc_fclose(f);
 		return 0;  // ok
 	}
 
@@ -266,7 +269,7 @@ int bmp24b_write(char * file,bitmap_data * bdata)
 	unsigned long bitmapdatalinesize;
 	unsigned char * linebuffer;
 
-	f = fopen(file,"wb");
+	f = hxc_fopen(file,"wb");
 	if(f)
 	{
 		memset(&bitmap_header,0,sizeof(BITMAPFILEHEADER));
@@ -308,7 +311,7 @@ int bmp24b_write(char * file,bitmap_data * bdata)
 		}
 
 		free(linebuffer);
-		fclose(f);
+		hxc_fclose(f);
 	}
 
 	return 0;
@@ -324,7 +327,7 @@ int bmp16b_write(char * file,bitmap_data * bdata)
 	unsigned long bitmapdatalinesize;
 	unsigned char * linebuffer;
 
-	f = fopen(file,"wb");
+	f = hxc_fopen(file,"wb");
 	if(f)
 	{
 		memset(&bitmap_header,0,sizeof(BITMAPFILEHEADER));
@@ -370,7 +373,7 @@ int bmp16b_write(char * file,bitmap_data * bdata)
 		}
 
 		free(linebuffer);
-		fclose(f);
+		hxc_fclose(f);
 	}
 
 	return 0;
@@ -428,7 +431,7 @@ int bmpRLE8b_write(char * file,bitmap_data * bdata)
 	unsigned char pal[256*4];
 
 
-	f = fopen(file,"wb");
+	f = hxc_fopen(file,"wb");
 	if(f)
 	{
 		memset(&bitmap_header,0,sizeof(BITMAPFILEHEADER));
@@ -495,7 +498,7 @@ int bmpRLE8b_write(char * file,bitmap_data * bdata)
 		fwrite(&bitmap_info_header,1,sizeof(BITMAPINFOHEADER),f);
 
 		free(linebuffer);
-		fclose(f);
+		hxc_fclose(f);
 	}
 
 	return 0;
