@@ -174,7 +174,7 @@ void savebuffer(char * name,unsigned char * buffer, int size)
 	if(f)
 	{
 		fwrite(buffer,size,1,f);
-		fclose(f);
+		hxc_fclose(f);
 	}
 }
 
