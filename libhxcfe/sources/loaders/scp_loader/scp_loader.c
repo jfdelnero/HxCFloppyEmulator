@@ -88,6 +88,7 @@ int SCP_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			return HXCFE_BADFILE;
 		}
 
+		hxc_fclose(f);
 		floppycontext->hxc_printf(MSG_DEBUG,"SCP_libIsValidDiskFile : SCP file !");
 		return HXCFE_VALIDFILE;
 	}
