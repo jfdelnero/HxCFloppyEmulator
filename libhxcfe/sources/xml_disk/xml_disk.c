@@ -915,12 +915,12 @@ int	hxcfe_setXmlFloppyLayoutFile(XmlFloppyBuilder* context,char * filepath)
 
 	if(hxc_checkfileext(filepath,"xml"))
 	{
-		f=fopen(filepath,"rb");
+		f=hxc_fopen(filepath,"rb");
 		if(f)
 		{
 			memset(firstline,0,sizeof(firstline));
 			fgets(firstline,sizeof(firstline)-1,f);
-			fclose(f);
+			hxc_fclose(f);
 
 			if(strstr(firstline,"<?xml version="))
 			{
@@ -967,7 +967,7 @@ FLOPPY* hxcfe_generateXmlFloppy (XmlFloppyBuilder* context,unsigned char * rambu
 	{
 		ad->floppy = 0;
 
-		f = fopen((char*)ad->xmlfile_path,"rb");
+		f = hxc_fopen((char*)ad->xmlfile_path,"rb");
 		if(f)
 		{
 			fseek(f,0,SEEK_END);
@@ -987,7 +987,7 @@ FLOPPY* hxcfe_generateXmlFloppy (XmlFloppyBuilder* context,unsigned char * rambu
 				}
 			}
 
-			fclose(f);
+			hxc_fclose(f);
 		}
 	}
 
@@ -1002,7 +1002,7 @@ FLOPPY* hxcfe_generateXmlFileFloppy (XmlFloppyBuilder* context,char *file)
 	unsigned char * buffer;
 
 	ret = 0;
-	f = fopen(file,"rb");
+	f = hxc_fopen(file,"rb");
 	if(f)
 	{
 		fseek(f,0,SEEK_END);
@@ -1029,7 +1029,7 @@ FLOPPY* hxcfe_generateXmlFileFloppy (XmlFloppyBuilder* context,char *file)
 			}
 		}
 
-		fclose(f);
+		hxc_fclose(f);
 	}
 
 	return ret;
