@@ -270,6 +270,7 @@ int SCP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			{
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
+					floppycontext->hxc_printf(MSG_DEBUG,"Load Track %.3d Side %d",j,i);
 					curside=decodestream(floppycontext,f,tracksoffset[(j<<1)|(i&1)],&rpm,timecoef,phasecorrection,scph.number_of_revolution);
 
 					if(!floppydisk->tracks[j/doublestep])
