@@ -98,6 +98,12 @@ unsigned short getNextPulse(SIDE * track,unsigned int * offset,int * rollover)
 			*rollover = 0xFF;
 		}
 
+		// Overflow...
+		if(totaltime >= (65536*25) )
+		{
+			return 0xFFFF;
+		}
+
 		if( track->databuffer[(*offset)>>3] & (0x80 >> ((*offset) & 7) ) )
 		{
 			return (int)((float)totaltime/(float)25);
