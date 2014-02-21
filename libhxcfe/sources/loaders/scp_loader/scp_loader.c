@@ -235,6 +235,16 @@ int SCP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				return HXCFE_BADFILE;
 			}
 
+			floppycontext->hxc_printf(MSG_INFO_1,"Loading SCP file...");
+			floppycontext->hxc_printf(MSG_INFO_1,"Version : 0x%.2X",scph.version);
+			floppycontext->hxc_printf(MSG_INFO_1,"Disk Type : 0x%.2X",scph.disk_type);
+			floppycontext->hxc_printf(MSG_INFO_1,"Start track : %d",scph.start_track);
+			floppycontext->hxc_printf(MSG_INFO_1,"End track : %d",scph.end_track);
+			floppycontext->hxc_printf(MSG_INFO_1,"Number of revolution(s) : %d",scph.number_of_revolution);
+			floppycontext->hxc_printf(MSG_INFO_1,"Flags : 0x%.2X",scph.flags);
+			floppycontext->hxc_printf(MSG_INFO_1,"File Checksum : 0x%.4X",scph.file_data_checksum);
+			floppycontext->hxc_printf(MSG_INFO_1,"RFU 1,2,3 : 0x%.2X,0x%.2X,0x%.2X",scph.RFU_0,scph.RFU_1,scph.RFU_2);
+
 			nbside = 1;
 
 			doublestep = 1;

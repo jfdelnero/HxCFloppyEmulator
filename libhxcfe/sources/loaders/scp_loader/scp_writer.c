@@ -313,7 +313,7 @@ int SCP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 			}
 		}
 
-		scph.version = 0x02;
+		scph.version = 0x09;
 
 		// Header
 		fwrite(&scph,sizeof(scp_header),1,f);
