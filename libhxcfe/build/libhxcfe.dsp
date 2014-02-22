@@ -1767,6 +1767,10 @@ SOURCE=..\sources\loaders\scp_loader\scp_writer.c
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\sources\loaders\bmp_loader\bmp_disk_writer.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\loaders\bmp_loader\bmp_file.c
 # End Source File
 # Begin Source File
