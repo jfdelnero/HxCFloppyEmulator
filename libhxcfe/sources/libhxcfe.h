@@ -304,8 +304,17 @@ const char * hxcfe_getTrackEncodingName(HXCFLOPPYEMULATOR* floppycontext,int tra
 typedef struct s_sectorlist_
 {
 	SECTORCONFIG * sectorconfig;
+
+	int side,track;
+
+	// track mode
 	int x_pos1,y_pos1;
 	int x_pos2,y_pos2;
+
+	// disc mode
+	float start_angle,end_angle;
+	int   diameter,thickness;
+
 	struct s_sectorlist_ * next_element;
 }s_sectorlist;
 
