@@ -81,12 +81,12 @@ floppy_infos_window::floppy_infos_window() {
         x_offset->textsize(12);
         x_offset->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Value_Slider* x_offset
-      { track_view_bt = new Fl_Round_Button(213, 640, 64, 4, "Track view");
+      { track_view_bt = new Fl_Round_Button(213, 640, 92, 16, "Track view");
         track_view_bt->type(102);
         track_view_bt->down_box(FL_ROUND_DOWN_BOX);
         track_view_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Round_Button* track_view_bt
-      { disc_view_bt = new Fl_Round_Button(340, 640, 64, 4, "Disk view");
+      { disc_view_bt = new Fl_Round_Button(340, 640, 81, 16, "Disk view");
         disc_view_bt->type(102);
         disc_view_bt->down_box(FL_ROUND_DOWN_BOX);
         disc_view_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
