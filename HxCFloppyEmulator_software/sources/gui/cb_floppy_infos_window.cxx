@@ -36,7 +36,7 @@
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
 // File : cb_floppy_infos_window.cxx
-// Contains: 
+// Contains:
 //
 // Written by:	DEL NERO Jean Francois
 //
@@ -48,6 +48,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <math.h>
 
 #include "fl_includes.h"
 
@@ -66,6 +67,8 @@ extern s_gui_context * guicontext;
 
 char fullstr[256*1024];
 
+#define PI    ((float)  3.141592654f)
+
 void update_graph(floppy_infos_window * w)
 {
 	s_trackdisplay * td;
@@ -79,11 +82,11 @@ void update_graph(floppy_infos_window * w)
 
 	disp_xsize=w->floppy_map_disp->w();
 	disp_ysize=w->floppy_map_disp->h();
-	
+
 	if(w->window->shown())
 	{
 		w->window->make_current();
-		
+
 		w->object_txt->textsize(9);
 		w->object_txt->textfont(FL_SCREEN);
 
@@ -107,13 +110,13 @@ void update_graph(floppy_infos_window * w)
 			{
 				if(w->track_number_slide->value()>=guicontext->loadedfloppy->floppyNumberOfTrack)
 					w->track_number_slide->value(guicontext->loadedfloppy->floppyNumberOfTrack-1);
-				
+
 				if(w->side_number_slide->value()>=guicontext->loadedfloppy->floppyNumberOfSide)
 					w->side_number_slide->value(guicontext->loadedfloppy->floppyNumberOfSide-1);
 
 				w->track_number_slide->scrollvalue((int)w->track_number_slide->value(),1,0,guicontext->loadedfloppy->floppyNumberOfTrack);
 				w->side_number_slide->scrollvalue((int)w->side_number_slide->value(),1,0,guicontext->loadedfloppy->floppyNumberOfSide);
-				
+
 				if(w->track_view_bt->value())
 				{
 					hxcfe_td_draw_track(guicontext->hxcfe,td,guicontext->loadedfloppy,(int)w->track_number_slide->value(),(int)w->side_number_slide->value());
@@ -142,7 +145,27 @@ void update_graph(floppy_infos_window * w)
 				track=(int)w->track_number_slide->value();
 				side=(int)w->side_number_slide->value();
 
-				sprintf(tempstr,"Track : %d Side : %d ",track,side);
+				if(!w->disc_view_bt->value())
+				{
+					sprintf(tempstr,"Track : %d Side : %d ",track,side);
+					w->side_number_slide->activate();
+					w->track_number_slide->activate();
+					w->x_offset->activate();
+					w->x_time->activate();
+					w->y_time->activate();
+				}
+				else
+				{
+					sprintf(tempstr,"");
+					w->side_number_slide->deactivate();
+					w->track_number_slide->deactivate();
+					w->x_offset->deactivate();
+					w->x_time->deactivate();
+					w->y_time->deactivate();
+					w->x_pos->value("---");
+					w->y_pos->value("---");
+				}
+
 				w->global_status->value(tempstr);
 
 				sprintf(tempstr,"Track RPM tag : %d\nBitrate flag : %d\nTrack encoding flag : %x\n",
@@ -150,12 +173,12 @@ void update_graph(floppy_infos_window * w)
 					(int)guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate,
 					guicontext->loadedfloppy->tracks[track]->sides[side]->track_encoding
 					);
-				
+
 				w->buf->remove(0,w->buf->length());
 
 				sprintf(tempstr,"Track RPM : %d RPM - ",guicontext->loadedfloppy->tracks[track]->floppyRPM);
 				w->buf->append((char*)tempstr);
-				
+
 				if(guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate==-1)
 				{
 					sprintf(tempstr,"Bitrate : VARIABLE\n");
@@ -170,13 +193,13 @@ void update_graph(floppy_infos_window * w)
 				sprintf(tempstr,"Track len : %d cells\n",(int)guicontext->loadedfloppy->tracks[track]->sides[side]->tracklen);
 				w->buf->append((char*)tempstr);
 				sprintf(tempstr,"Number of side : %d\n",guicontext->loadedfloppy->tracks[track]->number_of_side);
-				w->buf->append((char*)tempstr);	
+				w->buf->append((char*)tempstr);
 
 				sprintf(tempstr,"Interface mode: %s - %s\n",
 					hxcfe_getFloppyInterfaceModeName(guicontext->hxcfe,guicontext->interfacemode),
 					hxcfe_getFloppyInterfaceModeDesc(guicontext->hxcfe,guicontext->interfacemode)
 					);
-				w->buf->append((char*)tempstr);	
+				w->buf->append((char*)tempstr);
 
 				w->object_txt->buffer(w->buf);
 			}
@@ -200,11 +223,11 @@ void update_graph(floppy_infos_window * w)
 }
 
 void tick_infos(void *w) {
-	
+
 	s_trackdisplay * td;
-	floppy_infos_window *window;	
+	floppy_infos_window *window;
 	window=(floppy_infos_window *)w;
-	
+
 	if(window->window->shown())
 	{
 		window->window->make_current();
@@ -220,20 +243,20 @@ void tick_infos(void *w) {
 			fl_draw_image((unsigned char *)td->framebuffer, window->floppy_map_disp->x(), window->floppy_map_disp->y(), td->xsize, td->ysize, 3, 0);
 		}
 	}
-				
-	Fl::repeat_timeout(0.1, tick_infos, w);  
+
+	Fl::repeat_timeout(0.1, tick_infos, w);
 }
 
 int InfosThreadProc(void* floppycontext,void* hw_context)
 {
-	return 0;	
+	return 0;
 }
 
 void floppy_infos_window_bt_read(Fl_Button* bt, void*)
 {
 	floppy_infos_window *fdw;
 	Fl_Window *dw;
-	
+
 	dw=((Fl_Window*)(bt->parent()));
 	fdw=(floppy_infos_window *)dw->user_data();
 }
@@ -241,16 +264,16 @@ void floppy_infos_window_bt_read(Fl_Button* bt, void*)
 void floppy_infos_ok(Fl_Button*, void* w)
 {
 	floppy_infos_window *fdw;
-	
+
 	fdw=(floppy_infos_window *)w;
-	
+
 	fdw->window->hide();
 }
 
 void disk_infos_window_callback(Fl_Widget *o, void *v)
 {
 	floppy_infos_window *window;
-	
+
 	window=((floppy_infos_window*)(o->user_data()));
 
 	if(window->x_time->value()>1000)
@@ -273,6 +296,98 @@ void disk_infos_window_callback(Fl_Widget *o, void *v)
 	update_graph(window);
 }
 
+
+
+float getangle(int xsize,int ysize,int x_pos,int y_pos)
+{
+	float x1,y1,x2,y2,x3,y3;
+	float angle;
+	float dx21,dx31,dy21,dy31;
+	float m12,m13;
+
+	x1 = (float)(xsize / 2);
+	y1 = (float)(ysize / 2);
+
+	x2 = (float)xsize;
+	y2 = (float)(ysize / 2);
+
+	x3 = (float)x_pos;
+	y3 = (float)y_pos;
+
+	dx21 = x2-x1;
+	dx31 = x3-x1;
+	dy21 = y2-y1;
+	dy31 = y3-y1;
+
+	m12 = (float)sqrt( dx21*dx21 + dy21*dy21 );
+	m13 = (float)sqrt( dx31*dx31 + dy31*dy31 );
+
+	angle = (float)acos( (dx21*dx31 + dy21*dy31) / (m12 * m13) );
+
+	if(dy31>=0)
+	{
+		angle = PI + (PI - angle);
+	}
+
+	return angle;
+}
+
+
+int getdistance(int xsize,int ysize,int x_pos,int y_pos)
+{
+	int distance;
+
+	distance = (int)sqrt( pow( (xsize/2) - x_pos, 2 ) + pow( (ysize/2) - y_pos, 2 ) );
+
+	return distance;
+}
+
+
+int isTheRightSector(floppy_infos_window *fiw,s_sectorlist * sl,int xpos,int ypos)
+{
+	int disp_xsize,disp_ysize;
+	float pos_angle;
+	int distance,side;
+
+	if(fiw->disc_view_bt->value())
+	{
+		disp_xsize=fiw->floppy_map_disp->w();
+		disp_ysize=fiw->floppy_map_disp->h();
+
+		if(xpos<(disp_xsize/2))
+		{
+			pos_angle = getangle(disp_xsize/2,disp_ysize,xpos,ypos);
+			distance = getdistance(disp_xsize/2,disp_ysize,xpos,ypos);
+			side = 0;
+		}
+		else
+		{
+			pos_angle = getangle(disp_xsize/2,disp_ysize,(xpos-(disp_xsize/2)),ypos);
+			distance = getdistance(disp_xsize/2,disp_ysize,(xpos-(disp_xsize/2)),ypos);
+			side = 1;
+		}
+
+		if( ( pos_angle>=sl->start_angle && pos_angle<=sl->end_angle ) &&
+			( distance>=(sl->diameter) && distance<=(sl->diameter + sl->thickness) ) &&
+			sl->side == side
+			)
+		{
+			return 1;
+		}
+
+	}
+	else
+	{
+		if( ( xpos>=sl->x_pos1 && xpos<=sl->x_pos2 ) &&
+			( ypos>=(sl->y_pos1) && ypos<=(sl->y_pos2) ) )
+		{
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 void mouse_di_cb(Fl_Widget *o, void *v)
 {
 	unsigned int i;
@@ -289,7 +404,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 	unsigned char c;
 	s_sectorlist * sl;
 	int disp_xsize,disp_ysize,disp_xpos,disp_ypos;
-	
+
 	dw=((Fl_Window*)(o->parent()));
 	fiw=(floppy_infos_window *)dw->user_data();
 
@@ -308,16 +423,19 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 		if(xpos>disp_xsize) xpos=disp_xsize-1;
 
 		ypos=Fl::event_y() - disp_ypos;
-		
+
 		if(ypos<0) ypos=0;
 		if(ypos>disp_ysize) ypos=disp_ysize-1;
 
 		ypos=disp_ysize-ypos;
 
-		sprintf(str,"x position : %.3f ms",	(xpos * stepperpix_x)/1000);
-		fiw->x_pos->value(str);
-		sprintf(str,"y position : %.3f us",	ypos*stepperpix_y);
-		fiw->y_pos->value(str);
+		if(!fiw->disc_view_bt->value())
+		{
+			sprintf(str,"x position : %.3f ms",	(xpos * stepperpix_x)/1000);
+			fiw->x_pos->value(str);
+			sprintf(str,"y position : %.3f us",	ypos*stepperpix_y);
+			fiw->y_pos->value(str);
+		}
 
 		fiw->buf->remove(0,fiw->buf->length());
 
@@ -334,9 +452,17 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 			if(sl->sectorconfig)
 			{
 				fullstr[0]=0;
-				if( ( xpos>=sl->x_pos1 && xpos<=sl->x_pos2 ) && 
-					( ypos>=(sl->y_pos1) && ypos<=(sl->y_pos2) ) )
+
+				if( isTheRightSector(fiw,sl,xpos,ypos) )
 				{
+					if(fiw->disc_view_bt->value())
+					{
+						sprintf(str,"Track : %d Side : %d ",sl->track,sl->side);
+						fiw->global_status->value(str);
+
+						fiw->track_number_slide->value(sl->track);
+						fiw->side_number_slide->value(sl->side);
+					}
 
 					switch(sl->sectorconfig->trackencoding)
 					{
@@ -375,7 +501,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						break;
 					}
 					fiw->buf->append((char*)str);
-	
+
 					sprintf(str,"Sector ID %.3d - Size %.5d - Size ID 0x%.2x - Track ID %.3d - Side ID %.3d\n",
 						sl->sectorconfig->sector,
 						sl->sectorconfig->sectorsize,
@@ -430,7 +556,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 							}
 
 							sprintf(str,"%.2X ",sl->sectorconfig->input_data[i]);
-							strcat(fullstr,str);				
+							strcat(fullstr,str);
 
 							c='.';
 							if( (sl->sectorconfig->input_data[i]>=32 && sl->sectorconfig->input_data[i]<=126) )
@@ -439,17 +565,16 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 							str2[i&0xF]=c;
 
 						}
-					
+
 						str2[16]=0;
 						strcat(fullstr,"| ");
 						strcat(fullstr,str2);
 					}
-			
-					strcat(fullstr,"\n\n");				
 
+					strcat(fullstr,"\n\n");
 
-					fiw->buf->append((char*)fullstr);					
-					
+					fiw->buf->append((char*)fullstr);
+
 					fiw->object_txt->buffer(fiw->buf);
 				}
 			}
@@ -464,7 +589,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 			sprintf(str,"Track RPM : %d RPM - ",guicontext->loadedfloppy->tracks[track]->floppyRPM);
 			strcat(fullstr,str);
-				
+
 			if(guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate==-1)
 			{
 				sprintf(str,"Bitrate : VARIABLE\n");
@@ -485,7 +610,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 			sprintf(str,"Interface mode: %s - %s\n",
 				hxcfe_getFloppyInterfaceModeName(guicontext->hxcfe,guicontext->interfacemode),
 				hxcfe_getFloppyInterfaceModeDesc(guicontext->hxcfe,guicontext->interfacemode));
-			
+
 			strcat(fullstr,str);
 
 			fiw->buf->append((char*)fullstr);
