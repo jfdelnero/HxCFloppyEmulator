@@ -75,13 +75,13 @@ class floppy_infos_window {open
           label {Track view}
           user_data this
           callback disk_infos_window_callback
-          xywh {213 640 64 4} type Radio down_box ROUND_DOWN_BOX
+          xywh {213 640 92 16} type Radio down_box ROUND_DOWN_BOX
         }
         Fl_Round_Button disc_view_bt {
           label {Disk view}
           user_data this
-          callback disk_infos_window_callback
-          xywh {340 640 64 4} type Radio down_box ROUND_DOWN_BOX
+          callback disk_infos_window_callback selected
+          xywh {340 640 81 16} type Radio down_box ROUND_DOWN_BOX
         }
         Fl_Slider x_time {
           label {full x time scale}
