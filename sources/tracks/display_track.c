@@ -1002,6 +1002,10 @@ void draw_circle (s_trackdisplay *td,unsigned long col,float start_angle,float s
 	length = diametre;
 
 	if(op!=1) thickness++;
+
+	
+	length += thickness;
+
 	i = 0;
 	do
 	{
@@ -1018,7 +1022,7 @@ void draw_circle (s_trackdisplay *td,unsigned long col,float start_angle,float s
 			angle += angle_stepsize;
 		}while (angle < stop_angle );
 
-		length++;
+		length--;
 		i++;
 	}while(i<(thickness));
 }
@@ -1104,7 +1108,7 @@ s_sectorlist * display_sectors_disk(HXCFLOPPYEMULATOR* floppycontext,s_trackdisp
 					}
 					else
 					{
-						color = 0x00FF00;
+						color = 0x44FF44;
 					}
 
 					draw_circle (td,color,(float)((float)2 * PI)*(startsector_timingoffset/track_timing),(float)((float)2 * PI)*(datasector_timingoffset/track_timing),xpos,ypos,diam,0,thickness);
@@ -1122,12 +1126,12 @@ s_sectorlist * display_sectors_disk(HXCFLOPPYEMULATOR* floppycontext,s_trackdisp
 						if(sc->use_alternate_data_crc)
 						{
 							// CRC error -> Red
-							color = 0x0000FF;
+							color = 0x008FFA;
 						}
 						else
 						{
 							// Sector ok -> Green
-							color = 0x33FF33;
+							color = 0x00FF00;
 						}
 					}
 
@@ -1165,7 +1169,6 @@ void hxcfe_td_draw_disk(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOP
 	unsigned int color;
 	int y_pos,x_pos_1,x_pos_2;
 	float track_ep;
-
 	int bitrate;
 	int xpos;
 
@@ -1253,7 +1256,6 @@ void hxcfe_td_draw_disk(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLOP
 			track_ep=(float)( (td->ysize-(y_pos)) - 60 ) /(float) floppydisk->floppyNumberOfTrack;
 
 			draw_circle (td,0xEFEFEF,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)),1,(int)0);
-
 			draw_circle (td,0xEFEFEF,0,(float)((float)((float)2 * PI)),x_pos_2,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)),1,(int)0);
 		}
 	}
