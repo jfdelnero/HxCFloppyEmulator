@@ -757,6 +757,7 @@ int amigados_ftell( FSMNG * fsmng,int filehandle)
 int amigados_fseek( FSMNG * fsmng,int filehandle,long offset,int origin)
 {
 	struct File * file;
+
 	if(filehandle && filehandle<128)
 	{
 		if((long)fsmng->handletable[filehandle-1]!=-1)
@@ -773,11 +774,14 @@ int amigados_fseek( FSMNG * fsmng,int filehandle,long offset,int origin)
 					return HXCFE_NOERROR;
 				break;
 				case SEEK_END:
-					adfFileSeek((struct File *)fsmng->handletable[filehandle-1], 0xFFFFFFFF);
+					
+					adfFileSeek((struct File *)fsmng->handletable[filehandle-1], file->fileHdr->byteSize);
+
 					if((unsigned long)offset<file->pos)
 						adfFileSeek((struct File *)fsmng->handletable[filehandle-1], file->pos - offset);
 					else
 						adfFileSeek((struct File *)fsmng->handletable[filehandle-1], 0);
+
 					return HXCFE_NOERROR;
 				break;
 			}
