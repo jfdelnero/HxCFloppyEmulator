@@ -128,6 +128,7 @@ const char * plugid_lst[]=
 	PLUGIN_SKF,
 	PLUGIN_SCP,
 	PLUGIN_BMP,
+	PLUGIN_DISK_BMP,
 	PLUGIN_GENERIC_XML
 };
 
@@ -316,6 +317,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"KF Stream file\t*.raw\n"
 					"SCP file\t*.scp\n"
 					"BMP file\t*.bmp\n"
+					"BMP file (disk)\t*.bmp\n"
 					"XML file\t*.xml\n"
 					);
 
