@@ -56,6 +56,8 @@
 
 int BMP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename);
 
+int BMP_Disk_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename);
+
 int BMP_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
 {
 
@@ -69,6 +71,32 @@ int BMP_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 		(LOADDISKFILE)		0,
 		(WRITEDISKFILE)		BMP_libWrite_DiskFile,
 		(GETPLUGININFOS)	BMP_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			floppycontext,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
+
+int BMP_Disk_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+{
+
+	static const char plug_id[]="BMP_DISK_IMAGE";
+	static const char plug_desc[]="BMP floppy layout (disk) image generator";
+	static const char plug_ext[]="bmp";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	0,
+		(LOADDISKFILE)		0,
+		(WRITEDISKFILE)		BMP_Disk_libWrite_DiskFile,
+		(GETPLUGININFOS)	BMP_Disk_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
