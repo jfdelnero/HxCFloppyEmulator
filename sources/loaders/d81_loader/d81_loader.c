@@ -120,14 +120,13 @@ int D81_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	fseek (f , 0 , SEEK_SET); 
 	
 	if(filesize!=0)
-	{		
-		
+	{
 		sectorsize=512; // D81 file support only 512bytes/sector floppies.
 		// read the first sector
 		floppydisk->floppyNumberOfTrack=80;
 		floppydisk->floppyNumberOfSide=2;
 		floppydisk->floppySectorPerTrack=10;
-		gap3len=38;
+		gap3len=35;
 		interleave=1;
 		rpm=300;
 		floppydisk->floppyBitRate=250000;
@@ -154,7 +153,7 @@ int D81_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				fseek (f , file_offset , SEEK_SET);
 				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);		
 				
-				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
+				currentcylinder->sides[1-i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
 			}
 		}
 			
