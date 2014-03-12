@@ -248,7 +248,7 @@ int SCP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 		strcpy((char*)&scph.sign,"SCP");
 
-		tracknumber = floppy->floppyNumberOfTrack * floppy->floppyNumberOfSide;
+		tracknumber = floppy->floppyNumberOfTrack * 2;
 
 		if(tracknumber>83*2)
 		{
@@ -333,7 +333,14 @@ int SCP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 			tracksoffset[i] = LITTLEENDIAN_DWORD(ftell(f));
 
-			write_scp_track(f,floppy->tracks[i>>1]->sides[i&1],&track_checksum,i,scph.number_of_revolution);
+			if(floppy->floppyNumberOfSide == 2)
+			{
+				write_scp_track(f,floppy->tracks[i>>1]->sides[i&1],&track_checksum,i,scph.number_of_revolution);
+			}
+			else
+			{
+				write_scp_track(f,floppy->tracks[i>>1]->sides[0],&track_checksum,i,scph.number_of_revolution);
+			}
 
 			file_checksum = file_checksum + track_checksum;
 		}
