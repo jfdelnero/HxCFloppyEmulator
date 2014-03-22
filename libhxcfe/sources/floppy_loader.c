@@ -120,19 +120,26 @@ int hxcfe_checkLoaderID(HXCFLOPPYEMULATOR* floppycontext,int moduleID)
 {
 	int i;
 
-	i=0;
-	do
+	if( moduleID >= 0 )
 	{
-		i++;
-	}while((staticplugins[i]!=(GETPLUGININFOS)-1) && i<moduleID);
+		i=0;
+		do
+		{
+			i++;
+		}while((staticplugins[i]!=(GETPLUGININFOS)-1) && i<moduleID);
 
-	if(staticplugins[i]==(GETPLUGININFOS)-1)
-	{
-		return HXCFE_BADPARAMETER;
+		if(staticplugins[i]==(GETPLUGININFOS)-1)
+		{
+			return HXCFE_BADPARAMETER;
+		}
+		else
+		{
+			return HXCFE_NOERROR;
+		}
 	}
 	else
 	{
-		return HXCFE_NOERROR;
+		return HXCFE_BADPARAMETER;
 	}
 }
 
@@ -181,6 +188,8 @@ int hxcfe_getLoaderAccess(HXCFLOPPYEMULATOR* floppycontext,int moduleID)
 {
 	int ret;
 	plugins_ptr func_ptr;
+
+	ret = 0;
 
 	if(hxcfe_checkLoaderID(floppycontext,moduleID)==HXCFE_NOERROR)
 	{
