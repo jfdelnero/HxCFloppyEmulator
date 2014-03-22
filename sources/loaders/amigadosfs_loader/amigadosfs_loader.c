@@ -366,7 +366,11 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 
 			}
 
-			rc=adfCreateFlop(adfdevice, repname, 0,&reptime );
+			if(strlen(repname))
+				rc=adfCreateFlop(adfdevice, repname, 0,&reptime );
+			else
+				rc=adfCreateFlop(adfdevice, "AmigaDOS (HxC)", 0,&reptime );
+
 			free(repname);
 
 			if (rc==RC_OK)
