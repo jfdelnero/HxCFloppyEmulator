@@ -185,7 +185,7 @@ int get_next_MFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 					mfm_buffer[3] = 0x89;
 					mfm_buffer[4] = 0x44;
 					mfm_buffer[5] = 0x89;
-					bit_offset=searchBitStream(track->databuffer,track->tracklen,(88+10)*8,mfm_buffer,6*8,bit_offset);
+					bit_offset=searchBitStream(track->databuffer,track->tracklen,(88+16)*8,mfm_buffer,6*8,bit_offset);
 
 					if((bit_offset!=-1))
 					{
@@ -377,7 +377,7 @@ int get_next_MEMBRAIN_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTO
 					mfm_buffer[1] = 0x89;
 					mfm_buffer[2] = 0x55;
 					mfm_buffer[3] = 0x4A;
-					bit_offset=searchBitStream(track->databuffer,track->tracklen,(88+10)*8,mfm_buffer,4*8,bit_offset);
+					bit_offset=searchBitStream(track->databuffer,track->tracklen,(88+16)*8,mfm_buffer,4*8,bit_offset);
 
 					if((bit_offset!=-1))
 					{
@@ -754,7 +754,7 @@ int get_next_FM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFI
 						do
 						{
 							fm_buffer[3]=datamark[i];
-							bit_offset=searchBitStream(track->databuffer,track->tracklen,((88+10)*8*2),fm_buffer,4*8,old_bit_offset);
+							bit_offset=searchBitStream(track->databuffer,track->tracklen,((88+16)*8*2),fm_buffer,4*8,old_bit_offset);
 							i++;
 						}while(i<4 && bit_offset==-1 );
 
@@ -932,7 +932,7 @@ int get_next_TYCOMFM_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTOR
 						do
 						{
 							fm_buffer[3]=datamark[i];
-							bit_offset=searchBitStream(track->databuffer,track->tracklen,((88+10)*8*2),fm_buffer,4*8,old_bit_offset);
+							bit_offset=searchBitStream(track->databuffer,track->tracklen,((88+16)*8*2),fm_buffer,4*8,old_bit_offset);
 							i++;
 						}while(i<4 && bit_offset==-1 );
 
@@ -1101,7 +1101,7 @@ int get_next_EMU_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONF
 
 						bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*8,bit_offset+(4*8*4));
 
-						if((bit_offset-old_bit_offset<((88+10)*8*2)) && bit_offset!=-1)
+						if((bit_offset-old_bit_offset<((88+16)*8*2)) && bit_offset!=-1)
 						{
 
 							sector->cylinder = bit_inverter_emuii[tmp_buffer[2]]>>1;
@@ -1697,7 +1697,7 @@ int analysis_and_extract_sector_EMUIIFM(HXCFLOPPYEMULATOR* floppycontext,SIDE * 
 
 						bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*8,bit_offset+(4*8*4));
 
-						if((bit_offset-old_bit_offset<((88+10)*8*2)) && bit_offset!=-1)
+						if((bit_offset-old_bit_offset<((88+16)*8*2)) && bit_offset!=-1)
 						{
 							sectors->number_of_sector++;
 							sectors->sectorlist=(sect_sector **)realloc(sectors->sectorlist,sizeof(sect_sector *)*sectors->number_of_sector);
