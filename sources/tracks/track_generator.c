@@ -409,6 +409,7 @@ int pushTrackCode(track_generator *tg,unsigned char data,unsigned char clock,SID
 		case ISOFORMAT_DD11S:
 		case AMIGAFORMAT_DD:
 		case MEMBRAINFORMAT_DD:
+		case UKNCFORMAT_DD:
 			getMFMcode(tg,data,clock,&side->databuffer[tg->last_bit_offset/8]);
 			tg->last_bit_offset=tg->last_bit_offset+(2*8);
 		break;
@@ -596,6 +597,7 @@ void FastMFMFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_da
 		case ISOFORMAT_DD:
 		case ISOFORMAT_DD11S:
 		case MEMBRAINFORMAT_DD:
+		case UKNCFORMAT_DD:
 			FastMFMgenerator(tg,side,track_data,size);
 		break;
 
@@ -799,6 +801,7 @@ unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackenco
 		case ISOFORMAT_DD:
 		case ISOFORMAT_DD11S:
 		case MEMBRAINFORMAT_DD:
+		case UKNCFORMAT_DD:
 			total_track_size=total_track_size*2;
 			break;
 
@@ -828,7 +831,7 @@ unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackenco
 		if(sectorconfigtab[j].trackencoding == TYCOMFORMAT_SD)
 			sector_size = 128;
 
-		track_size=(configptr->len_ssync+configptr->len_addrmarkp1+configptr->len_addrmarkp2 + 2 +configptr->len_gap2 +configptr->len_dsync+configptr->len_datamarkp1+configptr->len_datamarkp2+2+gap3);
+		track_size=(configptr->len_ssync+configptr->len_addrmarkp1+configptr->len_addrmarkp2 + 2 +configptr->len_gap2 +configptr->len_dsync+configptr->len_datamarkp1+configptr->len_datamarkp2+2+gap3+configptr->posthcrc_len+configptr->postdcrc_len);
 		track_size=track_size+sector_size + 2;
 
 		if(configptr->sector_id) track_size++;
@@ -848,6 +851,7 @@ unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackenco
 			case ISOFORMAT_DD:
 			case ISOFORMAT_DD11S:
 			case MEMBRAINFORMAT_DD:
+			case UKNCFORMAT_DD:
 				track_size=track_size*2;
 				break;
 
@@ -990,6 +994,7 @@ SIDE * tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short n
 		case ISOFORMAT_DD11S:
 		case IBMFORMAT_DD:
 		case ISOFORMAT_DD:
+		case UKNCFORMAT_DD:
 			currentside->track_encoding=ISOIBM_MFM_ENCODING;
 		break;
 
@@ -1164,6 +1169,12 @@ void tg_addISOSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE
 		}
 
 	}
+
+	// add extra desync
+	for(i=0;i<formatstab[trackencoding].posthcrc_len;i++)
+	{  
+        pushTrackCode(tg,formatstab[trackencoding].posthcrc_glitch_data,formatstab[trackencoding].posthcrc_glitch_clock,currentside,sectorconfig->trackencoding);
+	}
 	
 	// gap2
 	for(i=0;i<formatstab[trackencoding].len_gap2;i++)
@@ -1245,6 +1256,12 @@ void tg_addISOSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE
 			pushTrackCode(tg,CRC16_Low ,0xFF,currentside,sectorconfig->trackencoding);
 		}
 	}
+
+	// add extra desync
+	for(i=0;i<formatstab[trackencoding].postdcrc_len;i++)
+	{
+		pushTrackCode(tg,formatstab[trackencoding].postdcrc_glitch_data,formatstab[trackencoding].postdcrc_glitch_clock,currentside,sectorconfig->trackencoding);
+	}
 					
 	//gap3
 	if(sectorconfig->gap3!=255)
@@ -1276,6 +1293,7 @@ void tg_addISOSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE
 		case ISOFORMAT_DD11S:
 		case IBMFORMAT_DD:
 		case ISOFORMAT_DD:
+		case UKNCFORMAT_DD:
 			trackenc=ISOIBM_MFM_ENCODING;
 		break;
 
@@ -1473,6 +1491,7 @@ void tg_addSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * 
 		case ISOFORMAT_DD11S:
 		case TYCOMFORMAT_SD:
 		case MEMBRAINFORMAT_DD:
+		case UKNCFORMAT_DD:
 			tg_addISOSectorToTrack(tg,sectorconfig,currentside);
 			break;
 
@@ -1641,6 +1660,7 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 					case IBMFORMAT_DD:
 					case ISOFORMAT_DD:
 					case MEMBRAINFORMAT_DD:
+					case UKNCFORMAT_DD:
 						computedgap3=computedgap3/(1*8);
 					break;
 				}
