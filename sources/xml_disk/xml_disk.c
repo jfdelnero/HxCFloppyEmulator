@@ -446,12 +446,14 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 				{
 					ad->statestack[ad->stack_ptr].track_type = ISOFORMAT_SD;
 				}
-
 				if(!strcmp(buffer,"IBM_FM"))
 				{
 					ad->statestack[ad->stack_ptr].track_type = IBMFORMAT_SD;
 				}
-
+				if(!strcmp(buffer,"UKNC_MFM"))
+				{
+					ad->statestack[ad->stack_ptr].track_type = UKNCFORMAT_DD;
+				}
 				if(!strcmp(buffer,"AMIGA_MFM"))
 				{
 					ad->statestack[ad->stack_ptr].track_type = AMIGAFORMAT_DD;
