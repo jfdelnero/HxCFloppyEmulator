@@ -472,6 +472,9 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						case ISOFORMAT_DD:
 							sprintf(str,"MFM  ");
 						break;
+						case UKNCFORMAT_DD:
+							sprintf(str,"UKNC ");
+						break;
 						case AMIGAFORMAT_DD:
 							sprintf(str,"AMFM ");
 						break;
