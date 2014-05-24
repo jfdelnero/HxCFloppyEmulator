@@ -21,6 +21,7 @@
 #include "data_DiskLayout_Emax_DD_800KB_xml.h"
 #include "data_DiskLayout_Ensoniq_Mirage_440KB_xml.h"
 #include "data_DiskLayout_Excellon_CNC6_xml.h"
+#include "data_DiskLayout_UKNC_800KB_xml.h"
 
 datatype * disklayout_list[]=
 {
@@ -46,6 +47,7 @@ datatype * disklayout_list[]=
 	data_DiskLayout_DOS_EXHD_4_5MB_xml,
 	data_DiskLayout_DOS_EXHD_6_78MB_xml,
 	data_DiskLayout_OS9_1280KB_xml,
+	data_DiskLayout_UKNC_800KB_xml,
 	data_DiskLayout_Excellon_CNC6_xml,
 	0
 };
