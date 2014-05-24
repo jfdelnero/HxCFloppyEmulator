@@ -42,7 +42,7 @@
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
-#ifdef IPF_SUPPORT 
+#ifdef IPF_SUPPORT
 
 #include <string.h>
 #include <stdlib.h>
@@ -58,7 +58,7 @@
 
 #include "libhxcadaptor.h"
 
-#define BYTE char 
+#define BYTE char
 #define WORD short
 #define DWORD long
 #define LIB_TYPE 1
@@ -96,7 +96,7 @@ int IPF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	floppycontext->hxc_printf(MSG_DEBUG,"IPF_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"ipf"))
+	if(hxc_checkfileext(imgfile,"ipf") || hxc_checkfileext(imgfile,"ct") || hxc_checkfileext(imgfile,"ctr"))
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"IPF_libIsValidDiskFile : IPF file !");
 		if(init_caps_lib())
@@ -175,13 +175,13 @@ unsigned long trackcopy(unsigned char * dest,unsigned char * src,unsigned long o
 		}
 
 		j++;
-		if(j>=dest_tracklen) 
+		if(j>=dest_tracklen)
 		{
 			j=0;
 		}
 
 		k++;
-		if(k>=tracklen) 
+		if(k>=tracklen)
 		{
 			k=0;
 		}
@@ -192,7 +192,7 @@ unsigned long trackcopy(unsigned char * dest,unsigned char * src,unsigned long o
 
 int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	
+
 	unsigned int filesize;
 	unsigned int i,j,k,l,m,len;
 	unsigned char *fileimg;
@@ -214,26 +214,26 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	CYLINDER* currentcylinder;
 	unsigned char flakeybyte;
 	SIDE* currentside;
-	
+
 	UDWORD flag;
-	
+
 	floppycontext->hxc_printf(MSG_DEBUG,"IPF_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
-	
+	fseek (f , 0 , SEEK_SET);
+
 	if(filesize!=0)
 	{
 		fileimg=(char*)malloc(filesize);
-		
+
 		if(fileimg!=NULL)
 		{
 			i=0;
@@ -242,14 +242,14 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				fread(fileimg+(i*1024),1024,1,f);
 				i++;
 			}while(i<((filesize/1024)+1));
-			
+
 		}
 		else
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"Memory error!");
 			hxc_fclose(f);
 			return HXCFE_INTERNALERROR;
-		}	
+		}
 	}
 	else
 	{
@@ -257,14 +257,14 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		hxc_fclose(f);
 		return HXCFE_BADFILE;
 	}
-	
+
 	hxc_fclose(f);
-	
+
 	cvi.type = LIB_TYPE;
 	pCAPSGetVersionInfo (&cvi, 0);
 
 	flag = DI_LOCK_DENVAR/*|DI_LOCK_DENNOISE|DI_LOCK_NOISE*/|DI_LOCK_UPDATEFD|DI_LOCK_TYPE | DI_LOCK_INDEX;
-	
+
 	floppycontext->hxc_printf(MSG_DEBUG,"CAPS: library version %d.%d (flags=%08X)", cvi.release, cvi.revision, cvi.flag);
 	oldlib = (cvi.flag & (DI_LOCK_TRKBIT | DI_LOCK_OVLBIT)) != (DI_LOCK_TRKBIT | DI_LOCK_OVLBIT);
 	sizefactor=8;
@@ -281,9 +281,9 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	//flag=DI_LOCK_DENVAR|DI_LOCK_UPDATEFD|DI_LOCK_TYPE;
 
-	
+
 	img=pCAPSAddImage();
-	
+
 	if(img!=-1)
 	{
 		if(pCAPSLockImageMemory(img, fileimg,filesize,0)!=imgeUnsupported )
@@ -302,8 +302,8 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			floppycontext->hxc_printf(MSG_DEBUG,"maxcylinder : %d",ci2.maxcylinder);
 			floppycontext->hxc_printf(MSG_DEBUG,"Date : %d/%d/%d",ci2.crdt.day,ci2.crdt.month,ci2.crdt.year);
 			///////////////////
-			
-			
+
+
 			if(ci2.type == ciitFDD)
 			{
 				floppydisk->floppySectorPerTrack=0;
@@ -314,7 +314,7 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
 				floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
 				memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-				
+
 				for(i=ci2.mincylinder;i<=ci2.maxcylinder;i++)
 				{
 					for(j=ci2.minhead;j<=ci2.maxhead;j++)
@@ -333,7 +333,7 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							//	floppycontext->hxc_printf(MSG_DEBUG,"trackcnt    : %d\n",ti.trackcnt);
 							floppycontext->hxc_printf(MSG_DEBUG,"tracklen     : %d %s",ti.tracklen*sizefactor,(ti.tracklen*sizefactor)&0x7?"non aligned !":"aligned");
 							floppycontext->hxc_printf(MSG_DEBUG,"overlap     : %d %s",ti.overlap*sizefactor,(ti.overlap*sizefactor)&0x7?"non aligned !":"aligned");
-														
+
 							if(!floppydisk->tracks[i])
 							{
 								floppydisk->tracks[i]=(CYLINDER*)malloc(sizeof(CYLINDER));
@@ -341,17 +341,17 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
 								currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
 								memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
-								
-								currentcylinder->floppyRPM=rpm;	
+
+								currentcylinder->floppyRPM=rpm;
 							}
-							
+
 							currentcylinder->sides[j]=malloc(sizeof(SIDE));
 							memset(currentcylinder->sides[j],0,sizeof(SIDE));
 							currentside=currentcylinder->sides[j];
 
 							currentside->flakybitsbuffer=0;
 							currentside->track_encoding=AMIGA_MFM_ENCODING;
-							
+
 							intrackflakeybit=-1;
 
 							////////////////////////////////////////////////////////////////
@@ -364,73 +364,77 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 								currentside->databuffer=malloc(len);
 								memset(currentside->databuffer,0,len);
-								
+
 								//flakey bits in track ?
-								if(ti.type & CTIT_FLAG_FLAKEY)
+								if((ti.type & CTIT_FLAG_FLAKEY) && hxc_checkfileext(imgfile,"ipf") )
 								{
-
+									// This method is only valid with ipf files (fixed track size at each revolution...)
 									temptrack=(unsigned char *)malloc(len);
-									memset(temptrack,0,len);
-
-									overlap=0;
-									if(ti.overlap>=0)
-										overlap=ti.overlap*sizefactor;
-
-
-									currentside->tracklen=trackcopy(currentside->databuffer,ti.trackbuf,overlap,ti.tracklen,(unsigned char)((ti.overlap<0)?0xFF:0x00));
-
-									currentside->flakybitsbuffer=malloc(len);
-									memset(currentside->flakybitsbuffer,0x00,len);	
-
-									pCAPSUnlockTrack(img,i, j);
-									
-									// try to read the track x time, and check for differences
-									for(k=0;k<10;k++)
+									if(temptrack)
 									{
-										flakeyti.type = LIB_TYPE;
-										ret=pCAPSLockTrack((struct CapsTrackInfo *)&flakeyti, img, i, j, flag);
-										if(ret==imgeOk)
+										memset(temptrack,0,len);
+
+										overlap=0;
+										if(ti.overlap>=0)
+											overlap=ti.overlap*sizefactor;
+
+										currentside->tracklen=trackcopy(currentside->databuffer,ti.trackbuf,overlap,ti.tracklen,(unsigned char)((ti.overlap<0)?0xFF:0x00));
+
+										currentside->flakybitsbuffer = malloc(len);
+										if(currentside->flakybitsbuffer)
 										{
+											memset(currentside->flakybitsbuffer,0x00,len);
 
-											overlap=0;
-											if(ti.overlap>=0)
-												overlap=flakeyti.overlap;
-
-											trackcopy(temptrack,flakeyti.trackbuf,overlap,flakeyti.tracklen,(unsigned char)((ti.overlap<0)?0xFF:0x00));
-
-											for(l=0;l<ti.tracklen>>3;l++)
-											{
-												flakeybyte= temptrack[l] ^ currentside->databuffer[l];
-												for(m=0;m<8;m=m+2)
-												{
-													// a flaybit detected ?
-													if((flakeybyte&(0xC0>>m)) || ((currentside->databuffer[l]&(0xC0>>m))==(0xC0>>m) ) )
-													{
-														currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l] | (0xC0>>m);
-														currentside->databuffer[l]=currentside->databuffer[l] & ~(0xC0>>m);
-														intrackflakeybit=l;
-													}
-												}
-											
-
-											}
 											pCAPSUnlockTrack(img,i, j);
+
+											// try to read the track x time, and check for differences
+											for(k=0;k<10;k++)
+											{
+												flakeyti.type = LIB_TYPE;
+												ret=pCAPSLockTrack((struct CapsTrackInfo *)&flakeyti, img, i, j, flag);
+												if(ret==imgeOk)
+												{
+
+													overlap=0;
+													if(ti.overlap>=0)
+														overlap=flakeyti.overlap;
+
+													trackcopy(temptrack,flakeyti.trackbuf,overlap,flakeyti.tracklen,(unsigned char)((ti.overlap<0)?0xFF:0x00));
+
+													for(l=0;l<ti.tracklen>>3;l++)
+													{
+														flakeybyte= temptrack[l] ^ currentside->databuffer[l];
+														for(m=0;m<8;m=m+2)
+														{
+															// a flaybit detected ?
+															if((flakeybyte&(0xC0>>m)) || ((currentside->databuffer[l]&(0xC0>>m))==(0xC0>>m) ) )
+															{
+																currentside->flakybitsbuffer[l]=currentside->flakybitsbuffer[l] | (0xC0>>m);
+																currentside->databuffer[l]=currentside->databuffer[l] & ~(0xC0>>m);
+																intrackflakeybit=l;
+															}
+														}
+
+													}
+													pCAPSUnlockTrack(img,i, j);
+												}
+											}
+
+											ti.type = LIB_TYPE;
+											ret = pCAPSLockTrack((struct CapsTrackInfo *)&ti, img, i, j, flag);
 										}
+
+										free(temptrack);
 									}
-
-									ti.type = LIB_TYPE;
-									ret=pCAPSLockTrack((struct CapsTrackInfo *)&ti, img, i, j, flag);
-
-									free(temptrack);
 
 								}
 								else
-								{	
+								{
 
 									overlap=0;
 									if(ti.overlap>0)
 										overlap=ti.overlap*sizefactor;
-							
+
 									currentside->tracklen=trackcopy(currentside->databuffer,ti.trackbuf,overlap,ti.tracklen,(unsigned char)((ti.overlap<0)?0xFF:0x00));
 								}
 							}
@@ -443,9 +447,9 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								currentside->flakybitsbuffer=malloc(len);
 								memset(currentside->flakybitsbuffer,0xFF,len);
 							}
-							
-							bitrate=((rpm/60)*currentside->tracklen)>>1;							
-						
+
+							bitrate=((rpm/60)*currentside->tracklen)>>1;
+
 							floppycontext->hxc_printf(MSG_DEBUG,"Fixed bitrate    : %d",bitrate);
 							currentside->timingbuffer=0;
 							currentside->bitrate=bitrate;
@@ -462,7 +466,7 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								memset(currentside->timingbuffer,0,len);
 								k=0;
 								do
-								{							
+								{
 									currentside->timingbuffer[k]=((1000-ti.timebuf[k])*(bitrate/1000))+bitrate;
 									k++;
 								}while(k<ti.timelen);
@@ -474,22 +478,22 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 								currentside->bitrate=VARIABLEBITRATE;
 							}
-								
+
 							floppycontext->hxc_printf(MSG_DEBUG,"timebuf     : %.8X",ti.timebuf);
-							
-							if(ti.type & CTIT_FLAG_FLAKEY) 
+
+							if(ti.type & CTIT_FLAG_FLAKEY)
 							{
 								floppycontext->hxc_printf(MSG_DEBUG,"Track %d Side %d: CTIT_FLAG_FLAKEY",i,j);
 							}
 
-							
-							if((ti.type & CTIT_MASK_TYPE) ==  ctitNoise) 
+
+							if((ti.type & CTIT_MASK_TYPE) ==  ctitNoise)
 							{
 								floppycontext->hxc_printf(MSG_DEBUG,"Track %d Side %d: cells are unformatted (random size)",i,j);
 							}
-							
 
-							if(intrackflakeybit !=  -1) 
+
+							if(intrackflakeybit !=  -1)
 							{
 								floppycontext->hxc_printf(MSG_DEBUG,"In track flakey bit found (last: %d)",intrackflakeybit);
 							}
@@ -497,13 +501,13 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							pCAPSUnlockTrack(img,i, j);
 							if(floppydisk->floppySectorPerTrack<ti.sectorcnt )
 								floppydisk->floppySectorPerTrack=(unsigned short)ti.sectorcnt;
-							
+
 							currentside->number_of_sector=ti.sectorcnt;
 
 							len=currentside->tracklen>>3;
 							if(currentside->tracklen&0x7) len++;
 
-							
+
 							currentside->indexbuffer=malloc(len);
 							memset(currentside->indexbuffer,0,len);
 							fillindex(-2500,currentside,2500,TRUE,0);
@@ -512,40 +516,62 @@ int IPF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						}
 						else
 						{
+
+							if(!floppydisk->tracks[i])
+							{
+								floppydisk->tracks[i]=(CYLINDER*)malloc(sizeof(CYLINDER));
+								currentcylinder=floppydisk->tracks[i];
+								currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
+								currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*currentcylinder->number_of_side);
+								memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
+
+								currentcylinder->floppyRPM=rpm;
+							}
+
+							currentcylinder->sides[j]=malloc(sizeof(SIDE));
+							memset(currentcylinder->sides[j],0,sizeof(SIDE));
+							currentside=currentcylinder->sides[j];
+
 							// error -> random track
 							currentside->timingbuffer=0;
-							currentside->tracklen=12500*sizefactor;
+							currentside->bitrate = 250000;
+							currentside->tracklen=12500 * 8;
 							currentside->databuffer=malloc(currentside->tracklen>>3);
-							memset(currentside->databuffer,0,currentside->tracklen>>3);
-							
+							memset(currentside->databuffer,0x11,currentside->tracklen>>3);
+
 							currentside->flakybitsbuffer=malloc(currentside->tracklen>>3);
 							memset(currentside->flakybitsbuffer,0xFF,currentside->tracklen>>3);
+
+							currentside->indexbuffer=malloc(currentside->tracklen>>3);
+							memset(currentside->indexbuffer,0,currentside->tracklen>>3);
+							//fillindex(-2500,currentside,2500,TRUE,0);
+
 						}
-						
+
 					}
-					
-				}				
-				
+
+				}
+
 			}
-			
+
 			pCAPSUnlockAllTracks(img);
-			
+
 		}
-		
+
 		pCAPSUnlockImage(img);
-		
-		
+
+
 		pCAPSRemImage(img);
-		
+
 		free(fileimg);
-		
+
 		floppycontext->hxc_printf(MSG_INFO_1,"IPF Loader : tracks file successfully loaded and encoded!");
 		return HXCFE_NOERROR;
-		
-		
+
+
 	}
-	
-	
+
+
 	return HXCFE_INTERNALERROR;
 }
 
