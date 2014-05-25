@@ -2140,7 +2140,7 @@ static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontex
 				floppycontext->hxc_printf(MSG_DEBUG,"Block %.4d : %s state |%d| - [%d <-> %d] %c s:%d l:%d size:%d bad bit:%d",block_num,getStateStr(pb[block_num].state),pb[block_num].locked,pb[block_num].overlap_offset,pb[block_num].overlap_offset+pb[block_num].overlap_size,c,pb[block_num].start_index,pb[block_num].number_of_pulses,pb[block_num].start_index+pb[block_num].number_of_pulses,j);
 			}
 #endif
-/*
+
 			for(block_num=0;block_num<nbblock;block_num++)
 			{
 				if(pb[block_num].locked)
@@ -2181,7 +2181,7 @@ static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontex
 
 				block_num++;
 			}
-*/
+
 			/*for(i=0;i<track_dump->nb_of_pulses;i++)
 			{
 				//if(track_dump->track_dump[i] > 0x100)
