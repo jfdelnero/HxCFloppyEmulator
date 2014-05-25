@@ -10,6 +10,23 @@
 -------------------------------------------------------------------------------
 
 /*********************************************************
+25 may 2014: HxCFloppyEmulator 2.0.22.0
+
+GUI - Track viewer window : New viewer mode -> Disk surface view mode.
+
+Raw loader :  UKNC Russian computer support added.
+
+New Writer : BMP file (Disk/circular layout) -> Disk layout can now be exported into a BMP file (for disk analysis) !
+
+libhxcfe : Correction of the UTF8 path support in some loaders/writers.
+
+New Loader : SPS CT Raw file format support added. (NOTE : No flakey bits support for the moment !)
+
+libhxcfe : Generic flux stream analyzer enhanced.
+
+Disk Browser : ADFLib fseek corrected.
+
+/*********************************************************
 03 January 2014: HxCFloppyEmulator 2.0.20.1
 
 Disk Browser : AmigaDOS disk support added ! Amiga Files can be read/write/deleted with the Disk Browser !
