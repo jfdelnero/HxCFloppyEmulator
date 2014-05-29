@@ -1445,6 +1445,8 @@ static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontex
 
 	unsigned long mt_i, block_num,t,nb_of_multimatch;
 
+	unsigned long pass_loop;
+
 	unsigned char c;
 
 	int k;
@@ -1827,6 +1829,8 @@ static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontex
 			floppycontext->hxc_printf(MSG_DEBUG,"--   Second pass analysis ! --");
 			floppycontext->hxc_printf(MSG_DEBUG,"------------------------------");
 
+			pass_loop = 0;
+
 			do
 			{
 				block_analysed = 0;
@@ -2000,7 +2004,16 @@ static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontex
 					}
 				}
 
-			}while(block_analysed);
+				pass_loop++;
+
+			}while(block_analysed && ( pass_loop < ( nbblock * 2 ) ));
+
+			if(pass_loop >= ( nbblock * 2 ) )
+			{
+				floppycontext->hxc_printf(MSG_DEBUG,"Infinite loop... Second pass analysis aborted!");
+			}
+
+			floppycontext->hxc_printf(MSG_DEBUG,"Second pass done in %d loop(s)",pass_loop);
 #endif
 
 
@@ -2008,6 +2021,8 @@ static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontex
 			floppycontext->hxc_printf(MSG_DEBUG,"------------------------------");
 			floppycontext->hxc_printf(MSG_DEBUG,"--   Third pass analysis ! --");
 			floppycontext->hxc_printf(MSG_DEBUG,"------------------------------");
+
+			pass_loop = 0;
 
 			do
 			{
@@ -2072,7 +2087,17 @@ static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontex
 					}
 				}
 
-			}while(block_analysed);
+				pass_loop++;
+
+			}while(block_analysed && ( pass_loop < ( nbblock * 4 ) ));
+
+			if(pass_loop >= ( nbblock * 4 ) )
+			{
+				floppycontext->hxc_printf(MSG_DEBUG,"Infinite loop... Third pass analysis aborted!");
+			}
+
+			floppycontext->hxc_printf(MSG_DEBUG,"Third pass done in %d loop(s)",pass_loop);
+
 #endif
 
 			memset(overlap_pulses_tab,0,track_dump->nb_of_pulses * sizeof(unsigned long) );
