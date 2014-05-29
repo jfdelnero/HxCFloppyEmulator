@@ -203,7 +203,26 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 					{
 						j--;
 					}
-					if(filelist[filenb][j]==SEPARTOR) j++;
+					if(loaderid != hxcfe_getLoaderID(guicontext->hxcfe,"KRYOFLUXSTREAM") || !j) 
+					{
+						if(filelist[filenb][j]==SEPARTOR) j++;
+					}
+					else
+					{
+						//Keep the parent folder name for KF stream file...
+						if(j)
+						{
+							if(filelist[filenb][j]==SEPARTOR)
+								filelist[filenb][j] = '_';
+
+							while(filelist[filenb][j]!=SEPARTOR && j)
+							{
+								j--;
+							}
+							if(filelist[filenb][j]==SEPARTOR) j++;
+						}
+					}
+
 					destinationfile=(char*)malloc(strlen(&filelist[filenb][j])+strlen(destfolder)+2+99);
 					sprintf(destinationfile,"%s%c%s",destfolder,SEPARTOR,&filelist[filenb][j]);
 					i=strlen(destinationfile);
