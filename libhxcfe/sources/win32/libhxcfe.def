@@ -135,3 +135,19 @@ EXPORTS
 
    hxcfe_getSide				@500
    hxcfe_shiftTrackData			@501
+   hxcfe_getCellState			@502
+   hxcfe_setCellState			@503
+   hxcfe_removeCell				@504
+   hxcfe_insertCell				@505
+   hxcfe_getCellFlakeyState		@506
+   hxcfe_setCellFlakeyState		@507
+   hxcfe_getCellIndexState		@508
+   hxcfe_setCellIndexState		@509
+   hxcfe_getCellBitrate			@510
+   hxcfe_setCellBitrate			@511
+
+
+
+
+
+
