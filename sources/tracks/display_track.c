@@ -898,6 +898,58 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	}while(!endfill);
 
 	//////////////////////////////////////////
+	// cell drawing
+
+	if(!(td->x_us>1000))
+	{
+		tracksize=currentside->tracklen;
+		old_i=buffer_offset;
+		i=buffer_offset;
+		timingoffset=0;
+		endfill=0;
+		do
+		{
+			do
+			{
+				timingoffset=getOffsetTiming(currentside,i,timingoffset,old_i);
+				timingoffset2=getOffsetTiming(currentside,i+1,timingoffset,i);
+
+				old_i=i;
+				xpos= (int)( timingoffset / xresstep ) - (( timingoffset2 - timingoffset) / (xresstep *2) );
+
+				if(xpos>=0 && (xpos<td->xsize) )
+				{
+					for(ypos= td->ysize - 40 ; ypos > (td->ysize - 50) ; ypos--)
+					{
+						col=(s_col *)&td->framebuffer[(td->xsize*ypos) + xpos];
+						col->blue=0;
+						col->green=155;
+						col->red=0;
+					}
+				}
+				else
+				{
+					endfill=1;
+				};
+				i++;
+			}while(i<tracksize);
+
+			old_i=0;
+			i=0;
+
+		}while(!endfill);
+
+		ypos = td->ysize - 40;
+		for(xpos = 0;xpos < td->xsize ; xpos++)
+		{
+			col=(s_col *)&td->framebuffer[(td->xsize*ypos) + xpos];
+			col->blue=0;
+			col->green=155;
+			col->red=0;
+		}
+	}
+
+	//////////////////////////////////////////
 	// Sector drawing
 	for(i=0;i<32;i++)
 	{

@@ -495,10 +495,6 @@ int hxcfe_removeDir( FSMNG * fsmng,char * foldername);
 
 void hxcfe_deinitFsManager(FSMNG * fsmng);
 
-// Track data/bitstream modification functions.
-SIDE * hxcfe_getSide(FLOPPY * fp,int track,int side);
-int    hxcfe_shiftTrackData(SIDE * side,long bitoffset);
-
 //////////////////////////////////////////////////////////////////
 // Flux Stream Analyzer
 
@@ -554,4 +550,26 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std);
 
 void hxcfe_FxStream_FreeStream(FXS * fxs,s_track_dump * stream);
 
+//////////////////////////////////////////////////////////////////
+// Track edition functions
+
+SIDE * hxcfe_getSide(FLOPPY * fp,int track,int side);
+
+int    hxcfe_shiftTrackData(SIDE * side,long bitoffset);
+
 void AdjustTrackPeriod(HXCFLOPPYEMULATOR* floppycontext,SIDE * curside_S0,SIDE * curside_S1);
+
+int  hxcfe_getCellState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber);
+int  hxcfe_setCellState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber,int state);
+
+int  hxcfe_removeCell(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber);
+int  hxcfe_insertCell(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber,int state);
+
+int  hxcfe_getCellFlakeyState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber);
+int  hxcfe_setCellFlakeyState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber,int state);
+
+int  hxcfe_getCellIndexState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber);
+int  hxcfe_setCellIndexState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber,int state);
+
+int  hxcfe_getCellBitrate(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber);
+int  hxcfe_setCellBitrate(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber,unsigned long bitrate);
