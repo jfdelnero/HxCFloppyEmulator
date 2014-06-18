@@ -1856,6 +1856,10 @@ SOURCE=..\sources\tracks\track_generator.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\sources\tracks\trackeditor.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\tracks\trackutils.c
 # End Source File
 # Begin Source File
