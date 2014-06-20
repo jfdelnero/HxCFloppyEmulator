@@ -69,6 +69,21 @@ char fullstr[256*1024];
 
 #define PI    ((float)  3.141592654f)
 
+double adjust_timescale(double slide)
+{
+	if(slide >= 250 * 1000) 
+	{
+		slide -= (250 * 1000);
+		slide += 250;
+	}
+	else
+	{
+		slide = (slide * 250) / (double)(250 * 1000); 
+	}
+
+	return slide;
+}
+
 void update_graph(floppy_infos_window * w)
 {
 	s_trackdisplay * td;
@@ -104,7 +119,7 @@ void update_graph(floppy_infos_window * w)
 			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,ARBURGDAT_ENCODING,w->arburg_bt->value());
 			hxcfe_td_activate_analyzer(guicontext->hxcfe,td,ARBURGSYS_ENCODING,w->arburg_bt->value());
 
-			hxcfe_td_setparams(guicontext->hxcfe,td,(int)(w->x_time->value()),(int)w->y_time->value(),(int)(w->x_offset->value()*1000));
+			hxcfe_td_setparams(guicontext->hxcfe,td,(int)(adjust_timescale(w->x_time->value())),(int)w->y_time->value(),(int)(w->x_offset->value()*1000));
 
 			if(guicontext->loadedfloppy)
 			{
@@ -276,23 +291,6 @@ void disk_infos_window_callback(Fl_Widget *o, void *v)
 
 	window=((floppy_infos_window*)(o->user_data()));
 
-	if(window->x_time->value()>1000)
-	{
-		window->x_time->step(1000);
-	}
-	else
-	{
-		if(window->x_time->value()>100)
-		{
-			window->x_time->step(64);
-		}
-		else
-		{
-			window->x_time->step(1);
-		}
-
-	}
-
 	update_graph(window);
 }
 
@@ -388,6 +386,63 @@ int isTheRightSector(floppy_infos_window *fiw,s_sectorlist * sl,int xpos,int ypo
 	return 0;
 }
 
+int isTheRightPulse(floppy_infos_window *fiw,s_pulseslist * pl,int xpos,int ypos)
+{
+	int disp_xsize,disp_ysize;
+
+	disp_xsize=fiw->floppy_map_disp->w();
+	disp_ysize=fiw->floppy_map_disp->h();
+
+	if(!fiw->disc_view_bt->value())
+	{
+		if( ( xpos>=pl->x_pos1 && xpos<=pl->x_pos2 ) &&
+			( ypos>=(disp_ysize - 250) && ypos<=(disp_ysize - 40)) )
+		{
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int isTheRightPulseFlakey(floppy_infos_window *fiw,s_pulseslist * pl,int xpos,int ypos)
+{
+	int disp_xsize,disp_ysize;
+
+	disp_xsize=fiw->floppy_map_disp->w();
+	disp_ysize=fiw->floppy_map_disp->h();
+
+	if(!fiw->disc_view_bt->value())
+	{
+		if( ( xpos>=pl->x_pos1 && xpos<=pl->x_pos2 ) &&
+			( ypos>=30 && ypos<=50) )
+		{
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int isTheRightPulseIndex(floppy_infos_window *fiw,s_pulseslist * pl,int xpos,int ypos)
+{
+	int disp_xsize,disp_ysize;
+
+	disp_xsize=fiw->floppy_map_disp->w();
+	disp_ysize=fiw->floppy_map_disp->h();
+
+	if(!fiw->disc_view_bt->value())
+	{
+		if( ( xpos>=pl->x_pos1 && xpos<=pl->x_pos2 ) &&
+			( ypos>=10 && ypos<=27) )
+		{
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 void mouse_di_cb(Fl_Widget *o, void *v)
 {
 	unsigned int i;
@@ -396,13 +451,18 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 	Fl_Mouse_Box *dnd = (Fl_Mouse_Box*)o;
 	double stepperpix_x;
 	double stepperpix_y;
-	int xpos,ypos;
+	int xpos,ypos,buttons_state;
 	char str[512];
 	char str2[512];
 	int track,side;
 
+	int event;
+
 	unsigned char c;
+
 	s_sectorlist * sl;
+	s_pulseslist * pl;
+
 	int disp_xsize,disp_ysize,disp_xpos,disp_ypos;
 
 	dw=((Fl_Window*)(o->parent()));
@@ -413,10 +473,68 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 	disp_xpos=fiw->floppy_map_disp->x();
 	disp_ypos=fiw->floppy_map_disp->y();
 
-	if(dnd->event() == FL_ENTER)
+	event = dnd->event();
+
+	if(event == FL_PUSH)
 	{
-		stepperpix_x=(fiw->x_time->value())/disp_xsize;
-		stepperpix_y=(fiw->y_time->value())/(double)disp_ysize;
+		pl = guicontext->td->pl;
+
+		buttons_state = Fl::event_buttons();
+		if(buttons_state)
+		{
+			if(!fiw->disc_view_bt->value())
+			{
+
+				xpos=Fl::event_x() - disp_xpos;
+				if(xpos<0) xpos=0;
+				if(xpos>disp_xsize) xpos=disp_xsize-1;
+
+				ypos=Fl::event_y() - disp_ypos;
+
+				if(ypos<0) ypos=0;
+				if(ypos>disp_ysize) ypos=disp_ysize-1;
+
+				track=(int)fiw->track_number_slide->value();
+				side=(int)fiw->side_number_slide->value();
+
+				while(pl)
+				{
+					if(isTheRightPulse(fiw,pl,xpos,ypos))
+					{
+						if(hxcfe_getCellState(guicontext->hxcfe,guicontext->loadedfloppy->tracks[track]->sides[side],pl->pulse_number))
+							hxcfe_setCellState(guicontext->hxcfe,guicontext->loadedfloppy->tracks[track]->sides[side],pl->pulse_number,0);
+						else
+							hxcfe_setCellState(guicontext->hxcfe,guicontext->loadedfloppy->tracks[track]->sides[side],pl->pulse_number,1);
+					}
+
+					if(isTheRightPulseFlakey(fiw,pl,xpos,ypos))
+					{
+						if(hxcfe_getCellFlakeyState(guicontext->hxcfe,guicontext->loadedfloppy->tracks[track]->sides[side],pl->pulse_number))
+							hxcfe_setCellFlakeyState(guicontext->hxcfe,guicontext->loadedfloppy->tracks[track]->sides[side],pl->pulse_number,0);
+						else
+							hxcfe_setCellFlakeyState(guicontext->hxcfe,guicontext->loadedfloppy->tracks[track]->sides[side],pl->pulse_number,1);
+					}
+
+					if(isTheRightPulseIndex(fiw,pl,xpos,ypos))
+					{
+						if(hxcfe_getCellIndexState(guicontext->hxcfe,guicontext->loadedfloppy->tracks[track]->sides[side],pl->pulse_number))
+							hxcfe_setCellIndexState(guicontext->hxcfe,guicontext->loadedfloppy->tracks[track]->sides[side],pl->pulse_number,0);
+						else
+							hxcfe_setCellIndexState(guicontext->hxcfe,guicontext->loadedfloppy->tracks[track]->sides[side],pl->pulse_number,1);
+					}
+
+					pl = pl->next_element;
+				}
+
+				guicontext->updatefloppyinfos = 1;
+			}
+		}
+	}
+
+	if(event == FL_MOVE)
+	{
+		stepperpix_x=(adjust_timescale(fiw->x_time->value()))/disp_xsize;
+		stepperpix_y=(adjust_timescale(fiw->y_time->value()))/(double)disp_ysize;
 
 		xpos=Fl::event_x() - disp_xpos;
 		if(xpos<0) xpos=0;
@@ -540,7 +658,6 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 					fiw->buf->append((char*)str);
 
-
 					if(sl->sectorconfig->input_data)
 					{
 						for(i=0;i<sl->sectorconfig->sectorsize;i++)
@@ -619,6 +736,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 			fiw->buf->append((char*)fullstr);
 
 			fiw->object_txt->buffer(fiw->buf);
+
 		}
 
 	}
