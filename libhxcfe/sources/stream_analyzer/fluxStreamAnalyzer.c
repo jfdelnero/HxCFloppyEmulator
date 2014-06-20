@@ -2766,6 +2766,51 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 
 						hxcfe_deinitSectorSearch(ss);
 
+						/*
+						//////////////////
+
+						ss = hxcfe_initSectorSearch(fxs->hxcfe,fp);
+
+						scl = hxcfe_getAllTrackSectors(ss,0,0,ARBURGDAT_ENCODING,&nb_sectorfound);
+
+						if(scl)
+						{
+							for(sectnum=0;sectnum<nb_sectorfound;sectnum++)
+							{
+								if(!scl[sectnum]->use_alternate_header_crc)
+									qualitylevel[revolution] += 0x010000;
+								if(!scl[sectnum]->use_alternate_data_crc && scl[sectnum]->input_data)
+									qualitylevel[revolution] += 0x000001;
+
+								hxcfe_freeSectorConfig  (ss,scl[sectnum]);
+							}
+							free(scl);
+						}
+
+						hxcfe_deinitSectorSearch(ss);
+
+						//////////////////
+
+						ss = hxcfe_initSectorSearch(fxs->hxcfe,fp);
+
+						scl = hxcfe_getAllTrackSectors(ss,0,0,ARBURGSYS_ENCODING,&nb_sectorfound);
+						if(scl)
+						{
+							for(sectnum=0;sectnum<nb_sectorfound;sectnum++)
+							{
+								if(!scl[sectnum]->use_alternate_header_crc)
+									qualitylevel[revolution] += 0x010000;
+								if(!scl[sectnum]->use_alternate_data_crc && scl[sectnum]->input_data)
+									qualitylevel[revolution] += 0x000001;
+
+								hxcfe_freeSectorConfig  (ss,scl[sectnum]);
+							}
+							free(scl);
+						}
+
+						hxcfe_deinitSectorSearch(ss);
+						*/
+
 						freefloppy(fp);
 					}
 
