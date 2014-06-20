@@ -714,8 +714,15 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	timingoffset=0;
 	interbit=0;
 	i=buffer_offset;
-	xresstep = (double)td->x_us/(double)td->xsize;
+	
+	xresstep = 0;
+	if(td->xsize)
+		xresstep = (double)td->x_us/(double)td->xsize;
 	endfill=0;
+
+	if(!xresstep)
+		return;
+
 
 	//////////////////////////////////////////
 	// Scatter drawing
@@ -732,7 +739,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 				xpos= (int)( timingoffset / (xresstep) );
 				ypos= td->ysize - (int)( ( (double) ((interbit+1) * 500000) / (double) bitrate ) / (double)((double)td->y_us/(double)td->ysize));
 
-				if(td->x_us>1000)
+				if(td->x_us>250)
 				{
 					// Scather gatter display mode
 					if( (xpos<td->xsize) && (ypos<td->ysize) && ypos>=0 )
@@ -916,7 +923,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	//////////////////////////////////////////
 	// cell drawing
 
-	if(!(td->x_us>1000))
+	if(!(td->x_us>250))
 	{
 		// Only possible in pulses display mode
 		tracksize=currentside->tracklen;
