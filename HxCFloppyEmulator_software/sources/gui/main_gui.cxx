@@ -690,7 +690,8 @@ Main_Window::Main_Window()
 	this->infos_window=new floppy_infos_window();
 	this->infos_window->x_offset->bounds(0.0, 100);
 	this->infos_window->x_offset->value(85);
-	this->infos_window->x_time->scrollvalue(300*1000,1,1,1000*1000);
+	this->infos_window->x_time->scrollvalue((300*1000)+ (250 * 1000),1,1000,(1000*1000) + (250 * 1000));
+	this->infos_window->x_time->step(1000);
 	this->infos_window->y_time->scrollvalue(16,1,2,64);
 	this->infos_window->track_view_bt->value(1);
 	this->infos_window->disc_view_bt->value(0);

@@ -49,8 +49,9 @@ class Fl_Mouse_Box : public Fl_Box
                     return 1;
 
 
+				case FL_PUSH:
                 case FL_MOVE:
-                    //evt = e;
+                    evt = e;
 
                     // make a copy of the DND payload
                     //evt_len = Fl::event_length();
