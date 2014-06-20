@@ -146,7 +146,8 @@ void freelist(struct s_sectorlist_ * element)
 
 double getOffsetTiming(SIDE *currentside,int offset,double timingoffset,int start)
 {
-	int i,j,bitrate,totaloffset;
+	int i,j,totaloffset;
+	unsigned long bitrate;
 
 	if( offset >= start )
 	{
@@ -162,13 +163,13 @@ double getOffsetTiming(SIDE *currentside,int offset,double timingoffset,int star
 
 	if(currentside->bitrate==VARIABLEBITRATE)
 	{
-		do
+		while( i < totaloffset )
 		{
 			bitrate = currentside->timingbuffer[j>>3];
 			timingoffset = timingoffset + ((double)(500000)/(double)bitrate);
 			i++;
 			j = (j+1) % currentside->tracklen;
-		}while( i < totaloffset );
+		}
 	}
 	else
 	{
@@ -645,6 +646,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	int endfill;
 	double xresstep;
 	s_sectorlist * sl,*oldsl;
+	s_pulseslist * pl,*oldpl;
 	SIDE * currentside;
 	s_col * col;
 
@@ -671,6 +673,17 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	}
 	td->sl=0;
 
+	pl=td->pl;
+	while(pl)
+	{
+
+		oldpl = pl->next_element;
+
+		free(pl);
+
+		pl = oldpl;
+	}
+	td->pl=0;
 
 	currentside=floppydisk->tracks[track]->sides[side];
 
@@ -719,9 +732,10 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 				xpos= (int)( timingoffset / (xresstep) );
 				ypos= td->ysize - (int)( ( (double) ((interbit+1) * 500000) / (double) bitrate ) / (double)((double)td->y_us/(double)td->ysize));
 
-				if( (xpos<td->xsize) && (ypos<td->ysize) && ypos>=0 )
+				if(td->x_us>1000)
 				{
-					if(td->x_us>1000)
+					// Scather gatter display mode
+					if( (xpos<td->xsize) && (ypos<td->ysize) && ypos>=0 )
 					{
 						td->framebuffer[(td->xsize*ypos) + xpos]++;
 
@@ -736,16 +750,18 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 							td->framebuffer[(td->xsize*ypos) + xpos]++;
 						}
 					}
-					else
+				}
+				else
+				{
+					// Pulses display mode
+					if( (xpos<td->xsize) )
 					{
 
 						for(ypos= td->ysize - 40 ; ypos > (td->ysize - 250) ; ypos--)
 						{
 							td->framebuffer[(td->xsize*ypos) + xpos]=255;
 						}
-
 					}
-
 				}
 
 				if(xpos>td->xsize)
@@ -765,7 +781,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 
 			i++;
 
-		}while(i<tracksize);
+		}while(i<tracksize && !endfill);
 
 		xpos= (int)( timingoffset / xresstep );
 		if(xpos>td->xsize)
@@ -839,7 +855,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 
 				i++;
 
-			}while(i<tracksize);
+			}while(i<tracksize && !endfill);
 
 			i=0;
 			old_i=0;
@@ -890,7 +906,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 				endfill=1;
 			};
 			i++;
-		}while(i<tracksize);
+		}while(i<tracksize && !endfill);
 
 		old_i=0;
 		i=0;
@@ -902,6 +918,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 
 	if(!(td->x_us>1000))
 	{
+		// Only possible in pulses display mode
 		tracksize=currentside->tracklen;
 		old_i=buffer_offset;
 		i=buffer_offset;
@@ -915,7 +932,7 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 				timingoffset2=getOffsetTiming(currentside,i+1,timingoffset,i);
 
 				old_i=i;
-				xpos= (int)( timingoffset / xresstep ) - (( timingoffset2 - timingoffset) / (xresstep *2) );
+				xpos = (int)( timingoffset / xresstep ) - (int)(( timingoffset2 - timingoffset) / (xresstep *2) );
 
 				if(xpos>=0 && (xpos<td->xsize) )
 				{
@@ -926,18 +943,34 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 						col->green=155;
 						col->red=0;
 					}
+					// Add the pulse to the pulses list.
+					oldpl = pl;
+					pl = malloc(sizeof(s_pulseslist));
+					if(pl)
+					{
+						memset(pl,0,sizeof(s_pulseslist));
+						pl->track = track;
+						pl->side = side;
+						pl->pulse_number = i;
+						pl->x_pos1 = xpos;
+						pl->x_pos2 = xpos + (int)(( timingoffset2 - timingoffset) / (xresstep) );
+						pl->next_element = oldpl;
+					}
 				}
 				else
 				{
-					endfill=1;
+					if(xpos >= 0 )
+						endfill = 1;
 				};
 				i++;
-			}while(i<tracksize);
+			}while(i<tracksize && !endfill);
 
 			old_i=0;
 			i=0;
 
 		}while(!endfill);
+
+		td->pl = pl;
 
 		ypos = td->ysize - 40;
 		for(xpos = 0;xpos < td->xsize ; xpos++)

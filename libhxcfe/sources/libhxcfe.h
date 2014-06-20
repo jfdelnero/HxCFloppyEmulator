@@ -318,6 +318,17 @@ typedef struct s_sectorlist_
 	struct s_sectorlist_ * next_element;
 }s_sectorlist;
 
+typedef struct s_pulseslist_
+{
+	int side,track;
+
+	int pulse_number;
+
+	int x_pos1,x_pos2;
+
+	struct s_pulseslist_ * next_element;
+}s_pulseslist;
+
 typedef struct s_trackdisplay_
 {
 	int xsize,ysize;
@@ -328,6 +339,8 @@ typedef struct s_trackdisplay_
 	s_sectorlist * sl;
 
 	unsigned long enabledtrackmode;
+
+	s_pulseslist * pl;
 
 }s_trackdisplay;
 
