@@ -138,6 +138,13 @@ int FLPPCM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 		floppydisk->floppyNumberOfSide = (unsigned char)flp_header.nbsides;
 		floppydisk->floppySectorPerTrack = flp_header.nbsectors;
 		floppydisk->floppyBitRate = 250000;
+		floppydisk->floppyiftype = IBMPC_DD_FLOPPYMODE;
+		if( floppydisk->floppySectorPerTrack >= 15 && sectorsize >=512 )
+		{
+			floppydisk->floppyBitRate = 500000;
+			floppydisk->floppyiftype=IBMPC_HD_FLOPPYMODE;
+		}
+
 		rpm = 300;
 		gap3len = 0xFF;
 		interleave = 1;
