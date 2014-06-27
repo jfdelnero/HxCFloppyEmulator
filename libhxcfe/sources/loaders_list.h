@@ -101,6 +101,7 @@
 #include "./loaders/scp_loader/scp_loader.h"
 #include "./loaders/bmp_loader/bmp_loader.h"
 #include "./loaders/xml_loader/xml_loader.h"
+#include "./loaders/flppcm_loader/flppcm_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -132,6 +133,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)AMIGADOSFSDK_libGetPluginInfo,
 	(GETPLUGININFOS)Prophet_libGetPluginInfo,
 	(GETPLUGININFOS)IMG_libGetPluginInfo,
+	(GETPLUGININFOS)FLPPCM_libGetPluginInfo,
 	(GETPLUGININFOS)MSX_libGetPluginInfo,
 	(GETPLUGININFOS)FAT12FLOPPY_libGetPluginInfo,
 	(GETPLUGININFOS)HFE_libGetPluginInfo,
