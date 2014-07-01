@@ -160,6 +160,14 @@ SOURCE=..\sources\gui\usbhxcfecfg_window.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\sources\gui\microintro\hxcmod.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\gui\microintro\hxcmod.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\gui\microintro\packer\lzw.c
 # End Source File
 # Begin Source File
@@ -193,10 +201,6 @@ SOURCE=..\sources\gui\microintro\packer\rle.c
 # Begin Source File
 
 SOURCE=..\sources\gui\microintro\packer\rle.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\sources\gui\microintro\mod32.lib
 # End Source File
 # End Group
 # Begin Source File
