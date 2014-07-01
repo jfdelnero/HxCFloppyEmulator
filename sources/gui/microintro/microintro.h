@@ -26,5 +26,5 @@ typedef struct uintro_context_
 uintro_context * uintro_init(unsigned short xsize,unsigned short ysize);
 void uintro_reset(uintro_context * ui_context);
 void uintro_getnextframe(uintro_context * democontext);
-void uintro_getnext_soundsample(uintro_context * democontext,unsigned char* buffer,int size);
+void uintro_getnext_soundsample(uintro_context * democontext,unsigned short* buffer,int size);
 void uintro_deinit(uintro_context * democontext);
