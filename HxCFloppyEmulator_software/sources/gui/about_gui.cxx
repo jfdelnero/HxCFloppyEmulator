@@ -70,7 +70,7 @@ void CALLBACK SoundHandlerProc(HWAVEOUT hwo,UINT uMsg,DWORD * dwInstance,DWORD *
 			case WOM_OPEN:
 				break;
 			case WOM_DONE:
-				uintro_getnext_soundsample(gb_ui_context,(unsigned char*)((struct wavehdr_tag *)dwParam1)->lpData,sizeof(buffer2));
+				uintro_getnext_soundsample(gb_ui_context,(unsigned short*)((struct wavehdr_tag *)dwParam1)->lpData,sizeof(buffer2)/2);
 				waveOutWrite(shwd,(struct wavehdr_tag *)dwParam1,sizeof(pwhOut2));
 				break;
 			case WOM_CLOSE:

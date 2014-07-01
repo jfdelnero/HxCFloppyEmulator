@@ -48,6 +48,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "hxcmod.h"
+
 #include "microintro.h"
 #include "mod32.h"
 #include "packer/pack.h"
@@ -59,6 +61,8 @@
 #include "data/data_maktone_class_cracktro15_mod.h"
 #include "data/data_vim_not_again_mod.h"
 #include "data/data_zandax_supplydas_booze_mod.h"
+
+void * mp;
 
 typedef struct scrolltab_
 {
@@ -276,31 +280,23 @@ uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 	{
 		case 0:
 			data_maktone_class_cracktro15_mod->unpacked_data=mi_unpack(data_maktone_class_cracktro15_mod->data,data_maktone_class_cracktro15_mod->csize ,data_maktone_class_cracktro15_mod->data, data_maktone_class_cracktro15_mod->size);
-#ifdef WIN32
-			InitModule(NULL,buffer1,16,data_maktone_class_cracktro15_mod->unpacked_data);
-#endif
+			mp = hxcmod_load(data_maktone_class_cracktro15_mod->unpacked_data);
 		break;
 		case 1:
 			data_jozz_cognition_mod->unpacked_data=mi_unpack(data_jozz_cognition_mod->data,data_jozz_cognition_mod->csize ,data_jozz_cognition_mod->data, data_jozz_cognition_mod->size);
-#ifdef WIN32            
-			InitModule(NULL,buffer1,16,data_jozz_cognition_mod->unpacked_data);
-#endif
+			mp = hxcmod_load(data_jozz_cognition_mod->unpacked_data);
 		break;
 		case 2:
 			data_zandax_supplydas_booze_mod->unpacked_data=mi_unpack(data_zandax_supplydas_booze_mod->data,data_zandax_supplydas_booze_mod->csize ,data_zandax_supplydas_booze_mod->data, data_zandax_supplydas_booze_mod->size);
-#ifdef WIN32
-			InitModule(NULL,buffer1,16,data_zandax_supplydas_booze_mod->unpacked_data);
-#endif
+			mp = hxcmod_load(data_zandax_supplydas_booze_mod->unpacked_data);
 		break;
 		case 3:
 			data_vim_not_again_mod->unpacked_data=mi_unpack(data_vim_not_again_mod->data,data_vim_not_again_mod->csize ,data_vim_not_again_mod->data, data_vim_not_again_mod->size);
-#ifdef WIN32
-			InitModule(NULL,buffer1,16,data_vim_not_again_mod->unpacked_data);
-#endif
+			mp = hxcmod_load(data_vim_not_again_mod->unpacked_data);
 		break;
 
 	}
-	
+
 	return ui_context;
 }
 
@@ -334,42 +330,31 @@ void uintro_reset(uintro_context * ui_context)
 		case 0:
 			if(!data_maktone_class_cracktro15_mod->unpacked_data)
 				data_maktone_class_cracktro15_mod->unpacked_data=mi_unpack(data_maktone_class_cracktro15_mod->data,data_maktone_class_cracktro15_mod->csize ,data_maktone_class_cracktro15_mod->data, data_maktone_class_cracktro15_mod->size);
-#ifdef WIN32
-			InitModule(NULL,buffer1,16,data_maktone_class_cracktro15_mod->unpacked_data);
-#endif
+			mp = hxcmod_load(data_maktone_class_cracktro15_mod->unpacked_data);
 		break;
 		case 1:
 			if(!data_jozz_cognition_mod->unpacked_data)
 				data_jozz_cognition_mod->unpacked_data=mi_unpack(data_jozz_cognition_mod->data,data_jozz_cognition_mod->csize ,data_jozz_cognition_mod->data, data_jozz_cognition_mod->size);
-#ifdef WIN32            
-			InitModule(NULL,buffer1,16,data_jozz_cognition_mod->unpacked_data);
-#endif
+			mp = hxcmod_load(data_jozz_cognition_mod->unpacked_data);
 		break;
 		case 2:
 			if(!data_zandax_supplydas_booze_mod->unpacked_data)
 				data_zandax_supplydas_booze_mod->unpacked_data=mi_unpack(data_zandax_supplydas_booze_mod->data,data_zandax_supplydas_booze_mod->csize ,data_zandax_supplydas_booze_mod->data, data_zandax_supplydas_booze_mod->size);
-#ifdef WIN32
-			InitModule(NULL,buffer1,16,data_zandax_supplydas_booze_mod->unpacked_data);
-#endif
+			mp = hxcmod_load(data_zandax_supplydas_booze_mod->unpacked_data);
 		break;
 		case 3:
 			if(!data_vim_not_again_mod->unpacked_data)
 				data_vim_not_again_mod->unpacked_data=mi_unpack(data_vim_not_again_mod->data,data_vim_not_again_mod->csize ,data_vim_not_again_mod->data, data_vim_not_again_mod->size);
-#ifdef WIN32
-			InitModule(NULL,buffer1,16,data_vim_not_again_mod->unpacked_data);
-#endif
+			mp = hxcmod_load(data_vim_not_again_mod->unpacked_data);
 		break;
 
 	}
-	
 }
 
 
-void uintro_getnext_soundsample(uintro_context * democontext,unsigned char* buffer,int size)
+void uintro_getnext_soundsample(uintro_context * democontext,unsigned short* buffer,int size)
 {
-#ifdef WIN32
-	GiveMeSamples(buffer,size);
-#endif
+	hxcmod_fillbuffer(mp,buffer, size/2);
 }
 
 
