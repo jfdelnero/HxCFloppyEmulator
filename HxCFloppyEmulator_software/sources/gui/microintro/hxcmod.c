@@ -1000,4 +1000,3 @@ void hxcmod_unload(void * modctx)
 	if(mod)
 		memclear(mod,0,sizeof(modcontext));
 }
-}
