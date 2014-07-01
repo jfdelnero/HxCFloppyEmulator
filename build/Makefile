@@ -43,7 +43,7 @@ FTDIFLOPPYEMU=usb_hxcfloppyemulator.o variablebitrate.o
 
 GUI = main_gui.o about_gui.o batch_converter_window.o floppy_dump_window.o floppy_infos_window.o license_gui.o log.o rawfile_loader_window.o sdhxcfecfg_window.o usbhxcfecfg_window.o cb_batch_converter_window.o cb_floppy_dump_window.o cb_floppy_infos_window.o cb_rawfile_loader_window.o cb_sdhxcfecfg_window.o cb_usbhxcfecfg_window.o cb_filesystem_generator_window.o filesystem_generator_window.o 
 
-MICROINTRO = microintro.o lzw.o pack.o rle.o
+MICROINTRO = microintro.o lzw.o pack.o rle.o hxcmod.o
 FLTKLIB = ../sources/thirdpartylibs/fltk/fltk-1.3.x/lib/libfltk.a ../sources/thirdpartylibs/fltk/fltk-1.3.x/lib/libfltk_images.a
 
 all: $(EXEC)
@@ -133,6 +133,9 @@ usbhxcfecfg_window.o : ../sources/gui/usbhxcfecfg_window.cxx
 microintro.o : ../sources/gui/microintro/microintro.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+hxcmod.o : ../sources/gui/microintro/hxcmod.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+	
 lzw.o : ../sources/gui/microintro/packer/lzw.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
