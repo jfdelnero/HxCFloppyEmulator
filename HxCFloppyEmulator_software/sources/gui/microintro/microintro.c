@@ -47,11 +47,12 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-
+#ifdef WIN32  
+#include <windows.h>
+#endif
 #include "hxcmod.h"
 
 #include "microintro.h"
-#include "mod32.h"
 #include "packer/pack.h"
 
 #include "data/data_bmp_sob_bmp.h"
