@@ -126,6 +126,35 @@ static short sintable[]={
 	180,161,141,120, 97, 74, 49, 24
 };
 
+typedef struct modtype_
+{
+	unsigned char signature[5];
+	int numberofchannels;
+}modtype;
+
+modtype modlist[]=
+{
+	{ "M.K.",4},
+	{ "FLT4",4},
+	{ "FLT8",8},
+	{ "4CHN",4},
+	{ "6CHN",6},
+	{ "8CHN",8},
+	{ "10CH",10},
+	{ "12CH",12},
+	{ "14CH",14},
+	{ "16CH",16},
+	{ "18CH",18},
+	{ "20CH",20},
+	{ "22CH",22},
+	{ "24CH",24},
+	{ "26CH",26},
+	{ "28CH",28},
+	{ "30CH",30},
+	{ "32CH",32},
+	{ "",0}
+};
+
 ///////////////////////////////////////////////////////////////////////////////////
 
 #pragma pack(1)
@@ -166,6 +195,7 @@ typedef struct {
 	muint   length;
 	muint   reppnt;
 	muint   replen;
+	mulong  samppos;
 	muint   period;
 	muchar  volume;
 	mulong  ticks;
@@ -180,7 +210,6 @@ typedef struct {
 	muchar  ArpIndex;
 
 	short   oldk;
-	muchar  oldoffsetconfig;
 	muchar  volumeslide;
 
 	muchar  vibraparam;
@@ -192,7 +221,7 @@ typedef struct {
 typedef struct {
 	module  song;
 	char *  sampledata[31];
-	note *  patterndata[64];
+	note *  patterndata[128];
 
 	mulong  playrate;
 	muint   tablepos;
@@ -240,6 +269,24 @@ static void memclear(void * dest,unsigned char value,unsigned long size)
 	}
 }
 
+static int memcompare(unsigned char * buf1,unsigned char * buf2,unsigned int size)
+{
+	unsigned int i;
+
+	i = 0;
+
+	while(i<size)
+	{
+		if(buf1[i] != buf2[i])
+		{
+			return 0;
+		}
+		i++;
+	}
+
+	return 1;
+}
+
 static int getnote(unsigned short period,int finetune,short * perdiodtable)
 {
 	short * fineperiodtable;
@@ -247,13 +294,13 @@ static int getnote(unsigned short period,int finetune,short * perdiodtable)
 
 	fineperiodtable = &perdiodtable[(finetune&0xF) * MAXNOTES];
 
-    for(i = 0; i < MAXNOTES; i++)
-    {
-        if(period >= fineperiodtable[i])
-        {
-            return i;
-        }
-    }
+	for(i = 0; i < MAXNOTES; i++)
+	{
+		if(period >= fineperiodtable[i])
+		{
+			return i;
+		}
+	}
 
 	return MAXNOTES;
 }
@@ -301,7 +348,7 @@ static void worknote(note * nptr, channel * cptr,char t,modcontext * mod)
 		if(( (effect>>8) != EFFECT_TONE_PORTAMENTO && (effect>>8)!=EFFECT_VOLSLIDE_TONEPORTA) /*&& (period != 0 || sample != 0)*/)
 		{
 			if (period!=0)
-				cptr->ticks = 0;
+				cptr->samppos = 0;
 		}
 
 		cptr->decalperiod=0;
@@ -429,9 +476,16 @@ static void worknote(note * nptr, channel * cptr,char t,modcontext * mod)
 			effect, and hence is not played.
 			*/
 
+			if(period!=0)
+			{
+				cptr->portaperiod=period;
+				cptr->period=operiod;
+			}
+
 			cptr->effect=EFFECT_VOLSLIDE_TONEPORTA;
 			if( ( effect & 0xFF ) != 0 )
 				cptr->volumeslide = ( effect & 0xFF );
+
 		break;
 
 		case EFFECT_VOLSLIDE_VIBRATO:
@@ -457,16 +511,8 @@ static void worknote(note * nptr, channel * cptr,char t,modcontext * mod)
 			offset using the current volume.
 			*/
 
-			if((effect & 0xFF)!=0)
-			{
-				cptr->ticks=((effect & 0xFF) * 256)*((cptr->period - cptr->decalperiod )/mod->sampleticksconst);
-				cptr->oldoffsetconfig=(effect & 0xFF);
-			}
-			else
-			{
-				cptr->ticks=((cptr->oldoffsetconfig) * 256)*((cptr->period - cptr->decalperiod )/mod->sampleticksconst);
+			cptr->samppos = ((effect>>4) * 4096) + ((effect&0xF)*256);
 
-			}
 		break;
 
 		case EFFECT_VOLUME_SLIDE:
@@ -611,8 +657,11 @@ static void worknote(note * nptr, channel * cptr,char t,modcontext * mod)
 
 			if((effect&0xFF)<0x21)
 			{
-				mod->song.speed = effect&0xFF;
-				mod->patternticksaim = (long)mod->song.speed * ((mod->playrate * 5 ) / (((long)2 * (long)mod->bpm)));
+				if(effect&0xFF)
+				{
+					mod->song.speed = effect&0xFF;
+					mod->patternticksaim = (long)mod->song.speed * ((mod->playrate * 5 ) / (((long)2 * (long)mod->bpm)));
+				}
 			}
 
 			if((effect&0xFF)>=0x21)
@@ -635,8 +684,6 @@ static void worknote(note * nptr, channel * cptr,char t,modcontext * mod)
 
 static void workeffect(note * nptr, channel * cptr)
 {
-	short t;
-
 	switch(cptr->effect)
 	{
 		case EFFECT_ARPEGGIO:
@@ -655,7 +702,7 @@ static void workeffect(note * nptr, channel * cptr)
 
 			cptr->period -= cptr->parameffect;
 
-			if(cptr->period < 113 || cptr->period > 856)
+			if(cptr->period < 113 || cptr->period > 20000)
 				cptr->period = 113;
 
 		break;
@@ -664,8 +711,8 @@ static void workeffect(note * nptr, channel * cptr)
 
 			cptr->period += cptr->parameffect;
 
-			if(cptr->period > 856)
-				cptr->period = 856;
+			if(cptr->period > 20000)
+				cptr->period = 20000;
 
 		break;
 
@@ -722,15 +769,11 @@ static void workeffect(note * nptr, channel * cptr)
 		case EFFECT_VOLSLIDE_VIBRATO:
 		case EFFECT_VIBRATO:
 
-			t = cptr->period - cptr->decalperiod - cptr->vibraperiod;
-
 			cptr->vibraperiod=((cptr->vibraparam&0xF)*sintable[cptr->vibrapointeur&0x1F])>>7;
 
 			if(cptr->vibrapointeur>31) cptr->vibraperiod=-cptr->vibraperiod;
 
 			cptr->vibrapointeur=(cptr->vibrapointeur+((cptr->vibraparam>>4)&0xf))&0x1F;
-
-			cptr->ticks= ( ( ( cptr->period - cptr->decalperiod - cptr->vibraperiod) *cptr->ticks)/t);
 
 			if(cptr->effect == EFFECT_VOLSLIDE_VIBRATO)
 			{
@@ -796,9 +839,23 @@ void * hxcmod_load(void * moddata)
 		{
 			memclear(mod,0,sizeof(modcontext));
 
-			mod->number_of_channels = 4;
-
 			memcopy(&(mod->song.title),modmemory,1084);
+
+			i = 0;
+			mod->number_of_channels = 0;
+			while(modlist[i].numberofchannels)
+			{
+				if(memcompare(mod->song.signature,modlist[i].signature,4))
+				{
+					mod->number_of_channels = modlist[i].numberofchannels;
+				}
+
+				i++;
+			}
+
+			if(!mod->number_of_channels)
+				return 0;
+
 
 			// traitement des mods 15 samples
 			/*if (memcmp(&(song.signature), "M.K.", 4) != 0 && memcmp(&(song.signature), "FLT4", 4) != 0 &&  memcmp(&(song.signature), "FLT8", 4) != 0)
@@ -867,7 +924,6 @@ void * hxcmod_load(void * moddata)
 			{
 				mod->channels[i].volume = 0;
 				mod->channels[i].period = 448;
-				mod->channels[i].oldoffsetconfig=0;
 			}
 		}
 	}
@@ -883,6 +939,7 @@ void hxcmod_fillbuffer(void * modctx,unsigned short * buffer, unsigned long nbsa
 	short l,r;
 	short ll,lr;
 	short tl,tr;
+	short finalperiod;
 	modcontext * mod;
 	note	*nptr;
 	channel *cptr;
@@ -935,6 +992,7 @@ void hxcmod_fillbuffer(void * modctx,unsigned short * buffer, unsigned long nbsa
 
 				mod->patterntickse=0;
 			}
+
 			//---------------------------------------
 
 			l=0;
@@ -942,30 +1000,36 @@ void hxcmod_fillbuffer(void * modctx,unsigned short * buffer, unsigned long nbsa
 
 			for (j =0, cptr = mod->channels; (j < mod->number_of_channels) && (cptr->period!=0); j++, cptr++)
 			{
-				k=0;
-				if(((long)cptr->period - (long)cptr->decalperiod - (long)cptr->vibraperiod )!=0)
-				k = (((mod->sampleticksconst * cptr->ticks) / ((long)cptr->period - (long)cptr->decalperiod - (long)cptr->vibraperiod )));
+				finalperiod = cptr->period - cptr->decalperiod - cptr->vibraperiod;
+				if(finalperiod)
+				{
+					cptr->samppos += ( (mod->sampleticksconst<<8) / finalperiod );
+				}
 
-				cptr->ticks++;
+				//cptr->ticks++;
 
 				if(cptr->replen<=2)
 				{
-					if (k >= (cptr->length))
+					if ((cptr->samppos>>8) >= (cptr->length))
 					{
 						cptr->length = 0;
 						cptr->reppnt = 0;
-						cptr->ticks = 0;
-						k=0;
+
+						if(cptr->length)
+							cptr->samppos = cptr->samppos % (cptr->length<<8);
+						else
+							cptr->samppos = 0;
 					}
 				}
 				else
 				{
-					if (k >= (unsigned long)(cptr->replen+cptr->reppnt))
+					if ((cptr->samppos>>8) >= (unsigned long)(cptr->replen+cptr->reppnt))
 					{
-						k=cptr->reppnt;
-						cptr->ticks = (((long)cptr->period - (long)cptr->decalperiod - (long)cptr->vibraperiod )*k)/(mod->sampleticksconst);
+						cptr->samppos = (cptr->samppos % ((cptr->replen+cptr->reppnt)<<8)) + (cptr->reppnt<<8);
 					}
 				}
+
+				k = cptr->samppos >> 8;
 
 				if(cptr->sampdata!=0 && (((j&3)==1) || ((j&3)==2) ))
 					r += ( (cptr->sampdata[k] *  cptr->volume));
