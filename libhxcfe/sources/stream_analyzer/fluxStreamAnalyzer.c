@@ -2285,24 +2285,6 @@ static unsigned long getbestindex(s_track_dump *track_dump,unsigned long * overl
 	return bestval;
 }
 
-double GetTrackPeriod(HXCFLOPPYEMULATOR* floppycontext,SIDE * curside)
-{
-	int tracklen,i;
-	double total_period;
-
-	tracklen = curside->tracklen /8;
-	if(curside->tracklen & 7)
-		tracklen++;
-
-	total_period = 0;
-	for(i=0;i<tracklen;i++)
-	{
-		total_period = total_period + (double)((double)1/(double)curside->timingbuffer[i]);
-	}
-
-	return total_period;
-}
-
 void AdjustTrackPeriod(HXCFLOPPYEMULATOR* floppycontext,SIDE * curside_S0,SIDE * curside_S1)
 {
 	int tracklen,i;

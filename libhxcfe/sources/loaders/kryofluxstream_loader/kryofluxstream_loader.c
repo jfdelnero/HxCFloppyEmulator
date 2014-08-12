@@ -184,6 +184,9 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * r
 
 			currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
 
+			if(rpm)
+				*rpm = (short)( 60 / GetTrackPeriod(floppycontext,currentside) );
+
 			hxcfe_FxStream_FreeStream(fxs,track_dump);
 		}
 
@@ -346,7 +349,8 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 			if(singleside)
 				nbside = 1;
 			nbtrack=(maxtrack-mintrack)+1;
-			nbtrack=nbtrack/doublestep;
+			if(doublestep==2)
+				nbtrack=(nbtrack/doublestep) + 1;
 
 			floppycontext->hxc_printf(MSG_DEBUG,"%d track (%d - %d), %d sides (%d - %d)",nbtrack,mintrack,maxtrack,nbside,minside,maxside);
 

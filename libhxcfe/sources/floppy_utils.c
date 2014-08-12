@@ -178,3 +178,20 @@ void savebuffer(char * name,unsigned char * buffer, int size)
 	}
 }
 
+double GetTrackPeriod(HXCFLOPPYEMULATOR* floppycontext,SIDE * curside)
+{
+	int tracklen,i;
+	double total_period;
+
+	tracklen = curside->tracklen /8;
+	if(curside->tracklen & 7)
+		tracklen++;
+
+	total_period = 0;
+	for(i=0;i<tracklen;i++)
+	{
+		total_period = total_period + (double)((double)(1*4)/(double)curside->timingbuffer[i]);
+	}
+
+	return total_period;
+}

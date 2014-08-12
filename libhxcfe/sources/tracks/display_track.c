@@ -685,6 +685,15 @@ void hxcfe_td_draw_track(HXCFLOPPYEMULATOR* floppycontext,s_trackdisplay *td,FLO
 	}
 	td->pl=0;
 
+	if(track>=floppydisk->floppyNumberOfTrack) track = floppydisk->floppyNumberOfTrack - 1;
+	if(track<0) track = 0;
+
+	if(!floppydisk->floppyNumberOfTrack || !floppydisk->floppyNumberOfSide)
+	{
+		memset(td->framebuffer,0xCC,td->xsize*td->ysize*sizeof(unsigned int));
+		return;
+	}
+
 	currentside=floppydisk->tracks[track]->sides[side];
 
 	tracksize=currentside->tracklen;
