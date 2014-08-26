@@ -84,6 +84,32 @@ double adjust_timescale(double slide)
 	return slide;
 }
 
+int valuesanitycheck(int val,int min, int max, int * modif)
+{
+	int retval;
+
+	if(modif)
+		*modif = 0;
+
+
+	retval = val;
+	if(val >= max)
+	{
+		if(modif)
+			*modif = 1;
+		retval = max - 1;
+	}
+	
+	if(retval<0)
+	{
+		if(modif)
+			*modif = 1;
+		retval = min;
+	}
+
+	return retval;
+}
+
 void update_graph(floppy_infos_window * w)
 {
 	s_trackdisplay * td;
@@ -94,6 +120,7 @@ void update_graph(floppy_infos_window * w)
 	char tempstr[512];
 
 	int track,side;
+	int valmodif;
 
 	disp_xsize=w->floppy_map_disp->w();
 	disp_ysize=w->floppy_map_disp->h();
@@ -157,8 +184,15 @@ void update_graph(floppy_infos_window * w)
 
 				fl_draw_image((unsigned char *)td->framebuffer, w->floppy_map_disp->x(), w->floppy_map_disp->y(), td->xsize, td->ysize, 3, 0);
 
-				track=(int)w->track_number_slide->value();
-				side=(int)w->side_number_slide->value();
+				track = (int)w->track_number_slide->value();
+				track = valuesanitycheck(track,0, guicontext->loadedfloppy->floppyNumberOfTrack,&valmodif);
+				if(valmodif) 
+					w->track_number_slide->value(track);
+				
+				side = (int)w->side_number_slide->value();
+				side = valuesanitycheck(side,0, guicontext->loadedfloppy->floppyNumberOfSide,&valmodif);
+				if(valmodif) 
+					w->side_number_slide->value(side);
 
 				if(!w->disc_view_bt->value())
 				{
@@ -183,40 +217,44 @@ void update_graph(floppy_infos_window * w)
 
 				w->global_status->value(tempstr);
 
-				sprintf(tempstr,"Track RPM tag : %d\nBitrate flag : %d\nTrack encoding flag : %x\n",
-					(int)guicontext->loadedfloppy->tracks[track]->floppyRPM,
-					(int)guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate,
-					guicontext->loadedfloppy->tracks[track]->sides[side]->track_encoding
-					);
-
-				w->buf->remove(0,w->buf->length());
-
-				sprintf(tempstr,"Track RPM : %d RPM - ",guicontext->loadedfloppy->tracks[track]->floppyRPM);
-				w->buf->append((char*)tempstr);
-
-				if(guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate==-1)
+				if(guicontext->loadedfloppy->floppyNumberOfTrack)
 				{
-					sprintf(tempstr,"Bitrate : VARIABLE\n");
-				}
-				else
-				{
-					sprintf(tempstr,"Bitrate : %d bit/s\n",(int)guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate);
-				}
-				w->buf->append((char*)tempstr);
-				sprintf(tempstr,"Track format : %s\n",hxcfe_getTrackEncodingName(guicontext->hxcfe,guicontext->loadedfloppy->tracks[track]->sides[side]->track_encoding));
-				w->buf->append((char*)tempstr);
-				sprintf(tempstr,"Track len : %d cells\n",(int)guicontext->loadedfloppy->tracks[track]->sides[side]->tracklen);
-				w->buf->append((char*)tempstr);
-				sprintf(tempstr,"Number of side : %d\n",guicontext->loadedfloppy->tracks[track]->number_of_side);
-				w->buf->append((char*)tempstr);
+					sprintf(tempstr,"Track RPM tag : %d\nBitrate flag : %d\nTrack encoding flag : %x\n",
+						(int)guicontext->loadedfloppy->tracks[track]->floppyRPM,
+						(int)guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate,
+						guicontext->loadedfloppy->tracks[track]->sides[side]->track_encoding
+						);
 
-				sprintf(tempstr,"Interface mode: %s - %s\n",
-					hxcfe_getFloppyInterfaceModeName(guicontext->hxcfe,guicontext->interfacemode),
-					hxcfe_getFloppyInterfaceModeDesc(guicontext->hxcfe,guicontext->interfacemode)
-					);
-				w->buf->append((char*)tempstr);
+					w->buf->remove(0,w->buf->length());
 
-				w->object_txt->buffer(w->buf);
+					sprintf(tempstr,"Track RPM : %d RPM - ",guicontext->loadedfloppy->tracks[track]->floppyRPM);
+					w->buf->append((char*)tempstr);
+				
+
+					if(guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate==-1)
+					{
+						sprintf(tempstr,"Bitrate : VARIABLE\n");
+					}
+					else
+					{
+						sprintf(tempstr,"Bitrate : %d bit/s\n",(int)guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate);
+					}
+					w->buf->append((char*)tempstr);
+					sprintf(tempstr,"Track format : %s\n",hxcfe_getTrackEncodingName(guicontext->hxcfe,guicontext->loadedfloppy->tracks[track]->sides[side]->track_encoding));
+					w->buf->append((char*)tempstr);
+					sprintf(tempstr,"Track len : %d cells\n",(int)guicontext->loadedfloppy->tracks[track]->sides[side]->tracklen);
+					w->buf->append((char*)tempstr);
+					sprintf(tempstr,"Number of side : %d\n",guicontext->loadedfloppy->tracks[track]->number_of_side);
+					w->buf->append((char*)tempstr);
+
+					sprintf(tempstr,"Interface mode: %s - %s\n",
+						hxcfe_getFloppyInterfaceModeName(guicontext->hxcfe,guicontext->interfacemode),
+						hxcfe_getFloppyInterfaceModeDesc(guicontext->hxcfe,guicontext->interfacemode)
+						);
+					w->buf->append((char*)tempstr);
+
+					w->object_txt->buffer(w->buf);
+				}
 			}
 			else
 			{
@@ -456,7 +494,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 	char str2[512];
 	int track,side;
 
-	int event;
+	int event,valmodif;
 
 	unsigned char c;
 
@@ -494,8 +532,15 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 				if(ypos<0) ypos=0;
 				if(ypos>disp_ysize) ypos=disp_ysize-1;
 
-				track=(int)fiw->track_number_slide->value();
+				track = (int)fiw->track_number_slide->value();
+				track = valuesanitycheck(track,0, guicontext->loadedfloppy->floppyNumberOfTrack,&valmodif);
+				if(valmodif)
+					fiw->track_number_slide->value(track);
+
 				side=(int)fiw->side_number_slide->value();
+				side = valuesanitycheck(side,0, guicontext->loadedfloppy->floppyNumberOfSide,&valmodif);
+				if(valmodif)
+					fiw->side_number_slide->value(side);
 
 				while(pl)
 				{
@@ -704,40 +749,51 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 		if(guicontext->loadedfloppy)
 		{
-			track=(int)fiw->track_number_slide->value();
+			track = (int)fiw->track_number_slide->value();
+			track = valuesanitycheck(track,0, guicontext->loadedfloppy->floppyNumberOfTrack,&valmodif);
+			if(valmodif)
+				fiw->track_number_slide->value(track);
+
 			side=(int)fiw->side_number_slide->value();
+			side = valuesanitycheck(side,0, guicontext->loadedfloppy->floppyNumberOfSide,&valmodif);
+			if(valmodif)
+				fiw->side_number_slide->value(side);
 
-			sprintf(str,"Track RPM : %d RPM - ",guicontext->loadedfloppy->tracks[track]->floppyRPM);
-			strcat(fullstr,str);
-
-			if(guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate==-1)
+			if(guicontext->loadedfloppy->floppyNumberOfTrack)
 			{
-				sprintf(str,"Bitrate : VARIABLE\n");
+				sprintf(str,"Track RPM : %d RPM - ",guicontext->loadedfloppy->tracks[track]->floppyRPM);
+				strcat(fullstr,str);
+
+				if(guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate==-1)
+				{
+					sprintf(str,"Bitrate : VARIABLE\n");
+				}
+				else
+				{
+					sprintf(str,"Bitrate : %d bit/s\n",(int)guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate);
+				}
+				strcat(fullstr,str);
+
+				sprintf(str,"Track format : %s\n",hxcfe_getTrackEncodingName(guicontext->hxcfe,guicontext->loadedfloppy->tracks[track]->sides[side]->track_encoding));
+				strcat(fullstr,str);
+				sprintf(str,"Track len : %d cells\n",(int)guicontext->loadedfloppy->tracks[track]->sides[side]->tracklen);
+				strcat(fullstr,str);
+				sprintf(str,"Number of side : %d\n",guicontext->loadedfloppy->tracks[track]->number_of_side);
+				strcat(fullstr,str);
+
+				sprintf(str,"Interface mode: %s - %s\n",
+					hxcfe_getFloppyInterfaceModeName(guicontext->hxcfe,guicontext->interfacemode),
+					hxcfe_getFloppyInterfaceModeDesc(guicontext->hxcfe,guicontext->interfacemode));
+
+				strcat(fullstr,str);
+
+				fiw->buf->append((char*)fullstr);
+
+				fiw->object_txt->buffer(fiw->buf);
 			}
-			else
-			{
-				sprintf(str,"Bitrate : %d bit/s\n",(int)guicontext->loadedfloppy->tracks[track]->sides[side]->bitrate);
-			}
-			strcat(fullstr,str);
-
-			sprintf(str,"Track format : %s\n",hxcfe_getTrackEncodingName(guicontext->hxcfe,guicontext->loadedfloppy->tracks[track]->sides[side]->track_encoding));
-			strcat(fullstr,str);
-			sprintf(str,"Track len : %d cells\n",(int)guicontext->loadedfloppy->tracks[track]->sides[side]->tracklen);
-			strcat(fullstr,str);
-			sprintf(str,"Number of side : %d\n",guicontext->loadedfloppy->tracks[track]->number_of_side);
-			strcat(fullstr,str);
-
-			sprintf(str,"Interface mode: %s - %s\n",
-				hxcfe_getFloppyInterfaceModeName(guicontext->hxcfe,guicontext->interfacemode),
-				hxcfe_getFloppyInterfaceModeDesc(guicontext->hxcfe,guicontext->interfacemode));
-
-			strcat(fullstr,str);
-
-			fiw->buf->append((char*)fullstr);
-
-			fiw->object_txt->buffer(fiw->buf);
 
 		}
 
 	}
+
 }
