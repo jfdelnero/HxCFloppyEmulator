@@ -96,6 +96,7 @@ int fatfs_init(struct fatfs *fs)
             valid_partition = 1;
         break;
         case 0x00:
+		case 0x02:
             valid_partition = 0;
             break;
         default:
