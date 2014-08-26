@@ -130,14 +130,14 @@ int FZF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	nbblock = filesize / 1024;
 	if(filesize & 0x3FF ) nbblock++;
 
-	fzf_file = malloc ( filesize );
+	fzf_file = malloc ( nbblock * 1024 );
 	if(!fzf_file)
 	{
 		hxc_fclose(f);
 		return HXCFE_INTERNALERROR;
 	}
 
-	memset(fzf_file,0,filesize);
+	memset(fzf_file,0,nbblock * 1024);
 	fread(fzf_file,1,filesize,f);
 
 	hxc_fclose(f);
