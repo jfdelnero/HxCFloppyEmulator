@@ -2556,6 +2556,17 @@ unsigned long getbestrevolution(unsigned long * score,unsigned long nb_revolutio
 
 }
 
+int tracktypelist[]=
+{
+	ISOIBM_MFM_ENCODING,
+	ISOIBM_FM_ENCODING,
+	AMIGA_MFM_ENCODING,
+	EMU_FM_ENCODING,
+	ARBURGSYS_ENCODING,
+	ARBURGDAT_ENCODING,
+	UNKNOWN_ENCODING
+};
+
 SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 {
 	HXCFLOPPYEMULATOR * hxcfe;
@@ -2718,6 +2729,8 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 
 				memset(qualitylevel,0,sizeof(qualitylevel));
 
+				currentside->track_encoding = UNKNOWN_ENCODING;
+
 				for(revolution = 0; revolution < std->nb_of_index - 1; revolution++)
 				{
 #ifdef FLUXSTREAMDBG
@@ -2728,70 +2741,33 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 					{
 						fp = makefloppyfromtrack(revolutionside[revolution]);
 
-						ss = hxcfe_initSectorSearch(fxs->hxcfe,fp);
-
-						scl = hxcfe_getAllTrackISOSectors(ss,0,0,&nb_sectorfound);
-						if(scl)
+						i = 0;
+						while( ( currentside->track_encoding == UNKNOWN_ENCODING ) && tracktypelist[i] != UNKNOWN_ENCODING )
 						{
-							for(sectnum=0;sectnum<nb_sectorfound;sectnum++)
-							{
-								if(!scl[sectnum]->use_alternate_header_crc)
-									qualitylevel[revolution] += 0x010000;
-								if(!scl[sectnum]->use_alternate_data_crc && scl[sectnum]->input_data)
-									qualitylevel[revolution] += 0x000001;
+							ss = hxcfe_initSectorSearch(fxs->hxcfe,fp);
 
-								hxcfe_freeSectorConfig  (ss,scl[sectnum]);
+							scl = hxcfe_getAllTrackSectors(ss,0,0,tracktypelist[i],&nb_sectorfound);
+
+							if(scl)
+							{
+								for(sectnum=0;sectnum<nb_sectorfound;sectnum++)
+								{
+									if(!scl[sectnum]->use_alternate_header_crc)
+										qualitylevel[revolution] += 0x010000;
+									if(!scl[sectnum]->use_alternate_data_crc && scl[sectnum]->input_data)
+										qualitylevel[revolution] += 0x000001;
+
+									currentside->track_encoding = tracktypelist[i];
+
+									hxcfe_freeSectorConfig  (ss,scl[sectnum]);
+								}
+								free(scl);
 							}
 
-							free(scl);
+							hxcfe_deinitSectorSearch(ss);
+
+							i++;
 						}
-
-						hxcfe_deinitSectorSearch(ss);
-
-						/*
-						//////////////////
-
-						ss = hxcfe_initSectorSearch(fxs->hxcfe,fp);
-
-						scl = hxcfe_getAllTrackSectors(ss,0,0,ARBURGDAT_ENCODING,&nb_sectorfound);
-
-						if(scl)
-						{
-							for(sectnum=0;sectnum<nb_sectorfound;sectnum++)
-							{
-								if(!scl[sectnum]->use_alternate_header_crc)
-									qualitylevel[revolution] += 0x010000;
-								if(!scl[sectnum]->use_alternate_data_crc && scl[sectnum]->input_data)
-									qualitylevel[revolution] += 0x000001;
-
-								hxcfe_freeSectorConfig  (ss,scl[sectnum]);
-							}
-							free(scl);
-						}
-
-						hxcfe_deinitSectorSearch(ss);
-
-						//////////////////
-
-						ss = hxcfe_initSectorSearch(fxs->hxcfe,fp);
-
-						scl = hxcfe_getAllTrackSectors(ss,0,0,ARBURGSYS_ENCODING,&nb_sectorfound);
-						if(scl)
-						{
-							for(sectnum=0;sectnum<nb_sectorfound;sectnum++)
-							{
-								if(!scl[sectnum]->use_alternate_header_crc)
-									qualitylevel[revolution] += 0x010000;
-								if(!scl[sectnum]->use_alternate_data_crc && scl[sectnum]->input_data)
-									qualitylevel[revolution] += 0x000001;
-
-								hxcfe_freeSectorConfig  (ss,scl[sectnum]);
-							}
-							free(scl);
-						}
-
-						hxcfe_deinitSectorSearch(ss);
-						*/
 
 						freefloppy(fp);
 					}
@@ -2813,6 +2789,8 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 #ifdef FLUXSTREAMDBG
 				fxs->hxcfe->hxc_printf(MSG_DEBUG,"getbestindex : %d",revolution);
 #endif
+
+				revolutionside[revolution]->track_encoding = currentside->track_encoding;
 
 				currentside = revolutionside[revolution];
 				revolutionside[revolution] = 0;
