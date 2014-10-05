@@ -203,7 +203,7 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 					{
 						j--;
 					}
-					if(loaderid != hxcfe_getLoaderID(guicontext->hxcfe,"KRYOFLUXSTREAM") || !j) 
+					if(loaderid != hxcfe_getLoaderID(guicontext->hxcfe,(char*)PLUGIN_SKF) || !j) 
 					{
 						if(filelist[filenb][j]==SEPARTOR) j++;
 					}
