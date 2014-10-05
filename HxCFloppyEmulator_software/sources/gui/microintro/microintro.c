@@ -251,7 +251,6 @@ void convert8b24b(bmaptype * img,unsigned short transcolor)
 uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 {
 	uintro_context * ui_context;
-	char buffer1[16];
 
 	ui_context=(uintro_context *)malloc(sizeof(uintro_context));
 	memset(ui_context,0,sizeof(uintro_context));	
@@ -303,8 +302,6 @@ uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 
 void uintro_reset(uintro_context * ui_context)
 {
-	char buffer1[16];
-
 	ui_context->col_f1 = 0;
 	ui_context->col_f2 = 0;
 	ui_context->col_f3 = 0;

@@ -898,7 +898,7 @@ void * hxcmod_load(void * moddata)
 
 				if (sptr->length == 0) continue;
 
-				mod->sampledata[i] = modmemory;
+				mod->sampledata[i] = (char*)modmemory;
 				modmemory += sptr->length;
 
 				if (sptr->replen + sptr->reppnt > sptr->length)
