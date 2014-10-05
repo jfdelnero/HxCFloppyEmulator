@@ -10,6 +10,27 @@
 -------------------------------------------------------------------------------
 
 /*********************************************************
+05 october 2014: HxCFloppyEmulator 2.0.26.0
+
+New Loader : PC Magazine (FLP) file format support added.
+
+GUI - Track viewer window : Track editing functionality added, internal sanity check added.
+
+libhxcfe : Casio FZF loader -> non sector-aligned file image size issue corrected.
+
+libhxcfe : Generic flux stream analyzer enhanced - Track encoding & RPM correctly reported.
+
+Batch converter : Now use the folder name for the output filename while converting KF stream files (raw).
+
+FAT12 Disk Browser:  PC98 FAT disk support enhanced, free space reporting corrected.
+
+Raw Loader - Predefined raw formats added (XML) :
+- Logical Interchange Format (LIF) 3"1/2 264KB (single side).
+- Logical Interchange Format (LIF) 3"1/2 616KB (double side).
+- Logical Interchange Format (LIF) 3"1/2 1232KB (HD).
+- Logical Interchange Format (LIF) 5"1/4 264KB.
+
+/*********************************************************
 25 may 2014: HxCFloppyEmulator 2.0.22.0
 
 GUI - Track viewer window : New viewer mode -> Disk surface view mode.
