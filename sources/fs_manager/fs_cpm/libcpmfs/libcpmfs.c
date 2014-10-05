@@ -43,6 +43,9 @@
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "libcpmfs.h"
 
 int libcpmfs_init(cpmfs * fs)
