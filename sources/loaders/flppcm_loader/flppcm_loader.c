@@ -86,7 +86,7 @@ int FLPPCM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		fread(&flp_header,sizeof(flp_header_t),1,f);
 		hxc_fclose(f);
 
-		if(strncmp(flp_header.hsign,"PCM",sizeof(flp_header.hsign)))
+		if(strncmp((char*)flp_header.hsign,"PCM",sizeof(flp_header.hsign)))
 		{
 			floppycontext->hxc_printf(MSG_DEBUG,"FLPPCM_libIsValidDiskFile : non FLP file - bad header !");
 			return HXCFE_BADFILE;
@@ -131,7 +131,7 @@ int FLPPCM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 
 	fread(&flp_header,sizeof(flp_header_t),1,f);
 
-	if(!strncmp(flp_header.hsign,"PCM",sizeof(flp_header.hsign)))
+	if(!strncmp((char*)flp_header.hsign,"PCM",sizeof(flp_header.hsign)))
 	{
 		sectorsize = flp_header.sectorsize;
 		floppydisk->floppyNumberOfTrack = flp_header.nbtracks;
