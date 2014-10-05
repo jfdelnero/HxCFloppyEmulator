@@ -22,5 +22,9 @@
 ..\..\converttools\bmptoh DiskLayout_Ensoniq_Mirage_440KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Excellon_CNC6.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_UKNC_800KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_LIF_3_50_264KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_LIF_3_50_616KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_LIF_3_50_1232KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_LIF_5_25_264KB.xml -DATA
 
 move *.h ..
