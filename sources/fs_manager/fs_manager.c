@@ -51,6 +51,7 @@
 #include "fs_manager.h"
 #include "fs_fat12/fs_fat12.h"
 #include "fs_amigados/fs_amigados.h"
+#include "fs_cpm/fs_cpm.h"
 
 int hxcfe_checkFSID(HXCFLOPPYEMULATOR* floppycontext,int FSID)
 {
@@ -268,7 +269,6 @@ int hxcfe_closeDir(FSMNG * fsmng, int dirhandle)
 		return amigados_closeDir(fsmng, dirhandle);
 	else
 		return fat12_closeDir(fsmng, dirhandle);
-
 }
 
 int hxcfe_openFile(FSMNG * fsmng, char * filename)
@@ -339,7 +339,6 @@ int hxcfe_createDir( FSMNG * fsmng,char * foldername)
 		return amigados_createDir( fsmng,foldername);
 	else
 		return fat12_createDir( fsmng,foldername);
-
 }
 
 int hxcfe_removeDir( FSMNG * fsmng,char * foldername)
