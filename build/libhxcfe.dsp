@@ -1962,6 +1962,30 @@ SOURCE=..\sources\fs_manager\fs_amigados\fs_amigados.c
 SOURCE=..\sources\fs_manager\fs_amigados\fs_amigados.h
 # End Source File
 # End Group
+# Begin Group "fs_cpm"
+
+# PROP Default_Filter ""
+# Begin Group "libcpmfs"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\fs_manager\fs_cpm\libcpmfs\libcpmfs.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\fs_manager\fs_cpm\libcpmfs\libcpmfs.h
+# End Source File
+# End Group
+# Begin Source File
+
+SOURCE=..\sources\fs_manager\fs_cpm\fs_cpm.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\fs_manager\fs_cpm\fs_cpm.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\sources\fs_manager\fs_manager.c
