@@ -237,6 +237,8 @@ typedef struct SECTORSEARCH_
 	int cur_side;
 
 	SECTORSEARCHTRACKCACHE * track_cache;
+
+	int old_bitoffset;
 }SECTORSEARCH;
 
 SECTORSEARCH* hxcfe_initSectorSearch(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
