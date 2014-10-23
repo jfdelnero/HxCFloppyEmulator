@@ -375,6 +375,7 @@ int slowSearchBitStream(unsigned char * input_data,unsigned long input_data_size
 {
 	unsigned long cur_startoffset;
 	unsigned long i;
+	int tracksearchlen;
 	int len;
 
 	cur_startoffset = bit_offset;
@@ -382,12 +383,15 @@ int slowSearchBitStream(unsigned char * input_data,unsigned long input_data_size
 
 	if(searchlen<=0)
 	{
-		searchlen = input_data_size;
+		tracksearchlen = input_data_size;
+	}
+	else
+	{
+		tracksearchlen = searchlen;
 	}
 
-	while( ( cur_startoffset < input_data_size ) && ( len < searchlen ) )
+	while( ( cur_startoffset < input_data_size ) && ( len < tracksearchlen ) )
 	{
-
 		i=0;
 		while( ( i < chr_data_size) && ( ( getbit(input_data,( (cur_startoffset + i) % input_data_size)) == getbit(chr_data, i % chr_data_size) ) ) )
 		{
@@ -402,6 +406,29 @@ int slowSearchBitStream(unsigned char * input_data,unsigned long input_data_size
 		cur_startoffset++;
 		len++;
 
+	}
+
+	// End of track passed ?
+	if( (searchlen>=0) && (cur_startoffset == input_data_size ) && ( len < tracksearchlen ) )
+	{
+		cur_startoffset = 0;
+		while( ( cur_startoffset < input_data_size ) && ( len < tracksearchlen ) )
+		{
+			i=0;
+			while( ( i < chr_data_size) && ( ( getbit(input_data,( (cur_startoffset + i) % input_data_size)) == getbit(chr_data, i % chr_data_size) ) ) )
+			{
+				i++;
+			}
+
+			if(i == chr_data_size)
+			{
+				return cur_startoffset;
+			}
+
+			cur_startoffset++;
+			len++;
+
+		}
 	}
 
 	return -1;
@@ -504,7 +531,6 @@ int searchBitStream(unsigned char * input_data,unsigned long input_data_size,int
 	{
 		bitoffset = -1;
 	}
-
 
 	return bitoffset;
 }
