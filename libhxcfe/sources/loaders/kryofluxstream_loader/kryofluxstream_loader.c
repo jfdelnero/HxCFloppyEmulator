@@ -184,7 +184,7 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * r
 
 			currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
 
-			if(rpm)
+			if(rpm && currentside)
 				*rpm = (short)( 60 / GetTrackPeriod(floppycontext,currentside) );
 
 			hxcfe_FxStream_FreeStream(fxs,track_dump);
