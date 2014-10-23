@@ -394,191 +394,240 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 				switch(datablock.TYPEIDCODE)
 				{
-				case AFI_DATA_MFM:
-					switch(datablock.packer_id)
-					{
-						case AFI_COMPRESS_NONE:
-							currentside->databuffer=malloc(datablock.unpacked_size);
-							fread(currentside->databuffer,datablock.unpacked_size,1,f);
-							break;
-						case AFI_COMPRESS_GZIP:
-							currentside->databuffer=malloc(datablock.unpacked_size);
-							temp_uncompressbuffer=malloc(datablock.packed_size);
-							fread(temp_uncompressbuffer,datablock.packed_size,1,f);
-							destLen=datablock.unpacked_size;
-							uncompress(currentside->databuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
-							free(temp_uncompressbuffer);
-							break;
-						default:
-						break;
-					}
-					break;
-
-
-				case AFI_DATA_CELL:
-					switch(datablock.packer_id)
-					{
-						case AFI_COMPRESS_NONE:
-							currentside->databuffer=malloc(datablock.unpacked_size);
-							fread(currentside->databuffer,datablock.unpacked_size,1,f);
-							break;
-						case AFI_COMPRESS_GZIP:
-							currentside->databuffer=malloc(datablock.unpacked_size);
-							temp_uncompressbuffer=malloc(datablock.packed_size);
-							fread(temp_uncompressbuffer,datablock.packed_size,1,f);
-							destLen=datablock.unpacked_size;
-							uncompress(currentside->databuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
-							free(temp_uncompressbuffer);
-							break;
-						default:
-						break;
-					}
-					break;
-
-				case AFI_DATA_INDEX:
-					switch(datablock.packer_id)
-					{
-						case AFI_COMPRESS_NONE:
-							currentside->indexbuffer=malloc(datablock.packed_size);
-							fread(currentside->indexbuffer,datablock.packed_size,1,f);
-
-							break;
-						case AFI_COMPRESS_GZIP:
-							currentside->indexbuffer=malloc(datablock.unpacked_size);
-							temp_uncompressbuffer=malloc(datablock.packed_size);
-							fread(temp_uncompressbuffer,datablock.packed_size,1,f);
-							destLen=datablock.unpacked_size;
-							uncompress(currentside->indexbuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
-							free(temp_uncompressbuffer);
-							break;
-						default:
-						break;
-					}
-					break;
-
-				case AFI_DATA_BITRATE:
-					currentside->bitrate=VARIABLEBITRATE;
-
-					if(track.encoding_mode == AFI_TRACKENCODING_CELLARRAY)
-					{
+					case AFI_DATA_MFM:
 						switch(datablock.packer_id)
 						{
 							case AFI_COMPRESS_NONE:
-
-								temp_timing = malloc(datablock.packed_size);
-								fread(temp_timing,datablock.packed_size,1,f);
-
-								currentside->timingbuffer=malloc( bytelen * sizeof(unsigned long));
-
-								for(k=0;k<bytelen;k++)
-								{
-									currentside->timingbuffer[k] = temp_timing[k*8];
-								}
-
-								k=0;
-								do
-								{
-									k++;
-								}while( ( k < bytelen ) && (currentside->timingbuffer[k-1]==currentside->timingbuffer[k]) );
-
-								if( k == bytelen )
-								{
-									currentside->bitrate=currentside->timingbuffer[0];
-									free(currentside->timingbuffer);
-									currentside->timingbuffer=0;
-								}
-
-								free(temp_timing);
-
+								currentside->databuffer=malloc(datablock.unpacked_size);
+								fread(currentside->databuffer,datablock.unpacked_size,1,f);
 								break;
-
 							case AFI_COMPRESS_GZIP:
-
-
-								currentside->timingbuffer=malloc(bytelen * sizeof(unsigned long));
-
+								currentside->databuffer=malloc(datablock.unpacked_size);
 								temp_uncompressbuffer=malloc(datablock.packed_size);
 								fread(temp_uncompressbuffer,datablock.packed_size,1,f);
-
 								destLen=datablock.unpacked_size;
-								temp_timing = malloc(destLen);
-								uncompress((unsigned char*)temp_timing, &destLen,temp_uncompressbuffer, datablock.packed_size);
-
+								uncompress(currentside->databuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
 								free(temp_uncompressbuffer);
-
-								temp_uncompressbuffer_long = bitrate_rle_unpack(temp_timing,destLen/4,&destLen);
-
-
-								for(k=0;k<bytelen;k++)
-								{
-									currentside->timingbuffer[k] = temp_uncompressbuffer_long[k*8];
-								}
-
-								free(temp_uncompressbuffer_long);
-
-								k=0;
-								do
-								{
-									k++;
-								}while( ( k < bytelen ) && (currentside->timingbuffer[k-1]==currentside->timingbuffer[k]));
-
-								if( k == bytelen )
-								{
-									currentside->bitrate=currentside->timingbuffer[0];
-									free(currentside->timingbuffer);
-									currentside->timingbuffer=0;
-								}
-
-								free(temp_timing);
 								break;
 							default:
 							break;
 						}
+					break;
 
-					}
-					else
-					{
+
+					case AFI_DATA_CELL:
 						switch(datablock.packer_id)
 						{
 							case AFI_COMPRESS_NONE:
+								currentside->databuffer=malloc(datablock.unpacked_size);
+								fread(currentside->databuffer,datablock.unpacked_size,1,f);
+								break;
+							case AFI_COMPRESS_GZIP:
+								currentside->databuffer=malloc(datablock.unpacked_size);
+								temp_uncompressbuffer=malloc(datablock.packed_size);
+								fread(temp_uncompressbuffer,datablock.packed_size,1,f);
+								destLen=datablock.unpacked_size;
+								uncompress(currentside->databuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
+								free(temp_uncompressbuffer);
+								break;
+							default:
+							break;
+						}
+					break;
 
-								currentside->timingbuffer=malloc(datablock.packed_size);
-								fread(currentside->timingbuffer,datablock.packed_size,1,f);
+					case AFI_DATA_INDEX:
+						switch(datablock.packer_id)
+						{
+							case AFI_COMPRESS_NONE:
+								currentside->indexbuffer=malloc(datablock.packed_size);
+								fread(currentside->indexbuffer,datablock.packed_size,1,f);
 
+								break;
+							case AFI_COMPRESS_GZIP:
+								currentside->indexbuffer=malloc(datablock.unpacked_size);
+								temp_uncompressbuffer=malloc(datablock.packed_size);
+								fread(temp_uncompressbuffer,datablock.packed_size,1,f);
+								destLen=datablock.unpacked_size;
+								uncompress(currentside->indexbuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
+								free(temp_uncompressbuffer);
+								break;
+							default:
+							break;
+						}
+					break;
+
+					case AFI_DATA_BITRATE:
+						currentside->bitrate=VARIABLEBITRATE;
+
+						if(track.encoding_mode == AFI_TRACKENCODING_CELLARRAY)
+						{
+							switch(datablock.packer_id)
+							{
+								case AFI_COMPRESS_NONE:
+
+									temp_timing = malloc(datablock.packed_size);
+									fread(temp_timing,datablock.packed_size,1,f);
+
+									currentside->timingbuffer=malloc( bytelen * sizeof(unsigned long));
+
+									for(k=0;k<bytelen;k++)
+									{
+										currentside->timingbuffer[k] = temp_timing[k*8];
+									}
+
+									k=0;
+									do
+									{
+										k++;
+									}while( ( k < bytelen ) && (currentside->timingbuffer[k-1]==currentside->timingbuffer[k]) );
+
+									if( k == bytelen )
+									{
+										currentside->bitrate=currentside->timingbuffer[0];
+										free(currentside->timingbuffer);
+										currentside->timingbuffer=0;
+									}
+
+									free(temp_timing);
+
+								break;
+
+								case AFI_COMPRESS_GZIP:
+
+
+									currentside->timingbuffer=malloc(bytelen * sizeof(unsigned long));
+
+									temp_uncompressbuffer=malloc(datablock.packed_size);
+									fread(temp_uncompressbuffer,datablock.packed_size,1,f);
+
+									destLen=datablock.unpacked_size;
+									temp_timing = malloc(destLen);
+									uncompress((unsigned char*)temp_timing, &destLen,temp_uncompressbuffer, datablock.packed_size);
+
+									free(temp_uncompressbuffer);
+
+									temp_uncompressbuffer_long = bitrate_rle_unpack(temp_timing,destLen/4,&destLen);
+
+
+									for(k=0;k<bytelen;k++)
+									{
+										currentside->timingbuffer[k] = temp_uncompressbuffer_long[k*8];
+									}
+
+									free(temp_uncompressbuffer_long);
+
+									k=0;
+									do
+									{
+										k++;
+									}while( ( k < bytelen ) && (currentside->timingbuffer[k-1]==currentside->timingbuffer[k]));
+
+									if( k == bytelen )
+									{
+										currentside->bitrate=currentside->timingbuffer[0];
+										free(currentside->timingbuffer);
+										currentside->timingbuffer=0;
+									}
+
+									free(temp_timing);
+								break;
+								default:
+								break;
+							}
+
+						}
+						else
+						{
+							switch(datablock.packer_id)
+							{
+								case AFI_COMPRESS_NONE:
+
+									currentside->timingbuffer=malloc(datablock.packed_size);
+									fread(currentside->timingbuffer,datablock.packed_size,1,f);
+
+									k=0;
+									do
+									{
+										k++;
+									}while( ( k < datablock.packed_size ) && ( currentside->timingbuffer[k-1] == currentside->timingbuffer[k] ));
+
+									if( k == datablock.packed_size )
+									{
+										currentside->bitrate=currentside->timingbuffer[0];
+										free(currentside->timingbuffer);
+										currentside->timingbuffer=0;
+									}
+								break;
+
+								case AFI_COMPRESS_GZIP:
+									currentside->timingbuffer=malloc(datablock.unpacked_size);
+									temp_uncompressbuffer=malloc(datablock.packed_size);
+									fread(temp_uncompressbuffer,datablock.packed_size,1,f);
+									destLen=datablock.unpacked_size;
+									uncompress((unsigned char*)currentside->timingbuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
+
+									k=0;
+									do
+									{
+										k++;
+									}while( ( k < datablock.unpacked_size ) && ( currentside->timingbuffer[k-1] == currentside->timingbuffer[k] ) );
+
+									if( k == datablock.unpacked_size )
+									{
+										currentside->bitrate = currentside->timingbuffer[0];
+										free(currentside->timingbuffer);
+										currentside->timingbuffer=0;
+									}
+
+									free(temp_uncompressbuffer);
+								break;
+								default:
+								break;
+							}
+						}
+					
+					break;
+
+					case AFI_DATA_PDC:
+					
+					break;
+
+					case AFI_DATA_WEAKBITS:
+						switch(datablock.packer_id)
+						{
+							case AFI_COMPRESS_NONE:
+								currentside->flakybitsbuffer=malloc(datablock.packed_size);
+								fread(currentside->flakybitsbuffer,datablock.packed_size,1,f);
 								k=0;
 								do
 								{
 									k++;
-								}while( ( k < datablock.packed_size ) && ( currentside->timingbuffer[k-1] == currentside->timingbuffer[k] ));
+								}while( ( k < datablock.packed_size ) && ( currentside->flakybitsbuffer[k-1] == currentside->flakybitsbuffer[k] ) );
 
 								if( k == datablock.packed_size )
 								{
-									currentside->bitrate=currentside->timingbuffer[0];
-									free(currentside->timingbuffer);
-									currentside->timingbuffer=0;
+									free(currentside->flakybitsbuffer);
+									currentside->flakybitsbuffer=0;
 								}
-
-
 								break;
 
 							case AFI_COMPRESS_GZIP:
-								currentside->timingbuffer=malloc(datablock.unpacked_size);
+								currentside->flakybitsbuffer=malloc(datablock.unpacked_size);
 								temp_uncompressbuffer=malloc(datablock.packed_size);
 								fread(temp_uncompressbuffer,datablock.packed_size,1,f);
 								destLen=datablock.unpacked_size;
-								uncompress((unsigned char*)currentside->timingbuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
+								uncompress(currentside->flakybitsbuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
 
 								k=0;
 								do
 								{
 									k++;
-								}while( ( k < datablock.unpacked_size ) && ( currentside->timingbuffer[k-1] == currentside->timingbuffer[k] ) );
+								}while( ( k < datablock.unpacked_size ) && ( currentside->flakybitsbuffer[k-1] == currentside->flakybitsbuffer[k] ) && !currentside->flakybitsbuffer[k]);
 
-								if( k == datablock.unpacked_size )
+								if(k==datablock.unpacked_size)
 								{
-									currentside->bitrate = currentside->timingbuffer[0];
-									free(currentside->timingbuffer);
-									currentside->timingbuffer=0;
+									free(currentside->flakybitsbuffer);
+									currentside->flakybitsbuffer=0;
 								}
 
 								free(temp_uncompressbuffer);
@@ -586,59 +635,10 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							default:
 							break;
 						}
-					}
 					break;
 
-				case AFI_DATA_PDC:
-					break;
-
-				case AFI_DATA_WEAKBITS:
-					switch(datablock.packer_id)
-					{
-
-						case AFI_COMPRESS_NONE:
-							currentside->flakybitsbuffer=malloc(datablock.packed_size);
-							fread(currentside->flakybitsbuffer,datablock.packed_size,1,f);
-							k=0;
-							do
-							{
-								k++;
-							}while( ( k < datablock.packed_size ) && ( currentside->flakybitsbuffer[k-1] == currentside->flakybitsbuffer[k] ) );
-
-							if( k == datablock.packed_size )
-							{
-								free(currentside->flakybitsbuffer);
-								currentside->flakybitsbuffer=0;
-							}
-							break;
-
-						case AFI_COMPRESS_GZIP:
-							currentside->flakybitsbuffer=malloc(datablock.unpacked_size);
-							temp_uncompressbuffer=malloc(datablock.packed_size);
-							fread(temp_uncompressbuffer,datablock.packed_size,1,f);
-							destLen=datablock.unpacked_size;
-							uncompress(currentside->flakybitsbuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
-
-							k=0;
-							do
-							{
-								k++;
-							}while( ( k < datablock.unpacked_size ) && ( currentside->flakybitsbuffer[k-1] == currentside->flakybitsbuffer[k] ) && !currentside->flakybitsbuffer[k]);
-
-							if(k==datablock.unpacked_size)
-							{
-								free(currentside->flakybitsbuffer);
-								currentside->flakybitsbuffer=0;
-							}
-
-							free(temp_uncompressbuffer);
-							break;
-						default:
-						break;
-					}
-					break;
-
-				default:
+					default:
+					
 					break;
 
 				}
@@ -667,6 +667,32 @@ int AFI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				}
 			}
 		}
+
+
+		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+		{
+			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+			{
+				if(floppydisk->tracks[j])
+				{
+					if(floppydisk->tracks[j]->sides[i])
+					{
+						currentside=floppydisk->tracks[j]->sides[i];
+
+						if(currentside->timingbuffer)
+						{
+							floppydisk->tracks[j]->floppyRPM = (short)( 60 / GetTrackPeriod(floppycontext,currentside) );
+						}
+						else
+						{
+							floppydisk->tracks[j]->floppyRPM = (unsigned short)( ( currentside->bitrate * 60 ) / ( currentside->tracklen / 2 ) );
+						}
+					}
+				}
+			}
+		}
+
+		floppyTrackTypeIdentification(floppycontext,floppydisk);
 
 		hxc_fclose(f);
 		return HXCFE_NOERROR;
