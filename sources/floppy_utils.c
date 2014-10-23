@@ -195,3 +195,72 @@ double GetTrackPeriod(HXCFLOPPYEMULATOR* floppycontext,SIDE * curside)
 
 	return total_period;
 }
+
+int tracktypelisttoscan[]=
+{
+	ISOIBM_MFM_ENCODING,
+	ISOIBM_FM_ENCODING,
+	AMIGA_MFM_ENCODING,
+	EMU_FM_ENCODING,
+	ARBURGSYS_ENCODING,
+	ARBURGDAT_ENCODING,
+	UNKNOWN_ENCODING
+};
+
+int floppyTrackTypeIdentification(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp)
+{
+	int i,j,t;
+	int sectnum;
+	unsigned char first_track_encoding;
+	int nb_sectorfound;
+	SECTORSEARCH* ss;
+	SECTORCONFIG** scl;
+	
+	i = 0;
+	
+	first_track_encoding = UNKNOWN_ENCODING;
+
+	ss = hxcfe_initSectorSearch(floppycontext,fp);
+	if(ss)
+	{
+		for(i=0;i<fp->floppyNumberOfTrack;i++)
+		{
+			for(j=0;j<fp->floppyNumberOfSide;j++)
+			{
+
+				nb_sectorfound = 0;
+				t=0;
+				do{
+					first_track_encoding = tracktypelisttoscan[t];
+					scl = hxcfe_getAllTrackSectors(ss,i,j,first_track_encoding,&nb_sectorfound);
+					ss->old_bitoffset = 0;
+					ss->bitoffset = 0;
+					t++;
+				}while(!nb_sectorfound && (tracktypelisttoscan[t] != UNKNOWN_ENCODING));
+
+				if(nb_sectorfound)
+				{
+					fp->tracks[i]->sides[j]->track_encoding = first_track_encoding ;
+				}
+
+				if(scl)
+				{
+					for(sectnum=0;sectnum<nb_sectorfound;sectnum++)
+					{
+						if(first_track_encoding == UNKNOWN_ENCODING)
+							first_track_encoding = tracktypelisttoscan[i];
+
+						hxcfe_freeSectorConfig  (ss,scl[sectnum]);
+					}
+					
+					free(scl);
+				}
+			}
+		}
+
+		hxcfe_deinitSectorSearch(ss);
+
+	}
+
+	return 0;
+}
