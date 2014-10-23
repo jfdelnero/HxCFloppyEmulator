@@ -173,7 +173,15 @@ int XML_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 			fprintf(xmlfile,"\t\t<gap3>%d</gap3>\n",0xFF);
 
-			fprintf(xmlfile,"\t\t<bitrate>%d</bitrate>\n",floppy->floppyBitRate);
+			if(floppy->floppyBitRate!=-1)
+			{
+				fprintf(xmlfile,"\t\t<bitrate>%d</bitrate>\n",floppy->floppyBitRate);
+			}
+			else
+			{
+				fprintf(xmlfile,"\t\t<bitrate>%d</bitrate>\n",(int)((float)(floppy->tracks[0]->sides[0]->tracklen/2) * ( (float)floppy->tracks[0]->floppyRPM / (float)60)));
+			}
+
 			fprintf(xmlfile,"\t\t<pregap>%d</pregap>\n",0);
 			fprintf(xmlfile,"\t\t<rpm>%d</rpm>\n",floppy->tracks[0]->floppyRPM);
 
