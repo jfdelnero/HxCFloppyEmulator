@@ -9,3 +9,4 @@ unsigned long fillindex(int startindex,SIDE * track,unsigned long us,unsigned ch
 CYLINDER* allocCylinderEntry(unsigned short rpm,unsigned char number_of_side);
 void savebuffer(char * name,unsigned char * buffer, int size);
 double GetTrackPeriod(HXCFLOPPYEMULATOR* floppycontext,SIDE * curside);
+int floppyTrackTypeIdentification(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
