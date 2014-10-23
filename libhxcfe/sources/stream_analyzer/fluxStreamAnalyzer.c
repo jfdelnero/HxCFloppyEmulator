@@ -106,15 +106,13 @@ static void computehistogram(unsigned long *indata,int size,unsigned long *outda
 	int i;
 
 	memset(outdata,0,sizeof(unsigned long) * (65536) );
-	i=0;
-	do
+	for(i=0;i<size;i++)
 	{
 		if(indata[i]<0x10000)
 		{
 			outdata[indata[i]]++;
 		}
-		i++;
-	}while(i<size);
+	}
 }
 
 static int detectpeaks(HXCFLOPPYEMULATOR* floppycontext,unsigned long *histogram)
@@ -388,7 +386,7 @@ static void quickSort(s_match * table, int start, int end)
     quickSort(table, right+1, end);
 }
 
-SIDE* ScanAndDecodeStream(int initialvalue,s_track_dump * track,unsigned long * overlap_tab,unsigned long start_index, short rpm,int phasecorrection)
+SIDE* ScanAndDecodeStream(HXCFLOPPYEMULATOR* floppycontext,int initialvalue,s_track_dump * track,unsigned long * overlap_tab,unsigned long start_index, short rpm,int phasecorrection)
 {
 #define TEMPBUFSIZE 256*1024
 	int pumpcharge;
@@ -446,7 +444,15 @@ SIDE* ScanAndDecodeStream(int initialvalue,s_track_dump * track,unsigned long * 
 		// Sync the "PLL"
 
 		bitoffset=0;
-		size = ( overlap_tab[start_index] - (start_index) );
+		if( ( start_index + (overlap_tab[start_index] - start_index ) ) < track->nb_of_pulses )
+		{
+			size = ( overlap_tab[start_index] - (start_index) );
+		}
+		else
+		{
+			floppycontext->hxc_printf(MSG_ERROR,"ScanAndDecodeStream : End of the stream flux passed ! Bad Stream flux ?");
+			size = track->nb_of_pulses - start_index;
+		}
 
 		bitoffset=0;
 		if(start_index>2000)
@@ -466,8 +472,7 @@ SIDE* ScanAndDecodeStream(int initialvalue,s_track_dump * track,unsigned long * 
 		//
 		outtrack[0] = 0x80;
 		bitoffset=0;
-		i=0;
-		do
+		for(i=0;i<size;i++)
 		{
 			value = track->track_dump[start_index + i];
 
@@ -487,9 +492,7 @@ SIDE* ScanAndDecodeStream(int initialvalue,s_track_dump * track,unsigned long * 
 
 			if( (bitoffset>>3) < TEMPBUFSIZE )
 				trackbitrate[(bitoffset>>3)] = (int)((float)(TICKFREQ)/(float)((float)((pll.pump_charge*2)/16)));
-
-			i++;
-		}while(i<size);
+		}
 
 		if(bitoffset&7)
 		{
@@ -2583,6 +2586,8 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 
 	unsigned long qualitylevel[32];
 
+	unsigned char first_track_encoding;
+
 	pulsesblock * pb;
 	short rpm;
 	int nb_sectorfound,sectnum;
@@ -2654,9 +2659,6 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 						first_index = std->nb_of_pulses - 1;
 					}
 
-#ifdef FLUXSTREAMDBG
-					fxs->hxcfe->hxc_printf(MSG_DEBUG,"First valid index : %d",first_index);
-#endif
 
 					track_len = 0;
 					i = first_index;
@@ -2668,6 +2670,10 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 							i++;
 						}while( ( i < std->nb_of_pulses ) && ( i < overlap_tab[first_index] ) );
 					}
+
+#ifdef FLUXSTREAMDBG
+					fxs->hxcfe->hxc_printf(MSG_DEBUG,"First valid index : %d [max : %d] - track lenght : %d - overlap : %d",first_index,std->nb_of_pulses,track_len,overlap_tab[first_index]);
+#endif
 
 					if(track_len)
 					{
@@ -2700,8 +2706,16 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 						if( !fxs->defaultbitrate )
 						{
 							histo=(unsigned long*)malloc(65536* sizeof(unsigned long));
+							if((first_index + (overlap_tab[first_index] - first_index))<std->nb_of_pulses)
+							{
+								computehistogram(&std->track_dump[first_index],overlap_tab[first_index] - first_index,histo);
+							}
+							else
+							{
+								computehistogram(&std->track_dump[first_index],std->nb_of_pulses - first_index,histo);
+								hxcfe->hxc_printf(MSG_ERROR,"hxcfe_FxStream_AnalyzeAndGetTrack : End of the stream flux passed ! Bad Stream flux ?");
+							}
 
-							computehistogram(&std->track_dump[first_index],overlap_tab[first_index] - first_index,histo);
 
 							bitrate=detectpeaks(hxcfe,histo);
 
@@ -2716,7 +2730,7 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 							bitrate = TICKFREQ / ( fxs->defaultbitrate * 1000 );
 						}
 
-						currentside = ScanAndDecodeStream(bitrate,std,overlap_tab,first_index,rpm,fxs->phasecorrection);
+						currentside = ScanAndDecodeStream(hxcfe,bitrate,std,overlap_tab,first_index,rpm,fxs->phasecorrection);
 
 						cleanupTrack(currentside);
 
@@ -2724,25 +2738,31 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 
 						hxcfe->hxc_printf(MSG_DEBUG,"...done");
 					}
+					else
+					{
+						revolutionside[revolution] = 0;
+					}
 
 				}
 
 				memset(qualitylevel,0,sizeof(qualitylevel));
 
-				currentside->track_encoding = UNKNOWN_ENCODING;
+				first_track_encoding = UNKNOWN_ENCODING;
 
 				for(revolution = 0; revolution < std->nb_of_index - 1; revolution++)
 				{
+					currentside = revolutionside[revolution];
 #ifdef FLUXSTREAMDBG
-					fxs->hxcfe->hxc_printf(MSG_DEBUG,"Scanning revolution %d...",revolution);
+					fxs->hxcfe->hxc_printf(MSG_DEBUG,"Scanning revolution %d [0x%X]...",revolution,revolutionside[revolution]);
 #endif
-
-					if(revolutionside[revolution])
+					if(currentside)
 					{
+						currentside->track_encoding = UNKNOWN_ENCODING;
+
 						fp = makefloppyfromtrack(revolutionside[revolution]);
 
 						i = 0;
-						while( ( currentside->track_encoding == UNKNOWN_ENCODING ) && tracktypelist[i] != UNKNOWN_ENCODING )
+						while( tracktypelist[i] != UNKNOWN_ENCODING )
 						{
 							ss = hxcfe_initSectorSearch(fxs->hxcfe,fp);
 
@@ -2757,7 +2777,8 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 									if(!scl[sectnum]->use_alternate_data_crc && scl[sectnum]->input_data)
 										qualitylevel[revolution] += 0x000001;
 
-									currentside->track_encoding = tracktypelist[i];
+									if(first_track_encoding == UNKNOWN_ENCODING)
+										first_track_encoding = tracktypelist[i];
 
 									hxcfe_freeSectorConfig  (ss,scl[sectnum]);
 								}
@@ -2765,6 +2786,9 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 							}
 
 							hxcfe_deinitSectorSearch(ss);
+
+							if(first_track_encoding != UNKNOWN_ENCODING)
+								currentside->track_encoding = first_track_encoding;
 
 							i++;
 						}
@@ -2789,11 +2813,31 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 #ifdef FLUXSTREAMDBG
 				fxs->hxcfe->hxc_printf(MSG_DEBUG,"getbestindex : %d",revolution);
 #endif
+				if(revolutionside[revolution])
+				{
+					revolutionside[revolution]->track_encoding = first_track_encoding;
 
-				revolutionside[revolution]->track_encoding = currentside->track_encoding;
+					currentside = revolutionside[revolution];
+					revolutionside[revolution] = 0;
+				}
+				else
+				{
+					fxs->hxcfe->hxc_printf(MSG_ERROR,"NULL revolutionside !!! (%d)",revolution);
 
-				currentside = revolutionside[revolution];
-				revolutionside[revolution] = 0;
+					revolution = 0;
+					while(!revolutionside[revolution] && (revolution < std->nb_of_index - 1))
+					{
+						revolution++;
+					}
+
+					if(revolution != (std->nb_of_index - 1) ) 
+					{
+						revolutionside[revolution]->track_encoding = first_track_encoding;
+
+						currentside = revolutionside[revolution];
+						revolutionside[revolution] = 0;
+					}
+				}
 
 				for(revolution = 0; revolution < std->nb_of_index - 1; revolution++)
 				{
