@@ -37,6 +37,7 @@
 #include "dmk_writer.h"
 
 #include "tracks/sector_extractor.h"
+#include "tracks/trackutils.h"
 
 #include "libhxcadaptor.h"
 
