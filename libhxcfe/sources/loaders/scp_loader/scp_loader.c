@@ -63,6 +63,8 @@
 
 #include "libhxcadaptor.h"
 
+//#define SCPDEBUG 1
+
 int SCP_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 {
 	scp_header scph;
@@ -104,19 +106,24 @@ int SCP_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned long foffset,short * rpm,float timecoef,int phasecorrection,int revolution)
 {
 	SIDE* currentside;
-	int totallenght,i,offset;
+	int totallenght,i,k,offset;
 
 	s_track_dump *track_dump;
 	FXS * fxs;
 	scp_track_header trkh;
 
 	unsigned short * trackbuf;
+	unsigned long * trackbuf_dword;
+	unsigned long realnumberofpulses;
+	unsigned long revonumberofpulses;
+	unsigned long curpulselength;
+	unsigned long j;
 
 	currentside=0;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
 
-	floppycontext->hxc_printf(MSG_DEBUG,"Loading...");
+	floppycontext->hxc_printf(MSG_DEBUG,"Loading SCP track...");
 
 	fxs = hxcfe_initFxStream(floppycontext);
 	if(fxs)
@@ -131,7 +138,16 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned lon
 			for(i=0;i<revolution;i++)
 			{
 				totallenght += trkh.index_position[i].track_lenght;
+
+#ifdef SCPDEBUG
+				floppycontext->hxc_printf(MSG_DEBUG,"Revolution %d : %d words - offset 0x%x - index time : %d",i,trkh.index_position[i].track_lenght,trkh.index_position[i].track_offset,(trkh.index_position[i].index_time));
+#endif
 			}
+
+
+#ifdef SCPDEBUG
+			floppycontext->hxc_printf(MSG_DEBUG,"Total track lenght : [0x%X - 0x%X] - %d bytes",foffset + trkh.index_position[0].track_offset,foffset + trkh.index_position[0].track_offset + ((totallenght*sizeof(unsigned short))-1),totallenght*sizeof(unsigned short));
+#endif
 
 			totallenght++;
 
@@ -147,9 +163,15 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned lon
 					for(i=0;i<revolution;i++)
 					{
 						fseek(f,foffset + trkh.index_position[i].track_offset,SEEK_SET);
-	
+
 						fread(&trackbuf[offset], (trkh.index_position[i].track_lenght*sizeof(unsigned short)) , 1, f);
 
+#ifdef SCPDEBUG
+						floppycontext->hxc_printf(MSG_DEBUG,"SCP read stream - offset [0x%X - 0x%X] : %d bytes",
+							 foffset + trkh.index_position[i].track_offset,
+							 (foffset + trkh.index_position[i].track_offset) + ((trkh.index_position[i].track_lenght*sizeof(unsigned short)) - 1 ),
+							(trkh.index_position[i].track_lenght*sizeof(unsigned short)));
+#endif
 						offset += (trkh.index_position[i].track_lenght);
 					}
 
@@ -158,24 +180,73 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned lon
 						trackbuf[i] = BIGENDIAN_WORD( trackbuf[i] );
 					}
 
+					trackbuf_dword = malloc((totallenght+1)*sizeof(unsigned long));
+
+					realnumberofpulses = 0;
+					curpulselength = 0;
+					k = 0;
+
+					for(i=0;i<revolution;i++)
+					{
+						revonumberofpulses = 0;
+
+						for(j=0;j<trkh.index_position[i].track_lenght;j++)
+						{
+							curpulselength += trackbuf[k];
+
+							if(trackbuf[k])
+							{
+								trackbuf_dword[realnumberofpulses] = curpulselength;
+								curpulselength = 0;
+								realnumberofpulses++;
+								revonumberofpulses++;
+							}
+							else
+							{
+								curpulselength += 65536;
+							}
+
+							k++;
+						}
+
+						trkh.index_position[i].track_lenght = revonumberofpulses;
+
+					}
+
+					// dummy pulse
+					trackbuf_dword[totallenght] = 32000;
+					realnumberofpulses++;
+
+					free(trackbuf);
+
 					hxcfe_FxStream_setResolution(fxs,25000); // 25 ns per tick
 
-					track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf,16,(totallenght));
+					track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf_dword,32,(realnumberofpulses));
 					if(track_dump)
 					{
-						offset = 0;
-						hxcfe_FxStream_AddIndex(fxs,track_dump,0);
-
-						for(i=0;i<revolution;i++)
+						if(revolution)
 						{
-							offset += (trkh.index_position[i].track_lenght);
+							offset = 0;
 							hxcfe_FxStream_AddIndex(fxs,track_dump,offset);
+
+							for(i=0;i<revolution;i++)
+							{
+								offset += (trkh.index_position[i].track_lenght);
+								hxcfe_FxStream_AddIndex(fxs,track_dump,offset);
+							}
 						}
+
 						currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
-						
+
+						if(currentside)
+						{
+							if(rpm)
+								*rpm = (short)( 60 / GetTrackPeriod(floppycontext,currentside) );
+						}
+
 						hxcfe_FxStream_FreeStream(fxs,track_dump);
 					}
-					free(trackbuf);
+					free(trackbuf_dword);
 				}
 			}
 		}
@@ -266,11 +337,11 @@ int SCP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 			floppycontext->hxc_printf(MSG_DEBUG,"%d track (%d - %d), %d sides (%d - %d)",nbtrack,mintrack,maxtrack,nbside,minside,maxside);
 
-			floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-			floppydisk->floppyBitRate=VARIABLEBITRATE;
-			floppydisk->floppyNumberOfTrack=nbtrack;
-			floppydisk->floppyNumberOfSide=nbside;
-			floppydisk->floppySectorPerTrack=-1;
+			floppydisk->floppyiftype = GENERIC_SHUGART_DD_FLOPPYMODE;
+			floppydisk->floppyBitRate = VARIABLEBITRATE;
+			floppydisk->floppyNumberOfTrack = nbtrack;
+			floppydisk->floppyNumberOfSide = nbside;
+			floppydisk->floppySectorPerTrack = -1;
 
 			fread(tracksoffset,sizeof(tracksoffset),1,f);
 
@@ -325,7 +396,6 @@ int SCP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 							previous_bit = curside->databuffer[k] & 1;
 						}
-
 					}
 
 					currentcylinder=floppydisk->tracks[j/doublestep];
