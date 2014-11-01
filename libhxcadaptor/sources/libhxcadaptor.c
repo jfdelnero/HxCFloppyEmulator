@@ -86,12 +86,12 @@ DWORD WINAPI ThreadProc( LPVOID lpParameter)
 {
 	threadinit *threadinitptr;
 	THREADFUNCTION thread;
-	HXCFLOPPYEMULATOR* floppycontext;
+	HXCFE* floppycontext;
 	USBHXCFE * hw_context;
 
 	if( lpParameter )
 	{
-		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+		//SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 
 		threadinitptr=(threadinit*)lpParameter;
 		thread=threadinitptr->thread;
@@ -109,7 +109,7 @@ void * ThreadProc( void *lpParameter)
 {
 	threadinit *threadinitptr;
 	THREADFUNCTION thread;
-	HXCFLOPPYEMULATOR* floppycontext;
+	HXCFE* floppycontext;
 	USBHXCFE * hw_context;
 
 	threadinitptr=(threadinit*)lpParameter;
@@ -128,7 +128,7 @@ void * ThreadProc( void *lpParameter)
 }
 #endif
 
-int hxc_setevent(HXCFLOPPYEMULATOR* floppycontext,unsigned char id)
+int hxc_setevent(HXCFE* floppycontext,unsigned char id)
 {
 #ifdef WIN32
 	SetEvent(eventtab[id]);
@@ -138,7 +138,7 @@ int hxc_setevent(HXCFLOPPYEMULATOR* floppycontext,unsigned char id)
 	return 0;
 }
 
-unsigned long hxc_createevent(HXCFLOPPYEMULATOR* floppycontext,unsigned char id)
+unsigned long hxc_createevent(HXCFE* floppycontext,unsigned char id)
 {
 #ifdef WIN32
 
@@ -154,7 +154,7 @@ unsigned long hxc_createevent(HXCFLOPPYEMULATOR* floppycontext,unsigned char id)
 #endif
 }
 
-int hxc_waitevent(HXCFLOPPYEMULATOR* floppycontext,int id,int timeout)
+int hxc_waitevent(HXCFE* floppycontext,int id,int timeout)
 {
 
 #ifdef WIN32
@@ -217,7 +217,7 @@ void hxc_pause(int ms)
 #endif
 }
 
-int hxc_createthread(HXCFLOPPYEMULATOR* floppycontext,void* hwcontext,THREADFUNCTION thread,int priority)
+int hxc_createthread(HXCFE* floppycontext,void* hwcontext,THREADFUNCTION thread,int priority)
 {
 #ifdef WIN32
 	DWORD sit;
@@ -315,34 +315,39 @@ char * hxc_getfilenamebase(char * fullpath,char * filenamebase)
 {
 	int len,i;
 
-	len=strlen(fullpath);
-
-	i=0;
-	if(len)
+	if(fullpath)
 	{
-		i=len-1;
-		while(i &&	(fullpath[i]!='\\' && fullpath[i]!='/' && fullpath[i]!=':') )
+		len=strlen(fullpath);
+
+		i=0;
+		if(len)
 		{
-			i--;
+			i=len-1;
+			while(i &&	(fullpath[i]!='\\' && fullpath[i]!='/' && fullpath[i]!=':') )
+			{
+				i--;
+			}
+
+			if( fullpath[i]=='\\' || fullpath[i]=='/' || fullpath[i]==':' )
+			{
+				i++;
+			}
+
+			if(i>len)
+			{
+				i=len;
+			}
 		}
 
-		if( fullpath[i]=='\\' || fullpath[i]=='/' || fullpath[i]==':' )
+		if(filenamebase)
 		{
-			i++;
+			strcpy(filenamebase,&fullpath[i]);
 		}
 
-		if(i>len)
-		{
-			i=len;
-		}
+		return &fullpath[i];
 	}
 
-	if(filenamebase)
-	{
-		strcpy(filenamebase,&fullpath[i]);
-	}
-
-	return &fullpath[i];
+	return 0;
 }
 
 char * hxc_getfilenameext(char * fullpath,char * filenameext)
@@ -352,39 +357,44 @@ char * hxc_getfilenameext(char * fullpath,char * filenameext)
 	
 	filename=hxc_getfilenamebase(fullpath,0);
 
-	len=strlen(filename);
-
-	i=0;
-	if(len)
+	if(filename)
 	{
-		i=len-1;
+		len=strlen(filename);
 
-		while(i &&	( filename[i] != '.' ) )
+		i=0;
+		if(len)
 		{
-			i--;
+			i=len-1;
+
+			while(i &&	( filename[i] != '.' ) )
+			{
+				i--;
+			}
+
+			if( filename[i] == '.' )
+			{
+				i++;
+			}
+			else
+			{
+				i=len;
+			}
+
+			if(i>len)
+			{
+				i=len;
+			}
 		}
 
-		if( filename[i] == '.' )
+		if(filenameext)
 		{
-			i++;
-		}
-		else
-		{
-			i=len;
+			strcpy(filenameext,&filename[i]);
 		}
 
-		if(i>len)
-		{
-			i=len;
-		}
+		return &filename[i];	
 	}
 
-	if(filenameext)
-	{
-		strcpy(filenameext,&filename[i]);
-	}
-
-	return &filename[i];	
+	return 0;
 }
 
 int hxc_getfilenamewext(char * fullpath,char * filenamewext)
@@ -392,22 +402,25 @@ int hxc_getfilenamewext(char * fullpath,char * filenamewext)
 	char * filename;
 	char * ext;
 	int len;
-	
-	filename=hxc_getfilenamebase(fullpath,0);
-	ext=hxc_getfilenameext(fullpath,0);
 
-	len=ext-filename;
-
-	
-	if(len && filename[len-1]=='.')
+	len = 0;
+	if(fullpath)
 	{
-		len--;
-	}
+		filename = hxc_getfilenamebase(fullpath,0);
+		ext = hxc_getfilenameext(fullpath,0);
 
-	if(filenamewext)
-	{
-		memcpy(filenamewext,filename,len);
-		filenamewext[len]=0;
+		len = ext-filename;
+
+		if(len && filename[len-1]=='.')
+		{
+			len--;
+		}
+
+		if(filenamewext)
+		{
+			memcpy(filenamewext,filename,len);
+			filenamewext[len]=0;
+		}
 	}
 	
 	return len;	
@@ -417,15 +430,19 @@ int hxc_getpathfolder(char * fullpath,char * folder)
 {
 	int len;
 	char * filenameptr;
-	
-	filenameptr=hxc_getfilenamebase(fullpath,0);
 
-	len=filenameptr-fullpath;
-
-	if(folder)
+	len = 0;
+	if(fullpath)
 	{
-		memcpy(folder,fullpath,len);
-		folder[len]=0;
+		filenameptr = hxc_getfilenamebase(fullpath,0);
+
+		len = filenameptr-fullpath;
+
+		if(folder)
+		{
+			memcpy(folder,fullpath,len);
+			folder[len]=0;
+		}
 	}
 	
 	return len;
@@ -438,7 +455,6 @@ int hxc_checkfileext(char * path,char *ext)
 
 	if(path && ext)
 	{
-
 		if( ( strlen(hxc_getfilenameext(path,0)) < 16 )  && ( strlen(ext) < 16 ))
 		{
 			hxc_getfilenameext(path,(char*)&pathext);
