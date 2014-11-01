@@ -47,12 +47,15 @@
 #include <string.h>
 #include <stdlib.h>
 
-extern "C"
-{
-	#include "libhxcfe.h"
-	#include "usb_hxcfloppyemulator.h"
-	#include "libhxcadaptor.h"
-}
+#include "fl_includes.h"
+
+#include "libhxcfe.h"
+#include "usb_hxcfloppyemulator.h"
+#include "libhxcadaptor.h"
+
+#include "soft_cfg_file.h"
+#include "fl_dnd_box.h"
+
 #include "main.h"
 #include "loader.h"
 
@@ -62,11 +65,17 @@ extern s_gui_context * guicontext;
 extern track_type track_type_list[];
 extern void sync_if_config();
 
-int load_floppy(FLOPPY * floppydisk,char * defaultfilename)
+int load_floppy(HXCFE_FLOPPY * floppydisk,char * defaultfilename)
 {
+	HXCFE_IMGLDR * imgldr_ctx;
 	int ret;
 
-	hxcfe_floppyUnload(guicontext->hxcfe,guicontext->loadedfloppy);
+	imgldr_ctx = hxcfe_imgInitLoader(guicontext->hxcfe);
+	if(imgldr_ctx)
+	{
+		hxcfe_imgUnload(imgldr_ctx,guicontext->loadedfloppy);
+		hxcfe_imgDeInitLoader(imgldr_ctx);
+	}
 
 	guicontext->loadedfloppy=floppydisk;
 
@@ -95,66 +104,87 @@ int load_floppy(FLOPPY * floppydisk,char * defaultfilename)
 	return ret;
 }
 
+static int progress_callback(unsigned int current,unsigned int total, void * user)
+{
+	s_gui_context * guicontext;
+
+	guicontext = (s_gui_context *)user;
+
+	if(total)
+		guicontext->loadingprogess = ((float)current / (float)total) * (float)100;
+	else
+		guicontext->loadingprogess = (float)100;
+
+	return 0;
+}
+
 int load_floppy_image(char *filename)
 {
 	int ret;
-	int i;
 	int loaderid;
-
-	hxcfe_floppyUnload(guicontext->hxcfe,guicontext->loadedfloppy);
-	guicontext->loadedfloppy=0;
+	HXCFE_IMGLDR * imgldr_ctx;
 
 	ret=-1;
 
-	loaderid=hxcfe_autoSelectLoader(guicontext->hxcfe,filename,0);
-		
-	if(loaderid>=0)
-		guicontext->loadedfloppy=hxcfe_floppyLoad(guicontext->hxcfe,filename,loaderid,&ret);
-		
-	guicontext->loadstatus=ret;
-
-	if(ret!=HXCFE_NOERROR || !guicontext->loadedfloppy)
+	imgldr_ctx = hxcfe_imgInitLoader(guicontext->hxcfe);
+	if(imgldr_ctx)
 	{
+
+		guicontext->loadingprogess = 0;
+		hxcfe_imgSetProgressCallback(imgldr_ctx,progress_callback,(void*)guicontext);
+
+		hxcfe_imgUnload(imgldr_ctx,guicontext->loadedfloppy);
+		
 		guicontext->loadedfloppy=0;
-		guicontext->bufferfilename[0]=0;
-	}
-	else
-	{	
-		sync_if_config();
-#ifndef STANDALONEFSBROWSER
-		libusbhxcfe_loadFloppy(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy);
-#endif
-		if(filename)
+
+		hxc_getfilenamebase(filename,guicontext->bufferfilename);
+
+		loaderid = hxcfe_imgAutoSetectLoader(imgldr_ctx,filename,0);
+			
+		if(loaderid>=0)
+			guicontext->loadedfloppy = hxcfe_imgLoad(imgldr_ctx,filename,loaderid,&ret);
+			
+		guicontext->loadstatus=ret;
+
+		if(ret!=HXCFE_NOERROR || !guicontext->loadedfloppy)
 		{
-			i=strlen(filename);
-			while(i!=0 && filename[i]!='\\')
-			{
-				i--;
-			}
-			if(filename[i]=='\\') i++;
-			sprintf(guicontext->bufferfilename,"%s",&filename[i]);
+			guicontext->loadedfloppy=0;
+			guicontext->bufferfilename[0]=0;
 		}
 		else
-		{
-			sprintf(guicontext->bufferfilename,"Empty Floppy");
+		{	
+			sync_if_config();
+	#ifndef STANDALONEFSBROWSER
+			libusbhxcfe_loadFloppy(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy);
+	#endif
+			if(filename)
+			{
+				hxc_getfilenamebase(filename,guicontext->bufferfilename);
+			}
+			else
+			{
+				sprintf(guicontext->bufferfilename,"Empty Floppy");
+			}
 		}
+		
+		guicontext->updatefloppyinfos++;
+
+		hxcfe_imgDeInitLoader(imgldr_ctx);
 	}
-	
-	guicontext->updatefloppyinfos++;
 
 	return ret;
 }
 
 
-FLOPPY * loadrawimage(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file,int * ret)
+HXCFE_FLOPPY * loadrawimage(HXCFE* floppycontext,cfgrawfile * rfc,char * file,int * ret)
 {
-	FBuilder* fb;
+	HXCFE_FLPGEN* fb;
 	FILE * f;
 	unsigned int i,j,k,nbside;
 	unsigned char * trackbuffer;
 	int sectornumber;
 	int offset;
-	FLOPPY * fp;
+	HXCFE_FLOPPY * fp;
 
 	f=0;
 	fp = 0;
@@ -268,16 +298,24 @@ FLOPPY * loadrawimage(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * f
 	return fp;
 }
 
-int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file)
+int loadrawfile(HXCFE* floppycontext,cfgrawfile * rfc,char * file)
 {
 	int ret;
-	FLOPPY * fp;
+	HXCFE_FLOPPY * fp;
+	HXCFE_IMGLDR * imgldr_ctx;
 
 	fp = loadrawimage(floppycontext,rfc,file,&ret);
 	if(fp)
 	{
 		if(guicontext->loadedfloppy)
-			hxcfe_floppyUnload(guicontext->hxcfe,guicontext->loadedfloppy);
+		{
+			imgldr_ctx = hxcfe_imgInitLoader(guicontext->hxcfe);
+			if(imgldr_ctx)
+			{
+				hxcfe_imgUnload(imgldr_ctx,guicontext->loadedfloppy);
+				hxcfe_imgDeInitLoader(imgldr_ctx);
+			}
+		}
 
 		sprintf(guicontext->bufferfilename,"");
 		guicontext->loadedfloppy=0;

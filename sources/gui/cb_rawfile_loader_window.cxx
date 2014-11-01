@@ -166,20 +166,21 @@ void raw_loader_window_datachanged(Fl_Widget* w, void*)
 	char file[512];
 	rawfile_loader_window *rlw;
 	Fl_Window *dw;
-	XmlFloppyBuilder* rfb;
+	HXCFE_XMLLDR* rfb;
 	int xmlload;
 
-	dw=((Fl_Window*)(w->parent()));
-	rlw=(rawfile_loader_window *)dw->user_data();
+	dw = ((Fl_Window*)(w->parent()));
+	rlw = (rawfile_loader_window *)dw->user_data();
 
-	totalsector=(int)(rlw->innum_nbtrack->value() * 	rlw->innum_sectorpertrack->value());
+	totalsector = (int)(rlw->innum_nbtrack->value() * rlw->innum_sectorpertrack->value());
+
 	if(rlw->choice_numberofside->value())
 		totalsector=totalsector*2;
 
 	sprintf((char*)temp,"%d",totalsector);
 
 	rlw->strout_totalsector->value((const char*)temp);
-	totalsize=totalsector * (128<<rlw->choice_sectorsize->value());
+	totalsize = totalsector * (128<<rlw->choice_sectorsize->value());
 	sprintf((char*)temp,"%d",totalsize);
 	rlw->strout_totalsize->value((const char*)temp);
 
@@ -327,7 +328,7 @@ void raw_loader_window_bt_loadrawfile(Fl_Button* bt, void*)
 	rawfile_loader_window *rlw;
 	Fl_Window *dw;
 	cfgrawfile rfc;
-	XmlFloppyBuilder* rfb;
+	HXCFE_XMLLDR* rfb;
 
 	memset(file,0,sizeof(file));
 
@@ -377,7 +378,7 @@ void raw_loader_window_bt_createemptyfloppy(Fl_Button* bt, void*)
 	Fl_Window *dw;
 	cfgrawfile rfc;
 	int disklayout;
-	XmlFloppyBuilder* rfb;
+	HXCFE_XMLLDR* rfb;
 
 	dw=((Fl_Window*)(bt->parent()));
 	rlw=(rawfile_loader_window *)dw->user_data();

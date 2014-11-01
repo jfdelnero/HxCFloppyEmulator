@@ -51,26 +51,29 @@
 
 #include "fl_includes.h"
 
+#include "libhxcfe.h"
+#include "usb_hxcfloppyemulator.h"
+#include "libhxcadaptor.h"
+
+#ifdef WIN32
 extern "C"
 {
-	#include "libhxcfe.h"
-	#include "usb_hxcfloppyemulator.h"
-	#include "libhxcadaptor.h"
-#ifdef WIN32
 	#include "thirdpartylibs/fdrawcmd/fdrawcmd.h"
-#endif
 }
+#endif
+
 
 #include "loader.h"
 #include "main.h"
+#include "log_gui.h"
 
 extern s_gui_context * guicontext;
 
 typedef struct floppydumperparams_
 {
-	HXCFLOPPYEMULATOR * flopemu;
+	HXCFE * flopemu;
 
-	FLOPPY * floppydisk;
+	HXCFE_FLOPPY * floppydisk;
 
 	floppy_dump_window *windowshwd;
 	int drive;
@@ -159,7 +162,7 @@ static void closedevice(HANDLE h)
 		return;
 
 	if (!DeviceIoControl(h, IOCTL_FD_UNLOCK_FDC, 0,0, 0, 0, &ret, NULL)) {
-		printf("IOCTL_FD_UNLOCK_FDC failed err=%d\n", GetLastError());
+		CUI_affiche(MSG_DEBUG,"IOCTL_FD_UNLOCK_FDC failed err=%d\n", GetLastError());
 	}
 
 	CloseHandle(h);
@@ -187,27 +190,27 @@ HANDLE opendevice(int drive)
 	specparams.srt_hut = 0x0F;
 	specparams.hlt_nd = 0xFE;
 	if (!DeviceIoControl(h, IOCTL_FDCMD_SPECIFY, &specparams, sizeof(FD_SPECIFY_PARAMS), NULL, 0, &ret, NULL)) {
-		printf("IOCTL_FDCMD_SPECIFY failed err=%d\n", GetLastError());
+		CUI_affiche(MSG_DEBUG,"IOCTL_FDCMD_SPECIFY failed err=%d\n", GetLastError());
 		closedevice(h);
 		return 0;
 	}
 
 	b = 2; // 250Kbps
 	if (!DeviceIoControl(h, IOCTL_FD_SET_DATA_RATE, &b, sizeof b, NULL, 0, &ret, NULL)) {
-		printf("IOCTL_FD_SET_DATA_RATE=%d failed err=%d\n", b, GetLastError());
+		CUI_affiche(MSG_DEBUG,"IOCTL_FD_SET_DATA_RATE=%d failed err=%d\n", b, GetLastError());
 		closedevice(h);
 		return 0;
 	}
 
 	b = 0;
 	if (!DeviceIoControl(h, IOCTL_FD_SET_DISK_CHECK, &b, sizeof b, NULL, 0, &ret, NULL)) {
-		printf("IOCTL_FD_SET_DISK_CHECK=%d failed err=%d\n", b, GetLastError());
+		CUI_affiche(MSG_DEBUG,"IOCTL_FD_SET_DISK_CHECK=%d failed err=%d\n", b, GetLastError());
 		closedevice(h);
 		return 0;
 	}
 
 	if (!DeviceIoControl(h, IOCTL_FD_LOCK_FDC, 0,0, 0, 0, &ret, NULL)) {
-		printf("IOCTL_FD_LOCK_FDC=%d failed err=%d\n", b, GetLastError());
+		CUI_affiche(MSG_DEBUG,"IOCTL_FD_LOCK_FDC=%d failed err=%d\n", b, GetLastError());
 		closedevice(h);
 		return 0;
 	}
@@ -226,7 +229,7 @@ static int seek(HANDLE h,int cyl, int head)
 	sp.cyl = cyl;
 	sp.head = head;
 	if (!DeviceIoControl(h, IOCTL_FDCMD_SEEK, &sp, sizeof sp, NULL, 0, &ret, NULL)) {
-		printf("IOCTL_FDCMD_SEEK failed cyl=%d, err=%d\n", sp.cyl, GetLastError());
+		CUI_affiche(MSG_DEBUG,"IOCTL_FDCMD_SEEK failed cyl=%d, err=%d\n", sp.cyl, GetLastError());
 		return 0;
 	}
 	return 1;
@@ -246,8 +249,8 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 	FD_SCAN_RESULT *sr;
 	FD_READ_WRITE_PARAMS rwp;
 	FD_CMD_RESULT cmdr;
-	HXCFLOPPYEMULATOR *hxcfe;
-	FBuilder* fb;
+	HXCFE *hxcfe;
+	HXCFE_FLPGEN* fb;
 	floppydumperparams * params;
 	char * tempstr;
 	unsigned char b;
@@ -266,7 +269,8 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 
 	xsize=460;
 	ysize=200;
-	hxcfe->hxc_printf(MSG_DEBUG,"Starting Floppy dump...");
+
+	CUI_affiche(MSG_DEBUG,"Starting Floppy dump...");
 
 	tempstr=(char*)malloc(1024);
 
@@ -298,7 +302,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 				sprintf(tempstr,"Error during RPM checking :%d ",GetLastError());
 				params->windowshwd->global_status->value(tempstr);
 
-				hxcfe->hxc_printf(MSG_DEBUG,"Leaving Floppy dump: IOCTL_FD_GET_TRACK_TIME error %d...",GetLastError());
+				CUI_affiche(MSG_DEBUG,"Leaving Floppy dump: IOCTL_FD_GET_TRACK_TIME error %d...",GetLastError());
 				closedevice(h);
 				free(tempstr);
 
@@ -312,7 +316,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 
 			rpm=(unsigned short)(60000/(rotationtime/1000));
 
-			hxcfe->hxc_printf(MSG_DEBUG,"Drive RPM: %d",rpm);
+			CUI_affiche(MSG_DEBUG,"Drive RPM: %d",rpm);
 			sprintf(tempstr,"Drive RPM: %d",rpm);
 			params->windowshwd->global_status->value(tempstr);
 
@@ -393,7 +397,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 						b = tm[m].bitrate_code;
 						if (!DeviceIoControl(h, IOCTL_FD_SET_DATA_RATE, &b, sizeof b, NULL, 0, &ret, NULL))
 						{
-							printf("IOCTL_FD_SET_DATA_RATE=%d failed err=%d\n", b, GetLastError());
+							CUI_affiche(MSG_DEBUG,"IOCTL_FD_SET_DATA_RATE=%d failed err=%d\n", b, GetLastError());
 							closedevice(h);
 							params->status=0;
 							return 0;
@@ -401,7 +405,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 
 						if (!DeviceIoControl(h, IOCTL_FD_SCAN_TRACK, &sp, sizeof sp, sr, sizeof(FD_ID_HEADER)*256 + 1, &ret, NULL))
 						{
-							hxcfe->hxc_printf(MSG_DEBUG,"IOCTL_FD_SCAN_TRACK error %d ...",GetLastError());
+							CUI_affiche(MSG_DEBUG,"IOCTL_FD_SCAN_TRACK error %d ...",GetLastError());
 						}
 
 						if(sr->count)
@@ -425,7 +429,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 					}while(l<8 && !sr->count);
 
 
-					hxcfe->hxc_printf(MSG_DEBUG,"Track %d side %d: %d sectors found : ",i,j,sr->count);
+					CUI_affiche(MSG_DEBUG,"Track %d side %d: %d sectors found : ",i,j,sr->count);
 
 					seek(h,i*params->double_step, j);
 
@@ -474,7 +478,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 
 					for(k=0;k<sr->count;k++)
 					{
-						hxcfe->hxc_printf(MSG_DEBUG,"Sector %.2d, Track ID: %.3d, Head ID:%d, Size: %d bytes, Bitrate:%dkbits/s, %s",sr->Header[k].sector,sr->Header[k].cyl,sr->Header[k].head,128<<sr->Header[k].size,bitrate/1000,trackformat==IBMFORMAT_SD?"FM":"MFM");
+						CUI_affiche(MSG_DEBUG,"Sector %.2d, Track ID: %.3d, Head ID:%d, Size: %d bytes, Bitrate:%dkbits/s, %s",sr->Header[k].sector,sr->Header[k].cyl,sr->Header[k].head,128<<sr->Header[k].size,bitrate/1000,trackformat==IBMFORMAT_SD?"FM":"MFM");
 
 						if(tm[m].encoding_mode)
 						{
@@ -541,7 +545,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 						if(!retry)
 						{
 							DeviceIoControl(h, IOCTL_FD_GET_RESULT,0, 0, &cmdr, sizeof(FD_CMD_RESULT), &ret, NULL);
-							hxcfe->hxc_printf(MSG_DEBUG,"Read Error ! ST0: %.2x, ST1: %.2x, ST2: %.2x",cmdr.st0,cmdr.st1,cmdr.st2);
+							CUI_affiche(MSG_DEBUG,"Read Error ! ST0: %.2x, ST1: %.2x, ST2: %.2x",cmdr.st0,cmdr.st1,cmdr.st2);
 							number_of_bad_sector++;
 
 							o=p;
@@ -602,11 +606,11 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 			sprintf(tempstr,"%d Sector(s) Read, %d bytes, %d Bad sector(s)",numberofsector_read,total_size,number_of_bad_sector);
 			params->windowshwd->current_status->value(tempstr);
 
-			hxcfe->hxc_printf(MSG_DEBUG,"Done ! %d sectors read, %d bad sector(s), %d bytes read",numberofsector_read,number_of_bad_sector,total_size);
+			CUI_affiche(MSG_DEBUG,"Done ! %d sectors read, %d bad sector(s), %d bytes read",numberofsector_read,number_of_bad_sector,total_size);
 
 			free(tempstr);
 
-			hxcfe->hxc_printf(MSG_DEBUG,"Leaving Floppy dump...");
+			CUI_affiche(MSG_DEBUG,"Leaving Floppy dump...");
 
 			params->status=0;
 			return 0;
@@ -618,7 +622,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 
 	free(tempstr);
 
-	hxcfe->hxc_printf(MSG_DEBUG,"Leaving Floppy dump...");
+	CUI_affiche(MSG_DEBUG,"Leaving Floppy dump...");
 
 	params->status=0;
 #endif

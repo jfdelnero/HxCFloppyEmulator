@@ -66,8 +66,6 @@ extern "C"
 
 s_gui_context * guicontext;
 
-extern int CUI_affiche(int MSGTYPE,char * chaine, ...);
-
 int main(int argc, char **argv)
 {
 	guicontext=(s_gui_context *)malloc(sizeof(s_gui_context));

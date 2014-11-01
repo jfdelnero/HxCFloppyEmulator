@@ -31,6 +31,6 @@
 	}track_type;
 
 int load_floppy_image(char *filename);
-int load_floppy(FLOPPY * floppydisk,char * defaultfilename);
-FLOPPY * loadrawimage(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file,int * ret);
-int loadrawfile(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * rfc,char * file);
+int load_floppy(HXCFE_FLOPPY * floppydisk,char * defaultfilename);
+HXCFE_FLOPPY * loadrawimage(HXCFE* floppycontext,cfgrawfile * rfc,char * file,int * ret);
+int loadrawfile(HXCFE* floppycontext,cfgrawfile * rfc,char * file);

@@ -34,7 +34,7 @@ rawfile_loader_window::rawfile_loader_window() {
       chk_autogap3->labelsize(12);
       chk_autogap3->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
     } // Fl_Check_Button* chk_autogap3
-    { numin_pregap = new Fl_Value_Input(230, 216, 95, 20, "PRE-GAP lenght :");
+    { numin_pregap = new Fl_Value_Input(230, 216, 95, 20, "PRE-GAP length :");
       numin_pregap->labelsize(12);
       numin_pregap->textsize(12);
       numin_pregap->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
@@ -142,7 +142,7 @@ rawfile_loader_window::rawfile_loader_window() {
       choice_tracktype->align(Fl_Align(FL_ALIGN_TOP_LEFT));
       choice_tracktype->when(FL_WHEN_CHANGED);
     } // Fl_Choice* choice_tracktype
-    { numin_gap3 = new Fl_Value_Input(10, 215, 105, 20, "GAP3 lenght :");
+    { numin_gap3 = new Fl_Value_Input(10, 215, 105, 20, "GAP3 length :");
       numin_gap3->labelsize(12);
       numin_gap3->textsize(12);
       numin_gap3->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
