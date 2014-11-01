@@ -116,20 +116,24 @@ typedef void HXCFE_SECTCFG;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // UI Output callback functions                                                                   //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifndef HXCFE_PRINTF_FUNC
+#ifndef _HXCFE_PRINTF_FUNC_
 typedef int (*HXCFE_PRINTF_FUNC)(int MSGTYPE,char * string, ...);
+#define _HXCFE_PRINTF_FUNC_
 #endif
 
-#ifndef HXCFE_TRACKPOSOUT_FUNC
+#ifndef _HXCFE_TRACKPOSOUT_FUNC_
 typedef int (*HXCFE_TRACKPOSOUT_FUNC)(unsigned int current,unsigned int total);
+#define _HXCFE_TRACKPOSOUT_FUNC_
 #endif
 
-#ifndef HXCFE_IMGLDRPROGRESSOUT_FUNC
+#ifndef _HXCFE_IMGLDRPROGRESSOUT_FUNC_
 typedef int (*HXCFE_IMGLDRPROGRESSOUT_FUNC)(unsigned int current,unsigned int total, void * user);
+#define _HXCFE_IMGLDRPROGRESSOUT_FUNC_
 #endif
 
-#ifndef HXCFE_TDPROGRESSOUT_FUNC
+#ifndef _HXCFE_TDPROGRESSOUT_FUNC_
 typedef int (*HXCFE_TDPROGRESSOUT_FUNC)(unsigned int current,unsigned int total,void * td, void * user);
+#define _HXCFE_TDPROGRESSOUT_FUNC_
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
