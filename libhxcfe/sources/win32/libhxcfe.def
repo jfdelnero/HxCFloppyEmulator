@@ -5,11 +5,7 @@ EXPORTS
    hxcfe_getVersion			@3
    hxcfe_deinit				@4
    hxcfe_getLicense			@5
-
-   hxcfe_autoSelectLoader   @21
-   hxcfe_floppyLoad			@22
-   hxcfe_floppyUnload		@23
-   hxcfe_floppyExport		@24
+   
    hxcfe_getNumberOfTrack	@25
    hxcfe_getNumberOfSide	@26
    hxcfe_getFloppySize		@27
@@ -18,17 +14,15 @@ EXPORTS
    hxcfe_floppySetInterfaceMode @30
    hxcfe_floppyGetDoubleStep @31
    hxcfe_floppySetDoubleStep @32
-   hxcfe_numberOfLoader		@33
-   hxcfe_getLoaderID		@34
-   hxcfe_getLoaderAccess	@35
-   hxcfe_getLoaderDesc		@36
-   hxcfe_getLoaderName		@37
-   hxcfe_getLoaderExt		@38
    hxcfe_getFloppyInterfaceModeID @39
    hxcfe_getFloppyInterfaceModeName	@40
    hxcfe_getFloppyInterfaceModeDesc @41
    hxcfe_getTrackEncodingName	@42
-   hxcfe_floppyLoadEx			@43
+   hxcfe_getTrackBitrate        @43
+   hxcfe_getTrackEncoding       @44
+   hxcfe_getTrackLength         @45
+   hxcfe_getTrackRPM            @46
+   hxcfe_getTrackNumberOfSide   @47
 
    hxcfe_initFloppy			@50
    hxcfe_pushTrack			@51
@@ -64,15 +58,14 @@ EXPORTS
    hxcfe_getFloppy			@80
    hxcfe_generateDisk		@81
 
-
-   hxcfe_initSectorSearch		@100
+   hxcfe_initSectorAccess		@100
    hxcfe_getNextSector			@101
    hxcfe_searchSector			@102
    hxcfe_getSectorSize			@103
    hxcfe_getSectorData			@104
    hxcfe_readSectorData			@105
    hxcfe_freeSectorConfig		@106
-   hxcfe_deinitSectorSearch		@107
+   hxcfe_deinitSectorAccess		@107
    hxcfe_writeSectorData		@108
 
    hxcfe_td_init				@120
@@ -82,9 +75,28 @@ EXPORTS
    hxcfe_td_setparams			@124
    hxcfe_td_getlastsectorlist	@125
    hxcfe_td_activate_analyzer	@126
-
+   hxcfe_td_getframebuffer		@127
+   hxcfe_td_getframebuffer_xres @128
+   hxcfe_td_getframebuffer_yres	@129
+   hxcfe_td_getlastpulselist    @130
+   hxcfe_td_setProgressCallback @131
 
    hxcfe_generateFloppy			@150
+
+   hxcfe_imgInitLoader			@160
+   hxcfe_imgDeInitLoader		@161
+   hxcfe_imgAutoSetectLoader    @162
+   hxcfe_imgLoad                @163
+   hxcfe_imgLoadEx              @164
+   hxcfe_imgUnload              @165
+   hxcfe_imgExport              @166
+   hxcfe_imgSetProgressCallback @167
+   hxcfe_imgGetNumberOfLoader	@168
+   hxcfe_imgGetLoaderID			@169
+   hxcfe_imgGetLoaderAccess		@170
+   hxcfe_imgGetLoaderDesc		@171
+   hxcfe_imgGetLoaderName		@172
+   hxcfe_imgGetLoaderExt		@173
 
    hxcfe_initXmlFloppy			@200
    hxcfe_numberOfXmlLayout		@201
@@ -133,6 +145,22 @@ EXPORTS
    hxcfe_getFreeFsSpace			@423
    hxcfe_getTotalFsSpace		@424
 
+   hxcfe_getSectorConfigEncoding         @450
+   hxcfe_getSectorConfigSectorID         @451
+   hxcfe_getSectorConfigSideID           @452
+   hxcfe_getSectorConfigSectorSize       @453
+   hxcfe_getSectorConfigTrackID          @454
+   hxcfe_getSectorConfigHCRC             @455
+   hxcfe_getSectorConfigDCRC             @456
+   hxcfe_getSectorConfigStartSectorIndex @457
+   hxcfe_getSectorConfigStartDataIndex   @458
+   hxcfe_getSectorConfigEndSectorIndex   @459
+   hxcfe_getSectorConfigInputData        @460
+   hxcfe_getSectorConfigSizeID           @461
+   hxcfe_getSectorConfigDataMark         @462
+   hxcfe_getSectorConfigHCRCStatus       @463
+   hxcfe_getSectorConfigDCRCStatus       @464
+
    hxcfe_getSide				@500
    hxcfe_shiftTrackData			@501
    hxcfe_getCellState			@502
@@ -145,9 +173,3 @@ EXPORTS
    hxcfe_setCellIndexState		@509
    hxcfe_getCellBitrate			@510
    hxcfe_setCellBitrate			@511
-
-
-
-
-
-

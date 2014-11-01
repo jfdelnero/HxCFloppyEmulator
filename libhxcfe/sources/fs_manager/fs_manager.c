@@ -47,13 +47,20 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "libhxcfe.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
+#include "sector_search.h"
+#include "fdc_ctrl.h"
 #include "fs_manager.h"
+#include "libhxcfe.h"
+
 #include "fs_fat12/fs_fat12.h"
 #include "fs_amigados/fs_amigados.h"
 #include "fs_cpm/fs_cpm.h"
 
-int hxcfe_checkFSID(HXCFLOPPYEMULATOR* floppycontext,int FSID)
+
+
+int hxcfe_checkFSID(HXCFE* floppycontext,int FSID)
 {
 	int i;
 
@@ -77,16 +84,16 @@ int hxcfe_checkFSID(HXCFLOPPYEMULATOR* floppycontext,int FSID)
 }
 
 
-FSMNG * hxcfe_initFsManager(HXCFLOPPYEMULATOR * hxcfe)
+HXCFE_FSMNG * hxcfe_initFsManager(HXCFE * hxcfe)
 {
-	FSMNG * fsmng;
+	HXCFE_FSMNG * fsmng;
 
 	hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_initFsManager");
 
-	fsmng = malloc(sizeof(FSMNG));
+	fsmng = malloc(sizeof(HXCFE_FSMNG));
 	if(fsmng)
 	{
-		memset(fsmng,0,sizeof(FSMNG));
+		memset(fsmng,0,sizeof(HXCFE_FSMNG));
 		fsmng->hxcfe = hxcfe;
 		fsmng->sectorpertrack = 9;
 		fsmng->sidepertrack = 2;
@@ -98,7 +105,7 @@ FSMNG * hxcfe_initFsManager(HXCFLOPPYEMULATOR * hxcfe)
 	return 0;
 }
 
-int hxcfe_getFSID(HXCFLOPPYEMULATOR* floppycontext, char * fsname)
+int hxcfe_getFSID(HXCFE* floppycontext, char * fsname)
 {
 	int i;
 
@@ -116,7 +123,7 @@ int hxcfe_getFSID(HXCFLOPPYEMULATOR* floppycontext, char * fsname)
 	return 0;
 }
 
-int	hxcfe_numberOfFS(HXCFLOPPYEMULATOR* floppycontext)
+int	hxcfe_numberOfFS(HXCFE* floppycontext)
 {
 	int i;
 
@@ -131,7 +138,7 @@ int	hxcfe_numberOfFS(HXCFLOPPYEMULATOR* floppycontext)
 	return i;
 }
 
-const char* hxcfe_getFSDesc(HXCFLOPPYEMULATOR* floppycontext,int FSID)
+const char* hxcfe_getFSDesc(HXCFE* floppycontext,int FSID)
 {
 
 	floppycontext->hxc_printf(MSG_DEBUG,"hxcfe_getFSDesc : %d",FSID);
@@ -148,7 +155,7 @@ const char* hxcfe_getFSDesc(HXCFLOPPYEMULATOR* floppycontext,int FSID)
 	return 0;
 }
 
-const char* hxcfe_getFSName(HXCFLOPPYEMULATOR* floppycontext,int FSID)
+const char* hxcfe_getFSName(HXCFE* floppycontext,int FSID)
 {
 
 	floppycontext->hxc_printf(MSG_DEBUG,"hxcfe_getFSName : %d",FSID);
@@ -165,7 +172,7 @@ const char* hxcfe_getFSName(HXCFLOPPYEMULATOR* floppycontext,int FSID)
 	return 0;
 }
 
-int hxcfe_selectFS(FSMNG * fsmng, int FSID)
+int hxcfe_selectFS(HXCFE_FSMNG * fsmng, int FSID)
 {
 
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_selectFS : %d",FSID);
@@ -180,14 +187,14 @@ int hxcfe_selectFS(FSMNG * fsmng, int FSID)
 	return HXCFE_NOERROR;
 }
 
-void hxcfe_deinitFsManager(FSMNG * fsmng)
+void hxcfe_deinitFsManager(HXCFE_FSMNG * fsmng)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_deinitFsManager");
 
 	free(fsmng);
 }
 
-int hxcfe_mountImage(FSMNG * fsmng, FLOPPY *floppy)
+int hxcfe_mountImage(HXCFE_FSMNG * fsmng, HXCFE_FLOPPY *floppy)
 {
 	int ret;
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_mountImage");
@@ -211,7 +218,7 @@ int hxcfe_mountImage(FSMNG * fsmng, FLOPPY *floppy)
 
 }
 
-int hxcfe_umountImage(FSMNG * fsmng)
+int hxcfe_umountImage(HXCFE_FSMNG * fsmng)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_umountImage");
 
@@ -221,7 +228,7 @@ int hxcfe_umountImage(FSMNG * fsmng)
 		return fat12_umountImage(fsmng);
 }
 
-int hxcfe_getFreeFsSpace(FSMNG * fsmng)
+int hxcfe_getFreeFsSpace(HXCFE_FSMNG * fsmng)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_getFreeFsSpace");
 
@@ -231,7 +238,7 @@ int hxcfe_getFreeFsSpace(FSMNG * fsmng)
 		return fat12_getFreeSpace( fsmng );
 }
 
-int hxcfe_getTotalFsSpace(FSMNG * fsmng)
+int hxcfe_getTotalFsSpace(HXCFE_FSMNG * fsmng)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_getTotalFsSpace");
 
@@ -241,7 +248,7 @@ int hxcfe_getTotalFsSpace(FSMNG * fsmng)
 		return fat12_getTotalSpace( fsmng );
 }
 
-int hxcfe_openDir(FSMNG * fsmng, char * path)
+int hxcfe_openDir(HXCFE_FSMNG * fsmng, char * path)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_openDir : %s",path);
 
@@ -251,7 +258,7 @@ int hxcfe_openDir(FSMNG * fsmng, char * path)
 		return fat12_openDir(fsmng,path);
 }
 
-int hxcfe_readDir(FSMNG * fsmng,int dirhandle,FSENTRY * dirent)
+int hxcfe_readDir(HXCFE_FSMNG * fsmng,int dirhandle,HXCFE_FSENTRY * dirent)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_readDir : 0x%.8x",dirhandle);
 
@@ -261,7 +268,7 @@ int hxcfe_readDir(FSMNG * fsmng,int dirhandle,FSENTRY * dirent)
 		return fat12_readDir(fsmng,dirhandle,dirent);
 }
 
-int hxcfe_closeDir(FSMNG * fsmng, int dirhandle)
+int hxcfe_closeDir(HXCFE_FSMNG * fsmng, int dirhandle)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_closeDir : 0x%.8x",dirhandle);
 
@@ -271,7 +278,7 @@ int hxcfe_closeDir(FSMNG * fsmng, int dirhandle)
 		return fat12_closeDir(fsmng, dirhandle);
 }
 
-int hxcfe_openFile(FSMNG * fsmng, char * filename)
+int hxcfe_openFile(HXCFE_FSMNG * fsmng, char * filename)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_openFile : %s",filename);
 
@@ -281,7 +288,7 @@ int hxcfe_openFile(FSMNG * fsmng, char * filename)
 		return fat12_openFile(fsmng,filename);
 }
 
-int hxcfe_createFile(FSMNG * fsmng, char * filename)
+int hxcfe_createFile(HXCFE_FSMNG * fsmng, char * filename)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_createFile : %s",filename);
 
@@ -291,7 +298,7 @@ int hxcfe_createFile(FSMNG * fsmng, char * filename)
 		return fat12_createFile(fsmng,filename);
 }
 
-int hxcfe_writeFile(FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
+int hxcfe_writeFile(HXCFE_FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_writeFile : 0x%.8x - 0x%.8x / %d bytes",filehandle,buffer,size);
 
@@ -301,7 +308,7 @@ int hxcfe_writeFile(FSMNG * fsmng,int filehandle,unsigned char * buffer,int size
 		return fat12_writeFile(fsmng,filehandle,buffer,size);
 }
 
-int hxcfe_readFile( FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
+int hxcfe_readFile( HXCFE_FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_readFile : 0x%.8x - 0x%.8x / %d bytes",filehandle,buffer,size);
 
@@ -311,7 +318,7 @@ int hxcfe_readFile( FSMNG * fsmng,int filehandle,unsigned char * buffer,int size
 		return fat12_readFile( fsmng,filehandle,buffer,size);
 }
 
-int hxcfe_deleteFile(FSMNG * fsmng, char * filename)
+int hxcfe_deleteFile(HXCFE_FSMNG * fsmng, char * filename)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_deleteFile : %s",filename);
 
@@ -321,7 +328,7 @@ int hxcfe_deleteFile(FSMNG * fsmng, char * filename)
 		return fat12_deleteFile(fsmng,filename);
 }
 
-int hxcfe_closeFile(FSMNG * fsmng, int filehandle)
+int hxcfe_closeFile(HXCFE_FSMNG * fsmng, int filehandle)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_closeFile : 0x%.8x",filehandle);
 
@@ -331,7 +338,7 @@ int hxcfe_closeFile(FSMNG * fsmng, int filehandle)
 		return fat12_closeFile(fsmng,filehandle);
 }
 
-int hxcfe_createDir( FSMNG * fsmng,char * foldername)
+int hxcfe_createDir( HXCFE_FSMNG * fsmng,char * foldername)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_createDir : %s",foldername);
 
@@ -341,7 +348,7 @@ int hxcfe_createDir( FSMNG * fsmng,char * foldername)
 		return fat12_createDir( fsmng,foldername);
 }
 
-int hxcfe_removeDir( FSMNG * fsmng,char * foldername)
+int hxcfe_removeDir( HXCFE_FSMNG * fsmng,char * foldername)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_removeDir : %s",foldername);
 
@@ -351,7 +358,7 @@ int hxcfe_removeDir( FSMNG * fsmng,char * foldername)
 		return fat12_removeDir( fsmng,foldername);
 }
 
-int hxcfe_fseek( FSMNG * fsmng,int filehandle,long offset,int origin)
+int hxcfe_fseek( HXCFE_FSMNG * fsmng,int filehandle,long offset,int origin)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_fseek : 0x%.8x - 0x%.8x (%d) ",filehandle,offset,origin);
 
@@ -362,7 +369,7 @@ int hxcfe_fseek( FSMNG * fsmng,int filehandle,long offset,int origin)
 
 }
 
-int hxcfe_ftell( FSMNG * fsmng,int filehandle)
+int hxcfe_ftell( HXCFE_FSMNG * fsmng,int filehandle)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_ftell : 0x%.8x",filehandle);
 

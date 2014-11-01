@@ -30,6 +30,7 @@
 #include <string.h>
 #include "bmp_file.h"
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 #include "libhxcadaptor.h"
 

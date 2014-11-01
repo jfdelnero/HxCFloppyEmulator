@@ -73,4 +73,4 @@
 	#define SIDE_INVERTED 0x04
 	#define SIDE0_FIRST 0x08
 
-int RAW_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue);
+int RAW_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue);

@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -58,12 +60,12 @@
 
 #include "libhxcadaptor.h"
 
-int SAP_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int SAP_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int floppyformat;
 	sapID sapid;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"SAP_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAP_libIsValidDiskFile");
 
 	if(hxc_checkfileext(imgfile,"sap"))
 	{
@@ -72,26 +74,26 @@ int SAP_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		if(sapid!=SAP_ERROR)
 		{
 			sap_CloseArchive(sapid);
-			floppycontext->hxc_printf(MSG_DEBUG,"SAP_libIsValidDiskFile : SAP file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAP_libIsValidDiskFile : SAP file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"SAP_libIsValidDiskFile : non SAP file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAP_libIsValidDiskFile : non SAP file !");
 			return HXCFE_BADFILE;
 		}
 
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"SAP_libIsValidDiskFile : non SAP file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAP_libIsValidDiskFile : non SAP file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int SAP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	unsigned int i,j,k;
 	unsigned char* trackdata;
@@ -104,15 +106,15 @@ int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	int floppyformat;
 	sapID sapid;
 	sapsector_t sapsector;
-	SECTORCONFIG  sectorconfig[SAP_NSECTS];
-	CYLINDER* currentcylinder;
+	HXCFE_SECTCFG  sectorconfig[SAP_NSECTS];
+	HXCFE_CYLINDER* currentcylinder;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"SAP_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAP_libLoad_DiskFile %s",imgfile);
 
 	sapid=sap_OpenArchive(imgfile, &floppyformat);
 	if(sapid==SAP_ERROR)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return -1;
 	}
 
@@ -139,7 +141,7 @@ int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		trackformat=ISOFORMAT_SD;
 		break;
 	default:
-		floppycontext->hxc_printf(MSG_ERROR,"Unknow floppy format: %d !",floppyformat);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Unknow floppy format: %d !",floppyformat);
 		sap_CloseArchive(sapid);
 		return -1;
 		break;
@@ -148,15 +150,15 @@ int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	floppydisk->floppyBitRate=250000;
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 	rpm=300; // normal rpm
 
 
-	floppycontext->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track,%d bytes/sector gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,sectorsize,gap3len,interleave,rpm);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track,%d bytes/sector gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,sectorsize,gap3len,interleave,rpm);
 
 	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 
-	memset(sectorconfig,0,sizeof(SECTORCONFIG)*SAP_NSECTS);
+	memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*SAP_NSECTS);
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
 
@@ -169,7 +171,7 @@ int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			for(k=0;k<SAP_NSECTS;k++)
 			{
 				sap_ReadSector(sapid, j, k+1, &sapsector);
-				floppycontext->hxc_printf(MSG_DEBUG,"[%.2d:%.2d]: Sect %.2d, Track %.2d, Format: 0x%.2x, Protect 0x%.2x",j,k,sapsector.sector,sapsector.track,sapsector.format,sapsector.protection);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"[%.2d:%.2d]: Sect %.2d, Track %.2d, Format: 0x%.2x, Protect 0x%.2x",j,k,sapsector.sector,sapsector.track,sapsector.format,sapsector.protection);
 				sectorconfig[k].bitrate=250000;
 				sectorconfig[k].gap3=255;
 				sectorconfig[k].head=0;
@@ -181,7 +183,7 @@ int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				memcpy(sectorconfig[k].input_data,sapsector.data,sectorconfig[k].sectorsize);
 			}
 
-			currentcylinder->sides[i]=tg_generateTrackEx(SAP_NSECTS,(SECTORCONFIG *)&sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
+			currentcylinder->sides[i]=tg_generateTrackEx(SAP_NSECTS,(HXCFE_SECTCFG *)&sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
 
 			for(k=0;k<SAP_NSECTS;k++)
 			{
@@ -198,13 +200,13 @@ int SAP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	sap_CloseArchive(sapid);
 
-	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 	return HXCFE_NOERROR;
 
 }
 
-int SAP_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int SAP_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="THOMSONTO8D_SAP";
@@ -220,7 +222,7 @@ int SAP_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

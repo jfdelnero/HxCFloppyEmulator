@@ -47,7 +47,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
@@ -57,26 +60,26 @@
 
 #include "libhxcadaptor.h"
 
-int ADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int ADF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"ADF_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADF_libIsValidDiskFile");
 
 	if(hxc_checkfileext(imgfile,"adf"))
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"ADF_libIsValidDiskFile : %s is an ADF file !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADF_libIsValidDiskFile : %s is an ADF file !",imgfile);
 
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"ADF_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"ADF_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
 		if(filesize%(512*11))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"ADF_libIsValidDiskFile : non ADF file ! Bad file size!");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADF_libIsValidDiskFile : non ADF file ! Bad file size!");
 			return HXCFE_BADFILE;
 		}
 
@@ -84,14 +87,14 @@ int ADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"ADF_libIsValidDiskFile : non ADF file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADF_libIsValidDiskFile : non ADF file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int ADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	unsigned int filesize;
@@ -101,14 +104,14 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned char* trackdata;
 	unsigned char gap3len,skew,trackformat,interleave;
 	unsigned short sectorsize;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"ADF_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADF_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -118,7 +121,7 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	if(!filesize)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Bad file size : %d !",filesize);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Bad file size : %d !",filesize);
 		hxc_fclose(f);
 		return HXCFE_BADFILE;
 	}
@@ -143,7 +146,7 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
 	floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*(floppydisk->floppyNumberOfTrack+4));
+	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*(floppydisk->floppyNumberOfTrack+4));
 
 	sectorsize=512;
 	interleave=1;
@@ -187,12 +190,12 @@ int ADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	free(trackdata);
 
-	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }
 
-int ADF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int ADF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="AMIGA_ADF";
@@ -208,7 +211,7 @@ int ADF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

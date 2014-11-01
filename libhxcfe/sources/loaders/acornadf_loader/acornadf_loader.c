@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -57,11 +59,11 @@
 
 #include "libhxcadaptor.h"
 
-int ACORNADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int ACORNADF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"ACORNADF_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ACORNADF_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"adf") )
 	{
@@ -69,22 +71,22 @@ int ACORNADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"ACORNADF_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"ACORNADF_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 			
 		if(filesize&0x3FF)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"ACORNADF_libIsValidDiskFile : non Acorn ADF file - bad file size !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ACORNADF_libIsValidDiskFile : non Acorn ADF file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"ACORNADF_libIsValidDiskFile : Acorn ADF file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ACORNADF_libIsValidDiskFile : Acorn ADF file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"ACORNADF_libIsValidDiskFile : non Acorn ADF file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ACORNADF_libIsValidDiskFile : non Acorn ADF file !");
 		return HXCFE_BADFILE;
 	}
 	
@@ -93,7 +95,7 @@ int ACORNADF_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 
 
-int ACORNADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int ACORNADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	
 	FILE * f;
@@ -105,14 +107,14 @@ int ACORNADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	unsigned short rpm;
 	unsigned short sectorsize;
 	unsigned char trackformat;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 	
-	floppycontext->hxc_printf(MSG_DEBUG,"ACORNADF_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ACORNADF_libLoad_DiskFile %s",imgfile);
 	
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 	
@@ -147,8 +149,8 @@ int ACORNADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 			
 		trackformat=ISOFORMAT_DD;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-		floppycontext->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
 		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 			
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
@@ -170,19 +172,19 @@ int ACORNADF_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 			
 		free(trackdata);
 
-		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 		hxc_fclose(f);
 		return HXCFE_NOERROR;
 
 	}
 	
-	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 
-int ACORNADF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int ACORNADF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ACORN_ADF";
@@ -198,7 +200,7 @@ int ACORNADF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long inf
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

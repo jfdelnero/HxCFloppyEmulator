@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #include "hfe_loader.h"
@@ -86,7 +87,7 @@ extern FILE * rfopen(char* fn,char * mode);
 extern int rfwrite(void * buffer,int size,int mul,FILE * file);
 extern int rfclose(FILE *f);
 
-int HFE_HDDD_A2_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 
 	pictrack * track;
@@ -104,11 +105,11 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 	
 	unsigned short fm_pulses;
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Write HFE file %s for the standalone emulator (with HDDD A2 support).",filename);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write HFE file %s for the standalone emulator (with HDDD A2 support).",filename);
 
 	if(!floppy->floppyNumberOfTrack)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot create zero track HFE file");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create zero track HFE file");
 		return -1;
 	}
 
@@ -140,8 +141,8 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 
 		FILEHEADER->floppyinterfacemode=(unsigned char)floppy->floppyiftype;
 
-		floppycontext->hxc_printf(MSG_INFO_1,"Floppy interface mode %s (%s)",	hxcfe_getFloppyInterfaceModeName(floppycontext,FILEHEADER->floppyinterfacemode),
-																			hxcfe_getFloppyInterfaceModeDesc(floppycontext,FILEHEADER->floppyinterfacemode) );
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Floppy interface mode %s (%s)",	hxcfe_getFloppyInterfaceModeName(imgldr_ctx->hxcfe,FILEHEADER->floppyinterfacemode),
+																			hxcfe_getFloppyInterfaceModeDesc(imgldr_ctx->hxcfe,FILEHEADER->floppyinterfacemode) );
 
 		FILEHEADER->track_encoding=0;
 		FILEHEADER->formatrevision=0;
@@ -206,7 +207,7 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 
 				if(mfmsize*2>0xFFFF)
 				{
-					floppycontext->hxc_printf(MSG_ERROR,"Argg!! track %d too long (%x) and shorten to 0xFFFF !",i,mfmsize*2);
+					imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Argg!! track %d too long (%x) and shorten to 0xFFFF !",i,mfmsize*2);
 					mfmsize=0x7FFF;
 				}
 
@@ -331,7 +332,7 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 		else
 		{
 			rfclose(hxcpicfile);
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
 			return -1;
 		}
 
@@ -339,7 +340,7 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 
 		rfclose(hxcpicfile);
 
-		floppycontext->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
 
 		free(FILEHEADER);
 
@@ -347,7 +348,7 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
 
 		return -1;
 	}

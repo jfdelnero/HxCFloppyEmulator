@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -57,33 +59,33 @@
 
 #include "libhxcadaptor.h"
 
-int D81_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int D81_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"D81_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D81_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"d81") )
 	{
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"D81_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"D81_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 					
 		if(filesize&0x1FF)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"D81_libIsValidDiskFile : non D81 file - bad file size !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D81_libIsValidDiskFile : non D81 file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"D81_libIsValidDiskFile : D81 file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D81_libIsValidDiskFile : D81 file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"D81_libIsValidDiskFile : non D81 file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D81_libIsValidDiskFile : non D81 file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -92,7 +94,7 @@ int D81_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 
 
-int D81_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int D81_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	
 	FILE * f;
@@ -104,14 +106,14 @@ int D81_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned short rpm;
 	unsigned short sectorsize;
 	unsigned char trackformat;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 	
-	floppycontext->hxc_printf(MSG_DEBUG,"D81_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D81_libLoad_DiskFile %s",imgfile);
 	
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 	
@@ -132,9 +134,9 @@ int D81_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyBitRate=250000;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 			
-		floppycontext->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
 			
 		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 			
@@ -159,20 +161,20 @@ int D81_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			
 		free(trackdata);
 
-		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 		hxc_fclose(f);
 		return HXCFE_NOERROR;
 
 	}
 	
-	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 
 
-int D81_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int D81_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="C64_D81";
@@ -188,7 +190,7 @@ int D81_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

@@ -384,7 +384,7 @@ typedef struct scp_header_
 typedef struct scp_index_pos_
 {
 	unsigned long index_time;
-	unsigned long track_lenght;
+	unsigned long track_length;
 	unsigned long track_offset;
 }scp_index_pos;
 

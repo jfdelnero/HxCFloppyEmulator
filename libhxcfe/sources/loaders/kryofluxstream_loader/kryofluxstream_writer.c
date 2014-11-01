@@ -47,6 +47,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #include "kryofluxstream_format.h"
@@ -59,7 +60,7 @@
 #include "types.h"
 
 // Get the next cell value.
-static unsigned long getNextPulse(SIDE * track,unsigned int * offset,int * rollover)
+static unsigned long getNextPulse(HXCFE_SIDE * track,unsigned int * offset,int * rollover)
 {
 	int i;
 	float totaltime;
@@ -165,7 +166,7 @@ int alignOOB(FILE * f)
 	return j;
 }
 
-unsigned long write_kf_stream_track(char * filepath,SIDE * track,int tracknum,int sidenum,unsigned int revolution)
+unsigned long write_kf_stream_track(char * filepath,HXCFE_SIDE * track,int tracknum,int sidenum,unsigned int revolution)
 {
 	char fullp[512];
 	char fullp2[512];
@@ -380,7 +381,7 @@ unsigned long write_kf_stream_track(char * filepath,SIDE * track,int tracknum,in
 	return 0;
 }
 
-int KryoFluxStream_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int KryoFluxStream_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int i,j;
 

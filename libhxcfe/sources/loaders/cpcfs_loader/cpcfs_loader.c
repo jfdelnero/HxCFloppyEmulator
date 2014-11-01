@@ -49,6 +49,7 @@
 #include <sys/stat.h>
 #include <time.h>
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -58,18 +59,18 @@
 
 #include "libhxcadaptor.h"
 
-HXCFLOPPYEMULATOR* global_floppycontext;
-extern int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * folder,char * file);
+HXCFE* global_floppycontext;
+extern int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char * file);
 
 
-int CPCFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int CPCFSDK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	
 	int pathlen;
 	char * filepath;
     struct stat staterep;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"CPCFSDK_libIsValidDiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCFSDK_libIsValidDiskFile %s",imgfile);
 	if(imgfile)
 	{
 		pathlen=strlen(imgfile);
@@ -88,13 +89,13 @@ int CPCFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 					if(strstr( filepath,".cpcfs" )!=NULL)
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"CPCFSDK file !");
+						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCFSDK file !");
 						free(filepath);
 						return HXCFE_VALIDFILE;
 					}
 					else
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"non CPCFSDK file ! (.cpcfs missing)");
+						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"non CPCFSDK file ! (.cpcfs missing)");
 						free(filepath);
 						return HXCFE_BADFILE;
 					}
@@ -102,11 +103,11 @@ int CPCFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"non CPCFSDK file ! (it's not a directory)");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"non CPCFSDK file ! (it's not a directory)");
 				return HXCFE_BADFILE;
 			}
 		}
-		floppycontext->hxc_printf(MSG_DEBUG,"0 byte string ?");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"0 byte string ?");
 	}
 	return HXCFE_BADPARAMETER;
 
@@ -114,19 +115,19 @@ int CPCFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 }
 
 
-int ScanCpcFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * folder,char * file)
+int ScanCpcFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char * file)
 {
 
 	return 0;
 }
 
-int CPCFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int CPCFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 		return HXCFE_BADFILE;
 }
 
 
-int CPCFSDK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int CPCFSDK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="CPC_FS";
@@ -142,7 +143,7 @@ int CPCFSDK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long info
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

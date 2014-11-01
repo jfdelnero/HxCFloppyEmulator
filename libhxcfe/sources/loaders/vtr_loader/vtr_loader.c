@@ -47,6 +47,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -59,12 +60,12 @@
 
 extern unsigned char bit_inverter[];
 
-int VTR_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int VTR_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	FILE *f;
 	vtrucco_picfileformatheader header;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"VTR_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VTR_libIsValidDiskFile");
 
 	if(imgfile)
 	{
@@ -80,12 +81,12 @@ int VTR_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 			if( !strncmp((char*)header.HEADERSIGNATURE,"VTrucco",7))
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"VTR_libIsValidDiskFile : VTrucco file !");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VTR_libIsValidDiskFile : VTrucco file !");
 				return HXCFE_VALIDFILE;
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"VTR_libIsValidDiskFile : non VTrucco file !");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VTR_libIsValidDiskFile : non VTrucco file !");
 				return HXCFE_BADFILE;
 			}
 		}
@@ -94,25 +95,25 @@ int VTR_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	return HXCFE_BADPARAMETER;
 }
 
-int VTR_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int VTR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	vtrucco_picfileformatheader header;
 	unsigned int i,j,k,l,offset,offset2;
-	CYLINDER* currentcylinder;
-	SIDE* currentside;
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SIDE* currentside;
     vtrucco_pictrack* trackoffsetlist;
     unsigned int tracks_base;
     unsigned char * hfetrack;
 	unsigned int nbofblock,tracklen;
 
 
-	floppycontext->hxc_printf(MSG_DEBUG,"VTR_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VTR_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -128,7 +129,7 @@ int VTR_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyiftype=header.floppyinterfacemode;
 
 
-		floppycontext->hxc_printf(MSG_DEBUG,"VTrucco File : %d track, %d side, %d bit/s, %d sectors, mode %d",
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VTrucco File : %d track, %d side, %d bit/s, %d sectors, mode %d",
 			floppydisk->floppyNumberOfTrack,
 			floppydisk->floppyNumberOfSide,
 			floppydisk->floppyBitRate,
@@ -143,8 +144,8 @@ int VTR_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
         tracks_base= 512+( (((sizeof(vtrucco_pictrack)* header.number_of_track)/512)+1)*512);
         fseek( f,tracks_base,SEEK_SET);
 
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-		memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 
 		for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
@@ -168,7 +169,7 @@ int VTR_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			currentcylinder=floppydisk->tracks[i];
 
 
-		/*	floppycontext->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
+		/*	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
 			trackdesc.track_number,
 			trackdesc.side_number,
 			trackdesc.mfmtrackoffset,
@@ -176,8 +177,8 @@ int VTR_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 */
 			for(j=0;j<currentcylinder->number_of_side;j++)
 			{
-				currentcylinder->sides[j]=malloc(sizeof(SIDE));
-				memset(currentcylinder->sides[j],0,sizeof(SIDE));
+				currentcylinder->sides[j]=malloc(sizeof(HXCFE_SIDE));
+				memset(currentcylinder->sides[j],0,sizeof(HXCFE_SIDE));
 				currentside=currentcylinder->sides[j];
 
 				currentside->number_of_sector=floppydisk->floppySectorPerTrack;
@@ -224,13 +225,13 @@ int VTR_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	}
 
 	hxc_fclose(f);
-	floppycontext->hxc_printf(MSG_ERROR,"bad header");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"bad header");
 	return HXCFE_BADFILE;
 }
 
-int VTR_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename);
+int VTR_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 
-int VTR_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int VTR_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="VTR_IMG";
@@ -246,7 +247,7 @@ int VTR_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

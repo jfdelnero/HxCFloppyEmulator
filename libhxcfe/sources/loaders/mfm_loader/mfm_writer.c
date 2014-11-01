@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #include "mfm_loader.h"
@@ -36,7 +37,7 @@
 
 #include "libhxcadaptor.h"
 
-int MFM_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int MFM_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {	
 
 	FILE * hxcmfmfile;
@@ -49,7 +50,7 @@ int MFM_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	unsigned int i,j;
 	unsigned int trackpos;
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Write MFM file %s...",filename);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write MFM file %s...",filename);
 
 	hxcmfmfile=hxc_fopen(filename,"wb");
 	if(hxcmfmfile)
@@ -74,7 +75,7 @@ int MFM_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 		mfmheader.mfmtracklistoffset=sizeof(mfmheader);
 		fwrite(&mfmheader,sizeof(mfmheader),1,hxcmfmfile);
 		
-		floppycontext->hxc_printf(MSG_INFO_1,"%d Tracks, %d side(s)",mfmheader.number_of_track,mfmheader.number_of_side);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d Tracks, %d side(s)",mfmheader.number_of_track,mfmheader.number_of_side);
 
 		offsettrack=(long*) malloc(((mfmheader.number_of_track*mfmheader.number_of_side)+1)*sizeof(long));
 
@@ -101,7 +102,7 @@ int MFM_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 				offsettrack[(i*mfmheader.number_of_side)+j]=(long)trackpos;
 				mfmtrackdesc.mfmtrackoffset=trackpos;
 				
-				floppycontext->hxc_printf(MSG_DEBUG,"Write Track %d:%d [%x] %x bytes",i,j,mfmtrackdesc.mfmtrackoffset,mfmsize);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Write Track %d:%d [%x] %x bytes",i,j,mfmtrackdesc.mfmtrackoffset,mfmsize);
 				trackpos=trackpos+mfmsize;
 				if(trackpos&0x1FF)
 				{
@@ -155,7 +156,7 @@ int MFM_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
 
 		return -1;
 	}

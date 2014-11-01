@@ -48,7 +48,9 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
+#include "./tracks/track_generator.h"
 
 #include "floppy_loader.h"
 #include "floppy_utils.h"
@@ -88,7 +90,7 @@ int sdd_getfloppyconfig(unsigned char * img,unsigned int filesize,unsigned char 
 }
 
 
-int SDDSpeccyDos_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int SDDSpeccyDos_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 	unsigned char buffer[256];
@@ -100,20 +102,20 @@ int SDDSpeccyDos_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgf
 	unsigned char gap3len;
 	unsigned char interleave;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile");
 
 	if(hxc_checkfileext(imgfile,"sdd"))
 	{
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"SDDSpeccyDos_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SDDSpeccyDos_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
 		if(filesize&0xFF)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile : non SDD IMG file - bad file size !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile : non SDD IMG file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
@@ -135,32 +137,32 @@ int SDDSpeccyDos_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgf
 				&interleave)
 				)
 			{
-				floppycontext->hxc_printf(MSG_INFO_1,"SDD file : filesize:%dkB, %d tracks, %d side(s), %d sectors/track",filesize/1024,NumberOfTrack,NumberOfSide,SectorPerTrack);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"SDD file : filesize:%dkB, %d tracks, %d side(s), %d sectors/track",filesize/1024,NumberOfTrack,NumberOfSide,SectorPerTrack);
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile : non SDD file : Wrong boot sector signature!");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile : non SDD file : Wrong boot sector signature!");
 			}
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"SDDSpeccyDos_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SDDSpeccyDos_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile : SDD file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile : SDD file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile : non SDD file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile : non SDD file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-int SDDSpeccyDos_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int SDDSpeccyDos_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
@@ -172,14 +174,14 @@ int SDDSpeccyDos_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 	unsigned char  gap3len,interleave,skew,trackformat,density;
 	unsigned short rpm;
 	unsigned short sectorsize;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -223,11 +225,11 @@ int SDDSpeccyDos_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 				trackformat = IBMFORMAT_SD;
 			}
 
-			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 			rpm=300; // normal rpm
 
-			floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d bitrate:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm,floppydisk->floppyBitRate);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d bitrate:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm,floppydisk->floppyBitRate);
 			trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
@@ -250,7 +252,7 @@ int SDDSpeccyDos_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 
 			free(trackdata);
 
-			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 			hxc_fclose(f);
 			return HXCFE_NOERROR;
 
@@ -259,12 +261,12 @@ int SDDSpeccyDos_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 		return HXCFE_FILECORRUPTED;
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 
-int SDDSpeccyDos_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int SDDSpeccyDos_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="SPECCYDOS_SDD";
@@ -280,7 +282,7 @@ int SDDSpeccyDos_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

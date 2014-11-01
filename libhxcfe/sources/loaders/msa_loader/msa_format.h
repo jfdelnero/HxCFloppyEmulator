@@ -21,12 +21,12 @@ Word  Ending track (0-based)
 
 Individual tracks follow the header in alternating side order, e.g. a double sided disk is stored as:
 
-TRACK 0, SIDE 0
-TRACK 0, SIDE 1
-TRACK 1, SIDE 0
-TRACK 1, SIDE 1
-TRACK 2, SIDE 0
-TRACK 2, SIDE 1
+TRACK 0, HXCFE_SIDE 0
+TRACK 0, HXCFE_SIDE 1
+TRACK 1, HXCFE_SIDE 0
+TRACK 1, HXCFE_SIDE 1
+TRACK 2, HXCFE_SIDE 0
+TRACK 2, HXCFE_SIDE 1
 
 ...and so on. Track blocks are made up as follows:
 

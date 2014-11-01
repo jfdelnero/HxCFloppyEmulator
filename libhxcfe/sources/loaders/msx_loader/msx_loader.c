@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -128,12 +130,12 @@ int msx_imggetfloppyconfig(char * filename,unsigned char * img,unsigned int file
 }
 
 
-int MSX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int MSX_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int conffound,i;
 	int filesize;
-
-	floppycontext->hxc_printf(MSG_DEBUG,"MSX_libIsValidDiskFile");
+	
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MSX_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"img") || hxc_checkfileext(imgfile,"dsk") )
 	{
@@ -141,13 +143,13 @@ int MSX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"MSX_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"MSX_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
 		if(filesize&0x1FF)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"MSX_libIsValidDiskFile : non MSX IMG file - bad file size !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MSX_libIsValidDiskFile : non MSX IMG file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
@@ -164,18 +166,18 @@ int MSX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		if(conffound)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"MSX_libIsValidDiskFile : MSX IMG file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MSX_libIsValidDiskFile : MSX IMG file !");
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"MSX_libIsValidDiskFile : non MSX IMG file - bad file size !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MSX_libIsValidDiskFile : non MSX IMG file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"MSX_libIsValidDiskFile : non MSX IMG file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MSX_libIsValidDiskFile : non MSX IMG file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -184,7 +186,7 @@ int MSX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 
 
-int MSX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int MSX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
@@ -198,14 +200,14 @@ int MSX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned int   bitrate;
 	unsigned char  trackformat,skew;
 
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"MSX_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MSX_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -242,9 +244,9 @@ int MSX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				trackformat=IBMFORMAT_DD;
 				floppydisk->floppyBitRate=bitrate;
 				floppydisk->floppyiftype=MSX2_DD_FLOPPYMODE;
-				floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+				floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
-				floppycontext->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,bitrate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,bitrate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
 
 				skew=0;
 				trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
@@ -269,7 +271,7 @@ int MSX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				}
 
 
-				floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 			}
 
 			hxc_fclose(f);
@@ -282,12 +284,12 @@ int MSX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		}
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 
-int MSX_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int MSX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="MSX_DSK";
@@ -303,7 +305,7 @@ int MSX_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

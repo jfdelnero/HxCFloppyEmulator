@@ -48,7 +48,9 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
+#include "./tracks/track_generator.h"
 
 #include "floppy_loader.h"
 #include "floppy_utils.h"
@@ -61,13 +63,13 @@
 
 #include "dmk_writer.h"
 
-int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int DMK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 	dmk_header dmk_h;
 	FILE *f;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile");
 	if(imgfile)
 	{
 		f=hxc_fopen(imgfile,"r+b");
@@ -85,14 +87,14 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			{
 				if(!dmk_h.track_len)
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad file size !");
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad file size !");
 					return HXCFE_BADFILE;
 				}
 				else
 				{
 					if(((filesize-sizeof(dmk_header))%dmk_h.track_len))
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad file size !");
+						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad file size !");
 						return HXCFE_BADFILE;
 					}
 				}
@@ -114,7 +116,7 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 							)
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad header !");
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad header !");
 					return HXCFE_BADFILE;
 				}
 
@@ -123,21 +125,21 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad file size !");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad file size !");
 				return HXCFE_BADFILE;
 			}
 
-			floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : DMK file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : DMK file !");
 			return HXCFE_VALIDFILE;
 		}
 
 		if(hxc_checkfileext( imgfile,"dmk"))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : DMK file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : DMK file !");
 			return HXCFE_VALIDFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file !");
 		return HXCFE_BADFILE;
 
 	}
@@ -146,7 +148,7 @@ int DMK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 }
 
 
-SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, unsigned char * trackclk,unsigned short * idamoffset,unsigned int tracklen,unsigned long * tracktotalsize, dmk_header *dmkh,int s)
+HXCFE_SIDE* DMKpatchtrack(HXCFE* floppycontext,unsigned char * trackdata, unsigned char * trackclk,unsigned short * idamoffset,unsigned int tracklen,unsigned long * tracktotalsize, dmk_header *dmkh,int s)
 {
 	int i,j,l;
 	unsigned int nbofsector,lastptr,lastdensity,tracksize,bitrate,k;
@@ -156,7 +158,7 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 	unsigned char trackstep;
 
 	int sectorbegin;
-	SIDE* currentside;
+	HXCFE_SIDE* currentside;
 	track_generator tg;
 
 	lastptr=0;
@@ -409,7 +411,7 @@ SIDE* DMKpatchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackdata, 
 	return currentside;
 }
 
-int DMK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int DMK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
@@ -421,17 +423,17 @@ int DMK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned char* trackclk;
 	unsigned short rpm;
 	int numberoftrack,numberofside;
-	CYLINDER* currentcylinder;
-	SIDE* currentside;
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SIDE* currentside;
 	dmk_header dmk_h;
 	unsigned short idam_offset_table[64];
 
-	floppycontext->hxc_printf(MSG_DEBUG,"DMK_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -454,11 +456,11 @@ int DMK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyNumberOfSide=numberofside;
 		floppydisk->floppySectorPerTrack=-1;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 		rpm=300; // normal rpm
 
-		floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
 
 		trackdata=(unsigned char*)malloc(dmk_h.track_len+16);
 		trackclk=(unsigned char*)malloc(dmk_h.track_len+16);
@@ -480,9 +482,9 @@ int DMK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					fread(trackdata,dmk_h.track_len-128,1,f);
 					memset(trackclk,0xFF,dmk_h.track_len-128);
 
-					floppycontext->hxc_printf(MSG_DEBUG,"Track %d Side %d Tracklen %d TTableOffset:0x%.8x",j,i,dmk_h.track_len,file_offset);
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %d Side %d Tracklen %d TTableOffset:0x%.8x",j,i,dmk_h.track_len,file_offset);
 
-					currentside=DMKpatchtrack(floppycontext,trackdata, trackclk,idam_offset_table,dmk_h.track_len-128,&tracktotalsize, &dmk_h,j);
+					currentside=DMKpatchtrack(imgldr_ctx->hxcfe,trackdata, trackclk,idam_offset_table,dmk_h.track_len-128,&tracktotalsize, &dmk_h,j);
 					currentcylinder->sides[i]=currentside;
 					fillindex(-2500,currentside,2500,TRUE,1);
 
@@ -497,18 +499,18 @@ int DMK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		if(trackdata)
 			free(trackdata);
 
-		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 		hxc_fclose(f);
 		return HXCFE_NOERROR;
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 
-int DMK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int DMK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="TRS80_DMK";
@@ -524,7 +526,7 @@ int DMK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

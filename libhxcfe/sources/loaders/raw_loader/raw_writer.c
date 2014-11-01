@@ -28,6 +28,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "raw_loader.h"
@@ -36,7 +38,7 @@
 
 #include "libhxcadaptor.h"
   
-int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {	
 	int i,j,k,l,nbsector;
 	FILE * rawfile;
@@ -44,10 +46,10 @@ int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	char   tmp_str[256];
 	int sectorsize,track_type_id;
 
-	SECTORSEARCH* ss;
-	SECTORCONFIG** sca;
+	HXCFE_SECTORACCESS* ss;
+	HXCFE_SECTCFG** sca;
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Write RAW file %s...",filename);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write RAW file %s...",filename);
 
 	track_type_id=0;
 	log_str=0;
@@ -55,7 +57,7 @@ int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	rawfile=hxc_fopen(filename,"wb");
 	if(rawfile)
 	{
-		ss=hxcfe_initSectorSearch(floppycontext,floppy);
+		ss=hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 		if(ss)
 		{
 			for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
@@ -156,13 +158,13 @@ int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 					}
 
-					floppycontext->hxc_printf(MSG_INFO_1,log_str);
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,log_str);
 					free(log_str);
 
 				}
 			}
 			
-			hxcfe_deinitSectorSearch(ss);
+			hxcfe_deinitSectorAccess(ss);
 		}
 
 		hxc_fclose(rawfile);

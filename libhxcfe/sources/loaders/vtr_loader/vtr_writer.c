@@ -29,8 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
-
 
 #include "vtr_loader.h"
 #include "vtr_format.h"
@@ -39,7 +39,7 @@
 
 extern unsigned char bit_inverter[];
 
-int VTR_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int VTR_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 
 	vtrucco_pictrack * track;
@@ -55,7 +55,7 @@ int VTR_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	unsigned int tracklistlen;
 	unsigned int tracksize;
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Write vtrucco-HFE file %s for the standalone emulator.",filename);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write vtrucco-HFE file %s for the standalone emulator.",filename);
 
 	hxcpicfile=hxc_fopen(filename,"wb");
 
@@ -120,7 +120,7 @@ int VTR_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 				track=(vtrucco_pictrack *)(offsettrack+(i*sizeof(vtrucco_pictrack)));
 				if(mfmsize*2>0xFFFF)
 				{
-					floppycontext->hxc_printf(MSG_ERROR,"Argg!! track %d too long (%x) and shorten to 0xFFFF !",i,mfmsize*2);
+					imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Argg!! track %d too long (%x) and shorten to 0xFFFF !",i,mfmsize*2);
 					mfmsize=0x7FFF;
 				}
 				track->track_len=mfmsize*2;
@@ -215,7 +215,7 @@ int VTR_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
         hxc_fclose(hxcpicfile);
 
-		floppycontext->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
 
 		free(FILEHEADER);
 
@@ -223,7 +223,7 @@ int VTR_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
 
 		return -1;
 	}

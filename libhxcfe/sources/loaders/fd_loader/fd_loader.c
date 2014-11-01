@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -57,34 +59,34 @@
 
 #include "libhxcadaptor.h"
 
-int FD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int FD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"fd_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"fd_libIsValidDiskFile");
 	if( hxc_checkfileext(imgfile,"fd") )
 	{
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"FD_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"FD_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
 		if((filesize==327680) || (filesize==655360))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"FD_libIsValidDiskFile : TO8D FD file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FD_libIsValidDiskFile : TO8D FD file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"FD_libIsValidDiskFile : non TO8D FD file ! - bad file size! ");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FD_libIsValidDiskFile : non TO8D FD file ! - bad file size! ");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"FD_libIsValidDiskFile : non TO8D FD file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FD_libIsValidDiskFile : non TO8D FD file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -93,7 +95,7 @@ int FD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 
 
-int FD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int FD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	unsigned int filesize;
@@ -103,14 +105,14 @@ int FD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,cha
 	unsigned char  gap3len,interleave,trackformat,skew;
 	unsigned short rpm;
 	unsigned short sectorsize;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"fd_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"fd_libLoad_DiskFile %s",imgfile);
 	
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 	
@@ -129,7 +131,7 @@ int FD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,cha
 			floppydisk->floppyNumberOfSide=2;
 		break;
 		default:
-			floppycontext->hxc_printf(MSG_DEBUG,"non TO8D FD file ! - bad file size! ");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"non TO8D FD file ! - bad file size! ");
 			hxc_fclose(f);
 			return HXCFE_BADFILE;
 		break;
@@ -143,10 +145,10 @@ int FD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,cha
 	floppydisk->floppySectorPerTrack=16;
 	floppydisk->floppyBitRate=250000;
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 	rpm=300; // normal rpm
 			
-	floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 				
 	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 			
@@ -169,13 +171,13 @@ int FD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,cha
 
 	free(trackdata);
 
-	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }
 
-int FD_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int FD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="THOMSON_FD";
@@ -191,7 +193,7 @@ int FD_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

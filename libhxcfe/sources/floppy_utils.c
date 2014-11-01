@@ -48,12 +48,15 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
+#include "sector_search.h"
 #include "libhxcfe.h"
 #include "floppy_loader.h"
 
 #include "libhxcadaptor.h"
 
-unsigned long us2index(unsigned long startindex,SIDE * track,unsigned long us,unsigned char fill,char fillorder)
+unsigned long us2index(unsigned long startindex,HXCFE_SIDE * track,unsigned long us,unsigned char fill,char fillorder)
 {
 	uint32_t time,freq;
 
@@ -137,7 +140,7 @@ unsigned long us2index(unsigned long startindex,SIDE * track,unsigned long us,un
 	}
 };
 
-unsigned long fillindex(int startindex,SIDE * track,unsigned long us,unsigned char fill,char fillorder)
+unsigned long fillindex(int startindex,HXCFE_SIDE * track,unsigned long us,unsigned char fill,char fillorder)
 {
 	int start_index;
 
@@ -154,15 +157,15 @@ unsigned long fillindex(int startindex,SIDE * track,unsigned long us,unsigned ch
 	return us2index(start_index,track,us&0xFFFFFF,fill,fillorder);
 }
 
-CYLINDER* allocCylinderEntry(unsigned short rpm,unsigned char number_of_side)
+HXCFE_CYLINDER* allocCylinderEntry(unsigned short rpm,unsigned char number_of_side)
 {
-	CYLINDER* cyl;
+	HXCFE_CYLINDER* cyl;
 
-	cyl=(CYLINDER*)malloc(sizeof(CYLINDER));
+	cyl=(HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
 	cyl->floppyRPM=rpm;
 	cyl->number_of_side=number_of_side;
-	cyl->sides=(SIDE**)malloc(sizeof(SIDE*)*number_of_side);
-	memset(cyl->sides,0,sizeof(SIDE*)*number_of_side);
+	cyl->sides=(HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*number_of_side);
+	memset(cyl->sides,0,sizeof(HXCFE_SIDE*)*number_of_side);
 	return cyl;
 }
 
@@ -178,7 +181,7 @@ void savebuffer(char * name,unsigned char * buffer, int size)
 	}
 }
 
-double GetTrackPeriod(HXCFLOPPYEMULATOR* floppycontext,SIDE * curside)
+double GetTrackPeriod(HXCFE* floppycontext,HXCFE_SIDE * curside)
 {
 	int tracklen,i;
 	double total_period;
@@ -207,20 +210,20 @@ int tracktypelisttoscan[]=
 	UNKNOWN_ENCODING
 };
 
-int floppyTrackTypeIdentification(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp)
+int floppyTrackTypeIdentification(HXCFE* floppycontext,HXCFE_FLOPPY *fp)
 {
 	int i,j,t;
 	int sectnum;
 	unsigned char first_track_encoding;
 	int nb_sectorfound;
-	SECTORSEARCH* ss;
-	SECTORCONFIG** scl;
+	HXCFE_SECTORACCESS* ss;
+	HXCFE_SECTCFG** scl;
 	
 	i = 0;
 	
 	first_track_encoding = UNKNOWN_ENCODING;
 
-	ss = hxcfe_initSectorSearch(floppycontext,fp);
+	ss = hxcfe_initSectorAccess(floppycontext,fp);
 	if(ss)
 	{
 		for(i=0;i<fp->floppyNumberOfTrack;i++)
@@ -258,7 +261,7 @@ int floppyTrackTypeIdentification(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp)
 			}
 		}
 
-		hxcfe_deinitSectorSearch(ss);
+		hxcfe_deinitSectorAccess(ss);
 
 	}
 

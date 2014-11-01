@@ -47,7 +47,7 @@
 #include <string.h>
 #include <stdio.h>
 
-
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 #include "floppy_loader.h"
 #include "floppy_utils.h"
@@ -106,7 +106,7 @@ interfacemode interfacemodelist[]=
 
 
 
-int hxcfe_getFloppyInterfaceModeID(HXCFLOPPYEMULATOR* floppycontext,char * ifmode)
+int hxcfe_getFloppyInterfaceModeID(HXCFE* floppycontext,char * ifmode)
 {
 	int i;
 
@@ -121,7 +121,7 @@ int hxcfe_getFloppyInterfaceModeID(HXCFLOPPYEMULATOR* floppycontext,char * ifmod
 
 }
 
-const char * hxcfe_getFloppyInterfaceModeName(HXCFLOPPYEMULATOR* floppycontext,int ifmodeid)
+const char * hxcfe_getFloppyInterfaceModeName(HXCFE* floppycontext,int ifmodeid)
 {
 	
 	int i;
@@ -140,7 +140,7 @@ const char * hxcfe_getFloppyInterfaceModeName(HXCFLOPPYEMULATOR* floppycontext,i
 
 }
 
-const char * hxcfe_getFloppyInterfaceModeDesc(HXCFLOPPYEMULATOR* floppycontext,int ifmodeid)
+const char * hxcfe_getFloppyInterfaceModeDesc(HXCFE* floppycontext,int ifmodeid)
 {
 	int i;
 
@@ -158,7 +158,7 @@ const char * hxcfe_getFloppyInterfaceModeDesc(HXCFLOPPYEMULATOR* floppycontext,i
 }
 
 
-const char * hxcfe_getTrackEncodingName(HXCFLOPPYEMULATOR* floppycontext,int trackencodingid)
+const char * hxcfe_getTrackEncodingName(HXCFE* floppycontext,int trackencodingid)
 {
 	
 	int i;

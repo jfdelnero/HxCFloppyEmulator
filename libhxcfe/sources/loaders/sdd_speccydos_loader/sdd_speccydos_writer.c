@@ -29,7 +29,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
+
 #include "sdd_speccydos_loader.h"
 #include "sdd_speccydos_writer.h"
 #include "tracks/sector_extractor.h"
@@ -38,25 +41,25 @@
 #include "types.h"
 
 // Main writer function
-int SDDSpeccyDos_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int SDDSpeccyDos_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int i,j,k,id;
 	int nbsector;
 	unsigned int sectorsize;
 
 	FILE * sdddskfile;
-	SECTORSEARCH* ss;
-	SECTORCONFIG* sc;
+	HXCFE_SECTORACCESS* ss;
+	HXCFE_SECTCFG* sc;
 
 	unsigned char * flat_track;
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Write SDD file %s...",filename);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write SDD file %s...",filename);
 
 	sectorsize = 256;
 	nbsector = 0;
 
 	// Get the number of sector per track.
-	ss = hxcfe_initSectorSearch(floppycontext,floppy);
+	ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 	if(ss)
 	{
 		id = 1;
@@ -84,7 +87,7 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 			id++;
 		}while(sc);
 
-		hxcfe_deinitSectorSearch(ss);
+		hxcfe_deinitSectorAccess(ss);
 	}
 
 	if(nbsector)
@@ -97,7 +100,7 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 			sdddskfile = hxc_fopen(filename,"wb");
 			if(sdddskfile)
 			{
-				ss = hxcfe_initSectorSearch(floppycontext,floppy);
+				ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 				if(ss)
 				{
 					for(i = 0; i < (int)floppy->floppyNumberOfSide; i++)
@@ -132,7 +135,7 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 						}
 					}
 
-					hxcfe_deinitSectorSearch(ss);
+					hxcfe_deinitSectorAccess(ss);
 				}
 
 				hxc_fclose(sdddskfile);

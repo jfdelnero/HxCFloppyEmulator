@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 #include "msa_loader.h"
 #include "msa_writer.h"
@@ -138,21 +140,21 @@ unsigned short msapacktrack(unsigned char * inputtrack,int insize,unsigned char 
 }
 
 // Main writer function
-int MSA_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int MSA_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int i,j,k,id;
 	int nbsector;
 
 	FILE * msadskfile;
-	SECTORSEARCH* ss;
-	SECTORCONFIG* sc;
+	HXCFE_SECTORACCESS* ss;
+	HXCFE_SECTCFG* sc;
 
 	unsigned char * flat_track;
 	unsigned char * packed_track;
 	unsigned short outsize;
 	msa_header msah;
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Write MSA file %s...",filename);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write MSA file %s...",filename);
 
 	memset(&msah,0,sizeof(msa_header));
 	msah.sign[0] = 0xE;
@@ -162,7 +164,7 @@ int MSA_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	msah.number_of_track = BIGENDIAN_WORD( (floppy->floppyNumberOfTrack - 1));
 
 	// Get the number of sector per track.
-	ss = hxcfe_initSectorSearch(floppycontext,floppy);
+	ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 	if(ss)
 	{
 		id = 1;
@@ -190,7 +192,7 @@ int MSA_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 			id++;
 		}while(sc);
 
-		hxcfe_deinitSectorSearch(ss);
+		hxcfe_deinitSectorAccess(ss);
 	}
 
 	msah.number_of_sector_per_track = BIGENDIAN_WORD(nbsector);
@@ -209,7 +211,7 @@ int MSA_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 			{
 				fwrite(&msah,sizeof(msa_header),1,msadskfile);
 
-				ss = hxcfe_initSectorSearch(floppycontext,floppy);
+				ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 				if(ss)
 				{
 					for(j = 0; (j < (int)floppy->floppyNumberOfTrack); j++)
@@ -238,7 +240,7 @@ int MSA_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 						}
 					}
 
-					hxcfe_deinitSectorSearch(ss);
+					hxcfe_deinitSectorAccess(ss);
 				}
 
 				hxc_fclose(msadskfile);

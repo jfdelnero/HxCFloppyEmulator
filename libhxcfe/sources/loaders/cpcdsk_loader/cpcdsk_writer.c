@@ -29,12 +29,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "cpcdsk_format.h"
 #include "cpcdsk_loader.h"
-
-#include "tracks/sector_extractor.h"
 
 #include "libhxcadaptor.h"
 
@@ -73,7 +73,7 @@ unsigned char  size_to_code(unsigned long size)
 	}
 }
 
-int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int i,j,k,nbsector;
 	FILE * cpcdskfile;
@@ -88,11 +88,11 @@ int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 	cpcdsk_trackheader cpcdsk_th;
 	cpcdsk_sector cpcdsk_s;
 
-	SECTORSEARCH* ss;
-	SECTORCONFIG** sca;
+	HXCFE_SECTORACCESS* ss;
+	HXCFE_SECTCFG** sca;
 
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Write CPCDSK file %s...",filename);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write CPCDSK file %s...",filename);
 
 	log_str=0;
 	cpcdskfile=hxc_fopen(filename,"wb");
@@ -105,7 +105,7 @@ int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 		fwrite(&disk_info_block,0x100,1,cpcdskfile);
 		track_cnt=0;
 
-		ss=hxcfe_initSectorSearch(floppycontext,floppy);
+		ss=hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 
 		if(ss)
 		{
@@ -200,7 +200,7 @@ int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 							cpcdsk_s.side = sca[k]->head;
 							cpcdsk_s.track = sca[k]->cylinder;
 							cpcdsk_s.sector_size_code = size_to_code(sca[k]->sectorsize);
-							cpcdsk_s.data_lenght = sca[k]->sectorsize;
+							cpcdsk_s.data_length = sca[k]->sectorsize;
 
 							// ID part CRC ERROR ?
 							if(sca[k]->use_alternate_header_crc)
@@ -261,13 +261,13 @@ int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 					disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt]=(ftell(cpcdskfile)-trackinfooffset)/256;
 					track_cnt++;
 
-					floppycontext->hxc_printf(MSG_INFO_1,log_str);
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,log_str);
 					free(log_str);
 
 				}
 			}
 
-			hxcfe_deinitSectorSearch(ss);
+			hxcfe_deinitSectorAccess(ss);
 
 		}
 

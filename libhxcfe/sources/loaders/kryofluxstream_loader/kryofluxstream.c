@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -64,16 +65,16 @@
 #define KF_ICLOCK (KF_MCLOCK / 16)
 */
 
-//#define KFSTREAMDBG 1
+#define KFSTREAMDBG 1
 
-s_track_dump* DecodeKFStreamFile(HXCFLOPPYEMULATOR* floppycontext,FXS * fxs,char * file,float timecoef)
+HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char * file,float timecoef)
 {
 	unsigned long i;
 	s_oob_header		* oob;
 	s_oob_StreamRead	* streamRead;
 	s_oob_StreamEnd		* streamEnd;
 	s_oob_DiskIndex		* diskIndex;
-	s_track_dump		* track_dump;
+	HXCFE_TRKSTREAM		* track_dump;
 
 	s_oob_DiskIndex  tabindex[16];
 

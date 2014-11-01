@@ -47,6 +47,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -54,11 +55,11 @@
 
 #include "bmp_loader.h"
 
-int BMP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename);
+int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 
-int BMP_Disk_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename);
+int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 
-int BMP_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int BMP_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="BMP_IMAGE";
@@ -74,7 +75,7 @@ int BMP_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,
@@ -84,7 +85,7 @@ int BMP_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 			);
 }
 
-int BMP_Disk_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int BMP_Disk_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="BMP_DISK_IMAGE";
@@ -100,7 +101,7 @@ int BMP_Disk_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long inf
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

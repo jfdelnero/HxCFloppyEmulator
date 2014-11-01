@@ -52,6 +52,7 @@
 #include <math.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -63,21 +64,21 @@
 
 #include "libhxcadaptor.h"
 
-//#define SCPDEBUG 1
+#define SCPDEBUG 1
 
-int SCP_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int SCP_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	scp_header scph;
 	FILE *f;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"SCP_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCP_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"scp") )
 	{
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"SCP_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SCP_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
@@ -85,31 +86,31 @@ int SCP_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		if( strncmp((char*)scph.sign,"SCP",3) )
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"SCP_libIsValidDiskFile : Bad file header !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SCP_libIsValidDiskFile : Bad file header !");
 			hxc_fclose(f);
 			return HXCFE_BADFILE;
 		}
 
 		hxc_fclose(f);
-		floppycontext->hxc_printf(MSG_DEBUG,"SCP_libIsValidDiskFile : SCP file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCP_libIsValidDiskFile : SCP file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"SCP_libIsValidDiskFile : non SCP file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCP_libIsValidDiskFile : non SCP file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned long foffset,short * rpm,float timecoef,int phasecorrection,int revolution)
+static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,unsigned long foffset,short * rpm,float timecoef,int phasecorrection,int revolution)
 {
-	SIDE* currentside;
-	int totallenght,i,k,offset;
+	HXCFE_SIDE* currentside;
+	int totallength,i,k,offset;
 
-	s_track_dump *track_dump;
-	FXS * fxs;
+	HXCFE_TRKSTREAM *track_dump;
+	HXCFE_FXSA * fxs;
 	scp_track_header trkh;
 
 	unsigned short * trackbuf;
@@ -134,29 +135,29 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned lon
 
 		if(!strncmp((char*)&trkh.trk_sign,"TRK",3))
 		{
-			totallenght = 0;
+			totallength = 0;
 			for(i=0;i<revolution;i++)
 			{
-				totallenght += trkh.index_position[i].track_lenght;
+				totallength += trkh.index_position[i].track_length;
 
 #ifdef SCPDEBUG
-				floppycontext->hxc_printf(MSG_DEBUG,"Revolution %d : %d words - offset 0x%x - index time : %d",i,trkh.index_position[i].track_lenght,trkh.index_position[i].track_offset,(trkh.index_position[i].index_time));
+				floppycontext->hxc_printf(MSG_DEBUG,"Revolution %d : %d words - offset 0x%x - index time : %d",i,trkh.index_position[i].track_length,trkh.index_position[i].track_offset,(trkh.index_position[i].index_time));
 #endif
 			}
 
 
 #ifdef SCPDEBUG
-			floppycontext->hxc_printf(MSG_DEBUG,"Total track lenght : [0x%X - 0x%X] - %d bytes",foffset + trkh.index_position[0].track_offset,foffset + trkh.index_position[0].track_offset + ((totallenght*sizeof(unsigned short))-1),totallenght*sizeof(unsigned short));
+			floppycontext->hxc_printf(MSG_DEBUG,"Total track length : [0x%X - 0x%X] - %d bytes",foffset + trkh.index_position[0].track_offset,foffset + trkh.index_position[0].track_offset + ((totallength*sizeof(unsigned short))-1),totallength*sizeof(unsigned short));
 #endif
 
-			totallenght++;
+			totallength++;
 
-			if(totallenght)
+			if(totallength)
 			{
-				trackbuf = malloc(totallenght*sizeof(unsigned short));
+				trackbuf = malloc(totallength*sizeof(unsigned short));
 				if(trackbuf)
 				{
-					memset(trackbuf,0,totallenght*sizeof(unsigned short));
+					memset(trackbuf,0,totallength*sizeof(unsigned short));
 
 					offset = 0;
 
@@ -164,23 +165,23 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned lon
 					{
 						fseek(f,foffset + trkh.index_position[i].track_offset,SEEK_SET);
 
-						fread(&trackbuf[offset], (trkh.index_position[i].track_lenght*sizeof(unsigned short)) , 1, f);
+						fread(&trackbuf[offset], (trkh.index_position[i].track_length*sizeof(unsigned short)) , 1, f);
 
 #ifdef SCPDEBUG
 						floppycontext->hxc_printf(MSG_DEBUG,"SCP read stream - offset [0x%X - 0x%X] : %d bytes",
 							 foffset + trkh.index_position[i].track_offset,
-							 (foffset + trkh.index_position[i].track_offset) + ((trkh.index_position[i].track_lenght*sizeof(unsigned short)) - 1 ),
-							(trkh.index_position[i].track_lenght*sizeof(unsigned short)));
+							 (foffset + trkh.index_position[i].track_offset) + ((trkh.index_position[i].track_length*sizeof(unsigned short)) - 1 ),
+							(trkh.index_position[i].track_length*sizeof(unsigned short)));
 #endif
-						offset += (trkh.index_position[i].track_lenght);
+						offset += (trkh.index_position[i].track_length);
 					}
 
-					for(i=0;i<totallenght;i++)
+					for(i=0;i<totallength;i++)
 					{
 						trackbuf[i] = BIGENDIAN_WORD( trackbuf[i] );
 					}
 
-					trackbuf_dword = malloc((totallenght+1)*sizeof(unsigned long));
+					trackbuf_dword = malloc((totallength+1)*sizeof(unsigned long));
 
 					realnumberofpulses = 0;
 					curpulselength = 0;
@@ -190,7 +191,7 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned lon
 					{
 						revonumberofpulses = 0;
 
-						for(j=0;j<trkh.index_position[i].track_lenght;j++)
+						for(j=0;j<trkh.index_position[i].track_length;j++)
 						{
 							curpulselength += trackbuf[k];
 
@@ -209,12 +210,12 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned lon
 							k++;
 						}
 
-						trkh.index_position[i].track_lenght = revonumberofpulses;
+						trkh.index_position[i].track_length = revonumberofpulses;
 
 					}
 
 					// dummy pulse
-					trackbuf_dword[totallenght] = 32000;
+					trackbuf_dword[totallength] = 32000;
 					realnumberofpulses++;
 
 					free(trackbuf);
@@ -231,7 +232,7 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned lon
 
 							for(i=0;i<revolution;i++)
 							{
-								offset += (trkh.index_position[i].track_lenght);
+								offset += (trkh.index_position[i].track_length);
 								hxcfe_FxStream_AddIndex(fxs,track_dump,offset);
 							}
 						}
@@ -260,7 +261,7 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,FILE * f,unsigned lon
 }
 
 
-int SCP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	int mintrack,maxtrack;
@@ -269,9 +270,9 @@ int SCP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned short i,j;
 	int k,l;
 	int doublestep;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 	int found,track,side;
-	SIDE * curside;
+	HXCFE_SIDE * curside;
 	int nbtrack,nbside;
 	float timecoef;
 	int tracklen;
@@ -282,7 +283,7 @@ int SCP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	scp_header scph;
 	unsigned long tracksoffset[83*2];
 
-	floppycontext->hxc_printf(MSG_DEBUG,"SCP_libLoad_DiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCP_libLoad_DiskFile");
 
 	if(imgfile)
 	{
@@ -302,19 +303,19 @@ int SCP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			if(strncmp((char*)&scph.sign,"SCP",3))
 			{
 				hxc_fclose(f);
-				floppycontext->hxc_printf(MSG_DEBUG,"SCP_libLoad_DiskFile : bad Header !");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCP_libLoad_DiskFile : bad Header !");
 				return HXCFE_BADFILE;
 			}
 
-			floppycontext->hxc_printf(MSG_INFO_1,"Loading SCP file...");
-			floppycontext->hxc_printf(MSG_INFO_1,"Version : 0x%.2X",scph.version);
-			floppycontext->hxc_printf(MSG_INFO_1,"Disk Type : 0x%.2X",scph.disk_type);
-			floppycontext->hxc_printf(MSG_INFO_1,"Start track : %d",scph.start_track);
-			floppycontext->hxc_printf(MSG_INFO_1,"End track : %d",scph.end_track);
-			floppycontext->hxc_printf(MSG_INFO_1,"Number of revolution(s) : %d",scph.number_of_revolution);
-			floppycontext->hxc_printf(MSG_INFO_1,"Flags : 0x%.2X",scph.flags);
-			floppycontext->hxc_printf(MSG_INFO_1,"File Checksum : 0x%.4X",scph.file_data_checksum);
-			floppycontext->hxc_printf(MSG_INFO_1,"RFU 1,2,3 : 0x%.2X,0x%.2X,0x%.2X",scph.RFU_0,scph.RFU_1,scph.RFU_2);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Loading SCP file...");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Version : 0x%.2X",scph.version);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Disk Type : 0x%.2X",scph.disk_type);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Start track : %d",scph.start_track);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"End track : %d",scph.end_track);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Number of revolution(s) : %d",scph.number_of_revolution);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Flags : 0x%.2X",scph.flags);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"File Checksum : 0x%.4X",scph.file_data_checksum);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"RFU 1,2,3 : 0x%.2X,0x%.2X,0x%.2X",scph.RFU_0,scph.RFU_1,scph.RFU_2);
 
 			nbside = 1;
 
@@ -335,7 +336,7 @@ int SCP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				nbside = 2;
 			}
 
-			floppycontext->hxc_printf(MSG_DEBUG,"%d track (%d - %d), %d sides (%d - %d)",nbtrack,mintrack,maxtrack,nbside,minside,maxside);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%d track (%d - %d), %d sides (%d - %d)",nbtrack,mintrack,maxtrack,nbside,minside,maxside);
 
 			floppydisk->floppyiftype = GENERIC_SHUGART_DD_FLOPPYMODE;
 			floppydisk->floppyBitRate = VARIABLEBITRATE;
@@ -345,19 +346,21 @@ int SCP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 			fread(tracksoffset,sizeof(tracksoffset),1,f);
 
-			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 			for(j=0;j<floppydisk->floppyNumberOfTrack*doublestep;j=j+doublestep)
 			{
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"Load Track %.3d Side %d",j,i);
+					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | i&1,(floppydisk->floppyNumberOfTrack*doublestep)*2 );
+
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Load Track %.3d Side %d",j,i);
 
 					if(floppydisk->floppyNumberOfSide == 2)
-						curside=decodestream(floppycontext,f,tracksoffset[(j<<1)|(i&1)],&rpm,timecoef,phasecorrection,scph.number_of_revolution);
+						curside=decodestream(imgldr_ctx->hxcfe,f,tracksoffset[(j<<1)|(i&1)],&rpm,timecoef,phasecorrection,scph.number_of_revolution);
 					else
-						curside=decodestream(floppycontext,f,tracksoffset[j],&rpm,timecoef,phasecorrection,scph.number_of_revolution);
+						curside=decodestream(imgldr_ctx->hxcfe,f,tracksoffset[j],&rpm,timecoef,phasecorrection,scph.number_of_revolution);
 
 					if(!floppydisk->tracks[j/doublestep])
 					{
@@ -413,14 +416,14 @@ int SCP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					curside = floppydisk->tracks[j]->sides[i];
 					if(curside && floppydisk->tracks[0]->sides[0])
 					{
-						AdjustTrackPeriod(floppycontext,floppydisk->tracks[0]->sides[0],curside);
+						AdjustTrackPeriod(imgldr_ctx->hxcfe,floppydisk->tracks[0]->sides[0],curside);
 					}
 				}
 			}
 
-			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
-			hxcfe_sanityCheck(floppycontext,floppydisk);
+			hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
 			return HXCFE_NOERROR;
 		}
@@ -429,7 +432,7 @@ int SCP_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	return HXCFE_BADFILE;
 }
 
-int SCP_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int SCP_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 	static const char plug_id[]="SCP_FLUX_STREAM";
 	static const char plug_desc[]="SCP Stream Loader";
@@ -444,7 +447,7 @@ int SCP_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

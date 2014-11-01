@@ -25,7 +25,7 @@
 //
 */
 
-int get_next_A2GCR1_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFIG * sector,int track_offset);
-int get_next_A2GCR2_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFIG * sector,int track_offset);
+int get_next_A2GCR1_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset);
+int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset);
 
-void tg_addAppleSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * currentside);
+void tg_addAppleSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside);

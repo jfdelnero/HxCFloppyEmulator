@@ -25,8 +25,8 @@ typedef struct sect_floppy_
 	sect_track ** tracklist;
 }sect_floppy;
 
-int analysis_and_extract_sector_MFM(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,sect_track * sectors);
-int analysis_and_extract_sector_AMIGAMFM(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,sect_track * sectors);
-int analysis_and_extract_sector_FM(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,sect_track * sectors);
-int analysis_and_extract_sector_EMUIIFM(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,sect_track * sectors);
+int analysis_and_extract_sector_MFM(HXCFE* floppycontext,HXCFE_SIDE * track,sect_track * sectors);
+int analysis_and_extract_sector_AMIGAMFM(HXCFE* floppycontext,HXCFE_SIDE * track,sect_track * sectors);
+int analysis_and_extract_sector_FM(HXCFE* floppycontext,HXCFE_SIDE * track,sect_track * sectors);
+int analysis_and_extract_sector_EMUIIFM(HXCFE* floppycontext,HXCFE_SIDE * track,sect_track * sectors);
 

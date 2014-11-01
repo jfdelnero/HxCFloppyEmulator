@@ -49,6 +49,8 @@
 #include <sys/stat.h>
 #include <time.h>
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -62,17 +64,17 @@
 #include "stdboot3.h"
 
 
-HXCFLOPPYEMULATOR* global_floppycontext;
+HXCFE* global_floppycontext;
 
 
-int AMIGADOSFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int AMIGADOSFSDK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 
 	int pathlen;
 	char * filepath;
 	struct stat staterep;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile %s",imgfile);
 	if(imgfile)
 	{
 		pathlen=strlen(imgfile);
@@ -91,13 +93,13 @@ int AMIGADOSFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgf
 
 					if(strstr( filepath,".amigados" )!=NULL)
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : AMIGADOSFSDK file !");
+						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : AMIGADOSFSDK file !");
 						free(filepath);
 						return HXCFE_VALIDFILE;
 					}
 					else
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : non AMIGADOSFSDK file ! (.amigados missing)");
+						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : non AMIGADOSFSDK file ! (.amigados missing)");
 						free(filepath);
 						return HXCFE_BADFILE;
 					}
@@ -105,11 +107,11 @@ int AMIGADOSFSDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgf
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : non AMIGADOSFSDK file ! (it's not a directory)");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : non AMIGADOSFSDK file ! (it's not a directory)");
 				return HXCFE_BADFILE;
 			}
 		}
-		floppycontext->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : 0 byte string ?");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : 0 byte string ?");
 	}
 	return HXCFE_BADPARAMETER;
 }
@@ -129,7 +131,7 @@ static void adlib_printdebug(char * msg)
 	global_floppycontext->hxc_printf(MSG_DEBUG,"AdfLib Debug: %s",msg);
 }
 
-int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * folder,char * file)
+int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char * file)
 {
 	long hfindfile;
 	filefoundinfo FindFileData;
@@ -281,7 +283,7 @@ int ScanFile(HXCFLOPPYEMULATOR* floppycontext,struct Volume * adfvolume,char * f
 	return 0;
 }
 
-int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int AMIGADOSFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	unsigned int i,j;
 	unsigned int file_offset;
@@ -304,25 +306,25 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 
 //	FILE * debugadf;
 	int rc;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 
 	numberoftrack=80;
 	numberofsectorpertrack=11;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libLoad_DiskFile %s",imgfile);
 
 	hxc_stat(imgfile,&repstate);
 	ts=localtime(&repstate.st_ctime);
 	if(repstate.st_mode&S_IFDIR || !strlen(imgfile) )
 	{
 
-		global_floppycontext=floppycontext;
+		global_floppycontext=imgldr_ctx->hxcfe;
 		adfEnvInitDefault();
 		adfChgEnvProp(PR_EFCT,adlib_printerror);
 		adfChgEnvProp(PR_WFCT,adlib_printwarning);
 		adfChgEnvProp(PR_VFCT,adlib_printdebug);
 
-		floppycontext->hxc_printf(MSG_DEBUG,"ADFLib %s %s",adfGetVersionNumber(), adfGetVersionDate());
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADFLib %s %s",adfGetVersionNumber(), adfGetVersionDate());
 
 		adfdevice = adfCreateMemoryDumpDevice(numberoftrack, 2, numberofsectorpertrack,&flatimg,&flatimgsize);
 		if(adfdevice)
@@ -378,17 +380,17 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 				adfvolume = adfMount(adfdevice, 0, 0);
 				if(adfvolume)
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"adfCreateFlop ok");
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"adfCreateFlop ok");
 					if(adfInstallBootBlock(adfvolume, stdboot3)!=RC_OK)
 					{
-						floppycontext->hxc_printf(MSG_ERROR,"adflib: adfInstallBootBlock error!");
+						imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"adflib: adfInstallBootBlock error!");
 					}
 
 					if(strlen(imgfile))
 					{
-						if(ScanFile(floppycontext,adfvolume,imgfile,"*.*"))
+						if(ScanFile(imgldr_ctx->hxcfe,adfvolume,imgfile,"*.*"))
 						{
-							floppycontext->hxc_printf(MSG_DEBUG,"ScanFile error!");
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ScanFile error!");
 							return HXCFE_INTERNALERROR;
 						}
 					}
@@ -407,19 +409,19 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 				}
 				else
 				{
-					floppycontext->hxc_printf(MSG_ERROR,"adflib: adfMount error!");
+					imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"adflib: adfMount error!");
 					return HXCFE_INTERNALERROR;
 				}
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_ERROR,"adflib: Error while creating the virtual floppy!");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"adflib: Error while creating the virtual floppy!");
 				return HXCFE_INTERNALERROR;
 			}
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"adflib: adfCreateMemoryDumpDevice error!");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"adflib: adfCreateMemoryDumpDevice error!");
 			return HXCFE_INTERNALERROR;
 		}
 
@@ -436,7 +438,7 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 			floppydisk->floppyNumberOfTrack=numberoftrack;
 			floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
 			floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
-			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*(floppydisk->floppyNumberOfTrack+4));
+			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*(floppydisk->floppyNumberOfTrack+4));
 
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 			{
@@ -469,22 +471,22 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flop
 
 			free(flatimg2);
 
-			floppycontext->hxc_printf(MSG_INFO_1,"AMIGADOSFSDK Loader : tracks file successfully loaded and encoded!");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"AMIGADOSFSDK Loader : tracks file successfully loaded and encoded!");
 
 			return HXCFE_NOERROR;
 		}
 
-		floppycontext->hxc_printf(MSG_ERROR,"flatimg==0 !?");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"flatimg==0 !?");
 		return HXCFE_INTERNALERROR;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"not a directory !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"not a directory !");
 		return HXCFE_BADFILE;
 	}
 }
 
-int AMIGADOSFSDK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int AMIGADOSFSDK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="AMIGA_FS";
@@ -500,7 +502,7 @@ int AMIGADOSFSDK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

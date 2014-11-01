@@ -48,7 +48,9 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
+#include "./tracks/track_generator.h"
 
 #include "floppy_loader.h"
 #include "floppy_utils.h"
@@ -79,12 +81,12 @@ typedef struct dim_header_
 
 
 
-int DIM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int DIM_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	FILE * f;
 	dim_header header;
 	
-	floppycontext->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile");
 	
 	if( hxc_checkfileext(imgfile,"dim") )
 	{
@@ -92,7 +94,7 @@ int DIM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"DIM_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"DIM_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 			
@@ -103,25 +105,25 @@ int DIM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		if(	header.id_header==0x4242)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile : DIM file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile : DIM file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile : non DIM file ! Bad header!");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile : non DIM file ! Bad header!");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile : non DIM file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile : non DIM file !");
 		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;
 }
 
-int DIM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int DIM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	
 	FILE * f;
@@ -132,15 +134,15 @@ int DIM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned char  gap3len,interleave;
 	unsigned short rpm;
 	unsigned short sectorsize;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 	dim_header header;
 	
-	floppycontext->hxc_printf(MSG_DEBUG,"DIM_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DIM_libLoad_DiskFile %s",imgfile);
 	
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 	
@@ -180,11 +182,11 @@ int DIM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			interleave=2;
 		}
 					
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 			
 		rpm=300; // normal rpm
 			
-		floppycontext->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d bitrate:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm,floppydisk->floppyBitRate);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d bitrate:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm,floppydisk->floppyBitRate);
 				
 		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 			
@@ -208,7 +210,7 @@ int DIM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		free(trackdata);
 		
-		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 	
 		hxc_fclose(f);
 		return HXCFE_NOERROR;
@@ -219,7 +221,7 @@ int DIM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	return HXCFE_FILECORRUPTED;
 }
 
-int DIM_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int DIM_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ATARIST_DIM";
@@ -235,7 +237,7 @@ int DIM_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

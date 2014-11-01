@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -60,20 +62,20 @@
 #include "libhxcadaptor.h"
 
 
-int FLPPCM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int FLPPCM_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 	FILE *f;
 	flp_header_t flp_header;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"FLPPCM_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FLPPCM_libIsValidDiskFile");
 
 	if(hxc_checkfileext(imgfile,"flp"))
 	{
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"FLPPCM_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"FLPPCM_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
@@ -88,23 +90,23 @@ int FLPPCM_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		if(strncmp((char*)flp_header.hsign,"PCM",sizeof(flp_header.hsign)))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"FLPPCM_libIsValidDiskFile : non FLP file - bad header !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FLPPCM_libIsValidDiskFile : non FLP file - bad header !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"FLPPCM_libIsValidDiskFile : FLP file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FLPPCM_libIsValidDiskFile : FLP file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"FLPPCM_libIsValidDiskFile : non FLP file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FLPPCM_libIsValidDiskFile : non FLP file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-int FLPPCM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int FLPPCM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
@@ -115,15 +117,15 @@ int FLPPCM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 	unsigned short rpm;
 	unsigned short sectorsize;
 	unsigned char trackformat;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 	flp_header_t flp_header;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"FLPPCM_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FLPPCM_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -149,9 +151,9 @@ int FLPPCM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 		gap3len = 0xFF;
 		interleave = 1;
 
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
-		floppycontext->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
 
 		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 
@@ -177,19 +179,19 @@ int FLPPCM_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 
 		free(trackdata);
 
-		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 		hxc_fclose(f);
 		return HXCFE_NOERROR;
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"Bad FLP header");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Bad FLP header");
 	hxc_fclose(f);
 
 	return HXCFE_BADFILE;
 }
 
-int FLPPCM_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int FLPPCM_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 	static const char plug_id[]="FLP_IMG";
 	static const char plug_desc[]="FLP PC Magazine image Loader";
@@ -204,7 +206,7 @@ int FLPPCM_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infot
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -58,12 +60,12 @@
 
 #include "libhxcadaptor.h"
 
-int IMD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int IMD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	FILE *f;
 	char fileheader[5];
 
-	floppycontext->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile");
 
 	if(hxc_checkfileext(imgfile,"imd"))
 	{
@@ -79,33 +81,33 @@ int IMD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		if( !strncmp(fileheader,"IMD ",4))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile : IMD file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile : IMD file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile : non IMD file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile : non IMD file !");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile : non IMD file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile : non IMD file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	char fileheader[5];
 //	MFMTRACKIMG trackdesc;
 	unsigned int i,j,trackcount,headcount;
-	SECTORCONFIG* sectorconfig;
-	CYLINDER* currentcylinder;
-	SIDE* currentside;
+	HXCFE_SECTCFG* sectorconfig;
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SIDE* currentside;
 	int bitrate;
 	unsigned short pregap;
 	unsigned char * sectormap;
@@ -118,14 +120,14 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned short rpm;
 	unsigned char sectordatarecordcode,cdata;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"IMD_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMD_libLoad_DiskFile %s",imgfile);
 
 	pregap = 0;
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -220,7 +222,7 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 
 
-		floppycontext->hxc_printf(MSG_DEBUG,"IMD File : %d track, %d side, %d bit/s, %d sectors, mode %d",
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMD File : %d track, %d side, %d bit/s, %d sectors, mode %d",
 			floppydisk->floppyNumberOfTrack,
 			floppydisk->floppyNumberOfSide,
 			floppydisk->floppyBitRate,
@@ -229,8 +231,8 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		interleave=1;
 		rpm=300;
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-		memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 		fseek(f,0,SEEK_SET);
 		// recherche fin entete / comentaire(s).
@@ -245,8 +247,8 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			if(fread(&trackcfg,sizeof(trackcfg),1,f))
 			{
 
-				sectorconfig=(SECTORCONFIG*)malloc(sizeof(SECTORCONFIG)*trackcfg.number_of_sector);
-				memset(sectorconfig,0,sizeof(SECTORCONFIG)*trackcfg.number_of_sector);
+				sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*trackcfg.number_of_sector);
+				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*trackcfg.number_of_sector);
 
 				// lecture map sector.
 				sectormap=(unsigned char*) malloc(trackcfg.number_of_sector);
@@ -336,7 +338,7 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				}
 
 
-				floppycontext->hxc_printf(MSG_DEBUG,"Track %d Head %d: %d kbits/s, %d %dbytes sectors, encoding :%d",
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %d Head %d: %d kbits/s, %d %dbytes sectors, encoding :%d",
 					trackcfg.physical_cylinder,
 					trackcfg.physical_head&0xF,
 					bitrate/1000,
@@ -440,7 +442,7 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 				for(j=0;j<trackcfg.number_of_sector;j++)
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"Sector:%d %x %x %x",sectorconfig[j].sector,sectorconfig[j].alternate_datamark,sectorconfig[j].alternate_sector_size_id,tracktype);
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sector:%d %x %x %x",sectorconfig[j].sector,sectorconfig[j].alternate_datamark,sectorconfig[j].alternate_sector_size_id,tracktype);
 				}
 
 				free(track_data);
@@ -471,19 +473,19 @@ int IMD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		hxc_fclose(f);
 
-		hxcfe_sanityCheck(floppycontext,floppydisk);
+		hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
 		return HXCFE_NOERROR;
 	}
 
 	hxc_fclose(f);
-	floppycontext->hxc_printf(MSG_ERROR,"bad header");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"bad header");
 	return HXCFE_BADFILE;
 }
 
-int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename);
+int IMD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 
-int IMD_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int IMD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="IMD_IMG";
@@ -499,7 +501,7 @@ int IMD_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

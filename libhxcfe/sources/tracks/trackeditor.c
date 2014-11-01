@@ -47,10 +47,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 #include "trackutils.h"
 
-SIDE * hxcfe_getSide(FLOPPY * fp,int track,int side)
+HXCFE_SIDE * hxcfe_getSide(HXCFE_FLOPPY * fp,int track,int side)
 {
 	if(fp)
 	{
@@ -69,7 +70,7 @@ SIDE * hxcfe_getSide(FLOPPY * fp,int track,int side)
 	return 0;
 }
 
-void hxcfe_freeSide(SIDE * side)
+void hxcfe_freeSide(HXCFE_SIDE * side)
 {
 	if(side)
 	{
@@ -106,7 +107,7 @@ void hxcfe_freeSide(SIDE * side)
 	return;
 }
 
-int hxcfe_shiftTrackData(SIDE * side,long bitoffset)
+int hxcfe_shiftTrackData(HXCFE_SIDE * side,long bitoffset)
 {
 	unsigned char * tmpbuffer;
 	unsigned long i,j;
@@ -158,7 +159,7 @@ int hxcfe_shiftTrackData(SIDE * side,long bitoffset)
 	return HXCFE_BADPARAMETER;
 }
 
-int  hxcfe_getCellState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber)
+int  hxcfe_getCellState(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber)
 {
 	if(currentside && floppycontext)
 	{
@@ -170,7 +171,7 @@ int  hxcfe_getCellState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsi
 	return HXCFE_BADPARAMETER;
 }
 
-int hxcfe_setCellState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber,int state)
+int hxcfe_setCellState(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber,int state)
 {
 	if(currentside && floppycontext)
 	{
@@ -183,7 +184,7 @@ int hxcfe_setCellState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsig
 	return HXCFE_BADPARAMETER;
 }
 
-int  hxcfe_removeCell(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber)
+int  hxcfe_removeCell(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber)
 {
 	unsigned long i;
 
@@ -226,7 +227,7 @@ int  hxcfe_removeCell(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsign
 	return HXCFE_BADPARAMETER;
 }
 
-int  hxcfe_insertCell(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber,int state)
+int  hxcfe_insertCell(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber,int state)
 {
 	unsigned long i,tmpbufsize,oldbufsize;
 
@@ -363,7 +364,7 @@ int  hxcfe_insertCell(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsign
 	return HXCFE_BADPARAMETER;
 }
 
-int  hxcfe_getCellFlakeyState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber)
+int  hxcfe_getCellFlakeyState(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber)
 {
 	if(currentside && floppycontext)
 	{
@@ -375,7 +376,7 @@ int  hxcfe_getCellFlakeyState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentsid
 	return HXCFE_BADPARAMETER;
 }
 
-int hxcfe_setCellFlakeyState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber,int state)
+int hxcfe_setCellFlakeyState(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber,int state)
 {
 	int tmpbufsize;
 
@@ -409,7 +410,7 @@ int hxcfe_setCellFlakeyState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside
 	return HXCFE_BADPARAMETER;
 }
 
-int  hxcfe_getCellIndexState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber)
+int  hxcfe_getCellIndexState(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber)
 {
 	if(currentside && floppycontext)
 	{
@@ -421,7 +422,7 @@ int  hxcfe_getCellIndexState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside
 	return HXCFE_BADPARAMETER;
 }
 
-int hxcfe_setCellIndexState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber,int state)
+int hxcfe_setCellIndexState(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber,int state)
 {
 	if(currentside && floppycontext)
 	{
@@ -434,7 +435,7 @@ int hxcfe_setCellIndexState(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,
 	return HXCFE_BADPARAMETER;
 }
 
-int  hxcfe_getCellBitrate(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber)
+int  hxcfe_getCellBitrate(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber)
 {
 	if(currentside && floppycontext)
 	{
@@ -453,7 +454,7 @@ int  hxcfe_getCellBitrate(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,un
 	return HXCFE_BADPARAMETER;
 }
 
-int hxcfe_setCellBitrate(HXCFLOPPYEMULATOR* floppycontext,SIDE * currentside,unsigned long cellnumber,unsigned long bitrate)
+int hxcfe_setCellBitrate(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber,unsigned long bitrate)
 {
 	int tmpbufsize;
 	unsigned long i;

@@ -26,60 +26,48 @@
 */
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define CALLINGMETHOD
+#define VARIABLEBITRATE                    -1
+#define VARIABLEENCODING                 1
 
-#define VARIABLEBITRATE					-1
-#define VARIABLEENCODING				 1
-
-#define ISOIBM_MFM_ENCODING				0x00
-#define AMIGA_MFM_ENCODING				0x01
-#define ISOIBM_FM_ENCODING				0x02
-#define EMU_FM_ENCODING					0x03
-#define TYCOM_FM_ENCODING				0x04
-#define MEMBRAIN_MFM_ENCODING			0x05
-#define APPLEII_GCR1_ENCODING			0x06
-#define APPLEII_GCR2_ENCODING			0x07
-#define APPLEII_HDDD_A2_GCR1_ENCODING	0x08
-#define APPLEII_HDDD_A2_GCR2_ENCODING	0x09
-#define ARBURGDAT_ENCODING				0x0A
-#define ARBURGSYS_ENCODING				0x0B
-
-#define UNKNOWN_ENCODING				0xFF
-
-typedef struct SIDE_
+typedef struct _HXCFE_SIDE
 {
-	unsigned int    number_of_sector;		// nombre de secteurs sur la piste (informatif/optionnel) -> -1 si inconnu.
-	unsigned char * databuffer;				// buffer data
-	long            bitrate;				// si == a VARIABLEBITRATE utiliser timingbuffer
-	unsigned long * timingbuffer;			// buffer bitrate de la piste.
-	unsigned char * flakybitsbuffer;		// si = 0 pas de flakey/weak bits.
-	unsigned char * indexbuffer;			// buffer signal index 1->activé 0->désactivé
-	unsigned char * track_encoding_buffer;	// buffer code codage
-	
-	
-	unsigned char   track_encoding;
+    unsigned int    number_of_sector;        // Number of sectors per track (if know) -> -1 if unknow.
+    unsigned char * databuffer;              // data buffer.
+    long            bitrate;                 // if equal to VARIABLEBITRATE timingbuffer must be used.
+    unsigned long * timingbuffer;            // bitrate buffer.
+    unsigned char * flakybitsbuffer;         // if equal to zero no flakey/weak bits information.
+    unsigned char * indexbuffer;             // index state buffer signal 1->asserted 0->non asserted.
+    unsigned char * track_encoding_buffer;   // track encoding indication buffer.
+    
+    unsigned char   track_encoding;
 
-	unsigned long   tracklen;				// longueur de  databuffer/timingbuffer/flakybitsbuffer/indexbuffer (nombre d'elements)
-}SIDE;
+    unsigned long   tracklen;                // databuffer/timingbuffer/flakybitsbuffer/indexbuffer length
+}HXCFE_SIDE;
+#define _HXCFE_SIDE_
 
-typedef struct CYLINDER_
+
+
+typedef struct _HXCFE_CYLINDER
 {
-	unsigned short  floppyRPM;				// rotation par minute (informatif/optionnel)
-	unsigned char   number_of_side;
-	SIDE    **      sides;
-}CYLINDER;
+    unsigned short  floppyRPM;                // rotation par minute (informatif/optionnel)
+    unsigned char   number_of_side;
+    HXCFE_SIDE  **  sides;
+}HXCFE_CYLINDER;
+#define _HXCFE_CYLINDER_
 
-typedef struct FLOPPY_
+
+
+typedef struct _HXCFE_FLOPPY
 {
-	unsigned int    floppyBitRate;
+    unsigned int    floppyBitRate;
 
-	unsigned char   floppyNumberOfSide;
-	unsigned short  floppyNumberOfTrack;
-	unsigned short  floppySectorPerTrack;
+    unsigned char   floppyNumberOfSide;
+    unsigned short  floppyNumberOfTrack;
+    unsigned short  floppySectorPerTrack;
 
-	unsigned short  floppyiftype;
-	unsigned char   double_step;
+    unsigned short  floppyiftype;
+    unsigned char   double_step;
 
-	CYLINDER    **  tracks;
-}FLOPPY;
-
+    HXCFE_CYLINDER ** tracks;
+}HXCFE_FLOPPY;
+#define _HXCFE_FLOPPY_

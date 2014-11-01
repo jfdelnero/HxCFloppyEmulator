@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -58,12 +60,12 @@
 
 #include "libhxcadaptor.h"
 
-int GKH_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int GKH_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	gkh_header header;
 	FILE * f;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"GKH_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"GKH_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"gkh"))
 	{
@@ -71,7 +73,7 @@ int GKH_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"GKH_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"GKH_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
@@ -80,11 +82,11 @@ int GKH_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		if(!memcmp(&header.header_tag,"TDDFI",5))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"GKH_libIsValidDiskFile : GKH file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"GKH_libIsValidDiskFile : GKH file !");
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"GKH_libIsValidDiskFile : Bad header !!");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"GKH_libIsValidDiskFile : Bad header !!");
 			return HXCFE_BADFILE;
 		}
 
@@ -92,21 +94,21 @@ int GKH_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"GKH_libIsValidDiskFile : non GKH file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"GKH_libIsValidDiskFile : non GKH file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-int GKH_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int GKH_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
 	unsigned int i,j;
 	unsigned char gap3len,interleave,startid;
 	unsigned short rpm,sectorsize;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 	int data_offset;
 	unsigned char trackformat;
 	unsigned char skew;	
@@ -117,12 +119,12 @@ int GKH_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned char * trackdata;
 	int file_offset;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"GKH_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"GKH_libLoad_DiskFile %s",imgfile);
 	
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 	
@@ -165,8 +167,8 @@ int GKH_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		gap3len=255;
 		interleave=1;
 
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);	
-		floppycontext->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);	
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
 		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 			
@@ -192,18 +194,18 @@ int GKH_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		free(trackdata);
 
-		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		hxc_fclose(f);
 		
 		return HXCFE_NOERROR;	
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"BAD GKH file!");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"BAD GKH file!");
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 
-int GKH_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int GKH_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ENSONIQ_GKH";
@@ -219,7 +221,7 @@ int GKH_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

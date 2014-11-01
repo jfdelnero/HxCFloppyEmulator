@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -319,7 +321,7 @@ JV3SectorsOffsets *JV3_offset(JV3SectorHeader JV3SH[], unsigned int NumberofSide
 	return SO;
 }
 
-int JV3_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int JV3_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int offset1, offset2;
 	unsigned short SectorPerTrack, NumberOfTrack, SectorSize, NumberOfEntries;
@@ -328,7 +330,7 @@ int JV3_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	FILE *f;
 	JV3SectorHeader sh[JV3_HEADER_MAX];
 
-	floppycontext->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"jv3") ||
 		hxc_checkfileext(imgfile,"dsk")
@@ -338,7 +340,7 @@ int JV3_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"JV3_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"JV3_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}					
 		
@@ -351,30 +353,30 @@ int JV3_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			hxc_fclose(f);
 
 			if (total_data == (unsigned int)(offset2 - offset1 -1)) {
-				floppycontext->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile : JV3 file !");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile : JV3 file !");
 				return HXCFE_VALIDFILE;
 			} else {
-				floppycontext->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile : non JV3 file !");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile : non JV3 file !");
 				return HXCFE_BADFILE;
 			}
 		}
 		else
 		{
 			hxc_fclose(f);
-			floppycontext->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile : non JV3 file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile : non JV3 file !");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile : non JV3 file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile : non JV3 file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
@@ -386,20 +388,20 @@ int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned char  trackformat;
 	unsigned short sector_found;
 
-	SECTORCONFIG*	sectorconfig;
-	CYLINDER*		currentcylinder;
+	HXCFE_SECTCFG*	sectorconfig;
+	HXCFE_CYLINDER*		currentcylinder;
 
 	JV3SectorHeader sh[JV3_HEADER_MAX];
 	JV3SectorsOffsets *pOffset, *SectorsOffsets;
 	unsigned char write_protected;
 	unsigned int inc;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"JV3_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JV3_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -426,12 +428,12 @@ int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		floppydisk->floppyBitRate=bitrate;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
-		floppycontext->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,bitrate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,bitrate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
 
-		sectorconfig=(SECTORCONFIG*)malloc(sizeof(SECTORCONFIG)*floppydisk->floppySectorPerTrack);
-		memset(sectorconfig,0,sizeof(SECTORCONFIG)*floppydisk->floppySectorPerTrack);
+		sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
+		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 
 		
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
@@ -443,7 +445,7 @@ int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
 				inc = 0;                                    // used to build track data
-				memset(sectorconfig,0,sizeof(SECTORCONFIG)*floppydisk->floppySectorPerTrack);
+				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 				sector_found=0;
 
 				cur_pos = GetFirstPos(SectorsOffsets,NumberofEntries,j,i);
@@ -516,21 +518,21 @@ int JV3_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		free(sectorconfig);
 		free(SectorsOffsets);
-		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 		hxc_fclose(f);
 
-		hxcfe_sanityCheck(floppycontext,floppydisk);
+		hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
 		return HXCFE_NOERROR;
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 
-int JV3_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int JV3_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="TRS80_JV3";
@@ -546,7 +548,7 @@ int JV3_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

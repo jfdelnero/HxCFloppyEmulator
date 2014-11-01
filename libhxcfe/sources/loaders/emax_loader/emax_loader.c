@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -85,11 +87,11 @@
 #define TOTAL_OS ((OS1_HIGH-OS1_LOW)+(OS2_HIGH-OS2_LOW)+(OS3_HIGH-OS3_LOW))
 
 
-int EMAX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int EMAX_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 	
-	floppycontext->hxc_printf(MSG_DEBUG,"EMAX_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMAX_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"em1") ||
 		hxc_checkfileext(imgfile,"em2") ||
@@ -100,23 +102,23 @@ int EMAX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"EMAX_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"EMAX_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"EMAX_libIsValidDiskFile : Emax file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMAX_libIsValidDiskFile : Emax file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"EMAX_libIsValidDiskFile : non Emax file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMAX_libIsValidDiskFile : non Emax file !");
 		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;
 }
 
-int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int EMAX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	
 	FILE * f,*f2;
@@ -130,18 +132,18 @@ int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,c
 	unsigned short numberofsector;
 	unsigned char  trackformat,skew;
 
-	CYLINDER* currentcylinder;
-	SECTORCONFIG  sectorconfig[10];
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SECTCFG  sectorconfig[10];
     
 	char hdr[EMAXUTIL_HDRLEN+1];
     char fhdr[EMAXUTIL_HDRLEN+1]; 
 
-	floppycontext->hxc_printf(MSG_DEBUG,"EMAX_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMAX_libLoad_DiskFile %s",imgfile);
 	
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 	
@@ -167,7 +169,7 @@ int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,c
 	f2=hxc_fopen(os_filename,"rb");
 	if(f2==NULL) 
 	{	
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open os file %s !",os_filename);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open os file %s !",os_filename);
 	}
 
 	if(filesize!=0)
@@ -187,11 +189,11 @@ int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,c
 			
 			floppydisk->floppyBitRate=250000;
 			floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 			
 			rpm=300; // normal rpm
 			
-			floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 				
 			floppy_data= malloc((SCTR_SIZE * SCTR_TRK) * TRK_CYL * HEADS);
 			memset(floppy_data,0xF6,(SCTR_SIZE * SCTR_TRK) * TRK_CYL * HEADS);
@@ -205,7 +207,7 @@ int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,c
 
 			if (strncmp(fhdr, hdr, EMAXUTIL_HDRLEN)!=0)
 			{
-				floppycontext->hxc_printf(MSG_ERROR,"Wrong version: disk says %s", fhdr);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Wrong version: disk says %s", fhdr);
 				hxc_fclose(f);
 				if(f2)
 					hxc_fclose(f2);
@@ -251,7 +253,7 @@ int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,c
 					file_offset=( (((numberofsector)*512)) * floppydisk->floppyNumberOfSide * j ) +
 						        ( (((numberofsector)*512)) * i );
 
-					memset(sectorconfig,0,sizeof(SECTORCONFIG)*10);
+					memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*10);
 					for(k=0;k<10;k++)
 					{
 						sectorconfig[k].head=i;
@@ -265,13 +267,13 @@ int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,c
 
 					}
 
-					currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,(SECTORCONFIG *)&sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
+					currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,(HXCFE_SECTCFG *)&sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
 				}
 			}
 
 			free(floppy_data);
 			
-			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
 			hxc_fclose(f);
 			if(f2)
@@ -285,14 +287,14 @@ int EMAX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,c
 		return HXCFE_FILECORRUPTED;
 	}
 	
-	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	if(f2)
 		hxc_fclose(f2);
 	return HXCFE_BADFILE;
 }
 
-int EMAX_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int EMAX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="EMAX_EM";
@@ -308,7 +310,7 @@ int EMAX_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotyp
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

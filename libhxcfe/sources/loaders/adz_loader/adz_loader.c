@@ -47,7 +47,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
+#include "./tracks/track_generator.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
@@ -60,9 +63,9 @@
 #define UNPACKBUFFER 128*1024
 
 
-int ADZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int ADZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
-	floppycontext->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile");
 
 	if(hxc_checkfileext(imgfile,"adz") || hxc_checkfileext(imgfile,"gz"))
 	{
@@ -70,24 +73,24 @@ int ADZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		{
 			if( !strstr(hxc_getfilenamebase(imgfile,0),".adf.gz") )
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile : non ADZ file !");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile : non ADZ file !");
 				return HXCFE_BADFILE;
 			}
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile : ADZ file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile : ADZ file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile : non ADZ file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile : non ADZ file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-int ADZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int ADZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	unsigned int filesize;
 	unsigned int i,j;
@@ -98,14 +101,14 @@ int ADZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	gzFile file;
 	int err;
 
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"ADZ_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADZ_libLoad_DiskFile %s",imgfile);
 
 	file = gzopen(imgfile, "rb");
 	if (!file)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"gzopen: Error while reading the file!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"gzopen: Error while reading the file!");
 		return -1;
 	}
 
@@ -124,7 +127,7 @@ int ADZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	if(!flatimg)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Unpack error!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Unpack error!");
 		return HXCFE_BADFILE;
 	}
 
@@ -141,7 +144,7 @@ int ADZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyNumberOfTrack=(filesize/(512*2*floppydisk->floppySectorPerTrack));
 		floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
 		floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*(floppydisk->floppyNumberOfTrack+4));
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*(floppydisk->floppyNumberOfTrack+4));
 
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
@@ -174,14 +177,14 @@ int ADZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyNumberOfTrack += 4;
 
 
-		floppycontext->hxc_printf(MSG_INFO_1,"ADZ Loader : tracks file successfully loaded and encoded!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"ADZ Loader : tracks file successfully loaded and encoded!");
 		return 0;
 	}
 
 	return HXCFE_BADFILE;
 }
 
-int ADZ_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int ADZ_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="AMIGA_ADZ";
@@ -197,7 +200,7 @@ int ADZ_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

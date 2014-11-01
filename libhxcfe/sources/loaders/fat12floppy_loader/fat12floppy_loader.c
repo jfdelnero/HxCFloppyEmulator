@@ -49,6 +49,8 @@
 #include <sys/stat.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -64,12 +66,12 @@
 #include "fatlib.h"
 
 
-int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int FAT12FLOPPY_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int i,found;
 	struct stat staterep;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile");
 	if(imgfile)
 	{
 		memset(&staterep,0,sizeof(struct stat));
@@ -92,12 +94,12 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfi
 
 				if(found)
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : FAT12FLOPPY file ! (Dir , %s)",configlist[i].dirext);
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : FAT12FLOPPY file ! (Dir , %s)",configlist[i].dirext);
 					return HXCFE_VALIDFILE;
 				}
 				else
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : non FAT12FLOPPY file !");
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : non FAT12FLOPPY file !");
 					return HXCFE_BADFILE;
 				}
 			}
@@ -117,19 +119,19 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfi
 
 				if(found)
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : FAT12FLOPPY file ! (File , %s)",configlist[i].dirext);
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : FAT12FLOPPY file ! (File , %s)",configlist[i].dirext);
 					return HXCFE_VALIDFILE;
 				}
 				else
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : non FAT12FLOPPY file !");
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : non FAT12FLOPPY file !");
 					return HXCFE_BADFILE;
 				}
 			}
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : non FAT12FLOPPY file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : non FAT12FLOPPY file !");
 			return HXCFE_BADFILE;
 		}
 	}
@@ -139,7 +141,7 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfi
 
 
 
-int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int FAT12FLOPPY_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	unsigned int i,j;
 	unsigned int file_offset;
@@ -154,7 +156,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 	unsigned char media_type;
 	unsigned char tracktype;
 	FATCONFIG fatconfig;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 	struct stat staterep;
 	int pregap;
 
@@ -162,7 +164,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 
 	fat_boot_sector * fatbs;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libLoad_DiskFile %s",imgfile);
 
 	if(!parameters)
 	{
@@ -199,7 +201,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 			(floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide*configlist[i].sectorsize);
 
 
-	floppycontext->hxc_printf(MSG_INFO_1,"floppy size:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d, bitrate:%d, gap3: %d ",dksize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm,floppydisk->floppyBitRate,gap3len);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"floppy size:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d, bitrate:%d, gap3: %d ",dksize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm,floppydisk->floppyBitRate,gap3len);
 
 	flatimg = (unsigned char*)malloc(dksize);
 	if(flatimg != NULL)
@@ -265,14 +267,14 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 
 		if(dirmode)
 		{
-			if(ScanFileAndAddToFAT(floppycontext,imgfile,"*.*",&flatimg[fatposition],&flatimg[rootposition],&flatimg[dataposition],0,&fatconfig,numberofcluster))
+			if(ScanFileAndAddToFAT(imgldr_ctx->hxcfe,imgfile,"*.*",&flatimg[fatposition],&flatimg[rootposition],&flatimg[dataposition],0,&fatconfig,numberofcluster))
 			{
 				return HXCFE_BADFILE;
 			}
 		}
 		else
 		{
-			if(ScanFileAndAddToFAT(floppycontext,imgfile,0    ,&flatimg[fatposition],&flatimg[rootposition],&flatimg[dataposition],0,&fatconfig,numberofcluster))
+			if(ScanFileAndAddToFAT(imgldr_ctx->hxcfe,imgfile,0    ,&flatimg[fatposition],&flatimg[rootposition],&flatimg[dataposition],0,&fatconfig,numberofcluster))
 			{
 				return HXCFE_BADFILE;
 			}
@@ -301,7 +303,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 	}
 
 	sectorsize=fatconfig.sectorsize;
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
@@ -320,11 +322,11 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flopp
 
 	free(flatimg);
 
-	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 	return HXCFE_NOERROR;
 }
 
-int FAT12FLOPPY_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int FAT12FLOPPY_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="FAT12FLOPPY";
@@ -340,7 +342,7 @@ int FAT12FLOPPY_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long 
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

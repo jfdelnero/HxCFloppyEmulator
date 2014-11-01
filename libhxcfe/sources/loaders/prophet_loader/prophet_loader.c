@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -57,40 +59,40 @@
 
 #include "libhxcadaptor.h"
 
-int Prophet_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int Prophet_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"Prophet_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Prophet_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"img"))
 	{
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Prophet_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Prophet_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
 		if((filesize%((5*1024) + (1*256))) || ( ((filesize/( (5*1024) + (1*256) ) )!=80) && ((filesize/( (5*1024) + (1*256) ) )!=160) ) )
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"Prophet_libIsValidDiskFile : non Prophet file - bad file size !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Prophet_libIsValidDiskFile : non Prophet file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"Prophet_libIsValidDiskFile : Prophet file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Prophet_libIsValidDiskFile : Prophet file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"Prophet_libIsValidDiskFile : non Prophet file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Prophet_libIsValidDiskFile : non Prophet file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-int Prophet_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int Prophet_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
@@ -102,15 +104,15 @@ int Prophet_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 	unsigned short rpm,sectorsize;
 	unsigned short numberofsector;
 	unsigned char trackformat;
-	CYLINDER* currentcylinder;
-	SECTORCONFIG  sectorconfig[6];
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SECTCFG  sectorconfig[6];
 
-	floppycontext->hxc_printf(MSG_DEBUG,"Prophet_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Prophet_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -142,11 +144,11 @@ int Prophet_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 
 			floppydisk->floppyBitRate=250000;
 			floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 			rpm=300; // normal rpm
 
-			floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
 			trackdata=(unsigned char*)malloc(((numberofsector-1)*1024)+512);
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
@@ -158,7 +160,7 @@ int Prophet_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
 
-					memset(sectorconfig,0,sizeof(SECTORCONFIG)*6);
+					memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*6);
 					for(k=0;k<6;k++)
 					{
 						sectorconfig[k].head=i;
@@ -177,13 +179,13 @@ int Prophet_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 					fseek (f , file_offset , SEEK_SET);
 					fread(trackdata,(((numberofsector-1)*1024)+256),1,f);
 
-					currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,(SECTORCONFIG *)&sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,0,2500,-2500);
+					currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,(HXCFE_SECTCFG *)&sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,0,2500,-2500);
 				}
 			}
 
 			free(trackdata);
 
-			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 			hxc_fclose(f);
 			return HXCFE_NOERROR;
@@ -193,12 +195,12 @@ int Prophet_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 		return HXCFE_FILECORRUPTED;
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 
-int Prophet_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int Prophet_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="PROPHET2000";
@@ -214,7 +216,7 @@ int Prophet_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long info
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

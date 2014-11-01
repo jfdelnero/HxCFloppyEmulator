@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -57,12 +59,12 @@
 
 #include "libhxcadaptor.h"
 
-int EDE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int EDE_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	unsigned char header_buffer[512];
 	FILE * f;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile");
 
 	if(	hxc_checkfileext(imgfile,"ede") || 
 		hxc_checkfileext(imgfile,"eda") || 
@@ -72,12 +74,12 @@ int EDE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		)
 	{
 
-		floppycontext->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile : EDE file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile : EDE file !");
 
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"EDE_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"EDE_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
@@ -89,28 +91,28 @@ int EDE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			switch(header_buffer[0x1FF])
 			{
 				case 0x01:
-					floppycontext->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : Mirage (DD) format");
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : Mirage (DD) format");
 				break;
 				case 0x02:
-					floppycontext->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : SQ-80 (DD) format");
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : SQ-80 (DD) format");
 				break;
 				case 0x03:
-					floppycontext->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : EPS (DD) format");
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : EPS (DD) format");
 				break;
 				case 0x04:
-					floppycontext->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : VFX-SD (DD) format");
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : VFX-SD (DD) format");
 				break;
 				case 0xcb:
-					floppycontext->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : ASR-10 HD format");
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : ASR-10 HD format");
 				break;
 				case 0xcc: 
-					floppycontext->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : TS-10/12 HD format");
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : TS-10/12 HD format");
 				break;
 				case 0x07:
-					floppycontext->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : TS-10/12 DD format");
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : TS-10/12 DD format");
 				break;
 				default:
-					floppycontext->hxc_printf(MSG_ERROR,"EDE_libIsValidDiskFile : Unknow format : %x !",header_buffer[0x1FF]);
+					imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"EDE_libIsValidDiskFile : Unknow format : %x !",header_buffer[0x1FF]);
 					return HXCFE_BADFILE;
 				break;
 			}
@@ -118,7 +120,7 @@ int EDE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		else
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"EDE_libIsValidDiskFile : Bad header !!");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"EDE_libIsValidDiskFile : Bad header !!");
 			return HXCFE_BADFILE;
 		}
 
@@ -126,7 +128,7 @@ int EDE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile : non EDE file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile : non EDE file !");
 		return HXCFE_BADFILE;
 	}
 	
@@ -135,7 +137,7 @@ int EDE_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 
 
-int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	
 	FILE * f;
@@ -144,7 +146,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	int k;
 	unsigned char gap3len,interleave;
 	unsigned short rpm,sectorsize;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 	unsigned char header_buffer[512];
 	int header_offset;
 	int blocknum;
@@ -153,16 +155,16 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	int floppy_buffer_index;
 	unsigned char trackformat;
 	unsigned char skew;
-	SECTORCONFIG  * sectorconfig;
+	HXCFE_SECTCFG  * sectorconfig;
 	unsigned int sectorsizelayout[32];
 	unsigned int sectoridlayout[32];
 	
-	floppycontext->hxc_printf(MSG_DEBUG,"EDE_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EDE_libLoad_DiskFile %s",imgfile);
 	
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 	
@@ -185,7 +187,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		{
 
 			case 0x01:
-				floppycontext->hxc_printf(MSG_INFO_0,"Mirage (DD) format");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"Mirage (DD) format");
 				header_offset=0xA0;
 				sectorsize=1024; 
 				floppydisk->floppyBitRate=250000;
@@ -201,7 +203,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				break;
 
 			case 0x02:
-				floppycontext->hxc_printf(MSG_INFO_0,"SQ-80 (DD) format");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"SQ-80 (DD) format");
 				header_offset=0xA0;
 				sectorsize=1024;
 				rpm=290;
@@ -218,7 +220,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				break;
 
 			case 0x03:
-				floppycontext->hxc_printf(MSG_INFO_0,"EPS (DD) format");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"EPS (DD) format");
 				header_offset=0xA0;
 				floppydisk->floppyBitRate=250000;
 				floppydisk->floppyNumberOfTrack=80;
@@ -232,7 +234,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				break;
 
 			case 0x04:
-				floppycontext->hxc_printf(MSG_INFO_0,"VFX-SD (DD) format");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"VFX-SD (DD) format");
 				header_offset=0xA0;
 				floppydisk->floppyBitRate=250000;
 				floppydisk->floppyNumberOfTrack=80;
@@ -245,7 +247,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				break;
 
 			case 0xcb:
-				floppycontext->hxc_printf(MSG_INFO_0,"ASR-10 HD format");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"ASR-10 HD format");
 				floppydisk->floppyiftype=IBMPC_HD_FLOPPYMODE;
 				header_offset=0x60;
 				floppydisk->floppyBitRate=500000;
@@ -261,7 +263,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				break;
 
 			case 0xcc: 
-				floppycontext->hxc_printf(MSG_INFO_0,"TS-10/12 HD format");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"TS-10/12 HD format");
 				floppydisk->floppyiftype=IBMPC_HD_FLOPPYMODE;
 				header_offset=0x60;
 				floppydisk->floppyBitRate=500000;
@@ -277,7 +279,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 			case 0x07:
 				floppydisk->floppyiftype=IBMPC_DD_FLOPPYMODE;
-				floppycontext->hxc_printf(MSG_INFO_0,"TS-10/12 DD format");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"TS-10/12 DD format");
 				header_offset=0xA0;
 				floppydisk->floppyBitRate=250000;
 				floppydisk->floppyNumberOfTrack=80;
@@ -291,7 +293,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				break;
 
 			default:
-				floppycontext->hxc_printf(MSG_ERROR,"Unknow format : %x !",header_buffer[0x1FF]);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Unknow format : %x !",header_buffer[0x1FF]);
 				hxc_fclose(f);
 				return HXCFE_BADFILE;
 			break;
@@ -299,16 +301,16 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		number_of_block=floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide*floppydisk->floppySectorPerTrack;
 
-		sectorconfig=malloc(sizeof(SECTORCONFIG) * floppydisk->floppySectorPerTrack);
-		memset(sectorconfig,0,sizeof(SECTORCONFIG) * floppydisk->floppySectorPerTrack);
+		sectorconfig=malloc(sizeof(HXCFE_SECTCFG) * floppydisk->floppySectorPerTrack);
+		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG) * floppydisk->floppySectorPerTrack);
 
 		floppy_buffer_index=0;
 		blocknum=0;
 		bitmask=0x80;
 
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 		
-		floppycontext->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
@@ -319,7 +321,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
 
-				memset(sectorconfig,0,sizeof(SECTORCONFIG)*floppydisk->floppySectorPerTrack);
+				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
 				{
 					sectorconfig[k].head=i;
@@ -336,12 +338,12 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					{
 						if(!(header_buffer[header_offset]&bitmask))
 						{
-							floppycontext->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d File offset: 0x%.8x",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize,ftell(f));
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d File offset: 0x%.8x",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize,ftell(f));
 							fread(sectorconfig[k].input_data,sectorsize,1,f);
 						}
 						else
 						{
-							floppycontext->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d File offset: ----------",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d File offset: ----------",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize);
 							for(l=0;l<(sectorconfig[k].sectorsize/2);l++)
 							{
 								sectorconfig[k].input_data[(l*2)]=0x6D;
@@ -358,7 +360,7 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					}
 					else
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize);
+						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize);
 						for(l=0;l<(sectorconfig[k].sectorsize/2);l++)
 						{
 							sectorconfig[k].input_data[(l*2)]=0x6D;
@@ -378,18 +380,18 @@ int EDE_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		free(sectorconfig);
 
-		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		hxc_fclose(f);
 		
 		return HXCFE_NOERROR;	
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"BAD EDE file!");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"BAD EDE file!");
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 
-int EDE_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int EDE_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ENSONIQ_EDE";
@@ -405,7 +407,7 @@ int EDE_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

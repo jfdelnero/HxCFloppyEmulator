@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -58,13 +60,13 @@
 
 #include "libhxcadaptor.h"
 
-int ApriDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int ApriDisk_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	unsigned char HeaderBuffer[128];
 	FILE * f;
 	int pathlen;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libIsValidDiskFile");
 
 	if(imgfile)
 	{
@@ -80,12 +82,12 @@ int ApriDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 				if(!strcmp(APRIDISK_HeaderString,(char*)HeaderBuffer))
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk_libIsValidDiskFile : ApriDisk file !");
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libIsValidDiskFile : ApriDisk file !");
 					return HXCFE_VALIDFILE;
 				}
 				else
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk_libIsValidDiskFile : ApriDisk file !");
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libIsValidDiskFile : ApriDisk file !");
 					return HXCFE_BADFILE;
 				}
 			}
@@ -97,15 +99,15 @@ int ApriDisk_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 
 
-int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	apridisk_data_record * data_record;
 	apridisk_compressed_data * compressed_dataitem;
 	unsigned int i,j;
-	SECTORCONFIG* sectorconfig;
-	CYLINDER* currentcylinder;
-	SIDE* currentside;
+	HXCFE_SECTCFG* sectorconfig;
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SIDE* currentside;
 	unsigned short rpm;
 	unsigned char  interleave;
 
@@ -114,12 +116,12 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	unsigned char * file_buffer;
 	int fileindex,newtrack;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -135,7 +137,7 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	// Header check
 	if(strcmp(APRIDISK_HeaderString,(char*)&file_buffer[fileindex]))
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -198,8 +200,8 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 						data_record->item_type=DATA_RECORD_DELETED;
 
 
-						sectorconfig=(SECTORCONFIG*)realloc(sectorconfig,sizeof(SECTORCONFIG)*(number_of_sector+1));
-						memset(&sectorconfig[number_of_sector],0,sizeof(SECTORCONFIG));
+						sectorconfig=(HXCFE_SECTCFG*)realloc(sectorconfig,sizeof(HXCFE_SECTCFG)*(number_of_sector+1));
+						memset(&sectorconfig[number_of_sector],0,sizeof(HXCFE_SECTCFG));
 
 						sectorconfig[number_of_sector].cylinder=i;
 						sectorconfig[number_of_sector].head=j;
@@ -229,7 +231,7 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 							break;
 
 						default:
-							floppycontext->hxc_printf(MSG_ERROR,"Unknow compression id (%.4x) !",data_record->compression);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Unknow compression id (%.4x) !",data_record->compression);
 							sectorconfig[number_of_sector].input_data=0;
 							break;
 						}
@@ -242,7 +244,7 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 						fileindex=fileindex+data_record->data_size;
 					}
 
-					floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk_libLoad_DiskFile: item DATA_RECORD_SECTOR found. Header size=%d, Data size=%d, Sector=%d Head=%d Cylinder=%d",data_record->header_size,data_record->data_size,data_record->sector,data_record->head,data_record->cylinder);
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libLoad_DiskFile: item DATA_RECORD_SECTOR found. Header size=%d, Data size=%d, Sector=%d Head=%d Cylinder=%d",data_record->header_size,data_record->data_size,data_record->sector,data_record->head,data_record->cylinder);
 					break;
 
 				case DATA_RECORD_COMMENT:
@@ -272,15 +274,15 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 
 		if(newtrack)
 		{
-			floppydisk->tracks=(CYLINDER**)realloc(floppydisk->tracks,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			floppydisk->tracks[i]=(CYLINDER*)malloc(sizeof(CYLINDER));
-			memset(floppydisk->tracks[i],0,sizeof(CYLINDER));
+			floppydisk->tracks=(HXCFE_CYLINDER**)realloc(floppydisk->tracks,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			floppydisk->tracks[i]=(HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
+			memset(floppydisk->tracks[i],0,sizeof(HXCFE_CYLINDER));
 		}
 
 		currentcylinder=floppydisk->tracks[floppydisk->floppyNumberOfTrack-1];
 		currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-		currentcylinder->sides=(SIDE**)realloc(currentcylinder->sides,sizeof(SIDE*)*currentcylinder->number_of_side);
-		//memset(currentcylinder->sides,0,sizeof(SIDE*)*currentcylinder->number_of_side);
+		currentcylinder->sides=(HXCFE_SIDE**)realloc(currentcylinder->sides,sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
+		//memset(currentcylinder->sides,0,sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
 
 		currentcylinder->floppyRPM=rpm;
 
@@ -333,7 +335,7 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 				{
 					fileindex=fileindex+(data_record->header_size-sizeof(apridisk_data_record));
 				}
-				floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk_libLoad_DiskFile: item DATA_RECORD_COMMENT found: %s",&file_buffer[fileindex]);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libLoad_DiskFile: item DATA_RECORD_COMMENT found: %s",&file_buffer[fileindex]);
 				fileindex=fileindex+data_record->data_size;
 				break;
 
@@ -342,7 +344,7 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 				{
 					fileindex=fileindex+(data_record->header_size-sizeof(apridisk_data_record));
 				}
-				floppycontext->hxc_printf(MSG_DEBUG,"ApriDisk_libLoad_DiskFile: item DATA_RECORD_CREATOR found: %s",&file_buffer[fileindex]);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libLoad_DiskFile: item DATA_RECORD_CREATOR found: %s",&file_buffer[fileindex]);
 				fileindex=fileindex+data_record->data_size;
 				break;
 
@@ -358,12 +360,12 @@ int ApriDisk_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 
 	free(file_buffer);
 
-	hxcfe_sanityCheck(floppycontext,floppydisk);
+	hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
 	return HXCFE_NOERROR;
 }
 
-int ApriDisk_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int ApriDisk_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="APRIDISK";
@@ -379,7 +381,7 @@ int ApriDisk_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long inf
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

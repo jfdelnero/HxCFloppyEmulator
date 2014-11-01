@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -58,12 +60,12 @@
 
 #include "libhxcadaptor.h"
 
-int CPCDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int CPCDSK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	cpcdsk_fileheader fileheader;
 	FILE * f;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile");
 
 	if(hxc_checkfileext(imgfile,"dsk"))
 	{
@@ -71,7 +73,7 @@ int CPCDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"CPCDSK_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"CPCDSK_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
@@ -83,18 +85,18 @@ int CPCDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			!strncmp(fileheader.headertag,"MV - CPC",8)
 			)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile : CPC Dsk file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile : CPC Dsk file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile : non CPC Dsk file !(bad header)");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile : non CPC Dsk file !(bad header)");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile : non CPC Dsk file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile : non CPC Dsk file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -103,7 +105,7 @@ int CPCDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 
 
-int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
@@ -120,18 +122,18 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 	cpcdsk_sector sector;
 	unsigned char * tracksizetab;
 	unsigned int trackposition;
-	SECTORCONFIG* sectorconfig;
-	CYLINDER** realloctracktable;
+	HXCFE_SECTCFG* sectorconfig;
+	HXCFE_CYLINDER** realloctracktable;
 
-	CYLINDER* currentcylinder;
-	SIDE* currentside;
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SIDE* currentside;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"CPCDSK_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCDSK_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -147,18 +149,18 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 		if( !strncmp(fileheader.headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",16))
 		{
 			extendformat=1;
-			floppycontext->hxc_printf(MSG_INFO_1,"Extended CPC Dsk file\n");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Extended CPC Dsk file\n");
 		}
 		else
 		{
 			if(	!strncmp(fileheader.headertag,"MV - CPC",8))
 			{
 				extendformat=0;
-				floppycontext->hxc_printf(MSG_INFO_1,"CPC Dsk standard file\n");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"CPC Dsk standard file\n");
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_ERROR,"non CPC Dsk : Bad header!\n");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"non CPC Dsk : Bad header!\n");
 				hxc_fclose(f);
 				return HXCFE_BADFILE;
 			}
@@ -183,10 +185,10 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 		sectorconfig=0;
 		interleave=1;
 
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-		memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
-		floppycontext->hxc_printf(MSG_INFO_1,"%d tracks, %d Side(s)\n",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d Side(s)\n",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide);
 
 		trackposition=0x100;
 
@@ -216,9 +218,9 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 						if(trackheader.track_number>=floppydisk->floppyNumberOfTrack)
 						{
 							floppydisk->floppyNumberOfTrack=trackheader.track_number+1;
-							realloctracktable=(CYLINDER**)malloc(sizeof(CYLINDER*)*trackheader.track_number);
-							memset(realloctracktable,0,sizeof(CYLINDER*)*trackheader.track_number);
-							memcpy(realloctracktable,floppydisk->tracks,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+							realloctracktable=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*trackheader.track_number);
+							memset(realloctracktable,0,sizeof(HXCFE_CYLINDER*)*trackheader.track_number);
+							memcpy(realloctracktable,floppydisk->tracks,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 							free(floppydisk->tracks);
 							floppydisk->tracks=realloctracktable;
 						}
@@ -231,12 +233,12 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 						}
 
 
-						floppycontext->hxc_printf(MSG_DEBUG,"\nnumber %d - track:%d side:%d sector:%d sc:%d gap3:%d fill:%x recmode:%d bitrate:%d\n ",i,trackheader.track_number,trackheader.side_number,trackheader.number_of_sector,trackheader.sector_size_code,trackheader.gap3_length,trackheader.filler_byte,trackheader.rec_mode,trackheader.datarate);
+						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"\nnumber %d - track:%d side:%d sector:%d sc:%d gap3:%d fill:%x recmode:%d bitrate:%d\n ",i,trackheader.track_number,trackheader.side_number,trackheader.number_of_sector,trackheader.sector_size_code,trackheader.gap3_length,trackheader.filler_byte,trackheader.rec_mode,trackheader.datarate);
 
 						if(trackheader.number_of_sector)
 						{
-							sectorconfig=(SECTORCONFIG*)malloc(sizeof(SECTORCONFIG)*trackheader.number_of_sector);
-							memset(sectorconfig,0,sizeof(SECTORCONFIG)*trackheader.number_of_sector);
+							sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*trackheader.number_of_sector);
+							memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*trackheader.number_of_sector);
 
 
 							gap3len=trackheader.gap3_length;
@@ -282,7 +284,7 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 								sectorconfig[j].gap3=gap3len;
 								sectorconfig[j].trackencoding=IBMFORMAT_DD;
 
-								floppycontext->hxc_printf(MSG_DEBUG,"%d:%d track id:%d side id:%d sector id %d sector size (id):%d sector size :%d bad crc:%d sreg1:%x sreg2:%x",trackheader.track_number,trackheader.side_number,sector.track,sector.side,sector.sector_id,sectorconfig[j].sectorsize,sector.data_lenght,sectorconfig[j].use_alternate_data_crc,sector.fdc_status_reg1,sector.fdc_status_reg2);
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%d:%d track id:%d side id:%d sector id %d sector size (id):%d sector size :%d bad crc:%d sreg1:%x sreg2:%x",trackheader.track_number,trackheader.side_number,sector.track,sector.side,sector.sector_id,sectorconfig[j].sectorsize,sector.data_length,sectorconfig[j].use_alternate_data_crc,sector.fdc_status_reg1,sector.fdc_status_reg2);
 							}
 						}
 
@@ -331,7 +333,7 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 					else
 					{
 
-						floppycontext->hxc_printf(MSG_DEBUG,"\nnnumber %d - empty !\n ",i);
+						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"\nnnumber %d - empty !\n ",i);
 
 						if(!floppydisk->tracks[t])
 						{
@@ -346,12 +348,12 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 				else
 				{
 
-					floppycontext->hxc_printf(MSG_ERROR,"bad track header !\n");
+					imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"bad track header !\n");
 				}
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_WARNING,"EOF ! Missing track(s) ?\n");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_WARNING,"EOF ! Missing track(s) ?\n");
 			}
 
 		}
@@ -381,19 +383,19 @@ int CPCDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk
 
 		hxc_fclose(f);
 
-		hxcfe_sanityCheck(floppycontext,floppydisk);
+		hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
 		return HXCFE_NOERROR;
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 
-int CPCDSK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename);
+int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 
-int CPCDSK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int CPCDSK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="AMSTRADCPC_DSK";
@@ -409,7 +411,7 @@ int CPCDSK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infot
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

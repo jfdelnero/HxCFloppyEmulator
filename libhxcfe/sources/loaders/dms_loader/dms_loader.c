@@ -47,7 +47,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
@@ -61,18 +64,18 @@
 
 #include "libhxcadaptor.h"
 
-int DMS_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int DMS_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
-	floppycontext->hxc_printf(MSG_DEBUG,"DMS_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMS_libIsValidDiskFile");
 
 	if(hxc_checkfileext(imgfile,"dms"))
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"DMS_libIsValidDiskFile : DMS file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMS_libIsValidDiskFile : DMS file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"DMS_libIsValidDiskFile : non DMS file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMS_libIsValidDiskFile : non DMS file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -81,7 +84,7 @@ int DMS_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 
 
-int DMS_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int DMS_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	unsigned int filesize;
 	unsigned int i,j;
@@ -91,16 +94,16 @@ int DMS_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	HXCFILE * fo;
 	unsigned char* flatimg;
 	int retxdms;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"DMS_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMS_libLoad_DiskFile %s",imgfile);
 
 	// ouverture et decompression du fichier dms
 	fo=HXC_fopen("","");
 	retxdms=Process_File(imgfile,fo, CMD_UNPACK, 0, 0, 0);
 	if(retxdms)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"XDMS: Error %d while reading the file!",retxdms);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"XDMS: Error %d while reading the file!",retxdms);
 		HXC_fclose(fo);
 		return HXCFE_ACCESSERROR;
 	}
@@ -121,7 +124,7 @@ int DMS_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyNumberOfTrack=(filesize/(512*2*11));
 		floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
 		floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*(floppydisk->floppyNumberOfTrack+4));
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*(floppydisk->floppyNumberOfTrack+4));
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
@@ -154,16 +157,16 @@ int DMS_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		floppydisk->floppyNumberOfTrack += 4;
 
-		floppycontext->hxc_printf(MSG_INFO_1,"DMS Loader : tracks file successfully loaded and encoded!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"DMS Loader : tracks file successfully loaded and encoded!");
 		HXC_fclose(fo);
 		return HXCFE_NOERROR;
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"DMS file access error!");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"DMS file access error!");
 	return HXCFE_ACCESSERROR;
 }
 
-int DMS_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int DMS_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="AMIGA_DMS";
@@ -179,7 +182,7 @@ int DMS_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

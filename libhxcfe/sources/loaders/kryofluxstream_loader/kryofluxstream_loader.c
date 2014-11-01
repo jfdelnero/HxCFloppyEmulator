@@ -51,6 +51,7 @@
 #include <math.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -64,7 +65,7 @@
 
 #include "libhxcadaptor.h"
 
-int KryoFluxStream_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int KryoFluxStream_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int found,track,side;
 	struct stat staterep;
@@ -73,7 +74,7 @@ int KryoFluxStream_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 	s_oob_header oob;
 	char filename[512];
 
-	floppycontext->hxc_printf(MSG_DEBUG,"KryoFluxStream_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"KryoFluxStream_libIsValidDiskFile");
 
 	if(imgfile)
 	{
@@ -159,12 +160,12 @@ int KryoFluxStream_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * im
 	return HXCFE_BADPARAMETER;
 }
 
-static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * rpm,float timecoef,int phasecorrection,int bitrate)
+static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,float timecoef,int phasecorrection,int bitrate)
 {
-	SIDE* currentside;
+	HXCFE_SIDE* currentside;
 
-	s_track_dump *track_dump;
-	FXS * fxs;
+	HXCFE_TRKSTREAM *track_dump;
+	HXCFE_FXSA * fxs;
 
 	currentside=0;
 
@@ -198,7 +199,7 @@ static SIDE* decodestream(HXCFLOPPYEMULATOR* floppycontext,char * file,short * r
 	return currentside;
 }
 
-int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	char * filepath;
@@ -209,19 +210,19 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 	short rpm;
 	unsigned short i,j;
 	int doublestep;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 	int len;
 	int found,track,side;
 	struct stat staterep;
 	s_oob_header oob;
-	SIDE * curside;
+	HXCFE_SIDE * curside;
 	int nbtrack,nbside;
 	float timecoef;
 
 	int phasecorrection;
 	int bitrate;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"KryoFluxStream_libLoad_DiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"KryoFluxStream_libLoad_DiskFile");
 
 	if(imgfile)
 	{
@@ -352,7 +353,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 			if(doublestep==2)
 				nbtrack=(nbtrack/doublestep) + 1;
 
-			floppycontext->hxc_printf(MSG_DEBUG,"%d track (%d - %d), %d sides (%d - %d)",nbtrack,mintrack,maxtrack,nbside,minside,maxside);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%d track (%d - %d), %d sides (%d - %d)",nbtrack,mintrack,maxtrack,nbside,minside,maxside);
 
 			floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 			floppydisk->floppyBitRate=VARIABLEBITRATE;
@@ -360,16 +361,18 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 			floppydisk->floppyNumberOfSide=nbside;
 			floppydisk->floppySectorPerTrack=-1;
 
-			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 			for(j=0;j<floppydisk->floppyNumberOfTrack*doublestep;j=j+doublestep)
 			{
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
+					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | i&1,(floppydisk->floppyNumberOfTrack*doublestep)*2 );
+
 					sprintf(filepath,"%s%s%.2d.%d.raw",folder,fname,j,i);
 
-					curside=decodestream(floppycontext,filepath,&rpm,timecoef,phasecorrection,bitrate);
+					curside=decodestream(imgldr_ctx->hxcfe,filepath,&rpm,timecoef,phasecorrection,bitrate);
 
 					if(!floppydisk->tracks[j/doublestep])
 					{
@@ -389,17 +392,17 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 					curside = floppydisk->tracks[j]->sides[i];
 					if(curside && floppydisk->tracks[0]->sides[0])
 					{
-						AdjustTrackPeriod(floppycontext,floppydisk->tracks[0]->sides[0],curside);
+						AdjustTrackPeriod(imgldr_ctx->hxcfe,floppydisk->tracks[0]->sides[0],curside);
 					}
 				}
 			}
 
-			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 			free( folder );
 			free( filepath );
 
-			hxcfe_sanityCheck(floppycontext,floppydisk);
+			hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
 			return HXCFE_NOERROR;
 		}
@@ -410,7 +413,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * fl
 
 
 
-int KryoFluxStream_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int KryoFluxStream_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="KRYOFLUXSTREAM";
@@ -426,7 +429,7 @@ int KryoFluxStream_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned lo
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

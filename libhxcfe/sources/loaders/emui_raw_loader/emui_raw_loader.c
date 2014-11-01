@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -58,11 +60,11 @@
 
 #include "libhxcadaptor.h"
 
-int EMUI_RAW_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int EMUI_RAW_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"EMUI_RAW_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUI_RAW_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"emufd") )
 	{
@@ -73,40 +75,40 @@ int EMUI_RAW_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 					
 		if(filesize==(0xE00*35))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"EMUI_RAW_libIsValidDiskFile : EmuI raw file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUI_RAW_libIsValidDiskFile : EmuI raw file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"EMUI_RAW_libIsValidDiskFile : non EmuI raw file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUI_RAW_libIsValidDiskFile : non EmuI raw file !");
 			return HXCFE_BADFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"EMUI_RAW_libIsValidDiskFile : non EmuI raw file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUI_RAW_libIsValidDiskFile : non EmuI raw file !");
 		return HXCFE_BADFILE;
 	}
 	
 	return HXCFE_BADPARAMETER;
 }
 
-int EMUI_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int EMUI_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	unsigned int i;
-	CYLINDER* currentcylinder;
-	SIDE* currentside;
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SIDE* currentside;
 	unsigned char sector_data[0xE00];
 	int tracknumber,sidenumber;
 	
 	
-	floppycontext->hxc_printf(MSG_DEBUG,"EMUI_RAW_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUI_RAW_libLoad_DiskFile %s",imgfile);
 	
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 	
@@ -116,7 +118,7 @@ int EMUI_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	floppydisk->floppySectorPerTrack=1;
 	floppydisk->floppyiftype=EMU_SHUGART_FLOPPYMODE;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"EmuI File : %d track, %d side, %d bit/s, %d sectors, mode %d",
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EmuI File : %d track, %d side, %d bit/s, %d sectors, mode %d",
 		floppydisk->floppyNumberOfTrack,
 		floppydisk->floppyNumberOfSide,
 		floppydisk->floppyBitRate,
@@ -124,8 +126,8 @@ int EMUI_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		floppydisk->floppyiftype);
 
 
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-	memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 	for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
 	{			
@@ -143,7 +145,7 @@ int EMUI_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		}
 			
 
-		floppycontext->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
 			tracknumber,
 			sidenumber,
 			(0xE00*tracknumber*2)+(sidenumber*0xE00),
@@ -154,14 +156,14 @@ int EMUI_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 			currentside=currentcylinder->sides[sidenumber];					
 			currentside->number_of_sector=floppydisk->floppySectorPerTrack;
 			
-			BuildEmuIITrack(floppycontext,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,1);
+			BuildEmuIITrack(imgldr_ctx->hxcfe,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,1);
 	}			
 	
 	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }
 
-int EMUI_RAW_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int EMUI_RAW_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="EMULATORI";
@@ -177,7 +179,7 @@ int EMUI_RAW_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long inf
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

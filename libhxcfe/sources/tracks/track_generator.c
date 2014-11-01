@@ -47,6 +47,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "internal_libhxcfe.h"
+#include "track_generator.h"
 #include "libhxcfe.h"
 
 #include "apple2.h"
@@ -55,6 +57,8 @@
 #include "floppy_utils.h"
 #include "math.h"
 #include "trackutils.h"
+
+#include "track_types_defs.h"
 
 
 unsigned short MFM_tab[]=
@@ -392,7 +396,7 @@ void getDirectcode(track_generator *tg,unsigned char data,unsigned char * dstbuf
 	return;
 }
 
-int pushTrackCode(track_generator *tg,unsigned char data,unsigned char clock,SIDE * side,unsigned char trackencoding)
+int pushTrackCode(track_generator *tg,unsigned char data,unsigned char clock,HXCFE_SIDE * side,unsigned char trackencoding)
 {
 	
 	switch(trackencoding)
@@ -469,7 +473,7 @@ int BuildCylinder(unsigned char * mfm_buffer,int mfm_size,unsigned char * track_
 
 
 // Fast Bin to MFM converter
-void FastMFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_data,int size)
+void FastMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size)
 {
 	unsigned short i,l;
 	unsigned char  byte;
@@ -500,7 +504,7 @@ void FastMFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_data
 }
 
 // Fast Amiga Bin to MFM converter
-void FastAmigaMFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_data,int size)
+void FastAmigaMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size)
 {
 	unsigned short i,l;
 	unsigned char  byte;
@@ -545,7 +549,7 @@ void FastAmigaMFMgenerator(track_generator *tg,SIDE * side,unsigned char * track
 
 
 // Fast Bin to FM converter
-void FastFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_data,int size)
+void FastFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size)
 {
 	unsigned short j,l;
 	unsigned char  i,k;
@@ -582,7 +586,7 @@ void FastFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_data,
 	return;
 }
 
-void FastMFMFMgenerator(track_generator *tg,SIDE * side,unsigned char * track_data,int size,unsigned char trackencoding)
+void FastMFMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size,unsigned char trackencoding)
 {
 	
 	switch(trackencoding)
@@ -661,7 +665,7 @@ void BuildFMCylinder(unsigned char * buffer,int fmtracksize,unsigned char * buff
 	}
 }
 
-int ISOIBMGetTrackSize(int TRACKTYPE,unsigned int numberofsector,unsigned int sectorsize,unsigned int gap3len,SECTORCONFIG * sectorconfigtab)
+int ISOIBMGetTrackSize(int TRACKTYPE,unsigned int numberofsector,unsigned int sectorsize,unsigned int gap3len,HXCFE_SECTCFG * sectorconfigtab)
 {
 	unsigned int i,j;
 	isoibm_config * configptr;
@@ -741,7 +745,7 @@ unsigned char* compute_interleave_tab(unsigned char interleave,unsigned char ske
 }
 
 
-int searchgap3value(unsigned int numberofsector,SECTORCONFIG * sectorconfigtab)
+int searchgap3value(unsigned int numberofsector,HXCFE_SECTCFG * sectorconfigtab)
 {
 	unsigned int i,j;
 	unsigned char gap3;
@@ -772,7 +776,7 @@ void tg_initTrackEncoder(track_generator *tg)
 	tg->mfm_last_bit=0xFFFF;
 }
 
-unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackencoding,unsigned int bitrate,unsigned int numberofsector,SECTORCONFIG * sectorconfigtab,unsigned int pregaplen,unsigned long * track_period)
+unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackencoding,unsigned int bitrate,unsigned int numberofsector,HXCFE_SECTCFG * sectorconfigtab,unsigned int pregaplen,unsigned long * track_period)
 {
 	unsigned int i,j;
 	unsigned long tck_period;
@@ -875,17 +879,17 @@ unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackenco
 	return total_track_size;
 }
 
-SIDE * tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short numberofsector,unsigned char trackencoding,unsigned int bitrate,SECTORCONFIG * sectorconfigtab,unsigned short pregap)
+HXCFE_SIDE * tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short numberofsector,unsigned char trackencoding,unsigned int bitrate,HXCFE_SECTCFG * sectorconfigtab,unsigned short pregap)
 {
-	SIDE * currentside;
+	HXCFE_SIDE * currentside;
 	int variable_param,tracklen;
 	unsigned int i;
 	unsigned long   startindex;
 
 	startindex=tg->last_bit_offset/8;
 
-	currentside=(SIDE*)malloc(sizeof(SIDE));
-	memset(currentside,0,sizeof(SIDE));
+	currentside=(HXCFE_SIDE*)malloc(sizeof(HXCFE_SIDE));
+	memset(currentside,0,sizeof(HXCFE_SIDE));
 				
 	currentside->number_of_sector=numberofsector;
 
@@ -1043,7 +1047,7 @@ SIDE * tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short n
 	return currentside;
 }
 
-void tg_addISOSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * currentside)
+void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
 
 	unsigned short  i;
@@ -1350,7 +1354,7 @@ void tg_addISOSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE
 //  Data CRC (even B0)
 //  Data ( even and odd) 
 
-void tg_addAmigaSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * currentside)
+void tg_addAmigaSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
 
 	unsigned short  i;
@@ -1478,7 +1482,7 @@ void tg_addAmigaSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SI
 	currentside->number_of_sector++;
 }
 
-void tg_addSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * currentside)
+void tg_addSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
 
 	switch(sectorconfig->trackencoding)
@@ -1507,7 +1511,7 @@ void tg_addSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * 
 	}
 }
 
-void tg_completeTrack(track_generator *tg, SIDE * currentside,unsigned char trackencoding)
+void tg_completeTrack(track_generator *tg, HXCFE_SIDE * currentside,unsigned char trackencoding)
 {
 	int tracklen,trackoffset;
 	unsigned char oldval,c;
@@ -1573,7 +1577,7 @@ void tg_completeTrack(track_generator *tg, SIDE * currentside,unsigned char trac
 	}
 }
 
-SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorconfigtab,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned short pregap,int indexlen,int indexpos)
+HXCFE_SIDE * tg_generateTrackEx(unsigned short number_of_sector,HXCFE_SECTCFG * sectorconfigtab,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned short pregap,int indexlen,int indexpos)
 {
 	unsigned short i;
 	unsigned long tracksize;
@@ -1584,7 +1588,7 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 	int gap3;
 
 	track_generator tg;
-	SIDE * currentside;
+	HXCFE_SIDE * currentside;
 
 	// compute the sectors interleaving.
 	interleavetab = compute_interleave_tab(interleave,skew,number_of_sector);
@@ -1599,7 +1603,7 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 	else
 		wanted_trackperiod=(100000*60)/300;
 	
-	// compute the adjustable gap3 lenght
+	// compute the adjustable gap3 length
 	// how many gap3 we need to compute ?
 	gap3tocompute=0;
 	for(i=0;i<number_of_sector;i++)
@@ -1639,7 +1643,7 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 		gap3period=wanted_trackperiod-(track_period+indexperiod);
 		gap3period=gap3period/gap3tocompute;
 
-		// set the right gap3 lenght according to the sector bitrate
+		// set the right gap3 length according to the sector bitrate
 		for(i=0;i<number_of_sector;i++)
 		{
 			// if gap3 not set...
@@ -1677,7 +1681,7 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 	// recompute the track size with the new gap settings.
 	tracksize=tg_computeMinTrackSize(&tg,trackencoding,bitrate,number_of_sector,sectorconfigtab,pregap,&track_period);
 
-	// adjust the track lenght to get the right rpm.
+	// adjust the track length to get the right rpm.
 	if(wanted_trackperiod>track_period)
 	{
 		tracksize=tracksize+((((wanted_trackperiod-track_period) * ((bitrate/4)/4) )/(12500/4)));
@@ -1717,14 +1721,14 @@ SIDE * tg_generateTrackEx(unsigned short number_of_sector,SECTORCONFIG * sectorc
 
 
 
-SIDE * tg_generateTrack(unsigned char * sectors_data,unsigned short sector_size,unsigned short number_of_sector,unsigned char track,unsigned char side,unsigned char sectorid,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned char gap3,unsigned short pregap, int indexlen,int indexpos)
+HXCFE_SIDE * tg_generateTrack(unsigned char * sectors_data,unsigned short sector_size,unsigned short number_of_sector,unsigned char track,unsigned char side,unsigned char sectorid,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned char gap3,unsigned short pregap, int indexlen,int indexpos)
 {
 	unsigned short i;
-	SIDE * currentside;
-	SECTORCONFIG * sectorconfigtab;
+	HXCFE_SIDE * currentside;
+	HXCFE_SECTCFG * sectorconfigtab;
 
-	sectorconfigtab=malloc(sizeof(SECTORCONFIG)*number_of_sector);
-	memset(sectorconfigtab,0,sizeof(SECTORCONFIG)*number_of_sector);
+	sectorconfigtab=malloc(sizeof(HXCFE_SECTCFG)*number_of_sector);
+	memset(sectorconfigtab,0,sizeof(HXCFE_SECTCFG)*number_of_sector);
 
 	for(i=0;i<number_of_sector;i++)
 	{
@@ -1745,14 +1749,14 @@ SIDE * tg_generateTrack(unsigned char * sectors_data,unsigned short sector_size,
 	return currentside;
 }
 
-SIDE * tg_alloctrack(unsigned int bitrate,unsigned char trackencoding,unsigned short rpm,unsigned int tracksize,int indexlen,int indexpos,unsigned char buffertoalloc)
+HXCFE_SIDE * tg_alloctrack(unsigned int bitrate,unsigned char trackencoding,unsigned short rpm,unsigned int tracksize,int indexlen,int indexpos,unsigned char buffertoalloc)
 {
-	SIDE * currentside;
+	HXCFE_SIDE * currentside;
 	unsigned int tracklen;
 	unsigned int i;
 
-	currentside=(SIDE*)malloc(sizeof(SIDE));
-	memset(currentside,0,sizeof(SIDE));
+	currentside=(HXCFE_SIDE*)malloc(sizeof(HXCFE_SIDE));
+	memset(currentside,0,sizeof(HXCFE_SIDE));
 				
 	currentside->number_of_sector=0;
 

@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -62,12 +64,12 @@
 
 //#define PASTI_DBG 1
 
-int STX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int STX_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	FILE * f;
 	pasti_fileheader * fileheader;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"STX_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STX_libIsValidDiskFile");
 
 	if(hxc_checkfileext(imgfile,"stx"))
 	{
@@ -83,19 +85,19 @@ int STX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		if(strcmp(fileheader->headertag,"RSY"))
 		{
 			free(fileheader);
-			floppycontext->hxc_printf(MSG_DEBUG,"STX_libIsValidDiskFile : non STX file (bad header)!");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STX_libIsValidDiskFile : non STX file (bad header)!");
 			return HXCFE_BADFILE;
 		}
 		else
 		{
 			free(fileheader);
-			floppycontext->hxc_printf(MSG_DEBUG,"STX_libIsValidDiskFile : STX file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STX_libIsValidDiskFile : STX file !");
 			return HXCFE_VALIDFILE;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"STX_libIsValidDiskFile : non STX file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STX_libIsValidDiskFile : non STX file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -125,7 +127,7 @@ unsigned char getchunk(unsigned char c)
 ////////////////////////////////////////////////////
 // Scan a track and make an sectors position list
 ////////////////////////////////////////////////////
-unsigned int * getSectorHeaderOffset(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackbuffer,int buffersize,int numsector)
+unsigned int * getSectorHeaderOffset(HXCFE* floppycontext,unsigned char * trackbuffer,int buffersize,int numsector)
 {
 	unsigned int * offsetlist;
 	int i,t;
@@ -163,7 +165,7 @@ unsigned int * getSectorHeaderOffset(HXCFLOPPYEMULATOR* floppycontext,unsigned c
 // This function try to found index/data mark and path them.
 // Used on tracks without sector.
 /////////////////////////////////////////////////////////////////
-void patchtrack(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackbuffer,unsigned char * trackclock,int buffersize,int tracknum)
+void patchtrack(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * trackclock,int buffersize,int tracknum)
 {
 	int lastindex;
 	int i,doff;
@@ -223,7 +225,7 @@ unsigned char patchbyte(unsigned char * buffer,unsigned char * maskbuffer,int bu
 /////////////////////////////////////////////////////////////////
 // This function patch the track with a sector header and data
 /////////////////////////////////////////////////////////////////
-void addsector(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackbuffer,unsigned char * trackclock,unsigned char * trackmask,unsigned int buffersize,unsigned int * offsetlist,int numsector,SECTORCONFIG * sector)
+void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * trackclock,unsigned char * trackmask,unsigned int buffersize,unsigned int * offsetlist,int numsector,HXCFE_SECTCFG * sector)
 {
 	unsigned int lastindex,shoff,doff;
 	unsigned int i;
@@ -392,7 +394,7 @@ void addsector(HXCFLOPPYEMULATOR* floppycontext,unsigned char * trackbuffer,unsi
 		);
 }
 
-int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
@@ -409,7 +411,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	pasti_fileheader * fileheader;
 	pasti_trackheader trackheader;
 	pasti_sector * sector;
-	SECTORCONFIG* sectorconfig;
+	HXCFE_SECTCFG* sectorconfig;
 	int * sectorheader_index;
 	unsigned int * sectordata_index;
 	unsigned char * temptrack;
@@ -430,8 +432,8 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	int weaksectoroffset;
 	unsigned char * weaksectorbuffer;
 
-	CYLINDER* currentcylinder;
-	SIDE* currentside;
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SIDE* currentside;
 
 #ifdef PASTI_DBG
 	char tempstring[512];
@@ -439,16 +441,16 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 #endif
 
 
-	floppycontext->hxc_printf(MSG_DEBUG,"STX_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STX_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
-	floppycontext->hxc_printf(MSG_DEBUG,"Image Info: %s\n",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Image Info: %s\n",imgfile);
 
 	fileheader=(pasti_fileheader*)malloc(sizeof(pasti_fileheader));
 	fread( fileheader, sizeof(pasti_fileheader), 1, f );
@@ -513,15 +515,15 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		}
 		sprintf(&tempstring[strlen(tempstring)],"\n");
 
-		floppycontext->hxc_printf(MSG_DEBUG,"%s",tempstring);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%s",tempstring);
 
-		floppycontext->hxc_printf(MSG_DEBUG,"Number of track : %d (%d), Number of side: %d\n",numberoftrack,numberoftrackperside,numberofside);
-		floppycontext->hxc_printf(MSG_DEBUG,"Tracks :");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Number of track : %d (%d), Number of side: %d\n",numberoftrack,numberoftrackperside,numberofside);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Tracks :");
 #endif
 		if(floppydisk->floppyNumberOfTrack)
 		{
-			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 			for(i=0;i<numberoftrack;i++)
 			{
@@ -531,24 +533,24 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 				///////////////////////////// debug ///////////////////////////////
 #ifdef PASTI_DBG
-				floppycontext->hxc_printf(MSG_DEBUG,"");
-				floppycontext->hxc_printf(MSG_DEBUG,"T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T");
-				floppycontext->hxc_printf(MSG_DEBUG,"T-T-T-T-T-T-T-T- Track Header %.3d Offset 0x%.8X -T-T-T-T-T-T-T-T-T-T",i,trackheaderpos);
-				floppycontext->hxc_printf(MSG_DEBUG,"T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T");
-				floppycontext->hxc_printf(MSG_DEBUG,"Track %.3d",trackheader.track_code&0x7F);
-				floppycontext->hxc_printf(MSG_DEBUG,"Side %.3d" ,trackheader.track_code>>7);
-				floppycontext->hxc_printf(MSG_DEBUG,"Number of Sector %.3d" ,trackheader.numberofsector);
-				floppycontext->hxc_printf(MSG_DEBUG,"Track Size : 0x%.8X" ,trackheader.tracksize);
-				floppycontext->hxc_printf(MSG_DEBUG,"Track Flags: 0x%.4X" ,trackheader.flags);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T-T-T-T-T-T-T-T- Track Header %.3d Offset 0x%.8X -T-T-T-T-T-T-T-T-T-T",i,trackheaderpos);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T-T");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %.3d",trackheader.track_code&0x7F);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Side %.3d" ,trackheader.track_code>>7);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Number of Sector %.3d" ,trackheader.numberofsector);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track Size : 0x%.8X" ,trackheader.tracksize);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track Flags: 0x%.4X" ,trackheader.flags);
 
-				floppycontext->hxc_printf(MSG_DEBUG,"Track header:");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track header:");
 				tempstring[0]=0;
 				for(debug_i=0;debug_i<sizeof(trackheader);debug_i++)
 				{
 					sprintf(&tempstring[strlen(tempstring)],"%.2X ",*(((unsigned char*)&trackheader)+debug_i));
 				}
-				floppycontext->hxc_printf(MSG_DEBUG,"%s",tempstring);
-				floppycontext->hxc_printf(MSG_DEBUG,"---------------------------------------------");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%s",tempstring);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"---------------------------------------------");
 #endif
 				///////////////////////////// debug ///////////////////////////////
 
@@ -573,14 +575,14 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					// -> encodage "standard"
 					case 0:
 #ifdef PASTI_DBG
-						floppycontext->hxc_printf(MSG_DEBUG,"READ SECTOR track");
+						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"READ SECTOR track");
 #endif
 						if(trackheader.numberofsector)
 						{
 							sector=malloc(sizeof(pasti_sector)*trackheader.numberofsector);
 							memset(sector,0,sizeof(pasti_sector)*trackheader.numberofsector);
-							sectorconfig=(SECTORCONFIG *) malloc(sizeof(SECTORCONFIG)* trackheader.numberofsector);
-							memset(sectorconfig,0,sizeof(SECTORCONFIG)* trackheader.numberofsector);
+							sectorconfig=(HXCFE_SECTCFG *) malloc(sizeof(HXCFE_SECTCFG)* trackheader.numberofsector);
+							memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)* trackheader.numberofsector);
 
 							// lecture de l'ensemble des descripteurs de secteur
 							for(j=0;j<(trackheader.numberofsector);j++)
@@ -613,18 +615,18 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 									///////////////////////////// debug ///////////////////////////////
 #ifdef PASTI_DBG
-									floppycontext->hxc_printf(MSG_DEBUG,"------ Sector Header %.3d - Offset 0x%.8X ------",j,sectorlistoffset + (sizeof(pasti_sector)*j));
-									floppycontext->hxc_printf(MSG_DEBUG,"Track: %.3d",sector[j].track_num);
-									floppycontext->hxc_printf(MSG_DEBUG,"Side: %.3d" ,sector[j].side_num);
-									floppycontext->hxc_printf(MSG_DEBUG,"Sector ID: %.3d" ,sector[j].sector_num);
-									floppycontext->hxc_printf(MSG_DEBUG,"Sector size: 0x%.2X (%d bytes)" ,sector[j].sector_size,128<<sector[j].sector_size);
-									floppycontext->hxc_printf(MSG_DEBUG,"Sector Flags: 0x%.2X" ,sector[j].sector_flags);
-									floppycontext->hxc_printf(MSG_DEBUG,"Sector FDC Status: 0x%.2X" ,sector[j].FDC_status);
-									floppycontext->hxc_printf(MSG_DEBUG,"Sector Header CRC : 0x%.4X" ,sector[j].header_crc);
-									floppycontext->hxc_printf(MSG_DEBUG,"Sector data Offset: 0x%.8X" ,sector[j].sector_pos);
-									floppycontext->hxc_printf(MSG_DEBUG,"Index-Sector Timing: %d" ,sector[j].sector_pos_timing);
-									floppycontext->hxc_printf(MSG_DEBUG,"Read Sector Timing: %d" ,sector[j].sector_speed_timing);
-									floppycontext->hxc_printf(MSG_DEBUG,"Sector header:");
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"------ Sector Header %.3d - Offset 0x%.8X ------",j,sectorlistoffset + (sizeof(pasti_sector)*j));
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track: %.3d",sector[j].track_num);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Side: %.3d" ,sector[j].side_num);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sector ID: %.3d" ,sector[j].sector_num);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sector size: 0x%.2X (%d bytes)" ,sector[j].sector_size,128<<sector[j].sector_size);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sector Flags: 0x%.2X" ,sector[j].sector_flags);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sector FDC Status: 0x%.2X" ,sector[j].FDC_status);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sector Header CRC : 0x%.4X" ,sector[j].header_crc);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sector data Offset: 0x%.8X" ,sector[j].sector_pos);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Index-Sector Timing: %d" ,sector[j].sector_pos_timing);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Read Sector Timing: %d" ,sector[j].sector_speed_timing);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sector header:");
 									tempstring[0]=0;
 									for(debug_i=0;debug_i<sizeof(pasti_sector);debug_i++)
 									{
@@ -634,8 +636,8 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 											sprintf(&tempstring[strlen(tempstring)]," ");
 										}
 									}
-									floppycontext->hxc_printf(MSG_DEBUG,"%s",tempstring);
-									floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%s",tempstring);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"------------------------------------------------");
 #endif
 									///////////////////////////// debug ///////////////////////////////
 
@@ -666,12 +668,12 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 									///////////////////////////// debug ///////////////////////////////
 #ifdef PASTI_DBG
-									floppycontext->hxc_printf(MSG_DEBUG,"------ Sector %.3d : No Header / unprotected -------",j);
-									floppycontext->hxc_printf(MSG_DEBUG,"Track: %.3d",sectorconfig[j].cylinder);
-									floppycontext->hxc_printf(MSG_DEBUG,"Side: %.3d" ,sectorconfig[j].head);
-									floppycontext->hxc_printf(MSG_DEBUG,"Sector ID: %.3d" ,sectorconfig[j].sector);
-									floppycontext->hxc_printf(MSG_DEBUG,"Sector size: %d bytes" ,sectorconfig[j].sectorsize);
-									floppycontext->hxc_printf(MSG_DEBUG,"---------------------------------------------------");
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"------ Sector %.3d : No Header / unprotected -------",j);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track: %.3d",sectorconfig[j].cylinder);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Side: %.3d" ,sectorconfig[j].head);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sector ID: %.3d" ,sectorconfig[j].sector);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sector size: %d bytes" ,sectorconfig[j].sectorsize);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"---------------------------------------------------");
 #endif
 									///////////////////////////// debug ///////////////////////////////
 
@@ -688,7 +690,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						{
 							fread( &temp_val, sizeof(unsigned short), 1, f );
 #ifdef PASTI_DBG
-							floppycontext->hxc_printf(MSG_DEBUG,"Unknow value %x",temp_val);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Unknow value %x",temp_val);
 #endif
 						}
 
@@ -696,7 +698,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						for(j=0;j<trackheader.numberofsector;j++)
 						{
 #ifdef PASTI_DBG
-							floppycontext->hxc_printf(MSG_DEBUG,"Reading Sector data %d at: 0x%.8X",j,trackpos + sector[j].sector_pos);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Reading Sector data %d at: 0x%.8X",j,trackpos + sector[j].sector_pos);
 #endif
 							fseek(f,trackpos + sector[j].sector_pos,SEEK_SET);
 							sectorconfig[j].input_data=malloc(sectorconfig[j].sectorsize);
@@ -708,18 +710,18 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						// Allocation track
 						if(!floppydisk->tracks[tracknumber])
 						{
-							floppydisk->tracks[tracknumber]=(CYLINDER*)malloc(sizeof(CYLINDER));
-							memset(floppydisk->tracks[tracknumber],0,sizeof(CYLINDER));
+							floppydisk->tracks[tracknumber]=(HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
+							memset(floppydisk->tracks[tracknumber],0,sizeof(HXCFE_CYLINDER));
 							floppydisk->tracks[tracknumber]->floppyRPM=300;
 							currentcylinder=floppydisk->tracks[tracknumber];
 							currentcylinder->number_of_side=0;
 
-							currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*2);
-							memset(currentcylinder->sides,0,sizeof(SIDE*)*2);
+							currentcylinder->sides=(HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*2);
+							memset(currentcylinder->sides,0,sizeof(HXCFE_SIDE*)*2);
 						}
 
 						currentcylinder->number_of_side++;
-						currentcylinder->sides[sidenumber]=tg_generateTrackEx(trackheader.numberofsector,(SECTORCONFIG *)sectorconfig,interleave,0,floppydisk->floppyBitRate,300,trackformat,0,2500,0);
+						currentcylinder->sides[sidenumber]=tg_generateTrackEx(trackheader.numberofsector,(HXCFE_SECTCFG *)sectorconfig,interleave,0,floppydisk->floppyBitRate,300,trackformat,0,2500,0);
 						currentside=currentcylinder->sides[sidenumber];
 
 						currentside->flakybitsbuffer=tg_allocsubtrack_char(currentside->tracklen,0x00);
@@ -738,9 +740,9 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							{
 								///////////////////////////// debug ///////////////////////////////
 #ifdef PASTI_DBG
-								floppycontext->hxc_printf(MSG_DEBUG,"----------- Flakey Buffer - Sector %.3d -----------",j);
-								floppycontext->hxc_printf(MSG_DEBUG,"File Offset: 0x%.8X Size : %d Bytes",weaksectoroffset,128<<sector[j].sector_size);
-								floppycontext->hxc_printf(MSG_DEBUG,"---------------------------------------------------");
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"----------- Flakey Buffer - Sector %.3d -----------",j);
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"File Offset: 0x%.8X Size : %d Bytes",weaksectoroffset,128<<sector[j].sector_size);
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"---------------------------------------------------");
 #endif
 								///////////////////////////// debug ///////////////////////////////
 
@@ -794,7 +796,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					///////////////////////////////////////////////////////////////////////////////////////////////
 					case 1:
 
-						floppycontext->hxc_printf(MSG_DEBUG,"READTRACK track");
+						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"READTRACK track");
 
 						// allocation buffers secteurs
 						if(trackheader.numberofsector)
@@ -802,8 +804,8 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							sector=malloc(sizeof(pasti_sector)*trackheader.numberofsector);
 							memset(sector,0,sizeof(pasti_sector)*trackheader.numberofsector);
 
-							sectorconfig=(SECTORCONFIG *) malloc(sizeof(SECTORCONFIG)* trackheader.numberofsector);
-							memset(sectorconfig,0,sizeof(SECTORCONFIG)* trackheader.numberofsector);
+							sectorconfig=(HXCFE_SECTCFG *) malloc(sizeof(HXCFE_SECTCFG)* trackheader.numberofsector);
+							memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)* trackheader.numberofsector);
 						}
 						else
 						{
@@ -860,24 +862,24 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 									sprintf(&tempstring[strlen(tempstring)]," ");
 								}
 							}
-							floppycontext->hxc_printf(MSG_DEBUG,"%s",tempstring);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%s",tempstring);
 #endif
 							///////////////////////////// debug ///////////////////////////////
 
 							///////////////////////////// debug ///////////////////////////////
 #ifdef PASTI_DBG
-							floppycontext->hxc_printf(MSG_DEBUG,"------ Sector Header %.3d - Offset 0x%.8X ------",j,sectorlistoffset + (sizeof(pasti_sector)*j));
-							floppycontext->hxc_printf(MSG_DEBUG,"Track: %.3d",sector[j].track_num);
-							floppycontext->hxc_printf(MSG_DEBUG,"Side: %.3d" ,sector[j].side_num);
-							floppycontext->hxc_printf(MSG_DEBUG,"Sector ID: %.3d" ,sector[j].sector_num);
-							floppycontext->hxc_printf(MSG_DEBUG,"Sector size: 0x%.2X (%d bytes)" ,sector[j].sector_size,128<<sector[j].sector_size);
-							floppycontext->hxc_printf(MSG_DEBUG,"Sector Flags: 0x%.2X" ,sector[j].sector_flags);
-							floppycontext->hxc_printf(MSG_DEBUG,"Sector FDC Status: 0x%.2X" ,sector[j].FDC_status);
-							floppycontext->hxc_printf(MSG_DEBUG,"Sector Header CRC : 0x%.4X" ,sector[j].header_crc);
-							floppycontext->hxc_printf(MSG_DEBUG,"Sector data Offset: 0x%.8X" ,sector[j].sector_pos);
-							floppycontext->hxc_printf(MSG_DEBUG,"Index-Sector Timing: %d" ,sector[j].sector_pos_timing);
-							floppycontext->hxc_printf(MSG_DEBUG,"Read Sector Timing: %d" ,sector[j].sector_speed_timing);
-							floppycontext->hxc_printf(MSG_DEBUG,"Sector header:");
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"------ Sector Header %.3d - Offset 0x%.8X ------",j,sectorlistoffset + (sizeof(pasti_sector)*j));
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track: %.3d",sector[j].track_num);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Side: %.3d" ,sector[j].side_num);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sector ID: %.3d" ,sector[j].sector_num);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sector size: 0x%.2X (%d bytes)" ,sector[j].sector_size,128<<sector[j].sector_size);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sector Flags: 0x%.2X" ,sector[j].sector_flags);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sector FDC Status: 0x%.2X" ,sector[j].FDC_status);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sector Header CRC : 0x%.4X" ,sector[j].header_crc);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sector data Offset: 0x%.8X" ,sector[j].sector_pos);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Index-Sector Timing: %d" ,sector[j].sector_pos_timing);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Read Sector Timing: %d" ,sector[j].sector_speed_timing);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sector header:");
 							tempstring[0]=0;
 							for(debug_i=0;debug_i<sizeof(pasti_sector);debug_i++)
 							{
@@ -887,8 +889,8 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 									sprintf(&tempstring[strlen(tempstring)]," ");
 								}
 							}
-							floppycontext->hxc_printf(MSG_DEBUG,"%s",tempstring);
-							floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%s",tempstring);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"------------------------------------------------");
 #endif
 									///////////////////////////// debug ///////////////////////////////
 
@@ -903,7 +905,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						{
 							fread( &index_sync, sizeof(unsigned short), 1, f );
 #ifdef PASTI_DBG
-							floppycontext->hxc_printf(MSG_DEBUG,"Index sync pos %x",index_sync);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Index sync pos %x",index_sync);
 #endif
 						}
 						fread( &temp_val, sizeof(unsigned short), 1, f );
@@ -911,7 +913,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 						tracklen=temp_val;
 
 #ifdef PASTI_DBG
-						floppycontext->hxc_printf(MSG_DEBUG,"READTRACK datas size %x",tracklen);
+						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"READTRACK datas size %x",tracklen);
 #endif
 
 						temptrack=(unsigned char*)malloc(tracklen);
@@ -924,7 +926,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 							memset(tempclock,0xFF,tracklen);
 							memset(tempmask,0xFF,tracklen);
 
-							sectordata_index=getSectorHeaderOffset(floppycontext,temptrack,tracklen,trackheader.numberofsector);
+							sectordata_index=getSectorHeaderOffset(imgldr_ctx->hxcfe,temptrack,tracklen,trackheader.numberofsector);
 
 							lastindex=0;
 
@@ -944,11 +946,11 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 							for(j=0;j<trackheader.numberofsector;j++)
 							{
-								addsector(floppycontext,temptrack,tempclock,tempmask,tracklen,sectordata_index,j,sectorconfig);
+								addsector(imgldr_ctx->hxcfe,temptrack,tempclock,tempmask,tracklen,sectordata_index,j,sectorconfig);
 							}
 
 							if(!trackheader.numberofsector)
-								patchtrack(floppycontext,temptrack,tempclock,tracklen,i);
+								patchtrack(imgldr_ctx->hxcfe,temptrack,tempclock,tracklen,i);
 
 							// Second pass : CRC recalculation
 							for(j=0;j<(unsigned int)(trackheader.numberofsector);j++)
@@ -987,7 +989,7 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 										}
 
-										floppycontext->hxc_printf(MSG_DEBUG," - sectordata_index[0x%.4X]=0x%.8X , data crc result: %.2X%.2X  %d bytes",j,sectorconfig[j].startsectorindex,CRC16_High,CRC16_Low,sectorconfig[j].sectorsize+4);
+										imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG," - sectordata_index[0x%.4X]=0x%.8X , data crc result: %.2X%.2X  %d bytes",j,sectorconfig[j].startsectorindex,CRC16_High,CRC16_Low,sectorconfig[j].sectorsize+4);
 									}
 								}
 							}
@@ -1023,9 +1025,9 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 								{
 									///////////////////////////// debug ///////////////////////////////
 	#ifdef PASTI_DBG
-									floppycontext->hxc_printf(MSG_DEBUG,"----------- Flakey Buffer - Sector %.3d -----------",j);
-									floppycontext->hxc_printf(MSG_DEBUG,"File Offset: 0x%.8X Size : %d Bytes",weaksectoroffset,128<<sector[j].sector_size);
-									floppycontext->hxc_printf(MSG_DEBUG,"---------------------------------------------------");
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"----------- Flakey Buffer - Sector %.3d -----------",j);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"File Offset: 0x%.8X Size : %d Bytes",weaksectoroffset,128<<sector[j].sector_size);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"---------------------------------------------------");
 	#endif
 									///////////////////////////// debug ///////////////////////////////
 
@@ -1131,15 +1133,15 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			}
 			else
 			{
-				floppydisk->tracks[i]=(CYLINDER*)malloc(sizeof(CYLINDER));
-				memset(floppydisk->tracks[i],0,sizeof(CYLINDER));
+				floppydisk->tracks[i]=(HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
+				memset(floppydisk->tracks[i],0,sizeof(HXCFE_CYLINDER));
 				floppydisk->tracks[i]->floppyRPM=300;
 
 				currentcylinder=floppydisk->tracks[i];
 				currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
 
-				currentcylinder->sides=(SIDE**)malloc(sizeof(SIDE*)*2);
-				memset(currentcylinder->sides,0,sizeof(SIDE*)*2);
+				currentcylinder->sides=(HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*2);
+				memset(currentcylinder->sides,0,sizeof(HXCFE_SIDE*)*2);
 				floppydisk->tracks[i]->sides[0]=tg_generateTrack(0,512,0 ,(unsigned char)i,(unsigned char)0,1,interleave,(unsigned char)(0),250000,currentcylinder->floppyRPM,ISOFORMAT_DD,255,0,2500| NO_SECTOR_UNDER_INDEX,0);
 
 				if(floppydisk->tracks[i]->number_of_side==2)
@@ -1152,23 +1154,23 @@ int STX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		free(fileheader);
 
-		hxcfe_sanityCheck(floppycontext,floppydisk);
+		hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
-		floppycontext->hxc_printf(MSG_INFO_0,"Pasti image loading done!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"Pasti image loading done!");
 
 		return HXCFE_NOERROR;
 	}
 	else
 	{
 		free(fileheader);
-		floppycontext->hxc_printf(MSG_ERROR,"non STX/pasti image (bad header)",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"non STX/pasti image (bad header)",imgfile);
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_INTERNALERROR;
 }
 
-int STX_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int STX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ATARIST_STX";
@@ -1184,7 +1186,7 @@ int STX_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

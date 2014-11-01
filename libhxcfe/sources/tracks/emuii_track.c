@@ -47,6 +47,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "crc.h"
@@ -90,7 +92,7 @@ unsigned char bit_inverter_emuii[]=
         0x1F,0x9F,0x5F,0xDF,0x3F,0xBF,0x7F,0xFF
 };
 
-int BuildEmuIITrack(HXCFLOPPYEMULATOR* floppycontext,unsigned int tracknumber,unsigned int sidenumber,unsigned char* datain,unsigned char * fmdata,unsigned long * fmsizebuffer,int trackformat)
+int BuildEmuIITrack(HXCFE* floppycontext,unsigned int tracknumber,unsigned int sidenumber,unsigned char* datain,unsigned char * fmdata,unsigned long * fmsizebuffer,int trackformat)
 {
 	unsigned int i,j,k;
 	unsigned char CRC16_High;

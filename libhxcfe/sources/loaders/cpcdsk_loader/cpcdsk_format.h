@@ -59,7 +59,7 @@ typedef struct cpcdsk_sector_
  unsigned char   sector_size_code;
  unsigned char	 fdc_status_reg1;
  unsigned char	 fdc_status_reg2;
- unsigned short  data_lenght;
+ unsigned short  data_length;
 }cpcdsk_sector;
 
 #pragma pack()
