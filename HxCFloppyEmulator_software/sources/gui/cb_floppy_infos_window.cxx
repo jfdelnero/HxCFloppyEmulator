@@ -267,7 +267,7 @@ void update_graph(floppy_infos_window * w)
 					w->buf->append((char*)tempstr);
 					sprintf(tempstr,"Track format : %s\n",hxcfe_getTrackEncodingName(guicontext->hxcfe, hxcfe_getTrackEncoding(guicontext->loadedfloppy,track,side) ) );
 					w->buf->append((char*)tempstr);
-					sprintf(tempstr,"Track len : %d cells\n",hxcfe_getTrackLength(guicontext->loadedfloppy,track,side));
+					sprintf(tempstr,"Track len : %ul cells\n",hxcfe_getTrackLength(guicontext->loadedfloppy,track,side));
 					w->buf->append((char*)tempstr);
 					sprintf(tempstr,"Number of side : %d\n",hxcfe_getTrackNumberOfSide(guicontext->loadedfloppy,track));
 					w->buf->append((char*)tempstr);
