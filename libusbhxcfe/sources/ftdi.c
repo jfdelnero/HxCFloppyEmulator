@@ -27,6 +27,7 @@
 
 //#define DEBUGMODE 1
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #ifdef WIN32
@@ -270,7 +271,7 @@ int createlistenerthread(RDTHREADFUNCTION thread,int priority,ftdi_context ftdih
 
 #endif
 
-int ftdi_load_lib (HXCFLOPPYEMULATOR* floppycontext)
+int ftdi_load_lib (HXCFE* floppycontext)
 {
 
 #ifdef DEBUGMODE

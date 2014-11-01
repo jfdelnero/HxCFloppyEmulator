@@ -48,7 +48,7 @@
 #include <string.h>
 #include <math.h>
 
-
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #include "variablebitrate.h"
@@ -195,7 +195,7 @@ unsigned long * realloc_time_buffer(unsigned long * buffer,unsigned long numbero
 	return ptr;
 }
 
-int GetNewTrackRevolution(HXCFLOPPYEMULATOR* floppycontext,unsigned char * index_h0,unsigned char * datah0,unsigned int lendatah0,unsigned char * datah1,unsigned int lendatah1,unsigned char * randomh0,unsigned char * randomh1,long fixedbitrateh0,unsigned long * timeh0,long fixedbitrateh1,unsigned long * timeh1,unsigned char ** finalbuffer_param,unsigned char ** randomfinalbuffer_param,unsigned char readysignal,unsigned char diskchange,unsigned char writeprotect,unsigned char amigaready,unsigned char selectconfig)
+int GetNewTrackRevolution(HXCFE* floppycontext,unsigned char * index_h0,unsigned char * datah0,unsigned int lendatah0,unsigned char * datah1,unsigned int lendatah1,unsigned char * randomh0,unsigned char * randomh1,long fixedbitrateh0,unsigned long * timeh0,long fixedbitrateh1,unsigned long * timeh1,unsigned char ** finalbuffer_param,unsigned char ** randomfinalbuffer_param,unsigned char readysignal,unsigned char diskchange,unsigned char writeprotect,unsigned char amigaready,unsigned char selectconfig)
 {
 	unsigned long i,k,j;
 	unsigned long head0speed;

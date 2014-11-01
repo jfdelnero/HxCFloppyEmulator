@@ -43,6 +43,9 @@
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define NEXTPACKET_EVENT 0x1
 #define TRACKCHANGED_EVENT 0x2
@@ -102,14 +105,18 @@ typedef struct USBHXCFE_
 
 }USBHXCFE;
 
-USBHXCFE * libusbhxcfe_init(HXCFLOPPYEMULATOR* floppycontext);
-int libusbhxcfe_deInit(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif);
-int libusbhxcfe_loadFloppy(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,FLOPPY * floppydisk);
-int libusbhxcfe_ejectFloppy(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif);
-int libusbhxcfe_getStats(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,USBStats* stats,int clear);
-int libusbhxcfe_setInterfaceMode(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,int interfacemode,int doublestep,int drive);
-int libusbhxcfe_setUSBBufferSize(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,int size);
-int libusbhxcfe_getInterfaceMode(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif);
-int libusbhxcfe_getDoubleStep(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif);
-int libusbhxcfe_getDrive(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif);
-int libusbhxcfe_getCurTrack(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif);
+USBHXCFE * libusbhxcfe_init(HXCFE* floppycontext);
+int libusbhxcfe_deInit(HXCFE* floppycontext,USBHXCFE * hwif);
+int libusbhxcfe_loadFloppy(HXCFE* floppycontext,USBHXCFE * hwif,HXCFE_FLOPPY * floppydisk);
+int libusbhxcfe_ejectFloppy(HXCFE* floppycontext,USBHXCFE * hwif);
+int libusbhxcfe_getStats(HXCFE* floppycontext,USBHXCFE * hwif,USBStats* stats,int clear);
+int libusbhxcfe_setInterfaceMode(HXCFE* floppycontext,USBHXCFE * hwif,int interfacemode,int doublestep,int drive);
+int libusbhxcfe_setUSBBufferSize(HXCFE* floppycontext,USBHXCFE * hwif,int size);
+int libusbhxcfe_getInterfaceMode(HXCFE* floppycontext,USBHXCFE * hwif);
+int libusbhxcfe_getDoubleStep(HXCFE* floppycontext,USBHXCFE * hwif);
+int libusbhxcfe_getDrive(HXCFE* floppycontext,USBHXCFE * hwif);
+int libusbhxcfe_getCurTrack(HXCFE* floppycontext,USBHXCFE * hwif);
+
+#ifdef __cplusplus
+}
+#endif
