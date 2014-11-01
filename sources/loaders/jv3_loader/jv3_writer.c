@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "jv3_format.h"
@@ -52,7 +54,7 @@ unsigned char jv3flags(unsigned char num,unsigned char mask)
 }
 
 // Main writer function
-int JV3_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int JV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {	
 	int i,j,k;
 	int nbsector;
@@ -64,15 +66,15 @@ int JV3_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	JV3SectorHeader sectorheader[JV3_HEADER_MAX*2];  //JV3 allows for 2 sets of headers + data
 	unsigned char * sectordata[JV3_HEADER_MAX*2];
 	unsigned int sectorsizes[JV3_HEADER_MAX*2];
-	SECTORSEARCH* ss;
-	SECTORCONFIG** sca;
+	HXCFE_SECTORACCESS* ss;
+	HXCFE_SECTCFG** sca;
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Write JV3 file %s...",filename);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write JV3 file %s...",filename);
 
 	jv3dskfile = hxc_fopen(filename,"wb");
 	if(jv3dskfile)
 	{
-		ss = hxcfe_initSectorSearch(floppycontext,floppy);		
+		ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);		
 		if(ss)
 		{
 			//Create sectorheader fields
@@ -161,7 +163,7 @@ int JV3_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 				free(sectordata[i]);
 			}
 
-			hxcfe_deinitSectorSearch(ss);
+			hxcfe_deinitSectorAccess(ss);
 		}
 
 		hxc_fclose(jv3dskfile);

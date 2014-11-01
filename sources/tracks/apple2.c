@@ -48,6 +48,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "trackutils.h"
@@ -181,7 +183,7 @@ unsigned long DeNybbleSector6and2(unsigned char * dataOut,unsigned char * input_
 #define EXTRACTSECTORINFO 0x04
 #define ENDOFSECTOR 0x05
 
-int get_next_A2GCR2_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFIG * sector,int track_offset)
+int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {
 	int bit_offset,old_bit_offset;
 	int sector_size;
@@ -192,7 +194,7 @@ int get_next_A2GCR2_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORC
 	int i;
 
 	bit_offset=track_offset;
-	memset(sector,0,sizeof(SECTORCONFIG));
+	memset(sector,0,sizeof(HXCFE_SECTCFG));
 
 	sector_extractor_sm=LOOKFOR_GAP1;
 
@@ -359,7 +361,7 @@ int get_next_A2GCR2_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORC
 	return bit_offset;
 }
 
-int get_next_A2GCR1_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORCONFIG * sector,int track_offset)
+int get_next_A2GCR1_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {
 	int bit_offset,old_bit_offset;
 	int sector_size;
@@ -370,7 +372,7 @@ int get_next_A2GCR1_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORC
 	int i;
 
 	bit_offset=track_offset;
-	memset(sector,0,sizeof(SECTORCONFIG));
+	memset(sector,0,sizeof(HXCFE_SECTCFG));
 
 	sector_extractor_sm=LOOKFOR_GAP1;
 
@@ -537,7 +539,7 @@ int get_next_A2GCR1_sector(HXCFLOPPYEMULATOR* floppycontext,SIDE * track,SECTORC
 	return bit_offset;
 }
 
-void tg_addAppleSectorToTrack(track_generator *tg,SECTORCONFIG * sectorconfig,SIDE * currentside)
+void tg_addAppleSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
 
 	unsigned short  i;

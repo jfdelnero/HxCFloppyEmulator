@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -58,20 +60,20 @@
 
 #include "libhxcadaptor.h"
 
-int VDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int VDK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 	vdk_header vdk_h;
 	FILE * f;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"VDK_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VDK_libIsValidDiskFile");
 	if(imgfile)
 	{
 
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"VDK_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"VDK_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return -1;
 		}
 
@@ -89,15 +91,15 @@ int VDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 			if(filesize%256)
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"VDK_libIsValidDiskFile : non VDK file !");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VDK_libIsValidDiskFile : non VDK file !");
 				return HXCFE_BADFILE;
 			}
 
-			floppycontext->hxc_printf(MSG_DEBUG,"VDK_libIsValidDiskFile : VDK file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VDK_libIsValidDiskFile : VDK file !");
 			return HXCFE_VALIDFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"VDK_libIsValidDiskFile : non VDK file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VDK_libIsValidDiskFile : non VDK file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -105,7 +107,7 @@ int VDK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 }
 
 
-int VDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int VDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
@@ -116,14 +118,14 @@ int VDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	vdk_header vdk_h;
 	unsigned short rpm,sectorsize;
 	unsigned char skew,trackformat;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"VDK_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VDK_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -139,7 +141,7 @@ int VDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	if((vdk_h.signature!=0x6B64) || ((filesize-vdk_h.header_size)%256))
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non VDK file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"non VDK file !");
 		hxc_fclose(f);
 		return HXCFE_BADFILE;
 	}
@@ -150,12 +152,12 @@ int VDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	floppydisk->floppySectorPerTrack=(filesize-vdk_h.header_size)/(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide*256);
 	floppydisk->floppyBitRate=250000;
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 	rpm=300; // normal rpm
 	skew=0;
-	floppycontext->hxc_printf(MSG_INFO_1,"VDK File : VDK version: 0x%.2x,Source ID: 0x%.2x, Source Version: 0x%.2x, Flags: 0x%.2x",vdk_h.version,vdk_h.file_source_id,vdk_h.file_source_ver,vdk_h.flags);
-	floppycontext->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track, rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"VDK File : VDK version: 0x%.2x,Source ID: 0x%.2x, Source Version: 0x%.2x, Flags: 0x%.2x",vdk_h.version,vdk_h.file_source_id,vdk_h.file_source_ver,vdk_h.flags);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track, rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
 
 	sectorsize=256;
 	gap3len=24;
@@ -186,13 +188,13 @@ int VDK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	free(trackdata);
 
-	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }
 
-int VDK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int VDK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="DRAGON3264_VDK";
@@ -208,7 +210,7 @@ int VDK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

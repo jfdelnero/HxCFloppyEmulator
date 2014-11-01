@@ -32,16 +32,17 @@
 
 #include "version.h"
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "imd_format.h"
-#include "tracks/sector_extractor.h"
 
 #include "libhxcadaptor.h"
 
 extern unsigned char size_to_code(unsigned long size);
 
-int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int IMD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int i,j,k,l,nbsector;
 	FILE * imdfile;
@@ -60,13 +61,13 @@ int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	struct tm * ts;
 	time_t currenttime;
 
-	SECTORSEARCH* ss;
-	SECTORCONFIG** sca;
+	HXCFE_SECTORACCESS* ss;
+	HXCFE_SECTCFG** sca;
 
 //	struct DateTime reptime;
 
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Write IMD file %s...",filename);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write IMD file %s...",filename);
 
 	log_str=0;
 	imdfile=hxc_fopen(filename,"wb");
@@ -86,7 +87,7 @@ int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 		track_cnt=0;
 
-		ss=hxcfe_initSectorSearch(floppycontext,floppy);
+		ss=hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 		if(ss)
 		{
 
@@ -265,14 +266,14 @@ int IMD_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 					track_cnt++;
 
-					floppycontext->hxc_printf(MSG_INFO_1,log_str);
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,log_str);
 					free(log_str);
 
 				}
 
 			}
 
-			hxcfe_deinitSectorSearch(ss);
+			hxcfe_deinitSectorAccess(ss);
 		}
 
 		hxc_fclose(imdfile);

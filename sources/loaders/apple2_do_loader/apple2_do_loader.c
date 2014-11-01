@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -57,32 +59,32 @@
 
 #include "libhxcadaptor.h"
 
-int Apple2_do_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int Apple2_do_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"Apple2_do_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_do_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"do") || hxc_checkfileext(imgfile,"po"))
 	{
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Apple2_do_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Apple2_do_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
 		if( filesize%(16*1*256) || ( (filesize/(16*1*256)) > 50 ) )
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"Apple2_do_libIsValidDiskFile : non DO file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_do_libIsValidDiskFile : non DO file !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"Apple2_do_libIsValidDiskFile : DO file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_do_libIsValidDiskFile : DO file !");
 		return HXCFE_VALIDFILE;
 	}
 
-	floppycontext->hxc_printf(MSG_DEBUG,"Apple2_do_libIsValidDiskFile : non DO file !");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_do_libIsValidDiskFile : non DO file !");
 	return HXCFE_BADFILE;
 }
 
@@ -110,7 +112,7 @@ unsigned char PhysicalToLogicalSectorMap_ProDos[] =
 	0x04, 0x0C, 0x05, 0x0D, 0x06, 0x0E, 0x07, 0x0F
 };
 
-int Apple2_do_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int Apple2_do_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
@@ -125,10 +127,10 @@ int Apple2_do_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 	unsigned char * sector_order;
 
 
-	SECTORCONFIG* sectorconfig;
-	CYLINDER* currentcylinder;
+	HXCFE_SECTCFG* sectorconfig;
+	HXCFE_CYLINDER* currentcylinder;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"Apple2_do_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_do_libLoad_DiskFile %s",imgfile);
 
 	sector_order = (unsigned char *)&PhysicalToLogicalSectorMap_Dos33;
 	if(hxc_checkfileext(imgfile,"po"))
@@ -139,7 +141,7 @@ int Apple2_do_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -163,12 +165,12 @@ int Apple2_do_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 
 			floppydisk->floppyBitRate=bitrate;
 			floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
-			floppycontext->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,bitrate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,bitrate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
 
-			sectorconfig=(SECTORCONFIG*)malloc(sizeof(SECTORCONFIG)*floppydisk->floppySectorPerTrack);
-			memset(sectorconfig,0,sizeof(SECTORCONFIG)*floppydisk->floppySectorPerTrack);
+			sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
+			memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 
 			trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 
@@ -187,7 +189,7 @@ int Apple2_do_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 					fseek (f , file_offset , SEEK_SET);
 					fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
 
-					memset(sectorconfig,0,sizeof(SECTORCONFIG)*floppydisk->floppySectorPerTrack);
+					memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 					for(k=0;k<floppydisk->floppySectorPerTrack;k++)
 					{
 						sectorconfig[k].cylinder=j;
@@ -205,19 +207,19 @@ int Apple2_do_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 			}
 
 			free(sectorconfig);
-			floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 			hxc_fclose(f);
 			return HXCFE_NOERROR;
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 
 
-int Apple2_do_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int Apple2_do_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="APPLE2_DO";
@@ -233,7 +235,7 @@ int Apple2_do_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long in
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

@@ -47,6 +47,9 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
+#include "floppy_builder.h"
 #include "libhxcfe.h"
 #include "floppy_loader.h"
 #include "floppy_utils.h"
@@ -66,16 +69,21 @@ int dummy_trackpos(unsigned int current,unsigned int total)
     return 0;
 }
 
+int dummy_progress(unsigned int current,unsigned int total, void * user)
+{
+    return 0;
+}
+
 ////////////////////////////////////////////////////////////////////////
 
-HXCFLOPPYEMULATOR* hxcfe_init(void)
+HXCFE* hxcfe_init(void)
 {
-	HXCFLOPPYEMULATOR* hxcfe;
+	HXCFE* hxcfe;
 
-	hxcfe=malloc(sizeof(HXCFLOPPYEMULATOR));
+	hxcfe=malloc(sizeof(HXCFE));
 	if(hxcfe)
 	{
-		memset(hxcfe,0,sizeof(HXCFLOPPYEMULATOR));
+		memset(hxcfe,0,sizeof(HXCFE));
 
 		hxcfe->hxc_printf=&dummy_output;
 		hxcfe->hxc_settrackpos=&dummy_trackpos;
@@ -87,24 +95,24 @@ HXCFLOPPYEMULATOR* hxcfe_init(void)
 	return hxcfe;
 }
 
-int hxcfe_setOutputFunc(HXCFLOPPYEMULATOR* floppycontext,HXCPRINTF_FUNCTION hxc_printf)
+int hxcfe_setOutputFunc(HXCFE* floppycontext,HXCFE_PRINTF_FUNC hxc_printf)
 {
 	floppycontext->hxc_printf=hxc_printf;
 
 	return HXCFE_NOERROR;
 }
 
-const char * hxcfe_getVersion(HXCFLOPPYEMULATOR* floppycontext)
+const char * hxcfe_getVersion(HXCFE* floppycontext)
 {
 	return STR_FILE_VERSION2;
 }
 
-const char * hxcfe_getLicense(HXCFLOPPYEMULATOR* floppycontext)
+const char * hxcfe_getLicense(HXCFE* floppycontext)
 {
 	return (char*)licensetxt;
 }
 
-void hxcfe_deinit(HXCFLOPPYEMULATOR* hxcfe)
+void hxcfe_deinit(HXCFE* hxcfe)
 {
 	if(hxcfe)
 	{
@@ -116,7 +124,7 @@ void hxcfe_deinit(HXCFLOPPYEMULATOR* hxcfe)
 
 ////////////////////////////////////////////////////////////////////////
 
-int hxcfe_checkLoaderID(HXCFLOPPYEMULATOR* floppycontext,int moduleID)
+static int hxcfe_checkLoaderID(HXCFE_IMGLDR * imgldr_ctx,int moduleID)
 {
 	int i;
 
@@ -143,7 +151,7 @@ int hxcfe_checkLoaderID(HXCFLOPPYEMULATOR* floppycontext,int moduleID)
 	}
 }
 
-int hxcfe_numberOfLoader(HXCFLOPPYEMULATOR* floppycontext)
+int hxcfe_imgGetNumberOfLoader(HXCFE_IMGLDR * imgldr_ctx)
 {
 	int i;
 
@@ -156,8 +164,7 @@ int hxcfe_numberOfLoader(HXCFLOPPYEMULATOR* floppycontext)
 	return i;
 }
 
-
-int hxcfe_getLoaderID(HXCFLOPPYEMULATOR* floppycontext,char * container)
+int hxcfe_imgGetLoaderID(HXCFE_IMGLDR * imgldr_ctx,char * container)
 {
 	int i;
 	int ret;
@@ -169,7 +176,7 @@ int hxcfe_getLoaderID(HXCFLOPPYEMULATOR* floppycontext,char * container)
 	{
 		if(staticplugins[i])
 		{
-			ret=staticplugins[i](floppycontext,GETPLUGINID,&plugin_id);
+			ret=staticplugins[i](imgldr_ctx,GETPLUGINID,&plugin_id);
 			if((ret==HXCFE_NOERROR)  && !strcmp(container,plugin_id))
 			{
 				return i;
@@ -179,21 +186,21 @@ int hxcfe_getLoaderID(HXCFLOPPYEMULATOR* floppycontext,char * container)
 		i++;
 	}while(staticplugins[i]!=(GETPLUGININFOS)-1);
 
-	floppycontext->hxc_printf(MSG_DEBUG,"hxcfe_searchContainer : Plugin %s not found !",container);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_searchContainer : Plugin %s not found !",container);
 
 	return -1;
 }
 
-int hxcfe_getLoaderAccess(HXCFLOPPYEMULATOR* floppycontext,int moduleID)
+int hxcfe_imgGetLoaderAccess(HXCFE_IMGLDR * imgldr_ctx,int moduleID)
 {
 	int ret;
 	plugins_ptr func_ptr;
 
 	ret = 0;
 
-	if(hxcfe_checkLoaderID(floppycontext,moduleID)==HXCFE_NOERROR)
+	if(hxcfe_checkLoaderID(imgldr_ctx,moduleID)==HXCFE_NOERROR)
 	{
-		ret=staticplugins[moduleID](floppycontext,GETFUNCPTR,&func_ptr);
+		ret=staticplugins[moduleID](imgldr_ctx,GETFUNCPTR,&func_ptr);
 		if(ret==HXCFE_NOERROR)
 		{
 			if(func_ptr.libLoad_DiskFile)
@@ -206,178 +213,252 @@ int hxcfe_getLoaderAccess(HXCFLOPPYEMULATOR* floppycontext,int moduleID)
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Bad module ID : %x !",moduleID);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Bad module ID : %x !",moduleID);
 	}
 
 	return ret;
 }
 
-const char* hxcfe_getLoaderDesc(HXCFLOPPYEMULATOR* floppycontext,int moduleID)
+const char* hxcfe_imgGetLoaderDesc(HXCFE_IMGLDR * imgldr_ctx,int moduleID)
 {
 	int ret;
 	plugins_ptr func_ptr;
 	char * desc;
 
-	if(hxcfe_checkLoaderID(floppycontext,moduleID)==HXCFE_NOERROR)
+	if(hxcfe_checkLoaderID(imgldr_ctx,moduleID)==HXCFE_NOERROR)
 	{
-		ret=staticplugins[moduleID](floppycontext,GETFUNCPTR,&func_ptr);
+		ret=staticplugins[moduleID](imgldr_ctx,GETFUNCPTR,&func_ptr);
 		if(ret==HXCFE_NOERROR)
 		{
-			staticplugins[moduleID](floppycontext,GETDESCRIPTION,&desc);
+			staticplugins[moduleID](imgldr_ctx,GETDESCRIPTION,&desc);
 			return desc;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Bad module ID : %x !",moduleID);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Bad module ID : %x !",moduleID);
 	}
 
 	return 0;
 }
 
-const char* hxcfe_getLoaderName(HXCFLOPPYEMULATOR* floppycontext,int moduleID)
+const char* hxcfe_imgGetLoaderName(HXCFE_IMGLDR * imgldr_ctx,int moduleID)
 {
 	int ret;
 	plugins_ptr func_ptr;
 	char * desc;
 
-	if(hxcfe_checkLoaderID(floppycontext,moduleID)==HXCFE_NOERROR)
+	if(hxcfe_checkLoaderID(imgldr_ctx,moduleID)==HXCFE_NOERROR)
 	{
-		ret=staticplugins[moduleID](floppycontext,GETFUNCPTR,&func_ptr);
+		ret=staticplugins[moduleID](imgldr_ctx,GETFUNCPTR,&func_ptr);
 		if(ret==HXCFE_NOERROR)
 		{
-			staticplugins[moduleID](floppycontext,GETPLUGINID,&desc);
+			staticplugins[moduleID](imgldr_ctx,GETPLUGINID,&desc);
 			return desc;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Bad module ID : %x !",moduleID);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Bad module ID : %x !",moduleID);
 	}
 
 	return 0;
 }
 
-const char* hxcfe_getLoaderExt(HXCFLOPPYEMULATOR* floppycontext,int moduleID)
+const char* hxcfe_imgGetLoaderExt(HXCFE_IMGLDR * imgldr_ctx,int moduleID)
 {
 	int ret;
 	plugins_ptr func_ptr;
 	char * desc;
 
-	if(hxcfe_checkLoaderID(floppycontext,moduleID)==HXCFE_NOERROR)
+	if(hxcfe_checkLoaderID(imgldr_ctx,moduleID)==HXCFE_NOERROR)
 	{
-		ret=staticplugins[moduleID](floppycontext,GETFUNCPTR,&func_ptr);
+		ret=staticplugins[moduleID](imgldr_ctx,GETFUNCPTR,&func_ptr);
 		if(ret==HXCFE_NOERROR)
 		{
-			staticplugins[moduleID](floppycontext,GETEXTENSION,&desc);
+			staticplugins[moduleID](imgldr_ctx,GETEXTENSION,&desc);
 			return desc;
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Bad module ID : %x !",moduleID);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Bad module ID : %x !",moduleID);
 	}
 
 	return 0;
 }
 
-int hxcfe_autoSelectLoader(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int moduleID)
+int hxcfe_imgAutoSetectLoader(HXCFE_IMGLDR * imgldr_ctx,char* imgname,int moduleID)
 {
 	int i;
 	int ret;
 	plugins_ptr func_ptr;
+	HXCFE* hxcfe;
 
-	floppycontext->hxc_printf(MSG_INFO_0,"Checking %s",imgname);
+	ret = HXCFE_BADPARAMETER;
 
-	i=moduleID;
-	do
+	if( imgldr_ctx )
 	{
-		if(staticplugins[i])
+		hxcfe = imgldr_ctx->hxcfe;
+
+		hxcfe->hxc_printf(MSG_INFO_0,"Checking %s",imgname);
+
+		i = moduleID;
+		do
 		{
-			ret=staticplugins[i](floppycontext,GETFUNCPTR,&func_ptr);
-			if(ret==HXCFE_NOERROR)
+			if(staticplugins[i])
 			{
-				if(func_ptr.libIsValidDiskFile)
+				ret = staticplugins[i](imgldr_ctx,GETFUNCPTR,&func_ptr);
+				if( ret == HXCFE_NOERROR )
 				{
-					ret=func_ptr.libIsValidDiskFile(floppycontext,imgname);
-					if(ret==HXCFE_VALIDFILE)
+					if(func_ptr.libIsValidDiskFile)
 					{
-						floppycontext->hxc_printf(MSG_INFO_0,"File loader found : %s (%s)",hxcfe_getLoaderName(floppycontext,i),hxcfe_getLoaderDesc(floppycontext,i));
-						return i;
-					}
-					else
-					{
-						floppycontext->hxc_printf(MSG_DEBUG,"libIsValidDiskFile n%d return %d",i,ret);
+						ret = func_ptr.libIsValidDiskFile(imgldr_ctx,imgname);
+						if(ret == HXCFE_VALIDFILE)
+						{
+							hxcfe->hxc_printf(MSG_INFO_0,"File loader found : %s (%s)",hxcfe_imgGetLoaderName(imgldr_ctx,i),hxcfe_imgGetLoaderDesc(imgldr_ctx,i));
+							return i;
+						}
+						else
+						{
+							hxcfe->hxc_printf(MSG_DEBUG,"libIsValidDiskFile n%d return %d",i,ret);
+						}
 					}
 				}
 			}
-		}
 
-		i++;
-	}while(staticplugins[i]!=(GETPLUGININFOS)-1);
+			i++;
+		}while( staticplugins[i] != (GETPLUGININFOS)-1 );
 
-	floppycontext->hxc_printf(MSG_ERROR,"No loader support the file %s !",imgname);
+		hxcfe->hxc_printf(MSG_ERROR,"No loader support the file %s !",imgname);
 
-	ret=HXCFE_UNSUPPORTEDFILE;
+		ret = HXCFE_UNSUPPORTEDFILE;
 
-	return -1;
-}
-
-FLOPPY * hxcfe_floppyLoadEx(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int moduleID,int * err_ret,void * parameters)
-{
-	int ret;
-	FLOPPY * newfloppy;
-	plugins_ptr func_ptr;
-
-	floppycontext->hxc_printf(MSG_INFO_0,"Loading %s",imgname);
-
-	newfloppy=0;
-
-	if(hxcfe_checkLoaderID(floppycontext,moduleID)==HXCFE_NOERROR)
-	{
-		ret=staticplugins[moduleID](floppycontext,GETFUNCPTR,&func_ptr);
-		if(ret==HXCFE_NOERROR)
-		{
-			ret=func_ptr.libIsValidDiskFile(floppycontext,imgname);
-			if(ret==HXCFE_VALIDFILE)
-			{
-				newfloppy=malloc(sizeof(FLOPPY));
-				memset(newfloppy,0,sizeof(FLOPPY));
-				floppycontext->hxc_printf(MSG_INFO_0,"file loader found!");
-				ret=func_ptr.libLoad_DiskFile(floppycontext,newfloppy,imgname,parameters);
-				if(ret!=HXCFE_NOERROR)
-				{
-					free(newfloppy);
-					newfloppy=0;
-				}
-
-				if(err_ret) *err_ret=ret;
-
-				return newfloppy;
-			}
-			else
-			{
-				floppycontext->hxc_printf(MSG_ERROR,"%s refuse the file %s (%d)!",hxcfe_getLoaderName(floppycontext,moduleID),imgname,ret);
-				if(err_ret) *err_ret=ret;
-				return newfloppy;
-			}
-		}
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"Bad plugin ID : 0x%x",moduleID);
+	return ret;
+}
 
-	ret=HXCFE_BADPARAMETER;
-	if(err_ret) *err_ret=ret;
+int hxcfe_imgSetProgressCallback(HXCFE_IMGLDR * imgldr_ctx,HXCFE_IMGLDRPROGRESSOUT_FUNC progress_func,void * userdata)
+{
+	if(imgldr_ctx)
+	{
+		if(progress_func)
+		{
+			imgldr_ctx->progress_userdata = userdata;
+			imgldr_ctx->hxc_setprogress = progress_func;
+		}
+	}
+	return 0;
+}
+
+int hxcfe_imgCallProgressCallback(HXCFE_IMGLDR * imgldr_ctx,int cur,int max)
+{
+	if(imgldr_ctx)
+	{
+		if(imgldr_ctx->hxc_setprogress)
+		{
+			imgldr_ctx->hxc_setprogress(cur,max,imgldr_ctx->progress_userdata);
+		}
+	}
+	return 0;
+}
+
+
+HXCFE_IMGLDR *   hxcfe_imgInitLoader(HXCFE * hxcfe)
+{
+	HXCFE_IMGLDR * imgldr_ctx;
+
+	imgldr_ctx = malloc(sizeof(HXCFE_IMGLDR));
+	if(imgldr_ctx)
+	{
+		memset(imgldr_ctx,0,sizeof(HXCFE_IMGLDR));
+		imgldr_ctx->hxcfe = hxcfe;
+		imgldr_ctx->hxc_setprogress=&dummy_progress;
+	}
+
+	return imgldr_ctx;
+}
+
+void hxcfe_imgDeInitLoader(HXCFE_IMGLDR * imgldr_ctx)
+{
+	if(imgldr_ctx)
+	{
+		free(imgldr_ctx);
+	}
+
+	return;
+}
+
+HXCFE_FLOPPY * hxcfe_imgLoadEx(HXCFE_IMGLDR * imgldr_ctx,char* imgname,int moduleID,int * err_ret,void * parameters)
+{
+	int ret;
+	HXCFE* hxcfe;
+	HXCFE_FLOPPY * newfloppy;
+	plugins_ptr func_ptr;
+
+	newfloppy = 0;
+
+	if(imgldr_ctx)
+	{
+		hxcfe = imgldr_ctx->hxcfe;
+
+		hxcfe->hxc_printf(MSG_INFO_0,"Loading %s",imgname);
+
+		if( hxcfe_checkLoaderID(imgldr_ctx,moduleID) == HXCFE_NOERROR )
+		{
+			ret = staticplugins[moduleID](imgldr_ctx,GETFUNCPTR,&func_ptr);
+			if( ret == HXCFE_NOERROR )
+			{
+				ret = func_ptr.libIsValidDiskFile(imgldr_ctx,imgname);
+				if( ret == HXCFE_VALIDFILE )
+				{
+					newfloppy = malloc(sizeof(HXCFE_FLOPPY));
+					if(newfloppy)
+					{
+						memset(newfloppy,0,sizeof(HXCFE_FLOPPY));
+						hxcfe->hxc_printf(MSG_INFO_0,"file loader found!");
+						ret = func_ptr.libLoad_DiskFile(imgldr_ctx,newfloppy,imgname,parameters);
+						if(ret != HXCFE_NOERROR)
+						{
+							free(newfloppy);
+							newfloppy = 0;
+						}
+
+						if(err_ret)
+							*err_ret = ret;
+					}
+					return newfloppy;
+				}
+				else
+				{
+					hxcfe->hxc_printf(MSG_ERROR,"%s refuse the file %s (%d)!",hxcfe_imgGetLoaderName(imgldr_ctx,moduleID),imgname,ret);
+
+					if(err_ret)
+						*err_ret=ret;
+
+					return newfloppy;
+				}
+			}
+		}
+
+		hxcfe->hxc_printf(MSG_ERROR,"Bad plugin ID : 0x%x",moduleID);
+
+		ret = HXCFE_BADPARAMETER;
+		if(err_ret)
+			*err_ret = ret;
+
+	}
 	return newfloppy;
 
 }
 
-FLOPPY * hxcfe_floppyLoad(HXCFLOPPYEMULATOR* floppycontext,char* imgname,int moduleID,int * err_ret)
+HXCFE_FLOPPY * hxcfe_imgLoad(HXCFE_IMGLDR * imgldr_ctx,char* imgname,int moduleID,int * err_ret)
 {
-	return hxcfe_floppyLoadEx(floppycontext,imgname,moduleID,err_ret,0);
+	return hxcfe_imgLoadEx(imgldr_ctx,imgname,moduleID,err_ret,0);
 }
 
-int hxcfe_floppyUnload(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk)
+int hxcfe_imgUnload(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk)
 {
 	unsigned int i,j;
 
@@ -401,36 +482,36 @@ int hxcfe_floppyUnload(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk)
 	return 0;
 }
 
-int hxcfe_floppyExport(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,char* imgname,int moduleID)
+int hxcfe_imgExport(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * newfloppy,char* imgname,int moduleID)
 {
 	int ret;
 	plugins_ptr func_ptr;
 
-	if(hxcfe_checkLoaderID(floppycontext,moduleID)==HXCFE_NOERROR)
+	if(hxcfe_checkLoaderID(imgldr_ctx,moduleID)==HXCFE_NOERROR)
 	{
-		ret=staticplugins[moduleID](floppycontext,GETFUNCPTR,&func_ptr);
+		ret=staticplugins[moduleID](imgldr_ctx->hxcfe,GETFUNCPTR,&func_ptr);
 		if(ret==HXCFE_NOERROR)
 		{
 			if(func_ptr.libWrite_DiskFile)
 			{
-				ret=func_ptr.libWrite_DiskFile(floppycontext,newfloppy,imgname,0);
+				ret=func_ptr.libWrite_DiskFile(imgldr_ctx,newfloppy,imgname,0);
 				return ret;
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_ERROR,"No export support in %s!",hxcfe_getLoaderName(floppycontext,moduleID) );
+				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"No export support in %s!",hxcfe_imgGetLoaderName(imgldr_ctx,moduleID) );
 				return HXCFE_UNSUPPORTEDFILE;
 			}
 		}
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"Bad plugin ID : 0x%x",moduleID);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Bad plugin ID : 0x%x",moduleID);
 	return HXCFE_BADPARAMETER;
 }
 
 ////////////////////////////////////////////////////////////////////////
 
-int hxcfe_floppyGetSetParams(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,unsigned char dir,unsigned short param,void * value)
+int hxcfe_floppyGetSetParams(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy,unsigned char dir,unsigned short param,void * value)
 {
 	int ret;
 
@@ -477,12 +558,12 @@ int hxcfe_floppyGetSetParams(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy
 	return ret;
 }
 
-int hxcfe_floppyGetInterfaceMode(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy)
+int hxcfe_floppyGetInterfaceMode(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy)
 {
 	return newfloppy->floppyiftype;
 }
 
-int hxcfe_floppySetInterfaceMode(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,int ifmode)
+int hxcfe_floppySetInterfaceMode(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy,int ifmode)
 {
 
 	if(hxcfe_getFloppyInterfaceModeName(floppycontext,ifmode))
@@ -494,18 +575,18 @@ int hxcfe_floppySetInterfaceMode(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfl
 	return HXCFE_BADPARAMETER;
 }
 
-int hxcfe_floppyGetDoubleStep(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy)
+int hxcfe_floppyGetDoubleStep(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy)
 {
 	return newfloppy->double_step;
 }
 
-int hxcfe_floppySetDoubleStep(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * newfloppy,int doublestep)
+int hxcfe_floppySetDoubleStep(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy,int doublestep)
 {
 	newfloppy->double_step=doublestep;
 	return HXCFE_NOERROR;
 }
 
-int libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue,const char * pluginid,const char * plugindesc,plugins_ptr * pluginfunc,const char * fileext)
+int libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue,const char * pluginid,const char * plugindesc,plugins_ptr * pluginfunc,const char * fileext)
 {
 	if(returnvalue)
 	{
@@ -537,9 +618,9 @@ int libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,voi
 	return HXCFE_BADPARAMETER;
 }
 
-FBuilder* hxcfe_initFloppy(HXCFLOPPYEMULATOR* floppycontext,int nb_of_track,int nb_of_side)
+HXCFE_FLPGEN* hxcfe_initFloppy(HXCFE* floppycontext,int nb_of_track,int nb_of_side)
 {
-	FBuilder* fb;
+	HXCFE_FLPGEN* fb;
 
 	fb=0;
 
@@ -547,12 +628,12 @@ FBuilder* hxcfe_initFloppy(HXCFLOPPYEMULATOR* floppycontext,int nb_of_track,int 
 
 	if(( nb_of_track && (nb_of_track<=256)) && ((nb_of_side>=1) && (nb_of_side<=2) ) )
 	{
-		fb=(FBuilder*)malloc(sizeof(FBuilder));
+		fb=(HXCFE_FLPGEN*)malloc(sizeof(HXCFE_FLPGEN));
 		if(fb)
 		{
-			memset(fb,0,sizeof(FBuilder));
-			fb->floppydisk=(FLOPPY*)malloc(sizeof(FLOPPY));
-			memset(fb->floppydisk,0,sizeof(FLOPPY));
+			memset(fb,0,sizeof(HXCFE_FLPGEN));
+			fb->floppydisk=(HXCFE_FLOPPY*)malloc(sizeof(HXCFE_FLOPPY));
+			memset(fb->floppydisk,0,sizeof(HXCFE_FLOPPY));
 			fb->floppydisk->floppyBitRate=DEFAULT_DD_BITRATE;
 			fb->floppydisk->double_step=0;
 			fb->floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
@@ -560,8 +641,8 @@ FBuilder* hxcfe_initFloppy(HXCFLOPPYEMULATOR* floppycontext,int nb_of_track,int 
 			fb->floppydisk->floppyNumberOfSide=nb_of_side;
 			fb->floppydisk->floppySectorPerTrack=-1;
 
-			fb->floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*fb->floppydisk->floppyNumberOfTrack);
-			memset(fb->floppydisk->tracks,0,sizeof(CYLINDER*)*fb->floppydisk->floppyNumberOfTrack);
+			fb->floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*fb->floppydisk->floppyNumberOfTrack);
+			memset(fb->floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*fb->floppydisk->floppyNumberOfTrack);
 
 			fb->fb_stack_pointer=0;
 			fb->fb_stack=(fb_track_state*)malloc(sizeof(fb_track_state)*STACK_SIZE);
@@ -603,19 +684,19 @@ FBuilder* hxcfe_initFloppy(HXCFLOPPYEMULATOR* floppycontext,int nb_of_track,int 
 	return fb;
 }
 
-int hxcfe_getNumberOfTrack(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp)
+int hxcfe_getNumberOfTrack(HXCFE* floppycontext,HXCFE_FLOPPY *fp)
 {
 	return fp->floppyNumberOfTrack;
 }
 
-int hxcfe_getNumberOfSide(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp)
+int hxcfe_getNumberOfSide(HXCFE* floppycontext,HXCFE_FLOPPY *fp)
 {
 	return fp->floppyNumberOfSide;
 }
 
-int hxcfe_setNumberOfTrack (FBuilder* fb,unsigned short numberoftrack)
+int hxcfe_setNumberOfTrack (HXCFE_FLPGEN* fb,unsigned short numberoftrack)
 {
-	CYLINDER	**	tmptracks;
+	HXCFE_CYLINDER	**	tmptracks;
 	unsigned short	tmpfloppyNumberOfTrack;
 
 	tmptracks = 0;
@@ -628,22 +709,22 @@ int hxcfe_setNumberOfTrack (FBuilder* fb,unsigned short numberoftrack)
 	}
 
 	fb->floppydisk->floppyNumberOfTrack = numberoftrack;
-	fb->floppydisk->tracks = (CYLINDER**)malloc(sizeof(CYLINDER*)*fb->floppydisk->floppyNumberOfTrack);
+	fb->floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*fb->floppydisk->floppyNumberOfTrack);
 	if( !fb->floppydisk->tracks)
 	{
 		return HXCFE_INTERNALERROR;
 	}
-	memset(fb->floppydisk->tracks,0,sizeof(CYLINDER*)*fb->floppydisk->floppyNumberOfTrack);
+	memset(fb->floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*fb->floppydisk->floppyNumberOfTrack);
 
 	if(tmptracks)
 	{
 		if ( tmpfloppyNumberOfTrack < numberoftrack )
 		{
-			memcpy(fb->floppydisk->tracks,tmptracks,sizeof(CYLINDER*)*tmpfloppyNumberOfTrack);
+			memcpy(fb->floppydisk->tracks,tmptracks,sizeof(HXCFE_CYLINDER*)*tmpfloppyNumberOfTrack);
 		}
 		else
 		{
-			memcpy(fb->floppydisk->tracks,tmptracks,sizeof(CYLINDER*)*numberoftrack);
+			memcpy(fb->floppydisk->tracks,tmptracks,sizeof(HXCFE_CYLINDER*)*numberoftrack);
 		}
 
 		free(tmptracks);
@@ -652,25 +733,25 @@ int hxcfe_setNumberOfTrack (FBuilder* fb,unsigned short numberoftrack)
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setNumberOfSide (FBuilder* fb,unsigned char numberofside)
+int hxcfe_setNumberOfSide (HXCFE_FLPGEN* fb,unsigned char numberofside)
 {
 	fb->floppydisk->floppyNumberOfSide = numberofside;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setNumberOfSector (FBuilder* fb,unsigned short numberofsector)
+int hxcfe_setNumberOfSector (HXCFE_FLPGEN* fb,unsigned short numberofsector)
 {
 	fb->fb_stack[fb->fb_stack_pointer].numberofsector_min = numberofsector;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setTrackPreGap (FBuilder* fb,unsigned short pregap)
+int hxcfe_setTrackPreGap (HXCFE_FLPGEN* fb,unsigned short pregap)
 {
 	fb->fb_stack[fb->fb_stack_pointer].pregap = pregap;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_pushTrack (FBuilder* fb,unsigned int rpm,int number,int side,int type)
+int hxcfe_pushTrack (HXCFE_FLPGEN* fb,unsigned int rpm,int number,int side,int type)
 {
 	fb_track_state * cur_track;
 	unsigned char * data_to_realloc;
@@ -712,7 +793,7 @@ int hxcfe_pushTrack (FBuilder* fb,unsigned int rpm,int number,int side,int type)
 	return HXCFE_BADPARAMETER;
 }
 
-int hxcfe_pushSector (FBuilder* fb)
+int hxcfe_pushSector (HXCFE_FLPGEN* fb)
 {
 	fb_track_state * cur_track;
 
@@ -721,7 +802,7 @@ int hxcfe_pushSector (FBuilder* fb)
 	if( cur_track->sc_stack_pointer < (STACK_SIZE-1) )
 	{
 		cur_track->sc_stack_pointer++;
-		memcpy(&cur_track->sc_stack[cur_track->sc_stack_pointer],&cur_track->sc_stack[cur_track->sc_stack_pointer-1],sizeof(SECTORCONFIG));
+		memcpy(&cur_track->sc_stack[cur_track->sc_stack_pointer],&cur_track->sc_stack[cur_track->sc_stack_pointer-1],sizeof(HXCFE_SECTCFG));
 
 		cur_track->sc_stack[cur_track->sc_stack_pointer].sector++;
 
@@ -731,7 +812,7 @@ int hxcfe_pushSector (FBuilder* fb)
 	return HXCFE_INTERNALERROR;
 }
 
-int hxcfe_popSector (FBuilder* fb)
+int hxcfe_popSector (HXCFE_FLPGEN* fb)
 {
 	fb_track_state * cur_track;
 
@@ -739,12 +820,12 @@ int hxcfe_popSector (FBuilder* fb)
 
 	if( cur_track->numberofsector < (NUMBEROFSECTOR_MAX-1) )
 	{
-		memcpy(&cur_track->sectortab[cur_track->numberofsector],&cur_track->sc_stack[cur_track->sc_stack_pointer],sizeof(SECTORCONFIG) );
+		memcpy(&cur_track->sectortab[cur_track->numberofsector],&cur_track->sc_stack[cur_track->sc_stack_pointer],sizeof(HXCFE_SECTCFG) );
 		cur_track->numberofsector++;
 		if(cur_track->numberofsector_min < cur_track->numberofsector )
 			cur_track->numberofsector_min = cur_track->numberofsector;
 
-		memset(&cur_track->sc_stack[cur_track->sc_stack_pointer],0,sizeof(SECTORCONFIG));
+		memset(&cur_track->sc_stack[cur_track->sc_stack_pointer],0,sizeof(HXCFE_SECTCFG));
 
 		if( cur_track->sc_stack_pointer )
 		{
@@ -757,12 +838,12 @@ int hxcfe_popSector (FBuilder* fb)
 	return HXCFE_INTERNALERROR;
 }
 
-int hxcfe_pushTrackPFS (FBuilder* fb,int number,int side)
+int hxcfe_pushTrackPFS (HXCFE_FLPGEN* fb,int number,int side)
 {
 	return hxcfe_pushTrack (fb,fb->fb_stack[fb->fb_stack_pointer].rpm,number,side,fb->fb_stack[fb->fb_stack_pointer].type);
 }
 
-int hxcfe_setTrackBitrate(FBuilder* fb,int bitrate)
+int hxcfe_setTrackBitrate(HXCFE_FLPGEN* fb,int bitrate)
 {
 	fb_track_state * cur_track;
 
@@ -774,7 +855,7 @@ int hxcfe_setTrackBitrate(FBuilder* fb,int bitrate)
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setTrackType(FBuilder* fb,int type)
+int hxcfe_setTrackType(HXCFE_FLPGEN* fb,int type)
 {
 	fb_track_state * cur_track;
 
@@ -788,13 +869,13 @@ int hxcfe_setTrackType(FBuilder* fb,int type)
 
 }
 
-int hxcfe_setTrackInterleave(FBuilder* fb,int interleave)
+int hxcfe_setTrackInterleave(HXCFE_FLPGEN* fb,int interleave)
 {
 	fb->fb_stack[fb->fb_stack_pointer].interleave = interleave;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorSize(FBuilder* fb,int size)
+int hxcfe_setSectorSize(HXCFE_FLPGEN* fb,int size)
 {
 	fb_track_state * cur_track;
 
@@ -806,28 +887,28 @@ int hxcfe_setSectorSize(FBuilder* fb,int size)
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setTrackSkew(FBuilder* fb,int skew)
+int hxcfe_setTrackSkew(HXCFE_FLPGEN* fb,int skew)
 {
 	fb->fb_stack[fb->fb_stack_pointer].skew = skew;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setIndexPosition(FBuilder* fb,int position,int allowsector)
+int hxcfe_setIndexPosition(HXCFE_FLPGEN* fb,int position,int allowsector)
 {
 	fb->fb_stack[fb->fb_stack_pointer].indexpos = position;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setIndexLength(FBuilder* fb,int length)
+int hxcfe_setIndexLength(HXCFE_FLPGEN* fb,int length)
 {
 	fb->fb_stack[fb->fb_stack_pointer].indexlen = length;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorData(FBuilder* fb,unsigned char * buffer,int size)
+int hxcfe_setSectorData(HXCFE_FLPGEN* fb,unsigned char * buffer,int size)
 {
 	fb_track_state * cur_track;
-	SECTORCONFIG * cur_sector;
+	HXCFE_SECTCFG * cur_sector;
 
 	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
 	cur_sector = &cur_track->sc_stack[cur_track->sc_stack_pointer];
@@ -850,7 +931,7 @@ int hxcfe_setSectorData(FBuilder* fb,unsigned char * buffer,int size)
 }
 
 
-int hxcfe_addSector(FBuilder* fb,int sectornumber,int side,int track,unsigned char * buffer,int size)
+int hxcfe_addSector(HXCFE_FLPGEN* fb,int sectornumber,int side,int track,unsigned char * buffer,int size)
 {
 	hxcfe_pushSector (fb);
 
@@ -865,7 +946,7 @@ int hxcfe_addSector(FBuilder* fb,int sectornumber,int side,int track,unsigned ch
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_addSectors(FBuilder* fb,int side,int track,unsigned char * trackdata,int buffersize,int numberofsectors)
+int hxcfe_addSectors(HXCFE_FLPGEN* fb,int side,int track,unsigned char * trackdata,int buffersize,int numberofsectors)
 {
 	int i,ret;
 	int startsectorid,sectorsize;
@@ -894,7 +975,7 @@ int hxcfe_addSectors(FBuilder* fb,int side,int track,unsigned char * trackdata,i
 	return HXCFE_BADPARAMETER;
 }
 
-int hxcfe_setSectorSizeID(FBuilder* fb,unsigned char sectorsizeid)
+int hxcfe_setSectorSizeID(HXCFE_FLPGEN* fb,unsigned char sectorsizeid)
 {
 	fb_track_state * cur_track;
 
@@ -906,13 +987,13 @@ int hxcfe_setSectorSizeID(FBuilder* fb,unsigned char sectorsizeid)
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setStartSectorID(FBuilder* fb,unsigned char startsectorid)
+int hxcfe_setStartSectorID(HXCFE_FLPGEN* fb,unsigned char startsectorid)
 {
 	fb->fb_stack[fb->fb_stack_pointer].start_sector_id = startsectorid;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorBitrate(FBuilder* fb,int bitrate)
+int hxcfe_setSectorBitrate(HXCFE_FLPGEN* fb,int bitrate)
 {
 	fb_track_state * cur_track;
 
@@ -922,7 +1003,7 @@ int hxcfe_setSectorBitrate(FBuilder* fb,int bitrate)
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorFill(FBuilder* fb,unsigned char fill)
+int hxcfe_setSectorFill(HXCFE_FLPGEN* fb,unsigned char fill)
 {
 	fb_track_state * cur_track;
 
@@ -931,7 +1012,7 @@ int hxcfe_setSectorFill(FBuilder* fb,unsigned char fill)
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorTrackID(FBuilder* fb,unsigned char track)
+int hxcfe_setSectorTrackID(HXCFE_FLPGEN* fb,unsigned char track)
 {
 	fb_track_state * cur_track;
 
@@ -940,7 +1021,7 @@ int hxcfe_setSectorTrackID(FBuilder* fb,unsigned char track)
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorHeadID(FBuilder* fb,unsigned char head)
+int hxcfe_setSectorHeadID(HXCFE_FLPGEN* fb,unsigned char head)
 {
 	fb_track_state * cur_track;
 
@@ -949,7 +1030,7 @@ int hxcfe_setSectorHeadID(FBuilder* fb,unsigned char head)
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorID(FBuilder* fb,unsigned char head)
+int hxcfe_setSectorID(HXCFE_FLPGEN* fb,unsigned char head)
 {
 	fb_track_state * cur_track;
 
@@ -958,7 +1039,7 @@ int hxcfe_setSectorID(FBuilder* fb,unsigned char head)
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorGap3(FBuilder* fb,unsigned char Gap3)
+int hxcfe_setSectorGap3(HXCFE_FLPGEN* fb,unsigned char Gap3)
 {
 	fb_track_state * cur_track;
 
@@ -967,7 +1048,7 @@ int hxcfe_setSectorGap3(FBuilder* fb,unsigned char Gap3)
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorEncoding(FBuilder* fb,int encoding)
+int hxcfe_setSectorEncoding(HXCFE_FLPGEN* fb,int encoding)
 {
 	fb_track_state * cur_track;
 
@@ -976,13 +1057,13 @@ int hxcfe_setSectorEncoding(FBuilder* fb,int encoding)
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setRPM(FBuilder* fb,unsigned short rpm)
+int hxcfe_setRPM(HXCFE_FLPGEN* fb,unsigned short rpm)
 {
 	fb->fb_stack[fb->fb_stack_pointer].rpm = rpm;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorDataCRC(FBuilder* fb,unsigned short crc)
+int hxcfe_setSectorDataCRC(HXCFE_FLPGEN* fb,unsigned short crc)
 {
 	fb_track_state * cur_track;
 
@@ -992,7 +1073,7 @@ int hxcfe_setSectorDataCRC(FBuilder* fb,unsigned short crc)
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorHeaderCRC(FBuilder* fb,unsigned short crc)
+int hxcfe_setSectorHeaderCRC(HXCFE_FLPGEN* fb,unsigned short crc)
 {
 	fb_track_state * cur_track;
 
@@ -1002,7 +1083,7 @@ int hxcfe_setSectorHeaderCRC(FBuilder* fb,unsigned short crc)
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorDataMark(FBuilder* fb,unsigned char datamark)
+int hxcfe_setSectorDataMark(HXCFE_FLPGEN* fb,unsigned char datamark)
 {
 	fb_track_state * cur_track;
 
@@ -1013,9 +1094,9 @@ int hxcfe_setSectorDataMark(FBuilder* fb,unsigned char datamark)
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_popTrack (FBuilder* fb)
+int hxcfe_popTrack (HXCFE_FLPGEN* fb)
 {
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 	fb_track_state * current_fb_track_state;
 	int i;
 	unsigned long sui_flag;
@@ -1073,42 +1154,42 @@ int hxcfe_popTrack (FBuilder* fb)
 	return HXCFE_NOERROR;
 }
 
-unsigned short hxcfe_getCurrentNumberOfTrack (FBuilder* fb)
+unsigned short hxcfe_getCurrentNumberOfTrack (HXCFE_FLPGEN* fb)
 {
 	return fb->floppydisk->floppyNumberOfTrack;
 }
 
-unsigned char  hxcfe_getCurrentNumberOfSide (FBuilder* fb)
+unsigned char  hxcfe_getCurrentNumberOfSide (HXCFE_FLPGEN* fb)
 {
 	return fb->floppydisk->floppyNumberOfSide;
 }
 
-unsigned short hxcfe_getCurrentNumberOfSector (FBuilder* fb)
+unsigned short hxcfe_getCurrentNumberOfSector (HXCFE_FLPGEN* fb)
 {
 	return fb->fb_stack[fb->fb_stack_pointer].numberofsector_min;
 }
 
-int hxcfe_getCurrentSectorSize(FBuilder* fb)
+int hxcfe_getCurrentSectorSize(HXCFE_FLPGEN* fb)
 {
 	return fb->fb_stack[fb->fb_stack_pointer].sectors_size;
 }
 
-unsigned char  hxcfe_getCurrentTrackType (FBuilder* fb)
+unsigned char  hxcfe_getCurrentTrackType (HXCFE_FLPGEN* fb)
 {
 	return fb->fb_stack[fb->fb_stack_pointer].type;
 }
 
-unsigned short hxcfe_getCurrentRPM (FBuilder* fb)
+unsigned short hxcfe_getCurrentRPM (HXCFE_FLPGEN* fb)
 {
 	return fb->fb_stack[fb->fb_stack_pointer].rpm;
 }
 
-int hxcfe_getCurrentSkew(FBuilder* fb)
+int hxcfe_getCurrentSkew(HXCFE_FLPGEN* fb)
 {
 	return fb->fb_stack[fb->fb_stack_pointer].skew;
 }
 
-int hxcfe_generateDisk(FBuilder* fb,unsigned char * diskdata,int buffersize)
+int hxcfe_generateDisk(HXCFE_FLPGEN* fb,unsigned char * diskdata,int buffersize)
 {
 	int i,j,ret;
 	int numberofsector,sectorsize;
@@ -1150,11 +1231,11 @@ int hxcfe_generateDisk(FBuilder* fb,unsigned char * diskdata,int buffersize)
 	return HXCFE_NOERROR;
 }
 
-FLOPPY* hxcfe_getFloppy(FBuilder* fb)
+HXCFE_FLOPPY* hxcfe_getFloppy(HXCFE_FLPGEN* fb)
 {
 	int bitrate,trackencoding;
 	int i,j;
-	FLOPPY *f;
+	HXCFE_FLOPPY *f;
 
 	f=0;
 
@@ -1231,14 +1312,14 @@ FLOPPY* hxcfe_getFloppy(FBuilder* fb)
 	return f;
 }
 
-FLOPPY* hxcfe_sanityCheck(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk)
+HXCFE_FLOPPY* hxcfe_sanityCheck(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk)
 {
 	int numberoftrack,truenumberoftrack;
 	int numberofside,oldnumberofside,truenumberofside;
 	int needanewpass,defaultbitrate,defaultrpm;
 	int i;
-	SIDE	**		tmpsides;
-	SIDE * currentside;
+	HXCFE_SIDE	**		tmpsides;
+	HXCFE_SIDE * currentside;
 
 	if(floppydisk)
 	{
@@ -1289,8 +1370,8 @@ FLOPPY* hxcfe_sanityCheck(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk)
 		if(!floppydisk->tracks)
 		{
 			floppycontext->hxc_printf(MSG_WARNING,"Sanity Checker : No track allocated ? Please Check the Loader !");
-			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 		}
 
 		numberoftrack = floppydisk->floppyNumberOfTrack;
@@ -1336,8 +1417,8 @@ FLOPPY* hxcfe_sanityCheck(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk)
 							oldnumberofside = floppydisk->tracks[truenumberoftrack]->number_of_side;
 							// Realloc buffer
 							floppydisk->tracks[truenumberoftrack]->number_of_side = numberofside;
-							floppydisk->tracks[truenumberoftrack]->sides=(SIDE**)malloc(sizeof(SIDE*)*numberofside);
-							memset(floppydisk->tracks[truenumberoftrack]->sides,0,sizeof(SIDE*)*numberofside);
+							floppydisk->tracks[truenumberoftrack]->sides=(HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*numberofside);
+							memset(floppydisk->tracks[truenumberoftrack]->sides,0,sizeof(HXCFE_SIDE*)*numberofside);
 
 							if(tmpsides && oldnumberofside)
 								floppydisk->tracks[truenumberoftrack]->sides[0] = tmpsides[0];
@@ -1374,8 +1455,8 @@ FLOPPY* hxcfe_sanityCheck(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk)
 
 				if(!currentside)
 				{
-					currentside=(SIDE*)malloc(sizeof(SIDE));
-					memset(currentside,0,sizeof(SIDE));
+					currentside=(HXCFE_SIDE*)malloc(sizeof(HXCFE_SIDE));
+					memset(currentside,0,sizeof(HXCFE_SIDE));
 				}
 
 				floppydisk->tracks[truenumberoftrack]->sides[truenumberofside]=currentside;
@@ -1456,10 +1537,11 @@ fs_config fs_config_table[]=
 };
 
 
-FLOPPY * hxcfe_generateFloppy(HXCFLOPPYEMULATOR* floppycontext,char* path,int fsID,int * err_ret)
+HXCFE_FLOPPY * hxcfe_generateFloppy(HXCFE* floppycontext,char* path,int fsID,int * err_ret)
 {
 	int ret;
-	FLOPPY * newfloppy;
+	HXCFE_FLOPPY * newfloppy;
+	HXCFE_IMGLDR * imgldr_ctx;
 	plugins_ptr func_ptr;
 	int moduleID;
 	int i;
@@ -1468,40 +1550,100 @@ FLOPPY * hxcfe_generateFloppy(HXCFLOPPYEMULATOR* floppycontext,char* path,int fs
 
 	newfloppy=0;
 
-	if( fsID == FS_880KB_AMIGADOS )
-		moduleID = hxcfe_getLoaderID (floppycontext,PLUGIN_AMIGA_FS);
-	else
-		moduleID = hxcfe_getLoaderID (floppycontext,PLUGIN_FAT12FLOPPY);
-
-	i=0;
-	while(fs_config_table[i].name && (fs_config_table[i].fsID != fsID))
+	imgldr_ctx = hxcfe_imgInitLoader(floppycontext);
+	if(imgldr_ctx)
 	{
-		i++;
-	}
+		if( fsID == FS_880KB_AMIGADOS )
+			moduleID = hxcfe_imgGetLoaderID (imgldr_ctx,PLUGIN_AMIGA_FS);
+		else
+			moduleID = hxcfe_imgGetLoaderID (imgldr_ctx,PLUGIN_FAT12FLOPPY);
 
-	if(hxcfe_checkLoaderID(floppycontext,moduleID)==HXCFE_NOERROR && fs_config_table[i].name)
-	{
-		ret=staticplugins[moduleID](floppycontext,GETFUNCPTR,&func_ptr);
-		if(ret==HXCFE_NOERROR)
+		i=0;
+		while(fs_config_table[i].name && (fs_config_table[i].fsID != fsID))
 		{
-			newfloppy=malloc(sizeof(FLOPPY));
-			memset(newfloppy,0,sizeof(FLOPPY));
-			floppycontext->hxc_printf(MSG_INFO_0,"file loader found!");
-			ret=func_ptr.libLoad_DiskFile(floppycontext,newfloppy,path,fs_config_table[i].name);
-			if(ret!=HXCFE_NOERROR)
-			{
-				free(newfloppy);
-				newfloppy=0;
-			}
-			if(err_ret) *err_ret=ret;
-			return newfloppy;
+			i++;
 		}
+
+		if(hxcfe_checkLoaderID(imgldr_ctx,moduleID)==HXCFE_NOERROR && fs_config_table[i].name)
+		{
+			ret=staticplugins[moduleID](imgldr_ctx,GETFUNCPTR,&func_ptr);
+			if(ret==HXCFE_NOERROR)
+			{
+				newfloppy=malloc(sizeof(HXCFE_FLOPPY));
+				memset(newfloppy,0,sizeof(HXCFE_FLOPPY));
+				floppycontext->hxc_printf(MSG_INFO_0,"file loader found!");
+				ret=func_ptr.libLoad_DiskFile(imgldr_ctx,newfloppy,path,fs_config_table[i].name);
+				if(ret!=HXCFE_NOERROR)
+				{
+					free(newfloppy);
+					newfloppy=0;
+				}
+				if(err_ret) *err_ret=ret;
+
+				hxcfe_imgDeInitLoader(imgldr_ctx);
+
+				return newfloppy;
+			}
+		}
+
+		floppycontext->hxc_printf(MSG_ERROR,"Bad plugin ID : 0x%x",moduleID);
+
+		ret=HXCFE_BADPARAMETER;
+		if(err_ret) *err_ret=ret;
+
+		hxcfe_imgDeInitLoader(imgldr_ctx);
 	}
-
-	floppycontext->hxc_printf(MSG_ERROR,"Bad plugin ID : 0x%x",moduleID);
-
-	ret=HXCFE_BADPARAMETER;
-	if(err_ret) *err_ret=ret;
 	return newfloppy;
 }
+
+int hxcfe_getTrackBitrate(HXCFE_FLOPPY * fp,int track,int side)
+{
+	if(fp)
+	{
+		return fp->tracks[track]->sides[side]->bitrate;
+	}
+	
+	return 0;
+}
+
+unsigned char hxcfe_getTrackEncoding(HXCFE_FLOPPY * fp,int track,int side)
+{
+	if(fp)
+	{
+		return fp->tracks[track]->sides[side]->track_encoding;
+	}
+	
+	return 0;
+}
+
+unsigned long hxcfe_getTrackLength(HXCFE_FLOPPY * fp,int track,int side)
+{
+	if(fp)
+	{
+		return fp->tracks[track]->sides[side]->tracklen;
+	}
+	
+	return 0;
+}
+
+unsigned short hxcfe_getTrackRPM(HXCFE_FLOPPY * fp,int track)
+{
+	if(fp)
+	{
+		return fp->tracks[track]->floppyRPM;
+	}
+	
+	return 0;
+}
+
+unsigned char hxcfe_getTrackNumberOfSide(HXCFE_FLOPPY * fp,int track)
+{
+	if(fp)
+	{
+		return fp->tracks[track]->number_of_side;
+	}
+	
+	return 0;
+}
+
 

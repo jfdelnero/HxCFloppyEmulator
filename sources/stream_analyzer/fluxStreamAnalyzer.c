@@ -51,6 +51,8 @@
 #include <math.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -64,7 +66,7 @@
 
 #define MAXPULSESKEW 10
 
-//#define FLUXSTREAMDBG 1
+#define FLUXSTREAMDBG 1
 
 #define SECONDPASSANALYSIS 1
 
@@ -72,7 +74,7 @@
 #define BLOCK_TIME 1000
 #define TICKFREQ 250000000 // 250Mhz tick
 
-HXCFLOPPYEMULATOR* floppycont;
+HXCFE* floppycont;
 
 typedef struct stathisto_
 {
@@ -115,7 +117,7 @@ static void computehistogram(unsigned long *indata,int size,unsigned long *outda
 	}
 }
 
-static int detectpeaks(HXCFLOPPYEMULATOR* floppycontext,unsigned long *histogram)
+static int detectpeaks(HXCFE* floppycontext,unsigned long *histogram)
 {
 	int i,k;
 	int total;
@@ -386,7 +388,7 @@ static void quickSort(s_match * table, int start, int end)
     quickSort(table, right+1, end);
 }
 
-SIDE* ScanAndDecodeStream(HXCFLOPPYEMULATOR* floppycontext,int initialvalue,s_track_dump * track,unsigned long * overlap_tab,unsigned long start_index, short rpm,int phasecorrection)
+HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKSTREAM * track,unsigned long * overlap_tab,unsigned long start_index, short rpm,int phasecorrection)
 {
 #define TEMPBUFSIZE 256*1024
 	int pumpcharge;
@@ -406,7 +408,7 @@ SIDE* ScanAndDecodeStream(HXCFLOPPYEMULATOR* floppycontext,int initialvalue,s_tr
 
 	pll_stat pll;
 
-	SIDE* hxcfe_track;
+	HXCFE_SIDE* hxcfe_track;
 
 	centralvalue = initialvalue;
 	pumpcharge = initialvalue ;
@@ -593,7 +595,7 @@ static unsigned long time_to_tick(unsigned long time)
 	return (unsigned long) (double)(( (double)time * TICKFREQ ) / (1000 * 1000 * 100 ) );
 }
 
-static void cleanupTrack(SIDE *curside)
+static void cleanupTrack(HXCFE_SIDE *curside)
 {
 	unsigned long tracklen,k;
 	unsigned char l;
@@ -633,7 +635,7 @@ static void cleanupTrack(SIDE *curside)
 	}
 }
 
-static unsigned long GetDumpTimelength(s_track_dump * track_dump)
+static unsigned long GetDumpTimelength(HXCFE_TRKSTREAM * track_dump)
 {
 	unsigned long len;
 
@@ -656,8 +658,8 @@ static unsigned long GetDumpTimelength(s_track_dump * track_dump)
 
 typedef struct pulsesblock_
 {
-	unsigned long timelenght;
-	unsigned long ticklenght;
+	unsigned long timelength;
+	unsigned long ticklength;
 	unsigned long start_index;
 	unsigned long end_index;
 	unsigned long number_of_pulses;
@@ -669,7 +671,7 @@ typedef struct pulsesblock_
 	int locked;
 }pulsesblock;
 
-static pulsesblock * ScanAndFindBoundaries(s_track_dump * track_dump, int blocktimelength, unsigned long number_of_block)
+static pulsesblock * ScanAndFindBoundaries(HXCFE_TRKSTREAM * track_dump, int blocktimelength, unsigned long number_of_block)
 {
 	unsigned long i,j;
 	pulsesblock * pb;
@@ -699,8 +701,8 @@ static pulsesblock * ScanAndFindBoundaries(s_track_dump * track_dump, int blockt
 			};
 
 			pb[i].end_index = j;
-			pb[i].ticklenght = len;
-			pb[i].timelenght = tick_to_time(len);
+			pb[i].ticklength = len;
+			pb[i].timelength = tick_to_time(len);
 			pb[i].number_of_pulses = ( pb[i].end_index - pb[i].start_index );
 
 		}
@@ -710,7 +712,7 @@ static pulsesblock * ScanAndFindBoundaries(s_track_dump * track_dump, int blockt
 	return pb;
 }
 
-static unsigned long ScanAndGetIndexPeriod(s_track_dump * track_dump)
+static unsigned long ScanAndGetIndexPeriod(HXCFE_TRKSTREAM * track_dump)
 {
 	unsigned long len, nb_rotation;
 
@@ -770,7 +772,7 @@ static unsigned long ScanAndGetIndexPeriod(s_track_dump * track_dump)
 	return tick_to_time(globalperiod);
 }
 
-static void compareblock(s_track_dump * td,pulsesblock * src_block, unsigned long dst_block_offset,unsigned long * pulses_ok,unsigned long * pulses_failed, unsigned long * margetab,int partial)
+static void compareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, unsigned long dst_block_offset,unsigned long * pulses_ok,unsigned long * pulses_failed, unsigned long * margetab,int partial)
 {
 	long marge;
 	int time1,time2,pourcent_error;
@@ -855,7 +857,7 @@ static void compareblock(s_track_dump * td,pulsesblock * src_block, unsigned lon
 
 }
 
-static int fastcompareblock(s_track_dump * td,pulsesblock * src_block, unsigned long dst_block_offset,unsigned long * margetab)
+static int fastcompareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, unsigned long dst_block_offset,unsigned long * margetab)
 {
 	long marge;
 	int time1,time2,pourcent_error;
@@ -926,7 +928,7 @@ static int fastcompareblock(s_track_dump * td,pulsesblock * src_block, unsigned 
 	return 1;
 }
 
-static unsigned long detectflakeybits(s_track_dump * td,pulsesblock * src_block, unsigned long dst_block_offset,unsigned long * pulses_ok,unsigned long * pulses_failed,unsigned long * overlap_tab,unsigned long maxptr,unsigned long * margetab)
+static unsigned long detectflakeybits(HXCFE_TRKSTREAM * td,pulsesblock * src_block, unsigned long dst_block_offset,unsigned long * pulses_ok,unsigned long * pulses_failed,unsigned long * overlap_tab,unsigned long maxptr,unsigned long * margetab)
 {
 	long marge;
 	int time1,time2,pourcent_error;
@@ -1055,7 +1057,7 @@ static unsigned long getnearestbit(unsigned long * src,unsigned long index,unsig
 	return 0;
 }
 
-static unsigned long compare_block_timebased(HXCFLOPPYEMULATOR* floppycontext,s_track_dump * td,pulsesblock * prev_block,pulsesblock * src_block,pulsesblock * next_block, unsigned long * overlap_tab,long *in_shift)
+static unsigned long compare_block_timebased(HXCFE* floppycontext,HXCFE_TRKSTREAM * td,pulsesblock * prev_block,pulsesblock * src_block,pulsesblock * next_block, unsigned long * overlap_tab,long *in_shift)
 {
 	unsigned long i;
 	unsigned long src_start_index,src_last_index;
@@ -1269,7 +1271,7 @@ static int getNearestMatchedBlock(pulsesblock * pb, int dir, int currentblock,in
 	}
 }
 
-unsigned long searchBestOverlap(s_track_dump * track_dump, pulsesblock * src_block, unsigned long repeat_index, unsigned long tick_down_max, unsigned long tick_up_max, s_match * match_table,unsigned long * margetab, int * searchstate,int fullcompare)
+unsigned long searchBestOverlap(HXCFE_TRKSTREAM * track_dump, pulsesblock * src_block, unsigned long repeat_index, unsigned long tick_down_max, unsigned long tick_up_max, s_match * match_table,unsigned long * margetab, int * searchstate,int fullcompare)
 {
 	unsigned long i_down,i_up;
 	unsigned long tick_up;
@@ -1414,7 +1416,7 @@ unsigned long searchBestOverlap(s_track_dump * track_dump, pulsesblock * src_blo
 	return mt_i;
 }
 
-static int GetTickCnt(s_track_dump * track_dump,unsigned int start, unsigned int end)
+static int GetTickCnt(HXCFE_TRKSTREAM * track_dump,unsigned int start, unsigned int end)
 {
 	unsigned int i,ticknum;
 
@@ -1429,7 +1431,7 @@ static int GetTickCnt(s_track_dump * track_dump,unsigned int start, unsigned int
 	return ticknum;
 }
 
-static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontext,FXS * fxs,s_track_dump * track_dump,unsigned long indexperiod,unsigned long nbblock,pulsesblock * pb)
+static unsigned long * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * track_dump,unsigned long indexperiod,unsigned long nbblock,pulsesblock * pb)
 {
 #ifdef SECONDPASSANALYSIS
 	unsigned long block_analysed;
@@ -2227,7 +2229,7 @@ static unsigned long * ScanAndFindRepeatedBlocks(HXCFLOPPYEMULATOR* floppycontex
 	return overlap_pulses_tab;
 }
 
-static unsigned long getbestindex(s_track_dump *track_dump,unsigned long * overlap_tab,int bestindex,unsigned long * score,unsigned long nb_revolution)
+static unsigned long getbestindex(HXCFE_TRKSTREAM *track_dump,unsigned long * overlap_tab,int bestindex,unsigned long * score,unsigned long nb_revolution)
 {
 	unsigned long i,j;
 	unsigned long first_index,last_index,bad_pulses;
@@ -2288,7 +2290,7 @@ static unsigned long getbestindex(s_track_dump *track_dump,unsigned long * overl
 	return bestval;
 }
 
-void AdjustTrackPeriod(HXCFLOPPYEMULATOR* floppycontext,SIDE * curside_S0,SIDE * curside_S1)
+void AdjustTrackPeriod(HXCFE* floppycontext,HXCFE_SIDE * curside_S0,HXCFE_SIDE * curside_S1)
 {
 	int tracklen,i;
 	double period_s0,period_s1;
@@ -2306,16 +2308,16 @@ void AdjustTrackPeriod(HXCFLOPPYEMULATOR* floppycontext,SIDE * curside_S0,SIDE *
 	}
 }
 
-FXS * hxcfe_initFxStream(HXCFLOPPYEMULATOR * hxcfe)
+HXCFE_FXSA * hxcfe_initFxStream(HXCFE * hxcfe)
 {
-	FXS * fxs;
+	HXCFE_FXSA * fxs;
 
 	if(hxcfe)
 	{
-		fxs = malloc(sizeof(FXS));
+		fxs = malloc(sizeof(HXCFE_FXSA));
 		if(fxs)
 		{
-			memset(fxs,0,sizeof(FXS));
+			memset(fxs,0,sizeof(HXCFE_FXSA));
 			fxs->hxcfe = hxcfe;
 			fxs->phasecorrection = 8;
 			return fxs;
@@ -2325,7 +2327,7 @@ FXS * hxcfe_initFxStream(HXCFLOPPYEMULATOR * hxcfe)
 	return 0;
 }
 
-void hxcfe_FxStream_setResolution(FXS * fxs,int step)
+void hxcfe_FxStream_setResolution(HXCFE_FXSA * fxs,int step)
 {
 	if(fxs)
 	{
@@ -2333,7 +2335,7 @@ void hxcfe_FxStream_setResolution(FXS * fxs,int step)
 	}
 }
 
-void hxcfe_FxStream_setBitrate(FXS * fxs,int bitrate)
+void hxcfe_FxStream_setBitrate(HXCFE_FXSA * fxs,int bitrate)
 {
 	if(fxs)
 	{
@@ -2341,7 +2343,7 @@ void hxcfe_FxStream_setBitrate(FXS * fxs,int bitrate)
 	}
 }
 
-void hxcfe_FxStream_setPhaseCorrectionFactor(FXS * fxs,int phasefactor)
+void hxcfe_FxStream_setPhaseCorrectionFactor(HXCFE_FXSA * fxs,int phasefactor)
 {
 	if(fxs)
 	{
@@ -2349,15 +2351,15 @@ void hxcfe_FxStream_setPhaseCorrectionFactor(FXS * fxs,int phasefactor)
 	}
 }
 
-s_track_dump * hxcfe_FxStream_ImportStream(FXS * fxs,void * stream,int wordsize,unsigned int nbword)
+HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream(HXCFE_FXSA * fxs,void * stream,int wordsize,unsigned int nbword)
 {
-	s_track_dump* track_dump;
+	HXCFE_TRKSTREAM* track_dump;
 	unsigned int i;
 
-	track_dump=malloc(sizeof(s_track_dump));
+	track_dump=malloc(sizeof(HXCFE_TRKSTREAM));
 	if(track_dump)
 	{
-		memset(track_dump,0,sizeof(s_track_dump));
+		memset(track_dump,0,sizeof(HXCFE_TRKSTREAM));
 
 		track_dump->track_dump = malloc(nbword * sizeof(unsigned long) );
 		if(track_dump->track_dump)
@@ -2397,7 +2399,7 @@ s_track_dump * hxcfe_FxStream_ImportStream(FXS * fxs,void * stream,int wordsize,
 	return 0;
 }
 
-void hxcfe_FxStream_AddIndex(FXS * fxs,s_track_dump * std,unsigned long streamposition)
+void hxcfe_FxStream_AddIndex(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * std,unsigned long streamposition)
 {
 	unsigned long cellpos,i;
 	if(fxs)
@@ -2426,7 +2428,7 @@ void hxcfe_FxStream_AddIndex(FXS * fxs,s_track_dump * std,unsigned long streampo
 	}
 }
 
-int hxcfe_FxStream_GetNumberOfRevolution(FXS * fxs,s_track_dump * std)
+int hxcfe_FxStream_GetNumberOfRevolution(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * std)
 {
 	if(fxs)
 	{
@@ -2444,7 +2446,7 @@ int hxcfe_FxStream_GetNumberOfRevolution(FXS * fxs,s_track_dump * std)
 	return 0;
 }
 
-unsigned long hxcfe_FxStream_GetRevolutionPeriod(FXS * fxs,s_track_dump * std,int revolution)
+unsigned long hxcfe_FxStream_GetRevolutionPeriod(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * std,int revolution)
 {
 	if(fxs)
 	{
@@ -2462,7 +2464,7 @@ unsigned long hxcfe_FxStream_GetRevolutionPeriod(FXS * fxs,s_track_dump * std,in
 	return 0;
 }
 
-unsigned long hxcfe_FxStream_GetMeanRevolutionPeriod(FXS * fxs,s_track_dump * std)
+unsigned long hxcfe_FxStream_GetMeanRevolutionPeriod(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * std)
 {
 	unsigned long nb_rotation;
 
@@ -2496,26 +2498,26 @@ unsigned long hxcfe_FxStream_GetMeanRevolutionPeriod(FXS * fxs,s_track_dump * st
 	return tick_to_time(globalperiod);
 }
 
-FLOPPY * makefloppyfromtrack(SIDE * side)
+HXCFE_FLOPPY * makefloppyfromtrack(HXCFE_SIDE * side)
 {
-	FLOPPY * newfloppy;
+	HXCFE_FLOPPY * newfloppy;
 
-	newfloppy=malloc(sizeof(FLOPPY));
+	newfloppy=malloc(sizeof(HXCFE_FLOPPY));
 	if(newfloppy)
 	{
-		memset(newfloppy,0,sizeof(FLOPPY));
+		memset(newfloppy,0,sizeof(HXCFE_FLOPPY));
 		newfloppy->floppyBitRate = 250000;
 		newfloppy->floppyNumberOfSide = 1;
 		newfloppy->floppyNumberOfTrack = 1;
 		newfloppy->floppySectorPerTrack = -1;
 
-		newfloppy->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*newfloppy->floppyNumberOfTrack);
-		memset(newfloppy->tracks,0,sizeof(CYLINDER*)*newfloppy->floppyNumberOfTrack);
+		newfloppy->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*newfloppy->floppyNumberOfTrack);
+		memset(newfloppy->tracks,0,sizeof(HXCFE_CYLINDER*)*newfloppy->floppyNumberOfTrack);
 
 		newfloppy->tracks[0] = allocCylinderEntry(0,newfloppy->floppyNumberOfSide);
 
-		newfloppy->tracks[0]->sides=(SIDE**)malloc(sizeof(SIDE*)*newfloppy->floppyNumberOfSide);
-		memset(newfloppy->tracks[0]->sides,0,sizeof(SIDE*)*newfloppy->floppyNumberOfSide);
+		newfloppy->tracks[0]->sides=(HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*newfloppy->floppyNumberOfSide);
+		memset(newfloppy->tracks[0]->sides,0,sizeof(HXCFE_SIDE*)*newfloppy->floppyNumberOfSide);
 
 		newfloppy->tracks[0]->sides[0] = side;
 	}
@@ -2523,7 +2525,7 @@ FLOPPY * makefloppyfromtrack(SIDE * side)
 	return newfloppy;
 }
 
-void freefloppy(FLOPPY * fp)
+void freefloppy(HXCFE_FLOPPY * fp)
 {
 	if(fp)
 	{
@@ -2570,14 +2572,14 @@ int tracktypelist[]=
 	UNKNOWN_ENCODING
 };
 
-SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
+HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * std)
 {
-	HXCFLOPPYEMULATOR * hxcfe;
+	HXCFE * hxcfe;
 	int bitrate;
 	unsigned long totallen, nbblock,indexperiod;
 	unsigned long * histo;
-	SIDE* currentside;
-	SIDE* revolutionside[32];
+	HXCFE_SIDE* currentside;
+	HXCFE_SIDE* revolutionside[32];
 
 	unsigned long * overlap_tab;
 	unsigned long first_index;
@@ -2592,9 +2594,9 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 	short rpm;
 	int nb_sectorfound,sectnum;
 
-	SECTORSEARCH* ss;
-	FLOPPY *fp;
-	SECTORCONFIG** scl;
+	HXCFE_SECTORACCESS* ss;
+	HXCFE_FLOPPY *fp;
+	HXCFE_SECTCFG** scl;
 
 	currentside = 0;
 
@@ -2608,7 +2610,7 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 		// Number of block of 10ms.
 		nbblock = totallen / ( BLOCK_TIME * 100 );
 
-		hxcfe->hxc_printf(MSG_DEBUG,"Track dump lenght : %d us, number of block : %d (block time : %d us), Number of pulses : %d",totallen/100,nbblock,BLOCK_TIME,std->nb_of_pulses);
+		hxcfe->hxc_printf(MSG_DEBUG,"Track dump length : %d us, number of block : %d (block time : %d us), Number of pulses : %d",totallen/100,nbblock,BLOCK_TIME,std->nb_of_pulses);
 
 		// Scan and find block index boundaries.
 		pb = ScanAndFindBoundaries(std, BLOCK_TIME, nbblock);
@@ -2672,7 +2674,7 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 					}
 
 #ifdef FLUXSTREAMDBG
-					fxs->hxcfe->hxc_printf(MSG_DEBUG,"First valid index : %d [max : %d] - track lenght : %d - overlap : %d",first_index,std->nb_of_pulses,track_len,overlap_tab[first_index]);
+					fxs->hxcfe->hxc_printf(MSG_DEBUG,"First valid index : %d [max : %d] - track length : %d - overlap : %d",first_index,std->nb_of_pulses,track_len,overlap_tab[first_index]);
 #endif
 
 					if(track_len)
@@ -2764,7 +2766,7 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 						i = 0;
 						while( tracktypelist[i] != UNKNOWN_ENCODING )
 						{
-							ss = hxcfe_initSectorSearch(fxs->hxcfe,fp);
+							ss = hxcfe_initSectorAccess(fxs->hxcfe,fp);
 
 							scl = hxcfe_getAllTrackSectors(ss,0,0,tracktypelist[i],&nb_sectorfound);
 
@@ -2785,7 +2787,7 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 								free(scl);
 							}
 
-							hxcfe_deinitSectorSearch(ss);
+							hxcfe_deinitSectorAccess(ss);
 
 							if(first_track_encoding != UNKNOWN_ENCODING)
 								currentside->track_encoding = first_track_encoding;
@@ -2866,7 +2868,7 @@ SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(FXS * fxs,s_track_dump * std)
 	return currentside;
 }
 
-void hxcfe_FxStream_FreeStream(FXS * fxs,s_track_dump * stream)
+void hxcfe_FxStream_FreeStream(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream)
 {
 	if(fxs)
 	{
@@ -2882,7 +2884,7 @@ void hxcfe_FxStream_FreeStream(FXS * fxs,s_track_dump * stream)
 	}
 }
 
-void hxcfe_deinitFxStream(FXS * fxs)
+void hxcfe_deinitFxStream(HXCFE_FXSA * fxs)
 {
 	if(fxs)
 	{

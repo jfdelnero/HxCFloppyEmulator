@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -87,27 +89,27 @@
 #define TOTAL_OS ((OS1_HIGH-OS1_LOW)+(OS2_HIGH-OS2_LOW)+(OS3_HIGH-OS3_LOW))
 
 
-int EMUII_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int EMUII_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"EMAX_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMAX_libIsValidDiskFile");
 	
 	if( hxc_checkfileext(imgfile,"eii") )
 	{
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"EMUII_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"EMUII_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 				
-		floppycontext->hxc_printf(MSG_DEBUG,"EMUII_libIsValidDiskFile : EMUII file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUII_libIsValidDiskFile : EMUII file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"EMUII_libIsValidDiskFile : non EMUII file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUII_libIsValidDiskFile : non EMUII file !");
 		return HXCFE_BADFILE;
 	}
 	
@@ -116,20 +118,20 @@ int EMUII_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 
 
-int EMUII_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int EMUII_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	
 	FILE * f_eii,*f_os;
 	unsigned int i;
 	char os_filename[512];
 
-	CYLINDER* currentcylinder;
-	SIDE* currentside;
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SIDE* currentside;
 	unsigned char sector_data[0xE00];
 	int tracknumber,sidenumber;
  
 
-	floppycontext->hxc_printf(MSG_DEBUG,"EMUII_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUII_libLoad_DiskFile %s",imgfile);
 	
 	strcpy(os_filename,imgfile);
 	i=strlen(os_filename)-1;
@@ -146,14 +148,14 @@ int EMUII_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,
 	f_os=hxc_fopen(os_filename,"rb");
 	if(f_os==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open os file %s !",os_filename);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open os file %s !",os_filename);
 		return HXCFE_ACCESSERROR;
 	}
 	
 	f_eii=hxc_fopen(imgfile,"rb");
 	if(f_eii==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 	
@@ -163,7 +165,7 @@ int EMUII_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,
 	floppydisk->floppySectorPerTrack=1;
 	floppydisk->floppyiftype=EMU_SHUGART_FLOPPYMODE;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"EmuII File : %d track, %d side, %d bit/s, %d sectors, mode %d",
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EmuII File : %d track, %d side, %d bit/s, %d sectors, mode %d",
 		floppydisk->floppyNumberOfTrack,
 		floppydisk->floppyNumberOfSide,
 		floppydisk->floppyBitRate,
@@ -171,8 +173,8 @@ int EMUII_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,
 		floppydisk->floppyiftype);
 
 
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-	memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 	for(i=0;i<(unsigned int)(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide);i++)
 	{			
@@ -204,7 +206,7 @@ int EMUII_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,
 		}
 			
 
-		floppycontext->hxc_printf(MSG_DEBUG,"track %d side %d at offset 0x%x (0x%x bytes)",
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"track %d side %d at offset 0x%x (0x%x bytes)",
 			tracknumber,
 			sidenumber,
 			(0xE00*tracknumber*2)+(sidenumber*0xE00),
@@ -214,7 +216,7 @@ int EMUII_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,
 		currentside=currentcylinder->sides[sidenumber];					
 		currentside->number_of_sector=floppydisk->floppySectorPerTrack;
 			
-		BuildEmuIITrack(floppycontext,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,2);
+		BuildEmuIITrack(imgldr_ctx->hxcfe,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,2);
 			
 	}			
 	
@@ -224,7 +226,7 @@ int EMUII_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,
 
 }
 
-int EMUII_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int EMUII_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 	static const char plug_id[]="EMULATORII_EMUII";
 	static const char plug_desc[]="E-mu Emulator II *.eii Loader";
@@ -239,7 +241,7 @@ int EMUII_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infoty
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

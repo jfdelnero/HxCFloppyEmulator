@@ -28,6 +28,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "xml_loader.h"
@@ -36,10 +38,10 @@
 
 #include "libhxcadaptor.h"
 
-void gettracktype(SECTORSEARCH* ss,int track,int side,int * nbsect,int *firstsectid,char * format,int *sectorsize)
+void gettracktype(HXCFE_SECTORACCESS* ss,int track,int side,int * nbsect,int *firstsectid,char * format,int *sectorsize)
 {
 	int i;
-	SECTORCONFIG** sca;
+	HXCFE_SECTCFG** sca;
 	int nb_sectorfound;
 
 	*sectorsize = 512;
@@ -85,7 +87,7 @@ void gettracktype(SECTORSEARCH* ss,int track,int side,int * nbsect,int *firstsec
 
 typedef struct sect_offset_
 {
-	SECTORCONFIG* ss;
+	HXCFE_SECTCFG* ss;
 	unsigned long offset;
 }sect_offset;
 
@@ -120,27 +122,27 @@ static void quickSort(sect_offset ** table, int start, int end)
     quickSort(table, right+1, end);
 }
 
-int XML_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int i,j,k,s;
 	FILE * xmlfile;
 	int fileoffset,nb_sectorfound;
 	int nbsect,firstsectid,sectorsize,imagesize;
 	char trackformat[32];
-	SECTORSEARCH* ss;
-	SECTORCONFIG** sca;
+	HXCFE_SECTORACCESS* ss;
+	HXCFE_SECTCFG** sca;
 	sect_offset ** sorted_sectoffset,**sectoffset;
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Write XML file %s...",filename);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write XML file %s...",filename);
 
 	fileoffset = 0;
 
 	xmlfile=hxc_fopen(filename,"w+");
 	if(xmlfile)
 	{
-		imagesize = hxcfe_getFloppySize(floppycontext,floppy,0);
+		imagesize = hxcfe_getFloppySize(imgldr_ctx->hxcfe,floppy,0);
 
-		ss=hxcfe_initSectorSearch(floppycontext,floppy);
+		ss=hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 		if(ss)
 		{
 			fprintf(xmlfile,"<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n");
@@ -278,7 +280,7 @@ int XML_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 					fprintf(xmlfile,"\t\t\t</track>\n");
 				}
 			}
-			hxcfe_deinitSectorSearch(ss);
+			hxcfe_deinitSectorAccess(ss);
 		}
 
 		fprintf(xmlfile,"\t\t</track_list>\n");

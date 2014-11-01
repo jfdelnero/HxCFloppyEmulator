@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "dmk_format.h"
@@ -155,7 +157,7 @@ int dmkbitlookingfor(unsigned char * input_data,unsigned long intput_data_size,i
 	return bitoffset;
 }
 
-int DMK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int DMK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int i,j,k,nbsector_mfm,nbsector_fm;
 	unsigned char IDAMbuf[0x80];
@@ -170,13 +172,13 @@ int DMK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	unsigned char mfm_buffer[16];
 	int track_size;
 
-	SECTORSEARCH* ss;
-	SECTORCONFIG** sca_mfm;
-	SECTORCONFIG** sca_fm;
+	HXCFE_SECTORACCESS* ss;
+	HXCFE_SECTCFG** sca_mfm;
+	HXCFE_SECTCFG** sca_fm;
 
 	dmk_header dmkheader;
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Write DMK file %s...",filename);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write DMK file %s...",filename);
 
 	dmkdskfile=hxc_fopen(filename,"wb");
 	if(dmkdskfile)
@@ -198,7 +200,7 @@ int DMK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 			fwrite(&dmkheader,sizeof(dmk_header),1,dmkdskfile);
 
-			ss=hxcfe_initSectorSearch(floppycontext,floppy);
+			ss=hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 			if(ss)
 			{
 				for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
@@ -347,7 +349,7 @@ int DMK_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 					}
 				}
 
-				hxcfe_deinitSectorSearch(ss);
+				hxcfe_deinitSectorAccess(ss);
 
 			}
 

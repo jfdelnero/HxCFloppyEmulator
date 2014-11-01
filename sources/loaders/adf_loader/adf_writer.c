@@ -28,6 +28,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "adf_loader.h"
@@ -36,7 +39,7 @@
 
 #include "libhxcadaptor.h"
 
-int ADF_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int ADF_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int i,j,k,s;
 	FILE * rawfile;
@@ -44,10 +47,10 @@ int ADF_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	int sectorsize,track_type_id;
 	int systblockfound;
 
-	SECTORSEARCH* ss;
-	SECTORCONFIG* sc;
+	HXCFE_SECTORACCESS* ss;
+	HXCFE_SECTCFG* sc;
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Write ADF file %s...",filename);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write ADF file %s...",filename);
 
 	track_type_id=0;
 
@@ -63,7 +66,7 @@ int ADF_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	rawfile=hxc_fopen(filename,"wb");
 	if(rawfile)
 	{
-		ss=hxcfe_initSectorSearch(floppycontext,floppy);
+		ss=hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 		if(ss)
 		{
 			for(j=0;j<80;j++)
@@ -96,7 +99,7 @@ int ADF_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 						}
 						else
 						{
-							floppycontext->hxc_printf(MSG_WARNING,"T%.2dH%dS%d : Amiga Sector not found !?!...",j,i,s);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_WARNING,"T%.2dH%dS%d : Amiga Sector not found !?!...",j,i,s);
 							// Sector Not found ?!?
 							// Put a blank data sector instead...
 							memset(blankblock,0x00,sizeof(blankblock));
@@ -107,7 +110,7 @@ int ADF_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 					}
 				}
 			}
-			hxcfe_deinitSectorSearch(ss);
+			hxcfe_deinitSectorAccess(ss);
 		}
 		hxc_fclose(rawfile);
 	}

@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -58,12 +60,12 @@
 
 #include "libhxcadaptor.h"
 
-int FDI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int FDI_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	FILE *f;
 	fdi_header f_header;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"fdi") )
 	{
@@ -76,11 +78,11 @@ int FDI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 			if(f_header.signature[0]=='F' && f_header.signature[1]=='D' && f_header.signature[2]=='I')
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile : FDI file !");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile : FDI file !");
 				return HXCFE_VALIDFILE;
 			}
 
-			floppycontext->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile : non FDI file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile : non FDI file !");
 			return HXCFE_BADFILE;
 		}
 
@@ -88,7 +90,7 @@ int FDI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile : non FDI file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile : non FDI file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -97,7 +99,7 @@ int FDI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 
 
-int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	
 	FILE * f;
@@ -109,19 +111,19 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned char trackformat;
 	unsigned char skew;
 	unsigned int  trackoffset,tempoffset,file_offset;
-	SECTORCONFIG* sectorconfig;
-	CYLINDER* currentcylinder;
+	HXCFE_SECTCFG* sectorconfig;
+	HXCFE_CYLINDER* currentcylinder;
 
 	fdi_header f_header;
 	fdi_track_header track_header;
 	fdi_sector_header sector_header;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"FDI_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDI_libLoad_DiskFile %s",imgfile);
 	
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 	
@@ -134,14 +136,14 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	if(f_header.signature[0]!='F' || f_header.signature[1]!='D' || f_header.signature[2]!='I')
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Bad FDI file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Bad FDI file !");
 		hxc_fclose(f);
 		return HXCFE_BADFILE;
 	}
 
 	fseek(f,f_header.diskdescription_offset,SEEK_SET);
 	fread(tempsector,f_header.data_offset - f_header.diskdescription_offset,1,f);
-	floppycontext->hxc_printf(MSG_INFO_1,"Disk:%s",tempsector);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Disk:%s",tempsector);
 
 
 	trackoffset=f_header.additionnal_infos_len+0xE;
@@ -160,9 +162,9 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	floppydisk->floppyNumberOfTrack=number_of_track;
 	floppydisk->floppyNumberOfSide=number_of_side;
 	floppydisk->floppySectorPerTrack=number_of_sectorpertrack;
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 	trackformat=IBMFORMAT_DD;		
-	floppycontext->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
 		
 			
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
@@ -173,10 +175,10 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 		{
 			fread(&track_header,sizeof(fdi_track_header),1,f);
-			floppycontext->hxc_printf(MSG_DEBUG,"[%d:%d] %d sectors, Track Offset :0x%x:",j,i,track_header.number_of_sectors,track_header.track_offset+f_header.data_offset);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"[%d:%d] %d sectors, Track Offset :0x%x:",j,i,track_header.number_of_sectors,track_header.track_offset+f_header.data_offset);
 
-			sectorconfig=(SECTORCONFIG*)malloc(sizeof(SECTORCONFIG)*track_header.number_of_sectors);
-			memset(sectorconfig,0,sizeof(SECTORCONFIG)*track_header.number_of_sectors);
+			sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*track_header.number_of_sectors);
+			memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*track_header.number_of_sectors);
 			
 			for(k=0;k<track_header.number_of_sectors;k++)
 			{
@@ -184,7 +186,7 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 				file_offset=f_header.data_offset+track_header.track_offset+sector_header.sector_offset;
 
-				floppycontext->hxc_printf(MSG_DEBUG,"[%d:%d] Cyl:%d,Head:%d,Sec:%d,Size:%d,Flags:0x%.2X,Offset:0x%.8x",
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"[%d:%d] Cyl:%d,Head:%d,Sec:%d,Size:%d,Flags:0x%.2X,Offset:0x%.8x",
 					j,i,sector_header.cylinder_number,                                                                                                   
 					sector_header.head_number,
 					sector_header.sector_number,
@@ -238,17 +240,17 @@ int FDI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	}
 			
 			
-	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 	hxc_fclose(f);
 
-	hxcfe_sanityCheck(floppycontext,floppydisk);
+	hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
 	return HXCFE_NOERROR;
 }
 			
 
-int FDI_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int FDI_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ZXSPECTRUM_FDI";
@@ -264,7 +266,7 @@ int FDI_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

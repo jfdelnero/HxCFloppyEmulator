@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -59,20 +61,20 @@
 
 #include "libhxcadaptor.h"
 
-int STT_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int STT_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 	FILE * f;
 	stt_header STTHEADER;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"STT_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STT_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"stt") )
 	{
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"STT_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"STT_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
@@ -87,23 +89,23 @@ int STT_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 		if(STTHEADER.stt_signature!=0x4D455453) //"STEM"
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"STT_libIsValidDiskFile : non STT IMG file - bad signature !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STT_libIsValidDiskFile : non STT IMG file - bad signature !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"STT_libIsValidDiskFile : STT file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STT_libIsValidDiskFile : STT file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"STT_libIsValidDiskFile : non STT file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STT_libIsValidDiskFile : non STT file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-int STT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int STT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
@@ -114,20 +116,20 @@ int STT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned short sectorsize,rpm;
 	unsigned char trackformat;
 	unsigned long file_track_list_offset;
-	CYLINDER* currentcylinder;
-	SIDE* currentside;
-	SECTORCONFIG* sectorconfig;
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SIDE* currentside;
+	HXCFE_SECTCFG* sectorconfig;
 	stt_header STTHEADER;
 	stt_track_offset STTTRACKOFFSET;
 	stt_track_header STTTRACKHEADER;
 	stt_sector       STTSECTOR;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"STT_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STT_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -140,7 +142,7 @@ int STT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	if(STTHEADER.stt_signature!=0x4D455453) //"STEM"
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"non STT IMG file - bad signature !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"non STT IMG file - bad signature !");
 		hxc_fclose(f);
 
 		return HXCFE_BADFILE;
@@ -153,8 +155,8 @@ int STT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	floppydisk->floppyBitRate=250000;
 	floppydisk->floppyiftype=ATARIST_DD_FLOPPYMODE;
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-	memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 	rpm=300; // normal rpm
 
@@ -162,7 +164,7 @@ int STT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	gap3len=80;
 	sectorsize=512;
 
-	floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
 	for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 	{
@@ -183,7 +185,7 @@ int STT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			fread((void*)&STTTRACKOFFSET,sizeof(stt_track_offset),1,f);
 			file_track_list_offset=file_track_list_offset+sizeof(stt_track_offset);
 
-			floppycontext->hxc_printf(MSG_DEBUG,"Current Track Offset : 0x%.8X, Size: 0x%.8X, Next File Track List Offset : 0x%.8X",STTTRACKOFFSET.track_offset,STTTRACKOFFSET.track_size,file_track_list_offset);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Current Track Offset : 0x%.8X, Size: 0x%.8X, Next File Track List Offset : 0x%.8X",STTTRACKOFFSET.track_offset,STTTRACKOFFSET.track_size,file_track_list_offset);
 
 			fseek (f, STTTRACKOFFSET.track_offset, SEEK_SET);
 
@@ -192,7 +194,7 @@ int STT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			if(!memcmp(&STTTRACKHEADER.stt_track_signature,"TRCK",4))
 			{
 
-				floppycontext->hxc_printf(MSG_INFO_1,"Track: %d, Side: %d, Number of sector: %d, Tracks Flags:0x%.8x, Sector Flags:0x%.8x",j,i,STTTRACKHEADER.number_of_sectors,STTTRACKHEADER.tracks_flags,STTTRACKHEADER.sectors_flags);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Track: %d, Side: %d, Number of sector: %d, Tracks Flags:0x%.8x, Sector Flags:0x%.8x",j,i,STTTRACKHEADER.number_of_sectors,STTTRACKHEADER.tracks_flags,STTTRACKHEADER.sectors_flags);
 
 				trackformat=ISOFORMAT_DD;
 				if(STTTRACKHEADER.number_of_sectors==11 || STTTRACKHEADER.number_of_sectors==12)
@@ -200,13 +202,13 @@ int STT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					trackformat=ISOFORMAT_DD11S;
 				}
 
-				sectorconfig=malloc(sizeof(SECTORCONFIG)*STTTRACKHEADER.number_of_sectors);
-				memset(sectorconfig,0,sizeof(SECTORCONFIG)*STTTRACKHEADER.number_of_sectors);
+				sectorconfig=malloc(sizeof(HXCFE_SECTCFG)*STTTRACKHEADER.number_of_sectors);
+				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*STTTRACKHEADER.number_of_sectors);
 				for(k=0;k<STTTRACKHEADER.number_of_sectors;k++)
 				{
 					fread((void*)&STTSECTOR,sizeof(stt_sector),1,f);
 
-					floppycontext->hxc_printf(MSG_INFO_1,"Sector id: %d, Side id: %d, Track id: %d, Sector size:%d",STTSECTOR.sector_nb_id,STTSECTOR.side_nb_id,STTSECTOR.track_nb_id,STTSECTOR.data_len);
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Sector id: %d, Side id: %d, Track id: %d, Sector size:%d",STTSECTOR.sector_nb_id,STTSECTOR.side_nb_id,STTSECTOR.track_nb_id,STTSECTOR.data_len);
 
 					sectorconfig[k].sector=STTSECTOR.sector_nb_id;
 					sectorconfig[k].head=STTSECTOR.side_nb_id;
@@ -246,13 +248,13 @@ int STT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_INFO_1,"Bad track Header !? : Track: %d, Side: %d",j,i);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Bad track Header !? : Track: %d, Side: %d",j,i);
 				trackformat=ISOFORMAT_DD;
 
 				STTTRACKHEADER.number_of_sectors=0;
 
-				sectorconfig=malloc(sizeof(SECTORCONFIG));
-				memset(sectorconfig,0,sizeof(SECTORCONFIG));
+				sectorconfig=malloc(sizeof(HXCFE_SECTCFG));
+				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG));
 				currentside=tg_generateTrackEx((unsigned short)STTTRACKHEADER.number_of_sectors,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,0,2500 | NO_SECTOR_UNDER_INDEX,-2500);
 
 				currentcylinder->sides[i]=currentside;
@@ -262,14 +264,14 @@ int STT_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		}
 	}
 
-	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 	hxc_fclose(f);
 	return HXCFE_NOERROR;
 
 }
 
-int STT_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int STT_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ATARIST_STT";
@@ -285,7 +287,7 @@ int STT_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

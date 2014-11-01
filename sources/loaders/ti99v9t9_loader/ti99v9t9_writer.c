@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "ti99v9t9_loader.h"
@@ -37,7 +39,7 @@
 
 #include "libhxcadaptor.h"
 
-int TI99V9T9_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {	
 	int i,j,k;
 	FILE * ti99v9t9file;
@@ -51,14 +53,14 @@ int TI99V9T9_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,
 	unsigned int sectorsize;
 	unsigned char * diskimage;
 	int error;
-	SECTORSEARCH* ss;
-	SECTORCONFIG* sc;
+	HXCFE_SECTORACCESS* ss;
+	HXCFE_SECTCFG* sc;
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Write TI99 V9T9 file %s...",filename);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write TI99 V9T9 file %s...",filename);
 	
-	imagesize=hxcfe_getFloppySize(floppycontext,floppy,&nbsector);
+	imagesize=hxcfe_getFloppySize(imgldr_ctx->hxcfe,floppy,&nbsector);
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Disk size : %d Bytes %d Sectors",imagesize,nbsector);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Disk size : %d Bytes %d Sectors",imagesize,nbsector);
 
 	numberofsector=9;
 	numberofside=1;
@@ -148,7 +150,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,
 			break;
 				
 		default:
-			floppycontext->hxc_printf(MSG_ERROR,"Bad image size!..");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Bad image size!..");
 			return 0;
 			break;
 	}
@@ -160,7 +162,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,
 	{
 		memset( diskimage ,0xF6 , numberofsector * numberoftrack * numberofside * sectorsize);
 
-		ss = hxcfe_initSectorSearch(floppycontext,floppy);
+		ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 		if(ss)
 		{
 			for(i=0;i<numberofside;i++)
@@ -173,7 +175,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,
 						if(sc)
 						{
 							if(sc->use_alternate_data_crc)
-								floppycontext->hxc_printf(MSG_ERROR,"Warning : Bad Data CRC : T:%d H:%d S:%d Size :%dB",j,i,k,sc->sectorsize);
+								imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Warning : Bad Data CRC : T:%d H:%d S:%d Size :%dB",j,i,k,sc->sectorsize);
 	
 							if(sc->sectorsize == sectorsize)
 							{
@@ -192,14 +194,14 @@ int TI99V9T9_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,
 							else
 							{
 								error++;
-								floppycontext->hxc_printf(MSG_ERROR,"Bad Sector Size : T:%d H:%d S:%d Size :%dB, Should be %dB",j,i,k,sc->sectorsize,sectorsize);
+								imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Bad Sector Size : T:%d H:%d S:%d Size :%dB, Should be %dB",j,i,k,sc->sectorsize,sectorsize);
 							}
 
 							hxcfe_freeSectorConfig(ss,sc);
 						}
 						else
 						{
-							floppycontext->hxc_printf(MSG_ERROR,"Sector not found : T:%d H:%d S:%d",j,i,k);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Sector not found : T:%d H:%d S:%d",j,i,k);
 						}
 					}
 				}
@@ -216,20 +218,20 @@ int TI99V9T9_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,
 				else
 				{
 					free(diskimage);
-					hxcfe_deinitSectorSearch(ss);
+					hxcfe_deinitSectorAccess(ss);
 					return HXCFE_ACCESSERROR;
 				}
 			}
 		}
 
 		free(diskimage);
-		hxcfe_deinitSectorSearch(ss);
+		hxcfe_deinitSectorAccess(ss);
 
 		if(!error)
 			return HXCFE_NOERROR;
 		else
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"This disk have some errors !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"This disk have some errors !");
 			return HXCFE_FILECORRUPTED;
 		}
 	}

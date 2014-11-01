@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -57,7 +59,7 @@
 
 #include "libhxcadaptor.h"
 
-int RAW_libIsValidFormat(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * imgformatcfg)
+int RAW_libIsValidFormat(HXCFE* floppycontext,cfgrawfile * imgformatcfg)
 {
 	unsigned int tracktype;
 	int tracklen;
@@ -124,7 +126,7 @@ int RAW_libIsValidFormat(HXCFLOPPYEMULATOR* floppycontext,cfgrawfile * imgformat
 
 
 
-int RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,cfgrawfile * imgformatcfg)
+int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,cfgrawfile * imgformatcfg)
 {
 	
 	FILE * f;
@@ -139,12 +141,12 @@ int RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	if(imgfile)
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"RAW_libLoad_DiskFile %s",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"RAW_libLoad_DiskFile %s",imgfile);
 		
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 			return -1;
 		}
 		
@@ -154,7 +156,7 @@ int RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"RAW_libLoad_DiskFile empty floppy");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"RAW_libLoad_DiskFile empty floppy");
 	}	
 
 	
@@ -185,9 +187,9 @@ int RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	floppydisk->floppyBitRate=bitrate;
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
-	floppycontext->hxc_printf(MSG_DEBUG,"%d bytes sectors, %d sectors/tracks,interleaving %d, skew %d, %d tracks, %d side(s), gap3 %d, %d rpm, %d bits/s",
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%d bytes sectors, %d sectors/tracks,interleaving %d, skew %d, %d tracks, %d side(s), gap3 %d, %d rpm, %d bits/s",
 		sectorsize,
 		floppydisk->floppySectorPerTrack,
 		interleave,
@@ -203,27 +205,27 @@ int RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	{
 		case FM_TRACK_TYPE:
 			tracktype=ISOFORMAT_SD;
-			floppycontext->hxc_printf(MSG_DEBUG,"FM ISO tracks format");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FM ISO tracks format");
 		break;
 
 		case FMIBM_TRACK_TYPE:
 			tracktype=IBMFORMAT_SD;
-			floppycontext->hxc_printf(MSG_DEBUG,"FM IBM tracks format");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FM IBM tracks format");
 		break;
 
 		case MFM_TRACK_TYPE:
 			tracktype=ISOFORMAT_DD;
-			floppycontext->hxc_printf(MSG_DEBUG,"MFM ISO tracks format");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MFM ISO tracks format");
 		break;
 
 		case MFMIBM_TRACK_TYPE:
 			tracktype=IBMFORMAT_DD;
-			floppycontext->hxc_printf(MSG_DEBUG,"MFM IBM tracks format");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MFM IBM tracks format");
 		break;
 
 		case GCR_TRACK_TYPE:
 			tracktype=0;
-			floppycontext->hxc_printf(MSG_DEBUG,"GCR tracks format");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"GCR tracks format");
 		break;
 	};
 
@@ -269,7 +271,7 @@ int RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			{
 				fseek (f , file_offset , SEEK_SET);
 					
-				floppycontext->hxc_printf(MSG_DEBUG,"Track %d Head %d : Reading %d bytes at %.8X",j,i,sectorsize*floppydisk->floppySectorPerTrack,file_offset);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %d Head %d : Reading %d bytes at %.8X",j,i,sectorsize*floppydisk->floppySectorPerTrack,file_offset);
 				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
 				
 			}
@@ -302,16 +304,16 @@ int RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	free(trackdata);
 	if(f) hxc_fclose(f);
 
-	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 
 
 	return HXCFE_NOERROR;
 }
 
-int RAW_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename);
+int RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 
-int RAW_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int RAW_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="RAW_LOADER";
@@ -327,7 +329,7 @@ int RAW_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

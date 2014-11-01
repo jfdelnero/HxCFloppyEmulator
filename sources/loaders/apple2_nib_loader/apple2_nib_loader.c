@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -63,40 +65,40 @@
 
 extern unsigned short ext_a2_bit_expander[];
 
-int Apple2_nib_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int Apple2_nib_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"Apple2_nib_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_nib_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"nib") )
 	{
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Apple2_nib_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Apple2_nib_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
 		if(filesize != (NIB_TRACK_SIZE*35) )
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"Apple2_nib_libIsValidDiskFile : non Apple 2 NIB file - bad file size !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_nib_libIsValidDiskFile : non Apple 2 NIB file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"Apple2_nib_libIsValidDiskFile : Apple 2 NIB file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_nib_libIsValidDiskFile : Apple 2 NIB file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"Apple2_nib_libIsValidDiskFile : non Apple 2 NIB file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_nib_libIsValidDiskFile : non Apple 2 NIB file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-int Apple2_nib_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int Apple2_nib_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	unsigned int filesize;
@@ -105,7 +107,7 @@ int Apple2_nib_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 	unsigned char* trackdata;
 	unsigned char  trackformat;
 	unsigned short rpm;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 
 	unsigned short pulses;
 
@@ -114,12 +116,12 @@ int Apple2_nib_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 #endif
 	unsigned char  data_nibble;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"Apple2_nib_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_nib_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -140,11 +142,11 @@ int Apple2_nib_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 		floppydisk->floppyBitRate = floppydisk->floppyBitRate * 2;
 #endif
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 		rpm=300;
 
-		floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s)",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s)",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide);
 
 		trackdata=(unsigned char*)malloc(NIB_TRACK_SIZE);
 
@@ -196,19 +198,19 @@ int Apple2_nib_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 
 		free(trackdata);
 
-		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 		hxc_fclose(f);
 		return HXCFE_NOERROR;
 
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 
-int Apple2_nib_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int Apple2_nib_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="APPLE2_NIB";
@@ -224,7 +226,7 @@ int Apple2_nib_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long i
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

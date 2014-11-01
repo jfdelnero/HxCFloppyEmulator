@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -57,12 +59,12 @@
 
 #include "libhxcadaptor.h"
 
-int VEGASDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int VEGASDSK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	unsigned char buffer[256];
 	FILE * f;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"VEGASDSK_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VEGASDSK_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"veg") || hxc_checkfileext(imgfile,"vegasdsk") )
 	{
@@ -70,7 +72,7 @@ int VEGASDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		f=hxc_fopen(imgfile,"rb");
 		if(f==NULL)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"VEGASDSK_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"VEGASDSK_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
@@ -78,12 +80,12 @@ int VEGASDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		fread(buffer,256,1,f);
 
 		hxc_fclose(f);
-		floppycontext->hxc_printf(MSG_DEBUG,"VEGASDSK_libIsValidDiskFile : Vegas DSK file ! %d tracks %d sectors/tracks",buffer[0x26]+1,buffer[0x27]+1);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VEGASDSK_libIsValidDiskFile : Vegas DSK file ! %d tracks %d sectors/tracks",buffer[0x26]+1,buffer[0x27]+1);
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"VEGASDSK_libIsValidDiskFile : non Vegas DSK file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VEGASDSK_libIsValidDiskFile : non Vegas DSK file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -92,7 +94,7 @@ int VEGASDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 
 
-int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
@@ -108,15 +110,15 @@ int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	unsigned char  ddmode;
 
 
-	CYLINDER* currentcylinder;
-	SECTORCONFIG  sectorconfig[30];
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SECTCFG  sectorconfig[30];
 
-	floppycontext->hxc_printf(MSG_DEBUG,"VEGASDSK_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VEGASDSK_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -186,11 +188,11 @@ int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 
 	floppydisk->floppyBitRate=250000;
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 	rpm=300; // normal rpm
 
-	floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
 	j=0;
 	floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
@@ -198,7 +200,7 @@ int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 	{
 		file_offset=( (((bootnumberofsector)*256)) * i );
-		memset(sectorconfig,0,sizeof(SECTORCONFIG)*10);
+		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*10);
 		for(k=0;k<10;k++)
 		{
 			sectorconfig[k].head=i;
@@ -213,7 +215,7 @@ int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 
 		}
 
-		currentcylinder->sides[i]=tg_generateTrackEx(10,(SECTORCONFIG *)&sectorconfig,5,0,floppydisk->floppyBitRate,rpm,ISOFORMAT_SD,0,2500,-2500);
+		currentcylinder->sides[i]=tg_generateTrackEx(10,(HXCFE_SECTCFG *)&sectorconfig,5,0,floppydisk->floppyBitRate,rpm,ISOFORMAT_SD,0,2500,-2500);
 
 		for(k=0;k<10;k++)
 		{
@@ -237,7 +239,7 @@ int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 				                ( (((floppydisk->floppySectorPerTrack)*256)) * i );
 			fread(floppy_data,floppydisk->floppySectorPerTrack*sectorsize,1,f);
 
-			memset(sectorconfig,0,sizeof(SECTORCONFIG)*floppydisk->floppySectorPerTrack);
+			memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 			for(k=0;k<floppydisk->floppySectorPerTrack;k++)
 			{
 				sectorconfig[k].head=i;
@@ -250,19 +252,19 @@ int VEGASDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 				sectorconfig[k].input_data=&floppy_data[k*256];
 			}
 
-			currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,(SECTORCONFIG *)&sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,0,2500,-2500);
+			currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,(HXCFE_SECTCFG *)&sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,0,2500,-2500);
 		}
 	}
 
 	free(floppy_data);
 
-	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }
 
-int VEGASDSK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int VEGASDSK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="VEGAS6809";
@@ -278,7 +280,7 @@ int VEGASDSK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long inf
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #include "afi_format.h"
@@ -193,7 +194,7 @@ unsigned long * bitrate_rle_pack(unsigned long * bitrate,unsigned long len,unsig
 }
 
 
-int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int AFI_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 
 	FILE * hxcafifile;
@@ -228,7 +229,7 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 	floppy->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Write AFI file %s...",filename);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write AFI file %s...",filename);
 
 	hxcafifile=hxc_fopen(filename,"wb");
 	if(hxcafifile)
@@ -302,7 +303,7 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 		afiinfo.number_of_string=0;
 
-		floppycontext->hxc_printf(MSG_INFO_1,"%d Tracks, %d side(s)",afiinfo.end_track,afiinfo.end_side);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d Tracks, %d side(s)",afiinfo.end_track,afiinfo.end_side);
 
 		//------------- track list -------------
 		memset(&afitracklist,0,sizeof(AFITRACKLIST));
@@ -353,7 +354,7 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 					afitrack.nb_of_element = floppy->tracks[i]->sides[j]->tracklen;
 					afitrack.number_of_data_chunk = 4;//-------
 
-					floppycontext->hxc_printf(MSG_DEBUG,"Track %d [%d:%d], file offset %X",t,afitrack.track_number,afitrack.side_number,track_list[t]+afiheader.track_list_offset);
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %d [%d:%d], file offset %X",t,afitrack.track_number,afitrack.side_number,track_list[t]+afiheader.track_list_offset);
 
 					track_fileptr = ftell(hxcafifile);
 					fwrite(&afitrack,sizeof(afitrack),1,hxcafifile);
@@ -507,7 +508,7 @@ int AFI_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
 
 		return -1;
 	}

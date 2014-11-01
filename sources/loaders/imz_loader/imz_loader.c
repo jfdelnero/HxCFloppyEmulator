@@ -47,6 +47,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -63,20 +65,20 @@
 
 extern int pc_imggetfloppyconfig(unsigned char * img,unsigned int filesize,unsigned short *numberoftrack,unsigned char *numberofside,unsigned short *numberofsectorpertrack,unsigned char *gap3len,unsigned char *interleave,unsigned short *rpm, unsigned int *bitrate,unsigned short * ifmode);
 
-int IMZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int IMZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int err;
 	unzFile uf;
 	unz_file_info file_info;
 	char filename_inzip[256];
 
-	floppycontext->hxc_printf(MSG_DEBUG,"IMZ_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMZ_libIsValidDiskFile");
 	if( hxc_checkfileext(imgfile,"imz"))
 	{
 		uf=unzOpen (imgfile);
 		if (!uf)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"IMZ_libIsValidDiskFile : unzOpen: Error while reading the file!");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"IMZ_libIsValidDiskFile : unzOpen: Error while reading the file!");
 			return HXCFE_BADFILE;
 		}
 
@@ -88,12 +90,12 @@ int IMZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		}
 
 		unzClose(uf);
-		floppycontext->hxc_printf(MSG_DEBUG,"IMZ_libIsValidDiskFile : IMZ file : %s (%d bytes) !",filename_inzip,file_info.uncompressed_size);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMZ_libIsValidDiskFile : IMZ file : %s (%d bytes) !",filename_inzip,file_info.uncompressed_size);
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"IMZ_libIsValidDiskFile : non IMZ file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMZ_libIsValidDiskFile : non IMZ file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -102,7 +104,7 @@ int IMZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 
 
-int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int IMZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	unsigned int filesize;
 	unsigned int i,j;
@@ -114,15 +116,15 @@ int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	int err=UNZ_OK;
 	unzFile uf;
 	unz_file_info file_info;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 	unsigned short rpm;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"IMZ_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMZ_libLoad_DiskFile %s",imgfile);
 
 	uf=unzOpen (imgfile);
 	if (!uf)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"unzOpen: Error while reading the file!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"unzOpen: Error while reading the file!");
 		return HXCFE_BADFILE;
 	}
 
@@ -146,14 +148,14 @@ int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	flatimg=(unsigned char*)malloc(filesize);
 	if(!flatimg)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Unpack error!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Unpack error!");
 		return HXCFE_BADFILE;
 	}
 
 	err=unzReadCurrentFile  (uf, flatimg, filesize);
 	if (err<0)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"error %d with zipfile in unzReadCurrentFile",err);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"error %d with zipfile in unzReadCurrentFile",err);
 		unzClose(uf);
 		free(flatimg);
 		return HXCFE_BADFILE;
@@ -179,7 +181,7 @@ int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		skew=0;
 		trackformat=IBMFORMAT_DD;
 
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
@@ -195,7 +197,7 @@ int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			}
 		}
 
-		floppycontext->hxc_printf(MSG_INFO_1,"IMZ Loader : tracks file successfully loaded and encoded!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"IMZ Loader : tracks file successfully loaded and encoded!");
 		free(flatimg);
 		return 0;
 	}
@@ -204,7 +206,7 @@ int IMZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	return HXCFE_BADFILE;
 }
 
-int IMZ_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int IMZ_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="RAW_IMZ";
@@ -220,7 +222,7 @@ int IMZ_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

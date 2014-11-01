@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -58,12 +60,12 @@
 
 #include "libhxcadaptor.h"
 
-int OricDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int OricDSK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	FILE *f;
 	unsigned char fileheader[10];
 
-	floppycontext->hxc_printf(MSG_DEBUG,"OricDSK_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"OricDSK_libIsValidDiskFile");
 
 	if(hxc_checkfileext(imgfile,"dsk"))
 	{
@@ -81,19 +83,19 @@ int OricDSK_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		if( !strncmp((char*)fileheader,"MFM_DISK",8) ||
 		    !strncmp((char*)fileheader,"ORICDISK",8))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"OricDSK_libIsValidDiskFile : OricDSK file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"OricDSK_libIsValidDiskFile : OricDSK file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"OricDSK_libIsValidDiskFile : non OricDSK file (bad header)!");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"OricDSK_libIsValidDiskFile : non OricDSK file (bad header)!");
 			return HXCFE_BADFILE;
 		}
 
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"OricDSK_libIsValidDiskFile : non OricDSK file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"OricDSK_libIsValidDiskFile : non OricDSK file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -169,16 +171,16 @@ int issector(mfmformatsect * sector)
 
 }
 
-SECTORCONFIG * extractsector(HXCFLOPPYEMULATOR* floppycontext,unsigned char *data,unsigned char * inputtrack,int tracksize,int * numberofsector)
+HXCFE_SECTCFG * extractsector(HXCFE* floppycontext,unsigned char *data,unsigned char * inputtrack,int tracksize,int * numberofsector)
 {
 	int i,j,k;
 	int sectorsize;
-	SECTORCONFIG * tabsector;
+	HXCFE_SECTCFG * tabsector;
 
 	mfmformatsect * testsector;
 
-	tabsector=(SECTORCONFIG *)malloc(sizeof(SECTORCONFIG)*32);
-	memset(tabsector,0,sizeof(SECTORCONFIG)*32);
+	tabsector=(HXCFE_SECTCFG *)malloc(sizeof(HXCFE_SECTCFG)*32);
+	memset(tabsector,0,sizeof(HXCFE_SECTCFG)*32);
 
 	i=0;
 	j=0;
@@ -233,7 +235,7 @@ SECTORCONFIG * extractsector(HXCFLOPPYEMULATOR* floppycontext,unsigned char *dat
 	return tabsector;
 }
 
-int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	unsigned int filesize;
@@ -246,17 +248,17 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 	int numberofsector;
 	unsigned short sectorsize,rpm;
 	unsigned char interleave,gap3len;
-	CYLINDER* currentcylinder;
-	SIDE* currentside;
-	SECTORCONFIG * sectlist;
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SIDE* currentside;
+	HXCFE_SECTCFG * sectlist;
 	oricdsk_fileheader * fileheader;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"OricDSK_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"OricDSK_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -278,14 +280,14 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 		floppydisk->floppyBitRate=250000;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 
-		floppycontext->hxc_printf(MSG_DEBUG,"%d tracks, %d side",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%d tracks, %d side",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide);
 
 		if( !strncmp(fileheader->headertag,"MFM_DISK",8))
 		{
 			mfmformat=1;
 			geometrie=fileheader->number_of_sectors_geometrie;
 			floppydisk->floppySectorPerTrack=-1;
-			floppycontext->hxc_printf(MSG_DEBUG,"OricDSK_libLoad_DiskFile MFM_DISK %d tracks %d sides geometrie %d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,geometrie);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"OricDSK_libLoad_DiskFile MFM_DISK %d tracks %d sides geometrie %d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,geometrie);
 		}
 		else
 		{
@@ -294,7 +296,7 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 				mfmformat=0;
 				geometrie=0;
 				floppydisk->floppySectorPerTrack=(unsigned short)fileheader->number_of_sectors_geometrie;
-				floppycontext->hxc_printf(MSG_DEBUG,"OricDSK_libLoad_DiskFile ORICDISK %d tracks %d sides %d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"OricDSK_libLoad_DiskFile ORICDISK %d tracks %d sides %d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
 			}
 			else
 			{
@@ -308,12 +310,12 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 		{
 
 		case 0:// "OLD" format
-			floppycontext->hxc_printf(MSG_DEBUG,"ORICDISK format !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ORICDISK format !");
 
 			trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 
-			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
 				for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
@@ -338,10 +340,10 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 			break;
 
 		case 1:// "New" format
-			floppycontext->hxc_printf(MSG_DEBUG,"MFM_DISK format !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MFM_DISK format !");
 
-			floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 			{
@@ -351,13 +353,13 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 			switch(geometrie)
 			{
 			case 1:
-				floppycontext->hxc_printf(MSG_DEBUG,"Geometrie 1:  11111..000000!");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Geometrie 1:  11111..000000!");
 				tracksize=(((filesize-256)/fileheader->number_of_side)/fileheader->number_of_tracks);
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
 					for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"------------------ Track %d, side %d -------------------",j,i);
+						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"------------------ Track %d, side %d -------------------",j,i);
 						currentcylinder=floppydisk->tracks[j];
 
 						file_offset=(i*floppydisk->floppyNumberOfTrack*tracksize)+(j*tracksize)+256;
@@ -367,7 +369,7 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 						fread(trackdata,tracksize,1,f);
 
 						trackdatatab=(unsigned char*)malloc(256*1024);
-						sectlist=extractsector(floppycontext,trackdatatab,trackdata,tracksize,&numberofsector);
+						sectlist=extractsector(imgldr_ctx->hxcfe,trackdatatab,trackdata,tracksize,&numberofsector);
 
 						currentcylinder->sides[i]=tg_generateTrackEx((unsigned short)numberofsector,sectlist,interleave,(unsigned char)(j*2),DEFAULT_DD_BITRATE,rpm,IBMFORMAT_DD,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
 						currentside=currentcylinder->sides[i];
@@ -380,9 +382,9 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 				break;
 
 			case 0:
-				floppycontext->hxc_printf(MSG_DEBUG,"Geometrie 0 ?: using Geometrie 2");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Geometrie 0 ?: using Geometrie 2");
 			case 2:
-				floppycontext->hxc_printf(MSG_DEBUG,"Geometrie 2:  01010101010...!");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Geometrie 2:  01010101010...!");
 
 				tracksize=(((filesize-256)/fileheader->number_of_side)/fileheader->number_of_tracks);
 
@@ -392,7 +394,7 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 
 					for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"------------------ Track %d, side %d -------------------",j,i);
+						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"------------------ Track %d, side %d -------------------",j,i);
 
 						file_offset=(j*tracksize*floppydisk->floppyNumberOfSide) + (i*tracksize) + 256;
 
@@ -402,7 +404,7 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 						fread(trackdata,tracksize,1,f);
 
 						trackdatatab=(unsigned char*)malloc(256*1024);
-						sectlist=extractsector(floppycontext,trackdatatab,trackdata,tracksize,&numberofsector);
+						sectlist=extractsector(imgldr_ctx->hxcfe,trackdatatab,trackdata,tracksize,&numberofsector);
 
 						currentcylinder->sides[i]=tg_generateTrackEx((unsigned short)numberofsector,sectlist,interleave,(unsigned char)(j*2),DEFAULT_DD_BITRATE,rpm,IBMFORMAT_DD,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
 
@@ -419,10 +421,10 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 		break;
 		}
 
-		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		hxc_fclose(f);
 
-		hxcfe_sanityCheck(floppycontext,floppydisk);
+		hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
 		return HXCFE_NOERROR;
 
@@ -430,11 +432,11 @@ int OricDSK_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydis
 
 	hxc_fclose(f);
 
-	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	return HXCFE_BADFILE;
 }
 
-int OricDSK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int OricDSK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ORIC_DSK";
@@ -450,7 +452,7 @@ int OricDSK_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long info
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

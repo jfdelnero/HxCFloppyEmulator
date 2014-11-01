@@ -25,4 +25,4 @@
 //
 */
 
-int SDDSpeccyDos_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue);
+int SDDSpeccyDos_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue);

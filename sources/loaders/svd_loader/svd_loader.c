@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -59,13 +61,13 @@
 
 #include "libhxcadaptor.h"
 
-int SVD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int SVD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	char   linebuffer[80];
 	int major,minor;
 	FILE *f;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile");
 	if( hxc_checkfileext(imgfile,"svd") )
 	{
 		f=hxc_fopen(imgfile,"r");
@@ -76,7 +78,7 @@ int SVD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 			if (sscanf(linebuffer,"%d.%d",&major,&minor) != 2)
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : Bad code version !");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : Bad code version !");
 				return(HXCFE_BADFILE);
 			}
 
@@ -86,23 +88,23 @@ int SVD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : Bad code version !");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : Bad code version !");
 				return HXCFE_BADFILE;
 			}
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : Access error !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : Access error !");
 		return HXCFE_ACCESSERROR;
 
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : non SVD file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : non SVD file !");
 		return HXCFE_BADFILE;
 	}
 }
 
-int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
@@ -113,17 +115,17 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned char  gap3len,interleave;
 	unsigned short sectorsize,rpm;
 	unsigned char Sector_attribute_flag;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 	unsigned char trackformat;
 	int major,minor;
 	int sectorpertrack,numberoftrack,numberofside,sectsize,wprot;
 	unsigned char	blockbuf[256];
 	char linebuffer[80];
 	int	blanks,indexptr,sector;
-	SECTORCONFIG * sectorconfig;
+	HXCFE_SECTCFG * sectorconfig;
 	int sectorindex;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"JVC_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JVC_libLoad_DiskFile %s",imgfile);
 
 	gap3len=255;
 	interleave=1;
@@ -136,7 +138,7 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -148,7 +150,7 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	fgets(linebuffer,sizeof(linebuffer),f);
 	if (sscanf(linebuffer,"%d.%d",&major,&minor) != 2)
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"Bad code version !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Bad code version !");
 		return(HXCFE_BADFILE);
 	}
 
@@ -203,8 +205,8 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 				indexptr = 0;
 				sectorindex=0;
 
-				sectorconfig=malloc(sizeof(SECTORCONFIG) * sectorpertrack);
-				memset(sectorconfig,0,sizeof(SECTORCONFIG) * sectorpertrack);
+				sectorconfig=malloc(sizeof(HXCFE_SECTCFG) * sectorpertrack);
+				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG) * sectorpertrack);
 
 				for (sector = 0; sector < sectorpertrack; sector++)
 				{
@@ -331,19 +333,19 @@ int SVD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		free(trackdata);
 
-		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 		hxc_fclose(f);
 		return HXCFE_NOERROR;
 
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 
-int SVD_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int SVD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="SVD";
@@ -359,7 +361,7 @@ int SVD_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

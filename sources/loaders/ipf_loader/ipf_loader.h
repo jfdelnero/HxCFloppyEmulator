@@ -26,6 +26,6 @@
 */
 #ifdef IPF_SUPPORT 
 
-int IPF_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue);
+int IPF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue);
 
 #endif

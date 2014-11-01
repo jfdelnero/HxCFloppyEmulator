@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #include "bmp_loader.h"
@@ -41,10 +42,10 @@ extern void copyPict(unsigned long * dest,int d_xsize,int d_ysize,int d_xpos,int
 
 extern unsigned char getPixelCode(unsigned long pix,unsigned long * pal,int * nbcol);
 
-int BMP_Disk_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * filename)
+int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * filename)
 {
 	int ret,i,j,k;
-	s_trackdisplay * td;
+	HXCFE_TD * td;
 	unsigned long * ptr;
 	unsigned char * ptrchar;
 	bitmap_data bdata;
@@ -54,32 +55,32 @@ int BMP_Disk_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 
 	ret = HXCFE_NOERROR;
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Write BMP file %s",filename);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write BMP file %s",filename);
 
-	td = hxcfe_td_init(floppycontext,1024,480);
+	td = hxcfe_td_init(imgldr_ctx->hxcfe,1024,480);
 	if(td)
 	{
-		hxcfe_td_activate_analyzer(floppycontext,td,ISOIBM_MFM_ENCODING,1);
-		hxcfe_td_activate_analyzer(floppycontext,td,ISOIBM_FM_ENCODING,1);
-		hxcfe_td_activate_analyzer(floppycontext,td,AMIGA_MFM_ENCODING,1);
-		hxcfe_td_activate_analyzer(floppycontext,td,EMU_FM_ENCODING,1);
-		hxcfe_td_activate_analyzer(floppycontext,td,MEMBRAIN_MFM_ENCODING,1);
-		hxcfe_td_activate_analyzer(floppycontext,td,TYCOM_FM_ENCODING,1);
-		hxcfe_td_activate_analyzer(floppycontext,td,APPLEII_GCR1_ENCODING,1);
-		hxcfe_td_activate_analyzer(floppycontext,td,APPLEII_GCR2_ENCODING,1);
-		//hxcfe_td_activate_analyzer(floppycontext,td,ARBURGDAT_ENCODING,1);
-		//hxcfe_td_activate_analyzer(floppycontext,td,ARBURGSYS_ENCODING,1);
+		hxcfe_td_activate_analyzer(td,ISOIBM_MFM_ENCODING,1);
+		hxcfe_td_activate_analyzer(td,ISOIBM_FM_ENCODING,1);
+		hxcfe_td_activate_analyzer(td,AMIGA_MFM_ENCODING,1);
+		hxcfe_td_activate_analyzer(td,EMU_FM_ENCODING,1);
+		hxcfe_td_activate_analyzer(td,MEMBRAIN_MFM_ENCODING,1);
+		hxcfe_td_activate_analyzer(td,TYCOM_FM_ENCODING,1);
+		hxcfe_td_activate_analyzer(td,APPLEII_GCR1_ENCODING,1);
+		hxcfe_td_activate_analyzer(td,APPLEII_GCR2_ENCODING,1);
+		//hxcfe_td_activate_analyzer(td,ARBURGDAT_ENCODING,1);
+		//hxcfe_td_activate_analyzer(td,ARBURGSYS_ENCODING,1);
 
-		hxcfe_td_setparams(floppycontext,td,240*1000,16,90*1000);
+		hxcfe_td_setparams(td,240*1000,16,90*1000);
 
 		ptr = malloc(td->xsize*td->ysize*4);
 		if(ptr)
 		{
 			memset(ptr,0,(td->xsize*td->ysize*4));
 
-			floppycontext->hxc_printf(MSG_INFO_1,"Generate track BMP...\n");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Generate track BMP...\n");
 
-			hxcfe_td_draw_disk(floppycontext,td,floppydisk);
+			hxcfe_td_draw_disk(td,floppydisk);
 
 			copyPict((unsigned long *)ptr,td->xsize,td->ysize,0,0,(unsigned long *)td->framebuffer,td->xsize,td->ysize);
 
@@ -91,7 +92,7 @@ int BMP_Disk_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 			ptrchar = malloc((td->xsize*td->ysize));
 			if(ptrchar)
 			{
-				floppycontext->hxc_printf(MSG_INFO_1,"Converting image...\n");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Converting image...\n");
 				nbcol = 0;
 				k=0;
 				for(i=0;i< ( td->ysize );i++)
@@ -132,7 +133,7 @@ int BMP_Disk_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 					}
 				}
 
-				floppycontext->hxc_printf(MSG_INFO_1,"Writing %s...\n",filename);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Writing %s...\n",filename);
 
 				if(nbcol>=256)
 				{
@@ -155,7 +156,7 @@ int BMP_Disk_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 					bmpRLE8b_write(filename,&bdata);
 				}
 
-				floppycontext->hxc_printf(MSG_INFO_1,"%d tracks written to the BMP file",floppydisk->floppyNumberOfTrack * floppydisk->floppyNumberOfSide);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks written to the BMP file",floppydisk->floppyNumberOfTrack * floppydisk->floppyNumberOfSide);
 
 				free(ptrchar);
 			}
@@ -168,15 +169,15 @@ int BMP_Disk_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppyd
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Internal error (malloc) !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Internal error (malloc) !");
 			return HXCFE_INTERNALERROR;
 		}
 
-		hxcfe_td_deinit(floppycontext,td);
+		hxcfe_td_deinit(td);
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Internal error !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Internal error !");
 		return HXCFE_INTERNALERROR;
 	}
 

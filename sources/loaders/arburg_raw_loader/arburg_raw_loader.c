@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -59,11 +61,11 @@
 
 #include "libhxcadaptor.h"
 
-int ARBURG_RAW_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int ARBURG_RAW_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"arburgfd") )
 	{
@@ -74,7 +76,7 @@ int ARBURG_RAW_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfil
 
 		if(filesize==(ARBURB_DATATRACK_SIZE*2*80))
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile : Arburg Data raw file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile : Arburg Data raw file !");
 			return HXCFE_VALIDFILE;
 		}
 		else
@@ -82,38 +84,38 @@ int ARBURG_RAW_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfil
 
 			if(filesize==( (ARBURB_DATATRACK_SIZE*10)+(ARBURB_SYSTEMTRACK_SIZE*70)+(ARBURB_SYSTEMTRACK_SIZE*80) ))
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile : Arburg System raw file !");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile : Arburg System raw file !");
 				return HXCFE_VALIDFILE;
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile : non Arburg raw file !");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile : non Arburg raw file !");
 				return HXCFE_BADFILE;
 			}
 		}
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile : non Arburg raw file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile : non Arburg raw file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-int ARBURG_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int ARBURG_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	unsigned short i;
 	int filesize;
-	CYLINDER*      currentcylinder;
-	SIDE*          currentside;
+	HXCFE_CYLINDER*      currentcylinder;
+	HXCFE_SIDE*          currentside;
 	unsigned char  sector_data[ARBURB_SYSTEMTRACK_SIZE + 2];
 	unsigned short tracknumber,sidenumber;
 	int systemdisk;
 	int fileoffset,blocksize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libLoad_DiskFile %s",imgfile);
 
 	filesize=hxc_getfilesize(imgfile);
 
@@ -125,14 +127,14 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 	if(filesize==( (ARBURB_DATATRACK_SIZE*10)+(ARBURB_SYSTEMTRACK_SIZE*70)+(ARBURB_SYSTEMTRACK_SIZE*80) ))
 	{
 		systemdisk = 1;
-		floppycontext->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libLoad_DiskFile : Arburg Data raw file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libLoad_DiskFile : Arburg Data raw file !");
 	}
 
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -142,7 +144,7 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 	floppydisk->floppySectorPerTrack=1;
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"Arburg File : %d track, %d side, %d bit/s, %d sectors, mode %d",
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Arburg File : %d track, %d side, %d bit/s, %d sectors, mode %d",
 		floppydisk->floppyNumberOfTrack,
 		floppydisk->floppyNumberOfSide,
 		floppydisk->floppyBitRate,
@@ -150,8 +152,8 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 		floppydisk->floppyiftype);
 
 
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-	memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 	for(i=0;i<floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide;i++)
 	{
@@ -184,7 +186,7 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 		currentcylinder=floppydisk->tracks[tracknumber];
 
 
-		floppycontext->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
 			tracknumber,
 			sidenumber,
 			fileoffset,
@@ -196,12 +198,12 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 
 		if(i<10 || !systemdisk )
 		{
-			BuildArburgTrack(floppycontext,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,2);
+			BuildArburgTrack(imgldr_ctx->hxcfe,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,2);
 			currentside->track_encoding = ARBURGDAT_ENCODING;
 		}
 		else
 		{
-			BuildArburgSysTrack(floppycontext,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,2);
+			BuildArburgSysTrack(imgldr_ctx->hxcfe,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,2);
 			currentside->track_encoding = ARBURGSYS_ENCODING;
 		}
 
@@ -211,7 +213,7 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy
 	return HXCFE_NOERROR;
 }
 
-int ARBURG_RAW_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int ARBURG_RAW_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ARBURG";
@@ -227,7 +229,7 @@ int ARBURG_RAW_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long i
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

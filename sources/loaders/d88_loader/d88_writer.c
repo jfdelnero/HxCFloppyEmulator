@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "d88_format.h"
@@ -73,7 +75,7 @@ unsigned char  size_to_code_d88(unsigned long size)
 	}
 }
 
-int D88_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int D88_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int i,j,k,nbsector;
 	FILE * d88file;
@@ -93,10 +95,10 @@ int D88_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 	int nb_valid_sector;
 
-	SECTORSEARCH* ss;
-	SECTORCONFIG** sca;
+	HXCFE_SECTORACCESS* ss;
+	HXCFE_SECTCFG** sca;
 
-	floppycontext->hxc_printf(MSG_INFO_1,"Write D88 file %s...",filename);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write D88 file %s...",filename);
 
 	log_str=0;
 
@@ -118,7 +120,7 @@ int D88_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 		track_cnt=0;
 
-		ss = hxcfe_initSectorSearch(floppycontext,floppy);
+		ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 		if( ss )
 		{
 			for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
@@ -242,13 +244,13 @@ int D88_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 						}
 					}
 
-					floppycontext->hxc_printf(MSG_INFO_1,log_str);
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,log_str);
 					free(log_str);
 
 				}
 			}
 
-			hxcfe_deinitSectorSearch(ss);
+			hxcfe_deinitSectorAccess(ss);
 
 		}
 

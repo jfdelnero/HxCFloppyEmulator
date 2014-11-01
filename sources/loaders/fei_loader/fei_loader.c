@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -59,11 +61,11 @@
 
 extern unsigned char bit_inverter[];
 
-int FEI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int FEI_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"FEI_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FEI_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"fei"))
 	{
@@ -73,34 +75,34 @@ int FEI_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		if(filesize<0) 
 			return HXCFE_ACCESSERROR;
 
-		floppycontext->hxc_printf(MSG_DEBUG,"FEI_libIsValidDiskFile : FEI file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FEI_libIsValidDiskFile : FEI file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"FEI_libIsValidDiskFile : non FEI file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FEI_libIsValidDiskFile : non FEI file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-int FEI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int FEI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	unsigned int i,j,k,filesize;
 	unsigned short rpm;
-	CYLINDER* currentcylinder;
-	SIDE* currentside;
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SIDE* currentside;
 	unsigned int tracksize;
 	
 	
-	floppycontext->hxc_printf(MSG_DEBUG,"FEI_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FEI_libLoad_DiskFile %s",imgfile);
 	
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 	
@@ -133,7 +135,7 @@ int FEI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		}
 	}
 
-	floppycontext->hxc_printf(MSG_DEBUG,"FEI File : %d track, %d side, %d bit/s, %d sectors, mode %d",
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FEI File : %d track, %d side, %d bit/s, %d sectors, mode %d",
 		floppydisk->floppyNumberOfTrack,
 		floppydisk->floppyNumberOfSide,
 		floppydisk->floppyBitRate,
@@ -141,8 +143,8 @@ int FEI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 		floppydisk->floppyiftype);
 
 
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
-	memset(floppydisk->tracks,0,sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 	for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
 	{			
@@ -162,7 +164,7 @@ int FEI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			
 			fseek(f,(tracksize*i)+(tracksize*floppydisk->floppyNumberOfTrack*j),SEEK_SET);
 
-			floppycontext->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
 												i,
 												j,
 												ftell(f),
@@ -181,7 +183,7 @@ int FEI_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	return HXCFE_NOERROR;	
 }
 
-int FEI_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int FEI_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="FEI";
@@ -197,7 +199,7 @@ int FEI_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

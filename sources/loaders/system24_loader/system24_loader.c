@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -59,33 +61,33 @@
 #include "libhxcadaptor.h"
 
 
-int System24_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int System24_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"System24_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"System24_libIsValidDiskFile");
 
 	if(hxc_checkfileext(imgfile,"s24"))
 	{
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
 		if(  ( filesize % ( 2 * ( ( 2048 * 5 ) + 1024 + 256 ) ) ) && ( filesize % ( 2 * ( 8192 + ( 1024 * 3 ) + 512 + 256 ) ) ) )
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"System24_libIsValidDiskFile : non System 24 file - bad file size !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"System24_libIsValidDiskFile : non System 24 file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"System24_libIsValidDiskFile : S24 file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"System24_libIsValidDiskFile : S24 file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"System24_libIsValidDiskFile : non S24 file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"System24_libIsValidDiskFile : non S24 file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -94,7 +96,7 @@ int System24_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 
 
-int System24_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int System24_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
@@ -106,15 +108,15 @@ int System24_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	unsigned char  gap3len,trackformat;
 	unsigned short rpm;
 	int tracksize;
-	CYLINDER* currentcylinder;
-	SECTORCONFIG  * sectorconfig;
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SECTCFG  * sectorconfig;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"System24_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"System24_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -142,7 +144,7 @@ int System24_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		{
 			hxc_fclose(f);
 
-			floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 
 			return HXCFE_BADFILE;
 		}
@@ -155,13 +157,13 @@ int System24_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	floppydisk->floppyBitRate = DEFAULT_HD_BITRATE;
 	trackformat=IBMFORMAT_DD;
 
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)* ( floppydisk->floppyNumberOfTrack + 4 ));
+	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)* ( floppydisk->floppyNumberOfTrack + 4 ));
 
 	rpm=288; // normal rpm
 
 
-	sectorconfig=malloc(sizeof(SECTORCONFIG) *  floppydisk->floppySectorPerTrack );
-	memset(sectorconfig,0,sizeof(SECTORCONFIG) *  floppydisk->floppySectorPerTrack );
+	sectorconfig=malloc(sizeof(HXCFE_SECTCFG) *  floppydisk->floppySectorPerTrack );
+	memset(sectorconfig,0,sizeof(HXCFE_SECTCFG) *  floppydisk->floppySectorPerTrack );
 
 	trackdata=(unsigned char*)malloc(tracksize);
 
@@ -288,12 +290,12 @@ int System24_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 
 	free(trackdata);
 
-	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }
 
-int System24_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int System24_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="SYSTEM_24";
@@ -309,7 +311,7 @@ int System24_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long inf
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

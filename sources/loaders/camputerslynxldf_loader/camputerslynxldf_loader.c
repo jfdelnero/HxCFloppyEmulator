@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -57,11 +59,11 @@
 
 #include "libhxcadaptor.h"
 
-int CAMPUTERSLYNX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int CAMPUTERSLYNX_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"ldf") )
 	{
@@ -70,22 +72,22 @@ int CAMPUTERSLYNX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * img
 
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"CAMPUTERSLYNX_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"CAMPUTERSLYNX_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
 		if(filesize&0x1FF)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libIsValidDiskFile : non LDF file - bad file size !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libIsValidDiskFile : non LDF file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libIsValidDiskFile : LDF file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libIsValidDiskFile : LDF file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libIsValidDiskFile : non LDF file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libIsValidDiskFile : non LDF file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -94,7 +96,7 @@ int CAMPUTERSLYNX_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * img
 
 
 
-int CAMPUTERSLYNX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int CAMPUTERSLYNX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	
 	FILE * f;
@@ -106,14 +108,14 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 	unsigned short rpm;
 	unsigned short sectorsize;
 	unsigned char trackformat;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 	
-	floppycontext->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libLoad_DiskFile %s",imgfile);
 	
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"CAMPUTERSLYNX_libLoad_DiskFile : Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"CAMPUTERSLYNX_libLoad_DiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 	
@@ -164,8 +166,8 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 					
 		trackformat=IBMFORMAT_DD;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack+1);
-		floppycontext->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack+1);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
 		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 			
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
@@ -209,22 +211,22 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * flo
 
 		free(trackdata);
 
-		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 		hxc_fclose(f);
 
-		hxcfe_sanityCheck(floppycontext,floppydisk);
+		hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
 		return HXCFE_NOERROR;
 
 	}
 	
-	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 
-int CAMPUTERSLYNX_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int CAMPUTERSLYNX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="CAMPUTERSLYNX";
@@ -240,7 +242,7 @@ int CAMPUTERSLYNX_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned lon
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

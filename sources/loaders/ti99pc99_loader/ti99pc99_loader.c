@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -59,28 +61,28 @@
 
 #include "libhxcadaptor.h"
 
-int TI99PC99_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int TI99PC99_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile : TI99PC99_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile : TI99PC99_libIsValidDiskFile");
 	if(imgfile)
 	{
 
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0) 
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"TI99PC99_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"TI99PC99_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return -1;
 		}
 				
 		if(filesize%3253 && filesize%6872)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile : non TI99 PC99 file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile : non TI99 PC99 file !");
 			return HXCFE_BADFILE;
 		}
 			
-		floppycontext->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile : TI99 PC99 file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile : TI99 PC99 file !");
 		return HXCFE_VALIDFILE;
 		
 	}
@@ -240,7 +242,7 @@ int patchtrackMFM(unsigned char * trackdata, unsigned char * trackclk,int trackl
 	return nbofsector;
 }
 
-int TI99PC99_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	
 	FILE * f;
@@ -251,16 +253,16 @@ int TI99PC99_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 	unsigned char* trackclk;
 	unsigned short rpm;
 	int fmmode,tracklen,numberoftrack,numberofside;
-	CYLINDER* currentcylinder;
-	SIDE* currentside;
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SIDE* currentside;
 	
 	
-	floppycontext->hxc_printf(MSG_DEBUG,"TI99PC99_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99PC99_libLoad_DiskFile %s",imgfile);
 	
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL) 
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -277,7 +279,7 @@ int TI99PC99_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 
 		if(filesize%3253 && filesize%6872)
 		{
-			floppycontext->hxc_printf(MSG_DEBUG,"non TI99 PC99 file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"non TI99 PC99 file !");
 			return HXCFE_BADFILE;
 		}
 		
@@ -285,14 +287,14 @@ int TI99PC99_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		{
 			tracklen=3253;
 			fmmode=1;
-			floppycontext->hxc_printf(MSG_DEBUG,"FM TI99 PC99 file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FM TI99 PC99 file !");
 			floppydisk->floppyBitRate=250000;
 		}
 		else
 		{
 			tracklen=6872;
 			fmmode=0;
-			floppycontext->hxc_printf(MSG_DEBUG,"MFM TI99 PC99 file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MFM TI99 PC99 file !");
 			floppydisk->floppyBitRate=250000;
 		}
 
@@ -307,7 +309,7 @@ int TI99PC99_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 			numberoftrack=40;
 			break;
 		default:
-			floppycontext->hxc_printf(MSG_ERROR,"Unsupported geometry!");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Unsupported geometry!");
 			hxc_fclose(f);
 			return HXCFE_BADFILE;
 			break;
@@ -317,11 +319,11 @@ int TI99PC99_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		floppydisk->floppyNumberOfSide=numberofside;
 		floppydisk->floppySectorPerTrack=-1;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-		floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 			
 		rpm=300; // normal rpm
 			
-		floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
 				
 		trackdata=(unsigned char*)malloc(tracklen);
 		trackclk=(unsigned char*)malloc(tracklen);
@@ -372,18 +374,18 @@ int TI99PC99_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydi
 		
 		free(trackdata);
 		
-		floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
 		hxc_fclose(f);
 		return HXCFE_NOERROR;
 	}
 
-	floppycontext->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
 }
 
-int TI99PC99_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int TI99PC99_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="TI994A_PC99";
@@ -399,7 +401,7 @@ int TI99PC99_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long inf
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

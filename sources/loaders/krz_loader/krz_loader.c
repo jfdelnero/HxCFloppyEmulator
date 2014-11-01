@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -61,11 +63,11 @@
 
 extern unsigned char msdos_bootsector;
 
-int KRZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int KRZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"KRZ_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"KRZ_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile,"krz"))
 	{
@@ -73,16 +75,16 @@ int KRZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"KRZ_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"KRZ_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
-		floppycontext->hxc_printf(MSG_DEBUG,"KRZ_libIsValidDiskFile : Kurzweil KRZ file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"KRZ_libIsValidDiskFile : Kurzweil KRZ file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"KRZ_libIsValidDiskFile : non Kurzweil KRZ file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"KRZ_libIsValidDiskFile : non Kurzweil KRZ file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -91,7 +93,7 @@ int KRZ_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 
 
-int KRZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int KRZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	unsigned int i,j;
 	unsigned int file_offset;
@@ -106,11 +108,11 @@ int KRZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned long   dataposition;
 	int pcbootsector;
 	int dksize;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 
 	FATCONFIG fatconfig;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"krz_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"krz_libLoad_DiskFile %s",imgfile);
 
 	floppydisk->floppyNumberOfTrack=80;
 	floppydisk->floppyNumberOfSide=2;
@@ -128,7 +130,7 @@ int KRZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 			(floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide*512);
 
 
-	floppycontext->hxc_printf(MSG_INFO_1,"floppy size:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",dksize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"floppy size:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",dksize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
 
 	flatimg=(unsigned char*)malloc(dksize);
 	if(flatimg!=NULL)
@@ -175,7 +177,7 @@ int KRZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		numberofcluster=(fatconfig.nbofsector-(dataposition/fatconfig.sectorsize))/fatconfig.clustersize;
 
-		if(ScanFileAndAddToFAT(floppycontext,imgfile,0,&flatimg[fatposition],&flatimg[rootposition],&flatimg[dataposition],0,&fatconfig,numberofcluster))
+		if(ScanFileAndAddToFAT(imgldr_ctx->hxcfe,imgfile,0,&flatimg[fatposition],&flatimg[rootposition],&flatimg[dataposition],0,&fatconfig,numberofcluster))
 		{
 			return HXCFE_BADFILE;
 		}
@@ -190,7 +192,7 @@ int KRZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 
 	floppydisk->floppyiftype=IBMPC_HD_FLOPPYMODE;
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
@@ -208,11 +210,11 @@ int KRZ_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	free(flatimg);
 
-	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 	return HXCFE_NOERROR;
 }
 
-int KRZ_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int KRZ_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="KURZWEIL_KRZ";
@@ -228,7 +230,7 @@ int KRZ_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

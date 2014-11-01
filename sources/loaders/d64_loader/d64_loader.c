@@ -47,6 +47,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -66,25 +67,25 @@ typedef struct d64trackpos_
 }d64trackpos;
 
 
-int D64_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int D64_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
-	floppycontext->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile");
 
 	if(hxc_checkfileext(imgfile,"d64"))
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile : D64 file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile : D64 file !");
 		return HXCFE_VALIDFILE;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile : non D64 file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile : non D64 file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	unsigned int filesize;
@@ -93,20 +94,20 @@ int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	int tracklen;
 	unsigned short rpm;
 	unsigned short sectorsize;
-	CYLINDER* currentcylinder;
-	SIDE* currentside;
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SIDE* currentside;
 	unsigned char * errormap;
 	d64trackpos * tracklistpos;
 	unsigned int number_of_track;
 	int errormap_size;
 
 
-	floppycontext->hxc_printf(MSG_DEBUG,"D64_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D64_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -155,7 +156,7 @@ int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 		default:
 			// not supported !
-			floppycontext->hxc_printf(MSG_ERROR,"Unsupported D64 file size ! (%d Bytes)",filesize);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Unsupported D64 file size ! (%d Bytes)",filesize);
 			hxc_fclose(f);
 			return HXCFE_UNSUPPORTEDFILE;
 			
@@ -220,11 +221,11 @@ int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	floppydisk->floppyBitRate=VARIABLEBITRATE;
 	floppydisk->floppyiftype=C64_DD_FLOPPYMODE;
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 	
 	rpm=300;
 
-	floppycontext->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,rpm);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,rpm);
 					
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
@@ -239,8 +240,8 @@ int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					
 			tracklen=(tracklistpos[j].bitrate/(rpm/60))/4;
 				
-			currentcylinder->sides[i]=malloc(sizeof(SIDE));
-			memset(currentcylinder->sides[i],0,sizeof(SIDE));
+			currentcylinder->sides[i]=malloc(sizeof(HXCFE_SIDE));
+			memset(currentcylinder->sides[i],0,sizeof(HXCFE_SIDE));
 			currentside=currentcylinder->sides[i];
 					
 			currentside->number_of_sector=tracklistpos[j].number_of_sector;
@@ -262,7 +263,7 @@ int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 					
 			fread(trackdata,sectorsize*currentside->number_of_sector,1,f);
 		
-			floppycontext->hxc_printf(MSG_DEBUG,"Track:%d Size:%d File offset:%d Number of sector:%d Bitrate:%d",j,currentside->tracklen,tracklistpos[j].fileoffset,tracklistpos[j].number_of_sector,currentside->bitrate);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track:%d Size:%d File offset:%d Number of sector:%d Bitrate:%d",j,currentside->tracklen,tracklistpos[j].fileoffset,tracklistpos[j].number_of_sector,currentside->bitrate);
 
 			BuildGCRTrack(currentside->number_of_sector,sectorsize,j,i,trackdata,currentside->databuffer,&currentside->tracklen);
 	
@@ -275,13 +276,13 @@ int D64_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	
 	if(errormap) free(errormap);
 			
-	floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		
 	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }
 
-int D64_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int D64_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="C64_D64";
@@ -297,7 +298,7 @@ int D64_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -58,20 +59,20 @@
 
 #include "libhxcadaptor.h"
 
-int XML_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int XML_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int filesize;
 	char firstline[512];
 	FILE * f;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"XML_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"XML_libIsValidDiskFile");
 
 	if(hxc_checkfileext(imgfile,"xml"))
 	{
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0)
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"XML_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"XML_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
@@ -84,40 +85,40 @@ int XML_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 			if(strstr(firstline,"<?xml version="))
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"XML_libIsValidDiskFile : XML file !");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"XML_libIsValidDiskFile : XML file !");
 				return HXCFE_VALIDFILE;
 			}
 
-			floppycontext->hxc_printf(MSG_DEBUG,"XML_libIsValidDiskFile : non XML file !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"XML_libIsValidDiskFile : non XML file !");
 			return HXCFE_BADFILE;
 
 		}
 
-		floppycontext->hxc_printf(MSG_ERROR,"XML_libIsValidDiskFile : Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"XML_libIsValidDiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"XML_libIsValidDiskFile : non XML file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"XML_libIsValidDiskFile : non XML file !");
 		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-int XML_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int XML_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	unsigned int filesize;
-	XmlFloppyBuilder* rfb;
-	FLOPPY * fp;
+	HXCFE_XMLLDR* rfb;
+	HXCFE_FLOPPY * fp;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"XML_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"XML_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -129,7 +130,7 @@ int XML_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	if(hxc_checkfileext(imgfile,"xml") && filesize!=0)
 	{
-		rfb = hxcfe_initXmlFloppy(floppycontext);
+		rfb = hxcfe_initXmlFloppy(imgldr_ctx->hxcfe);
 		if(rfb)
 		{
 			if(hxcfe_setXmlFloppyLayoutFile(rfb,imgfile) == HXCFE_NOERROR)
@@ -145,12 +146,12 @@ int XML_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 				if(fp)
 				{
-					memcpy(floppydisk,fp,sizeof(FLOPPY));
+					memcpy(floppydisk,fp,sizeof(HXCFE_FLOPPY));
 					free(fp);
 
 					hxcfe_deinitXmlFloppy(rfb);
 
-					floppycontext->hxc_printf(MSG_DEBUG,"XML_libLoad_DiskFile - disk generated !");
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"XML_libLoad_DiskFile - disk generated !");
 
 					return HXCFE_NOERROR;
 				}
@@ -164,7 +165,7 @@ int XML_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	return HXCFE_BADFILE;
 }
 
-int XML_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int XML_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 	static const char plug_id[]="GENERIC_XML";
 	static const char plug_desc[]="Generic XML file Loader";
@@ -179,7 +180,7 @@ int XML_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

@@ -33,10 +33,10 @@ enum {
 	GETEXTENSION = 4
 };
 
-typedef int (*ISVALIDDISKFILE) (void* floppycontext,char * imgfile);
-typedef int (*LOADDISKFILE)(void* floppycontext,void * floppydisk,char * imgfile,void * parameters);
-typedef int (*WRITEDISKFILE)(void* floppycontext,void * floppydisk,char * imgfile,void * parameters);
-typedef int (*GETPLUGININFOS)(void* floppycontext,unsigned long infotype,void * returnvalue);
+typedef int (*ISVALIDDISKFILE) (void* imgldr_ctx,char * imgfile);
+typedef int (*LOADDISKFILE)(void* imgldr_ctx,void * floppydisk,char * imgfile,void * parameters);
+typedef int (*WRITEDISKFILE)(void* imgldr_ctx,void * floppydisk,char * imgfile,void * parameters);
+typedef int (*GETPLUGININFOS)(void* imgldr_ctx,unsigned long infotype,void * returnvalue);
 
 typedef struct plugins_ptr_
 {
@@ -47,7 +47,7 @@ typedef struct plugins_ptr_
 }plugins_ptr;
 
 
-int libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue,const char * pluginid,const char * plugindesc,plugins_ptr * pluginfunc,const char * fileext);
+int libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue,const char * pluginid,const char * plugindesc,plugins_ptr * pluginfunc,const char * fileext);
 
-FLOPPY* hxcfe_sanityCheck(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk);
+HXCFE_FLOPPY* hxcfe_sanityCheck(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk);
 

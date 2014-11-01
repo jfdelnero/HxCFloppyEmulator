@@ -47,18 +47,24 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
+#include "sector_search.h"
+#include "fdc_ctrl.h"
+#include "fs_manager/fs_manager.h"
 #include "libhxcfe.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
 #include "libcpmfs/libcpmfs.h"
 
-HXCFLOPPYEMULATOR* floppycontext;
-FSMNG * gb_fsmng;
+HXCFE* floppycontext;
+HXCFE_FSMNG * gb_fsmng;
 
 cpmfs fs;
 
-void init_cpm(FSMNG * fsmng)
+void init_cpm(HXCFE_FSMNG * fsmng)
 {
 	gb_fsmng = fsmng;
 	libcpmfs_init(&fs);
@@ -74,7 +80,7 @@ static int media_write(unsigned long sector, unsigned char *buffer,unsigned long
 		return 0;
 }
 
-int cpm_mountImage(FSMNG * fsmng, FLOPPY *floppy)
+int cpm_mountImage(HXCFE_FSMNG * fsmng, HXCFE_FLOPPY *floppy)
 {
 	unsigned char sectorbuffer[1024];
 	int nbsector,fdcstatus,badsectorfound;
@@ -162,7 +168,7 @@ int cpm_mountImage(FSMNG * fsmng, FLOPPY *floppy)
 	return HXCFE_INTERNALERROR;
 }
 
-int cpm_umountImage(FSMNG * fsmng)
+int cpm_umountImage(HXCFE_FSMNG * fsmng)
 {
 	if(fsmng->fdc)
 	{
@@ -173,17 +179,17 @@ int cpm_umountImage(FSMNG * fsmng)
 	return HXCFE_NOERROR;
 }
 
-int cpm_getFreeSpace(FSMNG * fsmng)
+int cpm_getFreeSpace(HXCFE_FSMNG * fsmng)
 {
 	return 0;
 }
 
-int cpm_getTotalSpace(FSMNG * fsmng)
+int cpm_getTotalSpace(HXCFE_FSMNG * fsmng)
 {
 	return 0;
 }
 
-int cpm_openDir(FSMNG * fsmng, char * path)
+int cpm_openDir(HXCFE_FSMNG * fsmng, char * path)
 {
 	cpmfs_dir * dir;
 	int i;
@@ -221,7 +227,7 @@ int cpm_openDir(FSMNG * fsmng, char * path)
 	return HXCFE_ACCESSERROR;
 }
 
-int cpm_readDir(FSMNG * fsmng,int dirhandle,FSENTRY * dirent)
+int cpm_readDir(HXCFE_FSMNG * fsmng,int dirhandle,HXCFE_FSENTRY * dirent)
 {
 	int ret;
 	cpmfs_entry entry;
@@ -252,7 +258,7 @@ int cpm_readDir(FSMNG * fsmng,int dirhandle,FSENTRY * dirent)
 	return HXCFE_ACCESSERROR;
 }
 
-int cpm_closeDir(FSMNG * fsmng, int dirhandle)
+int cpm_closeDir(HXCFE_FSMNG * fsmng, int dirhandle)
 {
 	if(dirhandle<128)
 	{
@@ -266,7 +272,7 @@ int cpm_closeDir(FSMNG * fsmng, int dirhandle)
 	return HXCFE_ACCESSERROR;
 }
 
-int cpm_openFile(FSMNG * fsmng, char * filename)
+int cpm_openFile(HXCFE_FSMNG * fsmng, char * filename)
 {
 	void *file;
 	int i;
@@ -288,7 +294,7 @@ int cpm_openFile(FSMNG * fsmng, char * filename)
 	return HXCFE_ACCESSERROR;
 }
 
-int cpm_createFile(FSMNG * fsmng, char * filename)
+int cpm_createFile(HXCFE_FSMNG * fsmng, char * filename)
 {
     void *file;
 	int i;
@@ -310,7 +316,7 @@ int cpm_createFile(FSMNG * fsmng, char * filename)
 	return HXCFE_ACCESSERROR;
 }
 
-int cpm_writeFile(FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
+int cpm_writeFile(HXCFE_FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
 {
 	int byteswrite;
 	if(filehandle<128)
@@ -324,7 +330,7 @@ int cpm_writeFile(FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
 	return HXCFE_ACCESSERROR;
 }
 
-int cpm_readFile( FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
+int cpm_readFile( HXCFE_FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
 {
 	int bytesread;
 	if(filehandle && filehandle<128)
@@ -338,7 +344,7 @@ int cpm_readFile( FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
 	return HXCFE_ACCESSERROR;
 }
 
-int cpm_deleteFile(FSMNG * fsmng, char * filename)
+int cpm_deleteFile(HXCFE_FSMNG * fsmng, char * filename)
 {
 	if(libcpmfs_remove(&fs,filename)>=0)
 	{
@@ -348,7 +354,7 @@ int cpm_deleteFile(FSMNG * fsmng, char * filename)
 	return HXCFE_ACCESSERROR;
 }
 
-int cpm_closeFile( FSMNG * fsmng,int filehandle)
+int cpm_closeFile( HXCFE_FSMNG * fsmng,int filehandle)
 {
 	if(filehandle && filehandle<128)
 	{
@@ -362,7 +368,7 @@ int cpm_closeFile( FSMNG * fsmng,int filehandle)
 	return HXCFE_ACCESSERROR;
 }
 
-int cpm_createDir( FSMNG * fsmng,char * foldername)
+int cpm_createDir( HXCFE_FSMNG * fsmng,char * foldername)
 {
 	if(libcpmfs_createdirectory(&fs,foldername))
 	{
@@ -371,12 +377,12 @@ int cpm_createDir( FSMNG * fsmng,char * foldername)
 	return HXCFE_ACCESSERROR;
 }
 
-int cpm_removeDir( FSMNG * fsmng,char * foldername)
+int cpm_removeDir( HXCFE_FSMNG * fsmng,char * foldername)
 {
 	return cpm_deleteFile(fsmng, foldername);
 }
 
-int cpm_ftell( FSMNG * fsmng,int filehandle)
+int cpm_ftell( HXCFE_FSMNG * fsmng,int filehandle)
 {
 	if(filehandle && filehandle<128)
 	{
@@ -389,7 +395,7 @@ int cpm_ftell( FSMNG * fsmng,int filehandle)
 	return HXCFE_ACCESSERROR;
 }
 
-int cpm_fseek( FSMNG * fsmng,int filehandle,long offset,int origin)
+int cpm_fseek( HXCFE_FSMNG * fsmng,int filehandle,long offset,int origin)
 {
 	if(filehandle && filehandle<128)
 	{

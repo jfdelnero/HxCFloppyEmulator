@@ -3,10 +3,10 @@
 #define REVERTED_INDEX        0x20000000
 
 
-unsigned long us2index(unsigned long startindex,SIDE * track,unsigned long us,unsigned char fill,char fillorder);
-unsigned long fillindex(int startindex,SIDE * track,unsigned long us,unsigned char fill,char fillorder);
+unsigned long us2index(unsigned long startindex,HXCFE_SIDE * track,unsigned long us,unsigned char fill,char fillorder);
+unsigned long fillindex(int startindex,HXCFE_SIDE * track,unsigned long us,unsigned char fill,char fillorder);
 
-CYLINDER* allocCylinderEntry(unsigned short rpm,unsigned char number_of_side);
+HXCFE_CYLINDER* allocCylinderEntry(unsigned short rpm,unsigned char number_of_side);
 void savebuffer(char * name,unsigned char * buffer, int size);
-double GetTrackPeriod(HXCFLOPPYEMULATOR* floppycontext,SIDE * curside);
-int floppyTrackTypeIdentification(HXCFLOPPYEMULATOR* floppycontext,FLOPPY *fp);
+double GetTrackPeriod(HXCFE* floppycontext,HXCFE_SIDE * curside);
+int floppyTrackTypeIdentification(HXCFE* floppycontext,HXCFE_FLOPPY *fp);

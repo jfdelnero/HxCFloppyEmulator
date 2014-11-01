@@ -48,6 +48,8 @@
 #include <stdio.h>
 
 #include "types.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -58,13 +60,13 @@
 
 #include "libhxcadaptor.h"
 
-int SAD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
+int SAD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int pathlen;
 	FILE * f;
 	SAD_HEADER sadh;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"SAD_libIsValidDiskFile");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAD_libIsValidDiskFile");
 	if(imgfile)
 	{
 		pathlen=strlen(imgfile);
@@ -74,7 +76,7 @@ int SAD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 			f=hxc_fopen(imgfile,"rb");
 			if(f==NULL)
 			{
-				floppycontext->hxc_printf(MSG_ERROR,"SAD_libIsValidDiskFile : Cannot open %s !",imgfile);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SAD_libIsValidDiskFile : Cannot open %s !",imgfile);
 				return HXCFE_ACCESSERROR;
 			}
 
@@ -85,12 +87,12 @@ int SAD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 			if(!strncmp((char*)sadh.abSignature,SAD_SIGNATURE,sizeof SAD_SIGNATURE - 1))
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"SAD_libIsValidDiskFile : SAD file !");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAD_libIsValidDiskFile : SAD file !");
 				return HXCFE_VALIDFILE;
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"SAD_libIsValidDiskFile : non SAD file !");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAD_libIsValidDiskFile : non SAD file !");
 				return HXCFE_BADFILE;
 			}
 
@@ -102,7 +104,7 @@ int SAD_libIsValidDiskFile(HXCFLOPPYEMULATOR* floppycontext,char * imgfile)
 
 
 
-int SAD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,char * imgfile,void * parameters)
+int SAD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	unsigned int i,j;
@@ -112,15 +114,15 @@ int SAD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	unsigned short rpm;
 	unsigned short sectorsize;
 	unsigned char trackformat,skew;
-	CYLINDER* currentcylinder;
+	HXCFE_CYLINDER* currentcylinder;
 	SAD_HEADER sadh;
 
-	floppycontext->hxc_printf(MSG_DEBUG,"SAD_libLoad_DiskFile %s",imgfile);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAD_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"SAD_libLoad_DiskFile : Cannot open %s !",imgfile);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SAD_libLoad_DiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
@@ -129,7 +131,7 @@ int SAD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 	if(strncmp((char*)sadh.abSignature,SAD_SIGNATURE,sizeof SAD_SIGNATURE - 1))
 	{
 		hxc_fclose(f);
-		floppycontext->hxc_printf(MSG_DEBUG,"SAD_libLoad_DiskFile : non SAD file !");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAD_libLoad_DiskFile : non SAD file !");
 		return HXCFE_BADFILE;
 	}
 
@@ -144,11 +146,11 @@ int SAD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	floppydisk->floppyBitRate=250000;
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-	floppydisk->tracks=(CYLINDER**)malloc(sizeof(CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 	rpm=300; // normal rpm
 
-	floppycontext->hxc_printf(MSG_INFO_1,"SAD_libLoad_DiskFile : %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"SAD_libLoad_DiskFile : %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
 	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 
@@ -170,13 +172,13 @@ int SAD_libLoad_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppydisk,ch
 
 	free(trackdata);
 
-	floppycontext->hxc_printf(MSG_INFO_1,"SAD_libLoad_DiskFile : track file successfully loaded and encoded!");
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"SAD_libLoad_DiskFile : track file successfully loaded and encoded!");
 
 	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }
 
-int SAD_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype,void * returnvalue)
+int SAD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="SAMCOUPE_SAD";
@@ -192,7 +194,7 @@ int SAD_libGetPluginInfo(HXCFLOPPYEMULATOR* floppycontext,unsigned long infotype
 	};
 
 	return libGetPluginInfo(
-			floppycontext,
+			imgldr_ctx,
 			infotype,
 			returnvalue,
 			plug_id,

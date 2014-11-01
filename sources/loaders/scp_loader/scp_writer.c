@@ -48,6 +48,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #include "scp_format.h"
@@ -71,7 +72,7 @@ unsigned long update_checksum(unsigned long checksum,unsigned char * buffer,unsi
 	return checksum;
 }
 
-unsigned short getNextPulse(SIDE * track,unsigned int * offset,int * rollover)
+unsigned short getNextPulse(HXCFE_SIDE * track,unsigned int * offset,int * rollover)
 {
 	int i;
 	float totaltime;
@@ -124,7 +125,7 @@ unsigned short getNextPulse(SIDE * track,unsigned int * offset,int * rollover)
 	}while(1);
 }
 
-unsigned long write_scp_track(FILE *f,SIDE * track,unsigned long * csum,int tracknum,unsigned int revolution)
+unsigned long write_scp_track(FILE *f,HXCFE_SIDE * track,unsigned long * csum,int tracknum,unsigned int revolution)
 {
 	unsigned long checksum,file_checksum,size,offset,totalsize;
 	unsigned short trackbuffer[256];
@@ -195,7 +196,7 @@ unsigned long write_scp_track(FILE *f,SIDE * track,unsigned long * csum,int trac
 		}
 
 		trkh.index_position[j].index_time = LITTLEENDIAN_DWORD(total_time);
-		trkh.index_position[j].track_lenght = LITTLEENDIAN_DWORD(size/2);
+		trkh.index_position[j].track_length = LITTLEENDIAN_DWORD(size/2);
 		trkh.index_position[j].track_offset = LITTLEENDIAN_DWORD(offset);
 
 		totalsize += size;
@@ -230,7 +231,7 @@ unsigned long write_scp_track(FILE *f,SIDE * track,unsigned long * csum,int trac
 	return totalsize;
 }
 
-int SCP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	FILE * f;
 	scp_header scph;
@@ -252,7 +253,7 @@ int SCP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 		if(tracknumber>83*2)
 		{
-			floppycontext->hxc_printf(MSG_WARNING,"SCP_libWrite_DiskFile : Track number limited to 164 !");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_WARNING,"SCP_libWrite_DiskFile : Track number limited to 164 !");
 			tracknumber = 83*2;
 		}
 
@@ -329,6 +330,8 @@ int SCP_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char 
 
 		for(i=0;i<tracknumber;i++)
 		{
+			hxcfe_imgCallProgressCallback(imgldr_ctx,i,tracknumber);
+
 			fseek(f,0,SEEK_END);
 
 			tracksoffset[i] = LITTLEENDIAN_DWORD(ftell(f));

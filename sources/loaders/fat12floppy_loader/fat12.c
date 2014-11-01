@@ -30,6 +30,7 @@
 #include <sys/stat.h>
 #include <time.h>
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -38,7 +39,7 @@
 
 #include "libhxcadaptor.h"
 
-int ScanFileAndAddToFAT(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * file, unsigned char * fattable,unsigned char *entriestable,unsigned char *datatable,int parentcluster,FATCONFIG * fatconfig,int numberofcluster)
+int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned char * fattable,unsigned char *entriestable,unsigned char *datatable,int parentcluster,FATCONFIG * fatconfig,int numberofcluster)
 {
 	long hfindfile;
 	filefoundinfo FindFileData;

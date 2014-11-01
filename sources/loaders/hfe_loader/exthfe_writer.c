@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
 #include "hfe_loader.h"
@@ -175,7 +176,7 @@ void extaddpad(unsigned char * track,int mfmsize,int tracksize)
 	#define extrfclose fclose
 #endif
 
-int EXTHFE_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,char * filename)
+int EXTHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 
 	picexttrack * track;
@@ -193,7 +194,7 @@ int EXTHFE_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 	unsigned char factor;
 
 	factor=1;// factor=1-> 50% duty cycle  // factor=2-> 25% duty cycle
-	floppycontext->hxc_printf(MSG_INFO_1,"Write HFE file %s for the standalone emulator.",filename);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write HFE file %s for the standalone emulator.",filename);
 
 	ramfile=0;
 	ramfile_size=0;
@@ -292,7 +293,7 @@ int EXTHFE_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 
 				if(mfmsize*2>0xFFFF)
 				{
-					floppycontext->hxc_printf(MSG_ERROR,"Argg!! track %d too long (%x) and shorten to 0xFFFF !",i,mfmsize*2);
+					imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Argg!! track %d too long (%x) and shorten to 0xFFFF !",i,mfmsize*2);
 					mfmsize=0x7FFF;
 				}
 
@@ -439,7 +440,7 @@ int EXTHFE_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 		else
 		{
 			extrfclose(hxcpicfile);
-			floppycontext->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
 			return -1;
 		}
 
@@ -447,7 +448,7 @@ int EXTHFE_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 
 		extrfclose(hxcpicfile);
 
-		floppycontext->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
 
 		free(FILEHEADER);
 
@@ -455,7 +456,7 @@ int EXTHFE_libWrite_DiskFile(HXCFLOPPYEMULATOR* floppycontext,FLOPPY * floppy,ch
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
 
 		return -1;
 	}
