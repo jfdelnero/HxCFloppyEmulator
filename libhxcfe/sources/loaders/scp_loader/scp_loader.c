@@ -353,7 +353,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			{
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
-					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | i&1,(floppydisk->floppyNumberOfTrack*doublestep)*2 );
+					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),(floppydisk->floppyNumberOfTrack*doublestep)*2 );
 
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Load Track %.3d Side %d",j,i);
 
