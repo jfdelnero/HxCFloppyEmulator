@@ -49,6 +49,7 @@
 
 //#define DEBUGVB 1
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 #include "usb_hxcfloppyemulator.h"
 
@@ -136,7 +137,7 @@ void randomizebuffer(USBHXCFE * hw_context,unsigned char * buffer,unsigned char 
 
 
 // fonction de generation du prochain paquet USB a envoyer
-int FillBuffer(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context,unsigned char * paquetbuffer,int * headmoved)
+int FillBuffer(HXCFE* floppycontext,USBHXCFE * hw_context,unsigned char * paquetbuffer,int * headmoved)
 {
 	int t;
 	int trackposition;
@@ -376,7 +377,7 @@ int FillBuffer(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context,unsigned c
 }
 
 
-int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
+int ftdichiplistener(HXCFE* floppycontext,USBHXCFE * hw_context)
 {
 	unsigned long hw_handle;
 	int we_ret;
@@ -802,7 +803,7 @@ int ftdichiplistener(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hw_context)
 	return 0;
 }
 
-USBHXCFE* libusbhxcfe_init(HXCFLOPPYEMULATOR* floppycontext)
+USBHXCFE* libusbhxcfe_init(HXCFE* floppycontext)
 {
 	int i,j;
 	unsigned char randomvalue;
@@ -854,14 +855,14 @@ USBHXCFE* libusbhxcfe_init(HXCFLOPPYEMULATOR* floppycontext)
 }
 
 
-int libusbhxcfe_deInit(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif)
+int libusbhxcfe_deInit(HXCFE* floppycontext,USBHXCFE * hwif)
 {
 	if(hwif)
 		free(hwif);
 	return 0;
 }
 
-int libusbhxcfe_loadFloppy(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,FLOPPY * floppydisk)
+int libusbhxcfe_loadFloppy(HXCFE* floppycontext,USBHXCFE * hwif,HXCFE_FLOPPY * floppydisk)
 {
 #define BUFFERSIZE 2*128*1024
 	unsigned int final_buffer_len;
@@ -989,13 +990,13 @@ int libusbhxcfe_loadFloppy(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,FLOP
 	return 0;
 }
 
-int libusbhxcfe_ejectFloppy(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif)
+int libusbhxcfe_ejectFloppy(HXCFE* floppycontext,USBHXCFE * hwif)
 {
 
 	return 0;
 }
 
-int libusbhxcfe_getStats(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,USBStats* stats,int clear)
+int libusbhxcfe_getStats(HXCFE* floppycontext,USBHXCFE * hwif,USBStats* stats,int clear)
 {
 	if(hwif)
 	{
@@ -1024,7 +1025,7 @@ int libusbhxcfe_getStats(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,USBSta
 
 }
 
-int libusbhxcfe_setInterfaceMode(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,int interfacemode,int doublestep,int drive)
+int libusbhxcfe_setInterfaceMode(HXCFE* floppycontext,USBHXCFE * hwif,int interfacemode,int doublestep,int drive)
 {
 	if(hwif)
 	{
@@ -1035,7 +1036,7 @@ int libusbhxcfe_setInterfaceMode(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwi
 	return 0;
 }
 
-int libusbhxcfe_getInterfaceMode(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif)
+int libusbhxcfe_getInterfaceMode(HXCFE* floppycontext,USBHXCFE * hwif)
 {
 	if(hwif)
 	{
@@ -1045,7 +1046,7 @@ int libusbhxcfe_getInterfaceMode(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwi
 	return 0;
 }
 
-int libusbhxcfe_getDoubleStep(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif)
+int libusbhxcfe_getDoubleStep(HXCFE* floppycontext,USBHXCFE * hwif)
 {
 	if(hwif)
 	{
@@ -1055,7 +1056,7 @@ int libusbhxcfe_getDoubleStep(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif)
 	return 0;
 }
 
-int libusbhxcfe_getDrive(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif)
+int libusbhxcfe_getDrive(HXCFE* floppycontext,USBHXCFE * hwif)
 {
 	if(hwif)
 	{
@@ -1065,7 +1066,7 @@ int libusbhxcfe_getDrive(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif)
 	return 0;
 }
 
-int libusbhxcfe_getCurTrack(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif)
+int libusbhxcfe_getCurTrack(HXCFE* floppycontext,USBHXCFE * hwif)
 {
 	if(hwif)
 	{
@@ -1074,7 +1075,7 @@ int libusbhxcfe_getCurTrack(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif)
 	return 0;
 }
 
-int libusbhxcfe_setUSBBufferSize(HXCFLOPPYEMULATOR* floppycontext,USBHXCFE * hwif,int size)
+int libusbhxcfe_setUSBBufferSize(HXCFE* floppycontext,USBHXCFE * hwif,int size)
 {
 	if(hwif)
 	{

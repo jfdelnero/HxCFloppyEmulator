@@ -30,7 +30,7 @@
 #define FT_PURGE_TX         2
 #define FT_EVENT_RXCHAR		    1
 
-int ftdi_load_lib (HXCFLOPPYEMULATOR* floppycontext);
+int ftdi_load_lib (HXCFE* floppycontext);
 
 int open_ftdichip(unsigned long * ftdihandle);
 int close_ftdichip(unsigned long ftdihandle);
