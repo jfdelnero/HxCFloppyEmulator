@@ -133,7 +133,9 @@ int hxc_setevent(HXCFE* floppycontext,unsigned char id)
 #ifdef WIN32
 	SetEvent(eventtab[id]);
 #else
-
+	pthread_mutex_lock(&eventtab[id]->eMutex);
+	pthread_cond_signal(&eventtab[id]->eCondVar);
+	pthread_mutex_unlock(&eventtab[id]->eMutex);
 #endif
 	return 0;
 }
