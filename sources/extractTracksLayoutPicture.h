@@ -1,2 +1,2 @@
 
-int extractTracksLayoutPic(HXCFLOPPYEMULATOR* hxcfe,char * infile);
+int extractTracksLayoutPic(HXCFE* hxcfe,char * infile);

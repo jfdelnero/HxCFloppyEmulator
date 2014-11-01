@@ -44,6 +44,10 @@
 
 #include "extractTracksLayoutPicture.h"
 
+#define DISKLAYOUT_XRES 1024
+#define DISKLAYOUT_YRES 480
+
+
 void copyPict(unsigned long * dest,int d_xsize,int d_ysize,int d_xpos,int d_ypos,unsigned long * src,int s_xsize,int s_ysize)
 {
 	int j;
@@ -117,13 +121,14 @@ unsigned char getPixelCode(unsigned long pix,unsigned long * pal,int * nbcol)
 	return 0;
 }
 
-int extractTracksLayoutPic(HXCFLOPPYEMULATOR* hxcfe,char * infile)
+int extractTracksLayoutPic(HXCFE* hxcfe,char * infile)
 {
 	int loaderid;
 	int ret,i,j,k;
 	int cur_col,cur_row;
-	FLOPPY * floppydisk;
-	s_trackdisplay * td;
+	HXCFE_FLOPPY * floppydisk;
+	HXCFE_IMGLDR * imgldr_ctx;
+	HXCFE_TD * td;
 	unsigned long * ptr;
 	unsigned char * ptrchar;
 	int nb_col,nb_row,max_row;
@@ -133,205 +138,210 @@ int extractTracksLayoutPic(HXCFLOPPYEMULATOR* hxcfe,char * infile)
 	unsigned long pal[256];
 	int nbcol;
 
-	loaderid=hxcfe_autoSelectLoader(hxcfe,infile,0);
-	if(loaderid>=0)
+	imgldr_ctx = hxcfe_imgInitLoader(hxcfe);
+
+	if(imgldr_ctx)
 	{
-		floppydisk=hxcfe_floppyLoad(hxcfe,infile,loaderid,&ret);
-
-		if(ret!=HXCFE_NOERROR || !floppydisk)
+		loaderid = hxcfe_imgAutoSetectLoader(imgldr_ctx,infile,0);
+		if(loaderid>=0)
 		{
-			switch(ret)
+			floppydisk = hxcfe_imgLoad(imgldr_ctx,infile,loaderid,&ret);
+			if(ret!=HXCFE_NOERROR || !floppydisk)
 			{
-				case HXCFE_UNSUPPORTEDFILE:
-					printf("Load error!: Image file not yet supported!\n");
-				break;
-				case HXCFE_FILECORRUPTED:
-					printf("Load error!: File corrupted ? Read error ?\n");
-				break;
-				case HXCFE_ACCESSERROR:
-					printf("Load error!:  Read file error!\n");
-				break;
-				default:
-					printf("Load error! error %d\n",ret);
-				break;
+				switch(ret)
+				{
+					case HXCFE_UNSUPPORTEDFILE:
+						printf("Load error!: Image file not yet supported!\n");
+					break;
+					case HXCFE_FILECORRUPTED:
+						printf("Load error!: File corrupted ? Read error ?\n");
+					break;
+					case HXCFE_ACCESSERROR:
+						printf("Load error!:  Read file error!\n");
+					break;
+					default:
+						printf("Load error! error %d\n",ret);
+					break;
+				}
 			}
-		}
-		else
-		{
-			td = hxcfe_td_init(hxcfe,1024,480);
-			if(td)
+			else
 			{
-				hxcfe_td_activate_analyzer(hxcfe,td,ISOIBM_MFM_ENCODING,1);
-				hxcfe_td_activate_analyzer(hxcfe,td,ISOIBM_FM_ENCODING,1);
-				hxcfe_td_activate_analyzer(hxcfe,td,AMIGA_MFM_ENCODING,1);
-				hxcfe_td_activate_analyzer(hxcfe,td,EMU_FM_ENCODING,1);
-				hxcfe_td_activate_analyzer(hxcfe,td,MEMBRAIN_MFM_ENCODING,1);
-				hxcfe_td_activate_analyzer(hxcfe,td,TYCOM_FM_ENCODING,1);
-				hxcfe_td_activate_analyzer(hxcfe,td,APPLEII_GCR1_ENCODING,1);
-				hxcfe_td_activate_analyzer(hxcfe,td,APPLEII_GCR2_ENCODING,1);
-				//hxcfe_td_activate_analyzer(hxcfe,td,ARBURGDAT_ENCODING,1);
-				//hxcfe_td_activate_analyzer(hxcfe,td,ARBURGSYS_ENCODING,1);
-
-				hxcfe_td_setparams(hxcfe,td,240*1000,16,90*1000);
-
-				max_row = 32;
-
-				if( floppydisk->floppyNumberOfTrack * floppydisk->floppyNumberOfSide < 88 )
+				td = hxcfe_td_init(hxcfe,DISKLAYOUT_XRES,DISKLAYOUT_YRES);
+				if(td)
 				{
-					max_row = 10;
-				}
-				else
-				{
-					if( floppydisk->floppyNumberOfTrack * floppydisk->floppyNumberOfSide < 180)
+					hxcfe_td_activate_analyzer(td,ISOIBM_MFM_ENCODING,1);
+					hxcfe_td_activate_analyzer(td,ISOIBM_FM_ENCODING,1);
+					hxcfe_td_activate_analyzer(td,AMIGA_MFM_ENCODING,1);
+					hxcfe_td_activate_analyzer(td,EMU_FM_ENCODING,1);
+					hxcfe_td_activate_analyzer(td,MEMBRAIN_MFM_ENCODING,1);
+					hxcfe_td_activate_analyzer(td,TYCOM_FM_ENCODING,1);
+					hxcfe_td_activate_analyzer(td,APPLEII_GCR1_ENCODING,1);
+					hxcfe_td_activate_analyzer(td,APPLEII_GCR2_ENCODING,1);
+					//hxcfe_td_activate_analyzer(td,ARBURGDAT_ENCODING,1);
+					//hxcfe_td_activate_analyzer(td,ARBURGSYS_ENCODING,1);
+
+					hxcfe_td_setparams(td,240*1000,16,90*1000);
+
+					max_row = 32;
+
+					if( hxcfe_getNumberOfTrack(hxcfe,floppydisk) * hxcfe_getNumberOfSide(hxcfe,floppydisk) < 88 )
 					{
-						max_row = 16;
+						max_row = 10;
 					}
-				}
-
-				nb_col = (( floppydisk->floppyNumberOfTrack * floppydisk->floppyNumberOfSide ) / max_row)+1;
-				if( ( floppydisk->floppyNumberOfTrack * floppydisk->floppyNumberOfSide ) >= max_row)
-					nb_row = max_row;
-				else
-					nb_row = floppydisk->floppyNumberOfTrack * floppydisk->floppyNumberOfSide;
-
-				ptr = malloc((td->xsize*td->ysize*4)*nb_row*nb_col);
-				if(ptr)
-				{
-					memset(ptr,0,(td->xsize*td->ysize*4)*nb_row*nb_col);
-
-					cur_row = 0;
-					cur_col = 0;
-					for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+					else
 					{
-						for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+						if( hxcfe_getNumberOfTrack(hxcfe,floppydisk) * hxcfe_getNumberOfSide(hxcfe,floppydisk) < 180)
 						{
-							printf("Generate track BMP %d:%d\n",j,i);
-							hxcfe_td_draw_track(hxcfe,td,floppydisk,j,i);
+							max_row = 16;
+						}
+					}
 
-							copyPict((unsigned long *)ptr,nb_col*td->xsize,nb_row*td->ysize,cur_col*td->xsize,cur_row*td->ysize,(unsigned long *)td->framebuffer,td->xsize,td->ysize);
+					nb_col = (( hxcfe_getNumberOfTrack(hxcfe,floppydisk) * hxcfe_getNumberOfSide(hxcfe,floppydisk) ) / max_row)+1;
+					if( ( hxcfe_getNumberOfTrack(hxcfe,floppydisk) * hxcfe_getNumberOfSide(hxcfe,floppydisk) ) >= max_row)
+						nb_row = max_row;
+					else
+						nb_row = hxcfe_getNumberOfTrack(hxcfe,floppydisk) * hxcfe_getNumberOfSide(hxcfe,floppydisk);
 
-							cur_row++;
-							if(cur_row==max_row)
+					ptr = malloc((DISKLAYOUT_XRES*DISKLAYOUT_YRES*4)*nb_row*nb_col);
+					if(ptr)
+					{
+						memset(ptr,0,(DISKLAYOUT_XRES*DISKLAYOUT_YRES*4)*nb_row*nb_col);
+
+						cur_row = 0;
+						cur_col = 0;
+						for(j=0;j<hxcfe_getNumberOfTrack(hxcfe,floppydisk);j++)
+						{
+							for(i=0;i<hxcfe_getNumberOfSide(hxcfe,floppydisk);i++)
 							{
-								cur_row = 0;
-								cur_col++;
-							}
+								printf("Generate track BMP %d:%d\n",j,i);
+								hxcfe_td_draw_track(td,floppydisk,j,i);
 
-						}
-					}
+								copyPict((unsigned long *)ptr,nb_col*DISKLAYOUT_XRES,nb_row*DISKLAYOUT_YRES,cur_col*DISKLAYOUT_XRES,cur_row*DISKLAYOUT_YRES,(unsigned long *)hxcfe_td_getframebuffer(td),DISKLAYOUT_XRES,DISKLAYOUT_YRES);
 
-					for(i=0;i<nb_col;i++)
-					{
-						if( ((i*td->xsize)-4) >= 0 )
-							vLine(ptr,nb_col*td->xsize,nb_row*td->ysize,(i*td->xsize)-4);
-					}
-
-					for(j=0;j<nb_row;j++)
-					{
-						if(j&1)
-						{
-							if( ((j*td->ysize)-1) >= 0 )
-								hLine(ptr,nb_col*td->xsize,nb_row*td->ysize,(j*td->ysize)-1);
-						}
-						else
-						{
-							if( ((j*td->ysize)-3) >= 0 )
-								hLine(ptr,nb_col*td->xsize,nb_row*td->ysize,(j*td->ysize)-3);
-							if( ((j*td->ysize)-2) >= 0 )
-								hLine(ptr,nb_col*td->xsize,nb_row*td->ysize,(j*td->ysize)-2);
-							if( ((j*td->ysize)-1) >= 0 )
-								hLine(ptr,nb_col*td->xsize,nb_row*td->ysize,(j*td->ysize)-1);
-						}
-					}
-
-					get_filename(infile,ofilename);
-					strcat(ofilename,".bmp");
-
-					for(i=0;i<256;i++)
-					{
-						pal[i]=i|(i<<8)|(i<<16);
-					}
-	
-					ptrchar = malloc((td->xsize*td->ysize)*nb_row*nb_col);
-					if(ptrchar)
-					{
-						printf("Converting image...\n");
-						nbcol = 0;
-						k=0;
-						for(i=0;i< ( nb_row * td->ysize );i++)
-						{
-							for(j=0;j< ( nb_col * td->xsize );j++)
-							{
-								ptrchar[k] = getPixelCode(ptr[k],(unsigned long*)&pal,&nbcol);
-								k++;
-							}
-						}
-
-						if(nbcol>=256)
-						{
-							k = 0;
-							for(i=0;i< ( nb_row * td->ysize );i++)
-							{
-								for(j=0;j< ( nb_col * td->xsize );j++)
+								cur_row++;
+								if(cur_row==max_row)
 								{
-									ptr[k] = ptr[k] & 0xF8F8F8;
-									k++;
+									cur_row = 0;
+									cur_col++;
 								}
-							}
 
-							for(i=0;i<256;i++)
+							}
+						}
+
+						for(i=0;i<nb_col;i++)
+						{
+							if( ((i*DISKLAYOUT_XRES)-4) >= 0 )
+								vLine(ptr,nb_col*DISKLAYOUT_XRES,nb_row*DISKLAYOUT_YRES,(i*DISKLAYOUT_XRES)-4);
+						}
+
+						for(j=0;j<nb_row;j++)
+						{
+							if(j&1)
 							{
-								pal[i]=i|(i<<8)|(i<<16);
+								if( ((j*DISKLAYOUT_YRES)-1) >= 0 )
+									hLine(ptr,nb_col*DISKLAYOUT_XRES,nb_row*DISKLAYOUT_YRES,(j*DISKLAYOUT_YRES)-1);
 							}
+							else
+							{
+								if( ((j*DISKLAYOUT_YRES)-3) >= 0 )
+									hLine(ptr,nb_col*DISKLAYOUT_XRES,nb_row*DISKLAYOUT_YRES,(j*DISKLAYOUT_YRES)-3);
+								if( ((j*DISKLAYOUT_YRES)-2) >= 0 )
+									hLine(ptr,nb_col*DISKLAYOUT_XRES,nb_row*DISKLAYOUT_YRES,(j*DISKLAYOUT_YRES)-2);
+								if( ((j*DISKLAYOUT_YRES)-1) >= 0 )
+									hLine(ptr,nb_col*DISKLAYOUT_XRES,nb_row*DISKLAYOUT_YRES,(j*DISKLAYOUT_YRES)-1);
+							}
+						}
 
+						get_filename(infile,ofilename);
+						strcat(ofilename,".bmp");
+
+						for(i=0;i<256;i++)
+						{
+							pal[i]=i|(i<<8)|(i<<16);
+						}
+		
+						ptrchar = malloc((DISKLAYOUT_XRES*DISKLAYOUT_YRES)*nb_row*nb_col);
+						if(ptrchar)
+						{
+							printf("Converting image...\n");
 							nbcol = 0;
 							k=0;
-							for(i=0;i< ( nb_row * td->ysize );i++)
+							for(i=0;i< ( nb_row * DISKLAYOUT_YRES );i++)
 							{
-								for(j=0;j< ( nb_col * td->xsize );j++)
+								for(j=0;j< ( nb_col * DISKLAYOUT_XRES );j++)
 								{
 									ptrchar[k] = getPixelCode(ptr[k],(unsigned long*)&pal,&nbcol);
 									k++;
 								}
 							}
+
+							if(nbcol>=256)
+							{
+								k = 0;
+								for(i=0;i< ( nb_row * DISKLAYOUT_YRES );i++)
+								{
+									for(j=0;j< ( nb_col * DISKLAYOUT_XRES );j++)
+									{
+										ptr[k] = ptr[k] & 0xF8F8F8;
+										k++;
+									}
+								}
+
+								for(i=0;i<256;i++)
+								{
+									pal[i]=i|(i<<8)|(i<<16);
+								}
+
+								nbcol = 0;
+								k=0;
+								for(i=0;i< ( nb_row * DISKLAYOUT_YRES );i++)
+								{
+									for(j=0;j< ( nb_col * DISKLAYOUT_XRES );j++)
+									{
+										ptrchar[k] = getPixelCode(ptr[k],(unsigned long*)&pal,&nbcol);
+										k++;
+									}
+								}
+							}
+
+							printf("Writing %s...\n",ofilename);
+
+							if(nbcol>=256)
+							{
+								bdata.nb_color = 16;
+								bdata.xsize = DISKLAYOUT_XRES * nb_col;
+								bdata.ysize = DISKLAYOUT_YRES * nb_row;
+								bdata.data = (unsigned long*)ptr;
+								bdata.palette = 0;
+
+								bmp16b_write(ofilename,&bdata);							
+							}
+ 							else
+							{
+								bdata.nb_color = 8;
+								bdata.xsize = DISKLAYOUT_XRES * nb_col;
+								bdata.ysize = DISKLAYOUT_YRES * nb_row;
+								bdata.data = (unsigned long*)ptrchar;
+								bdata.palette = (unsigned char*)&pal;
+
+								bmpRLE8b_write(ofilename,&bdata);
+							}
+							printf("Done!\n");
+
+							free(ptrchar);
 						}
 
-						printf("Writing %s...\n",ofilename);
-
-						if(nbcol>=256)
-						{
-							bdata.nb_color = 16;
-							bdata.xsize = td->xsize * nb_col;
-							bdata.ysize = td->ysize * nb_row;
-							bdata.data = (unsigned long*)ptr;
-							bdata.palette = 0;
-
-							bmp16b_write(ofilename,&bdata);							
-						}
- 						else
-						{
-							bdata.nb_color = 8;
-							bdata.xsize = td->xsize * nb_col;
-							bdata.ysize = td->ysize * nb_row;
-							bdata.data = (unsigned long*)ptrchar;
-							bdata.palette = (unsigned char*)&pal;
-
-							bmpRLE8b_write(ofilename,&bdata);
-						}
-						printf("Done!\n");
-
-						free(ptrchar);
+						free(ptr);
 					}
 
-					free(ptr);
+					hxcfe_td_deinit(td);
 				}
 
-				hxcfe_td_deinit(hxcfe,td);
+				hxcfe_imgUnload(imgldr_ctx,floppydisk);
 			}
-
-			hxcfe_floppyUnload(hxcfe,floppydisk);
 		}
-	}
 
+		hxcfe_imgDeInitLoader(imgldr_ctx);
+	}
 	return 0;
 }
