@@ -14,8 +14,8 @@ typedef struct s_gui_context_
 	unsigned char twistedcable;
 	int interfacemode;
 
-	HXCFLOPPYEMULATOR * hxcfe;
-	FLOPPY * loadedfloppy;
+	HXCFE * hxcfe;
+	HXCFE_FLOPPY * loadedfloppy;
 	USBHXCFE * usbhxcfe;
 
 	int backlight_tmr;
@@ -29,8 +29,10 @@ typedef struct s_gui_context_
 	int xsize,ysize;
 	unsigned char * mapfloppybuffer;
 
-	s_trackdisplay * td;
+	HXCFE_TD * td;
+	unsigned char * flayoutframebuffer;
 	int updatefloppyinfos;
+	int graphupdate;
 
 	int updatefloppyfs;
 
@@ -40,5 +42,9 @@ typedef struct s_gui_context_
 	char xml_file_path[1024];
 
 	void * main_window;
+
+	float loadingprogess;
+
+	int exit;
 
 }s_gui_context;

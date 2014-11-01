@@ -86,10 +86,12 @@ extern "C"
 
 	extern void convert8b24b(bmaptype * img,unsigned short transcolor);
 
-	#include "libhxcfe.h"
-	#include "usb_hxcfloppyemulator.h"
 	#include "version.h"
 }
+
+#include "libhxcfe.h"
+#include "libhxcadaptor.h"
+#include "usb_hxcfloppyemulator.h"
 
 #include "loader.h"
 #include "main_gui.h"
@@ -101,10 +103,11 @@ extern "C"
 
 #include "msg_txt.h"
 
-extern int CUI_affiche(int MSGTYPE,char * chaine, ...);
 extern s_gui_context * guicontext;
 
 char * license_txt;
+
+int loadthreadstat;
 
 const char * plugid_lst[]=
 {
@@ -277,6 +280,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 	int loaderid;
 	Fl_Native_File_Chooser fnfc;
 	unsigned char deffilename[512];
+	HXCFE_IMGLDR * imgldr_ctx;
 
 	if(!guicontext->loadedfloppy)
 	{
@@ -334,16 +338,23 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 			{
 				i=fnfc.filter_value();
 				
-				loaderid=hxcfe_getLoaderID(guicontext->hxcfe,(char*)plugid_lst[i]);
-				
-				if(loaderid>=0)
+				imgldr_ctx = hxcfe_imgInitLoader(guicontext->hxcfe);
+				if(imgldr_ctx)
 				{
-					if(!guicontext->autoselectmode)
+					loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,(char*)plugid_lst[i]);
+				
+					if(loaderid>=0)
 					{
-						hxcfe_floppySetInterfaceMode(guicontext->hxcfe,guicontext->loadedfloppy,guicontext->interfacemode);
+						if(!guicontext->autoselectmode)
+						{
+							hxcfe_floppySetInterfaceMode(guicontext->hxcfe,guicontext->loadedfloppy,guicontext->interfacemode);
+						}
+						
+						hxcfe_floppySetDoubleStep(guicontext->hxcfe,guicontext->loadedfloppy,guicontext->doublestep);
+						hxcfe_imgExport(imgldr_ctx,guicontext->loadedfloppy,(char*)fnfc.filename(),loaderid);
 					}
-					hxcfe_floppySetDoubleStep(guicontext->hxcfe,guicontext->loadedfloppy,guicontext->doublestep);
-					hxcfe_floppyExport(guicontext->hxcfe,guicontext->loadedfloppy,(char*)fnfc.filename(),loaderid);
+
+					hxcfe_imgDeInitLoader(imgldr_ctx);
 				}
 				break; // FILE CHOSEN
 			}
@@ -400,12 +411,60 @@ void format_choice_cb(Fl_Widget *, void *v)
 	sync_if_config();
 }
 
-void dnd_open(const char *urls)
+typedef struct _loadthread
 {
-	load_floppy_image((char*)urls);
+	char * urls;
+}loadthread;
+
+int loading_thread(void* floppycontext,void* context)
+{
+	loadthread * loadth;
+	
+	loadth = (loadthread*)context;
+	load_floppy_image(loadth->urls);
+
 	guicontext->updatefloppyinfos++;
 	guicontext->updatefloppyfs++;
+
+	loadthreadstat=0;
+	free(loadth->urls);
+	free(loadth);
+
+	return 0;
 }
+
+void dnd_open(const char *urls)
+{
+	loadthread * loadthread_params;
+
+	if(loadthreadstat==0)
+	{
+		loadthreadstat = 1;
+		loadthread_params = (loadthread *)malloc(sizeof(loadthread));
+		if(loadthread_params)
+		{
+			if(strlen(urls))
+			{
+				loadthread_params->urls =(char*)malloc(strlen(urls)+1);
+				memset(loadthread_params->urls,0,strlen(urls)+1);
+				memcpy(loadthread_params->urls,urls,strlen(urls));
+			}
+			else
+				loadthread_params->urls = 0;
+
+			hxc_createthread(guicontext->hxcfe,(void*)loadthread_params,&loading_thread,1);
+
+			//load_floppy_image((char*)urls);
+			//guicontext->updatefloppyinfos++;
+			//guicontext->updatefloppyfs++;
+		}
+		else
+		{
+			loadthreadstat = 0;
+		}
+	}
+}
+
 
 void dnd_cb(Fl_Widget *o, void *v)
 {
@@ -449,7 +508,7 @@ static void tick_mw(void *v) {
 
 	if(guicontext->loadedfloppy && strlen(guicontext->bufferfilename))
 	{
-		sprintf(tempstr,"%s - %d track(s) %d side(s)     ",guicontext->bufferfilename,guicontext->loadedfloppy->floppyNumberOfTrack,guicontext->loadedfloppy->floppyNumberOfSide);
+		sprintf(tempstr,"%s - %d track(s) %d side(s)     ",guicontext->bufferfilename,hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy),hxcfe_getNumberOfSide(guicontext->hxcfe,guicontext->loadedfloppy));
 
 		if( guicontext->txtindex >= strlen(tempstr) )
 		{
@@ -501,12 +560,22 @@ static void tick_mw(void *v) {
 #ifndef STANDALONEFSBROWSER
 	if(guicontext->loadedfloppy)
 	{
-		sprintf(tempstr,"Track %d/%d",libusbhxcfe_getCurTrack(guicontext->hxcfe,guicontext->usbhxcfe),guicontext->loadedfloppy->floppyNumberOfTrack);
+		sprintf(tempstr,"Track %d/%d",libusbhxcfe_getCurTrack(guicontext->hxcfe,guicontext->usbhxcfe),hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy));
 
 		window->track_pos_str->value((const char*)tempstr);
 		window->track_pos->minimum(0);
-		window->track_pos->maximum(guicontext->loadedfloppy->floppyNumberOfTrack);
+		window->track_pos->maximum( (float)hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy) );
 		window->track_pos->value((float)libusbhxcfe_getCurTrack(guicontext->hxcfe,guicontext->usbhxcfe));
+	}
+	else
+	{
+		sprintf(tempstr,"Loading : %s",guicontext->bufferfilename);
+		window->file_name_txt->value((const char*)tempstr);
+		//window->track_pos->color(0x000000FF);
+		window->track_pos->minimum(0);
+		window->track_pos->maximum( (float)100);
+		window->track_pos->value(   (float)guicontext->loadingprogess);
+		//window->redraw();
 	}
 #endif
 
@@ -573,12 +642,14 @@ Main_Window::Main_Window()
   : Fl_Window(WINDOW_XSIZE,428)
 {
 	int i;
-	XmlFloppyBuilder* rfb;
+	HXCFE_XMLLDR* rfb;
 	char * temp;
+	infothread * infoth;
 
 	txtindex=0;
 	i=0;
 	evt_txt=0;
+	loadthreadstat = 0;
 	USBStats stats;
 
 	guicontext->loadedfloppy=0;
@@ -687,6 +758,7 @@ Main_Window::Main_Window()
 	
 	//////////////////////////////////////////////
 	// Floppy view window
+	
 	this->infos_window=new floppy_infos_window();
 	this->infos_window->x_offset->bounds(0.0, 100);
 	this->infos_window->x_offset->value(85);
@@ -695,7 +767,19 @@ Main_Window::Main_Window()
 	this->infos_window->y_time->scrollvalue(16,1,2,64);
 	this->infos_window->track_view_bt->value(1);
 	this->infos_window->disc_view_bt->value(0);
-	guicontext->td=hxcfe_td_init(guicontext->hxcfe,this->infos_window->floppy_map_disp->w(),this->infos_window->floppy_map_disp->h());
+	guicontext->td = hxcfe_td_init(guicontext->hxcfe,this->infos_window->floppy_map_disp->w(),this->infos_window->floppy_map_disp->h());
+	guicontext->flayoutframebuffer = (unsigned char*)malloc( this->infos_window->floppy_map_disp->w() * this->infos_window->floppy_map_disp->h() * 3);
+	if(guicontext->flayoutframebuffer)
+	{
+		memset(guicontext->flayoutframebuffer,0,this->infos_window->floppy_map_disp->w()*this->infos_window->floppy_map_disp->h() * 3);
+		hxc_createevent(guicontext->hxcfe,10);
+
+		infoth = (infothread *)malloc(sizeof(infothread));
+		infoth->window = (floppy_infos_window*)(this->infos_window);
+		infoth->guicontext = guicontext;		
+		hxc_createthread(guicontext->hxcfe,(void*)infoth,&InfosThreadProc,1);
+
+	}
 	this->infos_window->buf=new Fl_Text_Buffer;
 	this->infos_window->object_txt->buffer(this->infos_window->buf);
 	this->infos_window->amiga_mfm_bt->value(1);

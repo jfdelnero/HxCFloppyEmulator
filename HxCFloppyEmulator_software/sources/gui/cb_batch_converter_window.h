@@ -1,7 +1,7 @@
 
 typedef struct batchconverterparams_
 {
-	HXCFLOPPYEMULATOR * flopemu;
+	HXCFE * flopemu;
 	//HWND windowshwd;
 	batch_converter_window *windowshwd;
 	char sourcedir[1024];

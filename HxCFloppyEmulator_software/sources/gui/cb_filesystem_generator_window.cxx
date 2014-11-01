@@ -289,7 +289,7 @@ void filesystem_generator_window_bt_injectdir(Fl_Button* bt, void*)
 {
 	filesystem_generator_window *fgw;
 	Fl_Window *dw;
-	FLOPPY *floppy;
+	HXCFE_FLOPPY *floppy;
 
 	dw=((Fl_Window*)(bt->parent()));
 	fgw=(filesystem_generator_window *)dw->user_data();
@@ -317,7 +317,7 @@ void filesystem_generator_window_bt_injectdir(Fl_Button* bt, void*)
 
 void tick_fs(void *w) {
 
-	s_trackdisplay * td;
+	HXCFE_TD * td;
 	filesystem_generator_window *window;
 	window=(filesystem_generator_window *)w;
 
@@ -348,7 +348,7 @@ void tick_fs(void *w) {
 }
 
 
-int displaydir(FSMNG  * fsmng,filesystem_generator_window *fgw,char * folder,int level)
+int displaydir(HXCFE_FSMNG  * fsmng,filesystem_generator_window *fgw,char * folder,int level)
 {
 	char fullpath[512];
 	char fullpath2[512];
@@ -356,7 +356,7 @@ int displaydir(FSMNG  * fsmng,filesystem_generator_window *fgw,char * folder,int
 	int ret;
 	int dir;
 	int totalsize;
-	FSENTRY  dirent;
+	HXCFE_FSENTRY  dirent;
 
 	totalsize = 0;
 
@@ -442,7 +442,7 @@ int displaydir(FSMNG  * fsmng,filesystem_generator_window *fgw,char * folder,int
 	return 0;
 }
 
-int getdir(filesystem_generator_window *fsw,FSMNG  * fsmng,char * folder,char * dstfolder,int level)
+int getdir(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,char * dstfolder,int level)
 {
 	char fullpath[1024];
 	char fullpathdst[1024];
@@ -451,7 +451,7 @@ int getdir(filesystem_generator_window *fsw,FSMNG  * fsmng,char * folder,char * 
 	int filesize;
 	int ret;
 	int dir,i;
-	FSENTRY  dirent;
+	HXCFE_FSENTRY  dirent;
 	FILE * f;
 	int floppyfile;
 
@@ -653,7 +653,7 @@ int getdir(filesystem_generator_window *fsw,FSMNG  * fsmng,char * folder,char * 
 
 void browse_floppy_disk(filesystem_generator_window *fgw,int lastoperationerror)
 {
-	FSMNG  * fsmng;
+	HXCFE_FSMNG  * fsmng;
 	int totalsize;
 	char statustxt[512];
 
@@ -767,7 +767,7 @@ void filesystem_generator_window_bt_delete(Fl_Button *bt,void *)
 	char itempath[512];
 	filesystem_generator_window *fgw;
 	Fl_Window *dw;
-	FSMNG  * fsmng;
+	HXCFE_FSMNG  * fsmng;
 	Fl_Tree_Item * flt_item;
 
 	dw=((Fl_Window*)(bt->parent()));
@@ -1025,7 +1025,7 @@ void dnd_fs_conv(const char *urls)
 
 }
 
-int addentry(filesystem_generator_window *fsw,FSMNG  * fsmng,  char * srcpath,char *dstpath)
+int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcpath,char *dstpath)
 {
 	FILE * f;
 	int size,file_handle,ret,dirhandle,wsize;
@@ -1224,14 +1224,14 @@ int addentry(filesystem_generator_window *fsw,FSMNG  * fsmng,  char * srcpath,ch
 
 int getfilesthread(void* floppycontext,void* hw_context)
 {
-	FSMNG  * fsmng;
-	HXCFLOPPYEMULATOR* floppyem;
+	HXCFE_FSMNG  * fsmng;
+	HXCFE* floppyem;
 	filesystem_generator_window *fsw;
 	s_param_fs_params * fsparams2;
 	char itempath[512];
 	Fl_Tree_Item * flt_item;
 
-	floppyem=(HXCFLOPPYEMULATOR*)floppycontext;
+	floppyem=(HXCFE*)floppycontext;
 	fsparams2=(s_param_fs_params *)hw_context;
 
 	if(floppyem && fsparams2)
@@ -1331,8 +1331,8 @@ void filesystem_generator_window_bt_getfiles(Fl_Button *bt,void *)
 
 int draganddropfsthread(void* floppycontext,void* hw_context)
 {
-	FSMNG  * fsmng;
-	HXCFLOPPYEMULATOR* floppyem;
+	HXCFE_FSMNG  * fsmng;
+	HXCFE* floppyem;
 	filesystem_generator_window *fsw;
 	s_param_fs_params * fsparams2;
 	char fullpath[1024];
@@ -1344,7 +1344,7 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 	struct stat entry;
 	Fl_Tree_Item * flt_item;
 
-	floppyem=(HXCFLOPPYEMULATOR*)floppycontext;
+	floppyem=(HXCFE*)floppycontext;
 	fsparams2=(s_param_fs_params *)hw_context;
 
 	if(floppyem && fsparams2)

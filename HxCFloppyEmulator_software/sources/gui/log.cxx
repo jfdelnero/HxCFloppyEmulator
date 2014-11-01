@@ -67,12 +67,9 @@
 
 #include "log_gui.h"
 
-extern "C"
-{
-	#include "libhxcfe.h"
-	#include "usb_hxcfloppyemulator.h"
-	#include "libhxcadaptor.h"
-}
+#include "libhxcfe.h"
+#include "usb_hxcfloppyemulator.h"
+#include "libhxcadaptor.h"
 
 #include "main.h"
 

@@ -49,12 +49,9 @@
 #include "fl_includes.h"
 #include "fl_dnd_box.h"
 
-extern "C"
-{
-	#include "libhxcfe.h"
-	#include "usb_hxcfloppyemulator.h"
-	#include "libhxcadaptor.h"
-}
+#include "libhxcfe.h"
+#include "usb_hxcfloppyemulator.h"
+#include "libhxcadaptor.h"
 
 #include "fl_includes.h"
 
@@ -120,36 +117,34 @@ ff_type ff_type_list[]=
 	{ -1,"",0,0}			
 };
 
-int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * destfolder,int output_file_format,batchconverterparams * params)
+int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,int output_file_format,batchconverterparams * params)
 {
 	int i,j,filenb,ret;
 	char *destinationfile,*tempstr;
-	FLOPPY * thefloppydisk;
+	HXCFE_FLOPPY * thefloppydisk;
 	int loaderid;
 	cfgrawfile rfc;
 	Main_Window* mw;
 	int disklayout;
-	XmlFloppyBuilder* rfb;
-	
-	filenb=0;
-	while(filelist[filenb])
-	{		
+	HXCFE_XMLLDR* rfb;
+	HXCFE_IMGLDR * imgldr_ctx;
 
-		if(1)
-		{
-
-
+	imgldr_ctx = hxcfe_imgInitLoader( floppycontext );
+	if(imgldr_ctx)
+	{
+		filenb=0;
+		while(filelist[filenb])
+		{		
 			if(!params->rawfilemode)
-				loaderid=hxcfe_autoSelectLoader(floppycontext,filelist[filenb],0);
+				loaderid = hxcfe_imgAutoSetectLoader(imgldr_ctx,filelist[filenb],0);
 			else
 				loaderid = 0;
 
 			if(loaderid>=0 || params->rawfilemode)
 			{
-
 				if(!params->rawfilemode)
 				{
-					thefloppydisk = hxcfe_floppyLoad(floppycontext,filelist[filenb],loaderid,&ret);
+					thefloppydisk = hxcfe_imgLoad(imgldr_ctx,filelist[filenb],loaderid,&ret);
 				}
 				else
 				{
@@ -158,7 +153,7 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 					disklayout = mw->rawloader_window->choice_disklayout->value();
 					if(disklayout>=1)
 					{
-						rfb=hxcfe_initXmlFloppy(guicontext->hxcfe);
+						rfb = hxcfe_initXmlFloppy(guicontext->hxcfe);
 						if(rfb)
 						{
 							if(disklayout ==  1)
@@ -197,15 +192,16 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 				}
 				else
 				{
-
 					j=strlen(filelist[filenb]);
 					while(filelist[filenb][j]!=SEPARTOR && j)
 					{
 						j--;
 					}
-					if(loaderid != hxcfe_getLoaderID(guicontext->hxcfe,(char*)PLUGIN_SKF) || !j) 
+
+					if(loaderid != hxcfe_imgGetLoaderID(imgldr_ctx,(char*)PLUGIN_SKF) || !j) 
 					{
-						if(filelist[filenb][j]==SEPARTOR) j++;
+						if(filelist[filenb][j]==SEPARTOR) 
+							j++;
 					}
 					else
 					{
@@ -226,7 +222,7 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 					destinationfile=(char*)malloc(strlen(&filelist[filenb][j])+strlen(destfolder)+2+99);
 					sprintf(destinationfile,"%s%c%s",destfolder,SEPARTOR,&filelist[filenb][j]);
 					i=strlen(destinationfile);
-					
+						
 					do
 					{
 						i--;
@@ -237,10 +233,10 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 						destinationfile[i]='_';
 					}
 					ret=1;
-					
+						
 					strcat(destinationfile,ff_type_list[output_file_format].ext);
 
-					loaderid=hxcfe_getLoaderID(floppycontext,(char*)ff_type_list[output_file_format].plug_id);
+					loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,(char*)ff_type_list[output_file_format].plug_id);
 					if(ret>=0)
 					{	
 						if(!guicontext->autoselectmode)
@@ -250,10 +246,10 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 						
 						hxcfe_floppySetDoubleStep(guicontext->hxcfe,thefloppydisk,guicontext->doublestep);
 
-						ret=hxcfe_floppyExport(floppycontext,thefloppydisk,destinationfile,loaderid);
+						ret = hxcfe_imgExport(imgldr_ctx,thefloppydisk,destinationfile,loaderid);
 					}
 
-					hxcfe_floppyUnload(floppycontext,thefloppydisk);
+					hxcfe_imgUnload(imgldr_ctx,thefloppydisk);
 
 					tempstr=(char*)malloc(1024);
 
@@ -279,14 +275,18 @@ int draganddropconvert(HXCFLOPPYEMULATOR* floppycontext,char ** filelist,char * 
 					free(tempstr);
 				}
 			}
-		}
+		
 		filenb++;
-	}	
+	
+		}
+
+		hxcfe_imgDeInitLoader( imgldr_ctx );
+	}
 
 	return 0;
 }
 
-int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,char * destfolder,char * file,int output_file_format,batchconverterparams * params)
+int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destfolder,char * file,int output_file_format,batchconverterparams * params)
 {
 	long hfindfile;
 	filefoundinfo FindFileData;
@@ -294,212 +294,218 @@ int browse_and_convert_directory(HXCFLOPPYEMULATOR* floppycontext,char * folder,
 	int ret,i;
 	char * destinationfolder;
 	char * destinationfile;
-	FLOPPY * thefloppydisk;
+	HXCFE_FLOPPY * thefloppydisk;
 	unsigned char * fullpath;
 	unsigned char * tempstr;
 	int loaderid;
 	Main_Window* mw;
 	int disklayout;
-	XmlFloppyBuilder* rfb;
+	HXCFE_XMLLDR* rfb;
 	cfgrawfile rfc;
+	HXCFE_IMGLDR * imgldr_ctx;
 
-	hfindfile=hxc_find_first_file(folder,file, &FindFileData); 
-	if(hfindfile!=-1)
+	imgldr_ctx = hxcfe_imgInitLoader( floppycontext );
+	if(imgldr_ctx)
 	{
-		bbool=1;
-		while(hfindfile!=-1 && bbool && !params->abort)
+		hfindfile=hxc_find_first_file(folder,file, &FindFileData); 
+		if(hfindfile!=-1)
 		{
-			if(!params->abort)
+			bbool=1;
+			while(hfindfile!=-1 && bbool && !params->abort)
 			{
-
-				if(FindFileData.isdirectory)
+				if(!params->abort)
 				{
-					if(strcmp(".",FindFileData.filename)!=0 && strcmp("..",FindFileData.filename)!=0)
+
+					if(FindFileData.isdirectory)
 					{
-						destinationfolder=(char*)malloc(strlen(FindFileData.filename)+strlen(destfolder)+2);
-						sprintf(destinationfolder,"%s%c%s",destfolder,SEPARTOR,FindFileData.filename);
-
-						//printf("Creating directory %s\n",destinationfolder);
-						hxc_mkdir(destinationfolder);
-
-						fullpath=(unsigned char*)malloc(strlen(FindFileData.filename)+strlen(folder)+2+9);
-						sprintf((char*)fullpath,"%s%c%s",folder,SEPARTOR,FindFileData.filename);
-
-						floppycontext->hxc_printf(MSG_INFO_1,(char*)"Entering directory %s",FindFileData.filename);
-
-						tempstr=(unsigned char*)malloc(1024);
-						sprintf((char*)tempstr,"Entering directory %s",FindFileData.filename);
-						params->windowshwd->strout_convert_status->value((const char*)tempstr);
-
-						if(browse_and_convert_directory(floppycontext,(char*)fullpath,destinationfolder,file,output_file_format,params))
+						if(strcmp(".",FindFileData.filename)!=0 && strcmp("..",FindFileData.filename)!=0)
 						{
+							destinationfolder=(char*)malloc(strlen(FindFileData.filename)+strlen(destfolder)+2);
+							sprintf(destinationfolder,"%s%c%s",destfolder,SEPARTOR,FindFileData.filename);
+
+							//printf("Creating directory %s\n",destinationfolder);
+							hxc_mkdir(destinationfolder);
+
+							fullpath=(unsigned char*)malloc(strlen(FindFileData.filename)+strlen(folder)+2+9);
+							sprintf((char*)fullpath,"%s%c%s",folder,SEPARTOR,FindFileData.filename);
+
+							CUI_affiche(MSG_INFO_1,(char*)"Entering directory %s",FindFileData.filename);
+
+							tempstr=(unsigned char*)malloc(1024);
+							sprintf((char*)tempstr,"Entering directory %s",FindFileData.filename);
+							params->windowshwd->strout_convert_status->value((const char*)tempstr);
+
+							if(browse_and_convert_directory(floppycontext,(char*)fullpath,destinationfolder,file,output_file_format,params))
+							{
+								free(destinationfolder);
+								free(fullpath);
+								free(tempstr);
+								hxc_find_close(hfindfile);
+								return 1;
+							}
 							free(destinationfolder);
 							free(fullpath);
+							CUI_affiche(MSG_INFO_1,(char*)"Leaving directory %s",FindFileData.filename);
+							
+							sprintf((char*)tempstr,"Leaving directory %s",FindFileData.filename);
+							params->windowshwd->strout_convert_status->value((const char*)tempstr);
 							free(tempstr);
-							hxc_find_close(hfindfile);
-							return 1;
+							
 						}
-						free(destinationfolder);
-						free(fullpath);
-						floppycontext->hxc_printf(MSG_INFO_1,(char*)"Leaving directory %s",FindFileData.filename);
-						
-						sprintf((char*)tempstr,"Leaving directory %s",FindFileData.filename);
-						params->windowshwd->strout_convert_status->value((const char*)tempstr);
-						free(tempstr);
-						
 					}
-				}
-				else
-				{
-					floppycontext->hxc_printf(MSG_INFO_1,(char*)"converting file %s, %dB",FindFileData.filename,FindFileData.size);
-					if(FindFileData.size)
+					else
 					{
-
-						fullpath=(unsigned char*)malloc(strlen(FindFileData.filename)+strlen(folder)+2+9);
-						sprintf((char*)fullpath,"%s%c%s",folder,SEPARTOR,FindFileData.filename);
-
-						if(!params->rawfilemode)
-							loaderid=hxcfe_autoSelectLoader(floppycontext,(char*)fullpath,0);
-
-						if(loaderid>=0 || params->rawfilemode)
+						CUI_affiche(MSG_INFO_1,(char*)"converting file %s, %dB",FindFileData.filename,FindFileData.size);
+						if(FindFileData.size)
 						{
 
+							fullpath=(unsigned char*)malloc(strlen(FindFileData.filename)+strlen(folder)+2+9);
+							sprintf((char*)fullpath,"%s%c%s",folder,SEPARTOR,FindFileData.filename);
+
 							if(!params->rawfilemode)
-							{
-								thefloppydisk = hxcfe_floppyLoad(floppycontext,(char*)fullpath,loaderid,&ret);
-							}
-							else
-							{
-								mw = (Main_Window*)guicontext->main_window;
+								loaderid = hxcfe_imgAutoSetectLoader(imgldr_ctx,(char*)fullpath,0);
 
-								disklayout = mw->rawloader_window->choice_disklayout->value();
-								if(disklayout>=1)
+							if(loaderid>=0 || params->rawfilemode)
+							{
+
+								if(!params->rawfilemode)
 								{
-									rfb = hxcfe_initXmlFloppy(guicontext->hxcfe);
-									if(rfb)
-									{
-										if(disklayout ==  1)
-											hxcfe_setXmlFloppyLayoutFile(rfb,guicontext->xml_file_path);
-										else
-											hxcfe_selectXmlFloppyLayout(rfb,disklayout-2);
-
-										thefloppydisk = hxcfe_generateXmlFileFloppy (rfb,(char*)fullpath);
-										hxcfe_deinitXmlFloppy(rfb);
-										ret = 0;
-									}
+									thefloppydisk = hxcfe_imgLoad(imgldr_ctx,(char*)fullpath,loaderid,&ret);
 								}
 								else
 								{
-									getWindowState(mw->rawloader_window,&rfc);
-									thefloppydisk = loadrawimage(floppycontext,&rfc,(char*)fullpath,&ret);
-								}
-							}
+									mw = (Main_Window*)guicontext->main_window;
 
-						}
-						else
-							ret=loaderid;
+									disklayout = mw->rawloader_window->choice_disklayout->value();
+									if(disklayout>=1)
+									{
+										rfb = hxcfe_initXmlFloppy(guicontext->hxcfe);
+										if(rfb)
+										{
+											if(disklayout ==  1)
+												hxcfe_setXmlFloppyLayoutFile(rfb,guicontext->xml_file_path);
+											else
+												hxcfe_selectXmlFloppyLayout(rfb,disklayout-2);
 
-						free(fullpath);
-
-						if(ret!=HXCFE_NOERROR || !thefloppydisk)
-						{
-							switch(ret)
-							{
-								case HXCFE_UNSUPPORTEDFILE:
-									//printf("Load error!: Image file not yet supported!\n");
-								break;
-								case HXCFE_FILECORRUPTED:
-									//printf("Load error!: File corrupted ? Read error ?\n");
-								break;
-								case HXCFE_ACCESSERROR:
-									//printf("Load error!:  Read file error!\n");
-								break;
-								default:
-									//printf("Load error! error %d\n",ret);
-								break;
-							}
-						}
-						else
-						{
-							destinationfile=(char*)malloc(strlen(FindFileData.filename)+strlen(destfolder)+2+99);
-							sprintf(destinationfile,"%s%c%s",destfolder,SEPARTOR,FindFileData.filename);
-							i=strlen(destinationfile);
-							do
-							{
-								i--;
-							}while(i && destinationfile[i]!='.');
-
-							if(i)
-							{
-							  destinationfile[i]='_';
-							}
-
-							//printf("Creating file %s\n",destinationfile);
-							strcat(destinationfile,ff_type_list[output_file_format].ext);							
-
-							loaderid=hxcfe_getLoaderID(floppycontext,(char*)ff_type_list[output_file_format].plug_id);
-							if(loaderid>=0)
-							{
-								if(!guicontext->autoselectmode)
-								{
-									hxcfe_floppySetInterfaceMode(guicontext->hxcfe,thefloppydisk,guicontext->interfacemode);
+											thefloppydisk = hxcfe_generateXmlFileFloppy (rfb,(char*)fullpath);
+											hxcfe_deinitXmlFloppy(rfb);
+											ret = 0;
+										}
+									}
+									else
+									{
+										getWindowState(mw->rawloader_window,&rfc);
+										thefloppydisk = loadrawimage(floppycontext,&rfc,(char*)fullpath,&ret);
+									}
 								}
 
-								hxcfe_floppySetDoubleStep(guicontext->hxcfe,thefloppydisk,guicontext->doublestep);
-
-								ret=hxcfe_floppyExport(floppycontext,thefloppydisk,destinationfile,loaderid);
 							}
 							else
 								ret=loaderid;
 
+							free(fullpath);
 
-							hxcfe_floppyUnload(floppycontext,thefloppydisk);
-
-							tempstr=(unsigned char*)malloc(1024);
-							
-							i=strlen(destinationfile);
-							do
+							if(ret!=HXCFE_NOERROR || !thefloppydisk)
 							{
-								i--;
-							}while(i && destinationfile[i]!=SEPARTOR);
-
-							if(!ret)
-							{
-								sprintf((char*)tempstr,"%s created",&destinationfile[i]);
-								params->windowshwd->strout_convert_status->value((const char*)tempstr);
-								params->numberoffileconverted++;
+								switch(ret)
+								{
+									case HXCFE_UNSUPPORTEDFILE:
+										//printf("Load error!: Image file not yet supported!\n");
+									break;
+									case HXCFE_FILECORRUPTED:
+										//printf("Load error!: File corrupted ? Read error ?\n");
+									break;
+									case HXCFE_ACCESSERROR:
+										//printf("Load error!:  Read file error!\n");
+									break;
+									default:
+										//printf("Load error! error %d\n",ret);
+									break;
+								}
 							}
 							else
 							{
-								sprintf((char*)tempstr,"Error cannot create %s",&destinationfile[i]);
-								params->windowshwd->strout_convert_status->value((const char*)tempstr);
-							}
+								destinationfile=(char*)malloc(strlen(FindFileData.filename)+strlen(destfolder)+2+99);
+								sprintf(destinationfile,"%s%c%s",destfolder,SEPARTOR,FindFileData.filename);
+								i=strlen(destinationfile);
+								do
+								{
+									i--;
+								}while(i && destinationfile[i]!='.');
 
-							free(destinationfile);
-							free(tempstr);
+								if(i)
+								{
+								  destinationfile[i]='_';
+								}
+
+								//printf("Creating file %s\n",destinationfile);
+								strcat(destinationfile,ff_type_list[output_file_format].ext);							
+
+								loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,(char*)ff_type_list[output_file_format].plug_id);
+								if(loaderid>=0)
+								{
+									if(!guicontext->autoselectmode)
+									{
+										hxcfe_floppySetInterfaceMode(guicontext->hxcfe,thefloppydisk,guicontext->interfacemode);
+									}
+
+									hxcfe_floppySetDoubleStep(guicontext->hxcfe,thefloppydisk,guicontext->doublestep);
+
+									ret = hxcfe_imgExport(imgldr_ctx,thefloppydisk,destinationfile,loaderid);
+								}
+								else
+									ret = loaderid;
+
+
+								hxcfe_imgUnload(imgldr_ctx,thefloppydisk);
+
+								tempstr=(unsigned char*)malloc(1024);
+								
+								i=strlen(destinationfile);
+								do
+								{
+									i--;
+								}while(i && destinationfile[i]!=SEPARTOR);
+
+								if(!ret)
+								{
+									sprintf((char*)tempstr,"%s created",&destinationfile[i]);
+									params->windowshwd->strout_convert_status->value((const char*)tempstr);
+									params->numberoffileconverted++;
+								}
+								else
+								{
+									sprintf((char*)tempstr,"Error cannot create %s",&destinationfile[i]);
+									params->windowshwd->strout_convert_status->value((const char*)tempstr);
+								}
+
+								free(destinationfile);
+								free(tempstr);
+							}
 						}
 					}
-				}
 
-				bbool=hxc_find_next_file(hfindfile,folder,file,&FindFileData);	
+					bbool=hxc_find_next_file(hfindfile,folder,file,&FindFileData);	
+				}
 			}
+
 		}
 
+		hxc_find_close(hfindfile);
+
+		hxcfe_imgDeInitLoader( imgldr_ctx );
 	}
-
-	hxc_find_close(hfindfile);
-
 	return 0;
 }
 
 int convertthread(void* floppycontext,void* hw_context)
 {
 
-	HXCFLOPPYEMULATOR* floppyem;
+	HXCFE* floppyem;
 	batch_converter_window *bcw;
 	char * tempstr;
 
-	floppyem=(HXCFLOPPYEMULATOR*)floppycontext;
+	floppyem=(HXCFE*)floppycontext;
 	bcw=(batch_converter_window *)hw_context;
 
 	memset(&bcparams,0,sizeof(batchconverterparams));
@@ -539,7 +545,7 @@ int convertthread(void* floppycontext,void* hw_context)
 int draganddropconvertthread(void* floppycontext,void* hw_context)
 {
 	
-	HXCFLOPPYEMULATOR* floppyem;
+	HXCFE* floppyem;
 	batch_converter_window *bcw;
 	batchconverterparams bcparams;
 	char * tempstr;
@@ -547,7 +553,7 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 	int filecount,i,j,k;
 	char ** filelist;
 
-	floppyem=(HXCFLOPPYEMULATOR*)floppycontext;
+	floppyem=(HXCFE*)floppycontext;
 	bcparams2=(s_param_bc_params *)hw_context;
 	bcw=bcparams2->bcw;
 
