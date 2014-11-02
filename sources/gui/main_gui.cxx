@@ -238,6 +238,56 @@ void bt_clicked(Fl_Widget * w, void * fc_ptr)
 
 }
 
+typedef struct _loadthread
+{
+	char * urls;
+}loadthread;
+
+int loading_thread(void* floppycontext,void* context)
+{
+	loadthread * loadth;
+	
+	loadth = (loadthread*)context;
+	load_floppy_image(loadth->urls);
+
+	guicontext->updatefloppyinfos++;
+	guicontext->updatefloppyfs++;
+
+	loadthreadstat=0;
+	free(loadth->urls);
+	free(loadth);
+
+	return 0;
+}
+
+void load_file(const char *urls)
+{
+	loadthread * loadthread_params;
+
+	if(loadthreadstat==0)
+	{
+		loadthreadstat = 1;
+		loadthread_params = (loadthread *)malloc(sizeof(loadthread));
+		if(loadthread_params)
+		{
+			if(strlen(urls))
+			{
+				loadthread_params->urls =(char*)malloc(strlen(urls)+1);
+				memset(loadthread_params->urls,0,strlen(urls)+1);
+				memcpy(loadthread_params->urls,urls,strlen(urls));
+			}
+			else
+				loadthread_params->urls = 0;
+
+			hxc_createthread(guicontext->hxcfe,(void*)loadthread_params,&loading_thread,1);
+		}
+		else
+		{
+			loadthreadstat = 0;
+		}
+	}
+}
+
 
 void load_file_image(Fl_Widget * w, void * fc_ptr) 
 {
@@ -262,13 +312,8 @@ void load_file_image(Fl_Widget * w, void * fc_ptr)
 #ifdef STANDALONEFSBROWSER
 			write_back_fileimage();
 #endif
-			load_floppy_image((char*)fnfc.filename());
+			load_file((char*)fnfc.filename());
 
-			guicontext->last_loaded_image_path[0] = 0;
-			strcat(guicontext->last_loaded_image_path,(char*)fnfc.filename());
-
-			guicontext->updatefloppyinfos++;
-			guicontext->updatefloppyfs++;
 			break; // FILE CHOSEN
 		}
 	}
@@ -413,60 +458,6 @@ void format_choice_cb(Fl_Widget *, void *v)
 	sync_if_config();
 }
 
-typedef struct _loadthread
-{
-	char * urls;
-}loadthread;
-
-int loading_thread(void* floppycontext,void* context)
-{
-	loadthread * loadth;
-	
-	loadth = (loadthread*)context;
-	load_floppy_image(loadth->urls);
-
-	guicontext->updatefloppyinfos++;
-	guicontext->updatefloppyfs++;
-
-	loadthreadstat=0;
-	free(loadth->urls);
-	free(loadth);
-
-	return 0;
-}
-
-void dnd_open(const char *urls)
-{
-	loadthread * loadthread_params;
-
-	if(loadthreadstat==0)
-	{
-		loadthreadstat = 1;
-		loadthread_params = (loadthread *)malloc(sizeof(loadthread));
-		if(loadthread_params)
-		{
-			if(strlen(urls))
-			{
-				loadthread_params->urls =(char*)malloc(strlen(urls)+1);
-				memset(loadthread_params->urls,0,strlen(urls)+1);
-				memcpy(loadthread_params->urls,urls,strlen(urls));
-			}
-			else
-				loadthread_params->urls = 0;
-
-			hxc_createthread(guicontext->hxcfe,(void*)loadthread_params,&loading_thread,1);
-
-			//load_floppy_image((char*)urls);
-			//guicontext->updatefloppyinfos++;
-			//guicontext->updatefloppyfs++;
-		}
-		else
-		{
-			loadthreadstat = 0;
-		}
-	}
-}
-
 
 void dnd_cb(Fl_Widget *o, void *v)
 {
@@ -490,7 +481,7 @@ void dnd_cb(Fl_Widget *o, void *v)
 				path = URIfilepathparser((char*)dnd_str,strlen(dnd_str));
 				if(path)
 				{
-					dnd_open(path);
+					load_file(path);
 					free(path);
 				}
 
