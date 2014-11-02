@@ -56,6 +56,7 @@
 #include "floppy_utils.h"
 
 #include "trd_loader.h"
+#include "trd_writer.h"
 
 #include "libhxcadaptor.h"
 
@@ -253,7 +254,7 @@ int TRD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void *
 	{
 		(ISVALIDDISKFILE)	TRD_libIsValidDiskFile,
 		(LOADDISKFILE)		TRD_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		TRD_libWrite_DiskFile,
 		(GETPLUGININFOS)	TRD_libGetPluginInfo
 	};
 

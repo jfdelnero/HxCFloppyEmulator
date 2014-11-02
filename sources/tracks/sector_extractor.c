@@ -1829,7 +1829,13 @@ HXCFE_SECTCFG* hxcfe_getNextSector(HXCFE_SECTORACCESS* ss_ctx,int track,int side
 	if(!ss_ctx->fp)
 		return 0;
 
+	if(track >= ss_ctx->fp->floppyNumberOfTrack)
+		return 0;
+
 	if(!ss_ctx->fp->tracks[track])
+		return 0;
+
+	if(side >= ss_ctx->fp->tracks[track]->number_of_side)
 		return 0;
 
 	if(!ss_ctx->fp->tracks[track]->sides[side])
@@ -2161,6 +2167,11 @@ HXCFE_SECTCFG* hxcfe_searchSector(HXCFE_SECTORACCESS* ss_ctx,int track,int side,
 	else
 	{
 		hxcfe_resetSearchTrackPosition(ss_ctx);
+
+		if(track>=ss_ctx->fp->floppyNumberOfTrack)
+		{
+			return 0;
+		}
 	}
 
 	do
@@ -2249,7 +2260,7 @@ int hxcfe_getFloppySize(HXCFE* floppycontext,HXCFE_FLOPPY *fp,int * nbsector)
 
 							hxcfe_freeSectorConfig(ss_ctx,sc);
 						}
-						
+
 					}while(sc);
 
 					if(!secfound)
@@ -2424,7 +2435,7 @@ unsigned char hxcfe_getSectorConfigEncoding(HXCFE* floppycontext,HXCFE_SECTCFG* 
 	if(sc)
 	{
 		return sc->trackencoding;
-	}	
+	}
 	return 0;
 }
 
@@ -2433,7 +2444,7 @@ unsigned char hxcfe_getSectorConfigSectorID(HXCFE* floppycontext,HXCFE_SECTCFG* 
 	if(sc)
 	{
 		return sc->sector;
-	}	
+	}
 	return 0;
 }
 
@@ -2442,7 +2453,7 @@ unsigned char hxcfe_getSectorConfigDataMark(HXCFE* floppycontext,HXCFE_SECTCFG* 
 	if(sc)
 	{
 		return sc->alternate_datamark;
-	}	
+	}
 	return 0;
 }
 
@@ -2451,7 +2462,7 @@ unsigned char hxcfe_getSectorConfigSideID(HXCFE* floppycontext,HXCFE_SECTCFG* sc
 	if(sc)
 	{
 		return sc->head;
-	}	
+	}
 	return 0;
 }
 
@@ -2460,7 +2471,7 @@ unsigned char hxcfe_getSectorConfigSizeID(HXCFE* floppycontext,HXCFE_SECTCFG* sc
 	if(sc)
 	{
 		return sc->alternate_sector_size_id;
-	}	
+	}
 	return 0;
 }
 
@@ -2469,7 +2480,7 @@ unsigned char hxcfe_getSectorConfigTrackID(HXCFE* floppycontext,HXCFE_SECTCFG* s
 	if(sc)
 	{
 		return sc->cylinder;
-	}	
+	}
 	return 0;
 }
 
@@ -2478,7 +2489,7 @@ unsigned short hxcfe_getSectorConfigHCRC(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 	if(sc)
 	{
 		return sc->header_crc;
-	}	
+	}
 	return 0;
 }
 
@@ -2487,7 +2498,7 @@ unsigned short hxcfe_getSectorConfigDCRC(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 	if(sc)
 	{
 		return sc->data_crc;
-	}	
+	}
 	return 0;
 }
 
@@ -2496,7 +2507,7 @@ unsigned int hxcfe_getSectorConfigSectorSize(HXCFE* floppycontext,HXCFE_SECTCFG*
 	if(sc)
 	{
 		return sc->sectorsize;
-	}	
+	}
 	return 0;
 }
 
@@ -2505,7 +2516,7 @@ unsigned long hxcfe_getSectorConfigStartSectorIndex(HXCFE* floppycontext,HXCFE_S
 	if(sc)
 	{
 		return sc->startsectorindex;
-	}	
+	}
 	return 0;
 }
 
@@ -2514,7 +2525,7 @@ unsigned long hxcfe_getSectorConfigStartDataIndex(HXCFE* floppycontext,HXCFE_SEC
 	if(sc)
 	{
 		return sc->startdataindex;
-	}	
+	}
 	return 0;
 }
 
@@ -2523,7 +2534,7 @@ unsigned long hxcfe_getSectorConfigEndSectorIndex(HXCFE* floppycontext,HXCFE_SEC
 	if(sc)
 	{
 		return sc->endsectorindex;
-	}	
+	}
 	return 0;
 }
 
@@ -2532,7 +2543,7 @@ unsigned char * hxcfe_getSectorConfigInputData(HXCFE* floppycontext,HXCFE_SECTCF
 	if(sc)
 	{
 		return sc->input_data;
-	}	
+	}
 	return 0;
 }
 
@@ -2541,7 +2552,7 @@ unsigned char   hxcfe_getSectorConfigHCRCStatus(HXCFE* floppycontext,HXCFE_SECTC
 	if(sc)
 	{
 		return sc->alternate_addressmark;
-	}	
+	}
 	return 0;
 }
 
@@ -2550,7 +2561,7 @@ unsigned char   hxcfe_getSectorConfigDCRCStatus(HXCFE* floppycontext,HXCFE_SECTC
 	if(sc)
 	{
 		return sc->alternate_datamark;
-	}	
+	}
 	return 0;
 }
 
