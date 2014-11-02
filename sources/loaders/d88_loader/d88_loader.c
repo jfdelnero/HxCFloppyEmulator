@@ -341,7 +341,10 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					sectorconfig[j].head=sectorheader.head;
 					sectorconfig[j].sector=sectorheader.sector_id;
 					sectorconfig[j].sectorsize=sectorheader.sector_length;
-					sectorconfig[j].gap3=255;
+					sectorconfig[j].gap3 = 255;
+					if(number_of_sector>16)
+						sectorconfig[j].gap3 = 22; // Silpheed (18 sectors) gap3 issue 
+
 					sectorconfig[j].trackencoding=tracktype;
 					sectorconfig[j].input_data=malloc(sectorheader.sector_length);
 					sectorconfig[j].bitrate=floppydisk->floppyBitRate;
