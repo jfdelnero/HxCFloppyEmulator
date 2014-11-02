@@ -65,7 +65,7 @@
 #define KF_ICLOCK (KF_MCLOCK / 16)
 */
 
-#define KFSTREAMDBG 1
+//#define KFSTREAMDBG 1
 
 HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char * file,float timecoef)
 {
@@ -79,7 +79,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 	s_oob_DiskIndex  tabindex[16];
 
 	FILE* f;
-#ifdef KFSTREAMDBG	
+#ifdef KFSTREAMDBG
 	double mck;
 	double sck;
 	double ick;
@@ -162,7 +162,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 						totalcell = totalcell + cell_value;
 						totalstreampos++;
 					break;
-				
+
 					// Nop
 					case 0x0A:
 						offset=offset+3;
@@ -177,7 +177,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 						totalstreampos++;
 					break;
 						//
-						
+
 					//0x0B 	Overflow16 	1 	Next cell value is increased by 0×10000 (16-bits). Decoding of *this* cell should continue at next stream position
 					case 0x0B:
 						overflowvalue = overflowvalue + 0x10000;
@@ -185,7 +185,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 						totalstreampos++;
 					break;
 
-					//0x0C 	Value16 	3 	New cell value: Upper 8 bits are offset+1 in the stream, lower 8-bits are offset+2 
+					//0x0C 	Value16 	3 	New cell value: Upper 8 bits are offset+1 in the stream, lower 8-bits are offset+2
 					case 0x0C:
 						offset++;
 						cell_value = kfstreambuffer[offset] << 8;
@@ -250,7 +250,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 								floppycontext->hxc_printf(MSG_DEBUG,"---Stream End---");
 		#endif
 								streamEnd=	(s_oob_StreamEnd*) &kfstreambuffer[offset + sizeof(s_oob_header) ];
-		#ifdef KFSTREAMDBG							
+		#ifdef KFSTREAMDBG
 								floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X Result: 0x%.8X",streamEnd->StreamPosition,streamEnd->Result);
 		#endif
 							break;
@@ -263,9 +263,9 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 								tempstr=malloc(oob->Size+1);
 								memset(tempstr,0,oob->Size+1);
 								memcpy(tempstr,&kfstreambuffer[offset + sizeof(s_oob_header)],oob->Size);
-		
-								floppycontext->hxc_printf(MSG_DEBUG,"String : %s",tempstr);		
-								free(tempstr);	
+
+								floppycontext->hxc_printf(MSG_DEBUG,"String : %s",tempstr);
+								free(tempstr);
 		#endif
 							break;
 
@@ -282,7 +282,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 							offset=offset+oob->Size + sizeof(s_oob_header);
 						totalstreampos++;
 					break;
-				
+
 					default:
 						cell_value = kfstreambuffer[offset];
 

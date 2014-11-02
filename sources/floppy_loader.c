@@ -509,6 +509,126 @@ int hxcfe_imgExport(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * newfloppy,char* img
 	return HXCFE_BADPARAMETER;
 }
 
+int hxcfe_floppyUnload(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk)
+{
+	unsigned int i,j;
+
+	if(floppydisk)
+	{
+		if(floppydisk->tracks)
+		{
+			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+			{
+				if(floppydisk->tracks[j])
+				{
+					if(floppydisk->tracks[j]->sides)
+					{
+
+						for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+						{
+							hxcfe_freeSide(floppydisk->tracks[j]->sides[i]);
+						}
+
+						free(floppydisk->tracks[j]->sides);
+					}
+
+					free(floppydisk->tracks[j]);
+				}
+			}
+			free(floppydisk->tracks);
+		}
+		free(floppydisk);
+	}
+	return 0;
+}
+
+
+HXCFE_FLOPPY * hxcfe_floppyDuplicate(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk)
+{
+	unsigned int i,j;
+	HXCFE_FLOPPY * fp;
+	int bufferlen;
+
+	fp = 0;
+	if(floppydisk)
+	{
+		fp = malloc(sizeof(HXCFE_FLOPPY));
+		if(fp)
+		{
+			memcpy(fp,floppydisk,sizeof(HXCFE_FLOPPY));
+
+			fp->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*fp->floppyNumberOfTrack);
+			if(fp->tracks)
+			{
+				for(j=0;j<fp->floppyNumberOfTrack;j++)
+				{
+					fp->tracks[j] = (HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
+					if(fp->tracks[j])
+					{
+						memcpy(fp->tracks[j],floppydisk->tracks[j],sizeof(HXCFE_CYLINDER));
+
+						fp->tracks[j]->sides = (HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*fp->tracks[j]->number_of_side);
+						if(fp->tracks[j]->sides)
+						{
+							memset(fp->tracks[j]->sides,0,sizeof(HXCFE_SIDE*)*fp->tracks[j]->number_of_side);
+
+							for(i=0;i<fp->tracks[j]->number_of_side;i++)
+							{
+								fp->tracks[j]->sides[i] = (HXCFE_SIDE*)malloc(sizeof(HXCFE_SIDE));
+								if(fp->tracks[j]->sides[i])
+								{
+									memcpy(fp->tracks[j]->sides[i],floppydisk->tracks[j]->sides[i],sizeof(HXCFE_SIDE));
+
+									bufferlen = fp->tracks[j]->sides[i]->tracklen / 8;
+									if(fp->tracks[j]->sides[i]->tracklen&7)
+										bufferlen++;
+
+									if(fp->tracks[j]->sides[i]->databuffer)
+									{
+										fp->tracks[j]->sides[i]->databuffer = malloc(bufferlen);
+										if(fp->tracks[j]->sides[i]->databuffer)
+											memcpy(fp->tracks[j]->sides[i]->databuffer,floppydisk->tracks[j]->sides[i]->databuffer,bufferlen);
+									}
+
+									if(fp->tracks[j]->sides[i]->flakybitsbuffer)
+									{
+										fp->tracks[j]->sides[i]->flakybitsbuffer = malloc(bufferlen);
+										if(fp->tracks[j]->sides[i]->flakybitsbuffer)
+											memcpy(fp->tracks[j]->sides[i]->flakybitsbuffer,floppydisk->tracks[j]->sides[i]->flakybitsbuffer,bufferlen);
+									}
+
+									if(fp->tracks[j]->sides[i]->indexbuffer)
+									{
+										fp->tracks[j]->sides[i]->indexbuffer = malloc(bufferlen);
+										if(fp->tracks[j]->sides[i]->indexbuffer)
+											memcpy(fp->tracks[j]->sides[i]->indexbuffer,floppydisk->tracks[j]->sides[i]->indexbuffer,bufferlen);
+									}
+
+									if(fp->tracks[j]->sides[i]->timingbuffer)
+									{
+										fp->tracks[j]->sides[i]->timingbuffer = malloc(bufferlen * sizeof(unsigned long));
+										if(fp->tracks[j]->sides[i]->timingbuffer)
+											memcpy(fp->tracks[j]->sides[i]->timingbuffer,floppydisk->tracks[j]->sides[i]->timingbuffer,bufferlen * sizeof(unsigned long));
+									}
+
+									if(fp->tracks[j]->sides[i]->track_encoding_buffer)
+									{
+										fp->tracks[j]->sides[i]->track_encoding_buffer = malloc(bufferlen);
+										if(fp->tracks[j]->sides[i]->track_encoding_buffer)
+											memcpy(fp->tracks[j]->sides[i]->track_encoding_buffer,floppydisk->tracks[j]->sides[i]->track_encoding_buffer,bufferlen);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return fp;
+}
+
 ////////////////////////////////////////////////////////////////////////
 
 int hxcfe_floppyGetSetParams(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy,unsigned char dir,unsigned short param,void * value)
@@ -1602,7 +1722,7 @@ int hxcfe_getTrackBitrate(HXCFE_FLOPPY * fp,int track,int side)
 	{
 		return fp->tracks[track]->sides[side]->bitrate;
 	}
-	
+
 	return 0;
 }
 
@@ -1612,7 +1732,7 @@ unsigned char hxcfe_getTrackEncoding(HXCFE_FLOPPY * fp,int track,int side)
 	{
 		return fp->tracks[track]->sides[side]->track_encoding;
 	}
-	
+
 	return 0;
 }
 
@@ -1622,7 +1742,7 @@ unsigned long hxcfe_getTrackLength(HXCFE_FLOPPY * fp,int track,int side)
 	{
 		return fp->tracks[track]->sides[side]->tracklen;
 	}
-	
+
 	return 0;
 }
 
@@ -1632,7 +1752,7 @@ unsigned short hxcfe_getTrackRPM(HXCFE_FLOPPY * fp,int track)
 	{
 		return fp->tracks[track]->floppyRPM;
 	}
-	
+
 	return 0;
 }
 
@@ -1642,7 +1762,7 @@ unsigned char hxcfe_getTrackNumberOfSide(HXCFE_FLOPPY * fp,int track)
 	{
 		return fp->tracks[track]->number_of_side;
 	}
-	
+
 	return 0;
 }
 

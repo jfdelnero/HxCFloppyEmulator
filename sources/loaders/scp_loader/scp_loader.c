@@ -64,7 +64,7 @@
 
 #include "libhxcadaptor.h"
 
-#define SCPDEBUG 1
+//#define SCPDEBUG 1
 
 int SCP_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
@@ -330,7 +330,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			nbtrack=(maxtrack-mintrack)+1;
 
-			if(nbtrack > 84) 
+			if(nbtrack > 84)
 			{
 				nbtrack = nbtrack / 2;
 				nbside = 2;

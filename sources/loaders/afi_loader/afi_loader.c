@@ -586,11 +586,11 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								break;
 							}
 						}
-					
+
 					break;
 
 					case AFI_DATA_PDC:
-					
+
 					break;
 
 					case AFI_DATA_WEAKBITS:
@@ -639,7 +639,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					break;
 
 					default:
-					
+
 					break;
 
 				}
