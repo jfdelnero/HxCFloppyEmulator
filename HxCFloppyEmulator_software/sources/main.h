@@ -18,6 +18,9 @@ typedef struct s_gui_context_
 	HXCFE_FLOPPY * loadedfloppy;
 	USBHXCFE * usbhxcfe;
 
+	HXCFE_FLOPPY * trackviewerfloppy;
+	int trackviewerfloppy_updateneeded;
+
 	int backlight_tmr;
 	int standby_tmr;
 	int step_sound;
