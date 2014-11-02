@@ -170,7 +170,7 @@ int TRD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d sectors (%d bytes), %d tracks, %d sides...",nbsector,sectorsize,nbtrack,nbside);
 
 	memset(datasector,0,sizeof(datasector));
-	sprintf(datasector,"!!! Missing Sector !!!\n");
+	sprintf((char*)datasector,"!!! Missing Sector !!!\n");
 
 	ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 	if(ss)
