@@ -2551,7 +2551,7 @@ unsigned char   hxcfe_getSectorConfigHCRCStatus(HXCFE* floppycontext,HXCFE_SECTC
 {
 	if(sc)
 	{
-		return sc->alternate_addressmark;
+		return sc->use_alternate_header_crc;
 	}
 	return 0;
 }
@@ -2560,7 +2560,7 @@ unsigned char   hxcfe_getSectorConfigDCRCStatus(HXCFE* floppycontext,HXCFE_SECTC
 {
 	if(sc)
 	{
-		return sc->alternate_datamark;
+		return sc->use_alternate_data_crc;
 	}
 	return 0;
 }
