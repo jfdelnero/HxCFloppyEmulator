@@ -182,6 +182,9 @@ void               hxcfe_imgDeInitLoader(HXCFE_IMGLDR * imgldr_ctx);
 int                hxcfe_getNumberOfTrack(HXCFE* floppycontext,HXCFE_FLOPPY *fp);
 int                hxcfe_getNumberOfSide(HXCFE* floppycontext,HXCFE_FLOPPY *fp);
 
+int                hxcfe_floppyUnload(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk);
+HXCFE_FLOPPY *     hxcfe_floppyDuplicate(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk);
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Custom Image/floppy generation functions                                                       //
 ////////////////////////////////////////////////////////////////////////////////////////////////////

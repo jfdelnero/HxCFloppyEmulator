@@ -5,7 +5,8 @@ EXPORTS
    hxcfe_getVersion			@3
    hxcfe_deinit				@4
    hxcfe_getLicense			@5
-   
+   hxcfe_floppyUnload		@23
+   hxcfe_floppyDuplicate	@24
    hxcfe_getNumberOfTrack	@25
    hxcfe_getNumberOfSide	@26
    hxcfe_getFloppySize		@27

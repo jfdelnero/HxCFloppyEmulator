@@ -66,7 +66,7 @@
 
 #define MAXPULSESKEW 10
 
-#define FLUXSTREAMDBG 1
+//#define FLUXSTREAMDBG 1
 
 #define SECONDPASSANALYSIS 1
 
@@ -2832,7 +2832,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 						revolution++;
 					}
 
-					if(revolution != (std->nb_of_index - 1) ) 
+					if(revolution != (std->nb_of_index - 1) )
 					{
 						revolutionside[revolution]->track_encoding = first_track_encoding;
 
