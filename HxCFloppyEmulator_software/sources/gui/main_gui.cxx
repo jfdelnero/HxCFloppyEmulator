@@ -122,6 +122,7 @@ const char * plugid_lst[]=
 	PLUGIN_TI994A_V9T9,
 	PLUGIN_TRS80_JV3,
 	PLUGIN_TRS80_DMK,
+	PLUGIN_ZXSPECTRUM_TRD,
 	PLUGIN_SPECCYSDD,
 	PLUGIN_NEC_D88,
 	PLUGIN_ATARIST_MSA,
@@ -312,6 +313,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"TI99/4A V9T9 DSK file\t*.dsk\n"
 					"TRS80 JV3 file\t*.jv3\n"
 					"TRS80 DMK file\t*.dmk\n"
+					"Zx Spectrum TRD file\t*.trd\n"
 					"Speccy SDD file\t*.sdd\n"
 					"PC88  D88 file\t*.d88\n"
 					"ATARI ST MSA file\t*.msa\n"

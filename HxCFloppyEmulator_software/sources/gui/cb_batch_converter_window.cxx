@@ -102,6 +102,7 @@ ff_type ff_type_list[]=
 	{ FF_ADF,"ADF - ADF sectors file format",PLUGIN_AMIGA_ADF,".adf"},
 	{ FF_JV3,"JV3 - JV3 TRS80 file format",PLUGIN_TRS80_JV3,".jv3"},
 	{ FF_DMK,"DMK - DMK TRS80 file format",PLUGIN_TRS80_DMK,".dmk"},
+	{ FF_TRD,"TRD - TRD Zx Spectrum format",PLUGIN_ZXSPECTRUM_TRD,".trd"},
 	{ FF_SDDSPECCY,"SDD - SDD Speccy DOS file format",PLUGIN_SPECCYSDD,".sdd"},
 	{ FF_V9T9,"TI99/4A V9T9 sectors file format",PLUGIN_TI994A_V9T9,".dsk"},
 	{ FF_D88, "D88 - D88 PC88 file format",PLUGIN_NEC_D88,".d88"},

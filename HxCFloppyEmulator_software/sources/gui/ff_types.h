@@ -18,6 +18,7 @@ enum
 	FF_ADF,
 	FF_JV3,
 	FF_DMK,
+	FF_TRD,
 	FF_SDDSPECCY,
 	FF_V9T9,
 	FF_D88,
