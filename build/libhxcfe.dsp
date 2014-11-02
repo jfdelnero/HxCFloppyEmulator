@@ -1013,6 +1013,14 @@ SOURCE=..\sources\loaders\trd_loader\trd_loader.c
 
 SOURCE=..\sources\loaders\trd_loader\trd_loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\trd_loader\trd_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\trd_loader\trd_writer.h
+# End Source File
 # End Group
 # Begin Group "SCL"
 
