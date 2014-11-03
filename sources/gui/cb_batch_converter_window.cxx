@@ -646,7 +646,7 @@ void batch_converter_window_bt_convert(Fl_Button* bt, void*)
 	dw=((Fl_Window*)(bt->parent()));
 	bcw=(batch_converter_window *)dw->user_data();
 	bcw->bt_convert->deactivate();
-	hxc_createthread(guicontext->hxcfe,bcw,&convertthread,1);
+	hxc_createthread(guicontext->hxcfe,bcw,&convertthread,0);
 }
 
 void batch_converter_window_bt_select_src(Fl_Button* bt, void*)
@@ -743,7 +743,7 @@ void dnd_bc_cb(Fl_Widget *o, void *v)
 				{
 					strcpy(bcparams->files,dnd->event_text());
 
-					hxc_createthread(guicontext->hxcfe,bcparams,&draganddropconvertthread,1);
+					hxc_createthread(guicontext->hxcfe,bcparams,&draganddropconvertthread,0);
 				}
 				else
 				{
