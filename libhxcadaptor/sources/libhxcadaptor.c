@@ -206,7 +206,7 @@ void hxc_msleep (unsigned int ms) {
     microsecs = ms * 1000;
     tv.tv_sec  = microsecs / 1000000;
     tv.tv_usec = microsecs % 1000000;
-    select (0, NULL, NULL, NULL, &tv);  
+    select (0, NULL, NULL, NULL, &tv);
 }
 #endif
 
@@ -245,8 +245,16 @@ int hxc_createthread(HXCFE* floppycontext,void* hwcontext,THREADFUNCTION thread,
 
 	pthread_attr_setinheritsched(&threadattrib, PTHREAD_EXPLICIT_SCHED);
 
-	pthread_attr_setschedpolicy(&threadattrib,SCHED_FIFO);
-	param.sched_priority = sched_get_priority_max(SCHED_FIFO);
+	if(priority)
+	{
+		pthread_attr_setschedpolicy(&threadattrib,SCHED_FIFO);
+		param.sched_priority = sched_get_priority_max(SCHED_FIFO);
+	}
+	else
+	{
+		pthread_attr_setschedpolicy(&threadattrib,SCHED_OTHER);
+		param.sched_priority = sched_get_priority_max(SCHED_OTHER);
+	}
 	/* set the new scheduling param */
 	pthread_attr_setschedparam (&threadattrib, &param);
 
@@ -356,7 +364,7 @@ char * hxc_getfilenameext(char * fullpath,char * filenameext)
 {
 	char * filename;
 	int len,i;
-	
+
 	filename=hxc_getfilenamebase(fullpath,0);
 
 	if(filename)
@@ -393,7 +401,7 @@ char * hxc_getfilenameext(char * fullpath,char * filenameext)
 			strcpy(filenameext,&filename[i]);
 		}
 
-		return &filename[i];	
+		return &filename[i];
 	}
 
 	return 0;
@@ -424,8 +432,8 @@ int hxc_getfilenamewext(char * fullpath,char * filenamewext)
 			filenamewext[len]=0;
 		}
 	}
-	
-	return len;	
+
+	return len;
 }
 
 int hxc_getpathfolder(char * fullpath,char * folder)
@@ -446,7 +454,7 @@ int hxc_getpathfolder(char * fullpath,char * folder)
 			folder[len]=0;
 		}
 	}
-	
+
 	return len;
 }
 
@@ -461,7 +469,7 @@ int hxc_checkfileext(char * path,char *ext)
 		{
 			hxc_getfilenameext(path,(char*)&pathext);
 			hxc_strlower(pathext);
-			
+
 			strcpy((char*)srcext,ext);
 			hxc_strlower(srcext);
 
@@ -486,7 +494,7 @@ int hxc_getfilesize(char * path)
 		f=hxc_fopen(path,"rb");
 		if(f)
 		{
-			fseek (f , 0 , SEEK_END); 
+			fseek (f , 0 , SEEK_END);
 			filesize=ftell(f);
 
 			fclose(f);
