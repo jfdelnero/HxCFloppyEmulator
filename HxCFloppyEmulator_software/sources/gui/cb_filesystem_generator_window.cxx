@@ -1316,7 +1316,7 @@ void filesystem_generator_window_bt_getfiles(Fl_Button *bt,void *)
 						{
 							strcpy(fsparams->files,dirstr);
 							fgw->FATAccessInProgress = 1;
-							hxc_createthread(guicontext->hxcfe,fsparams,&getfilesthread,1);
+							hxc_createthread(guicontext->hxcfe,fsparams,&getfilesthread,0);
 						}
 						else
 						{
@@ -1508,7 +1508,7 @@ void dnd_fs_cb(Fl_Widget *o, void *v)
 					{
 						strcpy(fsparams->files,dnd->event_text());
 						fgw->FATAccessInProgress = 1;
-						hxc_createthread(guicontext->hxcfe,fsparams,&draganddropfsthread,1);
+						hxc_createthread(guicontext->hxcfe,fsparams,&draganddropfsthread,0);
 					}
 					else
 					{

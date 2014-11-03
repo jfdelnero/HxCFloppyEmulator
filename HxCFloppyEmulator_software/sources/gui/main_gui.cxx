@@ -279,7 +279,7 @@ void load_file(const char *urls)
 			else
 				loadthread_params->urls = 0;
 
-			hxc_createthread(guicontext->hxcfe,(void*)loadthread_params,&loading_thread,1);
+			hxc_createthread(guicontext->hxcfe,(void*)loadthread_params,&loading_thread,0);
 		}
 		else
 		{
@@ -770,7 +770,7 @@ Main_Window::Main_Window()
 		infoth = (infothread *)malloc(sizeof(infothread));
 		infoth->window = (floppy_infos_window*)(this->infos_window);
 		infoth->guicontext = guicontext;		
-		hxc_createthread(guicontext->hxcfe,(void*)infoth,&InfosThreadProc,1);
+		hxc_createthread(guicontext->hxcfe,(void*)infoth,&InfosThreadProc,0);
 
 	}
 	this->infos_window->buf=new Fl_Text_Buffer;

@@ -668,7 +668,7 @@ void floppy_dump_window_bt_read(Fl_Button* bt, void*)
 	fdw->current_status->value(tempstr);
 
 	//fdw->deactivate();
-	hxc_createthread(guicontext->hxcfe,&fdp,&DumpThreadProc,1);
+	hxc_createthread(guicontext->hxcfe,&fdp,&DumpThreadProc,0);
 }
 
 void floppy_dump_ok(Fl_Button*, void* w)
