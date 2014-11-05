@@ -300,8 +300,8 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 				else
 					scph.disk_type = 0x14;
 				break;
-		}		
-		
+		}
+
 		scph.flags = 0x01;
 		if(floppy->floppyNumberOfTrack>42)
 			scph.flags |= 0x02;

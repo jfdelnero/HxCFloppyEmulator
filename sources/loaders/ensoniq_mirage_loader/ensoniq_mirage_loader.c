@@ -68,12 +68,12 @@ int Ensoniq_mirage_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	if( hxc_checkfileext(imgfile,"edm") )
 	{
 		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0) 
+		if(filesize<0)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Ensoniq_mirage_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
-					
+
 		if(filesize%((5*1024) + (1*512)) )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Ensoniq_mirage_libIsValidDiskFile : non Ensoniq mirage file - bad file size !");
@@ -94,7 +94,7 @@ int Ensoniq_mirage_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int Ensoniq_mirage_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	
+
 	FILE * f;
 	unsigned int filesize;
 	unsigned int i,j,k;
@@ -107,25 +107,25 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 	unsigned short numberofsector;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SECTCFG  sectorconfig[6];
-	
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Ensoniq_mirage_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
-	
+	fseek (f , 0 , SEEK_SET);
+
 	numberofsector=6;
-	
+
 	if(filesize!=0)
-	{		
-		
+	{
+
 		sectorsize=1024;
 		gap3len=30;
 		interleave=1;
@@ -137,15 +137,15 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 		if(1)
 		{
-			
+
 			floppydisk->floppyBitRate=250000;
 			floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			
+
 			rpm=300; // normal rpm
-			
+
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
-				
+
 			tracklen=(DEFAULT_DD_BITRATE/(rpm/60))/4;
 			trackdata=(unsigned char*)malloc(((numberofsector-1)*1024)+512);
 
@@ -153,9 +153,11 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 			{
 				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 				currentcylinder=floppydisk->tracks[j];
-				
+
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
+					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
+
 					memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*6);
 					for(k=0;k<6;k++)
 					{
@@ -174,15 +176,15 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 						        ( (((numberofsector-1)*1024)+512) * i );
 					fseek (f , file_offset , SEEK_SET);
 					fread(trackdata,(((numberofsector-1)*1024)+512),1,f);
-					
+
 					currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,0,2500,-2500);
 				}
 			}
 
 			free(trackdata);
-			
+
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		
+
 			hxc_fclose(f);
 			return HXCFE_NOERROR;
 
@@ -190,7 +192,7 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 		hxc_fclose(f);
 		return HXCFE_FILECORRUPTED;
 	}
-	
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;

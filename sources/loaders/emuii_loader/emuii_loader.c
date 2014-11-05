@@ -69,9 +69,9 @@
 #define END_SCTR 10
 
 #define RWDISK_VERSION "1.1"
-#define RWDISK_DATE "Fri Mar 19 13:31:05 1993" 
+#define RWDISK_DATE "Fri Mar 19 13:31:05 1993"
 #define EMAXUTIL_HDR "emaxutil v%3s %24s\n"
-#define EMAXUTIL_HDRLEN 39 	
+#define EMAXUTIL_HDRLEN 39
 
 
 
@@ -94,16 +94,16 @@ int EMUII_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	int filesize;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMAX_libIsValidDiskFile");
-	
+
 	if( hxc_checkfileext(imgfile,"eii") )
 	{
 		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0) 
+		if(filesize<0)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"EMUII_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
-				
+
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUII_libIsValidDiskFile : EMUII file !");
 		return HXCFE_VALIDFILE;
 	}
@@ -112,7 +112,7 @@ int EMUII_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUII_libIsValidDiskFile : non EMUII file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 
@@ -120,7 +120,7 @@ int EMUII_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int EMUII_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	
+
 	FILE * f_eii,*f_os;
 	unsigned int i;
 	char os_filename[512];
@@ -129,10 +129,10 @@ int EMUII_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 	HXCFE_SIDE* currentside;
 	unsigned char sector_data[0xE00];
 	int tracknumber,sidenumber;
- 
+
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUII_libLoad_DiskFile %s",imgfile);
-	
+
 	strcpy(os_filename,imgfile);
 	i=strlen(os_filename)-1;
 	while(i && (os_filename[i]!='\\') && (os_filename[i]!='/') )
@@ -146,19 +146,19 @@ int EMUII_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 	sprintf(&os_filename[i],"emuiios.emuiifd");
 
 	f_os=hxc_fopen(os_filename,"rb");
-	if(f_os==NULL) 
+	if(f_os==NULL)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open os file %s !",os_filename);
 		return HXCFE_ACCESSERROR;
 	}
-	
+
 	f_eii=hxc_fopen(imgfile,"rb");
-	if(f_eii==NULL) 
+	if(f_eii==NULL)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
+
 	floppydisk->floppyNumberOfTrack=80;
 	floppydisk->floppyNumberOfSide=2;
 	floppydisk->floppyBitRate=DEFAULT_EMUII_BITRATE;
@@ -177,11 +177,13 @@ int EMUII_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 	memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 	for(i=0;i<(unsigned int)(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide);i++)
-	{			
+	{
+
+		hxcfe_imgCallProgressCallback(imgldr_ctx,i,floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide);
 
 		tracknumber=i>>1;
 		sidenumber=i&1;
-	
+
 		if((i<22) || (i>=158))
 		{
 			fseek(f_os,i*0xE00,SEEK_SET);
@@ -204,7 +206,7 @@ int EMUII_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 			floppydisk->tracks[tracknumber]=allocCylinderEntry(300,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[tracknumber];
 		}
-			
+
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"track %d side %d at offset 0x%x (0x%x bytes)",
 			tracknumber,
@@ -213,13 +215,13 @@ int EMUII_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 			0xE00);
 
 		currentcylinder->sides[sidenumber]=tg_alloctrack(floppydisk->floppyBitRate,EMU_FM_ENCODING,currentcylinder->floppyRPM,((floppydisk->floppyBitRate/5)*2),2000,-2000,0x00);
-		currentside=currentcylinder->sides[sidenumber];					
+		currentside=currentcylinder->sides[sidenumber];
 		currentside->number_of_sector=floppydisk->floppySectorPerTrack;
-			
+
 		BuildEmuIITrack(imgldr_ctx->hxcfe,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,2);
-			
-	}			
-	
+
+	}
+
 	hxc_fclose(f_eii);
 	hxc_fclose(f_os);
 	return HXCFE_NOERROR;

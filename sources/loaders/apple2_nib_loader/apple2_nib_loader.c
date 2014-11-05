@@ -152,6 +152,7 @@ int Apple2_nib_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
+			hxcfe_imgCallProgressCallback(imgldr_ctx, j,floppydisk->floppyNumberOfTrack);
 
 			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];

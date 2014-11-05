@@ -208,6 +208,8 @@ int DMK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 					for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
 					{
 
+						hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppy->floppyNumberOfTrack*2);
+
 						memset(track_buf,0xAA,track_size);
 						memset(&IDAMbuf,0,128);
 

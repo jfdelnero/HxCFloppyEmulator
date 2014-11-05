@@ -69,7 +69,7 @@ int FDI_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 	if( hxc_checkfileext(imgfile,"fdi") )
 	{
-	
+
 		f=hxc_fopen(imgfile,"rb");
 		if(f)
 		{
@@ -101,7 +101,7 @@ int FDI_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	
+
 	FILE * f;
 	unsigned int  i,j,k,file_size;
 	unsigned char interleave;
@@ -119,14 +119,14 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	fdi_sector_header sector_header;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDI_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
+
 
 	fseek(f,0,SEEK_END);
 	file_size=ftell(f);
@@ -163,23 +163,25 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	floppydisk->floppyNumberOfSide=number_of_side;
 	floppydisk->floppySectorPerTrack=number_of_sectorpertrack;
 	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-	trackformat=IBMFORMAT_DD;		
+	trackformat=IBMFORMAT_DD;
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
-		
-			
+
+
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-	{	
+	{
 		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 		currentcylinder=floppydisk->tracks[j];
-				
+
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 		{
+			hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
+
 			fread(&track_header,sizeof(fdi_track_header),1,f);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"[%d:%d] %d sectors, Track Offset :0x%x:",j,i,track_header.number_of_sectors,track_header.track_offset+f_header.data_offset);
 
 			sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*track_header.number_of_sectors);
 			memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*track_header.number_of_sectors);
-			
+
 			for(k=0;k<track_header.number_of_sectors;k++)
 			{
 				fread(&sector_header,sizeof(fdi_sector_header),1,f);
@@ -187,7 +189,7 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				file_offset=f_header.data_offset+track_header.track_offset+sector_header.sector_offset;
 
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"[%d:%d] Cyl:%d,Head:%d,Sec:%d,Size:%d,Flags:0x%.2X,Offset:0x%.8x",
-					j,i,sector_header.cylinder_number,                                                                                                   
+					j,i,sector_header.cylinder_number,
 					sector_header.head_number,
 					sector_header.sector_number,
 					128<<sector_header.sector_size,
@@ -205,7 +207,7 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				sectorconfig[k].fill_byte=246;
 				sectorconfig[k].bitrate=floppydisk->floppyBitRate;
 				sectorconfig[k].trackencoding=trackformat;
-				
+
 				if(!(sector_header.flags&0x1F))
 				{
 					sectorconfig[k].use_alternate_data_crc=0xFF;
@@ -217,7 +219,7 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					sectorconfig[k].alternate_datamark=0xF8;
 					sectorconfig[k].use_alternate_datamark=1;
 				}
-				
+
 				if(file_offset<file_size)
 				{
 					sectorconfig[k].input_data=malloc(sectorconfig[k].sectorsize);
@@ -226,9 +228,9 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				}
 
 				fseek(f,tempoffset,SEEK_SET);
-				
+
 			}
-					
+
 			currentcylinder->sides[i]=tg_generateTrackEx(track_header.number_of_sectors,sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
 
 			for(k=0;k<track_header.number_of_sectors;k++)
@@ -238,8 +240,8 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			free(sectorconfig);
 		}
 	}
-			
-			
+
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 	hxc_fclose(f);
@@ -248,7 +250,7 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	return HXCFE_NOERROR;
 }
-			
+
 
 int FDI_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
 {

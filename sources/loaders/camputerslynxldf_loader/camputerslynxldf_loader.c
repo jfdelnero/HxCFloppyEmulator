@@ -70,7 +70,7 @@ int CAMPUTERSLYNX_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 		filesize=hxc_getfilesize(imgfile);
 
-		if(filesize<0) 
+		if(filesize<0)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"CAMPUTERSLYNX_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
@@ -98,7 +98,7 @@ int CAMPUTERSLYNX_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int CAMPUTERSLYNX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	
+
 	FILE * f;
 	unsigned int filesize;
 	unsigned int i,j;
@@ -109,23 +109,23 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 	unsigned short sectorsize;
 	unsigned char trackformat;
 	HXCFE_CYLINDER* currentcylinder;
-	
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"CAMPUTERSLYNX_libLoad_DiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
-	
+	fseek (f , 0 , SEEK_SET);
+
 	if(filesize!=0)
-	{		
-		sectorsize=512; 
+	{
+		sectorsize=512;
 		rpm=300;
 
 		// read the first sector
@@ -163,30 +163,32 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 
 		gap3len=255;
 		interleave=2;
-					
+
 		trackformat=IBMFORMAT_DD;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack+1);
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
 		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-			
+
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
 			floppydisk->tracks[j]=allocCylinderEntry(rpm,2);
 			currentcylinder=floppydisk->tracks[j];
-				
+
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
+				hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
+
 				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 					(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-				
+
 				fseek (f , file_offset , SEEK_SET);
-				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);		
-				
+				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
+
 				switch(floppydisk->floppyNumberOfSide)
 				{
 					case 1:
-						// dummy/empty track side 0. 
+						// dummy/empty track side 0.
 						currentcylinder->sides[0]=tg_generateTrack(trackdata,sectorsize,0 ,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,ISOFORMAT_DD,gap3len,0,2500| NO_SECTOR_UNDER_INDEX,-2500);
 						// first track to side 1
 						currentcylinder->sides[1]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500| NO_SECTOR_UNDER_INDEX,-2500);
@@ -198,7 +200,7 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 				}
 			}
 		}
-		
+
 		// add a dummy track...
 		floppydisk->tracks[floppydisk->floppyNumberOfTrack]=allocCylinderEntry(rpm,2);
 		currentcylinder=floppydisk->tracks[j];
@@ -220,7 +222,7 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 		return HXCFE_NOERROR;
 
 	}
-	
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;

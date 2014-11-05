@@ -389,6 +389,8 @@ int KryoFluxStream_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * flo
 	{
 		for(i=0;i<floppy->floppyNumberOfTrack;i++)
 		{
+			hxcfe_imgCallProgressCallback(imgldr_ctx,i + (j*floppy->floppyNumberOfSide),floppy->floppyNumberOfTrack*floppy->floppyNumberOfSide );
+
 			write_kf_stream_track(filename,floppy->tracks[i]->sides[j],i,j,5);
 		}
 	}

@@ -40,11 +40,11 @@
 #include "libhxcadaptor.h"
 
 int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
-{	
+{
 	int i,j,k;
 	FILE * ti99v9t9file;
 	int nbsector,imagesize;
-	
+
 	int numberofsector,numberofside,numberoftrack;
 	int bitrate;
 	int density;
@@ -57,7 +57,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 	HXCFE_SECTCFG* sc;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write TI99 V9T9 file %s...",filename);
-	
+
 	imagesize=hxcfe_getFloppySize(imgldr_ctx->hxcfe,floppy,&nbsector);
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Disk size : %d Bytes %d Sectors",imagesize,nbsector);
@@ -80,7 +80,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 			density=ISOIBM_FM_ENCODING;
 			interleave=4;
 		break;
-				
+
 		case 2*40*9*256:
 			// 180kbytes: either DSSD or 18-sector-per-track SSDD.
 			// We assume DSSD since DSSD is more common and is supported by
@@ -92,7 +92,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 			density=ISOIBM_FM_ENCODING;
 			interleave=4;
 		break;
-				
+
 		case 1*40*16*256:
 			// 160kbytes: 16-sector-per-track SSDD (standard format for TI
 			// DD disk controller prototype, and the TI hexbus disk
@@ -104,7 +104,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 			density=ISOIBM_MFM_ENCODING;
 			interleave=9;
 		break;
-				
+
 		case 2*40*16*256:
 			// 320kbytes: 16-sector-per-track DSDD (standard format for TI
 			// DD disk controller prototype, and TI hexbus disk
@@ -116,7 +116,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 			density=ISOIBM_MFM_ENCODING;
 			interleave=9;
 			break;
-				
+
 		case 2*40*18*256:
 			//  360kbytes: 18-sector-per-track DSDD (standard format for most
 			// third-party DD disk controllers, but reportedly not supported by
@@ -128,7 +128,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 			density=ISOIBM_MFM_ENCODING;
 			interleave=5;
 			break;
-				
+
 		case 2*80*18*256:
 			// 720kbytes: 18-sector-per-track 80-track DSDD (Myarc only)
 			numberofside=2;
@@ -138,7 +138,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 			density=ISOIBM_MFM_ENCODING;
 			interleave=5;
 			break;
-				
+
 			case 2*80*36*256:
 			// 1.44Mbytes: DSHD (Myarc only)
 			numberofside=2;
@@ -148,7 +148,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 			density=ISOIBM_MFM_ENCODING;
 			interleave=11;
 			break;
-				
+
 		default:
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Bad image size!..");
 			return 0;
@@ -169,6 +169,8 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 			{
 				for(j=0;j<numberoftrack;j++)
 				{
+					hxcfe_imgCallProgressCallback(imgldr_ctx, j + (i*numberoftrack),numberofside*numberoftrack);
+
 					for(k=0;k<numberofsector;k++)
 					{
 						sc = hxcfe_searchSector(ss,j,i,k,density);
@@ -176,12 +178,12 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 						{
 							if(sc->use_alternate_data_crc)
 								imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Warning : Bad Data CRC : T:%d H:%d S:%d Size :%dB",j,i,k,sc->sectorsize);
-	
+
 							if(sc->sectorsize == sectorsize)
 							{
 								if(i==0)
 								{
-									file_offset=(j*numberofsector)*sectorsize + ( k * sectorsize );	
+									file_offset=(j*numberofsector)*sectorsize + ( k * sectorsize );
 								}
 								else
 								{
@@ -239,6 +241,6 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 	{
 		return HXCFE_INTERNALERROR;
 	}
-	
+
 	return 0;
 }

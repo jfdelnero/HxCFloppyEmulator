@@ -409,6 +409,8 @@ int TI99V9T9_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
+				hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
+
 				if(i==0)
 				{
 					file_offset=(j*floppydisk->floppySectorPerTrack)*sectorsize;

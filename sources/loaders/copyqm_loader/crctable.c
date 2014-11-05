@@ -85,10 +85,10 @@ int get_i16( unsigned char* buf, int pos )
     unsigned char low_byte;
     unsigned char high_byte;
     unsigned int outInt;
-    
+
     low_byte = buf[pos++];
     high_byte = buf[pos];
-    
+
     /* Signed, eh. Lets see. */
     outInt = 0;
     if ( (signed char)high_byte < 0 ) {
@@ -98,7 +98,7 @@ int get_i16( unsigned char* buf, int pos )
     }
 
     outInt |= (high_byte << 8 ) | low_byte;
-    
+
     return outInt;
 }
 

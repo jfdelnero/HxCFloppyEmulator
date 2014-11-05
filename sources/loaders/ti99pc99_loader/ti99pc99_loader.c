@@ -70,23 +70,23 @@ int TI99PC99_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	{
 
 		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0) 
+		if(filesize<0)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"TI99PC99_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return -1;
 		}
-				
+
 		if(filesize%3253 && filesize%6872)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile : non TI99 PC99 file !");
 			return HXCFE_BADFILE;
 		}
-			
+
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile : TI99 PC99 file !");
 		return HXCFE_VALIDFILE;
-		
+
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 
@@ -97,7 +97,7 @@ int patchtrackFM(unsigned char * trackdata, unsigned char * trackclk,int trackle
 	int nbofsector;
 	unsigned char crctable[32];
 	unsigned char CRC16_High,CRC16_Low;
-	
+
 	nbofsector=0;
 	i=0;
 	do
@@ -145,7 +145,7 @@ int patchtrackFM(unsigned char * trackdata, unsigned char * trackclk,int trackle
 						}
 
 					}
-		
+
 					j++;
 				}while(j<32);
 			}
@@ -165,7 +165,7 @@ int patchtrackMFM(unsigned char * trackdata, unsigned char * trackclk,int trackl
 	int nbofsector;
 	unsigned char crctable[32];
 	unsigned char CRC16_High,CRC16_Low;
-	
+
 	nbofsector=0;
 	i=0;
 	do
@@ -225,11 +225,11 @@ int patchtrackMFM(unsigned char * trackdata, unsigned char * trackclk,int trackl
 						}
 
 					}
-		
+
 					j++;
 				}while(j<64);
 
-				
+
 
 			}
 
@@ -244,7 +244,7 @@ int patchtrackMFM(unsigned char * trackdata, unsigned char * trackclk,int trackl
 
 int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	
+
 	FILE * f;
 	unsigned int filesize;
 	unsigned int i,j;
@@ -255,26 +255,26 @@ int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	int fmmode,tracklen,numberoftrack,numberofside;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
-	
-	
+
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99PC99_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
+	fseek (f , 0 , SEEK_SET);
 
 
 	if(filesize!=0)
-	{		
-			
+	{
+
 		fmmode=0;
 
 		if(filesize%3253 && filesize%6872)
@@ -282,7 +282,7 @@ int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"non TI99 PC99 file !");
 			return HXCFE_BADFILE;
 		}
-		
+
 		if(!(filesize%3253))
 		{
 			tracklen=3253;
@@ -314,31 +314,32 @@ int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			return HXCFE_BADFILE;
 			break;
 		}
-			
+
 		floppydisk->floppyNumberOfTrack=numberoftrack;
 		floppydisk->floppyNumberOfSide=numberofside;
 		floppydisk->floppySectorPerTrack=-1;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			
+
 		rpm=300; // normal rpm
-			
+
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
-				
+
 		trackdata=(unsigned char*)malloc(tracklen);
 		trackclk=(unsigned char*)malloc(tracklen);
-			
+
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
-				
+
 			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
-				
+
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
-					
+				hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
+
 				if(fmmode)
-				{	
+				{
 					floppydisk->tracks[j]->sides[i]=tg_alloctrack(floppydisk->floppyBitRate,ISOIBM_FM_ENCODING ,currentcylinder->floppyRPM,tracklen*4*8,2500,-2500,0x00);
 
 				}
@@ -347,12 +348,12 @@ int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 					floppydisk->tracks[j]->sides[i]=tg_alloctrack(floppydisk->floppyBitRate,ISOIBM_MFM_ENCODING,currentcylinder->floppyRPM,tracklen*2*8,2500,-2500,0x00);
 				}
 				currentside=currentcylinder->sides[i];
-				
+
 				currentside->number_of_sector=floppydisk->floppySectorPerTrack;
-					
-				file_offset=(tracklen*j)+(tracklen*numberoftrack*(i&1));					
+
+				file_offset=(tracklen*j)+(tracklen*numberoftrack*(i&1));
 				fseek (f , file_offset , SEEK_SET);
-					
+
 				fread(trackdata,tracklen,1,f);
 				memset(trackclk,0xFF,tracklen);
 
@@ -371,11 +372,11 @@ int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			}
 
 		}
-		
+
 		free(trackdata);
-		
+
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		
+
 		hxc_fclose(f);
 		return HXCFE_NOERROR;
 	}

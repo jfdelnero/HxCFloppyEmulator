@@ -98,12 +98,12 @@ void init_decompress()
 	memset(&son,0, (TSIZE)*2);
 	memset(&freq,0,(TSIZE+1)*2);
 	Bits=0;
-	Bitbuff=0;			
-	GBcheck=0;			
-	GBr=0;				
-	GBi=0;				
-	GBj=0;				
-	GBk=0;				
+	Bitbuff=0;
+	GBcheck=0;
+	GBr=0;
+	GBi=0;
+	GBj=0;
+	GBk=0;
 
 	GBstate=0;
 	Eof=0;
@@ -325,7 +325,7 @@ int getblock(unsigned char *p, unsigned short size, unsigned char *e)
 
 unsigned char * unpack(unsigned char *packeddata,unsigned int size)
 {
-	
+
 	unsigned char * buffer,* finalbuffer;
 	int i,j;
 

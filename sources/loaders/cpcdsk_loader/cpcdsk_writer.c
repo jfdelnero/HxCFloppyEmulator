@@ -115,6 +115,8 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 				{
 					sprintf(tmp_str,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(cpcdskfile));
 
+					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),floppy->floppyNumberOfTrack*2 );
+
 					log_str=0;
 					log_str=realloc(log_str,strlen(tmp_str)+1);
 					memset(log_str,0,strlen(tmp_str)+1);

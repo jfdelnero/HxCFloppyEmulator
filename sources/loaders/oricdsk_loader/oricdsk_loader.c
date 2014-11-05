@@ -320,6 +320,9 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 			{
 				for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 				{
+
+					hxcfe_imgCallProgressCallback(imgldr_ctx,j + (i*floppydisk->floppyNumberOfTrack),(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide) );
+
 					if(!floppydisk->tracks[j])
 						floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 
@@ -359,6 +362,8 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 				{
 					for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 					{
+						hxcfe_imgCallProgressCallback(imgldr_ctx,j + (i*floppydisk->floppyNumberOfTrack),(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide) );
+
 						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"------------------ Track %d, side %d -------------------",j,i);
 						currentcylinder=floppydisk->tracks[j];
 
@@ -394,6 +399,8 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 
 					for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 					{
+						hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide) );
+
 						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"------------------ Track %d, side %d -------------------",j,i);
 
 						file_offset=(j*tracksize*floppydisk->floppyNumberOfSide) + (i*tracksize) + 256;

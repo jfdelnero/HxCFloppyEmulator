@@ -320,6 +320,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 		for(i=0;i<trackliststruct.number_of_track;i++)
 		{
+			hxcfe_imgCallProgressCallback(imgldr_ctx,i,trackliststruct.number_of_track );
 
 			fseek(f,header.track_list_offset+tracklistoffset[i],SEEK_SET);
 			fread(&track,sizeof(track),1,f);

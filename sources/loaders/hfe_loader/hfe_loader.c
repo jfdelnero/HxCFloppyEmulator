@@ -213,6 +213,8 @@ int HFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 */
 			for(j=0;j<currentcylinder->number_of_side;j++)
 			{
+				hxcfe_imgCallProgressCallback(imgldr_ctx,(i<<1) + (j&1),floppydisk->floppyNumberOfTrack*2 );
+
 				currentcylinder->sides[j]=malloc(sizeof(HXCFE_SIDE));
 				memset(currentcylinder->sides[j],0,sizeof(HXCFE_SIDE));
 				currentside=currentcylinder->sides[j];

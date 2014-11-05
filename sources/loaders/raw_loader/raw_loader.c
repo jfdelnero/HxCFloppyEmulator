@@ -66,10 +66,10 @@ int RAW_libIsValidFormat(HXCFE* floppycontext,cfgrawfile * imgformatcfg)
 	int gap3len,interleave,rpm,bitrate;
 	int sectorsize;
 	int tracklendiv;
-	
+
 
 	sectorsize=128<<(imgformatcfg->sectorsize&7);
-	
+
 	if(imgformatcfg->autogap3)
 		gap3len=255;
 	else
@@ -106,14 +106,14 @@ int RAW_libIsValidFormat(HXCFE* floppycontext,cfgrawfile * imgformatcfg)
 		break;
 	};
 
-	if(rpm==0) 
+	if(rpm==0)
 		return HXCFE_BADPARAMETER;
 
 
 	tracklen=((bitrate*60)/rpm)/tracklendiv;
 
 	//finaltracksize=ISOIBMGetTrackSize(tracktype,imgformatcfg->sectorpertrack,sectorsize,gap3len,0);
-	
+
 	//if(finaltracksize<=tracklen)
 	{
 		return HXCFE_VALIDFILE;
@@ -128,7 +128,7 @@ int RAW_libIsValidFormat(HXCFE* floppycontext,cfgrawfile * imgformatcfg)
 
 int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,cfgrawfile * imgformatcfg)
 {
-	
+
 	FILE * f;
 	unsigned int filesize;
 	unsigned int i,j,fileside,bitrate;
@@ -136,30 +136,30 @@ int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	unsigned char* trackdata;
 	unsigned char gap3len,interleave,skew,curskew,tracktype,firstsectorid;
 	unsigned short sectorsize,rpm;
-	
+
 	f=0;
-	
+
 	if(imgfile)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"RAW_libLoad_DiskFile %s",imgfile);
-		
+
 		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL) 
+		if(f==NULL)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 			return -1;
 		}
-		
-		fseek (f , 0 , SEEK_END); 
+
+		fseek (f , 0 , SEEK_END);
 		filesize=ftell(f);
-		fseek (f , 0 , SEEK_SET); 
+		fseek (f , 0 , SEEK_SET);
 	}
 	else
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"RAW_libLoad_DiskFile empty floppy");
-	}	
+	}
 
-	
+
 	sectorsize=128<<(imgformatcfg->sectorsize&7);
 
 	if(!imgformatcfg->autogap3)
@@ -173,7 +173,7 @@ int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	skew=imgformatcfg->skew;
 
 	floppydisk->floppyNumberOfTrack=(unsigned short)imgformatcfg->numberoftrack;
-	
+
 	if((imgformatcfg->sidecfg&TWOSIDESFLOPPY) || (imgformatcfg->sidecfg&SIDE_INVERTED))
 	{
 		floppydisk->floppyNumberOfSide=2;
@@ -182,7 +182,7 @@ int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	{
 		floppydisk->floppyNumberOfSide=1;
 	}
-	
+
 	floppydisk->floppySectorPerTrack=imgformatcfg->sectorpertrack;
 
 	floppydisk->floppyBitRate=bitrate;
@@ -230,15 +230,15 @@ int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	};
 
 	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-			
+
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
-				
+
 		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-				
+
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 		{
-					
+			hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
 
 			if(imgformatcfg->sidecfg&TWOSIDESFLOPPY)
 			{
@@ -266,20 +266,20 @@ int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 							(sectorsize*(floppydisk->floppySectorPerTrack)*fileside);
 			}
-			
+
 			if(f)
 			{
 				fseek (f , file_offset , SEEK_SET);
-					
+
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %d Head %d : Reading %d bytes at %.8X",j,i,sectorsize*floppydisk->floppySectorPerTrack,file_offset);
 				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
-				
+
 			}
 			else
 			{
 				memset(trackdata,imgformatcfg->fillvalue,sectorsize*floppydisk->floppySectorPerTrack);
 			}
-					
+
 			firstsectorid=imgformatcfg->firstidsector;
 			if(imgformatcfg->intersidesectornumbering)
 			{

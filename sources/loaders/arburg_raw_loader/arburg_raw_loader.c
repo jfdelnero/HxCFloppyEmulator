@@ -157,6 +157,7 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 
 	for(i=0;i<floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide;i++)
 	{
+		hxcfe_imgCallProgressCallback(imgldr_ctx, i,floppydisk->floppyNumberOfTrack*2);
 
 		tracknumber = i % floppydisk->floppyNumberOfTrack;
 		if(i>=floppydisk->floppyNumberOfTrack)

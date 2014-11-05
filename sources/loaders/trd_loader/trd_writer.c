@@ -187,9 +187,9 @@ int TRD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 			for(k=0;k<nbtrack;k++)
 			{
-
 				for(j=0;j<nbside;j++)
 				{
+					hxcfe_imgCallProgressCallback(imgldr_ctx,(i<<1) + (j&1),nbside*nbtrack );
 
 					for(i=0;i<nbsector;i++)
 					{
