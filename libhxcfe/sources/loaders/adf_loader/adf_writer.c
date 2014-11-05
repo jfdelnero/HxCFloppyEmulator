@@ -73,6 +73,9 @@ int ADF_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			{
 				for(i=0;i<2;i++)
 				{
+
+					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),80*2 );
+
 					for(s=0;s<11;s++)
 					{
 						sc = hxcfe_searchSector (ss,j,i,s,AMIGA_MFM_ENCODING);

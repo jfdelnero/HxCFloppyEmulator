@@ -78,25 +78,25 @@ int TeleDisk_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	{
 		pathlen=strlen(imgfile);
 		if(pathlen!=0)
-		{			
+		{
 			f=hxc_fopen(imgfile,"rb");
-			if(f==NULL) 
+			if(f==NULL)
 			{
 				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"TeleDisk_libIsValidDiskFile : Cannot open %s !",imgfile);
 				return HXCFE_ACCESSERROR;
 			}
-			
+
 			fseek(f,0,SEEK_SET);
 
 			memset(&td_header,0,sizeof(TELEDISK_HEADER));
-			fread( &td_header, sizeof(TELEDISK_HEADER), 1, f );  
+			fread( &td_header, sizeof(TELEDISK_HEADER), 1, f );
 
 			i=ftell(f);
 
 			if(ftell(f)==sizeof(TELEDISK_HEADER))
 			{
 
-				if ( ((td_header.TXT[0]!='t') || (td_header.TXT[1]!='d')) && ((td_header.TXT[0]!='T') || (td_header.TXT[1]!='D'))) 
+				if ( ((td_header.TXT[0]!='t') || (td_header.TXT[1]!='d')) && ((td_header.TXT[0]!='T') || (td_header.TXT[1]!='D')))
 				{
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TeleDisk_libIsValidDiskFile : bad header tag !");
 					hxc_fclose(f);
@@ -109,7 +109,7 @@ int TeleDisk_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 				{
 					CRC16_Update(&CRC16_High,&CRC16_Low, ptr[i],(unsigned char*)crctable );
 				}
-				
+
 				if(td_header.CRC!=((CRC16_High<<8)|CRC16_Low))
 				{
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"bad header crc !");
@@ -121,7 +121,7 @@ int TeleDisk_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 				hxc_fclose(f);
 				return HXCFE_VALIDFILE;
 			}
-	
+
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TeleDisk_libIsValidDiskFile : bad header tag !");
 			hxc_fclose(f);
      		return HXCFE_BADFILE;
@@ -140,9 +140,9 @@ int RLEExpander(unsigned char *src,unsigned char *dst,int blocklen)
 
   unsigned int uBlock;
   unsigned int uCount;
-  
+
   s2=dst;
-  
+
   len=(src[1]<<8)|src[0];
   type=src[2];
   len--;
@@ -156,14 +156,14 @@ int RLEExpander(unsigned char *src,unsigned char *dst,int blocklen)
       rlen=len;
       break;
     }
-    
+
 	case 1:
     {
       len=(src[1]<<8) | src[0];
       rlen=len<<1;
       d1=src[2];
 	  d2=src[3];
-      while (len--) 
+      while (len--)
 	  {
 		  *dst++=d1;
 		  *dst++=d2;
@@ -192,7 +192,7 @@ int RLEExpander(unsigned char *src,unsigned char *dst,int blocklen)
 				rlen=rlen+len;
 				s2=s2+len;
 				s1=s1+len;
-				
+
 				len2=len2-len;
 			}
 			else
@@ -204,7 +204,7 @@ int RLEExpander(unsigned char *src,unsigned char *dst,int blocklen)
 				uCount = *s1;
 				s1++;
 				len2--;
-				
+
 				while(uCount)
 				{
 						memcpy(s2, s1, uBlock);
@@ -242,7 +242,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	unsigned short * datalen;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
-	TELEDISK_HEADER        *td_header;	
+	TELEDISK_HEADER        *td_header;
 	TELEDISK_TRACK_HEADER  *td_track_header;
 	TELEDISK_SECTOR_HEADER *td_sector_header;
 	TELEDISK_COMMENT * td_comment;
@@ -256,9 +256,11 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	unsigned long fileimage_buffer_offset;
 	int rlen;
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TeleDisk_libLoad_DiskFile %s",imgfile);
-	
+
+	hxcfe_imgCallProgressCallback(imgldr_ctx,0,100 );
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"TeleDisk_libLoad_DiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
@@ -290,7 +292,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	td_header=(TELEDISK_HEADER*)&fileimage[fileimage_buffer_offset];
 	fileimage_buffer_offset=fileimage_buffer_offset+sizeof(TELEDISK_HEADER);
 
-	if ( ((td_header->TXT[0]!='t') || (td_header->TXT[1]!='d')) && ((td_header->TXT[0]!='T') || (td_header->TXT[1]!='D'))) 
+	if ( ((td_header->TXT[0]!='t') || (td_header->TXT[1]!='d')) && ((td_header->TXT[0]!='T') || (td_header->TXT[1]!='D')))
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"TeleDisk_libLoad_DiskFile : bad header tag !");
 		free(fileimage);
@@ -303,7 +305,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	{
 		CRC16_Update(&CRC16_High,&CRC16_Low, ptr[i],(unsigned char*)crctable );
 	}
-				
+
 	if(td_header->CRC!=((CRC16_High<<8)|CRC16_Low))
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"TeleDisk_libLoad_DiskFile : bad header crc !");
@@ -374,7 +376,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	interleave=1;
 	numberoftrack=0;
 	sectorsize=512;
-	
+
 	file_offset=fileimage_buffer_offset;
 
 	floppydisk->floppyNumberOfSide=td_header->Surface;
@@ -438,9 +440,9 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 
 	skew=1;
-	rpm=300; // normal rpm			
+	rpm=300; // normal rpm
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), gap3:%d,rpm:%d bitrate:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm,floppydisk->floppyBitRate);
-	
+
 	tracklen=(floppydisk->floppyBitRate/(rpm/60))/4;
 
 	//////////////////////////////////
@@ -448,7 +450,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	td_track_header=(TELEDISK_TRACK_HEADER  *)&fileimage[fileimage_buffer_offset];
 	fileimage_buffer_offset=fileimage_buffer_offset+sizeof(TELEDISK_TRACK_HEADER);
-	
+
 	while(td_track_header->SecPerTrk!=0xFF)
 	{
 		if(td_track_header->PhysSide&0x7F)
@@ -468,9 +470,8 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		{
 			trackformat=IBMFORMAT_DD;
 		}
-		
+
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"------------- Track:%d, Side:%d, Number of Sector:%d -------------",td_track_header->PhysCyl,sidenumber,td_track_header->SecPerTrk);
-		
 
 		if(!floppydisk->tracks[td_track_header->PhysCyl])
 		{
@@ -497,7 +498,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		}
 		if(CRC16_Low!=td_track_header->CRC)
 		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"!!!! Track header CRC Error !!!!");			
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"!!!! Track header CRC Error !!!!");
 		}
 		////////////////////////////////////////////////////////
 
@@ -516,7 +517,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			sectorconfig[i].gap3=255;
 			sectorconfig[i].trackencoding=trackformat;
 
-			
+
 			if(td_sector_header->Syndrome & 0x04)
 			{
 				sectorconfig[i].use_alternate_datamark=1;
@@ -532,16 +533,16 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			{
 				sectorconfig[i].missingdataaddressmark=1;
 			}
-			
+
 			sectorconfig[i].input_data=malloc(sectorconfig[i].sectorsize);
 			if  ( (td_sector_header->Syndrome & 0x30) == 0 && (td_sector_header->SLen & 0xf8) == 0 )
-			{			
+			{
 				//fileimage_buffer_offset=fileimage_buffer_offset+sizeof(unsigned short);
 
 				datalen=(unsigned short*)&fileimage[fileimage_buffer_offset];
 				memcpy(&tempdata,&fileimage[fileimage_buffer_offset],(*datalen)+2);
 				fileimage_buffer_offset=fileimage_buffer_offset+(*datalen)+2;
-				
+
 				rlen=RLEExpander(tempdata,sectorconfig[i].input_data,(int)*datalen);
 			}
 			else
@@ -566,10 +567,12 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		fileimage_buffer_offset=fileimage_buffer_offset+sizeof(TELEDISK_TRACK_HEADER);
 
 	}
-		
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 	free(fileimage);
+
+	hxcfe_imgCallProgressCallback(imgldr_ctx,100,100 );
 
 	hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 

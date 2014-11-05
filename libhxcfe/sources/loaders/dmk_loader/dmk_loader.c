@@ -476,6 +476,8 @@ int DMK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
+					hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
+
 					file_offset=sizeof(dmk_header)+((dmk_h.track_len)*(j*floppydisk->floppyNumberOfSide))+((dmk_h.track_len)*(i&1));
 					fseek (f , file_offset , SEEK_SET);
 					fread(&idam_offset_table,128,1,f);

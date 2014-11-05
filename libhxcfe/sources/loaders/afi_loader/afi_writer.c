@@ -330,6 +330,8 @@ int AFI_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			{
 				for(j=0;j<floppy->tracks[i]->number_of_side;j++)
 				{
+					hxcfe_imgCallProgressCallback(imgldr_ctx,(i<<1) + (j&1),(2*floppy->floppyNumberOfTrack) );
+
 					memset(data_list,0,sizeof(unsigned long)*16);
 					memset(&afitrack,0,sizeof(afitrack));
 					sprintf((char*)&afitrack.afi_track_tag,AFI_TRACK_TAG);

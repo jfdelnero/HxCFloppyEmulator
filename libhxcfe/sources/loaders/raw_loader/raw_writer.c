@@ -37,9 +37,9 @@
 #include "tracks/sector_extractor.h"
 
 #include "libhxcadaptor.h"
-  
+
 int RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
-{	
+{
 	int i,j,k,l,nbsector;
 	FILE * rawfile;
 	char * log_str;
@@ -64,6 +64,8 @@ int RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			{
 				for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
 				{
+					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),(2*floppy->floppyNumberOfTrack) );
+
 					sprintf(tmp_str,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(rawfile));
 
 					log_str=0;
@@ -163,7 +165,7 @@ int RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 				}
 			}
-			
+
 			hxcfe_deinitSectorAccess(ss);
 		}
 

@@ -70,7 +70,7 @@ int EMUII_RAW_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	{
 
 		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0) 
+		if(filesize<0)
 			return HXCFE_ACCESSERROR;
 
 		if(filesize==(0xE00*2*80))
@@ -101,16 +101,16 @@ int EMUII_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 	HXCFE_SIDE*          currentside;
 	unsigned char  sector_data[0xE00];
 	unsigned short tracknumber,sidenumber;
-	
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUII_RAW_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
+
 	floppydisk->floppyNumberOfTrack=80;
 	floppydisk->floppyNumberOfSide=2;
 	floppydisk->floppyBitRate=DEFAULT_EMUII_BITRATE;
@@ -129,11 +129,13 @@ int EMUII_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 	memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 	for(i=0;i<floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide;i++)
-	{			
+	{
+
+		hxcfe_imgCallProgressCallback(imgldr_ctx,i,floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide);
 
 		tracknumber=i>>1;
 		sidenumber=i&1;
-	
+
 		fseek(f,i*0xE00,SEEK_SET);
 		fread(&sector_data,0xE00,1,f);
 
@@ -142,7 +144,7 @@ int EMUII_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 			floppydisk->tracks[tracknumber]=allocCylinderEntry(300,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[tracknumber];
 		}
-			
+
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
 			tracknumber,
@@ -151,14 +153,14 @@ int EMUII_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 			0xE00);
 
 		currentcylinder->sides[sidenumber]=tg_alloctrack(floppydisk->floppyBitRate,EMU_FM_ENCODING,currentcylinder->floppyRPM,((floppydisk->floppyBitRate/5)*2),2000,-2000,0x00);
-		currentside=currentcylinder->sides[sidenumber];					
+		currentside=currentcylinder->sides[sidenumber];
 		currentside->number_of_sector=floppydisk->floppySectorPerTrack;
 
-			
+
 		BuildEmuIITrack(imgldr_ctx->hxcfe,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,2);
-			
-	}			
-	
+
+	}
+
 	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }

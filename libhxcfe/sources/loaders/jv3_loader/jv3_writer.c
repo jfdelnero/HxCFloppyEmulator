@@ -55,7 +55,7 @@ unsigned char jv3flags(unsigned char num,unsigned char mask)
 
 // Main writer function
 int JV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
-{	
+{
 	int i,j,k;
 	int nbsector;
 	int sectorcount;
@@ -74,7 +74,7 @@ int JV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	jv3dskfile = hxc_fopen(filename,"wb");
 	if(jv3dskfile)
 	{
-		ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);		
+		ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 		if(ss)
 		{
 			//Create sectorheader fields
@@ -83,12 +83,13 @@ int JV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			for(j = 0; (j < (int)floppy->floppyNumberOfTrack) && (sectorcount < JV3_HEADER_MAX*2); j++)
 			{
 				for(i = 0; (i < (int)floppy->floppyNumberOfSide) && (sectorcount < JV3_HEADER_MAX*2); i++)
-				{	
+				{
+					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),(2*floppy->floppyNumberOfTrack) );
 
 					sca = hxcfe_getAllTrackISOSectors(ss,j,i,&nbsector);
 					if(sca)
 					{
-						for(k = 0; (k < nbsector) && (sectorcount < JV3_HEADER_MAX*2); k++) 
+						for(k = 0; (k < nbsector) && (sectorcount < JV3_HEADER_MAX*2); k++)
 						{
 							density = 0;
 							if(sca[k]->trackencoding == ISOFORMAT_DD )
@@ -123,7 +124,7 @@ int JV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 							}
 							sectorheader[sectorcount].flags = flags;
 							if (sca[k]->sectorsize > sectorsize) sectorsize = sca[k]->sectorsize;
-							
+
 							sectorcount++;
 
 							free(sca[k]);  //still using sca[k]->input_data, so free it later
@@ -150,7 +151,7 @@ int JV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 				sectorheader[i].sector = JV3_FREE;
 				sectorheader[i].flags = flags;
 			}
-			
+
 			//Finally write everything to the file
 			for(i = 0; i < sectorcount; i++)
 			{

@@ -127,6 +127,8 @@ int D88_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			{
 				for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
 				{
+					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),2*floppy->floppyNumberOfTrack);
+
 					sprintf(tmp_str,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(d88file));
 
 					log_str=0;
@@ -271,7 +273,7 @@ int D88_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 		if(maxtrack < 46)
 		{
-			// 2D : 300RPM, 250Kb/s, 2 sides, 40 tracks floppy format . 
+			// 2D : 300RPM, 250Kb/s, 2 sides, 40 tracks floppy format .
 			// 2D
 			d88_fh.media_flag = 0x00;
 		}

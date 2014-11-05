@@ -199,6 +199,8 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	currentcylinder=floppydisk->tracks[j];
 	for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 	{
+		hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
+
 		file_offset=( (((bootnumberofsector)*256)) * i );
 		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*10);
 		for(k=0;k<10;k++)
@@ -234,6 +236,7 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 		{
+			hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
 
 			file_offset=offset+ ( (((floppydisk->floppySectorPerTrack)*256)) * floppydisk->floppyNumberOfSide * (j-1) ) +
 				                ( (((floppydisk->floppySectorPerTrack)*256)) * i );

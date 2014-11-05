@@ -62,20 +62,20 @@
 #pragma pack(1)
 typedef struct dim_header_
 {
-	unsigned short id_header;        // 0x0000 Word ID Header (0x4242('BB')) 
+	unsigned short id_header;        // 0x0000 Word ID Header (0x4242('BB'))
 	unsigned char  unused1;
-	unsigned char  used_sector_only; // 0x0003 Byte Image contains all sectors (0) or used sectors (1) 
+	unsigned char  used_sector_only; // 0x0003 Byte Image contains all sectors (0) or used sectors (1)
 	unsigned short unused2;
-	unsigned char  side;             // 0x0006 Byte Sides (0 or 1; add 1 to this to get correct number of sides) 
+	unsigned char  side;             // 0x0006 Byte Sides (0 or 1; add 1 to this to get correct number of sides)
 	unsigned char  unused3;
 	unsigned char  nbsector;         // 0x0008 Byte Sectors per track
     unsigned char  unused4;
-	unsigned char  start_track;      // 0x000A Byte Start Track (0 based) 
+	unsigned char  start_track;      // 0x000A Byte Start Track (0 based)
     unsigned char  unused5;
     unsigned char  end_track;        // 0x000C Byte Ending Track (0 based)
-    unsigned char  density;			 // 0x000D Byte Double-Density(0) or High-Density (1) 
-    unsigned char  sectorsizeh;       // sector size (bytes) 
-    unsigned char  sectorsizel;       // sector size (bytes) 
+    unsigned char  density;			 // 0x000D Byte Double-Density(0) or High-Density (1)
+    unsigned char  sectorsizeh;       // sector size (bytes)
+    unsigned char  sectorsizel;       // sector size (bytes)
 }dim_header;
 #pragma pack()
 
@@ -85,23 +85,23 @@ int DIM_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	FILE * f;
 	dim_header header;
-	
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile");
-	
+
 	if( hxc_checkfileext(imgfile,"dim") )
 	{
 
 		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL) 
+		if(f==NULL)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"DIM_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
-			
+
 		fread(&header,sizeof(dim_header),1,f);
 
 		hxc_fclose(f);
-					
+
 
 		if(	header.id_header==0x4242)
 		{
@@ -119,13 +119,13 @@ int DIM_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile : non DIM file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 
 int DIM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	
+
 	FILE * f;
 	unsigned char  i,j,skew;
 	unsigned int   file_offset;
@@ -136,22 +136,22 @@ int DIM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	unsigned short sectorsize;
 	HXCFE_CYLINDER* currentcylinder;
 	dim_header header;
-	
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DIM_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
+
 	fread(&header,sizeof(dim_header),1,f);
-	
-	
+
+
 	if(header.id_header==0x4242)
-	{		
-		
+	{
+
 		sectorsize=(header.sectorsizeh*256)+header.sectorsizel; // st file support only 512bytes/sector floppies.
 		if(!sectorsize || (sectorsize&0xFF)) sectorsize=512;
 		// read the first sector
@@ -181,43 +181,45 @@ int DIM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			trackformat=ISOFORMAT_DD11S;
 			interleave=2;
 		}
-					
+
 		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			
+
 		rpm=300; // normal rpm
-			
+
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d bitrate:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm,floppydisk->floppyBitRate);
-				
+
 		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-			
+
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
-				
+
 			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
-				
+
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
+				hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
+
 				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 							(sectorsize*(floppydisk->floppySectorPerTrack)*i)+0x20;
-					
+
 				fseek (f , file_offset , SEEK_SET);
 				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
-					
+
 				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
 			}
 		}
 
 		free(trackdata);
-		
+
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-	
+
 		hxc_fclose(f);
 		return HXCFE_NOERROR;
 
 	}
 	hxc_fclose(f);
-	
+
 	return HXCFE_FILECORRUPTED;
 }
 

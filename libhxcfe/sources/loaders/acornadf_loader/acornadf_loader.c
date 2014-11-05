@@ -69,12 +69,12 @@ int ACORNADF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	{
 
 		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0) 
+		if(filesize<0)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"ACORNADF_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
-			
+
 		if(filesize&0x3FF)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ACORNADF_libIsValidDiskFile : non Acorn ADF file - bad file size !");
@@ -89,7 +89,7 @@ int ACORNADF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ACORNADF_libIsValidDiskFile : non Acorn ADF file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 
@@ -97,7 +97,7 @@ int ACORNADF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int ACORNADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	
+
 	FILE * f;
 	unsigned int filesize;
 	unsigned int i,j;
@@ -108,23 +108,23 @@ int ACORNADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	unsigned short sectorsize;
 	unsigned char trackformat;
 	HXCFE_CYLINDER* currentcylinder;
-	
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ACORNADF_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
-	
+	fseek (f , 0 , SEEK_SET);
+
 	if(filesize!=0)
-	{		
-		sectorsize=1024; 
+	{
+		sectorsize=1024;
 		rpm=300;
 
 		// read the first sector
@@ -146,30 +146,32 @@ int ACORNADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			interleave=1;
 			floppydisk->floppyBitRate=250000;
 		}
-			
+
 		trackformat=ISOFORMAT_DD;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
 		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-			
+
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
 			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
-				
+
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
+				hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
+
 				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 					(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-				
+
 				fseek (f , file_offset , SEEK_SET);
-				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);		
-				
+				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
+
 				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
 			}
 		}
-			
+
 		free(trackdata);
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
@@ -178,7 +180,7 @@ int ACORNADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		return HXCFE_NOERROR;
 
 	}
-	
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;

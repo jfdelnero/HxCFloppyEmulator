@@ -67,7 +67,7 @@ int FD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	if( hxc_checkfileext(imgfile,"fd") )
 	{
 		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0) 
+		if(filesize<0)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"FD_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
@@ -108,18 +108,18 @@ int FD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 	HXCFE_CYLINDER* currentcylinder;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"fd_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
-	
+	fseek (f , 0 , SEEK_SET);
+
 	sectorsize=256; // FD file support only 256bytes/sector floppies.
 	// read the first sector
 	switch(filesize)
@@ -136,7 +136,7 @@ int FD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 			return HXCFE_BADFILE;
 		break;
 	}
-	
+
 	gap3len=50;
 	interleave=1;
 	skew=0;
@@ -147,24 +147,26 @@ int FD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 	rpm=300; // normal rpm
-			
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
-				
+
 	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-			
+
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
-				
+
 		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 		currentcylinder=floppydisk->tracks[j];
-			
+
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 		{
+			hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
+
 			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack))+
 				                    (sectorsize*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfTrack*i);
 			fseek (f , file_offset , SEEK_SET);
 			fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
-					
+
 			currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
 		}
 	}

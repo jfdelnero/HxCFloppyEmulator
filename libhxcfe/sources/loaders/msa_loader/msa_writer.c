@@ -218,6 +218,8 @@ int MSA_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 					{
 						for(i = 0; i < (int)floppy->floppyNumberOfSide; i++)
 						{
+							hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),floppy->floppyNumberOfTrack*2 );
+
 							for(k=0;k<nbsector;k++)
 							{
 								sc = hxcfe_searchSector(ss,j,i,k+1,ISOIBM_MFM_ENCODING);

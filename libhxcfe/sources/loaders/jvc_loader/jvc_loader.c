@@ -73,7 +73,7 @@ int JVC_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JVC_libIsValidDiskFile : non JVC file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 
@@ -102,18 +102,18 @@ int JVC_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	HXCFE_CYLINDER* currentcylinder;
 	unsigned char trackformat;
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JVC_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
-	
+	fseek (f , 0 , SEEK_SET);
+
 
 	if(filesize!=0)
 	{
@@ -144,37 +144,39 @@ int JVC_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 		floppydisk->floppyBitRate=DEFAULT_DD_BITRATE;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-		
+
 		trackformat=ISOFORMAT_DD;
 		skew=0;
 		interleave=1;
 		gap3len=255;
 
 		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			
+
 		rpm=300; // normal rpm
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, sector size: %dB , gap3:%d, interleave:%d,rpm:%d bitrate:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,sectorsize,gap3len,interleave,rpm,floppydisk->floppyBitRate);
 
 		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-			
+
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
-				
+
 			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
-				
+
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
+				hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
+
 				if(jvc_h.Sector_attribute_flag)
 					file_offset=((sectorsize+1)*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 						((sectorsize+1)*(floppydisk->floppySectorPerTrack)*i);
 				else
 					file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 						(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-					
+
 				fseek (f , file_offset , SEEK_SET);
-						
+
 				Sector_attribute_flag=0;
 				for(k=0;k<jvc_h.Setors_per_track;k++)
 				{
@@ -192,13 +194,13 @@ int JVC_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		}
 
 		free(trackdata);
-			
+
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		
+
 		hxc_fclose(f);
 		return HXCFE_NOERROR;
 	}
-	
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;

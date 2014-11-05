@@ -152,6 +152,7 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	for(i=0;i<128;i++)
 	{
+		hxcfe_imgCallProgressCallback(imgldr_ctx,i,128);
 
 		for(j=0;j<=1;j++)
 		{

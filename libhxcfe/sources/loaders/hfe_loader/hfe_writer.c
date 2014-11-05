@@ -325,6 +325,7 @@ int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		i=0;
 		while(i<(FILEHEADER->number_of_track))
 		{
+				hxcfe_imgCallProgressCallback(imgldr_ctx,i,(FILEHEADER->number_of_track) );
 
 				mfmsize=floppy->tracks[i]->sides[0]->tracklen * factor;
 				if(mfmsize&7)

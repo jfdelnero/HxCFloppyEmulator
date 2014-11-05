@@ -67,11 +67,11 @@ int JV1_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 	if( hxc_checkfileext(imgfile,"jv1") || hxc_checkfileext(imgfile,"dsk"))
 	{
-	
+
 		if(hxc_checkfileext(imgfile,"dsk"))
 		{
 			filesize=hxc_getfilesize(imgfile);
-			if(filesize<0) 
+			if(filesize<0)
 			{
 				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"JV1_libIsValidDiskFile : Cannot open %s !",imgfile);
 				return HXCFE_ACCESSERROR;
@@ -142,10 +142,10 @@ int JV1_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,bitrate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
-			
+
 			sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 			memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
-		
+
 			trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
@@ -156,6 +156,7 @@ int JV1_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
+					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
 
 					file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 						(sectorsize*(floppydisk->floppySectorPerTrack)*i);

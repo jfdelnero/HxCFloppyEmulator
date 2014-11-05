@@ -121,7 +121,7 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	switch(filesize)
 	{
 		case 174848:
-			//35 track, no errors 
+			//35 track, no errors
 			number_of_track=35;
 			break;
 
@@ -134,14 +134,14 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			memset(errormap,0,errormap_size);
 			fseek(f,errormap_size,SEEK_END);
 			fread(errormap,errormap_size,1,f);
-			
+
 			break;
 
 		case 196608:
 			//40 track, no errors
 			number_of_track=40;
 			break;
-		
+
 		case 197376:
 			//40 track, 768 error bytes
 			number_of_track=40;
@@ -151,7 +151,7 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			memset(errormap,0,errormap_size);
 			fseek(f,errormap_size,SEEK_END);
 			fread(errormap,errormap_size,1,f);
-			
+
 			break;
 
 		default:
@@ -159,7 +159,7 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Unsupported D64 file size ! (%d Bytes)",filesize);
 			hxc_fclose(f);
 			return HXCFE_UNSUPPORTEDFILE;
-			
+
 			break;
 	}
 
@@ -200,7 +200,7 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		k=k+(18*256);
 		i++;
 	}while(i<number_of_track && i<30);
-		
+
 	i=30;
 	do
 	{
@@ -216,68 +216,69 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	floppydisk->floppyNumberOfTrack=number_of_track;
 	floppydisk->floppyNumberOfSide=1;
 	floppydisk->floppySectorPerTrack=-1;
-	
+
 	sectorsize=256; // c64 file support only 256bytes/sector floppies.
-	
+
 	floppydisk->floppyBitRate=VARIABLEBITRATE;
 	floppydisk->floppyiftype=C64_DD_FLOPPYMODE;
 	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-	
+
 	rpm=300;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,rpm);
-					
+
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
-		
+
 		trackdata=(unsigned char*)malloc(sectorsize*tracklistpos[j].number_of_sector);
 
 		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-		currentcylinder=floppydisk->tracks[j];				
-		
+		currentcylinder=floppydisk->tracks[j];
+
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 		{
-					
+			hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
+
 			tracklen=(tracklistpos[j].bitrate/(rpm/60))/4;
-				
+
 			currentcylinder->sides[i]=malloc(sizeof(HXCFE_SIDE));
 			memset(currentcylinder->sides[i],0,sizeof(HXCFE_SIDE));
 			currentside=currentcylinder->sides[i];
-					
+
 			currentside->number_of_sector=tracklistpos[j].number_of_sector;
 			currentside->tracklen=tracklen;
-					
+
 			currentside->databuffer=malloc(currentside->tracklen);
 			memset(currentside->databuffer,0,currentside->tracklen);
-					
+
 			currentside->flakybitsbuffer=0;
-			
+
 			currentside->indexbuffer=malloc(currentside->tracklen);
 			memset(currentside->indexbuffer,0,currentside->tracklen);
-					
+
 			currentside->timingbuffer=0;
 			currentside->bitrate=tracklistpos[j].bitrate;
 			currentside->track_encoding=UNKNOWN_ENCODING;
-			
+
 			fseek (f , tracklistpos[j].fileoffset , SEEK_SET);
-					
+
 			fread(trackdata,sectorsize*currentside->number_of_sector,1,f);
-		
+
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track:%d Size:%d File offset:%d Number of sector:%d Bitrate:%d",j,currentside->tracklen,tracklistpos[j].fileoffset,tracklistpos[j].number_of_sector,currentside->bitrate);
 
 			BuildGCRTrack(currentside->number_of_sector,sectorsize,j,i,trackdata,currentside->databuffer,&currentside->tracklen);
-	
+
 			currentside->tracklen=currentside->tracklen*8;
 
 		}
 
 		free(trackdata);
 	}
-	
+
 	if(errormap) free(errormap);
-			
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		
+
 	hxc_fclose(f);
 	return HXCFE_NOERROR;
 }

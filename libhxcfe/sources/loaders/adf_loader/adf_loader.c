@@ -164,6 +164,8 @@ int ADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 		{
+			hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),floppydisk->floppyNumberOfTrack*2 );
+
 			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
 					(sectorsize*(floppydisk->floppySectorPerTrack)*i);
 			fseek (f , file_offset , SEEK_SET);

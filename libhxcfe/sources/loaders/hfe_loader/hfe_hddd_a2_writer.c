@@ -102,7 +102,7 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 	unsigned int trackpos;
 	unsigned int tracklistlen;
 	unsigned int tracksize;
-	
+
 	unsigned short fm_pulses;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write HFE file %s for the standalone emulator (with HDDD A2 support).",filename);
@@ -163,7 +163,7 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 		{
 			FILEHEADER->track_encoding = APPLEII_HDDD_A2_GCR2_ENCODING;
 		}
-			
+
 		if( floppy->floppyNumberOfTrack	> 42 )
 		{
 			FILEHEADER->single_step=0xFF;
@@ -184,6 +184,8 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 
 		while(i<(FILEHEADER->number_of_track))
 		{
+				hxcfe_imgCallProgressCallback(imgldr_ctx,i,(FILEHEADER->number_of_track) );
+
 				mfmsize=0;
 				mfmsize2=0;
 
@@ -315,7 +317,7 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 				free(mfmtracks0);
 				free(mfmtracks1);
 				free(mfmtrackfinal);
-				
+
 			i++;
 		};
 

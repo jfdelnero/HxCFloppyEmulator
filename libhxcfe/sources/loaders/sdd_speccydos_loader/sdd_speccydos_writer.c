@@ -107,7 +107,7 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * flopp
 					{
 						for(j = 0; (j < (int)floppy->floppyNumberOfTrack); j++)
 						{
-
+							hxcfe_imgCallProgressCallback(imgldr_ctx, j + (i*floppy->floppyNumberOfTrack),floppy->floppyNumberOfTrack*2);
 							for(k=0;k<(int)(sectorsize/16)*nbsector;k++)
 							{
 								memcpy(&flat_track[k*16],"<MISSINGSECTOR!>",16);
@@ -128,7 +128,7 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * flopp
 										free(sc);
 									}
 								}
-								
+
 							}
 
 							fwrite(flat_track,nbsector * sectorsize,1,sdddskfile);

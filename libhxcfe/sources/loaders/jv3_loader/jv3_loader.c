@@ -87,7 +87,7 @@ JV3SectorsOffsets *JV3_bsearch(unsigned int key, JV3SectorsOffsets *base, size_t
 int GetFirstPos(JV3SectorsOffsets *base,int size,unsigned int track_id,unsigned int side_id)
 {
 	int i;
-	
+
 	i = 0;
 	while( i < size)
 	{
@@ -104,7 +104,7 @@ int GetFirstPos(JV3SectorsOffsets *base,int size,unsigned int track_id,unsigned 
 int GetNextPos(JV3SectorsOffsets *base,int size,unsigned int track_id,unsigned int side_id,unsigned int pos)
 {
 	int i,cur_pos;
-	
+
 	cur_pos = 0;
 	while( (cur_pos < size) && base[cur_pos].sector_pos != pos )
 	{
@@ -131,7 +131,7 @@ int GetNextPos(JV3SectorsOffsets *base,int size,unsigned int track_id,unsigned i
 JV3SectorsOffsets * GetSectorPosition(JV3SectorsOffsets *base,int size,unsigned int pos)
 {
 	int i;
-	
+
 	i = 0;
 	while( i < size)
 	{
@@ -214,7 +214,7 @@ JV3SectorsOffsets *JV3_offset(JV3SectorHeader JV3SH[], unsigned int NumberofSide
 	offset = ftell(jv3_file);
 	SO = (JV3SectorsOffsets *) malloc(sizeof(JV3SectorsOffsets)*NumberofEntries);
 	for (i=0; i<JV3_HEADER_MAX; i++) {
-		if (JV3SH[i].track != JV3_FREE) 
+		if (JV3SH[i].track != JV3_FREE)
 		{
 			SO[pos].key = JV3SH[i].track << 16 | JV3SH[i].sector << 8 | gbn(JV3SH[i].flags, JV3_SIDE);
 			SO[pos].offset = offset;
@@ -240,8 +240,8 @@ JV3SectorsOffsets *JV3_offset(JV3SectorHeader JV3SH[], unsigned int NumberofSide
 				SO[pos].side_id = 0;
 			}
 			sector_pos++;
-		    	
-			switch (gbn(JV3SH[i].flags, JV3_SIZE)) 
+
+			switch (gbn(JV3SH[i].flags, JV3_SIZE))
 			{
 				case JV3_SIZE_USED_256:
 					SO[pos].size = 256;
@@ -260,10 +260,10 @@ JV3SectorsOffsets *JV3_offset(JV3SectorHeader JV3SH[], unsigned int NumberofSide
 					offset += 512;
 					break;
 			}
-			
-			if (gbn(JV3SH[i].flags, JV3_DENSITY)) 
+
+			if (gbn(JV3SH[i].flags, JV3_DENSITY))
 			{         		/* Double density */
-				
+
 				SO[pos].density=0xFF;
 
 				switch (gbn(JV3SH[i].flags, JV3_DAM))
@@ -275,13 +275,13 @@ JV3SectorsOffsets *JV3_offset(JV3SectorHeader JV3SH[], unsigned int NumberofSide
 						SO[pos].DAM = 0xF8;
 						break;
 				}
-			} 
-			else 
+			}
+			else
 			{
 				SO[pos].density=0x00;
 
 				switch (gbn(JV3SH[i].flags, JV3_DAM)) /* Single density */
-				{    	 	
+				{
 					case JV3_DAM_FB_SD:
 						SO[pos].DAM = 0xFB;
 						break;
@@ -296,8 +296,8 @@ JV3SectorsOffsets *JV3_offset(JV3SectorHeader JV3SH[], unsigned int NumberofSide
 						break;
 				}
   			}
-        } 
-		else 
+        }
+		else
 		{
 			//SO[pos].density=0x00;
 
@@ -338,18 +338,18 @@ int JV3_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	{
 
 		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL) 
+		if(f==NULL)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"JV3_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
-		}					
-		
+		}
+
 		fread(sh, sizeof(JV3SectorHeader), JV3_HEADER_MAX, f);
        	if ((total_data = JV3_disk_geometry(sh, &NumberOfSide, &SectorPerTrack, &NumberOfTrack, &SectorSize, &StartIdSector, &NumberOfEntries)) != 0)
 		{
 			offset1 = ftell(f);
 			fseek (f , 0 , SEEK_END);
-			offset2 = ftell(f); 
+			offset2 = ftell(f);
 			hxc_fclose(f);
 
 			if (total_data == (unsigned int)(offset2 - offset1 -1)) {
@@ -414,7 +414,7 @@ int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		fread(sh, sizeof(JV3SectorHeader), JV3_HEADER_MAX, f);
 
 		JV3_disk_geometry(sh, &floppydisk->floppyNumberOfSide, &floppydisk->floppySectorPerTrack, &floppydisk->floppyNumberOfTrack, &SectorSize, &StartIdSector, &NumberofEntries);
-		
+
 		fread(&write_protected, sizeof(write_protected), 1, f);                                                                         // just to jump this infomation
 
 
@@ -435,7 +435,7 @@ int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 
-		
+
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
 
@@ -444,6 +444,8 @@ int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
+				hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
+
 				inc = 0;                                    // used to build track data
 				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 				sector_found=0;
@@ -454,28 +456,28 @@ int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				{
 					pOffset = GetSectorPosition(SectorsOffsets,NumberofEntries,cur_pos);
 
-		    		if (pOffset == NULL) 
+		    		if (pOffset == NULL)
 					{
 						inc += SectorSize;
-					} 
-					else 
+					}
+					else
 					{
-						
+
 						sectorconfig[sector_found].sectorsize=pOffset->size;
 						sectorconfig[sector_found].input_data=malloc(sectorconfig[sector_found].sectorsize);
 						memset(sectorconfig[sector_found].input_data,0,sectorconfig[sector_found].sectorsize);
 
 						fseek(f, pOffset->offset, SEEK_SET);
 						fread(sectorconfig[sector_found].input_data,pOffset->size,1,f);
-						
+
 						inc += pOffset->size;
-						
-						if (pOffset->DAM != 0xFB) 
+
+						if (pOffset->DAM != 0xFB)
 						{
 							sectorconfig[sector_found].use_alternate_datamark=1;
 							sectorconfig[sector_found].alternate_datamark=pOffset->DAM;
 						}
-						
+
 						if(pOffset->density)
 						{
 							sectorconfig[sector_found].trackencoding=IBMFORMAT_DD;

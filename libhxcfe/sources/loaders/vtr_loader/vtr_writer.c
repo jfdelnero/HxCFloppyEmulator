@@ -141,7 +141,7 @@ int VTR_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		i=0;
 		do
 		{
-
+				hxcfe_imgCallProgressCallback(imgldr_ctx,i,FILEHEADER->number_of_track );
 				mfmsize=floppy->tracks[i]->sides[0]->tracklen;
 				if(mfmsize&7)
 					mfmsize=(mfmsize/8)+1;

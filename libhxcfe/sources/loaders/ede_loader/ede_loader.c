@@ -66,18 +66,18 @@ int EDE_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile");
 
-	if(	hxc_checkfileext(imgfile,"ede") || 
-		hxc_checkfileext(imgfile,"eda") || 
-		hxc_checkfileext(imgfile,"eds") || 
+	if(	hxc_checkfileext(imgfile,"ede") ||
+		hxc_checkfileext(imgfile,"eda") ||
+		hxc_checkfileext(imgfile,"eds") ||
 		hxc_checkfileext(imgfile,"edt") ||
-		hxc_checkfileext(imgfile,"edv") 
+		hxc_checkfileext(imgfile,"edv")
 		)
 	{
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile : EDE file !");
 
 		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL) 
+		if(f==NULL)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"EDE_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
@@ -105,7 +105,7 @@ int EDE_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 				case 0xcb:
 					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : ASR-10 HD format");
 				break;
-				case 0xcc: 
+				case 0xcc:
 					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : TS-10/12 HD format");
 				break;
 				case 0x07:
@@ -131,7 +131,7 @@ int EDE_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile : non EDE file !");
 		return HXCFE_BADFILE;
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
 
@@ -139,7 +139,7 @@ int EDE_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	
+
 	FILE * f;
 	unsigned int filesize;
 	unsigned int i,j,l;
@@ -158,20 +158,20 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	HXCFE_SECTCFG  * sectorconfig;
 	unsigned int sectorsizelayout[32];
 	unsigned int sectoridlayout[32];
-	
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EDE_libLoad_DiskFile %s",imgfile);
-	
+
 	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL) 
+	if(f==NULL)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
-	
-	fseek (f , 0 , SEEK_END); 
+
+	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET); 
-	
+	fseek (f , 0 , SEEK_SET);
+
 
 	fread(header_buffer,0x200,1,f);
 
@@ -179,7 +179,7 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	{
 
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-		sectorsize=512; 
+		sectorsize=512;
 		rpm=300;
 		trackformat=ISOFORMAT_DD;
 		skew=0;
@@ -189,7 +189,7 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			case 0x01:
 				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"Mirage (DD) format");
 				header_offset=0xA0;
-				sectorsize=1024; 
+				sectorsize=1024;
 				floppydisk->floppyBitRate=250000;
 				floppydisk->floppyNumberOfTrack=80;
 				floppydisk->floppyNumberOfSide=1;
@@ -262,7 +262,7 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k;
 				break;
 
-			case 0xcc: 
+			case 0xcc:
 				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"TS-10/12 HD format");
 				floppydisk->floppyiftype=IBMPC_HD_FLOPPYMODE;
 				header_offset=0x60;
@@ -309,17 +309,18 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		bitmask=0x80;
 
 		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-		
+
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
-				
+
 			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
-				
+
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
+				hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
 
 				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
@@ -368,7 +369,7 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						}
 					}
 				}
-					
+
 				currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,128,2500,-2500);
 
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
@@ -382,8 +383,8 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		hxc_fclose(f);
-		
-		return HXCFE_NOERROR;	
+
+		return HXCFE_NOERROR;
 	}
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"BAD EDE file!");

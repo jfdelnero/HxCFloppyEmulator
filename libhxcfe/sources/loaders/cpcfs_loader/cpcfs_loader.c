@@ -65,7 +65,7 @@ extern int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder
 
 int CPCFSDK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
-	
+
 	int pathlen;
 	char * filepath;
     struct stat staterep;
@@ -75,7 +75,7 @@ int CPCFSDK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	{
 		pathlen=strlen(imgfile);
 		if(pathlen!=0)
-		{		
+		{
 			memset(&staterep,0,sizeof(struct stat));
 			hxc_stat(imgfile,&staterep);
 

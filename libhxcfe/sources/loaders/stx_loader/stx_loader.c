@@ -527,6 +527,9 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			for(i=0;i<numberoftrack;i++)
 			{
+
+				hxcfe_imgCallProgressCallback(imgldr_ctx,i,numberoftrack);
+
 				//lecture descripteur track
 				trackheaderpos=ftell(f);
 				fread( &trackheader, sizeof(trackheader), 1, f );

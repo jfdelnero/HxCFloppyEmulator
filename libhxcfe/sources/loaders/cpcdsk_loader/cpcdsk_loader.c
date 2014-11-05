@@ -194,6 +194,9 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 		for(i=0;i<(unsigned int)(fileheader.number_of_sides*fileheader.number_of_tracks);i++)
 		{
+
+			hxcfe_imgCallProgressCallback(imgldr_ctx,i,fileheader.number_of_sides*fileheader.number_of_tracks);
+
 			fseek (f , trackposition , SEEK_SET);
 
 			memset(&trackheader,0,sizeof(trackheader));

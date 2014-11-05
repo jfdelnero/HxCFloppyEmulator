@@ -263,7 +263,7 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		number_of_track = 40 * 2;
 	}
 
-	if( ( number_of_track & 1 )  && (side == 2) ) 
+	if( ( number_of_track & 1 )  && (side == 2) )
 		number_of_track++;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Number of track: %d",number_of_track);
@@ -293,6 +293,8 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	i=0;
 	do
 	{
+		hxcfe_imgCallProgressCallback(imgldr_ctx,i,number_of_track);
+
 		if(track_offset)
 		{
 			fseek(f,track_offset+basefileptr,SEEK_SET);
@@ -343,7 +345,7 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					sectorconfig[j].sectorsize=sectorheader.sector_length;
 					sectorconfig[j].gap3 = 255;
 					if(number_of_sector>16)
-						sectorconfig[j].gap3 = 22; // Silpheed (18 sectors) gap3 issue 
+						sectorconfig[j].gap3 = 22; // Silpheed (18 sectors) gap3 issue
 
 					sectorconfig[j].trackencoding=tracktype;
 					sectorconfig[j].input_data=malloc(sectorheader.sector_length);

@@ -38,10 +38,10 @@
 #include "libhxcadaptor.h"
 
 int MFM_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
-{	
+{
 
 	FILE * hxcmfmfile;
-	
+
 	MFMTRACKIMG mfmtrackdesc;
 	MFMIMG mfmheader;
 	unsigned char * mfmtrack;
@@ -74,7 +74,7 @@ int MFM_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		mfmheader.floppyiftype=(unsigned char)floppy->floppyiftype;
 		mfmheader.mfmtracklistoffset=sizeof(mfmheader);
 		fwrite(&mfmheader,sizeof(mfmheader),1,hxcmfmfile);
-		
+
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d Tracks, %d side(s)",mfmheader.number_of_track,mfmheader.number_of_side);
 
 		offsettrack=(long*) malloc(((mfmheader.number_of_track*mfmheader.number_of_side)+1)*sizeof(long));
@@ -83,7 +83,7 @@ int MFM_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		trackpos=sizeof(mfmheader)+(sizeof(mfmtrackdesc)*(mfmheader.number_of_track*mfmheader.number_of_side));
 		if(trackpos&0x1FF)
 		{
-			trackpos=(trackpos&(~0x1FF))+0x200;						
+			trackpos=(trackpos&(~0x1FF))+0x200;
 		}
 		do
 		{
@@ -101,16 +101,16 @@ int MFM_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 				mfmtrackdesc.track_number=i;
 				offsettrack[(i*mfmheader.number_of_side)+j]=(long)trackpos;
 				mfmtrackdesc.mfmtrackoffset=trackpos;
-				
+
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Write Track %d:%d [%x] %x bytes",i,j,mfmtrackdesc.mfmtrackoffset,mfmsize);
 				trackpos=trackpos+mfmsize;
 				if(trackpos&0x1FF)
 				{
-					trackpos=(trackpos&(~0x1FF))+0x200;					
+					trackpos=(trackpos&(~0x1FF))+0x200;
 				}
 
 				fwrite(&mfmtrackdesc,sizeof(mfmtrackdesc),1,hxcmfmfile);
-				
+
 			}
 
 			i++;
@@ -120,6 +120,8 @@ int MFM_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		i=0;
 		do
 		{
+			hxcfe_imgCallProgressCallback(imgldr_ctx,i,(mfmheader.number_of_track) );
+
 			for(j=0;j<(mfmheader.number_of_side);j++)
 			{
 				memset(&mfmtrackdesc,0,sizeof(mfmtrackdesc));
@@ -130,7 +132,7 @@ int MFM_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 					mfmsize=mfmsize/8;
 
 				mfmtrack=(unsigned char*) malloc(mfmsize);
-				
+
 				if(ftell(hxcmfmfile)<offsettrack[(i*mfmheader.number_of_side)+j])
 				{
 					memset(mfmtrack,0,offsettrack[(i*mfmheader.number_of_side)+j]-ftell(hxcmfmfile));
@@ -138,9 +140,9 @@ int MFM_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 				}
 
 				memcpy(mfmtrack,floppy->tracks[i]->sides[j]->databuffer,mfmsize);
-					
+
 				fwrite(mfmtrack,mfmsize,1,hxcmfmfile);
-						
+
 				free(mfmtrack);
 
 			}
@@ -161,5 +163,5 @@ int MFM_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		return -1;
 	}
 
-	
+
 }

@@ -208,6 +208,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	FILE * f;
 	int img;
 	int ret;
+	int progresscnt;
 	int overlap;
 	int intrackflakeybit;
 	unsigned long bitrate;
@@ -219,6 +220,8 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	UDWORD flag;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IPF_libLoad_DiskFile %s",imgfile);
+
+	progresscnt = 0;
 
 	f=hxc_fopen(imgfile,"rb");
 	if(f==NULL)
@@ -304,7 +307,6 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Date : %d/%d/%d",ci2.crdt.day,ci2.crdt.month,ci2.crdt.year);
 			///////////////////
 
-
 			if(ci2.type == ciitFDD)
 			{
 				floppydisk->floppySectorPerTrack=0;
@@ -320,6 +322,9 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				{
 					for(j=ci2.minhead;j<=ci2.maxhead;j++)
 					{
+						hxcfe_imgCallProgressCallback(imgldr_ctx,progresscnt,((ci2.maxcylinder-ci2.mincylinder)+1) * ((ci2.maxhead - ci2.minhead)+1));
+
+						progresscnt++;
 						ti.type = LIB_TYPE;
 						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"-----------------------------%d %d",i,j);
 						ret=pCAPSLockTrack((struct CapsTrackInfo *)&ti, img, i, j, flag);
