@@ -25,8 +25,6 @@
 //
 */
 
-#define FASTWRITE 1
-
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,9 +36,6 @@
 #include "hfe_format.h"
 
 #include "libhxcadaptor.h"
-
-unsigned char * ramfile;
-int ramfile_size;
 
 unsigned char bit_inverter[]=
 {
@@ -146,38 +141,37 @@ void addpad(unsigned char * track,int mfmsize,int tracksize)
 	}
 }
 
-#ifdef FASTWRITE
-	FILE * rfopen(char* fn,char * mode)
-	{
-		ramfile=0;
-		ramfile_size=0;
-		return (FILE *)1;
-	};
+typedef struct RAMFILE_
+{
+	unsigned char * ramfile;
+	int ramfile_size;
+}RAMFILE;
 
-	int rfwrite(void * buffer,int size,int mul,FILE * file)
-	{
-		ramfile=realloc(ramfile,ramfile_size+size);
-		memcpy(&ramfile[ramfile_size],buffer,size);
-		ramfile_size=ramfile_size+size;
-		return size;
-	}
+FILE * rfopen(char* fn,char * mode,RAMFILE * rf)
+{
+	rf->ramfile=0;
+	rf->ramfile_size=0;
+	return (FILE *)1;
+};
 
-	int rfclose(FILE *f)
-	{
+int rfwrite(void * buffer,int size,int mul,FILE * file,RAMFILE * rf)
+{
+	rf->ramfile = realloc(rf->ramfile,rf->ramfile_size+size);
+	memcpy(&rf->ramfile[rf->ramfile_size],buffer,size);
+	rf->ramfile_size = rf->ramfile_size + size;
+	return size;
+}
 
-		if(ramfile)
-			free(ramfile);
-		return 0;
-	};
-#else
-	#define rfopen  fopen
-	#define rfwrite fwrite
-	#define rfclose fclose
-#endif
+int rfclose(FILE *f,RAMFILE * rf)
+{
+	if(rf->ramfile)
+		free(rf->ramfile);
+	return 0;
+};
 
 int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-
+	RAMFILE rf;
 	pictrack * track;
 
 	FILE * hxcpicfile;
@@ -200,10 +194,8 @@ int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create zero track HFE file");
 		return -1;
 	}
-	ramfile=0;
-	ramfile_size=0;
 
-	hxcpicfile=rfopen(filename,"wb");
+	hxcpicfile=rfopen(filename,"wb",&rf);
 
 	if(hxcpicfile)
 	{
@@ -268,7 +260,7 @@ int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		else
 			FILEHEADER->single_step=0xFF;
 
-		rfwrite(FILEHEADER,512,1,hxcpicfile);
+		rfwrite(FILEHEADER,512,1,hxcpicfile,&rf);
 
 		tracklistlen=((((((FILEHEADER->number_of_track)+1)*sizeof(pictrack))/512)+1));
 		offsettrack=(unsigned char*) malloc(tracklistlen*512);
@@ -320,7 +312,7 @@ int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			i++;
 		};
 
-		rfwrite(offsettrack,512*tracklistlen,1,hxcpicfile);
+		rfwrite(offsettrack,512*tracklistlen,1,hxcpicfile,&rf);
 
 		i=0;
 		while(i<(FILEHEADER->number_of_track))
@@ -429,7 +421,7 @@ int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 				}
 
 
-				rfwrite(mfmtrackfinal,tracksize*2,1,hxcpicfile);
+				rfwrite(mfmtrackfinal,tracksize*2,1,hxcpicfile,&rf);
 
 				free(mfmtracks0);
 				free(mfmtracks1);
@@ -442,23 +434,20 @@ int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		free(offsettrack);
 
 
-#ifdef FASTWRITE
 		hxcpicfile=hxc_fopen(filename,"wb");
 		if(hxcpicfile)
 		{
-			fwrite(ramfile,ramfile_size,1,hxcpicfile);
+			fwrite(rf.ramfile,rf.ramfile_size,1,hxcpicfile);
 			hxc_fclose(hxcpicfile);
 		}
 		else
 		{
-			rfclose(hxcpicfile);
+			rfclose(hxcpicfile,&rf);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
 			return -1;
 		}
 
-#endif
-
-		rfclose(hxcpicfile);
+		rfclose(hxcpicfile,&rf);
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
 

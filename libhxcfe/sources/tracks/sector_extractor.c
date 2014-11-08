@@ -214,11 +214,11 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 
 						if(!CRC16_High && !CRC16_Low)
 						{ // crc ok !!!
-							floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
+							floppycontext->hxc_printf(MSG_DEBUG,"CRC data ok.");
 						}
 						else
 						{
-							floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
+							floppycontext->hxc_printf(MSG_DEBUG,"CRC data error!");
 							sector->use_alternate_data_crc=0xFF;
 						}
 
@@ -362,12 +362,12 @@ int get_next_MEMBRAIN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 
 					if(!CRC16_High && !CRC16_Low)
 					{ // crc ok !!!
- 						floppycontext->hxc_printf(MSG_DEBUG,"Valid MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
+ 						floppycontext->hxc_printf(MSG_DEBUG,"Valid MEMBRAIN MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
 						sector->use_alternate_header_crc = 0;
 					}
 					else
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"Bad MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
+						floppycontext->hxc_printf(MSG_DEBUG,"Bad MEMBRAIN MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
 						sector_extractor_sm=LOOKFOR_GAP1;
 						bit_offset++;
 						break;
@@ -402,15 +402,15 @@ int get_next_MEMBRAIN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 							CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
 						}
 
-						sector->data_crc= ( tmp_sector[k-2]<<8 ) | tmp_sector[k-1] ;
+						sector->data_crc = ( tmp_sector[k-2]<<8 ) | tmp_sector[k-1] ;
 
 						if(!CRC16_High && !CRC16_Low)
 						{ // crc ok !!!
-							floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
+							floppycontext->hxc_printf(MSG_DEBUG,"CRC data ok.");
 						}
 						else
 						{
-							floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
+							floppycontext->hxc_printf(MSG_DEBUG,"CRC data error!");
 							sector->use_alternate_data_crc=0xFF;
 						}
 
@@ -781,15 +781,15 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 								CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
 							}
 
-							sector->data_crc= ( tmp_sector[k-2]<<8 ) | tmp_sector[k-1] ;
+							sector->data_crc = ( tmp_sector[k-2]<<8 ) | tmp_sector[k-1] ;
 
 							if(!CRC16_High && !CRC16_Low)
 							{ // crc ok !!!
-								floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
+								floppycontext->hxc_printf(MSG_DEBUG,"CRC data ok.");
 							}
 							else
 							{
-								floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
+								floppycontext->hxc_printf(MSG_DEBUG,"CRC data error!");
 								sector->use_alternate_data_crc=0xFF;
 							}
 
@@ -958,15 +958,15 @@ int get_next_TYCOMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCF
 								CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
 							}
 
-							sector->data_crc= ( tmp_sector[k-2]<<8 ) | tmp_sector[k-1] ;
+							sector->data_crc = ( tmp_sector[k-2]<<8 ) | tmp_sector[k-1] ;
 
 							if(!CRC16_High && !CRC16_Low)
 							{ // crc ok !!!
-								floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
+								floppycontext->hxc_printf(MSG_DEBUG,"CRC data ok.");
 							}
 							else
 							{
-								floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
+								floppycontext->hxc_printf(MSG_DEBUG,"CRC data error!");
 								sector->use_alternate_data_crc=0xFF;
 							}
 
@@ -1139,12 +1139,12 @@ int get_next_EMU_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 
 								if(!CRC16_High && !CRC16_Low)
 								{ // crc ok !!!
-									floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
+									floppycontext->hxc_printf(MSG_DEBUG,"CRC data ok.");
 									sector->use_alternate_data_crc = 0x00;
 								}
 								else
 								{
-									floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
+									floppycontext->hxc_printf(MSG_DEBUG,"CRC data error!");
 									sector->use_alternate_data_crc = 0xFF;
 								}
 
@@ -1728,11 +1728,11 @@ int analysis_and_extract_sector_EMUIIFM(HXCFE* floppycontext,HXCFE_SIDE * track,
 
 							if(!CRC16_High && !CRC16_Low)
 							{ // crc ok !!!
-								floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
+								floppycontext->hxc_printf(MSG_DEBUG,"CRC data ok.");
 							}
 							else
 							{
-								floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
+								floppycontext->hxc_printf(MSG_DEBUG,"CRC data error!");
 							}
 
 							for(k=0;k<sector_size;k++)
