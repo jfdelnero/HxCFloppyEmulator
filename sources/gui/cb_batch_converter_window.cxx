@@ -82,7 +82,7 @@
 #endif
 
 batchconverterparams bcparams;
-
+int abort_trigger;
 extern s_gui_context * guicontext;
 
 typedef struct s_param_bc_params_
@@ -118,6 +118,22 @@ ff_type ff_type_list[]=
 	{ -1,"",0,0}			
 };
 
+static int progress_callback(unsigned int current,unsigned int total, void * user)
+{
+	s_gui_context * guicontext;
+	Main_Window * mw;
+
+	guicontext = (s_gui_context *)user;
+	mw =(Main_Window*) guicontext->main_window;
+
+	if(total)
+	{
+		mw->batchconv_window->progress_indicator->value(((float)current/(float)total)*100);
+	}
+
+	return 0;
+}
+
 int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,int output_file_format,batchconverterparams * params)
 {
 	int i,j,filenb,ret;
@@ -128,14 +144,21 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 	Main_Window* mw;
 	int disklayout;
 	HXCFE_XMLLDR* rfb;
-	HXCFE_IMGLDR * imgldr_ctx;
+	HXCFE_IMGLDR* imgldr_ctx;
+
+	mw =(Main_Window*) guicontext->main_window;
 
 	imgldr_ctx = hxcfe_imgInitLoader( floppycontext );
 	if(imgldr_ctx)
 	{
+		hxcfe_imgSetProgressCallback(imgldr_ctx,progress_callback,(void*)guicontext);
+
 		filenb=0;
-		while(filelist[filenb])
+		while(filelist[filenb] && !abort_trigger)
 		{		
+			mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(50,255,50));
+			mw->batchconv_window->progress_indicator->label("Reading");
+
 			if(!params->rawfilemode)
 				loaderid = hxcfe_imgAutoSetectLoader(imgldr_ctx,filelist[filenb],0);
 			else
@@ -175,6 +198,9 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 
 				if(ret!=HXCFE_NOERROR || !thefloppydisk)
 				{
+					mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(255,10,10));
+					mw->batchconv_window->progress_indicator->label("Error");
+
 					switch(ret)
 					{
 						case HXCFE_UNSUPPORTEDFILE:
@@ -193,6 +219,8 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 				}
 				else
 				{
+					mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(220,255,10));
+					mw->batchconv_window->progress_indicator->label("Writing");
 					j=strlen(filelist[filenb]);
 					while(filelist[filenb][j]!=SEPARTOR && j)
 					{
@@ -277,9 +305,11 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 				}
 			}
 		
-		filenb++;
+			filenb++;
 	
 		}
+
+		mw->batchconv_window->progress_indicator->label("");
 
 		hxcfe_imgDeInitLoader( imgldr_ctx );
 	}
@@ -305,16 +335,20 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 	cfgrawfile rfc;
 	HXCFE_IMGLDR * imgldr_ctx;
 
+	mw =(Main_Window*) guicontext->main_window;
+
 	imgldr_ctx = hxcfe_imgInitLoader( floppycontext );
 	if(imgldr_ctx)
 	{
+		hxcfe_imgSetProgressCallback(imgldr_ctx,progress_callback,(void*)guicontext);
+
 		hfindfile=hxc_find_first_file(folder,file, &FindFileData); 
 		if(hfindfile!=-1)
 		{
 			bbool=1;
-			while(hfindfile!=-1 && bbool && !params->abort)
+			while(hfindfile!=-1 && bbool && !abort_trigger)
 			{
-				if(!params->abort)
+				if(!abort_trigger)
 				{
 
 					if(FindFileData.isdirectory)
@@ -342,6 +376,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 								free(fullpath);
 								free(tempstr);
 								hxc_find_close(hfindfile);
+								mw->batchconv_window->progress_indicator->label("");
 								return 1;
 							}
 							free(destinationfolder);
@@ -356,6 +391,9 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 					}
 					else
 					{
+						mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(50,255,50));
+						mw->batchconv_window->progress_indicator->label("Reading");
+
 						CUI_affiche(MSG_INFO_1,(char*)"converting file %s, %dB",FindFileData.filename,FindFileData.size);
 						if(FindFileData.size)
 						{
@@ -408,6 +446,9 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 
 							if(ret!=HXCFE_NOERROR || !thefloppydisk)
 							{
+								mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(255,10,10));
+								mw->batchconv_window->progress_indicator->label("Error");
+
 								switch(ret)
 								{
 									case HXCFE_UNSUPPORTEDFILE:
@@ -426,6 +467,9 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 							}
 							else
 							{
+								mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(220,255,10));
+								mw->batchconv_window->progress_indicator->label("Writing");
+
 								destinationfile=(char*)malloc(strlen(FindFileData.filename)+strlen(destfolder)+2+99);
 								sprintf(destinationfile,"%s%c%s",destfolder,SEPARTOR,FindFileData.filename);
 								i=strlen(destinationfile);
@@ -495,6 +539,8 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 		hxc_find_close(hfindfile);
 
 		hxcfe_imgDeInitLoader( imgldr_ctx );
+
+		mw->batchconv_window->progress_indicator->label("");
 	}
 	return 0;
 }
@@ -646,6 +692,7 @@ void batch_converter_window_bt_convert(Fl_Button* bt, void*)
 	dw=((Fl_Window*)(bt->parent()));
 	bcw=(batch_converter_window *)dw->user_data();
 	bcw->bt_convert->deactivate();
+	abort_trigger = 0;
 	hxc_createthread(guicontext->hxcfe,bcw,&convertthread,0);
 }
 
@@ -662,6 +709,11 @@ void batch_converter_window_bt_select_src(Fl_Button* bt, void*)
 	{
 		bcw->strin_src_dir->value(dirstr);
 	}
+}
+
+void batch_converter_window_progress_indicator(Fl_Progress * flp,void *)
+{
+
 }
 
 void batch_converter_window_bt_select_dst(Fl_Button* bt, void*)
@@ -687,7 +739,7 @@ void batch_converter_window_bt_cancel(Fl_Button* bt, void*)
 	dw=((Fl_Window*)(bt->parent()));
 	bcw=(batch_converter_window *)dw->user_data();
 	
-	bcparams.abort=0xFF;
+	abort_trigger = 0xFF;
 
 	bcw->window->hide();
 }
@@ -742,7 +794,7 @@ void dnd_bc_cb(Fl_Widget *o, void *v)
 				if(bcparams->files)
 				{
 					strcpy(bcparams->files,dnd->event_text());
-
+					abort_trigger = 0;
 					hxc_createthread(guicontext->hxcfe,bcparams,&draganddropconvertthread,0);
 				}
 				else

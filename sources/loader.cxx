@@ -104,7 +104,7 @@ int load_floppy(HXCFE_FLOPPY * floppydisk,char * defaultfilename)
 	return ret;
 }
 
-static int progress_callback(unsigned int current,unsigned int total, void * user)
+int progress_callback(unsigned int current,unsigned int total, void * user)
 {
 	s_gui_context * guicontext;
 

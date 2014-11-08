@@ -51,10 +51,14 @@ batch_converter_window::batch_converter_window() {
       hlptxt->align(Fl_Align(37));
       hlptxt->deactivate();
     } // Fl_Output* hlptxt
-    { chkbox_rawinputsfiles = new Fl_Check_Button(18, 102, 64, 15, "Treat input files as RAW files");
+    { chkbox_rawinputsfiles = new Fl_Check_Button(18, 102, 200, 15, "Treat input files as RAW files");
       chkbox_rawinputsfiles->down_box(FL_DOWN_BOX);
       chkbox_rawinputsfiles->callback((Fl_Callback*)batch_converter_window_inputasrawfile, (void*)(this));
     } // Fl_Check_Button* chkbox_rawinputsfiles
+    { progress_indicator = new Fl_Progress(20, 213, 165, 20);
+      progress_indicator->selection_color((Fl_Color)149);
+      progress_indicator->callback((Fl_Callback*)batch_converter_window_progress_indicator, (void*)(this));
+    } // Fl_Progress* progress_indicator
 
     Fl_DND_Box *o = new Fl_DND_Box(0, 0,413, 286, 0);
     o->callback(dnd_bc_cb);

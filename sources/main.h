@@ -48,6 +48,9 @@ typedef struct s_gui_context_
 
 	float loadingprogess;
 
+	int exporting;
+	int loading;
+
 	int exit;
 
 }s_gui_context;

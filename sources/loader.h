@@ -34,3 +34,4 @@ int load_floppy_image(char *filename);
 int load_floppy(HXCFE_FLOPPY * floppydisk,char * defaultfilename);
 HXCFE_FLOPPY * loadrawimage(HXCFE* floppycontext,cfgrawfile * rfc,char * file,int * ret);
 int loadrawfile(HXCFE* floppycontext,cfgrawfile * rfc,char * file);
+int progress_callback(unsigned int current,unsigned int total, void * user);

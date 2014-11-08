@@ -45,14 +45,19 @@ class batch_converter_window {open
         callback batch_converter_window_bt_cancel
         xywh {300 210 100 25}
       }
-      Fl_Output hlptxt {
+      Fl_Output hlptxt {selected
         xywh {5 208 400 72} box NO_BOX align 37 deactivate
       }
       Fl_Check_Button chkbox_rawinputsfiles {
         label {Treat input files as RAW files}
         user_data this
-        callback batch_converter_window_inputasrawfile selected
-        xywh {18 102 64 15} down_box DOWN_BOX
+        callback batch_converter_window_inputasrawfile
+        xywh {18 102 200 15} down_box DOWN_BOX
+      }
+      Fl_Progress progress_indicator {
+        user_data this
+        callback batch_converter_window_progress_indicator
+        xywh {20 213 165 20} selection_color 149
       }
     }
   }
