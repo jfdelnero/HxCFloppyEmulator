@@ -118,7 +118,7 @@ ff_type ff_type_list[]=
 	{ -1,"",0,0}			
 };
 
-static int progress_callback(unsigned int current,unsigned int total, void * user)
+int progress_callback_bc(unsigned int current,unsigned int total, void * user)
 {
 	s_gui_context * guicontext;
 	Main_Window * mw;
@@ -151,7 +151,7 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 	imgldr_ctx = hxcfe_imgInitLoader( floppycontext );
 	if(imgldr_ctx)
 	{
-		hxcfe_imgSetProgressCallback(imgldr_ctx,progress_callback,(void*)guicontext);
+		hxcfe_imgSetProgressCallback(imgldr_ctx,progress_callback_bc,(void*)guicontext);
 
 		filenb=0;
 		while(filelist[filenb] && !abort_trigger)
@@ -340,7 +340,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 	imgldr_ctx = hxcfe_imgInitLoader( floppycontext );
 	if(imgldr_ctx)
 	{
-		hxcfe_imgSetProgressCallback(imgldr_ctx,progress_callback,(void*)guicontext);
+		hxcfe_imgSetProgressCallback(imgldr_ctx,progress_callback_bc,(void*)guicontext);
 
 		hfindfile=hxc_find_first_file(folder,file, &FindFileData); 
 		if(hfindfile!=-1)
