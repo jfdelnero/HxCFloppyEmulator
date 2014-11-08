@@ -107,8 +107,6 @@ extern s_gui_context * guicontext;
 
 char * license_txt;
 
-int loadthreadstat;
-
 const char * plugid_lst[]=
 {
 	PLUGIN_HXC_HFE,
@@ -233,9 +231,88 @@ void bt_clicked(Fl_Widget * w, void * fc_ptr)
 		case 8:
 			mw->infos_window->window->show();
 		break;
+	}
+}
+
+typedef struct _exportthread
+{
+	char * urls;
+	HXCFE_FLOPPY * floppy;
+	char * type;
+}exportthread;
+
+int export_thread(void* floppycontext,void* context)
+{
+	exportthread * exportth;
+	HXCFE_IMGLDR * imgldr_ctx;
+	HXCFE_FLOPPY * fp;
+	int loaderid;
+	
+	exportth = (exportthread*)context;
+
+	imgldr_ctx = hxcfe_imgInitLoader(guicontext->hxcfe);
+	if(imgldr_ctx)
+	{
+		guicontext->exporting++;
+
+		guicontext->loadingprogess = 0;
+		hxcfe_imgSetProgressCallback(imgldr_ctx,progress_callback,(void*)guicontext);
+
+		loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,(char*)exportth->type);
+		
+		if(loaderid>=0)
+		{
+			fp = hxcfe_floppyDuplicate(guicontext->hxcfe,guicontext->loadedfloppy);
+			if(fp)
+			{
+				if(!guicontext->autoselectmode)
+				{
+					hxcfe_floppySetInterfaceMode(guicontext->hxcfe,fp,guicontext->interfacemode);
+				}
+
+				hxcfe_floppySetDoubleStep(guicontext->hxcfe,fp,guicontext->doublestep);
+				hxcfe_imgExport(imgldr_ctx,fp,(char*)exportth->urls,loaderid);
+				hxcfe_imgUnload(imgldr_ctx,fp);
+			}
+		}
+
+		hxcfe_imgDeInitLoader(imgldr_ctx);
+
+		guicontext->exporting--;
+	}
+
+	free(exportth->type);
+	free(exportth->urls);
+	free(exportth);
+
+	return 0;
+}
+
+int launchexport(char * urls,HXCFE_FLOPPY * fp, char * type)
+{
+	exportthread * exportthread_params;
+
+	exportthread_params = (exportthread *)malloc(sizeof(exportthread));
+	if(exportthread_params)
+	{
+		if(strlen(urls))
+		{
+			exportthread_params->urls =(char*)malloc(strlen(urls)+1);
+			memset(exportthread_params->urls,0,strlen(urls)+1);
+			memcpy(exportthread_params->urls,urls,strlen(urls));
+
+			exportthread_params->type =(char*)malloc(strlen(type)+1);
+			memset(exportthread_params->type,0,strlen(type)+1);
+			memcpy(exportthread_params->type,type,strlen(type));
+			
+			exportthread_params->floppy = fp;
+			
+			hxc_createthread(guicontext->hxcfe,(void*)exportthread_params,&export_thread,0);
+		}
 		
 	}
 
+	return 0;
 }
 
 typedef struct _loadthread
@@ -253,7 +330,8 @@ int loading_thread(void* floppycontext,void* context)
 	guicontext->updatefloppyinfos++;
 	guicontext->updatefloppyfs++;
 
-	loadthreadstat=0;
+	guicontext->loading = 0;
+
 	free(loadth->urls);
 	free(loadth);
 
@@ -264,12 +342,13 @@ void load_file(const char *urls)
 {
 	loadthread * loadthread_params;
 
-	if(loadthreadstat==0)
+	if(!guicontext->loading)
 	{
-		loadthreadstat = 1;
 		loadthread_params = (loadthread *)malloc(sizeof(loadthread));
 		if(loadthread_params)
 		{
+			guicontext->loading = 1;
+
 			if(strlen(urls))
 			{
 				loadthread_params->urls =(char*)malloc(strlen(urls)+1);
@@ -283,7 +362,7 @@ void load_file(const char *urls)
 		}
 		else
 		{
-			loadthreadstat = 0;
+			guicontext->loading = 0;
 		}
 	}
 }
@@ -323,10 +402,8 @@ void load_file_image(Fl_Widget * w, void * fc_ptr)
 void save_file_image(Fl_Widget * w, void * fc_ptr) 
 {
 	int i;
-	int loaderid;
 	Fl_Native_File_Chooser fnfc;
 	unsigned char deffilename[512];
-	HXCFE_IMGLDR * imgldr_ctx;
 
 	if(!guicontext->loadedfloppy)
 	{
@@ -383,26 +460,11 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 				break; // CANCEL
 			default:
 			{
+
 				i=fnfc.filter_value();
 				
-				imgldr_ctx = hxcfe_imgInitLoader(guicontext->hxcfe);
-				if(imgldr_ctx)
-				{
-					loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,(char*)plugid_lst[i]);
-				
-					if(loaderid>=0)
-					{
-						if(!guicontext->autoselectmode)
-						{
-							hxcfe_floppySetInterfaceMode(guicontext->hxcfe,guicontext->loadedfloppy,guicontext->interfacemode);
-						}
-						
-						hxcfe_floppySetDoubleStep(guicontext->hxcfe,guicontext->loadedfloppy,guicontext->doublestep);
-						hxcfe_imgExport(imgldr_ctx,guicontext->loadedfloppy,(char*)fnfc.filename(),loaderid);
-					}
+				launchexport((char*)fnfc.filename(),guicontext->loadedfloppy,(char*)plugid_lst[i]);
 
-					hxcfe_imgDeInitLoader(imgldr_ctx);
-				}
 				break; // FILE CHOSEN
 			}
 		}
@@ -551,24 +613,38 @@ static void tick_mw(void *v) {
 	}
 
 #ifndef STANDALONEFSBROWSER
-	if(guicontext->loadedfloppy)
+	if(!guicontext->exporting)
 	{
-		sprintf(tempstr,"Track %d/%d",libusbhxcfe_getCurTrack(guicontext->hxcfe,guicontext->usbhxcfe),hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy));
 
-		window->track_pos_str->value((const char*)tempstr);
-		window->track_pos->minimum(0);
-		window->track_pos->maximum( (float)hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy) );
-		window->track_pos->value((float)libusbhxcfe_getCurTrack(guicontext->hxcfe,guicontext->usbhxcfe));
+		if(guicontext->loading)
+		{
+			sprintf(tempstr,"Loading : %s",guicontext->bufferfilename);
+			window->file_name_txt->value((const char*)tempstr);
+			window->track_pos->minimum(0);
+			window->track_pos->maximum( (float)100);
+			window->track_pos->value(   (float)guicontext->loadingprogess);
+		}
+		else
+		{
+			if(guicontext->loadedfloppy)
+			{
+				sprintf(tempstr,"Track %d/%d",libusbhxcfe_getCurTrack(guicontext->hxcfe,guicontext->usbhxcfe),hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy));
+
+				window->track_pos_str->value((const char*)tempstr);
+				window->track_pos->minimum(0);
+				window->track_pos->maximum( (float)hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy) );
+				window->track_pos->value((float)libusbhxcfe_getCurTrack(guicontext->hxcfe,guicontext->usbhxcfe));
+			}
+		}
 	}
 	else
 	{
-		sprintf(tempstr,"Loading : %s",guicontext->bufferfilename);
+		sprintf(tempstr,"Exporting : %s",guicontext->bufferfilename);
 		window->file_name_txt->value((const char*)tempstr);
 		//window->track_pos->color(0x000000FF);
 		window->track_pos->minimum(0);
 		window->track_pos->maximum( (float)100);
 		window->track_pos->value(   (float)guicontext->loadingprogess);
-		//window->redraw();
 	}
 #endif
 
@@ -638,12 +714,15 @@ Main_Window::Main_Window()
 	HXCFE_XMLLDR* rfb;
 	char * temp;
 	infothread * infoth;
+	USBStats stats;
 
 	txtindex=0;
 	i=0;
 	evt_txt=0;
-	loadthreadstat = 0;
-	USBStats stats;
+
+
+	guicontext->loading = 0;
+	guicontext->exporting = 0;
 
 	guicontext->loadedfloppy=0;
 	guicontext->autoselectmode=0xFF;
@@ -792,6 +871,9 @@ Main_Window::Main_Window()
 	batchconv_window->hlptxt->textsize(10);
 	batchconv_window->hlptxt->readonly(FL_INPUT_READONLY);
 	batchconv_window->hlptxt->static_value("To convert a large quantity of floppy images, set the source directory and the target directory (the SDCard). Drag&Drop mode : Just set the target directory and drag&drop the floppy images on this window.");
+	batchconv_window->progress_indicator->minimum(0);
+	batchconv_window->progress_indicator->maximum(100);
+
 
 	//////////////////////////////////////////////
 	// File system window

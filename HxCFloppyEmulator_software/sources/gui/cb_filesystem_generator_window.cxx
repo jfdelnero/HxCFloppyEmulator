@@ -1456,13 +1456,16 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 
 				guicontext->updatefloppyinfos++;
 
-
 				k=0;
 				while(filelist[k])
 				{
 					free(filelist[k]);
 					k++;
 				}
+
+#ifndef STANDALONEFSBROWSER
+				libusbhxcfe_loadFloppy(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy);
+#endif
 			}
 
 			free(filelist);
