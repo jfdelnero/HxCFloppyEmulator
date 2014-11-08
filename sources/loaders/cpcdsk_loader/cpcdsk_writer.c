@@ -75,7 +75,7 @@ unsigned char  size_to_code(unsigned long size)
 
 int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-	int i,j,k,nbsector;
+	int i,j,k,l,nbsector;
 	FILE * cpcdskfile;
 	char * log_str;
 	char   tmp_str[256];
@@ -230,7 +230,17 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 							fwrite(&cpcdsk_s,sizeof(cpcdsk_sector),1,cpcdskfile);
 
 							fseek(cpcdskfile,0,SEEK_END);
-							fwrite(sca[k]->input_data,sca[k]->sectorsize,1,cpcdskfile);
+							if(sca[k]->input_data)
+							{
+								fwrite(sca[k]->input_data,sca[k]->sectorsize,1,cpcdskfile);
+							}
+							else
+							{
+								for(l=0;l<(int)sca[k]->sectorsize;l++)
+								{
+									fputc(sca[k]->fill_byte,cpcdskfile);
+								}
+							}
 
 							sprintf(tmp_str,"%d ",sca[k]->sector);
 							log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);

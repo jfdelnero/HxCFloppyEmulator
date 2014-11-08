@@ -25,8 +25,6 @@
 //
 */
 
-#define FASTWRITE 1
-
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,9 +36,6 @@
 #include "hfe_format.h"
 
 #include "libhxcadaptor.h"
-
-unsigned char * ramfile;
-int ramfile_size;
 
 extern unsigned char bit_inverter[];
 extern unsigned short bit_expander[];
@@ -83,13 +78,20 @@ unsigned short ext_a2_bit_expander[]=
 
 
 extern void addpad(unsigned char * track,int mfmsize,int tracksize);
-extern FILE * rfopen(char* fn,char * mode);
-extern int rfwrite(void * buffer,int size,int mul,FILE * file);
-extern int rfclose(FILE *f);
+
+typedef struct RAMFILE_
+{
+	unsigned char * ramfile;
+	int ramfile_size;
+}RAMFILE;
+
+FILE * rfopen(char* fn,char * mode,RAMFILE * rf);
+int rfwrite(void * buffer,int size,int mul,FILE * file,RAMFILE * rf);
+int rfclose(FILE *f,RAMFILE * rf);
 
 int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-
+	RAMFILE rf;
 	pictrack * track;
 
 	FILE * hxcpicfile;
@@ -113,10 +115,7 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 		return -1;
 	}
 
-	ramfile=0;
-	ramfile_size=0;
-
-	hxcpicfile=rfopen(filename,"wb");
+	hxcpicfile=rfopen(filename,"wb",&rf);
 
 	if(hxcpicfile)
 	{
@@ -173,7 +172,7 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 			FILEHEADER->single_step=0x00;
 		}
 
-		rfwrite(FILEHEADER,512,1,hxcpicfile);
+		rfwrite(FILEHEADER,512,1,hxcpicfile,&rf);
 
 		tracklistlen=((((((FILEHEADER->number_of_track)+1)*sizeof(pictrack))/512)+1));
 		offsettrack=(unsigned char*) malloc(tracklistlen*512);
@@ -226,7 +225,7 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 			i++;
 		};
 
-		rfwrite(offsettrack,512*tracklistlen,1,hxcpicfile);
+		rfwrite(offsettrack,512*tracklistlen,1,hxcpicfile,&rf);
 
 		i=0;
 		while(i<(FILEHEADER->number_of_track))
@@ -312,7 +311,7 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 					}
 				}
 
-				rfwrite(mfmtrackfinal,tracksize*2,1,hxcpicfile);
+				rfwrite(mfmtrackfinal,tracksize*2,1,hxcpicfile,&rf);
 
 				free(mfmtracks0);
 				free(mfmtracks1);
@@ -323,24 +322,20 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 
 		free(offsettrack);
 
-
-#ifdef FASTWRITE
 		hxcpicfile=hxc_fopen(filename,"wb");
 		if(hxcpicfile)
 		{
-			fwrite(ramfile,ramfile_size,1,hxcpicfile);
+			fwrite(rf.ramfile,rf.ramfile_size,1,hxcpicfile);
 			hxc_fclose(hxcpicfile);
 		}
 		else
 		{
-			rfclose(hxcpicfile);
+			rfclose(hxcpicfile,&rf);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
 			return -1;
 		}
 
-#endif
-
-		rfclose(hxcpicfile);
+		rfclose(hxcpicfile,&rf);
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
 

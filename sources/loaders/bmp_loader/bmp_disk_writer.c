@@ -42,6 +42,11 @@ extern void copyPict(unsigned long * dest,int d_xsize,int d_ysize,int d_xpos,int
 
 extern unsigned char getPixelCode(unsigned long pix,unsigned long * pal,int * nbcol);
 
+static int progress_callback(unsigned int current,unsigned int total,void * td,void * user)
+{
+	return hxcfe_imgCallProgressCallback((HXCFE_IMGLDR*)user,current,total);
+}
+
 int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * filename)
 {
 	int ret,i,j,k;
@@ -60,6 +65,8 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydis
 	td = hxcfe_td_init(imgldr_ctx->hxcfe,1024,480);
 	if(td)
 	{
+		hxcfe_td_setProgressCallback(td,&progress_callback,(void*)imgldr_ctx);
+
 		hxcfe_td_activate_analyzer(td,ISOIBM_MFM_ENCODING,1);
 		hxcfe_td_activate_analyzer(td,ISOIBM_FM_ENCODING,1);
 		hxcfe_td_activate_analyzer(td,AMIGA_MFM_ENCODING,1);
@@ -78,7 +85,7 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydis
 		{
 			memset(ptr,0,(td->xsize*td->ysize*4));
 
-			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Generate track BMP...\n");
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Generate track BMP...");
 
 			hxcfe_td_draw_disk(td,floppydisk);
 
@@ -92,7 +99,7 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydis
 			ptrchar = malloc((td->xsize*td->ysize));
 			if(ptrchar)
 			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Converting image...\n");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Converting image...");
 				nbcol = 0;
 				k=0;
 				for(i=0;i< ( td->ysize );i++)
@@ -133,7 +140,7 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydis
 					}
 				}
 
-				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Writing %s...\n",filename);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Writing %s...",filename);
 
 				if(nbcol>=256)
 				{

@@ -101,7 +101,7 @@ HXCFE_TD * hxcfe_td_init(HXCFE* floppycontext,unsigned long xsize,unsigned long 
 	return td;
 }
 
-int    hxcfe_td_setProgressCallback(HXCFE_TD *td,HXCFE_TDPROGRESSOUT_FUNC progress_func,void * userdata)
+int hxcfe_td_setProgressCallback(HXCFE_TD *td,HXCFE_TDPROGRESSOUT_FUNC progress_func,void * userdata)
 {
 	if(td)
 	{
@@ -1383,7 +1383,7 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	{
 		for(track=0;track<floppydisk->floppyNumberOfTrack;track++)
 		{
-			td->hxc_setprogress(track + (side*track),floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide,td,td->progress_userdata);
+			td->hxc_setprogress(track + (side*floppydisk->floppyNumberOfTrack),floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide,td,td->progress_userdata);
 
 			currentside=floppydisk->tracks[track]->sides[side];
 

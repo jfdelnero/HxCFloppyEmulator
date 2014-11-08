@@ -56,7 +56,7 @@ unsigned char jv3flags(unsigned char num,unsigned char mask)
 // Main writer function
 int JV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-	int i,j,k;
+	int i,j,k,l;
 	int nbsector;
 	int sectorcount;
 	unsigned int sectorsize;
@@ -160,8 +160,18 @@ int JV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 					fwrite(sectorheader+i,sizeof(JV3SectorHeader),JV3_HEADER_MAX,jv3dskfile);
 					fputc(0xff,jv3dskfile);  //write protect off
 				}
-				fwrite(sectordata[i],sizeof(unsigned char),sectorsizes[i],jv3dskfile);
-				free(sectordata[i]);
+				if(sectordata[i])
+				{
+					fwrite(sectordata[i],sizeof(unsigned char),sectorsizes[i],jv3dskfile);
+					free(sectordata[i]);
+				}
+				else
+				{	
+					for(l=0;l<(int)sectorsizes[i];l++)
+					{
+						fputc(0,jv3dskfile);
+					}
+				}
 			}
 
 			hxcfe_deinitSectorAccess(ss);

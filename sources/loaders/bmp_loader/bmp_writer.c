@@ -38,6 +38,11 @@
 
 #include "bmp_file.h"
 
+static int progress_callback(unsigned int current,unsigned int total,void * td,void * user)
+{
+	return hxcfe_imgCallProgressCallback((HXCFE_IMGLDR*)user,current,total);
+}
+
 void copyPict(unsigned long * dest,int d_xsize,int d_ysize,int d_xpos,int d_ypos,unsigned long * src,int s_xsize,int s_ysize)
 {
 	int j;
@@ -131,6 +136,8 @@ int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	td = hxcfe_td_init(imgldr_ctx->hxcfe,1024,480);
 	if(td)
 	{
+		hxcfe_td_setProgressCallback(td,&progress_callback,(void*)imgldr_ctx);
+
 		hxcfe_td_activate_analyzer(td,ISOIBM_MFM_ENCODING,1);
 		hxcfe_td_activate_analyzer(td,ISOIBM_FM_ENCODING,1);
 		hxcfe_td_activate_analyzer(td,AMIGA_MFM_ENCODING,1);
@@ -175,7 +182,9 @@ int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			{
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
-					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Generate track BMP %d:%d\n",j,i);
+					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),floppydisk->floppyNumberOfTrack*2 );
+
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Generate track BMP %d:%d",j,i);
 					hxcfe_td_draw_track(td,floppydisk,j,i);
 
 					copyPict((unsigned long *)ptr,nb_col*td->xsize,nb_row*td->ysize,cur_col*td->xsize,cur_row*td->ysize,(unsigned long *)td->framebuffer,td->xsize,td->ysize);
@@ -222,7 +231,7 @@ int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			ptrchar = malloc((td->xsize*td->ysize)*nb_row*nb_col);
 			if(ptrchar)
 			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Converting image...\n");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Converting image...");
 				nbcol = 0;
 				k=0;
 				for(i=0;i< ( nb_row * td->ysize );i++)
@@ -263,7 +272,7 @@ int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					}
 				}
 
-				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Writing %s...\n",filename);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Writing %s...",filename);
 
 				if(nbcol>=256)
 				{
