@@ -309,7 +309,9 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 	
 		}
 
-		mw->batchconv_window->progress_indicator->label("");
+		mw->batchconv_window->progress_indicator->label("Done");
+		mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(80,80,255));
+		mw->batchconv_window->progress_indicator->value(100);
 
 		hxcfe_imgDeInitLoader( imgldr_ctx );
 	}
@@ -376,7 +378,9 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 								free(fullpath);
 								free(tempstr);
 								hxc_find_close(hfindfile);
-								mw->batchconv_window->progress_indicator->label("");
+								mw->batchconv_window->progress_indicator->label("Done");
+								mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(80,80,255));
+								mw->batchconv_window->progress_indicator->value(100);
 								return 1;
 							}
 							free(destinationfolder);
@@ -540,7 +544,9 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 
 		hxcfe_imgDeInitLoader( imgldr_ctx );
 
-		mw->batchconv_window->progress_indicator->label("");
+		mw->batchconv_window->progress_indicator->label("Done");
+		mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(80,80,255));
+		mw->batchconv_window->progress_indicator->value(100);
 	}
 	return 0;
 }
