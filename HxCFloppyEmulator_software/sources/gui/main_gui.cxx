@@ -703,6 +703,8 @@ static void tick_mw(void *v) {
 			window->usbcfg_window->chk_doublestep->value(0);
 	}
 
+	window->batchconv_window->progress_indicator->redraw();
+
 	Fl::repeat_timeout(0.10, tick_mw, v);
 
 }
