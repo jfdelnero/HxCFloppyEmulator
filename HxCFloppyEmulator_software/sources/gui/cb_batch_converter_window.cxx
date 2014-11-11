@@ -137,7 +137,7 @@ int progress_callback_bc(unsigned int current,unsigned int total, void * user)
 int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,int output_file_format,batchconverterparams * params)
 {
 	int i,j,filenb,ret;
-	char *destinationfile,*tempstr;
+	char *destinationfile,* tempstr;
 	HXCFE_FLOPPY * thefloppydisk;
 	int loaderid;
 	cfgrawfile rfc;
@@ -158,6 +158,17 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 		{		
 			mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(50,255,50));
 			mw->batchconv_window->progress_indicator->label("Reading");
+
+			if(filelist[filenb])
+			{
+				tempstr = (char*)malloc(8*1024);
+				if(tempstr)
+				{
+					sprintf((char*)tempstr,"%s",hxc_getfilenamebase(filelist[filenb],0));
+					params->windowshwd->strout_convert_status->value((const char*)tempstr);
+					free(tempstr);
+				}
+			}
 
 			if(!params->rawfilemode)
 				loaderid = hxcfe_imgAutoSetectLoader(imgldr_ctx,filelist[filenb],0);
@@ -265,6 +276,14 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 						
 					strcat(destinationfile,ff_type_list[output_file_format].ext);
 
+					tempstr = (char*)malloc(8*1024);
+					if(tempstr)
+					{
+						sprintf((char*)tempstr,"%s",hxc_getfilenamebase(destinationfile,0));
+						params->windowshwd->strout_convert_status->value((const char*)tempstr);
+						free(tempstr);
+					}
+
 					loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,(char*)ff_type_list[output_file_format].plug_id);
 					if(ret>=0)
 					{	
@@ -280,7 +299,6 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 
 					hxcfe_imgUnload(imgldr_ctx,thefloppydisk);
 
-					tempstr=(char*)malloc(1024);
 
 					i=strlen(destinationfile);
 					do
@@ -288,20 +306,24 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 						i--;
 					}while(i && destinationfile[i]!=SEPARTOR);
 
-					if(!ret)
+					tempstr = (char*)malloc(8*1024);
+					if(tempstr)
 					{
-						sprintf(tempstr,"%s created",&destinationfile[i]);
-						params->windowshwd->strout_convert_status->value((const char*)tempstr);
-						params->numberoffileconverted++;
+						if(!ret)
+						{
+							sprintf(tempstr,"%s created",&destinationfile[i]);
+							params->windowshwd->strout_convert_status->value((const char*)tempstr);
+							params->numberoffileconverted++;
+						}
+						else
+						{
+							sprintf(tempstr,"Error cannot create %s",&destinationfile[i]);
+							params->windowshwd->strout_convert_status->value((const char*)tempstr);
+						}
+						free(tempstr);
 					}
-					else
-					{
-						sprintf(tempstr,"Error cannot create %s",&destinationfile[i]);
-						params->windowshwd->strout_convert_status->value((const char*)tempstr);
-					}
-
 					free(destinationfile);
-					free(tempstr);
+
 				}
 			}
 		
@@ -368,7 +390,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 
 							CUI_affiche(MSG_INFO_1,(char*)"Entering directory %s",FindFileData.filename);
 
-							tempstr=(unsigned char*)malloc(1024);
+							tempstr=(unsigned char*)malloc(8*1024);
 							sprintf((char*)tempstr,"Entering directory %s",FindFileData.filename);
 							params->windowshwd->strout_convert_status->value((const char*)tempstr);
 
@@ -404,6 +426,14 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 
 							fullpath=(unsigned char*)malloc(strlen(FindFileData.filename)+strlen(folder)+2+9);
 							sprintf((char*)fullpath,"%s%c%s",folder,SEPARTOR,FindFileData.filename);
+
+							tempstr = (unsigned char*)malloc(8*1024);
+							if(tempstr)
+							{
+								sprintf((char*)tempstr,"%s",FindFileData.filename);
+								params->windowshwd->strout_convert_status->value((const char*)tempstr);
+								free(tempstr);
+							}
 
 							if(!params->rawfilemode)
 								loaderid = hxcfe_imgAutoSetectLoader(imgldr_ctx,(char*)fullpath,0);
@@ -476,6 +506,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 
 								destinationfile=(char*)malloc(strlen(FindFileData.filename)+strlen(destfolder)+2+99);
 								sprintf(destinationfile,"%s%c%s",destfolder,SEPARTOR,FindFileData.filename);
+
 								i=strlen(destinationfile);
 								do
 								{
@@ -489,6 +520,14 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 
 								//printf("Creating file %s\n",destinationfile);
 								strcat(destinationfile,ff_type_list[output_file_format].ext);							
+
+								tempstr = (unsigned char*)malloc(8*1024);
+								if(tempstr)
+								{
+									sprintf((char*)tempstr,"%s",hxc_getfilenamebase(destinationfile,0));
+									params->windowshwd->strout_convert_status->value((const char*)tempstr);
+									free(tempstr);
+								}
 
 								loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,(char*)ff_type_list[output_file_format].plug_id);
 								if(loaderid>=0)
