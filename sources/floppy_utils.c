@@ -191,12 +191,25 @@ double GetTrackPeriod(HXCFE* floppycontext,HXCFE_SIDE * curside)
 		tracklen++;
 
 	total_period = 0;
-	for(i=0;i<tracklen;i++)
+	if(curside->timingbuffer)
 	{
-		total_period = total_period + (double)((double)(1*4)/(double)curside->timingbuffer[i]);
+		for(i=0;i<tracklen;i++)
+		{
+			total_period = total_period + (double)((double)(1*4)/(double)curside->timingbuffer[i]);
+		}
+	}
+	else
+	{
+		for(i=0;i<tracklen;i++)
+		{
+			total_period = total_period + (double)((double)(1*4)/(double)curside->bitrate);
+		}
 	}
 
-	return total_period;
+	if(total_period)
+		return total_period;
+	else
+		return 1;
 }
 
 int tracktypelisttoscan[]=
