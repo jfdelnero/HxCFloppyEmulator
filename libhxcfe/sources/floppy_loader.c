@@ -1648,7 +1648,11 @@ fs_config fs_config_table[]=
 	{"fat1680",		"3\"5        1.68MB DSHD FAT12",FS_1_68MB_MSDOS_FAT12,0},
 	{"fat2880",		"3\"5        2.88MB DSED FAT12",FS_2_88MB_MSDOS_FAT12,0},
 	{"fat3381",		"3\"5        3.38MB DSHD FAT12",FS_3_38MB_MSDOS_FAT12,0},
-	{"fatbigst",	"3\"5        4.23MB DSDD Atari FAT12",FS_4_23MB_ATARI_FAT12,0},
+	{"fatbigst",	"3\"5        3.42MB DSDD Atari FAT12",FS_3_42MB_ATARI_FAT12,0},
+
+	{"fat5355",		"3\"5        5.35MB DSHD FAT12",FS_5_35MB_MSDOS_FAT12,0},
+	{"fat5355b",	"3\"5        5.35MB DSHD FAT12",FS_5_35MB_B_MSDOS_FAT12,0},
+
 	{"fat6789",		"3\"5        6.78MB DSHD FAT12",FS_6_78MB_MSDOS_FAT12,0},
 	{"fatbig",		"",FS_16MB_MSDOS_FAT12,0},
 	{"fat4572",		"3\"5        4.50MB DSHD FAT12",FS_4_50MB_MSDOS_FAT12,0},
