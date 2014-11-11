@@ -99,12 +99,15 @@ Fl_Menu_Item fs_choices[]=
 	{ "3\"5        3.38MB DSHD FAT12",0,fs_choice_cb,(void*)FS_3_38MB_MSDOS_FAT12},
 	{ "3\"5        4.50MB DSHD FAT12",0,fs_choice_cb,(void*)FS_4_50MB_MSDOS_FAT12},
 
+	{ "3\"5        5.35MB DSHD FAT12",0,fs_choice_cb,(void*)FS_5_35MB_MSDOS_FAT12},
+	{ "3\"5        5.35MB DSHD FAT12 (B)",0,fs_choice_cb,(void*)FS_5_35MB_B_MSDOS_FAT12},
+
 	{ "3\"5        6.78MB DSHD FAT12",0,fs_choice_cb,(void*)FS_6_78MB_MSDOS_FAT12},
 
 	{ "3\"5        360KB SSDD Atari FAT12",0,fs_choice_cb,(void*)FS_360KB_ATARI_FAT12},
 	{ "3\"5        720KB DSDD Atari FAT12",0,fs_choice_cb,(void*)FS_720KB_ATARI_FAT12},
 	{ "3\"5        902KB DSDD Atari FAT12",0,fs_choice_cb,(void*)FS_902KB_ATARI_FAT12},
-	{ "3\"5        4.23MB DSDD Atari FAT12",0,fs_choice_cb,(void*)FS_4_23MB_ATARI_FAT12},
+	{ "3\"5        3.42MB DSDD Atari FAT12",0,fs_choice_cb,(void*)FS_3_42MB_ATARI_FAT12},
 
 	{ "3\"5        880KB DSDD AmigaDOS",0,fs_choice_cb,(void*)FS_880KB_AMIGADOS},
 
