@@ -704,6 +704,8 @@ static void tick_mw(void *v) {
 	}
 
 	window->batchconv_window->progress_indicator->redraw();
+	window->batchconv_window->strout_convert_status->redraw();
+	window->batchconv_window->bt_convert->redraw();
 
 	Fl::repeat_timeout(0.10, tick_mw, v);
 
