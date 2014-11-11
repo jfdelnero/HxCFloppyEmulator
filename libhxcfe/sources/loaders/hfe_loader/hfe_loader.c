@@ -202,7 +202,7 @@ int HFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
 			currentcylinder->sides=(HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
 			memset(currentcylinder->sides,0,sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
-			currentcylinder->floppyRPM=header.floppyRPM;
+			currentcylinder->floppyRPM = header.floppyRPM;
 
 
 		/*	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
@@ -258,7 +258,6 @@ int HFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					}
 				}
 
-
 				nbofblock=(currentside->tracklen/256);
 				for(k=0;k<nbofblock;k++)
 				{
@@ -271,6 +270,9 @@ int HFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				}
 
 				currentside->tracklen=currentside->tracklen*8;
+
+				if(!currentcylinder->floppyRPM)
+					currentcylinder->floppyRPM = (short)( 60 / GetTrackPeriod(imgldr_ctx->hxcfe,currentside) );
 
 			}
 
