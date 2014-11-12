@@ -1487,6 +1487,9 @@ static unsigned long * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA
 	overlap_pulses_tab = 0;
 
 	margetab = malloc(sizeof(unsigned long) * 65536);
+	if(!margetab)
+		return 0;
+
 	memset(margetab,0,sizeof(unsigned long) * 65536);
 
 	pourcent_error = MAXPULSESKEW;
@@ -1509,6 +1512,9 @@ static unsigned long * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA
 					overlap_pulses_tab[i] = i + 1;
 				}
 			}
+
+			free(margetab);
+
 			return overlap_pulses_tab;
 		}
 
