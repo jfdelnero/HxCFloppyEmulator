@@ -157,7 +157,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,unsigned long foff
 				trackbuf = malloc(totallength*sizeof(unsigned short));
 				if(trackbuf)
 				{
-					memset(trackbuf,0,totallength*sizeof(unsigned short));
+					memset(trackbuf,0x00,totallength*sizeof(unsigned short));
 
 					offset = 0;
 
@@ -181,43 +181,47 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,unsigned long foff
 						trackbuf[i] = BIGENDIAN_WORD( trackbuf[i] );
 					}
 
-					trackbuf_dword = malloc((totallength+1)*sizeof(unsigned long));
-
 					realnumberofpulses = 0;
-					curpulselength = 0;
-					k = 0;
 
-					for(i=0;i<revolution;i++)
+					trackbuf_dword = malloc((totallength+1)*sizeof(unsigned long));
+					if(trackbuf_dword)
 					{
-						revonumberofpulses = 0;
+						memset(trackbuf_dword,0x00,(totallength+1)*sizeof(unsigned long));
+						curpulselength = 0;
+						k = 0;
 
-						for(j=0;j<trkh.index_position[i].track_length;j++)
+						for(i=0;i<revolution;i++)
 						{
-							curpulselength += trackbuf[k];
+							revonumberofpulses = 0;
 
-							if(trackbuf[k])
+							for(j=0;j<trkh.index_position[i].track_length;j++)
 							{
-								trackbuf_dword[realnumberofpulses] = curpulselength;
-								curpulselength = 0;
-								realnumberofpulses++;
-								revonumberofpulses++;
-							}
-							else
-							{
-								curpulselength += 65536;
+								curpulselength += trackbuf[k];
+
+								if(trackbuf[k])
+								{
+									trackbuf_dword[realnumberofpulses] = curpulselength;
+									curpulselength = 0;
+									realnumberofpulses++;
+									revonumberofpulses++;
+								}
+								else
+								{
+									curpulselength += 65536;
+								}
+
+								k++;
 							}
 
-							k++;
+							trkh.index_position[i].track_length = revonumberofpulses;
+
 						}
 
-						trkh.index_position[i].track_length = revonumberofpulses;
+						// dummy pulse
+						trackbuf_dword[realnumberofpulses] = 300;
+						realnumberofpulses++;
 
 					}
-
-					// dummy pulse
-					trackbuf_dword[totallength] = 32000;
-					realnumberofpulses++;
-
 					free(trackbuf);
 
 					hxcfe_FxStream_setResolution(fxs,25000); // 25 ns per tick
