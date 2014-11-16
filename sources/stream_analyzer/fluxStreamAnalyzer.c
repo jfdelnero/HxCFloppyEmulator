@@ -947,7 +947,7 @@ static unsigned long detectflakeybits(HXCFE_TRKSTREAM * td,pulsesblock * src_blo
 	int time1,time2,pourcent_error;
 	int bad_pulses,good_pulses;
 	unsigned long nbpulses;
-	unsigned long *forward_link;
+	long *forward_link;
 
 	unsigned long *srcptr,*start_ptr, *dst_ptr, *last_dump_ptr,*last_block_ptr,*maxptr5;
 
