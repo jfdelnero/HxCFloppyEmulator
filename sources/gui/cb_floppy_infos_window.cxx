@@ -455,7 +455,7 @@ int getdistance(int xsize,int ysize,int x_pos,int y_pos)
 {
 	int distance;
 
-	distance = (int)sqrt( pow( (xsize/2) - x_pos, 2 ) + pow( (ysize/2) - y_pos, 2 ) );
+	distance = (int)sqrt( pow( (float)((xsize/2) - x_pos), 2 ) + pow( (float)((ysize/2) - y_pos), 2 ) );
 
 	return distance;
 }
