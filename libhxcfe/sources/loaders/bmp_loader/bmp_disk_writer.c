@@ -62,7 +62,7 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write BMP file %s",filename);
 
-	td = hxcfe_td_init(imgldr_ctx->hxcfe,1024,480);
+	td = hxcfe_td_init(imgldr_ctx->hxcfe,1920,940);
 	if(td)
 	{
 		hxcfe_td_setProgressCallback(td,&progress_callback,(void*)imgldr_ctx);
