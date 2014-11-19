@@ -1443,20 +1443,16 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 		}
 	}
 
-	for(side=0;side<floppydisk->floppyNumberOfSide;side++)
+	for(track=0;track<floppydisk->floppyNumberOfTrack+1;track++)
 	{
-		for(track=0;track<floppydisk->floppyNumberOfTrack;track++)
-		{
-			currentside=floppydisk->tracks[track]->sides[side];
+		track_ep=(float)( (td->ysize-(y_pos)) - 60 ) /((float) floppydisk->floppyNumberOfTrack+1);
 
-			tracksize=currentside->tracklen;
-
-			track_ep=(float)( (td->ysize-(y_pos)) - 60 ) /(float) floppydisk->floppyNumberOfTrack;
-
-			draw_circle (td,0xEFEFEF,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)),1,(int)0);
-			draw_circle (td,0xEFEFEF,0,(float)((float)((float)2 * PI)),x_pos_2,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)),1,(int)0);
-		}
+		draw_circle (td,0xEFEFEF,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)) + 1,1,(int)0);
+		draw_circle (td,0xEFEFEF,0,(float)((float)((float)2 * PI)),x_pos_2,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)) + 1,1,(int)0);
 	}
+
+	draw_circle (td,0xEFEFEF,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack+1) * track_ep)) + 1,1,(int)0);
+	draw_circle (td,0xEFEFEF,0,(float)((float)((float)2 * PI)),x_pos_2,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack+1) * track_ep)) + 1,1,(int)0);
 
 	td->hxc_setprogress(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide,floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide,td,td->progress_userdata);
 }
