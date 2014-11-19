@@ -806,12 +806,22 @@ HXCFE_FLPGEN* hxcfe_initFloppy(HXCFE* floppycontext,int nb_of_track,int nb_of_si
 
 int hxcfe_getNumberOfTrack(HXCFE* floppycontext,HXCFE_FLOPPY *fp)
 {
-	return fp->floppyNumberOfTrack;
+	if(fp)
+	{
+		return fp->floppyNumberOfTrack;
+	}
+
+	return 0;
 }
 
 int hxcfe_getNumberOfSide(HXCFE* floppycontext,HXCFE_FLOPPY *fp)
 {
-	return fp->floppyNumberOfSide;
+	if(fp)
+	{
+		return fp->floppyNumberOfSide;
+	}
+
+	return 0;
 }
 
 int hxcfe_setNumberOfTrack (HXCFE_FLPGEN* fb,unsigned short numberoftrack)
