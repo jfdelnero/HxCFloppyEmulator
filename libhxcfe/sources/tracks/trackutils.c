@@ -481,7 +481,7 @@ int searchBitStream(unsigned char * input_data,unsigned long input_data_size,int
 
 	t=0;
 	// Scan the track data...
-	while( (trackoffset<tracksize) && (t<searchsize) )
+	while( ((trackoffset+(cnt+1))<tracksize) && (t<searchsize) )
 	{
 		for(i=starti;i<8;i++)
 		{

@@ -628,13 +628,16 @@ int get_next_AMIGAMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 				else
 				{
 					bit_offset = chgbitptr(track->tracklen,bit_offset,(8*2)+1);
+					if(!bit_offset)
+						sector_extractor_sm = ENDOFTRACK;
+					else
+						sector_extractor_sm = LOOKFOR_GAP1;
 
 					sector_conf->use_alternate_header_crc = 0xFF;
 
 					sector_conf->endsectorindex = sector_conf->startdataindex;
-					sector_extractor_sm = LOOKFOR_GAP1;
+					
 				}
-
 
 			break;
 
@@ -1786,6 +1789,7 @@ int analysis_and_extract_sector_EMUIIFM(HXCFE* floppycontext,HXCFE_SIDE * track,
 HXCFE_SECTORACCESS* hxcfe_initSectorAccess(HXCFE* floppycontext,HXCFE_FLOPPY *fp)
 {
 	HXCFE_SECTORACCESS* ss_ctx;
+	int i;
 
 	ss_ctx = (HXCFE_SECTORACCESS*) malloc(sizeof(HXCFE_SECTORACCESS));
 	memset(ss_ctx,0,sizeof(HXCFE_SECTORACCESS));
@@ -1802,7 +1806,10 @@ HXCFE_SECTORACCESS* hxcfe_initSectorAccess(HXCFE* floppycontext,HXCFE_FLOPPY *fp
 		ss_ctx->track_cache = malloc(sizeof(SECTORSEARCHTRACKCACHE) * fp->floppyNumberOfTrack * 2);
 		if(ss_ctx->track_cache)
 		{
-			memset(ss_ctx->track_cache,0,sizeof(SECTORSEARCHTRACKCACHE) * fp->floppyNumberOfTrack * 2);
+			for(i=0;i<fp->floppyNumberOfTrack * 2;i++)
+			{
+				ss_ctx->track_cache[i].nb_sector_cached = 0;
+			}
 		}
 	}
 
@@ -1813,7 +1820,7 @@ HXCFE_SECTCFG* hxcfe_getNextSector(HXCFE_SECTORACCESS* ss_ctx,int track,int side
 {
 	HXCFE_SECTCFG * sc;
 	SECTORSEARCHTRACKCACHE * trackcache;
-	int bitoffset;
+	int bitoffset,tmp_bitoffset;
 	int i;
 
 	if((ss_ctx->bitoffset == -1) || (ss_ctx->cur_side != side) || (ss_ctx->cur_track != track))
@@ -1849,6 +1856,7 @@ HXCFE_SECTCFG* hxcfe_getNextSector(HXCFE_SECTORACCESS* ss_ctx,int track,int side
 
 	sc=(HXCFE_SECTCFG *) malloc(sizeof(HXCFE_SECTCFG));
 
+	tmp_bitoffset = bitoffset;
 	switch(type)
 	{
 		case ISOIBM_MFM_ENCODING:
@@ -1884,6 +1892,14 @@ HXCFE_SECTCFG* hxcfe_getNextSector(HXCFE_SECTORACCESS* ss_ctx,int track,int side
 		default:
 			bitoffset=-1;
 		break;
+	}
+
+
+	if(bitoffset == tmp_bitoffset)
+	{
+		ss_ctx->bitoffset = -1;
+		free(sc);
+		return 0;
 	}
 
 	ss_ctx->bitoffset = bitoffset;

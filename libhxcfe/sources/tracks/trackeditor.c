@@ -50,6 +50,7 @@
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 #include "trackutils.h"
+#include "floppy_utils.h"
 
 HXCFE_SIDE * hxcfe_getSide(HXCFE_FLOPPY * fp,int track,int side)
 {
@@ -110,7 +111,8 @@ void hxcfe_freeSide(HXCFE_SIDE * side)
 int hxcfe_shiftTrackData(HXCFE_SIDE * side,long bitoffset)
 {
 	unsigned char * tmpbuffer;
-	unsigned long i,j;
+	unsigned long * longtmpbuffer;
+	unsigned long i,j,oldptr,ptr;
 
 	if(side)
 	{
@@ -150,9 +152,59 @@ int hxcfe_shiftTrackData(HXCFE_SIDE * side,long bitoffset)
 
 			////////////////////////////////////////////////////////////
 
+			if(side->timingbuffer)
+			{
+				longtmpbuffer = malloc( ((side->tracklen>>3) + 8) * sizeof(unsigned long) );
+				if(longtmpbuffer)
+				{
+					oldptr = -1;
+					for(i=0;i<side->tracklen;i++)
+					{
+						ptr = ( ( i + bitoffset ) % side->tracklen )>>3;
+						if(oldptr!=ptr)
+						{
+							longtmpbuffer[ptr] = side->timingbuffer[(i%side->tracklen)>>3];
+							oldptr=ptr;
+						}
+					}
+
+					j=0;
+					if(side->tracklen&7)
+						j = 1;
+
+					memcpy(side->timingbuffer,longtmpbuffer,((side->tracklen>>3) + j)*sizeof(unsigned long));
+
+					free(longtmpbuffer);
+				}
+			}
+
 			free(tmpbuffer);
 
 			return HXCFE_NOERROR;
+		}
+	}
+
+	return HXCFE_BADPARAMETER;
+}
+
+int hxcfe_rotateFloppy(HXCFE* floppycontext,HXCFE_FLOPPY * fp,int bitoffset,int total)
+{
+	unsigned long i,j;
+	double period,periodtoshift;
+	unsigned long offset;
+
+	if(fp)
+	{
+		for(i=0;i<fp->floppyNumberOfTrack;i++)
+		{
+			for(j=0;j<fp->floppyNumberOfSide;j++)
+			{
+				period = GetTrackPeriod(floppycontext,fp->tracks[i]->sides[j]);
+				periodtoshift = (period * (double)((double)bitoffset/(double)total)); //
+				offset = fp->tracks[i]->sides[j]->tracklen - us2index(0,fp->tracks[i]->sides[j],(unsigned long)((double)(periodtoshift * 1000000)),0,0);
+				
+				hxcfe_shiftTrackData(fp->tracks[i]->sides[j],(offset&(~0x7)));
+			}
 		}
 	}
 

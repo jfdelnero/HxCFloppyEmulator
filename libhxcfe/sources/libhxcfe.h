@@ -473,6 +473,7 @@ unsigned short     hxcfe_getTrackRPM(HXCFE_FLOPPY * fp,int track);
 unsigned char      hxcfe_getTrackNumberOfSide(HXCFE_FLOPPY * fp,int track);
 
 int                hxcfe_shiftTrackData(HXCFE_SIDE * side,long bitoffset);
+int                hxcfe_rotateFloppy(HXCFE* floppycontext,HXCFE_FLOPPY * fp,int bitoffset,int total);
 
 void               AdjustTrackPeriod(HXCFE* floppycontext,HXCFE_SIDE * curside_S0,HXCFE_SIDE * curside_S1);
 

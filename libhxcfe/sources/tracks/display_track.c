@@ -180,6 +180,11 @@ double getOffsetTiming(HXCFE_SIDE *currentside,int offset,double timingoffset,in
 {
 	int i,j,totaloffset;
 	unsigned long bitrate;
+	double timinginc;
+	unsigned long tracklen;
+	unsigned long oldbitrate;
+
+	tracklen = currentside->tracklen;
 
 	if( offset >= start )
 	{
@@ -187,20 +192,37 @@ double getOffsetTiming(HXCFE_SIDE *currentside,int offset,double timingoffset,in
 	}
 	else
 	{
-		totaloffset = start + ((currentside->tracklen - start) + offset);
+		totaloffset = start + ((tracklen - start) + offset);
 	}
 
 	i = start;
-	j = start%currentside->tracklen;
+	j = start%tracklen;
 
 	if(currentside->bitrate==VARIABLEBITRATE)
 	{
-		while( i < totaloffset )
+		if( i < totaloffset )
 		{
 			bitrate = currentside->timingbuffer[j>>3];
-			timingoffset = timingoffset + ((double)(500000)/(double)bitrate);
-			i++;
-			j = (j+1) % currentside->tracklen;
+			oldbitrate = bitrate;
+			timinginc = ((double)(500000)/(double)bitrate);
+
+			while( i < totaloffset )
+			{
+				if(!(j&7))
+				{
+					bitrate = currentside->timingbuffer[j>>3];
+
+					if( oldbitrate != bitrate)
+					{
+						timinginc = ((double)(500000)/(double)bitrate);
+						oldbitrate = bitrate;
+					}
+				}
+
+				timingoffset = timingoffset + timinginc;
+				i++;
+				j = ( j + 1 ) % tracklen;
+			}
 		}
 	}
 	else
