@@ -174,3 +174,4 @@ EXPORTS
    hxcfe_setCellIndexState		@509
    hxcfe_getCellBitrate			@510
    hxcfe_setCellBitrate			@511
+   hxcfe_rotateFloppy			@512
