@@ -795,11 +795,13 @@ static void compareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, unsigned 
 	unsigned long *dst_ptr;
 	unsigned long *last_dump_ptr;
 	unsigned long *last_block_ptr;
+	unsigned long src_number_of_pulses;
 
 	bad_pulses = 0;
 	good_pulses = 0;
+	src_number_of_pulses = src_block->number_of_pulses;
 
-	if(dst_block_offset + src_block->number_of_pulses >= td->nb_of_pulses)
+	if( dst_block_offset >= td->nb_of_pulses)
 	{
 		if(pulses_ok)
 			*pulses_ok = 0;
@@ -810,6 +812,11 @@ static void compareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, unsigned 
 		return;
 	}
 
+	if(dst_block_offset + src_number_of_pulses >= td->nb_of_pulses)
+	{
+		src_number_of_pulses = td->nb_of_pulses - dst_block_offset;
+	}
+
 	src_block->overlap_offset = dst_block_offset;
 
 	start_ptr = &td->track_dump[src_block->start_index];
@@ -817,9 +824,9 @@ static void compareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, unsigned 
 	last_dump_ptr = &td->track_dump[td->nb_of_pulses - 2];
 
 	if(partial)
-		last_block_ptr = &td->track_dump[src_block->start_index + (src_block->number_of_pulses/100)];
+		last_block_ptr = &td->track_dump[src_block->start_index + (src_number_of_pulses/100)];
 	else
-		last_block_ptr = &td->track_dump[src_block->start_index + (src_block->number_of_pulses)];
+		last_block_ptr = &td->track_dump[src_block->start_index + (src_number_of_pulses)];
 
 	if( dst_ptr < last_dump_ptr && start_ptr < last_block_ptr )
 	{
@@ -828,7 +835,7 @@ static void compareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, unsigned 
 
 		pourcent_error = MAXPULSESKEW;
 
-		while( dst_ptr < last_dump_ptr && start_ptr < last_block_ptr)
+		while( (dst_ptr + 8) < last_dump_ptr && (start_ptr+8) < last_block_ptr)
 		{
 			if(time1<65536)
 				marge = margetab[time1];
@@ -857,7 +864,243 @@ static void compareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, unsigned 
 					good_pulses++;
 				}
 			}
+
+
+			if(time1<65536)
+				marge = margetab[time1];
+			else
+				marge = ( ( time1 * pourcent_error ) / 100 );
+
+			if( time2 > ( time1 + marge ) )
+			{
+				time1 = time1 + *(++start_ptr);
+
+				bad_pulses++;
+			}
+			else
+			{
+				if( time2 < ( time1 - marge ) )
+				{
+					time2 = time2 + *(++dst_ptr);
+
+					bad_pulses++;
+				}
+				else
+				{
+					time1 = *(++start_ptr);
+					time2 = *(++dst_ptr);
+
+					good_pulses++;
+				}
+			}
+
+			if(time1<65536)
+				marge = margetab[time1];
+			else
+				marge = ( ( time1 * pourcent_error ) / 100 );
+
+			if( time2 > ( time1 + marge ) )
+			{
+				time1 = time1 + *(++start_ptr);
+
+				bad_pulses++;
+			}
+			else
+			{
+				if( time2 < ( time1 - marge ) )
+				{
+					time2 = time2 + *(++dst_ptr);
+
+					bad_pulses++;
+				}
+				else
+				{
+					time1 = *(++start_ptr);
+					time2 = *(++dst_ptr);
+
+					good_pulses++;
+				}
+			}
+
+			if(time1<65536)
+				marge = margetab[time1];
+			else
+				marge = ( ( time1 * pourcent_error ) / 100 );
+
+			if( time2 > ( time1 + marge ) )
+			{
+				time1 = time1 + *(++start_ptr);
+
+				bad_pulses++;
+			}
+			else
+			{
+				if( time2 < ( time1 - marge ) )
+				{
+					time2 = time2 + *(++dst_ptr);
+
+					bad_pulses++;
+				}
+				else
+				{
+					time1 = *(++start_ptr);
+					time2 = *(++dst_ptr);
+
+					good_pulses++;
+				}
+			}
+
+
+			if(time1<65536)
+				marge = margetab[time1];
+			else
+				marge = ( ( time1 * pourcent_error ) / 100 );
+
+			if( time2 > ( time1 + marge ) )
+			{
+				time1 = time1 + *(++start_ptr);
+
+				bad_pulses++;
+			}
+			else
+			{
+				if( time2 < ( time1 - marge ) )
+				{
+					time2 = time2 + *(++dst_ptr);
+
+					bad_pulses++;
+				}
+				else
+				{
+					time1 = *(++start_ptr);
+					time2 = *(++dst_ptr);
+
+					good_pulses++;
+				}
+			}
+
+
+			if(time1<65536)
+				marge = margetab[time1];
+			else
+				marge = ( ( time1 * pourcent_error ) / 100 );
+
+			if( time2 > ( time1 + marge ) )
+			{
+				time1 = time1 + *(++start_ptr);
+
+				bad_pulses++;
+			}
+			else
+			{
+				if( time2 < ( time1 - marge ) )
+				{
+					time2 = time2 + *(++dst_ptr);
+
+					bad_pulses++;
+				}
+				else
+				{
+					time1 = *(++start_ptr);
+					time2 = *(++dst_ptr);
+
+					good_pulses++;
+				}
+			}
+
+
+			if(time1<65536)
+				marge = margetab[time1];
+			else
+				marge = ( ( time1 * pourcent_error ) / 100 );
+
+			if( time2 > ( time1 + marge ) )
+			{
+				time1 = time1 + *(++start_ptr);
+
+				bad_pulses++;
+			}
+			else
+			{
+				if( time2 < ( time1 - marge ) )
+				{
+					time2 = time2 + *(++dst_ptr);
+
+					bad_pulses++;
+				}
+				else
+				{
+					time1 = *(++start_ptr);
+					time2 = *(++dst_ptr);
+
+					good_pulses++;
+				}
+			}
+
+			if(time1<65536)
+				marge = margetab[time1];
+			else
+				marge = ( ( time1 * pourcent_error ) / 100 );
+
+			if( time2 > ( time1 + marge ) )
+			{
+				time1 = time1 + *(++start_ptr);
+
+				bad_pulses++;
+			}
+			else
+			{
+				if( time2 < ( time1 - marge ) )
+				{
+					time2 = time2 + *(++dst_ptr);
+
+					bad_pulses++;
+				}
+				else
+				{
+					time1 = *(++start_ptr);
+					time2 = *(++dst_ptr);
+
+					good_pulses++;
+				}
+			}
+
 		}
+
+
+
+		while( (dst_ptr) < last_dump_ptr && (start_ptr) < last_block_ptr)
+		{
+			if(time1<65536)
+				marge = margetab[time1];
+			else
+				marge = ( ( time1 * pourcent_error ) / 100 );
+
+			if( time2 > ( time1 + marge ) )
+			{
+				time1 = time1 + *(++start_ptr);
+
+				bad_pulses++;
+			}
+			else
+			{
+				if( time2 < ( time1 - marge ) )
+				{
+					time2 = time2 + *(++dst_ptr);
+
+					bad_pulses++;
+				}
+				else
+				{
+					time1 = *(++start_ptr);
+					time2 = *(++dst_ptr);
+
+					good_pulses++;
+				}
+			}
+
+		}
+
 	}
 
 	src_block->overlap_size = dst_ptr - &td->track_dump[dst_block_offset];
@@ -950,12 +1193,14 @@ static unsigned long detectflakeybits(HXCFE_TRKSTREAM * td,pulsesblock * src_blo
 	long *forward_link;
 
 	unsigned long *srcptr,*start_ptr, *dst_ptr, *last_dump_ptr,*last_block_ptr,*maxptr5;
+	unsigned long src_number_of_pulses;
 
 	forward_link = pl->forward_link;
 	bad_pulses = 0;
 	good_pulses = 0;
+	src_number_of_pulses = src_block->number_of_pulses;
 
-	if(dst_block_offset + src_block->number_of_pulses >= td->nb_of_pulses)
+	if(dst_block_offset >= td->nb_of_pulses)
 	{
 		if(pulses_ok)
 			*pulses_ok = 0;
@@ -966,12 +1211,17 @@ static unsigned long detectflakeybits(HXCFE_TRKSTREAM * td,pulsesblock * src_blo
 		return 0;
 	}
 
+	if(dst_block_offset + src_number_of_pulses >= td->nb_of_pulses)
+	{
+		src_number_of_pulses = td->nb_of_pulses - dst_block_offset;
+	}
+
 	srcptr        = td->track_dump;
 
 	start_ptr     = &td->track_dump[src_block->start_index];
 	dst_ptr       = &td->track_dump[dst_block_offset];
 	last_dump_ptr = &td->track_dump[td->nb_of_pulses - 2];
-	last_block_ptr= &td->track_dump[src_block->start_index + src_block->number_of_pulses];
+	last_block_ptr= &td->track_dump[src_block->start_index + src_number_of_pulses];
 
 	if(maxptr == 0xFFFFFFFF)
 	{
