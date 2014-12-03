@@ -39,41 +39,7 @@
 #include "tracks/sector_extractor.h"
 
 #include "libhxcadaptor.h"
-
-unsigned char  size_to_code_d88(unsigned long size)
-{
-
-	switch(size)
-	{
-		case 128:
-			return 0;
-		break;
-		case 256:
-			return 1;
-		break;
-		case 512:
-			return 2;
-		break;
-		case 1024:
-			return 3;
-		break;
-		case 2048:
-			return 4;
-		break;
-		case 4096:
-			return 5;
-		break;
-		case 8192:
-			return 6;
-		break;
-		case 16384:
-			return 7;
-		break;
-		default:
-			return 0;
-		break;
-	}
-}
+#include "floppy_utils.h"
 
 int D88_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
@@ -191,7 +157,7 @@ int D88_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 									if(!density)
 										d88_s.density = 0x40;
 
-									d88_s.sector_size = size_to_code_d88(sca[k]->sectorsize);
+									d88_s.sector_size = size_to_code(sca[k]->sectorsize);
 									d88_s.sector_length = sca[k]->sectorsize;
 									if(!sca[k]->input_data)
 										d88_s.sector_length = 0;
