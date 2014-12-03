@@ -299,6 +299,7 @@ HXCFE_SECTORACCESS* hxcfe_initSectorAccess(HXCFE* floppycontext,HXCFE_FLOPPY *fp
 
 HXCFE_SECTCFG*     hxcfe_getNextSector(HXCFE_SECTORACCESS* ss_ctx,int track,int side,int type);
 HXCFE_SECTCFG*     hxcfe_searchSector (HXCFE_SECTORACCESS* ss_ctx,int track,int side,int id,int type);
+void               hxcfe_resetSearchTrackPosition(HXCFE_SECTORACCESS* ss_ctx);
 HXCFE_SECTCFG**    hxcfe_getAllTrackSectors(HXCFE_SECTORACCESS* ss_ctx,int track,int side,int type,int * nb_sectorfound);
 HXCFE_SECTCFG**    hxcfe_getAllTrackISOSectors(HXCFE_SECTORACCESS* ss_ctx,int track,int side,int * nb_sectorfound);
 int                hxcfe_getSectorSize(HXCFE_SECTORACCESS* ss_ctx,HXCFE_SECTCFG* sc);

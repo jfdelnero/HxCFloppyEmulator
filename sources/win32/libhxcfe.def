@@ -59,15 +59,16 @@ EXPORTS
    hxcfe_getFloppy			@80
    hxcfe_generateDisk		@81
 
-   hxcfe_initSectorAccess		@100
-   hxcfe_getNextSector			@101
-   hxcfe_searchSector			@102
-   hxcfe_getSectorSize			@103
-   hxcfe_getSectorData			@104
-   hxcfe_readSectorData			@105
-   hxcfe_freeSectorConfig		@106
-   hxcfe_deinitSectorAccess		@107
-   hxcfe_writeSectorData		@108
+   hxcfe_initSectorAccess		  @100
+   hxcfe_getNextSector			  @101
+   hxcfe_searchSector			  @102
+   hxcfe_getSectorSize			  @103
+   hxcfe_getSectorData			  @104
+   hxcfe_readSectorData			  @105
+   hxcfe_freeSectorConfig		  @106
+   hxcfe_deinitSectorAccess		  @107
+   hxcfe_writeSectorData		  @108
+   hxcfe_resetSearchTrackPosition @109
 
    hxcfe_td_init				@120
    hxcfe_td_draw_track			@121
