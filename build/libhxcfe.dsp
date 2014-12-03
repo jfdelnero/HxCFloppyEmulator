@@ -717,6 +717,10 @@ SOURCE=..\sources\loaders\stx_loader\stx_loader.c
 
 SOURCE=..\sources\loaders\stx_loader\stx_loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\stx_loader\stx_writer.c
+# End Source File
 # End Group
 # Begin Group "CPCDSK"
 
