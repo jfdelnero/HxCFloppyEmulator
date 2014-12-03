@@ -225,6 +225,50 @@ double GetTrackPeriod(HXCFE* floppycontext,HXCFE_SIDE * curside)
 		return 1;
 }
 
+double MeasureTrackTiming(HXCFE* floppycontext,HXCFE_SIDE * curside,unsigned long startpulse,unsigned long endpulse)
+{
+	unsigned long lenbyte,i,lenbit;
+	double total_period;
+
+
+	if( (startpulse < curside->tracklen) && (endpulse < curside->tracklen) ) 
+	{
+		if(startpulse<=endpulse)
+		{
+			lenbit = endpulse - startpulse;
+		}
+		else
+		{
+			lenbit = endpulse + (curside->tracklen - startpulse);			
+		}
+
+		lenbyte = lenbit /8;
+		if(lenbit & 7)
+			lenbyte++;
+
+		total_period = 0;
+		if(curside->timingbuffer)
+		{
+			for(i=0;i<lenbyte;i++)
+			{
+				total_period = total_period + (double)((double)(1*4)/(double)curside->timingbuffer[((startpulse/8) + i)%(curside->tracklen/8)]);
+			}
+		}
+		else
+		{
+			for(i=0;i<lenbyte;i++)
+			{
+				total_period = total_period + (double)((double)(1*4)/(double)curside->bitrate);
+			}
+		}
+	}
+
+	if(total_period)
+		return total_period;
+	else
+		return 1;
+}
+
 int tracktypelisttoscan[]=
 {
 	ISOIBM_MFM_ENCODING,
@@ -292,4 +336,39 @@ int floppyTrackTypeIdentification(HXCFE* floppycontext,HXCFE_FLOPPY *fp)
 	}
 
 	return 0;
+}
+
+unsigned char  size_to_code(unsigned long size)
+{
+
+	switch(size)
+	{
+		case 128:
+			return 0;
+		break;
+		case 256:
+			return 1;
+		break;
+		case 512:
+			return 2;
+		break;
+		case 1024:
+			return 3;
+		break;
+		case 2048:
+			return 4;
+		break;
+		case 4096:
+			return 5;
+		break;
+		case 8192:
+			return 6;
+		break;
+		case 16384:
+			return 7;
+		break;
+		default:
+			return 0;
+		break;
+	}
 }
