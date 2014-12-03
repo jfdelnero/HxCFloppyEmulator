@@ -56,6 +56,7 @@
 #include "floppy_utils.h"
 
 #include "stx_loader.h"
+#include "stx_writer.h"
 
 #include "pasti_format.h"
 
@@ -1184,7 +1185,7 @@ int STX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void *
 	{
 		(ISVALIDDISKFILE)	STX_libIsValidDiskFile,
 		(LOADDISKFILE)		STX_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		STX_libWrite_DiskFile,
 		(GETPLUGININFOS)	STX_libGetPluginInfo
 	};
 
