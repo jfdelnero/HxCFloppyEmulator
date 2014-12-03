@@ -9,4 +9,8 @@ unsigned long fillindex(int startindex,HXCFE_SIDE * track,unsigned long us,unsig
 HXCFE_CYLINDER* allocCylinderEntry(unsigned short rpm,unsigned char number_of_side);
 void savebuffer(char * name,unsigned char * buffer, int size);
 double GetTrackPeriod(HXCFE* floppycontext,HXCFE_SIDE * curside);
+double MeasureTrackTiming(HXCFE* floppycontext,HXCFE_SIDE * curside,unsigned long startpulse,unsigned long endpulse);
+
 int floppyTrackTypeIdentification(HXCFE* floppycontext,HXCFE_FLOPPY *fp);
+
+unsigned char  size_to_code(unsigned long size);
