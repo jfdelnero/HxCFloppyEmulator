@@ -107,6 +107,7 @@ ff_type ff_type_list[]=
 	{ FF_V9T9,"TI99/4A V9T9 sectors file format",PLUGIN_TI994A_V9T9,".dsk"},
 	{ FF_D88, "D88 - D88 PC88 file format",PLUGIN_NEC_D88,".d88"},
 	{ FF_MSA, "MSA - ATARI ST MSA file format",PLUGIN_ATARIST_MSA,".msa"},
+	{ FF_STX, "STX - ATARI ST STX file format",PLUGIN_ATARIST_STX,".stx"},
 	{ FF_HDDDA2_HFE,"HFE - HDDD A2 Support",PLUGIN_HXC_HDDD_A2,".hfe"},
 	{ FF_EHFE,"HFE - Rev 2 - Experimental",PLUGIN_HXC_EXTHFE,".hfe"},
 	{ FF_ARBG,"Arburg - Arburg RAW sectors file format",PLUGIN_ARBURG,".arburgfd"},
