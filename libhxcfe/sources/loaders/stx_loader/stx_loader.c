@@ -1160,6 +1160,8 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 		hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
+		hxc_fclose(f);
+
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"Pasti image loading done!");
 
 		return HXCFE_NOERROR;
@@ -1167,6 +1169,9 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	else
 	{
 		free(fileheader);
+
+		hxc_fclose(f);
+
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"non STX/pasti image (bad header)",imgfile);
 		return HXCFE_BADFILE;
 	}
