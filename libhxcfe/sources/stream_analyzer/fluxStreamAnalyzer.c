@@ -62,6 +62,8 @@
 
 #include "libhxcadaptor.h"
 
+#include "asm_mmx_routines.h"
+
 #define BASEINDEX 1
 
 #define MAXPULSESKEW 25
@@ -73,6 +75,8 @@
 // us
 #define BLOCK_TIME 1000
 #define TICKFREQ 250000000 // 250Mhz tick
+
+#define SEARCHDEPTH 0.025
 
 HXCFE* floppycont;
 
@@ -1582,6 +1586,7 @@ unsigned long searchBestOverlap(HXCFE_TRKSTREAM * track_dump, pulsesblock * src_
 				if(repeat_index + i_up < track_dump->nb_of_pulses)
 				{
 					// compare the block
+					//mmx_blk_compare (unsigned long * src_ptr,unsigned long * dst_ptr,unsigned long * last_src_ptr,unsigned long * last_dst_ptr, int * bad_pulses, int * good_pulses);
 					compareblock(track_dump,src_block, repeat_index + i_up,&good,&bad,0);
 
 					match_table[mt_i].yes = good;
@@ -1887,8 +1892,8 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 				}while( (cur_time_len < index_tickpediod) && (j < track_dump->nb_of_pulses) );
 
-				tick_down_max = time_to_tick((unsigned long)((double)indexperiod * (double)0.05));
-				tick_up_max =   time_to_tick((unsigned long)((double)indexperiod * (double)0.05));
+				tick_down_max = time_to_tick((unsigned long)((double)indexperiod * (double)SEARCHDEPTH));
+				tick_up_max =   time_to_tick((unsigned long)((double)indexperiod * (double)SEARCHDEPTH));
 
 				searchstate = 0;
 
@@ -1977,8 +1982,8 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 							}while( (cur_time_len < (block_tickpediod * (block_num-previousmatchedblock)) ) && (j < track_dump->nb_of_pulses) );
 
-							tick_down_max = time_to_tick((unsigned long)((double)BLOCK_TIME*100 * (block_num-previousmatchedblock) * (double)0.05));
-							tick_up_max =   time_to_tick((unsigned long)((double)BLOCK_TIME*100 * (block_num-previousmatchedblock) * (double)0.05));
+							tick_down_max = time_to_tick((unsigned long)((double)BLOCK_TIME*100 * (block_num-previousmatchedblock) * (double)SEARCHDEPTH*2));
+							tick_up_max =   time_to_tick((unsigned long)((double)BLOCK_TIME*100 * (block_num-previousmatchedblock) * (double)SEARCHDEPTH*2));
 #ifdef FLUXSTREAMDBG
 							floppycontext->hxc_printf(MSG_DEBUG,"Block %d : Match block distance : %d",block_num,previousmatchedblock);
 #endif
@@ -1999,8 +2004,8 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 							}while( (cur_time_len < index_tickpediod) && (j < track_dump->nb_of_pulses) );
 
-							tick_down_max = time_to_tick((unsigned long)((double)indexperiod * (double)0.05));
-							tick_up_max =   time_to_tick((unsigned long)((double)indexperiod * (double)0.05));
+							tick_down_max = time_to_tick((unsigned long)((double)indexperiod * (double)SEARCHDEPTH*2));
+							tick_up_max =   time_to_tick((unsigned long)((double)indexperiod * (double)SEARCHDEPTH*2));
 
 #ifdef FLUXSTREAMDBG
 							floppycontext->hxc_printf(MSG_DEBUG,"Block %d : index distance (period : %d) tick_down_max : %d, tick_up_max : %d",block_num,indexperiod,tick_to_time(tick_down_max),tick_to_time(tick_up_max));
