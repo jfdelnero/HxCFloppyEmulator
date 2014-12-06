@@ -62,7 +62,7 @@
 
 #include "libhxcadaptor.h"
 
-#include "asm_mmx_routines.h"
+//#include "asm_mmx_routines.h"
 
 #define BASEINDEX 1
 
