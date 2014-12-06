@@ -70,6 +70,8 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	int sect_cnt;
 	int tracksize;
 	int tracksectsize;
+	int number_of_side;
+	int number_of_track;
 
 	pasti_fileheader header;
 	pasti_trackheader track_header;
@@ -84,21 +86,39 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	header.headertag[3] = 0;
 	header.codeversion1 = 3;
 	header.codeversion2 = 1;
+	header.unknowvalue  = 0x00;
 
 	header.number_of_track = (unsigned char)floppy->floppyNumberOfTrack;
-	if(floppy->floppyNumberOfSide&1)
-		header.number_of_track |= 0x80;
+
+	number_of_track = (unsigned char)floppy->floppyNumberOfTrack;
+	number_of_side = 1;
+
+	if(floppy->floppyNumberOfSide == 2)
+	{
+		header.number_of_track *= 2;
+		number_of_side = 2;
+	}
+
+	if(header.number_of_track > 0xA4 )
+	{
+		header.number_of_track = 0xA4;
+
+		if(number_of_side == 2)
+			number_of_track = 0xA4 / 2;
+		else
+			number_of_track = 0xA4;
+	}
 
 	stxdskfile = hxc_fopen(filename,"w+b");
 	if(stxdskfile)
 	{
 		fwrite(&header,sizeof(pasti_fileheader),1,stxdskfile);
 
-		for(i=0;i<floppy->floppyNumberOfTrack;i++)
+		for(i=0;i<number_of_track;i++)
 		{
-			for(j=0;j<floppy->floppyNumberOfSide;j++)
+			for(j=0;j<number_of_side;j++)
 			{
-				hxcfe_imgCallProgressCallback(imgldr_ctx,(i<<1) | (j&1),floppy->floppyNumberOfTrack*2 );
+				hxcfe_imgCallProgressCallback(imgldr_ctx,(i<<1) | (j&1),number_of_track*2 );
 
 				fseek(stxdskfile,0,SEEK_END);
 
@@ -137,8 +157,16 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 							sector_header.header_crc = (sc->header_crc>>8) | (sc->header_crc<<8);
 
 							sector_header.FDC_status = 0x00;
-							if(sc->use_alternate_data_crc)
-								sector_header.FDC_status = 0x88;
+							if(sc->input_data)
+							{
+								if(sc->use_alternate_data_crc)
+									sector_header.FDC_status = 0x08;
+							}
+							else
+							{
+								if(sc->use_alternate_header_crc)
+									sector_header.FDC_status = 0x18;
+							}
 							sector_header.sector_size = size_to_code(sc->sectorsize);
 
 							fwrite(&sector_header,sizeof(pasti_sector),1,stxdskfile);
