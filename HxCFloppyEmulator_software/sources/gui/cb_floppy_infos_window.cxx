@@ -485,12 +485,25 @@ int isTheRightSector(floppy_infos_window *fiw,s_sectorlist * sl,int xpos,int ypo
 			side = 1;
 		}
 
-		if( ( pos_angle>=sl->start_angle && pos_angle<=sl->end_angle ) &&
-			( distance>=(sl->diameter) && distance<=(sl->diameter + sl->thickness) ) &&
-			sl->side == side
-			)
+		if(sl->end_angle < PI*2)
 		{
-			return 1;
+			if( ( pos_angle>=sl->start_angle && pos_angle<=sl->end_angle ) &&
+				( distance>=(sl->diameter) && distance<=(sl->diameter + sl->thickness) ) &&
+				sl->side == side
+				)
+			{
+				return 1;
+			}
+		}
+		else
+		{	// Sector over index case...
+			if( ( pos_angle>=sl->start_angle || pos_angle<=(sl->end_angle-(PI*2)) ) &&
+				( distance>=(sl->diameter) && distance<=(sl->diameter + sl->thickness) ) &&
+				sl->side == side
+				)
+			{
+				return 1;
+			}
 		}
 
 	}
@@ -661,6 +674,18 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 				}
 
 				guicontext->updatefloppyinfos = 1;
+			}
+			else
+			{
+				fiw->track_view_bt->value(1);
+				fiw->disc_view_bt->value(0);
+				fiw->side_number_slide->activate();
+				fiw->track_number_slide->activate();
+				fiw->x_offset->activate();
+				fiw->x_time->activate();
+				fiw->y_time->activate();
+
+				hxc_setevent(guicontext->hxcfe,10);
 			}
 		}
 	}
