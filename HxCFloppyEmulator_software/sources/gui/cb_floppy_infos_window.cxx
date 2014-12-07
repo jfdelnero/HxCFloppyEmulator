@@ -253,7 +253,7 @@ void update_graph(floppy_infos_window * w)
 					w->buf->append((char*)tempstr);
 					sprintf(tempstr,"Track format : %s\n",hxcfe_getTrackEncodingName(guicontext->hxcfe, hxcfe_getTrackEncoding(guicontext->trackviewerfloppy,track,side) ) );
 					w->buf->append((char*)tempstr);
-					sprintf(tempstr,"Track len : %lu cells\n",hxcfe_getTrackLength(guicontext->trackviewerfloppy,track,side));
+					sprintf(tempstr,"Track len : %d cells\n",hxcfe_getTrackLength(guicontext->trackviewerfloppy,track,side));
 					w->buf->append((char*)tempstr);
 					sprintf(tempstr,"Number of side : %d\n",hxcfe_getTrackNumberOfSide(guicontext->trackviewerfloppy,track));
 					w->buf->append((char*)tempstr);
@@ -799,7 +799,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						hxcfe_getSectorConfigDCRC(guicontext->hxcfe,sl->sectorconfig),hxcfe_getSectorConfigDCRCStatus(guicontext->hxcfe,sl->sectorconfig)?"BAD CRC!":"Ok");
 					fiw->buf->append((char*)str);
 
-					sprintf(str,"Start Sector cell : %lu, Start Sector Data cell %lu, End Sector cell %lu\n",
+					sprintf(str,"Start Sector cell : %d, Start Sector Data cell %d, End Sector cell %d\n",
 						hxcfe_getSectorConfigStartSectorIndex(guicontext->hxcfe,sl->sectorconfig),
 						hxcfe_getSectorConfigStartDataIndex(guicontext->hxcfe,sl->sectorconfig),
 						hxcfe_getSectorConfigEndSectorIndex(guicontext->hxcfe,sl->sectorconfig));
@@ -807,14 +807,14 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 					if( hxcfe_getSectorConfigStartSectorIndex(guicontext->hxcfe,sl->sectorconfig) <= hxcfe_getSectorConfigEndSectorIndex(guicontext->hxcfe,sl->sectorconfig) )
 					{
-						sprintf(str,"Number of cells : %lu\n",
+						sprintf(str,"Number of cells : %d\n",
 							hxcfe_getSectorConfigEndSectorIndex(guicontext->hxcfe,sl->sectorconfig) - hxcfe_getSectorConfigStartSectorIndex(guicontext->hxcfe,sl->sectorconfig));
 					}
 					else
 					{
 						track=(int)fiw->track_number_slide->value();
 						side=(int)fiw->side_number_slide->value();
-						sprintf(str,"Number of cells : %lu\n",
+						sprintf(str,"Number of cells : %d\n",
 							( ( hxcfe_getTrackLength(guicontext->trackviewerfloppy,track,side) - hxcfe_getSectorConfigStartSectorIndex(guicontext->hxcfe,sl->sectorconfig) ) + hxcfe_getSectorConfigEndSectorIndex(guicontext->hxcfe,sl->sectorconfig) ) );
 					}
 
