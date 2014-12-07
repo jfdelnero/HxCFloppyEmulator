@@ -64,6 +64,8 @@
 
 #include <errno.h>
 
+#include <stdint.h>
+
 #include "libhxcfe.h"
 #include "usb_hxcfloppyemulator.h"
 #include "libhxcadaptor.h"
