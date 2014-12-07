@@ -27,6 +27,8 @@
 
 //#define DEBUGMODE 1
 
+#include <stdint.h>
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
@@ -60,7 +62,7 @@
 
 #if !defined(FTDILIB)
 
-typedef FT_STATUS (WINAPI * FT_OPEN)(int deviceNumber,	FT_HANDLE *pHandle);
+typedef FT_STATUS (WINAPI * FT_OPEN)(int32_t deviceNumber,	FT_HANDLE *pHandle);
 typedef FT_STATUS (WINAPI * FT_READ)( FT_HANDLE ftHandle,LPVOID lpBuffer,DWORD nBufferSize,LPDWORD lpBytesReturned);
 typedef FT_STATUS (WINAPI * FT_WRITE)(FT_HANDLE ftHandle,LPVOID lpBuffer,DWORD nBufferSize,LPDWORD lpBytesWritten);
 typedef FT_STATUS (WINAPI * FT_GETSTATUS)(FT_HANDLE ftHandle,DWORD *dwRxBytes,DWORD *dwTxBytes,DWORD *dwEventDWord);
@@ -85,17 +87,17 @@ FT_CLOSE pFT_Close;
 typedef void * ftdi_context;
 
 typedef ftdi_context ( * P_FTDI_NEW)();
-typedef int ( * P_FTDI_INIT)(ftdi_context ftdi);
-typedef int ( * P_FTDI_USB_OPEN)(ftdi_context ftdi, int vendor, int product);
-typedef int ( * P_FTDI_USB_CLOSE)(ftdi_context ftdi);
-typedef int ( * P_FTDI_USB_PURGE_RX_BUFFER)(ftdi_context ftdi);
-typedef int ( * P_FTDI_USB_PURGE_TX_BUFFER)(ftdi_context ftdi);
-typedef int ( * P_FTDI_USB_PURGE_BUFFERS)(ftdi_context ftdi);
-typedef int ( * P_FTDI_READ_DATA_SET_CHUNKSIZE)(ftdi_context ftdi, unsigned int chunksize);
-typedef int ( * P_FTDI_WRITE_DATA_SET_CHUNKSIZE)(ftdi_context ftdi, unsigned int chunksize);
-typedef int ( * P_FTDI_SET_LATENCY_TIMER)(ftdi_context ftdi, unsigned char latency);
-typedef int ( * P_FTDI_WRITE_DATA)(ftdi_context ftdi, unsigned char * buf, int size);
-typedef int ( * P_FTDI_READ_DATA)(ftdi_context ftdi, unsigned char * buf, int size);
+typedef int32_t ( * P_FTDI_INIT)(ftdi_context ftdi);
+typedef int32_t ( * P_FTDI_USB_OPEN)(ftdi_context ftdi, int32_t vendor, int32_t product);
+typedef int32_t ( * P_FTDI_USB_CLOSE)(ftdi_context ftdi);
+typedef int32_t ( * P_FTDI_USB_PURGE_RX_BUFFER)(ftdi_context ftdi);
+typedef int32_t ( * P_FTDI_USB_PURGE_TX_BUFFER)(ftdi_context ftdi);
+typedef int32_t ( * P_FTDI_USB_PURGE_BUFFERS)(ftdi_context ftdi);
+typedef int32_t ( * P_FTDI_READ_DATA_SET_CHUNKSIZE)(ftdi_context ftdi, uint32_t chunksize);
+typedef int32_t ( * P_FTDI_WRITE_DATA_SET_CHUNKSIZE)(ftdi_context ftdi, uint32_t chunksize);
+typedef int32_t ( * P_FTDI_SET_LATENCY_TIMER)(ftdi_context ftdi, unsigned char latency);
+typedef int32_t ( * P_FTDI_WRITE_DATA)(ftdi_context ftdi, unsigned char * buf, int32_t size);
+typedef int32_t ( * P_FTDI_READ_DATA)(ftdi_context ftdi, unsigned char * buf, int32_t size);
 
 P_FTDI_NEW                      p_ftdi_new;
 P_FTDI_INIT                     p_ftdi_init;
@@ -114,13 +116,13 @@ P_FTDI_READ_DATA                p_ftdi_read_data;
 
 EVENT_HANDLE * STOP_THREAD_EVENT;
 EVENT_HANDLE * READ_THREAD_EVENT;
-int stop_thread;
+int32_t stop_thread;
 
 ftdi_context * ftdic;
 
 typedef struct _DATA_FIFO{
-	unsigned long ptr_in;
-	unsigned long ptr_out;
+	uint32_t ptr_in;
+	uint32_t ptr_out;
 	unsigned char BUFFER[BUFFERSIZE];
 } DATA_FIFO;
 
@@ -149,12 +151,12 @@ void destroyevent(EVENT_HANDLE * theevent)
 	free(theevent);
 }
 
-int waitevent(EVENT_HANDLE* theevent,int timeout)
+int32_t waitevent(EVENT_HANDLE* theevent,int32_t timeout)
 {
 	struct timeval now;
 	struct timespec timeoutstr;
-	int retcode;
-	int ret;
+	int32_t retcode;
+	int32_t ret;
 
 	pthread_mutex_lock(&theevent->eMutex);
 	gettimeofday(&now,0);
@@ -177,7 +179,7 @@ int waitevent(EVENT_HANDLE* theevent,int timeout)
 
 // --------------------------------------------------------
 
-typedef int (*RDTHREADFUNCTION) (ftdi_context ftdihandle);
+typedef int32_t (*RDTHREADFUNCTION) (ftdi_context ftdihandle);
 
 typedef struct listenerthreadinit_
 {
@@ -198,9 +200,9 @@ void * FTDIListenerThreadProc( void *lpParameter)
 	return 0;
 }
 
-int FTDIListener(ftdi_context ftdihandle)
+int32_t FTDIListener(ftdi_context ftdihandle)
 {
-	int returnvalue,i;
+	int32_t returnvalue,i;
 	unsigned char * bufferptr;
 	
 	#ifdef DEBUGMODE
@@ -240,9 +242,9 @@ int FTDIListener(ftdi_context ftdihandle)
 	return 0;
 }
 
-int createlistenerthread(RDTHREADFUNCTION thread,int priority,ftdi_context ftdihandle)
+int32_t createlistenerthread(RDTHREADFUNCTION thread,int32_t priority,ftdi_context ftdihandle)
 {
-	unsigned long sit;
+	uint32_t sit;
 	pthread_t threadid;
 	listenerthreadinit *threadinitptr;
 	pthread_attr_t threadattrib;
@@ -271,7 +273,7 @@ int createlistenerthread(RDTHREADFUNCTION thread,int priority,ftdi_context ftdih
 
 #endif
 
-int ftdi_load_lib (HXCFE* floppycontext)
+int32_t ftdi_load_lib (HXCFE* floppycontext)
 {
 
 #ifdef DEBUGMODE
@@ -403,10 +405,10 @@ int ftdi_load_lib (HXCFE* floppycontext)
 	return -1;
 }
 
-int open_ftdichip(unsigned long * ftdihandle)
+int32_t open_ftdichip(uint32_t * ftdihandle)
 {
 
-	int i;
+	int32_t i;
 
 #ifdef DEBUGMODE
 	printf("---open_ftdichip---\n");
@@ -422,7 +424,7 @@ int open_ftdichip(unsigned long * ftdihandle)
 	else
 	{
 		stop_thread=0;
-		*ftdihandle=(unsigned long)(ftdic);
+		*ftdihandle=(uint32_t)(ftdic);
 		STOP_THREAD_EVENT=createevent();
 		READ_THREAD_EVENT=0;
 		tx_fifo.ptr_in=0;
@@ -457,7 +459,7 @@ int open_ftdichip(unsigned long * ftdihandle)
 	return -1;
 }
 
-int close_ftdichip(unsigned long ftdihandle)
+int32_t close_ftdichip(uint32_t ftdihandle)
 {
 
 #ifdef DEBUGMODE
@@ -482,9 +484,9 @@ int close_ftdichip(unsigned long ftdihandle)
 	return 0;
 }
 
-int purge_ftdichip(unsigned long ftdihandle,unsigned long buffer)
+int32_t purge_ftdichip(uint32_t ftdihandle,uint32_t buffer)
 {
-	int ret;
+	int32_t ret;
 
 #ifdef DEBUGMODE
 	printf("---purge_ftdichip---\n");
@@ -515,7 +517,7 @@ int purge_ftdichip(unsigned long ftdihandle,unsigned long buffer)
 	return 0;
 }
 
-int setusbparameters_ftdichip(unsigned long ftdihandle,unsigned long buffersizetx,unsigned long buffersizerx)
+int32_t setusbparameters_ftdichip(uint32_t ftdihandle,uint32_t buffersizetx,uint32_t buffersizerx)
 {
 
 #ifdef DEBUGMODE
@@ -538,7 +540,7 @@ int setusbparameters_ftdichip(unsigned long ftdihandle,unsigned long buffersizet
 	return 0;
 }
 
-int setlatencytimer_ftdichip(unsigned long ftdihandle,unsigned char latencytimer_ms)
+int32_t setlatencytimer_ftdichip(uint32_t ftdihandle,unsigned char latencytimer_ms)
 {
 
 #ifdef DEBUGMODE
@@ -564,12 +566,12 @@ int setlatencytimer_ftdichip(unsigned long ftdihandle,unsigned char latencytimer
 	return 0;
 }
 
-int write_ftdichip(unsigned long ftdihandle,unsigned char * buffer,unsigned int size)
+int32_t write_ftdichip(uint32_t ftdihandle,unsigned char * buffer,uint32_t size)
 {
 #if defined(FTDILIB)
-	int dwWritten;
+	int32_t dwWritten;
 #else
-	unsigned int dwWritten;
+	uint32_t dwWritten;
 #endif
 
 #ifdef DEBUGMODE
@@ -599,13 +601,13 @@ int write_ftdichip(unsigned long ftdihandle,unsigned char * buffer,unsigned int 
 
 }
 
-int read_ftdichip(unsigned long ftdihandle,unsigned char * buffer,unsigned int size)
+int32_t read_ftdichip(uint32_t ftdihandle,unsigned char * buffer,uint32_t size)
 {
 #if defined(FTDILIB)
-	int returnvalue;
-	int nb_of_byte;
+	int32_t returnvalue;
+	int32_t nb_of_byte;
 #else
-	unsigned int returnvalue;
+	uint32_t returnvalue;
 #endif
 
 #ifdef DEBUGMODE
@@ -642,10 +644,10 @@ int read_ftdichip(unsigned long ftdihandle,unsigned char * buffer,unsigned int s
 #endif
 }
 
-int getfifostatus_ftdichip(unsigned long ftdihandle,int * txlevel,int *rxlevel,unsigned long * event)
+int32_t getfifostatus_ftdichip(uint32_t ftdihandle,int32_t * txlevel,int32_t *rxlevel,uint32_t * event)
 {
 #if defined(FTDILIB)
-	long nb_of_byte,ptr_out;
+	int32_t nb_of_byte,ptr_out;
 #endif
 
 #ifdef DEBUGMODE
@@ -678,7 +680,7 @@ int getfifostatus_ftdichip(unsigned long ftdihandle,int * txlevel,int *rxlevel,u
 
 #else
 
-	if(pFT_GetStatus((FT_HANDLE*)ftdihandle,(unsigned int*)rxlevel,(unsigned int*)txlevel,(DWORD*)event)!=FT_OK)
+	if(pFT_GetStatus((FT_HANDLE*)ftdihandle,(uint32_t*)rxlevel,(uint32_t*)txlevel,(DWORD*)event)!=FT_OK)
 	{
 		return -1;
 	}
@@ -688,7 +690,7 @@ int getfifostatus_ftdichip(unsigned long ftdihandle,int * txlevel,int *rxlevel,u
 #endif
 }
 
-int seteventnotification_ftdichip(unsigned long ftdihandle,unsigned long eventmask,void * event)
+int32_t seteventnotification_ftdichip(uint32_t ftdihandle,uint32_t eventmask,void * event)
 {
 
 #ifdef DEBUGMODE

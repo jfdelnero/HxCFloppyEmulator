@@ -47,27 +47,27 @@
 
 typedef struct trackzone_
 {
-	int start;
-	int end;
-	unsigned long bitrate;
+	int32_t  start;
+	int32_t  end;
+	uint32_t bitrate;
 
-	unsigned char code1;
-	unsigned int code1lenint;
+	uint8_t  code1;
+	uint32_t code1lenint;
 
-	unsigned char code2;
-	unsigned int code2lenint;
+	uint8_t  code2;
+	uint32_t code2lenint;
 
 }trackzone;
 
 typedef struct trackpart_
 {
-	unsigned char code;
-	int len;
+	uint8_t code;
+	int32_t len;
 }trackpart;
 
 #define GRANULA 64
 
-int GetNewTrackRevolution(HXCFE* floppycontext,unsigned char * index_h0,unsigned char * datah0,unsigned int lendatah0,unsigned char * datah1,unsigned int lendatah1,unsigned char * randomh0,unsigned char * randomh1,long fixedbitrateh0,unsigned long * timeh0,long fixedbitrateh1,unsigned long * timeh1,unsigned char ** finalbuffer,unsigned char ** randomfinalbuffer,unsigned char readysignal,unsigned char diskchange,unsigned char writeprotect,unsigned char amigaready,unsigned char selectconfig);
+int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0,uint32_t lendatah0,uint8_t * datah1,uint32_t lendatah1,uint8_t * randomh0,uint8_t * randomh1,int32_t fixedbitrateh0,uint32_t * timeh0,int32_t fixedbitrateh1,uint32_t * timeh1,uint8_t ** finalbuffer_param,uint8_t ** randomfinalbuffer_param,uint8_t readysignal,uint8_t diskchange,uint8_t writeprotect,uint8_t amigaready,uint8_t selectconfig);
 
 
 
