@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\..\..\build\Release_libhxcadaptor"
 # PROP Target_Dir "..\..\..\build\"
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\..\libusbhxcfe\trunk\sources" /I "..\..\..\libhxcfe\trunk\sources" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D "_CRT_SECURE_NO_WARNINGS" /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\..\libusbhxcfe\trunk\sources" /I "..\..\..\libhxcadaptor\trunk\sources\win32" /I "..\..\..\libhxcfe\trunk\sources" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D "_CRT_SECURE_NO_WARNINGS" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x40c /d "NDEBUG"
 # ADD RSC /l 0x40c /d "NDEBUG"
@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\..\..\build\Debug_libhxcadaptor"
 # PROP Target_Dir "..\..\..\build\"
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\..\..\libusbhxcfe\trunk\sources" /I "..\..\..\libhxcfe\trunk\sources" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "_CRT_SECURE_NO_WARNINGS" /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\..\..\libusbhxcfe\trunk\sources" /I "..\..\..\libhxcadaptor\trunk\sources\win32" /I "..\..\..\libhxcfe\trunk\sources" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "_CRT_SECURE_NO_WARNINGS" /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x40c /d "_DEBUG"
 # ADD RSC /l 0x40c /d "_DEBUG"
