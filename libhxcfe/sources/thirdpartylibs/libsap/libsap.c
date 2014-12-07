@@ -23,6 +23,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+#include "types.h"
+
 #include "libsap.h"
 
 #include "libhxcfe.h"

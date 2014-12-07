@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -50,7 +52,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 	int density;
 	int interleave;
 	int file_offset;
-	unsigned int sectorsize;
+	int sectorsize;
 	unsigned char * diskimage;
 	int error;
 	HXCFE_SECTORACCESS* ss;
@@ -241,6 +243,4 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 	{
 		return HXCFE_INTERNALERROR;
 	}
-
-	return 0;
 }

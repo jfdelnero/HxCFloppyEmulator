@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -59,7 +61,7 @@ int JV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	int i,j,k,l;
 	int nbsector;
 	int sectorcount;
-	unsigned int sectorsize;
+	int sectorsize;
 	unsigned char density;
 	unsigned char flags;
 	FILE * jv3dskfile;

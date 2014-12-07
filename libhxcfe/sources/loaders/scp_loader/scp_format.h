@@ -368,32 +368,32 @@ TDH_OFFSET = 0x0C                  ; offset to flux data from start of TDH (1st 
 
 typedef struct scp_header_
 {
-	unsigned char sign[3];				// "SCP"
-	unsigned char version;				// Version<<4|Revision
-	unsigned char disk_type;
-	unsigned char number_of_revolution;
-	unsigned char start_track;
-	unsigned char end_track;
-	unsigned char flags;
-	unsigned char RFU_0;
-	unsigned char RFU_1;
-	unsigned char RFU_2;
-	unsigned long file_data_checksum;
+	uint8_t  sign[3];				// "SCP"
+	uint8_t  version;				// Version<<4|Revision
+	uint8_t  disk_type;
+	uint8_t  number_of_revolution;
+	uint8_t  start_track;
+	uint8_t  end_track;
+	uint8_t  flags;
+	uint8_t  RFU_0;
+	uint8_t  RFU_1;
+	uint8_t  RFU_2;
+	uint32_t file_data_checksum;
 }scp_header;
 
 typedef struct scp_index_pos_
 {
-	unsigned long index_time;
-	unsigned long track_length;
-	unsigned long track_offset;
+	uint32_t index_time;
+	uint32_t track_length;
+	uint32_t track_offset;
 }scp_index_pos;
 
 typedef struct scp_track_header_
 {
-	unsigned char trk_sign[3];				// "TRK"
-	unsigned char track_number;
+	uint8_t  trk_sign[3];				// "TRK"
+	uint8_t  track_number;
 	scp_index_pos index_position[5];
-	unsigned long track_data_checksum;
+	uint32_t track_data_checksum;
 }scp_track_header;
 
 #pragma pack()

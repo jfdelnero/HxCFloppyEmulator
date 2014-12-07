@@ -47,6 +47,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
@@ -61,10 +63,10 @@
 
 #include "libhxcadaptor.h"
 
-unsigned short filecheckcrc(FILE * f,unsigned long fileoffset,unsigned long size)
+uint16_t filecheckcrc(FILE * f,uint32_t fileoffset,uint32_t size)
 {
 	unsigned char crc16l,crc16h;
-	unsigned long temp_fileptr;
+	uint32_t temp_fileptr;
 	unsigned char buffer[512];
 	unsigned char crctable[32];
 	int i,s;
@@ -99,14 +101,14 @@ unsigned short filecheckcrc(FILE * f,unsigned long fileoffset,unsigned long size
 	}
 	fseek(f,temp_fileptr,SEEK_SET);
 
-	return (crc16l<<8) | crc16h;
+	return (uint16_t)((crc16l<<8) | crc16h);
 }
 
-unsigned long * bitrate_rle_unpack(unsigned long * packedbuffer,unsigned long len,unsigned long * outlen)
+uint32_t * bitrate_rle_unpack(uint32_t * packedbuffer,uint32_t len,uint32_t * outlen)
 {
-	unsigned long i,j,out_index;
-	unsigned long unpackedlen;
-	unsigned long * unpacked;
+	uint32_t i,j,out_index;
+	uint32_t unpackedlen;
+	uint32_t * unpacked;
 
 	// 0x80 00 00 00
 	// 1XXXXXXX 00 00 00
@@ -125,10 +127,10 @@ unsigned long * bitrate_rle_unpack(unsigned long * packedbuffer,unsigned long le
 	}
 
 	out_index = 0;
-	unpacked = malloc(unpackedlen * sizeof(unsigned long));
+	unpacked = malloc(unpackedlen * sizeof(uint32_t));
 	if(unpacked)
 	{
-		memset(unpacked,0,unpackedlen * sizeof(unsigned long));
+		memset(unpacked,0,unpackedlen * sizeof(uint32_t));
 
 		unpackedlen = 0;
 		for(i=0;i<len;i++)
@@ -188,8 +190,6 @@ int AFI_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AFI_libIsValidDiskFile : non AFI file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -200,19 +200,18 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	AFITRACKLIST trackliststruct;
 	AFITRACK track;
 	AFIDATA datablock;
-	unsigned int i,j,k;
-	unsigned long destLen;
+	int i,j;
+	uint32_t k,bytelen;
+	uint32_t destLen;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
-	unsigned long * tracklistoffset;
-	unsigned long * datalistoffset;
+	uint32_t * tracklistoffset;
+	uint32_t * datalistoffset;
 
 	unsigned char * temp_uncompressbuffer;
-	unsigned long * temp_uncompressbuffer_long;
+	uint32_t * temp_uncompressbuffer_long;
 
-	unsigned long * temp_timing;
-
-	unsigned long bytelen;
+	uint32_t * temp_timing;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AFI_libLoad_DiskFile %s",imgfile);
 
@@ -315,10 +314,10 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				return HXCFE_BADFILE;
 		}
 
-		tracklistoffset=(unsigned long*)malloc(trackliststruct.number_of_track*4);
-		fread(tracklistoffset,trackliststruct.number_of_track*4,1,f);
+		tracklistoffset=(uint32_t*)malloc(trackliststruct.number_of_track*sizeof(uint32_t));
+		fread(tracklistoffset,trackliststruct.number_of_track*sizeof(uint32_t),1,f);
 
-		for(i=0;i<trackliststruct.number_of_track;i++)
+		for(i=0;i<(int)trackliststruct.number_of_track;i++)
 		{
 			hxcfe_imgCallProgressCallback(imgldr_ctx,i,trackliststruct.number_of_track );
 
@@ -330,24 +329,28 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				return HXCFE_BADFILE;
 			}
 
-			if(filecheckcrc(f,header.track_list_offset+tracklistoffset[i],(track.number_of_data_chunk*sizeof(unsigned long))+sizeof(AFITRACK)+sizeof(unsigned short)))
+			if(filecheckcrc(f,header.track_list_offset+tracklistoffset[i],(track.number_of_data_chunk*sizeof(uint32_t))+sizeof(AFITRACK)+sizeof(unsigned short)))
 			{
 				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"bad track CRC !");
 				hxc_fclose(f);
 				return HXCFE_BADFILE;
 			}
 
-			datalistoffset=(unsigned long *)malloc(track.number_of_data_chunk*sizeof(unsigned long));
-			fread(datalistoffset,track.number_of_data_chunk*sizeof(unsigned long),1,f);
+			datalistoffset=(uint32_t *)malloc(track.number_of_data_chunk*sizeof(uint32_t));
+			fread(datalistoffset,track.number_of_data_chunk*sizeof(uint32_t),1,f);
 
 			if(!floppydisk->tracks[track.track_number])
 			{
 				floppydisk->tracks[track.track_number]=(HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
-				currentcylinder=floppydisk->tracks[track.track_number];
+				currentcylinder = floppydisk->tracks[track.track_number];
 				currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
 				currentcylinder->sides=(HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
 				memset(currentcylinder->sides,0,sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
 				currentcylinder->floppyRPM=0;//header.floppyRPM;
+			}
+			else
+			{
+				currentcylinder = floppydisk->tracks[track.track_number];
 			}
 
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
@@ -376,7 +379,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			currentside->track_encoding=UNKNOWN_ENCODING;
 			currentside->bitrate=250000;
 			currentside->flakybitsbuffer=0;
-			for(j=0;j<track.number_of_data_chunk;j++)
+			for(j=0;j<(int)track.number_of_data_chunk;j++)
 			{
 				fseek(f,header.track_list_offset+tracklistoffset[i]+datalistoffset[j],SEEK_SET);
 				fread(&datablock,sizeof(datablock),1,f);
@@ -470,7 +473,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 									temp_timing = malloc(datablock.packed_size);
 									fread(temp_timing,datablock.packed_size,1,f);
 
-									currentside->timingbuffer=malloc( bytelen * sizeof(unsigned long));
+									currentside->timingbuffer=malloc( bytelen * sizeof(uint32_t));
 
 									for(k=0;k<bytelen;k++)
 									{
@@ -497,7 +500,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								case AFI_COMPRESS_GZIP:
 
 
-									currentside->timingbuffer=malloc(bytelen * sizeof(unsigned long));
+									currentside->timingbuffer=malloc(bytelen * sizeof(uint32_t));
 
 									temp_uncompressbuffer=malloc(datablock.packed_size);
 									fread(temp_uncompressbuffer,datablock.packed_size,1,f);
@@ -707,7 +710,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int AFI_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 
-int AFI_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int AFI_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="HXC_AFI";

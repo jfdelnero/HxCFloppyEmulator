@@ -52,15 +52,15 @@ RETCODE adfReadEntryBlock(struct Volume* vol, SECTNUM nSect, struct bEntryBlock*
 RETCODE adfWriteDirBlock(struct Volume* vol, SECTNUM nSect, struct bDirBlock *dir);
 RETCODE adfWriteEntryBlock(struct Volume* vol, SECTNUM nSect, struct bEntryBlock *ent);
 
-char* adfAccess2String(long acc);
+char* adfAccess2String(int32_t acc);
 unsigned char adfIntlToUpper(unsigned char c);
 int adfGetHashValue(unsigned char *name, BOOL intl);
 void myToUpper( unsigned char *ostr, unsigned char *nstr, int,BOOL intl );
 PREFIX RETCODE adfChangeDir(struct Volume* vol, char *name);
 PREFIX RETCODE adfParentDir(struct Volume* vol);
-PREFIX RETCODE adfSetEntryAccess(struct Volume*, SECTNUM, char*, long);
+PREFIX RETCODE adfSetEntryAccess(struct Volume*, SECTNUM, char*, int32_t);
 PREFIX RETCODE adfSetEntryComment(struct Volume*, SECTNUM, char*, char*);
-SECTNUM adfNameToEntryBlk(struct Volume *vol, long ht[], char* name, 
+SECTNUM adfNameToEntryBlk(struct Volume *vol, int32_t ht[], char* name, 
     struct bEntryBlock *entry, SECTNUM *);
 
 PREFIX void printEntry(struct Entry* entry);

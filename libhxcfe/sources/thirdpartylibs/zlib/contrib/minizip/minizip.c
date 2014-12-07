@@ -182,14 +182,14 @@ void do_help()
 
 /* calculate the CRC32 of a file,
    because to encrypt a file, we need known the CRC32 of the file before */
-int getFileCrc(const char* filenameinzip,void*buf,unsigned long size_buf,unsigned long* result_crc)
+int getFileCrc(const char* filenameinzip,void*buf,uint32_t size_buf,uint32_t* result_crc)
 {
-   unsigned long calculate_crc=0;
+   uint32_t calculate_crc=0;
    int err=ZIP_OK;
    FILE * fin = FOPEN_FUNC(filenameinzip,"rb");
 
-   unsigned long size_read = 0;
-   unsigned long total_read = 0;
+   uint32_t size_read = 0;
+   uint32_t total_read = 0;
    if (fin==NULL)
    {
        err = ZIP_ERRNO;
@@ -400,7 +400,7 @@ int main(argc,argv)
                 const char* filenameinzip = argv[i];
                 const char *savefilenameinzip;
                 zip_fileinfo zi;
-                unsigned long crcFile=0;
+                uint32_t crcFile=0;
                 int zip64 = 0;
 
                 zi.tmz_date.tm_sec = zi.tmz_date.tm_min = zi.tmz_date.tm_hour =

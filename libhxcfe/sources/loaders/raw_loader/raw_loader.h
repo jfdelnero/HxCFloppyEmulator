@@ -24,26 +24,23 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 */
-
-
-
 	typedef struct cfgrawfile_
 	{
-		unsigned char sectorpertrack;
-		unsigned char sectorsize;
-		unsigned long numberoftrack;
-		unsigned char tracktype;
-		unsigned char sidecfg;	
-		unsigned long gap3;
-		unsigned long rpm;
-		unsigned long bitrate;
-		unsigned char interleave;
-		unsigned char firstidsector;
-		unsigned char skew;
-		unsigned char autogap3;
-		unsigned char fillvalue;
-		unsigned char intersidesectornumbering;
-		unsigned char sideskew;
+		uint8_t  sectorpertrack;
+		uint8_t  sectorsize;
+		uint32_t numberoftrack;
+		uint8_t  tracktype;
+		uint8_t  sidecfg;	
+		uint32_t gap3;
+		uint32_t rpm;
+		uint32_t bitrate;
+		uint8_t  interleave;
+		uint8_t  firstidsector;
+		uint8_t  skew;
+		uint8_t  autogap3;
+		uint8_t  fillvalue;
+		uint8_t  intersidesectornumbering;
+		uint8_t  sideskew;
 	}cfgrawfile;
 
 	enum
@@ -57,14 +54,14 @@
 
 	typedef struct track_type_
 	{
-		int id;
+		int32_t id;
 		char * name;
-		int tracktype;
+		int32_t tracktype;
 	}track_type;
 
 	typedef struct sectorsize_type_
 	{
-		int id;
+		int32_t id;
 		char * name;
 
 	}sectorsize_type;
@@ -73,4 +70,4 @@
 	#define SIDE_INVERTED 0x04
 	#define SIDE0_FIRST 0x08
 
-int RAW_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue);
+int32_t RAW_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue);

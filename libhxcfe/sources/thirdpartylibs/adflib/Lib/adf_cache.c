@@ -588,10 +588,10 @@ RETCODE adfReadDirCBlock(struct Volume *vol, SECTNUM nSect, struct bDirCacheBloc
  * adfWriteDirCblock
  *
  */
-RETCODE adfWriteDirCBlock(struct Volume* vol, long nSect, struct bDirCacheBlock* dirc)
+RETCODE adfWriteDirCBlock(struct Volume* vol, int32_t nSect, struct bDirCacheBlock* dirc)
 {
     unsigned char buf[LOGICAL_BLOCK_SIZE];
-    unsigned long newSum;
+    uint32_t newSum;
  
     dirc->type = T_DIRC;
     dirc->headerKey = nSect; 
@@ -603,7 +603,7 @@ RETCODE adfWriteDirCBlock(struct Volume* vol, long nSect, struct bDirCacheBlock*
 
     newSum = adfNormalSum(buf, 20, LOGICAL_BLOCK_SIZE);
     swLong(buf+20,newSum);
-/*    *(long*)(buf+20) = swapLong((unsigned char*)&newSum);*/
+/*    *(int32_t*)(buf+20) = swapLong((unsigned char*)&newSum);*/
 
     if (adfWriteBlock(vol, nSect, buf)!=RC_OK)
 		return RC_ERROR;

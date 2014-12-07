@@ -47,6 +47,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 #include "./tracks/track_generator.h"
@@ -86,17 +88,15 @@ int ADZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile : non ADZ file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 int ADZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	unsigned int filesize;
-	unsigned int i,j;
+	int32_t i,j;
 	unsigned int file_offset;
-	unsigned short sectorsize;
-	unsigned char gap3len,skew,trackformat,interleave;
+	int32_t sectorsize;
+	int32_t gap3len,skew,trackformat,interleave;
 	unsigned char* flatimg;
 	gzFile file;
 	int err;
@@ -133,11 +133,12 @@ int ADZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	if(flatimg)
 	{
-		sectorsize=512;
-		interleave=1;
-		gap3len=0;
-		skew=0;
-		trackformat=AMIGAFORMAT_DD;
+		sectorsize = 512;
+		interleave = 1;
+		gap3len = 0;
+		skew = 0;
+		file_offset = 0;
+		trackformat = AMIGAFORMAT_DD;
 
 		floppydisk->floppySectorPerTrack=11;
 		floppydisk->floppyNumberOfSide=2;
@@ -164,7 +165,7 @@ int ADZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		}
 
 		// Add 4 empty tracks
-		for(j=floppydisk->floppyNumberOfTrack;j<(unsigned int)(floppydisk->floppyNumberOfTrack + 4);j++)
+		for(j=floppydisk->floppyNumberOfTrack;j<(floppydisk->floppyNumberOfTrack + 4);j++)
 		{
 			floppydisk->tracks[j]=allocCylinderEntry(DEFAULT_AMIGA_RPM,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
@@ -185,7 +186,7 @@ int ADZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_BADFILE;
 }
 
-int ADZ_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int ADZ_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="AMIGA_ADZ";

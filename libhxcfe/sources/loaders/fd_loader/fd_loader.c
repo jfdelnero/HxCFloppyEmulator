@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -89,8 +90,6 @@ int FD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FD_libIsValidDiskFile : non TO8D FD file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 
@@ -99,12 +98,12 @@ int FD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 {
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j;
+	int i,j;
 	unsigned int file_offset;
 	unsigned char* trackdata;
-	unsigned char  gap3len,interleave,trackformat,skew;
-	unsigned short rpm;
-	unsigned short sectorsize;
+	int gap3len,interleave,trackformat,skew;
+	int rpm;
+	int sectorsize;
 	HXCFE_CYLINDER* currentcylinder;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"fd_libLoad_DiskFile %s",imgfile);
@@ -179,7 +178,7 @@ int FD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 	return HXCFE_NOERROR;
 }
 
-int FD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int FD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="THOMSON_FD";

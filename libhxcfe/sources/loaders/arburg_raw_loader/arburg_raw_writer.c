@@ -28,6 +28,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -115,7 +117,7 @@ int ARBURG_RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,
 							{
 								if(sca[k]->sector==l)
 								{
-									if(sca[k]->sectorsize!=(unsigned int)sectorsize)
+									if(sca[k]->sectorsize!=sectorsize)
 									{
 										sectorsize=-1;
 									}

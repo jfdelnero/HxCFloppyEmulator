@@ -29,29 +29,29 @@
 
 typedef struct picfileformatheader_
 {
-	unsigned char HEADERSIGNATURE[8];
-	unsigned char formatrevision;
-	unsigned char number_of_track;
-	unsigned char number_of_side;
-	unsigned char track_encoding;
-	unsigned short bitRate;
-	unsigned short floppyRPM;
-	unsigned char floppyinterfacemode;
-	unsigned char write_protected;
-	unsigned short track_list_offset;
-	unsigned char write_allowed;
-	unsigned char single_step;
-	unsigned char track0s0_altencoding;
-	unsigned char track0s0_encoding;
-	unsigned char track0s1_altencoding;
-	unsigned char track0s1_encoding;
+	uint8_t  HEADERSIGNATURE[8];
+	uint8_t  formatrevision;
+	uint8_t  number_of_track;
+	uint8_t  number_of_side;
+	uint8_t  track_encoding;
+	uint16_t bitRate;
+	uint16_t floppyRPM;
+	uint8_t  floppyinterfacemode;
+	uint8_t  write_protected;
+	uint16_t track_list_offset;
+	uint8_t  write_allowed;
+	uint8_t  single_step;
+	uint8_t  track0s0_altencoding;
+	uint8_t  track0s0_encoding;
+	uint8_t  track0s1_altencoding;
+	uint8_t  track0s1_encoding;
 }picfileformatheader;
 
 
 typedef struct pictrack_
 {
-	unsigned short offset;
-	unsigned short track_len;
+	uint16_t offset;
+	uint16_t track_len;
 }pictrack;
 
 #pragma pack()
@@ -60,29 +60,29 @@ typedef struct pictrack_
 
 typedef struct picfileformatextheader_
 {
-	unsigned char HEADERSIGNATURE[8];
-	unsigned char formatrevision;
-	unsigned char number_of_track;
-	unsigned char number_of_side;
-	unsigned char track_encoding;
-	unsigned short bitRate;
-	unsigned short floppyRPM;
-	unsigned char floppyinterfacemode;
-	unsigned char write_protected;
-	unsigned short track_list_offset;
-	unsigned char write_allowed;
-	unsigned char single_step;
-	unsigned char track0s0_altencoding;
-	unsigned char track0s0_encoding;
-	unsigned char track0s1_altencoding;
-	unsigned char track0s1_encoding;
+	uint8_t  HEADERSIGNATURE[8];
+	uint8_t  formatrevision;
+	uint8_t  number_of_track;
+	uint8_t  number_of_side;
+	uint8_t  track_encoding;
+	uint16_t bitRate;
+	uint16_t floppyRPM;
+	uint8_t  floppyinterfacemode;
+	uint8_t  write_protected;
+	uint16_t track_list_offset;
+	uint8_t  write_allowed;
+	uint8_t  single_step;
+	uint8_t  track0s0_altencoding;
+	uint8_t  track0s0_encoding;
+	uint8_t  track0s1_altencoding;
+	uint8_t  track0s1_encoding;
 }picfileformatextheader;
 
 
 typedef struct picexttrack_
 {
-	unsigned short offset;
-	unsigned short track_len;
+	uint16_t offset;
+	uint16_t track_len;
 }picexttrack;
 
 #pragma pack()

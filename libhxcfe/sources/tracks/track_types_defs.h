@@ -2,81 +2,81 @@
 typedef struct isoibm_config_
 {
 	// format index
-	int             indexformat;
+	int32_t   indexformat;
 
 	// post index gap4 config
-	unsigned char   data_gap4a;
-	unsigned int    len_gap4a;
+	uint8_t   data_gap4a;
+	int32_t   len_gap4a;
 
 	// index sync config
-	unsigned char   data_isync;
-	unsigned int    len_isync;
+	uint8_t   data_isync;
+	int32_t   len_isync;
 
 	// index mark coding
-	unsigned char   data_indexmarkp1;
-	unsigned char   clock_indexmarkp1;
-	unsigned char   len_indexmarkp1;
+	uint8_t   data_indexmarkp1;
+	uint8_t   clock_indexmarkp1;
+	int32_t   len_indexmarkp1;
 
-	unsigned char   data_indexmarkp2;
-	unsigned char   clock_indexmarkp2;
-	unsigned char   len_indexmarkp2;
+	uint8_t   data_indexmarkp2;
+	uint8_t   clock_indexmarkp2;
+	int32_t   len_indexmarkp2;
 
 	// gap1 config
 
-	unsigned char   data_gap1;
-	unsigned int    len_gap1;
+	uint8_t   data_gap1;
+	int32_t   len_gap1;
 
 	// h sync config
-	unsigned char   data_ssync;
-	unsigned int    len_ssync;
+	uint8_t   data_ssync;
+	int32_t   len_ssync;
 
 	// d sync config
-	unsigned char   data_dsync;
-	unsigned int    len_dsync;
+	uint8_t   data_dsync;
+	int32_t   len_dsync;
 
 	// address mark coding
-	unsigned char   data_addrmarkp1;
-	unsigned char   clock_addrmarkp1;
-	unsigned char   len_addrmarkp1;
+	uint8_t   data_addrmarkp1;
+	uint8_t   clock_addrmarkp1;
+	int32_t   len_addrmarkp1;
 
-	unsigned char   data_addrmarkp2;
-	unsigned char   clock_addrmarkp2;
-	unsigned char   len_addrmarkp2;
+	uint8_t   data_addrmarkp2;
+	uint8_t   clock_addrmarkp2;
+	int32_t   len_addrmarkp2;
 
 	// gap2 config
-	unsigned char   data_gap2;
-	unsigned int    len_gap2;
+	uint8_t   data_gap2;
+	int32_t   len_gap2;
 
 	// data mark coding
-	unsigned char   data_datamarkp1;
-	unsigned char   clock_datamarkp1;
-	unsigned char   len_datamarkp1;
+	uint8_t   data_datamarkp1;
+	uint8_t   clock_datamarkp1;
+	int32_t   len_datamarkp1;
 
-	unsigned char   data_datamarkp2;
-	unsigned char   clock_datamarkp2;
-	unsigned char   len_datamarkp2;
+	uint8_t   data_datamarkp2;
+	uint8_t   clock_datamarkp2;
+	int32_t   len_datamarkp2;
 
 	// gap3 config
-	unsigned char   data_gap3;
-	unsigned int    len_gap3;
+	uint8_t   data_gap3;
+	int32_t   len_gap3;
 
-	unsigned char   data_gap4b;
-	unsigned int    len_gap4b;
+	uint8_t   data_gap4b;
+	int32_t   len_gap4b;
 
-	unsigned char   track_id;
-	unsigned char   side_id;
-	unsigned char   sector_id;
-	unsigned char   sector_size_id;
+	uint8_t   track_id;
+	uint8_t   side_id;
+	uint8_t   sector_id;
+	uint8_t   sector_size_id;
 
-	unsigned short  crc_poly,crc_initial;
+	uint16_t  crc_poly,crc_initial;
 
-	unsigned char   posthcrc_glitch_data;
-	unsigned char   posthcrc_glitch_clock;
-	unsigned char   posthcrc_len;
+	uint8_t   posthcrc_glitch_data;
+	uint8_t   posthcrc_glitch_clock;
+	int32_t   posthcrc_len;
 
-	unsigned char   postdcrc_glitch_data;
-	unsigned char   postdcrc_glitch_clock;
-	unsigned char   postdcrc_len;
+	uint8_t   postdcrc_glitch_data;
+	uint8_t   postdcrc_glitch_clock;
+	int32_t   postdcrc_len;
 
 }isoibm_config;
 

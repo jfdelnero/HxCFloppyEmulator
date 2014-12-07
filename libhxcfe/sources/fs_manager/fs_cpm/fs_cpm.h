@@ -13,7 +13,7 @@ int cpm_createDir( HXCFE_FSMNG * fsmng,char * foldername);
 int cpm_removeDir( HXCFE_FSMNG * fsmng,char * foldername);
 
 int cpm_ftell( HXCFE_FSMNG * fsmng,int filehandle);
-int cpm_fseek( HXCFE_FSMNG * fsmng,int filehandle,long offset,int origin);
+int cpm_fseek( HXCFE_FSMNG * fsmng,int filehandle,int32_t offset,int origin);
 
 int cpm_openDir(HXCFE_FSMNG * fsmng, char * path);
 int cpm_readDir(HXCFE_FSMNG * fsmng,int dirhandle,HXCFE_FSENTRY * dirent);

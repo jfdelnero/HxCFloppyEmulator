@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -60,23 +61,25 @@
 
 #include "libhxcadaptor.h"
 
+#pragma pack(1)
 typedef struct ti99_vib
 {
-		char    name[10];			  // volume name (10 characters, pad with spaces)
-		unsigned char totsecsMSB;     // disk length in sectors (big-endian) (usually 360, 720 or 1440)
-		unsigned char totsecsLSB;
-		unsigned char secspertrack;   // sectors per track (usually 9 (FM) or 18 (MFM))
-		unsigned char id[3];          // String "DSK"
-		unsigned char protection;     // 'P' if disk is protected, ' ' otherwise.
-		unsigned char tracksperside;  // tracks per side (usually 40)
-		unsigned char sides;          // sides (1 or 2)
-		unsigned char density;        // 0,1 (FM) or 2,3,4 (MFM)
-		unsigned char res[36];        // Empty for traditional disks, or up to 3 directory pointers
-		unsigned char abm[200];       // allocation bitmap: a 1 for each sector in use (sector 0 is LSBit of byte 0,
-									  // sector 7 is MSBit of byte 0, sector 8 is LSBit of byte 1, etc.)
+		int8_t  name[10];		// volume name (10 characters, pad with spaces)
+		uint8_t totsecsMSB;     // disk length in sectors (big-endian) (usually 360, 720 or 1440)
+		uint8_t totsecsLSB;
+		uint8_t secspertrack;   // sectors per track (usually 9 (FM) or 18 (MFM))
+		uint8_t id[3];          // String "DSK"
+		uint8_t protection;     // 'P' if disk is protected, ' ' otherwise.
+		uint8_t tracksperside;  // tracks per side (usually 40)
+		uint8_t sides;          // sides (1 or 2)
+		uint8_t density;        // 0,1 (FM) or 2,3,4 (MFM)
+		uint8_t res[36];        // Empty for traditional disks, or up to 3 directory pointers
+		uint8_t abm[200];       // allocation bitmap: a 1 for each sector in use (sector 0 is LSBit of byte 0,
+								// sector 7 is MSBit of byte 0, sector 8 is LSBit of byte 1, etc.)
 } ti99_vib;
+#pragma pack()
 
-int getDiskGeometry(FILE * f,unsigned short * numberoftrack,unsigned char * numberofside,unsigned short * numberofsector,unsigned char * skewside0,unsigned char * skewside1,unsigned char * interleave,int * density,unsigned int * bitrate,unsigned short * sectorsize)
+int getDiskGeometry(FILE * f,int * numberoftrack,int * numberofside,int * numberofsector,int * skewside0,int * skewside1,int * interleave,int * density,int * bitrate,int * sectorsize)
 {
 	int totsecs,filesize;
 	ti99_vib vib;
@@ -298,11 +301,11 @@ int getDiskGeometry(FILE * f,unsigned short * numberoftrack,unsigned char * numb
 int TI99V9T9_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	FILE * f;
-	unsigned short numberoftrack,numberofsector;
-	unsigned char skew0,skew1,interleave,numberofside;
+	int numberoftrack,numberofsector;
+	int skew0,skew1,interleave,numberofside;
 	int density;
-	unsigned short sectorsize;
-	unsigned int bitrate;
+	int sectorsize;
+	int bitrate;
 	int ret;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99V9T9_libIsValidDiskFile");
@@ -358,12 +361,12 @@ int TI99V9T9_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	FILE * f;
 	unsigned int filesize;
-	unsigned short i,j,sectorsize;
+	int i,j,sectorsize;
 	unsigned int file_offset;
-	unsigned char skew0,skew1,skew,interleave,gap3len;
+	int skew0,skew1,skew,interleave,gap3len;
 	unsigned char* trackdata;
-	unsigned char trackformat;
-	unsigned short rpm;
+	int trackformat;
+	int rpm;
 	int density;
 	HXCFE_CYLINDER* currentcylinder;
 
@@ -446,7 +449,7 @@ int TI99V9T9_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	return HXCFE_BADFILE;
 }
 
-int TI99V9T9_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int TI99V9T9_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="TI994A_V9T9";

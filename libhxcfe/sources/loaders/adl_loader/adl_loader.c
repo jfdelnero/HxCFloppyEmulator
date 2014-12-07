@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 #include "./tracks/track_generator.h"
@@ -88,8 +89,6 @@ int ADL_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADL_libIsValidDiskFile : non Acorn BBC ADL file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 
@@ -172,7 +171,7 @@ int ADL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_FILECORRUPTED;
 }
 
-int ADL_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int ADL_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="BBC_ADL";

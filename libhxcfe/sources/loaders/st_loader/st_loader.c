@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -61,11 +62,11 @@
 
 #include "libhxcadaptor.h"
 
-int getfloppyconfig(unsigned char * img,unsigned int filesize,unsigned short *numberoftrack,unsigned char *numberofside,unsigned short *numberofsectorpertrack,unsigned char *gap3len,unsigned char *interleave)
+int getfloppyconfig(unsigned char * img,unsigned int filesize,int *numberoftrack,int *numberofside,int *numberofsectorpertrack,unsigned char *gap3len,unsigned char *interleave)
 {
 	int i;
-	unsigned char  nb_of_side,nb_of_track,nb_of_sector;
-	unsigned short numberofsector;
+	int nb_of_side,nb_of_track,nb_of_sector;
+	int numberofsector;
 	unsigned char  * uimg;
 	unsigned char  conffound;
 
@@ -206,8 +207,6 @@ int ST_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ST_libIsValidDiskFile : non ST file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 int ST_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -333,7 +332,7 @@ int ST_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 	return HXCFE_BADFILE;
 }
 
-int ST_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int ST_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ATARIST_ST";

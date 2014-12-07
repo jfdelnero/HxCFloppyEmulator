@@ -65,7 +65,7 @@ extern void                  _Expat_XML_SetNotationDeclHandler(struct ExpatIFace
 extern void                  _Expat_XML_SetNotStandaloneHandler(struct ExpatIFace *, XML_Parser parser, XML_NotStandaloneHandler handler);
 extern enum XML_Error        _Expat_XML_GetErrorCode(struct ExpatIFace *, XML_Parser parser);
 extern const XML_LChar *     _Expat_XML_ErrorString(struct ExpatIFace *, enum XML_Error code);
-extern long                  _Expat_XML_GetCurrentByteIndex(struct ExpatIFace *, XML_Parser parser);
+extern int32_t                  _Expat_XML_GetCurrentByteIndex(struct ExpatIFace *, XML_Parser parser);
 extern int                   _Expat_XML_GetCurrentLineNumber(struct ExpatIFace *, XML_Parser parser);
 extern int                   _Expat_XML_GetCurrentColumnNumber(struct ExpatIFace *, XML_Parser parser);
 extern int                   _Expat_XML_GetCurrentByteCount(struct ExpatIFace *, XML_Parser parser);
@@ -364,7 +364,7 @@ const XML_LChar * _Expat_XML_ErrorString(struct ExpatIFace * Self, enum XML_Erro
 	return XML_ErrorString(code);
 }
 
-long _Expat_XML_GetCurrentByteIndex(struct ExpatIFace * Self, XML_Parser parser)
+int32_t _Expat_XML_GetCurrentByteIndex(struct ExpatIFace * Self, XML_Parser parser)
 {
 	return XML_GetCurrentByteIndex(parser);
 }

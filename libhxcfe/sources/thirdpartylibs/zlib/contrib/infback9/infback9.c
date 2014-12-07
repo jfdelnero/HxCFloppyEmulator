@@ -140,7 +140,7 @@ void makefixed9(void)
     do { \
         PULL(); \
         have--; \
-        hold += (unsigned long)(*next++) << bits; \
+        hold += (uint32_t)(*next++) << bits; \
         bits += 8; \
     } while (0)
 
@@ -225,17 +225,17 @@ void FAR *out_desc;
     z_const unsigned char FAR *next;    /* next input */
     unsigned char FAR *put;     /* next output */
     unsigned have;              /* available input */
-    unsigned long left;         /* available output */
+    uint32_t left;         /* available output */
     inflate_mode mode;          /* current inflate mode */
     int lastblock;              /* true if processing last block */
     int wrap;                   /* true if the window has wrapped */
     unsigned char FAR *window;  /* allocated sliding window, if needed */
-    unsigned long hold;         /* bit buffer */
+    uint32_t hold;         /* bit buffer */
     unsigned bits;              /* bits in bit buffer */
     unsigned extra;             /* extra bits needed */
-    unsigned long length;       /* literal or length of data to copy */
-    unsigned long offset;       /* distance back to copy string from */
-    unsigned long copy;         /* number of stored or match bytes to copy */
+    uint32_t length;       /* literal or length of data to copy */
+    uint32_t offset;       /* distance back to copy string from */
+    uint32_t copy;         /* number of stored or match bytes to copy */
     unsigned char FAR *from;    /* where to copy match bytes from */
     code const FAR *lencode;    /* starting table for length/literal codes */
     code const FAR *distcode;   /* starting table for distance codes */

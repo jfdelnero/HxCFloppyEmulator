@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -88,8 +89,6 @@ int Prophet_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Prophet_libIsValidDiskFile : non Prophet file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 int Prophet_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -97,13 +96,13 @@ int Prophet_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j,k;
+	int i,j,k;
 	unsigned int file_offset;
 	unsigned char* trackdata;
-	unsigned char gap3len,interleave;
-	unsigned short rpm,sectorsize;
-	unsigned short numberofsector;
-	unsigned char trackformat;
+	int gap3len,interleave;
+	int rpm,sectorsize;
+	int numberofsector;
+	int trackformat;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SECTCFG  sectorconfig[6];
 
@@ -201,7 +200,7 @@ int Prophet_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 	return HXCFE_BADFILE;
 }
 
-int Prophet_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int Prophet_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="PROPHET2000";

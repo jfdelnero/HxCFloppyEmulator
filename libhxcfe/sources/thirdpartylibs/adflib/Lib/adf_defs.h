@@ -31,15 +31,20 @@
 #define ADFLIB_VERSION "0.7.11a"
 #define ADFLIB_DATE "January 20th, 2007"
 
-#define SECTNUM long
-#define RETCODE long
+#define SECTNUM int32_t
+#define RETCODE int32_t
 
+#ifndef TRUE
 #define TRUE    1
-#define FALSE   0
+#endif
 
-#define ULONG   unsigned long
-#define USHORT  unsigned short
-#define UCHAR   unsigned char
+#ifndef FALSE
+#define FALSE    0
+#endif
+
+#define ULONG   uint32_t
+#define USHORT  uint16_t
+#define UCHAR   uint8_t
 #define BOOL    int
 
 

@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -104,12 +105,12 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	FILE * f;
 	apridisk_data_record * data_record;
 	apridisk_compressed_data * compressed_dataitem;
-	unsigned int i,j;
+	int i,j;
 	HXCFE_SECTCFG* sectorconfig;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
-	unsigned short rpm;
-	unsigned char  interleave;
+	int rpm;
+	int interleave;
 
 	int number_of_track,number_of_sector;
 	int totalfilesize,k;
@@ -366,7 +367,7 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	return HXCFE_NOERROR;
 }
 
-int ApriDisk_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int ApriDisk_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="APRIDISK";

@@ -150,7 +150,7 @@ RETCODE adfMountHdFile(struct Device *dev)
 {
     struct Volume* vol;
     unsigned char buf[512];
-    long size;
+    int32_t size;
     BOOL found;
 
     dev->devType = DEVTYPE_HARDFILE;
@@ -211,7 +211,7 @@ RETCODE adfMountHd(struct Device *dev)
     struct bPARTblock part;
     struct bFSHDblock fshd;
 	struct bLSEGblock lseg;
-	long next;
+	int32_t next;
     struct List *vList, *listRoot;
     int i;
     struct Volume* vol;
@@ -733,7 +733,7 @@ adfReadRDSKblock( struct Device* dev, struct bRDSKblock* blk )
 adfWriteRDSKblock(struct Device *dev, struct bRDSKblock* rdsk)
 {
     unsigned char buf[LOGICAL_BLOCK_SIZE];
-    unsigned long newSum;
+    uint32_t newSum;
     struct nativeFunctions *nFct;
     RETCODE rc2, rc = RC_OK;
 
@@ -745,7 +745,7 @@ adfWriteRDSKblock(struct Device *dev, struct bRDSKblock* rdsk)
     memset(buf,0,LOGICAL_BLOCK_SIZE);
 
     strncpy(rdsk->id,"RDSK",4);
-    rdsk->size = sizeof(struct bRDSKblock)/sizeof(long);
+    rdsk->size = sizeof(struct bRDSKblock)/sizeof(int32_t);
     rdsk->blockSize = LOGICAL_BLOCK_SIZE;
     rdsk->badBlockList = -1;
 
@@ -779,7 +779,7 @@ adfWriteRDSKblock(struct Device *dev, struct bRDSKblock* rdsk)
  *
  */
     RETCODE
-adfReadPARTblock( struct Device* dev, long nSect, struct bPARTblock* blk )
+adfReadPARTblock( struct Device* dev, int32_t nSect, struct bPARTblock* blk )
 {
     UCHAR buf[ sizeof(struct bPARTblock) ];
     struct nativeFunctions *nFct;
@@ -825,10 +825,10 @@ adfReadPARTblock( struct Device* dev, long nSect, struct bPARTblock* blk )
  *
  */
     RETCODE
-adfWritePARTblock(struct Device *dev, long nSect, struct bPARTblock* part)
+adfWritePARTblock(struct Device *dev, int32_t nSect, struct bPARTblock* part)
 {
     unsigned char buf[LOGICAL_BLOCK_SIZE];
-    unsigned long newSum;
+    uint32_t newSum;
     struct nativeFunctions *nFct;
     RETCODE rc2, rc = RC_OK;
 	
@@ -840,7 +840,7 @@ adfWritePARTblock(struct Device *dev, long nSect, struct bPARTblock* part)
     memset(buf,0,LOGICAL_BLOCK_SIZE);
 
     strncpy(part->id,"PART",4);
-    part->size = sizeof(struct bPARTblock)/sizeof(long);
+    part->size = sizeof(struct bPARTblock)/sizeof(int32_t);
     part->blockSize = LOGICAL_BLOCK_SIZE;
     part->vectorSize = 16;
 	part->blockSize = 128;
@@ -854,7 +854,7 @@ adfWritePARTblock(struct Device *dev, long nSect, struct bPARTblock* part)
 
     newSum = adfNormalSum(buf, 8, LOGICAL_BLOCK_SIZE);
     swLong(buf+8, newSum);
-/*    *(long*)(buf+8) = swapLong((unsigned char*)&newSum);*/
+/*    *(int32_t*)(buf+8) = swapLong((unsigned char*)&newSum);*/
 
     nFct = adfEnv.nativeFct;
     if (dev->isNativeDev)
@@ -872,7 +872,7 @@ adfWritePARTblock(struct Device *dev, long nSect, struct bPARTblock* part)
  *
  */
     RETCODE
-adfReadFSHDblock( struct Device* dev, long nSect, struct bFSHDblock* blk)
+adfReadFSHDblock( struct Device* dev, int32_t nSect, struct bFSHDblock* blk)
 {
     UCHAR buf[sizeof(struct bFSHDblock)];
     struct nativeFunctions *nFct;
@@ -912,10 +912,10 @@ adfReadFSHDblock( struct Device* dev, long nSect, struct bFSHDblock* blk)
  *
  */
     RETCODE
-adfWriteFSHDblock(struct Device *dev, long nSect, struct bFSHDblock* fshd)
+adfWriteFSHDblock(struct Device *dev, int32_t nSect, struct bFSHDblock* fshd)
 {
     unsigned char buf[LOGICAL_BLOCK_SIZE];
-    unsigned long newSum;
+    uint32_t newSum;
     struct nativeFunctions *nFct;
     RETCODE rc = RC_OK;
 
@@ -927,7 +927,7 @@ adfWriteFSHDblock(struct Device *dev, long nSect, struct bFSHDblock* fshd)
     memset(buf,0,LOGICAL_BLOCK_SIZE);
 
     strncpy(fshd->id,"FSHD",4);
-    fshd->size = sizeof(struct bFSHDblock)/sizeof(long);
+    fshd->size = sizeof(struct bFSHDblock)/sizeof(int32_t);
 
     memcpy(buf, fshd, sizeof(struct bFSHDblock));
 #ifdef LITT_ENDIAN
@@ -936,7 +936,7 @@ adfWriteFSHDblock(struct Device *dev, long nSect, struct bFSHDblock* fshd)
 
     newSum = adfNormalSum(buf, 8, LOGICAL_BLOCK_SIZE);
     swLong(buf+8, newSum);
-/*    *(long*)(buf+8) = swapLong((unsigned char*)&newSum);*/
+/*    *(int32_t*)(buf+8) = swapLong((unsigned char*)&newSum);*/
 
     nFct = adfEnv.nativeFct;
     if (dev->isNativeDev)
@@ -955,7 +955,7 @@ adfWriteFSHDblock(struct Device *dev, long nSect, struct bFSHDblock* fshd)
  *
  */
    RETCODE
-adfReadLSEGblock(struct Device* dev, long nSect, struct bLSEGblock* blk)
+adfReadLSEGblock(struct Device* dev, int32_t nSect, struct bLSEGblock* blk)
 {
     UCHAR buf[sizeof(struct bLSEGblock)];
     struct nativeFunctions *nFct;
@@ -995,10 +995,10 @@ adfReadLSEGblock(struct Device* dev, long nSect, struct bLSEGblock* blk)
  *
  */
     RETCODE
-adfWriteLSEGblock(struct Device *dev, long nSect, struct bLSEGblock* lseg)
+adfWriteLSEGblock(struct Device *dev, int32_t nSect, struct bLSEGblock* lseg)
 {
     unsigned char buf[LOGICAL_BLOCK_SIZE];
-    unsigned long newSum;
+    uint32_t newSum;
     struct nativeFunctions *nFct;
     RETCODE rc;
 
@@ -1010,7 +1010,7 @@ adfWriteLSEGblock(struct Device *dev, long nSect, struct bLSEGblock* lseg)
     memset(buf,0,LOGICAL_BLOCK_SIZE);
 
     strncpy(lseg->id,"LSEG",4);
-    lseg->size = sizeof(struct bLSEGblock)/sizeof(long);
+    lseg->size = sizeof(struct bLSEGblock)/sizeof(int32_t);
 
     memcpy(buf, lseg, sizeof(struct bLSEGblock));
 #ifdef LITT_ENDIAN
@@ -1019,7 +1019,7 @@ adfWriteLSEGblock(struct Device *dev, long nSect, struct bLSEGblock* lseg)
 
     newSum = adfNormalSum(buf, 8, LOGICAL_BLOCK_SIZE);
     swLong(buf+8,newSum);
-/*    *(long*)(buf+8) = swapLong((unsigned char*)&newSum);*/
+/*    *(int32_t*)(buf+8) = swapLong((unsigned char*)&newSum);*/
 
     nFct = adfEnv.nativeFct;
     if (dev->isNativeDev)

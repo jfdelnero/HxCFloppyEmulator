@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -82,8 +83,6 @@ int D88_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D88_libIsValidDiskFile : non D88 file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -98,9 +97,9 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	HXCFE_CYLINDER* currentcylinder;
 	unsigned int bitrate;
 	int indexfile;
-	unsigned long tracklen;
+	uint32_t tracklen;
 	int number_of_track,number_of_sector;
-	unsigned long track_offset;
+	uint32_t track_offset;
 	char * indexstr;
 	char str_file[512];
 	int basefileptr;
@@ -240,13 +239,13 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 
 	fseek(f,basefileptr+sizeof(d88_fileheader),SEEK_SET);
-	fread(&track_offset,sizeof(unsigned long),1,f);
+	fread(&track_offset,sizeof(uint32_t),1,f);
 
-	number_of_track=(track_offset-sizeof(d88_fileheader))/sizeof(unsigned long);
+	number_of_track=(track_offset-sizeof(d88_fileheader))/sizeof(uint32_t);
 	do
 	{
-		fseek(f,basefileptr+sizeof(d88_fileheader)+((number_of_track-1)*sizeof(unsigned long)),SEEK_SET);
-		fread(&track_offset,1,sizeof(unsigned long),f);
+		fseek(f,basefileptr+sizeof(d88_fileheader)+((number_of_track-1)*sizeof(uint32_t)),SEEK_SET);
+		fread(&track_offset,1,sizeof(uint32_t),f);
 		if(!track_offset)
 		{
 			number_of_track--;
@@ -270,7 +269,7 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	fseek(f,basefileptr+sizeof(d88_fileheader),SEEK_SET);
 
-	fread(&track_offset,sizeof(unsigned long),1,f);
+	fread(&track_offset,sizeof(uint32_t),1,f);
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"first track offset:%X",track_offset);
 
 
@@ -323,7 +322,7 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 					if(!sectorheader.sector_length)
 					{
-						sectorheader.sector_length=128 * (1 << sectorheader.sector_size);
+						sectorheader.sector_length = (unsigned short)(128 * (1 << sectorheader.sector_size));
 					}
 
 					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Cylinder:%.3d, Head:%d, Size:%.1d (%d), Sector ID:%.3d, Status:0x%.2x, Density: %d, Deleted Data: %d, File offset:0x%.6x",
@@ -402,9 +401,9 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			if(!floppydisk->tracks[i>>1])
 			{
 				floppydisk->tracks[i>>1]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-				currentcylinder=floppydisk->tracks[i>>1];
 			}
-	//
+			currentcylinder=floppydisk->tracks[i>>1];
+
 			currentcylinder->floppyRPM=rpm;
 			currentcylinder->sides[i&1]=tg_generateTrackEx((unsigned short)number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,tracktype,0,2500 | NO_SECTOR_UNDER_INDEX,-2500);
 
@@ -424,9 +423,9 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			if(!floppydisk->tracks[i>>1])
 			{
-				floppydisk->tracks[i>>1]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-				currentcylinder=floppydisk->tracks[i>>1];
+				floppydisk->tracks[i>>1]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);	
 			}
+			currentcylinder=floppydisk->tracks[i>>1];
 
 			tracklen=((bitrate/(rpm/60))/4)*8;
 			currentcylinder->floppyRPM=rpm;
@@ -437,17 +436,17 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		{
 			i++;
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %d offset: 0x%X",i,track_offset);
-			fseek(f,basefileptr + sizeof(d88_fileheader)  + (i * sizeof(unsigned long)),SEEK_SET);
+			fseek(f,basefileptr + sizeof(d88_fileheader)  + (i * sizeof(uint32_t)),SEEK_SET);
 		}
 		else
 		{
 			i=i+2;
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %d offset: 0x%X",i>>1,track_offset);
-			fseek(f,basefileptr + sizeof(d88_fileheader)  + ((i>>1) * sizeof(unsigned long)),SEEK_SET);
+			fseek(f,basefileptr + sizeof(d88_fileheader)  + ((i>>1) * sizeof(uint32_t)),SEEK_SET);
 		}
 
 
-		fread(&track_offset,sizeof(unsigned long),1,f);
+		fread(&track_offset,sizeof(uint32_t),1,f);
 
 	}while(i<number_of_track);
 
@@ -463,7 +462,7 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_NOERROR;
 }
 
-int D88_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int D88_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="NEC_D88";

@@ -12,6 +12,7 @@
 */
 
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "zlib.h"
 #include "ioapi.h"
@@ -275,7 +276,7 @@ long ZCALLBACK win32_tell_file_func (voidpf opaque,voidpf stream)
             ret = -1;
         }
         else
-            ret=(long)pos.LowPart;
+            ret=(int32_t)pos.LowPart;
     }
     return ret;
 }

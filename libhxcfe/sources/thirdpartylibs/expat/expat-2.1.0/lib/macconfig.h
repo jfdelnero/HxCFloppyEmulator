@@ -44,7 +44,7 @@
 #undef const
 
 /* Define to `long' if <sys/types.h> does not define. */
-#define off_t  long
+#define off_t  int32_t
 
 /* Define to `unsigned' if <sys/types.h> does not define. */
 #undef size_t

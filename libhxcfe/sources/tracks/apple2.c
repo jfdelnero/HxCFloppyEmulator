@@ -48,6 +48,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -102,7 +104,7 @@ void NybbleSector6and2( unsigned char * dataIn, unsigned char * nybbleOut)
 	}
 }
 
-unsigned long DeNybbleSector6and2(unsigned char * dataOut,unsigned char * input_data,unsigned long intput_data_size,unsigned long bit_offset,unsigned char * crc_error)
+uint32_t DeNybbleSector6and2(unsigned char * dataOut,unsigned char * input_data,uint32_t intput_data_size,uint32_t bit_offset,unsigned char * crc_error)
 {
 	unsigned char buff1_offset;
 	unsigned char byte;
@@ -542,10 +544,9 @@ int get_next_A2GCR1_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 void tg_addAppleSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
 
-	unsigned short  i;
-	unsigned char   trackencoding,trackenc;
+	int32_t   trackencoding,trackenc;
 	unsigned char   sector_buffer[300];
-	unsigned long   startindex,j;
+	int32_t   startindex,j,i;
 	unsigned char	volume,checksum,nibbleval;
 
 	checksum = 0;

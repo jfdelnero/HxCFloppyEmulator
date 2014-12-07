@@ -1,15 +1,14 @@
 
 #define sos_ui8_t  unsigned char
 #define sos_ui16_t unsigned short
-#define sos_ui32_t unsigned long
+#define sos_ui32_t uint32_t
 
 
 typedef struct FATPARTITION_
 {
-	int FATType;
+	int32_t FATType;
 
 	unsigned char * rawdata;
-
 
 }FATPARTITION;
 //

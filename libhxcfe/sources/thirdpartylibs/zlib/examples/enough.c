@@ -85,14 +85,14 @@
    need to be examined to cover all of the possible table memory usage cases
    for the default arguments of 286 symbols limited to 15-bit codes.
 
-   Note that an unsigned long long type is used for counting.  It is quite easy
+   Note that an uint32_t long type is used for counting.  It is quite easy
    to exceed the capacity of an eight-byte integer with a large number of
    symbols and a large maximum code length, so multiple-precision arithmetic
-   would need to replace the unsigned long long arithmetic in that case.  This
+   would need to replace the uint32_t long arithmetic in that case.  This
    program will abort if an overflow occurs.  The big_t type identifies where
    the counting takes place.
 
-   An unsigned long long type is also used for calculating the number of
+   An uint32_t long type is also used for calculating the number of
    possible codes remaining at the maximum length.  This limits the maximum
    code length to the number of bits in a long long minus the number of bits
    needed to represent the symbols in a flat code.  The code_t type identifies
@@ -107,8 +107,8 @@
 #define local static
 
 /* special data types */
-typedef unsigned long long big_t;   /* type for code counting */
-typedef unsigned long long code_t;  /* type for bit pattern counting */
+typedef uint32_t long big_t;   /* type for code counting */
+typedef uint32_t long code_t;  /* type for bit pattern counting */
 struct tab {                        /* type for been here check */
     size_t len;         /* length of bit vector in char's */
     char *vec;          /* allocated bit vector */
@@ -451,7 +451,7 @@ local void enough(int syms)
    code, use "enough 30 6".
 
    This uses the %llu printf format to print big_t numbers, which assumes that
-   big_t is an unsigned long long.  If the big_t type is changed (for example
+   big_t is an uint32_t long.  If the big_t type is changed (for example
    to a multiple precision type), the method of printing will also need to be
    updated.
  */

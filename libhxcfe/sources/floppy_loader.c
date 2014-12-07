@@ -47,6 +47,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "floppy_builder.h"
@@ -460,7 +462,7 @@ HXCFE_FLOPPY * hxcfe_imgLoad(HXCFE_IMGLDR * imgldr_ctx,char* imgname,int moduleI
 
 int hxcfe_imgUnload(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk)
 {
-	unsigned int i,j;
+	int i,j;
 
 	if(floppydisk)
 	{
@@ -511,7 +513,7 @@ int hxcfe_imgExport(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * newfloppy,char* img
 
 int hxcfe_floppyUnload(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk)
 {
-	unsigned int i,j;
+	int i,j;
 
 	if(floppydisk)
 	{
@@ -545,7 +547,7 @@ int hxcfe_floppyUnload(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk)
 
 HXCFE_FLOPPY * hxcfe_floppyDuplicate(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk)
 {
-	unsigned int i,j;
+	int i,j;
 	HXCFE_FLOPPY * fp;
 	int bufferlen;
 
@@ -606,9 +608,9 @@ HXCFE_FLOPPY * hxcfe_floppyDuplicate(HXCFE* floppycontext,HXCFE_FLOPPY * floppyd
 
 									if(fp->tracks[j]->sides[i]->timingbuffer)
 									{
-										fp->tracks[j]->sides[i]->timingbuffer = malloc(bufferlen * sizeof(unsigned long));
+										fp->tracks[j]->sides[i]->timingbuffer = malloc(bufferlen * sizeof(uint32_t));
 										if(fp->tracks[j]->sides[i]->timingbuffer)
-											memcpy(fp->tracks[j]->sides[i]->timingbuffer,floppydisk->tracks[j]->sides[i]->timingbuffer,bufferlen * sizeof(unsigned long));
+											memcpy(fp->tracks[j]->sides[i]->timingbuffer,floppydisk->tracks[j]->sides[i]->timingbuffer,bufferlen * sizeof(uint32_t));
 									}
 
 									if(fp->tracks[j]->sides[i]->track_encoding_buffer)
@@ -706,105 +708,108 @@ int hxcfe_floppySetDoubleStep(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy,int 
 	return HXCFE_NOERROR;
 }
 
-int libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue,const char * pluginid,const char * plugindesc,plugins_ptr * pluginfunc,const char * fileext)
+int libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue,const char * pluginid,const char * plugindesc,plugins_ptr * pluginfunc,const char * fileext)
 {
-	if(returnvalue)
+	if(imgldr_ctx)
 	{
-		switch(infotype)
+		if(returnvalue)
 		{
-			case GETPLUGINID:
-				*(char**)(returnvalue)=(char*)pluginid;
-				break;
+			switch(infotype)
+			{
+				case GETPLUGINID:
+					*(char**)(returnvalue)=(char*)pluginid;
+					break;
 
-			case GETDESCRIPTION:
-				*(char**)(returnvalue)=(char*)plugindesc;
-				break;
+				case GETDESCRIPTION:
+					*(char**)(returnvalue)=(char*)plugindesc;
+					break;
 
-			case GETFUNCPTR:
-				memcpy(returnvalue,pluginfunc,sizeof(plugins_ptr));
-				break;
+				case GETFUNCPTR:
+					memcpy(returnvalue,pluginfunc,sizeof(plugins_ptr));
+					break;
 
-			case GETEXTENSION:
-				*(char**)(returnvalue)=(char*)fileext;
-				break;
+				case GETEXTENSION:
+					*(char**)(returnvalue)=(char*)fileext;
+					break;
 
-			default:
-				return HXCFE_BADPARAMETER;
-				break;
+				default:
+					return HXCFE_BADPARAMETER;
+					break;
+			}
+
+			return HXCFE_NOERROR;
 		}
-
-		return HXCFE_NOERROR;
 	}
 	return HXCFE_BADPARAMETER;
 }
 
-HXCFE_FLPGEN* hxcfe_initFloppy(HXCFE* floppycontext,int nb_of_track,int nb_of_side)
+HXCFE_FLPGEN* hxcfe_initFloppy( HXCFE* floppycontext, int32_t nb_of_track, int32_t nb_of_side )
 {
-	HXCFE_FLPGEN* fb;
+	HXCFE_FLPGEN* fb_ctx;
 
-	fb=0;
+	fb_ctx = 0;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"hxcfe_init_floppy : floppy builder init");
 
 	if(( nb_of_track && (nb_of_track<=256)) && ((nb_of_side>=1) && (nb_of_side<=2) ) )
 	{
-		fb=(HXCFE_FLPGEN*)malloc(sizeof(HXCFE_FLPGEN));
-		if(fb)
+		fb_ctx=(HXCFE_FLPGEN*)malloc(sizeof(HXCFE_FLPGEN));
+		if(fb_ctx)
 		{
-			memset(fb,0,sizeof(HXCFE_FLPGEN));
-			fb->floppydisk=(HXCFE_FLOPPY*)malloc(sizeof(HXCFE_FLOPPY));
-			memset(fb->floppydisk,0,sizeof(HXCFE_FLOPPY));
-			fb->floppydisk->floppyBitRate=DEFAULT_DD_BITRATE;
-			fb->floppydisk->double_step=0;
-			fb->floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-			fb->floppydisk->floppyNumberOfTrack=nb_of_track;
-			fb->floppydisk->floppyNumberOfSide=nb_of_side;
-			fb->floppydisk->floppySectorPerTrack=-1;
+			memset(fb_ctx,0,sizeof(HXCFE_FLPGEN));
+			fb_ctx->floppydisk=(HXCFE_FLOPPY*)malloc(sizeof(HXCFE_FLOPPY));
+			memset(fb_ctx->floppydisk,0,sizeof(HXCFE_FLOPPY));
+			fb_ctx->floppydisk->floppyBitRate=DEFAULT_DD_BITRATE;
+			fb_ctx->floppydisk->double_step=0;
+			fb_ctx->floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
+			fb_ctx->floppydisk->floppyNumberOfTrack=nb_of_track;
+			fb_ctx->floppydisk->floppyNumberOfSide=nb_of_side;
+			fb_ctx->floppydisk->floppySectorPerTrack=-1;
 
-			fb->floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*fb->floppydisk->floppyNumberOfTrack);
-			memset(fb->floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*fb->floppydisk->floppyNumberOfTrack);
+			fb_ctx->floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*fb_ctx->floppydisk->floppyNumberOfTrack);
+			memset(fb_ctx->floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*fb_ctx->floppydisk->floppyNumberOfTrack);
 
-			fb->fb_stack_pointer=0;
-			fb->fb_stack=(fb_track_state*)malloc(sizeof(fb_track_state)*STACK_SIZE);
-			memset(fb->fb_stack,0,sizeof(fb_track_state)*STACK_SIZE);
+			fb_ctx->fb_stack_pointer=0;
+			fb_ctx->fb_stack=(fb_track_state*)malloc(sizeof(fb_track_state)*STACK_SIZE);
+			memset(fb_ctx->fb_stack,0,sizeof(fb_track_state)*STACK_SIZE);
 
-			fb->fb_stack[0].interleave=1;
-			fb->fb_stack[0].rpm=300;
+			fb_ctx->fb_stack[0].interleave=1;
+			fb_ctx->fb_stack[0].rpm=300;
 
-			fb->fb_stack[0].sectors_size = 512;
+			fb_ctx->fb_stack[0].sectors_size = 512;
 
-			fb->fb_stack[0].indexlen=2500;
-			fb->fb_stack[0].indexpos=-2500;
-			fb->fb_stack[0].sectorunderindex=0;
+			fb_ctx->fb_stack[0].indexlen=2500;
+			fb_ctx->fb_stack[0].indexpos=-2500;
+			fb_ctx->fb_stack[0].sectorunderindex=0;
 
-			fb->fb_stack[0].numberofsector = 0;
-			fb->fb_stack[0].numberofsector_min = 0;
-			fb->fb_stack[0].start_sector_id = 1;
+			fb_ctx->fb_stack[0].numberofsector = 0;
+			fb_ctx->fb_stack[0].numberofsector_min = 0;
+			fb_ctx->fb_stack[0].start_sector_id = 1;
 
-			fb->fb_stack[0].bitrate=250000;
-			fb->fb_stack[0].sectorconfig.bitrate=fb->fb_stack[0].bitrate;
-			fb->fb_stack[0].sectorconfig.fill_byte=0xF6;
-			fb->fb_stack[0].sectorconfig.gap3=255;
-			fb->fb_stack[0].sectorconfig.sectorsize=512;
-			fb->fb_stack[0].sectorconfig.trackencoding=IBMFORMAT_DD;
-			fb->fb_stack[0].type = IBMFORMAT_DD;
-			//fb->fb_stack[0].sectorconfig.;
+			fb_ctx->fb_stack[0].bitrate=250000;
+			fb_ctx->fb_stack[0].sectorconfig.bitrate=fb_ctx->fb_stack[0].bitrate;
+			fb_ctx->fb_stack[0].sectorconfig.fill_byte=0xF6;
+			fb_ctx->fb_stack[0].sectorconfig.gap3=255;
+			fb_ctx->fb_stack[0].sectorconfig.sectorsize=512;
+			fb_ctx->fb_stack[0].sectorconfig.trackencoding=IBMFORMAT_DD;
+			fb_ctx->fb_stack[0].type = IBMFORMAT_DD;
+			//fb_ctx->fb_stack[0].sectorconfig.;
 
-			fb->fb_stack[0].sc_stack[0].bitrate = 250000;
-			fb->fb_stack[0].sc_stack[0].fill_byte = 0xF6;
-			fb->fb_stack[0].sc_stack[0].gap3=255;
-			fb->fb_stack[0].sc_stack[0].sectorsize = 512;
-			fb->fb_stack[0].sc_stack[0].trackencoding=IBMFORMAT_DD;
+			fb_ctx->fb_stack[0].sc_stack[0].bitrate = 250000;
+			fb_ctx->fb_stack[0].sc_stack[0].fill_byte = 0xF6;
+			fb_ctx->fb_stack[0].sc_stack[0].gap3=255;
+			fb_ctx->fb_stack[0].sc_stack[0].sectorsize = 512;
+			fb_ctx->fb_stack[0].sc_stack[0].trackencoding=IBMFORMAT_DD;
 		}
 		else
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"hxcfe_init_floppy : malloc error");
 		}
 	}
-	return fb;
+	return fb_ctx;
 }
 
-int hxcfe_getNumberOfTrack(HXCFE* floppycontext,HXCFE_FLOPPY *fp)
+int32_t hxcfe_getNumberOfTrack( HXCFE* floppycontext, HXCFE_FLOPPY *fp )
 {
 	if(fp)
 	{
@@ -824,37 +829,37 @@ int hxcfe_getNumberOfSide(HXCFE* floppycontext,HXCFE_FLOPPY *fp)
 	return 0;
 }
 
-int hxcfe_setNumberOfTrack (HXCFE_FLPGEN* fb,unsigned short numberoftrack)
+int32_t hxcfe_setNumberOfTrack ( HXCFE_FLPGEN* fb_ctx, int32_t numberoftrack )
 {
 	HXCFE_CYLINDER	**	tmptracks;
-	unsigned short	tmpfloppyNumberOfTrack;
+	int	tmpfloppyNumberOfTrack;
 
 	tmptracks = 0;
 	tmpfloppyNumberOfTrack = 0;
 
-	if( fb->floppydisk->tracks )
+	if( fb_ctx->floppydisk->tracks )
 	{
-		tmptracks = fb->floppydisk->tracks;
-		tmpfloppyNumberOfTrack = fb->floppydisk->floppyNumberOfTrack;
+		tmptracks = fb_ctx->floppydisk->tracks;
+		tmpfloppyNumberOfTrack = fb_ctx->floppydisk->floppyNumberOfTrack;
 	}
 
-	fb->floppydisk->floppyNumberOfTrack = numberoftrack;
-	fb->floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*fb->floppydisk->floppyNumberOfTrack);
-	if( !fb->floppydisk->tracks)
+	fb_ctx->floppydisk->floppyNumberOfTrack = numberoftrack;
+	fb_ctx->floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*fb_ctx->floppydisk->floppyNumberOfTrack);
+	if( !fb_ctx->floppydisk->tracks)
 	{
 		return HXCFE_INTERNALERROR;
 	}
-	memset(fb->floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*fb->floppydisk->floppyNumberOfTrack);
+	memset(fb_ctx->floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*fb_ctx->floppydisk->floppyNumberOfTrack);
 
 	if(tmptracks)
 	{
 		if ( tmpfloppyNumberOfTrack < numberoftrack )
 		{
-			memcpy(fb->floppydisk->tracks,tmptracks,sizeof(HXCFE_CYLINDER*)*tmpfloppyNumberOfTrack);
+			memcpy(fb_ctx->floppydisk->tracks,tmptracks,sizeof(HXCFE_CYLINDER*)*tmpfloppyNumberOfTrack);
 		}
 		else
 		{
-			memcpy(fb->floppydisk->tracks,tmptracks,sizeof(HXCFE_CYLINDER*)*numberoftrack);
+			memcpy(fb_ctx->floppydisk->tracks,tmptracks,sizeof(HXCFE_CYLINDER*)*numberoftrack);
 		}
 
 		free(tmptracks);
@@ -863,40 +868,40 @@ int hxcfe_setNumberOfTrack (HXCFE_FLPGEN* fb,unsigned short numberoftrack)
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setNumberOfSide (HXCFE_FLPGEN* fb,unsigned char numberofside)
+int32_t hxcfe_setNumberOfSide ( HXCFE_FLPGEN* fb_ctx, int32_t numberofside )
 {
-	fb->floppydisk->floppyNumberOfSide = numberofside;
+	fb_ctx->floppydisk->floppyNumberOfSide = numberofside;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setNumberOfSector (HXCFE_FLPGEN* fb,unsigned short numberofsector)
+int32_t hxcfe_setNumberOfSector ( HXCFE_FLPGEN* fb_ctx, int32_t numberofsector )
 {
-	fb->fb_stack[fb->fb_stack_pointer].numberofsector_min = numberofsector;
+	fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].numberofsector_min = numberofsector;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setTrackPreGap (HXCFE_FLPGEN* fb,unsigned short pregap)
+int32_t hxcfe_setTrackPreGap ( HXCFE_FLPGEN* fb_ctx, int32_t pregap )
 {
-	fb->fb_stack[fb->fb_stack_pointer].pregap = pregap;
+	fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].pregap = pregap;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_pushTrack (HXCFE_FLPGEN* fb,unsigned int rpm,int number,int side,int type)
+int32_t hxcfe_pushTrack ( HXCFE_FLPGEN* fb_ctx, uint32_t rpm, int32_t number, int32_t side, int32_t type )
 {
 	fb_track_state * cur_track;
 	unsigned char * data_to_realloc;
 	int i;
 
-	if(fb->fb_stack_pointer<(STACK_SIZE-1))
+	if(fb_ctx->fb_stack_pointer<(STACK_SIZE-1))
 	{
-		fb->fb_stack_pointer++;
+		fb_ctx->fb_stack_pointer++;
 
-		cur_track = &fb->fb_stack[fb->fb_stack_pointer];
+		cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
 
-		memcpy(&fb->fb_stack[fb->fb_stack_pointer],&fb->fb_stack[fb->fb_stack_pointer-1],sizeof(fb_track_state));
+		memcpy(&fb_ctx->fb_stack[fb_ctx->fb_stack_pointer],&fb_ctx->fb_stack[fb_ctx->fb_stack_pointer-1],sizeof(fb_track_state));
 
 		i = 0;
-		while( i < fb->fb_stack[fb->fb_stack_pointer].numberofsector )
+		while( i < fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].numberofsector )
 		{
 			if ( cur_track->sectortab[i].input_data )
 			{
@@ -907,15 +912,15 @@ int hxcfe_pushTrack (HXCFE_FLPGEN* fb,unsigned int rpm,int number,int side,int t
 			i++;
 		}
 
-		fb->fb_stack[fb->fb_stack_pointer].rpm = rpm;
-		fb->fb_stack[fb->fb_stack_pointer].side_number = side;
-		fb->fb_stack[fb->fb_stack_pointer].track_number = number;
-		fb->fb_stack[fb->fb_stack_pointer].type = type;
-		fb->fb_stack[fb->fb_stack_pointer].sc_stack[fb->fb_stack[fb->fb_stack_pointer].sc_stack_pointer].trackencoding = type;
-		fb->fb_stack[fb->fb_stack_pointer].sectorconfig.trackencoding = type;
-		fb->fb_stack[fb->fb_stack_pointer].numberofsector = 0;
+		fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].rpm = rpm;
+		fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].side_number = side;
+		fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].track_number = number;
+		fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].type = type;
+		fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].sc_stack[fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].sc_stack_pointer].trackencoding = type;
+		fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].sectorconfig.trackencoding = type;
+		fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].numberofsector = 0;
 
-		fb->fb_stack[fb->fb_stack_pointer].sc_stack_pointer = 0;
+		fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].sc_stack_pointer = 0;
 
 		return HXCFE_NOERROR;
 	}
@@ -923,11 +928,11 @@ int hxcfe_pushTrack (HXCFE_FLPGEN* fb,unsigned int rpm,int number,int side,int t
 	return HXCFE_BADPARAMETER;
 }
 
-int hxcfe_pushSector (HXCFE_FLPGEN* fb)
+int32_t hxcfe_pushSector ( HXCFE_FLPGEN* fb_ctx )
 {
 	fb_track_state * cur_track;
 
-	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
 
 	if( cur_track->sc_stack_pointer < (STACK_SIZE-1) )
 	{
@@ -942,11 +947,11 @@ int hxcfe_pushSector (HXCFE_FLPGEN* fb)
 	return HXCFE_INTERNALERROR;
 }
 
-int hxcfe_popSector (HXCFE_FLPGEN* fb)
+int32_t hxcfe_popSector ( HXCFE_FLPGEN* fb_ctx )
 {
 	fb_track_state * cur_track;
 
-	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
 
 	if( cur_track->numberofsector < (NUMBEROFSECTOR_MAX-1) )
 	{
@@ -968,79 +973,79 @@ int hxcfe_popSector (HXCFE_FLPGEN* fb)
 	return HXCFE_INTERNALERROR;
 }
 
-int hxcfe_pushTrackPFS (HXCFE_FLPGEN* fb,int number,int side)
+int32_t hxcfe_pushTrackPFS ( HXCFE_FLPGEN* fb_ctx, int32_t number, int32_t side )
 {
-	return hxcfe_pushTrack (fb,fb->fb_stack[fb->fb_stack_pointer].rpm,number,side,fb->fb_stack[fb->fb_stack_pointer].type);
+	return hxcfe_pushTrack (fb_ctx,fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].rpm,number,side,fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].type);
 }
 
-int hxcfe_setTrackBitrate(HXCFE_FLPGEN* fb,int bitrate)
+int32_t hxcfe_setTrackBitrate ( HXCFE_FLPGEN* fb_ctx, int32_t bitrate )
 {
 	fb_track_state * cur_track;
 
-	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
 
 	cur_track->bitrate = bitrate;
 	cur_track->sectorconfig.bitrate = bitrate;
-	cur_track->sc_stack[fb->fb_stack[fb->fb_stack_pointer].sc_stack_pointer].bitrate = bitrate;
+	cur_track->sc_stack[fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].sc_stack_pointer].bitrate = bitrate;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setTrackType(HXCFE_FLPGEN* fb,int type)
+int32_t hxcfe_setTrackType( HXCFE_FLPGEN* fb_ctx, int32_t type )
 {
 	fb_track_state * cur_track;
 
-	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
 
 	cur_track->type = type;
 	cur_track->sectorconfig.trackencoding = type;
-	cur_track->sc_stack[fb->fb_stack[fb->fb_stack_pointer].sc_stack_pointer].trackencoding = type;
+	cur_track->sc_stack[fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].sc_stack_pointer].trackencoding = type;
 
 	return HXCFE_NOERROR;
 
 }
 
-int hxcfe_setTrackInterleave(HXCFE_FLPGEN* fb,int interleave)
+int32_t hxcfe_setTrackInterleave ( HXCFE_FLPGEN* fb_ctx, int32_t interleave )
 {
-	fb->fb_stack[fb->fb_stack_pointer].interleave = interleave;
+	fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].interleave = interleave;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorSize(HXCFE_FLPGEN* fb,int size)
+int32_t hxcfe_setSectorSize( HXCFE_FLPGEN* fb_ctx, int32_t size )
 {
 	fb_track_state * cur_track;
 
-	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
 
-	fb->fb_stack[fb->fb_stack_pointer].sectors_size = size;
+	fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].sectors_size = size;
 	cur_track->sc_stack[cur_track->sc_stack_pointer].sectorsize = size;
 
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setTrackSkew(HXCFE_FLPGEN* fb,int skew)
+int32_t hxcfe_setTrackSkew ( HXCFE_FLPGEN* fb_ctx, int32_t skew )
 {
-	fb->fb_stack[fb->fb_stack_pointer].skew = skew;
+	fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].skew = skew;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setIndexPosition(HXCFE_FLPGEN* fb,int position,int allowsector)
+int32_t hxcfe_setIndexPosition ( HXCFE_FLPGEN* fb_ctx, int32_t position, int32_t allowsector )
 {
-	fb->fb_stack[fb->fb_stack_pointer].indexpos = position;
+	fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].indexpos = position;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setIndexLength(HXCFE_FLPGEN* fb,int length)
+int32_t hxcfe_setIndexLength ( HXCFE_FLPGEN* fb_ctx, int32_t Length )
 {
-	fb->fb_stack[fb->fb_stack_pointer].indexlen = length;
+	fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].indexlen = Length;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorData(HXCFE_FLPGEN* fb,unsigned char * buffer,int size)
+int32_t hxcfe_setSectorData( HXCFE_FLPGEN* fb_ctx, uint8_t * buffer, int32_t size )
 {
 	fb_track_state * cur_track;
 	HXCFE_SECTCFG * cur_sector;
 
-	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
 	cur_sector = &cur_track->sc_stack[cur_track->sc_stack_pointer];
 
 	if(cur_sector->input_data)
@@ -1060,38 +1065,37 @@ int hxcfe_setSectorData(HXCFE_FLPGEN* fb,unsigned char * buffer,int size)
 	return HXCFE_NOERROR;
 }
 
-
-int hxcfe_addSector(HXCFE_FLPGEN* fb,int sectornumber,int side,int track,unsigned char * buffer,int size)
+int32_t hxcfe_addSector ( HXCFE_FLPGEN* fb_ctx, int32_t sectornumber, int32_t side, int32_t track, uint8_t * buffer, int32_t size )
 {
-	hxcfe_pushSector (fb);
+	hxcfe_pushSector (fb_ctx);
 
-	hxcfe_setSectorTrackID(fb,(unsigned char)track);
-	hxcfe_setSectorHeadID(fb,(unsigned char)side);
-	hxcfe_setSectorID(fb,(unsigned char)sectornumber);
+	hxcfe_setSectorTrackID(fb_ctx,track);
+	hxcfe_setSectorHeadID(fb_ctx,side);
+	hxcfe_setSectorID(fb_ctx,sectornumber);
 
-	hxcfe_setSectorData(fb,buffer,size);
+	hxcfe_setSectorData(fb_ctx,buffer,size);
 
-	hxcfe_popSector (fb);
+	hxcfe_popSector (fb_ctx);
 
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_addSectors(HXCFE_FLPGEN* fb,int side,int track,unsigned char * trackdata,int buffersize,int numberofsectors)
+int32_t hxcfe_addSectors( HXCFE_FLPGEN* fb_ctx, int32_t side, int32_t track, uint8_t * trackdata, int32_t buffersize, int32_t numberofsectors )
 {
 	int i,ret;
 	int startsectorid,sectorsize;
 
-	if(fb->fb_stack[fb->fb_stack_pointer].numberofsector<0x400)
+	if(fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].numberofsector<0x400)
 	{
-		startsectorid = fb->fb_stack[fb->fb_stack_pointer].start_sector_id;
-		sectorsize = fb->fb_stack[fb->fb_stack_pointer].sectors_size;
+		startsectorid = fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].start_sector_id;
+		sectorsize = fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].sectors_size;
 
 		for(i = 0; i < numberofsectors ; i++)
 		{
 			if(trackdata)
-				ret = hxcfe_addSector(fb,startsectorid + i,side,track,&trackdata[i*sectorsize],sectorsize);
+				ret = hxcfe_addSector(fb_ctx,startsectorid + i,side,track,&trackdata[i*sectorsize],sectorsize);
 			else
-				ret = hxcfe_addSector(fb,startsectorid + i,side,track,0,sectorsize);
+				ret = hxcfe_addSector(fb_ctx,startsectorid + i,side,track,0,sectorsize);
 
 			if(ret != HXCFE_NOERROR)
 			{
@@ -1105,11 +1109,11 @@ int hxcfe_addSectors(HXCFE_FLPGEN* fb,int side,int track,unsigned char * trackda
 	return HXCFE_BADPARAMETER;
 }
 
-int hxcfe_setSectorSizeID(HXCFE_FLPGEN* fb,unsigned char sectorsizeid)
+int32_t hxcfe_setSectorSizeID ( HXCFE_FLPGEN* fb_ctx, int32_t sectorsizeid )
 {
 	fb_track_state * cur_track;
 
-	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
 
 	cur_track->sc_stack[cur_track->sc_stack_pointer].use_alternate_sector_size_id=0xFF;
 	cur_track->sc_stack[cur_track->sc_stack_pointer].alternate_sector_size_id=sectorsizeid;
@@ -1117,130 +1121,130 @@ int hxcfe_setSectorSizeID(HXCFE_FLPGEN* fb,unsigned char sectorsizeid)
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setStartSectorID(HXCFE_FLPGEN* fb,unsigned char startsectorid)
+int32_t hxcfe_setStartSectorID( HXCFE_FLPGEN* fb_ctx, int32_t startsectorid )
 {
-	fb->fb_stack[fb->fb_stack_pointer].start_sector_id = startsectorid;
+	fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].start_sector_id = startsectorid;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorBitrate(HXCFE_FLPGEN* fb,int bitrate)
+int32_t hxcfe_setSectorBitrate ( HXCFE_FLPGEN* fb_ctx, int32_t bitrate )
 {
 	fb_track_state * cur_track;
 
-	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
 	cur_track->sc_stack[cur_track->sc_stack_pointer].bitrate=bitrate;
 
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorFill(HXCFE_FLPGEN* fb,unsigned char fill)
+int32_t hxcfe_setSectorFill ( HXCFE_FLPGEN* fb_ctx, int32_t fill )
 {
 	fb_track_state * cur_track;
 
-	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
-	cur_track->sc_stack[cur_track->sc_stack_pointer].fill_byte=fill;
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
+	cur_track->sc_stack[cur_track->sc_stack_pointer].fill_byte = (unsigned char)fill;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorTrackID(HXCFE_FLPGEN* fb,unsigned char track)
+int32_t hxcfe_setSectorTrackID( HXCFE_FLPGEN* fb_ctx, int32_t track )
 {
 	fb_track_state * cur_track;
 
-	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
 	cur_track->sc_stack[cur_track->sc_stack_pointer].cylinder = track;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorHeadID(HXCFE_FLPGEN* fb,unsigned char head)
+int32_t hxcfe_setSectorHeadID( HXCFE_FLPGEN* fb_ctx, int32_t head )
 {
 	fb_track_state * cur_track;
 
-	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
 	cur_track->sc_stack[cur_track->sc_stack_pointer].head = head;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorID(HXCFE_FLPGEN* fb,unsigned char head)
+int32_t hxcfe_setSectorID( HXCFE_FLPGEN* fb_ctx, int32_t id )
 {
 	fb_track_state * cur_track;
 
-	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
-	cur_track->sc_stack[cur_track->sc_stack_pointer].sector = head;
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
+	cur_track->sc_stack[cur_track->sc_stack_pointer].sector = id;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorGap3(HXCFE_FLPGEN* fb,unsigned char Gap3)
+int32_t hxcfe_setSectorGap3 ( HXCFE_FLPGEN* fb_ctx, int32_t Gap3 )
 {
 	fb_track_state * cur_track;
 
-	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
 	cur_track->sc_stack[cur_track->sc_stack_pointer].gap3=Gap3;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorEncoding(HXCFE_FLPGEN* fb,int encoding)
+int32_t hxcfe_setSectorEncoding ( HXCFE_FLPGEN* fb_ctx, int32_t encoding )
 {
 	fb_track_state * cur_track;
 
-	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
-	cur_track->sc_stack[cur_track->sc_stack_pointer].trackencoding=encoding;
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
+	cur_track->sc_stack[cur_track->sc_stack_pointer].trackencoding = encoding;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setRPM(HXCFE_FLPGEN* fb,unsigned short rpm)
+int32_t hxcfe_setRPM( HXCFE_FLPGEN* fb_ctx, int32_t rpm )
 {
-	fb->fb_stack[fb->fb_stack_pointer].rpm = rpm;
+	fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].rpm = rpm;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorDataCRC(HXCFE_FLPGEN* fb,unsigned short crc)
+int32_t hxcfe_setSectorDataCRC ( HXCFE_FLPGEN* fb_ctx, uint32_t crc )
 {
 	fb_track_state * cur_track;
 
-	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
 	cur_track->sc_stack[cur_track->sc_stack_pointer].use_alternate_data_crc=0xFF;
 	cur_track->sc_stack[cur_track->sc_stack_pointer].data_crc=crc;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorHeaderCRC(HXCFE_FLPGEN* fb,unsigned short crc)
+int32_t hxcfe_setSectorHeaderCRC ( HXCFE_FLPGEN* fb_ctx, uint32_t crc )
 {
 	fb_track_state * cur_track;
 
-	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
 	cur_track->sc_stack[cur_track->sc_stack_pointer].use_alternate_header_crc=0xFF;
 	cur_track->sc_stack[cur_track->sc_stack_pointer].header_crc=crc;
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_setSectorDataMark(HXCFE_FLPGEN* fb,unsigned char datamark)
+int32_t hxcfe_setSectorDataMark ( HXCFE_FLPGEN* fb_ctx, uint32_t datamark )
 {
 	fb_track_state * cur_track;
 
-	cur_track = &fb->fb_stack[fb->fb_stack_pointer];
-	cur_track->sc_stack[cur_track->sc_stack_pointer].use_alternate_datamark=0xFF;
-	cur_track->sc_stack[cur_track->sc_stack_pointer].alternate_datamark=datamark;
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
+	cur_track->sc_stack[cur_track->sc_stack_pointer].use_alternate_datamark = 0xFF;
+	cur_track->sc_stack[cur_track->sc_stack_pointer].alternate_datamark = datamark;
 
 	return HXCFE_NOERROR;
 }
 
-int hxcfe_popTrack (HXCFE_FLPGEN* fb)
+int32_t hxcfe_popTrack ( HXCFE_FLPGEN* fb_ctx )
 {
 	HXCFE_CYLINDER* currentcylinder;
 	fb_track_state * current_fb_track_state;
 	int i;
-	unsigned long sui_flag;
+	uint32_t sui_flag;
 
-	if(fb->fb_stack_pointer)
+	if(fb_ctx->fb_stack_pointer)
 	{
-		current_fb_track_state=&fb->fb_stack[fb->fb_stack_pointer];
+		current_fb_track_state=&fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
 
-		if( current_fb_track_state->track_number < fb->floppydisk->floppyNumberOfTrack)
+		if( current_fb_track_state->track_number < fb_ctx->floppydisk->floppyNumberOfTrack)
 		{
-			if(!fb->floppydisk->tracks[current_fb_track_state->track_number])
-				fb->floppydisk->tracks[current_fb_track_state->track_number]=allocCylinderEntry(current_fb_track_state->rpm,2);
+			if(!fb_ctx->floppydisk->tracks[current_fb_track_state->track_number])
+				fb_ctx->floppydisk->tracks[current_fb_track_state->track_number]=allocCylinderEntry(current_fb_track_state->rpm,2);
 
-			currentcylinder=fb->floppydisk->tracks[current_fb_track_state->track_number];
+			currentcylinder=fb_ctx->floppydisk->tracks[current_fb_track_state->track_number];
 			sui_flag=0;
 
 			if(!current_fb_track_state->sectorunderindex)
@@ -1262,7 +1266,7 @@ int hxcfe_popTrack (HXCFE_FLPGEN* fb)
 					free(current_fb_track_state->sectortab[i].input_data);
 			}
 
-			fb->fb_stack_pointer--;
+			fb_ctx->fb_stack_pointer--;
 
 			return HXCFE_NOERROR;
 		}
@@ -1274,7 +1278,7 @@ int hxcfe_popTrack (HXCFE_FLPGEN* fb)
 					free(current_fb_track_state->sectortab[i].input_data);
 			}
 
-			fb->fb_stack_pointer--;
+			fb_ctx->fb_stack_pointer--;
 
 			return HXCFE_BADPARAMETER;
 		}
@@ -1284,75 +1288,75 @@ int hxcfe_popTrack (HXCFE_FLPGEN* fb)
 	return HXCFE_NOERROR;
 }
 
-unsigned short hxcfe_getCurrentNumberOfTrack (HXCFE_FLPGEN* fb)
+int32_t hxcfe_getCurrentNumberOfTrack ( HXCFE_FLPGEN* fb_ctx )
 {
-	return fb->floppydisk->floppyNumberOfTrack;
+	return fb_ctx->floppydisk->floppyNumberOfTrack;
 }
 
-unsigned char  hxcfe_getCurrentNumberOfSide (HXCFE_FLPGEN* fb)
+int32_t hxcfe_getCurrentNumberOfSide ( HXCFE_FLPGEN* fb_ctx )
 {
-	return fb->floppydisk->floppyNumberOfSide;
+	return fb_ctx->floppydisk->floppyNumberOfSide;
 }
 
-unsigned short hxcfe_getCurrentNumberOfSector (HXCFE_FLPGEN* fb)
+int32_t hxcfe_getCurrentNumberOfSector ( HXCFE_FLPGEN* fb_ctx )
 {
-	return fb->fb_stack[fb->fb_stack_pointer].numberofsector_min;
+	return fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].numberofsector_min;
 }
 
-int hxcfe_getCurrentSectorSize(HXCFE_FLPGEN* fb)
+int32_t hxcfe_getCurrentSectorSize( HXCFE_FLPGEN* fb_ctx )
 {
-	return fb->fb_stack[fb->fb_stack_pointer].sectors_size;
+	return fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].sectors_size;
 }
 
-unsigned char  hxcfe_getCurrentTrackType (HXCFE_FLPGEN* fb)
+int32_t hxcfe_getCurrentTrackType ( HXCFE_FLPGEN* fb_ctx )
 {
-	return fb->fb_stack[fb->fb_stack_pointer].type;
+	return fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].type;
 }
 
-unsigned short hxcfe_getCurrentRPM (HXCFE_FLPGEN* fb)
+int32_t hxcfe_getCurrentRPM ( HXCFE_FLPGEN* fb_ctx )
 {
-	return fb->fb_stack[fb->fb_stack_pointer].rpm;
+	return fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].rpm;
 }
 
-int hxcfe_getCurrentSkew(HXCFE_FLPGEN* fb)
+int32_t hxcfe_getCurrentSkew ( HXCFE_FLPGEN* fb_ctx )
 {
-	return fb->fb_stack[fb->fb_stack_pointer].skew;
+	return fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].skew;
 }
 
-int hxcfe_generateDisk(HXCFE_FLPGEN* fb,unsigned char * diskdata,int buffersize)
+int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, uint8_t * diskdata, int32_t buffersize )
 {
 	int i,j,ret;
 	int numberofsector,sectorsize;
 	int bufferoffset,type;
 	unsigned int rpm;
 
-	sectorsize = fb->fb_stack[fb->fb_stack_pointer].sectors_size;
-	numberofsector = fb->fb_stack[fb->fb_stack_pointer].numberofsector_min;
-	rpm = fb->fb_stack[fb->fb_stack_pointer].rpm;
-	type = fb->fb_stack[fb->fb_stack_pointer].type;
+	sectorsize = fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].sectors_size;
+	numberofsector = fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].numberofsector_min;
+	rpm = fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].rpm;
+	type = fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].type;
 
-	for(i = 0 ; i < fb->floppydisk->floppyNumberOfTrack ; i++ )
+	for(i = 0 ; i < fb_ctx->floppydisk->floppyNumberOfTrack ; i++ )
 	{
-		for(j = 0 ; j < fb->floppydisk->floppyNumberOfSide ; j++ )
+		for(j = 0 ; j < fb_ctx->floppydisk->floppyNumberOfSide ; j++ )
 		{
 			bufferoffset = numberofsector * sectorsize * ((i<<1) + (j&1)) ;
 
-			if(!fb->floppydisk->tracks[i] || !fb->floppydisk->tracks[i]->sides[j])
+			if(!fb_ctx->floppydisk->tracks[i] || !fb_ctx->floppydisk->tracks[i]->sides[j])
 			{
-				//if(!fb->floppydisk->tracks[i]->sides[j])
+				//if(!fb_ctx->floppydisk->tracks[i]->sides[j])
 				{
-					hxcfe_pushTrack (fb,rpm,i,j,type);
+					hxcfe_pushTrack (fb_ctx,rpm,i,j,type);
 
 					if( (bufferoffset + (sectorsize * numberofsector) )  > buffersize )
 					{
-						ret = hxcfe_addSectors(fb,j,i,0,0,numberofsector);
+						ret = hxcfe_addSectors(fb_ctx,j,i,0,0,numberofsector);
 					}
 					else
 					{
-						ret = hxcfe_addSectors(fb,j,i,&diskdata[bufferoffset],(sectorsize * numberofsector),numberofsector);
+						ret = hxcfe_addSectors(fb_ctx,j,i,&diskdata[bufferoffset],(sectorsize * numberofsector),numberofsector);
 					}
 
-					hxcfe_popTrack (fb);
+					hxcfe_popTrack (fb_ctx);
 				}
 			}
 		}
@@ -1361,7 +1365,7 @@ int hxcfe_generateDisk(HXCFE_FLPGEN* fb,unsigned char * diskdata,int buffersize)
 	return HXCFE_NOERROR;
 }
 
-HXCFE_FLOPPY* hxcfe_getFloppy(HXCFE_FLPGEN* fb)
+HXCFE_FLOPPY* hxcfe_getFloppy ( HXCFE_FLPGEN* fb_ctx )
 {
 	int bitrate,trackencoding;
 	int i,j;
@@ -1369,38 +1373,38 @@ HXCFE_FLOPPY* hxcfe_getFloppy(HXCFE_FLPGEN* fb)
 
 	f=0;
 
-	for (j = 0; j < fb->floppydisk->floppyNumberOfTrack; j++)
+	for (j = 0; j < fb_ctx->floppydisk->floppyNumberOfTrack; j++)
 	{
-		for (i = 0; i < fb->floppydisk->floppyNumberOfSide; i++)
+		for (i = 0; i < fb_ctx->floppydisk->floppyNumberOfSide; i++)
 		{
-			if(!fb->floppydisk->tracks[j])
+			if(!fb_ctx->floppydisk->tracks[j])
 			{
-				hxcfe_pushTrack (fb,fb->fb_stack[0].rpm,j,i,fb->fb_stack[0].type);
-				hxcfe_popTrack (fb);
+				hxcfe_pushTrack (fb_ctx,fb_ctx->fb_stack[0].rpm,j,i,fb_ctx->fb_stack[0].type);
+				hxcfe_popTrack (fb_ctx);
 			}
 			else
 			{
-				if(!fb->floppydisk->tracks[j]->sides[i])
+				if(!fb_ctx->floppydisk->tracks[j]->sides[i])
 				{
-					hxcfe_pushTrack (fb,fb->fb_stack[0].rpm,j,i,fb->fb_stack[0].type);
-					hxcfe_popTrack (fb);
+					hxcfe_pushTrack (fb_ctx,fb_ctx->fb_stack[0].rpm,j,i,fb_ctx->fb_stack[0].type);
+					hxcfe_popTrack (fb_ctx);
 				}
 			}
 		}
 	}
 
-	if(fb->floppydisk->floppyNumberOfTrack && fb->floppydisk->floppyNumberOfSide)
+	if(fb_ctx->floppydisk->floppyNumberOfTrack && fb_ctx->floppydisk->floppyNumberOfSide)
 	{
-		bitrate = fb->floppydisk->tracks[0]->sides[0]->bitrate;
-		trackencoding = fb->floppydisk->tracks[0]->sides[0]->track_encoding;
+		bitrate = fb_ctx->floppydisk->tracks[0]->sides[0]->bitrate;
+		trackencoding = fb_ctx->floppydisk->tracks[0]->sides[0]->track_encoding;
 
-		for(j=0;j<fb->floppydisk->floppyNumberOfTrack;j++)
+		for(j=0;j<fb_ctx->floppydisk->floppyNumberOfTrack;j++)
 		{
-			for(i=0;i<fb->floppydisk->tracks[j]->number_of_side;i++)
+			for(i=0;i<fb_ctx->floppydisk->tracks[j]->number_of_side;i++)
 			{
-				if(fb->floppydisk->tracks[j]->sides[i])
+				if(fb_ctx->floppydisk->tracks[j]->sides[i])
 				{
-					if(bitrate != fb->floppydisk->tracks[j]->sides[i]->bitrate)
+					if(bitrate != fb_ctx->floppydisk->tracks[j]->sides[i]->bitrate)
 					{
 						bitrate=-1;
 					}
@@ -1409,11 +1413,11 @@ HXCFE_FLOPPY* hxcfe_getFloppy(HXCFE_FLPGEN* fb)
 				{
 					if(i==1)
 					{
-						fb->floppydisk->tracks[j]->number_of_side--;
+						fb_ctx->floppydisk->tracks[j]->number_of_side--;
 					}
 					else
 					{
-						fb->floppydisk->tracks[j]->sides[i]=tg_generateTrack(0,
+						fb_ctx->floppydisk->tracks[j]->sides[i]=tg_generateTrack(0,
 																			0,
 																			0,
 																			0,
@@ -1422,21 +1426,21 @@ HXCFE_FLOPPY* hxcfe_getFloppy(HXCFE_FLPGEN* fb)
 																			1,
 																			1,
 																			bitrate,
-																			fb->floppydisk->tracks[j]->floppyRPM,
+																			fb_ctx->floppydisk->tracks[j]->floppyRPM,
 																			(unsigned char)trackencoding,
 																			255,
 																			0,
-																			fb->fb_stack[0].indexlen,
-																			fb->fb_stack[0].indexpos);
+																			fb_ctx->fb_stack[0].indexlen,
+																			fb_ctx->fb_stack[0].indexpos);
 					}
 				}
 			}
 		}
-		fb->floppydisk->floppyBitRate=bitrate;
+		fb_ctx->floppydisk->floppyBitRate=bitrate;
 
-		f=fb->floppydisk;
-		free(fb->fb_stack);
-		free(fb);
+		f=fb_ctx->floppydisk;
+		free(fb_ctx->fb_stack);
+		free(fb_ctx);
 	}
 
 	return f;
@@ -1730,7 +1734,7 @@ HXCFE_FLOPPY * hxcfe_generateFloppy(HXCFE* floppycontext,char* path,int fsID,int
 	return newfloppy;
 }
 
-int hxcfe_getTrackBitrate(HXCFE_FLOPPY * fp,int track,int side)
+int32_t hxcfe_getTrackBitrate( HXCFE_FLOPPY * fp, int32_t track, int32_t side )
 {
 	if(fp)
 	{
@@ -1740,7 +1744,7 @@ int hxcfe_getTrackBitrate(HXCFE_FLOPPY * fp,int track,int side)
 	return 0;
 }
 
-unsigned char hxcfe_getTrackEncoding(HXCFE_FLOPPY * fp,int track,int side)
+int32_t hxcfe_getTrackEncoding( HXCFE_FLOPPY * fp, int32_t track, int32_t side )
 {
 	if(fp)
 	{
@@ -1750,7 +1754,7 @@ unsigned char hxcfe_getTrackEncoding(HXCFE_FLOPPY * fp,int track,int side)
 	return 0;
 }
 
-unsigned long hxcfe_getTrackLength(HXCFE_FLOPPY * fp,int track,int side)
+int32_t hxcfe_getTrackLength( HXCFE_FLOPPY * fp, int32_t track, int32_t side )
 {
 	if(fp)
 	{
@@ -1760,7 +1764,7 @@ unsigned long hxcfe_getTrackLength(HXCFE_FLOPPY * fp,int track,int side)
 	return 0;
 }
 
-unsigned short hxcfe_getTrackRPM(HXCFE_FLOPPY * fp,int track)
+int32_t hxcfe_getTrackRPM( HXCFE_FLOPPY * fp, int32_t track )
 {
 	if(fp)
 	{
@@ -1770,7 +1774,7 @@ unsigned short hxcfe_getTrackRPM(HXCFE_FLOPPY * fp,int track)
 	return 0;
 }
 
-unsigned char hxcfe_getTrackNumberOfSide(HXCFE_FLOPPY * fp,int track)
+int32_t hxcfe_getTrackNumberOfSide(HXCFE_FLOPPY * fp, int32_t track )
 {
 	if(fp)
 	{
@@ -1779,5 +1783,3 @@ unsigned char hxcfe_getTrackNumberOfSide(HXCFE_FLOPPY * fp,int track)
 
 	return 0;
 }
-
-

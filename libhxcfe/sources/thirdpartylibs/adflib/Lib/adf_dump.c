@@ -44,7 +44,7 @@ extern struct Env adfEnv;
 RETCODE adfInitDumpDevice(struct Device* dev, char* name, BOOL ro)
 {
     struct nativeDevice* nDev;
-    long size;
+    int32_t size;
 
     nDev = (struct nativeDevice*)dev->nativeDev;
 
@@ -92,7 +92,7 @@ RETCODE adfInitDumpDevice(struct Device* dev, char* name, BOOL ro)
  * adfReadDumpSector
  *
  */
-RETCODE adfReadDumpSector(struct Device *dev, long n, int size, unsigned char* buf)
+RETCODE adfReadDumpSector(struct Device *dev, int32_t n, int size, unsigned char* buf)
 {
     struct nativeDevice* nDev;
     int r;
@@ -114,7 +114,7 @@ RETCODE adfReadDumpSector(struct Device *dev, long n, int size, unsigned char* b
 	}
 	else
 	{
-		if((unsigned long)((512*n)+size)<=nDev->memory_buffer_size)
+		if((uint32_t)((512*n)+size)<=nDev->memory_buffer_size)
 		{
 			memcpy(buf,&nDev->memory_buffer[512*n],size);
 		}
@@ -132,7 +132,7 @@ RETCODE adfReadDumpSector(struct Device *dev, long n, int size, unsigned char* b
  * adfWriteDumpSector
  *
  */
-RETCODE adfWriteDumpSector(struct Device *dev, long n, int size, unsigned char* buf)
+RETCODE adfWriteDumpSector(struct Device *dev, int32_t n, int size, unsigned char* buf)
 {
     struct nativeDevice* nDev;
     int r;
@@ -149,7 +149,7 @@ RETCODE adfWriteDumpSector(struct Device *dev, long n, int size, unsigned char* 
 	}
 	else
 	{
-		if((unsigned long)((512*n)+size)<=nDev->memory_buffer_size)
+		if((uint32_t)((512*n)+size)<=nDev->memory_buffer_size)
 		{
 			memcpy(&nDev->memory_buffer[512*n],buf,size);
 		}
@@ -202,7 +202,7 @@ RETCODE adfCreateHdFile(struct Device* dev, char* volName, int volType)
         return RC_ERROR;
     }
 
-    dev->volList[0] = adfCreateVol( dev, 0L, (long)dev->cylinders, volName, volType,0 );
+    dev->volList[0] = adfCreateVol( dev, 0L, (int32_t)dev->cylinders, volName, volType,0 );
     if (dev->volList[0]==NULL) {
         free(dev->volList);
         return RC_ERROR;
@@ -221,12 +221,12 @@ RETCODE adfCreateHdFile(struct Device* dev, char* volName, int volType)
  * returns NULL if failed
  */ 
     struct Device*
-adfCreateDumpDevice(char* filename, long cylinders, long heads, long sectors)
+adfCreateDumpDevice(char* filename, int32_t cylinders, int32_t heads, int32_t sectors)
 {
     struct Device* dev;
     unsigned char buf[LOGICAL_BLOCK_SIZE];
     struct nativeDevice* nDev;
-/*    long i;*/
+/*    int32_t i;*/
     int r;
 	
     dev=(struct Device*)calloc(1,sizeof(struct Device));
@@ -296,11 +296,11 @@ adfCreateDumpDevice(char* filename, long cylinders, long heads, long sectors)
  * returns NULL if failed
  */ 
     struct Device*
-adfCreateMemoryDumpDevice(long cylinders, long heads, long sectors,unsigned char ** memorybuffer,int * membufsize)
+adfCreateMemoryDumpDevice(int32_t cylinders, int32_t heads, int32_t sectors,unsigned char ** memorybuffer,int * membufsize)
 {
     struct Device* dev;
     struct nativeDevice* nDev;
-/*    long i;*/
+/*    int32_t i;*/
 
 	
     dev=(struct Device*)calloc(1,sizeof(struct Device));

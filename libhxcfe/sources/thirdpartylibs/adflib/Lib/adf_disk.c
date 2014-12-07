@@ -42,7 +42,7 @@
 
 extern struct Env adfEnv;
 
-unsigned long bitMask[32] = { 
+uint32_t bitMask[32] = { 
     0x1, 0x2, 0x4, 0x8,
 	0x10, 0x20, 0x40, 0x80,
     0x100, 0x200, 0x400, 0x800,
@@ -159,7 +159,7 @@ void adfVolumeInfo(struct Volume *vol)
  */
 struct Volume* adfMount( struct Device *dev, int nPart, BOOL readOnly )
 {
-    long nBlock;
+    int32_t nBlock;
     struct bRootBlock root;
 	struct bBootBlock boot;
 	struct Volume* vol;
@@ -235,7 +235,7 @@ void adfUnMount(struct Volume *vol)
  *
  * 
  */
-struct Volume* adfCreateVol( struct Device* dev, long start, long len, 
+struct Volume* adfCreateVol( struct Device* dev, int32_t start, int32_t len, 
     char* volName, int volType,struct DateTime * voldate )
 {
     struct bBootBlock boot;
@@ -375,10 +375,10 @@ printf("%3d %x, ",i,vol->bitmapTable[0]->map[i]);
  * read logical block
  */
 RETCODE
-adfReadBlock(struct Volume* vol, long nSect, unsigned char* buf)
+adfReadBlock(struct Volume* vol, int32_t nSect, unsigned char* buf)
 {
   /*    char strBuf[80];*/
-    long pSect;
+    int32_t pSect;
     struct nativeFunctions *nFct;
     RETCODE rc;
 
@@ -419,9 +419,9 @@ adfReadBlock(struct Volume* vol, long nSect, unsigned char* buf)
  * adfWriteBlock
  *
  */
-RETCODE adfWriteBlock(struct Volume* vol, long nSect, unsigned char *buf)
+RETCODE adfWriteBlock(struct Volume* vol, int32_t nSect, unsigned char *buf)
 {
-    long pSect;
+    int32_t pSect;
     struct nativeFunctions *nFct;
     RETCODE rc;
 

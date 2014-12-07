@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -146,7 +147,7 @@ JV3SectorsOffsets * GetSectorPosition(JV3SectorsOffsets *base,int size,unsigned 
 }
 
 
-unsigned int JV3_disk_geometry(JV3SectorHeader JV3SH[], unsigned char *NumberofSides, unsigned short *SectorsperTrack, unsigned short *NumberofTracks, unsigned short *SectorSize, unsigned char *StartIdSector, unsigned short *NumberofEntries) {
+unsigned int JV3_disk_geometry(JV3SectorHeader JV3SH[], int *NumberofSides, int *SectorsperTrack, int *NumberofTracks, int *SectorSize, int *StartIdSector, int *NumberofEntries) {
 	int i, total_data = 0;
 
 	*StartIdSector = 255;
@@ -164,7 +165,7 @@ unsigned int JV3_disk_geometry(JV3SectorHeader JV3SH[], unsigned char *NumberofS
 				*SectorsperTrack = JV3SH[i].sector;
 			if (JV3SH[i].sector < *StartIdSector)
 				*StartIdSector = JV3SH[i].sector;
-			if (gbn(JV3SH[i].flags, JV3_SIDE) > *NumberofSides)
+			if (gbn(JV3SH[i].flags, JV3_SIDE) > (unsigned int)*NumberofSides)
 				*NumberofSides = gbn(JV3SH[i].flags, JV3_SIDE);
 			switch (gbn(JV3SH[i].flags, JV3_SIZE)) {
 				case JV3_SIZE_USED_256:
@@ -324,9 +325,9 @@ JV3SectorsOffsets *JV3_offset(JV3SectorHeader JV3SH[], unsigned int NumberofSide
 int JV3_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int offset1, offset2;
-	unsigned short SectorPerTrack, NumberOfTrack, SectorSize, NumberOfEntries;
+	int SectorPerTrack, NumberOfTrack, SectorSize, NumberOfEntries;
 	unsigned int   total_data;
-	unsigned char  StartIdSector,NumberOfSide;
+	int  StartIdSector,NumberOfSide;
 	FILE *f;
 	JV3SectorHeader sh[JV3_HEADER_MAX];
 
@@ -372,8 +373,6 @@ int JV3_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile : non JV3 file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -381,12 +380,12 @@ int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	FILE * f;
 	unsigned int filesize,cur_pos;
-	unsigned int i,j,k,bitrate;
-	unsigned short SectorSize, NumberofEntries;
-	unsigned char  gap3len,interleave,StartIdSector;
-	unsigned short rpm;
-	unsigned char  trackformat;
-	unsigned short sector_found;
+	int i,j,k,bitrate;
+	int SectorSize, NumberofEntries;
+	int  gap3len,interleave,StartIdSector;
+	int rpm;
+	int trackformat;
+	int sector_found;
 
 	HXCFE_SECTCFG*	sectorconfig;
 	HXCFE_CYLINDER*		currentcylinder;
@@ -534,7 +533,7 @@ int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_BADFILE;
 }
 
-int JV3_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int JV3_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="TRS80_JV3";

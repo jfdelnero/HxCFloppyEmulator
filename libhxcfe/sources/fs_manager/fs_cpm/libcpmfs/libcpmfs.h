@@ -1,7 +1,7 @@
 
 
-typedef int (*fn_diskio_read) (unsigned long sector, unsigned char *buffer, unsigned long sector_count);
-typedef int (*fn_diskio_write)(unsigned long sector, unsigned char *buffer, unsigned long sector_count);
+typedef int (*fn_diskio_read) (uint32_t sector, unsigned char *buffer, uint32_t sector_count);
+typedef int (*fn_diskio_write)(uint32_t sector, unsigned char *buffer, uint32_t sector_count);
 
 typedef struct _cpmfs
 {
@@ -31,7 +31,7 @@ int     libcpmfs_unmountImage(cpmfs * fs);
 void  * libcpmfs_fopen(cpmfs * fs, const char *path, const char *modifiers);
 int     libcpmfs_fwrite(cpmfs * fs,const void * data, int size, int count, void *file );
 int     libcpmfs_ftell(cpmfs * fs, void *file);
-int     libcpmfs_fseek(cpmfs * fs, void *file, long offset, int origin );
+int     libcpmfs_fseek(cpmfs * fs, void *file, int32_t offset, int origin );
 int     libcpmfs_fread(cpmfs * fs, void * data, int size, int count, void *file );
 int     libcpmfs_feof(cpmfs * fs,  void *file);
 int     libcpmfs_fclose(cpmfs * fs,void *file);

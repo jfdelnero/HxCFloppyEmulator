@@ -58,31 +58,31 @@ Note that UKV 1.2 does not use the flag byte.
 
 typedef struct fdi_header_
 {
-	unsigned char  signature[3];
-	unsigned char  write_protect;
-	unsigned short number_of_cylinders;
-	unsigned short number_of_heads;
-	unsigned short diskdescription_offset;
-	unsigned short data_offset;
-	unsigned short additionnal_infos_len;
+	uint8_t  signature[3];
+	uint8_t  write_protect;
+	uint16_t number_of_cylinders;
+	uint16_t number_of_heads;
+	uint16_t diskdescription_offset;
+	uint16_t data_offset;
+	uint16_t additionnal_infos_len;
 }fdi_header;
 
 
 typedef struct fdi_track_header_
 {
-	unsigned long  track_offset;
-	unsigned short unused;
-	unsigned char  number_of_sectors;
+	uint32_t track_offset;
+	uint16_t unused;
+	uint8_t  number_of_sectors;
 }fdi_track_header;
 
 typedef struct fdi_sector_header_
 {
-	unsigned char  cylinder_number;
-	unsigned char  head_number;
-	unsigned char  sector_number;
-	unsigned char  sector_size;
-	unsigned char  flags;
-	unsigned short sector_offset;
+	uint8_t  cylinder_number;
+	uint8_t  head_number;
+	uint8_t  sector_number;
+	uint8_t  sector_size;
+	uint8_t  flags;
+	uint16_t sector_offset;
 }fdi_sector_header;
 
 #pragma pack()

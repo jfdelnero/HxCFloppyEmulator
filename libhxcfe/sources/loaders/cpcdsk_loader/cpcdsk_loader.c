@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -99,8 +100,6 @@ int CPCDSK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile : non CPC Dsk file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 
@@ -111,17 +110,17 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 	FILE * f;
 	unsigned int filesize;
 	int tracksize;
-	unsigned int j,t,s,i;
-	unsigned int sectorposition;
+	int j,t,s,i;
+	int sectorposition;
 	int tracklen;
-	unsigned char gap3len,interleave;
-	unsigned short rpm;
+	int gap3len,interleave;
+	int rpm;
 	int extendformat;
 	cpcdsk_fileheader fileheader;
 	cpcdsk_trackheader trackheader;
 	cpcdsk_sector sector;
 	unsigned char * tracksizetab;
-	unsigned int trackposition;
+	int trackposition;
 	HXCFE_SECTCFG* sectorconfig;
 	HXCFE_CYLINDER** realloctracktable;
 
@@ -192,7 +191,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 		trackposition=0x100;
 
-		for(i=0;i<(unsigned int)(fileheader.number_of_sides*fileheader.number_of_tracks);i++)
+		for(i=0;i<(fileheader.number_of_sides*fileheader.number_of_tracks);i++)
 		{
 
 			hxcfe_imgCallProgressCallback(imgldr_ctx,i,fileheader.number_of_sides*fileheader.number_of_tracks);
@@ -201,7 +200,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 			memset(&trackheader,0,sizeof(trackheader));
 
-			if( ( ftell(f) == (long)trackposition ) && (fread(&trackheader,sizeof(trackheader),1,f) ==  1) )
+			if( ( ftell(f) == (int32_t)trackposition ) && (fread(&trackheader,sizeof(trackheader),1,f) ==  1) )
 			{
 
 				t=trackheader.track_number;
@@ -341,11 +340,12 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 						if(!floppydisk->tracks[t])
 						{
 							floppydisk->tracks[t]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-							currentcylinder=floppydisk->tracks[t];
 						}
 
+						currentcylinder = floppydisk->tracks[t];
+
 						tracklen=((DEFAULT_DD_BITRATE/(rpm/60))/4)*8;
-						currentcylinder->sides[s]=tg_alloctrack(floppydisk->floppyBitRate,ISOIBM_MFM_ENCODING,currentcylinder->floppyRPM,tracklen,2500,-2500,TG_ALLOCTRACK_RANDOMIZEDATABUFFER);
+						currentcylinder->sides[s] = tg_alloctrack(floppydisk->floppyBitRate,ISOIBM_MFM_ENCODING,currentcylinder->floppyRPM,tracklen,2500,-2500,TG_ALLOCTRACK_RANDOMIZEDATABUFFER);
 					}
 				}
 				else
@@ -361,7 +361,6 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 		}
 
-
 		// initialisation des tracks non formatées / non présente dans le fichier.
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
@@ -370,8 +369,9 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 				if(!floppydisk->tracks[j])
 				{
 					floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-					currentcylinder=floppydisk->tracks[j];
 				}
+
+				currentcylinder = floppydisk->tracks[j];
 
 				if(!floppydisk->tracks[j]->sides[i])
 				{
@@ -398,7 +398,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 
-int CPCDSK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int CPCDSK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="AMSTRADCPC_DSK";

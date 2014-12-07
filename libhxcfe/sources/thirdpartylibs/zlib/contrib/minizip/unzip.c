@@ -68,6 +68,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <stdint.h>
+
 #ifndef NOUNCRYPT
         #define NOUNCRYPT
 #endif
@@ -187,7 +189,7 @@ typedef struct
     int isZip64;
 
 #    ifndef NOUNCRYPT
-    unsigned long keys[3];     /* keys defining the pseudo-random sequence */
+    uint32_t keys[3];     /* keys defining the pseudo-random sequence */
     const z_crc_t* pcrc_32_tab;
 #    endif
 } unz64_s;

@@ -60,18 +60,18 @@ PREFIX void printEntry(struct Entry* entry);
 PREFIX void adfFreeDirList(struct List* list);
 PREFIX void adfFreeEntry(struct Entry *);
 PREFIX RETCODE adfRenameEntry(struct Volume *vol, SECTNUM, char *old,SECTNUM,char *pNew);	/* BV */
-PREFIX RETCODE adfSetEntryAccess(struct Volume*, SECTNUM, char*, long);
+PREFIX RETCODE adfSetEntryAccess(struct Volume*, SECTNUM, char*, int32_t);
 PREFIX RETCODE adfSetEntryComment(struct Volume*, SECTNUM, char*, char*);
 
 /* file */
-PREFIX long adfFileRealSize(unsigned long size, int blockSize, long *dataN, long *extN);
+PREFIX int32_t adfFileRealSize(uint32_t size, int blockSize, int32_t *dataN, int32_t *extN);
 PREFIX struct File* adfOpenFile(struct Volume *vol, char* name, char *mode);
 PREFIX void adfCloseFile(struct File *file);
-PREFIX long adfReadFile(struct File* file, long n, unsigned char *buffer);
+PREFIX int32_t adfReadFile(struct File* file, int32_t n, unsigned char *buffer);
 PREFIX BOOL adfEndOfFile(struct File* file);
-PREFIX long adfWriteFile(struct File *file, long n, unsigned char *buffer);
+PREFIX int32_t adfWriteFile(struct File *file, int32_t n, unsigned char *buffer);
 PREFIX void adfFlushFile(struct File *file);
-PREFIX void adfFileSeek(struct File *file, unsigned long pos);
+PREFIX void adfFileSeek(struct File *file, uint32_t pos);
 
 /* volume */
 PREFIX RETCODE adfInstallBootBlock(struct Volume *vol,unsigned char*);
@@ -88,8 +88,8 @@ PREFIX RETCODE adfCreateFlop(struct Device* dev, char* volName, int volType,stru
 PREFIX RETCODE adfCreateHdFile(struct Device* dev, char* volName, int volType);
 
 /* dump device */
-PREFIX struct Device* adfCreateDumpDevice(char* filename, long cyl, long heads, long sec);
-PREFIX struct Device* adfCreateMemoryDumpDevice(long cylinders, long heads, long sectors,unsigned char ** memorybuffer,int * membufsize);
+PREFIX struct Device* adfCreateDumpDevice(char* filename, int32_t cyl, int32_t heads, int32_t sec);
+PREFIX struct Device* adfCreateMemoryDumpDevice(int32_t cylinders, int32_t heads, int32_t sectors,unsigned char ** memorybuffer,int * membufsize);
 
 /* env */
 PREFIX void adfEnvInitDefault();
@@ -101,7 +101,7 @@ PREFIX char* adfGetVersionDate();
 PREFIX void adfSetEnvFct( void(*e)(char*), void(*w)(char*), void(*v)(char*) );
 
 /* link */
-PREFIX RETCODE adfBlockPtr2EntryName(struct Volume *, SECTNUM, SECTNUM,char **, long *);
+PREFIX RETCODE adfBlockPtr2EntryName(struct Volume *, SECTNUM, SECTNUM,char **, int32_t *);
 
 /* salv */
 PREFIX struct List* adfGetDelEnt(struct Volume *vol);
@@ -115,9 +115,9 @@ PREFIX BOOL isSectNumValid(struct Volume *vol, SECTNUM nSect);
 
 /* low level API */
 
-PREFIX RETCODE adfReadBlock(struct Volume* , long nSect, unsigned char* buf);
-PREFIX RETCODE adfWriteBlock(struct Volume* , long nSect, unsigned char* buf);
-PREFIX long adfCountFreeBlocks(struct Volume* vol);
+PREFIX RETCODE adfReadBlock(struct Volume* , int32_t nSect, unsigned char* buf);
+PREFIX RETCODE adfWriteBlock(struct Volume* , int32_t nSect, unsigned char* buf);
+PREFIX int32_t adfCountFreeBlocks(struct Volume* vol);
 
 
 #ifdef __cplusplus

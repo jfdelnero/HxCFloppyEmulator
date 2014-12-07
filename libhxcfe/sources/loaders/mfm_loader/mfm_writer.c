@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
@@ -45,7 +47,7 @@ int MFM_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	MFMTRACKIMG mfmtrackdesc;
 	MFMIMG mfmheader;
 	unsigned char * mfmtrack;
-	long * offsettrack;
+	int32_t * offsettrack;
 	int mfmsize;
 	unsigned int i,j;
 	unsigned int trackpos;
@@ -77,7 +79,7 @@ int MFM_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d Tracks, %d side(s)",mfmheader.number_of_track,mfmheader.number_of_side);
 
-		offsettrack=(long*) malloc(((mfmheader.number_of_track*mfmheader.number_of_side)+1)*sizeof(long));
+		offsettrack=(int32_t*) malloc(((mfmheader.number_of_track*mfmheader.number_of_side)+1)*sizeof(int32_t));
 
 		i=0;
 		trackpos=sizeof(mfmheader)+(sizeof(mfmtrackdesc)*(mfmheader.number_of_track*mfmheader.number_of_side));
@@ -99,7 +101,7 @@ int MFM_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 				mfmtrackdesc.mfmtracksize=mfmsize;
 				mfmtrackdesc.side_number=j;
 				mfmtrackdesc.track_number=i;
-				offsettrack[(i*mfmheader.number_of_side)+j]=(long)trackpos;
+				offsettrack[(i*mfmheader.number_of_side)+j]=(int32_t)trackpos;
 				mfmtrackdesc.mfmtrackoffset=trackpos;
 
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Write Track %d:%d [%x] %x bytes",i,j,mfmtrackdesc.mfmtrackoffset,mfmsize);

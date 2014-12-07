@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -96,7 +97,6 @@ int IMD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		return HXCFE_BADFILE;
 	}
 
-	return HXCFE_BADPARAMETER;
 }
 
 int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -108,16 +108,16 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	HXCFE_SECTCFG* sectorconfig;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
-	int bitrate;
-	unsigned short pregap;
+	int32_t bitrate;
+	int32_t pregap;
 	unsigned char * sectormap;
 	unsigned char * sectorcylmap;
 	unsigned char * sectorheadmap;
 	unsigned char * track_data;
 	imd_trackheader trackcfg;
-	unsigned short sectorsize;
-	unsigned char interleave,tracktype;
-	unsigned short rpm;
+	int32_t sectorsize;
+	int32_t interleave,tracktype;
+	int32_t rpm;
 	unsigned char sectordatarecordcode,cdata;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMD_libLoad_DiskFile %s",imgfile);
@@ -271,7 +271,7 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					fread(sectorheadmap,1,trackcfg.number_of_sector,f);
 				}
 
-				sectorsize=(128<<trackcfg.sector_size_code);
+				sectorsize = (int32_t)(128<<trackcfg.sector_size_code);
 				track_data=malloc(sectorsize*trackcfg.number_of_sector);
 				memset(track_data,0,sectorsize*trackcfg.number_of_sector);
 
@@ -432,9 +432,11 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				if(!floppydisk->tracks[trackcfg.physical_cylinder])
 				{
-					currentcylinder = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-					floppydisk->tracks[trackcfg.physical_cylinder] = currentcylinder;
+					floppydisk->tracks[trackcfg.physical_cylinder] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 				}
+
+				currentcylinder = floppydisk->tracks[trackcfg.physical_cylinder];
+				
 
 				currentside = tg_generateTrackEx((unsigned short)trackcfg.number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,tracktype,pregap,2500 | NO_SECTOR_UNDER_INDEX,-2500);
 				currentcylinder->sides[trackcfg.physical_head&0xF]=currentside;
@@ -486,7 +488,7 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int IMD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 
-int IMD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int IMD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="IMD_IMG";

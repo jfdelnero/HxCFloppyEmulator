@@ -47,6 +47,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -92,21 +94,21 @@ unsigned char bit_inverter_emuii[]=
         0x1F,0x9F,0x5F,0xDF,0x3F,0xBF,0x7F,0xFF
 };
 
-int BuildEmuIITrack(HXCFE* floppycontext,unsigned int tracknumber,unsigned int sidenumber,unsigned char* datain,unsigned char * fmdata,unsigned long * fmsizebuffer,int trackformat)
+int32_t BuildEmuIITrack(HXCFE* floppycontext,int tracknumber,int sidenumber,unsigned char* datain,unsigned char * fmdata,int32_t * fmsizebuffer,int trackformat)
 {
-	unsigned int i,j,k;
+	int i,j,k;
 	unsigned char CRC16_High;
 	unsigned char CRC16_Low;
 	unsigned char *tempdata;
 	unsigned char *tempclock;
-	unsigned long finalsize;
-	unsigned long current_buffer_size;
+	int32_t finalsize;
+	int32_t current_buffer_size;
 
 	unsigned char crctable[32];
 
-	unsigned long sectorsize;
+	int32_t sectorsize;
 	unsigned char track_num;
-	unsigned long buffersize;
+	int32_t buffersize;
 
 	buffersize=*fmsizebuffer/8;
 

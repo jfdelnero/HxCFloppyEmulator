@@ -27,13 +27,13 @@
  */
 
 PREFIX     struct Device*
-adfCreateDumpDevice(char* filename, long cyl, long heads, long sec);
+adfCreateDumpDevice(char* filename, int32_t cyl, int32_t heads, int32_t sec);
 PREFIX     struct Device*
-adfCreateMemoryDumpDevice(long cylinders, long heads, long sectors,unsigned char ** memorybuffer,int * membufsize);
+adfCreateMemoryDumpDevice(int32_t cylinders, int32_t heads, int32_t sectors,unsigned char ** memorybuffer,int * membufsize);
 PREFIX RETCODE adfCreateHdFile(struct Device* dev, char* volName, int volType);
 BOOL adfInitDumpDevice(struct Device* dev, char* name,BOOL);
-BOOL adfReadDumpSector(struct Device *dev, long n, int size, unsigned char* buf);
-BOOL adfWriteDumpSector(struct Device *dev, long n, int size, unsigned char* buf);
+BOOL adfReadDumpSector(struct Device *dev, int32_t n, int size, unsigned char* buf);
+BOOL adfWriteDumpSector(struct Device *dev, int32_t n, int size, unsigned char* buf);
 void adfReleaseDumpDevice(struct Device *dev);
 
 

@@ -1,27 +1,27 @@
 
 typedef struct sect_sector_
 {
-	int type;
-	int sectorsize;
-	int track_id;
-	int side_id;
-	int sector_id;
-	unsigned char *buffer;
+	int32_t type;
+	int32_t sectorsize;
+	int32_t track_id;
+	int32_t side_id;
+	int32_t sector_id;
+	uint8_t *buffer;
 }sect_sector;
 
 typedef struct sect_track_
 {
-	unsigned char side;
-	unsigned char track;
-	int number_of_sector;
+	uint8_t side;
+	uint8_t track;
+	int32_t number_of_sector;
 	sect_sector ** sectorlist;
 
 }sect_track;
 
 typedef struct sect_floppy_
 {
-	int number_of_side;
-	int number_of_track;
+	int32_t number_of_side;
+	int32_t number_of_track;
 	sect_track ** tracklist;
 }sect_floppy;
 

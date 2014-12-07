@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -73,8 +74,6 @@ int HDM_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HDM_libIsValidDiskFile : non HDM file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 int HDM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -82,16 +81,16 @@ int HDM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j;
+	int i,j;
 	unsigned int file_offset;
 	unsigned char* trackdata;
-	unsigned char trackformat;
-	unsigned char skew;
+	int trackformat;
+	int skew;
 	int tracklen;
-	unsigned char gap3len,interleave;
-	unsigned short rpm;
-	unsigned short sectorsize;
-	unsigned int bitrate;
+	int gap3len,interleave;
+	int rpm;
+	int sectorsize;
+	int bitrate;
 
 	HXCFE_CYLINDER* currentcylinder;
 
@@ -163,7 +162,7 @@ int HDM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 }
 
 
-int HDM_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int HDM_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="X68000_HDM";

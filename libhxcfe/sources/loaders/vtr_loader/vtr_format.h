@@ -29,35 +29,35 @@
 
 typedef struct vtrucco_picfileformatheader_
 {
-	unsigned char HEADERSIGNATURE[7];
-	unsigned char write_protected;
-	unsigned short floppyRPM;
+	uint8_t  HEADERSIGNATURE[7];
+	uint8_t  write_protected;
+	uint16_t floppyRPM;
 
-	unsigned char number_of_track;
-	unsigned char floppyinterfacemode;
-	unsigned char number_of_side;
+	uint8_t  number_of_track;
+	uint8_t  floppyinterfacemode;
+	uint8_t  number_of_side;
 
-	unsigned char track_encoding;
-	unsigned short bitRate;
-	unsigned short track_list_offset;
+	uint8_t  track_encoding;
+	uint16_t bitRate;
+	uint16_t track_list_offset;
 
-	unsigned char formatrevision;
+	uint8_t  formatrevision;
 
-	unsigned char RESERVED[100];
+	uint8_t  RESERVED[100];
 
-	unsigned char input_filename[128];
+	uint8_t  input_filename[128];
 
-	unsigned char RESERVED2[50];
+	uint8_t  RESERVED2[50];
 
-	unsigned char CREDITS[73];
+	uint8_t  CREDITS[73];
 
 }vtrucco_picfileformatheader;
 
 
 typedef struct vtrucco_pictrack_
 {
-	unsigned short offset;
-	unsigned short track_len;
+	uint16_t offset;
+	uint16_t track_len;
 }vtrucco_pictrack;
 
 #pragma pack()

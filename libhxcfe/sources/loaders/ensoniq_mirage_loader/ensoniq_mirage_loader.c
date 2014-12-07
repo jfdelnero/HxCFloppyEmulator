@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -88,8 +89,6 @@ int Ensoniq_mirage_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Ensoniq_mirage_libIsValidDiskFile : non Ensoniq mirage file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 int Ensoniq_mirage_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -97,14 +96,14 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j,k;
+	int i,j,k;
 	unsigned int file_offset;
 	unsigned char* trackdata;
-	int tracklen;
-	unsigned char  gap3len,interleave;
-	unsigned char  trackformat;
-	unsigned short sectorsize,rpm;
-	unsigned short numberofsector;
+	int  tracklen;
+	int  gap3len,interleave;
+	int  trackformat;
+	int  sectorsize,rpm;
+	int  numberofsector;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SECTCFG  sectorconfig[6];
 
@@ -198,7 +197,7 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 	return HXCFE_BADFILE;
 }
 
-int Ensoniq_mirage_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int Ensoniq_mirage_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ENSONIQ_EDM";

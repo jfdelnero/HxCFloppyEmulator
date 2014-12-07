@@ -48,6 +48,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
@@ -58,9 +60,7 @@
 
 #include "libhxcadaptor.h"
 
-#include "types.h"
-
-unsigned long update_checksum(unsigned long checksum,unsigned char * buffer,unsigned int size)
+uint32_t update_checksum(uint32_t checksum,unsigned char * buffer,unsigned int size)
 {
 	unsigned int i;
 
@@ -72,7 +72,7 @@ unsigned long update_checksum(unsigned long checksum,unsigned char * buffer,unsi
 	return checksum;
 }
 
-unsigned short getNextPulse(HXCFE_SIDE * track,unsigned int * offset,int * rollover)
+unsigned short getNextPulse(HXCFE_SIDE * track,int * offset,int * rollover)
 {
 	int i;
 	float totaltime;
@@ -125,16 +125,16 @@ unsigned short getNextPulse(HXCFE_SIDE * track,unsigned int * offset,int * rollo
 	}while(1);
 }
 
-unsigned long write_scp_track(FILE *f,HXCFE_SIDE * track,unsigned long * csum,int tracknum,unsigned int revolution)
+uint32_t write_scp_track(FILE *f,HXCFE_SIDE * track,uint32_t * csum,int tracknum,unsigned int revolution)
 {
-	unsigned long checksum,file_checksum,size,offset,totalsize;
+	uint32_t checksum,file_checksum,size,offset,totalsize;
 	unsigned short trackbuffer[256];
 	unsigned int i,j;
-	unsigned long total_time;
+	uint32_t total_time;
 	char timestamp[64];
 	scp_track_header trkh;
 	int fpos;
-	unsigned int trackoffset;
+	int trackoffset;
 	int trackrollover;
 	time_t curtimecnt;
 	struct tm * curtime;
@@ -235,11 +235,11 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 {
 	FILE * f;
 	scp_header scph;
-	unsigned long tracksoffset[83*2];
-	unsigned long tracklist_offset;
+	uint32_t tracksoffset[83*2];
+	uint32_t tracklist_offset;
 
-	unsigned long file_checksum;
-	unsigned long track_checksum;
+	uint32_t file_checksum;
+	uint32_t track_checksum;
 	int i,tracknumber;
 
 	f = hxc_fopen(filename,"wb");

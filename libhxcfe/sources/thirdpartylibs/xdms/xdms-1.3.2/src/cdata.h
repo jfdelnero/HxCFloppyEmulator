@@ -7,21 +7,22 @@
  *     dependant features and other global stuff
  */
 
+#include <stdint.h>
 
 #ifndef UCHAR
-#define UCHAR unsigned char
+#define UCHAR uint8_t
 #endif
 
 #ifndef USHORT
-#define USHORT unsigned short
+#define USHORT uint16_t
 #endif
 
 #ifndef SHORT
-#define SHORT short
+#define SHORT int16_t
 #endif
 
 #ifndef ULONG
-#define ULONG unsigned long
+#define ULONG uint32_t
 #endif
 
 

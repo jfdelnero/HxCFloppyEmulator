@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -89,8 +90,6 @@ int ACORNADF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ACORNADF_libIsValidDiskFile : non Acorn ADF file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 
@@ -100,13 +99,13 @@ int ACORNADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j;
+	int i,j;
 	unsigned int file_offset;
 	unsigned char* trackdata;
-	unsigned char gap3len,interleave;
-	unsigned short rpm;
-	unsigned short sectorsize;
-	unsigned char trackformat;
+	int gap3len,interleave;
+	int rpm;
+	int sectorsize;
+	int trackformat;
 	HXCFE_CYLINDER* currentcylinder;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ACORNADF_libLoad_DiskFile %s",imgfile);
@@ -186,7 +185,7 @@ int ACORNADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	return HXCFE_BADFILE;
 }
 
-int ACORNADF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int ACORNADF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ACORN_ADF";

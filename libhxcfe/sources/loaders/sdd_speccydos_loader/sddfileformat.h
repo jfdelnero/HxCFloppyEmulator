@@ -41,10 +41,10 @@ Boot sector started with "TRKY2" string for identify. (00h-04h bytes)
 #pragma pack(1)
 typedef struct sddfileformats_t_
 {
-	unsigned char SIGN[4];  // "TRKY2"
-	unsigned char PAD[9];
-	unsigned char density;
-	unsigned char nb_track_side;
-	unsigned char nb_sector_per_track;
+	uint8_t SIGN[4];  // "TRKY2"
+	uint8_t PAD[9];
+	uint8_t density;
+	uint8_t nb_track_side;
+	uint8_t nb_sector_per_track;
 }sddfileformats_t;
 #pragma pack()

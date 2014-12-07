@@ -47,6 +47,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -56,7 +58,6 @@
 #include "floppy_utils.h"
 #include "tracks/sector_extractor.h"
 #include "libhxcadaptor.h"
-#include "types.h"
 
 // Main writer function
 int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
@@ -132,6 +133,7 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 				fwrite(&track_header,sizeof(pasti_trackheader),1,stxdskfile);
 
+				sect_cnt = 0;
 				ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 				if(ss)
 				{

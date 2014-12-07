@@ -33,52 +33,51 @@
 
 typedef struct track_generator_
 {
-	unsigned long last_bit_offset;
-
-	unsigned short mfm_last_bit;
+	int32_t  last_bit_offset;
+	uint16_t mfm_last_bit;
 }track_generator;
 
 #ifndef _HXCFE_SECTCFG_
 
 typedef struct _HXCFE_SECTCFG
 {
-	unsigned char  head;
-	unsigned char  sector;
-	unsigned char  sectorsleft;
-	unsigned char  cylinder;
+	int32_t        head;
+	int32_t        sector;
+	int32_t        sectorsleft;
+	int32_t        cylinder;
 
-	unsigned int   sectorsize;
+	int32_t        sectorsize;
 
-	unsigned char  use_alternate_sector_size_id;
-	unsigned char  alternate_sector_size_id;
+	int32_t        use_alternate_sector_size_id;
+	int32_t        alternate_sector_size_id;
 
-	unsigned char  missingdataaddressmark;
+	int32_t        missingdataaddressmark;
 
-	unsigned char  use_alternate_header_crc;	//0x1 -> Bad crc  , 0x2 alternate crc
-	unsigned short data_crc;
+	int32_t        use_alternate_header_crc;	//0x1 -> Bad crc  , 0x2 alternate crc
+	uint32_t       data_crc;
 
-	unsigned char  use_alternate_data_crc;		//0x1 -> Bad crc  , 0x2 alternate crc
-	unsigned short header_crc;
+	int32_t        use_alternate_data_crc;		//0x1 -> Bad crc  , 0x2 alternate crc
+	uint32_t       header_crc;
 
-	unsigned char  use_alternate_datamark;
-	unsigned char  alternate_datamark;
+	int32_t        use_alternate_datamark;
+	int32_t        alternate_datamark;
 
-	unsigned char  use_alternate_addressmark;
-	unsigned char  alternate_addressmark;
+	int32_t        use_alternate_addressmark;
+	int32_t        alternate_addressmark;
 
-	unsigned long  startsectorindex;
-	unsigned long  startdataindex;
-	unsigned long  endsectorindex;
+	int32_t        startsectorindex;
+	int32_t        startdataindex;
+	int32_t        endsectorindex;
 
-	unsigned char  trackencoding;
+	int32_t        trackencoding;
 
-	unsigned char  gap3;
+	int32_t        gap3;
 
-	unsigned int   bitrate;
+	int32_t        bitrate;
 
-	unsigned char  * input_data;
-	unsigned char  fill_byte;
-	unsigned char  fill_byte_used;				// Set to indicate that the sector is filled with "fill_byte"
+	uint8_t     * input_data;
+	uint8_t       fill_byte;
+	uint8_t       fill_byte_used;				// Set to indicate that the sector is filled with "fill_byte"
 }HXCFE_SECTCFG;
 
 #define _HXCFE_SECTCFG_
@@ -91,26 +90,26 @@ typedef struct _HXCFE_SECTCFG
 #define       TG_ALLOCTRACK_RANDOMIZEDATABUFFER 0x08
 #define       TG_ALLOCTRACK_UNFORMATEDBUFFER    0x10
 
- int             BuildCylinder(unsigned char * mfm_buffer,int mfm_size,unsigned char * track_clk,unsigned char * track_data,int track_size);
- void            BuildFMCylinder(unsigned char * buffer,int fmtracksize,unsigned char * bufferclk,unsigned char * track,int size);
+ int32_t         BuildCylinder(uint8_t * mfm_buffer,int32_t mfm_size,uint8_t * track_clk,uint8_t * track_data,int32_t track_size);
+ void            BuildFMCylinder(uint8_t * buffer,int32_t fmtracksize,uint8_t * bufferclk,uint8_t * track,int32_t size);
 
- void            getMFMcode(track_generator *tg,unsigned char data,unsigned char clock,unsigned char * dstbuf);
- void            getFMcode (track_generator *tg,unsigned char data,unsigned char clock,unsigned char * dstbuf);
- int             pushTrackCode(track_generator *tg,unsigned char data,unsigned char clock,HXCFE_SIDE * side,unsigned char trackencoding);
+ void            getMFMcode(track_generator *tg,uint8_t data,uint8_t clock,unsigned char * dstbuf);
+ void            getFMcode (track_generator *tg,uint8_t data,uint8_t clock,unsigned char * dstbuf);
+ int32_t         pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE * side,int32_t trackencoding);
 
  void            hxcfe_freeSide(HXCFE_SIDE * side);
 
  void            tg_initTrackEncoder(track_generator *tg);
- unsigned long   tg_computeMinTrackSize(track_generator *tg,unsigned char trackencoding,unsigned int bitrate,unsigned int numberofsector,HXCFE_SECTCFG * sectorconfigtab,unsigned int pregaplen,unsigned long * track_period);
+ int32_t         tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t bitrate,int32_t numberofsector,HXCFE_SECTCFG * sectorconfigtab,int32_t pregaplen,int32_t * track_period);
  void            tg_addSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside);
- void            tg_completeTrack(track_generator *tg, HXCFE_SIDE * currentside,unsigned char trackencoding);
+ void            tg_completeTrack(track_generator *tg, HXCFE_SIDE * currentside,int32_t trackencoding);
+ HXCFE_SIDE *    tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberofsector,int32_t trackencoding,int32_t bitrate,HXCFE_SECTCFG * sectorconfigtab,int32_t pregap);
 
- HXCFE_SIDE *    tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short numberofsector,unsigned char trackencoding,unsigned int bitrate,HXCFE_SECTCFG * sectorconfigtab,unsigned short pregap);
+ HXCFE_SIDE *    tg_generateTrack(uint8_t * sectors_data,int32_t sector_size,int32_t number_of_sector,int32_t track,int32_t side,int32_t sectorid,int32_t interleave,int32_t skew,int32_t bitrate,int32_t rpm,int32_t trackencoding,int32_t gap3,int32_t pregap, int32_t indexlen,int32_t indexpos);
+ HXCFE_SIDE *    tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorconfigtab,int32_t interleave,int32_t skew,int32_t bitrate,int32_t rpm,int32_t trackencoding,int32_t pregap,int32_t indexlen,int32_t indexpos);
 
- HXCFE_SIDE *    tg_generateTrack(unsigned char * sectors_data,unsigned short sector_size,unsigned short number_of_sector,unsigned char track,unsigned char side,unsigned char sectorid,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned char gap3,unsigned short pregap, int indexlen,int indexpos);
- HXCFE_SIDE *    tg_generateTrackEx(unsigned short number_of_sector,HXCFE_SECTCFG * sectorconfigtab,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned short pregap,int indexlen,int indexpos);
+ HXCFE_SIDE *    tg_alloctrack(int32_t bitrate,int32_t trackencoding,int32_t rpm,int32_t tracksize,int32_t indexlen,int32_t indexpos,int32_t buffertoalloc);
 
- HXCFE_SIDE *    tg_alloctrack(unsigned int bitrate,unsigned char trackencoding,unsigned short rpm,unsigned int tracksize,int indexlen,int indexpos,unsigned char buffertoalloc);
 
- unsigned long * tg_allocsubtrack_long(unsigned int tracksize,unsigned long initvalue);
- unsigned char * tg_allocsubtrack_char(unsigned int tracksize,unsigned char initvalue);
+ uint32_t * tg_allocsubtrack_long( int32_t tracksize, uint32_t initvalue );
+ uint8_t  * tg_allocsubtrack_char( int32_t tracksize, uint8_t initvalue );

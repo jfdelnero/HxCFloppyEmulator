@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -130,16 +131,16 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 {
 	FILE * f;
 	unsigned int   filesize;
-	unsigned int   i,j;
+	int   i,j;
 	unsigned int   file_offset;
 	unsigned char* flatimg;
-	unsigned char  gap3len,interleave;
-	unsigned short rpm;
-	unsigned short sectorsize;
+	int gap3len,interleave;
+	int rpm;
+	int sectorsize;
 	unsigned char  checksum;
-	unsigned long  crc,crc32,comentlen;
+	uint32_t  crc,crc32,comentlen;
 	unsigned char* fileheader;
-	unsigned char  trackformat;
+	int  trackformat;
 	size_t curwritepos;
 	char *comment_buf;
 	size_t image_size;
@@ -382,7 +383,7 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 	return HXCFE_FILECORRUPTED;
 }
 
-int CopyQm_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int CopyQm_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="COPYQM";

@@ -71,11 +71,11 @@ Hopefully this helps more and more programmers to use the .MSA file format with 
 
 typedef struct msa_header_
 {
-	unsigned char  sign[2]; // 0x0E 0x0F
-	unsigned short number_of_sector_per_track;
-	unsigned short number_of_side;
-	unsigned short start_track;
-	unsigned short number_of_track;
+	uint8_t  sign[2]; // 0x0E 0x0F
+	uint16_t number_of_sector_per_track;
+	uint16_t number_of_side;
+	uint16_t start_track;
+	uint16_t number_of_track;
 }msa_header;
 
 #pragma pack()

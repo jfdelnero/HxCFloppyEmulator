@@ -28,11 +28,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "bmp_file.h"
+
+#include "types.h"
 
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 #include "libhxcadaptor.h"
+
+#include "bmp_file.h"
+
 
 int bmp_load(char * file,bitmap_data * bdata)
 {
@@ -41,7 +45,7 @@ int bmp_load(char * file,bitmap_data * bdata)
 	int xsize,ysize;
 	int bitperpixel;
 	int palettesize;
-	unsigned long bitmapdataoffset,bitmapdatalinesize;
+	unsigned int    bitmapdataoffset,bitmapdatalinesize;
 	unsigned char * linebuffer;
 	BITMAPFILEHEADER bitmap_header;
 	BITMAPINFOHEADER bitmap_info_header;
@@ -101,8 +105,8 @@ int bmp_load(char * file,bitmap_data * bdata)
 
 				bdata->xsize = xsize;
 				bdata->ysize = ysize;
-				bdata->data = (unsigned long *)malloc(xsize*ysize*sizeof(unsigned long));
-				memset(bdata->data,0,xsize*ysize*sizeof(unsigned long));
+				bdata->data = (uint32_t *)malloc(xsize*ysize*sizeof(uint32_t));
+				memset(bdata->data,0,xsize*ysize*sizeof(uint32_t));
 
 				switch(bitperpixel)
 				{
@@ -267,7 +271,7 @@ int bmp24b_write(char * file,bitmap_data * bdata)
 	int i,j;
 	BITMAPFILEHEADER bitmap_header;
 	BITMAPINFOHEADER bitmap_info_header;
-	unsigned long bitmapdatalinesize;
+	uint32_t bitmapdatalinesize;
 	unsigned char * linebuffer;
 
 	f = hxc_fopen(file,"wb");
@@ -325,7 +329,7 @@ int bmp16b_write(char * file,bitmap_data * bdata)
 	unsigned short color;
 	BITMAPFILEHEADER bitmap_header;
 	BITMAPINFOHEADER bitmap_info_header;
-	unsigned long bitmapdatalinesize;
+	uint32_t bitmapdatalinesize;
 	unsigned char * linebuffer;
 
 	f = hxc_fopen(file,"wb");
@@ -426,7 +430,7 @@ int bmpRLE8b_write(char * file,bitmap_data * bdata)
 	int i,lnsize,datasize;
 	BITMAPFILEHEADER bitmap_header;
 	BITMAPINFOHEADER bitmap_info_header;
-	unsigned long bitmapdatalinesize;
+	uint32_t bitmapdatalinesize;
 	unsigned char * linebuffer;
 	unsigned char * src_data;
 	unsigned char pal[256*4];

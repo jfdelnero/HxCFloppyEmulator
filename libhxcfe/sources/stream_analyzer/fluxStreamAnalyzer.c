@@ -51,6 +51,7 @@
 #include <math.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -82,38 +83,38 @@ HXCFE* floppycont;
 
 typedef struct stathisto_
 {
-	unsigned long val;
-	unsigned long occurence;
+	uint32_t val;
+	uint32_t occurence;
 	float pourcent;
 }stathisto;
 
 typedef struct pulses_link_
 {
-	long * forward_link;
-	long * backward_link;
-	long number_of_pulses;
+	int32_t * forward_link;
+	int32_t * backward_link;
+	int32_t number_of_pulses;
 }pulses_link;
 
 typedef struct pulsesblock_
 {
-	long timelength;
-	long ticklength;
-	long start_index;
-	long end_index;
-	long number_of_pulses;
+	int32_t timelength;
+	int32_t ticklength;
+	int32_t start_index;
+	int32_t end_index;
+	int32_t number_of_pulses;
 
-	long state;
-	long overlap_offset;
-	long overlap_size;
+	int32_t state;
+	int32_t overlap_offset;
+	int32_t overlap_size;
 
-	int locked;
+	int32_t locked;
 }pulsesblock;
 
 typedef struct s_match_
 {
-	int yes;
-	int no;
-	long offset;
+	int32_t yes;
+	int32_t no;
+	int32_t offset;
 }s_match;
 
 static void settrackbit(unsigned char * dstbuffer,int dstsize,unsigned char byte,int bitoffset,int size)
@@ -136,11 +137,11 @@ static void settrackbit(unsigned char * dstbuffer,int dstsize,unsigned char byte
 	}
 }
 
-static void computehistogram(unsigned long *indata,int size,unsigned long *outdata)
+static void computehistogram(uint32_t *indata,int size,uint32_t *outdata)
 {
 	int i;
 
-	memset(outdata,0,sizeof(unsigned long) * (65536) );
+	memset(outdata,0,sizeof(uint32_t) * (65536) );
 	for(i=0;i<size;i++)
 	{
 		if(indata[i]<0x10000)
@@ -150,7 +151,7 @@ static void computehistogram(unsigned long *indata,int size,unsigned long *outda
 	}
 }
 
-static int detectpeaks(HXCFE* floppycontext,unsigned long *histogram)
+static int detectpeaks(HXCFE* floppycontext,uint32_t *histogram)
 {
 	int i,k;
 	int total;
@@ -263,27 +264,25 @@ static int detectpeaks(HXCFE* floppycontext,unsigned long *histogram)
 	{
 		return 1000;
 	}
-
-	return 833;
 }
 
 typedef struct pll_stat_
 {
 	// current cell size (1 cell size)
-	int pump_charge;
+	int32_t pump_charge;
 
 	// current window phase
-	int phase;
+	int32_t phase;
 
 	// center value
-	int pll_max;
-	int pivot;
-	int pll_min;
+	int32_t pll_max;
+	int32_t pivot;
+	int32_t pll_min;
 
-	int last_error;
+	int32_t last_error;
 
 	// last pulse phase
-	int lastpulsephase;
+	int32_t lastpulsephase;
 }pll_stat;
 
 static int getCellTiming(pll_stat * pll,int current_pulsevalue,int * badpulse,int t,int overlapval,int phasecorrection)
@@ -414,12 +413,12 @@ static void quickSort(s_match * table, int start, int end)
     quickSort(table, right+1, end);
 }
 
-HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKSTREAM * track,pulses_link * pl,unsigned long start_index, short rpm,int phasecorrection)
+HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKSTREAM * track,pulses_link * pl,uint32_t start_index, short rpm,int phasecorrection)
 {
 #define TEMPBUFSIZE 256*1024
 	int pumpcharge;
 	int i,j,size;
-	unsigned long value;
+	uint32_t value;
 	int cellcode;
 	int centralvalue;
 	int bitrate;
@@ -430,7 +429,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKS
 	int olderror;
 	unsigned char *outtrack;
 	unsigned char *flakeytrack;
-	unsigned long *trackbitrate;
+	uint32_t *trackbitrate;
 
 	pll_stat pll;
 
@@ -458,11 +457,11 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKS
 
 		outtrack=(unsigned char*)malloc(TEMPBUFSIZE);
 		flakeytrack=(unsigned char*)malloc(TEMPBUFSIZE);
-		trackbitrate=(unsigned long*)malloc(TEMPBUFSIZE*sizeof(unsigned long));
+		trackbitrate=(uint32_t*)malloc(TEMPBUFSIZE*sizeof(uint32_t));
 
 		memset(outtrack,0,TEMPBUFSIZE);
 		memset(flakeytrack,0,TEMPBUFSIZE);
-		memset(trackbitrate,0,TEMPBUFSIZE*sizeof(unsigned long));
+		memset(trackbitrate,0,TEMPBUFSIZE*sizeof(uint32_t));
 
 		for(i=0;i<TEMPBUFSIZE;i++)
 		{
@@ -597,7 +596,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKS
 
 			memcpy(hxcfe_track->databuffer,outtrack,tracksize);
 			memcpy(hxcfe_track->flakybitsbuffer,flakeytrack,tracksize);
-			memcpy(hxcfe_track->timingbuffer,trackbitrate, tracksize * sizeof(unsigned long));
+			memcpy(hxcfe_track->timingbuffer,trackbitrate, tracksize * sizeof(uint32_t));
 
 			hxcfe_track->bitrate = VARIABLEBITRATE;
 		}
@@ -611,19 +610,19 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKS
 	return hxcfe_track;
 }
 
-static unsigned long tick_to_time(unsigned long tick)
+static uint32_t tick_to_time(uint32_t tick)
 {
-	return (unsigned long) (double)( (double)tick  * (double)( (double)( 1000 * 1000 * 100 ) / (double)TICKFREQ ) );
+	return (uint32_t) (double)( (double)tick  * (double)( (double)( 1000 * 1000 * 100 ) / (double)TICKFREQ ) );
 }
 
-static unsigned long time_to_tick(unsigned long time)
+static uint32_t time_to_tick(uint32_t time)
 {
-	return (unsigned long) (double)(( (double)time * TICKFREQ ) / (1000 * 1000 * 100 ) );
+	return (uint32_t) (double)(( (double)time * TICKFREQ ) / (1000 * 1000 * 100 ) );
 }
 
 static int cleanupTrack(HXCFE_SIDE *curside)
 {
-	unsigned long tracklen,k;
+	uint32_t tracklen,k;
 	unsigned char l;
 	unsigned char previous_bit;
 	int bitpatched;
@@ -667,11 +666,11 @@ static int cleanupTrack(HXCFE_SIDE *curside)
 	return bitpatched;
 }
 
-static unsigned long GetDumpTimelength(HXCFE_TRKSTREAM * track_dump)
+static uint32_t GetDumpTimelength(HXCFE_TRKSTREAM * track_dump)
 {
-	unsigned long len;
+	uint32_t len;
 
-	unsigned long nb_pulses,i;
+	uint32_t nb_pulses,i;
 
 	len = 0;
 
@@ -688,12 +687,12 @@ static unsigned long GetDumpTimelength(HXCFE_TRKSTREAM * track_dump)
 	return tick_to_time(len);
 }
 
-static pulsesblock * ScanAndFindBoundaries(HXCFE_TRKSTREAM * track_dump, int blocktimelength, unsigned long number_of_block)
+static pulsesblock * ScanAndFindBoundaries(HXCFE_TRKSTREAM * track_dump, int blocktimelength, uint32_t number_of_block)
 {
-	unsigned long i,j;
+	uint32_t i,j;
 	pulsesblock * pb;
-	unsigned long len;
-	unsigned long blocklen;
+	uint32_t len;
+	uint32_t blocklen;
 
 	pb = 0;
 
@@ -729,12 +728,12 @@ static pulsesblock * ScanAndFindBoundaries(HXCFE_TRKSTREAM * track_dump, int blo
 	return pb;
 }
 
-static unsigned long ScanAndGetIndexPeriod(HXCFE_TRKSTREAM * track_dump)
+static uint32_t ScanAndGetIndexPeriod(HXCFE_TRKSTREAM * track_dump)
 {
-	unsigned long len, nb_rotation;
+	uint32_t len, nb_rotation;
 
-	unsigned long nb_pulses,nb_of_index,i,j,k;
-	unsigned long indexper[32],globalperiod;
+	uint32_t nb_pulses,nb_of_index,i,j,k;
+	uint32_t indexper[32],globalperiod;
 
 	len = 0;
 	nb_of_index = 0;
@@ -776,7 +775,7 @@ static unsigned long ScanAndGetIndexPeriod(HXCFE_TRKSTREAM * track_dump)
 				globalperiod = globalperiod + indexper[j];
 			}
 
-			globalperiod = (unsigned long)((double)((double)globalperiod / ((double)nb_rotation)));
+			globalperiod = (uint32_t)((double)((double)globalperiod / ((double)nb_rotation)));
 
 		}
 		else
@@ -789,17 +788,17 @@ static unsigned long ScanAndGetIndexPeriod(HXCFE_TRKSTREAM * track_dump)
 	return tick_to_time(globalperiod);
 }
 
-static void compareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, unsigned long dst_block_offset,unsigned long * pulses_ok,unsigned long * pulses_failed,int partial)
+static void compareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32_t dst_block_offset,uint32_t * pulses_ok,uint32_t * pulses_failed,int partial)
 {
 	int marge;
 	int time1,time2,pourcent_error;
 	int bad_pulses,good_pulses;
 
-	unsigned long *start_ptr;
-	unsigned long *dst_ptr;
-	unsigned long *last_dump_ptr;
-	unsigned long *last_block_ptr;
-	unsigned long src_number_of_pulses;
+	uint32_t *start_ptr;
+	uint32_t *dst_ptr;
+	uint32_t *last_dump_ptr;
+	uint32_t *last_block_ptr;
+	uint32_t src_number_of_pulses;
 
 	bad_pulses = 0;
 	good_pulses = 0;
@@ -1106,15 +1105,15 @@ static void compareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, unsigned 
 
 }
 
-static int fastcompareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, unsigned long dst_block_offset)
+static int fastcompareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32_t dst_block_offset)
 {
-	long marge;
+	int32_t marge;
 	int time1,time2,pourcent_error;
 
-	unsigned long *start_ptr;
-	unsigned long *dst_ptr;
-	unsigned long *last_dump_ptr;
-	unsigned long *last_block_ptr;
+	uint32_t *start_ptr;
+	uint32_t *dst_ptr;
+	uint32_t *last_dump_ptr;
+	uint32_t *last_block_ptr;
 
 	int errorcntdown;
 
@@ -1174,16 +1173,16 @@ static int fastcompareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, unsign
 	return 1;
 }
 
-static unsigned long detectflakeybits(HXCFE_TRKSTREAM * td,pulsesblock * src_block, unsigned long dst_block_offset,unsigned long * pulses_ok,unsigned long * pulses_failed,pulses_link * pl,unsigned long maxptr)
+static uint32_t detectflakeybits(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32_t dst_block_offset,uint32_t * pulses_ok,uint32_t * pulses_failed,pulses_link * pl,uint32_t maxptr)
 {
-	long marge;
+	int32_t marge;
 	int time1,time2,pourcent_error;
 	int bad_pulses,good_pulses;
-	unsigned long nbpulses;
-	long *forward_link;
+	uint32_t nbpulses;
+	int32_t *forward_link;
 
-	unsigned long *srcptr,*start_ptr, *dst_ptr, *last_dump_ptr,*last_block_ptr,*maxptr5;
-	unsigned long src_number_of_pulses;
+	uint32_t *srcptr,*start_ptr, *dst_ptr, *last_dump_ptr,*last_block_ptr,*maxptr5;
+	uint32_t src_number_of_pulses;
 
 	forward_link = pl->forward_link;
 	bad_pulses = 0;
@@ -1274,9 +1273,9 @@ static unsigned long detectflakeybits(HXCFE_TRKSTREAM * td,pulsesblock * src_blo
 	return (dst_ptr - srcptr);
 }
 
-static unsigned long getnearestbit(unsigned long * src,unsigned long index,unsigned long * dst,unsigned long buflen,long * shift)
+static uint32_t getnearestbit(uint32_t * src,uint32_t index,uint32_t * dst,uint32_t buflen,int32_t * shift)
 {
-	unsigned long i,ret_value;
+	uint32_t i,ret_value;
 
 	if(src[index])
 	{
@@ -1309,27 +1308,27 @@ static unsigned long getnearestbit(unsigned long * src,unsigned long index,unsig
 	return 0;
 }
 
-static unsigned long compare_block_timebased(HXCFE* floppycontext,HXCFE_TRKSTREAM * td,pulsesblock * prev_block,pulsesblock * src_block,pulsesblock * next_block, pulses_link * pl,long *in_shift)
+static uint32_t compare_block_timebased(HXCFE* floppycontext,HXCFE_TRKSTREAM * td,pulsesblock * prev_block,pulsesblock * src_block,pulsesblock * next_block, pulses_link * pl,int32_t *in_shift)
 {
-	unsigned long i;
-	unsigned long src_start_index,src_last_index;
-	unsigned long dst_start_index,dst_last_index;
-	unsigned long total_tick_source,total_tick_source2;
-	unsigned long total_tick_destination;
-	unsigned long time_index;
+	uint32_t i;
+	uint32_t src_start_index,src_last_index;
+	uint32_t dst_start_index,dst_last_index;
+	uint32_t total_tick_source,total_tick_source2;
+	uint32_t total_tick_destination;
+	uint32_t time_index;
 
-	unsigned long * time_pulse_array_src;
-	unsigned long * time_pulse_array_dst;
+	uint32_t * time_pulse_array_src;
+	uint32_t * time_pulse_array_dst;
 
-	unsigned long time_buffer_len,t;
+	uint32_t time_buffer_len,t;
 
-	unsigned long bad_pulses,good_pulses;
+	uint32_t bad_pulses,good_pulses;
 
-	long * forward_link;
+	int32_t * forward_link;
 
 	double timefactor;
 
-	long shift;
+	int32_t shift;
 
 
 	shift = 0;
@@ -1369,11 +1368,11 @@ static unsigned long compare_block_timebased(HXCFE* floppycontext,HXCFE_TRKSTREA
 
 	time_buffer_len = ((tick_to_time(total_tick_source)/10) + 1024);
 
-	time_pulse_array_src = malloc( time_buffer_len * sizeof(unsigned long));
-	memset(time_pulse_array_src, 0 , time_buffer_len * sizeof(unsigned long));
+	time_pulse_array_src = malloc( time_buffer_len * sizeof(uint32_t));
+	memset(time_pulse_array_src, 0 , time_buffer_len * sizeof(uint32_t));
 
-	time_pulse_array_dst = malloc( time_buffer_len * sizeof(unsigned long));
-	memset(time_pulse_array_dst, 0 ,time_buffer_len * sizeof(unsigned long));
+	time_pulse_array_dst = malloc( time_buffer_len * sizeof(uint32_t));
+	memset(time_pulse_array_dst, 0 ,time_buffer_len * sizeof(uint32_t));
 
 
 	timefactor = (double)total_tick_source / (double)total_tick_destination ;
@@ -1397,7 +1396,7 @@ static unsigned long compare_block_timebased(HXCFE* floppycontext,HXCFE_TRKSTREA
 	{
 		total_tick_destination = total_tick_destination + td->track_dump[i];
 
-		time_index = tick_to_time((unsigned long)((double)total_tick_destination*timefactor)) / 10;
+		time_index = tick_to_time((uint32_t)((double)total_tick_destination*timefactor)) / 10;
 
 		if(time_index<time_buffer_len)
 			time_pulse_array_dst[time_index] = i;
@@ -1454,7 +1453,7 @@ enum
 	PARTIALMATCH_STATE
 };
 
-const char *  getStateStr(unsigned long state)
+const char *  getStateStr(uint32_t state)
 {
 	switch(state)
 	{
@@ -1528,43 +1527,43 @@ static int getNearestMatchedBlock(pulsesblock * pb, int dir, int currentblock,in
 	}
 }
 
-unsigned long getNearestValidIndex(pulses_link * pl,unsigned long center,unsigned long limit)
+uint32_t getNearestValidIndex(pulses_link * pl,uint32_t center,uint32_t limit)
 {
-	long i;
-	long offset_min;
-	long offset_max;
+	int32_t i;
+	int32_t offset_min;
+	int32_t offset_max;
 
 	i = 0;
 	do
 	{
-		offset_min = (long)center - i;
-		offset_max = (long)center + i;
+		offset_min = (int32_t)center - i;
+		offset_max = (int32_t)center + i;
 
-		if(offset_max < (long)pl->number_of_pulses)
+		if(offset_max < (int32_t)pl->number_of_pulses)
 		{
 			if(pl->forward_link[offset_max]>=0)
-				return (unsigned long)offset_max;
+				return (uint32_t)offset_max;
 		}
 
 	/*	if(offset_min >= 0)
 		{
 			if(pl->forward_link[offset_min]>=0)
-				return (unsigned long)offset_min;
+				return (uint32_t)offset_min;
 		}*/
 
 		i++;
-	}while(i<(long)limit);
+	}while(i<(int32_t)limit);
 
 	return pl->number_of_pulses - 1;
 }
 
-unsigned long searchBestOverlap(HXCFE_TRKSTREAM * track_dump, pulsesblock * src_block, unsigned long repeat_index, unsigned long tick_down_max, unsigned long tick_up_max, s_match * match_table,int * searchstate,int fullcompare)
+uint32_t searchBestOverlap(HXCFE_TRKSTREAM * track_dump, pulsesblock * src_block, uint32_t repeat_index, uint32_t tick_down_max, uint32_t tick_up_max, s_match * match_table,int * searchstate,int fullcompare)
 {
-	unsigned long i_down,i_up;
-	unsigned long tick_up;
-	unsigned long tick_down;
-	unsigned long mt_i;
-	unsigned long good,bad;
+	uint32_t i_down,i_up;
+	uint32_t tick_up;
+	uint32_t tick_down;
+	uint32_t mt_i;
+	uint32_t good,bad;
 	int goodblockfound;
 
 	tick_up = 0;
@@ -1586,7 +1585,7 @@ unsigned long searchBestOverlap(HXCFE_TRKSTREAM * track_dump, pulsesblock * src_
 				if(repeat_index + i_up < track_dump->nb_of_pulses)
 				{
 					// compare the block
-					//mmx_blk_compare (unsigned long * src_ptr,unsigned long * dst_ptr,unsigned long * last_src_ptr,unsigned long * last_dst_ptr, int * bad_pulses, int * good_pulses);
+					//mmx_blk_compare (uint32_t * src_ptr,uint32_t * dst_ptr,uint32_t * last_src_ptr,uint32_t * last_dst_ptr, int * bad_pulses, int * good_pulses);
 					compareblock(track_dump,src_block, repeat_index + i_up,&good,&bad,0);
 
 					match_table[mt_i].yes = good;
@@ -1725,7 +1724,7 @@ static int GetTickCnt(HXCFE_TRKSTREAM * track_dump,unsigned int start, unsigned 
 
 pulses_link * alloc_pulses_link_array(int numberofpulses)
 {
-	long i;
+	int32_t i;
 	pulses_link * pl;
 
 	pl = malloc(sizeof(pulses_link));
@@ -1735,8 +1734,8 @@ pulses_link * alloc_pulses_link_array(int numberofpulses)
 
 		pl->number_of_pulses = numberofpulses;
 
-		pl->backward_link = (long*)malloc( (numberofpulses+1)*sizeof(long) );
-		pl->forward_link = (long*)malloc( (numberofpulses+1)*sizeof(long) );
+		pl->backward_link = (int32_t*)malloc( (numberofpulses+1)*sizeof(int32_t) );
+		pl->forward_link = (int32_t*)malloc( (numberofpulses+1)*sizeof(int32_t) );
 
 		if(!pl->backward_link || !pl->forward_link)
 		{
@@ -1780,28 +1779,28 @@ void free_pulses_link_array(pulses_link * pl)
 }
 
 
-static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * track_dump,unsigned long indexperiod,unsigned long nbblock,pulsesblock * pb)
+static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * track_dump,uint32_t indexperiod,uint32_t nbblock,pulsesblock * pb)
 {
 #ifdef SECONDPASSANALYSIS
-	unsigned long block_analysed;
+	uint32_t block_analysed;
 #endif
-	unsigned long j;
-	unsigned long cur_time_len;
-	unsigned long index_tickpediod,block_tickpediod;
+	uint32_t j;
+	uint32_t cur_time_len;
+	uint32_t index_tickpediod,block_tickpediod;
 	int firstblock,previous_block_matched;
 
-	unsigned long good,bad;
+	uint32_t good,bad;
 
-	unsigned long tick_up_max;
-	unsigned long tick_down_max;
+	uint32_t tick_up_max;
+	uint32_t tick_down_max;
 
-	unsigned long mt_i, block_num,nb_of_multimatch;
+	uint32_t mt_i, block_num,nb_of_multimatch;
 
-	unsigned long pass_loop;
+	uint32_t pass_loop;
 
 	unsigned char c;
 
-	long t;
+	int32_t t;
 
 	int k;
 
@@ -1809,7 +1808,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 	int previousmatchedblock;
 
-	long shift;
+	int32_t shift;
 
 	int partialmatch_cnt;
 
@@ -1820,7 +1819,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 	s_match * match_table;
 
-	long i;
+	int32_t i;
 
 	pulses_link * pl;
 
@@ -1852,7 +1851,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 				for(i=0;i<pl->number_of_pulses;i++)
 				{
-					if( ( pl->forward_link[i] >= 0 ) && ( pl->forward_link[i] < (long)pl->number_of_pulses ) )
+					if( ( pl->forward_link[i] >= 0 ) && ( pl->forward_link[i] < (int32_t)pl->number_of_pulses ) )
 					{
 						pl->backward_link[ pl->forward_link[i] ] = i;
 					}
@@ -1892,8 +1891,8 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 				}while( (cur_time_len < index_tickpediod) && (j < track_dump->nb_of_pulses) );
 
-				tick_down_max = time_to_tick((unsigned long)((double)indexperiod * (double)SEARCHDEPTH));
-				tick_up_max =   time_to_tick((unsigned long)((double)indexperiod * (double)SEARCHDEPTH));
+				tick_down_max = time_to_tick((uint32_t)((double)indexperiod * (double)SEARCHDEPTH));
+				tick_up_max =   time_to_tick((uint32_t)((double)indexperiod * (double)SEARCHDEPTH));
 
 				searchstate = 0;
 
@@ -1982,8 +1981,8 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 							}while( (cur_time_len < (block_tickpediod * (block_num-previousmatchedblock)) ) && (j < track_dump->nb_of_pulses) );
 
-							tick_down_max = time_to_tick((unsigned long)((double)BLOCK_TIME*100 * (block_num-previousmatchedblock) * (double)SEARCHDEPTH*2));
-							tick_up_max =   time_to_tick((unsigned long)((double)BLOCK_TIME*100 * (block_num-previousmatchedblock) * (double)SEARCHDEPTH*2));
+							tick_down_max = time_to_tick((uint32_t)((double)BLOCK_TIME*100 * (block_num-previousmatchedblock) * (double)SEARCHDEPTH*2));
+							tick_up_max =   time_to_tick((uint32_t)((double)BLOCK_TIME*100 * (block_num-previousmatchedblock) * (double)SEARCHDEPTH*2));
 #ifdef FLUXSTREAMDBG
 							floppycontext->hxc_printf(MSG_DEBUG,"Block %d : Match block distance : %d",block_num,previousmatchedblock);
 #endif
@@ -2004,8 +2003,8 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 							}while( (cur_time_len < index_tickpediod) && (j < track_dump->nb_of_pulses) );
 
-							tick_down_max = time_to_tick((unsigned long)((double)indexperiod * (double)SEARCHDEPTH*2));
-							tick_up_max =   time_to_tick((unsigned long)((double)indexperiod * (double)SEARCHDEPTH*2));
+							tick_down_max = time_to_tick((uint32_t)((double)indexperiod * (double)SEARCHDEPTH*2));
+							tick_up_max =   time_to_tick((uint32_t)((double)indexperiod * (double)SEARCHDEPTH*2));
 
 #ifdef FLUXSTREAMDBG
 							floppycontext->hxc_printf(MSG_DEBUG,"Block %d : index distance (period : %d) tick_down_max : %d, tick_up_max : %d",block_num,indexperiod,tick_to_time(tick_down_max),tick_to_time(tick_up_max));
@@ -2454,7 +2453,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 #endif
 
-			memset(pl->forward_link,0xFF,pl->number_of_pulses * sizeof(unsigned long) );
+			memset(pl->forward_link,0xFF,pl->number_of_pulses * sizeof(uint32_t) );
 
 			for(block_num=0;block_num<nbblock;block_num++)
 			{
@@ -2526,9 +2525,9 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 				{
 					for(i=pb[block_num].start_index;i<pb[block_num].number_of_pulses;i++)
 					{
-						if((i<(long)track_dump->nb_of_pulses) && pl->forward_link[i]>=0)
+						if((i<(int32_t)track_dump->nb_of_pulses) && pl->forward_link[i]>=0)
 						{
-							if(pl->forward_link[i]<(long)track_dump->nb_of_pulses)
+							if(pl->forward_link[i]<(int32_t)track_dump->nb_of_pulses)
 							{
 								if(!pl->forward_link[pl->forward_link[i]])
 								{
@@ -2549,7 +2548,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 						for(i=pb[block_num].start_index;i<pb[block_num].number_of_pulses;i++)
 						{
-							if((i<(long)track_dump->nb_of_pulses) && pl->forward_link[i]<0)
+							if((i<(int32_t)track_dump->nb_of_pulses) && pl->forward_link[i]<0)
 							{
 								pl->forward_link[i] = 1 + i;
 							}
@@ -2584,19 +2583,19 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 	return pl;
 }
 
-static unsigned long getbestindex(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM *track_dump,pulses_link * pl,int bestindex,unsigned long * score,unsigned long nb_revolution)
+static uint32_t getbestindex(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM *track_dump,pulses_link * pl,int bestindex,uint32_t * score,uint32_t nb_revolution)
 {
-	long i,j;
-	long first_index,last_index,bad_pulses;
+	int32_t i,j;
+	int32_t first_index,last_index,bad_pulses;
 
-	unsigned long bad_pulses_array[32],min_val;
-	unsigned long bestval;
+	uint32_t bad_pulses_array[32],min_val;
+	uint32_t bestval;
 
-	unsigned long bestscore,revnb;
+	uint32_t bestscore,revnb;
 
 	bestscore = score[bestindex];
 
-	memset(bad_pulses_array,0xFF,sizeof(unsigned long) * 32);
+	memset(bad_pulses_array,0xFF,sizeof(uint32_t) * 32);
 
 	bestval = 0;
 
@@ -2629,7 +2628,7 @@ static unsigned long getbestindex(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM *track_dump,p
 #endif
 
 	min_val = bad_pulses_array[0];
-	for(i=0;i<(long)nb_revolution;i++)
+	for(i=0;i<(int32_t)nb_revolution;i++)
 	{
 		if(min_val >= bad_pulses_array[i])
 		{
@@ -2655,7 +2654,7 @@ void AdjustTrackPeriod(HXCFE* floppycontext,HXCFE_SIDE * curside_S0,HXCFE_SIDE *
 
 	for(i=0;i<tracklen;i++)
 	{
-		curside_S1->timingbuffer[i] = (unsigned long)((double)curside_S1->timingbuffer[i] * (period_s1/period_s0));
+		curside_S1->timingbuffer[i] = (uint32_t)((double)curside_S1->timingbuffer[i] * (period_s1/period_s0));
 	}
 }
 
@@ -2712,28 +2711,28 @@ HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream(HXCFE_FXSA * fxs,void * stream,int
 	{
 		memset(track_dump,0,sizeof(HXCFE_TRKSTREAM));
 
-		track_dump->track_dump = malloc(nbword * sizeof(unsigned long) );
+		track_dump->track_dump = malloc(nbword * sizeof(uint32_t) );
 		if(track_dump->track_dump)
 		{
-			memset(track_dump->track_dump,0,nbword * sizeof(unsigned long));
+			memset(track_dump->track_dump,0,nbword * sizeof(uint32_t));
 			for(i=0;i<nbword;i++)
 			{
 				switch(wordsize)
 				{
 					case 8:
-						track_dump->track_dump[i] = *(((unsigned char*)stream) + i);
+						track_dump->track_dump[i] = *(((uint8_t*)stream) + i);
 					break;
 					case 16:
-						track_dump->track_dump[i] = *(((unsigned short*)stream) + i);
+						track_dump->track_dump[i] = *(((uint16_t*)stream) + i);
 					break;
 					case 32:
-						track_dump->track_dump[i] = *(((unsigned long*)stream) + i);
+						track_dump->track_dump[i] = *(((uint32_t*)stream) + i);
 					break;
 					default:
 					break;
 				}
 
-				track_dump->track_dump[i] = (unsigned long)((float)track_dump->track_dump[i] * (float)((float)fxs->steptime/(float)4000));
+				track_dump->track_dump[i] = (uint32_t)((float)track_dump->track_dump[i] * (float)((float)fxs->steptime/(float)4000));
 			}
 
 			track_dump->nb_of_pulses = nbword;
@@ -2750,9 +2749,9 @@ HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream(HXCFE_FXSA * fxs,void * stream,int
 	return 0;
 }
 
-void hxcfe_FxStream_AddIndex(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * std,unsigned long streamposition)
+void hxcfe_FxStream_AddIndex(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * std,uint32_t streamposition)
 {
-	unsigned long cellpos,i;
+	uint32_t cellpos,i;
 	if(fxs)
 	{
 		if(std)
@@ -2797,7 +2796,7 @@ int hxcfe_FxStream_GetNumberOfRevolution(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * std)
 	return 0;
 }
 
-unsigned long hxcfe_FxStream_GetRevolutionPeriod(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * std,int revolution)
+uint32_t hxcfe_FxStream_GetRevolutionPeriod(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * std,int revolution)
 {
 	if(fxs)
 	{
@@ -2815,12 +2814,14 @@ unsigned long hxcfe_FxStream_GetRevolutionPeriod(HXCFE_FXSA * fxs,HXCFE_TRKSTREA
 	return 0;
 }
 
-unsigned long hxcfe_FxStream_GetMeanRevolutionPeriod(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * std)
+uint32_t hxcfe_FxStream_GetMeanRevolutionPeriod(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * std)
 {
-	unsigned long nb_rotation;
+	uint32_t nb_rotation;
 
-	unsigned long i;
-	unsigned long currentperiod,globalperiod;
+	uint32_t i;
+	uint32_t currentperiod,globalperiod;
+
+	globalperiod = 0;
 
 	if(fxs)
 	{
@@ -2837,7 +2838,7 @@ unsigned long hxcfe_FxStream_GetMeanRevolutionPeriod(HXCFE_FXSA * fxs,HXCFE_TRKS
 					globalperiod += currentperiod;
 				}
 
-				globalperiod = (unsigned long)((double)((double)globalperiod / ((double)nb_rotation)));
+				globalperiod = (uint32_t)((double)((double)globalperiod / ((double)nb_rotation)));
 			}
 			else
 			{
@@ -2890,9 +2891,9 @@ void freefloppy(HXCFE_FLOPPY * fp)
 	}
 }
 
-unsigned long getbestrevolution(unsigned long * score,unsigned long nb_revolution)
+uint32_t getbestrevolution(uint32_t * score,uint32_t nb_revolution)
 {
-	unsigned long maxval,lastindex,i;
+	uint32_t maxval,lastindex,i;
 
 	lastindex = 0;
 	maxval = score[0];
@@ -2937,10 +2938,10 @@ HXCFE_TRKSTREAM * duplicate_track_stream(HXCFE_TRKSTREAM * trks)
 			memcpy(new_trks,trks,sizeof(HXCFE_TRKSTREAM));
 			if(trks->nb_of_pulses && trks->track_dump)
 			{
-				new_trks->track_dump = malloc(trks->nb_of_pulses * sizeof(unsigned long));
+				new_trks->track_dump = malloc(trks->nb_of_pulses * sizeof(uint32_t));
 				if(new_trks->track_dump)
 				{
-					memcpy(new_trks->track_dump,trks->track_dump,trks->nb_of_pulses * sizeof(unsigned long));
+					memcpy(new_trks->track_dump,trks->track_dump,trks->nb_of_pulses * sizeof(uint32_t));
 				}
 			}
 		}
@@ -2951,14 +2952,14 @@ HXCFE_TRKSTREAM * duplicate_track_stream(HXCFE_TRKSTREAM * trks)
 
 HXCFE_TRKSTREAM * reverse_track_stream(HXCFE_TRKSTREAM * trks)
 {
-	unsigned long i;
-	unsigned long * reversed_track;
+	uint32_t i;
+	uint32_t * reversed_track;
 
 	if(trks)
 	{
 		if(trks->track_dump && trks->nb_of_pulses)
 		{
-			reversed_track = malloc(trks->nb_of_pulses * sizeof(unsigned long));
+			reversed_track = malloc(trks->nb_of_pulses * sizeof(uint32_t));
 			if(reversed_track)
 			{
 				for(i=0;i<trks->nb_of_pulses;i++)
@@ -2981,7 +2982,7 @@ void printsidestat(HXCFE_FXSA * fxs,HXCFE_SIDE * side)
 #ifdef FLUXSTREAMDBG
 	int nbbadbit;
 	int nbbit;
-	unsigned long i;
+	uint32_t i;
 
 	fxs->hxcfe->hxc_printf(MSG_DEBUG,"Side stats: ");
 	fxs->hxcfe->hxc_printf(MSG_DEBUG,"Bitrate: %d",side->bitrate);
@@ -3024,20 +3025,20 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 {
 	HXCFE * hxcfe;
 	int bitrate;
-	unsigned long totallen, nbblock,indexperiod;
-	unsigned long * histo;
+	uint32_t totallen, nbblock,indexperiod;
+	uint32_t * histo;
 	HXCFE_SIDE* currentside;
 	HXCFE_SIDE* revolutionside[32];
 
 	pulses_link * pl;
 	pulses_link * pl_reversed;
 
-	long first_index;
-	unsigned long track_len;
-	unsigned long revolution;
-	long i;
+	int32_t first_index;
+	uint32_t track_len;
+	uint32_t revolution;
+	int32_t i;
 
-	unsigned long qualitylevel[32];
+	uint32_t qualitylevel[32];
 
 	unsigned char first_track_encoding;
 
@@ -3051,8 +3052,8 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 	HXCFE_SECTCFG** scl;
 	HXCFE_TRKSTREAM * reversed_std;
 
-	long * backward_link;
-	long * forward_link;
+	int32_t * backward_link;
+	int32_t * forward_link;
 	int number_of_pulses;
 	int patchedbits;
 
@@ -3171,13 +3172,13 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 					track_len = 0;
 					i = first_index;
-					if( i < (long)std->nb_of_pulses)
+					if( i < (int32_t)std->nb_of_pulses)
 					{
 						do
 						{
 							track_len = track_len + std->track_dump[i];
 							i++;
-						}while( ( i < (long)std->nb_of_pulses ) && ( i < pl->forward_link[first_index] ) );
+						}while( ( i < (int32_t)std->nb_of_pulses ) && ( i < pl->forward_link[first_index] ) );
 					}
 
 #ifdef FLUXSTREAMDBG
@@ -3208,14 +3209,14 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 							{
 								track_len = track_len + std->track_dump[first_index + i];
 								i++;
-							}while(i < (long)std->nb_of_pulses && track_len<time_to_tick(indexperiod));
+							}while(i < (int32_t)std->nb_of_pulses && track_len<time_to_tick(indexperiod));
 							pl->forward_link[first_index] = first_index + i;
 						}
 
 						if( !fxs->defaultbitrate )
 						{
-							histo=(unsigned long*)malloc(65536* sizeof(unsigned long));
-							if((first_index + (pl->forward_link[first_index] - first_index))<(long)std->nb_of_pulses)
+							histo=(uint32_t*)malloc(65536* sizeof(uint32_t));
+							if((first_index + (pl->forward_link[first_index] - first_index))<(int32_t)std->nb_of_pulses)
 							{
 								computehistogram(&std->track_dump[first_index],pl->forward_link[first_index] - first_index,histo);
 							}

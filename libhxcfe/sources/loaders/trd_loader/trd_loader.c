@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -74,8 +75,6 @@ int TRD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TRD_libIsValidDiskFile : non TRD file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 int TRD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -83,15 +82,15 @@ int TRD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j;
+	int i,j;
 	unsigned int file_offset;
 	unsigned char* trackdata;
-	unsigned char gap3len,interleave;
-	unsigned short sectorsize,rpm;
+	int gap3len,interleave;
+	int sectorsize,rpm;
 	int number_of_track,number_of_side,number_of_sectorpertrack;
 	unsigned char tempsector[256];
-	unsigned char trackformat;
-	unsigned char skew;
+	int trackformat;
+	int skew;
 
 	HXCFE_CYLINDER* currentcylinder;
 
@@ -244,7 +243,7 @@ int TRD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 }
 
 
-int TRD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int TRD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ZXSPECTRUM_TRD";

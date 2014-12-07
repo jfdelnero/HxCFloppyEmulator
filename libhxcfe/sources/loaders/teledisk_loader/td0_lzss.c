@@ -28,6 +28,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "types.h"
+
 #include "teledisk_format.h"
 #include "td0_lzss.h"
 

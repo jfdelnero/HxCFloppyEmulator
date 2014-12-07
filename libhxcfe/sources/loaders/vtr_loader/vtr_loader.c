@@ -47,6 +47,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
@@ -99,13 +101,13 @@ int VTR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 {
 	FILE * f;
 	vtrucco_picfileformatheader header;
-	unsigned int i,j,k,l,offset,offset2;
+	int i,j,k,l,offset,offset2;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
     vtrucco_pictrack* trackoffsetlist;
     unsigned int tracks_base;
     unsigned char * hfetrack;
-	unsigned int nbofblock,tracklen;
+	int nbofblock,tracklen;
 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VTR_libLoad_DiskFile %s",imgfile);
@@ -233,7 +235,7 @@ int VTR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int VTR_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 
-int VTR_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int VTR_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="VTR_IMG";

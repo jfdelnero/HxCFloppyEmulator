@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 #include "./tracks/track_generator.h"
@@ -90,19 +91,20 @@ int MSA_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
+	unsigned char * flatimg;
 	unsigned int filesize;
-	unsigned int i,j,k,l,l2;
+	int i,j,k,l,l2;
 	unsigned int file_offset;
-	unsigned char * flatimg,c,skew;
-	unsigned char   gap3len,interleave,numberofside,numberofsectorpertrack;
-	unsigned short  rpm;
-	unsigned short  sectorsize;
-	unsigned short  numberoftrack;
-	unsigned int    extractfilesize,filetracksize;
+	int32_t c,skew;
+	int32_t gap3len,interleave,numberofside,numberofsectorpertrack;
+	int32_t rpm;
+	int32_t sectorsize;
+	int32_t numberoftrack;
+	int32_t extractfilesize,filetracksize;
 	unsigned char   fileheader[5*2];
 	unsigned char   trackheader[1*2];
 	unsigned char*  tmpbuffer;
-	unsigned long   len;
+	int32_t   len;
 	unsigned char   trackformat;
 
 	HXCFE_CYLINDER* currentcylinder;
@@ -116,6 +118,7 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
+	file_offset = 0;
 	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
 	fseek (f , 0 , SEEK_SET);
@@ -142,7 +145,7 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			{
 				fread(trackheader,2,1,f);
 				filetracksize=((trackheader[0]*256)+trackheader[1]);
-				if(filetracksize==((unsigned int)numberofsectorpertrack*512))
+				if(filetracksize==(numberofsectorpertrack*512))
 				{
 					tmpbuffer=(unsigned char*)malloc(filetracksize);
 					memset(tmpbuffer,0,filetracksize);
@@ -208,7 +211,7 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				}
 
 				i++;
-			}while(i<(unsigned int)(numberoftrack*(numberofside)));
+			}while(i<(numberoftrack*(numberofside)));
 
 			hxc_fclose(f);
 
@@ -275,7 +278,7 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			}
 
 			// Add 4 empty tracks
-			for(j=floppydisk->floppyNumberOfTrack;j<(unsigned int)(floppydisk->floppyNumberOfTrack + 4);j++)
+			for(j=floppydisk->floppyNumberOfTrack;j<(floppydisk->floppyNumberOfTrack + 4);j++)
 			{
 				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 				currentcylinder=floppydisk->tracks[j];
@@ -301,7 +304,7 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_BADFILE;
 }
 
-int MSA_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int MSA_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ATARIST_MSA";

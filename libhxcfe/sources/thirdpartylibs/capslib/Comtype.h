@@ -1,20 +1,22 @@
 #ifndef COMTYPE_H
 #define COMTYPE_H
 
+#include <stdint.h>
+
 typedef void *PVOID;
 typedef BYTE *PBYTE;
 typedef WORD *PWORD;
 typedef DWORD *PDWORD;
-typedef char *PCHAR;
-typedef long IOREG;
+typedef int8_t *PCHAR;
+typedef int32_t IOREG;
 
-typedef unsigned char UBYTE;
-typedef unsigned short UWORD;
-typedef unsigned long UDWORD;
+typedef uint8_t  UBYTE;
+typedef uint16_t UWORD;
+typedef uint32_t UDWORD;
 //typedef unsigned __int64 UQUAD;
-typedef signed char SBYTE;
-typedef signed short SWORD;
-typedef signed long SDWORD;
+typedef int8_t  SBYTE;
+typedef int16_t SWORD;
+typedef int32_t SDWORD;
 //typedef signed __int64 SQUAD;
 
 typedef UBYTE *PUBYTE;

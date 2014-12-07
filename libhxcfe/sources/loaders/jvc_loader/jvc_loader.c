@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 #include "./tracks/track_generator.h"
@@ -73,30 +74,31 @@ int JVC_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JVC_libIsValidDiskFile : non JVC file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
+
+#pragma pack(1)
 
 typedef struct jvc_header_
 {
-  unsigned char Setors_per_track;
-  unsigned char Side_count;
-  unsigned char Sector_size_code;
-  unsigned char First_sector_ID;
-  unsigned char Sector_attribute_flag;
+  uint8_t Setors_per_track;
+  uint8_t Side_count;
+  uint8_t Sector_size_code;
+  uint8_t First_sector_ID;
+  uint8_t Sector_attribute_flag;
 }jvc_header;
 
+#pragma pack()
 
 int JVC_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j,k,skew;
-	unsigned int file_offset;
+	int i,j,k,skew;
+	int file_offset;
 	unsigned char* trackdata;
 	int headerSize;
-	unsigned char  gap3len,interleave;
-	unsigned short sectorsize,rpm;
+	int gap3len,interleave;
+	int sectorsize,rpm;
 	jvc_header jvc_h;
 	unsigned char Sector_attribute_flag;
 	HXCFE_CYLINDER* currentcylinder;
@@ -206,7 +208,7 @@ int JVC_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_BADFILE;
 }
 
-int JVC_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int JVC_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="TRS80_JVC";

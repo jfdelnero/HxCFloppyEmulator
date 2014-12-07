@@ -1,7 +1,8 @@
+#include "types.h"
 
 /* Automatically generated CRC table */
 /* polynomial: 0x104C11DB7, bit reverse algorithm */
-const unsigned long crc32r_table[256] = {
+const uint32_t crc32r_table[256] = {
     0x00000000UL,0x77073096UL,0xEE0E612CUL,0x990951BAUL,
     0x076DC419UL,0x706AF48FUL,0xE963A535UL,0x9E6495A3UL,
     0x0EDB8832UL,0x79DCB8A4UL,0xE0D5E91EUL,0x97D2D988UL,
@@ -69,7 +70,7 @@ const unsigned long crc32r_table[256] = {
     };
 
 
-void drv_qm_update_crc( unsigned long* crc, unsigned char byte )
+void drv_qm_update_crc( uint32_t * crc, unsigned char byte )
 {
     /* Note that there is a bug in the CopyQM CRC calculation  */
     /* When indexing in this table, they shift the crc ^ data  */
@@ -107,13 +108,13 @@ unsigned int get_u16( unsigned char* buf, int pos )
     return ((unsigned int)get_i16( buf, pos )) & 0xffff;
 }
 
-unsigned long get_u32( unsigned char* buf, int pos )
+uint32_t get_u32( unsigned char* buf, int pos )
 {
     int i;
-    unsigned long ret_val = 0;
+    uint32_t ret_val = 0;
     for ( i = 3; i >= 0; --i ) {
         ret_val <<= 8;
-        ret_val |= ( (unsigned long)buf[pos+i] & 0xff );
+        ret_val |= ( (uint32_t)buf[pos+i] & 0xff );
     }
     return ret_val;
 }

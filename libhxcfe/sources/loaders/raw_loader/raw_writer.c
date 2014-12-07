@@ -28,6 +28,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -73,9 +75,12 @@ int RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 					memset(log_str,0,strlen(tmp_str)+1);
 					strcat(log_str,tmp_str);
 
+					sca = 0;
+
 					k=0;
 					do
 					{
+						nbsector = 0;
 						switch(track_type_id)
 						{
 							case 0:
@@ -105,7 +110,7 @@ int RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 					}while(!nbsector && k<6);
 
-					if(nbsector)
+					if(sca && nbsector)
 					{
 						sectorsize=sca[0]->sectorsize;
 						for(l=0;l<256;l++)
@@ -116,7 +121,7 @@ int RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 							{
 								if(sca[k]->sector==l)
 								{
-									if(sca[k]->sectorsize!=(unsigned int)sectorsize)
+									if(sca[k]->sectorsize!=sectorsize)
 									{
 										sectorsize=-1;
 									}

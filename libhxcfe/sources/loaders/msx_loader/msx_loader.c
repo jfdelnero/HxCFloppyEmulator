@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -60,7 +61,7 @@
 
 #include "libhxcadaptor.h"
 
-int msx_imggetfloppyconfig(char * filename,unsigned char * img,unsigned int filesize,unsigned short  *numberoftrack,unsigned char *numberofside,unsigned short *numberofsectorpertrack,unsigned short *sectorsize,unsigned char *gap3len,unsigned char *interleave,unsigned short *rpm, unsigned int *bitrate)
+int msx_imggetfloppyconfig(char * filename,unsigned char * img,unsigned int filesize,int  *numberoftrack,int *numberofside,int *numberofsectorpertrack,int *sectorsize,int *gap3len,int *interleave,int *rpm, int *bitrate)
 {
 	int i;
 	int imgmode,nbofside_img;
@@ -180,8 +181,6 @@ int MSX_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MSX_libIsValidDiskFile : non MSX IMG file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 
@@ -191,14 +190,14 @@ int MSX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	FILE * f;
 	unsigned int   filesize;
-	unsigned int   i,j;
+	int i,j;
 	unsigned int   file_offset;
 	unsigned char* trackdata;
-	unsigned char  gap3len,interleave;
-	unsigned short rpm;
-	unsigned short sectorsize;
-	unsigned int   bitrate;
-	unsigned char  trackformat,skew;
+	int gap3len,interleave;
+	int rpm;
+	int sectorsize;
+	int bitrate;
+	int trackformat,skew;
 
 	HXCFE_CYLINDER* currentcylinder;
 
@@ -291,7 +290,7 @@ int MSX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_BADFILE;
 }
 
-int MSX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int MSX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="MSX_DSK";

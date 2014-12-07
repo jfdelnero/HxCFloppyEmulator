@@ -28,16 +28,16 @@
 
 typedef struct FATCONFIG_
 {
-	unsigned short sectorsize;
-	unsigned short nbofsector;
+	uint16_t sectorsize;
+	uint16_t nbofsector;
 
-	unsigned short reservedsector ;
+	uint16_t reservedsector;
 
-	unsigned char  numberoffat;
-	unsigned short nbofsectorperfat;
-	unsigned char  clustersize;
+	uint8_t  numberoffat;
+	uint16_t nbofsectorperfat;
+	uint8_t  clustersize;
 
-	unsigned short  numberofrootentries;
+	uint16_t numberofrootentries;
 }FATCONFIG;
 
 

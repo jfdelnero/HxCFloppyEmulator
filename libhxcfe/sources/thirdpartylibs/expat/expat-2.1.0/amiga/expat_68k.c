@@ -559,7 +559,7 @@ static const XML_LChar * stub_XML_ErrorStringPPC(ULONG *regarray)
 }
 struct EmuTrap stub_XML_ErrorString = { TRAPINST, TRAPTYPE, (ULONG (*)(ULONG *))stub_XML_ErrorStringPPC };
 
-static long stub_XML_GetCurrentByteIndexPPC(ULONG *regarray)
+static int32_t stub_XML_GetCurrentByteIndexPPC(ULONG *regarray)
 {
 	struct Library *Base = (struct Library *) regarray[REG68K_A6/4];
 	struct ExtendedLibrary *ExtLib = (struct ExtendedLibrary *) ((ULONG)Base + Base->lib_PosSize);

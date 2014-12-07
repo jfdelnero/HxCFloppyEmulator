@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
@@ -69,7 +70,7 @@
 
 HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char * file,float timecoef)
 {
-	unsigned long i;
+	uint32_t i;
 	s_oob_header		* oob;
 	s_oob_StreamRead	* streamRead;
 	s_oob_StreamEnd		* streamEnd;
@@ -87,19 +88,19 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 	char * tempstr;
 #endif
 	unsigned char * kfstreambuffer;
-	unsigned long * cellstream;
+	uint32_t * cellstream;
 
-	unsigned long cell_value;
-	unsigned long nbindex;
-	unsigned long offset;
-	unsigned long cellpos;
-	unsigned long streamend;
+	uint32_t cell_value;
+	uint32_t nbindex;
+	uint32_t offset;
+	uint32_t cellpos;
+	uint32_t streamend;
 
-	unsigned long overflowvalue;
+	uint32_t overflowvalue;
 
-	unsigned long filesize;
+	uint32_t filesize;
 
-	unsigned long totalcell,totalstreampos;
+	uint32_t totalcell,totalstreampos;
 
 	track_dump=0;
 	overflowvalue=0;
@@ -121,8 +122,8 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 			hxc_fclose(f);
 
-			cellstream=(unsigned long*)malloc(filesize*sizeof(unsigned long));
-			memset(cellstream,0,filesize*sizeof(unsigned long));
+			cellstream=(uint32_t*)malloc(filesize*sizeof(uint32_t));
+			memset(cellstream,0,filesize*sizeof(uint32_t));
 
 
 		#ifdef KFSTREAMDBG
@@ -158,7 +159,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 						overflowvalue = 0;
 
-						cellstream[cellpos++]=(unsigned long)((float)cell_value * timecoef);
+						cellstream[cellpos++]=(uint32_t)((float)cell_value * timecoef);
 						totalcell = totalcell + cell_value;
 						totalstreampos++;
 					break;
@@ -196,7 +197,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 						cell_value = cell_value + overflowvalue;
 						overflowvalue=0;
 
-						cellstream[cellpos++]=(unsigned long)((float)cell_value * timecoef);
+						cellstream[cellpos++]=(uint32_t)((float)cell_value * timecoef);
 						totalcell = totalcell + cell_value;
 						totalstreampos++;
 					break;
@@ -289,7 +290,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 						cell_value = cell_value + overflowvalue;
 						overflowvalue=0;
 
-						cellstream[cellpos++]=(unsigned long)((float)cell_value * timecoef);
+						cellstream[cellpos++]=(uint32_t)((float)cell_value * timecoef);
 						totalcell = totalcell + cell_value;
 						offset++;
 						totalstreampos++;

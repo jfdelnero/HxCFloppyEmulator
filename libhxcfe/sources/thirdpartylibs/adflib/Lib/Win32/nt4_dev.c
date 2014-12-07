@@ -24,6 +24,7 @@
 #include <windows.h>
 #include <winioctl.h>
 #include <stdio.h>
+#include <stdint.h>
 #include "nt4_dev.h"
 
 HANDLE NT4OpenDrive(char *lpstrDrive)
@@ -71,7 +72,7 @@ BOOL NT4CloseDrive(HANDLE hDrv)
 	return TRUE;
 }
 
-BOOL NT4ReadSector(HANDLE hDrv, long iSect, int iSize, void *lpvoidBuf)
+BOOL NT4ReadSector(HANDLE hDrv, int32_t iSect, int iSize, void *lpvoidBuf)
 {
 	void *lpvoidTempBuf;
 	DWORD dwActual;
@@ -94,7 +95,7 @@ BOOL NT4ReadSector(HANDLE hDrv, long iSect, int iSize, void *lpvoidBuf)
 	return TRUE;
 }
 
-BOOL NT4WriteSector(HANDLE hDrv, long iSect, int iSize, void *lpvoidBuf)
+BOOL NT4WriteSector(HANDLE hDrv, int32_t iSect, int iSize, void *lpvoidBuf)
 {
 	void *lpvoidTempBuf;
 	DWORD dwActual;
@@ -125,7 +126,7 @@ ULONG NT4GetDriveSize(HANDLE hDrv)
 {
 	DWORD dwActual;
 	DISK_GEOMETRY dgGeom;
-	long size;
+	int32_t size;
 
 	DeviceIoControl(hDrv, IOCTL_DISK_GET_DRIVE_GEOMETRY, NULL, 0,
 		&dgGeom, sizeof(DISK_GEOMETRY), &dwActual, NULL);

@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -102,21 +103,19 @@ int FLPPCM_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FLPPCM_libIsValidDiskFile : non FLP file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 int FLPPCM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
-	unsigned int i,j;
+	int i,j;
 	unsigned int file_offset;
 	unsigned char* trackdata;
-	unsigned char gap3len,interleave;
-	unsigned short rpm;
-	unsigned short sectorsize;
-	unsigned char trackformat;
+	int gap3len,interleave;
+	int rpm;
+	int sectorsize;
+	int trackformat;
 	HXCFE_CYLINDER* currentcylinder;
 	flp_header_t flp_header;
 
@@ -191,7 +190,7 @@ int FLPPCM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 	return HXCFE_BADFILE;
 }
 
-int FLPPCM_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int FLPPCM_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 	static const char plug_id[]="FLP_IMG";
 	static const char plug_desc[]="FLP PC Magazine image Loader";

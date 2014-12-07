@@ -36,12 +36,12 @@ extern struct Env adfEnv;
 /*
  * swLong
  *
- * write an unsigned long value (val) (in) 
+ * write an uint32_t value (val) (in) 
  * to an unsigned char* buffer (buf) (out)
  * 
  * used in adfWrite----Block() functions
  */
-void swLong(unsigned char* buf, unsigned long val)
+void swLong(unsigned char* buf, uint32_t val)
 {
 	buf[0]= (unsigned char)((val & 0xff000000) >>24UL);
 	buf[1]= (unsigned char)((val & 0x00ff0000) >>16UL);
@@ -102,7 +102,7 @@ void freeList(struct List* list)
  */
 
 void 
-adfDays2Date(long days, int *yy, int *mm, int *dd)
+adfDays2Date(int32_t days, int *yy, int *mm, int *dd)
 {
     int y,m;
     int nd;
@@ -186,7 +186,7 @@ adfGiveCurrentTime( void )
  * converts date and time (dt) into Amiga format : day, min, ticks
  */
     void
-adfTime2AmigaTime(struct DateTime dt, long *day, long *min, long *ticks )
+adfTime2AmigaTime(struct DateTime dt, int32_t *day, int32_t *min, int32_t *ticks )
 {
     int jm[12]={ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 

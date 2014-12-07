@@ -490,7 +490,7 @@ unsigned copy;
     do { \
         if (have == 0) goto inf_leave; \
         have--; \
-        hold += (unsigned long)(*next++) << bits; \
+        hold += (uint32_t)(*next++) << bits; \
         bits += 8; \
     } while (0)
 
@@ -610,7 +610,7 @@ int flush;
     z_const unsigned char FAR *next;    /* next input */
     unsigned char FAR *put;     /* next output */
     unsigned have, left;        /* available input and output */
-    unsigned long hold;         /* bit buffer */
+    uint32_t hold;         /* bit buffer */
     unsigned bits;              /* bits in bit buffer */
     unsigned in, out;           /* save starting available input and output */
     unsigned copy;              /* number of stored or match bytes to copy */
@@ -1294,7 +1294,7 @@ const Bytef *dictionary;
 uInt dictLength;
 {
     struct inflate_state FAR *state;
-    unsigned long dictid;
+    uint32_t dictid;
     int ret;
 
     /* check state */
@@ -1378,7 +1378,7 @@ int ZEXPORT inflateSync(strm)
 z_streamp strm;
 {
     unsigned len;               /* number of bytes to look at or looked at */
-    unsigned long in, out;      /* temporary to save total_in and total_out */
+    uint32_t in, out;      /* temporary to save total_in and total_out */
     unsigned char buf[4];       /* to restore bit buffer to byte string */
     struct inflate_state FAR *state;
 

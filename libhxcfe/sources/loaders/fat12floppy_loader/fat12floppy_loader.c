@@ -49,6 +49,7 @@
 #include <sys/stat.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -143,18 +144,18 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int FAT12FLOPPY_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	unsigned int i,j;
+	int32_t  i,j;
 	unsigned int file_offset;
 	unsigned char * flatimg;
-	unsigned char   gap3len,interleave,dirmode;
-	unsigned short  sectorsize,rpm;
-	int numberofcluster;
-	unsigned long   fatposition;
-	unsigned long   rootposition;
-	unsigned long   dataposition;
-	int dksize;
+	int32_t    gap3len,interleave,dirmode;
+	int32_t    sectorsize,rpm;
+	int32_t    numberofcluster;
+	uint32_t   fatposition;
+	uint32_t   rootposition;
+	uint32_t   dataposition;
+	int32_t    dksize;
 	unsigned char media_type;
-	unsigned char tracktype;
+	int32_t    tracktype;
 	FATCONFIG fatconfig;
 	HXCFE_CYLINDER* currentcylinder;
 	struct stat staterep;
@@ -318,7 +319,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppy
 	return HXCFE_NOERROR;
 }
 
-int FAT12FLOPPY_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int FAT12FLOPPY_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="FAT12FLOPPY";

@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -91,20 +92,18 @@ int FZF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FZF_libIsValidDiskFile : non FZF file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	unsigned int  filesize;
-	unsigned int  i,j;
+	int  i,j;
 	unsigned int  file_offset;
 	unsigned char * fzf_file;
-	unsigned char  gap3len,interleave,trackformat,skew,c;
-	unsigned short rpm;
-	unsigned short sectorsize;
+	int gap3len,interleave,trackformat,skew,c;
+	int rpm;
+	int sectorsize;
 	HXCFE_CYLINDER* currentcylinder;
 
 	unsigned char  number_of_banks;
@@ -113,7 +112,7 @@ int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	unsigned char  file_type;
 	unsigned char* floppy_data;
 
-	unsigned int  nbblock;
+	int  nbblock;
 	char filename[512];
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FZF_libLoad_DiskFile %s",imgfile);
@@ -221,7 +220,7 @@ int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	for(i=0;i<12;i++)
 	{
 
-		if (i>strlen(filename))
+		if (i>(int)strlen(filename))
 		{
 			c=0x20;
 		}
@@ -266,7 +265,7 @@ int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_NOERROR;
 }
 
-int FZF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int FZF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="CASIO_FZF";

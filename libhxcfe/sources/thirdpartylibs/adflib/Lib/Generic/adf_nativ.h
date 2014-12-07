@@ -35,7 +35,7 @@
 #endif
 
 #ifndef RETCODE
-#define RETCODE long
+#define RETCODE int32_t
 #endif
 
 struct nativeDevice{
@@ -46,9 +46,9 @@ struct nativeFunctions{
     /* called by adfMount() */
     RETCODE (*adfInitDevice)(struct Device*, char*,BOOL);
     /* called by adfReadBlock() */
-    RETCODE (*adfNativeReadSector)(struct Device*, long, int, unsigned char*);
+    RETCODE (*adfNativeReadSector)(struct Device*, int32_t, int, unsigned char*);
     /* called by adfWriteBlock() */
-    RETCODE (*adfNativeWriteSector)(struct Device*, long, int, unsigned char*);
+    RETCODE (*adfNativeWriteSector)(struct Device*, int32_t, int, unsigned char*);
     /* called by adfMount() */
     BOOL (*adfIsDevNative)(char*);
     /* called by adfUnMount() */
@@ -58,8 +58,8 @@ struct nativeFunctions{
 void adfInitNativeFct();
 
 
-RETCODE myReadSector(struct Device *dev, long n, int size, unsigned char* buf);
-RETCODE myWriteSector(struct Device *dev, long n, int size, unsigned char* buf);
+RETCODE myReadSector(struct Device *dev, int32_t n, int size, unsigned char* buf);
+RETCODE myWriteSector(struct Device *dev, int32_t n, int size, unsigned char* buf);
 RETCODE myInitDevice(struct Device *dev, char* name,BOOL);
 RETCODE myReleaseDevice(struct Device *dev);
 BOOL myIsDevNative(char*);

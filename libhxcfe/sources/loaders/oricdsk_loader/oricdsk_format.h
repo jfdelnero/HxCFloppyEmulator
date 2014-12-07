@@ -30,10 +30,10 @@
 // 256 bytes file header
 typedef struct oricdsk_fileheader_
 {
- char headertag[8]; // "ORICDSK" ou "MFM_DISK"
- unsigned long number_of_side;
- unsigned long number_of_tracks;
- unsigned long number_of_sectors_geometrie;
+ uint8_t  headertag[8]; // "ORICDSK" ou "MFM_DISK"
+ uint32_t number_of_side;
+ uint32_t number_of_tracks;
+ uint32_t number_of_sectors_geometrie;
 }oricdsk_fileheader;
 
 #pragma pack()

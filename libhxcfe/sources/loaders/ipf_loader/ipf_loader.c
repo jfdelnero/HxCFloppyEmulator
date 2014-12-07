@@ -49,6 +49,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
@@ -59,9 +60,9 @@
 
 #include "libhxcadaptor.h"
 
-#define BYTE char
-#define WORD short
-#define DWORD long
+#define BYTE  int8_t
+#define WORD  int16_t
+#define DWORD int32_t
 #define LIB_TYPE 1
 #define LIB_USER 1
 #include "./thirdpartylibs/capslib/Comtype.h"
@@ -115,13 +116,11 @@ int IPF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IPF_libIsValidDiskFile : non IPF file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
-unsigned long trackcopy(unsigned char * dest,unsigned char * src,unsigned long overlap,unsigned long tracklen,unsigned char nooverlap)
+uint32_t trackcopy(unsigned char * dest,unsigned char * src,uint32_t overlap,uint32_t tracklen,unsigned char nooverlap)
 {
-	unsigned long i,j,k,dest_tracklen;
+	uint32_t i,j,k,dest_tracklen;
 
 
 	k=0;
@@ -211,7 +210,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int progresscnt;
 	int overlap;
 	int intrackflakeybit;
-	unsigned long bitrate;
+	uint32_t bitrate;
 	int rpm,sizefactor;
 	HXCFE_CYLINDER* currentcylinder;
 	unsigned char flakeybyte;
@@ -236,7 +235,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	if(filesize!=0)
 	{
-		fileimg=(char*)malloc(filesize);
+		fileimg=(unsigned char*)malloc(filesize);
 
 		if(fileimg!=NULL)
 		{
@@ -466,7 +465,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							{
 								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Variable bit rate!!!");
 								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"timelen     : %d",ti.timelen);
-								len=ti.timelen*sizeof(unsigned long);
+								len=ti.timelen*sizeof(uint32_t);
 								if(currentside->tracklen&7) len=len+4;
 								currentside->timingbuffer=malloc(len);
 								memset(currentside->timingbuffer,0,len);
@@ -505,8 +504,8 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							}
 
 							pCAPSUnlockTrack(img,i, j);
-							if(floppydisk->floppySectorPerTrack<ti.sectorcnt )
-								floppydisk->floppySectorPerTrack=(unsigned short)ti.sectorcnt;
+							if(floppydisk->floppySectorPerTrack < (int32_t)ti.sectorcnt )
+								floppydisk->floppySectorPerTrack = (int32_t)ti.sectorcnt;
 
 							currentside->number_of_sector=ti.sectorcnt;
 
@@ -532,6 +531,10 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								memset(currentcylinder->sides,0,sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
 
 								currentcylinder->floppyRPM=rpm;
+							}
+							else
+							{
+								currentcylinder=floppydisk->tracks[i];
 							}
 
 							currentcylinder->sides[j]=malloc(sizeof(HXCFE_SIDE));
@@ -581,7 +584,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_INTERNALERROR;
 }
 
-int IPF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int IPF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="SPS_IPF";

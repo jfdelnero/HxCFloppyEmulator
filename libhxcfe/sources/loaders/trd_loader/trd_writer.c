@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -36,7 +38,6 @@
 #include "trd_writer.h"
 #include "tracks/sector_extractor.h"
 #include "libhxcadaptor.h"
-#include "types.h"
 
 // Main writer function
 int TRD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
@@ -59,12 +60,13 @@ int TRD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write TRD file %s...",filename);
 
+	layoutformat = 0;
+	sectorcnt = 0;
+
 	// Get the number of sector per track.
 	ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 	if(ss)
 	{
-		layoutformat = 0;
-		sectorcnt = 0;
 
 		for(id = 1;id<=16;id++)
 		{

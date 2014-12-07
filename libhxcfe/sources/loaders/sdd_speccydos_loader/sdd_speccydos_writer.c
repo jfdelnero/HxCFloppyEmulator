@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -38,14 +40,13 @@
 #include "tracks/sector_extractor.h"
 #include "sddfileformat.h"
 #include "libhxcadaptor.h"
-#include "types.h"
 
 // Main writer function
 int SDDSpeccyDos_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int i,j,k,id;
 	int nbsector;
-	unsigned int sectorsize;
+	int sectorsize;
 
 	FILE * sdddskfile;
 	HXCFE_SECTORACCESS* ss;

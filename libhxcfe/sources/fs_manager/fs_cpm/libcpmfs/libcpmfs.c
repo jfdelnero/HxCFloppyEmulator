@@ -46,6 +46,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "types.h"
+
 #include "libcpmfs.h"
 
 int libcpmfs_init(cpmfs * fs)
@@ -92,7 +95,7 @@ int libcpmfs_ftell(cpmfs * fs, void *file)
 	return 0;
 }
 
-int libcpmfs_fseek(cpmfs * fs, void *file, long offset, int origin )
+int libcpmfs_fseek(cpmfs * fs, void *file, int32_t offset, int origin )
 {
 	return 0;
 }

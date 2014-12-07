@@ -28,5 +28,5 @@
 #define ARBURB_DATATRACK_SIZE 0xA00
 #define ARBURB_SYSTEMTRACK_SIZE 0xF00
 
-int BuildArburgTrack(HXCFE* floppycontext,unsigned int tracknumber,unsigned int sidenumber,unsigned char* datain,unsigned char * fmdata,unsigned long * fmsizebuffer,int trackformat);
-int BuildArburgSysTrack(HXCFE* floppycontext,unsigned int tracknumber,unsigned int sidenumber,unsigned char* datain,unsigned char * fmdata,unsigned long * fmsizebuffer,int trackformat);
+int32_t BuildArburgTrack(HXCFE* floppycontext,int32_t tracknumber,int32_t sidenumber,uint8_t * datain,uint8_t * fmdata,int32_t * fmsizebuffer,int32_t trackformat);
+int32_t BuildArburgSysTrack(HXCFE* floppycontext,int32_t tracknumber,int32_t sidenumber,uint8_t * datain, uint8_t * fmdata, int32_t * fmsizebuffer,int32_t trackformat);

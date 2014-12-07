@@ -8,6 +8,8 @@
 #ifndef ZCONF_H
 #define ZCONF_H
 
+#include <stdint.h>
+
 /*
  * If you *really* need a unique prefix for all types and library functions,
  * compile with -DZ_PREFIX. The "standard" zlib should be compiled without it.
@@ -365,10 +367,10 @@
 #endif
 
 #if !defined(__MACTYPES__)
-typedef unsigned char  Byte;  /* 8 bits */
+typedef uint8_t  Byte;  /* 8 bits */
 #endif
-typedef unsigned int   uInt;  /* 16 bits or more */
-typedef unsigned long  uLong; /* 32 bits or more */
+typedef uint32_t  uInt;  /* 16 bits or more */
+typedef uint32_t  uLong; /* 32 bits or more */
 
 #ifdef SMALL_MEDIUM
    /* Borland C/C++ and some old MSC versions ignore FAR inside typedef */
@@ -396,7 +398,7 @@ typedef uLong FAR uLongf;
 #  if (UINT_MAX == 0xffffffffUL)
 #    define Z_U4 unsigned
 #  elif (ULONG_MAX == 0xffffffffUL)
-#    define Z_U4 unsigned long
+#    define Z_U4 uint32_t
 #  elif (USHRT_MAX == 0xffffffffUL)
 #    define Z_U4 unsigned short
 #  endif
@@ -405,7 +407,7 @@ typedef uLong FAR uLongf;
 #ifdef Z_U4
    typedef Z_U4 z_crc_t;
 #else
-   typedef unsigned long z_crc_t;
+   typedef uint32_t z_crc_t;
 #endif
 
 #ifdef HAVE_UNISTD_H    /* may be set to #if 1 by ./configure */

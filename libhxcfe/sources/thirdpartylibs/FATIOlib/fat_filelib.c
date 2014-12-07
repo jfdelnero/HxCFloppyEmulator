@@ -1137,7 +1137,7 @@ int fiol_fread(void * buffer, int size, int length, void *f )
 //-----------------------------------------------------------------------------
 // fiol_fseek: Seek to a specific place in the file
 //-----------------------------------------------------------------------------
-int fiol_fseek( void *f, long offset, int origin )
+int fiol_fseek( void *f, int32_t offset, int origin )
 {
     FL_FILE *file = (FL_FILE *)f;
     int res = -1;
@@ -1225,13 +1225,13 @@ int fiol_fgetpos(void *f , uint32 * position)
 //-----------------------------------------------------------------------------
 // fiol_ftell: Get the current file position
 //-----------------------------------------------------------------------------
-long fiol_ftell(void *f)
+int32_t fiol_ftell(void *f)
 {
     uint32 pos = 0;
 
     fiol_fgetpos(f, &pos);
 
-    return (long)pos;
+    return (int32_t)pos;
 }
 //-----------------------------------------------------------------------------
 // fiol_feof: Is the file pointer at the end of the stream?

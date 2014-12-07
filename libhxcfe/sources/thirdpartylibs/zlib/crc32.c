@@ -37,9 +37,9 @@
 #  define BYFOUR
 #endif
 #ifdef BYFOUR
-   local unsigned long crc32_little OF((unsigned long,
+   local uint32_t crc32_little OF((uint32_t,
                         const unsigned char FAR *, unsigned));
-   local unsigned long crc32_big OF((unsigned long,
+   local uint32_t crc32_big OF((uint32_t,
                         const unsigned char FAR *, unsigned));
 #  define TBLS 8
 #else
@@ -47,9 +47,9 @@
 #endif /* BYFOUR */
 
 /* Local functions for crc concatenation */
-local unsigned long gf2_matrix_times OF((unsigned long *mat,
-                                         unsigned long vec));
-local void gf2_matrix_square OF((unsigned long *square, unsigned long *mat));
+local uint32_t gf2_matrix_times OF((uint32_t *mat,
+                                         uint32_t vec));
+local void gf2_matrix_square OF((uint32_t *square, uint32_t *mat));
 local uLong crc32_combine_ OF((uLong crc1, uLong crc2, z_off64_t len2));
 
 
@@ -172,7 +172,7 @@ local void write_table(out, table)
 
     for (n = 0; n < 256; n++)
         fprintf(out, "%s0x%08lxUL%s", n % 5 ? "" : "    ",
-                (unsigned long)(table[n]),
+                (uint32_t)(table[n]),
                 n == 255 ? "\n" : (n % 5 == 4 ? ",\n" : ", "));
 }
 #endif /* MAKECRCH */
@@ -201,8 +201,8 @@ const z_crc_t FAR * ZEXPORT get_crc_table()
 #define DO8 DO1; DO1; DO1; DO1; DO1; DO1; DO1; DO1
 
 /* ========================================================================= */
-unsigned long ZEXPORT crc32(crc, buf, len)
-    unsigned long crc;
+uint32_t ZEXPORT crc32(crc, buf, len)
+    uint32_t crc;
     const unsigned char FAR *buf;
     uInt len;
 {
@@ -244,8 +244,8 @@ unsigned long ZEXPORT crc32(crc, buf, len)
 #define DOLIT32 DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4
 
 /* ========================================================================= */
-local unsigned long crc32_little(crc, buf, len)
-    unsigned long crc;
+local uint32_t crc32_little(crc, buf, len)
+    uint32_t crc;
     const unsigned char FAR *buf;
     unsigned len;
 {
@@ -274,7 +274,7 @@ local unsigned long crc32_little(crc, buf, len)
         c = crc_table[0][(c ^ *buf++) & 0xff] ^ (c >> 8);
     } while (--len);
     c = ~c;
-    return (unsigned long)c;
+    return (uint32_t)c;
 }
 
 /* ========================================================================= */
@@ -284,8 +284,8 @@ local unsigned long crc32_little(crc, buf, len)
 #define DOBIG32 DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4
 
 /* ========================================================================= */
-local unsigned long crc32_big(crc, buf, len)
-    unsigned long crc;
+local uint32_t crc32_big(crc, buf, len)
+    uint32_t crc;
     const unsigned char FAR *buf;
     unsigned len;
 {
@@ -316,7 +316,7 @@ local unsigned long crc32_big(crc, buf, len)
         c = crc_table[4][(c >> 24) ^ *buf++] ^ (c << 8);
     } while (--len);
     c = ~c;
-    return (unsigned long)(ZSWAP32(c));
+    return (uint32_t)(ZSWAP32(c));
 }
 
 #endif /* BYFOUR */
@@ -324,11 +324,11 @@ local unsigned long crc32_big(crc, buf, len)
 #define GF2_DIM 32      /* dimension of GF(2) vectors (length of CRC) */
 
 /* ========================================================================= */
-local unsigned long gf2_matrix_times(mat, vec)
-    unsigned long *mat;
-    unsigned long vec;
+local uint32_t gf2_matrix_times(mat, vec)
+    uint32_t *mat;
+    uint32_t vec;
 {
-    unsigned long sum;
+    uint32_t sum;
 
     sum = 0;
     while (vec) {
@@ -342,8 +342,8 @@ local unsigned long gf2_matrix_times(mat, vec)
 
 /* ========================================================================= */
 local void gf2_matrix_square(square, mat)
-    unsigned long *square;
-    unsigned long *mat;
+    uint32_t *square;
+    uint32_t *mat;
 {
     int n;
 
@@ -358,9 +358,9 @@ local uLong crc32_combine_(crc1, crc2, len2)
     z_off64_t len2;
 {
     int n;
-    unsigned long row;
-    unsigned long even[GF2_DIM];    /* even-power-of-two zeros operator */
-    unsigned long odd[GF2_DIM];     /* odd-power-of-two zeros operator */
+    uint32_t row;
+    uint32_t even[GF2_DIM];    /* even-power-of-two zeros operator */
+    uint32_t odd[GF2_DIM];     /* odd-power-of-two zeros operator */
 
     /* degenerate case (also disallow negative lengths) */
     if (len2 <= 0)

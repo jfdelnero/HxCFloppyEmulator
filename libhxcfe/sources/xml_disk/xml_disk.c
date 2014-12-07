@@ -46,6 +46,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "types.h"
+
 #include <expat.h>
 
 #include "internal_libhxcfe.h"
@@ -60,28 +62,28 @@
 
 typedef struct parse_stack_
 {
-	int state;
-	int track_type;
-	int cur_track;
+	int32_t state;
+	int32_t track_type;
+	int32_t cur_track;
 }parse_stack;
 
 typedef struct track_state_
 {
-	int base_adress;
-	int track_size;
-	int set;
+	int32_t base_adress;
+	int32_t track_size;
+	int32_t set;
 }track_state;
 
 typedef struct app_data
 {
 	HXCFE* floppycontext;
 
-	int current_state;
+	int32_t current_state;
 	void * p;
 
-	int stack_ptr;
+	int32_t stack_ptr;
 
-	int layout_id;
+	int32_t layout_id;
 	char * xmlfile_path[512];
 
 	parse_stack statestack[32];
@@ -91,26 +93,26 @@ typedef struct app_data
 
 	track_state ts[256*2];
 
-	int xmlcheck;
+	int32_t xmlcheck;
 
 	char * name[512];
 	char * description[512];
 
-	unsigned char * image_data;
+	uint8_t * image_data;
 
-	unsigned char * sector_data;
-	int sector_data_offset;
+	uint8_t * sector_data;
+	int32_t sector_data_offset;
 
-	int buffer_size;
-	int track_size;
+	int32_t buffer_size;
+	int32_t track_size;
 
-	int skew_per_track;
-	int skew_per_side;
+	int32_t skew_per_track;
+	int32_t skew_per_side;
 
-	int interface_mode;
-	int double_step;
+	int32_t interface_mode;
+	int32_t double_step;
 
-	int fill_value;
+	int32_t fill_value;
 
 } AppData;
 
@@ -303,9 +305,9 @@ int getstate(char * keyword, int currentstate)
 	return -1;
 }
 
-unsigned long ahextoi(char * str)
+uint32_t ahextoi(char * str)
 {
-	unsigned long hexval;
+	uint32_t hexval;
 	int i;
 	unsigned char c;
 

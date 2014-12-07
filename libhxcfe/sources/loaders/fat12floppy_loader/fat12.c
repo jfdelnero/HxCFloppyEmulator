@@ -30,6 +30,8 @@
 #include <sys/stat.h>
 #include <time.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
@@ -41,7 +43,7 @@
 
 int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned char * fattable,unsigned char *entriestable,unsigned char *datatable,int parentcluster,FATCONFIG * fatconfig,int numberofcluster)
 {
-	long hfindfile;
+	int32_t hfindfile;
 	filefoundinfo FindFileData;
 	int bbool;
 	int tii;

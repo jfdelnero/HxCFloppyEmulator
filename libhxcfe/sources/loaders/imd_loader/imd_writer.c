@@ -30,6 +30,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "types.h"
+
 #include "version.h"
 
 #include "internal_libhxcfe.h"
@@ -40,7 +42,7 @@
 
 #include "libhxcadaptor.h"
 
-extern unsigned char size_to_code(unsigned long size);
+extern unsigned char size_to_code(uint32_t size);
 
 int IMD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
