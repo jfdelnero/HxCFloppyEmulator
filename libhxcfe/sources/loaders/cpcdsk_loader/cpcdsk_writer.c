@@ -106,7 +106,7 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 					}
 
 					memset(&cpcdsk_th,0,sizeof(cpcdsk_trackheader));
-					sprintf(cpcdsk_th.headertag,"Track-Info\r\n");
+					sprintf((char*)&cpcdsk_th.headertag,"Track-Info\r\n");
 					cpcdsk_th.side_number=i;
 					cpcdsk_th.track_number=j;
 					cpcdsk_th.gap3_length=78;

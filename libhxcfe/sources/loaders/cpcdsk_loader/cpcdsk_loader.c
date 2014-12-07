@@ -81,9 +81,9 @@ int CPCDSK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		fread(&fileheader,sizeof(fileheader),1,f);
 		hxc_fclose(f);
 
-		if( !strncmp(fileheader.headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",16) ||
-			!strncmp(fileheader.headertag,"MV - CPCEMU Disk-File\r\nDisk-Info\r\n",11) ||
-			!strncmp(fileheader.headertag,"MV - CPC",8)
+		if( !strncmp((char*)&fileheader.headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",16) ||
+			!strncmp((char*)&fileheader.headertag,"MV - CPCEMU Disk-File\r\nDisk-Info\r\n",11) ||
+			!strncmp((char*)&fileheader.headertag,"MV - CPC",8)
 			)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile : CPC Dsk file !");
@@ -145,14 +145,14 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 		fread(&fileheader,sizeof(fileheader),1,f);
 
-		if( !strncmp(fileheader.headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",16))
+		if( !strncmp((char*)&fileheader.headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",16))
 		{
 			extendformat=1;
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Extended CPC Dsk file\n");
 		}
 		else
 		{
-			if(	!strncmp(fileheader.headertag,"MV - CPC",8))
+			if(	!strncmp((char*)&fileheader.headertag,"MV - CPC",8))
 			{
 				extendformat=0;
 				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"CPC Dsk standard file\n");
@@ -206,7 +206,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 				t=trackheader.track_number;
 				s=trackheader.side_number;
 
-				if(!strncmp(trackheader.headertag,"Track-Info\r\n",10) && (t<fileheader.number_of_tracks))//12))
+				if(!strncmp((char*)&trackheader.headertag,"Track-Info\r\n",10) && (t<fileheader.number_of_tracks))//12))
 				{
 					if(extendformat)
 					{
