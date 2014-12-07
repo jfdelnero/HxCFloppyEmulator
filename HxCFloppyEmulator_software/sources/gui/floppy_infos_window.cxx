@@ -2,6 +2,7 @@
 
 #include "floppy_infos_window.h"
 
+#include <stdint.h>
 extern "C"
 {
 	#include "libhxcfe.h"

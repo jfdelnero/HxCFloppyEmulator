@@ -43,13 +43,12 @@
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <stdint.h>
+
 #include "fl_includes.h"
 
-extern "C"
-{
-	#include "libhxcfe.h"
-	#include "usb_hxcfloppyemulator.h"
-}
+#include "libhxcfe.h"
+#include "usb_hxcfloppyemulator.h"
 
 #include "main.h"
 

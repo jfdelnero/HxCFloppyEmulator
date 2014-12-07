@@ -46,6 +46,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
+
 #include "fl_includes.h"
 #include "fl_dnd_box.h"
 

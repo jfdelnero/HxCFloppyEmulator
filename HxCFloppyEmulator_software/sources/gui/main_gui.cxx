@@ -51,10 +51,7 @@
 #include <stdlib.h>
 #include <stdarg.h> 
 #include <time.h>
-
-#ifndef WIN32
 #include <stdint.h>
-#endif
 
 #include "batch_converter_window.h"
 #include "filesystem_generator_window.h"
