@@ -49,6 +49,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <math.h>
+#include <stdint.h>
 
 #include "fl_includes.h"
 

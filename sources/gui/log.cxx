@@ -64,6 +64,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
+#include <stdint.h>
 
 #include "log_gui.h"
 

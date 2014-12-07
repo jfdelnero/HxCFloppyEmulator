@@ -2,6 +2,8 @@
 
 #include "batch_converter_window.h"
 
+#include <stdint.h>
+
 extern "C"
 {
 	#include "libhxcfe.h"

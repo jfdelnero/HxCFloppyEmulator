@@ -7,6 +7,7 @@
 #include <time.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <stdint.h>
 
 #include "soft_cfg_file.h"
 
@@ -16,10 +17,7 @@
 
 #include "main.h"
 
-extern "C"
-{
-	#include "libhxcadaptor.h"
-}
+#include "libhxcadaptor.h"
 
 typedef struct laststate_
 {
