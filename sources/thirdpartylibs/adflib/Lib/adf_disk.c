@@ -132,7 +132,7 @@ void adfVolumeInfo(struct Volume *vol)
 		printf ("DIRCACHE ");
 	putchar('\n');
 
-    printf("Free blocks = %ld\n", adfCountFreeBlocks(vol));
+    printf("Free blocks = %d\n", adfCountFreeBlocks(vol));
     if (vol->readOnly)
         printf("Read only\n");
     else
@@ -140,13 +140,13 @@ void adfVolumeInfo(struct Volume *vol)
  	
     /* created */
 	adfDays2Date(root.coDays, &year, &month, &days);
-    printf ("created %d/%02d/%02d %ld:%02ld:%02ld\n",days,month,year,
+    printf ("created %d/%02d/%02d %d:%02d:%02d\n",days,month,year,
 	    root.coMins/60,root.coMins%60,root.coTicks/50);	
 	adfDays2Date(root.days, &year, &month, &days);
-    printf ("last access %d/%02d/%02d %ld:%02ld:%02ld,   ",days,month,year,
+    printf ("last access %d/%02d/%02d %d:%02d:%02d,   ",days,month,year,
 	    root.mins/60,root.mins%60,root.ticks/50);	
 	adfDays2Date(root.cDays, &year, &month, &days);
-    printf ("%d/%02d/%02d %ld:%02ld:%02ld\n",days,month,year,
+    printf ("%d/%02d/%02d %d:%02d:%02d\n",days,month,year,
 	    root.cMins/60,root.cMins%60,root.cTicks/50);	
 }
 

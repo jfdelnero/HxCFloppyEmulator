@@ -81,9 +81,9 @@ void adfDeviceInfo(struct Device *dev)
 {
 	int i;
 	
-	printf("Cylinders   = %ld\n",dev->cylinders);
-    printf("Heads       = %ld\n",dev->heads);
-    printf("Sectors/Cyl = %ld\n\n",dev->sectors);
+	printf("Cylinders   = %d\n",dev->cylinders);
+    printf("Heads       = %d\n",dev->heads);
+    printf("Sectors/Cyl = %d\n\n",dev->sectors);
 	if (!dev->isNativeDev)
         printf("Dump device\n\n");
     else
@@ -106,12 +106,12 @@ void adfDeviceInfo(struct Device *dev)
 
     for(i=0; i<dev->nVol; i++) {
         if (dev->volList[i]->volName)
-            printf("%2d :  %7ld ->%7ld, \"%s\"", i,
+            printf("%2d :  %7d ->%7d, \"%s\"", i,
 			dev->volList[i]->firstBlock,
 			dev->volList[i]->lastBlock,
 			dev->volList[i]->volName);
         else
-            printf("%2d :  %7ld ->%7ld\n", i,
+            printf("%2d :  %7d ->%7d\n", i,
 			dev->volList[i]->firstBlock,
 			dev->volList[i]->lastBlock);
         if (dev->volList[i]->mounted)

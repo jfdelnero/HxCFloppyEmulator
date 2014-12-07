@@ -237,7 +237,7 @@ RETCODE adfRemoveEntry(struct Volume *vol, SECTNUM pSect, char *name)
             (*adfEnv.notifyFct)(pSect,ST_DIR);
     }
     else {
-      sprintf(buf, "adfRemoveEntry : secType %ld not supported", entry.secType);
+      sprintf(buf, "adfRemoveEntry : secType %d not supported", entry.secType);
         (*adfEnv.wFct)(buf);
         return RC_ERROR;
     }
@@ -839,11 +839,11 @@ adfGetHashValue(unsigned char *name, BOOL intl)
  */
 void printEntry(struct Entry* entry)
 {
-    printf("%-30s %2d %6ld ", entry->name, entry->type, entry->sector);
+    printf("%-30s %2d %6d ", entry->name, entry->type, entry->sector);
     printf("%2d/%02d/%04d %2d:%02d:%02d",entry->days, entry->month, entry->year,
         entry->hour, entry->mins, entry->secs);
     if (entry->type==ST_FILE)
-        printf("%8ld ",entry->size);
+        printf("%8d ",entry->size);
     else
         printf("         ");
     if (entry->type==ST_FILE || entry->type==ST_DIR)
@@ -975,7 +975,7 @@ RETCODE adfReadEntryBlock(struct Volume* vol, SECTNUM nSect, struct bEntryBlock 
     }
     if (ent->nameLen<0 || ent->nameLen>MAXNAMELEN || ent->commLen>MAXCMMTLEN) {
         (*adfEnv.wFct)("adfReadEntryBlock : nameLen or commLen incorrect"); 
-        printf("nameLen=%d, commLen=%d, name=%s sector%ld\n",
+        printf("nameLen=%d, commLen=%d, name=%s sector%d\n",
             ent->nameLen,ent->commLen,ent->name, ent->headerKey);
     }
 
