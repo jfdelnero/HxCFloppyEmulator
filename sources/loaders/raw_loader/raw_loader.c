@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -103,6 +104,11 @@ int RAW_libIsValidFormat(HXCFE* floppycontext,cfgrawfile * imgformatcfg)
 
 		case GCR_TRACK_TYPE:
 			tracktype=0;
+			tracklendiv = 12;
+		break;
+		default:
+			tracktype=ISOFORMAT_DD;
+			tracklendiv=8;
 		break;
 	};
 
@@ -131,11 +137,11 @@ int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j,fileside,bitrate;
+	int i,j,fileside,bitrate;
 	unsigned int file_offset;
 	unsigned char* trackdata;
-	unsigned char gap3len,interleave,skew,curskew,tracktype,firstsectorid;
-	unsigned short sectorsize,rpm;
+	int gap3len,interleave,skew,curskew,tracktype,firstsectorid;
+	int sectorsize,rpm;
 
 	f=0;
 
@@ -227,6 +233,10 @@ int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			tracktype=0;
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"GCR tracks format");
 		break;
+		default:
+			tracktype=ISOFORMAT_DD;
+		break;
+
 	};
 
 	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
@@ -313,7 +323,7 @@ int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 
-int RAW_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int RAW_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="RAW_LOADER";

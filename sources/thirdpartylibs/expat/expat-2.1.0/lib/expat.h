@@ -15,6 +15,8 @@
 #endif
 
 #include <stdlib.h>
+#include <stdint.h>
+
 #include "expat_external.h"
 
 #ifdef __cplusplus
@@ -913,7 +915,7 @@ XML_SetParamEntityParsing(XML_Parser parser,
 */
 XMLPARSEAPI(int)
 XML_SetHashSalt(XML_Parser parser,
-                unsigned long hash_salt);
+                uint32_t hash_salt);
 
 /* If XML_Parse or XML_ParseBuffer have returned XML_STATUS_ERROR, then
    XML_GetErrorCode returns information about the error.
@@ -1024,7 +1026,7 @@ enum XML_FeatureEnum {
 typedef struct {
   enum XML_FeatureEnum  feature;
   const XML_LChar       *name;
-  long int              value;
+  int32_t               value;
 } XML_Feature;
 
 XMLPARSEAPI(const XML_Feature *)

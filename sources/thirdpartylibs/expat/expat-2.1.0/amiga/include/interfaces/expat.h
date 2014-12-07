@@ -65,7 +65,7 @@ struct ExpatIFace
 	void APICALL (*XML_SetNotStandaloneHandler)(struct ExpatIFace *Self, XML_Parser parser, XML_NotStandaloneHandler handler);
 	enum XML_Error APICALL (*XML_GetErrorCode)(struct ExpatIFace *Self, XML_Parser parser);
 	const XML_LChar * APICALL (*XML_ErrorString)(struct ExpatIFace *Self, enum XML_Error code);
-	long APICALL (*XML_GetCurrentByteIndex)(struct ExpatIFace *Self, XML_Parser parser);
+	int32_t APICALL (*XML_GetCurrentByteIndex)(struct ExpatIFace *Self, XML_Parser parser);
 	int APICALL (*XML_GetCurrentLineNumber)(struct ExpatIFace *Self, XML_Parser parser);
 	int APICALL (*XML_GetCurrentColumnNumber)(struct ExpatIFace *Self, XML_Parser parser);
 	int APICALL (*XML_GetCurrentByteCount)(struct ExpatIFace *Self, XML_Parser parser);

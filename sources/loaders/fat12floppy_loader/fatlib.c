@@ -1,5 +1,8 @@
 #include <string.h>
 #include <stdlib.h>
+
+#include "types.h"
+
 #include "fatlib.h"
 
 int initFATPartion(int fattype,int numberofsector,FATPARTITION * fatpart)

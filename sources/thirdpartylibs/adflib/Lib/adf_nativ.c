@@ -65,7 +65,7 @@ RETCODE myInitDevice(struct Device* dev, char* name,BOOL ro)
  * myReadSector
  *
  */
-RETCODE myReadSector(struct Device *dev, long n, int size, unsigned char* buf)
+RETCODE myReadSector(struct Device *dev, int32_t n, int size, unsigned char* buf)
 {
      return RC_OK;   
 }
@@ -75,7 +75,7 @@ RETCODE myReadSector(struct Device *dev, long n, int size, unsigned char* buf)
  * myWriteSector
  *
  */
-RETCODE myWriteSector(struct Device *dev, long n, int size, unsigned char* buf)
+RETCODE myWriteSector(struct Device *dev, int32_t n, int size, unsigned char* buf)
 {
     return RC_OK;
 }

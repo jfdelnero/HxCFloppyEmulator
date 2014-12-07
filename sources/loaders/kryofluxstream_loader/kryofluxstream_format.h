@@ -25,29 +25,29 @@ Value	Name 	Meaning
 
 typedef struct s_oob_header_
 {
-	unsigned char 	Sign;  // 0x0D
-	unsigned char 	Type;
-	unsigned short 	Size;
+	uint8_t 	Sign;  // 0x0D
+	uint8_t 	Type;
+	uint16_t 	Size;
 }s_oob_header;
 
 
 typedef struct s_oob_StreamRead_
 {
-	unsigned long 	StreamPosition;
-	unsigned long 	TrTime;
+	uint32_t 	StreamPosition;
+	uint32_t 	TrTime;
 }s_oob_StreamRead;
 
 typedef struct s_oob_StreamEnd_
 {
-	unsigned long 	StreamPosition;
-	unsigned long 	Result;
+	uint32_t 	StreamPosition;
+	uint32_t 	Result;
 }s_oob_StreamEnd;
 
 typedef struct s_oob_DiskIndex_
 {
-	unsigned long 	StreamPosition;
-	unsigned long 	Timer;
-	unsigned long 	SysClk;
+	uint32_t 	StreamPosition;
+	uint32_t 	Timer;
+	uint32_t 	SysClk;
 }s_oob_DiskIndex;
 
 #define OOBTYPE_Stream_Read 0x01  // Start of flux transition timing data block (multiple per track)

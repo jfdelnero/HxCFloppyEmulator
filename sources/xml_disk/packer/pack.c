@@ -28,10 +28,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h> 
+
+#include "types.h"
+
 #include "lzw.h"
 #include "rle.h"
 
-unsigned char * data_unpack(unsigned char * bufferin, unsigned long sizein,unsigned char * bufferout, unsigned long sizeout)
+unsigned char * data_unpack(unsigned char * bufferin, uint32_t sizein,unsigned char * bufferout, uint32_t sizeout)
 {
 	unsigned char* buffer;
 

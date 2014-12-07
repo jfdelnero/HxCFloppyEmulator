@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -97,21 +98,19 @@ int GKH_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"GKH_libIsValidDiskFile : non GKH file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 int GKH_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
-	unsigned int i,j;
-	unsigned char gap3len,interleave,startid;
-	unsigned short rpm,sectorsize;
+	int i,j;
+	int gap3len,interleave,startid;
+	int rpm,sectorsize;
 	HXCFE_CYLINDER* currentcylinder;
 	int data_offset;
-	unsigned char trackformat;
-	unsigned char skew;
+	int trackformat;
+	int skew;
 	gkh_header header;
 	unsigned char tagbuffer[10];
 	image_type_tag *img_type_tag;
@@ -206,7 +205,7 @@ int GKH_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_BADFILE;
 }
 
-int GKH_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int GKH_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ENSONIQ_GKH";

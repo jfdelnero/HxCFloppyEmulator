@@ -47,6 +47,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
@@ -119,21 +121,19 @@ int HFE_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFE_libIsValidDiskFile : non HFE file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 int HFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	picfileformatheader header;
-	unsigned int i,j,k,l,offset,offset2;
+	int i,j,k,l,offset,offset2;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
     pictrack* trackoffsetlist;
     unsigned int tracks_base;
     unsigned char * hfetrack;
-	unsigned int nbofblock,tracklen;
+	int nbofblock,tracklen;
 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFE_libLoad_DiskFile %s",imgfile);
@@ -292,7 +292,7 @@ int HFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 
-int HFE_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int HFE_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="HXC_HFE";
@@ -320,7 +320,7 @@ int HFE_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void *
 
 int EXTHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 
-int EXTHFE_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int EXTHFE_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="HXC_EXTHFE";
@@ -348,7 +348,7 @@ int EXTHFE_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,voi
 
 int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 
-int HFE_HDDD_A2_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int HFE_HDDD_A2_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="HXC_HDDD_A2_HFE";

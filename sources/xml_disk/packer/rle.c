@@ -27,6 +27,8 @@
 #include <stdlib.h>
 #include <string.h> 
 
+#include "types.h"
+
 void rlepack(unsigned char * bufferin,int sizein,unsigned char * bufferout,int * sizeout)
 {
 	unsigned char c1;	

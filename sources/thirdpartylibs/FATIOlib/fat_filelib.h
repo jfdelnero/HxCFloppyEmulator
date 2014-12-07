@@ -91,9 +91,9 @@ int                 fiol_fputc(int c, void *file);
 int                 fiol_fputs(const char * str, void *file);
 int                 fiol_fwrite(const void * data, int size, int count, void *file );
 int                 fiol_fread(void * data, int size, int count, void *file );
-int                 fiol_fseek(void *file , long offset , int origin );
+int                 fiol_fseek(void *file , int32_t offset , int origin );
 int                 fiol_fgetpos(void *file , uint32 * position);
-long                fiol_ftell(void *f);
+int32_t                fiol_ftell(void *f);
 int                 fiol_feof(void *f);
 int                 fiol_remove(const char * filename);    
 

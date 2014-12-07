@@ -245,8 +245,8 @@ typedef struct {
 } DEFAULT_ATTRIBUTE;
 
 typedef struct {
-  unsigned long version;
-  unsigned long hash;
+  uint32_t version;
+  uint32_t hash;
   const XML_Char *uriName;
 } NS_ATT;
 
@@ -432,7 +432,7 @@ static ELEMENT_TYPE *
 getElementType(XML_Parser parser, const ENCODING *enc,
                const char *ptr, const char *end);
 
-static unsigned long generate_hash_secret_salt(void);
+static uint32_t generate_hash_secret_salt(void);
 static XML_Bool startParsing(XML_Parser parser);
 
 static XML_Parser
@@ -538,7 +538,7 @@ struct XML_ParserStruct {
   int m_idAttIndex;
   ATTRIBUTE *m_atts;
   NS_ATT *m_nsAtts;
-  unsigned long m_nsAttsVersion;
+  uint32_t m_nsAttsVersion;
   unsigned char m_nsAttsPower;
 #ifdef XML_ATTR_INFO
   XML_AttrInfo *m_attInfo;
@@ -556,7 +556,7 @@ struct XML_ParserStruct {
   XML_Bool m_useForeignDTD;
   enum XML_ParamEntityParsing m_paramEntityParsing;
 #endif
-  unsigned long m_hash_secret_salt;
+  uint32_t m_hash_secret_salt;
 };
 
 #define MALLOC(s) (parser->m_mem.malloc_fcn((s)))
@@ -690,7 +690,7 @@ static const XML_Char implicitContext[] = {
   ASCII_s, ASCII_p, ASCII_a, ASCII_c, ASCII_e, '\0'
 };
 
-static unsigned long
+static uint32_t
 generate_hash_secret_salt(void)
 {
   unsigned int seed = time(NULL) % UINT_MAX;
@@ -1028,7 +1028,7 @@ XML_ExternalEntityParserCreate(XML_Parser oldParser,
      from hash tables associated with either parser without us having
      to worry which hash secrets each table has.
   */
-  unsigned long oldhash_secret_salt = hash_secret_salt;
+  uint32_t oldhash_secret_salt = hash_secret_salt;
 
 #ifdef XML_DTD
   if (!context)
@@ -1487,7 +1487,7 @@ XML_SetParamEntityParsing(XML_Parser parser,
 
 int XMLCALL
 XML_SetHashSalt(XML_Parser parser,
-                unsigned long hash_salt)
+                uint32_t hash_salt)
 {
   /* block after XML_Parse()/XML_ParseBuffer() has been called */
   if (ps_parsing == XML_PARSING || ps_parsing == XML_SUSPENDED)
@@ -2878,7 +2878,7 @@ storeAtts(XML_Parser parser, const ENCODING *enc,
   i = 0;
   if (nPrefixes) {
     int j;  /* hash table index */
-    unsigned long version = nsAttsVersion;
+    uint32_t version = nsAttsVersion;
     int nsAttsSize = (int)1 << nsAttsPower;
     /* size of hash table must be at least 2 * (# of prefixed attributes) */
     if ((nPrefixes << 1) >> nsAttsPower) {  /* true for nsAttsPower = 0 */
@@ -2908,7 +2908,7 @@ storeAtts(XML_Parser parser, const ENCODING *enc,
       if (s[-1] == 2) {  /* prefixed */
         ATTRIBUTE_ID *id;
         const BINDING *b;
-        unsigned long uriHash = hash_secret_salt;
+        uint32_t uriHash = hash_secret_salt;
         ((XML_Char *)s)[-1] = 0;  /* clear flag */
         id = (ATTRIBUTE_ID *)lookup(parser, &dtd->attributeIds, s, 0);
         b = id->prefix->binding;
@@ -2935,7 +2935,7 @@ storeAtts(XML_Parser parser, const ENCODING *enc,
              Derived from code in lookup(parser, HASH_TABLE *table, ...).
           */
           unsigned char step = 0;
-          unsigned long mask = nsAttsSize - 1;
+          uint32_t mask = nsAttsSize - 1;
           j = uriHash & mask;  /* index into hash table */
           while (nsAtts[j].version == version) {
             /* for speed we compare stored hash values first */
@@ -5957,10 +5957,10 @@ keyeq(KEY s1, KEY s2)
   return XML_FALSE;
 }
 
-static unsigned long FASTCALL
+static uint32_t FASTCALL
 hash(XML_Parser parser, KEY s)
 {
-  unsigned long h = hash_secret_salt;
+  uint32_t h = hash_secret_salt;
   while (*s)
     h = CHAR_HASH(h, *s++);
   return h;
@@ -5984,11 +5984,11 @@ lookup(XML_Parser parser, HASH_TABLE *table, KEY name, size_t createSize)
       return NULL;
     }
     memset(table->v, 0, tsize);
-    i = hash(parser, name) & ((unsigned long)table->size - 1);
+    i = hash(parser, name) & ((uint32_t)table->size - 1);
   }
   else {
-    unsigned long h = hash(parser, name);
-    unsigned long mask = (unsigned long)table->size - 1;
+    uint32_t h = hash(parser, name);
+    uint32_t mask = (uint32_t)table->size - 1;
     unsigned char step = 0;
     i = h & mask;
     while (table->v[i]) {
@@ -6005,7 +6005,7 @@ lookup(XML_Parser parser, HASH_TABLE *table, KEY name, size_t createSize)
     if (table->used >> (table->power - 1)) {
       unsigned char newPower = table->power + 1;
       size_t newSize = (size_t)1 << newPower;
-      unsigned long newMask = (unsigned long)newSize - 1;
+      uint32_t newMask = (uint32_t)newSize - 1;
       size_t tsize = newSize * sizeof(NAMED *);
       NAMED **newV = (NAMED **)table->mem->malloc_fcn(tsize);
       if (!newV)
@@ -6013,7 +6013,7 @@ lookup(XML_Parser parser, HASH_TABLE *table, KEY name, size_t createSize)
       memset(newV, 0, tsize);
       for (i = 0; i < table->size; i++)
         if (table->v[i]) {
-          unsigned long newHash = hash(parser, table->v[i]->name);
+          uint32_t newHash = hash(parser, table->v[i]->name);
           size_t j = newHash & newMask;
           step = 0;
           while (newV[j]) {

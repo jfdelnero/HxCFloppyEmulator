@@ -2,8 +2,8 @@
 typedef struct keyword_
 {
 	char  * keyword;
-	int state;
-	int prev_state;
+	int32_t state;
+	int32_t prev_state;
 }keyword;
 
 enum

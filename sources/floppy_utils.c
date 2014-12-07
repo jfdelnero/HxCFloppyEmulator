@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "sector_search.h"
@@ -56,7 +57,7 @@
 
 #include "libhxcadaptor.h"
 
-unsigned long us2index(unsigned long startindex,HXCFE_SIDE * track,unsigned long us,unsigned char fill,char fillorder)
+int32_t us2index(int32_t startindex,HXCFE_SIDE * track,uint32_t us,unsigned char fill,char fillorder)
 {
 	uint32_t time,freq;
 
@@ -153,9 +154,9 @@ unsigned long us2index(unsigned long startindex,HXCFE_SIDE * track,unsigned long
 	}
 };
 
-unsigned long fillindex(int startindex,HXCFE_SIDE * track,unsigned long us,unsigned char fill,char fillorder)
+int32_t fillindex(int32_t startindex,HXCFE_SIDE * track,uint32_t us,unsigned char fill,char fillorder)
 {
-	int start_index;
+	int32_t start_index;
 
 	if(startindex>=0)
 	{
@@ -166,19 +167,24 @@ unsigned long fillindex(int startindex,HXCFE_SIDE * track,unsigned long us,unsig
 		start_index=us2index(0,track,-startindex,0,1);
 	}
 
-
 	return us2index(start_index,track,us&0xFFFFFF,fill,fillorder);
 }
 
-HXCFE_CYLINDER* allocCylinderEntry(unsigned short rpm,unsigned char number_of_side)
+HXCFE_CYLINDER* allocCylinderEntry(int32_t rpm,int32_t number_of_side)
 {
 	HXCFE_CYLINDER* cyl;
 
-	cyl=(HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
-	cyl->floppyRPM=rpm;
-	cyl->number_of_side=number_of_side;
-	cyl->sides=(HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*number_of_side);
-	memset(cyl->sides,0,sizeof(HXCFE_SIDE*)*number_of_side);
+	cyl = 0;
+	
+	if(number_of_side>0)
+	{
+		cyl=(HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
+		cyl->floppyRPM=rpm;
+		cyl->number_of_side=number_of_side;
+		cyl->sides=(HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*number_of_side);
+		memset(cyl->sides,0,sizeof(HXCFE_SIDE*)*number_of_side);
+	}
+
 	return cyl;
 }
 
@@ -199,64 +205,24 @@ double GetTrackPeriod(HXCFE* floppycontext,HXCFE_SIDE * curside)
 	int tracklen,i;
 	double total_period;
 
-	tracklen = curside->tracklen /8;
-	if(curside->tracklen & 7)
-		tracklen++;
-
 	total_period = 0;
-	if(curside->timingbuffer)
+
+	if(floppycontext)
 	{
-		for(i=0;i<tracklen;i++)
-		{
-			total_period = total_period + (double)((double)(1*4)/(double)curside->timingbuffer[i]);
-		}
-	}
-	else
-	{
-		for(i=0;i<tracklen;i++)
-		{
-			total_period = total_period + (double)((double)(1*4)/(double)curside->bitrate);
-		}
-	}
+		tracklen = curside->tracklen /8;
+		if(curside->tracklen & 7)
+			tracklen++;
 
-	if(total_period)
-		return total_period;
-	else
-		return 1;
-}
-
-double MeasureTrackTiming(HXCFE* floppycontext,HXCFE_SIDE * curside,unsigned long startpulse,unsigned long endpulse)
-{
-	unsigned long lenbyte,i,lenbit;
-	double total_period;
-
-
-	if( (startpulse < curside->tracklen) && (endpulse < curside->tracklen) ) 
-	{
-		if(startpulse<=endpulse)
-		{
-			lenbit = endpulse - startpulse;
-		}
-		else
-		{
-			lenbit = endpulse + (curside->tracklen - startpulse);			
-		}
-
-		lenbyte = lenbit /8;
-		if(lenbit & 7)
-			lenbyte++;
-
-		total_period = 0;
 		if(curside->timingbuffer)
 		{
-			for(i=0;i<lenbyte;i++)
+			for(i=0;i<tracklen;i++)
 			{
-				total_period = total_period + (double)((double)(1*4)/(double)curside->timingbuffer[((startpulse/8) + i)%(curside->tracklen/8)]);
+				total_period = total_period + (double)((double)(1*4)/(double)curside->timingbuffer[i]);
 			}
 		}
 		else
 		{
-			for(i=0;i<lenbyte;i++)
+			for(i=0;i<tracklen;i++)
 			{
 				total_period = total_period + (double)((double)(1*4)/(double)curside->bitrate);
 			}
@@ -269,7 +235,55 @@ double MeasureTrackTiming(HXCFE* floppycontext,HXCFE_SIDE * curside,unsigned lon
 		return 1;
 }
 
-int tracktypelisttoscan[]=
+double MeasureTrackTiming(HXCFE* floppycontext,HXCFE_SIDE * curside,int32_t startpulse,int32_t endpulse)
+{
+	uint32_t lenbyte,i,lenbit;
+	double   total_period;
+
+	total_period = 0;
+
+	if(floppycontext)
+	{
+		if( (startpulse < curside->tracklen) && (endpulse < curside->tracklen) ) 
+		{
+			if(startpulse<=endpulse)
+			{
+				lenbit = endpulse - startpulse;
+			}
+			else
+			{
+				lenbit = endpulse + (curside->tracklen - startpulse);			
+			}
+
+			lenbyte = lenbit /8;
+			if(lenbit & 7)
+				lenbyte++;
+
+			total_period = 0;
+			if(curside->timingbuffer)
+			{
+				for(i=0;i<lenbyte;i++)
+				{
+					total_period = total_period + (double)((double)(1*4)/(double)curside->timingbuffer[((startpulse/8) + i)%(curside->tracklen/8)]);
+				}
+			}
+			else
+			{
+				for(i=0;i<lenbyte;i++)
+				{
+					total_period = total_period + (double)((double)(1*4)/(double)curside->bitrate);
+				}
+			}
+		}
+	}
+
+	if(total_period)
+		return total_period;
+	else
+		return 1;
+}
+
+unsigned char tracktypelisttoscan[]=
 {
 	ISOIBM_MFM_ENCODING,
 	ISOIBM_FM_ENCODING,
@@ -338,7 +352,7 @@ int floppyTrackTypeIdentification(HXCFE* floppycontext,HXCFE_FLOPPY *fp)
 	return 0;
 }
 
-unsigned char  size_to_code(unsigned long size)
+unsigned char  size_to_code(uint32_t size)
 {
 
 	switch(size)

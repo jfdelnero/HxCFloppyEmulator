@@ -291,7 +291,7 @@ RETCODE adfSetEntryComment(struct Volume* vol, SECTNUM parSect, char* name,
  *
  */
 RETCODE adfSetEntryAccess(struct Volume* vol, SECTNUM parSect, char* name,
-    long newAcc)
+    int32_t newAcc)
 {
     struct bEntryBlock parent, entry;
     SECTNUM nSect;
@@ -365,7 +365,7 @@ struct List* adfGetRDirEnt(struct Volume* vol, SECTNUM nSect, BOOL recurs )
     int i;
     struct Entry *entry;
     SECTNUM nextSector;
-    long *hashTable;
+    int32_t *hashTable;
     struct bEntryBlock parent;
 
 
@@ -595,7 +595,7 @@ RETCODE adfEntBlock2Entry(struct bEntryBlock *entryBlk, struct Entry *entry)
  * adfNameToEntryBlk
  *
  */
-SECTNUM adfNameToEntryBlk(struct Volume *vol, long ht[], char* name, 
+SECTNUM adfNameToEntryBlk(struct Volume *vol, int32_t ht[], char* name, 
     struct bEntryBlock *entry, SECTNUM *nUpdSect)
 {
     int hashVal;
@@ -653,7 +653,7 @@ for(i=0; i<HT_SIZE; i++) printf("ht[%d]=%d    ",i,ht[i]);
  *
  */
     char* 
-adfAccess2String(long acc)
+adfAccess2String(int32_t acc)
 {
     static char ret[8+1];
 
@@ -815,7 +815,7 @@ myToUpper( unsigned char *nstr, unsigned char *ostr, int nlen, BOOL intl )
     int 
 adfGetHashValue(unsigned char *name, BOOL intl)
 {
-    unsigned long hash, len;
+    uint32_t hash, len;
     unsigned int i;
     unsigned char upper;
 
@@ -990,7 +990,7 @@ RETCODE adfReadEntryBlock(struct Volume* vol, SECTNUM nSect, struct bEntryBlock 
 RETCODE adfWriteEntryBlock(struct Volume* vol, SECTNUM nSect, struct bEntryBlock *ent)
 {
     unsigned char buf[512];
-    unsigned long newSum;
+    uint32_t newSum;
    
 
     memcpy(buf, ent, sizeof(struct bEntryBlock));
@@ -1015,7 +1015,7 @@ RETCODE adfWriteEntryBlock(struct Volume* vol, SECTNUM nSect, struct bEntryBlock
 RETCODE adfWriteDirBlock(struct Volume* vol, SECTNUM nSect, struct bDirBlock *dir)
 {
     unsigned char buf[512];
-    unsigned long newSum;
+    uint32_t newSum;
     
 
 /*printf("wdirblk=%d\n",nSect);*/

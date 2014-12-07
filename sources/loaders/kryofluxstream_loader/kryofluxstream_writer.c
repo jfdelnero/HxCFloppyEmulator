@@ -47,6 +47,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
@@ -57,10 +59,9 @@
 
 #include "libhxcadaptor.h"
 
-#include "types.h"
 
 // Get the next cell value.
-static unsigned long getNextPulse(HXCFE_SIDE * track,unsigned int * offset,int * rollover)
+static int32_t getNextPulse(HXCFE_SIDE * track,int * offset,int * rollover)
 {
 	int i;
 	float totaltime;
@@ -77,7 +78,7 @@ static unsigned long getNextPulse(HXCFE_SIDE * track,unsigned int * offset,int *
 	}
 
 	i=1;
-	do
+	for(;;)
 	{
 		*offset = (*offset) +1;
 
@@ -89,7 +90,7 @@ static unsigned long getNextPulse(HXCFE_SIDE * track,unsigned int * offset,int *
 
 		if( track->databuffer[(*offset)>>3] & (0x80 >> ((*offset) & 7) ) )
 		{
-			return (unsigned long)((float)totaltime/(float)(41.619));
+			return  (uint32_t)((float)totaltime/(float)(41.619));
 		}
 		else
 		{
@@ -104,7 +105,7 @@ static unsigned long getNextPulse(HXCFE_SIDE * track,unsigned int * offset,int *
 				totaltime += ((float)(1000*1000*1000) / (float)(track->bitrate*2));
 			}
 		}
-	}while(1);
+	}
 }
 
 int nextbyte(FILE *f,int i,unsigned char * trackbuffer)
@@ -166,24 +167,24 @@ int alignOOB(FILE * f)
 	return j;
 }
 
-unsigned long write_kf_stream_track(char * filepath,HXCFE_SIDE * track,int tracknum,int sidenum,unsigned int revolution)
+uint32_t write_kf_stream_track(char * filepath,HXCFE_SIDE * track,int tracknum,int sidenum,unsigned int revolution)
 {
 	char fullp[512];
 	char fullp2[512];
 	char fileext[16];
 
 	unsigned char trackbuffer[256];
-	unsigned long value;
+	uint32_t value;
 
 	int streampos,streamsize;
-	unsigned int trackoffset;
+	int trackoffset;
 	int trackrollover;
 	unsigned int i,j;
 
 	unsigned char old_index_state;
 
-	unsigned long totalcelllen;
-	unsigned long iclk;
+	uint32_t totalcelllen;
+	uint32_t iclk;
 
 	int SRcntdown;
 

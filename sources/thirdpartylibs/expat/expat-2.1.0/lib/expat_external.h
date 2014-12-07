@@ -5,6 +5,8 @@
 #ifndef Expat_External_INCLUDED
 #define Expat_External_INCLUDED 1
 
+#include <stdint.h>
+
 /* External API definitions */
 
 #if defined(_MSC_EXTENSIONS) && !defined(__BEOS__) && !defined(__CYGWIN__)
@@ -100,12 +102,12 @@ typedef char XML_LChar;
 typedef __int64 XML_Index; 
 typedef unsigned __int64 XML_Size;
 #else
-typedef long long XML_Index;
-typedef unsigned long long XML_Size;
+typedef  int64_t XML_Index;
+typedef uint64_t  XML_Size;
 #endif
 #else
-typedef long XML_Index;
-typedef unsigned long XML_Size;
+typedef int32_t XML_Index;
+typedef uint32_t XML_Size;
 #endif /* XML_LARGE_SIZE */
 
 #ifdef __cplusplus

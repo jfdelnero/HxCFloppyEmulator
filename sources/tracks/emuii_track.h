@@ -26,7 +26,7 @@
 */
 #define DEFAULT_EMUII_BITRATE 312500
 
-int BuildEmuIITrack(HXCFE* floppycontext,unsigned int tracknumber,unsigned int sidenumber,unsigned char* datain,unsigned char * fmdata,unsigned long * fmsizebuffer,int trackformat);
+int32_t BuildEmuIITrack(HXCFE* floppycontext,int tracknumber,int sidenumber,unsigned char* datain,unsigned char * fmdata,int32_t * fmsizebuffer,int trackformat);
 
 
 

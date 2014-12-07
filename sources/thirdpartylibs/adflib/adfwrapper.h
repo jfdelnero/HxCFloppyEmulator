@@ -416,7 +416,7 @@ public:
    BOOL SetFileAccess(LPCTSTR pstrName, SECTNUM nSector, DWORD dwAccess)
    {
       USES_CONVERSION;
-      return adfSetEntryAccess(m_vol,  nSector, T2A(const_cast<LPTSTR>(pstrName)), (long)dwAccess)==RC_OK;
+      return adfSetEntryAccess(m_vol,  nSector, T2A(const_cast<LPTSTR>(pstrName)), (int32_t)dwAccess)==RC_OK;
    }
 
    BOOL SetFileComment(LPCTSTR pstrName, SECTNUM nSector, LPCTSTR pstrComment)

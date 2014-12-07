@@ -220,14 +220,14 @@ local void skip(file *in, unsigned n)
 }
 
 /* read a four-byte unsigned integer, little-endian, from in */
-unsigned long read4(file *in)
+uint32_t read4(file *in)
 {
-    unsigned long val;
+    uint32_t val;
 
     val = read1(in);
     val += (unsigned)read1(in) << 8;
-    val += (unsigned long)read1(in) << 16;
-    val += (unsigned long)read1(in) << 24;
+    val += (uint32_t)read1(in) << 16;
+    val += (uint32_t)read1(in) << 24;
     return val;
 }
 
@@ -260,7 +260,7 @@ local int gzscan(char *name, z_stream *strm, int level)
 {
     int ret, lastbit, left, full;
     unsigned have;
-    unsigned long crc, tot;
+    uint32_t crc, tot;
     unsigned char *window;
     off_t lastoff, end;
     file gz;

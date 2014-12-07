@@ -47,6 +47,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "sector_search.h"
@@ -112,9 +114,9 @@ static void lba2chs(HXCFE_FSMNG * fsmng,int lba, int *track, int *head, int *sec
 	}
 }
 
-static int media_read(unsigned long sector, unsigned char *buffer, unsigned long sector_count)
+static int media_read(uint32_t sector, unsigned char *buffer, uint32_t sector_count)
 {
-	unsigned long i,c;
+	uint32_t i,c;
 	int fp_track,fp_head,fp_sector,fdcstatus;
 
 	lba2chs(gb_fsmng,sector, &fp_track,&fp_head,&fp_sector);
@@ -142,9 +144,9 @@ static int media_read(unsigned long sector, unsigned char *buffer, unsigned long
 		return 0;
 }
 
-static int media_write(unsigned long sector, unsigned char *buffer,unsigned long sector_count)
+static int media_write(uint32_t sector, unsigned char *buffer,uint32_t sector_count)
 {
-	unsigned long i,c;
+	uint32_t i,c;
 	int fp_track,fp_head,fp_sector,fdcstatus;
 
 	lba2chs(gb_fsmng,sector, &fp_track,&fp_head,&fp_sector);
@@ -495,7 +497,7 @@ int fat12_ftell( HXCFE_FSMNG * fsmng,int filehandle)
 	return HXCFE_ACCESSERROR;
 }
 
-int fat12_fseek( HXCFE_FSMNG * fsmng,int filehandle,long offset,int origin)
+int fat12_fseek( HXCFE_FSMNG * fsmng,int filehandle,int32_t offset,int origin)
 {
 	if(filehandle && filehandle<128)
 	{

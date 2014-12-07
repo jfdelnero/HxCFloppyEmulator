@@ -47,6 +47,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "track_generator.h"
 #include "libhxcfe.h"
@@ -208,10 +210,10 @@ unsigned char odd_tab[]=
 
 typedef struct gap3conf_
 {
-	unsigned char  trackmode;
-	unsigned short sectorsize;
-	unsigned char numberofsector;
-	unsigned char gap3;
+	uint8_t  trackmode;
+	uint16_t sectorsize;
+	uint8_t  numberofsector;
+	uint8_t  gap3;
 }gap3conf;
 
 
@@ -335,38 +337,40 @@ void getMFMcode(track_generator *tg,unsigned char data,unsigned char clock,unsig
 
 void getFMcode(track_generator *tg,unsigned char data,unsigned char clock,unsigned char * dstbuf)
 {
-	unsigned long * fm_code;
+	uint32_t * fm_code;
 	unsigned char k,i;
-			
-	fm_code=(unsigned long *)dstbuf;
 
-	*fm_code=0;
-	for(k=0;k<4;k++)
+	if(tg)
 	{
-		*fm_code=*fm_code>>8;
+		fm_code=(uint32_t *)dstbuf;
 
-		////////////////////////////////////
-		// data
-		for(i=0;i<2;i++)
+		*fm_code=0;
+		for(k=0;k<4;k++)
 		{
-			if(data&(0x80>>(i+(k*2)) ))
-			{	// 0x10 
-				// 00010001)
-				*fm_code=*fm_code | ((0x10>>(i*4))<<24);
+			*fm_code=*fm_code>>8;
+
+			////////////////////////////////////
+			// data
+			for(i=0;i<2;i++)
+			{
+				if(data&(0x80>>(i+(k*2)) ))
+				{	// 0x10 
+					// 00010001)
+					*fm_code=*fm_code | ((0x10>>(i*4))<<24);
+				}
 			}
-		}
 
-		// clock
-		for(i=0;i<2;i++)
-		{
-			if(clock&(0x80>>(i+(k*2)) ))
-			{	// 0x40 
-				// 01000100)
-				*fm_code=*fm_code | ((0x40>>(i*4))<<24);
+			// clock
+			for(i=0;i<2;i++)
+			{
+				if(clock&(0x80>>(i+(k*2)) ))
+				{	// 0x40 
+					// 01000100)
+					*fm_code=*fm_code | ((0x40>>(i*4))<<24);
+				}
 			}
 		}
 	}
-	
 	return;
 }
 
@@ -375,28 +379,30 @@ void getDirectcode(track_generator *tg,unsigned char data,unsigned char * dstbuf
 	unsigned short * direct_code;
 	unsigned char k,i;
 
-	direct_code=(unsigned short *)dstbuf;
-
-	*direct_code=0;
-	for(k=0;k<2;k++)
+	if(tg)
 	{
-		*direct_code=*direct_code>>8;
+		direct_code=(unsigned short *)dstbuf;
 
-		////////////////////////////////////
-		// data
-		for(i=0;i<4;i++)
+		*direct_code=0;
+		for(k=0;k<2;k++)
 		{
-			if(data&(0x80>>(i+(k*4)) ))
+			*direct_code=*direct_code>>8;
+
+			////////////////////////////////////
+			// data
+			for(i=0;i<4;i++)
 			{
-				*direct_code=*direct_code | ((0x80>>(i*2))<<8);
+				if(data&(0x80>>(i+(k*4)) ))
+				{
+					*direct_code=*direct_code | ((0x80>>(i*2))<<8);
+				}
 			}
 		}
 	}
-
 	return;
 }
 
-int pushTrackCode(track_generator *tg,unsigned char data,unsigned char clock,HXCFE_SIDE * side,unsigned char trackencoding)
+int32_t pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE * side,int32_t trackencoding)
 {
 	
 	switch(trackencoding)
@@ -506,10 +512,10 @@ void FastMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * trac
 // Fast Amiga Bin to MFM converter
 void FastAmigaMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size)
 {
-	unsigned short i,l;
-	unsigned char  byte;
-	unsigned short lastbit;
-	unsigned short mfm_code;
+	int32_t  i,l;
+	uint8_t  byte;
+	uint16_t lastbit;
+	uint16_t mfm_code;
 	unsigned char * mfm_buffer;
 
 	mfm_buffer=&side->databuffer[tg->last_bit_offset/8];
@@ -551,8 +557,8 @@ void FastAmigaMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char *
 // Fast Bin to FM converter
 void FastFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size)
 {
-	unsigned short j,l;
-	unsigned char  i,k;
+	int32_t j,l;
+	int32_t i,k;
 	unsigned char  byte;
 	unsigned char * fm_buffer;
 
@@ -669,8 +675,8 @@ int ISOIBMGetTrackSize(int TRACKTYPE,unsigned int numberofsector,unsigned int se
 {
 	unsigned int i,j;
 	isoibm_config * configptr;
-	unsigned long finalsize,headersize;
-	unsigned long totaldatasize;
+	uint32_t finalsize,headersize;
+	uint32_t totaldatasize;
 
 
 	configptr=NULL;
@@ -776,79 +782,32 @@ void tg_initTrackEncoder(track_generator *tg)
 	tg->mfm_last_bit=0xFFFF;
 }
 
-unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackencoding,unsigned int bitrate,unsigned int numberofsector,HXCFE_SECTCFG * sectorconfigtab,unsigned int pregaplen,unsigned long * track_period)
+int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t bitrate,int32_t numberofsector,HXCFE_SECTCFG * sectorconfigtab,int32_t pregaplen,int32_t * track_period)
 {
-	unsigned int i,j;
-	unsigned long tck_period;
+	int32_t i,j;
+	int32_t tck_period;
 	isoibm_config * configptr;
-	unsigned long total_track_size,sector_size,track_size;
+	int32_t total_track_size,sector_size,track_size;
 	unsigned char gap3;
 
-	configptr=0;
-	tck_period=0;
-	i=0;
-
-	configptr=&formatstab[trackencoding-1];
-
-	total_track_size=(configptr->len_gap4a+pregaplen)+configptr->len_isync+configptr->len_indexmarkp1+configptr->len_indexmarkp2 + \
-					 configptr->len_gap1;
-
-	switch(trackencoding)
+	total_track_size = 0;
+	if(tg)
 	{
-		case IBMFORMAT_SD:
-		case ISOFORMAT_SD:
-		case TYCOMFORMAT_SD:
-			total_track_size=total_track_size*4;
-			break;
+		configptr=0;
+		tck_period=0;
+		i=0;
 
-		case IBMFORMAT_DD:
-		case ISOFORMAT_DD:
-		case ISOFORMAT_DD11S:
-		case MEMBRAINFORMAT_DD:
-		case UKNCFORMAT_DD:
-			total_track_size=total_track_size*2;
-			break;
+		configptr=&formatstab[trackencoding-1];
 
-		default:
-			total_track_size=total_track_size*2;
-			break;
-	}
-	
-	if(total_track_size && bitrate)
- 		tck_period=tck_period+(100000/(bitrate/(total_track_size*4)));
+		total_track_size=(configptr->len_gap4a+pregaplen)+configptr->len_isync+configptr->len_indexmarkp1+configptr->len_indexmarkp2 + \
+						 configptr->len_gap1;
 
-
-	for(j=0;j<numberofsector;j++)
-	{
-		// if gap3 is set to "to be computed" we consider it as zero for the moment...
-		if(sectorconfigtab[j].gap3==255)
-		{
-			gap3=0;
-		}
-		else
-		{
-			gap3=sectorconfigtab[j].gap3;
-		}
-		configptr=&formatstab[sectorconfigtab[j].trackencoding-1];
-	
-		sector_size = sectorconfigtab[j].sectorsize;
-		if(sectorconfigtab[j].trackencoding == TYCOMFORMAT_SD)
-			sector_size = 128;
-
-		track_size=(configptr->len_ssync+configptr->len_addrmarkp1+configptr->len_addrmarkp2 + 2 +configptr->len_gap2 +configptr->len_dsync+configptr->len_datamarkp1+configptr->len_datamarkp2+2+gap3+configptr->posthcrc_len+configptr->postdcrc_len);
-		track_size=track_size+sector_size + 2;
-
-		if(configptr->sector_id) track_size++;
-		if(configptr->sector_size_id) track_size++;
-		if(configptr->side_id) track_size++;
-		if(configptr->track_id) track_size++;
-
-		switch(sectorconfigtab[j].trackencoding)
+		switch(trackencoding)
 		{
 			case IBMFORMAT_SD:
 			case ISOFORMAT_SD:
 			case TYCOMFORMAT_SD:
-				track_size=track_size*4;
+				total_track_size=total_track_size*4;
 				break;
 
 			case IBMFORMAT_DD:
@@ -856,35 +815,86 @@ unsigned long tg_computeMinTrackSize(track_generator *tg,unsigned char trackenco
 			case ISOFORMAT_DD11S:
 			case MEMBRAINFORMAT_DD:
 			case UKNCFORMAT_DD:
-				track_size=track_size*2;
+				total_track_size=total_track_size*2;
 				break;
 
 			default:
-				track_size=track_size*2;
+				total_track_size=total_track_size*2;
 				break;
 		}
+		
+		if(total_track_size && bitrate)
+ 			tck_period=tck_period+(100000/(bitrate/(total_track_size*4)));
 
-		total_track_size=total_track_size+track_size;
 
-		if( sectorconfigtab[0].bitrate && track_size )
-			tck_period=tck_period+(10000000/((sectorconfigtab[0].bitrate*100)/(track_size*4)));
+		for(j=0;j<numberofsector;j++)
+		{
+			// if gap3 is set to "to be computed" we consider it as zero for the moment...
+			if(sectorconfigtab[j].gap3==255)
+			{
+				gap3=0;
+			}
+			else
+			{
+				gap3=sectorconfigtab[j].gap3;
+			}
+			configptr=&formatstab[sectorconfigtab[j].trackencoding-1];
+		
+			sector_size = sectorconfigtab[j].sectorsize;
+			if(sectorconfigtab[j].trackencoding == TYCOMFORMAT_SD)
+				sector_size = 128;
 
+			track_size=(configptr->len_ssync+configptr->len_addrmarkp1+configptr->len_addrmarkp2 + 2 +configptr->len_gap2 +configptr->len_dsync+configptr->len_datamarkp1+configptr->len_datamarkp2+2+gap3+configptr->posthcrc_len+configptr->postdcrc_len);
+			track_size=track_size+sector_size + 2;
+
+			if(configptr->sector_id) track_size++;
+			if(configptr->sector_size_id) track_size++;
+			if(configptr->side_id) track_size++;
+			if(configptr->track_id) track_size++;
+
+			switch(sectorconfigtab[j].trackencoding)
+			{
+				case IBMFORMAT_SD:
+				case ISOFORMAT_SD:
+				case TYCOMFORMAT_SD:
+					track_size=track_size*4;
+					break;
+
+				case IBMFORMAT_DD:
+				case ISOFORMAT_DD:
+				case ISOFORMAT_DD11S:
+				case MEMBRAINFORMAT_DD:
+				case UKNCFORMAT_DD:
+					track_size=track_size*2;
+					break;
+
+				default:
+					track_size=track_size*2;
+					break;
+			}
+
+			total_track_size=total_track_size+track_size;
+
+			if( sectorconfigtab[0].bitrate && track_size )
+				tck_period=tck_period+(10000000/((sectorconfigtab[0].bitrate*100)/(track_size*4)));
+
+		}
+		
+		if(track_period)
+			*track_period=tck_period;
+
+		total_track_size=total_track_size*8;
 	}
-	
-	if(track_period)
-		*track_period=tck_period;
-
-	total_track_size=total_track_size*8;
 
 	return total_track_size;
 }
 
-HXCFE_SIDE * tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned short numberofsector,unsigned char trackencoding,unsigned int bitrate,HXCFE_SECTCFG * sectorconfigtab,unsigned short pregap)
+HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberofsector,int32_t trackencoding,int32_t bitrate,HXCFE_SECTCFG * sectorconfigtab,int32_t pregap)
 {
 	HXCFE_SIDE * currentside;
 	int variable_param,tracklen;
-	unsigned int i;
-	unsigned long   startindex;
+	int32_t i;
+	int32_t startindex;
 
 	startindex=tg->last_bit_offset/8;
 
@@ -912,8 +922,8 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned s
 				variable_param=1;
 				currentside->bitrate=VARIABLEBITRATE;
 
-				currentside->timingbuffer=malloc(tracklen*sizeof(unsigned long));
-				memset(currentside->timingbuffer,0,tracklen*sizeof(unsigned long));
+				currentside->timingbuffer=malloc(tracklen*sizeof(uint32_t));
+				memset(currentside->timingbuffer,0,tracklen*sizeof(uint32_t));
 			}
 			i++;
 		}
@@ -1049,13 +1059,12 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,unsigned long tracksize,unsigned s
 
 void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
-
-	unsigned short  i;
+	int32_t  i,j;
 	unsigned char   c,trackencoding,trackenc;
 	unsigned char   CRC16_High;
 	unsigned char   CRC16_Low;
 	unsigned char   crctable[32];
-	unsigned long   startindex,j,sectorsize;
+	int32_t   startindex,sectorsize;
 
 	startindex=tg->last_bit_offset/8;
 	
@@ -1142,7 +1151,7 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 			else
 			{	
 				c=0;
-				while(((unsigned int)(128<<(unsigned int)c) != sectorsize ) && c<8)
+				while(((128<<(unsigned int)c) != sectorsize ) && c<8)
 				{
 					c++;
 				}
@@ -1286,19 +1295,21 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 		}
 	}
 
+	trackenc = ISOIBM_MFM_ENCODING;
+
 	switch(trackencoding)
 	{
 		case IBMFORMAT_SD:
 		case ISOFORMAT_SD:
 		case TYCOMFORMAT_SD:
-			trackenc=ISOIBM_FM_ENCODING;
+			trackenc = ISOIBM_FM_ENCODING;
 		break;
 
 		case ISOFORMAT_DD11S:
 		case IBMFORMAT_DD:
 		case ISOFORMAT_DD:
 		case UKNCFORMAT_DD:
-			trackenc=ISOIBM_MFM_ENCODING;
+			trackenc = ISOIBM_MFM_ENCODING;
 		break;
 
 		case MEMBRAINFORMAT_DD:
@@ -1306,7 +1317,7 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 		break;
 
 		default:
-			trackenc=ISOIBM_MFM_ENCODING;
+			trackenc = ISOIBM_MFM_ENCODING;
 		break;
 	}
 
@@ -1314,7 +1325,7 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 	{
 		for(j=startindex;j<(tg->last_bit_offset/8);j++)
 		{
-			currentside->track_encoding_buffer[j]=trackenc;
+			currentside->track_encoding_buffer[j] = trackenc;
 		}
 	}
 
@@ -1357,9 +1368,9 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 void tg_addAmigaSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
 
-	unsigned short  i;
-	unsigned char   trackencoding,trackenc;
-	unsigned long   startindex,j;
+	int32_t  i;
+	int32_t  trackencoding,trackenc;
+	int32_t  startindex,j;
 	unsigned char   header[4];
 	unsigned char   headerparity[2];
 	unsigned char   sectorparity[2];
@@ -1511,11 +1522,11 @@ void tg_addSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_
 	}
 }
 
-void tg_completeTrack(track_generator *tg, HXCFE_SIDE * currentside,unsigned char trackencoding)
+void tg_completeTrack(track_generator *tg, HXCFE_SIDE * currentside,int32_t trackencoding)
 {
-	int tracklen,trackoffset;
+	int32_t tracklen,trackoffset;
 	unsigned char oldval,c;
-	unsigned int startindex,i;
+	int32_t startindex,i;
 
 	tracklen=currentside->tracklen/8;
 	if(currentside->tracklen&7) tracklen++;
@@ -1577,15 +1588,15 @@ void tg_completeTrack(track_generator *tg, HXCFE_SIDE * currentside,unsigned cha
 	}
 }
 
-HXCFE_SIDE * tg_generateTrackEx(unsigned short number_of_sector,HXCFE_SECTCFG * sectorconfigtab,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned short pregap,int indexlen,int indexpos)
+HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorconfigtab,int32_t interleave,int32_t skew,int32_t bitrate,int32_t rpm,int32_t trackencoding,int32_t pregap,int32_t indexlen,int32_t indexpos)
 {
-	unsigned short i;
-	unsigned long tracksize;
-	unsigned long track_period,wanted_trackperiod,indexperiod;
+	int32_t i;
+	int32_t tracksize;
+	int32_t track_period,wanted_trackperiod,indexperiod;
 	unsigned char * interleavetab;
-	unsigned char gap3tocompute;
-	unsigned long gap3period,computedgap3;
-	int gap3;
+	int32_t gap3tocompute;
+	uint32_t gap3period,computedgap3;
+	int32_t gap3;
 
 	track_generator tg;
 	HXCFE_SIDE * currentside;
@@ -1596,7 +1607,7 @@ HXCFE_SIDE * tg_generateTrackEx(unsigned short number_of_sector,HXCFE_SECTCFG * 
 	tg_initTrackEncoder(&tg);
 
 	// get minimum track size
-	tracksize=tg_computeMinTrackSize(&tg,trackencoding,bitrate,number_of_sector,sectorconfigtab,pregap,&track_period);
+	tracksize = tg_computeMinTrackSize(&tg,trackencoding,bitrate,number_of_sector,sectorconfigtab,pregap,&track_period);
 	
 	if(rpm)
 		wanted_trackperiod=(100000*60)/rpm;
@@ -1650,7 +1661,7 @@ HXCFE_SIDE * tg_generateTrackEx(unsigned short number_of_sector,HXCFE_SECTCFG * 
 			if(sectorconfigtab[i].gap3==0xFF)
 			{	
 				// TODO: make integer this...
-				computedgap3=(unsigned long)floor((float)gap3period*(float)((float)sectorconfigtab[i].bitrate/(float)100000));
+				computedgap3=(uint32_t)floor((float)gap3period*(float)((float)sectorconfigtab[i].bitrate/(float)100000));
 
 				switch(sectorconfigtab[i].trackencoding)
 				{
@@ -1719,9 +1730,7 @@ HXCFE_SIDE * tg_generateTrackEx(unsigned short number_of_sector,HXCFE_SECTCFG * 
 	return currentside;
 }
 
-
-
-HXCFE_SIDE * tg_generateTrack(unsigned char * sectors_data,unsigned short sector_size,unsigned short number_of_sector,unsigned char track,unsigned char side,unsigned char sectorid,unsigned char interleave,unsigned char skew,unsigned int bitrate,unsigned short rpm,unsigned char trackencoding,unsigned char gap3,unsigned short pregap, int indexlen,int indexpos)
+HXCFE_SIDE * tg_generateTrack(unsigned char * sectors_data,int32_t sector_size,int32_t number_of_sector,int32_t track,int32_t side,int32_t sectorid,int32_t interleave,int32_t skew,int32_t bitrate,int32_t rpm,int32_t trackencoding,int32_t gap3,int32_t pregap, int32_t indexlen,int32_t indexpos)
 {
 	unsigned short i;
 	HXCFE_SIDE * currentside;
@@ -1749,7 +1758,7 @@ HXCFE_SIDE * tg_generateTrack(unsigned char * sectors_data,unsigned short sector
 	return currentside;
 }
 
-HXCFE_SIDE * tg_alloctrack(unsigned int bitrate,unsigned char trackencoding,unsigned short rpm,unsigned int tracksize,int indexlen,int indexpos,unsigned char buffertoalloc)
+HXCFE_SIDE * tg_alloctrack(int32_t bitrate,int32_t trackencoding,int32_t rpm,int32_t tracksize,int32_t indexlen,int32_t indexpos,int32_t buffertoalloc)
 {
 	HXCFE_SIDE * currentside;
 	unsigned int tracklen;
@@ -1772,7 +1781,7 @@ HXCFE_SIDE * tg_alloctrack(unsigned int bitrate,unsigned char trackencoding,unsi
 	if(buffertoalloc & TG_ALLOCTRACK_ALLOCTIMIMGBUFFER)
 	{
 		currentside->bitrate=VARIABLEBITRATE;
-		currentside->timingbuffer=malloc(tracklen*sizeof(unsigned long));
+		currentside->timingbuffer=malloc(tracklen*sizeof(uint32_t));
 		for(i=0;i<tracklen;i++)
 		{
 			currentside->timingbuffer[i]=bitrate;
@@ -1839,18 +1848,16 @@ HXCFE_SIDE * tg_alloctrack(unsigned int bitrate,unsigned char trackencoding,unsi
 	return currentside;
 }
 
-
-
-unsigned long * tg_allocsubtrack_long(unsigned int tracksize,unsigned long initvalue)
+uint32_t * tg_allocsubtrack_long( int32_t tracksize, uint32_t initvalue )
 {
 	unsigned int tracklen;
 	unsigned int i;
-	unsigned long * ptr;
+	uint32_t * ptr;
 
 	tracklen=tracksize/8;
 	if(tracksize&7) tracklen++;
 
-	ptr=malloc(tracklen*sizeof(unsigned long));
+	ptr=malloc(tracklen*sizeof(uint32_t));
 	if(ptr)
 	{
 		for(i=0;i<tracklen;i++)
@@ -1862,16 +1869,16 @@ unsigned long * tg_allocsubtrack_long(unsigned int tracksize,unsigned long initv
 	return ptr;
 }
 
-unsigned char * tg_allocsubtrack_char(unsigned int tracksize,unsigned char initvalue)
+uint8_t  * tg_allocsubtrack_char( int32_t tracksize, uint8_t initvalue )
 {
-	unsigned int tracklen;
-	unsigned int i;
+	int32_t tracklen;
+	int32_t i;
 	unsigned char * ptr;
 
 	tracklen=tracksize/8;
 	if(tracksize&7) tracklen++;
 
-	ptr=malloc(tracklen*sizeof(unsigned char));
+	ptr=malloc(tracklen*sizeof(uint8_t));
 	if(ptr)
 	{
 		for(i=0;i<tracklen;i++)

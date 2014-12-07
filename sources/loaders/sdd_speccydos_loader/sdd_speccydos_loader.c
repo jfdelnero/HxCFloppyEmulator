@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 #include "./tracks/track_generator.h"
@@ -62,7 +63,7 @@
 
 #include "libhxcadaptor.h"
 
-int sdd_getfloppyconfig(unsigned char * img,unsigned int filesize,unsigned char * density,unsigned short *numberoftrack,unsigned char *numberofside,unsigned short *numberofsectorpertrack,unsigned char *gap3len,unsigned char *interleave)
+int sdd_getfloppyconfig(unsigned char * img,unsigned int filesize,int * density,int *numberoftrack,int *numberofside,int *numberofsectorpertrack,int *gap3len,int *interleave)
 {
 	sddfileformats_t  * uimg;
 
@@ -95,12 +96,12 @@ int SDDSpeccyDos_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	int filesize;
 	unsigned char buffer[256];
 	FILE * f;
-	unsigned char density;
-	unsigned short NumberOfTrack;
-	unsigned char NumberOfSide;
-	unsigned short SectorPerTrack;
-	unsigned char gap3len;
-	unsigned char interleave;
+	int density;
+	int NumberOfTrack;
+	int NumberOfSide;
+	int SectorPerTrack;
+	int gap3len;
+	int interleave;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile");
 
@@ -158,8 +159,6 @@ int SDDSpeccyDos_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile : non SDD file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 int SDDSpeccyDos_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -169,11 +168,11 @@ int SDDSpeccyDos_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flopp
 	unsigned int filesize;
 	unsigned int file_offset;
 
-	unsigned short i,j;
+	int i,j;
 	unsigned char* trackdata;
-	unsigned char  gap3len,interleave,skew,trackformat,density;
-	unsigned short rpm;
-	unsigned short sectorsize;
+	int gap3len,interleave,skew,trackformat,density;
+	int rpm;
+	int sectorsize;
 	HXCFE_CYLINDER* currentcylinder;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libLoad_DiskFile %s",imgfile);
@@ -266,7 +265,7 @@ int SDDSpeccyDos_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flopp
 	return HXCFE_BADFILE;
 }
 
-int SDDSpeccyDos_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int SDDSpeccyDos_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="SPECCYDOS_SDD";

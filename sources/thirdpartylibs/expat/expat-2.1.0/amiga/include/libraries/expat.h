@@ -50,8 +50,8 @@ extern "C" {
 
 typedef char XML_Char;
 typedef char XML_LChar;
-typedef long XML_Index;
-typedef unsigned long XML_Size;
+typedef int32_t XML_Index;
+typedef uint32_t XML_Size;
 
 struct XML_ParserStruct;
 typedef struct XML_ParserStruct *XML_Parser;
@@ -475,7 +475,7 @@ XML_GetErrorCode(XML_Parser parser);
 
 int XML_GetCurrentLineNumber(XML_Parser parser);
 int XML_GetCurrentColumnNumber(XML_Parser parser);
-long XML_GetCurrentByteIndex(XML_Parser parser);
+int32_t XML_GetCurrentByteIndex(XML_Parser parser);
 
 int
 XML_GetCurrentByteCount(XML_Parser parser);
@@ -535,7 +535,7 @@ enum XML_FeatureEnum {
 typedef struct {
   enum XML_FeatureEnum  feature;
   const XML_LChar       *name;
-  long int              value;
+  int32_t int              value;
 } XML_Feature;
 
 const XML_Feature *

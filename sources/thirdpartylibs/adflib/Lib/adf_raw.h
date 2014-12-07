@@ -53,13 +53,13 @@
 #define SWBL_FSHD         10 
 #define SWBL_LSEG         11
 
-RETCODE adfReadRootBlock(struct Volume*, long nSect, struct bRootBlock* root);
-RETCODE adfWriteRootBlock(struct Volume* vol, long nSect, struct bRootBlock* root);
+RETCODE adfReadRootBlock(struct Volume*, int32_t nSect, struct bRootBlock* root);
+RETCODE adfWriteRootBlock(struct Volume* vol, int32_t nSect, struct bRootBlock* root);
 RETCODE adfReadBootBlock(struct Volume*, struct bBootBlock* boot);
 RETCODE adfWriteBootBlock(struct Volume* vol, struct bBootBlock* boot);
 
-unsigned long adfBootSum(unsigned char *buf);
-unsigned long adfNormalSum( unsigned char *buf, int offset, int bufLen );
+uint32_t adfBootSum(unsigned char *buf);
+uint32_t adfNormalSum( unsigned char *buf, int offset, int bufLen );
 
 void swapEndian( unsigned char *buf, int type );
 

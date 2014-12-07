@@ -47,6 +47,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "sector_search.h"
@@ -358,7 +360,7 @@ int hxcfe_removeDir( HXCFE_FSMNG * fsmng,char * foldername)
 		return fat12_removeDir( fsmng,foldername);
 }
 
-int hxcfe_fseek( HXCFE_FSMNG * fsmng,int filehandle,long offset,int origin)
+int hxcfe_fseek( HXCFE_FSMNG * fsmng,int filehandle,int32_t offset,int origin)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_fseek : 0x%.8x - 0x%.8x (%d) ",filehandle,offset,origin);
 

@@ -57,20 +57,20 @@
 
 
 typedef struct {
-  unsigned char track;
-  unsigned char sector;
-  unsigned char flags;
+  uint8_t track;
+  uint8_t sector;
+  uint8_t flags;
 } JV3SectorHeader;
 
 typedef struct {
-  unsigned int key;
-  unsigned int offset;
-  unsigned char DAM;
-  unsigned char density;
-  unsigned int size;
-  unsigned int sector_id;
-  unsigned int track_id;
-  unsigned int side_id;
-  unsigned int sector_pos;
-  unsigned char bad_sector;
+  uint32_t key;
+  uint32_t offset;
+  uint8_t  DAM;
+  uint8_t  density;
+  uint32_t size;
+  uint32_t sector_id;
+  uint32_t track_id;
+  uint32_t side_id;
+  uint32_t sector_pos;
+  uint8_t  bad_sector;
 } JV3SectorsOffsets;

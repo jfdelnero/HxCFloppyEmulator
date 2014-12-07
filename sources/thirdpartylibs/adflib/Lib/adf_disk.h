@@ -38,14 +38,14 @@ PREFIX BOOL isSectNumValid(struct Volume *vol, SECTNUM nSect);
 PREFIX struct Volume* adfMount( struct Device *dev, int nPart, BOOL readOnly );
 PREFIX void adfUnMount(struct Volume *vol);
 PREFIX void adfVolumeInfo(struct Volume *vol);
-struct Volume* adfCreateVol( struct Device* dev, long start, long len, 
+struct Volume* adfCreateVol( struct Device* dev, int32_t start, int32_t len, 
     char* volName, int volType,struct DateTime * voldate );
 
-/*void adfReadBitmap(struct Volume* , long nBlock, struct bRootBlock* root);
+/*void adfReadBitmap(struct Volume* , int32_t nBlock, struct bRootBlock* root);
 void adfUpdateBitmap(struct Volume*);
 */
-PREFIX RETCODE adfReadBlock(struct Volume* , long nSect, unsigned char* buf);
-PREFIX RETCODE adfWriteBlock(struct Volume* , long nSect, unsigned char* buf);
+PREFIX RETCODE adfReadBlock(struct Volume* , int32_t nSect, unsigned char* buf);
+PREFIX RETCODE adfWriteBlock(struct Volume* , int32_t nSect, unsigned char* buf);
 
 #endif /* _ADF_DISK_H */
 

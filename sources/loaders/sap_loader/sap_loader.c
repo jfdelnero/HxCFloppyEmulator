@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -89,20 +90,18 @@ int SAP_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAP_libIsValidDiskFile : non SAP file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 int SAP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	unsigned int i,j,k;
+	int i,j,k;
 	unsigned char* trackdata;
-	unsigned char gap3len,interleave;
-	unsigned char skew;
-	unsigned short rpm;
-	unsigned short sectorsize;
+	int gap3len,interleave;
+	int skew;
+	int rpm;
+	int sectorsize;
 
-	unsigned char trackformat;
+	int trackformat;
 	int floppyformat;
 	sapID sapid;
 	sapsector_t sapsector;
@@ -207,7 +206,7 @@ int SAP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 }
 
-int SAP_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int SAP_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="THOMSONTO8D_SAP";

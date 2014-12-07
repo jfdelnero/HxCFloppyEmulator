@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -101,8 +102,6 @@ int STT_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STT_libIsValidDiskFile : non STT file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 int STT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -110,12 +109,12 @@ int STT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j,k;
+	int i,j,k;
 	unsigned int file_offset;
-	unsigned char gap3len,interleave;
-	unsigned short sectorsize,rpm;
-	unsigned char trackformat;
-	unsigned long file_track_list_offset;
+	int gap3len,interleave;
+	int sectorsize,rpm;
+	int trackformat;
+	uint32_t file_track_list_offset;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
 	HXCFE_SECTCFG* sectorconfig;
@@ -236,7 +235,7 @@ int STT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				currentside=tg_generateTrackEx((unsigned short)STTTRACKHEADER.number_of_sectors,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,0,2500 | NO_SECTOR_UNDER_INDEX,-2500);
 				currentcylinder->sides[i]=currentside;
 
-				currentside->bitrate=(long)(250000*(float)((float)(currentside->tracklen/2)/(float)50000));
+				currentside->bitrate=(int32_t)(250000*(float)((float)(currentside->tracklen/2)/(float)50000));
 
 
 				for(k=0;k<STTTRACKHEADER.number_of_sectors;k++)
@@ -272,7 +271,7 @@ int STT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 }
 
-int STT_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int STT_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ATARIST_STT";

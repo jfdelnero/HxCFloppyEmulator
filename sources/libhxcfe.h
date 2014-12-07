@@ -117,34 +117,35 @@ typedef void HXCFE_SECTCFG;
 // UI Output callback functions                                                                   //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifndef _HXCFE_PRINTF_FUNC_
-typedef int (*HXCFE_PRINTF_FUNC)(int MSGTYPE,char * string, ...);
+typedef int32_t (*HXCFE_PRINTF_FUNC)(int32_t MSGTYPE, char * string, ... );
 #define _HXCFE_PRINTF_FUNC_
 #endif
 
 #ifndef _HXCFE_TRACKPOSOUT_FUNC_
-typedef int (*HXCFE_TRACKPOSOUT_FUNC)(unsigned int current,unsigned int total);
+typedef int32_t (*HXCFE_TRACKPOSOUT_FUNC)(uint32_t current, uint32_t total );
 #define _HXCFE_TRACKPOSOUT_FUNC_
 #endif
 
 #ifndef _HXCFE_IMGLDRPROGRESSOUT_FUNC_
-typedef int (*HXCFE_IMGLDRPROGRESSOUT_FUNC)(unsigned int current,unsigned int total, void * user);
+typedef int32_t (*HXCFE_IMGLDRPROGRESSOUT_FUNC)(uint32_t current, uint32_t total, void * user );
 #define _HXCFE_IMGLDRPROGRESSOUT_FUNC_
 #endif
 
 #ifndef _HXCFE_TDPROGRESSOUT_FUNC_
-typedef int (*HXCFE_TDPROGRESSOUT_FUNC)(unsigned int current,unsigned int total,void * td, void * user);
+typedef int32_t (*HXCFE_TDPROGRESSOUT_FUNC)(uint32_t current, uint32_t total, void * td, void * user );
 #define _HXCFE_TDPROGRESSOUT_FUNC_
 #endif
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Init Function                                                                                  //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HXCFE*             hxcfe_init(void);
-void               hxcfe_deinit(HXCFE* hxcfe);
+HXCFE*                 hxcfe_init(void );
+void                   hxcfe_deinit( HXCFE* hxcfe );
 
-const char *       hxcfe_getVersion(HXCFE* floppycontext);
-const char *       hxcfe_getLicense(HXCFE* floppycontext);
+const char *           hxcfe_getVersion( HXCFE* floppycontext );
+const char *           hxcfe_getLicense( HXCFE* floppycontext );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // stdio printf functions                                                                         //
@@ -157,33 +158,33 @@ const char *       hxcfe_getLicense(HXCFE* floppycontext);
 #define MSG_ERROR                        3
 #define MSG_DEBUG                        4
 
-int                hxcfe_setOutputFunc(HXCFE* floppycontext,HXCFE_PRINTF_FUNC hxc_printf);
+int32_t                hxcfe_setOutputFunc( HXCFE* floppycontext, HXCFE_PRINTF_FUNC hxc_printf );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // File image functions                                                                           //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-HXCFE_IMGLDR *     hxcfe_imgInitLoader(HXCFE * hxcfe);
+HXCFE_IMGLDR *         hxcfe_imgInitLoader(HXCFE * hxcfe );
 
-int                hxcfe_imgGetNumberOfLoader(HXCFE_IMGLDR * imgldr_ctx);
-int                hxcfe_imgGetLoaderID(HXCFE_IMGLDR * imgldr_ctx,char * container);
-int                hxcfe_imgGetLoaderAccess(HXCFE_IMGLDR * imgldr_ctx,int moduleID);
-const char*        hxcfe_imgGetLoaderDesc(HXCFE_IMGLDR * imgldr_ctx,int moduleID);
-const char*        hxcfe_imgGetLoaderName(HXCFE_IMGLDR * imgldr_ctx,int moduleID);
-const char*        hxcfe_imgGetLoaderExt(HXCFE_IMGLDR * imgldr_ctx,int moduleID);
-int                hxcfe_imgAutoSetectLoader(HXCFE_IMGLDR * imgldr_ctx,char* imgname,int moduleID);
-HXCFE_FLOPPY *     hxcfe_imgLoad(HXCFE_IMGLDR * imgldr_ctx,char* imgname,int moduleID,int * err_ret);
-HXCFE_FLOPPY *     hxcfe_imgLoadEx(HXCFE_IMGLDR * imgldr_ctx,char* imgname,int moduleID,int * err_ret,void * parameters);
-int                hxcfe_imgUnload(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk);
-int                hxcfe_imgExport(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * newfloppy,char* imgname,int moduleID);
-int                hxcfe_imgSetProgressCallback(HXCFE_IMGLDR * imgldr_ctx,HXCFE_IMGLDRPROGRESSOUT_FUNC progress_func,void * userdata);
+int32_t                hxcfe_imgGetNumberOfLoader(HXCFE_IMGLDR * imgldr_ctx );
+int32_t                hxcfe_imgGetLoaderID(HXCFE_IMGLDR * imgldr_ctx, char * container );
+int32_t                hxcfe_imgGetLoaderAccess(HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID );
+const char*            hxcfe_imgGetLoaderDesc(HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID );
+const char*            hxcfe_imgGetLoaderName(HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID );
+const char*            hxcfe_imgGetLoaderExt(HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID );
+int32_t                hxcfe_imgAutoSetectLoader(HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_t moduleID );
+HXCFE_FLOPPY *         hxcfe_imgLoad(HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_t moduleID, int32_t * err_ret );
+HXCFE_FLOPPY *         hxcfe_imgLoadEx(HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_t moduleID, int32_t * err_ret, void * parameters );
+int32_t                hxcfe_imgUnload(HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * floppydisk );
+int32_t                hxcfe_imgExport(HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * newfloppy, char* imgname, int32_t moduleID );
+int32_t                hxcfe_imgSetProgressCallback(HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDRPROGRESSOUT_FUNC progress_func, void * userdata );
 
-void               hxcfe_imgDeInitLoader(HXCFE_IMGLDR * imgldr_ctx);
+void                   hxcfe_imgDeInitLoader(HXCFE_IMGLDR * imgldr_ctx );
 
-int                hxcfe_getNumberOfTrack(HXCFE* floppycontext,HXCFE_FLOPPY *fp);
-int                hxcfe_getNumberOfSide(HXCFE* floppycontext,HXCFE_FLOPPY *fp);
+int32_t                hxcfe_getNumberOfTrack( HXCFE* floppycontext, HXCFE_FLOPPY *fp );
+int32_t                hxcfe_getNumberOfSide( HXCFE* floppycontext, HXCFE_FLOPPY *fp );
 
-int                hxcfe_floppyUnload(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk);
-HXCFE_FLOPPY *     hxcfe_floppyDuplicate(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk);
+int32_t                hxcfe_floppyUnload( HXCFE* floppycontext, HXCFE_FLOPPY * floppydisk );
+HXCFE_FLOPPY *         hxcfe_floppyDuplicate( HXCFE* floppycontext, HXCFE_FLOPPY * floppydisk );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Custom Image/floppy generation functions                                                       //
@@ -205,112 +206,112 @@ HXCFE_FLOPPY *     hxcfe_floppyDuplicate(HXCFE* floppycontext,HXCFE_FLOPPY * flo
 #define UKNCFORMAT_DD                    0x0E
 #define DIRECT_ENCODING                  0xFE
 
-HXCFE_FLPGEN*      hxcfe_initFloppy(HXCFE* floppycontext,int nb_of_track,int nb_of_side);
+HXCFE_FLPGEN*          hxcfe_initFloppy( HXCFE* floppycontext, int32_t nb_of_track, int32_t nb_of_side );
 
-int                hxcfe_setNumberOfTrack (HXCFE_FLPGEN* fb_ctx,unsigned short numberoftrack);
-int                hxcfe_setNumberOfSide (HXCFE_FLPGEN* fb_ctx,unsigned char numberofside);
-int                hxcfe_setNumberOfSector (HXCFE_FLPGEN* fb_ctx,unsigned short numberofsector);
-int                hxcfe_setSectorSize(HXCFE_FLPGEN* fb_ctx,int size);
-int                hxcfe_setStartSectorID(HXCFE_FLPGEN* fb_ctx,unsigned char startsectorid);
-int                hxcfe_setTrackType(HXCFE_FLPGEN* fb_ctx,int type);
+int32_t                hxcfe_setNumberOfTrack ( HXCFE_FLPGEN* fb_ctx, int32_t numberoftrack );
+int32_t                hxcfe_setNumberOfSide ( HXCFE_FLPGEN* fb_ctx, int32_t numberofside );
+int32_t                hxcfe_setNumberOfSector ( HXCFE_FLPGEN* fb_ctx, int32_t numberofsector );
+int32_t                hxcfe_setSectorSize( HXCFE_FLPGEN* fb_ctx, int32_t size );
+int32_t                hxcfe_setStartSectorID( HXCFE_FLPGEN* fb_ctx, int32_t startsectorid );
+int32_t                hxcfe_setTrackType( HXCFE_FLPGEN* fb_ctx, int32_t type );
 
-int                hxcfe_pushTrack (HXCFE_FLPGEN* fb_ctx,unsigned int rpm,int number,int side,int type);
-int                hxcfe_pushTrackPFS (HXCFE_FLPGEN* fb_ctx,int number,int side);
+int32_t                hxcfe_pushTrack ( HXCFE_FLPGEN* fb_ctx, uint32_t rpm, int32_t number, int32_t side, int32_t type );
+int32_t                hxcfe_pushTrackPFS ( HXCFE_FLPGEN* fb_ctx, int32_t number, int32_t side );
 
-int                hxcfe_setTrackInterleave (HXCFE_FLPGEN* fb_ctx,int interleave);
-int                hxcfe_setTrackSkew (HXCFE_FLPGEN* fb_ctx,int skew);
+int32_t                hxcfe_setTrackInterleave ( HXCFE_FLPGEN* fb_ctx, int32_t interleave );
+int32_t                hxcfe_setTrackSkew ( HXCFE_FLPGEN* fb_ctx, int32_t skew );
 
-int                hxcfe_setTrackPreGap (HXCFE_FLPGEN* fb_ctx,unsigned short pregap);
+int32_t                hxcfe_setTrackPreGap ( HXCFE_FLPGEN* fb_ctx, int32_t pregap );
 
-int                hxcfe_setIndexPosition (HXCFE_FLPGEN* fb_ctx,int position,int allowsector);
-int                hxcfe_setIndexLength (HXCFE_FLPGEN* fb_ctx,int Length);
+int32_t                hxcfe_setIndexPosition ( HXCFE_FLPGEN* fb_ctx, int32_t position, int32_t allowsector );
+int32_t                hxcfe_setIndexLength ( HXCFE_FLPGEN* fb_ctx, int32_t Length );
 
-int                hxcfe_setTrackBitrate (HXCFE_FLPGEN* fb_ctx,int bitrate);
+int32_t                hxcfe_setTrackBitrate ( HXCFE_FLPGEN* fb_ctx, int32_t bitrate );
 
-int                hxcfe_addSector (HXCFE_FLPGEN* fb_ctx,int sectornumber,int side,int track,unsigned char * buffer,int size);
+int32_t                hxcfe_addSector ( HXCFE_FLPGEN* fb_ctx, int32_t sectornumber, int32_t side, int32_t track, uint8_t * buffer, int32_t size );
 
-int                hxcfe_addSectors(HXCFE_FLPGEN* fb_ctx,int side,int track,unsigned char * trackdata,int buffersize,int numberofsectors);
+int32_t                hxcfe_addSectors( HXCFE_FLPGEN* fb_ctx, int32_t side, int32_t track, uint8_t * trackdata, int32_t buffersize, int32_t numberofsectors );
 
-int                hxcfe_pushSector (HXCFE_FLPGEN* fb_ctx);
+int32_t                hxcfe_pushSector ( HXCFE_FLPGEN* fb_ctx );
 
-int                hxcfe_setSectorBitrate (HXCFE_FLPGEN* fb_ctx,int bitrate);
+int32_t                hxcfe_setSectorBitrate ( HXCFE_FLPGEN* fb_ctx, int32_t bitrate );
 
-int                hxcfe_setSectorGap3 (HXCFE_FLPGEN* fb_ctx,unsigned char Gap3);
-int                hxcfe_setSectorSizeID (HXCFE_FLPGEN* fb_ctx,unsigned char sectorsizeid);
-int                hxcfe_setSectorFill (HXCFE_FLPGEN* fb_ctx,unsigned char fill);
+int32_t                hxcfe_setSectorGap3 ( HXCFE_FLPGEN* fb_ctx, int32_t Gap3 );
+int32_t                hxcfe_setSectorSizeID ( HXCFE_FLPGEN* fb_ctx, int32_t sectorsizeid );
+int32_t                hxcfe_setSectorFill ( HXCFE_FLPGEN* fb_ctx, int32_t fill );
 
-int                hxcfe_setSectorTrackID(HXCFE_FLPGEN* fb_ctx,unsigned char track);
-int                hxcfe_setSectorHeadID(HXCFE_FLPGEN* fb_ctx,unsigned char head);
-int                hxcfe_setSectorID(HXCFE_FLPGEN* fb_ctx,unsigned char id);
+int32_t                hxcfe_setSectorTrackID( HXCFE_FLPGEN* fb_ctx, int32_t track );
+int32_t                hxcfe_setSectorHeadID( HXCFE_FLPGEN* fb_ctx, int32_t head );
+int32_t                hxcfe_setSectorID( HXCFE_FLPGEN* fb_ctx, int32_t id );
 
-int                hxcfe_setSectorEncoding (HXCFE_FLPGEN* fb_ctx,int encoding);
+int32_t                hxcfe_setSectorEncoding ( HXCFE_FLPGEN* fb_ctx, int32_t encoding );
 
-int                hxcfe_setSectorDataCRC (HXCFE_FLPGEN* fb_ctx,unsigned short crc);
-int                hxcfe_setSectorHeaderCRC (HXCFE_FLPGEN* fb_ctx,unsigned short crc);
+int32_t                hxcfe_setSectorDataCRC ( HXCFE_FLPGEN* fb_ctx, uint32_t crc );
+int32_t                hxcfe_setSectorHeaderCRC ( HXCFE_FLPGEN* fb_ctx, uint32_t crc );
 
-int                hxcfe_setSectorDataMark (HXCFE_FLPGEN* fb_ctx,unsigned char datamark);
+int32_t                hxcfe_setSectorDataMark ( HXCFE_FLPGEN* fb_ctx, uint32_t datamark );
 
-int                hxcfe_setSectorData(HXCFE_FLPGEN* fb_ctx,unsigned char * buffer,int size);
+int32_t                hxcfe_setSectorData( HXCFE_FLPGEN* fb_ctx, uint8_t * buffer, int32_t size );
 
-int                hxcfe_popSector (HXCFE_FLPGEN* fb_ctx);
+int32_t                hxcfe_popSector ( HXCFE_FLPGEN* fb_ctx );
 
-int                hxcfe_popTrack (HXCFE_FLPGEN* fb_ctx);
+int32_t                hxcfe_popTrack ( HXCFE_FLPGEN* fb_ctx );
 
-int                hxcfe_setRPM(HXCFE_FLPGEN* fb_ctx,unsigned short rpm);
+int32_t                hxcfe_setRPM( HXCFE_FLPGEN* fb_ctx, int32_t rpm );
 
-unsigned short     hxcfe_getCurrentNumberOfSector (HXCFE_FLPGEN* fb_ctx);
-unsigned char      hxcfe_getCurrentNumberOfSide (HXCFE_FLPGEN* fb_ctx);
-unsigned short     hxcfe_getCurrentNumberOfTrack (HXCFE_FLPGEN* fb_ctx);
-int                hxcfe_getCurrentSectorSize(HXCFE_FLPGEN* fb_ctx);
-unsigned char      hxcfe_getCurrentTrackType (HXCFE_FLPGEN* fb_ctx);
-unsigned short     hxcfe_getCurrentRPM (HXCFE_FLPGEN* fb_ctx);
-int                hxcfe_getCurrentSkew (HXCFE_FLPGEN* fb_ctx);
+int32_t                hxcfe_getCurrentNumberOfSector ( HXCFE_FLPGEN* fb_ctx );
+int32_t                hxcfe_getCurrentNumberOfSide ( HXCFE_FLPGEN* fb_ctx );
+int32_t                hxcfe_getCurrentNumberOfTrack ( HXCFE_FLPGEN* fb_ctx );
+int32_t                hxcfe_getCurrentSectorSize( HXCFE_FLPGEN* fb_ctx );
+int32_t                hxcfe_getCurrentTrackType ( HXCFE_FLPGEN* fb_ctx );
+int32_t                hxcfe_getCurrentRPM ( HXCFE_FLPGEN* fb_ctx );
+int32_t                hxcfe_getCurrentSkew ( HXCFE_FLPGEN* fb_ctx );
 
-HXCFE_FLOPPY*      hxcfe_getFloppy (HXCFE_FLPGEN* fb_ctx);
+HXCFE_FLOPPY*          hxcfe_getFloppy ( HXCFE_FLPGEN* fb_ctx );
 
-int                hxcfe_generateDisk(HXCFE_FLPGEN* fb_ctx,unsigned char * diskdata,int buffersize);
+int32_t                hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, uint8_t * diskdata, int32_t buffersize );
 
-int                hxcfe_getFloppySize(HXCFE* floppycontext,HXCFE_FLOPPY *fp,int * nbsector);
+int32_t                hxcfe_getFloppySize( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t * nbsector );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // XML based Raw File loader                                                                      //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HXCFE_XMLLDR*      hxcfe_initXmlFloppy(HXCFE* floppycontext);
+HXCFE_XMLLDR*          hxcfe_initXmlFloppy( HXCFE* floppycontext );
 
-int                hxcfe_numberOfXmlLayout(HXCFE_XMLLDR* xmlfb_ctx);
-int                hxcfe_getXmlLayoutID(HXCFE_XMLLDR* xmlfb_ctx,char * container);
-const char*        hxcfe_getXmlLayoutDesc(HXCFE_XMLLDR* xmlfb_ctx,int moduleID);
-const char*        hxcfe_getXmlLayoutName(HXCFE_XMLLDR* xmlfb_ctx,int moduleID);
+int32_t                hxcfe_numberOfXmlLayout( HXCFE_XMLLDR* xmlfb_ctx );
+int32_t                hxcfe_getXmlLayoutID( HXCFE_XMLLDR* xmlfb_ctx, char * container );
+const char*            hxcfe_getXmlLayoutDesc( HXCFE_XMLLDR* xmlfb_ctx, int32_t moduleID );
+const char*            hxcfe_getXmlLayoutName( HXCFE_XMLLDR* xmlfb_ctx, int32_t moduleID );
 
-int                hxcfe_selectXmlFloppyLayout(HXCFE_XMLLDR* xmlfb_ctx,int layoutid);
-int                hxcfe_setXmlFloppyLayoutFile(HXCFE_XMLLDR* xmlfb_ctx,char * filepath);
+int32_t                hxcfe_selectXmlFloppyLayout( HXCFE_XMLLDR* xmlfb_ctx, int32_t layoutid );
+int32_t                hxcfe_setXmlFloppyLayoutFile( HXCFE_XMLLDR* xmlfb_ctx, char * filepath );
 
-HXCFE_FLOPPY*      hxcfe_generateXmlFloppy (HXCFE_XMLLDR* xmlfb_ctx,unsigned char * rambuffer,unsigned buffersize);
-HXCFE_FLOPPY*      hxcfe_generateXmlFileFloppy (HXCFE_XMLLDR* xmlfb_ctx,char *file);
+HXCFE_FLOPPY*          hxcfe_generateXmlFloppy ( HXCFE_XMLLDR* xmlfb_ctx, uint8_t * rambuffer, uint32_t buffersize );
+HXCFE_FLOPPY*          hxcfe_generateXmlFileFloppy ( HXCFE_XMLLDR* xmlfb_ctx, char *file );
 
-void               hxcfe_deinitXmlFloppy(HXCFE_XMLLDR* xmlfb_ctx);
+void                   hxcfe_deinitXmlFloppy( HXCFE_XMLLDR* xmlfb_ctx );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Sector Search,Read,Write functions                                                             //
+// Sector Search, Read, Write functions                                                             //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HXCFE_SECTORACCESS* hxcfe_initSectorAccess(HXCFE* floppycontext,HXCFE_FLOPPY *fp);
+HXCFE_SECTORACCESS*    hxcfe_initSectorAccess( HXCFE* floppycontext, HXCFE_FLOPPY *fp );
 
-HXCFE_SECTCFG*     hxcfe_getNextSector(HXCFE_SECTORACCESS* ss_ctx,int track,int side,int type);
-HXCFE_SECTCFG*     hxcfe_searchSector (HXCFE_SECTORACCESS* ss_ctx,int track,int side,int id,int type);
-void               hxcfe_resetSearchTrackPosition(HXCFE_SECTORACCESS* ss_ctx);
-HXCFE_SECTCFG**    hxcfe_getAllTrackSectors(HXCFE_SECTORACCESS* ss_ctx,int track,int side,int type,int * nb_sectorfound);
-HXCFE_SECTCFG**    hxcfe_getAllTrackISOSectors(HXCFE_SECTORACCESS* ss_ctx,int track,int side,int * nb_sectorfound);
-int                hxcfe_getSectorSize(HXCFE_SECTORACCESS* ss_ctx,HXCFE_SECTCFG* sc);
-unsigned char *    hxcfe_getSectorData(HXCFE_SECTORACCESS* ss_ctx,HXCFE_SECTCFG* sc);
+HXCFE_SECTCFG*         hxcfe_getNextSector( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t type );
+HXCFE_SECTCFG*         hxcfe_searchSector ( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t id, int32_t type );
+void                   hxcfe_resetSearchTrackPosition( HXCFE_SECTORACCESS* ss_ctx );
+HXCFE_SECTCFG**        hxcfe_getAllTrackSectors( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t type, int32_t * nb_sectorfound );
+HXCFE_SECTCFG**        hxcfe_getAllTrackISOSectors( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t * nb_sectorfound );
+int32_t                hxcfe_getSectorSize( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SECTCFG* sc );
+uint8_t *              hxcfe_getSectorData( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SECTCFG* sc );
 
-int                hxcfe_readSectorData     (HXCFE_SECTORACCESS* ss_ctx,int track,int side,int sector,int numberofsector,int sectorsize,int type,unsigned char * buffer,int * fdcstatus);
-int                hxcfe_writeSectorData    (HXCFE_SECTORACCESS* ss_ctx,int track,int side,int sector,int numberofsector,int sectorsize,int type,unsigned char * buffer,int * fdcstatus);
+int32_t                hxcfe_readSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t sector, int32_t numberofsector, int32_t sectorsize, int32_t type, uint8_t * buffer, int32_t * fdcstatus );
+int32_t                hxcfe_writeSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t sector, int32_t numberofsector, int32_t sectorsize, int32_t type, uint8_t * buffer, int32_t * fdcstatus );
 
-void               hxcfe_freeSectorConfig  (HXCFE_SECTORACCESS* ss_ctx,HXCFE_SECTCFG* sc);
+void                   hxcfe_freeSectorConfig( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SECTCFG* sc );
 
-void               hxcfe_deinitSectorAccess(HXCFE_SECTORACCESS* ss_ctx);
+void                   hxcfe_deinitSectorAccess( HXCFE_SECTORACCESS* ss_ctx );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // FDC style functions                                                                            //
@@ -321,18 +322,18 @@ void               hxcfe_deinitSectorAccess(HXCFE_SECTORACCESS* ss_ctx);
 #define FDC_NO_DATA                      0x02
 #define FDC_SECTOR_NOT_FOUND             0x03
 
-HXCFE_FDCCTRL *    hxcfe_initFDC (HXCFE* floppycontext);
+HXCFE_FDCCTRL *    hxcfe_initFDC ( HXCFE* floppycontext );
 
-int                hxcfe_insertDiskFDC (HXCFE_FDCCTRL * fdc,HXCFE_FLOPPY *fp);
-int                hxcfe_readSectorFDC (HXCFE_FDCCTRL * fdc,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size,int * fdcstatus);
-int                hxcfe_writeSectorFDC (HXCFE_FDCCTRL * fdc,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size,int * fdcstatus);
+int32_t                hxcfe_insertDiskFDC (HXCFE_FDCCTRL * fdc, HXCFE_FLOPPY *fp );
+int32_t                hxcfe_readSectorFDC (HXCFE_FDCCTRL * fdc, uint8_t track, uint8_t side, uint8_t sector, int32_t sectorsize, int32_t mode, int32_t nbsector, uint8_t * buffer, int32_t buffer_size, int32_t * fdcstatus );
+int32_t                hxcfe_writeSectorFDC (HXCFE_FDCCTRL * fdc, uint8_t track, uint8_t side, uint8_t sector, int32_t sectorsize, int32_t mode, int32_t nbsector, uint8_t * buffer, int32_t buffer_size, int32_t * fdcstatus );
 
-void               hxcfe_deinitFDC (HXCFE_FDCCTRL * fdc);
+void                   hxcfe_deinitFDC (HXCFE_FDCCTRL * fdc );
 
-int                hxcfe_FDC_READSECTOR  (HXCFE* floppycontext,HXCFE_FLOPPY *fp,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size,int * fdcstatus);
-int                hxcfe_FDC_WRITESECTOR (HXCFE* floppycontext,HXCFE_FLOPPY *fp,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size,int * fdcstatus);
-int                hxcfe_FDC_FORMAT      (HXCFE* floppycontext,unsigned char track,unsigned char side,unsigned char nbsector,int sectorsize,int sectoridstart,int skew,int interleave,int mode,int * fdcstatus);
-int                hxcfe_FDC_SCANSECTOR  (HXCFE* floppycontext,unsigned char track,unsigned char side,int mode,unsigned char * sector,unsigned char * buffer,int buffer_size,int * fdcstatus);
+int32_t                hxcfe_FDC_READSECTOR  ( HXCFE* floppycontext, HXCFE_FLOPPY *fp, uint8_t track, uint8_t side, uint8_t sector, int32_t sectorsize, int32_t mode, int32_t nbsector, uint8_t * buffer, int32_t buffer_size, int32_t * fdcstatus );
+int32_t                hxcfe_FDC_WRITESECTOR ( HXCFE* floppycontext, HXCFE_FLOPPY *fp, uint8_t track, uint8_t side, uint8_t sector, int32_t sectorsize, int32_t mode, int32_t nbsector, uint8_t * buffer, int32_t buffer_size, int32_t * fdcstatus );
+int32_t                hxcfe_FDC_FORMAT      ( HXCFE* floppycontext, uint8_t track, uint8_t side, uint8_t nbsector, int32_t sectorsize, int32_t sectoridstart, int32_t skew, int32_t interleave, int32_t mode, int32_t * fdcstatus );
+int32_t                hxcfe_FDC_SCANSECTOR  ( HXCFE* floppycontext, uint8_t track, uint8_t side, int32_t mode, uint8_t * sector, uint8_t * buffer, int32_t buffer_size, int32_t * fdcstatus );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Floppy interfaces setting functions.                                                           //
@@ -382,19 +383,19 @@ enum {
     GET = 1
 };
 
-int                hxcfe_floppyGetSetParams(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy,unsigned char dir,unsigned short param,void * value);
+int32_t                hxcfe_floppyGetSetParams( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy, uint8_t dir, uint16_t param, void * value );
 
-int                hxcfe_floppyGetInterfaceMode(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy);
-int                hxcfe_floppySetInterfaceMode(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy,int ifmode);
+int32_t                hxcfe_floppyGetInterfaceMode( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy );
+int32_t                hxcfe_floppySetInterfaceMode( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy, int32_t ifmode );
 
-int                hxcfe_floppyGetDoubleStep(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy);
-int                hxcfe_floppySetDoubleStep(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy,int doublestep);
+int32_t                hxcfe_floppyGetDoubleStep( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy );
+int32_t                hxcfe_floppySetDoubleStep( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy, int32_t doublestep );
 
-int                hxcfe_getFloppyInterfaceModeID(HXCFE* floppycontext,char * ifmode);
+int32_t                hxcfe_getFloppyInterfaceModeID( HXCFE* floppycontext, char * ifmode );
 
-const char *       hxcfe_getFloppyInterfaceModeName(HXCFE* floppycontext,int ifmodeid);
-const char *       hxcfe_getFloppyInterfaceModeDesc(HXCFE* floppycontext,int ifmodeid);
-const char *       hxcfe_getTrackEncodingName(HXCFE* floppycontext,int trackencodingid);
+const char *           hxcfe_getFloppyInterfaceModeName( HXCFE* floppycontext, int32_t ifmodeid );
+const char *           hxcfe_getFloppyInterfaceModeDesc( HXCFE* floppycontext, int32_t ifmodeid );
+const char *           hxcfe_getTrackEncodingName( HXCFE* floppycontext, int32_t trackencodingid );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Track analyser functions                                                                       //
@@ -404,110 +405,110 @@ typedef struct s_sectorlist_
 {
     HXCFE_SECTCFG * sectorconfig;
 
-    int side,track;
+    int32_t side, track;
 
     // track mode
-    int x_pos1,y_pos1;
-    int x_pos2,y_pos2;
+    int32_t x_pos1, y_pos1;
+    int32_t x_pos2, y_pos2;
 
     // disc mode
-    float start_angle,end_angle;
-    int   diameter,thickness;
+    float start_angle, end_angle;
+    int32_t   diameter, thickness;
 
     struct s_sectorlist_ * next_element;
 }s_sectorlist;
 
 typedef struct s_pulseslist_
 {
-    int side,track;
+    int32_t side, track;
 
-    int pulse_number;
+    int32_t pulse_number;
 
-    int x_pos1,x_pos2;
+    int32_t x_pos1, x_pos2;
 
     struct s_pulseslist_ * next_element;
 }s_pulseslist;
 
-HXCFE_TD*          hxcfe_td_init(HXCFE* floppycontext,unsigned long xsize,unsigned long ysize);
-void               hxcfe_td_setparams(HXCFE_TD *td,unsigned long x_us,unsigned long y_us,unsigned long x_start_us);
-void               hxcfe_td_activate_analyzer(HXCFE_TD *td,int TRACKTYPE,int enable);
-void               hxcfe_td_draw_track(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,int side);
-s_sectorlist *     hxcfe_td_getlastsectorlist(HXCFE_TD *td);
-void               hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk);
-void *             hxcfe_td_getframebuffer(HXCFE_TD *td);
-int                hxcfe_td_getframebuffer_xres(HXCFE_TD *td);
-int                hxcfe_td_getframebuffer_yres(HXCFE_TD *td);
-int                hxcfe_td_setProgressCallback(HXCFE_TD *td,HXCFE_TDPROGRESSOUT_FUNC progress_func,void * userdata);
-void               hxcfe_td_deinit(HXCFE_TD *td);
-s_pulseslist *     hxcfe_td_getlastpulselist(HXCFE_TD *td);
+HXCFE_TD*              hxcfe_td_init( HXCFE* floppycontext, uint32_t xsize, uint32_t ysize );
+void                   hxcfe_td_setparams( HXCFE_TD *td, uint32_t x_us, uint32_t y_us, uint32_t x_start_us );
+void                   hxcfe_td_activate_analyzer( HXCFE_TD *td, int32_t TRACKTYPE, int32_t enable );
+void                   hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track, int32_t side );
+s_sectorlist *         hxcfe_td_getlastsectorlist( HXCFE_TD *td );
+void                   hxcfe_td_draw_disk( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk );
+void *                 hxcfe_td_getframebuffer( HXCFE_TD *td );
+int32_t                hxcfe_td_getframebuffer_xres( HXCFE_TD *td );
+int32_t                hxcfe_td_getframebuffer_yres( HXCFE_TD *td );
+int32_t                hxcfe_td_setProgressCallback( HXCFE_TD *td, HXCFE_TDPROGRESSOUT_FUNC progress_func, void * userdata );
+void                   hxcfe_td_deinit( HXCFE_TD *td );
+s_pulseslist *         hxcfe_td_getlastpulselist( HXCFE_TD *td );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Flux Stream Analyzer                                                                           //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HXCFE_FXSA *       hxcfe_initFxStream(HXCFE * hxcfe);
+HXCFE_FXSA *           hxcfe_initFxStream(HXCFE * hxcfe );
 
-void               hxcfe_FxStream_setResolution(HXCFE_FXSA * fxs,int step);
-void               hxcfe_FxStream_setBitrate(HXCFE_FXSA * fxs,int bitrate);
-void               hxcfe_FxStream_setPhaseCorrectionFactor(HXCFE_FXSA * fxs,int phasefactor);
+void                   hxcfe_FxStream_setResolution( HXCFE_FXSA * fxs, int32_t step );
+void                   hxcfe_FxStream_setBitrate( HXCFE_FXSA * fxs, int32_t bitrate );
+void                   hxcfe_FxStream_setPhaseCorrectionFactor( HXCFE_FXSA * fxs, int32_t phasefactor );
 
-HXCFE_TRKSTREAM *  hxcfe_FxStream_ImportStream(HXCFE_FXSA * fxs,void * stream,int wordsize,unsigned int nbword);
-void               hxcfe_FxStream_AddIndex(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * std,unsigned long streamposition);
-HXCFE_SIDE *       hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * std);
-void               hxcfe_FxStream_FreeStream(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream);
+HXCFE_TRKSTREAM *      hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, int32_t wordsize, uint32_t nbword );
+void                   hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t streamposition );
+HXCFE_SIDE *           hxcfe_FxStream_AnalyzeAndGetTrack( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std );
+void                   hxcfe_FxStream_FreeStream( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * stream );
 
-int                hxcfe_FxStream_GetNumberOfRevolution(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * std);
-unsigned long      hxcfe_FxStream_GetRevolutionPeriod(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * std,int revolution);
-unsigned long      hxcfe_FxStream_GetMeanRevolutionPeriod(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * std);
+int32_t                hxcfe_FxStream_GetNumberOfRevolution( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std );
+uint32_t               hxcfe_FxStream_GetRevolutionPeriod( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, int32_t revolution );
+uint32_t               hxcfe_FxStream_GetMeanRevolutionPeriod( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std );
 
-void               hxcfe_deinitFxStream(HXCFE_FXSA * fxs);
+void                   hxcfe_deinitFxStream( HXCFE_FXSA * fxs );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Track edition functions                                                                        //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HXCFE_SIDE *       hxcfe_getSide(HXCFE_FLOPPY * fp,int track,int side);
-int                hxcfe_getTrackBitrate(HXCFE_FLOPPY * fp,int track,int side);
-unsigned char      hxcfe_getTrackEncoding(HXCFE_FLOPPY * fp,int track,int side);
-unsigned long      hxcfe_getTrackLength(HXCFE_FLOPPY * fp,int track,int side);
-unsigned short     hxcfe_getTrackRPM(HXCFE_FLOPPY * fp,int track);
-unsigned char      hxcfe_getTrackNumberOfSide(HXCFE_FLOPPY * fp,int track);
+HXCFE_SIDE *           hxcfe_getSide( HXCFE_FLOPPY * fp, int32_t track, int32_t side );
+int32_t                hxcfe_getTrackBitrate( HXCFE_FLOPPY * fp, int32_t track, int32_t side );
+int32_t                hxcfe_getTrackEncoding( HXCFE_FLOPPY * fp, int32_t track, int32_t side );
+int32_t                hxcfe_getTrackLength( HXCFE_FLOPPY * fp, int32_t track, int32_t side );
+int32_t                hxcfe_getTrackRPM( HXCFE_FLOPPY * fp, int32_t track );
+int32_t                hxcfe_getTrackNumberOfSide(HXCFE_FLOPPY * fp,int32_t track);
 
-int                hxcfe_shiftTrackData(HXCFE_SIDE * side,long bitoffset);
-int                hxcfe_rotateFloppy(HXCFE* floppycontext,HXCFE_FLOPPY * fp,int bitoffset,int total);
+int32_t                hxcfe_shiftTrackData(HXCFE_SIDE * side, int32_t bitoffset );
+int32_t                hxcfe_rotateFloppy( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t bitoffset, int32_t total );
 
-void               AdjustTrackPeriod(HXCFE* floppycontext,HXCFE_SIDE * curside_S0,HXCFE_SIDE * curside_S1);
+void                   AdjustTrackPeriod( HXCFE* floppycontext, HXCFE_SIDE * curside_S0, HXCFE_SIDE * curside_S1 );
 
-int                hxcfe_getCellState(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber);
-int                hxcfe_setCellState(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber,int state);
+int32_t                hxcfe_getCellState( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber );
+int32_t                hxcfe_setCellState( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, int32_t state );
 
-int                hxcfe_removeCell(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber);
-int                hxcfe_insertCell(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber,int state);
+int32_t                hxcfe_removeCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber );
+int32_t                hxcfe_insertCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, int32_t state );
 
-int                hxcfe_getCellFlakeyState(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber);
-int                hxcfe_setCellFlakeyState(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber,int state);
+int32_t                hxcfe_getCellFlakeyState( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber );
+int32_t                hxcfe_setCellFlakeyState( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, int32_t state );
 
-int                hxcfe_getCellIndexState(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber);
-int                hxcfe_setCellIndexState(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber,int state);
+int32_t                hxcfe_getCellIndexState( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber );
+int32_t                hxcfe_setCellIndexState( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, int32_t state );
 
-int                hxcfe_getCellBitrate(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber);
-int                hxcfe_setCellBitrate(HXCFE* floppycontext,HXCFE_SIDE * currentside,unsigned long cellnumber,unsigned long bitrate);
+int32_t                hxcfe_getCellBitrate( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber );
+int32_t                hxcfe_setCellBitrate( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, uint32_t bitrate );
 
-unsigned char      hxcfe_getSectorConfigEncoding(HXCFE* floppycontext,HXCFE_SECTCFG* sc);
-unsigned char      hxcfe_getSectorConfigSectorID(HXCFE* floppycontext,HXCFE_SECTCFG* sc);
-unsigned char      hxcfe_getSectorConfigSideID(HXCFE* floppycontext,HXCFE_SECTCFG* sc);
-unsigned char      hxcfe_getSectorConfigSizeID(HXCFE* floppycontext,HXCFE_SECTCFG* sc);
-unsigned char      hxcfe_getSectorConfigTrackID(HXCFE* floppycontext,HXCFE_SECTCFG* sc);
-unsigned short     hxcfe_getSectorConfigHCRC(HXCFE* floppycontext,HXCFE_SECTCFG* sc);
-unsigned short     hxcfe_getSectorConfigDCRC(HXCFE* floppycontext,HXCFE_SECTCFG* sc);
-unsigned int       hxcfe_getSectorConfigSectorSize(HXCFE* floppycontext,HXCFE_SECTCFG* sc);
-unsigned long      hxcfe_getSectorConfigStartSectorIndex(HXCFE* floppycontext,HXCFE_SECTCFG* sc);
-unsigned long      hxcfe_getSectorConfigStartDataIndex(HXCFE* floppycontext,HXCFE_SECTCFG* sc);
-unsigned long      hxcfe_getSectorConfigEndSectorIndex(HXCFE* floppycontext,HXCFE_SECTCFG* sc);
-unsigned char *    hxcfe_getSectorConfigInputData(HXCFE* floppycontext,HXCFE_SECTCFG* sc);
-unsigned char      hxcfe_getSectorConfigDataMark(HXCFE* floppycontext,HXCFE_SECTCFG* sc);
-unsigned char      hxcfe_getSectorConfigHCRCStatus(HXCFE* floppycontext,HXCFE_SECTCFG* sc);
-unsigned char      hxcfe_getSectorConfigDCRCStatus(HXCFE* floppycontext,HXCFE_SECTCFG* sc);
+int32_t                hxcfe_getSectorConfigEncoding( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
+int32_t                hxcfe_getSectorConfigSectorID( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
+int32_t                hxcfe_getSectorConfigSideID( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
+int32_t                hxcfe_getSectorConfigSizeID( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
+int32_t                hxcfe_getSectorConfigTrackID( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
+uint32_t               hxcfe_getSectorConfigHCRC( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
+uint32_t               hxcfe_getSectorConfigDCRC( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
+int32_t                hxcfe_getSectorConfigSectorSize( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
+int32_t                hxcfe_getSectorConfigStartSectorIndex( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
+int32_t                hxcfe_getSectorConfigStartDataIndex( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
+int32_t                hxcfe_getSectorConfigEndSectorIndex( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
+uint8_t *              hxcfe_getSectorConfigInputData( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
+int32_t                hxcfe_getSectorConfigDataMark( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
+int32_t                hxcfe_getSectorConfigHCRCStatus( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
+int32_t                hxcfe_getSectorConfigDCRCStatus( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // File system functions                                                                          //
@@ -558,52 +559,50 @@ enum
 
 typedef struct FSENTRY_
 {
-
-    int isdir;
-    int size;
+    int32_t isdir;
+    int32_t size;
     char entryname[512];
-    unsigned long flags;
-
+    uint32_t flags;
 }HXCFE_FSENTRY;
 
-int                hxcfe_getFSID(HXCFE* floppycontext, char * fsname);
-int                hxcfe_numberOfFS(HXCFE* floppycontext);
-const char*        hxcfe_getFSDesc(HXCFE* floppycontext,int FSID);
-const char*        hxcfe_getFSName(HXCFE* floppycontext,int FSID);
+int32_t                hxcfe_getFSID( HXCFE* floppycontext, char * fsname );
+int32_t                hxcfe_numberOfFS( HXCFE* floppycontext );
+const char*            hxcfe_getFSDesc( HXCFE* floppycontext, int32_t FSID );
+const char*            hxcfe_getFSName( HXCFE* floppycontext, int32_t FSID );
 
-HXCFE_FLOPPY *     hxcfe_generateFloppy(HXCFE* floppycontext,char* path,int fsID,int * err_ret);
+HXCFE_FLOPPY *         hxcfe_generateFloppy( HXCFE* floppycontext, char* path, int32_t fsID, int32_t * err_ret );
 
-HXCFE_FSMNG *      hxcfe_initFsManager(HXCFE * hxcfe);
+HXCFE_FSMNG *          hxcfe_initFsManager(HXCFE * hxcfe );
 
-int                hxcfe_selectFS(HXCFE_FSMNG * fsmng, int fsid);
+int32_t                hxcfe_selectFS( HXCFE_FSMNG * fsmng, int32_t fsid );
 
-int                hxcfe_mountImage(HXCFE_FSMNG * fsmng, HXCFE_FLOPPY *floppy);
-int                hxcfe_umountImage(HXCFE_FSMNG * fsmng);
+int32_t                hxcfe_mountImage( HXCFE_FSMNG * fsmng, HXCFE_FLOPPY *floppy );
+int32_t                hxcfe_umountImage( HXCFE_FSMNG * fsmng );
 
-int                hxcfe_getFreeFsSpace(HXCFE_FSMNG * fsmng);
-int                hxcfe_getTotalFsSpace(HXCFE_FSMNG * fsmng);
+int32_t                hxcfe_getFreeFsSpace( HXCFE_FSMNG * fsmng );
+int32_t                hxcfe_getTotalFsSpace( HXCFE_FSMNG * fsmng );
 
-int                hxcfe_openDir(HXCFE_FSMNG * fsmng, char * path);
-int                hxcfe_readDir(HXCFE_FSMNG * fsmng,int dirhandle,HXCFE_FSENTRY * dirent);
-int                hxcfe_closeDir(HXCFE_FSMNG * fsmng, int dirhandle);
+int32_t                hxcfe_openDir( HXCFE_FSMNG * fsmng, char * path );
+int32_t                hxcfe_readDir( HXCFE_FSMNG * fsmng, int32_t dirhandle, HXCFE_FSENTRY * dirent );
+int32_t                hxcfe_closeDir( HXCFE_FSMNG * fsmng, int32_t dirhandle );
 
-int                hxcfe_getFirstFile(HXCFE_FSMNG * fsmng, HXCFE_FSENTRY * dirent, char * rootdir);
-int                hxcfe_getNextFile(HXCFE_FSMNG * fsmng, HXCFE_FSENTRY * dirent);
+int32_t                hxcfe_getFirstFile( HXCFE_FSMNG * fsmng, HXCFE_FSENTRY * dirent, char * rootdir );
+int32_t                hxcfe_getNextFile( HXCFE_FSMNG * fsmng, HXCFE_FSENTRY * dirent );
 
-int                hxcfe_openFile(HXCFE_FSMNG * fsmng, char * filename);
-int                hxcfe_createFile(HXCFE_FSMNG * fsmng, char * filename);
-int                hxcfe_writeFile(HXCFE_FSMNG * fsmng,int filehandle,unsigned char * buffer,int size);
-int                hxcfe_readFile(HXCFE_FSMNG * fsmng,int filehandle,unsigned char * buffer,int size);
-int                hxcfe_deleteFile(HXCFE_FSMNG * fsmng, char * filename);
-int                hxcfe_closeFile(HXCFE_FSMNG * fsmng, int filehandle);
+int32_t                hxcfe_openFile( HXCFE_FSMNG * fsmng, char * filename );
+int32_t                hxcfe_createFile( HXCFE_FSMNG * fsmng, char * filename );
+int32_t                hxcfe_writeFile( HXCFE_FSMNG * fsmng, int32_t filehandle, uint8_t * buffer, int32_t size );
+int32_t                hxcfe_readFile( HXCFE_FSMNG * fsmng, int32_t filehandle, uint8_t * buffer, int32_t size );
+int32_t                hxcfe_deleteFile( HXCFE_FSMNG * fsmng, char * filename );
+int32_t                hxcfe_closeFile( HXCFE_FSMNG * fsmng, int32_t filehandle );
 
-int                hxcfe_fseek( HXCFE_FSMNG * fsmng,int filehandle,long offset,int origin);
-int                hxcfe_ftell( HXCFE_FSMNG * fsmng,int filehandle);
+int32_t                hxcfe_fseek( HXCFE_FSMNG * fsmng, int32_t filehandle, int32_t offset, int32_t origin );
+int32_t                hxcfe_ftell( HXCFE_FSMNG * fsmng, int32_t filehandle );
 
-int                hxcfe_createDir( HXCFE_FSMNG * fsmng,char * foldername);
-int                hxcfe_removeDir( HXCFE_FSMNG * fsmng,char * foldername);
+int32_t                hxcfe_createDir( HXCFE_FSMNG * fsmng, char * foldername );
+int32_t                hxcfe_removeDir( HXCFE_FSMNG * fsmng, char * foldername );
 
-void               hxcfe_deinitFsManager(HXCFE_FSMNG * fsmng);
+void                   hxcfe_deinitFsManager( HXCFE_FSMNG * fsmng );
 
 #ifdef __cplusplus
 }

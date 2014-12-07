@@ -28,38 +28,38 @@
 
 typedef struct cpcdsk_fileheader_
 {
- char headertag[34]; // "EXTENDED CPC DSK File\r\nDisk-Info\r\n" ou  "MV - CPCEMU Disk-File\r\nDisk-Info\r\n"
- char creatorname[14];
- unsigned char number_of_tracks;
- unsigned char number_of_sides;
- unsigned short size_of_a_track; // not used in extended cpc dsk file
+ int8_t   headertag[34]; // "EXTENDED CPC DSK File\r\nDisk-Info\r\n" ou  "MV - CPCEMU Disk-File\r\nDisk-Info\r\n"
+ int8_t   creatorname[14];
+ uint8_t  number_of_tracks;
+ uint8_t  number_of_sides;
+ uint16_t size_of_a_track; // not used in extended cpc dsk file
 }cpcdsk_fileheader;
 
 
 typedef struct cpcdsk_trackheader_
 {
- char headertag[13];  	// "Track-Info\r\n"
- unsigned short unused1;
- unsigned char unused1b;
- unsigned char track_number;
- unsigned char side_number;
- unsigned char datarate;
- unsigned char rec_mode;
- unsigned char sector_size_code;
- unsigned char number_of_sector;
- unsigned char gap3_length;
- unsigned char filler_byte;
+ int8_t    headertag[13];  	// "Track-Info\r\n"
+ uint16_t  unused1;
+ uint8_t   unused1b;
+ uint8_t   track_number;
+ uint8_t   side_number;
+ uint8_t   datarate;
+ uint8_t   rec_mode;
+ uint8_t   sector_size_code;
+ uint8_t   number_of_sector;
+ uint8_t   gap3_length;
+ uint8_t   filler_byte;
 }cpcdsk_trackheader;
 
 typedef struct cpcdsk_sector_
 {
- unsigned char   track;
- unsigned char   side;
- unsigned char   sector_id;
- unsigned char   sector_size_code;
- unsigned char	 fdc_status_reg1;
- unsigned char	 fdc_status_reg2;
- unsigned short  data_length;
+ uint8_t   track;
+ uint8_t   side;
+ uint8_t   sector_id;
+ uint8_t   sector_size_code;
+ uint8_t   fdc_status_reg1;
+ uint8_t   fdc_status_reg2;
+ uint16_t  data_length;
 }cpcdsk_sector;
 
 #pragma pack()

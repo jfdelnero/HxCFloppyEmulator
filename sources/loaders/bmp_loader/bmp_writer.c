@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
@@ -43,11 +45,11 @@ static int progress_callback(unsigned int current,unsigned int total,void * td,v
 	return hxcfe_imgCallProgressCallback((HXCFE_IMGLDR*)user,current,total);
 }
 
-void copyPict(unsigned long * dest,int d_xsize,int d_ysize,int d_xpos,int d_ypos,unsigned long * src,int s_xsize,int s_ysize)
+void copyPict(uint32_t * dest,int d_xsize,int d_ysize,int d_xpos,int d_ypos,uint32_t * src,int s_xsize,int s_ysize)
 {
 	int j;
-	unsigned long * ptr_line_src;
-	unsigned long * ptr_line_dst;
+	uint32_t * ptr_line_src;
+	uint32_t * ptr_line_dst;
 
 	for(j=0;j<s_ysize;j++)
 	{
@@ -58,10 +60,10 @@ void copyPict(unsigned long * dest,int d_xsize,int d_ysize,int d_xpos,int d_ypos
 	}
 }
 
-void vLine(unsigned long * dest,unsigned long d_xsize,unsigned long d_ysize,unsigned long ypos)
+void vLine(uint32_t * dest,uint32_t d_xsize,uint32_t d_ysize,uint32_t ypos)
 {
-	unsigned long j;
-	unsigned long * ptr_line_dst;
+	uint32_t j;
+	uint32_t * ptr_line_dst;
 
 	for(j=0;j<d_ysize;j++)
 	{
@@ -77,9 +79,9 @@ void vLine(unsigned long * dest,unsigned long d_xsize,unsigned long d_ysize,unsi
 	}
 }
 
-void hLine(unsigned long * dest,unsigned long d_xsize,unsigned long d_ysize,unsigned long ypos)
+void hLine(uint32_t * dest,uint32_t d_xsize,uint32_t d_ysize,uint32_t ypos)
 {
-	unsigned long * ptr_line_dst;
+	uint32_t * ptr_line_dst;
 
 	ptr_line_dst = &dest[ d_xsize * ypos ];
 
@@ -89,7 +91,7 @@ void hLine(unsigned long * dest,unsigned long d_xsize,unsigned long d_ysize,unsi
 	}
 }
 
-unsigned char getPixelCode(unsigned long pix,unsigned long * pal,int * nbcol)
+unsigned char getPixelCode(uint32_t pix,uint32_t * pal,int * nbcol)
 {
 	int i;
 
@@ -121,12 +123,12 @@ int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int ret,i,j,k;
 	int cur_col,cur_row;
 	HXCFE_TD * td;
-	unsigned long * ptr;
+	uint32_t * ptr;
 	unsigned char * ptrchar;
 	int nb_col,nb_row,max_row;
 	bitmap_data bdata;
 
-	unsigned long pal[256];
+	uint32_t pal[256];
 	int nbcol;
 
 	ret = HXCFE_NOERROR;
@@ -187,7 +189,7 @@ int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Generate track BMP %d:%d",j,i);
 					hxcfe_td_draw_track(td,floppydisk,j,i);
 
-					copyPict((unsigned long *)ptr,nb_col*td->xsize,nb_row*td->ysize,cur_col*td->xsize,cur_row*td->ysize,(unsigned long *)td->framebuffer,td->xsize,td->ysize);
+					copyPict((uint32_t *)ptr,nb_col*td->xsize,nb_row*td->ysize,cur_col*td->xsize,cur_row*td->ysize,(uint32_t *)td->framebuffer,td->xsize,td->ysize);
 
 					cur_row++;
 					if(cur_row==max_row)
@@ -238,7 +240,7 @@ int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				{
 					for(j=0;j< ( nb_col * td->xsize );j++)
 					{
-						ptrchar[k] = getPixelCode(ptr[k],(unsigned long*)&pal,&nbcol);
+						ptrchar[k] = getPixelCode(ptr[k],(uint32_t*)&pal,&nbcol);
 						k++;
 					}
 				}
@@ -266,7 +268,7 @@ int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					{
 						for(j=0;j< ( nb_col * td->xsize );j++)
 						{
-							ptrchar[k] = getPixelCode(ptr[k],(unsigned long*)&pal,&nbcol);
+							ptrchar[k] = getPixelCode(ptr[k],(uint32_t*)&pal,&nbcol);
 							k++;
 						}
 					}
@@ -279,7 +281,7 @@ int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					bdata.nb_color = 16;
 					bdata.xsize = td->xsize * nb_col;
 					bdata.ysize = td->ysize * nb_row;
-					bdata.data = (unsigned long*)ptr;
+					bdata.data = (uint32_t*)ptr;
 					bdata.palette = 0;
 
 					bmp16b_write(filename,&bdata);
@@ -289,7 +291,7 @@ int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					bdata.nb_color = 8;
 					bdata.xsize = td->xsize * nb_col;
 					bdata.ysize = td->ysize * nb_row;
-					bdata.data = (unsigned long*)ptrchar;
+					bdata.data = (uint32_t*)ptrchar;
 					bdata.palette = (unsigned char*)&pal;
 
 					bmpRLE8b_write(filename,&bdata);

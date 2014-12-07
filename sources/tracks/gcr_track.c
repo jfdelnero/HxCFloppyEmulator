@@ -47,6 +47,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "types.h"
+
 #include "crc.h"
 #include "gcr_track.h"
 
@@ -175,7 +177,7 @@ unsigned char * BuildGCRCylinder(int * gcrtracksize,unsigned char * track,unsign
 
 int GCRGetTrackSize(unsigned int numberofsector,unsigned int sectorsize)
 {
-	unsigned long finalsize;
+	uint32_t finalsize;
 
 	finalsize= ( 5 + 8 + 9 + 5 + 260 + 12) * numberofsector;
 
@@ -183,17 +185,17 @@ int GCRGetTrackSize(unsigned int numberofsector,unsigned int sectorsize)
 
 }
 
-int BuildGCRTrack(unsigned int numberofsector,unsigned int sectorsize,unsigned int tracknumber,unsigned int sidenumber,unsigned char* datain,unsigned char * mfmdata,unsigned long * mfmsizebuffer)
+int32_t BuildGCRTrack(int numberofsector,int sectorsize,int tracknumber,int sidenumber,unsigned char* datain,unsigned char * mfmdata,int32_t * mfmsizebuffer)
 {
-	unsigned int i,j,k,l,t;
+	int i,j,k,l,t;
 	unsigned char *tempdata;
 
 	unsigned char *temptrack;
 	int temptracksize;
 	unsigned char *tempnongcr;
-	unsigned long finalsize;
-	unsigned long indexbuffer;
-	unsigned long current_buffer_size;
+	int32_t finalsize;
+	int32_t indexbuffer;
+	int32_t current_buffer_size;
 
 	/*
 	  Here's the layout of a standard low-level pattern on a 1541 disk. Use the
@@ -310,7 +312,7 @@ normal 8 bytes to be understood. Once decoded, its breakdown is as follows:
 			{
 				memset(mfmdata,0x22,*mfmsizebuffer);
 
-				if(*mfmsizebuffer>=(unsigned long)temptracksize)
+				if(*mfmsizebuffer>=temptracksize)
 				{
 					memcpy(mfmdata,temptrack,temptracksize);
 

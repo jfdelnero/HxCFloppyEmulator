@@ -47,6 +47,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "sector_search.h"
@@ -70,12 +72,12 @@ void init_cpm(HXCFE_FSMNG * fsmng)
 	libcpmfs_init(&fs);
 }
 
-static int media_read(unsigned long sector, unsigned char *buffer, unsigned long sector_count)
+static int media_read(uint32_t sector, unsigned char *buffer, uint32_t sector_count)
 {
 		return 0;
 }
 
-static int media_write(unsigned long sector, unsigned char *buffer,unsigned long sector_count)
+static int media_write(uint32_t sector, unsigned char *buffer,uint32_t sector_count)
 {
 		return 0;
 }
@@ -395,7 +397,7 @@ int cpm_ftell( HXCFE_FSMNG * fsmng,int filehandle)
 	return HXCFE_ACCESSERROR;
 }
 
-int cpm_fseek( HXCFE_FSMNG * fsmng,int filehandle,long offset,int origin)
+int cpm_fseek( HXCFE_FSMNG * fsmng,int filehandle,int32_t offset,int origin)
 {
 	if(filehandle && filehandle<128)
 	{

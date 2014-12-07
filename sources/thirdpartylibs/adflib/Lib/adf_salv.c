@@ -73,7 +73,7 @@ void adfFreeDelList(struct List* list)
 struct List* adfGetDelEnt(struct Volume *vol)
 {
     struct GenBlock *block;
-    long i;
+    int32_t i;
     struct List *list, *head;
     BOOL delEnt;
 
@@ -226,7 +226,7 @@ RETCODE adfUndelDir(struct Volume* vol, SECTNUM pSect, SECTNUM nSect,
  */
 RETCODE adfUndelFile(struct Volume* vol, SECTNUM pSect, SECTNUM nSect, struct bFileHeaderBlock* entry)
 {
-    long i;
+    int32_t i;
     char name[MAXNAMELEN+1];
     struct bEntryBlock parent;
     RETCODE rc;

@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -105,8 +106,6 @@ int SCL_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCL_libIsValidDiskFile : non Sinclair SCL file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 unsigned int lsb2ui(unsigned char *mem)
@@ -128,15 +127,15 @@ int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 {
 
 	FILE * f;
-	unsigned int i,j;
+	int i,j;
 	unsigned int file_offset;
-	unsigned char  gap3len,interleave;
-	unsigned short rpm;
-	unsigned short sectorsize;
+	int gap3len,interleave;
+	int rpm;
+	int sectorsize;
 	int number_of_track,number_of_side,number_of_sectorpertrack;
 
 	void *tmp;
-	unsigned char size,skew;
+	unsigned int size,skew;
 	unsigned int *trd_free;
 	unsigned char *trd_fsec;
 	unsigned char *trd_ftrk;
@@ -146,8 +145,8 @@ int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	char block_headers[256][14];
 	unsigned char * trd_image;
 
-	unsigned long left;
-	unsigned long trd_offset;
+	uint32_t left;
+	uint32_t trd_offset;
 	unsigned char trackformat;
 
 	HXCFE_CYLINDER* currentcylinder;
@@ -226,7 +225,7 @@ int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		memcpy((void *) ((char *) trd_image + *trd_files * 16 + 0x0E),
 			 (void *) trd_fsec, 2);
 
-		left = (unsigned long) ((unsigned char) block_headers[i][13]) * 256L;
+		left = (uint32_t) ((unsigned char) block_headers[i][13]) * 256L;
 		trd_offset = (*trd_ftrk) * 4096L + (*trd_fsec) * 256L;
 
 		fread(&(trd_image[trd_offset]),left,1,f);
@@ -291,7 +290,7 @@ int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 }
 
 
-int SCL_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int SCL_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ZXSPECTRUM_SCL";

@@ -36,7 +36,7 @@
 #include"defendian.h"
 
 union u{
-    long l;
+    int32_t l;
     char c[4];
     };
 
@@ -97,7 +97,7 @@ void adfEnvInitDefault()
 
     if (sizeof(short)!=2) 
         { fprintf(stderr,"Compilation error : sizeof(short)!=2\n"); exit(1); }
-    if (sizeof(long)!=4) 
+    if (sizeof(int32_t)!=4) 
         { fprintf(stderr,"Compilation error : sizeof(short)!=2\n"); exit(1); }
     if (sizeof(struct bEntryBlock)!=512)
         { fprintf(stderr,"Internal error : sizeof(struct bEntryBlock)!=512\n"); exit(1); }

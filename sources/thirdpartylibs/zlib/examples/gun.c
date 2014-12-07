@@ -119,8 +119,8 @@ local unsigned in(void *in_desc, z_const unsigned char **buf)
 struct outd {
     int outfile;
     int check;                  /* true if checking crc and total */
-    unsigned long crc;
-    unsigned long total;
+    uint32_t crc;
+    uint32_t total;
 };
 
 /* Write output buffer and update the CRC-32 and total bytes written.  write()

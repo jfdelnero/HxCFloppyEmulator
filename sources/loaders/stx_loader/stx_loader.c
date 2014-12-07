@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -101,8 +102,6 @@ int STX_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STX_libIsValidDiskFile : non STX file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 
@@ -128,16 +127,16 @@ unsigned char getchunk(unsigned char c)
 ////////////////////////////////////////////////////
 // Scan a track and make an sectors position list
 ////////////////////////////////////////////////////
-unsigned int * getSectorHeaderOffset(HXCFE* floppycontext,unsigned char * trackbuffer,int buffersize,int numsector)
+int * getSectorHeaderOffset(HXCFE* floppycontext,unsigned char * trackbuffer,int buffersize,int numsector)
 {
-	unsigned int * offsetlist;
+	int * offsetlist;
 	int i,t;
 
 	offsetlist=0;
 
 	if(numsector)
 	{
-		offsetlist = malloc(sizeof(unsigned int) * numsector);
+		offsetlist = malloc(sizeof(int) * numsector);
 		for(i=0;i<numsector;i++) offsetlist[i] = 0xFFFFFFFF;
 
 		t=0;
@@ -226,10 +225,10 @@ unsigned char patchbyte(unsigned char * buffer,unsigned char * maskbuffer,int bu
 /////////////////////////////////////////////////////////////////
 // This function patch the track with a sector header and data
 /////////////////////////////////////////////////////////////////
-void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * trackclock,unsigned char * trackmask,unsigned int buffersize,unsigned int * offsetlist,int numsector,HXCFE_SECTCFG * sector)
+void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * trackclock,unsigned char * trackmask,int buffersize,int * offsetlist,int numsector,HXCFE_SECTCFG * sector)
 {
-	unsigned int lastindex,shoff,doff;
-	unsigned int i;
+	int lastindex,shoff,doff;
+	int i;
 
 	shoff=-1;
 	doff=-1;
@@ -400,21 +399,21 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	FILE * f;
 	int t;
-	unsigned int i,j,k,l;
-	unsigned char trackformat;
-	unsigned char interleave;
+	int i,j,k,l;
+	int trackformat;
+	int interleave;
 	unsigned short temp_val;
 	unsigned short index_sync;
 	unsigned char numberoftrackperside;
-	unsigned int numberoftrack,tracknumber,sidenumber;
-	unsigned int numberofside;
-	unsigned int trackmode;
+	int numberoftrack,tracknumber,sidenumber;
+	int numberofside;
+	int trackmode;
 	pasti_fileheader * fileheader;
 	pasti_trackheader trackheader;
 	pasti_sector * sector;
 	HXCFE_SECTCFG* sectorconfig;
 	int * sectorheader_index;
-	unsigned int * sectordata_index;
+	int * sectordata_index;
 	unsigned char * temptrack;
 	unsigned char * tempclock;
 	unsigned char * tempmask;
@@ -456,6 +455,8 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	fileheader=(pasti_fileheader*)malloc(sizeof(pasti_fileheader));
 	fread( fileheader, sizeof(pasti_fileheader), 1, f );
 
+	sector = 0;
+	sectorconfig = 0;
 
 	if(!strcmp(fileheader->headertag,"RSY"))
 	{
@@ -756,7 +757,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 									fseek(f,weaksectoroffset,SEEK_SET);
 									fread(weaksectorbuffer,128<<sector[j].sector_size,1,f);
 
-									for(k=0;(k<(unsigned int)(128<<sector[j].sector_size)*2);k=k+2)
+									for(k=0;(k<(128<<sector[j].sector_size)*2);k=k+2)
 									{
 										currentside->flakybitsbuffer[(sectorconfig[j].startdataindex+k+0)%(currentside->tracklen/8)]=getchunk((unsigned char)((~weaksectorbuffer[k/2])>>4));
 										currentside->flakybitsbuffer[(sectorconfig[j].startdataindex+k+1)%(currentside->tracklen/8)]=getchunk((unsigned char)(~weaksectorbuffer[k/2]));
@@ -774,7 +775,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							for(l=(sectorconfig[j].startdataindex);l<((sectorconfig[j].startdataindex)+(sectorconfig[j].sectorsize*2));l++)
 							{
 								if(sector[j].sector_speed_timing)
-									currentside->timingbuffer[l%(currentside->tracklen/8)]=(unsigned long)(((float)(sectorconfig[j].sectorsize*8)/(float)sector[j].sector_speed_timing)*(float)1000000);
+									currentside->timingbuffer[l%(currentside->tracklen/8)]=(uint32_t)(((float)(sectorconfig[j].sectorsize*8)/(float)sector[j].sector_speed_timing)*(float)1000000);
 								else
 									currentside->timingbuffer[l%(currentside->tracklen/8)]=floppydisk->floppyBitRate;
 							}
@@ -787,8 +788,16 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								if(sectorconfig[j].input_data) free(sectorconfig[j].input_data);
 							}
 
-							free(sectorconfig);
-							free(sector);
+							if(sectorconfig)
+							{
+								free(sectorconfig);
+								sectorconfig = 0;
+							}
+							if(sector)
+							{
+								free(sector);
+								sector = 0;
+							}
 						}
 					break;
 
@@ -934,7 +943,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 							lastindex=0;
 
-							for(j=0;j<(unsigned int)(trackheader.numberofsector);j++)
+							for(j=0;j<(trackheader.numberofsector);j++)
 							{
 								if(sectorconfig[j].sectorsize)
 								{
@@ -957,7 +966,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								patchtrack(imgldr_ctx->hxcfe,temptrack,tempclock,tracklen,i);
 
 							// Second pass : CRC recalculation
-							for(j=0;j<(unsigned int)(trackheader.numberofsector);j++)
+							for(j=0;j<(trackheader.numberofsector);j++)
 							{
 								if(sectorconfig[j].startdataindex!=-1 && sectorconfig[j].sectorsize)
 								{
@@ -1041,7 +1050,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 										fseek(f,weaksectoroffset,SEEK_SET);
 										fread(weaksectorbuffer,128<<sector[j].sector_size,1,f);
 
-										for(k=0;(k<((unsigned int)(128<<sector[j].sector_size)*2));k=k+2)
+										for(k=0;(k<(128<<sector[j].sector_size)*2);k=k+2)
 										{
 											currentside->flakybitsbuffer[((sectorconfig[j].startdataindex)+k+0)%(currentside->tracklen/8)]=getchunk((unsigned char)((~weaksectorbuffer[k/2])>>4));
 											currentside->flakybitsbuffer[((sectorconfig[j].startdataindex)+k+1)%(currentside->tracklen/8)]=getchunk((unsigned char)(~weaksectorbuffer[k/2]));
@@ -1059,7 +1068,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								for(l=(sectorconfig[j].startdataindex);l<((sectorconfig[j].startdataindex)+(sectorconfig[j].sectorsize*2));l++)
 								{
 									if(sector[j].sector_speed_timing)
-										currentside->timingbuffer[l%(currentside->tracklen/8)]=(unsigned long)(((float)(sectorconfig[j].sectorsize*8)/(float)sector[j].sector_speed_timing)*(float)1000000);
+										currentside->timingbuffer[l%(currentside->tracklen/8)]=(uint32_t)(((float)(sectorconfig[j].sectorsize*8)/(float)sector[j].sector_speed_timing)*(float)1000000);
 									else
 										currentside->timingbuffer[l%(currentside->tracklen/8)]=250000;
 								}
@@ -1175,11 +1184,9 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"non STX/pasti image (bad header)",imgfile);
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_INTERNALERROR;
 }
 
-int STX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int STX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ATARIST_STX";

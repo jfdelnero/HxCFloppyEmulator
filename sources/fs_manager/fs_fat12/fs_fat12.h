@@ -13,7 +13,7 @@ int fat12_createDir( HXCFE_FSMNG * fsmng,char * foldername);
 int fat12_removeDir( HXCFE_FSMNG * fsmng,char * foldername);
 
 int fat12_ftell( HXCFE_FSMNG * fsmng,int filehandle);
-int fat12_fseek( HXCFE_FSMNG * fsmng,int filehandle,long offset,int origin);
+int fat12_fseek( HXCFE_FSMNG * fsmng,int filehandle,int32_t offset,int origin);
 
 int fat12_openDir(HXCFE_FSMNG * fsmng, char * path);
 int fat12_readDir(HXCFE_FSMNG * fsmng,int dirhandle,HXCFE_FSENTRY * dirent);

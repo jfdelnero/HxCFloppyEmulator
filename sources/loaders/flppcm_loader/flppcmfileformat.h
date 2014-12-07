@@ -29,12 +29,12 @@
 
 typedef struct flp_header_t_
 {
-	unsigned char  hsign[3];
-	unsigned short ver;
-	unsigned short nbsides;
-	unsigned short nbtracks;
-	unsigned short nbsectors;
-	unsigned short sectorsize;
+	uint8_t  hsign[3];
+	uint16_t ver;
+	uint16_t nbsides;
+	uint16_t nbtracks;
+	uint16_t nbsectors;
+	uint16_t sectorsize;
 }flp_header_t;
 
 #pragma pack()

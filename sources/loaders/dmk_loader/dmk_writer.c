@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -62,14 +64,14 @@ void setdmktrackbit(unsigned char * input_data,int bit_offset,int state)
 	return;
 }
 
-int dmkbitlookingfor(unsigned char * input_data,unsigned long intput_data_size,int searchlen,unsigned char * chr_data,unsigned long chr_data_size,unsigned long bit_offset)
+int dmkbitlookingfor(unsigned char * input_data,uint32_t intput_data_size,int searchlen,unsigned char * chr_data,uint32_t chr_data_size,uint32_t bit_offset)
 {
-	unsigned long i,j,trackoffset,cnt,k,starti;
+	uint32_t i,j,trackoffset,cnt,k,starti;
 	unsigned char stringtosearch[8][128];
 	unsigned char mask[8][128];
 
 	unsigned char prev;
-	unsigned long tracksize;
+	uint32_t tracksize;
 	int searchsize;
 	int t;
 	int found;

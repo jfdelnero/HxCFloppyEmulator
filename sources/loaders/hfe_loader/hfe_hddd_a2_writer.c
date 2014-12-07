@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
@@ -81,8 +83,8 @@ extern void addpad(unsigned char * track,int mfmsize,int tracksize);
 
 typedef struct RAMFILE_
 {
-	unsigned char * ramfile;
-	int ramfile_size;
+	uint8_t * ramfile;
+	int32_t ramfile_size;
 }RAMFILE;
 
 FILE * rfopen(char* fn,char * mode,RAMFILE * rf);
@@ -132,7 +134,7 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 		else
 		{
 			if(floppy->tracks[0]->sides[0]->bitrate == VARIABLEBITRATE)
-				FILEHEADER->bitRate=(unsigned short)((unsigned long)(floppy->tracks[0]->sides[0]->timingbuffer[ (floppy->tracks[0]->sides[0]->tracklen/8) / 2] * 2)/1000);
+				FILEHEADER->bitRate=(unsigned short)( (floppy->tracks[0]->sides[0]->timingbuffer[ (floppy->tracks[0]->sides[0]->tracklen/8) / 2] * 2)/1000);
 			else
 				FILEHEADER->bitRate=(floppy->tracks[0]->sides[0]->bitrate * 2)/1000;
 		}

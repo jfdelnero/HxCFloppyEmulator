@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -88,8 +89,6 @@ int VEGASDSK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VEGASDSK_libIsValidDiskFile : non Vegas DSK file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 
@@ -99,16 +98,15 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j,k;
+	int i,j,k;
 	unsigned int file_offset,offset;
 	unsigned char* floppy_data;
-	unsigned char  gap3len,interleave;
-	unsigned short sectorsize,rpm;
-	unsigned short bootnumberofsector;
+	int gap3len,interleave;
+	int sectorsize,rpm;
+	int bootnumberofsector;
 	unsigned char  trackformat;
 	unsigned char  buffer[256];
 	unsigned char  ddmode;
-
 
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SECTCFG  sectorconfig[30];
@@ -267,7 +265,7 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	return HXCFE_NOERROR;
 }
 
-int VEGASDSK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int VEGASDSK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="VEGAS6809";

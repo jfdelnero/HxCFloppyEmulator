@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -87,25 +88,23 @@ int KRZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"KRZ_libIsValidDiskFile : non Kurzweil KRZ file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 
 
 int KRZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	unsigned int i,j;
+	int i,j;
 	unsigned int file_offset;
 	unsigned char * flatimg;
-	unsigned char gap3len,interleave,skew;
-	unsigned char trackformat;
-	unsigned short rpm;
-	unsigned short sectorsize;
+	int gap3len,interleave,skew;
+	int trackformat;
+	int rpm;
+	int sectorsize;
 	int numberofcluster;
-	unsigned long   fatposition;
-	unsigned long   rootposition;
-	unsigned long   dataposition;
+	uint32_t   fatposition;
+	uint32_t   rootposition;
+	uint32_t   dataposition;
 	int pcbootsector;
 	int dksize;
 	HXCFE_CYLINDER* currentcylinder;
@@ -216,7 +215,7 @@ int KRZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_NOERROR;
 }
 
-int KRZ_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int KRZ_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="KURZWEIL_KRZ";

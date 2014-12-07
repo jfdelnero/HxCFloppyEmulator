@@ -2,29 +2,29 @@
 
 typedef struct gkh_header_
 {
-	unsigned long  header_tag;   // "TDDF"
-	unsigned char  type;         // I
-	unsigned char  version;		 // 0x01
-	unsigned short numberoftags;
+	uint32_t header_tag;   // "TDDF"
+	uint8_t  type;         // I
+	uint8_t  version;		 // 0x01
+	uint16_t numberoftags;
 }gkh_header;
 
 
 typedef struct image_type_tag_
 {
-	unsigned char  tagtype;      // 0x0A
-	unsigned char  datatype;     // I
-	unsigned short nboftrack;		
-	unsigned short nbofheads;
-	unsigned short nbofsectors;
-	unsigned short sectorsize;
+	uint8_t  tagtype;      // 0x0A
+	uint8_t  datatype;     // I
+	uint16_t nboftrack;		
+	uint16_t nbofheads;
+	uint16_t nbofsectors;
+	uint16_t sectorsize;
 }image_type_tag;
 
 typedef struct image_location_tag_
 {
-	unsigned char  tagtype;      // 0x0B
-	unsigned char  datatype;     // I
-	unsigned long  longword1;
-	unsigned long  fileoffset;
+	uint8_t  tagtype;      // 0x0B
+	uint8_t  datatype;     // I
+	uint32_t longword1;
+	uint32_t fileoffset;
 }image_location_tag;
 
 #pragma pack()

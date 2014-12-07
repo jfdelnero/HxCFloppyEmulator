@@ -357,7 +357,7 @@ utf8_toUtf16(const ENCODING *enc,
       break;
     case BT_LEAD4:
       {
-        unsigned long n;
+        uint32_t n;
         if (to + 1 == toLim)
           goto after;
         n = ((from[0] & 0x7) << 18) | ((from[1] & 0x3f) << 12)

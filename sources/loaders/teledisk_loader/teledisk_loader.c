@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -235,7 +236,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	FILE * f;
 	unsigned int i;
 	unsigned int file_offset;
-	unsigned long tracklen;
+	uint32_t tracklen;
 	unsigned char interleave,skew,trackformat;
 	unsigned short rpm,sectorsize;
 	int Compress,numberoftrack,sidenumber;
@@ -250,10 +251,10 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	unsigned char crctable[32];
 	unsigned char CRC16_High,CRC16_Low;
 	unsigned char * ptr;
-	unsigned long filesize;
+	uint32_t filesize;
 	HXCFE_SECTCFG  * sectorconfig;
 	unsigned char * fileimage;
-	unsigned long fileimage_buffer_offset;
+	uint32_t fileimage_buffer_offset;
 	int rlen;
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TeleDisk_libLoad_DiskFile %s",imgfile);
 
@@ -579,7 +580,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	return HXCFE_NOERROR;
 }
 
-int TeleDisk_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int TeleDisk_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="TELEDISK_TD0";

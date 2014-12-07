@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
@@ -74,8 +76,8 @@ void extaddpad(unsigned char * track,int mfmsize,int tracksize)
 
 typedef struct RAMFILE_
 {
-	unsigned char * ramfile;
-	int ramfile_size;
+	uint8_t * ramfile;
+	int32_t ramfile_size;
 }RAMFILE;
 
 FILE * rfopen(char* fn,char * mode,RAMFILE * rf);

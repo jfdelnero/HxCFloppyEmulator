@@ -47,6 +47,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "types.h"
+
 unsigned short biteven[]=
 {
 	0x0000, 0x0001, 0x0004, 0x0005, 0x0010, 0x0011, 0x0014, 0x0015,
@@ -371,10 +373,10 @@ int arburgsysfmtobin(unsigned char * input_data,int input_data_size,unsigned cha
 }
 
 
-int slowSearchBitStream(unsigned char * input_data,unsigned long input_data_size,int searchlen,unsigned char * chr_data,unsigned long chr_data_size,unsigned long bit_offset)
+int slowSearchBitStream(unsigned char * input_data,uint32_t input_data_size,int searchlen,unsigned char * chr_data,uint32_t chr_data_size,uint32_t bit_offset)
 {
-	unsigned long cur_startoffset;
-	unsigned long i;
+	uint32_t cur_startoffset;
+	uint32_t i;
 	int tracksearchlen;
 	int len;
 
@@ -434,12 +436,12 @@ int slowSearchBitStream(unsigned char * input_data,unsigned long input_data_size
 	return -1;
 }
 
-int searchBitStream(unsigned char * input_data,unsigned long input_data_size,int searchlen,unsigned char * chr_data,unsigned long chr_data_size,unsigned long bit_offset)
+int searchBitStream(unsigned char * input_data,uint32_t input_data_size,int searchlen,unsigned char * chr_data,uint32_t chr_data_size,uint32_t bit_offset)
 {
-	unsigned long i,j,trackoffset,cnt,starti;
+	uint32_t i,j,trackoffset,cnt,starti;
 	unsigned char stringtosearch[8][128];
 	unsigned char prev;
-	unsigned long tracksize;
+	uint32_t tracksize;
 	int searchsize;
 	int t;
 	int bitoffset;

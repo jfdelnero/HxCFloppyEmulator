@@ -40,8 +40,8 @@ int  bintofm(unsigned char * track_data,int track_data_size,unsigned char * bin_
 
 int arburgsysfmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit);
 
-int  searchBitStream(unsigned char * input_data,unsigned long input_data_size,int searchlen, \
-					unsigned char * chr_data,unsigned long chr_data_size,unsigned long bit_offset);
+int  searchBitStream(unsigned char * input_data,uint32_t input_data_size,int searchlen, \
+					unsigned char * chr_data,uint32_t chr_data_size,uint32_t bit_offset);
 
 void sortbuffer(unsigned char * buffer,unsigned char * outbuffer,int size);
 

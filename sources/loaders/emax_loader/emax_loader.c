@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -115,7 +116,6 @@ int EMAX_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		return HXCFE_BADFILE;
 	}
 
-	return HXCFE_BADPARAMETER;
 }
 
 int EMAX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -123,14 +123,14 @@ int EMAX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,ch
 
 	FILE * f,*f2;
 	unsigned int filesize;
-	unsigned int i,j,k;
+	int i,j,k;
 	unsigned int file_offset;
 	unsigned char* floppy_data;
 	char os_filename[512];
-	unsigned char  gap3len,interleave;
-	unsigned short sectorsize,rpm;
-	unsigned short numberofsector;
-	unsigned char  trackformat,skew;
+	int gap3len,interleave;
+	int sectorsize,rpm;
+	int numberofsector;
+	int trackformat,skew;
 
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SECTCFG  sectorconfig[10];
@@ -295,7 +295,7 @@ int EMAX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,ch
 	return HXCFE_BADFILE;
 }
 
-int EMAX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int EMAX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="EMAX_EM";

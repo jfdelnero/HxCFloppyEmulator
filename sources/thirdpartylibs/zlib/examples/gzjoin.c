@@ -142,14 +142,14 @@ local int bload(bin *in)
                     bail("unexpected end of file on ", in->name))
 
 /* get a four-byte little-endian unsigned integer from file */
-local unsigned long bget4(bin *in)
+local uint32_t bget4(bin *in)
 {
-    unsigned long val;
+    uint32_t val;
 
     val = bget(in);
-    val += (unsigned long)(bget(in)) << 8;
-    val += (unsigned long)(bget(in)) << 16;
-    val += (unsigned long)(bget(in)) << 24;
+    val += (uint32_t)(bget(in)) << 8;
+    val += (uint32_t)(bget(in)) << 16;
+    val += (uint32_t)(bget(in)) << 24;
     return val;
 }
 
@@ -242,7 +242,7 @@ local void gzhead(bin *in)
 }
 
 /* write a four-byte little-endian unsigned integer to out */
-local void put4(unsigned long val, FILE *out)
+local void put4(uint32_t val, FILE *out)
 {
     putc(val & 0xff, out);
     putc((val >> 8) & 0xff, out);
@@ -262,7 +262,7 @@ local void zpull(z_streamp strm, bin *in)
 }
 
 /* Write header for gzip file to out and initialize trailer. */
-local void gzinit(unsigned long *crc, unsigned long *tot, FILE *out)
+local void gzinit(uint32_t *crc, uint32_t *tot, FILE *out)
 {
     fwrite("\x1f\x8b\x08\0\0\0\0\0\0\xff", 1, 10, out);
     *crc = crc32(0L, Z_NULL, 0);
@@ -276,7 +276,7 @@ local void gzinit(unsigned long *crc, unsigned long *tot, FILE *out)
    crc and length (modulo 2^32) of the output for the trailer.  The resulting
    gzip file is written to out.  gzinit() must be called before the first call
    of gzcopy() to write the gzip header and to initialize crc and tot. */
-local void gzcopy(char *name, int clr, unsigned long *crc, unsigned long *tot,
+local void gzcopy(char *name, int clr, uint32_t *crc, uint32_t *tot,
                   FILE *out)
 {
     int ret;                /* return value from zlib functions */
@@ -409,7 +409,7 @@ local void gzcopy(char *name, int clr, unsigned long *crc, unsigned long *tot,
 
     /* update crc and tot */
     *crc = crc32_combine(*crc, bget4(in), len);
-    *tot += (unsigned long)len;
+    *tot += (uint32_t)len;
 
     /* clean up */
     inflateEnd(&strm);
@@ -426,7 +426,7 @@ local void gzcopy(char *name, int clr, unsigned long *crc, unsigned long *tot,
 /* join the gzip files on the command line, write result to stdout */
 int main(int argc, char **argv)
 {
-    unsigned long crc, tot;     /* running crc and total uncompressed length */
+    uint32_t crc, tot;     /* running crc and total uncompressed length */
 
     /* skip command name */
     argc--;

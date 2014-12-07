@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
@@ -38,9 +40,9 @@
 
 #include "bmp_file.h"
 
-extern void copyPict(unsigned long * dest,int d_xsize,int d_ysize,int d_xpos,int d_ypos,unsigned long * src,int s_xsize,int s_ysize);
+extern void copyPict(uint32_t * dest,int d_xsize,int d_ysize,int d_xpos,int d_ypos,uint32_t * src,int s_xsize,int s_ysize);
 
-extern unsigned char getPixelCode(unsigned long pix,unsigned long * pal,int * nbcol);
+extern unsigned char getPixelCode(uint32_t pix,uint32_t * pal,int * nbcol);
 
 static int progress_callback(unsigned int current,unsigned int total,void * td,void * user)
 {
@@ -51,11 +53,11 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydis
 {
 	int ret,i,j,k;
 	HXCFE_TD * td;
-	unsigned long * ptr;
+	uint32_t * ptr;
 	unsigned char * ptrchar;
 	bitmap_data bdata;
 
-	unsigned long pal[256];
+	uint32_t pal[256];
 	int nbcol;
 
 	ret = HXCFE_NOERROR;
@@ -89,7 +91,7 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 			hxcfe_td_draw_disk(td,floppydisk);
 
-			copyPict((unsigned long *)ptr,td->xsize,td->ysize,0,0,(unsigned long *)td->framebuffer,td->xsize,td->ysize);
+			copyPict((uint32_t *)ptr,td->xsize,td->ysize,0,0,(uint32_t *)td->framebuffer,td->xsize,td->ysize);
 
 			for(i=0;i<256;i++)
 			{
@@ -106,7 +108,7 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydis
 				{
 					for(j=0;j< ( td->xsize );j++)
 					{
-						ptrchar[k] = getPixelCode(ptr[k],(unsigned long*)&pal,&nbcol);
+						ptrchar[k] = getPixelCode(ptr[k],(uint32_t*)&pal,&nbcol);
 						k++;
 					}
 				}
@@ -134,7 +136,7 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydis
 					{
 						for(j=0;j< ( td->xsize );j++)
 						{
-							ptrchar[k] = getPixelCode(ptr[k],(unsigned long*)&pal,&nbcol);
+							ptrchar[k] = getPixelCode(ptr[k],(uint32_t*)&pal,&nbcol);
 							k++;
 						}
 					}
@@ -147,7 +149,7 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydis
 					bdata.nb_color = 16;
 					bdata.xsize = td->xsize;
 					bdata.ysize = td->ysize;
-					bdata.data = (unsigned long*)ptr;
+					bdata.data = (uint32_t*)ptr;
 					bdata.palette = 0;
 
 					bmp16b_write(filename,&bdata);
@@ -157,7 +159,7 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydis
 					bdata.nb_color = 8;
 					bdata.xsize = td->xsize;
 					bdata.ysize = td->ysize;
-					bdata.data = (unsigned long*)ptrchar;
+					bdata.data = (uint32_t*)ptrchar;
 					bdata.palette = (unsigned char*)&pal;
 
 					bmpRLE8b_write(filename,&bdata);

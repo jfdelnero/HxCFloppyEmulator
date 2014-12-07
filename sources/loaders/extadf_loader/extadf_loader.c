@@ -47,6 +47,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 #include "./tracks/track_generator.h"
@@ -92,8 +94,6 @@ int EXTADF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EXTADF_libIsValidDiskFile : non Extended ADF file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 
@@ -103,7 +103,7 @@ int EXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 {
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j;
+	int i,j;
 	unsigned char* trackdata;
 	int	tracklen;
 	HXCFE_CYLINDER* currentcylinder;
@@ -113,8 +113,8 @@ int EXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 	unsigned char * tracktable;
 	unsigned int trackindex,tracksize,tracksize_bit;
 
-	unsigned char gap3len,skew,trackformat,interleave;
-	unsigned short sectorsize;
+	int gap3len,skew,trackformat,interleave;
+	int sectorsize;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EXTADF_libLoad_DiskFile %s",imgfile);
 
@@ -248,7 +248,7 @@ int EXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 	return HXCFE_NOERROR;
 }
 
-int EXTADF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int EXTADF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="AMIGA_EXTADF";

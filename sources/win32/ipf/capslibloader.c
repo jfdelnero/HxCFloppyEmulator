@@ -30,7 +30,7 @@ CAPSREMIMAGE pCAPSRemImage=0;
 int init_caps_lib()
 {
 	HMODULE h;
-	unsigned long ret;
+	uint32_t ret;
 	if(pCAPSInit && \
 	   pCAPSAddImage &&  \
 	   pCAPSLockImageMemory && \
@@ -50,47 +50,47 @@ int init_caps_lib()
 		h = LoadLibrary ("CAPSImg.dll");
 		if(h)
 		{
-			ret=(unsigned long )GetProcAddress (h, "CAPSInit");
+			ret=(uint32_t )GetProcAddress (h, "CAPSInit");
 			pCAPSInit = (CAPSINIT)ret;
 			if(!ret){ FreeLibrary(h); return 0;};
 
-			ret=(unsigned long )GetProcAddress (h, "CAPSAddImage");
+			ret=(uint32_t )GetProcAddress (h, "CAPSAddImage");
 			pCAPSAddImage = (CAPSADDIMAGE)ret;
 			if(!ret){ FreeLibrary(h); return 0;};
 
-			ret=(unsigned long )GetProcAddress (h, "CAPSLockImageMemory");
+			ret=(uint32_t )GetProcAddress (h, "CAPSLockImageMemory");
 			pCAPSLockImageMemory = (CAPSLOCKIMAGEMEMORY)ret;
 			if(!ret){ FreeLibrary(h); return 0;};
 
-			ret=(unsigned long )GetProcAddress (h, "CAPSUnlockImage");
+			ret=(uint32_t )GetProcAddress (h, "CAPSUnlockImage");
 			pCAPSUnlockImage = (CAPSUNLOCKIMAGE)ret;
 			if(!ret){ FreeLibrary(h); return 0;};
 
-			ret=(unsigned long )GetProcAddress (h, "CAPSLoadImage");
+			ret=(uint32_t )GetProcAddress (h, "CAPSLoadImage");
 			pCAPSLoadImage = (CAPSLOADIMAGE)ret;
 			if(!ret){ FreeLibrary(h); return 0;};
 
-			ret=(unsigned long )GetProcAddress (h, "CAPSGetImageInfo");
+			ret=(uint32_t )GetProcAddress (h, "CAPSGetImageInfo");
 			pCAPSGetImageInfo = (CAPSGETIMAGEINFO)ret;
 			if(!ret){ FreeLibrary(h); return 0;};
 
-			ret=(unsigned long )GetProcAddress (h, "CAPSLockTrack");
+			ret=(uint32_t )GetProcAddress (h, "CAPSLockTrack");
 			pCAPSLockTrack = (CAPSLOCKTRACK)ret;
 			if(!ret){ FreeLibrary(h); return 0;};
 
-			ret=(unsigned long )GetProcAddress (h, "CAPSUnlockTrack");
+			ret=(uint32_t )GetProcAddress (h, "CAPSUnlockTrack");
 			pCAPSUnlockTrack = (CAPSUNLOCKTRACK)ret;
 			if(!ret){ FreeLibrary(h); return 0;};
 
-			ret=(unsigned long )GetProcAddress (h, "CAPSUnlockAllTracks");
+			ret=(uint32_t )GetProcAddress (h, "CAPSUnlockAllTracks");
 			pCAPSUnlockAllTracks = (CAPSUNLOCKALLTRACKS)ret;
 			if(!ret){ FreeLibrary(h); return 0;};
 
-			ret=(unsigned long )GetProcAddress (h, "CAPSGetVersionInfo");
+			ret=(uint32_t )GetProcAddress (h, "CAPSGetVersionInfo");
 			pCAPSGetVersionInfo = (CAPSGETVERSIONINFO)ret;
 			if(!ret){ FreeLibrary(h); return 0;};
 
-			ret=(unsigned long )GetProcAddress (h, "CAPSRemImage");
+			ret=(uint32_t )GetProcAddress (h, "CAPSRemImage");
 			pCAPSRemImage = (CAPSREMIMAGE)ret;
 			if(!ret){ FreeLibrary(h); return 0;};
 

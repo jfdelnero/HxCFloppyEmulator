@@ -48,6 +48,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -66,7 +68,7 @@ int dummy_graph_progress(unsigned int current,unsigned int total,void * td,void 
     return 0;
 }
 
-HXCFE_TD * hxcfe_td_init(HXCFE* floppycontext,unsigned long xsize,unsigned long ysize)
+HXCFE_TD * hxcfe_td_init(HXCFE* floppycontext,uint32_t xsize,uint32_t ysize)
 {
 	HXCFE_TD * td;
 
@@ -113,7 +115,7 @@ int hxcfe_td_setProgressCallback(HXCFE_TD *td,HXCFE_TDPROGRESSOUT_FUNC progress_
 	}
 	return 0;
 }
-void hxcfe_td_setparams(HXCFE_TD *td,unsigned long x_us,unsigned long y_us,unsigned long x_start_us)
+void hxcfe_td_setparams(HXCFE_TD *td,uint32_t x_us,uint32_t y_us,uint32_t x_start_us)
 {
 	if(td)
 	{
@@ -127,10 +129,10 @@ void hxcfe_td_setparams(HXCFE_TD *td,unsigned long x_us,unsigned long y_us,unsig
 #pragma pack(1)
 typedef struct s_col_
 {
-	unsigned char red;
-	unsigned char green;
-	unsigned char blue;
-	unsigned char spare;
+	uint8_t red;
+	uint8_t green;
+	uint8_t blue;
+	uint8_t spare;
 }s_col;
 #pragma pack()
 
@@ -179,10 +181,10 @@ void freelist(struct s_sectorlist_ * element)
 double getOffsetTiming(HXCFE_SIDE *currentside,int offset,double timingoffset,int start)
 {
 	int i,j,totaloffset;
-	unsigned long bitrate;
+	uint32_t bitrate;
 	double timinginc;
-	unsigned long tracklen;
-	unsigned long oldbitrate;
+	uint32_t tracklen;
+	uint32_t oldbitrate;
 
 	tracklen = currentside->tracklen;
 
@@ -266,16 +268,16 @@ void putchar8x8(HXCFE_TD *td,int x_pos,int y_pos,unsigned char c,unsigned int co
 						if(!color)
 						{
 							col=(s_col *)&td->framebuffer[(td->xsize*ypos) + xpos];
-							col->blue=col->blue/2;
-							col->red=col->red/2;
-							col->green=col->green/2;
+							col->blue=(unsigned char)(col->blue/2);
+							col->red=(unsigned char)(col->red/2);
+							col->green=(unsigned char)(col->green/2);
 						}
 						else
 						{
 							col=(s_col *)&td->framebuffer[(td->xsize*ypos) + xpos];
-							col->blue=(color>>16)&0xFF;
-							col->red=color&0xFF;
-							col->green=(color>>8)&0xFF;
+							col->blue=(unsigned char)((color>>16)&0xFF);
+							col->red=(unsigned char)(color&0xFF);
+							col->green=(unsigned char)((color>>8)&0xFF);
 						}
 					}
 				}
@@ -406,8 +408,8 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 										for(j=50;j<(td->ysize-10);j++)
 										{
 											col=(s_col *)&td->framebuffer[(td->xsize*j) + i];
-											col->blue=3*col->blue/4;
-											col->green=3*col->green/4;
+											col->blue=(unsigned char)((3*col->blue)/4);
+											col->green=(unsigned char)((3*col->green)/4);
 										}
 									}
 									else
@@ -416,8 +418,8 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 										for(j=50;j<(td->ysize-10);j++)
 										{
 											col=(s_col *)&td->framebuffer[(td->xsize*j) + i];
-											col->blue=3*col->blue/4;
-											col->red=3*col->red/4;
+											col->blue=(unsigned char)((3*col->blue)/4);
+											col->red=(unsigned char)((3*col->red)/4);
 										}
 									}
 								}
@@ -441,8 +443,8 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 										for(j=50;j<(td->ysize-10);j++)
 										{
 											col=(s_col *)&td->framebuffer[(td->xsize*j) + i];
-											col->green=3*col->green/4;
-											col->red=3*col->red/4;
+											col->green=(unsigned char)((3*col->green)/4);
+											col->red=(unsigned char)((3*col->red)/4);
 										}
 									}
 									else
@@ -453,8 +455,8 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 											for(j=50;j<(td->ysize-10);j++)
 											{
 												col=(s_col *)&td->framebuffer[(td->xsize*j) + i];
-												col->blue=3*col->blue/4;
-												col->green=3*col->green/4;
+												col->blue=(unsigned char)((3*col->blue)/4);
+												col->green=(unsigned char)((3*col->green)/4);
 											}
 										}
 										else
@@ -465,13 +467,13 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 												col=(s_col *)&td->framebuffer[(td->xsize*j) + i];
 												if(!sc->fill_byte_used)
 												{
-													col->blue=3*col->blue/6;
-													col->red=3*col->red/6;
+													col->blue=(unsigned char)((3*col->blue)/6);
+													col->red=(unsigned char)((3*col->red)/6);
 												}
 												else
 												{
-													col->blue=3*col->blue/4;
-													col->red=3*col->red/4;
+													col->blue=(unsigned char)((3*col->blue)/4);
+													col->red=(unsigned char)((3*col->red)/4);
 												}
 											}
 										}
@@ -494,14 +496,14 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 									if(sc->use_alternate_data_crc)
 									{
 										col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos_startheader];
-										col->blue=3*col->blue/8;
-										col->green=3*col->green/8;
+										col->blue=(unsigned char)((3*col->blue)/8);
+										col->green=(unsigned char)((3*col->green)/8);
 									}
 									else
 									{
 										col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos_startheader];
-										col->blue=3*col->blue/8;
-										col->red=3*col->red/8;
+										col->blue=(unsigned char)((3*col->blue)/8);
+										col->red=(unsigned char)((3*col->red)/8);
 									}
 								}
 							}
@@ -520,16 +522,16 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 										if(sc->use_alternate_data_crc)
 										{
 											col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos_startdata];
-											col->blue=3*col->blue/16;
-											col->green=3*col->green/16;
-											col->red=3*col->red/4;
+											col->blue=(unsigned char)((3*col->blue)/16);
+											col->green=(unsigned char)((3*col->green)/16);
+											col->red=(unsigned char)((3*col->red)/4);
 										}
 										else
 										{
 											col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos_startdata];
-											col->blue=3*col->blue/16;
-											col->green=3*col->green/4;
-											col->red=3*col->red/16;
+											col->blue=(unsigned char)((3*col->blue)/16);
+											col->green=(unsigned char)((3*col->green)/4);
+											col->red=(unsigned char)((3*col->red)/16);
 										}
 									}
 								}
@@ -644,14 +646,14 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 									if(sc->use_alternate_data_crc)
 									{
 										col=(s_col *)&td->framebuffer[(td->xsize*j) + (xpos_endsector-1)];
-										col->blue=3*col->blue/8;
-										col->green=3*col->green/8;
+										col->blue=(unsigned char)((3*col->blue)/8);
+										col->green=(unsigned char)((3*col->green)/8);
 									}
 									else
 									{
 										col=(s_col *)&td->framebuffer[(td->xsize*j) + (xpos_endsector-1)];
-										col->blue=3*col->blue/8;
-										col->red=3*col->red/8;
+										col->blue = (unsigned char)((3*col->blue)/8);
+										col->red = (unsigned char)((3*col->red)/8);
 									}
 								}
 							}
@@ -876,13 +878,13 @@ void hxcfe_td_draw_track(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,int si
 		}
 		else
 		{
-			col->green=255 - (col->red );
-			col->blue=255 - (col->red );
-			col->red=255 - (col->red );
+			col->green = (unsigned char)( 255 - col->red );
+			col->blue = (unsigned char)( 255 - col->red );
+			col->red = (unsigned char)( 255 - col->red );
 
-			col->green=col->green/2;
-			col->blue=col->blue/2;
-			col->red=col->red/2;
+			col->green = (unsigned char)(col->green / 2);
+			col->blue = (unsigned char)(col->blue / 2);
+			col->red = (unsigned char)(col->red / 2);
 		}
 	}
 
@@ -1077,10 +1079,10 @@ s_pulseslist * hxcfe_td_getlastpulselist(HXCFE_TD *td)
 	return td->pl;
 }
 
-void plot(HXCFE_TD *td,int x,int y,unsigned long color,int op)
+void plot(HXCFE_TD *td,int x,int y,uint32_t color,int op)
 {
 	unsigned char color_r,color_v,color_b;
-	unsigned long rdcolor;
+	uint32_t rdcolor;
 
 	if(x>=0 && x<td->xsize)
 	{
@@ -1164,7 +1166,7 @@ void circle(HXCFE_TD *td,int x_centre,int y_centre,int r,unsigned int color)
 	}
 }
 
-void draw_circle (HXCFE_TD *td,unsigned long col,float start_angle,float stop_angle,int xpos,int ypos,int diametre,int op,int thickness)
+void draw_circle (HXCFE_TD *td,uint32_t col,float start_angle,float stop_angle,int xpos,int ypos,int diametre,int op,int thickness)
 {
     int x, y,i;
     int length;
@@ -1361,6 +1363,8 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	int xpos;
 	s_sectorlist * sl,*oldsl;
 
+	track_ep = 0;
+
 	sl=td->sl;
 	while(sl)
 	{
@@ -1381,7 +1385,7 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	}
 	td->sl=0;
 
-	memset(td->framebuffer,0,td->xsize*td->ysize*sizeof(unsigned long));
+	memset(td->framebuffer,0,td->xsize*td->ysize*sizeof(uint32_t));
 
 	ysize=1;
 	xsize=2048;

@@ -47,6 +47,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
@@ -81,24 +83,22 @@ int D64_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile : non D64 file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j,k;
+	int i,j,k;
 	unsigned char* trackdata;
 	int tracklen;
-	unsigned short rpm;
-	unsigned short sectorsize;
+	int rpm;
+	int sectorsize;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
 	unsigned char * errormap;
 	d64trackpos * tracklistpos;
-	unsigned int number_of_track;
+	int number_of_track;
 	int errormap_size;
 
 
@@ -283,7 +283,7 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_NOERROR;
 }
 
-int D64_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int D64_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="C64_D64";

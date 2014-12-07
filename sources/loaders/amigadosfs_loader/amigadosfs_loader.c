@@ -49,6 +49,8 @@
 #include <sys/stat.h>
 #include <time.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -133,7 +135,7 @@ static void adlib_printdebug(char * msg)
 
 int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char * file)
 {
-	long hfindfile;
+	int32_t hfindfile;
 	filefoundinfo FindFileData;
 	int bbool;
 	int byte_written;
@@ -285,7 +287,7 @@ int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char *
 
 int AMIGADOSFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	unsigned int i,j;
+	int i,j;
 	unsigned int file_offset;
 	struct Device * adfdevice;
 	struct Volume * adfvolume;
@@ -427,11 +429,12 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flopp
 
 		if(flatimg2)
 		{
-			sectorsize=512;
-			interleave=1;
-			gap3len=0;
-			skew=0;
-			trackformat=AMIGAFORMAT_DD;
+			sectorsize = 512;
+			interleave = 1;
+			gap3len = 0;
+			skew = 0;
+			file_offset = 0;
+			trackformat = AMIGAFORMAT_DD;
 
 			floppydisk->floppySectorPerTrack=numberofsectorpertrack;
 			floppydisk->floppyNumberOfSide=2;
@@ -458,7 +461,7 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flopp
 			}
 
 			// Add 4 empty tracks
-			for(j=floppydisk->floppyNumberOfTrack;j<(unsigned int)(floppydisk->floppyNumberOfTrack + 4);j++)
+			for(j=floppydisk->floppyNumberOfTrack;j<(floppydisk->floppyNumberOfTrack + 4);j++)
 			{
 				floppydisk->tracks[j]=allocCylinderEntry(DEFAULT_AMIGA_RPM,floppydisk->floppyNumberOfSide);
 				currentcylinder=floppydisk->tracks[j];
@@ -488,7 +491,7 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flopp
 	}
 }
 
-int AMIGADOSFSDK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int AMIGADOSFSDK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="AMIGA_FS";

@@ -28,6 +28,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -88,7 +90,7 @@ void gettracktype(HXCFE_SECTORACCESS* ss,int track,int side,int * nbsect,int *fi
 typedef struct sect_offset_
 {
 	HXCFE_SECTCFG* ss;
-	unsigned long offset;
+	uint32_t offset;
 }sect_offset;
 
 static void exchange(sect_offset **  table, int a, int b)

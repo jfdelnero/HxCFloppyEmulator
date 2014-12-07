@@ -32,7 +32,7 @@
 
 /* Return size times approximately the cube root of 2, keeping the result as 1,
    3, or 5 times a power of 2 -- the result is always > size, until the result
-   is the maximum value of an unsigned long, where it remains.  This is useful
+   is the maximum value of an uint32_t, where it remains.  This is useful
    to keep reallocations less than ~33% over the actual data. */
 local size_t bythirds(size_t size)
 {
@@ -92,7 +92,7 @@ int main(int argc, char **argv)
     char *arg, *name = NULL;
     unsigned char *source = NULL, *dest;
     size_t len = 0;
-    unsigned long sourcelen, destlen;
+    uint32_t sourcelen, destlen;
 
     /* process arguments */
     while (arg = *++argv, --argc)
@@ -133,7 +133,7 @@ int main(int argc, char **argv)
 
     /* test inflate data with offset skip */
     len -= skip;
-    sourcelen = (unsigned long)len;
+    sourcelen = (uint32_t)len;
     ret = puff(NIL, &destlen, source + skip, &sourcelen);
     if (ret)
         fprintf(stderr, "puff() failed with return code %d\n", ret);

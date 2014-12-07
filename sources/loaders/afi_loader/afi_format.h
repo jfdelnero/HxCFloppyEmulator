@@ -27,9 +27,9 @@
 
 #pragma pack(1)
 
-#define byte  unsigned char
-#define word  unsigned short
-#define dword unsigned int
+#define uint8_t   unsigned char
+#define uint16_t  unsigned short
+#define uint32_t  unsigned int
 
 #define STRINGTAGSIZE 16
 #define AFI_CRCSIZE 2
@@ -46,40 +46,40 @@
 /////////////////////////////////////////////////////
 //  file header
 typedef struct AFIIMG_
-{	
-	byte  afi_img_tag[STRINGTAGSIZE];
-        
-	byte  version_code_major;
-    byte  version_code_minor;
-        
-	dword header_size;
-	
-	dword floppyinfo_offset;
-	dword track_list_offset;
+{
+	uint8_t  afi_img_tag[STRINGTAGSIZE];
 
-	word header_crc;
+	uint8_t  version_code_major;
+    uint8_t  version_code_minor;
+
+	uint32_t header_size;
+
+	uint32_t floppyinfo_offset;
+	uint32_t track_list_offset;
+
+	uint16_t header_crc;
 }AFIIMG;
 
 /////////////////////////////////////////////////////
 //  file info struct
 typedef struct AFIIMGINFO_
-{	
-	byte  afi_img_infos_tag[STRINGTAGSIZE];
-        
-	dword  floppy_info_size;
+{
+	uint8_t   afi_img_infos_tag[STRINGTAGSIZE];
 
-    dword  mediatype_code;
-    dword  platformtype_code;
-        
-	dword  total_track;
-	dword  start_track;
-	dword    end_track;
-	dword  start_side;
-	dword    end_side;
+	uint32_t  floppy_info_size;
 
-	dword number_of_string;
+    uint32_t  mediatype_code;
+    uint32_t  platformtype_code;
+
+	uint32_t  total_track;
+	uint32_t  start_track;
+	uint32_t  end_track;
+	uint32_t  start_side;
+	uint32_t  end_side;
+
+	uint32_t  number_of_string;
 }AFIIMGINFO;
-//dword string_info_list; //*number_of_string
+//uint32_t string_info_list; //*number_of_string
 //word info_crc;
 
 //
@@ -106,12 +106,12 @@ enum {
 /////////////////////////////////////////////////////
 //  string info struct
 typedef struct AFI_STRING_
-{	
-	byte  afi_string_tag[STRINGTAGSIZE];
-	byte  afi_string_type_tag[STRINGTAGSIZE];
-	dword  string_size;
+{
+	uint8_t  afi_string_tag[STRINGTAGSIZE];
+	uint8_t  afi_string_type_tag[STRINGTAGSIZE];
+	uint32_t string_size;
 }AFI_STRING;
-//byte  afi_string;//*string_size
+//uint8_t  afi_string;//*string_size
 //word string_crc;
 
 //string type tag
@@ -123,31 +123,31 @@ typedef struct AFI_STRING_
 #define AFI_FLOPPY_PLATFORMTYPE "PLATFORM_TYPE"
 
 /////////////////////////////////////////////////////
-// track list 
+// track list
 typedef struct AFITRACKLIST_
-{	
-	byte  afi_img_track_list_tag[STRINGTAGSIZE];
-	dword number_of_track;
+{
+	uint8_t  afi_img_track_list_tag[STRINGTAGSIZE];
+	uint32_t number_of_track;
 }AFITRACKLIST;
-//	dword track_offset_list; //*number_of_track
+//	uint32_t track_offset_list; //*number_of_track
 //	word  tracklist_crc;
 
 //
 /////////////////////////////////////////////////////
 // track
 typedef struct AFITRACK_
-{	
-	byte  afi_track_tag[STRINGTAGSIZE];
+{
+	uint8_t  afi_track_tag[STRINGTAGSIZE];
 
-	dword track_number;
-	dword side_number;
+	uint32_t track_number;
+	uint32_t side_number;
 
-	dword encoding_mode;
-	dword nb_of_element;
+	uint32_t encoding_mode;
+	uint32_t nb_of_element;
 
-	dword number_of_data_chunk;
+	uint32_t number_of_data_chunk;
 }AFITRACK;
-//	dword data_offset_list; //*number_of_data_chunk
+//	uint32_t data_offset_list; //*number_of_data_chunk
 //	word  afi_track_crc;
 
 // encoding mode
@@ -174,24 +174,24 @@ enum {
 /////////////////////////////////////////////////////
 // data
 typedef struct AFIDATA_
-{	
-	byte  afi_data_tag[STRINGTAGSIZE];
+{
+	uint8_t  afi_data_tag[STRINGTAGSIZE];
 
-	dword TYPEIDCODE;
-	byte  type_tag[STRINGTAGSIZE];
+	uint32_t TYPEIDCODE;
+	uint8_t  type_tag[STRINGTAGSIZE];
 
-	dword nb_bits_per_element;
+	uint32_t nb_bits_per_element;
 
-	dword packed_size;
-	dword packer_id;
-	dword unpacked_size;
+	uint32_t packed_size;
+	uint32_t packer_id;
+	uint32_t unpacked_size;
 
 }AFIDATA;
-//	byte data;//*packed_size
-//	word  afi_data_crc;
+//	uint8_t data;//*packed_size
+//	uint16_t  afi_data_crc;
 
 
-// data type 
+// data type
 enum {
 	AFI_DATA_NONE,
 	AFI_DATA_MFM,
@@ -210,8 +210,8 @@ enum {
 #define AFI_DATA_TYPE_CELL     "CELL_DATA"
 
 typedef struct AFI_DATACODE_
-{	
-	byte  idcode;        
+{
+	uint8_t  idcode;
 	char * idcodetag;
 }AFI_DATACODE;
 

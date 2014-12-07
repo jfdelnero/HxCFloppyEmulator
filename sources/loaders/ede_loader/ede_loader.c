@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -131,8 +132,6 @@ int EDE_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile : non EDE file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 
@@ -142,10 +141,9 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j,l;
-	int k;
-	unsigned char gap3len,interleave;
-	unsigned short rpm,sectorsize;
+	int i,j,l,k;
+	int gap3len,interleave;
+	int rpm,sectorsize;
 	HXCFE_CYLINDER* currentcylinder;
 	unsigned char header_buffer[512];
 	int header_offset;
@@ -154,7 +152,7 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	unsigned char bitmask;
 	int floppy_buffer_index;
 	unsigned char trackformat;
-	unsigned char skew;
+	int skew;
 	HXCFE_SECTCFG  * sectorconfig;
 	unsigned int sectorsizelayout[32];
 	unsigned int sectoridlayout[32];
@@ -392,7 +390,7 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_BADFILE;
 }
 
-int EDE_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int EDE_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ENSONIQ_EDE";

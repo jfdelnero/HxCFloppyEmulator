@@ -17,7 +17,7 @@
 // FAT File IO Library is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
+// (at your option) any later version. 
 //
 // FAT File IO Library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -256,14 +256,13 @@ uint32 fatfs_find_next_cluster(struct fatfs *fs, uint32 current_cluster)
         current_cluster = 2;
 
     // Find which sector of FAT table to read
-
     if (fs->fat_type == FAT_TYPE_12)
     {
         position = ( (current_cluster * 3) / 2 );
         fat_sector_offset =  position / fs->sector_size;
 
         reload_needed = 0;
-        if ( (unsigned long)(position % fs->sector_size) == (unsigned long)(fs->sector_size-1))
+        if ( (uint32_t)(position % fs->sector_size) == (uint32_t)(fs->sector_size-1))
         {
             // reload needed
             reload_needed = 1;
@@ -401,7 +400,7 @@ int fatfs_find_blank_cluster(struct fatfs *fs, uint32 start_cluster, uint32 *fre
             fat_sector_offset =  position / fs->sector_size;
 
             reload_needed = 0;
-            if ( (unsigned long)(position % fs->sector_size) == (unsigned long)(fs->sector_size-1))
+            if ( (uint32_t)(position % fs->sector_size) == (uint32_t)(fs->sector_size-1))
             {
                 // reload needed
                 reload_needed = 1;
@@ -502,7 +501,7 @@ int fatfs_fat_set_cluster(struct fatfs *fs, uint32 cluster, uint32 next_cluster)
         fat_sector_offset =  position / fs->sector_size;
 
         reload_needed = 0;
-        if ( (unsigned long)(position % fs->sector_size) == (unsigned long)(fs->sector_size-1))
+        if ( (uint32_t)(position % fs->sector_size) == (uint32_t)(fs->sector_size-1))
         {
             // reload needed
             reload_needed = 1;

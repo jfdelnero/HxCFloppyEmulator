@@ -100,21 +100,20 @@ char APRIDISK_HeaderString[]="ACT Apricot disk image\032\004";
 
 typedef struct apridisk_data_record_
 {
-	unsigned long  item_type;
-	unsigned short compression;
-	unsigned short header_size;
-	unsigned long data_size;
-	unsigned char head;
-	unsigned char sector;
-	unsigned short cylinder;
+	uint32_t item_type;
+	uint16_t compression;
+	uint16_t header_size;
+	uint32_t data_size;
+	uint8_t  head;
+	uint8_t  sector;
+	uint16_t cylinder;
 }apridisk_data_record;
 
 
 typedef struct apridisk_compressed_data_
 {
-	unsigned short count;
-	unsigned char  byte;
+	uint16_t count;
+	uint8_t  byte;
 }apridisk_compressed_data;
-
 
 #pragma pack()

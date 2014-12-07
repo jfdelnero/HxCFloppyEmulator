@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -112,12 +113,12 @@ int VDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	FILE * f;
 	unsigned int filesize,filetracklen;
-	unsigned int i,j,file_offset;
-	unsigned char  gap3len,interleave;
+	int i,j,file_offset;
+	int gap3len,interleave;
 	unsigned char* trackdata;
 	vdk_header vdk_h;
-	unsigned short rpm,sectorsize;
-	unsigned char skew,trackformat;
+	int rpm,sectorsize;
+	int skew,trackformat;
 	HXCFE_CYLINDER* currentcylinder;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VDK_libLoad_DiskFile %s",imgfile);
@@ -196,7 +197,7 @@ int VDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_NOERROR;
 }
 
-int VDK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int VDK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="DRAGON3264_VDK";

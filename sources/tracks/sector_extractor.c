@@ -47,6 +47,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "sector_search.h"
@@ -1491,6 +1493,7 @@ int write_FM_sectordata(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 	unsigned char CRC16_High;
 	unsigned char CRC16_Low;
 	unsigned char crctable[32];
+	unsigned char temp;
 
 	// Data CRC
 	CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
@@ -1503,7 +1506,8 @@ int write_FM_sectordata(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 	}
 
 	bit_offset = sector->startdataindex;
-	bit_offset = bintofm(track->databuffer,track->tracklen,&sector->alternate_datamark,1,bit_offset);
+	temp = (unsigned char)sector->alternate_datamark;
+	bit_offset = bintofm(track->databuffer,track->tracklen,&temp,1,bit_offset);
 	// Clear missing clocks
 	setbit(track->databuffer,bit_offset-15,0);
 	setbit(track->databuffer,bit_offset-19,0);
@@ -1523,7 +1527,6 @@ int write_MFM_sectordata(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG *
 	unsigned char temp;
 	unsigned char crctable[32];
 
-	temp = 0x4E;
 	// Data CRC
 	CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
 
@@ -1538,10 +1541,12 @@ int write_MFM_sectordata(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG *
 	}
 
 	bit_offset = sector->startdataindex + (3*8*2);
-	bit_offset = bintomfm(track->databuffer,track->tracklen,&sector->alternate_datamark,1,bit_offset);
+	temp = (unsigned char)sector->alternate_datamark;
+	bit_offset = bintomfm(track->databuffer,track->tracklen,&temp,1,bit_offset);
 	bit_offset = bintomfm(track->databuffer,track->tracklen,buffer,buffersize,bit_offset);
 	bit_offset = bintomfm(track->databuffer,track->tracklen,&CRC16_High,1,bit_offset);
 	bit_offset = bintomfm(track->databuffer,track->tracklen,&CRC16_Low ,1,bit_offset);
+	temp = 0x4E;
 	bit_offset = bintomfm(track->databuffer,track->tracklen,&temp ,1,bit_offset);
 
 	return 0;
@@ -1551,8 +1556,7 @@ int write_AMIGAMFM_sectordata(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECT
 {
 	int bit_offset;
 	unsigned char sectorparity[2];
-	unsigned int i;
-	int l;
+	int i,l;
 	unsigned char  byte;
 	unsigned short lastbit,mfm_code;
 	unsigned char  *mfm_buffer;
@@ -1816,7 +1820,7 @@ HXCFE_SECTORACCESS* hxcfe_initSectorAccess(HXCFE* floppycontext,HXCFE_FLOPPY *fp
 	return ss_ctx;
 }
 
-HXCFE_SECTCFG* hxcfe_getNextSector(HXCFE_SECTORACCESS* ss_ctx,int track,int side,int type)
+HXCFE_SECTCFG* hxcfe_getNextSector( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t type )
 {
 	HXCFE_SECTCFG * sc;
 	SECTORSEARCHTRACKCACHE * trackcache;
@@ -1946,7 +1950,7 @@ void hxcfe_resetSearchTrackPosition(HXCFE_SECTORACCESS* ss_ctx)
 	}
 }
 
-HXCFE_SECTCFG** hxcfe_getAllTrackSectors(HXCFE_SECTORACCESS* ss_ctx,int track,int side,int type,int * nb_sectorfound)
+HXCFE_SECTCFG** hxcfe_getAllTrackSectors( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t type, int32_t * nb_sectorfound )
 {
 	int i;
 	HXCFE_SECTCFG * sc;
@@ -1993,8 +1997,7 @@ HXCFE_SECTCFG** hxcfe_getAllTrackSectors(HXCFE_SECTORACCESS* ss_ctx,int track,in
 	return scarray;
 }
 
-
-HXCFE_SECTCFG** hxcfe_getAllTrackISOSectors(HXCFE_SECTORACCESS* ss_ctx,int track,int side,int * nb_sectorfound)
+HXCFE_SECTCFG** hxcfe_getAllTrackISOSectors( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t * nb_sectorfound )
 {
 	int i,i_fm,i_mfm;
 	HXCFE_SECTCFG * sc;
@@ -2142,7 +2145,7 @@ HXCFE_SECTCFG** hxcfe_getAllTrackISOSectors(HXCFE_SECTORACCESS* ss_ctx,int track
 }
 
 
-HXCFE_SECTCFG* hxcfe_searchSector(HXCFE_SECTORACCESS* ss_ctx,int track,int side,int id,int type)
+HXCFE_SECTCFG* hxcfe_searchSector ( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t id, int32_t type )
 {
 	HXCFE_SECTCFG * sc;
 	SECTORSEARCHTRACKCACHE * trackcache;
@@ -2214,17 +2217,17 @@ HXCFE_SECTCFG* hxcfe_searchSector(HXCFE_SECTORACCESS* ss_ctx,int track,int side,
 	return 0;
 }
 
-int hxcfe_getSectorSize(HXCFE_SECTORACCESS* ss_ctx,HXCFE_SECTCFG* sc)
+int32_t hxcfe_getSectorSize( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SECTCFG* sc )
 {
 	return sc->sectorsize;
 }
 
-unsigned char * hxcfe_getSectorData(HXCFE_SECTORACCESS* ss_ctx,HXCFE_SECTCFG* sc)
+uint8_t * hxcfe_getSectorData(HXCFE_SECTORACCESS* ss_ctx,HXCFE_SECTCFG* sc)
 {
 	return sc->input_data;
 }
 
-int hxcfe_getFloppySize(HXCFE* floppycontext,HXCFE_FLOPPY *fp,int * nbsector)
+int32_t hxcfe_getFloppySize( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t * nbsector )
 {
 	HXCFE_SECTORACCESS* ss_ctx;
 	HXCFE_SECTCFG* sc;
@@ -2322,7 +2325,7 @@ int hxcfe_readSectorData(HXCFE_SECTORACCESS* ss_ctx,int track,int side,int secto
 			sc = hxcfe_searchSector ( ss_ctx, track, side, sector + nbsectorread, type);
 			if(sc)
 			{
-				if(sc->sectorsize == (unsigned int)sectorsize)
+				if(sc->sectorsize == sectorsize)
 				{
 					if(sc->input_data)
 					{
@@ -2446,7 +2449,7 @@ void hxcfe_freeSectorConfig(HXCFE_SECTORACCESS* ss_ctx,HXCFE_SECTCFG* sc)
 	}
 }
 
-unsigned char hxcfe_getSectorConfigEncoding(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
+int32_t hxcfe_getSectorConfigEncoding(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 {
 	if(sc)
 	{
@@ -2455,7 +2458,7 @@ unsigned char hxcfe_getSectorConfigEncoding(HXCFE* floppycontext,HXCFE_SECTCFG* 
 	return 0;
 }
 
-unsigned char hxcfe_getSectorConfigSectorID(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
+int32_t hxcfe_getSectorConfigSectorID(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 {
 	if(sc)
 	{
@@ -2464,7 +2467,7 @@ unsigned char hxcfe_getSectorConfigSectorID(HXCFE* floppycontext,HXCFE_SECTCFG* 
 	return 0;
 }
 
-unsigned char hxcfe_getSectorConfigDataMark(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
+int32_t hxcfe_getSectorConfigDataMark(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 {
 	if(sc)
 	{
@@ -2473,7 +2476,7 @@ unsigned char hxcfe_getSectorConfigDataMark(HXCFE* floppycontext,HXCFE_SECTCFG* 
 	return 0;
 }
 
-unsigned char hxcfe_getSectorConfigSideID(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
+int32_t hxcfe_getSectorConfigSideID(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 {
 	if(sc)
 	{
@@ -2482,7 +2485,7 @@ unsigned char hxcfe_getSectorConfigSideID(HXCFE* floppycontext,HXCFE_SECTCFG* sc
 	return 0;
 }
 
-unsigned char hxcfe_getSectorConfigSizeID(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
+int32_t hxcfe_getSectorConfigSizeID(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 {
 	if(sc)
 	{
@@ -2491,7 +2494,7 @@ unsigned char hxcfe_getSectorConfigSizeID(HXCFE* floppycontext,HXCFE_SECTCFG* sc
 	return 0;
 }
 
-unsigned char hxcfe_getSectorConfigTrackID(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
+int32_t hxcfe_getSectorConfigTrackID(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 {
 	if(sc)
 	{
@@ -2500,7 +2503,7 @@ unsigned char hxcfe_getSectorConfigTrackID(HXCFE* floppycontext,HXCFE_SECTCFG* s
 	return 0;
 }
 
-unsigned short hxcfe_getSectorConfigHCRC(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
+uint32_t hxcfe_getSectorConfigHCRC(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 {
 	if(sc)
 	{
@@ -2509,7 +2512,7 @@ unsigned short hxcfe_getSectorConfigHCRC(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 	return 0;
 }
 
-unsigned short hxcfe_getSectorConfigDCRC(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
+uint32_t hxcfe_getSectorConfigDCRC(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 {
 	if(sc)
 	{
@@ -2518,7 +2521,7 @@ unsigned short hxcfe_getSectorConfigDCRC(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 	return 0;
 }
 
-unsigned int hxcfe_getSectorConfigSectorSize(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
+int32_t hxcfe_getSectorConfigSectorSize(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 {
 	if(sc)
 	{
@@ -2527,7 +2530,7 @@ unsigned int hxcfe_getSectorConfigSectorSize(HXCFE* floppycontext,HXCFE_SECTCFG*
 	return 0;
 }
 
-unsigned long hxcfe_getSectorConfigStartSectorIndex(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
+int32_t hxcfe_getSectorConfigStartSectorIndex(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 {
 	if(sc)
 	{
@@ -2536,7 +2539,7 @@ unsigned long hxcfe_getSectorConfigStartSectorIndex(HXCFE* floppycontext,HXCFE_S
 	return 0;
 }
 
-unsigned long hxcfe_getSectorConfigStartDataIndex(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
+int32_t hxcfe_getSectorConfigStartDataIndex(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 {
 	if(sc)
 	{
@@ -2545,7 +2548,7 @@ unsigned long hxcfe_getSectorConfigStartDataIndex(HXCFE* floppycontext,HXCFE_SEC
 	return 0;
 }
 
-unsigned long hxcfe_getSectorConfigEndSectorIndex(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
+int32_t hxcfe_getSectorConfigEndSectorIndex(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 {
 	if(sc)
 	{
@@ -2554,7 +2557,7 @@ unsigned long hxcfe_getSectorConfigEndSectorIndex(HXCFE* floppycontext,HXCFE_SEC
 	return 0;
 }
 
-unsigned char * hxcfe_getSectorConfigInputData(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
+uint8_t * hxcfe_getSectorConfigInputData(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 {
 	if(sc)
 	{
@@ -2563,7 +2566,7 @@ unsigned char * hxcfe_getSectorConfigInputData(HXCFE* floppycontext,HXCFE_SECTCF
 	return 0;
 }
 
-unsigned char   hxcfe_getSectorConfigHCRCStatus(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
+int32_t hxcfe_getSectorConfigHCRCStatus(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 {
 	if(sc)
 	{
@@ -2572,7 +2575,7 @@ unsigned char   hxcfe_getSectorConfigHCRCStatus(HXCFE* floppycontext,HXCFE_SECTC
 	return 0;
 }
 
-unsigned char   hxcfe_getSectorConfigDCRCStatus(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
+int32_t hxcfe_getSectorConfigDCRCStatus(HXCFE* floppycontext,HXCFE_SECTCFG* sc)
 {
 	if(sc)
 	{

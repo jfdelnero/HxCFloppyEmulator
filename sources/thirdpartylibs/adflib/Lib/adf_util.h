@@ -31,16 +31,16 @@
 #include "adf_str.h"
 
 
-void swLong(unsigned char* buf, unsigned long val);
+void swLong(unsigned char* buf, uint32_t val);
 void swShort(unsigned char* buf, unsigned short val);
 
 PREFIX struct List* newCell(struct List* list, void* content);
 PREFIX void freeList(struct List* list);
-void adfDays2Date(long days, int *yy, int *mm, int *dd);
+void adfDays2Date(int32_t days, int *yy, int *mm, int *dd);
 
 BOOL adfIsLeap(int y);
     void
-adfTime2AmigaTime(struct DateTime dt, long *day, long *min, long *ticks );
+adfTime2AmigaTime(struct DateTime dt, int32_t *day, int32_t *min, int32_t *ticks );
     struct DateTime
 adfGiveCurrentTime( void );
 void dumpBlock(unsigned char *buf);

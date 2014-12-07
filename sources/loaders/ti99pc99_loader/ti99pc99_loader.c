@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -247,11 +248,11 @@ int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j;
-	unsigned int file_offset;
+	int i,j;
+	int file_offset;
 	unsigned char* trackdata;
 	unsigned char* trackclk;
-	unsigned short rpm;
+	int rpm;
 	int fmmode,tracklen,numberoftrack,numberofside;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
@@ -386,7 +387,7 @@ int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	return HXCFE_BADFILE;
 }
 
-int TI99PC99_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int TI99PC99_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="TI994A_PC99";

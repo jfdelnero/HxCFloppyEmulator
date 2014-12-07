@@ -52,6 +52,7 @@
 #include <math.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
@@ -100,11 +101,9 @@ int SCP_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCP_libIsValidDiskFile : non SCP file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
-static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,unsigned long foffset,short * rpm,float timecoef,int phasecorrection,int revolution)
+static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,uint32_t foffset,short * rpm,float timecoef,int phasecorrection,int revolution)
 {
 	HXCFE_SIDE* currentside;
 	int totallength,i,k,offset;
@@ -114,11 +113,11 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,unsigned long foff
 	scp_track_header trkh;
 
 	unsigned short * trackbuf;
-	unsigned long * trackbuf_dword;
-	unsigned long realnumberofpulses;
-	unsigned long revonumberofpulses;
-	unsigned long curpulselength;
-	unsigned long j;
+	uint32_t * trackbuf_dword;
+	uint32_t realnumberofpulses;
+	uint32_t revonumberofpulses;
+	uint32_t curpulselength;
+	uint32_t j;
 
 	currentside=0;
 
@@ -183,10 +182,10 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,unsigned long foff
 
 					realnumberofpulses = 0;
 
-					trackbuf_dword = malloc((totallength+1)*sizeof(unsigned long));
+					trackbuf_dword = malloc((totallength+1)*sizeof(uint32_t));
 					if(trackbuf_dword)
 					{
-						memset(trackbuf_dword,0x00,(totallength+1)*sizeof(unsigned long));
+						memset(trackbuf_dword,0x00,(totallength+1)*sizeof(uint32_t));
 						curpulselength = 0;
 						k = 0;
 
@@ -285,7 +284,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int phasecorrection;
 
 	scp_header scph;
-	unsigned long tracksoffset[83*2];
+	uint32_t tracksoffset[83*2];
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCP_libLoad_DiskFile");
 
@@ -436,7 +435,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_BADFILE;
 }
 
-int SCP_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int SCP_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 	static const char plug_id[]="SCP_FLUX_STREAM";
 	static const char plug_desc[]="SCP Stream Loader";

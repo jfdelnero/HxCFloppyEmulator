@@ -138,12 +138,16 @@
 
 #define SEC_CYL_MAP  0x80
 #define SEC_HEAD_MAP 0x40
+
+#pragma pack(1)
+
 typedef struct imd_trackheader_
 {
-	unsigned char track_mode_code;
-	unsigned char physical_cylinder;
-	unsigned char physical_head; // (!bits 7 & 6) 
-	unsigned char number_of_sector;
-	unsigned char sector_size_code;
+	uint8_t track_mode_code;
+	uint8_t physical_cylinder;
+	uint8_t physical_head; // (!bits 7 & 6) 
+	uint8_t number_of_sector;
+	uint8_t sector_size_code;
 }imd_trackheader;
 
+#pragma pack()

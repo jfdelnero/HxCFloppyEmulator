@@ -91,7 +91,7 @@
 /* 56   28 */ unsigned char FAR *window;/*          size of window, wsize!=0 */
 /* 64   32 */ code const FAR *lcode;    /* ebp rbp  local strm->lencode */
 /* 72   36 */ code const FAR *dcode;    /*     r11  local strm->distcode */
-/* 80   40 */ size_t /*unsigned long */hold;       /* edx rdx  local strm->hold */
+/* 80   40 */ size_t /*uint32_t */hold;       /* edx rdx  local strm->hold */
 /* 88   44 */ unsigned bits;            /* ebx rbx  local strm->bits */
 /* 92   48 */ unsigned wsize;           /*          window size */
 /* 96   52 */ unsigned write;           /*          window write index */
@@ -144,7 +144,7 @@ unsigned start;         /* inflate()'s starting value for strm->avail_out */
 
     /* align in on 1/2 hold size boundary */
     while (((size_t)(void *)ar.in & (sizeof(ar.hold) / 2 - 1)) != 0) {
-        ar.hold += (unsigned long)*ar.in++ << ar.bits;
+        ar.hold += (uint32_t)*ar.in++ << ar.bits;
         ar.bits += 8;
     }
 
@@ -178,7 +178,7 @@ unsigned start;         /* inflate()'s starting value for strm->avail_out */
     strm->avail_out = (unsigned)(ar.out < ar.end ?
                                  PAD_AVAIL_OUT + (ar.end - ar.out) :
                                  PAD_AVAIL_OUT - (ar.out - ar.end));
-    state->hold = (unsigned long)ar.hold;
+    state->hold = (uint32_t)ar.hold;
     state->bits = ar.bits;
     return;
 }

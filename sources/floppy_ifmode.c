@@ -47,6 +47,9 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "types.h"
+
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 #include "floppy_loader.h"
@@ -54,14 +57,14 @@
 
 typedef struct interfacemode_
 {
-	int ifmodeid;
+	int32_t ifmodeid;
 	const char* ifmodename;
 	const char* ifmodedesc;
 }interfacemode;
 
 typedef struct trackmode_
 {
-	int trackmodeid;
+	int32_t trackmodeid;
 	const char* trackmodename;
 	const char* trackmodedesc;
 }trackmode;
@@ -103,22 +106,23 @@ interfacemode interfacemodelist[]=
 	{-1,"",	""},
 };
 
-
-
-
 int hxcfe_getFloppyInterfaceModeID(HXCFE* floppycontext,char * ifmode)
 {
 	int i;
-
-	i=0;
-
-	while( strcmp( interfacemodelist[i].ifmodename , ifmode ) && ( interfacemodelist[i].ifmodeid >= 0 ) )
+	
+	if(floppycontext)
 	{
-		i++;
+		i=0;
+
+		while( strcmp( interfacemodelist[i].ifmodename , ifmode ) && ( interfacemodelist[i].ifmodeid >= 0 ) )
+		{
+			i++;
+		}
+
+		return interfacemodelist[i].ifmodeid;
 	}
-
-	return interfacemodelist[i].ifmodeid;
-
+	
+	return 0;
 }
 
 const char * hxcfe_getFloppyInterfaceModeName(HXCFE* floppycontext,int ifmodeid)
@@ -126,35 +130,46 @@ const char * hxcfe_getFloppyInterfaceModeName(HXCFE* floppycontext,int ifmodeid)
 	
 	int i;
 
-	i=0;
-
-	while( ( interfacemodelist[i].ifmodeid != ifmodeid ) && ( interfacemodelist[i].ifmodeid >= 0 ) )
+	if(floppycontext)
 	{
-		i++;
+		i=0;
+
+
+		while( ( interfacemodelist[i].ifmodeid != ifmodeid ) && ( interfacemodelist[i].ifmodeid >= 0 ) )
+		{
+			i++;
+		}
+
+		if( interfacemodelist[i].ifmodeid <0 )
+			return NULL;
+		else
+			return interfacemodelist[i].ifmodename;
 	}
 
-	if( interfacemodelist[i].ifmodeid <0 )
-		return NULL;
-	else
-		return interfacemodelist[i].ifmodename;
-
+	return 0;
 }
 
 const char * hxcfe_getFloppyInterfaceModeDesc(HXCFE* floppycontext,int ifmodeid)
 {
 	int i;
 
-	i=0;
-
-	while( ( interfacemodelist[i].ifmodeid != ifmodeid ) && ( interfacemodelist[i].ifmodeid >= 0 ) )
+	if(floppycontext)
 	{
-		i++;
+
+		i=0;
+
+		while( ( interfacemodelist[i].ifmodeid != ifmodeid ) && ( interfacemodelist[i].ifmodeid >= 0 ) )
+		{
+			i++;
+		}
+
+		if( interfacemodelist[i].ifmodeid <0 )
+			return NULL;
+		else
+			return interfacemodelist[i].ifmodedesc;
 	}
 
-	if( interfacemodelist[i].ifmodeid <0 )
-		return NULL;
-	else
-		return interfacemodelist[i].ifmodedesc;
+	return 0;
 }
 
 
@@ -163,16 +178,21 @@ const char * hxcfe_getTrackEncodingName(HXCFE* floppycontext,int trackencodingid
 	
 	int i;
 
-	i=0;
-
-	while( ( trackmodelist[i].trackmodeid != trackencodingid ) && ( trackmodelist[i].trackmodeid >= 0 ) )
+	if(floppycontext)
 	{
-		i++;
+
+		i=0;
+
+		while( ( trackmodelist[i].trackmodeid != trackencodingid ) && ( trackmodelist[i].trackmodeid >= 0 ) )
+		{
+			i++;
+		}
+
+		if( trackmodelist[i].trackmodeid <0 )
+			return NULL;
+		else
+			return trackmodelist[i].trackmodename;
 	}
 
-	if( trackmodelist[i].trackmodeid <0 )
-		return NULL;
-	else
-		return trackmodelist[i].trackmodename;
-
+	return 0;
 }

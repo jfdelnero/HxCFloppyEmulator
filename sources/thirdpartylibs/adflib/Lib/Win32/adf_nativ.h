@@ -33,28 +33,28 @@
 #endif
 
 #ifndef RETCODE
-#define RETCODE long
+#define RETCODE int32_t
 #endif
 
 struct nativeDevice{
 	FILE *fd; /* needed by adf_dump.c */
 	unsigned char * memory_buffer;
-	unsigned long memory_buffer_size;
+	uint32_t memory_buffer_size;
 	void *hDrv;
 };
 
 struct nativeFunctions{
 	RETCODE (*adfInitDevice)(struct Device*, char*, BOOL);
-	RETCODE (*adfNativeReadSector)(struct Device*, long, int, unsigned char*);
-	RETCODE (*adfNativeWriteSector)(struct Device*, long, int, unsigned char*);
+	RETCODE (*adfNativeReadSector)(struct Device*, int32_t, int, unsigned char*);
+	RETCODE (*adfNativeWriteSector)(struct Device*, int32_t, int, unsigned char*);
 	BOOL (*adfIsDevNative)(char*);
 	RETCODE (*adfReleaseDevice)();
 };
 
 void adfInitNativeFct();
 
-RETCODE Win32ReadSector(struct Device *dev, long n, int size, unsigned char* buf);
-RETCODE Win32WriteSector(struct Device *dev, long n, int size, unsigned char* buf);
+RETCODE Win32ReadSector(struct Device *dev, int32_t n, int size, unsigned char* buf);
+RETCODE Win32WriteSector(struct Device *dev, int32_t n, int size, unsigned char* buf);
 RETCODE Win32InitDevice(struct Device *dev, char* name, BOOL ro);
 RETCODE Win32ReleaseDevice(struct Device *dev);
 BOOL Win32IsDevNative(char*);

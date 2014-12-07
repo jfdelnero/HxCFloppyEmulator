@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -93,8 +94,6 @@ int FDI_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile : non FDI file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 
@@ -103,14 +102,14 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 {
 
 	FILE * f;
-	unsigned int  i,j,k,file_size;
-	unsigned char interleave;
-	unsigned short rpm;
+	int  i,j,k,file_size;
+	int interleave;
+	int rpm;
 	int number_of_track,number_of_side,number_of_sectorpertrack;
 	unsigned char tempsector[256];
-	unsigned char trackformat;
-	unsigned char skew;
-	unsigned int  trackoffset,tempoffset,file_offset;
+	int trackformat;
+	int skew;
+	int trackoffset,tempoffset,file_offset;
 	HXCFE_SECTCFG* sectorconfig;
 	HXCFE_CYLINDER* currentcylinder;
 
@@ -252,7 +251,7 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 }
 
 
-int FDI_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int FDI_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ZXSPECTRUM_FDI";

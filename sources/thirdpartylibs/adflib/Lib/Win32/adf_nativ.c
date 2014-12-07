@@ -76,7 +76,7 @@ RETCODE Win32InitDevice(struct Device* dev, char* lpstrName, BOOL ro)
 }
 
 
-RETCODE Win32ReadSector(struct Device *dev, long n, int size, unsigned char* buf)
+RETCODE Win32ReadSector(struct Device *dev, int32_t n, int size, unsigned char* buf)
 {
 	struct nativeDevice* tDev;
 
@@ -91,7 +91,7 @@ RETCODE Win32ReadSector(struct Device *dev, long n, int size, unsigned char* buf
 }
 
 
-RETCODE Win32WriteSector(struct Device *dev, long n, int size, unsigned char* buf)
+RETCODE Win32WriteSector(struct Device *dev, int32_t n, int size, unsigned char* buf)
 {
 	struct nativeDevice* tDev;
 

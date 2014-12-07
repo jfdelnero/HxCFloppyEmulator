@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 #include "./tracks/track_generator.h"
@@ -148,7 +149,7 @@ int DMK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 }
 
 
-HXCFE_SIDE* DMKpatchtrack(HXCFE* floppycontext,unsigned char * trackdata, unsigned char * trackclk,unsigned short * idamoffset,unsigned int tracklen,unsigned long * tracktotalsize, dmk_header *dmkh,int s)
+HXCFE_SIDE* DMKpatchtrack(HXCFE* floppycontext,unsigned char * trackdata, unsigned char * trackclk,unsigned short * idamoffset,unsigned int tracklen,uint32_t * tracktotalsize, dmk_header *dmkh,int s)
 {
 	int i,j,l;
 	unsigned int nbofsector,lastptr,lastdensity,tracksize,bitrate,k;
@@ -416,12 +417,12 @@ int DMK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j;
+	int i,j;
 	unsigned int file_offset;
-	unsigned long tracktotalsize;
+	uint32_t tracktotalsize;
 	unsigned char* trackdata;
 	unsigned char* trackclk;
-	unsigned short rpm;
+	int rpm;
 	int numberoftrack,numberofside;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
@@ -512,7 +513,7 @@ int DMK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_BADFILE;
 }
 
-int DMK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int DMK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="TRS80_DMK";

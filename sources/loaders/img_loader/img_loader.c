@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -61,7 +62,7 @@
 
 #include "libhxcadaptor.h"
 
-int pc_imggetfloppyconfig(unsigned char * img,unsigned int filesize,unsigned short *numberoftrack,unsigned char *numberofside,unsigned short *numberofsectorpertrack,unsigned char *gap3len,unsigned char *interleave,unsigned short *rpm, unsigned int *bitrate,unsigned short * ifmode)
+int pc_imggetfloppyconfig(unsigned char * img,unsigned int filesize,int *numberoftrack,int *numberofside,int *numberofsectorpertrack,int *gap3len,int *interleave,int *rpm, int *bitrate,int * ifmode)
 {
 	int i;
 	unsigned char * uimg;
@@ -194,8 +195,6 @@ int IMG_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMG_libIsValidDiskFile : non IMG file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 
@@ -205,12 +204,12 @@ int IMG_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j;
+	int i,j;
 	unsigned int file_offset;
 	unsigned char* trackdata;
-	unsigned char gap3len,interleave;
-	unsigned short rpm;
-	unsigned short sectorsize;
+	int gap3len,interleave;
+	int rpm;
+	int sectorsize;
 	unsigned char trackformat;
 	HXCFE_CYLINDER* currentcylinder;
 
@@ -296,7 +295,7 @@ int IMG_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_BADFILE;
 }
 
-int IMG_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int IMG_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="RAW_IMG";

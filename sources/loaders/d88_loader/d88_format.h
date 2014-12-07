@@ -86,25 +86,25 @@ Note: sector size and data size are coded using 2 bytes with little endian.
 
 typedef struct d88_fileheader_
 {
-	unsigned char name[16];
-	unsigned char reserved[10];
-	unsigned char write_protect;
-	unsigned char media_flag;
-	unsigned long file_size;
+	uint8_t name[16];
+	uint8_t reserved[10];
+	uint8_t write_protect;
+	uint8_t media_flag;
+	uint32_t file_size;
 }d88_fileheader;
 
 typedef struct d88_sector_
 {
-	unsigned char  cylinder;
-	unsigned char  head;
-	unsigned char  sector_id;
-	unsigned char  sector_size;
-	unsigned short number_of_sectors;
-	unsigned char  density;
-	unsigned char  deleted_data;
-	unsigned char  sector_status;
-	unsigned char  reserved[5];
-	unsigned short sector_length;
+	uint8_t  cylinder;
+	uint8_t  head;
+	uint8_t  sector_id;
+	uint8_t  sector_size;
+	uint16_t number_of_sectors;
+	uint8_t  density;
+	uint8_t  deleted_data;
+	uint8_t  sector_status;
+	uint8_t  reserved[5];
+	uint16_t sector_length;
 }d88_sector;
 
 #pragma pack()

@@ -47,6 +47,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -63,7 +65,7 @@
 
 #define UNPACKBUFFER 128*1024
 
-extern int pc_imggetfloppyconfig(unsigned char * img,unsigned int filesize,unsigned short *numberoftrack,unsigned char *numberofside,unsigned short *numberofsectorpertrack,unsigned char *gap3len,unsigned char *interleave,unsigned short *rpm, unsigned int *bitrate,unsigned short * ifmode);
+extern int pc_imggetfloppyconfig(unsigned char * img,unsigned int filesize,int *numberoftrack,int *numberofside,int *numberofsectorpertrack,int *gap3len,int *interleave,int *rpm, int *bitrate,int * ifmode);
 
 int IMZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
@@ -98,26 +100,24 @@ int IMZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMZ_libIsValidDiskFile : non IMZ file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 
 
 int IMZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	unsigned int filesize;
-	unsigned int i,j;
-	unsigned int file_offset;
-	unsigned short sectorsize;
-	unsigned char gap3len,skew,trackformat,interleave;
+	int filesize;
+	int i,j;
+	int file_offset;
+	int sectorsize;
+	int gap3len,skew,trackformat,interleave;
 	char filename_inzip[256];
 	unsigned char* flatimg;
 	int err=UNZ_OK;
 	unzFile uf;
 	unz_file_info file_info;
 	HXCFE_CYLINDER* currentcylinder;
-	unsigned short rpm;
+	int rpm;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMZ_libLoad_DiskFile %s",imgfile);
 
@@ -208,7 +208,7 @@ int IMZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_BADFILE;
 }
 
-int IMZ_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int IMZ_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="RAW_IMZ";

@@ -1124,7 +1124,7 @@ local int detect_data_type(s)
      * set bits 0..6, 14..25, and 28..31
      * 0xf3ffc07f = binary 11110011111111111100000001111111
      */
-    unsigned long black_mask = 0xf3ffc07fUL;
+    uint32_t black_mask = 0xf3ffc07fUL;
     int n;
 
     /* Check for non-textual ("black-listed") bytes. */

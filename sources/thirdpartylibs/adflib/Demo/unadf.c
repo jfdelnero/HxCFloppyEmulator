@@ -101,7 +101,7 @@ void extractFile(struct Volume *vol, char* name, char* path, unsigned char *extb
 {
     struct File *file;
     FILE* out;
-    long n;
+    int32_t n;
     char *filename;
 
     filename = NULL;

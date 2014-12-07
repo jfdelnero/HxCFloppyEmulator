@@ -31,17 +31,17 @@
 
 typedef struct _HXCFE_SIDE
 {
-    unsigned int    number_of_sector;        // Number of sectors per track (if know) -> -1 if unknow.
-    unsigned char * databuffer;              // data buffer.
-    long            bitrate;                 // if equal to VARIABLEBITRATE timingbuffer must be used.
-    unsigned long * timingbuffer;            // bitrate buffer.
-    unsigned char * flakybitsbuffer;         // if equal to zero no flakey/weak bits information.
-    unsigned char * indexbuffer;             // index state buffer signal 1->asserted 0->non asserted.
-    unsigned char * track_encoding_buffer;   // track encoding indication buffer.
+    int32_t         number_of_sector;        // Number of sectors per track (if know) -> -1 if unknow.
+    uint8_t       * databuffer;              // data buffer.
+    int32_t         bitrate;                 // if equal to VARIABLEBITRATE timingbuffer must be used.
+    uint32_t      * timingbuffer;            // bitrate buffer.
+    uint8_t       * flakybitsbuffer;         // if equal to zero no flakey/weak bits information.
+    uint8_t       * indexbuffer;             // index state buffer signal 1->asserted 0->non asserted.
+    uint8_t       * track_encoding_buffer;   // track encoding indication buffer.
     
-    unsigned char   track_encoding;
+    int32_t         track_encoding;
 
-    unsigned long   tracklen;                // databuffer/timingbuffer/flakybitsbuffer/indexbuffer length
+    int32_t         tracklen;                // databuffer/timingbuffer/flakybitsbuffer/indexbuffer length
 }HXCFE_SIDE;
 #define _HXCFE_SIDE_
 
@@ -49,8 +49,8 @@ typedef struct _HXCFE_SIDE
 
 typedef struct _HXCFE_CYLINDER
 {
-    unsigned short  floppyRPM;                // rotation par minute (informatif/optionnel)
-    unsigned char   number_of_side;
+    int32_t         floppyRPM;                // rotation par minute (informatif/optionnel)
+    int32_t         number_of_side;
     HXCFE_SIDE  **  sides;
 }HXCFE_CYLINDER;
 #define _HXCFE_CYLINDER_
@@ -59,14 +59,14 @@ typedef struct _HXCFE_CYLINDER
 
 typedef struct _HXCFE_FLOPPY
 {
-    unsigned int    floppyBitRate;
+    int32_t         floppyBitRate;
 
-    unsigned char   floppyNumberOfSide;
-    unsigned short  floppyNumberOfTrack;
-    unsigned short  floppySectorPerTrack;
+    int32_t         floppyNumberOfSide;
+    int32_t         floppyNumberOfTrack;
+    int32_t         floppySectorPerTrack;
 
-    unsigned short  floppyiftype;
-    unsigned char   double_step;
+    int32_t         floppyiftype;
+    int32_t         double_step;
 
     HXCFE_CYLINDER ** tracks;
 }HXCFE_FLOPPY;

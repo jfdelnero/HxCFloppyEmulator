@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -107,13 +108,13 @@ int SAD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 int SAD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
-	unsigned int i,j;
+	int i,j;
 	unsigned int file_offset;
 	unsigned char* trackdata;
-	unsigned char gap3len,interleave;
-	unsigned short rpm;
-	unsigned short sectorsize;
-	unsigned char trackformat,skew;
+	int gap3len,interleave;
+	int rpm;
+	int sectorsize;
+	int trackformat,skew;
 	HXCFE_CYLINDER* currentcylinder;
 	SAD_HEADER sadh;
 
@@ -180,7 +181,7 @@ int SAD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_NOERROR;
 }
 
-int SAD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int SAD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="SAMCOUPE_SAD";

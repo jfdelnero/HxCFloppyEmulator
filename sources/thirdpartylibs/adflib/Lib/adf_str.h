@@ -53,7 +53,7 @@ struct Volume {
 
     BOOL mounted;
 
-    long bitmapSize;             /* in blocks */
+    int32_t bitmapSize;             /* in blocks */
     SECTNUM *bitmapBlocks;       /* bitmap blocks pointers */
     struct bBitmapBlock **bitmapTable;
     BOOL *bitmapBlocksChg;
@@ -63,8 +63,8 @@ struct Volume {
 
 
 struct Partition {
-    long startCyl;
-    long lenCyl;
+    int32_t startCyl;
+    int32_t lenCyl;
     char* volName;
     int volType;
 };
@@ -79,14 +79,14 @@ struct Partition {
 struct Device {
     int devType;               /* see below */
     BOOL readOnly;
-    long size;                 /* in bytes */
+    int32_t size;                 /* in bytes */
 
     int nVol;                  /* partitions */
     struct Volume** volList;  
 	
-    long cylinders;            /* geometry */
-    long heads;
-    long sectors;
+    int32_t cylinders;            /* geometry */
+    int32_t heads;
+    int32_t sectors;
 
     BOOL isNativeDev;
     void *nativeDev;
@@ -102,9 +102,9 @@ struct File {
     void *currentData;
     struct bFileExtBlock* currentExt;
 
-    long nDataBlock;
+    int32_t nDataBlock;
     SECTNUM curDataPtr;
-    unsigned long pos;
+    uint32_t pos;
 
     int posInDataBlk;
     int posInExtBlk;
@@ -121,14 +121,14 @@ struct Entry{
     SECTNUM real;
     SECTNUM parent;
     char* comment;
-    unsigned long size;
-	long access;
+    uint32_t size;
+	int32_t access;
     int year, month, days;
     int hour, mins, secs;
 };
 
 struct CacheEntry{
-    long header, size, protect;
+    int32_t header, size, protect;
     short days, mins, ticks;
     signed char type;
     char nLen, cLen;
@@ -194,37 +194,37 @@ struct GenBlock{
 
 struct FileBlocks{
     SECTNUM header;
-    long nbExtens;
+    int32_t nbExtens;
     SECTNUM* extens;
-    long nbData;
+    int32_t nbData;
     SECTNUM* data;
 };
 
 struct bEntryBlock {
-/*000*/	long	type;		/* T_HEADER == 2 */
-/*004*/	long	headerKey;	/* current block number */
-        long	r1[3];
-/*014*/	unsigned long	checkSum;
-/*018*/	long	hashTable[HT_SIZE];
-        long	r2[2];
-/*140*/	long	access;	/* bit0=del, 1=modif, 2=write, 3=read */
-/*144*/	long	byteSize;
+/*000*/	int32_t	type;		/* T_HEADER == 2 */
+/*004*/	int32_t	headerKey;	/* current block number */
+        int32_t	r1[3];
+/*014*/	uint32_t	checkSum;
+/*018*/	int32_t	hashTable[HT_SIZE];
+        int32_t	r2[2];
+/*140*/	int32_t	access;	/* bit0=del, 1=modif, 2=write, 3=read */
+/*144*/	int32_t	byteSize;
 /*148*/	char	commLen;
 /*149*/	char	comment[MAXCMMTLEN+1];
         char	r3[91-(MAXCMMTLEN+1)];
-/*1a4*/	long	days;
-/*1a8*/	long	mins;
-/*1ac*/	long	ticks;
+/*1a4*/	int32_t	days;
+/*1a8*/	int32_t	mins;
+/*1ac*/	int32_t	ticks;
 /*1b0*/	char	nameLen;
 /*1b1*/	char	name[MAXNAMELEN+1];
-        long	r4;
-/*1d4*/	long	realEntry;
-/*1d8*/	long	nextLink;
-        long	r5[5];
-/*1f0*/	long	nextSameHash;
-/*1f4*/	long	parent;
-/*1f8*/	long	extension;
-/*1fc*/	long	secType;
+        int32_t	r4;
+/*1d4*/	int32_t	realEntry;
+/*1d8*/	int32_t	nextLink;
+        int32_t	r5[5];
+/*1f0*/	int32_t	nextSameHash;
+/*1f4*/	int32_t	parent;
+/*1f8*/	int32_t	extension;
+/*1fc*/	int32_t	secType;
 	};
 
 

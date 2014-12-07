@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -50,7 +52,7 @@ int D88_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	int track_cnt,density;
 	d88_fileheader d88_fh;
 	d88_sector d88_s;
-	unsigned long tracktable[164];
+	uint32_t tracktable[164];
 
 	int mfmdd_found;
 	int mfmhd_found;

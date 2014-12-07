@@ -41,7 +41,7 @@ RETCODE adfUpdateCache(struct Volume *vol, struct bEntryBlock *parent, struct bE
 RETCODE adfDelFromCache(struct Volume *vol, struct bEntryBlock *parent, SECTNUM);
 
 RETCODE adfReadDirCBlock(struct Volume *vol, SECTNUM nSect, struct bDirCacheBlock *dirc);
-RETCODE adfWriteDirCBlock(struct Volume*, long, struct bDirCacheBlock* dirc);
+RETCODE adfWriteDirCBlock(struct Volume*, int32_t, struct bDirCacheBlock* dirc);
 
 #endif /* _ADF_CACHE_H */
 

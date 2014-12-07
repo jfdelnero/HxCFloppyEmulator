@@ -28,40 +28,40 @@
 
 typedef struct pasti_fileheader_
 {
- char headertag[4]; // "RSY\0"
- unsigned short codeversion1;
- unsigned short codeversion2;
- unsigned short unused1;
- unsigned char  number_of_track; //valide si <= 0xA8
- unsigned char  unknowvalue;
- unsigned long  unused2;
+ uint8_t   headertag[4]; // "RSY\0"
+ uint16_t  codeversion1;
+ uint16_t  codeversion2;
+ uint16_t  unused1;
+ uint8_t   number_of_track; //valide si <= 0xA8
+ uint8_t   unknowvalue;
+ uint32_t  unused2;
 }pasti_fileheader;
 
 
 typedef struct pasti_trackheader_
 {
- unsigned long  tracksize;
- unsigned long  unused1;
- unsigned short numberofsector;
- unsigned short flags;
- unsigned short Tvalue;
- unsigned char  track_code;
- unsigned char  unused2;
+ uint32_t  tracksize;
+ uint32_t  unused1;
+ uint16_t  numberofsector;
+ uint16_t  flags;
+ uint16_t  Tvalue;
+ uint8_t   track_code;
+ uint8_t   unused2;
 
 }pasti_trackheader;
 
 typedef struct pasti_sector_
 {
- unsigned long   sector_pos;
- unsigned short  sector_pos_timing;
- unsigned short  sector_speed_timing;
- unsigned char   track_num;
- unsigned char   side_num;
- unsigned char	 sector_num;
- unsigned char	 sector_size;
- unsigned short  header_crc;
- unsigned char   FDC_status;
- unsigned char   sector_flags; // (always 00)
+ uint32_t  sector_pos;
+ uint16_t  sector_pos_timing;
+ uint16_t  sector_speed_timing;
+ uint8_t   track_num;
+ uint8_t   side_num;
+ uint8_t   sector_num;
+ uint8_t   sector_size;
+ uint16_t  header_crc;
+ uint8_t   FDC_status;
+ uint8_t   sector_flags; // (always 00)
 }pasti_sector;
 
 #pragma pack()

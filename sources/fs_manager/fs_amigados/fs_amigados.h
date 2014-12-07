@@ -12,9 +12,9 @@ int amigados_closeFile( HXCFE_FSMNG * fsmng,int filehandle);
 int amigados_createDir( HXCFE_FSMNG * fsmng,char * foldername);
 int amigados_removeDir( HXCFE_FSMNG * fsmng,char * foldername);
 
-int amigados_ftell( HXCFE_FSMNG * fsmng,int filehandle);
-int amigados_fseek( HXCFE_FSMNG * fsmng,int filehandle,long offset,int origin);
+int32_t amigados_ftell( HXCFE_FSMNG * fsmng,int32_t filehandle);
+int32_t amigados_fseek( HXCFE_FSMNG * fsmng,int32_t filehandle,int32_t offset,int32_t origin);
 
-int amigados_openDir(HXCFE_FSMNG * fsmng, char * path);
-int amigados_readDir(HXCFE_FSMNG * fsmng,int dirhandle,HXCFE_FSENTRY * dirent);
-int amigados_closeDir(HXCFE_FSMNG * fsmng, int dirhandle);
+int32_t amigados_openDir(HXCFE_FSMNG * fsmng, char * path);
+int32_t amigados_readDir(HXCFE_FSMNG * fsmng,int32_t dirhandle,HXCFE_FSENTRY * dirent);
+int32_t amigados_closeDir(HXCFE_FSMNG * fsmng, int32_t dirhandle);

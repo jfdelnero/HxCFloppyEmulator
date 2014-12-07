@@ -73,14 +73,14 @@ typedef struct _HXCFE_TD
 {
     HXCFE * hxcfe;
 
-    int xsize,ysize;
-    int x_us,y_us;
-    int x_start_us;
-    unsigned int * framebuffer;
+    int32_t    xsize,ysize;
+    int32_t    x_us,y_us;
+    int32_t    x_start_us;
+    uint32_t * framebuffer;
 
     void * sl;
 
-    unsigned long enabledtrackmode;
+    uint32_t enabledtrackmode;
 
     void * pl;
 
@@ -93,18 +93,18 @@ typedef struct _HXCFE_TD
 
 typedef struct _s_index_evt
 {
-    unsigned long dump_offset;
-    unsigned long cellpos;
-    unsigned long clk;
+    uint32_t dump_offset;
+    uint32_t cellpos;
+    uint32_t clk;
 }s_index_evt;
 
 
 typedef struct _HXCFE_TRKSTREAM
 {
-    unsigned long	* track_dump;
-    unsigned long	nb_of_pulses;
-    s_index_evt		index_evt_tab[32];
-    unsigned long	nb_of_index;
+    uint32_t	* track_dump;
+    uint32_t	nb_of_pulses;
+    s_index_evt	index_evt_tab[32];
+    uint32_t	nb_of_index;
 }HXCFE_TRKSTREAM;
 
 #define _HXCFE_TRKSTREAM_
@@ -115,11 +115,11 @@ typedef struct _HXCFE_FXSA
     HXCFE * hxcfe;
 
     // step resolution (ps)
-    int steptime;
+    int32_t steptime;
 
-    int phasecorrection;
+    int32_t phasecorrection;
 
-    int defaultbitrate;
+    int32_t defaultbitrate;
 
 }HXCFE_FXSA;
 
@@ -130,10 +130,10 @@ typedef struct _fs_config
 {
     char * name;
     char * desc;
-    int    fsID;
-    int    type;
+    int32_t    fsID;
+    int32_t    type;
 }fs_config;
 
 extern fs_config fs_config_table[];
 
-int hxcfe_imgCallProgressCallback(HXCFE_IMGLDR * imgldr_ctx,int cur,int max);
+int32_t hxcfe_imgCallProgressCallback(HXCFE_IMGLDR * imgldr_ctx,int32_t cur,int32_t max);

@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -160,7 +162,7 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 						{
 							memset(&cpcdsk_s,0,sizeof(cpcdsk_sector));
 
-							if(sca[k]->sectorsize!=(unsigned int)sectorsize)
+							if(sca[k]->sectorsize!=sectorsize)
 							{
 								sectorsize=-1;
 							}

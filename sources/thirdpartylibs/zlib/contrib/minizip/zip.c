@@ -26,6 +26,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+#include <stdint.h>
+
 #include "zlib.h"
 #include "zip.h"
 
@@ -74,7 +77,7 @@
 
 
 // NOT sure that this work on ALL platform
-#define MAKEULONG64(a, b) ((ZPOS64_T)(((unsigned long)(a)) | ((ZPOS64_T)((unsigned long)(b))) << 32))
+#define MAKEULONG64(a, b) ((ZPOS64_T)(((uint32_t)(a)) | ((ZPOS64_T)((uint32_t)(b))) << 32))
 
 #ifndef SEEK_CUR
 #define SEEK_CUR    1
@@ -156,7 +159,7 @@ typedef struct
     ZPOS64_T totalCompressedData;
     ZPOS64_T totalUncompressedData;
 #ifndef NOCRYPT
-    unsigned long keys[3];     /* keys defining the pseudo-random sequence */
+    uint32_t keys[3];     /* keys defining the pseudo-random sequence */
     const z_crc_t* pcrc_32_tab;
     int crypt_header_size;
 #endif

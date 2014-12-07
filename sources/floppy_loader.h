@@ -36,7 +36,7 @@ enum {
 typedef int (*ISVALIDDISKFILE) (void* imgldr_ctx,char * imgfile);
 typedef int (*LOADDISKFILE)(void* imgldr_ctx,void * floppydisk,char * imgfile,void * parameters);
 typedef int (*WRITEDISKFILE)(void* imgldr_ctx,void * floppydisk,char * imgfile,void * parameters);
-typedef int (*GETPLUGININFOS)(void* imgldr_ctx,unsigned long infotype,void * returnvalue);
+typedef int (*GETPLUGININFOS)(void* imgldr_ctx,uint32_t infotype,void * returnvalue);
 
 typedef struct plugins_ptr_
 {
@@ -47,7 +47,7 @@ typedef struct plugins_ptr_
 }plugins_ptr;
 
 
-int libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue,const char * pluginid,const char * plugindesc,plugins_ptr * pluginfunc,const char * fileext);
+int libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue,const char * pluginid,const char * plugindesc,plugins_ptr * pluginfunc,const char * fileext);
 
 HXCFE_FLOPPY* hxcfe_sanityCheck(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk);
 

@@ -6,12 +6,12 @@
 #include "../../packer/pack.h"
 
 typedef struct {
-	unsigned long xres;
-	unsigned long yres;
-	unsigned long size;
-	unsigned long csize;
-	unsigned char type;
-	unsigned char pack;
+	uint32_t xres;
+	uint32_t yres;
+	uint32_t size;
+	uint32_t csize;
+	uint8_t type;
+	uint8_t pack;
 } bmpinfo;
 
 
@@ -19,14 +19,14 @@ char * extractbmpdata(char *bmpfile,bmpinfo *info)
 {
 	FILE * file;
 	int p,m,i,j,o,k;
-	long s;
-	unsigned long taille,taille2;
-	unsigned char * dbuffer;
-	unsigned char vc;
+	int32_t s;
+	uint32_t taille,taille2;
+	uint8_t * dbuffer;
+	uint8_t vc;
 
 	BITMAPFILEHEADER bmph;
 	BITMAPINFOHEADER bmih;
-	unsigned char pallette[256*8];
+	uint8_t pallette[256*8];
 
 
 	file=fopen(bmpfile,"rb");

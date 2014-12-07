@@ -48,6 +48,7 @@
 #include <stdio.h>
 
 #include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -98,37 +99,28 @@ int OricDSK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"OricDSK_libIsValidDiskFile : non OricDSK file !");
 		return HXCFE_BADFILE;
 	}
-
-	return HXCFE_BADPARAMETER;
 }
 
 
 
 
+#pragma pack(1)
 typedef struct mfmformatsect_
 {
-	unsigned char idam1[3]; // 0xA1 * 3
-	unsigned char idam2;    // 0xFE
-	unsigned char track;
-	unsigned char head;
-	unsigned char sector;
-	unsigned char bytes;
-	unsigned char crc[2];
-	unsigned char gap2[22]; // 0x4E
-	unsigned char sync[12]; // 0x00
-	unsigned char dataam1[3]; // 0xA1 * 3
-	unsigned char dataam2;    // 0xFB
+	uint8_t idam1[3]; // 0xA1 * 3
+	uint8_t idam2;    // 0xFE
+	uint8_t track;
+	uint8_t head;
+	uint8_t sector;
+	uint8_t bytes;
+	uint8_t crc[2];
+	uint8_t gap2[22]; // 0x4E
+	uint8_t sync[12]; // 0x00
+	uint8_t dataam1[3]; // 0xA1 * 3
+	uint8_t dataam2;    // 0xFB
 }mfmformatsect;
 
-
-typedef struct sectorlist_
-{
-	unsigned short sectorsize;
-	unsigned char sectorid;
-	unsigned char trackid;
-	unsigned char headid;
-	unsigned char * data;
-}sectorlist;
+#pragma pack()
 
 int issector(mfmformatsect * sector)
 {
@@ -239,15 +231,15 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 {
 	FILE * f;
 	unsigned int filesize;
-	unsigned int i,j,mfmformat,geometrie;
+	int i,j,mfmformat,geometrie;
 	unsigned int file_offset;
 	unsigned char* trackdata;
 	unsigned char* trackdatatab;
-	int tracklen;
-	int tracksize;
-	int numberofsector;
-	unsigned short sectorsize,rpm;
-	unsigned char interleave,gap3len;
+	int32_t tracklen;
+	int32_t tracksize;
+	int32_t numberofsector;
+	int32_t sectorsize,rpm;
+	int32_t interleave,gap3len;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
 	HXCFE_SECTCFG * sectlist;
@@ -443,7 +435,7 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 	return HXCFE_BADFILE;
 }
 
-int OricDSK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,unsigned long infotype,void * returnvalue)
+int OricDSK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="ORIC_DSK";

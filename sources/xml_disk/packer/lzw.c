@@ -62,6 +62,8 @@ COPYRIGHT 1993-1998 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #include <stdlib.h>
 #include <string.h>
 
+#include "types.h"
+
 #include "lzw.h"
 
 #define BITS				15
@@ -300,25 +302,25 @@ ubyte *lzw_compress( ubyte *inputbuf, ubyte *outputbuf, int input_size, int *out
 			dict[ index ].code_value = next_code++;
 			dict[ index ].parent_code = string_code;
 			dict[ index ].character = (char) character;
-			OutputBits( output,(unsigned long) string_code, current_code_bits );
+			OutputBits( output,(uint32_t) string_code, current_code_bits );
 			string_code = character;
 
 			if ( next_code > MAX_CODE )
 			{
-				OutputBits( output,(unsigned long) FLUSH_CODE, current_code_bits );
+				OutputBits( output,(uint32_t) FLUSH_CODE, current_code_bits );
 				InitializeDictionary();
 			}
 			else if ( next_code > next_bump_code )
 			{
-				OutputBits( output,(unsigned long) BUMP_CODE, current_code_bits );
+				OutputBits( output,(uint32_t) BUMP_CODE, current_code_bits );
 				current_code_bits++;
 				next_bump_code <<= 1;
 				next_bump_code |= 1;
 			}
 		}
 	}
-	OutputBits( output, (unsigned long) string_code, current_code_bits );
-	OutputBits( output, (unsigned long) END_OF_STREAM, current_code_bits);
+	OutputBits( output, (uint32_t) string_code, current_code_bits );
+	OutputBits( output, (uint32_t) END_OF_STREAM, current_code_bits);
 
 	*output_size = output->current_byte + 1;
 

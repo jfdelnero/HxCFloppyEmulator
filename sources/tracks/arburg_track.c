@@ -47,6 +47,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -58,7 +60,7 @@
 
 extern unsigned char bit_inverter_emuii[];
 
-int BuildArburgTrack(HXCFE* floppycontext,unsigned int tracknumber,unsigned int sidenumber,unsigned char* datain,unsigned char * fmdata,unsigned long * fmsizebuffer,int trackformat)
+int32_t BuildArburgTrack(HXCFE* floppycontext,int32_t tracknumber,int32_t sidenumber,uint8_t * datain,uint8_t * fmdata,int32_t * fmsizebuffer,int32_t trackformat)
 {
 	/*
 		Arburg Track format:
@@ -69,16 +71,16 @@ int BuildArburgTrack(HXCFE* floppycontext,unsigned int tracknumber,unsigned int 
 		Sync? : OxDF Bytes (High bytes checksum)
 	*/
 
-	unsigned int i,j,k;
+	int i,j,k;
 	unsigned char *tempdata;
 	unsigned char *tempclock;
-	unsigned long finalsize;
-	unsigned long current_buffer_size;
+	int32_t finalsize;
+	int32_t current_buffer_size;
 
-	unsigned short checksum;
+	uint16_t checksum;
 
-	unsigned long sectorsize;
-	unsigned long buffersize;
+	int32_t sectorsize;
+	int32_t buffersize;
 
 
 	buffersize=*fmsizebuffer/8;
@@ -195,7 +197,7 @@ int BuildArburgTrack(HXCFE* floppycontext,unsigned int tracknumber,unsigned int 
 	}
 }
 
-int pushArburgSysByte(unsigned char byte, int bitoffset, unsigned char * track,unsigned long tracksize)
+int pushArburgSysByte(unsigned char byte, int bitoffset, unsigned char * track,uint32_t tracksize)
 {
 	int k;
 
@@ -222,7 +224,7 @@ int pushArburgSysByte(unsigned char byte, int bitoffset, unsigned char * track,u
 	return bitoffset;
 }
 
-int BuildArburgSysTrack(HXCFE* floppycontext,unsigned int tracknumber,unsigned int sidenumber,unsigned char* datain,unsigned char * fmdata,unsigned long * fmsizebuffer,int trackformat)
+int32_t BuildArburgSysTrack(HXCFE* floppycontext,int32_t tracknumber,int32_t sidenumber,uint8_t* datain, uint8_t * fmdata, int32_t * fmsizebuffer,int32_t trackformat)
 {
 	/*
 		Arburg Track format:
@@ -233,8 +235,8 @@ int BuildArburgSysTrack(HXCFE* floppycontext,unsigned int tracknumber,unsigned i
 		Sync? : OxDF Bytes (High bytes checksum)
 	*/
 
-	unsigned int k;
-	unsigned short checksum;
+	int k;
+	uint16_t checksum;
 	int bitoffset,newbitoffset;
 
 	bitoffset = 0;

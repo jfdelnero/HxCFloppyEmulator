@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
@@ -37,7 +39,6 @@
 #include "msa_format.h"
 #include "tracks/sector_extractor.h"
 #include "libhxcadaptor.h"
-#include "types.h"
 
 unsigned short msapacktrack(unsigned char * inputtrack,int insize,unsigned char * outputtrack)
 {
@@ -162,6 +163,8 @@ int MSA_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 	msah.number_of_side = BIGENDIAN_WORD( (floppy->floppyNumberOfSide - 1));
 	msah.number_of_track = BIGENDIAN_WORD( (floppy->floppyNumberOfTrack - 1));
+
+	nbsector = 0;
 
 	// Get the number of sector per track.
 	ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
