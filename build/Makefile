@@ -29,7 +29,7 @@ EXEC=hxcfe
 
 all: $(EXEC)
 
-hxcfe:  hxcfe.o bmp_file.o utils.o extractTracksLayoutPicture.o ../../../build/libhxcadaptor.a $(LIBHXCFE) $(LIBUSBHXCFE)
+hxcfe:  hxcfe.o utils.o ../../../build/libhxcadaptor.a $(LIBHXCFE) $(LIBUSBHXCFE)
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
@@ -42,13 +42,7 @@ $(LIBUSBHXCFE): ../../../build/$(LIBUSBHXCFE)
 hxcfe.o: ../sources/hxcfe.c 
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-bmp_file.o: ../sources/bmp_file.c
-	$(CC) -o $@ -c $< $(CFLAGS)
-
 utils.o: ../sources/utils.c
-	$(CC) -o $@ -c $< $(CFLAGS)
-
-extractTracksLayoutPicture.o: ../sources/extractTracksLayoutPicture.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 clean:
