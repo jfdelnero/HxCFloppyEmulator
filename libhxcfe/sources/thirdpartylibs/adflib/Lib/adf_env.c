@@ -46,7 +46,7 @@ void rwHeadAccess(SECTNUM physical, SECTNUM logical, BOOL write)
 {
     /* display the physical sector, the logical block, and if the access is read or write */
 
-    fprintf(stderr, "phy %ld / log %ld : %c\n", physical, logical, write ? 'W' : 'R');
+    fprintf(stderr, "phy %d / log %d : %c\n", physical, logical, write ? 'W' : 'R');
 }
 
 void progressBar(int perCentDone)
