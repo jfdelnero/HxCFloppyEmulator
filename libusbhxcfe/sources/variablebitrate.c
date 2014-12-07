@@ -48,6 +48,8 @@
 #include <string.h>
 #include <math.h>
 
+#include <stdint.h>
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
@@ -94,10 +96,10 @@ void adjustrand(unsigned char * d, unsigned char * r)
 }
 
 
-unsigned char * realloc_buffer(unsigned char * buffer,unsigned long numberofbit,unsigned int factor)
+unsigned char * realloc_buffer(unsigned char * buffer,uint32_t numberofbit,uint32_t factor)
 {
-	unsigned long i,j,k,l;
-	unsigned long newsize;
+	uint32_t i,j,k,l;
+	uint32_t newsize;
 	unsigned char * ptr;
 
 
@@ -150,25 +152,25 @@ unsigned char * realloc_buffer(unsigned char * buffer,unsigned long numberofbit,
 }
 
 
-unsigned long * realloc_time_buffer(unsigned long * buffer,unsigned long numberofbit,unsigned int factor)
+uint32_t * realloc_time_buffer(uint32_t * buffer,uint32_t numberofbit,uint32_t factor)
 {
-	unsigned long i,k,l;
-	unsigned long newsize,nbelement;
-	unsigned long * ptr;
+	uint32_t i,k,l;
+	uint32_t newsize,nbelement;
+	uint32_t * ptr;
 
 
 	if((numberofbit*factor)&0x7)
 	{
 		newsize=(((numberofbit*factor)/8)+1);
-		ptr=malloc((newsize+16)*sizeof(unsigned long));
-		memset(ptr,0,(newsize+16)*sizeof(unsigned long));
+		ptr=malloc((newsize+16)*sizeof(uint32_t));
+		memset(ptr,0,(newsize+16)*sizeof(uint32_t));
 		nbelement=(((numberofbit)/8)+1);
 	}
 	else
 	{
 		newsize=((numberofbit*factor)/8);
-		ptr=malloc((newsize+16)*sizeof(unsigned long));
-		memset(ptr,0,(newsize+16)*sizeof(unsigned long));
+		ptr=malloc((newsize+16)*sizeof(uint32_t));
+		memset(ptr,0,(newsize+16)*sizeof(uint32_t));
 		nbelement=(((numberofbit)/8));
 	}
 
@@ -195,37 +197,37 @@ unsigned long * realloc_time_buffer(unsigned long * buffer,unsigned long numbero
 	return ptr;
 }
 
-int GetNewTrackRevolution(HXCFE* floppycontext,unsigned char * index_h0,unsigned char * datah0,unsigned int lendatah0,unsigned char * datah1,unsigned int lendatah1,unsigned char * randomh0,unsigned char * randomh1,long fixedbitrateh0,unsigned long * timeh0,long fixedbitrateh1,unsigned long * timeh1,unsigned char ** finalbuffer_param,unsigned char ** randomfinalbuffer_param,unsigned char readysignal,unsigned char diskchange,unsigned char writeprotect,unsigned char amigaready,unsigned char selectconfig)
+int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0,uint32_t lendatah0,uint8_t * datah1,uint32_t lendatah1,uint8_t * randomh0,uint8_t * randomh1,int32_t fixedbitrateh0,uint32_t * timeh0,int32_t fixedbitrateh1,uint32_t * timeh1,uint8_t ** finalbuffer_param,uint8_t ** randomfinalbuffer_param,uint8_t readysignal,uint8_t diskchange,uint8_t writeprotect,uint8_t amigaready,uint8_t selectconfig)
 {
-	unsigned long i,k,j;
-	unsigned long head0speed;
-	unsigned long head1speed;
+	uint32_t i,k,j;
+	uint32_t head0speed;
+	uint32_t head1speed;
 
-	unsigned long finalsizebuffer;
+	uint32_t finalsizebuffer;
 	unsigned char * finalbuffer;
 	unsigned char * randomfinalbuffer;
 
-	long tick_offset_h0;
-	long tick_offset_h1;
+	int32_t tick_offset_h0;
+	int32_t tick_offset_h1;
 	
-	unsigned long trackzoneindex0;
-	unsigned long trackzoneindex1;
+	uint32_t trackzoneindex0;
+	uint32_t trackzoneindex1;
 	
-	unsigned long trackparthead0index,trackparthead1index;
-	int lencode_track0,lencode_track1;
+	uint32_t trackparthead0index,trackparthead1index;
+	int32_t lencode_track0,lencode_track1;
 
 	unsigned char datah0tmp;
 	unsigned char datah1tmp;
 	unsigned char randomh0tmp,randomh1tmp;
 	unsigned char speedcfg_track0,speedcfg_track1;
 
-	unsigned int numberofzoneh0,numberofzoneh1;
-	long deltatick;
-	int inserttimecode;
+	uint32_t numberofzoneh0,numberofzoneh1;
+	int32_t deltatick;
+	int32_t inserttimecode;
 	unsigned char currentindex;
 
 	float time_base;
-	unsigned int bloclen;
+	uint32_t bloclen;
 
 	int lencode_track0_error=0;
 	int lencode_track1_error=0;
@@ -417,7 +419,7 @@ int GetNewTrackRevolution(HXCFE* floppycontext,unsigned char * index_h0,unsigned
 		
 		if(numberofpart)
 		{
-			for(j=0;j<(unsigned long)numberofpart;j++)
+			for(j=0;j<(uint32_t)numberofpart;j++)
 			{
 
 				trackzonebuffer_temp[newzoneindex].bitrate=trackzonebuffer_0[i].bitrate;
@@ -453,7 +455,7 @@ int GetNewTrackRevolution(HXCFE* floppycontext,unsigned char * index_h0,unsigned
 		
 		if(numberofpart)
 		{
-			for(j=0;j<(unsigned long)numberofpart;j++)
+			for(j=0;j<(uint32_t)numberofpart;j++)
 			{
 
 				trackzonebuffer_temp[newzoneindex].bitrate=trackzonebuffer_1[i].bitrate;
@@ -522,10 +524,10 @@ int GetNewTrackRevolution(HXCFE* floppycontext,unsigned char * index_h0,unsigned
 			
 		if(time_base-trackzonebuffer_0[i].code1)
 		{
-			trackzonebuffer_0[i].code1lenint=(int)((time_base-trackzonebuffer_0[i].code1)*bloclen);
+			trackzonebuffer_0[i].code1lenint=(uint32_t)((time_base-trackzonebuffer_0[i].code1)*bloclen);
 
 			trackzonebuffer_0[i].code2=(unsigned char)ceil(time_base);
-			trackzonebuffer_0[i].code2lenint=(int)((trackzonebuffer_0[i].code2-time_base)*bloclen);
+			trackzonebuffer_0[i].code2lenint=(uint32_t)((trackzonebuffer_0[i].code2-time_base)*bloclen);
 		}
 		else
 		{

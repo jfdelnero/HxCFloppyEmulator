@@ -47,6 +47,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <stdint.h>
+
 //#define DEBUGVB 1
 
 #include "internal_libhxcfe.h"
@@ -59,9 +61,9 @@
 
 // fonction permettant de changer l'etat des signaux ready, dskchg et de source de selection
 // dans un buffer
-void patchbuffer(unsigned char * buffer, unsigned long bufferlen,unsigned char patchvalue)
+void patchbuffer(uint8_t * buffer, uint32_t bufferlen,uint8_t patchvalue)
 {
-	unsigned int i;
+	uint32_t i;
 
 	i=0;
 	do
@@ -76,9 +78,9 @@ void patchbuffer(unsigned char * buffer, unsigned long bufferlen,unsigned char p
 
 
 //permet de detecter sur un octet est une commande ou un code MFM
-unsigned char iscmd(unsigned char c)
+uint8_t iscmd(uint8_t c)
 {
-	unsigned char c2;
+	uint8_t c2;
 
 	c2=(c>>4)&0xF;
 	if((c==0x7) || (c==0xD) || (c==0xC) || (c2==0x7) || (c2==0xD) || (c2==0xC))
@@ -94,12 +96,12 @@ unsigned char iscmd(unsigned char c)
 
 // fonction generant des code mfm aléatoire dans un buffer MFM
 // (emulation track non formate / weak bits)
-void randomizebuffer(USBHXCFE * hw_context,unsigned char * buffer,unsigned char * randombuffer, unsigned long bufferlen)
+void randomizebuffer(USBHXCFE * hw_context,uint8_t * buffer,uint8_t * randombuffer, uint32_t bufferlen)
 {
-	unsigned int i,j;
-	unsigned char * rand_lut;
-	unsigned rand_mask;
-	unsigned char data;
+	uint32_t i,j;
+	uint8_t * rand_lut;
+	uint8_t rand_mask;
+	uint8_t data;
 
 	rand_lut = hw_context->randomlut;
 
@@ -137,22 +139,22 @@ void randomizebuffer(USBHXCFE * hw_context,unsigned char * buffer,unsigned char 
 
 
 // fonction de generation du prochain paquet USB a envoyer
-int FillBuffer(HXCFE* floppycontext,USBHXCFE * hw_context,unsigned char * paquetbuffer,int * headmoved)
+int32_t FillBuffer(HXCFE* floppycontext,USBHXCFE * hw_context,uint8_t * paquetbuffer,int32_t * headmoved)
 {
-	int t;
-	int trackposition;
-	static int l=0;
-	static int currenttrack_finalbuffer=0;
-	int floppypin34;
-	int floppypin2;
-	int writeprotect;
-	int amigaready;
-	unsigned long bytecopied;
-	unsigned long final_buffer_len;
-	unsigned char * trackptr;
-	unsigned char * randomtrackptr;
-	unsigned int floppydisable;
-	unsigned char ctrl_byte;
+	int32_t t;
+	int32_t trackposition;
+	static int32_t l=0;
+	static int32_t currenttrack_finalbuffer=0;
+	int32_t floppypin34;
+	int32_t floppypin2;
+	int32_t writeprotect;
+	int32_t amigaready;
+	uint32_t bytecopied;
+	uint32_t final_buffer_len;
+	uint8_t * trackptr;
+	uint8_t * randomtrackptr;
+	uint32_t floppydisable;
+	uint8_t ctrl_byte;
 
 
 		if(hw_context->current_track<hw_context->number_of_track)
@@ -377,38 +379,38 @@ int FillBuffer(HXCFE* floppycontext,USBHXCFE * hw_context,unsigned char * paquet
 }
 
 
-int ftdichiplistener(HXCFE* floppycontext,USBHXCFE * hw_context)
+int32_t ftdichiplistener(HXCFE* floppycontext,USBHXCFE * hw_context)
 {
-	unsigned long hw_handle;
-	int we_ret;
-	int init_failed,ftdierror;
-	int i;
-	int RxBytes,TxBytes;
-	unsigned char * srambuffer;
-	unsigned char * srambuffer2;
-	unsigned char * input_buffer;
-	int byteread,bytetoread;
-	int checkalignement;
-	int trackpointer;
-	int byte_read;
-	int txbuffersize;
-	unsigned long eventftdi,eventftdimask;
-	unsigned long * rxevent;
-	int headmoved;
-	int bytetowrite;
-	int floppypin34;
-	int floppypin2;
-	int amigaready;
-	unsigned int floppydisable;
-	unsigned char ctrl_byte,current_track;
+	uint32_t hw_handle;
+	int32_t we_ret;
+	int32_t init_failed,ftdierror;
+	int32_t i;
+	int32_t RxBytes,TxBytes;
+	uint8_t * srambuffer;
+	uint8_t * srambuffer2;
+	uint8_t * input_buffer;
+	int32_t byteread,bytetoread;
+	int32_t checkalignement;
+	int32_t trackpointer;
+	int32_t byte_read;
+	int32_t txbuffersize;
+	uint32_t eventftdi,eventftdimask;
+	uint32_t * rxevent;
+	int32_t headmoved;
+	int32_t bytetowrite;
+	int32_t floppypin34;
+	int32_t floppypin2;
+	int32_t amigaready;
+	uint32_t floppydisable;
+	uint8_t ctrl_byte,current_track;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"thread ftdichiplistener");
 	hw_handle=0;
 	headmoved=0;
 
-	srambuffer=(unsigned char*)malloc(SRAMSIZE);
-	srambuffer2=(unsigned char*)malloc(SRAMSIZE);
-	input_buffer=(unsigned char*)malloc(SRAMSIZE);
+	srambuffer=(uint8_t*)malloc(SRAMSIZE);
+	srambuffer2=(uint8_t*)malloc(SRAMSIZE);
+	input_buffer=(uint8_t*)malloc(SRAMSIZE);
 	if(!srambuffer || !input_buffer)
 	{
 		floppycontext->hxc_printf(MSG_ERROR,"srambuffer malloc error !");
@@ -426,7 +428,7 @@ int ftdichiplistener(HXCFE* floppycontext,USBHXCFE * hw_context)
 	hw_context->usbstats.packetsent=0;
 	hw_context->usbstats.totaldataout=0;
 
-	rxevent=(unsigned long*)hxc_createevent(floppycontext,1);
+	rxevent=(uint32_t*)hxc_createevent(floppycontext,1);
 
 	do // boucle principale
 	{
@@ -805,8 +807,8 @@ int ftdichiplistener(HXCFE* floppycontext,USBHXCFE * hw_context)
 
 USBHXCFE* libusbhxcfe_init(HXCFE* floppycontext)
 {
-	int i,j;
-	unsigned char randomvalue;
+	int32_t i,j;
+	uint8_t randomvalue;
 	USBHXCFE* hwif;
 
 	floppycontext->hxc_printf(MSG_INFO_0,"Starting CPLDFloppyEmulator Hw manager...");
@@ -820,7 +822,7 @@ USBHXCFE* libusbhxcfe_init(HXCFE* floppycontext)
 		hwif->hw_handle=0;
 
 		// generation d'une LUT pour le random MFM
-		hwif->randomlut=(unsigned char*)malloc(1024);
+		hwif->randomlut=(uint8_t*)malloc(1024);
 		for(i=0;i<1024;i++)
 		{
 			hwif->randomlut[i]=0;
@@ -855,20 +857,20 @@ USBHXCFE* libusbhxcfe_init(HXCFE* floppycontext)
 }
 
 
-int libusbhxcfe_deInit(HXCFE* floppycontext,USBHXCFE * hwif)
+int32_t libusbhxcfe_deInit(HXCFE* floppycontext,USBHXCFE * hwif)
 {
 	if(hwif)
 		free(hwif);
 	return 0;
 }
 
-int libusbhxcfe_loadFloppy(HXCFE* floppycontext,USBHXCFE * hwif,HXCFE_FLOPPY * floppydisk)
+int32_t libusbhxcfe_loadFloppy(HXCFE* floppycontext,USBHXCFE * hwif,HXCFE_FLOPPY * floppydisk)
 {
 #define BUFFERSIZE 2*128*1024
-	unsigned int final_buffer_len;
-	unsigned short i;
-	unsigned char * final_buffer;
-	unsigned char * final_randombuffer;
+	uint32_t final_buffer_len;
+	uint16_t i;
+	uint8_t * final_buffer;
+	uint8_t * final_randombuffer;
 
 	#ifdef DEBUGVB
 	FILE * fdebug;
@@ -895,9 +897,9 @@ int libusbhxcfe_loadFloppy(HXCFE* floppycontext,USBHXCFE * hwif,HXCFE_FLOPPY * f
 				free(hwif->precalcusbtrack[i].randomusbtrack);
 		}
 
-		//final_buffer=(unsigned char*) malloc(BUFFERSIZE);
-		//final_randombuffer=(unsigned char*) malloc(BUFFERSIZE);
-		hwif->number_of_track=(unsigned char)floppydisk->floppyNumberOfTrack;
+		//final_buffer=(uint8_t*) malloc(BUFFERSIZE);
+		//final_randombuffer=(uint8_t*) malloc(BUFFERSIZE);
+		hwif->number_of_track=(uint8_t)floppydisk->floppyNumberOfTrack;
 		for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
 		{
 
@@ -950,8 +952,8 @@ int libusbhxcfe_loadFloppy(HXCFE* floppycontext,USBHXCFE * hwif,HXCFE_FLOPPY * f
 
 				}
 
-				hwif->precalcusbtrack[i].usbtrack=(unsigned char *)malloc(final_buffer_len);
-				hwif->precalcusbtrack[i].randomusbtrack=(unsigned char *)malloc(final_buffer_len);
+				hwif->precalcusbtrack[i].usbtrack=(uint8_t *)malloc(final_buffer_len);
+				hwif->precalcusbtrack[i].randomusbtrack=(uint8_t *)malloc(final_buffer_len);
 				hwif->precalcusbtrack[i].tracklen=final_buffer_len;
 
 				memcpy(hwif->precalcusbtrack[i].usbtrack,final_buffer,final_buffer_len);
@@ -979,7 +981,7 @@ int libusbhxcfe_loadFloppy(HXCFE* floppycontext,USBHXCFE * hwif,HXCFE_FLOPPY * f
 		}
 
 
-		hwif->interface_mode=(unsigned char)floppydisk->floppyiftype;
+		hwif->interface_mode=(uint8_t)floppydisk->floppyiftype;
 		hwif->floppychanged=1;
 
 
@@ -990,13 +992,13 @@ int libusbhxcfe_loadFloppy(HXCFE* floppycontext,USBHXCFE * hwif,HXCFE_FLOPPY * f
 	return 0;
 }
 
-int libusbhxcfe_ejectFloppy(HXCFE* floppycontext,USBHXCFE * hwif)
+int32_t libusbhxcfe_ejectFloppy(HXCFE* floppycontext,USBHXCFE * hwif)
 {
 
 	return 0;
 }
 
-int libusbhxcfe_getStats(HXCFE* floppycontext,USBHXCFE * hwif,USBStats* stats,int clear)
+int32_t libusbhxcfe_getStats(HXCFE* floppycontext,USBHXCFE * hwif,USBStats* stats,int32_t clear)
 {
 	if(hwif)
 	{
@@ -1025,7 +1027,7 @@ int libusbhxcfe_getStats(HXCFE* floppycontext,USBHXCFE * hwif,USBStats* stats,in
 
 }
 
-int libusbhxcfe_setInterfaceMode(HXCFE* floppycontext,USBHXCFE * hwif,int interfacemode,int doublestep,int drive)
+int32_t libusbhxcfe_setInterfaceMode(HXCFE* floppycontext,USBHXCFE * hwif,int32_t interfacemode,int32_t doublestep,int32_t drive)
 {
 	if(hwif)
 	{
@@ -1036,7 +1038,7 @@ int libusbhxcfe_setInterfaceMode(HXCFE* floppycontext,USBHXCFE * hwif,int interf
 	return 0;
 }
 
-int libusbhxcfe_getInterfaceMode(HXCFE* floppycontext,USBHXCFE * hwif)
+int32_t libusbhxcfe_getInterfaceMode(HXCFE* floppycontext,USBHXCFE * hwif)
 {
 	if(hwif)
 	{
@@ -1046,7 +1048,7 @@ int libusbhxcfe_getInterfaceMode(HXCFE* floppycontext,USBHXCFE * hwif)
 	return 0;
 }
 
-int libusbhxcfe_getDoubleStep(HXCFE* floppycontext,USBHXCFE * hwif)
+int32_t libusbhxcfe_getDoubleStep(HXCFE* floppycontext,USBHXCFE * hwif)
 {
 	if(hwif)
 	{
@@ -1056,7 +1058,7 @@ int libusbhxcfe_getDoubleStep(HXCFE* floppycontext,USBHXCFE * hwif)
 	return 0;
 }
 
-int libusbhxcfe_getDrive(HXCFE* floppycontext,USBHXCFE * hwif)
+int32_t libusbhxcfe_getDrive(HXCFE* floppycontext,USBHXCFE * hwif)
 {
 	if(hwif)
 	{
@@ -1066,7 +1068,7 @@ int libusbhxcfe_getDrive(HXCFE* floppycontext,USBHXCFE * hwif)
 	return 0;
 }
 
-int libusbhxcfe_getCurTrack(HXCFE* floppycontext,USBHXCFE * hwif)
+int32_t libusbhxcfe_getCurTrack(HXCFE* floppycontext,USBHXCFE * hwif)
 {
 	if(hwif)
 	{
@@ -1075,7 +1077,7 @@ int libusbhxcfe_getCurTrack(HXCFE* floppycontext,USBHXCFE * hwif)
 	return 0;
 }
 
-int libusbhxcfe_setUSBBufferSize(HXCFE* floppycontext,USBHXCFE * hwif,int size)
+int32_t libusbhxcfe_setUSBBufferSize(HXCFE* floppycontext,USBHXCFE * hwif,int32_t size)
 {
 	if(hwif)
 	{

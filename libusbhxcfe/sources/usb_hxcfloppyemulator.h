@@ -58,64 +58,64 @@ extern "C" {
 
 typedef struct _USBStats
 {
-	unsigned long totaldataout;
-	unsigned long dataout;
+	uint32_t totaldataout;
+	uint32_t dataout;
 	
-	unsigned long synclost;
+	uint32_t synclost;
 
-	unsigned long packetsize;
-	unsigned long totalpacketsent;
-	unsigned long packetsent;
+	uint32_t packetsize;
+	uint32_t totalpacketsent;
+	uint32_t packetsent;
 	
 }USBStats;
 
 typedef struct usbtrack_
 {
-	unsigned char * usbtrack;
-	unsigned char * randomusbtrack;
-	unsigned long tracklen;
+	uint8_t       * usbtrack;
+	uint8_t       * randomusbtrack;
+	uint32_t tracklen;
 }usbtrack;
 
 typedef struct USBHXCFE_
 {
 	USBStats usbstats;
 
-	unsigned char number_of_track;
+	uint8_t       number_of_track;
 	usbtrack precalcusbtrack[256];
 
-	unsigned char *randomlut;
-	unsigned long hw_handle;
+	uint8_t       *randomlut;
+	uint32_t hw_handle;
 	
-	unsigned char interface_mode;
-	unsigned int  drive_select_source;
-	unsigned char double_step;
+	uint8_t       interface_mode;
+	uint32_t      drive_select_source;
+	uint8_t       double_step;
 
-	unsigned char current_track;
+	uint8_t       current_track;
 
 	//	unsigned char floppyloaded;
-	unsigned char floppychanged;
+	uint8_t       floppychanged;
 
-	unsigned long trackbuffer_pos;
+	uint32_t      trackbuffer_pos;
 
-	unsigned char start_emulation;
-	unsigned char stop_emulation;
-	unsigned char running;
+	uint8_t       start_emulation;
+	uint8_t       stop_emulation;
+	uint8_t       running;
 
-	unsigned char status; // 0 -> error  1->lookingfor 2->online
+	uint8_t       status; // 0 -> error  1->lookingfor 2->online
 
 }USBHXCFE;
 
 USBHXCFE * libusbhxcfe_init(HXCFE* floppycontext);
-int libusbhxcfe_deInit(HXCFE* floppycontext,USBHXCFE * hwif);
-int libusbhxcfe_loadFloppy(HXCFE* floppycontext,USBHXCFE * hwif,HXCFE_FLOPPY * floppydisk);
-int libusbhxcfe_ejectFloppy(HXCFE* floppycontext,USBHXCFE * hwif);
-int libusbhxcfe_getStats(HXCFE* floppycontext,USBHXCFE * hwif,USBStats* stats,int clear);
-int libusbhxcfe_setInterfaceMode(HXCFE* floppycontext,USBHXCFE * hwif,int interfacemode,int doublestep,int drive);
-int libusbhxcfe_setUSBBufferSize(HXCFE* floppycontext,USBHXCFE * hwif,int size);
-int libusbhxcfe_getInterfaceMode(HXCFE* floppycontext,USBHXCFE * hwif);
-int libusbhxcfe_getDoubleStep(HXCFE* floppycontext,USBHXCFE * hwif);
-int libusbhxcfe_getDrive(HXCFE* floppycontext,USBHXCFE * hwif);
-int libusbhxcfe_getCurTrack(HXCFE* floppycontext,USBHXCFE * hwif);
+int32_t libusbhxcfe_deInit(HXCFE* floppycontext,USBHXCFE * hwif);
+int32_t libusbhxcfe_loadFloppy(HXCFE* floppycontext,USBHXCFE * hwif,HXCFE_FLOPPY * floppydisk);
+int32_t libusbhxcfe_ejectFloppy(HXCFE* floppycontext,USBHXCFE * hwif);
+int32_t libusbhxcfe_getStats(HXCFE* floppycontext,USBHXCFE * hwif,USBStats* stats,int32_t clear);
+int32_t libusbhxcfe_setInterfaceMode(HXCFE* floppycontext,USBHXCFE * hwif,int32_t interfacemode,int32_t doublestep,int32_t drive);
+int32_t libusbhxcfe_setUSBBufferSize(HXCFE* floppycontext,USBHXCFE * hwif,int32_t size);
+int32_t libusbhxcfe_getInterfaceMode(HXCFE* floppycontext,USBHXCFE * hwif);
+int32_t libusbhxcfe_getDoubleStep(HXCFE* floppycontext,USBHXCFE * hwif);
+int32_t libusbhxcfe_getDrive(HXCFE* floppycontext,USBHXCFE * hwif);
+int32_t libusbhxcfe_getCurTrack(HXCFE* floppycontext,USBHXCFE * hwif);
 
 #ifdef __cplusplus
 }
