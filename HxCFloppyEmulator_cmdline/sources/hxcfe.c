@@ -34,14 +34,13 @@
 #include <fcntl.h>
 #include <time.h>
 
+#include <stdint.h>
+
 #include "libhxcfe.h"
 
 #include "utils.h"
 
 #include "usb_hxcfloppyemulator.h"
-#include "bmp_file.h"
-
-#include "extractTracksLayoutPicture.h"
 
 int verbose;
 
@@ -141,7 +140,6 @@ void printhelp(char* argv[])
 	printf("  -list\t\t\t\t: List the content of the floppy image\n");
 	printf("  -getfile:[FILE]\t\t: Get a file from the floppy image\n");
 	printf("  -putfile:[FILE]\t\t: Put a file to the floppy image\n");
-	printf("  -graphlayout\t\t\t: Extract the disk layout picture (BMP).\n");
 
 	printf("\n");
 }
@@ -1063,11 +1061,6 @@ int main(int argc, char* argv[])
 		putfile(hxcfe,filename,filetoget);
 	}
 
-	if(isOption(argc,argv,"graphlayout",0)>0)
-	{
-		extractTracksLayoutPic(hxcfe,filename);
-	}
-
 	// Input file name option
 	if(isOption(argc,argv,"usb",(char*)&temp)>0)
 	{
@@ -1084,8 +1077,7 @@ int main(int argc, char* argv[])
 		(isOption(argc,argv,"conv",0)<=0) &&
 		(isOption(argc,argv,"usb",0)<=0) &&
 		(isOption(argc,argv,"rawlist",0)<=0) &&
-		(isOption(argc,argv,"infos",0)<=0 ) &&
-		(isOption(argc,argv,"graphlayout",0)<=0 )
+		(isOption(argc,argv,"infos",0)<=0 )
 		)
 	{
 		printhelp(argv);
