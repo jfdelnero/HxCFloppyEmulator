@@ -274,7 +274,7 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%d tracks, %d side",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide);
 
-		if( !strncmp(fileheader->headertag,"MFM_DISK",8))
+		if( !strncmp((char*)&fileheader->headertag,"MFM_DISK",8))
 		{
 			mfmformat=1;
 			geometrie=fileheader->number_of_sectors_geometrie;
@@ -283,7 +283,7 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 		}
 		else
 		{
-			if(	!strncmp(fileheader->headertag,"ORICDISK",8))
+			if(	!strncmp((char*)&fileheader->headertag,"ORICDISK",8))
 			{
 				mfmformat=0;
 				geometrie=0;

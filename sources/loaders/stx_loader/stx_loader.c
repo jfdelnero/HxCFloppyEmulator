@@ -84,7 +84,7 @@ int STX_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 		hxc_fclose(f);
 
-		if(strcmp(fileheader->headertag,"RSY"))
+		if(strcmp((char*)&fileheader->headertag,"RSY"))
 		{
 			free(fileheader);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STX_libIsValidDiskFile : non STX file (bad header)!");
@@ -458,7 +458,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	sector = 0;
 	sectorconfig = 0;
 
-	if(!strcmp(fileheader->headertag,"RSY"))
+	if(!strcmp((char*)&fileheader->headertag,"RSY"))
 	{
 		numberoftrack=fileheader->number_of_track;
 		t=ftell(f);
