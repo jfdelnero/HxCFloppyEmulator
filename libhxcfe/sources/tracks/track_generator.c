@@ -324,18 +324,18 @@ static gap3conf std_gap3_tab[]=
 	{0xFF,0xFFFF,0xFF,0xFF}
 };
 
-void getMFMcode(track_generator *tg,unsigned char data,unsigned char clock,unsigned char * dstbuf)
+void getMFMcode(track_generator *tg,uint8_t data,uint8_t clock,uint8_t * dstbuf)
 {
-	unsigned short mfm_code;
-	mfm_code = MFM_tab[data] & CLK_tab[clock] & tg->mfm_last_bit;
-	tg->mfm_last_bit=~(MFM_tab[data]<<15);		
-	dstbuf[1]=mfm_code&0xFF;
-	dstbuf[0]=mfm_code>>8;
+	uint16_t mfm_code;
+	mfm_code = (uint16_t)(MFM_tab[data] & CLK_tab[clock] & tg->mfm_last_bit);
+	tg->mfm_last_bit = (uint16_t)(~(MFM_tab[data]<<15));
+	dstbuf[1] = (uint8_t)(mfm_code&0xFF);
+	dstbuf[0] = (uint8_t)(mfm_code>>8);
 
 	return;
 }
 
-void getFMcode(track_generator *tg,unsigned char data,unsigned char clock,unsigned char * dstbuf)
+void getFMcode(track_generator *tg,uint8_t data,uint8_t clock,uint8_t * dstbuf)
 {
 	uint32_t * fm_code;
 	unsigned char k,i;
@@ -376,17 +376,17 @@ void getFMcode(track_generator *tg,unsigned char data,unsigned char clock,unsign
 
 void getDirectcode(track_generator *tg,unsigned char data,unsigned char * dstbuf)
 {
-	unsigned short * direct_code;
+	uint16_t * direct_code;
 	unsigned char k,i;
 
 	if(tg)
 	{
-		direct_code=(unsigned short *)dstbuf;
+		direct_code=(uint16_t *)dstbuf;
 
 		*direct_code=0;
 		for(k=0;k<2;k++)
 		{
-			*direct_code=*direct_code>>8;
+			*direct_code = (uint16_t)(*direct_code >> 8);
 
 			////////////////////////////////////
 			// data
@@ -394,7 +394,7 @@ void getDirectcode(track_generator *tg,unsigned char data,unsigned char * dstbuf
 			{
 				if(data&(0x80>>(i+(k*4)) ))
 				{
-					*direct_code=*direct_code | ((0x80>>(i*2))<<8);
+					*direct_code = (uint16_t)(*direct_code | ((0x80>>(i*2))<<8));
 				}
 			}
 		}
@@ -457,15 +457,15 @@ int BuildCylinder(unsigned char * mfm_buffer,int mfm_size,unsigned char * track_
 	i=0;
 	for(l=0;l<track_size;l++)
 	{
-		byte =track_data[l];
-		clock=track_clk[l];
+		byte  = track_data[l];
+		clock = track_clk[l];
 
-		mfm_code = MFM_tab[byte] & CLK_tab[clock] & lastbit;
+		mfm_code = (uint16_t)(MFM_tab[byte] & CLK_tab[clock] & lastbit);
 
-		mfm_buffer[i++]=mfm_code>>8;
-		mfm_buffer[i++]=mfm_code&0xFF;
+		mfm_buffer[i++] = (uint8_t)(mfm_code>>8);
+		mfm_buffer[i++] = (uint8_t)(mfm_code&0xFF);
 
-		lastbit=~(MFM_tab[byte]<<15);		
+		lastbit = (uint16_t)(~(MFM_tab[byte]<<15));
 	}
 
 	// Clear the remaining buffer bytes
@@ -482,9 +482,9 @@ int BuildCylinder(unsigned char * mfm_buffer,int mfm_size,unsigned char * track_
 void FastMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size)
 {
 	unsigned short i,l;
-	unsigned char  byte;
-	unsigned short lastbit;
-	unsigned short mfm_code;
+	uint8_t  byte;
+	uint16_t lastbit;
+	uint16_t mfm_code;
 	unsigned char * mfm_buffer;
 
 	mfm_buffer=&side->databuffer[tg->last_bit_offset/8];
@@ -495,15 +495,15 @@ void FastMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * trac
 	for(l=0;l<size;l++)
 	{
 		byte =track_data[l];
-		mfm_code = MFM_tab[byte] & lastbit;
+		mfm_code = (uint16_t)(MFM_tab[byte] & lastbit);
 
-		mfm_buffer[i++]=mfm_code>>8;
-		mfm_buffer[i++]=mfm_code&0xFF;
+		mfm_buffer[i++] = (uint8_t)(mfm_code>>8);
+		mfm_buffer[i++] = (uint8_t)(mfm_code&0xFF);
 
-		lastbit=~(MFM_tab[byte]<<15);		
+		lastbit = (uint16_t)(~(MFM_tab[byte]<<15));
 	}
 
-	tg->mfm_last_bit=lastbit;
+	tg->mfm_last_bit = lastbit;
 	tg->last_bit_offset=tg->last_bit_offset+(i*8);
 
 	return;
@@ -518,33 +518,33 @@ void FastAmigaMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char *
 	uint16_t mfm_code;
 	unsigned char * mfm_buffer;
 
-	mfm_buffer=&side->databuffer[tg->last_bit_offset/8];
+	mfm_buffer = &side->databuffer[tg->last_bit_offset/8];
 
 	// MFM Encoding
-	lastbit=tg->mfm_last_bit;
+	lastbit = tg->mfm_last_bit;
 	i=0;
 
 	for(l=0;l<size;l=l+2)
 	{
-		byte =(odd_tab[track_data[l]]<<4) | odd_tab[track_data[l+1]];
-		mfm_code = MFM_tab[byte] & lastbit;
+		byte = (uint8_t)((odd_tab[track_data[l]]<<4) | odd_tab[track_data[l+1]]);
+		mfm_code = (uint16_t)(MFM_tab[byte] & lastbit);
 
-		mfm_buffer[i++]=mfm_code>>8;
-		mfm_buffer[i++]=mfm_code&0xFF;
+		mfm_buffer[i++] = (uint8_t)(mfm_code>>8);
+		mfm_buffer[i++] = (uint8_t)(mfm_code&0xFF);
 
-		lastbit=~(MFM_tab[byte]<<15);		
+		lastbit = (uint16_t)(~(MFM_tab[byte]<<15));
 	}
 
 
 	for(l=0;l<size;l=l+2)
 	{
-		byte =(even_tab[track_data[l]]<<4) | even_tab[track_data[l+1]];
-		mfm_code = MFM_tab[byte] & lastbit;
+		byte = (uint8_t)((even_tab[track_data[l]]<<4) | even_tab[track_data[l+1]]);
+		mfm_code = (uint16_t)(MFM_tab[byte] & lastbit);
 
-		mfm_buffer[i++]=mfm_code>>8;
-		mfm_buffer[i++]=mfm_code&0xFF;
+		mfm_buffer[i++] = (uint8_t)(mfm_code>>8);
+		mfm_buffer[i++] = (uint8_t)(mfm_code&0xFF);
 
-		lastbit=~(MFM_tab[byte]<<15);		
+		lastbit = (uint16_t)(~(MFM_tab[byte]<<15));
 	}
 
 	tg->mfm_last_bit=lastbit;
@@ -562,16 +562,16 @@ void FastFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track
 	unsigned char  byte;
 	unsigned char * fm_buffer;
 
-	fm_buffer=&side->databuffer[tg->last_bit_offset/8];
+	fm_buffer = &side->databuffer[tg->last_bit_offset/8];
 
 	j=0;
 	for(l=0;l<size;l++)
 	{
-		byte=track_data[l];
+		byte = track_data[l];
 			
 		for(k=0;k<4;k++)
 		{
-			fm_buffer[j]=0x44;
+			fm_buffer[j] = 0x44;
 			////////////////////////////////////
 			// data
 			for(i=0;i<2;i++)
@@ -579,7 +579,7 @@ void FastFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track
 				if(byte&(0x80>>(i+(k*2)) ))
 				{	// 0x10 
 					// 00010001)
-					fm_buffer[j]=fm_buffer[j] | (0x10>>(i*4));
+					fm_buffer[j] = (uint8_t)( fm_buffer[j] | (0x10>>(i*4)) );
 				}
 			}
 
@@ -592,7 +592,7 @@ void FastFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track
 	return;
 }
 
-void FastMFMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size,unsigned char trackencoding)
+void FastMFMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size,int trackencoding)
 {
 	
 	switch(trackencoding)
@@ -630,7 +630,7 @@ void BuildFMCylinder(unsigned char * buffer,int fmtracksize,unsigned char * buff
 	// Clean up
 	for(i=0;i<(fmtracksize);i++)
 	{
-		buffer[i]=0x00;
+		buffer[i] = 0x00;
 	}
 
 	j=0;
@@ -639,12 +639,12 @@ void BuildFMCylinder(unsigned char * buffer,int fmtracksize,unsigned char * buff
 	j=0;
 	for(l=0;l<size;l++)
 	{
-		byte=track[l];
-		clock=bufferclk[l];
+		byte = track[l];
+		clock = bufferclk[l];
 			
 		for(k=0;k<4;k++)
 		{
-			buffer[j]=0x00;
+			buffer[j] = 0x00;
 			////////////////////////////////////
 			// data
 			for(i=0;i<2;i++)
@@ -652,7 +652,7 @@ void BuildFMCylinder(unsigned char * buffer,int fmtracksize,unsigned char * buff
 				if(byte&(0x80>>(i+(k*2)) ))
 				{	// 0x10 
 					// 00010001)
-					buffer[j]=buffer[j] | (0x10>>(i*4));
+					buffer[j] = (uint8_t)(buffer[j] | (0x10>>(i*4)));
 				}
 			}
 
@@ -662,7 +662,7 @@ void BuildFMCylinder(unsigned char * buffer,int fmtracksize,unsigned char * buff
 				if(clock&(0x80>>(i+(k*2)) ))
 				{	// 0x40 
 					// 01000100)
-					buffer[j]=buffer[j] | (0x40>>(i*4));
+					buffer[j] = (uint8_t)( buffer[j] | (0x40>>(i*4)));
 				}
 			}
 
@@ -713,21 +713,21 @@ int ISOIBMGetTrackSize(int TRACKTYPE,unsigned int numberofsector,unsigned int se
 
 }
 
-unsigned char* compute_interleave_tab(unsigned char interleave,unsigned char skew,unsigned short numberofsector)
+unsigned char* compute_interleave_tab(int interleave,int skew,int numberofsector)
 {
 
 	int i,j;
-	unsigned char *interleave_tab;
-	unsigned char *allocated_tab;
+	uint8_t *interleave_tab;
+	uint8_t *allocated_tab;
 
-	interleave_tab=(unsigned char *)malloc(numberofsector*sizeof(unsigned char));
+	interleave_tab=(uint8_t *)malloc(numberofsector*sizeof(uint8_t));
 	if(numberofsector)
 	{
 		if(interleave_tab)
 		{
-			allocated_tab=(unsigned char *)malloc(numberofsector*sizeof(unsigned char));
-			memset(interleave_tab,0,numberofsector*sizeof(unsigned char));
-			memset(allocated_tab,0,numberofsector*sizeof(unsigned char));
+			allocated_tab=(uint8_t *)malloc(numberofsector*sizeof(uint8_t));
+			memset(interleave_tab,0,numberofsector*sizeof(uint8_t));
+			memset(allocated_tab,0,numberofsector*sizeof(uint8_t));
 
 			j=skew%(numberofsector);
 			i=0;
@@ -737,8 +737,8 @@ unsigned char* compute_interleave_tab(unsigned char interleave,unsigned char ske
 				{
 					j=(j+1)%(numberofsector);
 				}
-				interleave_tab[j]=i;
-				allocated_tab[j]=0xFF;
+				interleave_tab[j] = (uint8_t)i;
+				allocated_tab[j] = 0xFF;
 				j=(j+interleave)%(numberofsector);
 				i++;
 			}while(i<numberofsector);		
@@ -836,7 +836,7 @@ int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t
 			}
 			else
 			{
-				gap3=sectorconfigtab[j].gap3;
+				gap3 = (uint8_t)(sectorconfigtab[j].gap3);
 			}
 			configptr=&formatstab[sectorconfigtab[j].trackencoding-1];
 		
@@ -1050,7 +1050,7 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 	{
 		for(i=startindex;i<(tg->last_bit_offset/8);i++)
 		{
-			currentside->track_encoding_buffer[i]=currentside->track_encoding;
+			currentside->track_encoding_buffer[i] = (uint8_t)(currentside->track_encoding);
 		}
 	}
 
@@ -1060,16 +1060,16 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
 	int32_t  i,j;
-	unsigned char   c,trackencoding,trackenc;
-	unsigned char   CRC16_High;
-	unsigned char   CRC16_Low;
-	unsigned char   crctable[32];
-	int32_t   startindex,sectorsize;
+	uint8_t  c,trackencoding,trackenc;
+	uint8_t  CRC16_High;
+	uint8_t  CRC16_Low;
+	uint8_t  crctable[32];
+	int32_t  startindex,sectorsize;
 
 	startindex=tg->last_bit_offset/8;
 	
-	sectorconfig->startsectorindex=tg->last_bit_offset/8;
-	trackencoding=sectorconfig->trackencoding-1;
+	sectorconfig->startsectorindex = tg->last_bit_offset/8;
+	trackencoding = (uint8_t)(sectorconfig->trackencoding-1);
 			
 	// sync
 	for(i=0;i<formatstab[trackencoding].len_ssync;i++)
@@ -1089,8 +1089,8 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 	{
 		for(i=0;i<formatstab[trackencoding].len_addrmarkp2;i++)
 		{
-			pushTrackCode(tg,sectorconfig->alternate_addressmark,formatstab[trackencoding].clock_addrmarkp2,currentside,sectorconfig->trackencoding);
-			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->alternate_addressmark,(unsigned char*)&crctable );
+			pushTrackCode(tg,(uint8_t)sectorconfig->alternate_addressmark,formatstab[trackencoding].clock_addrmarkp2,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, (uint8_t)(sectorconfig->alternate_addressmark),(unsigned char*)&crctable );
 		}
 	}
 	else
@@ -1104,11 +1104,11 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 
 	if(formatstab[trackencoding].indexformat==MEMBRAINFORMAT_DD)
 	{
-		c = sectorconfig->cylinder>>3;
+		c = (uint8_t)(sectorconfig->cylinder>>3);
 		pushTrackCode(tg,c,0xFF,currentside,sectorconfig->trackencoding);
 		CRC16_Update(&CRC16_High,&CRC16_Low, c,(unsigned char*)&crctable );
 
-		c = (sectorconfig->cylinder<<5) | ((sectorconfig->head&1) << 4) | (sectorconfig->sector&0xF);
+		c = (uint8_t)((sectorconfig->cylinder<<5) | ((sectorconfig->head&1) << 4) | (sectorconfig->sector&0xF));
 		pushTrackCode(tg,c,0xFF,currentside,sectorconfig->trackencoding);
 		CRC16_Update(&CRC16_High,&CRC16_Low, c,(unsigned char*)&crctable );
 
@@ -1119,22 +1119,22 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 		// track number
 		if(formatstab[trackencoding].track_id)
 		{
-			pushTrackCode(tg,sectorconfig->cylinder,0xFF,currentside,sectorconfig->trackencoding);
-			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->cylinder,(unsigned char*)&crctable );
+			pushTrackCode(tg,(uint8_t)sectorconfig->cylinder,0xFF,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, (uint8_t)sectorconfig->cylinder,(unsigned char*)&crctable );
 		}
 
 		//01 Side # The side number this is (0 or 1) 
 		if(formatstab[trackencoding].side_id)
 		{
-			pushTrackCode(tg,sectorconfig->head,  0xFF,currentside,sectorconfig->trackencoding);
-			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->head,(unsigned char*)&crctable );
+			pushTrackCode(tg,(uint8_t)sectorconfig->head,  0xFF,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, (uint8_t)sectorconfig->head,(unsigned char*)&crctable );
 		}
 
 		//01 Sector # The sector number 
 		if(formatstab[trackencoding].sector_id)
 		{
-			pushTrackCode(tg,sectorconfig->sector,0xFF,currentside,sectorconfig->trackencoding);
-			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->sector,(unsigned char*)&crctable );
+			pushTrackCode(tg,(uint8_t)sectorconfig->sector,0xFF,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, (uint8_t)sectorconfig->sector,(unsigned char*)&crctable );
 		}
 
 		//01 Sector size: 02=512. (00=128, 01=256, 02=512, 03=1024) 
@@ -1146,7 +1146,7 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 			sectorsize = sectorconfig->sectorsize;
 			if(sectorconfig->use_alternate_sector_size_id)
 			{
-				c=sectorconfig->alternate_sector_size_id;
+				c = (uint8_t)sectorconfig->alternate_sector_size_id;
 			}
 			else
 			{	
@@ -1215,8 +1215,8 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 	{
 		for(i=0;i<formatstab[trackencoding].len_datamarkp2;i++)
 		{
-			pushTrackCode(tg,sectorconfig->alternate_datamark,formatstab[trackencoding].clock_datamarkp2,currentside,sectorconfig->trackencoding);
-			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->alternate_datamark,(unsigned char*)&crctable );
+			pushTrackCode(tg,(uint8_t)sectorconfig->alternate_datamark,formatstab[trackencoding].clock_datamarkp2,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, (uint8_t)sectorconfig->alternate_datamark,(unsigned char*)&crctable );
 		}
 	}
 	else
@@ -1371,9 +1371,9 @@ void tg_addAmigaSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 	int32_t  i;
 	int32_t  trackencoding,trackenc;
 	int32_t  startindex,j;
-	unsigned char   header[4];
-	unsigned char   headerparity[2];
-	unsigned char   sectorparity[2];
+	uint8_t  header[4];
+	uint8_t  headerparity[2];
+	uint8_t  sectorparity[2];
 
 	startindex=tg->last_bit_offset/8;
 	
@@ -1395,10 +1395,10 @@ void tg_addAmigaSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 	headerparity[0]=0;
 	headerparity[1]=0;
 
-	header[0]=0xFF;
-	header[1]=(sectorconfig->cylinder<<1) | (sectorconfig->head&1);
-	header[2]=sectorconfig->sector;
-	header[3]=sectorconfig->sectorsleft;
+	header[0] = 0xFF;
+	header[1] = (uint8_t)((sectorconfig->cylinder<<1) | (sectorconfig->head&1));
+	header[2] = (uint8_t)sectorconfig->sector;
+	header[3] = (uint8_t)sectorconfig->sectorsleft;
 	
 	pushTrackCode(tg,(unsigned char)(( odd_tab[header[0]]<<4)|( odd_tab[header[1]])),0xFF,currentside,sectorconfig->trackencoding);
 	pushTrackCode(tg,(unsigned char)(( odd_tab[header[2]]<<4)|( odd_tab[header[3]])),0xFF,currentside,sectorconfig->trackencoding);
@@ -1486,7 +1486,7 @@ void tg_addAmigaSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 	{
 		for(j=startindex;j<(tg->last_bit_offset/8);j++)
 		{
-			currentside->track_encoding_buffer[j]=trackenc;
+			currentside->track_encoding_buffer[j] = (uint8_t)trackenc;
 		}
 	}
 
@@ -1525,7 +1525,7 @@ void tg_addSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_
 void tg_completeTrack(track_generator *tg, HXCFE_SIDE * currentside,int32_t trackencoding)
 {
 	int32_t tracklen,trackoffset;
-	unsigned char oldval,c;
+	uint8_t c,oldval;
 	int32_t startindex,i;
 
 	tracklen=currentside->tracklen/8;
@@ -1550,11 +1550,11 @@ void tg_completeTrack(track_generator *tg, HXCFE_SIDE * currentside,int32_t trac
 		trackoffset=startindex;
 		if(trackoffset<tracklen)
 		{
-			currentside->databuffer[trackoffset] = currentside->databuffer[trackoffset] & 0x3F;
+			currentside->databuffer[trackoffset] = (uint8_t)(currentside->databuffer[trackoffset] & 0x3F);
 			while(trackoffset<tracklen)
 			{
 				c = currentside->databuffer[trackoffset];
-				c = (c >> 1) | ((oldval << 7)&0x80) ;
+				c = (uint8_t)( (c >> 1) | ( (oldval << 7) & 0x80 ) );
 
 				oldval = currentside->databuffer[trackoffset];
 				currentside->databuffer[trackoffset] = c;
@@ -1566,7 +1566,7 @@ void tg_completeTrack(track_generator *tg, HXCFE_SIDE * currentside,int32_t trac
 
 		if(trackoffset && trackoffset<tracklen)
 		{
-			currentside->databuffer[trackoffset-1] = currentside->databuffer[trackoffset-1] & 0xFC;
+			currentside->databuffer[trackoffset-1] = (uint8_t)(currentside->databuffer[trackoffset-1] & 0xFC);
 		}
 	}
 
@@ -1799,7 +1799,7 @@ HXCFE_SIDE * tg_alloctrack(int32_t bitrate,int32_t trackencoding,int32_t rpm,int
 
 		for(i=0;i<tracklen;i++)
 		{
-			currentside->track_encoding_buffer[i]=trackencoding;
+			currentside->track_encoding_buffer[i] = (uint8_t)trackencoding;
 		}
 	}
 
@@ -1827,7 +1827,7 @@ HXCFE_SIDE * tg_alloctrack(int32_t bitrate,int32_t trackencoding,int32_t rpm,int
 	{
 		for(i=0;i<tracklen;i++)
 		{
-			currentside->databuffer[i]=rand();
+			currentside->databuffer[i] = (uint8_t)(rand());
 		}
 	}
 

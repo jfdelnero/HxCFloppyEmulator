@@ -117,7 +117,7 @@ typedef struct s_match_
 	int32_t offset;
 }s_match;
 
-static void settrackbit(unsigned char * dstbuffer,int dstsize,unsigned char byte,int bitoffset,int size)
+static void settrackbit(uint8_t * dstbuffer,int dstsize,uint8_t byte,int bitoffset,int size)
 {
 	int i,j,k;
 
@@ -128,9 +128,9 @@ static void settrackbit(unsigned char * dstbuffer,int dstsize,unsigned char byte
 		if( (i>>3) < dstsize)
 		{
 			if(byte&((0x80)>>(j&7)))
-				dstbuffer[(i>>3)]=dstbuffer[(i>>3)]|( (0x80>>(i&7)));
+				dstbuffer[(i>>3)] = (uint8_t)(dstbuffer[(i>>3)]|( (0x80>>(i&7))));
 			else
-				dstbuffer[(i>>3)]=dstbuffer[(i>>3)]&(~(0x80>>(i&7)));
+				dstbuffer[(i>>3)] = (uint8_t)(dstbuffer[(i>>3)]&(~(0x80>>(i&7))));
 		}
 
 		i++;
@@ -399,14 +399,15 @@ static void quickSort(s_match * table, int start, int end)
     if(start >= end)
         return;
 
-    while(1)
+    for(;;)
     {
         do right--; while(table[right].yes > pivot);
         do left++; while(table[left].yes < pivot);
 
         if(left < right)
             exchange(table, left, right);
-        else break;
+        else 
+			break;
     }
 
     quickSort(table, start, right);
@@ -644,8 +645,8 @@ static int cleanupTrack(HXCFE_SIDE *curside)
 			{
 				if(curside->databuffer[k] & 0x80)
 				{
-					curside->databuffer[k] = curside->databuffer[k] ^ 0x80;
-					curside->flakybitsbuffer[k] =  curside->flakybitsbuffer[k] | (0x80);
+					curside->databuffer[k] = (uint8_t)(curside->databuffer[k] ^ 0x80);
+					curside->flakybitsbuffer[k] =  (uint8_t)(curside->flakybitsbuffer[k] | (0x80));
 					bitpatched++;
 				}
 			}
@@ -654,13 +655,13 @@ static int cleanupTrack(HXCFE_SIDE *curside)
 			{
 				if((curside->databuffer[k] & (0xC0>>l)) == (0xC0>>l))
 				{
-					curside->databuffer[k] = curside->databuffer[k] ^ (0x40>>l);
-					curside->flakybitsbuffer[k] =  curside->flakybitsbuffer[k] | (0x40>>l);
+					curside->databuffer[k] = (uint8_t)(curside->databuffer[k] ^ (0x40>>l));
+					curside->flakybitsbuffer[k] =  (uint8_t)(curside->flakybitsbuffer[k] | (0x40>>l));
 					bitpatched++;
 				}
 			}
 
-			previous_bit = curside->databuffer[k] & 1;
+			previous_bit = (uint8_t)(curside->databuffer[k] & 1);
 		}
 	}
 	return bitpatched;
@@ -726,66 +727,6 @@ static pulsesblock * ScanAndFindBoundaries(HXCFE_TRKSTREAM * track_dump, int blo
 	}
 
 	return pb;
-}
-
-static uint32_t ScanAndGetIndexPeriod(HXCFE_TRKSTREAM * track_dump)
-{
-	uint32_t len, nb_rotation;
-
-	uint32_t nb_pulses,nb_of_index,i,j,k;
-	uint32_t indexper[32],globalperiod;
-
-	len = 0;
-	nb_of_index = 0;
-
-	if(track_dump)
-	{
-		if(track_dump->nb_of_index > 1)
-		{
-
-			nb_rotation = 0;
-			nb_pulses = track_dump->nb_of_pulses;
-			nb_of_index = track_dump->nb_of_index;
-			if(nb_of_index > 32) nb_of_index = 32;
-
-			for(j=0;j<(track_dump->nb_of_index - 1);j++)
-			{
-
-				nb_pulses = track_dump->index_evt_tab[j + 1].cellpos - \
-							track_dump->index_evt_tab[j].cellpos;
-
-				len = 0;
-
-				k = track_dump->index_evt_tab[j].cellpos;
-				if(k + nb_pulses < track_dump->nb_of_pulses)
-				{
-					for(i=0;i<nb_pulses;i++)
-					{
-						len = len + track_dump->track_dump[i + k];
-					}
-
-					indexper[j] = len;
-					nb_rotation++;
-				}
-			}
-
-			globalperiod = 0;
-			for(j=0;j<(nb_rotation);j++)
-			{
-				globalperiod = globalperiod + indexper[j];
-			}
-
-			globalperiod = (uint32_t)((double)((double)globalperiod / ((double)nb_rotation)));
-
-		}
-		else
-		{
-			globalperiod = 0;
-		}
-
-	}
-
-	return tick_to_time(globalperiod);
 }
 
 static void compareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32_t dst_block_offset,uint32_t * pulses_ok,uint32_t * pulses_failed,int partial)
@@ -1330,6 +1271,8 @@ static uint32_t compare_block_timebased(HXCFE* floppycontext,HXCFE_TRKSTREAM * t
 
 	int32_t shift;
 
+	if(!floppycontext)
+		return 0;
 
 	shift = 0;
 	if(in_shift)
@@ -1707,6 +1650,7 @@ uint32_t searchBestOverlap(HXCFE_TRKSTREAM * track_dump, pulsesblock * src_block
 	return mt_i;
 }
 
+#ifdef FLUXSTREAMDBG
 static int GetTickCnt(HXCFE_TRKSTREAM * track_dump,unsigned int start, unsigned int end)
 {
 	unsigned int i,ticknum;
@@ -1721,6 +1665,7 @@ static int GetTickCnt(HXCFE_TRKSTREAM * track_dump,unsigned int start, unsigned 
 
 	return ticknum;
 }
+#endif
 
 pulses_link * alloc_pulses_link_array(int numberofpulses)
 {
@@ -2593,50 +2538,54 @@ static uint32_t getbestindex(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM *track_dump,pulses
 
 	uint32_t bestscore,revnb;
 
-	bestscore = score[bestindex];
-
-	memset(bad_pulses_array,0xFF,sizeof(uint32_t) * 32);
-
 	bestval = 0;
 
-	for(revnb = 0; revnb < nb_revolution ; revnb++)
+	if(fxs && track_dump)
 	{
-		if ( score[revnb] == bestscore )
+		bestscore = score[bestindex];
+
+		memset(bad_pulses_array,0xFF,sizeof(uint32_t) * 32);
+
+		
+
+		for(revnb = 0; revnb < nb_revolution ; revnb++)
 		{
-			first_index = getNearestValidIndex(pl,track_dump->index_evt_tab[revnb].dump_offset,pl->number_of_pulses);
-
-			bad_pulses = 0;
-			last_index = pl->forward_link[first_index];
-
-			if(last_index>=0)
+			if ( score[revnb] == bestscore )
 			{
-				for(j=first_index;j<last_index;j++)
+				first_index = getNearestValidIndex(pl,track_dump->index_evt_tab[revnb].dump_offset,pl->number_of_pulses);
+
+				bad_pulses = 0;
+				last_index = pl->forward_link[first_index];
+
+				if(last_index>=0)
 				{
-					if( pl->forward_link[j] < 0 && pl->backward_link[j] < 0 )
-						bad_pulses++;
+					for(j=first_index;j<last_index;j++)
+					{
+						if( pl->forward_link[j] < 0 && pl->backward_link[j] < 0 )
+							bad_pulses++;
+					}
 				}
+				bad_pulses_array[revnb] = bad_pulses;
 			}
-			bad_pulses_array[revnb] = bad_pulses;
 		}
-	}
 
-#ifdef FLUXSTREAMDBG
-	for(revnb = 0; revnb < nb_revolution ; revnb++)
-	{
-		fxs->hxcfe->hxc_printf(MSG_DEBUG,"getbestindex : Index %d, %d bad pulse(s)",revnb,bad_pulses_array[revnb]);
-	}
-#endif
-
-	min_val = bad_pulses_array[0];
-	for(i=0;i<(int32_t)nb_revolution;i++)
-	{
-		if(min_val >= bad_pulses_array[i])
+	#ifdef FLUXSTREAMDBG
+		for(revnb = 0; revnb < nb_revolution ; revnb++)
 		{
-			min_val = bad_pulses_array[i];
-			bestval = i;
+			fxs->hxcfe->hxc_printf(MSG_DEBUG,"getbestindex : Index %d, %d bad pulse(s)",revnb,bad_pulses_array[revnb]);
+		}
+	#endif
+
+		min_val = bad_pulses_array[0];
+		for(i=0;i<(int32_t)nb_revolution;i++)
+		{
+			if(min_val >= bad_pulses_array[i])
+			{
+				min_val = bad_pulses_array[i];
+				bestval = i;
+			}
 		}
 	}
-
 	return bestval;
 }
 
@@ -3040,7 +2989,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 	uint32_t qualitylevel[32];
 
-	unsigned char first_track_encoding;
+	int32_t first_track_encoding;
 
 	pulsesblock * pb;
 	pulsesblock * pb_reversed;

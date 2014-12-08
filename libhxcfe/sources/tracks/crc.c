@@ -35,9 +35,9 @@ unsigned short GenCRC16TableEntry( const unsigned short index, const short NumBi
 
 	for( i = 0; i < NumBits; i++ ) {
 		if( Ret & 0x8000 )
-			Ret = (Ret << 1) ^ Poly;
+			Ret = (unsigned short)((Ret << 1) ^ Poly);
 		else 
-			Ret = Ret << 1;
+			Ret = (unsigned short)(Ret << 1);
 	}
 	
 	return Ret;
@@ -58,13 +58,13 @@ void CRC16_Init( unsigned char *CRC16_High, unsigned char *CRC16_Low,unsigned ch
 	
 	for( i = 0; i < Count; i++ ) {
 		te = GenCRC16TableEntry( i, NUM_BITS, polynome );
-		crctable[i+Count]=te>>8;
-		crctable[i]=te&0xFF;
+		crctable[i+Count] = (unsigned char)(te>>8);
+		crctable[i]=(unsigned char)(te&0xFF);
 	}
 
 	// Initialise the CRC to 0xFFFF for the CCITT specification
-	*CRC16_High = initvalue>>8;
-	*CRC16_Low = initvalue&0xFF;
+	*CRC16_High = (unsigned char)(initvalue>>8);
+	*CRC16_Low = (unsigned char)(initvalue&0xFF);
 }
 
 /*
@@ -77,18 +77,18 @@ void CRC16_Update4Bits(unsigned char *CRC16_High, unsigned char *CRC16_Low, unsi
 	unsigned char	t;
 
 	// Step one, extract the Most significant 4 bits of the CRC register
-	t = *CRC16_High >> 4;
+	t = (unsigned char)((*CRC16_High) >> 4);
 
 	// XOR in the Message Data into the extracted bits
-	t = t ^ val;
+	t = (unsigned char)(t ^ val);
 
 	// Shift the CRC Register left 4 bits
-	*CRC16_High = (*CRC16_High << 4) | (*CRC16_Low >> 4);
-	*CRC16_Low = *CRC16_Low << 4;
+	*CRC16_High = (unsigned char)((*CRC16_High << 4) | (*CRC16_Low >> 4));
+	*CRC16_Low = (unsigned char)(*CRC16_Low << 4);
 
 	// Do the table lookups and XOR the result into the CRC Tables
-	*CRC16_High = *CRC16_High ^ crctable[t+16];
-	*CRC16_Low = *CRC16_Low ^ crctable[t];
+	*CRC16_High = (unsigned char)(*CRC16_High ^ crctable[t+16]);
+	*CRC16_Low = (unsigned char)(*CRC16_Low ^ crctable[t]);
 }
 
 /*

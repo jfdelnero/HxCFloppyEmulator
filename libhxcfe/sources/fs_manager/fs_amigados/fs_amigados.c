@@ -311,6 +311,8 @@ static int changedir(HXCFE_FSMNG * fsmng,char * path,SECTNUM * curdir,int dir)
 
 	adfvolume = (struct Volume *)fsmng->volume;
 
+	ret = 1;
+
 	if(strlen(path))
 	{
 

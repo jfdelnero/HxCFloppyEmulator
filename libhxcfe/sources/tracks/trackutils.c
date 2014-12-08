@@ -94,11 +94,11 @@ void setbit(unsigned char * input_data,int bit_offset,int state)
 {
 	if(state)
 	{
-		input_data[bit_offset>>3] = input_data[bit_offset>>3] |  (0x80 >> ( bit_offset&0x7 ) );
+		input_data[bit_offset>>3] = (unsigned char)( input_data[bit_offset>>3] |  (0x80 >> ( bit_offset&0x7 ) ) );
 	}
 	else
 	{
-		input_data[bit_offset>>3] = input_data[bit_offset>>3] & ~(0x80 >> ( bit_offset&0x7 ) );
+		input_data[bit_offset>>3] = (unsigned char)( input_data[bit_offset>>3] & ~(0x80 >> ( bit_offset&0x7 ) ) );
 	}
 
 	return;
@@ -113,9 +113,9 @@ void setfieldbit(unsigned char * dstbuffer,unsigned char byte,int bitoffset,int 
 	for(j=0;j<size;j++)
 	{
 		if(byte&((0x80)>>(j&7)))
-			dstbuffer[i>>3] = dstbuffer[i>>3] | ( (0x80>>(i&7)));
+			dstbuffer[i>>3] = (unsigned char)( dstbuffer[i>>3] | ( (0x80>>(i&7))) );
 		else
-			dstbuffer[i>>3] = dstbuffer[i>>3] & (~(0x80>>(i&7)));
+			dstbuffer[i>>3] = (unsigned char)( dstbuffer[i>>3] & (~(0x80>>(i&7))) );
 
 		i++;
 	}
@@ -154,20 +154,20 @@ int mfmtobin(unsigned char * input_data,int input_data_size,unsigned char * deco
 	do
 	{
 
-		c1=input_data[j] & (0x80>>(bit_offset&7));
+		c1 = (unsigned char)( input_data[j] & (0x80>>(bit_offset&7)) );
 		bit_offset=(bit_offset+1)%input_data_size;
 		j=bit_offset>>3;
 
-		c2=input_data[j] & (0x80>>(bit_offset&7));
+		c2 = (unsigned char)( input_data[j] & (0x80>>(bit_offset&7)) );
 		bit_offset=(bit_offset+1)%input_data_size;
 		j=bit_offset>>3;
 
 		if( c2 && !c1 )
-			decod_data[i] = decod_data[i] | b;
+			decod_data[i] = (unsigned char)( decod_data[i] | b );
 		else
-			decod_data[i] = decod_data[i] & ~b;
+			decod_data[i] = (unsigned char)( decod_data[i] & ~b );
 
-		b=b>>1;
+		b = (unsigned char)( b>>1 );
 		if(!b)
 		{
 			b=0x80;
@@ -229,7 +229,7 @@ int bintomfm(unsigned char * track_data,int track_data_size,unsigned char * bin_
 			lastbit = 0;
 		}
 
-		b=b>>1;
+		b = (unsigned char)( b >> 1 );
 		if(!b)
 		{
 			b=0x80;
@@ -255,7 +255,7 @@ int fmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod
 	{
 		//0C0D0C0D
 
-		binbyte=binbyte | (getbit(input_data,(bit_offset+3)%input_data_size)<<1) | (getbit(input_data,(bit_offset+7)%input_data_size)<<0);
+		binbyte = (unsigned char)( binbyte | (getbit(input_data,(bit_offset+3)%input_data_size)<<1) | (getbit(input_data,(bit_offset+7)%input_data_size)<<0));
 
 		bitshift=bitshift+2;
 
@@ -268,7 +268,7 @@ int fmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod
 		}
 		else
 		{
-			binbyte=binbyte<<2;
+			binbyte = (unsigned char)( binbyte << 2 );
 		}
 
 		bit_offset=(bit_offset+8)%input_data_size;
@@ -312,7 +312,7 @@ int bintofm(unsigned char * track_data,int track_data_size,unsigned char * bin_d
 			bit_offset = (bit_offset+1) % track_data_size;
 		}
 
-		b=b>>1;
+		b = (unsigned char)( b >> 1 );
 		if(!b)
 		{
 			b=0x80;
@@ -340,7 +340,7 @@ int arburgsysfmtobin(unsigned char * input_data,int input_data_size,unsigned cha
 		{
 			//01 -> 0
 
-			binbyte = binbyte & 0xFE;
+			binbyte = (unsigned char)( binbyte & 0xFE );
 
 			bit_offset=(bit_offset+2)%input_data_size;
 		}
@@ -348,7 +348,7 @@ int arburgsysfmtobin(unsigned char * input_data,int input_data_size,unsigned cha
 		{
 			//001 -> 1
 
-			binbyte = binbyte | 0x01;
+			binbyte = (unsigned char)( binbyte | 0x01 );
 
 			bit_offset=(bit_offset+3)%input_data_size;
 		}
@@ -364,7 +364,7 @@ int arburgsysfmtobin(unsigned char * input_data,int input_data_size,unsigned cha
 		}
 		else
 		{
-			binbyte=binbyte<<1;
+			binbyte = (unsigned char)( binbyte << 1 );
 		}
 
 	}while(i<decod_data_size);
@@ -456,8 +456,8 @@ int searchBitStream(unsigned char * input_data,uint32_t input_data_size,int sear
 		prev=0;
 		for(j=0;j<cnt;j++)
 		{
-			stringtosearch[i][j]= prev | (chr_data[j]>>i);
-			prev = chr_data[j] << (8-i);
+			stringtosearch[i][j]= (unsigned char)(prev | (chr_data[j]>>i));
+			prev = (unsigned char)(chr_data[j] << (8-i));
 		}
 		stringtosearch[i][j]=prev;
 	}
@@ -545,7 +545,7 @@ void sortbuffer(unsigned char * buffer,unsigned char * outbuffer,int size)
 	word_outbuffer=(unsigned short *)outbuffer;
 	for(i=0;i<(size/2);i++)
 	{
-		w=(biteven[buffer[i]]<<1)| (biteven[buffer[i+(size/2)]]);
-		word_outbuffer[i]=(w>>8) | (w<<8);
+		w = (unsigned short)((biteven[buffer[i]]<<1)| (biteven[buffer[i+(size/2)]]));
+		word_outbuffer[i] = (unsigned short)( (w>>8) | (w<<8) );
 	}
 }
