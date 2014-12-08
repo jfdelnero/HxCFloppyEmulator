@@ -348,9 +348,12 @@ int cpm_readFile( HXCFE_FSMNG * fsmng,int filehandle,unsigned char * buffer,int 
 
 int cpm_deleteFile(HXCFE_FSMNG * fsmng, char * filename)
 {
-	if(libcpmfs_remove(&fs,filename)>=0)
+	if(fsmng)
 	{
-		return HXCFE_NOERROR;
+		if(libcpmfs_remove(&fs,filename)>=0)
+		{
+			return HXCFE_NOERROR;
+		}
 	}
 
 	return HXCFE_ACCESSERROR;
@@ -372,9 +375,12 @@ int cpm_closeFile( HXCFE_FSMNG * fsmng,int filehandle)
 
 int cpm_createDir( HXCFE_FSMNG * fsmng,char * foldername)
 {
-	if(libcpmfs_createdirectory(&fs,foldername))
+	if(fsmng)
 	{
-		return HXCFE_NOERROR;
+		if(libcpmfs_createdirectory(&fs,foldername))
+		{
+			return HXCFE_NOERROR;
+		}
 	}
 	return HXCFE_ACCESSERROR;
 }

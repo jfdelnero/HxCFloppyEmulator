@@ -52,7 +52,7 @@ void rlepack(unsigned char * bufferin,int sizein,unsigned char * bufferout,int *
 	}
 	else 
 	{
-		c1=~bufferin[0];
+		c1 = (unsigned char)(~bufferin[0]);
 		mode=1;
 		k=0;
 	}
@@ -73,18 +73,18 @@ void rlepack(unsigned char * bufferin,int sizein,unsigned char * bufferout,int *
 				count1++;
 				if(count1==0x7F)
 				{
-					bufferout[j]=count1&0x7F;
+					bufferout[j] = (unsigned char)(count1&0x7F);
 					j++;
-					bufferout[j]=c1;
+					bufferout[j] = c1;
 					j++;
 					count1=1;
 				}
 			}
 			else
 			{	
-				bufferout[j]=count1&0x7F;
+				bufferout[j] = (unsigned char)(count1&0x7F);
 				j++;
-				bufferout[j]=c1;
+				bufferout[j] = c1;
 				j++;
 				c1=bufferin[i];
 				count1=1;
@@ -108,7 +108,7 @@ void rlepack(unsigned char * bufferin,int sizein,unsigned char * bufferout,int *
 				j++;
 				if(count1==0x7F)
 				{
-					bufferout[k]=(count1&0x7F)|0x80;
+					bufferout[k] = (unsigned char)((count1&0x7F)|0x80);
 					k=j;
 					count1=1;
 				}
@@ -119,7 +119,7 @@ void rlepack(unsigned char * bufferin,int sizein,unsigned char * bufferout,int *
 				bufferout[j]=c1;
 				j++;
 				c1=bufferin[i];
-				bufferout[k]=(count1&0x7F)|0x80;
+				bufferout[k] = (unsigned char)((count1&0x7F)|0x80);
 				k=j;
 				count1=1;
 			

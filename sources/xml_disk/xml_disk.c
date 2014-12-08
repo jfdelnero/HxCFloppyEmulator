@@ -562,14 +562,14 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 					for(i=0;i<len/2;i++)
 					{
 						if(buffer[i*2]>='A')
-							ad->sector_data[ad->sector_data_offset] = ((buffer[i*2] - 'A') + 10 ) << 4;
+							ad->sector_data[ad->sector_data_offset] = (uint8_t)(((buffer[i*2] - 'A') + 10 ) << 4);
 						else
-							ad->sector_data[ad->sector_data_offset] = ((buffer[i*2] - '0') ) << 4;
+							ad->sector_data[ad->sector_data_offset] = (uint8_t)(((buffer[i*2] - '0') ) << 4);
 
 						if(buffer[(i*2)+1]>='A')
-							ad->sector_data[ad->sector_data_offset] |= ((buffer[(i*2)+1] - 'A') + 10) & 0xF;
+							ad->sector_data[ad->sector_data_offset] |= (uint8_t)(((buffer[(i*2)+1] - 'A') + 10) & 0xF);
 						else
-							ad->sector_data[ad->sector_data_offset] |= ((buffer[(i*2)+1] - '0')) & 0xF;
+							ad->sector_data[ad->sector_data_offset] |= (uint8_t)(((buffer[(i*2)+1] - '0')) & 0xF);
 
 						ad->sector_data_offset++;
 						if( ad->sector_data_offset == sectorsize )
@@ -589,6 +589,9 @@ static void XMLCALL start(void *data, const char *el, const char **attr)
 	int newstate;
 	int track,side,sector,sectorsize;
 	AppData	*ad = (AppData *) data;
+
+	sector = 0xFF;
+	sectorsize = 128;
 
 	newstate = getnewstate((char*)el, ad->current_state);
 	if ( newstate >= 0 )

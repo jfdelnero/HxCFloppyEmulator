@@ -1216,7 +1216,7 @@ int get_next_Arburg_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 	int bit_offset,k;
 	int sector_size;
 	unsigned char fm_buffer[32];
-	unsigned short checksum;
+	uint16_t checksum;
 	int sector_extractor_sm;
 
 	bit_offset=track_offset;
@@ -1302,7 +1302,7 @@ int get_next_Arburg_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 					checksum = 0;
 					for(k=0;k < 0x9FE;k++)
 					{
-						checksum = checksum + sector->input_data[k];
+						checksum = (uint16_t)(checksum + sector->input_data[k]);
 					}
 
 					if( ((checksum & 0xFF) == sector->input_data[0x9FE]) &&  (((checksum>>8) & 0xFF) == sector->input_data[0x9FF]) )
@@ -1358,7 +1358,7 @@ int get_next_ArburgSyst_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SEC
 	int bit_offset,k;
 	int sector_size;
 	unsigned char fm_buffer[32];
-	unsigned short checksum;
+	uint16_t checksum;
 	int sector_extractor_sm;
 
 	bit_offset=track_offset;
@@ -1444,7 +1444,7 @@ int get_next_ArburgSyst_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SEC
 					checksum = 0;
 					for(k=0;k < 0xEFE;k++)
 					{
-						checksum = checksum + sector->input_data[k];
+						checksum = (uint16_t)(checksum + sector->input_data[k]);
 					}
 
 					if( ((checksum & 0xFF) == sector->input_data[0xEFE]) &&  (((checksum>>8) & 0xFF) == sector->input_data[0xEFF]) )
@@ -1557,8 +1557,8 @@ int write_AMIGAMFM_sectordata(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECT
 	int bit_offset;
 	unsigned char sectorparity[2];
 	int i,l;
-	unsigned char  byte;
-	unsigned short lastbit,mfm_code;
+	uint8_t  byte;
+	uint16_t lastbit,mfm_code;
 	unsigned char  *mfm_buffer;
 	track_generator tg;
 
@@ -1600,24 +1600,24 @@ int write_AMIGAMFM_sectordata(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECT
 
 	for(l=0;l<buffersize;l=l+2)
 	{
-		byte =(odd_tab[buffer[l]]<<4) | odd_tab[buffer[l+1]];
-		mfm_code = MFM_tab[byte] & lastbit;
+		byte = (uint8_t)((odd_tab[buffer[l]]<<4) | odd_tab[buffer[l+1]]);
+		mfm_code = (uint16_t)(MFM_tab[byte] & lastbit);
 
-		mfm_buffer[i++]=mfm_code>>8;
-		mfm_buffer[i++]=mfm_code&0xFF;
+		mfm_buffer[i++] = (uint8_t)(mfm_code>>8);
+		mfm_buffer[i++] = (uint8_t)(mfm_code&0xFF);
 
-		lastbit=~(MFM_tab[byte]<<15);
+		lastbit = (uint16_t)(~(MFM_tab[byte]<<15));
 	}
 
 	for(l=0;l<buffersize;l=l+2)
 	{
-		byte =(even_tab[buffer[l]]<<4) | even_tab[buffer[l+1]];
-		mfm_code = MFM_tab[byte] & lastbit;
+		byte = (uint8_t)((even_tab[buffer[l]]<<4) | even_tab[buffer[l+1]]);
+		mfm_code = (uint16_t)(MFM_tab[byte] & lastbit);
 
-		mfm_buffer[i++]=mfm_code>>8;
-		mfm_buffer[i++]=mfm_code&0xFF;
+		mfm_buffer[i++] = (uint8_t)(mfm_code>>8);
+		mfm_buffer[i++] = (uint8_t)(mfm_code&0xFF);
 
-		lastbit=~(MFM_tab[byte]<<15);
+		lastbit = (uint16_t)(~(MFM_tab[byte]<<15));
 	}
 
 	tg.mfm_last_bit = lastbit;
@@ -2667,7 +2667,7 @@ void hxcfe_deinitFDC (HXCFE_FDCCTRL * fdc)
 int hxcfe_FDC_READSECTOR (HXCFE* floppycontext,HXCFE_FLOPPY *fp,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size,int * fdcstatus)
 {
 	HXCFE_FDCCTRL * fdcctrl;
-	unsigned char cnt;
+	int cnt;
 
 	cnt = 0;
 
@@ -2687,7 +2687,7 @@ int hxcfe_FDC_READSECTOR (HXCFE* floppycontext,HXCFE_FLOPPY *fp,unsigned char tr
 int hxcfe_FDC_WRITESECTOR (HXCFE* floppycontext,HXCFE_FLOPPY *fp,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size,int * fdcstatus)
 {
 	HXCFE_FDCCTRL * fdcctrl;
-	unsigned char cnt;
+	int cnt;
 
 	cnt = 0;
 
