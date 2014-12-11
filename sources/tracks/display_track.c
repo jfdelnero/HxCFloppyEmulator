@@ -1349,6 +1349,113 @@ s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int t
 	return sl;
 }
 
+int countSector(s_sectorlist * sl,int side)
+{
+	int cnt;
+
+	cnt = 0;
+
+	while(sl)
+	{
+		if(sl->side == side)
+		{
+			if(sl->sectorconfig)
+				cnt++;
+		}
+		sl = sl->next_element;
+	}
+	
+	return cnt;
+}
+
+int countSize(s_sectorlist * sl,int side)
+{
+	int size;
+
+	size = 0;
+
+	while(sl)
+	{
+		if(sl->side == side)
+		{
+			if(sl->sectorconfig)
+				size = size + sl->sectorconfig->sectorsize;
+		}
+		sl = sl->next_element;
+	}
+	
+	return size;
+}
+
+int countBadSectors(s_sectorlist * sl,int side)
+{
+	int cnt;
+
+	cnt = 0;
+
+	while(sl)
+	{
+		if(sl->side == side)
+		{
+			if(sl->sectorconfig)
+			{
+				if(!sl->sectorconfig->trackencoding || sl->sectorconfig->use_alternate_data_crc)
+				{
+					cnt++;
+				}
+			}
+		}
+		sl = sl->next_element;
+	}
+	
+	return cnt;
+}
+
+int countTrackType(s_sectorlist * sl,int side,int type)
+{
+	int cnt;
+
+	cnt = 0;
+
+	while(sl)
+	{
+		if(sl->side == side)
+		{
+			if(sl->sectorconfig)
+			{
+				if(sl->sectorconfig->trackencoding == type)
+				{
+					cnt++;
+				}
+			}
+		}
+		sl = sl->next_element;
+	}
+	
+	return cnt;
+}
+
+typedef struct type_list_
+{
+	int track_type;
+	char *name;
+}type_list;
+
+
+type_list track_type_list[]=
+{
+	{ISOFORMAT_SD,      "ISO FM"},
+	{ISOFORMAT_DD,      "ISO MFM"},
+	{AMIGAFORMAT_DD,    "Amiga MFM"},
+	{TYCOMFORMAT_SD,    "TYFM"},
+	{MEMBRAINFORMAT_DD, "MEMBRAIN"},
+	{EMUFORMAT_SD,      "E-mu"},
+	{APPLE2_GCR5A3,     "Apple II 5A3"},
+	{APPLE2_GCR6A2,     "Apple II 6A2"},
+	{ARBURG_DAT,        "Arburg DATA"},
+	{ARBURG_SYS,        "Arburg SYSTEM"},
+	{0,0}
+};
 
 void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 {
@@ -1357,10 +1464,11 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	int track,side;
 	HXCFE_SIDE * currentside;
 	unsigned int color;
-	int y_pos,x_pos_1,x_pos_2;
+	int y_pos,x_pos_1,x_pos_2,ytypepos;
 	float track_ep;
 	int bitrate;
 	int xpos;
+	char tempstr[512];
 	s_sectorlist * sl,*oldsl;
 
 	track_ep = 0;
@@ -1411,13 +1519,13 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 		{
 			td->hxc_setprogress(track + (side*floppydisk->floppyNumberOfTrack),floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide,td,td->progress_userdata);
 
-			currentside=floppydisk->tracks[track]->sides[side];
+			currentside = floppydisk->tracks[track]->sides[side];
 
-			tracksize=currentside->tracklen;
+			tracksize = currentside->tracklen;
 
 			bitrate = currentside->bitrate;
 
-			track_ep=(float)( (td->ysize-(y_pos)) - 60 ) /((float) floppydisk->floppyNumberOfTrack+1);
+			track_ep = (float)( (td->ysize-(y_pos)) - 60 ) /((float) floppydisk->floppyNumberOfTrack+1);
 
 			//////////////////////////////////////////
 			// Sector drawing
@@ -1466,7 +1574,52 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 
 			putstring8x8(td,x_pos_1 + 40,y_pos - 3,"---",0xCCCCCC,0);
 			putstring8x8(td,x_pos_2 + 40,y_pos - 3,"---",0xCCCCCC,0);
+
+			sprintf(tempstr,"Side %d, %d Tracks",side,floppydisk->floppyNumberOfTrack);
+			if(side==0)
+				putstring8x8(td,1,1,tempstr,0xAAAAAA,0);
+			else
+				putstring8x8(td,td->xsize/2,1,tempstr,0xAAAAAA,0);
+
 		}
+	}
+
+	sprintf(tempstr,"%d Sectors (%d bad)", countSector(td->sl,0),countBadSectors(td->sl,0));
+	putstring8x8(td,1,11,tempstr,0xAAAAAA,0);
+
+	sprintf(tempstr,"%d Bytes", countSize(td->sl,0));
+	putstring8x8(td,1,21,tempstr,0xAAAAAA,0);
+
+	sprintf(tempstr,"%d Sectors (%d bad)", countSector(td->sl,1),countBadSectors(td->sl,1));
+	putstring8x8(td,(td->xsize/2)+1,11,tempstr,0xAAAAAA,0);
+
+	sprintf(tempstr,"%d Bytes", countSize(td->sl,1));
+	putstring8x8(td,(td->xsize/2)+1,21,tempstr,0xAAAAAA,0);
+
+	ytypepos = 31;
+	i = 0;
+	while(track_type_list[i].name)
+	{
+		if(countTrackType(td->sl,0,track_type_list[i].track_type))
+		{
+			sprintf(tempstr,track_type_list[i].name);
+			putstring8x8(td,1,ytypepos,tempstr,0xAAAAAA,0);
+			ytypepos += 10;
+		}		
+		i++;
+	}
+
+	ytypepos = 31;
+	i = 0;
+	while(track_type_list[i].name)
+	{
+		if(countTrackType(td->sl,1,track_type_list[i].track_type))
+		{
+			sprintf(tempstr,track_type_list[i].name);
+			putstring8x8(td,(td->xsize/2)+1,ytypepos,tempstr,0xAAAAAA,0);
+			ytypepos += 10;
+		}		
+		i++;
 	}
 
 	for(track=0;track<floppydisk->floppyNumberOfTrack+1;track++)

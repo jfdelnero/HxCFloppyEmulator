@@ -75,9 +75,9 @@ typedef struct _HXCFE_SECTCFG
 
 	int32_t        bitrate;
 
-	uint8_t     * input_data;
-	uint8_t       fill_byte;
-	uint8_t       fill_byte_used;				// Set to indicate that the sector is filled with "fill_byte"
+	uint8_t      * input_data;
+	uint8_t        fill_byte;
+	uint8_t        fill_byte_used;				// Set to indicate that the sector is filled with "fill_byte"
 }HXCFE_SECTCFG;
 
 #define _HXCFE_SECTCFG_
