@@ -638,7 +638,7 @@ int get_next_AMIGAMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 					sector_conf->use_alternate_header_crc = 0xFF;
 
 					sector_conf->endsectorindex = sector_conf->startdataindex;
-					
+
 				}
 
 			break;
@@ -2714,4 +2714,101 @@ int hxcfe_FDC_SCANSECTOR (HXCFE* floppycontext,unsigned char track,unsigned char
 {
 	//TODO
 	return 0;
+}
+
+int write_raw_file(HXCFE* floppycontext,FILE * f,HXCFE_FLOPPY * fp,int32_t startidsector,int32_t sectorpertrack,int32_t nboftrack,int32_t nbofside,int32_t sectorsize,int32_t tracktype,int32_t sidefilelayout)
+{
+	int sect,trk,side,i;
+	HXCFE_SECTORACCESS* ss;
+	HXCFE_SECTCFG * scfg;
+	int badsect,missingsect;
+	const char * badsectmess = "!! BAD SECTOR !!";
+	const char * misssectmess= "!!  MISSING   !!";
+
+	badsect = 0;
+	missingsect = 0;
+
+	if(f && fp)
+	{
+		ss = hxcfe_initSectorAccess( floppycontext, fp );
+		if(ss)
+		{
+			for(trk=0;trk<fp->floppyNumberOfTrack;trk++)
+			{
+				for(side = 0; side < nbofside; side++)
+				{
+					for(sect = 0; sect < sectorpertrack; sect++)
+					{
+						scfg = hxcfe_searchSector ( ss, trk, side, startidsector + sect, tracktype );
+						if(scfg)
+						{
+							if(scfg->use_alternate_data_crc || !scfg->input_data)
+							{
+								badsect++;
+							}
+
+							if((scfg->sectorsize == sectorsize) && scfg->input_data)
+							{
+								fwrite(scfg->input_data,scfg->sectorsize,1,f);
+							}
+							else
+							{
+								for(i=0;i<sectorsize;i++)
+								{
+									fputc(badsectmess[i&0xF],f);
+								}
+							}
+
+							hxcfe_freeSectorConfig( ss , scfg );
+						}
+						else
+						{
+							missingsect++;
+							for(i=0;i<sectorsize;i++)
+							{
+								fputc(misssectmess[i&0xF],f);
+							}
+						}
+					}
+				}
+			}
+
+			hxcfe_deinitSectorAccess(ss);
+		}
+	}
+
+	return 0;
+}
+
+int count_sector(HXCFE* floppycontext,HXCFE_FLOPPY * fp,int32_t startidsector,int32_t track,int32_t side,int32_t sectorsize,int32_t tracktype)
+{
+	int sect_cnt;
+	HXCFE_SECTORACCESS* ss;
+	HXCFE_SECTCFG * scfg;
+
+	sect_cnt = 0;
+	if(fp)
+	{
+		ss = hxcfe_initSectorAccess( floppycontext, fp );
+		if(ss)
+		{
+			do
+			{
+				scfg = hxcfe_searchSector ( ss, track, side, startidsector + sect_cnt, tracktype );
+				if(scfg)
+				{
+					if((scfg->sectorsize == sectorsize) && scfg->input_data)
+					{
+						sect_cnt++;
+					}
+
+					hxcfe_freeSectorConfig( ss , scfg );
+				}
+			}while(scfg);
+
+			hxcfe_deinitSectorAccess(ss);
+		}
+	}
+
+	return sect_cnt;
 }
