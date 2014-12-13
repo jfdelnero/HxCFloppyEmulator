@@ -780,7 +780,7 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	timingoffset=0;
 	interbit=0;
 	i=buffer_offset;
-	
+
 	xresstep = 0;
 	if(td->xsize)
 		xresstep = (double)td->x_us/(double)td->xsize;
@@ -1175,7 +1175,7 @@ void draw_circle (HXCFE_TD *td,uint32_t col,float start_angle,float stop_angle,i
     float angle_stepsize = (float)0.001;
 
 	length = diametre;
-	
+
 	if(op!=1) thickness++;
 
 	length += thickness;
@@ -1365,7 +1365,7 @@ int countSector(s_sectorlist * sl,int side)
 		}
 		sl = sl->next_element;
 	}
-	
+
 	return cnt;
 }
 
@@ -1384,7 +1384,7 @@ int countSize(s_sectorlist * sl,int side)
 		}
 		sl = sl->next_element;
 	}
-	
+
 	return size;
 }
 
@@ -1408,7 +1408,7 @@ int countBadSectors(s_sectorlist * sl,int side)
 		}
 		sl = sl->next_element;
 	}
-	
+
 	return cnt;
 }
 
@@ -1432,7 +1432,7 @@ int countTrackType(s_sectorlist * sl,int side,int type)
 		}
 		sl = sl->next_element;
 	}
-	
+
 	return cnt;
 }
 
@@ -1603,10 +1603,9 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	{
 		if(countTrackType(td->sl,0,track_type_list[i].track_type))
 		{
-			sprintf(tempstr,track_type_list[i].name);
-			putstring8x8(td,1,ytypepos,tempstr,0xAAAAAA,0);
+			putstring8x8(td,1,ytypepos,track_type_list[i].name,0xAAAAAA,0);
 			ytypepos += 10;
-		}		
+		}
 		i++;
 	}
 
@@ -1616,10 +1615,9 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	{
 		if(countTrackType(td->sl,1,track_type_list[i].track_type))
 		{
-			sprintf(tempstr,track_type_list[i].name);
-			putstring8x8(td,(td->xsize/2)+1,ytypepos,tempstr,0xAAAAAA,0);
+			putstring8x8(td,(td->xsize/2)+1,ytypepos,track_type_list[i].name,0xAAAAAA,0);
 			ytypepos += 10;
-		}		
+		}
 		i++;
 	}
 
