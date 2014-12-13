@@ -438,9 +438,8 @@ int32_t pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE 
 	return 0;
 }
 
-
 // Fast Bin to MFM converter
-int BuildCylinder(unsigned char * mfm_buffer,int mfm_size,unsigned char * track_clk,unsigned char * track_data,int track_size)
+int32_t BuildCylinder(uint8_t * mfm_buffer,int32_t mfm_size,uint8_t * track_clk,uint8_t * track_data,int32_t track_size)
 {
 	int i,l;
 	unsigned char byte,clock;
@@ -622,7 +621,7 @@ void FastMFMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * tr
 }
 
 // FM encoder
-void BuildFMCylinder(unsigned char * buffer,int fmtracksize,unsigned char * bufferclk,unsigned char * track,int size)
+void BuildFMCylinder(uint8_t * buffer,int32_t fmtracksize,uint8_t * bufferclk,uint8_t * track,int32_t size)
 {
 	int i,j,k,l;
 	unsigned char byte,clock;

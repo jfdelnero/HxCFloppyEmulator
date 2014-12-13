@@ -147,7 +147,7 @@ JV3SectorsOffsets * GetSectorPosition(JV3SectorsOffsets *base,int size,unsigned 
 }
 
 
-unsigned int JV3_disk_geometry(JV3SectorHeader JV3SH[], int *NumberofSides, int *SectorsperTrack, int *NumberofTracks, int *SectorSize, int *StartIdSector, int *NumberofEntries) {
+unsigned int JV3_disk_geometry(JV3SectorHeader JV3SH[], int32_t *NumberofSides, int32_t *SectorsperTrack, int32_t *NumberofTracks, int32_t *SectorSize, int32_t *StartIdSector, int32_t *NumberofEntries) {
 	int i, total_data = 0;
 
 	*StartIdSector = 255;
@@ -325,9 +325,9 @@ JV3SectorsOffsets *JV3_offset(JV3SectorHeader JV3SH[], unsigned int NumberofSide
 int JV3_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int offset1, offset2;
-	int SectorPerTrack, NumberOfTrack, SectorSize, NumberOfEntries;
+	int32_t SectorPerTrack, NumberOfTrack, SectorSize, NumberOfEntries;
 	unsigned int   total_data;
-	int  StartIdSector,NumberOfSide;
+	int32_t  StartIdSector,NumberOfSide;
 	FILE *f;
 	JV3SectorHeader sh[JV3_HEADER_MAX];
 
@@ -381,10 +381,10 @@ int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	FILE * f;
 	unsigned int filesize,cur_pos;
 	int i,j,k,bitrate;
-	int SectorSize, NumberofEntries;
-	int  gap3len,interleave,StartIdSector;
-	int rpm;
-	int trackformat;
+	int32_t SectorSize, NumberofEntries;
+	int32_t gap3len,interleave,StartIdSector;
+	int32_t rpm;
+	int32_t trackformat;
 	int sector_found;
 
 	HXCFE_SECTCFG*	sectorconfig;

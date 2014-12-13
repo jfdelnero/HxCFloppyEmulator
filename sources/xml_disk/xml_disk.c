@@ -733,12 +733,12 @@ static void XMLCALL ns_start(void *data, const char *prefix, const char *uri)
 
 }
 
-static void XMLCALL ns_end(void *data, const char *prefix)
+static void XMLCALL ns_end( void *data, const char *prefix )
 {
 
 }
 
-HXCFE_XMLLDR* hxcfe_initXmlFloppy(HXCFE* floppycontext)
+HXCFE_XMLLDR* hxcfe_initXmlFloppy( HXCFE* floppycontext )
 {
 	AppData *ad;
 	HXCFE_XMLLDR * rfw;
@@ -796,7 +796,7 @@ HXCFE_XMLLDR* hxcfe_initXmlFloppy(HXCFE* floppycontext)
 	return rfw;
 }
 
-void hxcfe_deinitXmlFloppy(HXCFE_XMLLDR* xmlfb_ctx)
+void hxcfe_deinitXmlFloppy( HXCFE_XMLLDR* xmlfb_ctx )
 {
 	int i;
 
@@ -816,7 +816,7 @@ void hxcfe_deinitXmlFloppy(HXCFE_XMLLDR* xmlfb_ctx)
 	free(xmlfb_ctx);
 }
 
-int hxcfe_getXmlLayoutID(HXCFE_XMLLDR* xmlfb_ctx,char * container)
+int32_t hxcfe_getXmlLayoutID( HXCFE_XMLLDR* xmlfb_ctx, char * container )
 {
 	int i;
 	AppData	*ad = (AppData *) xmlfb_ctx->ad;
@@ -846,7 +846,7 @@ int hxcfe_getXmlLayoutID(HXCFE_XMLLDR* xmlfb_ctx,char * container)
 	return -1;
 }
 
-const char* hxcfe_getXmlLayoutDesc(HXCFE_XMLLDR* xmlfb_ctx,int moduleID)
+const char* hxcfe_getXmlLayoutDesc( HXCFE_XMLLDR* xmlfb_ctx, int32_t moduleID )
 {
 	AppData	*ad = (AppData *) xmlfb_ctx->ad;
 
@@ -867,7 +867,7 @@ const char* hxcfe_getXmlLayoutDesc(HXCFE_XMLLDR* xmlfb_ctx,int moduleID)
 	return NULL;
 }
 
-const char* hxcfe_getXmlLayoutName(HXCFE_XMLLDR* xmlfb_ctx,int moduleID)
+const char* hxcfe_getXmlLayoutName( HXCFE_XMLLDR* xmlfb_ctx, int32_t moduleID )
 {
 	AppData	*ad = (AppData *) xmlfb_ctx->ad;
 
@@ -888,9 +888,9 @@ const char* hxcfe_getXmlLayoutName(HXCFE_XMLLDR* xmlfb_ctx,int moduleID)
 	return NULL;
 }
 
-int	hxcfe_numberOfXmlLayout(HXCFE_XMLLDR* xmlfb_ctx)
+int32_t	hxcfe_numberOfXmlLayout( HXCFE_XMLLDR* xmlfb_ctx )
 {
-	int i;
+	int32_t i;
 
 	i = 0;
 	while( disklayout_list[i] )
@@ -902,7 +902,7 @@ int	hxcfe_numberOfXmlLayout(HXCFE_XMLLDR* xmlfb_ctx)
 }
 
 
-int	hxcfe_selectXmlFloppyLayout(HXCFE_XMLLDR* xmlfb_ctx,int layoutid)
+int32_t	hxcfe_selectXmlFloppyLayout( HXCFE_XMLLDR* xmlfb_ctx, int32_t layoutid )
 {
 	AppData	*ad = (AppData *) xmlfb_ctx->ad;
 
@@ -915,7 +915,7 @@ int	hxcfe_selectXmlFloppyLayout(HXCFE_XMLLDR* xmlfb_ctx,int layoutid)
 	return HXCFE_BADPARAMETER;
 }
 
-int	hxcfe_setXmlFloppyLayoutFile(HXCFE_XMLLDR* xmlfb_ctx,char * filepath)
+int32_t	hxcfe_setXmlFloppyLayoutFile(HXCFE_XMLLDR* xmlfb_ctx,char * filepath)
 {
 	char firstline[512];
 	FILE * f;
@@ -947,7 +947,7 @@ int	hxcfe_setXmlFloppyLayoutFile(HXCFE_XMLLDR* xmlfb_ctx,char * filepath)
 }
 
 
-HXCFE_FLOPPY* hxcfe_generateXmlFloppy (HXCFE_XMLLDR* xmlfb_ctx,unsigned char * rambuffer,unsigned buffersize)
+HXCFE_FLOPPY* hxcfe_generateXmlFloppy ( HXCFE_XMLLDR* xmlfb_ctx, uint8_t * rambuffer, uint32_t buffersize )
 {
 	AppData *ad;
 	FILE *f;

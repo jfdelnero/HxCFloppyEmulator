@@ -74,7 +74,7 @@ HXCFE_FSMNG * gb_fsmng;
 extern struct Env adfEnv;
 
 
-static void lba2chs(HXCFE_FSMNG * fsmng,int lba, int *track, int *head, int *sector)
+static void lba2chs(HXCFE_FSMNG * fsmng,int32_t lba, int32_t *track, int32_t *head, int32_t *sector)
 {
 	if(fsmng)
 	{
@@ -152,9 +152,9 @@ RETCODE HxCADFLibInitDevice(struct Device* dev, char* name,BOOL ro)
 RETCODE HxCADFLibReadSector(struct Device *dev, int32_t sector, int32_t size, uint8_t* buf)
 {
 	uint32_t i,c,sector_count;
-	int fp_track,fp_head,fp_sector,fdcstatus;
+	int32_t fp_track,fp_head,fp_sector,fdcstatus;
 	unsigned char tmpSectBuf[512];
-	int remainSize;
+	int32_t remainSize;
 
 	sector_count = size / gb_fsmng->sectorsize;
 	if(size&0x1FF) sector_count++;
@@ -197,12 +197,12 @@ RETCODE HxCADFLibReadSector(struct Device *dev, int32_t sector, int32_t size, ui
 		return 0;
 }
 
-RETCODE HxCADFLibWriteSector(struct Device *dev, int32_t sector, int size, unsigned char* buf)
+RETCODE HxCADFLibWriteSector(struct Device *dev, int32_t sector, int32_t size, unsigned char* buf)
 {
 	uint32_t i,c,sector_count;
-	int fp_track,fp_head,fp_sector,fdcstatus;
+	int32_t fp_track,fp_head,fp_sector,fdcstatus;
 	unsigned char tmpSectBuf[512];
-	int remainSize;
+	int32_t remainSize;
 
 	sector_count = size / gb_fsmng->sectorsize;
 	if(size&0x1FF) sector_count++;
@@ -301,9 +301,9 @@ void init_amigados(HXCFE_FSMNG * fsmng)
 	floppycontext = fsmng->hxcfe;
 }
 
-static int changedir(HXCFE_FSMNG * fsmng,char * path,SECTNUM * curdir,int dir)
+static int32_t changedir(HXCFE_FSMNG * fsmng,char * path,SECTNUM * curdir,int32_t dir)
 {
-	int i,ret;
+	int32_t i,ret;
 	char tmppath[512];
 	char * tmpptr;
 	struct bEntryBlock entry;
@@ -380,10 +380,10 @@ static int changedir(HXCFE_FSMNG * fsmng,char * path,SECTNUM * curdir,int dir)
 	return ret;
 }
 
-int amigados_mountImage(HXCFE_FSMNG * fsmng, HXCFE_FLOPPY *floppy)
+int32_t amigados_mountImage(HXCFE_FSMNG * fsmng, HXCFE_FLOPPY *floppy)
 {
 	unsigned char sectorbuffer[512];
-	int nbsector,fdcstatus,badsectorfound;
+	int32_t nbsector,fdcstatus,badsectorfound;
 	struct Volume * adfvolume;
 	struct Device * adfdevice;
 
@@ -455,7 +455,7 @@ int amigados_mountImage(HXCFE_FSMNG * fsmng, HXCFE_FLOPPY *floppy)
 	return HXCFE_INTERNALERROR;
 }
 
-int amigados_umountImage(HXCFE_FSMNG * fsmng)
+int32_t amigados_umountImage(HXCFE_FSMNG * fsmng)
 {
 	if(fsmng->fdc)
 	{
@@ -466,7 +466,7 @@ int amigados_umountImage(HXCFE_FSMNG * fsmng)
 	return HXCFE_NOERROR;
 }
 
-int amigados_getFreeSpace(HXCFE_FSMNG * fsmng)
+int32_t amigados_getFreeSpace(HXCFE_FSMNG * fsmng)
 {
 	struct Volume * adfvolume;
 
@@ -475,7 +475,7 @@ int amigados_getFreeSpace(HXCFE_FSMNG * fsmng)
 	return adfCountFreeBlocks(adfvolume) * 512;
 }
 
-int amigados_getTotalSpace(HXCFE_FSMNG * fsmng)
+int32_t amigados_getTotalSpace(HXCFE_FSMNG * fsmng)
 {
 	struct Device * adfdevice;
 
@@ -484,9 +484,9 @@ int amigados_getTotalSpace(HXCFE_FSMNG * fsmng)
 	return adfdevice->size;
 }
 
-int amigados_openDir(HXCFE_FSMNG * fsmng, char * path)
+int32_t amigados_openDir(HXCFE_FSMNG * fsmng, char * path)
 {
-	int i;
+	int32_t i;
 	SECTNUM snum;
 
 	if( changedir(fsmng,path,&snum,1) ==  RC_OK)
@@ -512,11 +512,11 @@ int amigados_openDir(HXCFE_FSMNG * fsmng, char * path)
 	return HXCFE_ACCESSERROR;
 }
 
-int amigados_readDir(HXCFE_FSMNG * fsmng,int dirhandle,HXCFE_FSENTRY * dirent)
+int32_t amigados_readDir(HXCFE_FSMNG * fsmng,int32_t dirhandle,HXCFE_FSENTRY * dirent)
 {
 	struct List *list, *cell;
 	struct Entry *entry;
-	int i;
+	int32_t i;
 	struct Volume * adfvolume;
 
 	adfvolume = (struct Volume *)fsmng->volume;
@@ -566,7 +566,7 @@ int amigados_readDir(HXCFE_FSMNG * fsmng,int dirhandle,HXCFE_FSENTRY * dirent)
 	return HXCFE_ACCESSERROR;
 }
 
-int amigados_closeDir(HXCFE_FSMNG * fsmng, int dirhandle)
+int32_t amigados_closeDir(HXCFE_FSMNG * fsmng, int32_t dirhandle)
 {
 	if(dirhandle<128)
 	{
@@ -579,10 +579,10 @@ int amigados_closeDir(HXCFE_FSMNG * fsmng, int dirhandle)
 	return HXCFE_ACCESSERROR;
 }
 
-int amigados_openFile(HXCFE_FSMNG * fsmng, char * filename)
+int32_t amigados_openFile(HXCFE_FSMNG * fsmng, char * filename)
 {
 	struct File *file;
-	int i;
+	int32_t i;
 	SECTNUM snum;
 	char filen[256];
 	struct Volume * adfvolume;
@@ -614,10 +614,10 @@ int amigados_openFile(HXCFE_FSMNG * fsmng, char * filename)
 	return HXCFE_ACCESSERROR;
 }
 
-int amigados_createFile(HXCFE_FSMNG * fsmng, char * filename)
+int32_t amigados_createFile(HXCFE_FSMNG * fsmng, char * filename)
 {
 	struct File *file;
-	int i;
+	int32_t i;
 	char filen[256];
 	char folderpath[256];
 	SECTNUM snum;
@@ -649,9 +649,9 @@ int amigados_createFile(HXCFE_FSMNG * fsmng, char * filename)
 	return HXCFE_ACCESSERROR;
 }
 
-int amigados_writeFile(HXCFE_FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
+int32_t amigados_writeFile(HXCFE_FSMNG * fsmng,int32_t filehandle,unsigned char * buffer,int32_t size)
 {
-	int byteswrite;
+	int32_t byteswrite;
 
 	byteswrite = 0;
 
@@ -669,9 +669,9 @@ int amigados_writeFile(HXCFE_FSMNG * fsmng,int filehandle,unsigned char * buffer
 	return HXCFE_ACCESSERROR;
 }
 
-int amigados_readFile( HXCFE_FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
+int32_t amigados_readFile( HXCFE_FSMNG * fsmng,int32_t filehandle,unsigned char * buffer,int32_t size)
 {
-	int bytesread;
+	int32_t bytesread;
 	if(filehandle && filehandle<128)
 	{
 		if((int32_t)fsmng->handletable[filehandle-1]!=-1)
@@ -683,7 +683,7 @@ int amigados_readFile( HXCFE_FSMNG * fsmng,int filehandle,unsigned char * buffer
 	return HXCFE_ACCESSERROR;
 }
 
-int amigados_deleteFile(HXCFE_FSMNG * fsmng, char * filename)
+int32_t amigados_deleteFile(HXCFE_FSMNG * fsmng, char * filename)
 {
 	char filen[256];
 	char folderpath[256];
@@ -707,7 +707,7 @@ int amigados_deleteFile(HXCFE_FSMNG * fsmng, char * filename)
 	return HXCFE_ACCESSERROR;
 }
 
-int amigados_closeFile( HXCFE_FSMNG * fsmng,int filehandle)
+int32_t amigados_closeFile( HXCFE_FSMNG * fsmng,int32_t filehandle)
 {
 	if(filehandle && filehandle<128)
 	{
@@ -721,7 +721,7 @@ int amigados_closeFile( HXCFE_FSMNG * fsmng,int filehandle)
 	return HXCFE_ACCESSERROR;
 }
 
-int amigados_createDir( HXCFE_FSMNG * fsmng,char * foldername)
+int32_t amigados_createDir( HXCFE_FSMNG * fsmng,char * foldername)
 {
 	char filen[256];
 	char folderpath[256];
@@ -745,12 +745,12 @@ int amigados_createDir( HXCFE_FSMNG * fsmng,char * foldername)
 	return HXCFE_ACCESSERROR;
 }
 
-int amigados_removeDir( HXCFE_FSMNG * fsmng,char * foldername)
+int32_t amigados_removeDir( HXCFE_FSMNG * fsmng,char * foldername)
 {
 	return amigados_deleteFile(fsmng, foldername);
 }
 
-int amigados_ftell( HXCFE_FSMNG * fsmng,int filehandle)
+int32_t amigados_ftell( HXCFE_FSMNG * fsmng,int32_t filehandle)
 {
 	struct File * file;
 	if(filehandle && filehandle<128)

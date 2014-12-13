@@ -136,4 +136,4 @@ typedef struct _fs_config
 
 extern fs_config fs_config_table[];
 
-int32_t hxcfe_imgCallProgressCallback(HXCFE_IMGLDR * imgldr_ctx,int32_t cur,int32_t max);
+int32_t hxcfe_imgCallProgressCallback( HXCFE_IMGLDR * imgldr_ctx, int32_t cur, int32_t max );

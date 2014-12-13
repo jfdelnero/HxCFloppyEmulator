@@ -299,7 +299,7 @@ int floppyTrackTypeIdentification(HXCFE* floppycontext,HXCFE_FLOPPY *fp)
 	int i,j,t;
 	int sectnum;
 	unsigned char first_track_encoding;
-	int nb_sectorfound;
+	int32_t nb_sectorfound;
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG** scl;
 	

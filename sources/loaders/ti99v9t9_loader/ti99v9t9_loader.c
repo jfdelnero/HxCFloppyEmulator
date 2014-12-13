@@ -79,9 +79,9 @@ typedef struct ti99_vib
 } ti99_vib;
 #pragma pack()
 
-int getDiskGeometry(FILE * f,int * numberoftrack,int * numberofside,int * numberofsector,int * skewside0,int * skewside1,int * interleave,int * density,int * bitrate,int * sectorsize)
+int32_t getDiskGeometry(FILE * f,int32_t * numberoftrack,int32_t * numberofside,int32_t * numberofsector,int32_t * skewside0,int32_t * skewside1,int32_t * interleave,int32_t * density,int32_t * bitrate,int32_t * sectorsize)
 {
-	int totsecs,filesize;
+	int32_t totsecs,filesize;
 	ti99_vib vib;
 
 	*sectorsize=256;
@@ -301,11 +301,11 @@ int getDiskGeometry(FILE * f,int * numberoftrack,int * numberofside,int * number
 int TI99V9T9_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	FILE * f;
-	int numberoftrack,numberofsector;
-	int skew0,skew1,interleave,numberofside;
-	int density;
-	int sectorsize;
-	int bitrate;
+	int32_t numberoftrack,numberofsector;
+	int32_t skew0,skew1,interleave,numberofside;
+	int32_t density;
+	int32_t sectorsize;
+	int32_t bitrate;
 	int ret;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99V9T9_libIsValidDiskFile");
@@ -361,13 +361,14 @@ int TI99V9T9_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	FILE * f;
 	unsigned int filesize;
-	int i,j,sectorsize;
+	int i,j;
+	int32_t sectorsize;
 	unsigned int file_offset;
-	int skew0,skew1,skew,interleave,gap3len;
+	int32_t skew0,skew1,skew,interleave,gap3len;
 	unsigned char* trackdata;
-	int trackformat;
-	int rpm;
-	int density;
+	int32_t trackformat;
+	int32_t rpm;
+	int32_t density;
 	HXCFE_CYLINDER* currentcylinder;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99V9T9_libLoad_DiskFile %s",imgfile);

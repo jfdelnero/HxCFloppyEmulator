@@ -42,11 +42,11 @@
 
 int RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-	int i,j,k,l,nbsector;
+	int32_t i,j,k,l,nbsector;
 	FILE * rawfile;
 	char * log_str;
 	char   tmp_str[256];
-	int sectorsize,track_type_id;
+	int32_t sectorsize,track_type_id;
 
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG** sca;

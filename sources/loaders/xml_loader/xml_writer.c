@@ -44,7 +44,7 @@ void gettracktype(HXCFE_SECTORACCESS* ss,int track,int side,int * nbsect,int *fi
 {
 	int i;
 	HXCFE_SECTCFG** sca;
-	int nb_sectorfound;
+	int32_t nb_sectorfound;
 
 	*sectorsize = 512;
 	*firstsectid = 1;
@@ -128,7 +128,8 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 {
 	int i,j,k,s;
 	FILE * xmlfile;
-	int fileoffset,nb_sectorfound;
+	int fileoffset;
+	int32_t nb_sectorfound;
 	int nbsect,firstsectid,sectorsize,imagesize;
 	char trackformat[32];
 	HXCFE_SECTORACCESS* ss;

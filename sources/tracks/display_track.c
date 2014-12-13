@@ -103,7 +103,7 @@ HXCFE_TD * hxcfe_td_init(HXCFE* floppycontext,uint32_t xsize,uint32_t ysize)
 	return td;
 }
 
-int hxcfe_td_setProgressCallback(HXCFE_TD *td,HXCFE_TDPROGRESSOUT_FUNC progress_func,void * userdata)
+int32_t hxcfe_td_setProgressCallback( HXCFE_TD *td, HXCFE_TDPROGRESSOUT_FUNC progress_func, void * userdata )
 {
 	if(td)
 	{
@@ -115,7 +115,8 @@ int hxcfe_td_setProgressCallback(HXCFE_TD *td,HXCFE_TDPROGRESSOUT_FUNC progress_
 	}
 	return 0;
 }
-void hxcfe_td_setparams(HXCFE_TD *td,uint32_t x_us,uint32_t y_us,uint32_t x_start_us)
+
+void hxcfe_td_setparams( HXCFE_TD *td, uint32_t x_us, uint32_t y_us, uint32_t x_start_us )
 {
 	if(td)
 	{
@@ -675,7 +676,7 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 	return sl;
 }
 
-void hxcfe_td_activate_analyzer(HXCFE_TD *td,int TRACKTYPE,int enable)
+void hxcfe_td_activate_analyzer( HXCFE_TD *td, int32_t TRACKTYPE, int32_t enable )
 {
 	if(td && TRACKTYPE<32)
 	{
@@ -686,7 +687,7 @@ void hxcfe_td_activate_analyzer(HXCFE_TD *td,int TRACKTYPE,int enable)
 	}
 }
 
-void hxcfe_td_draw_track(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,int side)
+void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track, int32_t side )
 {
 	int tracksize;
 	int i,j,old_i;
@@ -1646,7 +1647,7 @@ void * hxcfe_td_getframebuffer(HXCFE_TD *td)
 	return 0;
 }
 
-int hxcfe_td_getframebuffer_xres(HXCFE_TD *td)
+int32_t hxcfe_td_getframebuffer_xres( HXCFE_TD *td )
 {
 	if(td)
 	{
@@ -1657,7 +1658,7 @@ int hxcfe_td_getframebuffer_xres(HXCFE_TD *td)
 
 }
 
-int hxcfe_td_getframebuffer_yres(HXCFE_TD *td)
+int32_t hxcfe_td_getframebuffer_yres( HXCFE_TD *td )
 {
 	if(td)
 	{

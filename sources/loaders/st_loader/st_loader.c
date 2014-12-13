@@ -62,11 +62,11 @@
 
 #include "libhxcadaptor.h"
 
-int getfloppyconfig(unsigned char * img,unsigned int filesize,int *numberoftrack,int *numberofside,int *numberofsectorpertrack,unsigned char *gap3len,unsigned char *interleave)
+int getfloppyconfig(unsigned char * img,uint32_t filesize,int32_t *numberoftrack,int32_t *numberofside,int32_t *numberofsectorpertrack,unsigned char *gap3len,unsigned char *interleave)
 {
 	int i;
-	int nb_of_side,nb_of_track,nb_of_sector;
-	int numberofsector;
+	int32_t nb_of_side,nb_of_track,nb_of_sector;
+	int32_t numberofsector;
 	unsigned char  * uimg;
 	unsigned char  conffound;
 

@@ -106,7 +106,7 @@ interfacemode interfacemodelist[]=
 	{-1,"",	""},
 };
 
-int hxcfe_getFloppyInterfaceModeID(HXCFE* floppycontext,char * ifmode)
+int32_t hxcfe_getFloppyInterfaceModeID( HXCFE* floppycontext, char * ifmode )
 {
 	int i;
 	
@@ -125,7 +125,7 @@ int hxcfe_getFloppyInterfaceModeID(HXCFE* floppycontext,char * ifmode)
 	return 0;
 }
 
-const char * hxcfe_getFloppyInterfaceModeName(HXCFE* floppycontext,int ifmodeid)
+const char * hxcfe_getFloppyInterfaceModeName( HXCFE* floppycontext, int32_t ifmodeid )
 {
 	
 	int i;
@@ -149,7 +149,7 @@ const char * hxcfe_getFloppyInterfaceModeName(HXCFE* floppycontext,int ifmodeid)
 	return 0;
 }
 
-const char * hxcfe_getFloppyInterfaceModeDesc(HXCFE* floppycontext,int ifmodeid)
+const char * hxcfe_getFloppyInterfaceModeDesc( HXCFE* floppycontext, int32_t ifmodeid )
 {
 	int i;
 
@@ -172,8 +172,7 @@ const char * hxcfe_getFloppyInterfaceModeDesc(HXCFE* floppycontext,int ifmodeid)
 	return 0;
 }
 
-
-const char * hxcfe_getTrackEncodingName(HXCFE* floppycontext,int trackencodingid)
+const char * hxcfe_getTrackEncodingName( HXCFE* floppycontext,int32_t trackencodingid )
 {
 	
 	int i;

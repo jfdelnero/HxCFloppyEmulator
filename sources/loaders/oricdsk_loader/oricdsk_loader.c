@@ -163,7 +163,7 @@ int issector(mfmformatsect * sector)
 
 }
 
-HXCFE_SECTCFG * extractsector(HXCFE* floppycontext,unsigned char *data,unsigned char * inputtrack,int tracksize,int * numberofsector)
+HXCFE_SECTCFG * extractsector(HXCFE* floppycontext,unsigned char *data,unsigned char * inputtrack,int32_t tracksize,int32_t * numberofsector)
 {
 	int i,j,k;
 	int sectorsize;

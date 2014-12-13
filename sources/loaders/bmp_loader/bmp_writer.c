@@ -40,7 +40,7 @@
 
 #include "bmp_file.h"
 
-static int progress_callback(unsigned int current,unsigned int total,void * td,void * user)
+static int32_t progress_callback( uint32_t current, uint32_t total, void * td, void * user )
 {
 	return hxcfe_imgCallProgressCallback((HXCFE_IMGLDR*)user,current,total);
 }
