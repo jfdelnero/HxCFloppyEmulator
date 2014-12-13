@@ -65,7 +65,7 @@
 
 #define UNPACKBUFFER 128*1024
 
-extern int pc_imggetfloppyconfig(unsigned char * img,unsigned int filesize,int *numberoftrack,int *numberofside,int *numberofsectorpertrack,int *gap3len,int *interleave,int *rpm, int *bitrate,int * ifmode);
+extern int pc_imggetfloppyconfig(unsigned char * img,uint32_t filesize,int32_t *numberoftrack,int32_t *numberofside,int32_t *numberofsectorpertrack,int32_t *gap3len,int32_t *interleave,int32_t *rpm, int32_t *bitrate,int32_t * ifmode);
 
 int IMZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
@@ -106,18 +106,18 @@ int IMZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int IMZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	int filesize;
+	int32_t filesize;
 	int i,j;
-	int file_offset;
-	int sectorsize;
-	int gap3len,skew,trackformat,interleave;
+	int32_t file_offset;
+	int32_t sectorsize;
+	int32_t gap3len,skew,trackformat,interleave;
 	char filename_inzip[256];
 	unsigned char* flatimg;
 	int err=UNZ_OK;
 	unzFile uf;
 	unz_file_info file_info;
 	HXCFE_CYLINDER* currentcylinder;
-	int rpm;
+	int32_t rpm;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMZ_libLoad_DiskFile %s",imgfile);
 

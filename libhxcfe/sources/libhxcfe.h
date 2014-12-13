@@ -163,22 +163,22 @@ int32_t                hxcfe_setOutputFunc( HXCFE* floppycontext, HXCFE_PRINTF_F
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // File image functions                                                                           //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-HXCFE_IMGLDR *         hxcfe_imgInitLoader(HXCFE * hxcfe );
+HXCFE_IMGLDR *         hxcfe_imgInitLoader( HXCFE * hxcfe );
 
-int32_t                hxcfe_imgGetNumberOfLoader(HXCFE_IMGLDR * imgldr_ctx );
-int32_t                hxcfe_imgGetLoaderID(HXCFE_IMGLDR * imgldr_ctx, char * container );
-int32_t                hxcfe_imgGetLoaderAccess(HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID );
-const char*            hxcfe_imgGetLoaderDesc(HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID );
-const char*            hxcfe_imgGetLoaderName(HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID );
-const char*            hxcfe_imgGetLoaderExt(HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID );
-int32_t                hxcfe_imgAutoSetectLoader(HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_t moduleID );
+int32_t                hxcfe_imgGetNumberOfLoader( HXCFE_IMGLDR * imgldr_ctx );
+int32_t                hxcfe_imgGetLoaderID( HXCFE_IMGLDR * imgldr_ctx, char * container );
+int32_t                hxcfe_imgGetLoaderAccess( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID );
+const char*            hxcfe_imgGetLoaderDesc( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID );
+const char*            hxcfe_imgGetLoaderName( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID );
+const char*            hxcfe_imgGetLoaderExt( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID );
+int32_t                hxcfe_imgAutoSetectLoader( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_t moduleID );
 HXCFE_FLOPPY *         hxcfe_imgLoad(HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_t moduleID, int32_t * err_ret );
-HXCFE_FLOPPY *         hxcfe_imgLoadEx(HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_t moduleID, int32_t * err_ret, void * parameters );
-int32_t                hxcfe_imgUnload(HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * floppydisk );
-int32_t                hxcfe_imgExport(HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * newfloppy, char* imgname, int32_t moduleID );
-int32_t                hxcfe_imgSetProgressCallback(HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDRPROGRESSOUT_FUNC progress_func, void * userdata );
+HXCFE_FLOPPY *         hxcfe_imgLoadEx( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_t moduleID, int32_t * err_ret, void * parameters );
+int32_t                hxcfe_imgUnload( HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * floppydisk );
+int32_t                hxcfe_imgExport( HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * newfloppy, char* imgname, int32_t moduleID );
+int32_t                hxcfe_imgSetProgressCallback( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDRPROGRESSOUT_FUNC progress_func, void * userdata );
 
-void                   hxcfe_imgDeInitLoader(HXCFE_IMGLDR * imgldr_ctx );
+void                   hxcfe_imgDeInitLoader( HXCFE_IMGLDR * imgldr_ctx );
 
 int32_t                hxcfe_getNumberOfTrack( HXCFE* floppycontext, HXCFE_FLOPPY *fp );
 int32_t                hxcfe_getNumberOfSide( HXCFE* floppycontext, HXCFE_FLOPPY *fp );

@@ -1498,7 +1498,7 @@ int write_FM_sectordata(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 	// Data CRC
 	CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
 
-	CRC16_Update(&CRC16_High,&CRC16_Low, sector->alternate_datamark ,(unsigned char*)crctable );
+	CRC16_Update(&CRC16_High,&CRC16_Low, (unsigned char)sector->alternate_datamark ,(unsigned char*)crctable );
 
 	for(i=0;i<buffersize;i++)
 	{
@@ -1533,7 +1533,7 @@ int write_MFM_sectordata(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG *
 	CRC16_Update(&CRC16_High,&CRC16_Low, 0xA1 ,(unsigned char*)crctable );
 	CRC16_Update(&CRC16_High,&CRC16_Low, 0xA1 ,(unsigned char*)crctable );
 	CRC16_Update(&CRC16_High,&CRC16_Low, 0xA1 ,(unsigned char*)crctable );
-	CRC16_Update(&CRC16_High,&CRC16_Low, sector->alternate_datamark ,(unsigned char*)crctable );
+	CRC16_Update(&CRC16_High,&CRC16_Low, (unsigned char)sector->alternate_datamark ,(unsigned char*)crctable );
 
 	for(i=0;i<buffersize;i++)
 	{
@@ -2308,7 +2308,7 @@ int32_t hxcfe_getFloppySize( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t * n
 
 }
 
-int hxcfe_readSectorData(HXCFE_SECTORACCESS* ss_ctx,int track,int side,int sector,int numberofsector,int sectorsize,int type,unsigned char * buffer,int * fdcstatus)
+int32_t hxcfe_readSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t sector, int32_t numberofsector, int32_t sectorsize, int32_t type, uint8_t * buffer, int32_t * fdcstatus )
 {
 	HXCFE_SECTCFG * sc;
 	int nbsectorread;
@@ -2372,7 +2372,7 @@ int hxcfe_readSectorData(HXCFE_SECTORACCESS* ss_ctx,int track,int side,int secto
 	return nbsectorread;
 }
 
-int hxcfe_writeSectorData(HXCFE_SECTORACCESS* ss_ctx,int track,int side,int sector,int numberofsector,int sectorsize,int type,unsigned char * buffer,int * fdcstatus)
+int32_t hxcfe_writeSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t sector, int32_t numberofsector, int32_t sectorsize, int32_t type, uint8_t * buffer, int32_t * fdcstatus )
 {
 	HXCFE_SECTCFG * sc;
 	int nbsectorwrite;
@@ -2438,8 +2438,7 @@ int hxcfe_writeSectorData(HXCFE_SECTORACCESS* ss_ctx,int track,int side,int sect
 
 }
 
-
-void hxcfe_freeSectorConfig(HXCFE_SECTORACCESS* ss_ctx,HXCFE_SECTCFG* sc)
+void hxcfe_freeSectorConfig( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SECTCFG* sc )
 {
 	if(sc)
 	{
@@ -2609,7 +2608,7 @@ HXCFE_FDCCTRL * hxcfe_initFDC (HXCFE* floppycontext)
 	return 0;
 }
 
-int hxcfe_insertDiskFDC (HXCFE_FDCCTRL * fdc,HXCFE_FLOPPY *fp)
+int32_t hxcfe_insertDiskFDC (HXCFE_FDCCTRL * fdc, HXCFE_FLOPPY *fp )
 {
 	if(fdc)
 	{
@@ -2628,7 +2627,7 @@ int hxcfe_insertDiskFDC (HXCFE_FDCCTRL * fdc,HXCFE_FLOPPY *fp)
 	return HXCFE_BADPARAMETER;
 }
 
-int hxcfe_readSectorFDC (HXCFE_FDCCTRL * fdc,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size,int * fdcstatus)
+int32_t hxcfe_readSectorFDC (HXCFE_FDCCTRL * fdc, uint8_t track, uint8_t side, uint8_t sector, int32_t sectorsize, int32_t mode, int32_t nbsector, uint8_t * buffer, int32_t buffer_size, int32_t * fdcstatus )
 {
 	if(fdc)
 	{
@@ -2641,7 +2640,7 @@ int hxcfe_readSectorFDC (HXCFE_FDCCTRL * fdc,unsigned char track,unsigned char s
 	return HXCFE_BADPARAMETER;
 }
 
-int hxcfe_writeSectorFDC (HXCFE_FDCCTRL * fdc,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size,int * fdcstatus)
+int32_t hxcfe_writeSectorFDC (HXCFE_FDCCTRL * fdc, uint8_t track, uint8_t side, uint8_t sector, int32_t sectorsize, int32_t mode, int32_t nbsector, uint8_t * buffer, int32_t buffer_size, int32_t * fdcstatus )
 {
 	if(fdc)
 	{
@@ -2664,7 +2663,7 @@ void hxcfe_deinitFDC (HXCFE_FDCCTRL * fdc)
 	}
 }
 
-int hxcfe_FDC_READSECTOR (HXCFE* floppycontext,HXCFE_FLOPPY *fp,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size,int * fdcstatus)
+int32_t hxcfe_FDC_READSECTOR  ( HXCFE* floppycontext, HXCFE_FLOPPY *fp, uint8_t track, uint8_t side, uint8_t sector, int32_t sectorsize, int32_t mode, int32_t nbsector, uint8_t * buffer, int32_t buffer_size, int32_t * fdcstatus )
 {
 	HXCFE_FDCCTRL * fdcctrl;
 	int cnt;
@@ -2684,7 +2683,7 @@ int hxcfe_FDC_READSECTOR (HXCFE* floppycontext,HXCFE_FLOPPY *fp,unsigned char tr
 	return cnt;
 }
 
-int hxcfe_FDC_WRITESECTOR (HXCFE* floppycontext,HXCFE_FLOPPY *fp,unsigned char track,unsigned char side,unsigned char sector,int sectorsize,int mode,int nbsector,unsigned char * buffer,int buffer_size,int * fdcstatus)
+int32_t hxcfe_FDC_WRITESECTOR ( HXCFE* floppycontext, HXCFE_FLOPPY *fp, uint8_t track, uint8_t side, uint8_t sector, int32_t sectorsize, int32_t mode, int32_t nbsector, uint8_t * buffer, int32_t buffer_size, int32_t * fdcstatus )
 {
 	HXCFE_FDCCTRL * fdcctrl;
 	int cnt;
@@ -2704,13 +2703,13 @@ int hxcfe_FDC_WRITESECTOR (HXCFE* floppycontext,HXCFE_FLOPPY *fp,unsigned char t
 	return cnt;
 }
 
-int hxcfe_FDC_FORMAT(HXCFE* floppycontext,unsigned char track,unsigned char side,unsigned char nbsector,int sectorsize,int sectoridstart,int skew,int interleave,int mode,int * fdcstatus)
+int32_t hxcfe_FDC_FORMAT( HXCFE* floppycontext, uint8_t track, uint8_t side, uint8_t nbsector, int32_t sectorsize, int32_t sectoridstart, int32_t skew, int32_t interleave, int32_t mode, int32_t * fdcstatus )
 {
 	//TODO
 	return 0;
 }
 
-int hxcfe_FDC_SCANSECTOR (HXCFE* floppycontext,unsigned char track,unsigned char side,int mode,unsigned char * sector,unsigned char * buffer,int buffer_size,int * fdcstatus)
+int32_t hxcfe_FDC_SCANSECTOR  ( HXCFE* floppycontext, uint8_t track, uint8_t side, int32_t mode, uint8_t * sector, uint8_t * buffer, int32_t buffer_size, int32_t * fdcstatus )
 {
 	//TODO
 	return 0;

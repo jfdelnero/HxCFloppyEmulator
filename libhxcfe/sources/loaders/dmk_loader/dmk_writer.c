@@ -161,18 +161,18 @@ int dmkbitlookingfor(unsigned char * input_data,uint32_t intput_data_size,int se
 
 int DMK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-	int i,j,k,nbsector_mfm,nbsector_fm;
+	int32_t i,j,k,nbsector_mfm,nbsector_fm;
 	unsigned char IDAMbuf[0x80];
 	FILE * dmkdskfile;
-	int tabindex;
-	int bit_offset;
+	int32_t tabindex;
+	int32_t bit_offset;
 
 	unsigned char * track_buf;
 	unsigned char * tmp_fm_track_buf;
 	unsigned short tab_ptr_value;
-	int databitoffset;
+	int32_t databitoffset;
 	unsigned char mfm_buffer[16];
-	int track_size;
+	int32_t track_size;
 
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG** sca_mfm;

@@ -1,7 +1,7 @@
 
 typedef struct _SECTORSEARCHTRACKCACHE
 {
-	int nb_sector_cached;
+	int32_t nb_sector_cached;
 	HXCFE_SECTCFG sectorcache[512];
 }SECTORSEARCHTRACKCACHE;
 
@@ -11,13 +11,13 @@ typedef struct _HXCFE_SECTORACCESS
 {
 	HXCFE* hxcfe;
 	HXCFE_FLOPPY *fp;
-	int bitoffset;
-	int cur_track;
-	int cur_side;
+	int32_t bitoffset;
+	int32_t cur_track;
+	int32_t cur_side;
 
 	SECTORSEARCHTRACKCACHE * track_cache;
 
-	int old_bitoffset;
+	int32_t old_bitoffset;
 }HXCFE_SECTORACCESS;
 
 #define _HXCFE_SECTORACCESS_

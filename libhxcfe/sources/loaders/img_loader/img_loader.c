@@ -62,7 +62,7 @@
 
 #include "libhxcadaptor.h"
 
-int pc_imggetfloppyconfig(unsigned char * img,unsigned int filesize,int *numberoftrack,int *numberofside,int *numberofsectorpertrack,int *gap3len,int *interleave,int *rpm, int *bitrate,int * ifmode)
+int pc_imggetfloppyconfig(unsigned char * img,uint32_t filesize,int32_t *numberoftrack,int32_t *numberofside,int32_t *numberofsectorpertrack,int32_t *gap3len,int32_t *interleave,int32_t *rpm, int32_t *bitrate,int32_t * ifmode)
 {
 	int i;
 	unsigned char * uimg;
@@ -207,9 +207,9 @@ int IMG_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int i,j;
 	unsigned int file_offset;
 	unsigned char* trackdata;
-	int gap3len,interleave;
-	int rpm;
-	int sectorsize;
+	int32_t gap3len,interleave;
+	int32_t rpm;
+	int32_t sectorsize;
 	unsigned char trackformat;
 	HXCFE_CYLINDER* currentcylinder;
 

@@ -71,7 +71,7 @@ fn_diskio_write media_write_callback;
 HXCFE* floppycontext;
 HXCFE_FSMNG * gb_fsmng;
 
-static void lba2chs(HXCFE_FSMNG * fsmng,int lba, int *track, int *head, int *sector)
+static void lba2chs(HXCFE_FSMNG * fsmng,int32_t lba, int32_t *track, int32_t *head, int32_t *sector)
 {
 
 	if(fsmng)
@@ -114,10 +114,10 @@ static void lba2chs(HXCFE_FSMNG * fsmng,int lba, int *track, int *head, int *sec
 	}
 }
 
-static int media_read(uint32_t sector, unsigned char *buffer, uint32_t sector_count)
+static int32_t media_read(uint32_t sector, uint8_t *buffer, uint32_t sector_count)
 {
 	uint32_t i,c;
-	int fp_track,fp_head,fp_sector,fdcstatus;
+	int32_t fp_track,fp_head,fp_sector,fdcstatus;
 
 	lba2chs(gb_fsmng,sector, &fp_track,&fp_head,&fp_sector);
 	gb_fsmng->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FS : media_read, sector: 0x%.8X, sector count : %d, Track: %d, Side: %d, Sector: %d",sector,sector_count,fp_track,fp_head,fp_sector);
@@ -144,10 +144,10 @@ static int media_read(uint32_t sector, unsigned char *buffer, uint32_t sector_co
 		return 0;
 }
 
-static int media_write(uint32_t sector, unsigned char *buffer,uint32_t sector_count)
+static int32_t media_write(uint32_t sector, uint8_t *buffer,uint32_t sector_count)
 {
 	uint32_t i,c;
-	int fp_track,fp_head,fp_sector,fdcstatus;
+	int32_t fp_track,fp_head,fp_sector,fdcstatus;
 
 	lba2chs(gb_fsmng,sector, &fp_track,&fp_head,&fp_sector);
 	gb_fsmng->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FS : media_write, sector: 0x%.8X, sector count : %d, Track: %d, Side: %d, Sector: %d",sector,sector_count,fp_track,fp_head,fp_sector);
@@ -180,10 +180,10 @@ void init_fat12(HXCFE_FSMNG * fsmng)
 	gb_fsmng = fsmng;
 }
 
-int fat12_mountImage(HXCFE_FSMNG * fsmng, HXCFE_FLOPPY *floppy)
+int32_t fat12_mountImage(HXCFE_FSMNG * fsmng, HXCFE_FLOPPY *floppy)
 {
 	unsigned char sectorbuffer[1024];
-	int nbsector,fdcstatus,badsectorfound;
+	int32_t nbsector,fdcstatus,badsectorfound;
 
 	badsectorfound = 0;
 
@@ -268,7 +268,7 @@ int fat12_mountImage(HXCFE_FSMNG * fsmng, HXCFE_FLOPPY *floppy)
 	return HXCFE_INTERNALERROR;
 }
 
-int fat12_umountImage(HXCFE_FSMNG * fsmng)
+int32_t fat12_umountImage(HXCFE_FSMNG * fsmng)
 {
 	if(fsmng->fdc)
 	{
@@ -280,17 +280,17 @@ int fat12_umountImage(HXCFE_FSMNG * fsmng)
 	return HXCFE_NOERROR;
 }
 
-int fat12_getFreeSpace(HXCFE_FSMNG * fsmng)
+int32_t fat12_getFreeSpace(HXCFE_FSMNG * fsmng)
 {
 	return fiol_getFreeSpace();
 }
 
-int fat12_getTotalSpace(HXCFE_FSMNG * fsmng)
+int32_t fat12_getTotalSpace(HXCFE_FSMNG * fsmng)
 {
 	return fiol_getTotalSpace();
 }
 
-int fat12_openDir(HXCFE_FSMNG * fsmng, char * path)
+int32_t fat12_openDir(HXCFE_FSMNG * fsmng, char * path)
 {
 	FL_DIR * dir;
 	int i;
@@ -328,9 +328,9 @@ int fat12_openDir(HXCFE_FSMNG * fsmng, char * path)
 	return HXCFE_ACCESSERROR;
 }
 
-int fat12_readDir(HXCFE_FSMNG * fsmng,int dirhandle,HXCFE_FSENTRY * dirent)
+int32_t fat12_readDir(HXCFE_FSMNG * fsmng,int32_t dirhandle,HXCFE_FSENTRY * dirent)
 {
-	int ret;
+	int32_t ret;
 	fl_dirent entry;
 
 	if(dirhandle<128)
@@ -359,7 +359,7 @@ int fat12_readDir(HXCFE_FSMNG * fsmng,int dirhandle,HXCFE_FSENTRY * dirent)
 	return HXCFE_ACCESSERROR;
 }
 
-int fat12_closeDir(HXCFE_FSMNG * fsmng, int dirhandle)
+int32_t fat12_closeDir(HXCFE_FSMNG * fsmng, int32_t dirhandle)
 {
 	if(dirhandle<128)
 	{
@@ -374,7 +374,7 @@ int fat12_closeDir(HXCFE_FSMNG * fsmng, int dirhandle)
 	return HXCFE_ACCESSERROR;
 }
 
-int fat12_openFile(HXCFE_FSMNG * fsmng, char * filename)
+int32_t fat12_openFile(HXCFE_FSMNG * fsmng, char * filename)
 {
 	FL_FILE *file;
 	int i;
@@ -396,7 +396,7 @@ int fat12_openFile(HXCFE_FSMNG * fsmng, char * filename)
 	return HXCFE_ACCESSERROR;
 }
 
-int fat12_createFile(HXCFE_FSMNG * fsmng, char * filename)
+int32_t fat12_createFile(HXCFE_FSMNG * fsmng, char * filename)
 {
 	FL_FILE *file;
 	int i;
@@ -418,9 +418,9 @@ int fat12_createFile(HXCFE_FSMNG * fsmng, char * filename)
 	return HXCFE_ACCESSERROR;
 }
 
-int fat12_writeFile(HXCFE_FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
+int32_t fat12_writeFile(HXCFE_FSMNG * fsmng,int32_t filehandle,unsigned char * buffer,int32_t size)
 {
-	int byteswrite;
+	int32_t byteswrite;
 	if(filehandle<128)
 	{
 		if(fsmng->handletable[filehandle-1])
@@ -432,9 +432,9 @@ int fat12_writeFile(HXCFE_FSMNG * fsmng,int filehandle,unsigned char * buffer,in
 	return HXCFE_ACCESSERROR;
 }
 
-int fat12_readFile( HXCFE_FSMNG * fsmng,int filehandle,unsigned char * buffer,int size)
+int32_t fat12_readFile( HXCFE_FSMNG * fsmng,int32_t filehandle,unsigned char * buffer,int32_t size)
 {
-	int bytesread;
+	int32_t bytesread;
 	if(filehandle && filehandle<128)
 	{
 		if(fsmng->handletable[filehandle-1])
@@ -446,7 +446,7 @@ int fat12_readFile( HXCFE_FSMNG * fsmng,int filehandle,unsigned char * buffer,in
 	return HXCFE_ACCESSERROR;
 }
 
-int fat12_deleteFile(HXCFE_FSMNG * fsmng, char * filename)
+int32_t fat12_deleteFile(HXCFE_FSMNG * fsmng, char * filename)
 {
 	if(fiol_remove(filename)>=0)
 	{
@@ -456,7 +456,7 @@ int fat12_deleteFile(HXCFE_FSMNG * fsmng, char * filename)
 	return HXCFE_ACCESSERROR;
 }
 
-int fat12_closeFile( HXCFE_FSMNG * fsmng,int filehandle)
+int32_t fat12_closeFile( HXCFE_FSMNG * fsmng,int32_t filehandle)
 {
 	if(filehandle && filehandle<128)
 	{
@@ -470,7 +470,7 @@ int fat12_closeFile( HXCFE_FSMNG * fsmng,int filehandle)
 	return HXCFE_ACCESSERROR;
 }
 
-int fat12_createDir( HXCFE_FSMNG * fsmng,char * foldername)
+int32_t fat12_createDir( HXCFE_FSMNG * fsmng,char * foldername)
 {
 	if(fiol_createdirectory(foldername))
 	{
@@ -479,12 +479,12 @@ int fat12_createDir( HXCFE_FSMNG * fsmng,char * foldername)
 	return HXCFE_ACCESSERROR;
 }
 
-int fat12_removeDir( HXCFE_FSMNG * fsmng,char * foldername)
+int32_t fat12_removeDir( HXCFE_FSMNG * fsmng,char * foldername)
 {
 	return fat12_deleteFile(fsmng, foldername);
 }
 
-int fat12_ftell( HXCFE_FSMNG * fsmng,int filehandle)
+int32_t fat12_ftell( HXCFE_FSMNG * fsmng,int32_t filehandle)
 {
 	if(filehandle && filehandle<128)
 	{
@@ -497,7 +497,7 @@ int fat12_ftell( HXCFE_FSMNG * fsmng,int filehandle)
 	return HXCFE_ACCESSERROR;
 }
 
-int fat12_fseek( HXCFE_FSMNG * fsmng,int filehandle,int32_t offset,int origin)
+int32_t fat12_fseek( HXCFE_FSMNG * fsmng,int32_t filehandle,int32_t offset,int32_t origin)
 {
 	if(filehandle && filehandle<128)
 	{

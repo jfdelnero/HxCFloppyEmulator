@@ -45,7 +45,8 @@
 
 int D88_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-	int i,j,k,nbsector;
+	int i,j,k;
+	int32_t nbsector;
 	FILE * d88file;
 	char * log_str;
 	char   tmp_str[256];

@@ -631,8 +631,8 @@ SECTNUM adfCreateNextFileBlock(struct File* file)
  * adfPos2DataBlock
  *
  */
-int32_t adfPos2DataBlock(int pos, int blockSize, 
-    int *posInExtBlk, int *posInDataBlk, int *curDataN )
+int32_t adfPos2DataBlock(int32_t pos, int blockSize, 
+    int *posInExtBlk, int *posInDataBlk, int32_t *curDataN )
 {
     int extBlock;
 

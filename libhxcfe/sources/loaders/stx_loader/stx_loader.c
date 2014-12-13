@@ -250,10 +250,10 @@ void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * 
 		patchbyte(trackclock ,0        ,buffersize,lastindex++,0x0A);
 		//patchbyte(trackbuffer,trackmask,buffersize,lastindex,0xFE);
 		lastindex++;
-		patchbyte(trackbuffer,trackmask,buffersize,lastindex++,sector[numsector].cylinder);
-		patchbyte(trackbuffer,trackmask,buffersize,lastindex++,sector[numsector].head);
-		patchbyte(trackbuffer,trackmask,buffersize,lastindex++,sector[numsector].sector);
-		patchbyte(trackbuffer,trackmask,buffersize,lastindex++,sector[numsector].alternate_sector_size_id);
+		patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)sector[numsector].cylinder);
+		patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)sector[numsector].head);
+		patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)sector[numsector].sector);
+		patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)sector[numsector].alternate_sector_size_id);
 		patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)(sector[numsector].header_crc&0xff));
 		patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)((sector[numsector].header_crc>>8)&0xff));
 
@@ -336,10 +336,10 @@ void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * 
 			patchbyte(trackclock ,0        ,buffersize,lastindex++,0x0A);
 			//patchbyte(trackbuffer,trackmask,buffersize,lastindex++,0xFE);
 			lastindex++;
-			patchbyte(trackbuffer,trackmask,buffersize,lastindex++,sector[numsector].cylinder);
-			patchbyte(trackbuffer,trackmask,buffersize,lastindex++,sector[numsector].head);
-			patchbyte(trackbuffer,trackmask,buffersize,lastindex++,sector[numsector].sector);
-			patchbyte(trackbuffer,trackmask,buffersize,lastindex++,sector[numsector].alternate_sector_size_id);
+			patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)sector[numsector].cylinder);
+			patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)sector[numsector].head);
+			patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)sector[numsector].sector);
+			patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)sector[numsector].alternate_sector_size_id);
 			patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)(sector[numsector].header_crc&0xff));
 			patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)((sector[numsector].header_crc>>8)&0xff));
 

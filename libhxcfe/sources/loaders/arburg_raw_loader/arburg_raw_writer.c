@@ -42,7 +42,8 @@
 
 int ARBURG_RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-	int i,j,k,l,nbsector;
+	int i,j,k,l;
+	int32_t nbsector;
 	FILE * rawfile;
 	char * log_str;
 	char   tmp_str[256];

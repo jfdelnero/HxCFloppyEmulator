@@ -45,14 +45,14 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 {
 	int i,j,k;
 	FILE * ti99v9t9file;
-	int nbsector,imagesize;
+	int32_t nbsector,imagesize;
 
-	int numberofsector,numberofside,numberoftrack;
-	int bitrate;
-	int density;
-	int interleave;
+	int32_t numberofsector,numberofside,numberoftrack;
+	int32_t bitrate;
+	int32_t density;
+	int32_t interleave;
 	int file_offset;
-	int sectorsize;
+	int32_t sectorsize;
 	unsigned char * diskimage;
 	int error;
 	HXCFE_SECTORACCESS* ss;

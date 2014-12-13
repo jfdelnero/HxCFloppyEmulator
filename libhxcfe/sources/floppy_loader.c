@@ -97,7 +97,7 @@ HXCFE* hxcfe_init(void)
 	return hxcfe;
 }
 
-int hxcfe_setOutputFunc(HXCFE* floppycontext,HXCFE_PRINTF_FUNC hxc_printf)
+int32_t hxcfe_setOutputFunc( HXCFE* floppycontext, HXCFE_PRINTF_FUNC hxc_printf )
 {
 	floppycontext->hxc_printf=hxc_printf;
 
@@ -126,7 +126,7 @@ void hxcfe_deinit(HXCFE* hxcfe)
 
 ////////////////////////////////////////////////////////////////////////
 
-static int hxcfe_checkLoaderID(HXCFE_IMGLDR * imgldr_ctx,int moduleID)
+static int32_t hxcfe_checkLoaderID(HXCFE_IMGLDR * imgldr_ctx,int32_t moduleID)
 {
 	int i;
 
@@ -153,7 +153,7 @@ static int hxcfe_checkLoaderID(HXCFE_IMGLDR * imgldr_ctx,int moduleID)
 	}
 }
 
-int hxcfe_imgGetNumberOfLoader(HXCFE_IMGLDR * imgldr_ctx)
+int32_t hxcfe_imgGetNumberOfLoader( HXCFE_IMGLDR * imgldr_ctx )
 {
 	int i;
 
@@ -166,7 +166,7 @@ int hxcfe_imgGetNumberOfLoader(HXCFE_IMGLDR * imgldr_ctx)
 	return i;
 }
 
-int hxcfe_imgGetLoaderID(HXCFE_IMGLDR * imgldr_ctx,char * container)
+int32_t hxcfe_imgGetLoaderID( HXCFE_IMGLDR * imgldr_ctx, char * container )
 {
 	int i;
 	int ret;
@@ -193,7 +193,7 @@ int hxcfe_imgGetLoaderID(HXCFE_IMGLDR * imgldr_ctx,char * container)
 	return -1;
 }
 
-int hxcfe_imgGetLoaderAccess(HXCFE_IMGLDR * imgldr_ctx,int moduleID)
+int32_t hxcfe_imgGetLoaderAccess( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID )
 {
 	int ret;
 	plugins_ptr func_ptr;
@@ -221,7 +221,7 @@ int hxcfe_imgGetLoaderAccess(HXCFE_IMGLDR * imgldr_ctx,int moduleID)
 	return ret;
 }
 
-const char* hxcfe_imgGetLoaderDesc(HXCFE_IMGLDR * imgldr_ctx,int moduleID)
+const char* hxcfe_imgGetLoaderDesc( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID )
 {
 	int ret;
 	plugins_ptr func_ptr;
@@ -244,7 +244,7 @@ const char* hxcfe_imgGetLoaderDesc(HXCFE_IMGLDR * imgldr_ctx,int moduleID)
 	return 0;
 }
 
-const char* hxcfe_imgGetLoaderName(HXCFE_IMGLDR * imgldr_ctx,int moduleID)
+const char* hxcfe_imgGetLoaderName( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID )
 {
 	int ret;
 	plugins_ptr func_ptr;
@@ -267,7 +267,7 @@ const char* hxcfe_imgGetLoaderName(HXCFE_IMGLDR * imgldr_ctx,int moduleID)
 	return 0;
 }
 
-const char* hxcfe_imgGetLoaderExt(HXCFE_IMGLDR * imgldr_ctx,int moduleID)
+const char* hxcfe_imgGetLoaderExt( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID )
 {
 	int ret;
 	plugins_ptr func_ptr;
@@ -290,7 +290,7 @@ const char* hxcfe_imgGetLoaderExt(HXCFE_IMGLDR * imgldr_ctx,int moduleID)
 	return 0;
 }
 
-int hxcfe_imgAutoSetectLoader(HXCFE_IMGLDR * imgldr_ctx,char* imgname,int moduleID)
+int32_t hxcfe_imgAutoSetectLoader( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_t moduleID )
 {
 	int i;
 	int ret;
@@ -341,7 +341,7 @@ int hxcfe_imgAutoSetectLoader(HXCFE_IMGLDR * imgldr_ctx,char* imgname,int module
 	return ret;
 }
 
-int hxcfe_imgSetProgressCallback(HXCFE_IMGLDR * imgldr_ctx,HXCFE_IMGLDRPROGRESSOUT_FUNC progress_func,void * userdata)
+int32_t hxcfe_imgSetProgressCallback( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDRPROGRESSOUT_FUNC progress_func, void * userdata )
 {
 	if(imgldr_ctx)
 	{
@@ -354,7 +354,7 @@ int hxcfe_imgSetProgressCallback(HXCFE_IMGLDR * imgldr_ctx,HXCFE_IMGLDRPROGRESSO
 	return 0;
 }
 
-int hxcfe_imgCallProgressCallback(HXCFE_IMGLDR * imgldr_ctx,int cur,int max)
+int32_t hxcfe_imgCallProgressCallback( HXCFE_IMGLDR * imgldr_ctx, int32_t cur, int32_t max )
 {
 	if(imgldr_ctx)
 	{
@@ -392,7 +392,7 @@ void hxcfe_imgDeInitLoader(HXCFE_IMGLDR * imgldr_ctx)
 	return;
 }
 
-HXCFE_FLOPPY * hxcfe_imgLoadEx(HXCFE_IMGLDR * imgldr_ctx,char* imgname,int moduleID,int * err_ret,void * parameters)
+HXCFE_FLOPPY * hxcfe_imgLoadEx( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_t moduleID, int32_t * err_ret, void * parameters )
 {
 	int ret;
 	HXCFE* hxcfe;
@@ -455,12 +455,12 @@ HXCFE_FLOPPY * hxcfe_imgLoadEx(HXCFE_IMGLDR * imgldr_ctx,char* imgname,int modul
 
 }
 
-HXCFE_FLOPPY * hxcfe_imgLoad(HXCFE_IMGLDR * imgldr_ctx,char* imgname,int moduleID,int * err_ret)
+HXCFE_FLOPPY * hxcfe_imgLoad(HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_t moduleID, int32_t * err_ret )
 {
 	return hxcfe_imgLoadEx(imgldr_ctx,imgname,moduleID,err_ret,0);
 }
 
-int hxcfe_imgUnload(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk)
+int32_t hxcfe_imgUnload( HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * floppydisk )
 {
 	int i,j;
 
@@ -484,7 +484,7 @@ int hxcfe_imgUnload(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk)
 	return 0;
 }
 
-int hxcfe_imgExport(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * newfloppy,char* imgname,int moduleID)
+int32_t hxcfe_imgExport( HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * newfloppy, char* imgname, int32_t moduleID )
 {
 	int ret;
 	plugins_ptr func_ptr;
@@ -511,7 +511,7 @@ int hxcfe_imgExport(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * newfloppy,char* img
 	return HXCFE_BADPARAMETER;
 }
 
-int hxcfe_floppyUnload(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk)
+int32_t hxcfe_floppyUnload( HXCFE* floppycontext, HXCFE_FLOPPY * floppydisk )
 {
 	int i,j;
 
@@ -545,7 +545,7 @@ int hxcfe_floppyUnload(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk)
 }
 
 
-HXCFE_FLOPPY * hxcfe_floppyDuplicate(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk)
+HXCFE_FLOPPY * hxcfe_floppyDuplicate( HXCFE* floppycontext, HXCFE_FLOPPY * floppydisk )
 {
 	int i,j;
 	HXCFE_FLOPPY * fp;
@@ -632,8 +632,7 @@ HXCFE_FLOPPY * hxcfe_floppyDuplicate(HXCFE* floppycontext,HXCFE_FLOPPY * floppyd
 }
 
 ////////////////////////////////////////////////////////////////////////
-
-int hxcfe_floppyGetSetParams(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy,unsigned char dir,unsigned short param,void * value)
+int32_t hxcfe_floppyGetSetParams( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy, uint8_t dir, uint16_t param, void * value )
 {
 	int ret;
 
@@ -680,12 +679,12 @@ int hxcfe_floppyGetSetParams(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy,unsig
 	return ret;
 }
 
-int hxcfe_floppyGetInterfaceMode(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy)
+int32_t hxcfe_floppyGetInterfaceMode( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy )
 {
 	return newfloppy->floppyiftype;
 }
 
-int hxcfe_floppySetInterfaceMode(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy,int ifmode)
+int32_t hxcfe_floppySetInterfaceMode( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy, int32_t ifmode )
 {
 
 	if(hxcfe_getFloppyInterfaceModeName(floppycontext,ifmode))
@@ -697,12 +696,12 @@ int hxcfe_floppySetInterfaceMode(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy,i
 	return HXCFE_BADPARAMETER;
 }
 
-int hxcfe_floppyGetDoubleStep(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy)
+int32_t hxcfe_floppyGetDoubleStep( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy )
 {
 	return newfloppy->double_step;
 }
 
-int hxcfe_floppySetDoubleStep(HXCFE* floppycontext,HXCFE_FLOPPY * newfloppy,int doublestep)
+int32_t hxcfe_floppySetDoubleStep( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy, int32_t doublestep )
 {
 	newfloppy->double_step=doublestep;
 	return HXCFE_NOERROR;
@@ -819,7 +818,7 @@ int32_t hxcfe_getNumberOfTrack( HXCFE* floppycontext, HXCFE_FLOPPY *fp )
 	return 0;
 }
 
-int hxcfe_getNumberOfSide(HXCFE* floppycontext,HXCFE_FLOPPY *fp)
+int32_t hxcfe_getNumberOfSide( HXCFE* floppycontext, HXCFE_FLOPPY *fp )
 {
 	if(fp)
 	{
@@ -1675,7 +1674,7 @@ fs_config fs_config_table[]=
 };
 
 
-HXCFE_FLOPPY * hxcfe_generateFloppy(HXCFE* floppycontext,char* path,int fsID,int * err_ret)
+HXCFE_FLOPPY * hxcfe_generateFloppy( HXCFE* floppycontext, char* path, int32_t fsID, int32_t * err_ret )
 {
 	int ret;
 	HXCFE_FLOPPY * newfloppy;

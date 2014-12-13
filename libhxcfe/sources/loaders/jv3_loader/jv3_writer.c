@@ -59,9 +59,9 @@ unsigned char jv3flags(unsigned char num,unsigned char mask)
 int JV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int i,j,k,l;
-	int nbsector;
-	int sectorcount;
-	int sectorsize;
+	int32_t nbsector;
+	int32_t sectorcount;
+	int32_t sectorsize;
 	unsigned char density;
 	unsigned char flags;
 	FILE * jv3dskfile;
@@ -105,7 +105,7 @@ int JV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 							sectorheader[sectorcount].sector = sca[k]->sector;
 							flags = 0;
 							flags |= jv3flags(density,JV3_DENSITY);
-							flags |= jv3flags(sca[k]->head,JV3_SIDE);
+							flags |= jv3flags((unsigned char)sca[k]->head,JV3_SIDE);
 							switch (sca[k]->use_alternate_datamark?sca[k]->alternate_datamark:0xfb)
 							{
 								case 0xfb: flags |= jv3flags( (unsigned char)(density?JV3_DAM_FB_DD:JV3_DAM_FB_SD), JV3_DAM); break;

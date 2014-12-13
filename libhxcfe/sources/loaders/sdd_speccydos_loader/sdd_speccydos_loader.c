@@ -63,7 +63,7 @@
 
 #include "libhxcadaptor.h"
 
-int sdd_getfloppyconfig(unsigned char * img,unsigned int filesize,int * density,int *numberoftrack,int *numberofside,int *numberofsectorpertrack,int *gap3len,int *interleave)
+int sdd_getfloppyconfig(unsigned char * img,uint32_t filesize,int32_t * density,int32_t *numberoftrack,int32_t *numberofside,int32_t *numberofsectorpertrack,int32_t *gap3len,int32_t *interleave)
 {
 	sddfileformats_t  * uimg;
 
@@ -93,15 +93,15 @@ int sdd_getfloppyconfig(unsigned char * img,unsigned int filesize,int * density,
 
 int SDDSpeccyDos_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
-	int filesize;
+	int32_t filesize;
 	unsigned char buffer[256];
 	FILE * f;
-	int density;
-	int NumberOfTrack;
-	int NumberOfSide;
-	int SectorPerTrack;
-	int gap3len;
-	int interleave;
+	int32_t density;
+	int32_t NumberOfTrack;
+	int32_t NumberOfSide;
+	int32_t SectorPerTrack;
+	int32_t gap3len;
+	int32_t interleave;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile");
 
@@ -170,9 +170,9 @@ int SDDSpeccyDos_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flopp
 
 	int i,j;
 	unsigned char* trackdata;
-	int gap3len,interleave,skew,trackformat,density;
-	int rpm;
-	int sectorsize;
+	int32_t gap3len,interleave,skew,trackformat,density;
+	int32_t rpm;
+	int32_t sectorsize;
 	HXCFE_CYLINDER* currentcylinder;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libLoad_DiskFile %s",imgfile);

@@ -158,4 +158,3 @@ static FAT_INLINE struct fat_node * fat_list_pop_head(struct fat_list *list)
 }
 
 #endif
-

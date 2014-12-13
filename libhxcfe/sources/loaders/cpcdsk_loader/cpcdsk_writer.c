@@ -44,15 +44,15 @@
 
 int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-	int i,j,k,l,nbsector;
+	int32_t i,j,k,l,nbsector;
 	FILE * cpcdskfile;
 	char * log_str;
 	char   tmp_str[256];
 	char   disk_info_block[256];
 	char rec_mode;
-	int sectorsize;
-	int track_cnt;
-	int sectorlistoffset,trackinfooffset;
+	int32_t sectorsize;
+	int32_t track_cnt;
+	int32_t sectorlistoffset,trackinfooffset;
 	cpcdsk_fileheader * cpcdsk_fh;
 	cpcdsk_trackheader cpcdsk_th;
 	cpcdsk_sector cpcdsk_s;
