@@ -63,6 +63,42 @@
 
 #define PI    ((float)  3.141592654f)
 
+uint8_t bitcount_array[]=
+{
+	0x00,0x01,0x01,0x02,0x01,0x02,0x02,0x03,
+	0x01,0x02,0x02,0x03,0x02,0x03,0x03,0x04,
+	0x01,0x02,0x02,0x03,0x02,0x03,0x03,0x04,
+	0x02,0x03,0x03,0x04,0x03,0x04,0x04,0x05,
+	0x01,0x02,0x02,0x03,0x02,0x03,0x03,0x04,
+	0x02,0x03,0x03,0x04,0x03,0x04,0x04,0x05,
+	0x02,0x03,0x03,0x04,0x03,0x04,0x04,0x05,
+	0x03,0x04,0x04,0x05,0x04,0x05,0x05,0x06,
+	0x01,0x02,0x02,0x03,0x02,0x03,0x03,0x04,
+	0x02,0x03,0x03,0x04,0x03,0x04,0x04,0x05,
+	0x02,0x03,0x03,0x04,0x03,0x04,0x04,0x05,
+	0x03,0x04,0x04,0x05,0x04,0x05,0x05,0x06,
+	0x02,0x03,0x03,0x04,0x03,0x04,0x04,0x05,
+	0x03,0x04,0x04,0x05,0x04,0x05,0x05,0x06,
+	0x03,0x04,0x04,0x05,0x04,0x05,0x05,0x06,
+	0x04,0x05,0x05,0x06,0x05,0x06,0x06,0x07,
+	0x01,0x02,0x02,0x03,0x02,0x03,0x03,0x04,
+	0x02,0x03,0x03,0x04,0x03,0x04,0x04,0x05,
+	0x02,0x03,0x03,0x04,0x03,0x04,0x04,0x05,
+	0x03,0x04,0x04,0x05,0x04,0x05,0x05,0x06,
+	0x02,0x03,0x03,0x04,0x03,0x04,0x04,0x05,
+	0x03,0x04,0x04,0x05,0x04,0x05,0x05,0x06,
+	0x03,0x04,0x04,0x05,0x04,0x05,0x05,0x06,
+	0x04,0x05,0x05,0x06,0x05,0x06,0x06,0x07,
+	0x02,0x03,0x03,0x04,0x03,0x04,0x04,0x05,
+	0x03,0x04,0x04,0x05,0x04,0x05,0x05,0x06,
+	0x03,0x04,0x04,0x05,0x04,0x05,0x05,0x06,
+	0x04,0x05,0x05,0x06,0x05,0x06,0x06,0x07,
+	0x03,0x04,0x04,0x05,0x04,0x05,0x05,0x06,
+	0x04,0x05,0x05,0x06,0x05,0x06,0x06,0x07,
+	0x04,0x05,0x05,0x06,0x05,0x06,0x06,0x07,
+	0x05,0x06,0x06,0x07,0x06,0x07,0x07,0x08
+};
+
 int dummy_graph_progress(unsigned int current,unsigned int total,void * td,void * user)
 {
     return 0;
@@ -236,7 +272,7 @@ double getOffsetTiming(HXCFE_SIDE *currentside,int offset,double timingoffset,in
 	return timingoffset;
 }
 
-void putchar8x8(HXCFE_TD *td,int x_pos,int y_pos,unsigned char c,unsigned int color,int vertical)
+void putchar8x8(HXCFE_TD *td,int x_pos,int y_pos,unsigned char c,uint32_t color,uint32_t bgcolor,int vertical,int transparent)
 {
 	int charoffset;
 	int xpos,ypos;
@@ -249,36 +285,45 @@ void putchar8x8(HXCFE_TD *td,int x_pos,int y_pos,unsigned char c,unsigned int co
 	{
 		for(i=0;i<8;i++) // x
 		{
-			if( font8x8[charoffset + j ] & (0x01<<(i&7)) )
+			if(vertical)
 			{
-				if(vertical)
-				{
-					xpos=(x_pos + j);
-					ypos=(y_pos + (8-i));
-				}
-				else
-				{
-					xpos=(x_pos + i);
-					ypos=(y_pos + j);
-				}
+				xpos=(x_pos + j);
+				ypos=(y_pos + (8-i));
+			}
+			else
+			{
+				xpos=(x_pos + i);
+				ypos=(y_pos + j);
+			}
 
-				if(xpos>=0 && xpos<td->xsize)
+			if(xpos>=0 && xpos<td->xsize)
+			{
+				if(ypos>=0 && ypos<td->ysize)
 				{
-					if(ypos>=0 && ypos<td->ysize)
+					col=(s_col *)&td->framebuffer[(td->xsize*ypos) + xpos];
+
+					if( ( font8x8[charoffset + j ] & (0x01<<(i&7)) ) )
 					{
 						if(!color)
 						{
-							col=(s_col *)&td->framebuffer[(td->xsize*ypos) + xpos];
 							col->blue=(unsigned char)(col->blue/2);
 							col->red=(unsigned char)(col->red/2);
 							col->green=(unsigned char)(col->green/2);
 						}
 						else
 						{
-							col=(s_col *)&td->framebuffer[(td->xsize*ypos) + xpos];
 							col->blue=(unsigned char)((color>>16)&0xFF);
 							col->red=(unsigned char)(color&0xFF);
 							col->green=(unsigned char)((color>>8)&0xFF);
+						}
+					}
+					else
+					{
+						if(!transparent)
+						{
+							col->blue=(unsigned char)((bgcolor>>16)&0xFF);
+							col->red=(unsigned char)(bgcolor&0xFF);
+							col->green=(unsigned char)((bgcolor>>8)&0xFF);
 						}
 					}
 				}
@@ -287,7 +332,7 @@ void putchar8x8(HXCFE_TD *td,int x_pos,int y_pos,unsigned char c,unsigned int co
 	}
 }
 
-void putstring8x8(HXCFE_TD *td,int x_pos,int y_pos,char * str,unsigned int color,int vertical)
+void putstring8x8(HXCFE_TD *td,int x_pos,int y_pos,char * str,uint32_t color,uint32_t bgcolor,int vertical,int transparent)
 {
 	int i;
 
@@ -298,11 +343,11 @@ void putstring8x8(HXCFE_TD *td,int x_pos,int y_pos,char * str,unsigned int color
 
 		if(vertical)
 		{
-			putchar8x8(td,x_pos,y_pos-(i*8),str[i],color,vertical);
+			putchar8x8(td,x_pos,y_pos-(i*8),str[i],color,bgcolor,vertical,transparent);
 		}
 		else
 		{
-			putchar8x8(td,x_pos+(i*8),y_pos,str[i],color,vertical);
+			putchar8x8(td,x_pos+(i*8),y_pos,str[i],color,bgcolor,vertical,transparent);
 		}
 		i++;
 	}
@@ -587,13 +632,13 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 
 							strcat(tempstr,tempstr2);
 
-							putstring8x8(td,xpos_startheader,225,tempstr,0x000,1);
+							putstring8x8(td,xpos_startheader,225,tempstr,0x000,0x000,1,1);
 
 							if(sc->startdataindex != sc->endsectorindex)
 								sprintf(tempstr,"T:%.2d H:%d S:%.3d CRC:%.4X",sc->cylinder,sc->head,sc->sector,sc->data_crc);
 							else
 								sprintf(tempstr,"T:%.2d H:%d S:%.3d NO DATA?",sc->cylinder,sc->head,sc->sector);
-							putstring8x8(td,xpos_startheader+8,225,tempstr,0x000,1);
+							putstring8x8(td,xpos_startheader+8,225,tempstr,0x000,0x000,1,1);
 						}
 						else
 						{
@@ -634,7 +679,7 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 								break;
 
 							}
-							putstring8x8(td,xpos_startheader,225,tempstr,0x000,1);
+							putstring8x8(td,xpos_startheader,225,tempstr,0x000,0x000,1,1);
 						}
 
 						// Right Line
@@ -1066,7 +1111,7 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	}
 
 	sprintf(tmp_str,"T:%.3d S:%.1d",track,side);
-	putstring8x8(td,1,1,tmp_str,0x000,0);
+	putstring8x8(td,1,1,tmp_str,0x000,0x000,0,1);
 
 }
 
@@ -1194,6 +1239,99 @@ void draw_circle (HXCFE_TD *td,uint32_t col,float start_angle,float stop_angle,i
 			plot(td, x+xpos, -y+ypos  , col, op);
 
 			angle += angle_stepsize;
+		}while (angle < stop_angle );
+
+		length--;
+		i++;
+	}while(i<(thickness));
+}
+
+void draw_density_circle (HXCFE_TD *td,uint32_t col,float start_angle,float stop_angle,int xpos,int ypos,int diametre,int op,int thickness,HXCFE_SIDE * side)
+{
+	int x, y,i, x_old,y_old;
+	int length;
+	int old_j,j,k;
+
+	double timingoffset;
+	float track_timing,timingoffset2;
+	float angle = 0.0;
+	float angle_stepsize = (float)0.001;
+	int tracksize;
+	int prev_offset;
+	int bitcount;
+	int totalcount;
+	uint8_t lum,mask;
+
+	length = diametre;
+
+	if(op!=1) thickness++;
+
+	length += thickness;
+
+	track_timing = (float)getOffsetTiming(side,side->tracklen,0,0);
+
+	tracksize = side->tracklen;
+
+	i = 0;
+	do
+	{
+		timingoffset = 0;
+		old_j = 0;
+		j = 0;
+		prev_offset = 0;
+
+		//bitcount
+		angle = start_angle;
+		x_old = (int)((length) * cos (angle));
+		y_old = (int)((length) * sin (angle));
+		// go through all angles from 0 to 2 * PI radians
+		do
+		{
+			// calculate x, y from a vector with known length and angle
+			x = (int)((length) * cos (angle));
+			y = (int)((length) * sin (angle));
+
+			if( (x_old != x) || (y_old != y) )
+			{
+				timingoffset2=( track_timing * ( angle / ( stop_angle - start_angle ) ) );
+
+				while((j<tracksize) && timingoffset2>timingoffset)
+				{
+					timingoffset = getOffsetTiming(side,j,timingoffset,old_j);
+					old_j=j;
+					j++;
+				};
+
+				bitcount = 0;
+				totalcount = 0;
+				if(j - prev_offset)
+				{
+
+					mask = 0xFF >> (prev_offset&7);
+
+					for(k=0;k<(j - prev_offset);k+=8)
+					{
+						bitcount = bitcount + bitcount_array[(side->databuffer[(prev_offset+k)>>3])&mask];
+						totalcount = totalcount + bitcount_array[mask];
+						if( (j - prev_offset) - k >= 8)
+							mask = 0xFF;
+						else
+							mask = 0xFF << ( 8 - ( (j - prev_offset) - k ) ) ;
+					}
+				}
+
+				lum = (uint8_t)((float)col * (float) ((float)bitcount/(float)totalcount) );
+
+				plot(td, x+xpos, -y+ypos  , (uint32_t)( (lum<<16) | ( (lum>>1) <<8) | (lum>>1)), op);
+
+				prev_offset = old_j;
+			}
+
+			angle += angle_stepsize;
+
+			x_old = x;
+			y_old = y;
+
 		}while (angle < stop_angle );
 
 		length--;
@@ -1361,7 +1499,9 @@ int countSector(s_sectorlist * sl,int side)
 		if(sl->side == side)
 		{
 			if(sl->sectorconfig)
+			{
 				cnt++;
+			}
 		}
 		sl = sl->next_element;
 	}
@@ -1380,7 +1520,9 @@ int countSize(s_sectorlist * sl,int side)
 		if(sl->side == side)
 		{
 			if(sl->sectorconfig)
+			{
 				size = size + sl->sectorconfig->sectorsize;
+			}
 		}
 		sl = sl->next_element;
 	}
@@ -1400,7 +1542,7 @@ int countBadSectors(s_sectorlist * sl,int side)
 		{
 			if(sl->sectorconfig)
 			{
-				if(!sl->sectorconfig->trackencoding || sl->sectorconfig->use_alternate_data_crc)
+				if(!sl->sectorconfig->trackencoding || sl->sectorconfig->use_alternate_data_crc || !sl->sectorconfig->input_data)
 				{
 					cnt++;
 				}
@@ -1510,15 +1652,41 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 		circle(td,x_pos_2,y_pos,i,color);
 	}
 
-	y_pos = td->ysize/2;
-	x_pos_1 = td->xsize/4;
-	x_pos_2 = td->xsize - (td->xsize/4);
+	track_ep = (float)( (td->ysize-(y_pos)) - 60 ) /((float) floppydisk->floppyNumberOfTrack+1);
+	for(track=0;track<floppydisk->floppyNumberOfTrack;track++)
+	{
+		td->hxc_setprogress(track*floppydisk->floppyNumberOfSide,floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide*2,td,td->progress_userdata);
+
+		currentside = floppydisk->tracks[track]->sides[0];
+		draw_density_circle (td,0x0000FF,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)),0,(int)track_ep,currentside);
+
+		sprintf(tempstr,"Side %d, %d Tracks",0,track);
+		putstring8x8(td,1,1,tempstr,0xAAAAAA,0x000000,0,0);
+
+		if(floppydisk->tracks[track]->number_of_side == 2)
+		{
+			sprintf(tempstr,"Side %d, %d Tracks",1,track);
+			putstring8x8(td,td->xsize/2,1,tempstr,0xAAAAAA,0x000000,0,0);
+
+			currentside = floppydisk->tracks[track]->sides[1];
+			draw_density_circle (td,0x0000FF,0,(float)((float)((float)2 * PI)),x_pos_2,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)),0,(int)track_ep,currentside);
+		}
+	}
+
+	sprintf(tempstr,"Side %d, %d Tracks",0,floppydisk->floppyNumberOfTrack);
+	putstring8x8(td,1,1,tempstr,0xAAAAAA,0x000000,0,0);
+
+	if(floppydisk->floppyNumberOfSide == 2)
+	{
+		sprintf(tempstr,"Side %d, %d Tracks",1,floppydisk->floppyNumberOfTrack);
+		putstring8x8(td,td->xsize/2,1,tempstr,0xAAAAAA,0x000000,0,0);
+	}
 
 	for(side=0;side<floppydisk->floppyNumberOfSide;side++)
 	{
 		for(track=0;track<floppydisk->floppyNumberOfTrack;track++)
 		{
-			td->hxc_setprogress(track + (side*floppydisk->floppyNumberOfTrack),floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide,td,td->progress_userdata);
+			td->hxc_setprogress((floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide) + track + (side*floppydisk->floppyNumberOfTrack),floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide*2,td,td->progress_userdata);
 
 			currentside = floppydisk->tracks[track]->sides[side];
 
@@ -1567,66 +1735,62 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 				}while(i<tracksize);
 			}
 
-			putstring8x8(td,x_pos_1 - 24,y_pos + 32,"Side 0",0x666666,0);
-			putstring8x8(td,x_pos_2 - 24,y_pos + 32,"Side 1",0x666666,0);
+			sprintf(tempstr,"%d Sectors,%d bad", countSector(td->sl,0),countBadSectors(td->sl,0));
+			putstring8x8(td,1,11,tempstr,0xAAAAAA,0x000000,0,0);
 
-			putstring8x8(td,x_pos_1 - 4,y_pos - 44,"->",0x666666,0);
-			putstring8x8(td,x_pos_2 - 4,y_pos - 44,"->",0x666666,0);
+			sprintf(tempstr,"%d Bytes", countSize(td->sl,0));
+			putstring8x8(td,1,21,tempstr,0xAAAAAA,0x000000,0,0);
 
-			putstring8x8(td,x_pos_1 + 40,y_pos - 3,"---",0xCCCCCC,0);
-			putstring8x8(td,x_pos_2 + 40,y_pos - 3,"---",0xCCCCCC,0);
+			sprintf(tempstr,"%d Sectors,%d bad", countSector(td->sl,1),countBadSectors(td->sl,1));
+			putstring8x8(td,(td->xsize/2)+1,11,tempstr,0xAAAAAA,0x000000,0,0);
 
-			sprintf(tempstr,"Side %d, %d Tracks",side,floppydisk->floppyNumberOfTrack);
-			if(side==0)
-				putstring8x8(td,1,1,tempstr,0xAAAAAA,0);
-			else
-				putstring8x8(td,td->xsize/2,1,tempstr,0xAAAAAA,0);
+			sprintf(tempstr,"%d Bytes", countSize(td->sl,1));
+			putstring8x8(td,(td->xsize/2)+1,21,tempstr,0xAAAAAA,0x000000,0,0);
+
+			ytypepos = 31;
+			i = 0;
+			while(track_type_list[i].name)
+			{
+				if(countTrackType(td->sl,0,track_type_list[i].track_type))
+				{
+					putstring8x8(td,1,ytypepos,"             ",0xAAAAAA,0x000000,0,0);
+					putstring8x8(td,1,ytypepos,track_type_list[i].name,0xAAAAAA,0x000000,0,0);
+					ytypepos += 10;
+				}
+				i++;
+			}
+
+			ytypepos = 31;
+			i = 0;
+			while(track_type_list[i].name)
+			{
+				if(countTrackType(td->sl,1,track_type_list[i].track_type))
+				{
+					putstring8x8(td,(td->xsize/2)+1,ytypepos,"             ",0xAAAAAA,0x000000,0,0);
+					putstring8x8(td,(td->xsize/2)+1,ytypepos,track_type_list[i].name,0xAAAAAA,0x000000,0,0);
+					ytypepos += 10;
+				}
+				i++;
+			}
 
 		}
 	}
 
-	sprintf(tempstr,"%d Sectors (%d bad)", countSector(td->sl,0),countBadSectors(td->sl,0));
-	putstring8x8(td,1,11,tempstr,0xAAAAAA,0);
+	putstring8x8(td,x_pos_1 - 24,y_pos + 32,"Side 0",0x666666,0x000000,0,1);
+	putstring8x8(td,x_pos_2 - 24,y_pos + 32,"Side 1",0x666666,0x000000,0,1);
 
-	sprintf(tempstr,"%d Bytes", countSize(td->sl,0));
-	putstring8x8(td,1,21,tempstr,0xAAAAAA,0);
+	putstring8x8(td,x_pos_1 - 4,y_pos - 44,"->",0x666666,0x000000,0,1);
+	putstring8x8(td,x_pos_2 - 4,y_pos - 44,"->",0x666666,0x000000,0,1);
 
-	sprintf(tempstr,"%d Sectors (%d bad)", countSector(td->sl,1),countBadSectors(td->sl,1));
-	putstring8x8(td,(td->xsize/2)+1,11,tempstr,0xAAAAAA,0);
-
-	sprintf(tempstr,"%d Bytes", countSize(td->sl,1));
-	putstring8x8(td,(td->xsize/2)+1,21,tempstr,0xAAAAAA,0);
-
-	ytypepos = 31;
-	i = 0;
-	while(track_type_list[i].name)
-	{
-		if(countTrackType(td->sl,0,track_type_list[i].track_type))
-		{
-			putstring8x8(td,1,ytypepos,track_type_list[i].name,0xAAAAAA,0);
-			ytypepos += 10;
-		}
-		i++;
-	}
-
-	ytypepos = 31;
-	i = 0;
-	while(track_type_list[i].name)
-	{
-		if(countTrackType(td->sl,1,track_type_list[i].track_type))
-		{
-			putstring8x8(td,(td->xsize/2)+1,ytypepos,track_type_list[i].name,0xAAAAAA,0);
-			ytypepos += 10;
-		}
-		i++;
-	}
+	putstring8x8(td,x_pos_1 + 40,y_pos - 3,"---",0xCCCCCC,0x000000,0,1);
+	putstring8x8(td,x_pos_2 + 40,y_pos - 3,"---",0xCCCCCC,0x000000,0,1);
 
 	for(track=0;track<floppydisk->floppyNumberOfTrack+1;track++)
 	{
 		track_ep=(float)( (td->ysize-(y_pos)) - 60 ) /((float) floppydisk->floppyNumberOfTrack+1);
 
-		draw_circle (td,0xEFEFEF,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)) + 1,1,(int)0);
-		draw_circle (td,0xEFEFEF,0,(float)((float)((float)2 * PI)),x_pos_2,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)) + 1,1,(int)0);
+		draw_circle (td,0xFAFAFA,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)) + 1,1,(int)0);
+		draw_circle (td,0xFAFAFA,0,(float)((float)((float)2 * PI)),x_pos_2,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)) + 1,1,(int)0);
 	}
 
 	draw_circle (td,0xEFEFEF,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack+1) * track_ep)) + 1,1,(int)0);
