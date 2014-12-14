@@ -85,6 +85,9 @@ typedef struct _HXCFE_TD
     void * pl;
 
     HXCFE_TDPROGRESSOUT_FUNC hxc_setprogress;
+
+	char * name;
+
     void * progress_userdata;
 }HXCFE_TD;
 

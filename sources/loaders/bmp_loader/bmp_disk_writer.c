@@ -56,6 +56,7 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydis
 	uint32_t * ptr;
 	unsigned char * ptrchar;
 	bitmap_data bdata;
+	char name[1024];
 
 	uint32_t pal[256];
 	int nbcol;
@@ -68,6 +69,9 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydis
 	if(td)
 	{
 		hxcfe_td_setProgressCallback(td,&progress_callback,(void*)imgldr_ctx);
+
+		hxc_getfilenamewext(filename, (char*)&name );
+		hxcfe_td_setName( td , (char*)&name );
 
 		hxcfe_td_activate_analyzer(td,ISOIBM_MFM_ENCODING,1);
 		hxcfe_td_activate_analyzer(td,ISOIBM_FM_ENCODING,1);

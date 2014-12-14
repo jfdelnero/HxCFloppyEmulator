@@ -82,6 +82,7 @@ EXPORTS
    hxcfe_td_getframebuffer_yres	@129
    hxcfe_td_getlastpulselist    @130
    hxcfe_td_setProgressCallback @131
+   hxcfe_td_setName				@132
 
    hxcfe_generateFloppy			@150
 

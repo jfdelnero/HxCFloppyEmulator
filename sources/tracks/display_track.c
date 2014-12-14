@@ -54,7 +54,11 @@
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
+#include "version.h"
+
 #include "crc.h"
+#include "std_crc32.h"
+
 #include "floppy_utils.h"
 
 #include "display_track.h"
@@ -1115,6 +1119,28 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 
 }
 
+int32_t hxcfe_td_setName( HXCFE_TD *td, char * name )
+{
+	if( td )
+	{
+		if(name)
+		{
+			if(td->name)
+				free(td->name);
+
+			td->name = malloc( strlen(name) + 1);
+			if(td->name)
+			{
+				strcpy(td->name,name);
+				return HXCFE_NOERROR;
+			}
+
+			return HXCFE_INTERNALERROR;
+		}
+	}
+
+	return HXCFE_NOERROR;
+}
 s_sectorlist * hxcfe_td_getlastsectorlist(HXCFE_TD *td)
 {
 	return td->sl;
@@ -1339,7 +1365,7 @@ void draw_density_circle (HXCFE_TD *td,uint32_t col,float start_angle,float stop
 	}while(i<(thickness));
 }
 
-s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,int side,double timingoffset_offset, int TRACKTYPE,int xpos,int ypos,int diam,int thickness)
+s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,int side,double timingoffset_offset, int TRACKTYPE,int xpos,int ypos,int diam,int thickness,uint32_t * crc32)
 {
 	int tracksize;
 	int old_i;
@@ -1379,7 +1405,7 @@ s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int t
 	{
 		do
 		{
-			sc=hxcfe_getNextSector(ss,track,side,TRACKTYPE);
+			sc = hxcfe_getNextSector(ss,track,side,TRACKTYPE);
 			if(sc)
 			{
 				oldsl = sl;
@@ -1454,6 +1480,14 @@ s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int t
 							else
 							{
 								color = 0x66EE00;
+							}
+
+							if(crc32)
+							{	
+								if(sc->input_data && !sc->use_alternate_data_crc)
+								{
+									*crc32 = std_crc32(*crc32, sc->input_data, sc->sectorsize);
+								}
 							}
 						}
 					}
@@ -1605,6 +1639,7 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	int tracksize;
 	int i,ysize,xsize;
 	int track,side;
+	uint32_t crc32;
 	HXCFE_SIDE * currentside;
 	unsigned int color;
 	int y_pos,x_pos_1,x_pos_2,ytypepos;
@@ -1616,6 +1651,7 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 
 	track_ep = 0;
 
+	crc32 = 0x00000000;
 	sl=td->sl;
 	while(sl)
 	{
@@ -1644,6 +1680,15 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	y_pos = td->ysize/2;
 	x_pos_1 = td->xsize/4;
 	x_pos_2 = td->xsize - (td->xsize/4);
+
+	sprintf(tempstr,"libhxcfe v%s",STR_FILE_VERSION2);
+	putstring8x8(td,1,td->ysize - (8 + 1),tempstr,0xAAAAAA,0x000000,0,0);
+
+	if(td->name)
+	{
+		putstring8x8(td,1,td->ysize - (8*4),td->name,0xAAAAAA,0x000000,1,0);
+		putstring8x8(td,(td->xsize/2) + 1,td->ysize - (8*4),td->name,0xAAAAAA,0x000000,1,0);
+	}
 
 	color = 0x131313;
 	for(i=25;i<(td->ysize-(y_pos));i++)
@@ -1682,11 +1727,11 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 		putstring8x8(td,td->xsize/2,1,tempstr,0xAAAAAA,0x000000,0,0);
 	}
 
-	for(side=0;side<floppydisk->floppyNumberOfSide;side++)
+	for(track=0;track<floppydisk->floppyNumberOfTrack;track++)
 	{
-		for(track=0;track<floppydisk->floppyNumberOfTrack;track++)
+		for(side=0;side<floppydisk->floppyNumberOfSide;side++)
 		{
-			td->hxc_setprogress((floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide) + track + (side*floppydisk->floppyNumberOfTrack),floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide*2,td,td->progress_userdata);
+			td->hxc_setprogress((floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide) + track * floppydisk->floppyNumberOfSide ,floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide*2,td,td->progress_userdata);
 
 			currentside = floppydisk->tracks[track]->sides[side];
 
@@ -1704,11 +1749,11 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 				{
 					if(!side)
 					{
-						display_sectors_disk(td,floppydisk,track,side,0,i,x_pos_1,y_pos,60 + (int)((floppydisk->floppyNumberOfTrack-track) * track_ep),(int)track_ep);
+						display_sectors_disk(td,floppydisk,track,side,0,i,x_pos_1,y_pos,60 + (int)((floppydisk->floppyNumberOfTrack-track) * track_ep),(int)track_ep,&crc32);
 					}
 					else
 					{
-						display_sectors_disk(td,floppydisk,track,side,0,i,x_pos_2,y_pos,60 + (int)((floppydisk->floppyNumberOfTrack-track) * track_ep),(int)track_ep);
+						display_sectors_disk(td,floppydisk,track,side,0,i,x_pos_2,y_pos,60 + (int)((floppydisk->floppyNumberOfTrack-track) * track_ep),(int)track_ep,&crc32);
 					}
 				}
 			}
@@ -1718,7 +1763,6 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 				i=0;
 				do
 				{
-
 					if( currentside->flakybitsbuffer[i>>3] & (0x80>>(i&7)) )
 					{
 						xpos= (int)((float)2048 * ((float)i/(float)tracksize));
@@ -1746,6 +1790,9 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 
 			sprintf(tempstr,"%d Bytes", countSize(td->sl,1));
 			putstring8x8(td,(td->xsize/2)+1,21,tempstr,0xAAAAAA,0x000000,0,0);
+
+			sprintf(tempstr,"CRC32: 0x%.8X",crc32);
+			putstring8x8(td,td->xsize/2 - (8*18),td->ysize - 9,tempstr,0xAAAAAA,0x000000,0,0);
 
 			ytypepos = 31;
 			i = 0;
@@ -1789,8 +1836,8 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	{
 		track_ep=(float)( (td->ysize-(y_pos)) - 60 ) /((float) floppydisk->floppyNumberOfTrack+1);
 
-		draw_circle (td,0xFAFAFA,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)) + 1,1,(int)0);
-		draw_circle (td,0xFAFAFA,0,(float)((float)((float)2 * PI)),x_pos_2,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)) + 1,1,(int)0);
+		draw_circle (td,0xF8F8F8,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)) + 1,1,(int)0);
+		draw_circle (td,0xF8F8F8,0,(float)((float)((float)2 * PI)),x_pos_2,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)) + 1,1,(int)0);
 	}
 
 	draw_circle (td,0xEFEFEF,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack+1) * track_ep)) + 1,1,(int)0);
@@ -1834,5 +1881,9 @@ int32_t hxcfe_td_getframebuffer_yres( HXCFE_TD *td )
 void hxcfe_td_deinit(HXCFE_TD *td)
 {
 	free(td->framebuffer);
+
+	if(td->name)
+		free(td->name);
+
 	free(td);
 }
