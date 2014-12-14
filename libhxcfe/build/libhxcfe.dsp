@@ -2039,14 +2039,14 @@ SOURCE=..\sources\floppy_utils.c
 
 SOURCE=..\sources\win32\libhxcfe.def
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\std_crc32.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
-# Begin Source File
-
-SOURCE=..\sources\tracks\crc.h
-# End Source File
 # Begin Source File
 
 SOURCE=..\sources\tracks\emuii_track.h
@@ -2090,6 +2090,10 @@ SOURCE=..\sources\plugins_id.h
 # Begin Source File
 
 SOURCE=..\sources\tracks\sector_extractor.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\std_crc32.h
 # End Source File
 # Begin Source File
 

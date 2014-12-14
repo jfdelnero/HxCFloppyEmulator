@@ -439,6 +439,7 @@ void *                 hxcfe_td_getframebuffer( HXCFE_TD *td );
 int32_t                hxcfe_td_getframebuffer_xres( HXCFE_TD *td );
 int32_t                hxcfe_td_getframebuffer_yres( HXCFE_TD *td );
 int32_t                hxcfe_td_setProgressCallback( HXCFE_TD *td, HXCFE_TDPROGRESSOUT_FUNC progress_func, void * userdata );
+int32_t                hxcfe_td_setName( HXCFE_TD *td, char * name );
 void                   hxcfe_td_deinit( HXCFE_TD *td );
 s_pulseslist *         hxcfe_td_getlastpulselist( HXCFE_TD *td );
 
