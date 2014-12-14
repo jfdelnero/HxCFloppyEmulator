@@ -313,7 +313,7 @@ static int32_t changedir(HXCFE_FSMNG * fsmng,char * path,SECTNUM * curdir,int32_
 
 	ret = 1;
 
-	if(strlen(path))
+	if(strlen(path) && adfvolume)
 	{
 
 		i = 0;
@@ -471,8 +471,10 @@ int32_t amigados_getFreeSpace(HXCFE_FSMNG * fsmng)
 	struct Volume * adfvolume;
 
 	adfvolume = (struct Volume *)fsmng->volume;
-
-	return adfCountFreeBlocks(adfvolume) * 512;
+	if(adfvolume)
+		return adfCountFreeBlocks(adfvolume) * 512;
+	else
+		return HXCFE_ACCESSERROR;
 }
 
 int32_t amigados_getTotalSpace(HXCFE_FSMNG * fsmng)
@@ -480,8 +482,11 @@ int32_t amigados_getTotalSpace(HXCFE_FSMNG * fsmng)
 	struct Device * adfdevice;
 
 	adfdevice = (struct Device *)fsmng->device;
+	if(adfdevice)
+		return adfdevice->size;
+	else
+		return HXCFE_ACCESSERROR;
 
-	return adfdevice->size;
 }
 
 int32_t amigados_openDir(HXCFE_FSMNG * fsmng, char * path)
@@ -521,7 +526,7 @@ int32_t amigados_readDir(HXCFE_FSMNG * fsmng,int32_t dirhandle,HXCFE_FSENTRY * d
 
 	adfvolume = (struct Volume *)fsmng->volume;
 
-	if(dirhandle<128)
+	if(dirhandle<128 && adfvolume)
 	{
 		if((int32_t)fsmng->dirhandletable[dirhandle-1]!=-1)
 		{
@@ -589,6 +594,9 @@ int32_t amigados_openFile(HXCFE_FSMNG * fsmng, char * filename)
 
 	adfvolume = (struct Volume *)fsmng->volume;
 
+	if(!adfvolume)
+		return HXCFE_ACCESSERROR;
+
 	i = 0;
 	while(((int32_t)fsmng->handletable[i]!=-1) && i<128)
 	{
@@ -624,6 +632,9 @@ int32_t amigados_createFile(HXCFE_FSMNG * fsmng, char * filename)
 	struct Volume * adfvolume;
 
 	adfvolume = (struct Volume *)fsmng->volume;
+
+	if(!adfvolume)
+		return HXCFE_ACCESSERROR;
 
 	i = 0;
 	while((int32_t)fsmng->handletable[i]!=-1 && i<128)
@@ -692,6 +703,9 @@ int32_t amigados_deleteFile(HXCFE_FSMNG * fsmng, char * filename)
 
 	adfvolume = (struct Volume *)fsmng->volume;
 
+	if(!adfvolume)
+		return HXCFE_ACCESSERROR;
+
 	hxc_getpathfolder(filename,folderpath);
 
 	if( changedir(fsmng,folderpath,&snum,1) ==  RC_OK)
@@ -729,6 +743,9 @@ int32_t amigados_createDir( HXCFE_FSMNG * fsmng,char * foldername)
 	struct Volume * adfvolume;
 
 	adfvolume = (struct Volume *)fsmng->volume;
+
+	if(!adfvolume)
+		return HXCFE_ACCESSERROR;
 
 	hxc_getpathfolder(foldername,folderpath);
 
