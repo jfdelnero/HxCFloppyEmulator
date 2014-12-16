@@ -419,13 +419,15 @@ static void quickSort(s_match * table, int start, int end)
 
         if(left < right)
             exchange(table, left, right);
-        else 
+        else
 			break;
     }
 
     quickSort(table, start, right);
     quickSort(table, right+1, end);
 }
+
+//#define USE_PLL_BITRATE 1
 
 HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKSTREAM * track,pulses_link * pl,uint32_t start_index, short rpm,int phasecorrection)
 {
@@ -438,12 +440,28 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKS
 	int bitrate;
 
 	int bitoffset;
+	int old_bitoffset;
 	int tracksize;
 
 	int olderror;
 	unsigned char *outtrack;
 	unsigned char *flakeytrack;
 	uint32_t *trackbitrate;
+
+#ifndef USE_PLL_BITRATE
+	float byteduration;
+	float partialduration;
+	float cumul_value;
+	uint32_t cumul_code;
+
+	uint32_t code_array[32];
+	float    value_array[32];
+	uint32_t in_ptr;
+	uint32_t out_ptr;
+	uint32_t fifolevel;
+
+	uint32_t leftbit;
+#endif
 
 	pll_stat pll;
 
@@ -512,6 +530,16 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKS
 		// "Decode" the stream...
 		//
 		outtrack[0] = 0x80;
+		old_bitoffset = 0;
+
+#ifndef USE_PLL_BITRATE
+		cumul_code = 0;
+		cumul_value = 0;
+		in_ptr = 0;
+		out_ptr = 0;
+		fifolevel = 0;
+#endif
+
 		bitoffset=0;
 		for(i=0;i<size;i++)
 		{
@@ -521,9 +549,6 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKS
 
 			bitoffset = bitoffset + cellcode;
 
-//			if((bitoffset>30680 && bitoffset<31500) || (bitoffset>20860 && bitoffset<21680))
-//				floppycont->hxc_printf(MSG_DEBUG,">%d\t\tV:%d\t\tC:%d\tPLL:%d\tP:%d\tE:%d",bitoffset,value,cellcode,(pll.pump_charge/16),pll.pivot/16,pll.last_error/16);
-
 			settrackbit(outtrack,TEMPBUFSIZE,0xFF,bitoffset,1);
 
 			if((pl->forward_link[start_index + i]<0 && pl->backward_link[start_index + i]<0) || ( ( pll.last_error > (170*16) ) || ( pll.last_error < -(170*16) )))
@@ -531,9 +556,72 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKS
 				settrackbit(flakeytrack,TEMPBUFSIZE,0xFF,bitoffset,1);
 			}
 
+#ifdef USE_PLL_BITRATE
 			if( (bitoffset>>3) < TEMPBUFSIZE )
 				trackbitrate[(bitoffset>>3)] = (int)((float)(TICKFREQ)/(float)((float)((pll.pump_charge*2)/16)));
+#else
+			code_array[in_ptr&31] = cellcode;
+			value_array[in_ptr&31] = (float)value;
+			in_ptr = (in_ptr + 1)&31;
+			/*if(fifolevel<32)
+				fifolevel++;
+			else
+				out_ptr = (out_ptr + 1)&31;*/
+
+			cumul_value += value;
+			cumul_code += cellcode;
+
+			while(cumul_code>=8)
+			{
+				byteduration = 0;
+				leftbit = 8;
+				do
+				{
+					if( leftbit >= code_array[out_ptr&31] )
+					{
+						byteduration = byteduration + value_array[out_ptr&31];
+						leftbit = leftbit - code_array[out_ptr&31];
+
+						out_ptr = (out_ptr + 1)&31;
+						fifolevel--;
+					}
+					else
+					{
+						partialduration = value_array[out_ptr&31] * (float)((float)leftbit/(float)code_array[out_ptr&31]);
+						byteduration = byteduration + partialduration;
+
+						value_array[out_ptr&31] -= partialduration;
+						code_array[out_ptr&31] -= leftbit;
+						leftbit = 0;
+					}
+				}while(leftbit);
+
+				cumul_value = cumul_value - byteduration;
+				cumul_code = cumul_code - 8;
+
+				if( (old_bitoffset>>3) < TEMPBUFSIZE )
+				{
+					trackbitrate[(old_bitoffset>>3)] = (uint32_t)((float)(TICKFREQ*4)/(float)byteduration);
+					old_bitoffset += 8;
+				}
+			};
+#endif
+
 		}
+
+#ifndef USE_PLL_BITRATE
+		if(cumul_code)
+		{
+			byteduration = (float)cumul_value * ((float)8 / (float)cumul_code);
+
+			if( (old_bitoffset>>3) < TEMPBUFSIZE )
+			{
+				trackbitrate[(old_bitoffset>>3)] = (uint32_t)((float)(TICKFREQ)/(float)(byteduration/4));
+				old_bitoffset += 8;
+			}
+
+		}
+#endif
 
 		if(bitoffset&7)
 		{
@@ -701,7 +789,7 @@ static uint32_t GetDumpTimelength(HXCFE_TRKSTREAM * track_dump)
 	return tick_to_time(len);
 }
 
-static track_blocks * ScanAndFindBoundaries(HXCFE_TRKSTREAM * track_dump, int blocktimelength)
+static track_blocks * AllocateBlocks(HXCFE_TRKSTREAM * track_dump, int blocktimelength)
 {
 	uint32_t i,j;
 	pulsesblock * pb;
@@ -2598,7 +2686,7 @@ static uint32_t getbestindex(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM *track_dump,pulses
 
 		memset(bad_pulses_array,0xFF,sizeof(uint32_t) * 32);
 
-		
+
 
 		for(revnb = 0; revnb < nb_revolution ; revnb++)
 		{
@@ -3068,8 +3156,8 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 		// Get the total track dump time length. (in 10th of nano seconds)
 		totallen = GetDumpTimelength(std);
 
-		// Scan and find block index boundaries.
-		tb = ScanAndFindBoundaries(std, BLOCK_TIME);
+		// Allocate the blocks.
+		tb = AllocateBlocks(std, BLOCK_TIME);
 
 		hxcfe->hxc_printf(MSG_DEBUG,"Track dump length : %d us, number of block : %d, Number of pulses : %d",totallen/100,tb->number_of_blocks,std->nb_of_pulses);
 
@@ -3099,8 +3187,8 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 				{
 					reverse_track_stream(reversed_std);
 
-					// Scan and find block index boundaries.
-					tb_reversed = ScanAndFindBoundaries(reversed_std, BLOCK_TIME);
+					// Allocate the blocks.
+					tb_reversed = AllocateBlocks(reversed_std, BLOCK_TIME);
 
 					pl_reversed = ScanAndFindRepeatedBlocks(hxcfe,fxs,reversed_std,indexperiod,tb_reversed);
 
@@ -3215,7 +3303,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 						if( !fxs->defaultbitrate )
 						{
-							histo=(uint32_t*)malloc(65536* sizeof(uint32_t));
+							histo = (uint32_t*)malloc(65536* sizeof(uint32_t));
 							if((first_index + (pl->forward_link[first_index] - first_index))<(int32_t)std->nb_of_pulses)
 							{
 								computehistogram(&std->track_dump[first_index],pl->forward_link[first_index] - first_index,histo);
@@ -3365,7 +3453,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 		free(tb->blocks);
 		free(tb);
-		
+
 
 		/*j=currentside->tracklen/8;
 		if(currentside->tracklen&7) j++;
