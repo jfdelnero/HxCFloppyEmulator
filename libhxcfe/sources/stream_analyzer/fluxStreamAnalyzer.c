@@ -638,6 +638,8 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKS
 
 		if(tracksize)
 		{
+
+#ifndef NOBITRATEFILTER
 			// First pass
 			i=0;
 			do
@@ -645,7 +647,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKS
 
 				j=0;
 				bitrate=0;
-				while(((i+j) < tracksize ) && j<64)
+				while(((i+j) < tracksize ) && j<24)
 				{
 					bitrate = ( bitrate + trackbitrate[(i+j)] );
 					j++;
@@ -654,7 +656,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKS
 				bitrate=bitrate/j;
 
 				j=0;
-				while(((i+j)< tracksize ) && j<64)
+				while(((i+j)< tracksize ) && j<24)
 				{
 					trackbitrate[(i+j)] = bitrate;
 					j++;
@@ -666,14 +668,13 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKS
 
 
 			// Second pass filter
-
 			i=0;
 			do
 			{
 
 				j=0;
 				bitrate=0;
-				while(((i+j) < tracksize ) && j<64)
+				while(((i+j) < tracksize ) && j<24)
 				{
 					bitrate = ( bitrate + trackbitrate[(i+j)] );
 					j++;
@@ -682,15 +683,16 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKS
 				bitrate=bitrate/j;
 
 				j=0;
-				while(((i+j)< tracksize ) && j<64)
+				while(((i+j)< tracksize ) && j<24)
 				{
 					trackbitrate[(i+j)] = bitrate;
 					j++;
 				}
 
-				i = i + 64;
+				i = i + 24;
 
 			}while(i < tracksize );
+#endif
 
 			bitrate=(int)( TICKFREQ / (centralvalue) );
 
