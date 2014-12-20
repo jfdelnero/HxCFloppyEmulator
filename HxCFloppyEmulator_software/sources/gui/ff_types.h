@@ -22,6 +22,7 @@ enum
 	FF_SDDSPECCY,
 	FF_V9T9,
 	FF_D88,
+	FF_ST,
 	FF_MSA,
 	FF_STX,
 	FF_HDDDA2_HFE,

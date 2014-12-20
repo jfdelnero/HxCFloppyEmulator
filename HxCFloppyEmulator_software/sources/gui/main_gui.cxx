@@ -120,6 +120,7 @@ const char * plugid_lst[]=
 	PLUGIN_ZXSPECTRUM_TRD,
 	PLUGIN_SPECCYSDD,
 	PLUGIN_NEC_D88,
+	PLUGIN_ATARIST_ST,
 	PLUGIN_ATARIST_MSA,
 	PLUGIN_ATARIST_STX,
 	PLUGIN_HXC_HDDD_A2,
@@ -436,6 +437,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"Zx Spectrum TRD file\t*.trd\n"
 					"Speccy SDD file\t*.sdd\n"
 					"PC88  D88 file\t*.d88\n"
+					"ATARI ST ST file\t*.st\n"
 					"ATARI ST MSA file\t*.msa\n"
 					"ATARI ST STX file\t*.stx\n"
 					"HFE file (HDDD A2 Encoding support)\t*.hfe\n"

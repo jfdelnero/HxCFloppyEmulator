@@ -10,7 +10,7 @@
 -------------------------------------------------------------------------------
 
 /*********************************************************
-05 october 2014: HxCFloppyEmulator 2.0.26.0
+05 October 2014: HxCFloppyEmulator 2.0.26.0
 
 New Loader : PC Magazine (FLP) file format support added.
 
