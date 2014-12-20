@@ -2715,7 +2715,7 @@ int32_t hxcfe_FDC_SCANSECTOR  ( HXCFE* floppycontext, uint8_t track, uint8_t sid
 	return 0;
 }
 
-int write_raw_file(HXCFE* floppycontext,FILE * f,HXCFE_FLOPPY * fp,int32_t startidsector,int32_t sectorpertrack,int32_t nboftrack,int32_t nbofside,int32_t sectorsize,int32_t tracktype,int32_t sidefilelayout)
+int write_raw_file(HXCFE_IMGLDR * imgldr_ctx,FILE * f,HXCFE_FLOPPY * fp,int32_t startidsector,int32_t sectorpertrack,int32_t nboftrack,int32_t nbofside,int32_t sectorsize,int32_t tracktype,int32_t sidefilelayout)
 {
 	int sect,trk,side,i;
 	HXCFE_SECTORACCESS* ss;
@@ -2729,30 +2729,30 @@ int write_raw_file(HXCFE* floppycontext,FILE * f,HXCFE_FLOPPY * fp,int32_t start
 
 	if(f && fp)
 	{
-		ss = hxcfe_initSectorAccess( floppycontext, fp );
+		ss = hxcfe_initSectorAccess( imgldr_ctx->hxcfe, fp );
 		if(ss)
 		{
-			for(trk=0;trk<fp->floppyNumberOfTrack;trk++)
+			for( trk = 0 ; trk < nboftrack ; trk++ )
 			{
-				for(side = 0; side < nbofside; side++)
+				for( side = 0 ; side < nbofside; side++ )
 				{
-					for(sect = 0; sect < sectorpertrack; sect++)
+					for( sect = 0 ; sect < sectorpertrack ; sect++ )
 					{
 						scfg = hxcfe_searchSector ( ss, trk, side, startidsector + sect, tracktype );
-						if(scfg)
+						if( scfg )
 						{
-							if(scfg->use_alternate_data_crc || !scfg->input_data)
+							if( scfg->use_alternate_data_crc || !scfg->input_data )
 							{
 								badsect++;
 							}
 
-							if((scfg->sectorsize == sectorsize) && scfg->input_data)
+							if( ( scfg->sectorsize == sectorsize ) && scfg->input_data )
 							{
-								fwrite(scfg->input_data,scfg->sectorsize,1,f);
+								fwrite( scfg->input_data, scfg->sectorsize, 1, f );
 							}
 							else
 							{
-								for(i=0;i<sectorsize;i++)
+								for( i = 0 ; i < sectorsize ; i++ )
 								{
 									fputc(badsectmess[i&0xF],f);
 								}
@@ -2763,12 +2763,14 @@ int write_raw_file(HXCFE* floppycontext,FILE * f,HXCFE_FLOPPY * fp,int32_t start
 						else
 						{
 							missingsect++;
-							for(i=0;i<sectorsize;i++)
+							for( i = 0 ; i < sectorsize ; i++ )
 							{
 								fputc(misssectmess[i&0xF],f);
 							}
 						}
 					}
+
+					hxcfe_imgCallProgressCallback(imgldr_ctx,trk*2,nboftrack*2 );
 				}
 			}
 
@@ -2776,7 +2778,10 @@ int write_raw_file(HXCFE* floppycontext,FILE * f,HXCFE_FLOPPY * fp,int32_t start
 		}
 	}
 
-	return 0;
+	if(badsect || missingsect)
+		return HXCFE_FILECORRUPTED;
+	else
+		return HXCFE_NOERROR;
 }
 
 int count_sector(HXCFE* floppycontext,HXCFE_FLOPPY * fp,int32_t startidsector,int32_t track,int32_t side,int32_t sectorsize,int32_t tracktype)

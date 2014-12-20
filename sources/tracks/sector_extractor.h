@@ -30,4 +30,6 @@ int analysis_and_extract_sector_AMIGAMFM(HXCFE* floppycontext,HXCFE_SIDE * track
 int analysis_and_extract_sector_FM(HXCFE* floppycontext,HXCFE_SIDE * track,sect_track * sectors);
 int analysis_and_extract_sector_EMUIIFM(HXCFE* floppycontext,HXCFE_SIDE * track,sect_track * sectors);
 
-int write_raw_file(HXCFE* floppycontext,FILE * f,HXCFE_FLOPPY * fp,int32_t startidsector,int32_t sectorpertrack,int32_t nboftrack,int32_t nbofside,int32_t sectorsize,int32_t tracktype,int32_t sidefilelayout);
+int write_raw_file(HXCFE_IMGLDR * imgldr_ctx,FILE * f,HXCFE_FLOPPY * fp,int32_t startidsector,int32_t sectorpertrack,int32_t nboftrack,int32_t nbofside,int32_t sectorsize,int32_t tracktype,int32_t sidefilelayout);
+
+int count_sector(HXCFE* floppycontext,HXCFE_FLOPPY * fp,int32_t startidsector,int32_t track,int32_t side,int32_t sectorsize,int32_t tracktype);
