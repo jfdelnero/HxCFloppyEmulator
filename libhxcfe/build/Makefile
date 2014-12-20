@@ -11,8 +11,8 @@ CFLAGS=-O3 $(INCLUDES)
 DISKLOADERPLUGINS_IPF=
 
 ifdef IPF_LIB_SUPPORT
-    CFLAGS=$(CFLAGS) -DIPF_SUPPORT
-    DISKLOADERPLUGINS_IPF= ipf_loader.o libcapsimage.so.2.0
+	CFLAGS=$(CFLAGS) -DIPF_SUPPORT
+	DISKLOADERPLUGINS_IPF= ipf_loader.o libcapsimage.so.2.0
 endif
 
 LDFLAGS= -g -shared -lc -lm  -ldl
@@ -45,21 +45,21 @@ MINIZIPOBJ = ioapi.o mztools.o unzip.o zip.o
 
 FATIOLIB = fat_access.o fat_cache.o fat_filelib.o fat_format.o fat_misc.o fat_string.o fat_table.o fat_write.o
 
-DISKLOADERPLUGINS=copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosfs_loader.o vfile.o cpcdsk_loader.o \
-                  msa_loader.o msx_loader.o smc_loader.o st_loader.o stx_loader.o img_loader.o dms_loader.o mfm_loader.o\
-                  oricdsk_loader.o d64_loader.o trd_loader.o scl_loader.o fat12floppy_loader.o fat12.o\
-                  hfe_loader.o imd_loader.o afi_loader.o sap_loader.o libsap.o jv1_loader.o vtr_loader.o d88_loader.o hdm_loader.o\
-                  ti99pc99_loader.o apridisk_loader.o ede_loader.o fd_loader.o vdk_loader.o dpx_loader.o mgt_loader.o emax_loader.o\
-                  ensoniq_mirage_loader.o sad_loader.o jv3_loader.o stt_loader.o prophet_loader.o teledisk_loader.o td0_lzss.o\
-                  emuii_raw_loader.o emuii_loader.o emui_raw_loader.o jvc_loader.o dim_loader.o ti99v9t9_loader.o d81_loader.o  acornadf_loader.o \
-                  camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o fdi_loader.o ssd_dsd_loader.o adl_loader.o \
-                  krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o system24_loader.o kryofluxstream_loader.o kryofluxstream.o \
-                  fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o xml_loader.o \
-				  flppcm_loader.o
+DISKLOADERPLUGINS = copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosfs_loader.o vfile.o cpcdsk_loader.o \
+					msa_loader.o msx_loader.o smc_loader.o st_loader.o stx_loader.o img_loader.o dms_loader.o mfm_loader.o\
+					oricdsk_loader.o d64_loader.o trd_loader.o scl_loader.o fat12floppy_loader.o fat12.o\
+					hfe_loader.o imd_loader.o afi_loader.o sap_loader.o libsap.o jv1_loader.o vtr_loader.o d88_loader.o hdm_loader.o\
+					ti99pc99_loader.o apridisk_loader.o ede_loader.o fd_loader.o vdk_loader.o dpx_loader.o mgt_loader.o emax_loader.o\
+					ensoniq_mirage_loader.o sad_loader.o jv3_loader.o stt_loader.o prophet_loader.o teledisk_loader.o td0_lzss.o\
+					emuii_raw_loader.o emuii_loader.o emui_raw_loader.o jvc_loader.o dim_loader.o ti99v9t9_loader.o d81_loader.o  acornadf_loader.o \
+					camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o fdi_loader.o ssd_dsd_loader.o adl_loader.o \
+					krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o system24_loader.o kryofluxstream_loader.o kryofluxstream.o \
+					fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o xml_loader.o \
+					flppcm_loader.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
-					kryofluxstream_writer.o adf_writer.o bmp_writer.o bmp_disk_writer.o bmp_file.o xml_writer.o trd_writer.o stx_writer.o
+					kryofluxstream_writer.o adf_writer.o bmp_writer.o bmp_disk_writer.o bmp_file.o xml_writer.o trd_writer.o stx_writer.o st_writer.o
 
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
@@ -239,6 +239,9 @@ msx_loader.o : $(BASEDIR)/loaders/msx_loader/msx_loader.c $(BASEDIR)/loaders/msx
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 st_loader.o : $(BASEDIR)/loaders/st_loader/st_loader.c $(BASEDIR)/loaders/st_loader/st_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+st_writer.o : $(BASEDIR)/loaders/st_loader/st_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 dim_loader.o : $(BASEDIR)/loaders/dim_loader/dim_loader.c $(BASEDIR)/loaders/dim_loader/dim_loader.h

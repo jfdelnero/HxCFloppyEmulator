@@ -57,6 +57,7 @@
 #include "floppy_utils.h"
 
 #include "st_loader.h"
+#include "st_writer.h"
 
 #include "stfileformat.h"
 
@@ -343,7 +344,7 @@ int ST_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retur
 	{
 		(ISVALIDDISKFILE)	ST_libIsValidDiskFile,
 		(LOADDISKFILE)		ST_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		ST_libWrite_DiskFile,
 		(GETPLUGININFOS)	ST_libGetPluginInfo
 	};
 

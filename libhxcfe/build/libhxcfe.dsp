@@ -43,7 +43,8 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir "..\..\..\build\"
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LIBHXCFE_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /Zi /O2 /I "..\..\..\libhxcadaptor\trunk\sources" /I "..\..\..\libhxcadaptor\trunk\sources\win32" /I "..\sources\\" /I "..\sources\win32" /I "..\sources\thirdpartylibs\expat\expat-2.1.0\lib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LIBHXCFE_EXPORTS" /D "IPF_SUPPORT" /D "XML_STATIC" /D "_CRT_SECURE_NO_WARNINGS" /FAs /FR /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /Ob2 /I "..\..\..\libhxcadaptor\trunk\sources" /I "..\..\..\libhxcadaptor\trunk\sources\win32" /I "..\sources\\" /I "..\sources\win32" /I "..\sources\thirdpartylibs\expat\expat-2.1.0\lib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LIBHXCFE_EXPORTS" /D "IPF_SUPPORT" /D "XML_STATIC" /D "_CRT_SECURE_NO_WARNINGS" /FAs /FR /FD /c
+# SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40c /d "NDEBUG"
@@ -696,6 +697,14 @@ SOURCE=..\sources\loaders\st_loader\st_loader.c
 # Begin Source File
 
 SOURCE=..\sources\loaders\st_loader\st_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\st_loader\st_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\st_loader\st_writer.h
 # End Source File
 # Begin Source File
 
