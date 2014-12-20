@@ -711,7 +711,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 		{
 			sprintf(str,"x position : %.3f ms",	(xpos * stepperpix_x)/1000);
 			fiw->x_pos->value(str);
-			sprintf(str,"y position : %.3f us",	ypos*stepperpix_y);
+			sprintf(str,"y position : %.3f us",	ypos*stepperpix_y*1000);
 			fiw->y_pos->value(str);
 		}
 

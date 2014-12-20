@@ -56,6 +56,7 @@ Fl_Menu_Item format_choices[]=
 	{ "SDD - SpeccyDOS SDD file format",0,format_choice_cb,(void*)PLUGIN_SPECCYSDD},
 	{ "V9T9- TI99/4A sectors file format",0,format_choice_cb,(void*)PLUGIN_TI994A_V9T9},
 	{ "D88 - PC88 D88 file format",0,format_choice_cb,(void*)PLUGIN_NEC_D88},
+	{ "ST - ATARI ST ST file format",0,format_choice_cb,(void*)PLUGIN_ATARIST_ST},
 	{ "MSA - ATARI ST MSA file format",0,format_choice_cb,(void*)PLUGIN_ATARIST_MSA},
 	{ "STX - Pasti/STX file format",0,format_choice_cb,(void*)PLUGIN_ATARIST_STX},
 	{ "HFE - SD HxC Floppy Emulator (HDDD A2 Support)",0,format_choice_cb,(void*)PLUGIN_HXC_HDDD_A2},

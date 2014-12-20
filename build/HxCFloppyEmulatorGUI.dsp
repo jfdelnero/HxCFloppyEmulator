@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir "..\..\..\build\"
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MT /GX /O2 /Ob2 /I "..\..\..\libhxcadaptor\trunk\sources" /I "..\..\..\libhxcadaptor\trunk\sources\win32" /I "..\sources" /I "..\sources\usb_floppyemulator\win32" /I "..\sources\gui" /I "..\sources\thirdpartylibs\fltk\fltk-1.3.x\\" /I "..\..\..\libhxcfe\trunk\sources" /I "..\..\..\libusbhxcfe\trunk\sources" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_CRT_SECURE_NO_WARNINGS" /FR /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /Ob2 /I "..\..\..\libhxcadaptor\trunk\sources" /I "..\..\..\libhxcadaptor\trunk\sources\win32" /I "..\sources" /I "..\sources\usb_floppyemulator\win32" /I "..\sources\gui" /I "..\sources\thirdpartylibs\fltk\fltk-1.3.x\\" /I "..\..\..\libhxcfe\trunk\sources" /I "..\..\..\libusbhxcfe\trunk\sources" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_CRT_SECURE_NO_WARNINGS" /FR /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40c /d "NDEBUG"
