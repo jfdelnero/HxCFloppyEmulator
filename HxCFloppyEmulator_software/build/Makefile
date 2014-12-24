@@ -41,7 +41,7 @@ EXEC=hxcfloppyemulator
 
 FTDIFLOPPYEMU=usb_hxcfloppyemulator.o variablebitrate.o
 
-GUI = main_gui.o about_gui.o batch_converter_window.o floppy_dump_window.o floppy_infos_window.o license_gui.o log.o rawfile_loader_window.o sdhxcfecfg_window.o usbhxcfecfg_window.o cb_batch_converter_window.o cb_floppy_dump_window.o cb_floppy_infos_window.o cb_rawfile_loader_window.o cb_sdhxcfecfg_window.o cb_usbhxcfecfg_window.o cb_filesystem_generator_window.o filesystem_generator_window.o 
+GUI = main_gui.o about_gui.o batch_converter_window.o floppy_dump_window.o floppy_infos_window.o license_gui.o log.o rawfile_loader_window.o sdhxcfecfg_window.o usbhxcfecfg_window.o cb_batch_converter_window.o cb_floppy_dump_window.o cb_floppy_infos_window.o cb_rawfile_loader_window.o cb_sdhxcfecfg_window.o cb_usbhxcfecfg_window.o cb_filesystem_generator_window.o filesystem_generator_window.o cb_edittool_window.o edittool_window.o
 
 MICROINTRO = microintro.o lzw.o pack.o rle.o hxcmod.o
 FLTKLIB = ../sources/thirdpartylibs/fltk/fltk-1.3.x/lib/libfltk.a ../sources/thirdpartylibs/fltk/fltk-1.3.x/lib/libfltk_images.a
@@ -85,6 +85,9 @@ cb_floppy_dump_window.o : ../sources/gui/cb_floppy_dump_window.cxx
 cb_floppy_infos_window.o : ../sources/gui/cb_floppy_infos_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
+cb_edittool_window.o : ../sources/gui/cb_edittool_window.cxx
+	$(CPP) -o $@ -c $< $(CFLAGS)
+
 cb_rawfile_loader_window.o : ../sources/gui/cb_rawfile_loader_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
@@ -110,6 +113,9 @@ floppy_dump_window.o : ../sources/gui/floppy_dump_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
 floppy_infos_window.o : ../sources/gui/floppy_infos_window.cxx
+	$(CPP) -o $@ -c $< $(CFLAGS)
+
+edittool_window.o : ../sources/gui/edittool_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
 license_gui.o : ../sources/gui/license_gui.cxx

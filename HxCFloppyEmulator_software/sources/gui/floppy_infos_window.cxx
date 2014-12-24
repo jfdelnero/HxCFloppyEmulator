@@ -82,12 +82,12 @@ floppy_infos_window::floppy_infos_window() {
         x_offset->textsize(12);
         x_offset->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Value_Slider* x_offset
-      { track_view_bt = new Fl_Round_Button(213, 640, 92, 16, "Track view");
+      { track_view_bt = new Fl_Round_Button(213, 629, 92, 16, "Track view");
         track_view_bt->type(102);
         track_view_bt->down_box(FL_ROUND_DOWN_BOX);
         track_view_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Round_Button* track_view_bt
-      { disc_view_bt = new Fl_Round_Button(340, 640, 81, 16, "Disk view");
+      { disc_view_bt = new Fl_Round_Button(340, 628, 81, 16, "Disk view");
         disc_view_bt->type(102);
         disc_view_bt->down_box(FL_ROUND_DOWN_BOX);
         disc_view_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
@@ -97,6 +97,10 @@ floppy_infos_window::floppy_infos_window() {
         x_time->labelsize(12);
         x_time->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Slider* x_time
+      { bt_edit = new Fl_Button(256, 645, 100, 20, "Edit tools");
+        bt_edit->labelsize(10);
+        bt_edit->callback((Fl_Callback*)disk_infos_window_bt_edit_callback, (void*)(this));
+      } // Fl_Button* bt_edit
       o->end();
     } // Fl_Group* o
     { Fl_Group* o = new Fl_Group(0, 594, 170, 76, "Mode");

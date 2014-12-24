@@ -36,6 +36,7 @@ class Main_Window : public Fl_Window {
 	rawfile_loader_window *rawloader_window;
 	sdhxcfecfg_window * sdcfg_window;
 	usbhxcfecfg_window * usbcfg_window;
+	trackedittool_window * trackedit_window;
 
 	Log_box * log_box;
 	About_box *about_window;

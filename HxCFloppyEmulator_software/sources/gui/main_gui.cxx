@@ -62,6 +62,7 @@
 #include "rawfile_loader_window.h"
 #include "sdhxcfecfg_window.h"
 #include "usbhxcfecfg_window.h"
+#include "edittool_window.h"
 #include "log_gui.h"
 #include "about_gui.h"
 
@@ -835,7 +836,6 @@ Main_Window::Main_Window()
 	
 	//////////////////////////////////////////////
 	// Floppy view window
-	
 	this->infos_window=new floppy_infos_window();
 	this->infos_window->x_offset->bounds(0.0, 100);
 	this->infos_window->x_offset->value(85);
@@ -867,6 +867,15 @@ Main_Window::Main_Window()
 	guicontext->updatefloppyinfos++;
 	guicontext->updatefloppyfs++;
 	
+	//////////////////////////////////////////////
+	// Floppy view window
+	
+	this->trackedit_window = new trackedittool_window();
+	this->infos_window->x_offset->bounds(0.0, 100);
+	this->trackedit_window->edit_startpoint->value("0");
+	this->trackedit_window->edit_endpoint->value("0");
+	this->trackedit_window->edit_bitrate->value("250000");
+
 	//////////////////////////////////////////////
 	// Batch convert window
 	this->batchconv_window=new batch_converter_window();

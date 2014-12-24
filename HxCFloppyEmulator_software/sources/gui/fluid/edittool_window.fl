@@ -1,0 +1,94 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0300 
+header_name {.h} 
+code_name {.cxx}
+class trackedittool_window {open
+} {
+  Function {trackedittool_window()} {open
+  } {
+    Fl_Window window {
+      label {Track edition toolbar} open selected
+      xywh {142 185 190 273} type Double labelsize 12 visible
+    } {
+      Fl_Button bt_copy {
+        label Copy
+        user_data this
+        callback edittool_window_bt_copy_callback
+        xywh {7 43 90 20} labelsize 10
+      }
+      Fl_Button bt_startpoint {
+        label {Select start point}
+        user_data this
+        callback edittool_window_bt_startpoint_callback
+        xywh {7 3 90 20} labelsize 10
+      }
+      Fl_Button bt_endpoint {
+        label {Select end point}
+        user_data this
+        callback edittool_window_bt_endpoint_callback
+        xywh {7 23 90 20} labelsize 10
+      }
+      Fl_Button bt_paste {
+        label Paste
+        user_data this
+        callback edittool_window_bt_paste_callback
+        xywh {7 63 90 20} labelsize 10
+      }
+      Fl_Button bt_fill {
+        label Fill
+        user_data this
+        callback edittool_window_bt_fill_callback
+        xywh {7 83 90 20} labelsize 10
+      }
+      Fl_Input edit_startpoint {
+        xywh {99 2 85 20} type Int labelsize 10 textsize 10
+      }
+      Fl_Input edit_endpoint {
+        xywh {99 23 85 20} type Int labelsize 10 textsize 10
+      }
+      Fl_Button bt_insert {
+        label Insert
+        user_data this
+        callback edittool_window_bt_insert_callback
+        xywh {7 103 90 20} labelsize 10
+      }
+      Fl_Button bt_delete {
+        label Delete
+        user_data this
+        callback edittool_window_bt_delete_callback
+        xywh {7 123 90 20} labelsize 10
+      }
+      Fl_Button bt_setflakey {
+        label {Set Flakey pattern}
+        user_data this
+        callback edittool_window_bt_flakeypattern_callback
+        xywh {7 143 90 20} labelsize 10
+      }
+      Fl_Button bt_setbitrate {
+        label {Set bitrate}
+        user_data this
+        callback edittool_window_bt_setbitrate_callback
+        xywh {7 163 90 20} labelsize 10
+      }
+      Fl_Light_Button bt_directedition {
+        label {Direct edition}
+        user_data this
+        xywh {7 203 90 20} labelsize 10
+      }
+      Fl_Input edit_bitrate {
+        user_data this
+        xywh {100 163 85 20} type Int labelsize 10 textsize 10
+      }
+      Fl_Input edit_editbuffer {
+        user_data this
+        xywh {8 224 177 35} type Int labelsize 10 textsize 10
+      }
+      Fl_Button bt_shift {
+        label Shift
+        user_data this
+        callback edittool_window_bt_shift_callback
+        xywh {7 183 90 20} labelsize 10
+      }
+    }
+  }
+} 

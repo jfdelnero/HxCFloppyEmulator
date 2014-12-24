@@ -8,7 +8,7 @@ class floppy_infos_window {open
   } {
     Fl_Window window {
       label {Visual Floppy disk} open
-      xywh {88 43 1003 670} type Double hide
+      xywh {83 21 1003 670} type Double hide
     } {
       Fl_Group {} {
         label Track open
@@ -75,19 +75,25 @@ class floppy_infos_window {open
           label {Track view}
           user_data this
           callback disk_infos_window_callback
-          xywh {213 640 92 16} type Radio down_box ROUND_DOWN_BOX
+          xywh {213 629 92 16} type Radio down_box ROUND_DOWN_BOX
         }
         Fl_Round_Button disc_view_bt {
           label {Disk view}
           user_data this
-          callback disk_infos_window_callback selected
-          xywh {340 640 81 16} type Radio down_box ROUND_DOWN_BOX
+          callback disk_infos_window_callback
+          xywh {340 628 81 16} type Radio down_box ROUND_DOWN_BOX
         }
         Fl_Slider x_time {
           label {full x time scale}
           user_data this
           callback disk_infos_window_callback
           xywh {175 520 273 20} type Horizontal labelsize 12
+        }
+        Fl_Button bt_edit {
+          label {Edit tools}
+          user_data this
+          callback disk_infos_window_bt_edit_callback selected
+          xywh {256 645 100 20} labelsize 10
         }
       }
       Fl_Group {} {
