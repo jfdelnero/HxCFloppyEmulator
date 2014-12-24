@@ -483,7 +483,7 @@ void                   AdjustTrackPeriod( HXCFE* floppycontext, HXCFE_SIDE * cur
 int32_t                hxcfe_getCellState( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber );
 int32_t                hxcfe_setCellState( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, int32_t state );
 
-int32_t                hxcfe_removeCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber );
+int32_t                hxcfe_removeCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, int32_t numberofcells );
 int32_t                hxcfe_insertCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, int32_t state );
 
 int32_t                hxcfe_getCellFlakeyState( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber );
@@ -493,7 +493,7 @@ int32_t                hxcfe_getCellIndexState( HXCFE* floppycontext, HXCFE_SIDE
 int32_t                hxcfe_setCellIndexState( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, int32_t state );
 
 int32_t                hxcfe_getCellBitrate( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber );
-int32_t                hxcfe_setCellBitrate( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, uint32_t bitrate );
+int32_t                hxcfe_setCellBitrate( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, uint32_t bitrate, int32_t numberofcells );
 
 int32_t                hxcfe_getSectorConfigEncoding( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
 int32_t                hxcfe_getSectorConfigSectorID( HXCFE* floppycontext, HXCFE_SECTCFG* sc );

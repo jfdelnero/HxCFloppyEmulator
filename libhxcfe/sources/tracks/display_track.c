@@ -748,7 +748,7 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	double timingoffset2;
 	int interbit;
 	int bitrate;
-	int xpos,ypos;
+	int xpos,ypos,old_xpos;
 	int endfill;
 	double xresstep;
 	s_sectorlist * sl,*oldsl;
@@ -942,23 +942,23 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	// Flakey bits drawing
 	if(currentside->flakybitsbuffer)
 	{
-		tracksize=currentside->tracklen;;
-		timingoffset=0;
-		i=buffer_offset;
-		old_i=buffer_offset;
+		tracksize = currentside->tracklen;;
+		timingoffset = 0;
+		i = buffer_offset;
+		old_i = buffer_offset;
 
-		endfill=0;
+		endfill = 0;
 		do
 		{
 			do
 			{
 
-				timingoffset=getOffsetTiming(currentside,i,timingoffset,old_i);
-				old_i=i;
-				xpos= (int) ( timingoffset / xresstep );
-				if( (xpos>=td->xsize) )
+				timingoffset = getOffsetTiming(currentside,i,timingoffset,old_i);
+				old_i = i;
+				xpos = (int) ( timingoffset / xresstep );
+				if( ( xpos >= td->xsize ) )
 				{
-					endfill=1;
+					endfill = 1;
 				}
 
 				if( currentside->flakybitsbuffer[i>>3] & (0x80>>(i&7)) )
@@ -1102,6 +1102,58 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 			col->green=155;
 			col->red=0;
 		}
+	}
+	else
+	{
+		// Pulse list generation
+		tracksize = currentside->tracklen;
+		old_i = buffer_offset;
+		i = buffer_offset;
+		timingoffset=0;
+
+		endfill=0;
+		old_xpos = -1;
+		do
+		{
+			do
+			{
+				timingoffset=getOffsetTiming(currentside,i,timingoffset,old_i);
+				timingoffset2=getOffsetTiming(currentside,i+1,timingoffset,i);
+
+				old_i=i;
+				xpos = (int)( timingoffset / xresstep ) - (int)(( timingoffset2 - timingoffset) / (xresstep *2) );
+
+				if(xpos>=0 && (xpos<td->xsize) && ( old_xpos != xpos ) )
+				{
+					// Add the pulse to the pulses list.
+					oldpl = pl;
+					pl = malloc(sizeof(s_pulseslist));
+					if(pl)
+					{
+						memset(pl,0,sizeof(s_pulseslist));
+						pl->track = track;
+						pl->side = side;
+						pl->pulse_number = i;
+						pl->x_pos1 = xpos;
+						pl->x_pos2 = xpos + 1;//(int)(( timingoffset2 - timingoffset) / (xresstep) );
+						pl->next_element = oldpl;
+						old_xpos = xpos;
+					}
+				}
+				else
+				{
+					if(xpos >= 0 && ( old_xpos != xpos ) )
+						endfill = 1;
+				};
+				i++;
+			}while(i<tracksize && !endfill);
+
+			old_i=0;
+			i=0;
+
+		}while(!endfill);
+
+		td->pl = pl;
 	}
 
 	//////////////////////////////////////////
