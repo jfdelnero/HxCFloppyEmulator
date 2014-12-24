@@ -238,41 +238,64 @@ int32_t hxcfe_setCellState( HXCFE* floppycontext, HXCFE_SIDE * currentside, int3
 	return HXCFE_BADPARAMETER;
 }
 
-int32_t hxcfe_removeCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber )
+int32_t hxcfe_removeCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, int32_t numberofcells )
 {
 	int32_t i;
+
+	int32_t loopcnt;
 
 	if(currentside && floppycontext)
 	{
 		if(cellnumber < currentside->tracklen)
 		{
-			for(i=cellnumber + 1;i<currentside->tracklen;i++)
+			if( numberofcells < currentside->tracklen )
 			{
-				setbit(currentside->databuffer,i-1,getbit(currentside->databuffer,i));
 
-				if(currentside->flakybitsbuffer)
+				if( (cellnumber + numberofcells) < currentside->tracklen )
+					loopcnt = currentside->tracklen - ( cellnumber + numberofcells);
+				else
 				{
-					setbit(currentside->flakybitsbuffer,i-1,getbit(currentside->flakybitsbuffer,i));
+					
+					loopcnt = (currentside->tracklen - ( numberofcells ));
+					currentside->tracklen = cellnumber;
+					cellnumber = 0;
+					numberofcells = currentside->tracklen - loopcnt;
+					
 				}
 
-				if(currentside->indexbuffer)
+				for(i=0;i<loopcnt;i++)
 				{
-					setbit(currentside->indexbuffer,i-1,getbit(currentside->indexbuffer,i));
+					setbit(currentside->databuffer, (cellnumber+i) ,getbit(currentside->databuffer,( cellnumber + numberofcells + i )));
+
+					if(currentside->flakybitsbuffer)
+					{
+						setbit(currentside->flakybitsbuffer,(cellnumber+i),getbit(currentside->flakybitsbuffer,( cellnumber + numberofcells + i )));
+					}
+
+					if(currentside->indexbuffer)
+					{
+						setbit(currentside->indexbuffer,(cellnumber+i),getbit(currentside->indexbuffer,( cellnumber + numberofcells + i )));
+					}
+
+					if(currentside->timingbuffer)
+					{
+						currentside->timingbuffer[(cellnumber+i)/8] = currentside->timingbuffer[( cellnumber + numberofcells + i )/8];
+					}
+
+					if(currentside->track_encoding_buffer)
+					{
+						currentside->track_encoding_buffer[(cellnumber+i)/8] = currentside->track_encoding_buffer[( cellnumber + numberofcells + i )/8];
+					}
+
 				}
 
-				if(currentside->timingbuffer)
-				{
-					currentside->timingbuffer[(i-1)/8] = currentside->timingbuffer[i/8];
-				}
-
-				if(currentside->track_encoding_buffer)
-				{
-					currentside->track_encoding_buffer[(i-1)/8] = currentside->track_encoding_buffer[i/8];
-				}
-
+				currentside->tracklen = currentside->tracklen - numberofcells;
+			
 			}
-
-			currentside->tracklen--;
+			else
+			{
+				currentside->tracklen = 1;
+			}
 
 			return HXCFE_NOERROR;
 		}
@@ -508,10 +531,10 @@ int32_t hxcfe_getCellBitrate( HXCFE* floppycontext, HXCFE_SIDE * currentside, in
 	return HXCFE_BADPARAMETER;
 }
 
-int32_t hxcfe_setCellBitrate( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, uint32_t bitrate )
+int32_t hxcfe_setCellBitrate( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, uint32_t bitrate, int32_t numberofcells )
 {
 	int tmpbufsize;
-	int32_t i;
+	int32_t i,j;
 
 	if(currentside && floppycontext)
 	{
@@ -519,7 +542,10 @@ int32_t hxcfe_setCellBitrate( HXCFE* floppycontext, HXCFE_SIDE * currentside, in
 		{
 			if(currentside->timingbuffer)
 			{
-				currentside->timingbuffer[cellnumber/8] = bitrate;
+				for(j=0;j<numberofcells;j++)
+				{
+					currentside->timingbuffer[((cellnumber+j)%currentside->tracklen)/8] = bitrate;
+				}
 			}
 			else
 			{
@@ -529,7 +555,7 @@ int32_t hxcfe_setCellBitrate( HXCFE* floppycontext, HXCFE_SIDE * currentside, in
 					tmpbufsize++;
 				}
 
-				currentside->flakybitsbuffer = malloc( tmpbufsize * sizeof(uint32_t) );
+				currentside->timingbuffer = malloc( tmpbufsize * sizeof(uint32_t) );
 				if( currentside->timingbuffer )
 				{
 					for(i=0;i<currentside->tracklen;i++)
@@ -537,8 +563,14 @@ int32_t hxcfe_setCellBitrate( HXCFE* floppycontext, HXCFE_SIDE * currentside, in
 						currentside->timingbuffer[i/8] = currentside->bitrate;
 					}
 
-					currentside->timingbuffer[cellnumber/8] = bitrate;
+					for(j=0;j<numberofcells;j++)
+					{
+						currentside->timingbuffer[((cellnumber+j)%currentside->tracklen)/8] = bitrate;
+					}
+
+					currentside->bitrate = VARIABLEBITRATE;
 				}
+
 			}
 
 			return HXCFE_NOERROR;
