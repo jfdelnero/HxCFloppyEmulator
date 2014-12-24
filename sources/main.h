@@ -36,6 +36,8 @@ typedef struct s_gui_context_
 	unsigned char * flayoutframebuffer;
 	int updatefloppyinfos;
 	int graphupdate;
+	int pointer_mode;
+	unsigned char * copybuffer;
 
 	int updatefloppyfs;
 

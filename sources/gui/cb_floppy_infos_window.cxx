@@ -65,6 +65,7 @@
 #include "usbhxcfecfg_window.h"
 #include "log_gui.h"
 #include "about_gui.h"
+#include "edittool_window.h"
 
 #include "libhxcfe.h"
 #include "libhxcadaptor.h"
@@ -415,7 +416,18 @@ void disk_infos_window_callback(Fl_Widget *o, void *v)
 	hxc_setevent(guicontext->hxcfe,10);
 }
 
+void disk_infos_window_bt_edit_callback(Fl_Widget *o, void *v)
+{
+	Main_Window *mwindow;
 
+	mwindow = (Main_Window *)guicontext->main_window;
+
+	floppy_infos_window *window;
+
+	window=((floppy_infos_window*)(o->user_data()));
+
+	mwindow->trackedit_window->window->show();
+}
 
 float getangle(int xsize,int ysize,int x_pos,int y_pos)
 {
@@ -581,6 +593,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 {
 	unsigned int i;
 	floppy_infos_window *fiw;
+	trackedittool_window *tew;
 	Fl_Window *dw;
 	Fl_Mouse_Box *dnd = (Fl_Mouse_Box*)o;
 	double stepperpix_x;
@@ -605,6 +618,11 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 	dw=((Fl_Window*)(o->parent()));
 	fiw=(floppy_infos_window *)dw->user_data();
 
+	Main_Window *window;
+
+	window = (Main_Window *)guicontext->main_window;
+	tew = (trackedittool_window *)window->trackedit_window;
+
 	disp_xsize=fiw->floppy_map_disp->w();
 	disp_ysize=fiw->floppy_map_disp->h();
 	disp_xpos=fiw->floppy_map_disp->x();
@@ -619,72 +637,96 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 		buttons_state = Fl::event_buttons();
 		if(buttons_state)
 		{
+			xpos=Fl::event_x() - disp_xpos;
+			if(xpos<0) xpos=0;
+			if(xpos>disp_xsize) xpos=disp_xsize-1;
+
+			ypos=Fl::event_y() - disp_ypos;
+
+			if(ypos<0) ypos=0;
+			if(ypos>disp_ysize) ypos=disp_ysize-1;
+
+			track = (int)fiw->track_number_slide->value();
+			track = valuesanitycheck(track,0, hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy),&valmodif);
+			if(valmodif)
+				fiw->track_number_slide->value(track);
+
+			side=(int)fiw->side_number_slide->value();
+			side = valuesanitycheck(side,0, hxcfe_getNumberOfSide(guicontext->hxcfe,guicontext->loadedfloppy),&valmodif);
+			if(valmodif)
+				fiw->side_number_slide->value(side);
+
 			if(!fiw->disc_view_bt->value())
 			{
-
-				xpos=Fl::event_x() - disp_xpos;
-				if(xpos<0) xpos=0;
-				if(xpos>disp_xsize) xpos=disp_xsize-1;
-
-				ypos=Fl::event_y() - disp_ypos;
-
-				if(ypos<0) ypos=0;
-				if(ypos>disp_ysize) ypos=disp_ysize-1;
-
-				track = (int)fiw->track_number_slide->value();
-				track = valuesanitycheck(track,0, hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy),&valmodif);
-				if(valmodif)
-					fiw->track_number_slide->value(track);
-
-				side=(int)fiw->side_number_slide->value();
-				side = valuesanitycheck(side,0, hxcfe_getNumberOfSide(guicontext->hxcfe,guicontext->loadedfloppy),&valmodif);
-				if(valmodif)
-					fiw->side_number_slide->value(side);
-
 				curside = hxcfe_getSide(guicontext->loadedfloppy,track,side);
 
 				while(pl)
 				{
+					if(tew->bt_directedition->value())
+					{
+						if(isTheRightPulse(fiw,pl,xpos,ypos))
+						{
+							if(hxcfe_getCellState(guicontext->hxcfe,curside,pl->pulse_number))
+								hxcfe_setCellState(guicontext->hxcfe,curside,pl->pulse_number,0);
+							else
+								hxcfe_setCellState(guicontext->hxcfe,curside,pl->pulse_number,1);
+						}
 
+						if(isTheRightPulseFlakey(fiw,pl,xpos,ypos))
+						{
+							if(hxcfe_getCellFlakeyState(guicontext->hxcfe,curside,pl->pulse_number))
+								hxcfe_setCellFlakeyState(guicontext->hxcfe,curside,pl->pulse_number,0);
+							else
+								hxcfe_setCellFlakeyState(guicontext->hxcfe,curside,pl->pulse_number,1);
+						}
+
+						if(isTheRightPulseIndex(fiw,pl,xpos,ypos))
+						{
+							if(hxcfe_getCellIndexState(guicontext->hxcfe,curside,pl->pulse_number))
+								hxcfe_setCellIndexState(guicontext->hxcfe,curside,pl->pulse_number,0);
+							else
+								hxcfe_setCellIndexState(guicontext->hxcfe,curside,pl->pulse_number,1);
+						}
+
+						guicontext->updatefloppyinfos = 1;
+					}
 
 					if(isTheRightPulse(fiw,pl,xpos,ypos))
 					{
-						if(hxcfe_getCellState(guicontext->hxcfe,curside,pl->pulse_number))
-							hxcfe_setCellState(guicontext->hxcfe,curside,pl->pulse_number,0);
-						else
-							hxcfe_setCellState(guicontext->hxcfe,curside,pl->pulse_number,1);
-					}
-
-					if(isTheRightPulseFlakey(fiw,pl,xpos,ypos))
-					{
-						if(hxcfe_getCellFlakeyState(guicontext->hxcfe,curside,pl->pulse_number))
-							hxcfe_setCellFlakeyState(guicontext->hxcfe,curside,pl->pulse_number,0);
-						else
-							hxcfe_setCellFlakeyState(guicontext->hxcfe,curside,pl->pulse_number,1);
-					}
-
-					if(isTheRightPulseIndex(fiw,pl,xpos,ypos))
-					{
-						if(hxcfe_getCellIndexState(guicontext->hxcfe,curside,pl->pulse_number))
-							hxcfe_setCellIndexState(guicontext->hxcfe,curside,pl->pulse_number,0);
-						else
-							hxcfe_setCellIndexState(guicontext->hxcfe,curside,pl->pulse_number,1);
+						sprintf(str,"%d",pl->pulse_number);
+						switch(guicontext->pointer_mode)
+						{
+							case 1:
+								tew->edit_startpoint->value(str);
+							break;
+							case 2:
+								tew->edit_endpoint->value(str);
+							break;
+						}
+						guicontext->pointer_mode = 0;
 					}
 
 					pl = pl->next_element;
 				}
 
-				guicontext->updatefloppyinfos = 1;
+
 			}
 			else
 			{
-				fiw->track_view_bt->value(1);
-				fiw->disc_view_bt->value(0);
-				fiw->side_number_slide->activate();
-				fiw->track_number_slide->activate();
-				fiw->x_offset->activate();
-				fiw->x_time->activate();
-				fiw->y_time->activate();
+				if(fiw->disc_view_bt->value())
+				{
+					fiw->track_view_bt->value(1);
+					fiw->disc_view_bt->value(0);
+					fiw->side_number_slide->activate();
+					fiw->track_number_slide->activate();
+					fiw->x_offset->activate();
+					fiw->x_time->activate();
+					fiw->y_time->activate();
+				}
+				else
+				{
+
+				}
 
 				hxc_setevent(guicontext->hxcfe,10);
 			}

@@ -108,6 +108,14 @@ SOURCE=..\sources\gui\batch_converter_window.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\sources\gui\edittool_window.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\gui\edittool_window.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\gui\filesystem_generator_window.cxx
 # End Source File
 # Begin Source File
@@ -218,6 +226,14 @@ SOURCE=..\sources\gui\cb_batch_converter_window.cxx
 # Begin Source File
 
 SOURCE=..\sources\gui\cb_batch_converter_window.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\gui\cb_edittool_window.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\gui\cb_edittool_window.h
 # End Source File
 # Begin Source File
 
