@@ -3,7 +3,7 @@
 #include "edittool_window.h"
 
 trackedittool_window::trackedittool_window() {
-  { window = new Fl_Double_Window(190, 273, "Track edition toolbar");
+  { window = new Fl_Double_Window(192, 269, "Track edition toolbar");
     window->labelsize(12);
     window->user_data((void*)(this));
     { bt_copy = new Fl_Button(7, 43, 90, 20, "Copy");
@@ -72,6 +72,12 @@ trackedittool_window::trackedittool_window() {
       bt_shift->labelsize(10);
       bt_shift->callback((Fl_Callback*)edittool_window_bt_shift_callback, (void*)(this));
     } // Fl_Button* bt_shift
+    { edit_shiftbit = new Fl_Int_Input(100, 185, 85, 20);
+      edit_shiftbit->type(2);
+      edit_shiftbit->labelsize(10);
+      edit_shiftbit->textsize(10);
+      edit_shiftbit->user_data((void*)(this));
+    } // Fl_Int_Input* edit_shiftbit
     window->end();
   } // Fl_Double_Window* window
 }
