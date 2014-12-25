@@ -91,7 +91,11 @@ class trackedittool_window {open
       }
       Fl_Input edit_shiftbit {
         user_data this
-        xywh {100 185 85 20} type Int labelsize 10 textsize 10
+        xywh {100 183 85 20} type Int labelsize 10 textsize 10
+      }
+      Fl_Input edit_fillflakey {
+        user_data this
+        xywh {100 143 85 20} type Int labelsize 10 textsize 10
       }
     }
   }

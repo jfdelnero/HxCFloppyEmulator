@@ -38,5 +38,6 @@ public:
   Fl_Int_Input *edit_editbuffer;
   Fl_Button *bt_shift;
   Fl_Int_Input *edit_shiftbit;
+  Fl_Int_Input *edit_fillflakey;
 };
 #endif

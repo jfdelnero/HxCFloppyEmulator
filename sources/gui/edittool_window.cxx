@@ -72,12 +72,18 @@ trackedittool_window::trackedittool_window() {
       bt_shift->labelsize(10);
       bt_shift->callback((Fl_Callback*)edittool_window_bt_shift_callback, (void*)(this));
     } // Fl_Button* bt_shift
-    { edit_shiftbit = new Fl_Int_Input(100, 185, 85, 20);
+    { edit_shiftbit = new Fl_Int_Input(100, 183, 85, 20);
       edit_shiftbit->type(2);
       edit_shiftbit->labelsize(10);
       edit_shiftbit->textsize(10);
       edit_shiftbit->user_data((void*)(this));
     } // Fl_Int_Input* edit_shiftbit
+    { edit_fillflakey = new Fl_Int_Input(100, 143, 85, 20);
+      edit_fillflakey->type(2);
+      edit_fillflakey->labelsize(10);
+      edit_fillflakey->textsize(10);
+      edit_fillflakey->user_data((void*)(this));
+    } // Fl_Int_Input* edit_fillflakey
     window->end();
   } // Fl_Double_Window* window
 }
