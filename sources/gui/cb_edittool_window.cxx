@@ -282,7 +282,37 @@ void edittool_window_bt_fill_callback(Fl_Button *o, void *v)
 
 void edittool_window_bt_shift_callback(Fl_Button *o, void *v)
 {
+	Main_Window *window;
+	floppy_infos_window *fiw;
+	HXCFE_SIDE * curside;
+	int valmodif;
+	int track,side;
+	trackedittool_window *tew;
+	int shiftpulse;
 
+	window = (Main_Window *)guicontext->main_window;
+	tew = (trackedittool_window *)window->trackedit_window;
+	fiw = (floppy_infos_window *)window->infos_window;
+
+	track = (int)fiw->track_number_slide->value();
+	track = valuesanitycheck(track,0, hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy),&valmodif);
+	if(valmodif)
+		fiw->track_number_slide->value(track);
+
+	side=(int)fiw->side_number_slide->value();
+	side = valuesanitycheck(side,0, hxcfe_getNumberOfSide(guicontext->hxcfe,guicontext->loadedfloppy),&valmodif);
+	if(valmodif)
+		fiw->side_number_slide->value(side);
+
+	shiftpulse = atoi(tew->edit_shiftbit->value());
+
+	curside = hxcfe_getSide(guicontext->loadedfloppy,track,side);
+	if(curside)
+	{
+		hxcfe_shiftTrackData(curside, shiftpulse );
+
+		guicontext->updatefloppyinfos = 1;
+	}
 }
 
 void edittool_window_bt_paste_callback(Fl_Button *o, void *v)

@@ -8,7 +8,7 @@ class trackedittool_window {open
   } {
     Fl_Window window {
       label {Track edition toolbar} open selected
-      xywh {142 185 190 273} type Double labelsize 12 visible
+      xywh {142 185 192 269} type Double labelsize 12 visible
     } {
       Fl_Button bt_copy {
         label Copy
@@ -88,6 +88,10 @@ class trackedittool_window {open
         user_data this
         callback edittool_window_bt_shift_callback
         xywh {7 183 90 20} labelsize 10
+      }
+      Fl_Input edit_shiftbit {
+        user_data this
+        xywh {100 185 85 20} type Int labelsize 10 textsize 10
       }
     }
   }

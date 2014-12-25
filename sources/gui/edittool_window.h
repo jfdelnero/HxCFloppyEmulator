@@ -37,5 +37,6 @@ public:
   Fl_Int_Input *edit_bitrate;
   Fl_Int_Input *edit_editbuffer;
   Fl_Button *bt_shift;
+  Fl_Int_Input *edit_shiftbit;
 };
 #endif
