@@ -121,6 +121,9 @@ int32_t hxcfe_shiftTrackData(HXCFE_SIDE * side, int32_t bitoffset )
 		tmpbuffer = malloc( (side->tracklen>>3) + 1 );
 		if(tmpbuffer)
 		{
+			if(bitoffset<0)
+				bitoffset = side->tracklen + bitoffset;
+
 			memset(tmpbuffer,0,(side->tracklen>>3) + 1);
 
 			for(i=0;i<side->tracklen;i++)
@@ -204,7 +207,7 @@ int32_t hxcfe_rotateFloppy( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t bit
 				period = GetTrackPeriod(floppycontext,fp->tracks[i]->sides[j]);
 				periodtoshift = (period * (double)((double)bitoffset/(double)total)); //
 				offset = fp->tracks[i]->sides[j]->tracklen - us2index(0,fp->tracks[i]->sides[j],(uint32_t)((double)(periodtoshift * 1000000)),0,0);
-				
+
 				hxcfe_shiftTrackData(fp->tracks[i]->sides[j],(offset&(~0x7)));
 			}
 		}
@@ -255,12 +258,12 @@ int32_t hxcfe_removeCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_
 					loopcnt = currentside->tracklen - ( cellnumber + numberofcells);
 				else
 				{
-					
+
 					loopcnt = (currentside->tracklen - ( numberofcells ));
 					currentside->tracklen = cellnumber;
 					cellnumber = 0;
 					numberofcells = currentside->tracklen - loopcnt;
-					
+
 				}
 
 				for(i=0;i<loopcnt;i++)
@@ -290,7 +293,7 @@ int32_t hxcfe_removeCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_
 				}
 
 				currentside->tracklen = currentside->tracklen - numberofcells;
-			
+
 			}
 			else
 			{
