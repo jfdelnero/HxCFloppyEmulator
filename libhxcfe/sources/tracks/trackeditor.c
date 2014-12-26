@@ -307,7 +307,7 @@ int32_t hxcfe_removeCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_
 	return HXCFE_BADPARAMETER;
 }
 
-int32_t hxcfe_insertCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, int32_t state )
+int32_t hxcfe_insertCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, int32_t state, int32_t numberofcells )
 {
 	int32_t i,tmpbufsize,oldbufsize;
 
@@ -325,8 +325,8 @@ int32_t hxcfe_insertCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_
 				oldbufsize++;
 			}
 
-			tmpbufsize = ( currentside->tracklen + 1 ) / 8;
-			if( ( currentside->tracklen + 1 ) & 7 )
+			tmpbufsize = ( currentside->tracklen + numberofcells ) / 8;
+			if( ( currentside->tracklen + numberofcells ) & 7 )
 			{
 				tmpbufsize++;
 			}
@@ -337,14 +337,17 @@ int32_t hxcfe_insertCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_
 
 				memcpy(tmpbuffer,currentside->databuffer,oldbufsize);
 
-				for(i=cellnumber;i<currentside->tracklen;i++)
+				for(i=cellnumber;i<cellnumber+numberofcells;i++)
 				{
-					setbit(tmpbuffer,i+1,getbit(tmpbuffer,i));
+					setbit( tmpbuffer, i, state );
 				}
 
-				setbit(tmpbuffer,cellnumber,state);
+				for(i=cellnumber;i<currentside->tracklen;i++)
+				{
+					setbit(tmpbuffer, i + numberofcells, getbit(currentside->databuffer,i) );
+				}
 
-				free(currentside->databuffer);
+				free( currentside->databuffer );
 
 				currentside->databuffer = tmpbuffer;
 			}
@@ -357,12 +360,15 @@ int32_t hxcfe_insertCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_
 
 					memcpy(tmpbuffer,currentside->flakybitsbuffer,oldbufsize);
 
-					for(i=cellnumber;i<currentside->tracklen;i++)
+					for(i=cellnumber;i<cellnumber+numberofcells;i++)
 					{
-						setbit(tmpbuffer,i+1,getbit(tmpbuffer,i));
+						setbit( tmpbuffer, i, 0 );
 					}
 
-					setbit(tmpbuffer,cellnumber,0);
+					for(i=cellnumber;i<currentside->tracklen;i++)
+					{
+						setbit(tmpbuffer, i + numberofcells, getbit(currentside->flakybitsbuffer,i) );
+					}
 
 					free(currentside->flakybitsbuffer);
 
@@ -378,12 +384,15 @@ int32_t hxcfe_insertCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_
 
 					memcpy(tmpbuffer,currentside->indexbuffer,oldbufsize);
 
-					for(i=cellnumber;i<currentside->tracklen;i++)
+					for(i=cellnumber;i<cellnumber+numberofcells;i++)
 					{
-						setbit(tmpbuffer,i+1,getbit(tmpbuffer,i));
+						setbit( tmpbuffer, i, 0 );
 					}
 
-					setbit(tmpbuffer,cellnumber,getbit(currentside->indexbuffer,cellnumber));
+					for(i=cellnumber;i<currentside->tracklen;i++)
+					{
+						setbit(tmpbuffer, i + numberofcells, getbit(currentside->indexbuffer,i) );
+					}
 
 					free(currentside->indexbuffer);
 
@@ -400,12 +409,15 @@ int32_t hxcfe_insertCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_
 
 					memcpy(tmpulongbuffer,currentside->timingbuffer,sizeof(uint32_t) * oldbufsize);
 
-					for(i=cellnumber;i<currentside->tracklen;i++)
+					for(i=cellnumber;i<cellnumber+numberofcells;i++)
 					{
-						tmpulongbuffer[(i+1)/8] =  tmpulongbuffer[i/8];
+						tmpulongbuffer[i/8] = currentside->timingbuffer[cellnumber/8];
 					}
 
-					tmpulongbuffer[cellnumber/8] = currentside->indexbuffer[cellnumber/8];
+					for(i=cellnumber;i<currentside->tracklen;i++)
+					{
+						tmpulongbuffer[( i + numberofcells ) / 8] =  currentside->timingbuffer[i/8];
+					}
 
 					free(currentside->timingbuffer);
 
@@ -422,12 +434,15 @@ int32_t hxcfe_insertCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_
 
 					memcpy(tmpbuffer,currentside->track_encoding_buffer,oldbufsize);
 
-					for(i=cellnumber;i<currentside->tracklen;i++)
+					for(i=cellnumber;i<cellnumber+numberofcells;i++)
 					{
-						tmpbuffer[(i+1)/8] =  tmpbuffer[i/8];
+						tmpbuffer[i/8] = currentside->track_encoding_buffer[cellnumber/8];
 					}
 
-					tmpbuffer[cellnumber/8] = currentside->track_encoding_buffer[cellnumber/8];
+					for(i=cellnumber;i<currentside->tracklen;i++)
+					{
+						tmpbuffer[ ( i + numberofcells ) / 8] =  tmpbuffer[i/8];
+					}
 
 					free(currentside->track_encoding_buffer);
 
@@ -435,7 +450,7 @@ int32_t hxcfe_insertCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_
 				}
 			}
 
-			currentside->tracklen++;
+			currentside->tracklen += numberofcells;
 
 			return HXCFE_NOERROR;
 		}
