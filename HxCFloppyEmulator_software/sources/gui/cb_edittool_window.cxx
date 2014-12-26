@@ -265,10 +265,66 @@ void edittool_window_bt_delete_callback(Fl_Button *o, void *v)
 void edittool_window_bt_insert_callback(Fl_Button *o, void *v)
 {
 	Main_Window *window;
+	floppy_infos_window *fiw;
+	HXCFE_SIDE * curside;
+	int valmodif;
+	int track,side;
 	trackedittool_window *tew;
+	int startpulse,endpulse;
+	int i,tracklen,loop;
+	char * copybuffer;
 
 	window = (Main_Window *)guicontext->main_window;
 	tew = (trackedittool_window *)window->trackedit_window;
+	fiw = (floppy_infos_window *)window->infos_window;
+
+	track = (int)fiw->track_number_slide->value();
+	track = valuesanitycheck(track,0, hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy),&valmodif);
+	if(valmodif)
+		fiw->track_number_slide->value(track);
+
+	side=(int)fiw->side_number_slide->value();
+	side = valuesanitycheck(side,0, hxcfe_getNumberOfSide(guicontext->hxcfe,guicontext->loadedfloppy),&valmodif);
+	if(valmodif)
+		fiw->side_number_slide->value(side);
+
+	startpulse = atoi(tew->edit_startpoint->value());
+	endpulse = atoi(tew->edit_endpoint->value());
+	tracklen = hxcfe_getTrackLength(guicontext->loadedfloppy,track,side);
+
+	curside = hxcfe_getSide(guicontext->loadedfloppy,track,side);
+	if(curside)
+	{
+		startpulse = startpulse % tracklen;
+		endpulse = endpulse % tracklen;
+
+		if(startpulse<endpulse)
+		{
+			loop = endpulse - startpulse;
+		}
+		else
+		{
+			loop = ( hxcfe_getTrackLength( guicontext->loadedfloppy, track, side ) - startpulse ) + endpulse;
+		}
+
+		copybuffer = (char*)tew->edit_editbuffer->value();
+		if(copybuffer)
+		{
+			hxcfe_insertCell( guicontext->hxcfe, curside, startpulse, 0, strlen(copybuffer) );
+
+			i = 0;
+			while(copybuffer[i])
+			{
+				if(copybuffer[i] == '0')
+					hxcfe_setCellState( guicontext->hxcfe, curside, (startpulse+i)%tracklen, 0 );
+				else
+					hxcfe_setCellState( guicontext->hxcfe, curside, (startpulse+i)%tracklen, 1 );
+				i++;
+			}
+
+			guicontext->updatefloppyinfos = 1;
+		}
+	}
 }
 
 void edittool_window_bt_fill_callback(Fl_Button *o, void *v)
