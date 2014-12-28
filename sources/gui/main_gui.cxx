@@ -49,7 +49,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdarg.h> 
+#include <stdarg.h>
 #include <time.h>
 #include <stdint.h>
 
@@ -79,7 +79,7 @@ extern "C"
 {
 	#include "microintro/data/data_bmp_hxc2001_backgnd_bmp.h"
 	#include "microintro/data/data_COPYING_FULL.h"
-	
+
 	#include "microintro/packer/pack.h"
 
 	extern void convert8b24b(bmaptype * img,unsigned short transcolor);
@@ -135,16 +135,16 @@ const char * plugid_lst[]=
 };
 
 static void tick_main(void *v) {
-	
+
 	Main_Window *window;
-	
+
 	window=(Main_Window *)v;
 	window->make_current();
 	Fl::repeat_timeout(0.10, tick_main, v);
 }
 
-void menu_clicked(Fl_Widget * w, void * fc_ptr) 
-{	
+void menu_clicked(Fl_Widget * w, void * fc_ptr)
+{
 	intptr_t i;
 	Main_Window *mw;
 	Fl_Window *dw;
@@ -197,8 +197,8 @@ void menu_clicked(Fl_Widget * w, void * fc_ptr)
 
 }
 
-void bt_clicked(Fl_Widget * w, void * fc_ptr) 
-{	
+void bt_clicked(Fl_Widget * w, void * fc_ptr)
+{
 	intptr_t i;
 	Main_Window *mw;
 	Fl_Window *dw;
@@ -247,7 +247,7 @@ int export_thread(void* floppycontext,void* context)
 	HXCFE_IMGLDR * imgldr_ctx;
 	HXCFE_FLOPPY * fp;
 	int loaderid;
-	
+
 	exportth = (exportthread*)context;
 
 	imgldr_ctx = hxcfe_imgInitLoader(guicontext->hxcfe);
@@ -259,7 +259,7 @@ int export_thread(void* floppycontext,void* context)
 		hxcfe_imgSetProgressCallback(imgldr_ctx,progress_callback,(void*)guicontext);
 
 		loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,(char*)exportth->type);
-		
+
 		if(loaderid>=0)
 		{
 			fp = hxcfe_floppyDuplicate(guicontext->hxcfe,guicontext->loadedfloppy);
@@ -304,12 +304,12 @@ int launchexport(char * urls,HXCFE_FLOPPY * fp, char * type)
 			exportthread_params->type =(char*)malloc(strlen(type)+1);
 			memset(exportthread_params->type,0,strlen(type)+1);
 			memcpy(exportthread_params->type,type,strlen(type));
-			
+
 			exportthread_params->floppy = fp;
-			
+
 			hxc_createthread(guicontext->hxcfe,(void*)exportthread_params,&export_thread,0);
 		}
-		
+
 	}
 
 	return 0;
@@ -323,7 +323,7 @@ typedef struct _loadthread
 int loading_thread(void* floppycontext,void* context)
 {
 	loadthread * loadth;
-	
+
 	loadth = (loadthread*)context;
 	load_floppy_image(loadth->urls);
 
@@ -368,10 +368,10 @@ void load_file(const char *urls)
 }
 
 
-void load_file_image(Fl_Widget * w, void * fc_ptr) 
+void load_file_image(Fl_Widget * w, void * fc_ptr)
 {
 	Fl_Native_File_Chooser fnfc;
-  
+
 	fnfc.title("Load image file");
 	fnfc.type(Fl_Native_File_Chooser::BROWSE_FILE);
 	fnfc.filter("Floppy disk image file\t*.*\n");
@@ -399,7 +399,7 @@ void load_file_image(Fl_Widget * w, void * fc_ptr)
 }
 
 
-void save_file_image(Fl_Widget * w, void * fc_ptr) 
+void save_file_image(Fl_Widget * w, void * fc_ptr)
 {
 	int i;
 	Fl_Native_File_Chooser fnfc;
@@ -411,7 +411,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 	}
 	else
 	{
-		
+
 		sprintf((char*)deffilename,"%s",guicontext->bufferfilename);
 		i=0;
 		while(deffilename[i]!=0)
@@ -453,7 +453,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 
 
 		//fnfc.directory("/var/tmp"); // default directory to use
-		
+
 		// Show native chooser
 		switch ( fnfc.show() ) {
 			case -1:
@@ -464,7 +464,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 			{
 
 				i=fnfc.filter_value();
-				
+
 				launchexport((char*)fnfc.filename(),guicontext->loadedfloppy,(char*)plugid_lst[i]);
 
 				break; // FILE CHOSEN
@@ -474,12 +474,12 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 }
 
 
-void load_file_image_pb(Fl_Widget * widget, void * ptr) 
+void load_file_image_pb(Fl_Widget * widget, void * ptr)
 {
 	load_file_image(widget,ptr);
 }
 
-void fc_callback(Fl_File_Chooser * fc, void *) 
+void fc_callback(Fl_File_Chooser * fc, void *)
 {
 	const char * fp;
 	fp=fc->value();
@@ -515,7 +515,7 @@ void sync_if_config()
 #endif
 }
 
-void format_choice_cb(Fl_Widget *, void *v) 
+void format_choice_cb(Fl_Widget *, void *v)
 {
 	guicontext->interfacemode =  (intptr_t)v;
 
@@ -585,10 +585,10 @@ static void tick_mw(void *v) {
 		j = strlen(tempstr2);
 		memcpy(&tempstr2[i],tempstr2,j);
 		tempstr2[i + j] = 0;
-			
+
 		window->file_name_txt->value((const char*)tempstr2);
 		//SetDlgItemText(hwndDlg,IDC_EDIT_STATUS,tempstr2);
-			
+
 		guicontext->txtindex++;
 	}
 	else
@@ -738,14 +738,14 @@ Main_Window::Main_Window()
 	guicontext->hxcfe=hxcfe_init();
 	hxcfe_setOutputFunc(guicontext->hxcfe,CUI_affiche);
 
-#ifndef STANDALONEFSBROWSER	
+#ifndef STANDALONEFSBROWSER
 	guicontext->usbhxcfe=libusbhxcfe_init(guicontext->hxcfe);
 #endif
 
 	Fl::scheme("gtk+");
 
 	Fl_Group group(0,0,WINDOW_XSIZE,392);
-	
+
 #ifdef WIN32
 	this->icon((char *)LoadIcon(fl_display, MAKEINTRESOURCE(101)));
 #endif
@@ -759,7 +759,7 @@ Main_Window::Main_Window()
 	{
 		txt_buttons_main[i].button = new Fl_Button(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*i), BUTTON_XSIZE, BUTTON_YSIZE, txt_buttons_main[i].label);
 		txt_buttons_main[i].button->labelsize(12);
-		txt_buttons_main[i].button->callback(bt_clicked,(void*)i);	
+		txt_buttons_main[i].button->callback(bt_clicked,(void*)i);
 
 		Fl_Box *box = new Fl_Box(FL_NO_BOX,BUTTON_XPOS+BUTTON_XSIZE,BUTTON_YPOS+(BUTTON_YSIZE/4)+(BUTTON_YSTEP*i),BUTTON_XSIZE*4,BUTTON_YSIZE/2,txt_buttons_main[i].desc);
 		box->align(FL_ALIGN_INSIDE|FL_ALIGN_LEFT);
@@ -795,10 +795,10 @@ Main_Window::Main_Window()
 
 	txt_buttons_main[0].button->callback(load_file_image,0);
 	txt_buttons_main[4].button->callback(save_file_image,0);
-		
+
 	menutable[1].user_data_=fc_load;
 	menutable[4].user_data_=fc_save;
-	Fl_Menu_Bar menubar(0,0,WINDOW_XSIZE,24); 
+	Fl_Menu_Bar menubar(0,0,WINDOW_XSIZE,24);
 	menubar.menu(menutable);
 
 	// Fl_DND_Box is constructed with the same dimensions and at the same position as Fl_Scroll
@@ -833,7 +833,9 @@ Main_Window::Main_Window()
 	guicontext->mapfloppybuffer=(unsigned char*)malloc(guicontext->xsize * guicontext->ysize * 4);
 	memset(guicontext->mapfloppybuffer,0,guicontext->xsize*guicontext->ysize*4);
 	tick_dump(this->fdump_window);
-	
+
+	hxc_createcriticalsection(guicontext->hxcfe,1);
+
 	//////////////////////////////////////////////
 	// Floppy view window
 	this->infos_window=new floppy_infos_window();
@@ -853,7 +855,7 @@ Main_Window::Main_Window()
 
 		infoth = (infothread *)malloc(sizeof(infothread));
 		infoth->window = (floppy_infos_window*)(this->infos_window);
-		infoth->guicontext = guicontext;		
+		infoth->guicontext = guicontext;
 		hxc_createthread(guicontext->hxcfe,(void*)infoth,&InfosThreadProc,0);
 
 	}
@@ -866,15 +868,20 @@ Main_Window::Main_Window()
 	tick_infos(this->infos_window);
 	guicontext->updatefloppyinfos++;
 	guicontext->updatefloppyfs++;
-	
+
 	//////////////////////////////////////////////
 	// Floppy view window
-	
+
 	this->trackedit_window = new trackedittool_window();
 	this->infos_window->x_offset->bounds(0.0, 100);
 	this->trackedit_window->edit_startpoint->value("0");
 	this->trackedit_window->edit_endpoint->value("0");
 	this->trackedit_window->edit_bitrate->value("250000");
+	this->trackedit_window->edit_bitrate2->value("250000");
+	this->trackedit_window->edit_rpm->value("300");
+	this->trackedit_window->edit_fillflakey->value("1");
+	this->trackedit_window->edit_shiftbit->value("0");
+	this->trackedit_window->edit_editbuffer->value("010");
 
 	//////////////////////////////////////////////
 	// Batch convert window
@@ -1012,11 +1019,11 @@ Main_Window::Main_Window()
 	this->about_window=new About_box();
 
 	data_COPYING_FULL->unpacked_data=mi_unpack(data_COPYING_FULL->data,data_COPYING_FULL->csize ,data_COPYING_FULL->data, data_COPYING_FULL->size);
-	
+
 	license_txt=(char*)data_COPYING_FULL->unpacked_data;
 	license_txt[data_COPYING_FULL->size - 1] = 0;
 
-	
+
 	sync_if_config();
 
 	txtindex=0;
@@ -1032,6 +1039,6 @@ Main_Window::Main_Window()
 
 Main_Window::~Main_Window()
 {
-	Fl::remove_timeout(tick_main,0); 
+	Fl::remove_timeout(tick_main,0);
 }
 

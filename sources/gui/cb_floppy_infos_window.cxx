@@ -231,32 +231,32 @@ void update_graph(floppy_infos_window * w)
 				if(hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->trackviewerfloppy))
 				{
 					sprintf(tempstr,"Track RPM tag : %d\nBitrate flag : %d\nTrack encoding flag : %x\n",
-						(int)hxcfe_getTrackRPM(guicontext->trackviewerfloppy,track),
-						hxcfe_getTrackBitrate(guicontext->trackviewerfloppy,track,side),
-						hxcfe_getTrackEncoding(guicontext->trackviewerfloppy,track,side)
+						(int)hxcfe_getTrackRPM(guicontext->hxcfe,guicontext->trackviewerfloppy,track),
+						hxcfe_getTrackBitrate(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side),
+						hxcfe_getTrackEncoding(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side)
 						);
 
 					w->buf->remove(0,w->buf->length());
 
-					sprintf(tempstr,"Track RPM : %d RPM - ",hxcfe_getTrackRPM(guicontext->trackviewerfloppy,track));
+					sprintf(tempstr,"Track RPM : %d RPM - ",hxcfe_getTrackRPM(guicontext->hxcfe,guicontext->trackviewerfloppy,track));
 					w->buf->append((char*)tempstr);
 
 
-					if( hxcfe_getTrackBitrate(guicontext->trackviewerfloppy,track,side) == -1)
+					if( hxcfe_getTrackBitrate(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side) == -1)
 					{
 						sprintf(tempstr,"Bitrate : VARIABLE\n");
 					}
 					else
 					{
-						sprintf(tempstr,"Bitrate : %d bit/s\n",hxcfe_getTrackBitrate(guicontext->trackviewerfloppy,track,side) );
+						sprintf(tempstr,"Bitrate : %d bit/s\n",hxcfe_getTrackBitrate(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side) );
 					}
 
 					w->buf->append((char*)tempstr);
-					sprintf(tempstr,"Track format : %s\n",hxcfe_getTrackEncodingName(guicontext->hxcfe, hxcfe_getTrackEncoding(guicontext->trackviewerfloppy,track,side) ) );
+					sprintf(tempstr,"Track format : %s\n",hxcfe_getTrackEncodingName(guicontext->hxcfe, hxcfe_getTrackEncoding(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side) ) );
 					w->buf->append((char*)tempstr);
-					sprintf(tempstr,"Track len : %d cells\n",hxcfe_getTrackLength(guicontext->trackviewerfloppy,track,side));
+					sprintf(tempstr,"Track len : %d cells\n",hxcfe_getTrackLength(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side));
 					w->buf->append((char*)tempstr);
-					sprintf(tempstr,"Number of side : %d\n",hxcfe_getTrackNumberOfSide(guicontext->trackviewerfloppy,track));
+					sprintf(tempstr,"Number of side : %d\n",hxcfe_getTrackNumberOfSide(guicontext->hxcfe,guicontext->trackviewerfloppy,track));
 					w->buf->append((char*)tempstr);
 
 
@@ -287,10 +287,12 @@ void tick_infos(void *w) {
 		{
 			if(guicontext->updatefloppyinfos)
 			{
+				hxc_entercriticalsection(guicontext->hxcfe,1);
 				guicontext->updatefloppyinfos=0;
 				guicontext->trackviewerfloppy_updateneeded = 1;
 				update_graph(window);
 				hxc_setevent(guicontext->hxcfe,10);
+				hxc_leavecriticalsection(guicontext->hxcfe,1);
 			}
 
 			fl_draw_image((unsigned char *)guicontext->flayoutframebuffer, window->floppy_map_disp->x(), window->floppy_map_disp->y(), hxcfe_td_getframebuffer_xres(td), hxcfe_td_getframebuffer_yres(td), 3, 0);
@@ -319,6 +321,7 @@ int InfosThreadProc(void* floppycontext,void* context)
 
 		if(!hxc_waitevent(guicontext->hxcfe,10,1000))
 		{
+			hxc_entercriticalsection(guicontext->hxcfe,1);
 
 			if(guicontext->trackviewerfloppy_updateneeded)
 			{
@@ -334,7 +337,6 @@ int InfosThreadProc(void* floppycontext,void* context)
 					guicontext->trackviewerfloppy = hxcfe_floppyDuplicate(guicontext->hxcfe,guicontext->loadedfloppy);
 				}
 			}
-
 
 			td = (HXCFE_TD *)guicontext->td;
 
@@ -377,6 +379,8 @@ int InfosThreadProc(void* floppycontext,void* context)
 				*ptr2++ = *ptr1++;
 				ptr1++;
 			}
+
+			hxc_leavecriticalsection(guicontext->hxcfe,1);
 
 		}
 
@@ -658,7 +662,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 			if(!fiw->disc_view_bt->value())
 			{
-				curside = hxcfe_getSide(guicontext->loadedfloppy,track,side);
+				curside = hxcfe_getSide(guicontext->hxcfe,guicontext->loadedfloppy,track,side);
 
 				while(pl)
 				{
@@ -764,6 +768,9 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 		fiw->object_txt->textsize(9);
 		fiw->object_txt->textfont(FL_SCREEN);
 
+		if(!fiw->disc_view_bt->value())
+			hxc_entercriticalsection(guicontext->hxcfe,1);
+
 		sl = hxcfe_td_getlastsectorlist(guicontext->td);
 		fullstr[0]=0;
 
@@ -857,7 +864,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						track=(int)fiw->track_number_slide->value();
 						side=(int)fiw->side_number_slide->value();
 						sprintf(str,"Number of cells : %d\n",
-							( ( hxcfe_getTrackLength(guicontext->trackviewerfloppy,track,side) - hxcfe_getSectorConfigStartSectorIndex(guicontext->hxcfe,sl->sectorconfig) ) + hxcfe_getSectorConfigEndSectorIndex(guicontext->hxcfe,sl->sectorconfig) ) );
+							( ( hxcfe_getTrackLength(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side) - hxcfe_getSectorConfigStartSectorIndex(guicontext->hxcfe,sl->sectorconfig) ) + hxcfe_getSectorConfigEndSectorIndex(guicontext->hxcfe,sl->sectorconfig) ) );
 					}
 
 					fiw->buf->append((char*)str);
@@ -910,6 +917,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 		if(guicontext->trackviewerfloppy)
 		{
+
 			track = (int)fiw->track_number_slide->value();
 			track = valuesanitycheck(track,0, hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->trackviewerfloppy),&valmodif);
 			if(valmodif)
@@ -922,25 +930,25 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 			if(hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->trackviewerfloppy))
 			{
-				sprintf(str,"Track RPM : %d RPM - ",hxcfe_getTrackRPM(guicontext->trackviewerfloppy,track));
+				sprintf(str,"Track RPM : %d RPM - ",hxcfe_getTrackRPM(guicontext->hxcfe,guicontext->trackviewerfloppy,track));
 				strcat(fullstr,str);
 
 
-				if( hxcfe_getTrackBitrate(guicontext->trackviewerfloppy,track,side) == -1)
+				if( hxcfe_getTrackBitrate(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side) == -1)
 				{
 					sprintf(str,"Bitrate : VARIABLE\n");
 				}
 				else
 				{
-					sprintf(str,"Bitrate : %d bit/s\n",(int)hxcfe_getTrackBitrate(guicontext->trackviewerfloppy,track,side) );
+					sprintf(str,"Bitrate : %d bit/s\n",(int)hxcfe_getTrackBitrate(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side) );
 				}
 				strcat(fullstr,str);
 
-				sprintf(str,"Track format : %s\n",hxcfe_getTrackEncodingName(guicontext->hxcfe,hxcfe_getTrackEncoding(guicontext->trackviewerfloppy,track,side)));
+				sprintf(str,"Track format : %s\n",hxcfe_getTrackEncodingName(guicontext->hxcfe,hxcfe_getTrackEncoding(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side)));
 				strcat(fullstr,str);
-				sprintf(str,"Track len : %d cells\n",(int)hxcfe_getTrackLength(guicontext->trackviewerfloppy,track,side));
+				sprintf(str,"Track len : %d cells\n",(int)hxcfe_getTrackLength(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side));
 				strcat(fullstr,str);
-				sprintf(str,"Number of side : %d\n",hxcfe_getTrackNumberOfSide(guicontext->trackviewerfloppy,track));
+				sprintf(str,"Number of side : %d\n",hxcfe_getTrackNumberOfSide(guicontext->hxcfe,guicontext->trackviewerfloppy,track));
 				strcat(fullstr,str);
 
 				sprintf(str,"Interface mode: %s - %s\n",
@@ -954,7 +962,11 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 				fiw->object_txt->buffer(fiw->buf);
 			}
 
+
 		}
+
+		if(!fiw->disc_view_bt->value())
+			hxc_leavecriticalsection(guicontext->hxcfe,1);
 
 	}
 
