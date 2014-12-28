@@ -225,7 +225,7 @@ unsigned long hxc_createcriticalsection(HXCFE* floppycontext,unsigned char id)
 	pthread_mutex_init(&criticalsectiontab[id], &mAttr);
 
 	// Mutex attribute can be destroy after initializing the mutex variable
-	pthread_mutexattr_destroy(&mAttr)
+	pthread_mutexattr_destroy(&mAttr);
 
 	return (unsigned long)&criticalsectiontab[id];
 #endif
