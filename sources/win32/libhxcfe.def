@@ -177,3 +177,5 @@ EXPORTS
    hxcfe_getCellBitrate			@510
    hxcfe_setCellBitrate			@511
    hxcfe_rotateFloppy			@512
+   hxcfe_setTrackRPM			@513
+   hxcfe_removeOddTracks		@514

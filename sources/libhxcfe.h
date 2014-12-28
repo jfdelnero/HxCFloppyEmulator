@@ -468,17 +468,19 @@ void                   hxcfe_deinitFxStream( HXCFE_FXSA * fxs );
 // Track edition functions                                                                        //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HXCFE_SIDE *           hxcfe_getSide( HXCFE_FLOPPY * fp, int32_t track, int32_t side );
-int32_t                hxcfe_getTrackBitrate( HXCFE_FLOPPY * fp, int32_t track, int32_t side );
-int32_t                hxcfe_getTrackEncoding( HXCFE_FLOPPY * fp, int32_t track, int32_t side );
-int32_t                hxcfe_getTrackLength( HXCFE_FLOPPY * fp, int32_t track, int32_t side );
-int32_t                hxcfe_getTrackRPM( HXCFE_FLOPPY * fp, int32_t track );
-int32_t                hxcfe_getTrackNumberOfSide(HXCFE_FLOPPY * fp,int32_t track);
+HXCFE_SIDE *           hxcfe_getSide( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, int32_t side );
+int32_t                hxcfe_getTrackBitrate( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, int32_t side );
+int32_t                hxcfe_getTrackEncoding( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, int32_t side );
+int32_t                hxcfe_getTrackLength( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, int32_t side );
+int32_t                hxcfe_getTrackRPM( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track );
+int32_t                hxcfe_getTrackNumberOfSide( HXCFE* floppycontext, HXCFE_FLOPPY * fp,int32_t track);
 
-int32_t                hxcfe_shiftTrackData(HXCFE_SIDE * side, int32_t bitoffset );
+int32_t                hxcfe_shiftTrackData( HXCFE* floppycontext, HXCFE_SIDE * side, int32_t bitoffset );
 int32_t                hxcfe_rotateFloppy( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t bitoffset, int32_t total );
 
 void                   AdjustTrackPeriod( HXCFE* floppycontext, HXCFE_SIDE * curside_S0, HXCFE_SIDE * curside_S1 );
+int32_t                hxcfe_setTrackRPM( HXCFE* floppycontext, HXCFE_SIDE * side, int32_t rpm );
+int32_t                hxcfe_removeOddTracks( HXCFE* floppycontext, HXCFE_FLOPPY * fp );
 
 int32_t                hxcfe_getCellState( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber );
 int32_t                hxcfe_setCellState( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, int32_t state );
