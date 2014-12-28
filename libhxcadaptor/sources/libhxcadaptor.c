@@ -215,9 +215,12 @@ unsigned long hxc_createcriticalsection(HXCFE* floppycontext,unsigned char id)
 	//create mutex attribute variable
 	pthread_mutexattr_t mAttr;
 
+#if defined(__APPLE__)
 	// setup recursive mutex for mutex attribute
+	pthread_mutexattr_settype(&mAttr, PTHREAD_MUTEX_RECURSIVE);
+#else
 	pthread_mutexattr_settype(&mAttr, PTHREAD_MUTEX_RECURSIVE_NP);
-
+#endif
 	// Use the mutex attribute to create the mutex
 	pthread_mutex_init(&criticalsectiontab[id], &mAttr);
 
