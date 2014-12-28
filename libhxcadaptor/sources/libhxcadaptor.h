@@ -26,6 +26,11 @@ int hxc_waitevent(HXCFE* floppycontext,int id,int timeout);
 void hxc_pause(int ms);
 int hxc_createthread(HXCFE* floppycontext,void* hwcontext,THREADFUNCTION thread,int priority);
 
+unsigned long hxc_createcriticalsection(HXCFE* floppycontext,unsigned char id);
+void hxc_entercriticalsection(HXCFE* floppycontext,unsigned char id);
+void hxc_leavecriticalsection(HXCFE* floppycontext,unsigned char id);
+void hxc_destroycriticalsection(HXCFE* floppycontext,unsigned char id);
+
 /////////////// String functions ///////////////
 
 #ifndef WIN32
