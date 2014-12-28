@@ -72,6 +72,7 @@
 
 #ifdef WIN32
 	HANDLE eventtab[256];
+	CRITICAL_SECTION criticalsectiontab[256];
 #else
 	typedef struct _EVENT_HANDLE{
 		pthread_cond_t eCondVar;
@@ -80,6 +81,8 @@
 	} EVENT_HANDLE;
 
 	EVENT_HANDLE * eventtab[256];
+
+	pthread_mutex_t criticalsectiontab[256];
 #endif
 
 #ifdef WIN32
@@ -200,6 +203,59 @@ int hxc_waitevent(HXCFE* floppycontext,int id,int timeout)
 	}
 #endif
 }
+
+unsigned long hxc_createcriticalsection(HXCFE* floppycontext,unsigned char id)
+{
+#ifdef WIN32
+
+	InitializeCriticalSection(&criticalsectiontab[id]);
+	return (unsigned long)&criticalsectiontab[id];
+
+#else
+	//create mutex attribute variable
+	pthread_mutexattr_t mAttr;
+
+	// setup recursive mutex for mutex attribute
+	pthread_mutexattr_settype(&mAttr, PTHREAD_MUTEX_RECURSIVE_NP);
+
+	// Use the mutex attribute to create the mutex
+	pthread_mutex_init(&criticalsectiontab[id], &mAttr);
+
+	// Mutex attribute can be destroy after initializing the mutex variable
+	pthread_mutexattr_destroy(&mAttr)
+
+	return (unsigned long)&criticalsectiontab[id];
+#endif
+}
+
+
+void hxc_entercriticalsection(HXCFE* floppycontext,unsigned char id)
+{
+#ifdef WIN32
+	EnterCriticalSection( &criticalsectiontab[id] );
+#else
+	pthread_mutex_lock( &criticalsectiontab[id] );
+#endif
+}
+
+void hxc_leavecriticalsection(HXCFE* floppycontext,unsigned char id)
+{
+#ifdef WIN32
+	LeaveCriticalSection( &criticalsectiontab[id] );
+#else
+	pthread_mutex_unlock( &criticalsectiontab[id] );
+#endif
+}
+
+void hxc_destroycriticalsection(HXCFE* floppycontext,unsigned char id)
+{
+#ifdef WIN32
+	DeleteCriticalSection(&criticalsectiontab[id]);
+#else
+	pthread_mutex_destroy (&criticalsectiontab[id]);
+#endif
+}
+
 
 #ifndef WIN32
 void hxc_msleep (unsigned int ms) {
