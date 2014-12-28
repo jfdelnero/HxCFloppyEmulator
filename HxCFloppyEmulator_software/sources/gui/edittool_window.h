@@ -17,6 +17,14 @@ extern void edittool_window_bt_flakeypattern_callback(Fl_Button*, void*);
 extern void edittool_window_bt_setbitrate_callback(Fl_Button*, void*);
 #include <FL/Fl_Light_Button.H>
 extern void edittool_window_bt_shift_callback(Fl_Button*, void*);
+extern void edittool_window_bt_erase_side1_callback(Fl_Button*, void*);
+extern void edittool_window_bt_erase_side0_callback(Fl_Button*, void*);
+extern void edittool_window_bt_setdiskbitrate_callback(Fl_Button*, void*);
+extern void edittool_window_bt_setdiskrpm_callback(Fl_Button*, void*);
+extern void edittool_window_bt_changetracknum_callback(Fl_Button*, void*);
+extern void edittool_window_bt_changesidenum_callback(Fl_Button*, void*);
+#include <FL/Fl_Box.H>
+extern void edittool_window_bt_removeoddtracks_callback(Fl_Button*, void*);
 
 class trackedittool_window {
 public:
@@ -39,5 +47,16 @@ public:
   Fl_Button *bt_shift;
   Fl_Int_Input *edit_shiftbit;
   Fl_Int_Input *edit_fillflakey;
+  Fl_Button *bt_erase1;
+  Fl_Button *bt_erase0;
+  Fl_Button *bt_setdiskbitrate;
+  Fl_Int_Input *edit_bitrate2;
+  Fl_Button *bt_rpm;
+  Fl_Button *bt_changetracknum;
+  Fl_Int_Input *edit_tracknum;
+  Fl_Button *bt_changesidenum;
+  Fl_Int_Input *edit_sidenum;
+  Fl_Int_Input *edit_rpm;
+  Fl_Button *bt_removeoddtracks;
 };
 #endif
