@@ -3446,7 +3446,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 				for(revolution = 0; revolution < std->nb_of_index - 1; revolution++)
 				{
-					hxcfe_freeSide(revolutionside[revolution]);
+					hxcfe_freeSide(fxs->hxcfe,revolutionside[revolution]);
 				}
 
 				free_pulses_link_array(pl);

@@ -97,7 +97,7 @@ typedef struct _HXCFE_SECTCFG
  void            getFMcode (track_generator *tg,uint8_t data,uint8_t clock,unsigned char * dstbuf);
  int32_t         pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE * side,int32_t trackencoding);
 
- void            hxcfe_freeSide(HXCFE_SIDE * side);
+ void            hxcfe_freeSide( HXCFE* floppycontext, HXCFE_SIDE * side );
 
  void            tg_initTrackEncoder(track_generator *tg);
  int32_t         tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t bitrate,int32_t numberofsector,HXCFE_SECTCFG * sectorconfigtab,int32_t pregaplen,int32_t * track_period);

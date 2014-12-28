@@ -470,7 +470,7 @@ int32_t hxcfe_imgUnload( HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * floppydisk )
 		{
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
-				hxcfe_freeSide(floppydisk->tracks[j]->sides[i]);
+				hxcfe_freeSide(imgldr_ctx->hxcfe,floppydisk->tracks[j]->sides[i]);
 			}
 
 			free(floppydisk->tracks[j]->sides);
@@ -528,7 +528,7 @@ int32_t hxcfe_floppyUnload( HXCFE* floppycontext, HXCFE_FLOPPY * floppydisk )
 
 						for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 						{
-							hxcfe_freeSide(floppydisk->tracks[j]->sides[i]);
+							hxcfe_freeSide(floppycontext,floppydisk->tracks[j]->sides[i]);
 						}
 
 						free(floppydisk->tracks[j]->sides);
@@ -1733,7 +1733,7 @@ HXCFE_FLOPPY * hxcfe_generateFloppy( HXCFE* floppycontext, char* path, int32_t f
 	return newfloppy;
 }
 
-int32_t hxcfe_getTrackBitrate( HXCFE_FLOPPY * fp, int32_t track, int32_t side )
+int32_t hxcfe_getTrackBitrate( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, int32_t side )
 {
 	if(fp)
 	{
@@ -1743,7 +1743,7 @@ int32_t hxcfe_getTrackBitrate( HXCFE_FLOPPY * fp, int32_t track, int32_t side )
 	return 0;
 }
 
-int32_t hxcfe_getTrackEncoding( HXCFE_FLOPPY * fp, int32_t track, int32_t side )
+int32_t hxcfe_getTrackEncoding( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, int32_t side )
 {
 	if(fp)
 	{
@@ -1753,7 +1753,7 @@ int32_t hxcfe_getTrackEncoding( HXCFE_FLOPPY * fp, int32_t track, int32_t side )
 	return 0;
 }
 
-int32_t hxcfe_getTrackLength( HXCFE_FLOPPY * fp, int32_t track, int32_t side )
+int32_t hxcfe_getTrackLength( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, int32_t side )
 {
 	if(fp)
 	{
@@ -1763,7 +1763,7 @@ int32_t hxcfe_getTrackLength( HXCFE_FLOPPY * fp, int32_t track, int32_t side )
 	return 0;
 }
 
-int32_t hxcfe_getTrackRPM( HXCFE_FLOPPY * fp, int32_t track )
+int32_t hxcfe_getTrackRPM( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track )
 {
 	if(fp)
 	{
@@ -1773,7 +1773,7 @@ int32_t hxcfe_getTrackRPM( HXCFE_FLOPPY * fp, int32_t track )
 	return 0;
 }
 
-int32_t hxcfe_getTrackNumberOfSide(HXCFE_FLOPPY * fp, int32_t track )
+int32_t hxcfe_getTrackNumberOfSide( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track )
 {
 	if(fp)
 	{

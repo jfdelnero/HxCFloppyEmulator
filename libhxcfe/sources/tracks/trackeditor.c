@@ -54,7 +54,7 @@
 #include "trackutils.h"
 #include "floppy_utils.h"
 
-HXCFE_SIDE * hxcfe_getSide( HXCFE_FLOPPY * fp, int32_t track, int32_t side )
+HXCFE_SIDE * hxcfe_getSide( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, int32_t side )
 {
 	if(fp)
 	{
@@ -73,7 +73,7 @@ HXCFE_SIDE * hxcfe_getSide( HXCFE_FLOPPY * fp, int32_t track, int32_t side )
 	return 0;
 }
 
-void hxcfe_freeSide(HXCFE_SIDE * side)
+void hxcfe_freeSide( HXCFE* floppycontext, HXCFE_SIDE * side )
 {
 	if(side)
 	{
@@ -110,7 +110,7 @@ void hxcfe_freeSide(HXCFE_SIDE * side)
 	return;
 }
 
-int32_t hxcfe_shiftTrackData(HXCFE_SIDE * side, int32_t bitoffset )
+int32_t hxcfe_shiftTrackData( HXCFE* floppycontext, HXCFE_SIDE * side, int32_t bitoffset )
 {
 	unsigned char * tmpbuffer;
 	uint32_t * longtmpbuffer;
@@ -208,7 +208,7 @@ int32_t hxcfe_rotateFloppy( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t bit
 				periodtoshift = (period * (double)((double)bitoffset/(double)total)); //
 				offset = fp->tracks[i]->sides[j]->tracklen - us2index(0,fp->tracks[i]->sides[j],(uint32_t)((double)(periodtoshift * 1000000)),0,0);
 
-				hxcfe_shiftTrackData(fp->tracks[i]->sides[j],(offset&(~0x7)));
+				hxcfe_shiftTrackData(floppycontext,fp->tracks[i]->sides[j],(offset&(~0x7)));
 			}
 		}
 	}
@@ -594,5 +594,75 @@ int32_t hxcfe_setCellBitrate( HXCFE* floppycontext, HXCFE_SIDE * currentside, in
 			return HXCFE_NOERROR;
 		}
 	}
+	return HXCFE_BADPARAMETER;
+}
+
+
+int32_t hxcfe_setTrackRPM( HXCFE* floppycontext, HXCFE_SIDE * side, int32_t rpm )
+{
+	double period_s0,period_s1;
+	int32_t i;
+	int32_t bitrate;
+
+	if(side)
+	{
+		period_s0 = GetTrackPeriod(floppycontext,side);
+		period_s1 = (double)1/(double)((double)rpm/(double)60);
+
+		for(i=0;i<side->tracklen;i++)
+		{
+			if(!(i&7))
+			{
+				bitrate = hxcfe_getCellBitrate( floppycontext, side, i );
+
+				bitrate = (int32_t)((double)bitrate * (double)(period_s0/period_s1));
+			}
+
+			hxcfe_setCellBitrate( floppycontext, side, i, bitrate, 1 );
+		}
+
+		return HXCFE_NOERROR;
+	}
+
+	return HXCFE_BADPARAMETER;
+}
+
+int32_t hxcfe_removeOddTracks( HXCFE* floppycontext, HXCFE_FLOPPY * fp)
+{
+	int32_t i,tracknum;
+
+	if(fp)
+	{
+		for(i=0;i<fp->floppyNumberOfTrack;i++)
+		{
+			if(i&1)
+			{
+				if(fp->tracks[i]->number_of_side>0)
+				{
+					hxcfe_freeSide( floppycontext, fp->tracks[i]->sides[0] );
+				}
+
+				if(fp->tracks[i]->number_of_side>1)
+				{
+					hxcfe_freeSide( floppycontext, fp->tracks[i]->sides[1] );
+				}
+
+				free(fp->tracks[i]);
+
+				fp->tracks[i] = 0;
+			}
+		}
+
+		tracknum = 0;
+		for(i=0;i<fp->floppyNumberOfTrack;i=i+2)
+		{
+			fp->tracks[i/2] = fp->tracks[i];
+				tracknum++;
+		}
+		fp->floppyNumberOfTrack = tracknum;
+
+		return HXCFE_NOERROR;
+	}
+
 	return HXCFE_BADPARAMETER;
 }
