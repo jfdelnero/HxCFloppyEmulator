@@ -577,7 +577,7 @@ HXCFE_FLOPPY * hxcfe_floppyDuplicate( HXCFE* floppycontext, HXCFE_FLOPPY * flopp
 							for(i=0;i<fp->tracks[j]->number_of_side;i++)
 							{
 								fp->tracks[j]->sides[i] = (HXCFE_SIDE*)malloc(sizeof(HXCFE_SIDE));
-								if(fp->tracks[j]->sides[i])
+								if(fp->tracks[j]->sides[i] && floppydisk->tracks[j]->sides[i])
 								{
 									memcpy(fp->tracks[j]->sides[i],floppydisk->tracks[j]->sides[i],sizeof(HXCFE_SIDE));
 

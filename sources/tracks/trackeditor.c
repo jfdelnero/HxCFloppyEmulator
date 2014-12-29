@@ -50,9 +50,13 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
 #include "libhxcfe.h"
-#include "trackutils.h"
+
+#include "floppy_loader.h"
 #include "floppy_utils.h"
+
+#include "trackutils.h"
 
 HXCFE_SIDE * hxcfe_getSide( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, int32_t side )
 {
@@ -662,6 +666,87 @@ int32_t hxcfe_removeOddTracks( HXCFE* floppycontext, HXCFE_FLOPPY * fp)
 		fp->floppyNumberOfTrack = tracknum;
 
 		return HXCFE_NOERROR;
+	}
+
+	return HXCFE_BADPARAMETER;
+}
+
+
+int32_t hxcfe_removeLastTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp)
+{
+	if(fp)
+	{
+		if(fp->floppyNumberOfTrack)
+		{
+			if(fp->tracks[fp->floppyNumberOfTrack-1]->number_of_side>0)
+			{
+				hxcfe_freeSide( floppycontext, fp->tracks[fp->floppyNumberOfTrack-1]->sides[0] );
+			}
+
+			if(fp->tracks[fp->floppyNumberOfTrack-1]->number_of_side>1)
+			{
+				hxcfe_freeSide( floppycontext, fp->tracks[fp->floppyNumberOfTrack-1]->sides[1] );
+			}
+
+			free(fp->tracks[fp->floppyNumberOfTrack-1]);
+
+			fp->floppyNumberOfTrack--;
+		}
+
+		return HXCFE_NOERROR;
+	}
+
+	return HXCFE_BADPARAMETER;
+}
+
+int32_t hxcfe_addTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp, uint32_t bitrate, int32_t rpm )
+{
+	HXCFE_CYLINDER ** oldcylinderarray;
+	HXCFE_CYLINDER ** newcylinderarray;
+	int i;
+
+	if(fp)
+	{
+		if(fp->floppyNumberOfTrack<256)
+		{
+
+			fp->floppyNumberOfTrack++;
+
+			oldcylinderarray = fp->tracks;
+
+			newcylinderarray = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*(fp->floppyNumberOfTrack));
+			if(newcylinderarray)
+			{
+				memcpy(newcylinderarray,oldcylinderarray,sizeof(HXCFE_CYLINDER*)*(fp->floppyNumberOfTrack-1));
+
+				newcylinderarray[fp->floppyNumberOfTrack-1] = allocCylinderEntry(rpm,fp->floppyNumberOfSide);
+
+				for(i=0;i<fp->floppyNumberOfSide;i++)
+				{
+					newcylinderarray[fp->floppyNumberOfTrack-1]->sides[i] = tg_generateTrack(0,512,0,0,0,1,1,0,bitrate,rpm,ISOFORMAT_DD,34,0,2500,-2500);
+				}
+
+				if(newcylinderarray[fp->floppyNumberOfTrack-1]->sides[0])
+				{
+					fp->tracks = newcylinderarray;
+
+					free(oldcylinderarray);
+				}
+				else
+				{
+					free(newcylinderarray[fp->floppyNumberOfTrack-1]->sides);
+					free(newcylinderarray[fp->floppyNumberOfTrack-1]);
+					free(newcylinderarray);
+
+					fp->floppyNumberOfTrack--;
+
+					return HXCFE_BADPARAMETER;
+				}
+
+			}
+
+			return HXCFE_NOERROR;
+		}
 	}
 
 	return HXCFE_BADPARAMETER;
