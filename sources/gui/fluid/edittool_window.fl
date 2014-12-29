@@ -7,7 +7,7 @@ class trackedittool_window {open
   Function {trackedittool_window()} {open
   } {
     Fl_Window window {
-      label {Track edition toolbar} open selected
+      label {Track edition toolbar} open
       xywh {144 146 198 416} type Double labelsize 12 visible
     } {
       Fl_Button bt_copy {
@@ -125,25 +125,17 @@ class trackedittool_window {open
         callback edittool_window_bt_setdiskrpm_callback
         xywh {7 216 93 20} labelsize 10
       }
-      Fl_Button bt_changetracknum {
-        label {Update Track Number}
+      Fl_Button bt_addtrack {
+        label {Add Track}
         user_data this
-        callback edittool_window_bt_changetracknum_callback
+        callback edittool_window_bt_addtrack_callback
         xywh {7 296 93 20} labelsize 9
       }
-      Fl_Input edit_tracknum {
+      Fl_Button bt_removetrack {
+        label {Remove Track}
         user_data this
-        xywh {105 296 85 20} type Int labelsize 10 textsize 10
-      }
-      Fl_Button bt_changesidenum {
-        label {Update Side Number}
-        user_data this
-        callback edittool_window_bt_changesidenum_callback
+        callback edittool_window_bt_removetrack_callback selected
         xywh {7 316 93 20} labelsize 9
-      }
-      Fl_Input edit_sidenum {
-        user_data this
-        xywh {105 316 85 20} type Int labelsize 10 textsize 10
       }
       Fl_Input edit_rpm {
         user_data this
