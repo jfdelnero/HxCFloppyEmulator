@@ -106,26 +106,14 @@ trackedittool_window::trackedittool_window() {
       bt_rpm->labelsize(10);
       bt_rpm->callback((Fl_Callback*)edittool_window_bt_setdiskrpm_callback, (void*)(this));
     } // Fl_Button* bt_rpm
-    { bt_changetracknum = new Fl_Button(7, 296, 93, 20, "Update Track Number");
-      bt_changetracknum->labelsize(9);
-      bt_changetracknum->callback((Fl_Callback*)edittool_window_bt_changetracknum_callback, (void*)(this));
-    } // Fl_Button* bt_changetracknum
-    { edit_tracknum = new Fl_Int_Input(105, 296, 85, 20);
-      edit_tracknum->type(2);
-      edit_tracknum->labelsize(10);
-      edit_tracknum->textsize(10);
-      edit_tracknum->user_data((void*)(this));
-    } // Fl_Int_Input* edit_tracknum
-    { bt_changesidenum = new Fl_Button(7, 316, 93, 20, "Update Side Number");
-      bt_changesidenum->labelsize(9);
-      bt_changesidenum->callback((Fl_Callback*)edittool_window_bt_changesidenum_callback, (void*)(this));
-    } // Fl_Button* bt_changesidenum
-    { edit_sidenum = new Fl_Int_Input(105, 316, 85, 20);
-      edit_sidenum->type(2);
-      edit_sidenum->labelsize(10);
-      edit_sidenum->textsize(10);
-      edit_sidenum->user_data((void*)(this));
-    } // Fl_Int_Input* edit_sidenum
+    { bt_addtrack = new Fl_Button(7, 296, 93, 20, "Add Track");
+      bt_addtrack->labelsize(9);
+      bt_addtrack->callback((Fl_Callback*)edittool_window_bt_addtrack_callback, (void*)(this));
+    } // Fl_Button* bt_addtrack
+    { bt_removetrack = new Fl_Button(7, 316, 93, 20, "Remove Track");
+      bt_removetrack->labelsize(9);
+      bt_removetrack->callback((Fl_Callback*)edittool_window_bt_removetrack_callback, (void*)(this));
+    } // Fl_Button* bt_removetrack
     { edit_rpm = new Fl_Int_Input(105, 216, 85, 20);
       edit_rpm->type(2);
       edit_rpm->labelsize(10);

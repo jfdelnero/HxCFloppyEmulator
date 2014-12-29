@@ -730,14 +730,34 @@ void edittool_window_bt_erase_side1_callback(Fl_Button *o, void *v)
 
 }
 
-void edittool_window_bt_changetracknum_callback(Fl_Button *o, void *v)
+void edittool_window_bt_addtrack_callback(Fl_Button *o, void *v)
 {
+	Main_Window *window;
+	floppy_infos_window *fiw;
+	trackedittool_window *tew;
 
+	window = (Main_Window *)guicontext->main_window;
+	tew = (trackedittool_window *)window->trackedit_window;
+	fiw = (floppy_infos_window *)window->infos_window;
+
+	hxc_entercriticalsection(guicontext->hxcfe,1);
+
+	hxcfe_addTrack( guicontext->hxcfe, guicontext->loadedfloppy, atoi(tew->edit_bitrate2->value()), atoi(tew->edit_rpm->value()) );
+
+	guicontext->updatefloppyinfos = 1;
+
+	hxc_leavecriticalsection(guicontext->hxcfe,1);
 }
 
-void edittool_window_bt_changesidenum_callback(Fl_Button *o, void *v)
+void edittool_window_bt_removetrack_callback(Fl_Button *o, void *v)
 {
+	hxc_entercriticalsection(guicontext->hxcfe,1);
 
+	hxcfe_removeLastTrack(guicontext->hxcfe, guicontext->loadedfloppy);
+
+	guicontext->updatefloppyinfos = 1;
+
+	hxc_leavecriticalsection(guicontext->hxcfe,1);
 }
 
 void edittool_window_bt_removeoddtracks_callback(Fl_Button *o, void *v)

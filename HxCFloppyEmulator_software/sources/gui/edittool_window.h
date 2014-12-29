@@ -21,8 +21,8 @@ extern void edittool_window_bt_erase_side1_callback(Fl_Button*, void*);
 extern void edittool_window_bt_erase_side0_callback(Fl_Button*, void*);
 extern void edittool_window_bt_setdiskbitrate_callback(Fl_Button*, void*);
 extern void edittool_window_bt_setdiskrpm_callback(Fl_Button*, void*);
-extern void edittool_window_bt_changetracknum_callback(Fl_Button*, void*);
-extern void edittool_window_bt_changesidenum_callback(Fl_Button*, void*);
+extern void edittool_window_bt_addtrack_callback(Fl_Button*, void*);
+extern void edittool_window_bt_removetrack_callback(Fl_Button*, void*);
 #include <FL/Fl_Box.H>
 extern void edittool_window_bt_removeoddtracks_callback(Fl_Button*, void*);
 
@@ -52,10 +52,8 @@ public:
   Fl_Button *bt_setdiskbitrate;
   Fl_Int_Input *edit_bitrate2;
   Fl_Button *bt_rpm;
-  Fl_Button *bt_changetracknum;
-  Fl_Int_Input *edit_tracknum;
-  Fl_Button *bt_changesidenum;
-  Fl_Int_Input *edit_sidenum;
+  Fl_Button *bt_addtrack;
+  Fl_Button *bt_removetrack;
   Fl_Int_Input *edit_rpm;
   Fl_Button *bt_removeoddtracks;
 };
