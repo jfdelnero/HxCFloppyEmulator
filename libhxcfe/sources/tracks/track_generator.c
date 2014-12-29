@@ -219,7 +219,7 @@ typedef struct gap3conf_
 
 
 static gap3conf std_gap3_tab[]=
-{ 
+{
 	{IBMFORMAT_DD, 256 ,0x12,0x0C},
 	{IBMFORMAT_DD, 256 ,0x10,0x32},
 	{IBMFORMAT_DD, 512 ,0x08,0x50},
@@ -354,7 +354,7 @@ void getFMcode(track_generator *tg,uint8_t data,uint8_t clock,uint8_t * dstbuf)
 			for(i=0;i<2;i++)
 			{
 				if(data&(0x80>>(i+(k*2)) ))
-				{	// 0x10 
+				{	// 0x10
 					// 00010001)
 					*fm_code=*fm_code | ((0x10>>(i*4))<<24);
 				}
@@ -364,7 +364,7 @@ void getFMcode(track_generator *tg,uint8_t data,uint8_t clock,uint8_t * dstbuf)
 			for(i=0;i<2;i++)
 			{
 				if(clock&(0x80>>(i+(k*2)) ))
-				{	// 0x40 
+				{	// 0x40
 					// 01000100)
 					*fm_code=*fm_code | ((0x40>>(i*4))<<24);
 				}
@@ -404,7 +404,7 @@ void getDirectcode(track_generator *tg,unsigned char data,unsigned char * dstbuf
 
 int32_t pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE * side,int32_t trackencoding)
 {
-	
+
 	switch(trackencoding)
 	{
 		case IBMFORMAT_SD:
@@ -445,7 +445,7 @@ int32_t BuildCylinder(uint8_t * mfm_buffer,int32_t mfm_size,uint8_t * track_clk,
 	unsigned char byte,clock;
 	unsigned short lastbit;
 	unsigned short mfm_code;
-	
+
 	if(track_size*2>mfm_size)
 	{
 		track_size=mfm_size/2;
@@ -567,7 +567,7 @@ void FastFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track
 	for(l=0;l<size;l++)
 	{
 		byte = track_data[l];
-			
+
 		for(k=0;k<4;k++)
 		{
 			fm_buffer[j] = 0x44;
@@ -576,7 +576,7 @@ void FastFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track
 			for(i=0;i<2;i++)
 			{
 				if(byte&(0x80>>(i+(k*2)) ))
-				{	// 0x10 
+				{	// 0x10
 					// 00010001)
 					fm_buffer[j] = (uint8_t)( fm_buffer[j] | (0x10>>(i*4)) );
 				}
@@ -585,15 +585,15 @@ void FastFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track
 			j++;
 		}
 	}
-	
+
 	tg->last_bit_offset=tg->last_bit_offset+(j*8);
-	
+
 	return;
 }
 
 void FastMFMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size,int trackencoding)
 {
-	
+
 	switch(trackencoding)
 	{
 		case IBMFORMAT_SD:
@@ -625,7 +625,7 @@ void BuildFMCylinder(uint8_t * buffer,int32_t fmtracksize,uint8_t * bufferclk,ui
 {
 	int i,j,k,l;
 	unsigned char byte,clock;
-	
+
 	// Clean up
 	for(i=0;i<(fmtracksize);i++)
 	{
@@ -640,7 +640,7 @@ void BuildFMCylinder(uint8_t * buffer,int32_t fmtracksize,uint8_t * bufferclk,ui
 	{
 		byte = track[l];
 		clock = bufferclk[l];
-			
+
 		for(k=0;k<4;k++)
 		{
 			buffer[j] = 0x00;
@@ -649,7 +649,7 @@ void BuildFMCylinder(uint8_t * buffer,int32_t fmtracksize,uint8_t * bufferclk,ui
 			for(i=0;i<2;i++)
 			{
 				if(byte&(0x80>>(i+(k*2)) ))
-				{	// 0x10 
+				{	// 0x10
 					// 00010001)
 					buffer[j] = (uint8_t)(buffer[j] | (0x10>>(i*4)));
 				}
@@ -659,7 +659,7 @@ void BuildFMCylinder(uint8_t * buffer,int32_t fmtracksize,uint8_t * bufferclk,ui
 			for(i=0;i<2;i++)
 			{
 				if(clock&(0x80>>(i+(k*2)) ))
-				{	// 0x40 
+				{	// 0x40
 					// 01000100)
 					buffer[j] = (uint8_t)( buffer[j] | (0x40>>(i*4)));
 				}
@@ -740,12 +740,12 @@ unsigned char* compute_interleave_tab(int interleave,int skew,int numberofsector
 				allocated_tab[j] = 0xFF;
 				j=(j+interleave)%(numberofsector);
 				i++;
-			}while(i<numberofsector);		
+			}while(i<numberofsector);
 
 			free(allocated_tab);
 		}
 	}
-	
+
 	return interleave_tab;
 }
 
@@ -821,7 +821,7 @@ int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t
 				total_track_size=total_track_size*2;
 				break;
 		}
-		
+
 		if(total_track_size && bitrate)
  			tck_period=tck_period+(100000/(bitrate/(total_track_size*4)));
 
@@ -838,7 +838,7 @@ int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t
 				gap3 = (uint8_t)(sectorconfigtab[j].gap3);
 			}
 			configptr=&formatstab[sectorconfigtab[j].trackencoding-1];
-		
+
 			sector_size = sectorconfigtab[j].sectorsize;
 			if(sectorconfigtab[j].trackencoding == TYCOMFORMAT_SD)
 				sector_size = 128;
@@ -878,7 +878,7 @@ int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t
 				tck_period=tck_period+(10000000/((sectorconfigtab[0].bitrate*100)/(track_size*4)));
 
 		}
-		
+
 		if(track_period)
 			*track_period=tck_period;
 
@@ -899,7 +899,7 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 
 	currentside=(HXCFE_SIDE*)malloc(sizeof(HXCFE_SIDE));
 	memset(currentside,0,sizeof(HXCFE_SIDE));
-				
+
 	currentside->number_of_sector=numberofsector;
 
 	tracklen=tracksize/8;
@@ -954,14 +954,14 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 	// data buffer allocation
 	currentside->databuffer=malloc(tracklen);
 	memset(currentside->databuffer,0,tracklen);
-					
+
 	currentside->flakybitsbuffer=0;
-					
+
 	/////////////////////////////
 	// index buffer allocation
 	currentside->indexbuffer=malloc(tracklen);
 	memset(currentside->indexbuffer,0,tracklen);
-	
+
 	if(numberofsector)
 	{
 		//gap4a (post index gap4)
@@ -981,7 +981,7 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 		{
 			pushTrackCode(tg,formatstab[trackencoding-1].data_indexmarkp1,formatstab[trackencoding-1].clock_indexmarkp1,currentside,trackencoding);
 		}
-		
+
 		for(i=0;i<formatstab[trackencoding-1].len_indexmarkp2;i++)
 		{
 			pushTrackCode(tg,formatstab[trackencoding-1].data_indexmarkp2,formatstab[trackencoding-1].clock_indexmarkp2,currentside,trackencoding);
@@ -1066,10 +1066,10 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 	int32_t  startindex,sectorsize;
 
 	startindex=tg->last_bit_offset/8;
-	
+
 	sectorconfig->startsectorindex = tg->last_bit_offset/8;
 	trackencoding = (uint8_t)(sectorconfig->trackencoding-1);
-			
+
 	// sync
 	for(i=0;i<formatstab[trackencoding].len_ssync;i++)
 	{
@@ -1122,21 +1122,21 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 			CRC16_Update(&CRC16_High,&CRC16_Low, (uint8_t)sectorconfig->cylinder,(unsigned char*)&crctable );
 		}
 
-		//01 Side # The side number this is (0 or 1) 
+		//01 Side # The side number this is (0 or 1)
 		if(formatstab[trackencoding].side_id)
 		{
 			pushTrackCode(tg,(uint8_t)sectorconfig->head,  0xFF,currentside,sectorconfig->trackencoding);
 			CRC16_Update(&CRC16_High,&CRC16_Low, (uint8_t)sectorconfig->head,(unsigned char*)&crctable );
 		}
 
-		//01 Sector # The sector number 
+		//01 Sector # The sector number
 		if(formatstab[trackencoding].sector_id)
 		{
 			pushTrackCode(tg,(uint8_t)sectorconfig->sector,0xFF,currentside,sectorconfig->trackencoding);
 			CRC16_Update(&CRC16_High,&CRC16_Low, (uint8_t)sectorconfig->sector,(unsigned char*)&crctable );
 		}
 
-		//01 Sector size: 02=512. (00=128, 01=256, 02=512, 03=1024) 
+		//01 Sector size: 02=512. (00=128, 01=256, 02=512, 03=1024)
 
 		sectorsize = 128;
 
@@ -1148,7 +1148,7 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 				c = (uint8_t)sectorconfig->alternate_sector_size_id;
 			}
 			else
-			{	
+			{
 				c=0;
 				while(((128<<(unsigned int)c) != sectorsize ) && c<8)
 				{
@@ -1184,10 +1184,10 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 
 	// add extra desync
 	for(i=0;i<formatstab[trackencoding].posthcrc_len;i++)
-	{  
+	{
         pushTrackCode(tg,formatstab[trackencoding].posthcrc_glitch_data,formatstab[trackencoding].posthcrc_glitch_clock,currentside,sectorconfig->trackencoding);
 	}
-	
+
 	// gap2
 	for(i=0;i<formatstab[trackencoding].len_gap2;i++)
 	{
@@ -1199,8 +1199,8 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 	{
 		pushTrackCode(tg,formatstab[trackencoding].data_dsync,0xFF,currentside,sectorconfig->trackencoding);
 	}
-			
-	//02 CRC The CRC of the data 
+
+	//02 CRC The CRC of the data
 	CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,formatstab[trackencoding].crc_poly,formatstab[trackencoding].crc_initial);
 
 	// data mark
@@ -1226,13 +1226,13 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 			CRC16_Update(&CRC16_High,&CRC16_Low, formatstab[trackencoding].data_datamarkp2,(unsigned char*)&crctable );
 		}
 	}
-		
+
 	sectorconfig->startdataindex=tg->last_bit_offset/8;
 	if(sectorconfig->input_data)
 	{
 		FastMFMFMgenerator(tg,currentside,sectorconfig->input_data,sectorsize,sectorconfig->trackencoding);
 
-		// data crc			
+		// data crc
 		for(i=0;i<sectorsize;i++)
 		{
 			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->input_data[i],(unsigned char*)&crctable );
@@ -1255,7 +1255,7 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 		pushTrackCode(tg,(unsigned char)((sectorconfig->data_crc>>8)&0xFF),0xFF,currentside,sectorconfig->trackencoding);
 	}
 	else
-	{	
+	{
 		//bad crc
 		if(sectorconfig->use_alternate_data_crc&0x1)
 		{
@@ -1274,7 +1274,7 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 	{
 		pushTrackCode(tg,formatstab[trackencoding].postdcrc_glitch_data,formatstab[trackencoding].postdcrc_glitch_clock,currentside,sectorconfig->trackencoding);
 	}
-					
+
 	//gap3
 	if(sectorconfig->gap3!=255)
 	{
@@ -1336,7 +1336,7 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 // Gap :  0xFF 0xFF
 // Sync : 0xA1 0xA1 (Clock 0x0A 0x0A)
 //  ->Sector ID : 0xFF(B3) TR(B2) SE(B1) 11-SE(B0)
-//  Sector ID (even B3) 
+//  Sector ID (even B3)
 //  Sector ID (even B2)
 //  Sector ID (even B1)
 //  Sector ID (even B0)
@@ -1362,7 +1362,7 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 //  Data CRC (even B2)
 //  Data CRC (even B1)
 //  Data CRC (even B0)
-//  Data ( even and odd) 
+//  Data ( even and odd)
 
 void tg_addAmigaSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
@@ -1375,10 +1375,10 @@ void tg_addAmigaSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 	uint8_t  sectorparity[2];
 
 	startindex=tg->last_bit_offset/8;
-	
+
 	sectorconfig->startsectorindex=tg->last_bit_offset/8;
 	trackencoding=sectorconfig->trackencoding-1;
-			
+
 	// sync
 	for(i=0;i<formatstab[trackencoding].len_ssync;i++)
 	{
@@ -1398,7 +1398,7 @@ void tg_addAmigaSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 	header[1] = (uint8_t)((sectorconfig->cylinder<<1) | (sectorconfig->head&1));
 	header[2] = (uint8_t)sectorconfig->sector;
 	header[3] = (uint8_t)sectorconfig->sectorsleft;
-	
+
 	pushTrackCode(tg,(unsigned char)(( odd_tab[header[0]]<<4)|( odd_tab[header[1]])),0xFF,currentside,sectorconfig->trackencoding);
 	pushTrackCode(tg,(unsigned char)(( odd_tab[header[2]]<<4)|( odd_tab[header[3]])),0xFF,currentside,sectorconfig->trackencoding);
 	pushTrackCode(tg,(unsigned char)((even_tab[header[0]]<<4)|(even_tab[header[1]])),0xFF,currentside,sectorconfig->trackencoding);
@@ -1440,7 +1440,7 @@ void tg_addAmigaSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 		{
 			sectorparity[0]^=(even_tab[sectorconfig->input_data[i]]<<4) | even_tab[sectorconfig->input_data[i+1]];
 			sectorparity[1]^=(even_tab[sectorconfig->input_data[i+2]]<<4) | even_tab[sectorconfig->input_data[i+3]];
-		}		
+		}
 	}
 
 	pushTrackCode(tg,0x00,0xFF,currentside,sectorconfig->trackencoding);
@@ -1460,7 +1460,7 @@ void tg_addAmigaSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 			pushTrackCode(tg,sectorconfig->fill_byte,0xFF,currentside,sectorconfig->trackencoding);
 		}
 	}
-					
+
 	//gap3
 	if(sectorconfig->gap3!=255)
 	{
@@ -1540,12 +1540,12 @@ void tg_completeTrack(track_generator *tg, HXCFE_SIDE * currentside,int32_t trac
 
 	if((trackencoding == IBMFORMAT_SD) || (trackencoding == ISOFORMAT_SD) || (trackencoding == TYCOMFORMAT_SD))
 	{
-		// 
+		//
 		// SCAN Command FM issue workaround for some FDC  : Desync the clock at the end of the track.
 		//
 
 		oldval = 0;
-		startindex = startindex + (( (trackoffset - startindex) * 3 ) / 4); 
+		startindex = startindex + (( (trackoffset - startindex) * 3 ) / 4);
 		trackoffset=startindex;
 		if(trackoffset<tracklen)
 		{
@@ -1607,12 +1607,12 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 
 	// get minimum track size
 	tracksize = tg_computeMinTrackSize(&tg,trackencoding,bitrate,number_of_sector,sectorconfigtab,pregap,&track_period);
-	
+
 	if(rpm)
 		wanted_trackperiod=(100000*60)/rpm;
 	else
 		wanted_trackperiod=(100000*60)/300;
-	
+
 	// compute the adjustable gap3 length
 	// how many gap3 we need to compute ?
 	gap3tocompute=0;
@@ -1658,7 +1658,7 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 		{
 			// if gap3 not set...
 			if(sectorconfigtab[i].gap3==0xFF)
-			{	
+			{
 				// TODO: make integer this...
 				computedgap3=(uint32_t)floor((float)gap3period*(float)((float)sectorconfigtab[i].bitrate/(float)100000));
 
@@ -1679,7 +1679,7 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 					break;
 				}
 
-				if(computedgap3>200) 
+				if(computedgap3>200)
 					computedgap3=200;
 				sectorconfigtab[i].gap3=(unsigned char)computedgap3;
 
@@ -1696,6 +1696,9 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 	{
 		tracksize=tracksize+((((wanted_trackperiod-track_period) * ((bitrate/4)/4) )/(12500/4)));
 	}
+
+	if(tracksize<0)
+		return 0;
 
 	// align the track size
 	if(tracksize&0x1F)
@@ -1765,7 +1768,7 @@ HXCFE_SIDE * tg_alloctrack(int32_t bitrate,int32_t trackencoding,int32_t rpm,int
 
 	currentside=(HXCFE_SIDE*)malloc(sizeof(HXCFE_SIDE));
 	memset(currentside,0,sizeof(HXCFE_SIDE));
-				
+
 	currentside->number_of_sector=0;
 
 	tracklen=tracksize/8;
@@ -1787,7 +1790,7 @@ HXCFE_SIDE * tg_alloctrack(int32_t bitrate,int32_t trackencoding,int32_t rpm,int
 		}
 	}
 
-		
+
 	///////////////////////////////////////////
 	// track encoding code buffer allocation
 	currentside->track_encoding=trackencoding;
@@ -1807,7 +1810,7 @@ HXCFE_SIDE * tg_alloctrack(int32_t bitrate,int32_t trackencoding,int32_t rpm,int
 	if(buffertoalloc & TG_ALLOCTRACK_ALLOCFLAKEYBUFFER)
 	{
 		currentside->flakybitsbuffer=malloc(tracklen*sizeof(unsigned char));
-		
+
 		if(buffertoalloc & TG_ALLOCTRACK_UNFORMATEDBUFFER )
 		{
 			memset(currentside->flakybitsbuffer,0xFF,tracklen*sizeof(unsigned char));
@@ -1817,7 +1820,7 @@ HXCFE_SIDE * tg_alloctrack(int32_t bitrate,int32_t trackencoding,int32_t rpm,int
 			memset(currentside->flakybitsbuffer,0x00,tracklen*sizeof(unsigned char));
 		}
 	}
-	
+
 	/////////////////////////////
 	// data buffer allocation
 	currentside->databuffer=malloc(tracklen);
@@ -1864,7 +1867,7 @@ uint32_t * tg_allocsubtrack_long( int32_t tracksize, uint32_t initvalue )
 			ptr[i]=initvalue;
 		}
 	}
-	
+
 	return ptr;
 }
 
@@ -1885,7 +1888,7 @@ uint8_t  * tg_allocsubtrack_char( int32_t tracksize, uint8_t initvalue )
 			ptr[i]=initvalue;
 		}
 	}
-	
+
 	return ptr;
 }
 

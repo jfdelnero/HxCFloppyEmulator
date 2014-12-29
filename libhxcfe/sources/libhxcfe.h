@@ -481,6 +481,8 @@ int32_t                hxcfe_rotateFloppy( HXCFE* floppycontext, HXCFE_FLOPPY * 
 void                   AdjustTrackPeriod( HXCFE* floppycontext, HXCFE_SIDE * curside_S0, HXCFE_SIDE * curside_S1 );
 int32_t                hxcfe_setTrackRPM( HXCFE* floppycontext, HXCFE_SIDE * side, int32_t rpm );
 int32_t                hxcfe_removeOddTracks( HXCFE* floppycontext, HXCFE_FLOPPY * fp );
+int32_t                hxcfe_removeLastTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp );
+int32_t                hxcfe_addTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp, uint32_t bitrate, int32_t rpm );
 
 int32_t                hxcfe_getCellState( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber );
 int32_t                hxcfe_setCellState( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, int32_t state );

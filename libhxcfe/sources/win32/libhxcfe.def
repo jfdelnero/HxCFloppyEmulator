@@ -179,3 +179,5 @@ EXPORTS
    hxcfe_rotateFloppy			@512
    hxcfe_setTrackRPM			@513
    hxcfe_removeOddTracks		@514
+   hxcfe_removeLastTrack        @515
+   hxcfe_addTrack               @516

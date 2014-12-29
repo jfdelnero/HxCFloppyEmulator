@@ -718,6 +718,9 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 		}
 		else
 			endfill=1;
+
+		if(loop>100)
+			endfill=1;
 	}while(!endfill);
 
 	td->sl=sl;
@@ -749,7 +752,7 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	int interbit;
 	int bitrate;
 	int xpos,ypos,old_xpos;
-	int endfill;
+	int endfill,loopcnt;
 	double xresstep;
 	s_sectorlist * sl,*oldsl;
 	s_pulseslist * pl,*oldpl;
@@ -947,6 +950,7 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 		i = buffer_offset;
 		old_i = buffer_offset;
 
+		loopcnt = 0;
 		endfill = 0;
 		do
 		{
@@ -979,6 +983,11 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 
 			}while(i<tracksize && !endfill);
 
+			loopcnt++;
+
+			if( i == tracksize && loopcnt>1000)
+				endfill = 1;
+
 			i=0;
 			old_i=0;
 		}while(!endfill);
@@ -991,6 +1000,7 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	old_i=buffer_offset;
 	i=buffer_offset;
 	timingoffset=0;
+	loopcnt = 0;
 	endfill=0;
 	do
 	{
@@ -1029,6 +1039,11 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 			};
 			i++;
 		}while(i<tracksize && !endfill);
+
+		loopcnt++;
+
+		if( i == tracksize && loopcnt>1000)
+			endfill = 1;
 
 		old_i=0;
 		i=0;
@@ -1111,6 +1126,7 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 		i = buffer_offset;
 		timingoffset=0;
 
+		loopcnt = 0;
 		endfill=0;
 		old_xpos = -1;
 		do
@@ -1148,8 +1164,14 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 				i++;
 			}while(i<tracksize && !endfill);
 
+			loopcnt++;
+
+			if( i == tracksize && loopcnt>1000)
+				endfill = 1;
+
 			old_i=0;
 			i=0;
+
 
 		}while(!endfill);
 
@@ -1535,7 +1557,7 @@ s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int t
 							}
 
 							if(crc32)
-							{	
+							{
 								if(sc->input_data && !sc->use_alternate_data_crc)
 								{
 									*crc32 = std_crc32(*crc32, sc->input_data, sc->sectorsize);
