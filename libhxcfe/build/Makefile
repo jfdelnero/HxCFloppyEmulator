@@ -55,11 +55,12 @@ DISKLOADERPLUGINS = copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigado
 					camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o fdi_loader.o ssd_dsd_loader.o adl_loader.o \
 					krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o system24_loader.o kryofluxstream_loader.o kryofluxstream.o \
 					fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o xml_loader.o \
-					flppcm_loader.o
+					flppcm_loader.o stw_loader.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
-					kryofluxstream_writer.o adf_writer.o bmp_writer.o bmp_disk_writer.o bmp_file.o xml_writer.o trd_writer.o stx_writer.o st_writer.o
+					kryofluxstream_writer.o adf_writer.o bmp_writer.o bmp_disk_writer.o bmp_file.o xml_writer.o trd_writer.o stx_writer.o st_writer.o \
+					stw_writer.o
 
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
@@ -296,6 +297,12 @@ mfm_loader.o : $(BASEDIR)/loaders/mfm_loader/mfm_loader.c $(BASEDIR)/loaders/mfm
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 mfm_writer.o : $(BASEDIR)/loaders/mfm_loader/mfm_writer.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+stw_loader.o : $(BASEDIR)/loaders/stw_loader/stw_loader.c $(BASEDIR)/loaders/stw_loader/stw_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+stw_writer.o : $(BASEDIR)/loaders/stw_loader/stw_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 svd_loader.o : $(BASEDIR)/loaders/svd_loader/svd_loader.c $(BASEDIR)/loaders/svd_loader/svd_loader.h

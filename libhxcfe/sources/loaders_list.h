@@ -102,6 +102,7 @@
 #include "./loaders/bmp_loader/bmp_loader.h"
 #include "./loaders/xml_loader/xml_loader.h"
 #include "./loaders/flppcm_loader/flppcm_loader.h"
+#include "./loaders/stw_loader/stw_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -121,6 +122,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)CopyQm_libGetPluginInfo,
 	(GETPLUGININFOS)TeleDisk_libGetPluginInfo,
 	(GETPLUGININFOS)MSA_libGetPluginInfo,
+	(GETPLUGININFOS)STW_libGetPluginInfo,
 	(GETPLUGININFOS)IMZ_libGetPluginInfo,
 	(GETPLUGININFOS)MFM_libGetPluginInfo,
 	(GETPLUGININFOS)OricDSK_libGetPluginInfo,

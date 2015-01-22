@@ -797,6 +797,10 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	if(track>=floppydisk->floppyNumberOfTrack) track = floppydisk->floppyNumberOfTrack - 1;
 	if(track<0) track = 0;
 
+	if(side>=floppydisk->floppyNumberOfSide) side = floppydisk->floppyNumberOfSide - 1;
+	if(side<0) side = 0;
+
+
 	if(!floppydisk->floppyNumberOfTrack || !floppydisk->floppyNumberOfSide)
 	{
 		memset(td->framebuffer,0xCC,td->xsize*td->ysize*sizeof(unsigned int));

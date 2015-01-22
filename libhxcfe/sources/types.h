@@ -31,7 +31,7 @@
 
 // little endian
 
-#define LITTLEENDIAN_WORD (wValue) (wValue)
+#define LITTLEENDIAN_WORD(wValue) (wValue)
 #define LITTLEENDIAN_DWORD(dwValue) (dwValue)
 
 #endif
