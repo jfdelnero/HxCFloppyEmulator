@@ -1847,6 +1847,26 @@ SOURCE=..\sources\loaders\flppcm_loader\flppcm_loader.h
 SOURCE=..\sources\loaders\flppcm_loader\flppcmfileformat.h
 # End Source File
 # End Group
+# Begin Group "STW"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\stw_loader\stw_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\stw_loader\stw_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\stw_loader\stw_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\stw_loader\stw_writer.c
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 
