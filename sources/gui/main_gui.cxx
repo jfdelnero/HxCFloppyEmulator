@@ -124,6 +124,7 @@ const char * plugid_lst[]=
 	PLUGIN_ATARIST_ST,
 	PLUGIN_ATARIST_MSA,
 	PLUGIN_ATARIST_STX,
+	PLUGIN_ATARIST_STW,
 	PLUGIN_HXC_HDDD_A2,
 	PLUGIN_HXC_EXTHFE,
 	PLUGIN_ARBURG,
@@ -441,6 +442,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"ATARI ST ST file\t*.st\n"
 					"ATARI ST MSA file\t*.msa\n"
 					"ATARI ST STX file\t*.stx\n"
+					"ATARI ST STW file\t*.stw\n"
 					"HFE file (HDDD A2 Encoding support)\t*.hfe\n"
 					"HFE file (Rev 2 - Experimental)\t*.hfe\n"
 					"Arburg file\t*.arburgfd\n"

@@ -691,7 +691,8 @@ void browse_floppy_disk(filesystem_generator_window *fgw,int lastoperationerror)
 							strcat(statustxt," |");
 				#ifdef STANDALONEFSBROWSER
 							sec_strncat(statustxt," File : ",sizeof(statustxt));
-							sec_strncat(statustxt,guicontext->last_loaded_image_path,sizeof(statustxt));
+							sec_strncat(statustxt,hxc_getfilenamebase(guicontext->last_loaded_image_path,0),sizeof(statustxt));
+
 				#endif
 							fgw->txtout_freesize->value((const char*)statustxt);
 						}
@@ -842,12 +843,22 @@ void filesystem_generator_window_bt_close(Fl_Button *bt,void *)
 
 int write_back_fileimage()
 {
+#ifdef STANDALONEFSBROWSER
+	HXCFE_IMGLDR * imgldr_ctx;
+#endif
+
 	if(guicontext->loaded_img_modified)
 	{
 		if(strlen(guicontext->last_loaded_image_path))
 		{
 #ifdef STANDALONEFSBROWSER
-			hxcfe_floppyExport(guicontext->hxcfe,guicontext->loadedfloppy,guicontext->last_loaded_image_path,hxcfe_getLoaderID(guicontext->hxcfe,"HXC_HFE"));
+			imgldr_ctx = hxcfe_imgInitLoader(guicontext->hxcfe);
+			if(imgldr_ctx)
+			{
+				hxcfe_imgExport( imgldr_ctx, guicontext->loadedfloppy, guicontext->last_loaded_image_path, hxcfe_imgGetLoaderID(imgldr_ctx,"HXC_HFE") );
+
+				hxcfe_imgDeInitLoader(imgldr_ctx);
+			}
 #endif
 		}
 		guicontext->loaded_img_modified = 0;
