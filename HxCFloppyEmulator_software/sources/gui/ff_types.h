@@ -25,6 +25,7 @@ enum
 	FF_ST,
 	FF_MSA,
 	FF_STX,
+	FF_STW,
 	FF_HDDDA2_HFE,
 	FF_EHFE,
 	FF_ARBG,
