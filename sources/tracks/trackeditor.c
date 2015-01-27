@@ -122,6 +122,12 @@ int32_t hxcfe_shiftTrackData( HXCFE* floppycontext, HXCFE_SIDE * side, int32_t b
 
 	if(side)
 	{
+
+		if(!bitoffset)
+		{
+			return HXCFE_NOERROR;
+		}
+
 		tmpbuffer = malloc( (side->tracklen>>3) + 1 );
 		if(tmpbuffer)
 		{

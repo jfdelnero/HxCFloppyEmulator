@@ -2797,16 +2797,16 @@ HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, 
 	HXCFE_TRKSTREAM* track_dump;
 	unsigned int i;
 
-	track_dump=malloc(sizeof(HXCFE_TRKSTREAM));
+	track_dump = malloc(sizeof(HXCFE_TRKSTREAM));
 	if(track_dump)
 	{
-		memset(track_dump,0,sizeof(HXCFE_TRKSTREAM));
+		memset( track_dump, 0, sizeof(HXCFE_TRKSTREAM) );
 
-		track_dump->track_dump = malloc(nbword * sizeof(uint32_t) );
-		if(track_dump->track_dump)
+		track_dump->track_dump = malloc( nbword * sizeof(uint32_t) );
+		if( track_dump->track_dump )
 		{
-			memset(track_dump->track_dump,0,nbword * sizeof(uint32_t));
-			for(i=0;i<nbword;i++)
+			memset( track_dump->track_dump, 0, nbword * sizeof(uint32_t) );
+			for( i = 0 ; i < nbword ; i++ )
 			{
 				switch(wordsize)
 				{
@@ -2840,7 +2840,7 @@ HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, 
 	return 0;
 }
 
-void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t streamposition )
+void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t streamposition, int32_t tickoffset )
 {
 	uint32_t cellpos,i;
 	if(fxs)
@@ -2861,6 +2861,7 @@ void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t 
 					}
 
 					std->index_evt_tab[std->nb_of_index].cellpos = cellpos;
+					std->index_evt_tab[std->nb_of_index].tick_offset = (int)( tickoffset * (float)((float)fxs->steptime/(float)4000));
 
 					std->nb_of_index++;
 				}
@@ -3443,6 +3444,8 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 						revolutionside[revolution] = 0;
 					}
 				}
+
+				hxcfe_shiftTrackData( fxs->hxcfe, currentside, us2index(0,currentside,(uint32_t)((std->index_evt_tab[revolution].tick_offset)*(double)((double)1000000/(double)TICKFREQ))& (~0x00000007),0,0) );
 
 				for(revolution = 0; revolution < std->nb_of_index - 1; revolution++)
 				{

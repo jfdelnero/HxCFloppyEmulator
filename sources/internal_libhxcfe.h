@@ -98,6 +98,7 @@ typedef struct _s_index_evt
 {
     uint32_t dump_offset;
     uint32_t cellpos;
+    int32_t  tick_offset;
     uint32_t clk;
 }s_index_evt;
 
