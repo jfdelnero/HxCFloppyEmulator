@@ -454,7 +454,7 @@ void                   hxcfe_FxStream_setBitrate( HXCFE_FXSA * fxs, int32_t bitr
 void                   hxcfe_FxStream_setPhaseCorrectionFactor( HXCFE_FXSA * fxs, int32_t phasefactor );
 
 HXCFE_TRKSTREAM *      hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, int32_t wordsize, uint32_t nbword );
-void                   hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t streamposition );
+void                   hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t streamposition, int32_t tickoffset );
 HXCFE_SIDE *           hxcfe_FxStream_AnalyzeAndGetTrack( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std );
 void                   hxcfe_FxStream_FreeStream( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * stream );
 

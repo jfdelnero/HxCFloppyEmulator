@@ -309,7 +309,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 			for(i=0;i<nbindex;i++)
 			{
-				hxcfe_FxStream_AddIndex(fxs,track_dump,tabindex[i].StreamPosition);
+				hxcfe_FxStream_AddIndex(fxs,track_dump,tabindex[i].StreamPosition,tabindex[i].Timer);
 			}
 		}
 	}

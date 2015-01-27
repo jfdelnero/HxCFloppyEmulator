@@ -231,12 +231,12 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,uint32_t foffset,s
 						if(revolution)
 						{
 							offset = 0;
-							hxcfe_FxStream_AddIndex(fxs,track_dump,offset);
+							hxcfe_FxStream_AddIndex(fxs,track_dump,offset,0);
 
 							for(i=0;i<revolution;i++)
 							{
 								offset += (trkh.index_position[i].track_length);
-								hxcfe_FxStream_AddIndex(fxs,track_dump,offset);
+								hxcfe_FxStream_AddIndex(fxs,track_dump,offset,0);
 							}
 						}
 
