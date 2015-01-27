@@ -69,7 +69,7 @@ int MFM_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		}
 		else
 		{
-			mfmheader.floppyBitRate=floppy->tracks[0]->sides[0]->bitrate/1000;
+			mfmheader.floppyBitRate=floppy->tracks[0]->sides[0]->timingbuffer[(floppy->tracks[0]->sides[0]->tracklen/8)/2]/1000;
 		}
 
 		mfmheader.floppyRPM=0;//floppy->floppyRPM;
