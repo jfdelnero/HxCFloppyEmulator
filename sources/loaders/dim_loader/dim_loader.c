@@ -57,30 +57,11 @@
 #include "floppy_utils.h"
 
 #include "dim_loader.h"
+#include "dim_writer.h"
+
+#include "dim_format.h"
 
 #include "libhxcadaptor.h"
-
-#pragma pack(1)
-typedef struct dim_header_
-{
-	uint16_t id_header;        // 0x0000 Word ID Header (0x4242('BB'))
-	uint8_t  unused1;
-	uint8_t  used_sector_only; // 0x0003 Byte Image contains all sectors (0) or used sectors (1)
-	uint16_t unused2;
-	uint8_t  side;             // 0x0006 Byte Sides (0 or 1; add 1 to this to get correct number of sides)
-	uint8_t  unused3;
-	uint8_t  nbsector;         // 0x0008 Byte Sectors per track
-    uint8_t  unused4;
-	uint8_t  start_track;      // 0x000A Byte Start Track (0 based)
-    uint8_t  unused5;
-    uint8_t  end_track;        // 0x000C Byte Ending Track (0 based)
-    uint8_t  density;			 // 0x000D Byte Double-Density(0) or High-Density (1)
-    uint8_t  sectorsizeh;       // sector size (bytes)
-    uint8_t  sectorsizel;       // sector size (bytes)
-}dim_header;
-#pragma pack()
-
-
 
 int DIM_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
@@ -102,7 +83,6 @@ int DIM_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		fread(&header,sizeof(dim_header),1,f);
 
 		hxc_fclose(f);
-
 
 		if(	header.id_header==0x4242)
 		{
@@ -147,10 +127,8 @@ int DIM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	fread(&header,sizeof(dim_header),1,f);
 
-
 	if(header.id_header==0x4242)
 	{
-
 		sectorsize=(header.sectorsizeh*256)+header.sectorsizel; // st file support only 512bytes/sector floppies.
 		if(!sectorsize || (sectorsize&0xFF)) sectorsize=512;
 		// read the first sector
@@ -233,7 +211,7 @@ int DIM_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 	{
 		(ISVALIDDISKFILE)	DIM_libIsValidDiskFile,
 		(LOADDISKFILE)		DIM_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		DIM_libWrite_DiskFile,
 		(GETPLUGININFOS)	DIM_libGetPluginInfo
 	};
 

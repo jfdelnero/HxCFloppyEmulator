@@ -60,7 +60,7 @@ DISKLOADERPLUGINS = copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigado
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
 					kryofluxstream_writer.o adf_writer.o bmp_writer.o bmp_disk_writer.o bmp_file.o xml_writer.o trd_writer.o stx_writer.o st_writer.o \
-					stw_writer.o
+					stw_writer.o dim_writer.o adz_writer.o
 
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
@@ -246,6 +246,9 @@ st_writer.o : $(BASEDIR)/loaders/st_loader/st_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 dim_loader.o : $(BASEDIR)/loaders/dim_loader/dim_loader.c $(BASEDIR)/loaders/dim_loader/dim_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+dim_writer.o : $(BASEDIR)/loaders/dim_loader/dim_writer.c $(BASEDIR)/loaders/dim_loader/dim_writer.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 stt_loader.o : $(BASEDIR)/loaders/stt_loader/stt_loader.c $(BASEDIR)/loaders/stt_loader/stt_loader.h
@@ -440,6 +443,9 @@ vfile.o : $(BASEDIR)/thirdpartylibs/xdms/vfile.c $(BASEDIR)/thirdpartylibs/xdms/
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 adz_loader.o : $(BASEDIR)/loaders/adz_loader/adz_loader.c $(BASEDIR)/loaders/adz_loader/adz_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+adz_writer.o : $(BASEDIR)/loaders/adz_loader/adz_writer.c $(BASEDIR)/loaders/adz_loader/adz_writer.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 kryofluxstream_loader.o : $(BASEDIR)/loaders/kryofluxstream_loader/kryofluxstream_loader.c $(BASEDIR)/loaders/kryofluxstream_loader/kryofluxstream_loader.h

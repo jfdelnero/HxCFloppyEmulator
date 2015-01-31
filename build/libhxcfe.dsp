@@ -906,6 +906,14 @@ SOURCE=..\sources\loaders\adz_loader\adz_loader.c
 
 SOURCE=..\sources\loaders\adz_loader\adz_loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\adz_loader\adz_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\adz_loader\adz_writer.h
+# End Source File
 # End Group
 # Begin Group "MSX"
 
@@ -1388,11 +1396,23 @@ SOURCE=..\sources\loaders\jvc_loader\jvc_loader.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\sources\loaders\dim_loader\dim_format.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\loaders\dim_loader\dim_loader.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\sources\loaders\dim_loader\dim_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\dim_loader\dim_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\dim_loader\dim_writer.h
 # End Source File
 # End Group
 # Begin Group "TI99V9T9"
