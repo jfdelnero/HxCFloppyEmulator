@@ -57,6 +57,7 @@
 #include "floppy_utils.h"
 
 #include "adz_loader.h"
+#include "adz_writer.h"
 
 #include "thirdpartylibs/zlib/zlib.h"
 
@@ -197,7 +198,7 @@ int ADZ_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 	{
 		(ISVALIDDISKFILE)	ADZ_libIsValidDiskFile,
 		(LOADDISKFILE)		ADZ_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		ADZ_libWrite_DiskFile,
 		(GETPLUGININFOS)	ADZ_libGetPluginInfo
 	};
 
