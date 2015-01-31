@@ -115,6 +115,7 @@ const char * plugid_lst[]=
 	PLUGIN_AMSTRADCPC_DSK,
 	PLUGIN_IMD_IMG,
 	PLUGIN_AMIGA_ADF,
+	PLUGIN_AMIGA_ADZ,
 	PLUGIN_TI994A_V9T9,
 	PLUGIN_TRS80_JV3,
 	PLUGIN_TRS80_DMK,
@@ -123,6 +124,7 @@ const char * plugid_lst[]=
 	PLUGIN_NEC_D88,
 	PLUGIN_ATARIST_ST,
 	PLUGIN_ATARIST_MSA,
+	PLUGIN_ATARIST_DIM,	
 	PLUGIN_ATARIST_STX,
 	PLUGIN_ATARIST_STW,
 	PLUGIN_HXC_HDDD_A2,
@@ -433,6 +435,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"CPC DSK file\t*.dsk\n"
 					"IMD file\t*.imd\n"
 					"ADF file\t*.adf\n"
+					"ADZ file\t*.adz\n"
 					"TI99/4A V9T9 DSK file\t*.dsk\n"
 					"TRS80 JV3 file\t*.jv3\n"
 					"TRS80 DMK file\t*.dmk\n"
@@ -441,6 +444,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"PC88  D88 file\t*.d88\n"
 					"ATARI ST ST file\t*.st\n"
 					"ATARI ST MSA file\t*.msa\n"
+					"ATARI ST DIM file\t*.dim\n"
 					"ATARI ST STX file\t*.stx\n"
 					"ATARI ST STW file\t*.stw\n"
 					"HFE file (HDDD A2 Encoding support)\t*.hfe\n"
