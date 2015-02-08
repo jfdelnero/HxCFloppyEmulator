@@ -3445,7 +3445,8 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 					}
 				}
 
-				hxcfe_shiftTrackData( fxs->hxcfe, currentside, us2index(0,currentside,(uint32_t)((std->index_evt_tab[revolution].tick_offset)*(double)((double)1000000/(double)TICKFREQ))& (~0x00000007),0,0) );
+				if( currentside )
+					hxcfe_shiftTrackData( fxs->hxcfe, currentside, us2index(0,currentside,(uint32_t)((std->index_evt_tab[revolution].tick_offset)*(double)((double)1000000/(double)TICKFREQ))& (~0x00000007),0,0) );
 
 				for(revolution = 0; revolution < std->nb_of_index - 1; revolution++)
 				{
