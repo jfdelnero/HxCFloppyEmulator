@@ -7,8 +7,8 @@ class trackedittool_window {open
   Function {trackedittool_window()} {open
   } {
     Fl_Window window {
-      label {Track edition toolbar} open
-      xywh {144 146 198 416} type Double labelsize 12 visible
+      label {Track edition toolbar} open selected
+      xywh {144 146 199 437} type Double labelsize 12 visible
     } {
       Fl_Button bt_copy {
         label Copy
@@ -73,7 +73,7 @@ class trackedittool_window {open
       Fl_Light_Button bt_directedition {
         label {Direct edition}
         user_data this
-        xywh {7 366 93 20} labelsize 10
+        xywh {7 386 93 20} labelsize 10
       }
       Fl_Input edit_bitrate {
         user_data this
@@ -81,7 +81,7 @@ class trackedittool_window {open
       }
       Fl_Input edit_editbuffer {
         user_data this
-        xywh {8 391 182 22} type Int labelsize 10 textsize 10
+        xywh {8 411 182 22} type Int labelsize 10 textsize 10
       }
       Fl_Button bt_shift {
         label Shift
@@ -101,13 +101,13 @@ class trackedittool_window {open
         label {Erase Side 1}
         user_data this
         callback edittool_window_bt_erase_side1_callback
-        xywh {7 276 93 20} labelsize 10
+        xywh {7 296 93 20} labelsize 10
       }
       Fl_Button bt_erase0 {
         label {Erase Side 0}
         user_data this
         callback edittool_window_bt_erase_side0_callback
-        xywh {7 256 93 20} labelsize 10
+        xywh {7 276 93 20} labelsize 10
       }
       Fl_Button bt_setdiskbitrate {
         label {Set Disk Bitrate}
@@ -129,13 +129,13 @@ class trackedittool_window {open
         label {Add Track}
         user_data this
         callback edittool_window_bt_addtrack_callback
-        xywh {7 296 93 20} labelsize 9
+        xywh {7 316 93 20} labelsize 9
       }
       Fl_Button bt_removetrack {
         label {Remove Track}
         user_data this
-        callback edittool_window_bt_removetrack_callback selected
-        xywh {7 316 93 20} labelsize 9
+        callback edittool_window_bt_removetrack_callback
+        xywh {7 336 93 20} labelsize 9
       }
       Fl_Input edit_rpm {
         user_data this
@@ -145,13 +145,23 @@ class trackedittool_window {open
         xywh {4 209 185 1} box ENGRAVED_BOX align 16
       }
       Fl_Box {} {
-        xywh {5 361 185 1} box ENGRAVED_BOX align 16
+        xywh {5 381 185 1} box ENGRAVED_BOX align 16
       }
       Fl_Button bt_removeoddtracks {
         label {Remove Odd Tracks}
         user_data this
         callback edittool_window_bt_removeoddtracks_callback
-        xywh {7 336 93 20} labelsize 9
+        xywh {7 356 93 20} labelsize 9
+      }
+      Fl_Button bt_shifttracks {
+        label {Shift Tracks}
+        user_data this
+        callback edittool_window_bt_shifttracks_callback
+        xywh {7 256 93 20} labelsize 10
+      }
+      Fl_Input edit_shiftbittracks {
+        user_data this
+        xywh {105 255 85 20} type Int labelsize 10 textsize 10
       }
     }
   }
