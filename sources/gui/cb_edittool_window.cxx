@@ -450,6 +450,33 @@ void edittool_window_bt_shift_callback(Fl_Button *o, void *v)
 	hxc_leavecriticalsection(guicontext->hxcfe,1);
 }
 
+void edittool_window_bt_shifttracks_callback(Fl_Button *o, void *v)
+{
+	Main_Window *window;
+	floppy_infos_window *fiw;
+	trackedittool_window *tew;
+	int shiftpulse;
+
+	hxc_entercriticalsection(guicontext->hxcfe,1);
+
+	window = (Main_Window *)guicontext->main_window;
+	tew = (trackedittool_window *)window->trackedit_window;
+	fiw = (floppy_infos_window *)window->infos_window;
+
+	shiftpulse = atoi(tew->edit_shiftbittracks->value());
+
+	shiftpulse = shiftpulse % 1000;
+
+	if(shiftpulse<0)
+		shiftpulse = 1000 + shiftpulse;
+
+	hxcfe_rotateFloppy( guicontext->hxcfe, guicontext->loadedfloppy, shiftpulse, 1000 );
+
+	guicontext->updatefloppyinfos = 1;
+
+	hxc_leavecriticalsection(guicontext->hxcfe,1);
+}
+
 void edittool_window_bt_paste_callback(Fl_Button *o, void *v)
 {
 	Main_Window *window;
