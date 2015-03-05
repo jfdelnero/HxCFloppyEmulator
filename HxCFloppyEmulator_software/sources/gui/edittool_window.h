@@ -25,6 +25,7 @@ extern void edittool_window_bt_addtrack_callback(Fl_Button*, void*);
 extern void edittool_window_bt_removetrack_callback(Fl_Button*, void*);
 #include <FL/Fl_Box.H>
 extern void edittool_window_bt_removeoddtracks_callback(Fl_Button*, void*);
+extern void edittool_window_bt_shifttracks_callback(Fl_Button*, void*);
 
 class trackedittool_window {
 public:
@@ -56,5 +57,7 @@ public:
   Fl_Button *bt_removetrack;
   Fl_Int_Input *edit_rpm;
   Fl_Button *bt_removeoddtracks;
+  Fl_Button *bt_shifttracks;
+  Fl_Int_Input *edit_shiftbittracks;
 };
 #endif

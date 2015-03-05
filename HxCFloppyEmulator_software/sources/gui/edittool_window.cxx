@@ -3,7 +3,7 @@
 #include "edittool_window.h"
 
 trackedittool_window::trackedittool_window() {
-  { window = new Fl_Double_Window(198, 416, "Track edition toolbar");
+  { window = new Fl_Double_Window(199, 437, "Track edition toolbar");
     window->labelsize(12);
     window->user_data((void*)(this));
     { bt_copy = new Fl_Button(7, 43, 93, 20, "Copy");
@@ -52,7 +52,7 @@ trackedittool_window::trackedittool_window() {
       bt_setbitrate->labelsize(10);
       bt_setbitrate->callback((Fl_Callback*)edittool_window_bt_setbitrate_callback, (void*)(this));
     } // Fl_Button* bt_setbitrate
-    { bt_directedition = new Fl_Light_Button(7, 366, 93, 20, "Direct edition");
+    { bt_directedition = new Fl_Light_Button(7, 386, 93, 20, "Direct edition");
       bt_directedition->labelsize(10);
       bt_directedition->user_data((void*)(this));
     } // Fl_Light_Button* bt_directedition
@@ -62,7 +62,7 @@ trackedittool_window::trackedittool_window() {
       edit_bitrate->textsize(10);
       edit_bitrate->user_data((void*)(this));
     } // Fl_Int_Input* edit_bitrate
-    { edit_editbuffer = new Fl_Int_Input(8, 391, 182, 22);
+    { edit_editbuffer = new Fl_Int_Input(8, 411, 182, 22);
       edit_editbuffer->type(2);
       edit_editbuffer->labelsize(10);
       edit_editbuffer->textsize(10);
@@ -84,11 +84,11 @@ trackedittool_window::trackedittool_window() {
       edit_fillflakey->textsize(10);
       edit_fillflakey->user_data((void*)(this));
     } // Fl_Int_Input* edit_fillflakey
-    { bt_erase1 = new Fl_Button(7, 276, 93, 20, "Erase Side 1");
+    { bt_erase1 = new Fl_Button(7, 296, 93, 20, "Erase Side 1");
       bt_erase1->labelsize(10);
       bt_erase1->callback((Fl_Callback*)edittool_window_bt_erase_side1_callback, (void*)(this));
     } // Fl_Button* bt_erase1
-    { bt_erase0 = new Fl_Button(7, 256, 93, 20, "Erase Side 0");
+    { bt_erase0 = new Fl_Button(7, 276, 93, 20, "Erase Side 0");
       bt_erase0->labelsize(10);
       bt_erase0->callback((Fl_Callback*)edittool_window_bt_erase_side0_callback, (void*)(this));
     } // Fl_Button* bt_erase0
@@ -106,11 +106,11 @@ trackedittool_window::trackedittool_window() {
       bt_rpm->labelsize(10);
       bt_rpm->callback((Fl_Callback*)edittool_window_bt_setdiskrpm_callback, (void*)(this));
     } // Fl_Button* bt_rpm
-    { bt_addtrack = new Fl_Button(7, 296, 93, 20, "Add Track");
+    { bt_addtrack = new Fl_Button(7, 316, 93, 20, "Add Track");
       bt_addtrack->labelsize(9);
       bt_addtrack->callback((Fl_Callback*)edittool_window_bt_addtrack_callback, (void*)(this));
     } // Fl_Button* bt_addtrack
-    { bt_removetrack = new Fl_Button(7, 316, 93, 20, "Remove Track");
+    { bt_removetrack = new Fl_Button(7, 336, 93, 20, "Remove Track");
       bt_removetrack->labelsize(9);
       bt_removetrack->callback((Fl_Callback*)edittool_window_bt_removetrack_callback, (void*)(this));
     } // Fl_Button* bt_removetrack
@@ -124,14 +124,24 @@ trackedittool_window::trackedittool_window() {
       o->box(FL_ENGRAVED_BOX);
       o->align(Fl_Align(FL_ALIGN_CENTER|FL_ALIGN_INSIDE));
     } // Fl_Box* o
-    { Fl_Box* o = new Fl_Box(5, 361, 185, 1);
+    { Fl_Box* o = new Fl_Box(5, 381, 185, 1);
       o->box(FL_ENGRAVED_BOX);
       o->align(Fl_Align(FL_ALIGN_CENTER|FL_ALIGN_INSIDE));
     } // Fl_Box* o
-    { bt_removeoddtracks = new Fl_Button(7, 336, 93, 20, "Remove Odd Tracks");
+    { bt_removeoddtracks = new Fl_Button(7, 356, 93, 20, "Remove Odd Tracks");
       bt_removeoddtracks->labelsize(9);
       bt_removeoddtracks->callback((Fl_Callback*)edittool_window_bt_removeoddtracks_callback, (void*)(this));
     } // Fl_Button* bt_removeoddtracks
+    { bt_shifttracks = new Fl_Button(7, 256, 93, 20, "Shift Tracks");
+      bt_shifttracks->labelsize(10);
+      bt_shifttracks->callback((Fl_Callback*)edittool_window_bt_shifttracks_callback, (void*)(this));
+    } // Fl_Button* bt_shifttracks
+    { edit_shiftbittracks = new Fl_Int_Input(105, 255, 85, 20);
+      edit_shiftbittracks->type(2);
+      edit_shiftbittracks->labelsize(10);
+      edit_shiftbittracks->textsize(10);
+      edit_shiftbittracks->user_data((void*)(this));
+    } // Fl_Int_Input* edit_shiftbittracks
     window->end();
   } // Fl_Double_Window* window
 }
