@@ -350,6 +350,7 @@ int InfosThreadProc(void* floppycontext,void* context)
 			hxcfe_td_activate_analyzer(td,APPLEII_GCR2_ENCODING,w->apple2_bt->value());
 			hxcfe_td_activate_analyzer(td,ARBURGDAT_ENCODING,w->arburg_bt->value());
 			hxcfe_td_activate_analyzer(td,ARBURGSYS_ENCODING,w->arburg_bt->value());
+			hxcfe_td_activate_analyzer(td,AED6200P_MFM_ENCODING,w->aed6200p_bt->value());
 
 			hxcfe_td_setparams(td,(int)(adjust_timescale(w->x_time->value())),(int)w->y_time->value(),(int)(w->x_offset->value()*1000));
 
@@ -827,6 +828,9 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						break;
 						case ARBURG_SYS:
 							sprintf(str,"Arburg SYS ");
+						break;
+						case AED6200P_DD:
+							sprintf(str,"AED 6200P ");
 						break;
 						default:
 							sprintf(str,"Unknow ");

@@ -477,6 +477,42 @@ void edittool_window_bt_shifttracks_callback(Fl_Button *o, void *v)
 	hxc_leavecriticalsection(guicontext->hxcfe,1);
 }
 
+void edittool_window_bt_swapsides_callback(Fl_Button *o, void *v)
+{
+	Main_Window *window;
+	floppy_infos_window *fiw;
+	HXCFE_SIDE * side0,* side1;
+	int track;
+	trackedittool_window *tew;
+
+	window = (Main_Window *)guicontext->main_window;
+	tew = (trackedittool_window *)window->trackedit_window;
+	fiw = (floppy_infos_window *)window->infos_window;
+
+	hxc_entercriticalsection(guicontext->hxcfe,1);
+
+	if(hxcfe_getNumberOfSide(guicontext->hxcfe,guicontext->loadedfloppy) == 2)
+	{
+		for(track=0;track<hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy);track++)
+		{
+			side0 = hxcfe_getSide( guicontext->hxcfe, guicontext->loadedfloppy, track, 0 );
+			side1 = hxcfe_getSide( guicontext->hxcfe, guicontext->loadedfloppy, track, 1 );
+
+			if(side0 && side1)
+			{
+				side0 = hxcfe_duplicateSide(guicontext->hxcfe,side0);
+				hxcfe_replaceSide( guicontext->hxcfe, guicontext->loadedfloppy, track, 0, side1 );
+				hxcfe_replaceSide( guicontext->hxcfe, guicontext->loadedfloppy, track, 1, side0 );
+				hxcfe_freeSide( guicontext->hxcfe, side0 );
+			}
+		}
+
+		guicontext->updatefloppyinfos = 1;
+	}
+
+	hxc_leavecriticalsection(guicontext->hxcfe,1);
+}
+
 void edittool_window_bt_paste_callback(Fl_Button *o, void *v)
 {
 	Main_Window *window;
