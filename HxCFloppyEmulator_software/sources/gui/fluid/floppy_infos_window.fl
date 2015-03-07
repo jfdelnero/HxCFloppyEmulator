@@ -8,7 +8,7 @@ class floppy_infos_window {open
   } {
     Fl_Window window {
       label {Visual Floppy disk} open
-      xywh {83 21 1003 670} type Double hide
+      xywh {99 9 1003 686} type Double visible
     } {
       Fl_Group {} {
         label Track open
@@ -29,7 +29,7 @@ class floppy_infos_window {open
       }
       Fl_Group {} {
         label Status open
-        xywh {455 502 509 167} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL labelsize 12 align 21
+        xywh {455 502 509 183} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL labelsize 12 align 21
       } {
         Fl_Output x_pos {
           xywh {460 519 250 15} labelsize 10 textsize 10
@@ -42,46 +42,46 @@ class floppy_infos_window {open
         }
         Fl_Text_Display object_txt {
           user_data this
-          xywh {460 547 500 119}
+          xywh {460 547 500 135}
         }
       }
       Fl_Button {} {
         label OK
         user_data this
         callback floppy_infos_ok
-        xywh {969 504 30 163}
+        xywh {969 504 30 179}
       }
       Fl_Group floppy_map_disp {
-        label {Floppy Map} open
+        label {Floppy Map} open selected
         xywh {0 1 1000 500} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {}
       Fl_Group {} {
         label View open
-        xywh {170 502 285 167} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+        xywh {170 502 285 185} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {
         Fl_Value_Slider y_time {
           label {full y time scale (us)}
           user_data this
           callback disk_infos_window_callback
-          xywh {175 557 273 20} type {Horz Knob} labelsize 12 textsize 12
+          xywh {175 562 273 20} type {Horz Knob} labelsize 12 textsize 12
         }
         Fl_Value_Slider x_offset {
           label {x offset (% of the track len)}
           user_data this
           callback disk_infos_window_callback
-          xywh {175 595 273 20} type {Horz Knob} labelsize 12 textsize 12
+          xywh {175 604 273 20} type {Horz Knob} labelsize 12 textsize 12
         }
         Fl_Round_Button track_view_bt {
           label {Track view}
           user_data this
           callback disk_infos_window_callback
-          xywh {213 629 92 16} type Radio down_box ROUND_DOWN_BOX
+          xywh {213 643 92 16} type Radio down_box ROUND_DOWN_BOX
         }
         Fl_Round_Button disc_view_bt {
           label {Disk view}
           user_data this
           callback disk_infos_window_callback
-          xywh {340 628 81 16} type Radio down_box ROUND_DOWN_BOX
+          xywh {340 642 81 16} type Radio down_box ROUND_DOWN_BOX
         }
         Fl_Slider x_time {
           label {full x time scale}
@@ -92,13 +92,13 @@ class floppy_infos_window {open
         Fl_Button bt_edit {
           label {Edit tools}
           user_data this
-          callback disk_infos_window_bt_edit_callback selected
-          xywh {256 645 100 20} labelsize 10
+          callback disk_infos_window_bt_edit_callback
+          xywh {256 663 100 20} labelsize 10
         }
       }
       Fl_Group {} {
         label Mode open
-        xywh {0 594 170 76} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
+        xywh {0 594 170 92} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
       } {
         Fl_Light_Button iso_mfm_bt {
           label {ISO MFM}
@@ -147,6 +147,12 @@ class floppy_infos_window {open
           user_data this
           callback disk_infos_window_callback
           xywh {87 652 75 15} labelsize 10
+        }
+        Fl_Light_Button aed6200p_bt {
+          label {AED 6200P}
+          user_data this
+          callback disk_infos_window_callback
+          xywh {87 667 75 15} labelsize 10
         }
       }
     }

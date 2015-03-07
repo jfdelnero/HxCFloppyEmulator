@@ -12,7 +12,7 @@ extern "C"
 #include "cb_floppy_infos_window.h"
 #include "fl_mouse_box.h"
 floppy_infos_window::floppy_infos_window() {
-  { window = new Fl_Double_Window(1003, 670, "Visual Floppy disk");
+  { window = new Fl_Double_Window(1003, 686, "Visual Floppy disk");
     window->user_data((void*)(this));
     { Fl_Group* o = new Fl_Group(0, 502, 170, 93, "Track");
       o->box(FL_ENGRAVED_FRAME);
@@ -33,7 +33,7 @@ floppy_infos_window::floppy_infos_window() {
       } // Fl_Value_Slider* side_number_slide
       o->end();
     } // Fl_Group* o
-    { Fl_Group* o = new Fl_Group(455, 502, 509, 167, "Status");
+    { Fl_Group* o = new Fl_Group(455, 502, 509, 183, "Status");
       o->box(FL_ENGRAVED_FRAME);
       o->labeltype(FL_ENGRAVED_LABEL);
       o->labelsize(12);
@@ -50,12 +50,12 @@ floppy_infos_window::floppy_infos_window() {
         global_status->labelsize(10);
         global_status->textsize(10);
       } // Fl_Output* global_status
-      { object_txt = new Fl_Text_Display(460, 547, 500, 119);
+      { object_txt = new Fl_Text_Display(460, 547, 500, 135);
         object_txt->user_data((void*)(this));
       } // Fl_Text_Display* object_txt
       o->end();
     } // Fl_Group* o
-    { Fl_Button* o = new Fl_Button(969, 504, 30, 163, "OK");
+    { Fl_Button* o = new Fl_Button(969, 504, 30, 179, "OK");
       o->callback((Fl_Callback*)floppy_infos_ok, (void*)(this));
     } // Fl_Button* o
     { floppy_map_disp = new Fl_Group(0, 1, 1000, 500, "Floppy Map");
@@ -65,29 +65,29 @@ floppy_infos_window::floppy_infos_window() {
       floppy_map_disp->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
       floppy_map_disp->end();
     } // Fl_Group* floppy_map_disp
-    { Fl_Group* o = new Fl_Group(170, 502, 285, 167, "View");
+    { Fl_Group* o = new Fl_Group(170, 502, 285, 185, "View");
       o->box(FL_ENGRAVED_FRAME);
       o->labeltype(FL_EMBOSSED_LABEL);
       o->labelsize(12);
       o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-      { y_time = new Fl_Value_Slider(175, 557, 273, 20, "full y time scale (us)");
+      { y_time = new Fl_Value_Slider(175, 562, 273, 20, "full y time scale (us)");
         y_time->type(5);
         y_time->labelsize(12);
         y_time->textsize(12);
         y_time->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Value_Slider* y_time
-      { x_offset = new Fl_Value_Slider(175, 595, 273, 20, "x offset (% of the track len)");
+      { x_offset = new Fl_Value_Slider(175, 604, 273, 20, "x offset (% of the track len)");
         x_offset->type(5);
         x_offset->labelsize(12);
         x_offset->textsize(12);
         x_offset->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Value_Slider* x_offset
-      { track_view_bt = new Fl_Round_Button(213, 629, 92, 16, "Track view");
+      { track_view_bt = new Fl_Round_Button(213, 643, 92, 16, "Track view");
         track_view_bt->type(102);
         track_view_bt->down_box(FL_ROUND_DOWN_BOX);
         track_view_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Round_Button* track_view_bt
-      { disc_view_bt = new Fl_Round_Button(340, 628, 81, 16, "Disk view");
+      { disc_view_bt = new Fl_Round_Button(340, 642, 81, 16, "Disk view");
         disc_view_bt->type(102);
         disc_view_bt->down_box(FL_ROUND_DOWN_BOX);
         disc_view_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
@@ -97,13 +97,13 @@ floppy_infos_window::floppy_infos_window() {
         x_time->labelsize(12);
         x_time->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Slider* x_time
-      { bt_edit = new Fl_Button(256, 645, 100, 20, "Edit tools");
+      { bt_edit = new Fl_Button(256, 663, 100, 20, "Edit tools");
         bt_edit->labelsize(10);
         bt_edit->callback((Fl_Callback*)disk_infos_window_bt_edit_callback, (void*)(this));
       } // Fl_Button* bt_edit
       o->end();
     } // Fl_Group* o
-    { Fl_Group* o = new Fl_Group(0, 594, 170, 76, "Mode");
+    { Fl_Group* o = new Fl_Group(0, 594, 170, 92, "Mode");
       o->box(FL_ENGRAVED_FRAME);
       o->labeltype(FL_EMBOSSED_LABEL);
       o->labelsize(10);
@@ -140,6 +140,10 @@ floppy_infos_window::floppy_infos_window() {
         arburg_bt->labelsize(10);
         arburg_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* arburg_bt
+      { aed6200p_bt = new Fl_Light_Button(87, 667, 75, 15, "AED 6200P");
+        aed6200p_bt->labelsize(10);
+        aed6200p_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* aed6200p_bt
       o->end();
     } // Fl_Group* o
 

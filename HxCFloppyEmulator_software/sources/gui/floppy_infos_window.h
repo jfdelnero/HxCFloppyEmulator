@@ -44,6 +44,7 @@ public:
   Fl_Light_Button *eemu_bt;
   Fl_Light_Button *apple2_bt;
   Fl_Light_Button *arburg_bt;
+  Fl_Light_Button *aed6200p_bt;
   Fl_Text_Buffer* buf;
   Fl_Text_Display * txt_displ;
 };
