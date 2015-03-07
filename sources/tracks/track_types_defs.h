@@ -575,7 +575,7 @@ static isoibm_config formatstab[]=
 	{
 		AED6200P_DD,
 
-		0x4E,00,				// post index gap4 config
+		0x00,00,				// post index gap4 config
 
 		0x00,00,				// index sync config
 
@@ -584,21 +584,21 @@ static isoibm_config formatstab[]=
 
 		0x00,32,				// gap1 config
 
-		0x00,12,				// h sync config
+		0x00,0,				// h sync config
 
-		0x00,12,				// d sync config
+		0x00,0,				// d sync config
 
 		0xC6,0xEB,1,			// address mark coding
 		0x00,0xFF,0,
 
-		0x4E,22,				// gap2 config
+		0x00,22,				// gap2 config
 
 		0xC0,0xEB,1,			// data mark coding
 		0x00,0xFF,0,
 
-		0x4E,84,				// gap3 config
+		0x00,84,				// gap3 config
 
-		0x4E,255,				// gap4 config
+		0x00,255,				// gap4 config
 
 		0xFF,0xFF,0xFF,0xFF,	// Track - Side - Sector - Size
 
