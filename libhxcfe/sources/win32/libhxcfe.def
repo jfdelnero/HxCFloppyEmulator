@@ -181,3 +181,6 @@ EXPORTS
    hxcfe_removeOddTracks		@514
    hxcfe_removeLastTrack        @515
    hxcfe_addTrack               @516
+   hxcfe_duplicateSide          @517
+   hxcfe_replaceSide            @518
+   hxcfe_freeSide               @519

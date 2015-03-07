@@ -627,6 +627,14 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 								case ARBURG_SYS:
 									sprintf(tempstr,"Arburg SYSTEM %.3dB ",sc->sectorsize);
 								break;
+								case AED6200P_DD:
+									if(sc->startdataindex != sc->endsectorindex)
+										sprintf(tempstr,"AED 6200P %.3dB DM:%.2Xh",sc->sectorsize,sc->alternate_datamark);
+									else
+										sprintf(tempstr,"AED 6200P %.3dB DM: ??",sc->sectorsize);
+									break;
+								break;
+
 							}
 
 							if(sc->fill_byte_used)
@@ -681,7 +689,9 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 								case ARBURG_SYS:
 									sprintf(tempstr,"Arburg SYSTEM Data ?");
 								break;
-
+								case AED6200P_DD:
+									sprintf(tempstr,"AED 6200P Data ?");
+								break;
 							}
 							putstring8x8(td,xpos_startheader,225,tempstr,0x000,0x000,1,1);
 						}
@@ -1709,6 +1719,7 @@ type_list track_type_list[]=
 	{APPLE2_GCR6A2,     "Apple II 6A2"},
 	{ARBURG_DAT,        "Arburg DATA"},
 	{ARBURG_SYS,        "Arburg SYSTEM"},
+	{AED6200P_DD,       "AED 6200P"},
 	{0,0}
 };
 

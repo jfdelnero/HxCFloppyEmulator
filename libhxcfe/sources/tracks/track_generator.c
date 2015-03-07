@@ -420,6 +420,7 @@ int32_t pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE 
 		case AMIGAFORMAT_DD:
 		case MEMBRAINFORMAT_DD:
 		case UKNCFORMAT_DD:
+		case AED6200P_DD:
 			getMFMcode(tg,data,clock,&side->databuffer[tg->last_bit_offset/8]);
 			tg->last_bit_offset=tg->last_bit_offset+(2*8);
 		break;
@@ -607,6 +608,7 @@ void FastMFMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * tr
 		case ISOFORMAT_DD11S:
 		case MEMBRAINFORMAT_DD:
 		case UKNCFORMAT_DD:
+		case AED6200P_DD:
 			FastMFMgenerator(tg,side,track_data,size);
 		break;
 
@@ -814,6 +816,7 @@ int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t
 			case ISOFORMAT_DD11S:
 			case MEMBRAINFORMAT_DD:
 			case UKNCFORMAT_DD:
+			case AED6200P_DD:
 				total_track_size=total_track_size*2;
 				break;
 
@@ -864,6 +867,7 @@ int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t
 				case ISOFORMAT_DD11S:
 				case MEMBRAINFORMAT_DD:
 				case UKNCFORMAT_DD:
+				case AED6200P_DD:
 					track_size=track_size*2;
 					break;
 
@@ -1029,6 +1033,10 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 
 		case AMIGAFORMAT_DD:
 			currentside->track_encoding=AMIGA_MFM_ENCODING;
+		break;
+
+		case AED6200P_DD:
+			currentside->track_encoding=AED6200P_MFM_ENCODING;
 		break;
 
 		default:
@@ -1311,6 +1319,10 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 			trackenc = ISOIBM_MFM_ENCODING;
 		break;
 
+		case AED6200P_DD:
+			trackenc = AED6200P_MFM_ENCODING;
+		break;
+
 		case MEMBRAINFORMAT_DD:
 			currentside->track_encoding = MEMBRAIN_MFM_ENCODING;
 		break;
@@ -1506,6 +1518,7 @@ void tg_addSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_
 		case TYCOMFORMAT_SD:
 		case MEMBRAINFORMAT_DD:
 		case UKNCFORMAT_DD:
+		case AED6200P_DD:
 			tg_addISOSectorToTrack(tg,sectorconfig,currentside);
 			break;
 
@@ -1675,6 +1688,7 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 					case ISOFORMAT_DD:
 					case MEMBRAINFORMAT_DD:
 					case UKNCFORMAT_DD:
+					case AED6200P_DD:
 						computedgap3=computedgap3/(1*8);
 					break;
 				}

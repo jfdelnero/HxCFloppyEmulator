@@ -204,6 +204,7 @@ HXCFE_FLOPPY *         hxcfe_floppyDuplicate( HXCFE* floppycontext, HXCFE_FLOPPY
 #define ARBURG_DAT                       0x0C
 #define ARBURG_SYS                       0x0D
 #define UKNCFORMAT_DD                    0x0E
+#define AED6200P_DD                      0x0F
 #define DIRECT_ENCODING                  0xFE
 
 HXCFE_FLPGEN*          hxcfe_initFloppy( HXCFE* floppycontext, int32_t nb_of_track, int32_t nb_of_side );
@@ -370,6 +371,7 @@ int32_t                hxcfe_FDC_SCANSECTOR  ( HXCFE* floppycontext, uint8_t tra
 #define APPLEII_HDDD_A2_GCR2_ENCODING    0x09
 #define ARBURGDAT_ENCODING               0x0A
 #define ARBURGSYS_ENCODING               0x0B
+#define AED6200P_MFM_ENCODING            0x0C
 
 #define UNKNOWN_ENCODING                 0xFF
 
@@ -469,6 +471,10 @@ void                   hxcfe_deinitFxStream( HXCFE_FXSA * fxs );
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 HXCFE_SIDE *           hxcfe_getSide( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, int32_t side );
+HXCFE_SIDE *           hxcfe_duplicateSide( HXCFE* floppycontext, HXCFE_SIDE * side );
+HXCFE_SIDE *           hxcfe_replaceSide( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track_number, int32_t side_number, HXCFE_SIDE * side );
+void                   hxcfe_freeSide( HXCFE* floppycontext, HXCFE_SIDE * side );
+
 int32_t                hxcfe_getTrackBitrate( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, int32_t side );
 int32_t                hxcfe_getTrackEncoding( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, int32_t side );
 int32_t                hxcfe_getTrackLength( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, int32_t side );

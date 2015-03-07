@@ -573,6 +573,41 @@ static isoibm_config formatstab[]=
 		0xA1,0x0A,3				// post crc data glith
 	},
 	{
+		AED6200P_DD,
+
+		0x4E,00,				// post index gap4 config
+
+		0x00,00,				// index sync config
+
+		0x00,0x00,0,			// index mark coding
+		0x00,0x00,0,
+
+		0x00,32,				// gap1 config
+
+		0x00,12,				// h sync config
+
+		0x00,12,				// d sync config
+
+		0xC6,0xEB,1,			// address mark coding
+		0x00,0xFF,0,
+
+		0x4E,22,				// gap2 config
+
+		0xC0,0xEB,1,			// data mark coding
+		0x00,0xFF,0,
+
+		0x4E,84,				// gap3 config
+
+		0x4E,255,				// gap4 config
+
+		0xFF,0xFF,0xFF,0xFF,	// Track - Side - Sector - Size
+
+		0x1021,0xFFFF,			// crc, initial value
+
+		0x00,0x00,0,			// post crc header glith
+		0x00,0x00,0				// post crc data glith
+	},	
+	{
 		0,
 
 		0x4E,00,				// post index gap4 config

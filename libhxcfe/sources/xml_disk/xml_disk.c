@@ -461,6 +461,10 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 				{
 					ad->statestack[ad->stack_ptr].track_type = AMIGAFORMAT_DD;
 				}
+				if(!strcmp(buffer,"AED6200P_MFM"))
+				{
+					ad->statestack[ad->stack_ptr].track_type = AED6200P_DD;
+				}
 
 				hxcfe_setTrackType(ad->fb,ad->statestack[ad->stack_ptr].track_type);
 			}
