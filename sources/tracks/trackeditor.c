@@ -77,6 +77,76 @@ HXCFE_SIDE * hxcfe_getSide( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t tra
 	return 0;
 }
 
+HXCFE_SIDE * hxcfe_duplicateSide( HXCFE* floppycontext, HXCFE_SIDE * side )
+{
+	HXCFE_SIDE * new_side;
+	int track_wordsize;
+
+	new_side = 0;
+
+	if(side)
+	{
+		new_side = malloc(sizeof(HXCFE_SIDE));
+		if( new_side )
+		{
+			memset( new_side, 0, sizeof(HXCFE_SIDE) );
+
+			track_wordsize = side->tracklen / 8;
+			if(side->tracklen&7)
+				track_wordsize++;
+
+			if( side->databuffer )
+			{
+				new_side->databuffer = malloc( track_wordsize );
+				if( new_side->databuffer )
+					memcpy(new_side->databuffer, side->databuffer,track_wordsize);
+			}
+
+			if( side->flakybitsbuffer )
+			{
+				new_side->flakybitsbuffer = malloc( track_wordsize );
+				if( new_side->flakybitsbuffer )
+					memcpy(new_side->flakybitsbuffer, side->flakybitsbuffer,track_wordsize);
+			}
+
+			if( side->indexbuffer )
+			{
+				new_side->indexbuffer = malloc( track_wordsize );
+				if( new_side->indexbuffer )
+					memcpy(new_side->indexbuffer, side->indexbuffer,track_wordsize);
+			}
+
+			if( side->timingbuffer )
+			{
+				new_side->timingbuffer = malloc( track_wordsize * sizeof(uint32_t) );
+				if( new_side->timingbuffer )
+					memcpy(new_side->timingbuffer, side->timingbuffer,track_wordsize * sizeof(uint32_t));
+			}
+
+			if( side->track_encoding_buffer )
+			{
+				new_side->track_encoding_buffer = malloc( track_wordsize );
+				if( new_side->track_encoding_buffer )
+					memcpy(new_side->track_encoding_buffer, side->track_encoding_buffer,track_wordsize );
+			}
+			
+			if( side->track_encoding_buffer )
+			{
+				new_side->track_encoding_buffer = malloc( track_wordsize );
+				if( new_side->track_encoding_buffer )
+					memcpy(new_side->track_encoding_buffer, side->track_encoding_buffer,track_wordsize );
+			}
+
+			new_side->bitrate = side->bitrate;
+			new_side->number_of_sector = side->number_of_sector;
+			new_side->track_encoding = side->track_encoding;
+			new_side->tracklen = side->tracklen;
+		}
+	}
+
+	return new_side;
+}
+
 void hxcfe_freeSide( HXCFE* floppycontext, HXCFE_SIDE * side )
 {
 	if(side)
@@ -112,6 +182,33 @@ void hxcfe_freeSide( HXCFE* floppycontext, HXCFE_SIDE * side )
 	}
 
 	return;
+}
+
+HXCFE_SIDE * hxcfe_replaceSide( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track_number, int32_t side_number, HXCFE_SIDE * side )
+{
+	HXCFE_SIDE * new_side;
+
+	new_side = 0;
+
+	if( fp && side)
+	{
+		if( ( track_number < fp->floppyNumberOfTrack ) && ( side_number < fp->floppyNumberOfSide ) )
+		{
+			if(fp->tracks)
+			{
+				if(fp->tracks[track_number]->sides && ( side_number < fp->tracks[track_number]->number_of_side) )
+				{
+					hxcfe_freeSide( floppycontext, fp->tracks[track_number]->sides[side_number] );
+
+					fp->tracks[track_number]->sides[side_number] = hxcfe_duplicateSide( floppycontext, side );
+
+					new_side = fp->tracks[track_number]->sides[side_number];
+				}
+			}
+		}
+	}
+
+	return new_side;
 }
 
 int32_t hxcfe_shiftTrackData( HXCFE* floppycontext, HXCFE_SIDE * side, int32_t bitoffset )
