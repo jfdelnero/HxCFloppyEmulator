@@ -257,6 +257,16 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 									}
 								}
 
+								if(sca[s]->head != i)
+								{
+									fprintf(xmlfile,"\t\t\t\t\t\t<side_id>0x%.2X</side_id>\n",sca[s]->head);
+								}
+
+								if(sca[s]->cylinder != j)
+								{
+									fprintf(xmlfile,"\t\t\t\t\t\t<track_id>0x%.2X</track_id>\n",sca[s]->cylinder);
+								}
+
 								if(sca[s]->use_alternate_datamark)
 								{
 									fprintf(xmlfile,"\t\t\t\t\t\t<datamark>0x%.2X</datamark>\n",sca[s]->alternate_datamark);
