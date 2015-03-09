@@ -13,7 +13,7 @@
 		<start_sector_id>1</start_sector_id>
 		<sector_per_track>10</sector_per_track>
 		<sector_size>256</sector_size>
-		<formatvalue>0xF6</formatvalue>
+		<formatvalue>0x00</formatvalue>
 		<gap3>27</gap3>
 		<bitrate>250000</bitrate>
 		<pregap>0</pregap>
