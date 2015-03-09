@@ -27,6 +27,7 @@
 #include "data_DiskLayout_LIF_3_50_1232KB_xml.h"
 #include "data_DiskLayout_LIF_5_25_264KB_xml.h"
 #include "data_DiskLayout_AED6200P_xml.h"
+#include "data_DiskLayout_Microtan_65_TANDOS_xml.h"
 
 datatype * disklayout_list[]=
 {
@@ -53,6 +54,7 @@ datatype * disklayout_list[]=
 	data_DiskLayout_DOS_EXHD_6_78MB_xml,
 	data_DiskLayout_OS9_1280KB_xml,
 	data_DiskLayout_UKNC_800KB_xml,
+	data_DiskLayout_Microtan_65_TANDOS_xml,
 	data_DiskLayout_Excellon_CNC6_xml,
 	data_DiskLayout_LIF_3_50_264KB_xml,
 	data_DiskLayout_LIF_3_50_616KB_xml,

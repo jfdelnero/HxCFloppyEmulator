@@ -27,4 +27,5 @@
 ..\..\converttools\bmptoh DiskLayout_LIF_3_50_1232KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_LIF_5_25_264KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_AED6200P.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Microtan_65_TANDOS.xml -DATA
 move *.h ..
