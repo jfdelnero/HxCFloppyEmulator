@@ -184,3 +184,5 @@ EXPORTS
    hxcfe_duplicateSide          @517
    hxcfe_replaceSide            @518
    hxcfe_freeSide               @519
+   hxcfe_localRepair            @520
+   hxcfe_sectorRepair           @521
