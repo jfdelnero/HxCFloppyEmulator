@@ -854,3 +854,277 @@ int32_t hxcfe_addTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp, uint32_t bitrat
 
 	return HXCFE_BADPARAMETER;
 }
+
+const unsigned short test_pattern_array[]=
+{
+	0x5555,0x9555,0x2555,0xA555,0x4955,0x8955,0x2955,0xA955,
+	0x5255,0x9255,0x2255,0xA255,0x4A55,0x8A55,0x2A55,0xAA55,
+	0x5495,0x9495,0x2495,0xA495,0x4895,0x8895,0x2895,0xA895,
+	0x5295,0x9295,0x2295,0xA295,0x4A95,0x8A95,0x2A95,0xAA95,
+	0x5525,0x9525,0x2525,0xA525,0x4925,0x8925,0x2925,0xA925,
+	0x5225,0x9225,0x2225,0xA225,0x4A25,0x8A25,0x2A25,0xAA25,
+	0x54A5,0x94A5,0x24A5,0xA4A5,0x48A5,0x88A5,0x28A5,0xA8A5,
+	0x52A5,0x92A5,0x22A5,0xA2A5,0x4AA5,0x8AA5,0x2AA5,0xAAA5,
+	0x5549,0x9549,0x2549,0xA549,0x4949,0x8949,0x2949,0xA949,
+	0x5249,0x9249,0x2249,0xA249,0x4A49,0x8A49,0x2A49,0xAA49,
+	0x5489,0x9489,0x2489,0xA489,0x4889,0x8889,0x2889,0xA889,
+	0x5289,0x9289,0x2289,0xA289,0x4A89,0x8A89,0x2A89,0xAA89,
+	0x5529,0x9529,0x2529,0xA529,0x4929,0x8929,0x2929,0xA929,
+	0x5229,0x9229,0x2229,0xA229,0x4A29,0x8A29,0x2A29,0xAA29,
+	0x54A9,0x94A9,0x24A9,0xA4A9,0x48A9,0x88A9,0x28A9,0xA8A9,
+	0x52A9,0x92A9,0x22A9,0xA2A9,0x4AA9,0x8AA9,0x2AA9,0xAAA9,
+	0x5552,0x9552,0x2552,0xA552,0x4952,0x8952,0x2952,0xA952,
+	0x5252,0x9252,0x2252,0xA252,0x4A52,0x8A52,0x2A52,0xAA52,
+	0x5492,0x9492,0x2492,0xA492,0x4892,0x8892,0x2892,0xA892,
+	0x5292,0x9292,0x2292,0xA292,0x4A92,0x8A92,0x2A92,0xAA92,
+	0x5522,0x9522,0x2522,0xA522,0x4922,0x8922,0x2922,0xA922,
+	0x5222,0x9222,0x2222,0xA222,0x4A22,0x8A22,0x2A22,0xAA22,
+	0x54A2,0x94A2,0x24A2,0xA4A2,0x48A2,0x88A2,0x28A2,0xA8A2,
+	0x52A2,0x92A2,0x22A2,0xA2A2,0x4AA2,0x8AA2,0x2AA2,0xAAA2,
+	0x554A,0x954A,0x254A,0xA54A,0x494A,0x894A,0x294A,0xA94A,
+	0x524A,0x924A,0x224A,0xA24A,0x4A4A,0x8A4A,0x2A4A,0xAA4A,
+	0x548A,0x948A,0x248A,0xA48A,0x488A,0x888A,0x288A,0xA88A,
+	0x528A,0x928A,0x228A,0xA28A,0x4A8A,0x8A8A,0x2A8A,0xAA8A,
+	0x552A,0x952A,0x252A,0xA52A,0x492A,0x892A,0x292A,0xA92A,
+	0x522A,0x922A,0x222A,0xA22A,0x4A2A,0x8A2A,0x2A2A,0xAA2A,
+	0x54AA,0x94AA,0x24AA,0xA4AA,0x48AA,0x88AA,0x28AA,0xA8AA,
+	0x52AA,0x92AA,0x22AA,0xA2AA,0x4AAA,0x8AAA,0x2AAA,0xAAAA,
+};
+
+
+uint32_t gettestpattern(unsigned long patternvalue)
+{
+	uint32_t pattern;
+
+	pattern =  test_pattern_array[ patternvalue & 0xFF ] << 16;
+	pattern |= test_pattern_array[ (patternvalue>>8) & 0xFF ];
+
+	if( pattern & 0x00010000 )
+		pattern = pattern & ~0x00008000;
+
+	return pattern;
+}
+
+int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track, int32_t side, int32_t start_cellnumber, int32_t numberofcells )
+{
+	int32_t i,test_pattern_size;
+	uint32_t pattern,loop,old_pattern;
+	HXCFE_SIDE * currentside;
+	HXCFE_SECTORACCESS * sa;
+	HXCFE_SECTCFG** sc_list;
+	HXCFE_SECTCFG* sc;
+	int32_t nb_sectorfound,sectorpos,good_pattern;
+
+	int32_t tab[5]={0,1,1,-3,-1};
+	uint32_t test_pattern;
+
+	good_pattern = 0;
+	if(fp && floppycontext)
+	{
+		if( ( track < fp->floppyNumberOfTrack ) && ( side < fp->floppyNumberOfSide ) )
+		{
+			nb_sectorfound = 0;
+
+			currentside = fp->tracks[track]->sides[side];
+
+			sa = hxcfe_initSectorAccess( floppycontext, fp );
+			sc_list = hxcfe_getAllTrackISOSectors( sa, track, side, &nb_sectorfound );
+
+			sectorpos = -1;
+			if(nb_sectorfound)
+			{
+				i = 0;
+				while(i < nb_sectorfound)
+				{
+					if( ( start_cellnumber >= sc_list[i]->startsectorindex ) && ( ((start_cellnumber + numberofcells )%currentside->tracklen ) < sc_list[i]->endsectorindex ) )
+					{
+						sectorpos = i;
+					}
+					i++;
+				}
+			}
+
+			if(sectorpos>=0)
+			{
+				test_pattern_size = numberofcells;
+
+				if( numberofcells && ( test_pattern_size < 28 ) )
+				{
+					// Back up...
+					old_pattern = 0x00000000;
+					for(i = 0; i < test_pattern_size;i++)
+					{
+						if(hxcfe_getCellState( floppycontext, currentside, (start_cellnumber + i) % currentside->tracklen))
+						{
+							old_pattern = old_pattern | (0x00000001 << i);
+						}
+					}
+
+					loop = 0;
+					do
+					{
+						if(tab[loop]>0)
+						{
+							hxcfe_insertCell( floppycontext, currentside, start_cellnumber, 0,  tab[loop] );
+							test_pattern_size += tab[loop];
+							
+						}
+						else
+						{
+							if(tab[loop]<0)
+							{
+								if( test_pattern_size > 0 )
+								{
+									hxcfe_removeCell( floppycontext, currentside, start_cellnumber, -tab[loop] );
+									test_pattern_size += tab[loop];
+								}
+							}
+						}
+
+						if( test_pattern_size > 0 )
+						{
+							pattern = 0x00000000;
+							do
+							{
+								test_pattern = gettestpattern(pattern);
+
+								for(i = 0; i < test_pattern_size;i++)
+								{
+									if( test_pattern & (0x80000000 >> i) )
+									{
+										hxcfe_setCellState( floppycontext, currentside, (start_cellnumber + i) % currentside->tracklen, 1 );
+									}
+									else
+									{
+										hxcfe_setCellState( floppycontext, currentside, (start_cellnumber + i) % currentside->tracklen, 0 );
+									}
+								}
+
+
+								// Test Sector State...
+								hxcfe_resetSearchTrackPosition( sa );
+
+								sc = hxcfe_searchSector ( sa, track, side, sc_list[sectorpos]->sector, ISOIBM_MFM_ENCODING );
+								if( sc )
+								{
+									if(!sc->use_alternate_data_crc)
+									{
+										good_pattern = 1;
+									}
+									hxcfe_freeSectorConfig( sa, sc );
+								}
+								
+								pattern++;
+							}while( (pattern & ((2<<(test_pattern_size-1))-1)) && !good_pattern);
+						}
+
+						loop++;
+					}while( ( loop < 5 ) && ( test_pattern_size > 0 ) && !good_pattern);
+
+					// Not found... restore the old state
+					if(!good_pattern)
+					{
+						hxcfe_insertCell( floppycontext, currentside, start_cellnumber, 0,  2 );
+						test_pattern_size += 2;
+						for(i = 0; i < test_pattern_size;i++)
+						{
+							if( old_pattern & (0x00000001 << i) )
+							{
+								hxcfe_setCellState( floppycontext, currentside, (start_cellnumber + i) % currentside->tracklen, 1 );
+							}
+							else
+							{
+								hxcfe_setCellState( floppycontext, currentside, (start_cellnumber + i) % currentside->tracklen, 0 );
+							}
+						}
+					}
+				}
+			}
+
+			if(sc_list)
+			{
+				i = 0;
+				while( i < nb_sectorfound )
+				{
+
+					hxcfe_freeSectorConfig( sa, sc_list[i] );
+					i++;
+				}
+				free(sc_list);
+			}
+			hxcfe_deinitSectorAccess( sa );
+
+			if(!good_pattern)
+				return HXCFE_NOERROR;
+			else
+				return 1; // Repaired...
+
+		}	
+	}
+	return HXCFE_BADPARAMETER;
+}
+
+int32_t hxcfe_sectorRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track, int32_t side, int32_t start_cellnumber )
+{
+	int32_t i,retrep;
+	HXCFE_SIDE * currentside;
+	HXCFE_SECTORACCESS * sa;
+	HXCFE_SECTCFG** sc_list;
+	int32_t nb_sectorfound,sectorpos,cellnumber;
+
+	if(fp && floppycontext)
+	{
+		if( ( track < fp->floppyNumberOfTrack ) && ( side < fp->floppyNumberOfSide ) )
+		{
+			sa = hxcfe_initSectorAccess( floppycontext, fp );
+			sc_list = hxcfe_getAllTrackISOSectors( sa, track, side, &nb_sectorfound );
+
+			currentside = fp->tracks[track]->sides[side];
+
+			sectorpos = -1;
+			if(nb_sectorfound)
+			{
+				i = 0;
+				while(i < nb_sectorfound)
+				{
+					if( ( start_cellnumber >= sc_list[i]->startsectorindex ) && ( (start_cellnumber%currentside->tracklen ) < sc_list[i]->endsectorindex ) )
+					{
+						sectorpos = i;
+					}
+					i++;
+				}
+			}
+
+			if(sectorpos>=0)
+			{
+
+				cellnumber = ( sc_list[sectorpos]->startdataindex + (4*8*2) );
+				do
+				{
+					retrep = hxcfe_localRepair( floppycontext, fp, track, side, cellnumber, 10 );
+					cellnumber = cellnumber + 8;
+				}while(cellnumber < ( sc_list[sectorpos]->endsectorindex - 16 ) && !retrep);
+			}
+
+			if(sc_list)
+			{
+				i = 0;
+				while( i < nb_sectorfound )
+				{
+
+					hxcfe_freeSectorConfig( sa, sc_list[i] );
+					i++;
+				}
+				free(sc_list);
+			}
+			hxcfe_deinitSectorAccess( sa );
+
+			if(!retrep)
+				return HXCFE_NOERROR;
+			else
+				return 1; // Repaired...
+		}
+	}
+	
+	return HXCFE_BADPARAMETER;
+}

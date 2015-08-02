@@ -505,6 +505,9 @@ int32_t                hxcfe_setCellIndexState( HXCFE* floppycontext, HXCFE_SIDE
 int32_t                hxcfe_getCellBitrate( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber );
 int32_t                hxcfe_setCellBitrate( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber, uint32_t bitrate, int32_t numberofcells );
 
+int32_t                hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track, int32_t side, int32_t start_cellnumber, int32_t numberofcells );
+int32_t                hxcfe_sectorRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track, int32_t side, int32_t start_cellnumber );
+
 int32_t                hxcfe_getSectorConfigEncoding( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
 int32_t                hxcfe_getSectorConfigSectorID( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
 int32_t                hxcfe_getSectorConfigSideID( HXCFE* floppycontext, HXCFE_SECTCFG* sc );
