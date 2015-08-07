@@ -481,7 +481,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			}
 			fseek(f,trackheaderpos,SEEK_SET);
 
-			fseek(f,trackheader.tracksize,SEEK_CUR);
+			fseek(f,trackheader.track_block_size,SEEK_CUR);
 		}
 
 		numberoftrackperside++;
@@ -545,7 +545,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %.3d",trackheader.track_code&0x7F);
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Side %.3d" ,trackheader.track_code>>7);
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Number of Sector %.3d" ,trackheader.numberofsector);
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track Size : 0x%.8X" ,trackheader.tracksize);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track Block Size : 0x%.8X" ,trackheader.track_block_size);
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track Flags: 0x%.4X" ,trackheader.flags);
 
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track header:");
@@ -602,8 +602,26 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 									sectorconfig[j].use_alternate_data_crc=0;
 
-									sectorconfig[j].missingdataaddressmark=0;
+									if( sector[j].FDC_status & 0x08 ) // Bad Data CRC ?
+									{
+										sectorconfig[j].use_alternate_data_crc = 0x01;
+									}
+
 									sectorconfig[j].use_alternate_datamark=0;
+
+									if( sector[j].FDC_status & 0x20 ) // Deleted sector ?
+									{
+										sectorconfig[j].use_alternate_datamark = 0xFF;
+										sectorconfig[j].alternate_datamark = 0xF8;
+									}
+
+									if( sector[j].FDC_status & 0x10 ) // data block not found ?
+									{
+										sectorconfig[j].use_alternate_datamark = 0xFF;
+										sectorconfig[j].alternate_datamark = 0x00;
+									}
+
+									sectorconfig[j].missingdataaddressmark=0;
 									sectorconfig[j].use_alternate_addressmark=0;
 									sectorconfig[j].head=sector[j].side_num;
 									sectorconfig[j].cylinder=sector[j].track_num;
@@ -647,7 +665,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 									///////////////////////////// debug ///////////////////////////////
 
 
-									if((sector[j].FDC_status&0x88)==0x88)
+									if((sector[j].FDC_status&0x80)==0x80)
 									{
 										numberofweaksector++;
 										weaksectortotalsize=weaksectortotalsize+sectorconfig[j].sectorsize;
@@ -741,7 +759,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						// generation flakey bits
 						for(j=0;j<(trackheader.numberofsector);j++)
 						{
-							if((sector[j].FDC_status&0x88)==0x88)
+							if((sector[j].FDC_status&0x80)==0x80)
 							{
 								///////////////////////////// debug ///////////////////////////////
 #ifdef PASTI_DBG
@@ -852,10 +870,32 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							else
 								sectorconfig[j].sectorsize=0;
 
+
+							sectorconfig[j].use_alternate_data_crc=0;
+
+							if( sector[j].FDC_status & 0x08 ) // Bad Data CRC ?
+							{
+								sectorconfig[j].use_alternate_data_crc = 0x01;
+							}
+
+							sectorconfig[j].use_alternate_datamark=0;
+
+							if( sector[j].FDC_status & 0x20 ) // Deleted sector ?
+							{
+								sectorconfig[j].use_alternate_datamark = 0xFF;
+								sectorconfig[j].alternate_datamark = 0xF8;
+							}
+
+							if( sector[j].FDC_status & 0x10 ) // data block not found ?
+							{
+								sectorconfig[j].use_alternate_datamark = 0xFF;
+								sectorconfig[j].alternate_datamark = 0x00;
+							}
+
 							sectorconfig[j].alternate_sector_size_id=sector[j].sector_size;
 							tracksize=tracksize+sectorconfig[j].sectorsize;
 
-							if((sector[j].FDC_status&0x88)==0x88)
+							if((sector[j].FDC_status&0x80)==0x80)
 							{
 								numberofweaksector++;
 
@@ -1034,7 +1074,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							//  flakey bits generation
 							for(j=0;j<(trackheader.numberofsector);j++)
 							{
-								if((sector[j].FDC_status&0x88)==0x88)
+								if((sector[j].FDC_status&0x80)==0x80)
 								{
 									///////////////////////////// debug ///////////////////////////////
 	#ifdef PASTI_DBG
@@ -1100,7 +1140,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				}
 
 				fseek(f,trackheaderpos,SEEK_SET);
-				fseek(f,trackheader.tracksize,SEEK_CUR);
+				fseek(f,trackheader.track_block_size,SEEK_CUR);
 
 			}
 

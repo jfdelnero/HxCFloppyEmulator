@@ -74,6 +74,15 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	int number_of_side;
 	int number_of_track;
 
+	int flakeystate;
+	int cellnumber,cellcnt;
+	int flakeymaskneeded;
+	int flakey_mask_size;
+
+	unsigned char * flakey_mask_buffer;
+	int flakey_mask_file_offset;
+	int flakey_mask_offset;
+
 	pasti_fileheader header;
 	pasti_trackheader track_header;
 	pasti_sector sector_header;
@@ -121,18 +130,21 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			{
 				hxcfe_imgCallProgressCallback(imgldr_ctx,(i<<1) | (j&1),number_of_track*2 );
 
+				flakey_mask_buffer = 0;
+
 				fseek(stxdskfile,0,SEEK_END);
 
 				memset(&track_header,0,sizeof(pasti_trackheader));
 				track_header.track_code = (j<<7) | i;
 				track_header.flags = 0x0001;
-				track_header.Tvalue = (unsigned short)((floppy->tracks[i]->sides[j]->tracklen / 8) / 2);
+				track_header.track_size = (unsigned short)((floppy->tracks[i]->sides[j]->tracklen / 8) / 2);
 
 				tracksize = sizeof(pasti_trackheader);
 				cur_track_file_offset = ftell(stxdskfile);
 
 				fwrite(&track_header,sizeof(pasti_trackheader),1,stxdskfile);
 
+				flakey_mask_size = 0;
 				sect_cnt = 0;
 				ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 				if(ss)
@@ -161,8 +173,29 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 							sector_header.FDC_status = 0x00;
 							if(sc->input_data)
 							{
-								if(sc->use_alternate_data_crc)
+								if(sc->use_alternate_data_crc) // Bad data CRC ?
+								{
 									sector_header.FDC_status = 0x08;
+
+									// Check flakey bits presence.
+									flakeymaskneeded = 0;
+									cellnumber = sc->startdataindex;
+									do
+									{
+										flakeystate = hxcfe_getCellFlakeyState( imgldr_ctx->hxcfe, floppy->tracks[i]->sides[j], cellnumber);
+										if(flakeystate>0)
+										{
+											flakeymaskneeded = 1;
+										}
+										cellnumber = (cellnumber+1) % floppy->tracks[i]->sides[j]->tracklen;
+									}while(flakeystate==0 && cellnumber!=sc->endsectorindex);
+
+									if(flakeymaskneeded)
+									{
+										flakey_mask_size += sc->sectorsize;
+										sector_header.FDC_status |= 0x80;
+									}
+								}
 							}
 							else
 							{
@@ -177,6 +210,18 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 						}
 					}while(sc);
 
+					flakey_mask_file_offset =  ftell( stxdskfile );
+					flakey_mask_offset = 0;
+
+					if(flakey_mask_size>0)
+					{
+						flakey_mask_buffer = malloc( flakey_mask_size );
+						if( flakey_mask_buffer )
+						{
+							memset(flakey_mask_buffer,0xFF,flakey_mask_size);
+							fwrite(flakey_mask_buffer,flakey_mask_size,1,stxdskfile);
+						}
+					}
 					hxcfe_resetSearchTrackPosition(ss);
 
 					sect_cnt = 0;
@@ -201,6 +246,36 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 							fwrite(&sector_header,sizeof(pasti_sector),1,stxdskfile);
 
+							if( sector_header.FDC_status & 0x80 )
+							{
+								if( flakey_mask_buffer )
+								{
+									// Save Flakey bits
+
+									// Skip Data mark
+									cellnumber = ( sc->startdataindex + ( (3+1)*8*2) ) % floppy->tracks[i]->sides[j]->tracklen;
+									cellcnt = 0;
+									do
+									{
+										flakeystate = hxcfe_getCellFlakeyState( imgldr_ctx->hxcfe, floppy->tracks[i]->sides[j], cellnumber);
+
+										if(flakeystate > 0)
+										{
+											if( cellcnt < (sc->sectorsize*8*2) )
+											{
+												flakey_mask_buffer[flakey_mask_offset + (cellcnt>>4)] =
+														( flakey_mask_buffer[flakey_mask_offset + (cellcnt>>4)] ^ (0x01<<((cellcnt>>1)&0x7)) ) & flakey_mask_buffer[flakey_mask_offset + (cellcnt>>4)];
+											}
+										}
+
+										cellnumber = (cellnumber+1) % floppy->tracks[i]->sides[j]->tracklen;
+										cellcnt++;
+									}while(cellnumber!=sc->endsectorindex);
+
+									flakey_mask_offset += sc->sectorsize;
+								}
+							}
+
 							sect_cnt++;
 							tracksize += sc->sectorsize;
 							tracksectsize += sc->sectorsize;
@@ -211,7 +286,15 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 					hxcfe_deinitSectorAccess(ss);
 				}
 
-				track_header.tracksize = tracksize;
+
+				if(flakey_mask_buffer)
+				{
+					fseek(stxdskfile,flakey_mask_file_offset,SEEK_SET);
+					fwrite(flakey_mask_buffer,flakey_mask_size,1,stxdskfile);
+					free(flakey_mask_buffer);
+				}
+
+				track_header.track_block_size = tracksize + flakey_mask_size;
 				track_header.numberofsector = sect_cnt;
 
 				fseek(stxdskfile,cur_track_file_offset,SEEK_SET);
