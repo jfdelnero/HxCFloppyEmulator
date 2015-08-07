@@ -40,11 +40,11 @@ typedef struct pasti_fileheader_
 
 typedef struct pasti_trackheader_
 {
- uint32_t  tracksize;
- uint32_t  unused1;
+ uint32_t  track_block_size;
+ uint32_t  flakey_mask_size;
  uint16_t  numberofsector;
  uint16_t  flags;
- uint16_t  Tvalue;
+ uint16_t  track_size;
  uint8_t   track_code;
  uint8_t   unused2;
 
