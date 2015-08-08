@@ -264,7 +264,7 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 											if( cellcnt < (sc->sectorsize*8*2) )
 											{
 												flakey_mask_buffer[flakey_mask_offset + (cellcnt>>4)] =
-														( flakey_mask_buffer[flakey_mask_offset + (cellcnt>>4)] ^ (0x01<<((cellcnt>>1)&0x7)) ) & flakey_mask_buffer[flakey_mask_offset + (cellcnt>>4)];
+														( flakey_mask_buffer[flakey_mask_offset + (cellcnt>>4)] ^ (0x80>>((cellcnt>>1)&0x7)) ) & flakey_mask_buffer[flakey_mask_offset + (cellcnt>>4)];
 											}
 										}
 
@@ -296,6 +296,7 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 				track_header.track_block_size = tracksize + flakey_mask_size;
 				track_header.numberofsector = sect_cnt;
+				track_header.flakey_mask_size = flakey_mask_size;
 
 				fseek(stxdskfile,cur_track_file_offset,SEEK_SET);
 				fwrite(&track_header,sizeof(pasti_trackheader),1,stxdskfile);
