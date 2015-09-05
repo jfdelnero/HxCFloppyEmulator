@@ -3,7 +3,46 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "libhxcadaptor"=..\libhxcadaptor\trunk\build\libhxcadaptor.dsp - Package Owner=<4>
+Project: "ADFOpus"=..\AdfOpus_hxc\trunk\ADFOpusSrc\ADFOpus.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name xDMS
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "HxCFloppyEmulatorGUI"=..\HxCFloppyEmulator_software\trunk\build\HxCFloppyEmulatorGUI.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name fltk
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libhxcadaptor
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libhxcfe
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libusbhxcfe
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "Zlib"=..\AdfOpus_hxc\trunk\ADFOpusSrc\Zlib\Zlib.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -15,7 +54,76 @@ Package=<4>
 
 ###############################################################################
 
-Project: "expat"="..\libhxcfe\trunk\sources\thirdpartylibs\expat\expat-2.1.0\lib\expat_static.dsp" - Package Owner=<4>
+Project: "expat_static"="..\libhxcfe\trunk\sources\thirdpartylibs\expat\expat-2.1.0\lib\expat_static.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "fltk"="..\HxCFloppyEmulator_software\trunk\sources\thirdpartylibs\fltk\fltk-1.3.x\ide\VisualC6\fltk.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "gui"=..\vfd_hxc\trunk\src\gui\vfdwin.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "hxcfe"=..\HxCFloppyEmulator_cmdline\trunk\build\hxcfe.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libhxcadaptor
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libhxcfe
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libusbhxcfe
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "lib"=..\vfd_hxc\trunk\src\lib\vfdlib.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libhxcadaptor"=..\libhxcadaptor\trunk\build\libhxcadaptor.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -47,66 +155,9 @@ Package=<5>
 
 Package=<4>
 {{{
-}}}
-
-###############################################################################
-
-Project: "hxcfe"=..\HxCFloppyEmulator_cmdline\trunk\build\hxcfe.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "fltk"="..\HxCFloppyEmulator_software\trunk\sources\thirdpartylibs\fltk\fltk-1.3.x\ide\VisualC6\fltk.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "HxCFloppyEmulatorGUI"=..\HxCFloppyEmulator_software\trunk\build\HxCFloppyEmulatorGUI.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "lib"=..\vfd_hxc\trunk\src\lib\vfdlib.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "gui"=..\vfd_hxc\trunk\src\gui\vfdwin.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
+    Begin Project Dependency
+    Project_Dep_Name libhxcadaptor
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -124,29 +175,6 @@ Package=<4>
 ###############################################################################
 
 Project: "xDMS"=..\AdfOpus_hxc\trunk\ADFOpusSrc\xdms\xDMS.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-###############################################################################
-
-Project: "Zlib"=..\AdfOpus_hxc\trunk\ADFOpusSrc\Zlib\Zlib.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "ADFOpus"=..\AdfOpus_hxc\trunk\ADFOpusSrc\ADFOpus.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
