@@ -239,7 +239,7 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 
 					}
 
-					disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt]=(ftell(cpcdskfile)-trackinfooffset)/256;
+					disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt] = (char)( (ftell(cpcdskfile)-trackinfooffset) / 256 );
 					track_cnt++;
 
 					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,log_str);

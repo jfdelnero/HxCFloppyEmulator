@@ -353,7 +353,7 @@ RETCODE adfMountFlop(struct Device* dev)
 	memset(diskName, 0, 35);
 	memcpy(diskName, root.diskName, root.nameLen);
 
-    vol->volName = strdup(diskName);
+    vol->volName = _strdup(diskName);
 	
     dev->volList =(struct Volume**) calloc(1,sizeof(struct Volume*));
     if (!dev->volList) {

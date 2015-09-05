@@ -137,7 +137,7 @@ RETCODE adfReadGenBlock(struct Volume *vol, SECTNUM nSect, struct GenBlock *bloc
             len = min(MAXNAMELEN, buf[vol->blockSize-80]);
             strncpy(name, (char*)buf+vol->blockSize-79, len);
             name[len] = '\0';
-            block->name = strdup(name);
+            block->name = _strdup(name);
             block->parent = swapLong(buf+vol->blockSize-12);
             break;
         case ST_ROOT:

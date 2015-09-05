@@ -79,7 +79,7 @@ RETCODE adfRenameEntry(struct Volume *vol, SECTNUM pSect, char *oldName,
     }
 
     /* change name and parent dir */
-    entry.nameLen = min(31, strlen(newName));
+    entry.nameLen = (char)min(31, strlen(newName));
     memcpy(entry.name, newName, entry.nameLen);
     entry.parent = nPSect;
     tmpSect = entry.nextSameHash;
@@ -269,7 +269,7 @@ RETCODE adfSetEntryComment(struct Volume* vol, SECTNUM parSect, char* name,
         return RC_ERROR;
     }
 
-    entry.commLen = min(MAXCMMTLEN, strlen(newCmt));
+    entry.commLen = (char)min(MAXCMMTLEN, strlen(newCmt));
     memcpy(entry.comment, newCmt, entry.commLen);
 
     if (entry.secType==ST_DIR)
@@ -539,7 +539,7 @@ RETCODE adfEntBlock2Entry(struct bEntryBlock *entryBlk, struct Entry *entry)
     len = min(entryBlk->nameLen, MAXNAMELEN);
     strncpy(buf, entryBlk->name, len);
     buf[len] = '\0';
-    entry->name = strdup(buf);
+    entry->name = _strdup(buf);
     if (entry->name==NULL)
         return RC_MALLOC;
 /*printf("len=%d name=%s parent=%ld\n",entryBlk->nameLen, entry->name,entry->parent );*/
@@ -560,7 +560,7 @@ RETCODE adfEntBlock2Entry(struct bEntryBlock *entryBlk, struct Entry *entry)
         len = min(entryBlk->commLen, MAXCMMTLEN);
         strncpy(buf, entryBlk->comment, len);
         buf[len] = '\0';
-        entry->comment = strdup(buf);
+        entry->comment = _strdup(buf);
         if (entry->comment==NULL) {
             free(entry->name);
             return RC_MALLOC;
@@ -572,7 +572,7 @@ RETCODE adfEntBlock2Entry(struct bEntryBlock *entryBlk, struct Entry *entry)
         len = min(entryBlk->commLen, MAXCMMTLEN);
         strncpy(buf, entryBlk->comment, len);
         buf[len] = '\0';
-        entry->comment = strdup(buf);
+        entry->comment = _strdup(buf);
         if (entry->comment==NULL) {
             free(entry->name);
             return RC_MALLOC;
@@ -874,7 +874,7 @@ RETCODE adfCreateDir(struct Volume* vol, SECTNUM nParent, char* name)
         return RC_ERROR;
     }
     memset(&dir, 0, sizeof(struct bDirBlock));
-    dir.nameLen = min(MAXNAMELEN, strlen(name));
+    dir.nameLen = (char)min(MAXNAMELEN, strlen(name));
     memcpy(dir.dirName,name,dir.nameLen);
     dir.headerKey = nSect;
 
@@ -922,7 +922,7 @@ RETCODE adfCreateFile(struct Volume* vol, SECTNUM nParent, char *name,
     if (nSect==-1) return RC_ERROR;
 /*printf("new fhdr=%d\n",nSect);*/
     memset(fhdr,0,512);
-    fhdr->nameLen = min(MAXNAMELEN, strlen(name));
+    fhdr->nameLen = (char)min(MAXNAMELEN, strlen(name));
     memcpy(fhdr->fileName,name,fhdr->nameLen);
     fhdr->headerKey = nSect;
     if (parent.secType==ST_ROOT)
