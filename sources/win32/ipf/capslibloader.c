@@ -2,6 +2,7 @@
 
 #include <windows.h>
 #include "thirdpartylibs/capslib/Comtype.h"
+#include "thirdpartylibs/capslib/CapsAPI.h"
 
 typedef SDWORD (__cdecl* CAPSINIT)(void);
 typedef SDWORD (__cdecl* CAPSADDIMAGE)(void);
