@@ -73,7 +73,7 @@ return RC_OK;
 /*        if (entryBlk.secType!=ST_ROOT && entry.parent!=lPar)
             printf("path=%s\n",path(vol,entry.parent));
 */
-       *name = strdup("");
+       *name = _strdup("");
         if (*name==NULL)
             return RC_MALLOC;
         return RC_OK;
