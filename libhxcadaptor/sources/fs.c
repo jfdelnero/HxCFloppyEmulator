@@ -200,20 +200,20 @@ FILE *hxc_fopen (const char *filename, const char *mode)
 
 		if(append)
 		{
-			if(lseek(fd,0,SEEK_END) == -1)
+			if(_lseek(fd,0,SEEK_END) == -1)
 			{
-				close (fd);
+				_close (fd);
 				return NULL;
 			}
 		}
 		else
 		{
-			lseek(fd,0,SEEK_SET);
+			_lseek(fd,0,SEEK_SET);
 		}
 
-		stream = fdopen(fd,mode);
+		stream = _fdopen(fd,mode);
 		if(stream == NULL)
-			close(fd);
+			_close(fd);
 	}
 
 	return stream;
@@ -474,7 +474,7 @@ int hxc_mkdir(char * folder)
 {
 
 #ifdef WIN32
-	mkdir(folder);
+	_mkdir(folder);
 #else
 	mkdir(folder,0777);
 #endif
