@@ -14,13 +14,49 @@
 //
 // Written by: Jean François DEL NERO
 //
+// You are free to do what you want with this code.
+// A credit is always appreciated if you include it into your prod :)
+//
+// This file include some parts of the Noisetracker/Soundtracker/Protracker
+// Module Format documentation written by Andrew Scott (Adrenalin Software)
+// (modformat.txt)
+//
+// The core (hxcmod.c/hxcmod.h) is designed to have the least external dependency.
+// So it should be usable on almost all OS and systems.
+// Please also note that no dynamic allocation is done into the HxCMOD core.
+//
 // Change History (most recent first):
+///////////////////////////////////////////////////////////////////////////////////
+// HxCMOD Core API:
+// -------------------------------------------
+// int  hxcmod_init(modcontext * modctx)
+//
+// - Initialize the modcontext buffer. Must be called before doing anything else.
+//   Return 1 if success. 0 in case of error.
+// -------------------------------------------
+// int  hxcmod_load( modcontext * modctx, void * mod_data, int mod_data_size )
+//
+// - "Load" a MOD from memory (from "mod_data" with size "mod_data_size").
+//   Return 1 if success. 0 in case of error.
+// -------------------------------------------
+// void hxcmod_fillbuffer( modcontext * modctx, unsigned short * outbuffer, unsigned long nbsample, tracker_buffer_state * trkbuf )
+//
+// - Generate and return the next samples chunk to outbuffer.
+//   nbsample specify the number of stereo 16bits samples you want.
+//   The output format is signed 44100Hz 16-bit Stereo PCM samples.
+//   The output buffer size in byte must be equal to ( nbsample * 2 * 2 ).
+//   The optional trkbuf parameter can be used to get detailed status of the player. Put NULL/0 is unused.
+// -------------------------------------------
+// void hxcmod_unload( modcontext * modctx )
+// - "Unload" / clear the player status.
+// -------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "hxcmod.h"
 
 ///////////////////////////////////////////////////////////////////////////////////
 
+// Effects list
 #define EFFECT_ARPEGGIO              0x0 // Supported
 #define EFFECT_PORTAMENTO_UP         0x1 // Supported
 #define EFFECT_PORTAMENTO_DOWN       0x2 // Supported
@@ -48,26 +84,17 @@
 #define EFFECT_E_RETRIGGER_NOTE      0x9 // - TO BE DONE -
 #define EFFECT_E_FINE_VOLSLIDE_UP    0xA // Supported
 #define EFFECT_E_FINE_VOLSLIDE_DOWN  0xB // Supported
-#define EFFECT_E_NOTE_CUT            0xC // - TO BE DONE -
+#define EFFECT_E_NOTE_CUT            0xC // Supported
 #define EFFECT_E_NOTE_DELAY          0xD // - TO BE DONE -
 #define EFFECT_E_PATTERN_DELAY       0xE // Supported
 #define EFFECT_E_INVERT_LOOP         0xF // - TO BE DONE -
 #define EFFECT_SET_SPEED             0xF0 // Supported
 #define EFFECT_SET_TEMPO             0xF2 // Supported
 
-#define NUMMAXCHANNELS 32
+#define PERIOD_TABLE_LENGTH  MAXNOTES
+#define FULL_PERIOD_TABLE_LENGTH  ( PERIOD_TABLE_LENGTH * 8 )
 
-#define MAXNOTES 12*12
-
-///////////////////////////////////////////////////////////////////////////////////
-
-typedef unsigned char	muchar;
-typedef unsigned short	muint;
-typedef unsigned long	mulong;
-
-///////////////////////////////////////////////////////////////////////////////////
-
-static short periodtable[]=
+static const short periodtable[]=
 {
 	27392, 25856, 24384, 23040, 21696, 20480, 19328, 18240, 17216, 16256, 15360, 14496,
 	13696, 12928, 12192, 11520, 10848, 10240,  9664,  9120,  8606,  8128,  7680,  7248,
@@ -83,7 +110,7 @@ static short periodtable[]=
 	   13,    13,    12,    11,    11,    10,     9,     9,     8,     8,     7,     7
 };
 
-static short sintable[]={
+static const short sintable[]={
 	  0,  24,  49,  74,  97, 120, 141,161,
 	180, 197, 212, 224, 235, 244, 250,253,
 	255, 253, 250, 244, 235, 224, 212,197,
@@ -122,103 +149,7 @@ modtype modlist[]=
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-#pragma pack(1)
-
-typedef struct {
-	muchar  name[22];
-	muint   length;
-	muchar  finetune;
-	muchar  volume;
-	muint   reppnt;
-	muint   replen;
-} sample;
-
-typedef struct {
-	muchar  sampperiod;
-	muchar  period;
-	muchar  sampeffect;
-	muchar  effect;
-} note;
-
-typedef struct {
-	muchar  title[20];
-	sample  samples[31];
-	muchar  length;
-	muchar  protracker;
-	muchar  patterntable[128];
-	muchar  signature[4];
-	muchar  speed;
-} module;
-
-#pragma pack()
-
-///////////////////////////////////////////////////////////////////////////////////
-
-typedef struct {
-	char *  sampdata;
-	muint   sampnum;
-	muint   length;
-	muint   reppnt;
-	muint   replen;
-	mulong  samppos;
-	muint   period;
-	muchar  volume;
-	mulong  ticks;
-	muchar  effect;
-	muchar  parameffect;
-
-	short   decalperiod;
-	short   portaspeed;
-	short   portaperiod;
-	short   vibraperiod;
-	short   Arpperiods[3];
-	muchar  ArpIndex;
-
-	short   oldk;
-	muchar  volumeslide;
-
-	muchar  vibraparam;
-	muchar  vibrapointeur;
-
-	muchar  finetune;
-
-	muint   patternloopcnt;
-	muint   patternloopstartpoint;
-} channel;
-
-typedef struct {
-	module  song;
-	char *  sampledata[31];
-	note *  patterndata[128];
-
-	mulong  playrate;
-	muint   tablepos;
-	muint   patternpos;
-	muint   patterndelay;
-	muint   jump_loop_effect;
-	muchar  bpm;
-	mulong  patternticks;
-	mulong  patterntickse;
-	mulong  patternticksaim;
-	mulong  sampleticksconst;
-
-	mulong  samplenb;
-
-	channel channels[NUMMAXCHANNELS];
-
-	muint   number_of_channels;
-
-	muint   fullperiod[(sizeof(periodtable)/sizeof(unsigned short))*8];
-
-} modcontext;
-
-///////////////////////////////////////////////////////////////////////////////////
-
-static modcontext g_modcontext;
-
-///////////////////////////////////////////////////////////////////////////////////
-
-static void memcopy(void * dest,void *source,unsigned long size)
+static void memcopy( void * dest, void *source, unsigned long size )
 {
 	unsigned long i;
 	unsigned char * d,*s;
@@ -231,7 +162,7 @@ static void memcopy(void * dest,void *source,unsigned long size)
 	}
 }
 
-static void memclear(void * dest,unsigned char value,unsigned long size)
+static void memclear( void * dest, unsigned char value, unsigned long size )
 {
 	unsigned long i;
 	unsigned char * d;
@@ -243,7 +174,7 @@ static void memclear(void * dest,unsigned char value,unsigned long size)
 	}
 }
 
-static int memcompare(unsigned char * buf1,unsigned char * buf2,unsigned int size)
+static int memcompare( unsigned char * buf1, unsigned char * buf2, unsigned int size )
 {
 	unsigned int i;
 
@@ -261,11 +192,11 @@ static int memcompare(unsigned char * buf1,unsigned char * buf2,unsigned int siz
 	return 1;
 }
 
-static int getnote(modcontext * mod,unsigned short period,int finetune)
+static int getnote( modcontext * mod, unsigned short period, int finetune )
 {
 	int i;
 
-	for(i = 0; i < (sizeof(mod->fullperiod)/sizeof(unsigned short)); i++)
+	for(i = 0; i < FULL_PERIOD_TABLE_LENGTH; i++)
 	{
 		if(period >= mod->fullperiod[i])
 		{
@@ -276,7 +207,7 @@ static int getnote(modcontext * mod,unsigned short period,int finetune)
 	return MAXNOTES;
 }
 
-static void worknote(note * nptr, channel * cptr,char t,modcontext * mod)
+static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 {
 	muint sample, period, effect, operiod;
 	muint curnote, arpnote;
@@ -291,7 +222,7 @@ static void worknote(note * nptr, channel * cptr,char t,modcontext * mod)
 	{
 		if( sample && sample<32 )
 		{
-			cptr->sampnum = sample-1;
+			cptr->sampnum = sample - 1;
 		}
 
 		if( period || sample )
@@ -308,7 +239,6 @@ static void worknote(note * nptr, channel * cptr,char t,modcontext * mod)
 				cptr->vibraperiod=0;
 				cptr->vibrapointeur=0;
 			}
-
 		}
 
 		if( (sample != 0) && ( (effect>>8) != EFFECT_VOLSLIDE_TONEPORTA ) )
@@ -317,7 +247,7 @@ static void worknote(note * nptr, channel * cptr,char t,modcontext * mod)
 			cptr->volumeslide = 0;
 		}
 
-		if( ( (effect>>8) != EFFECT_TONE_PORTAMENTO && (effect>>8)!=EFFECT_VOLSLIDE_TONEPORTA) /*&& (period != 0 || sample != 0)*/ )
+		if( ( (effect>>8) != EFFECT_TONE_PORTAMENTO && (effect>>8)!=EFFECT_VOLSLIDE_TONEPORTA) )
 		{
 			if (period!=0)
 				cptr->samppos = 0;
@@ -340,10 +270,12 @@ static void worknote(note * nptr, channel * cptr,char t,modcontext * mod)
 
 			cptr->period = period;
 		}
+
 	}
 
 	cptr->effect = 0;
 	cptr->parameffect = 0;
+	cptr->effect_code = effect;
 
 	switch (effect >> 8)
 	{
@@ -370,14 +302,14 @@ static void worknote(note * nptr, channel * cptr,char t,modcontext * mod)
 				cptr->Arpperiods[0] = cptr->period;
 
 				arpnote = curnote + (((cptr->parameffect>>4)&0xF)*8);
-				if(arpnote>=(sizeof(mod->fullperiod)/sizeof(unsigned short)))
-					arpnote = (sizeof(mod->fullperiod)/sizeof(unsigned short)) - 1;
+				if( arpnote >= FULL_PERIOD_TABLE_LENGTH )
+					arpnote = FULL_PERIOD_TABLE_LENGTH - 1;
 
 				cptr->Arpperiods[1] = mod->fullperiod[arpnote];
 
 				arpnote = curnote + (((cptr->parameffect)&0xF)*8);
-				if(arpnote>=(sizeof(mod->fullperiod)/sizeof(unsigned short)))
-					arpnote = (sizeof(mod->fullperiod)/sizeof(unsigned short)) - 1;
+				if( arpnote >= FULL_PERIOD_TABLE_LENGTH )
+					arpnote = FULL_PERIOD_TABLE_LENGTH - 1;
 
 				cptr->Arpperiods[2] = mod->fullperiod[arpnote];
 			}
@@ -593,7 +525,6 @@ static void worknote(note * nptr, channel * cptr,char t,modcontext * mod)
 						cptr->period = 856;
 				break;
 
-
 				case EFFECT_E_FINE_VOLSLIDE_UP:
 					/*
 					[14][10]: Fine volume slide up
@@ -608,7 +539,31 @@ static void worknote(note * nptr, channel * cptr,char t,modcontext * mod)
 						cptr->volume = 64;
 				break;
 
+				case EFFECT_E_FINE_VOLSLIDE_DOWN:
+					/*
+					[14][11]: Fine volume slide down
+					Where [14][11][x] means "decrement the volume of the current sample
+					by x". Similar to [14][10] but lowers volume. You cannot slide
+					beyond volume 0.
+					*/
+
+					cptr->volume -= (effect & 0xF);
+					if( cptr->volume > 200 )
+						cptr->volume = 0;
+				break;
+
 				case EFFECT_E_PATTERN_LOOP:
+					/*
+					[14][6]: Loop pattern
+					Where [14][6][x] means "set the start of a loop to this division if
+					x is 0, otherwise after this division, jump back to the start of a
+					loop and play it another x times before continuing". If the start
+					of the loop was not set, it will default to the start of the
+					current pattern. Hence 'loop pattern' cannot be performed across
+					multiple patterns. Note that loops do not support nesting, and you
+					may generate an infinite loop if you try to nest 'loop pattern's.
+					*/
+
 					if( effect & 0xF )
 					{
 						if( cptr->patternloopcnt )
@@ -637,23 +592,36 @@ static void worknote(note * nptr, channel * cptr,char t,modcontext * mod)
 					}
 
 				break;
+
 				case EFFECT_E_PATTERN_DELAY:
+					/*
+					[14][14]: Delay pattern
+					Where [14][14][x] means "after this division there will be a delay
+					equivalent to the time taken to play x divisions after which the
+					pattern will be resumed". The delay only relates to the
+					interpreting of new divisions, and all effects and previous notes
+					continue during delay.
+					*/
+
 					mod->patterndelay = (effect & 0xF);
 				break;
 
-
-				case EFFECT_E_FINE_VOLSLIDE_DOWN:
+				case EFFECT_E_NOTE_CUT:
 					/*
-					[14][11]: Fine volume slide down
-					Where [14][11][x] means "decrement the volume of the current sample
-					by x". Similar to [14][10] but lowers volume. You cannot slide
-					beyond volume 0.
+					[14][12]: Cut sample
+					Where [14][12][x] means "after the current sample has been played
+					for x ticks in this division, its volume will be set to 0". This
+					implies that if x is 0, then you will not hear any of the sample.
+					If you wish to insert "silence" in a pattern, it is better to use a
+					"silence"-sample (see above) due to the lack of proper support for
+					this effect.
 					*/
-
-					cptr->volume -= (effect & 0xF);
-					if( cptr->volume > 200 )
+					cptr->effect = EFFECT_E_NOTE_CUT;
+					cptr->cut_param = (effect & 0xF);
+					if(!cptr->cut_param)
 						cptr->volume = 0;
 				break;
+
 				default:
 
 				break;
@@ -713,10 +681,9 @@ static void worknote(note * nptr, channel * cptr,char t,modcontext * mod)
 
 	}
 
-
 }
 
-static void workeffect(note * nptr, channel * cptr)
+static void workeffect( note * nptr, channel * cptr )
 {
 	switch(cptr->effect)
 	{
@@ -734,30 +701,36 @@ static void workeffect(note * nptr, channel * cptr)
 
 		case EFFECT_PORTAMENTO_UP:
 
-			cptr->period -= cptr->parameffect;
+			if(cptr->period)
+			{
+				cptr->period -= cptr->parameffect;
 
-			if( cptr->period < 113 || cptr->period > 20000 )
-				cptr->period = 113;
+				if( cptr->period < 113 || cptr->period > 20000 )
+					cptr->period = 113;
+			}
 
 		break;
 
 		case EFFECT_PORTAMENTO_DOWN:
 
-			cptr->period += cptr->parameffect;
+			if(cptr->period)
+			{
+				cptr->period += cptr->parameffect;
 
-			if( cptr->period > 20000 )
-				cptr->period = 20000;
+				if( cptr->period > 20000 )
+					cptr->period = 20000;
+			}
 
 		break;
 
 		case EFFECT_VOLSLIDE_TONEPORTA:
 		case EFFECT_TONE_PORTAMENTO:
 
-			if( ( cptr->period != cptr->portaperiod ) && cptr->portaperiod )
+			if( cptr->period && ( cptr->period != cptr->portaperiod ) && cptr->portaperiod )
 			{
 				if( cptr->period > cptr->portaperiod )
 				{
-					if(cptr->period - cptr->portaperiod >= cptr->portaspeed )
+					if( cptr->period - cptr->portaperiod >= cptr->portaspeed )
 					{
 						cptr->period -= cptr->portaspeed;
 					}
@@ -777,9 +750,15 @@ static void workeffect(note * nptr, channel * cptr)
 						cptr->period = cptr->portaperiod;
 					}
 				}
+
+				if( cptr->period == cptr->portaperiod )
+				{
+					// If the slide is over, don't let it to be retriggered.
+					cptr->portaperiod = 0;
+				}
 			}
 
-			if(cptr->effect==EFFECT_VOLSLIDE_TONEPORTA)
+			if( cptr->effect == EFFECT_VOLSLIDE_TONEPORTA )
 			{
 				if( cptr->volumeslide > 0x0F )
 				{
@@ -787,7 +766,6 @@ static void workeffect(note * nptr, channel * cptr)
 
 					if(cptr->volume>63)
 						cptr->volume = 63;
-
 				}
 				else
 				{
@@ -796,7 +774,6 @@ static void workeffect(note * nptr, channel * cptr)
 					if(cptr->volume>63)
 						cptr->volume=0;
 				}
-
 			}
 		break;
 
@@ -823,7 +800,7 @@ static void workeffect(note * nptr, channel * cptr)
 				{
 					cptr->volume = cptr->volume - cptr->volumeslide;
 
-					if( cptr->volume > 63 )
+					if( cptr->volume > 64 )
 						cptr->volume = 0;
 				}
 			}
@@ -848,6 +825,14 @@ static void workeffect(note * nptr, channel * cptr)
 			}
 		break;
 
+		case EFFECT_E_NOTE_CUT:
+			if(cptr->cut_param)
+				cptr->cut_param--;
+
+			if(!cptr->cut_param)
+				cptr->volume = 0;
+		break;
+
 		default:
 		break;
 
@@ -856,58 +841,102 @@ static void workeffect(note * nptr, channel * cptr)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
-
-void * hxcmod_load(void * moddata, int size)
+int hxcmod_init(modcontext * modctx)
 {
-	muint	i,j, max;
+	muint i,j;
+
+	if( modctx )
+	{
+		memclear(modctx,0,sizeof(modcontext));
+		modctx->playrate = 44100;
+		modctx->stereo = 1;
+		modctx->stereo_separation = 1;
+		modctx->bits = 16;
+		modctx->filter = 1;
+
+		for(i=0;i<PERIOD_TABLE_LENGTH - 1;i++)
+		{
+			for(j=0;j<8;j++)
+			{
+				modctx->fullperiod[(i*8) + j] = periodtable[i] - ((( periodtable[i] - periodtable[i+1] ) / 8) * j);
+			}
+		}
+
+		return 1;
+	}
+
+	return 0;
+}
+
+int hxcmod_setcfg(modcontext * modctx, int samplerate, int bits, int stereo, int stereo_separation, int filter)
+{
+	if( modctx )
+	{
+		modctx->playrate = samplerate;
+
+		if( stereo )
+			modctx->stereo = 1;
+		else
+			modctx->stereo = 0;
+			
+		if(stereo_separation < 4)
+		{
+			modctx->stereo_separation = stereo_separation;
+		}
+
+		if( bits == 8 || bits == 16 )
+		{
+			modctx->bits = bits;
+		}
+
+		if( filter )
+			modctx->filter = 1;
+		else
+			modctx->filter = 0;
+
+		return 1;
+	}
+
+	return 0;
+}
+
+int hxcmod_load( modcontext * modctx, void * mod_data, int mod_data_size )
+{
+	muint i, max;
 	unsigned short t;
-	sample	*sptr;
-	modcontext * mod;
+	sample *sptr;
 	unsigned char * modmemory,* endmodmemory;
 
-	mod = 0;
-	modmemory = (unsigned char *)moddata;
-	endmodmemory = modmemory + size;
+	modmemory = (unsigned char *)mod_data;
+	endmodmemory = modmemory + mod_data_size;
 
 	if(modmemory)
 	{
-		//mod=(modcontext *)malloc(sizeof(modcontext));
-		mod = (modcontext *) &g_modcontext;
-		if( mod )
+		if( modctx )
 		{
-			memclear(mod,0,sizeof(modcontext));
-
-			for(i=0;i<(sizeof(periodtable)/sizeof(unsigned short)) - 1;i++)
-			{
-				for(j=0;j<8;j++)
-				{
-					mod->fullperiod[(i*8) + j] = periodtable[i] - ((( periodtable[i] - periodtable[i+1] ) / 8) * j);
-				}
-			}
-
-			memcopy(&(mod->song.title),modmemory,1084);
+			memcopy(&(modctx->song.title),modmemory,1084);
 
 			i = 0;
-			mod->number_of_channels = 0;
+			modctx->number_of_channels = 0;
 			while(modlist[i].numberofchannels)
 			{
-				if(memcompare(mod->song.signature,modlist[i].signature,4))
+				if(memcompare(modctx->song.signature,modlist[i].signature,4))
 				{
-					mod->number_of_channels = modlist[i].numberofchannels;
+					modctx->number_of_channels = modlist[i].numberofchannels;
 				}
 
 				i++;
 			}
 
-			if( !mod->number_of_channels )
+			if( !modctx->number_of_channels )
 			{
 				// 15 Samples modules support
 				// Shift the whole datas to make it look likes a standard 4 channels mod.
-				memcopy(&(mod->song.signature), "M.K.", 4);
-				memcopy(&(mod->song.length), &(mod->song.samples[15]), 130);
-				memclear(&(mod->song.samples[15]), 0, 480);
+				memcopy(&(modctx->song.signature), "M.K.", 4);
+				memcopy(&(modctx->song.length), &(modctx->song.samples[15]), 130);
+				memclear(&(modctx->song.samples[15]), 0, 480);
 				modmemory += 600;
-				mod->number_of_channels = 4;
+				modctx->number_of_channels = 4;
 			}
 			else
 			{
@@ -920,10 +949,10 @@ void * hxcmod_load(void * moddata, int size)
 			// Patterns loading
 			for (i = max = 0; i < 128; i++)
 			{
-				while (max <= mod->song.patterntable[i])
+				while (max <= modctx->song.patterntable[i])
 				{
-					mod->patterndata[max] = (note*)modmemory;
-					modmemory += (256*mod->number_of_channels);
+					modctx->patterndata[max] = (note*)modmemory;
+					modmemory += (256*modctx->number_of_channels);
 					max++;
 
 					if( modmemory >= endmodmemory )
@@ -932,10 +961,10 @@ void * hxcmod_load(void * moddata, int size)
 			}
 
 			for (i = 0; i < 31; i++)
-				mod->sampledata[i]=0;
+				modctx->sampledata[i]=0;
 
 			// Samples loading
-			for (i = 0, sptr = mod->song.samples; i <31; i++, sptr++)
+			for (i = 0, sptr = modctx->song.samples; i <31; i++, sptr++)
 			{
 				t= (sptr->length &0xFF00)>>8 | (sptr->length &0xFF)<<8;
 				sptr->length = t*2;
@@ -949,7 +978,7 @@ void * hxcmod_load(void * moddata, int size)
 
 				if (sptr->length == 0) continue;
 
-				mod->sampledata[i] = modmemory;
+				modctx->sampledata[i] = modmemory;
 				modmemory += sptr->length;
 
 				if (sptr->replen + sptr->reppnt > sptr->length)
@@ -961,229 +990,296 @@ void * hxcmod_load(void * moddata, int size)
 
 			// States init
 
-			mod->playrate = 44100;
-			mod->tablepos = 0;
-			mod->patternpos = 0;
-			mod->song.speed = 6;
-			mod->bpm = 125;
-			mod->samplenb = 0;
+			modctx->tablepos = 0;
+			modctx->patternpos = 0;
+			modctx->song.speed = 6;
+			modctx->bpm = 125;
+			modctx->samplenb = 0;
 
-			mod->patternticks = (((long)mod->song.speed * mod->playrate * 5)/ (2 * mod->bpm)) + 1;
-			mod->patternticksaim = ((long)mod->song.speed * mod->playrate * 5) / (2 * mod->bpm);
+			modctx->patternticks = (((long)modctx->song.speed * modctx->playrate * 5)/ (2 * modctx->bpm)) + 1;
+			modctx->patternticksaim = ((long)modctx->song.speed * modctx->playrate * 5) / (2 * modctx->bpm);
 
-			mod->sampleticksconst = 3546894UL / mod->playrate; //8448*428/playrate;
+			modctx->sampleticksconst = 3546894UL / modctx->playrate; //8448*428/playrate;
 
-			for(i=0;i<(mod->number_of_channels);i++)
+			for(i=0; i < modctx->number_of_channels; i++)
 			{
-				mod->channels[i].volume = 0;
-				mod->channels[i].period = 448;
+				modctx->channels[i].volume = 0;
+				modctx->channels[i].period = 0;
 			}
+
+			modctx->mod_loaded = 1;
+
+			return 1;
 		}
 	}
 
-	return (void*)mod;
+	return 0;
 }
 
-void hxcmod_fillbuffer(void * modctx,unsigned short * buffer, unsigned long nbsample,tracker_buffer_state * trkbuf)
+void hxcmod_fillbuffer( modcontext * modctx, unsigned short * outbuffer, unsigned long nbsample, tracker_buffer_state * trkbuf )
 {
 	unsigned long i, j;
 	unsigned long k;
 	unsigned char c;
 	unsigned int state_remaining_steps;
-	short l,r;
-	short ll,lr;
-	short tl,tr;
+	int l,r;
+	int ll,lr;
+	int tl,tr;
 	short finalperiod;
-	modcontext * mod;
 	note	*nptr;
 	channel *cptr;
 
-	mod = (modcontext *)modctx;
-
-	if( mod && buffer )
+	if( modctx && outbuffer )
 	{
-		state_remaining_steps = 0;
-
-		if( trkbuf )
+		if(modctx->mod_loaded)
 		{
-			trkbuf->cur_rd_index = 0;
+			state_remaining_steps = 0;
 
-			memcopy(trkbuf->name,mod->song.title,sizeof(mod->song.title));
-
-			for(i=0;i<31;i++)
+			if( trkbuf )
 			{
-				memcopy(trkbuf->instruments[i].name,mod->song.samples[i].name,sizeof(trkbuf->instruments[i].name));
-			}
-		}
+				trkbuf->cur_rd_index = 0;
 
-		ll=0;
-		lr=0;
+				memcopy(trkbuf->name,modctx->song.title,sizeof(modctx->song.title));
 
-		for (i = 0; i < nbsample; i++)
-		{
-			//---------------------------------------
-			if( mod->patternticks++ > mod->patternticksaim )
-			{
-				if( !mod->patterndelay )
+				for(i=0;i<31;i++)
 				{
-					nptr = mod->patterndata[mod->song.patterntable[mod->tablepos]];
-					nptr = nptr + mod->patternpos;
-					cptr = mod->channels;
+					memcopy(trkbuf->instruments[i].name,modctx->song.samples[i].name,sizeof(trkbuf->instruments[i].name));
+				}
+			}
 
-					mod->patternticks = 0;
-					mod->patterntickse = 0;
+			ll = modctx->last_l_sample;
+			lr = modctx->last_r_sample;
 
-					for(c=0;c<mod->number_of_channels;c++)
+			for (i = 0; i < nbsample; i++)
+			{
+				//---------------------------------------
+				if( modctx->patternticks++ > modctx->patternticksaim )
+				{
+					if( !modctx->patterndelay )
 					{
-						worknote((note*)(nptr+c), (channel*)(cptr+c),(char)(c+1),mod);
-					}
+						nptr = modctx->patterndata[modctx->song.patterntable[modctx->tablepos]];
+						nptr = nptr + modctx->patternpos;
+						cptr = modctx->channels;
 
-					if( !mod->jump_loop_effect )
-						mod->patternpos += mod->number_of_channels;
-					else
-						mod->jump_loop_effect = 0;
+						modctx->patternticks = 0;
+						modctx->patterntickse = 0;
 
-					if( mod->patternpos == 64*mod->number_of_channels )
-					{
-						mod->tablepos++;
-						mod->patternpos = 0;
-						if(mod->tablepos >= mod->song.length)
-							mod->tablepos = 0;
-					}
-				}
-				else
-				{
-					mod->patterndelay--;
-					mod->patternticks = 0;
-					mod->patterntickse = 0;
-				}
+						for(c=0;c<modctx->number_of_channels;c++)
+						{
+							worknote((note*)(nptr+c), (channel*)(cptr+c),(char)(c+1),modctx);
+						}
 
-			}
-
-			if( mod->patterntickse++ > (mod->patternticksaim/mod->song.speed) )
-			{
-				nptr = mod->patterndata[mod->song.patterntable[mod->tablepos]];
-				nptr = nptr + mod->patternpos;
-				cptr = mod->channels;
-
-				for(c=0;c<mod->number_of_channels;c++)
-				{
-					workeffect(nptr+c, cptr+c);
-				}
-
-				mod->patterntickse = 0;
-			}
-
-			//---------------------------------------
-
-
-			if( trkbuf && !state_remaining_steps )
-			{
-				if( trkbuf->nb_of_state < trkbuf->nb_max_of_state )
-				{
-					memclear(&trkbuf->track_state_buf[trkbuf->nb_of_state],0,sizeof(tracker_state));
-				}
-			}
-
-			l=0;
-			r=0;
-
-			for(j =0, cptr = mod->channels; (j < mod->number_of_channels) && (cptr->period!=0); j++, cptr++)
-			{
-
-				finalperiod = cptr->period - cptr->decalperiod - cptr->vibraperiod;
-				if( finalperiod )
-				{
-					cptr->samppos += ( (mod->sampleticksconst<<10) / finalperiod );
-				}
-
-				cptr->ticks++;
-
-				if( cptr->replen<=2 )
-				{
-					if( (cptr->samppos>>10) >= (cptr->length) )
-					{
-						cptr->length = 0;
-						cptr->reppnt = 0;
-
-						if( cptr->length )
-							cptr->samppos = cptr->samppos % (((unsigned long)cptr->length)<<10);
+						if( !modctx->jump_loop_effect )
+							modctx->patternpos += modctx->number_of_channels;
 						else
-							cptr->samppos = 0;
+							modctx->jump_loop_effect = 0;
+
+						if( modctx->patternpos == 64*modctx->number_of_channels )
+						{
+							modctx->tablepos++;
+							modctx->patternpos = 0;
+							if(modctx->tablepos >= modctx->song.length)
+								modctx->tablepos = 0;
+						}
 					}
-				}
-				else
-				{
-					if( (cptr->samppos>>10) >= (unsigned long)(cptr->replen+cptr->reppnt) )
+					else
 					{
-						cptr->samppos = ((unsigned long)(cptr->reppnt)<<10) + (cptr->samppos % ((unsigned long)(cptr->replen+cptr->reppnt)<<10));
+						modctx->patterndelay--;
+						modctx->patternticks = 0;
+						modctx->patterntickse = 0;
 					}
+
 				}
 
-				k = cptr->samppos >> 10;
+				if( modctx->patterntickse++ > (modctx->patternticksaim/modctx->song.speed) )
+				{
+					nptr = modctx->patterndata[modctx->song.patterntable[modctx->tablepos]];
+					nptr = nptr + modctx->patternpos;
+					cptr = modctx->channels;
 
-				if( cptr->sampdata!=0 && ( ((j&3)==1) || ((j&3)==2) ) )
-					r += ( cptr->sampdata[k] *  cptr->volume );
+					for(c=0;c<modctx->number_of_channels;c++)
+					{
+						workeffect(nptr+c, cptr+c);
+					}
 
-				if( cptr->sampdata!=0 && ( ((j&3)==0) || ((j&3)==3) ) )
-					l += ( cptr->sampdata[k] *  cptr->volume );
+					modctx->patterntickse = 0;
+				}
 
+				//---------------------------------------
 
 				if( trkbuf && !state_remaining_steps )
 				{
 					if( trkbuf->nb_of_state < trkbuf->nb_max_of_state )
 					{
-						trkbuf->track_state_buf[trkbuf->nb_of_state].number_of_tracks = mod->number_of_channels;
-						trkbuf->track_state_buf[trkbuf->nb_of_state].buf_index = i;
-						trkbuf->track_state_buf[trkbuf->nb_of_state].cur_pattern = mod->song.patterntable[mod->tablepos];
-						trkbuf->track_state_buf[trkbuf->nb_of_state].cur_pattern_pos = mod->patternpos / mod->number_of_channels;
-						trkbuf->track_state_buf[trkbuf->nb_of_state].cur_pattern_table_pos = mod->tablepos;
-						trkbuf->track_state_buf[trkbuf->nb_of_state].bpm = mod->bpm;
-						trkbuf->track_state_buf[trkbuf->nb_of_state].speed = mod->song.speed;
-						trkbuf->track_state_buf[trkbuf->nb_of_state].tracks[j].cur_effect = cptr->effect;
-						trkbuf->track_state_buf[trkbuf->nb_of_state].tracks[j].cur_period = finalperiod;
-						trkbuf->track_state_buf[trkbuf->nb_of_state].tracks[j].cur_volume = cptr->volume;
-						trkbuf->track_state_buf[trkbuf->nb_of_state].tracks[j].instrument_number = cptr->sampnum;
+						memclear(&trkbuf->track_state_buf[trkbuf->nb_of_state],0,sizeof(tracker_state));
 					}
 				}
+
+				l=0;
+				r=0;
+
+				for(j =0, cptr = modctx->channels; j < modctx->number_of_channels ; j++, cptr++)
+				{
+					if( cptr->period != 0 )
+					{
+						finalperiod = cptr->period - cptr->decalperiod - cptr->vibraperiod;
+						if( finalperiod )
+						{
+							cptr->samppos += ( (modctx->sampleticksconst<<10) / finalperiod );
+						}
+
+						cptr->ticks++;
+
+						if( cptr->replen<=2 )
+						{
+							if( (cptr->samppos>>10) >= (cptr->length) )
+							{
+								cptr->length = 0;
+								cptr->reppnt = 0;
+
+								if( cptr->length )
+									cptr->samppos = cptr->samppos % (((unsigned long)cptr->length)<<10);
+								else
+									cptr->samppos = 0;
+							}
+						}
+						else
+						{
+							if( (cptr->samppos>>10) >= (unsigned long)(cptr->replen+cptr->reppnt) )
+							{
+								cptr->samppos = ((unsigned long)(cptr->reppnt)<<10) + (cptr->samppos % ((unsigned long)(cptr->replen+cptr->reppnt)<<10));
+							}
+						}
+
+						k = cptr->samppos >> 10;
+
+						if( cptr->sampdata!=0 && ( ((j&3)==1) || ((j&3)==2) ) )
+						{
+							r += ( cptr->sampdata[k] *  cptr->volume );
+						}
+
+						if( cptr->sampdata!=0 && ( ((j&3)==0) || ((j&3)==3) ) )
+						{
+							l += ( cptr->sampdata[k] *  cptr->volume );
+						}
+
+						if( trkbuf && !state_remaining_steps )
+						{
+							if( trkbuf->nb_of_state < trkbuf->nb_max_of_state )
+							{
+								trkbuf->track_state_buf[trkbuf->nb_of_state].number_of_tracks = modctx->number_of_channels;
+								trkbuf->track_state_buf[trkbuf->nb_of_state].buf_index = i;
+								trkbuf->track_state_buf[trkbuf->nb_of_state].cur_pattern = modctx->song.patterntable[modctx->tablepos];
+								trkbuf->track_state_buf[trkbuf->nb_of_state].cur_pattern_pos = modctx->patternpos / modctx->number_of_channels;
+								trkbuf->track_state_buf[trkbuf->nb_of_state].cur_pattern_table_pos = modctx->tablepos;
+								trkbuf->track_state_buf[trkbuf->nb_of_state].bpm = modctx->bpm;
+								trkbuf->track_state_buf[trkbuf->nb_of_state].speed = modctx->song.speed;
+								trkbuf->track_state_buf[trkbuf->nb_of_state].tracks[j].cur_effect = cptr->effect_code;
+								trkbuf->track_state_buf[trkbuf->nb_of_state].tracks[j].cur_parameffect = cptr->parameffect;
+								trkbuf->track_state_buf[trkbuf->nb_of_state].tracks[j].cur_period = finalperiod;
+								trkbuf->track_state_buf[trkbuf->nb_of_state].tracks[j].cur_volume = cptr->volume;
+								trkbuf->track_state_buf[trkbuf->nb_of_state].tracks[j].instrument_number = (unsigned char)cptr->sampnum;
+							}
+						}
+					}
+				}
+
+				if( trkbuf && !state_remaining_steps )
+				{
+					state_remaining_steps = trkbuf->sample_step;
+
+					if(trkbuf->nb_of_state < trkbuf->nb_max_of_state)
+						trkbuf->nb_of_state++;
+				}
+				else
+				{
+					state_remaining_steps--;
+				}
+
+				tl = (short)l;
+				tr = (short)r;
+
+				if ( modctx->filter )
+				{
+					// Filter
+					l = (l+ll)>>1;
+					r = (r+lr)>>1;
+				}
+
+				if ( modctx->stereo_separation == 1 )
+				{
+					// Left & Right Stereo panning
+					l = (l+(r>>1));
+					r = (r+(l>>1));
+				}
+
+				// Level limitation
+				if( l > 32767 ) l = 32767;
+				if( l < -32768 ) l = -32768;
+				if( r > 32767 ) r = 32767;
+				if( r < -32768 ) r = -32768;
+
+				// Store the final sample.
+				outbuffer[(i*2)]   = l;
+				outbuffer[(i*2)+1] = r;
+
+				ll = tl;
+				lr = tr;
+
 			}
 
-			if( trkbuf && !state_remaining_steps )
-			{
-				state_remaining_steps = trkbuf->sample_step;
+			modctx->last_l_sample = ll;
+			modctx->last_r_sample = lr;
 
-				if(trkbuf->nb_of_state < trkbuf->nb_max_of_state)
-					trkbuf->nb_of_state++;
-			}
-			else
-			{
-				state_remaining_steps--;
-			}
-
-			tr=r;
-			tl=l;
-
-			l=(l+ll)>>1;
-			r=(r+lr)>>1;
-
-			buffer[(i*2)]   = (l+(r>>1));
-			buffer[(i*2)+1] = (r+(l>>1));
-
-			ll=tl;
-			lr=tr;
-
+			modctx->samplenb = modctx->samplenb+nbsample;
 		}
+		else
+		{
+			for (i = 0; i < nbsample; i++)
+			{
+				// Mod not loaded. Return blank buffer.
+				outbuffer[(i*2)]   = 0;
+				outbuffer[(i*2)+1] = 0;
+			}
 
-		mod->samplenb=mod->samplenb+nbsample;
+			if(trkbuf)
+			{
+				trkbuf->nb_of_state = 0;
+				trkbuf->cur_rd_index = 0;
+				trkbuf->name[0] = 0;
+				memclear(trkbuf->track_state_buf,0,sizeof(tracker_state) * trkbuf->nb_max_of_state);
+				memclear(trkbuf->instruments,0,sizeof(trkbuf->instruments));
+			}
+		}
 	}
 }
 
-void hxcmod_unload(void * modctx)
+void hxcmod_unload( modcontext * modctx )
 {
-	modcontext * mod;
+	if(modctx)
+	{
+		memclear(&modctx->song,0,sizeof(modctx->song));
+		memclear(&modctx->sampledata,0,sizeof(modctx->sampledata));
+		memclear(&modctx->patterndata,0,sizeof(modctx->patterndata));
+		modctx->tablepos = 0;
+		modctx->patternpos = 0;
+		modctx->patterndelay  = 0;
+		modctx->jump_loop_effect = 0;
+		modctx->bpm = 0;
+		modctx->patternticks = 0;
+		modctx->patterntickse = 0;
+		modctx->patternticksaim = 0;
+		modctx->sampleticksconst = 0;
 
-	mod = (modcontext *)modctx;
+		modctx->samplenb = 0;
 
-	if(mod)
-		memclear(mod,0,sizeof(modcontext));
+		memclear(modctx->channels,0,sizeof(modctx->channels));
+
+		modctx->number_of_channels = 0;
+
+		modctx->mod_loaded = 0;
+
+		modctx->last_r_sample = 0;
+		modctx->last_l_sample = 0;
+	}
 }
