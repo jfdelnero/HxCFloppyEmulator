@@ -102,7 +102,10 @@ int RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 								sca = hxcfe_getAllTrackSectors(ss,j,i,MEMBRAIN_MFM_ENCODING,&nbsector);
 							break;
 							case 6:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,AED6200P_MFM_ENCODING,&nbsector);
+								sca = 0;
+								#ifdef AED6200P_SUPPORT
+									sca = hxcfe_getAllTrackSectors(ss,j,i,AED6200P_MFM_ENCODING,&nbsector);
+								#endif
 							break;
 
 						}
