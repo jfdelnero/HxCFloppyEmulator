@@ -85,7 +85,7 @@ int VFDDAT_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 				return HXCFE_BADFILE;
 			}
 
-			if(strncmp(&header[0x150],"VFD",3))
+			if(strncmp((char*)&header[0x150],"VFD",3))
 			{
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VFDDAT_libIsValidDiskFile : non DAT file ! bad header !");
 				return HXCFE_BADFILE;
