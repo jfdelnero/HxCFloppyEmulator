@@ -77,7 +77,7 @@ return RC_OK;
 		*name = _strdup("");
 #else
 		*name = strdup("");
-#endif				
+#endif
         if (*name==NULL)
             return RC_MALLOC;
         return RC_OK;
