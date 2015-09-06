@@ -539,7 +539,13 @@ RETCODE adfEntBlock2Entry(struct bEntryBlock *entryBlk, struct Entry *entry)
     len = min(entryBlk->nameLen, MAXNAMELEN);
     strncpy(buf, entryBlk->name, len);
     buf[len] = '\0';
+
+#if defined (WIN32)
     entry->name = _strdup(buf);
+#else
+	entry->name = strdup(buf);
+#endif
+
     if (entry->name==NULL)
         return RC_MALLOC;
 /*printf("len=%d name=%s parent=%ld\n",entryBlk->nameLen, entry->name,entry->parent );*/
@@ -560,7 +566,11 @@ RETCODE adfEntBlock2Entry(struct bEntryBlock *entryBlk, struct Entry *entry)
         len = min(entryBlk->commLen, MAXCMMTLEN);
         strncpy(buf, entryBlk->comment, len);
         buf[len] = '\0';
+#if defined (WIN32)
         entry->comment = _strdup(buf);
+#else
+	    entry->comment =  strdup(buf);
+#endif
         if (entry->comment==NULL) {
             free(entry->name);
             return RC_MALLOC;
@@ -572,7 +582,11 @@ RETCODE adfEntBlock2Entry(struct bEntryBlock *entryBlk, struct Entry *entry)
         len = min(entryBlk->commLen, MAXCMMTLEN);
         strncpy(buf, entryBlk->comment, len);
         buf[len] = '\0';
+#if defined (WIN32)
         entry->comment = _strdup(buf);
+#else
+	    entry->comment =  strdup(buf);
+#endif
         if (entry->comment==NULL) {
             free(entry->name);
             return RC_MALLOC;
