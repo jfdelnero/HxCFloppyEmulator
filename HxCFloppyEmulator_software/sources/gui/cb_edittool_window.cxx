@@ -477,6 +477,61 @@ void edittool_window_bt_shifttracks_callback(Fl_Button *o, void *v)
 	hxc_leavecriticalsection(guicontext->hxcfe,1);
 }
 
+void edittool_window_bt_repair_callback(Fl_Button *o, void *v)
+{
+	Main_Window *window;
+	floppy_infos_window *fiw;
+	HXCFE_SIDE * curside;
+	int valmodif;
+	int track,side;
+	trackedittool_window *tew;
+	int startpulse,endpulse;
+	int tracklen,loop;
+
+	hxc_entercriticalsection(guicontext->hxcfe,1);
+
+	window = (Main_Window *)guicontext->main_window;
+	tew = (trackedittool_window *)window->trackedit_window;
+	fiw = (floppy_infos_window *)window->infos_window;
+
+	track = (int)fiw->track_number_slide->value();
+	track = valuesanitycheck(track,0, hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy),&valmodif);
+	if(valmodif)
+		fiw->track_number_slide->value(track);
+
+	side=(int)fiw->side_number_slide->value();
+	side = valuesanitycheck(side,0, hxcfe_getNumberOfSide(guicontext->hxcfe,guicontext->loadedfloppy),&valmodif);
+	if(valmodif)
+		fiw->side_number_slide->value(side);
+
+	startpulse = atoi(tew->edit_startpoint->value());
+	endpulse = atoi(tew->edit_endpoint->value());
+	tracklen = hxcfe_getTrackLength(guicontext->hxcfe,guicontext->loadedfloppy,track,side);
+
+	curside = hxcfe_getSide(guicontext->hxcfe,guicontext->loadedfloppy,track,side);
+	if(curside)
+	{
+		startpulse = startpulse % tracklen;
+		endpulse = endpulse % tracklen;
+
+		if(startpulse<endpulse)
+		{
+			loop = endpulse - startpulse;
+		}
+		else
+		{
+			loop = ( hxcfe_getTrackLength(guicontext->hxcfe, guicontext->loadedfloppy, track, side ) - startpulse ) + endpulse;
+		}
+
+		//hxcfe_sectorRepair( guicontext->hxcfe, guicontext->loadedfloppy, track, side, startpulse);
+		hxcfe_localRepair( guicontext->hxcfe, guicontext->loadedfloppy, track, side, startpulse, loop );
+
+		guicontext->updatefloppyinfos = 1;
+	}
+
+	hxc_leavecriticalsection(guicontext->hxcfe,1);
+}
+
 void edittool_window_bt_swapsides_callback(Fl_Button *o, void *v)
 {
 	Main_Window *window;

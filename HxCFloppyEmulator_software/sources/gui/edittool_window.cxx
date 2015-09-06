@@ -3,7 +3,7 @@
 #include "edittool_window.h"
 
 trackedittool_window::trackedittool_window() {
-  { window = new Fl_Double_Window(199, 461, "Track edition toolbar");
+  { window = new Fl_Double_Window(199, 475, "Track edition toolbar");
     window->labelsize(12);
     window->user_data((void*)(this));
     { bt_copy = new Fl_Button(7, 43, 93, 20, "Copy");
@@ -52,7 +52,7 @@ trackedittool_window::trackedittool_window() {
       bt_setbitrate->labelsize(10);
       bt_setbitrate->callback((Fl_Callback*)edittool_window_bt_setbitrate_callback, (void*)(this));
     } // Fl_Button* bt_setbitrate
-    { bt_directedition = new Fl_Light_Button(7, 408, 93, 20, "Direct edition");
+    { bt_directedition = new Fl_Light_Button(7, 425, 93, 20, "Direct edition");
       bt_directedition->labelsize(10);
       bt_directedition->user_data((void*)(this));
     } // Fl_Light_Button* bt_directedition
@@ -62,7 +62,7 @@ trackedittool_window::trackedittool_window() {
       edit_bitrate->textsize(10);
       edit_bitrate->user_data((void*)(this));
     } // Fl_Int_Input* edit_bitrate
-    { edit_editbuffer = new Fl_Int_Input(8, 433, 182, 22);
+    { edit_editbuffer = new Fl_Int_Input(8, 450, 182, 22);
       edit_editbuffer->type(2);
       edit_editbuffer->labelsize(10);
       edit_editbuffer->textsize(10);
@@ -84,68 +84,72 @@ trackedittool_window::trackedittool_window() {
       edit_fillflakey->textsize(10);
       edit_fillflakey->user_data((void*)(this));
     } // Fl_Int_Input* edit_fillflakey
-    { bt_erase1 = new Fl_Button(7, 296, 93, 20, "Erase Side 1");
+    { bt_erase1 = new Fl_Button(7, 313, 93, 20, "Erase Side 1");
       bt_erase1->labelsize(10);
       bt_erase1->callback((Fl_Callback*)edittool_window_bt_erase_side1_callback, (void*)(this));
     } // Fl_Button* bt_erase1
-    { bt_erase0 = new Fl_Button(7, 276, 93, 20, "Erase Side 0");
+    { bt_erase0 = new Fl_Button(7, 293, 93, 20, "Erase Side 0");
       bt_erase0->labelsize(10);
       bt_erase0->callback((Fl_Callback*)edittool_window_bt_erase_side0_callback, (void*)(this));
     } // Fl_Button* bt_erase0
-    { bt_setdiskbitrate = new Fl_Button(7, 236, 93, 20, "Set Disk Bitrate");
+    { bt_setdiskbitrate = new Fl_Button(7, 253, 93, 20, "Set Disk Bitrate");
       bt_setdiskbitrate->labelsize(10);
       bt_setdiskbitrate->callback((Fl_Callback*)edittool_window_bt_setdiskbitrate_callback, (void*)(this));
     } // Fl_Button* bt_setdiskbitrate
-    { edit_bitrate2 = new Fl_Int_Input(105, 236, 85, 20);
+    { edit_bitrate2 = new Fl_Int_Input(105, 253, 85, 20);
       edit_bitrate2->type(2);
       edit_bitrate2->labelsize(10);
       edit_bitrate2->textsize(10);
       edit_bitrate2->user_data((void*)(this));
     } // Fl_Int_Input* edit_bitrate2
-    { bt_rpm = new Fl_Button(7, 216, 93, 20, "Set Disk RPM");
+    { bt_rpm = new Fl_Button(7, 233, 93, 20, "Set Disk RPM");
       bt_rpm->labelsize(10);
       bt_rpm->callback((Fl_Callback*)edittool_window_bt_setdiskrpm_callback, (void*)(this));
     } // Fl_Button* bt_rpm
-    { bt_addtrack = new Fl_Button(7, 336, 93, 20, "Add Track");
+    { bt_addtrack = new Fl_Button(7, 353, 93, 20, "Add Track");
       bt_addtrack->labelsize(9);
       bt_addtrack->callback((Fl_Callback*)edittool_window_bt_addtrack_callback, (void*)(this));
     } // Fl_Button* bt_addtrack
-    { bt_removetrack = new Fl_Button(7, 356, 93, 20, "Remove Track");
+    { bt_removetrack = new Fl_Button(7, 373, 93, 20, "Remove Track");
       bt_removetrack->labelsize(9);
       bt_removetrack->callback((Fl_Callback*)edittool_window_bt_removetrack_callback, (void*)(this));
     } // Fl_Button* bt_removetrack
-    { edit_rpm = new Fl_Int_Input(105, 216, 85, 20);
+    { edit_rpm = new Fl_Int_Input(105, 233, 85, 20);
       edit_rpm->type(2);
       edit_rpm->labelsize(10);
       edit_rpm->textsize(10);
       edit_rpm->user_data((void*)(this));
     } // Fl_Int_Input* edit_rpm
-    { Fl_Box* o = new Fl_Box(4, 209, 185, 1);
+    { Fl_Box* o = new Fl_Box(6, 228, 185, 1);
       o->box(FL_ENGRAVED_BOX);
       o->align(Fl_Align(FL_ALIGN_CENTER|FL_ALIGN_INSIDE));
     } // Fl_Box* o
-    { Fl_Box* o = new Fl_Box(5, 402, 185, 1);
+    { Fl_Box* o = new Fl_Box(5, 419, 185, 1);
       o->box(FL_ENGRAVED_BOX);
       o->align(Fl_Align(FL_ALIGN_CENTER|FL_ALIGN_INSIDE));
     } // Fl_Box* o
-    { bt_removeoddtracks = new Fl_Button(7, 376, 93, 20, "Remove Odd Tracks");
+    { bt_removeoddtracks = new Fl_Button(7, 393, 93, 20, "Remove Odd Tracks");
       bt_removeoddtracks->labelsize(9);
       bt_removeoddtracks->callback((Fl_Callback*)edittool_window_bt_removeoddtracks_callback, (void*)(this));
     } // Fl_Button* bt_removeoddtracks
-    { bt_shifttracks = new Fl_Button(7, 256, 93, 20, "Shift Tracks");
+    { bt_shifttracks = new Fl_Button(7, 273, 93, 20, "Shift Tracks");
       bt_shifttracks->labelsize(10);
       bt_shifttracks->callback((Fl_Callback*)edittool_window_bt_shifttracks_callback, (void*)(this));
     } // Fl_Button* bt_shifttracks
-    { edit_shiftbittracks = new Fl_Int_Input(105, 255, 85, 20);
+    { edit_shiftbittracks = new Fl_Int_Input(105, 272, 85, 20);
       edit_shiftbittracks->type(2);
       edit_shiftbittracks->labelsize(10);
       edit_shiftbittracks->textsize(10);
       edit_shiftbittracks->user_data((void*)(this));
     } // Fl_Int_Input* edit_shiftbittracks
-    { bt_swapsides = new Fl_Button(7, 316, 93, 20, "Swap sides");
+    { bt_swapsides = new Fl_Button(7, 333, 93, 20, "Swap sides");
       bt_swapsides->labelsize(10);
       bt_swapsides->callback((Fl_Callback*)edittool_window_bt_swapsides_callback, (void*)(this));
     } // Fl_Button* bt_swapsides
+    { bt_repair = new Fl_Button(7, 203, 93, 20, "Repair");
+      bt_repair->labelsize(10);
+      bt_repair->callback((Fl_Callback*)edittool_window_bt_repair_callback, (void*)(this));
+    } // Fl_Button* bt_repair
     window->end();
   } // Fl_Double_Window* window
 }
