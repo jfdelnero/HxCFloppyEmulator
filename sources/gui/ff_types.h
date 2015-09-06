@@ -32,6 +32,7 @@ enum
 	FF_EHFE,
 	FF_ARBG,
 	FF_SKF,
+	FF_IPF,
 	FF_SCP,
 	FF_BMP,
 	FF_DISK_BMP,
