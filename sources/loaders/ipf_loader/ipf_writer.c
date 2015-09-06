@@ -137,7 +137,7 @@ int IPF_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	file = hxc_fopen(filename,"wb");
 	if(file)
 	{
-		write_record_header("CAPS",0,0, file);
+		write_record_header((unsigned char*)"CAPS",0,0, file);
 
 		memset(&ipfi,0,sizeof(ipf_info));
 
@@ -153,7 +153,7 @@ int IPF_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		ipfi.release = IPF_ID;
 		ipfi.revision = IPF_ID;
 		ipfi.user_id = IPF_ID;
-		write_record_header("INFO",(unsigned char*)&ipfi,sizeof(ipf_info), file);
+		write_record_header((unsigned char*)"INFO",(unsigned char*)&ipfi,sizeof(ipf_info), file);
 
 		for(i=0;i<floppy->floppyNumberOfTrack;i++)
 		{
@@ -162,7 +162,7 @@ int IPF_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 				memset(&ipfimg,0,sizeof(ipf_img));
 				ipfimg.cyl = BIGENDIAN_DWORD(i);
 				ipfimg.head = BIGENDIAN_DWORD(j);
-				write_record_header("IMGE",(unsigned char*)&ipfimg,sizeof(ipf_img), file);
+				write_record_header((unsigned char*)"IMGE",(unsigned char*)&ipfimg,sizeof(ipf_img), file);
 			}
 		}
 
@@ -171,7 +171,7 @@ int IPF_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			for(j=0;j<floppy->floppyNumberOfSide;j++)
 			{
 				memset(&ipfd,0,sizeof(ipf_data));
-				write_record_header("DATA",(unsigned char*)&ipfd,sizeof(ipf_data), file);
+				write_record_header((unsigned char*)"DATA",(unsigned char*)&ipfd,sizeof(ipf_data), file);
 			}
 		}
 
