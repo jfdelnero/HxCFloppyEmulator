@@ -63,8 +63,6 @@
 #include "data/data_vim_not_again_mod.h"
 #include "data/data_zandax_supplydas_booze_mod.h"
 
-void * mp;
-
 typedef struct scrolltab_
 {
 	int ysrc;
@@ -273,28 +271,37 @@ uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 	bitmap_hxc2001_bmp->unpacked_data=mi_unpack(bitmap_hxc2001_bmp->data,bitmap_hxc2001_bmp->csize ,bitmap_hxc2001_bmp->data, bitmap_hxc2001_bmp->size);
 	convert8b16b(bitmap_hxc2001_bmp,(unsigned short)0xFFFF);
 
-#ifdef WIN32    
-	srand(GetTickCount());
-#endif
-	switch(rand()&3)
+	ui_context->modctx = malloc( sizeof(modcontext) );
+	if(ui_context->modctx)
 	{
-		case 0:
-			data_maktone_class_cracktro15_mod->unpacked_data=mi_unpack(data_maktone_class_cracktro15_mod->data,data_maktone_class_cracktro15_mod->csize ,data_maktone_class_cracktro15_mod->data, data_maktone_class_cracktro15_mod->size);
-			mp = hxcmod_load(data_maktone_class_cracktro15_mod->unpacked_data,data_maktone_class_cracktro15_mod->size);
-		break;
-		case 1:
-			data_jozz_cognition_mod->unpacked_data=mi_unpack(data_jozz_cognition_mod->data,data_jozz_cognition_mod->csize ,data_jozz_cognition_mod->data, data_jozz_cognition_mod->size);
-			mp = hxcmod_load(data_jozz_cognition_mod->unpacked_data,data_jozz_cognition_mod->size);
-		break;
-		case 2:
-			data_zandax_supplydas_booze_mod->unpacked_data=mi_unpack(data_zandax_supplydas_booze_mod->data,data_zandax_supplydas_booze_mod->csize ,data_zandax_supplydas_booze_mod->data, data_zandax_supplydas_booze_mod->size);
-			mp = hxcmod_load(data_zandax_supplydas_booze_mod->unpacked_data,data_zandax_supplydas_booze_mod->size);
-		break;
-		case 3:
-			data_vim_not_again_mod->unpacked_data=mi_unpack(data_vim_not_again_mod->data,data_vim_not_again_mod->csize ,data_vim_not_again_mod->data, data_vim_not_again_mod->size);
-			mp = hxcmod_load(data_vim_not_again_mod->unpacked_data,data_vim_not_again_mod->size);
-		break;
+		memset( ui_context->modctx, 0, sizeof(modcontext));
 
+		hxcmod_init( (modcontext*)ui_context->modctx );
+		hxcmod_setcfg( (modcontext*)ui_context->modctx, 44100, 16, 1, 1, 1);
+
+#ifdef WIN32    
+		srand(GetTickCount());
+#endif
+		switch(rand()&3)
+		{
+			case 0:
+				data_maktone_class_cracktro15_mod->unpacked_data=mi_unpack(data_maktone_class_cracktro15_mod->data,data_maktone_class_cracktro15_mod->csize ,data_maktone_class_cracktro15_mod->data, data_maktone_class_cracktro15_mod->size);
+				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_maktone_class_cracktro15_mod->unpacked_data, data_maktone_class_cracktro15_mod->size);
+			break;
+			case 1:
+				data_jozz_cognition_mod->unpacked_data=mi_unpack(data_jozz_cognition_mod->data,data_jozz_cognition_mod->csize ,data_jozz_cognition_mod->data, data_jozz_cognition_mod->size);
+				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_jozz_cognition_mod->unpacked_data, data_jozz_cognition_mod->size);
+			break;
+			case 2:
+				data_zandax_supplydas_booze_mod->unpacked_data=mi_unpack(data_zandax_supplydas_booze_mod->data,data_zandax_supplydas_booze_mod->csize ,data_zandax_supplydas_booze_mod->data, data_zandax_supplydas_booze_mod->size);
+				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_zandax_supplydas_booze_mod->unpacked_data, data_zandax_supplydas_booze_mod->size);
+			break;
+			case 3:
+				data_vim_not_again_mod->unpacked_data=mi_unpack(data_vim_not_again_mod->data,data_vim_not_again_mod->csize ,data_vim_not_again_mod->data, data_vim_not_again_mod->size);
+				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_vim_not_again_mod->unpacked_data, data_vim_not_again_mod->size);
+			break;
+
+		}
 	}
 
 	return ui_context;
@@ -328,22 +335,22 @@ void uintro_reset(uintro_context * ui_context)
 		case 0:
 			if(!data_maktone_class_cracktro15_mod->unpacked_data)
 				data_maktone_class_cracktro15_mod->unpacked_data=mi_unpack(data_maktone_class_cracktro15_mod->data,data_maktone_class_cracktro15_mod->csize ,data_maktone_class_cracktro15_mod->data, data_maktone_class_cracktro15_mod->size);
-			mp = hxcmod_load(data_maktone_class_cracktro15_mod->unpacked_data,data_maktone_class_cracktro15_mod->size);
+				hxcmod_load((modcontext*)ui_context->modctx,(void*)data_maktone_class_cracktro15_mod->unpacked_data,data_maktone_class_cracktro15_mod->size);
 		break;
 		case 1:
 			if(!data_jozz_cognition_mod->unpacked_data)
 				data_jozz_cognition_mod->unpacked_data=mi_unpack(data_jozz_cognition_mod->data,data_jozz_cognition_mod->csize ,data_jozz_cognition_mod->data, data_jozz_cognition_mod->size);
-			mp = hxcmod_load(data_jozz_cognition_mod->unpacked_data,data_jozz_cognition_mod->size);
+				hxcmod_load((modcontext*)ui_context->modctx,(void*)data_jozz_cognition_mod->unpacked_data,data_jozz_cognition_mod->size);
 		break;
 		case 2:
 			if(!data_zandax_supplydas_booze_mod->unpacked_data)
 				data_zandax_supplydas_booze_mod->unpacked_data=mi_unpack(data_zandax_supplydas_booze_mod->data,data_zandax_supplydas_booze_mod->csize ,data_zandax_supplydas_booze_mod->data, data_zandax_supplydas_booze_mod->size);
-			mp = hxcmod_load(data_zandax_supplydas_booze_mod->unpacked_data,data_zandax_supplydas_booze_mod->size);
+				hxcmod_load((modcontext*)ui_context->modctx,(void*)data_zandax_supplydas_booze_mod->unpacked_data,data_zandax_supplydas_booze_mod->size);
 		break;
 		case 3:
 			if(!data_vim_not_again_mod->unpacked_data)
 				data_vim_not_again_mod->unpacked_data=mi_unpack(data_vim_not_again_mod->data,data_vim_not_again_mod->csize ,data_vim_not_again_mod->data, data_vim_not_again_mod->size);
-			mp = hxcmod_load(data_vim_not_again_mod->unpacked_data,data_vim_not_again_mod->size);
+				hxcmod_load((modcontext*)ui_context->modctx,(void*)(data_vim_not_again_mod->unpacked_data),data_vim_not_again_mod->size);
 		break;
 
 	}
@@ -352,7 +359,7 @@ void uintro_reset(uintro_context * ui_context)
 
 void uintro_getnext_soundsample(uintro_context * democontext,unsigned short* buffer,int size)
 {
-	hxcmod_fillbuffer(mp,buffer, size/2,0);
+	hxcmod_fillbuffer( (modcontext*)democontext->modctx, buffer, size/2,0);
 }
 
 
@@ -509,6 +516,13 @@ void uintro_deinit(uintro_context * democontext)
 	if(data_jozz_cognition_mod->unpacked_data) free(data_jozz_cognition_mod->unpacked_data);
 	if(data_zandax_supplydas_booze_mod->unpacked_data) free(data_zandax_supplydas_booze_mod->unpacked_data);
 	if(data_vim_not_again_mod->unpacked_data) free(data_vim_not_again_mod->unpacked_data);
+
+	if(democontext->modctx)
+	{
+		hxcmod_unload( (modcontext*)democontext->modctx );
+		free(democontext->modctx);
+		democontext->modctx = 0;
+	}
 
 	data_jozz_cognition_mod->unpacked_data=0;
 	data_maktone_class_cracktro15_mod->unpacked_data=0;

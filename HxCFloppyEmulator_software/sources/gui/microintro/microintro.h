@@ -20,6 +20,8 @@ typedef struct uintro_context_
 
 	unsigned long tick;
 	unsigned char part;
+
+	void * modctx;
 }uintro_context;
 
 
