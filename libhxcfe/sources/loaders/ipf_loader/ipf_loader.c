@@ -57,6 +57,7 @@
 #include "floppy_utils.h"
 
 #include "ipf_loader.h"
+#include "ipf_writer.h"
 
 #include "libhxcadaptor.h"
 
@@ -595,7 +596,7 @@ int IPF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 	{
 		(ISVALIDDISKFILE)	IPF_libIsValidDiskFile,
 		(LOADDISKFILE)		IPF_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		IPF_libWrite_DiskFile,
 		(GETPLUGININFOS)	IPF_libGetPluginInfo
 	};
 
