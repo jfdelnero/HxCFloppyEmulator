@@ -242,7 +242,11 @@ local gzFile gz_open(path, fd, mode)
 #ifdef _WIN32
         fd == -2 ? _wopen(path, oflag, 0666) :
 #endif
+#if defined (WIN32)
         _open((const char *)path, oflag, 0666));
+#else
+        open((const char *)path, oflag, 0666));
+#endif
     if (state->fd == -1) {
         free(state->path);
         free(state);
