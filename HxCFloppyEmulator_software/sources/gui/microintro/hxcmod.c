@@ -978,7 +978,7 @@ int hxcmod_load( modcontext * modctx, void * mod_data, int mod_data_size )
 
 				if (sptr->length == 0) continue;
 
-				modctx->sampledata[i] = modmemory;
+				modctx->sampledata[i] = (char*)modmemory;
 				modmemory += sptr->length;
 
 				if (sptr->replen + sptr->reppnt > sptr->length)
