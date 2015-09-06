@@ -682,6 +682,10 @@ SOURCE=..\sources\loaders\ipf_loader\ipf_loader.c
 
 SOURCE=..\sources\loaders\ipf_loader\ipf_loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\ipf_loader\ipf_writer.c
+# End Source File
 # End Group
 # Begin Group "ST"
 
@@ -1881,6 +1885,18 @@ SOURCE=..\sources\loaders\stw_loader\stw_loader.h
 # Begin Source File
 
 SOURCE=..\sources\loaders\stw_loader\stw_writer.c
+# End Source File
+# End Group
+# Begin Group "VFDDAT"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\vfddat_loader\vfddat_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\vfddat_loader\vfddat_loader.h
 # End Source File
 # End Group
 # End Group
