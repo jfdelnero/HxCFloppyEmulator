@@ -27,6 +27,7 @@ extern void edittool_window_bt_removetrack_callback(Fl_Button*, void*);
 extern void edittool_window_bt_removeoddtracks_callback(Fl_Button*, void*);
 extern void edittool_window_bt_shifttracks_callback(Fl_Button*, void*);
 extern void edittool_window_bt_swapsides_callback(Fl_Button*, void*);
+extern void edittool_window_bt_repair_callback(Fl_Button*, void*);
 
 class trackedittool_window {
 public:
@@ -61,5 +62,6 @@ public:
   Fl_Button *bt_shifttracks;
   Fl_Int_Input *edit_shiftbittracks;
   Fl_Button *bt_swapsides;
+  Fl_Button *bt_repair;
 };
 #endif
