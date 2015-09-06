@@ -120,6 +120,7 @@ ff_type ff_type_list[]=
 	{ FF_EHFE,"HFE - Rev 2 - Experimental",PLUGIN_HXC_EXTHFE,".hfe"},
 	{ FF_ARBG,"Arburg - Arburg RAW sectors file format",PLUGIN_ARBURG,".arburgfd"},
 	{ FF_SKF,"Raw - Stream Kryoflux file format",PLUGIN_SKF,".raw"},
+	{ FF_IPF,"IPF - IPF file format (W.I.P)",PLUGIN_IPF,".ipf"},
 	{ FF_SCP,"SCP - SCP file format",PLUGIN_SCP,".scp"},
 	{ FF_BMP,"BMP - BMP file image",PLUGIN_BMP,".bmp"},
 	{ FF_DISK_BMP,"BMP - BMP file image (disk)",PLUGIN_DISK_BMP,".bmp"},

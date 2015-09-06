@@ -66,6 +66,7 @@ Fl_Menu_Item format_choices[]=
 	{ "HFE - Rev 2 - Experimental",0,format_choice_cb,(void*)PLUGIN_HXC_EXTHFE},
 	{ "Arburg - Arburg RAW sectors file format",0,format_choice_cb,(void*)PLUGIN_ARBURG},
 	{ "Raw - Stream Kryoflux file format",0,format_choice_cb,(void*)PLUGIN_SKF},
+	{ "IPF - SPS IPF file format (W.I.P)",0,format_choice_cb,(void*)PLUGIN_IPF},
 	{ "SCP - SCP stream file format",0,format_choice_cb,(void*)PLUGIN_SCP},
 	{ "BMP - BMP file image",0,format_choice_cb,(void*)PLUGIN_BMP},
 	{ "BMP - BMP file image (disk)",0,format_choice_cb,(void*)PLUGIN_DISK_BMP},

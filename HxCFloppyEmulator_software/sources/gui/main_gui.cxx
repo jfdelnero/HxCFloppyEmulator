@@ -131,6 +131,7 @@ const char * plugid_lst[]=
 	PLUGIN_HXC_EXTHFE,
 	PLUGIN_ARBURG,
 	PLUGIN_SKF,
+	PLUGIN_IPF,
 	PLUGIN_SCP,
 	PLUGIN_BMP,
 	PLUGIN_DISK_BMP,
@@ -451,6 +452,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"HFE file (Rev 2 - Experimental)\t*.hfe\n"
 					"Arburg file\t*.arburgfd\n"
 					"KF Stream file\t*.raw\n"
+					"SPS IPF file (W.I.P)\t*.ipf\n"
 					"SCP file\t*.scp\n"
 					"BMP file\t*.bmp\n"
 					"BMP file (disk)\t*.bmp\n"
