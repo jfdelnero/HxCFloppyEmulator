@@ -111,7 +111,7 @@ int TeleDisk_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 					CRC16_Update(&CRC16_High,&CRC16_Low, ptr[i],(unsigned char*)crctable );
 				}
 
-				if(td_header.CRC!=((CRC16_High<<8)|CRC16_Low))
+				if(((td_header.CRC[1]<<8)|td_header.CRC[0]) != ((CRC16_High<<8)|CRC16_Low))
 				{
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"bad header crc !");
 					hxc_fclose(f);
@@ -307,7 +307,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		CRC16_Update(&CRC16_High,&CRC16_Low, ptr[i],(unsigned char*)crctable );
 	}
 
-	if(td_header->CRC!=((CRC16_High<<8)|CRC16_Low))
+	if(((td_header->CRC[1]<<8)|td_header->CRC[0])!=((CRC16_High<<8)|CRC16_Low))
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"TeleDisk_libLoad_DiskFile : bad header crc !");
 		free(fileimage);
