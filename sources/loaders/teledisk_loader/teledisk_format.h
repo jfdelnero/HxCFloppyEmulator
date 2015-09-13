@@ -13,14 +13,14 @@ typedef struct _TELEDISK_HEADER
 	uint8_t	TrkDens;	// 0 = source matches media density, 1 = double density, 2 = quad density)
 	uint8_t	DosMode;	// Non-zero if disk was analysed according to DOS allocation
 	uint8_t	Surface;	// Disk sides stored in the image
-	uint8_t	CRC;		// 16-bit CRC for this header
+	uint8_t	CRC[2];		// 16-bit CRC for this header
 } TELEDISK_HEADER;
 
 // Optional comment block, present if bit 7 is set in bTrackDensity above
 typedef struct _TELEDISK_COMMENT
 {
-	uint8_t CRC;					// 16-bit CRC covering the comment block
-	uint8_t Len;					// Comment block length
+	uint8_t CRC[2];					// 16-bit CRC covering the comment block
+	uint16_t Len;					// Comment block length
 	uint8_t  bYear, bMon, bDay;		// Date of disk creation
 	uint8_t  bHour, bMin, bSec;		// Time of disk creation
 //  BYTE    abData[];				// Comment data, in null-terminated blocks
