@@ -119,12 +119,17 @@ void fill_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 
 	if(sdcfgw->chk_force_loading_startupa->value())
 		filecfg->startup_mode=filecfg->startup_mode|0x1;
+
 	if(sdcfgw->chk_force_loading_startupb->value())
 		filecfg->startup_mode=filecfg->startup_mode|0x2;
+
 	if(sdcfgw->chk_force_loading_autoboot->value())
 		filecfg->startup_mode=filecfg->startup_mode|0x4;
+
 	if(sdcfgw->chk_preindex->value())
 		filecfg->startup_mode=filecfg->startup_mode|0x8;
+
+
 }
 
 void set_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)

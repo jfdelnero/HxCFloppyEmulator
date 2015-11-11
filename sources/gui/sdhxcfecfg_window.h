@@ -13,6 +13,9 @@ extern void sdhxcfecfg_window_datachanged(Fl_Value_Slider*, void*);
 extern void sdhxcfecfg_window_datachanged(Fl_Check_Button*, void*);
 #include <FL/Fl_Choice.H>
 extern void ifcfg_window_datachanged(Fl_Widget*, void*);
+extern void sdhxcfecfg_window_datachanged(Fl_Choice*, void*);
+#include <FL/Fl_Text_Display.H>
+#include <FL/Fl_Button.H>
 extern void sdhxcfecfg_window_bt_load(Fl_Button*, void*);
 extern void sdhxcfecfg_window_bt_save(Fl_Button*, void*);
 
@@ -36,8 +39,16 @@ public:
   Fl_Check_Button *chk_hfr_autoifmode;
   Fl_Check_Button *chk_hfe_doublestep;
   Fl_Choice *choice_hfeifmode;
+  Fl_Choice *choice_interfacemode_drva_cfg;
+  Fl_Choice *choice_pin02_drva;
+  Fl_Choice *choice_pin34_drva;
+  Fl_Check_Button *chk_enable_twodrives_emu;
+  Fl_Check_Button *chk_drvb_as_motoron;
+  Fl_Choice *choice_interfacemode_drvb_cfg;
+  Fl_Choice *choice_pin02_drvb;
+  Fl_Choice *choice_pin34_drvb;
 private:
-  void cb_OK_i(Fl_Button*, void*);
+  inline void cb_OK_i(Fl_Button*, void*);
   static void cb_OK(Fl_Button*, void*);
 };
 #endif
