@@ -197,8 +197,8 @@ void fill_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 		else
 		{
 			filecfg->interfacemode_drive0 = 0x80;
-			filecfg->pin02_cfg_drive0 = pincfg_choices_values[sdcfgw->choice_pin02_drva->value()] - 1;
-			filecfg->pin34_cfg_drive0 = pincfg_choices_values[sdcfgw->choice_pin34_drva->value()] - 1;
+			filecfg->pin02_cfg_drive0 = pincfg_choices_values[sdcfgw->choice_pin02_drva->value()];
+			filecfg->pin34_cfg_drive0 = pincfg_choices_values[sdcfgw->choice_pin34_drva->value()];
 		}
 	}
 	else
@@ -223,8 +223,8 @@ void fill_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 		else
 		{
 			filecfg->interfacemode_drive1 = 0x80;
-			filecfg->pin02_cfg_drive1 = pincfg_choices_values[sdcfgw->choice_pin02_drvb->value()] - 1;
-			filecfg->pin34_cfg_drive1 = pincfg_choices_values[sdcfgw->choice_pin34_drvb->value()] - 1;
+			filecfg->pin02_cfg_drive1 = pincfg_choices_values[sdcfgw->choice_pin02_drvb->value()];
+			filecfg->pin34_cfg_drive1 = pincfg_choices_values[sdcfgw->choice_pin34_drvb->value()];
 		}
 	}
 	else
