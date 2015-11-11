@@ -715,7 +715,7 @@ static void tick_mw(void *v) {
 	}
 
 
-	if(window->sdcfg_window->choice_interfacemode_drva_cfg->value() == 0)
+	if(window->sdcfg_window->choice_interfacemode_drva_cfg->value() != 13)
 	{
 		window->sdcfg_window->choice_pin02_drva->deactivate();
 		window->sdcfg_window->choice_pin34_drva->deactivate();
@@ -728,7 +728,22 @@ static void tick_mw(void *v) {
 		window->sdcfg_window->choice_pin34_drva->activate();
 	}
 
-	if(window->sdcfg_window->choice_interfacemode_drvb_cfg->value() == 0)
+	if( !window->sdcfg_window->chk_enable_twodrives_emu->value() )
+	{
+		window->sdcfg_window->choice_interfacemode_drvb_cfg->value( window->sdcfg_window->choice_interfacemode_drva_cfg->value() );
+		window->sdcfg_window->choice_pin02_drvb->value(window->sdcfg_window->choice_pin02_drva->value());
+		window->sdcfg_window->choice_pin34_drvb->value(window->sdcfg_window->choice_pin34_drva->value());
+
+		window->sdcfg_window->choice_interfacemode_drvb_cfg->deactivate();
+		window->sdcfg_window->choice_pin02_drvb->deactivate();
+		window->sdcfg_window->choice_pin34_drvb->deactivate();
+	}
+	else
+	{
+		window->sdcfg_window->choice_interfacemode_drvb_cfg->activate();
+	}
+
+	if(window->sdcfg_window->choice_interfacemode_drvb_cfg->value() != 13 )
 	{
 		window->sdcfg_window->choice_pin02_drvb->deactivate();
 		window->sdcfg_window->choice_pin34_drvb->deactivate();
@@ -737,8 +752,16 @@ static void tick_mw(void *v) {
 	}
 	else
 	{
-		window->sdcfg_window->choice_pin02_drvb->activate();
-		window->sdcfg_window->choice_pin34_drvb->activate();
+		if( window->sdcfg_window->chk_enable_twodrives_emu->value() )
+		{
+			window->sdcfg_window->choice_pin02_drvb->activate();
+			window->sdcfg_window->choice_pin34_drvb->activate();
+		}
+		else
+		{
+			window->sdcfg_window->choice_pin02_drvb->deactivate();
+			window->sdcfg_window->choice_pin34_drvb->deactivate();
+		}
 	}
 
 	window->batchconv_window->progress_indicator->redraw();
