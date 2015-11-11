@@ -59,7 +59,7 @@ Fl_Menu_Item format_choices[]=
 	{ "D88 - PC88 D88 file format",0,format_choice_cb,(void*)PLUGIN_NEC_D88},
 	{ "ST - ATARI ST ST file format",0,format_choice_cb,(void*)PLUGIN_ATARIST_ST},
 	{ "MSA - ATARI ST MSA file format",0,format_choice_cb,(void*)PLUGIN_ATARIST_MSA},
-	{ "DIM - ATARI ST DIM file format",0,format_choice_cb,(void*)PLUGIN_ATARIST_DIM},	
+	{ "DIM - ATARI ST DIM file format",0,format_choice_cb,(void*)PLUGIN_ATARIST_DIM},
 	{ "STX - Pasti/STX file format",0,format_choice_cb,(void*)PLUGIN_ATARIST_STX},
 	{ "STW - STW file format",0,format_choice_cb,(void*)PLUGIN_ATARIST_STW},
 	{ "HFE - SD HxC Floppy Emulator (HDDD A2 Support)",0,format_choice_cb,(void*)PLUGIN_HXC_HDDD_A2},
@@ -159,16 +159,16 @@ Fl_Menu_Item pincfg_choices[]=
 	{ "Auto",0,NULL,(void*)PIN_CFG_AUTO},
 	{ "Low",0,NULL,(void*)PIN_CFG_LOW},
 	{ "High",0,NULL,(void*)PIN_CFG_HIGH},
-	{ "Ready",0,NULL,(void*)PIN_CFG_NOTREADY},
-	{ "nReady",0,NULL,(void*)PIN_CFG_READY},
-	{ "Density",0,NULL,(void*)PIN_CFG_NOTDENSITY},
-	{ "nDensity",0,NULL,(void*)PIN_CFG_DENSITY},
-	{ "DiskChange 1",0,NULL,(void*)PIN_CFG_NOTDC1},
-	{ "nDiskChange 1",0,NULL,(void*)PIN_CFG_DC1},
-	{ "DiskChange 2",0,NULL,(void*)PIN_CFG_NOTDC2},
-	{ "nDiskChange 2",0,NULL,(void*)PIN_CFG_DC2},
-	{ "DiskChange 3",0,NULL,(void*)PIN_CFG_NOTDC3},
-	{ "nDiskChange 3",0,NULL,(void*)PIN_CFG_DC3},
+	{ "Ready",0,NULL,(void*)PIN_CFG_READY},
+	{ "nReady",0,NULL,(void*)PIN_CFG_NOTREADY},
+	{ "Density",0,NULL,(void*)PIN_CFG_DENSITY},
+	{ "nDensity",0,NULL,(void*)PIN_CFG_NOTDENSITY},
+	{ "DiskChange 1",0,NULL,(void*)PIN_CFG_DC1},
+	{ "nDiskChange 1",0,NULL,(void*)PIN_CFG_NOTDC1},
+	{ "DiskChange 2",0,NULL,(void*)PIN_CFG_DC2},
+	{ "nDiskChange 2",0,NULL,(void*)PIN_CFG_NOTDC2},
+	{ "DiskChange 3",0,NULL,(void*)PIN_CFG_DC3},
+	{ "nDiskChange 3",0,NULL,(void*)PIN_CFG_NOTDC3},
 	{ 0,0,0,(void*)0},
 	{0}
 };
@@ -176,7 +176,7 @@ Fl_Menu_Item pincfg_choices[]=
 Fl_Menu_Item feifcfg_choices[]=
 {
 	{ "From HFE",0,NULL,(void*)-1},
-	{ "Generic Shugart",0,NULL,(void*)PIN_CFG_LOW},
+	{ "Generic Shugart",0,NULL,(void*)GENERIC_SHUGART_DD_FLOPPYMODE},
 	{ "IBM PC DD",0,NULL,(void*)IBMPC_DD_FLOPPYMODE},
 	{ "IBM PC HD",0,NULL,(void*)IBMPC_HD_FLOPPYMODE},
 	{ "AKAI S900/S950 DD",0,NULL,(void*)S950_DD_FLOPPYMODE},
@@ -188,10 +188,11 @@ Fl_Menu_Item feifcfg_choices[]=
 	{ "Amiga HD",0,NULL,(void*)AMIGA_HD_FLOPPYMODE},
 	{ "Amstrad CPC",0,NULL,(void*)CPC_DD_FLOPPYMODE},
 	{ "MSX 2",0,NULL,(void*)MSX2_DD_FLOPPYMODE},
-	{ "Custom",0,NULL,(void*)-2},
+	{ "Custom",0,NULL,(void*)0x80},
 	{ 0,0,0,(void*)0},
 	{0}
 };
+
 
 Fl_Menu_Item track_type_choices[]=
 {

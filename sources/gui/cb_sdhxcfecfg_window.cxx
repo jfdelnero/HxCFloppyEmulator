@@ -68,8 +68,61 @@ unsigned char filebuffer[8*1024];
 extern s_gui_context * guicontext;
 extern Fl_Menu_Item if_choices[];
 
+int feifcfg_choices_values[]=
+{
+	-1,
+	GENERIC_SHUGART_DD_FLOPPYMODE,
+	IBMPC_DD_FLOPPYMODE,
+	IBMPC_HD_FLOPPYMODE,
+	S950_DD_FLOPPYMODE,
+	S950_HD_FLOPPYMODE,
+	EMU_SHUGART_FLOPPYMODE,
+	ATARIST_DD_FLOPPYMODE,
+	ATARIST_HD_FLOPPYMODE,
+	AMIGA_DD_FLOPPYMODE,
+	AMIGA_HD_FLOPPYMODE,
+	CPC_DD_FLOPPYMODE,
+	MSX2_DD_FLOPPYMODE,
+	0x80,
+	0
+};
+
+int pincfg_choices_values[]=
+{
+	PIN_CFG_AUTO,
+	PIN_CFG_LOW,
+	PIN_CFG_HIGH,
+	PIN_CFG_READY,
+	PIN_CFG_NOTREADY,
+	PIN_CFG_DENSITY,
+	PIN_CFG_NOTDENSITY,
+	PIN_CFG_DC1,
+	PIN_CFG_NOTDC1,
+	PIN_CFG_DC2,
+	PIN_CFG_NOTDC2,
+	PIN_CFG_DC3,
+	PIN_CFG_NOTDC3,
+	0
+};
+
+int getmenuindex(int value,int * indexarray, int size)
+{
+	int i;
+
+	i = 0;
+	while( i < size )
+	{
+		if( indexarray[i] == value )
+			return i;
+
+		i++;
+	}
+	return 0;
+}
+
 void fill_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 {
+	int user_data;
 	memset(filebuffer,0,8192);
 	sprintf(filecfg->signature,"HXCFECFGV1.0");
 
@@ -88,7 +141,7 @@ void fill_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 		filecfg->disable_drive_select=0xFF;
 	else
 		filecfg->disable_drive_select=0x00;
-					
+
 	if(sdcfgw->chk_loadlastloaded->value())
 		filecfg->load_last_floppy=0x00;
 	else
@@ -106,7 +159,7 @@ void fill_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 
 	filecfg->back_light_tmr=(unsigned char)sdcfgw->valslider_device_backlight_timeout->value();
 	filecfg->standby_tmr=(unsigned char)sdcfgw->valslider_device_standby_timeout->value();
-					
+
 	filecfg->buzzer_step_duration=0xFF-(unsigned char)sdcfgw->slider_stepsound_level->value();
 	if(filecfg->buzzer_step_duration==0xFF)
 		filecfg->step_sound=0x00;
@@ -130,11 +183,72 @@ void fill_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 		filecfg->startup_mode=filecfg->startup_mode|0x8;
 
 
+	user_data = feifcfg_choices_values[sdcfgw->choice_interfacemode_drva_cfg->value()];
+	if( user_data != -1 )
+	{
+		filecfg->cfg_from_cfg_drive0 = 0xFF;
+
+		if(user_data < 0x80)
+		{
+			filecfg->interfacemode_drive0 = user_data;
+			filecfg->pin02_cfg_drive0 = 0;
+			filecfg->pin34_cfg_drive0 = 0;
+		}
+		else
+		{
+			filecfg->interfacemode_drive0 = 0x80;
+			filecfg->pin02_cfg_drive0 = pincfg_choices_values[sdcfgw->choice_pin02_drva->value()] - 1;
+			filecfg->pin34_cfg_drive0 = pincfg_choices_values[sdcfgw->choice_pin34_drva->value()] - 1;
+		}
+	}
+	else
+	{
+		filecfg->cfg_from_cfg_drive0 = 0x00;
+		filecfg->interfacemode_drive0 = 0;
+		filecfg->pin02_cfg_drive0 = 0;
+		filecfg->pin34_cfg_drive0 = 0;
+	}
+
+	user_data = feifcfg_choices_values[sdcfgw->choice_interfacemode_drvb_cfg->value()];
+	if( user_data != -1 )
+	{
+		filecfg->cfg_from_cfg_drive1 = 0xFF;
+
+		if(user_data < 0x80)
+		{
+			filecfg->interfacemode_drive1 = user_data;
+			filecfg->pin02_cfg_drive1 = 0;
+			filecfg->pin34_cfg_drive1 = 0;
+		}
+		else
+		{
+			filecfg->interfacemode_drive1 = 0x80;
+			filecfg->pin02_cfg_drive1 = pincfg_choices_values[sdcfgw->choice_pin02_drvb->value()] - 1;
+			filecfg->pin34_cfg_drive1 = pincfg_choices_values[sdcfgw->choice_pin34_drvb->value()] - 1;
+		}
+	}
+	else
+	{
+		filecfg->cfg_from_cfg_drive1 = 0x00;
+		filecfg->interfacemode_drive1 = 0;
+		filecfg->pin02_cfg_drive1 = 0;
+		filecfg->pin34_cfg_drive1 = 0;
+	}
+
+	if( sdcfgw->chk_enable_twodrives_emu->value() )
+		filecfg->enable_drive_b = 0x00;
+	else
+		filecfg->enable_drive_b = 0xFF;
+
+	if ( sdcfgw->chk_drvb_as_motoron->value() )
+		filecfg->drive_b_as_motor_on = 0xFF;
+	else
+		filecfg->drive_b_as_motor_on = 0x00;
 }
 
 void set_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 {
-	
+
 	if(!strncmp(filecfg->signature,"HXCFECFGV1.0",12))
 	{
 
@@ -147,7 +261,7 @@ void set_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 			sdcfgw->chk_disabediskdriveselector->set();
 		else
 			sdcfgw->chk_disabediskdriveselector->clear();
-			
+
 		if(filecfg->load_last_floppy)
 			sdcfgw->chk_loadlastloaded->clear();
 		else
@@ -165,9 +279,9 @@ void set_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 
 		sdcfgw->valslider_device_backlight_timeout->value(filecfg->back_light_tmr);
 		sdcfgw->valslider_device_standby_timeout->value(filecfg->standby_tmr);
-						
+
 		sdcfgw->slider_stepsound_level->value(0xFF-filecfg->buzzer_step_duration);
-		
+
 		sdcfgw->slider_scrolltxt_speed->value(64+((255-64)) - filecfg->lcd_scroll_speed);
 
 		if(filecfg->startup_mode&0x1)
@@ -184,11 +298,65 @@ void set_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 			sdcfgw->chk_force_loading_autoboot->set();
 		else
 			sdcfgw->chk_force_loading_autoboot->clear();
-			
+
 		if(filecfg->startup_mode&0x8)
 			sdcfgw->chk_preindex->set();
 		else
 			sdcfgw->chk_preindex->clear();
+
+		if(filecfg->drive_b_as_motor_on)
+			sdcfgw->chk_drvb_as_motoron->set();
+		else
+			sdcfgw->chk_drvb_as_motoron->clear();
+
+		if(filecfg->enable_drive_b)
+			sdcfgw->chk_enable_twodrives_emu->clear();
+		else
+			sdcfgw->chk_enable_twodrives_emu->set();
+
+
+		if(!filecfg->cfg_from_cfg_drive0)
+		{
+			sdcfgw->choice_interfacemode_drva_cfg->value(0);
+			sdcfgw->choice_pin02_drva->value(0);
+			sdcfgw->choice_pin34_drva->value(0);
+		}
+		else
+		{
+			sdcfgw->choice_interfacemode_drva_cfg->value( getmenuindex(filecfg->interfacemode_drive0,(int*)&feifcfg_choices_values,sizeof(feifcfg_choices_values) / sizeof(int) ) );
+			if( filecfg->interfacemode_drive0 == 0x80 )
+			{
+				sdcfgw->choice_pin02_drva->value( getmenuindex(filecfg->pin02_cfg_drive0,(int*)&pincfg_choices_values,sizeof(pincfg_choices_values) / sizeof(int) ) );
+				sdcfgw->choice_pin34_drva->value( getmenuindex(filecfg->pin34_cfg_drive0,(int*)&pincfg_choices_values,sizeof(pincfg_choices_values) / sizeof(int) ) );
+			}
+			else
+			{
+				sdcfgw->choice_pin02_drva->value(0);
+				sdcfgw->choice_pin34_drva->value(0);
+			}
+
+		}
+
+		if(!filecfg->cfg_from_cfg_drive1)
+		{
+			sdcfgw->choice_interfacemode_drvb_cfg->value(0);
+			sdcfgw->choice_pin02_drvb->value(0);
+			sdcfgw->choice_pin34_drvb->value(0);
+		}
+		else
+		{
+			sdcfgw->choice_interfacemode_drvb_cfg->value( getmenuindex(filecfg->interfacemode_drive1,(int*)&feifcfg_choices_values,sizeof(feifcfg_choices_values) / sizeof(int) ) );
+			if( filecfg->interfacemode_drive1 == 0x80 )
+			{
+				sdcfgw->choice_pin02_drvb->value( getmenuindex(filecfg->pin02_cfg_drive1,(int*)&pincfg_choices_values,sizeof(pincfg_choices_values) / sizeof(int) ) );
+				sdcfgw->choice_pin34_drvb->value( getmenuindex(filecfg->pin34_cfg_drive1,(int*)&pincfg_choices_values,sizeof(pincfg_choices_values) / sizeof(int) ) );
+			}
+			else
+			{
+				sdcfgw->choice_pin02_drvb->value(0);
+				sdcfgw->choice_pin34_drvb->value(0);
+			}
+		}
 	}
 }
 
@@ -218,7 +386,7 @@ void sdhxcfecfg_window_bt_load(Fl_Button* bt, void*)
 
 	dw=((Fl_Window*)(bt->parent()));
 	sdcfgw=(sdhxcfecfg_window *)dw->user_data();
-	
+
 	if(!fileselector((char*)"Select config file",(char*)temp,(char*)"*.cfg",(char*)"*.cfg",0,0))
 	{
 		f=hxc_fopen((char*)temp,"r+b");
