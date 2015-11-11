@@ -154,6 +154,45 @@ Fl_Menu_Item if_choices[]=
 	{0}
 };
 
+Fl_Menu_Item pincfg_choices[]=
+{
+	{ "Auto",0,NULL,(void*)PIN_CFG_AUTO},
+	{ "Low",0,NULL,(void*)PIN_CFG_LOW},
+	{ "High",0,NULL,(void*)PIN_CFG_HIGH},
+	{ "Ready",0,NULL,(void*)PIN_CFG_NOTREADY},
+	{ "nReady",0,NULL,(void*)PIN_CFG_READY},
+	{ "Density",0,NULL,(void*)PIN_CFG_NOTDENSITY},
+	{ "nDensity",0,NULL,(void*)PIN_CFG_DENSITY},
+	{ "DiskChange 1",0,NULL,(void*)PIN_CFG_NOTDC1},
+	{ "nDiskChange 1",0,NULL,(void*)PIN_CFG_DC1},
+	{ "DiskChange 2",0,NULL,(void*)PIN_CFG_NOTDC2},
+	{ "nDiskChange 2",0,NULL,(void*)PIN_CFG_DC2},
+	{ "DiskChange 3",0,NULL,(void*)PIN_CFG_NOTDC3},
+	{ "nDiskChange 3",0,NULL,(void*)PIN_CFG_DC3},
+	{ 0,0,0,(void*)0},
+	{0}
+};
+
+Fl_Menu_Item feifcfg_choices[]=
+{
+	{ "From HFE",0,NULL,(void*)-1},
+	{ "Generic Shugart",0,NULL,(void*)PIN_CFG_LOW},
+	{ "IBM PC DD",0,NULL,(void*)IBMPC_DD_FLOPPYMODE},
+	{ "IBM PC HD",0,NULL,(void*)IBMPC_HD_FLOPPYMODE},
+	{ "AKAI S900/S950 DD",0,NULL,(void*)S950_DD_FLOPPYMODE},
+	{ "AKAI S950 HD",0,NULL,(void*)S950_HD_FLOPPYMODE},
+	{ "Emu Shugart",0,NULL,(void*)EMU_SHUGART_FLOPPYMODE},
+	{ "ATARI ST",0,NULL,(void*)ATARIST_DD_FLOPPYMODE},
+	{ "ATARI ST HD",0,NULL,(void*)ATARIST_HD_FLOPPYMODE},
+	{ "Amiga",0,NULL,(void*)AMIGA_DD_FLOPPYMODE},
+	{ "Amiga HD",0,NULL,(void*)AMIGA_HD_FLOPPYMODE},
+	{ "Amstrad CPC",0,NULL,(void*)CPC_DD_FLOPPYMODE},
+	{ "MSX 2",0,NULL,(void*)MSX2_DD_FLOPPYMODE},
+	{ "Custom",0,NULL,(void*)-2},
+	{ 0,0,0,(void*)0},
+	{0}
+};
+
 Fl_Menu_Item track_type_choices[]=
 {
 	{ "FM",0,raw_loader_window_datachanged,(void*)ISOFORMAT_SD},

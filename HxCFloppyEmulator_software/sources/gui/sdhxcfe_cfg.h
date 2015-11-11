@@ -30,5 +30,22 @@ typedef struct sdhxcfecfgfile_
     unsigned char interfacemode_drive1;
     unsigned char pin02_cfg_drive1;
     unsigned char pin34_cfg_drive1;
+
+	unsigned char drive_b_as_motor_on;
+
 }sdhxcfecfgfile;
 #pragma pack()
+
+#define PIN_CFG_AUTO		-1
+#define PIN_CFG_LOW			0
+#define PIN_CFG_HIGH		1
+#define PIN_CFG_NOTREADY	2
+#define PIN_CFG_READY		3
+#define PIN_CFG_NOTDENSITY	4
+#define PIN_CFG_DENSITY		5
+#define PIN_CFG_NOTDC1		6
+#define PIN_CFG_DC1			7
+#define PIN_CFG_NOTDC2		8
+#define PIN_CFG_DC2			9
+#define PIN_CFG_NOTDC3		10
+#define PIN_CFG_DC3			11

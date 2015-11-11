@@ -53,6 +53,7 @@
 #include <time.h>
 #include <stdint.h>
 
+#include "sdhxcfe_cfg.h"
 #include "batch_converter_window.h"
 #include "filesystem_generator_window.h"
 #include "cb_filesystem_generator_window.h"
@@ -124,7 +125,7 @@ const char * plugid_lst[]=
 	PLUGIN_NEC_D88,
 	PLUGIN_ATARIST_ST,
 	PLUGIN_ATARIST_MSA,
-	PLUGIN_ATARIST_DIM,	
+	PLUGIN_ATARIST_DIM,
 	PLUGIN_ATARIST_STX,
 	PLUGIN_ATARIST_STW,
 	PLUGIN_HXC_HDDD_A2,
@@ -713,6 +714,33 @@ static void tick_mw(void *v) {
 			window->usbcfg_window->chk_doublestep->value(0);
 	}
 
+
+	if(window->sdcfg_window->choice_interfacemode_drva_cfg->value() == 0)
+	{
+		window->sdcfg_window->choice_pin02_drva->deactivate();
+		window->sdcfg_window->choice_pin34_drva->deactivate();
+		window->sdcfg_window->choice_pin02_drva->value(0);
+		window->sdcfg_window->choice_pin34_drva->value(0);
+	}
+	else
+	{
+		window->sdcfg_window->choice_pin02_drva->activate();
+		window->sdcfg_window->choice_pin34_drva->activate();
+	}
+
+	if(window->sdcfg_window->choice_interfacemode_drvb_cfg->value() == 0)
+	{
+		window->sdcfg_window->choice_pin02_drvb->deactivate();
+		window->sdcfg_window->choice_pin34_drvb->deactivate();
+		window->sdcfg_window->choice_pin02_drvb->value(0);
+		window->sdcfg_window->choice_pin34_drvb->value(0);
+	}
+	else
+	{
+		window->sdcfg_window->choice_pin02_drvb->activate();
+		window->sdcfg_window->choice_pin34_drvb->activate();
+	}
+
 	window->batchconv_window->progress_indicator->redraw();
 	window->batchconv_window->strout_convert_status->redraw();
 	window->batchconv_window->bt_convert->redraw();
@@ -1008,7 +1036,13 @@ Main_Window::Main_Window()
 	sdcfg_window->valslider_device_backlight_timeout->scrollvalue(guicontext->backlight_tmr,1,0,256);
 	sdcfg_window->valslider_device_standby_timeout->scrollvalue(guicontext->standby_tmr,1,0,256);
 	sdcfg_window->chk_loadlastloaded->set();
-
+	sdcfg_window->chk_enable_twodrives_emu->set();
+	sdcfg_window->choice_pin02_drva->menu(pincfg_choices);
+	sdcfg_window->choice_pin34_drva->menu(pincfg_choices);
+	sdcfg_window->choice_pin02_drvb->menu(pincfg_choices);
+	sdcfg_window->choice_pin34_drvb->menu(pincfg_choices);
+	sdcfg_window->choice_interfacemode_drva_cfg->menu(feifcfg_choices);
+	sdcfg_window->choice_interfacemode_drvb_cfg->menu(feifcfg_choices);
 	//////////////////////////////////////////////
 	// USB FE CFG window
 #ifndef STANDALONEFSBROWSER
