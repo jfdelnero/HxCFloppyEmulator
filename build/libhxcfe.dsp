@@ -1899,6 +1899,22 @@ SOURCE=..\sources\loaders\vfddat_loader\vfddat_loader.c
 SOURCE=..\sources\loaders\vfddat_loader\vfddat_loader.h
 # End Source File
 # End Group
+# Begin Group "AnaDisk"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\ana_loader\ana_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\ana_loader\ana_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\ana_loader\ana_loader.h
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 
