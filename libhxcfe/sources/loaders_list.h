@@ -104,6 +104,7 @@
 #include "./loaders/flppcm_loader/flppcm_loader.h"
 #include "./loaders/stw_loader/stw_loader.h"
 #include "./loaders/vfddat_loader/vfddat_loader.h"
+#include "./loaders/ana_loader/ana_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -190,6 +191,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)BMP_Disk_libGetPluginInfo,
 	(GETPLUGININFOS)ARBURG_RAW_libGetPluginInfo,
 	(GETPLUGININFOS)XML_libGetPluginInfo,
+	(GETPLUGININFOS)ANA_libGetPluginInfo,
 	//(GETPLUGININFOS)VFDDAT_libGetPluginInfo,
 	(GETPLUGININFOS)-1
 };
