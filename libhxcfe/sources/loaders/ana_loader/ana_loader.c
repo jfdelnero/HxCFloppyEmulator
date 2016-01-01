@@ -262,7 +262,19 @@ int ANA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						fread(sectorconfig[sectorfound].input_data,sector_header.data_len,1,f);
 					}
 
-					sectorconfig[sectorfound].trackencoding = IBMFORMAT_DD;
+
+					/*
+					// Some AnaDisk images should have the first track in FM, but nothing
+					// into this format indicate it :/
+					if(i==0)
+						tracktype=IBMFORMAT_SD;
+					else
+						tracktype=IBMFORMAT_DD;
+					*/
+
+					tracktype=IBMFORMAT_DD;
+
+					sectorconfig[sectorfound].trackencoding = tracktype;
 					sectorconfig[sectorfound].bitrate = floppydisk->floppyBitRate;
 					sectorconfig[sectorfound].cylinder = sector_header.logical_cylinder;
 					sectorconfig[sectorfound].head = sector_header.logical_side;
