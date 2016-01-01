@@ -197,7 +197,9 @@ void menu_clicked(Fl_Widget * w, void * fc_ptr)
 		case 13:
 			Fl::scheme("gtk+");
 		break;
-
+		case 14:
+			Fl::scheme("gleam");
+		break;
 	}
 
 }
