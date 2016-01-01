@@ -1628,7 +1628,6 @@ HXCFE_FLOPPY* hxcfe_sanityCheck(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk)
 	return floppydisk;
 }
 
-
 fs_config fs_config_table[]=
 {
 	{"fatst",		"",FS_720KB_ATARI_FAT12,0},
@@ -1654,11 +1653,25 @@ fs_config fs_config_table[]=
 	{"fat640",		"3\"5        640KB DSDD FAT12",FS_3P5_DS_300RPM_640KB_MSDOS_FAT12,0},
 
 	{"fat720",		"3\"5        720KB DSDD FAT12",FS_720KB_MSDOS_FAT12,0},
+	{"fat738",		"3\"5        738KB DSDD FAT12",FS_738KB_MSDOS_FAT12,0},
+	{"fat800",		"3\"5        800KB DSDD FAT12",FS_800KB_MSDOS_FAT12,0},
+	{"fat820",		"3\"5        820KB DSDD FAT12",FS_820KB_MSDOS_FAT12,0},
 
 	{"fat1200",		"5\"25       1.2MB DSHD FAT12",FS_5P25_300RPM_1200KB_MSDOS_FAT12,0},
+	{"fat1230",		"5\"25       1.23MB DSHD FAT12",FS_5P25_300RPM_1230KB_MSDOS_FAT12,0},
 
 	{"fat1440",		"3\"5        1.44MB DSHD FAT12",FS_1_44MB_MSDOS_FAT12,0},
+	{"fat1476",		"3\"5        1.478MB DSHD FAT12",FS_1_476MB_MSDOS_FAT12,0},
+
+	{"fat1600",		"3\"5        1.6MB DSHD FAT12",FS_1_600MB_MSDOS_FAT12,0},
+	{"fat1640",		"3\"5        1.64MB DSHD FAT12",FS_1_640MB_MSDOS_FAT12,0},
 	{"fat1680",		"3\"5        1.68MB DSHD FAT12",FS_1_68MB_MSDOS_FAT12,0},
+
+	{"fat1722",		"3\"5        1.722MB DSHD FAT12",FS_1_722MB_MSDOS_FAT12,0},
+	{"fat1785",		"3\"5        1.785MB DSHD FAT12",FS_1_785MB_MSDOS_FAT12,0},
+
+	{"fat2540",		"3\"5        2.50MB DSDD FAT12",FS_2_50MB_MSDOS_FAT12,0},
+	
 	{"fat2880",		"3\"5        2.88MB DSED FAT12",FS_2_88MB_MSDOS_FAT12,0},
 	{"fat3381",		"3\"5        3.38MB DSHD FAT12",FS_3_38MB_MSDOS_FAT12,0},
 	{"fatbigst",	"3\"5        3.42MB DSDD Atari FAT12",FS_3_42MB_ATARI_FAT12,0},
@@ -1669,7 +1682,6 @@ fs_config fs_config_table[]=
 	{"fat6789",		"3\"5        6.78MB DSHD FAT12",FS_6_78MB_MSDOS_FAT12,0},
 	{"fatbig",		"",FS_16MB_MSDOS_FAT12,0},
 	{"fat4572",		"3\"5        4.50MB DSHD FAT12",FS_4_50MB_MSDOS_FAT12,0},
-	{"fat2540",		"3\"5        2.50MB DSDD FAT12",FS_2_50MB_MSDOS_FAT12,0},
 	{0,0,0,0}
 };
 
