@@ -8,14 +8,14 @@ class rawfile_loader_window {open
   } {
     Fl_Window window {
       label {RAW File format configuration}
-      user_data this open selected
+      user_data this open
       xywh {334 204 458 351} type Double visible
     } {
       Fl_Check_Button chk_reversesides {
         label {Reverse side}
         user_data this
         callback raw_loader_window_datachanged
-        xywh {333 58 25 25} down_box DOWN_BOX labelsize 12
+        xywh {333 58 117 25} down_box DOWN_BOX labelsize 12
       }
       Fl_Check_Button chk_intersidesectornum {
         label {Inter side sector numbering}
@@ -27,13 +27,13 @@ class rawfile_loader_window {open
         label {Tracks of a side grouped in the file}
         user_data this
         callback raw_loader_window_datachanged
-        xywh {333 17 125 25} down_box DOWN_BOX labelsize 12 align 148
+        xywh {333 14 125 33} down_box DOWN_BOX labelsize 12 align 148
       }
       Fl_Check_Button chk_autogap3 {
         label {Auto GAP3}
         user_data this
         callback raw_loader_window_datachanged
-        xywh {130 210 25 25} down_box DOWN_BOX labelsize 12
+        xywh {130 210 85 25} down_box DOWN_BOX labelsize 12
       }
       Fl_Value_Input numin_pregap {
         label {PRE-GAP lenght :}
@@ -63,7 +63,7 @@ class rawfile_loader_window {open
         label {Side based}
         user_data this
         callback raw_loader_window_datachanged
-        xywh {333 134 25 25} down_box DOWN_BOX labelsize 12
+        xywh {333 134 87 25} down_box DOWN_BOX labelsize 12
       }
       Fl_Output strout_totalsector {
         label {Total Sector:}
@@ -161,7 +161,7 @@ class rawfile_loader_window {open
       Fl_Choice choice_disklayout {
         label {Predefined Disk Layout:}
         user_data this
-        callback raw_loader_window_datachanged open
+        callback raw_loader_window_datachanged open selected
         xywh {10 255 150 20} down_box BORDER_BOX labelsize 12 align 5 when 1 textsize 11
       } {}
       Fl_Output hlptxt {

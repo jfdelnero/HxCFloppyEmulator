@@ -149,6 +149,7 @@ trackedittool_window::trackedittool_window() {
     { bt_repair = new Fl_Button(7, 203, 93, 20, "Repair");
       bt_repair->labelsize(10);
       bt_repair->callback((Fl_Callback*)edittool_window_bt_repair_callback, (void*)(this));
+      bt_repair->deactivate();
     } // Fl_Button* bt_repair
     window->end();
   } // Fl_Double_Window* window
