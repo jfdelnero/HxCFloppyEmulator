@@ -10,6 +10,69 @@
 -------------------------------------------------------------------------------
 
 /*********************************************************
+01 January 2016: HxCFloppyEmulator 2.1.4.0
+
+New Loader : *.ANA AnaDisk file loader.
+
+New Loader : VFDDAT file loader.
+
+New Loader : Densei Sirius VFD DAT Loader.
+
+New Writer : DIM writer.
+
+New Writer : ADZ writer.
+
+New Writer : *.TRD Writer.
+
+New Loader : Atari ST *.STW Loader.
+
+New Writer : Atari ST *.STW Writer.
+
+New Writer : Atari ST *.ST Writer.
+
+New Writer : Atari ST *.STX Writer.
+
+STX Loader/Writer : Flakey bits mask support added, Loader/writer improved.
+
+SCP Loader/Writer : Loader/writer improved.
+
+D88 Loader : Gap3 setting corrected.
+
+Dos disk browser : More disks layout.
+
+libhxcfe : New track support : AED6200P.
+
+XML format definitions : Mictrotan 65 TANDOS.
+
+Flux Stream Analyzer : Seg fault corrected.
+
+Flux Stream Analyzer : Input filtering reduced.
+
+Kryoflux Stream Loader (*XX.X.raw) / analyser : NFA over index support added.
+
+Track editor : add & remove track functions added.
+
+Track editor : RPM & Bitrate change functions added.
+
+Track editor : Insertion function added.
+
+Track editor : Negative offset support.
+
+Disk viewer : Image CRC32, library version and file name displayed.
+
+Disk viewer : Track(s) type displayed.
+
+Disk viewer : Cells density displayed.
+
+Progess bar added for the loaders/writers.
+
+SD/USB Emulator setting window : Advanced pinout settings added.
+
+Code sources fixes/changes for GCC, Clang and VS2015 x86 & x64 compilation support.
+
+And many more fixes and improvements...
+
+/*********************************************************
 05 October 2014: HxCFloppyEmulator 2.0.26.0
 
 New Loader : PC Magazine (FLP) file format support added.
