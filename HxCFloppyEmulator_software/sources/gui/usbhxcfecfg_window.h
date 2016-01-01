@@ -38,7 +38,7 @@ public:
   Fl_Check_Button *chk_doublestep;
   Fl_Choice *choice_ifmode;
 private:
-  void cb_OK_i(Fl_Button*, void*);
+  inline void cb_OK_i(Fl_Button*, void*);
   static void cb_OK(Fl_Button*, void*);
 };
 #endif

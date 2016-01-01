@@ -12,7 +12,7 @@ void rawfile_loader_window::cb_Close(Fl_Button* o, void* v) {
 rawfile_loader_window::rawfile_loader_window() {
   { window = new Fl_Double_Window(458, 351, "RAW File format configuration");
     window->user_data((void*)(this));
-    { chk_reversesides = new Fl_Check_Button(333, 58, 25, 25, "Reverse side");
+    { chk_reversesides = new Fl_Check_Button(333, 58, 117, 25, "Reverse side");
       chk_reversesides->down_box(FL_DOWN_BOX);
       chk_reversesides->labelsize(12);
       chk_reversesides->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
@@ -23,18 +23,18 @@ rawfile_loader_window::rawfile_loader_window() {
       chk_intersidesectornum->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
       chk_intersidesectornum->align(Fl_Align(132|FL_ALIGN_INSIDE));
     } // Fl_Check_Button* chk_intersidesectornum
-    { chk_side0track_first = new Fl_Check_Button(333, 17, 125, 25, "Tracks of a side grouped in the file");
+    { chk_side0track_first = new Fl_Check_Button(333, 14, 125, 33, "Tracks of a side grouped in the file");
       chk_side0track_first->down_box(FL_DOWN_BOX);
       chk_side0track_first->labelsize(12);
       chk_side0track_first->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
       chk_side0track_first->align(Fl_Align(132|FL_ALIGN_INSIDE));
     } // Fl_Check_Button* chk_side0track_first
-    { chk_autogap3 = new Fl_Check_Button(130, 210, 25, 25, "Auto GAP3");
+    { chk_autogap3 = new Fl_Check_Button(130, 210, 85, 25, "Auto GAP3");
       chk_autogap3->down_box(FL_DOWN_BOX);
       chk_autogap3->labelsize(12);
       chk_autogap3->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
     } // Fl_Check_Button* chk_autogap3
-    { numin_pregap = new Fl_Value_Input(230, 216, 95, 20, "PRE-GAP length :");
+    { numin_pregap = new Fl_Value_Input(230, 216, 95, 20, "PRE-GAP lenght :");
       numin_pregap->labelsize(12);
       numin_pregap->textsize(12);
       numin_pregap->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
@@ -58,7 +58,7 @@ rawfile_loader_window::rawfile_loader_window() {
       numin_skew->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
       numin_skew->align(Fl_Align(FL_ALIGN_TOP_LEFT));
     } // Fl_Value_Input* numin_skew
-    { chk_sidebasedskew = new Fl_Check_Button(333, 134, 25, 25, "Side based");
+    { chk_sidebasedskew = new Fl_Check_Button(333, 134, 87, 25, "Side based");
       chk_sidebasedskew->down_box(FL_DOWN_BOX);
       chk_sidebasedskew->labelsize(12);
       chk_sidebasedskew->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));
@@ -142,7 +142,7 @@ rawfile_loader_window::rawfile_loader_window() {
       choice_tracktype->align(Fl_Align(FL_ALIGN_TOP_LEFT));
       choice_tracktype->when(FL_WHEN_CHANGED);
     } // Fl_Choice* choice_tracktype
-    { numin_gap3 = new Fl_Value_Input(10, 215, 105, 20, "GAP3 length :");
+    { numin_gap3 = new Fl_Value_Input(10, 215, 105, 20, "GAP3 lenght :");
       numin_gap3->labelsize(12);
       numin_gap3->textsize(12);
       numin_gap3->callback((Fl_Callback*)raw_loader_window_datachanged, (void*)(this));

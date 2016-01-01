@@ -58,25 +58,25 @@ class sdhxcfecfg_window {open
           label {Load last loaded floppy}
           user_data this
           callback sdhxcfecfg_window_datachanged
-          xywh {155 112 15 18} down_box DOWN_BOX labelsize 12
+          xywh {155 112 145 18} down_box DOWN_BOX labelsize 12
         }
         Fl_Check_Button chk_disabediskdriveselector {
           label {Disable disk drive selector}
           user_data this
           callback sdhxcfecfg_window_datachanged
-          xywh {155 131 15 17} down_box DOWN_BOX labelsize 12
+          xywh {155 131 165 17} down_box DOWN_BOX labelsize 12
         }
         Fl_Check_Button chk_force_loading_startupa {
           label {Force loading STARTUPA.HFE into the drive A at power up}
           user_data this
           callback sdhxcfecfg_window_datachanged
-          xywh {9 153 16 14} down_box DOWN_BOX labelsize 11
+          xywh {9 153 301 16} down_box DOWN_BOX labelsize 11
         }
         Fl_Check_Button chk_force_loading_startupb {
           label {Force loading STARTUPB.HFE into the drive B at power up}
           user_data this
           callback sdhxcfecfg_window_datachanged
-          xywh {9 168 16 18} down_box DOWN_BOX labelsize 11
+          xywh {9 168 301 16} down_box DOWN_BOX labelsize 11
         }
         Fl_Group {} {
           label {AUTO BOOT Mode / File Selector software startup} open
@@ -86,19 +86,19 @@ class sdhxcfecfg_window {open
             label {Enable auto boot mode}
             user_data this
             callback sdhxcfecfg_window_datachanged
-            xywh {9 249 16 18} down_box DOWN_BOX labelsize 11
+            xywh {9 249 126 18} down_box DOWN_BOX labelsize 11
           }
           Fl_Check_Button chk_force_loading_autoboot {
             label {Force loading AUTOBOOT.HFE at power up}
             user_data this
             callback sdhxcfecfg_window_datachanged
-            xywh {9 268 16 18} down_box DOWN_BOX labelsize 11
+            xywh {9 268 226 18} down_box DOWN_BOX labelsize 11
           }
           Fl_Check_Button chk_preindex {
             label {Enable index Pre incrementing}
             user_data this
             callback sdhxcfecfg_window_datachanged
-            xywh {150 249 15 18} down_box DOWN_BOX labelsize 11
+            xywh {150 249 160 18} down_box DOWN_BOX labelsize 11
           }
         }
         Fl_Group {} {
@@ -109,25 +109,25 @@ class sdhxcfecfg_window {open
             label {Enable indexed mode}
             user_data this
             callback sdhxcfecfg_window_datachanged
-            xywh {9 210 16 15} down_box DOWN_BOX labelsize 11
+            xywh {9 210 121 16} down_box DOWN_BOX labelsize 11
           }
         }
       }
       Fl_Group {} {
-        label {HFE file interfacemode} open selected
+        label {HFE file interfacemode} open
         xywh {320 0 250 234} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
       } {
         Fl_Check_Button chk_hfr_autoifmode {
           label Auto
           user_data this
           callback ifcfg_window_datachanged
-          xywh {325 55 15 21} down_box DOWN_BOX labelsize 12
+          xywh {325 55 85 16} down_box DOWN_BOX labelsize 12 when 1
         }
         Fl_Check_Button chk_hfe_doublestep {
           label {Double Step}
           user_data this
           callback ifcfg_window_datachanged
-          xywh {325 75 15 18} down_box DOWN_BOX labelsize 12
+          xywh {325 75 85 16} down_box DOWN_BOX labelsize 12 when 1
         }
         Fl_Choice choice_hfeifmode {
           label Mode
@@ -159,13 +159,13 @@ class sdhxcfecfg_window {open
           } {}
           Fl_Check_Button chk_enable_twodrives_emu {
             label {2 drives emulation}
-            callback sdhxcfecfg_window_datachanged
-            xywh {325 195 15 15} down_box DOWN_BOX labelsize 12
+            callback sdhxcfecfg_window_datachanged selected
+            xywh {325 195 125 16} down_box DOWN_BOX labelsize 12
           }
           Fl_Check_Button chk_drvb_as_motoron {
             label {Drive B input as Drives A and B Motor ON}
             callback sdhxcfecfg_window_datachanged
-            xywh {325 210 15 14} down_box DOWN_BOX labelsize 12
+            xywh {325 210 240 16} down_box DOWN_BOX labelsize 12
           }
           Fl_Choice choice_interfacemode_drvb_cfg {
             user_data this

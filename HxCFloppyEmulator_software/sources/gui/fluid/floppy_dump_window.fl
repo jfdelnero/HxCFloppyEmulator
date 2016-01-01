@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0110 
+version 1.0300 
 header_name {.h} 
 code_name {.cxx}
 class floppy_dump_window {open
@@ -8,14 +8,14 @@ class floppy_dump_window {open
   } {
     Fl_Window window {
       label {Floppy disk dump} open
-      xywh {102 121 474 427} type Double hide
+      xywh {102 121 474 427} type Double visible
     } {
       Fl_Group {} {
         label {Dump setting} open
         xywh {5 5 155 180} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {
         Fl_Value_Input number_of_track {
-          label {Number of tracks}
+          label {Number of tracks} selected
           xywh {115 90 35 25} labelsize 12 textsize 12
         }
         Fl_Value_Input number_of_retry {
@@ -25,19 +25,19 @@ class floppy_dump_window {open
       }
       Fl_Round_Button sel_drive_a {
         label {Drive A:}
-        xywh {25 25 25 25} type Radio down_box ROUND_DOWN_BOX
+        xywh {15 25 80 16} type Radio down_box ROUND_DOWN_BOX
       }
       Fl_Round_Button sel_drive_b {
-        label {Drive B:} selected
-        xywh {25 45 25 25} type Radio down_box ROUND_DOWN_BOX
+        label {Drive B:}
+        xywh {15 45 80 16} type Radio down_box ROUND_DOWN_BOX
       }
       Fl_Check_Button double_sided {
         label {Double sided}
-        xywh {25 65 25 25} down_box DOWN_BOX
+        xywh {15 65 110 16} down_box DOWN_BOX
       }
       Fl_Check_Button double_step {
         label {Double step}
-        xywh {15 120 25 25} down_box DOWN_BOX
+        xywh {15 125 100 16} down_box DOWN_BOX
       }
       Fl_Group {} {
         label Status open
