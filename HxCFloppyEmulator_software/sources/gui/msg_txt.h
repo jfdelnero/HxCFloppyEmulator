@@ -74,7 +74,6 @@ Fl_Menu_Item format_choices[]=
 	{0}
 };
 
-
 Fl_Menu_Item fs_choices[]=
 {
 	{ "5\"25 & 8\" 160KB SSDD 300RPM FAT12",0,fs_choice_cb,(void*)FS_5P25_300RPM_160KB_MSDOS_FAT12},
@@ -94,13 +93,26 @@ Fl_Menu_Item fs_choices[]=
 
 	{ "3\"5        640KB DSDD FAT12",0,fs_choice_cb,(void*)FS_3P5_DS_300RPM_640KB_MSDOS_FAT12},
 
-	{ "3\"5        720KB DSDD FAT12 ",0,fs_choice_cb,(void*)FS_720KB_MSDOS_FAT12},
-	{ "3\"5        2.50MB DSDD FAT12",0,fs_choice_cb,(void*)FS_2_50MB_MSDOS_FAT12},
+	{ "3\"5        720KB DSDD FAT12",0,fs_choice_cb,(void*)FS_720KB_MSDOS_FAT12},
+	{ "3\"5        738KB DSDD FAT12",0,fs_choice_cb,(void*)FS_738KB_MSDOS_FAT12},
+	{ "3\"5        800KB DSDD FAT12",0,fs_choice_cb,(void*)FS_800KB_MSDOS_FAT12},
+	{ "3\"5        820KB DSDD FAT12",0,fs_choice_cb,(void*)FS_820KB_MSDOS_FAT12},
 
 	{ "5\"25       1.2MB DSHD FAT12",0,fs_choice_cb,(void*)FS_5P25_300RPM_1200KB_MSDOS_FAT12},
+	{ "5\"25       1.23MB DSHD FAT12",0,fs_choice_cb,(void*)FS_5P25_300RPM_1230KB_MSDOS_FAT12},
 
 	{ "3\"5        1.44MB DSHD FAT12",0,fs_choice_cb,(void*)FS_1_44MB_MSDOS_FAT12},
+	{ "3\"5        1.476MB DSHD FAT12",0,fs_choice_cb,(void*)FS_1_476MB_MSDOS_FAT12},
+
+	{ "3\"5        1.6MB DSHD FAT12",0,fs_choice_cb,(void*)FS_1_600MB_MSDOS_FAT12},
+	{ "3\"5        1.64MB DSHD FAT12",0,fs_choice_cb,(void*)FS_1_640MB_MSDOS_FAT12},
 	{ "3\"5        1.68MB DSHD FAT12",0,fs_choice_cb,(void*)FS_1_68MB_MSDOS_FAT12},
+	
+	{ "3\"5        1.722MB DSHD FAT12",0,fs_choice_cb,(void*)FS_1_722MB_MSDOS_FAT12},
+	{ "3\"5        1.785MB DSHD FAT12",0,fs_choice_cb,(void*)FS_1_785MB_MSDOS_FAT12},
+
+	{ "3\"5        2.50MB DSDD FAT12",0,fs_choice_cb,(void*)FS_2_50MB_MSDOS_FAT12},
+
 	{ "3\"5        2.88MB DSED FAT12",0,fs_choice_cb,(void*)FS_2_88MB_MSDOS_FAT12},
 	{ "3\"5        3.38MB DSHD FAT12",0,fs_choice_cb,(void*)FS_3_38MB_MSDOS_FAT12},
 	{ "3\"5        4.50MB DSHD FAT12",0,fs_choice_cb,(void*)FS_4_50MB_MSDOS_FAT12},
