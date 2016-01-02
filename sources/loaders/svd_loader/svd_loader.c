@@ -74,7 +74,7 @@ int SVD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		f=hxc_fopen(imgfile,"r");
 		if(f)
 		{
-			fgets(linebuffer,sizeof(linebuffer),f);
+			hxc_fgets(linebuffer,sizeof(linebuffer),f);
 			hxc_fclose(f);
 
 			if (sscanf(linebuffer,"%d.%d",&major,&minor) != 2)
@@ -148,7 +148,7 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	fseek (f , 0 , SEEK_SET);
 
 	// code version
-	fgets(linebuffer,sizeof(linebuffer),f);
+	hxc_fgets(linebuffer,sizeof(linebuffer),f);
 	if (sscanf(linebuffer,"%d.%d",&major,&minor) != 2)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Bad code version !");
@@ -156,27 +156,27 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	}
 
 	// number of sector per track
-	fgets(linebuffer,sizeof(linebuffer),f);
+	hxc_fgets(linebuffer,sizeof(linebuffer),f);
 	if (sscanf(linebuffer,"%d",&sectorpertrack) != 1)
 		return(HXCFE_BADFILE);
 
 	// number of tracks
-	fgets(linebuffer,sizeof(linebuffer),f);
+	hxc_fgets(linebuffer,sizeof(linebuffer),f);
 	if (sscanf(linebuffer,"%d",&numberoftrack) != 1)
 		return(HXCFE_BADFILE);
 
 	// number of sides
-	fgets(linebuffer,sizeof(linebuffer),f);
+	hxc_fgets(linebuffer,sizeof(linebuffer),f);
 	if (sscanf(linebuffer,"%d",&numberofside) != 1)
 		return(HXCFE_BADFILE);
 
 	// sector size
-	fgets(linebuffer,sizeof(linebuffer),f);
+	hxc_fgets(linebuffer,sizeof(linebuffer),f);
 	if (sscanf(linebuffer,"%d",&sectsize) != 1)
 		return(HXCFE_BADFILE);
 
 	// write protect
-	fgets(linebuffer,sizeof(linebuffer),f);
+	hxc_fgets(linebuffer,sizeof(linebuffer),f);
 	if (sscanf(linebuffer,"%d",&wprot) != 1)
 		return(HXCFE_BADFILE);
 
