@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
------------H----H--X----X-----CCCCC----22222----0000-----0000------11----------
-----------H----H----X-X-----C--------------2---0----0---0----0--1--1-----------
+-----------H----H--X----X-----CCCCC----22222-----0000-----0000------1----------
+----------H----H----X-X-----C--------------2---0----0---0----0---1-1-----------
 ---------HHHHHH-----X------C----------22222---0----0---0----0-----1------------
 --------H----H----X--X----C----------2-------0----0---0----0-----1-------------
 -------H----H---X-----X---CCCCC-----222222----0000-----0000----1111------------
@@ -18,9 +18,9 @@ New Loader : VFDDAT file loader.
 
 New Loader : Densei Sirius VFD DAT Loader.
 
-New Writer : DIM writer.
+New Writer : *.DIM writer.
 
-New Writer : ADZ writer.
+New Writer : *.ADZ writer.
 
 New Writer : *.TRD Writer.
 
@@ -38,19 +38,19 @@ SCP Loader/Writer : Loader/writer improved.
 
 D88 Loader : Gap3 setting corrected.
 
-Dos disk browser : More disks layout.
+Dos disk browser : More disks layouts.
 
 libhxcfe : New track support : AED6200P.
 
 XML format definitions : Mictrotan 65 TANDOS.
 
-Flux Stream Analyzer : Seg fault corrected.
+Flux Stream Analyzer : Possible segmentation fault corrected.
 
 Flux Stream Analyzer : Input filtering reduced.
 
 Kryoflux Stream Loader (*XX.X.raw) / analyser : NFA over index support added.
 
-Track editor : add & remove track functions added.
+Track editor : Add & Remove track functions added.
 
 Track editor : RPM & Bitrate change functions added.
 
@@ -71,6 +71,7 @@ SD/USB Emulator setting window : Advanced pinout settings added.
 Code sources fixes/changes for GCC, Clang and VS2015 x86 & x64 compilation support.
 
 And many more fixes and improvements...
+*********************************************************/
 
 /*********************************************************
 05 October 2014: HxCFloppyEmulator 2.0.26.0
@@ -92,6 +93,7 @@ Raw Loader - Predefined raw formats added (XML) :
 - Logical Interchange Format (LIF) 3"1/2 616KB (double side).
 - Logical Interchange Format (LIF) 3"1/2 1232KB (HD).
 - Logical Interchange Format (LIF) 5"1/4 264KB.
+*********************************************************/
 
 /*********************************************************
 25 may 2014: HxCFloppyEmulator 2.0.22.0
@@ -109,6 +111,7 @@ New Loader : SPS CT Raw file format support added. (NOTE : No flakey bits suppor
 libhxcfe : Generic flux stream analyzer enhanced.
 
 Disk Browser : ADFLib fseek corrected.
+*********************************************************/
 
 /*********************************************************
 03 January 2014: HxCFloppyEmulator 2.0.20.1
@@ -125,6 +128,7 @@ General : Low level sector reader and track display speed-optimized.
 
 MacOS X : Executable now compiled with the "-mmacosx-version-min=10.5" option
           -> Leopard,Snow Leopard,Lion,Mountain Lion & Mavericks supported.
+*********************************************************/
 
 /*********************************************************
 08 December 2013: HxCFloppyEmulator 2.0.18.4
@@ -172,7 +176,7 @@ Floppy Dump : Default step rate set at 16ms.
 zlib updated : zlib 1.2.8
 
 Amiga/UAE Extended ADF file loader : Amiga DOS track offset loading corrected.
-
+*********************************************************/
 
 /*********************************************************
 06 August 2013: HxCFloppyEmulator 2.0.16.0
@@ -182,6 +186,7 @@ FAT12 Loader/generator : Files size, disk size & disk free size displayed, lots 
 TRS80 Writer : Bad free() removed.
 
 General : Software passed with valgrind : Some memory leaks and possible issues corrected !
+*********************************************************/
 
 /*********************************************************
 16 July 2013: HxCFloppyEmulator 2.0.15.1
@@ -191,6 +196,7 @@ FAT12 Loader/generator : Default file creation date set to 1985 to avoid issue w
 Apple 2 Sectors generator : End of sector sync corrected, 6&2 GCR encoder corrected.
 
 Track viewer : Sectors on track boundary display issue corrected.
+*********************************************************/
 
 /*********************************************************
 14 July 2013: HxCFloppyEmulator 2.0.15.0
@@ -249,7 +255,7 @@ GUI - Drag & Drop Support : URI type path support added (Linux).
 GUI - Track viewer window : New buttons to enable/disable track format analysis.
 
 GUI - Log window : New buttons to enable/disable logs messages.
-
+*********************************************************/
 
 /*********************************************************
 24/03/2013: HxCFloppyEmulator 2.0.12.2
