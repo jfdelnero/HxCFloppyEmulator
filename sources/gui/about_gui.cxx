@@ -257,7 +257,7 @@ About_box::About_box()
 
 	o = new Fl_Box(200, 13, 320+6, 200+6);
 	o->box(FL_UP_BOX);// Fl_Box* o
-	o = new Fl_Box(5, 45, 180, 60, "Copyright (c) 2006-2014\nJean-François DEL NERO\n(c) HxC2001");
+	o = new Fl_Box(5, 45, 180, 60, "Copyright (c) 2006-2016\nJean-François DEL NERO\n(c) HxC2001");
 	o->box(FL_DOWN_BOX);
 
 	xpos_size=200+3;
