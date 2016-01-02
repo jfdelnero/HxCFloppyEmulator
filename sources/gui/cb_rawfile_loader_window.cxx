@@ -462,14 +462,19 @@ void raw_loader_window_bt_loadcfg(Fl_Button* bt, void*)
 		fpf_file=hxc_fopen(file,"rb");
 		if(fpf_file)
 		{
-			fread(header,sizeof(header),1,fpf_file);
-			if( !strncmp(header,"FPF_V0.1",sizeof(header)) )
+			if(fread(header,sizeof(header),1,fpf_file))
 			{
-				memset(&rfc,0,sizeof(cfgrawfile));
-				fread(&rfc,sizeof(cfgrawfile),1,fpf_file);
-				setWindowState(rlw,&rfc);
-				raw_loader_window_datachanged(bt, 0);
+				if( !strncmp(header,"FPF_V0.1",sizeof(header)) )
+				{
+					memset(&rfc,0,sizeof(cfgrawfile));
+					if(fread(&rfc,sizeof(cfgrawfile),1,fpf_file))
+					{
+						setWindowState(rlw,&rfc);
+						raw_loader_window_datachanged(bt, 0);
+					}
+				}
 			}
+
 			hxc_fclose(fpf_file);
 		}
 	}

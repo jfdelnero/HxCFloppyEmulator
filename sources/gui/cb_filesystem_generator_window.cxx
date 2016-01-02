@@ -1150,7 +1150,16 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 				buffer =(unsigned char*) malloc(size);
 				if(buffer)
 				{
-					fread(buffer,size,1,f);
+					if(!fread(buffer,size,1,f))
+					{
+						sprintf(progresstxt,"Cannot read source file %s !!!",srcpath);
+						fsw->txtout_freesize->value(progresstxt);
+						fsw->txtout_freesize->color(FL_RED);
+						free(buffer);
+						hxc_fclose(f);
+						return -1;
+					}
+
 					strncpy(fullpath,dstpath,sizeof(fullpath));
 					file_handle = hxcfe_createFile(fsmng,fullpath );
 					if(file_handle>0)

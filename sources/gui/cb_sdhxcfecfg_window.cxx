@@ -392,9 +392,11 @@ void sdhxcfecfg_window_bt_load(Fl_Button* bt, void*)
 		f=hxc_fopen((char*)temp,"r+b");
 		if(f)
 		{
-			fread(filebuffer,8*1024,1,f);
+			if(fread(filebuffer,8*1024,1,f))
+			{
+				set_cfg(sdcfgw,(sdhxcfecfgfile *)&filebuffer);
+			}
 			hxc_fclose(f);
-			set_cfg(sdcfgw,(sdhxcfecfgfile *)&filebuffer);
 		}
 	}
 }

@@ -317,7 +317,7 @@ int loadrawfile(HXCFE* floppycontext,cfgrawfile * rfc,char * file)
 			}
 		}
 
-		sprintf(guicontext->bufferfilename,"");
+		strcpy(guicontext->bufferfilename,"");
 		guicontext->loadedfloppy=0;
 
 		guicontext->loadedfloppy = fp;
