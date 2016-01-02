@@ -255,6 +255,11 @@ int hxc_fread(void * ptr, size_t size, FILE *f)
 	}
 }
 
+char * hxc_fgets(char * str, int num, FILE *f)
+{
+	return fgets( str, num, f );
+}
+
 int	hxc_fclose(FILE * f)
 {
 	return fclose(f);
