@@ -44,6 +44,7 @@ char * hxc_strlower(char * str);
 int hxc_open (const char *filename, int flags, ...);
 
 FILE *hxc_fopen (const char *filename, const char *mode);
+int hxc_fread(void * ptr, size_t size, FILE *f);
 int hxc_fclose(FILE * f);
 
 #ifndef stat
