@@ -81,7 +81,7 @@ int XML_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		if(f)
 		{
 			memset(firstline,0,sizeof(firstline));
-			fgets(firstline,sizeof(firstline)-1,f);
+			hxc_fgets(firstline,sizeof(firstline)-1,f);
 			hxc_fclose(f);
 
 			if(strstr(firstline,"<?xml version="))
