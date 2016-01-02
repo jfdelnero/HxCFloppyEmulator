@@ -164,7 +164,7 @@ int RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 						}
 						else
 						{
-							sprintf(tmp_str,"");
+							strcpy(tmp_str,"");
 						}
 
 						log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
