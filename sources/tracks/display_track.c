@@ -640,7 +640,7 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 							if(sc->fill_byte_used)
 								sprintf(tempstr2," F:%.2Xh",sc->fill_byte);
 							else
-								sprintf(tempstr2,"");
+								strcpy(tempstr2,"");
 
 							strcat(tempstr,tempstr2);
 
