@@ -97,7 +97,7 @@ int STW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Write Track %d:%d [%x] %x bytes",i,j,ftell(stwfile),mfmsize);
 
-				sprintf((char*)&stwtrackdesc.trkheader,"TRK");
+				memcpy((char*)&stwtrackdesc.trkheader,"TRK",3);
 				stwtrackdesc.side_number = j;
 				stwtrackdesc.track_number = i;
 				fwrite(&stwtrackdesc,sizeof(stwtrackdesc),1,stwfile);

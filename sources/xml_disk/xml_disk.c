@@ -931,7 +931,7 @@ int32_t	hxcfe_setXmlFloppyLayoutFile(HXCFE_XMLLDR* xmlfb_ctx,char * filepath)
 		if(f)
 		{
 			memset(firstline,0,sizeof(firstline));
-			fgets(firstline,sizeof(firstline)-1,f);
+			hxc_fgets(firstline,sizeof(firstline)-1,f);
 			hxc_fclose(f);
 
 			if(strstr(firstline,"<?xml version="))

@@ -65,7 +65,7 @@ int VTR_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	{
 		FILEHEADER=(vtrucco_picfileformatheader *) malloc(512);
 		memset(FILEHEADER,0xFF,512);
-		sprintf((char*)&FILEHEADER->HEADERSIGNATURE,"VTrucco");
+		memcpy((char*)&FILEHEADER->HEADERSIGNATURE,"VTrucco",7);
 
 		FILEHEADER->number_of_track=(unsigned char)floppy->floppyNumberOfTrack;
 		FILEHEADER->number_of_side=(unsigned char)floppy->floppyNumberOfSide;

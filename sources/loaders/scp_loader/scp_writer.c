@@ -144,7 +144,7 @@ uint32_t write_scp_track(FILE *f,HXCFE_SIDE * track,uint32_t * csum,int tracknum
 
 	memset(&trkh,0,sizeof(scp_track_header));
 
-	strcpy((char*)&trkh.trk_sign,"TRK");
+	memcpy((char*)&trkh.trk_sign,"TRK",3);
 
 	trkh.track_number = tracknum;
 
@@ -247,7 +247,7 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	{
 		memset(&scph,0,sizeof(scp_header));
 
-		strcpy((char*)&scph.sign,"SCP");
+		memcpy((char*)&scph.sign,"SCP",3);
 
 		tracknumber = floppy->floppyNumberOfTrack * 2;
 
