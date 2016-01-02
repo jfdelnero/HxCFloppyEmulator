@@ -1708,7 +1708,7 @@ typedef struct type_list_
 }type_list;
 
 
-const type_list track_type_list[]=
+const static type_list track_type_list[]=
 {
 	{ISOFORMAT_SD,      "ISO FM"},
 	{ISOFORMAT_DD,      "ISO MFM"},
