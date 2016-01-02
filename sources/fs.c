@@ -243,6 +243,18 @@ FILE *hxc_fopen (const char *filename, const char *mode)
 	return stream;
 }
 
+int hxc_fread(void * ptr, size_t size, FILE *f)
+{
+	if( fread(ptr,size,1,f) != 1 )
+	{
+		return 1; // Error
+	}
+	else
+	{
+		return 0; // No Error
+	}
+}
+
 int	hxc_fclose(FILE * f)
 {
 	return fclose(f);
