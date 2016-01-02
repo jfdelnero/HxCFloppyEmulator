@@ -222,7 +222,7 @@ int MSX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		trackdata = (unsigned char*)malloc( sectorsize + 1);
 		if( trackdata )
 		{
-			fread(trackdata,sectorsize+1,1,f);
+			hxc_fread(trackdata,sectorsize+1,f);
 
 			if(msx_imggetfloppyconfig(
 				imgfile,
@@ -265,7 +265,7 @@ int MSX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 						fseek (f , file_offset , SEEK_SET);
 
-						fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
+						hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
 
 						currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
 					}

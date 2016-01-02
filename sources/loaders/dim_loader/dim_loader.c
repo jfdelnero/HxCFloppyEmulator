@@ -80,7 +80,7 @@ int DIM_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			return HXCFE_ACCESSERROR;
 		}
 
-		fread(&header,sizeof(dim_header),1,f);
+		hxc_fread(&header,sizeof(dim_header),f);
 
 		hxc_fclose(f);
 
@@ -125,7 +125,7 @@ int DIM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
-	fread(&header,sizeof(dim_header),1,f);
+	hxc_fread(&header,sizeof(dim_header),f);
 
 	if(header.id_header==0x4242)
 	{
@@ -181,7 +181,7 @@ int DIM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							(sectorsize*(floppydisk->floppySectorPerTrack)*i)+0x20;
 
 				fseek (f , file_offset , SEEK_SET);
-				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
+				hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
 
 				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
 			}

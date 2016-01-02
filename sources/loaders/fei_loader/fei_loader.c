@@ -171,7 +171,7 @@ int FEI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 												ftell(f),
 												tracksize);
 
-			fread(currentside->databuffer,tracksize,1,f);
+			hxc_fread(currentside->databuffer,tracksize,f);
 
 			for(k=0;k<tracksize;k++)
 			{

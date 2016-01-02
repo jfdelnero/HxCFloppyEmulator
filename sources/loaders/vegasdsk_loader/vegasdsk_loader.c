@@ -78,7 +78,7 @@ int VEGASDSK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		}
 
 		fseek (f , 256*(3-1) , SEEK_SET);
-		fread(buffer,256,1,f);
+		hxc_fread(buffer,256,f);
 
 		hxc_fclose(f);
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VEGASDSK_libIsValidDiskFile : Vegas DSK file ! %d tracks %d sectors/tracks",buffer[0x26]+1,buffer[0x27]+1);
@@ -124,7 +124,7 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	filesize=ftell(f);
 
 	fseek (f , 256*(3-1) , SEEK_SET);
-	fread(buffer,256,1,f);
+	hxc_fread(buffer,256,f);
 
 	fseek (f , 0 , SEEK_SET);
 
@@ -211,7 +211,7 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			sectorconfig[k].gap3=255;
 			sectorconfig[k].trackencoding=ISOFORMAT_SD;
 			sectorconfig[k].input_data=malloc(sectorconfig[k].sectorsize);
-			fread(sectorconfig[k].input_data,256,1,f);
+			hxc_fread(sectorconfig[k].input_data,256,f);
 
 		}
 
@@ -238,7 +238,7 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 			file_offset=offset+ ( (((floppydisk->floppySectorPerTrack)*256)) * floppydisk->floppyNumberOfSide * (j-1) ) +
 				                ( (((floppydisk->floppySectorPerTrack)*256)) * i );
-			fread(floppy_data,floppydisk->floppySectorPerTrack*sectorsize,1,f);
+			hxc_fread(floppy_data,floppydisk->floppySectorPerTrack*sectorsize,f);
 
 			memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 			for(k=0;k<floppydisk->floppySectorPerTrack;k++)

@@ -991,7 +991,7 @@ HXCFE_FLOPPY* hxcfe_generateXmlFloppy ( HXCFE_XMLLDR* xmlfb_ctx, uint8_t * rambu
 				if(xmlbuffer)
 				{
 					memset(xmlbuffer,0,filesize + 1);
-					fread(xmlbuffer,filesize,1,f);
+					hxc_fread(xmlbuffer,filesize,f);
 
 					XML_Parse(xmlfb_ctx->xml_parser, xmlbuffer, filesize, 1);
 
@@ -1033,7 +1033,7 @@ HXCFE_FLOPPY* hxcfe_generateXmlFileFloppy (HXCFE_XMLLDR* xmlfb_ctx,char *file)
 			{
 				memset(buffer,0,filesize);
 
-				fread(buffer, filesize, 1, f);
+				hxc_fread(buffer, filesize, f);
 
 				ret = hxcfe_generateXmlFloppy (xmlfb_ctx,buffer,filesize);
 

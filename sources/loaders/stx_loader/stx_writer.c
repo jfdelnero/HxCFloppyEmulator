@@ -235,7 +235,7 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 							fseek(stxdskfile,cur_track_file_offset + sizeof(pasti_trackheader) + (sizeof(pasti_sector)*sect_cnt),SEEK_SET);
 
 							memset(&sector_header,0,sizeof(pasti_sector));
-							fread(&sector_header,sizeof(pasti_sector),1,stxdskfile);
+							hxc_fread(&sector_header,sizeof(pasti_sector),stxdskfile);
 
 							fseek(stxdskfile,0,SEEK_END);
 

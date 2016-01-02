@@ -355,7 +355,7 @@ int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 				file_offset=(tracklen*j)+(tracklen*numberoftrack*(i&1));
 				fseek (f , file_offset , SEEK_SET);
 
-				fread(trackdata,tracklen,1,f);
+				hxc_fread(trackdata,tracklen,f);
 				memset(trackclk,0xFF,tracklen);
 
 

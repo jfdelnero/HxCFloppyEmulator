@@ -137,7 +137,7 @@ int EMUI_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		sidenumber=0;
 
 		fseek(f,i*0xE00,SEEK_SET);
-		fread(&sector_data,0xE00,1,f);
+		hxc_fread(&sector_data,0xE00,f);
 
 		if(!floppydisk->tracks[tracknumber])
 		{

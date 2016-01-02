@@ -229,7 +229,7 @@ int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char *
 										{
 											size=filesize;
 										}
-										fread(&tempbuffer,size,1,ftemp);
+										hxc_fread(&tempbuffer,size,ftemp);
 
 										byte_written=adfWriteFile(adffile, size, tempbuffer);
 										if((byte_written!=size) || (adfCountFreeBlocks(adfvolume)<2) )
@@ -247,7 +247,7 @@ int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char *
 
 									/*fileimg=(unsigned char*)malloc(filesize);
 									memset(fileimg,0,filesize);
-									fread(fileimg,filesize,1,ftemp);
+									hxc_fread(fileimg,filesize,ftemp);
 									adfWriteFile(adffile, filesize, fileimg);
 									free(fileimg);*/
 

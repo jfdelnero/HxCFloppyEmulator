@@ -78,7 +78,7 @@ int ApriDisk_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			if(f)
 			{
 				memset(HeaderBuffer,0,sizeof(HeaderBuffer));
-				fread(HeaderBuffer,1,128,f);
+				hxc_fread(HeaderBuffer,128,f);
 				hxc_fclose(f);
 
 				if(!strcmp(APRIDISK_HeaderString,(char*)HeaderBuffer))
@@ -131,7 +131,7 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	fseek(f,0,SEEK_SET);
 	file_buffer=(unsigned char *) malloc(totalfilesize);
 	memset(file_buffer,0,totalfilesize);
-	fread(file_buffer,1,totalfilesize,f);
+	hxc_fread(file_buffer,totalfilesize,f);
 
 	fileindex=0;
 	//////////////////////////////////////////////////////

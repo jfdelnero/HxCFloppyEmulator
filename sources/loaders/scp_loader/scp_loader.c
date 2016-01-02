@@ -83,7 +83,7 @@ int SCP_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			return HXCFE_ACCESSERROR;
 		}
 
-		fread(&scph, sizeof(scp_header), 1, f);
+		hxc_fread(&scph, sizeof(scp_header), f);
 
 		if( strncmp((char*)scph.sign,"SCP",3) )
 		{
@@ -130,7 +130,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,uint32_t foffset,s
 	{
 		fseek(f,foffset,SEEK_SET);
 
-		fread(&trkh,sizeof(scp_track_header),1,f);
+		hxc_fread(&trkh,sizeof(scp_track_header),f);
 
 		if(!strncmp((char*)&trkh.trk_sign,"TRK",3))
 		{
@@ -164,7 +164,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,uint32_t foffset,s
 					{
 						fseek(f,foffset + trkh.index_position[i].track_offset,SEEK_SET);
 
-						fread(&trackbuf[offset], (trkh.index_position[i].track_length*sizeof(unsigned short)) , 1, f);
+						hxc_fread(&trackbuf[offset], (trkh.index_position[i].track_length*sizeof(unsigned short)), f);
 
 #ifdef SCPDEBUG
 						floppycontext->hxc_printf(MSG_DEBUG,"SCP read stream - offset [0x%X - 0x%X] : %d bytes",
@@ -302,7 +302,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		f=hxc_fopen(imgfile,"rb");
 		if(f)
 		{
-			fread(&scph,sizeof(scp_header),1,f);
+			hxc_fread(&scph, sizeof(scp_header), f);
 			if(strncmp((char*)&scph.sign,"SCP",3))
 			{
 				hxc_fclose(f);
@@ -347,7 +347,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			floppydisk->floppyNumberOfSide = nbside;
 			floppydisk->floppySectorPerTrack = -1;
 
-			fread(tracksoffset,sizeof(tracksoffset),1,f);
+			hxc_fread(tracksoffset,sizeof(tracksoffset),f);
 
 			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);

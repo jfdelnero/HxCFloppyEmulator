@@ -97,7 +97,7 @@ int32_t getDiskGeometry(FILE * f,int32_t * numberoftrack,int32_t * numberofside,
 	fseek (f , 0 , SEEK_END);
 	filesize=ftell(f);
 	fseek (f , 0 , SEEK_SET);
-	fread(&vib,sizeof(ti99_vib),1,f);
+	hxc_fread(&vib,sizeof(ti99_vib),f);
 	fseek (f , 0 , SEEK_SET);
 
 
@@ -430,7 +430,7 @@ int TI99V9T9_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Read track [%.3d:%.1X] : Offset:%.8X Size:%d*%d",j,i,file_offset,floppydisk->floppySectorPerTrack,sectorsize);
 
 				fseek (f , file_offset , SEEK_SET);
-				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
+				hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
 
 				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(j*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500 | NO_SECTOR_UNDER_INDEX,-2500);
 			}

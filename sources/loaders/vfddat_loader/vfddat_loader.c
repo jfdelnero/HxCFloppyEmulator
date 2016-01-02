@@ -75,7 +75,7 @@ int VFDDAT_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			fseek (f , 0 , SEEK_END);
 			filesize=ftell(f);
 			fseek (f , 0 , SEEK_SET);
-			fread(&header,sizeof(header),1,f);
+			hxc_fread(&header,sizeof(header),f);
 
 			hxc_fclose(f);
 
@@ -206,7 +206,7 @@ int VFDDAT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 	if(filesize!=0)
 	{
 
-		fread(&header,sizeof(header),1,f);
+		hxc_fread(&header,sizeof(header),f);
 		floppydisk->floppyBitRate=500000;
 
 		numberofside=2;
@@ -241,7 +241,7 @@ int VFDDAT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 					file_offset=sizeof(header)+((track_len)*(j*floppydisk->floppyNumberOfSide))+((track_len)*(i&1));
 					fseek (f , file_offset , SEEK_SET);
-					fread(trackdata,track_len,1,f);
+					hxc_fread(trackdata,track_len,f);
 					memset(trackclk,0xFF,track_len);
 
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %d Side %d Tracklen %d Track Offset:0x%.8x",j,i,track_len,file_offset);

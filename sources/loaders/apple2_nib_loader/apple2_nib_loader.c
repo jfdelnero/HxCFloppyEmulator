@@ -159,7 +159,7 @@ int Apple2_nib_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 			file_offset= NIB_TRACK_SIZE * j;
 
 			fseek (f , file_offset , SEEK_SET);
-			fread(trackdata,NIB_TRACK_SIZE,1,f);
+			hxc_fread(trackdata,NIB_TRACK_SIZE,f);
 
 #ifdef HDDD_A2_SUPPORT
 			currentcylinder->sides[0] = tg_alloctrack(floppydisk->floppyBitRate,trackformat,rpm,NIB_TRACK_SIZE * 2 * 8 * 2,1000,0,0);

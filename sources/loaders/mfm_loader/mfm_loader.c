@@ -76,7 +76,7 @@ int MFM_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 		memset(&header,0,sizeof(MFMIMG));
 
-		fread(&header,sizeof(header),1,f);
+		hxc_fread(&header,sizeof(header),f);
 		hxc_fclose(f);
 
 		if( !strncmp((char*)header.headername,"HXCMFM",6))
@@ -119,7 +119,7 @@ int MFM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	memset(&header,0,sizeof(MFMIMG));
 	memset(&trackdesc,0,sizeof(MFMTRACKIMG));
 
-	fread(&header,sizeof(header),1,f);
+	hxc_fread(&header,sizeof(header),f);
 
 	if(!strncmp((char*)header.headername,"HXCMFM",6))
 	{
@@ -146,7 +146,7 @@ int MFM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			hxcfe_imgCallProgressCallback(imgldr_ctx,i,(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide) );
 
 			fseek(f,(header.mfmtracklistoffset)+(i*sizeof(trackdesc)),SEEK_SET);
-			fread(&trackdesc,sizeof(trackdesc),1,f);
+			hxc_fread(&trackdesc,sizeof(trackdesc),f);
 			fseek(f,trackdesc.mfmtrackoffset,SEEK_SET);
 
 			if(!floppydisk->tracks[trackdesc.track_number])
@@ -166,7 +166,7 @@ int MFM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			currentside=currentcylinder->sides[trackdesc.side_number];
 			currentside->number_of_sector=floppydisk->floppySectorPerTrack;
 
-			fread(currentside->databuffer,currentside->tracklen/8,1,f);
+			hxc_fread(currentside->databuffer,currentside->tracklen/8,f);
 		}
 
 		hxc_fclose(f);

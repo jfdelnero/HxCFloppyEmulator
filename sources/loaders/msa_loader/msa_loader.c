@@ -74,7 +74,7 @@ int MSA_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		f=hxc_fopen(imgfile,"rb");
 		if(f)
 		{
-			fread(signature,3,1,f);
+			hxc_fread(signature,3,f);
 			hxc_fclose(f);
 			if(signature[0]==0x0E && signature[1]==0x0F && signature[2]==0x00)
 			{
@@ -126,7 +126,7 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	{
 		sectorsize=512; // msa file support only 512bytes/sector floppies.
 
-		fread(fileheader,5*sizeof(unsigned short),1,f);
+		hxc_fread(fileheader,5*sizeof(unsigned short),f);
 		if(fileheader[0]==0x0E && fileheader[1]==0x0F)
 		{
 			numberoftrack=((256*fileheader[8])+fileheader[9])+1;
@@ -143,13 +143,13 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			i=0;
 			do
 			{
-				fread(trackheader,2,1,f);
+				hxc_fread(trackheader,2,f);
 				filetracksize=((trackheader[0]*256)+trackheader[1]);
 				if(filetracksize==(numberofsectorpertrack*512))
 				{
 					tmpbuffer=(unsigned char*)malloc(filetracksize);
 					memset(tmpbuffer,0,filetracksize);
-					fread(tmpbuffer,filetracksize,1,f);
+					hxc_fread(tmpbuffer,filetracksize,f);
 					memcpy(flatimg+j,tmpbuffer,filetracksize);
 					free(tmpbuffer);
 					j=j+filetracksize;
@@ -161,7 +161,7 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					tmpbuffer=(unsigned char*)malloc(filetracksize);
 					memset(tmpbuffer,0,filetracksize);
 
-					fread(tmpbuffer,filetracksize,1,f);
+					hxc_fread(tmpbuffer,filetracksize,f);
 					do
 					{
 						if(tmpbuffer[k]!=0xE5)

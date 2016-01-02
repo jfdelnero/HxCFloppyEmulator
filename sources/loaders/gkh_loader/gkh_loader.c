@@ -78,7 +78,7 @@ int GKH_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			return HXCFE_ACCESSERROR;
 		}
 
-		fread(&header,sizeof(header),1,f);
+		hxc_fread(&header,sizeof(header),f);
 		hxc_fclose(f);
 
 		if(!memcmp(&header.header_tag,"TDDFI",5))
@@ -128,7 +128,7 @@ int GKH_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	}
 
 	data_offset=58;
-	fread(&header,sizeof(header),1,f);
+	hxc_fread(&header,sizeof(header),f);
 
 	if(!memcmp(&header.header_tag,"TDDFI",5) && header.version==1)
 	{
@@ -136,7 +136,7 @@ int GKH_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		i=0;
 		do
 		{
-			fread(&tagbuffer,10,1,f);
+			hxc_fread(&tagbuffer,10,f);
 			switch(tagbuffer[0])
 			{
 				case 0x0A:
@@ -186,7 +186,7 @@ int GKH_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							data_offset;
 
 				fseek (f , file_offset , SEEK_SET);
-				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
+				hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
 
 				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,startid,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
 			}

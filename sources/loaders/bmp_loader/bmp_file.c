@@ -54,11 +54,11 @@ int bmp_load(char * file,bitmap_data * bdata)
 	f = hxc_fopen(file,"rb");
 	if(f)
 	{
-		fread(&bitmap_header,1,sizeof(BITMAPFILEHEADER),f);
+		hxc_fread(&bitmap_header,sizeof(BITMAPFILEHEADER),f);
 
 		if( bitmap_header.bfType == 19778 )
 		{
-			fread(&bitmap_info_header,1,sizeof(BITMAPINFOHEADER),f);
+			hxc_fread(&bitmap_info_header,sizeof(BITMAPINFOHEADER),f);
 
 			xsize=bitmap_info_header.biWidth;
 			ysize=bitmap_info_header.biHeight;
@@ -97,7 +97,7 @@ int bmp_load(char * file,bitmap_data * bdata)
 					memset(palette,0,palettesize*sizeof(RGBQUAD));
 
 					fseek(f,sizeof(BITMAPFILEHEADER)+ bitmap_info_header.biSize ,SEEK_SET);
-					fread(palette,1,palettesize*sizeof(RGBQUAD),f);
+					hxc_fread(palette,palettesize*sizeof(RGBQUAD),f);
 				}
 
 				bitmapdataoffset = sizeof(BITMAPFILEHEADER)+ bitmap_info_header.biSize + (palettesize*sizeof(RGBQUAD));
@@ -122,7 +122,7 @@ int bmp_load(char * file,bitmap_data * bdata)
 						{
 
 							fseek(f,bitmapdataoffset + (bitmapdatalinesize*i) ,SEEK_SET);
-							fread(linebuffer,1,bitmapdatalinesize,f);
+							hxc_fread(linebuffer,bitmapdatalinesize,f);
 
 							for(j=0;j<xsize;j++)
 							{
@@ -147,7 +147,7 @@ int bmp_load(char * file,bitmap_data * bdata)
 						for(i=0;i<ysize;i++)
 						{
 							fseek(f,bitmapdataoffset + (bitmapdatalinesize*i) ,SEEK_SET);
-							fread(linebuffer,1,bitmapdatalinesize,f);
+							hxc_fread(linebuffer,bitmapdatalinesize,f);
 
 							for(j=0;j<xsize;j++)
 							{
@@ -172,7 +172,7 @@ int bmp_load(char * file,bitmap_data * bdata)
 						for(i=0;i<ysize;i++)
 						{
 							fseek(f,bitmapdataoffset + (bitmapdatalinesize*i) ,SEEK_SET);
-							fread(linebuffer,1,bitmapdatalinesize,f);
+							hxc_fread(linebuffer,bitmapdatalinesize,f);
 
 							for(j=0;j<xsize;j++)
 							{
@@ -198,7 +198,7 @@ int bmp_load(char * file,bitmap_data * bdata)
 						for(i=0;i<ysize;i++)
 						{
 							fseek(f,bitmapdataoffset + (bitmapdatalinesize*i) ,SEEK_SET);
-							fread(linebuffer,1,bitmapdatalinesize,f);
+							hxc_fread(linebuffer,bitmapdatalinesize,f);
 
 							for(j=0;j<xsize;j++)
 							{
@@ -223,7 +223,7 @@ int bmp_load(char * file,bitmap_data * bdata)
 						{
 
 							fseek(f,bitmapdataoffset + (bitmapdatalinesize*i) ,SEEK_SET);
-							fread(linebuffer,1,bitmapdatalinesize,f);
+							hxc_fread(linebuffer,bitmapdatalinesize,f);
 
 							for(j=0;j<xsize;j++)
 							{

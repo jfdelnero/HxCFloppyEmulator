@@ -86,7 +86,7 @@ int FLPPCM_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		{
 			return HXCFE_ACCESSERROR;
 		}
-		fread(&flp_header,sizeof(flp_header_t),1,f);
+		hxc_fread(&flp_header,sizeof(flp_header_t),f);
 		hxc_fclose(f);
 
 		if(strncmp((char*)flp_header.hsign,"PCM",sizeof(flp_header.hsign)))
@@ -130,7 +130,7 @@ int FLPPCM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 	memset(&flp_header,0,sizeof(flp_header_t));
 
-	fread(&flp_header,sizeof(flp_header_t),1,f);
+	hxc_fread(&flp_header,sizeof(flp_header_t),f);
 
 	if(!strncmp((char*)flp_header.hsign,"PCM",sizeof(flp_header.hsign)))
 	{
@@ -170,7 +170,7 @@ int FLPPCM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 							sizeof(flp_header_t);
 
 				fseek (f , file_offset , SEEK_SET);
-				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
+				hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
 
 				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500|REVERTED_INDEX,-2500);
 			}

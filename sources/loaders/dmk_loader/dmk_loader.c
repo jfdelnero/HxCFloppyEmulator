@@ -79,7 +79,7 @@ int DMK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			fseek (f , 0 , SEEK_END);
 			filesize=ftell(f);
 			fseek (f , 0 , SEEK_SET);
-			fread(&dmk_h,sizeof(dmk_header),1,f);
+			hxc_fread(&dmk_h,sizeof(dmk_header),f);
 
 			hxc_fclose(f);
 
@@ -445,7 +445,7 @@ int DMK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	if(filesize!=0)
 	{
 
-		fread(&dmk_h,sizeof(dmk_h),1,f);
+		hxc_fread(&dmk_h,sizeof(dmk_h),f);
 		floppydisk->floppyBitRate=250000;
 
 		numberofside=2;
@@ -481,8 +481,8 @@ int DMK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 					file_offset=sizeof(dmk_header)+((dmk_h.track_len)*(j*floppydisk->floppyNumberOfSide))+((dmk_h.track_len)*(i&1));
 					fseek (f , file_offset , SEEK_SET);
-					fread(&idam_offset_table,128,1,f);
-					fread(trackdata,dmk_h.track_len-128,1,f);
+					hxc_fread(&idam_offset_table,128,f);
+					hxc_fread(trackdata,dmk_h.track_len-128,f);
 					memset(trackclk,0xFF,dmk_h.track_len-128);
 
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %d Side %d Tracklen %d TTableOffset:0x%.8x",j,i,dmk_h.track_len,file_offset);

@@ -90,7 +90,7 @@ int TeleDisk_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			fseek(f,0,SEEK_SET);
 
 			memset(&td_header,0,sizeof(TELEDISK_HEADER));
-			fread( &td_header, sizeof(TELEDISK_HEADER), 1, f );
+			hxc_fread( &td_header, sizeof(TELEDISK_HEADER), f );
 
 			i=ftell(f);
 
@@ -286,7 +286,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		return HXCFE_INTERNALERROR;
 	}
 	memset(fileimage,0,filesize+512);
-	fread(fileimage,filesize,1,f);
+	hxc_fread(fileimage,filesize,f);
 	hxc_fclose(f);
 
 
@@ -346,7 +346,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		td_comment=(TELEDISK_COMMENT *)&fileimage[fileimage_buffer_offset];
 		fileimage_buffer_offset=fileimage_buffer_offset+sizeof(TELEDISK_COMMENT);
 
-		//fread( &td_comment, sizeof(td_comment), 1, f );
+		//hxc_fread( &td_comment, sizeof(td_comment), f );
 		ptr=(unsigned char*)td_comment;
 		ptr=ptr+2;
 		for(i=0;i<sizeof(TELEDISK_COMMENT)-2;i++)

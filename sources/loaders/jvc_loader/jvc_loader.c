@@ -128,7 +128,7 @@ int JVC_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		jvc_h.First_sector_ID=1;
 		jvc_h.Sector_attribute_flag=0;
 
-		fread(&jvc_h, headerSize,1,f);
+		hxc_fread(&jvc_h, headerSize,f);
 
 		sectorsize=128<<jvc_h.Sector_size_code;
 
@@ -184,11 +184,10 @@ int JVC_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				{
 					if(jvc_h.Sector_attribute_flag)
 					{
-
-						fread(&Sector_attribute_flag,1,1,f);
+						hxc_fread(&Sector_attribute_flag,1,f);
 					}
 
-					fread(&trackdata[k*sectorsize],sectorsize,1,f);
+					hxc_fread(&trackdata[k*sectorsize],sectorsize,f);
 				}
 
 				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500 | NO_SECTOR_UNDER_INDEX,-2500);

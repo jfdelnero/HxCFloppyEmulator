@@ -180,7 +180,7 @@ int System24_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 				        ( i *  ( tracksize ) );
 
 			fseek (f , file_offset , SEEK_SET);
-			fread(trackdata,tracksize,1,f);
+			hxc_fread(trackdata,tracksize,f);
 
 			if(tracksize == ( 8192 + ( 1024 * 3 ) + 512 + 256 ) )
 			{

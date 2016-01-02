@@ -87,7 +87,7 @@ int SCL_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SCL_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
-		fread(&sclsignature,8,1,f);
+		hxc_fread(&sclsignature,8,f);
 		hxc_fclose(f);
 
 		if(!strncmp(sclsignature, "SINCLAIR", 8))
@@ -160,7 +160,7 @@ int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
-	fread(&sclsignature,8,1,f);
+	hxc_fread(&sclsignature,8,f);
 	if(strncmp(sclsignature, "SINCLAIR", 8))
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"non Sinclair SCL file !(bad header)");
@@ -168,12 +168,12 @@ int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_BADFILE;
 	}
 
-	fread(&number_of_blocks,1,1,f);
+	hxc_fread(&number_of_blocks,1,f);
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCL_libLoad_DiskFile : %d block(s) in the file",number_of_blocks);
 
 	for (i=0; i < number_of_blocks; i++)
 	{
-		fread(&(block_headers[i][0]),14,1,f);
+		hxc_fread(&(block_headers[i][0]),14,f);
 	}
 
 	// allocate and init a TR DOS disk.
@@ -228,7 +228,7 @@ int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		left = (uint32_t) ((unsigned char) block_headers[i][13]) * 256L;
 		trd_offset = (*trd_ftrk) * 4096L + (*trd_fsec) * 256L;
 
-		fread(&(trd_image[trd_offset]),left,1,f);
+		hxc_fread(&(trd_image[trd_offset]),left,f);
 
 		(*trd_files)++;
 

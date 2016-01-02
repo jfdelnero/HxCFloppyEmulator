@@ -82,7 +82,7 @@ int SAD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			}
 
 			memset(&sadh,0,sizeof(SAD_HEADER));
-			fread(&sadh,sizeof(SAD_HEADER),1,f);
+			hxc_fread(&sadh,sizeof(SAD_HEADER),f);
 
 			hxc_fclose(f);
 
@@ -128,7 +128,7 @@ int SAD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	}
 
 	memset(&sadh,0,sizeof(SAD_HEADER));
-	fread(&sadh,sizeof(SAD_HEADER),1,f);
+	hxc_fread(&sadh,sizeof(SAD_HEADER),f);
 	if(strncmp((char*)sadh.abSignature,SAD_SIGNATURE,sizeof SAD_SIGNATURE - 1))
 	{
 		hxc_fclose(f);
@@ -167,7 +167,7 @@ int SAD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack))+
 				(sectorsize*(floppydisk->floppyNumberOfTrack*floppydisk->floppySectorPerTrack)*i) + sizeof(SAD_HEADER) ;
 			fseek (f , file_offset , SEEK_SET);
-			fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
+			hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
 
 			currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
 		}

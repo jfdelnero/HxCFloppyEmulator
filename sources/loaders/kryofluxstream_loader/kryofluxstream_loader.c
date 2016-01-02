@@ -96,7 +96,7 @@ int KryoFluxStream_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 					f=hxc_fopen(filepath,"rb");
 					if(f)
 					{
-						fread(&oob,sizeof(s_oob_header),1,f);
+						hxc_fread(&oob,sizeof(s_oob_header),f);
 						if(oob.Sign==OOB_SIGN)
 						{
 							found=1;
@@ -138,7 +138,7 @@ int KryoFluxStream_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 				f=hxc_fopen(imgfile,"rb");
 				if(f)
 				{
-					fread(&oob,sizeof(s_oob_header),1,f);
+					hxc_fread(&oob,sizeof(s_oob_header),f);
 					if( ( oob.Sign == OOB_SIGN ) && ( oob.Type>=1 && oob.Type<=4 ) )
 					{
 						found=1;
@@ -321,7 +321,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 				f=hxc_fopen(filepath,"rb");
 				if(f)
 				{
-					fread(&oob,sizeof(s_oob_header),1,f);
+					hxc_fread(&oob,sizeof(s_oob_header),f);
 					if(oob.Sign==OOB_SIGN)
 					{
 						if(mintrack>track) mintrack = track;

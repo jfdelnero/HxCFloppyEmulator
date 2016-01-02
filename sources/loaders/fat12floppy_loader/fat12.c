@@ -272,7 +272,7 @@ int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned
 									return 1;
 								}
 								memset(&datatable[(fatclusternb-2)*fatconfig->sectorsize*fatconfig->clustersize],0x00,fatconfig->sectorsize*fatconfig->clustersize);
-								fread(&datatable[(fatclusternb-2)*fatconfig->sectorsize*fatconfig->clustersize],fatconfig->sectorsize*fatconfig->clustersize,1,ftemp);
+								hxc_fread(&datatable[(fatclusternb-2)*fatconfig->sectorsize*fatconfig->clustersize],fatconfig->sectorsize*fatconfig->clustersize,ftemp);
 								setclusterptr(fattable,fatclusternb,0xFFF);
 								if(lefttoread>(fatconfig->sectorsize*fatconfig->clustersize))
 								{

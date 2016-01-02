@@ -74,7 +74,7 @@ int FDI_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		f=hxc_fopen(imgfile,"rb");
 		if(f)
 		{
-			fread(&f_header,sizeof(fdi_header),1,f);
+			hxc_fread(&f_header,sizeof(fdi_header),f);
 			hxc_fclose(f);
 
 			if(f_header.signature[0]=='F' && f_header.signature[1]=='D' && f_header.signature[2]=='I')
@@ -131,7 +131,7 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	file_size=ftell(f);
 	fseek(f,0,SEEK_SET);
 
-	fread(&f_header,sizeof(fdi_header),1,f);
+	hxc_fread(&f_header,sizeof(fdi_header),f);
 
 	if(f_header.signature[0]!='F' || f_header.signature[1]!='D' || f_header.signature[2]!='I')
 	{
@@ -141,7 +141,7 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	}
 
 	fseek(f,f_header.diskdescription_offset,SEEK_SET);
-	fread(tempsector,f_header.data_offset - f_header.diskdescription_offset,1,f);
+	hxc_fread(tempsector,f_header.data_offset - f_header.diskdescription_offset,f);
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Disk:%s",tempsector);
 
 
@@ -175,7 +175,7 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		{
 			hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
 
-			fread(&track_header,sizeof(fdi_track_header),1,f);
+			hxc_fread(&track_header,sizeof(fdi_track_header),f);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"[%d:%d] %d sectors, Track Offset :0x%x:",j,i,track_header.number_of_sectors,track_header.track_offset+f_header.data_offset);
 
 			sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*track_header.number_of_sectors);
@@ -183,7 +183,7 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			for(k=0;k<track_header.number_of_sectors;k++)
 			{
-				fread(&sector_header,sizeof(fdi_sector_header),1,f);
+				hxc_fread(&sector_header,sizeof(fdi_sector_header),f);
 
 				file_offset=f_header.data_offset+track_header.track_offset+sector_header.sector_offset;
 
@@ -223,7 +223,7 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				{
 					sectorconfig[k].input_data=malloc(sectorconfig[k].sectorsize);
 					fseek(f,file_offset,SEEK_SET);
-					fread(sectorconfig[k].input_data,sectorconfig[k].sectorsize,1,f);
+					hxc_fread(sectorconfig[k].input_data,sectorconfig[k].sectorsize,f);
 				}
 
 				fseek(f,tempoffset,SEEK_SET);

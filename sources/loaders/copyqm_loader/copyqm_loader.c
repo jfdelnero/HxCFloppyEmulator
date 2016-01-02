@@ -83,7 +83,7 @@ int CopyQm_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			}
 
 			fileheader=(char*)malloc(QM_HEADER_SIZE+1);
-			fread( fileheader, QM_HEADER_SIZE, 1, f );
+			hxc_fread( fileheader, QM_HEADER_SIZE, f );
 			if(ftell(f)==QM_HEADER_SIZE)
 			{
 
@@ -162,7 +162,7 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 	if(filesize!=0)
 	{
 		fileheader=(unsigned char*)malloc(QM_HEADER_SIZE+1);
-		fread( fileheader, QM_HEADER_SIZE, 1, f );
+		hxc_fread( fileheader, QM_HEADER_SIZE, f );
 
 		checksum=0;
 		/* Check the header checksum */
@@ -230,8 +230,8 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 				res = fseek( f, QM_HEADER_SIZE, SEEK_SET );
 				if ( !(res < 0) )
 				{
-					res = fread(comment_buf, 1,comentlen, f);
-					if ( !(res < (int)comentlen))
+					res = hxc_fread(comment_buf, comentlen, f);
+					if ( !res )
 					{
 						comment_buf[comentlen] = 0;
 						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Disk info:\n%s",comment_buf);
@@ -277,8 +277,8 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 			{
 				/* Read the length */
 				unsigned char lengthBuf[2];
-				res = fread( lengthBuf, 2, 1, f );
-				if ( res != 1 )
+				res = hxc_fread( lengthBuf, 2, f );
+				if ( res )
 				{
 					if ( feof( f ) )
 					{
@@ -317,7 +317,7 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 						if ( length != 0 )
 						{
 							/* Positive number - length different characters */
-							res = fread( flatimg + curwritepos, length, 1, f );
+							res = hxc_fread( flatimg + curwritepos, length, f );
 							/* Update CRC (and write pos) */
 							while ( length-- )
 							{
@@ -325,7 +325,7 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 									flatimg[curwritepos++] );
 								//crc = crc32r_table[(flatimg[curwritepos++] ^ (unsigned char)crc) & 0x3f ] ^ (crc >> 8);
 							}
-							if ( res != 1 )
+							if ( res )
 							{
 								free(flatimg);
 								free(fileheader);
