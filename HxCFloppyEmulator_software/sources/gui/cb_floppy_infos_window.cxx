@@ -216,7 +216,7 @@ void update_graph(floppy_infos_window * w)
 				}
 				else
 				{
-					sprintf(tempstr,"");
+					strcpy(tempstr,"");
 					w->side_number_slide->deactivate();
 					w->track_number_slide->deactivate();
 					w->x_offset->deactivate();
