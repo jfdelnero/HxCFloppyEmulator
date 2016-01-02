@@ -307,7 +307,7 @@ enum
 };
 
 
-track_type track_type_list[]=
+const track_type track_type_list[]=
 {
 	{ FM_TRACK_TYPE,"FM",ISOFORMAT_SD},
 	{ FMIBM_TRACK_TYPE,"IBM FM",IBMFORMAT_SD},
@@ -319,6 +319,7 @@ track_type track_type_list[]=
 	{ ARBURGDATA_TRACK_TYPE,"ARBURG DATA",ARBURG_DAT},
 	{ ARBURGSYST_TRACK_TYPE,"ARBURG SYSTEM",ARBURG_SYS},
 	//{ GCR_TRACK_TYPE,"GCR"},
-	{ -1,"",0}
+	{ -1,"",0},
+	{ 0,0,0}
 };
 
