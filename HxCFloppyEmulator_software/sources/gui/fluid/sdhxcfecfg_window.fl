@@ -7,188 +7,188 @@ class sdhxcfecfg_window {open
   Function {sdhxcfecfg_window()} {open
   } {
     Fl_Window window {
-      label {SDCard HxC Floppy Emulator settings} open
-      xywh {94 301 570 292} type Double labelsize 12 visible
+      label {SDCard HxC Floppy Emulator settings} open selected
+      xywh {393 287 568 292} type Double labelsize 12 visible
     } {
       Fl_Group {} {
         label {SD HxC Floppy Emulator Usage settings} open
-        xywh {5 0 315 289} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
+        xywh {1 0 315 289} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
       } {
         Fl_Group {} {
           label {User interface}
-          xywh {15 30 135 120} box SHADOW_BOX labeltype EMBOSSED_LABEL labelsize 10 align 5
+          xywh {11 30 135 120} box SHADOW_BOX labeltype EMBOSSED_LABEL labelsize 10 align 5
         } {
           Fl_Slider slider_uisound_level {
             label {UI Sound}
             user_data this
             callback sdhxcfecfg_window_datachanged
-            tooltip {Sound level} xywh {25 50 105 15} type {Horz Knob} labelsize 12 align 1
+            tooltip {Sound level} xywh {21 50 105 15} type {Horz Knob} labelsize 12 align 1
           }
           Fl_Slider slider_stepsound_level {
             label {Head step sound}
             user_data this
             callback sdhxcfecfg_window_datachanged
-            tooltip {Track change sound level} xywh {25 85 105 15} type {Horz Knob} labelsize 12 align 1
+            tooltip {Track change sound level} xywh {21 85 105 15} type {Horz Knob} labelsize 12 align 1
           }
           Fl_Slider slider_scrolltxt_speed {
             label {Scroll text speed}
             user_data this
             callback sdhxcfecfg_window_datachanged
-            tooltip {Filename scrolling speed (used if the filename has more than 16 characters)} xywh {25 120 105 15} type {Horz Knob} labelsize 12 align 1
+            tooltip {Filename scrolling speed (used if the filename has more than 16 characters)} xywh {21 120 105 15} type {Horz Knob} labelsize 12 align 1
           }
         }
         Fl_Group {} {
           label Standby
-          xywh {155 30 145 75} box SHADOW_BOX labeltype EMBOSSED_LABEL labelsize 10 align 5
+          xywh {151 30 145 75} box SHADOW_BOX labeltype EMBOSSED_LABEL labelsize 10 align 5
         } {
           Fl_Value_Slider valslider_device_standby_timeout {
             label {Device standby}
             user_data this
             callback sdhxcfecfg_window_datachanged
-            xywh {167 80 120 15} type {Horz Knob} labelsize 12 align 1
+            xywh {163 80 120 15} type {Horz Knob} labelsize 12 align 1
           }
           Fl_Value_Slider valslider_device_backlight_timeout {
             label {Backlight standby}
             user_data this
             callback sdhxcfecfg_window_datachanged
-            xywh {167 51 120 15} type {Horz Knob} labelsize 12 align 1
+            xywh {163 51 120 15} type {Horz Knob} labelsize 12 align 1
           }
         }
         Fl_Check_Button chk_loadlastloaded {
           label {Load last loaded floppy}
           user_data this
           callback sdhxcfecfg_window_datachanged
-          xywh {155 112 145 18} down_box DOWN_BOX labelsize 12
+          xywh {151 112 145 18} down_box DOWN_BOX labelsize 12
         }
         Fl_Check_Button chk_disabediskdriveselector {
           label {Disable disk drive selector}
           user_data this
           callback sdhxcfecfg_window_datachanged
-          xywh {155 131 165 17} down_box DOWN_BOX labelsize 12
+          xywh {151 131 165 17} down_box DOWN_BOX labelsize 12
         }
         Fl_Check_Button chk_force_loading_startupa {
           label {Force loading STARTUPA.HFE into the drive A at power up}
           user_data this
           callback sdhxcfecfg_window_datachanged
-          xywh {9 153 301 16} down_box DOWN_BOX labelsize 11
+          xywh {5 153 301 16} down_box DOWN_BOX labelsize 11
         }
         Fl_Check_Button chk_force_loading_startupb {
           label {Force loading STARTUPB.HFE into the drive B at power up}
           user_data this
           callback sdhxcfecfg_window_datachanged
-          xywh {9 168 301 16} down_box DOWN_BOX labelsize 11
+          xywh {5 168 301 16} down_box DOWN_BOX labelsize 11
         }
         Fl_Group {} {
           label {AUTO BOOT Mode / File Selector software startup} open
-          xywh {5 233 315 55} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
+          xywh {1 233 315 55} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
         } {
           Fl_Check_Button chk_enable_autoboot_mode {
             label {Enable auto boot mode}
             user_data this
             callback sdhxcfecfg_window_datachanged
-            xywh {9 249 126 18} down_box DOWN_BOX labelsize 11
+            xywh {5 249 126 18} down_box DOWN_BOX labelsize 11
           }
           Fl_Check_Button chk_force_loading_autoboot {
             label {Force loading AUTOBOOT.HFE at power up}
             user_data this
             callback sdhxcfecfg_window_datachanged
-            xywh {9 268 226 18} down_box DOWN_BOX labelsize 11
+            xywh {5 268 226 18} down_box DOWN_BOX labelsize 11
           }
           Fl_Check_Button chk_preindex {
             label {Enable index Pre incrementing}
             user_data this
             callback sdhxcfecfg_window_datachanged
-            xywh {150 249 160 18} down_box DOWN_BOX labelsize 11
+            xywh {146 249 160 18} down_box DOWN_BOX labelsize 11
           }
         }
         Fl_Group {} {
           label {Indexed Mode} open
-          xywh {5 190 315 45} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
+          xywh {1 190 315 45} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
         } {
           Fl_Check_Button chk_enable_indexed_mode {
             label {Enable indexed mode}
             user_data this
             callback sdhxcfecfg_window_datachanged
-            xywh {9 210 121 16} down_box DOWN_BOX labelsize 11
+            xywh {5 210 121 16} down_box DOWN_BOX labelsize 11
           }
         }
       }
       Fl_Group {} {
         label {HFE file interfacemode} open
-        xywh {320 0 250 234} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
+        xywh {316 0 250 234} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
       } {
         Fl_Check_Button chk_hfr_autoifmode {
           label Auto
           user_data this
           callback ifcfg_window_datachanged
-          xywh {325 55 85 16} down_box DOWN_BOX labelsize 12 when 1
+          xywh {321 55 85 16} down_box DOWN_BOX labelsize 12 when 1
         }
         Fl_Check_Button chk_hfe_doublestep {
           label {Double Step}
           user_data this
           callback ifcfg_window_datachanged
-          xywh {325 75 85 16} down_box DOWN_BOX labelsize 12 when 1
+          xywh {321 75 85 16} down_box DOWN_BOX labelsize 12 when 1
         }
         Fl_Choice choice_hfeifmode {
           label Mode
           user_data this
           callback ifcfg_window_datachanged open
-          xywh {361 24 160 20} down_box BORDER_BOX labelsize 12 when 1 textsize 12
+          xywh {357 24 160 20} down_box BORDER_BOX labelsize 12 when 1 textsize 12
         } {}
         Fl_Group {} {
           label {SD HxC Floppy Emulator Interface setting} open
-          xywh {320 97 250 137} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
+          xywh {316 97 250 137} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
         } {
           Fl_Choice choice_interfacemode_drva_cfg {
             label Mode
             user_data this
             callback sdhxcfecfg_window_datachanged open
-            xywh {365 130 95 20} down_box BORDER_BOX labelsize 12 when 1 textsize 10
+            xywh {361 130 95 20} down_box BORDER_BOX labelsize 12 when 1 textsize 10
           } {}
           Fl_Choice choice_pin02_drva {
             label {Pin 2}
             user_data this
             callback sdhxcfecfg_window_datachanged open
-            xywh {365 150 95 20} down_box BORDER_BOX labelsize 12 when 1 textsize 10
+            xywh {361 150 95 20} down_box BORDER_BOX labelsize 12 when 1 textsize 10
           } {}
           Fl_Choice choice_pin34_drva {
             label {Pin 34}
             user_data this
             callback sdhxcfecfg_window_datachanged open
-            xywh {365 170 95 20} down_box BORDER_BOX labelsize 12 when 1 textsize 10
+            xywh {361 170 95 20} down_box BORDER_BOX labelsize 12 when 1 textsize 10
           } {}
           Fl_Check_Button chk_enable_twodrives_emu {
             label {2 drives emulation}
-            callback sdhxcfecfg_window_datachanged selected
-            xywh {325 195 125 16} down_box DOWN_BOX labelsize 12
+            callback sdhxcfecfg_window_datachanged
+            xywh {321 195 125 16} down_box DOWN_BOX labelsize 12
           }
           Fl_Check_Button chk_drvb_as_motoron {
             label {Drive B input as Drives A and B Motor ON}
             callback sdhxcfecfg_window_datachanged
-            xywh {325 210 240 16} down_box DOWN_BOX labelsize 12
+            xywh {321 210 240 16} down_box DOWN_BOX labelsize 12
           }
           Fl_Choice choice_interfacemode_drvb_cfg {
             user_data this
             callback sdhxcfecfg_window_datachanged open
-            xywh {470 130 95 20} down_box BORDER_BOX labelsize 12 when 1 textsize 10
+            xywh {466 130 95 20} down_box BORDER_BOX labelsize 12 when 1 textsize 10
           } {}
           Fl_Choice choice_pin02_drvb {
             user_data this
             callback sdhxcfecfg_window_datachanged open
-            xywh {470 150 95 20} down_box BORDER_BOX labelsize 12 when 1 textsize 10
+            xywh {466 150 95 20} down_box BORDER_BOX labelsize 12 when 1 textsize 10
           } {}
           Fl_Choice choice_pin34_drvb {
             user_data this
             callback sdhxcfecfg_window_datachanged open
-            xywh {470 170 95 20} down_box BORDER_BOX labelsize 12 when 1 textsize 10
+            xywh {466 170 95 20} down_box BORDER_BOX labelsize 12 when 1 textsize 10
           } {}
           Fl_Text_Display {} {
             label {Drive A}
-            xywh {385 130 50 5} box NO_BOX labelsize 12 textsize 12
+            xywh {381 130 50 5} box NO_BOX labelsize 12 textsize 12
           }
           Fl_Text_Display {} {
             label {Drive B}
-            xywh {490 130 50 5} box NO_BOX labelsize 12 textsize 12
+            xywh {486 130 50 5} box NO_BOX labelsize 12 textsize 12
           }
         }
       }
@@ -196,19 +196,19 @@ class sdhxcfecfg_window {open
         label {Load config file}
         user_data this
         callback sdhxcfecfg_window_bt_load
-        xywh {322 235 90 25} labelsize 12
+        xywh {318 235 90 25} labelsize 12
       }
       Fl_Button {} {
         label {Save config file}
         user_data this
         callback sdhxcfecfg_window_bt_save
-        xywh {322 262 90 25} labelsize 12
+        xywh {318 262 90 25} labelsize 12
       }
       Fl_Button {} {
         label OK
         user_data this
         callback {((Fl_Window*)(o->parent()))->hide();}
-        xywh {479 262 90 25} labelsize 12
+        xywh {475 262 90 25} labelsize 12
       }
     }
   }

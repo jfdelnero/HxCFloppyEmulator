@@ -11,34 +11,34 @@ void sdhxcfecfg_window::cb_OK(Fl_Button* o, void* v) {
 }
 
 sdhxcfecfg_window::sdhxcfecfg_window() {
-  { window = new Fl_Double_Window(570, 292, "SDCard HxC Floppy Emulator settings");
+  { window = new Fl_Double_Window(568, 292, "SDCard HxC Floppy Emulator settings");
     window->labelsize(12);
     window->user_data((void*)(this));
-    { Fl_Group* o = new Fl_Group(5, 0, 315, 289, "SD HxC Floppy Emulator Usage settings");
+    { Fl_Group* o = new Fl_Group(1, 0, 315, 289, "SD HxC Floppy Emulator Usage settings");
       o->box(FL_ENGRAVED_FRAME);
       o->labeltype(FL_EMBOSSED_LABEL);
       o->labelsize(10);
       o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-      { Fl_Group* o = new Fl_Group(15, 30, 135, 120, "User interface");
+      { Fl_Group* o = new Fl_Group(11, 30, 135, 120, "User interface");
         o->box(FL_SHADOW_BOX);
         o->labeltype(FL_EMBOSSED_LABEL);
         o->labelsize(10);
         o->align(Fl_Align(FL_ALIGN_TOP_LEFT));
-        { slider_uisound_level = new Fl_Slider(25, 50, 105, 15, "UI Sound");
+        { slider_uisound_level = new Fl_Slider(21, 50, 105, 15, "UI Sound");
           slider_uisound_level->tooltip("Sound level");
           slider_uisound_level->type(5);
           slider_uisound_level->labelsize(12);
           slider_uisound_level->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
           slider_uisound_level->align(Fl_Align(FL_ALIGN_TOP));
         } // Fl_Slider* slider_uisound_level
-        { slider_stepsound_level = new Fl_Slider(25, 85, 105, 15, "Head step sound");
+        { slider_stepsound_level = new Fl_Slider(21, 85, 105, 15, "Head step sound");
           slider_stepsound_level->tooltip("Track change sound level");
           slider_stepsound_level->type(5);
           slider_stepsound_level->labelsize(12);
           slider_stepsound_level->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
           slider_stepsound_level->align(Fl_Align(FL_ALIGN_TOP));
         } // Fl_Slider* slider_stepsound_level
-        { slider_scrolltxt_speed = new Fl_Slider(25, 120, 105, 15, "Scroll text speed");
+        { slider_scrolltxt_speed = new Fl_Slider(21, 120, 105, 15, "Scroll text speed");
           slider_scrolltxt_speed->tooltip("Filename scrolling speed (used if the filename has more than 16 characters)");
           slider_scrolltxt_speed->type(5);
           slider_scrolltxt_speed->labelsize(12);
@@ -47,18 +47,18 @@ sdhxcfecfg_window::sdhxcfecfg_window() {
         } // Fl_Slider* slider_scrolltxt_speed
         o->end();
       } // Fl_Group* o
-      { Fl_Group* o = new Fl_Group(155, 30, 145, 75, "Standby");
+      { Fl_Group* o = new Fl_Group(151, 30, 145, 75, "Standby");
         o->box(FL_SHADOW_BOX);
         o->labeltype(FL_EMBOSSED_LABEL);
         o->labelsize(10);
         o->align(Fl_Align(FL_ALIGN_TOP_LEFT));
-        { valslider_device_standby_timeout = new Fl_Value_Slider(167, 80, 120, 15, "Device standby");
+        { valslider_device_standby_timeout = new Fl_Value_Slider(163, 80, 120, 15, "Device standby");
           valslider_device_standby_timeout->type(5);
           valslider_device_standby_timeout->labelsize(12);
           valslider_device_standby_timeout->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
           valslider_device_standby_timeout->align(Fl_Align(FL_ALIGN_TOP));
         } // Fl_Value_Slider* valslider_device_standby_timeout
-        { valslider_device_backlight_timeout = new Fl_Value_Slider(167, 51, 120, 15, "Backlight standby");
+        { valslider_device_backlight_timeout = new Fl_Value_Slider(163, 51, 120, 15, "Backlight standby");
           valslider_device_backlight_timeout->type(5);
           valslider_device_backlight_timeout->labelsize(12);
           valslider_device_backlight_timeout->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
@@ -66,54 +66,54 @@ sdhxcfecfg_window::sdhxcfecfg_window() {
         } // Fl_Value_Slider* valslider_device_backlight_timeout
         o->end();
       } // Fl_Group* o
-      { chk_loadlastloaded = new Fl_Check_Button(155, 112, 145, 18, "Load last loaded floppy");
+      { chk_loadlastloaded = new Fl_Check_Button(151, 112, 145, 18, "Load last loaded floppy");
         chk_loadlastloaded->down_box(FL_DOWN_BOX);
         chk_loadlastloaded->labelsize(12);
         chk_loadlastloaded->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
       } // Fl_Check_Button* chk_loadlastloaded
-      { chk_disabediskdriveselector = new Fl_Check_Button(155, 131, 165, 17, "Disable disk drive selector");
+      { chk_disabediskdriveselector = new Fl_Check_Button(151, 131, 165, 17, "Disable disk drive selector");
         chk_disabediskdriveselector->down_box(FL_DOWN_BOX);
         chk_disabediskdriveselector->labelsize(12);
         chk_disabediskdriveselector->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
       } // Fl_Check_Button* chk_disabediskdriveselector
-      { chk_force_loading_startupa = new Fl_Check_Button(9, 153, 301, 16, "Force loading STARTUPA.HFE into the drive A at power up");
+      { chk_force_loading_startupa = new Fl_Check_Button(5, 153, 301, 16, "Force loading STARTUPA.HFE into the drive A at power up");
         chk_force_loading_startupa->down_box(FL_DOWN_BOX);
         chk_force_loading_startupa->labelsize(11);
         chk_force_loading_startupa->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
       } // Fl_Check_Button* chk_force_loading_startupa
-      { chk_force_loading_startupb = new Fl_Check_Button(9, 168, 301, 16, "Force loading STARTUPB.HFE into the drive B at power up");
+      { chk_force_loading_startupb = new Fl_Check_Button(5, 168, 301, 16, "Force loading STARTUPB.HFE into the drive B at power up");
         chk_force_loading_startupb->down_box(FL_DOWN_BOX);
         chk_force_loading_startupb->labelsize(11);
         chk_force_loading_startupb->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
       } // Fl_Check_Button* chk_force_loading_startupb
-      { Fl_Group* o = new Fl_Group(5, 233, 315, 55, "AUTO BOOT Mode / File Selector software startup");
+      { Fl_Group* o = new Fl_Group(1, 233, 315, 55, "AUTO BOOT Mode / File Selector software startup");
         o->box(FL_ENGRAVED_FRAME);
         o->labeltype(FL_EMBOSSED_LABEL);
         o->labelsize(10);
         o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-        { chk_enable_autoboot_mode = new Fl_Check_Button(9, 249, 126, 18, "Enable auto boot mode");
+        { chk_enable_autoboot_mode = new Fl_Check_Button(5, 249, 126, 18, "Enable auto boot mode");
           chk_enable_autoboot_mode->down_box(FL_DOWN_BOX);
           chk_enable_autoboot_mode->labelsize(11);
           chk_enable_autoboot_mode->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
         } // Fl_Check_Button* chk_enable_autoboot_mode
-        { chk_force_loading_autoboot = new Fl_Check_Button(9, 268, 226, 18, "Force loading AUTOBOOT.HFE at power up");
+        { chk_force_loading_autoboot = new Fl_Check_Button(5, 268, 226, 18, "Force loading AUTOBOOT.HFE at power up");
           chk_force_loading_autoboot->down_box(FL_DOWN_BOX);
           chk_force_loading_autoboot->labelsize(11);
           chk_force_loading_autoboot->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
         } // Fl_Check_Button* chk_force_loading_autoboot
-        { chk_preindex = new Fl_Check_Button(150, 249, 160, 18, "Enable index Pre incrementing");
+        { chk_preindex = new Fl_Check_Button(146, 249, 160, 18, "Enable index Pre incrementing");
           chk_preindex->down_box(FL_DOWN_BOX);
           chk_preindex->labelsize(11);
           chk_preindex->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
         } // Fl_Check_Button* chk_preindex
         o->end();
       } // Fl_Group* o
-      { Fl_Group* o = new Fl_Group(5, 190, 315, 45, "Indexed Mode");
+      { Fl_Group* o = new Fl_Group(1, 190, 315, 45, "Indexed Mode");
         o->box(FL_ENGRAVED_FRAME);
         o->labeltype(FL_EMBOSSED_LABEL);
         o->labelsize(10);
         o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-        { chk_enable_indexed_mode = new Fl_Check_Button(9, 210, 121, 16, "Enable indexed mode");
+        { chk_enable_indexed_mode = new Fl_Check_Button(5, 210, 121, 16, "Enable indexed mode");
           chk_enable_indexed_mode->down_box(FL_DOWN_BOX);
           chk_enable_indexed_mode->labelsize(11);
           chk_enable_indexed_mode->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
@@ -122,93 +122,93 @@ sdhxcfecfg_window::sdhxcfecfg_window() {
       } // Fl_Group* o
       o->end();
     } // Fl_Group* o
-    { Fl_Group* o = new Fl_Group(320, 0, 250, 234, "HFE file interfacemode");
+    { Fl_Group* o = new Fl_Group(316, 0, 250, 234, "HFE file interfacemode");
       o->box(FL_ENGRAVED_FRAME);
       o->labeltype(FL_EMBOSSED_LABEL);
       o->labelsize(10);
       o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-      { chk_hfr_autoifmode = new Fl_Check_Button(325, 55, 85, 16, "Auto");
+      { chk_hfr_autoifmode = new Fl_Check_Button(321, 55, 85, 16, "Auto");
         chk_hfr_autoifmode->down_box(FL_DOWN_BOX);
         chk_hfr_autoifmode->labelsize(12);
         chk_hfr_autoifmode->callback((Fl_Callback*)ifcfg_window_datachanged, (void*)(this));
         chk_hfr_autoifmode->when(FL_WHEN_CHANGED);
       } // Fl_Check_Button* chk_hfr_autoifmode
-      { chk_hfe_doublestep = new Fl_Check_Button(325, 75, 85, 16, "Double Step");
+      { chk_hfe_doublestep = new Fl_Check_Button(321, 75, 85, 16, "Double Step");
         chk_hfe_doublestep->down_box(FL_DOWN_BOX);
         chk_hfe_doublestep->labelsize(12);
         chk_hfe_doublestep->callback((Fl_Callback*)ifcfg_window_datachanged, (void*)(this));
         chk_hfe_doublestep->when(FL_WHEN_CHANGED);
       } // Fl_Check_Button* chk_hfe_doublestep
-      { choice_hfeifmode = new Fl_Choice(361, 24, 160, 20, "Mode");
+      { choice_hfeifmode = new Fl_Choice(357, 24, 160, 20, "Mode");
         choice_hfeifmode->down_box(FL_BORDER_BOX);
         choice_hfeifmode->labelsize(12);
         choice_hfeifmode->textsize(12);
         choice_hfeifmode->callback((Fl_Callback*)ifcfg_window_datachanged, (void*)(this));
         choice_hfeifmode->when(FL_WHEN_CHANGED);
       } // Fl_Choice* choice_hfeifmode
-      { Fl_Group* o = new Fl_Group(320, 97, 250, 137, "SD HxC Floppy Emulator Interface setting");
+      { Fl_Group* o = new Fl_Group(316, 97, 250, 137, "SD HxC Floppy Emulator Interface setting");
         o->box(FL_ENGRAVED_FRAME);
         o->labeltype(FL_EMBOSSED_LABEL);
         o->labelsize(10);
         o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-        { choice_interfacemode_drva_cfg = new Fl_Choice(365, 130, 95, 20, "Mode");
+        { choice_interfacemode_drva_cfg = new Fl_Choice(361, 130, 95, 20, "Mode");
           choice_interfacemode_drva_cfg->down_box(FL_BORDER_BOX);
           choice_interfacemode_drva_cfg->labelsize(12);
           choice_interfacemode_drva_cfg->textsize(10);
           choice_interfacemode_drva_cfg->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
           choice_interfacemode_drva_cfg->when(FL_WHEN_CHANGED);
         } // Fl_Choice* choice_interfacemode_drva_cfg
-        { choice_pin02_drva = new Fl_Choice(365, 150, 95, 20, "Pin 2");
+        { choice_pin02_drva = new Fl_Choice(361, 150, 95, 20, "Pin 2");
           choice_pin02_drva->down_box(FL_BORDER_BOX);
           choice_pin02_drva->labelsize(12);
           choice_pin02_drva->textsize(10);
           choice_pin02_drva->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
           choice_pin02_drva->when(FL_WHEN_CHANGED);
         } // Fl_Choice* choice_pin02_drva
-        { choice_pin34_drva = new Fl_Choice(365, 170, 95, 20, "Pin 34");
+        { choice_pin34_drva = new Fl_Choice(361, 170, 95, 20, "Pin 34");
           choice_pin34_drva->down_box(FL_BORDER_BOX);
           choice_pin34_drva->labelsize(12);
           choice_pin34_drva->textsize(10);
           choice_pin34_drva->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
           choice_pin34_drva->when(FL_WHEN_CHANGED);
         } // Fl_Choice* choice_pin34_drva
-        { chk_enable_twodrives_emu = new Fl_Check_Button(325, 195, 125, 16, "2 drives emulation");
+        { chk_enable_twodrives_emu = new Fl_Check_Button(321, 195, 125, 16, "2 drives emulation");
           chk_enable_twodrives_emu->down_box(FL_DOWN_BOX);
           chk_enable_twodrives_emu->labelsize(12);
           chk_enable_twodrives_emu->callback((Fl_Callback*)sdhxcfecfg_window_datachanged);
         } // Fl_Check_Button* chk_enable_twodrives_emu
-        { chk_drvb_as_motoron = new Fl_Check_Button(325, 210, 240, 16, "Drive B input as Drives A and B Motor ON");
+        { chk_drvb_as_motoron = new Fl_Check_Button(321, 210, 240, 16, "Drive B input as Drives A and B Motor ON");
           chk_drvb_as_motoron->down_box(FL_DOWN_BOX);
           chk_drvb_as_motoron->labelsize(12);
           chk_drvb_as_motoron->callback((Fl_Callback*)sdhxcfecfg_window_datachanged);
         } // Fl_Check_Button* chk_drvb_as_motoron
-        { choice_interfacemode_drvb_cfg = new Fl_Choice(470, 130, 95, 20);
+        { choice_interfacemode_drvb_cfg = new Fl_Choice(466, 130, 95, 20);
           choice_interfacemode_drvb_cfg->down_box(FL_BORDER_BOX);
           choice_interfacemode_drvb_cfg->labelsize(12);
           choice_interfacemode_drvb_cfg->textsize(10);
           choice_interfacemode_drvb_cfg->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
           choice_interfacemode_drvb_cfg->when(FL_WHEN_CHANGED);
         } // Fl_Choice* choice_interfacemode_drvb_cfg
-        { choice_pin02_drvb = new Fl_Choice(470, 150, 95, 20);
+        { choice_pin02_drvb = new Fl_Choice(466, 150, 95, 20);
           choice_pin02_drvb->down_box(FL_BORDER_BOX);
           choice_pin02_drvb->labelsize(12);
           choice_pin02_drvb->textsize(10);
           choice_pin02_drvb->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
           choice_pin02_drvb->when(FL_WHEN_CHANGED);
         } // Fl_Choice* choice_pin02_drvb
-        { choice_pin34_drvb = new Fl_Choice(470, 170, 95, 20);
+        { choice_pin34_drvb = new Fl_Choice(466, 170, 95, 20);
           choice_pin34_drvb->down_box(FL_BORDER_BOX);
           choice_pin34_drvb->labelsize(12);
           choice_pin34_drvb->textsize(10);
           choice_pin34_drvb->callback((Fl_Callback*)sdhxcfecfg_window_datachanged, (void*)(this));
           choice_pin34_drvb->when(FL_WHEN_CHANGED);
         } // Fl_Choice* choice_pin34_drvb
-        { Fl_Text_Display* o = new Fl_Text_Display(385, 130, 50, 5, "Drive A");
+        { Fl_Text_Display* o = new Fl_Text_Display(381, 130, 50, 5, "Drive A");
           o->box(FL_NO_BOX);
           o->labelsize(12);
           o->textsize(12);
         } // Fl_Text_Display* o
-        { Fl_Text_Display* o = new Fl_Text_Display(490, 130, 50, 5, "Drive B");
+        { Fl_Text_Display* o = new Fl_Text_Display(486, 130, 50, 5, "Drive B");
           o->box(FL_NO_BOX);
           o->labelsize(12);
           o->textsize(12);
@@ -217,15 +217,15 @@ sdhxcfecfg_window::sdhxcfecfg_window() {
       } // Fl_Group* o
       o->end();
     } // Fl_Group* o
-    { Fl_Button* o = new Fl_Button(322, 235, 90, 25, "Load config file");
+    { Fl_Button* o = new Fl_Button(318, 235, 90, 25, "Load config file");
       o->labelsize(12);
       o->callback((Fl_Callback*)sdhxcfecfg_window_bt_load, (void*)(this));
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(322, 262, 90, 25, "Save config file");
+    { Fl_Button* o = new Fl_Button(318, 262, 90, 25, "Save config file");
       o->labelsize(12);
       o->callback((Fl_Callback*)sdhxcfecfg_window_bt_save, (void*)(this));
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(479, 262, 90, 25, "OK");
+    { Fl_Button* o = new Fl_Button(475, 262, 90, 25, "OK");
       o->labelsize(12);
       o->callback((Fl_Callback*)cb_OK, (void*)(this));
     } // Fl_Button* o
