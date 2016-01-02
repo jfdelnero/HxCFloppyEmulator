@@ -78,7 +78,7 @@ int OricDSK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 		memset(fileheader,0,sizeof(fileheader));
 
-		fread(fileheader,10,1,f);
+		hxc_fread(fileheader,10,f);
 		hxc_fclose(f);
 
 		if( !strncmp((char*)fileheader,"MFM_DISK",8) ||
@@ -261,7 +261,7 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 	{
 		mfmformat=0;
 		fileheader=(oricdsk_fileheader *) malloc(256);
-		fread(fileheader,256,1,f);
+		hxc_fread(fileheader,256,f);
 		sectorsize=256; // OricDSK file support only 256bytes/sector floppies.
 		gap3len=255;
 		interleave=1;
@@ -324,7 +324,7 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 						(sectorsize*(floppydisk->floppySectorPerTrack)*floppydisk->floppyNumberOfTrack*i))+256;
 
 					fseek (f , file_offset , SEEK_SET);
-					fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
+					hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
 
 					currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,1,0,floppydisk->floppyBitRate,currentcylinder->floppyRPM,IBMFORMAT_DD,gap3len,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
 					currentside=currentcylinder->sides[i];
@@ -363,7 +363,7 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 
 						trackdata=(unsigned char *) malloc(tracksize);
 						fseek (f , file_offset , SEEK_SET);
-						fread(trackdata,tracksize,1,f);
+						hxc_fread(trackdata,tracksize,f);
 
 						trackdatatab=(unsigned char*)malloc(256*1024);
 						sectlist=extractsector(imgldr_ctx->hxcfe,trackdatatab,trackdata,tracksize,&numberofsector);
@@ -400,7 +400,7 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 						trackdata=(unsigned char *) malloc(tracksize);
 
 						fseek (f , file_offset , SEEK_SET);
-						fread(trackdata,tracksize,1,f);
+						hxc_fread(trackdata,tracksize,f);
 
 						trackdatatab=(unsigned char*)malloc(256*1024);
 						sectlist=extractsector(imgldr_ctx->hxcfe,trackdatatab,trackdata,tracksize,&numberofsector);

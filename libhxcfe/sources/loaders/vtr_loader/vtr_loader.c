@@ -78,7 +78,7 @@ int VTR_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			{
 				return HXCFE_ACCESSERROR;
 			}
-			fread(&header,sizeof(header),1,f);
+			hxc_fread(&header,sizeof(header),f);
 			hxc_fclose(f);
 
 			if( !strncmp((char*)header.HEADERSIGNATURE,"VTrucco",7))
@@ -119,7 +119,7 @@ int VTR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
-	fread(&header,sizeof(header),1,f);
+	hxc_fread(&header,sizeof(header),f);
 
 	if(!strncmp((char*)header.HEADERSIGNATURE,"VTrucco",7))
 	{
@@ -141,7 +141,7 @@ int VTR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
         trackoffsetlist=(vtrucco_pictrack*)malloc(sizeof(vtrucco_pictrack)* header.number_of_track);
         memset(trackoffsetlist,0,sizeof(vtrucco_pictrack)* header.number_of_track);
         fseek( f,512,SEEK_SET);
-        fread( trackoffsetlist,sizeof(vtrucco_pictrack)* header.number_of_track,1,f);
+        hxc_fread( trackoffsetlist,sizeof(vtrucco_pictrack)* header.number_of_track,f);
 
         tracks_base= 512+( (((sizeof(vtrucco_pictrack)* header.number_of_track)/512)+1)*512);
         fseek( f,tracks_base,SEEK_SET);
@@ -165,7 +165,7 @@ int VTR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			hfetrack=(unsigned char*)malloc( tracklen );
 
-			fread( hfetrack,tracklen,1,f);
+			hxc_fread( hfetrack,tracklen,f);
 
 			floppydisk->tracks[i]=allocCylinderEntry(300,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[i];

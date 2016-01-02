@@ -189,7 +189,7 @@ int Apple2_do_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 						(sectorsize*(floppydisk->floppySectorPerTrack)*i);
 
 					fseek (f , file_offset , SEEK_SET);
-					fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
+					hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
 
 					memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 					for(k=0;k<floppydisk->floppySectorPerTrack;k++)

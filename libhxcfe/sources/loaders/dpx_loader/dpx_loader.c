@@ -179,7 +179,7 @@ int DPX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 					fseek (f , file_offset , SEEK_SET);
 
-					fread(trackdata,(((numberofsector-1)*1024)+512),1,f);
+					hxc_fread(trackdata,(((numberofsector-1)*1024)+512),f);
 
 					currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,1,0,floppydisk->floppyBitRate,rpm,trackformat,0,2500,-2500);
 				}

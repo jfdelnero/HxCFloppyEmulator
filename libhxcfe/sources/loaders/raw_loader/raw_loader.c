@@ -282,7 +282,7 @@ int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				fseek (f , file_offset , SEEK_SET);
 
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %d Head %d : Reading %d bytes at %.8X",j,i,sectorsize*floppydisk->floppySectorPerTrack,file_offset);
-				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
+				hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
 
 			}
 			else

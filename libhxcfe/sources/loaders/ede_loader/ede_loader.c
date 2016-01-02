@@ -84,7 +84,7 @@ int EDE_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			return HXCFE_ACCESSERROR;
 		}
 
-		fread(header_buffer,0x200,1,f);
+		hxc_fread(header_buffer,0x200,f);
 
 		hxc_fclose(f);
 		if((header_buffer[0]==0x0D) && (header_buffer[1]==0x0A))
@@ -171,7 +171,7 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	fseek (f , 0 , SEEK_SET);
 
 
-	fread(header_buffer,0x200,1,f);
+	hxc_fread(header_buffer,0x200,f);
 
 	if((filesize!=0) && (header_buffer[0]==0x0D) && (header_buffer[1]==0x0A))
 	{
@@ -338,7 +338,7 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						if(!(header_buffer[header_offset]&bitmask))
 						{
 							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d File offset: 0x%.8x",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize,ftell(f));
-							fread(sectorconfig[k].input_data,sectorsize,1,f);
+							hxc_fread(sectorconfig[k].input_data,sectorsize,f);
 						}
 						else
 						{

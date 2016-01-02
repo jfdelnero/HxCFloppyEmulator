@@ -139,7 +139,7 @@ int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	}
 
 	memset(fzf_file,0,nbblock * 1024);
-	fread(fzf_file,1,filesize,f);
+	hxc_fread(fzf_file,filesize,f);
 
 	hxc_fclose(f);
 

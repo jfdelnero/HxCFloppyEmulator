@@ -145,7 +145,7 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	totalfilesize=0;
 	while((!feof(f)) && (partcount<256) && (totalfilesize<truetotalfilesize))
 	{
-		fread(&fileheader,sizeof(fileheader),1,f);
+		hxc_fread(&fileheader,sizeof(fileheader),f);
 		if(fileheader.file_size)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%s",fileheader.name);
@@ -183,7 +183,7 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	while(indexfile)
 	{
-		fread(&fileheader,sizeof(fileheader),1,f);
+		hxc_fread(&fileheader,sizeof(fileheader),f);
 		fseek(f,fileheader.file_size-sizeof(fileheader),SEEK_CUR);
 		indexfile--;
 	}
@@ -193,7 +193,7 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	//////////////////////////////////////////////////////
 	// Header read
-	fread(&fileheader,sizeof(fileheader),1,f);
+	hxc_fread(&fileheader,sizeof(fileheader),f);
 	fileheader.reserved[0]=0;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Opening %s (%d), part %s , part size:%d",imgfile,indexfile,fileheader.name,fileheader.file_size);
@@ -239,13 +239,13 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 
 	fseek(f,basefileptr+sizeof(d88_fileheader),SEEK_SET);
-	fread(&track_offset,sizeof(uint32_t),1,f);
+	hxc_fread(&track_offset,sizeof(uint32_t),f);
 
 	number_of_track=(track_offset-sizeof(d88_fileheader))/sizeof(uint32_t);
 	do
 	{
 		fseek(f,basefileptr+sizeof(d88_fileheader)+((number_of_track-1)*sizeof(uint32_t)),SEEK_SET);
-		fread(&track_offset,1,sizeof(uint32_t),f);
+		hxc_fread(&track_offset,sizeof(uint32_t),f);
 		if(!track_offset)
 		{
 			number_of_track--;
@@ -269,7 +269,7 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	fseek(f,basefileptr+sizeof(d88_fileheader),SEEK_SET);
 
-	fread(&track_offset,sizeof(uint32_t),1,f);
+	hxc_fread(&track_offset,sizeof(uint32_t),f);
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"first track offset:%X",track_offset);
 
 
@@ -297,7 +297,7 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		if(track_offset)
 		{
 			fseek(f,track_offset+basefileptr,SEEK_SET);
-			fread(&sectorheader,sizeof(d88_sector),1,f);
+			hxc_fread(&sectorheader,sizeof(d88_sector),f);
 
 			number_of_sector=sectorheader.number_of_sectors;
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Number of sector: %d",number_of_sector);
@@ -350,7 +350,7 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					sectorconfig[j].input_data=malloc(sectorheader.sector_length);
 					sectorconfig[j].bitrate=floppydisk->floppyBitRate;
 
-					fread(sectorconfig[j].input_data,sectorheader.sector_length,1,f);
+					hxc_fread(sectorconfig[j].input_data,sectorheader.sector_length,f);
 
 					if(sectorheader.deleted_data == 0x10)
 					{
@@ -392,7 +392,7 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					}
 
 					// fread datas
-					fread(&sectorheader,sizeof(d88_sector),1,f);
+					hxc_fread(&sectorheader,sizeof(d88_sector),f);
 
 					j++;
 				}while(j<number_of_sector);
@@ -446,7 +446,7 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		}
 
 
-		fread(&track_offset,sizeof(uint32_t),1,f);
+		hxc_fread(&track_offset,sizeof(uint32_t),f);
 
 	}while(i<number_of_track);
 

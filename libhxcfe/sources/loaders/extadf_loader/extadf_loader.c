@@ -78,7 +78,7 @@ int EXTADF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		}
 
 		memset(header,0,sizeof(header));
-		fread(header,12,1,f);
+		hxc_fread(header,12,f);
 		hxc_fclose(f);
 
 		if(!strncmp((char*)header,"UAE-1ADF",8))
@@ -137,7 +137,7 @@ int EXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 	}
 
 	memset(header,0,sizeof(header));
-	fread(header,12,1,f);
+	hxc_fread(header,12,f);
 
 	numberoftrack=0;
 	if(!strncmp((char*)header,"UAE-1ADF",8))
@@ -146,7 +146,7 @@ int EXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 		tracktable=malloc(12*numberoftrack);
 		memset(tracktable,0,12*numberoftrack);
 
-		fread(tracktable,12*numberoftrack,1,f);
+		hxc_fread(tracktable,12*numberoftrack,f);
 	}
 	trackindex=0;
 
@@ -194,7 +194,7 @@ int EXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"[%.3d:%.1X] Reading Non-DOS track at 0x%.8x, Size : 0x%.8x",j,i,ftell(f),tracksize);
 
 						currentcylinder->sides[i]=tg_alloctrack(DEFAULT_AMIGA_BITRATE,AMIGA_MFM_ENCODING,DEFAULT_AMIGA_RPM,(tracksize)*8,2500,-100,0x00);
-						fread(currentcylinder->sides[i]->databuffer,tracksize,1,f);
+						hxc_fread(currentcylinder->sides[i]->databuffer,tracksize,f);
 						currentcylinder->sides[i]->number_of_sector=floppydisk->floppySectorPerTrack;
 
 					}
@@ -213,7 +213,7 @@ int EXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 							{
 								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"[%.3d:%.1X] Reading DOS track at 0x%.8x, Size : 0x%.8x",j,i,ftell(f),tracksize);
 
-								fread(trackdata,tracksize,1,f);
+								hxc_fread(trackdata,tracksize,f);
 
 								currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,(unsigned short)(tracksize_bit/sectorsize),(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-11150);
 

@@ -182,7 +182,7 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 					(sectorsize*(floppydisk->floppySectorPerTrack)*i);
 
 				fseek (f , file_offset , SEEK_SET);
-				fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,1,f);
+				hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
 
 				switch(floppydisk->floppyNumberOfSide)
 				{

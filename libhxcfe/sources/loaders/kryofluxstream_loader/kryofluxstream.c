@@ -118,7 +118,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 			kfstreambuffer=malloc(filesize);
 
-			fread(kfstreambuffer,filesize,1,f);
+			hxc_fread(kfstreambuffer,filesize,f);
 
 			hxc_fclose(f);
 

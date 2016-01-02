@@ -82,7 +82,7 @@ int VDK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		filesize=ftell(f);
 		fseek (f , 0 , SEEK_SET);
 
-		fread(&vdk_h,sizeof(vdk_header),1,f);
+		hxc_fread(&vdk_h,sizeof(vdk_header),f);
 
 		hxc_fclose(f);
 
@@ -136,7 +136,7 @@ int VDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	fseek (f , 0 , SEEK_SET);
 
 	memset(&vdk_h,0,sizeof(vdk_header));
-	fread(&vdk_h,sizeof(vdk_header),1,f);
+	hxc_fread(&vdk_h,sizeof(vdk_header),f);
 
 	fseek (f , vdk_h.header_size , SEEK_SET);
 
@@ -182,7 +182,7 @@ int VDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			file_offset=((filetracklen*j*floppydisk->floppyNumberOfSide)+(filetracklen*(i&1)))+vdk_h.header_size;
 			fseek (f , file_offset , SEEK_SET);
 
-			fread(trackdata,filetracklen,1,f);
+			hxc_fread(trackdata,filetracklen,f);
 
 			currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
 		}

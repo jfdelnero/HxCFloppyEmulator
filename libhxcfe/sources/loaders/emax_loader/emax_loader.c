@@ -201,7 +201,7 @@ int EMAX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,ch
 			sprintf (hdr, EMAXUTIL_HDR, RWDISK_VERSION, RWDISK_DATE);
 			hdr[EMAXUTIL_HDRLEN]=0;
 
-			fread (fhdr, (unsigned int) EMAXUTIL_HDRLEN,1,f);
+			hxc_fread (fhdr, (unsigned int) EMAXUTIL_HDRLEN,f);
 			fhdr[EMAXUTIL_HDRLEN]=0;
 
 
@@ -218,28 +218,28 @@ int EMAX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,ch
 			{
 				for(i=OS1_LOW;i<=OS1_HIGH;i++)
 				{
-					fread(&floppy_data[i*512],512,1,f2);
+					hxc_fread(&floppy_data[i*512],512,f2);
 				}
 
 				for(i=OS2_LOW;i<=OS2_HIGH;i++)
 				{
-					fread(&floppy_data[i*512],512,1,f2);
+					hxc_fread(&floppy_data[i*512],512,f2);
 				}
 
 				for(i=OS3_LOW;i<=OS3_HIGH;i++)
 				{
-					fread(&floppy_data[i*512],512,1,f2);
+					hxc_fread(&floppy_data[i*512],512,f2);
 				}
 			}
 
 			for(i=BANK_LOW;i<=BANK_HIGH;i++)
 			{
-				fread(&floppy_data[i*512],512,1,f);
+				hxc_fread(&floppy_data[i*512],512,f);
 			}
 
 			for(i=SAMPLE_LOW;i<=SAMPLE_HIGH;i++)
 			{
-				fread(&floppy_data[i*512],512,1,f);
+				hxc_fread(&floppy_data[i*512],512,f);
 			}
 
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)

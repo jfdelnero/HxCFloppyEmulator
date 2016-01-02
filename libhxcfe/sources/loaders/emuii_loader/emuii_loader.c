@@ -187,17 +187,17 @@ int EMUII_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 		{
 			fseek(f_os,i*0xE00,SEEK_SET);
 			memset(&sector_data,0x00,0xE00);
-			fread(&sector_data,0xE00,1,f_os);
+			hxc_fread(&sector_data,0xE00,f_os);
 		}
 		else
 		{
 			memset(&sector_data,0xFF,0xE00);
 
 			fseek(f_os,i*0xE00,SEEK_SET);
-			fread(&sector_data,0xE00,1,f_os);
+			hxc_fread(&sector_data,0xE00,f_os);
 
 			fseek(f_eii,(i-22)*0xE00,SEEK_SET);
-			fread(&sector_data,0xE00,1,f_eii);
+			hxc_fread(&sector_data,0xE00,f_eii);
 		}
 
 		if(!floppydisk->tracks[tracknumber])

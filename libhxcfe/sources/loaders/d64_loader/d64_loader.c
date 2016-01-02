@@ -133,7 +133,7 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			errormap=(unsigned char*)malloc(errormap_size);
 			memset(errormap,0,errormap_size);
 			fseek(f,errormap_size,SEEK_END);
-			fread(errormap,errormap_size,1,f);
+			hxc_fread(errormap,errormap_size,f);
 
 			break;
 
@@ -150,7 +150,7 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			errormap=(unsigned char*)malloc(errormap_size);
 			memset(errormap,0,errormap_size);
 			fseek(f,errormap_size,SEEK_END);
-			fread(errormap,errormap_size,1,f);
+			hxc_fread(errormap,errormap_size,f);
 
 			break;
 
@@ -262,7 +262,7 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			fseek (f , tracklistpos[j].fileoffset , SEEK_SET);
 
-			fread(trackdata,sectorsize*currentside->number_of_sector,1,f);
+			hxc_fread(trackdata,sectorsize*currentside->number_of_sector,f);
 
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track:%d Size:%d File offset:%d Number of sector:%d Bitrate:%d",j,currentside->tracklen,tracklistpos[j].fileoffset,tracklistpos[j].number_of_sector,currentside->bitrate);
 

@@ -102,7 +102,7 @@ int HFE_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		{
 			return HXCFE_ACCESSERROR;
 		}
-		fread(&header,sizeof(header),1,f);
+		hxc_fread(&header,sizeof(header),f);
 		hxc_fclose(f);
 
 		if( !strncmp((char*)header.HEADERSIGNATURE,"HXCPICFE",8))
@@ -145,7 +145,7 @@ int HFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
-	fread(&header,sizeof(header),1,f);
+	hxc_fread(&header,sizeof(header),f);
 
 	if(!strncmp((char*)header.HEADERSIGNATURE,"HXCPICFE",8))
 	{
@@ -168,7 +168,7 @@ int HFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
         trackoffsetlist=(pictrack*)malloc(sizeof(pictrack)* header.number_of_track);
         memset(trackoffsetlist,0,sizeof(pictrack)* header.number_of_track);
         fseek( f,512,SEEK_SET);
-        fread( trackoffsetlist,sizeof(pictrack)* header.number_of_track,1,f);
+        hxc_fread( trackoffsetlist,sizeof(pictrack)* header.number_of_track,f);
 
         tracks_base= 512+( (((sizeof(pictrack)* header.number_of_track)/512)+1)*512);
         fseek( f,tracks_base,SEEK_SET);
@@ -194,7 +194,7 @@ int HFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFE File : reading track %d, track size:%d - file offset:%.8X",
 				i,tracklen,(trackoffsetlist[i].offset*512));
 
-			fread( hfetrack,tracklen,1,f);
+			hxc_fread( hfetrack,tracklen,f);
 
 
 			floppydisk->tracks[i]=(HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));

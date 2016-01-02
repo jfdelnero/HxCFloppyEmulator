@@ -81,7 +81,7 @@ uint16_t filecheckcrc(FILE * f,uint32_t fileoffset,uint32_t size)
 
 		if(s>512)
 		{
-			fread(&buffer,512,1,f);
+			hxc_fread(&buffer,512,f);
 			for(i=0;i<512;i++)
 			{
 				CRC16_Update(&crc16h,&crc16l,buffer[i],(unsigned char*)crctable);
@@ -90,7 +90,7 @@ uint16_t filecheckcrc(FILE * f,uint32_t fileoffset,uint32_t size)
 		}
 		else
 		{
-			fread(&buffer,s,1,f);
+			hxc_fread(&buffer,s,f);
 			for(i=0;i<s;i++)
 			{
 				CRC16_Update(&crc16h,&crc16l,buffer[i],(unsigned char*)crctable);
@@ -171,7 +171,7 @@ int AFI_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		if(f==NULL)
 			return HXCFE_ACCESSERROR;
 
-		fread(&header,sizeof(header),1,f);
+		hxc_fread(&header,sizeof(header),f);
 		hxc_fclose(f);
 
 		if( !strncmp((char*)header.afi_img_tag,AFI_IMG_TAG,strlen(AFI_IMG_TAG)) )
@@ -222,7 +222,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
-	fread(&header,sizeof(header),1,f);
+	hxc_fread(&header,sizeof(header),f);
 
 	if(!strncmp((char*)header.afi_img_tag,AFI_IMG_TAG,strlen(AFI_IMG_TAG)))
 	{
@@ -236,7 +236,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 
 		fseek(f,header.floppyinfo_offset,SEEK_SET);
-		fread(&afiinfo,sizeof(afiinfo),1,f);
+		hxc_fread(&afiinfo,sizeof(afiinfo),f);
 
 		floppydisk->floppyNumberOfTrack=afiinfo.end_track+1;
 		floppydisk->floppyNumberOfSide=afiinfo.end_side+1;
@@ -307,7 +307,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 		fseek(f,header.track_list_offset,SEEK_SET);
-		fread(&trackliststruct,sizeof(trackliststruct),1,f);
+		hxc_fread(&trackliststruct,sizeof(trackliststruct),f);
 		if(strncmp((char*)trackliststruct.afi_img_track_list_tag,AFI_TRACKLIST_TAG,strlen(AFI_TRACKLIST_TAG)))
 		{
 				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"bad AFI_TRACKLIST_TAG");
@@ -315,14 +315,14 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		}
 
 		tracklistoffset=(uint32_t*)malloc(trackliststruct.number_of_track*sizeof(uint32_t));
-		fread(tracklistoffset,trackliststruct.number_of_track*sizeof(uint32_t),1,f);
+		hxc_fread(tracklistoffset,trackliststruct.number_of_track*sizeof(uint32_t),f);
 
 		for(i=0;i<(int)trackliststruct.number_of_track;i++)
 		{
 			hxcfe_imgCallProgressCallback(imgldr_ctx,i,trackliststruct.number_of_track );
 
 			fseek(f,header.track_list_offset+tracklistoffset[i],SEEK_SET);
-			fread(&track,sizeof(track),1,f);
+			hxc_fread(&track,sizeof(track),f);
 			if(strncmp((char*)track.afi_track_tag,AFI_TRACK_TAG,strlen(AFI_TRACK_TAG)))
 			{
 				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"bad AFI_TRACK_TAG");
@@ -337,7 +337,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			}
 
 			datalistoffset=(uint32_t *)malloc(track.number_of_data_chunk*sizeof(uint32_t));
-			fread(datalistoffset,track.number_of_data_chunk*sizeof(uint32_t),1,f);
+			hxc_fread(datalistoffset,track.number_of_data_chunk*sizeof(uint32_t),f);
 
 			if(!floppydisk->tracks[track.track_number])
 			{
@@ -382,7 +382,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			for(j=0;j<(int)track.number_of_data_chunk;j++)
 			{
 				fseek(f,header.track_list_offset+tracklistoffset[i]+datalistoffset[j],SEEK_SET);
-				fread(&datablock,sizeof(datablock),1,f);
+				hxc_fread(&datablock,sizeof(datablock),f);
 
 				if(strncmp((char*)datablock.afi_data_tag,AFI_DATA_TAG,strlen(AFI_DATA_TAG)))
 				{
@@ -404,12 +404,12 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						{
 							case AFI_COMPRESS_NONE:
 								currentside->databuffer=malloc(datablock.unpacked_size);
-								fread(currentside->databuffer,datablock.unpacked_size,1,f);
+								hxc_fread(currentside->databuffer,datablock.unpacked_size,f);
 								break;
 							case AFI_COMPRESS_GZIP:
 								currentside->databuffer=malloc(datablock.unpacked_size);
 								temp_uncompressbuffer=malloc(datablock.packed_size);
-								fread(temp_uncompressbuffer,datablock.packed_size,1,f);
+								hxc_fread(temp_uncompressbuffer,datablock.packed_size,f);
 								destLen=datablock.unpacked_size;
 								uncompress(currentside->databuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
 								free(temp_uncompressbuffer);
@@ -425,12 +425,12 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						{
 							case AFI_COMPRESS_NONE:
 								currentside->databuffer=malloc(datablock.unpacked_size);
-								fread(currentside->databuffer,datablock.unpacked_size,1,f);
+								hxc_fread(currentside->databuffer,datablock.unpacked_size,f);
 								break;
 							case AFI_COMPRESS_GZIP:
 								currentside->databuffer=malloc(datablock.unpacked_size);
 								temp_uncompressbuffer=malloc(datablock.packed_size);
-								fread(temp_uncompressbuffer,datablock.packed_size,1,f);
+								hxc_fread(temp_uncompressbuffer,datablock.packed_size,f);
 								destLen=datablock.unpacked_size;
 								uncompress(currentside->databuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
 								free(temp_uncompressbuffer);
@@ -445,13 +445,13 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						{
 							case AFI_COMPRESS_NONE:
 								currentside->indexbuffer=malloc(datablock.packed_size);
-								fread(currentside->indexbuffer,datablock.packed_size,1,f);
+								hxc_fread(currentside->indexbuffer,datablock.packed_size,f);
 
 								break;
 							case AFI_COMPRESS_GZIP:
 								currentside->indexbuffer=malloc(datablock.unpacked_size);
 								temp_uncompressbuffer=malloc(datablock.packed_size);
-								fread(temp_uncompressbuffer,datablock.packed_size,1,f);
+								hxc_fread(temp_uncompressbuffer,datablock.packed_size,f);
 								destLen=datablock.unpacked_size;
 								uncompress(currentside->indexbuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
 								free(temp_uncompressbuffer);
@@ -471,7 +471,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								case AFI_COMPRESS_NONE:
 
 									temp_timing = malloc(datablock.packed_size);
-									fread(temp_timing,datablock.packed_size,1,f);
+									hxc_fread(temp_timing,datablock.packed_size,f);
 
 									currentside->timingbuffer=malloc( bytelen * sizeof(uint32_t));
 
@@ -503,7 +503,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 									currentside->timingbuffer=malloc(bytelen * sizeof(uint32_t));
 
 									temp_uncompressbuffer=malloc(datablock.packed_size);
-									fread(temp_uncompressbuffer,datablock.packed_size,1,f);
+									hxc_fread(temp_uncompressbuffer,datablock.packed_size,f);
 
 									destLen=datablock.unpacked_size;
 									temp_timing = malloc(destLen);
@@ -548,7 +548,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								case AFI_COMPRESS_NONE:
 
 									currentside->timingbuffer=malloc(datablock.packed_size);
-									fread(currentside->timingbuffer,datablock.packed_size,1,f);
+									hxc_fread(currentside->timingbuffer,datablock.packed_size,f);
 
 									k=0;
 									do
@@ -567,7 +567,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								case AFI_COMPRESS_GZIP:
 									currentside->timingbuffer=malloc(datablock.unpacked_size);
 									temp_uncompressbuffer=malloc(datablock.packed_size);
-									fread(temp_uncompressbuffer,datablock.packed_size,1,f);
+									hxc_fread(temp_uncompressbuffer,datablock.packed_size,f);
 									destLen=datablock.unpacked_size;
 									uncompress((unsigned char*)currentside->timingbuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
 
@@ -602,7 +602,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						{
 							case AFI_COMPRESS_NONE:
 								currentside->flakybitsbuffer=malloc(datablock.packed_size);
-								fread(currentside->flakybitsbuffer,datablock.packed_size,1,f);
+								hxc_fread(currentside->flakybitsbuffer,datablock.packed_size,f);
 								k=0;
 								do
 								{
@@ -619,7 +619,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							case AFI_COMPRESS_GZIP:
 								currentside->flakybitsbuffer=malloc(datablock.unpacked_size);
 								temp_uncompressbuffer=malloc(datablock.packed_size);
-								fread(temp_uncompressbuffer,datablock.packed_size,1,f);
+								hxc_fread(temp_uncompressbuffer,datablock.packed_size,f);
 								destLen=datablock.unpacked_size;
 								uncompress(currentside->flakybitsbuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
 

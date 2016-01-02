@@ -177,7 +177,7 @@ int Prophet_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 					file_offset=( (((numberofsector-1)*1024)+256) * floppydisk->floppyNumberOfSide * j ) +
 						        ( (((numberofsector-1)*1024)+256) * i );
 					fseek (f , file_offset , SEEK_SET);
-					fread(trackdata,(((numberofsector-1)*1024)+256),1,f);
+					hxc_fread(trackdata,(((numberofsector-1)*1024)+256),f);
 
 					currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,(HXCFE_SECTCFG *)&sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,0,2500,-2500);
 				}

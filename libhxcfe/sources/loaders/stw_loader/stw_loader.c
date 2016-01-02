@@ -76,7 +76,7 @@ int STW_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 		memset(&header,0,sizeof(STWIMG));
 
-		fread(&header,sizeof(header),1,f);
+		hxc_fread(&header,sizeof(header),f);
 		hxc_fclose(f);
 
 		if( !strncmp((char*)header.headername,"STW",3))
@@ -118,7 +118,7 @@ int STW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	memset(&header,0,sizeof(STWIMG));
 	memset(&trackdesc,0,sizeof(STWTRACKIMG));
 
-	fread(&header,sizeof(header),1,f);
+	hxc_fread(&header,sizeof(header),f);
 
 	if(!strncmp((char*)header.headername,"STW",3))
 	{
@@ -145,7 +145,7 @@ int STW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			hxcfe_imgCallProgressCallback(imgldr_ctx,i,(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide) );
 
 			fseek(f,sizeof(header)+(i*(sizeof(trackdesc)+(BIGENDIAN_WORD(header.bytes_per_tracks)*2))),SEEK_SET);
-			fread(&trackdesc,sizeof(trackdesc),1,f);
+			hxc_fread(&trackdesc,sizeof(trackdesc),f);
 
 			if(!floppydisk->tracks[trackdesc.track_number])
 			{
@@ -164,7 +164,7 @@ int STW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			currentside=currentcylinder->sides[trackdesc.side_number];
 			currentside->number_of_sector=floppydisk->floppySectorPerTrack;
 
-			fread(currentside->databuffer,currentside->tracklen/8,1,f);
+			hxc_fread(currentside->databuffer,currentside->tracklen/8,f);
 		}
 
 		hxc_fclose(f);

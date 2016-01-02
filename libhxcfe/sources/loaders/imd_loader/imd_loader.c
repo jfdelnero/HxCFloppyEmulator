@@ -77,7 +77,7 @@ int IMD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 		memset(fileheader,0,sizeof(fileheader));
 
-		fread(&fileheader,4,1,f);
+		hxc_fread(&fileheader,4,f);
 		hxc_fclose(f);
 
 		if( !strncmp(fileheader,"IMD ",4))
@@ -133,7 +133,7 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	memset(fileheader,0,sizeof(fileheader));
 
-	fread(&fileheader,sizeof(fileheader),1,f);
+	hxc_fread(&fileheader,sizeof(fileheader),f);
 
 	if(!strncmp(fileheader,"IMD ",4))
 	{
@@ -150,7 +150,7 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		do
 		{
 
-			if(fread(&trackcfg,1,sizeof(trackcfg),f))
+			if(!hxc_fread(&trackcfg,sizeof(trackcfg),f))
 			{
 				fseek(f,trackcfg.number_of_sector,SEEK_CUR);
 				if(trackcfg.physical_head & SEC_CYL_MAP)
@@ -175,7 +175,7 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				for(i=0;i<trackcfg.number_of_sector;i++)
 				{
-					fread(&sectordatarecordcode,1,1,f);
+					hxc_fread(&sectordatarecordcode,1,f);
 
 					switch(sectordatarecordcode)
 					{
@@ -245,7 +245,7 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		{
 			hxcfe_imgCallProgressCallback(imgldr_ctx,i,(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide) );
 
-			if(fread(&trackcfg,sizeof(trackcfg),1,f))
+			if(!hxc_fread(&trackcfg,sizeof(trackcfg),f))
 			{
 
 				sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*trackcfg.number_of_sector);
@@ -253,14 +253,14 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				// lecture map sector.
 				sectormap=(unsigned char*) malloc(trackcfg.number_of_sector);
-				fread(sectormap,trackcfg.number_of_sector,1,f);
+				hxc_fread(sectormap,trackcfg.number_of_sector,f);
 
 				// init map cylinder
 				sectorcylmap=(unsigned char*) malloc(trackcfg.number_of_sector);
 				memset(sectorcylmap,trackcfg.physical_cylinder,trackcfg.number_of_sector);
 				if(trackcfg.physical_head & SEC_CYL_MAP)
 				{
-					fread(sectorcylmap,trackcfg.number_of_sector,1,f);
+					hxc_fread(sectorcylmap,trackcfg.number_of_sector,f);
 				}
 
 				// init map head
@@ -268,7 +268,7 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				memset(sectorheadmap,trackcfg.physical_head&0xF,trackcfg.number_of_sector);
 				if(trackcfg.physical_head & SEC_HEAD_MAP)
 				{
-					fread(sectorheadmap,1,trackcfg.number_of_sector,f);
+					hxc_fread(sectorheadmap,trackcfg.number_of_sector,f);
 				}
 
 				sectorsize = (int32_t)(128<<trackcfg.sector_size_code);
@@ -351,33 +351,33 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				for(j=0;j<trackcfg.number_of_sector;j++)
 				{
 
-					fread(&sectordatarecordcode,1,1,f);
+					hxc_fread(&sectordatarecordcode,1,f);
 					switch(sectordatarecordcode)
 					{
 						case 0x00:
 						break;
 						case 0x01:
-							fread(&track_data[j*sectorsize],1,sectorsize,f);
+							hxc_fread(&track_data[j*sectorsize],sectorsize,f);
 							sectorconfig[j].input_data=&track_data[j*sectorsize];
 							sectorconfig[j].use_alternate_datamark=0x00;
 							sectorconfig[j].alternate_datamark=0xFB;
 						break;
 						case 0x02:
-							fread(&cdata,1,1,f);
+							hxc_fread(&cdata,1,f);
 							memset(&track_data[j*sectorsize],cdata,sectorsize);
 							sectorconfig[j].input_data=&track_data[j*sectorsize];
 							sectorconfig[j].use_alternate_datamark=0x00;
 							sectorconfig[j].alternate_datamark=0xFB;
 						break;
 						case 0x03:
-							fread(&track_data[j*sectorsize],1,sectorsize,f);
+							hxc_fread(&track_data[j*sectorsize],sectorsize,f);
 							sectorconfig[j].input_data=&track_data[j*sectorsize];
 							sectorconfig[j].use_alternate_datamark=1;
 							sectorconfig[j].alternate_datamark=0xF8;
 
 						break;
 						case 0x04:
-							fread(&cdata,1,1,f);
+							hxc_fread(&cdata,1,f);
 							memset(&track_data[j*sectorsize],cdata,sectorsize);
 							sectorconfig[j].input_data=&track_data[j*sectorsize];
 							sectorconfig[j].use_alternate_datamark=1;
@@ -385,13 +385,13 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 						break;
 						case 0x05:
-							fread(&track_data[j*sectorsize],1,sectorsize,f);
+							hxc_fread(&track_data[j*sectorsize],sectorsize,f);
 							sectorconfig[j].input_data=&track_data[j*sectorsize];
 							sectorconfig[j].use_alternate_data_crc=0x1;
 							sectorconfig[j].alternate_datamark=0xFB;
 						break;
 						case 0x06:
-							fread(&cdata,1,1,f);
+							hxc_fread(&cdata,1,f);
 							memset(&track_data[j*sectorsize],cdata,sectorsize);
 							sectorconfig[j].input_data=&track_data[j*sectorsize];
 							sectorconfig[j].use_alternate_data_crc=0x1;
@@ -399,14 +399,14 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							sectorconfig[j].use_alternate_datamark=0x00;
 						break;
 						case 0x07:
-							fread(&track_data[j*sectorsize],1,sectorsize,f);
+							hxc_fread(&track_data[j*sectorsize],sectorsize,f);
 							sectorconfig[j].input_data=&track_data[j*sectorsize];
 							sectorconfig[j].use_alternate_datamark=1;
 							sectorconfig[j].alternate_datamark=0xF8;
 							sectorconfig[j].use_alternate_data_crc=0x1;
 						break;
 						case 0x08:
-							fread(&cdata,1,1,f);
+							hxc_fread(&cdata,1,f);
 							memset(&track_data[j*sectorsize],cdata,sectorsize);
 							sectorconfig[j].input_data=&track_data[j*sectorsize];
 							sectorconfig[j].use_alternate_datamark=1;

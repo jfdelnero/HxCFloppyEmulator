@@ -80,7 +80,7 @@ int snes_smc_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			fileheader=(unsigned char*)malloc(512);
 			if(fileheader)
 			{
-				fread(fileheader,1,512,f);
+				hxc_fread(fileheader,512,f);
 				if( fileheader[8]==0xaa && fileheader[9]==0xbb )
 				{
 					switch(fileheader[10])

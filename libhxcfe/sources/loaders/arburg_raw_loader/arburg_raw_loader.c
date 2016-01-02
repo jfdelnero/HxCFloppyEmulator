@@ -176,7 +176,7 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 		}
 
 		fseek(f,fileoffset,SEEK_SET);
-		fread(&sector_data,blocksize,1,f);
+		hxc_fread(&sector_data,blocksize,f);
 
 		if(!floppydisk->tracks[tracknumber])
 		{

@@ -84,7 +84,7 @@ int STT_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		fseek (f , 0 , SEEK_SET);
 
 		STTHEADER.stt_signature=0;
-		fread(&STTHEADER,sizeof(stt_header),1,f);
+		hxc_fread(&STTHEADER,sizeof(stt_header),f);
 
 		hxc_fclose(f);
 
@@ -137,7 +137,7 @@ int STT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	fseek (f , 0 , SEEK_SET);
 
 	STTHEADER.stt_signature=0;
-	fread(&STTHEADER,sizeof(stt_header),1,f);
+	hxc_fread(&STTHEADER,sizeof(stt_header),f);
 
 	if(STTHEADER.stt_signature!=0x4D455453) //"STEM"
 	{
@@ -182,14 +182,14 @@ int STT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			currentcylinder->floppyRPM=rpm;
 
 			fseek (f, file_track_list_offset, SEEK_SET);
-			fread((void*)&STTTRACKOFFSET,sizeof(stt_track_offset),1,f);
+			hxc_fread((void*)&STTTRACKOFFSET,sizeof(stt_track_offset),f);
 			file_track_list_offset=file_track_list_offset+sizeof(stt_track_offset);
 
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Current Track Offset : 0x%.8X, Size: 0x%.8X, Next File Track List Offset : 0x%.8X",STTTRACKOFFSET.track_offset,STTTRACKOFFSET.track_size,file_track_list_offset);
 
 			fseek (f, STTTRACKOFFSET.track_offset, SEEK_SET);
 
-			fread((void*)&STTTRACKHEADER,sizeof(stt_track_header),1,f);
+			hxc_fread((void*)&STTTRACKHEADER,sizeof(stt_track_header),f);
 
 			if(!memcmp(&STTTRACKHEADER.stt_track_signature,"TRCK",4))
 			{
@@ -206,7 +206,7 @@ int STT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*STTTRACKHEADER.number_of_sectors);
 				for(k=0;k<STTTRACKHEADER.number_of_sectors;k++)
 				{
-					fread((void*)&STTSECTOR,sizeof(stt_sector),1,f);
+					hxc_fread((void*)&STTSECTOR,sizeof(stt_sector),f);
 
 					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Sector id: %d, Side id: %d, Track id: %d, Sector size:%d",STTSECTOR.sector_nb_id,STTSECTOR.side_nb_id,STTSECTOR.track_nb_id,STTSECTOR.data_len);
 
@@ -226,7 +226,7 @@ int STT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 					sectorconfig[k].input_data=malloc(STTSECTOR.data_len);
 					fseek (f, STTSECTOR.data_offset + STTTRACKOFFSET.track_offset, SEEK_SET);
-					fread(sectorconfig[k].input_data,STTSECTOR.data_len,1,f);
+					hxc_fread(sectorconfig[k].input_data,STTSECTOR.data_len,f);
 
 					fseek (f, file_offset, SEEK_SET);
 

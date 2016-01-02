@@ -345,7 +345,7 @@ int JV3_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			return HXCFE_ACCESSERROR;
 		}
 
-		fread(sh, sizeof(JV3SectorHeader), JV3_HEADER_MAX, f);
+		hxc_fread(sh, sizeof(JV3SectorHeader)*JV3_HEADER_MAX, f);
        	if ((total_data = JV3_disk_geometry(sh, &NumberOfSide, &SectorPerTrack, &NumberOfTrack, &SectorSize, &StartIdSector, &NumberOfEntries)) != 0)
 		{
 			offset1 = ftell(f);
@@ -410,11 +410,11 @@ int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	if(filesize!=0)
 	{
-		fread(sh, sizeof(JV3SectorHeader), JV3_HEADER_MAX, f);
+		hxc_fread(sh, sizeof(JV3SectorHeader) * JV3_HEADER_MAX, f);
 
 		JV3_disk_geometry(sh, &floppydisk->floppyNumberOfSide, &floppydisk->floppySectorPerTrack, &floppydisk->floppyNumberOfTrack, &SectorSize, &StartIdSector, &NumberofEntries);
 
-		fread(&write_protected, sizeof(write_protected), 1, f);                                                                         // just to jump this infomation
+		hxc_fread(&write_protected, sizeof(write_protected), f); // just to jump this infomation
 
 
 		SectorsOffsets = JV3_offset(sh, floppydisk->floppyNumberOfSide, floppydisk->floppySectorPerTrack, floppydisk->floppyNumberOfTrack, NumberofEntries, f);

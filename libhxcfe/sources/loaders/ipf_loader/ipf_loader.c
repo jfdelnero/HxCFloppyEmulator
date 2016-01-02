@@ -243,7 +243,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			i=0;
 			do
 			{
-				fread(fileimg+(i*1024),1024,1,f);
+				hxc_fread(fileimg+(i*1024),1024,f);
 				i++;
 			}while(i<((filesize/1024)+1));
 

@@ -93,7 +93,7 @@ int AnaDisk_SanityCheck(HXCFE_IMGLDR * imgldr_ctx,char * imgfile,int32_t * mintr
 		counted_size = 0;
 		do
 		{
-			fread(&sector_header,sizeof(sector_header),1,f);
+			hxc_fread(&sector_header,sizeof(sector_header),f);
 
 			if(mintrack)
 			{
@@ -172,10 +172,10 @@ int getnextsector(int32_t track,int32_t side,AnaDisk_sectorheader * sectorheader
 
 	do
 	{
-		ret = fread(sectorheader,sizeof(AnaDisk_sectorheader),1,f);
+		ret = hxc_fread(sectorheader,sizeof(AnaDisk_sectorheader),f);
 		lastdatapos = ftell(f);
 		fseek(f,sectorheader->data_len,SEEK_CUR);
-	}while( ret && !feof(f) && ( sectorheader->cylinder != track || sectorheader->side != side) );
+	}while( !ret && !feof(f) && ( sectorheader->cylinder != track || sectorheader->side != side) );
 
 	if( !ret || feof(f) )
 	{
@@ -259,7 +259,7 @@ int ANA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					if(sector_header.data_len)
 					{
 						sectorconfig[sectorfound].input_data = malloc(sector_header.data_len);
-						fread(sectorconfig[sectorfound].input_data,sector_header.data_len,1,f);
+						hxc_fread(sectorconfig[sectorfound].input_data,sector_header.data_len,f);
 					}
 
 

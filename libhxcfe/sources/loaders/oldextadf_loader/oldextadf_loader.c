@@ -77,7 +77,7 @@ int OLDEXTADF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		}
 
 		memset(header,0,sizeof(header));
-		fread(header,12,1,f);
+		hxc_fread(header,12,f);
 		hxc_fclose(f);
 
 		if(!strncmp((char*)header,"UAE--ADF",8))
@@ -133,7 +133,7 @@ int OLDEXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 	}
 
 	memset(header,0,sizeof(header));
-	fread(header,8,1,f);
+	hxc_fread(header,8,f);
 
 	numberoftrack=0;
 	if(!strncmp((char*)header,"UAE--ADF",8))
@@ -142,7 +142,7 @@ int OLDEXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 		tracktable=malloc(4*numberoftrack);
 		memset(tracktable,0,4*numberoftrack);
 
-		fread(tracktable,4*numberoftrack,1,f);
+		hxc_fread(tracktable,4*numberoftrack,f);
 	}
 	trackindex=0;
 
@@ -194,7 +194,7 @@ int OLDEXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 						currentcylinder->sides[i]->databuffer[0]=tracktable[(4*trackindex)+0];
 						currentcylinder->sides[i]->databuffer[1]=tracktable[(4*trackindex)+1];
 
-						fread(&currentcylinder->sides[i]->databuffer[2],tracksize,1,f);
+						hxc_fread(&currentcylinder->sides[i]->databuffer[2],tracksize,f);
 
 						currentcylinder->sides[i]->number_of_sector=floppydisk->floppySectorPerTrack;
 
@@ -208,7 +208,7 @@ int OLDEXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 						trackdata=(unsigned char*)malloc(tracksize);
 
-						fread(trackdata,tracksize,1,f);
+						hxc_fread(trackdata,tracksize,f);
 
 						currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,(unsigned short)(tracksize/sectorsize),(unsigned char)j,(unsigned char)i,0,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-11150);
 

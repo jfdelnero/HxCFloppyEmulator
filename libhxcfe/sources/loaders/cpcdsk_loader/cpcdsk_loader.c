@@ -78,7 +78,7 @@ int CPCDSK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			return HXCFE_ACCESSERROR;
 		}
 
-		fread(&fileheader,sizeof(fileheader),1,f);
+		hxc_fread(&fileheader,sizeof(fileheader),f);
 		hxc_fclose(f);
 
 		if( !strncmp((char*)&fileheader.headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",16) ||
@@ -143,7 +143,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 	if(filesize!=0)
 	{
 
-		fread(&fileheader,sizeof(fileheader),1,f);
+		hxc_fread(&fileheader,sizeof(fileheader),f);
 
 		if( !strncmp((char*)&fileheader.headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",16))
 		{
@@ -170,7 +170,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 		{
 			// read the tracks size array.
 			tracksizetab=(unsigned char *)malloc(fileheader.number_of_sides*fileheader.number_of_tracks);
-			fread(tracksizetab,fileheader.number_of_sides*fileheader.number_of_tracks,1,f);
+			hxc_fread(tracksizetab,fileheader.number_of_sides*fileheader.number_of_tracks,f);
 		}
 
 		floppydisk->floppyBitRate=250000;
@@ -200,7 +200,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 			memset(&trackheader,0,sizeof(trackheader));
 
-			if( ( ftell(f) == (int32_t)trackposition ) && (fread(&trackheader,sizeof(trackheader),1,f) ==  1) )
+			if( ( ftell(f) == (int32_t)trackposition ) && !hxc_fread(&trackheader,sizeof(trackheader),f) )
 			{
 
 				t=trackheader.track_number;
@@ -250,7 +250,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 							for(j=0;j<trackheader.number_of_sector;j++)
 							{
 								fseek (f,trackposition+sizeof(trackheader)+(sizeof(sector)*j), SEEK_SET);
-								fread(&sector,sizeof(sector),1,f);
+								hxc_fread(&sector,sizeof(sector),f);
 
 								sectorconfig[j].cylinder=sector.track;
 								sectorconfig[j].head=sector.side;
@@ -259,7 +259,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 								sectorconfig[j].input_data=malloc(sectorconfig[j].sectorsize);
 
 								fseek (f, trackposition+0x100+sectorposition/*sizeof(trackheader)+(sizeof(sector)*j)*/, SEEK_SET);
-								fread(sectorconfig[j].input_data,sectorconfig[j].sectorsize,1,f);
+								hxc_fread(sectorconfig[j].input_data,sectorconfig[j].sectorsize,f);
 
 								sectorposition=sectorposition+sectorconfig[j].sectorsize;
 
