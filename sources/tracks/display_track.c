@@ -342,20 +342,21 @@ void putstring8x8(HXCFE_TD *td,int x_pos,int y_pos,char * str,uint32_t color,uin
 
 	i=0;
 
-	while(str[i])
+	if( td && str )
 	{
-
-		if(vertical)
+		while(str[i])
 		{
-			putchar8x8(td,x_pos,y_pos-(i*8),str[i],color,bgcolor,vertical,transparent);
+			if(vertical)
+			{
+				putchar8x8(td,x_pos,y_pos-(i*8),str[i],color,bgcolor,vertical,transparent);
+			}
+			else
+			{
+				putchar8x8(td,x_pos+(i*8),y_pos,str[i],color,bgcolor,vertical,transparent);
+			}
+			i++;
 		}
-		else
-		{
-			putchar8x8(td,x_pos+(i*8),y_pos,str[i],color,bgcolor,vertical,transparent);
-		}
-		i++;
 	}
-
 }
 
 s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,int side,double timingoffset_offset, int TRACKTYPE)
