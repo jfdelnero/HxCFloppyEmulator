@@ -467,7 +467,7 @@ int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						memset(sectorconfig[sector_found].input_data,0,sectorconfig[sector_found].sectorsize);
 
 						fseek(f, pOffset->offset, SEEK_SET);
-						fread(sectorconfig[sector_found].input_data,pOffset->size,1,f);
+						hxc_fread(sectorconfig[sector_found].input_data,pOffset->size,f);
 
 						inc += pOffset->size;
 

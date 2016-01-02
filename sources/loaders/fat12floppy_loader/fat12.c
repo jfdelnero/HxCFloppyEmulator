@@ -108,7 +108,8 @@ int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned
 						subnewentry=findfreeentry(&datatable[(fatclusternb-2)*fatconfig->sectorsize*fatconfig->clustersize]);
 						subentry=(fat_directory_entry *)subnewentry;
 
-						sprintf(subentry->DIR_Name,".          ");
+						memset(subentry->DIR_Name,' ',sizeof(subentry->DIR_Name)); // "."
+						subentry->DIR_Name[0] = '.';
 
 						//memcpy(subnewentry,".          ",strlen(".          "));
 						subentry->DIR_Attr=0x10;
@@ -116,7 +117,11 @@ int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned
 
 						subnewentry=findfreeentry(&datatable[(fatclusternb-2)*fatconfig->sectorsize*fatconfig->clustersize]);
 						subentry=(fat_directory_entry *)subnewentry;
-						sprintf(subentry->DIR_Name,"..         ");
+
+						memset(subentry->DIR_Name,' ',sizeof(subentry->DIR_Name)); // ".."
+						subentry->DIR_Name[0] = '.';
+						subentry->DIR_Name[1] = '.';
+
 						subentry->DIR_Attr=0x10;
 						subentry->DIR_FstClusLO=parentcluster;
 						//*( (unsigned short*) &subnewentry[0x1A])=parentcluster;
