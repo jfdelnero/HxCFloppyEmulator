@@ -60,10 +60,9 @@
 #include "main.h"
 #include "loader.h"
 
-
 extern s_gui_context * guicontext;
 
-extern track_type track_type_list[];
+extern const track_type track_type_list[];
 extern void sync_if_config();
 
 int load_floppy(HXCFE_FLOPPY * floppydisk,char * defaultfilename)
@@ -135,16 +134,16 @@ int load_floppy_image(char *filename)
 		hxcfe_imgSetProgressCallback(imgldr_ctx,progress_callback,(void*)guicontext);
 
 		hxcfe_imgUnload(imgldr_ctx,guicontext->loadedfloppy);
-		
+
 		guicontext->loadedfloppy=0;
 
 		hxc_getfilenamebase(filename,guicontext->bufferfilename);
 
 		loaderid = hxcfe_imgAutoSetectLoader(imgldr_ctx,filename,0);
-			
+
 		if(loaderid>=0)
 			guicontext->loadedfloppy = hxcfe_imgLoad(imgldr_ctx,filename,loaderid,&ret);
-			
+
 		guicontext->loadstatus=ret;
 
 		if(ret!=HXCFE_NOERROR || !guicontext->loadedfloppy)
@@ -153,7 +152,7 @@ int load_floppy_image(char *filename)
 			guicontext->bufferfilename[0]=0;
 		}
 		else
-		{	
+		{
 			sync_if_config();
 	#ifndef STANDALONEFSBROWSER
 			libusbhxcfe_loadFloppy(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy);
@@ -167,7 +166,7 @@ int load_floppy_image(char *filename)
 				sprintf(guicontext->bufferfilename,"Empty Floppy");
 			}
 		}
-		
+
 		guicontext->updatefloppyinfos++;
 
 		hxcfe_imgDeInitLoader(imgldr_ctx);
@@ -205,7 +204,7 @@ HXCFE_FLOPPY * loadrawimage(HXCFE* floppycontext,cfgrawfile * rfc,char * file,in
 		fb=hxcfe_initFloppy(floppycontext,rfc->numberoftrack,nbside);
 		if(fb)
 		{
-			hxcfe_setTrackInterleave(fb,rfc->interleave);	
+			hxcfe_setTrackInterleave(fb,rfc->interleave);
 			hxcfe_setSectorFill(fb,rfc->fillvalue);
 
 			hxcfe_setTrackPreGap(fb, (unsigned short)rfc->pregap);
@@ -232,7 +231,7 @@ HXCFE_FLOPPY * loadrawimage(HXCFE* floppycontext,cfgrawfile * rfc,char * file,in
 						hxcfe_pushTrack(fb,rfc->rpm,i,1-j,track_type_list[rfc->tracktype].tracktype);
 					else
 						hxcfe_pushTrack(fb,rfc->rpm,i,j,track_type_list[rfc->tracktype].tracktype);
-					
+
 					// Set the skew
 					if(rfc->sideskew)
 					{
@@ -255,7 +254,7 @@ HXCFE_FLOPPY * loadrawimage(HXCFE* floppycontext,cfgrawfile * rfc,char * file,in
 							{
 								offset = (128<<rfc->sectorsize) * rfc->sectorpertrack * rfc->numberoftrack;
 							}
-							
+
 							offset += (128<<rfc->sectorsize) * rfc->sectorpertrack * i;
 						}
 						else
@@ -263,7 +262,7 @@ HXCFE_FLOPPY * loadrawimage(HXCFE* floppycontext,cfgrawfile * rfc,char * file,in
 							offset  = (128<<rfc->sectorsize) * rfc->sectorpertrack * i * nbside;
 							offset += (128<<rfc->sectorsize) * rfc->sectorpertrack * j;
 						}
-						
+
 						fseek(f,offset,SEEK_SET);
 						fread(trackbuffer,(128<<rfc->sectorsize)*rfc->sectorpertrack,1,f);
 					}
@@ -321,7 +320,7 @@ int loadrawfile(HXCFE* floppycontext,cfgrawfile * rfc,char * file)
 		sprintf(guicontext->bufferfilename,"");
 		guicontext->loadedfloppy=0;
 
-		guicontext->loadedfloppy = fp; 
+		guicontext->loadedfloppy = fp;
 
 		sync_if_config();
 
