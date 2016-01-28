@@ -147,7 +147,12 @@ static int _open_directory(char *path, uint32 *pathCluster)
         {
             // Check entry is folder
             if (fatfs_entry_is_dir(&sfEntry))
-                startcluster = ((FAT_HTONS((uint32)sfEntry.FstClusHI))<<16) + FAT_HTONS(sfEntry.FstClusLO);
+			{
+				if( _fs.fat_type == FAT_TYPE_32 )
+					startcluster = ((FAT_HTONS((uint32)sfEntry.FstClusHI))<<16) + FAT_HTONS(sfEntry.FstClusLO);
+				else
+					startcluster = FAT_HTONS(sfEntry.FstClusLO);
+			}
             else
                 return 0;
         }
@@ -392,7 +397,10 @@ static FL_FILE* _open_file(const char *path)
             memcpy(file->shortfilename, sfEntry.Name, FAT_SFN_SIZE_FULL);
             file->filelength = FAT_HTONL(sfEntry.FileSize);
             file->bytenum = 0;
-            file->startcluster = ((FAT_HTONS((uint32)sfEntry.FstClusHI))<<16) + FAT_HTONS(sfEntry.FstClusLO);
+			if( _fs.fat_type == FAT_TYPE_32 )
+				file->startcluster = ((FAT_HTONS((uint32)sfEntry.FstClusHI))<<16) + FAT_HTONS(sfEntry.FstClusLO);
+			else
+				file->startcluster = FAT_HTONS(sfEntry.FstClusLO);
             file->file_data_address = 0xFFFFFFFF;
             file->file_data_dirty = 0;
             file->filelength_changed = 0;

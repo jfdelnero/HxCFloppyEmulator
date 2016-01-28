@@ -808,7 +808,11 @@ int fatfs_list_directory_next(struct fatfs *fs, struct fs_dir_list_status *dirls
                         entry->is_dir = 0;
 
                     entry->size = FAT_HTONL(directoryEntry->FileSize);
-                    entry->cluster = ((uint32)(FAT_HTONS(directoryEntry->FstClusHI))<<16) | (uint32)FAT_HTONS(directoryEntry->FstClusLO);
+
+					if( fs->fat_type == FAT_TYPE_32 )
+						entry->cluster = ((uint32)(FAT_HTONS(directoryEntry->FstClusHI))<<16) | (uint32)FAT_HTONS(directoryEntry->FstClusLO);
+					else
+						entry->cluster = (uint32)FAT_HTONS(directoryEntry->FstClusLO);
 
 					if( !( directoryEntry->Attr & 0x08 ) ) //Volume label ?
 					{
@@ -860,7 +864,11 @@ int fatfs_list_directory_next(struct fatfs *fs, struct fs_dir_list_status *dirls
                         entry->is_dir = 0;
 
                     entry->size = FAT_HTONL(directoryEntry->FileSize);
-                    entry->cluster = ((uint32)(FAT_HTONS(directoryEntry->FstClusHI))<<16) | (uint32)FAT_HTONS(directoryEntry->FstClusLO);
+
+					if( fs->fat_type == FAT_TYPE_32 )
+						entry->cluster = ((uint32)(FAT_HTONS(directoryEntry->FstClusHI))<<16) | (uint32)FAT_HTONS(directoryEntry->FstClusLO);
+					else
+						entry->cluster = (uint32)FAT_HTONS(directoryEntry->FstClusLO);
 
 					if( !( directoryEntry->Attr & 0x08 ) ) //Volume label ?
 					{
