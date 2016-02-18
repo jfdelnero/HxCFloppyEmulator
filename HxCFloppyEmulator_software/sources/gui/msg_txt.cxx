@@ -142,6 +142,8 @@ Fl_Menu_Item fs_choices[]=
 	{ "3\"5        1.68MB DSHD FAT12",0,fs_choice_cb,(void*)FS_1_68MB_MSDOS_FAT12},
 
 	{ "3\"5        1.722MB DSHD FAT12",0,fs_choice_cb,(void*)FS_1_722MB_MSDOS_FAT12},
+	{ "3\"5        1.743MB DSHD FAT12",0,fs_choice_cb,(void*)FS_1_743MB_MSDOS_FAT12},
+	{ "3\"5        1.764MB DSHD FAT12",0,fs_choice_cb,(void*)FS_1_764MB_MSDOS_FAT12},
 	{ "3\"5        1.785MB DSHD FAT12",0,fs_choice_cb,(void*)FS_1_785MB_MSDOS_FAT12},
 
 	{ "3\"5        2.50MB DSDD FAT12",0,fs_choice_cb,(void*)FS_2_50MB_MSDOS_FAT12},
