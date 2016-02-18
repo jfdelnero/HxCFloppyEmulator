@@ -157,6 +157,8 @@ fat12config configlist[]=
 	{"fat1640",     0xFF, 82,2,20,300,500000,win95_bootsector, 14,  0,2,  IBMPC_HD_FLOPPYMODE,   IBMFORMAT_DD,0xF0,1, 512, 224,1}, //3.5" Double Sided, 82 tracks per side, 20 sectors per track (1.64MB)
 	{"fat1680",     0xFF, 80,2,21,300,500000,win95_bootsector, 14,  0,2,  IBMPC_HD_FLOPPYMODE,   IBMFORMAT_DD,0xF0,1, 512, 224,1}, //3.5" Double Sided, 80 tracks per side, 21 sectors per track (1.68MB)
 	{"fat1722",     0xFF, 82,2,21,300,500000,win95_bootsector, 14,  0,2,  IBMPC_HD_FLOPPYMODE,   IBMFORMAT_DD,0xF0,1, 512, 224,1}, //3.5" Double Sided, 82 tracks per side, 21 sectors per track (1.722MB)
+	{"fat1743",     0xFF, 83,2,21,300,500000,win95_bootsector, 14,  0,2,  IBMPC_HD_FLOPPYMODE,   IBMFORMAT_DD,0xF0,1, 512, 224,1}, //3.5" Double Sided, 83 tracks per side, 21 sectors per track (1.743MB)
+	{"fat1764",     0xFF, 84,2,21,300,500000,win95_bootsector, 14,  0,2,  IBMPC_HD_FLOPPYMODE,   IBMFORMAT_DD,0xF0,1, 512, 224,1}, //3.5" Double Sided, 84 tracks per side, 21 sectors per track (1.764MB)
 	{"fat1785",     0xFF, 85,2,21,300,500000,win95_bootsector, 14,  0,2,  IBMPC_HD_FLOPPYMODE,   IBMFORMAT_DD,0xF0,1, 512, 224,1}, //3.5" Double Sided, 85 tracks per side, 21 sectors per track (1.785MB)
 	{"fat2880",     0xFF, 80,2,36,300,1000000,win95_bootsector,84,  0,1,  IBMPC_ED_FLOPPYMODE,   IBMFORMAT_DD,0xF0,2, 512, 240,1}, //3.5" Double Sided, 80 tracks per side, 36 sectors per track (2.88MB)
 	{"fat3381",     0xFF,127,2,26,240,500000,win95_bootsector, 14,  0,2,  IBMPC_HD_FLOPPYMODE,   IBMFORMAT_DD,0xF0,2, 512, 224,1},
