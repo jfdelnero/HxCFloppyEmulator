@@ -51,6 +51,7 @@ int IMD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	char * log_str;
 	char   tmp_str[256];
 	char rec_mode;
+	unsigned char sector_type;
 
 	unsigned char sector_numbering_map[256];
 	unsigned char cylinder_numbering_map[256];
@@ -224,20 +225,121 @@ int IMD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 									l++;
 								}
 
+								sector_type = 0;
 								if(l!=(int)sca[k]->sectorsize)
 								{
-									fputs("\1",imdfile);
+									// Non compressed
+									if(!sca[k]->use_alternate_data_crc)
+									{
+										// CRC ok
+										switch(sca[k]->alternate_datamark)
+										{
+											case 0xFB:
+												sector_type = 1;
+											break;
+											case 0xF8: // Deleted datamark
+												sector_type = 3;
+											break;
+											default:
+												sector_type = 1;
+											break;
+										}
+									}
+									else
+									{
+										// CRC Error
+										switch(sca[k]->alternate_datamark)
+										{
+											case 0xFB:
+												sector_type = 5;
+											break;
+											case 0xF8: // Deleted datamark
+												sector_type = 7;
+											break;
+											default:
+												sector_type = 5;
+											break;
+										}
+									}
+
+									fwrite(&sector_type,1,1,imdfile);
 									fwrite(sca[k]->input_data,sca[k]->sectorsize,1,imdfile);
 								}
 								else
 								{
-									fputs("\2",imdfile);
+									// Compressed
+									if(!sca[k]->use_alternate_data_crc)
+									{
+										// CRC ok
+										switch(sca[k]->alternate_datamark)
+										{
+											case 0xFB:
+												sector_type = 2;
+											break;
+											case 0xF8: // Deleted datamark
+												sector_type = 4;
+											break;
+											default:
+												sector_type = 2;
+											break;
+										}
+									}
+									else
+									{
+										// CRC Error
+										switch(sca[k]->alternate_datamark)
+										{
+											case 0xFB:
+												sector_type = 6;
+											break;
+											case 0xF8: // Deleted datamark
+												sector_type = 8;
+											break;
+											default:
+												sector_type = 6;
+											break;
+										}
+									}
+									fwrite(&sector_type,1,1,imdfile);
 									fwrite(sca[k]->input_data,1,1,imdfile);
 								}
 							}
 							else
 							{
-								fputs("\2",imdfile);
+								// Compressed
+								if(!sca[k]->use_alternate_data_crc)
+								{
+									// CRC ok
+									switch(sca[k]->alternate_datamark)
+									{
+										case 0xFB:
+											sector_type = 2;
+										break;
+										case 0xF8: // Deleted datamark
+											sector_type = 4;
+										break;
+										default:
+											sector_type = 2;
+										break;
+									}
+								}
+								else
+								{
+									// CRC Error
+									switch(sca[k]->alternate_datamark)
+									{
+										case 0xFB:
+											sector_type = 6;
+										break;
+										case 0xF8: // Deleted datamark
+											sector_type = 8;
+										break;
+										default:
+											sector_type = 6;
+										break;
+									}
+								}
+								fwrite(&sector_type,1,1,imdfile);
 								fwrite(&sca[k]->fill_byte,1,1,imdfile);
 							}
 
