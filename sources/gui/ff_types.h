@@ -36,5 +36,6 @@ enum
 	FF_SCP,
 	FF_BMP,
 	FF_DISK_BMP,
-	FF_XML
+	FF_XML,
+	FF_AMSTRADDSK
 };
