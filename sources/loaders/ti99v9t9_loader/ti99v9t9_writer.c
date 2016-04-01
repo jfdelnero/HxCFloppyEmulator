@@ -55,6 +55,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 	int32_t sectorsize;
 	unsigned char * diskimage;
 	int error;
+	int fm_fallback = 0;
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG* sc;
 
@@ -129,6 +130,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 			bitrate=250000;
 			density=ISOIBM_MFM_ENCODING;
 			interleave=5;
+			fm_fallback=1;
 			break;
 
 		case 2*80*18*256:
@@ -167,6 +169,24 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 		ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 		if(ss)
 		{
+			if (fm_fallback)
+			{
+				sc = hxcfe_searchSector(ss,0,0,0,density);
+
+				if (!sc)
+				{
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"DSDD MFM probe failed, trying DSSD FM.");
+					numberoftrack = 80;
+					numberofsector = 9;
+					density = ISOIBM_FM_ENCODING;
+					imagesize = numberofsector * numberoftrack * numberofside * sectorsize;
+					diskimage = realloc(diskimage, imagesize);
+					if (!diskimage)
+						return HXCFE_INTERNALERROR;
+					memset(diskimage,0xF6, imagesize);
+				}
+			}
+
 			for(i=0;i<numberofside;i++)
 			{
 				for(j=0;j<numberoftrack;j++)
