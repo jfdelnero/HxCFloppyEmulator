@@ -381,6 +381,54 @@ int convertrawfile(HXCFE* hxcfe,char * infile,char * layout,char * outfile,char 
 	return 0;
 }
 
+
+int usbloadrawfile(HXCFE* hxcfe, char * infile, char * layout, int drive, int doublestep, int ifmode)
+{
+	int layoutid;
+	int loaderid;
+	int ret;
+	HXCFE_FLOPPY * floppydisk;
+	HXCFE_XMLLDR * rfb;
+	USBHXCFE * usbfe;
+	HXCFE_IMGLDR * imgldr_ctx;
+
+	printf("Starting usb emulation - %s\n", infile);
+
+	usbfe = libusbhxcfe_init(hxcfe);
+	if (usbfe)
+	{
+		rfb = hxcfe_initXmlFloppy(hxcfe);
+		if (rfb)
+		{
+			layoutid = hxcfe_getXmlLayoutID(rfb, layout);
+
+			if (layoutid >= 0)
+			{
+
+				hxcfe_selectXmlFloppyLayout(rfb, layoutid);
+
+				if (strlen(infile))
+					floppydisk = hxcfe_generateXmlFileFloppy(rfb, infile);
+				else
+					floppydisk = hxcfe_generateXmlFloppy(rfb, 0, 0);
+
+
+				libusbhxcfe_loadFloppy(hxcfe, usbfe, floppydisk);
+
+				printf("type q and enter to quit\n");
+				do
+				{
+				} while (getchar() != 'q');
+
+				hxcfe_deinitXmlFloppy(rfb);
+
+			}
+		}
+	}
+	return 0;
+}
+
+
 int usbload(HXCFE* hxcfe,char * infile,int drive,int doublestep,int ifmode)
 {
 	int loaderid;
@@ -1064,7 +1112,15 @@ int main(int argc, char* argv[])
 	// Input file name option
 	if(isOption(argc,argv,"usb",(char*)&temp)>0)
 	{
-		usbload(hxcfe,filename,temp[0]-'0',doublestep,interfacemode);
+		if (isOption(argc, argv, "uselayout", (char*)&layoutformat)>0)
+		{
+			usbloadrawfile(hxcfe, filename, layoutformat, temp[0] - '0', doublestep, interfacemode);
+		}
+		else
+		{
+			usbload(hxcfe, filename, temp[0] - '0', doublestep, interfacemode);
+		}
+		
 	}
 
 	if( (isOption(argc,argv,"help",0)<=0) &&
