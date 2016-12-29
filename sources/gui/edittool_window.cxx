@@ -151,6 +151,10 @@ trackedittool_window::trackedittool_window() {
       bt_repair->callback((Fl_Callback*)edittool_window_bt_repair_callback, (void*)(this));
       bt_repair->deactivate();
     } // Fl_Button* bt_repair
+    { bt_reversedisk = new Fl_Button(103, 333, 93, 20, "Reverse Tracks");
+      bt_reversedisk->labelsize(10);
+      bt_reversedisk->callback((Fl_Callback*)edittool_window_bt_reversedisk_callback, (void*)(this));
+    } // Fl_Button* bt_reversedisk
     window->end();
   } // Fl_Double_Window* window
 }
