@@ -8,7 +8,7 @@ class trackedittool_window {open
   } {
     Fl_Window window {
       label {Track edition toolbar} open
-      xywh {144 146 199 475} type Double labelsize 12 visible
+      xywh {119 105 199 475} type Double labelsize 12 visible
     } {
       Fl_Button bt_copy {
         label Copy
@@ -172,8 +172,14 @@ class trackedittool_window {open
       Fl_Button bt_repair {
         label Repair
         user_data this
-        callback edittool_window_bt_repair_callback selected
+        callback edittool_window_bt_repair_callback
         xywh {7 203 93 20} labelsize 10 deactivate
+      }
+      Fl_Button bt_reversedisk {
+        label {Reverse Tracks}
+        user_data this
+        callback edittool_window_bt_reversedisk_callback selected
+        xywh {103 333 93 20} labelsize 10
       }
     }
   }

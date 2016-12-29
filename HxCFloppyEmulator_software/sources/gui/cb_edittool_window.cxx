@@ -568,6 +568,17 @@ void edittool_window_bt_swapsides_callback(Fl_Button *o, void *v)
 	hxc_leavecriticalsection(guicontext->hxcfe,1);
 }
 
+void edittool_window_bt_reversedisk_callback(Fl_Button *o, void *v)
+{
+	hxc_entercriticalsection(guicontext->hxcfe,1);
+
+	hxcfe_reverseFloppy(guicontext->hxcfe,guicontext->loadedfloppy);
+
+	guicontext->updatefloppyinfos = 1;
+
+	hxc_leavecriticalsection(guicontext->hxcfe,1);
+}
+
 void edittool_window_bt_paste_callback(Fl_Button *o, void *v)
 {
 	Main_Window *window;
