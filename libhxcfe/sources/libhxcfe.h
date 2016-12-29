@@ -484,6 +484,9 @@ int32_t                hxcfe_getTrackNumberOfSide( HXCFE* floppycontext, HXCFE_F
 int32_t                hxcfe_shiftTrackData( HXCFE* floppycontext, HXCFE_SIDE * side, int32_t bitoffset );
 int32_t                hxcfe_rotateFloppy( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t bitoffset, int32_t total );
 
+int32_t                hxcfe_reverseTrackData( HXCFE* floppycontext, HXCFE_SIDE * side );
+int32_t                hxcfe_reverseFloppy( HXCFE* floppycontext, HXCFE_FLOPPY * fp );
+
 void                   AdjustTrackPeriod( HXCFE* floppycontext, HXCFE_SIDE * curside_S0, HXCFE_SIDE * curside_S1 );
 int32_t                hxcfe_setTrackRPM( HXCFE* floppycontext, HXCFE_SIDE * side, int32_t rpm );
 int32_t                hxcfe_removeOddTracks( HXCFE* floppycontext, HXCFE_FLOPPY * fp );

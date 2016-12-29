@@ -186,3 +186,5 @@ EXPORTS
    hxcfe_freeSide               @519
    hxcfe_localRepair            @520
    hxcfe_sectorRepair           @521
+   hxcfe_reverseTrackData       @522
+   hxcfe_reverseFloppy          @523
