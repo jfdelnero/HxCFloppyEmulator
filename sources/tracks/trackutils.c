@@ -106,10 +106,10 @@ void setbit(unsigned char * input_data,int bit_offset,int state)
 
 void setfieldbit(unsigned char * dstbuffer,unsigned char byte,int bitoffset,int size)
 {
-	int i,j,k;
+	int i,j;
 
-	k=0;
-	i=bitoffset;
+	i = bitoffset;
+
 	for(j=0;j<size;j++)
 	{
 		if(byte&((0x80)>>(j&7)))

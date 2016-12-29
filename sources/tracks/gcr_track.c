@@ -194,7 +194,6 @@ int32_t BuildGCRTrack(int numberofsector,int sectorsize,int tracknumber,int side
 	int temptracksize;
 	unsigned char *tempnongcr;
 	int32_t finalsize;
-	int32_t indexbuffer;
 	int32_t current_buffer_size;
 
 	/*
@@ -225,7 +224,6 @@ normal 8 bytes to be understood. Once decoded, its breakdown is as follows:
 
 	finalsize= ( 5 + 8 + 9 + 5 + 260 + 12) * numberofsector;
 
-	indexbuffer=0;
 	current_buffer_size=(int)(*mfmsizebuffer * 0.8);
 
 	if(finalsize<=current_buffer_size)

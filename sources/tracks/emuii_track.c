@@ -114,6 +114,11 @@ int32_t BuildEmuIITrack(HXCFE* floppycontext,int tracknumber,int sidenumber,unsi
 
 	sectorsize=3584;
 
+	track_num = 0;
+
+	current_buffer_size=buffersize/4;
+	finalsize=20 + 10 +8 + 6 + sectorsize + 2 + 2 + 20;
+
 	switch(trackformat)
 	{
 		case 1:
@@ -123,10 +128,11 @@ int32_t BuildEmuIITrack(HXCFE* floppycontext,int tracknumber,int sidenumber,unsi
 		case 2:
 			track_num=tracknumber*2+sidenumber;
 		break;
+		default:
+			floppycontext->hxc_printf(MSG_ERROR,"BuildEmuIITrack : Bad track format !");
+			return finalsize;
+		break;
 	}
-
-	current_buffer_size=buffersize/4;
-	finalsize=20 + 10 +8 + 6 + sectorsize + 2 + 2 + 20;
 
 	if(finalsize<=current_buffer_size)
 	{

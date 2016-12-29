@@ -99,7 +99,7 @@ void checkEmptySector(HXCFE_SECTCFG * sector)
 
 int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {
-	int bit_offset_bak,bit_offset,old_bit_offset,tmp_bit_offset;
+	int bit_offset_bak,bit_offset,tmp_bit_offset;
 	int sector_size;
 	unsigned char mfm_buffer[32];
 	unsigned char tmp_buffer[32];
@@ -180,8 +180,6 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"Bad MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
 					}
-
-					old_bit_offset = bit_offset;
 
 					bit_offset++;
 					sector_size = sectorsize[tmp_buffer[7]&0x7];
@@ -264,8 +262,6 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 						sector->endsectorindex = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,3+7,bit_offset,0);
  						floppycontext->hxc_printf(MSG_DEBUG,"get_next_MFM_sector : Data sector without sector header !?!");
 
-						old_bit_offset=bit_offset;
-
 						sector->cylinder = 0;
 						sector->head = 0;
 						sector->sector = 0;
@@ -304,7 +300,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 
 int get_next_MEMBRAIN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {
-	int bit_offset_bak,bit_offset,old_bit_offset,tmp_bit_offset;
+	int bit_offset_bak,bit_offset,tmp_bit_offset;
 	int sector_size;
 	unsigned char mfm_buffer[32];
 	unsigned char tmp_buffer[32];
@@ -385,8 +381,6 @@ int get_next_MEMBRAIN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 						break;
 					}
 
-					old_bit_offset = bit_offset;
-
 					bit_offset++;
 					sector_size = sectorsize[2];
 					bit_offset_bak = bit_offset;
@@ -456,8 +450,6 @@ int get_next_MEMBRAIN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 						sector->endsectorindex = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,3+7,bit_offset,0);
  						floppycontext->hxc_printf(MSG_DEBUG,"get_next_MEMBRAIN_sector : Data sector without sector header !?!");
 
-						old_bit_offset=bit_offset;
-
 						sector->cylinder = 0;
 						sector->head = 0;
 						sector->sector = 0;
@@ -496,7 +488,7 @@ int get_next_MEMBRAIN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 
 int get_next_AED6200P_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {
-	int bit_offset_bak,bit_offset,old_bit_offset,tmp_bit_offset;
+	int bit_offset_bak,bit_offset,tmp_bit_offset;
 	int sector_size;
 	unsigned char mfm_buffer[32];
 	unsigned char tmp_buffer[32];
@@ -575,8 +567,6 @@ int get_next_AED6200P_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"Bad AED6200P sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
 					}
-
-					old_bit_offset = bit_offset;
 
 					bit_offset++;
 					sector_size = sector->sectorsize;
@@ -666,8 +656,6 @@ int get_next_AED6200P_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 						sector->endsectorindex = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,3+7,bit_offset,0);
  						floppycontext->hxc_printf(MSG_DEBUG,"get_next_MFM_sector : Data sector without sector header !?!");
 
-						old_bit_offset=bit_offset;
-
 						sector->cylinder = 0;
 						sector->head = 0;
 						sector->sector = 0;
@@ -706,7 +694,7 @@ int get_next_AED6200P_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 
 int get_next_AMIGAMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector_conf,int track_offset)
 {
-	int bit_offset,old_bit_offset;
+	int bit_offset;
 	int start_sector_bit_offset;
 	int sector_size;
 
@@ -797,8 +785,6 @@ int get_next_AMIGAMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 					sector_size = 512;
 
 					floppycontext->hxc_printf(MSG_DEBUG,"Valid Amiga MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",header[1]>>1,header[1]&1,header[2],sector_size);
-
-					old_bit_offset = bit_offset;
 
 					sortbuffer(&sector_data[32],temp_sector,sector_size);
 					memcpy(&sector_data[32],temp_sector,sector_size);
@@ -1120,6 +1106,7 @@ int get_next_TYCOMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCF
 					{
 						CRC16_Update(&CRC16_High,&CRC16_Low, tmp_buffer[k],(unsigned char*)crctable );
 					}
+
 
 					if(!CRC16_High && !CRC16_Low)
 					{ // crc ok !!!
