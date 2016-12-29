@@ -91,22 +91,19 @@ int VEGASDSK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	}
 }
 
-
-
 int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
 	FILE * f;
 	unsigned int filesize;
 	int i,j,k;
-	unsigned int file_offset,offset;
+	unsigned int offset;
 	unsigned char* floppy_data;
 	int gap3len,interleave;
 	int sectorsize,rpm;
 	int bootnumberofsector;
 	unsigned char  trackformat;
 	unsigned char  buffer[256];
-	unsigned char  ddmode;
 
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SECTCFG  sectorconfig[30];
@@ -154,7 +151,6 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			gap3len=20;
 			bootnumberofsector=10;
 			sectorsize=256;
-			ddmode=0xFF;
 			floppydisk->floppyNumberOfSide=1;
 			interleave=9;
 			trackformat=ISOFORMAT_DD;
@@ -164,7 +160,6 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			gap3len=20;
 			bootnumberofsector=10;
 			sectorsize=256;
-			ddmode=0xFF;
 			floppydisk->floppyNumberOfSide=2;
 			interleave=9;
 			trackformat=ISOFORMAT_DD;
@@ -199,7 +194,6 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	{
 		hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
 
-		file_offset=( (((bootnumberofsector)*256)) * i );
 		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*10);
 		for(k=0;k<10;k++)
 		{
@@ -236,8 +230,6 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		{
 			hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
 
-			file_offset=offset+ ( (((floppydisk->floppySectorPerTrack)*256)) * floppydisk->floppyNumberOfSide * (j-1) ) +
-				                ( (((floppydisk->floppySectorPerTrack)*256)) * i );
 			hxc_fread(floppy_data,floppydisk->floppySectorPerTrack*sectorsize,f);
 
 			memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);

@@ -45,17 +45,12 @@ int ADF_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	int i,j,k,s;
 	FILE * rawfile;
 	unsigned char blankblock[512];
-	int sectorsize,track_type_id;
-	int systblockfound;
+	int sectorsize;
 
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG* sc;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write ADF file %s...",filename);
-
-	track_type_id=0;
-
-	systblockfound = 0;
 
 	memset(blankblock,0x00,sizeof(blankblock));
 
@@ -116,8 +111,12 @@ int ADF_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			}
 			hxcfe_deinitSectorAccess(ss);
 		}
+
 		hxc_fclose(rawfile);
+
+		return HXCFE_NOERROR;
+
 	}
 
-	return 0;
+	return HXCFE_ACCESSERROR;
 }

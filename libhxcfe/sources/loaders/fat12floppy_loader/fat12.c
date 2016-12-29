@@ -46,7 +46,6 @@ int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned
 	int32_t hfindfile;
 	filefoundinfo FindFileData;
 	int bbool;
-	int tii;
 	FILE * ftemp;
 	unsigned char * newentry;
 	unsigned char * subnewentry;
@@ -60,7 +59,6 @@ int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned
 	struct stat repstate;
 	struct tm * ts;
 
-	tii=0;
 	if(strlen(folder))
 	{
 		hfindfile=hxc_find_first_file(folder,file, &FindFileData);
@@ -240,8 +238,8 @@ int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned
 						ts=localtime(&repstate.st_ctime);
 						if(ts)
 						{
-							entry->DIR_CrtDate=  (((ts->tm_year-80) &0x7F)<<9) | ((ts->tm_mon+1 &0xF)<<5) | (ts->tm_mday &0x1F);
-							entry->DIR_CrtTime= ((ts->tm_hour&0x1F)<<11) | ((ts->tm_min  &0x3F)<<5) | ((ts->tm_sec/2)&0x1F);
+							entry->DIR_CrtDate=  (((ts->tm_year-80) & 0x7F)<<9) | (((ts->tm_mon+1) & 0xF)<<5) | (ts->tm_mday & 0x1F);
+							entry->DIR_CrtTime= ((ts->tm_hour & 0x1F)<<11) | ((ts->tm_min & 0x3F)<<5) | ((ts->tm_sec/2) & 0x1F);
 						}
 						else
 						{
@@ -253,8 +251,8 @@ int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned
 						ts=localtime(&repstate.st_mtime);
 						if(ts)
 						{
-							entry->DIR_WrtDate=  (((ts->tm_year-80) &0x7F)<<9) | ((ts->tm_mon+1 &0xF)<<5) | (ts->tm_mday &0x1F);
-							entry->DIR_WrtTime= ((ts->tm_hour&0x1F)<<11) | ((ts->tm_min  &0x3F)<<5) | ((ts->tm_sec/2)&0x1F);
+							entry->DIR_WrtDate=  (((ts->tm_year-80) & 0x7F)<<9) | (((ts->tm_mon+1) & 0xF)<<5) | (ts->tm_mday & 0x1F);
+							entry->DIR_WrtTime= ((ts->tm_hour & 0x1F)<<11) | ((ts->tm_min  & 0x3F)<<5) | ((ts->tm_sec/2) & 0x1F);
 						}
 						else
 						{

@@ -64,21 +64,16 @@
 int msx_imggetfloppyconfig(char * filename,unsigned char * img,unsigned int filesize,int32_t  *numberoftrack,int32_t *numberofside,int32_t *numberofsectorpertrack,int32_t *sectorsize,int32_t *gap3len,int32_t *interleave,int32_t *rpm, int32_t *bitrate)
 {
 	int i;
-	int imgmode,nbofside_img;
-	//unsigned int numberofsector;
 	unsigned char * uimg;
 	int conffound,numberofsector;
 
 	uimg=(unsigned char *)img;
-	imgmode=0;
 	conffound=0;
 	uimg=(unsigned char *)img;
 
 
 	if(!strstr( filename,".img" ))
 	{
-		nbofside_img=img[0];
-		imgmode=1;
 		img++;
 	}
 

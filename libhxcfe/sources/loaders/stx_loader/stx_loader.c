@@ -412,7 +412,6 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	pasti_trackheader trackheader;
 	pasti_sector * sector;
 	HXCFE_SECTCFG* sectorconfig;
-	int * sectorheader_index;
 	int * sectordata_index;
 	unsigned char * temptrack;
 	unsigned char * tempclock;
@@ -842,7 +841,6 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						{
 							sector=0;
 							sectorconfig=0;
-							sectorheader_index=0;
 						}
 
 						// lecture de l'ensemble des descripteurs de secteur

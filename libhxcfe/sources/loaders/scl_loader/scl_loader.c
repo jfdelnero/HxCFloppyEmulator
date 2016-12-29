@@ -136,7 +136,6 @@ int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	void *tmp;
 	unsigned int size,skew;
-	unsigned int *trd_free;
 	unsigned char *trd_fsec;
 	unsigned char *trd_ftrk;
 	unsigned char *trd_files;
@@ -194,7 +193,6 @@ int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 
 	tmp = (char *) trd_image + 0x8E5;
-	trd_free = (unsigned int *) tmp;
 	trd_files = (unsigned char *) trd_image + 0x8E4;
 	trd_fsec = (unsigned char *) trd_image + 0x8E1;
 	trd_ftrk = (unsigned char *) trd_image + 0x8E2;
