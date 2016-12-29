@@ -1279,7 +1279,6 @@ void circle(HXCFE_TD *td,int x_centre,int y_centre,int r,unsigned int color)
 	int x;
 	int y;
 	int d;
-	int offset;
 
 	x=0;
 	y=r;
@@ -1292,8 +1291,6 @@ void circle(HXCFE_TD *td,int x_centre,int y_centre,int r,unsigned int color)
 
 	while(y>=x)
 	{
-		offset = (int)((2048 / 8) * (float)((float)x / (float)y));
-
 		plot(td, x+x_centre, -y+y_centre  , color,0);   // 1 -
 		plot(td, y+x_centre, -x+y_centre  , color,0);   // 2 +
 		plot(td, x_centre + y, x+y_centre , color,0);   // 3 -
@@ -1464,8 +1461,7 @@ s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int t
 	float endsector_timingoffset;
 	float timingoffset;
 	int color;
-	int xpos_tmp;
-	int endfill,loop;
+	int loop;
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG* sc;
 	HXCFE_SIDE * currentside;
@@ -1473,7 +1469,6 @@ s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int t
 
 	old_i=0;
 	loop=0;
-	endfill=0;
 
 	sl=td->sl;
 	oldsl=0;
@@ -1482,7 +1477,6 @@ s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int t
 	tracksize=currentside->tracklen;
 
 	startsector_timingoffset = 0;
-	xpos_tmp = 0;
 
 	old_i=0;
 	timingoffset = 0;
@@ -1727,14 +1721,13 @@ const static type_list track_type_list[]=
 void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 {
 	int tracksize;
-	int i,ysize,xsize;
+	int i;
 	int track,side;
 	uint32_t crc32;
 	HXCFE_SIDE * currentside;
 	unsigned int color;
 	int y_pos,x_pos_1,x_pos_2,ytypepos;
 	float track_ep;
-	int bitrate;
 	int xpos;
 	char tempstr[512];
 	s_sectorlist * sl,*oldsl;
@@ -1763,9 +1756,6 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	td->sl=0;
 
 	memset(td->framebuffer,0,td->xsize*td->ysize*sizeof(uint32_t));
-
-	ysize=1;
-	xsize=2048;
 
 	y_pos = td->ysize/2;
 	x_pos_1 = td->xsize/4;
@@ -1826,8 +1816,6 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 			currentside = floppydisk->tracks[track]->sides[side];
 
 			tracksize = currentside->tracklen;
-
-			bitrate = currentside->bitrate;
 
 			track_ep = (float)( (td->ysize-(y_pos)) - 60 ) /((float) floppydisk->floppyNumberOfTrack+1);
 

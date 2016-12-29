@@ -785,7 +785,7 @@ void tg_initTrackEncoder(track_generator *tg)
 
 int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t bitrate,int32_t numberofsector,HXCFE_SECTCFG * sectorconfigtab,int32_t pregaplen,int32_t * track_period)
 {
-	int32_t i,j;
+	int32_t j;
 	int32_t tck_period;
 	isoibm_config * configptr;
 	int32_t total_track_size,sector_size,track_size;
@@ -796,7 +796,6 @@ int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t
 	{
 		configptr=0;
 		tck_period=0;
-		i=0;
 
 		configptr=&formatstab[trackencoding-1];
 
@@ -1696,6 +1695,7 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 				if(computedgap3>200)
 					computedgap3=200;
 				sectorconfigtab[i].gap3=(unsigned char)computedgap3;
+
 
 				//floppycontext->hxc_printf(MSG_DEBUG,"Sector:%d Computed Gap:%d",sectorconfigtab[i].sector, computedgap3);
 			}

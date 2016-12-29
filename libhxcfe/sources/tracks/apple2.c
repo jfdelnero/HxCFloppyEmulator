@@ -544,7 +544,7 @@ int get_next_A2GCR1_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 void tg_addAppleSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
 
-	int32_t   trackencoding,trackenc;
+	int32_t   trackenc;
 	unsigned char   sector_buffer[300];
 	int32_t   startindex,j,i;
 	unsigned char	volume,checksum,nibbleval;
@@ -555,7 +555,6 @@ void tg_addAppleSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 	startindex=tg->last_bit_offset/8;
 
 	sectorconfig->startsectorindex=tg->last_bit_offset/8;
-	trackencoding=sectorconfig->trackencoding-1;
 
 	// Sync bytes
 	for (i = 0; i < 14; i++)

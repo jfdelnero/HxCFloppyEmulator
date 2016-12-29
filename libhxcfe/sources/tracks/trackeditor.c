@@ -716,6 +716,8 @@ int32_t hxcfe_setTrackRPM( HXCFE* floppycontext, HXCFE_SIDE * side, int32_t rpm 
 		period_s0 = GetTrackPeriod(floppycontext,side);
 		period_s1 = (double)1/(double)((double)rpm/(double)60);
 
+		bitrate = 250000;
+
 		for(i=0;i<side->tracklen;i++)
 		{
 			if(!(i&7))
@@ -1095,6 +1097,7 @@ int32_t hxcfe_sectorRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t trac
 				}
 			}
 
+			retrep = 0;
 			if(sectorpos>=0)
 			{
 

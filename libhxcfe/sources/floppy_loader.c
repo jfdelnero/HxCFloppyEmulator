@@ -664,6 +664,7 @@ int32_t hxcfe_floppyGetSetParams( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy
 					else
 					{
 						newfloppy->double_step=0x00;
+
 					}
 					ret=HXCFE_NOERROR;
 				break;
@@ -1356,6 +1357,8 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, uint8_t * diskdata, int32_t bu
 					}
 
 					hxcfe_popTrack (fb_ctx);
+
+					return ret;
 				}
 			}
 		}
@@ -1449,7 +1452,7 @@ HXCFE_FLOPPY* hxcfe_sanityCheck(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk)
 {
 	int numberoftrack,truenumberoftrack;
 	int numberofside,oldnumberofside,truenumberofside;
-	int needanewpass,defaultbitrate,defaultrpm;
+	int needanewpass;
 	int i;
 	HXCFE_SIDE	**		tmpsides;
 	HXCFE_SIDE * currentside;
@@ -1490,14 +1493,8 @@ HXCFE_FLOPPY* hxcfe_sanityCheck(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk)
 				floppycontext->hxc_printf(MSG_WARNING,"Sanity Checker : Under 25kBit/s ?!? - fixed to 250KB/S. Please Check the Loader !");
 				floppydisk->floppyBitRate = 250000;
 			}
-			defaultbitrate = floppydisk->floppyBitRate;
-		}
-		else
-		{
-			defaultbitrate = 250000;
 		}
 
-		defaultrpm = 300;
 		numberofside = floppydisk->floppyNumberOfSide;
 
 		if(!floppydisk->tracks)

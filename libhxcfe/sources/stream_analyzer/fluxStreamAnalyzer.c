@@ -132,11 +132,10 @@ typedef struct s_match_
 
 static void settrackbit(uint8_t * dstbuffer,int dstsize,uint8_t byte,int bitoffset,int size)
 {
-	int i,j,k;
+	int i,j;
 
-	k=0;
-	i=bitoffset;
-	for(j=0;j<size;j++)
+	i = bitoffset;
+	for(j = 0; j < size;j++)
 	{
 		if( (i>>3) < dstsize)
 		{
@@ -432,7 +431,6 @@ static void quickSort(s_match * table, int start, int end)
 HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKSTREAM * track,pulses_link * pl,uint32_t start_index, short rpm,int phasecorrection)
 {
 #define TEMPBUFSIZE 256*1024
-	int pumpcharge;
 	int i,j,size;
 	uint32_t value;
 	int cellcode;
@@ -443,7 +441,6 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKS
 	int old_bitoffset;
 	int tracksize;
 
-	int olderror;
 	unsigned char *outtrack;
 	unsigned char *flakeytrack;
 	uint32_t *trackbitrate;
@@ -468,7 +465,6 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKS
 	HXCFE_SIDE* hxcfe_track;
 
 	centralvalue = initialvalue;
-	pumpcharge = initialvalue ;
 
 	pll.pump_charge = ( initialvalue * 16 ) / 2;
 	pll.phase = 0;
@@ -477,9 +473,6 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKS
 	pll.pll_min = pll.pivot - ( ( pll.pivot * 18 ) / 100 );
 
 	pll.lastpulsephase = 0;
-
-	olderror = 0;
-
 
 	hxcfe_track = 0;
 
@@ -794,15 +787,12 @@ static uint32_t GetDumpTimelength(HXCFE_TRKSTREAM * track_dump)
 static track_blocks * AllocateBlocks(HXCFE_TRKSTREAM * track_dump, int blocktimelength)
 {
 	uint32_t i,j;
-	pulsesblock * pb;
 	uint32_t len;
 	uint32_t blocklen;
 	uint32_t number_of_blocks;
 	int32_t timeoffset;
 	int64_t tickoffset;
 	track_blocks * trackb;
-
-	pb = 0;
 
 	trackb = malloc(sizeof(track_blocks));
 	if(trackb)
@@ -839,7 +829,6 @@ static track_blocks * AllocateBlocks(HXCFE_TRKSTREAM * track_dump, int blocktime
 			{
 				blocklen = time_to_tick( blocktimelength * 100 + ( (i%7) * 75 ) );
 
-				pb = &trackb->blocks[i];
 				trackb->blocks[i].start_index = j;
 
 				len = 0;
@@ -875,7 +864,7 @@ static track_blocks * AllocateBlocks(HXCFE_TRKSTREAM * track_dump, int blocktime
 static void compareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32_t dst_block_offset,uint32_t * pulses_ok,uint32_t * pulses_failed,int partial)
 {
 	int marge;
-	int time1,time2,pourcent_error;
+	int time1,time2;
 	int bad_pulses,good_pulses;
 
 	uint32_t *start_ptr;
@@ -919,8 +908,6 @@ static void compareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32_t 
 	{
 		time1 = *(start_ptr);
 		time2 = *(dst_ptr);
-
-		pourcent_error = MAXPULSESKEW;
 
 		marge = ( ( time1 * MAXPULSESKEW ) >> 8 );
 
@@ -1192,7 +1179,7 @@ static void compareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32_t 
 static int fastcompareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32_t dst_block_offset)
 {
 	int32_t marge;
-	int time1,time2,pourcent_error;
+	int time1,time2;
 
 	uint32_t *start_ptr;
 	uint32_t *dst_ptr;
@@ -1220,8 +1207,6 @@ static int fastcompareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32
 	{
 		time1 = *(start_ptr);
 		time2 = *(dst_ptr);
-
-		pourcent_error = MAXPULSESKEW;
 
 		while( dst_ptr < last_dump_ptr && start_ptr < last_block_ptr)
 		{
@@ -1260,9 +1245,8 @@ static int fastcompareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32
 static uint32_t detectflakeybits(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32_t dst_block_offset,uint32_t * pulses_ok,uint32_t * pulses_failed,pulses_link * pl,uint32_t maxptr)
 {
 	int32_t marge;
-	int time1,time2,pourcent_error;
+	int time1,time2;
 	int bad_pulses,good_pulses;
-	uint32_t nbpulses;
 	int32_t *forward_link;
 
 	uint32_t *srcptr,*start_ptr, *dst_ptr, *last_dump_ptr,*last_block_ptr,*maxptr5;
@@ -1305,14 +1289,10 @@ static uint32_t detectflakeybits(HXCFE_TRKSTREAM * td,pulsesblock * src_block, u
 		maxptr5 = &td->track_dump[maxptr];
 	}
 
-	nbpulses = td->nb_of_pulses;
-
 	if( dst_ptr < last_dump_ptr && start_ptr < last_block_ptr )
 	{
 		time1 = *(start_ptr);
 		time2 = *(dst_ptr);
-
-		pourcent_error = MAXPULSESKEW;
 
 		while(dst_ptr < last_dump_ptr && start_ptr < last_block_ptr)
 		{
@@ -1616,13 +1596,13 @@ static int getNearestMatchedBlock(pulsesblock * pb, int dir, int currentblock,in
 uint32_t getNearestValidIndex(pulses_link * pl,uint32_t center,uint32_t limit)
 {
 	int32_t i;
-	int32_t offset_min;
+	//int32_t offset_min;
 	int32_t offset_max;
 
 	i = 0;
 	do
 	{
-		offset_min = (int32_t)center - i;
+		//offset_min = (int32_t)center - i;
 		offset_max = (int32_t)center + i;
 
 		if(offset_max < (int32_t)pl->number_of_pulses)
@@ -1876,7 +1856,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 	uint32_t j;
 	uint32_t cur_time_len;
 	uint32_t index_tickpediod;
-	int firstblock,previous_block_matched;
+	int previous_block_matched;
 
 	uint32_t good,bad;
 
@@ -1899,8 +1879,6 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 	int32_t shift;
 
-	int partialmatch_cnt;
-
 	int end_dump_reached;
 
 	int	next_locked_block;
@@ -1913,11 +1891,9 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 	pulses_link * pl;
 
 	floppycont = floppycontext;
-	partialmatch_cnt = 0;
 
 	index_tickpediod = time_to_tick(indexperiod);
 
-	firstblock = 1;
 	previous_block_matched = 0;
 
 	end_dump_reached = 0;
@@ -3001,6 +2977,7 @@ uint32_t getbestrevolution(uint32_t * score,uint32_t nb_revolution)
 		}
 	}
 
+
 	return lastindex;
 
 }
@@ -3148,8 +3125,9 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 	int32_t * backward_link;
 	int32_t * forward_link;
 	int number_of_pulses;
+#ifdef FLUXSTREAMDBG
 	int patchedbits;
-
+#endif
 	currentside = 0;
 
 	hxcfe = fxs->hxcfe;
@@ -3333,8 +3311,10 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 						currentside = ScanAndDecodeStream(hxcfe,bitrate,std,pl,first_index,rpm,fxs->phasecorrection);
 
+#ifndef FLUXSTREAMDBG
+						cleanupTrack(currentside);
+#else
 						patchedbits = cleanupTrack(currentside);
-#ifdef FLUXSTREAMDBG
 						fxs->hxcfe->hxc_printf(MSG_DEBUG,"%d bits patched",patchedbits);
 #endif
 						revolutionside[revolution] = currentside;
