@@ -323,6 +323,103 @@ int32_t hxcfe_rotateFloppy( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t bit
 	return HXCFE_BADPARAMETER;
 }
 
+int32_t hxcfe_reverseTrackData( HXCFE* floppycontext, HXCFE_SIDE * side )
+{
+	unsigned char * tmpbuffer;
+	uint32_t * longtmpbuffer;
+	int32_t i,j,oldptr,ptr;
+
+	if(side)
+	{
+		tmpbuffer = malloc( (side->tracklen>>3) + 1 );
+		if(tmpbuffer)
+		{
+			memset(tmpbuffer,0,(side->tracklen>>3) + 1);
+
+			for(i=0;i<side->tracklen;i++)
+			{
+				setbit(tmpbuffer, i,getbit(side->databuffer,( side->tracklen - 1 ) - i));
+			}
+
+			j=0;
+			if(side->tracklen&7)
+				j = 1;
+
+			memcpy(side->databuffer,tmpbuffer,(side->tracklen>>3) + j);
+
+			////////////////////////////////////////////////////////////
+
+			if(side->flakybitsbuffer)
+			{
+				memset(tmpbuffer,0,(side->tracklen>>3) + 1);
+
+				for(i=0;i<side->tracklen;i++)
+				{
+					setbit(tmpbuffer, i,getbit(side->flakybitsbuffer,( side->tracklen - 1 ) - i));
+				}
+
+				j=0;
+				if(side->tracklen&7)
+					j = 1;
+
+				memcpy(side->flakybitsbuffer,tmpbuffer,(side->tracklen>>3) + j);
+			}
+
+			////////////////////////////////////////////////////////////
+
+			if(side->timingbuffer)
+			{
+				longtmpbuffer = malloc( ((side->tracklen>>3) + 8) * sizeof(uint32_t) );
+				if(longtmpbuffer)
+				{
+					oldptr = -1;
+					for(i=0;i<side->tracklen;i++)
+					{
+						ptr = ( i )>>3;
+						if(oldptr!=ptr)
+						{
+							longtmpbuffer[ptr] = side->timingbuffer[(( side->tracklen - 1 ) - i)>>3];
+							oldptr=ptr;
+						}
+					}
+
+					j=0;
+					if(side->tracklen&7)
+						j = 1;
+
+					memcpy(side->timingbuffer,longtmpbuffer,((side->tracklen>>3) + j)*sizeof(uint32_t));
+
+					free(longtmpbuffer);
+				}
+			}
+
+			free(tmpbuffer);
+
+			return HXCFE_NOERROR;
+		}
+	}
+
+	return HXCFE_BADPARAMETER;
+}
+
+int32_t hxcfe_reverseFloppy( HXCFE* floppycontext, HXCFE_FLOPPY * fp )
+{
+	int32_t i,j;
+
+	if(fp)
+	{
+		for(i=0;i<fp->floppyNumberOfTrack;i++)
+		{
+			for(j=0;j<fp->floppyNumberOfSide;j++)
+			{
+				hxcfe_reverseTrackData( floppycontext,fp->tracks[i]->sides[j] );
+			}
+		}
+	}
+
+	return HXCFE_BADPARAMETER;
+}
+
 int32_t hxcfe_getCellState( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_t cellnumber )
 {
 	if(currentside && floppycontext)
