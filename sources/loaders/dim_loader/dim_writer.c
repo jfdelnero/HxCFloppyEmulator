@@ -111,7 +111,10 @@ int DIM_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		writeret = write_raw_file(imgldr_ctx,file,floppy,1,nbsector,nbtrack,nbside,sectorsize,ISOIBM_MFM_ENCODING,0);
 
 		hxc_fclose(file);
+		
+		return writeret;
 	}
 
-	return writeret;
+	return HXCFE_ACCESSERROR;
+	
 }

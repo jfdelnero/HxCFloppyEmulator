@@ -66,26 +66,26 @@ int bmp_load(char * file,bitmap_data * bdata)
 
 			if(!bitmap_info_header.biCompression)
 			{
-
 				// read palette
 				switch(bitperpixel)
 				{
 					case 1:
-						palettesize=2;
+						palettesize = 2;
 					break;
 					case 4:
-						palettesize=16;
+						palettesize = 16;
 					break;
 					case 8:
-						palettesize=256;
+						palettesize = 256;
 					break;
 					case 24:
-						palettesize=0;
+						palettesize = 0;
 					break;
 					case 32:
-						palettesize=0;
+						palettesize = 0;
 					break;
 					default:
+						palettesize = 0;
 						//non supported
 					break;
 				}
@@ -126,9 +126,9 @@ int bmp_load(char * file,bitmap_data * bdata)
 
 							for(j=0;j<xsize;j++)
 							{
-								bdata->data[(xsize*((ysize-1)-i))+j]=palette[(linebuffer[(j/8)]>>(1*(7-(j)&7)))&0x1].rgbRed |
-																	 palette[(linebuffer[(j/8)]>>(1*(7-(j)&7)))&0x1].rgbGreen<<8 |
-																	 palette[(linebuffer[(j/8)]>>(1*(7-(j)&7)))&0x1].rgbBlue<<16;
+								bdata->data[(xsize*((ysize-1)-i))+j]=palette[(linebuffer[(j/8)]>>(7-(j&7)))&0x1].rgbRed |
+																	 palette[(linebuffer[(j/8)]>>(7-(j&7)))&0x1].rgbGreen<<8 |
+																	 palette[(linebuffer[(j/8)]>>(7-(j&7)))&0x1].rgbBlue<<16;
 							}
 						}
 

@@ -236,10 +236,9 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	FILE * f;
 	unsigned int i;
 	unsigned int file_offset;
-	uint32_t tracklen;
-	unsigned char interleave,skew,trackformat;
-	unsigned short rpm,sectorsize;
-	int Compress,numberoftrack,sidenumber;
+	unsigned char interleave,trackformat;
+	unsigned short rpm;
+	int numberoftrack,sidenumber;
 	unsigned short * datalen;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
@@ -322,18 +321,15 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		return HXCFE_BADFILE;
 	}
 
-	Compress=0;
 	if(((td_header->TXT[0]=='T') && (td_header->TXT[1]=='D')))
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"TeleDisk_libLoad_DiskFile : Normal compression");
-		Compress=0;
 	}
 
 	if(((td_header->TXT[0]=='t') && (td_header->TXT[1]=='d')))
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"TeleDisk_libLoad_DiskFile : Advanced compression");
 		fileimage=unpack(fileimage,filesize);
-		Compress=1;
 	}
 
 	td_header=(TELEDISK_HEADER*)&fileimage[0];
@@ -376,7 +372,6 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	interleave=1;
 	numberoftrack=0;
-	sectorsize=512;
 
 	file_offset=fileimage_buffer_offset;
 
@@ -440,11 +435,8 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 
-	skew=1;
 	rpm=300; // normal rpm
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), gap3:%d,rpm:%d bitrate:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm,floppydisk->floppyBitRate);
-
-	tracklen=(floppydisk->floppyBitRate/(rpm/60))/4;
 
 	//////////////////////////////////
 	fileimage_buffer_offset=file_offset;

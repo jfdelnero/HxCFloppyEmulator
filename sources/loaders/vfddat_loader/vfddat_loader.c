@@ -113,7 +113,7 @@ int VFDDAT_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 static HXCFE_SIDE* VFDpatchtrack(HXCFE* floppycontext,unsigned char * trackdata, unsigned char * trackclk,unsigned int tracklen,uint32_t * tracktotalsize, unsigned char *header,int s)
 {
 	int i,j;
-	unsigned int nbofsector,lastptr,lastdensity,tracksize,bitrate,k;
+	unsigned int tracksize,k;
 	unsigned char * track_density;
 	unsigned char trackformat;
 	unsigned long * idamoffset;
@@ -121,19 +121,14 @@ static HXCFE_SIDE* VFDpatchtrack(HXCFE* floppycontext,unsigned char * trackdata,
 	HXCFE_SIDE* currentside;
 	track_generator tg;
 
-	lastptr=0;
-	bitrate=500000;
-
 	memset(trackclk,0xFF,tracklen);
 
 	idamoffset = (unsigned long*)header;
 
-	nbofsector=0;
 	k=0;
 	track_density=malloc(tracklen+4);
 	
 	memset(track_density,ISOFORMAT_DD,tracklen);
-	lastdensity=ISOFORMAT_DD;
 	trackformat=ISOFORMAT_DD;
 
 	i = 0;

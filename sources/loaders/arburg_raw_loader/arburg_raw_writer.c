@@ -98,6 +98,10 @@ int ARBURG_RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,
 								if(nbsector)
 									systblockfound = 0xFF;
 							break;
+							default:
+								sca = 0;
+ 							break;
+							
 						}
 
 						if(!nbsector)
@@ -107,7 +111,7 @@ int ARBURG_RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,
 
 					}while(!nbsector && k<2);
 
-					if(nbsector)
+					if(nbsector && sca)
 					{
 						sectorsize=sca[0]->sectorsize;
 						for(l=0;l<256;l++)
@@ -193,7 +197,9 @@ int ARBURG_RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,
 		}
 
 		hxc_fclose(rawfile);
+
+		return HXCFE_NOERROR;		
 	}
 
-	return 0;
+	return HXCFE_ACCESSERROR;
 }

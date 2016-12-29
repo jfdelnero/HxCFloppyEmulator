@@ -497,7 +497,7 @@ int32_t amigados_openDir(HXCFE_FSMNG * fsmng, char * path)
 	if( changedir(fsmng,path,&snum,1) ==  RC_OK)
 	{
 		i = 0;
-		while((int32_t)fsmng->dirhandletable[i]!=-1 && i<128)
+		while(fsmng->dirhandletable[i]!=(void*)-1 && i<128)
 		{
 			i++;
 		}
@@ -528,7 +528,7 @@ int32_t amigados_readDir(HXCFE_FSMNG * fsmng,int32_t dirhandle,HXCFE_FSENTRY * d
 
 	if(dirhandle<128 && adfvolume)
 	{
-		if((int32_t)fsmng->dirhandletable[dirhandle-1]!=-1)
+		if(fsmng->dirhandletable[dirhandle-1]!=(void*)-1)
 		{
 			/* saves the head of the list */
 			cell = list = adfGetDirEnt(adfvolume,(int32_t)fsmng->dirhandletable[dirhandle-1]);
@@ -598,7 +598,7 @@ int32_t amigados_openFile(HXCFE_FSMNG * fsmng, char * filename)
 		return HXCFE_ACCESSERROR;
 
 	i = 0;
-	while(((int32_t)fsmng->handletable[i]!=-1) && i<128)
+	while((fsmng->handletable[i]!=(void*)-1) && i<128)
 	{
 		i++;
 	}
@@ -637,7 +637,7 @@ int32_t amigados_createFile(HXCFE_FSMNG * fsmng, char * filename)
 		return HXCFE_ACCESSERROR;
 
 	i = 0;
-	while((int32_t)fsmng->handletable[i]!=-1 && i<128)
+	while(fsmng->handletable[i]!=(void*)-1 && i<128)
 	{
 		i++;
 	}
@@ -668,7 +668,7 @@ int32_t amigados_writeFile(HXCFE_FSMNG * fsmng,int32_t filehandle,unsigned char 
 
 	if(filehandle<128)
 	{
-		if((int32_t)fsmng->handletable[filehandle-1]!=-1)
+		if(fsmng->handletable[filehandle-1]!=(void*)-1)
 		{
 			if(amigados_getFreeSpace(fsmng) >= size)
 			{
@@ -685,7 +685,7 @@ int32_t amigados_readFile( HXCFE_FSMNG * fsmng,int32_t filehandle,unsigned char 
 	int32_t bytesread;
 	if(filehandle && filehandle<128)
 	{
-		if((int32_t)fsmng->handletable[filehandle-1]!=-1)
+		if(fsmng->handletable[filehandle-1]!=(void*)-1)
 		{
 			bytesread = adfReadFile((struct File*)fsmng->handletable[filehandle-1], size, buffer);
 			return bytesread;
@@ -725,7 +725,7 @@ int32_t amigados_closeFile( HXCFE_FSMNG * fsmng,int32_t filehandle)
 {
 	if(filehandle && filehandle<128)
 	{
-		if((int32_t)fsmng->handletable[filehandle-1]!=-1)
+		if(fsmng->handletable[filehandle-1]!=(void*)-1)
 		{
 			adfCloseFile((struct File *)fsmng->handletable[filehandle-1]);
 			fsmng->handletable[filehandle-1] = (void*)-1;
@@ -772,7 +772,7 @@ int32_t amigados_ftell( HXCFE_FSMNG * fsmng,int32_t filehandle)
 	struct File * file;
 	if(filehandle && filehandle<128)
 	{
-		if((int32_t)fsmng->handletable[filehandle-1]!=-1)
+		if(fsmng->handletable[filehandle-1]!=(void*)-1)
 		{
 			file = (struct File *)fsmng->handletable[filehandle-1];
 			return file->pos;
@@ -787,7 +787,7 @@ int32_t amigados_fseek( HXCFE_FSMNG * fsmng,int32_t filehandle,int32_t offset,in
 
 	if(filehandle && filehandle<128)
 	{
-		if((int32_t)fsmng->handletable[filehandle-1]!=-1)
+		if(fsmng->handletable[filehandle-1]!=(void*)-1)
 		{
 			file = (struct File *)fsmng->handletable[filehandle-1];
 			switch(origin)

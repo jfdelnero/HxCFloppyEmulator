@@ -235,13 +235,11 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 	unsigned int file_offset;
 	unsigned char* trackdata;
 	unsigned char* trackdatatab;
-	int32_t tracklen;
 	int32_t tracksize;
 	int32_t numberofsector;
 	int32_t sectorsize,rpm;
 	int32_t interleave,gap3len;
 	HXCFE_CYLINDER* currentcylinder;
-	HXCFE_SIDE* currentside;
 	HXCFE_SECTCFG * sectlist;
 	oricdsk_fileheader * fileheader;
 
@@ -296,8 +294,6 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 			}
 		}
 
-		tracklen=(floppydisk->floppyBitRate/((rpm)/60))/4;
-
 		switch(mfmformat)
 		{
 
@@ -327,7 +323,6 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 					hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
 
 					currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,1,0,floppydisk->floppyBitRate,currentcylinder->floppyRPM,IBMFORMAT_DD,gap3len,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
-					currentside=currentcylinder->sides[i];
 				}
 
 			}
@@ -369,7 +364,6 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 						sectlist=extractsector(imgldr_ctx->hxcfe,trackdatatab,trackdata,tracksize,&numberofsector);
 
 						currentcylinder->sides[i]=tg_generateTrackEx((unsigned short)numberofsector,sectlist,interleave,(unsigned char)(j*2),DEFAULT_DD_BITRATE,rpm,IBMFORMAT_DD,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
-						currentside=currentcylinder->sides[i];
 
 						free(trackdatatab);
 						free(sectlist);

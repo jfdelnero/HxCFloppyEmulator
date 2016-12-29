@@ -152,7 +152,7 @@ int DMK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 HXCFE_SIDE* DMKpatchtrack(HXCFE* floppycontext,unsigned char * trackdata, unsigned char * trackclk,unsigned short * idamoffset,unsigned int tracklen,uint32_t * tracktotalsize, dmk_header *dmkh,int s)
 {
 	int i,j,l;
-	unsigned int nbofsector,lastptr,lastdensity,tracksize,bitrate,k;
+	unsigned int lastptr,lastdensity,tracksize,bitrate,k;
 	unsigned char * track_density;
 	unsigned char trackformat;
 	unsigned int  final_tracklen;
@@ -173,7 +173,6 @@ HXCFE_SIDE* DMKpatchtrack(HXCFE* floppycontext,unsigned char * trackdata, unsign
 
 	memset(trackclk,0xFF,tracklen);
 
-	nbofsector=0;
 	k=0;
 	track_density=malloc(tracklen+4);
 

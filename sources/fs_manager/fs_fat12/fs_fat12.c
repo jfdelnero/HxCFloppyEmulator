@@ -119,6 +119,10 @@ static int32_t media_read(uint32_t sector, uint8_t *buffer, uint32_t sector_coun
 	uint32_t i,c;
 	int32_t fp_track,fp_head,fp_sector,fdcstatus;
 
+	fp_track = 0;
+	fp_sector = 0;
+	fp_head = 0;
+
 	lba2chs(gb_fsmng,sector, &fp_track,&fp_head,&fp_sector);
 	gb_fsmng->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FS : media_read, sector: 0x%.8X, sector count : %d, Track: %d, Side: %d, Sector: %d",sector,sector_count,fp_track,fp_head,fp_sector);
 	c=0;
@@ -149,6 +153,10 @@ static int32_t media_write(uint32_t sector, uint8_t *buffer,uint32_t sector_coun
 	uint32_t i,c;
 	int32_t fp_track,fp_head,fp_sector,fdcstatus;
 
+	fp_track = 0;
+	fp_sector = 0;
+	fp_head = 0;
+	
 	lba2chs(gb_fsmng,sector, &fp_track,&fp_head,&fp_sector);
 	gb_fsmng->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FS : media_write, sector: 0x%.8X, sector count : %d, Track: %d, Side: %d, Sector: %d",sector,sector_count,fp_track,fp_head,fp_sector);
 
