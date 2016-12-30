@@ -7,7 +7,16 @@ UNAME := $(shell uname)
 BASEDIR=../sources
 INCLUDES = -I$(BASEDIR)/ -I ../../../libhxcadaptor/trunk/sources
 
-CFLAGS=-O3 $(INCLUDES)
+DEBUG ?= 0
+
+ifeq ($(DEBUG), 1)
+	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG -fsanitize=address -fno-omit-frame-pointer
+	LDFLAGS= -shared -lc -lm  -ldl -Wl,-Map,foo.map -lasan
+else
+	CFLAGS=-O3 $(INCLUDES) -Wall
+	LDFLAGS= -shared -lc -lm  -ldl -s -Wl,-Map,foo.map
+endif
+
 DISKLOADERPLUGINS_IPF=
 
 ifdef IPF_LIB_SUPPORT
@@ -15,7 +24,6 @@ ifdef IPF_LIB_SUPPORT
 	DISKLOADERPLUGINS_IPF= ipf_loader.o libcapsimage.so.2.0
 endif
 
-LDFLAGS= -g -shared -lc -lm  -ldl
 EXEC=libhxcfe.so
 
 ifeq ($(UNAME), Linux)
