@@ -8,8 +8,8 @@ int fileselector(char * title,char * str,char *filename,char *filter,int save,in
 	Fl_Native_File_Chooser fnfc;
   
 	fnfc.title(title);
-	
-	fnfc.options(Fl_Native_File_Chooser::SAVEAS_CONFIRM|Fl_Native_File_Chooser::NEW_FOLDER);
+
+	fnfc.options(Fl_Native_File_Chooser::SAVEAS_CONFIRM|Fl_Native_File_Chooser::NEW_FOLDER|Fl_Native_File_Chooser::USE_FILTER_EXT);
 
 	if(!dir)
 	{
