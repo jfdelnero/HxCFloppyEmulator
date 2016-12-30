@@ -53,9 +53,9 @@ int hxc_fclose(FILE * f);
 #endif
 int hxc_stat( const char *filename, struct stat *buf);
 
-int hxc_find_first_file(char *folder,char *file,filefoundinfo* fileinfo);
-int hxc_find_next_file(int handleff,char *folder,char *file,filefoundinfo* fileinfo);
-int hxc_find_close(int handle);
+void* hxc_find_first_file(char *folder,char *file,filefoundinfo* fileinfo);
+int hxc_find_next_file(void* handleff,char *folder,char *file,filefoundinfo* fileinfo);
+int hxc_find_close(void* handle);
 
 int  hxc_mkdir(char * folder);
 
