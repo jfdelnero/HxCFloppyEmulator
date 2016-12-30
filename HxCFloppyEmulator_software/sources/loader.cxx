@@ -186,13 +186,22 @@ HXCFE_FLOPPY * loadrawimage(HXCFE* floppycontext,cfgrawfile * rfc,char * file,in
 	int offset;
 	HXCFE_FLOPPY * fp;
 
+	*ret = HXCFE_ACCESSERROR;
+
 	f=0;
 	fp = 0;
 	if(file)
+	{
 		f=hxc_fopen(file,"r+b");
+		if(!f)
+		{
+			return 0;
+		}
+	}
 
 	if(f || file==NULL)
 	{
+
 		nbside=(rfc->sidecfg)&2?2:1;
 
 		if(f)
@@ -204,6 +213,8 @@ HXCFE_FLOPPY * loadrawimage(HXCFE* floppycontext,cfgrawfile * rfc,char * file,in
 		fb=hxcfe_initFloppy(floppycontext,rfc->numberoftrack,nbside);
 		if(fb)
 		{
+			*ret = HXCFE_NOERROR;
+
 			hxcfe_setTrackInterleave(fb,rfc->interleave);
 			hxcfe_setSectorFill(fb,rfc->fillvalue);
 
@@ -264,7 +275,11 @@ HXCFE_FLOPPY * loadrawimage(HXCFE* floppycontext,cfgrawfile * rfc,char * file,in
 						}
 
 						fseek(f,offset,SEEK_SET);
-						fread(trackbuffer,(128<<rfc->sectorsize)*rfc->sectorpertrack,1,f);
+						if(!fread(trackbuffer,(128<<rfc->sectorsize)*rfc->sectorpertrack,1,f))
+						{
+							*ret = HXCFE_ACCESSERROR;
+						}
+
 					}
 
 					// add all sectors
@@ -292,8 +307,6 @@ HXCFE_FLOPPY * loadrawimage(HXCFE* floppycontext,cfgrawfile * rfc,char * file,in
 			hxc_fclose(f);
 		}
 	}
-
-	*ret = 0;
 
 	return fp;
 }
@@ -330,9 +343,7 @@ int loadrawfile(HXCFE* floppycontext,cfgrawfile * rfc,char * file)
 
 		if(guicontext->loadedfloppy)
 		{
-			ret=HXCFE_NOERROR;
-
-			guicontext->loadstatus=ret;
+			guicontext->loadstatus = ret;
 
 			if(file)
 				strcpy(guicontext->bufferfilename,hxc_getfilenamebase(file,0));

@@ -60,7 +60,10 @@ int load_last_cfg()
 	f=hxc_fopen(executablepath,"rb");
 	if(f)
 	{
-		fread(lastst,sizeof(cfg_file_buffer),1,f);
+		if(!fread(lastst,sizeof(cfg_file_buffer),1,f))
+		{
+			memset(lastst,0,sizeof(cfg_file_buffer));
+		}
 		hxc_fclose(f);
 
 //		hwif->usbstats.packetsize=lastst->usb_packet_size;
@@ -87,7 +90,7 @@ int save_cfg()
 
 	lastst=(laststate *)&cfg_file_buffer;
 
-	memset(&cfg_file_buffer,0,sizeof(laststate));
+	memset(&cfg_file_buffer,0,sizeof(cfg_file_buffer));
 
 	hxc_getcurrentdirectory(executablepath,512);
 

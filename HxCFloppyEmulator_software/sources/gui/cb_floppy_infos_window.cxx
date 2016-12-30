@@ -87,14 +87,10 @@ static int progress_callback(unsigned int current,unsigned int total,void * td,v
 {
 	int i,j,k;
 	s_gui_context * guicontext;
-	Main_Window *window;
-	floppy_infos_window *finfow;
 	HXCFE_TD * ltd;
 	unsigned char *ptr1;
 
 	guicontext = (s_gui_context *)user;
-	window = (Main_Window *)guicontext->main_window;
-	finfow = (floppy_infos_window *)window->infos_window;
 
 	ltd = td;
 
@@ -392,15 +388,6 @@ int InfosThreadProc(void* floppycontext,void* context)
 	return 0;
 }
 
-void floppy_infos_window_bt_read(Fl_Button* bt, void*)
-{
-	floppy_infos_window *fdw;
-	Fl_Window *dw;
-
-	dw=((Fl_Window*)(bt->parent()));
-	fdw=(floppy_infos_window *)dw->user_data();
-}
-
 void floppy_infos_ok(Fl_Button*, void* w)
 {
 	floppy_infos_window *fdw;
@@ -426,10 +413,6 @@ void disk_infos_window_bt_edit_callback(Fl_Widget *o, void *v)
 	Main_Window *mwindow;
 
 	mwindow = (Main_Window *)guicontext->main_window;
-
-	floppy_infos_window *window;
-
-	window=((floppy_infos_window*)(o->user_data()));
 
 	mwindow->trackedit_window->window->show();
 }
@@ -539,9 +522,8 @@ int isTheRightSector(floppy_infos_window *fiw,s_sectorlist * sl,int xpos,int ypo
 
 int isTheRightPulse(floppy_infos_window *fiw,s_pulseslist * pl,int xpos,int ypos)
 {
-	int disp_xsize,disp_ysize;
+	int disp_ysize;
 
-	disp_xsize=fiw->floppy_map_disp->w();
 	disp_ysize=fiw->floppy_map_disp->h();
 
 	if(!fiw->disc_view_bt->value())
@@ -558,11 +540,6 @@ int isTheRightPulse(floppy_infos_window *fiw,s_pulseslist * pl,int xpos,int ypos
 
 int isTheRightPulseFlakey(floppy_infos_window *fiw,s_pulseslist * pl,int xpos,int ypos)
 {
-	int disp_xsize,disp_ysize;
-
-	disp_xsize=fiw->floppy_map_disp->w();
-	disp_ysize=fiw->floppy_map_disp->h();
-
 	if(!fiw->disc_view_bt->value())
 	{
 		if( ( xpos>=pl->x_pos1 && xpos<=pl->x_pos2 ) &&
@@ -577,11 +554,6 @@ int isTheRightPulseFlakey(floppy_infos_window *fiw,s_pulseslist * pl,int xpos,in
 
 int isTheRightPulseIndex(floppy_infos_window *fiw,s_pulseslist * pl,int xpos,int ypos)
 {
-	int disp_xsize,disp_ysize;
-
-	disp_xsize=fiw->floppy_map_disp->w();
-	disp_ysize=fiw->floppy_map_disp->h();
-
 	if(!fiw->disc_view_bt->value())
 	{
 		if( ( xpos>=pl->x_pos1 && xpos<=pl->x_pos2 ) &&

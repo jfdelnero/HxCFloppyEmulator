@@ -279,8 +279,8 @@ void edittool_window_bt_insert_callback(Fl_Button *o, void *v)
 	int valmodif;
 	int track,side;
 	trackedittool_window *tew;
-	int startpulse,endpulse;
-	int i,tracklen,loop;
+	int startpulse;
+	int i,tracklen;
 	char * copybuffer;
 
 	hxc_entercriticalsection(guicontext->hxcfe,1);
@@ -300,23 +300,12 @@ void edittool_window_bt_insert_callback(Fl_Button *o, void *v)
 		fiw->side_number_slide->value(side);
 
 	startpulse = atoi(tew->edit_startpoint->value());
-	endpulse = atoi(tew->edit_endpoint->value());
 	tracklen = hxcfe_getTrackLength(guicontext->hxcfe,guicontext->loadedfloppy,track,side);
 
 	curside = hxcfe_getSide(guicontext->hxcfe,guicontext->loadedfloppy,track,side);
 	if(curside)
 	{
 		startpulse = startpulse % tracklen;
-		endpulse = endpulse % tracklen;
-
-		if(startpulse<endpulse)
-		{
-			loop = endpulse - startpulse;
-		}
-		else
-		{
-			loop = ( hxcfe_getTrackLength(guicontext->hxcfe, guicontext->loadedfloppy, track, side ) - startpulse ) + endpulse;
-		}
 
 		copybuffer = (char*)tew->edit_editbuffer->value();
 		if(copybuffer)
@@ -453,7 +442,6 @@ void edittool_window_bt_shift_callback(Fl_Button *o, void *v)
 void edittool_window_bt_shifttracks_callback(Fl_Button *o, void *v)
 {
 	Main_Window *window;
-	floppy_infos_window *fiw;
 	trackedittool_window *tew;
 	int shiftpulse;
 
@@ -461,7 +449,6 @@ void edittool_window_bt_shifttracks_callback(Fl_Button *o, void *v)
 
 	window = (Main_Window *)guicontext->main_window;
 	tew = (trackedittool_window *)window->trackedit_window;
-	fiw = (floppy_infos_window *)window->infos_window;
 
 	shiftpulse = atoi(tew->edit_shiftbittracks->value());
 
@@ -534,15 +521,8 @@ void edittool_window_bt_repair_callback(Fl_Button *o, void *v)
 
 void edittool_window_bt_swapsides_callback(Fl_Button *o, void *v)
 {
-	Main_Window *window;
-	floppy_infos_window *fiw;
 	HXCFE_SIDE * side0,* side1;
 	int track;
-	trackedittool_window *tew;
-
-	window = (Main_Window *)guicontext->main_window;
-	tew = (trackedittool_window *)window->trackedit_window;
-	fiw = (floppy_infos_window *)window->infos_window;
 
 	hxc_entercriticalsection(guicontext->hxcfe,1);
 
@@ -711,7 +691,6 @@ void edittool_window_bt_copy_callback(Fl_Button *o, void *v)
 void edittool_window_bt_setdiskrpm_callback(Fl_Button *o, void *v)
 {
 	Main_Window *window;
-	floppy_infos_window *fiw;
 	HXCFE_SIDE * curside;
 	int track,side;
 	trackedittool_window *tew;
@@ -720,7 +699,6 @@ void edittool_window_bt_setdiskrpm_callback(Fl_Button *o, void *v)
 
 	window = (Main_Window *)guicontext->main_window;
 	tew = (trackedittool_window *)window->trackedit_window;
-	fiw = (floppy_infos_window *)window->infos_window;
 
 	for(side=0;side<hxcfe_getNumberOfSide(guicontext->hxcfe,guicontext->loadedfloppy);side++)
 	{
@@ -742,7 +720,6 @@ void edittool_window_bt_setdiskrpm_callback(Fl_Button *o, void *v)
 void edittool_window_bt_setdiskbitrate_callback(Fl_Button *o, void *v)
 {
 	Main_Window *window;
-	floppy_infos_window *fiw;
 	HXCFE_SIDE * curside;
 	int track,side;
 	trackedittool_window *tew;
@@ -752,7 +729,6 @@ void edittool_window_bt_setdiskbitrate_callback(Fl_Button *o, void *v)
 
 	window = (Main_Window *)guicontext->main_window;
 	tew = (trackedittool_window *)window->trackedit_window;
-	fiw = (floppy_infos_window *)window->infos_window;
 
 	for(side=0;side<hxcfe_getNumberOfSide(guicontext->hxcfe,guicontext->loadedfloppy);side++)
 	{
@@ -776,16 +752,9 @@ void edittool_window_bt_setdiskbitrate_callback(Fl_Button *o, void *v)
 
 void edittool_window_bt_erase_side0_callback(Fl_Button *o, void *v)
 {
-	Main_Window *window;
-	floppy_infos_window *fiw;
 	HXCFE_SIDE * curside;
 	int track;
-	trackedittool_window *tew;
 	int j,tracklen;
-
-	window = (Main_Window *)guicontext->main_window;
-	tew = (trackedittool_window *)window->trackedit_window;
-	fiw = (floppy_infos_window *)window->infos_window;
 
 	hxc_entercriticalsection(guicontext->hxcfe,1);
 
@@ -818,16 +787,9 @@ void edittool_window_bt_erase_side0_callback(Fl_Button *o, void *v)
 
 void edittool_window_bt_erase_side1_callback(Fl_Button *o, void *v)
 {
-	Main_Window *window;
-	floppy_infos_window *fiw;
 	HXCFE_SIDE * curside;
 	int track;
-	trackedittool_window *tew;
 	int j,tracklen;
-
-	window = (Main_Window *)guicontext->main_window;
-	tew = (trackedittool_window *)window->trackedit_window;
-	fiw = (floppy_infos_window *)window->infos_window;
 
 	hxc_entercriticalsection(guicontext->hxcfe,1);
 
@@ -862,12 +824,10 @@ void edittool_window_bt_erase_side1_callback(Fl_Button *o, void *v)
 void edittool_window_bt_addtrack_callback(Fl_Button *o, void *v)
 {
 	Main_Window *window;
-	floppy_infos_window *fiw;
 	trackedittool_window *tew;
 
 	window = (Main_Window *)guicontext->main_window;
 	tew = (trackedittool_window *)window->trackedit_window;
-	fiw = (floppy_infos_window *)window->infos_window;
 
 	hxc_entercriticalsection(guicontext->hxcfe,1);
 

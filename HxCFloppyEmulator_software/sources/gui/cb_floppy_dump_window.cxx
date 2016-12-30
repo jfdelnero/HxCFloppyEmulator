@@ -93,9 +93,6 @@ typedef struct trackmode_
 	unsigned char encoding_mode; // 0 Fm other MFM
 }trackmode;
 
-
-static floppydumperparams fdparams;
-
 trackmode tm[]=
 {
 	{0,500000,0,0xFF},
@@ -128,9 +125,9 @@ void tick_dump(void *w) {
 	Fl::repeat_timeout(0.02, tick_dump, w);
 }
 
+#ifdef WIN32
 static int checkversion(void)
 {
-#ifdef WIN32
 	DWORD version = 0;
 	DWORD ret;
 	HANDLE h;
@@ -147,11 +144,8 @@ static int checkversion(void)
 		return 0;
 	}
 	return version;
-#else
-    return 0;
-#endif
-
 }
+#endif
 
 #ifdef WIN32
 static void closedevice(HANDLE h)
