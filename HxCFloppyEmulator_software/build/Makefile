@@ -6,15 +6,22 @@ UNAME := $(shell uname)
 
 INCLUDEPATH = -I ../sources -I ../../../libhxcfe/trunk/sources -I ../sources/  -I ../sources/gui -I ../sources/thirdpartylibs/fltk/fltk-1.3.x/ -I ../../../libusbhxcfe/trunk/sources -I ../../../libhxcadaptor/trunk/sources -I ../sources/gui/microintro/
 
-ifdef IPF_LIB_SUPPORT
-    CFLAGS=-O3 $(INCLUDEPATH) -DIPF_SUPPORT
-    DISKLOADERPLUGINS_IPF= ipf_loader.o libcapsimage.so.2.0
+DEBUG ?= 0
+
+ifeq ($(DEBUG), 1)
+	CFLAGS=-O0 $(INCLUDEPATH) -Wall -g -DDEBUG -fsanitize=address -fno-omit-frame-pointer
+	LDFLAGS= -lc -lm  -ldl -lpthread -Wl,-Map,foo.map -lasan
 else
-    CFLAGS=-O3  $(INCLUDEPATH)
-    DISKLOADERPLUGINS_IPF=
+	CFLAGS=-O3 $(INCLUDEPATH) -Wall
+	LDFLAGS= -lc -lm  -ldl -lpthread -s -Wl,-Map,foo.map
 endif
 
-LDFLAGS=-lc -lm  -ldl  -lpthread
+ifdef IPF_LIB_SUPPORT
+    CFLAGS += -DIPF_SUPPORT
+    DISKLOADERPLUGINS_IPF= ipf_loader.o libcapsimage.so.2.0
+else
+    DISKLOADERPLUGINS_IPF=
+endif
 
 LIBHXCFE = libhxcfe.so
 LIBUSBHXCFE = libusbhxcfe.so
@@ -34,7 +41,7 @@ LDFLAGS += -framework Cocoa -arch i386 -mmacosx-version-min=10.5
 LIBHXCFE = libhxcfe.dylib
 LIBUSBHXCFE = libusbhxcfe.dylib
 else
-LDFLAGS += -lX11
+LDFLAGS += -lX11 -lXext -lXfixes
 endif
 
 EXEC=hxcfloppyemulator
