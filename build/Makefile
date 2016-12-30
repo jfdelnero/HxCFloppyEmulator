@@ -3,9 +3,18 @@ CC=gcc
 
 UNAME := $(shell uname)
 
-CFLAGS=-O3 -I ../sources -I ../../../libhxcfe/trunk/sources -I ../../../libusbhxcfe/trunk/sources
+INCLUDES = -I ../sources -I ../../../libhxcfe/trunk/sources -I ../../../libusbhxcfe/trunk/sources
 
-LDFLAGS=-lc -lm  -ldl  -lpthread
+DEBUG ?= 0
+
+ifeq ($(DEBUG), 1)
+	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG -fsanitize=address -fno-omit-frame-pointer
+	LDFLAGS= -lc -lm  -ldl -lpthread -Wl,-Map,foo.map -lasan
+else
+	CFLAGS=-O3 $(INCLUDES) -Wall
+	LDFLAGS= -lc -lm  -ldl -lpthread -s -Wl,-Map,foo.map
+endif
+
 LIBHXCFE = libhxcfe.so
 LIBUSBHXCFE = libusbhxcfe.so
 
