@@ -66,6 +66,7 @@
 
 #include <stdint.h>
 
+#include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 #include "usb_hxcfloppyemulator.h"
 #include "libhxcadaptor.h"
@@ -182,7 +183,6 @@ int hxc_waitevent(HXCFE* floppycontext,int id,int timeout)
 	struct timeval now;
 	struct timespec timeoutstr;
 	int retcode;
-	int ret;
 
 	pthread_mutex_lock(&eventtab[id]->eMutex);
 	gettimeofday(&now,0);
@@ -284,6 +284,8 @@ int hxc_createthread(HXCFE* floppycontext,void* hwcontext,THREADFUNCTION thread,
 {
 #ifdef WIN32
 	DWORD sit;
+	HANDLE thread_handle;
+
 	threadinit *threadinitptr;
 
 	threadinitptr=(threadinit*)malloc(sizeof(threadinit));
@@ -291,16 +293,24 @@ int hxc_createthread(HXCFE* floppycontext,void* hwcontext,THREADFUNCTION thread,
 	threadinitptr->hxcfloppyemulatorcontext=floppycontext;
 	threadinitptr->hwcontext=hwcontext;
 
-	CreateThread(NULL,8*1024,&ThreadProc,threadinitptr,0,&sit);
+	thread_handle = CreateThread(NULL,8*1024,&ThreadProc,threadinitptr,0,&sit);
+
+	if(!thread_handle)
+	{
+		floppycontext->hxc_printf(MSG_ERROR,"hxc_createthread : CreateThread failed -> 0x.8X", GetLastError());
+	}
 
 	return sit;
 #else
 
 	unsigned long sit;
+	int ret;
 	pthread_t threadid;
 	pthread_attr_t threadattrib;
 	threadinit *threadinitptr;
 	struct sched_param param;
+
+	sit = 0;
 
 	pthread_attr_init(&threadattrib);
 
@@ -324,7 +334,11 @@ int hxc_createthread(HXCFE* floppycontext,void* hwcontext,THREADFUNCTION thread,
 	threadinitptr->hxcfloppyemulatorcontext=floppycontext;
 	threadinitptr->hwcontext=hwcontext;
 
-	pthread_create(&threadid, &threadattrib,ThreadProc, threadinitptr);
+	ret = pthread_create(&threadid, &threadattrib,ThreadProc, threadinitptr);
+	if(ret)
+	{
+		floppycontext->hxc_printf(MSG_ERROR,"hxc_createthread : pthread_create failed -> %d",ret);
+	}
 
 	return sit;
 #endif

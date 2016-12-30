@@ -107,6 +107,10 @@ int hxc_open (const char *filename, int flags, ...)
 	unsigned int mode = 0;
 	va_list ap;
 
+#if defined (DEBUG)
+	printf("hxc_open : filename=%s flags=%x\n",filename,flags);
+#endif
+
 	va_start (ap, flags);
 	if (flags & O_CREAT)
 		mode = va_arg (ap, unsigned int);
@@ -148,6 +152,10 @@ FILE *hxc_fopen (const char *filename, const char *mode)
 	int fd;
 	const char *ptr;
 	FILE *stream;
+
+#if defined (DEBUG)
+	printf("hxc_fopen : filename=%s mode=%s\n",filename,mode);
+#endif
 
 	// Try the classic way (ascii path)
 	stream = fopen(filename,mode);
@@ -245,6 +253,11 @@ FILE *hxc_fopen (const char *filename, const char *mode)
 
 int hxc_fread(void * ptr, size_t size, FILE *f)
 {
+
+#if defined (DEBUG)
+	printf("hxc_fread : ptr=%p size=%zu file:%p\n",ptr,size,f);
+#endif
+
 	if( fread(ptr,size,1,f) != 1 )
 	{
 		return 1; // Error
@@ -262,12 +275,18 @@ char * hxc_fgets(char * str, int num, FILE *f)
 
 int	hxc_fclose(FILE * f)
 {
+#if defined (DEBUG)
+	printf("hxc_fclose : file:%p\n",f);
+#endif
+
 	return fclose(f);
 }
 
 int hxc_statex( const char *filename, struct stat *buf)
 {
-
+#if defined (DEBUG)
+	printf("hxc_statex : filename=%s\n",filename);
+#endif
 #if defined (WIN32)
 	wchar_t wpath[MAX_PATH+1];
 
@@ -300,8 +319,12 @@ int hxc_stat( const char *filename, struct stat *buf)
  return hxc_statex(filename,buf);
 }
 
-int hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
+void * hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 {
+#if defined (DEBUG)
+	printf("hxc_find_first_file : folder=%s file=%s\n",folder,file);
+#endif
+
 #if defined (WIN32)
 
 	HANDLE hfindfile;
@@ -336,12 +359,12 @@ int hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 
 		fileinfo->size = FindFileData.nFileSizeLow;
 		free(folderstr);
-		return (int)hfindfile;
+		return (void*)hfindfile;
 	}
 	else
 	{
 		free(folderstr);
-		return -1;
+		return 0;
 	}
 
 #else
@@ -377,35 +400,40 @@ int hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 					strncpy(fileinfo->filename,d->d_name,256);
 
 					free(tmpstr);
-					return (int)dir;
+					return (void*)dir;
 				}
 
 				free(tmpstr);
 			}
 
 			closedir (dir);
-			dir=(DIR *)-1;
+			dir=0;
 
 		}
 
 		closedir (dir);
-		dir=(DIR *)-1;
+		dir=0;;
 	}
 	else
 	{
-		dir=(DIR *)-1;
+		dir=0;
 	}
 
-	return (int)dir;
+	return (void*)dir;
 
 #endif
 
-	return -1;
+	return 0;
 }
 
-int hxc_find_next_file(int handleff, char *folder, char *file, filefoundinfo* fileinfo)
+int hxc_find_next_file(void* handleff, char *folder, char *file, filefoundinfo* fileinfo)
 {
 	int ret;
+
+#if defined (DEBUG)
+	printf("hxc_find_next_file : handleff:%p folder=%s file=%s\n",handleff,folder,file);
+#endif
+
 #if defined (WIN32)
 	WIN32_FIND_DATAW FindFileData;
 
@@ -468,15 +496,18 @@ int hxc_find_next_file(int handleff, char *folder, char *file, filefoundinfo* fi
 	return ret;
 }
 
-int hxc_find_close(int handle)
+int hxc_find_close(void* handle)
 {
+#if defined (DEBUG)
+	printf("hxc_find_close : handle:%p\n",handle);
+#endif
+	
 #if defined (WIN32)
-	FindClose((void*)handle);
+	if(handle)
+		FindClose((void*)handle);
 #else
-	DIR * dir;
-	dir = (DIR*) handle;
-	if(dir)
-		closedir(dir);
+	if(handle)
+		closedir((DIR*) handle);
 #endif
 	return 0;
 }
@@ -513,6 +544,9 @@ char * hxc_getcurrentdirectory(char *currentdirectory,int buffersize)
 
 int hxc_mkdir(char * folder)
 {
+#if defined (DEBUG)
+	printf("hxc_mkdir : folder:%s\n",folder);
+#endif
 
 #ifdef WIN32
 	_mkdir(folder);
