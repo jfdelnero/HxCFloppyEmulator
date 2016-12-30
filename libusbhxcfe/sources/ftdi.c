@@ -25,8 +25,6 @@
 //
 */
 
-//#define DEBUGMODE 1
-
 #include <stdint.h>
 
 #include "internal_libhxcfe.h"
@@ -156,7 +154,6 @@ int32_t waitevent(EVENT_HANDLE* theevent,int32_t timeout)
 	struct timeval now;
 	struct timespec timeoutstr;
 	int32_t retcode;
-	int32_t ret;
 
 	pthread_mutex_lock(&theevent->eMutex);
 	gettimeofday(&now,0);
@@ -203,9 +200,8 @@ void * FTDIListenerThreadProc( void *lpParameter)
 int32_t FTDIListener(ftdi_context ftdihandle)
 {
 	int32_t returnvalue,i;
-	unsigned char * bufferptr;
 	
-	#ifdef DEBUGMODE
+	#ifdef DEBUG
 	printf("FTDIListener\n");
 	#endif 
 	do
@@ -222,14 +218,14 @@ int32_t FTDIListener(ftdi_context ftdihandle)
 				rx_fifo.ptr_in=(rx_fifo.ptr_in+1)&(BUFFERSIZE-1);
 			}
 
-			#ifdef DEBUGMODE
+			#ifdef DEBUG
 				printf("rx : %d %d \n",rx_fifo.ptr_in,returnvalue);
 			#endif
 			if(READ_THREAD_EVENT)setevent(READ_THREAD_EVENT);
 		}
 		else
 		{
-			#ifdef DEBUGMODE
+			#ifdef DEBUG
 				printf("FTDIListener : ftdi_read_data=%d\n",returnvalue);
 			#endif
 
@@ -249,6 +245,9 @@ int32_t createlistenerthread(RDTHREADFUNCTION thread,int32_t priority,ftdi_conte
 	listenerthreadinit *threadinitptr;
 	pthread_attr_t threadattrib;
 	struct sched_param param;
+	int ret;
+
+	sit = 0;
 
 	//pthread_attr_create(&threadattrib);
 	pthread_attr_init(&threadattrib);
@@ -265,9 +264,13 @@ int32_t createlistenerthread(RDTHREADFUNCTION thread,int32_t priority,ftdi_conte
 	threadinitptr->thread=thread;
 	threadinitptr->ftdihandle=ftdihandle;
 
-	//pthread_create(&threadid, &threadattrib,FTDIListenerThreadProc, threadinitptr);
-	pthread_create(&threadid,0,FTDIListenerThreadProc, threadinitptr);
-
+	ret = pthread_create(&threadid,0,FTDIListenerThreadProc, threadinitptr);
+	if(ret)
+	{
+#ifdef DEBUG		
+		printf("createlistenerthread : pthread_create failed -> %d",ret);
+#endif		
+	}
 	return sit;
 }
 
@@ -276,7 +279,7 @@ int32_t createlistenerthread(RDTHREADFUNCTION thread,int32_t priority,ftdi_conte
 int32_t ftdi_load_lib (HXCFE* floppycontext)
 {
 
-#ifdef DEBUGMODE
+#ifdef DEBUG
 	printf("---ftdi_load_lib---\n");
 #endif
 
@@ -405,12 +408,9 @@ int32_t ftdi_load_lib (HXCFE* floppycontext)
 	return -1;
 }
 
-int32_t open_ftdichip(uint32_t * ftdihandle)
+int32_t open_ftdichip(void ** ftdihandle)
 {
-
-	int32_t i;
-
-#ifdef DEBUGMODE
+#ifdef DEBUG
 	printf("---open_ftdichip---\n");
 #endif
 
@@ -424,7 +424,7 @@ int32_t open_ftdichip(uint32_t * ftdihandle)
 	else
 	{
 		stop_thread=0;
-		*ftdihandle=(uint32_t)(ftdic);
+		*ftdihandle=(void*)(ftdic);
 		STOP_THREAD_EVENT=createevent();
 		READ_THREAD_EVENT=0;
 		tx_fifo.ptr_in=0;
@@ -440,6 +440,7 @@ int32_t open_ftdichip(uint32_t * ftdihandle)
 	}
 
 #else
+	int32_t i;
 
 	i=0;
 	do
@@ -459,10 +460,10 @@ int32_t open_ftdichip(uint32_t * ftdihandle)
 	return -1;
 }
 
-int32_t close_ftdichip(uint32_t ftdihandle)
+int32_t close_ftdichip(void * ftdihandle)
 {
 
-#ifdef DEBUGMODE
+#ifdef DEBUG
 	printf("---close_ftdichip---\n");
 #endif
 
@@ -484,11 +485,11 @@ int32_t close_ftdichip(uint32_t ftdihandle)
 	return 0;
 }
 
-int32_t purge_ftdichip(uint32_t ftdihandle,uint32_t buffer)
+int32_t purge_ftdichip(void* ftdihandle,uint32_t buffer)
 {
 	int32_t ret;
 
-#ifdef DEBUGMODE
+#ifdef DEBUG
 	printf("---purge_ftdichip---\n");
 #endif
 	ret = 0;
@@ -517,10 +518,10 @@ int32_t purge_ftdichip(uint32_t ftdihandle,uint32_t buffer)
 	return 0;
 }
 
-int32_t setusbparameters_ftdichip(uint32_t ftdihandle,uint32_t buffersizetx,uint32_t buffersizerx)
+int32_t setusbparameters_ftdichip(void * ftdihandle,uint32_t buffersizetx,uint32_t buffersizerx)
 {
 
-#ifdef DEBUGMODE
+#ifdef DEBUG
 	printf("---setusbparameters_ftdichip---\n");
 #endif
 
@@ -540,10 +541,10 @@ int32_t setusbparameters_ftdichip(uint32_t ftdihandle,uint32_t buffersizetx,uint
 	return 0;
 }
 
-int32_t setlatencytimer_ftdichip(uint32_t ftdihandle,unsigned char latencytimer_ms)
+int32_t setlatencytimer_ftdichip(void* ftdihandle,unsigned char latencytimer_ms)
 {
 
-#ifdef DEBUGMODE
+#ifdef DEBUG
 	printf("---setlatencytimer_ftdichip---\n");
 #endif
 
@@ -566,7 +567,7 @@ int32_t setlatencytimer_ftdichip(uint32_t ftdihandle,unsigned char latencytimer_
 	return 0;
 }
 
-int32_t write_ftdichip(uint32_t ftdihandle,unsigned char * buffer,uint32_t size)
+int32_t write_ftdichip(void* ftdihandle,unsigned char * buffer,uint32_t size)
 {
 #if defined(FTDILIB)
 	int32_t dwWritten;
@@ -574,7 +575,7 @@ int32_t write_ftdichip(uint32_t ftdihandle,unsigned char * buffer,uint32_t size)
 	uint32_t dwWritten;
 #endif
 
-#ifdef DEBUGMODE
+#ifdef DEBUG
 	printf("---write_ftdichip---\n");
 #endif
 	
@@ -601,16 +602,15 @@ int32_t write_ftdichip(uint32_t ftdihandle,unsigned char * buffer,uint32_t size)
 
 }
 
-int32_t read_ftdichip(uint32_t ftdihandle,unsigned char * buffer,uint32_t size)
+int32_t read_ftdichip(void* ftdihandle,unsigned char * buffer,uint32_t size)
 {
 #if defined(FTDILIB)
-	int32_t returnvalue;
 	int32_t nb_of_byte;
 #else
 	uint32_t returnvalue;
 #endif
 
-#ifdef DEBUGMODE
+#ifdef DEBUG
 	printf("---read_ftdichip---\n");
 #endif
 
@@ -644,13 +644,13 @@ int32_t read_ftdichip(uint32_t ftdihandle,unsigned char * buffer,uint32_t size)
 #endif
 }
 
-int32_t getfifostatus_ftdichip(uint32_t ftdihandle,int32_t * txlevel,int32_t *rxlevel,uint32_t * event)
+int32_t getfifostatus_ftdichip(void* ftdihandle,int32_t * txlevel,int32_t *rxlevel,uint32_t * event)
 {
 #if defined(FTDILIB)
 	int32_t nb_of_byte,ptr_out;
 #endif
 
-#ifdef DEBUGMODE
+#ifdef DEBUG
 	printf("---getfifostatus_ftdichip---\n");
 #endif
 
@@ -690,10 +690,10 @@ int32_t getfifostatus_ftdichip(uint32_t ftdihandle,int32_t * txlevel,int32_t *rx
 #endif
 }
 
-int32_t seteventnotification_ftdichip(uint32_t ftdihandle,uint32_t eventmask,void * event)
+int32_t seteventnotification_ftdichip(void* ftdihandle,uint32_t eventmask,void * event)
 {
 
-#ifdef DEBUGMODE
+#ifdef DEBUG
 	printf("---seteventnotification_ftdichip---\n");
 #endif
 
