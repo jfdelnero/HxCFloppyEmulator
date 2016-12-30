@@ -150,6 +150,8 @@ int generateDisk(AppData *ad,unsigned char * diskdata,int buffersize)
 				if( ( offset  >= buffersize) || !diskdata )
 				{
 					ret = hxcfe_addSectors(ad->fb,j,i,0,0,numberofsector);
+					if(ret != HXCFE_NOERROR)
+						ad->floppycontext->hxc_printf(MSG_ERROR,"generateDisk : hxcfe_addSectors failed -> %d !",ret);
 				}
 				else
 				{
@@ -157,6 +159,8 @@ int generateDisk(AppData *ad,unsigned char * diskdata,int buffersize)
 					if(buffersize - offset >= (sectorsize * numberofsector) )
 					{
 						ret = hxcfe_addSectors(ad->fb,j,i,&diskdata[offset],(sectorsize * numberofsector),numberofsector);
+						if(ret != HXCFE_NOERROR)
+							ad->floppycontext->hxc_printf(MSG_ERROR,"generateDisk : hxcfe_addSectors failed -> %d !",ret);
 					}
 					else
 					{
@@ -167,12 +171,15 @@ int generateDisk(AppData *ad,unsigned char * diskdata,int buffersize)
 							memcpy(partialbuf,&diskdata[offset],buffersize - offset);
 
 							ret = hxcfe_addSectors(ad->fb,j,i,partialbuf,(sectorsize * numberofsector),numberofsector);
-
+							if(ret != HXCFE_NOERROR)
+								ad->floppycontext->hxc_printf(MSG_ERROR,"generateDisk : hxcfe_addSectors failed -> %d !",ret);
 							free(partialbuf);
 						}
 						else
 						{
 							ret = hxcfe_addSectors(ad->fb,j,i,0,0,numberofsector);
+							if(ret != HXCFE_NOERROR)
+								ad->floppycontext->hxc_printf(MSG_ERROR,"generateDisk : hxcfe_addSectors failed -> %d !",ret);
 						}
 
 					}
@@ -233,6 +240,8 @@ int dumpDisk(AppData *ad,unsigned char * diskdata,int buffersize,HXCFE_FLOPPY * 
 					if(buffersize - offset >= (sectorsize * numberofsector) )
 					{
 						ret = hxcfe_addSectors(ad->fb,j,i,&diskdata[offset],(sectorsize * numberofsector),numberofsector);
+						if(ret != HXCFE_NOERROR)
+							ad->floppycontext->hxc_printf(MSG_ERROR,"dumpDisk : hxcfe_addSectors failed -> %d !",ret);
 					}
 					else
 					{
@@ -243,12 +252,16 @@ int dumpDisk(AppData *ad,unsigned char * diskdata,int buffersize,HXCFE_FLOPPY * 
 							memcpy(partialbuf,&diskdata[offset],buffersize - offset);
 
 							ret = hxcfe_addSectors(ad->fb,j,i,partialbuf,(sectorsize * numberofsector),numberofsector);
+							if(ret != HXCFE_NOERROR)
+								ad->floppycontext->hxc_printf(MSG_ERROR,"dumpDisk : hxcfe_addSectors failed -> %d !",ret);
 
 							free(partialbuf);
 						}
 						else
 						{
 							ret = hxcfe_addSectors(ad->fb,j,i,0,0,numberofsector);
+							if(ret != HXCFE_NOERROR)
+								ad->floppycontext->hxc_printf(MSG_ERROR,"dumpDisk : hxcfe_addSectors failed -> %d !",ret);
 						}
 
 					}
