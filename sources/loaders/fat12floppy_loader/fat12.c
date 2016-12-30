@@ -43,7 +43,7 @@
 
 int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned char * fattable,unsigned char *entriestable,unsigned char *datatable,int parentcluster,FATCONFIG * fatconfig,int numberofcluster)
 {
-	int32_t hfindfile;
+	void* hfindfile;
 	filefoundinfo FindFileData;
 	int bbool;
 	FILE * ftemp;
@@ -61,11 +61,11 @@ int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned
 
 	if(strlen(folder))
 	{
-		hfindfile=hxc_find_first_file(folder,file, &FindFileData);
-		if(hfindfile!=-1)
+		hfindfile = hxc_find_first_file(folder,file, &FindFileData);
+		if(hfindfile)
 		{
 			bbool=1;
-			while(hfindfile!=-1 && bbool)
+			while(hfindfile && bbool)
 			{
 				if(FindFileData.isdirectory)
 				{
