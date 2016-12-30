@@ -144,7 +144,6 @@ int32_t FillBuffer(HXCFE* floppycontext,USBHXCFE * hw_context,uint8_t * paquetbu
 	int32_t t;
 	int32_t trackposition;
 	static int32_t l=0;
-	static int32_t currenttrack_finalbuffer=0;
 	int32_t floppypin34;
 	int32_t floppypin2;
 	int32_t writeprotect;
@@ -381,7 +380,7 @@ int32_t FillBuffer(HXCFE* floppycontext,USBHXCFE * hw_context,uint8_t * paquetbu
 
 int32_t ftdichiplistener(HXCFE* floppycontext,USBHXCFE * hw_context)
 {
-	uint32_t hw_handle;
+	void* hw_handle;
 	int32_t we_ret;
 	int32_t init_failed,ftdierror;
 	int32_t i;

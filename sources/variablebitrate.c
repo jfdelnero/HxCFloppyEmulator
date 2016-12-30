@@ -200,8 +200,6 @@ uint32_t * realloc_time_buffer(uint32_t * buffer,uint32_t numberofbit,uint32_t f
 int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0,uint32_t lendatah0,uint8_t * datah1,uint32_t lendatah1,uint8_t * randomh0,uint8_t * randomh1,int32_t fixedbitrateh0,uint32_t * timeh0,int32_t fixedbitrateh1,uint32_t * timeh1,uint8_t ** finalbuffer_param,uint8_t ** randomfinalbuffer_param,uint8_t readysignal,uint8_t diskchange,uint8_t writeprotect,uint8_t amigaready,uint8_t selectconfig)
 {
 	uint32_t i,k,j;
-	uint32_t head0speed;
-	uint32_t head1speed;
 
 	uint32_t finalsizebuffer;
 	unsigned char * finalbuffer;
@@ -264,11 +262,8 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	lendatah0=((lendatah0*sizefactor)/8);
 	lendatah1=((lendatah1*sizefactor)/8);
 
-	trackzoneindex0=0;
-	head0speed=0;
-	
+	trackzoneindex0=0;	
 	trackzoneindex1=0;
-	head1speed=0;
 
 	if(lendatah0>lendatah1)
 		finalsizebuffer=(lendatah0*2)+(32000*sizefactor);

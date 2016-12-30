@@ -32,15 +32,15 @@
 
 int32_t ftdi_load_lib (HXCFE* floppycontext);
 
-int32_t open_ftdichip(uint32_t * ftdihandle);
-int32_t close_ftdichip(uint32_t ftdihandle);
-int32_t purge_ftdichip(uint32_t ftdihandle,uint32_t buffer);
-int32_t setusbparameters_ftdichip(uint32_t ftdihandle,uint32_t buffersizetx,uint32_t buffersizerx);
-int32_t setlatencytimer_ftdichip(uint32_t ftdihandle,unsigned char latencytimer_ms);
-int32_t write_ftdichip(uint32_t ftdihandle,unsigned char * buffer,uint32_t size);
-int32_t read_ftdichip(uint32_t ftdihandle,unsigned char * buffer,uint32_t size);
-int32_t getfifostatus_ftdichip(uint32_t ftdihandle,int32_t * txlevel,int32_t *rxlevel,uint32_t * event);
-int32_t seteventnotification_ftdichip(uint32_t ftdihandle,uint32_t eventmask,void * event);
+int32_t open_ftdichip(void ** ftdihandle);
+int32_t close_ftdichip(void * ftdihandle);
+int32_t purge_ftdichip(void * ftdihandle,uint32_t buffer);
+int32_t setusbparameters_ftdichip(void * ftdihandle,uint32_t buffersizetx,uint32_t buffersizerx);
+int32_t setlatencytimer_ftdichip(void * ftdihandle,unsigned char latencytimer_ms);
+int32_t write_ftdichip(void * ftdihandle,unsigned char * buffer,uint32_t size);
+int32_t read_ftdichip(void * ftdihandle,unsigned char * buffer,uint32_t size);
+int32_t getfifostatus_ftdichip(void * ftdihandle,int32_t * txlevel,int32_t *rxlevel,uint32_t * event);
+int32_t seteventnotification_ftdichip(void * ftdihandle,uint32_t eventmask,void * event);
 
 
 
