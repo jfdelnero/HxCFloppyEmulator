@@ -11,10 +11,10 @@ DEBUG ?= 0
 
 ifeq ($(DEBUG), 1)
 	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG -fsanitize=address -fno-omit-frame-pointer
-	LDFLAGS= -shared -lc -lm  -ldl -Wl,-Map,foo.map -lasan
+	LDFLAGS= -shared -lc -lm -ldl -lasan
 else
 	CFLAGS=-O3 $(INCLUDES) -Wall
-	LDFLAGS= -shared -lc -lm  -ldl -s -Wl,-Map,foo.map
+	LDFLAGS= -shared -lc -lm -ldl -s
 endif
 
 DISKLOADERPLUGINS_IPF=
@@ -27,7 +27,7 @@ endif
 EXEC=libhxcfe.so
 
 ifeq ($(UNAME), Linux)
-CFLAGS += -fPIC
+CFLAGS += -fPIC -Wl,-Map,foo.map
 endif
 
 ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
