@@ -135,7 +135,7 @@ static void adlib_printdebug(char * msg)
 
 int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char * file)
 {
-	int32_t hfindfile;
+	void* hfindfile;
 	filefoundinfo FindFileData;
 	int bbool;
 	int byte_written;
@@ -146,11 +146,11 @@ int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char *
 	int size,filesize;
 	RETCODE  rc;
 
-	hfindfile=hxc_find_first_file(folder,file, &FindFileData);
-	if(hfindfile!=-1)
+	hfindfile = hxc_find_first_file(folder,file, &FindFileData);
+	if(hfindfile)
 	{
 		bbool=TRUE;
-		while(hfindfile!=-1 && bbool)
+		while( hfindfile && bbool )
 		{
 			if(FindFileData.isdirectory)
 			{
