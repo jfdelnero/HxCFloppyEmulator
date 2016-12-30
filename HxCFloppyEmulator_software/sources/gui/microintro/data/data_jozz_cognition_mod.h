@@ -979,9 +979,5 @@ unsigned char data__jozz_cognition_mod[]={
 
 static datatype data_jozz_cognition_mod[]=
 {
- 255,
- 21792,
- 9487,
- data__jozz_cognition_mod,
- 0
+	{ 255, 21792, 9487, data__jozz_cognition_mod, 0 }
 };

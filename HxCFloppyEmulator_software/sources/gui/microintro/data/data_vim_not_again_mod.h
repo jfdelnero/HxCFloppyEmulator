@@ -1775,9 +1775,5 @@ unsigned char data__vim_not_again_mod[]={
 
 static datatype data_vim_not_again_mod[]=
 {
- 255,
- 27514,
- 17445,
- data__vim_not_again_mod,
- 0
+	{ 255, 27514, 17445, data__vim_not_again_mod, 0 }
 };

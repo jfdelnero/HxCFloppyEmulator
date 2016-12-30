@@ -400,11 +400,5 @@ unsigned char data_bmphxc2001_backgnd_bmp[]={
 
 static bmaptype bitmap_hxc2001_backgnd_bmp[]=
 {
- 9,
- 350,
- 450,
- 158268,
- 3679,
- data_bmphxc2001_backgnd_bmp,
- 0
+	{ 9, 350, 450, 158268, 3679, data_bmphxc2001_backgnd_bmp, 0 }
 };

@@ -239,11 +239,5 @@ unsigned char data_bmphxc2001_bmp[]={
 
 static bmaptype bitmap_hxc2001_bmp[]=
 {
- 9,
- 150,
- 151,
- 23418,
- 2066,
- data_bmphxc2001_bmp,
- 0
+	{ 9, 150, 151, 23418, 2066, data_bmphxc2001_bmp, 0 }
 };
