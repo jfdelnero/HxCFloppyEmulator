@@ -7,8 +7,15 @@ UNAME := $(shell uname)
 BASEDIR=../sources
 INCLUDES = -I$(BASEDIR)/ -I ../../../libhxcfe/trunk/sources -I ../sources/win32 -I ../../../libhxcadaptor/trunk/sources
 
-CFLAGS=-O3 $(INCLUDES)
-LDFLAGS= -g -shared -lc -lm  -ldl
+DEBUG ?= 0
+
+ifeq ($(DEBUG), 1)
+	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG -fsanitize=address -fno-omit-frame-pointer
+	LDFLAGS= -shared -lc -lm  -ldl -Wl,-Map,foo.map -lasan
+else
+	CFLAGS=-O3 $(INCLUDES) -Wall
+	LDFLAGS= -shared -lc -lm  -ldl -s -Wl,-Map,foo.map
+endif
 
 EXEC=libusbhxcfe.so
 
