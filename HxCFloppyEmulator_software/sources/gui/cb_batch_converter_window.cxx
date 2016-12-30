@@ -126,7 +126,7 @@ ff_type ff_type_list[]=
 	{ FF_BMP,"BMP - BMP file image",PLUGIN_BMP,".bmp"},
 	{ FF_DISK_BMP,"BMP - BMP file image (disk)",PLUGIN_DISK_BMP,".bmp"},
 	{ FF_XML,"XML - XML file image",PLUGIN_GENERIC_XML,".xml"},
-	{ -1,"",0,0}			
+	{ -1,"",0,0}
 };
 
 int progress_callback_bc(unsigned int current,unsigned int total, void * user)
@@ -166,7 +166,7 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 
 		filenb=0;
 		while(filelist[filenb] && !abort_trigger)
-		{		
+		{
 			mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(50,255,50));
 			mw->batchconv_window->progress_indicator->label("Reading");
 
@@ -249,9 +249,9 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 						j--;
 					}
 
-					if(loaderid != hxcfe_imgGetLoaderID(imgldr_ctx,(char*)PLUGIN_SKF) || !j) 
+					if(loaderid != hxcfe_imgGetLoaderID(imgldr_ctx,(char*)PLUGIN_SKF) || !j)
 					{
-						if(filelist[filenb][j]==SEPARTOR) 
+						if(filelist[filenb][j]==SEPARTOR)
 							j++;
 					}
 					else
@@ -273,7 +273,7 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 					destinationfile=(char*)malloc(strlen(&filelist[filenb][j])+strlen(destfolder)+2+99);
 					sprintf(destinationfile,"%s%c%s",destfolder,SEPARTOR,&filelist[filenb][j]);
 					i=strlen(destinationfile);
-						
+
 					do
 					{
 						i--;
@@ -284,7 +284,7 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 						destinationfile[i]='_';
 					}
 					ret=1;
-						
+
 					strcat(destinationfile,ff_type_list[output_file_format].ext);
 
 					tempstr = (char*)malloc(8*1024);
@@ -297,12 +297,12 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 
 					loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,(char*)ff_type_list[output_file_format].plug_id);
 					if(ret>=0)
-					{	
+					{
 						if(!guicontext->autoselectmode)
 						{
 							hxcfe_floppySetInterfaceMode(guicontext->hxcfe,thefloppydisk,guicontext->interfacemode);
 						}
-						
+
 						hxcfe_floppySetDoubleStep(guicontext->hxcfe,thefloppydisk,guicontext->doublestep);
 
 						ret = hxcfe_imgExport(imgldr_ctx,thefloppydisk,destinationfile,loaderid);
@@ -337,9 +337,9 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 
 				}
 			}
-		
+
 			filenb++;
-	
+
 		}
 
 		mw->batchconv_window->progress_indicator->label("Done");
@@ -354,7 +354,7 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 
 int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destfolder,char * file,int output_file_format,batchconverterparams * params)
 {
-	long hfindfile;
+	void* hfindfile;
 	filefoundinfo FindFileData;
 	int bbool;
 	int ret,i;
@@ -377,11 +377,11 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 	{
 		hxcfe_imgSetProgressCallback(imgldr_ctx,progress_callback_bc,(void*)guicontext);
 
-		hfindfile=hxc_find_first_file(folder,file, &FindFileData); 
-		if(hfindfile!=-1)
+		hfindfile = hxc_find_first_file(folder,file, &FindFileData);
+		if(hfindfile)
 		{
 			bbool=1;
-			while(hfindfile!=-1 && bbool && !abort_trigger)
+			while(hfindfile && bbool && !abort_trigger)
 			{
 				if(!abort_trigger)
 				{
@@ -419,11 +419,11 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 							free(destinationfolder);
 							free(fullpath);
 							CUI_affiche(MSG_INFO_1,(char*)"Leaving directory %s",FindFileData.filename);
-							
+
 							sprintf((char*)tempstr,"Leaving directory %s",FindFileData.filename);
 							params->windowshwd->strout_convert_status->value((const char*)tempstr);
 							free(tempstr);
-							
+
 						}
 					}
 					else
@@ -530,7 +530,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 								}
 
 								//printf("Creating file %s\n",destinationfile);
-								strcat(destinationfile,ff_type_list[output_file_format].ext);							
+								strcat(destinationfile,ff_type_list[output_file_format].ext);
 
 								tempstr = (unsigned char*)malloc(8*1024);
 								if(tempstr)
@@ -559,7 +559,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 								hxcfe_imgUnload(imgldr_ctx,thefloppydisk);
 
 								tempstr=(unsigned char*)malloc(1024);
-								
+
 								i=strlen(destinationfile);
 								do
 								{
@@ -584,7 +584,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 						}
 					}
 
-					bbool=hxc_find_next_file(hfindfile,folder,file,&FindFileData);	
+					bbool = hxc_find_next_file(hfindfile,folder,file,&FindFileData);
 				}
 			}
 
@@ -647,7 +647,7 @@ int convertthread(void* floppycontext,void* hw_context)
 
 int draganddropconvertthread(void* floppycontext,void* hw_context)
 {
-	
+
 	HXCFE* floppyem;
 	batch_converter_window *bcw;
 	batchconverterparams bcparams;
@@ -712,7 +712,7 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 
 	if(filecount)
 	{
-	
+
 		draganddropconvert(	guicontext->hxcfe,
 							filelist,
 							bcparams.destdir,
@@ -735,7 +735,7 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 	free(filelist);
 
 	free(bcparams2->files);
-	
+
 	bcw->bt_convert->activate();
 	return 0;
 }
@@ -794,7 +794,7 @@ void batch_converter_window_bt_cancel(Fl_Button* bt, void*)
 
 	dw=((Fl_Window*)(bt->parent()));
 	bcw=(batch_converter_window *)dw->user_data();
-	
+
 	abort_trigger = 0xFF;
 
 	bcw->window->hide();
@@ -827,9 +827,9 @@ void dnd_bc_cb(Fl_Widget *o, void *v)
 	batch_converter_window *bcw;
 	Fl_Window *dw;
 	Fl_DND_Box *dnd = (Fl_DND_Box*)o;
-	
+
 	s_param_bc_params * bcparams;
-	
+
 	dw=((Fl_Window*)(o->parent()));
 	bcw=(batch_converter_window *)dw->user_data();
 

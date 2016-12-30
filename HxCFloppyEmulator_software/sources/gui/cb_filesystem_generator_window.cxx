@@ -877,7 +877,7 @@ int load_indexed_fileimage(int index)
 	char cur_directory[1024*4];
 	char fullpath[1024*4];
 
-	long fff_handle;
+	void* findfile_handle;
 	int ret,i;
 	filefoundinfo fi;
 	unsigned char filebuffer[8*1024];
@@ -948,24 +948,24 @@ int load_indexed_fileimage(int index)
 
 		hxc_getcurrentdirectory(cur_directory,sizeof(cur_directory));
 
-		fff_handle = hxc_find_first_file(cur_directory,"*.hfe",&fi);
-		if(fff_handle!=-1)
+		findfile_handle = hxc_find_first_file(cur_directory,"*.hfe",&fi);
+		if(findfile_handle)
 		{
 			ret = 1;
 			i = 0;
 			while( i < cur_index && ret)
 			{
-				ret = hxc_find_next_file(fff_handle,cur_directory,"*.hfe",&fi);
+				ret = hxc_find_next_file(findfile_handle,cur_directory,"*.hfe",&fi);
 				i++;
 			}
 
 			if(!ret)
 			{
-				hxc_find_close(fff_handle);
+				hxc_find_close(findfile_handle);
 				cur_index = 0;
 
-				fff_handle = hxc_find_first_file(cur_directory,"*.hfe",&fi);
-				if(fff_handle != -1)
+				findfile_handle = hxc_find_first_file(cur_directory,"*.hfe",&fi);
+				if(findfile_handle)
 				{
 					strncpy(filename,fi.filename,sizeof(filename));
 				}
@@ -980,7 +980,7 @@ int load_indexed_fileimage(int index)
 				strncpy(filename,fi.filename,sizeof(filename));
 			}
 
-			hxc_find_close(fff_handle);
+			hxc_find_close(findfile_handle);
 		}
 		else
 		{
@@ -1046,7 +1046,7 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 	char fullpath[1024];
 	char srcfullpath[1024];
 	char progresstxt[1024];
-	int ff;
+	void * findfile_handle;
 	filefoundinfo ffi;
 
 	sprintf(progresstxt,"Adding %s ...",dstpath);
@@ -1075,8 +1075,8 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 
 		if(!ret)
 		{
-			ff = hxc_find_first_file(srcpath,(char*)"*.*",&ffi);
-			if(ff != -1)
+			findfile_handle = hxc_find_first_file(srcpath,(char*)"*.*",&ffi);
+			if(findfile_handle)
 			{
 				do
 				{
@@ -1093,7 +1093,7 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 							sec_strncat(fullpath,ffi.filename,sizeof(fullpath));
 							if(addentry(fsw, fsmng, srcfullpath, fullpath)<0)
 							{
-								hxc_find_close(ff);
+								hxc_find_close(findfile_handle);
 								return -1;
 							}
 						}
@@ -1109,16 +1109,16 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 						sec_strncat(fullpath,ffi.filename,sizeof(fullpath));
 						if(addentry(fsw, fsmng, srcfullpath, fullpath)<0)
 						{
-							hxc_find_close(ff);
+							hxc_find_close(findfile_handle);
 							return -1;
 						}
 					}
 
-					ret = hxc_find_next_file(ff,srcpath,(char*)"*.*",&ffi);
+					ret = hxc_find_next_file(findfile_handle,srcpath,(char*)"*.*",&ffi);
 
 				}while(ret);
 
-				ret = hxc_find_close(ff);
+				ret = hxc_find_close(findfile_handle);
 			}
 		}
 		else
