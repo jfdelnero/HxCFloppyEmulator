@@ -179,10 +179,16 @@ int RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			}
 
 			hxcfe_deinitSectorAccess(ss);
+
+			hxc_fclose(rawfile);
+
+			return HXCFE_NOERROR;
 		}
 
 		hxc_fclose(rawfile);
+
+		return HXCFE_INTERNALERROR;
 	}
 
-	return 0;
+	return HXCFE_ACCESSERROR;
 }

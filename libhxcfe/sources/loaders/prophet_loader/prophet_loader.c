@@ -100,7 +100,7 @@ int Prophet_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 	unsigned int file_offset;
 	unsigned char* trackdata;
 	int gap3len,interleave;
-	int rpm,sectorsize;
+	int rpm;
 	int numberofsector;
 	int trackformat;
 	HXCFE_CYLINDER* currentcylinder;
@@ -124,7 +124,6 @@ int Prophet_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 	if(filesize!=0)
 	{
 
-		sectorsize=1024;
 		gap3len=40;
 		interleave=1;
 		trackformat=ISOFORMAT_DD;
@@ -172,6 +171,7 @@ int Prophet_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 						sectorconfig[k].trackencoding=trackformat;
 						sectorconfig[k].input_data=&trackdata[k*1024];
 					}
+
 					sectorconfig[numberofsector-1].sectorsize=256;
 
 					file_offset=( (((numberofsector-1)*1024)+256) * floppydisk->floppyNumberOfSide * j ) +

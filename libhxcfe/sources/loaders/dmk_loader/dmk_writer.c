@@ -291,7 +291,7 @@ int DMK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 							{
 								memset(tmp_fm_track_buf,0xAA,track_size);
 
-								databitoffset = ( 3 - sca_fm[0]->startsectorindex&3 );
+								databitoffset = ( 3 - (sca_fm[0]->startsectorindex&3) );
 
 								for(k=0;k<track_size*8*2;k=k+4)
 								{

@@ -99,10 +99,9 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 	int i,j,k;
 	unsigned int file_offset;
 	unsigned char* trackdata;
-	int  tracklen;
 	int  gap3len,interleave;
 	int  trackformat;
-	int  sectorsize,rpm;
+	int  rpm;
 	int  numberofsector;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SECTCFG  sectorconfig[6];
@@ -125,7 +124,6 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 	if(filesize!=0)
 	{
 
-		sectorsize=1024;
 		gap3len=30;
 		interleave=1;
 		trackformat=ISOFORMAT_DD;
@@ -145,7 +143,6 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
-			tracklen=(DEFAULT_DD_BITRATE/(rpm/60))/4;
 			trackdata=(unsigned char*)malloc(((numberofsector-1)*1024)+512);
 
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
@@ -169,6 +166,7 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 						sectorconfig[k].trackencoding=trackformat;
 						sectorconfig[k].input_data=&trackdata[k*1024];
 					}
+
 					sectorconfig[numberofsector-1].sectorsize=512;
 
 					file_offset=( (((numberofsector-1)*1024)+512) * floppydisk->floppyNumberOfSide * j ) +

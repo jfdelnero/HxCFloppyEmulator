@@ -48,9 +48,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 	int32_t nbsector,imagesize;
 
 	int32_t numberofsector,numberofside,numberoftrack;
-	int32_t bitrate;
 	int32_t density;
-	int32_t interleave;
 	int file_offset;
 	int32_t sectorsize;
 	unsigned char * diskimage;
@@ -68,9 +66,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 	numberofsector=9;
 	numberofside=1;
 	numberoftrack=40;
-	bitrate=250000;
 	density=ISOIBM_FM_ENCODING;
-	interleave=4;
 	sectorsize = 256;
 
 	switch(imagesize)
@@ -79,9 +75,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 			numberofside=1;
 			numberoftrack=40;
 			numberofsector=9;
-			bitrate=250000;
 			density=ISOIBM_FM_ENCODING;
-			interleave=4;
 		break;
 
 		case 2*40*9*256:
@@ -91,9 +85,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 			numberofside=2;
 			numberoftrack=40;
 			numberofsector=9;
-			bitrate=250000;
 			density=ISOIBM_FM_ENCODING;
-			interleave=4;
 		break;
 
 		case 1*40*16*256:
@@ -103,9 +95,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 			numberofside=1;
 			numberoftrack=40;
 			numberofsector=16;
-			bitrate=250000;
 			density=ISOIBM_MFM_ENCODING;
-			interleave=9;
 		break;
 
 		case 2*40*16*256:
@@ -115,9 +105,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 			numberofside=2;
 			numberoftrack=40;
 			numberofsector=16;
-			bitrate=250000;
 			density=ISOIBM_MFM_ENCODING;
-			interleave=9;
 			break;
 
 		case 2*40*18*256:
@@ -127,9 +115,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 			numberofside=2;
 			numberoftrack=40;
 			numberofsector=18;
-			bitrate=250000;
 			density=ISOIBM_MFM_ENCODING;
-			interleave=5;
 			fm_fallback=1;
 			break;
 
@@ -138,9 +124,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 			numberofside=2;
 			numberoftrack=80;
 			numberofsector=18;
-			bitrate=250000;
 			density=ISOIBM_MFM_ENCODING;
-			interleave=5;
 			break;
 
 			case 2*80*36*256:
@@ -148,9 +132,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 			numberofside=2;
 			numberoftrack=80;
 			numberofsector=36;
-			bitrate=500000;
 			density=ISOIBM_MFM_ENCODING;
-			interleave=11;
 			break;
 
 		default:

@@ -439,6 +439,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	unsigned int debug_i;
 #endif
 
+	currentcylinder = 0;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STX_libLoad_DiskFile %s",imgfile);
 

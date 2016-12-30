@@ -64,7 +64,6 @@
 
 int STT_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
-	int filesize;
 	FILE * f;
 	stt_header STTHEADER;
 
@@ -78,10 +77,6 @@ int STT_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"STT_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
-
-		fseek (f , 0 , SEEK_END);
-		filesize=ftell(f);
-		fseek (f , 0 , SEEK_SET);
 
 		STTHEADER.stt_signature=0;
 		hxc_fread(&STTHEADER,sizeof(stt_header),f);
@@ -112,7 +107,7 @@ int STT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int i,j,k;
 	unsigned int file_offset;
 	int gap3len,interleave;
-	int sectorsize,rpm;
+	int rpm;
 	int trackformat;
 	uint32_t file_track_list_offset;
 	HXCFE_CYLINDER* currentcylinder;
@@ -161,7 +156,6 @@ int STT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	interleave=1;
 	gap3len=80;
-	sectorsize=512;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 

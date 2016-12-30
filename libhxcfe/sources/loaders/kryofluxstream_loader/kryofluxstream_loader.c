@@ -293,7 +293,10 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 			f=hxc_fopen(filepath,"rb");
 			if(f)
 			{
-				fscanf(f,"%d",&phasecorrection);
+				if(fscanf(f,"%d",&phasecorrection) != 1)
+				{
+					phasecorrection = 8;
+				}
 				hxc_fclose(f);
 			}
 
@@ -302,7 +305,10 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 			f=hxc_fopen(filepath,"rb");
 			if(f)
 			{
-				fscanf(f,"%d",&bitrate);
+				if( fscanf(f,"%d",&bitrate) != 1 )
+				{
+					bitrate = 0;
+				}
 				hxc_fclose(f);
 			}
 
@@ -365,6 +371,8 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
+			rpm = 300;
+
 			for(j=0;j<floppydisk->floppyNumberOfTrack*doublestep;j=j+doublestep)
 			{
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
@@ -373,7 +381,8 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 					sprintf(filepath,"%s%s%.2d.%d.raw",folder,fname,j,i);
 
-					curside=decodestream(imgldr_ctx->hxcfe,filepath,&rpm,timecoef,phasecorrection,bitrate);
+					rpm = 300;
+					curside = decodestream(imgldr_ctx->hxcfe,filepath,&rpm,timecoef,phasecorrection,bitrate);
 
 					if(!floppydisk->tracks[j/doublestep])
 					{

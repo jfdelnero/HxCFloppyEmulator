@@ -83,6 +83,7 @@ int ST_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * f
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d sectors (%d bytes), %d tracks, %d sides...",nbsector,sectorsize,nbtrack,nbside);
 
+	writeret = HXCFE_ACCESSERROR;
 	stfile = hxc_fopen(filename,"wb");
 	if(stfile)
 	{

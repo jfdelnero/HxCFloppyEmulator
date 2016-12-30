@@ -115,7 +115,6 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	unsigned char* trackdata;
 	int gap3len,interleave;
 	int sectorsize,rpm;
-	unsigned char Sector_attribute_flag;
 	HXCFE_CYLINDER* currentcylinder;
 	int trackformat;
 	int major,minor;
@@ -322,10 +321,8 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				fseek (f , file_offset , SEEK_SET);
 
-				Sector_attribute_flag=0;
 				for(k=0;k<11;k++)
 				{
-
 					hxc_fread(&trackdata[k*sectorsize],sectorsize,f);
 				}
 

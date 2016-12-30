@@ -58,7 +58,6 @@ int IMD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	unsigned char side_numbering_map[256];
 
 	int32_t track_cnt,bitrate;
-	int32_t sectorlistoffset,trackinfooffset;
 
 	imd_trackheader imd_th;
 
@@ -196,9 +195,7 @@ int IMD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 						imd_th.sector_size_code=size_to_code(sca[0]->sectorsize);
 					}
 
-					trackinfooffset=ftell(imdfile);
 					fwrite(&imd_th,sizeof(imd_trackheader),1,imdfile);
-					sectorlistoffset=ftell(imdfile);
 
 					for(k=0;k<nbsector;k++)
 					{

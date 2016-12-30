@@ -95,6 +95,8 @@ int FEI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	HXCFE_SIDE* currentside;
 	int tracksize;
 
+	currentcylinder = 0;
+	tracksize = 0;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FEI_libLoad_DiskFile %s",imgfile);
 
@@ -142,46 +144,53 @@ int FEI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		floppydisk->floppyiftype);
 
 
+
 	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-	memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-
-	for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
+	if(tracksize && floppydisk->tracks)
 	{
+		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
-		for(j=0;j<floppydisk->floppyNumberOfSide;j++)
+		for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
 		{
 
-			hxcfe_imgCallProgressCallback(imgldr_ctx, (i<<1) + (j&1),floppydisk->floppyNumberOfTrack*2);
-
-			if(!floppydisk->tracks[i])
+			for(j=0;j<floppydisk->floppyNumberOfSide;j++)
 			{
-				floppydisk->tracks[i]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-				currentcylinder=floppydisk->tracks[i];
-			}
 
-			currentcylinder->sides[j]=tg_alloctrack(floppydisk->floppyBitRate,UNKNOWN_ENCODING,currentcylinder->floppyRPM,tracksize*8,2500,-2500,0x00);
-			currentside=currentcylinder->sides[j];
-			currentside->number_of_sector=floppydisk->floppySectorPerTrack;
+				hxcfe_imgCallProgressCallback(imgldr_ctx, (i<<1) + (j&1),floppydisk->floppyNumberOfTrack*2);
 
-			fseek(f,(tracksize*i)+(tracksize*floppydisk->floppyNumberOfTrack*j),SEEK_SET);
+				if(!floppydisk->tracks[i])
+				{
+					floppydisk->tracks[i]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+					currentcylinder = floppydisk->tracks[i];
+				}
 
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
-												i,
-												j,
-												ftell(f),
-												tracksize);
+				currentcylinder->sides[j]=tg_alloctrack(floppydisk->floppyBitRate,UNKNOWN_ENCODING,currentcylinder->floppyRPM,tracksize*8,2500,-2500,0x00);
+				currentside=currentcylinder->sides[j];
+				currentside->number_of_sector=floppydisk->floppySectorPerTrack;
 
-			hxc_fread(currentside->databuffer,tracksize,f);
+				fseek(f,(tracksize*i)+(tracksize*floppydisk->floppyNumberOfTrack*j),SEEK_SET);
 
-			for(k=0;k<tracksize;k++)
-			{
-				currentside->databuffer[k]=bit_inverter[currentside->databuffer[k]];
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
+													i,
+													j,
+													ftell(f),
+													tracksize);
+
+				hxc_fread(currentside->databuffer,tracksize,f);
+
+				for(k=0;k<tracksize;k++)
+				{
+					currentside->databuffer[k]=bit_inverter[currentside->databuffer[k]];
+				}
 			}
 		}
+
+		hxc_fclose(f);
+		return HXCFE_NOERROR;
 	}
 
 	hxc_fclose(f);
-	return HXCFE_NOERROR;
+	return HXCFE_BADFILE;
 }
 
 int FEI_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)

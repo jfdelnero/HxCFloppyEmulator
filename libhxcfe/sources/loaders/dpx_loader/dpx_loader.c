@@ -100,12 +100,10 @@ int DPX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int i,j,k;
 	unsigned int file_offset;
 	unsigned char* trackdata;
-	int tracklen;
 	int gap3len,interleave;
-	int sectorsize,rpm;
+	int rpm;
 	int numberofsector;
 	int trackformat;
-	int skew;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SECTCFG  sectorconfig[6];
 
@@ -128,10 +126,8 @@ int DPX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	if(filesize!=0)
 	{
 
-		sectorsize=1024;
 		gap3len=30;
 		interleave=1;
-		skew=0;
 		floppydisk->floppyNumberOfSide=2;
 		floppydisk->floppySectorPerTrack=6;
 		floppydisk->floppyNumberOfTrack=(filesize/(((numberofsector-1)*1024)+512)) / floppydisk->floppyNumberOfSide;
@@ -147,7 +143,6 @@ int DPX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
-			tracklen=(DEFAULT_DD_BITRATE/(rpm/60))/4;
 			trackdata=(unsigned char*)malloc(((numberofsector-1)*1024)+512);
 
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
@@ -172,6 +167,7 @@ int DPX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						sectorconfig[k].trackencoding=trackformat;
 						sectorconfig[k].input_data=&trackdata[k*1024];
 					}
+
 					sectorconfig[numberofsector-1].sectorsize=512;
 
 					file_offset=( (((numberofsector-1)*1024)+512) * floppydisk->floppyNumberOfSide * j ) +
