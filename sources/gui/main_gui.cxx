@@ -253,7 +253,9 @@ int export_thread(void* floppycontext,void* context)
 	exportthread * exportth;
 	HXCFE_IMGLDR * imgldr_ctx;
 	HXCFE_FLOPPY * fp;
-	int loaderid;
+	int loaderid,i;
+	char filepath[512];
+	char * extptr;
 
 	exportth = (exportthread*)context;
 
@@ -277,8 +279,29 @@ int export_thread(void* floppycontext,void* context)
 					hxcfe_floppySetInterfaceMode(guicontext->hxcfe,fp,guicontext->interfacemode);
 				}
 
+				strcpy(filepath,exportth->urls);
+
+				extptr = (char*)hxcfe_imgGetLoaderExt( imgldr_ctx, loaderid );
+				if(extptr)
+				{
+
+
+					i = strlen(filepath);
+					while( i && filepath[i]!='.' && filepath[i]!='\\' && filepath[i]!='/')
+					{
+						i--;
+					}
+
+					if( i && filepath[i] != '.' )
+					{
+						// no file extension found. Add the default module extension.
+						strcat(filepath,".");
+						strcat(filepath,extptr);
+					}
+				}
+
 				hxcfe_floppySetDoubleStep(guicontext->hxcfe,fp,guicontext->doublestep);
-				hxcfe_imgExport(imgldr_ctx,fp,(char*)exportth->urls,loaderid);
+				hxcfe_imgExport(imgldr_ctx,fp,(char*)filepath,loaderid);
 				hxcfe_imgUnload(imgldr_ctx,fp);
 			}
 		}
@@ -455,7 +478,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"HFE file (Rev 2 - Experimental)\t*.hfe\n"
 					"Arburg file\t*.arburgfd\n"
 					"KF Stream file\t*.raw\n"
-					"SPS IPF file (W.I.P)\t*.ipf\n"
+					"SPS IPF file (WIP)\t*.ipf\n"
 					"SCP file\t*.scp\n"
 					"BMP file\t*.bmp\n"
 					"BMP file (disk)\t*.bmp\n"
@@ -473,7 +496,6 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 				break; // CANCEL
 			default:
 			{
-
 				i=fnfc.filter_value();
 
 				launchexport((char*)fnfc.filename(),guicontext->loadedfloppy,(char*)plugid_lst[i]);
