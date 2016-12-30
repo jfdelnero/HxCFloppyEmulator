@@ -1547,11 +1547,5 @@ unsigned char data_bmpsob_bmp[]={
 
 static bmaptype bitmap_sob_bmp[]=
 {
- 9,
- 320,
- 292,
- 94208,
- 15140,
- data_bmpsob_bmp,
- 0
+	{ 9, 320, 292, 94208, 15140, data_bmpsob_bmp, 0 }
 };

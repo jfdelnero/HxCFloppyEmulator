@@ -1928,9 +1928,5 @@ unsigned char data__COPYING_FULL[]={
 
 static datatype data_COPYING_FULL[]=
 {
- 255,
- 42471,
- 18971,
- data__COPYING_FULL,
- 0
+	{ 255, 42471, 18971, data__COPYING_FULL, 0 }
 };

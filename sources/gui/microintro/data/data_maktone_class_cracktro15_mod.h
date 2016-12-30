@@ -618,9 +618,5 @@ unsigned char data__maktone_class_cracktro15_mod[]={
 
 static datatype data_maktone_class_cracktro15_mod[]=
 {
- 255,
- 13766,
- 5876,
- data__maktone_class_cracktro15_mod,
- 0
+	{ 255, 13766, 5876, data__maktone_class_cracktro15_mod, 0 }
 };

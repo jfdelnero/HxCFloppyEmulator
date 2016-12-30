@@ -530,9 +530,5 @@ unsigned char data__zandax_supplydas_booze_mod[]={
 
 static datatype data_zandax_supplydas_booze_mod[]=
 {
- 255,
- 9226,
- 4994,
- data__zandax_supplydas_booze_mod,
- 0
+	{ 255, 9226, 4994, data__zandax_supplydas_booze_mod, 0 }
 };
