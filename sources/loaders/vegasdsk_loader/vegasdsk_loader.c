@@ -97,11 +97,9 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	FILE * f;
 	unsigned int filesize;
 	int i,j,k;
-	unsigned int offset;
 	unsigned char* floppy_data;
 	int gap3len,interleave;
 	int sectorsize,rpm;
-	int bootnumberofsector;
 	unsigned char  trackformat;
 	unsigned char  buffer[256];
 
@@ -132,7 +130,6 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	{
 		case 10:
 			floppydisk->floppySectorPerTrack=10;
-			bootnumberofsector=10;
 			sectorsize=256;
 			floppydisk->floppyNumberOfSide=1;
 			interleave=5;
@@ -140,7 +137,6 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			break;
 		case 20:
 			floppydisk->floppySectorPerTrack=10;
-			bootnumberofsector=10;
 			sectorsize=256;
 			floppydisk->floppyNumberOfSide=2;
 			interleave=5;
@@ -149,7 +145,6 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		case 18:
 			floppydisk->floppySectorPerTrack=18;
 			gap3len=20;
-			bootnumberofsector=10;
 			sectorsize=256;
 			floppydisk->floppyNumberOfSide=1;
 			interleave=9;
@@ -158,7 +153,6 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		case 36:
 			floppydisk->floppySectorPerTrack=18;
 			gap3len=20;
-			bootnumberofsector=10;
 			sectorsize=256;
 			floppydisk->floppyNumberOfSide=2;
 			interleave=9;
@@ -166,7 +160,6 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			break;
 		default:
 			floppydisk->floppySectorPerTrack=10;
-			bootnumberofsector=10;
 			sectorsize=256;
 			floppydisk->floppyNumberOfSide=1;
 			interleave=5;
@@ -175,8 +168,6 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	}
 
 	floppydisk->floppyNumberOfTrack=buffer[0x26]+1;
-
-
 
 
 	floppydisk->floppyBitRate=250000;
@@ -217,7 +208,6 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		}
 	}
 
-	offset=ftell(f);
 
 	floppy_data=malloc(floppydisk->floppySectorPerTrack*sectorsize);
 

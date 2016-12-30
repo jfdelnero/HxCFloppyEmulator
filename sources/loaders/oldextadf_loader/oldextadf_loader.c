@@ -112,6 +112,8 @@ int OLDEXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 	int gap3len,skew,trackformat,interleave;
 	int sectorsize;
 
+	tracktable = 0;
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"OLDEXTADF_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");

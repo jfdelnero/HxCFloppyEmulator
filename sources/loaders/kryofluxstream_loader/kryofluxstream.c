@@ -72,8 +72,6 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 {
 	uint32_t i;
 	s_oob_header		* oob;
-	s_oob_StreamRead	* streamRead;
-	s_oob_StreamEnd		* streamEnd;
 	s_oob_DiskIndex		* diskIndex;
 	HXCFE_TRKSTREAM		* track_dump;
 
@@ -81,6 +79,9 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 	FILE* f;
 #ifdef KFSTREAMDBG
+	s_oob_StreamRead	* streamRead;
+	s_oob_StreamEnd		* streamEnd;
+
 	double mck;
 	double sck;
 	double ick;
@@ -215,9 +216,9 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 		#ifdef KFSTREAMDBG
 								floppycontext->hxc_printf(MSG_DEBUG,"---Stream Read---");
 		#endif
-								streamRead=	(s_oob_StreamRead*) &kfstreambuffer[offset + sizeof(s_oob_header) ];
 
 		#ifdef KFSTREAMDBG
+								streamRead=	(s_oob_StreamRead*) &kfstreambuffer[offset + sizeof(s_oob_header) ];
 								floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X TrTime: 0x%.8X",streamRead->StreamPosition,streamRead->TrTime);
 		#endif
 								break;
@@ -250,8 +251,9 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 		#ifdef KFSTREAMDBG
 								floppycontext->hxc_printf(MSG_DEBUG,"---Stream End---");
 		#endif
-								streamEnd=	(s_oob_StreamEnd*) &kfstreambuffer[offset + sizeof(s_oob_header) ];
+								
 		#ifdef KFSTREAMDBG
+								streamEnd =	(s_oob_StreamEnd*) &kfstreambuffer[offset + sizeof(s_oob_header) ];
 								floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X Result: 0x%.8X",streamEnd->StreamPosition,streamEnd->Result);
 		#endif
 							break;

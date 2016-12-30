@@ -62,81 +62,15 @@
 
 int RAW_libIsValidFormat(HXCFE* floppycontext,cfgrawfile * imgformatcfg)
 {
-	unsigned int tracktype;
-	int tracklen;
-	int gap3len,interleave,rpm,bitrate;
-	int sectorsize;
-	int tracklendiv;
-
-
-	sectorsize=128<<(imgformatcfg->sectorsize&7);
-
-	if(imgformatcfg->autogap3)
-		gap3len=255;
-	else
-		gap3len=imgformatcfg->gap3;
-
-	rpm=imgformatcfg->rpm;
-	bitrate=imgformatcfg->bitrate;
-	interleave=imgformatcfg->interleave;
-
-	switch(imgformatcfg->tracktype)
-	{
-		case FM_TRACK_TYPE:
-			tracktype=ISOFORMAT_SD;
-			tracklendiv=16;
-		break;
-
-		case FMIBM_TRACK_TYPE:
-			tracktype=IBMFORMAT_SD;
-			tracklendiv=16;
-		break;
-
-		case MFM_TRACK_TYPE:
-			tracktype=ISOFORMAT_DD;
-			tracklendiv=8;
-		break;
-
-		case MFMIBM_TRACK_TYPE:
-			tracktype=IBMFORMAT_DD;
-			tracklendiv=8;
-		break;
-
-		case GCR_TRACK_TYPE:
-			tracktype=0;
-			tracklendiv = 12;
-		break;
-		default:
-			tracktype=ISOFORMAT_DD;
-			tracklendiv=8;
-		break;
-	};
-
-	if(rpm==0)
+	if(imgformatcfg->rpm == 0)
 		return HXCFE_BADPARAMETER;
 
-
-	tracklen=((bitrate*60)/rpm)/tracklendiv;
-
-	//finaltracksize=ISOIBMGetTrackSize(tracktype,imgformatcfg->sectorpertrack,sectorsize,gap3len,0);
-
-	//if(finaltracksize<=tracklen)
-	{
-		return HXCFE_VALIDFILE;
-	}
-	//else
-	{
-	//	return HXCFE_BADPARAMETER;
-	}
+	return HXCFE_VALIDFILE;
 }
-
-
 
 int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,cfgrawfile * imgformatcfg)
 {
-
 	FILE * f;
-	unsigned int filesize;
 	int i,j,fileside,bitrate;
 	unsigned int file_offset;
 	unsigned char* trackdata;
@@ -153,18 +87,13 @@ int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		if(f==NULL)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-			return -1;
+			return HXCFE_ACCESSERROR;
 		}
-
-		fseek (f , 0 , SEEK_END);
-		filesize=ftell(f);
-		fseek (f , 0 , SEEK_SET);
 	}
 	else
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"RAW_libLoad_DiskFile empty floppy");
 	}
-
 
 	sectorsize=128<<(imgformatcfg->sectorsize&7);
 
@@ -315,8 +244,6 @@ int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	if(f) hxc_fclose(f);
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-
-
 
 	return HXCFE_NOERROR;
 }

@@ -50,7 +50,7 @@ int D88_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	FILE * d88file;
 	char * log_str;
 	char   tmp_str[256];
-	int track_cnt,density;
+	int density;
 	d88_fileheader d88_fh;
 	d88_sector d88_s;
 	uint32_t tracktable[164];
@@ -86,8 +86,6 @@ int D88_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 		memset(tracktable,0,sizeof(tracktable));
 		fwrite(&tracktable, sizeof(tracktable),1,d88file);
-
-		track_cnt=0;
 
 		ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 		if( ss )

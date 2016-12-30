@@ -118,6 +118,8 @@ int GKH_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	unsigned char * trackdata;
 	int file_offset;
 
+	sectorsize = 0;
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"GKH_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
@@ -132,7 +134,6 @@ int GKH_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	if(!memcmp(&header.header_tag,"TDDFI",5) && header.version==1)
 	{
-
 		i=0;
 		do
 		{
@@ -166,38 +167,41 @@ int GKH_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		gap3len=255;
 		interleave=1;
 
-		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
-
-		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-
-		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+		if(sectorsize)
 		{
+			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
-			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-			currentcylinder=floppydisk->tracks[j];
+			trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 
-			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 			{
-				hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
 
-				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-					        (sectorsize*(floppydisk->floppySectorPerTrack)*i)+
-							data_offset;
+				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+				currentcylinder=floppydisk->tracks[j];
 
-				fseek (f , file_offset , SEEK_SET);
-				hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
+				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+				{
+					hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
 
-				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,startid,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
+					file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
+								(sectorsize*(floppydisk->floppySectorPerTrack)*i)+
+								data_offset;
+
+					fseek (f , file_offset , SEEK_SET);
+					hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
+
+					currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,startid,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
+				}
 			}
+
+			free(trackdata);
+
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+			hxc_fclose(f);
+
+			return HXCFE_NOERROR;
 		}
-
-		free(trackdata);
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		hxc_fclose(f);
-
-		return HXCFE_NOERROR;
 	}
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"BAD GKH file!");

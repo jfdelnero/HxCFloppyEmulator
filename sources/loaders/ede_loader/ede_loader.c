@@ -150,7 +150,6 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int blocknum;
 	int number_of_block;
 	unsigned char bitmask;
-	int floppy_buffer_index;
 	unsigned char trackformat;
 	int skew;
 	HXCFE_SECTCFG  * sectorconfig;
@@ -302,7 +301,6 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		sectorconfig=malloc(sizeof(HXCFE_SECTCFG) * floppydisk->floppySectorPerTrack);
 		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG) * floppydisk->floppySectorPerTrack);
 
-		floppy_buffer_index=0;
 		blocknum=0;
 		bitmask=0x80;
 

@@ -128,7 +128,7 @@ int EMAX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,ch
 	unsigned char* floppy_data;
 	char os_filename[512];
 	int gap3len,interleave;
-	int sectorsize,rpm;
+	int rpm;
 	int numberofsector;
 	int trackformat,skew;
 
@@ -136,7 +136,7 @@ int EMAX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,ch
 	HXCFE_SECTCFG  sectorconfig[10];
 
 	char hdr[EMAXUTIL_HDRLEN+1];
-    char fhdr[EMAXUTIL_HDRLEN+1];
+	char fhdr[EMAXUTIL_HDRLEN+1];
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMAX_libLoad_DiskFile %s",imgfile);
 
@@ -153,7 +153,7 @@ int EMAX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,ch
 
 	numberofsector=10;
 
-    strcpy(os_filename,imgfile);
+	strcpy(os_filename,imgfile);
 	i=strlen(os_filename)-1;
 	while(i && (os_filename[i]!='\\') && (os_filename[i]!='/') )
 	{
@@ -175,7 +175,6 @@ int EMAX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,ch
 	if(filesize!=0)
 	{
 
-		sectorsize=512;
 		gap3len=255;
 		interleave=1;
 		skew=2;

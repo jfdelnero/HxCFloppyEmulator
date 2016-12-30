@@ -125,8 +125,9 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 	HXCFE_CYLINDER** realloctracktable;
 
 	HXCFE_CYLINDER* currentcylinder;
-	HXCFE_SIDE* currentside;
+	//HXCFE_SIDE* currentside;
 
+	currentcylinder = 0;
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCDSK_libLoad_DiskFile %s",imgfile);
 
 	f=hxc_fopen(imgfile,"rb");
@@ -230,8 +231,8 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 						if(!floppydisk->tracks[t])
 						{
-							floppydisk->tracks[t]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-							currentcylinder=floppydisk->tracks[t];
+							floppydisk->tracks[t] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+							currentcylinder = floppydisk->tracks[t];
 						}
 
 
@@ -300,7 +301,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 								free(sectorconfig[j].input_data);
 						}
 
-						currentside=currentcylinder->sides[s];
+
 
 
 						if(trackheader.number_of_sector)
@@ -310,7 +311,10 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 						}
 
 						///////////////////////
-						/*	for(j=0;j<trackheader.number_of_sector;j++)
+						/*
+						currentside=currentcylinder->sides[s];
+
+						for(j=0;j<trackheader.number_of_sector;j++)
 						{
 
 						  if(sectorconfig[j].baddatacrc)

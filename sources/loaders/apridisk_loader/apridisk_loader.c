@@ -112,7 +112,7 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	int rpm;
 	int interleave;
 
-	int number_of_track,number_of_sector;
+	int number_of_sector;
 	int totalfilesize,k;
 	unsigned char * file_buffer;
 	int fileindex,newtrack;
@@ -142,7 +142,6 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		return HXCFE_BADFILE;
 	}
 
-	number_of_track=0;
 	i=0;
 
 	floppydisk->floppyBitRate=500000;

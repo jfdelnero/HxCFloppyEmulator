@@ -274,7 +274,6 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int k,l;
 	int doublestep;
 	HXCFE_CYLINDER* currentcylinder;
-	int found,track,side;
 	HXCFE_SIDE * curside;
 	int nbtrack,nbside;
 	float timecoef;
@@ -290,10 +289,6 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	if(imgfile)
 	{
-		track=0;
-		side=0;
-		found=0;
-
 		mintrack=0;
 		maxtrack=0;
 		minside=0;
