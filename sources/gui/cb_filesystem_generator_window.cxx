@@ -1368,6 +1368,8 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 	floppyem=(HXCFE*)floppycontext;
 	fsparams2=(s_param_fs_params *)hw_context;
 
+	ret = -1;
+
 	if(floppyem && fsparams2)
 	{
 		fsw=fsparams2->fsw;

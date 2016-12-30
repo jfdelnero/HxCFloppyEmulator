@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdarg.h> 
+#include <stdarg.h>
 #include <time.h>
 #include <stdint.h>
 
@@ -139,10 +139,10 @@ int stopAudioOut()
 		waveOutReset(shwd);
 		waveOutBreakLoop(shwd);
 		waveOutBreakLoop(shwd);
-  
+
 		waveOutUnprepareHeader(shwd,&pwhOut1,sizeof(WAVEHDR));
 		waveOutUnprepareHeader(shwd,&pwhOut2,sizeof(WAVEHDR));
-				
+
 		waveOutClose(shwd);
 		#endif
 	}
@@ -150,21 +150,21 @@ int stopAudioOut()
 	return 0;
 }
 
-static void tick(void *v) 
+static void tick(void *v)
 {
 	About_box *window;
 	unsigned char * ptr1;
 	int i,j,k;
-	
+
 	window=(About_box *)v;
-	
+
 	if(window->shown())
 	{
 		demostate = 1;
 		startAudioOut();
 		window->make_current();
 		uintro_getnextframe(window->ui_context);
-		
+
 		ptr1=(unsigned char*)window->ui_context->framebuffer;
 		k=0;
 		j=0;
@@ -175,7 +175,7 @@ static void tick(void *v)
 			ptr1[j++]=ptr1[k+0];
 			k=k+4;
 		}
-		
+
 		fl_draw_image((unsigned char *)window->ui_context->framebuffer, window->xpos_size, window->ypos_size, window->xsize, window->ysize, 3, 0);
 	}
 	else
@@ -188,8 +188,8 @@ static void tick(void *v)
 		stopAudioOut();
 	}
 
-	
-	Fl::repeat_timeout(0.02, tick, v);	
+
+	Fl::repeat_timeout(0.02, tick, v);
 }
 
 
@@ -200,7 +200,7 @@ void close(Fl_Widget *w, void * t)
 	w->parent()->hide();
 }
 
-void create_license_window(Fl_Widget *, void *) 
+void create_license_window(Fl_Widget *, void *)
 {
 	new License_box();
 	return ;
@@ -208,16 +208,25 @@ void create_license_window(Fl_Widget *, void *)
 
 void OpenURLInBrowser(Fl_Widget *,void* u)
 {
-	char * url;
-	url=(char*)u;
 	#if defined (WIN32)
+		char * url;
+		url=(char*)u;
+
 		ShellExecute(HWND_DESKTOP, "open", url, NULL, NULL, SW_SHOW);
 	#elif defined (OSX)
+		char * url;
 		char commandString[2048];
+
+		url=(char*)u;
+
 		sprintf(commandString, "open %s", url);
 		system(commandString);
 	#elif defined (__amigaos4__)
+		char * url;
 		char commandString[2048];
+
+		url=(char*)u;
+
 		sprintf(commandString, "ibrowse:ibrowse %s", url);
 		system(commandString);
 	#endif
@@ -225,8 +234,8 @@ void OpenURLInBrowser(Fl_Widget *,void* u)
 
 About_box::~About_box()
 {
-	Fl::remove_timeout(tick,0); 
-	
+	Fl::remove_timeout(tick,0);
+
 	stopAudioOut();
 
     uintro_deinit(this->ui_context);
@@ -235,7 +244,7 @@ About_box::~About_box()
 About_box::About_box()
   : Fl_Window(530,240)
 {
-	
+
 
 	o = new Fl_Box(5, 15, 180, 25, "HxC FLoppy Emulator");
 	o->box(FL_DOWN_BOX);
@@ -251,7 +260,7 @@ About_box::About_box()
 
 	button_license=		new Fl_Button(5, 110+25*3, 180, 25, "Under GPL License");
 	button_license->callback(create_license_window,0);
-	
+
 	button_ok=new Fl_Button(5, 110+25*4, 180/2, 25, "OK" ); // Fl_Button* o
 	button_ok->callback(close,0);
 
@@ -268,7 +277,7 @@ About_box::About_box()
 
 	ui_context=uintro_init(xsize,ysize);
 	gb_ui_context = ui_context;
-	
+
 
 	this->end();
 
@@ -281,7 +290,7 @@ About_box::About_box()
 	demostate = 0;
 
 	tick(this);
-	
+
 	return ;
 }
 

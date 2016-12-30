@@ -490,13 +490,6 @@ void load_file_image_pb(Fl_Widget * widget, void * ptr)
 	load_file_image(widget,ptr);
 }
 
-void fc_callback(Fl_File_Chooser * fc, void *)
-{
-	const char * fp;
-	fp=fc->value();
-}
-
-
 #define BUTTON_XPOS 5
 #define BUTTON_YPOS 30
 #define BUTTON_XSIZE 100

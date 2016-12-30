@@ -159,6 +159,7 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 
 	mw =(Main_Window*) guicontext->main_window;
 
+	thefloppydisk = 0;
 	imgldr_ctx = hxcfe_imgInitLoader( floppycontext );
 	if(imgldr_ctx)
 	{
@@ -371,6 +372,9 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 	HXCFE_IMGLDR * imgldr_ctx;
 
 	mw =(Main_Window*) guicontext->main_window;
+
+	loaderid = -1;
+	thefloppydisk = 0;
 
 	imgldr_ctx = hxcfe_imgInitLoader( floppycontext );
 	if(imgldr_ctx)
@@ -603,12 +607,9 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 
 int convertthread(void* floppycontext,void* hw_context)
 {
-
-	HXCFE* floppyem;
 	batch_converter_window *bcw;
 	char * tempstr;
 
-	floppyem=(HXCFE*)floppycontext;
 	bcw=(batch_converter_window *)hw_context;
 
 	memset(&bcparams,0,sizeof(batchconverterparams));
@@ -647,8 +648,6 @@ int convertthread(void* floppycontext,void* hw_context)
 
 int draganddropconvertthread(void* floppycontext,void* hw_context)
 {
-
-	HXCFE* floppyem;
 	batch_converter_window *bcw;
 	batchconverterparams bcparams;
 	char * tempstr;
@@ -656,7 +655,6 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 	int filecount,i,j,k;
 	char ** filelist;
 
-	floppyem=(HXCFE*)floppycontext;
 	bcparams2=(s_param_bc_params *)hw_context;
 	bcw=bcparams2->bcw;
 
