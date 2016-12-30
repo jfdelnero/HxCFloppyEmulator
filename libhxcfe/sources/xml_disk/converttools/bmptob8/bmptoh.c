@@ -207,7 +207,7 @@ char  buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
 	}
 
 	fprintf(file2,"};\n");
-	if(info->type!=0xff) fprintf(file2,"\n\nstatic bmaptype bitmap_%s[]=\n{\n %d,\n %d,\n %d,\n %d,\n %d,\n data_bmp%s,\n 0\n};\n",temp,info->type,info->xres,info->yres,info->size,info->csize,temp);
+	if(info->type!=0xff) fprintf(file2,"\n\nstatic bmaptype bitmap_%s[]=\n{\n\t{ %d, %d, %d, %d, %d, data_bmp%s, 0 }\n};\n",temp,info->type,info->xres,info->yres,info->size,info->csize,temp);
 	else fprintf(file2,"\n\nstatic datatype data_%s[]=\n{\n\t{ %d, %d, %d, data__%s, 0 }\n};\n",temp,info->type,info->size,info->csize,temp);
 	fclose(file2);
 	return 0;
