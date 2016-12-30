@@ -10,6 +10,33 @@
 -------------------------------------------------------------------------------
 
 /*********************************************************
+Latest snapshot :
+
+XML format definitions : Korg DSS1 DD disk.
+
+XML format definitions : Emax II.
+
+Command line tool : USB loader -> Raw loader added.
+
+Amstrad DSK file added to the batch converter export list.
+
+ImageDisk (*.IMD) export : Deleted data mark and data CRC error flags supported.
+
+FAT12/16 Disk browser : Entries First cluster readback corrected. (With high word uninitialized).
+
+IMG loader : More disk sizes support added.
+
+DosDiskBrowser : 1.743MB & 1.764MB added.
+
+64bits systems : Batch converter and Dos Disk browser issues fixed.
+
+MacOS X & Linux version : file export -> Auto-append the file extension.
+
+Track editor : Disk flux stream reverse function.
+
+*********************************************************/
+
+/*********************************************************
 01 January 2016: HxCFloppyEmulator 2.1.4.0
 
 New Loader : *.ANA AnaDisk file loader.
