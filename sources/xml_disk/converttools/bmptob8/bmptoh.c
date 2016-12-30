@@ -1,6 +1,8 @@
-#include "stdio.h"
-#include "malloc.h"
-#include "string.h"
+#include <stdio.h>
+#include <malloc.h>
+#include <string.h>
+
+#include "stdint.h"
 
 #include <windows.h>
 #include "../../packer/pack.h"
@@ -101,7 +103,7 @@ char * extractbmpdata(char *bmpfile,bmpinfo *info)
 		k=0;
 		vc=0;
 
-		for(i=0;i<taille2-j;i++)
+		for(i=0;i<(int)(taille2-j);i++)
 		{
 
 			if(info->type==1)
@@ -146,7 +148,8 @@ char * extractbmpdata(char *bmpfile,bmpinfo *info)
 
 char  buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
 {
-	int l,i;
+	int l;
+	unsigned int i;
 	FILE * file2;
 
 	char temp[128];
@@ -205,10 +208,83 @@ char  buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
 
 	fprintf(file2,"};\n");
 	if(info->type!=0xff) fprintf(file2,"\n\nstatic bmaptype bitmap_%s[]=\n{\n %d,\n %d,\n %d,\n %d,\n %d,\n data_bmp%s,\n 0\n};\n",temp,info->type,info->xres,info->yres,info->size,info->csize,temp);
-	else fprintf(file2,"\n\nstatic datatype data_%s[]=\n{\n %d,\n %d,\n %d,\n data__%s,\n 0\n};\n",temp,info->type,info->size,info->csize,temp);
+	else fprintf(file2,"\n\nstatic datatype data_%s[]=\n{\n\t{ %d, %d, %d, data__%s, 0 }\n};\n",temp,info->type,info->size,info->csize,temp);
 	fclose(file2);
 	return 0;
 }
+
+
+unsigned char mi_pack(unsigned char * bufferin, unsigned long sizein,unsigned char * bufferout, int * sizeout)
+{
+	unsigned char* buffer;
+	unsigned char* buffer2;
+	unsigned long  newsize;
+	unsigned long  newsize_lzw;
+	unsigned long  newsize_rle;
+	int mode;
+
+
+	buffer =  (unsigned char*)malloc(sizein * 10);
+	buffer2 = (unsigned char*)malloc(sizein * 10);
+
+	if( buffer && buffer2)
+	{
+		memset(buffer, 0, sizein * 10);
+		memset(buffer2, 0, sizein * 10);
+
+		lzw_compress(bufferin,buffer,sizein,&newsize_lzw);
+		rlepack(bufferin,sizein,buffer2,&newsize_rle);
+
+		mode=0;
+
+		// Note : only lzw mode for this project.
+		//if(newsize_rle<sizein && newsize_rle< newsize_lzw)
+		//	mode=1; //rle
+
+		if(newsize_lzw<sizein && newsize_lzw< newsize_rle)
+			mode=2; //lzw
+
+		printf("mode : %d\n",mode);
+
+		switch(mode)
+		{
+
+			case 0:
+				memcpy((buffer2+1),bufferin,sizein);
+				buffer2[0]=0x0;
+				memcpy(bufferout,buffer2,sizein+1);
+				*sizeout=sizein+1;
+			break;
+
+			case 1:
+				rlepack(bufferin,sizein,buffer+1,(int*)&newsize);
+				buffer[0]=0x2;
+				memcpy(bufferout,buffer,newsize+1);
+				*sizeout=newsize+1;
+			break;
+
+			case 2:
+				lzw_compress(bufferin,buffer+1,sizein,(int*)&newsize);
+				buffer[0]=0x1;
+				memcpy(bufferout,buffer,newsize+1);
+				*sizeout=newsize+1;
+			break;
+
+			case 3:
+				rlepack(bufferin,sizein,buffer2,(int*)&newsize);
+				lzw_compress(buffer2,buffer+1,newsize,(int*)&newsize_lzw);
+				buffer[0]=0x3;
+				memcpy(bufferout,buffer,newsize_lzw+1);
+				*sizeout=newsize_lzw+1;
+			break;
+		}
+
+		free(buffer);
+		free(buffer2);
+	}
+
+	return 0;
+};
 
 
 int main(int argc, char* argv[])
@@ -231,29 +307,30 @@ int main(int argc, char* argv[])
 			i--;
 		}while(i);
 
-			dbuffer=NULL;
-			dbuffer=(unsigned char *)extractbmpdata(argv[1],&infoo);
+		dbuffer=NULL;
+		dbuffer=(unsigned char *)extractbmpdata(argv[1],&infoo);
 
-			if(dbuffer!=NULL)
-			{//(info.size+100+1024
-				printf("%d\n",infoo.size+100+1024);
-				cbuffer=(unsigned char *)malloc(infoo.size+100+1024);
-				if(cbuffer!=NULL)
-				{
-					printf("Pack...\n");
-					mi_pack(dbuffer,infoo.size,cbuffer, &size);
+		if(dbuffer!=NULL)
+		{
+			printf("%d\n",infoo.size+100+1024);
+			cbuffer=(unsigned char *)malloc(infoo.size+100+1024);
+			if(cbuffer!=NULL)
+			{
+				printf("Pack...\n");
 
-					printf("build include file...\n");
-					infoo.csize=size;
-					buildincludefile(argv[1],&infoo,cbuffer);
-					free(cbuffer);
-					free(dbuffer);
-				}
-				else
-				{
-					printf("Malloc Error!\n");
-				}
+				mi_pack(dbuffer,infoo.size,cbuffer, &size);
+				printf("build include file...\n");
+				infoo.csize=size;
+				buildincludefile(argv[1],&infoo,cbuffer);
+
+				free(cbuffer);
+				free(dbuffer);
 			}
+			else
+			{
+				printf("Malloc Error!\n");
+			}
+		}
 	}
 	return 0;
 }

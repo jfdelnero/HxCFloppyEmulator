@@ -85,9 +85,5 @@ unsigned char data__DiskLayout_LinnForat9K_720KB_xml[]={
 
 static datatype data_DiskLayout_LinnForat9K_720KB_xml[]=
 {
- 255,
- 772,
- 546,
- data__DiskLayout_LinnForat9K_720KB_xml,
- 0
+	{ 255, 772, 546, data__DiskLayout_LinnForat9K_720KB_xml, 0 }
 };

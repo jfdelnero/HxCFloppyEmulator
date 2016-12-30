@@ -84,9 +84,5 @@ unsigned char data__DiskLayout_DOS_ED_2_88MB_xml[]={
 
 static datatype data_DiskLayout_DOS_ED_2_88MB_xml[]=
 {
- 255,
- 763,
- 532,
- data__DiskLayout_DOS_ED_2_88MB_xml,
- 0
+	{ 255, 763, 532, data__DiskLayout_DOS_ED_2_88MB_xml, 0 }
 };

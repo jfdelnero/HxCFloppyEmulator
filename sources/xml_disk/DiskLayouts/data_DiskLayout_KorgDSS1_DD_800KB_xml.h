@@ -1561,9 +1561,5 @@ unsigned char data__DiskLayout_KorgDSS1_DD_800KB_xml[]={
 
 static datatype data_DiskLayout_KorgDSS1_DD_800KB_xml[]=
 {
- 255,
- 167941,
- 15305,
- data__DiskLayout_KorgDSS1_DD_800KB_xml,
- 0
+	{ 255, 167941, 15305, data__DiskLayout_KorgDSS1_DD_800KB_xml, 0 }
 };

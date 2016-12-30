@@ -84,9 +84,5 @@ unsigned char data__DiskLayout_DOS_DD_720KB_xml[]={
 
 static datatype data_DiskLayout_DOS_DD_720KB_xml[]=
 {
- 255,
- 760,
- 530,
- data__DiskLayout_DOS_DD_720KB_xml,
- 0
+	{ 255, 760, 530, data__DiskLayout_DOS_DD_720KB_xml, 0 }
 };

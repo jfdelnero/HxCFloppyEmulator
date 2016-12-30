@@ -86,9 +86,5 @@ unsigned char data__DiskLayout_AkaiS950_HD_1_6MB_xml[]={
 
 static datatype data_DiskLayout_AkaiS950_HD_1_6MB_xml[]=
 {
- 255,
- 822,
- 556,
- data__DiskLayout_AkaiS950_HD_1_6MB_xml,
- 0
+	{ 255, 822, 556, data__DiskLayout_AkaiS950_HD_1_6MB_xml, 0 }
 };

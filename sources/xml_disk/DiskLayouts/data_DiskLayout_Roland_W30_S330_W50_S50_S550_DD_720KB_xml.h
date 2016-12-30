@@ -87,9 +87,5 @@ unsigned char data__DiskLayout_Roland_W30_S330_W50_S50_S550_DD_720KB_xml[]={
 
 static datatype data_DiskLayout_Roland_W30_S330_W50_S50_S550_DD_720KB_xml[]=
 {
- 255,
- 802,
- 562,
- data__DiskLayout_Roland_W30_S330_W50_S50_S550_DD_720KB_xml,
- 0
+	{ 255, 802, 562, data__DiskLayout_Roland_W30_S330_W50_S50_S550_DD_720KB_xml, 0 }
 };

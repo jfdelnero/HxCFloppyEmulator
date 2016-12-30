@@ -504,9 +504,5 @@ unsigned char data__DiskLayout_Ensoniq_Mirage_440KB_xml[]={
 
 static datatype data_DiskLayout_Ensoniq_Mirage_440KB_xml[]=
 {
- 255,
- 34126,
- 4739,
- data__DiskLayout_Ensoniq_Mirage_440KB_xml,
- 0
+	{ 255, 34126, 4739, data__DiskLayout_Ensoniq_Mirage_440KB_xml, 0 }
 };

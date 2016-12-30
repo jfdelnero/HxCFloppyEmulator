@@ -84,9 +84,5 @@ unsigned char data__DiskLayout_DOS_HD_1_44MB_xml[]={
 
 static datatype data_DiskLayout_DOS_HD_1_44MB_xml[]=
 {
- 255,
- 761,
- 532,
- data__DiskLayout_DOS_HD_1_44MB_xml,
- 0
+	{ 255, 761, 532, data__DiskLayout_DOS_HD_1_44MB_xml, 0 }
 };

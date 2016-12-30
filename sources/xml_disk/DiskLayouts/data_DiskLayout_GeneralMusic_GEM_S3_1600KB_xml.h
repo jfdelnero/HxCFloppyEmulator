@@ -90,9 +90,5 @@ unsigned char data__DiskLayout_GeneralMusic_GEM_S3_1600KB_xml[]={
 
 static datatype data_DiskLayout_GeneralMusic_GEM_S3_1600KB_xml[]=
 {
- 255,
- 892,
- 596,
- data__DiskLayout_GeneralMusic_GEM_S3_1600KB_xml,
- 0
+	{ 255, 892, 596, data__DiskLayout_GeneralMusic_GEM_S3_1600KB_xml, 0 }
 };
