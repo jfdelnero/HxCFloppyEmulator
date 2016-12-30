@@ -87,9 +87,5 @@ unsigned char data__DiskLayout_OS9_1280KB_xml[]={
 
 static datatype data_DiskLayout_OS9_1280KB_xml[]=
 {
- 255,
- 835,
- 566,
- data__DiskLayout_OS9_1280KB_xml,
- 0
+	{ 255, 835, 566, data__DiskLayout_OS9_1280KB_xml, 0 }
 };

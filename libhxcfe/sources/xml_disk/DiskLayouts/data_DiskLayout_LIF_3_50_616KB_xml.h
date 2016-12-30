@@ -2856,9 +2856,5 @@ unsigned char data__DiskLayout_LIF_3_50_616KB_xml[]={
 
 static datatype data_DiskLayout_LIF_3_50_616KB_xml[]=
 {
- 255,
- 477044,
- 28257,
- data__DiskLayout_LIF_3_50_616KB_xml,
- 0
+	{ 255, 477044, 28257, data__DiskLayout_LIF_3_50_616KB_xml, 0 }
 };

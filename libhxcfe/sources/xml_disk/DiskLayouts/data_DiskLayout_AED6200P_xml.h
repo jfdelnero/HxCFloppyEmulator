@@ -2590,9 +2590,5 @@ unsigned char data__DiskLayout_AED6200P_xml[]={
 
 static datatype data_DiskLayout_AED6200P_xml[]=
 {
- 255,
- 444670,
- 25593,
- data__DiskLayout_AED6200P_xml,
- 0
+	{ 255, 444670, 25593, data__DiskLayout_AED6200P_xml, 0 }
 };

@@ -91,9 +91,5 @@ unsigned char data__DiskLayout_Ensoniq_DD_800KB_xml[]={
 
 static datatype data_DiskLayout_Ensoniq_DD_800KB_xml[]=
 {
- 255,
- 886,
- 600,
- data__DiskLayout_Ensoniq_DD_800KB_xml,
- 0
+	{ 255, 886, 600, data__DiskLayout_Ensoniq_DD_800KB_xml, 0 }
 };

@@ -85,9 +85,5 @@ unsigned char data__DiskLayout_CasioFZ1_HD_1_25MB_xml[]={
 
 static datatype data_DiskLayout_CasioFZ1_HD_1_25MB_xml[]=
 {
- 255,
- 774,
- 547,
- data__DiskLayout_CasioFZ1_HD_1_25MB_xml,
- 0
+	{ 255, 774, 547, data__DiskLayout_CasioFZ1_HD_1_25MB_xml, 0 }
 };

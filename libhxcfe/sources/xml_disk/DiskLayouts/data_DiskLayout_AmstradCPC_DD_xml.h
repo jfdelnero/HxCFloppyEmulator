@@ -86,9 +86,5 @@ unsigned char data__DiskLayout_AmstradCPC_DD_xml[]={
 
 static datatype data_DiskLayout_AmstradCPC_DD_xml[]=
 {
- 255,
- 806,
- 556,
- data__DiskLayout_AmstradCPC_DD_xml,
- 0
+	{ 255, 806, 556, data__DiskLayout_AmstradCPC_DD_xml, 0 }
 };

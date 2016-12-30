@@ -125,9 +125,5 @@ unsigned char data__DiskLayout_Excellon_CNC6_xml[]={
 
 static datatype data_DiskLayout_Excellon_CNC6_xml[]=
 {
- 255,
- 2023,
- 942,
- data__DiskLayout_Excellon_CNC6_xml,
- 0
+	{ 255, 2023, 942, data__DiskLayout_Excellon_CNC6_xml, 0 }
 };

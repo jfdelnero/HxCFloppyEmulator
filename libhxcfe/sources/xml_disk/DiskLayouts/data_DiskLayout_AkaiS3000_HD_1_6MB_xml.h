@@ -86,9 +86,5 @@ unsigned char data__DiskLayout_AkaiS3000_HD_1_6MB_xml[]={
 
 static datatype data_DiskLayout_AkaiS3000_HD_1_6MB_xml[]=
 {
- 255,
- 818,
- 555,
- data__DiskLayout_AkaiS3000_HD_1_6MB_xml,
- 0
+	{ 255, 818, 555, data__DiskLayout_AkaiS3000_HD_1_6MB_xml, 0 }
 };

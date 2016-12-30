@@ -84,9 +84,5 @@ unsigned char data__DiskLayout_DOS_EXHD_6_78MB_xml[]={
 
 static datatype data_DiskLayout_DOS_EXHD_6_78MB_xml[]=
 {
- 255,
- 767,
- 530,
- data__DiskLayout_DOS_EXHD_6_78MB_xml,
- 0
+	{ 255, 767, 530, data__DiskLayout_DOS_EXHD_6_78MB_xml, 0 }
 };

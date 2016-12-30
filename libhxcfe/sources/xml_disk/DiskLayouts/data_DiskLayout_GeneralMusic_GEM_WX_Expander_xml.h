@@ -91,9 +91,5 @@ unsigned char data__DiskLayout_GeneralMusic_GEM_WX_Expander_xml[]={
 
 static datatype data_DiskLayout_GeneralMusic_GEM_WX_Expander_xml[]=
 {
- 255,
- 902,
- 606,
- data__DiskLayout_GeneralMusic_GEM_WX_Expander_xml,
- 0
+	{ 255, 902, 606, data__DiskLayout_GeneralMusic_GEM_WX_Expander_xml, 0 }
 };

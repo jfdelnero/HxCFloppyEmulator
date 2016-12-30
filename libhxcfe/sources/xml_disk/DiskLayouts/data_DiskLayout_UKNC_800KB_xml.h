@@ -2122,9 +2122,5 @@ unsigned char data__DiskLayout_UKNC_800KB_xml[]={
 
 static datatype data_DiskLayout_UKNC_800KB_xml[]=
 {
- 255,
- 306579,
- 20917,
- data__DiskLayout_UKNC_800KB_xml,
- 0
+	{ 255, 306579, 20917, data__DiskLayout_UKNC_800KB_xml, 0 }
 };

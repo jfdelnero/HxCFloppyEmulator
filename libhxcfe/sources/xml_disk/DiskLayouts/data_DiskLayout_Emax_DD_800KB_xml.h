@@ -89,9 +89,5 @@ unsigned char data__DiskLayout_Emax_DD_800KB_xml[]={
 
 static datatype data_DiskLayout_Emax_DD_800KB_xml[]=
 {
- 255,
- 876,
- 580,
- data__DiskLayout_Emax_DD_800KB_xml,
- 0
+	{ 255, 876, 580, data__DiskLayout_Emax_DD_800KB_xml, 0 }
 };
