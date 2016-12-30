@@ -9,10 +9,10 @@ DEBUG ?= 0
 
 ifeq ($(DEBUG), 1)
 	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG -fsanitize=address -fno-omit-frame-pointer
-	LDFLAGS= -lc -lm  -ldl -lpthread -Wl,-Map,foo.map -lasan
+	LDFLAGS= -lc -lm -ldl -lpthread -lasan
 else
 	CFLAGS=-O3 $(INCLUDES) -Wall
-	LDFLAGS= -lc -lm  -ldl -lpthread -s -Wl,-Map,foo.map
+	LDFLAGS= -lc -lm -ldl -lpthread -s
 endif
 
 LIBHXCFE = libhxcfe.so
@@ -26,7 +26,7 @@ LIBUSBHXCFE= libusbhxcfe.dylib
 endif
 
 ifeq ($(UNAME), Linux)
-LDFLAGS += -Wl,-rpath=.
+LDFLAGS += -Wl,-rpath=. -Wl,-Map,foo.map
 endif
 
 ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
