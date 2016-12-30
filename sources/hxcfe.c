@@ -159,7 +159,7 @@ void printlibmodule(HXCFE* hxcfe)
 
 	imgldr_ctx = hxcfe_imgInitLoader(hxcfe);
 	if(imgldr_ctx)
-	{	
+	{
 		i=0;
 		numberofloader = hxcfe_imgGetNumberOfLoader(imgldr_ctx);
 		while(i<numberofloader)
@@ -227,7 +227,6 @@ void printinterfacemode(HXCFE* hxcfe)
 {
 
 	int i,j;
-	int numberofifmode;
 	const char* ptr;
 
 	printf("---------------------------------------------------------------------------\n");
@@ -236,7 +235,6 @@ void printinterfacemode(HXCFE* hxcfe)
 	printf("Interface ID                  (code)   DESCRIPTION                         \n\n");
 
 	i=0;
-	numberofifmode=0;
 	while(hxcfe_getFloppyInterfaceModeName(hxcfe,i))
 	{
 		ptr=hxcfe_getFloppyInterfaceModeName(hxcfe,i);
@@ -385,12 +383,9 @@ int convertrawfile(HXCFE* hxcfe,char * infile,char * layout,char * outfile,char 
 int usbloadrawfile(HXCFE* hxcfe, char * infile, char * layout, int drive, int doublestep, int ifmode)
 {
 	int layoutid;
-	int loaderid;
-	int ret;
 	HXCFE_FLOPPY * floppydisk;
 	HXCFE_XMLLDR * rfb;
 	USBHXCFE * usbfe;
-	HXCFE_IMGLDR * imgldr_ctx;
 
 	printf("Starting usb emulation - %s\n", infile);
 
@@ -497,7 +492,7 @@ int usbload(HXCFE* hxcfe,char * infile,int drive,int doublestep,int ifmode)
 					libusbhxcfe_ejectFloppy(hxcfe,usbfe);
 
 					libusbhxcfe_deInit(hxcfe,usbfe);
-	
+
 					hxcfe_imgUnload(imgldr_ctx,floppydisk);
 				}
 			}
@@ -903,27 +898,33 @@ int putfile(HXCFE* hxcfe,char * infile,char *path)
 						buffer = malloc(size);
 						if(buffer)
 						{
-							fread(buffer,size,1,f);
+							ret = fread(buffer,size,1,f);
 							fclose(f);
-
-							i= strlen(path);
-
-							while(i && path[i]!='\\')
+							if(ret)
 							{
-								i--;
+								i= strlen(path);
+
+								while(i && path[i]!='\\')
+								{
+									i--;
+								}
+
+								if(i)
+									i++;
+
+								strcpy(foutput,"/");
+								strcat(foutput,&path[i]);
+								filehandle = hxcfe_createFile(fsmng, foutput);
+								if(filehandle > 0)
+								{
+									printf("\nCreate %s\n",foutput);
+									hxcfe_writeFile(fsmng,filehandle,buffer,size);
+									hxcfe_closeFile(fsmng,filehandle);
+								}
 							}
-
-							if(i)
-								i++;
-
-							strcpy(foutput,"/");
-							strcat(foutput,&path[i]);
-							filehandle = hxcfe_createFile(fsmng, foutput);
-							if(filehandle > 0)
+							else
 							{
-								printf("\nCreate %s\n",foutput);
-								hxcfe_writeFile(fsmng,filehandle,buffer,size);
-								hxcfe_closeFile(fsmng,filehandle);
+								printf("ERROR : Cannot read the file !\n");
 							}
 
 							free(buffer);
@@ -1120,7 +1121,7 @@ int main(int argc, char* argv[])
 		{
 			usbload(hxcfe, filename, temp[0] - '0', doublestep, interfacemode);
 		}
-		
+
 	}
 
 	if( (isOption(argc,argv,"help",0)<=0) &&
