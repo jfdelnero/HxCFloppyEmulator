@@ -430,7 +430,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 		fnfc.title("Export disk/Save As");
 		fnfc.preset_file((char*)deffilename);
 		fnfc.type(Fl_Native_File_Chooser::BROWSE_SAVE_FILE);
-		fnfc.options(Fl_Native_File_Chooser::SAVEAS_CONFIRM|Fl_Native_File_Chooser::NEW_FOLDER);
+		fnfc.options(Fl_Native_File_Chooser::SAVEAS_CONFIRM|Fl_Native_File_Chooser::NEW_FOLDER|Fl_Native_File_Chooser::USE_FILTER_EXT);
 		fnfc.filter("HFE file (SDCard HxC Floppy Emulator file format)\t*.hfe\n"
 					"VTR file (VTrucco Floppy Emulator file format)\t*.vtr\n"
 					"MFM file (MFM/FM track file format)\t*.mfm\n"
