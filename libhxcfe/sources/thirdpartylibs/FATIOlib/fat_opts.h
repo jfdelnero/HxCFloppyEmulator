@@ -16,7 +16,7 @@
     #define FATFS_IS_LITTLE_ENDIAN          1
 #endif
 
-// Max filename Length 
+// Max filename Length
 #ifndef FATFS_MAX_LONG_FILENAME
     #define FATFS_MAX_LONG_FILENAME         260
 #endif
@@ -42,20 +42,25 @@
 // Improves access speed considerably
 #define FAT_CLUSTER_CACHE_ENTRIES         1024
 
-// Include support for writing files (1 / 0)? 
+// Include support for writing files (1 / 0)?
 #ifndef FATFS_INC_WRITE_SUPPORT
     #define FATFS_INC_WRITE_SUPPORT         1
 #endif
 
-// Support long filenames (1 / 0)? 
+// Support long filenames (1 / 0)?
 // (if not (0) only 8.3 format is supported)
 #ifndef FATFS_INC_LFN_SUPPORT
-    #define FATFS_INC_LFN_SUPPORT           1    
+    #define FATFS_INC_LFN_SUPPORT           1
 #endif
 
 // Support directory listing (1 / 0)?
 #ifndef FATFS_DIR_LIST_SUPPORT
     #define FATFS_DIR_LIST_SUPPORT          1
+#endif
+
+// Support time/date (1 / 0)?
+#ifndef FATFS_INC_TIME_DATE_SUPPORT
+    #define FATFS_INC_TIME_DATE_SUPPORT     0
 #endif
 
 // Include support for formatting disks (1 / 0)?
@@ -78,6 +83,11 @@
         #include <stdio.h>
         #define FAT_PRINTF(a)               printf a
     #endif
+#endif
+
+// Time/Date support requires time.h
+#if FATFS_INC_TIME_DATE_SUPPORT
+    #include <time.h>
 #endif
 
 #endif

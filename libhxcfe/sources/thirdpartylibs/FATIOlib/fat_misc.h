@@ -59,5 +59,10 @@ void    fatfs_filename_to_lfn(char *filename, uint8 *buffer, int entry, uint8 sf
 void    fatfs_sfn_create_entry(char *shortfilename, uint32 size, uint32 startCluster, struct fat_dir_entry *entry, int dir);
 int     fatfs_lfn_create_sfn(char *sfn_output, char *filename);
 int     fatfs_lfn_generate_tail(char *sfn_output, char *sfn_input, uint32 tailNum);
+void    fatfs_convert_from_fat_time(uint16 fat_time, int *hours, int *minutes, int *seconds);
+void    fatfs_convert_from_fat_date(uint16 fat_date, int *day, int *month, int *year);
+uint16  fatfs_convert_to_fat_time(int hours, int minutes, int seconds);
+uint16  fatfs_convert_to_fat_date(int day, int month, int year);
+void    fatfs_print_sector(uint32 sector, uint8 *data);
 
 #endif

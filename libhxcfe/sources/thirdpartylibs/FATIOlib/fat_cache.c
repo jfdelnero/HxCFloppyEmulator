@@ -43,14 +43,14 @@ int fatfs_cache_init(struct fatfs *fs, FL_FILE *file)
 {
 #ifdef FAT_CLUSTER_CACHE_ENTRIES
     int i;
-    
+
     for (i=0;i<FAT_CLUSTER_CACHE_ENTRIES;i++)
     {
         file->cluster_cache_idx[i] = 0xFFFFFFFF; // Not used
-        file->cluster_cache_data[i] = 0; 
+        file->cluster_cache_data[i] = 0;
     }
 #endif
-    
+
     return 1;
 }
 //-----------------------------------------------------------------------------
@@ -67,7 +67,7 @@ int fatfs_cache_get_next_cluster(struct fatfs *fs, FL_FILE *file, uint32 cluster
         return 1;
     }
 #endif
-    
+
     return 0;
 }
 //-----------------------------------------------------------------------------
