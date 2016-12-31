@@ -7,9 +7,9 @@ int media_init()
     return 1;
 }
 
-int media_read(uint32_t sector, unsigned char *buffer, uint32_t sector_count)
+int media_read(unsigned long sector, unsigned char *buffer, unsigned long sector_count)
 {
-    uint32_t i;
+    unsigned long i;
 
     for (i=0;i<sector_count;i++)
     {
@@ -24,9 +24,9 @@ int media_read(uint32_t sector, unsigned char *buffer, uint32_t sector_count)
     return 1;
 }
 
-int media_write(uint32_t sector, unsigned char *buffer, uint32_t sector_count)
+int media_write(unsigned long sector, unsigned char *buffer, unsigned long sector_count)
 {
-    uint32_t i;
+    unsigned long i;
 
     for (i=0;i<sector_count;i++)
     {

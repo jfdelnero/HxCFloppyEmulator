@@ -16,6 +16,7 @@
 #define FAT_INIT_WRONG_PARTITION_TYPE       (-6)
 #define FAT_INIT_STRUCT_PACKING             (-7)
 
+#define FAT_DIR_ENTRIES_PER_SECTOR          (FAT_SECTOR_SIZE / FAT_DIR_ENTRY_SIZE)
 
 //-----------------------------------------------------------------------------
 // Function Pointers
@@ -39,7 +40,7 @@ struct fat_buffer;
 struct fat_buffer
 {
     uint8                   sector[MAX_FAT_SECTOR_SIZE * FAT_BUFFER_SECTORS];
-    uint32                  address; 
+    uint32                  address;
     int                     dirty;
     uint8 *                 ptr;
 
@@ -83,7 +84,7 @@ struct fatfs
 
     // Working buffer
     struct fat_buffer        currentsector;
-    
+
     // FAT Buffer
     struct fat_buffer        *fat_buffer_head;
     struct fat_buffer        fat_buffers[FAT_BUFFERS];
@@ -102,6 +103,14 @@ struct fs_dir_ent
     uint8                   is_dir;
     uint32                  cluster;
     uint32                  size;
+
+#if FATFS_INC_TIME_DATE_SUPPORT
+    uint16                  access_date;
+    uint16                  write_time;
+    uint16                  write_date;
+    uint16                  create_date;
+    uint16                  create_time;
+#endif
 };
 
 //-----------------------------------------------------------------------------
@@ -122,5 +131,6 @@ int     fatfs_update_file_length(struct fatfs *fs, uint32 Cluster, char *shortna
 int     fatfs_mark_file_deleted(struct fatfs *fs, uint32 Cluster, char *shortname);
 void    fatfs_list_directory_start(struct fatfs *fs, struct fs_dir_list_status *dirls, uint32 StartCluster);
 int     fatfs_list_directory_next(struct fatfs *fs, struct fs_dir_list_status *dirls, struct fs_dir_ent *entry);
+int     fatfs_update_timestamps(struct fat_dir_entry *directoryEntry, int create, int modify, int access);
 
 #endif

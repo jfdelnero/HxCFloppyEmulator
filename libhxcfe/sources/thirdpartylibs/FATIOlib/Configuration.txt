@@ -43,6 +43,9 @@ FATFS_INC_LFN_SUPPORT 	[1/0]
 FATFS_DIR_LIST_SUPPORT 	[1/0]
   Include support for directory listing.
 
+FATFS_INC_TIME_DATE_SUPPORT  [1/0]
+  Use time/date functions provided by time.h to update creation & modification timestamps.
+
 FATFS_INC_FORMAT_SUPPORT
   Include support for formatting disks (FAT16 only).
 
