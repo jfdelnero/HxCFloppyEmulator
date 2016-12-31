@@ -50,7 +50,7 @@ int fatfs_add_free_space(struct fatfs *fs, uint32 *startCluster, uint32 clusters
 
     // Set the next free cluster hint to unknown
     if (fs->next_free_cluster != FAT32_LAST_CLUSTER)
-        fatfs_set_fs_info_next_free_cluster(fs, FAT32_LAST_CLUSTER); 
+        fatfs_set_fs_info_next_free_cluster(fs, FAT32_LAST_CLUSTER);
 
     for (i=0;i<clusters;i++)
     {
@@ -59,7 +59,7 @@ int fatfs_add_free_space(struct fatfs *fs, uint32 *startCluster, uint32 clusters
         {
             // Point last to this
             fatfs_fat_set_cluster(fs, start, nextcluster);
-            
+
             // Point this to end of file
             fatfs_fat_set_cluster(fs, nextcluster, FAT32_LAST_CLUSTER);
 
@@ -90,7 +90,7 @@ int fatfs_allocate_free_space(struct fatfs *fs, int newFile, uint32 *startCluste
 
     // Set the next free cluster hint to unknown
     if (fs->next_free_cluster != FAT32_LAST_CLUSTER)
-        fatfs_set_fs_info_next_free_cluster(fs, FAT32_LAST_CLUSTER); 
+        fatfs_set_fs_info_next_free_cluster(fs, FAT32_LAST_CLUSTER);
 
     // Work out size and clusters
     clusterSize = fs->sectors_per_cluster * fs->sector_size;
@@ -128,7 +128,7 @@ int fatfs_allocate_free_space(struct fatfs *fs, int newFile, uint32 *startCluste
     return 1;
 }
 //-----------------------------------------------------------------------------
-// fatfs_find_free_dir_offset: Find a free space in the directory for a new entry 
+// fatfs_find_free_dir_offset: Find a free space in the directory for a new entry
 // which takes up 'entryCount' blocks (or allocate some more)
 //-----------------------------------------------------------------------------
 static int fatfs_find_free_dir_offset(struct fatfs *fs, uint32 dirCluster, int entryCount, uint32 *pSector, uint8 *pOffset)
@@ -150,7 +150,7 @@ static int fatfs_find_free_dir_offset(struct fatfs *fs, uint32 dirCluster, int e
     while (1)
     {
         // Read sector
-        if (fatfs_sector_reader(fs, dirCluster, x++, 0)) 
+        if (fatfs_sector_reader(fs, dirCluster, x++, 0))
         {
             // Analyse Sector
             nb_item = fs->sector_size / FAT_DIR_ENTRY_SIZE;
@@ -174,12 +174,12 @@ static int fatfs_find_free_dir_offset(struct fatfs *fs, uint32 dirCluster, int e
                         start_recorded = 1;
                     }
 
-                    // Increment the count in-case the file turns 
+                    // Increment the count in-case the file turns
                     // out to be deleted...
                     possible_spaces++;
                 }
                 // SFN Entry
-                else 
+                else
                 {
                     // Has file been deleted?
                     if (fs->currentsector.sector[recordoffset] == FILE_HEADER_DELETED)
@@ -252,7 +252,7 @@ static int fatfs_find_free_dir_offset(struct fatfs *fs, uint32 dirCluster, int e
             }
 
             // If non of the name fitted on previous sectors
-            if (!start_recorded) 
+            if (!start_recorded)
             {
                 // Store start
                 *pSector = (x-1);
@@ -293,7 +293,6 @@ int fatfs_add_file_entry(struct fatfs *fs, uint32 dirCluster, char *filename, ch
     if (!fs->disk_io.write_media)
         return 0;
 
-
 #if FATFS_INC_LFN_SUPPORT
     // Check if the LFN is really needed.
     i = 0;
@@ -311,7 +310,7 @@ int fatfs_add_file_entry(struct fatfs *fs, uint32 dirCluster, char *filename, ch
         i++;
     }
     tmpshortname[i] = 0;
-    if(i) 
+    if(i)
     {
         if(tmpshortname[i-1] == '.')
             tmpshortname[i-1] = 0;
@@ -329,7 +328,7 @@ int fatfs_add_file_entry(struct fatfs *fs, uint32 dirCluster, char *filename, ch
 
     }
 #else
-    entryCount = 0;    
+    entryCount = 0;
 #endif
 
     // Find space in the directory for this filename (or allocate some more)
@@ -349,7 +348,7 @@ int fatfs_add_file_entry(struct fatfs *fs, uint32 dirCluster, char *filename, ch
     while (1)
     {
         // Read sector
-        if (fatfs_sector_reader(fs, dirCluster, x++, 0)) 
+        if (fatfs_sector_reader(fs, dirCluster, x++, 0))
         {
             // Analyse Sector
             nb_item = fs->sector_size / FAT_DIR_ENTRY_SIZE;
@@ -365,11 +364,17 @@ int fatfs_add_file_entry(struct fatfs *fs, uint32 dirCluster, char *filename, ch
 
                 // Start adding filename
                 if (foundEnd)
-                {                
+                {
                     if (entryCount==0)
                     {
                         // Short filename
                         fatfs_sfn_create_entry(shortfilename, size, startCluster, &shortEntry, dir);
+
+#if FATFS_INC_TIME_DATE_SUPPORT
+                        // Update create, access & modify time & date
+                        fatfs_update_timestamps(&shortEntry, 1, 1, 1);
+#endif
+
                         memcpy(&fs->currentsector.sector[recordoffset], &shortEntry, sizeof(shortEntry));
 
                         // Writeback
@@ -381,7 +386,7 @@ int fatfs_add_file_entry(struct fatfs *fs, uint32 dirCluster, char *filename, ch
                         entryCount--;
 
                         // Copy entry to directory buffer
-                        fatfs_filename_to_lfn(filename, &fs->currentsector.sector[recordoffset], entryCount, checksum); 
+                        fatfs_filename_to_lfn(filename, &fs->currentsector.sector[recordoffset], entryCount, checksum);
                         dirtySector = 1;
                     }
 #endif
@@ -396,7 +401,7 @@ int fatfs_add_file_entry(struct fatfs *fs, uint32 dirCluster, char *filename, ch
 
                 dirtySector = 0;
             }
-        } 
+        }
         else
             return 0;
     } // End of while loop

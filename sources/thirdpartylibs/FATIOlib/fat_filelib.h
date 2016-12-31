@@ -56,7 +56,7 @@ typedef struct sFL_FILE
 
     // Read/Write sector buffer
     uint8                   file_data_sector[MAX_FAT_SECTOR_SIZE];
-    uint32                  file_data_address; 
+    uint32                  file_data_address;
     int                     file_data_dirty;
 
     // File fopen flags
@@ -93,11 +93,11 @@ int                 fiol_fwrite(const void * data, int size, int count, void *fi
 int                 fiol_fread(void * data, int size, int count, void *file );
 int                 fiol_fseek(void *file , int32_t offset , int origin );
 int                 fiol_fgetpos(void *file , uint32 * position);
-int32_t                fiol_ftell(void *f);
+int32_t             fiol_ftell(void *f);
 int                 fiol_feof(void *f);
 int                 fiol_remove(const char * filename);    
 
-// Equivelant dirent.h 
+// Equivelant dirent.h
 typedef struct fs_dir_list_status    FL_DIR;
 typedef struct fs_dir_ent            fl_dirent;
 
@@ -109,6 +109,8 @@ int                 fiol_closedir(FL_DIR* dir);
 void                fiol_listdirectory(const char *path);
 int                 fiol_createdirectory(const char *path);
 int                 fiol_is_dir(const char *path);
+
+int                 fiol_format(uint32 volume_sectors, const char *name);
 
 // Test hooks
 #ifdef FATFS_INC_TEST_HOOKS

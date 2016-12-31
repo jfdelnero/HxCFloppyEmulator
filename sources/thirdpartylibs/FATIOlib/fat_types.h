@@ -23,7 +23,7 @@ typedef uint32_t uint32;
 
 // Little Endian - No swap required
 #if FATFS_IS_LITTLE_ENDIAN == 1
-    
+
     #define FAT_HTONS(n) (n)
     #define FAT_HTONL(n) (n)
 
@@ -41,9 +41,17 @@ typedef uint32_t uint32;
 //-------------------------------------------------------------
 // Structure Packing Compile Options
 //-------------------------------------------------------------
-#define STRUCT_PACK	
-#define STRUCT_PACK_BEGIN	
-#define STRUCT_PACK_END		
-#define STRUCT_PACKED
+#ifdef __GNUC__
+    #define STRUCT_PACK
+    #define STRUCT_PACK_BEGIN
+    #define STRUCT_PACK_END
+    #define STRUCT_PACKED           __attribute__ ((packed))
+#else
+    // Other compilers may require other methods of packing structures
+    #define STRUCT_PACK
+    #define STRUCT_PACK_BEGIN
+    #define STRUCT_PACK_END
+    #define STRUCT_PACKED
+#endif
 
 #endif

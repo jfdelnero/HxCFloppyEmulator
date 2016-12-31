@@ -64,7 +64,7 @@
 #define PARTITION1_SIZE_LOCATION        458
 
 #define FAT_DIR_ENTRY_SIZE              32
-#define FAT_SFN_SIZE_FULL               11            
+#define FAT_SFN_SIZE_FULL               11
 #define FAT_SFN_SIZE_PARTIAL            8
 
 //-----------------------------------------------------------------------------
@@ -82,6 +82,24 @@
 #define FILE_HEADER_DELETED             0xE5
 #define FILE_TYPE_DIR                   0x10
 #define FILE_TYPE_FILE                  0x20
+
+//-----------------------------------------------------------------------------
+// Time / Date details
+//-----------------------------------------------------------------------------
+#define FAT_TIME_HOURS_SHIFT            11
+#define FAT_TIME_HOURS_MASK             0x1F
+#define FAT_TIME_MINUTES_SHIFT          5
+#define FAT_TIME_MINUTES_MASK           0x3F
+#define FAT_TIME_SECONDS_SHIFT          0
+#define FAT_TIME_SECONDS_MASK           0x1F
+#define FAT_TIME_SECONDS_SCALE          2
+#define FAT_DATE_YEAR_SHIFT             9
+#define FAT_DATE_YEAR_MASK              0x7F
+#define FAT_DATE_MONTH_SHIFT            5
+#define FAT_DATE_MONTH_MASK             0xF
+#define FAT_DATE_DAY_SHIFT              0
+#define FAT_DATE_DAY_MASK               0x1F
+#define FAT_DATE_YEAR_OFFSET            1980
 
 //-----------------------------------------------------------------------------
 // Other Defines
