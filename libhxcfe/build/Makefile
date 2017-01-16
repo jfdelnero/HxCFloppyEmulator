@@ -68,7 +68,7 @@ DISKLOADERPLUGINS = copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigado
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
 					kryofluxstream_writer.o adf_writer.o bmp_writer.o bmp_disk_writer.o bmp_file.o xml_writer.o trd_writer.o stx_writer.o st_writer.o \
-					stw_writer.o dim_writer.o adz_writer.o ipf_writer.o
+					stw_writer.o dim_writer.o adz_writer.o ipf_writer.o fd_writer.o
 
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
@@ -353,6 +353,9 @@ sap_loader.o : $(BASEDIR)/loaders/sap_loader/sap_loader.c $(BASEDIR)/loaders/sap
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 fd_loader.o : $(BASEDIR)/loaders/fd_loader/fd_loader.c $(BASEDIR)/loaders/fd_loader/fd_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+	
+fd_writer.o : $(BASEDIR)/loaders/fd_loader/fd_writer.c $(BASEDIR)/loaders/fd_loader/fd_writer.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 ipf_loader.o : $(BASEDIR)/loaders/ipf_loader/ipf_loader.c $(BASEDIR)/loaders/ipf_loader/ipf_loader.h

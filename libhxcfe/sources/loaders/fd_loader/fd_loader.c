@@ -41,6 +41,7 @@
 // Written by:	DEL NERO Jean Francois
 //
 // Change History (most recent first):
+// Jan. 2017 :  T. Missonier (sourcezax@users.sourceforge.net) : Correction for double sided fd files. Added fd_writer support
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <string.h>
@@ -57,7 +58,7 @@
 #include "floppy_utils.h"
 
 #include "fd_loader.h"
-
+#include "fd_writer.h"
 #include "libhxcadaptor.h"
 
 int FD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
@@ -166,7 +167,7 @@ int FD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 			fseek (f , file_offset , SEEK_SET);
 			hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
 
-			currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
+			currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,0,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
 		}
 	}
 
@@ -189,7 +190,7 @@ int FD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retur
 	{
 		(ISVALIDDISKFILE)	FD_libIsValidDiskFile,
 		(LOADDISKFILE)		FD_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		FD_libWrite_DiskFile,
 		(GETPLUGININFOS)	FD_libGetPluginInfo
 	};
 
