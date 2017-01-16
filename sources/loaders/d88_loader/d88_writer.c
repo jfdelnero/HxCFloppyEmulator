@@ -147,8 +147,8 @@ int D88_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 											fmdd_found++;
 									}
 
-									d88_s.cylinder = j;
-									d88_s.head = i;
+									d88_s.cylinder = sca[k]->cylinder;
+									d88_s.head = sca[k]->head;
 									d88_s.number_of_sectors = nb_valid_sector;
 									d88_s.sector_id = sca[k]->sector;
 
