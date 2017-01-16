@@ -11,7 +11,6 @@ enum
 {
 	FF_HFE=0,
 	FF_MFM,
-	FF_FD,
 	FF_AFI,
 	FF_VTR,
 	FF_RAW,
@@ -29,6 +28,7 @@ enum
 	FF_DIM,	
 	FF_STX,
 	FF_STW,
+	FF_FD,
 	FF_HDDDA2_HFE,
 	FF_EHFE,
 	FF_ARBG,
