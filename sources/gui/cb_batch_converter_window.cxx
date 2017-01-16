@@ -99,7 +99,6 @@ ff_type ff_type_list[]=
 {
 	{ FF_HFE,"HFE - SDCard HxC Floppy Emulator file format",PLUGIN_HXC_HFE,".hfe"},
 	{ FF_MFM,"MFM - MFM/FM track file format",PLUGIN_HXC_MFM,".mfm"},
-	{ FF_FD, "FD - Thomson file image format",PLUGIN_THOMSON_FD,".fd"},
 	{ FF_AFI,"AFI - Advanced file image format",PLUGIN_HXC_AFI,".afi"},
 	{ FF_VTR,"VTR - VTrucco Floppy Emulator file format",PLUGIN_VTR_IMG,".vtr"},
 	{ FF_RAW,"RAW - RAW sectors file format",PLUGIN_RAW_LOADER,".img"},
@@ -117,6 +116,7 @@ ff_type ff_type_list[]=
 	{ FF_DIM, "DIM - ATARI ST DIM file format",PLUGIN_ATARIST_DIM,".dim"},
 	{ FF_STX, "STX - ATARI ST STX file format",PLUGIN_ATARIST_STX,".stx"},
 	{ FF_STW, "STW - ATARI ST STW file format",PLUGIN_ATARIST_STW,".stw"},
+	{ FF_FD, "FD - Thomson file image format",PLUGIN_THOMSON_FD,".fd"},
 	{ FF_AMSTRADDSK, "DSK - Amstrad CPC DSK file format",PLUGIN_AMSTRADCPC_DSK,".dsk"},
 	{ FF_HDDDA2_HFE,"HFE - HDDD A2 Support",PLUGIN_HXC_HDDD_A2,".hfe"},
 	{ FF_EHFE,"HFE - Rev 2 - Experimental",PLUGIN_HXC_EXTHFE,".hfe"},

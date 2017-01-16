@@ -128,6 +128,7 @@ const char * plugid_lst[]=
 	PLUGIN_ATARIST_DIM,
 	PLUGIN_ATARIST_STX,
 	PLUGIN_ATARIST_STW,
+	PLUGIN_THOMSON_FD,
 	PLUGIN_HXC_HDDD_A2,
 	PLUGIN_HXC_EXTHFE,
 	PLUGIN_ARBURG,
@@ -474,6 +475,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"ATARI ST DIM file\t*.dim\n"
 					"ATARI ST STX file\t*.stx\n"
 					"ATARI ST STW file\t*.stw\n"
+					"Thomson FD file\t*.fd\n"
 					"HFE file (HDDD A2 Encoding support)\t*.hfe\n"
 					"HFE file (Rev 2 - Experimental)\t*.hfe\n"
 					"Arburg file\t*.arburgfd\n"
