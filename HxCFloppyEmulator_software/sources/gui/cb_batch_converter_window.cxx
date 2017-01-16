@@ -99,6 +99,7 @@ ff_type ff_type_list[]=
 {
 	{ FF_HFE,"HFE - SDCard HxC Floppy Emulator file format",PLUGIN_HXC_HFE,".hfe"},
 	{ FF_MFM,"MFM - MFM/FM track file format",PLUGIN_HXC_MFM,".mfm"},
+	{ FF_FD, "FD - Thomson file image format",PLUGIN_THOMSON_FD,".fd"},
 	{ FF_AFI,"AFI - Advanced file image format",PLUGIN_HXC_AFI,".afi"},
 	{ FF_VTR,"VTR - VTrucco Floppy Emulator file format",PLUGIN_VTR_IMG,".vtr"},
 	{ FF_RAW,"RAW - RAW sectors file format",PLUGIN_RAW_LOADER,".img"},

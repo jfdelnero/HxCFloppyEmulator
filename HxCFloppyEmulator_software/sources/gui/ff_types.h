@@ -11,6 +11,7 @@ enum
 {
 	FF_HFE=0,
 	FF_MFM,
+	FF_FD,
 	FF_AFI,
 	FF_VTR,
 	FF_RAW,
