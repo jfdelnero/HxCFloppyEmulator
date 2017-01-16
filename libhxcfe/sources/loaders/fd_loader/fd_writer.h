@@ -25,7 +25,7 @@
 //
 */
 /*Changelog 
-/*Jan 2017 : FD_writer.h (based on ST_writer)  by T. Missonier (sourcezax@users.sourceforge.net) */
+  Jan 2017 : FD_writer.h (based on ST_writer)  by T. Missonier (sourcezax@users.sourceforge.net) */
 
 int FD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 int write_raw_FDfile(HXCFE_IMGLDR * imgldr_ctx,FILE * f,HXCFE_FLOPPY * fp,int32_t startidsector,int32_t sectorpertrack,int32_t nboftrack,int32_t nbofside,int32_t sectorsize,int32_t tracktype,int32_t sidefilelayout);
