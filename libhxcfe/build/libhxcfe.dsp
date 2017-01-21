@@ -1202,6 +1202,10 @@ SOURCE=..\sources\loaders\fd_loader\fd_loader.c
 
 SOURCE=..\sources\loaders\fd_loader\fd_loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\fd_loader\fd_writer.c
+# End Source File
 # End Group
 # Begin Group "VDK"
 
