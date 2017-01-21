@@ -1,6 +1,6 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
-header_name {.h} 
+version 1.0304
+header_name {.h}
 code_name {.cxx}
 class sdhxcfecfg_window {open
 } {
@@ -8,7 +8,7 @@ class sdhxcfecfg_window {open
   } {
     Fl_Window window {
       label {SDCard HxC Floppy Emulator settings} open selected
-      xywh {393 287 568 292} type Double labelsize 12 visible
+      xywh {61 305 565 290} type Double labelsize 12 visible
     } {
       Fl_Group {} {
         label {SD HxC Floppy Emulator Usage settings} open
@@ -58,25 +58,25 @@ class sdhxcfecfg_window {open
           label {Load last loaded floppy}
           user_data this
           callback sdhxcfecfg_window_datachanged
-          xywh {151 112 145 18} down_box DOWN_BOX labelsize 12
+          xywh {151 112 145 18} down_box DOWN_BOX labelsize 11
         }
         Fl_Check_Button chk_disabediskdriveselector {
-          label {Disable disk drive selector}
+          label {Disable drive selector}
           user_data this
           callback sdhxcfecfg_window_datachanged
-          xywh {151 131 165 17} down_box DOWN_BOX labelsize 12
+          xywh {151 131 154 17} down_box DOWN_BOX labelsize 11
         }
         Fl_Check_Button chk_force_loading_startupa {
-          label {Force loading STARTUPA.HFE into the drive A at power up}
+          label {Force loading STARTUPA.HFE to drive A at power up}
           user_data this
           callback sdhxcfecfg_window_datachanged
-          xywh {5 153 301 16} down_box DOWN_BOX labelsize 11
+          xywh {3 153 310 16} down_box DOWN_BOX labelsize 11
         }
         Fl_Check_Button chk_force_loading_startupb {
-          label {Force loading STARTUPB.HFE into the drive B at power up}
+          label {Force loading STARTUPB.HFE to drive B at power up}
           user_data this
           callback sdhxcfecfg_window_datachanged
-          xywh {5 168 301 16} down_box DOWN_BOX labelsize 11
+          xywh {3 170 310 16} down_box DOWN_BOX labelsize 11
         }
         Fl_Group {} {
           label {AUTO BOOT Mode / File Selector software startup} open
@@ -86,19 +86,19 @@ class sdhxcfecfg_window {open
             label {Enable auto boot mode}
             user_data this
             callback sdhxcfecfg_window_datachanged
-            xywh {5 249 126 18} down_box DOWN_BOX labelsize 11
+            xywh {3 249 142 18} down_box DOWN_BOX labelsize 11
           }
           Fl_Check_Button chk_force_loading_autoboot {
             label {Force loading AUTOBOOT.HFE at power up}
             user_data this
             callback sdhxcfecfg_window_datachanged
-            xywh {5 268 226 18} down_box DOWN_BOX labelsize 11
+            xywh {3 268 226 18} down_box DOWN_BOX labelsize 11
           }
           Fl_Check_Button chk_preindex {
-            label {Enable index Pre incrementing}
+            label {Enable index Pre increment}
             user_data this
             callback sdhxcfecfg_window_datachanged
-            xywh {146 249 160 18} down_box DOWN_BOX labelsize 11
+            xywh {144 249 171 18} down_box DOWN_BOX labelsize 11
           }
         }
         Fl_Group {} {
@@ -109,7 +109,7 @@ class sdhxcfecfg_window {open
             label {Enable indexed mode}
             user_data this
             callback sdhxcfecfg_window_datachanged
-            xywh {5 210 121 16} down_box DOWN_BOX labelsize 11
+            xywh {3 210 132 16} down_box DOWN_BOX labelsize 11
           }
         }
       }
@@ -163,7 +163,7 @@ class sdhxcfecfg_window {open
             xywh {321 195 125 16} down_box DOWN_BOX labelsize 12
           }
           Fl_Check_Button chk_drvb_as_motoron {
-            label {Drive B input as Drives A and B Motor ON}
+            label {Drive B input as Drives Motor ON}
             callback sdhxcfecfg_window_datachanged
             xywh {321 210 240 16} down_box DOWN_BOX labelsize 12
           }
@@ -196,20 +196,20 @@ class sdhxcfecfg_window {open
         label {Load config file}
         user_data this
         callback sdhxcfecfg_window_bt_load
-        xywh {318 235 90 25} labelsize 12
+        xywh {318 235 107 25} labelsize 12
       }
       Fl_Button {} {
         label {Save config file}
         user_data this
         callback sdhxcfecfg_window_bt_save
-        xywh {318 262 90 25} labelsize 12
+        xywh {318 262 107 25} labelsize 12
       }
       Fl_Button {} {
         label OK
         user_data this
         callback {((Fl_Window*)(o->parent()))->hide();}
-        xywh {475 262 90 25} labelsize 12
+        xywh {473 262 90 25} labelsize 12
       }
     }
   }
-} 
+}
