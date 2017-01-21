@@ -1,186 +1,186 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
-header_name {.h} 
+version 1.0304
+header_name {.h}
 code_name {.cxx}
 class trackedittool_window {open
 } {
   Function {trackedittool_window()} {open
   } {
     Fl_Window window {
-      label {Track edition toolbar} open
-      xywh {119 105 199 475} type Double labelsize 12 visible
+      label {Track edition toolbar} open selected
+      xywh {263 164 220 380} type Double labelsize 12 visible
     } {
       Fl_Button bt_copy {
         label Copy
         user_data this
         callback edittool_window_bt_copy_callback
-        xywh {7 43 93 20} labelsize 10
+        xywh {7 36 113 16} labelsize 10
       }
       Fl_Button bt_startpoint {
         label {Select start point}
         user_data this
         callback edittool_window_bt_startpoint_callback
-        xywh {7 3 93 20} labelsize 10
+        xywh {7 3 113 16} labelsize 10
       }
       Fl_Button bt_endpoint {
         label {Select end point}
         user_data this
         callback edittool_window_bt_endpoint_callback
-        xywh {7 23 93 20} labelsize 10
+        xywh {7 20 113 16} labelsize 10
       }
       Fl_Button bt_paste {
         label Paste
         user_data this
         callback edittool_window_bt_paste_callback
-        xywh {7 63 93 20} labelsize 10
+        xywh {7 52 113 16} labelsize 10
       }
       Fl_Button bt_fill {
         label Fill
         user_data this
         callback edittool_window_bt_fill_callback
-        xywh {7 83 93 20} labelsize 10
+        xywh {7 68 113 16} labelsize 10
       }
       Fl_Input edit_startpoint {
-        xywh {104 2 85 20} type Int labelsize 10 textsize 10
+        xywh {125 3 85 16} type Int labelsize 10 textsize 10
       }
       Fl_Input edit_endpoint {
-        xywh {104 23 85 20} type Int labelsize 10 textsize 10
+        xywh {125 20 85 16} type Int labelsize 10 textsize 10
       }
       Fl_Button bt_insert {
         label Insert
         user_data this
         callback edittool_window_bt_insert_callback
-        xywh {7 103 93 20} labelsize 10
+        xywh {7 85 113 16} labelsize 10
       }
       Fl_Button bt_delete {
         label Delete
         user_data this
         callback edittool_window_bt_delete_callback
-        xywh {7 123 93 20} labelsize 10
+        xywh {7 102 113 16} labelsize 10
       }
       Fl_Button bt_setflakey {
         label {Set Flakey pattern}
         user_data this
         callback edittool_window_bt_flakeypattern_callback
-        xywh {7 143 93 20} labelsize 10
+        xywh {7 118 113 16} labelsize 10
       }
       Fl_Button bt_setbitrate {
         label {Set bitrate}
         user_data this
         callback edittool_window_bt_setbitrate_callback
-        xywh {7 163 93 20} labelsize 10
+        xywh {7 134 113 16} labelsize 10
       }
       Fl_Light_Button bt_directedition {
         label {Direct edition}
         user_data this
-        xywh {7 425 93 20} labelsize 10
+        xywh {7 335 113 16} labelsize 10
       }
       Fl_Input edit_bitrate {
         user_data this
-        xywh {105 163 85 20} type Int labelsize 10 textsize 10
+        xywh {125 134 85 16} type Int labelsize 10 textsize 10
       }
       Fl_Input edit_editbuffer {
         user_data this
-        xywh {8 450 182 22} type Int labelsize 10 textsize 10
+        xywh {7 352 207 22} type Int labelsize 10 textsize 10
       }
       Fl_Button bt_shift {
         label Shift
         user_data this
         callback edittool_window_bt_shift_callback
-        xywh {7 183 93 20} labelsize 10
+        xywh {7 150 113 16} labelsize 10
       }
       Fl_Input edit_shiftbit {
         user_data this
-        xywh {105 183 85 20} type Int labelsize 10 textsize 10
+        xywh {125 150 85 16} type Int labelsize 10 textsize 10
       }
       Fl_Input edit_fillflakey {
         user_data this
-        xywh {105 143 85 20} type Int labelsize 10 textsize 10
+        xywh {125 68 85 16} type Int labelsize 10 textsize 10
       }
       Fl_Button bt_erase1 {
         label {Erase Side 1}
         user_data this
         callback edittool_window_bt_erase_side1_callback
-        xywh {7 313 93 20} labelsize 10
+        xywh {7 250 113 16} labelsize 10
       }
       Fl_Button bt_erase0 {
         label {Erase Side 0}
         user_data this
         callback edittool_window_bt_erase_side0_callback
-        xywh {7 293 93 20} labelsize 10
+        xywh {7 234 113 16} labelsize 10
       }
       Fl_Button bt_setdiskbitrate {
         label {Set Disk Bitrate}
         user_data this
         callback edittool_window_bt_setdiskbitrate_callback
-        xywh {7 253 93 20} labelsize 10
+        xywh {7 202 113 16} labelsize 10
       }
       Fl_Input edit_bitrate2 {
         user_data this
-        xywh {105 253 85 20} type Int labelsize 10 textsize 10
+        xywh {125 202 85 16} type Int labelsize 10 textsize 10
       }
       Fl_Button bt_rpm {
         label {Set Disk RPM}
         user_data this
         callback edittool_window_bt_setdiskrpm_callback
-        xywh {7 233 93 20} labelsize 10
+        xywh {7 187 113 16} labelsize 10
       }
       Fl_Button bt_addtrack {
         label {Add Track}
         user_data this
         callback edittool_window_bt_addtrack_callback
-        xywh {7 353 93 20} labelsize 9
+        xywh {7 282 113 16} labelsize 9
       }
       Fl_Button bt_removetrack {
         label {Remove Track}
         user_data this
         callback edittool_window_bt_removetrack_callback
-        xywh {7 373 93 20} labelsize 9
+        xywh {7 298 113 16} labelsize 9
       }
       Fl_Input edit_rpm {
         user_data this
-        xywh {105 233 85 20} type Int labelsize 10 textsize 10
+        xywh {125 187 85 16} type Int labelsize 10 textsize 10
       }
       Fl_Box {} {
-        xywh {6 228 185 1} box ENGRAVED_BOX align 16
+        xywh {6 184 209 1} box ENGRAVED_BOX align 16
       }
       Fl_Box {} {
-        xywh {5 419 185 1} box ENGRAVED_BOX align 16
+        xywh {5 332 210 1} box ENGRAVED_BOX align 16
       }
       Fl_Button bt_removeoddtracks {
         label {Remove Odd Tracks}
         user_data this
         callback edittool_window_bt_removeoddtracks_callback
-        xywh {7 393 93 20} labelsize 9
+        xywh {7 314 113 16} labelsize 9
       }
       Fl_Button bt_shifttracks {
         label {Shift Tracks}
         user_data this
         callback edittool_window_bt_shifttracks_callback
-        xywh {7 273 93 20} labelsize 10
+        xywh {7 218 113 16} labelsize 10
       }
       Fl_Input edit_shiftbittracks {
         user_data this
-        xywh {105 272 85 20} type Int labelsize 10 textsize 10
+        xywh {125 217 85 16} type Int labelsize 10 textsize 10
       }
       Fl_Button bt_swapsides {
         label {Swap sides}
         user_data this
         callback edittool_window_bt_swapsides_callback
-        xywh {7 333 93 20} labelsize 10
+        xywh {7 266 113 16} labelsize 10
       }
       Fl_Button bt_repair {
         label Repair
         user_data this
         callback edittool_window_bt_repair_callback
-        xywh {7 203 93 20} labelsize 10 deactivate
+        xywh {7 166 113 16} labelsize 10 deactivate
       }
       Fl_Button bt_reversedisk {
         label {Reverse Tracks}
         user_data this
-        callback edittool_window_bt_reversedisk_callback selected
-        xywh {103 333 93 20} labelsize 10
+        callback edittool_window_bt_reversedisk_callback
+        xywh {120 314 95 16} labelsize 10
       }
     }
   }
-} 
+}

@@ -516,11 +516,11 @@ void load_file_image_pb(Fl_Widget * widget, void * ptr)
 
 #define BUTTON_XPOS 5
 #define BUTTON_YPOS 30
-#define BUTTON_XSIZE 100
+#define BUTTON_XSIZE 110
 #define BUTTON_YSIZE 35
 #define BUTTON_YSTEP 35
 
-#define WINDOW_XSIZE 341
+#define WINDOW_XSIZE 345
 
 void sync_if_config()
 {

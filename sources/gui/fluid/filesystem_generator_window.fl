@@ -1,6 +1,6 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
-header_name {.h} 
+version 1.0304
+header_name {.h}
 code_name {.cxx}
 class filesystem_generator_window {open
 } {
@@ -8,7 +8,7 @@ class filesystem_generator_window {open
   } {
     Fl_Window window {
       label {DOS Floppy Disk File Browser} open
-      xywh {365 142 704 416} type Double visible
+      xywh {365 142 705 415} type Double visible
     } {
       Fl_Button bt_injectdir {
         label {Create Disk}
@@ -43,7 +43,7 @@ class filesystem_generator_window {open
         xywh {5 377 600 32} labeltype NO_LABEL
       }
       Fl_Output hlptxt {
-        xywh {610 118 90 128} box NO_BOX labeltype NO_LABEL
+        xywh {610 118 90 155} box NO_BOX labeltype NO_LABEL labelsize 12 align 0 textsize 12
       }
       Fl_Button bt_saveexport {
         label {Save/Export}
@@ -57,9 +57,9 @@ class filesystem_generator_window {open
       }
       Fl_Counter disk_selector {
         label {Disk Selector:}
-        callback filesystem_generator_window_sel_disk selected
+        callback filesystem_generator_window_sel_disk
         xywh {610 290 90 20} align 1 minimum 0 maximum 1000 step 1
       }
     }
   }
-} 
+}
