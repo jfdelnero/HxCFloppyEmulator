@@ -263,7 +263,7 @@ void fatfs_sfn_create_entry(char *shortfilename, uint32 size, uint32 startCluste
     month= 9;
     mday = 26;
 
-    date = (((year-80) &0x7F)<<9) | ((month+1 &0xF)<<5) | (mday &0x1F);
+    date = (((year-80) &0x7F)<<9) | (((month+1) &0xF)<<5) | (mday &0x1F);
     // Unless we have a RTC we might as well set these to 1980
     entry->CrtTimeTenth = 0x00;
 	entry->CrtTime[0] = 0x00;
