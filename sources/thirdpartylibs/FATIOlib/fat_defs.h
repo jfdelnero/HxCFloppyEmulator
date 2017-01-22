@@ -107,6 +107,8 @@
 #define FAT32_LAST_CLUSTER              0xFFFFFFFF
 #define FAT32_INVALID_CLUSTER           0xFFFFFFFF
 
+#pragma pack(1)
+
 STRUCT_PACK_BEGIN
 struct fat_dir_entry STRUCT_PACK
 {
@@ -124,5 +126,7 @@ struct fat_dir_entry STRUCT_PACK
     uint32 FileSize;
 } STRUCT_PACKED;
 STRUCT_PACK_END
+
+#pragma pack()
 
 #endif
