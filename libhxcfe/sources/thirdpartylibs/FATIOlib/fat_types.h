@@ -45,7 +45,7 @@ typedef uint32_t uint32;
     #define STRUCT_PACK
     #define STRUCT_PACK_BEGIN
     #define STRUCT_PACK_END
-    #define STRUCT_PACKED           __attribute__ ((packed))
+    #define STRUCT_PACKED           __attribute__ ((packed,aligned(1)))
 #else
     // Other compilers may require other methods of packing structures
     #define STRUCT_PACK
