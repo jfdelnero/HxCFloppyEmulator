@@ -26,7 +26,7 @@
 */
 
 /*Changelog 
-/*Jan  2017 :  FD_writer.c (based on ST_writer)  by T. Missonier (sourcezax@users.sourceforge.net) */
+  Jan  2017 :  FD_writer.c (based on ST_writer)  by T. Missonier (sourcezax@users.sourceforge.net) */
 
 #include <string.h>
 #include <stdio.h>
