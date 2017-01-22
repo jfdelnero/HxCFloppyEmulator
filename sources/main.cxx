@@ -68,6 +68,24 @@ s_gui_context * guicontext;
 
 int main(int argc, char **argv)
 {
+
+#ifdef WIN32
+	OSVERSIONINFO osvi;
+
+	ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+
+	GetVersionEx(&osvi);
+
+	if( osvi.dwMajorVersion < 5 ) // At least Windows 2000 ?
+	{
+		// No ... Windows 95 & Windows 98 have no unicode support... FLTK can't be used with these OS...
+		MessageBox(NULL,"This version of Windows is unsupported !\nWindows 2000 or higher is required !\nFor Windows 95/98 please use an older version of this software (v1.X.X.X)",
+						"Unsupported Windows version",MB_OK|MB_ICONSTOP);
+		exit(-1);
+	}
+#endif
+
 	guicontext=(s_gui_context *)malloc(sizeof(s_gui_context));
 	if(guicontext)
 	{
@@ -76,6 +94,6 @@ int main(int argc, char **argv)
 		new Main_Window();
 
 		return 0;
-	}	
+	}
 	return -1;
 }
