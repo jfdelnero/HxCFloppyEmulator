@@ -10,15 +10,21 @@
 -------------------------------------------------------------------------------
 
 /*********************************************************
-Latest snapshot :
+22 January 2017: HxCFloppyEmulator 2.1.6.0
 
-XML format definitions : Korg DSS1 DD disk.
+XML format definitions : Korg DSS1 DD disks added.
 
-XML format definitions : Emax II.
+XML format definitions : Emax II disks added.
 
 Command line tool : USB loader -> Raw loader added.
 
 Amstrad DSK file added to the batch converter export list.
+
+New Writer : Thomson *.FD writer.
+
+Thomson *.FD loader fixed : Side 1 ID corrected to 0.
+
+D88 Writer fixed : Cylinder and Side ID correctly set.
 
 ImageDisk (*.IMD) export : Deleted data mark and data CRC error flags supported.
 
@@ -33,6 +39,8 @@ DosDiskBrowser : 1.743MB & 1.764MB added.
 MacOS X & Linux version : file export -> Auto-append the file extension.
 
 Track editor : Disk flux stream reverse function.
+
+Track viewer & editor : GUI layout changed/updated.
 
 *********************************************************/
 
