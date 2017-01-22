@@ -1,6 +1,6 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
-header_name {.h} 
+version 1.0304
+header_name {.h}
 code_name {.cxx}
 class floppy_infos_window {open
 } {
@@ -8,153 +8,153 @@ class floppy_infos_window {open
   } {
     Fl_Window window {
       label {Visual Floppy disk} open
-      xywh {99 9 1003 686} type Double visible
+      xywh {43 121 1275 540} type Double visible
     } {
       Fl_Group {} {
-        label Track open
-        xywh {0 502 170 93} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+        label {Track / Side selection} open
+        xywh {1000 372 275 84} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {
         Fl_Value_Slider track_number_slide {
           label {Track number}
           user_data this
           callback disk_infos_window_callback
-          xywh {6 522 159 19} type Horizontal labelsize 12 textsize 12
+          xywh {1006 388 264 19} type Horizontal labelsize 12 textsize 12
         }
         Fl_Value_Slider side_number_slide {
           label {Side number}
           user_data this
           callback disk_infos_window_callback
-          xywh {5 557 160 19} type Horizontal labelsize 12 textsize 12
+          xywh {1005 420 265 19} type Horizontal labelsize 12 textsize 12
         }
       }
       Fl_Group {} {
         label Status open
-        xywh {455 502 509 183} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL labelsize 12 align 21
+        xywh {1000 2 275 284} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL labelsize 12 align 21
       } {
         Fl_Output x_pos {
-          xywh {460 519 250 15} labelsize 10 textsize 10
+          xywh {1005 17 265 15} labelsize 10 textsize 10
         }
         Fl_Output y_pos {
-          xywh {710 519 250 15} labelsize 10 textsize 10
+          xywh {1005 33 265 15} labelsize 10 textsize 10
         }
         Fl_Output global_status {
-          xywh {460 534 500 13} labelsize 10 textsize 10
+          xywh {1005 49 265 16} labelsize 10 textsize 10
         }
         Fl_Text_Display object_txt {
-          user_data this
-          xywh {460 547 500 135}
+          user_data this selected
+          xywh {1005 68 265 215} labelsize 10 textsize 10
         }
       }
       Fl_Button {} {
         label OK
         user_data this
         callback floppy_infos_ok
-        xywh {969 504 30 179}
+        xywh {1158 465 105 26}
       }
       Fl_Group floppy_map_disp {
-        label {Floppy Map} open selected
+        label {Floppy Map} open
         xywh {0 1 1000 500} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {}
       Fl_Group {} {
         label View open
-        xywh {170 502 285 185} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+        xywh {0 500 1275 41} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {
         Fl_Value_Slider y_time {
           label {full y time scale (us)}
           user_data this
           callback disk_infos_window_callback
-          xywh {175 562 273 20} type {Horz Knob} labelsize 12 textsize 12
+          xywh {694 505 305 20} type {Horz Knob} labelsize 12 textsize 12
         }
         Fl_Value_Slider x_offset {
           label {x offset (% of the track len)}
           user_data this
           callback disk_infos_window_callback
-          xywh {175 604 273 20} type {Horz Knob} labelsize 12 textsize 12
+          xywh {45 505 305 20} type {Horz Knob} labelsize 12 textsize 12
         }
         Fl_Round_Button track_view_bt {
-          label {Track view}
+          label {Track view mode}
           user_data this
           callback disk_infos_window_callback
-          xywh {213 643 92 16} type Radio down_box ROUND_DOWN_BOX
+          xywh {1021 512 110 16} type Radio down_box ROUND_DOWN_BOX
         }
         Fl_Round_Button disc_view_bt {
-          label {Disk view}
+          label {Disk view mode}
           user_data this
           callback disk_infos_window_callback
-          xywh {340 642 81 16} type Radio down_box ROUND_DOWN_BOX
+          xywh {1151 512 103 16} type Radio down_box ROUND_DOWN_BOX
         }
         Fl_Slider x_time {
           label {full x time scale}
           user_data this
           callback disk_infos_window_callback
-          xywh {175 520 273 20} type Horizontal labelsize 12
-        }
-        Fl_Button bt_edit {
-          label {Edit tools}
-          user_data this
-          callback disk_infos_window_bt_edit_callback
-          xywh {256 663 100 20} labelsize 10
+          xywh {370 505 305 20} type Horizontal labelsize 12
         }
       }
       Fl_Group {} {
-        label Mode open
-        xywh {0 594 170 92} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
+        label {Track analysis format} open
+        xywh {1000 287 275 84} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
       } {
         Fl_Light_Button iso_mfm_bt {
           label {ISO MFM}
           user_data this
           callback disk_infos_window_callback
-          xywh {4 607 80 15} labelsize 10
+          xywh {1015 305 76 15} labelsize 10
         }
         Fl_Light_Button iso_fm_bt {
           label {ISO FM}
           user_data this
           callback disk_infos_window_callback
-          xywh {4 622 80 15} labelsize 10
+          xywh {1015 320 76 15} labelsize 10
         }
         Fl_Light_Button amiga_mfm_bt {
           label {AMIGA MFM}
           user_data this
           callback disk_infos_window_callback
-          xywh {4 637 80 15} labelsize 10
+          xywh {1015 335 76 15} labelsize 10
         }
         Fl_Light_Button membrain_bt {
           label MEMBRAIN
           user_data this
           callback disk_infos_window_callback
-          xywh {87 637 75 15} labelsize 10
+          xywh {1099 335 76 15} labelsize 10
         }
         Fl_Light_Button tycom_bt {
           label TYCOM
           user_data this
           callback disk_infos_window_callback
-          xywh {87 622 75 15} labelsize 10
+          xywh {1099 320 76 15} labelsize 10
         }
         Fl_Light_Button eemu_bt {
           label {E-Emu}
           user_data this
           callback disk_infos_window_callback
-          xywh {87 607 75 15} labelsize 10
+          xywh {1099 305 76 15} labelsize 10
         }
         Fl_Light_Button apple2_bt {
           label {Apple II}
           user_data this
           callback disk_infos_window_callback
-          xywh {4 652 80 15} labelsize 10
+          xywh {1015 350 76 15} labelsize 10
         }
         Fl_Light_Button arburg_bt {
           label Arburg
           user_data this
           callback disk_infos_window_callback
-          xywh {87 652 75 15} labelsize 10
+          xywh {1099 350 76 15} labelsize 10
         }
         Fl_Light_Button aed6200p_bt {
           label {AED 6200P}
           user_data this
           callback disk_infos_window_callback
-          xywh {87 667 75 15} labelsize 10
+          xywh {1183 305 76 15} labelsize 10
         }
+      }
+      Fl_Button bt_edit {
+        label {Edit tools}
+        user_data this
+        callback disk_infos_window_bt_edit_callback
+        xywh {1010 465 105 26} labelsize 10
       }
     }
   }
-} 
+}
