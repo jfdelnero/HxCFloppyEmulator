@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2016 Jean-François DEL NERO
+// Copyright (C) 2006-2017 Jean-François DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
