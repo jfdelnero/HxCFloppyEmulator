@@ -25,7 +25,7 @@
 //
 */
 
-/*Changelog 
+/*Changelog
   Jan  2017 :  FD_writer.c (based on ST_writer)  by T. Missonier (sourcezax@users.sourceforge.net) */
 
 #include <string.h>
@@ -66,7 +66,7 @@ int write_raw_FDfile(HXCFE_IMGLDR * imgldr_ctx,FILE * f,HXCFE_FLOPPY * fp,int32_
 				{
                      for( trk = 0 ; trk < nboftrack ; trk++ )
 			{
-				
+
 					for( sect = 0 ; sect < sectorpertrack ; sect++ )
 					{
 						scfg = hxcfe_searchSector ( ss, trk, side, startidsector + sect, tracktype );
@@ -157,11 +157,15 @@ int FD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * f
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d sectors (%d bytes), %d tracks, %d sides...",nbsector,sectorsize,nbtrack,nbside);
 
+	writeret = HXCFE_ACCESSERROR;
+
 	fdfile = hxc_fopen(filename,"wb");
 	if(fdfile)
 	{
 		writeret = write_raw_FDfile(imgldr_ctx,fdfile,floppy,1,16,80,nbside,sectorsize,ISOIBM_MFM_ENCODING,0);
 		hxc_fclose(fdfile);
+
+		writeret = HXCFE_NOERROR;
 	}
 
 	return writeret;
