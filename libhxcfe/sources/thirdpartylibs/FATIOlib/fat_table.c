@@ -255,13 +255,15 @@ uint32 fatfs_find_next_cluster(struct fatfs *fs, uint32 current_cluster)
     if (current_cluster == 0)
         current_cluster = 2;
 
+	reload_needed = 0;
+	position = 0;
+
     // Find which sector of FAT table to read
     if (fs->fat_type == FAT_TYPE_12)
     {
         position = ( (current_cluster * 3) / 2 );
         fat_sector_offset =  position / fs->sector_size;
 
-        reload_needed = 0;
         if ( (uint32_t)(position % fs->sector_size) == (uint32_t)(fs->sector_size-1))
         {
             // reload needed
@@ -288,7 +290,6 @@ uint32 fatfs_find_next_cluster(struct fatfs *fs, uint32 current_cluster)
         // Read Next Clusters value from Sector Buffer
         if(reload_needed)
         {
-
             fat12_clusnum_part1 = FAT12_GET_8BIT_WORD(pbuf,fs->sector_size-1);
             pbuf = fatfs_fat_read_sector(fs, fs->fat_begin_lba+fat_sector_offset+1);
             fat12_clusnum_part2 = FAT12_GET_8BIT_WORD(pbuf,0);
@@ -391,6 +392,8 @@ int fatfs_find_blank_cluster(struct fatfs *fs, uint32 start_cluster, uint32 *fre
 		current_cluster = start_cluster;
 
     reload_needed = 0;
+	position = 0;
+
     do
     {
         // Find which sector of FAT table to read
@@ -494,6 +497,8 @@ int fatfs_fat_set_cluster(struct fatfs *fs, uint32 cluster, uint32 next_cluster)
     int reload_needed;
 
     reload_needed = 0;
+	position = 0;
+
     // Find which sector of FAT table to read
     if (fs->fat_type == FAT_TYPE_12)
     {

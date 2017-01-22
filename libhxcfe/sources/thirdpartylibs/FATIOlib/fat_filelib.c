@@ -1515,7 +1515,6 @@ int fiol_createdirectory(const char *path)
 void fiol_listdirectory(const char *path)
 {
     FL_DIR dirstat;
-    int filenumber = 0;
 
     // If first call to library, initialise
     CHECK_FL_INIT();
