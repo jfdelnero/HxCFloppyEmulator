@@ -117,9 +117,9 @@ int SAP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return -1;
 	}
 
-	gap3len=255;
-	interleave=1;
-	skew=0;
+	gap3len = 255;
+	interleave = 7;
+	skew = 0;
 
 	switch(floppyformat)
 	{
