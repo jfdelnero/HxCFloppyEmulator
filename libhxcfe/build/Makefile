@@ -63,7 +63,7 @@ DISKLOADERPLUGINS = copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigado
 					camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o fdi_loader.o ssd_dsd_loader.o adl_loader.o \
 					krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o system24_loader.o kryofluxstream_loader.o kryofluxstream.o \
 					fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o xml_loader.o \
-					flppcm_loader.o stw_loader.o vfddat_loader.o ana_loader.o
+					flppcm_loader.o stw_loader.o vfddat_loader.o ana_loader.o atr_loader.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
@@ -144,7 +144,7 @@ crc.o: $(BASEDIR)/tracks/crc.c $(BASEDIR)/tracks/crc.h
 
 std_crc32.o: $(BASEDIR)/tracks/std_crc32.c $(BASEDIR)/tracks/std_crc32.h
 	$(CC) -o $@ -c $< $(CFLAGS)
-	
+
 track_generator.o : $(BASEDIR)/tracks/track_generator.c $(BASEDIR)/tracks/track_generator.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
@@ -262,6 +262,9 @@ dim_loader.o : $(BASEDIR)/loaders/dim_loader/dim_loader.c $(BASEDIR)/loaders/dim
 dim_writer.o : $(BASEDIR)/loaders/dim_loader/dim_writer.c $(BASEDIR)/loaders/dim_loader/dim_writer.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+atr_loader.o : $(BASEDIR)/loaders/atr_loader/atr_loader.c $(BASEDIR)/loaders/atr_loader/atr_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
 stt_loader.o : $(BASEDIR)/loaders/stt_loader/stt_loader.c $(BASEDIR)/loaders/stt_loader/stt_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
@@ -354,7 +357,7 @@ sap_loader.o : $(BASEDIR)/loaders/sap_loader/sap_loader.c $(BASEDIR)/loaders/sap
 
 fd_loader.o : $(BASEDIR)/loaders/fd_loader/fd_loader.c $(BASEDIR)/loaders/fd_loader/fd_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
-	
+
 fd_writer.o : $(BASEDIR)/loaders/fd_loader/fd_writer.c $(BASEDIR)/loaders/fd_loader/fd_writer.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 

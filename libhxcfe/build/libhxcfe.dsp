@@ -1919,6 +1919,22 @@ SOURCE=..\sources\loaders\ana_loader\ana_loader.c
 SOURCE=..\sources\loaders\ana_loader\ana_loader.h
 # End Source File
 # End Group
+# Begin Group "ATR"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\atr_loader\atr_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\atr_loader\atr_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\atr_loader\atr_loader.h
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 

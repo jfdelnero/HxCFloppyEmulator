@@ -105,6 +105,7 @@
 #include "./loaders/stw_loader/stw_loader.h"
 #include "./loaders/vfddat_loader/vfddat_loader.h"
 #include "./loaders/ana_loader/ana_loader.h"
+#include "./loaders/atr_loader/atr_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -192,6 +193,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)ARBURG_RAW_libGetPluginInfo,
 	(GETPLUGININFOS)XML_libGetPluginInfo,
 	(GETPLUGININFOS)ANA_libGetPluginInfo,
+	(GETPLUGININFOS)ATR_libGetPluginInfo,
 	//(GETPLUGININFOS)VFDDAT_libGetPluginInfo,
 	(GETPLUGININFOS)-1
 };
