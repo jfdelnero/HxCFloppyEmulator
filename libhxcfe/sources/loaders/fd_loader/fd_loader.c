@@ -138,7 +138,7 @@ int FD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 	}
 
 	gap3len=50;
-	interleave=1;
+	interleave = 7;
 	skew=0;
 	trackformat=ISOFORMAT_DD;
 	floppydisk->floppyNumberOfTrack=80;
