@@ -958,6 +958,30 @@ SOURCE=..\sources\loaders\hfe_loader\hfe_loader.h
 
 SOURCE=..\sources\loaders\hfe_loader\hfe_writer.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\hfe_loader\hfev3_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\hfe_loader\hfev3_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\hfe_loader\hfev3_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\hfe_loader\hfev3_trackgen.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\hfe_loader\hfev3_trackgen.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\hfe_loader\hfev3_writer.c
+# End Source File
 # End Group
 # Begin Group "IMD"
 
