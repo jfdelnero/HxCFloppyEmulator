@@ -31,6 +31,7 @@ enum
 	FF_FD,
 	FF_HDDDA2_HFE,
 	FF_EHFE,
+	FF_HFEV3,
 	FF_ARBG,
 	FF_SKF,
 	FF_IPF,
