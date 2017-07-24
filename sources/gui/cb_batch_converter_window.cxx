@@ -120,6 +120,7 @@ ff_type ff_type_list[]=
 	{ FF_AMSTRADDSK, "DSK - Amstrad CPC DSK file format",PLUGIN_AMSTRADCPC_DSK,".dsk"},
 	{ FF_HDDDA2_HFE,"HFE - HDDD A2 Support",PLUGIN_HXC_HDDD_A2,".hfe"},
 	{ FF_EHFE,"HFE - Rev 2 - Experimental",PLUGIN_HXC_EXTHFE,".hfe"},
+	{ FF_HFEV3,"HFE - Rev 3 - Experimental",PLUGIN_HXC_HFEV3,".hfe"},	
 	{ FF_ARBG,"Arburg - Arburg RAW sectors file format",PLUGIN_ARBURG,".arburgfd"},
 	{ FF_SKF,"Raw - Stream Kryoflux file format",PLUGIN_SKF,".raw"},
 	{ FF_IPF,"IPF - IPF file format (W.I.P)",PLUGIN_IPF,".ipf"},

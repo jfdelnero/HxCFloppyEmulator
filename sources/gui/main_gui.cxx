@@ -131,6 +131,7 @@ const char * plugid_lst[]=
 	PLUGIN_THOMSON_FD,
 	PLUGIN_HXC_HDDD_A2,
 	PLUGIN_HXC_EXTHFE,
+	PLUGIN_HXC_HFEV3,
 	PLUGIN_ARBURG,
 	PLUGIN_SKF,
 	PLUGIN_IPF,
@@ -478,6 +479,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"Thomson FD file\t*.fd\n"
 					"HFE file (HDDD A2 Encoding support)\t*.hfe\n"
 					"HFE file (Rev 2 - Experimental)\t*.hfe\n"
+					"HFE file (Rev 3 - Experimental)\t*.hfe\n"					
 					"Arburg file\t*.arburgfd\n"
 					"KF Stream file\t*.raw\n"
 					"SPS IPF file (WIP)\t*.ipf\n"
