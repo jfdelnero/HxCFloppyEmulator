@@ -305,12 +305,7 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 					floppy->tracks[i]->sides[1]->timingbuffer,
 					&final_buffer_H0,
 					&final_buffer_H1,
-					&final_randombuffer,
-					0,
-					0,
-					0,
-					0,
-					0);
+					&final_randombuffer);
 
 				precalcopcodestracks[i].opcodetrack_H0 = (unsigned char *)malloc(final_buffer_len);
 				precalcopcodestracks[i].opcodetrack_H1 = (unsigned char *)malloc(final_buffer_len);
@@ -348,7 +343,7 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 
 				if(mfmsize2>mfmsize) mfmsize=mfmsize2;
 */
-				mfmsize = final_buffer_len;
+				mfmsize = final_buffer_len * 2;
 
 				tracklenarray[i] = final_buffer_len;
 
@@ -359,10 +354,10 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 				}
 
 				track=(pictrack *)(offsettrack+(i*sizeof(pictrack)));
-				track->track_len=mfmsize*2;
-				track->offset=trackpos;
+				track->track_len = mfmsize;
+				track->offset = trackpos;
 
-				if((mfmsize*2)%512)
+				if( ( mfmsize ) % 512 )
 					trackpos=trackpos+(((mfmsize)/512)+1);
 				else
 					trackpos=trackpos+((mfmsize)/512);
