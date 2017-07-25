@@ -59,16 +59,9 @@
 
 //#define DEBUGVB 1
 
-
-#define SETINDEX_H0_OPCODE 0xC0
-#define SETINDEX_H1_OPCODE 0x0C
-
-#define NOP_H0_OPCODE 0x70
-#define NOP_H1_OPCODE 0x07
-
-#define SETBITRATE_H0_OPCODE 0xD0
-#define SETBITRATE_H1_OPCODE 0x0D
-
+#define SETINDEX_OPCODE 0xF1
+#define NOP_OPCODE 0xF0
+#define SETBITRATE_OPCODE 0xF2
 
 trackzone trackzonebuffer_0[2048*2];
 trackzone trackzonebuffer_1[2048*2];
@@ -207,7 +200,7 @@ uint32_t * realloc_time_buffer(uint32_t * buffer,uint32_t numberofbit,uint32_t f
 	return ptr;
 }
 
-int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0,uint32_t lendatah0,uint8_t * datah1,uint32_t lendatah1,uint8_t * randomh0,uint8_t * randomh1,int32_t fixedbitrateh0,uint32_t * timeh0,int32_t fixedbitrateh1,uint32_t * timeh1,uint8_t ** finalbuffer_H0_param,uint8_t ** finalbuffer_H1_param,uint8_t ** randomfinalbuffer_param,uint8_t readysignal,uint8_t diskchange,uint8_t writeprotect,uint8_t amigaready,uint8_t selectconfig)
+int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0,uint32_t lendatah0,uint8_t * datah1,uint32_t lendatah1,uint8_t * randomh0,uint8_t * randomh1,int32_t fixedbitrateh0,uint32_t * timeh0,int32_t fixedbitrateh1,uint32_t * timeh1,uint8_t ** finalbuffer_H0_param,uint8_t ** finalbuffer_H1_param,uint8_t ** randomfinalbuffer_param)
 {
 	uint32_t i,k,j;
 
@@ -279,9 +272,9 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	trackzoneindex1=0;
 
 	if(lendatah0>lendatah1)
-		finalsizebuffer=(lendatah0*2)+(32000*sizefactor);
+		finalsizebuffer=(lendatah0)+(32000*sizefactor);
 	else
-		finalsizebuffer=(lendatah1*2)+(32000*sizefactor);
+		finalsizebuffer=(lendatah1)+(32000*sizefactor);
 
 	finalbuffer_H0 = malloc(finalsizebuffer);
 	memset(finalbuffer_H0,0,finalsizebuffer);
@@ -726,30 +719,19 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 		{
 			if((index_h0[i] && !currentindex) || (!index_h0[i] && currentindex))
 			{
-				finalbuffer_H0[k]=SETINDEX_H0_OPCODE | SETINDEX_H1_OPCODE;
-				finalbuffer_H1[k]=SETINDEX_H0_OPCODE | SETINDEX_H1_OPCODE;
+				finalbuffer_H0[k] = SETINDEX_OPCODE;
+				finalbuffer_H1[k] = SETINDEX_OPCODE;
 
 				k=(k+1)%finalsizebuffer;
 
 				if(index_h0[i])
 				{
-					finalbuffer_H0[k]=1;
-					finalbuffer_H1[k]=1;
 					currentindex=1;
 				}
 				else
 				{
-					finalbuffer_H0[k]=0;
-					finalbuffer_H1[k]=0;
 					currentindex=0;
 				}
-				finalbuffer_H0[k] |= ((readysignal<<1)&0x2);
-				finalbuffer_H0[k] |= ((diskchange<<2)&0x4);
-				finalbuffer_H0[k] |= ((writeprotect<<3)&0x8);
-				finalbuffer_H0[k] |= ((amigaready<<4)&0x10);
-				finalbuffer_H0[k] |= ((selectconfig<<5)&0xE0);
-				finalbuffer_H1[k] = finalbuffer_H0[k];
-				k=(k+1)%finalsizebuffer;
 			}
 		}
 
@@ -764,11 +746,11 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			lencode_track1=trackpartbuffer_1[trackparthead1index].len;
 			trackparthead1index++;
 
-			finalbuffer_H0[k] = SETBITRATE_H0_OPCODE | SETBITRATE_H1_OPCODE;
-			finalbuffer_H1[k] = finalbuffer_H0[k];
+			finalbuffer_H0[k] = SETBITRATE_OPCODE;
+			finalbuffer_H1[k] = SETBITRATE_OPCODE;
 			k=(k+1)%finalsizebuffer;
 			finalbuffer_H0[k] = speedcfg_track0-2;
-			finalbuffer_H1[k] = finalbuffer_H0[k];
+			finalbuffer_H1[k] = speedcfg_track0-2;
 			k=(k+1)%finalsizebuffer;
 		}
 		else
@@ -784,14 +766,23 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 					trackparthead0index++;
 
 					if(speedcfg_track0!=speedcfg_track1)
-						finalbuffer_H0[k]=SETBITRATE_H0_OPCODE | NOP_H1_OPCODE;
-					else
-						finalbuffer_H0[k]=SETBITRATE_H0_OPCODE | SETBITRATE_H1_OPCODE;
+					{
+						finalbuffer_H0[k] = SETBITRATE_OPCODE;
+						finalbuffer_H1[k] = NOP_OPCODE;
+						k=(k+1)%finalsizebuffer;
+						finalbuffer_H0[k] = speedcfg_track0-2;
+						finalbuffer_H1[k] = NOP_OPCODE;
 
-					finalbuffer_H1[k] = finalbuffer_H0[k];
-					k=(k+1)%finalsizebuffer;
-					finalbuffer_H0[k]=speedcfg_track0-2;
-					finalbuffer_H1[k] = finalbuffer_H0[k];
+					}
+					else
+					{
+						finalbuffer_H0[k]=SETBITRATE_OPCODE;
+						finalbuffer_H1[k]=SETBITRATE_OPCODE;
+						k=(k+1)%finalsizebuffer;
+						finalbuffer_H0[k] = speedcfg_track0-2;
+						finalbuffer_H1[k] = speedcfg_track0-2;
+					}
+
 					k=(k+1)%finalsizebuffer;
 
 				}
@@ -807,13 +798,26 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 					trackparthead1index++;
 
 					if(speedcfg_track0!=speedcfg_track1)
-						finalbuffer_H0[k]=NOP_H0_OPCODE | SETBITRATE_H1_OPCODE;
+					{
+						finalbuffer_H0[k]= NOP_OPCODE;
+						finalbuffer_H1[k]= SETBITRATE_OPCODE;
+						
+						k=(k+1)%finalsizebuffer;
+
+						finalbuffer_H0[k] = NOP_OPCODE;
+						finalbuffer_H1[k] = speedcfg_track1-2;
+					}
 					else
-						finalbuffer_H0[k]=SETBITRATE_H0_OPCODE | SETBITRATE_H1_OPCODE;
-					finalbuffer_H1[k] = finalbuffer_H0[k];
-					k=(k+1)%finalsizebuffer;
-					finalbuffer_H0[k]=speedcfg_track1-2;
-					finalbuffer_H1[k] = finalbuffer_H0[k];
+					{
+						finalbuffer_H0[k]= SETBITRATE_OPCODE;
+						finalbuffer_H1[k]= NOP_OPCODE;
+
+						k=(k+1)%finalsizebuffer;
+
+						finalbuffer_H0[k] = speedcfg_track1-2;
+						finalbuffer_H1[k] = NOP_OPCODE;
+					}
+
 					k=(k+1)%finalsizebuffer;
 				}
 			}
@@ -850,7 +854,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 
 
 		// si pas de decalage temporel entre les 2 face : pas de compensation
-		if(!((abs(deltatick)>(speedcfg_track0*4)) || (abs(deltatick)>(speedcfg_track1*4))))
+		if(!((abs(deltatick)>(speedcfg_track0*8)) || (abs(deltatick)>(speedcfg_track1*8))))
 		{
 
 			datah0tmp=0;
@@ -872,7 +876,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			}
 			else
 			{
-				datah0tmp=NOP_H1_OPCODE|NOP_H0_OPCODE;
+				datah0tmp = NOP_OPCODE;
 			}
 
 			if(j<lendatah1)
@@ -888,12 +892,12 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			}
 			else
 			{
-				datah1tmp=NOP_H1_OPCODE|NOP_H0_OPCODE;
+				datah1tmp = NOP_OPCODE;
 			}
 
 			// fusion des 2 faces
-			finalbuffer_H0[k]= datah0tmp;
-			finalbuffer_H1[k]= datah1tmp;
+			finalbuffer_H0[k] = datah0tmp;
+			finalbuffer_H1[k] = datah1tmp;
 			//randomfinalbuffer[k]=(randomh0tmp&0xf0) | (randomh1tmp>>4);
 			k=(k+1)%finalsizebuffer;
 
@@ -942,16 +946,16 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 				}
 				else
 				{
-					datah1tmp=NOP_H1_OPCODE|NOP_H0_OPCODE;
+					datah1tmp = NOP_OPCODE;
 				}
 
 
-				finalbuffer_H0[k]= NOP_H0_OPCODE;
+				finalbuffer_H0[k]= NOP_OPCODE;
 				finalbuffer_H1[k]= datah1tmp;
 				//randomfinalbuffer[k]=(randomh1tmp>>4);
 				k=(k+1)%finalsizebuffer;
 
-				tick_offset_h1=tick_offset_h1+((speedcfg_track1)*4);
+				tick_offset_h1=tick_offset_h1+((speedcfg_track1)*8);
 
 				if(lencode_track1>0)
 				{
@@ -986,11 +990,11 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 				}
 				else
 				{
-					datah0tmp=NOP_H1_OPCODE|NOP_H0_OPCODE;
+					datah0tmp = NOP_OPCODE;
 				}
 
 				finalbuffer_H0[k]= datah0tmp;
-				finalbuffer_H1[k]= NOP_H1_OPCODE;
+				finalbuffer_H1[k]= NOP_OPCODE;
 				//randomfinalbuffer[k]=(randomh0tmp&0xf0);
 				k=(k+1)%finalsizebuffer;
 
@@ -1008,7 +1012,6 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 				}
 			}
 		}
-
 	}while(!((trackparthead0index>=numberofzoneh0 && trackparthead1index>=numberofzoneh1) && (!(lencode_track1>0) && !(lencode_track0>0))));
 
 	free(datah0);

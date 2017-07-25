@@ -258,7 +258,37 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 					{
 						offset=(k*256)+l;
 						offset2=(k*512)+l+(256*j);
-						currentside->databuffer[offset]=bit_inverter[hfetrack[offset2]];
+						currentside->databuffer[offset] = bit_inverter[hfetrack[offset2]];
+					}
+				}
+
+				l = 0;
+				k = 0;
+				while(k < currentside->tracklen && l < currentside->tracklen)
+				{
+					if( (currentside->databuffer[l]&0xF0) == 0xF0 )
+					{
+						switch( (currentside->databuffer[l]&0xF) )
+						{
+							case 0: // Nop
+								l++;
+								break;
+							case 1: // Set index
+								l++;
+								break;
+							case 2: // Set index
+								l += 2;
+								break;
+							default:
+								l++;
+								break;
+						}
+					}
+					else
+					{
+						currentside->databuffer[k] = currentside->databuffer[l];
+						k++;
+						l++;
 					}
 				}
 
