@@ -133,7 +133,7 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 	pictrack* trackoffsetlist;
 	unsigned int tracks_base;
 	unsigned char * hfetrack;
-	int nbofblock,tracklen;
+	int nbofblock,tracklen,bitrate;
 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEV3_libLoad_DiskFile %s",imgfile);
@@ -212,15 +212,15 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 				memset(currentcylinder->sides[j],0,sizeof(HXCFE_SIDE));
 				currentside=currentcylinder->sides[j];
 
-				currentside->number_of_sector=floppydisk->floppySectorPerTrack;
+				currentside->number_of_sector = floppydisk->floppySectorPerTrack;
 				currentside->tracklen=tracklen/2;
 
-				currentside->databuffer=malloc(currentside->tracklen);
+				currentside->databuffer = malloc(currentside->tracklen);
 				memset(currentside->databuffer,0,currentside->tracklen);
 
-				currentside->flakybitsbuffer=0;
+				currentside->flakybitsbuffer = 0;
 
-				currentside->indexbuffer=malloc(currentside->tracklen);
+				currentside->indexbuffer = malloc(currentside->tracklen);
 				memset(currentside->indexbuffer,0,currentside->tracklen);
 
 				for(k=0;k<256;k++)
@@ -228,8 +228,13 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 					currentside->indexbuffer[k]=0xFF;
 				}
 
-				currentside->timingbuffer=0;
-				currentside->bitrate=floppydisk->floppyBitRate;
+				currentside->timingbuffer = malloc(currentside->tracklen * sizeof(uint32_t));
+				for(k=0;k<currentside->tracklen;k++)
+				{
+					currentside->timingbuffer[k] = floppydisk->floppyBitRate;
+				}
+
+				currentside->bitrate=VARIABLEBITRATE;
 
 				currentside->track_encoding=header.track_encoding;
 
@@ -262,6 +267,7 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 					}
 				}
 
+				bitrate = floppydisk->floppyBitRate;
 				l = 0;
 				k = 0;
 				while(k < currentside->tracklen && l < currentside->tracklen)
@@ -270,13 +276,15 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 					{
 						switch( (currentside->databuffer[l]&0xF) )
 						{
-							case 0: // Nop
+							case 0x00: // Nop
 								l++;
 								break;
-							case 1: // Set index
+							case 0x01: // Set index
 								l++;
 								break;
-							case 2: // Set index
+							case 0x02: // Bitrate
+								bitrate = 36000000 / ( currentside->databuffer[l+1] * 2);
+
 								l += 2;
 								break;
 							default:
@@ -287,12 +295,13 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 					else
 					{
 						currentside->databuffer[k] = currentside->databuffer[l];
+						currentside->timingbuffer[k] = bitrate;
 						k++;
 						l++;
 					}
 				}
 
-				currentside->tracklen=currentside->tracklen*8;
+				currentside->tracklen = k * 8;
 
 				if(!currentcylinder->floppyRPM)
 					currentcylinder->floppyRPM = (short)( 60 / GetTrackPeriod(imgldr_ctx->hxcfe,currentside) );

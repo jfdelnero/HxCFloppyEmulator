@@ -522,7 +522,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	i=0;
 	do
 	{
-		time_base=(float)FLOPPYEMUFREQ/((float)trackzonebuffer_0[i].bitrate);
+		time_base=(float)FLOPPYEMUFREQ/((float)trackzonebuffer_0[i].bitrate*2);
 		bloclen=(trackzonebuffer_0[i].end-trackzonebuffer_0[i].start)+1;
 
 		trackzonebuffer_0[i].code1=(unsigned char)floor(time_base);
@@ -561,7 +561,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	i=0;
 	do
 	{
-		time_base=(float)FLOPPYEMUFREQ/((float)trackzonebuffer_1[i].bitrate);
+		time_base=(float)FLOPPYEMUFREQ/((float)trackzonebuffer_1[i].bitrate*2);
 		bloclen=(trackzonebuffer_1[i].end-trackzonebuffer_1[i].start)+1;
 
 		trackzonebuffer_1[i].code1=(unsigned char)floor(time_base);
@@ -637,8 +637,8 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	{
 		if(trackzonebuffer_1[i].code2lenint)
 		{
-			trackpartbuffer_1[j].code=trackzonebuffer_1[i].code1;
-			trackpartbuffer_1[j].len=trackzonebuffer_1[i].code2lenint;
+			trackpartbuffer_1[j].code = trackzonebuffer_1[i].code1;
+			trackpartbuffer_1[j].len = trackzonebuffer_1[i].code2lenint;
 			if(j<2047*2)
 				j++;
 			else
@@ -647,8 +647,8 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 
 		if(trackzonebuffer_1[i].code1lenint)
 		{
-			trackpartbuffer_1[j].code=trackzonebuffer_1[i].code2;
-			trackpartbuffer_1[j].len=trackzonebuffer_1[i].code1lenint;
+			trackpartbuffer_1[j].code = trackzonebuffer_1[i].code2;
+			trackpartbuffer_1[j].len = trackzonebuffer_1[i].code1lenint;
 			if(j<2047*2)
 				j++;
 			else
@@ -749,8 +749,8 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			finalbuffer_H0[k] = SETBITRATE_OPCODE;
 			finalbuffer_H1[k] = SETBITRATE_OPCODE;
 			k=(k+1)%finalsizebuffer;
-			finalbuffer_H0[k] = speedcfg_track0-2;
-			finalbuffer_H1[k] = speedcfg_track0-2;
+			finalbuffer_H0[k] = speedcfg_track0;
+			finalbuffer_H1[k] = speedcfg_track1;
 			k=(k+1)%finalsizebuffer;
 		}
 		else
@@ -770,7 +770,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 						finalbuffer_H0[k] = SETBITRATE_OPCODE;
 						finalbuffer_H1[k] = NOP_OPCODE;
 						k=(k+1)%finalsizebuffer;
-						finalbuffer_H0[k] = speedcfg_track0-2;
+						finalbuffer_H0[k] = speedcfg_track0;
 						finalbuffer_H1[k] = NOP_OPCODE;
 
 					}
@@ -779,8 +779,8 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 						finalbuffer_H0[k]=SETBITRATE_OPCODE;
 						finalbuffer_H1[k]=SETBITRATE_OPCODE;
 						k=(k+1)%finalsizebuffer;
-						finalbuffer_H0[k] = speedcfg_track0-2;
-						finalbuffer_H1[k] = speedcfg_track0-2;
+						finalbuffer_H0[k] = speedcfg_track0;
+						finalbuffer_H1[k] = speedcfg_track0;
 					}
 
 					k=(k+1)%finalsizebuffer;
@@ -805,7 +805,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 						k=(k+1)%finalsizebuffer;
 
 						finalbuffer_H0[k] = NOP_OPCODE;
-						finalbuffer_H1[k] = speedcfg_track1-2;
+						finalbuffer_H1[k] = speedcfg_track1;
 					}
 					else
 					{
@@ -814,7 +814,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 
 						k=(k+1)%finalsizebuffer;
 
-						finalbuffer_H0[k] = speedcfg_track1-2;
+						finalbuffer_H0[k] = speedcfg_track1;
 						finalbuffer_H1[k] = NOP_OPCODE;
 					}
 
@@ -832,18 +832,18 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			{
 				finalbuffer[k]=SETBITRATE_H0_OPCODE | SETBITRATE_H1_OPCODE;
 				k++;
-				finalbuffer[k]=speedcfg_track1-2;
+				finalbuffer[k] = speedcfg_track1;
 				k++;
 			}
 			else
 			{
 				finalbuffer[k]=SETBITRATE_H0_OPCODE | NOP_H1_OPCODE;
 				k++;
-				finalbuffer[k]=speedcfg_track0-2;
+				finalbuffer[k] = speedcfg_track0;
 				k++;
 				finalbuffer[k]=NOP_H0_OPCODE | SETBITRATE_H1_OPCODE;
 				k++;
-				finalbuffer[k]=speedcfg_track1-2;
+				finalbuffer[k] = speedcfg_track1;
 				k++;
 			}*/
 		}
