@@ -2,7 +2,7 @@
 //
 // Copyright (C) 2006-2017 Jean-François DEL NERO
 //
-// This file is part of HxCFloppyEmulator.
+// This file is part of the HxCFloppyEmulator library
 //
 // HxCFloppyEmulator may be used and distributed without restriction provided
 // that this copyright statement is not removed from the file and that any
@@ -59,11 +59,6 @@
 
 //#define DEBUGVB 1
 
-#define SETINDEX_OPCODE 0xF1
-#define NOP_OPCODE 0xF0
-#define SETBITRATE_OPCODE 0xF2
-#define SKIPBITS_OPCODE 0xF3
-
 trackzone trackzonebuffer_0[2048*2];
 trackzone trackzonebuffer_1[2048*2];
 
@@ -99,109 +94,7 @@ void adjustrand(unsigned char * d, unsigned char * r)
 	}
 }
 
-
-unsigned char * realloc_buffer(unsigned char * buffer,uint32_t numberofbit,uint32_t factor)
-{
-	uint32_t i,j,k,l;
-	uint32_t newsize;
-	unsigned char * ptr;
-
-
-	newsize=(numberofbit*factor);
-
-	if(newsize&0x7)
-	{
-		ptr=malloc(((numberofbit*factor)/8)+1);
-		memset(ptr,0,((numberofbit*factor)/8)+1);
-	}
-	else
-	{
-		ptr=malloc(((numberofbit*factor)/8));
-		memset(ptr,0,((numberofbit*factor)/8));
-	}
-
-	l=0;
-	k=0;
-	j=0;
-
-	if(!(newsize&0x7) && factor == 1)
-	{
-		memcpy(ptr, buffer, numberofbit/8);
-	}
-	else
-	{
-		for(l=0;l<factor;l++)
-		{
-			for(i=0;i<numberofbit;i++)
-			{
-				if( (buffer[k>>3]>>(0x7-(k&0x7)))&1)
-				{
-					ptr[j>>3]=ptr[j>>3]|(0x80>>(j&0x7));
-				}
-				//else
-				//{
-				//	ptr[j>>3]=ptr[j>>3]&(~((0x80)>>(j&0x7)));
-				//}
-
-				j++;
-				if(j>=newsize) j=0;
-
-				k++;
-				if(k>=numberofbit) k=0;
-			}
-		}
-	}
-
-	return ptr;
-}
-
-
-uint32_t * realloc_time_buffer(uint32_t * buffer,uint32_t numberofbit,uint32_t factor)
-{
-	uint32_t i,k,l;
-	uint32_t newsize,nbelement;
-	uint32_t * ptr;
-
-
-	if((numberofbit*factor)&0x7)
-	{
-		newsize=(((numberofbit*factor)/8)+1);
-		ptr=malloc((newsize+16)*sizeof(uint32_t));
-		memset(ptr,0,(newsize+16)*sizeof(uint32_t));
-		nbelement=(((numberofbit)/8)+1);
-	}
-	else
-	{
-		newsize=((numberofbit*factor)/8);
-		ptr=malloc((newsize+16)*sizeof(uint32_t));
-		memset(ptr,0,(newsize+16)*sizeof(uint32_t));
-		nbelement=(((numberofbit)/8));
-	}
-
-	l=0;
-	k=0;
-
-	for(l=0;l<factor;l++)
-	{
-		for(i=0;i<nbelement;i++)
-		{
-			ptr[k]=buffer[i];
-			k++;
-		}
-	}
-
-	l=newsize-1;
-	i=nbelement-1;
-	while(i && l && !ptr[l])
-	{
-		ptr[l]=buffer[i];
-		l--;
-		i--;
-	}
-	return ptr;
-}
-
-int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0,uint32_t lendatah0,uint8_t * datah1,uint32_t lendatah1,uint8_t * randomh0,uint8_t * randomh1,int32_t fixedbitrateh0,uint32_t * timeh0,int32_t fixedbitrateh1,uint32_t * timeh1,uint8_t ** finalbuffer_H0_param,uint8_t ** finalbuffer_H1_param,uint8_t ** randomfinalbuffer_param)
+int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0,uint32_t lendatah0,uint8_t * datah1,uint32_t lendatah1,uint8_t * randomh0,uint8_t * randomh1,int32_t fixedbitrateh0,uint32_t * timeh0,int32_t fixedbitrateh1,uint32_t * timeh1,uint8_t ** finalbuffer_H0_param,uint8_t ** finalbuffer_H1_param,uint8_t ** randomfinalbuffer_param)
 {
 	uint32_t i,k,j;
 
@@ -237,55 +130,45 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	int lencode_track0_error=0;
 	int lencode_track1_error=0;
 
-	int numberofpart,indexstart,newzoneindex,sizefactor;
+	int numberofpart,indexstart,newzoneindex;
 
 
 #ifdef DEBUGVB
 	floppycontext->hxc_printf(MSG_DEBUG,"********************************************************************");
 #endif
 
-	sizefactor=1;
-	if( (lendatah0&7) || (lendatah1&7) )
-	{
-	//	sizefactor=8;
-	}
-
 	lenbitdatah0 = lendatah0;
 	lenbitdatah1 = lendatah1;
 
-	datah0 = realloc_buffer(datah0,lendatah0,sizefactor);
-	datah1 = realloc_buffer(datah1,lendatah1,sizefactor);
-	index_h0 = realloc_buffer(index_h0,lendatah0,sizefactor);
-
-	if(randomh0)
-		randomh0=realloc_buffer(randomh0,lendatah0,sizefactor);
-	if(randomh1)
-		randomh1=realloc_buffer(randomh1,lendatah1,sizefactor);
-
-	if(timeh0)
-		timeh0=realloc_time_buffer(timeh0,lendatah0,sizefactor);
-
-	if(timeh1)
-		timeh1=realloc_time_buffer(timeh1,lendatah1,sizefactor);
-
-	lendatah0=((lendatah0*sizefactor)/8);
-	lendatah1=((lendatah1*sizefactor)/8);
+	lendatah0=(lendatah0/8);
+	lendatah1=(lendatah1/8);
 
 	trackzoneindex0=0;
 	trackzoneindex1=0;
 
 	if(lendatah0>lendatah1)
-		finalsizebuffer=(lendatah0)+(32000*sizefactor);
+		finalsizebuffer=(lendatah0)+(32000);
 	else
-		finalsizebuffer=(lendatah1)+(32000*sizefactor);
+		finalsizebuffer=(lendatah1)+(32000);
 
 	finalbuffer_H0 = malloc(finalsizebuffer);
-	memset(finalbuffer_H0,0,finalsizebuffer);
-
 	finalbuffer_H1 = malloc(finalsizebuffer);
-	memset(finalbuffer_H1,0,finalsizebuffer);
-
 	randomfinalbuffer_H0 = malloc(finalsizebuffer);
+
+	if(!finalbuffer_H0 || !finalbuffer_H1 || !randomfinalbuffer_H0)
+	{
+		if(finalbuffer_H0)
+			free(finalbuffer_H0);
+		if(finalbuffer_H1)
+			free(finalbuffer_H1);
+		if(randomfinalbuffer_H0)
+			free(randomfinalbuffer_H0);
+
+		return 0;
+	}
+
+	memset(finalbuffer_H0,0,finalsizebuffer);
+	memset(finalbuffer_H1,0,finalsizebuffer);
 	memset(randomfinalbuffer_H0,0,finalsizebuffer);
 
 	*finalbuffer_H0_param = finalbuffer_H0;
@@ -337,7 +220,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	}
 
 #ifdef DEBUGVB
-	floppycontext->hxc_printf(MSG_DEBUG,"GetNewTrackRevolution : head 0 number of time zone = %d!",trackzoneindex1 );
+	floppycontext->hxc_printf(MSG_DEBUG,"GenOpcodesTrack : head 0 number of time zone = %d!",trackzoneindex1 );
 #endif
 
 	// head 1
@@ -381,7 +264,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 		trackzoneindex1=0;
 	}
 #ifdef DEBUGVB
-	floppycontext->hxc_printf(MSG_DEBUG,"GetNewTrackRevolution : head 1 number of time zone = %d!",trackzoneindex1 );
+	floppycontext->hxc_printf(MSG_DEBUG,"GenOpcodesTrack : head 1 number of time zone = %d!",trackzoneindex1 );
 #endif
 
 
@@ -390,7 +273,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef DEBUGVB
 	floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
-	floppycontext->hxc_printf(MSG_DEBUG,"GetNewTrackRevolution: Head0:");
+	floppycontext->hxc_printf(MSG_DEBUG,"GenOpcodesTrack: Head0:");
 	for(i=0;i<trackzoneindex0+1;i++)
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"bitrate %d -  %.4x:%.4x (%d)",
@@ -401,7 +284,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 											 );
 	}
 
-	floppycontext->hxc_printf(MSG_DEBUG,"GetNewTrackRevolution: Head1:");
+	floppycontext->hxc_printf(MSG_DEBUG,"GenOpcodesTrack: Head1:");
 	for(i=0;i<trackzoneindex1+1;i++)
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"bitrate %d -  %.4x:%.4x (%d)",
@@ -430,7 +313,6 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 		{
 			for(j=0;j<(uint32_t)numberofpart;j++)
 			{
-
 				trackzonebuffer_temp[newzoneindex].bitrate=trackzonebuffer_0[i].bitrate;
 				trackzonebuffer_temp[newzoneindex].start=indexstart;
 				trackzonebuffer_temp[newzoneindex].end=indexstart+BITRATEBLOCKSIZE-1;
@@ -465,7 +347,6 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 		{
 			for(j=0;j<(uint32_t)numberofpart;j++)
 			{
-
 				trackzonebuffer_temp[newzoneindex].bitrate=trackzonebuffer_1[i].bitrate;
 				trackzonebuffer_temp[newzoneindex].start=indexstart;
 				trackzonebuffer_temp[newzoneindex].end=indexstart+BITRATEBLOCKSIZE-1;
@@ -495,7 +376,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef DEBUGVB
 	floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
-	floppycontext->hxc_printf(MSG_DEBUG,"GetNewTrackRevolution: Head0:");
+	floppycontext->hxc_printf(MSG_DEBUG,"GenOpcodesTrack: Head0:");
 	for(i=0;i<trackzoneindex0+1;i++)
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"bitrate %d -  %.4x:%.4x (%d)",
@@ -506,7 +387,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 											 );
 	}
 
-	floppycontext->hxc_printf(MSG_DEBUG,"GetNewTrackRevolution: Head1:");
+	floppycontext->hxc_printf(MSG_DEBUG,"GenOpcodesTrack: Head1:");
 	for(i=0;i<trackzoneindex1+1;i++)
 	{
 		floppycontext->hxc_printf(MSG_DEBUG,"bitrate %d -  %.4x:%.4x (%d)",
@@ -615,8 +496,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			if(j<(2047*2))
 				j++;
 			else
-				floppycontext->hxc_printf(MSG_ERROR,"GetNewTrackRevolution : trackpartbuffer_0 overrun !");
-
+				floppycontext->hxc_printf(MSG_ERROR,"GenOpcodesTrack : trackpartbuffer_0 overrun !");
 		}
 
 		if(trackzonebuffer_0[i].code1lenint)
@@ -626,7 +506,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			if(j<2047*2)
 				j++;
 			else
-				floppycontext->hxc_printf(MSG_ERROR,"GetNewTrackRevolution : trackpartbuffer_0 overrun !");
+				floppycontext->hxc_printf(MSG_ERROR,"GenOpcodesTrack : trackpartbuffer_0 overrun !");
 		}
 
 		i++;
@@ -645,7 +525,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			if(j<2047*2)
 				j++;
 			else
-				floppycontext->hxc_printf(MSG_ERROR,"GetNewTrackRevolution : trackpartbuffer_1 overrun !");
+				floppycontext->hxc_printf(MSG_ERROR,"GenOpcodesTrack : trackpartbuffer_1 overrun !");
 		}
 
 		if(trackzonebuffer_1[i].code1lenint)
@@ -655,7 +535,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			if(j<2047*2)
 				j++;
 			else
-				floppycontext->hxc_printf(MSG_ERROR,"GetNewTrackRevolution : trackpartbuffer_1 overrun !");
+				floppycontext->hxc_printf(MSG_ERROR,"GenOpcodesTrack : trackpartbuffer_1 overrun !");
 		}
 
 		i++;
@@ -667,7 +547,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef DEBUGVB
 	floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
-	floppycontext->hxc_printf(MSG_DEBUG,"GetNewTrackRevolution: Head0:");
+	floppycontext->hxc_printf(MSG_DEBUG,"GenOpcodesTrack: Head0:");
 	j=0;
 	k=0;
 	for(i=0;i<numberofzoneh0;i++)
@@ -680,7 +560,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	floppycontext->hxc_printf(MSG_DEBUG,"Total track Head0: %d timing : %dns",j,k/10);
 
 
-	floppycontext->hxc_printf(MSG_DEBUG,"GetNewTrackRevolution: Head1:");
+	floppycontext->hxc_printf(MSG_DEBUG,"GenOpcodesTrack: Head1:");
 	j=0;
 	k=0;
 	for(i=0;i<numberofzoneh1;i++)
@@ -717,7 +597,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	inserttimecode=0;
 
 	// Insert bit shift if needed.
-	
+
 	if(lenbitdatah0 & 7 || lenbitdatah1 & 7)
 	{
 		if( (lenbitdatah0 & 7) && !(lenbitdatah1 & 7) )
@@ -725,18 +605,18 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			finalbuffer_H0[k] = SKIPBITS_OPCODE;
 			finalbuffer_H1[k] = NOP_OPCODE;
 
-			k=(k+1)%finalsizebuffer;	
+			k=(k+1)%finalsizebuffer;
 
 			finalbuffer_H0[k] = 8 - (lenbitdatah0&7);
-			finalbuffer_H1[k] = NOP_OPCODE;			
+			finalbuffer_H1[k] = NOP_OPCODE;
 
-			k=(k+1)%finalsizebuffer;	
+			k=(k+1)%finalsizebuffer;
 
 			// Copy last bits
 			finalbuffer_H0[k] = datah0[(lenbitdatah0>>3)] >> (8 - (lenbitdatah0&7));
-			finalbuffer_H1[k] = NOP_OPCODE;	
+			finalbuffer_H1[k] = NOP_OPCODE;
 
-			k=(k+1)%finalsizebuffer;	
+			k=(k+1)%finalsizebuffer;
 
 		}
 
@@ -745,15 +625,15 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			finalbuffer_H0[k] = NOP_OPCODE;
 			finalbuffer_H1[k] = SKIPBITS_OPCODE;
 
-			k=(k+1)%finalsizebuffer;	
+			k=(k+1)%finalsizebuffer;
 
-			finalbuffer_H0[k] = NOP_OPCODE;			
+			finalbuffer_H0[k] = NOP_OPCODE;
 			finalbuffer_H1[k] = 8 - (lenbitdatah1&7);
 
-			k=(k+1)%finalsizebuffer;	
+			k=(k+1)%finalsizebuffer;
 
 			// Copy last bits
-			finalbuffer_H0[k] = NOP_OPCODE;	
+			finalbuffer_H0[k] = NOP_OPCODE;
 			finalbuffer_H1[k] = datah1[(lenbitdatah1>>3)] >> (8 - (lenbitdatah1&7));
 
 			k=(k+1)%finalsizebuffer;
@@ -764,15 +644,15 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			finalbuffer_H0[k] = SKIPBITS_OPCODE;
 			finalbuffer_H1[k] = SKIPBITS_OPCODE;
 
-			k=(k+1)%finalsizebuffer;	
+			k=(k+1)%finalsizebuffer;
 
-			finalbuffer_H0[k] = 8 - (lenbitdatah0&7);		
+			finalbuffer_H0[k] = 8 - (lenbitdatah0&7);
 			finalbuffer_H1[k] = 8 - (lenbitdatah1&7);
 
-			k=(k+1)%finalsizebuffer;	
+			k=(k+1)%finalsizebuffer;
 
 			// Copy last bits
-			finalbuffer_H0[k] = datah0[(lenbitdatah0>>3)] >> (8 - (lenbitdatah0&7));	
+			finalbuffer_H0[k] = datah0[(lenbitdatah0>>3)] >> (8 - (lenbitdatah0&7));
 			finalbuffer_H1[k] = datah1[(lenbitdatah1>>3)] >> (8 - (lenbitdatah1&7));
 
 			k=(k+1)%finalsizebuffer;
@@ -843,8 +723,8 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 					}
 					else
 					{
-						finalbuffer_H0[k]=SETBITRATE_OPCODE;
-						finalbuffer_H1[k]=SETBITRATE_OPCODE;
+						finalbuffer_H0[k] = SETBITRATE_OPCODE;
+						finalbuffer_H1[k] = SETBITRATE_OPCODE;
 						k=(k+1)%finalsizebuffer;
 						finalbuffer_H0[k] = speedcfg_track0;
 						finalbuffer_H1[k] = speedcfg_track0;
@@ -868,7 +748,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 					{
 						finalbuffer_H0[k]= NOP_OPCODE;
 						finalbuffer_H1[k]= SETBITRATE_OPCODE;
-						
+
 						k=(k+1)%finalsizebuffer;
 
 						finalbuffer_H0[k] = NOP_OPCODE;
@@ -888,7 +768,6 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 					k=(k+1)%finalsizebuffer;
 				}
 			}
-
 		}
 
 		// faut t'il configurer les bitrates (programmation periodique) ?
@@ -917,7 +796,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 		inserttimecode--;
 
 
-		deltatick=tick_offset_h0-tick_offset_h1;
+		deltatick = tick_offset_h0-tick_offset_h1;
 
 
 		// si pas de decalage temporel entre les 2 face : pas de compensation
@@ -932,10 +811,10 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			// marque comme random (flaky bits) ?
 			if(i<lendatah0)
 			{
-				datah0tmp=datah0[i];
+				datah0tmp = datah0[i];
 				if(randomh0)
 				{
-					randomh0tmp=randomh0[i];
+					randomh0tmp = randomh0[i];
 				}
 
 				adjustrand(&datah0tmp, &randomh0tmp);
@@ -955,7 +834,6 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 				}
 
 				adjustrand(&datah1tmp, &randomh1tmp);
-
 			}
 			else
 			{
@@ -968,8 +846,8 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			//randomfinalbuffer[k]=(randomh0tmp&0xf0) | (randomh1tmp>>4);
 			k=(k+1)%finalsizebuffer;
 
-			tick_offset_h0=tick_offset_h0+((speedcfg_track0)*8);
-			tick_offset_h1=tick_offset_h1+((speedcfg_track1)*8);
+			tick_offset_h0 += ((speedcfg_track0)*8);
+			tick_offset_h1 += ((speedcfg_track1)*8);
 
 			if(lencode_track0>0)
 			{
@@ -1022,7 +900,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 				//randomfinalbuffer[k]=(randomh1tmp>>4);
 				k=(k+1)%finalsizebuffer;
 
-				tick_offset_h1=tick_offset_h1+((speedcfg_track1)*8);
+				tick_offset_h1 += ((speedcfg_track1)*8);
 
 				if(lencode_track1>0)
 				{
@@ -1065,7 +943,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 				//randomfinalbuffer[k]=(randomh0tmp&0xf0);
 				k=(k+1)%finalsizebuffer;
 
-				tick_offset_h0=tick_offset_h0+((speedcfg_track0)*8);
+				tick_offset_h0 += ((speedcfg_track0)*8);
 
 				if(lencode_track0>0)
 				{
@@ -1081,145 +959,5 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 		}
 	}while(!((trackparthead0index>=numberofzoneh0 && trackparthead1index>=numberofzoneh1) && (!(lencode_track1>0) && !(lencode_track0>0))));
 
-	free(datah0);
-	free(datah1);
-	free(index_h0);
-
-	if(randomh0)
-		free(randomh0);
-	if(randomh1)
-		free(randomh1);
-
-	if(timeh0)
-		free(timeh0);
-
-	if(timeh1)
-		free(timeh1);
-
 	return k;
 }
-
-
-// fonction de debugage...
-#if 0
-int checkbuffer(unsigned char * buffer,int sizebf)
-{
-	int i;
-	int size1,size0;
-	int cmd_index0,cmd_nop0,cmd_setspeed0;
-	int cmd_index1,cmd_nop1,cmd_setspeed1;
-	unsigned char c;
-	static FILE *hfileh0=0;
-	static FILE *hfileh1=0;
-	static unsigned char *buf0=0;
-	static unsigned char *buf1=0;
-	char  dbugfile[1*1024];
-
-
-	if(!hfileh0)
-	{
-		sprintf(dbugfile,"d:\\h0.bin");
-		hfileh0=fopen(dbugfile,"w");
-		buf0=malloc(1024*1024);
-	}
-
-	if(!hfileh1)
-	{
-		sprintf(dbugfile,"d:\\h1.bin");
-		hfileh1=fopen(dbugfile,"w");
-		buf1=malloc(1024*1024);
-	}
-
-	size0=0;
-	size1=0;
-	cmd_index0=0;
-	cmd_index1=0;
-	cmd_nop0=0;
-	cmd_nop1=0;
-	cmd_setspeed0=0;
-	cmd_setspeed1=0;
-
-	// head 0
-	i=0;
-	do
-	{
-		c=buffer[i];
-		c=c&0xF;
-
-		switch(c)
-		{
-
-			case SETINDEX_H1_OPCODE:
-				i=i+2;
-				cmd_index0++;
-				break;
-			case SETBITRATE_H1_OPCODE:
-				cmd_setspeed0++;
-				i=i+2;
-				break;
-			case NOP_H1_OPCODE:
-				cmd_nop0++;
-				i=i+2;
-				break;
-			default:
-				if(size0&1)
-					buf0[size0>>1]=buf0[size0>>1] | c;
-				else
-					buf0[size0>>1]= (c<<4);
-
-				size0++;
-				i++;
-				break;
-		}
-
-	}while(i<sizebf);
-	/////////////////////////////////////
-	// head 1
-
-	i=0;
-	do
-	{
-		c=buffer[i];
-		c=(c>>4)&0xF;
-
-		switch(c)
-		{
-
-			case SETINDEX_H1_OPCODE:
-				i=i+2;
-				cmd_index1++;
-				break;
-			case SETBITRATE_H1_OPCODE:
-				cmd_setspeed1++;
-				i=i+2;
-				break;
-			case NOP_H1_OPCODE:
-				cmd_nop1++;
-				i=i+2;
-				break;
-			default:
-				if(size1&1)
-					buf1[size1>>1]=buf1[size1>>1] |c;
-				else
-					buf1[size1>>1]= (c<<4);
-
-				size1++;
-				i++;
-				break;
-		}
-
-	}while(i<sizebf);
-
-	size0=size0/2;
-	size1=size1/2;
-
-
-
-		#ifdef DEBUGMODE
-			fwrite(buf0,size0,1,hfileh0);
-			fwrite(buf1,size1,1,hfileh1);
-		#endif
-
- return 0;
-}
-#endif

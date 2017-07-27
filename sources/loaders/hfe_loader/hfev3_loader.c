@@ -58,6 +58,8 @@
 #include "hfev3_loader.h"
 #include "hfev3_format.h"
 
+#include "hfev3_trackgen.h"
+
 #include "libhxcadaptor.h"
 
 extern unsigned char bit_inverter[];
@@ -300,27 +302,30 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 				k = 0;
 				while(k < currentside->tracklen && l < currentside->tracklen)
 				{
-					if( (hfetrack2[l]&0xF0) == 0xF0 )
+					if( ( hfetrack2[l] & OPCODE_MASK ) == OPCODE_MASK )
 					{
-						switch( (hfetrack2[l]&0xF) )
+						switch( hfetrack2[l] )
 						{
-							case 0x00: // Nop
+							case NOP_OPCODE:
 								l++;
 								bitoffset_in += 8;
 								break;
-							case 0x01: // Set index
+
+							case SETINDEX_OPCODE:
 								l++;
 								bitoffset_in += 8;
 								break;
-							case 0x02: // Bitrate
-								bitrate = 36000000 / ( hfetrack2[l+1] * 2);
+
+							case SETBITRATE_OPCODE:
+								bitrate = FLOPPYEMUFREQ / ( hfetrack2[l+1] * 2);
 
 								l += 2;
 								bitoffset_in += 8*2;
 								break;
-							case 0x03: // Skip 
+
+							case SKIPBITS_OPCODE:
 								bitskip = hfetrack2[l+1];
-								
+
 								cpybits(currentside->databuffer,bitoffset_out,&hfetrack2[l+2],bitskip , 8-bitskip);
 								bitoffset_out+= (8-bitskip);
 								bitoffset_in += 8*3;
