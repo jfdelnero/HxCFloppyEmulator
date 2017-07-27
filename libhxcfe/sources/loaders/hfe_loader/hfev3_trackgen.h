@@ -2,7 +2,7 @@
 //
 // Copyright (C) 2006-2017 Jean-François DEL NERO
 //
-// This file is part of HxCFloppyEmulator.
+// This file is part of the HxCFloppyEmulator library
 //
 // HxCFloppyEmulator may be used and distributed without restriction provided
 // that this copyright statement is not removed from the file and that any
@@ -45,6 +45,13 @@
 
 #define FLOPPYEMUFREQ 36000000
 
+#define OPCODE_MASK       0xF0
+
+#define NOP_OPCODE        0xF0
+#define SETINDEX_OPCODE   0xF1
+#define SETBITRATE_OPCODE 0xF2
+#define SKIPBITS_OPCODE   0xF3
+
 typedef struct trackzone_
 {
 	int32_t  start;
@@ -67,4 +74,4 @@ typedef struct trackpart_
 
 #define GRANULA 64
 
-int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0,uint32_t lendatah0,uint8_t * datah1,uint32_t lendatah1,uint8_t * randomh0,uint8_t * randomh1,int32_t fixedbitrateh0,uint32_t * timeh0,int32_t fixedbitrateh1,uint32_t * timeh1,uint8_t ** finalbuffer_H0_param,uint8_t ** finalbuffer_H1_param,uint8_t ** randomfinalbuffer_param);
+int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0,uint32_t lendatah0,uint8_t * datah1,uint32_t lendatah1,uint8_t * randomh0,uint8_t * randomh1,int32_t fixedbitrateh0,uint32_t * timeh0,int32_t fixedbitrateh1,uint32_t * timeh1,uint8_t ** finalbuffer_H0_param,uint8_t ** finalbuffer_H1_param,uint8_t ** randomfinalbuffer_param);

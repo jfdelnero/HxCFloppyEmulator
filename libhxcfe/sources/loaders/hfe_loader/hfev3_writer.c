@@ -145,10 +145,10 @@ static void addpad(unsigned char * track,int mfmsize,int tracksize)
 		do
 		{
 			if( lastindex >= 2 )
-				track[j++]=track[lastindex-2];
+				track[j++]=  NOP_OPCODE;
 
 			if( j < tracksize )
-				track[j++] = track[ lastindex - 1 ];
+				track[j++] = NOP_OPCODE;
 
 		}while( j < tracksize );
 	}
@@ -291,7 +291,7 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 				mfmsize=0;
 				mfmsize2=0;
 
-				final_buffer_len = GetNewTrackRevolution(imgldr_ctx->hxcfe,
+				final_buffer_len = GenOpcodesTrack(imgldr_ctx->hxcfe,
 					floppy->tracks[i]->sides[0]->indexbuffer,
 					floppy->tracks[i]->sides[0]->databuffer,
 					floppy->tracks[i]->sides[0]->tracklen,
