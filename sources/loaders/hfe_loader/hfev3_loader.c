@@ -123,17 +123,42 @@ int HFEV3_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	}
 }
 
+int cpybits(unsigned char * bufout,int bitoffset_out,unsigned char * bufin,int bitoffset_in, int size)
+{
+	int i,bit;
+	unsigned char byte;
+
+	byte = 0;
+	bit = 0;
+
+	for(i = 0;i<size;i++)
+	{
+		if( bufin[bitoffset_in>>3] & ( 0x80 >> (bitoffset_in & 7) ) )
+		{
+			bufout[bitoffset_out>>3] |= ( 0x80 >> (bitoffset_out & 7) );
+		}
+		else
+		{
+			bufout[bitoffset_out>>3] &= ~( 0x80 >> (bitoffset_out & 7) );
+		}
+		bitoffset_in++;
+		bitoffset_out++;
+	}
+	return bitoffset_out;
+}
+
 int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	picfileformatheader header;
-	int i,j,k,l,offset,offset2;
+	int i,j,k,l,offset,offset2,bitoffset_in,bitoffset_out;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
 	pictrack* trackoffsetlist;
 	unsigned int tracks_base;
 	unsigned char * hfetrack;
-	int nbofblock,tracklen,bitrate;
+	unsigned char * hfetrack2;
+	int nbofblock,tracklen,bitrate,bitskip;
 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEV3_libLoad_DiskFile %s",imgfile);
@@ -190,6 +215,7 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 			}
 
 			hfetrack=(unsigned char*)malloc( tracklen );
+			hfetrack2=(unsigned char*)malloc( tracklen );
 
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFE V3 File : reading track %d, track size:%d - file offset:%.8X",
 				i,tracklen,(trackoffsetlist[i].offset*512));
@@ -263,45 +289,62 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 					{
 						offset=(k*256)+l;
 						offset2=(k*512)+l+(256*j);
-						currentside->databuffer[offset] = bit_inverter[hfetrack[offset2]];
+						hfetrack2[offset] = bit_inverter[hfetrack[offset2]];
 					}
 				}
 
 				bitrate = floppydisk->floppyBitRate;
 				l = 0;
+				bitoffset_in = 0;
+				bitoffset_out = 0;
 				k = 0;
 				while(k < currentside->tracklen && l < currentside->tracklen)
 				{
-					if( (currentside->databuffer[l]&0xF0) == 0xF0 )
+					if( (hfetrack2[l]&0xF0) == 0xF0 )
 					{
-						switch( (currentside->databuffer[l]&0xF) )
+						switch( (hfetrack2[l]&0xF) )
 						{
 							case 0x00: // Nop
 								l++;
+								bitoffset_in += 8;
 								break;
 							case 0x01: // Set index
 								l++;
+								bitoffset_in += 8;
 								break;
 							case 0x02: // Bitrate
-								bitrate = 36000000 / ( currentside->databuffer[l+1] * 2);
+								bitrate = 36000000 / ( hfetrack2[l+1] * 2);
 
 								l += 2;
+								bitoffset_in += 8*2;
 								break;
+							case 0x03: // Skip 
+								bitskip = hfetrack2[l+1];
+								
+								cpybits(currentside->databuffer,bitoffset_out,&hfetrack2[l+2],bitskip , 8-bitskip);
+								bitoffset_out+= (8-bitskip);
+								bitoffset_in += 8*3;
+								l += 3;
+							break;
+
 							default:
 								l++;
+								bitoffset_in += 8;
 								break;
 						}
 					}
 					else
 					{
-						currentside->databuffer[k] = currentside->databuffer[l];
+						bitoffset_out = cpybits(currentside->databuffer,bitoffset_out,hfetrack2,bitoffset_in, 8);
+
 						currentside->timingbuffer[k] = bitrate;
+						bitoffset_in += 8;
 						k++;
 						l++;
 					}
 				}
 
-				currentside->tracklen = k * 8;
+				currentside->tracklen = bitoffset_out;
 
 				if(!currentcylinder->floppyRPM)
 					currentcylinder->floppyRPM = (short)( 60 / GetTrackPeriod(imgldr_ctx->hxcfe,currentside) );
@@ -309,6 +352,8 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 			}
 
 			free(hfetrack);
+			free(hfetrack2);
+
 		}
 
 		free(trackoffsetlist);

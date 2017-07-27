@@ -62,6 +62,7 @@
 #define SETINDEX_OPCODE 0xF1
 #define NOP_OPCODE 0xF0
 #define SETBITRATE_OPCODE 0xF2
+#define SKIPBITS_OPCODE 0xF3
 
 trackzone trackzonebuffer_0[2048*2];
 trackzone trackzonebuffer_1[2048*2];
@@ -219,7 +220,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 
 	uint32_t trackparthead0index,trackparthead1index;
 	int32_t lencode_track0,lencode_track1;
-
+	int32_t lenbitdatah0,lenbitdatah1;
 	unsigned char datah0tmp;
 	unsigned char datah1tmp;
 	unsigned char randomh0tmp,randomh1tmp;
@@ -249,6 +250,8 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	//	sizefactor=8;
 	}
 
+	lenbitdatah0 = lendatah0;
+	lenbitdatah1 = lendatah1;
 
 	datah0 = realloc_buffer(datah0,lendatah0,sizefactor);
 	datah1 = realloc_buffer(datah1,lendatah1,sizefactor);
@@ -712,6 +715,70 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	currentindex=index_h0[lendatah0-1];
 
 	inserttimecode=0;
+
+	// Insert bit shift if needed.
+	
+	if(lenbitdatah0 & 7 || lenbitdatah1 & 7)
+	{
+		if( (lenbitdatah0 & 7) && !(lenbitdatah1 & 7) )
+		{
+			finalbuffer_H0[k] = SKIPBITS_OPCODE;
+			finalbuffer_H1[k] = NOP_OPCODE;
+
+			k=(k+1)%finalsizebuffer;	
+
+			finalbuffer_H0[k] = 8 - (lenbitdatah0&7);
+			finalbuffer_H1[k] = NOP_OPCODE;			
+
+			k=(k+1)%finalsizebuffer;	
+
+			// Copy last bits
+			finalbuffer_H0[k] = datah0[(lenbitdatah0>>3)] >> (8 - (lenbitdatah0&7));
+			finalbuffer_H1[k] = NOP_OPCODE;	
+
+			k=(k+1)%finalsizebuffer;	
+
+		}
+
+		if( !(lenbitdatah0 & 7) && (lenbitdatah1 & 7) )
+		{
+			finalbuffer_H0[k] = NOP_OPCODE;
+			finalbuffer_H1[k] = SKIPBITS_OPCODE;
+
+			k=(k+1)%finalsizebuffer;	
+
+			finalbuffer_H0[k] = NOP_OPCODE;			
+			finalbuffer_H1[k] = 8 - (lenbitdatah1&7);
+
+			k=(k+1)%finalsizebuffer;	
+
+			// Copy last bits
+			finalbuffer_H0[k] = NOP_OPCODE;	
+			finalbuffer_H1[k] = datah1[(lenbitdatah1>>3)] >> (8 - (lenbitdatah1&7));
+
+			k=(k+1)%finalsizebuffer;
+		}
+
+		if( (lenbitdatah0 & 7) && (lenbitdatah1 & 7) )
+		{
+			finalbuffer_H0[k] = SKIPBITS_OPCODE;
+			finalbuffer_H1[k] = SKIPBITS_OPCODE;
+
+			k=(k+1)%finalsizebuffer;	
+
+			finalbuffer_H0[k] = 8 - (lenbitdatah0&7);		
+			finalbuffer_H1[k] = 8 - (lenbitdatah1&7);
+
+			k=(k+1)%finalsizebuffer;	
+
+			// Copy last bits
+			finalbuffer_H0[k] = datah0[(lenbitdatah0>>3)] >> (8 - (lenbitdatah0&7));	
+			finalbuffer_H1[k] = datah1[(lenbitdatah1>>3)] >> (8 - (lenbitdatah1&7));
+
+			k=(k+1)%finalsizebuffer;
+		}
+	}
+
 	do
 	{
 		// opcode d'index a inserer ?
