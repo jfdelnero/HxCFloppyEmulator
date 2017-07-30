@@ -570,7 +570,7 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 	lencode_track0_error=0;
 	lencode_track1_error=0;
 
-	currentindex=index_h0[lendatah0-1];
+	currentindex = 0;
 
 	inserttimecode=0;
 
@@ -642,7 +642,7 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 		// opcode d'index a inserer ?
 		if(i<lendatah0)
 		{
-			if((index_h0[i] && !currentindex) || (!index_h0[i] && currentindex))
+			if( index_h0[i] && !currentindex )
 			{
 				finalbuffer_H0[k] = SETINDEX_OPCODE;
 				finalbuffer_H1[k] = SETINDEX_OPCODE;
@@ -656,6 +656,13 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 				else
 				{
 					currentindex=0;
+				}
+			}
+			else
+			{
+				if(!index_h0[i] && currentindex)
+				{
+					currentindex = 0;
 				}
 			}
 		}
