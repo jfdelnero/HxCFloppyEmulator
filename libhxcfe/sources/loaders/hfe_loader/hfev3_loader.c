@@ -64,6 +64,8 @@
 
 extern unsigned char bit_inverter[];
 
+//#define DEBUGVB 1
+
 static char * trackencodingcode[]=
 {
 	"ISOIBM_MFM_ENCODING",
@@ -307,11 +309,17 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 						switch( hfetrack2[l] )
 						{
 							case NOP_OPCODE:
+#ifdef DEBUGVB
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T%.3dS%d Off[%.5d] : NOP_OPCODE",i,j,l);
+#endif
 								l++;
 								bitoffset_in += 8;
 								break;
 
 							case SETINDEX_OPCODE:
+#ifdef DEBUGVB
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T%.3dS%d Off[%.5d] : SETINDEX_OPCODE",i,j,l);
+#endif
 								l++;
 								bitoffset_in += 8;
 								break;
@@ -319,12 +327,18 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 							case SETBITRATE_OPCODE:
 								bitrate = FLOPPYEMUFREQ / ( hfetrack2[l+1] * 2);
 
+#ifdef DEBUGVB
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T%.3dS%d Off[%.5d] : SETBITRATE_OPCODE : %d - %d",i,j,l,hfetrack2[l+1],bitrate);
+#endif
 								l += 2;
 								bitoffset_in += 8*2;
 								break;
 
 							case SKIPBITS_OPCODE:
 								bitskip = hfetrack2[l+1];
+#ifdef DEBUGVB
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T%.3dS%d Off[%.5d] : SKIPBITS_OPCODE : %d 0x%.2X",i,j,l,bitskip,hfetrack2[l+2]);
+#endif
 
 								cpybits(currentside->databuffer,bitoffset_out,&hfetrack2[l+2],bitskip , 8-bitskip);
 								bitoffset_out+= (8-bitskip);
@@ -333,6 +347,9 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 							break;
 
 							default:
+#ifdef DEBUGVB
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T%.3dS%d Off[%.5d] : Unknown Opcode !?! : 0x%.2X",hfetrack2[l]);
+#endif
 								l++;
 								bitoffset_in += 8;
 								break;
