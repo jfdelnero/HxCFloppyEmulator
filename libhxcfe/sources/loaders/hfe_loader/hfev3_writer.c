@@ -316,7 +316,7 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 				memcpy(precalcopcodestracks[i].opcodetrack_H1,final_buffer_H1,final_buffer_len);
 				memcpy(precalcopcodestracks[i].randomopcodetrack,final_randombuffer,final_buffer_len);
 
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"USB Track %d Size: %d bytes",i,final_buffer_len);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEv3 Track %d Size: %d bytes",i,final_buffer_len);
 
 				if(final_randombuffer)
 					free(final_randombuffer);
@@ -345,13 +345,13 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 */
 				mfmsize = final_buffer_len * 2;
 
-				tracklenarray[i] = final_buffer_len;
-
 				if(mfmsize>0xFFFF)
 				{
 					imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Argg!! track %d too long (%x) and shorten to 0xFFFF !",i,mfmsize*2);
-					mfmsize=0x7FFF;
+					mfmsize=0xFFFF;
 				}
+
+				tracklenarray[i] = mfmsize / 2;
 
 				track=(pictrack *)(offsettrack+(i*sizeof(pictrack)));
 				track->track_len = mfmsize;
@@ -361,8 +361,6 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 					trackpos=trackpos+(((mfmsize)/512)+1);
 				else
 					trackpos=trackpos+((mfmsize)/512);
-
-				//trackpos=trackpos+(((mfmsize*2)/512)+1);
 			i++;
 		};
 
@@ -371,19 +369,21 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 		i=0;
 		while(i<(FILEHEADER->number_of_track))
 		{
-				hxcfe_imgCallProgressCallback(imgldr_ctx,i,(FILEHEADER->number_of_track) );
+			hxcfe_imgCallProgressCallback(imgldr_ctx,i,(FILEHEADER->number_of_track) );
 
-				track=(pictrack *)(offsettrack+(i*sizeof(pictrack)));
+			track=(pictrack *)(offsettrack+(i*sizeof(pictrack)));
 
-				if(track->track_len%512)
-					tracksize=((track->track_len&(~0x1FF))+0x200)/2;//(((track->track_len/512)+1)*512)/2;
-				else
-					tracksize=track->track_len/2;
+			if(track->track_len%512)
+				tracksize=((track->track_len&(~0x1FF))+0x200)/2;//(((track->track_len/512)+1)*512)/2;
+			else
+				tracksize=track->track_len/2;
 
-				mfmtracks0=(unsigned char*) malloc(tracksize);
-				mfmtracks1=(unsigned char*) malloc(tracksize);
-				mfmtrackfinal=(unsigned char*) malloc(tracksize*2);
+			mfmtracks0=(unsigned char*) malloc(tracksize);
+			mfmtracks1=(unsigned char*) malloc(tracksize);
+			mfmtrackfinal=(unsigned char*) malloc(tracksize*2);
 
+			if( mfmtracks0 && mfmtracks1 && mfmtrackfinal)
+			{
 				memset(mfmtracks0,0x00,tracksize);
 				memset(mfmtracks1,0x00,tracksize);
 				memset(mfmtrackfinal,0x55,tracksize*2);
@@ -394,32 +394,40 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 				if(floppy->tracks[i]->number_of_side==2)
 				{
 					memcpy(mfmtracks1,precalcopcodestracks[i].opcodetrack_H1,tracklenarray[i]);
-					//memset(&mfmtracks1[mfmsize2],floppy->tracks[i]->sides[1]->databuffer[mfmsize2-1],tracksize-mfmsize2);
 					addpad(mfmtracks1,mfmsize2,tracksize);
 				}
 
 				for(k=0;k<tracksize/256;k++)
 				{
-
 					for(j=0;j<256;j++)
 					{
 						// inversion des bits pour le EUSART du PIC.
 
 						// head 0
 						mfmtrackfinal[(k*512)+j]=     bit_inverter[mfmtracks0[(k*256)+j]];
+
 						// head 1
 						mfmtrackfinal[(k*512)+j+256]= bit_inverter[mfmtracks1[(k*256)+j]];
-
 					}
 				}
-
 
 				rfwrite(mfmtrackfinal,tracksize*2,1,hxcpicfile,&rf);
 
 				free(mfmtracks0);
 				free(mfmtracks1);
 				free(mfmtrackfinal);
+			}
+			else
+			{
+				if( mfmtracks0 )
+					free(mfmtracks0);
 
+				if( mfmtracks1 )
+					free(mfmtracks1);
+
+				if( mfmtrackfinal )
+					free(mfmtrackfinal);
+			}
 
 			i++;
 		};
