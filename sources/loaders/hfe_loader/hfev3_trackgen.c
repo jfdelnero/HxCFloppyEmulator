@@ -69,29 +69,7 @@ trackpart trackpartbuffer_1[4096*2];
 
 void adjustrand(unsigned char * d, unsigned char * r)
 {
-	if ( (*d & 0xC0) == 0xC0)
-	{
-		*d = *d & ~0xC0;
-		*r = *r |  0xC0;
-	}
-
-	if ( (*d & 0x30) == 0x30)
-	{
-		*d = *d & ~0x30;
-		*r = *r |  0x30;
-	}
-
-	if ( (*d & 0x0C) == 0x0C)
-	{
-		*d = *d & ~0x0C;
-		*r = *r |  0x0C;
-	}
-
-	if ( (*d & 0x03) == 0x03)
-	{
-		*d = *d & ~0x03;
-		*r = *r |  0x03;
-	}
+	return;
 }
 
 int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0,uint32_t lendatah0,uint8_t * datah1,uint32_t lendatah1,uint8_t * randomh0,uint8_t * randomh1,int32_t fixedbitrateh0,uint32_t * timeh0,int32_t fixedbitrateh1,uint32_t * timeh1,uint8_t ** finalbuffer_H0_param,uint8_t ** finalbuffer_H1_param,uint8_t ** randomfinalbuffer_param)
@@ -682,20 +660,20 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 			}
 		}
 
-		if(((lencode_track0<=0) && (lencode_track1<=0)) && (trackpartbuffer_0[trackparthead0index].code==trackpartbuffer_1[trackparthead1index].code) )
+		if( (lencode_track0<=0) && (lencode_track1<=0) )
 		{
-
-			speedcfg_track0=trackpartbuffer_0[trackparthead0index].code;
-			lencode_track0=trackpartbuffer_0[trackparthead0index].len;
+			speedcfg_track0 = trackpartbuffer_0[trackparthead0index].code;
+			lencode_track0  = trackpartbuffer_0[trackparthead0index].len;
 			trackparthead0index++;
 
-			speedcfg_track1=trackpartbuffer_1[trackparthead1index].code;
-			lencode_track1=trackpartbuffer_1[trackparthead1index].len;
+			speedcfg_track1 = trackpartbuffer_1[trackparthead1index].code;
+			lencode_track1  = trackpartbuffer_1[trackparthead1index].len;
 			trackparthead1index++;
 
 			finalbuffer_H0[k] = SETBITRATE_OPCODE;
 			finalbuffer_H1[k] = SETBITRATE_OPCODE;
 			k=(k+1)%finalsizebuffer;
+
 			finalbuffer_H0[k] = speedcfg_track0;
 			finalbuffer_H1[k] = speedcfg_track1;
 			k=(k+1)%finalsizebuffer;
@@ -712,24 +690,12 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 					lencode_track0=trackpartbuffer_0[trackparthead0index].len;
 					trackparthead0index++;
 
-					if(speedcfg_track0!=speedcfg_track1)
-					{
-						finalbuffer_H0[k] = SETBITRATE_OPCODE;
-						finalbuffer_H1[k] = NOP_OPCODE;
-						k=(k+1)%finalsizebuffer;
-						finalbuffer_H0[k] = speedcfg_track0;
-						finalbuffer_H1[k] = NOP_OPCODE;
+					finalbuffer_H0[k] = SETBITRATE_OPCODE;
+					finalbuffer_H1[k] = SETBITRATE_OPCODE;
+					k=(k+1)%finalsizebuffer;
 
-					}
-					else
-					{
-						finalbuffer_H0[k] = SETBITRATE_OPCODE;
-						finalbuffer_H1[k] = SETBITRATE_OPCODE;
-						k=(k+1)%finalsizebuffer;
-						finalbuffer_H0[k] = speedcfg_track0;
-						finalbuffer_H1[k] = speedcfg_track0;
-					}
-
+					finalbuffer_H0[k] = speedcfg_track0;
+					finalbuffer_H1[k] = speedcfg_track1;
 					k=(k+1)%finalsizebuffer;
 
 				}
@@ -744,27 +710,12 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 					lencode_track1 = trackpartbuffer_1[trackparthead1index].len;
 					trackparthead1index++;
 
-					if(speedcfg_track0!=speedcfg_track1)
-					{
-						finalbuffer_H0[k]= NOP_OPCODE;
-						finalbuffer_H1[k]= SETBITRATE_OPCODE;
+					finalbuffer_H0[k]= SETBITRATE_OPCODE;
+					finalbuffer_H1[k]= SETBITRATE_OPCODE;
+					k=(k+1)%finalsizebuffer;
 
-						k=(k+1)%finalsizebuffer;
-
-						finalbuffer_H0[k] = NOP_OPCODE;
-						finalbuffer_H1[k] = speedcfg_track1;
-					}
-					else
-					{
-						finalbuffer_H0[k]= SETBITRATE_OPCODE;
-						finalbuffer_H1[k]= NOP_OPCODE;
-
-						k=(k+1)%finalsizebuffer;
-
-						finalbuffer_H0[k] = speedcfg_track1;
-						finalbuffer_H1[k] = NOP_OPCODE;
-					}
-
+					finalbuffer_H0[k] = speedcfg_track0;
+					finalbuffer_H1[k] = speedcfg_track1;
 					k=(k+1)%finalsizebuffer;
 				}
 			}
