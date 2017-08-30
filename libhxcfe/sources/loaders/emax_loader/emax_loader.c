@@ -174,18 +174,16 @@ int EMAX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,ch
 
 	if(filesize!=0)
 	{
-
-		gap3len=255;
+		gap3len=30;
 		interleave=1;
 		skew=2;
-		trackformat=ISOFORMAT_DD;
+		trackformat=IBMFORMAT_DD;
 		floppydisk->floppyNumberOfSide=2;
 		floppydisk->floppySectorPerTrack=10;
 		floppydisk->floppyNumberOfTrack=80;
 
 		if(1)
 		{
-
 			floppydisk->floppyBitRate=250000;
 			floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
@@ -256,18 +254,17 @@ int EMAX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,ch
 					memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*10);
 					for(k=0;k<10;k++)
 					{
-						sectorconfig[k].head=i;
-						sectorconfig[k].cylinder=j;
-						sectorconfig[k].sector=k+1;
-						sectorconfig[k].sectorsize=512;
-						sectorconfig[k].bitrate=floppydisk->floppyBitRate;
-						sectorconfig[k].gap3=gap3len;
-						sectorconfig[k].trackencoding=trackformat;
-						sectorconfig[k].input_data=&floppy_data[file_offset+(k*512)];
-
+						sectorconfig[k].head = i;
+						sectorconfig[k].cylinder = j;
+						sectorconfig[k].sector = k + 1;
+						sectorconfig[k].sectorsize = 512;
+						sectorconfig[k].bitrate = floppydisk->floppyBitRate;
+						sectorconfig[k].gap3 = gap3len;
+						sectorconfig[k].trackencoding = trackformat;
+						sectorconfig[k].input_data = &floppy_data[file_offset+(k*512)];
 					}
 
-					currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,(HXCFE_SECTCFG *)&sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
+					currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,(HXCFE_SECTCFG *)&sectorconfig,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,rpm,trackformat,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
 				}
 			}
 
