@@ -217,9 +217,9 @@ int ST_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 	unsigned int filesize;
 	unsigned int file_offset;
 
-	unsigned short i,j;
+	unsigned short i,j,skew;
 	unsigned char* trackdata;
-	unsigned char  gap3len,interleave,skew,trackformat;
+	unsigned char  gap3len,trackformat,interleave;
 	unsigned short rpm;
 	unsigned short sectorsize;
 	HXCFE_CYLINDER* currentcylinder;
@@ -299,7 +299,7 @@ int ST_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 					fseek (f , file_offset , SEEK_SET);
 					hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
 
-					currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
+					currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
 				}
 			}
 
@@ -311,7 +311,7 @@ int ST_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
-					currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,0,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
+					currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,0,(unsigned char)j,(unsigned char)i,1,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
 				}
 			}
 

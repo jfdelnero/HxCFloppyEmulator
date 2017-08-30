@@ -366,7 +366,7 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					}
 				}
 
-				currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,128,2500,-2500);
+				currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,128,2500,-2500);
 
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
 				{

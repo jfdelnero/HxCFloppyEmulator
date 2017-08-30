@@ -230,7 +230,7 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			}
 
-			currentcylinder->sides[i]=tg_generateTrackEx(track_header.number_of_sectors,sectorconfig,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
+			currentcylinder->sides[i]=tg_generateTrackEx(track_header.number_of_sectors,sectorconfig,interleave,(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
 
 			for(k=0;k<track_header.number_of_sectors;k++)
 			{
