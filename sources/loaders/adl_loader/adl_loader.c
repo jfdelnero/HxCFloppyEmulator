@@ -100,9 +100,9 @@ int ADL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	unsigned int filesize;
 	unsigned int file_offset;
 
-	unsigned short i,j;
+	int i,j,interleave,skew;
 	unsigned char* trackdata;
-	unsigned char  gap3len,interleave,skew,trackformat;
+	unsigned char  gap3len,trackformat;
 	unsigned short rpm;
 	unsigned short sectorsize;
 	HXCFE_CYLINDER* currentcylinder;
@@ -156,7 +156,7 @@ int ADL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				fseek (f , file_offset , SEEK_SET);
 				hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
 
-				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500| NO_SECTOR_UNDER_INDEX,-2500);
+				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500| NO_SECTOR_UNDER_INDEX,-2500);
 			}
 		}
 
