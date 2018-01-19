@@ -400,8 +400,8 @@ int32_t amigados_mountImage(HXCFE_FSMNG * fsmng, HXCFE_FLOPPY *floppy)
 
 	fsmng->fp = floppy;
 
-	if(fsmng->fp->floppyNumberOfTrack>83)
-		fsmng->trackperdisk = 83;
+	if( fsmng->fp->floppyNumberOfTrack > 84 )
+		fsmng->trackperdisk = 84;
 	else
 		fsmng->trackperdisk = fsmng->fp->floppyNumberOfTrack;
 	fsmng->sectorpertrack = 11;
