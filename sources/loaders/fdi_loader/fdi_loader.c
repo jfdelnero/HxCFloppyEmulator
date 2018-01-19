@@ -102,7 +102,7 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 {
 
 	FILE * f;
-	int  i,j,k,file_size;
+	int  i,j,k,filesize;
 	int interleave;
 	int rpm;
 	int number_of_track,number_of_side,number_of_sectorpertrack;
@@ -216,7 +216,7 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					sectorconfig[k].use_alternate_datamark=1;
 				}
 
-				if(file_offset<file_size)
+				if(file_offset<filesize)
 				{
 					sectorconfig[k].input_data=malloc(sectorconfig[k].sectorsize);
 					fseek(f,file_offset,SEEK_SET);
