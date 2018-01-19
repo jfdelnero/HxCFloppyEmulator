@@ -501,7 +501,7 @@ int hxc_find_close(void* handle)
 #if defined (DEBUG)
 	printf("hxc_find_close : handle:%p\n",handle);
 #endif
-	
+
 #if defined (WIN32)
 	if(handle)
 		FindClose((void*)handle);
@@ -553,5 +553,31 @@ int hxc_mkdir(char * folder)
 #else
 	mkdir(folder,0777);
 #endif
+	return 0;
+}
+
+int hxc_fgetsize( FILE * f )
+{
+	int cur_pos,filesize;
+
+	if( f )
+	{
+		cur_pos = ftell(f);
+		if( cur_pos >= 0 )
+		{
+			if(fseek (f , 0 , SEEK_END))
+				return 0;
+
+			filesize = ftell(f);
+
+			if( filesize < 0 )
+				filesize = 0;
+
+			fseek (f , cur_pos , SEEK_SET);
+		}
+
+		return filesize;
+	}
+
 	return 0;
 }
