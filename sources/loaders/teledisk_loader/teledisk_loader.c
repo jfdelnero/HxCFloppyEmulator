@@ -266,15 +266,14 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		return HXCFE_ACCESSERROR;
 	}
 
-	fseek(f,0,SEEK_END);
-	filesize=ftell(f);
-	if(!filesize)
+	filesize = hxc_fgetsize(f);
+
+	if( !filesize )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"TeleDisk_libLoad_DiskFile : 0 byte file !");
 		hxc_fclose(f);
 		return HXCFE_BADFILE;
 	}
-	fseek(f,0,SEEK_SET);
 
 	fileimage_buffer_offset=0;
 	fileimage=(unsigned char*)malloc(filesize+512);

@@ -126,9 +126,8 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		return HXCFE_ACCESSERROR;
 	}
 
-	fseek(f,0,SEEK_END);
-	totalfilesize=ftell(f);
-	fseek(f,0,SEEK_SET);
+	totalfilesize = hxc_fgetsize(f);
+
 	file_buffer=(unsigned char *) malloc(totalfilesize);
 	memset(file_buffer,0,totalfilesize);
 	hxc_fread(file_buffer,totalfilesize,f);

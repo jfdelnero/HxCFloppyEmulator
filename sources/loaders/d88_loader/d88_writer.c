@@ -245,7 +245,7 @@ int D88_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			d88_fh.media_flag = 0x00;
 		}
 
-		d88_fh.file_size = ftell(d88file);
+		d88_fh.file_size = hxc_fgetsize(d88file);
 		fseek(d88file,0,SEEK_SET);
 		fwrite(&d88_fh,sizeof(d88_fileheader),1,d88file);
 		fwrite(&tracktable, sizeof(tracktable),1,d88file);

@@ -146,73 +146,70 @@ int Apple2_do_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 		return HXCFE_ACCESSERROR;
 	}
 
-	fseek (f , 0 , SEEK_END);
-	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET);
+	filesize = hxc_fgetsize(f);
 
-	if(filesize!=0)
+	if( filesize )
 	{
+		sectorsize=256;
 
-			sectorsize=256;
+		bitrate=250000;
+		rpm=283;
+		interleave=1;
+		gap3len=20;
+		trackformat=APPLE2_GCR6A2;
+		floppydisk->floppyNumberOfSide=1;
+		floppydisk->floppySectorPerTrack=16;
+		floppydisk->floppyNumberOfTrack=filesize/( floppydisk->floppyNumberOfSide*floppydisk->floppySectorPerTrack*256);
 
-            bitrate=250000;
-            rpm=283;
-            interleave=1;
-            gap3len=20;
-			trackformat=APPLE2_GCR6A2;
-            floppydisk->floppyNumberOfSide=1;
-            floppydisk->floppySectorPerTrack=16;
-            floppydisk->floppyNumberOfTrack=filesize/( floppydisk->floppyNumberOfSide*floppydisk->floppySectorPerTrack*256);
+		floppydisk->floppyBitRate=bitrate;
+		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
-			floppydisk->floppyBitRate=bitrate;
-			floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,bitrate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
 
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,bitrate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
+		sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
+		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 
-			sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
-			memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
+		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 
-			trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+		{
 
-			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+			currentcylinder=floppydisk->tracks[j];
+
+			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
+				hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
 
-				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-				currentcylinder=floppydisk->tracks[j];
+				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
+							(sectorsize*(floppydisk->floppySectorPerTrack)*i);
 
-				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+				fseek (f , file_offset , SEEK_SET);
+				hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
+
+				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
 				{
-					hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
-
-					file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-						(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-
-					fseek (f , file_offset , SEEK_SET);
-					hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
-
-					memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
-					for(k=0;k<floppydisk->floppySectorPerTrack;k++)
-					{
-						sectorconfig[k].cylinder=j;
-						sectorconfig[k].head=i;
-						sectorconfig[k].sector=k;
-						sectorconfig[k].bitrate=floppydisk->floppyBitRate;
-						sectorconfig[k].gap3=gap3len;
-						sectorconfig[k].sectorsize=sectorsize;
-						sectorconfig[k].input_data=&trackdata[sector_order[k]*sectorsize];
-						sectorconfig[k].trackencoding=trackformat;
-					}
-
-					currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,20,2500,-2500);
+					sectorconfig[k].cylinder=j;
+					sectorconfig[k].head=i;
+					sectorconfig[k].sector=k;
+					sectorconfig[k].bitrate=floppydisk->floppyBitRate;
+					sectorconfig[k].gap3=gap3len;
+					sectorconfig[k].sectorsize=sectorsize;
+					sectorconfig[k].input_data=&trackdata[sector_order[k]*sectorsize];
+					sectorconfig[k].trackencoding=trackformat;
 				}
+
+				currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,20,2500,-2500);
 			}
+		}
 
-			free(sectorconfig);
-			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		free(sectorconfig);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
-			hxc_fclose(f);
-			return HXCFE_NOERROR;
+		hxc_fclose(f);
+		return HXCFE_NOERROR;
 	}
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);

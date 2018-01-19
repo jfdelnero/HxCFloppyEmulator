@@ -76,13 +76,10 @@ int DMK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		f=hxc_fopen(imgfile,"r+b");
 		if(f)
 		{
-			fseek (f , 0 , SEEK_END);
-			filesize=ftell(f);
-			fseek (f , 0 , SEEK_SET);
+			filesize = hxc_fgetsize(f);
 			hxc_fread(&dmk_h,sizeof(dmk_header),f);
 
 			hxc_fclose(f);
-
 
 			if(dmk_h.track_len)
 			{
@@ -437,13 +434,10 @@ int DMK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
-	fseek (f , 0 , SEEK_END);
-	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET);
+	filesize = hxc_fgetsize(f);
 
-	if(filesize!=0)
+	if( filesize )
 	{
-
 		hxc_fread(&dmk_h,sizeof(dmk_h),f);
 		floppydisk->floppyBitRate=250000;
 

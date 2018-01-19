@@ -115,8 +115,7 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		return HXCFE_ACCESSERROR;
 	}
 
-	fseek (f , 0 , SEEK_END);
-	filesize=ftell(f);
+	filesize = hxc_fgetsize(f);
 
 	fseek (f , 256*(3-1) , SEEK_SET);
 	hxc_fread(buffer,256,f);

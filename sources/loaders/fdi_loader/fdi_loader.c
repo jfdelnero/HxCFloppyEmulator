@@ -126,10 +126,7 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
-
-	fseek(f,0,SEEK_END);
-	file_size=ftell(f);
-	fseek(f,0,SEEK_SET);
+	filesize = hxc_fgetsize(f);
 
 	hxc_fread(&f_header,sizeof(fdi_header),f);
 

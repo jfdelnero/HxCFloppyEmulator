@@ -995,9 +995,7 @@ HXCFE_FLOPPY* hxcfe_generateXmlFloppy ( HXCFE_XMLLDR* xmlfb_ctx, uint8_t * rambu
 		f = hxc_fopen((char*)ad->xmlfile_path,"rb");
 		if(f)
 		{
-			fseek(f,0,SEEK_END);
-			filesize = ftell(f);
-			fseek(f,0,SEEK_SET);
+			filesize = hxc_fgetsize(f);
 			if(filesize>0)
 			{
 				xmlbuffer = malloc(filesize + 1);
@@ -1030,16 +1028,14 @@ HXCFE_FLOPPY* hxcfe_generateXmlFileFloppy (HXCFE_XMLLDR* xmlfb_ctx,char *file)
 	f = hxc_fopen(file,"rb");
 	if(f)
 	{
-		fseek(f,0,SEEK_END);
-		filesize = ftell(f);
+		filesize = hxc_fgetsize(f);
+
 		if(filesize)
 		{
 			if(filesize > 32*1024*1024)
 			{
 				filesize = 32*1024*1024;
 			}
-
-			fseek(f,0,SEEK_SET);
 
 			buffer = malloc(filesize);
 			if(buffer)

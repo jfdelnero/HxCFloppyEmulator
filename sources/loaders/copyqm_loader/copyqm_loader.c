@@ -156,10 +156,9 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 		return HXCFE_ACCESSERROR;
 	}
 
-	fseek (f , 0 , SEEK_END);
-	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET);
-	if(filesize!=0)
+	filesize = hxc_fgetsize(f);
+
+	if( filesize )
 	{
 		fileheader=(unsigned char*)malloc(QM_HEADER_SIZE+1);
 		hxc_fread( fileheader, QM_HEADER_SIZE, f );

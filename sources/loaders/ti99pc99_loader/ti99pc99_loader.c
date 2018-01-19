@@ -267,13 +267,9 @@ int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		return HXCFE_ACCESSERROR;
 	}
 
+	filesize = hxc_fgetsize(f);
 
-	fseek (f , 0 , SEEK_END);
-	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET);
-
-
-	if(filesize!=0)
+	if( filesize )
 	{
 
 		fmmode=0;

@@ -78,9 +78,7 @@ int VDK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			return -1;
 		}
 
-		fseek (f , 0 , SEEK_END);
-		filesize=ftell(f);
-		fseek (f , 0 , SEEK_SET);
+		filesize = hxc_fgetsize(f);
 
 		hxc_fread(&vdk_h,sizeof(vdk_header),f);
 
@@ -130,10 +128,7 @@ int VDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
-
-	fseek (f , 0 , SEEK_END);
-	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET);
+	filesize = hxc_fgetsize(f);
 
 	memset(&vdk_h,0,sizeof(vdk_header));
 	hxc_fread(&vdk_h,sizeof(vdk_header),f);
