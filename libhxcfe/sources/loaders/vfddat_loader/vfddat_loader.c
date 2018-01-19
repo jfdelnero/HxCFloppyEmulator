@@ -72,9 +72,7 @@ int VFDDAT_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		f=hxc_fopen(imgfile,"r+b");
 		if(f)
 		{
-			fseek (f , 0 , SEEK_END);
-			filesize=ftell(f);
-			fseek (f , 0 , SEEK_SET);
+			filesize = hxc_fgetsize(f);
 			hxc_fread(&header,sizeof(header),f);
 
 			hxc_fclose(f);
@@ -194,13 +192,10 @@ int VFDDAT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 		return HXCFE_ACCESSERROR;
 	}
 
-	fseek (f , 0 , SEEK_END);
-	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET);
+	filesize = hxc_fgetsize(f);
 
-	if(filesize!=0)
+	if( filesize )
 	{
-
 		hxc_fread(&header,sizeof(header),f);
 		floppydisk->floppyBitRate=500000;
 

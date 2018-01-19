@@ -127,9 +127,7 @@ int STT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
-	fseek (f , 0 , SEEK_END);
-	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET);
+	filesize = hxc_fgetsize(f);
 
 	STTHEADER.stt_signature=0;
 	hxc_fread(&STTHEADER,sizeof(stt_header),f);

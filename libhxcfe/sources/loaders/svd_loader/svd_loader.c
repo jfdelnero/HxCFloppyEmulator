@@ -142,9 +142,7 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
-	fseek (f , 0 , SEEK_END);
-	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET);
+	filesize = hxc_fgetsize(f);
 
 	// code version
 	hxc_fgets(linebuffer,sizeof(linebuffer),f);

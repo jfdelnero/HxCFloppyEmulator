@@ -103,8 +103,7 @@ int TRD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
-	fseek (f , 0 , SEEK_END);
-	filesize=ftell(f);
+	filesize = hxc_fgetsize(f);
 
 	fseek (f , 8*256 , SEEK_SET);
 	hxc_fread(tempsector,256,f);

@@ -70,13 +70,13 @@ int ACORNADF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	{
 
 		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
+		if( filesize < 0 )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"ACORNADF_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
-		if(filesize&0x3FF)
+		if( filesize & 0x3FF )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ACORNADF_libIsValidDiskFile : non Acorn ADF file - bad file size !");
 			return HXCFE_BADFILE;
@@ -92,11 +92,8 @@ int ACORNADF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	}
 }
 
-
-
 int ACORNADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
 	FILE * f;
 	unsigned int filesize;
 	int i,j;
@@ -110,18 +107,16 @@ int ACORNADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ACORNADF_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
-	fseek (f , 0 , SEEK_END);
-	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET);
+	filesize = hxc_fgetsize(f);
 
-	if(filesize!=0)
+	if( filesize )
 	{
 		sectorsize=1024;
 		rpm=300;

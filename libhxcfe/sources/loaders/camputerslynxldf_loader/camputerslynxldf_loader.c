@@ -118,11 +118,9 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 		return HXCFE_ACCESSERROR;
 	}
 
-	fseek (f , 0 , SEEK_END);
-	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET);
+	filesize = hxc_fgetsize(f);
 
-	if(filesize!=0)
+	if( filesize )
 	{
 		sectorsize=512;
 		rpm=300;

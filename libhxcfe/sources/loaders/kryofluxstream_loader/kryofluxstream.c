@@ -113,9 +113,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 		f=hxc_fopen(file,"rb");
 		if(f)
 		{
-			fseek(f,0,SEEK_END);
-			filesize=ftell(f);
-			fseek(f,0,SEEK_SET);
+			filesize = hxc_fgetsize(f);
 
 			kfstreambuffer=malloc(filesize);
 

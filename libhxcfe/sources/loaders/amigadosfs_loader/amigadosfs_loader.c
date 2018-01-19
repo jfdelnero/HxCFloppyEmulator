@@ -216,9 +216,8 @@ int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char *
 								ftemp=hxc_fopen(fullpath,"rb");
 								if(ftemp)
 								{
-									fseek(ftemp,0,SEEK_END);
-									filesize=ftell(ftemp);
-									fseek(ftemp,0,SEEK_SET);
+									filesize = hxc_fgetsize(ftemp);
+
 									do
 									{
 										if(filesize>=512)

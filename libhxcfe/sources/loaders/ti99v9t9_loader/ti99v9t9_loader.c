@@ -94,12 +94,11 @@ int32_t getDiskGeometry(FILE * f,int32_t * numberoftrack,int32_t * numberofside,
 	*bitrate=250000;
 	*density=1;
 
-	fseek (f , 0 , SEEK_END);
-	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET);
-	hxc_fread(&vib,sizeof(ti99_vib),f);
-	fseek (f , 0 , SEEK_SET);
+	filesize = hxc_fgetsize(f);
 
+	hxc_fread(&vib,sizeof(ti99_vib),f);
+
+	fseek (f , 0 , SEEK_SET);
 
 	// If we have read the sector successfully, let us parse it
 	totsecs = (vib.totsecsMSB << 8) | vib.totsecsLSB;
@@ -380,9 +379,7 @@ int TI99V9T9_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		return HXCFE_ACCESSERROR;
 	}
 
-	fseek (f , 0 , SEEK_END);
-	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET);
+	filesize = hxc_fgetsize(f);
 
 	if(getDiskGeometry(f,&floppydisk->floppyNumberOfTrack,&floppydisk->floppyNumberOfSide,&floppydisk->floppySectorPerTrack,&skew0,&skew1,&interleave,&density,&floppydisk->floppyBitRate,&sectorsize))
 	{

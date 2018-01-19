@@ -119,10 +119,8 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	}
 
 	file_offset = 0;
-	fseek (f , 0 , SEEK_END);
-	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET);
-	if(filesize!=0)
+	filesize = hxc_fgetsize(f);
+	if( filesize )
 	{
 		sectorsize=512; // msa file support only 512bytes/sector floppies.
 

@@ -404,11 +404,9 @@ int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
-	fseek (f , 0 , SEEK_END);
-	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET);
+	filesize = hxc_fgetsize(f);
 
-	if(filesize!=0)
+	if( filesize )
 	{
 		hxc_fread(sh, sizeof(JV3SectorHeader) * JV3_HEADER_MAX, f);
 

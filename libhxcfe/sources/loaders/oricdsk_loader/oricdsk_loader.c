@@ -252,10 +252,9 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 		return HXCFE_ACCESSERROR;
 	}
 
-	fseek (f , 0 , SEEK_END);
-	filesize=ftell(f);
-	fseek (f , 0 , SEEK_SET);
-	if(filesize!=0)
+	filesize = hxc_fgetsize(f);
+
+	if( filesize )
 	{
 		mfmformat=0;
 		fileheader=(oricdsk_fileheader *) malloc(256);

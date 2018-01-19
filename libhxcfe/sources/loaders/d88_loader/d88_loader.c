@@ -138,9 +138,7 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Floppy disk in this file :");
 	partcount=0;
 
-	fseek(f,0,SEEK_END);
-	truetotalfilesize=ftell(f);
-	fseek(f,0,SEEK_SET);
+	truetotalfilesize = hxc_fgetsize(f);
 
 	totalfilesize=0;
 	while((!feof(f)) && (partcount<256) && (totalfilesize<truetotalfilesize))
