@@ -1,5 +1,16 @@
 Revision History
 -=-=-=-=-=-=-=-=-
+
+v2.6.11+
+Patchs / Improvements added to the original version :
+ - FAT12 support added.
+ - Non-standard sector size support added (PC98...). 
+ - can remove a folder.
+ - Functions to get Free & total space added. 
+ - default file date set at file creation.
+ - various fixes.
+ Jean-François DEL NERO
+
 v2.6.11 - Fix compilation with GCC on 64-bit machines
 v2.6.10 - Added support for FAT32 format.
 V2.6.9  - Added support for time & date handling.
