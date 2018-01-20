@@ -22,9 +22,24 @@
 
 // Basic type
 typedef unsigned char	muchar;
+typedef signed   char   mchar;
 typedef unsigned short	muint;
 typedef          short	mint;
 typedef unsigned long	mulong;
+
+#ifdef HXCMOD_8BITS_OUTPUT
+	#ifdef HXCMOD_UNSIGNED_OUTPUT
+	typedef unsigned char msample;
+	#else
+	typedef signed char   msample;
+	#endif
+#else
+	#ifdef HXCMOD_UNSIGNED_OUTPUT
+	typedef unsigned short msample;
+	#else
+	typedef signed short   msample;
+	#endif
+#endif
 
 #define NUMMAXCHANNELS 32
 #define MAXNOTES 12*12
@@ -67,7 +82,7 @@ typedef struct {
 // HxCMod Internal structures
 //
 typedef struct {
-	char *  sampdata;
+	mchar * sampdata;
 	muint   sampnum;
 	muint   length;
 	muint   reppnt;
@@ -104,7 +119,7 @@ typedef struct {
 
 typedef struct {
 	module  song;
-	char *  sampledata[31];
+	mchar * sampledata[31];
 	note *  patterndata[128];
 
 	mulong  playrate;
@@ -206,9 +221,9 @@ typedef struct tracker_buffer_state_
 ///////////////////////////////////////////////////////////////////////////////////
 
 int  hxcmod_init( modcontext * modctx );
-int  hxcmod_setcfg( modcontext * modctx, int samplerate, int bits, int stereo, int stereo_separation, int filter);
+int  hxcmod_setcfg( modcontext * modctx, int samplerate, int stereo_separation, int filter);
 int  hxcmod_load( modcontext * modctx, void * mod_data, int mod_data_size );
-void hxcmod_fillbuffer( modcontext * modctx, unsigned short * outbuffer, unsigned long nbsample, tracker_buffer_state * trkbuf );
+void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long nbsample, tracker_buffer_state * trkbuf );
 void hxcmod_unload( modcontext * modctx );
 
 #endif
