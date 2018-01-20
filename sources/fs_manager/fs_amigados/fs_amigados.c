@@ -400,8 +400,8 @@ int32_t amigados_mountImage(HXCFE_FSMNG * fsmng, HXCFE_FLOPPY *floppy)
 
 	fsmng->fp = floppy;
 
-	if( fsmng->fp->floppyNumberOfTrack > 84 )
-		fsmng->trackperdisk = 84;
+	if( fsmng->fp->floppyNumberOfTrack > 85 )
+		fsmng->trackperdisk = 85;
 	else
 		fsmng->trackperdisk = fsmng->fp->floppyNumberOfTrack;
 	fsmng->sectorpertrack = 11;
@@ -764,6 +764,17 @@ int32_t amigados_createDir( HXCFE_FSMNG * fsmng,char * foldername)
 
 int32_t amigados_removeDir( HXCFE_FSMNG * fsmng,char * foldername)
 {
+	int len;
+
+	len = strlen(foldername);
+	if(len)
+	{
+		if(foldername[len-1] == '/')
+		{
+			foldername[len-1] = 0;
+		}
+	}
+
 	return amigados_deleteFile(fsmng, foldername);
 }
 
