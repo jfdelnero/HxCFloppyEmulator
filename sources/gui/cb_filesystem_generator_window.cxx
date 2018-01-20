@@ -652,6 +652,110 @@ int getdir(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,c
 	return 0;
 }
 
+int deltree(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,int level)
+{
+	char fullpath[1024];
+	char progresstxt[1024];
+	int dirhandle;
+	int ret;
+	int dir;
+	HXCFE_FSENTRY  dirent;
+
+	if(level > 16 )
+	{
+		return HXCFE_ACCESSERROR;
+	}
+
+	dirhandle = hxcfe_openDir(fsmng,folder);
+	if ( dirhandle > 0 )
+	{
+		if(!strlen(folder) || folder[strlen(folder)-1] != '/')
+		{
+			strcat(folder,"/");
+		}
+
+		do
+		{
+			dir = 0;
+			ret = hxcfe_readDir(fsmng,dirhandle,&dirent);
+			if(ret> 0)
+			{
+				if(dirent.isdir)
+				{
+					dir = 1;
+				}
+
+				strncpy(fullpath,folder,sizeof(fullpath));
+				sec_strncat(fullpath,dirent.entryname,sizeof(fullpath));
+
+				if(dir)
+				{
+					if(fullpath[strlen(fullpath)-1] != '/')
+					{
+						sec_strncat(fullpath,"/",sizeof(fullpath));
+					}
+
+					if( strcmp(dirent.entryname,"..") && strcmp(dirent.entryname,"."))
+					{
+						ret = deltree(fsw,fsmng,fullpath,level+1);
+						if(ret != HXCFE_NOERROR)
+						{
+							hxcfe_closeDir(fsmng,dirhandle);
+							return ret;
+						}
+					}
+				}
+				else
+				{
+					sprintf(progresstxt,"Delete %s ...",fullpath);
+					fsw->txtout_freesize->value(progresstxt);
+					fsw->txtout_freesize->redraw();
+
+					ret = hxcfe_deleteFile( fsmng, fullpath );
+					if(ret != HXCFE_NOERROR)
+					{
+						hxcfe_closeDir(fsmng,dirhandle);
+						return ret;
+					}
+				}
+			}
+			else
+			{
+				hxcfe_closeDir(fsmng,dirhandle);
+
+				// current folder empty... delete it.
+				sprintf(progresstxt,"Delete %s ...",folder);
+				fsw->txtout_freesize->value(progresstxt);
+				fsw->txtout_freesize->redraw();
+
+				ret = hxcfe_removeDir( fsmng, folder);
+				if(ret != HXCFE_NOERROR)
+				{
+					return ret;
+				}
+
+				return HXCFE_NOERROR;
+			}
+
+		}while(1);
+	}
+	else
+	{
+		sprintf(progresstxt,"Delete %s ...",folder);
+		fsw->txtout_freesize->value(progresstxt);
+		fsw->txtout_freesize->redraw();
+
+		ret = hxcfe_deleteFile( fsmng, folder );
+
+		if(ret != HXCFE_NOERROR)
+		{
+			return ret;
+		}
+	}
+
+	return HXCFE_NOERROR;
+}
+
 void browse_floppy_disk(filesystem_generator_window *fgw,int lastoperationerror)
 {
 	HXCFE_FSMNG  * fsmng;
@@ -795,7 +899,7 @@ void filesystem_generator_window_bt_delete(Fl_Button *bt,void *)
 				if(strstr(itempath,"            |"))
 					*strstr(itempath,"            |") = 0;
 
-				hxcfe_deleteFile(fsmng, itempath+2);
+				deltree(fgw,fsmng,itempath+2,0);
 				flt_item = fgw->fs_browser->next_selected_item(flt_item);
 			}
 
