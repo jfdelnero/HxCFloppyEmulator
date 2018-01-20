@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2017 Jean-François DEL NERO
+// Copyright (C) 2006-2018 Jean-François DEL NERO
 //
 // This file is part of HxCFloppyEmulator.
 //
@@ -266,7 +266,7 @@ About_box::About_box()
 
 	o = new Fl_Box(200, 13, 320+6, 200+6);
 	o->box(FL_UP_BOX);// Fl_Box* o
-	o = new Fl_Box(5, 45, 180, 60, "Copyright (c) 2006-2017\nJean-FranÃ§ois DEL NERO\n(c) HxC2001");
+	o = new Fl_Box(5, 45, 180, 60, "Copyright (c) 2006-2018\nJean-FranÃ§ois DEL NERO\n(c) HxC2001");
 	o->box(FL_DOWN_BOX);
 
 	xpos_size=200+3;
