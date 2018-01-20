@@ -277,7 +277,7 @@ uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 		memset( ui_context->modctx, 0, sizeof(modcontext));
 
 		hxcmod_init( (modcontext*)ui_context->modctx );
-		hxcmod_setcfg( (modcontext*)ui_context->modctx, 44100, 16, 1, 1, 1);
+		hxcmod_setcfg( (modcontext*)ui_context->modctx, 44100, 1, 1);
 
 #ifdef WIN32    
 		srand(GetTickCount());
