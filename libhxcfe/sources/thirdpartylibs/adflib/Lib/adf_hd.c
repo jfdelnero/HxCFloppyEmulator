@@ -56,7 +56,9 @@ int adfDevType(struct Device* dev)
     if( (dev->size==512*11*2*80) ||		/* BV */
         (dev->size==512*11*2*81) ||		/* BV */
         (dev->size==512*11*2*82) || 	/* BV */
-        (dev->size==512*11*2*83) )		/* BV */
+        (dev->size==512*11*2*83) || 	/* BV */
+        (dev->size==512*11*2*84) || 	/* BV */
+        (dev->size==512*11*2*85) )		/* BV */
         return(DEVTYPE_FLOPDD);
     else if (dev->size==512*22*2*80)
         return(DEVTYPE_FLOPHD);
