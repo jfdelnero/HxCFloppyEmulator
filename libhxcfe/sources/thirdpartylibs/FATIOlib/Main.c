@@ -31,6 +31,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
+// Patchs / Improvements added to the original version :
+// - FAT12 support added.
+// - Non-standard sector size support added (PC98...). 
+// - can remove a folder.
+// - Functions to get Free & total space added. 
+// - default file date set at file creation.
+// - various fixes.
+// Jean-François DEL NERO
 //-----------------------------------------------------------------------------
 #include <stdio.h>
 #include <stdlib.h>

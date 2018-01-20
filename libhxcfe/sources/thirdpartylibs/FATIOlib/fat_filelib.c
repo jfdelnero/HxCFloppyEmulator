@@ -28,6 +28,14 @@
 // along with FAT File IO Library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //-----------------------------------------------------------------------------
+// Patchs / Improvements added to the original version :
+// - FAT12 support added.
+// - Non-standard sector size support added (PC98...). 
+// - can remove a folder.
+// - Functions to get Free & total space added. 
+// - default file date set at file creation.
+// - various fixes.
+// Jean-François DEL NERO
 //-----------------------------------------------------------------------------
 #include <stdlib.h>
 #include <string.h>
@@ -345,12 +353,13 @@ static int _create_directory(char *path)
 }
 #endif
 //-----------------------------------------------------------------------------
-// _open_file: Open a file for reading
+// _open_entry: Open a entry (file or folder) a for reading
 //-----------------------------------------------------------------------------
-static FL_FILE* _open_file(const char *path)
+static FL_FILE* _open_entry(const char *path, int dir)
 {
     FL_FILE* file;
     struct fat_dir_entry sfEntry;
+	int isdir;
 
     // Allocate a new file handle
     file = _allocate_file();
@@ -391,16 +400,18 @@ static FL_FILE* _open_file(const char *path)
     // Using dir cluster address search for filename
     if (fatfs_get_file_entry(&_fs, file->parentcluster, file->filename,&sfEntry))
         // Make sure entry is file not dir!
-        if (fatfs_entry_is_file(&sfEntry))
+        isdir = fatfs_entry_is_dir(&sfEntry);
+        if ( ( !isdir && !dir ) || ( isdir && dir ) )
         {
             // Initialise file details
             memcpy(file->shortfilename, sfEntry.Name, FAT_SFN_SIZE_FULL);
             file->filelength = FAT_HTONL(sfEntry.FileSize);
             file->bytenum = 0;
-			if( _fs.fat_type == FAT_TYPE_32 )
-				file->startcluster = ((FAT_HTONS((uint32)sfEntry.FstClusHI))<<16) + FAT_HTONS(sfEntry.FstClusLO);
-			else
-				file->startcluster = FAT_HTONS(sfEntry.FstClusLO);
+			file->is_dir = isdir;
+            if( _fs.fat_type == FAT_TYPE_32 )
+                file->startcluster = ((FAT_HTONS((uint32)sfEntry.FstClusHI))<<16) + FAT_HTONS(sfEntry.FstClusLO);
+            else
+                file->startcluster = FAT_HTONS(sfEntry.FstClusLO);
             file->file_data_address = 0xFFFFFFFF;
             file->file_data_dirty = 0;
             file->filelength_changed = 0;
@@ -813,7 +824,7 @@ void* fiol_fopen(const char *path, const char *mode)
 
     // Read
     if (flags & FILE_READ)
-        file = _open_file(path);
+        file = _open_entry(path,0);
 
     // Create New
 #if FATFS_INC_WRITE_SUPPORT
@@ -825,7 +836,7 @@ void* fiol_fopen(const char *path, const char *mode)
     if (!(flags & FILE_READ))
         if ((flags & FILE_CREATE) && !file)
             if (flags & (FILE_WRITE | FILE_APPEND))
-                file = _open_file(path);
+                file = _open_entry(path,0);
 
     if (file)
         file->flags = flags;
@@ -1509,6 +1520,71 @@ int fiol_createdirectory(const char *path)
 }
 #endif
 //-----------------------------------------------------------------------------
+// fl_removedirectory: Remove an empty directory
+//-----------------------------------------------------------------------------
+#if FATFS_INC_WRITE_SUPPORT
+int fiol_removedirectory(const char *path)
+{
+    FL_DIR dirstat;
+    FL_FILE* folder;
+    int res = -1;
+
+    // If first call to library, initialise
+    CHECK_FL_INIT();
+
+    FL_LOCK(&_fs);
+
+    // Is the folder empty ?
+    if (fiol_opendir(path, &dirstat))
+    {
+        struct fs_dir_ent dirent;
+
+        while (fiol_readdir(&dirstat, &dirent) == 0)
+        {
+            if (dirent.is_dir)
+            {
+                if( strcmp(dirent.filename,"..") && strcmp(dirent.filename,".") )
+                {
+                    fiol_closedir(&dirstat);
+                    return res;
+                }
+            }
+            else
+            {
+                fiol_closedir(&dirstat);
+                return res;
+            }
+        }
+
+        // Ok we can delete the folder.
+        fiol_closedir(&dirstat);
+
+        // Use read_file as this will check if the file is already open!
+        folder =  _open_entry(path, 1);
+        if (folder)
+        {
+            // Delete allocated space
+            if (fatfs_free_cluster_chain(&_fs, folder->startcluster))
+            {
+                // Remove directory entries
+                if (fatfs_mark_file_deleted(&_fs, folder->parentcluster, (char*)folder->shortfilename))
+                {
+                    // Close the file handle (this should not write anything to the file
+                    // as we have not changed the file since opening it!)
+                    fiol_fclose(folder);
+
+                    res = 0;
+                }
+            }
+        }
+    }
+
+    FL_UNLOCK(&_fs);
+
+    return res;
+}
+#endif
+//-----------------------------------------------------------------------------
 // fl_listdirectory: List a directory based on a path
 //-----------------------------------------------------------------------------
 #if FATFS_DIR_LIST_SUPPORT
@@ -1632,6 +1708,15 @@ int fiol_is_dir(const char *path)
     return res;
 }
 #endif
+//-----------------------------------------------------------------------------
+// fiol_format: Format a partition with either FAT16 or FAT32 based on size
+//-----------------------------------------------------------------------------
+#if FATFS_INC_FORMAT_SUPPORT
+int fiol_format(uint32 volume_sectors, const char *name)
+{
+    return fatfs_format(&_fs, volume_sectors, name);
+}
+#endif /*FATFS_INC_FORMAT_SUPPORT*/
 //-----------------------------------------------------------------------------
 // fiol_get_fs:
 //-----------------------------------------------------------------------------

@@ -46,6 +46,9 @@ typedef struct sFL_FILE
     char                    filename[FATFS_MAX_LONG_FILENAME];
     uint8                   shortfilename[11];
 
+    // This file is a directory !
+    int                     is_dir; 
+
 #ifdef FAT_CLUSTER_CACHE_ENTRIES
     uint32                  cluster_cache_idx[FAT_CLUSTER_CACHE_ENTRIES];
     uint32                  cluster_cache_data[FAT_CLUSTER_CACHE_ENTRIES];
@@ -108,6 +111,7 @@ int                 fiol_closedir(FL_DIR* dir);
 // Extensions
 void                fiol_listdirectory(const char *path);
 int                 fiol_createdirectory(const char *path);
+int                 fiol_removedirectory(const char *path);
 int                 fiol_is_dir(const char *path);
 
 int                 fiol_format(uint32 volume_sectors, const char *name);
