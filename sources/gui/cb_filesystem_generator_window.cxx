@@ -1251,25 +1251,35 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 
 			if(size < 32 * 1024*1024 )
 			{
-				buffer =(unsigned char*) malloc(size);
-				if(buffer)
+				buffer = 0;
+				if(size)
+					buffer =(unsigned char*) malloc(size);
+
+				if(buffer || !size)
 				{
-					if(!fread(buffer,size,1,f))
+					if(size)
 					{
-						sprintf(progresstxt,"Cannot read source file %s !!!",srcpath);
-						fsw->txtout_freesize->value(progresstxt);
-						fsw->txtout_freesize->color(FL_RED);
-						free(buffer);
-						hxc_fclose(f);
-						return -1;
+						if(!fread(buffer,size,1,f))
+						{
+							sprintf(progresstxt,"Cannot read source file %s !!!",srcpath);
+							fsw->txtout_freesize->value(progresstxt);
+							fsw->txtout_freesize->color(FL_RED);
+							free(buffer);
+							hxc_fclose(f);
+							return -1;
+						}
 					}
 
 					strncpy(fullpath,dstpath,sizeof(fullpath));
 					file_handle = hxcfe_createFile(fsmng,fullpath );
 					if(file_handle>0)
 					{
-						wsize = hxcfe_writeFile(fsmng,file_handle,buffer,size);
+						wsize = 0;
+						if(size)
+							wsize = hxcfe_writeFile(fsmng,file_handle,buffer,size);
+
 						hxcfe_closeFile(fsmng,file_handle);
+
 						if( wsize != size )
 						{
 							sprintf(progresstxt,"Error: %s Write failed !!! No more space ? ",fullpath);
@@ -1301,13 +1311,15 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 						fsw->txtout_freesize->value(progresstxt);
 						fsw->txtout_freesize->color(FL_RED);
 
-						free(buffer);
+						if(buffer)
+							free(buffer);
 						hxc_fclose(f);
 
 						return -1;
 					}
 
-					free(buffer);
+					if(buffer)
+						free(buffer);
 				}
 				else
 				{
@@ -1319,7 +1331,6 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 					return -1;
 
 				}
-
 			}
 			else
 			{
@@ -1329,7 +1340,6 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 
 				hxc_fclose(f);
 				return -1;
-
 			}
 
 			hxc_fclose(f);
