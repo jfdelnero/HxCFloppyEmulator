@@ -489,7 +489,12 @@ int32_t fat12_createDir( HXCFE_FSMNG * fsmng,char * foldername)
 
 int32_t fat12_removeDir( HXCFE_FSMNG * fsmng,char * foldername)
 {
-	return fat12_deleteFile(fsmng, foldername);
+	if(fiol_removedirectory(foldername)>=0)
+	{
+		return HXCFE_NOERROR;
+	}
+
+	return HXCFE_ACCESSERROR;
 }
 
 int32_t fat12_ftell( HXCFE_FSMNG * fsmng,int32_t filehandle)
