@@ -28,6 +28,14 @@
 // along with FAT File IO Library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //-----------------------------------------------------------------------------
+// Patchs / Improvements added to the original version :
+// - FAT12 support added.
+// - Non-standard sector size support added (PC98...). 
+// - can remove a folder.
+// - Functions to get Free & total space added. 
+// - default file date set at file creation.
+// - various fixes.
+// Jean-François DEL NERO
 //-----------------------------------------------------------------------------
 #include <string.h>
 #include <assert.h>
