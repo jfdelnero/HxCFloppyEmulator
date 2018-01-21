@@ -129,11 +129,7 @@ int HFEV3_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int cpybits(unsigned char * bufout,int bitoffset_out,unsigned char * bufin,int bitoffset_in, int size)
 {
-	int i,bit;
-	unsigned char byte;
-
-	byte = 0;
-	bit = 0;
+	int i;
 
 	for(i = 0;i<size;i++)
 	{
