@@ -7,7 +7,36 @@
 -------H----H---X-----X---CCCCC-----222222----0000-----0000----1111------------
 -------------------------------------------------------------------------------
 --------------------------------------------------------- http://hxc2001.com --
+HxC Floppy Emulator project
+(c) 2006-2018 Jean-François DEL NERO / (c) HxC2001
+Forum    : http://torlus.com/floppy/forum
+Facebook : https://www.facebook.com/groups/hxc2001
 -------------------------------------------------------------------------------
+
+/*********************************************************
+21 January 2018: HxCFloppyEmulator 2.1.8.0
+
+New Loader : Atari ATR file image loader.
+
+New Write & Loader : HFE V3 : variable bitrate and other proctections support.
+                     (Experimental ! The file format definition not yet finished !)
+
+Kryoflux raw files Writer : Fix dead lock with tracks without pulse.
+
+Amiga DOS image browser : 85 tracks AmigaDos image support.
+
+Disk Image browser (FAT & AmigaDOS) : Fix null-sized file import issue.
+
+Disk Image browser (FAT & AmigaDOS) : Can now delete folders.
+
+All image loader : Fix possible track skew calculation error.
+
+Emax image loader : GAP fixed to 30.
+
+Thomson *.FD loader : Sector interleave set to 7
+
+Command line tool : -uselayout option can be now used to specify external xml disk layout file.
+*********************************************************/
 
 /*********************************************************
 22 January 2017: HxCFloppyEmulator 2.1.6.0
