@@ -19,7 +19,7 @@ Facebook : https://www.facebook.com/groups/hxc2001
 New Loader : Atari ATR file image loader.
 
 New Write & Loader : HFE V3 : variable bitrate and other proctections support.
-                     (Experimental ! The file format definition not yet finished !)
+                     (Experimental ! The file format definition is not yet finished !)
 
 Kryoflux raw files Writer : Fix dead lock with tracks without pulse.
 
@@ -29,7 +29,7 @@ Disk Image browser (FAT & AmigaDOS) : Fix null-sized file import issue.
 
 Disk Image browser (FAT & AmigaDOS) : Can now delete folders.
 
-All image loader : Fix possible track skew calculation error.
+All image loaders : Fix possible track skew calculation error.
 
 Emax image loader : GAP fixed to 30.
 
