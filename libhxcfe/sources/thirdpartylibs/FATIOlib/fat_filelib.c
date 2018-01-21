@@ -399,6 +399,7 @@ static FL_FILE* _open_entry(const char *path, int dir)
 
     // Using dir cluster address search for filename
     if (fatfs_get_file_entry(&_fs, file->parentcluster, file->filename,&sfEntry))
+    {
         // Make sure entry is file not dir!
         isdir = fatfs_entry_is_dir(&sfEntry);
         if ( ( !isdir && !dir ) || ( isdir && dir ) )
@@ -407,7 +408,7 @@ static FL_FILE* _open_entry(const char *path, int dir)
             memcpy(file->shortfilename, sfEntry.Name, FAT_SFN_SIZE_FULL);
             file->filelength = FAT_HTONL(sfEntry.FileSize);
             file->bytenum = 0;
-			file->is_dir = isdir;
+            file->is_dir = isdir;
             if( _fs.fat_type == FAT_TYPE_32 )
                 file->startcluster = ((FAT_HTONS((uint32)sfEntry.FstClusHI))<<16) + FAT_HTONS(sfEntry.FstClusLO);
             else
@@ -426,6 +427,7 @@ static FL_FILE* _open_entry(const char *path, int dir)
 
             return file;
         }
+    }
 
     _free_file(file);
     return NULL;
