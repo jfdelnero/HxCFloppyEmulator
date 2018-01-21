@@ -560,6 +560,8 @@ int hxc_fgetsize( FILE * f )
 {
 	int cur_pos,filesize;
 
+	filesize = 0;
+
 	if( f )
 	{
 		cur_pos = ftell(f);
