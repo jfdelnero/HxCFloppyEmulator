@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2017 Jean-François DEL NERO
+// Copyright (C) 2006-2018 Jean-François DEL NERO
 //
 // This file is part of HxCFloppyEmulator.
 //
@@ -314,66 +314,82 @@ int convertfile(HXCFE* hxcfe,char * infile,char * outfile,char * outformat,int i
 	return 0;
 }
 
-int convertrawfile(HXCFE* hxcfe,char * infile,char * layout,char * outfile,char * outformat,int ifmode)
+int load_xml_layout(HXCFE_XMLLDR* rfb, char * layout)
 {
-	int layoutid,loaderid;
-	HXCFE_FLOPPY * floppydisk;
-	HXCFE_XMLLDR* rfb;
-	HXCFE_IMGLDR * imgldr_ctx;
-
-
-	rfb=hxcfe_initXmlFloppy(hxcfe);
+	int layoutid;
 
 	layoutid = hxcfe_getXmlLayoutID(rfb,layout);
-
-	if(layoutid>=0)
+	if( layoutid < 0 )
 	{
-
-		hxcfe_selectXmlFloppyLayout(rfb,layoutid);
-
-		if(strlen(infile))
-			floppydisk = hxcfe_generateXmlFileFloppy(rfb,infile);
-		else
-			floppydisk = hxcfe_generateXmlFloppy(rfb,0,0);
-
-		hxcfe_deinitXmlFloppy(rfb);
-
-		if(!floppydisk)
+		// Layout not available internally. Try to read the xml file.
+		if( hxcfe_setXmlFloppyLayoutFile(rfb,layout) != HXCFE_NOERROR )
 		{
-			printf("Load error!\n");
-		}
-		else
-		{
-			if(ifmode<0)
-			{
-				ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
-			}
+			printf("Layout unknown and/or bad xml file !: %s\n",layout);
+			printf("Please use the option -rawlist for the layout list.\n");
 
-			imgldr_ctx = hxcfe_imgInitLoader(hxcfe);
-			if(imgldr_ctx)
-			{
-
-				loaderid=hxcfe_imgGetLoaderID(imgldr_ctx,outformat);
-				if(loaderid>=0)
-				{
-					hxcfe_floppySetInterfaceMode(hxcfe,floppydisk,ifmode);
-					hxcfe_imgExport(imgldr_ctx,floppydisk,outfile,loaderid);
-				}
-				else
-				{
-					printf("Cannot Find the Loader %s ! Please use the -modulelist option to see possible values.\n",outformat);
-				}
-
-				hxcfe_imgUnload(imgldr_ctx,floppydisk);
-
-				hxcfe_imgDeInitLoader(imgldr_ctx);
-			}
+			return -1;
 		}
 	}
 	else
 	{
-		printf("Layout unknown !: %s\n",layout);
-		printf("Please use the option -rawlist for the layout list.\n");
+		hxcfe_selectXmlFloppyLayout(rfb,layoutid);
+	}
+
+	return 0;
+}
+
+int convertrawfile(HXCFE* hxcfe,char * infile,char * layout,char * outfile,char * outformat,int ifmode)
+{
+	int loaderid;
+	HXCFE_FLOPPY * floppydisk;
+	HXCFE_XMLLDR* rfb;
+	HXCFE_IMGLDR * imgldr_ctx;
+
+	rfb = hxcfe_initXmlFloppy(hxcfe);
+
+	if( load_xml_layout(rfb, layout) < 0 )
+	{
+		hxcfe_deinitXmlFloppy(rfb);
+
+		return 0;
+	}
+
+	if(strlen(infile))
+		floppydisk = hxcfe_generateXmlFileFloppy(rfb,infile);
+	else
+		floppydisk = hxcfe_generateXmlFloppy(rfb,0,0);
+
+	hxcfe_deinitXmlFloppy(rfb);
+
+	if(!floppydisk)
+	{
+		printf("Load source image error!\n");
+	}
+	else
+	{
+		if(ifmode<0)
+		{
+			ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
+		}
+
+		imgldr_ctx = hxcfe_imgInitLoader(hxcfe);
+		if(imgldr_ctx)
+		{
+			loaderid=hxcfe_imgGetLoaderID(imgldr_ctx,outformat);
+			if(loaderid>=0)
+			{
+				hxcfe_floppySetInterfaceMode(hxcfe,floppydisk,ifmode);
+				hxcfe_imgExport(imgldr_ctx,floppydisk,outfile,loaderid);
+			}
+			else
+			{
+				printf("Cannot Find the Loader %s ! Please use the -modulelist option to see possible values.\n",outformat);
+			}
+
+			hxcfe_imgUnload(imgldr_ctx,floppydisk);
+
+			hxcfe_imgDeInitLoader(imgldr_ctx);
+		}
 	}
 
 	return 0;
@@ -382,7 +398,6 @@ int convertrawfile(HXCFE* hxcfe,char * infile,char * layout,char * outfile,char 
 
 int usbloadrawfile(HXCFE* hxcfe, char * infile, char * layout, int drive, int doublestep, int ifmode)
 {
-	int layoutid;
 	HXCFE_FLOPPY * floppydisk;
 	HXCFE_XMLLDR * rfb;
 	USBHXCFE * usbfe;
@@ -395,29 +410,26 @@ int usbloadrawfile(HXCFE* hxcfe, char * infile, char * layout, int drive, int do
 		rfb = hxcfe_initXmlFloppy(hxcfe);
 		if (rfb)
 		{
-			layoutid = hxcfe_getXmlLayoutID(rfb, layout);
-
-			if (layoutid >= 0)
+			if( load_xml_layout(rfb, layout) < 0 )
 			{
-
-				hxcfe_selectXmlFloppyLayout(rfb, layoutid);
-
-				if (strlen(infile))
-					floppydisk = hxcfe_generateXmlFileFloppy(rfb, infile);
-				else
-					floppydisk = hxcfe_generateXmlFloppy(rfb, 0, 0);
-
-
-				libusbhxcfe_loadFloppy(hxcfe, usbfe, floppydisk);
-
-				printf("type q and enter to quit\n");
-				do
-				{
-				} while (getchar() != 'q');
-
 				hxcfe_deinitXmlFloppy(rfb);
 
+				return 0;
 			}
+
+			if (strlen(infile))
+				floppydisk = hxcfe_generateXmlFileFloppy(rfb, infile);
+			else
+				floppydisk = hxcfe_generateXmlFloppy(rfb, 0, 0);
+
+			libusbhxcfe_loadFloppy(hxcfe, usbfe, floppydisk);
+
+			printf("type q and enter to quit\n");
+			do
+			{
+			} while (getchar() != 'q');
+
+			hxcfe_deinitXmlFloppy(rfb);
 		}
 	}
 	return 0;
