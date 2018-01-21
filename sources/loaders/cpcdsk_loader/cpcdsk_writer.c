@@ -60,7 +60,6 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG** sca;
 
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write CPCDSK file %s...",filename);
 
 	log_str=0;
@@ -68,9 +67,11 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 	if(cpcdskfile)
 	{
 		memset(disk_info_block,0,0x100);
-		cpcdsk_fh=(cpcdsk_fileheader *)&disk_info_block;
-		sprintf((char*)&cpcdsk_fh->headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n");
-		sprintf((char*)&cpcdsk_fh->creatorname,"HxCFloppyEmu\r\n");
+
+		cpcdsk_fh = (cpcdsk_fileheader *)&disk_info_block;
+		strncpy((char*)&cpcdsk_fh->headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",sizeof(cpcdsk_fh->headertag));
+		strncpy((char*)&cpcdsk_fh->creatorname,"HxCFloppyEmu\r\n",sizeof(cpcdsk_fh->creatorname));
+
 		fwrite(&disk_info_block,0x100,1,cpcdskfile);
 		track_cnt=0;
 
