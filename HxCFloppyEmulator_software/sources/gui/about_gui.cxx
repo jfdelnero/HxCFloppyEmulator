@@ -93,7 +93,6 @@ int startAudioOut()
 
 		if(waveOutGetNumDevs()!=0)
 		{
-	//		InitModule(NULL,buffer1,sizeof(buffer1),(char*)&themod);
 			pwfx.wFormatTag=1;
 			pwfx.nChannels=2;
 			pwfx.nSamplesPerSec=44100;
@@ -192,8 +191,6 @@ static void tick(void *v)
 	Fl::repeat_timeout(0.02, tick, v);
 }
 
-
-
 void close(Fl_Widget *w, void * t)
 {
 	stopAudioOut();
@@ -241,36 +238,60 @@ About_box::~About_box()
     uintro_deinit(this->ui_context);
 }
 
+#define BUTTONS_BLOCK_XPOS 5
+#define BUTTONS_BLOCK_YPOS 100
+
+#define BUTTON_SIZE_X 180
+#define BUTTON_SIZE_Y 25
+
 About_box::About_box()
   : Fl_Window(530,240)
 {
+	int cur_xpos,cur_ypos;
 
-
-	o = new Fl_Box(5, 15, 180, 25, "HxC FLoppy Emulator");
+	o = new Fl_Box(5, 5, BUTTON_SIZE_X, BUTTON_SIZE_Y, "HxC Floppy Emulator");
 	o->box(FL_DOWN_BOX);
 
-	button_wesite=		new Fl_Button(5, 110, 180, 25, "Website");
+	cur_xpos = BUTTONS_BLOCK_XPOS;
+	cur_ypos = BUTTONS_BLOCK_YPOS;
+
+	button_wesite = new Fl_Button(cur_xpos, cur_ypos, BUTTON_SIZE_X, BUTTON_SIZE_Y, "Website");
 	button_wesite->callback(OpenURLInBrowser,(void*)"http://www.hxc2001.com/");
 
-	button_forum=		new Fl_Button(5, 110+25, 180, 25, "Support Forum");
+	cur_ypos += BUTTON_SIZE_Y;
+
+	button_forum = new Fl_Button(cur_xpos, cur_ypos, BUTTON_SIZE_X / 2, BUTTON_SIZE_Y, "Forum");
 	button_forum->callback(OpenURLInBrowser,(void*)"http://torlus.com/floppy/forum");
 
-	button_releasenotes=new Fl_Button(5, 110+25*2, 180, 25, "Latest release notes");
+	button_facebook = new Fl_Button(cur_xpos + (BUTTON_SIZE_X / 2), cur_ypos, BUTTON_SIZE_X / 2, BUTTON_SIZE_Y, "Facebook");
+	button_facebook->callback(OpenURLInBrowser,(void*)"https://www.facebook.com/groups/hxc2001/");
+
+	cur_ypos += BUTTON_SIZE_Y;
+
+	button_releasenotes = new Fl_Button(cur_xpos, cur_ypos, BUTTON_SIZE_X, BUTTON_SIZE_Y, "Latest release notes");
 	button_releasenotes->callback(OpenURLInBrowser,(void*)"http://hxc2001.com/download/floppy_drive_emulator/hxcfloppyemulator_soft_release_notes.txt");
 
-	button_license=		new Fl_Button(5, 110+25*3, 180, 25, "Under GPL License");
+	cur_ypos += BUTTON_SIZE_Y;
+
+	button_license = new Fl_Button(cur_xpos, cur_ypos, BUTTON_SIZE_X, BUTTON_SIZE_Y, "Under GPL License");
 	button_license->callback(create_license_window,0);
 
-	button_ok=new Fl_Button(5, 110+25*4, 180/2, 25, "OK" ); // Fl_Button* o
+	cur_ypos += BUTTON_SIZE_Y;
+
+	button_ok = new Fl_Button(cur_xpos, cur_ypos, BUTTON_SIZE_X / 2, BUTTON_SIZE_Y, "OK" ); // Fl_Button* o
 	button_ok->callback(close,0);
 
-	o = new Fl_Box(200, 13, 320+6, 200+6);
+	o = new Fl_Box(200, 5, 320+6, 200+6);
 	o->box(FL_UP_BOX);// Fl_Box* o
-	o = new Fl_Box(5, 45, 180, 60, "Copyright (c) 2006-2018\nJean-François DEL NERO\n(c) HxC2001");
+
+	o = new Fl_Box(200, 200+6 + 5, 320+6, BUTTON_SIZE_Y, "hxc2001.com Mail: hxc2001(at)hxc2001.com");
+	o->box(FL_DOWN_BOX);
+
+	o = new Fl_Box(5, 35, 180, 60, "Copyright (c) 2006-2018\nJean-François DEL NERO\n(c) HxC2001");
 	o->box(FL_DOWN_BOX);
 
 	xpos_size=200+3;
-	ypos_size=13+3;
+	ypos_size=5+3;
 
 	xsize=320;
 	ysize=200;
@@ -278,12 +299,12 @@ About_box::About_box()
 	ui_context=uintro_init(xsize,ysize);
 	gb_ui_context = ui_context;
 
-
 	this->end();
 
 	windowname[0]=0;
 	strcpy(windowname,NOMFENETRE" - libhxcfe v");
 	strcat(windowname,hxcfe_getVersion(guicontext->hxcfe));
+
 	this->label(windowname);
 
 	audiostarted = 0;
@@ -291,6 +312,5 @@ About_box::About_box()
 
 	tick(this);
 
-	return ;
+	return;
 }
-

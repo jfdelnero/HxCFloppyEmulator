@@ -32,30 +32,31 @@ extern "C"
 
 // About class...
 class About_box : public Fl_Window {
-  
 
-  Fl_Button *button_wesite;
-  Fl_Button *button_releasenotes;
-  Fl_Button *button_license;
-  Fl_Button *button_ok;
-  Fl_Button *button_forum;
-  Fl_Progress* track_pos;
-  Fl_Text_Display* file_name_txt;
-  Fl_Box*  o;
-  Fl_Window *window;
+	Fl_Button *button_wesite;
+	Fl_Button *button_releasenotes;
+	Fl_Button *button_license;
+	Fl_Button *button_ok;
+	Fl_Button *button_forum;
+	Fl_Button *button_facebook;
+	Fl_Progress* track_pos;
+	Fl_Text_Display* file_name_txt;
+	Fl_Box*  o;
+	Fl_Window *window;
 
-  char windowname[128];
+	char windowname[128];
 
-  public:
-	  int	xsize;
-	  int	ysize;
-	  int	xpos_size;
-	  int	ypos_size;
-	  int	window_active;
+	public:
 
-	  uintro_context * ui_context;
+	int xsize;
+	int ysize;
+	int xpos_size;
+	int ypos_size;
+	int window_active;
 
-	  About_box();
+	uintro_context * ui_context;
+
+	About_box();
 	~About_box();
 
 };
