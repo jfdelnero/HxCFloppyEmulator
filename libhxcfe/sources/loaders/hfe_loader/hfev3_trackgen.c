@@ -198,7 +198,7 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 	}
 
 #ifdef DEBUGVB
-	floppycontext->hxc_printf(MSG_DEBUG,"GenOpcodesTrack : head 0 number of time zone = %d!",trackzoneindex1 );
+	floppycontext->hxc_printf(MSG_DEBUG,"GenOpcodesTrack : head 0 number of time zone = %d!",trackzoneindex0 );
 #endif
 
 	// head 1
@@ -269,7 +269,7 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 											 trackzonebuffer_1[i].bitrate,
 											 trackzonebuffer_1[i].start,
 											 trackzonebuffer_1[i].end,
-											 trackzonebuffer_1[i].end-trackzonebuffer_0[i].start
+											 trackzonebuffer_1[i].end-trackzonebuffer_1[i].start
 											 );
 	}
 #endif
@@ -525,7 +525,7 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef DEBUGVB
 	floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
-	floppycontext->hxc_printf(MSG_DEBUG,"GenOpcodesTrack: Head0:");
+	floppycontext->hxc_printf(MSG_DEBUG,"GenOpcodesTrack: Head0: %d zones",numberofzoneh0);
 	j=0;
 	k=0;
 	for(i=0;i<numberofzoneh0;i++)
@@ -537,8 +537,8 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 	}
 	floppycontext->hxc_printf(MSG_DEBUG,"Total track Head0: %d timing : %dns",j,k/10);
 
+	floppycontext->hxc_printf(MSG_DEBUG,"GenOpcodesTrack: Head1: %d zones",numberofzoneh1);
 
-	floppycontext->hxc_printf(MSG_DEBUG,"GenOpcodesTrack: Head1:");
 	j=0;
 	k=0;
 	for(i=0;i<numberofzoneh1;i++)
@@ -677,6 +677,13 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 			lencode_track1  = trackpartbuffer_1[trackparthead1index].len;
 			trackparthead1index++;
 
+			#ifdef DEBUGVB
+			if( !speedcfg_track0 || !speedcfg_track1 )
+			{
+				floppycontext->hxc_printf(MSG_DEBUG,"Invalid speed state ! : H0- P:%d L:%d S:%d --- H1- P:%d L:%d S:%d",trackparthead0index-1,lencode_track0,speedcfg_track0,trackparthead1index-1,lencode_track1,speedcfg_track1);
+			}
+			#endif
+
 			finalbuffer_H0[k] = SETBITRATE_OPCODE;
 			finalbuffer_H1[k] = SETBITRATE_OPCODE;
 			k=(k+1)%finalsizebuffer;
@@ -697,6 +704,13 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 					lencode_track0=trackpartbuffer_0[trackparthead0index].len;
 					trackparthead0index++;
 
+					#ifdef DEBUGVB
+					if( !speedcfg_track0 )
+					{
+						floppycontext->hxc_printf(MSG_DEBUG,"Invalid speed state ! : H0-P:%d L:%d S:%d",trackparthead0index-1,lencode_track0,speedcfg_track0);
+					}
+					#endif 
+
 					finalbuffer_H0[k] = SETBITRATE_OPCODE;
 					finalbuffer_H1[k] = SETBITRATE_OPCODE;
 					k=(k+1)%finalsizebuffer;
@@ -716,6 +730,13 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 					speedcfg_track1 = trackpartbuffer_1[trackparthead1index].code;
 					lencode_track1 = trackpartbuffer_1[trackparthead1index].len;
 					trackparthead1index++;
+
+					#ifdef DEBUGVB
+					if( !speedcfg_track1 )
+					{
+						floppycontext->hxc_printf(MSG_DEBUG,"Invalid speed state ! : H1-P:%d L:%d S:%d",trackparthead1index-1,lencode_track1,speedcfg_track1);
+					}
+					#endif
 
 					finalbuffer_H0[k]= SETBITRATE_OPCODE;
 					finalbuffer_H1[k]= SETBITRATE_OPCODE;
