@@ -30,17 +30,25 @@
 #include "data_DiskLayout_LIF_5_25_264KB_xml.h"
 #include "data_DiskLayout_AED6200P_xml.h"
 #include "data_DiskLayout_Microtan_65_TANDOS_xml.h"
+#include "data_DiskLayout_Acorn_160K_ADFS_xml.h"
+#include "data_DiskLayout_Acorn_320K_ADFM_xml.h"
+#include "data_DiskLayout_Acorn_640K_ADFL_xml.h"
+#include "data_DiskLayout_Dynacord_AddOne_xml.h"
 
 datatype * disklayout_list[]=
 {
 	data_DiskLayout_DOS_DD_720KB_xml,
 	data_DiskLayout_DOS_HD_1_44MB_xml,
 	data_DiskLayout_CasioFZ1_HD_1_25MB_xml,
+    data_DiskLayout_Acorn_160K_ADFS_xml,
+    data_DiskLayout_Acorn_320K_ADFM_xml,
+    data_DiskLayout_Acorn_640K_ADFL_xml,
 	data_DiskLayout_AkaiS950_HD_1_6MB_xml,
 	data_DiskLayout_AkaiS950_DD_800KB_xml,
 	data_DiskLayout_AkaiS3000_HD_1_6MB_xml,
 	data_DiskLayout_AmstradCPC_DD_xml,
 	data_DiskLayout_AtariST_DD_720KB_xml,
+	data_DiskLayout_Dynacord_AddOne_xml,
 	data_DiskLayout_Ensoniq_DD_800KB_xml,
 	data_DiskLayout_Ensoniq_HD_1600KB_xml,
 	data_DiskLayout_Ensoniq_Mirage_440KB_xml,
