@@ -986,8 +986,8 @@ int main(int argc, char* argv[])
 	hxcfe=hxcfe_init();
 	hxcfe_setOutputFunc(hxcfe,&CUI_affiche);
 
-	printf("HxC Floppy Emulator : Floppy image file converter\n");
-	printf("Copyright (C) 2006-2017 Jean-Francois DEL NERO\n");
+	printf("HxC Floppy Emulator : Floppy image file converter v2.0.2.1\n");
+	printf("Copyright (C) 2006-2018 Jean-Francois DEL NERO\n");
 	printf("This program comes with ABSOLUTELY NO WARRANTY\n");
 	printf("This is free software, and you are welcome to redistribute it\n");
 	printf("under certain conditions;\n\n");
