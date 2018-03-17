@@ -30,4 +30,9 @@
 ..\..\converttools\bmptoh DiskLayout_LIF_5_25_264KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_AED6200P.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Microtan_65_TANDOS.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Acorn_160K_ADFS.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Acorn_320K_ADFM.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Acorn_640K_ADFL.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Dynacord_AddOne.xml -DATA
 move *.h ..
+
