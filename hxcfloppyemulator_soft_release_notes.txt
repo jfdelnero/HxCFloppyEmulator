@@ -13,6 +13,12 @@ Forum    : http://torlus.com/floppy/forum
 Facebook : https://www.facebook.com/groups/hxc2001
 -------------------------------------------------------------------------------
 
+/*********************************************************
+18 March 2018: HxCFloppyEmulator 2.1.9.1
+
+-> Acorn BBC file format loader (*.ADL/ADM/ADF) fixed.
+
+*********************************************************/
 
 /*********************************************************
 18 March 2018: HxCFloppyEmulator 2.1.9.0
