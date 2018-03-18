@@ -2,7 +2,7 @@
 <!-- HxC Floppy Emulator Disk Layout -->
 <disk_layout>
 	<disk_layout_name>ACORN_ADFL_640K</disk_layout_name>
-	<disk_layout_description>Acorn ADFS 640K Floppy Disk</disk_layout_description>
+	<disk_layout_description>Acorn ADFL 640K Floppy Disk</disk_layout_description>
 	<prefered_file_extension>adf</prefered_file_extension>
 	<interface_mode>GENERIC_SHUGART_DD_FLOPPYMODE</interface_mode>
 	<file_size>655360</file_size>
