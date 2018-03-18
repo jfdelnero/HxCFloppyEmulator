@@ -13,6 +13,22 @@ Forum    : http://torlus.com/floppy/forum
 Facebook : https://www.facebook.com/groups/hxc2001
 -------------------------------------------------------------------------------
 
+
+/*********************************************************
+18 March 2018: HxCFloppyEmulator 2.1.9.0
+
+New XML format definitions :
+  - Acorn ADFS (160K).
+  - Acorn ADFM (320K).
+  - Acorn ADFL (640K).
+  - Dynacord Add-one.
+
+Stream importer :
+  - More debug/error messages,
+  - unconventional index period support.
+
+*********************************************************/
+
 /*********************************************************
 21 January 2018: HxCFloppyEmulator 2.1.8.0
 
