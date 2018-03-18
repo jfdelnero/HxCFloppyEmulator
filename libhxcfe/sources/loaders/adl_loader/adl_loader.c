@@ -66,7 +66,7 @@ int ADL_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADL_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"adl"))
+	if( hxc_checkfileext(imgfile,"adl") || hxc_checkfileext(imgfile,"adm") || hxc_checkfileext(imgfile,"adf") )
 	{
 		filesize=hxc_getfilesize(imgfile);
 		if(filesize<0)
@@ -75,7 +75,7 @@ int ADL_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			return HXCFE_ACCESSERROR;
 		}
 
-		if(filesize&0x1FF)
+		if(filesize&0x1FF || (filesize > 82*16*2*256 ) )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADL_libIsValidDiskFile : non Acorn BBC ADL IMG file - bad file size !");
 			return HXCFE_BADFILE;
@@ -121,18 +121,44 @@ int ADL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	if( filesize )
 	{
 		sectorsize=256;
+
 		floppydisk->floppyNumberOfTrack=80;
 		floppydisk->floppyNumberOfSide=2;
 		floppydisk->floppySectorPerTrack=16;
-		gap3len=255;
-		interleave=2;
-		skew=2;
-		rpm=300; // normal rpm
-		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-		floppydisk->floppyBitRate=DEFAULT_DD_BITRATE;
-		trackformat=IBMFORMAT_DD;
+		gap3len = 255;
+		interleave = 1;
+		skew = 7;
+		rpm = 300; // normal rpm
 
-		floppydisk->floppyNumberOfSide=2;
+		switch( filesize )
+		{
+			case 80*16*2*256:
+				floppydisk->floppyNumberOfTrack = 80;
+				floppydisk->floppyNumberOfSide = 2;
+				floppydisk->floppySectorPerTrack = 16;
+			break;
+			case 80*16*1*256:
+				floppydisk->floppyNumberOfTrack = 80;
+				floppydisk->floppyNumberOfSide = 1;
+				floppydisk->floppySectorPerTrack = 16;
+			break;
+			case 40*16*1*256:
+				floppydisk->floppyNumberOfTrack = 40;
+				floppydisk->floppyNumberOfSide = 1;
+				floppydisk->floppySectorPerTrack = 16;
+			break;
+			default:
+
+				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Invalid file size : %d bytes",filesize);
+				hxc_fclose(f);
+				return HXCFE_FILECORRUPTED;
+
+				break;
+		}
+
+		floppydisk->floppyiftype = GENERIC_SHUGART_DD_FLOPPYMODE;
+		floppydisk->floppyBitRate = DEFAULT_DD_BITRATE;
+		trackformat = IBMFORMAT_DD;
 
 		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
@@ -154,7 +180,7 @@ int ADL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				fseek (f , file_offset , SEEK_SET);
 				hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
 
-				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500| NO_SECTOR_UNDER_INDEX,-2500);
+				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,j*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500| NO_SECTOR_UNDER_INDEX,-2500);
 			}
 		}
 
