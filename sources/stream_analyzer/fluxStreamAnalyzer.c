@@ -2220,7 +2220,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 			floppycontext->hxc_printf(MSG_DEBUG,"-------- Fisrt Loop state ---------");
 
 			// print missing blocks.
-			for(block_num=0;block_num<nbblock;block_num++)
+			for(block_num=0;block_num<tb->number_of_blocks;block_num++)
 			{
 				c = ' ';
 
@@ -2557,7 +2557,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 #ifdef FLUXSTREAMDBG
 			// print missing blocks.
-			for(block_num=0;block_num<nbblock;block_num++)
+			for(block_num=0;block_num<tb->number_of_blocks;block_num++)
 			{
 				c = ' ';
 				if(block_num)
@@ -2825,8 +2825,12 @@ void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t 
 		{
 			if(streamposition < std->nb_of_pulses)
 			{
+#ifdef FLUXSTREAMDBG
+				fxs->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_FxStream_AddIndex : streamposition %d - tickoffset %d",streamposition,tickoffset);
+#endif
 				if(std->nb_of_index<32)
 				{
+
 					std->index_evt_tab[std->nb_of_index].dump_offset = streamposition;
 
 					cellpos = 0;
@@ -2842,6 +2846,10 @@ void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t 
 					std->nb_of_index++;
 				}
 			}
+			else
+			{
+				fxs->hxcfe->hxc_printf(MSG_ERROR,"hxcfe_FxStream_AddIndex : streamposition beyond of stream limit ! (%d >= %d)",streamposition,std->nb_of_pulses);
+			}
 		}
 	}
 }
@@ -2854,6 +2862,10 @@ int32_t hxcfe_FxStream_GetNumberOfRevolution( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM 
 		{
 			if(std->nb_of_index)
 			{
+#ifdef FLUXSTREAMDBG
+				fxs->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_FxStream_GetNumberOfRevolution:  %d",std->nb_of_index - 1);
+#endif
+
 				return std->nb_of_index - 1;
 			}
 
@@ -3149,7 +3161,12 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 		hxcfe->hxc_printf(MSG_DEBUG,"Index period : %d ms",indexperiod / (1000*100) );
 
-		if((indexperiod / (1000*100)) >= 80 && (indexperiod / (1000*100)) <= 400)
+		if( ( (indexperiod / (1000*100)) < 80 ) || ( (indexperiod / (1000*100)) >= 400 ) )
+		{
+			fxs->hxcfe->hxc_printf(MSG_WARNING,"Non-conventionnal index perdiod ! (%d ms)",(indexperiod / (1000*100)));
+		}
+
+		if(indexperiod > 0)
 		{
 
 			hxcfe->hxc_printf(MSG_DEBUG,"Block analysing...");
@@ -3264,9 +3281,8 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 						if(rpm <= 0 || rpm > 800 || tick_to_time(track_len) < 5000000 )
 						{
-#ifdef FLUXSTREAMDBG
-							fxs->hxcfe->hxc_printf(MSG_DEBUG,"Invalid rpm or tracklen (%d RPM, %d)...",rpm,tick_to_time(track_len));
-#endif
+
+							fxs->hxcfe->hxc_printf(MSG_ERROR,"Invalid rpm or tracklen (%d RPM, %d)...",rpm,tick_to_time(track_len));
 
 							rpm = 300;
 
@@ -3435,6 +3451,10 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 				free_pulses_link_array(pl);
 			}
+		}
+		else
+		{
+			fxs->hxcfe->hxc_printf(MSG_ERROR,"Index Period ! (%d ms)",(indexperiod / (1000*100)));
 		}
 
 		free(tb->blocks);
