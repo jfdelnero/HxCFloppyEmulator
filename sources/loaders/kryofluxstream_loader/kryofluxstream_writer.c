@@ -174,7 +174,7 @@ int alignOOB(FILE * f)
 	return j;
 }
 
-uint32_t write_kf_stream_track(char * filepath,HXCFE_SIDE * track,int tracknum,int sidenum,unsigned int revolution)
+uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_SIDE * track,int tracknum,int sidenum,unsigned int revolution)
 {
 	char fullp[512];
 	char fullp2[512];
@@ -208,6 +208,8 @@ uint32_t write_kf_stream_track(char * filepath,HXCFE_SIDE * track,int tracknum,i
 	sprintf(fileext,"%.2d.%d.raw",tracknum,sidenum);
 	strcat(fullp,fileext);
 
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"write_kf_stream_track : Creating %s (trk %d, side %d, rev %d)",fullp,tracknum,sidenum,revolution);
+
 	f = hxc_fopen(fullp,"wb");
 	if(f)
 	{
@@ -237,7 +239,11 @@ uint32_t write_kf_stream_track(char * filepath,HXCFE_SIDE * track,int tracknum,i
 		iclk = 0;
 		if(trackrollover != 0x01) // If no pulse, don't process the track.
 		{
-			for(j=0;j<revolution;j++)
+			trackoffset = (int)((float)track->tracklen * 0.75);
+
+			getNextPulse(track,&trackoffset,&trackrollover);
+
+			for(j=0;j<revolution + 2;j++)
 			{
 				i = 0;
 
@@ -325,6 +331,8 @@ uint32_t write_kf_stream_track(char * filepath,HXCFE_SIDE * track,int tracknum,i
 						oobdi.SysClk = iclk;
 						totalcelllen = 0;
 						fwrite(&oobdi,sizeof(s_oob_DiskIndex),1,f);
+
+						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"write_kf_stream_track : Index added (Stream pos : %d, Sysclk : %d)",oobdi.StreamPosition,oobdi.SysClk);
 					}
 
 					old_index_state = track->indexbuffer[trackoffset>>3];
@@ -355,9 +363,18 @@ uint32_t write_kf_stream_track(char * filepath,HXCFE_SIDE * track,int tracknum,i
 						fwrite(&oobsr,sizeof(s_oob_StreamRead),1,f);
 
 						SRcntdown = 0x7FF4;
+
 					}
 
 					streampos += streamsize;
+
+					if( j == ( revolution  + 1 ) )
+					{
+						if( trackoffset > (int)((float)track->tracklen * 0.15) )
+						{
+							trackrollover = 0x01;
+						}
+					}
 
 				}while(!trackrollover);
 
@@ -367,6 +384,10 @@ uint32_t write_kf_stream_track(char * filepath,HXCFE_SIDE * track,int tracknum,i
 					i = 0;
 				}
 			}
+		}
+		else
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_WARNING,"write_kf_stream_track : No pulse in this track !");
 		}
 
 		// Finish the stream
@@ -384,7 +405,13 @@ uint32_t write_kf_stream_track(char * filepath,HXCFE_SIDE * track,int tracknum,i
 		memset(trackbuffer,0x0D,7);
 		fwrite(&trackbuffer,7,1,f);
 
+		imgldr_ctx->hxcfe->hxc_printf(MSG_WARNING,"write_kf_stream_track : End of the track ! (StreamPosition : %d)",oobse.StreamPosition);
+
 		hxc_fclose(f);
+	}
+	else
+	{
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"write_kf_stream_track : Can't create %s !",fullp);
 	}
 
 	return 0;
@@ -400,7 +427,7 @@ int KryoFluxStream_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * flo
 		{
 			hxcfe_imgCallProgressCallback(imgldr_ctx,i + (j*floppy->floppyNumberOfTrack),floppy->floppyNumberOfTrack*floppy->floppyNumberOfSide );
 
-			write_kf_stream_track(filename,floppy->tracks[i]->sides[j],i,j,5);
+			write_kf_stream_track(imgldr_ctx, filename,floppy->tracks[i]->sides[j],i,j,5);
 		}
 	}
 
