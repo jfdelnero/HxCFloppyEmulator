@@ -14,6 +14,11 @@ Facebook : https://www.facebook.com/groups/hxc2001
 -------------------------------------------------------------------------------
 
 /*********************************************************
+11 April 2018: HxCFloppyEmulator 2.1.9.2
+
+Kryoflux Stream Loader (*XX.X.raw) : Loader & writer index position fixed.
+
+/*********************************************************
 18 March 2018: HxCFloppyEmulator 2.1.9.1
 
 -> Acorn BBC file format loader (*.ADL/ADM/ADF) fixed.
