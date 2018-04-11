@@ -78,18 +78,22 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 	HXCFE_TRKSTREAM		* track_dump;
 
 	s_oob_DiskIndex  tabindex[MAX_INDEX];
+	uint32_t tabindex_cellpos[MAX_INDEX];
 
 	FILE* f;
-#ifdef KFSTREAMDBG
-	s_oob_StreamRead	* streamRead;
-	s_oob_StreamEnd		* streamEnd;
 
 	double mck;
 	double sck;
 	double ick;
 
+	#ifdef KFSTREAMDBG
+
 	char * tempstr;
-#endif
+	s_oob_StreamRead	* streamRead;
+	s_oob_StreamEnd		* streamEnd;
+
+	#endif
+
 	unsigned char * kfstreambuffer;
 	uint32_t * cellstream;
 
@@ -126,18 +130,15 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 			cellstream=(uint32_t*)malloc(filesize*sizeof(uint32_t));
 			memset(cellstream,0,filesize*sizeof(uint32_t));
 
-
-		#ifdef KFSTREAMDBG
 			mck=((18432000 * 73) / 14) / 2;
 			sck=mck/2;
 			ick=mck/16;
-		#endif
 
-			cell_value=0;
-			offset=0;
-			nbindex=0;
-			cellpos=0;
-			streamend=0;
+			cell_value = 0;
+			offset = 0;
+			nbindex = 0;
+			cellpos = 0;
+			streamend = 0;
 			do
 			{
 				switch(kfstreambuffer[offset])
@@ -224,27 +225,21 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 								break;
 
 							case 0x02:
-		#ifdef KFSTREAMDBG
 								floppycontext->hxc_printf(MSG_DEBUG,"---Index--- : %d sp:%d",nbindex,cellpos);
-		#endif
 
 								diskIndex=	(s_oob_DiskIndex*) &kfstreambuffer[offset + sizeof(s_oob_header) ];
 
-		#ifdef KFSTREAMDBG
 								floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X SysClk: 0x%.8X Timer: 0x%.8X",diskIndex->StreamPosition,diskIndex->SysClk,diskIndex->Timer);
-		#endif
 
 								if(nbindex < MAX_INDEX)
 								{
 									tabindex[nbindex].StreamPosition = diskIndex->StreamPosition;
-									//tabindex[nbindex].CellPos = cellpos;
+									tabindex_cellpos[nbindex] = cellpos;
 									tabindex[nbindex].SysClk = diskIndex->SysClk;
 									tabindex[nbindex].Timer = diskIndex->Timer;
 									if(nbindex)
 									{
-			#ifdef KFSTREAMDBG
-										floppycontext->hxc_printf(MSG_DEBUG,"Delta : %d Rpm : %f ",tabindex[nbindex].SysClk-tabindex[nbindex-1].SysClk,(float)(ick*(float)60)/(float)(tabindex[nbindex].SysClk-tabindex[nbindex-1].SysClk));
-			#endif
+										floppycontext->hxc_printf(MSG_DEBUG,"Delta : %d (%d) Rpm : %f ",tabindex[nbindex].SysClk-tabindex[nbindex-1].SysClk,tabindex[nbindex].StreamPosition-tabindex[nbindex-1].StreamPosition,(float)(ick*(float)60)/(float)(tabindex[nbindex].SysClk-tabindex[nbindex-1].SysClk));
 									}
 									nbindex++;
 								}
@@ -317,13 +312,13 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 			free(kfstreambuffer);
 
 #ifdef KF_STREAM_ALL_REVS_IN_ONE
-			hxcfe_FxStream_AddIndex(fxs,track_dump,tabindex[0].StreamPosition,tabindex[0].Timer);
+			hxcfe_FxStream_AddIndex(fxs,tabindex_cellpos[0],tabindex[0].Timer);
 			tabindex[nbindex-1].StreamPosition -= 128;
-			hxcfe_FxStream_AddIndex(fxs,track_dump,tabindex[nbindex-1].StreamPosition,tabindex[nbindex-1].Timer);
+			hxcfe_FxStream_AddIndex(fxs,track_dump,tabindex_cellpos[nbindex-1],tabindex[nbindex-1].Timer);
 #else
 			for(i=0;i<nbindex;i++)
 			{
-				hxcfe_FxStream_AddIndex(fxs,track_dump,tabindex[i].StreamPosition,tabindex[i].Timer);
+				hxcfe_FxStream_AddIndex(fxs,track_dump,tabindex_cellpos[i],tabindex[i].Timer);
 			}
 #endif
 		}
