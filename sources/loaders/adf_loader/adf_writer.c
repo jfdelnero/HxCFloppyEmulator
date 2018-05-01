@@ -45,7 +45,7 @@ int ADF_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	int i,j,k,s;
 	FILE * rawfile;
 	unsigned char blankblock[512];
-	int sectorsize;
+	int sectorsize,maxsect;
 
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG* sc;
@@ -72,7 +72,29 @@ int ADF_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),80*2 );
 
-					for(s=0;s<11;s++)
+					maxsect = 0;
+
+					for(s=0;s<22;s++)
+					{
+						sc = hxcfe_searchSector (ss,j,i,s,AMIGA_MFM_ENCODING);
+						if(sc)
+						{
+							if( s > maxsect )
+								maxsect = s;
+
+							if(sc->input_data)
+								free(sc->input_data);
+
+							free(sc);
+						}
+					}
+
+					if( maxsect > 11 )
+						maxsect = 22;
+					else
+						maxsect = 11;
+
+					for(s=0;s<maxsect;s++)
 					{
 						sc = hxcfe_searchSector (ss,j,i,s,AMIGA_MFM_ENCODING);
 
