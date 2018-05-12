@@ -125,6 +125,9 @@ typedef struct _HXCFE_FXSA
 
     int32_t defaultbitrate;
 
+	int32_t filter;
+	int32_t filterpasses;
+
 }HXCFE_FXSA;
 
 #define _HXCFE_FXSA_
