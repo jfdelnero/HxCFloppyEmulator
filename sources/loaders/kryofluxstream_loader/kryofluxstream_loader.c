@@ -161,7 +161,7 @@ int KryoFluxStream_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	return HXCFE_BADPARAMETER;
 }
 
-static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,float timecoef,int phasecorrection,int bitrate)
+static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,float timecoef,int phasecorrection,int bitrate,int filter,int filterpasses)
 {
 	HXCFE_SIDE* currentside;
 
@@ -183,6 +183,8 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,flo
 			hxcfe_FxStream_setBitrate(fxs,bitrate);
 
 			hxcfe_FxStream_setPhaseCorrectionFactor(fxs,phasecorrection);
+
+			hxcfe_FxStream_setFilterParameters(fxs,filterpasses,filter);
 
 			currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
 
@@ -222,6 +224,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 	int phasecorrection;
 	int bitrate;
+	int filterpasses,filter;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"KryoFluxStream_libLoad_DiskFile");
 
@@ -296,6 +299,20 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 				if(fscanf(f,"%d",&phasecorrection) != 1)
 				{
 					phasecorrection = 8;
+				}
+				hxc_fclose(f);
+			}
+
+			filterpasses = 2;
+			filter = 24;
+			sprintf(filepath,"%s%s",folder,"filter.txt");
+			f=hxc_fopen(filepath,"rb");
+			if(f)
+			{
+				if(fscanf(f,"%d,%d",&filterpasses,&filter) != 2)
+				{
+					filterpasses = 2;
+					filter = 24;
 				}
 				hxc_fclose(f);
 			}
@@ -382,7 +399,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 					sprintf(filepath,"%s%s%.2d.%d.raw",folder,fname,j,i);
 
 					rpm = 300;
-					curside = decodestream(imgldr_ctx->hxcfe,filepath,&rpm,timecoef,phasecorrection,bitrate);
+					curside = decodestream(imgldr_ctx->hxcfe,filepath,&rpm,timecoef,phasecorrection,bitrate,filter,filterpasses);
 
 					if(!floppydisk->tracks[j/doublestep])
 					{
