@@ -14,6 +14,18 @@ Facebook : https://www.facebook.com/groups/hxc2001
 -------------------------------------------------------------------------------
 
 /*********************************************************
+12 May 2018: HxCFloppyEmulator 2.1.9.3
+
+Kryoflux Stream Loader (*XX.X.raw) : Another fix for the index position !
+Kryoflux Stream Loader (*XX.X.raw) : filter.txt config file to adjust the internal bitrate filter.
+
+Flux Stream Analyzer : Internal filter can now be set.
+
+ADF Writer : Amiga ADF HD file (22 Sectors/track) support added.
+
+/*********************************************************
+
+/*********************************************************
 11 April 2018: HxCFloppyEmulator 2.1.9.2
 
 Kryoflux Stream Loader (*XX.X.raw) : Loader & writer index position fixed.
