@@ -428,10 +428,10 @@ static void quickSort(s_match * table, int start, int end)
 
 //#define USE_PLL_BITRATE 1
 
-HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKSTREAM * track,pulses_link * pl,uint32_t start_index, short rpm,int phasecorrection)
+HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initialvalue,HXCFE_TRKSTREAM * track,pulses_link * pl,uint32_t start_index, short rpm,int phasecorrection)
 {
 #define TEMPBUFSIZE 256*1024
-	int i,j,size;
+	int i,j,k,size;
 	uint32_t value;
 	int cellcode;
 	int centralvalue;
@@ -631,61 +631,37 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,int initialvalue,HXCFE_TRKS
 
 		if(tracksize)
 		{
-
-#ifndef NOBITRATEFILTER
-			// First pass
-			i=0;
-			do
+			if(fxs->filter)
 			{
-
-				j=0;
-				bitrate=0;
-				while(((i+j) < tracksize ) && j<24)
+				for( k = 0; k < fxs->filterpasses; k++ )
 				{
-					bitrate = ( bitrate + trackbitrate[(i+j)] );
-					j++;
+					i = 0;
+					do
+					{
+						j = 0;
+						bitrate = 0;
+						while( ((i+j) < tracksize ) && j < fxs->filter)
+						{
+							bitrate = ( bitrate + trackbitrate[(i+j)] );
+							j++;
+						}
+
+						bitrate = bitrate/j;
+
+						j = 0;
+						while( ((i+j)< tracksize ) && j < fxs->filter)
+						{
+							trackbitrate[(i+j)] = bitrate;
+							j++;
+						}
+
+						i += fxs->filter;
+
+					}while( i < tracksize );
+
+					k++;
 				}
-
-				bitrate=bitrate/j;
-
-				j=0;
-				while(((i+j)< tracksize ) && j<24)
-				{
-					trackbitrate[(i+j)] = bitrate;
-					j++;
-				}
-
-				i = i + 16;
-
-			}while( i < tracksize );
-
-
-			// Second pass filter
-			i=0;
-			do
-			{
-
-				j=0;
-				bitrate=0;
-				while(((i+j) < tracksize ) && j<24)
-				{
-					bitrate = ( bitrate + trackbitrate[(i+j)] );
-					j++;
-				}
-
-				bitrate=bitrate/j;
-
-				j=0;
-				while(((i+j)< tracksize ) && j<24)
-				{
-					trackbitrate[(i+j)] = bitrate;
-					j++;
-				}
-
-				i = i + 24;
-
-			}while(i < tracksize );
-#endif
+			}
 
 			bitrate=(int)( TICKFREQ / (centralvalue) );
 
@@ -2735,6 +2711,11 @@ HXCFE_FXSA * hxcfe_initFxStream(HXCFE * hxcfe)
 		if(fxs)
 		{
 			memset(fxs,0,sizeof(HXCFE_FXSA));
+
+			// Default low pass filter setting
+			fxs->filterpasses = 2;
+			fxs->filter = 24;
+
 			fxs->hxcfe = hxcfe;
 			fxs->phasecorrection = 8;
 			return fxs;
@@ -2765,6 +2746,15 @@ void hxcfe_FxStream_setPhaseCorrectionFactor( HXCFE_FXSA * fxs, int32_t phasefac
 	if(fxs)
 	{
 		fxs->phasecorrection = phasefactor;
+	}
+}
+
+void hxcfe_FxStream_setFilterParameters( HXCFE_FXSA * fxs, int32_t number_of_passes, int32_t step )
+{
+	if(fxs)
+	{
+		fxs->filterpasses = number_of_passes;
+		fxs->filter = step;
 	}
 }
 
@@ -3325,7 +3315,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 							bitrate = TICKFREQ / ( fxs->defaultbitrate * 1000 );
 						}
 
-						currentside = ScanAndDecodeStream(hxcfe,bitrate,std,pl,first_index,rpm,fxs->phasecorrection);
+						currentside = ScanAndDecodeStream(hxcfe,fxs,bitrate,std,pl,first_index,rpm,fxs->phasecorrection);
 
 #ifndef FLUXSTREAMDBG
 						cleanupTrack(currentside);
