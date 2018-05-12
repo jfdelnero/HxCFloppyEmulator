@@ -70,6 +70,17 @@
 
 //#define KFSTREAMDBG 1
 
+typedef struct Index_
+{
+	uint32_t 	StreamPosition;
+	uint32_t 	Timer;
+	uint32_t 	SysClk;
+	uint32_t 	CellPos;
+	uint32_t 	IndexTime;
+	uint32_t 	PreIcTime;
+	uint32_t 	PostIcTime;
+}Index;
+
 HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char * file,float timecoef)
 {
 	uint32_t i;
@@ -77,8 +88,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 	s_oob_DiskIndex		* diskIndex;
 	HXCFE_TRKSTREAM		* track_dump;
 
-	s_oob_DiskIndex  tabindex[MAX_INDEX];
-	uint32_t tabindex_cellpos[MAX_INDEX];
+	Index index_events[MAX_INDEX];
 
 	FILE* f;
 
@@ -96,10 +106,12 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 	unsigned char * kfstreambuffer;
 	uint32_t * cellstream;
+	uint32_t * cellstreampos;
 
+	uint32_t nxt_index;
 	uint32_t cell_value;
 	uint32_t nbindex;
-	uint32_t offset;
+	uint32_t stream_ofs;
 	uint32_t cellpos;
 	uint32_t streamend;
 
@@ -107,12 +119,14 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 	uint32_t filesize;
 
-	uint32_t totalcell,totalstreampos;
+	uint32_t totalcell;
+	uint32_t total_index_time;
+	uint32_t next_cell_pos;
+	uint32_t index_cell_time;
+	uint32_t next_index_stream_pos;
 
 	track_dump=0;
 	overflowvalue=0;
-	totalcell = 0;
-	totalstreampos = 0;
 
 	if(fxs)
 	{
@@ -127,21 +141,35 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 			hxc_fclose(f);
 
-			cellstream=(uint32_t*)malloc(filesize*sizeof(uint32_t));
+			cellstream = (uint32_t*)malloc(filesize*sizeof(uint32_t));
+			cellstreampos = (uint32_t*)malloc(filesize*sizeof(uint32_t));
+
+			if( !cellstream || !cellstreampos )
+			{
+				if(cellstream)
+					free(cellstream);
+
+				if(cellstreampos)
+					free(cellstreampos);
+
+				return 0;
+			}
+
 			memset(cellstream,0,filesize*sizeof(uint32_t));
+			memset(cellstreampos,0,filesize*sizeof(uint32_t));
 
 			mck=((18432000 * 73) / 14) / 2;
 			sck=mck/2;
 			ick=mck/16;
 
 			cell_value = 0;
-			offset = 0;
+			stream_ofs = 0;
 			nbindex = 0;
 			cellpos = 0;
 			streamend = 0;
 			do
 			{
-				switch(kfstreambuffer[offset])
+				switch(kfstreambuffer[stream_ofs])
 				{
 					case 0x00:
 					case 0x01:
@@ -151,61 +179,52 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 					case 0x05:
 					case 0x06:
 					case 0x07:
-						cell_value = kfstreambuffer[offset] << 8;
-						offset++;
-						cell_value = cell_value | kfstreambuffer[offset];
-						offset++;
-
-						cell_value = cell_value + overflowvalue;
-
+						// 2 Bytes Flux (short)
+						cell_value = ( kfstreambuffer[stream_ofs] << 8 ) | kfstreambuffer[stream_ofs + 1];
+						cell_value += overflowvalue;
 
 						overflowvalue = 0;
 
-						cellstream[cellpos++]=(uint32_t)((float)cell_value * timecoef);
-						totalcell = totalcell + cell_value;
-						totalstreampos++;
+						cellstream[cellpos] = (uint32_t)((float)cell_value * timecoef);
+						cellstreampos[cellpos++] = stream_ofs;
+
+						stream_ofs += 2;
 					break;
 
-					// Nop
-					case 0x0A:
-						offset=offset+3;
-						totalstreampos++;
+					case 0x0A:	// Nop 3
+						stream_ofs += 3;
 					break;
-					case 0x09:
-						offset=offset+2;
-						totalstreampos++;
+					case 0x09:	// Nop 2
+						stream_ofs += 2;
 					break;
-					case 0x08:
-						offset=offset+1;
-						totalstreampos++;
+					case 0x08:	// Nop 1
+						stream_ofs += 1;
 					break;
 						//
 
-					//0x0B 	Overflow16 	1 	Next cell value is increased by 0×10000 (16-bits). Decoding of *this* cell should continue at next stream position
+					//0x0B Overflow16 1 Next cell value is increased by 0×10000 (16-bits).
+					//                  Decoding of *this* cell should continue at next stream position
 					case 0x0B:
-						overflowvalue = overflowvalue + 0x10000;
-						offset++;
-						totalstreampos++;
+						overflowvalue += 0x10000;
+						stream_ofs++;
 					break;
 
-					//0x0C 	Value16 	3 	New cell value: Upper 8 bits are offset+1 in the stream, lower 8-bits are offset+2
+					//0x0C Value16 3 New cell value: Upper 8 bits are offset+1 in the stream, lower 8-bits are offset+2
 					case 0x0C:
-						offset++;
-						cell_value = kfstreambuffer[offset] << 8;
-						offset++;
-						cell_value = cell_value | kfstreambuffer[offset];
-						offset++;
-
-						cell_value = cell_value + overflowvalue;
+						// 2 Bytes Flux (full)
+						cell_value = ( kfstreambuffer[stream_ofs + 1] << 8 ) | kfstreambuffer[stream_ofs + 2];
+						cell_value += overflowvalue;
 						overflowvalue=0;
 
-						cellstream[cellpos++]=(uint32_t)((float)cell_value * timecoef);
-						totalcell = totalcell + cell_value;
-						totalstreampos++;
+						cellstream[cellpos] = (uint32_t)((float)cell_value * timecoef);
+						cellstreampos[cellpos++] = stream_ofs;
+
+						stream_ofs += 3;
 					break;
 
 					case 0x0D:
-						oob=(s_oob_header*)&kfstreambuffer[offset];
+
+						oob=(s_oob_header*)&kfstreambuffer[stream_ofs];
 
 		#ifdef KFSTREAMDBG
 						floppycontext->hxc_printf(MSG_DEBUG,"OOB 0x%.2x 0x%.2x Size:0x%.4x",oob->Sign,oob->Type,oob->Size);
@@ -219,7 +238,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 		#endif
 
 		#ifdef KFSTREAMDBG
-								streamRead=	(s_oob_StreamRead*) &kfstreambuffer[offset + sizeof(s_oob_header) ];
+								streamRead = (s_oob_StreamRead*) &kfstreambuffer[stream_ofs + sizeof(s_oob_header) ];
 								floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X TrTime: 0x%.8X",streamRead->StreamPosition,streamRead->TrTime);
 		#endif
 								break;
@@ -227,20 +246,20 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 							case 0x02:
 								floppycontext->hxc_printf(MSG_DEBUG,"---Index--- : %d sp:%d",nbindex,cellpos);
 
-								diskIndex=	(s_oob_DiskIndex*) &kfstreambuffer[offset + sizeof(s_oob_header) ];
+								diskIndex=	(s_oob_DiskIndex*) &kfstreambuffer[stream_ofs + sizeof(s_oob_header) ];
 
 								floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X SysClk: 0x%.8X Timer: 0x%.8X",diskIndex->StreamPosition,diskIndex->SysClk,diskIndex->Timer);
 
 								if(nbindex < MAX_INDEX)
 								{
-									tabindex[nbindex].StreamPosition = diskIndex->StreamPosition;
-									tabindex_cellpos[nbindex] = cellpos;
-									tabindex[nbindex].SysClk = diskIndex->SysClk;
-									tabindex[nbindex].Timer = diskIndex->Timer;
-									if(nbindex)
-									{
-										floppycontext->hxc_printf(MSG_DEBUG,"Delta : %d (%d) Rpm : %f ",tabindex[nbindex].SysClk-tabindex[nbindex-1].SysClk,tabindex[nbindex].StreamPosition-tabindex[nbindex-1].StreamPosition,(float)(ick*(float)60)/(float)(tabindex[nbindex].SysClk-tabindex[nbindex-1].SysClk));
-									}
+									index_events[nbindex].StreamPosition = diskIndex->StreamPosition;
+									index_events[nbindex].SysClk = diskIndex->SysClk;
+									index_events[nbindex].Timer = diskIndex->Timer;
+									index_events[nbindex].CellPos = 0;
+									index_events[nbindex].IndexTime = 0;
+									index_events[nbindex].PreIcTime = 0;
+									index_events[nbindex].PostIcTime = 0;
+
 									nbindex++;
 								}
 								else
@@ -253,9 +272,9 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 		#ifdef KFSTREAMDBG
 								floppycontext->hxc_printf(MSG_DEBUG,"---Stream End---");
 		#endif
-								
+
 		#ifdef KFSTREAMDBG
-								streamEnd =	(s_oob_StreamEnd*) &kfstreambuffer[offset + sizeof(s_oob_header) ];
+								streamEnd =	(s_oob_StreamEnd*) &kfstreambuffer[stream_ofs + sizeof(s_oob_header) ];
 								floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X Result: 0x%.8X",streamEnd->StreamPosition,streamEnd->Result);
 		#endif
 							break;
@@ -265,17 +284,20 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 								floppycontext->hxc_printf(MSG_DEBUG,"---String---");
 		#endif
 		#ifdef KFSTREAMDBG
-								tempstr=malloc(oob->Size+1);
-								memset(tempstr,0,oob->Size+1);
-								memcpy(tempstr,&kfstreambuffer[offset + sizeof(s_oob_header)],oob->Size);
+								tempstr = malloc(oob->Size+1);
+								if( tempstr )
+								{
+									memset(tempstr,0,oob->Size+1);
+									memcpy(tempstr,&kfstreambuffer[stream_ofs + sizeof(s_oob_header)],oob->Size);
 
-								floppycontext->hxc_printf(MSG_DEBUG,"String : %s",tempstr);
-								free(tempstr);
+									floppycontext->hxc_printf(MSG_DEBUG,"String : %s",tempstr);
+									free(tempstr);
+								}
 		#endif
 							break;
 
 							case 0x0D:
-								streamend=1;
+								streamend = 1;
 							break;
 
 							default:
@@ -283,44 +305,112 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 								break;
 
 						}
+
 						if(!streamend)
-							offset=offset+oob->Size + sizeof(s_oob_header);
-						totalstreampos++;
+							stream_ofs += ( oob->Size + sizeof(s_oob_header) );
+
 					break;
 
 					default:
-						cell_value = kfstreambuffer[offset];
-
-						cell_value = cell_value + overflowvalue;
+						// 8 bit short value
+						cell_value = kfstreambuffer[stream_ofs];
+						cell_value += overflowvalue;
 						overflowvalue=0;
 
-						cellstream[cellpos++]=(uint32_t)((float)cell_value * timecoef);
-						totalcell = totalcell + cell_value;
-						offset++;
-						totalstreampos++;
+						cellstream[cellpos] = (uint32_t)((float)cell_value * timecoef);
+						cellstreampos[cellpos++] = stream_ofs;
+
+						stream_ofs++;
 					break;
 				}
 
+			}while( ( stream_ofs < filesize ) && !streamend);
 
-			}while( (offset<filesize) && !streamend);
+			cellstream[cellpos] = (uint32_t)((float)cell_value * timecoef);
+			cellstreampos[cellpos] = stream_ofs;
+
+			totalcell = cellpos;
+
+			if(nbindex)
+			{
+				total_index_time = 0;
+				nxt_index = 0;
+				next_cell_pos = 0;
+				next_index_stream_pos = index_events[nxt_index].StreamPosition;
+
+				for (cellpos=0; cellpos < totalcell; cellpos++)
+				{
+					total_index_time += cellstream[cellpos];
+
+					next_cell_pos = cellpos + 1;
+
+					if( nxt_index < nbindex )
+					{
+						if( next_index_stream_pos <= cellstreampos[next_cell_pos] )
+						{
+							// Index reached
+							if(!cellpos)
+							{
+								// Index at cell 0 ?
+								if (cellstreampos[0] >= next_index_stream_pos )
+								{
+									next_cell_pos = 0;
+								}
+							}
+
+							index_events[nxt_index].CellPos = next_cell_pos;
+
+							index_cell_time = cellstream[next_cell_pos];
+
+							if( !index_events[nxt_index].Timer )
+							{
+								index_events[nxt_index].Timer = index_cell_time;
+							}
+
+							if( next_cell_pos >= totalcell )
+							{
+								if( cellstreampos[next_cell_pos] == next_index_stream_pos )
+								{
+									index_cell_time += index_events[nxt_index].Timer;
+									cellstream[next_cell_pos] = index_cell_time;
+								}
+							}
+
+							nxt_index++;
+
+							if( nxt_index < nbindex )
+							{
+								next_index_stream_pos = index_events[nxt_index].StreamPosition;
+							}
+							else
+							{
+								next_index_stream_pos = 0;
+							}
+
+							if(next_cell_pos)
+								total_index_time = 0;
+						}
+					}
+				}
+			}
 
 			hxcfe_FxStream_setResolution(fxs,41619); // 41,619 ns per tick
 
 			track_dump = hxcfe_FxStream_ImportStream(fxs,cellstream,32,cellpos);
 
-			free(cellstream);
-			free(kfstreambuffer);
-
 #ifdef KF_STREAM_ALL_REVS_IN_ONE
-			hxcfe_FxStream_AddIndex(fxs,tabindex_cellpos[0],tabindex[0].Timer);
-			tabindex[nbindex-1].StreamPosition -= 128;
-			hxcfe_FxStream_AddIndex(fxs,track_dump,tabindex_cellpos[nbindex-1],tabindex[nbindex-1].Timer);
+			hxcfe_FxStream_AddIndex(fxs,index_events[0].CellPos,index_events[0].Timer);
+			hxcfe_FxStream_AddIndex(fxs,track_dump,index_events[0].CellPos,index_events[nbindex-1].Timer);
 #else
 			for(i=0;i<nbindex;i++)
 			{
-				hxcfe_FxStream_AddIndex(fxs,track_dump,tabindex_cellpos[i],tabindex[i].Timer);
+				hxcfe_FxStream_AddIndex(fxs,track_dump,index_events[i].CellPos,index_events[nxt_index].Timer);
 			}
 #endif
+
+			free(cellstream);
+			free(cellstreampos);
+			free(kfstreambuffer);
 		}
 	}
 
