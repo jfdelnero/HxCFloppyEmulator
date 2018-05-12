@@ -655,7 +655,15 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 							j++;
 						}
 
-						i += fxs->filter;
+						if( k == 0 )
+						{
+							i += ((fxs->filter) / 3 ) * 2;					
+						}
+						else
+						{
+							i += fxs->filter;	
+						}
+
 
 					}while( i < tracksize );
 
