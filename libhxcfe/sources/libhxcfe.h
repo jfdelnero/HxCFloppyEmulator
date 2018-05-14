@@ -457,15 +457,19 @@ void                   hxcfe_FxStream_setPhaseCorrectionFactor( HXCFE_FXSA * fxs
 void                   hxcfe_FxStream_setFilterParameters( HXCFE_FXSA * fxs, int32_t number_of_passes, int32_t step );
 
 HXCFE_TRKSTREAM *      hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, int32_t wordsize, uint32_t nbword );
-void                   hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t streamposition, int32_t tickoffset );
+void                   hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t streamposition, int32_t tickoffset, uint32_t flags );
 HXCFE_SIDE *           hxcfe_FxStream_AnalyzeAndGetTrack( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std );
 void                   hxcfe_FxStream_FreeStream( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * stream );
 
 int32_t                hxcfe_FxStream_GetNumberOfRevolution( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std );
+uint32_t               hxcfe_FxStream_GetRevolutionIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, int32_t revolution );
 uint32_t               hxcfe_FxStream_GetRevolutionPeriod( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, int32_t revolution );
 uint32_t               hxcfe_FxStream_GetMeanRevolutionPeriod( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std );
 
 void                   hxcfe_deinitFxStream( HXCFE_FXSA * fxs );
+
+#define FXSTRM_INDEX_MAININDEX   0x00000001
+#define FXSTRM_INDEX_SECTORINDEX 0x00000002
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Track edition functions                                                                        //

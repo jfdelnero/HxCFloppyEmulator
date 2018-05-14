@@ -404,7 +404,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 #else
 			for(i=0;i<nbindex;i++)
 			{
-				hxcfe_FxStream_AddIndex(fxs,track_dump,index_events[i].CellPos,index_events[nxt_index].Timer);
+				hxcfe_FxStream_AddIndex(fxs,track_dump,index_events[i].CellPos,index_events[i].Timer,FXSTRM_INDEX_MAININDEX);
 			}
 #endif
 
