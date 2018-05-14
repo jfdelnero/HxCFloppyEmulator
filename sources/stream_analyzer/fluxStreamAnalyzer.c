@@ -443,6 +443,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 
 	unsigned char *outtrack;
 	unsigned char *flakeytrack;
+	unsigned char *indextrack;
 	uint32_t *trackbitrate;
 
 #ifndef USE_PLL_BITRATE
@@ -456,9 +457,10 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 	uint32_t in_ptr;
 	uint32_t out_ptr;
 	uint32_t fifolevel;
-
 	uint32_t leftbit;
 #endif
+	uint32_t nextindex_pos;
+	uint32_t nextindex;
 
 	pll_stat pll;
 
@@ -482,10 +484,12 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 
 		outtrack=(unsigned char*)malloc(TEMPBUFSIZE);
 		flakeytrack=(unsigned char*)malloc(TEMPBUFSIZE);
+		indextrack=(unsigned char*)malloc(TEMPBUFSIZE);
 		trackbitrate=(uint32_t*)malloc(TEMPBUFSIZE*sizeof(uint32_t));
 
 		memset(outtrack,0,TEMPBUFSIZE);
 		memset(flakeytrack,0,TEMPBUFSIZE);
+		memset(indextrack,0,TEMPBUFSIZE);
 		memset(trackbitrate,0,TEMPBUFSIZE*sizeof(uint32_t));
 
 		for(i=0;i<TEMPBUFSIZE;i++)
@@ -533,6 +537,16 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 		fifolevel = 0;
 #endif
 
+
+		i = 0;
+		while ( ( i < track->nb_of_index ) && ( track->index_evt_tab[i].dump_offset < start_index ) )
+		{
+			i++;
+		}
+
+		nextindex = i;
+		nextindex_pos = track->index_evt_tab[i].dump_offset;
+
 		bitoffset=0;
 		for(i=0;i<size;i++)
 		{
@@ -543,6 +557,18 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 			bitoffset = bitoffset + cellcode;
 
 			settrackbit(outtrack,TEMPBUFSIZE,0xFF,bitoffset,1);
+
+			if( nextindex_pos == (start_index + i) )
+			{
+				// Generate index signal
+				settrackbit(indextrack,TEMPBUFSIZE,0xFF,bitoffset,1);
+
+				nextindex++;
+				if( nextindex < track->nb_of_index )
+				{
+					nextindex_pos = track->index_evt_tab[nextindex].dump_offset;
+				}
+			}
 
 			if((pl->forward_link[start_index + i]<0 && pl->backward_link[start_index + i]<0) || ( ( pll.last_error > (170*16) ) || ( pll.last_error < -(170*16) )))
 			{	// flakey bits or invalid bit...
@@ -657,11 +683,11 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 
 						if( k == 0 )
 						{
-							i += ((fxs->filter) / 3 ) * 2;					
+							i += ((fxs->filter) / 3 ) * 2;
 						}
 						else
 						{
-							i += fxs->filter;	
+							i += fxs->filter;
 						}
 
 
@@ -673,11 +699,20 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 
 			bitrate=(int)( TICKFREQ / (centralvalue) );
 
-			hxcfe_track = tg_alloctrack(bitrate,ISOFORMAT_DD,rpm,bitoffset,2000,0,TG_ALLOCTRACK_ALLOCFLAKEYBUFFER|TG_ALLOCTRACK_ALLOCTIMIMGBUFFER);
+			hxcfe_track = tg_alloctrack(bitrate,ISOFORMAT_DD,rpm,bitoffset,0,0,TG_ALLOCTRACK_ALLOCFLAKEYBUFFER|TG_ALLOCTRACK_ALLOCTIMIMGBUFFER);
 
 			memcpy(hxcfe_track->databuffer,outtrack,tracksize);
 			memcpy(hxcfe_track->flakybitsbuffer,flakeytrack,tracksize);
 			memcpy(hxcfe_track->timingbuffer,trackbitrate, tracksize * sizeof(uint32_t));
+
+			// add sector/track index
+			for(i=0;i<bitoffset;i++)
+			{
+				if(gettrackbit(indextrack,i))
+				{
+					us2index(i,hxcfe_track,2000,1,0);
+				}
+			}
 
 			hxcfe_track->bitrate = VARIABLEBITRATE;
 		}
@@ -2648,13 +2683,11 @@ static uint32_t getbestindex(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM *track_dump,pulses
 
 		memset(bad_pulses_array,0xFF,sizeof(uint32_t) * 32);
 
-
-
 		for(revnb = 0; revnb < nb_revolution ; revnb++)
 		{
 			if ( score[revnb] == bestscore )
 			{
-				first_index = getNearestValidIndex(pl,track_dump->index_evt_tab[revnb].dump_offset,pl->number_of_pulses);
+				first_index = getNearestValidIndex(pl,track_dump->index_evt_tab[hxcfe_FxStream_GetRevolutionIndex( fxs, track_dump, revnb )].dump_offset,pl->number_of_pulses);
 
 				bad_pulses = 0;
 				last_index = pl->forward_link[first_index];
@@ -2814,7 +2847,7 @@ HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, 
 	return 0;
 }
 
-void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t streamposition, int32_t tickoffset )
+void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t streamposition, int32_t tickoffset, uint32_t flags )
 {
 	uint32_t cellpos,i;
 	if(fxs)
@@ -2824,11 +2857,11 @@ void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t 
 			if(streamposition < std->nb_of_pulses)
 			{
 #ifdef FLUXSTREAMDBG
-				fxs->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_FxStream_AddIndex : streamposition %d - tickoffset %d",streamposition,tickoffset);
+				fxs->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_FxStream_AddIndex : streamposition %d - tickoffset %d - flags : 0x.8X",streamposition,tickoffset,flags);
 #endif
 				if(std->nb_of_index<32)
 				{
-
+					std->index_evt_tab[std->nb_of_index].flags = flags;
 					std->index_evt_tab[std->nb_of_index].dump_offset = streamposition;
 
 					cellpos = 0;
@@ -2854,17 +2887,66 @@ void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t 
 
 int32_t hxcfe_FxStream_GetNumberOfRevolution( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std )
 {
+	int count_rev;
+	unsigned int i;
+
 	if(fxs)
 	{
 		if(std)
 		{
 			if(std->nb_of_index)
 			{
+				count_rev = 0;
+
+				for(i=0;i<std->nb_of_index;i++)
+				{
+					if( std->index_evt_tab[i].flags & FXSTRM_INDEX_MAININDEX )
+					{
+						count_rev++;
+					}
+				}
+
 #ifdef FLUXSTREAMDBG
-				fxs->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_FxStream_GetNumberOfRevolution:  %d",std->nb_of_index - 1);
+				fxs->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_FxStream_GetNumberOfRevolution:  %d",count_rev - 1);
 #endif
 
-				return std->nb_of_index - 1;
+				return count_rev - 1;
+			}
+
+			return 0;
+		}
+	}
+
+	return 0;
+}
+
+uint32_t hxcfe_FxStream_GetRevolutionIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, int32_t revolution )
+{
+	int count_rev;
+	unsigned int i;
+
+	if(fxs)
+	{
+		if(std)
+		{
+			if(std->nb_of_index)
+			{
+				count_rev = 0;
+
+				for(i=0;i<std->nb_of_index;i++)
+				{
+					if( std->index_evt_tab[i].flags & FXSTRM_INDEX_MAININDEX )
+					{
+						if( count_rev == revolution )
+						{
+							return i;
+						}
+
+						count_rev++;
+					}
+				}
+
+				return 0;
 			}
 
 			return 0;
@@ -2876,13 +2958,19 @@ int32_t hxcfe_FxStream_GetNumberOfRevolution( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM 
 
 uint32_t hxcfe_FxStream_GetRevolutionPeriod( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, int32_t revolution )
 {
+	uint32_t period;
+
 	if(fxs)
 	{
 		if(std)
 		{
 			if(revolution < hxcfe_FxStream_GetNumberOfRevolution(fxs,std))
 			{
-				return std->index_evt_tab[revolution+1].cellpos - std->index_evt_tab[revolution].cellpos;
+
+				period = std->index_evt_tab[hxcfe_FxStream_GetRevolutionIndex( fxs, std, revolution+1 )].cellpos - \
+						std->index_evt_tab[hxcfe_FxStream_GetRevolutionIndex( fxs, std, revolution )].cellpos;
+
+				return period;
 			}
 
 			return 0;
@@ -3114,7 +3202,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 	int32_t first_index;
 	uint32_t track_len;
-	uint32_t revolution;
+	uint32_t nb_of_revolutions,revolution;
 	int32_t i;
 
 	uint32_t qualitylevel[32];
@@ -3246,13 +3334,15 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 				memset(revolutionside,0,sizeof(revolutionside));
 
-				for(revolution = 0; revolution < std->nb_of_index - 1; revolution++)
+				nb_of_revolutions = hxcfe_FxStream_GetNumberOfRevolution( fxs, std );
+
+				for(revolution = 0; revolution < nb_of_revolutions; revolution++)
 				{
 
 #ifdef FLUXSTREAMDBG
 					fxs->hxcfe->hxc_printf(MSG_DEBUG,"Revolution %d track generation...",revolution);
 #endif
-					first_index = getNearestValidIndex(pl,std->index_evt_tab[revolution].dump_offset,pl->number_of_pulses);
+					first_index = getNearestValidIndex(pl,std->index_evt_tab[hxcfe_FxStream_GetRevolutionIndex( fxs, std, revolution )].dump_offset,pl->number_of_pulses);
 
 					track_len = 0;
 					i = first_index;
@@ -3284,7 +3374,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 							rpm = 300;
 
-							first_index = std->index_evt_tab[0].dump_offset;
+							first_index = std->index_evt_tab[hxcfe_FxStream_GetRevolutionIndex( fxs, std, 0 )].dump_offset;
 
 							i = 0;
 							track_len = 0;
@@ -3346,7 +3436,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 				first_track_encoding = UNKNOWN_ENCODING;
 
-				for(revolution = 0; revolution < std->nb_of_index - 1; revolution++)
+				for(revolution = 0; revolution < nb_of_revolutions; revolution++)
 				{
 					currentside = revolutionside[revolution];
 #ifdef FLUXSTREAMDBG
@@ -3398,17 +3488,17 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 				}
 
 #ifdef FLUXSTREAMDBG
-				for(revolution = 0; revolution < std->nb_of_index - 1; revolution++)
+				for(revolution = 0; revolution < nb_of_revolutions; revolution++)
 				{
 					fxs->hxcfe->hxc_printf(MSG_DEBUG,"revolution %d : 0x%.8X",revolution,qualitylevel[revolution]);
 				}
 #endif
 
-				revolution = getbestrevolution(qualitylevel,std->nb_of_index - 1);
+				revolution = getbestrevolution(qualitylevel,nb_of_revolutions);
 #ifdef FLUXSTREAMDBG
 				fxs->hxcfe->hxc_printf(MSG_DEBUG,"getbestrevolution : %d",revolution);
 #endif
-				revolution = getbestindex(fxs,std,pl,revolution,qualitylevel,std->nb_of_index - 2);
+				revolution = getbestindex(fxs,std,pl,revolution,qualitylevel,nb_of_revolutions - 1);
 #ifdef FLUXSTREAMDBG
 				fxs->hxcfe->hxc_printf(MSG_DEBUG,"getbestindex : %d",revolution);
 #endif
@@ -3425,12 +3515,12 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 					fxs->hxcfe->hxc_printf(MSG_ERROR,"NULL revolutionside !!! (%d)",revolution);
 
 					revolution = 0;
-					while(!revolutionside[revolution] && (revolution < std->nb_of_index - 1))
+					while(!revolutionside[revolution] && (revolution < nb_of_revolutions))
 					{
 						revolution++;
 					}
 
-					if(revolution != (std->nb_of_index - 1) )
+					if(revolution != (nb_of_revolutions) )
 					{
 						revolutionside[revolution]->track_encoding = first_track_encoding;
 
@@ -3440,9 +3530,9 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 				}
 
 				if( currentside )
-					hxcfe_shiftTrackData( fxs->hxcfe, currentside, us2index(0,currentside,(uint32_t)((std->index_evt_tab[revolution].tick_offset)*(double)((double)1000000/(double)TICKFREQ))& (~0x00000007),0,0) );
+					hxcfe_shiftTrackData( fxs->hxcfe, currentside, us2index(0,currentside,(uint32_t)((std->index_evt_tab[hxcfe_FxStream_GetRevolutionIndex( fxs, std, revolution )].tick_offset)*(double)((double)1000000/(double)TICKFREQ))& (~0x00000007),0,0) );
 
-				for(revolution = 0; revolution < std->nb_of_index - 1; revolution++)
+				for(revolution = 0; revolution < nb_of_revolutions; revolution++)
 				{
 					hxcfe_freeSide(fxs->hxcfe,revolutionside[revolution]);
 				}
