@@ -127,6 +127,26 @@ int HFEV3_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	}
 }
 
+int setbits(unsigned char * bufout,int bitoffset_out,int state, int size)
+{
+	int i;
+
+	for(i = 0;i<size;i++)
+	{
+		if( state )
+		{
+			bufout[bitoffset_out>>3] |= ( 0x80 >> (bitoffset_out & 7) );
+		}
+		else
+		{
+			bufout[bitoffset_out>>3] &= ~( 0x80 >> (bitoffset_out & 7) );
+		}
+
+		bitoffset_out++;
+	}
+	return bitoffset_out;
+}
+
 int cpybits(unsigned char * bufout,int bitoffset_out,unsigned char * bufin,int bitoffset_in, int size)
 {
 	int i;
@@ -249,11 +269,6 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 				currentside->indexbuffer = malloc(currentside->tracklen);
 				memset(currentside->indexbuffer,0,currentside->tracklen);
 
-				for(k=0;k<256;k++)
-				{
-					currentside->indexbuffer[k]=0xFF;
-				}
-
 				currentside->timingbuffer = malloc(currentside->tracklen * sizeof(uint32_t));
 				for(k=0;k<currentside->tracklen;k++)
 				{
@@ -316,6 +331,8 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 #ifdef DEBUGVB
 								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T%.3dS%d Off[%.5d] : SETINDEX_OPCODE",i,j,l);
 #endif
+								setbits(currentside->indexbuffer,bitoffset_out,1, 256*8);
+
 								l++;
 								bitoffset_in += 8;
 								break;
