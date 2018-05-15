@@ -61,10 +61,13 @@
 
 #include "libhxcadaptor.h"
 
-/*#define KF_MCLOCK 48054857,14 //(((18432000 * 73) / 14) / 2)
+/*
+#define KF_MCLOCK 48054857,14 //(((18432000 * 73) / 14) / 2)
 #define KF_SCLOCK ((float)KF_MCLOCK / (float)2)
 #define KF_ICLOCK (KF_MCLOCK / 16)
 */
+
+#define KF_NS_PER_TICK 41619 // 41,619 ns per tick
 
 #define MAX_INDEX 128
 
@@ -79,7 +82,26 @@ typedef struct Index_
 	uint32_t 	IndexTime;
 	uint32_t 	PreIcTime;
 	uint32_t 	PostIcTime;
+
+	uint32_t 	Prev_Index_Tick;
+	uint32_t 	Next_Index_Tick;
+	uint32_t 	type;
 }Index;
+
+uint32_t get_tick_from_reversal(uint32_t* buffer,uint32_t reversal)
+{
+	uint32_t i;
+	uint32_t tick;
+
+	tick = 0;
+
+	for(i = 0;i < reversal; i++ )
+	{
+		tick += buffer[i];
+	}
+
+	return tick;
+}
 
 HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char * file,float timecoef)
 {
@@ -124,6 +146,8 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 	uint32_t next_cell_pos;
 	uint32_t index_cell_time;
 	uint32_t next_index_stream_pos;
+	uint32_t Prev_Max_Index_Tick;
+	uint32_t Next_Max_Index_Tick;
 
 	track_dump=0;
 	overflowvalue=0;
@@ -259,7 +283,8 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 									index_events[nbindex].IndexTime = 0;
 									index_events[nbindex].PreIcTime = 0;
 									index_events[nbindex].PostIcTime = 0;
-
+									index_events[nbindex].Prev_Index_Tick = 0;
+									index_events[nbindex].Next_Index_Tick = 0;
 									nbindex++;
 								}
 								else
@@ -394,7 +419,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 				}
 			}
 
-			hxcfe_FxStream_setResolution(fxs,41619); // 41,619 ns per tick
+			hxcfe_FxStream_setResolution(fxs,KF_NS_PER_TICK);
 
 			track_dump = hxcfe_FxStream_ImportStream(fxs,cellstream,32,cellpos);
 
@@ -402,9 +427,98 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 			hxcfe_FxStream_AddIndex(fxs,index_events[0].CellPos,index_events[0].Timer);
 			hxcfe_FxStream_AddIndex(fxs,track_dump,index_events[0].CellPos,index_events[nbindex-1].Timer);
 #else
+
 			for(i=0;i<nbindex;i++)
 			{
-				hxcfe_FxStream_AddIndex(fxs,track_dump,index_events[i].CellPos,index_events[i].Timer,FXSTRM_INDEX_MAININDEX);
+				index_events[i].type = FXSTRM_INDEX_MAININDEX;
+			}
+
+			// Hard sector indexes detection
+			if(nbindex > 1)
+			{
+				for( i = 0; i < nbindex ; i++ )
+				{
+					if(i)
+					{
+						index_events[i].Prev_Index_Tick = get_tick_from_reversal(cellstream,index_events[i].CellPos) - \
+														  get_tick_from_reversal(cellstream,index_events[i - 1].CellPos);
+					}
+
+					if( i < (nbindex - 1))
+					{
+						index_events[i].Next_Index_Tick = get_tick_from_reversal(cellstream,index_events[i + 1].CellPos) - \
+														  get_tick_from_reversal(cellstream,index_events[i].CellPos);
+					}
+				}
+			}
+
+			Prev_Max_Index_Tick = 0;
+			Next_Max_Index_Tick = 0;
+			for( i = 0; i < nbindex ; i++ )
+			{
+				if( Prev_Max_Index_Tick < index_events[i].Prev_Index_Tick )
+				{
+					Prev_Max_Index_Tick = index_events[i].Prev_Index_Tick;
+				}
+
+				if( Next_Max_Index_Tick < index_events[i].Next_Index_Tick )
+				{
+					Next_Max_Index_Tick = index_events[i].Next_Index_Tick;
+				}
+			}
+
+			// Max index delta is < to 50 ms, load this track as an hard sectored track.
+			if ( (Next_Max_Index_Tick * ((float)KF_NS_PER_TICK * 10E-10)) < 50 && (Prev_Max_Index_Tick * ((float)KF_NS_PER_TICK * 10E-10)) < 50 )
+			{
+				for( i = 0; i < nbindex ; i++ )
+				{
+					if ( ( index_events[i].Prev_Index_Tick > ( Prev_Max_Index_Tick / 4 ) * 3 ) &&
+						 ( index_events[i].Next_Index_Tick > ( Next_Max_Index_Tick / 4 ) * 3 ) )
+					{
+						index_events[i].type = FXSTRM_INDEX_SECTORINDEX;
+					}
+					else
+					{
+						if ( ( index_events[i].Prev_Index_Tick > ( Prev_Max_Index_Tick / 4 ) * 3 ) ||
+							 ( index_events[i].Next_Index_Tick > ( Next_Max_Index_Tick / 4 ) * 3 ) )
+						{
+							index_events[i].type = FXSTRM_INDEX_SECTORINDEX;
+						}
+						else
+						{
+							if( index_events[i].Prev_Index_Tick && index_events[i].Next_Index_Tick )
+							{
+								index_events[i].type = FXSTRM_INDEX_MAININDEX;
+							}
+						}
+					}
+				}
+
+				if( ( index_events[0].Next_Index_Tick > ( Next_Max_Index_Tick / 4 ) * 3 ))
+				{
+					index_events[0].type = FXSTRM_INDEX_SECTORINDEX;
+				}
+				else
+				{
+					if( ( index_events[1].Next_Index_Tick > ( Next_Max_Index_Tick / 4 ) * 3 ))
+					{
+						index_events[0].type = FXSTRM_INDEX_MAININDEX;
+					}
+					else
+					{
+						index_events[0].type = FXSTRM_INDEX_SECTORINDEX;
+					}
+				}
+			}
+
+			for( i = 0; i < nbindex ; i++ )
+			{
+				floppycontext->hxc_printf(MSG_DEBUG,"Index %d : Prev delta %f ms, Next delta %f ms, Type : 0x%x",i, \
+							(float)index_events[i].Prev_Index_Tick * ((float)KF_NS_PER_TICK * 10E-10), \
+							(float)index_events[i].Next_Index_Tick * ((float)KF_NS_PER_TICK * 10E-10), \
+							index_events[i].type);
+
+				hxcfe_FxStream_AddIndex(fxs,track_dump,index_events[i].CellPos,index_events[i].Timer,index_events[i].type);
 			}
 #endif
 
