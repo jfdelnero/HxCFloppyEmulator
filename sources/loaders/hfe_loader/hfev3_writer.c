@@ -97,14 +97,13 @@ static void addpad(unsigned char * track,int mfmsize,int tracksize)
 	i=tracksize-1;
 	while( i > 0 && !track[i] )
 	{
-
 		lastindex = i;
 		i--;
 	};
 
 	if( lastindex &&  (lastindex < tracksize) )
 	{
-		j= lastindex;
+		j = lastindex;
 		do
 		{
 			if( lastindex >= 2 )
@@ -156,7 +155,7 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 	unsigned char * mfmtracks0,*mfmtracks1,*mfmtrackfinal;
 	unsigned char * offsettrack;
 	int mfmsize,mfmsize2;
-	unsigned int i,j,k;
+	unsigned int i,j,k,side2;
 	unsigned int trackpos;
 	unsigned int tracklistlen;
 	unsigned int tracksize;
@@ -254,18 +253,22 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 				mfmsize=0;
 				mfmsize2=0;
 
+				side2 = 0;
+				if (floppy->tracks[0]->number_of_side == 2)
+					side2 = 1;
+
 				final_buffer_len = GenOpcodesTrack(imgldr_ctx->hxcfe,
 					floppy->tracks[i]->sides[0]->indexbuffer,
 					floppy->tracks[i]->sides[0]->databuffer,
 					floppy->tracks[i]->sides[0]->tracklen,
-					floppy->tracks[i]->sides[1]->databuffer,
-					floppy->tracks[i]->sides[1]->tracklen,
+					floppy->tracks[i]->sides[side2]->databuffer,
+					floppy->tracks[i]->sides[side2]->tracklen,
 					floppy->tracks[i]->sides[0]->flakybitsbuffer,
-					floppy->tracks[i]->sides[1]->flakybitsbuffer,
+					floppy->tracks[i]->sides[side2]->flakybitsbuffer,
 					floppy->tracks[i]->sides[0]->bitrate,
 					floppy->tracks[i]->sides[0]->timingbuffer,
-					floppy->tracks[i]->sides[1]->bitrate,
-					floppy->tracks[i]->sides[1]->timingbuffer,
+					floppy->tracks[i]->sides[side2]->bitrate,
+					floppy->tracks[i]->sides[side2]->timingbuffer,
 					&final_buffer_H0,
 					&final_buffer_H1,
 					&final_randombuffer);
@@ -358,6 +361,10 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 				{
 					memcpy(mfmtracks1,precalcopcodestracks[i].opcodetrack_H1,tracklenarray[i]);
 					addpad(mfmtracks1,mfmsize2,tracksize);
+				}
+				else
+				{
+					memcpy(mfmtracks1,mfmtracks0,tracksize);
 				}
 
 				for(k=0;k<tracksize/256;k++)
