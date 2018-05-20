@@ -142,6 +142,14 @@ floppy_infos_window::floppy_infos_window() {
         aed6200p_bt->labelsize(10);
         aed6200p_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* aed6200p_bt
+      { northstar_bt = new Fl_Light_Button(1183, 320, 76, 15, "NORTHSTAR");
+        northstar_bt->labelsize(10);
+        northstar_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* northstar_bt
+      { heathkit_bt = new Fl_Light_Button(1183, 335, 76, 15, "HEATHKIT");
+        heathkit_bt->labelsize(10);
+        heathkit_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* heathkit_bt
       o->end();
     } // Fl_Group* o
     { bt_edit = new Fl_Button(1010, 465, 105, 26, "Edit tools");
