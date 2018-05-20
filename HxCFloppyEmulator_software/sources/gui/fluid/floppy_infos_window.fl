@@ -41,7 +41,7 @@ class floppy_infos_window {open
           xywh {1005 49 265 16} labelsize 10 textsize 10
         }
         Fl_Text_Display object_txt {
-          user_data this selected
+          user_data this
           xywh {1005 68 265 215} labelsize 10 textsize 10
         }
       }
@@ -147,6 +147,18 @@ class floppy_infos_window {open
           user_data this
           callback disk_infos_window_callback
           xywh {1183 305 76 15} labelsize 10
+        }
+        Fl_Light_Button northstar_bt {
+          label NORTHSTAR
+          user_data this
+          callback disk_infos_window_callback
+          xywh {1183 320 76 15} labelsize 10
+        }
+        Fl_Light_Button heathkit_bt {
+          label HEATHKIT
+          user_data this
+          callback disk_infos_window_callback selected
+          xywh {1183 335 76 15} labelsize 10
         }
       }
       Fl_Button bt_edit {
