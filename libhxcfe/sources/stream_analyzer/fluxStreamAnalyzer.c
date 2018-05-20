@@ -560,6 +560,10 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 
 			if( nextindex_pos == (start_index + i) )
 			{
+				#ifdef FLUXSTREAMDBG
+				floppycontext->hxc_printf(MSG_DEBUG,"Index reached : Position %d",nextindex_pos);
+				#endif
+
 				// Generate index signal
 				settrackbit(indextrack,TEMPBUFSIZE,0xFF,bitoffset,1);
 
@@ -704,13 +708,14 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 			memcpy(hxcfe_track->databuffer,outtrack,tracksize);
 			memcpy(hxcfe_track->flakybitsbuffer,flakeytrack,tracksize);
 			memcpy(hxcfe_track->timingbuffer,trackbitrate, tracksize * sizeof(uint32_t));
+			memset(hxcfe_track->indexbuffer,0,tracksize);
 
 			// add sector/track index
 			for(i=0;i<bitoffset;i++)
 			{
 				if(gettrackbit(indextrack,i))
 				{
-					us2index(i,hxcfe_track,2000,1,0);
+					us2index(i % bitoffset,hxcfe_track,2000,1,0);
 				}
 			}
 
@@ -2802,6 +2807,9 @@ void hxcfe_FxStream_setFilterParameters( HXCFE_FXSA * fxs, int32_t number_of_pas
 HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, int32_t wordsize, uint32_t nbword )
 {
 	HXCFE_TRKSTREAM* track_dump;
+	uint32_t total_tick;
+	uint32_t total_tick_transposed;
+	uint32_t total_tick_computed;
 	unsigned int i;
 
 	track_dump = malloc(sizeof(HXCFE_TRKSTREAM));
@@ -2812,6 +2820,8 @@ HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, 
 		track_dump->track_dump = malloc( nbword * sizeof(uint32_t) );
 		if( track_dump->track_dump )
 		{
+			total_tick = 0;
+			total_tick_transposed = 0;
 			memset( track_dump->track_dump, 0, nbword * sizeof(uint32_t) );
 			for( i = 0 ; i < nbword ; i++ )
 			{
@@ -2830,7 +2840,32 @@ HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, 
 					break;
 				}
 
+				total_tick += track_dump->track_dump[i];
+
 				track_dump->track_dump[i] = (uint32_t)((float)track_dump->track_dump[i] * (float)((float)fxs->steptime/(float)4000));
+
+				total_tick_transposed += track_dump->track_dump[i];
+
+				total_tick_computed = (uint32_t)((float)total_tick * (float)((float)fxs->steptime/(float)4000));
+
+				// Possible cumulative error check.
+				if( total_tick_transposed != total_tick_computed )
+				{
+					// Fix it.
+					if( total_tick_transposed < total_tick_computed )
+					{
+						total_tick_transposed++;
+						track_dump->track_dump[i]++;
+					}
+					else
+					{
+						if( track_dump->track_dump[i] > 1 )
+						{
+							total_tick_transposed--;
+							track_dump->track_dump[i]--;
+						}
+					}
+				}
 			}
 
 			track_dump->nb_of_pulses = nbword;
