@@ -159,11 +159,19 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 		{
 			filesize = hxc_fgetsize(f);
 
-			kfstreambuffer=malloc(filesize);
+			kfstreambuffer = malloc(filesize);
+			if( kfstreambuffer )
+			{
+				hxc_fread(kfstreambuffer,filesize,f);
 
-			hxc_fread(kfstreambuffer,filesize,f);
+				hxc_fclose(f);
+			}
+			else
+			{
+				hxc_fclose(f);
 
-			hxc_fclose(f);
+				return 0;
+			}
 
 			cellstream = (uint32_t*)malloc(filesize*sizeof(uint32_t));
 			cellstreampos = (uint32_t*)malloc(filesize*sizeof(uint32_t));
