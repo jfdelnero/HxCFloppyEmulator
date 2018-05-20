@@ -347,6 +347,8 @@ int InfosThreadProc(void* floppycontext,void* context)
 			hxcfe_td_activate_analyzer(td,ARBURGDAT_ENCODING,w->arburg_bt->value());
 			hxcfe_td_activate_analyzer(td,ARBURGSYS_ENCODING,w->arburg_bt->value());
 			hxcfe_td_activate_analyzer(td,AED6200P_MFM_ENCODING,w->aed6200p_bt->value());
+			hxcfe_td_activate_analyzer(td,NORTHSTAR_HS_MFM__ENCODING,w->northstar_bt->value());
+			hxcfe_td_activate_analyzer(td,HEATHKIT_HS_FM_ENCODING,w->heathkit_bt->value());
 
 			hxcfe_td_setparams(td,(int)(adjust_timescale(w->x_time->value())),(int)w->y_time->value(),(int)(w->x_offset->value()*1000));
 
@@ -803,6 +805,12 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						break;
 						case AED6200P_DD:
 							sprintf(str,"AED 6200P Sector");
+						break;
+						case NORTHSTAR_HS_DD:
+							sprintf(str,"Northstar Sector");
+						break;
+						case HEATHKIT_HS_SD:
+							sprintf(str,"Heathkit Sector");
 						break;
 						default:
 							sprintf(str,"Unknow Sector");
