@@ -347,7 +347,7 @@ int InfosThreadProc(void* floppycontext,void* context)
 			hxcfe_td_activate_analyzer(td,ARBURGDAT_ENCODING,w->arburg_bt->value());
 			hxcfe_td_activate_analyzer(td,ARBURGSYS_ENCODING,w->arburg_bt->value());
 			hxcfe_td_activate_analyzer(td,AED6200P_MFM_ENCODING,w->aed6200p_bt->value());
-			hxcfe_td_activate_analyzer(td,NORTHSTAR_HS_MFM__ENCODING,w->northstar_bt->value());
+			hxcfe_td_activate_analyzer(td,NORTHSTAR_HS_MFM_ENCODING,w->northstar_bt->value());
 			hxcfe_td_activate_analyzer(td,HEATHKIT_HS_FM_ENCODING,w->heathkit_bt->value());
 
 			hxcfe_td_setparams(td,(int)(adjust_timescale(w->x_time->value())),(int)w->y_time->value(),(int)(w->x_offset->value()*1000));
