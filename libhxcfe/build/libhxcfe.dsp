@@ -1959,6 +1959,26 @@ SOURCE=..\sources\loaders\atr_loader\atr_loader.c
 SOURCE=..\sources\loaders\atr_loader\atr_loader.h
 # End Source File
 # End Group
+# Begin Group "Northstar"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\northstar_loader\northstar_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\northstar_loader\northstar_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\northstar_loader\northstar_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\northstar_loader\northstar_writer.h
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 
