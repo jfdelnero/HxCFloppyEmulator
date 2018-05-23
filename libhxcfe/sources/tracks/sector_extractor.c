@@ -486,6 +486,244 @@ int get_next_MEMBRAIN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 	return bit_offset;
 }
 
+int get_next_MFM_Northstar_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
+{
+	int bit_offset_bak,bit_offset,tmp_bit_offset;
+	int sector_size,i,j;
+	unsigned char mfm_buffer[32];
+	unsigned char tmp_buffer[2 + 512 + 1]; // Sync + Sector Info + Data + Checksum
+	unsigned char checksum;
+	int sector_extractor_sm;
+
+	memset(sector,0,sizeof(HXCFE_SECTCFG));
+
+	bit_offset=track_offset;
+
+	sector_extractor_sm=LOOKFOR_GAP1;
+
+	do
+	{
+		switch(sector_extractor_sm)
+		{
+			case LOOKFOR_GAP1:
+				memset(tmp_buffer,0x00,sizeof(tmp_buffer));
+				tmp_buffer[7] = 0xFB;
+				bintomfm(mfm_buffer,sizeof(mfm_buffer)*8,tmp_buffer,8,0);
+
+				bit_offset = searchBitStream(track->databuffer,track->tracklen,-1,mfm_buffer,2*8*8,bit_offset);
+
+				if(bit_offset!=-1)
+				{
+					if( bit_offset >= 3000 )
+						i = (bit_offset - 3000) % track->tracklen;
+					else
+						i =  (track->tracklen -  (3000 - bit_offset) ) % track->tracklen;
+
+					j = 0;
+					while( !track->indexbuffer[(( i % track->tracklen )/8)] && j < 6000 )
+					{
+						i++;
+						j++;
+					}
+
+					if(j < 6000)
+						sector_extractor_sm=LOOKFOR_ADDM;
+					else
+						bit_offset++;
+				}
+				else
+				{
+					sector_extractor_sm=ENDOFTRACK;
+				}
+			break;
+
+			case LOOKFOR_ADDM:
+				tmp_bit_offset = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,2 + 512 + 1,bit_offset + (8 * 7 * 2),0);
+				if( tmp_buffer[0] == 0xFB )
+				{
+					sector->startdataindex = bit_offset + (8 * 9 * 2) ;
+					sector->endsectorindex = tmp_bit_offset;
+
+					checksum = 0x00;
+
+					for(i=0;i<512;i++)
+					{
+						checksum ^= tmp_buffer[ 2 + i];
+						checksum = (checksum >> 7) | (checksum << 1);
+					}
+
+					sector->cylinder = (tmp_buffer[1] >> 4) & 0xF;
+					sector->head = 0;
+					sector->sector = tmp_buffer[1] & 0xF;
+					sector->sectorsize = 512;
+					sector->alternate_sector_size_id = 2;
+					sector->trackencoding = NORTHSTAR_HS_DD;
+					sector->alternate_datamark = 0x00;
+					sector->use_alternate_datamark = 0x00;
+					sector->alternate_addressmark = 0xFB;
+					sector->use_alternate_addressmark = 0xFF;
+					sector->header_crc = 0x0000;
+					sector->use_alternate_header_crc = 0x00;
+
+					sector->startsectorindex=bit_offset;
+
+					sector->data_crc = tmp_buffer[2 + 512];
+
+					if(track->timingbuffer)
+						sector->bitrate = track->timingbuffer[bit_offset/8];
+					else
+						sector->bitrate = track->bitrate;
+
+					if(tmp_buffer[2 + 512] == checksum)
+					{ // checksum ok !!!
+ 						floppycontext->hxc_printf(MSG_DEBUG,"Valid MFM Northstar sector found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
+					}
+					else
+					{
+						floppycontext->hxc_printf(MSG_DEBUG,"Bad MFM Northstar header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
+						sector->use_alternate_data_crc = 0xFF;
+					}
+
+					sector_size = 512;
+
+					sector->input_data=(unsigned char*)malloc(sector_size);
+					memcpy(sector->input_data,&tmp_buffer[2],sector_size);
+
+					bit_offset++;
+
+					bit_offset_bak = bit_offset;
+
+					sector_extractor_sm=ENDOFSECTOR;
+
+				}
+			break;
+
+			case ENDOFTRACK:
+
+			break;
+
+			default:
+				sector_extractor_sm=ENDOFTRACK;
+			break;
+
+		}
+	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+
+	return bit_offset;
+}
+
+int get_next_MFM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
+{
+	int bit_offset_bak,bit_offset,tmp_bit_offset;
+	int sector_size,i;
+	unsigned char mfm_buffer[32];
+	unsigned char tmp_buffer[2 + 512 + 1]; // Sync + Sector Info + Data + Checksum
+	unsigned char checksum;
+	int sector_extractor_sm;
+
+	memset(sector,0,sizeof(HXCFE_SECTCFG));
+
+	bit_offset=track_offset;
+
+	sector_extractor_sm=LOOKFOR_GAP1;
+
+	do
+	{
+		switch(sector_extractor_sm)
+		{
+			case LOOKFOR_GAP1:
+				memset(tmp_buffer,0x00,sizeof(tmp_buffer));
+				tmp_buffer[7] = 0xBF;
+				bintofm(mfm_buffer,sizeof(mfm_buffer)*8,tmp_buffer,8,0);
+
+				bit_offset = searchBitStream(track->databuffer,track->tracklen,-1,mfm_buffer,4*8*8,bit_offset);
+
+				if(bit_offset!=-1)
+				{
+					sector_extractor_sm=LOOKFOR_ADDM;
+				}
+				else
+				{
+					sector_extractor_sm=ENDOFTRACK;
+				}
+			break;
+
+			case LOOKFOR_ADDM:
+
+				tmp_bit_offset = fmtobin(track->databuffer,track->tracklen,tmp_buffer,1 + 1 + 1 + 1,bit_offset + (2 * 8 * 7 * 2),0);
+				if( tmp_buffer[0] == 0xBF )
+				{
+					sector->startdataindex = bit_offset + (8 * 9 * 2) ;
+					sector->endsectorindex = tmp_bit_offset;
+
+					checksum = 0x00;
+
+					for(i=0;i<3;i++)
+					{
+						checksum ^= tmp_buffer[ 2 + i];
+						checksum = (checksum >> 7) | (checksum << 1);
+					}
+
+					sector->cylinder = tmp_buffer[1] >> 4;
+					sector->head = 0;
+					sector->sector = tmp_buffer[1] & 0xF;
+					sector->sectorsize = 512;
+					sector->alternate_sector_size_id = 2;
+					sector->trackencoding = NORTHSTAR_HS_DD;
+					sector->alternate_datamark = 0x00;
+					sector->use_alternate_datamark = 0x00;
+					sector->alternate_addressmark = 0xFB;
+					sector->use_alternate_addressmark = 0xFF;
+					sector->header_crc = 0x0000;
+					sector->use_alternate_header_crc = 0x00;
+
+					sector->startsectorindex=bit_offset;
+
+					sector->data_crc = tmp_buffer[2 + 512];
+
+					if(track->timingbuffer)
+						sector->bitrate = track->timingbuffer[bit_offset/8];
+					else
+						sector->bitrate = track->bitrate;
+
+					if(tmp_buffer[2 + 512] == checksum)
+					{ // checksum ok !!!
+ 						floppycontext->hxc_printf(MSG_DEBUG,"Valid MFM Northstar sector found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
+					}
+					else
+					{
+						floppycontext->hxc_printf(MSG_DEBUG,"Bad MFM Northstar header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
+						sector->use_alternate_data_crc = 0xFF;
+					}
+
+					sector_size = 512;
+
+					sector->input_data=(unsigned char*)malloc(sector_size);
+					memcpy(sector->input_data,&tmp_buffer[2],sector_size);
+
+					bit_offset++;
+
+					bit_offset_bak = bit_offset;
+
+					sector_extractor_sm=ENDOFSECTOR;
+
+				}
+			break;
+
+			case ENDOFTRACK:
+
+			break;
+
+			default:
+				sector_extractor_sm=ENDOFTRACK;
+			break;
+
+		}
+	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+
+	return bit_offset;
+}
+
 int get_next_AED6200P_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {
 	int bit_offset_bak,bit_offset,tmp_bit_offset;
@@ -2102,7 +2340,12 @@ HXCFE_SECTCFG* hxcfe_getNextSector( HXCFE_SECTORACCESS* ss_ctx, int32_t track, i
 		case AED6200P_MFM_ENCODING:
 			bitoffset = get_next_AED6200P_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
-
+		case NORTHSTAR_HS_MFM_ENCODING:
+			bitoffset = get_next_MFM_Northstar_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
+		break;
+		case HEATHKIT_HS_FM_ENCODING:
+			bitoffset = get_next_MFM_Heathkit_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
+		break;
 		default:
 			bitoffset=-1;
 		break;
