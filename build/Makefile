@@ -61,14 +61,15 @@ DISKLOADERPLUGINS = copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigado
 					ensoniq_mirage_loader.o sad_loader.o jv3_loader.o stt_loader.o prophet_loader.o teledisk_loader.o td0_lzss.o\
 					emuii_raw_loader.o emuii_loader.o emui_raw_loader.o jvc_loader.o dim_loader.o ti99v9t9_loader.o d81_loader.o  acornadf_loader.o \
 					camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o fdi_loader.o ssd_dsd_loader.o adl_loader.o \
-					krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o system24_loader.o kryofluxstream_loader.o kryofluxstream.o \
-					fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o xml_loader.o \
-					flppcm_loader.o stw_loader.o vfddat_loader.o ana_loader.o atr_loader.o hfev3_loader.o hfev3_writer.o hfev3_trackgen.o
+					krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o system24_loader.o kryofluxstream_loader.o \
+					kryofluxstream.o fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o \
+                    northstar_loader.o  xml_loader.o flppcm_loader.o stw_loader.o vfddat_loader.o ana_loader.o atr_loader.o hfev3_loader.o hfev3_writer.o \
+                    hfev3_trackgen.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
 					kryofluxstream_writer.o adf_writer.o bmp_writer.o bmp_disk_writer.o bmp_file.o xml_writer.o trd_writer.o stx_writer.o st_writer.o \
-					stw_writer.o dim_writer.o adz_writer.o ipf_writer.o fd_writer.o
+					stw_writer.o dim_writer.o adz_writer.o ipf_writer.o fd_writer.o northstar_loader.o northstar_writer.o
 
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
@@ -502,6 +503,12 @@ flppcm_loader.o : $(BASEDIR)/loaders/flppcm_loader/flppcm_loader.c $(BASEDIR)/lo
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 vfddat_loader.o : $(BASEDIR)/loaders/vfddat_loader/vfddat_loader.c $(BASEDIR)/loaders/vfddat_loader/vfddat_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+northstar_loader.o : $(BASEDIR)/loaders/northstar_loader/northstar_loader.c $(BASEDIR)/loaders/northstar_loader/northstar_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+northstar_writer.o : $(BASEDIR)/loaders/northstar_loader/northstar_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 adf_hd.o : $(BASEDIR)/thirdpartylibs/adflib/Lib/adf_hd.c
