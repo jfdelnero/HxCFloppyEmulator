@@ -65,6 +65,9 @@
 
 #include "font.h"
 
+#include "loaders/bmp_loader/bmp_loader.h"
+#include "loaders/bmp_loader/bmp_file.h"
+
 #define PI    ((float)  3.141592654f)
 
 uint8_t bitcount_array[]=
@@ -1208,6 +1211,85 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 
 }
 
+void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
+{
+	int i,j;
+	int xpos,ypos;
+	char tmp_str[64];
+	uint32_t total_offset,cur_ticks,curcol;
+
+	memset(td->framebuffer,0,td->xsize*td->ysize);
+	//////////////////////////////////////////
+	// Scatter drawing
+	total_offset = 0;
+	for (i = 0; i < track_stream->nb_of_pulses; i++)
+	{
+		cur_ticks = track_stream->track_dump[i];
+		total_offset += cur_ticks;
+
+		xpos = (int)( ((double)total_offset / (double) (TICKFREQ / 1000000)) / ((double)((double)td->x_us/(double)td->xsize)) );
+
+		ypos = td->ysize - (int)( (double)( (double)cur_ticks / (double) (TICKFREQ / 1000000) )/ (double)((double)td->y_us/(double)td->ysize));
+
+		if ( ( xpos < td->xsize ) && ( ( ypos < td->ysize ) && ( ypos >= 0 ) ) )
+		{
+			td->framebuffer[(td->xsize*ypos) + xpos]++;
+		}
+	}
+
+	for(ypos = 0; ypos < td->ysize; ypos++)
+	{
+		for(xpos = 0; xpos < td->xsize; xpos++)
+		{
+			curcol = td->framebuffer[(td->xsize*ypos) + xpos];
+
+			curcol = curcol * 32;
+
+			if(curcol>255)
+			{
+				curcol = 255;
+			}
+
+			curcol = curcol<<8 | curcol << 16 | curcol;
+
+			td->framebuffer[(td->xsize*ypos) + xpos] = curcol;
+		}
+	}
+
+	//////////////////////////////////////////
+	// Draw indexes
+	for(i=0;i<track_stream->nb_of_index;i++)
+	{
+		j = 0;
+		total_offset = 0;
+		while( ( j < track_stream->index_evt_tab[i].dump_offset ) && ( j < track_stream->nb_of_pulses ) )
+		{
+			j++;
+			total_offset += track_stream->track_dump[j];
+		}
+
+		xpos = (int)( ((double)total_offset / (double) (TICKFREQ / 1000000)) / ((double)((double)td->x_us/(double)td->xsize)) );
+		ypos = 0;
+
+		if ( ( xpos < td->xsize ) && ( ypos < td->ysize ) )
+		{
+			for(ypos=0;ypos<td->ysize;ypos++)
+			{
+				if(!td->framebuffer[(td->xsize*(ypos)) + xpos])
+				{
+					td->framebuffer[(td->xsize*(ypos)) + xpos] = 0x00FF00;
+				}
+			}
+		}
+	}
+
+	// Print pixel density
+	sprintf(tmp_str,"xres: %f us/pix",((double)((double)td->x_us/(double)td->xsize)));
+	putstring8x8(td,1,1,tmp_str,0xFFFFFF,0x000000,0,0);
+	sprintf(tmp_str,"yres: %f us/pix",(double)((double)td->y_us/(double)td->ysize));
+	putstring8x8(td,1,1+8,tmp_str,0xFFFFFF,0x000000,0,0);
+}
+
 int32_t hxcfe_td_setName( HXCFE_TD *td, char * name )
 {
 	if( td )
@@ -1955,6 +2037,94 @@ int32_t hxcfe_td_getframebuffer_yres( HXCFE_TD *td )
 	return 0;
 }
 
+int32_t hxcfe_td_exportToBMP( HXCFE_TD *td, char * filename )
+{
+	int ret,i,j,k;
+	uint32_t * ptr;
+	unsigned char * ptrchar;
+	bitmap_data bdata;
+
+	uint32_t pal[256];
+	int nbcol;
+
+	ptr = malloc((td->xsize*td->ysize*4));
+	if(ptr)
+	{
+		memset(ptr,0,(td->xsize*td->ysize*4));
+	}
+
+	ptrchar = malloc((td->xsize*td->ysize));
+	if(ptrchar)
+	{
+		td->hxcfe->hxc_printf(MSG_INFO_1,"Converting image...");
+		nbcol = 0;
+
+		k=0;
+		for(i=0;i< ( td->ysize );i++)
+		{
+			for(j=0;j< (td->xsize );j++)
+			{
+				ptrchar[k] = getPixelCode(td->framebuffer[k],(uint32_t*)&pal,&nbcol);
+				k++;
+			}
+		}
+		
+		if(nbcol>=256)
+		{
+			k = 0;
+			for(i=0;i< ( td->ysize );i++)
+			{
+				for(j=0;j< ( td->xsize );j++)
+				{
+					ptrchar[k] = ptrchar[k] & 0xF8F8F8;
+					k++;
+				}
+			}
+
+			for(i=0;i<256;i++)
+			{
+				pal[i]=i|(i<<8)|(i<<16);
+			}
+
+			nbcol = 0;
+			k=0;
+			for(i=0;i< ( td->ysize );i++)
+			{
+				for(j=0;j< ( td->xsize );j++)
+				{
+					ptrchar[k] = getPixelCode(td->framebuffer[k],(uint32_t*)&pal,&nbcol);
+					k++;
+				}
+			}
+		}
+
+		td->hxcfe->hxc_printf(MSG_INFO_1,"Writing %s...",filename);
+
+		if(nbcol>=256)
+		{
+			bdata.nb_color = 16;
+			bdata.xsize = td->xsize;
+			bdata.ysize = td->ysize;
+			bdata.data = (uint32_t*)ptr;
+			bdata.palette = 0;
+			bmp16b_write(filename,&bdata);
+		}
+		else
+		{
+			bdata.nb_color = 8;
+			bdata.xsize = td->xsize;
+			bdata.ysize = td->ysize;
+			bdata.data = (uint32_t*)ptrchar;
+			bdata.palette = (unsigned char*)&pal;
+
+			bmpRLE8b_write(filename,&bdata);
+		}
+
+		free(ptrchar);
+	}
+
+	return 0;
+}
 
 void hxcfe_td_deinit(HXCFE_TD *td)
 {

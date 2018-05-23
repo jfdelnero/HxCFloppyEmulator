@@ -439,6 +439,7 @@ HXCFE_TD*              hxcfe_td_init( HXCFE* floppycontext, uint32_t xsize, uint
 void                   hxcfe_td_setparams( HXCFE_TD *td, uint32_t x_us, uint32_t y_us, uint32_t x_start_us );
 void                   hxcfe_td_activate_analyzer( HXCFE_TD *td, int32_t TRACKTYPE, int32_t enable );
 void                   hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track, int32_t side );
+void                   hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream );
 s_sectorlist *         hxcfe_td_getlastsectorlist( HXCFE_TD *td );
 void                   hxcfe_td_draw_disk( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk );
 void *                 hxcfe_td_getframebuffer( HXCFE_TD *td );
@@ -446,6 +447,7 @@ int32_t                hxcfe_td_getframebuffer_xres( HXCFE_TD *td );
 int32_t                hxcfe_td_getframebuffer_yres( HXCFE_TD *td );
 int32_t                hxcfe_td_setProgressCallback( HXCFE_TD *td, HXCFE_TDPROGRESSOUT_FUNC progress_func, void * userdata );
 int32_t                hxcfe_td_setName( HXCFE_TD *td, char * name );
+int32_t                hxcfe_td_exportToBMP( HXCFE_TD *td, char * filename );
 void                   hxcfe_td_deinit( HXCFE_TD *td );
 s_pulseslist *         hxcfe_td_getlastpulselist( HXCFE_TD *td );
 
