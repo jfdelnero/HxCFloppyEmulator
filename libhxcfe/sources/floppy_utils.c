@@ -61,6 +61,9 @@ int32_t us2index(int32_t startindex,HXCFE_SIDE * track,uint32_t us,unsigned char
 {
 	uint32_t time,freq;
 
+	if(!us)
+		return startindex;
+
 	if(!fillorder)
 	{
 		if(track->bitrate==VARIABLEBITRATE)
