@@ -71,3 +71,6 @@ typedef struct _HXCFE_FLOPPY
     HXCFE_CYLINDER ** tracks;
 }HXCFE_FLOPPY;
 #define _HXCFE_FLOPPY_
+
+// Internal stream tick
+#define TICKFREQ 250000000 // 250Mhz tick
