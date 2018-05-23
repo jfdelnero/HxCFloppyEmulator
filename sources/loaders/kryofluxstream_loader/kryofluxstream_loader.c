@@ -161,13 +161,13 @@ int KryoFluxStream_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	return HXCFE_BADPARAMETER;
 }
 
-static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,float timecoef,int phasecorrection,int bitrate,int filter,int filterpasses)
+static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,float timecoef,int phasecorrection,int bitrate,int filter,int filterpasses, int bmpexport)
 {
 	HXCFE_SIDE* currentside;
 
 	HXCFE_TRKSTREAM *track_dump;
 	HXCFE_FXSA * fxs;
-
+	char tmp_filename[512];
 	currentside=0;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
@@ -187,6 +187,13 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,flo
 			hxcfe_FxStream_setFilterParameters(fxs,filterpasses,filter);
 
 			currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
+
+			if( bmpexport )
+			{
+				strcpy(tmp_filename,file);
+				strcat(tmp_filename,".bmp");
+				hxcfe_FxStream_ExportToBmp(fxs,track_dump, tmp_filename);
+			}
 
 			if(rpm && currentside)
 				*rpm = (short)( 60 / GetTrackPeriod(floppycontext,currentside) );
@@ -225,6 +232,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 	int phasecorrection;
 	int bitrate;
 	int filterpasses,filter;
+	int bmp_export;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"KryoFluxStream_libLoad_DiskFile");
 
@@ -329,6 +337,15 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 				hxc_fclose(f);
 			}
 
+			bmp_export = 0;
+			sprintf(filepath,"%s%s",folder,"bmpexport.txt");
+			f=hxc_fopen(filepath,"rb");
+			if(f)
+			{
+				bmp_export = 1;
+				hxc_fclose(f);
+			}
+
 			track=0;
 			side=0;
 			found=0;
@@ -399,7 +416,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 					sprintf(filepath,"%s%s%.2d.%d.raw",folder,fname,j,i);
 
 					rpm = 300;
-					curside = decodestream(imgldr_ctx->hxcfe,filepath,&rpm,timecoef,phasecorrection,bitrate,filter,filterpasses);
+					curside = decodestream(imgldr_ctx->hxcfe,filepath,&rpm,timecoef,phasecorrection,bitrate,filter,filterpasses,bmp_export);
 
 					if(!floppydisk->tracks[j/doublestep])
 					{
