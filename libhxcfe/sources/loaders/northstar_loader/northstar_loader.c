@@ -120,7 +120,7 @@ int Northstar_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 	trackformat=NORTHSTAR_HS_DD;
 
-	if( !(filesize % (35*10*512) )
+	if( !(filesize % (35*10*512) ) )
 	{
 		gap3len=30;
 		interleave=1;
