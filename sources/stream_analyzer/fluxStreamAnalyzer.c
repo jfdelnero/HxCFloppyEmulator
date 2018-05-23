@@ -75,7 +75,6 @@
 
 // us
 #define BLOCK_TIME 1000
-#define TICKFREQ 250000000 // 250Mhz tick
 
 #define SEARCHDEPTH 0.025
 
@@ -486,6 +485,23 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 		flakeytrack=(unsigned char*)malloc(TEMPBUFSIZE);
 		indextrack=(unsigned char*)malloc(TEMPBUFSIZE);
 		trackbitrate=(uint32_t*)malloc(TEMPBUFSIZE*sizeof(uint32_t));
+
+		if( !outtrack || !flakeytrack || !indextrack || !trackbitrate )
+		{
+			if(outtrack)
+				free(outtrack);
+
+			if(flakeytrack)
+				free(flakeytrack);
+
+			if(indextrack)
+				free(indextrack);
+
+			if(trackbitrate)
+				free(trackbitrate);
+
+			return 0;
+		}
 
 		memset(outtrack,0,TEMPBUFSIZE);
 		memset(flakeytrack,0,TEMPBUFSIZE);
@@ -1620,7 +1636,6 @@ static int getNearestMatchedBlock(pulsesblock * pb, int dir, int currentblock,in
 uint32_t getNearestValidIndex(pulses_link * pl,uint32_t center,uint32_t limit)
 {
 	int32_t i;
-	//int32_t offset_min;
 	int32_t offset_max;
 
 	i = 0;
@@ -2675,7 +2690,7 @@ static uint32_t getbestindex(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM *track_dump,pulses
 	int32_t i,j;
 	int32_t first_index,last_index,bad_pulses;
 
-	uint32_t bad_pulses_array[32],min_val;
+	uint32_t bad_pulses_array[MAX_NB_OF_INDEX],min_val;
 	uint32_t bestval;
 
 	uint32_t bestscore,revnb;
@@ -2686,7 +2701,7 @@ static uint32_t getbestindex(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM *track_dump,pulses
 	{
 		bestscore = score[bestindex];
 
-		memset(bad_pulses_array,0xFF,sizeof(uint32_t) * 32);
+		memset(bad_pulses_array,0xFF,sizeof(uint32_t) * MAX_NB_OF_INDEX);
 
 		for(revnb = 0; revnb < nb_revolution ; revnb++)
 		{
@@ -2842,11 +2857,11 @@ HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, 
 
 				total_tick += track_dump->track_dump[i];
 
-				track_dump->track_dump[i] = (uint32_t)((float)track_dump->track_dump[i] * (float)((float)fxs->steptime/(float)4000));
+				track_dump->track_dump[i] = (uint32_t)((float)track_dump->track_dump[i] * (float)((float)fxs->steptime/(float)(1E12 / TICKFREQ)));
 
 				total_tick_transposed += track_dump->track_dump[i];
 
-				total_tick_computed = (uint32_t)((float)total_tick * (float)((float)fxs->steptime/(float)4000));
+				total_tick_computed = (uint32_t)((float)total_tick * (float)((float)fxs->steptime/(float)(1E12 / TICKFREQ)));
 
 				// Possible cumulative error check.
 				if( total_tick_transposed != total_tick_computed )
@@ -2892,9 +2907,9 @@ void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t 
 			if(streamposition < std->nb_of_pulses)
 			{
 #ifdef FLUXSTREAMDBG
-				fxs->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_FxStream_AddIndex : streamposition %d - tickoffset %d - flags : 0x.8X",streamposition,tickoffset,flags);
+				fxs->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_FxStream_AddIndex : streamposition %d (%d us) - tickoffset %d - flags : 0x%.8X",streamposition,tick_to_time(GetTickCnt(std,0, streamposition)),tickoffset,flags);
 #endif
-				if(std->nb_of_index<32)
+				if(std->nb_of_index<MAX_NB_OF_INDEX)
 				{
 					std->index_evt_tab[std->nb_of_index].flags = flags;
 					std->index_evt_tab[std->nb_of_index].dump_offset = streamposition;
@@ -2907,7 +2922,7 @@ void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t 
 					}
 
 					std->index_evt_tab[std->nb_of_index].cellpos = cellpos;
-					std->index_evt_tab[std->nb_of_index].tick_offset = (int)( tickoffset * (float)((float)fxs->steptime/(float)4000));
+					std->index_evt_tab[std->nb_of_index].tick_offset = (int)( tickoffset * (float)((float)fxs->steptime/(float)(1E12 / TICKFREQ)));
 
 					std->nb_of_index++;
 				}
@@ -3123,6 +3138,8 @@ int tracktypelist[]=
 	EMU_FM_ENCODING,
 	ARBURGSYS_ENCODING,
 	ARBURGDAT_ENCODING,
+	NORTHSTAR_HS_MFM_ENCODING,
+	HEATHKIT_HS_FM_ENCODING,
 	UNKNOWN_ENCODING
 };
 
@@ -3230,7 +3247,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 	uint32_t totallen,indexperiod;
 	uint32_t * histo;
 	HXCFE_SIDE* currentside;
-	HXCFE_SIDE* revolutionside[32];
+	HXCFE_SIDE* revolutionside[MAX_NB_OF_INDEX];
 
 	pulses_link * pl;
 	pulses_link * pl_reversed;
@@ -3240,7 +3257,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 	uint32_t nb_of_revolutions,revolution;
 	int32_t i;
 
-	uint32_t qualitylevel[32];
+	uint32_t qualitylevel[MAX_NB_OF_INDEX];
 
 	int32_t first_track_encoding;
 
@@ -3598,6 +3615,34 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 	}
 
 	return currentside;
+}
+
+void hxcfe_FxStream_ExportToBmp(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream, char * filename)
+{
+	HXCFE_TD * td;
+
+	td = hxcfe_td_init(fxs->hxcfe,1024*8,480);
+	if(td)
+	{
+		hxcfe_td_activate_analyzer(td,ISOIBM_MFM_ENCODING,1);
+		hxcfe_td_activate_analyzer(td,ISOIBM_FM_ENCODING,1);
+		hxcfe_td_activate_analyzer(td,AMIGA_MFM_ENCODING,1);
+		hxcfe_td_activate_analyzer(td,EMU_FM_ENCODING,1);
+		hxcfe_td_activate_analyzer(td,MEMBRAIN_MFM_ENCODING,1);
+		hxcfe_td_activate_analyzer(td,TYCOM_FM_ENCODING,1);
+		hxcfe_td_activate_analyzer(td,APPLEII_GCR1_ENCODING,1);
+		hxcfe_td_activate_analyzer(td,APPLEII_GCR2_ENCODING,1);
+		//hxcfe_td_activate_analyzer(td,ARBURGDAT_ENCODING,1);
+		//hxcfe_td_activate_analyzer(td,ARBURGSYS_ENCODING,1);
+
+		hxcfe_td_setparams(td,200*1000*10,16,0);
+
+		hxcfe_td_draw_stream_track( td, stream );
+
+		hxcfe_td_exportToBMP( td, filename );
+
+		hxcfe_td_deinit(td);
+	}
 }
 
 void hxcfe_FxStream_FreeStream(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream)
