@@ -410,6 +410,7 @@ int32_t pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE 
 		case IBMFORMAT_SD:
 		case ISOFORMAT_SD:
 		case TYCOMFORMAT_SD:
+		case HEATHKIT_HS_SD:
 			getFMcode(tg,data,clock,&side->databuffer[tg->last_bit_offset/8]);
 			tg->last_bit_offset=tg->last_bit_offset+(4*8);
 		break;
@@ -421,6 +422,7 @@ int32_t pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE 
 		case MEMBRAINFORMAT_DD:
 		case UKNCFORMAT_DD:
 		case AED6200P_DD:
+		case NORTHSTAR_HS_DD:
 			getMFMcode(tg,data,clock,&side->databuffer[tg->last_bit_offset/8]);
 			tg->last_bit_offset=tg->last_bit_offset+(2*8);
 		break;
@@ -1326,6 +1328,14 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 			currentside->track_encoding = MEMBRAIN_MFM_ENCODING;
 		break;
 
+		case NORTHSTAR_HS_DD:
+			currentside->track_encoding = NORTHSTAR_HS_MFM_ENCODING;
+		break;
+
+		case HEATHKIT_HS_SD:
+			currentside->track_encoding = HEATHKIT_HS_FM_ENCODING;
+		break;
+
 		default:
 			trackenc = ISOIBM_MFM_ENCODING;
 		break;
@@ -1503,6 +1513,90 @@ void tg_addAmigaSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 	currentside->number_of_sector++;
 }
 
+void tg_addNorthstarSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
+{
+
+	int32_t  i;
+	int32_t  trackencoding,trackenc;
+	int32_t  startindex,j;
+	uint8_t  checksum;
+
+	startindex=tg->last_bit_offset/8;
+
+	sectorconfig->startsectorindex=tg->last_bit_offset/8;
+	trackencoding=sectorconfig->trackencoding-1;
+
+	// Preamble 33 bytes of zero
+	for(i=0;i<7;i++)
+	{
+		pushTrackCode(tg,0x00,0xFF,currentside,NORTHSTAR_HS_DD);
+	}
+
+	if(currentside->indexbuffer)
+	{
+		if( sectorconfig->sector == 9 )
+		{
+			us2index( (tg->last_bit_offset + 5000) % currentside->tracklen,currentside,2000,1,0);
+		}
+
+		us2index( tg->last_bit_offset % currentside->tracklen,currentside,2000,1,0);
+	}
+
+	for(i=0;i<28;i++)
+	{
+		pushTrackCode(tg,0x00,0xFF,currentside,NORTHSTAR_HS_DD);
+	}
+
+	// sync
+	pushTrackCode(tg,0xFB,0xFF,currentside,NORTHSTAR_HS_DD);
+
+	// info
+	pushTrackCode(tg, (uint8_t)( ( ((sectorconfig->head & 1)<<4) | (sectorconfig->cylinder&1)<<(4+2)) | ((sectorconfig->cylinder&2)<<(4+2)) | (sectorconfig->sector&0xF) ),0xFF,currentside,NORTHSTAR_HS_DD);
+
+	checksum = 0x00;
+
+	// data
+	for(i=0;i<512;i++)
+	{
+		pushTrackCode(tg,sectorconfig->input_data[ i ],0xFF,currentside,NORTHSTAR_HS_DD);
+		checksum ^= sectorconfig->input_data[ i ];
+		checksum = (checksum >> 7) | (checksum << 1);
+	}
+
+	// Checksum
+	pushTrackCode(tg,checksum,0xFF,currentside,NORTHSTAR_HS_DD);
+
+	// "Random"
+	for(i=0;i<76;i++)
+	{
+		if(tg->last_bit_offset < (currentside->tracklen - 1) )
+		{
+			pushTrackCode(tg,0xAA,0xFF,currentside,NORTHSTAR_HS_DD);
+		}
+	}
+
+	// fill timing & encoding buffer
+	if(currentside->timingbuffer)
+	{
+		for(j=startindex;j<(tg->last_bit_offset/8);j++)
+		{
+			currentside->timingbuffer[j]=sectorconfig->bitrate;
+		}
+	}
+
+	trackenc=NORTHSTAR_HS_MFM_ENCODING;
+
+	if(currentside->track_encoding_buffer)
+	{
+		for(j=startindex;j<(tg->last_bit_offset/8);j++)
+		{
+			currentside->track_encoding_buffer[j] = (uint8_t)trackenc;
+		}
+	}
+
+	currentside->number_of_sector++;
+}
+
 void tg_addSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
 
@@ -1529,6 +1623,13 @@ void tg_addSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_
 		case APPLE2_GCR6A2:
 			tg_addAppleSectorToTrack(tg,sectorconfig,currentside);
 			break;
+
+		case NORTHSTAR_HS_DD:
+			tg_addNorthstarSectorToTrack(tg,sectorconfig,currentside);
+			break;
+
+		case HEATHKIT_HS_SD:
+		break;
 
 	}
 }
@@ -1679,6 +1780,7 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 					case IBMFORMAT_SD:
 					case ISOFORMAT_SD:
 					case TYCOMFORMAT_SD:
+					case HEATHKIT_HS_SD:
 						computedgap3=computedgap3/(2*8);
 					break;
 
@@ -1688,6 +1790,7 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 					case MEMBRAINFORMAT_DD:
 					case UKNCFORMAT_DD:
 					case AED6200P_DD:
+					case NORTHSTAR_HS_DD:
 						computedgap3=computedgap3/(1*8);
 					break;
 				}
