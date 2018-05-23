@@ -391,7 +391,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 								}
 							}
 
-							index_events[nxt_index].CellPos = next_cell_pos;
+							index_events[nxt_index].CellPos = next_index_stream_pos;//next_cell_pos;
 
 							index_cell_time = cellstream[next_cell_pos];
 
@@ -516,6 +516,23 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 					{
 						index_events[0].type = FXSTRM_INDEX_SECTORINDEX;
 					}
+				}
+
+				if( ( index_events[nbindex-1].Prev_Index_Tick < ( Next_Max_Index_Tick / 4 ) * 3 ))
+				{
+					if ( ( index_events[nbindex-2].Prev_Index_Tick < ( Prev_Max_Index_Tick / 4 ) * 3 ) &&
+						 ( index_events[nbindex-2].Next_Index_Tick < ( Next_Max_Index_Tick / 4 ) * 3 ) )
+					{
+						index_events[nbindex-1].type = FXSTRM_INDEX_SECTORINDEX;
+					}
+					else
+					{
+						index_events[nbindex-1].type = FXSTRM_INDEX_MAININDEX;
+					}
+				}
+				else
+				{
+					index_events[nbindex-1].type = FXSTRM_INDEX_SECTORINDEX;
 				}
 			}
 
