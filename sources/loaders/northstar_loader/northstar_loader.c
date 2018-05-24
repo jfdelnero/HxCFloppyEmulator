@@ -98,7 +98,7 @@ int Northstar_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 	FILE * f;
 	unsigned int filesize;
-	int i,j,k;
+	int i,j,k,trk;
 	unsigned int file_offset;
 	unsigned char* trackdata;
 	int gap3len,interleave;
@@ -131,6 +131,7 @@ int Northstar_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 		floppydisk->floppyBitRate = 250000;
 		floppydisk->floppyiftype = GENERIC_SHUGART_DD_FLOPPYMODE;
 		floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 		rpm=300; // normal rpm
 
@@ -140,16 +141,21 @@ int Northstar_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 		if(trackdata)
 		{
-
-			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+			trk = 0;
+			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
-
-				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-				currentcylinder=floppydisk->tracks[j];
-
-				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+				for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 				{
-					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
+
+					if( !floppydisk->tracks[j] )
+					{
+						floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+					}
+
+					currentcylinder=floppydisk->tracks[j];
+
+					hxcfe_imgCallProgressCallback(imgldr_ctx,trk,floppydisk->floppyNumberOfTrack*2 );
+					trk++;
 
 					memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 					for(k=0;k<floppydisk->floppySectorPerTrack;k++)
@@ -164,8 +170,15 @@ int Northstar_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 						sectorconfig[k].input_data = &trackdata[k*512];
 					}
 
-					file_offset=( ( (floppydisk->floppySectorPerTrack*512) * floppydisk->floppyNumberOfSide * j ) +
-						        ( (floppydisk->floppySectorPerTrack*512) ) * i );
+					if( i == 0 )
+					{
+						file_offset = ( ( floppydisk->floppySectorPerTrack * 512 ) * j );
+					}
+					else
+					{
+						file_offset = ( (floppydisk->floppyNumberOfTrack * floppydisk->floppySectorPerTrack * 512) ) + \
+									  ( (floppydisk->floppySectorPerTrack*512) * ( ( floppydisk->floppyNumberOfTrack - 1 ) - j ) );
+					}
 
 					fseek (f , file_offset , SEEK_SET);
 
