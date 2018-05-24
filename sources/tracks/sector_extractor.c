@@ -514,19 +514,19 @@ int get_next_MFM_Northstar_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 
 				if(bit_offset!=-1)
 				{
-					if( bit_offset >= 3000 )
-						i = (bit_offset - 3000) % track->tracklen;
+					if( bit_offset >= 500 )
+						i = (bit_offset - 500) % track->tracklen;
 					else
-						i =  (track->tracklen -  (3000 - bit_offset) ) % track->tracklen;
+						i =  (track->tracklen -  (500 - bit_offset) ) % track->tracklen;
 
 					j = 0;
-					while( !track->indexbuffer[(( i % track->tracklen )/8)] && j < 6000 )
+					while( !track->indexbuffer[(( i % track->tracklen )/8)] && j < 1000 )
 					{
 						i++;
 						j++;
 					}
 
-					if(j < 6000)
+					if(j < 1000)
 						sector_extractor_sm=LOOKFOR_ADDM;
 					else
 						bit_offset++;
