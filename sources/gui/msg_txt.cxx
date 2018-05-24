@@ -107,6 +107,7 @@ Fl_Menu_Item format_choices[]=
 	{ "BMP - BMP file image",0,format_choice_cb,(void*)PLUGIN_BMP},
 	{ "BMP - BMP file image (disk)",0,format_choice_cb,(void*)PLUGIN_DISK_BMP},
 	{ "XML - XML file image",0,format_choice_cb,(void*)PLUGIN_GENERIC_XML},
+	{ "NSI - Northstar file image",0,format_choice_cb,(void*)PLUGIN_NORTHSTAR},
 	{0}
 };
 
