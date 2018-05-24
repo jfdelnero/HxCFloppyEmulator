@@ -3168,14 +3168,56 @@ int32_t hxcfe_FDC_SCANSECTOR  ( HXCFE* floppycontext, uint8_t track, uint8_t sid
 	return 0;
 }
 
-int write_raw_file(HXCFE_IMGLDR * imgldr_ctx,FILE * f,HXCFE_FLOPPY * fp,int32_t startidsector,int32_t sectorpertrack,int32_t nboftrack,int32_t nbofside,int32_t sectorsize,int32_t tracktype,int32_t sidefilelayout)
+
+int write_raw_track(FILE * f,HXCFE_SECTORACCESS* ss,int32_t startidsector,int32_t sectorpertrack,int32_t trk,int32_t side,int32_t sectorsize,int32_t tracktype, int * badsect, int * missingsect )
 {
-	int sect,trk,side,i;
-	HXCFE_SECTORACCESS* ss;
+	int sect,i;
 	HXCFE_SECTCFG * scfg;
-	int badsect,missingsect;
 	const char * badsectmess = "!! BAD SECTOR !!";
 	const char * misssectmess= "!!  MISSING   !!";
+
+	for( sect = 0 ; sect < sectorpertrack ; sect++ )
+	{
+		scfg = hxcfe_searchSector ( ss, trk, side, startidsector + sect, tracktype );
+		if( scfg )
+		{
+			if( scfg->use_alternate_data_crc || !scfg->input_data )
+			{
+				*badsect++;
+			}
+
+			if( ( scfg->sectorsize == sectorsize ) && scfg->input_data )
+			{
+				fwrite( scfg->input_data, scfg->sectorsize, 1, f );
+			}
+			else
+			{
+				for( i = 0 ; i < sectorsize ; i++ )
+				{
+					fputc(badsectmess[i&0xF],f);
+				}
+			}
+
+			hxcfe_freeSectorConfig( ss , scfg );
+		}
+		else
+		{
+			*missingsect++;
+			for( i = 0 ; i < sectorsize ; i++ )
+			{
+				fputc(misssectmess[i&0xF],f);
+			}
+		}
+	}
+
+	return 0;
+}
+
+int write_raw_file(HXCFE_IMGLDR * imgldr_ctx,FILE * f,HXCFE_FLOPPY * fp,int32_t startidsector,int32_t sectorpertrack,int32_t nboftrack,int32_t nbofside,int32_t sectorsize,int32_t tracktype,int32_t sidefilelayout)
+{
+	int trk,side;
+	HXCFE_SECTORACCESS* ss;
+	int badsect,missingsect;
 
 	badsect = 0;
 	missingsect = 0;
@@ -3185,46 +3227,47 @@ int write_raw_file(HXCFE_IMGLDR * imgldr_ctx,FILE * f,HXCFE_FLOPPY * fp,int32_t 
 		ss = hxcfe_initSectorAccess( imgldr_ctx->hxcfe, fp );
 		if(ss)
 		{
-			for( trk = 0 ; trk < nboftrack ; trk++ )
+			switch (sidefilelayout)
 			{
-				for( side = 0 ; side < nbofside; side++ )
-				{
-					for( sect = 0 ; sect < sectorpertrack ; sect++ )
+				// Normal layout
+				case 0:
+					for( trk = 0 ; trk < nboftrack ; trk++ )
 					{
-						scfg = hxcfe_searchSector ( ss, trk, side, startidsector + sect, tracktype );
-						if( scfg )
+						for( side = 0 ; side < nbofside; side++ )
 						{
-							if( scfg->use_alternate_data_crc || !scfg->input_data )
-							{
-								badsect++;
-							}
+							write_raw_track(f,ss,startidsector,sectorpertrack,trk,side,sectorsize,tracktype,&badsect,&missingsect );
 
-							if( ( scfg->sectorsize == sectorsize ) && scfg->input_data )
-							{
-								fwrite( scfg->input_data, scfg->sectorsize, 1, f );
-							}
-							else
-							{
-								for( i = 0 ; i < sectorsize ; i++ )
-								{
-									fputc(badsectmess[i&0xF],f);
-								}
-							}
-
-							hxcfe_freeSectorConfig( ss , scfg );
-						}
-						else
-						{
-							missingsect++;
-							for( i = 0 ; i < sectorsize ; i++ )
-							{
-								fputc(misssectmess[i&0xF],f);
-							}
+							hxcfe_imgCallProgressCallback(imgldr_ctx,trk*2,nboftrack*2 );
 						}
 					}
+				break;
+				// Side 0 Tracks then Side 1 Tracks
+				case 1:
+					for( side = 0 ; side < nbofside; side++ )
+					{
+						for( trk = 0 ; trk < nboftrack ; trk++ )
+						{
+							write_raw_track(f,ss,startidsector,sectorpertrack,trk,side,sectorsize,tracktype,&badsect,&missingsect );
 
-					hxcfe_imgCallProgressCallback(imgldr_ctx,trk*2,nboftrack*2 );
-				}
+							hxcfe_imgCallProgressCallback( imgldr_ctx, (side*nboftrack) + trk, nboftrack*nbofside );
+						}
+					}
+				break;
+				// Side 0 Tracks then Side 1 Tracks "Serpentine"
+				case 2:
+					for( side = 0 ; side < nbofside; side++ )
+					{
+						for( trk = 0 ; trk < nboftrack ; trk++ )
+						{
+							if(side == 0)
+								write_raw_track(f,ss,startidsector,sectorpertrack,trk,side,sectorsize,tracktype,&badsect,&missingsect );
+							else
+								write_raw_track(f,ss,startidsector,sectorpertrack,(nboftrack - 1) - trk,side,sectorsize,tracktype,&badsect,&missingsect );
+
+							hxcfe_imgCallProgressCallback( imgldr_ctx, (side*nboftrack) + trk, nboftrack*nbofside );
+						}
+					}
+				break;
 			}
 
 			hxcfe_deinitSectorAccess(ss);
