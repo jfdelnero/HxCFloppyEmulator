@@ -87,7 +87,7 @@ int Northstar_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 	nsifile = hxc_fopen(filename,"wb");
 	if(nsifile)
 	{
-		writeret = write_raw_file(imgldr_ctx,nsifile,floppy,0,nbsector,nbtrack,nbside,sectorsize,NORTHSTAR_HS_MFM_ENCODING,0);
+		writeret = write_raw_file(imgldr_ctx,nsifile,floppy,0,nbsector,nbtrack,nbside,sectorsize,NORTHSTAR_HS_MFM_ENCODING,2);
 
 		hxc_fclose(nsifile);
 	}
