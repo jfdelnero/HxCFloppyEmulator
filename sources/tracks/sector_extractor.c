@@ -76,6 +76,7 @@ extern unsigned short MFM_tab[];
 #define ENDOFSECTOR 0x05
 
 unsigned short sectorsize[]={128,256,512,1024,2048,4096,8192,16384};
+extern unsigned char bit_inverter[];
 
 void checkEmptySector(HXCFE_SECTCFG * sector)
 {
@@ -612,14 +613,15 @@ int get_next_MFM_Northstar_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 	return bit_offset;
 }
 
-int get_next_MFM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
+int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {
 	int bit_offset_bak,bit_offset,tmp_bit_offset;
 	int sector_size,i;
-	unsigned char mfm_buffer[32];
-	unsigned char tmp_buffer[2 + 512 + 1]; // Sync + Sector Info + Data + Checksum
+	unsigned char fm_buffer[32];
+	unsigned char tmp_buffer[8 + 256 + 1]; // Sync + Data + Checksum
 	unsigned char checksum;
 	int sector_extractor_sm;
+	unsigned char *tmp_sector;
 
 	memset(sector,0,sizeof(HXCFE_SECTCFG));
 
@@ -633,10 +635,10 @@ int get_next_MFM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_S
 		{
 			case LOOKFOR_GAP1:
 				memset(tmp_buffer,0x00,sizeof(tmp_buffer));
-				tmp_buffer[7] = 0xBF;
-				bintofm(mfm_buffer,sizeof(mfm_buffer)*8,tmp_buffer,8,0);
+				tmp_buffer[7] = bit_inverter[0xFD];
+				bintofm(fm_buffer,sizeof(fm_buffer)*8,tmp_buffer,8,0);
 
-				bit_offset = searchBitStream(track->databuffer,track->tracklen,-1,mfm_buffer,4*8*8,bit_offset);
+				bit_offset = searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,4*8*8,bit_offset);
 
 				if(bit_offset!=-1)
 				{
@@ -650,58 +652,130 @@ int get_next_MFM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_S
 
 			case LOOKFOR_ADDM:
 
-				tmp_bit_offset = fmtobin(track->databuffer,track->tracklen,tmp_buffer,1 + 1 + 1 + 1,bit_offset + (2 * 8 * 7 * 2),0);
-				if( tmp_buffer[0] == 0xBF )
+				tmp_bit_offset = fmtobin(track->databuffer,track->tracklen,tmp_buffer,5,bit_offset + (2 * 8 * 7 * 2),0);
+				if( tmp_buffer[0] == bit_inverter[0xFD] )
 				{
-					sector->startdataindex = bit_offset + (8 * 9 * 2) ;
-					sector->endsectorindex = tmp_bit_offset;
-
 					checksum = 0x00;
 
 					for(i=0;i<3;i++)
 					{
-						checksum ^= tmp_buffer[ 2 + i];
+						checksum ^= bit_inverter[ tmp_buffer[ 1 + i ] ];
 						checksum = (checksum >> 7) | (checksum << 1);
 					}
 
-					sector->cylinder = tmp_buffer[1] >> 4;
+					if( checksum != bit_inverter[tmp_buffer[ 4 ]] )
+					{
+						sector_extractor_sm=ENDOFTRACK;
+						break;
+					}
+
+					sector->startsectorindex = (bit_offset + (7*8*4)) % track->tracklen;
+					sector->startdataindex = sector->startsectorindex;
+					sector->endsectorindex = tmp_bit_offset;
+
+					sector->cylinder = bit_inverter[ tmp_buffer[2] ];
 					sector->head = 0;
-					sector->sector = tmp_buffer[1] & 0xF;
-					sector->sectorsize = 512;
-					sector->alternate_sector_size_id = 2;
-					sector->trackencoding = NORTHSTAR_HS_DD;
+					sector->sector = bit_inverter[ tmp_buffer[3] ];
+					sector->sectorsize = 256;
+					sector->alternate_sector_size_id = 1;
+					sector->trackencoding = HEATHKIT_HS_SD;
 					sector->alternate_datamark = 0x00;
 					sector->use_alternate_datamark = 0x00;
-					sector->alternate_addressmark = 0xFB;
+					sector->alternate_addressmark = bit_inverter[0xFD];
 					sector->use_alternate_addressmark = 0xFF;
-					sector->header_crc = 0x0000;
+					sector->header_crc = bit_inverter[tmp_buffer[ 4 ]];
+
+					sector->data_crc = bit_inverter[tmp_buffer[ 4 ]];
 					sector->use_alternate_header_crc = 0x00;
-
-					sector->startsectorindex=bit_offset;
-
-					sector->data_crc = tmp_buffer[2 + 512];
 
 					if(track->timingbuffer)
 						sector->bitrate = track->timingbuffer[bit_offset/8];
 					else
 						sector->bitrate = track->bitrate;
 
-					if(tmp_buffer[2 + 512] == checksum)
+					if( checksum == bit_inverter[tmp_buffer[ 4 ]] )
 					{ // checksum ok !!!
- 						floppycontext->hxc_printf(MSG_DEBUG,"Valid MFM Northstar sector found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
+ 						floppycontext->hxc_printf(MSG_DEBUG,"Valid FM Heathkit sector found - Cyl:%d Side:%d Sect:%d Size:%d",bit_inverter[ tmp_buffer[2] ],tmp_buffer[5],bit_inverter[ tmp_buffer[3] ],sectorsize[tmp_buffer[7]&0x7]);
 					}
 					else
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"Bad MFM Northstar header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
-						sector->use_alternate_data_crc = 0xFF;
+						floppycontext->hxc_printf(MSG_DEBUG,"Bad FM Heathkit header found - Cyl:%d Side:%d Sect:%d Size:%d",bit_inverter[ tmp_buffer[2] ],tmp_buffer[5],bit_inverter[ tmp_buffer[3] ],sectorsize[tmp_buffer[7]&0x7]);
+						sector->use_alternate_header_crc = 0xFF;
 					}
 
-					sector_size = 512;
-
-					sector->input_data=(unsigned char*)malloc(sector_size);
-					memcpy(sector->input_data,&tmp_buffer[2],sector_size);
+					memset(tmp_buffer,0x00,sizeof(tmp_buffer));
+					tmp_buffer[7] = bit_inverter[0xFD];
+					bintofm(fm_buffer,sizeof(fm_buffer)*8,tmp_buffer,8,0);
 
 					bit_offset++;
+
+					bit_offset = searchBitStream(track->databuffer,track->tracklen,(88+16)*8,fm_buffer,4*8*8,bit_offset);
+					if((bit_offset!=-1))
+					{
+						tmp_sector=(unsigned char*)malloc(7+1+sector->sectorsize+1);
+						memset(tmp_sector,0,7+1+sector->sectorsize+1);
+
+						sector->startdataindex = (bit_offset + (7*8*4)) % track->tracklen;
+						sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_sector,7+1+sector->sectorsize+1,bit_offset,0);
+
+						if(tmp_sector[7+0] == bit_inverter[0xFD])
+						{
+							sector->alternate_datamark = bit_inverter[tmp_sector[7+0]];
+							sector->use_alternate_datamark = 0xFF;
+
+							checksum = 0x00;
+
+							//tmp_buffer[ 7 + 1 + 33 ] = 0xA5;
+							for(i=0;i<sector->sectorsize;i++)
+							{
+								checksum ^= bit_inverter[ tmp_buffer[ 7 + 1 + i ] ];
+								checksum = (checksum >> 7) | (checksum << 1);
+							}
+
+							sector->data_crc = checksum;
+							sector->use_alternate_data_crc = 0x00;
+
+							if( checksum == bit_inverter[tmp_buffer[ 7 + 1 +sector->sectorsize ]] )
+							{ // crc ok !!!
+								floppycontext->hxc_printf(MSG_DEBUG,"Data CRC Ok. (0x%.4X)",sector->data_crc);
+							}
+							else
+							{
+								floppycontext->hxc_printf(MSG_DEBUG,"Data CRC ERROR ! (0x%.4X)",sector->data_crc);
+								sector->use_alternate_data_crc = 0xFF;
+							}
+
+							sector->input_data=(unsigned char*)malloc(sector->sectorsize);
+							for(i=0;i<256;i++)
+							{
+								sector->input_data[i] = bit_inverter[ tmp_sector[ 7 +  1 + i] ];
+							}
+							free(tmp_sector);
+
+							// "Empty" sector detection
+							checkEmptySector(sector);
+
+							bit_offset++;
+						}
+						else
+						{
+							sector->startdataindex = tmp_bit_offset;
+							sector->endsectorindex = tmp_bit_offset;
+						}
+
+						sector_extractor_sm=ENDOFSECTOR;
+					}
+					else
+					{
+						sector->startdataindex = tmp_bit_offset;
+						sector->endsectorindex = tmp_bit_offset;
+
+						bit_offset = bit_offset_bak + 1;
+
+						sector_extractor_sm=ENDOFSECTOR;
+					}
+
+				//	bit_offset++;
 
 					bit_offset_bak = bit_offset;
 
@@ -2344,7 +2418,7 @@ HXCFE_SECTCFG* hxcfe_getNextSector( HXCFE_SECTORACCESS* ss_ctx, int32_t track, i
 			bitoffset = get_next_MFM_Northstar_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
 		case HEATHKIT_HS_FM_ENCODING:
-			bitoffset = get_next_MFM_Heathkit_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
+			bitoffset = get_next_FM_Heathkit_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
 		default:
 			bitoffset=-1;
