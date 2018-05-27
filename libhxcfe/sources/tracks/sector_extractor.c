@@ -615,8 +615,8 @@ int get_next_MFM_Northstar_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 
 int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {
-	int bit_offset_bak,bit_offset,tmp_bit_offset;
-	int sector_size,i;
+	int bit_offset,tmp_bit_offset;
+	int i;
 	unsigned char fm_buffer[32];
 	unsigned char tmp_buffer[8 + 256 + 1]; // Sync + Data + Checksum
 	unsigned char checksum;
@@ -638,11 +638,37 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 				tmp_buffer[7] = bit_inverter[0xFD];
 				bintofm(fm_buffer,sizeof(fm_buffer)*8,tmp_buffer,8,0);
 
+				bit_offset %= track->tracklen;
+
+				if( track->indexbuffer[ bit_offset / 8 ] )
+				{
+					// Search the index start point
+					while( track->indexbuffer[ bit_offset / 8 ] && (bit_offset > 0) )
+					{
+						bit_offset--;
+					}
+				}
+				else
+				{
+					// Search next index
+					while( !track->indexbuffer[ bit_offset / 8 ] )
+					{
+						bit_offset = ( bit_offset + 1 ) % track->tracklen;
+					}
+				}
+
 				bit_offset = searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,4*8*8,bit_offset);
 
 				if(bit_offset!=-1)
 				{
-					sector_extractor_sm=LOOKFOR_ADDM;
+					if( track->indexbuffer[ (bit_offset + (4*8*8))  / 8 ] )
+					{
+						sector_extractor_sm = LOOKFOR_ADDM;
+					}
+					else
+					{
+						bit_offset += (4*8*8);
+					}
 				}
 				else
 				{
@@ -665,7 +691,8 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 
 					if( checksum != bit_inverter[tmp_buffer[ 4 ]] )
 					{
-						sector_extractor_sm=ENDOFTRACK;
+						bit_offset = tmp_bit_offset + 1;
+						sector_extractor_sm=LOOKFOR_GAP1;
 						break;
 					}
 
@@ -679,9 +706,9 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 					sector->sectorsize = 256;
 					sector->alternate_sector_size_id = 1;
 					sector->trackencoding = HEATHKIT_HS_SD;
-					sector->alternate_datamark = 0x00;
-					sector->use_alternate_datamark = 0x00;
-					sector->alternate_addressmark = bit_inverter[0xFD];
+					sector->alternate_datamark = 0xFD;
+					sector->use_alternate_datamark = 0xFF;
+					sector->alternate_addressmark = 0xFD;
 					sector->use_alternate_addressmark = 0xFF;
 					sector->header_crc = bit_inverter[tmp_buffer[ 4 ]];
 
@@ -755,7 +782,7 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 							// "Empty" sector detection
 							checkEmptySector(sector);
 
-							bit_offset++;
+							bit_offset = sector->endsectorindex;
 						}
 						else
 						{
@@ -770,16 +797,10 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 						sector->startdataindex = tmp_bit_offset;
 						sector->endsectorindex = tmp_bit_offset;
 
-						bit_offset = bit_offset_bak + 1;
-
 						sector_extractor_sm=ENDOFSECTOR;
 					}
 
-				//	bit_offset++;
-
-					bit_offset_bak = bit_offset;
-
-					sector_extractor_sm=ENDOFSECTOR;
+					sector_extractor_sm = ENDOFSECTOR;
 
 				}
 			break;
