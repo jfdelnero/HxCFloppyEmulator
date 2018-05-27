@@ -62,6 +62,7 @@
 
 #include "track_types_defs.h"
 
+extern unsigned char bit_inverter[];
 
 unsigned short MFM_tab[]=
 {
@@ -1597,6 +1598,109 @@ void tg_addNorthstarSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconf
 	currentside->number_of_sector++;
 }
 
+void tg_addHeathkitSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
+{
+	int32_t  i;
+	int32_t  trackencoding,trackenc;
+	int32_t  startindex,j;
+	uint8_t  checksum;
+
+	startindex=tg->last_bit_offset/8;
+
+	sectorconfig->startsectorindex=tg->last_bit_offset/8;
+	trackencoding=sectorconfig->trackencoding-1;
+
+	for(i=0;i<17;i++)
+	{
+		pushTrackCode(tg,0x00,0xFF,currentside,HEATHKIT_HS_SD);
+	}
+
+	if(currentside->indexbuffer)
+	{
+		if( sectorconfig->sector == 9 )
+		{
+			us2index( (tg->last_bit_offset + 5000) % currentside->tracklen,currentside,2000,1,0);
+		}
+
+		us2index( tg->last_bit_offset % currentside->tracklen,currentside,2000,1,0);
+	}
+
+	for(i=0;i<14;i++)
+	{
+		pushTrackCode(tg,0x00,0xFF,currentside,HEATHKIT_HS_SD);
+	}
+
+	checksum = 0x00;
+	
+	// sync
+	pushTrackCode(tg,bit_inverter[0xFD],0xFF,currentside,HEATHKIT_HS_SD);
+
+	// Volume
+	pushTrackCode(tg,bit_inverter[0x00],0xFF,currentside,HEATHKIT_HS_SD);
+
+	checksum ^= 0x00;
+	checksum = (checksum >> 7) | (checksum << 1);
+
+	// Track
+	pushTrackCode(tg,bit_inverter[sectorconfig->cylinder],0xFF,currentside,HEATHKIT_HS_SD);
+
+	checksum ^= sectorconfig->cylinder;
+	checksum = (checksum >> 7) | (checksum << 1);
+
+	// Sector
+	pushTrackCode(tg,bit_inverter[sectorconfig->sector],0xFF,currentside,HEATHKIT_HS_SD);
+
+	checksum ^= sectorconfig->sector;
+	checksum = (checksum >> 7) | (checksum << 1);
+
+	// Header Checksum
+	pushTrackCode(tg,bit_inverter[checksum],0xFF,currentside,HEATHKIT_HS_SD);
+
+	checksum = 0x00;
+
+	for(i=0;i<17;i++)
+	{
+		pushTrackCode(tg,0x00,0xFF,currentside,HEATHKIT_HS_SD);
+	}
+	
+	// data sync
+	pushTrackCode(tg,bit_inverter[0xFD],0xFF,currentside,HEATHKIT_HS_SD);
+	
+	// data
+	for(i=0;i<256;i++)
+	{
+		pushTrackCode(tg,bit_inverter[sectorconfig->input_data[ i ]],0xFF,currentside,HEATHKIT_HS_SD);
+		checksum ^= sectorconfig->input_data[ i ];
+		checksum = (checksum >> 7) | (checksum << 1);
+	}
+
+	// Data Checksum
+	pushTrackCode(tg,bit_inverter[checksum],0xFF,currentside,HEATHKIT_HS_SD);
+
+	pushTrackCode(tg,0x00,0xFF,currentside,HEATHKIT_HS_SD);
+
+	// fill timing & encoding buffer
+	if(currentside->timingbuffer)
+	{
+		for(j=startindex;j<(tg->last_bit_offset/8);j++)
+		{
+			currentside->timingbuffer[j]=sectorconfig->bitrate;
+		}
+	}
+
+	trackenc = HEATHKIT_HS_FM_ENCODING;
+
+	if(currentside->track_encoding_buffer)
+	{
+		for(j=startindex;j<(tg->last_bit_offset/8);j++)
+		{
+			currentside->track_encoding_buffer[j] = (uint8_t)trackenc;
+		}
+	}
+
+	currentside->number_of_sector++;
+}
+
 void tg_addSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
 
@@ -1629,6 +1733,7 @@ void tg_addSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_
 			break;
 
 		case HEATHKIT_HS_SD:
+			tg_addHeathkitSectorToTrack(tg,sectorconfig,currentside);
 		break;
 
 	}
