@@ -129,6 +129,7 @@ ff_type ff_type_list[]=
 	{ FF_DISK_BMP,"BMP - BMP file image (disk)",PLUGIN_DISK_BMP,".bmp"},
 	{ FF_XML,"XML - XML file image",PLUGIN_GENERIC_XML,".xml"},
 	{ FF_NORTHSTAR,"NSI - Northstar file image",PLUGIN_NORTHSTAR,".nsi"},
+	{ FF_NORTHSTAR,"H8D - Heathkit file image",PLUGIN_HEATHKIT,".h8d"},
 	{ -1,"",0,0}
 };
 

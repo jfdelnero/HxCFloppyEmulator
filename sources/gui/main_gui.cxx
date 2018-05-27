@@ -139,7 +139,8 @@ const char * plugid_lst[]=
 	PLUGIN_BMP,
 	PLUGIN_DISK_BMP,
 	PLUGIN_GENERIC_XML,
-	PLUGIN_NORTHSTAR
+	PLUGIN_NORTHSTAR,
+	PLUGIN_HEATHKIT	
 };
 
 static void tick_main(void *v) {
@@ -489,6 +490,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"BMP file (disk)\t*.bmp\n"
 					"XML file\t*.xml\n"
 					"NSI file\t*.nsi\n"					
+					"H8D file\t*.h8d\n"					
 					);
 
 
