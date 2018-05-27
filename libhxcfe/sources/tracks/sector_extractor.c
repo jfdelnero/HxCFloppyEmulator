@@ -635,8 +635,8 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 		{
 			case LOOKFOR_GAP1:
 				memset(tmp_buffer,0x00,sizeof(tmp_buffer));
-				tmp_buffer[7] = bit_inverter[0xFD];
-				bintofm(fm_buffer,sizeof(fm_buffer)*8,tmp_buffer,8,0);
+				tmp_buffer[3] = bit_inverter[0xFD];
+				bintofm(fm_buffer,sizeof(fm_buffer)*8,tmp_buffer,4,0);
 
 				bit_offset %= track->tracklen;
 
@@ -663,17 +663,17 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 					}
 				}
 
-				bit_offset = searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,4*8*8,bit_offset);
+				bit_offset = searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,4*8*4,bit_offset);
 
 				if(bit_offset!=-1)
 				{
-					if( track->indexbuffer[ (bit_offset + (4*8*8))  / 8 ] )
+					if( track->indexbuffer[ (bit_offset + (4*8*4))  / 8 ] )
 					{
 						sector_extractor_sm = LOOKFOR_ADDM;
 					}
 					else
 					{
-						bit_offset += (4*8*8);
+						bit_offset += (4*8*4);
 					}
 				}
 				else
@@ -684,7 +684,7 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 
 			case LOOKFOR_ADDM:
 
-				tmp_bit_offset = fmtobin(track->databuffer,track->tracklen,tmp_buffer,5,bit_offset + (2 * 8 * 7 * 2),0);
+				tmp_bit_offset = fmtobin(track->databuffer,track->tracklen,tmp_buffer,5,bit_offset + (4 * 8 * 3),0);
 				if( tmp_buffer[0] == bit_inverter[0xFD] )
 				{
 					checksum = 0x00;
@@ -697,12 +697,18 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 
 					if( checksum != bit_inverter[tmp_buffer[ 4 ]] )
 					{
+
 						bit_offset = tmp_bit_offset + 1;
+
+						while( track->indexbuffer[ bit_offset / 8 ] && ( bit_offset < track->tracklen ) )
+						{
+							bit_offset++;
+						}
 						sector_extractor_sm=LOOKFOR_GAP1;
 						break;
 					}
 
-					sector->startsectorindex = (bit_offset + (7*8*4)) % track->tracklen;
+					sector->startsectorindex = (bit_offset + (3*8*4)) % track->tracklen;
 					sector->startdataindex = sector->startsectorindex;
 					sector->endsectorindex = tmp_bit_offset;
 
@@ -737,38 +743,37 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 					}
 
 					memset(tmp_buffer,0x00,sizeof(tmp_buffer));
-					tmp_buffer[7] = bit_inverter[0xFD];
+					tmp_buffer[3] = bit_inverter[0xFD];
 					bintofm(fm_buffer,sizeof(fm_buffer)*8,tmp_buffer,8,0);
 
 					bit_offset++;
 
-					bit_offset = searchBitStream(track->databuffer,track->tracklen,(88+16)*8,fm_buffer,4*8*8,bit_offset);
+					bit_offset = searchBitStream(track->databuffer,track->tracklen,(88+16)*8,fm_buffer,4*8*4,bit_offset);
 					if((bit_offset!=-1))
 					{
-						tmp_sector=(unsigned char*)malloc(7+1+sector->sectorsize+1);
-						memset(tmp_sector,0,7+1+sector->sectorsize+1);
+						tmp_sector=(unsigned char*)malloc(3+1+sector->sectorsize+1);
+						memset(tmp_sector,0,3+1+sector->sectorsize+1);
 
-						sector->startdataindex = (bit_offset + (7*8*4)) % track->tracklen;
-						sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_sector,7+1+sector->sectorsize+1,bit_offset,0);
+						sector->startdataindex = (bit_offset + (3*8*4)) % track->tracklen;
+						sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_sector,3+1+sector->sectorsize+1,bit_offset,0);
 
-						if(tmp_sector[7+0] == bit_inverter[0xFD])
+						if(tmp_sector[3+0] == bit_inverter[0xFD])
 						{
-							sector->alternate_datamark = bit_inverter[tmp_sector[7+0]];
+							sector->alternate_datamark = bit_inverter[tmp_sector[3+0]];
 							sector->use_alternate_datamark = 0xFF;
 
 							checksum = 0x00;
 
-							//tmp_buffer[ 7 + 1 + 33 ] = 0xA5;
 							for(i=0;i<sector->sectorsize;i++)
 							{
-								checksum ^= bit_inverter[ tmp_buffer[ 7 + 1 + i ] ];
+								checksum ^= bit_inverter[ tmp_buffer[ 3 + 1 + i ] ];
 								checksum = (checksum >> 7) | (checksum << 1);
 							}
 
 							sector->data_crc = checksum;
 							sector->use_alternate_data_crc = 0x00;
 
-							if( checksum == bit_inverter[tmp_buffer[ 7 + 1 +sector->sectorsize ]] )
+							if( checksum == bit_inverter[tmp_buffer[ 3 + 1 +sector->sectorsize ]] )
 							{ // crc ok !!!
 								floppycontext->hxc_printf(MSG_DEBUG,"Data CRC Ok. (0x%.4X)",sector->data_crc);
 							}
@@ -781,7 +786,7 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 							sector->input_data=(unsigned char*)malloc(sector->sectorsize);
 							for(i=0;i<256;i++)
 							{
-								sector->input_data[i] = bit_inverter[ tmp_sector[ 7 +  1 + i] ];
+								sector->input_data[i] = bit_inverter[ tmp_sector[ 3 +  1 + i] ];
 							}
 							free(tmp_sector);
 
