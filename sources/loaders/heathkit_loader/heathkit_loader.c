@@ -67,7 +67,7 @@ int Heathkit_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Heathkit_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"nsi") )
+	if( hxc_checkfileext(imgfile,"h8d") )
 	{
 
 		filesize=hxc_getfilesize(imgfile);
@@ -103,7 +103,7 @@ int Heathkit_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	unsigned char* trackdata;
 	int gap3len,interleave;
 	int rpm,sectorsize;
-	int trackformat;
+	int trackformat,skew;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SECTCFG  sectorconfig[16];
 
@@ -125,6 +125,7 @@ int Heathkit_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	{
 		gap3len=30;
 		interleave=1;
+		skew = 5;
 		floppydisk->floppySectorPerTrack = 10;
 		floppydisk->floppyNumberOfTrack = 40;
 		floppydisk->floppyNumberOfSide = filesize / ( floppydisk->floppySectorPerTrack * sectorsize * floppydisk->floppyNumberOfTrack);
@@ -178,7 +179,7 @@ int Heathkit_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 					hxc_fread(trackdata,(floppydisk->floppySectorPerTrack*sectorsize),f);
 
-					currentcylinder->sides[i] = tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,1,0,floppydisk->floppyBitRate,rpm,trackformat,0,0,0);
+					currentcylinder->sides[i] = tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,1,(j*skew),floppydisk->floppyBitRate,rpm,trackformat,0,0,0);
 				}
 			}
 
