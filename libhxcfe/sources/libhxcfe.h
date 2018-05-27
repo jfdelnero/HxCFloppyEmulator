@@ -465,6 +465,7 @@ void                   hxcfe_FxStream_setFilterParameters( HXCFE_FXSA * fxs, int
 HXCFE_TRKSTREAM *      hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, int32_t wordsize, uint32_t nbword );
 void                   hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t streamposition, int32_t tickoffset, uint32_t flags );
 HXCFE_SIDE *           hxcfe_FxStream_AnalyzeAndGetTrack( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std );
+void                   hxcfe_FxStream_ExportToBmp( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * stream, char * filename );
 void                   hxcfe_FxStream_FreeStream( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * stream );
 
 int32_t                hxcfe_FxStream_GetNumberOfRevolution( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std );

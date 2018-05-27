@@ -1222,7 +1222,7 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	//////////////////////////////////////////
 	// Scatter drawing
 	total_offset = 0;
-	for (i = 0; i < track_stream->nb_of_pulses; i++)
+	for (i = 0; i < (int)track_stream->nb_of_pulses; i++)
 	{
 		cur_ticks = track_stream->track_dump[i];
 		total_offset += cur_ticks;
@@ -1258,11 +1258,11 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 
 	//////////////////////////////////////////
 	// Draw indexes
-	for(i=0;i<track_stream->nb_of_index;i++)
+	for(i=0;i < (int)track_stream->nb_of_index;i++)
 	{
 		j = 0;
 		total_offset = 0;
-		while( ( j < track_stream->index_evt_tab[i].dump_offset ) && ( j < track_stream->nb_of_pulses ) )
+		while( ( j < (int)track_stream->index_evt_tab[i].dump_offset ) && ( j < (int)track_stream->nb_of_pulses ) )
 		{
 			j++;
 			total_offset += track_stream->track_dump[j];
@@ -2039,7 +2039,7 @@ int32_t hxcfe_td_getframebuffer_yres( HXCFE_TD *td )
 
 int32_t hxcfe_td_exportToBMP( HXCFE_TD *td, char * filename )
 {
-	int ret,i,j,k;
+	int i,j,k;
 	uint32_t * ptr;
 	unsigned char * ptrchar;
 	bitmap_data bdata;
@@ -2052,8 +2052,11 @@ int32_t hxcfe_td_exportToBMP( HXCFE_TD *td, char * filename )
 	{
 		memset(ptr,0,(td->xsize*td->ysize*4));
 	}
+	else
+		goto alloc_error;
 
 	ptrchar = malloc((td->xsize*td->ysize));
+
 	if(ptrchar)
 	{
 		td->hxcfe->hxc_printf(MSG_INFO_1,"Converting image...");
@@ -2068,7 +2071,7 @@ int32_t hxcfe_td_exportToBMP( HXCFE_TD *td, char * filename )
 				k++;
 			}
 		}
-		
+
 		if(nbcol>=256)
 		{
 			k = 0;
@@ -2122,8 +2125,22 @@ int32_t hxcfe_td_exportToBMP( HXCFE_TD *td, char * filename )
 
 		free(ptrchar);
 	}
+	else
+	{
+		goto alloc_error;
+	}
 
 	return 0;
+
+alloc_error:
+
+	if(ptr)
+		free(ptr);
+
+	if(ptrchar)
+		free(ptrchar);
+
+	return -1;
 }
 
 void hxcfe_td_deinit(HXCFE_TD *td)
