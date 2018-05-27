@@ -45,4 +45,4 @@ int bmpRLE8b_write(char * file,bitmap_data * bdata);
 int bmp24b_write(char * file,bitmap_data * bdata);
 int bmp16b_write(char * file,bitmap_data * bdata);
 
-
+unsigned char getPixelCode(uint32_t pix,uint32_t * pal,int * nbcol);
