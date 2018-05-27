@@ -1979,6 +1979,26 @@ SOURCE=..\sources\loaders\northstar_loader\northstar_writer.c
 SOURCE=..\sources\loaders\northstar_loader\northstar_writer.h
 # End Source File
 # End Group
+# Begin Group "Heathkit"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\heathkit_loader\heathkit_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\heathkit_loader\heathkit_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\heathkit_loader\heathkit_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\heathkit_loader\heathkit_writer.h
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 

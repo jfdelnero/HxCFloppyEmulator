@@ -108,6 +108,7 @@
 #include "./loaders/ana_loader/ana_loader.h"
 #include "./loaders/atr_loader/atr_loader.h"
 #include "./loaders/northstar_loader/northstar_loader.h"
+#include "./loaders/heathkit_loader/heathkit_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -198,6 +199,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)ANA_libGetPluginInfo,
 	(GETPLUGININFOS)ATR_libGetPluginInfo,
 	(GETPLUGININFOS)Northstar_libGetPluginInfo,
+	(GETPLUGININFOS)Heathkit_libGetPluginInfo,
 
 	//(GETPLUGININFOS)VFDDAT_libGetPluginInfo,
 	(GETPLUGININFOS)-1
