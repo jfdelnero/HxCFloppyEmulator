@@ -643,6 +643,41 @@ static isoibm_config formatstab[]=
 		0x00,0x00,0				// post crc data glith
 	},
 	{
+		HEATHKIT_HS_SD,
+
+		0x00,00,				// post index gap4 config
+
+		0x00,00,				// index sync config
+
+		0x00,0x00,0,			// index mark coding
+		0x00,0x00,0,
+
+		0x00,0,				// gap1 config
+
+		0x00,0,				// h sync config
+
+		0x00,0,				// d sync config
+
+		0x00,0x00,0,			// address mark coding
+		0xFD,0xFF,1,
+
+		0x00,0,				// gap2 config
+
+		0x00,0x00,1,			// data mark coding
+		0xFD,0xFF,0,
+
+		0x00,00,				// gap3 config
+
+		0x00,00,				// gap4 config
+
+		0xFF,0xFF,0xFF,0xFF,	// Track - Side - Sector - Size
+
+		0x00,0x0000,			// crc, initial value
+
+		0x00,0x00,0,			// post crc header glith
+		0x00,0x00,0				// post crc data glith
+	},
+	{
 		0,
 
 		0x4E,00,				// post index gap4 config
