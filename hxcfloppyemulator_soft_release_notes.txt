@@ -14,6 +14,23 @@ Facebook : https://www.facebook.com/groups/hxc2001
 -------------------------------------------------------------------------------
 
 /*********************************************************
+27 May 2018: HxCFloppyEmulator 2.1.11.1
+
+Hard-sectored H8D Heathkit raw file Loader & Writer added !
+
+/*********************************************************
+
+/*********************************************************
+24 May 2018: HxCFloppyEmulator 2.1.10.1
+
+Kryoflux Stream Loader (*XX.X.raw) & Stream analyzer : Hard-sectored images support and various fixes !
+Kryoflux Stream Loader (*XX.X.raw) : bmpexport.txt config file to generate the full stream track graph.
+
+NSI Northstar raw file Loader & Writer added !
+
+/*********************************************************
+
+/*********************************************************
 12 May 2018: HxCFloppyEmulator 2.1.9.3
 
 Kryoflux Stream Loader (*XX.X.raw) : Another fix for the index position !
