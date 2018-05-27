@@ -427,6 +427,11 @@ static void quickSort(s_match * table, int start, int end)
 
 //#define USE_PLL_BITRATE 1
 
+int gettrackbit(unsigned char * input_data,int bit_offset)
+{
+	return ((input_data[bit_offset>>3]>>(0x7-(bit_offset&0x7))))&0x01;
+}
+
 HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initialvalue,HXCFE_TRKSTREAM * track,pulses_link * pl,uint32_t start_index, short rpm,int phasecorrection)
 {
 #define TEMPBUFSIZE 256*1024
@@ -555,7 +560,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 
 
 		i = 0;
-		while ( ( i < track->nb_of_index ) && ( track->index_evt_tab[i].dump_offset < start_index ) )
+		while ( ( i < (int)track->nb_of_index ) && ( track->index_evt_tab[i].dump_offset < start_index ) )
 		{
 			i++;
 		}
