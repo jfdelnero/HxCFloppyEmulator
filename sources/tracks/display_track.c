@@ -2047,6 +2047,8 @@ int32_t hxcfe_td_exportToBMP( HXCFE_TD *td, char * filename )
 	uint32_t pal[256];
 	int nbcol;
 
+	ptrchar = 0;
+
 	ptr = malloc((td->xsize*td->ysize*4));
 	if(ptr)
 	{
