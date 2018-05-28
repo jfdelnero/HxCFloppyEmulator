@@ -1638,7 +1638,7 @@ void tg_addHeathkitSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfi
 	// Volume (hijack the alternate_addressmark field to transport it...)
 	pushTrackCode(tg,bit_inverter[sectorconfig->alternate_addressmark],0xFF,currentside,HEATHKIT_HS_SD);
 
-	checksum ^= 0x00;
+	checksum ^= sectorconfig->alternate_addressmark;
 	checksum = (checksum >> 7) | (checksum << 1);
 
 	// Track
