@@ -720,8 +720,10 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 					sector->trackencoding = HEATHKIT_HS_SD;
 					sector->alternate_datamark = 0xFD;
 					sector->use_alternate_datamark = 0xFF;
-					sector->alternate_addressmark = 0xFD;
-					sector->use_alternate_addressmark = 0xFF;
+
+					// Volume (hijack the alternate_addressmark field to transport it...)
+					sector->alternate_addressmark = bit_inverter[ tmp_buffer[1] ];
+					sector->use_alternate_addressmark = 0x00;
 					sector->header_crc = bit_inverter[tmp_buffer[ 4 ]];
 
 					sector->data_crc = bit_inverter[tmp_buffer[ 4 ]];
