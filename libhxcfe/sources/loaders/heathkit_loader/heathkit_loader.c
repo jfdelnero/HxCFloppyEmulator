@@ -106,6 +106,7 @@ int Heathkit_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	int trackformat,skew;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SECTCFG  sectorconfig[16];
+	unsigned char VolumeID;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Heathkit_libLoad_DiskFile %s",imgfile);
 
@@ -123,9 +124,10 @@ int Heathkit_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	if( !(filesize % (40*10*sectorsize) ) )
 	{
-		gap3len=30;
+		gap3len=0;
 		interleave=1;
 		skew = 5;
+		VolumeID = 0x00;
 		floppydisk->floppySectorPerTrack = 10;
 		floppydisk->floppyNumberOfTrack = 40;
 		floppydisk->floppyNumberOfSide = filesize / ( floppydisk->floppySectorPerTrack * sectorsize * floppydisk->floppyNumberOfTrack);
@@ -143,6 +145,19 @@ int Heathkit_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 		if(trackdata)
 		{
+			// HDOS or CPM image ?
+			hxc_fread(trackdata,(floppydisk->floppySectorPerTrack*sectorsize),f);
+
+			for( i = 0x900; i < 0xA00 - 4 ; i++ )
+			{
+				if( !strncmp( (const char*)&trackdata[i], "HDOS", 4 ) )
+				{
+					// HDOS disk. Get the volume ID for track 1-39.
+					VolumeID = trackdata[0x900];
+					break;
+				}
+			}
+
 			trk = 0;
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
@@ -170,6 +185,16 @@ int Heathkit_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 						sectorconfig[k].gap3 = gap3len;
 						sectorconfig[k].trackencoding = trackformat;
 						sectorconfig[k].input_data = &trackdata[k*sectorsize];
+
+						// Use the alternate_addressmark field as Volume field...
+						if( j == 0 )
+						{
+							sectorconfig[k].alternate_addressmark = 0x00;
+						}
+						else
+						{
+							sectorconfig[k].alternate_addressmark = VolumeID;
+						}
 					}
 
 					file_offset = ( ( floppydisk->floppySectorPerTrack * sectorsize ) * j * floppydisk->floppyNumberOfSide) + \
