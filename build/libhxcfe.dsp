@@ -1999,6 +1999,22 @@ SOURCE=..\sources\loaders\heathkit_loader\heathkit_writer.c
 SOURCE=..\sources\loaders\heathkit_loader\heathkit_writer.h
 # End Source File
 # End Group
+# Begin Group "SDU_loader"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\sdu_loader\sdu_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\sdu_loader\sdu_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\sdu_loader\sdu_loader.h
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 
