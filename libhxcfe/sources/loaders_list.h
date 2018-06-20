@@ -109,6 +109,7 @@
 #include "./loaders/atr_loader/atr_loader.h"
 #include "./loaders/northstar_loader/northstar_loader.h"
 #include "./loaders/heathkit_loader/heathkit_loader.h"
+#include "./loaders/sdu_loader/sdu_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -151,6 +152,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)HFE_HDDD_A2_libGetPluginInfo,
 	(GETPLUGININFOS)VTR_libGetPluginInfo,
 	(GETPLUGININFOS)IMD_libGetPluginInfo,
+	(GETPLUGININFOS)SDU_libGetPluginInfo,
 	(GETPLUGININFOS)AFI_libGetPluginInfo,
 	(GETPLUGININFOS)D64_libGetPluginInfo,
 	(GETPLUGININFOS)D81_libGetPluginInfo,
