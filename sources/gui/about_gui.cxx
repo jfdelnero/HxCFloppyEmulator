@@ -256,7 +256,7 @@ About_box::About_box()
 	cur_ypos = BUTTONS_BLOCK_YPOS;
 
 	button_wesite = new Fl_Button(cur_xpos, cur_ypos, BUTTON_SIZE_X, BUTTON_SIZE_Y, "Website");
-	button_wesite->callback(OpenURLInBrowser,(void*)"http://www.hxc2001.com/");
+	button_wesite->callback(OpenURLInBrowser,(void*)"https://hxc2001.com/");
 
 	cur_ypos += BUTTON_SIZE_Y;
 
@@ -269,7 +269,7 @@ About_box::About_box()
 	cur_ypos += BUTTON_SIZE_Y;
 
 	button_releasenotes = new Fl_Button(cur_xpos, cur_ypos, BUTTON_SIZE_X, BUTTON_SIZE_Y, "Latest release notes");
-	button_releasenotes->callback(OpenURLInBrowser,(void*)"http://hxc2001.com/download/floppy_drive_emulator/hxcfloppyemulator_soft_release_notes.txt");
+	button_releasenotes->callback(OpenURLInBrowser,(void*)"https://hxc2001.com/download/floppy_drive_emulator/hxcfloppyemulator_soft_release_notes.txt");
 
 	cur_ypos += BUTTON_SIZE_Y;
 
