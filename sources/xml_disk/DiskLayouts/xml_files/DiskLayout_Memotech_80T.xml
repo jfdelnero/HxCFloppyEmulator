@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- HxC Floppy Emulator Disk Layout -->
+<disk_layout>
+	<disk_layout_name>MEMOTECH_80T</disk_layout_name>
+	<disk_layout_description>Memotech Floppy Disk (80 tracks)</disk_layout_description>
+	<prefered_file_extension>dsk</prefered_file_extension>
+	<interface_mode>GENERIC_SHUGART_DD_FLOPPYMODE</interface_mode>
+	<file_size>655360</file_size>
+	<layout>
+		<number_of_track>80</number_of_track>
+		<number_of_side>2</number_of_side>
+		<format>IBM_MFM</format>
+		<start_sector_id>1</start_sector_id>
+		<sector_per_track>16</sector_per_track>
+		<sector_size>256</sector_size>
+		<interleave>3</interleave>
+		<skew_per_side>0</skew_per_side>
+		<skew_per_track>0</skew_per_track>
+		<formatvalue>0xE5</formatvalue>
+		<gap3>57</gap3>
+		<bitrate>250000</bitrate>
+		<pregap>0</pregap>
+		<rpm>300</rpm>
+		<track_list>
+		</track_list>
+	</layout>
+</disk_layout>
+
