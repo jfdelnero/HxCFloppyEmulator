@@ -60,6 +60,8 @@
 #include "./DiskLayouts/LayoutsIndex.h"
 #include "./packer/pack.h"
 
+#define XML_STRING_MAXSIZE 512
+
 typedef struct parse_stack_
 {
 	int32_t state;
@@ -95,8 +97,9 @@ typedef struct app_data
 
 	int32_t xmlcheck;
 
-	char * name[512];
-	char * description[512];
+	char name[XML_STRING_MAXSIZE];
+	char description[XML_STRING_MAXSIZE];
+	char file_extensions[XML_STRING_MAXSIZE];
 
 	uint8_t * image_data;
 
@@ -104,7 +107,6 @@ typedef struct app_data
 	int32_t sector_data_offset;
 
 	int32_t buffer_size;
-	int32_t track_size;
 
 	int32_t skew_per_track;
 	int32_t skew_per_side;
@@ -114,7 +116,85 @@ typedef struct app_data
 
 	int32_t fill_value;
 
+	int32_t min_nb_of_tracks;
+	int32_t max_nb_of_tracks;
+	int32_t nb_of_tracks;
+
+	int32_t min_nb_of_sides;
+	int32_t max_nb_of_sides;
+	int32_t nb_of_sides;
+
+	int32_t file_size;
+
+	int32_t nb_sectors_per_track;
+	int32_t sector_size;
+
 } AppData;
+
+char * get_ext(int index,char * bufin,char * bufferout)
+{
+	int i,j;
+
+	j = 0;
+	i = 0;
+	while( (i < index) && bufin[j])
+	{
+		while( ( bufin[j] != ',' ) && bufin[j] )
+		{
+			j++;
+		}
+
+		i++;
+		if(bufin[j])
+			j++;
+	}
+
+	if(bufin[j])
+	{
+		if(bufin[j] == ',')
+			j++;
+
+		i = 0;
+		bufferout[i] = 0;
+		do
+		{
+			bufferout[i] = bufin[j];
+			i++;
+			j++;
+		}while(bufin[j] != ',' && bufin[j]);
+		bufferout[i] = 0;
+
+		return bufferout;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int is_ext_matching(char * filename,char * extlist)
+{
+	int i;
+	char temp_ext[8];
+	char * ptr;
+
+	i = 0;
+	do{
+		ptr = get_ext(i,extlist,(char*)&temp_ext);
+
+		if(ptr)
+		{
+			if( hxc_checkfileext(filename,ptr) )
+			{
+				return 1;
+			}
+
+			i++;
+		}
+	}while(ptr);
+
+	return 0;
+}
 
 int generateDisk(AppData *ad,unsigned char * diskdata,int buffersize)
 {
@@ -381,10 +461,13 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 	switch(ad->current_state)
 	{
 		case DISK_LAYOUT_NAME:
-			strcpy((char*)&ad->name,(char*)buffer);
+			strncpy((char*)&ad->name,(char*)buffer,XML_STRING_MAXSIZE);
 		break;
 		case DISK_LAYOUT_DESCRIPTION:
-			strcpy((char*)&ad->description,(char*)buffer);
+			strncpy((char*)&ad->description,(char*)buffer,XML_STRING_MAXSIZE);
+		break;
+		case FILEEXT:
+			strncpy((char*)&ad->file_extensions,(char*)buffer,XML_STRING_MAXSIZE);
 		break;
 		case INTERFACE_MODE:
 			ad->interface_mode = hxcfe_getFloppyInterfaceModeID(ad->floppycontext,(char*)buffer);
@@ -397,26 +480,37 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 				ad->double_step = 0;
 		break;
 		case FILESIZE:
-
+			ad->file_size = atoi(buffer);
 		break;
 /*		case TRACKSIZE:
 			ad->track_size = atoi(buffer);
 		break;*/
+		case MINNUMBEROFTRACKS:
+			ad->min_nb_of_tracks = atoi(buffer);
+		break;
+		case MAXNUMBEROFTRACKS:
+			ad->max_nb_of_tracks = atoi(buffer);
+		break;
+
 		case NUMBEROFTRACK:
+			ad->nb_of_tracks = atoi(buffer);
 			if(!ad->xmlcheck)
-				hxcfe_setNumberOfTrack (ad->fb,(unsigned short)atoi(buffer));
+				hxcfe_setNumberOfTrack (ad->fb,(unsigned short)ad->nb_of_tracks);
 		break;
 		case NUMBEROFSIDE:
+			ad->nb_of_sides = (unsigned short)atoi(buffer);
 			if(!ad->xmlcheck)
-				hxcfe_setNumberOfSide (ad->fb,(unsigned char)atoi(buffer));
+				hxcfe_setNumberOfSide (ad->fb,(unsigned char)ad->nb_of_sides);
 		break;
 		case NUMBEROFSECTOR:
+			ad->nb_sectors_per_track = (unsigned short)atoi(buffer);
 			if(!ad->xmlcheck)
-				hxcfe_setNumberOfSector (ad->fb,(unsigned short)atoi(buffer));
+				hxcfe_setNumberOfSector (ad->fb,(unsigned short)ad->nb_sectors_per_track);
 		break;
 		case SECTORSIZE:
+			ad->sector_size = (unsigned short)atoi(buffer);
 			if(!ad->xmlcheck)
-				hxcfe_setSectorSize(ad->fb,atoi(buffer));
+				hxcfe_setSectorSize(ad->fb,ad->sector_size);
 		break;
 		case INTERLEAVE_TRACK:
 		case INTERLEAVE:
@@ -429,20 +523,19 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 				hxcfe_setTrackSkew(ad->fb,atoi(buffer));
 		break;
 		case SKEW_PER_TRACK:
-			if(!ad->xmlcheck)
-				ad->skew_per_track = atoi(buffer);
+			ad->skew_per_track = atoi(buffer);
 		break;
 		case SKEW_PER_SIDE:
-			if(!ad->xmlcheck)
-				ad->skew_per_side = atoi(buffer);
+			ad->skew_per_side = atoi(buffer);
 		break;
 		case FORMATVALUE:
 		case DATAFILL_SECTOR:
 			if(!ad->xmlcheck)
 			{
 				hxcfe_setSectorFill (ad->fb,(unsigned char)ahextoi(buffer));
-				ad->fill_value = ahextoi(buffer);
 			}
+
+			ad->fill_value = ahextoi(buffer);
 		break;
 		case FORMAT_TRACK:
 		case FORMAT:
@@ -518,11 +611,8 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 				hxcfe_setTrackBitrate(ad->fb,atoi(buffer));
 		break;
 		case DATAOFFSET:
-			if(!ad->xmlcheck)
-			{
-				track = ad->statestack[ad->stack_ptr].cur_track;
-				ad->ts[track].base_adress =  ahextoi(buffer);
-			}
+			track = ad->statestack[ad->stack_ptr].cur_track;
+			ad->ts[track].base_adress =  ahextoi(buffer);
 		break;
 		case DATAOFFSETSECTOR:
 			if(!ad->xmlcheck)
@@ -618,66 +708,68 @@ static void XMLCALL start(void *data, const char *el, const char **attr)
 		ad->statestack[ad->stack_ptr].state = newstate;
 		ad->current_state = newstate;
 
-		if(!ad->xmlcheck)
+		switch(ad->current_state)
 		{
-			switch(ad->current_state)
-			{
-				case LAYOUT:
+			case LAYOUT:
+				if(!ad->xmlcheck)
 					ad->fb = hxcfe_initFloppy(ad->floppycontext,80,2);
-				break;
-				case TRACK:
-					i=0;
-					side=0;
-					track=0;
+			break;
+			case TRACK:
+				i=0;
+				side=0;
+				track=0;
 
-					while(attr[i] && strcmp("track_number",attr[i]) )
-					{
-						i++;
-					}
-					if(attr[i+1])
-					{
-						track = atoi(attr[i+1]);
-					}
+				while(attr[i] && strcmp("track_number",attr[i]) )
+				{
+					i++;
+				}
+				if(attr[i+1])
+				{
+					track = atoi(attr[i+1]);
+				}
 
-					i=0;
-					while(attr[i] && strcmp("side_number",attr[i]) )
-					{
-						i++;
-					}
-					if(attr[i+1])
-					{
-						side = atoi(attr[i+1]);
-					}
+				i=0;
+				while(attr[i] && strcmp("side_number",attr[i]) )
+				{
+					i++;
+				}
+				if(attr[i+1])
+				{
+					side = atoi(attr[i+1]);
+				}
 
-					ad->statestack[ad->stack_ptr].cur_track = (track<<1) | (side&1);
-					ad->ts[(track<<1) | (side&1)].set=1;
+				ad->statestack[ad->stack_ptr].cur_track = (track<<1) | (side&1);
+				ad->ts[(track<<1) | (side&1)].set=1;
 
+				if(!ad->xmlcheck)
 					hxcfe_pushTrackPFS (ad->fb,track,side);
-				break;
+			break;
 
-				case SECTOR:
-					i=0;
-					while(attr[i] && strcmp("sector_id",attr[i]) )
-					{
-						i++;
-					}
-					if(attr[i+1])
-					{
-						sector = atoi(attr[i+1]);
-					}
+			case SECTOR:
+				i=0;
+				while(attr[i] && strcmp("sector_id",attr[i]) )
+				{
+					i++;
+				}
+				if(attr[i+1])
+				{
+					sector = atoi(attr[i+1]);
+				}
 
-					i=0;
-					while(attr[i] && strcmp("sector_size",attr[i]) )
-					{
-						i++;
-					}
-					if(attr[i+1])
-					{
-						sectorsize = atoi(attr[i+1]);
-					}
+				i=0;
+				while(attr[i] && strcmp("sector_size",attr[i]) )
+				{
+					i++;
+				}
+				if(attr[i+1])
+				{
+					sectorsize = atoi(attr[i+1]);
+				}
 
-					track = ad->statestack[ad->stack_ptr].cur_track;
+				track = ad->statestack[ad->stack_ptr].cur_track;
 
+				if(!ad->xmlcheck)
+				{
 					hxcfe_pushSector(ad->fb);
 
 					hxcfe_setSectorHeadID(ad->fb,(unsigned char)(track&1));
@@ -688,10 +780,11 @@ static void XMLCALL start(void *data, const char *el, const char **attr)
 					{
 						hxcfe_setSectorData(ad->fb,&ad->image_data[ad->ts[track].base_adress + ad->ts[track].track_size],sectorsize);
 					}
-					ad->ts[track].track_size +=  sectorsize;
+				}
 
-				break;
-			}
+				ad->ts[track].track_size +=  sectorsize;
+
+			break;
 		}
 	}
 	else
@@ -775,6 +868,10 @@ HXCFE_XMLLDR* hxcfe_initXmlFloppy( HXCFE* floppycontext )
 		memset(ad,0,sizeof(AppData));
 
 		ad->interface_mode = -1;
+		ad->min_nb_of_tracks = -1;
+		ad->max_nb_of_tracks = -1;
+		ad->nb_of_tracks = -1;
+		ad->file_size = -1;
 
 		i=0;
 		while( disklayout_list[i])
@@ -1017,6 +1114,148 @@ HXCFE_FLOPPY* hxcfe_generateXmlFloppy ( HXCFE_XMLLDR* xmlfb_ctx, uint8_t * rambu
 	return ad->floppy;
 }
 
+static int is_size_matching( HXCFE_XMLLDR* xmlfb_ctx, int image_size)
+{
+	AppData *ad;
+	int i;
+	int track_min;
+	int track_max;
+	int total_size;
+
+  	ad = xmlfb_ctx->ad;
+
+	track_min = ad->nb_of_tracks;
+	track_max = ad->nb_of_tracks;
+
+	if( ad->min_nb_of_tracks != -1 )
+		track_min = ad->min_nb_of_tracks;
+
+	if( ad->max_nb_of_tracks != -1 )
+		track_max = ad->max_nb_of_tracks;
+
+	for( i = 0; i < track_max * 2 ; i++)
+	{
+		if(!ad->ts[i].set)
+		{
+			ad->ts[i].track_size = ad->nb_sectors_per_track * ad->sector_size;
+			ad->ts[i].set = 1;
+		}
+	}
+
+	i = 0;
+	total_size = 0;
+	while(i < track_min * 2 )
+	{
+		total_size += ad->ts[i].track_size;
+		i++;
+
+		if(ad->nb_of_sides == 2)
+			total_size += ad->ts[i].track_size;
+		i++;
+	}
+
+	for( i = track_min * 2; i <= track_max * 2; i += 2 )
+	{
+		total_size += ad->ts[i].track_size;
+
+		if(ad->nb_of_sides == 2)
+			total_size += ad->ts[i+1].track_size;
+
+		if( total_size == image_size )
+		{
+			return i / 2;
+		}
+	}
+
+	return -1;
+}
+
+int32_t hxcfe_isMatchingXmlFloppy ( HXCFE_XMLLDR* xmlfb_ctx, char * filename, uint8_t * rambuffer, uint32_t buffersize )
+{
+	AppData *ad;
+	FILE *f;
+	int filesize;
+	char * xmlbuffer;
+
+	ad = xmlfb_ctx->ad;
+
+	ad->xmlcheck = 1;
+
+	ad->image_data = rambuffer;
+	ad->buffer_size = buffersize;
+
+	XML_ParserReset(xmlfb_ctx->xml_parser, NULL);
+	XML_SetUserData(xmlfb_ctx->xml_parser, (void *) ad);
+	XML_SetElementHandler(xmlfb_ctx->xml_parser, start, end);
+	XML_SetCharacterDataHandler(xmlfb_ctx->xml_parser, charhandler);
+	XML_SetNamespaceDeclHandler(xmlfb_ctx->xml_parser, ns_start, ns_end);
+
+	if(ad->layout_id!=-1)
+	{
+		XML_Parse(xmlfb_ctx->xml_parser, (char*)disklayout_list[ad->layout_id]->unpacked_data, disklayout_list[ad->layout_id]->size, 1);
+	}
+	else
+	{
+		ad->floppy = 0;
+
+		f = hxc_fopen((char*)ad->xmlfile_path,"rb");
+		if(f)
+		{
+			filesize = hxc_fgetsize(f);
+			if(filesize>0)
+			{
+				xmlbuffer = malloc(filesize + 1);
+				if(xmlbuffer)
+				{
+					memset(xmlbuffer,0,filesize + 1);
+					hxc_fread(xmlbuffer,filesize,f);
+
+					XML_Parse(xmlfb_ctx->xml_parser, xmlbuffer, filesize, 1);
+
+					free(xmlbuffer);
+				}
+			}
+
+			hxc_fclose(f);
+		}
+		else
+		{
+			return -1;
+		}
+	}
+
+	// Check image.
+
+	// Check file size
+	if( ad->file_size != -1 )
+	{
+		if( buffersize != ad->file_size )
+		{
+			return 0;
+		}
+	}
+
+	// Check file extension(s).
+	if(filename)
+	{
+		if( strlen( ad->file_extensions ) && strlen( filename ) )
+		{
+			if ( !is_ext_matching( filename, ad->file_extensions ) )
+			{
+				return 0;
+			}
+		}
+	}
+
+	// Check total raw sectors size
+	if ( !is_size_matching( xmlfb_ctx, buffersize ) )
+	{
+		return 0;
+	}
+
+	return 1;
+}
+
 HXCFE_FLOPPY* hxcfe_generateXmlFileFloppy (HXCFE_XMLLDR* xmlfb_ctx,char *file)
 {
 	FILE * f;
@@ -1056,15 +1295,59 @@ HXCFE_FLOPPY* hxcfe_generateXmlFileFloppy (HXCFE_XMLLDR* xmlfb_ctx,char *file)
 	return ret;
 }
 
-/*int hxcfe_checkCompatibilityXmlFileFloppy (HXCFE_XMLLDR* xmlfb_ctx,HXCFE_FLOPPY * fp)
+int32_t hxcfe_foundMatchingXmlFileFloppy (HXCFE_XMLLDR* xmlfb_ctx,char *file)
 {
-	HXCFE_FLOPPY * refFloppy;
+	FILE * f;
+	unsigned int filesize,i,number_of_layout;
+	int32_t ret;
+	unsigned char * buffer;
 
-	refFloppy = hxcfe_generateXmlFloppy (xmlfb_ctx,0,0);
-	if( refFloppy )
+	ret = HXCFE_UNSUPPORTEDFILE;
+
+	f = hxc_fopen(file,"rb");
+	if(f)
 	{
+		filesize = hxc_fgetsize(f);
 
+		if(filesize)
+		{
+			if(filesize > 32*1024*1024)
+			{
+				filesize = 32*1024*1024;
+			}
 
+			buffer = malloc(filesize);
+			if(buffer)
+			{
+				memset(buffer,0,filesize);
 
+				hxc_fread(buffer, filesize, f);
+
+				number_of_layout = hxcfe_numberOfXmlLayout( xmlfb_ctx );
+
+				i = 0;
+				while( i < number_of_layout)
+				{
+					if(	hxcfe_selectXmlFloppyLayout( xmlfb_ctx, i ) == HXCFE_NOERROR )
+					{
+						ret = hxcfe_isMatchingXmlFloppy(xmlfb_ctx,file,buffer,filesize);
+
+						if( ret > 0 )
+						{
+							free(buffer);
+							hxc_fclose(f);
+							return i;
+						}
+					}
+					i++;
+				}
+
+				free(buffer);
+			}
+		}
+
+		hxc_fclose(f);
 	}
-}*/
+
+	return ret;
+}
