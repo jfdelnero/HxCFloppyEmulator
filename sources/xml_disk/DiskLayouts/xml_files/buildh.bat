@@ -34,5 +34,12 @@
 ..\..\converttools\bmptoh DiskLayout_Acorn_320K_ADFM.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Acorn_640K_ADFL.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Dynacord_AddOne.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Memotech_40T.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Memotech_80T.xml -DATA
+..\..\converttools\bmptoh DiskLayout_OpusDiscovery.xml -DATA
+..\..\converttools\bmptoh DiskLayout_DEC_RX55.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Timex_FDD3000_40T1S.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Timex_FDD3000_80T2S.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Unitel_Videotex.xml -DATA
 move *.h ..
 
