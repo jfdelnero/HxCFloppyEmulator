@@ -293,6 +293,8 @@ int32_t                hxcfe_setXmlFloppyLayoutFile( HXCFE_XMLLDR* xmlfb_ctx, ch
 HXCFE_FLOPPY*          hxcfe_generateXmlFloppy ( HXCFE_XMLLDR* xmlfb_ctx, uint8_t * rambuffer, uint32_t buffersize );
 HXCFE_FLOPPY*          hxcfe_generateXmlFileFloppy ( HXCFE_XMLLDR* xmlfb_ctx, char *file );
 
+int32_t                hxcfe_foundMatchingXmlFileFloppy ( HXCFE_XMLLDR* xmlfb_ctx, char *file );
+
 void                   hxcfe_deinitXmlFloppy( HXCFE_XMLLDR* xmlfb_ctx );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
