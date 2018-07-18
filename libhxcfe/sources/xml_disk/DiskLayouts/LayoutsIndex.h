@@ -34,15 +34,22 @@
 #include "data_DiskLayout_Acorn_320K_ADFM_xml.h"
 #include "data_DiskLayout_Acorn_640K_ADFL_xml.h"
 #include "data_DiskLayout_Dynacord_AddOne_xml.h"
+#include "data_DiskLayout_Timex_FDD3000_80T2S_xml.h"
+#include "data_DiskLayout_Timex_FDD3000_40T1S_xml.h"
+#include "data_DiskLayout_OpusDiscovery_xml.h"
+#include "data_DiskLayout_Memotech_80T_xml.h"
+#include "data_DiskLayout_Memotech_40T_xml.h"
+#include "data_DiskLayout_DEC_RX55_xml.h"
+#include "data_DiskLayout_Unitel_Videotex_xml.h"
 
 datatype * disklayout_list[]=
 {
 	data_DiskLayout_DOS_DD_720KB_xml,
 	data_DiskLayout_DOS_HD_1_44MB_xml,
 	data_DiskLayout_CasioFZ1_HD_1_25MB_xml,
-    data_DiskLayout_Acorn_160K_ADFS_xml,
-    data_DiskLayout_Acorn_320K_ADFM_xml,
-    data_DiskLayout_Acorn_640K_ADFL_xml,
+	data_DiskLayout_Acorn_160K_ADFS_xml,
+	data_DiskLayout_Acorn_320K_ADFM_xml,
+	data_DiskLayout_Acorn_640K_ADFL_xml,
 	data_DiskLayout_AkaiS950_HD_1_6MB_xml,
 	data_DiskLayout_AkaiS950_DD_800KB_xml,
 	data_DiskLayout_AkaiS3000_HD_1_6MB_xml,
@@ -73,5 +80,12 @@ datatype * disklayout_list[]=
 	data_DiskLayout_LIF_3_50_1232KB_xml,
 	data_DiskLayout_LIF_5_25_264KB_xml,
 	data_DiskLayout_AED6200P_xml,
+	data_DiskLayout_Timex_FDD3000_80T2S_xml,
+	data_DiskLayout_Timex_FDD3000_40T1S_xml,
+	data_DiskLayout_OpusDiscovery_xml,
+	data_DiskLayout_Memotech_80T_xml,
+	data_DiskLayout_Memotech_40T_xml,
+	data_DiskLayout_DEC_RX55_xml,
+	data_DiskLayout_Unitel_Videotex_xml,
 	0
 };
