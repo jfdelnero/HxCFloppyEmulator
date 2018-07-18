@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- HxC Floppy Emulator Disk Layout -->
+<disk_layout>
+	<disk_layout_name>TIMEX_FDD3000_40T1S</disk_layout_name>
+	<disk_layout_description>Timex FDD3000 Floppy Disk (40 Tracks, 1 Side)</disk_layout_description>
+	<prefered_file_extension>dsk</prefered_file_extension>
+	<interface_mode>GENERIC_SHUGART_DD_FLOPPYMODE</interface_mode>
+	<file_size>163840</file_size>
+	<layout>
+		<number_of_track>40</number_of_track>
+		<number_of_side>1</number_of_side>
+		<format>IBM_MFM</format>
+		<start_sector_id>0</start_sector_id>
+		<sector_per_track>16</sector_per_track>
+		<sector_size>256</sector_size>
+		<interleave>1</interleave>
+		<skew_per_side>0</skew_per_side>
+		<skew_per_track>0</skew_per_track>
+		<formatvalue>0xE5</formatvalue>
+		<gap3>54</gap3>
+		<bitrate>250000</bitrate>
+		<pregap>0</pregap>
+		<rpm>300</rpm>
+	</layout>
+</disk_layout>
