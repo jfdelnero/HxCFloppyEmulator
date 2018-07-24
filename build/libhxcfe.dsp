@@ -2218,6 +2218,10 @@ SOURCE=..\sources\win32\libhxcfe.def
 # End Source File
 # Begin Source File
 
+SOURCE=..\sources\loaders_list.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\tracks\std_crc32.c
 # End Source File
 # End Group
