@@ -26,6 +26,9 @@
 */
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#ifndef _INC_INTERNAL_FLOPPY_
+#define _INC_INTERNAL_FLOPPY_
+
 #define VARIABLEBITRATE                    -1
 #define VARIABLEENCODING                 1
 
@@ -74,3 +77,5 @@ typedef struct _HXCFE_FLOPPY
 
 // Internal stream tick
 #define TICKFREQ 250000000 // 250Mhz tick
+
+#endif
