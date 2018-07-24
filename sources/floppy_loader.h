@@ -26,6 +26,9 @@
 */
 // loader return code
 
+#ifndef _INC_FLOPPY_LOADER_
+#define _INC_FLOPPY_LOADER_
+
 enum {
 	GETPLUGINID = 1,
 	GETDESCRIPTION = 2,
@@ -51,3 +54,4 @@ int libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnva
 
 HXCFE_FLOPPY* hxcfe_sanityCheck(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk);
 
+#endif
