@@ -61,6 +61,9 @@
 #include "version.h"
 #include "licensetxt.h"
 
+#include "plugins_id.h"
+
+
 int dummy_output(int MSGTYPE,char * chaine, ...)
 {
     return 0;
@@ -81,6 +84,9 @@ int dummy_progress(unsigned int current,unsigned int total, void * user)
 HXCFE* hxcfe_init(void)
 {
 	HXCFE* hxcfe;
+	image_plugin* plugin_ptr;
+	int nb_loader;
+	int i;
 
 	hxcfe=malloc(sizeof(HXCFE));
 	if(hxcfe)
@@ -92,8 +98,34 @@ HXCFE* hxcfe_init(void)
 
 		hxcfe->hxc_printf(MSG_INFO_0,"Starting HxCFloppyEmulator...");
 
-		sprintf(hxcfe->CONTAINERTYPE,"AUTOSELECT");
+		nb_loader = 0;
+		// Count how many static loaders we have.
+		while(staticplugins[nb_loader])
+		{
+			nb_loader++;
+		}
+		
+		if( nb_loader )
+		{
+			hxcfe->image_handlers = (void*)malloc( (nb_loader+1) * sizeof(image_plugin) );
+			if(hxcfe->image_handlers)
+			{
+				memset(hxcfe->image_handlers, 0, (nb_loader+1) * sizeof(image_plugin));
+				for(i=0;i<nb_loader;i++)
+				{
+					plugin_ptr = (image_plugin*)hxcfe->image_handlers;
+					plugin_ptr[i].infos_handler = staticplugins[i];
+				}
+			}
+			else
+			{
+				free(hxcfe);
+				return NULL;
+			}
+
+		}
 	}
+
 	return hxcfe;
 }
 
@@ -116,19 +148,27 @@ const char * hxcfe_getLicense(HXCFE* floppycontext)
 
 void hxcfe_deinit(HXCFE* hxcfe)
 {
-	if(hxcfe)
+	if( hxcfe )
 	{
 		hxcfe->hxc_printf(MSG_INFO_0,"Stopping HxCFloppyEmulator...");
 
-		free(hxcfe);
+		if(	hxcfe->image_handlers )
+		{
+			free( hxcfe->image_handlers );
+		}
+
+		free( hxcfe );
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////
 
-static int32_t hxcfe_checkLoaderID(HXCFE_IMGLDR * imgldr_ctx,int32_t moduleID)
+static int32_t hxcfe_checkLoaderID( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID )
 {
 	int i;
+	image_plugin* plugin_ptr;
+
+	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
 
 	if( moduleID >= 0 )
 	{
@@ -136,9 +176,9 @@ static int32_t hxcfe_checkLoaderID(HXCFE_IMGLDR * imgldr_ctx,int32_t moduleID)
 		do
 		{
 			i++;
-		}while((staticplugins[i]!=(GETPLUGININFOS)-1) && i<moduleID);
+		}while( plugin_ptr[i].infos_handler && i<moduleID);
 
-		if(staticplugins[i]==(GETPLUGININFOS)-1)
+		if( !plugin_ptr[i].infos_handler )
 		{
 			return HXCFE_BADPARAMETER;
 		}
@@ -156,12 +196,15 @@ static int32_t hxcfe_checkLoaderID(HXCFE_IMGLDR * imgldr_ctx,int32_t moduleID)
 int32_t hxcfe_imgGetNumberOfLoader( HXCFE_IMGLDR * imgldr_ctx )
 {
 	int i;
+	image_plugin* plugin_ptr;
+
+	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
 
 	i=0;
 	do
 	{
 		i++;
-	}while((staticplugins[i]!=(GETPLUGININFOS)-1));
+	}while( plugin_ptr[i].infos_handler );
 
 	return i;
 }
@@ -171,14 +214,17 @@ int32_t hxcfe_imgGetLoaderID( HXCFE_IMGLDR * imgldr_ctx, char * container )
 	int i;
 	int ret;
 	char * plugin_id;
+	image_plugin* plugin_ptr;
+
+	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
 
 	ret=0;
 	i=0;
 	do
 	{
-		if(staticplugins[i])
+		if( plugin_ptr[i].infos_handler )
 		{
-			ret=staticplugins[i](imgldr_ctx,GETPLUGINID,&plugin_id);
+			ret = plugin_ptr[i].infos_handler(imgldr_ctx,GETPLUGINID,&plugin_id);
 			if((ret==HXCFE_NOERROR)  && !strcmp(container,plugin_id))
 			{
 				return i;
@@ -186,7 +232,7 @@ int32_t hxcfe_imgGetLoaderID( HXCFE_IMGLDR * imgldr_ctx, char * container )
 		}
 
 		i++;
-	}while(staticplugins[i]!=(GETPLUGININFOS)-1);
+	}while( plugin_ptr[i].infos_handler );
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_searchContainer : Plugin %s not found !",container);
 
@@ -197,12 +243,15 @@ int32_t hxcfe_imgGetLoaderAccess( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID )
 {
 	int ret;
 	plugins_ptr func_ptr;
+	image_plugin* plugin_ptr;
+
+	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
 
 	ret = 0;
 
 	if(hxcfe_checkLoaderID(imgldr_ctx,moduleID)==HXCFE_NOERROR)
 	{
-		ret=staticplugins[moduleID](imgldr_ctx,GETFUNCPTR,&func_ptr);
+		ret=plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETFUNCPTR,&func_ptr);
 		if(ret==HXCFE_NOERROR)
 		{
 			if(func_ptr.libLoad_DiskFile)
@@ -226,13 +275,16 @@ const char* hxcfe_imgGetLoaderDesc( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID 
 	int ret;
 	plugins_ptr func_ptr;
 	char * desc;
+	image_plugin* plugin_ptr;
+
+	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
 
 	if(hxcfe_checkLoaderID(imgldr_ctx,moduleID)==HXCFE_NOERROR)
 	{
-		ret=staticplugins[moduleID](imgldr_ctx,GETFUNCPTR,&func_ptr);
+		ret=plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETFUNCPTR,&func_ptr);
 		if(ret==HXCFE_NOERROR)
 		{
-			staticplugins[moduleID](imgldr_ctx,GETDESCRIPTION,&desc);
+			plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETDESCRIPTION,&desc);
 			return desc;
 		}
 	}
@@ -249,13 +301,16 @@ const char* hxcfe_imgGetLoaderName( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID 
 	int ret;
 	plugins_ptr func_ptr;
 	char * desc;
+	image_plugin* plugin_ptr;
+
+	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
 
 	if(hxcfe_checkLoaderID(imgldr_ctx,moduleID)==HXCFE_NOERROR)
 	{
-		ret=staticplugins[moduleID](imgldr_ctx,GETFUNCPTR,&func_ptr);
+		ret = plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETFUNCPTR,&func_ptr);
 		if(ret==HXCFE_NOERROR)
 		{
-			staticplugins[moduleID](imgldr_ctx,GETPLUGINID,&desc);
+			plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETPLUGINID,&desc);
 			return desc;
 		}
 	}
@@ -272,13 +327,16 @@ const char* hxcfe_imgGetLoaderExt( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID )
 	int ret;
 	plugins_ptr func_ptr;
 	char * desc;
+	image_plugin* plugin_ptr;
+
+	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
 
 	if(hxcfe_checkLoaderID(imgldr_ctx,moduleID)==HXCFE_NOERROR)
 	{
-		ret=staticplugins[moduleID](imgldr_ctx,GETFUNCPTR,&func_ptr);
+		ret=plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETFUNCPTR,&func_ptr);
 		if(ret==HXCFE_NOERROR)
 		{
-			staticplugins[moduleID](imgldr_ctx,GETEXTENSION,&desc);
+			plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETEXTENSION,&desc);
 			return desc;
 		}
 	}
@@ -296,6 +354,9 @@ int32_t hxcfe_imgAutoSetectLoader( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int
 	int ret;
 	plugins_ptr func_ptr;
 	HXCFE* hxcfe;
+	image_plugin* plugin_ptr;
+
+	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
 
 	ret = HXCFE_BADPARAMETER;
 
@@ -308,9 +369,9 @@ int32_t hxcfe_imgAutoSetectLoader( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int
 		i = moduleID;
 		do
 		{
-			if(staticplugins[i])
+			if(plugin_ptr[i].infos_handler)
 			{
-				ret = staticplugins[i](imgldr_ctx,GETFUNCPTR,&func_ptr);
+				ret = plugin_ptr[i].infos_handler(imgldr_ctx,GETFUNCPTR,&func_ptr);
 				if( ret == HXCFE_NOERROR )
 				{
 					if(func_ptr.libIsValidDiskFile)
@@ -330,7 +391,7 @@ int32_t hxcfe_imgAutoSetectLoader( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int
 			}
 
 			i++;
-		}while( staticplugins[i] != (GETPLUGININFOS)-1 );
+		}while( plugin_ptr[i].infos_handler );
 
 		hxcfe->hxc_printf(MSG_ERROR,"No loader support the file %s !",imgname);
 
@@ -398,6 +459,9 @@ HXCFE_FLOPPY * hxcfe_imgLoadEx( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_
 	HXCFE* hxcfe;
 	HXCFE_FLOPPY * newfloppy;
 	plugins_ptr func_ptr;
+	image_plugin* plugin_ptr;
+
+	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
 
 	newfloppy = 0;
 
@@ -409,7 +473,7 @@ HXCFE_FLOPPY * hxcfe_imgLoadEx( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_
 
 		if( hxcfe_checkLoaderID(imgldr_ctx,moduleID) == HXCFE_NOERROR )
 		{
-			ret = staticplugins[moduleID](imgldr_ctx,GETFUNCPTR,&func_ptr);
+			ret = plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETFUNCPTR,&func_ptr);
 			if( ret == HXCFE_NOERROR )
 			{
 				ret = func_ptr.libIsValidDiskFile(imgldr_ctx,imgname);
@@ -488,10 +552,13 @@ int32_t hxcfe_imgExport( HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * newfloppy, ch
 {
 	int ret;
 	plugins_ptr func_ptr;
+	image_plugin* plugin_ptr;
+
+	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
 
 	if(hxcfe_checkLoaderID(imgldr_ctx,moduleID)==HXCFE_NOERROR)
 	{
-		ret=staticplugins[moduleID](imgldr_ctx->hxcfe,GETFUNCPTR,&func_ptr);
+		ret=plugin_ptr[moduleID].infos_handler(imgldr_ctx->hxcfe,GETFUNCPTR,&func_ptr);
 		if(ret==HXCFE_NOERROR)
 		{
 			if(func_ptr.libWrite_DiskFile)
@@ -708,7 +775,7 @@ int32_t hxcfe_floppySetDoubleStep( HXCFE* floppycontext, HXCFE_FLOPPY * newflopp
 	return HXCFE_NOERROR;
 }
 
-int libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue,const char * pluginid,const char * plugindesc,plugins_ptr * pluginfunc,const char * fileext)
+int libGetPluginInfo( HXCFE_IMGLDR * imgldr_ctx, uint32_t infotype, void * returnvalue, const char * pluginid, const char * plugindesc, plugins_ptr * pluginfunc, const char * fileext )
 {
 	if(imgldr_ctx)
 	{
@@ -1693,8 +1760,11 @@ HXCFE_FLOPPY * hxcfe_generateFloppy( HXCFE* floppycontext, char* path, int32_t f
 	plugins_ptr func_ptr;
 	int moduleID;
 	int i;
+	image_plugin* plugin_ptr;
 
 	floppycontext->hxc_printf(MSG_INFO_0,"Create file system (source path : %s) ...",path);
+
+	plugin_ptr = (image_plugin*)floppycontext->image_handlers;
 
 	newfloppy=0;
 
@@ -1714,7 +1784,7 @@ HXCFE_FLOPPY * hxcfe_generateFloppy( HXCFE* floppycontext, char* path, int32_t f
 
 		if(hxcfe_checkLoaderID(imgldr_ctx,moduleID)==HXCFE_NOERROR && fs_config_table[i].name)
 		{
-			ret=staticplugins[moduleID](imgldr_ctx,GETFUNCPTR,&func_ptr);
+			ret = plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETFUNCPTR,&func_ptr);
 			if(ret==HXCFE_NOERROR)
 			{
 				newfloppy=malloc(sizeof(HXCFE_FLOPPY));

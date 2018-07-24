@@ -26,7 +26,7 @@
 */
 
 #include "internal_floppy.h"
-#include "plugins_id.h"
+
 
 typedef int (*HXCFE_PRINTF_FUNC)(int MSGTYPE,char * string, ...);
 #define _HXCFE_PRINTF_FUNC_
@@ -44,7 +44,7 @@ typedef struct _HXCFE
 {
 	HXCFE_PRINTF_FUNC hxc_printf;
 	HXCFE_TRACKPOSOUT_FUNC hxc_settrackpos;
-	char CONTAINERTYPE[16];
+	void * image_handlers;
 }HXCFE;
 
 #define _HXCFE_
