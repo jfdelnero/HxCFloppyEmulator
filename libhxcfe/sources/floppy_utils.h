@@ -1,3 +1,6 @@
+#ifndef _INC_FLOPPY_UTILS_
+#define _INC_FLOPPY_UTILS_
+
 #define NO_SECTOR_UNDER_INDEX 0x80000000
 #define HARD_SECTORED_DISK    0x40000000
 #define REVERTED_INDEX        0x20000000
@@ -14,3 +17,5 @@ double MeasureTrackTiming(HXCFE* floppycontext,HXCFE_SIDE * curside,uint32_t sta
 int floppyTrackTypeIdentification(HXCFE* floppycontext,HXCFE_FLOPPY *fp);
 
 unsigned char  size_to_code(uint32_t size);
+
+#endif
