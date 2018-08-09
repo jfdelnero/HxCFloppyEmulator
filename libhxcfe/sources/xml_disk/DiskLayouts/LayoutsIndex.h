@@ -41,12 +41,14 @@
 #include "data_DiskLayout_Memotech_40T_xml.h"
 #include "data_DiskLayout_DEC_RX55_xml.h"
 #include "data_DiskLayout_Unitel_Videotex_xml.h"
+#include "data_DiskLayout_ABB_ASEA_640KB_xml.h"
 
 datatype * disklayout_list[]=
 {
 	data_DiskLayout_DOS_DD_720KB_xml,
 	data_DiskLayout_DOS_HD_1_44MB_xml,
 	data_DiskLayout_CasioFZ1_HD_1_25MB_xml,
+    data_DiskLayout_ABB_ASEA_640KB_xml,
 	data_DiskLayout_Acorn_160K_ADFS_xml,
 	data_DiskLayout_Acorn_320K_ADFM_xml,
 	data_DiskLayout_Acorn_640K_ADFL_xml,
