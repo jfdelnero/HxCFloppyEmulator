@@ -42,6 +42,7 @@
 #include "data_DiskLayout_DEC_RX55_xml.h"
 #include "data_DiskLayout_Unitel_Videotex_xml.h"
 #include "data_DiskLayout_ABB_ASEA_640KB_xml.h"
+#include "data_DiskLayout_Gravograph_ISIS_640KB_xml.h"
 
 datatype * disklayout_list[]=
 {
@@ -69,6 +70,7 @@ datatype * disklayout_list[]=
 	data_DiskLayout_KorgT3_HD_1_6MB_xml,
 	data_DiskLayout_GeneralMusic_GEM_S3_1600KB_xml,
 	data_DiskLayout_GeneralMusic_GEM_WX_Expander_xml,
+	data_DiskLayout_Gravograph_ISIS_640KB_xml,
 	data_DiskLayout_DOS_ED_2_88MB_xml,
 	data_DiskLayout_DOS_EXDD_2_5MB_xml,
 	data_DiskLayout_DOS_EXHD_4_5MB_xml,
