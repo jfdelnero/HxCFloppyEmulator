@@ -42,5 +42,6 @@
 ..\..\converttools\bmptoh DiskLayout_Timex_FDD3000_80T2S.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Unitel_Videotex.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_ABB_ASEA_640KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Gravograph_ISIS_640KB.xml -DATA
 move *.h ..
 
