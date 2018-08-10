@@ -249,7 +249,7 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 		memcpy((char*)&scph.sign,"SCP",3);
 
-		tracknumber = floppy->floppyNumberOfTrack * 2;
+		tracknumber = floppy->floppyNumberOfTrack * floppy->floppyNumberOfSide;
 
 		if(tracknumber>83*2)
 		{
@@ -316,6 +316,8 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 		scph.version = 0x09;
 
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCP_libWrite_DiskFile : Flags=0x%.2X Disktype=0x%.2X NumberOfRevolution=%d Version=%d NbTrack=%d NbSide:%d",scph.flags,scph.disk_type,scph.number_of_revolution,scph.version,floppy->floppyNumberOfTrack,floppy->floppyNumberOfSide);
+
 		// Header
 		fwrite(&scph,sizeof(scp_header),1,f);
 
@@ -342,7 +344,7 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			}
 			else
 			{
-				write_scp_track(f,floppy->tracks[i>>1]->sides[0],&track_checksum,i,scph.number_of_revolution);
+				write_scp_track(f,floppy->tracks[i]->sides[0],&track_checksum,i,scph.number_of_revolution);
 			}
 
 			file_checksum = file_checksum + track_checksum;
