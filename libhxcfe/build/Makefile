@@ -69,7 +69,7 @@ DISKLOADERPLUGINS = copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigado
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
 					kryofluxstream_writer.o adf_writer.o bmp_writer.o bmp_disk_writer.o bmp_file.o xml_writer.o trd_writer.o stx_writer.o st_writer.o \
-					stw_writer.o dim_writer.o adz_writer.o ipf_writer.o fd_writer.o northstar_loader.o northstar_writer.o heathkit_writer.o
+					stw_writer.o dim_writer.o adz_writer.o ipf_writer.o fd_writer.o northstar_loader.o northstar_writer.o heathkit_writer.o vdk_loader.o 
 
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
@@ -443,6 +443,9 @@ vtr_writer.o : $(BASEDIR)/loaders/vtr_loader/vtr_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 vdk_loader.o : $(BASEDIR)/loaders/vdk_loader/vdk_loader.c $(BASEDIR)/loaders/vdk_loader/vdk_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+vdk_writer.o : $(BASEDIR)/loaders/vdk_loader/vdk_writer.c $(BASEDIR)/loaders/vdk_writer/vdk_writer.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 dpx_loader.o : $(BASEDIR)/loaders/dpx_loader/dpx_loader.c $(BASEDIR)/loaders/dpx_loader/dpx_loader.h

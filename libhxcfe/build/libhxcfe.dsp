@@ -1246,6 +1246,14 @@ SOURCE=..\sources\loaders\vdk_loader\vdk_loader.c
 
 SOURCE=..\sources\loaders\vdk_loader\vdk_loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\vdk_loader\vdk_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\vdk_loader\vdk_writer.h
+# End Source File
 # End Group
 # Begin Group "DPX"
 
@@ -2013,6 +2021,26 @@ SOURCE=..\sources\loaders\sdu_loader\sdu_loader.c
 # Begin Source File
 
 SOURCE=..\sources\loaders\sdu_loader\sdu_loader.h
+# End Source File
+# End Group
+# Begin Group "XML_DB_LOADER"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\xml_db_loader\xml_db_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\xml_db_loader\xml_db_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\xml_db_loader\xml_db_writer.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\xml_db_loader\xml_db_writer.h
 # End Source File
 # End Group
 # End Group
