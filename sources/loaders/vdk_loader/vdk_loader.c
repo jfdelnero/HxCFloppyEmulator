@@ -57,6 +57,8 @@
 #include "floppy_utils.h"
 
 #include "vdk_loader.h"
+#include "vdk_writer.h"
+
 #include "vdk_format.h"
 
 #include "libhxcadaptor.h"
@@ -203,7 +205,7 @@ int VDK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 	{
 		(ISVALIDDISKFILE)	VDK_libIsValidDiskFile,
 		(LOADDISKFILE)		VDK_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		VDK_libWrite_DiskFile,
 		(GETPLUGININFOS)	VDK_libGetPluginInfo
 	};
 
