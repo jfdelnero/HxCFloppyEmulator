@@ -530,7 +530,7 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 	k=0;
 	for(i=0;i<numberofzoneh0;i++)
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"code %d len %d (%d)",trackpartbuffer_0[i].code,trackpartbuffer_0[i].len,j);
+		floppycontext->hxc_printf(MSG_DEBUG,"code %d len %d (Ofs:%d) [P:%d]",trackpartbuffer_0[i].code,trackpartbuffer_0[i].len,j,i);
 		j=j+trackpartbuffer_0[i].len;
 		k=k+(trackpartbuffer_0[i].code*625)*trackpartbuffer_0[i].len*4;
 		k=k%finalsizebuffer;
@@ -543,7 +543,7 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 	k=0;
 	for(i=0;i<numberofzoneh1;i++)
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"code %d len %d (%d)",trackpartbuffer_1[i].code,trackpartbuffer_1[i].len,j);
+		floppycontext->hxc_printf(MSG_DEBUG,"code %d len %d (Ofs:%d) [P:%d]",trackpartbuffer_1[i].code,trackpartbuffer_1[i].len,j,i);
 		j=j+trackpartbuffer_1[i].len;
 		k=k+(trackpartbuffer_1[i].code*625)*trackpartbuffer_1[i].len*4;
 		k=k%finalsizebuffer;
@@ -669,13 +669,19 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 
 		if( (lencode_track0<=0) && (lencode_track1<=0) )
 		{
-			speedcfg_track0 = trackpartbuffer_0[trackparthead0index].code;
-			lencode_track0  = trackpartbuffer_0[trackparthead0index].len;
-			trackparthead0index++;
+			if(trackparthead0index<numberofzoneh0)
+			{
+				lencode_track0  = trackpartbuffer_0[trackparthead0index].len;
+				speedcfg_track0 = trackpartbuffer_0[trackparthead0index].code;
+				trackparthead0index++;
+			}
 
-			speedcfg_track1 = trackpartbuffer_1[trackparthead1index].code;
-			lencode_track1  = trackpartbuffer_1[trackparthead1index].len;
-			trackparthead1index++;
+			if(trackparthead1index<numberofzoneh1)
+			{
+				lencode_track1  = trackpartbuffer_1[trackparthead1index].len;
+				speedcfg_track1 = trackpartbuffer_1[trackparthead1index].code;
+				trackparthead1index++;
+			}
 
 			#ifdef DEBUGVB
 			if( !speedcfg_track0 || !speedcfg_track1 )
@@ -700,8 +706,8 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 			{
 				if(trackparthead0index<numberofzoneh0)
 				{
-					speedcfg_track0=trackpartbuffer_0[trackparthead0index].code;
-					lencode_track0=trackpartbuffer_0[trackparthead0index].len;
+					lencode_track0 = trackpartbuffer_0[trackparthead0index].len;
+					speedcfg_track0 = trackpartbuffer_0[trackparthead0index].code;
 					trackparthead0index++;
 
 					#ifdef DEBUGVB
@@ -718,7 +724,6 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 					finalbuffer_H0[k] = speedcfg_track0;
 					finalbuffer_H1[k] = speedcfg_track1;
 					k=(k+1)%finalsizebuffer;
-
 				}
 			}
 
@@ -727,8 +732,8 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 			{
 				if(trackparthead1index<numberofzoneh1)
 				{
-					speedcfg_track1 = trackpartbuffer_1[trackparthead1index].code;
 					lencode_track1 = trackpartbuffer_1[trackparthead1index].len;
+					speedcfg_track1 = trackpartbuffer_1[trackparthead1index].code;
 					trackparthead1index++;
 
 					#ifdef DEBUGVB
@@ -772,11 +777,10 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 				k++;
 			}*/
 		}
+
 		inserttimecode--;
 
-
 		deltatick = tick_offset_h0-tick_offset_h1;
-
 
 		// si pas de decalage temporel entre les 2 face : pas de compensation
 		if(!((abs(deltatick)>(speedcfg_track0*8)) || (abs(deltatick)>(speedcfg_track1*8))))
