@@ -24,36 +24,23 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 */
-// loader return code
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-#ifndef _INC_FLOPPY_LOADER_
-#define _INC_FLOPPY_LOADER_
+#include "types.h"
 
-enum {
-	GETPLUGINID = 1,
-	GETDESCRIPTION = 2,
-	GETFUNCPTR = 3,
-	GETEXTENSION = 4,
-	GETNBSUBLOADER = 5,
-	SELECTSUBLOADER = 6
-};
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
+#include "libhxcfe.h"
 
-typedef int (*ISVALIDDISKFILE) (void* imgldr_ctx,char * imgfile);
-typedef int (*LOADDISKFILE)(void* imgldr_ctx,void * floppydisk,char * imgfile,void * parameters);
-typedef int (*WRITEDISKFILE)(void* imgldr_ctx,void * floppydisk,char * imgfile,void * parameters);
-typedef int (*GETPLUGININFOS)(void* imgldr_ctx,uint32_t infotype,void * returnvalue);
+#include "xml_db_loader.h"
 
-typedef struct plugins_ptr_
+#include "tracks/sector_extractor.h"
+
+#include "libhxcadaptor.h"
+
+int XMLDB_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-	ISVALIDDISKFILE libIsValidDiskFile;
-	LOADDISKFILE	libLoad_DiskFile;
-	WRITEDISKFILE	libWrite_DiskFile;
-	GETPLUGININFOS	libGetPluginInfos;
-}plugins_ptr;
-
-
-int libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue,const char * pluginid,const char * plugindesc,plugins_ptr * pluginfunc,const char * fileext);
-
-HXCFE_FLOPPY* hxcfe_sanityCheck(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk);
-
-#endif
+	return 0;
+}

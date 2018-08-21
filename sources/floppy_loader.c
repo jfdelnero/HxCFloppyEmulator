@@ -84,46 +84,78 @@ int dummy_progress(unsigned int current,unsigned int total, void * user)
 HXCFE* hxcfe_init(void)
 {
 	HXCFE* hxcfe;
+	HXCFE_IMGLDR *imgldr_ctx;
 	image_plugin* plugin_ptr;
 	int nb_loader;
-	int i;
+	int nb_xml_loader;
+	int i,j;
+	int ret;
 
 	hxcfe=malloc(sizeof(HXCFE));
-	if(hxcfe)
+	if( hxcfe )
 	{
 		memset(hxcfe,0,sizeof(HXCFE));
 
-		hxcfe->hxc_printf=&dummy_output;
-		hxcfe->hxc_settrackpos=&dummy_trackpos;
+		hxcfe->hxc_printf = &dummy_output;
+		hxcfe->hxc_settrackpos = &dummy_trackpos;
 
 		hxcfe->hxc_printf(MSG_INFO_0,"Starting HxCFloppyEmulator...");
 
 		nb_loader = 0;
 		// Count how many static loaders we have.
-		while(staticplugins[nb_loader])
+		while( staticplugins[nb_loader] )
 		{
 			nb_loader++;
 		}
-		
+
+		nb_xml_loader = 0;
+		imgldr_ctx = hxcfe_imgInitLoader(hxcfe);
+		if( imgldr_ctx )
+		{
+			ret = staticplugins[nb_loader - 1](imgldr_ctx,GETNBSUBLOADER,&nb_xml_loader);
+			if( ret != HXCFE_NOERROR )
+			{
+				nb_xml_loader = 0;
+				hxcfe->hxc_printf(MSG_ERROR,"XML Loader unavailable...");
+			}
+		}
+
 		if( nb_loader )
 		{
-			hxcfe->image_handlers = (void*)malloc( (nb_loader+1) * sizeof(image_plugin) );
-			if(hxcfe->image_handlers)
+			hxcfe->image_handlers = (void*)malloc( (nb_loader+nb_xml_loader+1) * sizeof(image_plugin) );
+			if( hxcfe->image_handlers )
 			{
-				memset(hxcfe->image_handlers, 0, (nb_loader+1) * sizeof(image_plugin));
-				for(i=0;i<nb_loader;i++)
+				memset(hxcfe->image_handlers, 0, (nb_loader+nb_xml_loader+1) * sizeof(image_plugin));
+
+				plugin_ptr = (image_plugin*)hxcfe->image_handlers;
+
+				for( i = 0 ; i < nb_loader - 1; i++ )
 				{
-					plugin_ptr = (image_plugin*)hxcfe->image_handlers;
 					plugin_ptr[i].infos_handler = staticplugins[i];
+					plugin_ptr[i].sub_id = 0;
+					plugin_ptr[i].flags = 0x00000000;
+				}
+
+				for( j = 0 ; j < nb_xml_loader; j++ )
+				{
+					plugin_ptr[i + j].infos_handler = staticplugins[nb_loader - 1];
+					plugin_ptr[i + j].sub_id = j + 1;
+					plugin_ptr[i + j].flags = IMAGE_LDR_DISABLED;
 				}
 			}
 			else
 			{
+				if( imgldr_ctx )
+					hxcfe_imgDeInitLoader(imgldr_ctx);
+
 				free(hxcfe);
+
 				return NULL;
 			}
-
 		}
+
+		if( imgldr_ctx )
+			hxcfe_imgDeInitLoader(imgldr_ctx);
 	}
 
 	return hxcfe;
@@ -281,7 +313,7 @@ const char* hxcfe_imgGetLoaderDesc( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID 
 
 	if(hxcfe_checkLoaderID(imgldr_ctx,moduleID)==HXCFE_NOERROR)
 	{
-		ret=plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETFUNCPTR,&func_ptr);
+		ret = plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETFUNCPTR,&func_ptr);
 		if(ret==HXCFE_NOERROR)
 		{
 			plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETDESCRIPTION,&desc);
@@ -333,7 +365,7 @@ const char* hxcfe_imgGetLoaderExt( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID )
 
 	if(hxcfe_checkLoaderID(imgldr_ctx,moduleID)==HXCFE_NOERROR)
 	{
-		ret=plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETFUNCPTR,&func_ptr);
+		ret = plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETFUNCPTR,&func_ptr);
 		if(ret==HXCFE_NOERROR)
 		{
 			plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETEXTENSION,&desc);
@@ -369,7 +401,7 @@ int32_t hxcfe_imgAutoSetectLoader( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int
 		i = moduleID;
 		do
 		{
-			if(plugin_ptr[i].infos_handler)
+			if(plugin_ptr[i].infos_handler && !(plugin_ptr[i].flags & IMAGE_LDR_DISABLED) )
 			{
 				ret = plugin_ptr[i].infos_handler(imgldr_ctx,GETFUNCPTR,&func_ptr);
 				if( ret == HXCFE_NOERROR )
@@ -1732,12 +1764,12 @@ fs_config fs_config_table[]=
 	{"fat1680",		"3\"5        1.68MB DSHD FAT12",FS_1_68MB_MSDOS_FAT12,0},
 
 	{"fat1722",		"3\"5        1.722MB DSHD FAT12",FS_1_722MB_MSDOS_FAT12,0},
-	{"fat1743",		"3\"5        1.743MB DSHD FAT12",FS_1_743MB_MSDOS_FAT12,0},	
-	{"fat1764",		"3\"5        1.764MB DSHD FAT12",FS_1_764MB_MSDOS_FAT12,0},	
+	{"fat1743",		"3\"5        1.743MB DSHD FAT12",FS_1_743MB_MSDOS_FAT12,0},
+	{"fat1764",		"3\"5        1.764MB DSHD FAT12",FS_1_764MB_MSDOS_FAT12,0},
 	{"fat1785",		"3\"5        1.785MB DSHD FAT12",FS_1_785MB_MSDOS_FAT12,0},
 
 	{"fat2540",		"3\"5        2.50MB DSDD FAT12",FS_2_50MB_MSDOS_FAT12,0},
-	
+
 	{"fat2880",		"3\"5        2.88MB DSED FAT12",FS_2_88MB_MSDOS_FAT12,0},
 	{"fat3381",		"3\"5        3.38MB DSHD FAT12",FS_3_38MB_MSDOS_FAT12,0},
 	{"fatbigst",	"3\"5        3.42MB DSDD Atari FAT12",FS_3_42MB_ATARI_FAT12,0},
