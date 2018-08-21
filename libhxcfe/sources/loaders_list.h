@@ -25,10 +25,13 @@
 //
 */
 
+#define IMAGE_LDR_DISABLED 0x00000001
+
 typedef struct image_plugin_
 {
 	GETPLUGININFOS infos_handler;
 	int sub_id;
+	unsigned int flags;
 }image_plugin;
 
 extern const GETPLUGININFOS staticplugins[];

@@ -124,6 +124,7 @@
 #include "./loaders/northstar_loader/northstar_loader.h"
 #include "./loaders/heathkit_loader/heathkit_loader.h"
 #include "./loaders/sdu_loader/sdu_loader.h"
+#include "./loaders/xml_db_loader/xml_db_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -218,5 +219,8 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)Heathkit_libGetPluginInfo,
 
 	//(GETPLUGININFOS)VFDDAT_libGetPluginInfo,
+
+	(GETPLUGININFOS)XMLDB_libGetPluginInfo,
+
 	0
 };
