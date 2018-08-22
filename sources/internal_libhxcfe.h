@@ -55,6 +55,10 @@ typedef struct _HXCFE_IMGLDR
 	HXCFE * hxcfe;
 	HXCFE_IMGLDRPROGRESSOUT_FUNC hxc_setprogress;
 	void * progress_userdata;
+
+	int selected_id;
+	int selected_subid;
+
 }HXCFE_IMGLDR;
 
 #define _HXCFE_IMGLDR_
