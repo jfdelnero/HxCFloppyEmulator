@@ -286,6 +286,9 @@ int32_t hxcfe_imgGetLoaderAccess( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID )
 		ret=plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETFUNCPTR,&func_ptr);
 		if(ret==HXCFE_NOERROR)
 		{
+			imgldr_ctx->selected_id = moduleID;
+			imgldr_ctx->selected_subid = 0;
+			
 			if(func_ptr.libLoad_DiskFile)
 				ret=ret | 0x01;
 			if(func_ptr.libWrite_DiskFile)
@@ -308,7 +311,7 @@ const char* hxcfe_imgGetLoaderDesc( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID 
 	plugins_ptr func_ptr;
 	char * desc;
 	image_plugin* plugin_ptr;
-
+	int sub_id;
 	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
 
 	if(hxcfe_checkLoaderID(imgldr_ctx,moduleID)==HXCFE_NOERROR)
@@ -316,7 +319,26 @@ const char* hxcfe_imgGetLoaderDesc( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID 
 		ret = plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETFUNCPTR,&func_ptr);
 		if(ret==HXCFE_NOERROR)
 		{
-			plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETDESCRIPTION,&desc);
+			imgldr_ctx->selected_id = moduleID;
+			imgldr_ctx->selected_subid = 0;
+
+			if( !plugin_ptr[moduleID].sub_id)
+			{
+				plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETDESCRIPTION,&desc);
+			}
+			else
+			{
+				sub_id = plugin_ptr[moduleID].sub_id;
+				if( plugin_ptr[moduleID].infos_handler(imgldr_ctx,SELECTSUBLOADER,&sub_id) == HXCFE_NOERROR )
+				{
+					plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETDESCRIPTION,&desc);
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
 			return desc;
 		}
 	}
@@ -334,6 +356,7 @@ const char* hxcfe_imgGetLoaderName( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID 
 	plugins_ptr func_ptr;
 	char * desc;
 	image_plugin* plugin_ptr;
+	int sub_id;
 
 	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
 
@@ -342,7 +365,26 @@ const char* hxcfe_imgGetLoaderName( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID 
 		ret = plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETFUNCPTR,&func_ptr);
 		if(ret==HXCFE_NOERROR)
 		{
-			plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETPLUGINID,&desc);
+			imgldr_ctx->selected_id = moduleID;
+			imgldr_ctx->selected_subid = 0;
+			
+			if( !plugin_ptr[moduleID].sub_id)
+			{
+				plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETPLUGINID,&desc);
+			}
+			else
+			{
+				sub_id = plugin_ptr[moduleID].sub_id;
+				if( plugin_ptr[moduleID].infos_handler(imgldr_ctx,SELECTSUBLOADER,&sub_id) == HXCFE_NOERROR )
+				{
+					plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETPLUGINID,&desc);
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
 			return desc;
 		}
 	}
@@ -360,6 +402,7 @@ const char* hxcfe_imgGetLoaderExt( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID )
 	plugins_ptr func_ptr;
 	char * desc;
 	image_plugin* plugin_ptr;
+	int sub_id;
 
 	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
 
@@ -368,7 +411,26 @@ const char* hxcfe_imgGetLoaderExt( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID )
 		ret = plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETFUNCPTR,&func_ptr);
 		if(ret==HXCFE_NOERROR)
 		{
-			plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETEXTENSION,&desc);
+			imgldr_ctx->selected_id = moduleID;
+			imgldr_ctx->selected_subid = 0;
+			
+			if( !plugin_ptr[moduleID].sub_id)
+			{
+				plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETEXTENSION,&desc);
+			}
+			else
+			{
+				sub_id = plugin_ptr[moduleID].sub_id;
+				if( plugin_ptr[moduleID].infos_handler(imgldr_ctx,SELECTSUBLOADER,&sub_id) == HXCFE_NOERROR )
+				{
+					plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETEXTENSION,&desc);
+				}
+				else
+				{
+					return 0;
+				}
+			}
+
 			return desc;
 		}
 	}

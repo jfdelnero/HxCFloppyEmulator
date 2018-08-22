@@ -61,7 +61,6 @@
 #include "libhxcadaptor.h"
 
 HXCFE_XMLLDR * rfb = 0;
-int selected_sub_loader = 0;
 
 int XMLDB_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
@@ -148,9 +147,10 @@ int XMLDB_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 
 int XMLDB_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-	static const char plug_id[]="XML_DATABASE_LOADER";
-	static const char plug_desc[]="XML Format database Loader";
-	static const char plug_ext[]="xml";
+	static char plug_id[512]="XML_DATABASE_LOADER";
+	static char plug_desc[512]="XML Format database Loader";
+	static char plug_ext[512]="xml";
+	char * tmp_ptr;
 
 	if(imgldr_ctx)
 	{
@@ -171,6 +171,9 @@ int XMLDB_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * re
 					break;
 
 				case GETEXTENSION:
+					if(!rfb)
+						rfb = hxcfe_initXmlFloppy(imgldr_ctx->hxcfe);
+
 					*(char**)(returnvalue)=(char*)plug_ext;
 					break;
 
@@ -183,7 +186,24 @@ int XMLDB_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * re
 					break;
 
 				case SELECTSUBLOADER:
-					selected_sub_loader = *((int*)returnvalue);
+					imgldr_ctx->selected_subid = *((int*)returnvalue);
+
+					if(!rfb)
+						rfb = hxcfe_initXmlFloppy(imgldr_ctx->hxcfe);
+
+
+					if( imgldr_ctx->selected_subid && rfb )
+					{
+						tmp_ptr = (char*)hxcfe_getXmlLayoutDesc( rfb, imgldr_ctx->selected_subid - 1 );
+						if(tmp_ptr)
+							strcpy(plug_desc,tmp_ptr);
+
+						tmp_ptr = (char*)hxcfe_getXmlLayoutName( rfb, imgldr_ctx->selected_subid - 1 );
+						if(tmp_ptr)
+							strcpy(plug_id,tmp_ptr);
+
+						hxcfe_selectXmlFloppyLayout( rfb, imgldr_ctx->selected_subid - 1 );
+					}
 					break;
 
 				default:
