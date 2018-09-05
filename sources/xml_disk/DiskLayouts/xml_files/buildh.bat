@@ -34,6 +34,7 @@
 ..\..\converttools\bmptoh DiskLayout_Acorn_320K_ADFM.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Acorn_640K_ADFL.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Dynacord_AddOne.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Dynacord_HD_1600KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Memotech_40T.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Memotech_80T.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_OpusDiscovery.xml -DATA
@@ -42,6 +43,15 @@
 ..\..\converttools\bmptoh DiskLayout_Timex_FDD3000_80T2S.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Unitel_Videotex.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_ABB_ASEA_640KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_ABB_ASEA_320KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_ABB_ASEA_328KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_PUMA_Robot_640KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Gravograph_ISIS_640KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Oerlikon_Balzers_250KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Oric_Jasmin_357KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Tatung_Einstein_DD_200KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Tatung_Einstein_DD_400KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_TRS80_JV1.xml -DATA
+
 move *.h ..
 
