@@ -16,7 +16,6 @@
 #include "data_DiskLayout_KorgDSS1_DD_800KB_xml.h"
 #include "data_DiskLayout_KorgT3_HD_1_6MB_xml.h"
 #include "data_DiskLayout_AtariST_DD_720KB_xml.h"
-#include "data_DiskLayout_OS9_1280KB_xml.h"
 #include "data_DiskLayout_GeneralMusic_GEM_S3_1600KB_xml.h"
 #include "data_DiskLayout_GeneralMusic_GEM_WX_Expander_xml.h"
 #include "data_DiskLayout_Emax_DD_800KB_xml.h"
@@ -34,21 +33,33 @@
 #include "data_DiskLayout_Acorn_320K_ADFM_xml.h"
 #include "data_DiskLayout_Acorn_640K_ADFL_xml.h"
 #include "data_DiskLayout_Dynacord_AddOne_xml.h"
+#include "data_DiskLayout_Dynacord_HD_1600KB_xml.h"
 #include "data_DiskLayout_Timex_FDD3000_80T2S_xml.h"
 #include "data_DiskLayout_Timex_FDD3000_40T1S_xml.h"
-#include "data_DiskLayout_OpusDiscovery_xml.h"
 #include "data_DiskLayout_Memotech_80T_xml.h"
 #include "data_DiskLayout_Memotech_40T_xml.h"
 #include "data_DiskLayout_DEC_RX55_xml.h"
 #include "data_DiskLayout_Unitel_Videotex_xml.h"
+#include "data_DiskLayout_ABB_ASEA_320KB_xml.h"
+#include "data_DiskLayout_ABB_ASEA_328KB_xml.h"
 #include "data_DiskLayout_ABB_ASEA_640KB_xml.h"
 #include "data_DiskLayout_Gravograph_ISIS_640KB_xml.h"
+#include "data_DiskLayout_Oerlikon_Balzers_250KB_xml.h"
+#include "data_DiskLayout_OpusDiscovery_xml.h"
+#include "data_DiskLayout_Oric_Jasmin_357KB_xml.h"
+#include "data_DiskLayout_OS9_1280KB_xml.h"
+#include "data_DiskLayout_PUMA_Robot_640KB_xml.h"
+#include "data_DiskLayout_Tatung_Einstein_DD_200KB_xml.h"
+#include "data_DiskLayout_Tatung_Einstein_DD_400KB_xml.h"
+#include "data_DiskLayout_TRS80_JV1_xml.h"
 
 datatype * disklayout_list[]=
 {
 	data_DiskLayout_DOS_DD_720KB_xml,
 	data_DiskLayout_DOS_HD_1_44MB_xml,
 	data_DiskLayout_CasioFZ1_HD_1_25MB_xml,
+	data_DiskLayout_ABB_ASEA_320KB_xml,
+	data_DiskLayout_ABB_ASEA_328KB_xml,
     data_DiskLayout_ABB_ASEA_640KB_xml,
 	data_DiskLayout_Acorn_160K_ADFS_xml,
 	data_DiskLayout_Acorn_320K_ADFM_xml,
@@ -59,6 +70,7 @@ datatype * disklayout_list[]=
 	data_DiskLayout_AmstradCPC_DD_xml,
 	data_DiskLayout_AtariST_DD_720KB_xml,
 	data_DiskLayout_Dynacord_AddOne_xml,
+	data_DiskLayout_Dynacord_HD_1600KB_xml,
 	data_DiskLayout_Ensoniq_DD_800KB_xml,
 	data_DiskLayout_Ensoniq_HD_1600KB_xml,
 	data_DiskLayout_Ensoniq_Mirage_440KB_xml,
@@ -84,9 +96,15 @@ datatype * disklayout_list[]=
 	data_DiskLayout_LIF_3_50_1232KB_xml,
 	data_DiskLayout_LIF_5_25_264KB_xml,
 	data_DiskLayout_AED6200P_xml,
+	data_DiskLayout_Tatung_Einstein_DD_200KB_xml,
+	data_DiskLayout_Tatung_Einstein_DD_400KB_xml,
 	data_DiskLayout_Timex_FDD3000_80T2S_xml,
 	data_DiskLayout_Timex_FDD3000_40T1S_xml,
+	data_DiskLayout_TRS80_JV1_xml,
+	data_DiskLayout_Oerlikon_Balzers_250KB_xml,
 	data_DiskLayout_OpusDiscovery_xml,
+	data_DiskLayout_Oric_Jasmin_357KB_xml,
+	data_DiskLayout_PUMA_Robot_640KB_xml,
 	data_DiskLayout_Memotech_80T_xml,
 	data_DiskLayout_Memotech_40T_xml,
 	data_DiskLayout_DEC_RX55_xml,
