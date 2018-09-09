@@ -5,6 +5,9 @@
 #include "data_DiskLayout_AkaiS950_DD_800KB_xml.h"
 #include "data_DiskLayout_AkaiS3000_HD_1_6MB_xml.h"
 #include "data_DiskLayout_AmstradCPC_DD_xml.h"
+#include "data_DiskLayout_COMX_35_SS_70KB_xml.h"
+#include "data_DiskLayout_COMX_35_DS_140KB_xml.h"
+#include "data_DiskLayout_COMX_35_SS_140KB_xml.h"
 #include "data_DiskLayout_Ensoniq_DD_800KB_xml.h"
 #include "data_DiskLayout_Ensoniq_HD_1600KB_xml.h"
 #include "data_DiskLayout_DOS_ED_2_88MB_xml.h"
@@ -71,6 +74,9 @@ datatype * disklayout_list[]=
 	data_DiskLayout_AmstradCPC_DD_xml,
 	data_DiskLayout_Automatix_RAIL_DD_400KB_xml,
 	data_DiskLayout_AtariST_DD_720KB_xml,
+	data_DiskLayout_COMX_35_SS_70KB_xml,
+	data_DiskLayout_COMX_35_DS_140KB_xml,
+	data_DiskLayout_COMX_35_SS_140KB_xml,
 	data_DiskLayout_Dynacord_AddOne_xml,
 	data_DiskLayout_Dynacord_HD_1600KB_xml,
 	data_DiskLayout_Ensoniq_DD_800KB_xml,
