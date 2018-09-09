@@ -35,6 +35,7 @@
 #include "data_DiskLayout_Acorn_160K_ADFS_xml.h"
 #include "data_DiskLayout_Acorn_320K_ADFM_xml.h"
 #include "data_DiskLayout_Acorn_640K_ADFL_xml.h"
+#include "data_DiskLayout_Didaktik_Spectrum_DD_720KB_xml.h"
 #include "data_DiskLayout_Dynacord_AddOne_xml.h"
 #include "data_DiskLayout_Dynacord_HD_1600KB_xml.h"
 #include "data_DiskLayout_Timex_FDD3000_80T2S_xml.h"
@@ -78,6 +79,7 @@ datatype * disklayout_list[]=
 	data_DiskLayout_COMX_35_SS_70KB_xml,
 	data_DiskLayout_COMX_35_DS_140KB_xml,
 	data_DiskLayout_COMX_35_SS_140KB_xml,
+	data_DiskLayout_Didaktik_Spectrum_DD_720KB_xml,
 	data_DiskLayout_Dynacord_AddOne_xml,
 	data_DiskLayout_Dynacord_HD_1600KB_xml,
 	data_DiskLayout_Ensoniq_DD_800KB_xml,
