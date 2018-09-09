@@ -6,7 +6,7 @@
 --------H----H----X--X----C----------2-------0----0---0----0-----1-------------
 -------H----H---X-----X---CCCCC-----222222----0000-----0000----1111------------
 -------------------------------------------------------------------------------
---------------------------------------------------------- http://hxc2001.com --
+-------------------------------------------------------- https://hxc2001.com --
 HxC Floppy Emulator project
 (c) 2006-2018 Jean-François DEL NERO / (c) HxC2001
 Forum    : http://torlus.com/floppy/forum
@@ -14,11 +14,39 @@ Facebook : https://www.facebook.com/groups/hxc2001
 -------------------------------------------------------------------------------
 
 /*********************************************************
+WIP : HxCFloppyEmulator X.X.X.X
+
+New XML format : ABB disks formats.
+New XML format : Automatix RAIL DD disk format.
+New XML format : COMX disks formats.
+New XML format : DEC RX55 format.
+New XML format : Didaktik Spectrum disk format.
+New XML format : Dynacord HD disks formats.
+New XML format : Gravograph ISIS 640KB disk format.
+New XML format : Memotech disks formats.
+New XML format : Oerlikon Balzers disks formats.
+New XML format : OpusDiscovery disk format.
+New XML format : Oric Jasmin disk format.
+New XML format : OS9 DD disks formats.
+New XML format : PUMA arm robot disks formats.
+New XML format : Tatung Einstein disks formats.
+New XML format : Timex FDD3000 formats.
+New XML format : TRS80 disk format.
+New XML format : Unitel Videotex format.
+New file image support : SAB Diskette Utility / *.SDU floppy image.
+SCP Loader/Writer : Fix single sided SCP file export. 
+New writer : Dragon VDK format. 
+
+Change urls to point to the main hxc2001 domain + switch to https.
+
+*********************************************************/
+
+/*********************************************************
 27 May 2018: HxCFloppyEmulator 2.1.11.1
 
 Hard-sectored H8D Heathkit raw file Loader & Writer added !
 
-/*********************************************************
+*********************************************************/
 
 /*********************************************************
 24 May 2018: HxCFloppyEmulator 2.1.10.1
@@ -28,7 +56,7 @@ Kryoflux Stream Loader (*XX.X.raw) : bmpexport.txt config file to generate the f
 
 NSI Northstar raw file Loader & Writer added !
 
-/*********************************************************
+*********************************************************/
 
 /*********************************************************
 12 May 2018: HxCFloppyEmulator 2.1.9.3
@@ -40,12 +68,15 @@ Flux Stream Analyzer : Internal filter can now be set.
 
 ADF Writer : Amiga ADF HD file (22 Sectors/track) support added.
 
-/*********************************************************
+*********************************************************/
 
 /*********************************************************
 11 April 2018: HxCFloppyEmulator 2.1.9.2
 
 Kryoflux Stream Loader (*XX.X.raw) : Loader & writer index position fixed.
+
+*********************************************************/
+
 
 /*********************************************************
 18 March 2018: HxCFloppyEmulator 2.1.9.1
