@@ -43,6 +43,7 @@
 #include "data_DiskLayout_ABB_ASEA_320KB_xml.h"
 #include "data_DiskLayout_ABB_ASEA_328KB_xml.h"
 #include "data_DiskLayout_ABB_ASEA_640KB_xml.h"
+#include "data_DiskLayout_Automatix_RAIL_DD_400KB_xml.h"
 #include "data_DiskLayout_Gravograph_ISIS_640KB_xml.h"
 #include "data_DiskLayout_Oerlikon_Balzers_250KB_xml.h"
 #include "data_DiskLayout_OpusDiscovery_xml.h"
@@ -68,6 +69,7 @@ datatype * disklayout_list[]=
 	data_DiskLayout_AkaiS950_DD_800KB_xml,
 	data_DiskLayout_AkaiS3000_HD_1_6MB_xml,
 	data_DiskLayout_AmstradCPC_DD_xml,
+	data_DiskLayout_Automatix_RAIL_DD_400KB_xml,
 	data_DiskLayout_AtariST_DD_720KB_xml,
 	data_DiskLayout_Dynacord_AddOne_xml,
 	data_DiskLayout_Dynacord_HD_1600KB_xml,
