@@ -489,7 +489,7 @@ int get_next_MEMBRAIN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 
 int get_next_MFM_Northstar_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {
-	int bit_offset_bak,bit_offset,tmp_bit_offset;
+	int bit_offset,tmp_bit_offset;
 	int sector_size,i,j;
 	unsigned char mfm_buffer[32];
 	unsigned char tmp_buffer[2 + 512 + 1]; // Sync + Sector Info + Data + Checksum
@@ -591,8 +591,6 @@ int get_next_MFM_Northstar_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 					memcpy(sector->input_data,&tmp_buffer[2],sector_size);
 
 					bit_offset++;
-
-					bit_offset_bak = bit_offset;
 
 					sector_extractor_sm=ENDOFSECTOR;
 
@@ -3291,7 +3289,7 @@ int write_raw_track(FILE * f,HXCFE_SECTORACCESS* ss,int32_t startidsector,int32_
 		{
 			if( scfg->use_alternate_data_crc || !scfg->input_data )
 			{
-				*badsect++;
+				*badsect = *badsect + 1;
 			}
 
 			if( ( scfg->sectorsize == sectorsize ) && scfg->input_data )
@@ -3310,7 +3308,7 @@ int write_raw_track(FILE * f,HXCFE_SECTORACCESS* ss,int32_t startidsector,int32_
 		}
 		else
 		{
-			*missingsect++;
+			*missingsect = *missingsect + 1;
 			for( i = 0 ; i < sectorsize ; i++ )
 			{
 				fputc(misssectmess[i&0xF],f);
