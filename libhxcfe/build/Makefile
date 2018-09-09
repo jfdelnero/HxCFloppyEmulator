@@ -64,12 +64,13 @@ DISKLOADERPLUGINS = copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigado
 					krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o system24_loader.o kryofluxstream_loader.o \
 					kryofluxstream.o fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o \
 					northstar_loader.o  xml_loader.o flppcm_loader.o stw_loader.o vfddat_loader.o ana_loader.o atr_loader.o hfev3_loader.o hfev3_writer.o \
-					hfev3_trackgen.o heathkit_loader.o sdu_loader.o
+					hfev3_trackgen.o heathkit_loader.o sdu_loader.o xml_db_loader.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
 					kryofluxstream_writer.o adf_writer.o bmp_writer.o bmp_disk_writer.o bmp_file.o xml_writer.o trd_writer.o stx_writer.o st_writer.o \
-					stw_writer.o dim_writer.o adz_writer.o ipf_writer.o fd_writer.o northstar_loader.o northstar_writer.o heathkit_writer.o vdk_loader.o 
+					stw_writer.o dim_writer.o adz_writer.o ipf_writer.o fd_writer.o northstar_loader.o northstar_writer.o heathkit_writer.o vdk_writer.o \
+					xml_db_writer.o
 
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
@@ -177,6 +178,12 @@ xml_loader.o : $(BASEDIR)/loaders/xml_loader/xml_loader.c $(BASEDIR)/loaders/xml
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 xml_writer.o : $(BASEDIR)/loaders/xml_loader/xml_writer.c $(BASEDIR)/loaders/xml_loader/xml_writer.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+xml_db_loader.o : $(BASEDIR)/loaders/xml_db_loader/xml_db_loader.c $(BASEDIR)/loaders/xml_db_loader/xml_db_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+xml_db_writer.o : $(BASEDIR)/loaders/xml_db_loader/xml_db_writer.c $(BASEDIR)/loaders/xml_db_loader/xml_db_writer.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 scp_loader.o : $(BASEDIR)/loaders/scp_loader/scp_loader.c $(BASEDIR)/loaders/scp_loader/scp_loader.h
@@ -445,7 +452,7 @@ vtr_writer.o : $(BASEDIR)/loaders/vtr_loader/vtr_writer.c
 vdk_loader.o : $(BASEDIR)/loaders/vdk_loader/vdk_loader.c $(BASEDIR)/loaders/vdk_loader/vdk_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-vdk_writer.o : $(BASEDIR)/loaders/vdk_loader/vdk_writer.c $(BASEDIR)/loaders/vdk_writer/vdk_writer.h
+vdk_writer.o : $(BASEDIR)/loaders/vdk_loader/vdk_writer.c $(BASEDIR)/loaders/vdk_loader/vdk_writer.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 dpx_loader.o : $(BASEDIR)/loaders/dpx_loader/dpx_loader.c $(BASEDIR)/loaders/dpx_loader/dpx_loader.h
