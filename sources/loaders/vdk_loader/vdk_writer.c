@@ -50,7 +50,6 @@ int VDK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	int sectorsize;
 
 	int writeret;
-	int i;
 
 	FILE * file;
 

@@ -1517,15 +1517,14 @@ void tg_addAmigaSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 void tg_addNorthstarSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
 
-	int32_t  i;
-	int32_t  trackencoding,trackenc;
+	int32_t  i,dd;
+	int32_t  trackenc;
 	int32_t  startindex,j;
 	uint8_t  checksum;
 
 	startindex=tg->last_bit_offset/8;
 
 	sectorconfig->startsectorindex=tg->last_bit_offset/8;
-	trackencoding=sectorconfig->trackencoding-1;
 
 	// Preamble 33 bytes of zero
 	for(i=0;i<7;i++)
@@ -1533,14 +1532,16 @@ void tg_addNorthstarSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconf
 		pushTrackCode(tg,0x00,0xFF,currentside,NORTHSTAR_HS_DD);
 	}
 
+	dd = 250;
+
 	if(currentside->indexbuffer)
 	{
 		if( sectorconfig->sector == 9 )
 		{
-			us2index( (tg->last_bit_offset + 5000) % currentside->tracklen,currentside,2000,1,0);
+			us2index( (tg->last_bit_offset + 5000 + dd) % currentside->tracklen,currentside,2000,1,0);
 		}
 
-		us2index( tg->last_bit_offset % currentside->tracklen,currentside,2000,1,0);
+		us2index( (tg->last_bit_offset + dd ) % currentside->tracklen,currentside,2000,1,0);
 	}
 
 	for(i=0;i<28;i++)
@@ -1601,14 +1602,13 @@ void tg_addNorthstarSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconf
 void tg_addHeathkitSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
 	int32_t  i;
-	int32_t  trackencoding,trackenc;
+	int32_t  trackenc;
 	int32_t  startindex,j;
 	uint8_t  checksum;
 
 	startindex=tg->last_bit_offset/8;
 
 	sectorconfig->startsectorindex=tg->last_bit_offset/8;
-	trackencoding=sectorconfig->trackencoding-1;
 
 	for(i=0;i<17;i++)
 	{
