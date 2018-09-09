@@ -51,6 +51,7 @@
 #include "data_DiskLayout_Oerlikon_Balzers_250KB_xml.h"
 #include "data_DiskLayout_OpusDiscovery_xml.h"
 #include "data_DiskLayout_Oric_Jasmin_357KB_xml.h"
+#include "data_DiskLayout_OS9_640KB_xml.h"
 #include "data_DiskLayout_OS9_1280KB_xml.h"
 #include "data_DiskLayout_PUMA_Robot_640KB_xml.h"
 #include "data_DiskLayout_Tatung_Einstein_DD_200KB_xml.h"
@@ -95,6 +96,7 @@ datatype * disklayout_list[]=
 	data_DiskLayout_DOS_EXDD_2_5MB_xml,
 	data_DiskLayout_DOS_EXHD_4_5MB_xml,
 	data_DiskLayout_DOS_EXHD_6_78MB_xml,
+	data_DiskLayout_OS9_640KB_xml,
 	data_DiskLayout_OS9_1280KB_xml,
 	data_DiskLayout_UKNC_800KB_xml,
 	data_DiskLayout_Microtan_65_TANDOS_xml,
