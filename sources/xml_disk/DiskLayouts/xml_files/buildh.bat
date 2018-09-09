@@ -53,6 +53,9 @@
 ..\..\converttools\bmptoh DiskLayout_Tatung_Einstein_DD_400KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_TRS80_JV1.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Automatix_RAIL_DD_400KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_COMX_35_DS_140KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_COMX_35_SS_70KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_COMX_35_SS_140KB.xml -DATA
 
 move *.h ..
 
