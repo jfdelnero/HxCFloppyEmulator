@@ -921,11 +921,11 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 		//////////////////////////////
 		// bitrate buffer allocation
 		variable_param=0;
-		currentside->bitrate=sectorconfigtab[0].bitrate;
+		currentside->bitrate = sectorconfigtab[0].bitrate;
 		i=0;
 		while(i<currentside->number_of_sector && !variable_param)
 		{
-			if(sectorconfigtab[i].bitrate!=sectorconfigtab[0].bitrate)
+			if(sectorconfigtab[i].bitrate != sectorconfigtab[0].bitrate)
 			{
 				variable_param = 1;
 				currentside->bitrate = VARIABLEBITRATE;
@@ -938,6 +938,7 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 			}
 			i++;
 		}
+
 		///////////////////////////////////////////
 		// track encoding code buffer allocation
 		variable_param=0;
@@ -958,6 +959,30 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 			}
 			i++;
 		}
+
+		///////////////////////////////////////////
+		// weak bits buffer allocation
+		variable_param=0;
+		currentside->flakybitsbuffer=0;
+
+		i=0;
+		while(i<currentside->number_of_sector && !variable_param)
+		{
+			if( sectorconfigtab[i].weak_bits_mask )
+			{
+				variable_param=1;
+
+				if( !currentside->flakybitsbuffer )
+				{
+					currentside->flakybitsbuffer = malloc(tracklen*sizeof(unsigned char));
+					if(!currentside->flakybitsbuffer)
+						goto alloc_error;
+				}
+
+				memset(currentside->flakybitsbuffer,0,tracklen*sizeof(unsigned char));
+			}
+			i++;
+		}
 	}
 	else
 	{
@@ -973,8 +998,6 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 
 	memset(currentside->databuffer,0,tracklen);
 
-	currentside->flakybitsbuffer=0;
-
 	/////////////////////////////
 	// index buffer allocation
 	currentside->indexbuffer=malloc(tracklen);
@@ -982,7 +1005,6 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 		goto alloc_error;
 
 	memset(currentside->indexbuffer,0,tracklen);
-
 
 	if(numberofsector)
 	{
@@ -1094,6 +1116,9 @@ alloc_error:
 	if( currentside->indexbuffer )
 		free( currentside->indexbuffer );
 
+	if( currentside->flakybitsbuffer )
+		free( currentside->flakybitsbuffer );
+
 	free( currentside );
 
 	return NULL;
@@ -1101,7 +1126,7 @@ alloc_error:
 
 void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
-	int32_t  i,j;
+	int32_t  i,j,k;
 	uint8_t  c,trackencoding,trackenc;
 	uint8_t  CRC16_High;
 	uint8_t  CRC16_Low;
@@ -1222,7 +1247,6 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 			pushTrackCode(tg,CRC16_High,0xFF,currentside,sectorconfig->trackencoding);
 			pushTrackCode(tg,CRC16_Low,0xFF,currentside,sectorconfig->trackencoding);
 		}
-
 	}
 
 	// add extra desync
@@ -1270,7 +1294,7 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 		}
 	}
 
-	sectorconfig->startdataindex=tg->last_bit_offset/8;
+	sectorconfig->startdataindex = tg->last_bit_offset/8;
 	if(sectorconfig->input_data)
 	{
 		FastMFMFMgenerator(tg,currentside,sectorconfig->input_data,sectorsize,sectorconfig->trackencoding);
@@ -1290,6 +1314,21 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 		}
 	}
 
+	if(sectorconfig->weak_bits_mask)
+	{
+		if( currentside->flakybitsbuffer)
+		{
+			for(i=0;i<sectorsize*8;i++)
+			{
+				if(sectorconfig->weak_bits_mask[i>>3] & (0x80 >> (i&7)))
+				{
+					k = (int)((float)( tg->last_bit_offset - ( sectorconfig->startdataindex * 8 ) ) * (float)( (float)i / (float)(sectorsize*8) ) );
+
+					currentside->flakybitsbuffer[sectorconfig->startdataindex + (k>>3)] |= ( 0x80 >> (k&7) );
+				}
+			}
+		}
+	}
 
 	if(sectorconfig->use_alternate_data_crc&0x2)
 	{
@@ -1326,7 +1365,6 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 			pushTrackCode(tg,formatstab[trackencoding].data_gap3,0xFF,currentside,sectorconfig->trackencoding);
 		}
 	}
-
 
 	// fill timing & encoding buffer
 	if(currentside->timingbuffer)
@@ -1962,7 +2000,9 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 	}
 
 	// alloc the track...
-	currentside=tg_initTrack(&tg,tracksize,number_of_sector,trackencoding,bitrate,sectorconfigtab,pregap);
+	currentside = tg_initTrack(&tg,tracksize,number_of_sector,trackencoding,bitrate,sectorconfigtab,pregap);
+	if( !currentside )
+		return NULL;
 
 	// and push all sectors to the track...
 	for(i=0;i<number_of_sector;i++)
