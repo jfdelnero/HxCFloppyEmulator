@@ -110,7 +110,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 	FILE * f;
 	unsigned int filesize;
 	int tracksize;
-	int j,t,s,i;
+	int i,j,k,l,t,s;
 	int sectorposition;
 	int tracklen;
 	int gap3len,interleave;
@@ -126,6 +126,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 	HXCFE_CYLINDER* currentcylinder;
 	//HXCFE_SIDE* currentside;
+	unsigned char * temp_buffer;
 
 	currentcylinder = 0;
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCDSK_libLoad_DiskFile %s",imgfile);
@@ -241,7 +242,6 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 							sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*trackheader.number_of_sector);
 							memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*trackheader.number_of_sector);
 
-
 							gap3len=trackheader.gap3_length;
 							sectorconfig->sectorsize=trackheader.sector_size_code;
 
@@ -251,56 +251,79 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 								fseek (f,trackposition+sizeof(trackheader)+(sizeof(sector)*j), SEEK_SET);
 								hxc_fread(&sector,sizeof(sector),f);
 
-								sectorconfig[j].cylinder=sector.track;
-								sectorconfig[j].head=sector.side;
-								sectorconfig[j].sector=sector.sector_id;
-								sectorconfig[j].sectorsize=128<<(sector.sector_size_code&7);
-								sectorconfig[j].input_data=malloc(sectorconfig[j].sectorsize);
+								sectorconfig[j].cylinder = sector.track;
+								sectorconfig[j].head = sector.side;
+								sectorconfig[j].sector = sector.sector_id;
+								sectorconfig[j].sectorsize = 128<<(sector.sector_size_code&7);
+								sectorconfig[j].input_data = malloc(sectorconfig[j].sectorsize);
 
 								fseek (f, trackposition+0x100+sectorposition/*sizeof(trackheader)+(sizeof(sector)*j)*/, SEEK_SET);
 								hxc_fread(sectorconfig[j].input_data,sectorconfig[j].sectorsize,f);
 
-								sectorposition=sectorposition+sectorconfig[j].sectorsize;
+								// Find the weak bits.
+								if( (sectorconfig[j].sectorsize != sector.data_length) )
+								{
+									sectorconfig[j].weak_bits_mask = malloc(sectorconfig[j].sectorsize);
+									if( sectorconfig[j].weak_bits_mask )
+									{
+										memset(sectorconfig[j].weak_bits_mask, 0x00, sectorconfig[j].sectorsize);
+										temp_buffer = malloc(sectorconfig[j].sectorsize);
+										if( temp_buffer ) 
+										{
+											for(k=0;k< sector.data_length / sectorconfig[j].sectorsize;k++)
+											{
+												fseek (f, trackposition+0x100+sectorposition + k*sectorconfig[j].sectorsize, SEEK_SET);
+												hxc_fread(temp_buffer,sectorconfig[j].sectorsize,f);
+												for(l=0;l<sectorconfig[j].sectorsize;l++)
+												{
+													sectorconfig[j].weak_bits_mask[l] |= (sectorconfig[j].input_data[l] ^ temp_buffer[l]);
+												}
+											}
+											free(temp_buffer);
+										}
+									}
+								}
+
+								sectorposition += sector.data_length;
 
 								// ID part CRC ERROR ?
 								if((sector.fdc_status_reg1&0x20) && !(sector.fdc_status_reg2&0x20))
 								{
-									sectorconfig[j].use_alternate_header_crc=0x1;
+									sectorconfig[j].use_alternate_header_crc = 0x1;
 								}
 
 								// Data part CRC ERROR ?
 								if((sector.fdc_status_reg1&0x20) &&  (sector.fdc_status_reg2&0x20))
 								{
-									sectorconfig[j].use_alternate_data_crc=0x1;
+									sectorconfig[j].use_alternate_data_crc = 0x1;
 								}
 
 								// Deleted Data Address Mark ?
 								if(sector.fdc_status_reg2&0x40)
 								{
-									sectorconfig[j].use_alternate_datamark=1;
-									sectorconfig[j].alternate_datamark=0xF8;
+									sectorconfig[j].use_alternate_datamark = 1;
+									sectorconfig[j].alternate_datamark = 0xF8;
 								}
 
-								sectorconfig[j].bitrate=floppydisk->floppyBitRate;
-								sectorconfig[j].gap3=gap3len;
-								sectorconfig[j].trackencoding=IBMFORMAT_DD;
+								sectorconfig[j].bitrate = floppydisk->floppyBitRate;
+								sectorconfig[j].gap3 = gap3len;
+								sectorconfig[j].trackencoding = IBMFORMAT_DD;
 
 								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%d:%d track id:%d side id:%d sector id %d sector size (id):%d sector size :%d bad crc:%d sreg1:%x sreg2:%x",trackheader.track_number,trackheader.side_number,sector.track,sector.side,sector.sector_id,sectorconfig[j].sectorsize,sector.data_length,sectorconfig[j].use_alternate_data_crc,sector.fdc_status_reg1,sector.fdc_status_reg2);
 							}
 						}
 
 						//
-						currentcylinder->floppyRPM=rpm;
-						currentcylinder->sides[s]=tg_generateTrackEx(trackheader.number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,300,IBMFORMAT_DD,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
+						currentcylinder->floppyRPM = rpm;
+						currentcylinder->sides[s] = tg_generateTrackEx(trackheader.number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,300,IBMFORMAT_DD,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
 
 						for(j=0;j<trackheader.number_of_sector;j++)
 						{
 							if(sectorconfig[j].input_data)
 								free(sectorconfig[j].input_data);
+							if(sectorconfig[j].weak_bits_mask)
+								free(sectorconfig[j].weak_bits_mask);
 						}
-
-
-
 
 						if(trackheader.number_of_sector)
 						{
