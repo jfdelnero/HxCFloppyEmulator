@@ -903,10 +903,13 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 
 	startindex=tg->last_bit_offset/8;
 
-	currentside=(HXCFE_SIDE*)malloc(sizeof(HXCFE_SIDE));
+	currentside = (HXCFE_SIDE*)malloc(sizeof(HXCFE_SIDE));
+	if ( !currentside )
+		return NULL;
+
 	memset(currentside,0,sizeof(HXCFE_SIDE));
 
-	currentside->number_of_sector=numberofsector;
+	currentside->number_of_sector = numberofsector;
 
 	tracklen=tracksize/8;
 	if(tracksize&7) tracklen++;
@@ -924,10 +927,13 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 		{
 			if(sectorconfigtab[i].bitrate!=sectorconfigtab[0].bitrate)
 			{
-				variable_param=1;
-				currentside->bitrate=VARIABLEBITRATE;
+				variable_param = 1;
+				currentside->bitrate = VARIABLEBITRATE;
 
-				currentside->timingbuffer=malloc(tracklen*sizeof(uint32_t));
+				currentside->timingbuffer = malloc(tracklen*sizeof(uint32_t));
+				if(!currentside->timingbuffer)
+					goto alloc_error;
+
 				memset(currentside->timingbuffer,0,tracklen*sizeof(uint32_t));
 			}
 			i++;
@@ -944,7 +950,10 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 				variable_param=1;
 				currentside->track_encoding=VARIABLEENCODING;
 
-				currentside->track_encoding_buffer=malloc(tracklen*sizeof(unsigned char));
+				currentside->track_encoding_buffer = malloc(tracklen*sizeof(unsigned char));
+				if(!currentside->track_encoding_buffer)
+					goto alloc_error;
+
 				memset(currentside->track_encoding_buffer,0,tracklen*sizeof(unsigned char));
 			}
 			i++;
@@ -952,13 +961,16 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 	}
 	else
 	{
-		currentside->bitrate=bitrate;
-		currentside->track_encoding=trackencoding;
+		currentside->bitrate = bitrate;
+		currentside->track_encoding = trackencoding;
 	}
 
 	/////////////////////////////
 	// data buffer allocation
-	currentside->databuffer=malloc(tracklen);
+	currentside->databuffer = malloc(tracklen);
+	if(!currentside->databuffer)
+		goto alloc_error;
+
 	memset(currentside->databuffer,0,tracklen);
 
 	currentside->flakybitsbuffer=0;
@@ -966,7 +978,11 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 	/////////////////////////////
 	// index buffer allocation
 	currentside->indexbuffer=malloc(tracklen);
+	if(!currentside->indexbuffer)
+		goto alloc_error;
+
 	memset(currentside->indexbuffer,0,tracklen);
+
 
 	if(numberofsector)
 	{
@@ -1064,6 +1080,23 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 	}
 
 	return currentside;
+
+alloc_error:
+	if( currentside->timingbuffer )
+		free( currentside->timingbuffer );
+
+	if( currentside->track_encoding_buffer )
+		free( currentside->track_encoding_buffer );
+
+	if( currentside->databuffer )
+		free( currentside->databuffer );
+
+	if( currentside->indexbuffer )
+		free( currentside->indexbuffer );
+
+	free( currentside );
+
+	return NULL;
 }
 
 void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
@@ -1631,7 +1664,7 @@ void tg_addHeathkitSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfi
 	}
 
 	checksum = 0x00;
-	
+
 	// sync
 	pushTrackCode(tg,bit_inverter[0xFD],0xFF,currentside,HEATHKIT_HS_SD);
 
@@ -1662,10 +1695,10 @@ void tg_addHeathkitSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfi
 	{
 		pushTrackCode(tg,0x00,0xFF,currentside,HEATHKIT_HS_SD);
 	}
-	
+
 	// data sync
 	pushTrackCode(tg,bit_inverter[0xFD],0xFF,currentside,HEATHKIT_HS_SD);
-	
+
 	// data
 	for(i=0;i<256;i++)
 	{
@@ -1931,7 +1964,7 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 	// alloc the track...
 	currentside=tg_initTrack(&tg,tracksize,number_of_sector,trackencoding,bitrate,sectorconfigtab,pregap);
 
-	// and write all sectors to it...
+	// and push all sectors to the track...
 	for(i=0;i<number_of_sector;i++)
 	{
 		tg_addSectorToTrack(&tg,&sectorconfigtab[interleavetab[i]],currentside);
@@ -1960,7 +1993,10 @@ HXCFE_SIDE * tg_generateTrack(unsigned char * sectors_data,int32_t sector_size,i
 	HXCFE_SIDE * currentside;
 	HXCFE_SECTCFG * sectorconfigtab;
 
-	sectorconfigtab=malloc(sizeof(HXCFE_SECTCFG)*number_of_sector);
+	sectorconfigtab = malloc(sizeof(HXCFE_SECTCFG)*number_of_sector);
+	if(!sectorconfigtab)
+		return NULL;
+
 	memset(sectorconfigtab,0,sizeof(HXCFE_SECTCFG)*number_of_sector);
 
 	for(i=0;i<number_of_sector;i++)
@@ -1976,7 +2012,8 @@ HXCFE_SIDE * tg_generateTrack(unsigned char * sectors_data,int32_t sector_size,i
 		sectorconfigtab[i].sectorsleft=number_of_sector-i; // Used in Amiga tracks.
 	}
 
-	currentside=tg_generateTrackEx(number_of_sector,sectorconfigtab,interleave,skew,bitrate,rpm,trackencoding,pregap,indexlen,indexpos);
+	currentside = tg_generateTrackEx(number_of_sector,sectorconfigtab,interleave,skew,bitrate,rpm,trackencoding,pregap,indexlen,indexpos);
+
 	free(sectorconfigtab);
 
 	return currentside;
@@ -1988,7 +2025,10 @@ HXCFE_SIDE * tg_alloctrack(int32_t bitrate,int32_t trackencoding,int32_t rpm,int
 	unsigned int tracklen;
 	unsigned int i;
 
-	currentside=(HXCFE_SIDE*)malloc(sizeof(HXCFE_SIDE));
+	currentside = (HXCFE_SIDE*) malloc(sizeof(HXCFE_SIDE));
+	if(!currentside)
+		return NULL;
+
 	memset(currentside,0,sizeof(HXCFE_SIDE));
 
 	currentside->number_of_sector=0;
@@ -2005,10 +2045,13 @@ HXCFE_SIDE * tg_alloctrack(int32_t bitrate,int32_t trackencoding,int32_t rpm,int
 	if(buffertoalloc & TG_ALLOCTRACK_ALLOCTIMIMGBUFFER)
 	{
 		currentside->bitrate=VARIABLEBITRATE;
-		currentside->timingbuffer=malloc(tracklen*sizeof(uint32_t));
+		currentside->timingbuffer = malloc(tracklen*sizeof(uint32_t));
+		if(!currentside->timingbuffer)
+			goto alloc_error;
+
 		for(i=0;i<tracklen;i++)
 		{
-			currentside->timingbuffer[i]=bitrate;
+			currentside->timingbuffer[i] = bitrate;
 		}
 	}
 
@@ -2019,7 +2062,9 @@ HXCFE_SIDE * tg_alloctrack(int32_t bitrate,int32_t trackencoding,int32_t rpm,int
 	if(buffertoalloc & TG_ALLOCTRACK_ALLOCENCODINGBUFFER)
 	{
 		currentside->track_encoding=VARIABLEENCODING;
-		currentside->track_encoding_buffer=malloc(tracklen*sizeof(unsigned char));
+		currentside->track_encoding_buffer = malloc(tracklen*sizeof(unsigned char));
+		if(!currentside->track_encoding_buffer)
+			goto alloc_error;
 
 		for(i=0;i<tracklen;i++)
 		{
@@ -2031,7 +2076,9 @@ HXCFE_SIDE * tg_alloctrack(int32_t bitrate,int32_t trackencoding,int32_t rpm,int
 	// track flakey bits allocation
 	if(buffertoalloc & TG_ALLOCTRACK_ALLOCFLAKEYBUFFER)
 	{
-		currentside->flakybitsbuffer=malloc(tracklen*sizeof(unsigned char));
+		currentside->flakybitsbuffer = malloc(tracklen*sizeof(unsigned char));
+		if(!currentside->flakybitsbuffer)
+			goto alloc_error;
 
 		if(buffertoalloc & TG_ALLOCTRACK_UNFORMATEDBUFFER )
 		{
@@ -2045,7 +2092,10 @@ HXCFE_SIDE * tg_alloctrack(int32_t bitrate,int32_t trackencoding,int32_t rpm,int
 
 	/////////////////////////////
 	// data buffer allocation
-	currentside->databuffer=malloc(tracklen);
+	currentside->databuffer = malloc(tracklen);
+	if(!currentside->databuffer)
+		goto alloc_error;
+
 	memset(currentside->databuffer,0,tracklen);
 	if(buffertoalloc & TG_ALLOCTRACK_RANDOMIZEDATABUFFER)
 	{
@@ -2057,7 +2107,10 @@ HXCFE_SIDE * tg_alloctrack(int32_t bitrate,int32_t trackencoding,int32_t rpm,int
 
 	/////////////////////////////
 	// index buffer allocation
-	currentside->indexbuffer=malloc(tracklen);
+	currentside->indexbuffer = malloc(tracklen);
+	if(!currentside->indexbuffer)
+		goto alloc_error;
+
 	memset(currentside->indexbuffer,0,tracklen);
 
 	if(indexlen & REVERTED_INDEX)
@@ -2070,6 +2123,26 @@ HXCFE_SIDE * tg_alloctrack(int32_t bitrate,int32_t trackencoding,int32_t rpm,int
 	}
 
 	return currentside;
+
+alloc_error:
+	if(currentside->timingbuffer)
+		free(currentside->timingbuffer);
+
+	if(currentside->track_encoding_buffer)
+		free(currentside->track_encoding_buffer);
+
+	if(currentside->flakybitsbuffer)
+		free(currentside->flakybitsbuffer);
+
+	if(currentside->databuffer)
+		free(currentside->databuffer);
+
+	if(currentside->indexbuffer)
+		free(currentside->indexbuffer);
+
+	free(currentside);
+
+	return NULL;
 }
 
 uint32_t * tg_allocsubtrack_long( int32_t tracksize, uint32_t initvalue )
@@ -2081,7 +2154,7 @@ uint32_t * tg_allocsubtrack_long( int32_t tracksize, uint32_t initvalue )
 	tracklen=tracksize/8;
 	if(tracksize&7) tracklen++;
 
-	ptr=malloc(tracklen*sizeof(uint32_t));
+	ptr = malloc(tracklen*sizeof(uint32_t));
 	if(ptr)
 	{
 		for(i=0;i<tracklen;i++)
@@ -2102,7 +2175,7 @@ uint8_t  * tg_allocsubtrack_char( int32_t tracksize, uint8_t initvalue )
 	tracklen=tracksize/8;
 	if(tracksize&7) tracklen++;
 
-	ptr=malloc(tracklen*sizeof(uint8_t));
+	ptr = malloc(tracklen*sizeof(uint8_t));
 	if(ptr)
 	{
 		for(i=0;i<tracklen;i++)
