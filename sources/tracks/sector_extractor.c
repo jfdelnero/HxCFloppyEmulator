@@ -2897,7 +2897,7 @@ int32_t hxcfe_readSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t
 					}
 
 					hxcfe_freeSectorConfig( ss_ctx, sc );
-					
+
 					nbsectorread++;
 				}
 				else
@@ -2963,7 +2963,7 @@ int32_t hxcfe_writeSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_
 					nbsectorwrite++;
 				}
 
-				hxcfe_freeSectorConfig( ss_ctx, sc );				
+				hxcfe_freeSectorConfig( ss_ctx, sc );
 			}
 			else
 			{
@@ -2980,15 +2980,27 @@ int32_t hxcfe_writeSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_
 
 }
 
-void hxcfe_freeSectorConfig( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SECTCFG* sc )
+void hxcfe_freeSectorConfigData( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SECTCFG* sc )
 {
 	if(sc)
 	{
 		if(sc->input_data)
 			free(sc->input_data);
 
+		sc->input_data = NULL;
+
 		if(sc->weak_bits_mask)
 			free(sc->weak_bits_mask);
+
+		sc->weak_bits_mask = NULL;
+	}
+}
+
+void hxcfe_freeSectorConfig( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SECTCFG* sc )
+{
+	if(sc)
+	{
+		hxcfe_freeSectorConfigData( ss_ctx, sc );
 
 		free(sc);
 	}

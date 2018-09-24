@@ -319,10 +319,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 						for(j=0;j<trackheader.number_of_sector;j++)
 						{
-							if(sectorconfig[j].input_data)
-								free(sectorconfig[j].input_data);
-							if(sectorconfig[j].weak_bits_mask)
-								free(sectorconfig[j].weak_bits_mask);
+							hxcfe_freeSectorConfigData( 0, &sectorconfig[j] );
 						}
 
 						if(trackheader.number_of_sector)

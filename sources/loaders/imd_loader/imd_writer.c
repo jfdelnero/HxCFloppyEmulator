@@ -347,23 +347,17 @@ int IMD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 						}while(k<nbsector);
 
-
 						k=0;
 						do
 						{
-							if(sca[k])
-							{
-								if(sca[k]->input_data)
-									free(sca[k]->input_data);
-								free(sca[k]);
-							}
+							hxcfe_freeSectorConfig( ss , sca[k] );
 							k++;
 						}while(k<nbsector);
 
 						if(sca)
 							free(sca);
 
-						log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
+						log_str = realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
 						strcat(log_str,tmp_str);
 
 					}

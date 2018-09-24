@@ -367,7 +367,7 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
 				{
-					free(sectorconfig[k].input_data);
+					hxcfe_freeSectorConfigData( 0, &sectorconfig[k] );
 				}
 			}
 		}

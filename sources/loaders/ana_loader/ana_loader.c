@@ -299,8 +299,7 @@ int ANA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				for(k=0;k<sectorfound;k++)
 				{
-					if(sectorconfig[k].input_data)
-						free(sectorconfig[k].input_data);
+					hxcfe_freeSectorConfigData( 0, &sectorconfig[k] );
 				}
 
 				fseek(f,0,SEEK_SET);

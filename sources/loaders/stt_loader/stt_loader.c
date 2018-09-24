@@ -232,8 +232,7 @@ int STT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				for(k=0;k<STTTRACKHEADER.number_of_sectors;k++)
 				{
-					if(sectorconfig[k].input_data)
-						free(sectorconfig[k].input_data);
+					hxcfe_freeSectorConfigData( 0, &sectorconfig[k] );
 				}
 
 				free(sectorconfig);
