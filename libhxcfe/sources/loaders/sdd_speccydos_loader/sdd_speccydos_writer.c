@@ -73,15 +73,11 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * flopp
 				{
 					nbsector = id;
 
-					if(sc->input_data)
-						free(sc->input_data);
-					free(sc);
+					hxcfe_freeSectorConfig( ss, sc );
 				}
 				else
 				{
-					if(sc->input_data)
-						free(sc->input_data);
-					free(sc);
+					hxcfe_freeSectorConfig( ss, sc );
 					sc = 0;
 				}
 			}
@@ -122,14 +118,11 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * flopp
 									if(sc->sectorsize == sectorsize)
 									{
 										if(sc->input_data)
-										{
 											memcpy((void*)&flat_track[k*sectorsize],sc->input_data,sc->sectorsize);
-											free(sc->input_data);
-										}
-										free(sc);
 									}
-								}
 
+									hxcfe_freeSectorConfig( ss, sc );
+								}
 							}
 
 							fwrite(flat_track,nbsector * sectorsize,1,sdddskfile);

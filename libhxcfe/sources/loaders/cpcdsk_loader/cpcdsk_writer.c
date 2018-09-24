@@ -265,8 +265,7 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 						k=0;
 						do
 						{
-							free(sca[k]->input_data);
-							free(sca[k]);
+							hxcfe_freeSectorConfig( ss, sca[k] );
 							k++;
 						}while(k<nbsector);
 

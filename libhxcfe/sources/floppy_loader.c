@@ -288,7 +288,7 @@ int32_t hxcfe_imgGetLoaderAccess( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID )
 		{
 			imgldr_ctx->selected_id = moduleID;
 			imgldr_ctx->selected_subid = 0;
-			
+
 			if(func_ptr.libLoad_DiskFile)
 				ret=ret | 0x01;
 			if(func_ptr.libWrite_DiskFile)
@@ -367,7 +367,7 @@ const char* hxcfe_imgGetLoaderName( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID 
 		{
 			imgldr_ctx->selected_id = moduleID;
 			imgldr_ctx->selected_subid = 0;
-			
+
 			if( !plugin_ptr[moduleID].sub_id)
 			{
 				plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETPLUGINID,&desc);
@@ -413,7 +413,7 @@ const char* hxcfe_imgGetLoaderExt( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID )
 		{
 			imgldr_ctx->selected_id = moduleID;
 			imgldr_ctx->selected_subid = 0;
-			
+
 			if( !plugin_ptr[moduleID].sub_id)
 			{
 				plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETEXTENSION,&desc);
@@ -1215,6 +1215,12 @@ int32_t hxcfe_setSectorData( HXCFE_FLPGEN* fb_ctx, uint8_t * buffer, int32_t siz
 		cur_sector->input_data = 0;
 	}
 
+	if(cur_sector->weak_bits_mask)
+	{
+		free(cur_sector->weak_bits_mask);
+		cur_sector->weak_bits_mask = 0;
+	}
+
 	if(buffer)
 	{
 		cur_sector->input_data = malloc(size);
@@ -1425,6 +1431,9 @@ int32_t hxcfe_popTrack ( HXCFE_FLPGEN* fb_ctx )
 			{
 				if(current_fb_track_state->sectortab[i].input_data)
 					free(current_fb_track_state->sectortab[i].input_data);
+
+				if(current_fb_track_state->sectortab[i].weak_bits_mask)
+					free(current_fb_track_state->sectortab[i].weak_bits_mask);
 			}
 
 			fb_ctx->fb_stack_pointer--;
@@ -1437,6 +1446,9 @@ int32_t hxcfe_popTrack ( HXCFE_FLPGEN* fb_ctx )
 			{
 				if(current_fb_track_state->sectortab[i].input_data)
 					free(current_fb_track_state->sectortab[i].input_data);
+
+				if(current_fb_track_state->sectortab[i].weak_bits_mask)
+					free(current_fb_track_state->sectortab[i].weak_bits_mask);
 			}
 
 			fb_ctx->fb_stack_pointer--;

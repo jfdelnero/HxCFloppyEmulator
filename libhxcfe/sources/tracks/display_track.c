@@ -782,14 +782,8 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 		oldsl = sl->next_element;
 		//sl = sl->next_element;
 
-		if(sl->sectorconfig)
-		{
-			if(sl->sectorconfig->input_data)
-			{
-				free(sl->sectorconfig->input_data);
-			}
-			free(sl->sectorconfig);
-		}
+		hxcfe_freeSectorConfig( 0, sl->sectorconfig );
+
 		free(sl);
 
 		sl = oldsl;
@@ -1820,17 +1814,10 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	sl=td->sl;
 	while(sl)
 	{
-
 		oldsl = sl->next_element;
 
-		if(sl->sectorconfig)
-		{
-			if(sl->sectorconfig->input_data)
-			{
-				free(sl->sectorconfig->input_data);
-			}
-			free(sl->sectorconfig);
-		}
+		hxcfe_freeSectorConfig( 0, sl->sectorconfig );
+
 		free(sl);
 
 		sl = oldsl;

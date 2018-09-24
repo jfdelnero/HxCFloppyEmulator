@@ -180,15 +180,11 @@ int MSA_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 				{
 					nbsector = id;
 
-					if(sc->input_data)
-						free(sc->input_data);
-					free(sc);
+					hxcfe_freeSectorConfig( ss, sc );
 				}
 				else
 				{
-					if(sc->input_data)
-						free(sc->input_data);
-					free(sc);
+					hxcfe_freeSectorConfig( ss, sc );
 					sc = 0;
 				}
 			}
@@ -231,12 +227,10 @@ int MSA_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 									if(sc->sectorsize == 512)
 									{
 										if(sc->input_data)
-										{
 											memcpy((void*)&flat_track[k*512],sc->input_data,sc->sectorsize);
-											free(sc->input_data);
-										}
-										free(sc);
 									}
+
+									hxcfe_freeSectorConfig( ss, sc );
 								}
 							}
 
