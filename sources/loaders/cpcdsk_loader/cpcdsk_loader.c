@@ -268,7 +268,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 									{
 										memset(sectorconfig[j].weak_bits_mask, 0x00, sectorconfig[j].sectorsize);
 										temp_buffer = malloc(sectorconfig[j].sectorsize);
-										if( temp_buffer ) 
+										if( temp_buffer )
 										{
 											for(k=0;k< sector.data_length / sectorconfig[j].sectorsize;k++)
 											{
