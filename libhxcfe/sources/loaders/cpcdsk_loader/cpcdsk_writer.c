@@ -44,14 +44,14 @@
 
 int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-	int32_t i,j,k,l,nbsector;
+	int32_t i,j,k,l,m,nbsector;
 	FILE * cpcdskfile;
 	char * log_str;
 	char   tmp_str[256];
 	char   disk_info_block[256];
 	char rec_mode;
 	int32_t sectorsize;
-	int32_t track_cnt;
+	int32_t track_cnt,weak_sector;
 	int32_t sectorlistoffset,trackinfooffset;
 	cpcdsk_fileheader * cpcdsk_fh;
 	cpcdsk_trackheader cpcdsk_th;
@@ -163,6 +163,8 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 						{
 							memset(&cpcdsk_s,0,sizeof(cpcdsk_sector));
 
+							weak_sector = 0;
+
 							if(sca[k]->sectorsize!=sectorsize)
 							{
 								sectorsize=-1;
@@ -185,6 +187,18 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 							{
 								cpcdsk_s.fdc_status_reg1 |= 0x20;
 								cpcdsk_s.fdc_status_reg2 |= 0x20;
+								if( sca[k]->weak_bits_mask )
+								{
+									l = 0;
+									do
+									{
+										if( sca[k]->weak_bits_mask[l] )
+										{
+											weak_sector = 1;
+										}
+										l++;
+									}while( !weak_sector && l < sca[k]->sectorsize );
+								}
 							}
 
 							// Deleted Data Address Mark ?
@@ -196,13 +210,42 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 								}
 							}
 
+							if( weak_sector )
+							{
+								cpcdsk_s.data_length *= 3;
+							}
+
 							fseek(cpcdskfile,sectorlistoffset+(k*sizeof(cpcdsk_sector)),SEEK_SET);
 							fwrite(&cpcdsk_s,sizeof(cpcdsk_sector),1,cpcdskfile);
 
 							fseek(cpcdskfile,0,SEEK_END);
 							if(sca[k]->input_data)
 							{
-								fwrite(sca[k]->input_data,sca[k]->sectorsize,1,cpcdskfile);
+								if(weak_sector)
+								{
+									unsigned char * tmp_buf;
+
+									tmp_buf = malloc(sca[k]->sectorsize);
+									if(tmp_buf)
+									{
+										for(l=0;l<3;l++)
+										{
+											memcpy(tmp_buf, sca[k]->input_data, sca[k]->sectorsize);
+											for(m=0;m<sca[k]->sectorsize;m++)
+											{
+												tmp_buf[m] = tmp_buf[m] ^ ( rand() & sca[k]->weak_bits_mask[m] );
+											}
+
+											fwrite(tmp_buf,sca[k]->sectorsize,1,cpcdskfile);
+										}
+
+										free(tmp_buf);
+									}
+								}
+								else
+								{
+									fwrite(sca[k]->input_data,sca[k]->sectorsize,1,cpcdskfile);
+								}
 							}
 							else
 							{
