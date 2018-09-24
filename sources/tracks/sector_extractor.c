@@ -226,8 +226,11 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 								sector->use_alternate_data_crc=0xFF;
 							}
 
-							sector->input_data=(unsigned char*)malloc(sector_size);
-							memcpy(sector->input_data,&tmp_sector[4],sector_size);
+							sector->input_data = (unsigned char*)malloc(sector_size);
+							if(sector->input_data)
+							{
+								memcpy(sector->input_data,&tmp_sector[4],sector_size);
+							}
 							free(tmp_sector);
 
 							// "Empty" sector detection
@@ -421,8 +424,11 @@ int get_next_MEMBRAIN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 							sector->use_alternate_data_crc=0xFF;
 						}
 
-						sector->input_data=(unsigned char*)malloc(sector_size);
-						memcpy(sector->input_data,&tmp_sector[2],sector_size);
+						sector->input_data = (unsigned char*)malloc(sector_size);
+						if(sector->input_data)
+						{
+							memcpy(sector->input_data,&tmp_sector[2],sector_size);
+						}
 						free(tmp_sector);
 
 						// "Empty" sector detection
@@ -2522,14 +2528,12 @@ HXCFE_SECTCFG** hxcfe_getAllTrackSectors( HXCFE_SECTORACCESS* ss_ctx, int32_t tr
 	do
 	{
 		sc = hxcfe_getNextSector(ss_ctx,track,side,type);
-		if(sc)
-		{
-			if(sc->input_data)
-				free(sc->input_data);
-			free(sc);
 
+		if(sc)
 			nb_of_sector++;
-		}
+
+		hxcfe_freeSectorConfig( ss_ctx, sc );
+
 	}while(sc);
 
 	if(nb_sectorfound)
@@ -2573,14 +2577,12 @@ HXCFE_SECTCFG** hxcfe_getAllTrackISOSectors( HXCFE_SECTORACCESS* ss_ctx, int32_t
 	do
 	{
 		sc = hxcfe_getNextSector(ss_ctx,track,side,ISOIBM_MFM_ENCODING);
-		if(sc)
-		{
-			if(sc->input_data)
-				free(sc->input_data);
-			free(sc);
 
+		if(sc)
 			nb_of_sector++;
-		}
+
+		hxcfe_freeSectorConfig( ss_ctx, sc );
+
 	}while(sc);
 
 	// FM
@@ -2588,14 +2590,12 @@ HXCFE_SECTCFG** hxcfe_getAllTrackISOSectors( HXCFE_SECTORACCESS* ss_ctx, int32_t
 	do
 	{
 		sc = hxcfe_getNextSector(ss_ctx,track,side,ISOIBM_FM_ENCODING);
-		if(sc)
-		{
-			if(sc->input_data)
-				free(sc->input_data);
-			free(sc);
 
+		if(sc)
 			nb_of_sector++;
-		}
+
+		hxcfe_freeSectorConfig( ss_ctx, sc );
+
 	}while(sc);
 
 	if(nb_sectorfound)
@@ -2764,10 +2764,7 @@ HXCFE_SECTCFG* hxcfe_searchSector ( HXCFE_SECTORACCESS* ss_ctx, int32_t track, i
 			}
 			else
 			{
-				if(sc->input_data)
-					free(sc->input_data);
-
-				free(sc);
+				hxcfe_freeSectorConfig( ss_ctx, sc );
 			}
 		}
 
@@ -2889,8 +2886,6 @@ int32_t hxcfe_readSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t
 					if(sc->input_data)
 					{
 						memcpy(&buffer[sectorsize*(sc->sector-sector)],sc->input_data,sectorsize);
-						free(sc->input_data);
-						sc->input_data=0;
 					}
 
 					if(sc->use_alternate_data_crc)
@@ -2900,22 +2895,16 @@ int32_t hxcfe_readSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t
 
 						ss_ctx->hxcfe->hxc_printf(MSG_ERROR,"hxcfe_readSectorData : ERROR -> Bad Data CRC ! track %d, side %d, sector %d,Sector size:%d,Type:%x",track,side,sector+nbsectorread,sectorsize,type);
 					}
-					free(sc);
 
+					hxcfe_freeSectorConfig( ss_ctx, sc );
+					
 					nbsectorread++;
 				}
 				else
 				{
-					if(sc->input_data)
-					{
-						free(sc->input_data);
-						sc->input_data=0;
-					}
-					free(sc);
-
+					hxcfe_freeSectorConfig( ss_ctx, sc );
 					return 0;
 				}
-
 			}
 			else
 			{
@@ -2974,13 +2963,7 @@ int32_t hxcfe_writeSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_
 					nbsectorwrite++;
 				}
 
-				if(sc->input_data)
-				{
-					free(sc->input_data);
-					sc->input_data=0;
-				}
-
-				free(sc);
+				hxcfe_freeSectorConfig( ss_ctx, sc );				
 			}
 			else
 			{
@@ -3003,6 +2986,10 @@ void hxcfe_freeSectorConfig( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SECTCFG* sc )
 	{
 		if(sc->input_data)
 			free(sc->input_data);
+
+		if(sc->weak_bits_mask)
+			free(sc->weak_bits_mask);
+
 		free(sc);
 	}
 }

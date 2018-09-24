@@ -82,10 +82,7 @@ int ADF_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 							if( s > maxsect )
 								maxsect = s;
 
-							if(sc->input_data)
-								free(sc->input_data);
-
-							free(sc);
+							hxcfe_freeSectorConfig( ss, sc );
 						}
 					}
 
@@ -113,10 +110,7 @@ int ADF_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 								fwrite(blankblock,sizeof(blankblock),1,rawfile);
 							}
 
-							if(sc->input_data)
-								free(sc->input_data);
-
-							free(sc);
+							hxcfe_freeSectorConfig( ss, sc );
 						}
 						else
 						{
