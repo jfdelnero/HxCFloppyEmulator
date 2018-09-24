@@ -200,10 +200,7 @@ int D88_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 										fwrite(sca[k]->input_data,sca[k]->sectorsize,1,d88file);
 								}
 
-								if(sca[k]->input_data)
-									free(sca[k]->input_data);
-
-								free(sca[k]);
+								hxcfe_freeSectorConfig( 0, sca[k]);
 							}
 
 							if(i==0)

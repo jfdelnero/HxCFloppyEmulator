@@ -387,8 +387,8 @@ int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int32_t trackformat;
 	int sector_found;
 
-	HXCFE_SECTCFG*	sectorconfig;
-	HXCFE_CYLINDER*		currentcylinder;
+	HXCFE_SECTCFG*  sectorconfig;
+	HXCFE_CYLINDER* currentcylinder;
 
 	JV3SectorHeader sh[JV3_HEADER_MAX];
 	JV3SectorsOffsets *pOffset, *SectorsOffsets;
@@ -431,7 +431,6 @@ int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 		sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
-
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
@@ -509,7 +508,7 @@ int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
 				{
-					free(sectorconfig[k].input_data);
+					hxcfe_freeSectorConfigData( 0, &sectorconfig[k] );
 				}
 
 			}

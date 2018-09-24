@@ -803,7 +803,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						{
 							for(j=0;j<trackheader.numberofsector;j++)
 							{
-								if(sectorconfig[j].input_data) free(sectorconfig[j].input_data);
+								hxcfe_freeSectorConfigData( 0, &sectorconfig[j] );
 							}
 
 							if(sectorconfig)
@@ -1121,7 +1121,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							{
 								for(j=0;j<trackheader.numberofsector;j++)
 								{
-									if(sectorconfig[j].input_data) free(sectorconfig[j].input_data);
+									hxcfe_freeSectorConfigData( 0, &sectorconfig[j] );
 								}
 							}
 

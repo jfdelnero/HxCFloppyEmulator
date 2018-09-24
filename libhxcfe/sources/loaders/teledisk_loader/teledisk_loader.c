@@ -550,8 +550,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 		for ( i=0;i < td_track_header->SecPerTrk;i++ )
 		{
-			if(sectorconfig[i].input_data)
-				free(sectorconfig[i].input_data);
+			hxcfe_freeSectorConfigData( 0, &sectorconfig[i] );
 		}
 		free(sectorconfig);
 

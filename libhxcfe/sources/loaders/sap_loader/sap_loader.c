@@ -187,11 +187,7 @@ int SAP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			for(k=0;k<SAP_NSECTS;k++)
 			{
-				if(sectorconfig[k].input_data)
-				{
-					free(sectorconfig[k].input_data);
-					sectorconfig[k].input_data=0;
-				}
+				hxcfe_freeSectorConfigData( 0, &sectorconfig[k] );
 			}
 		}
 	}

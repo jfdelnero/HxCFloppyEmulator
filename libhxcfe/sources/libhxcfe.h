@@ -314,6 +314,7 @@ uint8_t *              hxcfe_getSectorData( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SE
 int32_t                hxcfe_readSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t sector, int32_t numberofsector, int32_t sectorsize, int32_t type, uint8_t * buffer, int32_t * fdcstatus );
 int32_t                hxcfe_writeSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t sector, int32_t numberofsector, int32_t sectorsize, int32_t type, uint8_t * buffer, int32_t * fdcstatus );
 
+void                   hxcfe_freeSectorConfigData( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SECTCFG* sc );
 void                   hxcfe_freeSectorConfig( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SECTCFG* sc );
 
 void                   hxcfe_deinitSectorAccess( HXCFE_SECTORACCESS* ss_ctx );

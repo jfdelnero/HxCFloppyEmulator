@@ -292,11 +292,11 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 		for(k=0;k<number_of_sector;k++)
 		{
-			free(sectorconfig[k].input_data);
+			hxcfe_freeSectorConfigData( 0, &sectorconfig[k] );
 		}
 
 		if(number_of_sector)
-				free(sectorconfig);
+			free(sectorconfig);
 
 		}
 

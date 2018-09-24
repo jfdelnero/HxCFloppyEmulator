@@ -1429,11 +1429,7 @@ int32_t hxcfe_popTrack ( HXCFE_FLPGEN* fb_ctx )
 
 			for(i=0;i<current_fb_track_state->numberofsector;i++)
 			{
-				if(current_fb_track_state->sectortab[i].input_data)
-					free(current_fb_track_state->sectortab[i].input_data);
-
-				if(current_fb_track_state->sectortab[i].weak_bits_mask)
-					free(current_fb_track_state->sectortab[i].weak_bits_mask);
+				hxcfe_freeSectorConfigData( 0, &current_fb_track_state->sectortab[i] );
 			}
 
 			fb_ctx->fb_stack_pointer--;
@@ -1444,11 +1440,7 @@ int32_t hxcfe_popTrack ( HXCFE_FLPGEN* fb_ctx )
 		{
 			for(i=0;i<current_fb_track_state->numberofsector;i++)
 			{
-				if(current_fb_track_state->sectortab[i].input_data)
-					free(current_fb_track_state->sectortab[i].input_data);
-
-				if(current_fb_track_state->sectortab[i].weak_bits_mask)
-					free(current_fb_track_state->sectortab[i].weak_bits_mask);
+				hxcfe_freeSectorConfigData( 0, &current_fb_track_state->sectortab[i] );
 			}
 
 			fb_ctx->fb_stack_pointer--;

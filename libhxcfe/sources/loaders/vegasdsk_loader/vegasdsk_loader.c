@@ -203,7 +203,7 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 		for(k=0;k<10;k++)
 		{
-			free(sectorconfig[k].input_data);
+			hxcfe_freeSectorConfigData( 0, &sectorconfig[k] );
 		}
 	}
 

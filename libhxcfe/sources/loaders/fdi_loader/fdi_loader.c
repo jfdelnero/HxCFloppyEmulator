@@ -231,7 +231,7 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			for(k=0;k<track_header.number_of_sectors;k++)
 			{
-				free(sectorconfig[k].input_data);
+				hxcfe_freeSectorConfigData( 0, &sectorconfig[k] );
 			}
 			free(sectorconfig);
 		}
