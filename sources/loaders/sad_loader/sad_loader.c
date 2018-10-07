@@ -74,8 +74,8 @@ int SAD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		if(pathlen!=0)
 		{
 
-			f=hxc_fopen(imgfile,"rb");
-			if(f==NULL)
+			f = hxc_fopen(imgfile,"rb");
+			if( f == NULL )
 			{
 				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SAD_libIsValidDiskFile : Cannot open %s !",imgfile);
 				return HXCFE_ACCESSERROR;
@@ -120,8 +120,8 @@ int SAD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAD_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SAD_libLoad_DiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;

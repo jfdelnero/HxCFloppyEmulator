@@ -109,8 +109,8 @@ int Northstar_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Northstar_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;

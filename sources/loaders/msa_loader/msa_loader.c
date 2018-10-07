@@ -71,7 +71,7 @@ int MSA_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 	if(hxc_checkfileext(imgfile,"msa"))
 	{
-		f=hxc_fopen(imgfile,"rb");
+		f = hxc_fopen(imgfile,"rb");
 		if(f)
 		{
 			hxc_fread(signature,3,f);
@@ -111,8 +111,8 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MSA_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
