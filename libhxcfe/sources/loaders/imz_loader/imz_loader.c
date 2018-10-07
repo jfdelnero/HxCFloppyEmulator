@@ -61,11 +61,13 @@
 #include "thirdpartylibs/zlib/zlib.h"
 #include "thirdpartylibs/zlib/contrib/minizip/unzip.h"
 
+#include "loaders/common/raw_iso.h"
+
 #include "libhxcadaptor.h"
 
 #define UNPACKBUFFER 128*1024
 
-extern int pc_imggetfloppyconfig(unsigned char * img,uint32_t filesize,int32_t *numberoftrack,int32_t *numberofside,int32_t *numberofsectorpertrack,int32_t *gap3len,int32_t *interleave,int32_t *rpm, int32_t *bitrate,int32_t * ifmode);
+extern int pc_imggetfloppyconfig(unsigned char * img,uint32_t filesize, raw_iso_cfg *rawcfg);
 
 int IMZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
@@ -107,17 +109,15 @@ int IMZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 int IMZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	int32_t filesize;
-	int i,j;
-	int32_t file_offset;
-	int32_t sectorsize;
-	int32_t gap3len,skew,trackformat,interleave;
 	char filename_inzip[256];
 	unsigned char* flatimg;
 	int err=UNZ_OK;
 	unzFile uf;
 	unz_file_info file_info;
 	HXCFE_CYLINDER* currentcylinder = NULL;
-	int32_t rpm;
+
+	raw_iso_cfg rawcfg;
+	int ret;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMZ_libLoad_DiskFile %s",imgfile);
 
@@ -145,10 +145,11 @@ int IMZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	}
 
 	filesize=file_info.uncompressed_size;
+
 	flatimg=(unsigned char*)malloc(filesize);
 	if(!flatimg)
 	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Unpack error!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Alloc error!");
 		return HXCFE_BADFILE;
 	}
 
@@ -163,48 +164,17 @@ int IMZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	unzClose(uf);
 
-	if(pc_imggetfloppyconfig(
-			flatimg,
-			filesize,
-			&floppydisk->floppyNumberOfTrack,
-			&floppydisk->floppyNumberOfSide,
-			&floppydisk->floppySectorPerTrack,
-			&gap3len,
-			&interleave,
-			&rpm,
-			&floppydisk->floppyBitRate,
-			&floppydisk->floppyiftype)==1
-			)
+	if(pc_imggetfloppyconfig( flatimg, filesize, &rawcfg)==1)
 	{
-		sectorsize=512;
+		ret = raw_iso_loader(imgldr_ctx, floppydisk, 0, flatimg, filesize, &rawcfg);
 
-		skew=0;
-		trackformat=IBMFORMAT_DD;
-
-		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-
-		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-		{
-			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-			currentcylinder=floppydisk->tracks[j];
-
-			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-			{
-				hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
-
-				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-							(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-
-				currentcylinder->sides[i]=tg_generateTrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
-			}
-		}
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"IMZ Loader : tracks file successfully loaded and encoded!");
 		free(flatimg);
-		return 0;
+
+		return ret;
 	}
 
 	free(flatimg);
+
 	return HXCFE_BADFILE;
 }
 
