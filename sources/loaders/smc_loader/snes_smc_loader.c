@@ -74,7 +74,7 @@ int snes_smc_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"snes_smc_libIsValidDiskFile");
 	if(imgfile)
 	{
-		f=hxc_fopen(imgfile,"r+b");
+		f = hxc_fopen(imgfile,"r+b");
 		if(f)
 		{
 			fileheader=(unsigned char*)malloc(512);

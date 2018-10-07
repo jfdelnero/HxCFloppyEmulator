@@ -77,7 +77,7 @@ int XML_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			return HXCFE_ACCESSERROR;
 		}
 
-		f=hxc_fopen(imgfile,"rb");
+		f = hxc_fopen(imgfile,"rb");
 		if(f)
 		{
 			memset(firstline,0,sizeof(firstline));
@@ -114,8 +114,8 @@ int XML_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"XML_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;

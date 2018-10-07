@@ -154,7 +154,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 	if(fxs)
 	{
-		f=hxc_fopen(file,"rb");
+		f = hxc_fopen(file,"rb");
 		if(f)
 		{
 			filesize = hxc_fgetsize(f);
