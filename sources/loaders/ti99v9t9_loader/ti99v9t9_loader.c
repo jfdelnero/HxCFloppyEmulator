@@ -310,8 +310,8 @@ int TI99V9T9_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99V9T9_libIsValidDiskFile");
 	if(imgfile)
 	{
-		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL)
+		f = hxc_fopen(imgfile,"rb");
+		if( f == NULL )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"TI99V9T9_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
@@ -372,8 +372,8 @@ int TI99V9T9_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99V9T9_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;

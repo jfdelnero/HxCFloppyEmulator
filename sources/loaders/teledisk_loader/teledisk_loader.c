@@ -80,8 +80,8 @@ int TeleDisk_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		pathlen=strlen(imgfile);
 		if(pathlen!=0)
 		{
-			f=hxc_fopen(imgfile,"rb");
-			if(f==NULL)
+			f = hxc_fopen(imgfile,"rb");
+			if( f == NULL )
 			{
 				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"TeleDisk_libIsValidDiskFile : Cannot open %s !",imgfile);
 				return HXCFE_ACCESSERROR;
@@ -259,8 +259,8 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	hxcfe_imgCallProgressCallback(imgldr_ctx,0,100 );
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"TeleDisk_libLoad_DiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;

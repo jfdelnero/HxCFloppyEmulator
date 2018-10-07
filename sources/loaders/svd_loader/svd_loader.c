@@ -71,7 +71,7 @@ int SVD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile");
 	if( hxc_checkfileext(imgfile,"svd") )
 	{
-		f=hxc_fopen(imgfile,"r");
+		f = hxc_fopen(imgfile,"r");
 		if(f)
 		{
 			hxc_fgets(linebuffer,sizeof(linebuffer),f);
@@ -135,8 +135,8 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	sectorsize=512;
 	trackformat=0;
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;

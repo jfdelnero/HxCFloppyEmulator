@@ -69,7 +69,7 @@ int VFDDAT_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VFDDAT_libIsValidDiskFile");
 	if(imgfile)
 	{
-		f=hxc_fopen(imgfile,"r+b");
+		f = hxc_fopen(imgfile,"r+b");
 		if(f)
 		{
 			filesize = hxc_fgetsize(f);
@@ -185,8 +185,8 @@ int VFDDAT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VFDDAT_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
