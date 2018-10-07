@@ -71,8 +71,8 @@ int GKH_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	if( hxc_checkfileext(imgfile,"gkh"))
 	{
 
-		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL)
+		f = hxc_fopen(imgfile,"rb");
+		if( f == NULL )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"GKH_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
@@ -115,15 +115,15 @@ int GKH_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	unsigned char tagbuffer[10];
 	image_type_tag *img_type_tag;
 	image_location_tag *img_location_tag;
-	unsigned char * trackdata;
+	unsigned char * trackdata = NULL;
 	int file_offset;
 
 	sectorsize = 0;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"GKH_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
@@ -156,8 +156,8 @@ int GKH_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			i++;
 		}while(i<header.numberoftags);
 
-		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-		floppydisk->floppyBitRate=250000;
+		floppydisk->floppyiftype = GENERIC_SHUGART_DD_FLOPPYMODE;
+		floppydisk->floppyBitRate = 250000;
 		rpm=300;
 
 		trackformat=IBMFORMAT_DD;
@@ -169,10 +169,15 @@ int GKH_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 		if(sectorsize)
 		{
-			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			if(!floppydisk->tracks)
+				goto alloc_error;
+
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
 			trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+			if(!trackdata)
+				goto alloc_error;
 
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 			{
@@ -207,6 +212,19 @@ int GKH_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"BAD GKH file!");
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
+
+alloc_error:
+
+	if ( f )
+		hxc_fclose( f );
+
+	if( floppydisk->tracks )
+		free( floppydisk->tracks );
+
+	if( trackdata )
+		free( trackdata );
+
+	return HXCFE_INTERNALERROR;
 }
 
 int GKH_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)

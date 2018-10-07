@@ -244,13 +244,14 @@ int MSA_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 				hxc_fclose(msadskfile);
 			}
-
-			if(flat_track)
-				free(flat_track);
-
-			if(packed_track)
-				free(packed_track);
 		}
+
+		if(flat_track)
+			free(flat_track);
+
+		if(packed_track)
+			free(packed_track);
+
 	}
 
 	return 0;

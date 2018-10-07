@@ -96,11 +96,11 @@ int FZF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	FILE * f;
+	FILE * f = NULL;
 	unsigned int  filesize;
 	int  i,j;
 	unsigned int  file_offset;
-	unsigned char * fzf_file;
+	unsigned char * fzf_file = NULL;
 	int gap3len,interleave,trackformat,skew,c;
 	int rpm;
 	int sectorsize;
@@ -110,15 +110,15 @@ int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	unsigned char  number_of_voices;
 	unsigned short pcm_size;
 	unsigned char  file_type;
-	unsigned char* floppy_data;
+	unsigned char* floppy_data = NULL;
 
 	int  nbblock;
 	char filename[512];
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FZF_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
@@ -131,10 +131,7 @@ int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	fzf_file = malloc ( nbblock * 1024 );
 	if(!fzf_file)
-	{
-		hxc_fclose(f);
-		return HXCFE_INTERNALERROR;
-	}
+		goto alloc_error;
 
 	memset(fzf_file,0,nbblock * 1024);
 	hxc_fread(fzf_file,filesize,f);
@@ -155,10 +152,8 @@ int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	floppy_data = malloc(floppydisk->floppyNumberOfTrack * floppydisk->floppyNumberOfSide * floppydisk->floppySectorPerTrack * sectorsize);
 	if(!floppy_data)
-	{
-		free(fzf_file);
-		return HXCFE_INTERNALERROR;
-	}
+		goto alloc_error;
+
 	memset(floppy_data , 0x5A , floppydisk->floppyNumberOfTrack * floppydisk->floppyNumberOfSide * floppydisk->floppySectorPerTrack * sectorsize);
 
 	if (nbblock>1279)
@@ -234,7 +229,9 @@ int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	//////////////////////////////////////////////////////////////
 
-	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	if( !floppydisk->tracks )
+		goto alloc_error;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dB (%d blocks), %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize,nbblock,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"File type : %s (%d), Number of banks : %d, Number of voices : %d, PCM size : %d",fzffiletype[file_type&3],file_type,number_of_banks,number_of_voices,pcm_size);
@@ -261,6 +258,21 @@ int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	free(fzf_file);
 
 	return HXCFE_NOERROR;
+
+alloc_error:
+	if(f)
+		hxc_fclose(f);
+
+	if(fzf_file)
+		free(fzf_file);
+
+	if(floppy_data)
+		free(floppy_data);
+
+	if(floppydisk->tracks)
+		free(floppydisk->tracks);
+
+	return HXCFE_INTERNALERROR;
 }
 
 int FZF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)

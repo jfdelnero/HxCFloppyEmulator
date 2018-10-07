@@ -129,11 +129,10 @@ int EMUII_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 	unsigned char sector_data[0xE00];
 	int tracknumber,sidenumber;
 
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUII_libLoad_DiskFile %s",imgfile);
 
 	strcpy(os_filename,imgfile);
-	i=strlen(os_filename)-1;
+	i = strlen(os_filename)-1;
 	while(i && (os_filename[i]!='\\') && (os_filename[i]!='/') )
 	{
 		i--;
@@ -173,6 +172,9 @@ int EMUII_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 
 
 	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	if( !floppydisk->tracks )
+		goto alloc_error;
+
 	memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 	for(i=0;i<(unsigned int)(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide);i++)
@@ -224,6 +226,19 @@ int EMUII_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 	hxc_fclose(f_eii);
 	hxc_fclose(f_os);
 	return HXCFE_NOERROR;
+
+alloc_error:
+
+	if ( f_eii )
+		hxc_fclose( f_eii );
+
+	if ( f_os )
+		hxc_fclose( f_os );
+
+	if( floppydisk->tracks )
+		free( floppydisk->tracks );
+	
+	return HXCFE_INTERNALERROR;	
 
 }
 

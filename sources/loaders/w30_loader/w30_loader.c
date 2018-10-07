@@ -100,7 +100,7 @@ int W30_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	unsigned int filesize;
 	int i,j;
 	unsigned int file_offset;
-	unsigned char* trackdata;
+	unsigned char* trackdata = NULL;
 	int gap3len,interleave,trackformat,skew;
 	int rpm;
 	int sectorsize;
@@ -108,8 +108,8 @@ int W30_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"W30_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
@@ -129,17 +129,22 @@ int W30_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	floppydisk->floppySectorPerTrack=9;
 	floppydisk->floppyBitRate=250000;
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	if( !floppydisk->tracks )
+		goto alloc_error;
+
 	rpm=300; // normal rpm
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
-	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+	trackdata = (unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+	if(!trackdata)
+		goto alloc_error;
 
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
 
-		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+		floppydisk->tracks[j] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 		currentcylinder=floppydisk->tracks[j];
 
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
@@ -161,6 +166,18 @@ int W30_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	hxc_fclose(f);
 	return HXCFE_NOERROR;
+
+alloc_error:
+	if(f)
+		hxc_fclose(f);
+
+	if(trackdata)
+		free(trackdata);
+
+	if(floppydisk->tracks)
+		free(floppydisk->tracks);
+
+	return HXCFE_INTERNALERROR;
 }
 
 int W30_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)

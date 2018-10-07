@@ -103,17 +103,17 @@ int System24_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	unsigned int file_offset;
 
 	unsigned short i,j,k,l,ptr;
-	unsigned char* trackdata;
+	unsigned char* trackdata = NULL;
 	unsigned char  gap3len,trackformat;
 	unsigned short rpm;
 	int tracksize;
-	HXCFE_CYLINDER* currentcylinder;
-	HXCFE_SECTCFG  * sectorconfig;
+	HXCFE_CYLINDER* currentcylinder = NULL;
+	HXCFE_SECTCFG  * sectorconfig = NULL;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"System24_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
@@ -147,7 +147,6 @@ int System24_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		}
 	}
 
-
 	gap3len = 84;
 
 	floppydisk->floppyiftype = IBMPC_HD_FLOPPYMODE;
@@ -155,14 +154,20 @@ int System24_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	trackformat=IBMFORMAT_DD;
 
 	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)* ( floppydisk->floppyNumberOfTrack + 4 ));
+	if( !floppydisk->tracks )
+		goto alloc_error;
 
 	rpm=288; // normal rpm
 
+	sectorconfig = malloc(sizeof(HXCFE_SECTCFG) *  floppydisk->floppySectorPerTrack );
+	if( !sectorconfig )
+		goto alloc_error;
 
-	sectorconfig=malloc(sizeof(HXCFE_SECTCFG) *  floppydisk->floppySectorPerTrack );
 	memset(sectorconfig,0,sizeof(HXCFE_SECTCFG) *  floppydisk->floppySectorPerTrack );
 
 	trackdata=(unsigned char*)malloc(tracksize);
+	if( !trackdata )
+		goto alloc_error;
 
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
@@ -291,6 +296,23 @@ int System24_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 	hxc_fclose(f);
 	return HXCFE_NOERROR;
+
+alloc_error:
+
+	if ( f )
+		hxc_fclose( f );
+
+	if( floppydisk->tracks )
+		free( floppydisk->tracks );
+	
+	if( trackdata )
+		free( trackdata );
+
+	if( sectorconfig )
+		free( sectorconfig );
+
+	return HXCFE_INTERNALERROR;	
+
 }
 
 int System24_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)

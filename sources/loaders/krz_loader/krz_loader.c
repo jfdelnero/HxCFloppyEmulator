@@ -128,7 +128,6 @@ int KRZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	dksize=floppydisk->floppyNumberOfTrack*
 			(floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide*512);
 
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"floppy size:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",dksize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
 
 	flatimg=(unsigned char*)malloc(dksize);
@@ -137,7 +136,6 @@ int KRZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		memset(flatimg,0,dksize);
 		if(pcbootsector)
 			memcpy(flatimg,&msdos_bootsector,512);
-
 
 		fatconfig.sectorsize=512;
 		fatconfig.clustersize=2;
@@ -180,18 +178,18 @@ int KRZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		{
 			return HXCFE_BADFILE;
 		}
+
 		memcpy(&flatimg[((fatconfig.reservedsector)+(fatconfig.nbofsectorperfat))*fatconfig.sectorsize],&flatimg[fatposition],fatconfig.nbofsectorperfat*fatconfig.sectorsize);
-
-
 	}
 	else
 	{
 		return HXCFE_INTERNALERROR;
 	}
 
-
 	floppydisk->floppyiftype=IBMPC_HD_FLOPPYMODE;
 	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	if(!floppydisk->tracks)
+		goto alloc_error;
 
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
@@ -213,6 +211,15 @@ int KRZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 	return HXCFE_NOERROR;
+
+alloc_error:
+	if(flatimg)
+		free(flatimg);
+
+	if(floppydisk->tracks)
+		free(floppydisk->tracks);
+
+	return HXCFE_INTERNALERROR;
 }
 
 int KRZ_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
