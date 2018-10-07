@@ -167,8 +167,8 @@ int AFI_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	if(hxc_checkfileext(imgfile,"afi"))
 	{
 
-		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL)
+		f = hxc_fopen(imgfile,"rb");
+		if( f == NULL )
 			return HXCFE_ACCESSERROR;
 
 		hxc_fread(&header,sizeof(header),f);
@@ -215,8 +215,8 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AFI_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"AFI_libLoad_DiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;

@@ -75,8 +75,8 @@ int CopyQm_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		pathlen=strlen(imgfile);
 		if(pathlen!=0)
 		{
-			f=hxc_fopen(imgfile,"rb");
-			if(f==NULL)
+			f = hxc_fopen(imgfile,"rb");
+			if( f == NULL )
 			{
 				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"CopyQm_libIsValidDiskFile : Cannot open %s !",imgfile);
 				return HXCFE_ACCESSERROR;
@@ -149,8 +149,8 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CopyQm_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"CopyQm_libLoad_DiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;

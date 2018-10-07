@@ -74,7 +74,7 @@ int ApriDisk_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		pathlen=strlen(imgfile);
 		if(pathlen!=0)
 		{
-			f=hxc_fopen(imgfile,"r+b");
+			f = hxc_fopen(imgfile,"r+b");
 			if(f)
 			{
 				memset(HeaderBuffer,0,sizeof(HeaderBuffer));
@@ -119,8 +119,8 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
