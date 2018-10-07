@@ -167,16 +167,16 @@ int DMK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	int32_t tabindex;
 	int32_t bit_offset;
 
-	unsigned char * track_buf;
-	unsigned char * tmp_fm_track_buf;
+	unsigned char * track_buf = NULL;
+	unsigned char * tmp_fm_track_buf = NULL;
 	unsigned short tab_ptr_value;
 	int32_t databitoffset;
 	unsigned char mfm_buffer[16];
 	int32_t track_size;
 
-	HXCFE_SECTORACCESS* ss;
-	HXCFE_SECTCFG** sca_mfm;
-	HXCFE_SECTCFG** sca_fm;
+	HXCFE_SECTORACCESS* ss = NULL;
+	HXCFE_SECTCFG** sca_mfm = NULL;
+	HXCFE_SECTCFG** sca_fm = NULL;
 
 	dmk_header dmkheader;
 

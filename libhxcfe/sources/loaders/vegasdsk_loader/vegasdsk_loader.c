@@ -70,8 +70,8 @@ int VEGASDSK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	if( hxc_checkfileext(imgfile,"veg") || hxc_checkfileext(imgfile,"vegasdsk") )
 	{
 
-		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL)
+		f = hxc_fopen(imgfile,"rb");
+		if( f == NULL )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"VEGASDSK_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
@@ -97,7 +97,7 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	FILE * f;
 	unsigned int filesize;
 	int i,j,k;
-	unsigned char* floppy_data;
+	unsigned char* floppy_data = NULL;
 	int gap3len,interleave;
 	int sectorsize,rpm;
 	unsigned char  trackformat;
@@ -108,8 +108,8 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VEGASDSK_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
@@ -123,7 +123,6 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	fseek (f , 0 , SEEK_SET);
 
 	gap3len=255;
-
 
 	switch(buffer[0x27])
 	{
@@ -168,10 +167,16 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	floppydisk->floppyNumberOfTrack=buffer[0x26]+1;
 
-
 	floppydisk->floppyBitRate=250000;
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+
+	floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	if(!floppydisk->tracks)
+		goto alloc_error;
+
+	floppy_data = malloc(floppydisk->floppySectorPerTrack*sectorsize);
+	if(!floppy_data)
+		goto alloc_error;
 
 	rpm=300; // normal rpm
 
@@ -207,9 +212,6 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		}
 	}
 
-
-	floppy_data=malloc(floppydisk->floppySectorPerTrack*sectorsize);
-
 	for(j=1;j<floppydisk->floppyNumberOfTrack;j++)
 	{
 		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
@@ -244,6 +246,19 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	hxc_fclose(f);
 	return HXCFE_NOERROR;
+
+alloc_error:
+
+	if ( f )
+		hxc_fclose( f );
+
+	if( floppydisk->tracks )
+		free( floppydisk->tracks );
+
+	if( floppy_data )
+		free( floppy_data );
+
+	return HXCFE_INTERNALERROR;
 }
 
 int VEGASDSK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)

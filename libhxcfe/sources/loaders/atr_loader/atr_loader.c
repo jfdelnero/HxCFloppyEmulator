@@ -80,8 +80,8 @@ int ATR_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			return HXCFE_ACCESSERROR;
 		}
 
-		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL)
+		f = hxc_fopen(imgfile,"rb");
+		if( f == NULL )
 			return HXCFE_ACCESSERROR;
 
 		memset(&fileheader,0,sizeof(fileheader));
@@ -112,20 +112,20 @@ int ATR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	unsigned int filesize;
 	int i,j,k;
 	unsigned int file_offset,track_offset;
-	unsigned char* trackdata;
+	unsigned char* trackdata = NULL;
 	int trackformat;
 	int gap3len,interleave;
 	int sectorsize,rpm;
 	int bitrate,mixedsectorsize;
 	atr_header fileheader;
 
-	HXCFE_SECTCFG* sectorconfig;
-	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SECTCFG* sectorconfig = NULL;
+	HXCFE_CYLINDER* currentcylinder = NULL;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ATR_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
@@ -192,18 +192,24 @@ int ATR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		floppydisk->floppyBitRate = bitrate;
 		floppydisk->floppyiftype = GENERIC_SHUGART_DD_FLOPPYMODE;
 		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if( !floppydisk->tracks )
+			goto alloc_error;
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,bitrate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
 
 		sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
+		if( !sectorconfig )
+			goto alloc_error;
+
 		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 
 		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+		if( !trackdata )
+			goto alloc_error;
 
 		file_offset = 16;
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
-
 			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
 
@@ -257,6 +263,22 @@ int ATR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
+
+alloc_error:
+
+	if ( f )
+		hxc_fclose( f );
+
+	if( floppydisk->tracks )
+		free( floppydisk->tracks );
+	
+	if( trackdata )
+		free( trackdata );
+
+	if( sectorconfig )
+		free( sectorconfig );
+
+	return HXCFE_INTERNALERROR;	
 }
 
 
