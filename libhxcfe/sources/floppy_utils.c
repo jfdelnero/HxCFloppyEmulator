@@ -195,8 +195,8 @@ void savebuffer(char * name,unsigned char * buffer, int size)
 {
 	FILE * f;
 
-	f=hxc_fopen(name,"w+b");
-	if(f)
+	f = hxc_fopen(name,"w+b");
+	if( f )
 	{
 		fwrite(buffer,size,1,f);
 		hxc_fclose(f);
