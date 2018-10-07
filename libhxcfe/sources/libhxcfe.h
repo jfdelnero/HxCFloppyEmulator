@@ -223,6 +223,7 @@ int32_t                hxcfe_pushTrackPFS ( HXCFE_FLPGEN* fb_ctx, int32_t number
 
 int32_t                hxcfe_setTrackInterleave ( HXCFE_FLPGEN* fb_ctx, int32_t interleave );
 int32_t                hxcfe_setTrackSkew ( HXCFE_FLPGEN* fb_ctx, int32_t skew );
+int32_t                hxcfe_setSideSkew ( HXCFE_FLPGEN* fb_ctx, int32_t skew );
 
 int32_t                hxcfe_setTrackPreGap ( HXCFE_FLPGEN* fb_ctx, int32_t pregap );
 
@@ -270,9 +271,11 @@ int32_t                hxcfe_getCurrentTrackType ( HXCFE_FLPGEN* fb_ctx );
 int32_t                hxcfe_getCurrentRPM ( HXCFE_FLPGEN* fb_ctx );
 int32_t                hxcfe_getCurrentSkew ( HXCFE_FLPGEN* fb_ctx );
 
+int32_t                hxcfe_setInterfaceMode( HXCFE_FLPGEN* fb_ctx, int32_t mode );
+
 HXCFE_FLOPPY*          hxcfe_getFloppy ( HXCFE_FLPGEN* fb_ctx );
 
-int32_t                hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, uint8_t * diskdata, int32_t buffersize );
+int32_t                hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f, uint8_t * diskdata, int32_t buffersize );
 
 int32_t                hxcfe_getFloppySize( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t * nbsector );
 
