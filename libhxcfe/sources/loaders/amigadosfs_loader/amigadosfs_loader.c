@@ -55,8 +55,12 @@
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
+#include "loaders/common/raw_amiga.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
+
+#include "loaders/common/raw_amiga.h"
 
 #include "amigadosfs_loader.h"
 
@@ -288,7 +292,6 @@ int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char *
 
 int AMIGADOSFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	HXCFE_FLPGEN * fb_ctx;
 	struct Device * adfdevice;
 	struct Volume * adfvolume;
 	unsigned char * flatimg;
@@ -421,52 +424,9 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flopp
 			return HXCFE_INTERNALERROR;
 		}
 
-		if(flatimg2)
-		{
-			fb_ctx = hxcfe_initFloppy( imgldr_ctx->hxcfe, 86, 2 );
-			if( !fb_ctx )
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Alloc Error !");
-				free(flatimg2);
-				return HXCFE_INTERNALERROR;
-			}
+		ret = raw_amiga_loader(imgldr_ctx, floppydisk, 0, flatimg2, flatimgsize );
 
-			if( flatimgsize < 100*11*2*512 )
-			{
-				hxcfe_setNumberOfSector ( fb_ctx, 11 );
-				hxcfe_setRPM( fb_ctx, DEFAULT_AMIGA_RPM ); // normal rpm
-				hxcfe_setInterfaceMode( fb_ctx, AMIGA_DD_FLOPPYMODE);
-			}
-			else
-			{
-				hxcfe_setNumberOfSector ( fb_ctx, 22 );
-				hxcfe_setRPM( fb_ctx, DEFAULT_AMIGA_RPM / 2); // 150 rpm
-				hxcfe_setInterfaceMode( fb_ctx, AMIGA_HD_FLOPPYMODE);
-			}
-
-			if(( flatimgsize / ( 512 * hxcfe_getCurrentNumberOfTrack(fb_ctx) * hxcfe_getCurrentNumberOfSide(fb_ctx)))<80)
-				hxcfe_setNumberOfTrack ( fb_ctx, 80 );
-			else
-				hxcfe_setNumberOfTrack ( fb_ctx, flatimgsize/(512* hxcfe_getCurrentNumberOfTrack(fb_ctx) * hxcfe_getCurrentNumberOfSide(fb_ctx) ) );
-
-			hxcfe_setNumberOfSide ( fb_ctx, 2 );
-			hxcfe_setSectorSize( fb_ctx, 512 );
-
-			hxcfe_setTrackType( fb_ctx, AMIGAFORMAT_DD);
-			hxcfe_setTrackBitrate( fb_ctx, DEFAULT_AMIGA_BITRATE );
-
-			hxcfe_setStartSectorID( fb_ctx, 0 );
-			hxcfe_setSectorGap3 ( fb_ctx, 0 );
-
-			ret = hxcfe_generateDisk( fb_ctx, floppydisk, 0, flatimg2, flatimgsize );
-
-			free(flatimg2);
-
-			return ret;
-		}
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"flatimg==0 !?");
-		return HXCFE_INTERNALERROR;
+		return ret;
 	}
 	else
 	{
