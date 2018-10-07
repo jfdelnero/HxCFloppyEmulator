@@ -71,8 +71,8 @@ int CPCDSK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	if(hxc_checkfileext(imgfile,"dsk"))
 	{
 
-		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL)
+		f = hxc_fopen(imgfile,"rb");
+		if( f == NULL )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"CPCDSK_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
@@ -131,8 +131,8 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 	currentcylinder = 0;
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCDSK_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;

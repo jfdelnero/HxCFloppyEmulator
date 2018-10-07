@@ -126,8 +126,8 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	}
 
 
-	f=hxc_fopen(str_file,"rb");
-	if(f==NULL)
+	f = hxc_fopen(str_file,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
