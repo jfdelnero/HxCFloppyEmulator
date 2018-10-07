@@ -1037,8 +1037,8 @@ int32_t	hxcfe_setXmlFloppyLayoutFile(HXCFE_XMLLDR* xmlfb_ctx,char * filepath)
 
 	if(hxc_checkfileext(filepath,"xml"))
 	{
-		f=hxc_fopen(filepath,"rb");
-		if(f)
+		f = hxc_fopen(filepath,"rb");
+		if( f )
 		{
 			memset(firstline,0,sizeof(firstline));
 			hxc_fgets(firstline,sizeof(firstline)-1,f);
