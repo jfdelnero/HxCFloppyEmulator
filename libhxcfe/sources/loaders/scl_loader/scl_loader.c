@@ -81,8 +81,8 @@ int SCL_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 	if(hxc_checkfileext(imgfile,"scl"))
 	{
-		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL)
+		f = hxc_fopen(imgfile,"rb");
+		if( f == NULL )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SCL_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
@@ -152,8 +152,8 @@ int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCL_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f = hxc_fopen(imgfile,"rb");
+	if( f == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SCL_libLoad_DiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;

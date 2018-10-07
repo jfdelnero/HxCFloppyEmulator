@@ -93,7 +93,7 @@ int KryoFluxStream_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 				do
 				{
 					sprintf(filepath,"%s\\track%.2d.%d.raw",imgfile,track,side);
-					f=hxc_fopen(filepath,"rb");
+					f = hxc_fopen(filepath,"rb");
 					if(f)
 					{
 						hxc_fread(&oob,sizeof(s_oob_header),f);
@@ -135,7 +135,7 @@ int KryoFluxStream_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 					return HXCFE_BADFILE;
 				}
 
-				f=hxc_fopen(imgfile,"rb");
+				f = hxc_fopen(imgfile,"rb");
 				if(f)
 				{
 					hxc_fread(&oob,sizeof(s_oob_header),f);
@@ -266,7 +266,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 			doublestep=1;///
 			sprintf(filepath,"%s%s",folder,"doublestep");
-			f=hxc_fopen(filepath,"rb");
+			f = hxc_fopen(filepath,"rb");
 			if(f)
 			{
 				doublestep=2;
@@ -275,7 +275,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 			singleside=0;
 			sprintf(filepath,"%s%s",folder,"singleside");
-			f=hxc_fopen(filepath,"rb");
+			f = hxc_fopen(filepath,"rb");
 			if(f)
 			{
 				singleside=1;
@@ -284,7 +284,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 			timecoef=1;//2;////
 			sprintf(filepath,"%s%s",folder,"rpm360rpm300");
-			f=hxc_fopen(filepath,"rb");
+			f = hxc_fopen(filepath,"rb");
 			if(f)
 			{
 				timecoef=(float)1.2;
@@ -292,7 +292,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 			}
 
 			sprintf(filepath,"%s%s",folder,"rpm300rpm360");
-			f=hxc_fopen(filepath,"rb");
+			f = hxc_fopen(filepath,"rb");
 			if(f)
 			{
 				timecoef=(float)0.833;
@@ -301,7 +301,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 			phasecorrection = 8;
 			sprintf(filepath,"%s%s",folder,"pllsettings.txt");
-			f=hxc_fopen(filepath,"rb");
+			f = hxc_fopen(filepath,"rb");
 			if(f)
 			{
 				if(fscanf(f,"%d",&phasecorrection) != 1)
@@ -314,7 +314,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 			filterpasses = 2;
 			filter = 24;
 			sprintf(filepath,"%s%s",folder,"filter.txt");
-			f=hxc_fopen(filepath,"rb");
+			f = hxc_fopen(filepath,"rb");
 			if(f)
 			{
 				if(fscanf(f,"%d,%d",&filterpasses,&filter) != 2)
@@ -327,7 +327,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 			bitrate = 0;
 			sprintf(filepath,"%s%s",folder,"bitrate.txt");
-			f=hxc_fopen(filepath,"rb");
+			f = hxc_fopen(filepath,"rb");
 			if(f)
 			{
 				if( fscanf(f,"%d",&bitrate) != 1 )
@@ -339,7 +339,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 			bmp_export = 0;
 			sprintf(filepath,"%s%s",folder,"bmpexport.txt");
-			f=hxc_fopen(filepath,"rb");
+			f = hxc_fopen(filepath,"rb");
 			if(f)
 			{
 				bmp_export = 1;
@@ -358,7 +358,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 			do
 			{
 				sprintf(filepath,"%s%s%.2d.%d.raw",folder,fname,track,side);
-				f=hxc_fopen(filepath,"rb");
+				f = hxc_fopen(filepath,"rb");
 				if(f)
 				{
 					hxc_fread(&oob,sizeof(s_oob_header),f);

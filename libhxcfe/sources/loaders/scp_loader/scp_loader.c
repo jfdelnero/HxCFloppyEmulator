@@ -76,8 +76,8 @@ int SCP_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 	if( hxc_checkfileext(imgfile,"scp") )
 	{
-		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL)
+		f = hxc_fopen(imgfile,"rb");
+		if( f == NULL )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SCP_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
@@ -294,7 +294,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		minside=0;
 		maxside=0;
 
-		f=hxc_fopen(imgfile,"rb");
+		f = hxc_fopen(imgfile,"rb");
 		if(f)
 		{
 			hxc_fread(&scph, sizeof(scp_header), f);
