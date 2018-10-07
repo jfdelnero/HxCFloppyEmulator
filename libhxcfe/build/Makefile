@@ -53,7 +53,7 @@ MINIZIPOBJ = ioapi.o mztools.o unzip.o zip.o
 
 FATIOLIB = fat_access.o fat_cache.o fat_filelib.o fat_format.o fat_misc.o fat_string.o fat_table.o fat_write.o
 
-DISKLOADERPLUGINS = raw_amiga.o copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosfs_loader.o vfile.o cpcdsk_loader.o \
+DISKLOADERPLUGINS = raw_amiga.o raw_iso.o copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosfs_loader.o vfile.o cpcdsk_loader.o \
 					msa_loader.o msx_loader.o smc_loader.o st_loader.o stx_loader.o img_loader.o dms_loader.o mfm_loader.o\
 					oricdsk_loader.o d64_loader.o trd_loader.o scl_loader.o fat12floppy_loader.o fat12.o\
 					hfe_loader.o imd_loader.o afi_loader.o sap_loader.o libsap.o jv1_loader.o vtr_loader.o d88_loader.o hdm_loader.o\
@@ -157,6 +157,9 @@ gcr_track.o : $(BASEDIR)/tracks/gcr_track.c $(BASEDIR)/tracks/gcr_track.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 raw_amiga.o : $(BASEDIR)/loaders/common/raw_amiga.c $(BASEDIR)/loaders/common/raw_amiga.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+raw_iso.o : $(BASEDIR)/loaders/common/raw_iso.c $(BASEDIR)/loaders/common/raw_iso.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 apridisk_loader.o : $(BASEDIR)/loaders/apridisk_loader/apridisk_loader.c $(BASEDIR)/loaders/apridisk_loader/apridisk_loader.h
