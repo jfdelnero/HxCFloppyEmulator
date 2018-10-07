@@ -60,6 +60,8 @@
 
 #include "msa_writer.h"
 
+#include "loaders/common/raw_iso.h"
+
 #include "libhxcadaptor.h"
 
 int MSA_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
@@ -91,23 +93,20 @@ int MSA_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
-	unsigned char * flatimg;
+	raw_iso_cfg rawcfg;
+
+	unsigned char * flatimg = NULL;
+	unsigned char * tmpbuffer = NULL;
+
 	unsigned int filesize;
 	int i,j,k,l,l2;
-	unsigned int file_offset;
-	int32_t c,skew;
-	int32_t gap3len,interleave,numberofside,numberofsectorpertrack;
-	int32_t rpm;
-	int32_t sectorsize;
-	int32_t numberoftrack;
+	int32_t c;
 	int32_t extractfilesize,filetracksize;
 	unsigned char   fileheader[5*2];
 	unsigned char   trackheader[1*2];
-	unsigned char*  tmpbuffer;
 	int32_t   len;
-	unsigned char   trackformat;
 
-	HXCFE_CYLINDER* currentcylinder;
+	int ret;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MSA_libLoad_DiskFile %s",imgfile);
 
@@ -118,22 +117,24 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
-	file_offset = 0;
+	raw_iso_setdefcfg(&rawcfg);
+
 	filesize = hxc_fgetsize(f);
 	if( filesize )
 	{
-		sectorsize=512; // msa file support only 512bytes/sector floppies.
-
 		hxc_fread(fileheader,5*sizeof(unsigned short),f);
 		if(fileheader[0]==0x0E && fileheader[1]==0x0F)
 		{
-			numberoftrack=((256*fileheader[8])+fileheader[9])+1;
-			numberofside=((256*fileheader[4])+fileheader[5])+1;
-			numberofsectorpertrack=fileheader[2]*256+fileheader[3];
+			rawcfg.number_of_tracks = ((256*fileheader[8])+fileheader[9])+1;
+			rawcfg.number_of_sides =  ((256*fileheader[4])+fileheader[5])+1;
+			rawcfg.number_of_sectors_per_track = (fileheader[2]*256)+fileheader[3];
 
-			extractfilesize=(numberofsectorpertrack*512)*(numberoftrack+1)*(numberofside);
+			extractfilesize = (rawcfg.number_of_sectors_per_track*512)*(rawcfg.number_of_tracks+1)*(rawcfg.number_of_sides);
 
-			flatimg=(unsigned char*)malloc(extractfilesize);
+			flatimg = (unsigned char*)malloc(extractfilesize);
+			if( !flatimg )
+				goto alloc_error;
+
 			memset(flatimg,0,extractfilesize);
 
 			// chargement et decompression msa.
@@ -142,14 +143,18 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			do
 			{
 				hxc_fread(trackheader,2,f);
-				filetracksize=((trackheader[0]*256)+trackheader[1]);
-				if(filetracksize==(numberofsectorpertrack*512))
+				filetracksize = ((trackheader[0]*256)+trackheader[1]);
+				if(filetracksize == (rawcfg.number_of_sectors_per_track*512))
 				{
-					tmpbuffer=(unsigned char*)malloc(filetracksize);
+					tmpbuffer = (unsigned char*)malloc(filetracksize);
+					if( !tmpbuffer )
+						goto alloc_error;
+
 					memset(tmpbuffer,0,filetracksize);
 					hxc_fread(tmpbuffer,filetracksize,f);
 					memcpy(flatimg+j,tmpbuffer,filetracksize);
 					free(tmpbuffer);
+					tmpbuffer = NULL;
 					j=j+filetracksize;
 				}
 				else
@@ -157,6 +162,9 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					k=0;
 					l=0;
 					tmpbuffer=(unsigned char*)malloc(filetracksize);
+					if( !tmpbuffer )
+						goto alloc_error;
+
 					memset(tmpbuffer,0,filetracksize);
 
 					hxc_fread(tmpbuffer,filetracksize,f);
@@ -167,6 +175,7 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							if(l+j>extractfilesize)
 							{
 								free(tmpbuffer);
+								free( flatimg );
 								hxc_fclose(f);
 								return HXCFE_FILECORRUPTED;
 							}
@@ -188,6 +197,7 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							if(l+j+len>extractfilesize)
 							{
 								free(tmpbuffer);
+								free( flatimg );
 								hxc_fclose(f);
 								return HXCFE_FILECORRUPTED;
 							}
@@ -206,100 +216,76 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					j=j+l;
 
 					free(tmpbuffer);
+					tmpbuffer = NULL;
+
 				}
 
 				i++;
-			}while(i<(numberoftrack*(numberofside)));
+			}while(i< (rawcfg.number_of_tracks*rawcfg.number_of_sides) );
 
 			hxc_fclose(f);
 
-			floppydisk->floppyNumberOfTrack=numberoftrack;
-			floppydisk->floppyNumberOfSide=numberofside;
-			floppydisk->floppySectorPerTrack=numberofsectorpertrack;
-
-			if(floppydisk->floppySectorPerTrack<15)
+			if( rawcfg.number_of_sectors_per_track < 15 )
 			{
-				floppydisk->floppyBitRate=DEFAULT_DD_BITRATE;
-				floppydisk->floppyiftype=ATARIST_DD_FLOPPYMODE;
-				skew=2;
+				rawcfg.bitrate = DEFAULT_DD_BITRATE;
+				rawcfg.interface_mode = ATARIST_DD_FLOPPYMODE;
+				rawcfg.skew_per_track = 2;
 			}
 			else
 			{
-				floppydisk->floppyiftype=ATARIST_HD_FLOPPYMODE;
-				floppydisk->floppyBitRate=DEFAULT_HD_BITRATE;
-				skew=4;
+				rawcfg.bitrate = DEFAULT_HD_BITRATE;
+				rawcfg.interface_mode = ATARIST_HD_FLOPPYMODE;
+				rawcfg.skew_per_track = 4;
 			}
 
-			trackformat=ISOFORMAT_DD;
-			gap3len=84;
-			interleave=1;
-			switch(floppydisk->floppySectorPerTrack)
+			rawcfg.track_format = ISOFORMAT_DD;
+			rawcfg.gap3 = 84;
+			rawcfg.interleave = 1;
+			switch( rawcfg.number_of_sectors_per_track )
 			{
 				case 10:
-					gap3len=30;
+					rawcfg.gap3 = 30;
 				break;
 				case 11:
-					trackformat=ISOFORMAT_DD11S;
-					gap3len=3;
-					interleave=2;
+					rawcfg.track_format = ISOFORMAT_DD11S;
+					rawcfg.gap3 = 3;
+					rawcfg.interleave = 2;
 				break;
 				case 19:
-					gap3len=70;
+					rawcfg.gap3 = 70;
 				break;
 				case 20:
-					gap3len=40;
+					rawcfg.gap3 = 40;
 				break;
 				case 21:
-					gap3len=18;
+					rawcfg.gap3 = 18;
 				break;
 			}
 
-			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*(floppydisk->floppyNumberOfTrack+4));
+			rawcfg.rpm=300;
 
-			rpm=300;
-
-			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-			{
-
-				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-				currentcylinder=floppydisk->tracks[j];
-
-				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-				{
-					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),floppydisk->floppyNumberOfTrack*2 );
-
-					file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-								(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-
-					currentcylinder->sides[i]=tg_generateTrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,rpm,trackformat,gap3len,0,2500,-2500);
-				}
-			}
-
-			// Add 4 empty tracks
-			for(j=floppydisk->floppyNumberOfTrack;j<(floppydisk->floppyNumberOfTrack + 4);j++)
-			{
-				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-				currentcylinder=floppydisk->tracks[j];
-
-				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-				{
-					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),floppydisk->floppyNumberOfTrack*2 );
-
-					currentcylinder->sides[i]=tg_generateTrack(&flatimg[file_offset],sectorsize,0,(unsigned char)j,(unsigned char)i,1,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,rpm,trackformat,gap3len,0,2500,-2500);
-				}
-			}
-
-			floppydisk->floppyNumberOfTrack += 4;
+			ret = raw_iso_loader(imgldr_ctx, floppydisk, 0, flatimg, extractfilesize, &rawcfg);
 
 			free(flatimg);
 
-			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+			return ret;
 		}
 		return HXCFE_NOERROR;
 	}
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	return HXCFE_BADFILE;
+
+alloc_error:
+	if( flatimg )
+		free( flatimg );
+	if( tmpbuffer )
+		free( tmpbuffer );
+
+	hxc_fclose(f);
+
+	return HXCFE_INTERNALERROR;
+
 }
 
 int MSA_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)

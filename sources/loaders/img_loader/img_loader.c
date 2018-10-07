@@ -58,62 +58,75 @@
 
 #include "img_loader.h"
 
+#include "loaders/common/raw_iso.h"
+
 #include "pcimgfileformat.h"
 
 #include "libhxcadaptor.h"
 
-int pc_imggetfloppyconfig(unsigned char * img,uint32_t filesize,int32_t *numberoftrack,int32_t *numberofside,int32_t *numberofsectorpertrack,int32_t *gap3len,int32_t *interleave,int32_t *rpm, int32_t *bitrate,int32_t * ifmode)
+int pc_imggetfloppyconfig(unsigned char * img,uint32_t filesize, raw_iso_cfg *rawcfg)
 {
 	int i;
 	unsigned char * uimg;
 	int conffound,numberofsector;
 
-	conffound=0;
 	uimg=(unsigned char *)img;
+
+	conffound=0;
+
+	raw_iso_setdefcfg(rawcfg);
+
+	rawcfg->track_format = IBMFORMAT_DD;
+	rawcfg->fill_value = 0xE5;
+
+	rawcfg->rpm = 300;
+	rawcfg->sector_size = 512;
+	rawcfg->start_sector_id = 1;
+	rawcfg->interleave = 1;
 
 	if(uimg[0x18]<24 && uimg[0x18]>7 && (uimg[0x1A]==1 || uimg[0x1A]==2) && !(filesize&0x1FF) )
 	{
-		*rpm=300;
-		*numberofsectorpertrack=uimg[0x18];
-		*numberofside=uimg[0x1A];
-		if(*numberofsectorpertrack<=10)
+		rawcfg->rpm = 300;
+		rawcfg->number_of_sectors_per_track = uimg[0x18];
+		rawcfg->number_of_sides = uimg[0x1A];
+		if( rawcfg->number_of_sectors_per_track <= 10 )
 		{
-			*gap3len=84;
-			*interleave=1;
-			*bitrate=250000;
-			*ifmode=IBMPC_DD_FLOPPYMODE;
+			rawcfg->gap3 = 84;
+			rawcfg->interleave = 1;
+			rawcfg->bitrate=250000;
+			rawcfg->interface_mode = IBMPC_DD_FLOPPYMODE;
 		}
 		else
 		{
-			if(*numberofsectorpertrack<=21)
+			if(rawcfg->number_of_sectors_per_track <= 21)
 			{
-				*bitrate=500000;
-				*gap3len=84;
-				*interleave=1;
-				*ifmode=IBMPC_HD_FLOPPYMODE;
+				rawcfg->bitrate = 500000;
+				rawcfg->gap3 = 84;
+				rawcfg->interleave = 1;
+				rawcfg->interface_mode = IBMPC_HD_FLOPPYMODE;
 
-				if(*numberofsectorpertrack>18)
+				if( rawcfg->number_of_sectors_per_track > 18 )
 				{
-					*gap3len=14;
-					*interleave=2;
+					rawcfg->gap3 = 14;
+					rawcfg->interleave = 2;
 				}
 
-				if(*numberofsectorpertrack == 15)
+				if(rawcfg->number_of_sectors_per_track == 15)
 				{
-					*rpm=360;
+					rawcfg->rpm = 360;
 				}
 
 			}
 			else
 			{
-				*bitrate=1000000;
-				*gap3len=84;
-				*interleave=1;
-				*ifmode=IBMPC_ED_FLOPPYMODE;
+				rawcfg->bitrate = 1000000;
+				rawcfg->gap3 = 84;
+				rawcfg->interleave = 1;
+				rawcfg->interface_mode = IBMPC_ED_FLOPPYMODE;
 			}
 		}
-		numberofsector=uimg[0x13]+(uimg[0x14]*256);
-		*numberoftrack=(numberofsector/(*numberofsectorpertrack*(*numberofside)));
+		numberofsector = uimg[0x13]+(uimg[0x14]*256);
+		rawcfg->number_of_tracks = (numberofsector/(rawcfg->number_of_sectors_per_track * rawcfg->number_of_sides));
 
 	//	if((unsigned int)((*numberofsectorpertrack) * (*numberoftrack) * (*numberofside) *512)==filesize)
 		{
@@ -130,14 +143,14 @@ int pc_imggetfloppyconfig(unsigned char * img,uint32_t filesize,int32_t *numbero
 
 			if(pcimgfileformats[i].filesize==filesize)
 			{
-				*numberoftrack=pcimgfileformats[i].numberoftrack;
-				*numberofsectorpertrack=pcimgfileformats[i].sectorpertrack;
-				*numberofside=pcimgfileformats[i].numberofside;
-				*gap3len=pcimgfileformats[i].gap3len;
-				*interleave=pcimgfileformats[i].interleave;
-				*rpm=pcimgfileformats[i].RPM;
-				*bitrate=pcimgfileformats[i].bitrate;
-				*ifmode=pcimgfileformats[i].interface_mode;
+				rawcfg->number_of_tracks = pcimgfileformats[i].numberoftrack;
+				rawcfg->number_of_sectors_per_track = pcimgfileformats[i].sectorpertrack;
+				rawcfg->number_of_sides = pcimgfileformats[i].numberofside;
+				rawcfg->gap3 = pcimgfileformats[i].gap3len;
+				rawcfg->interleave = pcimgfileformats[i].interleave;
+				rawcfg->rpm = pcimgfileformats[i].RPM;
+				rawcfg->bitrate = pcimgfileformats[i].bitrate;
+				rawcfg->interface_mode = pcimgfileformats[i].interface_mode;
 				conffound=1;
 			}
 			i++;
@@ -202,94 +215,39 @@ int IMG_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 int IMG_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
-	FILE * f;
+	FILE * f_img;
+	raw_iso_cfg rawcfg;
 	unsigned int filesize;
-	int i,j;
-	unsigned int file_offset;
-	unsigned char* trackdata;
-	int32_t gap3len,interleave;
-	int32_t rpm;
-	int32_t sectorsize;
-	unsigned char trackformat;
-	HXCFE_CYLINDER* currentcylinder;
+	int ret;
+	char boot_sector[512];
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMG_libLoad_DiskFile %s",imgfile);
 
-	f = hxc_fopen(imgfile,"rb");
-	if( f == NULL )
+	f_img = hxc_fopen(imgfile,"rb");
+	if( f_img == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
-	filesize = hxc_fgetsize(f);
+	filesize = hxc_fgetsize( f_img );
 
-	if(filesize!=0)
+	memset(boot_sector,0,sizeof(boot_sector));
+	hxc_fread(boot_sector,512,f_img);
+
+	if(pc_imggetfloppyconfig( boot_sector, filesize, &rawcfg)==1)
 	{
-		sectorsize=512; // IMG file support only 512bytes/sector floppies.
-		// read the first sector
-		trackdata = (unsigned char*)malloc(sectorsize);
-		if(trackdata)
-		{
-			hxc_fread(trackdata,sectorsize,f);
-			if(pc_imggetfloppyconfig(
-				trackdata,
-				filesize,
-				&floppydisk->floppyNumberOfTrack,
-				&floppydisk->floppyNumberOfSide,
-				&floppydisk->floppySectorPerTrack,
-				&gap3len,
-				&interleave,
-				&rpm,
-				&floppydisk->floppyBitRate,
-				&floppydisk->floppyiftype)==1
-				)
-			{
+		fseek(f_img,0,SEEK_SET);
 
-				free(trackdata);
-				floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		ret = raw_iso_loader(imgldr_ctx, floppydisk, f_img, 0, 0, &rawcfg);
 
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
+		hxc_fclose(f_img);
 
-				trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-
-				trackformat=IBMFORMAT_DD;
-
-				for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-				{
-					floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-					currentcylinder=floppydisk->tracks[j];
-
-					for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-					{
-						hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),floppydisk->floppyNumberOfTrack*2 );
-
-						file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-							(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-
-						fseek (f , file_offset , SEEK_SET);
-						hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
-
-						currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
-					}
-				}
-
-				free(trackdata);
-
-				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-			}
-			hxc_fclose(f);
-			return HXCFE_NOERROR;
-		}
-		else
-		{
-			hxc_fclose(f);
-			return HXCFE_INTERNALERROR;
-		}
+		return ret;
 	}
 
-	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
-	hxc_fclose(f);
+	hxc_fclose(f_img);
+
 	return HXCFE_BADFILE;
 }
 

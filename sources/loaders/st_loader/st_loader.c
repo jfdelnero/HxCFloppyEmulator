@@ -61,19 +61,15 @@
 
 #include "stfileformat.h"
 
+#include "loaders/common/raw_iso.h"
+
 #include "libhxcadaptor.h"
 
-int getfloppyconfig(unsigned char bootsector[512],uint32_t filesize, HXCFE_FLPGEN * fb_ctx)
+static int getfloppyconfig(unsigned char bootsector[512],uint32_t filesize, raw_iso_cfg *rawcfg)
 {
 	int i;
 	int32_t nb_of_side,nb_of_track,nb_of_sector;
 	int32_t numberofsector;
-
-	int numberofsectorpertrack;
-	int numberofside;
-	int gap3len;
-	int numberoftrack;
-	int interleave;
 
 	unsigned char  * uimg;
 	unsigned char  conffound;
@@ -81,37 +77,40 @@ int getfloppyconfig(unsigned char bootsector[512],uint32_t filesize, HXCFE_FLPGE
 	uimg=(unsigned char *)bootsector;
 
 	conffound=0;
+
+	raw_iso_setdefcfg(rawcfg);
+
 	if(uimg[0x18]<24 && uimg[0x18]>8)
 	{
 
-		numberofsectorpertrack=uimg[0x18];
-		numberofside=uimg[0x1A];
+		rawcfg->number_of_sectors_per_track = uimg[0x18];
+		rawcfg->number_of_sides = uimg[0x1A];
 
-		gap3len=84;
-		interleave=1;
+		rawcfg->gap3 = 84;
+		rawcfg->interleave = 1;
 
-		switch(numberofsectorpertrack)
+		switch(rawcfg->number_of_sectors_per_track)
 		{
 			case 9:
-				gap3len=84;
-				interleave=1;
+				rawcfg->gap3 = 84;
+				rawcfg->interleave = 1;
 			break;
 			case 10:
-				gap3len=30;
-				interleave=1;
+				rawcfg->gap3 = 30;
+				rawcfg->interleave = 1;
 			break;
 			case 11:
-				interleave=2;
-				gap3len=3;
+				rawcfg->gap3 = 3;
+				rawcfg->interleave = 2;
 			break;
 		}
 
-		numberofsector=uimg[0x13]+(uimg[0x14]*256);
-		if(numberofsectorpertrack && numberofside )
+		numberofsector = uimg[0x13]+(uimg[0x14]*256);
+		if( rawcfg->number_of_sectors_per_track && rawcfg->number_of_sides )
 		{
-			numberoftrack=(numberofsector/(numberofsectorpertrack*numberofside));
+			rawcfg->number_of_tracks = (numberofsector/(rawcfg->number_of_sectors_per_track * rawcfg->number_of_sides));
 
-			if((unsigned int)((numberofsectorpertrack) * (numberoftrack) * (numberofside) * 512) == filesize)
+			if((unsigned int)((rawcfg->number_of_sectors_per_track) * (rawcfg->number_of_tracks) * (rawcfg->number_of_sides) * 512) == filesize)
 			{
 				conffound=1;
 			}
@@ -124,13 +123,13 @@ int getfloppyconfig(unsigned char bootsector[512],uint32_t filesize, HXCFE_FLPGE
 		i=0;
 		do
 		{
-			if(stfileformats[i].filesize==filesize)
+			if(stfileformats[i].filesize == filesize)
 			{
-				numberoftrack = stfileformats[i].numberoftrack;
-				numberofsectorpertrack = stfileformats[i].sectorpertrack;
-				numberofside = stfileformats[i].numberofside;
-				gap3len = stfileformats[i].gap3len;
-				interleave = stfileformats[i].interleave;
+				rawcfg->number_of_tracks = stfileformats[i].numberoftrack;
+				rawcfg->number_of_sectors_per_track = stfileformats[i].sectorpertrack;
+				rawcfg->number_of_sides = stfileformats[i].numberofside;
+				rawcfg->gap3 = stfileformats[i].gap3len;
+				rawcfg->interleave = stfileformats[i].interleave;
 				conffound=1;
 			}
 			i++;
@@ -148,26 +147,25 @@ int getfloppyconfig(unsigned char bootsector[512],uint32_t filesize, HXCFE_FLPGE
 					{
 						if(filesize==(unsigned int)(nb_of_side*nb_of_track*nb_of_sector*512))
 						{
-							numberoftrack = nb_of_track;
-							numberofsectorpertrack = nb_of_sector;
-							numberofside = nb_of_side;
+							rawcfg->number_of_tracks = nb_of_track;
+							rawcfg->number_of_sectors_per_track = nb_of_sector;
+							rawcfg->number_of_sides = nb_of_side;
+							rawcfg->gap3 = 84;
+							rawcfg->interleave = 1;
 
-							gap3len=84;
-							interleave=1;
-
-							switch( numberofsectorpertrack )
+							switch( rawcfg->number_of_sectors_per_track )
 							{
 								case 9:
-									gap3len=84;
-									interleave=1;
+									rawcfg->gap3 = 84;
+									rawcfg->interleave = 1;
 								break;
 								case 10:
-									gap3len=30;
-									interleave=1;
+									rawcfg->gap3 = 30;
+									rawcfg->interleave = 1;
 								break;
 								case 11:
-									interleave=2;
-									gap3len=3;
+									rawcfg->gap3 = 3;
+									rawcfg->interleave = 2;
 								break;
 							}
 
@@ -181,35 +179,34 @@ int getfloppyconfig(unsigned char bootsector[512],uint32_t filesize, HXCFE_FLPGE
 		}
 	}
 
-	hxcfe_setNumberOfTrack ( fb_ctx, numberoftrack );
-	hxcfe_setNumberOfSide ( fb_ctx, numberofside );
-	hxcfe_setNumberOfSector ( fb_ctx, numberofsectorpertrack );
-	hxcfe_setTrackInterleave( fb_ctx, interleave );
-	hxcfe_setSectorSize( fb_ctx, 512 );
-	hxcfe_setRPM( fb_ctx, 300 ); // normal rpm
+	rawcfg->fill_value = 0xE5;
 
-	hxcfe_setSectorGap3 ( fb_ctx, gap3len );
-	hxcfe_setTrackType( fb_ctx, ISOFORMAT_DD);
+	rawcfg->rpm = 300;
+	rawcfg->sector_size = 512;
+	rawcfg->start_sector_id = 1;
+	rawcfg->track_format = ISOFORMAT_DD;
 
-	if( numberofsectorpertrack < 15 )
+	if( rawcfg->number_of_sectors_per_track < 15 )
 	{
-		hxcfe_setInterfaceMode( fb_ctx, ATARIST_DD_FLOPPYMODE);
-		hxcfe_setTrackBitrate( fb_ctx, DEFAULT_DD_BITRATE );
-		hxcfe_setTrackSkew( fb_ctx, 2 );
-		hxcfe_setSideSkew( fb_ctx, 1 );
+		rawcfg->interface_mode = ATARIST_DD_FLOPPYMODE;
+		rawcfg->bitrate = DEFAULT_DD_BITRATE;
+
+		rawcfg->skew_per_track = 2;
+		rawcfg->skew_per_side = 1;
 	}
 	else
 	{
-		hxcfe_setInterfaceMode( fb_ctx, ATARIST_HD_FLOPPYMODE);
-		hxcfe_setTrackBitrate( fb_ctx, DEFAULT_HD_BITRATE );
-		hxcfe_setTrackSkew( fb_ctx, 4 );
-		hxcfe_setSideSkew( fb_ctx, 2 );
+		rawcfg->interface_mode = ATARIST_HD_FLOPPYMODE;
+		rawcfg->bitrate = DEFAULT_HD_BITRATE;
+
+		rawcfg->skew_per_track = 4;
+		rawcfg->skew_per_side = 2;
 	}
 
-	if(numberofsectorpertrack==11)
+	if( rawcfg->number_of_sectors_per_track == 11 )
 	{
-		hxcfe_setSectorGap3 ( fb_ctx, 3 );
-		hxcfe_setTrackType( fb_ctx, ISOFORMAT_DD11S);
+		rawcfg->gap3 = 3;
+		rawcfg->track_format = ISOFORMAT_DD11S;
 	}
 
 	return conffound;
@@ -249,7 +246,7 @@ int ST_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int ST_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	HXCFE_FLPGEN * fb_ctx;
+	raw_iso_cfg rawcfg;
 	FILE * f_img;
 	int ret;
 	unsigned int filesize;
@@ -266,28 +263,14 @@ int ST_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 
 	filesize = hxc_fgetsize(f_img);
 
-	if( !filesize )
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
-		hxc_fclose(f_img);
-		return HXCFE_BADFILE;
-	}
-
-	fb_ctx = hxcfe_initFloppy( imgldr_ctx->hxcfe, 86, 2 );
-	if( !fb_ctx )
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Alloc Error !");
-		hxc_fclose(f_img);
-		return HXCFE_INTERNALERROR;
-	}
-
+	memset(boot_sector,0,sizeof(boot_sector));
 	hxc_fread(boot_sector,512,f_img);
 
-	if( getfloppyconfig( boot_sector, filesize, fb_ctx) == 1 )
+	if( getfloppyconfig( boot_sector, filesize, &rawcfg) == 1 )
 	{
 		fseek(f_img,0,SEEK_SET);
 
-		ret = hxcfe_generateDisk( fb_ctx, floppydisk, f_img, 0, 0 );
+		ret = raw_iso_loader(imgldr_ctx, floppydisk, f_img, 0, 0, &rawcfg);
 
 		hxc_fclose(f_img);
 
