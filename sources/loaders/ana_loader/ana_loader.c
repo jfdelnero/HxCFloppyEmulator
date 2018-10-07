@@ -83,8 +83,8 @@ int AnaDisk_SanityCheck(HXCFE_IMGLDR * imgldr_ctx,char * imgfile,int32_t * mintr
 
 	if(filesize>0)
 	{
-		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL)
+		f = hxc_fopen(imgfile,"rb");
+		if( f == NULL )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Can't open %s !",imgfile);
 			return -1;
@@ -212,8 +212,8 @@ int ANA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Min Track : %d Max Track : %d Min Head : %d Max Head : %d",mintrack,maxtrack,minhead,maxhead);
 
-		f=hxc_fopen(imgfile,"rb");
-		if(f==NULL)
+		f = hxc_fopen(imgfile,"rb");
+		if( f == NULL )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
