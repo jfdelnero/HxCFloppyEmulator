@@ -27,7 +27,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> 
+#include <string.h>
 
 #include "types.h"
 
@@ -38,7 +38,9 @@ unsigned char * data_unpack(unsigned char * bufferin, uint32_t sizein,unsigned c
 {
 	unsigned char* buffer;
 
-	buffer=(unsigned char*)malloc(sizeout+100);
+	buffer = (unsigned char*)malloc(sizeout+100);
+	if( !buffer )
+		return NULL;
 
 	if(bufferin[0]&0x01)
 	{
@@ -49,5 +51,5 @@ unsigned char * data_unpack(unsigned char * bufferin, uint32_t sizein,unsigned c
 		memcpy(buffer,bufferin+1,sizeout);
 	}
 
-	return  buffer;
+	return buffer;
 };
