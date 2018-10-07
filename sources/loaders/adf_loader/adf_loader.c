@@ -72,7 +72,7 @@ int ADF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADF_libIsValidDiskFile : %s is an ADF file !",imgfile);
 
-		filesize=hxc_getfilesize(imgfile);
+		filesize = hxc_getfilesize(imgfile);
 		if(filesize<0)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"ADF_libIsValidDiskFile : Cannot open %s !",imgfile);
@@ -96,103 +96,69 @@ int ADF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int ADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	FILE * f;
+	HXCFE_FLPGEN * fb_ctx;
+	int ret;
+	FILE * f_img;
 	unsigned int filesize;
-	int i,j;
-	unsigned short rpm;
-	unsigned int file_offset,skew,interleave;
-	unsigned char* trackdata;
-	unsigned char gap3len,trackformat;
-	unsigned short sectorsize;
-	HXCFE_CYLINDER* currentcylinder;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADF_libLoad_DiskFile %s",imgfile);
 
-	f=hxc_fopen(imgfile,"rb");
-	if(f==NULL)
+	f_img = hxc_fopen(imgfile,"rb");
+	if( f_img == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
-	filesize = hxc_fgetsize(f);
+	filesize = hxc_fgetsize(f_img);
 
 	if(!filesize)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Bad file size : %d !",filesize);
-		hxc_fclose(f);
+		hxc_fclose(f_img);
 		return HXCFE_BADFILE;
+	}
+
+	fb_ctx = hxcfe_initFloppy( imgldr_ctx->hxcfe, 86, 2 );
+	if( !fb_ctx )
+	{
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Alloc Error !");
+		hxc_fclose(f_img);
+		return HXCFE_INTERNALERROR;
 	}
 
 	if(filesize<100*11*2*512)
 	{
-		floppydisk->floppySectorPerTrack=11;
-		rpm=DEFAULT_AMIGA_RPM;
+		hxcfe_setNumberOfSector ( fb_ctx, 11 );
+		hxcfe_setRPM( fb_ctx, DEFAULT_AMIGA_RPM ); // normal rpm
+		hxcfe_setInterfaceMode( fb_ctx, AMIGA_DD_FLOPPYMODE);
 	}
 	else
 	{
-		floppydisk->floppySectorPerTrack=22;
-		rpm=DEFAULT_AMIGA_RPM/2;
+		hxcfe_setNumberOfSector ( fb_ctx, 22 );
+		hxcfe_setRPM( fb_ctx, DEFAULT_AMIGA_RPM / 2); // 150 rpm
+		hxcfe_setInterfaceMode( fb_ctx, AMIGA_HD_FLOPPYMODE);
 	}
 
-	floppydisk->floppyNumberOfSide=2;
-
-	if((filesize/(512*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))<80)
-		floppydisk->floppyNumberOfTrack=80;
+	if(( filesize / ( 512 * hxcfe_getCurrentNumberOfTrack(fb_ctx) * hxcfe_getCurrentNumberOfSide(fb_ctx)))<80)
+		hxcfe_setNumberOfTrack ( fb_ctx, 80 );
 	else
-		floppydisk->floppyNumberOfTrack=filesize/(512*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide);
+		hxcfe_setNumberOfTrack ( fb_ctx, filesize/(512* hxcfe_getCurrentNumberOfTrack(fb_ctx) * hxcfe_getCurrentNumberOfSide(fb_ctx) ) );
 
-	floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
-	floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
-	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*(floppydisk->floppyNumberOfTrack+4));
+	hxcfe_setNumberOfSide ( fb_ctx, 2 );
+	hxcfe_setSectorSize( fb_ctx, 512 );
 
-	sectorsize=512;
-	interleave=1;
-	gap3len=0;
-	skew=0;
-	trackformat=AMIGAFORMAT_DD;
+	hxcfe_setTrackType( fb_ctx, AMIGAFORMAT_DD);
+	hxcfe_setTrackBitrate( fb_ctx, DEFAULT_AMIGA_BITRATE );
 
-	trackdata = (unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+	hxcfe_setStartSectorID( fb_ctx, 0 );
+	hxcfe_setSectorGap3 ( fb_ctx, 0 );
 
-	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-	{
+	ret = hxcfe_generateDisk( fb_ctx, floppydisk, f_img, 0, 0 );
 
-		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-		currentcylinder=floppydisk->tracks[j];
+	hxc_fclose(f_img);
 
-		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-		{
-			hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),floppydisk->floppyNumberOfTrack*2 );
-
-			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-					(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-			fseek (f , file_offset , SEEK_SET);
-			hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
-
-			currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-11150);
-		}
-	}
-
-	// Add 4 empty tracks
-	for(j=floppydisk->floppyNumberOfTrack;j<(floppydisk->floppyNumberOfTrack + 4);j++)
-	{
-		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-		currentcylinder=floppydisk->tracks[j];
-
-		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-		{
-			currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,0,(unsigned char)j,(unsigned char)i,0,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-11150);
-		}
-	}
-
-	floppydisk->floppyNumberOfTrack += 4;
-
-
-	free(trackdata);
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-	hxc_fclose(f);
-	return HXCFE_NOERROR;
+	return ret;
 }
 
 int ADF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)

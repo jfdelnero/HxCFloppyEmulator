@@ -68,6 +68,8 @@
 
 HXCFE* global_floppycontext;
 
+#define DEFAULT_DISK_NAME "AmigaDOS (HxC)"
+
 
 int AMIGADOSFSDK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
@@ -286,8 +288,7 @@ int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char *
 
 int AMIGADOSFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	int i,j;
-	unsigned int file_offset;
+	HXCFE_FLPGEN * fb_ctx;
 	struct Device * adfdevice;
 	struct Volume * adfvolume;
 	unsigned char * flatimg;
@@ -296,29 +297,26 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flopp
 	int flatimgsize;
 	int numberoftrack;
 	int numberofsectorpertrack;
-
-	unsigned short sectorsize;
-	unsigned char gap3len,skew,trackformat,interleave;
-
-
+	int ret;
     struct stat repstate;
 	struct tm * ts;
 	struct DateTime reptime;
 
 //	FILE * debugadf;
 	int rc;
-	HXCFE_CYLINDER* currentcylinder;
 
 	numberoftrack=80;
+
 	numberofsectorpertrack=11;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libLoad_DiskFile %s",imgfile);
 
 	hxc_stat(imgfile,&repstate);
-	ts=localtime(&repstate.st_ctime);
+
+	ts = localtime(&repstate.st_ctime);
+
 	if(repstate.st_mode&S_IFDIR || !strlen(imgfile) )
 	{
-
 		global_floppycontext=imgldr_ctx->hxcfe;
 		adfEnvInitDefault();
 		adfChgEnvProp(PR_EFCT,adlib_printerror);
@@ -331,48 +329,40 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flopp
 		if(adfdevice)
 		{
 
-			repname=(char *)malloc(strlen(imgfile)+1);
-			memset(repname,0,strlen(imgfile)+1);
-			i=strlen(imgfile);
-			if( (imgfile[i]=='\\' || imgfile[i]=='/') && i)
+			if( strlen(imgfile) < strlen(DEFAULT_DISK_NAME) )
 			{
-				imgfile[i]=0;
-				i--;
+				repname = (char *)malloc( strlen(DEFAULT_DISK_NAME) + 1 );
 			}
-			while(i && (imgfile[i]!='\\' && imgfile[i]!='/'))
+			else
 			{
-				i--;
+				repname = (char *)malloc( strlen(imgfile) + 1 );
 			}
-			if((imgfile[i]=='\\' || imgfile[i]=='/'))
-			{
-				 i++;
-			}
-			sprintf(repname,"%s",&imgfile[i]);
 
+			if( !repname )
+			{
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Alloc error!");
+				adfUnMountDev(adfdevice);
+				return HXCFE_INTERNALERROR;
+			}
+
+			memset(repname,0,strlen(imgfile)+1);
+			hxc_getfilenamebase( imgfile, repname );
+
+			if(!strlen(repname))
+				strcpy(repname, DEFAULT_DISK_NAME);
+
+			memset(&reptime,0,sizeof(struct DateTime));
 			if(ts)
 			{
-				reptime.year=ts->tm_year;	/* since 1900 */
-				reptime.mon=ts->tm_mon+1;
-				reptime.day=ts->tm_mday;
-				reptime.hour=ts->tm_hour;
-				reptime.min=ts->tm_min;
-				reptime.sec=ts->tm_sec;
-			}
-			else
-			{
-				reptime.year=0;
-				reptime.mon=0;
-				reptime.day=0;
-				reptime.hour=0;
-				reptime.min=0;
-				reptime.sec=0;
-
+				reptime.year = ts->tm_year; /* since 1900 */
+				reptime.mon  = ts->tm_mon+1;
+				reptime.day  = ts->tm_mday;
+				reptime.hour = ts->tm_hour;
+				reptime.min  = ts->tm_min;
+				reptime.sec  = ts->tm_sec;
 			}
 
-			if(strlen(repname))
-				rc=adfCreateFlop(adfdevice, repname, 0,&reptime );
-			else
-				rc=adfCreateFlop(adfdevice, "AmigaDOS (HxC)", 0,&reptime );
+			rc = adfCreateFlop(adfdevice, repname, 0,&reptime );
 
 			free(repname);
 
@@ -382,6 +372,7 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flopp
 				if(adfvolume)
 				{
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"adfCreateFlop ok");
+
 					if(adfInstallBootBlock(adfvolume, stdboot3)!=RC_OK)
 					{
 						imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"adflib: adfInstallBootBlock error!");
@@ -395,17 +386,21 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flopp
 							return HXCFE_INTERNALERROR;
 						}
 					}
-					flatimg2=(unsigned char*)malloc(flatimgsize);
-					memcpy(flatimg2,flatimg,flatimgsize);
-					adfUnMountDev(adfdevice);
-					/*////////
-					debugadf=hxc_fopen("d:\\debug.adf","wb");
-					if(debugadf)
+
+					flatimg2 = (unsigned char*)malloc(flatimgsize);
+					if( flatimg2 )
 					{
-						fwrite(flatimg2,flatimgsize,1,debugadf);
-						hxc_fclose(debugadf);
+						memcpy(flatimg2,flatimg,flatimgsize);
+						/*////////
+						debugadf = hxc_fopen("d:\\debug.adf","wb");
+						if(debugadf)
+						{
+							fwrite(flatimg2,flatimgsize,1,debugadf);
+							hxc_fclose(debugadf);
+						}
+						//////////*/
 					}
-					//////////*/
+					adfUnMountDev(adfdevice);
 
 				}
 				else
@@ -428,56 +423,46 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flopp
 
 		if(flatimg2)
 		{
-			sectorsize = 512;
-			interleave = 1;
-			gap3len = 0;
-			skew = 0;
-			file_offset = 0;
-			trackformat = AMIGAFORMAT_DD;
-
-			floppydisk->floppySectorPerTrack=numberofsectorpertrack;
-			floppydisk->floppyNumberOfSide=2;
-			floppydisk->floppyNumberOfTrack=numberoftrack;
-			floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
-			floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
-			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*(floppydisk->floppyNumberOfTrack+4));
-
-			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+			fb_ctx = hxcfe_initFloppy( imgldr_ctx->hxcfe, 86, 2 );
+			if( !fb_ctx )
 			{
-
-				floppydisk->tracks[j]=allocCylinderEntry(DEFAULT_AMIGA_RPM,floppydisk->floppyNumberOfSide);
-				currentcylinder=floppydisk->tracks[j];
-
-				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-				{
-					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),floppydisk->floppyNumberOfTrack*2 );
-
-					file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-								(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-
-					currentcylinder->sides[i]=tg_generateTrack(&flatimg2[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-11150);
-				}
+				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Alloc Error !");
+				free(flatimg2);
+				return HXCFE_INTERNALERROR;
 			}
 
-			// Add 4 empty tracks
-			for(j=floppydisk->floppyNumberOfTrack;j<(floppydisk->floppyNumberOfTrack + 4);j++)
+			if( flatimgsize < 100*11*2*512 )
 			{
-				floppydisk->tracks[j]=allocCylinderEntry(DEFAULT_AMIGA_RPM,floppydisk->floppyNumberOfSide);
-				currentcylinder=floppydisk->tracks[j];
-
-				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-				{
-					currentcylinder->sides[i]=tg_generateTrack(&flatimg2[file_offset],sectorsize,0,(unsigned char)j,(unsigned char)i,0,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-11150);
-				}
+				hxcfe_setNumberOfSector ( fb_ctx, 11 );
+				hxcfe_setRPM( fb_ctx, DEFAULT_AMIGA_RPM ); // normal rpm
+				hxcfe_setInterfaceMode( fb_ctx, AMIGA_DD_FLOPPYMODE);
+			}
+			else
+			{
+				hxcfe_setNumberOfSector ( fb_ctx, 22 );
+				hxcfe_setRPM( fb_ctx, DEFAULT_AMIGA_RPM / 2); // 150 rpm
+				hxcfe_setInterfaceMode( fb_ctx, AMIGA_HD_FLOPPYMODE);
 			}
 
-			floppydisk->floppyNumberOfTrack += 4;
+			if(( flatimgsize / ( 512 * hxcfe_getCurrentNumberOfTrack(fb_ctx) * hxcfe_getCurrentNumberOfSide(fb_ctx)))<80)
+				hxcfe_setNumberOfTrack ( fb_ctx, 80 );
+			else
+				hxcfe_setNumberOfTrack ( fb_ctx, flatimgsize/(512* hxcfe_getCurrentNumberOfTrack(fb_ctx) * hxcfe_getCurrentNumberOfSide(fb_ctx) ) );
+
+			hxcfe_setNumberOfSide ( fb_ctx, 2 );
+			hxcfe_setSectorSize( fb_ctx, 512 );
+
+			hxcfe_setTrackType( fb_ctx, AMIGAFORMAT_DD);
+			hxcfe_setTrackBitrate( fb_ctx, DEFAULT_AMIGA_BITRATE );
+
+			hxcfe_setStartSectorID( fb_ctx, 0 );
+			hxcfe_setSectorGap3 ( fb_ctx, 0 );
+
+			ret = hxcfe_generateDisk( fb_ctx, floppydisk, 0, flatimg2, flatimgsize );
 
 			free(flatimg2);
 
-			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"AMIGADOSFSDK Loader : tracks file successfully loaded and encoded!");
-
-			return HXCFE_NOERROR;
+			return ret;
 		}
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"flatimg==0 !?");
