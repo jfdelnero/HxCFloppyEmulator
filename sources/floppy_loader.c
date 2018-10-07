@@ -914,60 +914,85 @@ HXCFE_FLPGEN* hxcfe_initFloppy( HXCFE* floppycontext, int32_t nb_of_track, int32
 
 	if(( nb_of_track && (nb_of_track<=256)) && ((nb_of_side>=1) && (nb_of_side<=2) ) )
 	{
-		fb_ctx=(HXCFE_FLPGEN*)malloc(sizeof(HXCFE_FLPGEN));
-		if(fb_ctx)
-		{
-			memset(fb_ctx,0,sizeof(HXCFE_FLPGEN));
-			fb_ctx->floppydisk=(HXCFE_FLOPPY*)malloc(sizeof(HXCFE_FLOPPY));
-			memset(fb_ctx->floppydisk,0,sizeof(HXCFE_FLOPPY));
-			fb_ctx->floppydisk->floppyBitRate=DEFAULT_DD_BITRATE;
-			fb_ctx->floppydisk->double_step=0;
-			fb_ctx->floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-			fb_ctx->floppydisk->floppyNumberOfTrack=nb_of_track;
-			fb_ctx->floppydisk->floppyNumberOfSide=nb_of_side;
-			fb_ctx->floppydisk->floppySectorPerTrack=-1;
+		fb_ctx = (HXCFE_FLPGEN*)malloc(sizeof(HXCFE_FLPGEN));
+		if( !fb_ctx )
+			goto alloc_error;
 
-			fb_ctx->floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*fb_ctx->floppydisk->floppyNumberOfTrack);
-			memset(fb_ctx->floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*fb_ctx->floppydisk->floppyNumberOfTrack);
+		memset(fb_ctx,0,sizeof(HXCFE_FLPGEN));
 
-			fb_ctx->fb_stack_pointer=0;
-			fb_ctx->fb_stack=(fb_track_state*)malloc(sizeof(fb_track_state)*STACK_SIZE);
-			memset(fb_ctx->fb_stack,0,sizeof(fb_track_state)*STACK_SIZE);
+		fb_ctx->floppycontext = floppycontext;
 
-			fb_ctx->fb_stack[0].interleave=1;
-			fb_ctx->fb_stack[0].rpm=300;
+		fb_ctx->floppydisk = (HXCFE_FLOPPY*)malloc(sizeof(HXCFE_FLOPPY));
+		if(!fb_ctx->floppydisk)
+			goto alloc_error;
 
-			fb_ctx->fb_stack[0].sectors_size = 512;
+		memset(fb_ctx->floppydisk,0,sizeof(HXCFE_FLOPPY));
 
-			fb_ctx->fb_stack[0].indexlen=2500;
-			fb_ctx->fb_stack[0].indexpos=-2500;
-			fb_ctx->fb_stack[0].sectorunderindex=0;
+		fb_ctx->floppydisk->floppyBitRate=DEFAULT_DD_BITRATE;
+		fb_ctx->floppydisk->double_step=0;
+		fb_ctx->floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
+		fb_ctx->floppydisk->floppyNumberOfTrack=nb_of_track;
+		fb_ctx->floppydisk->floppyNumberOfSide=nb_of_side;
+		fb_ctx->floppydisk->floppySectorPerTrack=-1;
 
-			fb_ctx->fb_stack[0].numberofsector = 0;
-			fb_ctx->fb_stack[0].numberofsector_min = 0;
-			fb_ctx->fb_stack[0].start_sector_id = 1;
+		fb_ctx->floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*fb_ctx->floppydisk->floppyNumberOfTrack);
+		memset(fb_ctx->floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*fb_ctx->floppydisk->floppyNumberOfTrack);
 
-			fb_ctx->fb_stack[0].bitrate=250000;
-			fb_ctx->fb_stack[0].sectorconfig.bitrate=fb_ctx->fb_stack[0].bitrate;
-			fb_ctx->fb_stack[0].sectorconfig.fill_byte=0xF6;
-			fb_ctx->fb_stack[0].sectorconfig.gap3=255;
-			fb_ctx->fb_stack[0].sectorconfig.sectorsize=512;
-			fb_ctx->fb_stack[0].sectorconfig.trackencoding=IBMFORMAT_DD;
-			fb_ctx->fb_stack[0].type = IBMFORMAT_DD;
-			//fb_ctx->fb_stack[0].sectorconfig.;
+		fb_ctx->fb_stack_pointer=0;
 
-			fb_ctx->fb_stack[0].sc_stack[0].bitrate = 250000;
-			fb_ctx->fb_stack[0].sc_stack[0].fill_byte = 0xF6;
-			fb_ctx->fb_stack[0].sc_stack[0].gap3=255;
-			fb_ctx->fb_stack[0].sc_stack[0].sectorsize = 512;
-			fb_ctx->fb_stack[0].sc_stack[0].trackencoding=IBMFORMAT_DD;
-		}
-		else
-		{
-			floppycontext->hxc_printf(MSG_ERROR,"hxcfe_init_floppy : malloc error");
-		}
+		fb_ctx->fb_stack = (fb_track_state*)malloc(sizeof(fb_track_state)*STACK_SIZE);
+		memset(fb_ctx->fb_stack,0,sizeof(fb_track_state)*STACK_SIZE);
+
+		fb_ctx->fb_stack[0].interleave=1;
+		fb_ctx->fb_stack[0].rpm=300;
+
+		fb_ctx->fb_stack[0].sectors_size = 512;
+
+		fb_ctx->fb_stack[0].indexlen=2500;
+		fb_ctx->fb_stack[0].indexpos=-2500;
+		fb_ctx->fb_stack[0].sectorunderindex=0;
+
+		fb_ctx->fb_stack[0].numberofsector = 0;
+		fb_ctx->fb_stack[0].numberofsector_min = 0;
+		fb_ctx->fb_stack[0].start_sector_id = 1;
+
+		fb_ctx->fb_stack[0].bitrate=250000;
+		fb_ctx->fb_stack[0].sectorconfig.bitrate=fb_ctx->fb_stack[0].bitrate;
+		fb_ctx->fb_stack[0].sectorconfig.fill_byte=0xF6;
+		fb_ctx->fb_stack[0].sectorconfig.gap3=255;
+		fb_ctx->fb_stack[0].sectorconfig.sectorsize=512;
+		fb_ctx->fb_stack[0].sectorconfig.trackencoding=IBMFORMAT_DD;
+		fb_ctx->fb_stack[0].type = IBMFORMAT_DD;
+
+		fb_ctx->fb_stack[0].sc_stack[0].bitrate = 250000;
+		fb_ctx->fb_stack[0].sc_stack[0].fill_byte = 0xF6;
+		fb_ctx->fb_stack[0].sc_stack[0].gap3 = 255;
+		fb_ctx->fb_stack[0].sc_stack[0].sectorsize = 512;
+		fb_ctx->fb_stack[0].sc_stack[0].trackencoding=IBMFORMAT_DD;
 	}
+
 	return fb_ctx;
+
+alloc_error:
+	floppycontext->hxc_printf(MSG_ERROR,"hxcfe_init_floppy : malloc error");
+
+	if(fb_ctx)
+	{
+		if(fb_ctx->floppydisk)
+		{
+			if(fb_ctx->floppydisk->tracks)
+				free(fb_ctx->floppydisk->tracks);
+
+			free(fb_ctx->floppydisk);
+		}
+
+		if( fb_ctx->fb_stack )
+			free( fb_ctx->fb_stack );
+
+		free(fb_ctx);
+	}
+
+	return 0;
 }
 
 int32_t hxcfe_getNumberOfTrack( HXCFE* floppycontext, HXCFE_FLOPPY *fp )
@@ -1189,6 +1214,12 @@ int32_t hxcfe_setTrackSkew ( HXCFE_FLPGEN* fb_ctx, int32_t skew )
 	return HXCFE_NOERROR;
 }
 
+int32_t hxcfe_setSideSkew ( HXCFE_FLPGEN* fb_ctx, int32_t skew )
+{
+	fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].side_skew = skew;
+	return HXCFE_NOERROR;
+}
+
 int32_t hxcfe_setIndexPosition ( HXCFE_FLPGEN* fb_ctx, int32_t position, int32_t allowsector )
 {
 	fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].indexpos = position;
@@ -1224,7 +1255,14 @@ int32_t hxcfe_setSectorData( HXCFE_FLPGEN* fb_ctx, uint8_t * buffer, int32_t siz
 	if(buffer)
 	{
 		cur_sector->input_data = malloc(size);
-		memcpy(cur_sector->input_data,buffer,size);
+		if( cur_sector->input_data )
+		{
+			memcpy(cur_sector->input_data,buffer,size);
+		}
+		else
+		{
+			return HXCFE_INTERNALERROR;
+		}
 	}
 
 	cur_sector->sectorsize = size;
@@ -1395,6 +1433,16 @@ int32_t hxcfe_setSectorDataMark ( HXCFE_FLPGEN* fb_ctx, uint32_t datamark )
 	return HXCFE_NOERROR;
 }
 
+int32_t hxcfe_setInterfaceMode( HXCFE_FLPGEN* fb_ctx, int32_t mode )
+{
+	fb_track_state * cur_track;
+
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
+	cur_track->interface_mode = mode;
+
+	return HXCFE_NOERROR;
+}
+
 int32_t hxcfe_popTrack ( HXCFE_FLPGEN* fb_ctx )
 {
 	HXCFE_CYLINDER* currentcylinder;
@@ -1409,15 +1457,15 @@ int32_t hxcfe_popTrack ( HXCFE_FLPGEN* fb_ctx )
 		if( current_fb_track_state->track_number < fb_ctx->floppydisk->floppyNumberOfTrack)
 		{
 			if(!fb_ctx->floppydisk->tracks[current_fb_track_state->track_number])
-				fb_ctx->floppydisk->tracks[current_fb_track_state->track_number]=allocCylinderEntry(current_fb_track_state->rpm,2);
+				fb_ctx->floppydisk->tracks[current_fb_track_state->track_number] = allocCylinderEntry(current_fb_track_state->rpm,2);
 
-			currentcylinder=fb_ctx->floppydisk->tracks[current_fb_track_state->track_number];
+			currentcylinder = fb_ctx->floppydisk->tracks[current_fb_track_state->track_number];
 			sui_flag=0;
 
 			if(!current_fb_track_state->sectorunderindex)
 					sui_flag=NO_SECTOR_UNDER_INDEX;
 
-			currentcylinder->sides[current_fb_track_state->side_number]=tg_generateTrackEx((unsigned short)current_fb_track_state->numberofsector,
+			currentcylinder->sides[current_fb_track_state->side_number] = tg_generateTrackEx((unsigned short)current_fb_track_state->numberofsector,
 																							current_fb_track_state->sectortab,
 																							current_fb_track_state->interleave,
 																							current_fb_track_state->skew,
@@ -1488,23 +1536,99 @@ int32_t hxcfe_getCurrentSkew ( HXCFE_FLPGEN* fb_ctx )
 	return fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].skew;
 }
 
-int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, uint8_t * diskdata, int32_t buffersize )
+int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f, uint8_t * diskdata, int32_t buffersize )
 {
 	int i,j,ret;
 	int numberofsector,sectorsize;
 	int bufferoffset,type;
-	unsigned int rpm;
+	unsigned int rpm,interleave;
+	unsigned char * track_buffer;
+	unsigned char fill_byte;
+	int image_size;
+	int start_file_ofs;
+	int skew_per_track;
+	int skew_per_side;
+	fb_track_state * cur_track;
+	FILE * filehandle;
 
-	sectorsize = fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].sectors_size;
-	numberofsector = fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].numberofsector_min;
-	rpm = fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].rpm;
-	type = fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].type;
+	if ( !f && !diskdata )
+		return HXCFE_BADPARAMETER;
+
+	filehandle = (FILE*)f;
+	image_size = 0;
+	start_file_ofs = 0;
+
+	if( filehandle )
+	{
+		start_file_ofs = ftell(filehandle);
+		fseek(filehandle,0,SEEK_END);
+		image_size = ftell(filehandle);
+		fseek(filehandle,start_file_ofs,SEEK_SET);
+	}
+	else
+	{
+		image_size = buffersize;
+	}
+
+	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
+
+	sectorsize = cur_track->sectors_size;
+	numberofsector = cur_track->numberofsector_min;
+	interleave = cur_track->interleave;
+	rpm = cur_track->rpm;
+	type = cur_track->type;
+	skew_per_track = cur_track->skew;
+	skew_per_side = cur_track->side_skew;
+	fill_byte = cur_track->sc_stack[cur_track->sc_stack_pointer].fill_byte;
+
+	fb_ctx->floppycontext->hxc_printf(MSG_INFO_1,"Image Size:%dkB, %d tracks, %d side(s), %d sectors/track, interleave:%d,rpm:%d bitrate:%d",(image_size-start_file_ofs)/1024,
+																																						fb_ctx->floppydisk->floppyNumberOfTrack,
+																																						fb_ctx->floppydisk->floppyNumberOfSide,
+																																						numberofsector,
+																																						interleave,
+																																						rpm,
+																																						fb_ctx->floppydisk->floppyBitRate);
+
+	track_buffer = malloc( sectorsize *	numberofsector );
+	if( !track_buffer )
+		return HXCFE_INTERNALERROR;
 
 	for(i = 0 ; i < fb_ctx->floppydisk->floppyNumberOfTrack ; i++ )
 	{
 		for(j = 0 ; j < fb_ctx->floppydisk->floppyNumberOfSide ; j++ )
 		{
-			bufferoffset = numberofsector * sectorsize * ((i<<1) + (j&1)) ;
+			bufferoffset = start_file_ofs + ( numberofsector * sectorsize * ((i<<1) + (j&1)) ) ;
+			if( filehandle )
+			{
+				fseek( filehandle, bufferoffset, SEEK_SET);
+				if( (bufferoffset + (numberofsector * sectorsize)) < image_size )
+				{
+					fread( track_buffer, numberofsector * sectorsize, 1, filehandle );
+				}
+				else
+				{
+					memset(track_buffer, fill_byte, sectorsize * numberofsector);
+					if( bufferoffset < image_size )
+					{
+						fread(track_buffer,image_size - bufferoffset,1,f);
+					}
+				}
+			}
+			else
+			{
+				if( (bufferoffset + (numberofsector * sectorsize)) < image_size )
+				{
+					memcpy(track_buffer,&diskdata[bufferoffset],numberofsector * sectorsize);
+				}
+				else
+				{
+					memset(track_buffer, fill_byte, sectorsize * numberofsector);
+					if( bufferoffset < image_size )
+					{
+						memcpy(track_buffer,&diskdata[bufferoffset],image_size - bufferoffset);
+					}
+				}
+			}
 
 			if(!fb_ctx->floppydisk->tracks[i] || !fb_ctx->floppydisk->tracks[i]->sides[j])
 			{
@@ -1512,24 +1636,41 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, uint8_t * diskdata, int32_t bu
 				{
 					hxcfe_pushTrack (fb_ctx,rpm,i,j,type);
 
-					if( (bufferoffset + (sectorsize * numberofsector) )  > buffersize )
-					{
-						ret = hxcfe_addSectors(fb_ctx,j,i,0,0,numberofsector);
-					}
-					else
-					{
-						ret = hxcfe_addSectors(fb_ctx,j,i,&diskdata[bufferoffset],(sectorsize * numberofsector),numberofsector);
-					}
+					hxcfe_setTrackSkew( fb_ctx, (skew_per_track*i) + (skew_per_side*j) );
+
+					ret = hxcfe_addSectors(fb_ctx,j,i,track_buffer,(sectorsize * numberofsector),numberofsector);
 
 					hxcfe_popTrack (fb_ctx);
 
-					return ret;
+					if ( ret != HXCFE_NOERROR )
+						goto error;
 				}
 			}
 		}
 	}
 
+	if ( floppy )
+	{
+		memcpy(floppy, fb_ctx->floppydisk , sizeof(HXCFE_FLOPPY));
+		floppy->floppyiftype = cur_track->interface_mode;
+	}
+
+	fb_ctx->floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+
+	free( track_buffer );
+
+	free(fb_ctx->fb_stack);
+	free(fb_ctx);
+
 	return HXCFE_NOERROR;
+
+error:
+	free( track_buffer );
+
+	free(fb_ctx->fb_stack);
+	free(fb_ctx);
+
+	return HXCFE_INTERNALERROR;
 }
 
 HXCFE_FLOPPY* hxcfe_getFloppy ( HXCFE_FLPGEN* fb_ctx )
@@ -1605,7 +1746,7 @@ HXCFE_FLOPPY* hxcfe_getFloppy ( HXCFE_FLPGEN* fb_ctx )
 		}
 		fb_ctx->floppydisk->floppyBitRate=bitrate;
 
-		f=fb_ctx->floppydisk;
+		f = fb_ctx->floppydisk;
 		free(fb_ctx->fb_stack);
 		free(fb_ctx);
 	}
