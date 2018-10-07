@@ -59,12 +59,13 @@
 #include "adz_loader.h"
 #include "adz_writer.h"
 
+#include "loaders/common/raw_amiga.h"
+
 #include "thirdpartylibs/zlib/zlib.h"
 
 #include "libhxcadaptor.h"
 
 #define UNPACKBUFFER 128*1024
-
 
 int ADZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
@@ -93,7 +94,6 @@ int ADZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int ADZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	HXCFE_FLPGEN * fb_ctx;
 	int ret;
 	int i;
 	unsigned int filesize;
@@ -133,48 +133,7 @@ int ADZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	gzclose(file);
 
-	if(!flatimg)
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Alloc error!");
-		return HXCFE_INTERNALERROR;
-	}
-
-	fb_ctx = hxcfe_initFloppy( imgldr_ctx->hxcfe, 86, 2 );
-	if( !fb_ctx )
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Alloc Error !");
-		free(flatimg);
-		return HXCFE_INTERNALERROR;
-	}
-
-	if(filesize<100*11*2*512)
-	{
-		hxcfe_setNumberOfSector ( fb_ctx, 11 );
-		hxcfe_setRPM( fb_ctx, DEFAULT_AMIGA_RPM ); // normal rpm
-		hxcfe_setInterfaceMode( fb_ctx, AMIGA_DD_FLOPPYMODE);
-	}
-	else
-	{
-		hxcfe_setNumberOfSector ( fb_ctx, 22 );
-		hxcfe_setRPM( fb_ctx, DEFAULT_AMIGA_RPM / 2); // 150 rpm
-		hxcfe_setInterfaceMode( fb_ctx, AMIGA_HD_FLOPPYMODE);
-	}
-
-	if(( filesize / ( 512 * hxcfe_getCurrentNumberOfTrack(fb_ctx) * hxcfe_getCurrentNumberOfSide(fb_ctx)))<80)
-		hxcfe_setNumberOfTrack ( fb_ctx, 80 );
-	else
-		hxcfe_setNumberOfTrack ( fb_ctx, filesize/(512* hxcfe_getCurrentNumberOfTrack(fb_ctx) * hxcfe_getCurrentNumberOfSide(fb_ctx) ) );
-
-	hxcfe_setNumberOfSide ( fb_ctx, 2 );
-	hxcfe_setSectorSize( fb_ctx, 512 );
-
-	hxcfe_setTrackType( fb_ctx, AMIGAFORMAT_DD);
-	hxcfe_setTrackBitrate( fb_ctx, DEFAULT_AMIGA_BITRATE );
-
-	hxcfe_setStartSectorID( fb_ctx, 0 );
-	hxcfe_setSectorGap3 ( fb_ctx, 0 );
-
-	ret = hxcfe_generateDisk( fb_ctx, floppydisk, 0, flatimg, filesize );
+	ret = raw_amiga_loader(imgldr_ctx, floppydisk, 0, flatimg, filesize );
 
 	free(flatimg);
 
