@@ -82,90 +82,74 @@ int DMS_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	}
 }
 
-
-
 int DMS_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
+	HXCFE_FLPGEN * fb_ctx;
+	int ret;
 	unsigned int filesize;
-	int i,j,skew;
-	unsigned int file_offset;
-	unsigned short sectorsize;
-	unsigned char gap3len,trackformat,interleave;
-	HXCFILE * fo;
-	unsigned char* flatimg;
+	HXCFILE * f_img;
 	int retxdms;
-	HXCFE_CYLINDER* currentcylinder;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMS_libLoad_DiskFile %s",imgfile);
 
-	// ouverture et decompression du fichier dms
-	fo=HXC_fopen("","");
-	retxdms=Process_File(imgfile,fo, CMD_UNPACK, 0, 0, 0);
+	// Unpack the dms file.
+	f_img = HXC_fopen("","");
+	if( !f_img )
+	{
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Alloc Error !");
+		return HXCFE_INTERNALERROR;
+	}
+
+	retxdms = Process_File(imgfile,f_img, CMD_UNPACK, 0, 0, 0);
 	if(retxdms)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"XDMS: Error %d while reading the file!",retxdms);
-		HXC_fclose(fo);
+		HXC_fclose(f_img);
 		return HXCFE_ACCESSERROR;
 	}
 
+	filesize = f_img->buffersize;
 
-	filesize=fo->buffersize;
-	flatimg=fo->buffer;
-
-	if(fo!=0)
+	fb_ctx = hxcfe_initFloppy( imgldr_ctx->hxcfe, 86, 2 );
+	if( !fb_ctx )
 	{
-		sectorsize = 512;
-		interleave = 1;
-		gap3len = 0;
-		skew = 0;
-		file_offset = 0;
-		trackformat=AMIGAFORMAT_DD;
-		floppydisk->floppySectorPerTrack=11;
-		floppydisk->floppyNumberOfSide=2;
-		floppydisk->floppyNumberOfTrack=(filesize/(512*2*11));
-		floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
-		floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
-		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*(floppydisk->floppyNumberOfTrack+4));
-
-		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-		{
-
-			floppydisk->tracks[j]=allocCylinderEntry(DEFAULT_AMIGA_RPM,floppydisk->floppyNumberOfSide);
-			currentcylinder=floppydisk->tracks[j];
-
-			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-			{
-				hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),floppydisk->floppyNumberOfTrack*2);
-
-				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-							(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-
-				currentcylinder->sides[i]=tg_generateTrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-11150);
-
-			}
-		}
-
-		// Add 4 empty tracks
-		for(j=floppydisk->floppyNumberOfTrack;j<(floppydisk->floppyNumberOfTrack + 4);j++)
-		{
-			floppydisk->tracks[j]=allocCylinderEntry(DEFAULT_AMIGA_RPM,floppydisk->floppyNumberOfSide);
-			currentcylinder=floppydisk->tracks[j];
-
-			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-			{
-				currentcylinder->sides[i]=tg_generateTrack(&flatimg[file_offset],sectorsize,0,(unsigned char)j,(unsigned char)i,0,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-11150);
-			}
-		}
-
-		floppydisk->floppyNumberOfTrack += 4;
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"DMS Loader : tracks file successfully loaded and encoded!");
-		HXC_fclose(fo);
-		return HXCFE_NOERROR;
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Alloc Error !");
+		HXC_fclose( f_img );
+		return HXCFE_INTERNALERROR;
 	}
 
-	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"DMS file access error!");
-	return HXCFE_ACCESSERROR;
+	if(filesize<100*11*2*512)
+	{
+		hxcfe_setNumberOfSector ( fb_ctx, 11 );
+		hxcfe_setRPM( fb_ctx, DEFAULT_AMIGA_RPM ); // normal rpm
+		hxcfe_setInterfaceMode( fb_ctx, AMIGA_DD_FLOPPYMODE);
+	}
+	else
+	{
+		hxcfe_setNumberOfSector ( fb_ctx, 22 );
+		hxcfe_setRPM( fb_ctx, DEFAULT_AMIGA_RPM / 2); // 150 rpm
+		hxcfe_setInterfaceMode( fb_ctx, AMIGA_HD_FLOPPYMODE);
+	}
+
+	if(( filesize / ( 512 * hxcfe_getCurrentNumberOfTrack(fb_ctx) * hxcfe_getCurrentNumberOfSide(fb_ctx)))<80)
+		hxcfe_setNumberOfTrack ( fb_ctx, 80 );
+	else
+		hxcfe_setNumberOfTrack ( fb_ctx, filesize/(512* hxcfe_getCurrentNumberOfTrack(fb_ctx) * hxcfe_getCurrentNumberOfSide(fb_ctx) ) );
+
+	hxcfe_setNumberOfSide ( fb_ctx, 2 );
+	hxcfe_setSectorSize( fb_ctx, 512 );
+
+	hxcfe_setTrackType( fb_ctx, AMIGAFORMAT_DD);
+	hxcfe_setTrackBitrate( fb_ctx, DEFAULT_AMIGA_BITRATE );
+
+	hxcfe_setStartSectorID( fb_ctx, 0 );
+	hxcfe_setSectorGap3 ( fb_ctx, 0 );
+
+	ret = hxcfe_generateDisk( fb_ctx, floppydisk, 0, f_img->buffer, filesize );
+
+	HXC_fclose( f_img );
+
+	return ret;
 }
 
 int DMS_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
