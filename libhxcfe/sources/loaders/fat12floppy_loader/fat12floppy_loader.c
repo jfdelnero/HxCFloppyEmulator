@@ -61,6 +61,8 @@
 
 #include "libhxcadaptor.h"
 
+#include "loaders/common/raw_iso.h"
+
 #include "fat12.h"
 #include "fat12formats.h"
 
@@ -145,21 +147,19 @@ int FAT12FLOPPY_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 int FAT12FLOPPY_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	int32_t  i,j;
-	unsigned int file_offset;
+	raw_iso_cfg rawcfg;
+
 	unsigned char * flatimg;
-	int32_t    gap3len,interleave,dirmode;
-	int32_t    sectorsize,rpm;
+	int32_t    dirmode;
 	int32_t    numberofcluster;
 	uint32_t   fatposition;
 	uint32_t   rootposition;
 	uint32_t   dataposition;
 	int32_t    dksize;
 	unsigned char media_type;
-	int32_t    tracktype;
 	FATCONFIG fatconfig;
-	HXCFE_CYLINDER* currentcylinder;
 	struct stat staterep;
-	int pregap;
+	int ret;
 	char dummyext[512];
 
 	//	FILE * f;
@@ -187,23 +187,24 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppy
 	}
 
 	dirmode = configlist[i].dir;
-	floppydisk->floppyNumberOfTrack = configlist[i].number_of_track;
-	floppydisk->floppyNumberOfSide = configlist[i].number_of_side;
-	floppydisk->floppySectorPerTrack = configlist[i].number_of_sectorpertrack;
-	floppydisk->floppyBitRate = configlist[i].bitrate;
-	floppydisk->floppyiftype = configlist[i].interface_mode;
-	tracktype = configlist[i].tracktype;
-	interleave = configlist[i].interleave;
-	gap3len = configlist[i].gap3;
-	pregap = configlist[i].pregap;
+
+	raw_iso_setdefcfg(&rawcfg);
+
+	rawcfg.number_of_tracks = configlist[i].number_of_track;
+	rawcfg.number_of_sides = configlist[i].number_of_side;
+	rawcfg.number_of_sectors_per_track = configlist[i].number_of_sectorpertrack;
+	rawcfg.bitrate = configlist[i].bitrate;
+	rawcfg.interface_mode = configlist[i].interface_mode;
+	rawcfg.track_format = configlist[i].tracktype;
+	rawcfg.interleave = configlist[i].interleave;
+	rawcfg.gap3 = configlist[i].gap3;
+	rawcfg.rpm = configlist[i].rpm;
+	rawcfg.sector_size = configlist[i].sectorsize;
+	rawcfg.pregap = configlist[i].pregap;
 	media_type = configlist[i].BPB_media;
 
-	rpm = configlist[i].rpm;
-
-	dksize = floppydisk->floppyNumberOfTrack*
-			(floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide*configlist[i].sectorsize);
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"floppy size:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d, bitrate:%d, gap3: %d ",dksize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm,floppydisk->floppyBitRate,gap3len);
+	dksize = rawcfg.number_of_tracks *
+			(rawcfg.number_of_sectors_per_track * rawcfg.number_of_sides * configlist[i].sectorsize);
 
 	flatimg = (unsigned char*)malloc(dksize);
 	if(flatimg != NULL)
@@ -225,28 +226,28 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppy
 		fatconfig.numberoffat = 2;
 
 		fatconfig.numberofrootentries = configlist[i].root_dir_entries;
-		fatconfig.nbofsector = (floppydisk->floppyNumberOfTrack*
-								(floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide));
+		fatconfig.nbofsector = (rawcfg.number_of_tracks*
+								(rawcfg.number_of_sectors_per_track*rawcfg.number_of_sides));
 		fatconfig.nbofsectorperfat = ( ((fatconfig.nbofsector-(fatconfig.reservedsector+(fatconfig.numberofrootentries/32)))/fatconfig.clustersize)/((fatconfig.sectorsize*8)/12))+1;
 		//sprintf(&flatimg[CHSTOADR(0,0,0)+3],"HXC.EMU");
 
 		fatbs = (fat_boot_sector*)flatimg;
 
-		fatbs->BPB_BytsPerSec = fatconfig.sectorsize; //Nombre d'octets par secteur;
-		fatbs->BPB_SecPerClus = fatconfig.clustersize; //Nombre de secteurs par cluster (1, 2, 4, 8, 16, 32, 64 ou 128).
-		fatbs->BPB_RsvdSecCnt = fatconfig.reservedsector; //Nombre de secteur réservé en comptant le secteur de boot (32 par défaut pour FAT32, 1 par défaut pour FAT12/16).
-		fatbs->BPB_NumFATs = fatconfig.numberoffat; //Nombre de FATs sur le disque (2 par défaut).
-		fatbs->BPB_RootEntCnt = fatconfig.numberofrootentries; //Taille du répertoire racine (0 par défaut pour FAT32).
-		fatbs->BPB_TotSec16 = fatconfig.nbofsector; //Nombre total de secteur 16-bit (0 par défaut pour FAT32).
-		fatbs->BPB_Media = media_type; //Type de disque
+		fatbs->BPB_BytsPerSec = fatconfig.sectorsize;            // Nombre d'octets par secteur;
+		fatbs->BPB_SecPerClus = fatconfig.clustersize;           // Nombre de secteurs par cluster (1, 2, 4, 8, 16, 32, 64 ou 128).
+		fatbs->BPB_RsvdSecCnt = fatconfig.reservedsector;        // Nombre de secteur réservé en comptant le secteur de boot (32 par défaut pour FAT32, 1 par défaut pour FAT12/16).
+		fatbs->BPB_NumFATs = fatconfig.numberoffat;              // Nombre de FATs sur le disque (2 par défaut).
+		fatbs->BPB_RootEntCnt = fatconfig.numberofrootentries;   // Taille du répertoire racine (0 par défaut pour FAT32).
+		fatbs->BPB_TotSec16 = fatconfig.nbofsector;              // Nombre total de secteur 16-bit (0 par défaut pour FAT32).
+		fatbs->BPB_Media = media_type;                           // Type de disque
 
-		fatbs->BPB_FATSz16 = fatconfig.nbofsectorperfat; //Taille d'une FAT en secteurs (0 par défaut pour FAT32).
-		fatbs->BPB_SecPerTrk = floppydisk->floppySectorPerTrack; //Sectors per track
-		fatbs->BPB_NumHeads = floppydisk->floppyNumberOfSide; //Number of heads.
+		fatbs->BPB_FATSz16 = fatconfig.nbofsectorperfat;         // Taille d'une FAT en secteurs (0 par défaut pour FAT32).
+		fatbs->BPB_SecPerTrk = floppydisk->floppySectorPerTrack; // Sectors per track
+		fatbs->BPB_NumHeads = floppydisk->floppyNumberOfSide;    // Number of heads.
 
-		*( (unsigned short*) &flatimg[0x1FE])=0xAA55;//End of sector marker (0x55 0xAA)
+		*( (unsigned short*) &flatimg[0x1FE])=0xAA55;            // End of sector marker (0x55 0xAA)
 
-		fatposition = fatconfig.sectorsize*fatconfig.reservedsector;
+		fatposition = fatconfig.sectorsize * fatconfig.reservedsector;
 		memset(&flatimg[fatposition],0x00,fatconfig.numberoffat*fatconfig.nbofsectorperfat*512);
 
 		rootposition = ((fatconfig.reservedsector)+(fatconfig.numberoffat*fatconfig.nbofsectorperfat))*fatconfig.sectorsize;
@@ -288,35 +289,20 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppy
 		flatimg[fatposition+2] = 0xFF;
 
 		memcpy(&flatimg[((fatconfig.reservedsector)+(fatconfig.nbofsectorperfat))*fatconfig.sectorsize],&flatimg[fatposition],fatconfig.nbofsectorperfat*fatconfig.sectorsize);
+
+		ret = raw_iso_loader(imgldr_ctx, floppydisk, 0, flatimg, dksize, &rawcfg);
+
+		free(flatimg);
+
+		return ret;
+	
 	}
 	else
 	{
 		return HXCFE_INTERNALERROR;
 	}
 
-	sectorsize=fatconfig.sectorsize;
-	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-
-	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-	{
-
-		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-		currentcylinder=floppydisk->tracks[j];
-
-		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-		{
-			hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
-			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-						(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-
-			currentcylinder->sides[i] = tg_generateTrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,0,floppydisk->floppyBitRate,currentcylinder->floppyRPM,tracktype,gap3len,(unsigned short)pregap,2500,-2500);
-		}
-	}
-
-	free(flatimg);
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-	return HXCFE_NOERROR;
+	return HXCFE_BADFILE;
 }
 
 int FAT12FLOPPY_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
