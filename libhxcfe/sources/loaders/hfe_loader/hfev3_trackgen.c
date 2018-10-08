@@ -69,6 +69,9 @@ trackpart trackpartbuffer_1[4096*2];
 
 void adjustrand(unsigned char * d, unsigned char * r)
 {
+	if ((*d & 0xF0) == 0xF0) // Shouldn't match with an opcode at this point !
+		*d = *d ^ 0x90;
+
 	return;
 }
 
@@ -118,16 +121,16 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 	lenbitdatah0 = lendatah0;
 	lenbitdatah1 = lendatah1;
 
-	lendatah0=(lendatah0/8);
-	lendatah1=(lendatah1/8);
+	lendatah0 = (lendatah0/8);
+	lendatah1 = (lendatah1/8);
 
 	trackzoneindex0=0;
 	trackzoneindex1=0;
 
 	if(lendatah0>lendatah1)
-		finalsizebuffer=(lendatah0)+(32000);
+		finalsizebuffer = (lendatah0)+(32000);
 	else
-		finalsizebuffer=(lendatah1)+(32000);
+		finalsizebuffer = (lendatah1)+(32000);
 
 	finalbuffer_H0 = malloc(finalsizebuffer);
 	finalbuffer_H1 = malloc(finalsizebuffer);
@@ -186,15 +189,15 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 				trackzonebuffer_0[trackzoneindex0].bitrate=timeh0[i];
 			}
 			i++;
-		}while(i<lendatah0);
+		}while( i < lendatah0 );
 		trackzonebuffer_0[trackzoneindex0].end=i-1;
 	}
 	else
 	{
-		trackzonebuffer_0[0].bitrate=fixedbitrateh0;
-		trackzonebuffer_0[0].start=0;
-		trackzonebuffer_0[0].end=lendatah0-1;
-		trackzoneindex0=0;
+		trackzonebuffer_0[0].bitrate = fixedbitrateh0;
+		trackzonebuffer_0[0].start = 0;
+		trackzonebuffer_0[0].end = lendatah0-1;
+		trackzoneindex0 = 0;
 	}
 
 #ifdef DEBUGVB
@@ -580,6 +583,9 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 	{
 		if( (lenbitdatah0 & 7) && !(lenbitdatah1 & 7) )
 		{
+#ifdef DEBUGVB
+			floppycontext->hxc_printf(MSG_DEBUG,"SKIPBITS_OPCODE (0X) (Ofs: %d)", k);
+#endif
 			finalbuffer_H0[k] = SKIPBITS_OPCODE;
 			finalbuffer_H1[k] = NOP_OPCODE;
 
@@ -600,6 +606,10 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 
 		if( !(lenbitdatah0 & 7) && (lenbitdatah1 & 7) )
 		{
+#ifdef DEBUGVB
+			floppycontext->hxc_printf(MSG_DEBUG,"SKIPBITS_OPCODE (X1) (Ofs: %d)", k);
+#endif
+
 			finalbuffer_H0[k] = NOP_OPCODE;
 			finalbuffer_H1[k] = SKIPBITS_OPCODE;
 
@@ -619,6 +629,9 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 
 		if( (lenbitdatah0 & 7) && (lenbitdatah1 & 7) )
 		{
+#ifdef DEBUGVB
+			floppycontext->hxc_printf(MSG_DEBUG,"SKIPBITS_OPCODE (01) (Ofs: %d)", k);
+#endif
 			finalbuffer_H0[k] = SKIPBITS_OPCODE;
 			finalbuffer_H1[k] = SKIPBITS_OPCODE;
 
@@ -644,6 +657,9 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 		{
 			if( index_h0[i] && !currentindex )
 			{
+#ifdef DEBUGVB
+				floppycontext->hxc_printf(MSG_DEBUG,"SETINDEX_OPCODE (01) (Ofs: %d)", k);
+#endif
 				finalbuffer_H0[k] = SETINDEX_OPCODE;
 				finalbuffer_H1[k] = SETINDEX_OPCODE;
 
@@ -690,6 +706,10 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 			}
 			#endif
 
+#ifdef DEBUGVB
+			floppycontext->hxc_printf(MSG_DEBUG,"SETBITRATE_OPCODE (01) (Ofs: %d) (%d - %d)", k, speedcfg_track0, speedcfg_track1);
+#endif
+
 			finalbuffer_H0[k] = SETBITRATE_OPCODE;
 			finalbuffer_H1[k] = SETBITRATE_OPCODE;
 			k=(k+1)%finalsizebuffer;
@@ -717,6 +737,10 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 					}
 					#endif 
 
+#ifdef DEBUGVB
+					floppycontext->hxc_printf(MSG_DEBUG,"SETBITRATE_OPCODE (01) (Ofs: %d) (%d - %d)", k, speedcfg_track0, speedcfg_track1);
+#endif
+
 					finalbuffer_H0[k] = SETBITRATE_OPCODE;
 					finalbuffer_H1[k] = SETBITRATE_OPCODE;
 					k=(k+1)%finalsizebuffer;
@@ -743,8 +767,12 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 					}
 					#endif
 
-					finalbuffer_H0[k]= SETBITRATE_OPCODE;
-					finalbuffer_H1[k]= SETBITRATE_OPCODE;
+#ifdef DEBUGVB
+					floppycontext->hxc_printf(MSG_DEBUG,"SETBITRATE_OPCODE (01) (Ofs: %d) (%d - %d)", k, speedcfg_track0, speedcfg_track1);
+#endif
+
+					finalbuffer_H0[k] = SETBITRATE_OPCODE;
+					finalbuffer_H1[k] = SETBITRATE_OPCODE;
 					k=(k+1)%finalsizebuffer;
 
 					finalbuffer_H0[k] = speedcfg_track0;
@@ -868,9 +896,11 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 
 				if(j<lendatah1)
 				{
-					datah1tmp=datah1[j];
+					datah1tmp = datah1[j];
 					if(randomh1)
-						randomh1tmp=randomh1[j];
+						randomh1tmp = randomh1[j];
+
+					adjustrand(&datah1tmp, &randomh1tmp);
 				}
 				else
 				{
@@ -878,8 +908,8 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 				}
 
 
-				finalbuffer_H0[k]= NOP_OPCODE;
-				finalbuffer_H1[k]= datah1tmp;
+				finalbuffer_H0[k] = NOP_OPCODE;
+				finalbuffer_H1[k] = datah1tmp;
 				//randomfinalbuffer[k]=(randomh1tmp>>4);
 				k=(k+1)%finalsizebuffer;
 
@@ -910,11 +940,13 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 
 				if(i<lendatah0)
 				{
-					datah0tmp=datah0[i];
+					datah0tmp = datah0[i];
 					if(randomh0)
 					{
-						randomh0tmp=randomh0[i];
+						randomh0tmp = randomh0[i];
 					}
+
+					adjustrand(&datah0tmp, &randomh0tmp);
 				}
 				else
 				{
