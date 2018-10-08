@@ -338,8 +338,14 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 								break;
 
 							case SETBITRATE_OPCODE:
-								bitrate = FLOPPYEMUFREQ / ( hfetrack2[l+1] * 2);
-
+								if( hfetrack2[l+1] )
+								{
+									bitrate = FLOPPYEMUFREQ / ( hfetrack2[l+1] * 2);
+								}
+								else
+								{
+									imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"T%.3dS%d Off[%.5d] : SETBITRATE_OPCODE : %d. NULL Rate divisor !",i,j,l,hfetrack2[l+1]);
+								}
 #ifdef DEBUGVB
 								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T%.3dS%d Off[%.5d] : SETBITRATE_OPCODE : %d - %d",i,j,l,hfetrack2[l+1],bitrate);
 #endif
