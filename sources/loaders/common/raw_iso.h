@@ -6,6 +6,7 @@ typedef struct raw_iso_cfg_
 	int32_t number_of_sectors_per_track;
 	int32_t sector_size;
 	int32_t start_sector_id;
+	int32_t pregap;
 	int32_t gap3;
 	int32_t interleave;
 	int32_t skew_per_track;

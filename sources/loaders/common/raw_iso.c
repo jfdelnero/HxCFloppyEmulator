@@ -100,6 +100,7 @@ int raw_iso_loader(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk, FILE * f
 	hxcfe_setSectorSize( fb_ctx, cfg->sector_size );
 	hxcfe_setStartSectorID( fb_ctx, cfg->start_sector_id );
 	hxcfe_setSectorGap3( fb_ctx, cfg->gap3 );
+	hxcfe_setTrackPreGap( fb_ctx, cfg->pregap );
 	hxcfe_setTrackType( fb_ctx, cfg->track_format );
 	hxcfe_setTrackBitrate( fb_ctx, cfg->bitrate );
 	hxcfe_setRPM( fb_ctx, cfg->rpm );
@@ -124,6 +125,7 @@ void raw_iso_setdefcfg(raw_iso_cfg *rawcfg)
 		rawcfg->sector_size = 512;
 		rawcfg->start_sector_id = 1;
 		rawcfg->gap3 = 84;
+		rawcfg->pregap = 0;
 		rawcfg->interleave = 1;
 		rawcfg->skew_per_track = 1;
 		rawcfg->skew_per_side = 1;
