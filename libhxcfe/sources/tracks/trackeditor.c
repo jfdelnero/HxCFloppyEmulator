@@ -129,7 +129,7 @@ HXCFE_SIDE * hxcfe_duplicateSide( HXCFE* floppycontext, HXCFE_SIDE * side )
 				if( new_side->track_encoding_buffer )
 					memcpy(new_side->track_encoding_buffer, side->track_encoding_buffer,track_wordsize );
 			}
-			
+
 			if( side->track_encoding_buffer )
 			{
 				new_side->track_encoding_buffer = malloc( track_wordsize );
@@ -152,31 +152,19 @@ void hxcfe_freeSide( HXCFE* floppycontext, HXCFE_SIDE * side )
 	if(side)
 	{
 		if(side->databuffer)
-		{
 			free(side->databuffer);
-			side->databuffer=0;
-		}
+
 		if(side->flakybitsbuffer)
-		{
 			free(side->flakybitsbuffer);
-			side->flakybitsbuffer=0;
-		}
+
 		if(side->indexbuffer)
-		{
 			free(side->indexbuffer);
-			side->indexbuffer=0;
-		}
+
 		if(side->timingbuffer)
-		{
 			free(side->timingbuffer);
-			side->timingbuffer=0;
-		}
 
 		if(side->track_encoding_buffer)
-		{
 			free(side->track_encoding_buffer);
-			side->track_encoding_buffer=0;
-		}
 
 		free(side);
 	}
@@ -1066,7 +1054,7 @@ int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track
 						{
 							hxcfe_insertCell( floppycontext, currentside, start_cellnumber, 0,  tab[loop] );
 							test_pattern_size += tab[loop];
-							
+
 						}
 						else
 						{
@@ -1112,7 +1100,7 @@ int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track
 									}
 									hxcfe_freeSectorConfig( sa, sc );
 								}
-								
+
 								pattern++;
 							}while( (pattern & ((2<<(test_pattern_size-1))-1)) && !good_pattern);
 						}
@@ -1158,7 +1146,7 @@ int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track
 			else
 				return 1; // Repaired...
 
-		}	
+		}
 	}
 	return HXCFE_BADPARAMETER;
 }
@@ -1225,6 +1213,6 @@ int32_t hxcfe_sectorRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t trac
 				return 1; // Repaired...
 		}
 	}
-	
+
 	return HXCFE_BADPARAMETER;
 }
