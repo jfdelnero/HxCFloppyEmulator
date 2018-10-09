@@ -51,14 +51,13 @@
 
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
-#include "./tracks/track_generator.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
+#include "tracks/track_generator.h"
+
+#include "loaders/common/raw_iso.h"
 
 #include "ssd_dsd_loader.h"
-
-#include "libhxcadaptor.h"
 
 int DSD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
@@ -96,86 +95,48 @@ int DSD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int DSD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
-	FILE * f;
-	unsigned int filesize;
-	unsigned int file_offset;
-
-	int i,j,interleave,skew;
-	unsigned char* trackdata;
-	unsigned char  gap3len,trackformat;
-	unsigned short rpm;
-	unsigned short sectorsize;
-	HXCFE_CYLINDER* currentcylinder;
+	FILE * f_img;
+	raw_iso_cfg rawcfg;
+	int ret;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DSD_libLoad_DiskFile %s",imgfile);
 
-	f = hxc_fopen(imgfile,"rb");
-	if( f == NULL )
+	f_img = hxc_fopen(imgfile,"rb");
+	if( f_img == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
-	filesize = hxc_fgetsize(f);
+	raw_iso_setdefcfg(&rawcfg);
 
-	if( filesize )
+	rawcfg.sector_size = 256;
+	rawcfg.number_of_tracks = 80;
+	rawcfg.number_of_sides = 2;
+	rawcfg.number_of_sectors_per_track = 10;
+	rawcfg.gap3 = 255;
+	rawcfg.interleave = 2;
+	rawcfg.skew_per_track = 2;
+	rawcfg.rpm = 300;
+	rawcfg.interface_mode = GENERIC_SHUGART_DD_FLOPPYMODE;
+	rawcfg.bitrate = DEFAULT_DD_BITRATE;
+	rawcfg.track_format = ISOFORMAT_SD;
+
+	if(strstr( imgfile,".dsd" )!=NULL)
 	{
-		sectorsize=256;
-		floppydisk->floppyNumberOfTrack=80;
-		floppydisk->floppyNumberOfSide=2;
-		floppydisk->floppySectorPerTrack=10;
-		gap3len=255;
-		interleave=2;
-		skew=2;
-		rpm=300; // normal rpm
-		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-		floppydisk->floppyBitRate=DEFAULT_DD_BITRATE;
-		trackformat=ISOFORMAT_SD;
-
-		if(strstr( imgfile,".dsd" )!=NULL)
-		{
-			floppydisk->floppyNumberOfSide=2;
-		}
-
-		if(strstr( imgfile,".ssd" )!=NULL)
-		{
-			floppydisk->floppyNumberOfSide=1;
-		}
-
-		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d bitrate:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm,floppydisk->floppyBitRate);
-		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-
-		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-		{
-
-			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-			currentcylinder=floppydisk->tracks[j];
-
-			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-			{
-				hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
-
-				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-					        (sectorsize*(floppydisk->floppySectorPerTrack)*i);
-				fseek (f , file_offset , SEEK_SET);
-				hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
-
-				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,0,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
-			}
-		}
-
-		free(trackdata);
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		hxc_fclose(f);
-		return HXCFE_NOERROR;
-
+		rawcfg.number_of_sides = 2;
 	}
-	hxc_fclose(f);
-	return HXCFE_FILECORRUPTED;
+
+	if(strstr( imgfile,".ssd" )!=NULL)
+	{
+		rawcfg.number_of_sides = 1;
+	}
+
+	ret = raw_iso_loader(imgldr_ctx, floppydisk, f_img, 0, 0, &rawcfg);
+
+	hxc_fclose(f_img);
+
+	return ret;
 }
 
 int DSD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
