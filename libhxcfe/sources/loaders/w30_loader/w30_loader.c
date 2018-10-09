@@ -50,15 +50,14 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
 #include "libhxcfe.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
+#include "tracks/track_generator.h"
+
+#include "loaders/common/raw_iso.h"
 
 #include "w30_loader.h"
-
-#include "libhxcadaptor.h"
 
 int W30_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
@@ -96,88 +95,40 @@ int W30_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int W30_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	FILE * f;
-	unsigned int filesize;
-	int i,j;
-	unsigned int file_offset;
-	unsigned char* trackdata = NULL;
-	int gap3len,interleave,trackformat,skew;
-	int rpm;
-	int sectorsize;
-	HXCFE_CYLINDER* currentcylinder;
+	FILE * f_img;
+	raw_iso_cfg rawcfg;
+	int ret;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"W30_libLoad_DiskFile %s",imgfile);
 
-	f = hxc_fopen(imgfile,"rb");
-	if( f == NULL )
+	f_img = hxc_fopen(imgfile,"rb");
+	if( f_img == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
-	filesize = hxc_fgetsize(f);
+	raw_iso_setdefcfg(&rawcfg);
 
-	sectorsize=512; // w30/S330/S50/S550 file support only 512bytes/sector floppies.
+	rawcfg.sector_size = 512; // w30/S330/S50/S550 file support only 512bytes/sector floppies.
 
-	gap3len=255;
-	interleave=1;
-	skew=0;
+	rawcfg.gap3 = 255;
+	rawcfg.interleave = 1;
+	rawcfg.skew_per_track = 0;
 
-	trackformat=IBMFORMAT_DD;
-	floppydisk->floppyNumberOfTrack=80;
-	floppydisk->floppyNumberOfSide=2;
-	floppydisk->floppySectorPerTrack=9;
-	floppydisk->floppyBitRate=250000;
-	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-	floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-	if( !floppydisk->tracks )
-		goto alloc_error;
+	rawcfg.track_format = IBMFORMAT_DD;
+	rawcfg.number_of_tracks = 80;
+	rawcfg.number_of_sides = 2;
+	rawcfg.number_of_sectors_per_track = 9;
+	rawcfg.bitrate = 250000;
+	rawcfg.interface_mode = GENERIC_SHUGART_DD_FLOPPYMODE;
+	rawcfg.rpm = 300; // normal rpm
 
-	rpm=300; // normal rpm
+	ret = raw_iso_loader(imgldr_ctx, floppydisk, f_img, 0, 0, &rawcfg);
 
-	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
+	hxc_fclose(f_img);
 
-	trackdata = (unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-	if(!trackdata)
-		goto alloc_error;
-
-	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-	{
-
-		floppydisk->tracks[j] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-		currentcylinder=floppydisk->tracks[j];
-
-		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-		{
-			hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
-
-			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-				        (sectorsize*(floppydisk->floppySectorPerTrack)*i);
-			fseek (f , file_offset , SEEK_SET);
-			hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
-
-			currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
-		}
-	}
-
-	free(trackdata);
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-
-	hxc_fclose(f);
-	return HXCFE_NOERROR;
-
-alloc_error:
-	if(f)
-		hxc_fclose(f);
-
-	if(trackdata)
-		free(trackdata);
-
-	if(floppydisk->tracks)
-		free(floppydisk->tracks);
-
-	return HXCFE_INTERNALERROR;
+	return ret;
 }
 
 int W30_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
