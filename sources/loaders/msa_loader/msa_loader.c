@@ -51,18 +51,14 @@
 
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
-#include "./tracks/track_generator.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
+#include "tracks/track_generator.h"
 
 #include "msa_loader.h"
-
 #include "msa_writer.h"
 
 #include "loaders/common/raw_iso.h"
-
-#include "libhxcadaptor.h"
 
 int MSA_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {

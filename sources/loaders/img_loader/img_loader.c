@@ -50,19 +50,16 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
 #include "libhxcfe.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
+#include "tracks/track_generator.h"
 
 #include "img_loader.h"
 
 #include "loaders/common/raw_iso.h"
 
 #include "pcimgfileformat.h"
-
-#include "libhxcadaptor.h"
 
 int pc_imggetfloppyconfig(unsigned char * img,uint32_t filesize, raw_iso_cfg *rawcfg)
 {

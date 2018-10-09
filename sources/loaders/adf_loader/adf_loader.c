@@ -50,19 +50,14 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
 #include "libhxcfe.h"
+#include "libhxcadaptor.h"
+#include "floppy_loader.h"
 
 #include "loaders/common/raw_amiga.h"
 
-#include "floppy_loader.h"
-#include "floppy_utils.h"
-
 #include "adf_loader.h"
-
 #include "adf_writer.h"
-
-#include "libhxcadaptor.h"
 
 int ADF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
@@ -98,10 +93,8 @@ int ADF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int ADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	HXCFE_FLPGEN * fb_ctx;
 	int ret;
 	FILE * f_img;
-	unsigned int filesize;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADF_libLoad_DiskFile %s",imgfile);
 

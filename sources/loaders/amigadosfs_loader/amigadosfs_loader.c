@@ -52,23 +52,16 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
 #include "libhxcfe.h"
-
-#include "loaders/common/raw_amiga.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
 
 #include "loaders/common/raw_amiga.h"
 
 #include "amigadosfs_loader.h"
 
-#include "libhxcadaptor.h"
-
 #include "thirdpartylibs/adflib/Lib/adflib.h"
 #include "stdboot3.h"
-
 
 HXCFE* global_floppycontext;
 
