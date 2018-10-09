@@ -50,15 +50,14 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
 #include "libhxcfe.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
+#include "tracks/track_generator.h"
+
+#include "loaders/common/raw_iso.h"
 
 #include "krz_loader.h"
-
-#include "libhxcadaptor.h"
 
 #include "../fat12floppy_loader/fat12.h"
 
@@ -94,41 +93,34 @@ int KRZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int KRZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	int i,j;
-	unsigned int file_offset;
+	raw_iso_cfg rawcfg;
+	int ret;
 	unsigned char * flatimg;
-	int gap3len,interleave,skew;
-	int trackformat;
-	int rpm;
-	int sectorsize;
 	int numberofcluster;
-	uint32_t   fatposition;
-	uint32_t   rootposition;
-	uint32_t   dataposition;
+	uint32_t fatposition;
+	uint32_t rootposition;
+	uint32_t dataposition;
 	int pcbootsector;
 	int dksize;
-	HXCFE_CYLINDER* currentcylinder;
-
 	FATCONFIG fatconfig;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"krz_libLoad_DiskFile %s",imgfile);
 
-	floppydisk->floppyNumberOfTrack=80;
-	floppydisk->floppyNumberOfSide=2;
-	floppydisk->floppySectorPerTrack=18;
-	floppydisk->floppyBitRate=500000;
-	rpm=300;
+	rawcfg.number_of_tracks = 80;
+	rawcfg.number_of_sides = 2;
+	rawcfg.number_of_sectors_per_track = 18;
+	rawcfg.bitrate = 500000;
+	rawcfg.rpm = 300;
+	rawcfg.skew_per_track = 0;
+	rawcfg.gap3 = 84;
+	rawcfg.interleave = 1;
+	rawcfg.sector_size = 512;
+	rawcfg.track_format = IBMFORMAT_DD;
+	rawcfg.interface_mode = IBMPC_HD_FLOPPYMODE;
 	pcbootsector=1;
-	skew=0;
-	gap3len=84;
-	interleave=1;
-	sectorsize=512;
-	trackformat=IBMFORMAT_DD;
 
-	dksize=floppydisk->floppyNumberOfTrack*
-			(floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide*512);
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"floppy size:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",dksize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
+	dksize = floppydisk->floppyNumberOfTrack *
+			(floppydisk->floppySectorPerTrack * floppydisk->floppyNumberOfSide * 512);
 
 	flatimg=(unsigned char*)malloc(dksize);
 	if(flatimg!=NULL)
@@ -137,11 +129,11 @@ int KRZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		if(pcbootsector)
 			memcpy(flatimg,&msdos_bootsector,512);
 
-		fatconfig.sectorsize=512;
-		fatconfig.clustersize=2;
-		fatconfig.reservedsector=1;
-		fatconfig.numberoffat=2;
-		fatconfig.numberofrootentries=224;// 7secteurs = 32 *512
+		fatconfig.sectorsize = 512;
+		fatconfig.clustersize = 2;
+		fatconfig.reservedsector = 1;
+		fatconfig.numberoffat = 2;
+		fatconfig.numberofrootentries = 224;// 7secteurs = 32 *512
 		fatconfig.nbofsector=(floppydisk->floppyNumberOfTrack*
 								(floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide));
 		fatconfig.nbofsectorperfat=((fatconfig.nbofsector-(fatconfig.reservedsector+(fatconfig.numberofrootentries/32)))/((fatconfig.sectorsize*8)/12))+1;
@@ -168,11 +160,11 @@ int KRZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		*( (unsigned short*) &flatimg[0x1a])=floppydisk->floppyNumberOfSide; //Number of heads.
 		*( (unsigned short*) &flatimg[0x1FE])=0xAA55;//End of sector marker (0x55 0xAA)
 
-		fatposition=fatconfig.sectorsize*fatconfig.reservedsector;
-		rootposition=((fatconfig.reservedsector)+(fatconfig.numberoffat*fatconfig.nbofsectorperfat))*fatconfig.sectorsize;
-		dataposition=(((fatconfig.reservedsector)+(fatconfig.numberoffat*fatconfig.nbofsectorperfat))*fatconfig.sectorsize)+(32*fatconfig.numberofrootentries);
+		fatposition = fatconfig.sectorsize*fatconfig.reservedsector;
+		rootposition = ((fatconfig.reservedsector)+(fatconfig.numberoffat*fatconfig.nbofsectorperfat))*fatconfig.sectorsize;
+		dataposition = (((fatconfig.reservedsector)+(fatconfig.numberoffat*fatconfig.nbofsectorperfat))*fatconfig.sectorsize)+(32*fatconfig.numberofrootentries);
 
-		numberofcluster=(fatconfig.nbofsector-(dataposition/fatconfig.sectorsize))/fatconfig.clustersize;
+		numberofcluster = (fatconfig.nbofsector-(dataposition/fatconfig.sectorsize))/fatconfig.clustersize;
 
 		if(ScanFileAndAddToFAT(imgldr_ctx->hxcfe,imgfile,0,&flatimg[fatposition],&flatimg[rootposition],&flatimg[dataposition],0,&fatconfig,numberofcluster))
 		{
@@ -180,46 +172,18 @@ int KRZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		}
 
 		memcpy(&flatimg[((fatconfig.reservedsector)+(fatconfig.nbofsectorperfat))*fatconfig.sectorsize],&flatimg[fatposition],fatconfig.nbofsectorperfat*fatconfig.sectorsize);
+
+		ret = raw_iso_loader(imgldr_ctx, floppydisk, 0, flatimg, dksize, &rawcfg);
+
+		free(flatimg);
+
+		return ret;
+
 	}
 	else
 	{
 		return HXCFE_INTERNALERROR;
 	}
-
-	floppydisk->floppyiftype=IBMPC_HD_FLOPPYMODE;
-	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-	if(!floppydisk->tracks)
-		goto alloc_error;
-
-	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-	{
-		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-		currentcylinder=floppydisk->tracks[j];
-
-		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-		{
-			hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
-
-			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-						(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-
-			currentcylinder->sides[i]=tg_generateTrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
-		}
-	}
-
-	free(flatimg);
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-	return HXCFE_NOERROR;
-
-alloc_error:
-	if(flatimg)
-		free(flatimg);
-
-	if(floppydisk->tracks)
-		free(floppydisk->tracks);
-
-	return HXCFE_INTERNALERROR;
 }
 
 int KRZ_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
