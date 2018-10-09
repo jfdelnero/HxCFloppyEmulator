@@ -50,10 +50,11 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
 #include "libhxcfe.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
+#include "tracks/track_generator.h"
+
 #include "floppy_utils.h"
 
 #include "imz_loader.h"
@@ -62,8 +63,6 @@
 #include "thirdpartylibs/zlib/contrib/minizip/unzip.h"
 
 #include "loaders/common/raw_iso.h"
-
-#include "libhxcadaptor.h"
 
 #define UNPACKBUFFER 128*1024
 
