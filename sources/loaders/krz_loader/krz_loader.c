@@ -106,6 +106,8 @@ int KRZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"krz_libLoad_DiskFile %s",imgfile);
 
+	raw_iso_setdefcfg(&rawcfg);
+
 	rawcfg.number_of_tracks = 80;
 	rawcfg.number_of_sides = 2;
 	rawcfg.number_of_sectors_per_track = 18;
