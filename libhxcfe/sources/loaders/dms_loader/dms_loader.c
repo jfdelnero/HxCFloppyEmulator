@@ -50,11 +50,9 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
 #include "libhxcfe.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
 
 #include "loaders/common/raw_amiga.h"
 
@@ -64,9 +62,6 @@
 
 #include "thirdpartylibs/xdms/xdms-1.3.2/src/cdata.h"
 #include "thirdpartylibs/xdms/xdms-1.3.2/src/pfile.h"
-#include "thirdpartylibs/xdms/xdms-1.3.2/src/crc_csum.h"
-
-#include "libhxcadaptor.h"
 
 int DMS_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {

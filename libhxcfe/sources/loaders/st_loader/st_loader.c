@@ -50,11 +50,10 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
 #include "libhxcfe.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
+#include "tracks/track_generator.h"
 
 #include "st_loader.h"
 #include "st_writer.h"
@@ -62,8 +61,6 @@
 #include "stfileformat.h"
 
 #include "loaders/common/raw_iso.h"
-
-#include "libhxcadaptor.h"
 
 static int getfloppyconfig(unsigned char bootsector[512],uint32_t filesize, raw_iso_cfg *rawcfg)
 {
