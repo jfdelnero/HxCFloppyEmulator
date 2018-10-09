@@ -100,11 +100,11 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	unsigned int filesize;
 	int i,j,k,l,l2;
-	int32_t c;
+	uint8_t c;
+	int32_t len;
 	int32_t extractfilesize,filetracksize;
-	unsigned char   fileheader[5*2];
-	unsigned char   trackheader[1*2];
-	int32_t   len;
+	unsigned char fileheader[5*2];
+	unsigned char trackheader[1*2];
 
 	int ret;
 
@@ -137,9 +137,9 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			memset(flatimg,0,extractfilesize);
 
-			// chargement et decompression msa.
-			j=0;
-			i=0;
+			// Loading and unpacking the MSA file.
+			j = 0;
+			i = 0;
 			do
 			{
 				hxc_fread(trackheader,2,f);
@@ -155,12 +155,13 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					memcpy(flatimg+j,tmpbuffer,filetracksize);
 					free(tmpbuffer);
 					tmpbuffer = NULL;
-					j=j+filetracksize;
+					j += filetracksize;
 				}
 				else
 				{
-					k=0;
-					l=0;
+					k = 0;
+					l = 0;
+
 					tmpbuffer=(unsigned char*)malloc(filetracksize);
 					if( !tmpbuffer )
 						goto alloc_error;
@@ -172,40 +173,29 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					{
 						if(tmpbuffer[k]!=0xE5)
 						{
-							if(l+j>extractfilesize)
-							{
-								free(tmpbuffer);
-								free( flatimg );
-								hxc_fclose(f);
-								return HXCFE_FILECORRUPTED;
-							}
+							if( l+j > extractfilesize )
+								goto corrupted_file;
 
-							flatimg[l+j]=tmpbuffer[k];
+							flatimg[l+j] = tmpbuffer[k];
 							l++;
 							k++;
 						}
 						else
 						{
 							k++;
-							c=tmpbuffer[k];
-							k++;
-							len=256*tmpbuffer[k];
-							k++;
-							len=len+tmpbuffer[k];
-							k++;
+							c    = tmpbuffer[k++];
+							len  = tmpbuffer[k++] * 256;
+							len += tmpbuffer[k++];
 
 							if(l+j+len>extractfilesize)
 							{
-								free(tmpbuffer);
-								free( flatimg );
-								hxc_fclose(f);
-								return HXCFE_FILECORRUPTED;
+								goto corrupted_file;
 							}
 							else
 							{
 								for(l2=0;l2<len;l2++)
 								{
-									flatimg[l+j]=c;
+									flatimg[l+j] = c;
 									l++;
 								}
 							}
@@ -213,11 +203,10 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						}
 					}while(k<filetracksize);
 
-					j=j+l;
+					j += l;
 
 					free(tmpbuffer);
 					tmpbuffer = NULL;
-
 				}
 
 				i++;
@@ -262,7 +251,7 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				break;
 			}
 
-			rawcfg.rpm=300;
+			rawcfg.rpm = 300;
 
 			ret = raw_iso_loader(imgldr_ctx, floppydisk, 0, flatimg, extractfilesize, &rawcfg);
 
@@ -276,7 +265,9 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	return HXCFE_BADFILE;
 
+
 alloc_error:
+
 	if( flatimg )
 		free( flatimg );
 	if( tmpbuffer )
@@ -285,6 +276,17 @@ alloc_error:
 	hxc_fclose(f);
 
 	return HXCFE_INTERNALERROR;
+
+corrupted_file:
+
+	if( flatimg )
+		free( flatimg );
+	if( tmpbuffer )
+		free( tmpbuffer );
+
+	hxc_fclose(f);
+
+	return HXCFE_FILECORRUPTED;
 
 }
 
