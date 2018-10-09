@@ -51,15 +51,12 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
 #include "libhxcfe.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
+#include "tracks/track_generator.h"
 
 #include "fat12floppy_loader.h"
-
-#include "libhxcadaptor.h"
 
 #include "loaders/common/raw_iso.h"
 
@@ -161,8 +158,6 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppy
 	struct stat staterep;
 	int ret;
 	char dummyext[512];
-
-	//	FILE * f;
 
 	fat_boot_sector * fatbs;
 
