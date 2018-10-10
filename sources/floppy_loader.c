@@ -1536,6 +1536,13 @@ int32_t hxcfe_getCurrentSkew ( HXCFE_FLPGEN* fb_ctx )
 	return fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].skew;
 }
 
+int32_t hxcfe_setDiskFlags( HXCFE_FLPGEN* fb_ctx, int32_t flags )
+{
+	fb_ctx->disk_flags = flags;
+
+	return HXCFE_NOERROR;
+}
+
 int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f, uint8_t * diskdata, int32_t buffersize )
 {
 	int i,j,ret;
@@ -1550,6 +1557,7 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 	int skew_per_side;
 	fb_track_state * cur_track;
 	FILE * filehandle;
+	HXCFE_SIDE* tmp_side;
 
 	if ( !f && !diskdata )
 		return HXCFE_BADPARAMETER;
@@ -1597,7 +1605,17 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 	{
 		for(j = 0 ; j < fb_ctx->floppydisk->floppyNumberOfSide ; j++ )
 		{
-			bufferoffset = start_file_ofs + ( numberofsector * sectorsize * ((i<<1) + (j&1)) ) ;
+			if( fb_ctx->disk_flags & FLPGEN_SIDES_GROUPED )
+			{
+				bufferoffset = start_file_ofs + \
+								( numberofsector * sectorsize * fb_ctx->floppydisk->floppyNumberOfTrack * j) + \
+								( numberofsector * sectorsize * i );
+			}
+			else
+			{
+				bufferoffset = start_file_ofs + ( numberofsector * sectorsize * ((i<<1) + (j&1)) ) ;
+			}
+
 			if( filehandle )
 			{
 				fseek( filehandle, bufferoffset, SEEK_SET);
@@ -1646,6 +1664,13 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 						goto error;
 				}
 			}
+		}
+
+		if( fb_ctx->floppydisk->floppyNumberOfSide == 2 && (fb_ctx->disk_flags & FLPGEN_FLIP_SIDES) )
+		{
+			tmp_side = fb_ctx->floppydisk->tracks[i]->sides[0];
+			fb_ctx->floppydisk->tracks[i]->sides[0] = fb_ctx->floppydisk->tracks[i]->sides[1];
+			fb_ctx->floppydisk->tracks[i]->sides[1] = tmp_side;
 		}
 	}
 

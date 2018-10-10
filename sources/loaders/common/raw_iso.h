@@ -15,7 +15,10 @@ typedef struct raw_iso_cfg_
 	int32_t rpm;
 	int32_t track_format;
 	int32_t interface_mode;
+	int32_t flip_sides;
 	uint8_t fill_value;
+	int32_t trk_grouped_by_sides;
+
 }raw_iso_cfg;
 
 int raw_iso_loader(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk, FILE * f_img , unsigned char * imagebuffer, int size, raw_iso_cfg * cfg);

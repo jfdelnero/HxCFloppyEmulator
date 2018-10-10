@@ -37,6 +37,7 @@ typedef struct _HXCFE_FLPGEN
 	HXCFE* floppycontext;
 	int32_t fb_stack_pointer;
 	fb_track_state * fb_stack;
+	int32_t disk_flags;
 }HXCFE_FLPGEN;
 
 #define _HXCFE_FLPGEN_
