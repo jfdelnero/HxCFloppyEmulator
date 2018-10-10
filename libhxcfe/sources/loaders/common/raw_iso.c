@@ -65,6 +65,7 @@ int raw_iso_loader(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk, FILE * f
 	HXCFE_FLPGEN * fb_ctx;
 	int cur_offset;
 	int ret;
+	int32_t flags;
 
 	if( !f_img && !imagebuffer )
 	{
@@ -95,7 +96,7 @@ int raw_iso_loader(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk, FILE * f
 	}
 
 	hxcfe_setNumberOfTrack( fb_ctx, cfg->number_of_tracks );
-	hxcfe_setNumberOfSide( fb_ctx, cfg->number_of_sides );	
+	hxcfe_setNumberOfSide( fb_ctx, cfg->number_of_sides );
 	hxcfe_setNumberOfSector( fb_ctx, cfg->number_of_sectors_per_track );
 	hxcfe_setSectorSize( fb_ctx, cfg->sector_size );
 	hxcfe_setStartSectorID( fb_ctx, cfg->start_sector_id );
@@ -108,6 +109,16 @@ int raw_iso_loader(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk, FILE * f
 	hxcfe_setTrackSkew ( fb_ctx, cfg->skew_per_track );
 	hxcfe_setSideSkew ( fb_ctx, cfg->skew_per_side );
 	hxcfe_setSectorFill ( fb_ctx, cfg->fill_value );
+
+	flags = 0;
+
+	if(cfg->trk_grouped_by_sides)
+		flags |= FLPGEN_SIDES_GROUPED;
+
+	if(cfg->flip_sides)
+		flags |= FLPGEN_FLIP_SIDES;
+
+	hxcfe_setDiskFlags( fb_ctx, flags );
 
 	ret = hxcfe_generateDisk( fb_ctx, floppydisk, f_img, imagebuffer, size );
 
@@ -134,5 +145,7 @@ void raw_iso_setdefcfg(raw_iso_cfg *rawcfg)
 		rawcfg->track_format = IBMFORMAT_DD;
 		rawcfg->interface_mode = GENERIC_SHUGART_DD_FLOPPYMODE;
 		rawcfg->fill_value = 0xF6;
+		rawcfg->trk_grouped_by_sides = 0;
+		rawcfg->flip_sides = 0;
 	}
 }

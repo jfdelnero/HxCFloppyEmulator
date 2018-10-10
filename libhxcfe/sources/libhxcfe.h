@@ -275,6 +275,10 @@ int32_t                hxcfe_setInterfaceMode( HXCFE_FLPGEN* fb_ctx, int32_t mod
 
 HXCFE_FLOPPY*          hxcfe_getFloppy ( HXCFE_FLPGEN* fb_ctx );
 
+#define FLPGEN_SIDES_GROUPED 0x0001
+#define FLPGEN_FLIP_SIDES    0x0002
+
+int32_t                hxcfe_setDiskFlags( HXCFE_FLPGEN* fb_ctx, int32_t flags );
 int32_t                hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f, uint8_t * diskdata, int32_t buffersize );
 
 int32_t                hxcfe_getFloppySize( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t * nbsector );
