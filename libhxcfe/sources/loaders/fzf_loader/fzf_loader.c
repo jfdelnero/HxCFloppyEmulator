@@ -50,15 +50,14 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
 #include "libhxcfe.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
+#include "tracks/track_generator.h"
+
+#include "loaders/common/raw_iso.h"
 
 #include "fzf_loader.h"
-
-#include "libhxcadaptor.h"
 
 char * fzffiletype[]={
 	"full",
@@ -96,15 +95,13 @@ int FZF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
+	raw_iso_cfg rawcfg;
+	int ret;
 	FILE * f = NULL;
 	unsigned int  filesize;
 	int  i,j;
-	unsigned int  file_offset;
 	unsigned char * fzf_file = NULL;
-	int gap3len,interleave,trackformat,skew,c;
-	int rpm;
-	int sectorsize;
-	HXCFE_CYLINDER* currentcylinder;
+	int c;
 
 	unsigned char  number_of_banks;
 	unsigned char  number_of_voices;
@@ -137,24 +134,28 @@ int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	hxc_fread(fzf_file,filesize,f);
 
 	hxc_fclose(f);
+	f = NULL;
 
-	floppydisk->floppyNumberOfTrack=80;
-	floppydisk->floppyNumberOfSide=2;
-	floppydisk->floppySectorPerTrack=8;
-	floppydisk->floppyBitRate=500000;
-	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-	sectorsize = 1024;
-	rpm=360;
-	gap3len=255;
-	interleave=3;
-	skew=0;
-	trackformat=IBMFORMAT_DD;
+	raw_iso_setdefcfg(&rawcfg);
 
-	floppy_data = malloc(floppydisk->floppyNumberOfTrack * floppydisk->floppyNumberOfSide * floppydisk->floppySectorPerTrack * sectorsize);
+	rawcfg.number_of_tracks = 80;
+	rawcfg.number_of_sides = 2;
+	rawcfg.number_of_sectors_per_track = 8;
+	rawcfg.bitrate = 500000;
+	rawcfg.sector_size = 1024;
+	rawcfg.interface_mode = GENERIC_SHUGART_DD_FLOPPYMODE;
+	rawcfg.track_format = IBMFORMAT_DD;
+	rawcfg.interleave = 3;
+	rawcfg.gap3 = 255;
+	rawcfg.rpm = 360;
+
+	filesize = rawcfg.number_of_tracks * rawcfg.number_of_sides * rawcfg.number_of_sectors_per_track * rawcfg.bitrate;
+
+	floppy_data = malloc(filesize);
 	if(!floppy_data)
 		goto alloc_error;
 
-	memset(floppy_data , 0x5A , floppydisk->floppyNumberOfTrack * floppydisk->floppyNumberOfSide * floppydisk->floppySectorPerTrack * sectorsize);
+	memset(floppy_data, 0x5A, filesize);
 
 	if (nbblock>1279)
 	{
@@ -168,33 +169,33 @@ int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	for( i = 0; i  < nbblock; i++)
 	{
-		memcpy(&floppy_data[(i+4)*sectorsize],&fzf_file[i*sectorsize],sectorsize);
+		memcpy(&floppy_data[(i+4)*rawcfg.sector_size],&fzf_file[i*rawcfg.sector_size],rawcfg.sector_size);
 	}
 
 	// Fragment list - Sector 3
-	memset(&floppy_data[(sectorsize*3)+0],0,sectorsize);
-	floppy_data[(sectorsize*3)+0]=3; // Sector
-	floppy_data[(sectorsize*3)+2]=(3+nbblock)&0xff;
-	floppy_data[(sectorsize*3)+3]=(3+nbblock)>>8;
-	floppy_data[(sectorsize*3)+1018]=number_of_banks;
-	floppy_data[(sectorsize*3)+1020]=number_of_voices;
-	floppy_data[(sectorsize*3)+1022]=(pcm_size&0xff);
-	floppy_data[(sectorsize*3)+1023]=(pcm_size>>8)&0xff;
+	memset(&floppy_data[(rawcfg.sector_size*3)+0],0,rawcfg.sector_size);
+	floppy_data[(rawcfg.sector_size*3)+0] = 3; // Sector
+	floppy_data[(rawcfg.sector_size*3)+2] = (3+nbblock)&0xff;
+	floppy_data[(rawcfg.sector_size*3)+3] = (3+nbblock)>>8;
+	floppy_data[(rawcfg.sector_size*3)+1018] = number_of_banks;
+	floppy_data[(rawcfg.sector_size*3)+1020] = number_of_voices;
+	floppy_data[(rawcfg.sector_size*3)+1022] = (pcm_size&0xff);
+	floppy_data[(rawcfg.sector_size*3)+1023] = (pcm_size>>8)&0xff;
 
 	// Directory - Sector 2
-	memset(&floppy_data[(sectorsize*2)+0],0,sectorsize);
+	memset(&floppy_data[(rawcfg.sector_size*2)+0],0,rawcfg.sector_size);
 
 	// Sector 1
-	memset(&floppy_data[(sectorsize*1)+0],0,sectorsize);
-	memcpy(&floppy_data[(sectorsize*1)+0],"FULL-DATA-FZ",12);
-	floppy_data[(sectorsize*1)+12] = file_type;
-	floppy_data[(sectorsize*1)+13] = 0;
-	floppy_data[(sectorsize*1)+14] = 3;
-	floppy_data[(sectorsize*1)+15] = 0;
+	memset(&floppy_data[(rawcfg.sector_size)+0],0,rawcfg.sector_size);
+	memcpy(&floppy_data[(rawcfg.sector_size)+0],"FULL-DATA-FZ",12);
+	floppy_data[(rawcfg.sector_size)+12] = file_type;
+	floppy_data[(rawcfg.sector_size)+13] = 0;
+	floppy_data[(rawcfg.sector_size)+14] = 3;
+	floppy_data[(rawcfg.sector_size)+15] = 0;
 
 	// BAM - Sector 0
-	memset(&floppy_data[(sectorsize*0)+0],0,sectorsize);
-	memset(&floppy_data[(sectorsize*0)+288],0xFF,736);
+	memset(&floppy_data[0],0,rawcfg.sector_size);
+	memset(&floppy_data[288],0xFF,736);
 
 	for(i=0;i<nbblock+3;i+=8)
 	{
@@ -215,47 +216,25 @@ int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 		if (i>(int)strlen(filename))
 		{
-			c=0x20;
+			c = 0x20;
 		}
 		else
 		{
-			if ( (c=filename[i])<0x20) c=0x20;
+			if ( (c = filename[i])<0x20) c=0x20;
 		}
 
-		floppy_data[i]=c;
-		floppy_data[i+0x10]=c;
+		floppy_data[i] = c;
+		floppy_data[i+0x10] = c;
 	}
-	floppy_data[0x0e]=2;
+	floppy_data[0x0e] = 2;
+
+	free(fzf_file);
 
 	//////////////////////////////////////////////////////////////
 
-	floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-	if( !floppydisk->tracks )
-		goto alloc_error;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dB (%d blocks), %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize,nbblock,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
-	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"File type : %s (%d), Number of banks : %d, Number of voices : %d, PCM size : %d",fzffiletype[file_type&3],file_type,number_of_banks,number_of_voices,pcm_size);
-
-	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-	{
-
-		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-		currentcylinder=floppydisk->tracks[j];
-
-		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-		{
-			hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
-
-			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-				        (sectorsize*(floppydisk->floppySectorPerTrack)*i);
-			currentcylinder->sides[i]=tg_generateTrack(&floppy_data[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,200,2500,-2500);
-		}
-	}
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+	ret = raw_iso_loader(imgldr_ctx, floppydisk, 0, floppy_data, filesize, &rawcfg);
 
 	free(floppy_data);
-	free(fzf_file);
 
 	return HXCFE_NOERROR;
 

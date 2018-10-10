@@ -51,15 +51,14 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
 #include "libhxcfe.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
+#include "tracks/track_generator.h"
+#include "loaders/common/raw_iso.h"
 
 #include "fd_loader.h"
 #include "fd_writer.h"
-#include "libhxcadaptor.h"
 
 int FD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
@@ -97,84 +96,56 @@ int FD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int FD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	FILE * f;
-	unsigned int filesize;
-	int i,j;
-	unsigned int file_offset;
-	unsigned char* trackdata;
-	int gap3len,interleave,trackformat,skew;
-	int rpm;
-	int sectorsize;
-	HXCFE_CYLINDER* currentcylinder;
+	FILE * f_img;
+	raw_iso_cfg rawcfg;
+	int ret,filesize;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"fd_libLoad_DiskFile %s",imgfile);
 
-	f = hxc_fopen(imgfile,"rb");
-	if( f == NULL )
+	f_img = hxc_fopen(imgfile,"rb");
+	if( f_img == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
-	filesize = hxc_fgetsize(f);
+	raw_iso_setdefcfg(&rawcfg);
 
-	sectorsize=256; // FD file support only 256bytes/sector floppies.
-	// read the first sector
+	rawcfg.sector_size = 256; // FD file support only 256bytes/sector floppies.
+	rawcfg.bitrate = 250000;
+	rawcfg.rpm = 300;
+	rawcfg.interleave = 7;
+	rawcfg.skew_per_track = 0;
+	rawcfg.gap3 = 50;
+	rawcfg.track_format = ISOFORMAT_DD;
+	rawcfg.number_of_sectors_per_track = 16;
+	rawcfg.number_of_tracks = 80;
+	rawcfg.interface_mode = GENERIC_SHUGART_DD_FLOPPYMODE;
+
+	rawcfg.trk_grouped_by_sides = 1;
+
+	filesize = hxc_fgetsize(f_img);
+
 	switch(filesize)
 	{
 		case 327680:
-			floppydisk->floppyNumberOfSide=1;
+			rawcfg.number_of_sides = 1;
 		break;
 		case 655360:
-			floppydisk->floppyNumberOfSide=2;
+			rawcfg.number_of_sides = 2;
 		break;
 		default:
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"non TO8D FD file ! - bad file size! ");
-			hxc_fclose(f);
+			hxc_fclose(f_img);
 			return HXCFE_BADFILE;
 		break;
 	}
 
-	gap3len=50;
-	interleave = 7;
-	skew=0;
-	trackformat=ISOFORMAT_DD;
-	floppydisk->floppyNumberOfTrack=80;
-	floppydisk->floppySectorPerTrack=16;
-	floppydisk->floppyBitRate=250000;
-	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-	rpm=300; // normal rpm
+	ret = raw_iso_loader(imgldr_ctx, floppydisk, f_img, 0, 0, &rawcfg);
 
-	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
+	hxc_fclose(f_img);
 
-	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-
-	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-	{
-
-		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-		currentcylinder=floppydisk->tracks[j];
-
-		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-		{
-			hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
-
-			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack))+
-				                    (sectorsize*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfTrack*i);
-			fseek (f , file_offset , SEEK_SET);
-			hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
-
-			currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,0,1,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
-		}
-	}
-
-	free(trackdata);
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-
-	hxc_fclose(f);
-	return HXCFE_NOERROR;
+	return ret;
 }
 
 int FD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)

@@ -50,17 +50,15 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
 #include "libhxcfe.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
+#include "tracks/track_generator.h"
+
+#include "loaders/common/raw_iso.h"
 
 #include "sdu_loader.h"
-
 #include "sdu_format.h"
-
-#include "libhxcadaptor.h"
 
 int SDU_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
@@ -108,108 +106,56 @@ int SDU_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int SDU_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
-	FILE * f;
-	unsigned int filesize;
+	raw_iso_cfg rawcfg;
+	int ret;
+	FILE * f_img;
     sdu_header sduh;
-	int i,j;
-	unsigned int file_offset;
-	unsigned char* trackdata;
-	int32_t gap3len,interleave;
-	int32_t rpm;
-	int32_t sectorsize;
-	unsigned char trackformat;
-	HXCFE_CYLINDER* currentcylinder;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDU_libLoad_DiskFile %s",imgfile);
 
-	f = hxc_fopen(imgfile,"rb");
-	if( f == NULL )
+	f_img = hxc_fopen(imgfile,"rb");
+	if( f_img == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
-	filesize = hxc_fgetsize(f);
+    memset(&sduh, 0, sizeof(sduh));
 
-	if(filesize!=0)
+	hxc_fread(&sduh,sizeof(sduh),f_img);
+
+	if( strncmp((const char*)&sduh.signature,"SAB ",4))
 	{
-        memset(&sduh, 0, sizeof(sduh));
-
-		hxc_fread(&sduh,sizeof(sduh),f);
-
-		if( strncmp((const char*)&sduh.signature,"SAB ",4))
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SDU_libLoad_DiskFile : Bad file !");
-			return HXCFE_BADFILE;
-		}
-
-
-		rpm = 300;
-		gap3len = 30;
-		interleave = 1;
-
-        floppydisk->floppyNumberOfTrack = sduh.max_cylinder;
-        floppydisk->floppyNumberOfSide  = sduh.max_head;
-        floppydisk->floppySectorPerTrack = sduh.max_sector;
-		sectorsize = sduh.sector_size;
-
-		if( sectorsize *  floppydisk->floppySectorPerTrack > (512*11) )
-		{
-			floppydisk->floppyBitRate = 500000;
-		}
-		else
-		{
-			floppydisk->floppyBitRate = 250000;
-		}
-
-		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d sectorsize: %d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,sectorsize);
-
-		trackformat = IBMFORMAT_DD;
-
-		trackdata = (unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-        if( trackdata )
-        {
-		    for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-		    {
-			    floppydisk->tracks[j] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-			    currentcylinder = floppydisk->tracks[j];
-
-			    for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-			    {
-				    hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),floppydisk->floppyNumberOfTrack*2 );
-
-				    file_offset = sizeof(sdu_header) + (sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-							    (sectorsize*(floppydisk->floppySectorPerTrack)*i);
-
-				    fseek (f , file_offset , SEEK_SET);
-
-					memset(trackdata, 0, sectorsize*floppydisk->floppySectorPerTrack);
-				    hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
-
-				    currentcylinder->sides[i] = tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
-			    }
-		    }
-
-    		free(trackdata);
-
-			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		}
-		else
-		{
-			hxc_fclose(f);
-			return HXCFE_INTERNALERROR;
-		}
-
-		hxc_fclose(f);
-		return HXCFE_NOERROR;
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SDU_libLoad_DiskFile : Bad file !");
+		return HXCFE_BADFILE;
 	}
 
-	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
-	hxc_fclose(f);
-	return HXCFE_BADFILE;
+	raw_iso_setdefcfg(&rawcfg);
+
+	rawcfg.number_of_tracks = sduh.max_cylinder;
+	rawcfg.number_of_sides = sduh.max_head;
+	rawcfg.number_of_sectors_per_track = sduh.max_sector;
+	rawcfg.sector_size = sduh.sector_size;
+	rawcfg.interface_mode = GENERIC_SHUGART_DD_FLOPPYMODE;
+	rawcfg.track_format = IBMFORMAT_DD;
+	rawcfg.interleave = 1;
+	rawcfg.gap3 = 30;
+	rawcfg.rpm = 300;
+
+	if( rawcfg.sector_size *  rawcfg.number_of_sectors_per_track > (512*11) )
+	{
+		rawcfg.bitrate = 500000;
+	}
+	else
+	{
+		rawcfg.bitrate = 250000;
+	}
+
+	ret = raw_iso_loader(imgldr_ctx, floppydisk, f_img, 0, 0, &rawcfg);
+
+	hxc_fclose(f_img);
+
+	return ret;
 }
 
 int SDU_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)

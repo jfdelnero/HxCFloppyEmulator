@@ -50,15 +50,14 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
 #include "libhxcfe.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
+#include "tracks/track_generator.h"
+
+#include "loaders/common/raw_iso.h"
 
 #include "mgt_loader.h"
-
-#include "libhxcadaptor.h"
 
 int MGT_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
@@ -95,99 +94,59 @@ int MGT_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	}
 }
 
-
-
 int MGT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
-	FILE * f;
+	raw_iso_cfg rawcfg;
+	int ret;
+	FILE * f_img;
 	unsigned int filesize;
-	int i,j;
-	unsigned int file_offset;
-	unsigned char* trackdata;
-	int  gap3len,interleave;
-	int  sectorsize,rpm;
-	int  skew,trackformat;
-
-	HXCFE_CYLINDER* currentcylinder;
-
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MGT_libLoad_DiskFile %s",imgfile);
 
-	f = hxc_fopen(imgfile,"rb");
-	if( f == NULL )
+	f_img = hxc_fopen(imgfile,"rb");
+	if( f_img == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
-	filesize = hxc_fgetsize(f);
+	raw_iso_setdefcfg(&rawcfg);
+
+	rawcfg.bitrate = 250000;
+	rawcfg.rpm = 300;
+	rawcfg.skew_per_track = 0;
+	rawcfg.interleave = 1;
+	rawcfg.sector_size = 512;
+	rawcfg.track_format = ISOFORMAT_DD;
+	rawcfg.interface_mode = GENERIC_SHUGART_DD_FLOPPYMODE;
+
+	filesize = hxc_fgetsize(f_img);
 
 	switch( filesize )
 	{
-	case 819200:
-		floppydisk->floppyNumberOfTrack=80;
-		floppydisk->floppyNumberOfSide=2;
-		floppydisk->floppySectorPerTrack=10;
-		gap3len=35;
-		interleave=1;
-		skew=0;
-
+		case 819200:
+			rawcfg.number_of_tracks = 80;
+			rawcfg.number_of_sides = 2;
+			rawcfg.number_of_sectors_per_track = 10;
+			rawcfg.gap3 = 35;
+			rawcfg.interleave = 1;
+			rawcfg.skew_per_track = 0;
+			rawcfg.skew_per_side = 0;
 		break;
 
-	default:
-
-		hxc_fclose(f);
-		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Bad file size:  %d bytes !",filesize);
-		return HXCFE_BADFILE;
+		default:
+			hxc_fclose(f_img);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Bad file size:  %d bytes !",filesize);
+			return HXCFE_BADFILE;
 		break;
 
 	}
 
-	if(filesize!=0)
-	{
-		sectorsize=512; // st file support only 512bytes/sector floppies.
+	ret = raw_iso_loader(imgldr_ctx, floppydisk, f_img, 0, 0, &rawcfg);
 
-		// read the first sector
-		floppydisk->floppyBitRate=250000;
-		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-		trackformat=ISOFORMAT_DD;
-		rpm=300; // normal rpm
+	hxc_fclose(f_img);
 
-		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
-
-		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-
-		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-		{
-			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-			currentcylinder=floppydisk->tracks[j];
-
-			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-			{
-				hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
-
-				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-							(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-				fseek (f , file_offset , SEEK_SET);
-				hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
-
-				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
-			}
-		}
-
-		free(trackdata);
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-
-		hxc_fclose(f);
-		return HXCFE_NOERROR;
-	}
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
-	hxc_fclose(f);
-	return HXCFE_BADFILE;
+	return ret;
 }
 
 int MGT_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
