@@ -50,22 +50,21 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
 #include "libhxcfe.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
+#include "tracks/track_generator.h"
+
+#include "loaders/common/raw_iso.h"
 
 #include "copyqm_loader.h"
 #include "crctable.h"
-
-#include "libhxcadaptor.h"
 
 int CopyQm_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
 	int pathlen;
 	int i;
-	char * fileheader;
+	char fileheader[QM_HEADER_SIZE];
 	unsigned char checksum;
 	FILE * f;
 
@@ -82,16 +81,14 @@ int CopyQm_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 				return HXCFE_ACCESSERROR;
 			}
 
-			fileheader=(char*)malloc(QM_HEADER_SIZE+1);
+			memset( fileheader,0,QM_HEADER_SIZE);
 			hxc_fread( fileheader, QM_HEADER_SIZE, f );
 			if(ftell(f)==QM_HEADER_SIZE)
 			{
-
 				if ( fileheader[0] != 'C' || fileheader[1] != 'Q' )
 				{
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile : bad header tag !");
 					hxc_fclose(f);
-					free(fileheader);
 					return HXCFE_BADFILE;
 				}
 
@@ -101,23 +98,21 @@ int CopyQm_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 				{
 					checksum= checksum + (unsigned char)(fileheader[i]);
 				}
+
 				if ( checksum != 0 )
 				{
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile : bad header checksum !");
 					hxc_fclose(f);
-					free(fileheader);
 					return HXCFE_BADFILE;
 				}
 
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile : it's an copyqm file!");
 				hxc_fclose(f);
-				free(fileheader);
 				return HXCFE_VALIDFILE;
 			}
 
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile : bad header tag !");
 			hxc_fclose(f);
-			free(fileheader);
      		return HXCFE_BADFILE;
 		}
 	}
@@ -129,39 +124,38 @@ int CopyQm_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	FILE * f;
-	unsigned int   filesize;
-	int   i,j;
-	unsigned int   file_offset;
+	FILE * f_img;
+	raw_iso_cfg rawcfg;
+	unsigned int filesize;
+	int ret;
+
+	int   i;
 	unsigned char* flatimg;
-	int gap3len,interleave;
-	int rpm;
-	int sectorsize;
 	unsigned char  checksum;
 	uint32_t  crc,crc32,comentlen;
-	unsigned char* fileheader;
-	int  trackformat;
+	unsigned char fileheader[QM_HEADER_SIZE];
 	size_t curwritepos;
 	char *comment_buf;
 	size_t image_size;
 	int res;
-	HXCFE_CYLINDER* currentcylinder;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CopyQm_libLoad_DiskFile %s",imgfile);
 
-	f = hxc_fopen(imgfile,"rb");
-	if( f == NULL )
+	f_img = hxc_fopen(imgfile,"rb");
+	if( f_img == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"CopyQm_libLoad_DiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
-	filesize = hxc_fgetsize(f);
+	filesize = hxc_fgetsize(f_img);
 
 	if( filesize )
 	{
-		fileheader=(unsigned char*)malloc(QM_HEADER_SIZE+1);
-		hxc_fread( fileheader, QM_HEADER_SIZE, f );
+		raw_iso_setdefcfg(&rawcfg);
+
+		memset(fileheader,0,QM_HEADER_SIZE);
+		hxc_fread( &fileheader, QM_HEADER_SIZE, f_img );
 
 		checksum=0;
 		/* Check the header checksum */
@@ -169,46 +163,46 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 		{
 			checksum = checksum + (unsigned char)(fileheader[i]);
 		}
+
 		if ( checksum != 0 )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"bad header checksum !");
-			free(fileheader);
-			hxc_fclose(f);
+			hxc_fclose(f_img);
 			return HXCFE_BADFILE;
 		}
+
 		if ( fileheader[0] != 'C' || fileheader[1] != 'Q' )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"bad header tag !");
-			free(fileheader);
-			hxc_fclose(f);
+			hxc_fclose(f_img);
 			return HXCFE_BADFILE;
 		}
 
 
 		/* I'm guessing sector size is at 3. Expandqm thinks 7 */
-		sectorsize = get_u16( fileheader, 0x03 );
+		rawcfg.sector_size = get_u16( fileheader, 0x03 );
 		/* Number of sectors 0x0B-0x0C, strange number for non-blind, often 116 */
 		//qm_self->qm_h_nbr_sectors = get_u16( header, 0x0b );
 
 		/* Number of sectors per track */
-		floppydisk->floppySectorPerTrack= get_u16( fileheader, 0x10 );
+		rawcfg.number_of_sectors_per_track = get_u16( fileheader, 0x10 );
 		/* Number of heads */
-		floppydisk->floppyNumberOfSide= get_u16( fileheader, 0x12 );
+		rawcfg.number_of_sides = get_u16( fileheader, 0x12 );
 		/* Blind or not */
 		//qm_self->qm_h_blind = fileheader[0x58];
 		/* Density - 0 is DD, 1 means HD */
 		if(fileheader[0x59])
 		{
-			floppydisk->floppyBitRate=500000;
+			rawcfg.bitrate = 500000;
 		}
 		else
 		{
-			floppydisk->floppyBitRate=250000;
+			rawcfg.bitrate = 250000;
 		}
 		/* Number of used tracks */
-		floppydisk->floppyNumberOfTrack = fileheader[0x5a];
+		rawcfg.number_of_tracks = fileheader[0x5a];
 		/* Number of total tracks */
-		floppydisk->floppyNumberOfTrack = fileheader[0x5b];
+		rawcfg.number_of_tracks = fileheader[0x5b];
 		/* CRC 0x5c - 0x5f */
 		crc32 = get_u32( fileheader, 0x5c );
 		/* Length of comment */
@@ -216,7 +210,7 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 		/* 0x71 is first sector number - 1 */
 		//qm_self->qm_h_secbase = (signed char)(fileheader[0x71]);
 		/* 0x74 is interleave, I think. Normally 1, but 0 for old copyqm */
-		interleave = fileheader[0x74];
+		rawcfg.interleave = fileheader[0x74];
 		/* 0x75 is skew. Normally 0. Negative number for alternating sides */
 		//qm_self->qm_h_skew = header[0x75];
 
@@ -226,17 +220,17 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 			/* If malloc fails, ignore it - comments aren't essential */
 			if (comment_buf)
 			{
-				res = fseek( f, QM_HEADER_SIZE, SEEK_SET );
+				res = fseek( f_img, QM_HEADER_SIZE, SEEK_SET );
 				if ( !(res < 0) )
 				{
-					res = hxc_fread(comment_buf, comentlen, f);
+					res = hxc_fread(comment_buf, comentlen, f_img);
 					if ( !res )
 					{
 						comment_buf[comentlen] = 0;
 						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Disk info:\n%s",comment_buf);
-						free(comment_buf);
 					}
 				}
+				free(comment_buf);
 			}
 		}
 
@@ -244,18 +238,17 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 		curwritepos = 0;
 		/* FIXME: Use the used tracks instead of the total tracks to detect */
 		/*        that there is the correct amount of data in the image     */
-		image_size = (size_t)floppydisk->floppySectorPerTrack *
-				(size_t)floppydisk->floppyNumberOfSide *
-				(size_t)floppydisk->floppyNumberOfTrack * sectorsize;
+		image_size = (size_t)rawcfg.number_of_sectors_per_track *
+				(size_t)rawcfg.number_of_sides *
+				(size_t)rawcfg.number_of_tracks * rawcfg.sector_size;
 		/* Set the position after the header and comment */
-		res = fseek( f, QM_HEADER_SIZE + comentlen, SEEK_SET );
+		res = fseek( f_img, QM_HEADER_SIZE + comentlen, SEEK_SET );
 
 		crc=0xFFFFFFFF;
 		if ( res < 0 )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file corrupt!");
-			free(fileheader);
-			hxc_fclose(f);
+			hxc_fclose(f_img);
 			return HXCFE_FILECORRUPTED;
 		}
 
@@ -264,8 +257,7 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 		if ( ! flatimg )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"malloc error!");
-			free(fileheader);
-			hxc_fclose(f);
+			hxc_fclose(f_img);
 			return HXCFE_INTERNALERROR;
 		}
 
@@ -276,10 +268,10 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 			{
 				/* Read the length */
 				unsigned char lengthBuf[2];
-				res = hxc_fread( lengthBuf, 2, f );
+				res = hxc_fread( lengthBuf, 2, f_img );
 				if ( res )
 				{
-					if ( feof( f ) )
+					if ( feof( f_img ) )
 					{
 						/* End of file - fill with f6 - do not update CRC for these */
 						memset( flatimg + curwritepos, 0xf6, image_size - curwritepos );
@@ -288,8 +280,7 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 					else
 					{
 						free(flatimg);
-						free(fileheader);
-			            hxc_fclose(f);
+			            hxc_fclose(f_img);
 						return HXCFE_FILECORRUPTED;
 					}
 				}
@@ -299,7 +290,7 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 					if ( length < 0 )
 					{
 						/* Negative number - next byte is repeated (-length) times */
-						int c = fgetc( f );
+						int c = fgetc( f_img );
 						if ( c == EOF ) return HXCFE_FILECORRUPTED;
 						/* Copy the byte into memory and update the offset */
 						memset( flatimg + curwritepos, c, -length );
@@ -316,7 +307,7 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 						if ( length != 0 )
 						{
 							/* Positive number - length different characters */
-							res = hxc_fread( flatimg + curwritepos, length, f );
+							res = hxc_fread( flatimg + curwritepos, length, f_img );
 							/* Update CRC (and write pos) */
 							while ( length-- )
 							{
@@ -327,8 +318,7 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 							if ( res )
 							{
 								free(flatimg);
-								free(fileheader);
-								hxc_fclose(f);
+								hxc_fclose(f_img);
 								return HXCFE_FILECORRUPTED;
 							}
 						}
@@ -343,39 +333,18 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 			return -1;
 			}
 			}*/
-		free(fileheader);
-		hxc_fclose(f);
 
-		gap3len=255;
-		interleave=1;
+		hxc_fclose(f_img);
 
-		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-		trackformat=IBMFORMAT_DD;
-		rpm=300; // normal rpm
+		rawcfg.gap3 = 255;
+		rawcfg.interleave=1;
+		rawcfg.interface_mode = GENERIC_SHUGART_DD_FLOPPYMODE;
+		rawcfg.track_format = IBMFORMAT_DD;
+		rawcfg.rpm = 300;
 
-		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d Side(s), %d %d-bytes sector per tracks, interleave %d, GAP3:%d, %dkbits/s\n",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,sectorsize,interleave,gap3len,floppydisk->floppyBitRate/1000);
+		ret = raw_iso_loader(imgldr_ctx, floppydisk, 0, flatimg, image_size, &rawcfg);
 
-		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-		{
-			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-			currentcylinder=floppydisk->tracks[j];
-
-			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-			{
-				hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),floppydisk->floppyNumberOfTrack*2);
-
-				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-							(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-
-				currentcylinder->sides[i]=tg_generateTrack(&flatimg[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500 | NO_SECTOR_UNDER_INDEX,-2500);
-			}
-		}
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-		free(flatimg);
-
-	return HXCFE_NOERROR;
+		return ret;
 	}
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
