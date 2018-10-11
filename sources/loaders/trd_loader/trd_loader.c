@@ -50,16 +50,15 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
 #include "libhxcfe.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
+#include "tracks/track_generator.h"
+
+#include "loaders/common/raw_iso.h"
 
 #include "trd_loader.h"
 #include "trd_writer.h"
-
-#include "libhxcadaptor.h"
 
 int TRD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
@@ -79,44 +78,37 @@ int TRD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int TRD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
-	FILE * f;
+	raw_iso_cfg rawcfg;
+	FILE * f_img;
+	int ret;
 	unsigned int filesize;
-	int i,j;
-	unsigned int file_offset;
-	unsigned char* trackdata;
-	int gap3len,interleave;
-	int sectorsize,rpm;
-	int number_of_track,number_of_side,number_of_sectorpertrack;
 	unsigned char tempsector[256];
-	int trackformat;
-	int skew;
-
-	HXCFE_CYLINDER* currentcylinder;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TRD_libLoad_DiskFile %s",imgfile);
 
-	f = hxc_fopen(imgfile,"rb");
-	if( f == NULL )
+	f_img = hxc_fopen(imgfile,"rb");
+	if( f_img == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
-	filesize = hxc_fgetsize(f);
+	raw_iso_setdefcfg(&rawcfg);
 
-	fseek (f , 8*256 , SEEK_SET);
-	hxc_fread(tempsector,256,f);
+	filesize = hxc_fgetsize(f_img);
 
-	fseek (f , 0 , SEEK_SET);
+	fseek (f_img , 8*256 , SEEK_SET);
+	hxc_fread(tempsector,sizeof(tempsector),f_img);
+
+	fseek (f_img , 0 , SEEK_SET);
 
 	switch(filesize)
 	{
 		case 16*256 * 40 * 1: // 40 track one side
 			//35 track, no errors
-			number_of_track=40;
-			number_of_side=1;
-			number_of_sectorpertrack=16;
+			rawcfg.number_of_tracks = 40;
+			rawcfg.number_of_sides = 1;
+			rawcfg.number_of_sectors_per_track = 16;
 			break;
 
 		case 16*256 * 40 * 2: // 40 track two side // 80 track one side
@@ -129,116 +121,90 @@ int TRD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			switch(tempsector[0xE3])
 			{
 				case 22:
-					number_of_track=80;
-					number_of_side=2;
-					number_of_sectorpertrack=16;
+					rawcfg.number_of_tracks = 80;
+					rawcfg.number_of_sides = 2;
+					rawcfg.number_of_sectors_per_track = 16;
 					break;
 				case 23:
-					number_of_track=40;
-					number_of_side=2;
-					number_of_sectorpertrack=16;
+					rawcfg.number_of_tracks = 40;
+					rawcfg.number_of_sides = 2;
+					rawcfg.number_of_sectors_per_track = 16;
 					break;
 				case 24:
-					number_of_track=80;
-					number_of_side=1;
-					number_of_sectorpertrack=16;
+					rawcfg.number_of_tracks = 80;
+					rawcfg.number_of_sides = 1;
+					rawcfg.number_of_sectors_per_track = 16;
 					break;
 				case 25:
-					number_of_track=40;
-					number_of_side=1;
-					number_of_sectorpertrack=16;
+					rawcfg.number_of_tracks = 40;
+					rawcfg.number_of_sides = 1;
+					rawcfg.number_of_sectors_per_track = 16;
 					break;
 
 				default:
 					imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Unsupported TRD file size ! (%d Bytes)",filesize);
-					hxc_fclose(f);
+					hxc_fclose(f_img);
 					return HXCFE_UNSUPPORTEDFILE;
 					break;
 			}
 
-
 			break;
 
 		case 16*256 * 80 * 2: // 80 track two side
-			number_of_track=80;
-			number_of_side=2;
-			number_of_sectorpertrack=16;
+			rawcfg.number_of_tracks = 80;
+			rawcfg.number_of_sides = 2;
+			rawcfg.number_of_sectors_per_track = 16;
 			break;
 
 		default:
 			switch(tempsector[0xE3])
 			{
 				case 22:
-					number_of_track=80;
-					number_of_side=2;
-					number_of_sectorpertrack=16;
+					rawcfg.number_of_tracks = 80;
+					rawcfg.number_of_sides = 2;
+					rawcfg.number_of_sectors_per_track = 16;
 					break;
 				case 23:
-					number_of_track=40;
-					number_of_side=2;
-					number_of_sectorpertrack=16;
+					rawcfg.number_of_tracks = 40;
+					rawcfg.number_of_sides = 2;
+					rawcfg.number_of_sectors_per_track = 16;
 					break;
 				case 24:
-					number_of_track=80;
-					number_of_side=1;
-					number_of_sectorpertrack=16;
+					rawcfg.number_of_tracks = 80;
+					rawcfg.number_of_sides = 1;
+					rawcfg.number_of_sectors_per_track = 16;
 					break;
 				case 25:
-					number_of_track=40;
-					number_of_side=1;
-					number_of_sectorpertrack=16;
+					rawcfg.number_of_tracks = 40;
+					rawcfg.number_of_sides = 1;
+					rawcfg.number_of_sectors_per_track = 16;
 					break;
 
 				default:
 					// not supported !
 					imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Unsupported TRD file size ! (%d Bytes)",filesize);
-					hxc_fclose(f);
+					hxc_fclose(f_img);
 					return HXCFE_UNSUPPORTEDFILE;
 					break;
 			}
 			break;
 	}
 
-	rpm=300;
-	sectorsize=256; // TRD file support only 256bytes/sector floppies.
-	gap3len=50;
-	interleave=1;
-	skew=0;
-	floppydisk->floppyBitRate=250000;
-	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-	floppydisk->floppyNumberOfTrack=number_of_track;
-	floppydisk->floppyNumberOfSide=number_of_side;
-	floppydisk->floppySectorPerTrack=number_of_sectorpertrack;
-	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-	trackformat=IBMFORMAT_DD;
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
+	rawcfg.rpm = 300;
+	rawcfg.sector_size = 256;
+	rawcfg.gap3 = 50;
+	rawcfg.interleave = 1;
+	rawcfg.bitrate = 250000;
+	rawcfg.interface_mode = GENERIC_SHUGART_DD_FLOPPYMODE;
+	rawcfg.track_format = IBMFORMAT_DD;
 
-	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+	fseek(f_img,0,SEEK_SET);
 
-	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-	{
-		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-		currentcylinder=floppydisk->tracks[j];
+	ret = raw_iso_loader(imgldr_ctx, floppydisk, f_img, 0, 0, &rawcfg);
 
-		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-		{
-			hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
+	hxc_fclose(f_img);
 
-			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-						(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-
-			fseek (f , file_offset , SEEK_SET);
-			hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
-
-			currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)0,1,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2000,-2000);
-		}
-	}
-
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-
-	hxc_fclose(f);
-	return HXCFE_NOERROR;
+	return ret;
 }
 
 
