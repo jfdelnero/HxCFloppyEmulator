@@ -50,15 +50,14 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
 #include "libhxcfe.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
+#include "tracks/track_generator.h"
+
+#include "loaders/common/raw_iso.h"
 
 #include "scl_loader.h"
-
-#include "libhxcadaptor.h"
 
 unsigned char dir_entry[34] =
 	{
@@ -125,17 +124,12 @@ void ui2lsb(unsigned char *mem, unsigned int value)
 
 int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
-	FILE * f;
-	int i,j;
-	unsigned int file_offset;
-	int gap3len,interleave;
-	int rpm;
-	int sectorsize;
-	int number_of_track,number_of_side,number_of_sectorpertrack;
-
+	raw_iso_cfg rawcfg;
+	FILE * f_img;
+	int ret;
+	int i;
 	void *tmp;
-	unsigned int size,skew;
+	unsigned int size;
 	unsigned char *trd_fsec;
 	unsigned char *trd_ftrk;
 	unsigned char *trd_files;
@@ -146,51 +140,49 @@ int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	uint32_t left;
 	uint32_t trd_offset;
-	unsigned char trackformat;
-
-	HXCFE_CYLINDER* currentcylinder;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCL_libLoad_DiskFile %s",imgfile);
 
-	f = hxc_fopen(imgfile,"rb");
-	if( f == NULL )
+	f_img = hxc_fopen(imgfile,"rb");
+	if( f_img == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SCL_libLoad_DiskFile : Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
-	hxc_fread(&sclsignature,8,f);
+	hxc_fread(&sclsignature,8,f_img);
 	if(strncmp(sclsignature, "SINCLAIR", 8))
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"non Sinclair SCL file !(bad header)");
-		hxc_fclose(f);
+		hxc_fclose(f_img);
 		return HXCFE_BADFILE;
 	}
 
-	hxc_fread(&number_of_blocks,1,f);
+	hxc_fread(&number_of_blocks,1,f_img);
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCL_libLoad_DiskFile : %d block(s) in the file",number_of_blocks);
 
 	for (i=0; i < number_of_blocks; i++)
 	{
-		hxc_fread(&(block_headers[i][0]),14,f);
+		hxc_fread(&(block_headers[i][0]),14,f_img);
 	}
 
 	// allocate and init a TR DOS disk.
-	number_of_track=80;
-	number_of_side=2;
-	number_of_sectorpertrack=16;
-	trd_image=(unsigned char*)malloc(number_of_track*number_of_side*number_of_sectorpertrack*256);
+	raw_iso_setdefcfg(&rawcfg);
+
+	rawcfg.number_of_tracks = 80;
+	rawcfg.number_of_sides = 2;
+	rawcfg.number_of_sectors_per_track = 16;
+	trd_image = (unsigned char*)malloc(rawcfg.number_of_tracks * rawcfg.number_of_sides * rawcfg.number_of_sectors_per_track * 256);
 	if(!trd_image)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SCL_libLoad_DiskFile : Malloc error !");
-		hxc_fclose(f);
+		hxc_fclose(f_img);
 		return HXCFE_INTERNALERROR;
 	}
 
-	memset(trd_image,0,number_of_track*number_of_side*number_of_sectorpertrack*256);
+	memset(trd_image,0, rawcfg.number_of_tracks * rawcfg.number_of_sides * rawcfg.number_of_sectors_per_track * 256);
 	memcpy(&trd_image[0x08E2], dir_entry, 32);
     strncpy((char*)&trd_image[0x08F5], "HxCFE", 8);
-
 
 	tmp = (char *) trd_image + 0x8E5;
 	trd_files = (unsigned char *) trd_image + 0x8E4;
@@ -200,11 +192,11 @@ int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	// copy blocks to the trd disk
 	for (i=0; i < number_of_blocks; i++)
 	{
-		size=block_headers[i][13];
+		size = block_headers[i][13];
 		if (lsb2ui(tmp) < size)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SCL_libLoad_DiskFile : File too long to fit in the image *trd_free=%u < size=%u",lsb2ui(tmp),size);
-			hxc_fclose(f);
+			hxc_fclose(f_img);
 			free(trd_image);
 			return HXCFE_INTERNALERROR;
 		}
@@ -212,7 +204,7 @@ int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		if (*trd_files > 127)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SCL_libLoad_DiskFile : Image File full!");
-			hxc_fclose(f);
+			hxc_fclose(f_img);
 			free(trd_image);
 			return HXCFE_INTERNALERROR;
 		}
@@ -226,7 +218,7 @@ int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		left = (uint32_t) ((unsigned char) block_headers[i][13]) * 256L;
 		trd_offset = (*trd_ftrk) * 4096L + (*trd_fsec) * 256L;
 
-		hxc_fread(&(trd_image[trd_offset]),left,f);
+		hxc_fread(&(trd_image[trd_offset]),left,f_img);
 
 		(*trd_files)++;
 
@@ -248,43 +240,21 @@ int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		}
 
 	}
-	hxc_fclose(f);
+	hxc_fclose(f_img);
 
-	rpm=300;
-	sectorsize=256; // SCL file support only 256bytes/sector floppies.
-	gap3len=50;
-	trackformat=IBMFORMAT_DD;
-	interleave=1;
-	skew=0;
-	floppydisk->floppyBitRate=250000;
-	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-	floppydisk->floppyNumberOfTrack=number_of_track;
-	floppydisk->floppyNumberOfSide=number_of_side;
-	floppydisk->floppySectorPerTrack=number_of_sectorpertrack;
-	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	rawcfg.rpm=300;
+	rawcfg.sector_size = 256; // SCL file support only 256bytes/sector floppies.
+	rawcfg.gap3 = 50;
+	rawcfg.track_format = IBMFORMAT_DD;
+	rawcfg.interleave = 1;
+	rawcfg.bitrate = 250000;
+	rawcfg.interface_mode = GENERIC_SHUGART_DD_FLOPPYMODE;
 
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
-
-
-	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-	{
-
-		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-		currentcylinder=floppydisk->tracks[j];
-
-		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-		{
-			hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
-
-			file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-						(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-			currentcylinder->sides[i]=tg_generateTrack(&trd_image[file_offset],sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2000,-2000);
-		}
-	}
+	ret = raw_iso_loader(imgldr_ctx, floppydisk, 0, trd_image, rawcfg.number_of_tracks * rawcfg.number_of_sides * rawcfg.number_of_sectors_per_track * 256, &rawcfg);
 
 	free(trd_image);
-	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"SCL_libLoad_DiskFile : track file successfully loaded and encoded!");
-	return HXCFE_NOERROR;
+
+	return ret;
 }
 
 
