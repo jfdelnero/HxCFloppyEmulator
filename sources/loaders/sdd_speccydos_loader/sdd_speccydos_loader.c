@@ -51,36 +51,41 @@
 
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
-#include "./tracks/track_generator.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
+#include "tracks/track_generator.h"
+
+#include "loaders/common/raw_iso.h"
 
 #include "sdd_speccydos_loader.h"
 #include "sdd_speccydos_writer.h"
 
 #include "sddfileformat.h"
 
-#include "libhxcadaptor.h"
-
-int sdd_getfloppyconfig(unsigned char * img,uint32_t filesize,int32_t * density,int32_t *numberoftrack,int32_t *numberofside,int32_t *numberofsectorpertrack,int32_t *gap3len,int32_t *interleave)
+int sdd_getfloppyconfig(unsigned char * img,raw_iso_cfg *rawcfg)
 {
 	sddfileformats_t  * uimg;
 
 	uimg=(sddfileformats_t *)img;
 
+	raw_iso_setdefcfg(rawcfg);
+
 	if(!strncmp((char*)uimg->SIGN,"TRKY2",5))
 	{
-		*gap3len = 64;
-		*interleave = 1;
-		*numberofsectorpertrack = uimg->nb_sector_per_track;
-		*numberofside = ((uimg->nb_track_side >> 7) & 1) + 1;
-		*numberoftrack = uimg->nb_track_side & 0x7F;
+		rawcfg->gap3 = 64;
+		rawcfg->interleave = 1;
+		rawcfg->number_of_sectors_per_track = uimg->nb_sector_per_track;
+		rawcfg->number_of_sides = ((uimg->nb_track_side >> 7) & 1) + 1;
+		rawcfg->number_of_tracks = uimg->nb_track_side & 0x7F;
+		rawcfg->interface_mode = GENERIC_SHUGART_DD_FLOPPYMODE;
+		rawcfg->bitrate = DEFAULT_DD_BITRATE;
+		rawcfg->rpm = 300;
+		rawcfg->trk_grouped_by_sides = 1;
 
 		if(!(uimg->density & 1))
-			*density = 0xFF;
+			rawcfg->track_format = IBMFORMAT_DD;
 		else
-			*density = 0x00;
+			rawcfg->track_format = IBMFORMAT_SD;
 
 		return 1;
 	}
@@ -96,12 +101,7 @@ int SDDSpeccyDos_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	int32_t filesize;
 	unsigned char buffer[256];
 	FILE * f;
-	int32_t density;
-	int32_t NumberOfTrack;
-	int32_t NumberOfSide;
-	int32_t SectorPerTrack;
-	int32_t gap3len;
-	int32_t interleave;
+	raw_iso_cfg rawcfg;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile");
 
@@ -127,18 +127,9 @@ int SDDSpeccyDos_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 			hxc_fclose(f);
 
-			if(sdd_getfloppyconfig(
-				buffer,
-				filesize,
-				&density,
-				&NumberOfTrack,
-				&NumberOfSide,
-				&SectorPerTrack,
-				&gap3len,
-				&interleave)
-				)
+			if(sdd_getfloppyconfig( buffer, &rawcfg) )
 			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"SDD file : filesize:%dkB, %d tracks, %d side(s), %d sectors/track",filesize/1024,NumberOfTrack,NumberOfSide,SectorPerTrack);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"SDD file : filesize:%dkB, %d tracks, %d side(s), %d sectors/track",filesize/1024,rawcfg.number_of_tracks,rawcfg.number_of_sides,rawcfg.number_of_sectors_per_track);
 			}
 			else
 			{
@@ -163,102 +154,36 @@ int SDDSpeccyDos_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int SDDSpeccyDos_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
-	FILE * f;
-	unsigned int filesize;
-	unsigned int file_offset;
-
-	int i,j;
-	unsigned char* trackdata;
-	int32_t gap3len,interleave,skew,trackformat,density;
-	int32_t rpm;
-	int32_t sectorsize;
-	HXCFE_CYLINDER* currentcylinder;
+	raw_iso_cfg rawcfg;
+	FILE * f_img;
+	int ret;
+	unsigned char bootsector[256];
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libLoad_DiskFile %s",imgfile);
 
-	f = hxc_fopen(imgfile,"rb");
-	if( f == NULL )
+	f_img = hxc_fopen(imgfile,"rb");
+	if( f_img == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
 	}
 
-	filesize = hxc_fgetsize(f);
-
-	if( filesize )
+	// read the first sector
+	memset(bootsector, 0,sizeof(bootsector));
+	hxc_fread(bootsector,sizeof(bootsector),f_img);
+	if( sdd_getfloppyconfig( bootsector, &rawcfg) )
 	{
-		sectorsize = 256;
+		fseek(f_img,0,SEEK_SET);
 
-		// read the first sector
-		trackdata=(unsigned char*)malloc(sectorsize);
-		hxc_fread(trackdata,sectorsize,f);
-		if(sdd_getfloppyconfig(
-			trackdata,
-			filesize,
-			&density,
-			&floppydisk->floppyNumberOfTrack,
-			&floppydisk->floppyNumberOfSide,
-			&floppydisk->floppySectorPerTrack,
-			&gap3len,
-			&interleave)==1
-			)
-		{
+		ret = raw_iso_loader(imgldr_ctx, floppydisk, f_img, 0, 0, &rawcfg);
 
-			free(trackdata);
+		hxc_fclose(f_img);
 
-			floppydisk->floppyiftype = GENERIC_SHUGART_DD_FLOPPYMODE;
-			floppydisk->floppyBitRate = DEFAULT_DD_BITRATE;
-
-			skew=0;
-			if(density)
-			{
-				trackformat = IBMFORMAT_DD;
-			}
-			else
-			{
-				trackformat = IBMFORMAT_SD;
-			}
-
-			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-
-			rpm=300; // normal rpm
-
-			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d bitrate:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm,floppydisk->floppyBitRate);
-			trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-
-			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-			{
-
-				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-				currentcylinder=floppydisk->tracks[j];
-
-				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-				{
-					hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
-					file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack))+
-						        (sectorsize*(floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfTrack)*i);
-					fseek (f , file_offset , SEEK_SET);
-					hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
-
-					currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500,-2500);
-				}
-			}
-
-			free(trackdata);
-
-			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-			hxc_fclose(f);
-			return HXCFE_NOERROR;
-
-		}
-		hxc_fclose(f);
-		return HXCFE_FILECORRUPTED;
+		return ret;
 	}
 
-	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
-	hxc_fclose(f);
-	return HXCFE_BADFILE;
+	hxc_fclose(f_img);
+	return HXCFE_FILECORRUPTED;
 }
 
 int SDDSpeccyDos_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
