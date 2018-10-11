@@ -1546,6 +1546,7 @@ int32_t hxcfe_setDiskFlags( HXCFE_FLPGEN* fb_ctx, int32_t flags )
 int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f, uint8_t * diskdata, int32_t buffersize )
 {
 	int i,j,ret;
+	int numberoftracks;
 	int numberofsector,sectorsize;
 	int bufferoffset,type;
 	unsigned int rpm,interleave;
@@ -1565,6 +1566,24 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 	filehandle = (FILE*)f;
 	image_size = 0;
 	start_file_ofs = 0;
+
+	numberoftracks = fb_ctx->floppydisk->floppyNumberOfTrack;
+
+	// Increase the track number to add the blank tracks.
+	if( numberoftracks > 75 && numberoftracks < 79 )
+	{
+		hxcfe_setNumberOfTrack ( fb_ctx, 79 );
+	}
+
+	if( numberoftracks > 78 && numberoftracks < 84 )
+	{
+		hxcfe_setNumberOfTrack ( fb_ctx, 84 );
+	}
+
+	if( numberoftracks > 38 && numberoftracks < 42 )
+	{
+		hxcfe_setNumberOfTrack ( fb_ctx, 42 );
+	}
 
 	if( filehandle )
 	{
@@ -1590,7 +1609,7 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 	fill_byte = cur_track->sc_stack[cur_track->sc_stack_pointer].fill_byte;
 
 	fb_ctx->floppycontext->hxc_printf(MSG_INFO_1,"Image Size:%dkB, %d tracks, %d side(s), %d sectors/track, interleave:%d,rpm:%d bitrate:%d",(image_size-start_file_ofs)/1024,
-																																						fb_ctx->floppydisk->floppyNumberOfTrack,
+																																						numberoftracks,
 																																						fb_ctx->floppydisk->floppyNumberOfSide,
 																																						numberofsector,
 																																						interleave,
@@ -1601,14 +1620,14 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 	if( !track_buffer )
 		return HXCFE_INTERNALERROR;
 
-	for(i = 0 ; i < fb_ctx->floppydisk->floppyNumberOfTrack ; i++ )
+	for(i = 0 ; i < numberoftracks ; i++ )
 	{
 		for(j = 0 ; j < fb_ctx->floppydisk->floppyNumberOfSide ; j++ )
 		{
 			if( fb_ctx->disk_flags & FLPGEN_SIDES_GROUPED )
 			{
 				bufferoffset = start_file_ofs + \
-								( numberofsector * sectorsize * fb_ctx->floppydisk->floppyNumberOfTrack * j) + \
+								( numberofsector * sectorsize * numberoftracks * j) + \
 								( numberofsector * sectorsize * i );
 			}
 			else
@@ -1674,11 +1693,22 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 		}
 	}
 
+	// Add blank tracks.
+	for(;i<fb_ctx->floppydisk->floppyNumberOfTrack;i++)
+	{
+		for(j = 0 ; j < fb_ctx->floppydisk->floppyNumberOfSide ; j++ )
+		{
+			hxcfe_pushTrack (fb_ctx,rpm,i,j,type);
+			hxcfe_popTrack (fb_ctx);
+		}
+	}
+
 	if ( floppy )
 	{
 		memcpy(floppy, fb_ctx->floppydisk , sizeof(HXCFE_FLOPPY));
 		floppy->floppyiftype = cur_track->interface_mode;
 	}
+
 
 	fb_ctx->floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
