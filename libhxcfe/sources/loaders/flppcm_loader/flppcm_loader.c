@@ -50,18 +50,16 @@
 #include "types.h"
 
 #include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
 #include "libhxcfe.h"
-
+#include "libhxcadaptor.h"
 #include "floppy_loader.h"
-#include "floppy_utils.h"
+#include "tracks/track_generator.h"
+
+#include "loaders/common/raw_iso.h"
 
 #include "flppcm_loader.h"
 
 #include "flppcmfileformat.h"
-
-#include "libhxcadaptor.h"
-
 
 int FLPPCM_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 {
@@ -107,22 +105,16 @@ int FLPPCM_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 int FLPPCM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
+	raw_iso_cfg rawcfg;
 
-	FILE * f;
-	int i,j;
-	unsigned int file_offset;
-	unsigned char* trackdata;
-	int gap3len,interleave;
-	int rpm;
-	int sectorsize;
-	int trackformat;
-	HXCFE_CYLINDER* currentcylinder;
+	FILE * f_img;
+	int ret;
 	flp_header_t flp_header;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FLPPCM_libLoad_DiskFile %s",imgfile);
 
-	f = hxc_fopen(imgfile,"rb");
-	if( f == NULL )
+	f_img = hxc_fopen(imgfile,"rb");
+	if( f_img == NULL )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
 		return HXCFE_ACCESSERROR;
@@ -130,62 +122,39 @@ int FLPPCM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 	memset(&flp_header,0,sizeof(flp_header_t));
 
-	hxc_fread(&flp_header,sizeof(flp_header_t),f);
+	hxc_fread(&flp_header,sizeof(flp_header_t),f_img);
+
+	raw_iso_setdefcfg(&rawcfg);
 
 	if(!strncmp((char*)flp_header.hsign,"PCM",sizeof(flp_header.hsign)))
 	{
-		sectorsize = flp_header.sectorsize;
-		floppydisk->floppyNumberOfTrack = flp_header.nbtracks;
-		floppydisk->floppyNumberOfSide = (unsigned char)flp_header.nbsides;
-		floppydisk->floppySectorPerTrack = flp_header.nbsectors;
-		floppydisk->floppyBitRate = 250000;
-		floppydisk->floppyiftype = IBMPC_DD_FLOPPYMODE;
-		if( floppydisk->floppySectorPerTrack >= 15 && sectorsize >=512 )
+		rawcfg.sector_size = flp_header.sectorsize;
+		rawcfg.number_of_tracks = flp_header.nbtracks;
+		rawcfg.number_of_sides = (unsigned char)flp_header.nbsides;
+		rawcfg.number_of_sectors_per_track = flp_header.nbsectors;
+		rawcfg.bitrate = 250000;
+		rawcfg.interface_mode = IBMPC_DD_FLOPPYMODE;
+		if( rawcfg.number_of_sectors_per_track >= 15 && rawcfg.sector_size >=512 )
 		{
-			floppydisk->floppyBitRate = 500000;
-			floppydisk->floppyiftype=IBMPC_HD_FLOPPYMODE;
+			rawcfg.bitrate = 500000;
+			rawcfg.interface_mode = IBMPC_HD_FLOPPYMODE;
 		}
 
-		rpm = 300;
-		gap3len = 0xFF;
-		interleave = 1;
+		rawcfg.rpm = 300;
+		rawcfg.gap3 = 0xFF;
+		rawcfg.interleave = 1;
 
-		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		rawcfg.track_format = IBMFORMAT_DD;
 
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,floppydisk->floppyBitRate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
+		ret = raw_iso_loader(imgldr_ctx, floppydisk, f_img, 0, 0, &rawcfg);
 
-		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+		hxc_fclose(f_img);
 
-		trackformat=IBMFORMAT_DD;
-
-		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-		{
-			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-			currentcylinder=floppydisk->tracks[j];
-
-			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-			{
-				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-							(sectorsize*(floppydisk->floppySectorPerTrack)*i)+
-							sizeof(flp_header_t);
-
-				fseek (f , file_offset , SEEK_SET);
-				hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
-
-				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,(unsigned char)(0),floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500|REVERTED_INDEX,-2500);
-			}
-		}
-
-		free(trackdata);
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-
-		hxc_fclose(f);
-		return HXCFE_NOERROR;
+		return ret;
 	}
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Bad FLP header");
-	hxc_fclose(f);
+	hxc_fclose(f_img);
 
 	return HXCFE_BADFILE;
 }
