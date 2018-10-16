@@ -60,7 +60,7 @@ DISKLOADERPLUGINS = raw_amiga.o raw_iso.o copyqm_loader.o crctable.o adf_loader.
 					ti99pc99_loader.o apridisk_loader.o ede_loader.o fd_loader.o vdk_loader.o dpx_loader.o mgt_loader.o emax_loader.o\
 					ensoniq_mirage_loader.o sad_loader.o jv3_loader.o stt_loader.o prophet_loader.o teledisk_loader.o td0_lzss.o\
 					emuii_raw_loader.o emuii_loader.o emui_raw_loader.o jvc_loader.o dim_loader.o ti99v9t9_loader.o d81_loader.o  acornadf_loader.o \
-					camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o fdi_loader.o ssd_dsd_loader.o adl_loader.o \
+					camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o fdi_loader.o fdi_nec_loader.o ssd_dsd_loader.o adl_loader.o \
 					krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o system24_loader.o kryofluxstream_loader.o \
 					kryofluxstream.o fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o \
 					northstar_loader.o  xml_loader.o flppcm_loader.o stw_loader.o vfddat_loader.o ana_loader.o atr_loader.o hfev3_loader.o hfev3_writer.o \
@@ -397,6 +397,9 @@ ipf_writer.o : $(BASEDIR)/loaders/ipf_loader/ipf_writer.c $(BASEDIR)/loaders/ipf
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 fdi_loader.o : $(BASEDIR)/loaders/fdi_loader/fdi_loader.c $(BASEDIR)/loaders/fdi_loader/fdi_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+fdi_nec_loader.o : $(BASEDIR)/loaders/fdi_nec_loader/fdi_nec_loader.c $(BASEDIR)/loaders/fdi_nec_loader/fdi_nec_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 adl_loader.o : $(BASEDIR)/loaders/adl_loader/adl_loader.c $(BASEDIR)/loaders/adl_loader/adl_loader.h
