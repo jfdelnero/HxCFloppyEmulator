@@ -98,6 +98,7 @@
 #include "./loaders/extadf_loader/extadf_loader.h"
 #include "./loaders/oldextadf_loader/oldextadf_loader.h"
 #include "./loaders/fdi_loader/fdi_loader.h"
+#include "./loaders/fdi_nec_loader/fdi_nec_loader.h"
 #include "./loaders/adl_loader/adl_loader.h"
 #include "./loaders/ssd_dsd_loader/ssd_dsd_loader.h"
 #include "./loaders/krz_loader/krz_loader.h"
@@ -135,6 +136,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)EXTADF_libGetPluginInfo,
 	(GETPLUGININFOS)OLDEXTADF_libGetPluginInfo,
 	(GETPLUGININFOS)FDI_libGetPluginInfo,
+	(GETPLUGININFOS)FDINEC_libGetPluginInfo,
 	(GETPLUGININFOS)ADF_libGetPluginInfo,
 	(GETPLUGININFOS)ADL_libGetPluginInfo,
 	(GETPLUGININFOS)ACORNADF_libGetPluginInfo,
