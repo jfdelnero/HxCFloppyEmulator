@@ -177,7 +177,7 @@ int MSX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 {
 	raw_iso_cfg rawcfg;
 	int ret;
-	char boot_sector[512];
+	unsigned char boot_sector[512];
 	FILE * f_img;
 	unsigned int filesize;
 

@@ -215,7 +215,7 @@ int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	free(floppy_data);
 
-	return HXCFE_NOERROR;
+	return ret;
 
 alloc_error:
 	if(f)

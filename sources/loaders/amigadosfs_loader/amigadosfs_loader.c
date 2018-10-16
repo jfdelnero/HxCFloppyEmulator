@@ -84,7 +84,7 @@ int AMIGADOSFSDK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FIL
 			filepath=malloc(pathlen+1);
 			if(filepath!=0)
 			{
-				sprintf(filepath,"%s",imgfile);
+				sprintf(filepath,"%s",imgfile->path);
 				hxc_strlower(filepath);
 
 				if(strstr( filepath,".amigados" )!=NULL)
