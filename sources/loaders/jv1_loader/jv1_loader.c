@@ -60,25 +60,16 @@
 
 #include "libhxcadaptor.h"
 
-int JV1_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int JV1_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JV1_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"jv1") || hxc_checkfileext(imgfile,"dsk"))
+	if( hxc_checkfileext(imgfile->path,"jv1") || hxc_checkfileext(imgfile->path,"dsk"))
 	{
 
-		if(hxc_checkfileext(imgfile,"dsk"))
+		if(hxc_checkfileext(imgfile->path,"dsk"))
 		{
-			filesize=hxc_getfilesize(imgfile);
-			if(filesize<0)
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"JV1_libIsValidDiskFile : Cannot open %s !",imgfile);
-				return HXCFE_ACCESSERROR;
-			}
-
-			if( filesize%(10*1*256) || ( (filesize/(10*1*256)) > 120 ) )
+			if( imgfile->file_size%(10*1*256) || ( (imgfile->file_size/(10*1*256)) > 120 ) )
 			{
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JV1_libIsValidDiskFile : non JV1 file !");
 				return HXCFE_BADFILE;

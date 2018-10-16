@@ -63,6 +63,7 @@
 
 #include "plugins_id.h"
 
+#include "libhxcadaptor.h"
 
 int dummy_output(int MSGTYPE,char * chaine, ...)
 {
@@ -442,6 +443,66 @@ const char* hxcfe_imgGetLoaderExt( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID )
 	return 0;
 }
 
+int32_t hxcfe_imgCheckFileCompatibility( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * file_infos, char * loadername, char * fileext, int filesizemod)
+{
+	if(loadername)
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%s", loadername);
+
+	if( fileext )
+	{
+		if(! hxc_checkfileext( file_infos->path, fileext ) )
+			return HXCFE_BADFILE;
+	}
+
+	if( filesizemod )
+	{
+		if( ( file_infos->file_size % filesizemod ) || (file_infos->file_size <= 0) )
+		{
+			return HXCFE_BADFILE;
+		}
+	}
+
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%s : %s is an ADF file !", loadername, file_infos->path);
+
+	return HXCFE_VALIDFILE;
+}
+
+int32_t hxcfe_preloadImgInfos(HXCFE_IMGLDR * imgldr_ctx, char * imgname, HXCFE_IMGLDR_FILEINFOS * file_infos)
+{
+	FILE *f;
+	struct stat img_stat;
+
+	memset(file_infos,0,sizeof(file_infos));
+	memset(&img_stat,0,sizeof(struct stat));
+
+	hxc_stat( imgname, &img_stat );
+
+	if(img_stat.st_mode&S_IFDIR)
+		file_infos->is_dir = 1;
+	else
+		file_infos->is_dir = 0;
+
+	file_infos->file_size = 0;
+
+	if(!file_infos->is_dir)
+	{
+		f = hxc_fopen(imgname,"rb");
+		if( f == NULL )
+			return HXCFE_ACCESSERROR;
+
+		file_infos->file_size = hxc_fgetsize(f);
+
+		hxc_fread(&file_infos->file_header,sizeof(file_infos->file_header),f);
+
+		hxc_fclose(f);
+	}
+
+	strncpy(file_infos->file_extension, hxc_getfilenameext( imgname, 0 ), sizeof(file_infos->file_extension));
+	strncpy(file_infos->path, imgname, sizeof(file_infos->path));
+
+	return HXCFE_NOERROR;
+}
+
 int32_t hxcfe_imgAutoSetectLoader( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_t moduleID )
 {
 	int i;
@@ -449,6 +510,7 @@ int32_t hxcfe_imgAutoSetectLoader( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int
 	plugins_ptr func_ptr;
 	HXCFE* hxcfe;
 	image_plugin* plugin_ptr;
+	HXCFE_IMGLDR_FILEINFOS file_infos;
 
 	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
 
@@ -460,6 +522,12 @@ int32_t hxcfe_imgAutoSetectLoader( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int
 
 		hxcfe->hxc_printf(MSG_INFO_0,"Checking %s",imgname);
 
+		ret = hxcfe_preloadImgInfos(imgldr_ctx, imgname, &file_infos);
+		if(ret != HXCFE_NOERROR)
+			return ret;
+
+		ret = HXCFE_BADPARAMETER;
+
 		i = moduleID;
 		do
 		{
@@ -470,10 +538,11 @@ int32_t hxcfe_imgAutoSetectLoader( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int
 				{
 					if(func_ptr.libIsValidDiskFile)
 					{
-						ret = func_ptr.libIsValidDiskFile(imgldr_ctx,imgname);
+						ret = func_ptr.libIsValidDiskFile(imgldr_ctx,&file_infos);
 						if(ret == HXCFE_VALIDFILE)
 						{
 							hxcfe->hxc_printf(MSG_INFO_0,"File loader found : %s (%s)",hxcfe_imgGetLoaderName(imgldr_ctx,i),hxcfe_imgGetLoaderDesc(imgldr_ctx,i));
+
 							return i;
 						}
 						else
@@ -490,7 +559,6 @@ int32_t hxcfe_imgAutoSetectLoader( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int
 		hxcfe->hxc_printf(MSG_ERROR,"No loader support the file %s !",imgname);
 
 		ret = HXCFE_UNSUPPORTEDFILE;
-
 	}
 
 	return ret;
@@ -554,6 +622,7 @@ HXCFE_FLOPPY * hxcfe_imgLoadEx( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_
 	HXCFE_FLOPPY * newfloppy;
 	plugins_ptr func_ptr;
 	image_plugin* plugin_ptr;
+	HXCFE_IMGLDR_FILEINFOS file_infos;
 
 	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
 
@@ -565,12 +634,20 @@ HXCFE_FLOPPY * hxcfe_imgLoadEx( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_
 
 		hxcfe->hxc_printf(MSG_INFO_0,"Loading %s",imgname);
 
+		ret = hxcfe_preloadImgInfos(imgldr_ctx, imgname, &file_infos);
+		if(ret != HXCFE_NOERROR)
+		{
+			if(err_ret)
+				*err_ret = ret;
+			return 0;
+		}
+
 		if( hxcfe_checkLoaderID(imgldr_ctx,moduleID) == HXCFE_NOERROR )
 		{
 			ret = plugin_ptr[moduleID].infos_handler(imgldr_ctx,GETFUNCPTR,&func_ptr);
 			if( ret == HXCFE_NOERROR )
 			{
-				ret = func_ptr.libIsValidDiskFile(imgldr_ctx,imgname);
+				ret = func_ptr.libIsValidDiskFile(imgldr_ctx,&file_infos);
 				if( ret == HXCFE_VALIDFILE )
 				{
 					newfloppy = malloc(sizeof(HXCFE_FLOPPY));
@@ -1457,7 +1534,7 @@ int32_t hxcfe_popTrack ( HXCFE_FLPGEN* fb_ctx )
 		if( current_fb_track_state->track_number < fb_ctx->floppydisk->floppyNumberOfTrack)
 		{
 			if(!fb_ctx->floppydisk->tracks[current_fb_track_state->track_number])
-				fb_ctx->floppydisk->tracks[current_fb_track_state->track_number] = allocCylinderEntry(current_fb_track_state->rpm,2);
+				fb_ctx->floppydisk->tracks[current_fb_track_state->track_number] = allocCylinderEntry(current_fb_track_state->rpm,fb_ctx->floppydisk->floppyNumberOfSide);
 
 			currentcylinder = fb_ctx->floppydisk->tracks[current_fb_track_state->track_number];
 			sui_flag=0;

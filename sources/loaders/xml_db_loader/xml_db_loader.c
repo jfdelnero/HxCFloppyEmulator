@@ -62,11 +62,8 @@
 
 HXCFE_XMLLDR * rfb = 0;
 
-int XMLDB_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int XMLDB_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-	char firstline[512];
-	FILE * f;
 	HXCFE_XMLLDR * xmlldr;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"XMLDB_libIsValidDiskFile");

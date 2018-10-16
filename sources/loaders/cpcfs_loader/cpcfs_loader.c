@@ -65,23 +65,19 @@ HXCFE* global_floppycontext;
 extern int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char * file);
 
 
-int CPCFSDK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int CPCFSDK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 
 	int pathlen;
 	char * filepath;
-    struct stat staterep;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCFSDK_libIsValidDiskFile %s",imgfile);
 	if(imgfile)
 	{
-		pathlen=strlen(imgfile);
+		pathlen=strlen(imgfile->path);
 		if(pathlen!=0)
 		{
-			memset(&staterep,0,sizeof(struct stat));
-			hxc_stat(imgfile,&staterep);
-
-			if(staterep.st_mode&S_IFDIR)
+			if( imgfile->is_dir )
 			{
 				filepath=malloc(pathlen+1);
 				if(filepath!=0)
@@ -112,8 +108,6 @@ int CPCFSDK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"0 byte string ?");
 	}
 	return HXCFE_BADPARAMETER;
-
-
 }
 
 

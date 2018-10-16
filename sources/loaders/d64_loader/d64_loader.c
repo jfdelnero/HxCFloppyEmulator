@@ -69,11 +69,11 @@ typedef struct d64trackpos_
 }d64trackpos;
 
 
-int D64_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int D64_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"d64"))
+	if(hxc_checkfileext(imgfile->path,"d64"))
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile : D64 file !");
 		return HXCFE_VALIDFILE;

@@ -62,22 +62,13 @@
 #include "libhxcadaptor.h"
 
 
-int System24_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int System24_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"System24_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"s24"))
+	if(hxc_checkfileext(imgfile->path,"s24"))
 	{
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if(  ( filesize % ( 2 * ( ( 2048 * 5 ) + 1024 + 256 ) ) ) && ( filesize % ( 2 * ( 8192 + ( 1024 * 3 ) + 512 + 256 ) ) ) )
+		if(  ( imgfile->file_size % ( 2 * ( ( 2048 * 5 ) + 1024 + 256 ) ) ) && ( imgfile->file_size % ( 2 * ( 8192 + ( 1024 * 3 ) + 512 + 256 ) ) ) )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"System24_libIsValidDiskFile : non System 24 file - bad file size !");
 			return HXCFE_BADFILE;
@@ -92,8 +83,6 @@ int System24_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		return HXCFE_BADFILE;
 	}
 }
-
-
 
 int System24_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {

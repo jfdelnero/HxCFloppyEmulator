@@ -60,20 +60,9 @@
 
 #include "libhxcadaptor.h"
 
-int JVC_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int JVC_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JVC_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"jvc") )
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JVC_libIsValidDiskFile : JVC file !");
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JVC_libIsValidDiskFile : non JVC file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "JVC_libIsValidDiskFile", "jvc", 0);
 }
 
 #pragma pack(1)

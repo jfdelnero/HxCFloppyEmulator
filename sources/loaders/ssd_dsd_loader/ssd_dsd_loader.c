@@ -59,39 +59,10 @@
 
 #include "ssd_dsd_loader.h"
 
-int DSD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int DSD_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DSD_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"dsd") || hxc_checkfileext(imgfile,"ssd") )
-	{
-
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"DSD_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if(filesize&0x1FF)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DSD_libIsValidDiskFile : non Acorn BBC DSD/SSD IMG file - bad file size !");
-			return HXCFE_BADFILE;
-		}
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DSD_libIsValidDiskFile : Acorn BBC DSD/SSD file !");
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DSD_libIsValidDiskFile : non Acorn BBC DSD/SSD file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "DSD_libIsValidDiskFile", "dsd,ssd", 512 );
 }
-
-
 
 int DSD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {

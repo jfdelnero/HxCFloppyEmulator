@@ -60,36 +60,23 @@
 
 #include "libhxcadaptor.h"
 
-int EDE_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int EDE_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	unsigned char header_buffer[512];
-	FILE * f;
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile");
 
-	if(	hxc_checkfileext(imgfile,"ede") ||
-		hxc_checkfileext(imgfile,"eda") ||
-		hxc_checkfileext(imgfile,"eds") ||
-		hxc_checkfileext(imgfile,"edt") ||
-		hxc_checkfileext(imgfile,"edv")
+	if(	hxc_checkfileext(imgfile->path,"ede") ||
+		hxc_checkfileext(imgfile->path,"eda") ||
+		hxc_checkfileext(imgfile->path,"eds") ||
+		hxc_checkfileext(imgfile->path,"edt") ||
+		hxc_checkfileext(imgfile->path,"edv")
 		)
 	{
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile : EDE file !");
 
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
+		if((imgfile->file_header[0]==0x0D) && (imgfile->file_header[1]==0x0A))
 		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"EDE_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		hxc_fread(header_buffer,0x200,f);
-
-		hxc_fclose(f);
-		if((header_buffer[0]==0x0D) && (header_buffer[1]==0x0A))
-		{
-			switch(header_buffer[0x1FF])
+			switch(imgfile->file_header[0x1FF])
 			{
 				case 0x01:
 					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : Mirage (DD) format");
@@ -113,7 +100,7 @@ int EDE_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : TS-10/12 DD format");
 				break;
 				default:
-					imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"EDE_libIsValidDiskFile : Unknow format : %x !",header_buffer[0x1FF]);
+					imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"EDE_libIsValidDiskFile : Unknow format : %x !",imgfile->file_header[0x1FF]);
 					return HXCFE_BADFILE;
 				break;
 			}

@@ -63,30 +63,9 @@
 
 extern unsigned char msdos_bootsector;
 
-int KRZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int KRZ_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"KRZ_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"krz"))
-	{
-
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"KRZ_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"KRZ_libIsValidDiskFile : Kurzweil KRZ file !");
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"KRZ_libIsValidDiskFile : non Kurzweil KRZ file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "KRZ_libIsValidDiskFile", "krz", 0 );
 }
 
 

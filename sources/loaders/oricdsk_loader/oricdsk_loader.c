@@ -61,28 +61,14 @@
 
 #include "libhxcadaptor.h"
 
-int OricDSK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int OricDSK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	FILE *f;
-	unsigned char fileheader[10];
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"OricDSK_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"dsk"))
+	if(hxc_checkfileext(imgfile->path,"dsk"))
 	{
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-		{
-			return HXCFE_ACCESSERROR;
-		}
-
-		memset(fileheader,0,sizeof(fileheader));
-
-		hxc_fread(fileheader,10,f);
-		hxc_fclose(f);
-
-		if( !strncmp((char*)fileheader,"MFM_DISK",8) ||
-		    !strncmp((char*)fileheader,"ORICDISK",8))
+		if( !strncmp((char*)imgfile->file_header,"MFM_DISK",8) ||
+		    !strncmp((char*)imgfile->file_header,"ORICDISK",8))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"OricDSK_libIsValidDiskFile : OricDSK file !");
 			return HXCFE_VALIDFILE;

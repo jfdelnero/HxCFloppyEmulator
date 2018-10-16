@@ -60,27 +60,17 @@
 #include "gkh_loader.h"
 #include "gkh_format.h"
 
-int GKH_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int GKH_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	gkh_header header;
-	FILE * f;
+	gkh_header * header;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"GKH_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"gkh"))
+	if( hxc_checkfileext(imgfile->path,"gkh"))
 	{
+		header = (gkh_header *)imgfile->file_header;
 
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"GKH_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		hxc_fread(&header,sizeof(header),f);
-		hxc_fclose(f);
-
-		if(!memcmp(&header.header_tag,"TDDFI",5))
+		if(!memcmp(&header->header_tag,"TDDFI",5))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"GKH_libIsValidDiskFile : GKH file !");
 		}

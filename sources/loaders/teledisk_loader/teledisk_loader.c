@@ -65,68 +65,41 @@
 
 #include "libhxcadaptor.h"
 
-int TeleDisk_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int TeleDisk_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int pathlen,i;
-	FILE * f;
+	int i;
 	unsigned char crctable[32];
 	unsigned char CRC16_High,CRC16_Low;
-	TELEDISK_HEADER td_header;
+	TELEDISK_HEADER * td_header;
 	unsigned char * ptr;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TeleDisk_libIsValidDiskFile");
 	if(imgfile)
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+		td_header = (TELEDISK_HEADER *)&imgfile->file_header;
+
+		if ( ((td_header->TXT[0]!='t') || (td_header->TXT[1]!='d')) && ((td_header->TXT[0]!='T') || (td_header->TXT[1]!='D')))
 		{
-			f = hxc_fopen(imgfile,"rb");
-			if( f == NULL )
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"TeleDisk_libIsValidDiskFile : Cannot open %s !",imgfile);
-				return HXCFE_ACCESSERROR;
-			}
-
-			fseek(f,0,SEEK_SET);
-
-			memset(&td_header,0,sizeof(TELEDISK_HEADER));
-			hxc_fread( &td_header, sizeof(TELEDISK_HEADER), f );
-
-			i=ftell(f);
-
-			if(ftell(f)==sizeof(TELEDISK_HEADER))
-			{
-
-				if ( ((td_header.TXT[0]!='t') || (td_header.TXT[1]!='d')) && ((td_header.TXT[0]!='T') || (td_header.TXT[1]!='D')))
-				{
-					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TeleDisk_libIsValidDiskFile : bad header tag !");
-					hxc_fclose(f);
-					return HXCFE_BADFILE;
-				}
-
-				CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0xA097,0x0000);
-				ptr=(unsigned char*)&td_header;
-				for(i=0;i<0xA;i++)
-				{
-					CRC16_Update(&CRC16_High,&CRC16_Low, ptr[i],(unsigned char*)crctable );
-				}
-
-				if(((td_header.CRC[1]<<8)|td_header.CRC[0]) != ((CRC16_High<<8)|CRC16_Low))
-				{
-					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"bad header crc !");
-					hxc_fclose(f);
-     				return HXCFE_BADFILE;
-				}
-
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TeleDisk_libIsValidDiskFile : it's a Tele disk file!");
-				hxc_fclose(f);
-				return HXCFE_VALIDFILE;
-			}
-
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TeleDisk_libIsValidDiskFile : bad header tag !");
-			hxc_fclose(f);
+			return HXCFE_BADFILE;
+		}
+
+		CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0xA097,0x0000);
+		ptr=(unsigned char*)&td_header;
+		for(i=0;i<0xA;i++)
+		{
+			CRC16_Update(&CRC16_High,&CRC16_Low, ptr[i],(unsigned char*)crctable );
+		}
+
+		if(((td_header->CRC[1]<<8)|td_header->CRC[0]) != ((CRC16_High<<8)|CRC16_Low))
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"bad header crc !");
      		return HXCFE_BADFILE;
 		}
+
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TeleDisk_libIsValidDiskFile : it's a Tele disk file!");
+
+		return HXCFE_VALIDFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

@@ -62,28 +62,9 @@
 
 extern unsigned char bit_inverter[];
 
-int FEI_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int FEI_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FEI_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"fei"))
-	{
-
-		filesize=hxc_getfilesize(imgfile);
-
-		if(filesize<0)
-			return HXCFE_ACCESSERROR;
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FEI_libIsValidDiskFile : FEI file !");
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FEI_libIsValidDiskFile : non FEI file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "FEI_libIsValidDiskFile", "fei", 0 );
 }
 
 int FEI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)

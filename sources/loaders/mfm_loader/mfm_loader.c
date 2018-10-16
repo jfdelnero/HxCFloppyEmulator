@@ -61,25 +61,17 @@
 
 #include "libhxcadaptor.h"
 
-int MFM_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int MFM_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	FILE *f;
-	MFMIMG header;
+	MFMIMG * header;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MFM_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"mfm"))
+	if(hxc_checkfileext(imgfile->path,"mfm"))
 	{
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-			return HXCFE_ACCESSERROR;
+		header = (MFMIMG *)&imgfile->file_header;
 
-		memset(&header,0,sizeof(MFMIMG));
-
-		hxc_fread(&header,sizeof(header),f);
-		hxc_fclose(f);
-
-		if( !strncmp((char*)header.headername,"HXCMFM",6))
+		if( !strncmp((char*)header->headername,"HXCMFM",6))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MFM_libIsValidDiskFile : MFM file !");
 			return HXCFE_VALIDFILE;

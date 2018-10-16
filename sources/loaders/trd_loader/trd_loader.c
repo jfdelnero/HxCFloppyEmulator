@@ -60,11 +60,11 @@
 #include "trd_loader.h"
 #include "trd_writer.h"
 
-int TRD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int TRD_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TRD_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"trd"))
+	if(hxc_checkfileext(imgfile->path,"trd"))
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TRD_libIsValidDiskFile : TRD file !");
 		return HXCFE_VALIDFILE;

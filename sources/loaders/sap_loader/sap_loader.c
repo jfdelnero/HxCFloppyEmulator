@@ -61,17 +61,16 @@
 
 #include "libhxcadaptor.h"
 
-int SAP_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int SAP_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	int floppyformat;
 	sapID sapid;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAP_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"sap"))
+	if(hxc_checkfileext(imgfile->path,"sap"))
 	{
-
-		sapid=sap_OpenArchive(imgfile, &floppyformat);
+		sapid = sap_OpenArchive(imgfile->path, &floppyformat);
 		if(sapid!=SAP_ERROR)
 		{
 			sap_CloseArchive(sapid);

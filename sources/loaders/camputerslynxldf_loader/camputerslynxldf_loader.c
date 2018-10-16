@@ -60,40 +60,10 @@
 
 #include "libhxcadaptor.h"
 
-int CAMPUTERSLYNX_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int CAMPUTERSLYNX_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"ldf") )
-	{
-
-		filesize=hxc_getfilesize(imgfile);
-
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"CAMPUTERSLYNX_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if(filesize&0x1FF)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libIsValidDiskFile : non LDF file - bad file size !");
-			return HXCFE_BADFILE;
-		}
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libIsValidDiskFile : LDF file !");
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CAMPUTERSLYNX_libIsValidDiskFile : non LDF file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "CAMPUTERSLYNX_libIsValidDiskFile", "ldf", 512 );
 }
-
-
 
 int CAMPUTERSLYNX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {

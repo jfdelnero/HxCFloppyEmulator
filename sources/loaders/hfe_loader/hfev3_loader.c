@@ -92,24 +92,17 @@ static char * interfacemodecode[]=
 	"EMU_SHUGART_FLOPPYMODE"
 };
 
-int HFEV3_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int HFEV3_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	FILE *f;
-	picfileformatheader header;
+	picfileformatheader * header;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEV3_libIsValidDiskFile");
 
 	if(imgfile)
 	{
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-		{
-			return HXCFE_ACCESSERROR;
-		}
-		hxc_fread(&header,sizeof(header),f);
-		hxc_fclose(f);
+		header = (picfileformatheader *)&imgfile->file_header;
 
-		if( !strncmp((char*)header.HEADERSIGNATURE,"HXCHFEV3",8))
+		if( !strncmp((char*)header->HEADERSIGNATURE,"HXCHFEV3",8))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEV3_libIsValidDiskFile : HFE V3 file !");
 			return HXCFE_VALIDFILE;

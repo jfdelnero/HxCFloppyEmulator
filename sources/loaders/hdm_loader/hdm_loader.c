@@ -59,20 +59,9 @@
 #include "hdm_loader.h"
 
 
-int HDM_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int HDM_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HDM_libIsValidDiskFile");
-
-	if(hxc_checkfileext(imgfile,"hdm") || hxc_checkfileext(imgfile,"xdf"))
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HDM_libIsValidDiskFile : HDM file !");
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HDM_libIsValidDiskFile : non HDM file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "HDM_libIsValidDiskFile", "hdm,xdf", 1024);
 }
 
 int HDM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)

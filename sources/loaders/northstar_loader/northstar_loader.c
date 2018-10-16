@@ -61,36 +61,9 @@
 
 #include "libhxcadaptor.h"
 
-int Northstar_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int Northstar_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Northstar_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"nsi") )
-	{
-
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Northstar_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if( filesize % (35*10*512) )
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Northstar_libIsValidDiskFile : non Northstar file - bad file size !");
-			return HXCFE_BADFILE;
-		}
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Northstar_libIsValidDiskFile : Northstar file !");
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Northstar_libIsValidDiskFile : non Northstar file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "Northstar_libIsValidDiskFile", "nsi", (35*10*512) );
 }
 
 int Northstar_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)

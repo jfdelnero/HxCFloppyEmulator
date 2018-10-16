@@ -95,11 +95,11 @@ extern  CAPSUNLOCKALLTRACKS pCAPSUnlockAllTracks;
 extern  CAPSGETVERSIONINFO pCAPSGetVersionInfo;
 extern  CAPSREMIMAGE pCAPSRemImage;
 
-int IPF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int IPF_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IPF_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"ipf") || hxc_checkfileext(imgfile,"ct") || hxc_checkfileext(imgfile,"ctr"))
+	if(hxc_checkfileext(imgfile->path,"ipf") || hxc_checkfileext(imgfile->path,"ct") || hxc_checkfileext(imgfile->path,"ctr"))
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IPF_libIsValidDiskFile : IPF file !");
 		if(init_caps_lib())

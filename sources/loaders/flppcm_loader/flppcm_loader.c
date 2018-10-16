@@ -61,33 +61,17 @@
 
 #include "flppcmfileformat.h"
 
-int FLPPCM_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int FLPPCM_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-	FILE *f;
-	flp_header_t flp_header;
+	flp_header_t * flp_header;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FLPPCM_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"flp"))
+	if(hxc_checkfileext(imgfile->path,"flp"))
 	{
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"FLPPCM_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
+		flp_header = (flp_header_t *)&imgfile->file_header;
 
-		memset(&flp_header,0,sizeof(flp_header_t));
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-		{
-			return HXCFE_ACCESSERROR;
-		}
-		hxc_fread(&flp_header,sizeof(flp_header_t),f);
-		hxc_fclose(f);
-
-		if(strncmp((char*)flp_header.hsign,"PCM",sizeof(flp_header.hsign)))
+		if(strncmp((char*)flp_header->hsign,"PCM",sizeof(flp_header->hsign)))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FLPPCM_libIsValidDiskFile : non FLP file - bad header !");
 			return HXCFE_BADFILE;

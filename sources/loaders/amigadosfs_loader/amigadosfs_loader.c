@@ -68,51 +68,44 @@ HXCFE* global_floppycontext;
 #define DEFAULT_DISK_NAME "AmigaDOS (HxC)"
 
 
-int AMIGADOSFSDK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int AMIGADOSFSDK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 
 	int pathlen;
 	char * filepath;
-	struct stat staterep;
 
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile %s",imgfile);
-	if(imgfile)
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile %s",imgfile->path);
+
+	pathlen=strlen(imgfile->path);
+	if(pathlen!=0)
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+		if( imgfile->is_dir )
 		{
-			memset(&staterep,0,sizeof(struct stat));
-			hxc_stat(imgfile,&staterep);
-
-			if(staterep.st_mode&S_IFDIR)
+			filepath=malloc(pathlen+1);
+			if(filepath!=0)
 			{
-				filepath=malloc(pathlen+1);
-				if(filepath!=0)
-				{
-					sprintf(filepath,"%s",imgfile);
-					hxc_strlower(filepath);
+				sprintf(filepath,"%s",imgfile);
+				hxc_strlower(filepath);
 
-					if(strstr( filepath,".amigados" )!=NULL)
-					{
-						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : AMIGADOSFSDK file !");
-						free(filepath);
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : non AMIGADOSFSDK file ! (.amigados missing)");
-						free(filepath);
-						return HXCFE_BADFILE;
-					}
+				if(strstr( filepath,".amigados" )!=NULL)
+				{
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : AMIGADOSFSDK file !");
+					free(filepath);
+					return HXCFE_VALIDFILE;
+				}
+				else
+				{
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : non AMIGADOSFSDK file ! (.amigados missing)");
+					free(filepath);
+					return HXCFE_BADFILE;
 				}
 			}
-			else
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : non AMIGADOSFSDK file ! (it's not a directory)");
-				return HXCFE_BADFILE;
-			}
 		}
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : 0 byte string ?");
+		else
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libIsValidDiskFile : non AMIGADOSFSDK file ! (it's not a directory)");
+			return HXCFE_BADFILE;
+		}
 	}
 	return HXCFE_BADPARAMETER;
 }

@@ -60,35 +60,9 @@
 
 #include "libhxcadaptor.h"
 
-int VEGASDSK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int VEGASDSK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	unsigned char buffer[256];
-	FILE * f;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VEGASDSK_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"veg") || hxc_checkfileext(imgfile,"vegasdsk") )
-	{
-
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"VEGASDSK_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		fseek (f , 256*(3-1) , SEEK_SET);
-		hxc_fread(buffer,256,f);
-
-		hxc_fclose(f);
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VEGASDSK_libIsValidDiskFile : Vegas DSK file ! %d tracks %d sectors/tracks",buffer[0x26]+1,buffer[0x27]+1);
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VEGASDSK_libIsValidDiskFile : non Vegas DSK file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "VEGASDSK_libIsValidDiskFile", "veg,vegasdsk", 0);
 }
 
 int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)

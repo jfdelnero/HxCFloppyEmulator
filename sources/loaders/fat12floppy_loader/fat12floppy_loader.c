@@ -66,73 +66,61 @@
 #include "fatlib.h"
 
 
-int FAT12FLOPPY_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int FAT12FLOPPY_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	int i,found;
-	struct stat staterep;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile");
 	if(imgfile)
 	{
-		memset(&staterep,0,sizeof(struct stat));
-		if(!hxc_stat(imgfile,&staterep))
+		if( imgfile->is_dir )
 		{
-
-			if(staterep.st_mode&S_IFDIR)
+			found=0;
+			i=0;
+			do
 			{
-
-				found=0;
-				i=0;
-				do
+				if( configlist[i].dir && hxc_checkfileext(imgfile->path,configlist[i].dirext))
 				{
-					if( configlist[i].dir && hxc_checkfileext(imgfile,configlist[i].dirext))
-					{
-						found=1;
-					}
-					i++;
-				}while( strlen(configlist[i].dirext) && !found );
-
-				if(found)
-				{
-					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : FAT12FLOPPY file ! (Dir , %s)",configlist[i].dirext);
-					return HXCFE_VALIDFILE;
+					found=1;
 				}
-				else
-				{
-					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : non FAT12FLOPPY file !");
-					return HXCFE_BADFILE;
-				}
+				i++;
+			}while( strlen(configlist[i].dirext) && !found );
+
+			if(found)
+			{
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : FAT12FLOPPY file ! (Dir , %s)",configlist[i].dirext);
+				return HXCFE_VALIDFILE;
 			}
 			else
 			{
-
-				found=0;
-				i=0;
-				do
-				{
-					if( !configlist[i].dir && hxc_checkfileext(imgfile,configlist[i].dirext))
-					{
-						found=1;
-					}
-					i++;
-				}while( strlen(configlist[i].dirext) && !found );
-
-				if(found)
-				{
-					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : FAT12FLOPPY file ! (File , %s)",configlist[i].dirext);
-					return HXCFE_VALIDFILE;
-				}
-				else
-				{
-					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : non FAT12FLOPPY file !");
-					return HXCFE_BADFILE;
-				}
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : non FAT12FLOPPY file !");
+				return HXCFE_BADFILE;
 			}
 		}
 		else
 		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : non FAT12FLOPPY file !");
-			return HXCFE_BADFILE;
+
+			found=0;
+			i=0;
+			do
+			{
+				if( !configlist[i].dir && hxc_checkfileext(imgfile->path,configlist[i].dirext))
+				{
+					found=1;
+				}
+				i++;
+			}while( strlen(configlist[i].dirext) && !found );
+
+			if(found)
+			{
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : FAT12FLOPPY file ! (File , %s)",configlist[i].dirext);
+				return HXCFE_VALIDFILE;
+			}
+			else
+			{
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libIsValidDiskFile : non FAT12FLOPPY file !");
+				return HXCFE_BADFILE;
+			}
 		}
 	}
 

@@ -68,7 +68,7 @@
 
 extern int pc_imggetfloppyconfig(unsigned char * img,uint32_t filesize, raw_iso_cfg *rawcfg);
 
-int IMZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int IMZ_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	int err;
 	unzFile uf;
@@ -76,9 +76,9 @@ int IMZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	char filename_inzip[256];
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMZ_libIsValidDiskFile");
-	if( hxc_checkfileext(imgfile,"imz"))
+	if( hxc_checkfileext(imgfile->path,"imz"))
 	{
-		uf=unzOpen (imgfile);
+		uf = unzOpen (imgfile->path);
 		if (!uf)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"IMZ_libIsValidDiskFile : unzOpen: Error while reading the file!");

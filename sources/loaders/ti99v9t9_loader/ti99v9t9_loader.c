@@ -79,10 +79,10 @@ typedef struct ti99_vib
 } ti99_vib;
 #pragma pack()
 
-int32_t getDiskGeometry(FILE * f,int32_t * numberoftrack,int32_t * numberofside,int32_t * numberofsector,int32_t * skewside0,int32_t * skewside1,int32_t * interleave,int32_t * density,int32_t * bitrate,int32_t * sectorsize)
+int32_t getDiskGeometry(HXCFE_IMGLDR_FILEINFOS * imgfile,int32_t * numberoftrack,int32_t * numberofside,int32_t * numberofsector,int32_t * skewside0,int32_t * skewside1,int32_t * interleave,int32_t * density,int32_t * bitrate,int32_t * sectorsize)
 {
 	int32_t totsecs,filesize;
-	ti99_vib vib;
+	ti99_vib * vib;
 
 	*sectorsize=256;
 	*numberofside=1;
@@ -94,16 +94,13 @@ int32_t getDiskGeometry(FILE * f,int32_t * numberoftrack,int32_t * numberofside,
 	*bitrate=250000;
 	*density=1;
 
-	filesize = hxc_fgetsize(f);
-
-	hxc_fread(&vib,sizeof(ti99_vib),f);
-
-	fseek (f , 0 , SEEK_SET);
+	filesize = imgfile->file_size;
+	vib = (ti99_vib *)&imgfile->file_header;
 
 	// If we have read the sector successfully, let us parse it
-	totsecs = (vib.totsecsMSB << 8) | vib.totsecsLSB;
-	*numberofsector = vib.secspertrack;
-	if (vib.secspertrack == 0)
+	totsecs = (vib->totsecsMSB << 8) | vib->totsecsLSB;
+	*numberofsector = vib->secspertrack;
+	if (vib->secspertrack == 0)
 	{
 		// Some images might be like this, because the original SSSD
 		// TI controller always assumes 9.
@@ -139,7 +136,7 @@ int32_t getDiskGeometry(FILE * f,int32_t * numberoftrack,int32_t * numberofside,
 			break;
 	}
 
-	*numberoftrack = vib.tracksperside;
+	*numberoftrack = vib->tracksperside;
 
 	if (*numberoftrack == 0)
 	{
@@ -148,7 +145,7 @@ int32_t getDiskGeometry(FILE * f,int32_t * numberoftrack,int32_t * numberofside,
 		*numberoftrack = 40;
 	}
 
-	*numberofside = vib.sides;
+	*numberofside = vib->sides;
 
 	if (*numberofside == 0)
 	{
@@ -160,7 +157,7 @@ int32_t getDiskGeometry(FILE * f,int32_t * numberoftrack,int32_t * numberofside,
 	*bitrate=250000;
 
 	*density=1;
-	switch(vib.density)
+	switch(vib->density)
 	{
 		case 0:
 		case 1:
@@ -178,8 +175,8 @@ int32_t getDiskGeometry(FILE * f,int32_t * numberoftrack,int32_t * numberofside,
 	}
 
 	if (((*numberofsector * *numberoftrack * *numberofside) == totsecs)
-		&& ((vib.density <= 4) && (totsecs >= 2))
-		&& (filesize == totsecs*256) && !memcmp(vib.id, "DSK", 3))
+		&& ((vib->density <= 4) && (totsecs >= 2))
+		&& (filesize == totsecs*256) && !memcmp(vib->id, "DSK", 3))
 	{
 		return 1;
 	}
@@ -297,9 +294,8 @@ int32_t getDiskGeometry(FILE * f,int32_t * numberoftrack,int32_t * numberofside,
 }
 
 
-int TI99V9T9_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int TI99V9T9_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	FILE * f;
 	int32_t numberoftrack,numberofsector;
 	int32_t skew0,skew1,interleave,numberofside;
 	int32_t density;
@@ -310,16 +306,7 @@ int TI99V9T9_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99V9T9_libIsValidDiskFile");
 	if(imgfile)
 	{
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"TI99V9T9_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		ret=getDiskGeometry(f,&numberoftrack,&numberofside,&numberofsector,&skew0,&skew1,&interleave,&density,&bitrate,&sectorsize);
-
-		hxc_fclose(f);
+		ret=getDiskGeometry(imgfile,&numberoftrack,&numberofside,&numberofsector,&skew0,&skew1,&interleave,&density,&bitrate,&sectorsize);
 
 		switch(ret)
 		{
@@ -330,7 +317,7 @@ int TI99V9T9_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 			case 2:
 
-				if( hxc_checkfileext(imgfile,"v9t9") || hxc_checkfileext(imgfile,"pc99") )
+				if( hxc_checkfileext(imgfile->path,"v9t9") || hxc_checkfileext(imgfile->path,"pc99") )
 				{
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99V9T9_libIsValidDiskFile : V9T9 file !");
 					return HXCFE_VALIDFILE;
@@ -360,7 +347,7 @@ int TI99V9T9_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	FILE * f;
 	unsigned int filesize;
-	int i,j;
+	int i,j,ret;
 	int32_t sectorsize;
 	unsigned int file_offset;
 	int32_t skew0,skew1,skew,interleave,gap3len;
@@ -369,8 +356,13 @@ int TI99V9T9_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	int32_t rpm;
 	int32_t density;
 	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_IMGLDR_FILEINFOS file_infos;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99V9T9_libLoad_DiskFile %s",imgfile);
+
+	ret = hxcfe_preloadImgInfos(imgldr_ctx, imgfile, &file_infos);
+	if(ret != HXCFE_NOERROR)
+		return ret;
 
 	f = hxc_fopen(imgfile,"rb");
 	if( f == NULL )
@@ -381,7 +373,7 @@ int TI99V9T9_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	filesize = hxc_fgetsize(f);
 
-	if(getDiskGeometry(f,&floppydisk->floppyNumberOfTrack,&floppydisk->floppyNumberOfSide,&floppydisk->floppySectorPerTrack,&skew0,&skew1,&interleave,&density,&floppydisk->floppyBitRate,&sectorsize))
+	if(getDiskGeometry(&file_infos,&floppydisk->floppyNumberOfTrack,&floppydisk->floppyNumberOfSide,&floppydisk->floppySectorPerTrack,&skew0,&skew1,&interleave,&density,&floppydisk->floppyBitRate,&sectorsize))
 	{
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		rpm=300; // normal rpm

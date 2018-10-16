@@ -59,22 +59,13 @@
 
 #include "adl_loader.h"
 
-int ADL_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int ADL_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADL_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"adl") || hxc_checkfileext(imgfile,"adm") || hxc_checkfileext(imgfile,"adf") )
+	if( hxc_checkfileext(imgfile->path,"adl") || hxc_checkfileext(imgfile->path,"adm") || hxc_checkfileext(imgfile->path,"adf") )
 	{
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"ADL_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if(filesize&0x1FF || (filesize > 82*16*2*256 ) )
+		if(imgfile->file_size&0x1FF || (imgfile->file_size > 82*16*2*256 ) )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADL_libIsValidDiskFile : non Acorn BBC ADL IMG file - bad file size !");
 			return HXCFE_BADFILE;

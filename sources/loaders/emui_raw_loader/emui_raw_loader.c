@@ -61,35 +61,9 @@
 
 #include "libhxcadaptor.h"
 
-int EMUI_RAW_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int EMUI_RAW_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUI_RAW_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"emufd") )
-	{
-
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-			return HXCFE_ACCESSERROR;
-
-		if(filesize==(0xE00*35))
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUI_RAW_libIsValidDiskFile : EmuI raw file !");
-			return HXCFE_VALIDFILE;
-		}
-		else
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUI_RAW_libIsValidDiskFile : non EmuI raw file !");
-			return HXCFE_BADFILE;
-		}
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUI_RAW_libIsValidDiskFile : non EmuI raw file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "EMUI_RAW_libIsValidDiskFile", "emufd", (0xE00*35));
 }
 
 int EMUI_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)

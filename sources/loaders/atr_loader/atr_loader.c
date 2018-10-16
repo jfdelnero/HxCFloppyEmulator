@@ -62,34 +62,17 @@
 
 #include "libhxcadaptor.h"
 
-int ATR_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int ATR_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-	FILE *f;
-	atr_header fileheader;
+	atr_header * fileheader;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ATR_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"atr"))
+	if(hxc_checkfileext(imgfile->path,"atr"))
 	{
-		filesize=hxc_getfilesize(imgfile);
+		fileheader = (atr_header *)imgfile->file_header;
 
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"ATR_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-			return HXCFE_ACCESSERROR;
-
-		memset(&fileheader,0,sizeof(fileheader));
-
-		hxc_fread(&fileheader,sizeof(fileheader),f);
-		hxc_fclose(f);
-
-		if( fileheader.sign != 0x0296 && ( (filesize - 16) %128 ) )
+		if( fileheader->sign != 0x0296 && ( (imgfile->file_size - 16) %128 ) )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ATR_libIsValidDiskFile : non ATR file !");
 			return HXCFE_BADFILE;

@@ -60,43 +60,26 @@
 
 #include "libhxcadaptor.h"
 
-int XML_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int XML_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-	char firstline[512];
-	FILE * f;
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"XML_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"xml"))
+	if(hxc_checkfileext(imgfile->path,"xml"))
 	{
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
+		if(imgfile->file_size<0)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"XML_libIsValidDiskFile : Cannot open %s !",imgfile);
 			return HXCFE_ACCESSERROR;
 		}
 
-		f = hxc_fopen(imgfile,"rb");
-		if(f)
+		if(strstr(imgfile->file_header,"<?xml version="))
 		{
-			memset(firstline,0,sizeof(firstline));
-			hxc_fgets(firstline,sizeof(firstline)-1,f);
-			hxc_fclose(f);
-
-			if(strstr(firstline,"<?xml version="))
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"XML_libIsValidDiskFile : XML file !");
-				return HXCFE_VALIDFILE;
-			}
-
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"XML_libIsValidDiskFile : non XML file !");
-			return HXCFE_BADFILE;
-
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"XML_libIsValidDiskFile : XML file !");
+			return HXCFE_VALIDFILE;
 		}
 
-		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"XML_libIsValidDiskFile : Cannot open %s !",imgfile);
-		return HXCFE_ACCESSERROR;
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"XML_libIsValidDiskFile : non XML file !");
+		return HXCFE_BADFILE;
 	}
 	else
 	{

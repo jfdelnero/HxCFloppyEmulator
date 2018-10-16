@@ -66,23 +66,15 @@
 
 //#define PASTI_DBG 1
 
-int STX_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int STX_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	FILE * f;
 	pasti_fileheader * fileheader;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STX_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"stx"))
+	if(hxc_checkfileext(imgfile->path,"stx"))
 	{
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-			return HXCFE_ACCESSERROR;
-
-		fileheader=(pasti_fileheader*)malloc(sizeof(pasti_fileheader));
-		hxc_fread( fileheader, sizeof(pasti_fileheader), f );
-
-		hxc_fclose(f);
+		fileheader = (pasti_fileheader*)imgfile->file_header;
 
 		if(strcmp((char*)&fileheader->headertag,"RSY"))
 		{

@@ -60,28 +60,13 @@
 
 #include "libhxcadaptor.h"
 
-int EXTADF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int EXTADF_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	FILE * f;
-	unsigned char header[12];
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EXTADF_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"adf") )
+	if( hxc_checkfileext(imgfile->path,"adf") )
 	{
-
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"EXTADF_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		memset(header,0,sizeof(header));
-		hxc_fread(header,12,f);
-		hxc_fclose(f);
-
-		if(!strncmp((char*)header,"UAE-1ADF",8))
+		if(!strncmp((char*)imgfile->file_header,"UAE-1ADF",8))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EXTADF_libIsValidDiskFile : Extended ADF file (new version)!");
 			return HXCFE_VALIDFILE;

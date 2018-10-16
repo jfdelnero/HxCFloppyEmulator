@@ -60,22 +60,13 @@
 
 #include "libhxcadaptor.h"
 
-int Apple2_do_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int Apple2_do_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_do_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"do") || hxc_checkfileext(imgfile,"po"))
+	if( hxc_checkfileext(imgfile->path,"do") || hxc_checkfileext(imgfile->path,"po"))
 	{
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Apple2_do_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if( filesize%(16*1*256) || ( (filesize/(16*1*256)) > 50 ) )
+		if( imgfile->file_size % (16*1*256) || ( (imgfile->file_size/(16*1*256)) > 50 ) )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_do_libIsValidDiskFile : non DO file !");
 			return HXCFE_BADFILE;

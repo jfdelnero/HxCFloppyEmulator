@@ -210,35 +210,9 @@ static int getfloppyconfig(unsigned char bootsector[512],uint32_t filesize, raw_
 }
 
 
-int ST_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int ST_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ST_libIsValidDiskFile");
-
-	if(hxc_checkfileext(imgfile,"st"))
-	{
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"ST_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if(filesize&0x1FF)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ST_libIsValidDiskFile : non ST IMG file - bad file size !");
-			return HXCFE_BADFILE;
-		}
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ST_libIsValidDiskFile : ST file !");
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ST_libIsValidDiskFile : non ST file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "ST_libIsValidDiskFile", "st", 512);
 }
 
 int ST_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)

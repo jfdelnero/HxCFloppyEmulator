@@ -60,35 +60,9 @@
 
 #include "libhxcadaptor.h"
 
-int Ensoniq_mirage_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int Ensoniq_mirage_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Ensoniq_mirage_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"edm") )
-	{
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Ensoniq_mirage_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if(filesize%((5*1024) + (1*512)) )
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Ensoniq_mirage_libIsValidDiskFile : non Ensoniq mirage file - bad file size !");
-			return HXCFE_BADFILE;
-		}
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Ensoniq_mirage_libIsValidDiskFile : Ensoniq mirage file !");
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Ensoniq_mirage_libIsValidDiskFile : non Ensoniq mirage file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "Ensoniq_mirage_libIsValidDiskFile", "edm", ((5*1024) + (1*512)) );
 }
 
 int Ensoniq_mirage_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)

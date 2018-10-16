@@ -90,29 +90,9 @@
 #define TOTAL_OS ((OS1_HIGH-OS1_LOW)+(OS2_HIGH-OS2_LOW)+(OS3_HIGH-OS3_LOW))
 
 
-int EMUII_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int EMUII_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMAX_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"eii") )
-	{
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"EMUII_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUII_libIsValidDiskFile : EMUII file !");
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUII_libIsValidDiskFile : non EMUII file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "EMUII_libIsValidDiskFile", "eii", 0);
 }
 
 

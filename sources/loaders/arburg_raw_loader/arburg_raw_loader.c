@@ -62,20 +62,13 @@
 
 #include "libhxcadaptor.h"
 
-int ARBURG_RAW_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int ARBURG_RAW_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"arburgfd") )
+	if( hxc_checkfileext(imgfile->path,"arburgfd") )
 	{
-
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-			return HXCFE_ACCESSERROR;
-
-		if(filesize==(ARBURB_DATATRACK_SIZE*2*80))
+		if( imgfile->file_size == (ARBURB_DATATRACK_SIZE*2*80) )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile : Arburg Data raw file !");
 			return HXCFE_VALIDFILE;
@@ -83,7 +76,7 @@ int ARBURG_RAW_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		else
 		{
 
-			if(filesize==( (ARBURB_DATATRACK_SIZE*10)+(ARBURB_SYSTEMTRACK_SIZE*70)+(ARBURB_SYSTEMTRACK_SIZE*80) ))
+			if( imgfile->file_size == ( (ARBURB_DATATRACK_SIZE*10)+(ARBURB_SYSTEMTRACK_SIZE*70)+(ARBURB_SYSTEMTRACK_SIZE*80) ))
 			{
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile : Arburg System raw file !");
 				return HXCFE_VALIDFILE;

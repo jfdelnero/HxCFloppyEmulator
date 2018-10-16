@@ -61,29 +61,19 @@
 
 #include "libhxcadaptor.h"
 
-int CPCDSK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int CPCDSK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	cpcdsk_fileheader fileheader;
-	FILE * f;
+	cpcdsk_fileheader * fileheader;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"dsk"))
+	if(hxc_checkfileext(imgfile->path,"dsk"))
 	{
+		fileheader = (cpcdsk_fileheader *)imgfile->file_header;
 
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"CPCDSK_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		hxc_fread(&fileheader,sizeof(fileheader),f);
-		hxc_fclose(f);
-
-		if( !strncmp((char*)&fileheader.headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",16) ||
-			!strncmp((char*)&fileheader.headertag,"MV - CPCEMU Disk-File\r\nDisk-Info\r\n",11) ||
-			!strncmp((char*)&fileheader.headertag,"MV - CPC",8)
+		if( !strncmp((char*)&fileheader->headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",16) ||
+			!strncmp((char*)&fileheader->headertag,"MV - CPCEMU Disk-File\r\nDisk-Info\r\n",11) ||
+			!strncmp((char*)&fileheader->headertag,"MV - CPC",8)
 			)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile : CPC Dsk file !");

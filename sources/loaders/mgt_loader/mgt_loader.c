@@ -59,39 +59,9 @@
 
 #include "mgt_loader.h"
 
-int MGT_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int MGT_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MGT_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"sad") ||
-		hxc_checkfileext(imgfile,"mgt")
-		)
-	{
-
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"MGT_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if(filesize&0x1FF)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MGT_libIsValidDiskFile : non MGT file - bad file size !");
-			return HXCFE_BADFILE;
-		}
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MGT_libIsValidDiskFile : MGT file !");
-
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MGT_libIsValidDiskFile : non MGT file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "MGT_libIsValidDiskFile", "sad,mgt", 512 );
 }
 
 int MGT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)

@@ -61,26 +61,13 @@
 
 #include "libhxcadaptor.h"
 
-int IMD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int IMD_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	FILE *f;
-	char fileheader[5];
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"imd"))
+	if(hxc_checkfileext(imgfile->path,"imd"))
 	{
-
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-			return HXCFE_ACCESSERROR;
-
-		memset(fileheader,0,sizeof(fileheader));
-
-		hxc_fread(&fileheader,4,f);
-		hxc_fclose(f);
-
-		if( !strncmp(fileheader,"IMD ",4))
+		if( !strncmp(imgfile->file_header,"IMD ",4))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile : IMD file !");
 			return HXCFE_VALIDFILE;
