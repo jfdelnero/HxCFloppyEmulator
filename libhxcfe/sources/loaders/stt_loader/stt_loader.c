@@ -62,28 +62,17 @@
 
 #include "libhxcadaptor.h"
 
-int STT_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int STT_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	FILE * f;
-	stt_header STTHEADER;
+	stt_header * STTHEADER;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STT_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"stt") )
+	if( hxc_checkfileext(imgfile->path,"stt") )
 	{
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"STT_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
+		STTHEADER = (stt_header *)&imgfile->file_header;
 
-		STTHEADER.stt_signature=0;
-		hxc_fread(&STTHEADER,sizeof(stt_header),f);
-
-		hxc_fclose(f);
-
-		if(STTHEADER.stt_signature!=0x4D455453) //"STEM"
+		if(STTHEADER->stt_signature!=0x4D455453) //"STEM"
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STT_libIsValidDiskFile : non STT IMG file - bad signature !");
 			return HXCFE_BADFILE;

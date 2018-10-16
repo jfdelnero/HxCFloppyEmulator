@@ -66,10 +66,9 @@
 
 #include "libhxcadaptor.h"
 
-int KryoFluxStream_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int KryoFluxStream_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	int found,track,side;
-	struct stat staterep;
 	char * filepath;
 	FILE * f;
 	s_oob_header oob;
@@ -79,81 +78,72 @@ int KryoFluxStream_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 	if(imgfile)
 	{
-		memset(&staterep,0,sizeof(struct stat));
-		if(!hxc_stat(imgfile,&staterep))
+		if( imgfile->is_dir )
 		{
-			if(staterep.st_mode&S_IFDIR)
+			filepath = malloc( strlen(imgfile->path) + 32 );
+
+			track=0;
+			side=0;
+			found=0;
+			do
 			{
-
-				filepath = malloc( strlen(imgfile) + 32 );
-
-				track=0;
-				side=0;
-				found=0;
-				do
-				{
-					sprintf(filepath,"%s\\track%.2d.%d.raw",imgfile,track,side);
-					f = hxc_fopen(filepath,"rb");
-					if(f)
-					{
-						hxc_fread(&oob,sizeof(s_oob_header),f);
-						if(oob.Sign==OOB_SIGN)
-						{
-							found=1;
-						}
-						hxc_fclose(f);
-					}
-					side++;
-					if(side>1)
-					{
-						side = 0;
-						track++;
-					}
-
-				}while(track<84);
-
-				free( filepath );
-
-				if(found)
-				{
-					return HXCFE_VALIDFILE;
-				}
-				else
-				{
-					return HXCFE_BADFILE;
-				}
-
-			}
-			else
-			{
-				hxc_getfilenamebase(imgfile,(char*)&filename);
-				hxc_strlower((char*)&filename);
-				found=0;
-
-				if(!strstr(filename,".0.raw") && !strstr(filename,".1.raw") )
-				{
-					return HXCFE_BADFILE;
-				}
-
-				f = hxc_fopen(imgfile,"rb");
+				sprintf(filepath,"%s\\track%.2d.%d.raw",imgfile,track,side);
+				f = hxc_fopen(filepath,"rb");
 				if(f)
 				{
 					hxc_fread(&oob,sizeof(s_oob_header),f);
-					if( ( oob.Sign == OOB_SIGN ) && ( oob.Type>=1 && oob.Type<=4 ) )
+					if(oob.Sign==OOB_SIGN)
 					{
 						found=1;
 					}
 					hxc_fclose(f);
-
-					if(found)
-					{
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-						return HXCFE_BADFILE;
-					}
 				}
+				side++;
+				if(side>1)
+				{
+					side = 0;
+					track++;
+				}
+
+			}while(track<84);
+
+			free( filepath );
+
+			if(found)
+			{
+				return HXCFE_VALIDFILE;
+			}
+			else
+			{
+				return HXCFE_BADFILE;
+			}
+
+		}
+		else
+		{
+			hxc_getfilenamebase(imgfile->path,(char*)&filename);
+			hxc_strlower((char*)&filename);
+			found=0;
+
+			if(!strstr(filename,".0.raw") && !strstr(filename,".1.raw") )
+			{
+				return HXCFE_BADFILE;
+			}
+
+			memcpy(&oob,imgfile->file_header,sizeof(s_oob_header));
+
+			if( ( oob.Sign == OOB_SIGN ) && ( oob.Type>=1 && oob.Type<=4 ) )
+			{
+				found=1;
+			}
+
+			if(found)
+			{
+				return HXCFE_VALIDFILE;
+			}
+			else
+			{
+				return HXCFE_BADFILE;
 			}
 		}
 	}

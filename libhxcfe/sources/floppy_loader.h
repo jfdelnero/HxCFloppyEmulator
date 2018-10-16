@@ -38,7 +38,7 @@ enum {
 	SELECTSUBLOADER = 6
 };
 
-typedef int (*ISVALIDDISKFILE) (void* imgldr_ctx,char * imgfile);
+typedef int (*ISVALIDDISKFILE) (void* imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile);
 typedef int (*LOADDISKFILE)(void* imgldr_ctx,void * floppydisk,char * imgfile,void * parameters);
 typedef int (*WRITEDISKFILE)(void* imgldr_ctx,void * floppydisk,char * imgfile,void * parameters);
 typedef int (*GETPLUGININFOS)(void* imgldr_ctx,uint32_t infotype,void * returnvalue);

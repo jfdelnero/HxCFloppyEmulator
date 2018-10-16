@@ -322,7 +322,7 @@ JV3SectorsOffsets *JV3_offset(JV3SectorHeader JV3SH[], unsigned int NumberofSide
 	return SO;
 }
 
-int JV3_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int JV3_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	int offset1, offset2;
 	int32_t SectorPerTrack, NumberOfTrack, SectorSize, NumberOfEntries;
@@ -333,12 +333,12 @@ int JV3_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"jv3") ||
-		hxc_checkfileext(imgfile,"dsk")
+	if( hxc_checkfileext(imgfile->path,"jv3") ||
+		hxc_checkfileext(imgfile->path,"dsk")
 		)
 	{
 
-		f = hxc_fopen(imgfile,"rb");
+		f = hxc_fopen(imgfile->path,"rb");
 		if( f == NULL )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"JV3_libIsValidDiskFile : Cannot open %s !",imgfile);

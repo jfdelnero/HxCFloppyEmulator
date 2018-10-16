@@ -64,66 +64,49 @@
 
 #include "dmk_writer.h"
 
-int DMK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int DMK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-	dmk_header dmk_h;
-	FILE *f;
+	dmk_header *dmk_h;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile");
 	if(imgfile)
 	{
-		f = hxc_fopen(imgfile,"r+b");
-		if(f)
+		dmk_h = (dmk_header *)&imgfile->file_header;
+
+		if(dmk_h->track_len)
 		{
-			filesize = hxc_fgetsize(f);
-			hxc_fread(&dmk_h,sizeof(dmk_header),f);
-
-			hxc_fclose(f);
-
-			if(dmk_h.track_len)
+			if(!dmk_h->track_len)
 			{
-				if(!dmk_h.track_len)
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad file size !");
+				return HXCFE_BADFILE;
+			}
+			else
+			{
+				if( ( imgfile->file_size - sizeof(dmk_header) ) % dmk_h->track_len)
 				{
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad file size !");
 					return HXCFE_BADFILE;
 				}
-				else
-				{
-					if(((filesize-sizeof(dmk_header))%dmk_h.track_len))
-					{
-						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad file size !");
-						return HXCFE_BADFILE;
-					}
-				}
-
-				if(
-					( (dmk_h.write_protected!=0xFF) && (dmk_h.write_protected!=0x00) )	||
-								( (dmk_h.rsvd_2[0]!=0x00 && dmk_h.rsvd_2[0]!=0x12) ||
-								  (dmk_h.rsvd_2[1]!=0x00 && dmk_h.rsvd_2[1]!=0x34) ||
-								  (dmk_h.rsvd_2[2]!=0x00 && dmk_h.rsvd_2[2]!=0x56) ||
-								  (dmk_h.rsvd_2[3]!=0x00 && dmk_h.rsvd_2[3]!=0x78) )
-
-							||
-
-								(dmk_h.track_number==0 || dmk_h.track_number>90)
-
-							||
-
-								( (dmk_h.track_len>0x2940) || (dmk_h.track_len<0xB00) )
-
-							)
-				{
-					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad header !");
-					return HXCFE_BADFILE;
-				}
-
-
-
 			}
-			else
+
+			if(
+				( (dmk_h->write_protected!=0xFF) && (dmk_h->write_protected!=0x00) ) ||
+							( (dmk_h->rsvd_2[0]!=0x00 && dmk_h->rsvd_2[0]!=0x12) ||
+							  (dmk_h->rsvd_2[1]!=0x00 && dmk_h->rsvd_2[1]!=0x34) ||
+							  (dmk_h->rsvd_2[2]!=0x00 && dmk_h->rsvd_2[2]!=0x56) ||
+							  (dmk_h->rsvd_2[3]!=0x00 && dmk_h->rsvd_2[3]!=0x78) )
+
+						||
+
+							(dmk_h->track_number==0 || dmk_h->track_number>90)
+
+						||
+
+							( (dmk_h->track_len>0x2940) || (dmk_h->track_len<0xB00) )
+
+						)
 			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad file size !");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : non DMK file ! bad header !");
 				return HXCFE_BADFILE;
 			}
 
@@ -131,7 +114,7 @@ int DMK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 			return HXCFE_VALIDFILE;
 		}
 
-		if(hxc_checkfileext( imgfile,"dmk"))
+		if(hxc_checkfileext( imgfile->path,"dmk"))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : DMK file !");
 			return HXCFE_VALIDFILE;

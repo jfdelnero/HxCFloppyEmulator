@@ -60,33 +60,17 @@
 #include "sdu_loader.h"
 #include "sdu_format.h"
 
-int SDU_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int SDU_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-    sdu_header sduh;
-    FILE *f;
+    sdu_header * sduh;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDU_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"sdu") )
+	if( hxc_checkfileext(imgfile->path,"sdu") )
 	{
-		filesize = hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SDU_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		f = hxc_fopen(imgfile,"rb");
-		if(f == NULL)
-			return HXCFE_ACCESSERROR;
-
-        memset(&sduh, 0, sizeof(sduh));
-
-		hxc_fread(&sduh,sizeof(sduh),f);
-		hxc_fclose(f);
-
-		if( !strncmp((const char*)&sduh.signature,"SAB ",4))
+		sduh = (sdu_header *)imgfile->file_header;
+ 
+		if( !strncmp((const char*)&sduh->signature,"SAB ",4))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDU_libIsValidDiskFile : SDU file !");
 			return HXCFE_VALIDFILE;

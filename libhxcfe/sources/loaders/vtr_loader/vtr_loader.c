@@ -62,35 +62,25 @@
 
 extern unsigned char bit_inverter[];
 
-int VTR_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int VTR_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	FILE *f;
-	vtrucco_picfileformatheader header;
+	vtrucco_picfileformatheader *header;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VTR_libIsValidDiskFile");
 
 	if(imgfile)
 	{
-		if(strlen(imgfile))
-		{
-			f = hxc_fopen(imgfile,"rb");
-			if( f == NULL )
-			{
-				return HXCFE_ACCESSERROR;
-			}
-			hxc_fread(&header,sizeof(header),f);
-			hxc_fclose(f);
+		header = (vtrucco_picfileformatheader *)&imgfile->file_header;
 
-			if( !strncmp((char*)header.HEADERSIGNATURE,"VTrucco",7))
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VTR_libIsValidDiskFile : VTrucco file !");
-				return HXCFE_VALIDFILE;
-			}
-			else
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VTR_libIsValidDiskFile : non VTrucco file !");
-				return HXCFE_BADFILE;
-			}
+		if( !strncmp((char*)header->HEADERSIGNATURE,"VTrucco",7))
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VTR_libIsValidDiskFile : VTrucco file !");
+			return HXCFE_VALIDFILE;
+		}
+		else
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VTR_libIsValidDiskFile : non VTrucco file !");
+			return HXCFE_BADFILE;
 		}
 	}
 

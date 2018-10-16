@@ -138,15 +138,15 @@ int AnaDisk_SanityCheck(HXCFE_IMGLDR * imgldr_ctx,char * imgfile,int32_t * mintr
 	return -1;
 }
 
-int ANA_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int ANA_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	int ret;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ANA_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"ana"))
+	if(hxc_checkfileext(imgfile->path,"ana"))
 	{
-		ret = AnaDisk_SanityCheck(imgldr_ctx,imgfile,0,0,0,0);
+		ret = AnaDisk_SanityCheck(imgldr_ctx,imgfile->path,0,0,0,0);
 
 		if( ret > 0 )
 			return HXCFE_VALIDFILE;

@@ -64,113 +64,90 @@
 
 extern unsigned char msdos_bootsector;
 
-int snes_smc_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int snes_smc_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	FILE * f;
-	unsigned char * fileheader;
 	int fileok;
 
 	fileok=1;
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"snes_smc_libIsValidDiskFile");
+
 	if(imgfile)
 	{
-		f = hxc_fopen(imgfile,"r+b");
-		if(f)
+		if( imgfile->file_header[8]==0xaa && imgfile->file_header[9]==0xbb )
 		{
-			fileheader=(unsigned char*)malloc(512);
-			if(fileheader)
+			switch( imgfile->file_header[10] )
 			{
-				hxc_fread(fileheader,512,f);
-				if( fileheader[8]==0xaa && fileheader[9]==0xbb )
+				case 1:
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : Super Magic Card saver data");
+					break;
+				case 2:
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : Magic Griffin program (PC-Engine)");
+					break;
+				case 3:
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : Magic Griffin SRAM data");
+					break;
+				case 4:
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : SNES program");
+					break;
+				case 5:
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : SWC & SMC password, SRAM data");
+					break;
+				case 6:
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : Mega Drive program");
+					break;
+				case 7:
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : SMD SRAM data");
+					break;
+				case 8:
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : SWC & SMC saver data");
+					break;
+				default:
+					fileok=0;
+					break;
+			}
+
+			if(fileok)
+			{
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"snes_smc_libIsValidDiskFile : SMC/SMD file !");
+				return HXCFE_VALIDFILE;
+			}
+			else
+			{
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"snes_smc_libIsValidDiskFile : non SMC/SMD file !");
+				return HXCFE_BADFILE;
+			}
+		}
+		else
+		{
+			if(!strncmp((char*)&imgfile->file_header[8],"SUPERUFO",8))
+			{
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : SUPERUFO SMC");
+			}
+			else
+			{
+				if( ! hxc_checkfileext(imgfile->path,"smc") )
 				{
-					switch(fileheader[10])
-					{
-					case 1:
-						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : Super Magic Card saver data");
-						break;
-					case 2:
-						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : Magic Griffin program (PC-Engine)");
-						break;
-					case 3:
-						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : Magic Griffin SRAM data");
-						break;
-					case 4:
-						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : SNES program");
-						break;
-					case 5:
-						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : SWC & SMC password, SRAM data");
-						break;
-					case 6:
-						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : Mega Drive program");
-						break;
-					case 7:
-						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : SMD SRAM data");
-						break;
-					case 8:
-						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : SWC & SMC saver data");
-						break;
-					default:
-						fileok=0;
-						break;
-					}
-
-					if(fileok)
-					{
-						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"snes_smc_libIsValidDiskFile : SMC/SMD file !");
-						free(fileheader);
-						hxc_fclose(f);
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"snes_smc_libIsValidDiskFile : non SMC/SMD file !");
-						free(fileheader);
-						hxc_fclose(f);
-						return HXCFE_BADFILE;
-					}
-
+					imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"snes_smc_libIsValidDiskFile : unknow file type !");
+					fileok=0;
 				}
 				else
 				{
-						if(!strncmp((char*)&fileheader[8],"SUPERUFO",8))
-						{
-							imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : SUPERUFO SMC");
-						}
-						else
-						{
-							if( ! hxc_checkfileext(imgfile,"smc") )
-							{
-								imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"snes_smc_libIsValidDiskFile : unknow file type !");
-								fileok=0;
-							}
-							else
-							{
-								imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : Super Pro Fighter SMC?");
-							}
-						}
-
-					if(fileok)
-					{
-						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"snes_smc_libIsValidDiskFile : SMC/SMD file !");
-						free(fileheader);
-						hxc_fclose(f);
-						return HXCFE_VALIDFILE;
-					}
-					else
-					{
-						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"snes_smc_libIsValidDiskFile : non SMC/SMD file !");
-						free(fileheader);
-						hxc_fclose(f);
-						return HXCFE_BADFILE;
-					}
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : Super Pro Fighter SMC?");
 				}
-
 			}
-			hxc_fclose(f);
-			return HXCFE_INTERNALERROR;
-		}
-		return HXCFE_ACCESSERROR;
 
+			if(fileok)
+			{
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"snes_smc_libIsValidDiskFile : SMC/SMD file !");
+				return HXCFE_VALIDFILE;
+			}
+			else
+			{
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"snes_smc_libIsValidDiskFile : non SMC/SMD file !");
+				return HXCFE_BADFILE;
+			}
+		}
 	}
 
 	return HXCFE_BADPARAMETER;

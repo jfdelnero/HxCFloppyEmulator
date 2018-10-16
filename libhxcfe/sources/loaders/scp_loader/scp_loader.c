@@ -67,32 +67,22 @@
 
 //#define SCPDEBUG 1
 
-int SCP_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int SCP_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	scp_header scph;
-	FILE *f;
+	scp_header * scph;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCP_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"scp") )
+	if( hxc_checkfileext(imgfile->path,"scp") )
 	{
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SCP_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
+		scph = (scp_header *)&imgfile->file_header;
 
-		hxc_fread(&scph, sizeof(scp_header), f);
-
-		if( strncmp((char*)scph.sign,"SCP",3) )
+		if( strncmp((char*)&scph->sign,"SCP",3) )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SCP_libIsValidDiskFile : Bad file header !");
-			hxc_fclose(f);
 			return HXCFE_BADFILE;
 		}
 
-		hxc_fclose(f);
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCP_libIsValidDiskFile : SCP file !");
 		return HXCFE_VALIDFILE;
 	}

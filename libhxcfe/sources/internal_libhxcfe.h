@@ -61,6 +61,18 @@ typedef struct _HXCFE_IMGLDR
 
 }HXCFE_IMGLDR;
 
+typedef struct _HXCFE_IMGLDR_FILEINFOS
+{
+	int is_dir;
+	char path[1024];
+	char file_extension[32];
+	int file_size;
+	unsigned char file_header[512];
+}HXCFE_IMGLDR_FILEINFOS;
+
+int32_t hxcfe_preloadImgInfos(HXCFE_IMGLDR * imgldr_ctx, char * imgname, HXCFE_IMGLDR_FILEINFOS * file_infos);
+int32_t hxcfe_imgCheckFileCompatibility( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * file_infos, char * loadername, char * fileext, int filesizemod);
+
 #define _HXCFE_IMGLDR_
 
 

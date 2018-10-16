@@ -60,21 +60,13 @@
 #include "fd_loader.h"
 #include "fd_writer.h"
 
-int FD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int FD_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"fd_libIsValidDiskFile");
-	if( hxc_checkfileext(imgfile,"fd") )
-	{
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"FD_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
 
-		if((filesize==327680) || (filesize==655360))
+	if( hxc_checkfileext(imgfile->path,"fd") )
+	{
+		if((imgfile->file_size == 327680) || (imgfile->file_size == 655360))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FD_libIsValidDiskFile : TO8D FD file !");
 			return HXCFE_VALIDFILE;
@@ -91,8 +83,6 @@ int FD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		return HXCFE_BADFILE;
 	}
 }
-
-
 
 int FD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {

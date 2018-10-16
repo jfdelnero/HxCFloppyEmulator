@@ -62,41 +62,28 @@
 
 #include "libhxcadaptor.h"
 
-int SVD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int SVD_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	char   linebuffer[80];
 	int major,minor;
-	FILE *f;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile");
-	if( hxc_checkfileext(imgfile,"svd") )
+	if( hxc_checkfileext(imgfile->path,"svd") )
 	{
-		f = hxc_fopen(imgfile,"r");
-		if(f)
+		if (sscanf(imgfile->file_header,"%d.%d",&major,&minor) != 2)
 		{
-			hxc_fgets(linebuffer,sizeof(linebuffer),f);
-			hxc_fclose(f);
-
-			if (sscanf(linebuffer,"%d.%d",&major,&minor) != 2)
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : Bad code version !");
-				return(HXCFE_BADFILE);
-			}
-
-			if((major==2 && minor==0) ||(major==1 && minor==2) ||(major==1 && minor==5))
-			{
-				return HXCFE_VALIDFILE;
-			}
-			else
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : Bad code version !");
-				return HXCFE_BADFILE;
-			}
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : Bad code version !");
+			return(HXCFE_BADFILE);
 		}
 
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : Access error !");
-		return HXCFE_ACCESSERROR;
-
+		if((major==2 && minor==0) ||(major==1 && minor==2) ||(major==1 && minor==5))
+		{
+			return HXCFE_VALIDFILE;
+		}
+		else
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : Bad code version !");
+			return HXCFE_BADFILE;
+		}
 	}
 	else
 	{

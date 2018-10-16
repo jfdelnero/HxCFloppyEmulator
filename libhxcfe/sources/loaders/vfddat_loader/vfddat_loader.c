@@ -60,48 +60,31 @@
 
 #include "libhxcadaptor.h"
 
-int VFDDAT_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int VFDDAT_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-	unsigned char header[512];
-	FILE *f;
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VFDDAT_libIsValidDiskFile");
 	if(imgfile)
 	{
-		f = hxc_fopen(imgfile,"r+b");
-		if(f)
+		if(!hxc_checkfileext( imgfile->path,"dat"))
 		{
-			filesize = hxc_fgetsize(f);
-			hxc_fread(&header,sizeof(header),f);
-
-			hxc_fclose(f);
-
-			if(!filesize ||(filesize%512))
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VFDDAT_libIsValidDiskFile : non DAT file ! bad file size !");
-				return HXCFE_BADFILE;
-			}
-
-			if(strncmp((char*)&header[0x150],"VFD",3))
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VFDDAT_libIsValidDiskFile : non DAT file ! bad header !");
-				return HXCFE_BADFILE;
-			}
-
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VFDDAT_libIsValidDiskFile : DAT file !");
-			return HXCFE_VALIDFILE;
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VFDDAT_libIsValidDiskFile : non DAT file !");
+			return HXCFE_BADFILE;
 		}
 
-		if(hxc_checkfileext( imgfile,"dat"))
+		if(!imgfile->file_size ||(imgfile->file_size%512))
 		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VFDDAT_libIsValidDiskFile : DAT file !");
-			return HXCFE_VALIDFILE;
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VFDDAT_libIsValidDiskFile : non DAT file ! bad file size !");
+			return HXCFE_BADFILE;
 		}
 
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VFDDAT_libIsValidDiskFile : non DAT file !");
-		return HXCFE_BADFILE;
+		if(strncmp((char*)&imgfile->file_header[0x150],"VFD",3))
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VFDDAT_libIsValidDiskFile : non DAT file ! bad header !");
+			return HXCFE_BADFILE;
+		}
 
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VFDDAT_libIsValidDiskFile : DAT file !");
+		return HXCFE_VALIDFILE;
 	}
 
 	return HXCFE_BADPARAMETER;

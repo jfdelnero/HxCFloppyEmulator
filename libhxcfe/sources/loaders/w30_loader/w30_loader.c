@@ -59,38 +59,9 @@
 
 #include "w30_loader.h"
 
-int W30_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int W30_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"w30") || hxc_checkfileext(imgfile,"s50") || hxc_checkfileext(imgfile,"s33") || hxc_checkfileext(imgfile,"s55") )
-	{
-
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"W30_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if(filesize==737280)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile : W30/S50/S330/S550 file !");
-			return HXCFE_VALIDFILE;
-		}
-		else
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile : non W30/S50/S330/S550 file ! - bad file size! ");
-			return HXCFE_BADFILE;
-		}
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"W30_libIsValidDiskFile : non W30/S50/S330/S550 file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "W30_libIsValidDiskFile", "w30,s50,s33,s55", 737280 );
 }
 
 int W30_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)

@@ -61,36 +61,9 @@
 
 #include "libhxcadaptor.h"
 
-int Heathkit_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int Heathkit_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Heathkit_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"h8d") )
-	{
-
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Heathkit_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if( filesize % (40*10*256) )
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Heathkit_libIsValidDiskFile : non Heathkit file - bad file size !");
-			return HXCFE_BADFILE;
-		}
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Heathkit_libIsValidDiskFile : Heathkit file !");
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Heathkit_libIsValidDiskFile : non Heathkit file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "Heathkit_libIsValidDiskFile", "h8d", (40*10*256) );
 }
 
 int Heathkit_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)

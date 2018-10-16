@@ -128,24 +128,15 @@ int msx_imggetfloppyconfig(char * filename,unsigned char * img,uint32_t filesize
 }
 
 
-int MSX_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int MSX_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	int conffound,i;
-	int filesize;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MSX_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"img") || hxc_checkfileext(imgfile,"dsk") )
+	if( hxc_checkfileext(imgfile->path,"img") || hxc_checkfileext(imgfile->path,"dsk") )
 	{
-
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"MSX_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if(filesize&0x1FF)
+		if(imgfile->file_size&0x1FF || !imgfile->file_size )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MSX_libIsValidDiskFile : non MSX IMG file - bad file size !");
 			return HXCFE_BADFILE;
@@ -155,7 +146,7 @@ int MSX_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		conffound=0;
 		do
 		{
-			if((int)msxfileformats[i].filesize==filesize)
+			if((int)msxfileformats[i].filesize == imgfile->file_size)
 			{
 				conffound=1;
 			}

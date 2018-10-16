@@ -60,42 +60,23 @@
 #include "sad_loader.h"
 #include "sad_fileformat.h"
 
-int SAD_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int SAD_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int pathlen;
-	FILE * f;
-	SAD_HEADER sadh;
+	SAD_HEADER * sadh;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAD_libIsValidDiskFile");
 	if(imgfile)
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+		sadh = (SAD_HEADER *)imgfile->file_header;
+		if(!strncmp((char*)sadh->abSignature,SAD_SIGNATURE,sizeof SAD_SIGNATURE - 1))
 		{
-
-			f = hxc_fopen(imgfile,"rb");
-			if( f == NULL )
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SAD_libIsValidDiskFile : Cannot open %s !",imgfile);
-				return HXCFE_ACCESSERROR;
-			}
-
-			memset(&sadh,0,sizeof(SAD_HEADER));
-			hxc_fread(&sadh,sizeof(SAD_HEADER),f);
-
-			hxc_fclose(f);
-
-			if(!strncmp((char*)sadh.abSignature,SAD_SIGNATURE,sizeof SAD_SIGNATURE - 1))
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAD_libIsValidDiskFile : SAD file !");
-				return HXCFE_VALIDFILE;
-			}
-			else
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAD_libIsValidDiskFile : non SAD file !");
-				return HXCFE_BADFILE;
-			}
-
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAD_libIsValidDiskFile : SAD file !");
+			return HXCFE_VALIDFILE;
+		}
+		else
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAD_libIsValidDiskFile : non SAD file !");
+			return HXCFE_BADFILE;
 		}
 	}
 

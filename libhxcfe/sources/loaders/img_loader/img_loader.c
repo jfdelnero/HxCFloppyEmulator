@@ -158,23 +158,21 @@ int pc_imggetfloppyconfig(unsigned char * img,uint32_t filesize, raw_iso_cfg *ra
 }
 
 
-int IMG_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int IMG_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	int i,conffound;
-	int filesize;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMG_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"img") || hxc_checkfileext(imgfile,"ima"))
+	if(hxc_checkfileext(imgfile->path,"img") || hxc_checkfileext(imgfile->path,"ima"))
 	{
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
+		if(imgfile->file_size<0)
 		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"IMG_libIsValidDiskFile : Cannot open %s !",imgfile);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"IMG_libIsValidDiskFile : Cannot open %s !",imgfile->path);
 			return HXCFE_ACCESSERROR;
 		}
 
-		if(filesize&0x1FF)
+		if(imgfile->file_size&0x1FF)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMG_libIsValidDiskFile : non IMG file - bad file size !");
 			return HXCFE_BADFILE;
@@ -184,7 +182,7 @@ int IMG_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
 		conffound=0;
 		do
 		{
-			if((int)pcimgfileformats[i].filesize==filesize)
+			if((int)pcimgfileformats[i].filesize == imgfile->file_size)
 			{
 				conffound=1;
 			}

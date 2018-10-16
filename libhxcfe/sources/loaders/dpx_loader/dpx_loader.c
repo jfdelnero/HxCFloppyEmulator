@@ -60,36 +60,9 @@
 
 #include "libhxcadaptor.h"
 
-int DPX_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int DPX_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DPX_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"dpx") )
-	{
-
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"DPX_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if(filesize%((5*1024) + (1*512)) )
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DPX_libIsValidDiskFile : non DPX file - bad file size !");
-			return HXCFE_BADFILE;
-		}
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DPX_libIsValidDiskFile : DPX file !");
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DPX_libIsValidDiskFile : non DPX file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "DPX_libIsValidDiskFile", "dpx", ((5*1024) + (1*512)) );
 }
 
 int DPX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)

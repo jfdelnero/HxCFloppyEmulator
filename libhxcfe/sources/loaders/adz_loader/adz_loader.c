@@ -67,15 +67,15 @@
 
 #define UNPACKBUFFER 128*1024
 
-int ADZ_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int ADZ_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"adz") || hxc_checkfileext(imgfile,"gz"))
+	if(hxc_checkfileext(imgfile->path,"adz") || hxc_checkfileext(imgfile->path,"gz"))
 	{
-		if(hxc_checkfileext(imgfile,"gz"))
+		if(hxc_checkfileext(imgfile->path,"gz"))
 		{
-			if( !strstr(hxc_getfilenamebase(imgfile,0),".adf.gz") )
+			if( !strstr(hxc_getfilenamebase(imgfile->path,0),".adf.gz") )
 			{
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile : non ADZ file !");
 				return HXCFE_BADFILE;

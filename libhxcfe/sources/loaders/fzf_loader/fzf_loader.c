@@ -67,30 +67,9 @@ char * fzffiletype[]={
 };
 
 
-int FZF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int FZF_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FZF_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"fzf") )
-	{
-
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"FZF_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FZF_libIsValidDiskFile : FZF file !");
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FZF_libIsValidDiskFile : non FZF file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "FZF_libIsValidDiskFile", "fzf", 0 );
 }
 
 int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)

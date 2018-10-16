@@ -63,20 +63,9 @@
 #include "thirdpartylibs/xdms/xdms-1.3.2/src/cdata.h"
 #include "thirdpartylibs/xdms/xdms-1.3.2/src/pfile.h"
 
-int DMS_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int DMS_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMS_libIsValidDiskFile");
-
-	if(hxc_checkfileext(imgfile,"dms"))
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMS_libIsValidDiskFile : DMS file !");
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMS_libIsValidDiskFile : non DMS file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "DMS_libIsValidDiskFile", "dms", 0);
 }
 
 int DMS_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)

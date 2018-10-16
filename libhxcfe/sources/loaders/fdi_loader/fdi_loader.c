@@ -61,33 +61,24 @@
 
 #include "libhxcadaptor.h"
 
-int FDI_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int FDI_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	FILE *f;
-	fdi_header f_header;
+	fdi_header * f_header;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"fdi") )
+	if( hxc_checkfileext(imgfile->path,"fdi") )
 	{
+		f_header = (fdi_header *)imgfile->file_header;
 
-		f = hxc_fopen(imgfile,"rb");
-		if(f)
+		if(f_header->signature[0]=='F' && f_header->signature[1]=='D' && f_header->signature[2]=='I')
 		{
-			hxc_fread(&f_header,sizeof(fdi_header),f);
-			hxc_fclose(f);
-
-			if(f_header.signature[0]=='F' && f_header.signature[1]=='D' && f_header.signature[2]=='I')
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile : FDI file !");
-				return HXCFE_VALIDFILE;
-			}
-
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile : non FDI file !");
-			return HXCFE_BADFILE;
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile : FDI file !");
+			return HXCFE_VALIDFILE;
 		}
 
-		return HXCFE_ACCESSERROR;
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile : non FDI file !");
+		return HXCFE_BADFILE;
 	}
 	else
 	{

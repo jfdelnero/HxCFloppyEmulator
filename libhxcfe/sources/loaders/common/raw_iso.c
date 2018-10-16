@@ -88,7 +88,7 @@ int raw_iso_loader(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk, FILE * f
 		return HXCFE_BADFILE;
 	}
 
-	fb_ctx = hxcfe_initFloppy( imgldr_ctx->hxcfe, 86, 2 );
+	fb_ctx = hxcfe_initFloppy( imgldr_ctx->hxcfe, 86, cfg->number_of_sides );
 	if( !fb_ctx )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Alloc Error !");

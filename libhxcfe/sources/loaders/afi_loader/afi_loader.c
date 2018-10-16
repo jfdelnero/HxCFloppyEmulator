@@ -157,24 +157,18 @@ uint32_t * bitrate_rle_unpack(uint32_t * packedbuffer,uint32_t len,uint32_t * ou
 }
 
 
-int AFI_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int AFI_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	FILE *f;
-	AFIIMG header;
+	AFIIMG *header;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AFI_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"afi"))
+	if(hxc_checkfileext(imgfile->path,"afi"))
 	{
 
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-			return HXCFE_ACCESSERROR;
+		header = (AFIIMG *)imgfile->file_header;
 
-		hxc_fread(&header,sizeof(header),f);
-		hxc_fclose(f);
-
-		if( !strncmp((char*)header.afi_img_tag,AFI_IMG_TAG,strlen(AFI_IMG_TAG)) )
+		if( !strncmp((char*)header->afi_img_tag,AFI_IMG_TAG,strlen(AFI_IMG_TAG)) )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AFI_libIsValidDiskFile : AFI file !");
 			return HXCFE_VALIDFILE;

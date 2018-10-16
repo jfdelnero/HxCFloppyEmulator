@@ -62,22 +62,12 @@
 
 #include "libhxcadaptor.h"
 
-int TI99PC99_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int TI99PC99_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile : TI99PC99_libIsValidDiskFile");
 	if(imgfile)
 	{
-
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"TI99PC99_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return -1;
-		}
-
-		if(filesize%3253 && filesize%6872)
+		if( (imgfile->file_size%3253 && imgfile->file_size%6872) || !imgfile->file_size )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile : non TI99 PC99 file !");
 			return HXCFE_BADFILE;

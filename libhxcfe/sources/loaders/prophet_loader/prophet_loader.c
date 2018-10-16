@@ -60,22 +60,13 @@
 
 #include "libhxcadaptor.h"
 
-int Prophet_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int Prophet_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Prophet_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"img"))
+	if( hxc_checkfileext(imgfile->path,"img"))
 	{
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Prophet_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if((filesize%((5*1024) + (1*256))) || ( ((filesize/( (5*1024) + (1*256) ) )!=80) && ((filesize/( (5*1024) + (1*256) ) )!=160) ) )
+		if((imgfile->file_size%((5*1024) + (1*256))) || ( ((imgfile->file_size/( (5*1024) + (1*256) ) )!=80) && ((imgfile->file_size/( (5*1024) + (1*256) ) )!=160) ) )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Prophet_libIsValidDiskFile : non Prophet file - bad file size !");
 			return HXCFE_BADFILE;

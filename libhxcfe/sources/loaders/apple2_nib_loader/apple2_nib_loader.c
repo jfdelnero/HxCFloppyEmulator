@@ -66,35 +66,9 @@
 
 extern unsigned short ext_a2_bit_expander[];
 
-int Apple2_nib_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int Apple2_nib_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_nib_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"nib") )
-	{
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Apple2_nib_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if(filesize != (NIB_TRACK_SIZE*35) )
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_nib_libIsValidDiskFile : non Apple 2 NIB file - bad file size !");
-			return HXCFE_BADFILE;
-		}
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_nib_libIsValidDiskFile : Apple 2 NIB file !");
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_nib_libIsValidDiskFile : non Apple 2 NIB file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "Apple2_nib_libIsValidDiskFile", "nib", NIB_TRACK_SIZE*35 );
 }
 
 int Apple2_nib_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)

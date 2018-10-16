@@ -96,50 +96,27 @@ int sdd_getfloppyconfig(unsigned char * img,raw_iso_cfg *rawcfg)
 }
 
 
-int SDDSpeccyDos_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int SDDSpeccyDos_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int32_t filesize;
-	unsigned char buffer[256];
-	FILE * f;
 	raw_iso_cfg rawcfg;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"sdd"))
+	if(hxc_checkfileext(imgfile->path,"sdd"))
 	{
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SDDSpeccyDos_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if(filesize&0xFF)
+		if( imgfile->file_size & 0xFF)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile : non SDD IMG file - bad file size !");
 			return HXCFE_BADFILE;
 		}
 
-		f = hxc_fopen(imgfile,"rb");
-		if(f)
+		if(sdd_getfloppyconfig( imgfile->file_header, &rawcfg) )
 		{
-			hxc_fread(buffer,256,f);
-
-			hxc_fclose(f);
-
-			if(sdd_getfloppyconfig( buffer, &rawcfg) )
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"SDD file : filesize:%dkB, %d tracks, %d side(s), %d sectors/track",filesize/1024,rawcfg.number_of_tracks,rawcfg.number_of_sides,rawcfg.number_of_sectors_per_track);
-			}
-			else
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile : non SDD file : Wrong boot sector signature!");
-			}
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"SDD file : filesize:%dkB, %d tracks, %d side(s), %d sectors/track",imgfile->file_size/1024,rawcfg.number_of_tracks,rawcfg.number_of_sides,rawcfg.number_of_sectors_per_track);
 		}
 		else
 		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SDDSpeccyDos_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile : non SDD file : Wrong boot sector signature!");
 		}
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile : SDD file !");

@@ -59,35 +59,9 @@
 
 #include "d81_loader.h"
 
-int D81_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int D81_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D81_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"d81") )
-	{
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"D81_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if(filesize&0x1FF)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D81_libIsValidDiskFile : non D81 file - bad file size !");
-			return HXCFE_BADFILE;
-		}
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D81_libIsValidDiskFile : D81 file !");
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D81_libIsValidDiskFile : non D81 file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "D81_libIsValidDiskFile", "d81", 512);
 }
 
 

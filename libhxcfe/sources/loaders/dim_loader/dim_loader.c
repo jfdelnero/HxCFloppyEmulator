@@ -62,28 +62,16 @@
 
 #include "dim_format.h"
 
-int DIM_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int DIM_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	FILE * f;
-	dim_header header;
+	dim_header * header;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"dim") )
+	if( hxc_checkfileext(imgfile->path,"dim") )
 	{
-
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"DIM_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		hxc_fread(&header,sizeof(dim_header),f);
-
-		hxc_fclose(f);
-
-		if(	header.id_header==0x4242)
+		header = (dim_header *)&imgfile->file_header;
+		if(	header->id_header==0x4242)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile : DIM file !");
 			return HXCFE_VALIDFILE;

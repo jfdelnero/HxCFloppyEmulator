@@ -61,25 +61,17 @@
 
 #include "libhxcadaptor.h"
 
-int STW_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int STW_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	FILE *f;
-	STWIMG header;
+	STWIMG * header;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STW_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"stw"))
+	if(hxc_checkfileext(imgfile->path,"stw"))
 	{
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-			return HXCFE_ACCESSERROR;
+		header = (STWIMG *)&imgfile->file_header;
 
-		memset(&header,0,sizeof(STWIMG));
-
-		hxc_fread(&header,sizeof(header),f);
-		hxc_fclose(f);
-
-		if( !strncmp((char*)header.headername,"STW",3))
+		if( !strncmp((char*)header->headername,"STW",3))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STW_libIsValidDiskFile : STW file !");
 			return HXCFE_VALIDFILE;

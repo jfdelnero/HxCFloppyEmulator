@@ -59,36 +59,9 @@
 #include "adf_loader.h"
 #include "adf_writer.h"
 
-int ADF_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int ADF_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADF_libIsValidDiskFile");
-
-	if(hxc_checkfileext(imgfile,"adf"))
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADF_libIsValidDiskFile : %s is an ADF file !",imgfile);
-
-		filesize = hxc_getfilesize(imgfile);
-		if(filesize<0)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"ADF_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-
-		if(filesize%(512*11))
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADF_libIsValidDiskFile : non ADF file ! Bad file size!");
-			return HXCFE_BADFILE;
-		}
-
-		return HXCFE_VALIDFILE;
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADF_libIsValidDiskFile : non ADF file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "ADF_libIsValidDiskFile", "adf", 512*11);
 }
 
 int ADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)

@@ -60,60 +60,39 @@
 #include "copyqm_loader.h"
 #include "crctable.h"
 
-int CopyQm_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int CopyQm_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	int pathlen;
 	int i;
-	char fileheader[QM_HEADER_SIZE];
 	unsigned char checksum;
-	FILE * f;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile");
 	if(imgfile)
 	{
-		pathlen=strlen(imgfile);
+		pathlen=strlen(imgfile->path);
 		if(pathlen!=0)
 		{
-			f = hxc_fopen(imgfile,"rb");
-			if( f == NULL )
+			if ( imgfile->file_header[0] != 'C' || imgfile->file_header[1] != 'Q' )
 			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"CopyQm_libIsValidDiskFile : Cannot open %s !",imgfile);
-				return HXCFE_ACCESSERROR;
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile : bad header tag !");
+				return HXCFE_BADFILE;
 			}
 
-			memset( fileheader,0,QM_HEADER_SIZE);
-			hxc_fread( fileheader, QM_HEADER_SIZE, f );
-			if(ftell(f)==QM_HEADER_SIZE)
+			checksum=0;
+			/* Check the header checksum */
+			for ( i = 0; i < QM_HEADER_SIZE; ++i )
 			{
-				if ( fileheader[0] != 'C' || fileheader[1] != 'Q' )
-				{
-					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile : bad header tag !");
-					hxc_fclose(f);
-					return HXCFE_BADFILE;
-				}
-
-				checksum=0;
-				/* Check the header checksum */
-				for ( i = 0; i < QM_HEADER_SIZE; ++i )
-				{
-					checksum= checksum + (unsigned char)(fileheader[i]);
-				}
-
-				if ( checksum != 0 )
-				{
-					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile : bad header checksum !");
-					hxc_fclose(f);
-					return HXCFE_BADFILE;
-				}
-
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile : it's an copyqm file!");
-				hxc_fclose(f);
-				return HXCFE_VALIDFILE;
+				checksum= checksum + (unsigned char)(imgfile->file_header[i]);
 			}
 
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile : bad header tag !");
-			hxc_fclose(f);
-     		return HXCFE_BADFILE;
+			if ( checksum != 0 )
+			{
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile : bad header checksum !");
+				return HXCFE_BADFILE;
+			}
+
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CopyQm_libIsValidDiskFile : it's an copyqm file!");
+			return HXCFE_VALIDFILE;
 		}
 	}
 

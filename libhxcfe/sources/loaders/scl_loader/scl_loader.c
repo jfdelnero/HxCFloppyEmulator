@@ -71,25 +71,13 @@ unsigned char dir_entry[34] =
 		0x00, 0x00, 0x46, 0x55
 	};
 
-int SCL_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int SCL_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	char sclsignature[8];
-	FILE * f;
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCL_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile,"scl"))
+	if(hxc_checkfileext(imgfile->path,"scl"))
 	{
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SCL_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return HXCFE_ACCESSERROR;
-		}
-		hxc_fread(&sclsignature,8,f);
-		hxc_fclose(f);
-
-		if(!strncmp(sclsignature, "SINCLAIR", 8))
+		if(!strncmp((char*)&imgfile->file_header, "SINCLAIR", 8))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCL_libIsValidDiskFile : Sinclair SCL file !");
 			return HXCFE_VALIDFILE;

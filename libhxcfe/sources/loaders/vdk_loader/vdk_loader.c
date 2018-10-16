@@ -62,32 +62,19 @@
 
 #include "vdk_format.h"
 
-int VDK_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int VDK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	int filesize;
-	vdk_header vdk_h;
-	FILE * f;
+	vdk_header *vdk_h;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VDK_libIsValidDiskFile");
 	if(imgfile)
 	{
+		vdk_h = (vdk_header *)&imgfile->file_header;
 
-		f = hxc_fopen(imgfile,"rb");
-		if( f == NULL )
+		if(vdk_h->signature==0x6B64)
 		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"VDK_libIsValidDiskFile : Cannot open %s !",imgfile);
-			return -1;
-		}
-
-		filesize = hxc_fgetsize(f);
-
-		hxc_fread(&vdk_h,sizeof(vdk_header),f);
-
-		hxc_fclose(f);
-
-		if(vdk_h.signature==0x6B64)
-		{
-			filesize=filesize-vdk_h.header_size;
+			filesize = imgfile->file_size - vdk_h->header_size;
 
 			if(filesize%256)
 			{

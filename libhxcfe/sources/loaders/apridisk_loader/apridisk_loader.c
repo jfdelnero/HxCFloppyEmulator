@@ -61,37 +61,21 @@
 
 #include "libhxcadaptor.h"
 
-int ApriDisk_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int ApriDisk_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	unsigned char HeaderBuffer[128];
-	FILE * f;
-	int pathlen;
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libIsValidDiskFile");
 
 	if(imgfile)
 	{
-		pathlen=strlen(imgfile);
-		if(pathlen!=0)
+		if(!strcmp(APRIDISK_HeaderString,(char*)imgfile->file_header))
 		{
-			f = hxc_fopen(imgfile,"r+b");
-			if(f)
-			{
-				memset(HeaderBuffer,0,sizeof(HeaderBuffer));
-				hxc_fread(HeaderBuffer,128,f);
-				hxc_fclose(f);
-
-				if(!strcmp(APRIDISK_HeaderString,(char*)HeaderBuffer))
-				{
-					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libIsValidDiskFile : ApriDisk file !");
-					return HXCFE_VALIDFILE;
-				}
-				else
-				{
-					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libIsValidDiskFile : ApriDisk file !");
-					return HXCFE_BADFILE;
-				}
-			}
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libIsValidDiskFile : ApriDisk file !");
+			return HXCFE_VALIDFILE;
+		}
+		else
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libIsValidDiskFile : ApriDisk file !");
+			return HXCFE_BADFILE;
 		}
 	}
 

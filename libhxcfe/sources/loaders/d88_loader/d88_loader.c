@@ -63,16 +63,16 @@
 
 #include "libhxcadaptor.h"
 
-int D88_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int D88_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D88_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile,"d88") ||
-		hxc_checkfileext(imgfile,"d77") ||
-		hxc_checkfileext(imgfile,"88d") ||
-		hxc_checkfileext(imgfile,"d8u") ||
-		hxc_checkfileext(imgfile,"2d")	||
-		hxc_checkfileext(imgfile,"d68") )
+	if( hxc_checkfileext(imgfile->path,"d88") ||
+		hxc_checkfileext(imgfile->path,"d77") ||
+		hxc_checkfileext(imgfile->path,"88d") ||
+		hxc_checkfileext(imgfile->path,"d8u") ||
+		hxc_checkfileext(imgfile->path,"2d")	||
+		hxc_checkfileext(imgfile->path,"d68") )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D88_libIsValidDiskFile : D88 file !");
 		return HXCFE_VALIDFILE;

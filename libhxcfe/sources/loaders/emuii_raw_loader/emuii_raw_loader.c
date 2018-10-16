@@ -61,35 +61,9 @@
 
 #include "libhxcadaptor.h"
 
-int EMUII_RAW_libIsValidDiskFile(HXCFE_IMGLDR * imgldr_ctx,char * imgfile)
+int EMUII_RAW_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	int filesize;
-
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUII_RAW_libIsValidDiskFile");
-
-	if( hxc_checkfileext(imgfile,"emuiifd") || hxc_checkfileext(imgfile,"sp1200fd") )
-	{
-
-		filesize=hxc_getfilesize(imgfile);
-		if(filesize<0)
-			return HXCFE_ACCESSERROR;
-
-		if(filesize==(0xE00*2*80))
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUII_RAW_libIsValidDiskFile : EmuII/SP1200 raw file !");
-			return HXCFE_VALIDFILE;
-		}
-		else
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUII_RAW_libIsValidDiskFile : non EmuII/SP1200 raw file !");
-			return HXCFE_BADFILE;
-		}
-	}
-	else
-	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUII_RAW_libIsValidDiskFile : non EmuII raw file !");
-		return HXCFE_BADFILE;
-	}
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "EMUII_RAW_libIsValidDiskFile", "emuiifd,sp1200fd", (0xE00*2*80));
 }
 
 int EMUII_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
