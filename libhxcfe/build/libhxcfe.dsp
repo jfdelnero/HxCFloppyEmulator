@@ -2043,6 +2043,42 @@ SOURCE=..\sources\loaders\xml_db_loader\xml_db_writer.c
 SOURCE=..\sources\loaders\xml_db_loader\xml_db_writer.h
 # End Source File
 # End Group
+# Begin Group "FDI_NEC"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\fdi_nec_loader\fdi_nec_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\fdi_nec_loader\fdi_nec_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\fdi_nec_loader\fdi_nec_loader.h
+# End Source File
+# End Group
+# Begin Group "common"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\common\raw_amiga.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\common\raw_amiga.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\common\raw_iso.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\common\raw_iso.h
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 
