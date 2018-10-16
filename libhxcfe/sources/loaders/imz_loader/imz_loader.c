@@ -113,7 +113,6 @@ int IMZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int err=UNZ_OK;
 	unzFile uf;
 	unz_file_info file_info;
-	HXCFE_CYLINDER* currentcylinder = NULL;
 
 	raw_iso_cfg rawcfg;
 	int ret;

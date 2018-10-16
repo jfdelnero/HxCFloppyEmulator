@@ -72,7 +72,7 @@ int XML_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 			return HXCFE_ACCESSERROR;
 		}
 
-		if(strstr(imgfile->file_header,"<?xml version="))
+		if(strstr((char*)imgfile->file_header,"<?xml version="))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"XML_libIsValidDiskFile : XML file !");
 			return HXCFE_VALIDFILE;

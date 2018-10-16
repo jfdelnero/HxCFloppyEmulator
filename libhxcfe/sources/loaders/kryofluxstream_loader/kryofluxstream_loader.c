@@ -87,7 +87,7 @@ int KryoFluxStream_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_F
 			found=0;
 			do
 			{
-				sprintf(filepath,"%s\\track%.2d.%d.raw",imgfile,track,side);
+				sprintf(filepath,"%s\\track%.2d.%d.raw",imgfile->path,track,side);
 				f = hxc_fopen(filepath,"rb");
 				if(f)
 				{

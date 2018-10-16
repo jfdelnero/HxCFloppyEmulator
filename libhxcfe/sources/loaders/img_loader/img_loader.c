@@ -214,7 +214,7 @@ int IMG_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	raw_iso_cfg rawcfg;
 	unsigned int filesize;
 	int ret;
-	char boot_sector[512];
+	unsigned char boot_sector[512];
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMG_libLoad_DiskFile %s",imgfile);
 

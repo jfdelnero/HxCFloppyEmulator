@@ -472,7 +472,7 @@ int32_t hxcfe_preloadImgInfos(HXCFE_IMGLDR * imgldr_ctx, char * imgname, HXCFE_I
 	FILE *f;
 	struct stat img_stat;
 
-	memset(file_infos,0,sizeof(file_infos));
+	memset(file_infos,0,sizeof(HXCFE_IMGLDR_FILEINFOS));
 	memset(&img_stat,0,sizeof(struct stat));
 
 	hxc_stat( imgname, &img_stat );
@@ -1717,7 +1717,10 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 				fseek( filehandle, bufferoffset, SEEK_SET);
 				if( (bufferoffset + (numberofsector * sectorsize)) < image_size )
 				{
-					fread( track_buffer, numberofsector * sectorsize, 1, filehandle );
+					if( fread( track_buffer, numberofsector * sectorsize, 1, filehandle ) != 1 )
+					{
+						
+					}
 				}
 				else
 				{

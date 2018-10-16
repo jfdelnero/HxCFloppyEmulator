@@ -67,7 +67,7 @@ int IMD_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 	if(hxc_checkfileext(imgfile->path,"imd"))
 	{
-		if( !strncmp(imgfile->file_header,"IMD ",4))
+		if( !strncmp((char*)imgfile->file_header,"IMD ",4))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMD_libIsValidDiskFile : IMD file !");
 			return HXCFE_VALIDFILE;

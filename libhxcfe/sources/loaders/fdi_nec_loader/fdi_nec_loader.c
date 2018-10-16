@@ -93,7 +93,6 @@ int FDINEC_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 	raw_iso_cfg rawcfg;
 	FILE * f_img;
 	int filesize,ret;
-	int trackoffset;
 
 	fdi_nec_header f_header;
 
@@ -117,7 +116,6 @@ int FDINEC_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 		return HXCFE_BADFILE;
 	}
 
-	trackoffset = f_header.headersize;
 	fseek(f_img,f_header.headersize,SEEK_SET);
 
 	raw_iso_setdefcfg(&rawcfg);

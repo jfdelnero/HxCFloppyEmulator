@@ -69,7 +69,7 @@ int SVD_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile");
 	if( hxc_checkfileext(imgfile->path,"svd") )
 	{
-		if (sscanf(imgfile->file_header,"%d.%d",&major,&minor) != 2)
+		if (sscanf((char*)imgfile->file_header,"%d.%d",&major,&minor) != 2)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SVD_libIsValidDiskFile : Bad code version !");
 			return(HXCFE_BADFILE);
