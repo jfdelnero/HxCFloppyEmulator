@@ -92,15 +92,15 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	char fileheader[5];
 //	MFMTRACKIMG trackdesc;
 	unsigned int i,j,trackcount,headcount;
-	HXCFE_SECTCFG* sectorconfig;
-	HXCFE_CYLINDER* currentcylinder;
-	HXCFE_SIDE* currentside;
+	HXCFE_SECTCFG* sectorconfig = NULL;
+	HXCFE_CYLINDER* currentcylinder = NULL;
+	HXCFE_SIDE* currentside = NULL;
 	int32_t bitrate;
 	int32_t pregap;
-	unsigned char * sectormap;
-	unsigned char * sectorcylmap;
-	unsigned char * sectorheadmap;
-	unsigned char * track_data;
+	unsigned char * sectormap = NULL;
+	unsigned char * sectorcylmap = NULL;
+	unsigned char * sectorheadmap = NULL;
+	unsigned char * track_data = NULL;
 	imd_trackheader trackcfg;
 	int32_t sectorsize;
 	int32_t interleave,tracktype;
@@ -218,7 +218,10 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 		interleave=1;
 		rpm=300;
-		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if(!floppydisk->tracks)
+			goto alloc_error;
+
 		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 		fseek(f,0,SEEK_SET);
@@ -235,15 +238,24 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			if(!hxc_fread(&trackcfg,sizeof(trackcfg),f))
 			{
 
-				sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*trackcfg.number_of_sector);
+				sectorconfig = (HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*trackcfg.number_of_sector);
+				if(!sectorconfig)
+					goto alloc_error;
+		
 				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*trackcfg.number_of_sector);
 
 				// lecture map sector.
-				sectormap=(unsigned char*) malloc(trackcfg.number_of_sector);
+				sectormap = (unsigned char*) malloc(trackcfg.number_of_sector);
+				if(!sectormap)
+					goto alloc_error;
+
 				hxc_fread(sectormap,trackcfg.number_of_sector,f);
 
 				// init map cylinder
-				sectorcylmap=(unsigned char*) malloc(trackcfg.number_of_sector);
+				sectorcylmap = (unsigned char*) malloc(trackcfg.number_of_sector);
+				if(!sectorcylmap)
+					goto alloc_error;
+
 				memset(sectorcylmap,trackcfg.physical_cylinder,trackcfg.number_of_sector);
 				if(trackcfg.physical_head & SEC_CYL_MAP)
 				{
@@ -251,7 +263,10 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				}
 
 				// init map head
-				sectorheadmap=(unsigned char*) malloc(trackcfg.number_of_sector);
+				sectorheadmap = (unsigned char*) malloc(trackcfg.number_of_sector);
+				if(!sectorheadmap)
+					goto alloc_error;
+
 				memset(sectorheadmap,trackcfg.physical_head&0xF,trackcfg.number_of_sector);
 				if(trackcfg.physical_head & SEC_HEAD_MAP)
 				{
@@ -259,7 +274,10 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				}
 
 				sectorsize = (int32_t)(128<<trackcfg.sector_size_code);
-				track_data=malloc(sectorsize*trackcfg.number_of_sector);
+				track_data = malloc(sectorsize*trackcfg.number_of_sector);
+				if(!track_data)
+					goto alloc_error;
+
 				memset(track_data,0,sectorsize*trackcfg.number_of_sector);
 
 				 /*
@@ -426,9 +444,8 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				
 
 				currentside = tg_generateTrackEx((unsigned short)trackcfg.number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,tracktype,pregap,2500 | NO_SECTOR_UNDER_INDEX,-2500);
-				currentcylinder->sides[trackcfg.physical_head&0xF]=currentside;
-				currentcylinder->floppyRPM=rpm;
-
+				currentcylinder->sides[trackcfg.physical_head&0xF] = currentside;
+				currentcylinder->floppyRPM = rpm;
 
 				for(j=0;j<trackcfg.number_of_sector;j++)
 				{
@@ -436,10 +453,15 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				}
 
 				free(track_data);
+				track_data = NULL;
 				free(sectorheadmap);
+				sectorheadmap = NULL;
 				free(sectorcylmap);
+				sectorcylmap = NULL;
 				free(sectormap);
+				sectormap = NULL;
 				free(sectorconfig);
+				sectorconfig = NULL;
 			}
 			else
 			{
@@ -471,6 +493,24 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	hxc_fclose(f);
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"bad header");
 	return HXCFE_BADFILE;
+	
+alloc_error:
+	if(track_data)
+		free(track_data);
+
+	if(sectorheadmap)
+		free(sectorheadmap);
+
+	if(sectorcylmap)
+		free(sectorcylmap);
+
+	if(sectormap)
+		free(sectormap);
+
+	if(sectorconfig)
+		free(sectorconfig);
+
+	return HXCFE_INTERNALERROR;
 }
 
 int IMD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
