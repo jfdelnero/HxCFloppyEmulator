@@ -205,13 +205,15 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			{
 				rawcfg.bitrate = DEFAULT_DD_BITRATE;
 				rawcfg.interface_mode = ATARIST_DD_FLOPPYMODE;
-				rawcfg.skew_per_track = 2;
+				rawcfg.skew_per_track = 4;
+				rawcfg.skew_per_side = 2;
 			}
 			else
 			{
 				rawcfg.bitrate = DEFAULT_HD_BITRATE;
 				rawcfg.interface_mode = ATARIST_HD_FLOPPYMODE;
-				rawcfg.skew_per_track = 4;
+				rawcfg.skew_per_track = 8;
+				rawcfg.skew_per_side = 4;
 			}
 
 			rawcfg.track_format = ISOFORMAT_DD;

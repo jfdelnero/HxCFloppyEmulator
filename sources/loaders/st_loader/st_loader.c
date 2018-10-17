@@ -188,16 +188,16 @@ static int getfloppyconfig(unsigned char bootsector[512],uint32_t filesize, raw_
 		rawcfg->interface_mode = ATARIST_DD_FLOPPYMODE;
 		rawcfg->bitrate = DEFAULT_DD_BITRATE;
 
-		rawcfg->skew_per_track = 2;
-		rawcfg->skew_per_side = 1;
+		rawcfg->skew_per_track = 4;
+		rawcfg->skew_per_side = 2;
 	}
 	else
 	{
 		rawcfg->interface_mode = ATARIST_HD_FLOPPYMODE;
 		rawcfg->bitrate = DEFAULT_HD_BITRATE;
 
-		rawcfg->skew_per_track = 4;
-		rawcfg->skew_per_side = 2;
+		rawcfg->skew_per_track = 8;
+		rawcfg->skew_per_side = 4;
 	}
 
 	if( rawcfg->number_of_sectors_per_track == 11 )
