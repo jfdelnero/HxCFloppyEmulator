@@ -16,6 +16,14 @@ Facebook : https://www.facebook.com/groups/hxc2001
 /*********************************************************
 WIP : HxCFloppyEmulator X.X.X.X
 
+General : Faster/better file images identification and loader.
+General : Many loaders now use the new generic raw file loader.
+General : Lots of Code improvememnts.
+Internal tracks generator : Now support "weak" sectors.
+HFEv3 writer : Remove any possible parasitic opcodes comming from the stream.
+New Loader : Nec PC98/PC88 FDI.
+CPCDSK loader/writer : Now support the SAMDisk method for DSK with flakey bits.
+Roland DD XML : Fix tracks skew.
 New XML format : ABB disks formats.
 New XML format : Automatix RAIL DD disk format.
 New XML format : COMX disks formats.
@@ -34,8 +42,8 @@ New XML format : Timex FDD3000 formats.
 New XML format : TRS80 disk format.
 New XML format : Unitel Videotex format.
 New file image support : SAB Diskette Utility / *.SDU floppy image.
-SCP Loader/Writer : Fix single sided SCP file export. 
-New writer : Dragon VDK format. 
+SCP Loader/Writer : Fix single sided SCP file export.
+New writer : Dragon VDK format.
 
 Change urls to point to the main hxc2001 domain + switch to https.
 
