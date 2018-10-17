@@ -108,6 +108,7 @@ int raw_iso_loader(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk, FILE * f
 	hxcfe_setInterfaceMode( fb_ctx, cfg->interface_mode );
 	hxcfe_setTrackSkew ( fb_ctx, cfg->skew_per_track );
 	hxcfe_setSideSkew ( fb_ctx, cfg->skew_per_side );
+	hxcfe_setTrackInterleave ( fb_ctx, cfg->interleave );
 	hxcfe_setSectorFill ( fb_ctx, cfg->fill_value );
 
 	flags = 0;
