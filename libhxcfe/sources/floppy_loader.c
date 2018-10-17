@@ -1709,7 +1709,14 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 			}
 			else
 			{
-				bufferoffset = start_file_ofs + ( numberofsector * sectorsize * ((i<<1) + (j&1)) ) ;
+				if( fb_ctx->floppydisk->floppyNumberOfSide == 2 )
+				{
+					bufferoffset = start_file_ofs + ( numberofsector * sectorsize * ((i<<1) + (j&1)) ) ;
+				}
+				else
+				{
+					bufferoffset = start_file_ofs + ( numberofsector * sectorsize * i );					
+				}
 			}
 
 			if( filehandle )
