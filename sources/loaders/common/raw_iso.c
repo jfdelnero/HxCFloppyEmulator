@@ -139,8 +139,8 @@ void raw_iso_setdefcfg(raw_iso_cfg *rawcfg)
 		rawcfg->gap3 = 84;
 		rawcfg->pregap = 0;
 		rawcfg->interleave = 1;
-		rawcfg->skew_per_track = 1;
-		rawcfg->skew_per_side = 1;
+		rawcfg->skew_per_track = 0;
+		rawcfg->skew_per_side = 0;
 		rawcfg->bitrate = 250000;
 		rawcfg->rpm = 300;
 		rawcfg->track_format = IBMFORMAT_DD;
