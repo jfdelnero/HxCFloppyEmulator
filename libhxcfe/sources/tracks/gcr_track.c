@@ -78,20 +78,22 @@ unsigned char * BuildGCRCylinder(int * gcrtracksize,unsigned char * track,unsign
 	{
 		if(nongcrpart[i])
 		{
-			finalsize=finalsize+(4*2);
+			finalsize += (4*2);
 		}
 		else
 		{
-			finalsize=finalsize+(5*2);
+			finalsize += (5*2);
 		}
-
 	}
 
-	finalsize=finalsize*2;
-	finalsize=finalsize/8;
+	finalsize *= 2;
+	finalsize /= 8;
 
-	finalbuffer=(unsigned char *)malloc(finalsize);
-	*gcrtracksize=finalsize;
+	finalbuffer = (unsigned char *)malloc(finalsize);
+	if(!finalbuffer)
+		return NULL;
+
+	*gcrtracksize = finalsize;
 
 	// Clean up
 	for(i=0;i<(finalsize);i++)
@@ -110,62 +112,58 @@ unsigned char * BuildGCRCylinder(int * gcrtracksize,unsigned char * track,unsign
 		byte=track[l];
 		nongcrcode=nongcrpart[l];
 
-
-		if(!((nongcrcode>>shift)&0xF))
+		if( !((nongcrcode>>(4-shift)) & 0xF ) )
 		{
-
-			gcrcode=gcrencodingtable[(byte>>shift)&0xF];
+			gcrcode = gcrencodingtable[(byte>>(4-shift))&0xF];
 
 			for(j=0;j<5;j++)
 			{
 
 				if(gcrcode & (0x10>>j))
 				{
-					finalbuffer[k]=finalbuffer[k] | (0x80>>shift2);
+					finalbuffer[k] |= (0x80>>shift2);
 				}
 				else
 				{
-					finalbuffer[k]=finalbuffer[k] & (~(0xC0>>shift2));
+					finalbuffer[k] &= ~(0xC0>>shift2);
 				}
 
-				shift2=shift2+2;
-				if(shift2==8)
+				shift2 += 2;
+				if( shift2 == 8 )
 				{
-					shift2=0;
+					shift2 = 0;
 					k++;
-
 				}
 			}
 		}
 		else
 		{//non gcr - direct copy
-			quartet=(byte>>shift)&0xF;
+			quartet = (byte>>(4-shift)) & 0xF;
+
 			for(j=0;j<4;j++)
 			{
-
 				if(quartet & (0x08>>j))
 				{
-					finalbuffer[k]=finalbuffer[k] | (0x80>>shift2);
+					finalbuffer[k] |= (0x80>>shift2);
 				}
 				else
 				{
-					finalbuffer[k]=finalbuffer[k] & (~(0xC0>>shift2));
+					finalbuffer[k] &= (~(0xC0>>shift2));
 				}
 
-				shift2=shift2+2;
+				shift2 += 2;
 				if(shift2==8)
 				{
 					shift2=0;
 					k++;
-
 				}
 			}
 		}
 
-		shift=shift+4;
-		if(shift==8)
+		shift += 4;
+		if( shift == 8 )
 		{
-			shift=0;
+			shift = 0;
 			l++;
 		}
 
@@ -242,60 +240,49 @@ normal 8 bytes to be understood. Once decoded, its breakdown is as follows:
 				// sync
 				for(k=0;k<5;k++)
 				{
-					tempdata[j]=0xFF;
-					tempnongcr[j]=0xFF;
+					tempdata[j] = 0xFF;
+					tempnongcr[j] = 0xFF;
 					j++;
 				}
 
-				tempdata[j]=0x08; // $00 - header block ID ($08)
-				j++;
-				tempdata[j]=0x00; // header block checksum (EOR of $02-$05)
-				j++;
-				tempdata[j]=l;    // Sector
-				j++;
-				tempdata[j]=tracknumber;  // Track
-				j++;
-				tempdata[j]=0xA1;  // Format ID byte #2
-				j++;
-				tempdata[j]=0x1A;  // Format ID byte #1
-				j++;
+				tempdata[j++] = 0x08;             // $00 - header block ID ($08)
+				tempdata[j++] = 0x00;             // header block checksum (EOR of $02-$05)
+				tempdata[j++] = l;                // Sector
+				tempdata[j++] = 1 + tracknumber;  // Track
+				tempdata[j++] = 0xA1;             // Format ID byte #2
+				tempdata[j++] = 0x1A;             // Format ID byte #1
 
-				tempdata[j]=0x0F;  // $0F ("off" bytes)
-				j++;
-				tempdata[j]=0x0F;  // $0F ("off" bytes)
-				j++;
-				tempdata[j-7]=tempdata[j-6] ^ tempdata[j-5] ^ tempdata[j-4] ^ tempdata[j-3];
-
+				tempdata[j++] = 0x0F;  // $0F ("off" bytes)
+				tempdata[j++] = 0x0F;  // $0F ("off" bytes)
+				tempdata[j-7] = tempdata[j-6] ^ tempdata[j-5] ^ tempdata[j-4] ^ tempdata[j-3];
 
 				for(k=0;k<9;k++) // Header gap
 				{
-					tempdata[j]=0x55;
-					tempnongcr[j]=0xFF;
+					tempdata[j] = 0x55;
+					tempnongcr[j] = 0xFF;
 					j++;
 				}
 
 				for(k=0;k<5;k++) // Data sync
 				{
-					tempdata[j]=0xFF;
-					tempnongcr[j]=0xFF;
+					tempdata[j] = 0xFF;
+					tempnongcr[j] = 0xFF;
 					j++;
 				}
 
-				tempdata[j]=0x07;  // data block ID ($07)
+				tempdata[j] = 0x07;  // data block ID ($07)
 				j++;
-				t=j+256;
+				t = j + 256;
 				for(i=0;i<sectorsize;i++) // data sector & checksum
 				{
-					tempdata[j]=datain[(sectorsize*l)+i];
-					tempdata[t]=tempdata[t]^tempdata[j];
+					tempdata[j] = datain[(sectorsize*l)+i];
+					tempdata[t] = tempdata[t]^tempdata[j];
 					j++;
 				}
 				j++; // data checksum (EOR of data sector)
 
-				tempdata[j]=0x00;  // $00 ("off" bytes)
-				j++;
-				tempdata[j]=0x00;  // $00 ("off" bytes)
-				j++;
+				tempdata[j++] = 0x00;  // $00 ("off" bytes)
+				tempdata[j++] = 0x00;  // $00 ("off" bytes)
 
 				for(k=0;k<9;k++) // sector gap
 				{
@@ -305,7 +292,7 @@ normal 8 bytes to be understood. Once decoded, its breakdown is as follows:
 				}
 			}
 
-			temptrack=BuildGCRCylinder(&temptracksize,tempdata,tempnongcr,j);
+			temptrack = BuildGCRCylinder(&temptracksize,tempdata,tempnongcr,j);
 			if(temptrack)
 			{
 				memset(mfmdata,0x22,*mfmsizebuffer);
