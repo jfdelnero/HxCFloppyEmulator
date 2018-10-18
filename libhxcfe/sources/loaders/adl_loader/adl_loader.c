@@ -101,6 +101,8 @@ int ADL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	if( filesize )
 	{
+		raw_iso_setdefcfg(&rawcfg);
+
 		rawcfg.sector_size = 256;
 
 		rawcfg.number_of_tracks = 80;
