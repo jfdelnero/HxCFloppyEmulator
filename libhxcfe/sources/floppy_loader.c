@@ -445,12 +445,35 @@ const char* hxcfe_imgGetLoaderExt( HXCFE_IMGLDR * imgldr_ctx, int32_t moduleID )
 
 int32_t hxcfe_imgCheckFileCompatibility( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * file_infos, char * loadername, char * fileext, int filesizemod)
 {
+	char temp_ext[16];
+	int ret;
+	int i,j;
+
 	if(loadername)
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%s", loadername);
 
 	if( fileext )
 	{
-		if(! hxc_checkfileext( file_infos->path, fileext ) )
+		j = 0;
+		do
+		{
+			memset(temp_ext,0,sizeof(temp_ext));
+
+			i = 0;
+			while ( i < sizeof(temp_ext) - 1 && fileext[j] != ',' && fileext[j] )
+			{
+				temp_ext[i] = fileext[j];
+				j++;
+				i++;
+			}
+
+			if(fileext[j] == ',')
+				j++;
+
+			ret = hxc_checkfileext( file_infos->path, temp_ext );
+		}while(fileext[j] && !ret);
+
+		if( !ret )
 			return HXCFE_BADFILE;
 	}
 
@@ -1715,7 +1738,7 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 				}
 				else
 				{
-					bufferoffset = start_file_ofs + ( numberofsector * sectorsize * i );					
+					bufferoffset = start_file_ofs + ( numberofsector * sectorsize * i );
 				}
 			}
 
@@ -1726,7 +1749,7 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 				{
 					if( fread( track_buffer, numberofsector * sectorsize, 1, filehandle ) != 1 )
 					{
-						
+
 					}
 				}
 				else
