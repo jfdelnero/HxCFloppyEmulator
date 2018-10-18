@@ -140,7 +140,8 @@ int EMAX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,ch
 	{
 		rawcfg.gap3 = 30;
 		rawcfg.interleave = 1;
-		rawcfg.skew_per_track = 2;
+		rawcfg.skew_per_track = 4;
+		rawcfg.skew_per_side = 2;
 		rawcfg.track_format = IBMFORMAT_DD;
 		rawcfg.number_of_sides = 2;
 		rawcfg.number_of_sectors_per_track = 10;

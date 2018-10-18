@@ -85,9 +85,11 @@ int DSD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	rawcfg.number_of_tracks = 80;
 	rawcfg.number_of_sides = 2;
 	rawcfg.number_of_sectors_per_track = 10;
+	rawcfg.start_sector_id = 0;
 	rawcfg.gap3 = 255;
 	rawcfg.interleave = 2;
-	rawcfg.skew_per_track = 2;
+	rawcfg.skew_per_track = 4;
+	rawcfg.skew_per_side = 2;
 	rawcfg.rpm = 300;
 	rawcfg.interface_mode = GENERIC_SHUGART_DD_FLOPPYMODE;
 	rawcfg.bitrate = DEFAULT_DD_BITRATE;
