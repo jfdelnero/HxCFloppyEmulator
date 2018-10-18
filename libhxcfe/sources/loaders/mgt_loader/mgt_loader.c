@@ -84,7 +84,6 @@ int MGT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	rawcfg.bitrate = 250000;
 	rawcfg.rpm = 300;
-	rawcfg.skew_per_track = 0;
 	rawcfg.interleave = 1;
 	rawcfg.sector_size = 512;
 	rawcfg.track_format = ISOFORMAT_DD;

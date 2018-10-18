@@ -118,8 +118,6 @@ int DIM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	rawcfg.bitrate = 250000;
 	rawcfg.rpm = 300;
-	rawcfg.skew_per_track = 0;
-	rawcfg.interleave = 1;
 	rawcfg.sector_size = (header.sectorsizeh*256)+header.sectorsizel; // st file support only 512bytes/sector floppies.
 	if(!rawcfg.sector_size || (rawcfg.sector_size&0xFF))
 		rawcfg.sector_size = 512;
@@ -135,14 +133,16 @@ int DIM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	{
 		rawcfg.bitrate = DEFAULT_DD_BITRATE;
 		rawcfg.interface_mode = ATARIST_DD_FLOPPYMODE;
-		rawcfg.skew_per_track = 2;
+		rawcfg.skew_per_track = 4;
+		rawcfg.skew_per_side = 2;
 		rawcfg.number_of_sides = 1;
 	}
 	else
 	{
 		rawcfg.bitrate = DEFAULT_HD_BITRATE;
 		rawcfg.interface_mode = ATARIST_HD_FLOPPYMODE;
-		rawcfg.skew_per_track = 4;
+		rawcfg.skew_per_track = 8;
+		rawcfg.skew_per_side = 4;
 		rawcfg.number_of_sides = 2;
 	}
 
