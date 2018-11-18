@@ -375,8 +375,8 @@ typedef struct scp_header_
 	uint8_t  start_track;
 	uint8_t  end_track;
 	uint8_t  flags;
-	uint8_t  RFU_0;
-	uint8_t  RFU_1;
+	uint8_t  bit_cell_width;
+	uint8_t  number_of_heads;
 	uint8_t  RFU_2;
 	uint32_t file_data_checksum;
 }scp_header;
