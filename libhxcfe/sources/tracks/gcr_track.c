@@ -284,7 +284,7 @@ normal 8 bytes to be understood. Once decoded, its breakdown is as follows:
 				tempdata[j++] = 0x00;  // $00 ("off" bytes)
 				tempdata[j++] = 0x00;  // $00 ("off" bytes)
 
-				for(k=0;k<9;k++) // sector gap
+				for(k=0;k<8;k++) // sector gap
 				{
 					tempdata[j]=0x55;
 					tempnongcr[j]=0xFF;
