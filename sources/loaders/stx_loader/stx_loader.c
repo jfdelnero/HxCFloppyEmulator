@@ -78,13 +78,11 @@ int STX_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 		if(strcmp((char*)&fileheader->headertag,"RSY"))
 		{
-			free(fileheader);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STX_libIsValidDiskFile : non STX file (bad header)!");
 			return HXCFE_BADFILE;
 		}
 		else
 		{
-			free(fileheader);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STX_libIsValidDiskFile : STX file !");
 			return HXCFE_VALIDFILE;
 		}
