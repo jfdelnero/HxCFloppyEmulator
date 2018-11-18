@@ -287,6 +287,8 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 			case C64_DD_FLOPPYMODE:
 				scph.disk_type = 0x00;
+				tracknumber *= 2;
+				scph.end_track = tracknumber - 1;
 				break;
 
 			case S950_HD_FLOPPYMODE:
@@ -302,16 +304,31 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 				break;
 		}
 
-		scph.flags = 0x01;
+		scph.flags = INDEXMARK;
 		if(floppy->floppyNumberOfTrack>42)
-			scph.flags |= 0x02;
+			scph.flags |= DISK_96TPI;
 
 		if(floppy->tracks[0])
 		{
-			if( floppy->tracks[0]->floppyRPM > 350 && floppy->tracks[0]->floppyRPM < 340)
+			if( floppy->tracks[0]->floppyRPM > 345 && floppy->tracks[0]->floppyRPM < 400)
 			{
-				scph.flags |= 0x04;
+				scph.flags |= DISK_360RPM;
 			}
+		}
+
+		switch (floppy->floppyNumberOfSide)
+		{
+			case 1:
+				scph.number_of_heads = 1;
+				break;
+
+			case 2:
+				scph.number_of_heads = 0;
+				break;
+
+			default:
+				scph.number_of_heads = 0;
+				break;
 		}
 
 		scph.version = 0x09;
