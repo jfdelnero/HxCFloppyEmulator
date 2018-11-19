@@ -225,8 +225,8 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppy
 		fatbs->BPB_Media = media_type;                           // Type de disque
 
 		fatbs->BPB_FATSz16 = fatconfig.nbofsectorperfat;         // Taille d'une FAT en secteurs (0 par défaut pour FAT32).
-		fatbs->BPB_SecPerTrk = floppydisk->floppySectorPerTrack; // Sectors per track
-		fatbs->BPB_NumHeads = floppydisk->floppyNumberOfSide;    // Number of heads.
+		fatbs->BPB_SecPerTrk = rawcfg.number_of_sectors_per_track; // Sectors per track
+		fatbs->BPB_NumHeads = rawcfg.number_of_sides;            // Number of heads.
 
 		*( (unsigned short*) &flatimg[0x1FE])=0xAA55;            // End of sector marker (0x55 0xAA)
 
