@@ -303,7 +303,9 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Number of revolution(s) : %d",scph.number_of_revolution);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Flags : 0x%.2X",scph.flags);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"File Checksum : 0x%.4X",scph.file_data_checksum);
-			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"RFU 1,2,3 : 0x%.2X,0x%.2X,0x%.2X",scph.RFU_0,scph.RFU_1,scph.RFU_2);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Bit Cell width : %d",scph.bit_cell_width);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Number of heads : %d",scph.number_of_heads);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"RFU 2 : 0x%.2X",scph.RFU_2);
 
 			nbside = 1;
 
