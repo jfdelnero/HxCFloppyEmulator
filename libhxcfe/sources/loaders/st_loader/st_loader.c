@@ -221,7 +221,7 @@ int ST_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 	FILE * f_img;
 	int ret;
 	unsigned int filesize;
-	char boot_sector[512];
+	unsigned char boot_sector[512];
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ST_libLoad_DiskFile %s",imgfile);
 
