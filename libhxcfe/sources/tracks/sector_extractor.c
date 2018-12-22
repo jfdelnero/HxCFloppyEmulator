@@ -1224,11 +1224,14 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 	int k,i;
 	unsigned char crctable[32];
 
-	//0xF8 - 01000100 // 0x44
-	//0xF9 - 01000101 // 0x45
-	//0xFA - 01010100 // 0x54
-	//0xFB - 01010101 // 0x55
-	unsigned char datamark[4]={0x44,0x45,0x54,0x55};
+    //        C D C D  C D C D
+	//0xF8 - 00010100 01000100 // 0x1444
+	//0xF9 - 00010100 01000101 // 0x1445
+	//0xFA - 00010100 01010100 // 0x1454
+	//0xFB - 00010100 01010101 // 0x1455
+	//0xFC - 00010101 01000100 // 0x1544
+	//0xFD - 00010101 01000101 // 0x1545
+	unsigned short datamark[6]={0x1444,0x1445,0x1454,0x1455,0x1544,0x1545};
 
 	bit_offset=track_offset;
 	memset(sector,0,sizeof(HXCFE_SECTCFG));
@@ -1305,10 +1308,17 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 
 
 //;01000100 01010101 00010001 00010100 01[s]010101
-//;            1   1    1   1    1   0       1   1   -- FB
-//;            1   1    1   1    1   0       1   0   -- FA
+
+
+
 //;            1   1    1   1    1   0       0   0   -- F8
 //;            1   1    1   1    1   0       0   1   -- F9
+//;            1   1    1   1    1   0       1   0   -- FA
+//;            1   1    1   1    1   0       1   1   -- FB
+
+// DEC RX1/RX2 FM Sync
+//;            1   1    1   1    1   1       0   0   -- FC
+//;            1   1    1   1    1   1       0   1   -- FD
 
 						//11111011
 						fm_buffer[0]=0x55;
@@ -1319,10 +1329,11 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 						i=0;
 						do
 						{
-							fm_buffer[3]=datamark[i];
+							fm_buffer[2] = (datamark[i] >> 8) & 0xFF;
+							fm_buffer[3] = datamark[i] & 0xFF;
 							bit_offset = searchBitStream(track->databuffer,track->tracklen,((88+16)*8*2),fm_buffer,4*8,old_bit_offset);
 							i++;
-						}while(i<4 && bit_offset==-1 );
+						}while(i<6 && bit_offset==-1 );
 
 						if(bit_offset != -1)
 						{
