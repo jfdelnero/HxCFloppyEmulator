@@ -14,7 +14,7 @@ Facebook : https://www.facebook.com/groups/hxc2001
 -------------------------------------------------------------------------------
 
 /*********************************************************
-WIP : HxCFloppyEmulator X.X.X.X
+22 December 2018 : HxCFloppyEmulator 2.1.20.1
 
 General : Faster/better file images identification and loader.
 General : Many loaders now use the new generic raw file loader.
