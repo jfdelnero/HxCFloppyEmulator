@@ -22,7 +22,7 @@ General : Lots of code improvements.
 Internal tracks generator : Now support "weak" sectors.
 HFEv3 writer : Remove any possible parasitic opcodes coming from the stream.
 New Loader : NEC PC98/PC88 FDI.
-CPCDSK loader/writer : Now support the SAMDisk method for DSK with flakey bits.
+CPCDSK loader/writer : Now support the SAMDisk method for DSK with weak bits.
 Roland DD XML : Fix tracks skew.
 New XML format : ABB disks formats.
 New XML format : Automatix RAIL DD disk format.
@@ -191,7 +191,7 @@ New Writer : Atari ST *.ST Writer.
 
 New Writer : Atari ST *.STX Writer.
 
-STX Loader/Writer : Flakey bits mask support added, Loader/writer improved.
+STX Loader/Writer : Weak bits mask support added, Loader/writer improved.
 
 SCP Loader/Writer : Loader/writer improved.
 
@@ -265,7 +265,7 @@ New Writer : BMP file (Disk/circular layout) -> Disk layout can now be exported 
 
 libhxcfe : Correction of the UTF8 path support in some loaders/writers.
 
-New Loader : SPS CT Raw file format support added. (NOTE : No flakey bits support for the moment !)
+New Loader : SPS CT Raw file format support added. (NOTE : No weak bits support for the moment !)
 
 libhxcfe : Generic flux stream analyzer enhanced.
 
@@ -845,7 +845,7 @@ and to Kris Van de Cappelle (EMXP developer) for the tests and EmuII technicals 
 22/02/2009: HxCFloppyEmulator 1.2.0.10
 ->  IPF File format (http://www.softpres.org/)
 	-> An important bug regarding the track type identification corrected (reported by RichAplin / Cyclone 20 project)
-	-> in-track flakey bits fully supported (SuperHang-On,...)
+	-> in-track weak bits fully supported (SuperHang-On,...)
 *********************************************************/
 
 
@@ -863,7 +863,7 @@ and to Kris Van de Cappelle (EMXP developer) for the tests and EmuII technicals 
 	-> MFM / FM / GCR / RAW support
 	-> Hard sectored track supported
 	-> Variable bitrate support
-	-> "Flakey bits" support
+	-> "Weak bits" support
 	-> file data packed. (zlib)
 
 
