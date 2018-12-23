@@ -18,10 +18,10 @@ Facebook : https://www.facebook.com/groups/hxc2001
 
 General : Faster/better file images identification and loader.
 General : Many loaders now use the new generic raw file loader.
-General : Lots of Code improvememnts.
+General : Lots of code improvements.
 Internal tracks generator : Now support "weak" sectors.
-HFEv3 writer : Remove any possible parasitic opcodes comming from the stream.
-New Loader : Nec PC98/PC88 FDI.
+HFEv3 writer : Remove any possible parasitic opcodes coming from the stream.
+New Loader : NEC PC98/PC88 FDI.
 CPCDSK loader/writer : Now support the SAMDisk method for DSK with flakey bits.
 Roland DD XML : Fix tracks skew.
 New XML format : ABB disks formats.
