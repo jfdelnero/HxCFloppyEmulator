@@ -85,7 +85,7 @@ int TeleDisk_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINF
 		}
 
 		CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0xA097,0x0000);
-		ptr=(unsigned char*)&td_header;
+		ptr=(unsigned char*)td_header;
 		for(i=0;i<0xA;i++)
 		{
 			CRC16_Update(&CRC16_High,&CRC16_Low, ptr[i],(unsigned char*)crctable );
@@ -97,7 +97,7 @@ int TeleDisk_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINF
      		return HXCFE_BADFILE;
 		}
 
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TeleDisk_libIsValidDiskFile : it's a Tele disk file!");
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TeleDisk_libIsValidDiskFile : it's a TeleDisk file!");
 
 		return HXCFE_VALIDFILE;
 	}
