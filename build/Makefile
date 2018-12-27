@@ -1,14 +1,22 @@
-SUBDIRS =	../libhxcadaptor/trunk/build/ \
-			../libhxcfe/trunk/build/ \
-			../libusbhxcfe/trunk/build/ \
-			../HxCFloppyEmulator_cmdline/trunk/build/ \
-			../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.3.x/ \
-			../HxCFloppyEmulator_software/trunk/build/
+all: HxCFloppyEmulator_cmdline HxCFloppyEmulator_software
 
-all:	$(SUBDIRS)
+libhxcadaptor:
+	$(MAKE) -C ../libhxcadaptor/trunk/build/
 
-$(SUBDIRS):
-	$(MAKE) -C $@
+libhxcfe: libhxcadaptor
+	$(MAKE) -C ../libhxcfe/trunk/build/
+
+libusbhxcfe: libhxcadaptor
+	$(MAKE) -C ../libusbhxcfe/trunk/build/
+
+HxCFloppyEmulator_cmdline: libhxcfe libusbhxcfe
+	$(MAKE) -C ../HxCFloppyEmulator_cmdline/trunk/build/
+
+fltk:
+	$(MAKE) -C ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.3.x/
+
+HxCFloppyEmulator_software: libhxcfe libusbhxcfe fltk
+	$(MAKE) -C ../HxCFloppyEmulator_software/trunk/build/
 
 clean:
 	$(MAKE) -C ../libhxcadaptor/trunk/build/ clean
@@ -29,4 +37,4 @@ mrproper:
 	rm hxcfloppyemulator
 	rm hxcfe
 
-.PHONY: $(SUBDIRS)
+.PHONY: libhxcadaptor libhxcfe libusbhxcfe HxCFloppyEmulator_cmdline HxCFloppyEmulator_software fltk mrproper clean
