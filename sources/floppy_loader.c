@@ -2103,6 +2103,8 @@ fs_config fs_config_table[]=
 	{"fatst360",	"",FS_360KB_ATARI_FAT12,0},
 	{"amigados",	"3\"5        880KB DSDD AmigaDOS",FS_880KB_AMIGADOS,1},
 
+	{"amigados_hd",	"3\"5       1760KB DSHD AmigaDOS",FS_1760KB_AMIGADOS,2},
+
 	{"fat160a",		"5\"25 & 8\" 160KB SSDD 300RPM FAT12",FS_5P25_300RPM_160KB_MSDOS_FAT12,0},
 	{"fat160b",		"5\"25 & 8\" 160KB SSDD 360RPM FAT12",FS_5P25_360RPM_160KB_MSDOS_FAT12,0},
 
@@ -2175,7 +2177,7 @@ HXCFE_FLOPPY * hxcfe_generateFloppy( HXCFE* floppycontext, char* path, int32_t f
 	imgldr_ctx = hxcfe_imgInitLoader(floppycontext);
 	if(imgldr_ctx)
 	{
-		if( fsID == FS_880KB_AMIGADOS )
+		if( fsID == FS_880KB_AMIGADOS || fsID == FS_1760KB_AMIGADOS )
 			moduleID = hxcfe_imgGetLoaderID (imgldr_ctx,PLUGIN_AMIGA_FS);
 		else
 			moduleID = hxcfe_imgGetLoaderID (imgldr_ctx,PLUGIN_FAT12FLOPPY);
