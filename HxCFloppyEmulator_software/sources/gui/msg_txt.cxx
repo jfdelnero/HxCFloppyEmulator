@@ -100,7 +100,7 @@ Fl_Menu_Item format_choices[]=
 	{ "DSK - Amstrad CPC DSK file format",0,format_choice_cb,(void*)PLUGIN_AMSTRADCPC_DSK},
 	{ "HFE - SD HxC Floppy Emulator (HDDD A2 Support)",0,format_choice_cb,(void*)PLUGIN_HXC_HDDD_A2},
 	{ "HFE - Rev 2 - Experimental",0,format_choice_cb,(void*)PLUGIN_HXC_EXTHFE},
-	{ "HFE - Rev 3 - Experimental",0,format_choice_cb,(void*)PLUGIN_HXC_HFEV3},	
+	{ "HFE - Rev 3 - Experimental",0,format_choice_cb,(void*)PLUGIN_HXC_HFEV3},
 	{ "Arburg - Arburg RAW sectors file format",0,format_choice_cb,(void*)PLUGIN_ARBURG},
 	{ "Raw - Stream Kryoflux file format",0,format_choice_cb,(void*)PLUGIN_SKF},
 	{ "IPF - SPS IPF file format (W.I.P)",0,format_choice_cb,(void*)PLUGIN_IPF},
@@ -109,7 +109,7 @@ Fl_Menu_Item format_choices[]=
 	{ "BMP - BMP file image (disk)",0,format_choice_cb,(void*)PLUGIN_DISK_BMP},
 	{ "XML - XML file image",0,format_choice_cb,(void*)PLUGIN_GENERIC_XML},
 	{ "NSI - Northstar file image",0,format_choice_cb,(void*)PLUGIN_NORTHSTAR},
-	{ "H8D - Heathkit file image",0,format_choice_cb,(void*)PLUGIN_HEATHKIT},	
+	{ "H8D - Heathkit file image",0,format_choice_cb,(void*)PLUGIN_HEATHKIT},
 	{0}
 };
 
@@ -169,6 +169,7 @@ Fl_Menu_Item fs_choices[]=
 	{ "3\"5        3.42MB DSDD Atari FAT12",0,fs_choice_cb,(void*)FS_3_42MB_ATARI_FAT12},
 
 	{ "3\"5        880KB DSDD AmigaDOS",0,fs_choice_cb,(void*)FS_880KB_AMIGADOS},
+	{ "3\"5        1760KB DSHD AmigaDOS",0,fs_choice_cb,(void*)FS_1760KB_AMIGADOS},
 
 	{0}
 };
