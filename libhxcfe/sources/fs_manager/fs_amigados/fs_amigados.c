@@ -383,7 +383,7 @@ static int32_t changedir(HXCFE_FSMNG * fsmng,char * path,SECTNUM * curdir,int32_
 int32_t amigados_mountImage(HXCFE_FSMNG * fsmng, HXCFE_FLOPPY *floppy)
 {
 	unsigned char sectorbuffer[512];
-	int32_t nbsector,fdcstatus,badsectorfound;
+	int32_t nbsector,nbtrack,fdcstatus,badsectorfound;
 	struct Volume * adfvolume;
 	struct Device * adfdevice;
 
@@ -426,6 +426,16 @@ int32_t amigados_mountImage(HXCFE_FSMNG * fsmng, HXCFE_FLOPPY *floppy)
 				if(fdcstatus == FDC_BAD_DATA_CRC)
 					badsectorfound++;
 				nbsector++;
+			}
+
+			if(nbsector)
+			{
+				nbtrack = 0;
+				while(hxcfe_readSectorFDC(fsmng->fdc,nbtrack,0,(unsigned char)(nbsector - 1),512,AMIGA_MFM_ENCODING,1,(unsigned char*)sectorbuffer,sizeof(sectorbuffer),&fdcstatus))
+				{
+					nbtrack++;
+				}
+				fsmng->trackperdisk = nbtrack;
 			}
 
 			fsmng->sidepertrack = 2;
