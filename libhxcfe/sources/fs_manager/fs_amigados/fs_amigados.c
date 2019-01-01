@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2018 Jean-François DEL NERO
+// Copyright (C) 2006-2019 Jean-François DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
@@ -822,7 +822,7 @@ int32_t amigados_fseek( HXCFE_FSMNG * fsmng,int32_t filehandle,int32_t offset,in
 					return HXCFE_NOERROR;
 				break;
 				case SEEK_END:
-					
+
 					adfFileSeek((struct File *)fsmng->handletable[filehandle-1], file->fileHdr->byteSize);
 
 					if((uint32_t)offset<file->pos)
