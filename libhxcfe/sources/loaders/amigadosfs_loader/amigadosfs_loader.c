@@ -290,13 +290,21 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flopp
     struct stat repstate;
 	struct tm * ts;
 	struct DateTime reptime;
+	char * disk_format_name;
 
 //	FILE * debugadf;
 	int rc;
 
-	numberoftrack=80;
-
-	numberofsectorpertrack=11;
+	numberoftrack = 80;
+	numberofsectorpertrack = 11;
+	if(parameters)
+	{
+		disk_format_name = (char*)parameters;
+		if(!strcmp(disk_format_name,"amigados_hd"))
+		{
+			numberofsectorpertrack = 22;
+		}
+	}
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AMIGADOSFSDK_libLoad_DiskFile %s",imgfile);
 

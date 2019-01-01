@@ -608,6 +608,8 @@ enum
 	FS_1_764MB_MSDOS_FAT12,
     FS_1_785MB_MSDOS_FAT12,
 
+    FS_1760KB_AMIGADOS
+
 };
 
 typedef struct FSENTRY_
