@@ -8,10 +8,19 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------- https://hxc2001.com --
 HxC Floppy Emulator project
-(c) 2006-2018 Jean-François DEL NERO / (c) HxC2001
+(c) 2006-2019 Jean-François DEL NERO / (c) HxC2001
 Forum    : http://torlus.com/floppy/forum
 Facebook : https://www.facebook.com/groups/hxc2001
 -------------------------------------------------------------------------------
+
+/*********************************************************
+01 January 2019 : HxCFloppyEmulator 2.1.21.1
+
+Dos disk browser : Amiga HD (1760KB) disk creation support.
+Dos disk browser : Amiga HD (1760KB) disk support fixed.
+TeleDisk loader fixed : Bad CRC checking fixed.
+
+*********************************************************/
 
 /*********************************************************
 22 December 2018 : HxCFloppyEmulator 2.1.20.1
