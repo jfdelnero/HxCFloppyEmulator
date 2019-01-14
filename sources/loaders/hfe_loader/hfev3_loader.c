@@ -367,7 +367,7 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 #ifdef DEBUGVB
 								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T%.3dS%d Off[%.5d] : SETINDEX_OPCODE",i,j,l);
 #endif
-								setbits(currentside->indexbuffer,bitoffset_out,1, 256*8, currentside->tracklen);
+								setbits(currentside->indexbuffer,bitoffset_out,1, 256*8, currentside->tracklen*8);
 
 								l++;
 								bitoffset_in += 8;
@@ -395,7 +395,7 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T%.3dS%d Off[%.5d] : SKIPBITS_OPCODE : %d 0x%.2X",i,j,l,bitskip,hfetrack2[l+2]);
 #endif
 
-								cpybits(currentside->databuffer,bitoffset_out,&hfetrack2[l+2],bitskip , 8-bitskip,currentside->tracklen,tracklen);
+								cpybits(currentside->databuffer,bitoffset_out,&hfetrack2[l+2],bitskip , 8-bitskip,currentside->tracklen*8,tracklen*8);
 								bitoffset_out+= (8-bitskip);
 								bitoffset_in += 8*3;
 								l += 3;
@@ -412,7 +412,7 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 					}
 					else
 					{
-						bitoffset_out = cpybits(currentside->databuffer,bitoffset_out,hfetrack2,bitoffset_in, 8,currentside->tracklen,tracklen);
+						bitoffset_out = cpybits(currentside->databuffer,bitoffset_out,hfetrack2,bitoffset_in, 8,currentside->tracklen*8,tracklen*8);
 
 						currentside->timingbuffer[k] = bitrate;
 						bitoffset_in += 8;
