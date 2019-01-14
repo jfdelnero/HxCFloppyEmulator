@@ -155,6 +155,10 @@ trackedittool_window::trackedittool_window() {
       bt_reversedisk->labelsize(10);
       bt_reversedisk->callback((Fl_Callback*)edittool_window_bt_reversedisk_callback, (void*)(this));
     } // Fl_Button* bt_reversedisk
+    { bt_add_delete_side1 = new Fl_Button(120, 246, 95, 16, "Add/Delete Side 1");
+      bt_add_delete_side1->labelsize(10);
+      bt_add_delete_side1->callback((Fl_Callback*)edittool_window_bt_add_delete_side1_callback, (void*)(this));
+    } // Fl_Button* bt_add_delete_side1
     window->end();
   } // Fl_Double_Window* window
 }

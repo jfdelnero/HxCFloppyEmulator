@@ -29,6 +29,7 @@ extern void edittool_window_bt_shifttracks_callback(Fl_Button*, void*);
 extern void edittool_window_bt_swapsides_callback(Fl_Button*, void*);
 extern void edittool_window_bt_repair_callback(Fl_Button*, void*);
 extern void edittool_window_bt_reversedisk_callback(Fl_Button*, void*);
+extern void edittool_window_bt_add_delete_side1_callback(Fl_Button*, void*);
 
 class trackedittool_window {
 public:
@@ -65,5 +66,6 @@ public:
   Fl_Button *bt_swapsides;
   Fl_Button *bt_repair;
   Fl_Button *bt_reversedisk;
+  Fl_Button *bt_add_delete_side1;
 };
 #endif

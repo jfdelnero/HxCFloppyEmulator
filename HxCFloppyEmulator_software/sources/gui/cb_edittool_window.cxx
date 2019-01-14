@@ -821,6 +821,34 @@ void edittool_window_bt_erase_side1_callback(Fl_Button *o, void *v)
 
 }
 
+void edittool_window_bt_add_delete_side1_callback(Fl_Button *o, void *v)
+{
+	Main_Window *window;
+	trackedittool_window *tew;
+
+	window = (Main_Window *)guicontext->main_window;
+	tew = (trackedittool_window *)window->trackedit_window;
+
+	hxc_entercriticalsection(guicontext->hxcfe,1);
+
+	if( hxcfe_getNumberOfSide(guicontext->hxcfe,guicontext->loadedfloppy) == 1 )
+	{
+		hxcfe_allocSide1( guicontext->hxcfe, guicontext->loadedfloppy );
+	}
+	else
+	{
+		if( hxcfe_getNumberOfSide(guicontext->hxcfe,guicontext->loadedfloppy) == 2 )
+		{
+			hxcfe_deleteSide1( guicontext->hxcfe, guicontext->loadedfloppy );
+		}
+	}
+
+	guicontext->updatefloppyinfos = 1;
+
+	hxc_leavecriticalsection(guicontext->hxcfe,1);
+
+}
+
 void edittool_window_bt_addtrack_callback(Fl_Button *o, void *v)
 {
 	Main_Window *window;
