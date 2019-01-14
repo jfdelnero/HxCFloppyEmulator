@@ -8,7 +8,7 @@ class trackedittool_window {open
   } {
     Fl_Window window {
       label {Track edition toolbar} open selected
-      xywh {71 155 220 375} type Double labelsize 12 visible
+      xywh {439 251 220 375} type Double labelsize 12 visible
     } {
       Fl_Button bt_copy {
         label Copy
@@ -180,6 +180,12 @@ class trackedittool_window {open
         user_data this
         callback edittool_window_bt_reversedisk_callback
         xywh {121 310 95 16} labelsize 10
+      }
+      Fl_Button bt_add_delete_side1 {
+        label {Add/Delete Side 1}
+        user_data this
+        callback edittool_window_bt_add_delete_side1_callback
+        xywh {120 246 95 16} labelsize 10
       }
     }
   }
