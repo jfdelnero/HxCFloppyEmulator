@@ -184,8 +184,17 @@ HXCFE_CYLINDER* allocCylinderEntry(int32_t rpm,int32_t number_of_side)
 		cyl=(HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
 		cyl->floppyRPM=rpm;
 		cyl->number_of_side=number_of_side;
-		cyl->sides=(HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*number_of_side);
-		memset(cyl->sides,0,sizeof(HXCFE_SIDE*)*number_of_side);
+
+		if( number_of_side <= 2 )
+		{
+			cyl->sides = (HXCFE_SIDE**)malloc( sizeof(HXCFE_SIDE*) * 2 );
+			memset( cyl->sides, 0, sizeof(HXCFE_SIDE*) * 2 );
+		}
+		else
+		{
+			cyl->sides = (HXCFE_SIDE**)malloc( sizeof(HXCFE_SIDE*) * number_of_side );
+			memset( cyl->sides, 0, sizeof(HXCFE_SIDE*) * number_of_side );			
+		}
 	}
 
 	return cyl;
