@@ -889,6 +889,71 @@ int32_t hxcfe_removeLastTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp)
 	return HXCFE_BADPARAMETER;
 }
 
+int32_t hxcfe_deleteSide1( HXCFE* floppycontext, HXCFE_FLOPPY * fp )
+{
+	int track;
+
+	if( fp )
+	{
+		if( fp->floppyNumberOfSide == 2 )
+		{
+			for( track = 0; track < fp->floppyNumberOfTrack; track++ )
+			{
+				if( fp->tracks[track]->number_of_side == 2 )
+				{
+					hxcfe_freeSide( floppycontext, fp->tracks[track]->sides[1] );
+					fp->tracks[track]->number_of_side = 1;
+				}
+			}
+
+			fp->floppyNumberOfSide = 1;
+
+			return HXCFE_NOERROR;
+		}
+	}
+
+	return HXCFE_BADPARAMETER;
+}
+
+int32_t hxcfe_allocSide1( HXCFE* floppycontext, HXCFE_FLOPPY * fp )
+{
+	int track,i,tracklen;
+
+	if( fp )
+	{
+		if( fp->floppyNumberOfSide == 1 )
+		{
+			for( track = 0; track < fp->floppyNumberOfTrack; track++ )
+			{
+				if( fp->tracks[track]->number_of_side == 1 )
+				{
+					fp->tracks[track]->sides[1] = hxcfe_duplicateSide( floppycontext, fp->tracks[track]->sides[0] );
+					fp->tracks[track]->number_of_side = 2;
+
+					tracklen = hxcfe_getTrackLength(floppycontext,fp,track,1);
+
+					for(i=0;i<tracklen;i++)
+					{
+						if(!(i&0x3))
+							hxcfe_setCellState( floppycontext, fp->tracks[track]->sides[1], i, 1 );
+						else
+							hxcfe_setCellState( floppycontext, fp->tracks[track]->sides[1], i, 0 );
+
+						hxcfe_setCellFlakeyState( floppycontext, fp->tracks[track]->sides[1], i, 0 );
+					}
+				}
+			}
+
+			fp->floppyNumberOfSide = 2;
+
+			return HXCFE_NOERROR;
+		}
+	}
+
+
+	return HXCFE_BADPARAMETER;
+}
+
 int32_t hxcfe_addTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp, uint32_t bitrate, int32_t rpm )
 {
 	HXCFE_CYLINDER ** oldcylinderarray;
