@@ -188,3 +188,5 @@ EXPORTS
    hxcfe_sectorRepair           @521
    hxcfe_reverseTrackData       @522
    hxcfe_reverseFloppy          @523
+   hxcfe_deleteSide1            @524
+   hxcfe_allocSide1             @525
