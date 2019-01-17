@@ -251,7 +251,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 								hxc_fread(sectorconfig[j].input_data,sectorconfig[j].sectorsize,f);
 
 								// Find the weak bits.
-								if( (sectorconfig[j].sectorsize != sector.data_length) )
+								if( (sectorconfig[j].sectorsize != sector.data_length) && sector.data_length )
 								{
 									sectorconfig[j].weak_bits_mask = malloc(sectorconfig[j].sectorsize);
 									if( sectorconfig[j].weak_bits_mask )
@@ -274,7 +274,10 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 									}
 								}
 
-								sectorposition += sector.data_length;
+								if( sector.data_length )
+									sectorposition += sector.data_length;
+								else
+									sectorposition += sectorconfig[j].sectorsize;
 
 								// ID part CRC ERROR ?
 								if((sector.fdc_status_reg1&0x20) && !(sector.fdc_status_reg2&0x20))
