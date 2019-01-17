@@ -12,10 +12,11 @@ HxC Floppy Emulator project
 Forum    : http://torlus.com/floppy/forum
 Facebook : https://www.facebook.com/groups/hxc2001
 -------------------------------------------------------------------------------
+
 /*********************************************************
 17 January 2019 : HxCFloppyEmulator 2.1.22.2
 
-CPCDSK loader: v2.1.20.1 Regression fixed. (null sector data lenght field support).
+CPCDSK loader: v2.1.20.1 Regression fixed. (null sector data length field support).
 
 *********************************************************/
 
