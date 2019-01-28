@@ -1659,7 +1659,7 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 	fb_track_state * cur_track;
 	FILE * filehandle;
 	HXCFE_SIDE* tmp_side;
-
+	int disk_bitrate;
 	if ( !f && !diskdata )
 		return HXCFE_BADPARAMETER;
 
@@ -1708,13 +1708,12 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 	skew_per_side = cur_track->side_skew;
 	fill_byte = cur_track->sc_stack[cur_track->sc_stack_pointer].fill_byte;
 
-	fb_ctx->floppycontext->hxc_printf(MSG_INFO_1,"Image Size:%dkB, %d tracks, %d side(s), %d sectors/track, interleave:%d,rpm:%d bitrate:%d",(image_size-start_file_ofs)/1024,
+	fb_ctx->floppycontext->hxc_printf(MSG_INFO_1,"Image Size:%dkB, %d tracks, %d side(s), %d sectors/track, interleave:%d,rpm:%d",(image_size-start_file_ofs)/1024,
 																																						numberoftracks,
 																																						fb_ctx->floppydisk->floppyNumberOfSide,
 																																						numberofsector,
 																																						interleave,
-																																						rpm,
-																																						fb_ctx->floppydisk->floppyBitRate);
+																																						rpm);
 
 	track_buffer = malloc( sectorsize *	numberofsector );
 	if( !track_buffer )
@@ -1813,12 +1812,33 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 		}
 	}
 
+	disk_bitrate = VARIABLEBITRATE;
+	if(fb_ctx->floppydisk->tracks[0] && fb_ctx->floppydisk->tracks[0]->sides[0])
+	{
+		disk_bitrate = fb_ctx->floppydisk->tracks[0]->sides[0]->bitrate;
+	}
+
+	for(i = 0 ; i < fb_ctx->floppydisk->floppyNumberOfTrack ; i++ )
+	{
+		for(j = 0 ; j < fb_ctx->floppydisk->floppyNumberOfSide ; j++ )
+		{
+			if(fb_ctx->floppydisk->tracks[i] && fb_ctx->floppydisk->tracks[i]->sides[j])
+			{
+				if( fb_ctx->floppydisk->tracks[i]->sides[j]->bitrate != disk_bitrate )
+				{
+					disk_bitrate = VARIABLEBITRATE;
+				}
+			}
+		}
+	}
+
+	fb_ctx->floppydisk->floppyBitRate = disk_bitrate;
+
 	if ( floppy )
 	{
 		memcpy(floppy, fb_ctx->floppydisk , sizeof(HXCFE_FLOPPY));
 		floppy->floppyiftype = cur_track->interface_mode;
 	}
-
 
 	fb_ctx->floppycontext->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
