@@ -122,6 +122,6 @@ datatype * disklayout_list[]=
 	data_DiskLayout_Memotech_40T_xml,
 	data_DiskLayout_DEC_RX55_xml,
 	data_DiskLayout_Unitel_Videotex_xml,
-	data_DiskLayout_Coat_A_Matic_Robox_RC9400_DD_289KB_xml.h,
+	data_DiskLayout_Coat_A_Matic_Robox_RC9400_DD_289KB_xml,
 	0
 };
