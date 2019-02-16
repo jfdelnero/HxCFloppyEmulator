@@ -58,6 +58,7 @@
 #include "data_DiskLayout_Tatung_Einstein_DD_200KB_xml.h"
 #include "data_DiskLayout_Tatung_Einstein_DD_400KB_xml.h"
 #include "data_DiskLayout_TRS80_JV1_xml.h"
+#include "data_DiskLayout_Coat_A_Matic_Robox_RC9400_DD_289KB_xml.h"
 
 datatype * disklayout_list[]=
 {
@@ -66,7 +67,7 @@ datatype * disklayout_list[]=
 	data_DiskLayout_CasioFZ1_HD_1_25MB_xml,
 	data_DiskLayout_ABB_ASEA_320KB_xml,
 	data_DiskLayout_ABB_ASEA_328KB_xml,
-    data_DiskLayout_ABB_ASEA_640KB_xml,
+	data_DiskLayout_ABB_ASEA_640KB_xml,
 	data_DiskLayout_Acorn_160K_ADFS_xml,
 	data_DiskLayout_Acorn_320K_ADFM_xml,
 	data_DiskLayout_Acorn_640K_ADFL_xml,
@@ -121,5 +122,6 @@ datatype * disklayout_list[]=
 	data_DiskLayout_Memotech_40T_xml,
 	data_DiskLayout_DEC_RX55_xml,
 	data_DiskLayout_Unitel_Videotex_xml,
+	data_DiskLayout_Coat_A_Matic_Robox_RC9400_DD_289KB_xml.h,
 	0
 };
