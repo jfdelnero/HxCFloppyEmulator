@@ -1134,7 +1134,7 @@ int get_next_AMIGAMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 
 					sector_size = 512;
 
-					floppycontext->hxc_printf(MSG_DEBUG,"Valid Amiga MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",header[1]>>1,header[1]&1,header[2],sector_size);
+					floppycontext->hxc_printf(MSG_DEBUG,"Valid Amiga MFM sector header found - Cyl:%d Side:%d Sect:%d LeftSect:%d Size:%d",header[1]>>1,header[1]&1,header[2],header[3],sector_size);
 
 					sortbuffer(&sector_data[32],temp_sector,sector_size);
 					memcpy(&sector_data[32],temp_sector,sector_size);
