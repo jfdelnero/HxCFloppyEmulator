@@ -138,7 +138,7 @@ int * getSectorHeaderOffset(HXCFE* floppycontext,unsigned char * trackbuffer,int
 				if(1)//trackbuffer[i-1]!=0xA1)
 				{
 					offsetlist[t]=i-1;
-					floppycontext->hxc_printf(MSG_DEBUG,"[%x] header",offsetlist[t]);
+					floppycontext->hxc_printf(MSG_DEBUG,"[0x%X] header",offsetlist[t]);
 					t++;
 				}
 			}
@@ -152,7 +152,7 @@ int * getSectorHeaderOffset(HXCFE* floppycontext,unsigned char * trackbuffer,int
 
 
 /////////////////////////////////////////////////////////////////
-// This function try to found index/data mark and path them.
+// This function try to found index/data mark and patch them.
 // Used on tracks without sector.
 /////////////////////////////////////////////////////////////////
 void patchtrack(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * trackclock,int buffersize,int tracknum)
@@ -703,7 +703,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						{
 							hxc_fread( &temp_val, sizeof(unsigned short), f );
 #ifdef PASTI_DBG
-							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Unknow value %x",temp_val);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Unknow value 0x%X",temp_val);
 #endif
 						}
 
@@ -893,7 +893,6 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 							///////////////////////////// debug ///////////////////////////////
 #ifdef PASTI_DBG
-
 							sprintf(tempstring,"Sector:%.2d Size:%.8d Cylcode:%.2d HeadCode:%d SectorCode:%.2d Size:%d",j,sectorconfig[j].sectorsize,sectorconfig[j].cylinder,sectorconfig[j].head,sectorconfig[j].sector,sectorconfig[j].sectorsize);
 							sprintf(&tempstring[strlen(tempstring)]," Sector header:");
 							for(debug_i=0;debug_i<sizeof(pasti_sector);debug_i++)
@@ -947,7 +946,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						{
 							hxc_fread( &index_sync, sizeof(unsigned short), f );
 #ifdef PASTI_DBG
-							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Index sync pos %x",index_sync);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Index sync pos 0x%X",index_sync);
 #endif
 						}
 						hxc_fread( &temp_val, sizeof(unsigned short), f );
@@ -955,7 +954,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						tracklen=temp_val;
 
 #ifdef PASTI_DBG
-						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"READTRACK datas size %x",tracklen);
+						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"READTRACK data size 0x%X (File offset 0x%.8X)",tracklen,ftell(f));
 #endif
 
 						temptrack=(unsigned char*)malloc(tracklen);
