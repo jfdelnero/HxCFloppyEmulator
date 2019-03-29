@@ -14,11 +14,12 @@ Facebook : https://www.facebook.com/groups/hxc2001
 -------------------------------------------------------------------------------
 
 /*********************************************************
-Current Beta/dev snapshoot version
-
-16 February 2019 : HxCFloppyEmulator X.X.X.X
+29 March 2019 : HxCFloppyEmulator 2.1.23.1
 
 New XML format : Coat-A-Matic 9400 / Robox RC9400 format.
+
+Amiga Image loader (ADF, DMS,...) : Fix the v2.1.20.1 left sector(s) field regression ! 
+Update recommended for Amiga users !
 
 *********************************************************/
 
