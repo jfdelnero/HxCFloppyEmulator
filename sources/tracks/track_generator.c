@@ -1920,6 +1920,12 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 		indexperiod=(indexlen&0xFFFFFF)/10;
 	}
 
+	// Set/Fix the sector left field (Amiga)
+	for(i=0;i<number_of_sector;i++)
+	{
+		sectorconfigtab[i].sectorsleft = number_of_sector - i;
+	}
+
 	//first try : get a standard value...
 	if(gap3tocompute==number_of_sector)
 	{
@@ -2041,15 +2047,15 @@ HXCFE_SIDE * tg_generateTrack(unsigned char * sectors_data,int32_t sector_size,i
 
 	for(i=0;i<number_of_sector;i++)
 	{
-		sectorconfigtab[i].cylinder=track;
-		sectorconfigtab[i].head=side;
-		sectorconfigtab[i].bitrate=bitrate;
-		sectorconfigtab[i].gap3=gap3;
-		sectorconfigtab[i].input_data=&sectors_data[sector_size*i];
-		sectorconfigtab[i].sectorsize=sector_size;
-		sectorconfigtab[i].trackencoding=trackencoding;
-		sectorconfigtab[i].sector=sectorid+i;
-		sectorconfigtab[i].sectorsleft=number_of_sector-i; // Used in Amiga tracks.
+		sectorconfigtab[i].cylinder = track;
+		sectorconfigtab[i].head = side;
+		sectorconfigtab[i].bitrate = bitrate;
+		sectorconfigtab[i].gap3 = gap3;
+		sectorconfigtab[i].input_data = &sectors_data[sector_size*i];
+		sectorconfigtab[i].sectorsize = sector_size;
+		sectorconfigtab[i].trackencoding = trackencoding;
+		sectorconfigtab[i].sector = sectorid + i;
+		sectorconfigtab[i].sectorsleft = number_of_sector - i; // Used in Amiga tracks.
 	}
 
 	currentside = tg_generateTrackEx(number_of_sector,sectorconfigtab,interleave,skew,bitrate,rpm,trackencoding,pregap,indexlen,indexpos);
