@@ -95,6 +95,7 @@ int ACORNADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		rawcfg.gap3 = 80;
 		rawcfg.interleave = 1;
 		rawcfg.bitrate = 500000;
+		rawcfg.start_sector_id = 0;
 	}
 	else
 	{
@@ -104,6 +105,7 @@ int ACORNADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		rawcfg.gap3 = 80;
 		rawcfg.interleave = 1;
 		rawcfg.bitrate = 250000;
+		rawcfg.start_sector_id = 0;
 	}
 
 	rawcfg.track_format = ISOFORMAT_DD;
