@@ -142,16 +142,16 @@ int Apple2_nib_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 			for(i=0;i<NIB_TRACK_SIZE;i++)
 			{
 				data_nibble = trackdata[i];
-				pulses = ext_a2_bit_expander[ data_nibble ];
+				pulses = LUT_Byte2ShortEvenBitsExpander[ data_nibble ];
 
 #ifdef HDDD_A2_SUPPORT
 				// Add the FM Clocks
-				fm_pulses = ext_a2_bit_expander[pulses >> 8] | 0x2222;
+				fm_pulses = LUT_Byte2ShortEvenBitsExpander[pulses >> 8] | 0x2222;
 				currentcylinder->sides[0]->databuffer[(i*4)+0] = fm_pulses >> 8;
 				currentcylinder->sides[0]->databuffer[(i*4)+1] = fm_pulses &  0xFF;
 
 				// Add the FM Clocks
-				fm_pulses = ext_a2_bit_expander[pulses &  0xFF] | 0x2222;
+				fm_pulses = LUT_Byte2ShortEvenBitsExpander[pulses &  0xFF] | 0x2222;
 				currentcylinder->sides[0]->databuffer[(i*4)+2] = fm_pulses >> 8;
 				currentcylinder->sides[0]->databuffer[(i*4)+3] = fm_pulses &  0xFF;
 #else

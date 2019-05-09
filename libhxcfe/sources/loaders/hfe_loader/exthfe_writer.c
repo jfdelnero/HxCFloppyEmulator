@@ -63,10 +63,10 @@ void extaddpad(unsigned char * track,int mfmsize,int tracksize)
 
 		do
 		{
-			if(j<tracksize)track[j++]=bit_inverter[0x00];
-			if(j<tracksize)track[j++]=bit_inverter[0x06];
-			if(j<tracksize)track[j++]=bit_inverter[0xAA];
-			if(j<tracksize)track[j++]=bit_inverter[0xAA];
+			if(j<tracksize)track[j++]=LUT_ByteBitsInverter[0x00];
+			if(j<tracksize)track[j++]=LUT_ByteBitsInverter[0x06];
+			if(j<tracksize)track[j++]=LUT_ByteBitsInverter[0xAA];
+			if(j<tracksize)track[j++]=LUT_ByteBitsInverter[0xAA];
 		}
 		while(j<tracksize);
 
@@ -278,8 +278,8 @@ int EXTHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 
 					for(l=0;l<(tracksize/2);l=l+1)
 					{
-						mfmtracks0[l*2] = bit_expander[mfmtemp[l]]>>8;
-						mfmtracks0[(l*2)+1] = bit_expander[mfmtemp[l]]&0xFF;
+						mfmtracks0[l*2] = LUT_Byte2ShortEvenBitsExpander[mfmtemp[l]]>>8;
+						mfmtracks0[(l*2)+1] = LUT_Byte2ShortEvenBitsExpander[mfmtemp[l]]&0xFF;
 					}
 				}
 				if(floppy->tracks[i]->number_of_side==2)
@@ -298,8 +298,8 @@ int EXTHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 
 						for(l=0;l<(tracksize/2);l=l+1)
 						{
-							mfmtracks1[l*2] = (bit_expander[mfmtemp[l]]>>8);
-							mfmtracks1[(l*2)+1] = bit_expander[mfmtemp[l]]&0xFF;
+							mfmtracks1[l*2] = (LUT_Byte2ShortEvenBitsExpander[mfmtemp[l]]>>8);
+							mfmtracks1[(l*2)+1] = LUT_Byte2ShortEvenBitsExpander[mfmtemp[l]]&0xFF;
 						}
 					}
 
@@ -315,9 +315,9 @@ int EXTHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 						// inversion des bits pour le EUSART du PIC.
 
 						// head 0
-						mfmtrackfinal[(k*512)+j] = bit_inverter[mfmtracks0[(k*256)+j]];
+						mfmtrackfinal[(k*512)+j] = LUT_ByteBitsInverter[mfmtracks0[(k*256)+j]];
 						// head 1
-						mfmtrackfinal[(k*512)+j+256] = bit_inverter[mfmtracks1[(k*256)+j]];
+						mfmtrackfinal[(k*512)+j+256] = LUT_ByteBitsInverter[mfmtracks1[(k*256)+j]];
 
 					}
 				}

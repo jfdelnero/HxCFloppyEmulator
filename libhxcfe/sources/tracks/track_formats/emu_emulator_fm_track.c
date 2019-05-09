@@ -111,7 +111,7 @@ int get_next_EMU_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 			case LOOKFOR_ADDM:
 
 				sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_buffer,5,bit_offset,0);
-				if((bit_inverter[tmp_buffer[0]]==0xFA) && (bit_inverter[tmp_buffer[1]]==0x96))
+				if((LUT_ByteBitsInverter[tmp_buffer[0]]==0xFA) && (LUT_ByteBitsInverter[tmp_buffer[1]]==0x96))
 				{
 					sector->startsectorindex = bit_offset;
 					sector->startdataindex = sector->endsectorindex;
@@ -140,7 +140,7 @@ int get_next_EMU_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 					{ // crc ok !!!
 
 						sector->use_alternate_header_crc = 0x00;
-						floppycontext->hxc_printf(MSG_DEBUG,"Valid EmuII FM sector header found - Sect:%d",bit_inverter[tmp_buffer[2]]);
+						floppycontext->hxc_printf(MSG_DEBUG,"Valid EmuII FM sector header found - Sect:%d",LUT_ByteBitsInverter[tmp_buffer[2]]);
 						old_bit_offset=bit_offset;
 
 						//11111011
@@ -158,8 +158,8 @@ int get_next_EMU_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 						if((bit_offset-old_bit_offset<((88+16)*8*2)) && bit_offset!=-1)
 						{
 
-							sector->cylinder = bit_inverter[tmp_buffer[2]]>>1;
-							sector->head = bit_inverter[tmp_buffer[2]]&1;
+							sector->cylinder = LUT_ByteBitsInverter[tmp_buffer[2]]>>1;
+							sector->head = LUT_ByteBitsInverter[tmp_buffer[2]]&1;
 							sector->sector = 1;
 							sector_size = 0xE00;
 							sector->sectorsize = sector_size;
@@ -198,7 +198,7 @@ int get_next_EMU_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 
 								for(k=0;k<sector_size;k++)
 								{
-									sector->input_data[k]=bit_inverter[sector->input_data[k]];
+									sector->input_data[k]=LUT_ByteBitsInverter[sector->input_data[k]];
 								}
 
 								// "Empty" sector detection
@@ -301,7 +301,7 @@ int analysis_and_extract_sector_EMUIIFM(HXCFE* floppycontext,HXCFE_SIDE * track,
 
 			case LOOKFOR_ADDM:
 				fmtobin(track->databuffer,track->tracklen,tmp_buffer,5,bit_offset,0);
-				if((bit_inverter[tmp_buffer[0]]==0xFA) && (bit_inverter[tmp_buffer[1]]==0x96))
+				if((LUT_ByteBitsInverter[tmp_buffer[0]]==0xFA) && (LUT_ByteBitsInverter[tmp_buffer[1]]==0x96))
 				{
 					CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x8005,0x0000);
 					for(k=0;k<3;k++)
@@ -311,7 +311,7 @@ int analysis_and_extract_sector_EMUIIFM(HXCFE* floppycontext,HXCFE_SIDE * track,
 					if(!CRC16_High && !CRC16_Low)
 					{ // crc ok !!!
 						number_of_sector++;
-						floppycontext->hxc_printf(MSG_DEBUG,"Valid EmuII FM sector header found - Sect:%d",bit_inverter[tmp_buffer[2]]);
+						floppycontext->hxc_printf(MSG_DEBUG,"Valid EmuII FM sector header found - Sect:%d",LUT_ByteBitsInverter[tmp_buffer[2]]);
 						old_bit_offset=bit_offset;
 
 						sector_size = 0xE00;
@@ -335,8 +335,8 @@ int analysis_and_extract_sector_EMUIIFM(HXCFE* floppycontext,HXCFE_SIDE * track,
 							sectors->sectorlist[sectors->number_of_sector-1]=(sect_sector*)malloc(sizeof(sect_sector));
 							memset(sectors->sectorlist[sectors->number_of_sector-1],0,sizeof(sect_sector));
 
-							sectors->sectorlist[sectors->number_of_sector-1]->track_id=bit_inverter[tmp_buffer[2]]>>1;
-							sectors->sectorlist[sectors->number_of_sector-1]->side_id=bit_inverter[tmp_buffer[2]]&1;
+							sectors->sectorlist[sectors->number_of_sector-1]->track_id=LUT_ByteBitsInverter[tmp_buffer[2]]>>1;
+							sectors->sectorlist[sectors->number_of_sector-1]->side_id=LUT_ByteBitsInverter[tmp_buffer[2]]&1;
 							sectors->sectorlist[sectors->number_of_sector-1]->sector_id=1;
 							sectors->sectorlist[sectors->number_of_sector-1]->sectorsize=0xE00;
 
@@ -362,7 +362,7 @@ int analysis_and_extract_sector_EMUIIFM(HXCFE* floppycontext,HXCFE_SIDE * track,
 
 							for(k=0;k<sector_size;k++)
 							{
-								tmp_sector[k]=bit_inverter[tmp_sector[k]];
+								tmp_sector[k]=LUT_ByteBitsInverter[tmp_sector[k]];
 							}
 
 							sectors->sectorlist[sectors->number_of_sector-1]->buffer=(unsigned char*)malloc(sector_size);
@@ -465,7 +465,7 @@ int32_t BuildEmuIITrack(HXCFE* floppycontext,int tracknumber,int sidenumber,unsi
 			//Track GAP
 			for(k=0;k<20;k++)
 			{
-				setfieldbit(tempdata,bit_inverter[0xFF],j,8);
+				setfieldbit(tempdata,LUT_ByteBitsInverter[0xFF],j,8);
 				j=j+8;
 			}
 
@@ -473,20 +473,20 @@ int32_t BuildEmuIITrack(HXCFE* floppycontext,int tracknumber,int sidenumber,unsi
 			//Sector Header
 			for(k=0;k<4;k++)
 			{
-				setfieldbit(tempdata,bit_inverter[0x00],j,8);
+				setfieldbit(tempdata,LUT_ByteBitsInverter[0x00],j,8);
 				j += 8;
 			}
 
-			setfieldbit(tempdata,bit_inverter[0xFA],j,8);
+			setfieldbit(tempdata,LUT_ByteBitsInverter[0xFA],j,8);
 			j += 8;
-			setfieldbit(tempdata,bit_inverter[0x96],j,8);
+			setfieldbit(tempdata,LUT_ByteBitsInverter[0x96],j,8);
 			j += 8;
-			setfieldbit(tempdata,bit_inverter[track_num],j,8);
+			setfieldbit(tempdata,LUT_ByteBitsInverter[track_num],j,8);
 			j += 8;
 
 			//CRC The sector Header CRC
 			CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,0x8005,0x0000);
-			CRC16_Update(&CRC16_High,&CRC16_Low,bit_inverter[track_num],(unsigned char*)&crctable );
+			CRC16_Update(&CRC16_High,&CRC16_Low,LUT_ByteBitsInverter[track_num],(unsigned char*)&crctable );
 
 			setfieldbit(tempdata,CRC16_High,j,8);
 			j += 8;
@@ -498,31 +498,31 @@ int32_t BuildEmuIITrack(HXCFE* floppycontext,int tracknumber,int sidenumber,unsi
 
 				// Emu 1
 				case 1:
-					setfieldbit(tempdata,bit_inverter[0x00],j,8);
+					setfieldbit(tempdata,LUT_ByteBitsInverter[0x00],j,8);
 					j += 8;
-					setfieldbit(tempdata,bit_inverter[0x00],j,8);
+					setfieldbit(tempdata,LUT_ByteBitsInverter[0x00],j,8);
 					j += 8;
 
 					for(k=0;k<7;k++)
 					{
-						setfieldbit(tempdata,bit_inverter[0xFF],j,8);
+						setfieldbit(tempdata,LUT_ByteBitsInverter[0xFF],j,8);
 						j += 8;
 					}
-					//tempdata[j++]=bit_inverter[0xFF];
+					//tempdata[j++]=LUT_ByteBitsInverter[0xFF];
 
 				break;
 
 				// Emu 2
 				case 2:
-					setfieldbit(tempdata,bit_inverter[0x00],j,8);
+					setfieldbit(tempdata,LUT_ByteBitsInverter[0x00],j,8);
 					j += 8;
 					for(k=0;k<7;k++)
 					{
-						setfieldbit(tempdata,bit_inverter[0xFF],j,8);
+						setfieldbit(tempdata,LUT_ByteBitsInverter[0xFF],j,8);
 						j += 8;
 					}
 
-					setfieldbit(tempdata,bit_inverter[0xFF],j,4);
+					setfieldbit(tempdata,LUT_ByteBitsInverter[0xFF],j,4);
 					j += 4;
 				break;
 			}
@@ -533,13 +533,13 @@ int32_t BuildEmuIITrack(HXCFE* floppycontext,int tracknumber,int sidenumber,unsi
 
 			for(k=0;k<4;k++)
 			{
-				setfieldbit(tempdata,bit_inverter[0x00],j,8);
+				setfieldbit(tempdata,LUT_ByteBitsInverter[0x00],j,8);
 				j += 8;
 			}
 
-			setfieldbit(tempdata,bit_inverter[0xFA],j,8);
+			setfieldbit(tempdata,LUT_ByteBitsInverter[0xFA],j,8);
 			j += 8;
-			setfieldbit(tempdata,bit_inverter[0x96],j,8);
+			setfieldbit(tempdata,LUT_ByteBitsInverter[0x96],j,8);
 			j += 8;
 
 			//CRC The sector data CRC
@@ -547,9 +547,9 @@ int32_t BuildEmuIITrack(HXCFE* floppycontext,int tracknumber,int sidenumber,unsi
 
 			for(k=0;k<sectorsize;k++)
 			{
-				setfieldbit(tempdata,bit_inverter[datain[k]],j,8);
+				setfieldbit(tempdata,LUT_ByteBitsInverter[datain[k]],j,8);
 				j += 8;
-				CRC16_Update(&CRC16_High,&CRC16_Low,bit_inverter[datain[k]],(unsigned char*)&crctable );
+				CRC16_Update(&CRC16_High,&CRC16_Low,LUT_ByteBitsInverter[datain[k]],(unsigned char*)&crctable );
 			}
 
 			setfieldbit(tempdata,CRC16_High,j,8);
@@ -557,15 +557,15 @@ int32_t BuildEmuIITrack(HXCFE* floppycontext,int tracknumber,int sidenumber,unsi
 			setfieldbit(tempdata,CRC16_Low,j,8);
 			j += 8;
 
-			setfieldbit(tempdata,bit_inverter[0x00],j,8);
+			setfieldbit(tempdata,LUT_ByteBitsInverter[0x00],j,8);
 			j += 8;
-			setfieldbit(tempdata,bit_inverter[0x00],j,8);
+			setfieldbit(tempdata,LUT_ByteBitsInverter[0x00],j,8);
 			j += 8;
 
 
 			for(k=0;k<20;k++)
 			{
-				setfieldbit(tempdata,bit_inverter[0xFF],j,8);
+				setfieldbit(tempdata,LUT_ByteBitsInverter[0xFF],j,8);
 				j += 8;
 			}
 			/////////////////////////////////////////////////////////////////////////////////////////////
@@ -576,11 +576,11 @@ int32_t BuildEmuIITrack(HXCFE* floppycontext,int tracknumber,int sidenumber,unsi
 				{
 					if(j+8<(current_buffer_size*8))
 					{
-						setfieldbit(tempdata,bit_inverter[0xFF],j,8);
+						setfieldbit(tempdata,LUT_ByteBitsInverter[0xFF],j,8);
 					}
 					else
 					{
-						setfieldbit(tempdata,bit_inverter[0xFF],j,(current_buffer_size*8)-j);
+						setfieldbit(tempdata,LUT_ByteBitsInverter[0xFF],j,(current_buffer_size*8)-j);
 					}
 
 					j = j + 8;

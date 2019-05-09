@@ -202,7 +202,7 @@ int VTR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					{
 						offset=(k*256)+l;
 						offset2=(k*512)+l+(256*j);
-						currentside->databuffer[offset]=bit_inverter[hfetrack[offset2]];
+						currentside->databuffer[offset]=LUT_ByteBitsInverter[hfetrack[offset2]];
 					}
 				}
 
