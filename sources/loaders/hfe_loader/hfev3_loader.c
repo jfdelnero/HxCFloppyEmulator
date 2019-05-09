@@ -62,7 +62,7 @@
 
 #include "libhxcadaptor.h"
 
-extern unsigned char bit_inverter[];
+#include "tracks/luts.h"
 
 //#define DEBUGVB 1
 

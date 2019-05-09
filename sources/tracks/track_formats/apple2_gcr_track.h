@@ -25,20 +25,7 @@
 //
 */
 
-int  getbit(unsigned char * input_data,int bit_offset);
-void setbit(unsigned char * input_data,int bit_offset,int state);
+int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset);
+int get_next_A2GCR1_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset);
 
-void setfieldbit(unsigned char * dstbuffer,unsigned char byte,int bitoffset,int size);
-
-int  mfmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit);
-int  bintomfm(unsigned char * track_data,int track_data_size,unsigned char * bin_data,int bin_data_size,int bit_offset);
-
-int  fmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit);
-int  bintofm(unsigned char * track_data,int track_data_size,unsigned char * bin_data,int bin_data_size,int bit_offset);
-
-int  searchBitStream(unsigned char * input_data,uint32_t input_data_size,int searchlen, \
-					unsigned char * chr_data,uint32_t chr_data_size,uint32_t bit_offset);
-
-void sortbuffer(unsigned char * buffer,unsigned char * outbuffer,int size);
-
-int chgbitptr(int tracklen,int cur_offset,int offset);
+void tg_addAppleSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside);

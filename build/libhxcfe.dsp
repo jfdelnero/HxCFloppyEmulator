@@ -2083,22 +2083,110 @@ SOURCE=..\sources\loaders\common\raw_iso.h
 # Begin Group "tracks"
 
 # PROP Default_Filter ""
+# Begin Group "track_formats"
+
+# PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\sources\tracks\apple2.c
+SOURCE=..\sources\tracks\track_formats\aed6200p_track.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\sources\tracks\apple2.h
+SOURCE=..\sources\tracks\track_formats\aed6200p_track.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\sources\tracks\arburg_track.c
+SOURCE=..\sources\tracks\track_formats\amiga_mfm_track.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\sources\tracks\arburg_track.h
+SOURCE=..\sources\tracks\track_formats\amiga_mfm_track.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\apple2_gcr_track.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\apple2_gcr_track.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\arburg_track.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\arburg_track.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\c64_gcr_track.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\c64_gcr_track.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\emu_emulator_fm_track.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\emu_emulator_fm_track.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\heathkit_fm_track.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\heathkit_fm_track.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\iso_ibm_fm_track.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\iso_ibm_fm_track.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\iso_ibm_mfm_track.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\iso_ibm_mfm_track.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\membrain_mfm_track.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\membrain_mfm_track.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\northstar_mfm_track.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\northstar_mfm_track.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\sector_sm.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\tycom_fm_track.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\tycom_fm_track.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\sources\tracks\display_track.c
@@ -2109,11 +2197,11 @@ SOURCE=..\sources\tracks\display_track.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\sources\tracks\emuii_track.c
+SOURCE=..\sources\tracks\luts.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\sources\tracks\gcr_track.c
+SOURCE=..\sources\tracks\luts.h
 # End Source File
 # Begin Source File
 
@@ -2122,6 +2210,14 @@ SOURCE=..\sources\tracks\sector_extractor.c
 # Begin Source File
 
 SOURCE=..\sources\tracks\track_generator.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_types_defs.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_types_defs.h
 # End Source File
 # Begin Source File
 

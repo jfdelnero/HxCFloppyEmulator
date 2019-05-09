@@ -24,6 +24,7 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 */
+
 #define DEFAULT_HD_BITRATE 500000
 #define DEFAULT_DD_BITRATE 250000
 #define DEFAULT_AMIGA_BITRATE 253360
@@ -99,6 +100,7 @@ typedef struct _HXCFE_SECTCFG
  void            getMFMcode(track_generator *tg,uint8_t data,uint8_t clock,unsigned char * dstbuf);
  void            getFMcode (track_generator *tg,uint8_t data,uint8_t clock,unsigned char * dstbuf);
  int32_t         pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE * side,int32_t trackencoding);
+ void            FastMFMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size,int trackencoding);
 
  void            hxcfe_freeSide( HXCFE* floppycontext, HXCFE_SIDE * side );
 

@@ -26,39 +26,54 @@
 */
 ///////////////////////////////////////////////////////////////////////////////////
 //-------------------------------------------------------------------------------//
-//-------------------------------------------------------------------------------//
-//-----------H----H--X----X-----CCCCC----22222----0000-----0000------11----------//
-//----------H----H----X-X-----C--------------2---0----0---0----0--1--1-----------//
+//-----------H----H--X----X-----CCCCC-----22222----0000-----0000-----11----------//
+//----------H----H----X-X-----C--------------2---0----0---0----0---1-1-----------//
 //---------HHHHHH-----X------C----------22222---0----0---0----0-----1------------//
 //--------H----H----X--X----C----------2-------0----0---0----0-----1-------------//
-//-------H----H---X-----X---CCCCC-----222222----0000-----0000----1111------------//
+//-------H----H---X-----X---CCCCC-----22222----0000-----0000----11111------------//
 //-------------------------------------------------------------------------------//
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
-// File : gcr_track.c
-// Contains: gcr track builder/encoder
+// File : northstar_mfm_track.c
+// Contains: Northstar MFM hardsectored track support
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <string.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "types.h"
 
-#include "crc.h"
-#include "gcr_track.h"
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
+#include "sector_search.h"
+#include "fdc_ctrl.h"
+
+#include "libhxcfe.h"
+
+#include "floppy_utils.h"
+
+#include "tracks/sector_extractor.h"
+#include "tracks/crc.h"
+
+#include "c64_gcr_track.h"
+
+#include "tracks/trackutils.h"
+#include "tracks/luts.h"
+
+#include "sector_sm.h"
 
 const unsigned char gcrencodingtable[16]=
-			{
-				0x0A,0x0B,0x12,0x13,
-				0x0E,0x0F,0x16,0x17,
-				0x09,0x19,0x1A,0x1B,
-				0x0D,0x1D,0x1E,0x15
-			};
+{
+	0x0A,0x0B,0x12,0x13,
+	0x0E,0x0F,0x16,0x17,
+	0x09,0x19,0x1A,0x1B,
+	0x0D,0x1D,0x1E,0x15
+};
 
 // GCR encoder
 unsigned char * BuildGCRCylinder(int * gcrtracksize,unsigned char * track,unsigned char * nongcrpart,int size)
@@ -195,30 +210,30 @@ int32_t BuildGCRTrack(int numberofsector,int sectorsize,int tracknumber,int side
 	int32_t current_buffer_size;
 
 	/*
-	  Here's the layout of a standard low-level pattern on a 1541 disk. Use the
-above sample to follow along.
+	Here's the layout of a standard low-level pattern on a 1541 disk. Use the
+	above sample to follow along.
 
-   1. Header sync       FF FF FF FF FF (40 'on' bits, not GCR)
-   2. Header info       52 54 B5 29 4B 7A 5E 95 55 55 (10 GCR bytes)
-   3. Header gap        55 55 55 55 55 55 55 55 55 (9 bytes, never read)
-   4. Data sync         FF FF FF FF FF (40 'on' bits, not GCR)
-   5. Data block        55...4A (325 GCR bytes)
-   6. Inter-sector gap  55 55 55 55...55 55 (4 to 12 bytes, never read)
-   1. Header sync       (SYNC for the next sector)
+	1. Header sync       FF FF FF FF FF (40 'on' bits, not GCR)
+	2. Header info       52 54 B5 29 4B 7A 5E 95 55 55 (10 GCR bytes)
+	3. Header gap        55 55 55 55 55 55 55 55 55 (9 bytes, never read)
+	4. Data sync         FF FF FF FF FF (40 'on' bits, not GCR)
+	5. Data block        55...4A (325 GCR bytes)
+	6. Inter-sector gap  55 55 55 55...55 55 (4 to 12 bytes, never read)
+	1. Header sync       (SYNC for the next sector)
 
 
-  The 10 byte header info (#2) is GCR encoded and must be decoded  to  it's
-normal 8 bytes to be understood. Once decoded, its breakdown is as follows:
+	The 10 byte header info (#2) is GCR encoded and must be decoded  to  it's
+	normal 8 bytes to be understood. Once decoded, its breakdown is as follows:
 
-   Byte    $00 - header block ID ($08)
-            01 - header block checksum (EOR of $02-$05)
-            02 - Sector
-            03 - Track
-            04 - Format ID byte #2
-            05 - Format ID byte #1
-         06-07 - $0F ("off" bytes)
+	Byte   $00 - header block ID ($08)
+			01 - header block checksum (EOR of $02-$05)
+			02 - Sector
+			03 - Track
+			04 - Format ID byte #2
+			05 - Format ID byte #1
+			06-07 - $0F ("off" bytes)
 
-  */
+	*/
 
 	finalsize= ( 5 + 8 + 9 + 5 + 260 + 12) * numberofsector;
 

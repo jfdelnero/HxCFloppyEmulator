@@ -63,8 +63,7 @@
 #define NIB_TRACK_SIZE 6656
 
 //#define HDDD_A2_SUPPORT 1
-
-extern unsigned short ext_a2_bit_expander[];
+#include "tracks/luts.h"
 
 int Apple2_nib_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {

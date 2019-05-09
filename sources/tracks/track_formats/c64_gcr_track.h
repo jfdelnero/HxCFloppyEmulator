@@ -25,8 +25,8 @@
 //
 */
 
-#define ARBURB_DATATRACK_SIZE 0xA00
-#define ARBURB_SYSTEMTRACK_SIZE 0xF00
+#define DEFAULT_DD_RPM 300
 
-int32_t BuildArburgTrack(HXCFE* floppycontext,int32_t tracknumber,int32_t sidenumber,uint8_t * datain,uint8_t * fmdata,int32_t * fmsizebuffer,int32_t trackformat);
-int32_t BuildArburgSysTrack(HXCFE* floppycontext,int32_t tracknumber,int32_t sidenumber,uint8_t * datain, uint8_t * fmdata, int32_t * fmsizebuffer,int32_t trackformat);
+unsigned char * BuildGCRCylinder(int * gcrtracksize,unsigned char * track,unsigned char * nongcrpart,int size);
+int32_t BuildGCRTrack(int numberofsector,int sectorsize,int tracknumber,int sidenumber,unsigned char* datain,unsigned char * mfmdata,int32_t * mfmsizebuffer);
+int GCRGetTrackSize(unsigned int numberofsector,unsigned int sectorsize);

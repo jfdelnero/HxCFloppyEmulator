@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2019 Jean-François DEL NERO
+// Copyright (C) 2006-2019 Jean-FranÃ§ois DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
@@ -25,9 +25,5 @@
 //
 */
 
-#define DEFAULT_DD_RPM 300
-
-unsigned char * BuildGCRCylinder(int * gcrtracksize,unsigned char * track,unsigned char * nongcrpart,int size);
-int32_t BuildGCRTrack(int numberofsector,int sectorsize,int tracknumber,int sidenumber,unsigned char* datain,unsigned char * mfmdata,int32_t * mfmsizebuffer);
-int GCRGetTrackSize(unsigned int numberofsector,unsigned int sectorsize);
-
+int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset);
+int write_MFM_sectordata(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,unsigned char * buffer,int buffersize);

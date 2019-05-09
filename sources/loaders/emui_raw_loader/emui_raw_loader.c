@@ -56,7 +56,7 @@
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
-#include "tracks/emuii_track.h"
+#include "tracks/track_formats/emu_emulator_fm_track.h"
 #include "emui_raw_loader.h"
 
 #include "libhxcadaptor.h"
