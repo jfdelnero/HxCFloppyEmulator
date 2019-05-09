@@ -460,7 +460,7 @@ void sortbuffer(unsigned char * buffer,unsigned char * outbuffer,int size)
 	word_outbuffer=(unsigned short *)outbuffer;
 	for(i=0;i<(size/2);i++)
 	{
-		w = (unsigned short)((biteven[buffer[i]]<<1)| (biteven[buffer[i+(size/2)]]));
+		w = (unsigned short)((LUT_Byte2ShortOddBitsExpander[buffer[i]]<<1)| (LUT_Byte2ShortOddBitsExpander[buffer[i+(size/2)]]));
 		word_outbuffer[i] = (unsigned short)( (w>>8) | (w<<8) );
 	}
 }

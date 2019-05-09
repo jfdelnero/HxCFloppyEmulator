@@ -236,10 +236,10 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 				sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_buffer,7,bit_offset,0);
 				if(1)
 				{
-					tmp_buffer[0] = biteven[tmp_buffer[0]>>4]<<1 | (biteven[tmp_buffer[0]&0xF]);
-					tmp_buffer[1] = biteven[tmp_buffer[1]>>4]<<1 | (biteven[tmp_buffer[1]&0xF]);
-					tmp_buffer[2] = biteven[tmp_buffer[2]>>4]<<1 | (biteven[tmp_buffer[2]&0xF]);
-					tmp_buffer[3] = biteven[tmp_buffer[3]>>4]<<1 | (biteven[tmp_buffer[3]&0xF]);
+					tmp_buffer[0] = LUT_Byte2ShortOddBitsExpander[tmp_buffer[0]>>4]<<1 | (LUT_Byte2ShortOddBitsExpander[tmp_buffer[0]&0xF]);
+					tmp_buffer[1] = LUT_Byte2ShortOddBitsExpander[tmp_buffer[1]>>4]<<1 | (LUT_Byte2ShortOddBitsExpander[tmp_buffer[1]&0xF]);
+					tmp_buffer[2] = LUT_Byte2ShortOddBitsExpander[tmp_buffer[2]>>4]<<1 | (LUT_Byte2ShortOddBitsExpander[tmp_buffer[2]&0xF]);
+					tmp_buffer[3] = LUT_Byte2ShortOddBitsExpander[tmp_buffer[3]>>4]<<1 | (LUT_Byte2ShortOddBitsExpander[tmp_buffer[3]&0xF]);
 
 					CRC16_Low = 0x00;
 					for(i=0;i<4;i++)
@@ -414,10 +414,10 @@ int get_next_A2GCR1_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 				sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_buffer,7,bit_offset,0);
 				if(1)
 				{
-					tmp_buffer[0] = biteven[tmp_buffer[0]>>4]<<1 | (biteven[tmp_buffer[0]&0xF]);
-					tmp_buffer[1] = biteven[tmp_buffer[1]>>4]<<1 | (biteven[tmp_buffer[1]&0xF]);
-					tmp_buffer[2] = biteven[tmp_buffer[2]>>4]<<1 | (biteven[tmp_buffer[2]&0xF]);
-					tmp_buffer[3] = biteven[tmp_buffer[3]>>4]<<1 | (biteven[tmp_buffer[3]&0xF]);
+					tmp_buffer[0] = LUT_Byte2ShortOddBitsExpander[tmp_buffer[0]>>4]<<1 | (LUT_Byte2ShortOddBitsExpander[tmp_buffer[0]&0xF]);
+					tmp_buffer[1] = LUT_Byte2ShortOddBitsExpander[tmp_buffer[1]>>4]<<1 | (LUT_Byte2ShortOddBitsExpander[tmp_buffer[1]&0xF]);
+					tmp_buffer[2] = LUT_Byte2ShortOddBitsExpander[tmp_buffer[2]>>4]<<1 | (LUT_Byte2ShortOddBitsExpander[tmp_buffer[2]&0xF]);
+					tmp_buffer[3] = LUT_Byte2ShortOddBitsExpander[tmp_buffer[3]>>4]<<1 | (LUT_Byte2ShortOddBitsExpander[tmp_buffer[3]&0xF]);
 
 					CRC16_Low = 0x00;
 					for(i=0;i<4;i++)

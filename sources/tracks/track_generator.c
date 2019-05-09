@@ -191,8 +191,8 @@ static gap3conf std_gap3_tab[]=
 void getMFMcode(track_generator *tg,uint8_t data,uint8_t clock,uint8_t * dstbuf)
 {
 	uint16_t mfm_code;
-	mfm_code = (uint16_t)(MFM_tab[data] & CLK_tab[clock] & tg->mfm_last_bit);
-	tg->mfm_last_bit = (uint16_t)(~(MFM_tab[data]<<15));
+	mfm_code = (uint16_t)(LUT_Byte2MFM[data] & LUT_Byte2MFMClkMask[clock] & tg->mfm_last_bit);
+	tg->mfm_last_bit = (uint16_t)(~(LUT_Byte2MFM[data]<<15));
 	dstbuf[1] = (uint8_t)(mfm_code&0xFF);
 	dstbuf[0] = (uint8_t)(mfm_code>>8);
 
@@ -326,12 +326,12 @@ int32_t BuildCylinder(uint8_t * mfm_buffer,int32_t mfm_size,uint8_t * track_clk,
 		byte  = track_data[l];
 		clock = track_clk[l];
 
-		mfm_code = (uint16_t)(MFM_tab[byte] & CLK_tab[clock] & lastbit);
+		mfm_code = (uint16_t)(LUT_Byte2MFM[byte] & LUT_Byte2MFMClkMask[clock] & lastbit);
 
 		mfm_buffer[i++] = (uint8_t)(mfm_code>>8);
 		mfm_buffer[i++] = (uint8_t)(mfm_code&0xFF);
 
-		lastbit = (uint16_t)(~(MFM_tab[byte]<<15));
+		lastbit = (uint16_t)(~(LUT_Byte2MFM[byte]<<15));
 	}
 
 	// Clear the remaining buffer bytes
@@ -360,12 +360,12 @@ void FastMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * trac
 	for(l=0;l<size;l++)
 	{
 		byte =track_data[l];
-		mfm_code = (uint16_t)(MFM_tab[byte] & lastbit);
+		mfm_code = (uint16_t)(LUT_Byte2MFM[byte] & lastbit);
 
 		mfm_buffer[i++] = (uint8_t)(mfm_code>>8);
 		mfm_buffer[i++] = (uint8_t)(mfm_code&0xFF);
 
-		lastbit = (uint16_t)(~(MFM_tab[byte]<<15));
+		lastbit = (uint16_t)(~(LUT_Byte2MFM[byte]<<15));
 	}
 
 	tg->mfm_last_bit = lastbit;
@@ -391,25 +391,25 @@ void FastAmigaMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char *
 
 	for(l=0;l<size;l=l+2)
 	{
-		byte = (uint8_t)((odd_tab[track_data[l]]<<4) | odd_tab[track_data[l+1]]);
-		mfm_code = (uint16_t)(MFM_tab[byte] & lastbit);
+		byte = (uint8_t)((LUT_Byte2OddBits[track_data[l]]<<4) | LUT_Byte2OddBits[track_data[l+1]]);
+		mfm_code = (uint16_t)(LUT_Byte2MFM[byte] & lastbit);
 
 		mfm_buffer[i++] = (uint8_t)(mfm_code>>8);
 		mfm_buffer[i++] = (uint8_t)(mfm_code&0xFF);
 
-		lastbit = (uint16_t)(~(MFM_tab[byte]<<15));
+		lastbit = (uint16_t)(~(LUT_Byte2MFM[byte]<<15));
 	}
 
 
 	for(l=0;l<size;l=l+2)
 	{
-		byte = (uint8_t)((even_tab[track_data[l]]<<4) | even_tab[track_data[l+1]]);
-		mfm_code = (uint16_t)(MFM_tab[byte] & lastbit);
+		byte = (uint8_t)((LUT_Byte2EvenBits[track_data[l]]<<4) | LUT_Byte2EvenBits[track_data[l+1]]);
+		mfm_code = (uint16_t)(LUT_Byte2MFM[byte] & lastbit);
 
 		mfm_buffer[i++] = (uint8_t)(mfm_code>>8);
 		mfm_buffer[i++] = (uint8_t)(mfm_code&0xFF);
 
-		lastbit = (uint16_t)(~(MFM_tab[byte]<<15));
+		lastbit = (uint16_t)(~(LUT_Byte2MFM[byte]<<15));
 	}
 
 	tg->mfm_last_bit=lastbit;

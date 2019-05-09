@@ -340,7 +340,7 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 					{
 						offset=(k*256)+l;
 						offset2=(k*512)+l+(256*j);
-						hfetrack2[offset] = bit_inverter[hfetrack[offset2]];
+						hfetrack2[offset] = LUT_ByteBitsInverter[hfetrack[offset2]];
 					}
 				}
 

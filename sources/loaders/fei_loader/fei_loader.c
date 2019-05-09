@@ -159,7 +159,7 @@ int FEI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				for(k=0;k<tracksize;k++)
 				{
-					currentside->databuffer[k]=bit_inverter[currentside->databuffer[k]];
+					currentside->databuffer[k]=LUT_ByteBitsInverter[currentside->databuffer[k]];
 				}
 			}
 		}

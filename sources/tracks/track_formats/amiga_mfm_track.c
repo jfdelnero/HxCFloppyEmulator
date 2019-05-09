@@ -143,10 +143,10 @@ int get_next_AMIGAMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 				{
 					sortbuffer(&sector_data[4+(i*4)],tmp_buffer,4);
 
-					headerparity[0]^=( odd_tab[tmp_buffer[0]]<<4)|( odd_tab[tmp_buffer[1]]);
-					headerparity[1]^=( odd_tab[tmp_buffer[2]]<<4)|( odd_tab[tmp_buffer[3]]);
-					headerparity[0]^=(even_tab[tmp_buffer[0]]<<4)|(even_tab[tmp_buffer[1]]);
-					headerparity[1]^=(even_tab[tmp_buffer[2]]<<4)|(even_tab[tmp_buffer[3]]);
+					headerparity[0]^=( LUT_Byte2OddBits[tmp_buffer[0]]<<4)|( LUT_Byte2OddBits[tmp_buffer[1]]);
+					headerparity[1]^=( LUT_Byte2OddBits[tmp_buffer[2]]<<4)|( LUT_Byte2OddBits[tmp_buffer[3]]);
+					headerparity[0]^=(LUT_Byte2EvenBits[tmp_buffer[0]]<<4)|(LUT_Byte2EvenBits[tmp_buffer[1]]);
+					headerparity[1]^=(LUT_Byte2EvenBits[tmp_buffer[2]]<<4)|(LUT_Byte2EvenBits[tmp_buffer[3]]);
 				}
 
 				sector_conf->header_crc = headerparity[1] | (headerparity[0]<<8) ;
@@ -174,10 +174,10 @@ int get_next_AMIGAMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 					{
 						memcpy(tmp_buffer,&sector_data[32+(i*4)],4);
 
-						sectorparity[0]^=( odd_tab[tmp_buffer[0]]<<4)|( odd_tab[tmp_buffer[1]]);
-						sectorparity[1]^=( odd_tab[tmp_buffer[2]]<<4)|( odd_tab[tmp_buffer[3]]);
-						sectorparity[0]^=(even_tab[tmp_buffer[0]]<<4)|(even_tab[tmp_buffer[1]]);
-						sectorparity[1]^=(even_tab[tmp_buffer[2]]<<4)|(even_tab[tmp_buffer[3]]);
+						sectorparity[0]^=( LUT_Byte2OddBits[tmp_buffer[0]]<<4)|( LUT_Byte2OddBits[tmp_buffer[1]]);
+						sectorparity[1]^=( LUT_Byte2OddBits[tmp_buffer[2]]<<4)|( LUT_Byte2OddBits[tmp_buffer[3]]);
+						sectorparity[0]^=(LUT_Byte2EvenBits[tmp_buffer[0]]<<4)|(LUT_Byte2EvenBits[tmp_buffer[1]]);
+						sectorparity[1]^=(LUT_Byte2EvenBits[tmp_buffer[2]]<<4)|(LUT_Byte2EvenBits[tmp_buffer[3]]);
 					}
 
 					sector_conf->data_crc = sectorparity[1] | (sectorparity[0]<<8) ;
@@ -251,14 +251,14 @@ int write_AMIGAMFM_sectordata(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECT
 
 	for(i=0;i<sector->sectorsize;i=i+4)
 	{
-		sectorparity[0]^=(odd_tab[buffer[i]]<<4) | odd_tab[buffer[i+1]];
-		sectorparity[1]^=(odd_tab[buffer[i+2]]<<4) | odd_tab[buffer[i+3]];
+		sectorparity[0]^=(LUT_Byte2OddBits[buffer[i]]<<4) | LUT_Byte2OddBits[buffer[i+1]];
+		sectorparity[1]^=(LUT_Byte2OddBits[buffer[i+2]]<<4) | LUT_Byte2OddBits[buffer[i+3]];
 	}
 
 	for(i=0;i<sector->sectorsize;i=i+4)
 	{
-		sectorparity[0]^=(even_tab[buffer[i]]<<4) | even_tab[buffer[i+1]];
-		sectorparity[1]^=(even_tab[buffer[i+2]]<<4) | even_tab[buffer[i+3]];
+		sectorparity[0]^=(LUT_Byte2EvenBits[buffer[i]]<<4) | LUT_Byte2EvenBits[buffer[i+1]];
+		sectorparity[1]^=(LUT_Byte2EvenBits[buffer[i+2]]<<4) | LUT_Byte2EvenBits[buffer[i+3]];
 	}
 
 	bit_offset = sector->startdataindex;
@@ -283,24 +283,24 @@ int write_AMIGAMFM_sectordata(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECT
 
 	for(l=0;l<buffersize;l=l+2)
 	{
-		byte = (uint8_t)((odd_tab[buffer[l]]<<4) | odd_tab[buffer[l+1]]);
-		mfm_code = (uint16_t)(MFM_tab[byte] & lastbit);
+		byte = (uint8_t)((LUT_Byte2OddBits[buffer[l]]<<4) | LUT_Byte2OddBits[buffer[l+1]]);
+		mfm_code = (uint16_t)(LUT_Byte2MFM[byte] & lastbit);
 
 		mfm_buffer[i++] = (uint8_t)(mfm_code>>8);
 		mfm_buffer[i++] = (uint8_t)(mfm_code&0xFF);
 
-		lastbit = (uint16_t)(~(MFM_tab[byte]<<15));
+		lastbit = (uint16_t)(~(LUT_Byte2MFM[byte]<<15));
 	}
 
 	for(l=0;l<buffersize;l=l+2)
 	{
-		byte = (uint8_t)((even_tab[buffer[l]]<<4) | even_tab[buffer[l+1]]);
-		mfm_code = (uint16_t)(MFM_tab[byte] & lastbit);
+		byte = (uint8_t)((LUT_Byte2EvenBits[buffer[l]]<<4) | LUT_Byte2EvenBits[buffer[l+1]]);
+		mfm_code = (uint16_t)(LUT_Byte2MFM[byte] & lastbit);
 
 		mfm_buffer[i++] = (uint8_t)(mfm_code>>8);
 		mfm_buffer[i++] = (uint8_t)(mfm_code&0xFF);
 
-		lastbit = (uint16_t)(~(MFM_tab[byte]<<15));
+		lastbit = (uint16_t)(~(LUT_Byte2MFM[byte]<<15));
 	}
 
 	tg.mfm_last_bit = lastbit;
@@ -379,15 +379,15 @@ void tg_addAmigaSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 	header[2] = (uint8_t)sectorconfig->sector;
 	header[3] = (uint8_t)sectorconfig->sectorsleft;
 
-	pushTrackCode(tg,(unsigned char)(( odd_tab[header[0]]<<4)|( odd_tab[header[1]])),0xFF,currentside,sectorconfig->trackencoding);
-	pushTrackCode(tg,(unsigned char)(( odd_tab[header[2]]<<4)|( odd_tab[header[3]])),0xFF,currentside,sectorconfig->trackencoding);
-	pushTrackCode(tg,(unsigned char)((even_tab[header[0]]<<4)|(even_tab[header[1]])),0xFF,currentside,sectorconfig->trackencoding);
-	pushTrackCode(tg,(unsigned char)((even_tab[header[2]]<<4)|(even_tab[header[3]])),0xFF,currentside,sectorconfig->trackencoding);
+	pushTrackCode(tg,(unsigned char)(( LUT_Byte2OddBits[header[0]]<<4)|( LUT_Byte2OddBits[header[1]])),0xFF,currentside,sectorconfig->trackencoding);
+	pushTrackCode(tg,(unsigned char)(( LUT_Byte2OddBits[header[2]]<<4)|( LUT_Byte2OddBits[header[3]])),0xFF,currentside,sectorconfig->trackencoding);
+	pushTrackCode(tg,(unsigned char)((LUT_Byte2EvenBits[header[0]]<<4)|(LUT_Byte2EvenBits[header[1]])),0xFF,currentside,sectorconfig->trackencoding);
+	pushTrackCode(tg,(unsigned char)((LUT_Byte2EvenBits[header[2]]<<4)|(LUT_Byte2EvenBits[header[3]])),0xFF,currentside,sectorconfig->trackencoding);
 
-	headerparity[0]^=( odd_tab[header[0]]<<4)|( odd_tab[header[1]]);
-	headerparity[1]^=( odd_tab[header[2]]<<4)|( odd_tab[header[3]]);
-	headerparity[0]^=(even_tab[header[0]]<<4)|(even_tab[header[1]]);
-	headerparity[1]^=(even_tab[header[2]]<<4)|(even_tab[header[3]]);
+	headerparity[0]^=( LUT_Byte2OddBits[header[0]]<<4)|( LUT_Byte2OddBits[header[1]]);
+	headerparity[1]^=( LUT_Byte2OddBits[header[2]]<<4)|( LUT_Byte2OddBits[header[3]]);
+	headerparity[0]^=(LUT_Byte2EvenBits[header[0]]<<4)|(LUT_Byte2EvenBits[header[1]]);
+	headerparity[1]^=(LUT_Byte2EvenBits[header[2]]<<4)|(LUT_Byte2EvenBits[header[3]]);
 
 	// gap2
 	for(i=0;i<formatstab[trackencoding].len_gap2;i++)
@@ -412,14 +412,14 @@ void tg_addAmigaSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 	{
 		for(i=0;i<sectorconfig->sectorsize;i=i+4)
 		{
-			sectorparity[0]^=(odd_tab[sectorconfig->input_data[i]]<<4) | odd_tab[sectorconfig->input_data[i+1]];
-			sectorparity[1]^=(odd_tab[sectorconfig->input_data[i+2]]<<4) | odd_tab[sectorconfig->input_data[i+3]];
+			sectorparity[0]^=(LUT_Byte2OddBits[sectorconfig->input_data[i]]<<4) | LUT_Byte2OddBits[sectorconfig->input_data[i+1]];
+			sectorparity[1]^=(LUT_Byte2OddBits[sectorconfig->input_data[i+2]]<<4) | LUT_Byte2OddBits[sectorconfig->input_data[i+3]];
 		}
 
 		for(i=0;i<sectorconfig->sectorsize;i=i+4)
 		{
-			sectorparity[0]^=(even_tab[sectorconfig->input_data[i]]<<4) | even_tab[sectorconfig->input_data[i+1]];
-			sectorparity[1]^=(even_tab[sectorconfig->input_data[i+2]]<<4) | even_tab[sectorconfig->input_data[i+3]];
+			sectorparity[0]^=(LUT_Byte2EvenBits[sectorconfig->input_data[i]]<<4) | LUT_Byte2EvenBits[sectorconfig->input_data[i+1]];
+			sectorparity[1]^=(LUT_Byte2EvenBits[sectorconfig->input_data[i+2]]<<4) | LUT_Byte2EvenBits[sectorconfig->input_data[i+3]];
 		}
 	}
 

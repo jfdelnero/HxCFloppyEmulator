@@ -237,7 +237,7 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 				for(i_conv=0;i_conv<(mfmsize/2);i_conv++)
 				{
 					// Add the FM Clocks
-					fm_pulses = ext_a2_bit_expander[floppy->tracks[i]->sides[0]->databuffer[i_conv]] | 0x2222;
+					fm_pulses = LUT_Byte2ShortEvenBitsExpander[floppy->tracks[i]->sides[0]->databuffer[i_conv]] | 0x2222;
 					mfmtracks0[(i_conv*2)+0] = fm_pulses >> 8;
 					mfmtracks0[(i_conv*2)+1] = fm_pulses &  0xFF;
 				}
@@ -249,7 +249,7 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 					for(i_conv=0;i_conv<(mfmsize2/2);i_conv++)
 					{
 						// Add the FM Clocks
-						fm_pulses = ext_a2_bit_expander[floppy->tracks[i]->sides[1]->databuffer[i_conv]] | 0x2222;
+						fm_pulses = LUT_Byte2ShortEvenBitsExpander[floppy->tracks[i]->sides[1]->databuffer[i_conv]] | 0x2222;
 						mfmtracks1[(i_conv*2)+0] = fm_pulses >> 8;
 						mfmtracks1[(i_conv*2)+1] = fm_pulses &  0xFF;
 					}
@@ -268,9 +268,9 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 						// inversion des bits pour le EUSART du PIC.
 
 						// head 0
-						mfmtrackfinal[(k*512)+j]=     bit_inverter[mfmtracks0[(k*256)+j]];
+						mfmtrackfinal[(k*512)+j]=     LUT_ByteBitsInverter[mfmtracks0[(k*256)+j]];
 						// head 1
-						mfmtrackfinal[(k*512)+j+256]= bit_inverter[mfmtracks1[(k*256)+j]];
+						mfmtrackfinal[(k*512)+j+256]= LUT_ByteBitsInverter[mfmtracks1[(k*256)+j]];
 
 					}
 				}

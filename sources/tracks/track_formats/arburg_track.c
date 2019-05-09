@@ -204,7 +204,7 @@ int get_next_Arburg_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 
 					for(k=0;k< 1 + 0x9FE + 2;k++)
 					{
-						sector->input_data[k]=bit_inverter[sector->input_data[k + 1]];
+						sector->input_data[k]=LUT_ByteBitsInverter[sector->input_data[k + 1]];
 					}
 
 					checksum = 0;
@@ -346,7 +346,7 @@ int get_next_ArburgSyst_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SEC
 
 					for(k=0;k< 1 + 0xEFE + 2;k++)
 					{
-						sector->input_data[k]=bit_inverter[sector->input_data[k + 1]];
+						sector->input_data[k]=LUT_ByteBitsInverter[sector->input_data[k + 1]];
 					}
 
 					checksum = 0;
@@ -444,13 +444,13 @@ int32_t BuildArburgTrack(HXCFE* floppycontext,int32_t tracknumber,int32_t sidenu
 			//Track GAP
 			for(k=0;k<(56*8);k++)
 			{
-				setfieldbit(tempdata,bit_inverter[0x00],j,8);
+				setfieldbit(tempdata,LUT_ByteBitsInverter[0x00],j,8);
 				j=j+8;
 			}
 
 			/////////////////////////////////////////////////////////////////////////////////////////////
 			//Sector Header
-			setfieldbit(tempdata,bit_inverter[0xFF],j,8);
+			setfieldbit(tempdata,LUT_ByteBitsInverter[0xFF],j,8);
 			j=j+8;
 
 			/////////////////////////////////////////////////////////////////////////////////////////////
@@ -465,7 +465,7 @@ int32_t BuildArburgTrack(HXCFE* floppycontext,int32_t tracknumber,int32_t sidenu
 
 			for(k=0;k<ARBURB_DATATRACK_SIZE-2;k++)
 			{
-				setfieldbit(tempdata,bit_inverter[datain[k]],j,8);
+				setfieldbit(tempdata,LUT_ByteBitsInverter[datain[k]],j,8);
 				j=j+8;
 			}
 
@@ -473,7 +473,7 @@ int32_t BuildArburgTrack(HXCFE* floppycontext,int32_t tracknumber,int32_t sidenu
 
 			for(k=ARBURB_DATATRACK_SIZE-2;k<ARBURB_DATATRACK_SIZE;k++)
 			{
-				setfieldbit(tempdata,bit_inverter[datain[k]],j,8);
+				setfieldbit(tempdata,LUT_ByteBitsInverter[datain[k]],j,8);
 				j=j+8;
 			}
 
@@ -486,9 +486,9 @@ int32_t BuildArburgTrack(HXCFE* floppycontext,int32_t tracknumber,int32_t sidenu
 
 			#else
 
-			setfieldbit(tempdata,bit_inverter[checksum&0xFF],j,8);
+			setfieldbit(tempdata,LUT_ByteBitsInverter[checksum&0xFF],j,8);
 			j=j+8;
-			setfieldbit(tempdata,bit_inverter[checksum>>8],j,8);
+			setfieldbit(tempdata,LUT_ByteBitsInverter[checksum>>8],j,8);
 			j=j+8;
 
 			#endif
@@ -499,9 +499,9 @@ int32_t BuildArburgTrack(HXCFE* floppycontext,int32_t tracknumber,int32_t sidenu
 				for(i=j;i<(current_buffer_size*8);i=i+8)
 				{
 					if(j+8<(current_buffer_size*8))
-						setfieldbit(tempdata,bit_inverter[checksum>>8],j,8);
+						setfieldbit(tempdata,LUT_ByteBitsInverter[checksum>>8],j,8);
 					else
-						setfieldbit(tempdata,bit_inverter[checksum>>8],j,(current_buffer_size*8)-j);
+						setfieldbit(tempdata,LUT_ByteBitsInverter[checksum>>8],j,(current_buffer_size*8)-j);
 
 					j=j+8;
 				}

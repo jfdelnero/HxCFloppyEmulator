@@ -25,12 +25,12 @@
 //
 */
 
-extern unsigned short MFM_tab[];
-extern unsigned short CLK_tab[];
-extern unsigned char  even_tab[];
-extern unsigned char  odd_tab[];
-extern unsigned short biteven[];
-extern unsigned char  bit_inverter[];
-extern unsigned short bit_expander[];
-extern unsigned short ext_a2_bit_expander[];
+extern unsigned short LUT_Byte2MFM[];
+extern unsigned short LUT_Byte2MFMClkMask[];
+extern unsigned char  LUT_Byte2EvenBits[];
+extern unsigned char  LUT_Byte2OddBits[];
+extern unsigned short LUT_Byte2ShortEvenBitsExpander[];
+extern unsigned short LUT_Byte2ShortOddBitsExpander[];
+extern unsigned char  LUT_Byte2HighBitsCount[];
+extern unsigned char  LUT_ByteBitsInverter[];
 extern unsigned short sectorsize[];

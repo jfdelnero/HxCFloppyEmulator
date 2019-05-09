@@ -89,7 +89,7 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 		{
 			case LOOKFOR_GAP1:
 				memset(tmp_buffer,0x00,sizeof(tmp_buffer));
-				tmp_buffer[3] = bit_inverter[0xFD];
+				tmp_buffer[3] = LUT_ByteBitsInverter[0xFD];
 				bintofm(fm_buffer,sizeof(fm_buffer)*8,tmp_buffer,4,0);
 
 				bit_offset %= track->tracklen;
@@ -139,17 +139,17 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 			case LOOKFOR_ADDM:
 
 				tmp_bit_offset = fmtobin(track->databuffer,track->tracklen,tmp_buffer,5,bit_offset + (4 * 8 * 3),0);
-				if( tmp_buffer[0] == bit_inverter[0xFD] )
+				if( tmp_buffer[0] == LUT_ByteBitsInverter[0xFD] )
 				{
 					checksum = 0x00;
 
 					for(i=0;i<3;i++)
 					{
-						checksum ^= bit_inverter[ tmp_buffer[ 1 + i ] ];
+						checksum ^= LUT_ByteBitsInverter[ tmp_buffer[ 1 + i ] ];
 						checksum = (checksum >> 7) | (checksum << 1);
 					}
 
-					if( checksum != bit_inverter[tmp_buffer[ 4 ]] )
+					if( checksum != LUT_ByteBitsInverter[tmp_buffer[ 4 ]] )
 					{
 
 						bit_offset = tmp_bit_offset + 1;
@@ -166,9 +166,9 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 					sector->startdataindex = sector->startsectorindex;
 					sector->endsectorindex = tmp_bit_offset;
 
-					sector->cylinder = bit_inverter[ tmp_buffer[2] ];
+					sector->cylinder = LUT_ByteBitsInverter[ tmp_buffer[2] ];
 					sector->head = 0;
-					sector->sector = bit_inverter[ tmp_buffer[3] ];
+					sector->sector = LUT_ByteBitsInverter[ tmp_buffer[3] ];
 					sector->sectorsize = 256;
 					sector->alternate_sector_size_id = 1;
 					sector->trackencoding = HEATHKIT_HS_SD;
@@ -176,11 +176,11 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 					sector->use_alternate_datamark = 0xFF;
 
 					// Volume (hijack the alternate_addressmark field to transport it...)
-					sector->alternate_addressmark = bit_inverter[ tmp_buffer[1] ];
+					sector->alternate_addressmark = LUT_ByteBitsInverter[ tmp_buffer[1] ];
 					sector->use_alternate_addressmark = 0x00;
-					sector->header_crc = bit_inverter[tmp_buffer[ 4 ]];
+					sector->header_crc = LUT_ByteBitsInverter[tmp_buffer[ 4 ]];
 
-					sector->data_crc = bit_inverter[tmp_buffer[ 4 ]];
+					sector->data_crc = LUT_ByteBitsInverter[tmp_buffer[ 4 ]];
 					sector->use_alternate_header_crc = 0x00;
 
 					if(track->timingbuffer)
@@ -188,18 +188,18 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 					else
 						sector->bitrate = track->bitrate;
 
-					if( checksum == bit_inverter[tmp_buffer[ 4 ]] )
+					if( checksum == LUT_ByteBitsInverter[tmp_buffer[ 4 ]] )
 					{ // checksum ok !!!
- 						floppycontext->hxc_printf(MSG_DEBUG,"Valid FM Heathkit sector found - Cyl:%d Side:%d Sect:%d Size:%d",bit_inverter[ tmp_buffer[2] ],tmp_buffer[5],bit_inverter[ tmp_buffer[3] ],sectorsize[tmp_buffer[7]&0x7]);
+ 						floppycontext->hxc_printf(MSG_DEBUG,"Valid FM Heathkit sector found - Cyl:%d Side:%d Sect:%d Size:%d",LUT_ByteBitsInverter[ tmp_buffer[2] ],tmp_buffer[5],LUT_ByteBitsInverter[ tmp_buffer[3] ],sectorsize[tmp_buffer[7]&0x7]);
 					}
 					else
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"Bad FM Heathkit header found - Cyl:%d Side:%d Sect:%d Size:%d",bit_inverter[ tmp_buffer[2] ],tmp_buffer[5],bit_inverter[ tmp_buffer[3] ],sectorsize[tmp_buffer[7]&0x7]);
+						floppycontext->hxc_printf(MSG_DEBUG,"Bad FM Heathkit header found - Cyl:%d Side:%d Sect:%d Size:%d",LUT_ByteBitsInverter[ tmp_buffer[2] ],tmp_buffer[5],LUT_ByteBitsInverter[ tmp_buffer[3] ],sectorsize[tmp_buffer[7]&0x7]);
 						sector->use_alternate_header_crc = 0xFF;
 					}
 
 					memset(tmp_buffer,0x00,sizeof(tmp_buffer));
-					tmp_buffer[3] = bit_inverter[0xFD];
+					tmp_buffer[3] = LUT_ByteBitsInverter[0xFD];
 					bintofm(fm_buffer,sizeof(fm_buffer)*8,tmp_buffer,8,0);
 
 					bit_offset++;
@@ -213,23 +213,23 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 						sector->startdataindex = (bit_offset + (3*8*4)) % track->tracklen;
 						sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_sector,3+1+sector->sectorsize+1,bit_offset,0);
 
-						if(tmp_sector[3+0] == bit_inverter[0xFD])
+						if(tmp_sector[3+0] == LUT_ByteBitsInverter[0xFD])
 						{
-							sector->alternate_datamark = bit_inverter[tmp_sector[3+0]];
+							sector->alternate_datamark = LUT_ByteBitsInverter[tmp_sector[3+0]];
 							sector->use_alternate_datamark = 0xFF;
 
 							checksum = 0x00;
 
 							for(i=0;i<sector->sectorsize;i++)
 							{
-								checksum ^= bit_inverter[ tmp_buffer[ 3 + 1 + i ] ];
+								checksum ^= LUT_ByteBitsInverter[ tmp_buffer[ 3 + 1 + i ] ];
 								checksum = (checksum >> 7) | (checksum << 1);
 							}
 
 							sector->data_crc = checksum;
 							sector->use_alternate_data_crc = 0x00;
 
-							if( checksum == bit_inverter[tmp_buffer[ 3 + 1 +sector->sectorsize ]] )
+							if( checksum == LUT_ByteBitsInverter[tmp_buffer[ 3 + 1 +sector->sectorsize ]] )
 							{ // crc ok !!!
 								floppycontext->hxc_printf(MSG_DEBUG,"Data CRC Ok. (0x%.4X)",sector->data_crc);
 							}
@@ -242,7 +242,7 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 							sector->input_data=(unsigned char*)malloc(sector->sectorsize);
 							for(i=0;i<256;i++)
 							{
-								sector->input_data[i] = bit_inverter[ tmp_sector[ 3 +  1 + i] ];
+								sector->input_data[i] = LUT_ByteBitsInverter[ tmp_sector[ 3 +  1 + i] ];
 							}
 							free(tmp_sector);
 
@@ -320,28 +320,28 @@ void tg_addHeathkitSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfi
 	checksum = 0x00;
 
 	// sync
-	pushTrackCode(tg,bit_inverter[0xFD],0xFF,currentside,HEATHKIT_HS_SD);
+	pushTrackCode(tg,LUT_ByteBitsInverter[0xFD],0xFF,currentside,HEATHKIT_HS_SD);
 
 	// Volume (hijack the alternate_addressmark field to transport it...)
-	pushTrackCode(tg,bit_inverter[sectorconfig->alternate_addressmark],0xFF,currentside,HEATHKIT_HS_SD);
+	pushTrackCode(tg,LUT_ByteBitsInverter[sectorconfig->alternate_addressmark],0xFF,currentside,HEATHKIT_HS_SD);
 
 	checksum ^= sectorconfig->alternate_addressmark;
 	checksum = (checksum >> 7) | (checksum << 1);
 
 	// Track
-	pushTrackCode(tg,bit_inverter[sectorconfig->cylinder],0xFF,currentside,HEATHKIT_HS_SD);
+	pushTrackCode(tg,LUT_ByteBitsInverter[sectorconfig->cylinder],0xFF,currentside,HEATHKIT_HS_SD);
 
 	checksum ^= sectorconfig->cylinder;
 	checksum = (checksum >> 7) | (checksum << 1);
 
 	// Sector
-	pushTrackCode(tg,bit_inverter[sectorconfig->sector],0xFF,currentside,HEATHKIT_HS_SD);
+	pushTrackCode(tg,LUT_ByteBitsInverter[sectorconfig->sector],0xFF,currentside,HEATHKIT_HS_SD);
 
 	checksum ^= sectorconfig->sector;
 	checksum = (checksum >> 7) | (checksum << 1);
 
 	// Header Checksum
-	pushTrackCode(tg,bit_inverter[checksum],0xFF,currentside,HEATHKIT_HS_SD);
+	pushTrackCode(tg,LUT_ByteBitsInverter[checksum],0xFF,currentside,HEATHKIT_HS_SD);
 
 	checksum = 0x00;
 
@@ -351,18 +351,18 @@ void tg_addHeathkitSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfi
 	}
 
 	// data sync
-	pushTrackCode(tg,bit_inverter[0xFD],0xFF,currentside,HEATHKIT_HS_SD);
+	pushTrackCode(tg,LUT_ByteBitsInverter[0xFD],0xFF,currentside,HEATHKIT_HS_SD);
 
 	// data
 	for(i=0;i<256;i++)
 	{
-		pushTrackCode(tg,bit_inverter[sectorconfig->input_data[ i ]],0xFF,currentside,HEATHKIT_HS_SD);
+		pushTrackCode(tg,LUT_ByteBitsInverter[sectorconfig->input_data[ i ]],0xFF,currentside,HEATHKIT_HS_SD);
 		checksum ^= sectorconfig->input_data[ i ];
 		checksum = (checksum >> 7) | (checksum << 1);
 	}
 
 	// Data Checksum
-	pushTrackCode(tg,bit_inverter[checksum],0xFF,currentside,HEATHKIT_HS_SD);
+	pushTrackCode(tg,LUT_ByteBitsInverter[checksum],0xFF,currentside,HEATHKIT_HS_SD);
 
 	pushTrackCode(tg,0x00,0xFF,currentside,HEATHKIT_HS_SD);
 
