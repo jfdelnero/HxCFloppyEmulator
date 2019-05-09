@@ -60,7 +60,7 @@
 
 #include "libhxcadaptor.h"
 
-extern unsigned char bit_inverter[];
+#include "tracks/luts.h"
 
 int VTR_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {

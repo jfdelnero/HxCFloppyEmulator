@@ -26,23 +26,21 @@
 */
 ///////////////////////////////////////////////////////////////////////////////////
 //-------------------------------------------------------------------------------//
-//-------------------------------------------------------------------------------//
-//-----------H----H--X----X-----CCCCC----22222----0000-----0000------11----------//
-//----------H----H----X-X-----C--------------2---0----0---0----0--1--1-----------//
+//-----------H----H--X----X-----CCCCC-----22222----0000-----0000-----11----------//
+//----------H----H----X-X-----C--------------2---0----0---0----0---1-1-----------//
 //---------HHHHHH-----X------C----------22222---0----0---0----0-----1------------//
 //--------H----H----X--X----C----------2-------0----0---0----0-----1-------------//
-//-------H----H---X-----X---CCCCC-----222222----0000-----0000----1111------------//
+//-------H----H---X-----X---CCCCC-----22222----0000-----0000----11111------------//
 //-------------------------------------------------------------------------------//
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
-// File : apple2.c
-// Contains: Apple II nibbler
+// File : northstar_mfm_track.c
+// Contains: Northstar MFM hardsectored track support
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
-
 
 #include <string.h>
 #include <stdio.h>
@@ -52,10 +50,20 @@
 
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
+#include "sector_search.h"
+#include "fdc_ctrl.h"
+
 #include "libhxcfe.h"
 
-#include "trackutils.h"
+#include "tracks/sector_extractor.h"
+#include "tracks/crc.h"
 
+#include "apple2_gcr_track.h"
+
+#include "tracks/trackutils.h"
+#include "tracks/luts.h"
+
+#include "sector_sm.h"
 
 /////////////////////////////////////////////////////////
 // Apple II Translation tables
@@ -83,7 +91,6 @@ unsigned char byte_translation_FiveAndThree[] = {
 unsigned short byte_read_translation_FiveAndThree[256];
 
 /////////////////////////////////////////////////////////
-extern unsigned char even_tab[];
 
 void NybbleSector6and2( unsigned char * dataIn, unsigned char * nybbleOut)
 {
@@ -178,12 +185,6 @@ uint32_t DeNybbleSector6and2(unsigned char * dataOut,unsigned char * input_data,
 
 	return (bit_offset + (bit_i*2))%intput_data_size;
 }
-
-#define LOOKFOR_GAP1 0x01
-#define LOOKFOR_ADDM 0x02
-#define ENDOFTRACK 0x03
-#define EXTRACTSECTORINFO 0x04
-#define ENDOFSECTOR 0x05
 
 int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {

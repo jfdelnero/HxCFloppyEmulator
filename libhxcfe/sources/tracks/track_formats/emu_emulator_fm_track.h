@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2019 Jean-François DEL NERO
+// Copyright (C) 2006-2019 Jean-FranÃ§ois DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
@@ -24,9 +24,9 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 */
+
 #define DEFAULT_EMUII_BITRATE 312500
 
 int32_t BuildEmuIITrack(HXCFE* floppycontext,int tracknumber,int sidenumber,unsigned char* datain,unsigned char * fmdata,int32_t * fmsizebuffer,int trackformat);
 
-
-
+int get_next_EMU_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset);

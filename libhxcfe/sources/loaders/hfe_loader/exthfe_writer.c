@@ -39,8 +39,7 @@
 
 #include "libhxcadaptor.h"
 
-extern unsigned char bit_inverter[];
-extern unsigned short bit_expander[];
+#include "tracks/luts.h"
 
 void extaddpad(unsigned char * track,int mfmsize,int tracksize)
 {

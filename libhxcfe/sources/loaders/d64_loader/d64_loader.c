@@ -55,7 +55,7 @@
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
-#include "../../tracks/gcr_track.h"
+#include "tracks/track_formats/c64_gcr_track.h"
 
 #include "d64_loader.h"
 

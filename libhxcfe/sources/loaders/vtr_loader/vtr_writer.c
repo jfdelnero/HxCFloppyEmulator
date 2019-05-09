@@ -39,7 +39,7 @@
 
 #include "libhxcadaptor.h"
 
-extern unsigned char bit_inverter[];
+#include "tracks/luts.h"
 
 int VTR_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {

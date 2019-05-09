@@ -72,24 +72,29 @@ DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_w
 					stw_writer.o dim_writer.o adz_writer.o ipf_writer.o fd_writer.o northstar_loader.o northstar_writer.o heathkit_writer.o vdk_writer.o \
 					xml_db_writer.o
 
+TRACK_FORMATS_SUPPORT = luts.o track_types_defs.o aed6200p_track.o amiga_mfm_track.o apple2_gcr_track.o arburg_track.o emu_emulator_fm_track.o c64_gcr_track.o \
+						heathkit_fm_track.o iso_ibm_fm_track.o iso_ibm_mfm_track.o membrain_mfm_track.o northstar_mfm_track.o tycom_fm_track.o
+
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
 
+
+
 all: $(EXEC)
 
-libhxcfe.dll: floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o emuii_track.o arburg_track.o crc.o std_crc32.o track_generator.o trackutils.o trackeditor.o gcr_track.o apple2.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
+libhxcfe.dll: floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o crc.o std_crc32.o track_generator.o trackutils.o trackeditor.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o $(ADFLIBOBJ) $(TRACK_FORMATS_SUPPORT) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
-libhxcfe.dylib: floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o emuii_track.o arburg_track.o crc.o std_crc32.o track_generator.o trackutils.o trackeditor.o gcr_track.o apple2.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
+libhxcfe.dylib: floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o crc.o std_crc32.o track_generator.o trackutils.o trackeditor.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o $(ADFLIBOBJ) $(TRACK_FORMATS_SUPPORT) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
-libhxcfe.a: floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o emuii_track.o crc.o std_crc32.o arburg_track.o track_generator.o trackutils.o trackeditor.o gcr_track.o apple2.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB)
+libhxcfe.a: floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o crc.o std_crc32.o track_generator.o trackutils.o trackeditor.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o $(ADFLIBOBJ) $(TRACK_FORMATS_SUPPORT) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB)
 	$(AR) r $@    $^
 	cp $@ ../../../build
 
-libhxcfe.so: floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o emuii_track.o crc.o std_crc32.o arburg_track.o track_generator.o trackutils.o trackeditor.o gcr_track.o apple2.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o $(ADFLIBOBJ) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
+libhxcfe.so: floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o crc.o std_crc32.o track_generator.o trackutils.o trackeditor.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o $(ADFLIBOBJ) $(TRACK_FORMATS_SUPPORT) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
@@ -105,16 +110,55 @@ loaders_list.o: $(BASEDIR)/loaders_list.c
 floppy_utils.o: $(BASEDIR)/floppy_utils.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+luts.o : $(BASEDIR)/tracks/luts.c $(BASEDIR)/tracks/luts.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+track_types_defs.o : $(BASEDIR)/tracks/track_types_defs.c $(BASEDIR)/tracks/track_types_defs.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
 sector_extractor.o : $(BASEDIR)/tracks/sector_extractor.c $(BASEDIR)/tracks/sector_extractor.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+aed6200p_track.o : $(BASEDIR)/tracks/track_formats/aed6200p_track.c $(BASEDIR)/tracks/track_formats/aed6200p_track.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+amiga_mfm_track.o : $(BASEDIR)/tracks/track_formats/amiga_mfm_track.c $(BASEDIR)/tracks/track_formats/amiga_mfm_track.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+apple2_gcr_track.o : $(BASEDIR)/tracks/track_formats/apple2_gcr_track.c $(BASEDIR)/tracks/track_formats/apple2_gcr_track.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+arburg_track.o : $(BASEDIR)/tracks/track_formats/arburg_track.c $(BASEDIR)/tracks/track_formats/arburg_track.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+emu_emulator_fm_track.o : $(BASEDIR)/tracks/track_formats/emu_emulator_fm_track.c $(BASEDIR)/tracks/track_formats/emu_emulator_fm_track.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+c64_gcr_track.o : $(BASEDIR)/tracks/track_formats/c64_gcr_track.c $(BASEDIR)/tracks/track_formats/c64_gcr_track.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+heathkit_fm_track.o : $(BASEDIR)/tracks/track_formats/heathkit_fm_track.c $(BASEDIR)/tracks/track_formats/heathkit_fm_track.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+iso_ibm_fm_track.o : $(BASEDIR)/tracks/track_formats/iso_ibm_fm_track.c $(BASEDIR)/tracks/track_formats/iso_ibm_fm_track.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+iso_ibm_mfm_track.o : $(BASEDIR)/tracks/track_formats/iso_ibm_mfm_track.c $(BASEDIR)/tracks/track_formats/iso_ibm_mfm_track.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+membrain_mfm_track.o : $(BASEDIR)/tracks/track_formats/membrain_mfm_track.c $(BASEDIR)/tracks/track_formats/membrain_mfm_track.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+northstar_mfm_track.o : $(BASEDIR)/tracks/track_formats/northstar_mfm_track.c $(BASEDIR)/tracks/track_formats/northstar_mfm_track.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+tycom_fm_track.o : $(BASEDIR)/tracks/track_formats/tycom_fm_track.c $(BASEDIR)/tracks/track_formats/tycom_fm_track.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 trackutils.o : $(BASEDIR)/tracks/trackutils.c $(BASEDIR)/tracks/trackutils.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 trackeditor.o : $(BASEDIR)/tracks/trackeditor.c
-	$(CC) -o $@ -c $< $(CFLAGS)
-
-apple2.o : $(BASEDIR)/tracks/apple2.c $(BASEDIR)/tracks/apple2.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 display_track.o : $(BASEDIR)/tracks/display_track.c $(BASEDIR)/tracks/display_track.h
@@ -138,12 +182,6 @@ fs_cpm.o : $(BASEDIR)/fs_manager/fs_cpm/fs_cpm.c $(BASEDIR)/fs_manager/fs_cpm/fs
 libcpmfs.o : $(BASEDIR)/fs_manager/fs_cpm/libcpmfs/libcpmfs.c $(BASEDIR)/fs_manager/fs_cpm/libcpmfs/libcpmfs.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-emuii_track.o: $(BASEDIR)/tracks/emuii_track.c $(BASEDIR)/tracks/emuii_track.h
-	$(CC) -o $@ -c $< $(CFLAGS)
-
-arburg_track.o: $(BASEDIR)/tracks/arburg_track.c $(BASEDIR)/tracks/arburg_track.h
-	$(CC) -o $@ -c $< $(CFLAGS)
-
 crc.o: $(BASEDIR)/tracks/crc.c $(BASEDIR)/tracks/crc.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
@@ -151,9 +189,6 @@ std_crc32.o: $(BASEDIR)/tracks/std_crc32.c $(BASEDIR)/tracks/std_crc32.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 track_generator.o : $(BASEDIR)/tracks/track_generator.c $(BASEDIR)/tracks/track_generator.h
-	$(CC) -o $@ -c $< $(CFLAGS)
-
-gcr_track.o : $(BASEDIR)/tracks/gcr_track.c $(BASEDIR)/tracks/gcr_track.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 raw_amiga.o : $(BASEDIR)/loaders/common/raw_amiga.c $(BASEDIR)/loaders/common/raw_amiga.h

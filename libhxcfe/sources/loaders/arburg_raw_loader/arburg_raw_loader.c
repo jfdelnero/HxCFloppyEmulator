@@ -56,7 +56,7 @@
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
-#include "tracks/arburg_track.h"
+#include "tracks/track_formats/arburg_track.h"
 #include "arburg_raw_loader.h"
 #include "arburg_raw_writer.h"
 
