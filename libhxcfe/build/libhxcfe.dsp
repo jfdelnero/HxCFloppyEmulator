@@ -2128,6 +2128,14 @@ SOURCE=..\sources\tracks\track_formats\c64_gcr_track.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\sources\tracks\track_formats\dec_rx02_track.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\dec_rx02_track.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\tracks\track_formats\emu_emulator_fm_track.c
 # End Source File
 # Begin Source File
@@ -2185,6 +2193,34 @@ SOURCE=..\sources\tracks\track_formats\tycom_fm_track.c
 # Begin Source File
 
 SOURCE=..\sources\tracks\track_formats\tycom_fm_track.h
+# End Source File
+# End Group
+# Begin Group "encoding"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\tracks\encoding\dec_m2fm_encoding.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\encoding\dec_m2fm_encoding.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\encoding\fm_encoding.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\encoding\fm_encoding.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\encoding\mfm_encoding.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\encoding\mfm_encoding.h
 # End Source File
 # End Group
 # Begin Source File

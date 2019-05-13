@@ -73,7 +73,9 @@ DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_w
 					xml_db_writer.o
 
 TRACK_FORMATS_SUPPORT = luts.o track_types_defs.o aed6200p_track.o amiga_mfm_track.o apple2_gcr_track.o arburg_track.o emu_emulator_fm_track.o c64_gcr_track.o \
-						heathkit_fm_track.o iso_ibm_fm_track.o iso_ibm_mfm_track.o membrain_mfm_track.o northstar_mfm_track.o tycom_fm_track.o
+						heathkit_fm_track.o iso_ibm_fm_track.o iso_ibm_mfm_track.o membrain_mfm_track.o northstar_mfm_track.o tycom_fm_track.o dec_rx02_track.o
+
+ENCODING_SUPPORT = fm_encoding.o mfm_encoding.o dec_m2fm_encoding.o
 
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
@@ -82,19 +84,19 @@ XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
 
 all: $(EXEC)
 
-libhxcfe.dll: floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o crc.o std_crc32.o track_generator.o trackutils.o trackeditor.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o $(ADFLIBOBJ) $(TRACK_FORMATS_SUPPORT) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
+libhxcfe.dll: floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o crc.o std_crc32.o track_generator.o trackutils.o trackeditor.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o $(ADFLIBOBJ) $(ENCODING_SUPPORT) $(TRACK_FORMATS_SUPPORT) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
-libhxcfe.dylib: floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o crc.o std_crc32.o track_generator.o trackutils.o trackeditor.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o $(ADFLIBOBJ) $(TRACK_FORMATS_SUPPORT) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
+libhxcfe.dylib: floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o crc.o std_crc32.o track_generator.o trackutils.o trackeditor.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o $(ADFLIBOBJ) $(ENCODING_SUPPORT) $(TRACK_FORMATS_SUPPORT) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
-libhxcfe.a: floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o crc.o std_crc32.o track_generator.o trackutils.o trackeditor.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o $(ADFLIBOBJ) $(TRACK_FORMATS_SUPPORT) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB)
+libhxcfe.a: floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o crc.o std_crc32.o track_generator.o trackutils.o trackeditor.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o $(ADFLIBOBJ) $(ENCODING_SUPPORT) $(TRACK_FORMATS_SUPPORT) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB)
 	$(AR) r $@    $^
 	cp $@ ../../../build
 
-libhxcfe.so: floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o crc.o std_crc32.o track_generator.o trackutils.o trackeditor.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o $(ADFLIBOBJ) $(TRACK_FORMATS_SUPPORT) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
+libhxcfe.so: floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o crc.o std_crc32.o track_generator.o trackutils.o trackeditor.o sector_extractor.o display_track.o fluxStreamAnalyzer.o fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o $(ADFLIBOBJ) $(ENCODING_SUPPORT) $(TRACK_FORMATS_SUPPORT) $(DISKLOADERPLUGINS) $(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
@@ -113,6 +115,15 @@ floppy_utils.o: $(BASEDIR)/floppy_utils.c
 luts.o : $(BASEDIR)/tracks/luts.c $(BASEDIR)/tracks/luts.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+dec_m2fm_encoding.o : $(BASEDIR)/tracks/encoding/dec_m2fm_encoding.c $(BASEDIR)/tracks/encoding/dec_m2fm_encoding.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+mfm_encoding.o : $(BASEDIR)/tracks/encoding/mfm_encoding.c $(BASEDIR)/tracks/encoding/mfm_encoding.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+fm_encoding.o : $(BASEDIR)/tracks/encoding/fm_encoding.c $(BASEDIR)/tracks/encoding/fm_encoding.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
 track_types_defs.o : $(BASEDIR)/tracks/track_types_defs.c $(BASEDIR)/tracks/track_types_defs.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
@@ -129,6 +140,9 @@ apple2_gcr_track.o : $(BASEDIR)/tracks/track_formats/apple2_gcr_track.c $(BASEDI
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 arburg_track.o : $(BASEDIR)/tracks/track_formats/arburg_track.c $(BASEDIR)/tracks/track_formats/arburg_track.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+dec_rx02_track.o : $(BASEDIR)/tracks/track_formats/dec_rx02_track.c $(BASEDIR)/tracks/track_formats/dec_rx02_track.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 emu_emulator_fm_track.o : $(BASEDIR)/tracks/track_formats/emu_emulator_fm_track.c $(BASEDIR)/tracks/track_formats/emu_emulator_fm_track.h
