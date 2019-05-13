@@ -46,6 +46,7 @@ public:
   Fl_Light_Button *aed6200p_bt;
   Fl_Light_Button *northstar_bt;
   Fl_Light_Button *heathkit_bt;
+  Fl_Light_Button *decrx02_bt;
   Fl_Button *bt_edit;
   Fl_Text_Buffer* buf;
   Fl_Text_Display * txt_displ;
