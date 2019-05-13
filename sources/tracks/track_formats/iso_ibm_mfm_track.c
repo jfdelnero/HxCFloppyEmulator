@@ -61,6 +61,8 @@
 #include "tracks/track_formats/iso_ibm_mfm_track.h"
 
 #include "tracks/trackutils.h"
+#include "tracks/encoding/mfm_encoding.h"
+
 #include "tracks/luts.h"
 
 #include "sector_sm.h"

@@ -63,6 +63,8 @@
 #include "tracks/track_formats/heathkit_fm_track.h"
 
 #include "tracks/trackutils.h"
+#include "tracks/encoding/fm_encoding.h"
+
 #include "tracks/luts.h"
 
 #include "sector_sm.h"

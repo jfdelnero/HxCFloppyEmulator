@@ -94,11 +94,6 @@ typedef struct _HXCFE_SECTCFG
 #define       TG_ALLOCTRACK_RANDOMIZEDATABUFFER 0x08
 #define       TG_ALLOCTRACK_UNFORMATEDBUFFER    0x10
 
- int32_t         BuildCylinder(uint8_t * mfm_buffer,int32_t mfm_size,uint8_t * track_clk,uint8_t * track_data,int32_t track_size);
- void            BuildFMCylinder(uint8_t * buffer,int32_t fmtracksize,uint8_t * bufferclk,uint8_t * track,int32_t size);
-
- void            getMFMcode(track_generator *tg,uint8_t data,uint8_t clock,unsigned char * dstbuf);
- void            getFMcode (track_generator *tg,uint8_t data,uint8_t clock,unsigned char * dstbuf);
  int32_t         pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE * side,int32_t trackencoding);
  void            FastMFMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size,int trackencoding);
 

@@ -60,6 +60,7 @@
 #include "tracks/track_formats/amiga_mfm_track.h"
 #include "tracks/track_formats/apple2_gcr_track.h"
 #include "tracks/track_formats/arburg_track.h"
+#include "tracks/track_formats/dec_rx02_track.h"
 #include "tracks/track_formats/emu_emulator_fm_track.h"
 #include "tracks/track_formats/heathkit_fm_track.h"
 #include "tracks/track_formats/iso_ibm_fm_track.h"
@@ -67,6 +68,9 @@
 #include "tracks/track_formats/membrain_mfm_track.h"
 #include "tracks/track_formats/northstar_mfm_track.h"
 #include "tracks/track_formats/tycom_fm_track.h"
+
+#include "tracks/encoding/mfm_encoding.h"
+#include "tracks/encoding/fm_encoding.h"
 
 #include "trackutils.h"
 
@@ -188,56 +192,6 @@ static gap3conf std_gap3_tab[]=
 	{0xFF,0xFFFF,0xFF,0xFF}
 };
 
-void getMFMcode(track_generator *tg,uint8_t data,uint8_t clock,uint8_t * dstbuf)
-{
-	uint16_t mfm_code;
-	mfm_code = (uint16_t)(LUT_Byte2MFM[data] & LUT_Byte2MFMClkMask[clock] & tg->mfm_last_bit);
-	tg->mfm_last_bit = (uint16_t)(~(LUT_Byte2MFM[data]<<15));
-	dstbuf[1] = (uint8_t)(mfm_code&0xFF);
-	dstbuf[0] = (uint8_t)(mfm_code>>8);
-
-	return;
-}
-
-void getFMcode(track_generator *tg,uint8_t data,uint8_t clock,uint8_t * dstbuf)
-{
-	uint32_t * fm_code;
-	unsigned char k,i;
-
-	if(tg)
-	{
-		fm_code=(uint32_t *)dstbuf;
-
-		*fm_code=0;
-		for(k=0;k<4;k++)
-		{
-			*fm_code=*fm_code>>8;
-
-			////////////////////////////////////
-			// data
-			for(i=0;i<2;i++)
-			{
-				if(data&(0x80>>(i+(k*2)) ))
-				{	// 0x10
-					// 00010001)
-					*fm_code=*fm_code | ((0x10>>(i*4))<<24);
-				}
-			}
-
-			// clock
-			for(i=0;i<2;i++)
-			{
-				if(clock&(0x80>>(i+(k*2)) ))
-				{	// 0x40
-					// 01000100)
-					*fm_code=*fm_code | ((0x40>>(i*4))<<24);
-				}
-			}
-		}
-	}
-	return;
-}
-
 void getDirectcode(track_generator *tg,unsigned char data,unsigned char * dstbuf)
 {
 	uint16_t * direct_code;
@@ -305,158 +259,6 @@ int32_t pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE 
 	return 0;
 }
 
-// Fast Bin to MFM converter
-int32_t BuildCylinder(uint8_t * mfm_buffer,int32_t mfm_size,uint8_t * track_clk,uint8_t * track_data,int32_t track_size)
-{
-	int i,l;
-	unsigned char byte,clock;
-	unsigned short lastbit;
-	unsigned short mfm_code;
-
-	if(track_size*2>mfm_size)
-	{
-		track_size=mfm_size/2;
-	}
-
-	// MFM Encoding
-	lastbit=0xFFFF;
-	i=0;
-	for(l=0;l<track_size;l++)
-	{
-		byte  = track_data[l];
-		clock = track_clk[l];
-
-		mfm_code = (uint16_t)(LUT_Byte2MFM[byte] & LUT_Byte2MFMClkMask[clock] & lastbit);
-
-		mfm_buffer[i++] = (uint8_t)(mfm_code>>8);
-		mfm_buffer[i++] = (uint8_t)(mfm_code&0xFF);
-
-		lastbit = (uint16_t)(~(LUT_Byte2MFM[byte]<<15));
-	}
-
-	// Clear the remaining buffer bytes
-	while(i<mfm_size)
-	{
-		mfm_buffer[i++]=0x00;
-	}
-
-	return track_size;
-}
-
-// Fast Bin to MFM converter
-void FastMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size)
-{
-	unsigned short i,l;
-	uint8_t  byte;
-	uint16_t lastbit;
-	uint16_t mfm_code;
-	unsigned char * mfm_buffer;
-
-	mfm_buffer=&side->databuffer[tg->last_bit_offset/8];
-
-	// MFM Encoding
-	lastbit=tg->mfm_last_bit;
-	i=0;
-	for(l=0;l<size;l++)
-	{
-		byte =track_data[l];
-		mfm_code = (uint16_t)(LUT_Byte2MFM[byte] & lastbit);
-
-		mfm_buffer[i++] = (uint8_t)(mfm_code>>8);
-		mfm_buffer[i++] = (uint8_t)(mfm_code&0xFF);
-
-		lastbit = (uint16_t)(~(LUT_Byte2MFM[byte]<<15));
-	}
-
-	tg->mfm_last_bit = lastbit;
-	tg->last_bit_offset=tg->last_bit_offset+(i*8);
-
-	return;
-}
-
-// Fast Amiga Bin to MFM converter
-void FastAmigaMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size)
-{
-	int32_t  i,l;
-	uint8_t  byte;
-	uint16_t lastbit;
-	uint16_t mfm_code;
-	unsigned char * mfm_buffer;
-
-	mfm_buffer = &side->databuffer[tg->last_bit_offset/8];
-
-	// MFM Encoding
-	lastbit = tg->mfm_last_bit;
-	i=0;
-
-	for(l=0;l<size;l=l+2)
-	{
-		byte = (uint8_t)((LUT_Byte2OddBits[track_data[l]]<<4) | LUT_Byte2OddBits[track_data[l+1]]);
-		mfm_code = (uint16_t)(LUT_Byte2MFM[byte] & lastbit);
-
-		mfm_buffer[i++] = (uint8_t)(mfm_code>>8);
-		mfm_buffer[i++] = (uint8_t)(mfm_code&0xFF);
-
-		lastbit = (uint16_t)(~(LUT_Byte2MFM[byte]<<15));
-	}
-
-
-	for(l=0;l<size;l=l+2)
-	{
-		byte = (uint8_t)((LUT_Byte2EvenBits[track_data[l]]<<4) | LUT_Byte2EvenBits[track_data[l+1]]);
-		mfm_code = (uint16_t)(LUT_Byte2MFM[byte] & lastbit);
-
-		mfm_buffer[i++] = (uint8_t)(mfm_code>>8);
-		mfm_buffer[i++] = (uint8_t)(mfm_code&0xFF);
-
-		lastbit = (uint16_t)(~(LUT_Byte2MFM[byte]<<15));
-	}
-
-	tg->mfm_last_bit=lastbit;
-	tg->last_bit_offset=tg->last_bit_offset+(i*8);
-
-	return;
-}
-
-
-// Fast Bin to FM converter
-void FastFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size)
-{
-	int32_t j,l;
-	int32_t i,k;
-	unsigned char  byte;
-	unsigned char * fm_buffer;
-
-	fm_buffer = &side->databuffer[tg->last_bit_offset/8];
-
-	j=0;
-	for(l=0;l<size;l++)
-	{
-		byte = track_data[l];
-
-		for(k=0;k<4;k++)
-		{
-			fm_buffer[j] = 0x44;
-			////////////////////////////////////
-			// data
-			for(i=0;i<2;i++)
-			{
-				if(byte&(0x80>>(i+(k*2)) ))
-				{	// 0x10
-					// 00010001)
-					fm_buffer[j] = (uint8_t)( fm_buffer[j] | (0x10>>(i*4)) );
-				}
-			}
-
-			j++;
-		}
-	}
-
-	tg->last_bit_offset=tg->last_bit_offset+(j*8);
-
-	return;
-}
-
 void FastMFMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size,int trackencoding)
 {
 
@@ -485,56 +287,6 @@ void FastMFMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * tr
 		break;
 	}
 	return;
-}
-
-// FM encoder
-void BuildFMCylinder(uint8_t * buffer,int32_t fmtracksize,uint8_t * bufferclk,uint8_t * track,int32_t size)
-{
-	int i,j,k,l;
-	unsigned char byte,clock;
-
-	// Clean up
-	for(i=0;i<(fmtracksize);i++)
-	{
-		buffer[i] = 0x00;
-	}
-
-	j=0;
-
-	// FM Encoding
-	j=0;
-	for(l=0;l<size;l++)
-	{
-		byte = track[l];
-		clock = bufferclk[l];
-
-		for(k=0;k<4;k++)
-		{
-			buffer[j] = 0x00;
-			////////////////////////////////////
-			// data
-			for(i=0;i<2;i++)
-			{
-				if(byte&(0x80>>(i+(k*2)) ))
-				{	// 0x10
-					// 00010001)
-					buffer[j] = (uint8_t)(buffer[j] | (0x10>>(i*4)));
-				}
-			}
-
-			// clock
-			for(i=0;i<2;i++)
-			{
-				if(clock&(0x80>>(i+(k*2)) ))
-				{	// 0x40
-					// 01000100)
-					buffer[j] = (uint8_t)( buffer[j] | (0x40>>(i*4)));
-				}
-			}
-
-			j++;
-		}
-	}
 }
 
 int ISOIBMGetTrackSize(int TRACKTYPE,unsigned int numberofsector,unsigned int sectorsize,unsigned int gap3len,HXCFE_SECTCFG * sectorconfigtab)

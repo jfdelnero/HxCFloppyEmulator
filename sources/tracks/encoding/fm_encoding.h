@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2019 Jean-François DEL NERO
+// Copyright (C) 2006-2019 Jean-FranÃ§ois DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
@@ -25,17 +25,11 @@
 //
 */
 
-int  getbit(unsigned char * input_data,int bit_offset);
-void setbit(unsigned char * input_data,int bit_offset,int state);
+int fmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit);
+int bintofm(unsigned char * track_data,int track_data_size,unsigned char * bin_data,int bin_data_size,int bit_offset);
 
-void setfieldbit(unsigned char * dstbuffer,unsigned char byte,int bitoffset,int size);
+void getFMcode(track_generator *tg,uint8_t data,uint8_t clock,uint8_t * dstbuf);
 
-int  searchBitStream(unsigned char * input_data,uint32_t input_data_size,int searchlen, \
-					unsigned char * chr_data,uint32_t chr_data_size,uint32_t bit_offset);
+void BuildFMCylinder(uint8_t * buffer,int32_t fmtracksize,uint8_t * bufferclk,uint8_t * track,int32_t size);
 
-int  slowSearchBitStream(unsigned char * input_data,uint32_t input_data_size,int searchlen, \
-						unsigned char * chr_data,uint32_t chr_data_size,uint32_t bit_offset);
-
-void sortbuffer(unsigned char * buffer,unsigned char * outbuffer,int size);
-
-int chgbitptr(int tracklen,int cur_offset,int offset);
+void FastFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size);
