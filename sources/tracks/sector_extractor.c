@@ -62,6 +62,7 @@
 #include "tracks/track_formats/amiga_mfm_track.h"
 #include "tracks/track_formats/apple2_gcr_track.h"
 #include "tracks/track_formats/arburg_track.h"
+#include "tracks/track_formats/dec_rx02_track.h"
 #include "tracks/track_formats/emu_emulator_fm_track.h"
 #include "tracks/track_formats/heathkit_fm_track.h"
 #include "tracks/track_formats/iso_ibm_fm_track.h"
@@ -175,6 +176,9 @@ HXCFE_SECTCFG* hxcfe_getNextSector( HXCFE_SECTORACCESS* ss_ctx, int32_t track, i
 		break;
 		case ISOIBM_FM_ENCODING:
 			bitoffset = get_next_FM_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
+		break;
+		case DEC_RX02_FM_MFM_ENCODING:
+			bitoffset = get_next_dec_rx02_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
 		case TYCOM_FM_ENCODING:
 			bitoffset = get_next_TYCOMFM_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
@@ -698,6 +702,9 @@ int32_t hxcfe_writeSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_
 						case TYCOM_FM_ENCODING:
 						case ISOIBM_FM_ENCODING:
 							write_FM_sectordata(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,&buffer[sectorsize*nbsectorwrite],sectorsize);
+						break;
+						case DEC_RX02_FM_MFM_ENCODING:
+							write_dec_rx02_sectordata(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,&buffer[sectorsize*nbsectorwrite],sectorsize);
 						break;
 						case MEMBRAIN_MFM_ENCODING:
 							//write_ALT01_MFM_sectordata(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,&buffer[sectorsize*nbsectorwrite],sectorsize);
