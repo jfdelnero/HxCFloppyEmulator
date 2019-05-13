@@ -150,6 +150,10 @@ floppy_infos_window::floppy_infos_window() {
         heathkit_bt->labelsize(10);
         heathkit_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* heathkit_bt
+      { decrx02_bt = new Fl_Light_Button(1183, 350, 76, 15, "DEC RX02");
+        decrx02_bt->labelsize(10);
+        decrx02_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* decrx02_bt
       o->end();
     } // Fl_Group* o
     { bt_edit = new Fl_Button(1010, 465, 105, 26, "Edit tools");

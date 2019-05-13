@@ -157,8 +157,14 @@ class floppy_infos_window {open
         Fl_Light_Button heathkit_bt {
           label HEATHKIT
           user_data this
-          callback disk_infos_window_callback selected
+          callback disk_infos_window_callback
           xywh {1183 335 76 15} labelsize 10
+        }
+        Fl_Light_Button decrx02_bt {
+          label {DEC RX02}
+          user_data this
+          callback disk_infos_window_callback selected
+          xywh {1183 350 76 15} labelsize 10
         }
       }
       Fl_Button bt_edit {
