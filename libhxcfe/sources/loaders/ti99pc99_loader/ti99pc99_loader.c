@@ -51,6 +51,10 @@
 
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
+
+#include "tracks/encoding/fm_encoding.h"
+#include "tracks/encoding/mfm_encoding.h"
+
 #include "libhxcfe.h"
 
 #include "floppy_loader.h"
@@ -353,7 +357,7 @@ int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 				else
 				{
 					patchtrackMFM(trackdata,trackclk,tracklen);
-					BuildCylinder(currentside->databuffer,currentside->tracklen/8,trackclk,trackdata,tracklen);
+					BuildMFMCylinder(currentside->databuffer,currentside->tracklen/8,trackclk,trackdata,tracklen);
 				}
 
 			}
