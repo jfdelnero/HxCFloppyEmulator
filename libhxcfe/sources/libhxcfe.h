@@ -207,6 +207,8 @@ HXCFE_FLOPPY *         hxcfe_floppyDuplicate( HXCFE* floppycontext, HXCFE_FLOPPY
 #define AED6200P_DD                      0x0F
 #define NORTHSTAR_HS_DD                  0x10
 #define HEATHKIT_HS_SD                   0x11
+#define DECRX02_SDDD                     0x12
+
 #define DIRECT_ENCODING                  0xFE
 
 HXCFE_FLPGEN*          hxcfe_initFloppy( HXCFE* floppycontext, int32_t nb_of_track, int32_t nb_of_side );
@@ -386,6 +388,7 @@ int32_t                hxcfe_FDC_SCANSECTOR  ( HXCFE* floppycontext, uint8_t tra
 #define AED6200P_MFM_ENCODING            0x0C
 #define NORTHSTAR_HS_MFM_ENCODING        0x0D
 #define HEATHKIT_HS_FM_ENCODING          0x0E
+#define DEC_RX02_FM_MFM_ENCODING         0x0F
 
 #define UNKNOWN_ENCODING                 0xFF
 

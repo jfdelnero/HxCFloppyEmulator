@@ -53,6 +53,8 @@
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
 
+#include "tracks/encoding/mfm_encoding.h"
+
 #include "floppy_loader.h"
 #include "floppy_utils.h"
 
@@ -1053,7 +1055,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								}
 							}
 
-							BuildCylinder(currentside->databuffer,
+							BuildMFMCylinder(currentside->databuffer,
 								currentside->tracklen/8,
 								tempclock,
 								temptrack,
