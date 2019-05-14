@@ -73,7 +73,7 @@ int get_next_dec_rx02_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 	int bit_offset,old_bit_offset;
 	unsigned char fm_buffer[32];
 	unsigned char tmp_buffer[32];
-	unsigned char * tmp_sector;
+	unsigned char tmp_sector[1 + 256 + 2];
 	unsigned char CRC16_High;
 	unsigned char CRC16_Low;
 	int sector_extractor_sm;
@@ -192,8 +192,7 @@ int get_next_dec_rx02_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 
 							sector->startdataindex = bit_offset;
 
-							tmp_sector=(unsigned char*)malloc(1+256+2+6);
-							memset(tmp_sector,0,1+256+2);
+							memset(tmp_sector,0,sizeof(tmp_sector));
 
 							sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_sector,1,bit_offset,0);
 							if (sector->alternate_datamark == 0xFD || sector->alternate_datamark == 0xF9)
@@ -201,13 +200,14 @@ int get_next_dec_rx02_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 								sector->trackencoding = DECRX02_SDDD;
 								sector->sectorsize = 256;
 
-								sector->endsectorindex = decm2fmtobin(track->databuffer,track->tracklen,&tmp_sector[1],sector->sectorsize+2+2,sector->endsectorindex+1,0);
+								sector->endsectorindex = decm2fmtobin(track->databuffer,track->tracklen,&tmp_sector[1],sector->sectorsize+2,sector->endsectorindex+1,0);
 							}
 							else
 							{
+								sector->trackencoding = ISOFORMAT_SD;
 								sector->sectorsize = 128;
 
-								sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,&tmp_sector[1],sector->sectorsize+2,bit_offset+(0*8),0);
+								sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,&tmp_sector[1],sector->sectorsize+2,sector->endsectorindex,0);
 							}
 
 							CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
@@ -233,7 +233,6 @@ int get_next_dec_rx02_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 							{
 								memcpy(sector->input_data,&tmp_sector[1],sector->sectorsize);
 							}
-							free(tmp_sector);
 
 							// "Empty" sector detection
 							checkEmptySector(sector);
