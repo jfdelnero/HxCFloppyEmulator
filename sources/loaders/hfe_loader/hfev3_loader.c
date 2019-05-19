@@ -189,6 +189,7 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 	unsigned char * hfetrack = NULL;
 	unsigned char * hfetrack2 = NULL;
 	int nbofblock,tracklen,bitrate,bitskip;
+	unsigned char tmp_randmask;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEV3_libLoad_DiskFile %s",imgfile);
 
@@ -295,7 +296,10 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 					goto alloc_error;
 				memset(currentside->databuffer,0,currentside->tracklen);
 
-				currentside->flakybitsbuffer = 0;
+				currentside->flakybitsbuffer = malloc(currentside->tracklen);
+				if( !currentside->flakybitsbuffer )
+					goto alloc_error;
+				memset(currentside->flakybitsbuffer,0,currentside->tracklen);
 
 				currentside->indexbuffer = malloc(currentside->tracklen);
 				if( !currentside->indexbuffer )
@@ -399,6 +403,23 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 								bitoffset_out+= (8-bitskip);
 								bitoffset_in += 8*3;
 								l += 3;
+							break;
+
+							case RAND_OPCODE:
+#ifdef DEBUGVB
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T%.3dS%d Off[%.5d] : RAND_OPCODE",i,j,l);
+#endif
+								tmp_randmask = rand();
+								tmp_randmask = tmp_randmask  & 0x54;
+
+								cpybits(currentside->databuffer,bitoffset_out,&tmp_randmask,0, 8,currentside->tracklen*8,tracklen*8);
+								tmp_randmask = 0xFF;
+								bitoffset_out = cpybits(currentside->flakybitsbuffer,bitoffset_out,&tmp_randmask,0, 8,currentside->tracklen*8,tracklen*8);
+
+								currentside->timingbuffer[k] = bitrate;
+								bitoffset_in += 8;
+								k++;
+								l++;
 							break;
 
 							default:

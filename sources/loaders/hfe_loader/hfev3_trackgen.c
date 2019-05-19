@@ -69,8 +69,10 @@ trackpart trackpartbuffer_1[4096*2];
 
 void adjustrand(unsigned char * d, unsigned char * r)
 {
-	if ((*d & 0xF0) == 0xF0) // Shouldn't match with an opcode at this point !
+	if ( ((*d & 0xF0) == 0xF0) && (*d != RAND_OPCODE) ) // Shouldn't match with an opcode at this point !
+	{
 		*d = *d ^ 0x90;
+	}
 
 	return;
 }
@@ -85,6 +87,8 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 	unsigned char * randomfinalbuffer_H0;
 	unsigned char * finalbuffer_H1;
 	unsigned char * randomfinalbuffer_H1;
+
+	uint8_t prev_randomh0,prev_randomh1;
 
 	int32_t tick_offset_h0;
 	int32_t tick_offset_h1;
@@ -126,6 +130,9 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 
 	trackzoneindex0=0;
 	trackzoneindex1=0;
+
+	prev_randomh0 = 0;
+	prev_randomh1 = 0;
 
 	if(lendatah0>lendatah1)
 		finalsizebuffer = (lendatah0)+(32000);
@@ -735,7 +742,7 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 					{
 						floppycontext->hxc_printf(MSG_DEBUG,"Invalid speed state ! : H0-P:%d L:%d S:%d",trackparthead0index-1,lencode_track0,speedcfg_track0);
 					}
-					#endif 
+					#endif
 
 #ifdef DEBUGVB
 					floppycontext->hxc_printf(MSG_DEBUG,"SETBITRATE_OPCODE (01) (Ofs: %d) (%d - %d)", k, speedcfg_track0, speedcfg_track1);
@@ -823,8 +830,19 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 			if(i<lendatah0)
 			{
 				datah0tmp = datah0[i];
+
 				if(randomh0)
 				{
+					if(prev_randomh0>0 && randomh0[i])
+					{
+						datah0tmp = RAND_OPCODE;
+					}
+
+					if(randomh0[i])
+						prev_randomh0++;
+					else
+						prev_randomh0 = 0;
+
 					randomh0tmp = randomh0[i];
 				}
 
@@ -841,7 +859,17 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 				datah1tmp=datah1[j];
 				if(randomh1)
 				{
-					randomh1tmp=randomh1[j];
+					if(prev_randomh1>0 && randomh1[j])
+					{
+						datah1tmp = RAND_OPCODE;
+					}
+
+					if(randomh1[j])
+						prev_randomh1++;
+					else
+						prev_randomh1 = 0;
+
+					randomh1tmp = randomh1[j];
 				}
 
 				adjustrand(&datah1tmp, &randomh1tmp);
@@ -898,7 +926,19 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 				{
 					datah1tmp = datah1[j];
 					if(randomh1)
+					{
+						if(prev_randomh1>0 && randomh1[j])
+						{
+							datah1tmp = RAND_OPCODE;
+						}
+
+						if(randomh1[j])
+							prev_randomh1++;
+						else
+							prev_randomh1 = 0;
+
 						randomh1tmp = randomh1[j];
+					}
 
 					adjustrand(&datah1tmp, &randomh1tmp);
 				}
@@ -944,6 +984,15 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 					if(randomh0)
 					{
 						randomh0tmp = randomh0[i];
+						if(prev_randomh0>0 && randomh0[i])
+						{
+							datah0tmp = RAND_OPCODE;
+						}
+
+						if(randomh0[i])
+							prev_randomh0++;
+						else
+							prev_randomh0 = 0;
 					}
 
 					adjustrand(&datah0tmp, &randomh0tmp);

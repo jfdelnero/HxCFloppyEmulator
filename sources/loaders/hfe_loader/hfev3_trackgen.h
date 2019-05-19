@@ -51,6 +51,7 @@
 #define SETINDEX_OPCODE   0xF1
 #define SETBITRATE_OPCODE 0xF2
 #define SKIPBITS_OPCODE   0xF3
+#define RAND_OPCODE       0xF4
 
 typedef struct trackzone_
 {
