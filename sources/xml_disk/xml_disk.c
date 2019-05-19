@@ -559,6 +559,10 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 				{
 					ad->statestack[ad->stack_ptr].track_type = IBMFORMAT_SD;
 				}
+				if(!strcmp(buffer,"DECRX02_M2FM"))
+				{
+					ad->statestack[ad->stack_ptr].track_type = DECRX02_SDDD;
+				}
 				if(!strcmp(buffer,"UKNC_MFM"))
 				{
 					ad->statestack[ad->stack_ptr].track_type = UKNCFORMAT_DD;
