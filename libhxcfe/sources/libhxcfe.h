@@ -388,7 +388,7 @@ int32_t                hxcfe_FDC_SCANSECTOR  ( HXCFE* floppycontext, uint8_t tra
 #define AED6200P_MFM_ENCODING            0x0C
 #define NORTHSTAR_HS_MFM_ENCODING        0x0D
 #define HEATHKIT_HS_FM_ENCODING          0x0E
-#define DEC_RX02_FM_MFM_ENCODING         0x0F
+#define DEC_RX02_M2FM_ENCODING           0x0F
 
 #define UNKNOWN_ENCODING                 0xFF
 
