@@ -177,7 +177,7 @@ HXCFE_SECTCFG* hxcfe_getNextSector( HXCFE_SECTORACCESS* ss_ctx, int32_t track, i
 		case ISOIBM_FM_ENCODING:
 			bitoffset = get_next_FM_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
-		case DEC_RX02_FM_MFM_ENCODING:
+		case DEC_RX02_M2FM_ENCODING:
 			bitoffset = get_next_dec_rx02_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
 		case TYCOM_FM_ENCODING:
@@ -703,7 +703,7 @@ int32_t hxcfe_writeSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_
 						case ISOIBM_FM_ENCODING:
 							write_FM_sectordata(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,&buffer[sectorsize*nbsectorwrite],sectorsize);
 						break;
-						case DEC_RX02_FM_MFM_ENCODING:
+						case DEC_RX02_M2FM_ENCODING:
 							write_dec_rx02_sectordata(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,&buffer[sectorsize*nbsectorwrite],sectorsize);
 						break;
 						case MEMBRAIN_MFM_ENCODING:
