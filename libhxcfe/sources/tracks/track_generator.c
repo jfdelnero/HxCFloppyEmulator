@@ -71,6 +71,7 @@
 
 #include "tracks/encoding/mfm_encoding.h"
 #include "tracks/encoding/fm_encoding.h"
+#include "tracks/encoding/dec_m2fm_encoding.h"
 
 #include "trackutils.h"
 
@@ -222,6 +223,8 @@ void getDirectcode(track_generator *tg,unsigned char data,unsigned char * dstbuf
 
 int32_t pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE * side,int32_t trackencoding)
 {
+	int i;
+	unsigned char tmp_encoded_data[4];
 
 	switch(trackencoding)
 	{
@@ -229,8 +232,28 @@ int32_t pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE 
 		case ISOFORMAT_SD:
 		case TYCOMFORMAT_SD:
 		case HEATHKIT_HS_SD:
-			getFMcode(tg,data,clock,&side->databuffer[tg->last_bit_offset/8]);
-			tg->last_bit_offset=tg->last_bit_offset+(4*8);
+		case DECRX02_SDDD:
+			if( tg->last_bit_offset & 7)
+			{
+				getFMcode(tg,data,clock,(unsigned char*)&tmp_encoded_data);
+
+				for(i=0;i<(4*8);i++)
+				{
+					if( tg->last_bit_offset < side->tracklen )
+					{
+						setbit(side->databuffer, tg->last_bit_offset , getbit(tmp_encoded_data,i) );
+						tg->last_bit_offset++;
+					}
+				}
+			}
+			else
+			{
+				if( tg->last_bit_offset < side->tracklen )
+				{
+					getFMcode(tg,data,clock,&side->databuffer[tg->last_bit_offset/8]);
+					tg->last_bit_offset += (4*8);
+				}
+			}
 		break;
 
 		case IBMFORMAT_DD:
@@ -241,16 +264,51 @@ int32_t pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE 
 		case UKNCFORMAT_DD:
 		case AED6200P_DD:
 		case NORTHSTAR_HS_DD:
-			getMFMcode(tg,data,clock,&side->databuffer[tg->last_bit_offset/8]);
-			tg->last_bit_offset=tg->last_bit_offset+(2*8);
-		break;
+			if( tg->last_bit_offset & 7)
+			{
+				getMFMcode(tg,data,clock,(unsigned char*)&tmp_encoded_data);
 
+				for(i=0;i<(2*8);i++)
+				{
+					if( tg->last_bit_offset < side->tracklen )
+					{
+						setbit(side->databuffer, tg->last_bit_offset , getbit(tmp_encoded_data,i) );
+						tg->last_bit_offset++;
+					}
+				}
+			}
+			else
+			{
+				if( tg->last_bit_offset < side->tracklen )
+				{
+					getMFMcode(tg,data,clock,&side->databuffer[tg->last_bit_offset/8]);
+					tg->last_bit_offset += (2*8);
+				}
+			}
+		break;
 
 		case APPLE2_GCR5A3:
 		case APPLE2_GCR6A2:
 		case DIRECT_ENCODING:
-			getDirectcode(tg,data,&side->databuffer[tg->last_bit_offset/8]);
-			tg->last_bit_offset=tg->last_bit_offset+(2*8);
+			if( tg->last_bit_offset & 7)
+			{
+				getDirectcode(tg,data,(unsigned char*)&tmp_encoded_data);
+
+				for(i=0;i<(2*8);i++)
+				{
+					if( tg->last_bit_offset < side->tracklen )
+					{
+						setbit(side->databuffer, tg->last_bit_offset , getbit(tmp_encoded_data,i) );
+						tg->last_bit_offset++;
+					}
+				}
+			}
+			else
+			{
+				getDirectcode(tg,data,&side->databuffer[tg->last_bit_offset/8]);
+				tg->last_bit_offset += (2*8);
+			}
+
 		break;
 
 		default:
@@ -261,7 +319,6 @@ int32_t pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE 
 
 void FastMFMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size,int trackencoding)
 {
-
 	switch(trackencoding)
 	{
 		case IBMFORMAT_SD:
@@ -424,6 +481,7 @@ int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t
 			case IBMFORMAT_SD:
 			case ISOFORMAT_SD:
 			case TYCOMFORMAT_SD:
+			case DECRX02_SDDD:
 				total_track_size=total_track_size*4;
 				break;
 
@@ -459,7 +517,7 @@ int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t
 			configptr=&formatstab[sectorconfigtab[j].trackencoding-1];
 
 			sector_size = sectorconfigtab[j].sectorsize;
-			if(sectorconfigtab[j].trackencoding == TYCOMFORMAT_SD)
+			if(sectorconfigtab[j].trackencoding == TYCOMFORMAT_SD || sectorconfigtab[j].trackencoding == DECRX02_SDDD)
 				sector_size = 128;
 
 			track_size=(configptr->len_ssync+configptr->len_addrmarkp1+configptr->len_addrmarkp2 + 2 +configptr->len_gap2 +configptr->len_dsync+configptr->len_datamarkp1+configptr->len_datamarkp2+2+gap3+configptr->posthcrc_len+configptr->postdcrc_len);
@@ -475,6 +533,7 @@ int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t
 				case IBMFORMAT_SD:
 				case ISOFORMAT_SD:
 				case TYCOMFORMAT_SD:
+				case DECRX02_SDDD:
 					track_size=track_size*4;
 					break;
 
@@ -659,42 +718,46 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 		case IBMFORMAT_SD:
 		case ISOFORMAT_SD:
 		case TYCOMFORMAT_SD:
-			currentside->track_encoding=ISOIBM_FM_ENCODING;
+			currentside->track_encoding = ISOIBM_FM_ENCODING;
 		break;
 
 		case ISOFORMAT_DD11S:
 		case IBMFORMAT_DD:
 		case ISOFORMAT_DD:
 		case UKNCFORMAT_DD:
-			currentside->track_encoding=ISOIBM_MFM_ENCODING;
+			currentside->track_encoding = ISOIBM_MFM_ENCODING;
 		break;
 
 		case MEMBRAINFORMAT_DD:
-			currentside->track_encoding=MEMBRAIN_MFM_ENCODING;
+			currentside->track_encoding = MEMBRAIN_MFM_ENCODING;
 		break;
 
 		case EMUFORMAT_SD:
-			currentside->track_encoding=EMU_FM_ENCODING;
+			currentside->track_encoding = EMU_FM_ENCODING;
 		break;
 
 		case APPLE2_GCR5A3:
-			currentside->track_encoding=APPLEII_GCR1_ENCODING;
+			currentside->track_encoding = APPLEII_GCR1_ENCODING;
 		break;
 
 		case APPLE2_GCR6A2:
-			currentside->track_encoding=APPLEII_GCR2_ENCODING;
+			currentside->track_encoding = APPLEII_GCR2_ENCODING;
 		break;
 
 		case AMIGAFORMAT_DD:
-			currentside->track_encoding=AMIGA_MFM_ENCODING;
+			currentside->track_encoding = AMIGA_MFM_ENCODING;
 		break;
 
 		case AED6200P_DD:
-			currentside->track_encoding=AED6200P_MFM_ENCODING;
+			currentside->track_encoding = AED6200P_MFM_ENCODING;
+		break;
+
+		case DECRX02_SDDD:
+			currentside->track_encoding = DEC_RX02_M2FM_ENCODING;
 		break;
 
 		default:
-			currentside->track_encoding=ISOIBM_MFM_ENCODING;
+			currentside->track_encoding = ISOIBM_MFM_ENCODING;
 		break;
 	}
 
@@ -746,6 +809,8 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 	uint8_t  CRC16_Low;
 	uint8_t  crctable[32];
 	int32_t  startindex,sectorsize;
+	int data_part_encoding;
+	int startdatabitindex;
 
 	startindex=tg->last_bit_offset/8;
 
@@ -837,6 +902,17 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 					c++;
 				}
 			}
+
+			if( formatstab[trackencoding].indexformat == DECRX02_SDDD )
+			{
+				// DEC RX02 : Size field always set to 0.
+				c = 0;
+				if(sectorconfig->sectorsize < 256)
+					sectorsize = 128;
+				else
+					sectorsize = 256;
+			}
+
 			pushTrackCode(tg,c,0xFF,currentside,sectorconfig->trackencoding);
 			CRC16_Update(&CRC16_High,&CRC16_Low, c,(unsigned char*)&crctable );
 		}
@@ -866,7 +942,7 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 	// add extra desync
 	for(i=0;i<formatstab[trackencoding].posthcrc_len;i++)
 	{
-        pushTrackCode(tg,formatstab[trackencoding].posthcrc_glitch_data,formatstab[trackencoding].posthcrc_glitch_clock,currentside,sectorconfig->trackencoding);
+		pushTrackCode(tg,formatstab[trackencoding].posthcrc_glitch_data,formatstab[trackencoding].posthcrc_glitch_clock,currentside,sectorconfig->trackencoding);
 	}
 
 	// gap2
@@ -908,10 +984,31 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 		}
 	}
 
+	data_part_encoding = sectorconfig->trackencoding;
+
+	if( formatstab[trackencoding].indexformat == DECRX02_SDDD)
+	{
+		// DEC RX02 : Encode the Data + CRC in MFM.
+		data_part_encoding = ISOFORMAT_DD;
+		tg->mfm_last_bit = 0x7FFF;
+		tg->last_bit_offset++;
+	}
+
+	startdatabitindex = tg->last_bit_offset;
 	sectorconfig->startdataindex = tg->last_bit_offset/8;
 	if(sectorconfig->input_data)
 	{
-		FastMFMFMgenerator(tg,currentside,sectorconfig->input_data,sectorsize,sectorconfig->trackencoding);
+		if( tg->last_bit_offset & 7 )
+		{
+			for(i=0;i<sectorsize;i++)
+			{
+				pushTrackCode(tg,sectorconfig->input_data[i],0xFF,currentside,data_part_encoding);
+			}
+		}
+		else
+		{
+			FastMFMFMgenerator(tg,currentside,sectorconfig->input_data,sectorsize,data_part_encoding);
+		}
 
 		// data crc
 		for(i=0;i<sectorsize;i++)
@@ -923,7 +1020,7 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 	{
 		for(i=0;i<sectorsize;i++)
 		{
-			pushTrackCode(tg,sectorconfig->fill_byte,0xFF,currentside,sectorconfig->trackencoding);
+			pushTrackCode(tg,sectorconfig->fill_byte,0xFF,currentside,data_part_encoding);
 			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->fill_byte,(unsigned char*)&crctable );
 		}
 	}
@@ -947,22 +1044,28 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 	if(sectorconfig->use_alternate_data_crc&0x2)
 	{
 		// alternate crc
-		pushTrackCode(tg,(unsigned char)(sectorconfig->data_crc&0xFF),     0xFF,currentside,sectorconfig->trackencoding);
-		pushTrackCode(tg,(unsigned char)((sectorconfig->data_crc>>8)&0xFF),0xFF,currentside,sectorconfig->trackencoding);
+		pushTrackCode(tg,(unsigned char)(sectorconfig->data_crc&0xFF),     0xFF,currentside,data_part_encoding);
+		pushTrackCode(tg,(unsigned char)((sectorconfig->data_crc>>8)&0xFF),0xFF,currentside,data_part_encoding);
 	}
 	else
 	{
 		//bad crc
 		if(sectorconfig->use_alternate_data_crc&0x1)
 		{
-			pushTrackCode(tg,(unsigned char)(CRC16_High^0x21),0xFF,currentside,sectorconfig->trackencoding);
-			pushTrackCode(tg,(unsigned char)(CRC16_Low ^0x20),0xFF,currentside,sectorconfig->trackencoding);
+			pushTrackCode(tg,(unsigned char)(CRC16_High^0x21),0xFF,currentside,data_part_encoding);
+			pushTrackCode(tg,(unsigned char)(CRC16_Low ^0x20),0xFF,currentside,data_part_encoding);
 		}
 		else
 		{
-			pushTrackCode(tg,CRC16_High,0xFF,currentside,sectorconfig->trackencoding);
-			pushTrackCode(tg,CRC16_Low ,0xFF,currentside,sectorconfig->trackencoding);
+			pushTrackCode(tg,CRC16_High,0xFF,currentside,data_part_encoding);
+			pushTrackCode(tg,CRC16_Low ,0xFF,currentside,data_part_encoding);
 		}
+	}
+
+	if( formatstab[trackencoding].indexformat == DECRX02_SDDD )
+	{
+		// DEC RX02 : Convert/Patch the encoded MFM to DEC M2FM.
+		mfmtodecm2fm(currentside->databuffer,currentside->tracklen,startdatabitindex, (startdatabitindex + (256*8*2)) % currentside->tracklen );
 	}
 
 	// add extra desync
@@ -991,7 +1094,7 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 
 	trackenc = ISOIBM_MFM_ENCODING;
 
-	switch(trackencoding)
+	switch(sectorconfig->trackencoding)
 	{
 		case IBMFORMAT_SD:
 		case ISOFORMAT_SD:
@@ -1004,6 +1107,10 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 		case ISOFORMAT_DD:
 		case UKNCFORMAT_DD:
 			trackenc = ISOIBM_MFM_ENCODING;
+		break;
+
+		case DECRX02_SDDD:
+			trackenc = DEC_RX02_M2FM_ENCODING;
 		break;
 
 		case AED6200P_DD:
@@ -1043,12 +1150,12 @@ void tg_addSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_
 
 	switch(sectorconfig->trackencoding)
 	{
-
 		case IBMFORMAT_SD:
 		case IBMFORMAT_DD:
 		case ISOFORMAT_SD:
 		case ISOFORMAT_DD:
 		case ISOFORMAT_DD11S:
+		case DECRX02_SDDD:
 		case TYCOMFORMAT_SD:
 		case MEMBRAINFORMAT_DD:
 		case UKNCFORMAT_DD:
@@ -1093,7 +1200,11 @@ void tg_completeTrack(track_generator *tg, HXCFE_SIDE * currentside,int32_t trac
 		trackoffset=tg->last_bit_offset/8;
 	}
 
-	if((trackencoding == IBMFORMAT_SD) || (trackencoding == ISOFORMAT_SD) || (trackencoding == TYCOMFORMAT_SD))
+	if( (trackencoding == IBMFORMAT_SD) || \
+	    (trackencoding == ISOFORMAT_SD) || \
+		(trackencoding == TYCOMFORMAT_SD) || \
+		(trackencoding == DECRX02_SDDD)
+	)
 	{
 		//
 		// SCAN Command FM issue workaround for some FDC  : Desync the clock at the end of the track.
@@ -1198,7 +1309,6 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 		gap3=searchgap3value(number_of_sector,sectorconfigtab);
 		if(gap3!=-1)
 		{
-
 			for(i=0;i<number_of_sector;i++)
 			{
 				sectorconfigtab[i].gap3=(unsigned char)gap3;
@@ -1229,6 +1339,7 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 					case ISOFORMAT_SD:
 					case TYCOMFORMAT_SD:
 					case HEATHKIT_HS_SD:
+					case DECRX02_SDDD:
 						computedgap3=computedgap3/(2*8);
 					break;
 
@@ -1254,7 +1365,7 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 	}
 
 	// recompute the track size with the new gap settings.
-	tracksize=tg_computeMinTrackSize(&tg,trackencoding,bitrate,number_of_sector,sectorconfigtab,pregap,&track_period);
+	tracksize = tg_computeMinTrackSize(&tg,trackencoding,bitrate,number_of_sector,sectorconfigtab,pregap,&track_period);
 
 	// adjust the track length to get the right rpm.
 	if(wanted_trackperiod>track_period)
