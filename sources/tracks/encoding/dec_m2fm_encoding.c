@@ -108,3 +108,72 @@ int decm2fmtobin(unsigned char * input_data,int input_data_size,unsigned char * 
 	// Use the normal MFM decoding.
 	return mfmtobin(tmp_mfm_buffer, input_data_size+1, decod_data,decod_data_size, 1,lastbit) + bit_offset;
 }
+
+int mfmtodecm2fm(unsigned char * input_data,int input_data_size,int bit_offset,int size)
+{
+	int i,off,passed,prev_offset;
+	unsigned char tosearch[4];
+	unsigned char toreplace[4];
+	int start_offset,aligned;
+	#define WORDSIZE 11
+	// Encoded DEC M2FM "011110" replacement...
+
+	toreplace[0] = 0x44;       // 0100 0100 010 - DEC M2FM
+	toreplace[1] = 0x40;
+
+	tosearch[0] = 0x2A;        // 0010 1010 100 - Normal MFM
+	tosearch[1] = 0x80;
+
+	off = bit_offset;
+	start_offset = bit_offset;
+	do
+	{
+		prev_offset = off;
+		off = slowSearchBitStream(input_data,input_data_size,size,(unsigned char*)&tosearch,WORDSIZE,off);
+		if(off != -1)
+		{
+			if( prev_offset < off )
+			{
+				passed = off - prev_offset;
+			}
+			else
+			{
+				passed = (input_data_size - off) + prev_offset;
+			}
+
+			if( start_offset & 1 )
+			{
+				if(off&1)
+					aligned = 1;
+				else
+					aligned = 0;
+			}
+			else
+			{
+				if(!off&1)
+					aligned = 1;
+				else
+					aligned = 0;
+			}
+
+			if(!aligned)
+			{
+				// Unaligned !
+				off++;
+			}
+			else
+			{
+				// Replace the DEC rule with the normal MFM encoding
+				for(i=0;i<WORDSIZE;i++)
+				{
+					setbit(input_data,(off+i)%input_data_size, getbit(toreplace,i) );
+				}
+				off += WORDSIZE-1;
+			}
+
+			size -= passed;
+		}
+	}while(off != -1 && size > 0);
+
+	return 0;
+}
