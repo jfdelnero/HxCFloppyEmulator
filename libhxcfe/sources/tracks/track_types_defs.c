@@ -645,6 +645,41 @@ isoibm_config formatstab[]=
 		0x00,0x00,0				// post crc data glith
 	},
 	{
+		DECRX02_SDDD,
+
+		0xFF,00,				// post index gap4 config
+
+		0x00,00,				// index sync config
+
+		0x00,0x00,0,			// index mark coding
+		0xFC,0xD7,1,
+
+		0xFF,16,				// gap1 config
+
+		0x00,06,				// h sync config
+
+		0x00,06,				// d sync config
+
+		0x00,0x00,0,			// address mark coding
+		0xFE,0xC7,1,
+
+		0xFF,11,				// gap2 config
+
+		0x00,0x00,0,			// data mark coding
+		0xFD,0xC7,1,
+
+		0xFF,84,				// gap3 config
+
+		0xFF,255,				// gap4 config
+
+		0xFF,0xFF,0xFF,0xFF,	// Track - Side - Sector - Size
+
+		0x1021,0xFFFF,			// crc, initial value
+
+		0x00,0x00,0,			// post crc header glith
+		0x00,0x00,0				// post crc data glith
+	},
+	{
 		0,
 
 		0x4E,00,				// post index gap4 config
