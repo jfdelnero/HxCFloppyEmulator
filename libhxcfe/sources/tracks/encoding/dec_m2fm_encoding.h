@@ -26,3 +26,4 @@
 */
 
 int decm2fmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit);
+int mfmtodecm2fm(unsigned char * input_data,int input_data_size,int bit_offset,int size);
