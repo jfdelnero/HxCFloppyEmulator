@@ -572,6 +572,12 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 									else
 										sprintf(tempstr,"MFM  %.3dB DM: ??",sc->sectorsize);
 									break;
+								case DECRX02_SDDD:
+									if(sc->startdataindex != sc->endsectorindex)
+										sprintf(tempstr,"DEC M2FM  %.3dB DM:%.2Xh",sc->sectorsize,sc->alternate_datamark);
+									else
+										sprintf(tempstr,"DEC M2FM  %.3dB DM: ??",sc->sectorsize);								
+									break;
 								case AMIGAFORMAT_DD:
 									sprintf(tempstr,"AMFM %.3dB ",sc->sectorsize);
 									break;
