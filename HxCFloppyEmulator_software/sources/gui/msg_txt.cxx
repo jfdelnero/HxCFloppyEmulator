@@ -257,6 +257,7 @@ Fl_Menu_Item track_type_choices[]=
 	{ "TYCOM FM",0,raw_loader_window_datachanged,(void*)TYCOMFORMAT_SD},
 	{ "MEMBRAIN MFM",0,raw_loader_window_datachanged,(void*)MEMBRAINFORMAT_DD},
 	{ "UKNC MFM",0,raw_loader_window_datachanged,(void*)UKNCFORMAT_DD},
+	{ "DEC RX02 M2FM",0,raw_loader_window_datachanged,(void*)DECRX02_SDDD},
 	{0}
 };
 
@@ -303,6 +304,7 @@ const track_type track_type_list[]=
 	{ TYCOM_TRACK_TYPE,"TYCOM FM",TYCOMFORMAT_SD},
 	{ MEMBRAIN_TRACK_TYPE,"MEMBRAIN MFM",MEMBRAINFORMAT_DD},
 	{ UKNC_TRACK_TYPE,"UKNC MFM",UKNCFORMAT_DD},
+	{ DEC_RX02_TRACK_TYPE,"DEC RX02 M2FM",DECRX02_SDDD},
 	{ ARBURGDATA_TRACK_TYPE,"ARBURG DATA",ARBURG_DAT},
 	{ ARBURGSYST_TRACK_TYPE,"ARBURG SYSTEM",ARBURG_SYS},
 	//{ GCR_TRACK_TYPE,"GCR"},
