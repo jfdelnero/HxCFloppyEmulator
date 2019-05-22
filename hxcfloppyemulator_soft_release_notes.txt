@@ -16,7 +16,7 @@ Facebook : https://www.facebook.com/groups/hxc2001
 /*********************************************************
 22 May 2019 : HxCFloppyEmulator 2.1.24.1
 
-DEC RX02 M2MFM encoding/decoding support added.
+DEC RX02 M2FM encoding/decoding support added.
 
 HFEv3 : weakbits support added.
 
