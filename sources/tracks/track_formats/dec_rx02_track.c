@@ -170,20 +170,26 @@ int get_next_dec_rx02_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 //;            1   1    1   1    1   1       0   0   -- FC
 //;            1   1    1   1    1   1       0   1   -- FD
 
-						//11111011
+						// First search for NEC 0xFD Data mark
 						fm_buffer[0]=0x55;
 						fm_buffer[1]=0x11;
-						fm_buffer[2]=0x14;
-						fm_buffer[3]=0x55;
+						fm_buffer[2]=0x15;
+						fm_buffer[3]=0x45;
 
-						i=0;
-						do
+						i = 6;
+						bit_offset = searchBitStream(track->databuffer,track->tracklen,((88+16)*8*2),fm_buffer,4*8,old_bit_offset);
+
+						if( bit_offset == -1)
 						{
-							fm_buffer[2] = (datamark[i] >> 8) & 0xFF;
-							fm_buffer[3] = datamark[i] & 0xFF;
-							bit_offset = searchBitStream(track->databuffer,track->tracklen,((88+16)*8*2),fm_buffer,4*8,old_bit_offset);
-							i++;
-						}while(i<6 && bit_offset==-1 );
+							i=0;
+							do
+							{
+								fm_buffer[2] = (datamark[i] >> 8) & 0xFF;
+								fm_buffer[3] = datamark[i] & 0xFF;
+								bit_offset = searchBitStream(track->databuffer,track->tracklen,((88+16)*8*2),fm_buffer,4*8,old_bit_offset);
+								i++;
+							}while(i<6 && bit_offset==-1 );
+						}
 
 						if(bit_offset != -1)
 						{
