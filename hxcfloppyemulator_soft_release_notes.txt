@@ -14,7 +14,11 @@ Facebook : https://www.facebook.com/groups/hxc2001
 -------------------------------------------------------------------------------
 
 /*********************************************************
-XX April 2019 : HxCFloppyEmulator 2.X.X.X
+22 May 2019 : HxCFloppyEmulator 2.1.24.1
+
+DEC RX02 M2MFM encoding/decoding support added.
+
+HFEv3 : weakbits support added.
 
 Acorn ADF support : regression fixed.
 
@@ -25,7 +29,7 @@ Acorn ADF support : regression fixed.
 
 New XML format : Coat-A-Matic 9400 / Robox RC9400 format.
 
-Amiga Image loader (ADF, DMS,...) : Fix the v2.1.20.1 left sector(s) field regression ! 
+Amiga Image loader (ADF, DMS,...) : Fix the v2.1.20.1 left sector(s) field regression !
 Update recommended for Amiga users !
 
 *********************************************************/
