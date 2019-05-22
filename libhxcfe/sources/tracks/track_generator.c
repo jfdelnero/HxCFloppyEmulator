@@ -305,8 +305,11 @@ int32_t pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE 
 			}
 			else
 			{
-				getDirectcode(tg,data,&side->databuffer[tg->last_bit_offset/8]);
-				tg->last_bit_offset += (2*8);
+				if( tg->last_bit_offset < side->tracklen )
+				{
+					getDirectcode(tg,data,&side->databuffer[tg->last_bit_offset/8]);
+					tg->last_bit_offset += (2*8);
+				}
 			}
 
 		break;
@@ -1065,7 +1068,7 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 	if( formatstab[trackencoding].indexformat == DECRX02_SDDD )
 	{
 		// DEC RX02 : Convert/Patch the encoded MFM to DEC M2FM.
-		mfmtodecm2fm(currentside->databuffer,currentside->tracklen,startdatabitindex, (startdatabitindex + (256*8*2)) % currentside->tracklen );
+		mfmtodecm2fm( currentside->databuffer, currentside->tracklen, startdatabitindex, ((256+2)*8*2) );
 	}
 
 	// add extra desync
