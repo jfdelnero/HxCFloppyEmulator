@@ -11,6 +11,7 @@ HxC Floppy Emulator project
 (c) 2006-2019 Jean-François DEL NERO / (c) HxC2001
 Forum    : http://torlus.com/floppy/forum
 Facebook : https://www.facebook.com/groups/hxc2001
+Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
