@@ -170,5 +170,7 @@ fat12config configlist[]=
 	{"fatmonsterst",0xFF,255,2,17,200,250000,0,                35,  0,1,ATARIST_DD_FLOPPYMODE,   ISOFORMAT_DD,0xF9,4, 512, 112,1},
 	{"fatbig",      0xFF,127,2,24,100,500000,msdos_bootsector, 84,  0,2,  IBMPC_HD_FLOPPYMODE,   IBMFORMAT_DD,0xF0,2, 512, 112,1},
 	{"krz",         0x00, 80,2,18,300,500000,win95_bootsector, 84,  0,1,  IBMPC_HD_FLOPPYMODE,   IBMFORMAT_DD,0xF0,1, 512, 224,1}, //3.5" Double Sided, 80 tracks per side, 18 sectors per track (1.44MB)
+	{"k25",         0x00, 80,2,18,300,500000,win95_bootsector, 84,  0,1,  IBMPC_HD_FLOPPYMODE,   IBMFORMAT_DD,0xF0,1, 512, 224,1}, //3.5" Double Sided, 80 tracks per side, 18 sectors per track (1.44MB)
+	{"k26",         0x00, 80,2,18,300,500000,win95_bootsector, 84,  0,1,  IBMPC_HD_FLOPPYMODE,   IBMFORMAT_DD,0xF0,1, 512, 224,1}, //3.5" Double Sided, 80 tracks per side, 18 sectors per track (1.44MB)
 	{"",            0xFF, 80,2, 9,300,250000,0,                84,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_DD,0xF9,1, 512, 112,1}
 };
