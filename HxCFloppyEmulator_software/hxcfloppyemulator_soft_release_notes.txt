@@ -14,6 +14,13 @@ Facebook : https://www.facebook.com/groups/hxc2001
 -------------------------------------------------------------------------------
 
 /*********************************************************
+XX XXX 2019 : HxCFloppyEmulator 2.X.X.X
+
+-> New files Support : Kurzweil K25 (K2500) and K26 (K2600) file support.
+
+*********************************************************/
+
+/*********************************************************
 22 May 2019 : HxCFloppyEmulator 2.1.24.1
 
 DEC RX02 M2FM encoding/decoding support added.
