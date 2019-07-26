@@ -101,6 +101,7 @@ Fl_Menu_Item format_choices[]=
 	{ "HFE - SD HxC Floppy Emulator (HDDD A2 Support)",0,format_choice_cb,(void*)PLUGIN_HXC_HDDD_A2},
 	{ "HFE - Rev 2 - Experimental",0,format_choice_cb,(void*)PLUGIN_HXC_EXTHFE},
 	{ "HFE - Rev 3 - Experimental",0,format_choice_cb,(void*)PLUGIN_HXC_HFEV3},
+	{ "HFE - Stream - Experimental",0,format_choice_cb,(void*)PLUGIN_HXC_HFESTREAM},
 	{ "Arburg - Arburg RAW sectors file format",0,format_choice_cb,(void*)PLUGIN_ARBURG},
 	{ "Raw - Stream Kryoflux file format",0,format_choice_cb,(void*)PLUGIN_SKF},
 	{ "IPF - SPS IPF file format (W.I.P)",0,format_choice_cb,(void*)PLUGIN_IPF},

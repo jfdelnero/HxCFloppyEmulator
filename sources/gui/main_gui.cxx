@@ -133,6 +133,7 @@ const char * plugid_lst[]=
 	PLUGIN_HXC_HDDD_A2,
 	PLUGIN_HXC_EXTHFE,
 	PLUGIN_HXC_HFEV3,
+	PLUGIN_HXC_HFESTREAM,
 	PLUGIN_ARBURG,
 	PLUGIN_SKF,
 	PLUGIN_IPF,
@@ -141,7 +142,7 @@ const char * plugid_lst[]=
 	PLUGIN_DISK_BMP,
 	PLUGIN_GENERIC_XML,
 	PLUGIN_NORTHSTAR,
-	PLUGIN_HEATHKIT	
+	PLUGIN_HEATHKIT
 };
 
 static void tick_main(void *v) {
@@ -483,7 +484,8 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"Thomson FD file\t*.fd\n"
 					"HFE file (HDDD A2 Encoding support)\t*.hfe\n"
 					"HFE file (Rev 2 - Experimental)\t*.hfe\n"
-					"HFE file (Rev 3 - Experimental)\t*.hfe\n"					
+					"HFE file (Rev 3 - Experimental)\t*.hfe\n"
+					"HFE file (Stream - Experimental)\t*.hfe\n"
 					"Arburg file\t*.arburgfd\n"
 					"KF Stream file\t*.raw\n"
 					"SPS IPF file (WIP)\t*.ipf\n"
@@ -491,8 +493,8 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"BMP file\t*.bmp\n"
 					"BMP file (disk)\t*.bmp\n"
 					"XML file\t*.xml\n"
-					"NSI file\t*.nsi\n"					
-					"H8D file\t*.h8d\n"					
+					"NSI file\t*.nsi\n"
+					"H8D file\t*.h8d\n"
 					);
 
 
