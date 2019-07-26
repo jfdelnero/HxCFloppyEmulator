@@ -59,6 +59,7 @@
 #include "./loaders/smc_loader/snes_smc_loader.h"
 #include "./loaders/hfe_loader/hfe_loader.h"
 #include "./loaders/hfe_loader/hfev3_loader.h"
+#include "./loaders/streamhfe_loader/streamhfe_loader.h"
 #include "./loaders/imd_loader/imd_loader.h"
 #include "./loaders/afi_loader/afi_loader.h"
 #include "./loaders/d64_loader/d64_loader.h"
@@ -167,6 +168,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)HFEV3_libGetPluginInfo,
 	(GETPLUGININFOS)EXTHFE_libGetPluginInfo,
 	(GETPLUGININFOS)HFE_HDDD_A2_libGetPluginInfo,
+	(GETPLUGININFOS)STREAMHFE_libGetPluginInfo,
 	(GETPLUGININFOS)VTR_libGetPluginInfo,
 	(GETPLUGININFOS)IMD_libGetPluginInfo,
 	(GETPLUGININFOS)SDU_libGetPluginInfo,
