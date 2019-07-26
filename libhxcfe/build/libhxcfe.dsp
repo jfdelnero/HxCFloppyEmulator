@@ -2079,6 +2079,26 @@ SOURCE=..\sources\loaders\common\raw_iso.c
 SOURCE=..\sources\loaders\common\raw_iso.h
 # End Source File
 # End Group
+# Begin Group "StreamHFE"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\streamhfe_loader\streamhfe_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\streamhfe_loader\streamhfe_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\streamhfe_loader\streamhfe_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\streamhfe_loader\streamhfe_writer.c
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 
