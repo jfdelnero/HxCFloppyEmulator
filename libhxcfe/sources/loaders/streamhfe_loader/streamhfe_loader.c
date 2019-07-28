@@ -64,6 +64,8 @@
 
 #include "tracks/luts.h"
 
+#include "thirdpartylibs/lz4/lib/lz4lib.h"
+
 static char * interfacemodecode[]=
 {
 	"IBMPC_DD_FLOPPYMODE",
@@ -108,110 +110,124 @@ int STREAMHFE_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEIN
 	}
 }
 
-static HXCFE_SIDE* decodestream(HXCFE* floppycontext, streamhfe_track_def * trackdef,unsigned short * unpacked_data,int side,short * rpm,float timecoef,int phasecorrection,int revolution)
+static HXCFE_SIDE* decodestream(HXCFE* floppycontext, streamhfe_track_def * trackdef,unsigned char * unpacked_data,int side,short * rpm,float timecoef,int phasecorrection,unsigned int revolution)
 {
 	HXCFE_SIDE* currentside;
-	int i,k,l,offset;
+	unsigned int i,k,l,p,offset;
 
 	HXCFE_TRKSTREAM *track_dump;
 	HXCFE_FXSA * fxs;
 
-	unsigned short * tmp_trackbuf;
-
 	uint32_t * trackbuf_dword;
-	uint32_t realnumberofpulses;
-	uint32_t curpulselength;
-	uint32_t j,index_position[16];
-
+	uint32_t index_position[16];
+	unsigned char c;
 	uint32_t pulses_count;
+	uint32_t tmp_dword,remain_dword,cumul,r;
 	currentside = NULL;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
 
 	floppycontext->hxc_printf(MSG_DEBUG,"Loading Stream HFE track...");
 
+	index_position[0] = 0;
+
 	fxs = hxcfe_initFxStream(floppycontext);
 	if(fxs)
 	{
-		//Unpack data...
-		tmp_trackbuf = malloc(trackdef->unpacked_data_size/2);
-		if(!tmp_trackbuf)
-			return NULL;
+		pulses_count = trackdef->nb_pulses;
 
-		for(i = 0;i<(trackdef->track_len)/32;i++)
-		{
-			tmp_trackbuf[i] = unpacked_data[(i*2) + (side&1)];
-		}
-
-		pulses_count = 0;
-		for(i=0;i<(trackdef->track_len)/2;i++)
-		{
-			if(getbit((unsigned char *)tmp_trackbuf,i))
-				pulses_count++;
-		}
-
-		if(!pulses_count)
-			pulses_count++;
-
-		if(pulses_count)
+		if( pulses_count )
 		{
 			offset = 0;
 
-			realnumberofpulses = 0;
+			p = 0;
 
 			trackbuf_dword = malloc(((pulses_count*revolution)+1)*sizeof(uint32_t));
 			if(trackbuf_dword)
 			{
 				memset(trackbuf_dword,0x00,((pulses_count*revolution)+1)*sizeof(uint32_t));
 
-				realnumberofpulses = 0;
-				j = 0;
-				l = 0;
-				k = 0;
-				curpulselength = 1;
-				while(j < ((trackdef->track_len)/2) * revolution )
+				r = 0;
+				remain_dword = 0;
+				cumul = 0;
+				while( r < revolution )
 				{
-					if(!getbit((unsigned char *)tmp_trackbuf,j%((trackdef->track_len)/2)))
+					k = 0;
+					l = 0;
+					cumul = 0;
+					while(l < pulses_count )
 					{
-						curpulselength++;
-					}
-					else
-					{
-						trackbuf_dword[k] = curpulselength;
-						curpulselength = 1;
-						k++;
-						realnumberofpulses++;
+						c  = unpacked_data[k++];
+
+						if( !(c & 0x80) )
+						{
+							trackbuf_dword[p++] = c + remain_dword;
+							cumul += c;
+						}
+						else
+						{
+							if( (c & 0xC0) == 0x80 )
+							{
+								tmp_dword = (((uint32_t)(c & 0x3F) << 8) | unpacked_data[k++]);
+								trackbuf_dword[p++] = tmp_dword + remain_dword;
+								cumul += tmp_dword;
+							}
+							else
+							{
+								if( (c & 0xE0) == 0xC0 )
+								{
+									tmp_dword =  ((uint32_t)(c & 0x1F) << 16);
+									tmp_dword |= ((uint32_t)unpacked_data[k++]<<8);
+									tmp_dword |= ((uint32_t)unpacked_data[k++]<<0);
+
+									trackbuf_dword[p++] = tmp_dword + remain_dword;
+									cumul += tmp_dword;
+								}
+								else
+								{
+									if( (c & 0xF0) == 0xE0 )
+									{
+										tmp_dword =  ((uint32_t)(c & 0x0F) << 24);
+										tmp_dword |= ((uint32_t)unpacked_data[k++]<<16);
+										tmp_dword |= ((uint32_t)unpacked_data[k++]<<8);
+										tmp_dword |= ((uint32_t)unpacked_data[k++]<<0);
+
+										trackbuf_dword[p++] = tmp_dword + remain_dword;
+										cumul += tmp_dword;
+									}
+									else
+									{
+
+									}
+								}
+							}
+						}
+
+						l++;
+						remain_dword = 0;
 					}
 
-					if( j%((trackdef->track_len)/2) > (j+1)%((trackdef->track_len)/2) )
-					{
-						index_position[l++] = k;
-					}
+					index_position[r] = p;
 
-					j++;
+					r++;
+					remain_dword = trackdef->track_len - cumul;
 				}
 
 				// dummy pulse
-				trackbuf_dword[realnumberofpulses] = 300;
-				realnumberofpulses++;
+				trackbuf_dword[p++] = 300;
 			}
-
-			free(tmp_trackbuf);
 
 			hxcfe_FxStream_setResolution(fxs,DEFAULT_BITS_PERIOD);
 
-			track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf_dword,32,(realnumberofpulses));
+			track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf_dword,32, p);
 			if(track_dump)
 			{
-				if(revolution)
-				{
-					offset = 0;
-					hxcfe_FxStream_AddIndex(fxs,track_dump,offset,0,FXSTRM_INDEX_MAININDEX);
+				offset = 0;
+				hxcfe_FxStream_AddIndex(fxs,track_dump,offset,0,FXSTRM_INDEX_MAININDEX);
 
-					for(i=0;i<revolution;i++)
-					{
-						hxcfe_FxStream_AddIndex(fxs,track_dump,index_position[i],0,FXSTRM_INDEX_MAININDEX);
-					}
+				for(i=0;i<revolution;i++)
+				{
+					hxcfe_FxStream_AddIndex(fxs,track_dump,index_position[i],0,FXSTRM_INDEX_MAININDEX);
 				}
 
 				currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
@@ -281,14 +297,14 @@ int STREAMHFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 	FILE * f;
 	short rpm;
 	streamhfe_fileheader header;
-	int i,j;
+	int i,j,track_array_index;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE * curside;
 	int phasecorrection;
 	float timecoef;
 	streamhfe_track_def * trackoffsetlist;
 	unsigned char * packed_track_data;
-	unsigned short * unpacked_track;
+	unsigned char * unpacked_track;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STREAMHFE_libLoad_DiskFile %s",imgfile);
 
@@ -320,13 +336,13 @@ int STREAMHFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 			floppydisk->floppySectorPerTrack,
 			floppydisk->floppyiftype<0xC?interfacemodecode[floppydisk->floppyiftype]:"Unknow!");
 
-        trackoffsetlist = (streamhfe_track_def*)malloc(sizeof(streamhfe_track_def) * header.number_of_track);
+        trackoffsetlist = (streamhfe_track_def*)malloc(sizeof(streamhfe_track_def) * (header.number_of_track*header.number_of_side));
 		if(!trackoffsetlist)
 			goto error;
 
-        memset( trackoffsetlist, 0, sizeof(streamhfe_track_def) * header.number_of_track);
+        memset( trackoffsetlist, 0, sizeof(streamhfe_track_def) * (header.number_of_track*header.number_of_side));
         fseek( f,header.track_list_offset,SEEK_SET);
-        hxc_fread( trackoffsetlist, sizeof(streamhfe_track_def) * header.number_of_track, f);
+        hxc_fread( trackoffsetlist, sizeof(streamhfe_track_def) * (header.number_of_track*header.number_of_side), f);
 
 		floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 		if(!floppydisk->tracks)
@@ -336,46 +352,50 @@ int STREAMHFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
-			hxcfe_imgCallProgressCallback(imgldr_ctx, j,(floppydisk->floppyNumberOfTrack) );
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Load Track %.3d",j);
-
-			fseek(f, trackoffsetlist[j].packed_data_offset,SEEK_SET);
-			if(trackoffsetlist[j].packed_data_size)
+			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
-				packed_track_data = malloc(trackoffsetlist[j].packed_data_size);
-				if(!packed_track_data)
-					goto error;
+				hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1)|(i&1),(floppydisk->floppyNumberOfTrack * floppydisk->floppyNumberOfSide) );
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Load Track %.3d.%d",j,i);
 
-				hxc_fread(packed_track_data,trackoffsetlist[j].packed_data_size,f);
+				if( j == 80)
+					j = 80;
 
-				//Unpack data...
-				unpacked_track = malloc(trackoffsetlist[j].unpacked_data_size);
-				if(!unpacked_track)
-					goto error;
-
-				memcpy(unpacked_track,packed_track_data,trackoffsetlist[j].unpacked_data_size);
-
-				curside = decodestream(imgldr_ctx->hxcfe, &trackoffsetlist[j],unpacked_track,0,&rpm,timecoef,phasecorrection,4);
-				fix_track(curside);
-
-				if(!floppydisk->tracks[j])
+				track_array_index = (j<<1) | (i&1);
+				fseek(f, trackoffsetlist[track_array_index].packed_data_offset,SEEK_SET);
+				if(trackoffsetlist[track_array_index].packed_data_size)
 				{
-					floppydisk->tracks[j] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-				}
+					packed_track_data = malloc(trackoffsetlist[track_array_index].packed_data_size);
+					if(!packed_track_data)
+						goto error;
 
-				currentcylinder=floppydisk->tracks[j];
+					hxc_fread(packed_track_data,trackoffsetlist[track_array_index].packed_data_size,f);
 
-				currentcylinder->sides[0] = curside;
+					//Unpack data...
+					unpacked_track = malloc(trackoffsetlist[track_array_index].unpacked_data_size);
+					if(!unpacked_track)
+						goto error;
 
-				if(floppydisk->floppyNumberOfSide == 2)
-				{
-					curside = decodestream(imgldr_ctx->hxcfe, &trackoffsetlist[j],unpacked_track,1,&rpm,timecoef,phasecorrection,4);
+					LZ4_decompress_safe ((const char*)packed_track_data, (char*)unpacked_track, trackoffsetlist[track_array_index].packed_data_size, trackoffsetlist[track_array_index].unpacked_data_size);
+
+					//memcpy(unpacked_track,packed_track_data,trackoffsetlist[j].unpacked_data_size);
+
+					rpm = 300;
+
+					curside = decodestream(imgldr_ctx->hxcfe, &trackoffsetlist[track_array_index],unpacked_track,0,&rpm,timecoef,phasecorrection,3);
 					fix_track(curside);
-					currentcylinder->sides[1] = curside;
-				}
 
-				free(unpacked_track);
-				free(packed_track_data);
+					if(!floppydisk->tracks[j])
+					{
+						floppydisk->tracks[j] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+					}
+
+					currentcylinder=floppydisk->tracks[j];
+
+					currentcylinder->sides[i] = curside;
+
+					free(unpacked_track);
+					free(packed_track_data);
+				}
 			}
 		}
 

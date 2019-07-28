@@ -64,11 +64,10 @@ typedef struct streamhfe_track_def_
 	uint32_t packed_data_offset;          // In bytes - From the file begining
 	uint32_t packed_data_size;            // In bytes
 	uint32_t unpacked_data_size;          // In bytes
-	uint32_t track_len;                   // In bits - Keep it 32bits aligned
-	uint32_t pad_rfu;
+	uint32_t track_len;                   // In bits  - Keep it 32bits aligned (Total track time = track_len * bits_period)
+	uint32_t nb_pulses;
+	uint32_t pad_rfu1;
 	uint32_t pad_rfu2;
-	uint32_t pad_rfu3;
 }streamhfe_track_def;
 
 #pragma pack()
-
