@@ -62,113 +62,126 @@
 
 #include "tracks/luts.h"
 
-unsigned short * convert_track(HXCFE_IMGLDR * imgldr_ctx, HXCFE_CYLINDER * cyl,unsigned int * tracksize)
+#include "thirdpartylibs/lz4/lib/lz4lib.h"
+
+// 0XXXXXXX  < 128
+// 10XXXXXX XXXXXXXX < 16K
+// 110XXXXX XXXXXXXX XXXXXXXX < 6M
+// 1110XXXX XXXXXXXX XXXXXXXX XXXXXXXX < 6M
+
+unsigned char * convert_track(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side,unsigned int * tracksize,unsigned int * outbuffersize, unsigned int * number_of_pulses)
 {
-	int i,j;
+	unsigned int j,k;
 	unsigned int tracklen,bitrate;
-	unsigned int track_time[2];
+	unsigned int track_time;
 
-	unsigned int final_time_track_len,final_track_len;
-	unsigned int timepos,bitpos;
+	unsigned int final_track_len;
+	unsigned int timepos,oldbitpos,bitpos;
 
-	unsigned short * data_track_s[2];
-	unsigned short * final_data_track;
+	unsigned char  * data_track;
+	unsigned int bits_delta,nb_pulses;
 
-	final_data_track = NULL;
-	track_time[0] = 0;
-	track_time[1] = 0;
+	track_time = 0;
 
-	if(cyl->number_of_side)
+	tracklen = side->tracklen;
+	bitrate = side->bitrate;
+
+	for(j=0;j<tracklen;j++)
 	{
-		for(i=0;i<cyl->number_of_side;i++)
+		getbit(side->databuffer,j);
+
+		if(side->timingbuffer)
 		{
-			track_time[i] = 0;
-
-			tracklen = cyl->sides[i]->tracklen;
-			bitrate = cyl->sides[i]->bitrate;
-
-			for(j=0;j<tracklen;j++)
-			{
-				getbit(cyl->sides[i]->databuffer,j);
-
-				if(cyl->sides[i]->timingbuffer)
-				{
-					bitrate = cyl->sides[i]->timingbuffer[j/8];
-				}
-
-				track_time[i] += ( (1*1000*1000*1000) / (bitrate*2));
-			}
+			bitrate = side->timingbuffer[j/8];
 		}
 
-		if( track_time[1] > track_time[0] )
-			final_time_track_len = track_time[1];
-		else
-			final_time_track_len = track_time[0];
-
-		final_track_len = ( final_time_track_len / (DEFAULT_BITS_PERIOD / 1000) ) * 2;
-
-		if(final_track_len & 0x1F)
-			final_track_len = (final_track_len & ~0x1F) + 0x20;
-
-		data_track_s[0] = malloc((final_track_len/2) / 8);
-		data_track_s[1] = malloc((final_track_len/2) / 8);
-		final_data_track = malloc(final_track_len / 8);
-		if(final_data_track && data_track_s[0] && data_track_s[1])
-		{
-			memset(final_data_track,0,final_track_len / 8);
-			memset(data_track_s[0],0,(final_track_len/2) / 8);
-			memset(data_track_s[1],0,(final_track_len/2) / 8);
-
-			for(i=0;i<cyl->number_of_side;i++)
-			{
-				track_time[i] = 0;
-
-				tracklen = cyl->sides[i]->tracklen;
-				bitrate = cyl->sides[i]->bitrate;
-
-				for(j=0;j<tracklen;j++)
-				{
-					if(getbit(cyl->sides[i]->databuffer,j))
-					{
-						timepos = track_time[i];
-						bitpos = timepos / (DEFAULT_BITS_PERIOD / 1000);
-						data_track_s[i][bitpos/16] |= (0x8000>>(bitpos&0xF));
-					}
-
-					if(cyl->sides[i]->timingbuffer)
-					{
-						bitrate = cyl->sides[i]->timingbuffer[j/8];
-					}
-
-					track_time[i] += ( (1*1000*1000*1000) / (bitrate*2));
-				}
-			}
-
-			for(i=0;i<final_track_len/(16*2);i++)
-			{
-				final_data_track[i*2] = data_track_s[0][i];
-				final_data_track[(i*2)+1] = data_track_s[1][i];
-			}
-
-			*tracksize = final_track_len;
-
-			free(data_track_s[0]);
-			free(data_track_s[1]);
-		}
-		else
-		{
-			if(data_track_s[0])
-				free(data_track_s[0]);
-			if(data_track_s[1])
-				free(data_track_s[1]);
-			if(final_data_track)
-				free(final_data_track);
-		}
+		track_time += ( (1*1000*1000*1000) / (bitrate*2));
 	}
 
-	return final_data_track;
-}
+	final_track_len = ( track_time / (DEFAULT_BITS_PERIOD / 1000) );
 
+	if(final_track_len & 0x1F)
+		final_track_len = (final_track_len & ~0x1F) + 0x20;
+
+	data_track = malloc(tracklen);
+
+	if( data_track )
+	{
+		memset(data_track,0,tracklen);
+
+		track_time = 0;
+
+		k = 0;
+		nb_pulses = 0;
+
+		oldbitpos = 0;
+		for(j=0;j<tracklen;j++)
+		{
+			if(getbit(side->databuffer,j))
+			{
+				timepos = track_time;
+				bitpos = timepos / (DEFAULT_BITS_PERIOD / 1000);
+
+				bits_delta = bitpos - oldbitpos;
+				if( bits_delta < 0x00000080)
+				{
+					data_track[k++] = bits_delta;
+				}
+				else
+				{
+					if( bits_delta < 0x00004000)
+					{
+						data_track[k++] = 0x80 | (bits_delta>>8);
+						data_track[k++] = (bits_delta&0xFF);
+					}
+					else
+					{
+						if( bits_delta < 0x00200000)
+						{
+								data_track[k++] = 0xC0 | (bits_delta>>16);
+								data_track[k++] = ((bits_delta>>8)&0xFF);
+								data_track[k++] = (bits_delta&0xFF);
+						}
+						else
+						{
+							if( bits_delta < 0x10000000)
+							{
+								data_track[k++] = 0xE0 | (bits_delta>>24);
+								data_track[k++] = ((bits_delta>>16)&0xFF);
+								data_track[k++] = ((bits_delta>>8)&0xFF);
+								data_track[k++] = (bits_delta&0xFF);
+							}
+							else
+							{
+								data_track[k++] = 0xE0 | 0x0F;
+								data_track[k++] = 0xFF;
+								data_track[k++] = 0xFF;
+								data_track[k++] = 0xFF;
+							}
+						}
+					}
+				}
+
+				nb_pulses++;
+
+				oldbitpos = bitpos;
+			}
+
+			if(side->timingbuffer)
+			{
+				bitrate = side->timingbuffer[j/8];
+			}
+
+			track_time += ( (1*1000*1000*1000) / (bitrate*2));
+		}
+
+		*tracksize = final_track_len;
+		*outbuffersize = k;
+		*number_of_pulses = nb_pulses;
+	}
+
+	return data_track;
+}
 
 int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
@@ -176,11 +189,14 @@ int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 	streamhfe_track_def * tracks_def;
 
 	FILE * hxcstreamhfefile;
-	unsigned int i;
+	unsigned int i,j,packedsize;
 	unsigned int tracklistlen;
-	unsigned short * stream_track;
+	unsigned char * stream_track;
+	unsigned char * packed_track;
 	unsigned int stream_track_size;
+	unsigned int track_size,number_of_pulses;
 	unsigned char tempbuf[512];
+	unsigned int max_packed_size;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write Stream HFE file %s.",filename);
 
@@ -216,7 +232,7 @@ int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 
 		FILEHEADER->track_list_offset = ftell(hxcstreamhfefile);
 
-		tracklistlen=((((((FILEHEADER->number_of_track)+1)*sizeof(streamhfe_track_def))/512)+1));
+		tracklistlen=((((((FILEHEADER->number_of_track * FILEHEADER->number_of_side)+1)*sizeof(streamhfe_track_def))/512)+1));
 
 		tracks_def = (streamhfe_track_def *) malloc(tracklistlen*512);
 		memset(tracks_def,0x00,tracklistlen*512);
@@ -235,20 +251,39 @@ int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 		i=0;
 		while(i<(FILEHEADER->number_of_track))
 		{
-			tracks_def[i].flags = STREAMHFE_TRKFLAG_PACKED;
-			tracks_def[i].packed_data_offset = ftell(hxcstreamhfefile);
-			stream_track_size = 0;
-
-			stream_track = convert_track(imgldr_ctx, floppy->tracks[i],&stream_track_size);
-			if(stream_track)
+			j=0;
+			while(j<(FILEHEADER->number_of_side))
 			{
-				fwrite(stream_track,stream_track_size/8,1,hxcstreamhfefile);
-				free(stream_track);
-			}
+				tracks_def[(i<<1) | (j&1)].flags = STREAMHFE_TRKFLAG_PACKED;
+				tracks_def[(i<<1) | (j&1)].packed_data_offset = ftell(hxcstreamhfefile);
+				stream_track_size = 0;
 
-			tracks_def[i].packed_data_size = stream_track_size / 8;
-			tracks_def[i].unpacked_data_size = stream_track_size / 8;
-			tracks_def[i].track_len = stream_track_size;
+				packedsize = 0;
+				number_of_pulses = 0;
+
+				stream_track = convert_track(imgldr_ctx, floppy->tracks[i]->sides[j],&track_size,&stream_track_size, &number_of_pulses);
+				if(stream_track)
+				{
+					max_packed_size = LZ4_compressBound(stream_track_size);
+					packed_track = malloc(max_packed_size);
+					packedsize = LZ4_compress_default((const char*)stream_track, (char*)packed_track, stream_track_size, max_packed_size);
+
+					//packedsize = stream_track_size;
+					//memcpy( (char*)packed_track , (const char*)stream_track, packedsize);
+
+					fwrite(packed_track,packedsize,1,hxcstreamhfefile);
+
+					free(stream_track);
+					free(packed_track);
+				}
+
+				tracks_def[(i<<1) | (j&1)].packed_data_size = packedsize;
+				tracks_def[(i<<1) | (j&1)].unpacked_data_size = stream_track_size;
+				tracks_def[(i<<1) | (j&1)].track_len = track_size;
+				tracks_def[(i<<1) | (j&1)].nb_pulses = number_of_pulses;
+
+				j++;
+			}
 
 			i++;
 		}
