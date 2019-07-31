@@ -619,6 +619,18 @@ SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_write.c
 SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_write.h
 # End Source File
 # End Group
+# Begin Group "LZ4"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\lz4\lib\lz4.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\thirdpartylibs\lz4\lib\lz4.h
+# End Source File
+# End Group
 # End Group
 # Begin Group "loaders"
 
