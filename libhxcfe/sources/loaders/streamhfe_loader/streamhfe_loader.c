@@ -357,9 +357,6 @@ int STREAMHFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 				hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1)|(i&1),(floppydisk->floppyNumberOfTrack * floppydisk->floppyNumberOfSide) );
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Load Track %.3d.%d",j,i);
 
-				if( j == 80)
-					j = 80;
-
 				track_array_index = (j<<1) | (i&1);
 				fseek(f, trackoffsetlist[track_array_index].packed_data_offset,SEEK_SET);
 				if(trackoffsetlist[track_array_index].packed_data_size)
