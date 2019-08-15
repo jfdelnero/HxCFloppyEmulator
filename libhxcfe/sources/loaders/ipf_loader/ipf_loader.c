@@ -38,7 +38,7 @@
 // File : ipf_loader.c
 // Contains: IPF floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -70,6 +70,10 @@
 #include "./thirdpartylibs/capslib/CapsAPI.h"
 
 #include "capslibloader.h"
+
+#ifndef WIN32
+#define __cdecl
+#endif
 
 typedef SDWORD (__cdecl* CAPSINIT)(void);
 typedef SDWORD (__cdecl* CAPSADDIMAGE)(void);
