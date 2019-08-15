@@ -19,9 +19,9 @@ endif
 
 DISKLOADERPLUGINS_IPF=
 
-ifdef IPF_LIB_SUPPORT
-	CFLAGS=$(CFLAGS) -DIPF_SUPPORT
-	DISKLOADERPLUGINS_IPF= ipf_loader.o libcapsimage.so.2.0
+ifeq ($(UNAME), Linux)
+	CFLAGS:=$(CFLAGS) -DIPF_SUPPORT
+	DISKLOADERPLUGINS_IPF= ipf_loader.o capslibloader.o
 endif
 
 EXEC=libhxcfe.so
@@ -452,6 +452,11 @@ ipf_loader.o : $(BASEDIR)/loaders/ipf_loader/ipf_loader.c $(BASEDIR)/loaders/ipf
 
 ipf_writer.o : $(BASEDIR)/loaders/ipf_loader/ipf_writer.c $(BASEDIR)/loaders/ipf_loader/ipf_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
+
+ifeq ($(UNAME), Linux)
+capslibloader.o : $(BASEDIR)/linux/ipf/capslibloader.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+endif
 
 fdi_loader.o : $(BASEDIR)/loaders/fdi_loader/fdi_loader.c $(BASEDIR)/loaders/fdi_loader/fdi_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
