@@ -24,8 +24,8 @@ CFLAGS += -fPIC -Wl,-Map,foo.map
 endif
 
 ifeq ($(UNAME), Darwin)
-CFLAGS += -arch i386 -mmacosx-version-min=10.5
-LDFLAGS += -arch i386 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libusbhxcfe.dylib -mmacosx-version-min=10.5
+CFLAGS += -arch x86_64 -mmacosx-version-min=10.9
+LDFLAGS += -arch x86_64 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libusbhxcfe.dylib -mmacosx-version-min=10.9
 EXEC=libusbhxcfe.dylib
 endif
 
