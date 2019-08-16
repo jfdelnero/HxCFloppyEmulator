@@ -22,8 +22,8 @@ CFLAGS += -fPIC -Wl,-Map,foo.map
 endif
 
 ifeq ($(UNAME), Darwin)
-CFLAGS += -arch i386 -mmacosx-version-min=10.5
-LDFLAGS += -arch i386 -mmacosx-version-min=10.5
+CFLAGS += -arch x86_64 -mmacosx-version-min=10.9
+LDFLAGS += -arch x86_64 -mmacosx-version-min=10.9
 endif
 
 EXEC=libhxcadaptor.a
