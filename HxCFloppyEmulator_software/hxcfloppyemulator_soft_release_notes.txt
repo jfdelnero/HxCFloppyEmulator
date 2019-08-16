@@ -19,6 +19,10 @@ XX XXX 2019 : HxCFloppyEmulator 2.X.X.X
 
 -> New files Support : Kurzweil K25 (K2500) and K26 (K2600) file support.
 
+-> SPS CAPS library loader added for Linux.
+
+-> MacOS X : Preparing the MacOS X Catalina support : Switch to 64bits build + minimum version needed changed to 10.9 (Mavericks)
+
 *********************************************************/
 
 /*********************************************************

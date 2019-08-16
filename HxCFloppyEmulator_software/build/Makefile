@@ -36,8 +36,8 @@ LIBUSBHXCFE = libusbhxcfe.dll
 endif
 
 ifeq ($(UNAME), Darwin)
-CFLAGS += -DOSX -arch i386 -mmacosx-version-min=10.5
-LDFLAGS += -framework Cocoa -arch i386 -mmacosx-version-min=10.5
+CFLAGS += -DOSX -arch x86_64 -mmacosx-version-min=10.9
+LDFLAGS += -framework Cocoa -arch x86_64 -mmacosx-version-min=10.9
 LIBHXCFE = libhxcfe.dylib
 LIBUSBHXCFE = libusbhxcfe.dylib
 else
