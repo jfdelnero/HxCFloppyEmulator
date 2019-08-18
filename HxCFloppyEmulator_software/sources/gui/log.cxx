@@ -92,7 +92,6 @@ char * logs_buffer;
 
 #ifndef WIN32
 #define _vsnprintf vsnprintf
-#define _snprintf snprintf
 #endif
 
 int CUI_affiche(int MSGTYPE,char * chaine, ...)
