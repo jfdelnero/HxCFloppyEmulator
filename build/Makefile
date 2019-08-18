@@ -41,7 +41,7 @@ LDFLAGS += -framework Cocoa -arch x86_64 -mmacosx-version-min=10.9
 LIBHXCFE = libhxcfe.dylib
 LIBUSBHXCFE = libusbhxcfe.dylib
 else
-LDFLAGS += -lX11 -lXext -lXfixes
+LDFLAGS += $(shell ../sources/thirdpartylibs/fltk/fltk-1.3.x/fltk-config --ldflags)
 endif
 
 EXEC=hxcfloppyemulator
@@ -65,16 +65,16 @@ $(LIBHXCFE): ../../../build/$(LIBHXCFE)
 $(LIBUSBHXCFE): ../../../build/$(LIBUSBHXCFE)
 	ln ../../../build/$(LIBUSBHXCFE)  $(LIBUSBHXCFE)
 
-main.o: ../sources/main.cxx 
+main.o: ../sources/main.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-utils.o: ../sources/utils.cxx 
+utils.o: ../sources/utils.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-loader.o: ../sources/loader.cxx 
+loader.o: ../sources/loader.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-soft_cfg_file.o: ../sources/soft_cfg_file.cxx 
+soft_cfg_file.o: ../sources/soft_cfg_file.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
 about_gui.o : ../sources/gui/about_gui.cxx
@@ -151,7 +151,7 @@ microintro.o : ../sources/gui/microintro/microintro.c
 
 hxcmod.o : ../sources/gui/microintro/hxcmod.c
 	$(CC) -o $@ -c $< $(CFLAGS)
-	
+
 lzw.o : ../sources/gui/microintro/packer/lzw.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
