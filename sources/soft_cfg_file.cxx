@@ -19,6 +19,8 @@
 
 #include "libhxcadaptor.h"
 
+#define TMP_PATH_SIZE 1024
+
 typedef struct laststate_
 {
 	unsigned int usb_packet_size;
@@ -35,27 +37,16 @@ unsigned char cfg_file_buffer[4*1024];
 int load_last_cfg()
 {
 	FILE * f;
-	int i;
 	laststate * lastst;
-	char executablepath[512];
+	char executablepath[TMP_PATH_SIZE];
 
 	lastst=(laststate *)&cfg_file_buffer;
 
-	memset(cfg_file_buffer,0,sizeof(cfg_file_buffer));
+	memset(cfg_file_buffer,0,TMP_PATH_SIZE);
 
-	hxc_getcurrentdirectory(executablepath,512);
+	hxc_getcurrentdirectory(executablepath,TMP_PATH_SIZE);
 
-	i=strlen(executablepath);
-	while(i && executablepath[i]!='\\')
-	{
-		i--;
-	}
-	if(executablepath[i]=='\\')
-	{
-		i++;
-	}
-	sprintf(&executablepath[i],"config.dat");
-
+	snprintf( hxc_getfilenamebase(executablepath,NULL),TMP_PATH_SIZE - 11,"config.dat");
 
 	f=hxc_fopen(executablepath,"rb");
 	if(f)
@@ -84,27 +75,16 @@ int load_last_cfg()
 int save_cfg()
 {
 	FILE * f;
-	int i;
 	laststate * lastst;
-	char executablepath[512];
+	char executablepath[TMP_PATH_SIZE];
 
 	lastst=(laststate *)&cfg_file_buffer;
 
 	memset(&cfg_file_buffer,0,sizeof(cfg_file_buffer));
 
-	hxc_getcurrentdirectory(executablepath,512);
+	hxc_getcurrentdirectory(executablepath,TMP_PATH_SIZE);
 
-	i=strlen(executablepath);
-	while(i && executablepath[i]!='\\')
-	{
-		i--;
-	}
-	if(executablepath[i]=='\\')
-	{
-		i++;
-	}
-	sprintf(&executablepath[i],"config.dat");
-
+	snprintf(hxc_getfilenamebase(executablepath,NULL),TMP_PATH_SIZE - 11,"config.dat");
 
 	f=hxc_fopen(executablepath,"wb");
 	if(f)
