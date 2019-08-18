@@ -160,7 +160,7 @@ int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char *
 							{
 
 								fullpath=malloc(strlen(FindFileData.filename)+strlen(folder)+2);
-								sprintf(fullpath,"%s\\%s",folder,FindFileData.filename);
+								sprintf(fullpath,"%s"DIR_SEPARATOR"%s",folder,FindFileData.filename);
 
 								if(ScanFile(floppycontext,adfvolume,fullpath,file))
 								{
@@ -203,7 +203,7 @@ int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char *
 							if(FindFileData.size)
 							{
 								fullpath=malloc(strlen(FindFileData.filename)+strlen(folder)+2);
-								sprintf(fullpath,"%s\\%s",folder,FindFileData.filename);
+								sprintf(fullpath,"%s"DIR_SEPARATOR"%s",folder,FindFileData.filename);
 
 								ftemp=hxc_fopen(fullpath,"rb");
 								if(ftemp)
