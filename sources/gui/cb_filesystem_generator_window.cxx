@@ -796,8 +796,8 @@ void browse_floppy_disk(filesystem_generator_window *fgw,int lastoperationerror)
 				#ifdef STANDALONEFSBROWSER
 							sec_strncat(statustxt," File : ",sizeof(statustxt));
 							sec_strncat(statustxt,hxc_getfilenamebase(guicontext->last_loaded_image_path,0),sizeof(statustxt));
-
 				#endif
+
 							fgw->txtout_freesize->value((const char*)statustxt);
 						}
 						else
