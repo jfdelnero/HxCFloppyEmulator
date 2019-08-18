@@ -38,6 +38,7 @@ int load_last_cfg()
 {
 	FILE * f;
 	laststate * lastst;
+	char *tmp_ptr;
 	char executablepath[TMP_PATH_SIZE];
 
 	lastst=(laststate *)&cfg_file_buffer;
@@ -46,7 +47,8 @@ int load_last_cfg()
 
 	hxc_getcurrentdirectory(executablepath,TMP_PATH_SIZE);
 
-	snprintf( hxc_getfilenamebase(executablepath,NULL),TMP_PATH_SIZE - 11,"config.dat");
+	tmp_ptr = hxc_getfilenamebase(executablepath,NULL);
+	snprintf( tmp_ptr, TMP_PATH_SIZE - ( 11 + (tmp_ptr - (char*)&executablepath)),"config.dat");
 
 	f=hxc_fopen(executablepath,"rb");
 	if(f)
