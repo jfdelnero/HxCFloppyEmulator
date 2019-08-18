@@ -5,6 +5,9 @@ extern "C" {
 #ifdef WIN32
 #define DIR_SEPARATOR "\\"
 #define DIR_SEPARATOR_CHAR '\\'
+#if defined(_MSC_VER) && _MSC_VER < 1900
+int snprintf(char *outBuf, size_t size, const char *format, ...);
+#endif
 #else
 #define DIR_SEPARATOR "/"
 #define DIR_SEPARATOR_CHAR '/'

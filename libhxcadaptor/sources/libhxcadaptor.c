@@ -580,3 +580,42 @@ int hxc_getfilesize(char * path)
 
 	return filesize;
 }
+
+#ifdef WIN32
+
+#if defined(_MSC_VER) && _MSC_VER < 1900
+
+#define va_copy(dest, src) (dest = src)
+
+int vsnprintf(char *s, size_t n, const char *fmt, va_list ap)
+{
+	int ret;
+	va_list ap_copy;
+
+	if (n == 0)
+		return 0;
+	else if (n > INT_MAX)
+		return 0;
+	memset(s, 0, n);
+	va_copy(ap_copy, ap);
+	ret = _vsnprintf(s, n - 1, fmt, ap_copy);
+	va_end(ap_copy);
+
+	return ret;
+}
+
+int snprintf(char *s, size_t n, const char *fmt, ...)
+{
+	va_list ap;
+	int ret;
+
+	va_start(ap, fmt);
+	ret = vsnprintf(s, n, fmt, ap);
+	va_end(ap);
+
+	return ret;
+}
+
+#endif
+
+#endif
