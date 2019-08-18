@@ -112,16 +112,8 @@ int EMUII_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUII_libLoad_DiskFile %s",imgfile);
 
 	strcpy(os_filename,imgfile);
-	i = strlen(os_filename)-1;
-	while(i && (os_filename[i]!='\\') && (os_filename[i]!='/') )
-	{
-		i--;
-	}
-	if(i)
-	{
-		i++;
-	}
-	sprintf(&os_filename[i],"emuiios.emuiifd");
+
+	sprintf( hxc_getfilenamebase(os_filename,NULL),"emuiios.emuiifd");
 
 	f_os=hxc_fopen(os_filename,"rb");
 	if(f_os==NULL)
@@ -149,7 +141,6 @@ int EMUII_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 		floppydisk->floppyBitRate,
 		floppydisk->floppySectorPerTrack,
 		floppydisk->floppyiftype);
-
 
 	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 	if( !floppydisk->tracks )
