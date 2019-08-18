@@ -2,6 +2,14 @@
 extern "C" {
 #endif
 
+#ifdef WIN32
+#define DIR_SEPARATOR "\\"
+#define DIR_SEPARATOR_CHAR '\\'
+#else
+#define DIR_SEPARATOR "/"
+#define DIR_SEPARATOR_CHAR '/'
+#endif
+
 /////////////// Thread functions ////////////////
 
 typedef int (*THREADFUNCTION) (void* floppyemulator,void* hwemulator);

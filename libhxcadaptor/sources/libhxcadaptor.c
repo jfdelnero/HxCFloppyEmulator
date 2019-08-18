@@ -408,12 +408,12 @@ char * hxc_getfilenamebase(char * fullpath,char * filenamebase)
 		if(len)
 		{
 			i=len-1;
-			while(i &&	(fullpath[i]!='\\' && fullpath[i]!='/' && fullpath[i]!=':') )
+			while(i &&	( fullpath[i] != DIR_SEPARATOR_CHAR && fullpath[i]!=':') )
 			{
 				i--;
 			}
 
-			if( fullpath[i]=='\\' || fullpath[i]=='/' || fullpath[i]==':' )
+			if( fullpath[i] == DIR_SEPARATOR_CHAR || fullpath[i]==':' )
 			{
 				i++;
 			}
