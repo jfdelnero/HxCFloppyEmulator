@@ -79,6 +79,7 @@ int save_cfg()
 	FILE * f;
 	laststate * lastst;
 	char executablepath[TMP_PATH_SIZE];
+	char * tmp_ptr;
 
 	lastst=(laststate *)&cfg_file_buffer;
 
@@ -86,7 +87,8 @@ int save_cfg()
 
 	hxc_getcurrentdirectory(executablepath,TMP_PATH_SIZE);
 
-	snprintf(hxc_getfilenamebase(executablepath,NULL),TMP_PATH_SIZE - 11,"config.dat");
+	tmp_ptr = hxc_getfilenamebase(executablepath,NULL);
+	snprintf( tmp_ptr, TMP_PATH_SIZE - ( 11 + (tmp_ptr - (char*)&executablepath)),"config.dat");
 
 	f=hxc_fopen(executablepath,"wb");
 	if(f)
