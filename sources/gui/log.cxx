@@ -114,22 +114,22 @@ int CUI_affiche(int MSGTYPE,char * chaine, ...)
 		switch(MSGTYPE)
 		{
 			case MSG_INFO_0:
-				_snprintf(lineheader,sizeof(lineheader),"INFO 0 : ");
+				snprintf(lineheader,sizeof(lineheader),"INFO 0 : ");
 			break;
 			case MSG_INFO_1:
-				_snprintf(lineheader,sizeof(lineheader),"INFO 1 : ");
+				snprintf(lineheader,sizeof(lineheader),"INFO 1 : ");
 			break;
 			case MSG_WARNING:
-				_snprintf(lineheader,sizeof(lineheader),"WARNING: ");
+				snprintf(lineheader,sizeof(lineheader),"WARNING: ");
 			break;
 			case MSG_ERROR:
-				_snprintf(lineheader,sizeof(lineheader),"ERROR  : ");
+				snprintf(lineheader,sizeof(lineheader),"ERROR  : ");
 			break;
 			case MSG_DEBUG:
-				_snprintf(lineheader,sizeof(lineheader),"DEBUG  : ");
+				snprintf(lineheader,sizeof(lineheader),"DEBUG  : ");
 			break;
 			default:
-				_snprintf(lineheader,sizeof(lineheader),"UNKNOW MESSAGE TYPE: ");
+				snprintf(lineheader,sizeof(lineheader),"UNKNOW MESSAGE TYPE: ");
 			break;
 		}
 
