@@ -26,10 +26,37 @@
 */
 
 /*
-This information is copyright (C) 2012-2014 By Jim Drew.  Permissions is granted
+--------------------------------------------------------------------------------------
+Changes:
+
+v1.3 - 11/20/14
+
+* Changed structure info to add BYTE $000A as number of heads.  This has not been used
+  in any version of the SCP software, but will be starting with v1.6.
+
+v1.4 - 11/21/14
+
+* Redefined the HEADS definition and added it to BYTE $000A in IFF defines.
+
+v1.5 - 01/12/16
+
+* Extended track range.  This should not affect any programs using .scp image files
+  that followed the guidelines.
+  
+v1.6 - 12/05/17
+
+* Added extension footer, courtesy of Natalia Portillo.
+
+v1.7 - 10/27/18
+
+* Added resolution to previously reserved byte offset 0x0B.
+
+--------------------------------------------------------------------------------------
+
+This information is copyright (C) 2012-2017 By Jim Drew.  Permissions is granted
 for inclusion with any source code when keeping this copyright notice.
 
-Latest changes made: 04/12/14
+======================================================================================
 
 The SuperCard Pro image file format will handle flux level images for any type of disk,
 be it 8", 5.25", 3.5", 3", GCR, FM, MFM, etc.
@@ -48,7 +75,9 @@ then the file is not ours.
 
 BYTE 0x03 is the version/revision as a byte.  This is encoded as (Version<<4|Revision),
 so that 0x39= version 3.9 of the format.  This is the version number of the SCP imaging
-software that created this image.
+software that created this image.  If bit 5 (FOOTER) of the FLAGS (byte 0x08) is set,
+this byte will be zero, and you are required to use the version and name entries in the
+extension footer.
 
 BYTE 0x04 is the disk type and represents the type of disk for the image (see disk types
 in the defines).
@@ -76,6 +105,9 @@ Bit 3 - TYPE, cleared for preservation quality image
 
 Bit 4 - MODE, cleared if the image is read-only
               set if the image is read/write capable
+
+Bit 5 - FOOTER, cleared if the image does not contain an extension footer
+                set if the image contains an extension footer
   
 FLAGS bit 0 is used to determine when the reading of flux data started.  If this bit is
 set then the flux data was read immediately after the index pulse was detected.  If
@@ -98,33 +130,40 @@ images will be read-only (write protected) for emulation usage.  The read/write 
 images contain padded space to allow the track to change size within the image.  Only a
 single revolution is allowed when the TYPE bit is set (read/write capable).
 
+FLAGS bit 5 is used to determine the presence of an extension footer after the end of
+the image.
+
 BYTE 0x09 is the width of the bit cell time.  Normally this is always 0 which means
 16 bits wide, but if the value is non-zero then it represents the number of bits for
 each bit cell entry.  For example, if this byte was set to 8, then each bit cell entry
 would be 8 bits wide, not the normal 16 bits.  This is for future expansion, and may never
 be actually used.
 
-BYTE 0x0A is the number of heads.  This value is either 1 or 2.  If the value is 0 then
-it is due to being an older version of the SCP imaging program created the image.
+BYTE 0x0A is the head number(s) contained in the image.  This value is either 0, 1 or 2.
+If the value is 0 then both heads are contained in the image, which has always been the
+default for all SCP images (except C64).  A value of 1 means just side 0 (bottom) is
+contained in the image, and a value of 2 means just side 1 (top) is contained in the image.
 
-BYTE 0x0B is reserved for future use.
+BYTE 0x0B is resolution of the capture.  The base resolution is 25ns.  So a value of 0
+is the standard 25ns capture.  If the value is non-zero, then it is a multiplier value
+of 25ns.  So, a value of 1 is 25ns + 1 * 25ns = 50ns.  2=75ns, 3=100ns, etc.
 
 BYTES 0x0C-0x0F are the 32 bit checksum of data starting from offset 0x10 through the
 end of the image file.  Checksum is standard addition, with a wrap beyond 32 bits
 rolling over.  A value of 0x00000000 is used when FLAGS bit 4 (MODE) is set, as no checksum
 is calculated for read/write capable images.
 
-BYTES 0x10-0x2A7 are a table of longwords with each entry being a offset to a Track Data
+BYTES 0x10-0x2AF are a table of longwords with each entry being a offset to a Track Data
 Header (TDH) for each track that is stored in the image.  The table is always sequential.
-There is an entry for every track, with up to 166 tracks supported.  This means that disk
-images of up to 83 tracks with sides 0/1 are possible.  If no flux data for a track is
+There is an entry for every track, with up to 168 tracks supported.  This means that disk
+images of up to 84 tracks with sides 0/1 are possible.  If no flux data for a track is
 present, then the entry will contain a longword of zeros (0x00000000).  The 1st TDH
-will probably start at offset 0x000002A8, but could technically start anywhere in the file
+will probably start at offset 0x000002B0, but could technically start anywhere in the file
 because all entries are offset based, so track data does not have to be in any order.  This
 was done so you could append track data to the file and change the header to point to the
 appended data.  For simplicity it is recommended that you follow the normal image format
 shown below, with all tracks in sequential order.  The SuperCard Pro imaging software will
-always create a disk with all tracks and revolutions stored in sequentially.
+always create a disk with all tracks and revolutions stored sequentially.
 
 
 TRACK DATA HEADER (TDH) INFO:
@@ -186,10 +225,90 @@ offset based.  For simplicity, please try to keep the revolutions sequential.  S
 Pro's imaging software always stores the revolutions sequentially.
  
 
-After the last byte of flux data there will be a timestamp.  This timestamp is an
-ASCII string, ie: 1/05/2014 5:15:21 PM
+TIMESTAMP INFORMATION
+----------------------------
+
+After the last byte of flux data there will be a timestamp.  This timestamp is an ASCII
+string, ie: 1/05/2014 5:15:21 PM. Some implementations are known not to write it, so
+its presence is not guaranteed. Also its format depends on the region settings of the
+user that created the image. If the footer is present, implementations are required to
+use the timestamps on it.
 
 
+EXTENSION FOOTER INFO:
+----------------------------
+The extension footer contains some metadata describing the contents and origins of the
+disk image. Its presence is indicated by setting bit 5 of the FLAGS (byte 0x08). Fields
+and their meanings will not be modified by future versions of the image format, only
+expanded prepending new fields to the existing ones. This way, software can safely
+ignore any new fields.
+
+The extension footer, and any of the data its offsets point to, will always start
+after all of track data and the ASCII timestamp.  Since ASCII text characters have a
+value of 0x30 to 0x5F, it is safe to assume that if the first byte after the track data
+is not a valid ASCII value, that no timestamp is actually included (some apps using SCP
+format elected not to include a timestamp).  This first byte would be the start of the
+extension footer data.
+
+All offsets are relative to the start of the image file, and all strings they point to
+are to be stored as null-terminated UTF-8 format, prefixed with a 16-bit little-endian
+length in bytes not counting itself or the null-termination.
+E.g.: "My app" => 0x06 0x00 0x4D 0x79 0x20 0x97 0x70 0x70 0x00
+
+Because localization makes the ASCII timestamp be different depending on language and
+location user settings when creating an image, timestamps in the footer must be stored
+as a little-endian signed 64-bit count of seconds since 1st January 1970 00:00:00 in UTC.
+
+BYTES 0x00-0x03 contains the offset from the start of the file where the null-terminated
+UTF-8 string containing the drive manufacturer is stored. If the value is 0, the string
+is not present in the file.
+
+BYTES 0x04-0x07 contains the offset from the start of the file where the null-terminated
+UTF-8 string containing the drive model is stored. If the value is 0, the string is not
+present in the file.
+
+BYTES 0x08-0x0B contains the offset from the start of the file where the null-terminated
+UTF-8 string containing the drive serial number is stored. If the value is 0, the string
+is not present in the file.
+
+BYTES 0x0C-0x0F contains the offset from the start of the file where the null-terminated
+UTF-8 string containing the name of the user is stored. If the value is 0, the string is
+not present in the file.
+
+BYTES 0x10-0x13 contains the offset from the start of the file where the null-terminated
+UTF-8 string containing the name of the application that created this image is stored.
+Applications supporting any version of this footer are required to store their name in
+this footer. If the value is 0, the string is not present in the file.
+
+BYTES 0x14-0x17 contains the offset from the start of the file where the null-terminated
+UTF-8 string containing the user comments is stored. If the value is 0, the string is not   
+present in the file.
+
+BYTES 0x18-0x1F contains the little-endian signed 64-bit count of seconds since
+1st January 1970 00:00:00 in UTC corresponding to the date and time when the image was
+created.
+
+BYTES 0x20-0x27 contains the little-endian signed 64-bit count of seconds since
+1st January 1970 00:00:00 in UTC corresponding to the date and time when the image was
+last modified (e.g. adding this footer to old images, or adding new fields to this footer).
+
+BYTE 0x28 is the version/subversion of the application that created this image as a byte.
+This is encoded as (Version<<4|Subversion), so that 0x15= version 1.5 of the application.
+
+BYTE 0x29 is the version/revision of the SuperCardPro hardware as returned by the get
+info command. This is encoded as (Version<<4|Revision), so that 0x15= version 1.5 of the
+SuperCardPro hardware.
+
+BYTE 0x2A is the version/revision of the SuperCardPro firmware as returned by the get
+info command. This is encoded as (Version<<4|Revision), so that 0x11= version 1.2 of the
+SuperCardPro firmware.
+
+BYTE 0x2B is the revision of this format. This is encoded as (Version<<4|Revision), so
+currently it must be 0x16. Whenever the format is expanded, this revision will increase.
+Applications that encounter a revision higher than the last they know should treat the
+footer as they would with a known version.
+
+BYTES 0x2C-0x2F contains the ASCII of "FPCS" as the last 4 bytes of the file.
 
 ; ------------------------------------------------------------------
 ; SCP IMAGE FILE FORMAT
@@ -217,17 +336,35 @@ ASCII string, ie: 1/05/2014 5:15:21 PM
 ; 0007              END TRACK (0-165)
 ; 0008              FLAGS BITS (0=INDEX, 1=TPI, 2=RPM, 3=TYPE)
 ; 0009              BIT CELL ENCODING (0=16 BITS, >0=NUMBER OF BITS USED)
-; 000A-B            RESERVED (2 BYTES)
+; 000A              NUMBER OF HEADS
+; 000B              RESERVED
 ; 000C-F            32 BIT CHECKSUM OF DATA FROM 0x10-EOF
 ; 0010              OFFSET TO 1st TRACK DATA HEADER (4 bytes of 0 if track is skipped)
 ; 0014              OFFSET TO 2nd TRACK DATA HEADER (4 bytes of 0 if track is skipped)
 ; 0018              OFFSET TO 3rd TRACK DATA HEADER (4 bytes of 0 if track is skipped)
 ; ....
-; 02A4              OFFSET TO 166th TRACK DATA HEADER (4 bytes of 0 if track is skipped)
-; 02A8              TYPICAL START OF 1st TRACK DATA HEADER (always the case with SCP created images)
+; 02AC              OFFSET TO 168th TRACK DATA HEADER (4 bytes of 0 if track is skipped)
+; 02B0              TYPICAL START OF 1st TRACK DATA HEADER (always the case with SCP created images)
 ;
 ; ....              END OF TRACK DATA
 ; ????              TIMESTAMP (AS ASCII STRING - ie. 7/17/2013 12:45:49 PM)
+;
+; Start of extension footer
+;
+; ????              OFFSET TO DRIVE MANUFACTURER STRING (optional)
+; ????              OFFSET TO DRIVE MODEL STRING (optional)
+; ????              OFFSET TO DRIVE SERIAL NUMBER STRING (optional)
+; ????              OFFSET TO CREATOR STRING (optional)
+; ????              OFFSET TO APPLICATION NAME STRING (optional)
+; ????              OFFSET TO COMMENTS (optional)
+; ????              UTC TIME/DATE OF IMAGE CREATION
+; ????              UTC TIME/DATE OF IMAGE MODIFICATION
+; ????              VERSION/SUBVERSION OF APPLICATION THAT CREATED IMAGE
+; ????              VERSION/SUBVERSION OF SUPERCARD PRO HARDWARE
+; ????              VERSION/SUBVERSION OF SUPERCARD PRO FIRMWARE
+; ????              VERSION/SUBVERSION OF THIS IMAGE FORMAT
+; ????              ASCII 'FPCS'
+
 
 ; ## FILE FORMAT DEFINES ##
 
@@ -237,12 +374,13 @@ IFF_DISKTYPE = 0x04                ; disk type (0=CBM, 1=AMIGA, 2=APPLE II, 3=AT
 IFF_NUMREVS = 0x05                 ; number of revolutions (2=default)
 IFF_START = 0x06                   ; start track (0-165)
 IFF_END = 0x07                     ; end track (0-165)
-IFF_FLAGS = 0x08                   ; FLAGS bits (0=INDEX, 1=TPI, 2=RPM, 3=TYPE - see defines below)
+IFF_FLAGS = 0x08                   ; FLAGS bits (0=INDEX, 1=TPI, 2=RPM, 3=TYPE, 4=TYPE, 5=FOOTER, - see defines below)
 IFF_ENCODING = 0x09                ; BIT CELL ENCODING (0=16 BITS, >0=NUMBER OF BITS USED)
-IFF_RSRVED = 0x0A                  ; 2 bytes of reserved space
+IFF_HEADS = 0x0A                   ; 0=both heads are in image, 1=side 0 only, 2=side 1 only
+IFF_RESOLUTION = 0x0B              ; 0=25ns, 1=50, 2=75, 3=100, 4=125, etc.
 IFF_CHECKSUM = 0x0C                ; 32 bit checksum of data added together starting at 0x0010 through EOF
 IFF_THDOFFSET = 0x10               ; first track data header offset
-IFF_THDSTART = 0x2A8               ; start of first Track Data Header
+IFF_THDSTART = 0x2B0               ; start of first Track Data Header
 
 ; FLAGS BIT DEFINES (BIT NUMBER)
 
@@ -251,14 +389,15 @@ FB_TPI = 0x01                      ; clear = drive is 48TPI, set = drive is 96TP
 FB_RPM = 0x02                      ; clear = drive is 300 RPM drive, set = drive is 360 RPM drive
 FB_TYPE = 0x03                     ; clear = image is has original flux data, set = image is flux data that has been normalized
 FB_MODE = 0x04                     ; clear = image is read-only, set = image is read/write capable
+FB_FOOTER = 0x05                   ; clear = image does not contain a footer, set = image contains a footer at the end of it
 
 ; MANUFACTURERS                      7654 3210
 man_CBM = 0x00                     ; 0000 xxxx
 man_Atari = 0x10                   ; 0001 xxxx
 man_Apple = 0x20                   ; 0010 xxxx
-man_PC = 0x40                      ; 0011 xxxx
-man_Tandy = 0x21                   ; 0100 xxxx
-man_TI = 0x40                      ; 0101 xxxx
+man_PC = 0x30                      ; 0011 xxxx
+man_Tandy = 0x40                   ; 0100 xxxx
+man_TI = 0x50                      ; 0101 xxxx
 man_Roland = 0x60                  ; 0110 xxxx
 
 ; DISK TYPE BIT DEFINITIONS
@@ -290,8 +429,8 @@ disk_PC144M = 0x03                 ; xxxx 0011
 ; TANDY DISK TYPES
 disk_TRS80SSSD = 0x00              ; xxxx 0000
 disk_TRS80SSDD = 0x01              ; xxxx 0001
-disk_TRS80DSSD = 0x10              ; xxxx 0010
-disk_TRS80DSDD = 0x11              ; xxxx 0011
+disk_TRS80DSSD = 0x02              ; xxxx 0010
+disk_TRS80DSDD = 0x03              ; xxxx 0011
 
 ; TI DISK TYPES
 disk_TI994A = 0x00                 ; xxxx 0000
@@ -356,6 +495,24 @@ TDH_TABLESTART = 0x04              ; table of entries (3 longwords per revolutio
 TDH_DURATION = 0x4                 ; duration of track, from index pulse to index pulse (1st revolution)
 TDH_LENGTH = 0x08                  ; length of track (1st revolution)
 TDH_OFFSET = 0x0C                  ; offset to flux data from start of TDH (1st revolution)
+
+; ------------------------------------------------------------------
+; EXTENSION FOOTER FORMAT
+; ------------------------------------------------------------------
+;
+; 0000           DRIVE MANUFACTURER STRING OFFSET            - 4 bytes
+; 0004           DRIVE MODEL STRING OFFSET                   - 4 bytes
+; 0008           DRIVE SERIAL NUMBER STRING OFFSET           - 4 bytes
+; 000C           CREATOR STRING OFFSET                       - 4 bytes
+; 0010           APPLICATION NAME STRING OFFSET              - 4 bytes
+; 0014           COMMENTS STRING OFFSET                      - 4 bytes
+; 0018           IMAGE CREATION TIMESTAMP                    - 8 bytes
+; 0020           IMAGE MODIFICATION TIMESTAMP                - 8 bytes
+; 0028           APPLICATION VERSION (nibbles major/minor)   - 1 byte
+; 0029           SCP HARDWARE VERSION (nibbles major/minor)  - 1 byte
+; 002A           SCP FIRMWARE VERSION (nibbles major/minor)  - 1 byte
+; 002B           IMAGE FORMAT REVISION (nibbles major/minor) - 1 byte
+; 002C           'FPCS' (ASCII CHARS)                        - 4 bytes
 */
 
 // Header Flags
@@ -377,7 +534,7 @@ typedef struct scp_header_
 	uint8_t  flags;
 	uint8_t  bit_cell_width;
 	uint8_t  number_of_heads;
-	uint8_t  RFU_2;
+	uint8_t  resolution;
 	uint32_t file_data_checksum;
 }scp_header;
 
