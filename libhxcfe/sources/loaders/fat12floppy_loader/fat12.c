@@ -127,12 +127,7 @@ int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned
 						floppycontext->hxc_printf(MSG_INFO_1,"Entering directory %s",FindFileData.filename);
 
 						fullpath = malloc(strlen(FindFileData.filename)+strlen(folder)+2);
-	#ifdef WIN32
-						sprintf(fullpath,"%s\\%s",folder,FindFileData.filename);
-	#else
-						sprintf(fullpath,"%s/%s",folder,FindFileData.filename);
-	#endif
-
+						sprintf(fullpath,"%s"DIR_SEPARATOR"%s",folder,FindFileData.filename);
 
 						if(ScanFileAndAddToFAT(floppycontext,fullpath,file,fattable,&datatable[(fatclusternb-2)*fatconfig->sectorsize*fatconfig->clustersize],datatable,fatclusternb,fatconfig,numberofcluster))
 						{
@@ -222,11 +217,7 @@ int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned
 						if(file)
 						{
 							fullpath=malloc(strlen(FindFileData.filename)+strlen(folder)+2);
-	#ifdef WIN32
-							sprintf(fullpath,"%s\\%s",folder,FindFileData.filename);
-	#else
-							sprintf(fullpath,"%s/%s",folder,FindFileData.filename);
-	#endif
+							sprintf(fullpath,"%s"DIR_SEPARATOR"%s",folder,FindFileData.filename);
 						}
 						else
 						{
