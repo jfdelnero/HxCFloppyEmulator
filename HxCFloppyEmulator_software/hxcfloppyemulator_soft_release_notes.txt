@@ -15,7 +15,7 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
-XX XXX 2019 : HxCFloppyEmulator 2.X.X.X
+XX XXX 2019 : HxCFloppyEmulator 2.1.X.X
 
 -> New files Support : Kurzweil K25 (K2500) and K26 (K2600) file support.
 
@@ -23,6 +23,12 @@ XX XXX 2019 : HxCFloppyEmulator 2.X.X.X
 
 -> MacOS X : Preparing the MacOS X Catalina support : Switch to 64bits build + minimum version needed changed to 10.9 (Mavericks)
 
+-> Linux : Use the fltk build automatic flags matching with your system.
+
+-> SCP loader : Fix/set the number of heads to 2 when the number of head(s) field is set to 0.
+
+-> General : Codes fixes and improvements.
+ 
 *********************************************************/
 
 /*********************************************************
