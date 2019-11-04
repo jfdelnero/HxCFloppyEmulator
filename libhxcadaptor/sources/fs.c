@@ -373,6 +373,22 @@ void * hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 	struct stat fileStat;
 	char * tmpstr;
 
+	if(!file)
+	{
+		// File mode
+		memset(&fileStat,0,sizeof(struct stat));
+		if(!lstat (folder, &fileStat))
+		{
+			if ( !S_ISDIR ( fileStat.st_mode ) )
+			{
+				fileinfo->isdirectory = 0;
+				fileinfo->size = fileStat.st_size;
+				strncpy(fileinfo->filename,hxc_getfilenamebase(folder,NULL),256);
+				return (void*)-1;
+			}
+		}
+	}
+
 	dir = opendir (folder);
 	if(dir)
 	{
@@ -459,6 +475,9 @@ int hxc_find_next_file(void* handleff, char *folder, char *file, filefoundinfo* 
 	struct stat fileStat;
 	char * tmpstr;
 
+	if((long)(handleff) == -1) // File mode
+		return 0;
+
 	dir = (DIR*) handleff;
 	d = readdir (dir);
 
@@ -489,7 +508,7 @@ int hxc_find_next_file(void* handleff, char *folder, char *file, filefoundinfo* 
 
 			free(tmpstr);
 		}
-    }
+	}
 
 #endif
 
@@ -506,6 +525,9 @@ int hxc_find_close(void* handle)
 	if(handle)
 		FindClose((void*)handle);
 #else
+	if((long)(handle) == -1) // File mode
+		return 0;
+
 	if(handle)
 		closedir((DIR*) handle);
 #endif
