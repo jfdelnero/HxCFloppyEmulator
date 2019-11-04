@@ -64,6 +64,31 @@
 
 extern unsigned char msdos_bootsector;
 
+int is_gamedoctor_file(char * imgfile)
+{
+	char * tmp_ptr;
+
+	if( hxc_checkfileext(imgfile,"078") || \
+		hxc_checkfileext(imgfile,"068") || \
+		hxc_checkfileext(imgfile,"058") || \
+		hxc_checkfileext(imgfile,"048") || \
+		hxc_checkfileext(imgfile,"gd3") || \
+		hxc_checkfileext(imgfile,"gd7") )
+	{
+		tmp_ptr = hxc_getfilenamebase(imgfile,NULL);
+		if(tmp_ptr)
+		{
+			if( (tmp_ptr[0] == 's' || tmp_ptr[0] == 'S' ) && \
+				(tmp_ptr[1] == 'f' || tmp_ptr[1] == 'F' ) )
+			{
+				return HXCFE_VALIDFILE;
+			}
+		}
+	}
+
+	return HXCFE_BADFILE;
+}
+
 int snes_smc_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	int fileok;
@@ -118,55 +143,51 @@ int snes_smc_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINF
 				return HXCFE_BADFILE;
 			}
 		}
-		else
-		{
-			if(!strncmp((char*)&imgfile->file_header[8],"SUPERUFO",8))
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : SUPERUFO SMC");
-			}
-			else
-			{
-				if( ! hxc_checkfileext(imgfile->path,"smc") )
-				{
-					imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"snes_smc_libIsValidDiskFile : unknow file type !");
-					fileok=0;
-				}
-				else
-				{
-					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : Super Pro Fighter SMC?");
-				}
-			}
 
-			if(fileok)
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"snes_smc_libIsValidDiskFile : SMC/SMD file !");
-				return HXCFE_VALIDFILE;
-			}
-			else
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"snes_smc_libIsValidDiskFile : non SMC/SMD file !");
-				return HXCFE_BADFILE;
-			}
+		if(!strncmp((char*)&imgfile->file_header[8],"SUPERUFO",8))
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : SUPERUFO SMC");
+			return HXCFE_VALIDFILE;
 		}
+
+		if( hxc_checkfileext(imgfile->path,"smc") )
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : Super Pro Fighter SMC?");
+			return HXCFE_VALIDFILE;
+		}
+
+		if( is_gamedoctor_file(imgfile->path) == HXCFE_VALIDFILE )
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : Game Doctor SF3/SF7");
+			return HXCFE_VALIDFILE;
+		}
+
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"snes_smc_libIsValidDiskFile : non SMC/SMD file !");
+		return HXCFE_BADFILE;
 	}
 
 	return HXCFE_BADPARAMETER;
 }
 
-
-
 int snes_smc_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"snes_smc_libLoad_DiskFile %s",imgfile);
 
-	return FAT12FLOPPY_libLoad_DiskFile(imgldr_ctx,floppydisk,imgfile,".fat4572");
+	if( is_gamedoctor_file(imgfile) == HXCFE_VALIDFILE )
+	{
+		return FAT12FLOPPY_libLoad_DiskFile(imgldr_ctx,floppydisk,imgfile,".fat1440");
+	}
+	else
+	{
+		return FAT12FLOPPY_libLoad_DiskFile(imgldr_ctx,floppydisk,imgfile,".fat4572");
+	}
 }
 
 int snes_smc_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="SNES_SMC";
-	static const char plug_desc[]="Super famicom SMC Loader";
+	static const char plug_desc[]="Super famicom SMC / Game Doctor Loader";
 	static const char plug_ext[]="smc";
 
 	plugins_ptr plug_funcs=
