@@ -127,8 +127,6 @@ int FAT12FLOPPY_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILE
 	return HXCFE_BADPARAMETER;
 }
 
-
-
 int FAT12FLOPPY_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	int32_t  i,j;
@@ -251,6 +249,8 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppy
 		{
 			dirmode=0x00;
 		}
+
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FAT12FLOPPY_libLoad_DiskFile : dirmode=0x%x",dirmode);
 
 		if(dirmode)
 		{
