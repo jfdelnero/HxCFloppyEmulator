@@ -344,13 +344,17 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 							if(!floppydisk->tracks[i])
 							{
-								floppydisk->tracks[i]=(HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
-								currentcylinder=floppydisk->tracks[i];
-								currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-								currentcylinder->sides=(HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
+								floppydisk->tracks[i] = (HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
+								currentcylinder = floppydisk->tracks[i];
+								currentcylinder->number_of_side = floppydisk->floppyNumberOfSide;
+								currentcylinder->sides = (HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
 								memset(currentcylinder->sides,0,sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
 
 								currentcylinder->floppyRPM=rpm;
+							}
+							else
+							{
+								currentcylinder = floppydisk->tracks[i];
 							}
 
 							currentcylinder->sides[j]=malloc(sizeof(HXCFE_SIDE));
