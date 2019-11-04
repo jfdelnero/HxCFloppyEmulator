@@ -225,8 +225,8 @@ int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Floppy interface mode %s (%s)",	hxcfe_getFloppyInterfaceModeName(imgldr_ctx->hxcfe,FILEHEADER->floppyinterfacemode),
 																			hxcfe_getFloppyInterfaceModeDesc(imgldr_ctx->hxcfe,FILEHEADER->floppyinterfacemode) );
 
-		if(!floppy->double_step)
-			FILEHEADER->flags |= STREAMHFE_HDRFLAG_SINGLE_SIDE;
+		if(floppy->double_step)
+			FILEHEADER->flags |= STREAMHFE_HDRFLAG_DOUBLE_STEP;
 
 		fwrite(FILEHEADER,512,1,hxcstreamhfefile);
 
