@@ -70,6 +70,7 @@
 #include "soft_cfg_file.h"
 #include "fl_dnd_box.h"
 
+#include "gui_strings.h"
 
 #ifdef WIN32
 #include "win32\resource.h"
@@ -845,11 +846,11 @@ Main_Window::Main_Window()
 
 	for(i=0;i<9;i++)
 	{
-		txt_buttons_main[i].button = new Fl_Button(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*i), BUTTON_XSIZE, BUTTON_YSIZE, txt_buttons_main[i].label);
+		txt_buttons_main[i].button = new Fl_Button(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*i), BUTTON_XSIZE, BUTTON_YSIZE, getString(txt_buttons_main[i].label_id));
 		txt_buttons_main[i].button->labelsize(12);
 		txt_buttons_main[i].button->callback(bt_clicked,(void*)i);
 
-		Fl_Box *box = new Fl_Box(FL_NO_BOX,BUTTON_XPOS+BUTTON_XSIZE,BUTTON_YPOS+(BUTTON_YSIZE/4)+(BUTTON_YSTEP*i),BUTTON_XSIZE*4,BUTTON_YSIZE/2,txt_buttons_main[i].desc);
+		Fl_Box *box = new Fl_Box(FL_NO_BOX,BUTTON_XPOS+BUTTON_XSIZE,BUTTON_YPOS+(BUTTON_YSIZE/4)+(BUTTON_YSTEP*i),BUTTON_XSIZE*4,BUTTON_YSIZE/2,getString(txt_buttons_main[i].desc_id));
 		box->align(FL_ALIGN_INSIDE|FL_ALIGN_LEFT);
 		//box->labelfont(FL_BOLD);
 		box->labelsize(12);
