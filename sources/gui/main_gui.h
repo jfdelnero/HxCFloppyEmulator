@@ -2,8 +2,8 @@
 typedef struct main_button_list_
 {
 	Fl_Button * button;
-	const char * label;
-	const char * desc;
+	int label_id;
+	int desc_id;
 }main_button_list;
 
 

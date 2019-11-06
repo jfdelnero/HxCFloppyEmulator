@@ -30,18 +30,19 @@
 
 #include "msg_txt.h"
 
+#include "gui_strings.h"
 
 main_button_list  txt_buttons_main[]=
 {
-	{0,"Load","Load a floppy file image"},
-	{0,"Load Raw image","Load a custom raw floppy image /\ncreate a custom floppy"},
-	{0,"Batch converter","Convert multiple floppy files images"},
-	{0,"Disk Browser","Create / Browse a DOS floppy disk"},
-	{0,"Export","Export/save the loaded file image"},
-	{0,"SD HxC Floppy\nEmulator settings","Configure the SD HxC Floppy Emulator"},
-	{0,"USB HxC Floppy\nEmulator settings","Configure the USB HxC Floppy Emulator"},
-	{0,"Floppy disk dump","Read a real disk"},
-	{0,"Track Analyzer","Low level tracks viewer"}
+	{0,STR_MAINWINDOW_0002,STR_MAINWINDOW_0003},
+	{0,STR_MAINWINDOW_0004,STR_MAINWINDOW_0005},
+	{0,STR_MAINWINDOW_0006,STR_MAINWINDOW_0007},
+	{0,STR_MAINWINDOW_0008,STR_MAINWINDOW_0009},
+	{0,STR_MAINWINDOW_0010,STR_MAINWINDOW_0011},
+	{0,STR_MAINWINDOW_0012,STR_MAINWINDOW_0013},
+	{0,STR_MAINWINDOW_0014,STR_MAINWINDOW_0015},
+	{0,STR_MAINWINDOW_0016,STR_MAINWINDOW_0017},
+	{0,STR_MAINWINDOW_0018,STR_MAINWINDOW_0019}
 };
 
 Fl_Menu_Item menutable[] = {
