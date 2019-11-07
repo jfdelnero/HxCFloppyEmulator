@@ -1,4 +1,4 @@
-﻿/*
+/*
 //
 // Copyright (C) 2006-2019 Jean-François DEL NERO
 //
@@ -347,7 +347,6 @@ const platform platformlist[]=
 	{ C64_DD_FLOPPYMODE,"C64 1541","NA","NA","NA","NA"},
 	{ -1,"?","DS0","DS1","DS2","MTRON"}
 };
-
 */
 
 const track_type track_type_list[]=
