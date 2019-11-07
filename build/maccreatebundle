@@ -1,44 +1,55 @@
+export VERSION="2.1.26.1"
+export NAME="HxCFloppyEmulator"
+export DMGNAME="HxCFloppyEmulator"
+
+export CLI_PATH="hxcfe_cmdline"
+export CLI_EXEC="hxcfe"
+
+export GUI_PATH="HxCFloppyEmulator.app"
+export GUI_EXEC="hxcfloppyemulator"
+
 echo Creating App bundle :
 
 echo HxCFloppyEmulator
 
-mkdir hxcfe_cmdline
-mkdir hxcfe_cmdline/Frameworks
-mkdir hxcfe_cmdline/App
-cp hxcfe hxcfe_cmdline/App
-cp libhxcfe.dylib hxcfe_cmdline/Frameworks
-cp libusbhxcfe.dylib hxcfe_cmdline/Frameworks
-chmod 755 hxcfe_cmdline/App/hxcfe
-chmod 755 hxcfe_cmdline/Frameworks/libhxcfe.dylib
-chmod 755 hxcfe_cmdline/Frameworks/libusbhxcfe.dylib
+mkdir ${CLI_PATH}
+mkdir ${CLI_PATH}/Frameworks
+mkdir ${CLI_PATH}/App
+cp hxcfe ${CLI_PATH}/App/${CLI_EXEC}
+cp libhxcfe.dylib ${CLI_PATH}/Frameworks
+cp libusbhxcfe.dylib ${CLI_PATH}/Frameworks
+chmod 755 ${CLI_PATH}/App/hxcfe
+chmod 755 ${CLI_PATH}/Frameworks/libhxcfe.dylib
+chmod 755 ${CLI_PATH}/Frameworks/libusbhxcfe.dylib
 
-mkdir HxCFloppyEmulator.app
-mkdir HxCFloppyEmulator.app/Contents
-mkdir HxCFloppyEmulator.app/Contents/Resources
-mkdir HxCFloppyEmulator.app/Contents/MacOS
-mkdir HxCFloppyEmulator.app/Contents/Frameworks
+mkdir ${GUI_PATH}
+mkdir ${GUI_PATH}/Contents
+mkdir ${GUI_PATH}/Contents/Resources
+mkdir ${GUI_PATH}/Contents/MacOS
+mkdir ${GUI_PATH}/Contents/Frameworks
 
-echo APPLnone > HxCFloppyEmulator.app/Contents/PkgInfo
-iconutil --convert icns --output HxCFloppyEmulator.app/Contents/Resources/icons.icns ../HxCFloppyEmulator_software/trunk/sources/mac/icons/hxcfloppyemulator.iconset/
-cp hxcfloppyemulator HxCFloppyEmulator.app/Contents/MacOS
-chmod 755 HxCFloppyEmulator.app/Contents/MacOS/hxcfloppyemulator
-cp libhxcfe.dylib HxCFloppyEmulator.app/Contents/Frameworks
-cp libusbhxcfe.dylib HxCFloppyEmulator.app/Contents/Frameworks
-chmod 755 HxCFloppyEmulator.app/Contents/Frameworks/libhxcfe.dylib
-chmod 755 HxCFloppyEmulator.app/Contents/Frameworks/libusbhxcfe.dylib
-cat << EOF > HxCFloppyEmulator.app/Contents/info.plist
+echo APPLnone > ${GUI_PATH}/Contents/PkgInfo
+iconutil --convert icns --output ${GUI_PATH}/Contents/Resources/icons.icns ../HxCFloppyEmulator_software/trunk/sources/mac/icons/hxcfloppyemulator.iconset/
+cp hxcfloppyemulator ${GUI_PATH}/Contents/MacOS/${GUI_EXEC}
+chmod 755 ${GUI_PATH}/Contents/MacOS/${GUI_EXEC}
+cp libhxcfe.dylib ${GUI_PATH}/Contents/Frameworks
+cp libusbhxcfe.dylib ${GUI_PATH}/Contents/Frameworks
+chmod 755 ${GUI_PATH}/Contents/Frameworks/libhxcfe.dylib
+chmod 755 ${GUI_PATH}/Contents/Frameworks/libusbhxcfe.dylib
+
+cat << EOF > ${GUI_PATH}/Contents/info.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
 <plist version="0.9">
 <dict>
         <key>CFBundleName</key>
-        <string>HxCFloppyEmulator</string>
+        <string>${NAME}</string>
         <key>CFBundlePackageType</key>
         <string>APPL</string>
         <key>CFBundleVersion</key>
         <string>59</string>
         <key>CFBundleShortVersionString</key>
-        <string>2.1.25.1</string>
+        <string>${VERSION}</string>
         <key>CFBundleIconFile</key>
         <string>icons.icns</string>
         <key>CFBundleSignature</key>
@@ -47,4 +58,5 @@ cat << EOF > HxCFloppyEmulator.app/Contents/info.plist
 </plist>
 EOF
 
-hdiutil create HxCFloppyEmulator.dmg -srcfolder hxcfe_cmdline -srcfolder HxCFloppyEmulator.app -ov -volname HxCFloppyEmulator
+hdiutil create ${DMGNAME}.dmg -srcfolder ${CLI_PATH} -srcfolder ${GUI_PATH} -ov -volname ${DMGNAME}
+
