@@ -1,3 +1,48 @@
+﻿/*
+//
+// Copyright (C) 2006-2019 Jean-François DEL NERO
+//
+// This file is part of HxCFloppyEmulator.
+//
+// HxCFloppyEmulator may be used and distributed without restriction provided
+// that this copyright statement is not removed from the file and that any
+// derivative work contains the original copyright notice and the associated
+// disclaimer.
+//
+// HxCFloppyEmulator is free software; you can redistribute it
+// and/or modify  it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// HxCFloppyEmulator is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//   See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with HxCFloppyEmulator; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+//
+*/
+///////////////////////////////////////////////////////////////////////////////////
+//-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
+//-----------H----H--X----X-----CCCCC----22222----0000-----0000------11----------//
+//----------H----H----X-X-----C--------------2---0----0---0----0--1--1-----------//
+//---------HHHHHH-----X------C----------22222---0----0---0----0-----1------------//
+//--------H----H----X--X----C----------2-------0----0---0----0-----1-------------//
+//-------H----H---X-----X---CCCCC-----222222----0000-----0000----1111------------//
+//-------------------------------------------------------------------------------//
+//----------------------------------------------------- http://hxc2001.free.fr --//
+///////////////////////////////////////////////////////////////////////////////////
+// File : msg_txt.cxx
+// Contains: GUI menus
+//
+// Written by: Jean-François DEL NERO
+//
+// Change History (most recent first):
+///////////////////////////////////////////////////////////////////////////////////
+
 #include "fl_includes.h"
 
 #include <stdio.h>
@@ -47,31 +92,39 @@ main_button_list  txt_buttons_main[]=
 
 Fl_Menu_Item menutable[] = {
   {"&Floppy image",0,0,0,FL_SUBMENU},
-    {"&Load",	FL_ALT+'l',load_file_image_pb,0},
-    {"Load custom RAW file/Create custom floppy",	FL_ALT+'r',menu_clicked,(void*)1},
-    {"&Create DOS/AmigaDOS disk",	FL_ALT+'c',	menu_clicked,(void*)3},
-    {"&Export disk/Save As",	FL_ALT+'e', save_file_image, 0},
-    {"Batch convert files images",	FL_ALT+'b', menu_clicked,(void*)2},
-    {"Dump a Floppy disk",	FL_ALT+'d', menu_clicked,(void*)7},
-    {"Track Analyzer",	FL_ALT+'a', menu_clicked,(void*)10},
+	{"&Load",	FL_ALT+'l',load_file_image_pb,0},
+	{"Load custom RAW file/Create custom floppy",	FL_ALT+'r',menu_clicked,(void*)1},
+	{"&Create DOS/AmigaDOS disk",	FL_ALT+'c',	menu_clicked,(void*)3},
+	{"&Export disk/Save As",	FL_ALT+'e', save_file_image, 0},
+	{"Batch convert files images",	FL_ALT+'b', menu_clicked,(void*)2},
+	{"Dump a Floppy disk",	FL_ALT+'d', menu_clicked,(void*)7},
+	{"Track Analyzer",	FL_ALT+'a', menu_clicked,(void*)10},
 
-    {0},
+	{0},
+#ifndef OEM_MODE
   {"&Settings",FL_F+2,0,0,FL_SUBMENU},
-    {"SD HxC FLoppy Emulator settings",	FL_ALT+'l',menu_clicked,(void*)5},
-    {"USB HxC Floppy Emulator settings",	FL_ALT+'s',menu_clicked,(void*)6},
-    {0},
+	{"SD HxC Floppy Emulator settings",	FL_ALT+'l',menu_clicked,(void*)5},
+	{"USB HxC Floppy Emulator settings",	FL_ALT+'s',menu_clicked,(void*)6},
+	{0},
+#else
+  {"&Settings",FL_F+2,0,0,FL_SUBMENU},
+	{"Floppy Emulator settings",	FL_ALT+'l',menu_clicked,(void*)5},
+	{0},
+#endif
   {"&Look",FL_F+3,0,0,FL_SUBMENU},
-    {"Classic",	FL_ALT+'C',menu_clicked,(void*)11},
-    {"Plastic",	FL_ALT+'P',menu_clicked,(void*)12},
-    {"Gtk+",	FL_ALT+'G',menu_clicked,(void*)13},
+	{"Classic",	FL_ALT+'C',menu_clicked,(void*)11},
+	{"Plastic",	FL_ALT+'P',menu_clicked,(void*)12},
+	{"Gtk+",	FL_ALT+'G',menu_clicked,(void*)13},
 	{"Gleam",	FL_ALT+'E',menu_clicked,(void*)14},
-    {0},
+	{0},
   {"&Log",FL_F+4,0,0,FL_SUBMENU},
-    {"&Log",	FL_ALT+'l',menu_clicked,(void*)8},
-    {0},
-  {"&About",0,0,0,FL_SUBMENU},
-  {"&HxCFloppyEmulator",	FL_ALT+'h',menu_clicked,(void*)9},
-    {0},
+	{"&Log",	FL_ALT+'l',menu_clicked,(void*)8},
+	{0},
+#ifndef OEM_MODE
+	{"&About",0,0,0,FL_SUBMENU},
+	{"&HxCFloppyEmulator",	FL_ALT+'h',menu_clicked,(void*)9},
+#endif
+	{0},
   {0}
 };
 

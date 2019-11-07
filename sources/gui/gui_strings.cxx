@@ -1,9 +1,59 @@
+/*
+//
+// Copyright (C) 2006-2019 Jean-François DEL NERO
+//
+// This file is part of HxCFloppyEmulator.
+//
+// HxCFloppyEmulator may be used and distributed without restriction provided
+// that this copyright statement is not removed from the file and that any
+// derivative work contains the original copyright notice and the associated
+// disclaimer.
+//
+// HxCFloppyEmulator is free software; you can redistribute it
+// and/or modify  it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// HxCFloppyEmulator is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//   See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with HxCFloppyEmulator; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+//
+*/
+///////////////////////////////////////////////////////////////////////////////////
+//-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
+//-----------H----H--X----X-----CCCCC----22222----0000-----0000------11----------//
+//----------H----H----X-X-----C--------------2---0----0---0----0--1--1-----------//
+//---------HHHHHH-----X------C----------22222---0----0---0----0-----1------------//
+//--------H----H----X--X----C----------2-------0----0---0----0-----1-------------//
+//-------H----H---X-----X---CCCCC-----222222----0000-----0000----1111------------//
+//-------------------------------------------------------------------------------//
+//----------------------------------------------------- http://hxc2001.free.fr --//
+///////////////////////////////////////////////////////////////////////////////////
+// File : gui_strings.cxx
+// Contains: GUI texts
+//
+// Written by: Jean-François DEL NERO
+//
+// Change History (most recent first):
+///////////////////////////////////////////////////////////////////////////////////
+
 #include "gui_strings.h"
 
 string_entry strings_list[]=
 {
+#ifndef OEM_MODE
 	{ STR_SDSETTINGSWINDOW_0001, "SDCard HxC Floppy Emulator settings" },
 	{ STR_SDSETTINGSWINDOW_0002, "SD HxC Floppy Emulator Usage settings" },
+#else
+	{ STR_SDSETTINGSWINDOW_0001, "Floppy Emulator settings" },
+	{ STR_SDSETTINGSWINDOW_0002, "Floppy Emulator Usage settings" },
+#endif
 	{ STR_SDSETTINGSWINDOW_0003, "User interface" },
 	{ STR_SDSETTINGSWINDOW_0004, "UI Sound" },
 	{ STR_SDSETTINGSWINDOW_0005, "Sound level" },
@@ -28,7 +78,11 @@ string_entry strings_list[]=
 	{ STR_SDSETTINGSWINDOW_0024, "Auto" },
 	{ STR_SDSETTINGSWINDOW_0025, "Double Step" },
 	{ STR_SDSETTINGSWINDOW_0026, "Mode" },
+#ifndef OEM_MODE
 	{ STR_SDSETTINGSWINDOW_0027, "SD HxC Floppy Emulator Interface setting" },
+#else
+	{ STR_SDSETTINGSWINDOW_0027, "Floppy Emulator Interface setting" },
+#endif
 	{ STR_SDSETTINGSWINDOW_0028, "Mode" },
 	{ STR_SDSETTINGSWINDOW_0029, "Pin 2" },
 	{ STR_SDSETTINGSWINDOW_0030, "Pin 34" },
@@ -99,8 +153,13 @@ string_entry strings_list[]=
 	{ STR_EDITTOOLWINDOW_0023, "Reverse Tracks" },
 	{ STR_EDITTOOLWINDOW_0024, "Add/Delete Side 1" },
 
+#ifndef OEM_MODE
 	{ STR_USBSETTINGSWINDOW_0001, "USB HxC Floppy Emulator settings and status" },
 	{ STR_USBSETTINGSWINDOW_0002, "USB HxC Floppy Emulator status" },
+#else
+	{ STR_USBSETTINGSWINDOW_0001, "Floppy Emulator settings and status" },
+	{ STR_USBSETTINGSWINDOW_0002, "Floppy Emulator status" },
+#endif
 	{ STR_USBSETTINGSWINDOW_0003, "Status" },
 	{ STR_USBSETTINGSWINDOW_0004, "USB statistics and settings" },
 	{ STR_USBSETTINGSWINDOW_0005, "Max settle time" },
@@ -190,10 +249,17 @@ string_entry strings_list[]=
 	{ STR_MAINWINDOW_0009, "Create / Browse a DOS floppy disk" },
 	{ STR_MAINWINDOW_0010, "Export" },
 	{ STR_MAINWINDOW_0011, "Export/save the loaded file image" },
+#ifndef OEM_MODE
 	{ STR_MAINWINDOW_0012, "SD HxC Floppy\nEmulator settings" },
 	{ STR_MAINWINDOW_0013, "Configure the SD HxC Floppy Emulator" },
 	{ STR_MAINWINDOW_0014, "USB HxC Floppy\nEmulator settings" },
 	{ STR_MAINWINDOW_0015, "Configure the USB HxC Floppy Emulator" },
+#else
+	{ STR_MAINWINDOW_0012, "Floppy Emulator\nsettings" },
+	{ STR_MAINWINDOW_0013, "Configure the Floppy Emulator" },
+	{ STR_MAINWINDOW_0014, "" },
+	{ STR_MAINWINDOW_0015, "" },
+#endif
 	{ STR_MAINWINDOW_0016, "Floppy disk dump" },
 	{ STR_MAINWINDOW_0017, "Read a real disk" },
 	{ STR_MAINWINDOW_0018, "Track Analyzer" },
@@ -202,7 +268,6 @@ string_entry strings_list[]=
 	
 	{ 0x0000, 0x0000 }
 };
-
 	
 char * getString(unsigned int str_id)
 {
