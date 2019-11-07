@@ -902,7 +902,11 @@ Main_Window::Main_Window()
 	o->callback(dnd_cb);
 	end();
 
+#ifndef OEM_MODE
 	label(NOMFENETRE);
+#else
+	label("Floppy Emulator Toolbox v" STR_FILE_VERSION2);
+#endif
 
 #ifndef STANDALONEFSBROWSER
 	show();
