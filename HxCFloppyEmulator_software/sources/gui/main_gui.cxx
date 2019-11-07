@@ -38,7 +38,7 @@
 // File : main_gui.cxx
 // Contains: Main GUI window
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -805,7 +805,7 @@ static void tick_mw(void *v) {
 Main_Window::Main_Window()
   : Fl_Window(WINDOW_XSIZE,428)
 {
-	int i;
+	int i,j;
 	HXCFE_XMLLDR* rfb;
 	char * temp;
 	infothread * infoth;
@@ -839,39 +839,46 @@ Main_Window::Main_Window()
 	this->icon((char *)LoadIcon(fl_display, MAKEINTRESOURCE(101)));
 #endif
 
+#ifndef OEM_MODE
 	bitmap_hxc2001_backgnd_bmp->unpacked_data=mi_unpack(bitmap_hxc2001_backgnd_bmp->data,bitmap_hxc2001_backgnd_bmp->csize ,bitmap_hxc2001_backgnd_bmp->data, bitmap_hxc2001_backgnd_bmp->size);
 	convert8b24b(bitmap_hxc2001_backgnd_bmp,0x00);
 	group.image(new Fl_Tiled_Image(new Fl_RGB_Image((const unsigned char*)bitmap_hxc2001_backgnd_bmp->unpacked_data,bitmap_hxc2001_backgnd_bmp->Xsize, bitmap_hxc2001_backgnd_bmp->Ysize, 3, 0)));
 	group.align(FL_ALIGN_TEXT_OVER_IMAGE);
+#endif
 
+	j = 0;
 	for(i=0;i<9;i++)
 	{
-		txt_buttons_main[i].button = new Fl_Button(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*i), BUTTON_XSIZE, BUTTON_YSIZE, getString(txt_buttons_main[i].label_id));
-		txt_buttons_main[i].button->labelsize(12);
-		txt_buttons_main[i].button->callback(bt_clicked,(void*)i);
+		if(strlen(getString(txt_buttons_main[i].label_id)))
+		{
+			txt_buttons_main[i].button = new Fl_Button(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*j), BUTTON_XSIZE, BUTTON_YSIZE, getString(txt_buttons_main[i].label_id));
+			txt_buttons_main[i].button->labelsize(12);
+			txt_buttons_main[i].button->callback(bt_clicked,(void*)i);
 
-		Fl_Box *box = new Fl_Box(FL_NO_BOX,BUTTON_XPOS+BUTTON_XSIZE,BUTTON_YPOS+(BUTTON_YSIZE/4)+(BUTTON_YSTEP*i),BUTTON_XSIZE*4,BUTTON_YSIZE/2,getString(txt_buttons_main[i].desc_id));
-		box->align(FL_ALIGN_INSIDE|FL_ALIGN_LEFT);
-		//box->labelfont(FL_BOLD);
-		box->labelsize(12);
-		//box->labeltype(FL_EMBOSSED_LABEL);
-		box->labeltype(FL_ENGRAVED_LABEL);
+			Fl_Box *box = new Fl_Box(FL_NO_BOX,BUTTON_XPOS+BUTTON_XSIZE,BUTTON_YPOS+(BUTTON_YSIZE/4)+(BUTTON_YSTEP*j),BUTTON_XSIZE*4,BUTTON_YSIZE/2,getString(txt_buttons_main[i].desc_id));
+			box->align(FL_ALIGN_INSIDE|FL_ALIGN_LEFT);
+			//box->labelfont(FL_BOLD);
+			box->labelsize(12);
+			//box->labeltype(FL_EMBOSSED_LABEL);
+			box->labeltype(FL_ENGRAVED_LABEL);
+			j++;
+		}
 	}
 
-	file_name_txt = new Fl_Output(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*i++), WINDOW_XSIZE-(BUTTON_XPOS*2), 25);
+	file_name_txt = new Fl_Output(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*j++), WINDOW_XSIZE-(BUTTON_XPOS*2), 25);
 	file_name_txt->labelsize(12);
 	file_name_txt->textsize(12);
 	file_name_txt->align(FL_ALIGN_TOP_LEFT);
 	file_name_txt->value("No disk loaded.");
 	file_name_txt->box(FL_PLASTIC_UP_BOX);
 
-	track_pos_str = new Fl_Output(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*i++)-10, WINDOW_XSIZE-(BUTTON_XPOS*2), 25);
+	track_pos_str = new Fl_Output(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*j++)-10, WINDOW_XSIZE-(BUTTON_XPOS*2), 25);
 	track_pos_str->labelsize(12);
 	track_pos_str->textsize(12);
 	track_pos_str->align(FL_ALIGN_TOP_LEFT);
 	track_pos_str->box(FL_PLASTIC_UP_BOX);
 
-	track_pos = new Fl_Progress(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*i++)-18, WINDOW_XSIZE-(BUTTON_XPOS*2), 25);
+	track_pos = new Fl_Progress(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*j++)-18, WINDOW_XSIZE-(BUTTON_XPOS*2), 25);
 	track_pos->box(FL_THIN_UP_BOX);
 	track_pos->selection_color((Fl_Color)137);
 	track_pos->minimum(0);
@@ -906,6 +913,9 @@ Main_Window::Main_Window()
 	user_data((void*)(this));
 
 	load_last_cfg();
+
+	resize (this->x_root(),this->y_root(),WINDOW_XSIZE,BUTTON_YPOS+(BUTTON_YSTEP*j) - 25);
+
 	guicontext->main_window = (Main_Window *)this;
 
 	//////////////////////////////////////////////
