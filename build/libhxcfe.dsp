@@ -2424,6 +2424,18 @@ SOURCE=..\sources\stream_analyzer\fluxStreamAnalyzer.c
 SOURCE=..\sources\stream_analyzer\fluxStreamAnalyzer.h
 # End Source File
 # End Group
+# Begin Group "misc"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\misc\script_exec.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\misc\script_exec.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\sources\tracks\crc.c
