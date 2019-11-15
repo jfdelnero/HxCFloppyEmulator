@@ -65,19 +65,21 @@
 
 #include "libhxcadaptor.h"
 
+#include "misc/env.h"
+
 int dummy_output(int MSGTYPE,char * chaine, ...)
 {
-    return 0;
+	return 0;
 }
 
 int dummy_trackpos(unsigned int current,unsigned int total)
 {
-    return 0;
+	return 0;
 }
 
 int dummy_progress(unsigned int current,unsigned int total, void * user)
 {
-    return 0;
+	return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -99,6 +101,8 @@ HXCFE* hxcfe_init(void)
 
 		hxcfe->hxc_printf = &dummy_output;
 		hxcfe->hxc_settrackpos = &dummy_trackpos;
+
+		set_env_var(hxcfe, "LIBVERSION", "v"STR_FILE_VERSION2);
 
 		hxcfe->hxc_printf(MSG_INFO_0,"Starting HxCFloppyEmulator...");
 
