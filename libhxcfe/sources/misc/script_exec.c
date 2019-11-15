@@ -57,6 +57,8 @@
 
 #include "libhxcadaptor.h"
 
+#include "env.h"
+
 #include "version.h"
 
 #define MAX_CFG_STRING_SIZE 1024
@@ -227,7 +229,7 @@ static int get_hex_param(HXCFE * context, char * line,int cmd)
 	return 0;
 }
 
-static int print_version(HXCFE * context, char * line,int cmd)
+static int print_version_cmd(HXCFE * context, char * line,int cmd)
 {
 	context->hxc_printf(MSG_INFO_1,"v"STR_FILE_VERSION2);
 
@@ -251,15 +253,29 @@ static int get_str_param(HXCFE * context, char * line,int cmd)
 	return 0;
 }
 
-static int set_env_var(HXCFE * context, char * line,int cmd)
+static int set_env_var_cmd(HXCFE * context, char * line,int cmd)
 {
+	int i,j,ret;
+	char varname[MAX_CFG_STRING_SIZE];
+	char varvalue[MAX_CFG_STRING_SIZE];
 
+	ret = -1;
+
+	i = get_param(line, 1,varname);
+	j = get_param(line, 2,varvalue);
+
+	if(i>=0 && j>=0)
+	{
+		ret = set_env_var(context,(char*)&varname,(char*)&varvalue);
+	}
+
+	return ret;
 }
 
 kw_list kwlist[] =
 {
-	{"version",             print_version,      VERSION_CMD},
-	{"set",                 set_env_var,        SET_ENV_CMD},
+	{"version",             print_version_cmd,      VERSION_CMD},
+	{"set",                 set_env_var_cmd,        SET_ENV_CMD},
 
 	//{"exec",          get_hex_param,      EXEC_CMD},
 
@@ -333,8 +349,38 @@ int hxcfe_exec_script_file(HXCFE* context, char * script_path)
 	}
 	else
 	{
-		context->hxc_printf(MSG_ERROR,"Can't open %s ! Using default settings...",script_path);
+		context->hxc_printf(MSG_ERROR,"Can't open %s !",script_path);
 	}
 
 	return err;
 }
+
+/*int hxcfe_exec_script(HXCFE* context, char* script_buffer, int buffersize)
+{
+	int err = 0;
+	FILE * f;
+	char line[MAX_CFG_STRING_SIZE];
+
+	f = fopen(script_path,"r");
+	if(f)
+	{
+		do
+		{
+			if(!fgets(line,sizeof(line),f))
+				break;
+
+			if(feof(f))
+				break;
+
+			execute_line(context, line);
+		}while(1);
+
+		fclose(f);
+	}
+	else
+	{
+		context->hxc_printf(MSG_ERROR,"Can't open %s !",script_path);
+	}
+
+	return err;
+}*/
