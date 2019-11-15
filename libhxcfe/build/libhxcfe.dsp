@@ -2429,6 +2429,14 @@ SOURCE=..\sources\stream_analyzer\fluxStreamAnalyzer.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\sources\misc\env.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\misc\env.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\misc\script_exec.c
 # End Source File
 # Begin Source File
