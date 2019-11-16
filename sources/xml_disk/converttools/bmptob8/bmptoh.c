@@ -266,6 +266,8 @@ unsigned char mi_pack(unsigned char * bufferin, int sizein,unsigned char * buffe
 		memset(buffer, 0, sizein * 10);
 		memset(buffer2, 0, sizein * 10);
 
+		newsize_lzw = sizein * 10;
+
 		lzw_compress(bufferin,buffer,sizein,&newsize_lzw);
 		rlepack(bufferin,sizein,buffer2,&newsize_rle);
 
@@ -275,14 +277,11 @@ unsigned char mi_pack(unsigned char * bufferin, int sizein,unsigned char * buffe
 		//if(newsize_rle<sizein && newsize_rle< newsize_lzw)
 		//	mode=1; //rle
 
-		if(newsize_lzw<sizein && newsize_lzw< newsize_rle)
+		if( newsize_lzw >= 0 && newsize_lzw<sizein && newsize_lzw< newsize_rle)
 			mode=2; //lzw
-
-		printf("mode : %d\n",mode);
 
 		switch(mode)
 		{
-
 			case 0:
 				memcpy((buffer2+1),bufferin,sizein);
 				buffer2[0]=0x0;
@@ -298,6 +297,7 @@ unsigned char mi_pack(unsigned char * bufferin, int sizein,unsigned char * buffe
 			break;
 
 			case 2:
+				newsize = sizein * 10;
 				lzw_compress(bufferin,buffer+1,sizein,(int*)&newsize);
 				buffer[0]=0x1;
 				memcpy(bufferout,buffer,newsize+1);
@@ -305,6 +305,7 @@ unsigned char mi_pack(unsigned char * bufferin, int sizein,unsigned char * buffe
 			break;
 
 			case 3:
+				newsize = sizein * 10;
 				rlepack(bufferin,sizein,buffer2,(int*)&newsize);
 				lzw_compress(buffer2,buffer+1,newsize,(int*)&newsize_lzw);
 				buffer[0]=0x3;
@@ -317,7 +318,7 @@ unsigned char mi_pack(unsigned char * bufferin, int sizein,unsigned char * buffe
 		free(buffer2);
 	}
 
-	return 0;
+	return mode;
 };
 
 
@@ -327,9 +328,9 @@ int main(int argc, char* argv[])
 	bmpinfo infoo;
 	unsigned char * dbuffer;
 	unsigned char * cbuffer;
-	int size,i;
+	int size,i,mode;
 
-	printf("Binary2Header V0.6\nHxC2001\n");
+	printf("Binary2Header V0.6 - (c)HxC2001\n");
 
 	memset(&infoo,0,sizeof(bmpinfo));
 
@@ -340,7 +341,7 @@ int main(int argc, char* argv[])
 		i=argc-1;
 		do{
 			if(strcmp("-BMP8",argv[i])==0)  infoo.type=8;
-			if(strcmp("-BMP8P",argv[i])==0)  infoo.type=9;
+			if(strcmp("-BMP8P",argv[i])==0) infoo.type=9;
 			if(strcmp("-BMP1",argv[i])==0)  infoo.type=1;
 			if(strcmp("-DATA",argv[i])==0)  infoo.type=0xff;
 			i--;
@@ -350,16 +351,15 @@ int main(int argc, char* argv[])
 
 		if(dbuffer!=NULL)
 		{
-			printf("%d\n",infoo.size+100+1024);
-
 			cbuffer=(unsigned char *)malloc(infoo.size+100+1024);
 			if(cbuffer!=NULL)
 			{
 				memset(cbuffer,0,infoo.size+100+1024);
-				printf("Pack...\n");
 
-				mi_pack(dbuffer,infoo.size,cbuffer, &size);
-				printf("build include file...\n");
+				mode = mi_pack(dbuffer,infoo.size,cbuffer, &size);
+
+				printf("Generate header file... (Pack mode : %d, Source size : %d bytes, Final data size : %d bytes)\n",mode,infoo.size,size);
+
 				infoo.csize=size;
 				buildincludefile(argv[1],&infoo,cbuffer);
 
