@@ -41,6 +41,12 @@ LDFLAGS +=-arch x86_64 -dynamiclib -current_version 2.0 -install_name @executabl
 EXEC=libhxcfe.dylib
 endif
 
+XML_DSKLAYOUT_INPUTS  := $(wildcard $(BASEDIR)/xml_disk/DiskLayouts/xml_files/DiskLayout_*.xml)
+XML_DSKLAYOUT_OUTPUTS := $(patsubst $(BASEDIR)/xml_disk/DiskLayouts/xml_files/%.xml,$(BASEDIR)/xml_disk/DiskLayouts/%.h,$(XML_DSKLAYOUT_INPUTS))
+
+# Create a list of all the output files you want to generate
+OUTPUTS := $(patsubst ./input/%.txt,./output/%.out,$(INPUTS))
+
 ADFLIBOBJ= adf_hd.o adf_disk.o adf_raw.o adf_bitm.o adf_dump.o\
         adf_util.o adf_env.o adf_nativ.o adf_dir.o adf_file.o adf_cache.o \
         adf_link.o adf_salv.o
@@ -84,14 +90,18 @@ FS_SUPPORT = fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
 
-BASE = floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o crc.o std_crc32.o track_generator.o trackutils.o trackeditor.o sector_extractor.o \
-		display_track.o fluxStreamAnalyzer.o script_exec.o env.o
+BASE = floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o crc.o std_crc32.o track_generator.o trackutils.o \
+		trackeditor.o sector_extractor.o display_track.o fluxStreamAnalyzer.o script_exec.o env.o
 
 LIBS_OBJS = $(BASE) $(FS_SUPPORT) $(ADFLIBOBJ) $(ENCODING_SUPPORT) $(TRACK_FORMATS_SUPPORT) $(DISKLOADERPLUGINS) \
 			$(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(LZ4OBJ) \
 			$(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB)
 
-all: $(EXEC)
+all: SCRIPT_FILE XML_FILES $(EXEC)
+
+XML_FILES: bmptoh $(XML_DSKLAYOUT_OUTPUTS)
+
+SCRIPT_FILE: bmptoh $(BASEDIR)/init_script.h
 
 libhxcfe.dll: $(LIBS_OBJS) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
@@ -767,6 +777,16 @@ fat_table.o : $(BASEDIR)/thirdpartylibs/FATIOlib/fat_table.c
 
 fat_write.o : $(BASEDIR)/thirdpartylibs/FATIOlib/fat_write.c
 	$(CC) -o $@ -c $< $(CFLAGS)
+
+bmptoh:
+	cd $(BASEDIR)/xml_disk/converttools/bmptob8 && $(MAKE)
+	mv $(BASEDIR)/xml_disk/converttools/bmptob8/bmptoh $(BASEDIR)/xml_disk/converttools/
+
+$(BASEDIR)/xml_disk/DiskLayouts/%.h : $(BASEDIR)/xml_disk/DiskLayouts/xml_files/%.xml
+	cd $(BASEDIR)/xml_disk/DiskLayouts/xml_files/ && ../../converttools/bmptoh $(basename $(notdir $<.xml)) -DATA && mv data_$(basename $(notdir $<))_xml.h ..
+
+$(BASEDIR)/init_script.h : $(BASEDIR)/init.script
+	cd $(BASEDIR)/ && $(BASEDIR)/xml_disk/converttools/bmptoh $(basename $(notdir $<.script)) -DATA && mv data_$(basename $(notdir $<))_script.h init_script.h
 
 clean:
 	rm -rf *.o
