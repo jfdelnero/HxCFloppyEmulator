@@ -68,7 +68,8 @@ typedef int (* KW_FUNC)(HXCFE * context, char * line, int cmd);
 enum
 {
 	VERSION_CMD = 0,
-	SET_ENV_CMD
+	SET_ENV_CMD,
+	PRINT_ENV_VAR_CMD
 };
 
 typedef struct kw_list_
@@ -272,10 +273,33 @@ static int set_env_var_cmd(HXCFE * context, char * line,int cmd)
 	return ret;
 }
 
+static int print_env_var_cmd(HXCFE * context, char * line,int cmd)
+{
+	int i,ret;
+	char varname[MAX_CFG_STRING_SIZE];
+	char varvalue[MAX_CFG_STRING_SIZE];
+
+	ret = -1;
+
+	i = get_param(line, 1,varname);
+
+	if(i>=0)
+	{
+		ret = set_env_var(context,(char*)&varname,(char*)&varvalue);
+		if(ret>=0)
+		{
+			context->hxc_printf(MSG_INFO_1,"%s = %s",varname,varvalue);	
+		}
+	}
+
+	return ret;
+}
+
 kw_list kwlist[] =
 {
 	{"version",             print_version_cmd,      VERSION_CMD},
 	{"set",                 set_env_var_cmd,        SET_ENV_CMD},
+	{"print_env_var",       print_env_var_cmd,      PRINT_ENV_VAR_CMD},
 
 	//{"exec",          get_hex_param,      EXEC_CMD},
 
