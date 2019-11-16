@@ -22,36 +22,36 @@ COPYRIGHT 1993-1998 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
  * $Log: lzw.c $
  * Revision 1.8  1994/02/01  13:23:51  john
  * *** empty log message ***
- * 
+ *
  * Revision 1.7  1993/10/22  17:50:43  yuan
  * Fixed the hard to track down bug
- * 
+ *
  * Revision 1.6  1993/10/18  18:00:13  yuan
  * Fixed memory alloc errors.
- * 
+ *
  * Revision 1.5  1993/09/21  17:22:24  yuan
  * *** empty log message ***
- * 
+ *
  * Revision 1.4  1993/09/21  17:16:25  yuan
  * cleaning up
- * 
+ *
  * Revision 1.3  1993/09/14  13:11:57  yuan
  * cfread and cfwrite have been changed into lzw_expand and lzw_compress.
  * the new cfread and cfwrite functions are now in library.c
  * lzw_compress returns the compressed buffer and a parameter *size.
- * 
+ *
  * Revision 1.2  1993/09/09  17:45:56  yuan
  * tab added to ERROR messages
- * 
+ *
  * Revision 1.1  1993/09/08  16:15:03  yuan
  * Initial revision
  *
  * Revision 1.3  1993/07/24  19:05:22  yuan
  * *** empty log message ***
- * 
+ *
  * Revision 1.2  1993/07/22  11:27:29  yuan
  * No change
- * 
+ *
  * Revision 1.1  1993/07/21  15:28:48  matt
  * Initial revision
  *
@@ -176,7 +176,7 @@ int InputBit( BIT_BUF *bit_buf )
 	if ( bit_buf->mask == 0x80 )
 	{
 		bit_buf->rack = bit_buf->buf[bit_buf->current_byte++];
-		if ( bit_buf->rack == EOF ) 
+		if ( bit_buf->rack == EOF )
 		{
 			//printf( "    ERROR : Fatal error in InputBit!\n" );
 			//exit(4);
@@ -202,7 +202,7 @@ unsigned int InputBits( BIT_BUF *bit_buf, int bit_count )
 
 	while ( mask != 0)
 	{
-		if ( bit_buf->mask == 0x80 ) 
+		if ( bit_buf->mask == 0x80 )
 		{
 			bit_buf->rack = bit_buf->buf[bit_buf->current_byte++];
 			if ( bit_buf->rack == EOF )
@@ -212,7 +212,7 @@ unsigned int InputBits( BIT_BUF *bit_buf, int bit_count )
 				return 0xFFFFFFFF;
 			}
 		}
-		
+
 		if ( bit_buf->rack & bit_buf->mask )
 			return_value |= mask;
 
@@ -281,8 +281,7 @@ ubyte *lzw_compress( ubyte *inputbuf, ubyte *outputbuf, int input_size, int *out
 	string_code = ( *inputbuf++ );
 	for ( i=0 ; i<input_size ; i++ )
 	{
-
-		if (output->current_byte+4 >= input_size)
+		if ( output->current_byte+4 >= *output_size )
 		{
 			CloseOutputBitBuf( output );
 			FreeStorage();
@@ -361,7 +360,7 @@ ubyte *lzw_expand( ubyte *inputbuf, ubyte *outputbuf, int length )
 		{
 			outputbuf[counter++] = ( ubyte ) old_code;
 		}
-		else 
+		else
 		{
 			//printf( "ERROR:Tried to write %d\n", old_code );
 			//exit(1);
