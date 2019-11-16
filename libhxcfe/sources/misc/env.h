@@ -51,3 +51,4 @@ typedef struct envvar_entry_
 
 int set_env_var(HXCFE* context, char * varname, char * varvalue);
 char * get_env_var(HXCFE* context, char * varname, char * varvalue);
+char * get_env_var_index(HXCFE* context, int index, char * varvalue);

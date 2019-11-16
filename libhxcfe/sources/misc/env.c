@@ -181,3 +181,33 @@ char * get_env_var(HXCFE* context, char * varname, char * varvalue)
 		return NULL;
 	}
 }
+
+char * get_env_var_index(HXCFE* context, int index, char * varvalue)
+{
+	int i;
+	envvar_entry * tmp_envvars;
+
+	i = 0;
+
+	tmp_envvars = (envvar_entry *)context->envvar;
+	if(!tmp_envvars)
+		return NULL;
+
+	// search the variable...
+	while(tmp_envvars[i].name && i < index)
+	{
+		i++;
+	}
+
+	if(tmp_envvars[i].name)
+	{
+		if(varvalue)
+			strcpy(varvalue,tmp_envvars[i].varvalue);
+
+		return tmp_envvars[i].varvalue;
+	}
+	else
+	{
+		return NULL;
+	}
+}
