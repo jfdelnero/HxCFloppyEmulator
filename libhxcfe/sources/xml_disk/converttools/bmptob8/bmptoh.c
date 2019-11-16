@@ -2,10 +2,17 @@
 #include <malloc.h>
 #include <string.h>
 
+#ifdef WIN32
 #include "stdint.h"
-
 #include <windows.h>
+#else
+#include <stdint.h>
+#include "bmp_file.h"
+#endif
+
 #include "../../packer/pack.h"
+#include "../../packer/lzw.h"
+#include "../../packer/rle.h"
 
 typedef struct {
 	uint32_t xres;
@@ -16,7 +23,7 @@ typedef struct {
 	uint8_t pack;
 } bmpinfo;
 
-char * extractbmpdata(char *bmpfile,bmpinfo *info)
+uint8_t * extractbmpdata(char *bmpfile,bmpinfo *info)
 {
 	FILE * file;
 	int p,m,i,j,o,k;
@@ -29,24 +36,32 @@ char * extractbmpdata(char *bmpfile,bmpinfo *info)
 	BITMAPINFOHEADER bmih;
 	uint8_t pallette[256*8];
 
+	dbuffer = NULL;
+
 	file=fopen(bmpfile,"rb");
 	if( file )
 	{
 		//Get the file size
-		filesize = hxc_fgetsize(f);
+		fseek(file,0,SEEK_END);
+		filesize = ftell(file);
+		fseek(file,0,SEEK_SET);
 
 		// read header
 		if(info->type!=0xff)
 		{
-			fread(&bmph,sizeof(bmph),1,file);
-			fread(&bmih,sizeof(bmih),1,file);
+			if(fread(&bmph,sizeof(bmph),1,file) != 1)
+				goto read_error;
+
+			if(fread(&bmih,sizeof(bmih),1,file) != 1)
+				goto read_error;
 
 			info->xres=bmih.biWidth;
 			info->yres=bmih.biHeight;
 
 			if(info->type==9)
 			{
-				fread(&pallette,256*4,1,file);
+				if(fread(&pallette,256*4,1,file) != 1)
+					goto read_error;
 			}
 
 		}
@@ -75,7 +90,7 @@ char * extractbmpdata(char *bmpfile,bmpinfo *info)
 			info->size = adj_filesize;
 
 		//mem data
-		dbuffer = (char *) malloc(adj_filesize+100);
+		dbuffer = (uint8_t *) malloc(adj_filesize+100);
 
 		p=0;
 		j=0;
@@ -139,7 +154,14 @@ char * extractbmpdata(char *bmpfile,bmpinfo *info)
 	}
 	return NULL;
 
+read_error:
+	if(file)
+		fclose(file);
+	
+	if(dbuffer)
+		free(dbuffer);
 
+	return NULL;
 }
 
 char  buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
@@ -220,13 +242,13 @@ char  buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
 }
 
 
-unsigned char mi_pack(unsigned char * bufferin, unsigned long sizein,unsigned char * bufferout, int * sizeout)
+unsigned char mi_pack(unsigned char * bufferin, int sizein,unsigned char * bufferout, int * sizeout)
 {
 	unsigned char* buffer;
 	unsigned char* buffer2;
-	unsigned long  newsize;
-	unsigned long  newsize_lzw;
-	unsigned long  newsize_rle;
+	int  newsize;
+	int  newsize_lzw;
+	int  newsize_rle;
 	int mode;
 
 	buffer =  (unsigned char*)malloc(sizein * 10);
