@@ -1,5 +1,5 @@
 CFLAGS = -O3 -I../../.. -Wall
-LDFLAGS = 
+LDFLAGS =
 
 EXEC=bmptoh
 

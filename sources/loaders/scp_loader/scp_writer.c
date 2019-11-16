@@ -259,7 +259,7 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 		scph.start_track = 0;
 		scph.end_track = tracknumber - 1;
-		scph.number_of_revolution = 2;
+		scph.number_of_revolution = 3;
 
 		scph.disk_type = 0x15;
 
