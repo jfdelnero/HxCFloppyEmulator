@@ -38,6 +38,11 @@ uint8_t * extractbmpdata(char *bmpfile,bmpinfo *info)
 
 	dbuffer = NULL;
 
+	memset(&bmph,0,sizeof(BITMAPFILEHEADER));
+	memset(&bmih,0,sizeof(BITMAPINFOHEADER));
+
+	s = 0;
+
 	file=fopen(bmpfile,"rb");
 	if( file )
 	{
@@ -50,10 +55,10 @@ uint8_t * extractbmpdata(char *bmpfile,bmpinfo *info)
 		if(info->type!=0xff)
 		{
 			if(fread(&bmph,sizeof(bmph),1,file) != 1)
-				goto read_error;
+				goto error;
 
 			if(fread(&bmih,sizeof(bmih),1,file) != 1)
-				goto read_error;
+				goto error;
 
 			info->xres=bmih.biWidth;
 			info->yres=bmih.biHeight;
@@ -61,20 +66,19 @@ uint8_t * extractbmpdata(char *bmpfile,bmpinfo *info)
 			if(info->type==9)
 			{
 				if(fread(&pallette,256*4,1,file) != 1)
-					goto read_error;
+					goto error;
 			}
 
+			s=bmih.biWidth;
+			do
+			{
+				s=s-4;
+			}while(s>=4);
+
+			if(s!=0)
+				s=4-s;
 		}
 		//info->type=bmih.biBitCount;
-
-		s=bmih.biWidth;
-		do
-		{
-			s=s-4;
-		}while(s>=4);
-
-		if(s!=0)
-		s=4-s;
 
 		adj_filesize=((filesize-bmph.bfOffBits)-(s*bmih.biHeight));
 
@@ -91,6 +95,10 @@ uint8_t * extractbmpdata(char *bmpfile,bmpinfo *info)
 
 		//mem data
 		dbuffer = (uint8_t *) malloc(adj_filesize+100);
+		if(!dbuffer)
+			goto error;
+
+		memset(dbuffer,0,adj_filesize+100);
 
 		p=0;
 		j=0;
@@ -146,15 +154,14 @@ uint8_t * extractbmpdata(char *bmpfile,bmpinfo *info)
 					m=0;
 				}
 			}
-
-
 		}
+
 		fclose(file);
 		return dbuffer;
 	}
 	return NULL;
 
-read_error:
+error:
 	if(file)
 		fclose(file);
 	
@@ -321,8 +328,13 @@ int main(int argc, char* argv[])
 	unsigned char * dbuffer;
 	unsigned char * cbuffer;
 	int size,i;
+
 	printf("Binary2Header V0.6\nHxC2001\n");
-	if(argc==1)printf("Usage:\n");
+
+	memset(&infoo,0,sizeof(bmpinfo));
+
+	if(argc==1)
+		printf("Usage:\n");
 	else
 	{
 		i=argc-1;
@@ -334,15 +346,16 @@ int main(int argc, char* argv[])
 			i--;
 		}while(i);
 
-		dbuffer=NULL;
-		dbuffer=(unsigned char *)extractbmpdata(argv[1],&infoo);
+		dbuffer = (unsigned char *)extractbmpdata(argv[1],&infoo);
 
 		if(dbuffer!=NULL)
 		{
 			printf("%d\n",infoo.size+100+1024);
+
 			cbuffer=(unsigned char *)malloc(infoo.size+100+1024);
 			if(cbuffer!=NULL)
 			{
+				memset(cbuffer,0,infoo.size+100+1024);
 				printf("Pack...\n");
 
 				mi_pack(dbuffer,infoo.size,cbuffer, &size);
