@@ -59,6 +59,7 @@
 
 #include "libhxcadaptor.h"
 
+#include "misc/env.h"
 
 // Get the next cell value.
 static int32_t getNextPulse(HXCFE_SIDE * track,int * offset,int * rollover)
@@ -419,7 +420,9 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 
 int KryoFluxStream_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-	int i,j;
+	int i,j, nbrevolutions;
+
+	nbrevolutions = atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWEXPORT_NUMBER_OF_REVOLUTIONS", NULL));
 
 	for(j=0;j<floppy->floppyNumberOfSide;j++)
 	{
@@ -427,7 +430,7 @@ int KryoFluxStream_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * flo
 		{
 			hxcfe_imgCallProgressCallback(imgldr_ctx,i + (j*floppy->floppyNumberOfTrack),floppy->floppyNumberOfTrack*floppy->floppyNumberOfSide );
 
-			write_kf_stream_track(imgldr_ctx, filename,floppy->tracks[i]->sides[j],i,j,5);
+			write_kf_stream_track(imgldr_ctx, filename,floppy->tracks[i]->sides[j],i,j,nbrevolutions);
 		}
 	}
 

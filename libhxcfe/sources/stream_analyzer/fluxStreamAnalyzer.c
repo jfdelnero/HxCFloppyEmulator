@@ -63,6 +63,8 @@
 
 #include "libhxcadaptor.h"
 
+#include "misc/env.h"
+
 //#include "asm_mmx_routines.h"
 
 #define BASEINDEX 1
@@ -2779,11 +2781,11 @@ HXCFE_FXSA * hxcfe_initFxStream(HXCFE * hxcfe)
 			memset(fxs,0,sizeof(HXCFE_FXSA));
 
 			// Default low pass filter setting
-			fxs->filterpasses = 2;
-			fxs->filter = 24;
+			fxs->filterpasses = atoi( get_env_var( hxcfe, "FLUXSTREAM_DEFAULT_FILTERPASSES", NULL) );
+			fxs->filter = atoi( get_env_var( hxcfe, "FLUXSTREAM_DEFAULT_FILTERVALUE", NULL) );
 
 			fxs->hxcfe = hxcfe;
-			fxs->phasecorrection = 8;
+			fxs->phasecorrection = atoi( get_env_var( hxcfe, "FLUXSTREAM_DEFAULT_PHASECORRECTION", NULL) );
 			return fxs;
 		}
 	}
@@ -3306,7 +3308,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 		if( ( (indexperiod / (1000*100)) < 80 ) || ( (indexperiod / (1000*100)) >= 400 ) )
 		{
-			fxs->hxcfe->hxc_printf(MSG_WARNING,"Non-conventionnal index perdiod ! (%d ms)",(indexperiod / (1000*100)));
+			fxs->hxcfe->hxc_printf(MSG_WARNING,"Non-conventionnal index period ! (%d ms)",(indexperiod / (1000*100)));
 		}
 
 		if(indexperiod > 0)
