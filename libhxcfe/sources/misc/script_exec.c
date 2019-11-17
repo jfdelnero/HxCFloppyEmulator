@@ -288,7 +288,7 @@ static int print_env_var_cmd(HXCFE * context, char * line,int cmd)
 		ret = set_env_var(context,(char*)&varname,(char*)&varvalue);
 		if(ret>=0)
 		{
-			context->hxc_printf(MSG_INFO_1,"%s = %s",varname,varvalue);	
+			context->hxc_printf(MSG_INFO_1,"%s = %s",varname,varvalue);
 		}
 	}
 
@@ -379,32 +379,35 @@ int hxcfe_exec_script_file(HXCFE* context, char * script_path)
 	return err;
 }
 
-/*int hxcfe_exec_script(HXCFE* context, char* script_buffer, int buffersize)
+int hxcfe_exec_script_ram(HXCFE* context, unsigned char * script_buffer, int buffersize)
 {
 	int err = 0;
-	FILE * f;
+	int buffer_offset,line_offset;
 	char line[MAX_CFG_STRING_SIZE];
 
-	f = fopen(script_path,"r");
-	if(f)
+	buffer_offset = 0;
+	line_offset = 0;
+
+	do
 	{
-		do
+		memset(line,0,MAX_CFG_STRING_SIZE);
+		line_offset = 0;
+		while( script_buffer[buffer_offset] && script_buffer[buffer_offset]!='\n' && script_buffer[buffer_offset]!='\r' && (buffer_offset < buffersize) && (line_offset < MAX_CFG_STRING_SIZE - 1))
 		{
-			if(!fgets(line,sizeof(line),f))
-				break;
+			line[line_offset++] = script_buffer[buffer_offset++];
+		}
 
-			if(feof(f))
-				break;
+		while( script_buffer[buffer_offset] && (script_buffer[buffer_offset]=='\n' || script_buffer[buffer_offset]=='\r') )
+		{
+			buffer_offset++;
+		}
 
-			execute_line(context, line);
-		}while(1);
+		execute_line(context, line);
 
-		fclose(f);
-	}
-	else
-	{
-		context->hxc_printf(MSG_ERROR,"Can't open %s !",script_path);
-	}
+		if(!script_buffer[buffer_offset])
+			break;
+
+	}while(1);
 
 	return err;
-}*/
+}
