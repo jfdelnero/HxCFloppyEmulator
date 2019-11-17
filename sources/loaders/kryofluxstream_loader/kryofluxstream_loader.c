@@ -66,6 +66,8 @@
 
 #include "libhxcadaptor.h"
 
+#include "misc/env.h"
+
 int KryoFluxStream_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	int found,track,side;
@@ -253,88 +255,27 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 			}
 
 			filepath = malloc( strlen(imgfile) + 32 );
+			//sprintf(filepath,"%s%s",folder,"doublestep");
 
-			doublestep=1;///
-			sprintf(filepath,"%s%s",folder,"doublestep");
-			f = hxc_fopen(filepath,"rb");
-			if(f)
-			{
-				doublestep=2;
-				hxc_fclose(f);
-			}
+			doublestep = (atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_DOUBLE_STEP", NULL)) + 1)%3;
+			singleside =  atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_SINGLE_SIDE", NULL))&1;
 
-			singleside=0;
-			sprintf(filepath,"%s%s",folder,"singleside");
-			f = hxc_fopen(filepath,"rb");
-			if(f)
-			{
-				singleside=1;
-				hxc_fclose(f);
-			}
-
-			timecoef=1;//2;////
-			sprintf(filepath,"%s%s",folder,"rpm360rpm300");
-			f = hxc_fopen(filepath,"rb");
-			if(f)
+			timecoef=1;
+			if( !strcmp(get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_RPMFIX", NULL),"360TO300RPM") )
 			{
 				timecoef=(float)1.2;
-				hxc_fclose(f);
 			}
 
-			sprintf(filepath,"%s%s",folder,"rpm300rpm360");
-			f = hxc_fopen(filepath,"rb");
-			if(f)
+			if( !strcmp(get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_RPMFIX", NULL),"300TO360RPM") )
 			{
 				timecoef=(float)0.833;
-				hxc_fclose(f);
 			}
 
-			phasecorrection = 8;
-			sprintf(filepath,"%s%s",folder,"pllsettings.txt");
-			f = hxc_fopen(filepath,"rb");
-			if(f)
-			{
-				if(fscanf(f,"%d",&phasecorrection) != 1)
-				{
-					phasecorrection = 8;
-				}
-				hxc_fclose(f);
-			}
-
-			filterpasses = 2;
-			filter = 24;
-			sprintf(filepath,"%s%s",folder,"filter.txt");
-			f = hxc_fopen(filepath,"rb");
-			if(f)
-			{
-				if(fscanf(f,"%d,%d",&filterpasses,&filter) != 2)
-				{
-					filterpasses = 2;
-					filter = 24;
-				}
-				hxc_fclose(f);
-			}
-
-			bitrate = 0;
-			sprintf(filepath,"%s%s",folder,"bitrate.txt");
-			f = hxc_fopen(filepath,"rb");
-			if(f)
-			{
-				if( fscanf(f,"%d",&bitrate) != 1 )
-				{
-					bitrate = 0;
-				}
-				hxc_fclose(f);
-			}
-
-			bmp_export = 0;
-			sprintf(filepath,"%s%s",folder,"bmpexport.txt");
-			f = hxc_fopen(filepath,"rb");
-			if(f)
-			{
-				bmp_export = 1;
-				hxc_fclose(f);
-			}
+			phasecorrection = atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_PHASECORRECTION", NULL));
+			filterpasses = atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_FILTERPASSES", NULL));
+			filter = atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_FILTERVALUE", NULL));
+			bitrate = atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_BITRATE", NULL));
+			bmp_export = atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_BMPEXPORT", NULL));
 
 			track=0;
 			side=0;
