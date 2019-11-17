@@ -66,6 +66,11 @@
 #include "libhxcadaptor.h"
 
 #include "misc/env.h"
+#include "misc/script_exec.h"
+
+#include "init_script.h"
+
+#include "xml_disk/packer/pack.h"
 
 int dummy_output(int MSGTYPE,char * chaine, ...)
 {
@@ -93,6 +98,7 @@ HXCFE* hxcfe_init(void)
 	int nb_xml_loader;
 	int i,j;
 	int ret;
+	unsigned char * init_script;
 
 	hxcfe=malloc(sizeof(HXCFE));
 	if( hxcfe )
@@ -105,6 +111,14 @@ HXCFE* hxcfe_init(void)
 		set_env_var(hxcfe, "LIBVERSION", "v"STR_FILE_VERSION2);
 
 		hxcfe->hxc_printf(MSG_INFO_0,"Starting HxCFloppyEmulator...");
+
+		init_script = data_unpack(data_init_script->data,data_init_script->csize,0,data_init_script->size);
+		if(init_script)
+		{
+			hxcfe_exec_script_ram(hxcfe, init_script, data_init_script->size);
+
+			free(init_script);
+		}
 
 		nb_loader = 0;
 		// Count how many static loaders we have.
