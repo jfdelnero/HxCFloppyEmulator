@@ -211,3 +211,73 @@ char * get_env_var_index(HXCFE* context, int index, char * varvalue)
 		return NULL;
 	}
 }
+
+envvar_entry * duplicate_env_vars(envvar_entry * src)
+{
+	int i,j;
+	envvar_entry * tmp_envvars;
+
+	if(!src)
+		return NULL;
+
+	i = 0;
+	// count entry
+	while(src[i].name)
+	{
+		i++;
+	}
+
+	tmp_envvars = malloc(sizeof(envvar_entry) * (i + 1));
+	if(tmp_envvars)
+	{
+		memset(tmp_envvars,0,sizeof(envvar_entry) * (i + 1));
+		for(j=0;j<i;j++)
+		{
+			if(src[j].name)
+			{
+				tmp_envvars[j].name = malloc(strlen(src[j].name) + 1);
+				strcpy(tmp_envvars[j].name,src[j].name);
+			}
+
+			if(src[j].varvalue)
+			{
+				tmp_envvars[j].varvalue = malloc(strlen(src[j].varvalue) + 1);
+				strcpy(tmp_envvars[j].varvalue,src[j].varvalue);
+			}
+		}
+	}
+
+	return tmp_envvars;
+}
+
+void free_env_vars(envvar_entry * src)
+{
+	int i,j;
+
+	if(!src)
+		return;
+
+	i = 0;
+	// count entry
+	while(src[i].name)
+	{
+		i++;
+	}
+
+	for(j=0;j<i;j++)
+	{
+		if(src[j].name)
+		{
+			free(src[j].name);
+		}
+
+		if(src[j].varvalue)
+		{
+			free(src[j].varvalue);
+		}
+	}
+
+	free(src);
+
+	return;
+}
