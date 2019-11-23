@@ -67,6 +67,7 @@
 #include "libhxcadaptor.h"
 
 #include "misc/env.h"
+#include "misc/script_exec.h"
 
 int KryoFluxStream_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
@@ -225,13 +226,17 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 	int bitrate;
 	int filterpasses,filter;
 	int bmp_export;
+	envvar_entry * backup_env;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"KryoFluxStream_libLoad_DiskFile");
+
+	backup_env = NULL;
 
 	if(imgfile)
 	{
 		if(!hxc_stat(imgfile,&staterep))
 		{
+			backup_env = duplicate_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
 
 			len=hxc_getpathfolder(imgfile,0);
 			folder=(char*)malloc(len+1);
@@ -255,7 +260,8 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 			}
 
 			filepath = malloc( strlen(imgfile) + 32 );
-			//sprintf(filepath,"%s%s",folder,"doublestep");
+			sprintf(filepath,"%s%s",folder,"config.script");
+			hxcfe_exec_script_file(imgldr_ctx->hxcfe, filepath);
 
 			doublestep = (atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_DOUBLE_STEP", NULL)) + 1)%3;
 			singleside =  atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_SINGLE_SIDE", NULL))&1;
@@ -313,6 +319,9 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 			if(!found)
 			{
+				free_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
+				imgldr_ctx->hxcfe->envvar = backup_env;
+
 				free( folder );
 				free( filepath );
 				return HXCFE_BADFILE;
@@ -378,6 +387,9 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 			free( filepath );
 
 			hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
+
+			free_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
+			imgldr_ctx->hxcfe->envvar = backup_env;
 
 			return HXCFE_NOERROR;
 		}
