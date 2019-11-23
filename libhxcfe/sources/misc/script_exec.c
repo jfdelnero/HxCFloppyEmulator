@@ -351,9 +351,11 @@ static int execute_line(HXCFE * context,char * line)
 
 int hxcfe_exec_script_file(HXCFE* context, char * script_path)
 {
-	int err = 0;
+	int err;
 	FILE * f;
 	char line[MAX_CFG_STRING_SIZE];
+
+	err = HXCFE_INTERNALERROR;
 
 	f = fopen(script_path,"r");
 	if(f)
@@ -370,10 +372,13 @@ int hxcfe_exec_script_file(HXCFE* context, char * script_path)
 		}while(1);
 
 		fclose(f);
+
+		err = HXCFE_NOERROR;
 	}
 	else
 	{
 		context->hxc_printf(MSG_ERROR,"Can't open %s !",script_path);
+		err = HXCFE_ACCESSERROR;
 	}
 
 	return err;
