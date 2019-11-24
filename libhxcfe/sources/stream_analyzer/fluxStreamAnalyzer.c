@@ -2781,11 +2781,11 @@ HXCFE_FXSA * hxcfe_initFxStream(HXCFE * hxcfe)
 			memset(fxs,0,sizeof(HXCFE_FXSA));
 
 			// Default low pass filter setting
-			fxs->filterpasses = atoi( get_env_var( hxcfe, "FLUXSTREAM_DEFAULT_FILTERPASSES", NULL) );
-			fxs->filter = atoi( get_env_var( hxcfe, "FLUXSTREAM_DEFAULT_FILTERVALUE", NULL) );
+			fxs->filterpasses = atoi( get_env_var( hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES", NULL) );
+			fxs->filter = atoi( get_env_var( hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW", NULL) );
 
 			fxs->hxcfe = hxcfe;
-			fxs->phasecorrection = atoi( get_env_var( hxcfe, "FLUXSTREAM_DEFAULT_PHASECORRECTION", NULL) );
+			fxs->phasecorrection = atoi( get_env_var( hxcfe, "FLUXSTREAM_PHASE_CORRECTION_DIVISOR", NULL) );
 			return fxs;
 		}
 	}
