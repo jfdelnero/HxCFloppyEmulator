@@ -261,7 +261,7 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 		scph.start_track = 0;
 		scph.end_track = tracknumber - 1;
-		scph.number_of_revolution = atoi( get_env_var( imgldr_ctx->hxcfe, "SCPEXPORT_NUMBER_OF_REVOLUTION", NULL));
+		scph.number_of_revolution = atoi( get_env_var( imgldr_ctx->hxcfe, "SCPEXPORT_NUMBER_OF_REVOLUTIONS", NULL));
 
 		scph.disk_type = 0x15;
 
