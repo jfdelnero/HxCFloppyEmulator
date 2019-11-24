@@ -65,6 +65,9 @@
 
 #include "libhxcadaptor.h"
 
+#include "misc/env.h"
+#include "misc/script_exec.h"
+
 //#define SCPDEBUG 1
 
 int SCP_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
@@ -93,7 +96,7 @@ int SCP_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 	}
 }
 
-static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,uint32_t foffset,short * rpm,float timecoef,int phasecorrection,int revolution, int resolution)
+static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t foffset,short * rpm,float timecoef,int phasecorrection,int revolution, int resolution,int bitrate,int filter,int filterpasses, int bmpexport)
 {
 	HXCFE_SIDE* currentside;
 	int totallength,i,k,offset;
@@ -101,6 +104,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,uint32_t foffset,s
 	HXCFE_TRKSTREAM *track_dump;
 	HXCFE_FXSA * fxs;
 	scp_track_header trkh;
+	char tmp_filename[512];
 
 	unsigned short * trackbuf;
 	uint32_t * trackbuf_dword;
@@ -118,6 +122,12 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,uint32_t foffset,s
 	fxs = hxcfe_initFxStream(floppycontext);
 	if(fxs)
 	{
+		hxcfe_FxStream_setBitrate(fxs,bitrate);
+
+		hxcfe_FxStream_setPhaseCorrectionFactor(fxs,phasecorrection);
+
+		hxcfe_FxStream_setFilterParameters(fxs,filterpasses,filter);
+
 		fseek(f,foffset,SEEK_SET);
 
 		hxc_fread(&trkh,sizeof(scp_track_header),f);
@@ -189,7 +199,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,uint32_t foffset,s
 
 								if(trackbuf[k])
 								{
-									trackbuf_dword[realnumberofpulses] = curpulselength;
+									trackbuf_dword[realnumberofpulses] = (uint32_t)((float)curpulselength * timecoef);
 									curpulselength = 0;
 									realnumberofpulses++;
 									revonumberofpulses++;
@@ -207,7 +217,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,uint32_t foffset,s
 						}
 
 						// dummy pulse
-						trackbuf_dword[realnumberofpulses] = 300;
+						trackbuf_dword[realnumberofpulses] = (uint32_t)((float)300 * timecoef);;
 						realnumberofpulses++;
 
 					}
@@ -238,6 +248,12 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,uint32_t foffset,s
 								*rpm = (short)( 60 / GetTrackPeriod(floppycontext,currentside) );
 						}
 
+						if( bmpexport )
+						{
+							sprintf(tmp_filename,"track%.2d.%d.bmp",track>>1,track&1);
+							hxcfe_FxStream_ExportToBmp(fxs,track_dump, tmp_filename);
+						}
+
 						hxcfe_FxStream_FreeStream(fxs,track_dump);
 					}
 					free(trackbuf_dword);
@@ -261,21 +277,27 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int minside,maxside;
 	short rpm;
 	unsigned short i,j;
-	int k,l;
-	int doublestep;
+	int k,l,len;
+	int trackstep,singleside;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE * curside;
 	int nbtrack,nbside;
 	float timecoef;
 	int tracklen;
-
+	char * folder;
+	char * filepath;
 	int previous_bit;
 	int phasecorrection;
+	int filterpasses,filter;
+	int bitrate,bmp_export;
 
 	scp_header scph;
 	uint32_t tracksoffset[83*2];
+	envvar_entry * backup_env;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCP_libLoad_DiskFile");
+
+	backup_env = NULL;
 
 	if(imgfile)
 	{
@@ -295,6 +317,20 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				return HXCFE_BADFILE;
 			}
 
+			backup_env = duplicate_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
+
+			len=hxc_getpathfolder(imgfile,0);
+			folder=(char*)malloc(len+1);
+			hxc_getpathfolder(imgfile,folder);
+
+			filepath = malloc( strlen(imgfile) + 32 );
+			if(filepath)
+			{
+				sprintf(filepath,"%s%s",folder,"config.script");
+				hxcfe_exec_script_file(imgldr_ctx->hxcfe, filepath);
+				free(filepath);
+			}
+
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Loading SCP file...");
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Version : 0x%.2X",scph.version);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Disk Type : 0x%.2X",scph.disk_type);
@@ -309,11 +345,28 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			nbside = 1;
 
-			doublestep = 1;
+			if( atoi( get_env_var( imgldr_ctx->hxcfe, "SCPLOADER_DOUBLE_STEP", NULL) )&1 )
+				trackstep = 2;
+			else
+				trackstep = 1;
 
-			phasecorrection = 8;
+			singleside =  atoi( get_env_var( imgldr_ctx->hxcfe, "SCPLOADER_SINGLE_SIDE", NULL))&1;
+			phasecorrection = atoi( get_env_var( imgldr_ctx->hxcfe, "FLUXSTREAM_PHASE_CORRECTION_DIVISOR", NULL));
+			filterpasses = atoi( get_env_var( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES", NULL));
+			filter = atoi( get_env_var( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW", NULL));
+			bitrate = atoi( get_env_var( imgldr_ctx->hxcfe, "SCPLOADER_BITRATE", NULL));
+			bmp_export = atoi( get_env_var( imgldr_ctx->hxcfe, "SCPLOADER_BMPEXPORT", NULL));
 
 			timecoef = 1;
+			if( !strcmp(get_env_var( imgldr_ctx->hxcfe, "FLUXSTREAM_RPMFIX", NULL),"360TO300RPM") )
+			{
+				timecoef=(float)1.2;
+			}
+
+			if( !strcmp(get_env_var( imgldr_ctx->hxcfe, "FLUXSTREAM_RPMFIX", NULL),"300TO360RPM") )
+			{
+				timecoef=(float)0.833;
+			}
 
 			mintrack = scph.start_track;
 			maxtrack = scph.end_track;
@@ -343,7 +396,11 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			floppydisk->floppyiftype = GENERIC_SHUGART_DD_FLOPPYMODE;
 			floppydisk->floppyBitRate = VARIABLEBITRATE;
 			floppydisk->floppyNumberOfTrack = nbtrack;
-			floppydisk->floppyNumberOfSide = nbside;
+			if(singleside)
+				floppydisk->floppyNumberOfSide = 1;
+			else
+				floppydisk->floppyNumberOfSide = nbside;
+
 			floppydisk->floppySectorPerTrack = -1;
 
 			hxc_fread(tracksoffset,sizeof(tracksoffset),f);
@@ -351,22 +408,22 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
-			for(j=0;j<floppydisk->floppyNumberOfTrack*doublestep;j=j+doublestep)
+			for(j=0;j<floppydisk->floppyNumberOfTrack*trackstep;j=j+trackstep)
 			{
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
-					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),(floppydisk->floppyNumberOfTrack*doublestep)*2 );
+					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),(floppydisk->floppyNumberOfTrack*trackstep)*2 );
 
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Load Track %.3d Side %d",j,i);
 
-					if(floppydisk->floppyNumberOfSide == 2)
-						curside=decodestream(imgldr_ctx->hxcfe,f,tracksoffset[(j<<1)|(i&1)],&rpm,timecoef,phasecorrection,scph.number_of_revolution,1 + scph.resolution);
+					if(nbside == 2)
+						curside = decodestream(imgldr_ctx->hxcfe,f,(j<<1)|(i&1),tracksoffset[(j<<1)|(i&1)],&rpm,timecoef,phasecorrection,scph.number_of_revolution,1 + scph.resolution,bitrate,filter,filterpasses,bmp_export);
 					else
-						curside=decodestream(imgldr_ctx->hxcfe,f,tracksoffset[j],&rpm,timecoef,phasecorrection,scph.number_of_revolution,1 + scph.resolution);
+						curside = decodestream(imgldr_ctx->hxcfe,f,j<<1,tracksoffset[j],&rpm,timecoef,phasecorrection,scph.number_of_revolution,1 + scph.resolution,bitrate,filter,filterpasses,bmp_export);
 
-					if(!floppydisk->tracks[j/doublestep])
+					if(!floppydisk->tracks[j/trackstep])
 					{
-						floppydisk->tracks[j/doublestep]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+						floppydisk->tracks[j/trackstep] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 					}
 
 					if(curside)
@@ -403,7 +460,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						}
 					}
 
-					currentcylinder=floppydisk->tracks[j/doublestep];
+					currentcylinder=floppydisk->tracks[j/trackstep];
 					currentcylinder->sides[i]=curside;
 				}
 			}
@@ -426,6 +483,12 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 			hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
+
+			free_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
+			imgldr_ctx->hxcfe->envvar = backup_env;
+
+			if(folder)
+				free(folder);
 
 			return HXCFE_NOERROR;
 		}
