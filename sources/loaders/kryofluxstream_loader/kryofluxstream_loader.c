@@ -212,7 +212,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 	int minside,maxside,singleside;
 	short rpm;
 	unsigned short i,j;
-	int doublestep;
+	int trackstep;
 	HXCFE_CYLINDER* currentcylinder;
 	int len;
 	int found,track,side;
@@ -263,23 +263,27 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 			sprintf(filepath,"%s%s",folder,"config.script");
 			hxcfe_exec_script_file(imgldr_ctx->hxcfe, filepath);
 
-			doublestep = (atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_DOUBLE_STEP", NULL)) + 1)%3;
+			if( atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_DOUBLE_STEP", NULL)) & 1 )
+				trackstep = 2;
+			else
+				trackstep = 1;
+
 			singleside =  atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_SINGLE_SIDE", NULL))&1;
 
 			timecoef=1;
-			if( !strcmp(get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_RPMFIX", NULL),"360TO300RPM") )
+			if( !strcmp(get_env_var( imgldr_ctx->hxcfe, "FLUXSTREAM_RPMFIX", NULL),"360TO300RPM") )
 			{
 				timecoef=(float)1.2;
 			}
 
-			if( !strcmp(get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_RPMFIX", NULL),"300TO360RPM") )
+			if( !strcmp(get_env_var( imgldr_ctx->hxcfe, "FLUXSTREAM_RPMFIX", NULL),"300TO360RPM") )
 			{
 				timecoef=(float)0.833;
 			}
 
-			phasecorrection = atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_PHASECORRECTION", NULL));
-			filterpasses = atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_FILTERPASSES", NULL));
-			filter = atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_FILTERVALUE", NULL));
+			phasecorrection = atoi( get_env_var( imgldr_ctx->hxcfe, "FLUXSTREAM_PHASE_CORRECTION_DIVISOR", NULL));
+			filterpasses = atoi( get_env_var( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES", NULL));
+			filter = atoi( get_env_var( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW", NULL));
 			bitrate = atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_BITRATE", NULL));
 			bmp_export = atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_BMPEXPORT", NULL));
 
@@ -313,7 +317,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 				if(side>1)
 				{
 					side = 0;
-					track=track+doublestep;
+					track=track+trackstep;
 				}
 			}while(track<84);
 
@@ -331,8 +335,8 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 			if(singleside)
 				nbside = 1;
 			nbtrack=(maxtrack-mintrack)+1;
-			if(doublestep==2)
-				nbtrack=(nbtrack/doublestep) + 1;
+			if(trackstep==2)
+				nbtrack=(nbtrack/trackstep) + 1;
 
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%d track (%d - %d), %d sides (%d - %d)",nbtrack,mintrack,maxtrack,nbside,minside,maxside);
 
@@ -347,23 +351,23 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 			rpm = 300;
 
-			for(j=0;j<floppydisk->floppyNumberOfTrack*doublestep;j=j+doublestep)
+			for(j=0;j<floppydisk->floppyNumberOfTrack*trackstep;j=j+trackstep)
 			{
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
-					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),(floppydisk->floppyNumberOfTrack*doublestep)*2 );
+					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),(floppydisk->floppyNumberOfTrack*trackstep)*2 );
 
 					sprintf(filepath,"%s%s%.2d.%d.raw",folder,fname,j,i);
 
 					rpm = 300;
 					curside = decodestream(imgldr_ctx->hxcfe,filepath,&rpm,timecoef,phasecorrection,bitrate,filter,filterpasses,bmp_export);
 
-					if(!floppydisk->tracks[j/doublestep])
+					if(!floppydisk->tracks[j/trackstep])
 					{
-						floppydisk->tracks[j/doublestep]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+						floppydisk->tracks[j/trackstep]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 					}
 
-					currentcylinder=floppydisk->tracks[j/doublestep];
+					currentcylinder=floppydisk->tracks[j/trackstep];
 					currentcylinder->sides[i]=curside;
 				}
 			}

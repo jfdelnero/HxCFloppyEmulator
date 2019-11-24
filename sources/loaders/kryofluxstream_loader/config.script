@@ -28,9 +28,9 @@
 # uncomment one of the following line according to the speed correction to apply.
 #
 
-#set KFRAWLOADER_RPMFIX 300TO360RPM  # 300 RPM dump of a 360 RPM disk
+#set FLUXSTREAM_RPMFIX 300TO360RPM  # 300 RPM dump of a 360 RPM disk
 
-#set KFRAWLOADER_RPMFIX 360TO300RPM  # 360 RPM dump of a 300 RPM disk
+#set FLUXSTREAM_RPMFIX 360TO300RPM  # 360 RPM dump of a 300 RPM disk
 
 #
 # Pre process stream export to BMP file.
@@ -44,11 +44,11 @@
 # Set to 0 one of the parameters to disable the filter.
 #
 
-#set KFRAWLOADER_FILTERPASSES 2  # Number of passes
-#set KFRAWLOADER_FILTERVALUE 24  # Window size
+#set FLUXSTREAM_BITRATE_FILTER_PASSES 2  # Number of passes
+#set FLUXSTREAM_BITRATE_FILTER_WINDOW 24  # Window size
 
 #
 # PLL parameters.
 #
 
-#set KFRAWLOADER_PHASECORRECTION 8 # Phase correction divisor
+#set FLUXSTREAM_PHASE_CORRECTION_DIVISOR 8 # Phase correction divisor
