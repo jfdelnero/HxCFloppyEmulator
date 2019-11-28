@@ -82,55 +82,6 @@
 
 HXCFE* floppycont;
 
-typedef struct stathisto_
-{
-	uint32_t val;
-	uint32_t occurence;
-	float pourcent;
-}stathisto;
-
-typedef struct pulses_link_
-{
-	int32_t * forward_link;
-	int32_t * backward_link;
-	int32_t number_of_pulses;
-}pulses_link;
-
-typedef struct pulsesblock_
-{
-	int32_t timeoffset;
-	int64_t tickoffset;
-
-	int32_t timelength;
-	int32_t ticklength;
-	int32_t start_index;
-	int32_t end_index;
-	int32_t number_of_pulses;
-
-	int32_t state;
-	int32_t overlap_offset;
-	int32_t overlap_size;
-
-	int32_t locked;
-}pulsesblock;
-
-typedef struct track_blocks_
-{
-
-	pulsesblock * blocks;
-
-	uint32_t number_of_blocks;
-
-}track_blocks;
-
-
-typedef struct s_match_
-{
-	int32_t yes;
-	int32_t no;
-	int32_t offset;
-}s_match;
-
 static void settrackbit(uint8_t * dstbuffer,int dstsize,uint8_t byte,int bitoffset,int size)
 {
 	int i,j;
@@ -523,14 +474,21 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 		// Sync the "PLL"
 
 		bitoffset=0;
-		if( ( start_index + (pl->forward_link[start_index] - start_index ) ) < track->nb_of_pulses )
+		if(!pl)
 		{
-			size = ( pl->forward_link[start_index] - (start_index) );
+			size = track->nb_of_pulses - start_index;
 		}
 		else
 		{
-			floppycontext->hxc_printf(MSG_ERROR,"ScanAndDecodeStream : End of the stream flux passed ! Bad Stream flux ?");
-			size = track->nb_of_pulses - start_index;
+			if( ( start_index + (pl->forward_link[start_index] - start_index ) ) < track->nb_of_pulses )
+			{
+				size = ( pl->forward_link[start_index] - (start_index) );
+			}
+			else
+			{
+				floppycontext->hxc_printf(MSG_ERROR,"ScanAndDecodeStream : End of the stream flux passed ! Bad Stream flux ?");
+				size = track->nb_of_pulses - start_index;
+			}
 		}
 
 		bitoffset=0;
@@ -539,12 +497,24 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 		else
 			i = 0;
 
-		while(i<(int)start_index)
+		if(!pl)
 		{
-			value = track->track_dump[i];
-			cellcode = getCellTiming(&pll,value,0,bitoffset,pl->forward_link[i],phasecorrection);
-			i++;
-		};
+			while(i<(int)start_index)
+			{
+				value = track->track_dump[i];
+				cellcode = getCellTiming(&pll,value,0,bitoffset,1,phasecorrection);
+				i++;
+			};
+		}
+		else
+		{
+			while(i<(int)start_index)
+			{
+				value = track->track_dump[i];
+				cellcode = getCellTiming(&pll,value,0,bitoffset,pl->forward_link[i],phasecorrection);
+				i++;
+			};
+		}
 
 		//
 		// "Decode" the stream...
@@ -575,7 +545,10 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 		{
 			value = track->track_dump[start_index + i];
 
-			cellcode = getCellTiming(&pll,value,0,bitoffset,pl->forward_link[start_index + i],phasecorrection);
+			if(!pl)
+				cellcode = getCellTiming(&pll,value,0,bitoffset,1,phasecorrection);
+			else
+				cellcode = getCellTiming(&pll,value,0,bitoffset,pl->forward_link[start_index + i],phasecorrection);
 
 			bitoffset = bitoffset + cellcode;
 
@@ -597,9 +570,19 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 				}
 			}
 
-			if((pl->forward_link[start_index + i]<0 && pl->backward_link[start_index + i]<0) || ( ( pll.last_error > (170*16) ) || ( pll.last_error < -(170*16) )))
-			{	// flakey bits or invalid bit...
-				settrackbit(flakeytrack,TEMPBUFSIZE,0xFF,bitoffset,1);
+			if(!pl)
+			{
+				if( ( pll.last_error > (170*16) ) || ( pll.last_error < -(170*16) ) )
+				{	// flakey bits or invalid bit...
+					settrackbit(flakeytrack,TEMPBUFSIZE,0xFF,bitoffset,1);
+				}
+			}
+			else
+			{
+				if((pl->forward_link[start_index + i]<0 && pl->backward_link[start_index + i]<0) || ( ( pll.last_error > (170*16) ) || ( pll.last_error < -(170*16) )))
+				{	// flakey bits or invalid bit...
+					settrackbit(flakeytrack,TEMPBUFSIZE,0xFF,bitoffset,1);
+				}
 			}
 
 #ifdef USE_PLL_BITRATE
@@ -684,43 +667,46 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 
 		if(tracksize)
 		{
-			if(fxs->filter)
+			if(fxs)
 			{
-				for( k = 0; k < fxs->filterpasses; k++ )
+				if(fxs->filter)
 				{
-					i = 0;
-					do
+					for( k = 0; k < fxs->filterpasses; k++ )
 					{
-						j = 0;
-						bitrate = 0;
-						while( ((i+j) < tracksize ) && j < fxs->filter)
+						i = 0;
+						do
 						{
-							bitrate = ( bitrate + trackbitrate[(i+j)] );
-							j++;
-						}
+							j = 0;
+							bitrate = 0;
+							while( ((i+j) < tracksize ) && j < fxs->filter)
+							{
+								bitrate = ( bitrate + trackbitrate[(i+j)] );
+								j++;
+							}
 
-						bitrate = bitrate/j;
+							bitrate = bitrate/j;
 
-						j = 0;
-						while( ((i+j)< tracksize ) && j < fxs->filter)
-						{
-							trackbitrate[(i+j)] = bitrate;
-							j++;
-						}
+							j = 0;
+							while( ((i+j)< tracksize ) && j < fxs->filter)
+							{
+								trackbitrate[(i+j)] = bitrate;
+								j++;
+							}
 
-						if( k == 0 )
-						{
-							i += ((fxs->filter) / 3 ) * 2;
-						}
-						else
-						{
-							i += fxs->filter;
-						}
+							if( k == 0 )
+							{
+								i += ((fxs->filter) / 3 ) * 2;
+							}
+							else
+							{
+								i += fxs->filter;
+							}
 
 
-					}while( i < tracksize );
+						}while( i < tracksize );
 
-					k++;
+						k++;
+					}
 				}
 			}
 
