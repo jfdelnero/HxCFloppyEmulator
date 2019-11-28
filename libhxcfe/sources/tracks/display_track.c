@@ -66,6 +66,8 @@
 
 #include "font.h"
 
+#include "stream_analyzer/fluxStreamAnalyzer.h"
+
 #include "loaders/bmp_loader/bmp_loader.h"
 #include "loaders/bmp_loader/bmp_file.h"
 
@@ -576,7 +578,7 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 									if(sc->startdataindex != sc->endsectorindex)
 										sprintf(tempstr,"DEC M2FM  %.3dB DM:%.2Xh",sc->sectorsize,sc->alternate_datamark);
 									else
-										sprintf(tempstr,"DEC M2FM  %.3dB DM: ??",sc->sectorsize);								
+										sprintf(tempstr,"DEC M2FM  %.3dB DM: ??",sc->sectorsize);
 									break;
 								case AMIGAFORMAT_DD:
 									sprintf(tempstr,"AMFM %.3dB ",sc->sectorsize);
@@ -864,7 +866,6 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 					// Pulses display mode
 					if( (xpos<td->xsize) )
 					{
-
 						for(ypos= td->ysize - 40 ; ypos > (td->ysize - 250) ; ypos--)
 						{
 							td->framebuffer[(td->xsize*ypos) + xpos]=255;
@@ -1182,6 +1183,7 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	int xpos,ypos;
 	char tmp_str[64];
 	uint32_t total_offset,cur_ticks,curcol;
+	HXCFE_SIDE* side;
 
 	memset(td->framebuffer,0,td->xsize*td->ysize);
 	//////////////////////////////////////////
@@ -1247,6 +1249,9 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 			}
 		}
 	}
+
+	//side = ScanAndDecodeStream(td->hxcfe, NULL, 500,track_stream,NULL,0, 0, 8);
+	//hxcfe_freeSide(td->hxcfe,side);
 
 	// Print pixel density
 	sprintf(tmp_str,"xres: %f us/pix",((double)((double)td->x_us/(double)td->xsize)));
