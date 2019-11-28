@@ -119,7 +119,7 @@ libhxcfe.so: $(LIBS_OBJS) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
-floppy_loader.o: $(BASEDIR)/floppy_loader.c
+floppy_loader.o: $(BASEDIR)/floppy_loader.c $(BASEDIR)/init_script.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 floppy_ifmode.o: $(BASEDIR)/floppy_ifmode.c
