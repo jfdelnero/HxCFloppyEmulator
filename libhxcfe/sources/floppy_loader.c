@@ -120,6 +120,8 @@ HXCFE* hxcfe_init(void)
 			free(init_script);
 		}
 
+		hxcfe_exec_script_file(hxcfe, "config.script");
+
 		nb_loader = 0;
 		// Count how many static loaders we have.
 		while( staticplugins[nb_loader] )
