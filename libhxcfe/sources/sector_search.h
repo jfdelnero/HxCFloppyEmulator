@@ -1,8 +1,9 @@
+#define MAX_CACHED_SECTOR 2048
 
 typedef struct _SECTORSEARCHTRACKCACHE
 {
 	int32_t nb_sector_cached;
-	HXCFE_SECTCFG sectorcache[512];
+	HXCFE_SECTCFG sectorcache[MAX_CACHED_SECTOR];
 }SECTORSEARCHTRACKCACHE;
 
 #ifndef _HXCFE_SECTORACCESS_
