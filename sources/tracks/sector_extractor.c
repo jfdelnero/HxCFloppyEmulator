@@ -228,16 +228,16 @@ HXCFE_SECTCFG* hxcfe_getNextSector( HXCFE_SECTORACCESS* ss_ctx, int32_t track, i
 	if(track<ss_ctx->fp->floppyNumberOfTrack && ss_ctx->track_cache)
 	{
 		trackcache = &ss_ctx->track_cache[(track<<1) | (side&1)];
-		if(trackcache->nb_sector_cached<512 && bitoffset>=0)
+		if( trackcache->nb_sector_cached < MAX_CACHED_SECTOR && bitoffset>=0)
 		{
 			//Add a new cache entry
 			i=0;
-			while(i<trackcache->nb_sector_cached && ( trackcache->sectorcache[i].startsectorindex != sc->startsectorindex) && i<512)
+			while( i < trackcache->nb_sector_cached && ( trackcache->sectorcache[i].startsectorindex != sc->startsectorindex) && i < MAX_CACHED_SECTOR )
 			{
 				i++;
 			}
 
-			if( i<512 )
+			if( i < MAX_CACHED_SECTOR )
 			{
 				if(i == trackcache->nb_sector_cached)
 				{
