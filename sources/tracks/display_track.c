@@ -706,7 +706,7 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 		else
 			endfill=1;
 
-		if(loop>100)
+		if(loop>100 || td->noloop_trackmode)
 			endfill=1;
 	}while(!endfill);
 
@@ -1177,6 +1177,8 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 
 }
 
+extern int tracktypelist[];
+
 void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 {
 	int i,j;
@@ -1184,8 +1186,18 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	char tmp_str[64];
 	uint32_t total_offset,cur_ticks,curcol;
 	HXCFE_SIDE* side;
+	HXCFE_FLOPPY *fp;
 
-	memset(td->framebuffer,0,td->xsize*td->ysize);
+	HXCFE_SECTORACCESS* ss;
+	HXCFE_SECTCFG** scl;
+	int bitrate;
+	uint32_t * histo;
+
+	int32_t nb_sectorfound,sectnum;
+
+	td->noloop_trackmode = 1;
+
+	memset(td->framebuffer,0x000000,td->xsize*td->ysize);
 	//////////////////////////////////////////
 	// Scatter drawing
 	total_offset = 0;
@@ -1217,7 +1229,7 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 				curcol = 255;
 			}
 
-			curcol = curcol<<8 | curcol << 16 | curcol;
+			curcol = 0xFFFFFF - (curcol<<8 | curcol << 16 | curcol);
 
 			td->framebuffer[(td->xsize*ypos) + xpos] = curcol;
 		}
@@ -1242,16 +1254,52 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 		{
 			for(ypos=0;ypos<td->ysize;ypos++)
 			{
-				if(!td->framebuffer[(td->xsize*(ypos)) + xpos])
+				if(td->framebuffer[(td->xsize*(ypos)) + xpos] == 0xFFFFFF)
 				{
-					td->framebuffer[(td->xsize*(ypos)) + xpos] = 0x00FF00;
+					td->framebuffer[(td->xsize*(ypos)) + xpos] = 0xFF0000;
 				}
 			}
 		}
 	}
 
-	//side = ScanAndDecodeStream(td->hxcfe, NULL, 500,track_stream,NULL,0, 0, 8);
-	//hxcfe_freeSide(td->hxcfe,side);
+	bitrate = 500;
+
+	histo = (uint32_t*)malloc(65536* sizeof(uint32_t));
+	if(histo)
+	{
+		computehistogram(track_stream->track_dump, track_stream->nb_of_pulses, histo);
+
+		bitrate = detectpeaks(td->hxcfe,histo);
+
+		free(histo);
+	}
+	
+	side = ScanAndDecodeStream(td->hxcfe, NULL, bitrate,track_stream,NULL,0, 0, 8);
+	if(side)
+	{
+		cleanupTrack(side);
+
+		side->track_encoding = UNKNOWN_ENCODING;
+		side->bitrate = VARIABLEBITRATE;
+
+		fp = makefloppyfromtrack(side);
+		if(fp)
+		{
+			//////////////////////////////////////////
+			// Sector drawing
+			for(i=0;i<32;i++)
+			{
+				if(td->enabledtrackmode & (0x00000001<<i) )
+				{
+					display_sectors(td,fp,0,0,0,i);
+				}
+			}
+
+			freefloppy(fp);
+		}
+
+		hxcfe_freeSide(td->hxcfe,side);
+	}
 
 	// Print pixel density
 	sprintf(tmp_str,"xres: %f us/pix",((double)((double)td->x_us/(double)td->xsize)));

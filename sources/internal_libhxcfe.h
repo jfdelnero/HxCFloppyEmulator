@@ -99,6 +99,8 @@ typedef struct _HXCFE_TD
 
     uint32_t enabledtrackmode;
 
+	uint32_t noloop_trackmode;
+
     void * pl;
 
     HXCFE_TDPROGRESSOUT_FUNC hxc_setprogress;
