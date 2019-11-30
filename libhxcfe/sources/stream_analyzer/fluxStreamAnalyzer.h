@@ -48,3 +48,8 @@ typedef struct s_match_
 }s_match;
 
 HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initialvalue,HXCFE_TRKSTREAM * track,pulses_link * pl,uint32_t start_index, short rpm,int phasecorrection);
+int cleanupTrack(HXCFE_SIDE *curside);
+HXCFE_FLOPPY * makefloppyfromtrack(HXCFE_SIDE * side);
+void freefloppy(HXCFE_FLOPPY * fp);
+void computehistogram(uint32_t *indata,int size,uint32_t *outdata);
+int detectpeaks(HXCFE* floppycontext,uint32_t *histogram);

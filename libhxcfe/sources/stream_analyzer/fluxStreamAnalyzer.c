@@ -101,7 +101,7 @@ static void settrackbit(uint8_t * dstbuffer,int dstsize,uint8_t byte,int bitoffs
 	}
 }
 
-static void computehistogram(uint32_t *indata,int size,uint32_t *outdata)
+void computehistogram(uint32_t *indata,int size,uint32_t *outdata)
 {
 	int i;
 
@@ -115,7 +115,7 @@ static void computehistogram(uint32_t *indata,int size,uint32_t *outdata)
 	}
 }
 
-static int detectpeaks(HXCFE* floppycontext,uint32_t *histogram)
+int detectpeaks(HXCFE* floppycontext,uint32_t *histogram)
 {
 	int i,k;
 	int total;
@@ -249,7 +249,7 @@ typedef struct pll_stat_
 	int32_t lastpulsephase;
 }pll_stat;
 
-static int getCellTiming(pll_stat * pll,int current_pulsevalue,int * badpulse,int t,int overlapval,int phasecorrection)
+static int getCellTiming(pll_stat * pll,int current_pulsevalue,int * badpulse,int overlapval,int phasecorrection)
 {
 	int blankcell;
 	int cur_pll_error,left_boundary,right_boundary,center;
@@ -258,6 +258,13 @@ static int getCellTiming(pll_stat * pll,int current_pulsevalue,int * badpulse,in
 	blankcell = 0;
 
 	current_pulsevalue = current_pulsevalue * 16;
+
+	// very long tracks analysis overflow fix.
+	if(pll->phase > (512*1024*1014))
+	{
+		pll->phase -= (256*1024*1014);
+		pll->lastpulsephase -= (256*1024*1014);
+	}
 
 	//////////////////////////////////////////////////////////////
 	left_boundary = pll->phase;
@@ -276,7 +283,7 @@ static int getCellTiming(pll_stat * pll,int current_pulsevalue,int * badpulse,in
 		if(badpulse)
 			*badpulse = 1;
 
-		//floppycont->hxc_printf(MSG_DEBUG,"ValIn:%d Nbcell:%d Pumpcharche:%d Window Phase:%d LastPulsePhase:%d Err:%d Bit:%d",current_pulsevalue,blankcell,pll->pump_charge,pll->phase,pll->lastpulsephase,current_pulse_position - center,t);
+		//floppycont->hxc_printf(MSG_DEBUG,"ValIn:%d Nbcell:%d Pumpcharche:%d Window Phase:%d LastPulsePhase:%d Err:%d",current_pulsevalue,blankcell,pll->pump_charge,pll->phase,pll->lastpulsephase,current_pulse_position - center);
 		return blankcell;
 	}
 	else
@@ -320,7 +327,6 @@ static int getCellTiming(pll_stat * pll,int current_pulsevalue,int * badpulse,in
 				pll->pump_charge = ( (pll->pump_charge*31) + ( pll->pump_charge + cur_pll_error ) ) / 32;
 		}
 
-
 		if( pll->pump_charge < (pll->pll_min/2) )
 		{
 			pll->pump_charge = (pll->pll_min/2);
@@ -341,7 +347,7 @@ static int getCellTiming(pll_stat * pll,int current_pulsevalue,int * badpulse,in
 
 	pll->last_error = cur_pll_error;
 
-	//floppycont->hxc_printf(MSG_DEBUG,"ValIn:%d Nbcell:%d Pumpcharge:%d Window Phase:%d left_boundary:%d center:%d right_boundary:%d CurPulsePhase:%d Err:%d Bit:%d",current_pulsevalue,blankcell,pll->pump_charge/16,pll->phase/16,left_boundary,center,right_boundary,pll->lastpulsephase,cur_pll_error/16,t);
+	//floppycont->hxc_printf(MSG_DEBUG,"ValIn:%d Nbcell:%d Pumpcharge:%d Window Phase:%d left_boundary:%d center:%d right_boundary:%d CurPulsePhase:%d Err:%d",current_pulsevalue,blankcell,pll->pump_charge/16,pll->phase/16,left_boundary,center,right_boundary,pll->lastpulsephase,cur_pll_error/16);
 
 	return blankcell;
 }
@@ -387,7 +393,8 @@ int gettrackbit(unsigned char * input_data,int bit_offset)
 
 HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initialvalue,HXCFE_TRKSTREAM * track,pulses_link * pl,uint32_t start_index, short rpm,int phasecorrection)
 {
-#define TEMPBUFSIZE 256*1024
+	#define TEMPBUFSIZE 512*1024
+
 	int i,j,k,size;
 	uint32_t value;
 	int cellcode;
@@ -502,7 +509,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 			while(i<(int)start_index)
 			{
 				value = track->track_dump[i];
-				cellcode = getCellTiming(&pll,value,0,bitoffset,1,phasecorrection);
+				cellcode = getCellTiming(&pll,value,0,1,phasecorrection);
 				i++;
 			};
 		}
@@ -511,7 +518,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 			while(i<(int)start_index)
 			{
 				value = track->track_dump[i];
-				cellcode = getCellTiming(&pll,value,0,bitoffset,pl->forward_link[i],phasecorrection);
+				cellcode = getCellTiming(&pll,value,0,pl->forward_link[i],phasecorrection);
 				i++;
 			};
 		}
@@ -530,11 +537,14 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 		fifolevel = 0;
 #endif
 
-
 		i = 0;
-		while ( ( i < (int)track->nb_of_index ) && ( track->index_evt_tab[i].dump_offset < start_index ) )
+
+		if(pl)
 		{
-			i++;
+			while ( ( i < (int)track->nb_of_index ) && ( track->index_evt_tab[i].dump_offset < start_index ) )
+			{
+				i++;
+			}
 		}
 
 		nextindex = i;
@@ -543,12 +553,13 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 		bitoffset=0;
 		for(i=0;i<size;i++)
 		{
+
 			value = track->track_dump[start_index + i];
 
 			if(!pl)
-				cellcode = getCellTiming(&pll,value,0,bitoffset,1,phasecorrection);
+				cellcode = getCellTiming(&pll,value,0,1,phasecorrection);
 			else
-				cellcode = getCellTiming(&pll,value,0,bitoffset,pl->forward_link[start_index + i],phasecorrection);
+				cellcode = getCellTiming(&pll,value,0,pl->forward_link[start_index + i],phasecorrection);
 
 			bitoffset = bitoffset + cellcode;
 
@@ -664,7 +675,6 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 		if( tracksize >= TEMPBUFSIZE ) tracksize = TEMPBUFSIZE - 1;
 
 		// Bitrate Filter
-
 		if(tracksize)
 		{
 			if(fxs)
@@ -750,7 +760,7 @@ static uint32_t time_to_tick(uint32_t time)
 	return (uint32_t) (double)(( (double)time * TICKFREQ ) / (1000 * 1000 * 100 ) );
 }
 
-static int cleanupTrack(HXCFE_SIDE *curside)
+int cleanupTrack(HXCFE_SIDE *curside)
 {
 	uint32_t tracklen,k;
 	unsigned char l;
