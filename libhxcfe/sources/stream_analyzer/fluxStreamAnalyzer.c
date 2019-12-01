@@ -3624,21 +3624,21 @@ void hxcfe_FxStream_ExportToBmp(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream, char 
 {
 	HXCFE_TD * td;
 
-	td = hxcfe_td_init(fxs->hxcfe,1024*8,480);
+	td = hxcfe_td_init(fxs->hxcfe,atoi( get_env_var( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_XSIZE", NULL) ),atoi( get_env_var( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_YSIZE", NULL) ));
 	if(td)
 	{
-		hxcfe_td_activate_analyzer(td,ISOIBM_MFM_ENCODING,1);
-		hxcfe_td_activate_analyzer(td,ISOIBM_FM_ENCODING,1);
-		hxcfe_td_activate_analyzer(td,AMIGA_MFM_ENCODING,1);
-		hxcfe_td_activate_analyzer(td,EMU_FM_ENCODING,1);
-		hxcfe_td_activate_analyzer(td,MEMBRAIN_MFM_ENCODING,1);
-		hxcfe_td_activate_analyzer(td,TYCOM_FM_ENCODING,1);
-		hxcfe_td_activate_analyzer(td,APPLEII_GCR1_ENCODING,1);
-		hxcfe_td_activate_analyzer(td,APPLEII_GCR2_ENCODING,1);
-		//hxcfe_td_activate_analyzer(td,ARBURGDAT_ENCODING,1);
-		//hxcfe_td_activate_analyzer(td,ARBURGSYS_ENCODING,1);
+		hxcfe_td_activate_analyzer(td, ISOIBM_MFM_ENCODING, atoi( get_env_var( fxs->hxcfe, "BMPEXPORT_ENABLE_ISOIBM_MFM_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, ISOIBM_FM_ENCODING,  atoi( get_env_var( fxs->hxcfe, "BMPEXPORT_ENABLE_ISOIBM_FM_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, AMIGA_MFM_ENCODING, atoi( get_env_var( fxs->hxcfe, "BMPEXPORT_ENABLE_AMIGA_MFM_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, EMU_FM_ENCODING, atoi( get_env_var( fxs->hxcfe, "BMPEXPORT_ENABLE_EMU_FM_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, MEMBRAIN_MFM_ENCODING, atoi( get_env_var( fxs->hxcfe, "BMPEXPORT_ENABLE_MEMBRAIN_MFM_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, TYCOM_FM_ENCODING, atoi( get_env_var( fxs->hxcfe, "BMPEXPORT_ENABLE_TYCOM_FM_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, APPLEII_GCR1_ENCODING, atoi( get_env_var( fxs->hxcfe, "BMPEXPORT_ENABLE_APPLEII_GCR1_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, APPLEII_GCR2_ENCODING, atoi( get_env_var( fxs->hxcfe, "BMPEXPORT_ENABLE_APPLEII_GCR2_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, ARBURGDAT_ENCODING, atoi( get_env_var( fxs->hxcfe, "BMPEXPORT_ENABLE_ARBURGDAT_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, ARBURGSYS_ENCODING, atoi( get_env_var( fxs->hxcfe, "BMPEXPORT_ENABLE_ARBURGSYS_ENCODING", NULL)));
 
-		hxcfe_td_setparams(td,200*1000*10,16,0);
+		hxcfe_td_setparams(td,atoi( get_env_var( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_XTOTALTIME", NULL)),atoi( get_env_var( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_YTOTALTIME", NULL) ),0);
 
 		hxcfe_td_draw_stream_track( td, stream );
 
