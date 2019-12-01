@@ -1945,7 +1945,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 	if(track_dump->nb_of_pulses)
 	{
 		// Only one revolution -> No flakey bits detection : return a dummy buffer.
-		if(hxcfe_FxStream_GetNumberOfRevolution(fxs,track_dump) == 1)
+		if( ( hxcfe_FxStream_GetNumberOfRevolution(fxs,track_dump) == 1 ) || atoi( get_env_var( fxs->hxcfe, "FLUXSTREAM_SKIPBLOCKSDETECTION", NULL)) )
 		{
 			pl = alloc_pulses_link_array(track_dump->nb_of_pulses);
 			if(pl)
@@ -3330,7 +3330,6 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 					tb_reversed = AllocateBlocks(reversed_std, BLOCK_TIME);
 
 					pl_reversed = ScanAndFindRepeatedBlocks(hxcfe,fxs,reversed_std,indexperiod,tb_reversed);
-
 
 					number_of_pulses = pl->number_of_pulses;
 					backward_link = pl->backward_link;
