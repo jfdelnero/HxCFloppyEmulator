@@ -27,8 +27,16 @@ XX XXX 2019 : HxCFloppyEmulator 2.1.X.X
 
 -> SCP loader : Fix/set the number of heads to 2 when the number of head(s) field is set to 0.
 
+-> Game Doctor SF3 / SF7 file support added.
+
+-> Script support introduced.
+
+-> Internal environment variables support.
+
+-> Floppy Stream dump analysis bitmap export support. (Stream HFE, SCP, KF Raw)
+
 -> General : Codes fixes and improvements.
- 
+
 *********************************************************/
 
 /*********************************************************
