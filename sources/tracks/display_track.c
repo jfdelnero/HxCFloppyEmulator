@@ -1188,12 +1188,8 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	HXCFE_SIDE* side;
 	HXCFE_FLOPPY *fp;
 
-	HXCFE_SECTORACCESS* ss;
-	HXCFE_SECTCFG** scl;
 	int bitrate;
 	uint32_t * histo;
-
-	int32_t nb_sectorfound,sectnum;
 
 	td->noloop_trackmode = 1;
 
