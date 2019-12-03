@@ -430,11 +430,20 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 
 	HXCFE_SIDE* hxcfe_track;
 
-	centralvalue = initialvalue;
+	centralvalue = atoi( get_env_var( floppycontext, "FLUXSTREAM_INITIAL_BITRATE", NULL) );
+	if(!centralvalue)
+	{
+		centralvalue = initialvalue;
+	}
+	else
+	{
+		floppycontext->hxc_printf(MSG_DEBUG,"ScanAndDecodeStream : Measured bitrate : %d, Forced value : %d",(int)(TICKFREQ/initialvalue), centralvalue);		
+		centralvalue = (int)(TICKFREQ/centralvalue);
+	}
 
-	pll.pump_charge = ( initialvalue * 16 ) / 2;
+	pll.pump_charge = ( centralvalue * 16 ) / 2;
 	pll.phase = 0;
-	pll.pivot = initialvalue * 16;
+	pll.pivot = centralvalue * 16;
 	pll.pll_max = pll.pivot + ( ( pll.pivot * 18 ) / 100 );
 	pll.pll_min = pll.pivot - ( ( pll.pivot * 18 ) / 100 );
 
@@ -504,25 +513,27 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 		else
 			i = 0;
 
-		if(!pl)
+		if( !atoi( get_env_var( floppycontext, "FLUXSTREAM_NOPLLPRESYNC", NULL) ) )
 		{
-			while(i<(int)start_index)
+			if(!pl)
 			{
-				value = track->track_dump[i];
-				cellcode = getCellTiming(&pll,value,0,1,phasecorrection);
-				i++;
-			};
-		}
-		else
-		{
-			while(i<(int)start_index)
+				while(i<(int)start_index)
+				{
+					value = track->track_dump[i];
+					cellcode = getCellTiming(&pll,value,0,1,phasecorrection);
+					i++;
+				};
+			}
+			else
 			{
-				value = track->track_dump[i];
-				cellcode = getCellTiming(&pll,value,0,pl->forward_link[i],phasecorrection);
-				i++;
-			};
+				while(i<(int)start_index)
+				{
+					value = track->track_dump[i];
+					cellcode = getCellTiming(&pll,value,0,pl->forward_link[i],phasecorrection);
+					i++;
+				};
+			}
 		}
-
 		//
 		// "Decode" the stream...
 		//
