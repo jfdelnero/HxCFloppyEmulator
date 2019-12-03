@@ -267,7 +267,7 @@ static int set_env_var_cmd(HXCFE * context, char * line,int cmd)
 
 	if(i>=0 && j>=0)
 	{
-		ret = set_env_var(context,(char*)&varname,(char*)&varvalue);
+		ret = hxcfe_setEnvVar(context,(char*)&varname,(char*)&varvalue);
 	}
 
 	return ret;
@@ -285,7 +285,7 @@ static int print_env_var_cmd(HXCFE * context, char * line,int cmd)
 
 	if(i>=0)
 	{
-		ret = set_env_var(context,(char*)&varname,(char*)&varvalue);
+		ret = hxcfe_setEnvVar(context,(char*)&varname,(char*)&varvalue);
 		if(ret>=0)
 		{
 			context->hxc_printf(MSG_INFO_1,"%s = %s",varname,varvalue);
@@ -325,7 +325,7 @@ static int exec_cmd(HXCFE * context, char * command,char * line)
 	return 0;
 }
 
-static int execute_line(HXCFE * context,char * line)
+int hxcfe_execScriptLine( HXCFE * hxcfe,char * line )
 {
 	char command[MAX_CFG_STRING_SIZE];
 
@@ -335,9 +335,9 @@ static int execute_line(HXCFE * context,char * line)
 	{
 		if(strlen(command))
 		{
-			if( !exec_cmd(context, command,line))
+			if( !exec_cmd(hxcfe, command,line))
 			{
-				context->hxc_printf(MSG_ERROR,"Line syntax error : %s",line);
+				hxcfe->hxc_printf(MSG_ERROR,"Line syntax error : %s",line);
 
 				return 0;
 			}
@@ -349,7 +349,7 @@ static int execute_line(HXCFE * context,char * line)
 	return 0;
 }
 
-int hxcfe_exec_script_file(HXCFE* context, char * script_path)
+int hxcfe_execScriptFile( HXCFE* hxcfe, char * script_path )
 {
 	int err;
 	FILE * f;
@@ -368,7 +368,7 @@ int hxcfe_exec_script_file(HXCFE* context, char * script_path)
 			if(feof(f))
 				break;
 
-			execute_line(context, line);
+			hxcfe_execScriptLine(hxcfe, line);
 		}while(1);
 
 		fclose(f);
@@ -377,14 +377,14 @@ int hxcfe_exec_script_file(HXCFE* context, char * script_path)
 	}
 	else
 	{
-		context->hxc_printf(MSG_ERROR,"Can't open %s !",script_path);
+		hxcfe->hxc_printf(MSG_ERROR,"Can't open %s !",script_path);
 		err = HXCFE_ACCESSERROR;
 	}
 
 	return err;
 }
 
-int hxcfe_exec_script_ram(HXCFE* context, unsigned char * script_buffer, int buffersize)
+int hxcfe_execScriptRam( HXCFE* hxcfe, unsigned char * script_buffer, int buffersize )
 {
 	int err = 0;
 	int buffer_offset,line_offset;
@@ -407,7 +407,7 @@ int hxcfe_exec_script_ram(HXCFE* context, unsigned char * script_buffer, int buf
 			buffer_offset++;
 		}
 
-		execute_line(context, line);
+		hxcfe_execScriptLine(hxcfe, line);
 
 		if(!script_buffer[buffer_offset])
 			break;

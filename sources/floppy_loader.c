@@ -108,19 +108,19 @@ HXCFE* hxcfe_init(void)
 		hxcfe->hxc_printf = &dummy_output;
 		hxcfe->hxc_settrackpos = &dummy_trackpos;
 
-		set_env_var(hxcfe, "LIBVERSION", "v"STR_FILE_VERSION2);
+		hxcfe_setEnvVar(hxcfe, "LIBVERSION", "v"STR_FILE_VERSION2);
 
 		hxcfe->hxc_printf(MSG_INFO_0,"Starting HxCFloppyEmulator...");
 
 		init_script = data_unpack(data_init_script->data,data_init_script->csize,0,data_init_script->size);
 		if(init_script)
 		{
-			hxcfe_exec_script_ram(hxcfe, init_script, data_init_script->size);
+			hxcfe_execScriptRam(hxcfe, init_script, data_init_script->size);
 
 			free(init_script);
 		}
 
-		hxcfe_exec_script_file(hxcfe, "config.script");
+		hxcfe_execScriptFile(hxcfe, "config.script");
 
 		nb_loader = 0;
 		// Count how many static loaders we have.

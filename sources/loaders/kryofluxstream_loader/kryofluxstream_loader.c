@@ -261,31 +261,31 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 			filepath = malloc( strlen(imgfile) + 32 );
 			sprintf(filepath,"%s%s",folder,"config.script");
-			hxcfe_exec_script_file(imgldr_ctx->hxcfe, filepath);
+			hxcfe_execScriptFile(imgldr_ctx->hxcfe, filepath);
 
-			if( atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_DOUBLE_STEP", NULL)) & 1 )
+			if( atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "KFRAWLOADER_DOUBLE_STEP", NULL)) & 1 )
 				trackstep = 2;
 			else
 				trackstep = 1;
 
-			singleside =  atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_SINGLE_SIDE", NULL))&1;
+			singleside =  atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "KFRAWLOADER_SINGLE_SIDE", NULL))&1;
 
 			timecoef=1;
-			if( !strcmp(get_env_var( imgldr_ctx->hxcfe, "FLUXSTREAM_RPMFIX", NULL),"360TO300RPM") )
+			if( !strcmp(hxcfe_getEnvVar( imgldr_ctx->hxcfe, "FLUXSTREAM_RPMFIX", NULL),"360TO300RPM") )
 			{
 				timecoef=(float)1.2;
 			}
 
-			if( !strcmp(get_env_var( imgldr_ctx->hxcfe, "FLUXSTREAM_RPMFIX", NULL),"300TO360RPM") )
+			if( !strcmp(hxcfe_getEnvVar( imgldr_ctx->hxcfe, "FLUXSTREAM_RPMFIX", NULL),"300TO360RPM") )
 			{
 				timecoef=(float)0.833;
 			}
 
-			phasecorrection = atoi( get_env_var( imgldr_ctx->hxcfe, "FLUXSTREAM_PHASE_CORRECTION_DIVISOR", NULL));
-			filterpasses = atoi( get_env_var( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES", NULL));
-			filter = atoi( get_env_var( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW", NULL));
-			bitrate = atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_BITRATE", NULL));
-			bmp_export = atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWLOADER_BMPEXPORT", NULL));
+			phasecorrection = atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "FLUXSTREAM_PHASE_CORRECTION_DIVISOR", NULL));
+			filterpasses = atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES", NULL));
+			filter = atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW", NULL));
+			bitrate = atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "KFRAWLOADER_BITRATE", NULL));
+			bmp_export = atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "KFRAWLOADER_BMPEXPORT", NULL));
 
 			track=0;
 			side=0;

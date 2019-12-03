@@ -63,14 +63,14 @@
 
 #define MAX_CFG_STRING_SIZE 1024
 
-int set_env_var(HXCFE* context, char * varname, char * varvalue)
+int hxcfe_setEnvVar( HXCFE* hxcfe, char * varname, char * varvalue )
 {
 	int i;
 	envvar_entry * tmp_envvars;
 
 	i = 0;
 
-	tmp_envvars = (envvar_entry *)context->envvar;
+	tmp_envvars = (envvar_entry *)hxcfe->envvar;
 
 	if(!tmp_envvars)
 	{
@@ -80,7 +80,7 @@ int set_env_var(HXCFE* context, char * varname, char * varvalue)
 
 		memset( tmp_envvars,0,sizeof(envvar_entry));
 
-		context->envvar = (void*)tmp_envvars;
+		hxcfe->envvar = (void*)tmp_envvars;
 	}
 
 	// is the variable already there
@@ -143,19 +143,19 @@ int set_env_var(HXCFE* context, char * varname, char * varvalue)
 		}
 	}
 
-	context->envvar = (void*)tmp_envvars;
+	hxcfe->envvar = (void*)tmp_envvars;
 
 	return 1;
 }
 
-char * get_env_var(HXCFE* context, char * varname, char * varvalue)
+char * hxcfe_getEnvVar( HXCFE* hxcfe, char * varname, char * varvalue)
 {
 	int i;
 	envvar_entry * tmp_envvars;
 
 	i = 0;
 
-	tmp_envvars = (envvar_entry *)context->envvar;
+	tmp_envvars = (envvar_entry *)hxcfe->envvar;
 	if(!tmp_envvars)
 		return NULL;
 
@@ -182,14 +182,14 @@ char * get_env_var(HXCFE* context, char * varname, char * varvalue)
 	}
 }
 
-char * get_env_var_index(HXCFE* context, int index, char * varvalue)
+char * hxcfe_getEnvVarIndex( HXCFE* hxcfe, int index, char * varvalue)
 {
 	int i;
 	envvar_entry * tmp_envvars;
 
 	i = 0;
 
-	tmp_envvars = (envvar_entry *)context->envvar;
+	tmp_envvars = (envvar_entry *)hxcfe->envvar;
 	if(!tmp_envvars)
 		return NULL;
 
