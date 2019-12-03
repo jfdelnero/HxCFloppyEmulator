@@ -137,23 +137,23 @@ int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write BMP file %s",filename);
 
-	td = hxcfe_td_init(imgldr_ctx->hxcfe,atoi( get_env_var( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_XSIZE", NULL) ),atoi( get_env_var( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_YSIZE", NULL) ));
+	td = hxcfe_td_init(imgldr_ctx->hxcfe,atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_XSIZE", NULL) ),atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_YSIZE", NULL) ));
 	if(td)
 	{
 		hxcfe_td_setProgressCallback(td,&progress_callback,(void*)imgldr_ctx);
 
-		hxcfe_td_activate_analyzer(td, ISOIBM_MFM_ENCODING, atoi( get_env_var( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_ISOIBM_MFM_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, ISOIBM_FM_ENCODING,  atoi( get_env_var( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_ISOIBM_FM_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, AMIGA_MFM_ENCODING, atoi( get_env_var( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_AMIGA_MFM_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, EMU_FM_ENCODING, atoi( get_env_var( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_EMU_FM_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, MEMBRAIN_MFM_ENCODING, atoi( get_env_var( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_MEMBRAIN_MFM_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, TYCOM_FM_ENCODING, atoi( get_env_var( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_TYCOM_FM_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, APPLEII_GCR1_ENCODING, atoi( get_env_var( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_APPLEII_GCR1_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, APPLEII_GCR2_ENCODING, atoi( get_env_var( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_APPLEII_GCR2_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, ARBURGDAT_ENCODING, atoi( get_env_var( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_ARBURGDAT_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, ARBURGSYS_ENCODING, atoi( get_env_var( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_ARBURGSYS_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, ISOIBM_MFM_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_ISOIBM_MFM_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, ISOIBM_FM_ENCODING,  atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_ISOIBM_FM_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, AMIGA_MFM_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_AMIGA_MFM_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, EMU_FM_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_EMU_FM_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, MEMBRAIN_MFM_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_MEMBRAIN_MFM_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, TYCOM_FM_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_TYCOM_FM_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, APPLEII_GCR1_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_APPLEII_GCR1_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, APPLEII_GCR2_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_APPLEII_GCR2_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, ARBURGDAT_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_ARBURGDAT_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, ARBURGSYS_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_ARBURGSYS_ENCODING", NULL)));
 
-		hxcfe_td_setparams(td,atoi( get_env_var( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_XTOTALTIME", NULL)),atoi( get_env_var( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_YTOTALTIME", NULL) ),90*1000);
+		hxcfe_td_setparams(td,atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_XTOTALTIME", NULL)),atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_YTOTALTIME", NULL) ),90*1000);
 
 		max_row = 32;
 

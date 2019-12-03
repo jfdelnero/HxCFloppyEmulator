@@ -138,7 +138,7 @@ typedef int32_t (*HXCFE_TDPROGRESSOUT_FUNC)(uint32_t current, uint32_t total, vo
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Init Function                                                                                  //
+// Init functions                                                                                 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 HXCFE*                 hxcfe_init(void );
@@ -146,6 +146,22 @@ void                   hxcfe_deinit( HXCFE* hxcfe );
 
 const char *           hxcfe_getVersion( HXCFE* floppycontext );
 const char *           hxcfe_getLicense( HXCFE* floppycontext );
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Environment variables functions                                                                //
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int                    hxcfe_setEnvVar( HXCFE* hxcfe, char * varname, char * varvalue );
+char *                 hxcfe_getEnvVar( HXCFE* hxcfe, char * varname, char * varvalue );
+char *                 hxcfe_getEnvVarIndex( HXCFE* hxcfe, int index, char * varvalue );
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Scripts support functions                                                                      //
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int                    hxcfe_execScriptFile( HXCFE* hxcfe, char * script_path );
+int                    hxcfe_execScriptRam( HXCFE* hxcfe, unsigned char * script_buffer, int buffersize );
+int                    hxcfe_execScriptLine( HXCFE * hxcfe, char * line );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // stdio printf functions                                                                         //

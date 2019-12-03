@@ -422,7 +422,7 @@ int KryoFluxStream_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * flo
 {
 	int i,j, nbrevolutions;
 
-	nbrevolutions = atoi( get_env_var( imgldr_ctx->hxcfe, "KFRAWEXPORT_NUMBER_OF_REVOLUTIONS", NULL));
+	nbrevolutions = atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "KFRAWEXPORT_NUMBER_OF_REVOLUTIONS", NULL));
 
 	for(j=0;j<floppy->floppyNumberOfSide;j++)
 	{

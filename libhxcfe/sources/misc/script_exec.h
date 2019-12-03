@@ -42,6 +42,3 @@
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
-
-int hxcfe_exec_script_file(HXCFE* context, char * script_path);
-int hxcfe_exec_script_ram(HXCFE* context, unsigned char * script_buffer, int buffersize);

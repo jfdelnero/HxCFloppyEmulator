@@ -5,6 +5,15 @@ EXPORTS
    hxcfe_getVersion			@3
    hxcfe_deinit				@4
    hxcfe_getLicense			@5
+
+   hxcfe_setEnvVar			@10
+   hxcfe_getEnvVar			@11
+   hxcfe_getEnvVarIndex		@12
+
+   hxcfe_execScriptFile		@15
+   hxcfe_execScriptRam		@16
+   hxcfe_execScriptLine		@17
+
    hxcfe_floppyUnload		@23
    hxcfe_floppyDuplicate	@24
    hxcfe_getNumberOfTrack	@25
