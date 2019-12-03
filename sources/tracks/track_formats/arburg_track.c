@@ -217,14 +217,14 @@ int get_next_Arburg_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 
 					if( ((checksum & 0xFF) == sector->input_data[0x9FE]) &&  (((checksum>>8) & 0xFF) == sector->input_data[0x9FF]) )
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"Checksum data ok.");
+						floppycontext->hxc_printf(MSG_DEBUG,"get_next_Arburg_sector : Checksum data ok.");
 						sector->use_alternate_data_crc = 0x00;
 						sector->data_crc = sector->input_data[0x9FE];
 						sector->data_crc = sector->data_crc | (sector->input_data[0x9FF]<<8);
 					}
 					else
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"Checksum data Error !");
+						floppycontext->hxc_printf(MSG_DEBUG,"get_next_Arburg_sector : Checksum data Error !");
 						sector->use_alternate_data_crc = 0xFF;
 						sector->data_crc = sector->input_data[0x9FE];
 						sector->data_crc = sector->data_crc | (sector->input_data[0x9FF]<<8);
