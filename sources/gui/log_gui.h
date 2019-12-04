@@ -25,8 +25,6 @@
 //
 */
 
-
-// License class...
 class Log_box : public Fl_Window {
   
   Fl_Button *button_savelog;
