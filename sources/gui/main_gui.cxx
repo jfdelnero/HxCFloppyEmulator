@@ -524,6 +524,36 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 	}
 }
 
+void execute_script(Fl_Widget * w, void * fc_ptr)
+{
+	Fl_Native_File_Chooser fnfc;
+
+	fnfc.title("Execute script");
+	fnfc.type(Fl_Native_File_Chooser::BROWSE_FILE);
+	fnfc.filter("Script file\t*.script\n");
+
+	// Show native chooser
+	switch ( fnfc.show() ) {
+		case -1:
+		{
+			break; // ERROR
+		}
+		case 1:
+		{
+			break; // CANCEL
+		}
+		default:
+		{
+			hxcfe_execScriptFile( guicontext->hxcfe, (char*)fnfc.filename() );
+			break; // FILE CHOSEN
+		}
+	}
+}
+
+void execute_script_pb(Fl_Widget * widget, void * ptr)
+{
+	execute_script(widget,ptr);
+}
 
 void load_file_image_pb(Fl_Widget * widget, void * ptr)
 {

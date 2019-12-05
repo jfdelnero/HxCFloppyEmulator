@@ -93,13 +93,13 @@ main_button_list  txt_buttons_main[]=
 
 Fl_Menu_Item menutable[] = {
   {"&Floppy image",0,0,0,FL_SUBMENU},
-	{"&Load",	FL_ALT+'l',load_file_image_pb,0},
-	{"Load custom RAW file/Create custom floppy",	FL_ALT+'r',menu_clicked,(void*)1},
-	{"&Create DOS/AmigaDOS disk",	FL_ALT+'c',	menu_clicked,(void*)3},
-	{"&Export disk/Save As",	FL_ALT+'e', save_file_image, 0},
-	{"Batch convert files images",	FL_ALT+'b', menu_clicked,(void*)2},
-	{"Dump a Floppy disk",	FL_ALT+'d', menu_clicked,(void*)7},
-	{"Track Analyzer",	FL_ALT+'a', menu_clicked,(void*)10},
+	{"&Load", FL_ALT+'l',load_file_image_pb,0},
+	{"Load custom RAW file/Create custom floppy", FL_ALT+'r',menu_clicked,(void*)1},
+	{"&Create DOS/AmigaDOS disk", FL_ALT+'c', menu_clicked,(void*)3},
+	{"&Export disk/Save As", FL_ALT+'e', save_file_image, 0},
+	{"Batch convert files images", FL_ALT+'b', menu_clicked,(void*)2},
+	{"Dump a Floppy disk", FL_ALT+'d', menu_clicked,(void*)7},
+	{"Track Analyzer", FL_ALT+'a', menu_clicked,(void*)10},
 
 	{0},
 #ifndef OEM_MODE
@@ -107,6 +107,7 @@ Fl_Menu_Item menutable[] = {
 	{"SD HxC Floppy Emulator settings", FL_ALT+'l', menu_clicked, (void*)5},
 	{"USB HxC Floppy Emulator settings", FL_ALT+'s', menu_clicked, (void*)6},
 	{"Internal parameters", FL_ALT+'p', menu_clicked, (void*)15},
+	{"Execute script", FL_ALT+'e', execute_script_pb, (void*)16},
 	{0},
 #else
   {"&Settings",FL_F+2,0,0,FL_SUBMENU},
