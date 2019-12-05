@@ -60,6 +60,7 @@ class Main_Window : public Fl_Window {
 };
 
 void load_file_image_pb(Fl_Widget * widget, void * ptr);
+void execute_script_pb(Fl_Widget * widget, void * ptr);
 void menu_clicked(Fl_Widget * w, void * fc_ptr);
 void save_file_image(Fl_Widget * w, void * fc_ptr);
 void format_choice_cb(Fl_Widget *, void *v);
