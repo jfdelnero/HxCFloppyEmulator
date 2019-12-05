@@ -66,6 +66,7 @@
 #include "edittool_window.h"
 #include "log_gui.h"
 #include "about_gui.h"
+#include "parameters_gui.h"
 
 #include "soft_cfg_file.h"
 #include "fl_dnd_box.h"
@@ -206,6 +207,11 @@ void menu_clicked(Fl_Widget * w, void * fc_ptr)
 		break;
 		case 14:
 			Fl::scheme("gleam");
+		break;
+		case 15:
+			mw->parameters_box = new Parameters_box();
+
+			mw->parameters_box->show();
 		break;
 	}
 
@@ -435,12 +441,11 @@ void load_file_image(Fl_Widget * w, void * fc_ptr)
 	}
 }
 
-
 void save_file_image(Fl_Widget * w, void * fc_ptr)
 {
 	int i;
 	Fl_Native_File_Chooser fnfc;
-	unsigned char deffilename[512];
+	unsigned char deffilename[DEFAULT_TEXT_BUFFER_SIZE + 128];
 
 	if(!guicontext->loadedfloppy)
 	{
@@ -448,8 +453,8 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 	}
 	else
 	{
+		snprintf((char*)deffilename, sizeof(deffilename), "%s", guicontext->bufferfilename);
 
-		sprintf((char*)deffilename,"%s",guicontext->bufferfilename);
 		i=0;
 		while(deffilename[i]!=0)
 		{
@@ -597,14 +602,14 @@ void dnd_cb(Fl_Widget *o, void *v)
 static void tick_mw(void *v) {
 	Main_Window *window;
 	int i,j;
-	char tempstr[1024];
-	char tempstr2[1024];
+	char tempstr[DEFAULT_TEXT_BUFFER_SIZE + 128];
+	char tempstr2[DEFAULT_TEXT_BUFFER_SIZE + 128];
 
 	window=(Main_Window *)v;
 
 	if(guicontext->loadedfloppy && strlen(guicontext->bufferfilename))
 	{
-		sprintf(tempstr,"%s - %d track(s) %d side(s)     ",guicontext->bufferfilename,hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy),hxcfe_getNumberOfSide(guicontext->hxcfe,guicontext->loadedfloppy));
+		snprintf(tempstr, sizeof(tempstr), "%s - %d track(s) %d side(s)     ",guicontext->bufferfilename,hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy),hxcfe_getNumberOfSide(guicontext->hxcfe,guicontext->loadedfloppy));
 
 		if( guicontext->txtindex >= strlen(tempstr) )
 		{
@@ -620,6 +625,7 @@ static void tick_mw(void *v) {
 			j++;
 			if(j>=(int)strlen(tempstr)) j=0;
 		}while(i<(int)strlen(tempstr));
+
 		tempstr2[i]=0;
 		j = strlen(tempstr2);
 		memcpy(&tempstr2[i],tempstr2,j);
@@ -646,7 +652,7 @@ static void tick_mw(void *v) {
 					window->file_name_txt->value((const char*)"Load error! Read file error!");
 				break;
 				default:
-					sprintf(tempstr2,"Load error! error %d",guicontext->loadstatus);
+					snprintf(tempstr2, sizeof(tempstr2), "Load error! error %d",guicontext->loadstatus);
 					window->file_name_txt->value((const char*)tempstr2);
 				break;
 			}
@@ -659,7 +665,8 @@ static void tick_mw(void *v) {
 
 		if(guicontext->loading)
 		{
-			sprintf(tempstr,"Loading : %s",guicontext->bufferfilename);
+			snprintf(tempstr,sizeof(tempstr),"Loading : %s",guicontext->bufferfilename);
+
 			window->file_name_txt->value((const char*)tempstr);
 			window->track_pos->minimum(0);
 			window->track_pos->maximum( (float)100);
@@ -669,7 +676,7 @@ static void tick_mw(void *v) {
 		{
 			if(guicontext->loadedfloppy)
 			{
-				sprintf(tempstr,"Track %d/%d",libusbhxcfe_getCurTrack(guicontext->hxcfe,guicontext->usbhxcfe),hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy));
+				snprintf(tempstr,sizeof(tempstr),"Track %d/%d",libusbhxcfe_getCurTrack(guicontext->hxcfe,guicontext->usbhxcfe),hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy));
 
 				window->track_pos_str->value((const char*)tempstr);
 				window->track_pos->minimum(0);
@@ -680,13 +687,14 @@ static void tick_mw(void *v) {
 	}
 	else
 	{
-		sprintf(tempstr,"Exporting : %s",guicontext->bufferfilename);
+		snprintf(tempstr,sizeof(tempstr),"Exporting : %s",guicontext->bufferfilename);
 		window->file_name_txt->value((const char*)tempstr);
 		//window->track_pos->color(0x000000FF);
 		window->track_pos->minimum(0);
 		window->track_pos->maximum( (float)100);
 		window->track_pos->value(   (float)guicontext->loadingprogess);
 	}
+
 #endif
 
 	if(guicontext->autoselectmode)
@@ -744,7 +752,6 @@ static void tick_mw(void *v) {
 			window->usbcfg_window->chk_doublestep->value(0);
 	}
 
-
 	if(window->sdcfg_window->choice_interfacemode_drva_cfg->value() != 13)
 	{
 		window->sdcfg_window->choice_pin02_drva->deactivate();
@@ -799,7 +806,6 @@ static void tick_mw(void *v) {
 	window->batchconv_window->bt_convert->redraw();
 
 	Fl::repeat_timeout(0.10, tick_mw, v);
-
 }
 
 Main_Window::Main_Window()
