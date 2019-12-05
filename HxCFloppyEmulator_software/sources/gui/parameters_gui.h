@@ -27,7 +27,7 @@
 
 #include <FL/Fl_Scroll.H>
 #include <FL/Fl_Input.H>
-
+#include <FL/Fl_Output.H>
 
 typedef struct params_editbox_
 {
@@ -39,6 +39,7 @@ class Parameters_box : public Fl_Double_Window {
 
 	Fl_Button *button_ok;
 	Fl_Double_Window *window;
+	Fl_Output *hlptxt;
 	int xsize,ysize;
 
 public:
