@@ -114,10 +114,6 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 	FILE* f;
 
-	double mck;
-	double sck;
-	double ick;
-
 	#ifdef KFSTREAMDBG
 
 	char * tempstr;
@@ -189,10 +185,6 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 			memset(cellstream,0,filesize*sizeof(uint32_t));
 			memset(cellstreampos,0,filesize*sizeof(uint32_t));
-
-			mck=((18432000 * 73) / 14) / 2;
-			sck=mck/2;
-			ick=mck/16;
 
 			cell_value = 0;
 			stream_ofs = 0;

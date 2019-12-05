@@ -278,7 +278,7 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 						for( ; length != 0; ++length )
 						{
 							drv_qm_update_crc( &crc, (unsigned char)c );
-							//crc = crc32r_table[(c ^ (unsigned char)crc) & 0x3f ] ^ (crc >> 8);
+							crc = crc32r_table[(c ^ (unsigned char)crc) & 0x3f ] ^ (crc >> 8);
 						}
 					}
 					else
@@ -292,7 +292,7 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 							{
 								drv_qm_update_crc( &crc,
 									flatimg[curwritepos++] );
-								//crc = crc32r_table[(flatimg[curwritepos++] ^ (unsigned char)crc) & 0x3f ] ^ (crc >> 8);
+								crc = crc32r_table[(flatimg[curwritepos++] ^ (unsigned char)crc) & 0x3f ] ^ (crc >> 8);
 							}
 							if ( res )
 							{
@@ -307,11 +307,11 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 			/* Compare the CRCs */
 			/* The CRC is zero on old images so it cannot be checked then */
-			/*	if ( crc32 ) {
-			if ( crc32!= crc ) {
-			return -1;
+			if ( crc32 ) {
+				if ( crc32!= crc ) {
+					imgldr_ctx->hxcfe->hxc_printf(MSG_WARNING,"Copyqm loader: Bad CRC ?");
+				}
 			}
-			}*/
 
 		hxc_fclose(f_img);
 

@@ -109,7 +109,7 @@ int FDINEC_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 	hxc_fread(&f_header,sizeof(fdi_nec_header),f_img);
 
-	if( f_header.signature || f_header.cylinders > 90 || filesize > 1265664 || f_header.sectorsize % 128 || !f_header.headersize || f_header.headersize > filesize )
+	if( f_header.signature || f_header.cylinders > (uint32_t)90 || filesize > (int)1265664 || f_header.sectorsize % 128 || !f_header.headersize || f_header.headersize > (uint32_t)filesize )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Bad NEC FDI file !");
 		hxc_fclose(f_img);
