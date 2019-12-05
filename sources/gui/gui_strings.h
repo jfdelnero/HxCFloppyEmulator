@@ -2,7 +2,7 @@
 typedef struct string_entry_
 {
 	unsigned int string_id;
-	char * string;
+	const char * string;
 }string_entry;
 
 enum
@@ -216,4 +216,4 @@ enum
 	
 };
 
-char * getString(unsigned int str_id);
+const char * getString(unsigned int str_id);
