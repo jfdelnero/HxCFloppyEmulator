@@ -576,6 +576,10 @@ SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_format.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_list.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\thirdpartylibs\FATIOlib\fat_list.h
 # End Source File
 # Begin Source File

@@ -59,7 +59,7 @@ LZ4OBJ = lz4.o
 
 MINIZIPOBJ = ioapi.o mztools.o unzip.o zip.o
 
-FATIOLIB = fat_access.o fat_cache.o fat_filelib.o fat_format.o fat_misc.o fat_string.o fat_table.o fat_write.o
+FATIOLIB = fat_access.o fat_cache.o fat_filelib.o fat_format.o fat_misc.o fat_string.o fat_table.o fat_write.o fat_list.o
 
 DISKLOADERPLUGINS = raw_amiga.o raw_iso.o copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosfs_loader.o vfile.o cpcdsk_loader.o \
 					msa_loader.o msx_loader.o smc_loader.o st_loader.o stx_loader.o img_loader.o dms_loader.o mfm_loader.o\
@@ -767,6 +767,9 @@ fat_format.o : $(BASEDIR)/thirdpartylibs/FATIOlib/fat_format.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 fat_misc.o : $(BASEDIR)/thirdpartylibs/FATIOlib/fat_misc.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+fat_list.o : $(BASEDIR)/thirdpartylibs/FATIOlib/fat_list.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 fat_string.o : $(BASEDIR)/thirdpartylibs/FATIOlib/fat_string.c
