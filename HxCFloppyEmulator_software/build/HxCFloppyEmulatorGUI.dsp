@@ -361,6 +361,14 @@ SOURCE=..\sources\gui\msg_txt.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\sources\gui\parameters.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\gui\parameters_gui.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\gui\sdhxcfe_cfg.h
 # End Source File
 # Begin Source File
