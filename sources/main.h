@@ -1,8 +1,9 @@
+#define DEFAULT_TEXT_BUFFER_SIZE 4096
 
 typedef struct s_gui_context_
 {
-	char bufferfilename[4096];
-	char buffertext[4096];
+	char bufferfilename[DEFAULT_TEXT_BUFFER_SIZE];
+	char buffertext[DEFAULT_TEXT_BUFFER_SIZE];
 
 	char * logfile;
 
@@ -41,10 +42,10 @@ typedef struct s_gui_context_
 
 	int updatefloppyfs;
 
-	char last_loaded_image_path[4096];
+	char last_loaded_image_path[DEFAULT_TEXT_BUFFER_SIZE];
 	int loaded_img_modified;
 
-	char xml_file_path[1024];
+	char xml_file_path[DEFAULT_TEXT_BUFFER_SIZE];
 
 	void * main_window;
 

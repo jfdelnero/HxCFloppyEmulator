@@ -103,8 +103,9 @@ Fl_Menu_Item menutable[] = {
 	{0},
 #ifndef OEM_MODE
   {"&Settings",FL_F+2,0,0,FL_SUBMENU},
-	{"SD HxC Floppy Emulator settings",	FL_ALT+'l',menu_clicked,(void*)5},
-	{"USB HxC Floppy Emulator settings",	FL_ALT+'s',menu_clicked,(void*)6},
+	{"SD HxC Floppy Emulator settings", FL_ALT+'l', menu_clicked, (void*)5},
+	{"USB HxC Floppy Emulator settings", FL_ALT+'s', menu_clicked, (void*)6},
+	{"Internal parameters", FL_ALT+'p', menu_clicked, (void*)15},
 	{0},
 #else
   {"&Settings",FL_F+2,0,0,FL_SUBMENU},

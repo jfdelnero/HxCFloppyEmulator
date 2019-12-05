@@ -9,7 +9,7 @@ typedef struct main_button_list_
 
 // Main class...
 class Main_Window : public Fl_Window {
-  
+
 	Fl_Button *button_load;
 	Fl_Button *button_loadrawimg;
 	Fl_Button *button_batchconverter;
@@ -19,14 +19,13 @@ class Main_Window : public Fl_Window {
 	Fl_Button *button_usbhxcfesettings;
 	Fl_Button *button_floppydump;
 	
-
 	Fl_Box*  o;
 	Fl_Window *window;
 
 	int evt;
 
-    char *evt_txt;
-    int evt_len;
+	char *evt_txt;
+	int evt_len;
 
   public:
 	batch_converter_window *batchconv_window;
@@ -38,6 +37,7 @@ class Main_Window : public Fl_Window {
 	usbhxcfecfg_window * usbcfg_window;
 	trackedittool_window * trackedit_window;
 
+	Parameters_box * parameters_box;
 	Log_box * log_box;
 	About_box *about_window;
 
