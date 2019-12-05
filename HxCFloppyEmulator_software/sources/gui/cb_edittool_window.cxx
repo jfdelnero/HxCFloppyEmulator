@@ -58,6 +58,7 @@
 #include "filesystem_generator_window.h"
 #include "cb_filesystem_generator_window.h"
 #include "cb_floppy_infos_window.h"
+#include "parameters_gui.h"
 
 #include "floppy_dump_window.h"
 #include "floppy_infos_window.h"

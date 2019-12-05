@@ -60,6 +60,7 @@
 #include "sdhxcfecfg_window.h"
 #include "usbhxcfecfg_window.h"
 #include "edittool_window.h"
+#include "parameters_gui.h"
 #include "log_gui.h"
 #include "about_gui.h"
 #include "main_gui.h"

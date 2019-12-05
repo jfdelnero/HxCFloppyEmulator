@@ -66,6 +66,7 @@
 #include "log_gui.h"
 #include "about_gui.h"
 #include "edittool_window.h"
+#include "parameters_gui.h"
 
 #include "libhxcfe.h"
 #include "libhxcadaptor.h"
