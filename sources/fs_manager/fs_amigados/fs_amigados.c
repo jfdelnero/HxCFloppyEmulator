@@ -431,7 +431,7 @@ int32_t amigados_mountImage(HXCFE_FSMNG * fsmng, HXCFE_FLOPPY *floppy)
 			if(nbsector)
 			{
 				nbtrack = 0;
-				while(hxcfe_readSectorFDC(fsmng->fdc,nbtrack,0,(unsigned char)(nbsector - 1),512,AMIGA_MFM_ENCODING,1,(unsigned char*)sectorbuffer,sizeof(sectorbuffer),&fdcstatus))
+				while(hxcfe_readSectorFDC(fsmng->fdc,(uint8_t)nbtrack,0,(uint8_t)(nbsector - 1),512,AMIGA_MFM_ENCODING,1,(unsigned char*)sectorbuffer,sizeof(sectorbuffer),&fdcstatus))
 				{
 					nbtrack++;
 				}
@@ -503,6 +503,7 @@ int32_t amigados_openDir(HXCFE_FSMNG * fsmng, char * path)
 {
 	int32_t i;
 	SECTNUM snum;
+	intptr_t tmp_int;
 
 	if( changedir(fsmng,path,&snum,1) ==  RC_OK)
 	{
@@ -517,7 +518,8 @@ int32_t amigados_openDir(HXCFE_FSMNG * fsmng, char * path)
 			return HXCFE_ACCESSERROR;
 		}
 
-		fsmng->dirhandletable[i] = (void*)snum;
+		tmp_int = snum;
+		fsmng->dirhandletable[i] = (void*)tmp_int;
 
 		fsmng->dirindex[i] = 0;
 
@@ -533,6 +535,7 @@ int32_t amigados_readDir(HXCFE_FSMNG * fsmng,int32_t dirhandle,HXCFE_FSENTRY * d
 	struct Entry *entry;
 	int32_t i;
 	struct Volume * adfvolume;
+	intptr_t tmp_int;
 
 	adfvolume = (struct Volume *)fsmng->volume;
 
@@ -541,7 +544,8 @@ int32_t amigados_readDir(HXCFE_FSMNG * fsmng,int32_t dirhandle,HXCFE_FSENTRY * d
 		if(fsmng->dirhandletable[dirhandle-1]!=(void*)-1)
 		{
 			/* saves the head of the list */
-			cell = list = adfGetDirEnt(adfvolume,(int32_t)fsmng->dirhandletable[dirhandle-1]);
+			tmp_int = (intptr_t)fsmng->dirhandletable[dirhandle-1];
+			cell = list = adfGetDirEnt(adfvolume,(int32_t)tmp_int);
 
 			i=0;
 			/* while cell->next is NULL, the last cell */

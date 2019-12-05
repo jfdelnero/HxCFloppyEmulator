@@ -1768,7 +1768,7 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 				{
 					if( fread( track_buffer, numberofsector * sectorsize, 1, filehandle ) != 1 )
 					{
-
+						fb_ctx->floppycontext->hxc_printf(MSG_ERROR,"hxcfe_generateDisk : Error while reading the file image ! Unexpected end of file ?");
 					}
 				}
 				else
@@ -1776,7 +1776,10 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 					memset(track_buffer, fill_byte, sectorsize * numberofsector);
 					if( bufferoffset < image_size )
 					{
-						fread(track_buffer,image_size - bufferoffset,1,f);
+						if(fread(track_buffer,image_size - bufferoffset,1,f) != 1)
+						{
+							fb_ctx->floppycontext->hxc_printf(MSG_ERROR,"hxcfe_generateDisk : Error while reading the file image ! Unexpected end of file ?");
+						}
 					}
 				}
 			}
