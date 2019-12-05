@@ -210,6 +210,7 @@ static int extract_cmd(char * line, char * command)
 	return 0;
 }
 
+/*
 static int get_hex_param(HXCFE * context, char * line,int cmd)
 {
 	int i;
@@ -229,6 +230,7 @@ static int get_hex_param(HXCFE * context, char * line,int cmd)
 
 	return 0;
 }
+*/
 
 static int print_version_cmd(HXCFE * context, char * line,int cmd)
 {
@@ -237,6 +239,7 @@ static int print_version_cmd(HXCFE * context, char * line,int cmd)
 	return 0;
 }
 
+/*
 static int get_str_param(HXCFE * context, char * line,int cmd)
 {
 	int i;
@@ -253,6 +256,7 @@ static int get_str_param(HXCFE * context, char * line,int cmd)
 
 	return 0;
 }
+*/
 
 static int set_env_var_cmd(HXCFE * context, char * line,int cmd)
 {
