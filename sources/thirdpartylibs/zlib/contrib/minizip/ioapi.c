@@ -202,8 +202,13 @@ static long ZCALLBACK fseek64_file_func (voidpf  opaque, voidpf stream, ZPOS64_T
     }
     ret = 0;
 
+#ifdef WIN32
+    if(FSEEKO_FUNC((FILE *)stream, (uint32_t)offset, fseek_origin) != 0)
+                        ret = -1;
+#else
     if(FSEEKO_FUNC((FILE *)stream, offset, fseek_origin) != 0)
                         ret = -1;
+#endif
 
     return ret;
 }
