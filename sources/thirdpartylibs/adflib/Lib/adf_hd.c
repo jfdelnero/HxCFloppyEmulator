@@ -546,14 +546,18 @@ RETCODE adfCreateHdHeader(struct Device* dev, int n, struct Partition** partList
 
     strncpy(fshd.dosType,"DOS",3);
     fshd.dosType[3] = partList[0]->volType;
-	fshd.next = -1;
-	fshd.segListBlock = j+1;
+    fshd.next = -1;
+    fshd.segListBlock = j+1;
+
     if (adfWriteFSHDblock(dev, j, &fshd)!=RC_OK)
+	{
         return RC_ERROR;
-	j++;
+	}
+
+    j++;
 	
-	/* LSEG */
-	lseg.next = -1;
+    /* LSEG */
+    lseg.next = -1;
     if (adfWriteLSEGblock(dev, j, &lseg)!=RC_OK)
         return RC_ERROR;
 
