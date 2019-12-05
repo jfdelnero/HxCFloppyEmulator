@@ -227,7 +227,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	HXCFE_SECTCFG  * sectorconfig;
 	unsigned char * fileimage;
 	uint32_t fileimage_buffer_offset;
-	int rlen;
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TeleDisk_libLoad_DiskFile %s",imgfile);
 
 	hxcfe_imgCallProgressCallback(imgldr_ctx,0,100 );
@@ -508,7 +508,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 				memcpy(&tempdata,&fileimage[fileimage_buffer_offset],(*datalen)+2);
 				fileimage_buffer_offset=fileimage_buffer_offset+(*datalen)+2;
 
-				rlen=RLEExpander(tempdata,sectorconfig[i].input_data,(int)*datalen);
+				RLEExpander(tempdata,sectorconfig[i].input_data,(int)*datalen);
 			}
 			else
 			{

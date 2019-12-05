@@ -86,7 +86,6 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 	unsigned char * finalbuffer_H0;
 	unsigned char * randomfinalbuffer_H0;
 	unsigned char * finalbuffer_H1;
-	unsigned char * randomfinalbuffer_H1;
 
 	uint8_t prev_randomh0,prev_randomh1;
 
