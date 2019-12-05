@@ -204,7 +204,7 @@ char * hxcfe_getEnvVarIndex( HXCFE* hxcfe, int index, char * varvalue)
 		if(varvalue)
 			strcpy(varvalue,tmp_envvars[i].varvalue);
 
-		return tmp_envvars[i].varvalue;
+		return tmp_envvars[i].name;
 	}
 	else
 	{
