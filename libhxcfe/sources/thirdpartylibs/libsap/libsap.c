@@ -292,7 +292,7 @@ static void do_crc(sapsector_t *sapsector, int format)
 
 
 
-/* do_read_sector: 
+/* do_read_sector:
  *  Performs the low-level read operation for the specified sector.
  */
 static void do_read_sector(sapID id, sapsector_t *sapsector)
@@ -301,7 +301,10 @@ static void do_read_sector(sapID id, sapsector_t *sapsector)
    int format = ID_FORMAT(id);
    int i;
 
-   fread(buffer, sizeof(char), SAP_EXTSECTSIZE(format), ID_FILE(id));
+   if( fread(buffer, SAP_EXTSECTSIZE(format), 1, ID_FILE(id)) != 1 )
+   {
+        memset(buffer,0,sizeof(sapsector_t));
+   }
 
    sapsector->format     = buffer[0];
    sapsector->protection = buffer[1];
@@ -550,7 +553,7 @@ static void decode_filename(unsigned char entry_data[], const char filename[], i
 
    /* find short name */
    len = strlen(filename);
-   p = filename + len - 1;   
+   p = filename + len - 1;
 
    while ((p>=filename) && (*p != '/'))
       p--;
@@ -871,8 +874,10 @@ static void do_add_file(sapID id, FILE *file, int file_size, unsigned char entry
       seek_pos(id, sapsector.track, sapsector.sector);
 
       for (sect=0; sect<TO_SECTOR_PER_BLOCK; sect++) {
-         fread(sapsector.data, sizeof(char), TO_SECTSIZE(ID_FORMAT(id)), file);
-         do_write_sector(id, &sapsector);
+         if(fread(sapsector.data, TO_SECTSIZE(ID_FORMAT(id)), 1, file) == 1)
+         {
+             do_write_sector(id, &sapsector);
+         }
          sapsector.sector++;
       }
 
@@ -893,8 +898,10 @@ static void do_add_file(sapID id, FILE *file, int file_size, unsigned char entry
    fat_data[block] = TO_END_BLOCK_OFFSET + 1;
 
    while (file_size > TO_SECTSIZE(ID_FORMAT(id))) {
-      fread(sapsector.data, sizeof(char), TO_SECTSIZE(ID_FORMAT(id)), file);
-      do_write_sector(id, &sapsector);
+      if( fread(sapsector.data, TO_SECTSIZE(ID_FORMAT(id)), 1, file) == 1 )
+      {
+         do_write_sector(id, &sapsector);
+      }
       sapsector.sector++;
 
       fat_data[block]++;
@@ -902,8 +909,10 @@ static void do_add_file(sapID id, FILE *file, int file_size, unsigned char entry
    }
 
    /* write remaining individual bytes */
-   fread(sapsector.data, sizeof(char), TO_SECTSIZE(ID_FORMAT(id)), file);
-   do_write_sector(id, &sapsector);
+   if( fread(sapsector.data, sizeof(char), TO_SECTSIZE(ID_FORMAT(id)), file) == 1)
+   {
+       do_write_sector(id, &sapsector);
+   }
 
    entry_data[TO_END_SIZE] = file_size>>8;
    entry_data[TO_END_SIZE+1] = file_size;
@@ -1136,13 +1145,15 @@ sapID sap_OpenArchive(const char filename[], int *format)
       return SAP_ERROR;
    }
 
-   if ((ID_FILE(id)=hxc_fopen(filename, "rb+")) == NULL) {
+   if ((ID_FILE(id) = hxc_fopen(filename, "rb+")) == NULL) {
       sap_errno = SAP_ENOENT;
       return SAP_ERROR;
    }
 
-   /* read the header */ 
-   fread(header, sizeof(char), SAP_HEADER_SIZE, ID_FILE(id));
+   /* read the header */
+   if (fread(header, SAP_HEADER_SIZE, 1 , ID_FILE(id)) != 1) {
+      return SAP_ERROR;
+   }
 
    /* find the format */
    if ((header[0] != SAP_FORMAT1) && (header[0] != SAP_FORMAT2)) {
@@ -1152,7 +1163,7 @@ sapID sap_OpenArchive(const char filename[], int *format)
    }
 
    *format = header[0];
-   
+
    /* check the header */
    header[0] = 0;
 
@@ -1598,7 +1609,7 @@ int sap_ListArchive(sapID id, char buffer[], int buffer_size)
 int sap_AddFile(sapID id, const char filename[])
 {
    unsigned char entry_data[TO_DIRENTRY_LENGTH];
-   unsigned char trk20_data[SAP_TRACKSIZE1], *fat_data, *dir_data;
+   unsigned char trk20_data[SAP_TRACKSIZE1], *dir_data;
    int free_n=-1, prev_n=-1;
    int i, dskf, file_size = 0;
    FILE *file;
@@ -1645,7 +1656,6 @@ int sap_AddFile(sapID id, const char filename[])
    /* read track 20 */
    sap_ReadSectorEx(id, 20, 1, SAP_NSECTS, trk20_data);
 
-   fat_data = trk20_data + TO_FAT_START(ID_FORMAT(id));
    dir_data = trk20_data + TO_DIR_START(ID_FORMAT(id));
 
    /* simultaneously seek already free entry and previous entry */
