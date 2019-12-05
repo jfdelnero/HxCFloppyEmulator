@@ -32,7 +32,7 @@
 
 /* Return size times approximately the cube root of 2, keeping the result as 1,
    3, or 5 times a power of 2 -- the result is always > size, until the result
-   is the maximum value of an uint32_t, where it remains.  This is useful
+   is the maximum value of an unsigned long, where it remains.  This is useful
    to keep reallocations less than ~33% over the actual data. */
 local size_t bythirds(size_t size)
 {
