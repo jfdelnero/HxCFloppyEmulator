@@ -5,7 +5,7 @@ typedef struct string_entry_
 	char * string;
 }string_entry;
 
-typedef enum
+enum
 {
 	STR_SDSETTINGSWINDOW_0001 = 1,
 	STR_SDSETTINGSWINDOW_0002,
