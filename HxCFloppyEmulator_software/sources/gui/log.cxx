@@ -97,7 +97,7 @@ char * logs_buffer;
 int CUI_affiche(int MSGTYPE,char * chaine, ...)
 {
 	FILE * debugfile;
-	char lineheader[16];
+	char lineheader[32];
 	char fullline[LOGSTRINGSIZE];
 
 	if(((MSGTYPE == MSG_DEBUG ) && logsfifo.debug_msg) || (logsfifo.log_msg && (MSGTYPE!=MSG_DEBUG)) )

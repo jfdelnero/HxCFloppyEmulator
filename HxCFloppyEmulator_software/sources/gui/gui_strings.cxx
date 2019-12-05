@@ -269,7 +269,7 @@ string_entry strings_list[]=
 	{ 0x0000, 0x0000 }
 };
 	
-char * getString(unsigned int str_id)
+const char * getString(unsigned int str_id)
 {
 	int i;
 
