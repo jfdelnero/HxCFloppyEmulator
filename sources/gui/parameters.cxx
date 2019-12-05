@@ -157,17 +157,26 @@ Parameters_box::~Parameters_box()
 }
 
 Parameters_box::Parameters_box()
-  : Fl_Double_Window(640,400)
+  : Fl_Double_Window(740,480)
 {
 	editboxarray = NULL;
 
-	xsize = 640;
-	ysize = 400;
+	xsize = 740;
+	ysize = 480;
 
 	create_editbox();
 
 	button_ok = new Fl_Button(5, ysize-35, 80, 30, "Close" );
 	button_ok->callback(close_parameters,0);
+
+	hlptxt = new Fl_Output(5 + 80 + 10, ysize-40, xsize-90, 40);
+	hlptxt->box(FL_NO_BOX);
+	hlptxt->labeltype(FL_NO_LABEL);
+	hlptxt->textsize(12);
+	hlptxt->align(Fl_Align(FL_ALIGN_CENTER));
+	hlptxt->wrap(FL_INPUT_WRAP);
+	hlptxt->readonly(FL_INPUT_READONLY);
+	hlptxt->static_value("Advanced parameters to tweak the libhxcfe behavior.");
 
 	label("Parameters");
 
