@@ -61,6 +61,7 @@
 #include "edittool_window.h"
 #include "log_gui.h"
 #include "about_gui.h"
+#include "parameters_gui.h"
 
 #include "soft_cfg_file.h"
 #include "fl_dnd_box.h"
