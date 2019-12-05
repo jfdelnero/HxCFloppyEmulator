@@ -1233,7 +1233,7 @@ int32_t hxcfe_isMatchingXmlFloppy ( HXCFE_XMLLDR* xmlfb_ctx, char * filename, ui
 	// Check file size
 	if( ad->file_size != -1 )
 	{
-		if( buffersize != ad->file_size )
+		if( buffersize != (uint32_t)ad->file_size )
 		{
 			return 0;
 		}
