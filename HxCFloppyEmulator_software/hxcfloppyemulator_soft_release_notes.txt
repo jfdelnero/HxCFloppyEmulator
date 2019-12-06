@@ -41,6 +41,8 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 
 -> Game Doctor SF3 / SF7 file support added.
 
+-> zlib updated : zlib 1.2.11
+
 -> General : Codes fixes and improvements.
 
 *********************************************************/
