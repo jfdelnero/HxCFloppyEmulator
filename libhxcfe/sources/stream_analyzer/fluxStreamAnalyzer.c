@@ -752,10 +752,10 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 			hxcfe_track->bitrate = VARIABLEBITRATE;
 		}
 
-		free(outtrack);
-		free(flakeytrack);
 		free(trackbitrate);
-
+		free(indextrack);
+		free(flakeytrack);
+		free(outtrack);
 	}
 
 	return hxcfe_track;
