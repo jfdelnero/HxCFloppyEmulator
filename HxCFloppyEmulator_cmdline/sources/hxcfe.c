@@ -125,6 +125,7 @@ void printhelp(char* argv[])
 	printf("  -help \t\t\t: This help\n");
 	printf("  -license\t\t\t: Print the license\n");
 	printf("  -verbose\t\t\t: Verbose mode\n");
+	printf("  -script:[filename]\t\t: Script file to execute\n");
 	printf("  -modulelist\t\t\t: List modules in the libhxcfe [FORMAT]\n");
 	printf("  -rawlist\t\t\t: Disk layout list [DISKLAYOUT]\n");
 	printf("  -interfacelist\t\t: Floppy interfaces mode list [INTERFACE_MODE]\n");
@@ -986,8 +987,8 @@ int main(int argc, char* argv[])
 	hxcfe=hxcfe_init();
 	hxcfe_setOutputFunc(hxcfe,&CUI_affiche);
 
-	printf("HxC Floppy Emulator : Floppy image file converter v2.0.2.1\n");
-	printf("Copyright (C) 2006-2018 Jean-Francois DEL NERO\n");
+	printf("HxC Floppy Emulator : Floppy image file converter v2.0.3.1\n");
+	printf("Copyright (C) 2006-2019 Jean-Francois DEL NERO\n");
 	printf("This program comes with ABSOLUTELY NO WARRANTY\n");
 	printf("This is free software, and you are welcome to redistribute it\n");
 	printf("under certain conditions;\n\n");
@@ -1014,7 +1015,16 @@ int main(int argc, char* argv[])
 	}
 
 	memset(filename,0,sizeof(filename));
+	// Script execution option	
+	if(isOption(argc,argv,"script",(char*)&filename)>0)
+	{
+		if( strlen(filename) )
+		{
+			hxcfe_execScriptFile(hxcfe, (char*)&filename);
+		}
+	}
 
+	memset(filename,0,sizeof(filename));
 	// Input file name option
 	if(isOption(argc,argv,"finput",(char*)&filename)>0)
 	{
@@ -1133,7 +1143,6 @@ int main(int argc, char* argv[])
 		{
 			usbload(hxcfe, filename, temp[0] - '0', doublestep, interfacemode);
 		}
-
 	}
 
 	if( (isOption(argc,argv,"help",0)<=0) &&
@@ -1144,6 +1153,7 @@ int main(int argc, char* argv[])
 		(isOption(argc,argv,"getfile",0)<=0) &&
 		(isOption(argc,argv,"putfile",0)<=0) &&
 		(isOption(argc,argv,"conv",0)<=0) &&
+		(isOption(argc,argv,"script",0)<=0) &&
 		(isOption(argc,argv,"usb",0)<=0) &&
 		(isOption(argc,argv,"rawlist",0)<=0) &&
 		(isOption(argc,argv,"infos",0)<=0 )
