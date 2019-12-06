@@ -15,25 +15,31 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
-XX XXX 2019 : HxCFloppyEmulator 2.1.X.X
+6 December 2019 : HxCFloppyEmulator 2.2.1.1
 
--> New files Support : Kurzweil K25 (K2500) and K26 (K2600) file support.
+-> macOS Catalina support : Switch to 64bits build + minimum OS version needed changed to 10.9 (Mavericks)
 
--> SPS CAPS library loader added for Linux.
-
--> MacOS X : Preparing the MacOS X Catalina support : Switch to 64bits build + minimum version needed changed to 10.9 (Mavericks)
-
--> Linux : Use the fltk build automatic flags matching with your system.
-
--> SCP loader : Fix/set the number of heads to 2 when the number of head(s) field is set to 0.
-
--> Game Doctor SF3 / SF7 file support added.
+-> Internal environment variables support to tweak/change the default internal library settings/behavior.
 
 -> Script support introduced.
 
--> Internal environment variables support.
+-> GUI : New advanced/parameters window added.
 
--> Floppy Stream dump analysis bitmap export support. (Stream HFE, SCP, KF Raw)
+-> GUI : Script execution menu entry added.
+
+-> Command line tool : Script execution option added.
+
+-> Linux : Use the fltk build automatic flags to match with the system graphic stack.
+
+-> Floppy Stream dump analysis bitmap export support. (Stream HFE, SCP, KryoFlux Raw)
+
+-> SPS CAPS library loader support added for Linux.
+
+-> SCP loader : Fix/set the number of heads to 2 when the number of head(s) field is set to 0.
+
+-> New files Support : Kurzweil K25 (K2500) and K26 (K2600) file support.
+
+-> Game Doctor SF3 / SF7 file support added.
 
 -> General : Codes fixes and improvements.
 
@@ -1211,6 +1217,3 @@ Tout début du projet :
 - Mise au point de la carte sur port parallèle
 - premiers morceaux de code pour encoder les tracks d'une image ST puis ADF.
 *********************************************************/
-
-
-
