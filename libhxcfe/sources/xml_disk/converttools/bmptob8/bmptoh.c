@@ -249,7 +249,7 @@ char  buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
 }
 
 
-unsigned char mi_pack(unsigned char * bufferin, int sizein,unsigned char * bufferout, int * sizeout)
+int mi_pack(unsigned char * bufferin, int sizein,unsigned char * bufferout, int * sizeout)
 {
 	unsigned char* buffer;
 	unsigned char* buffer2;
@@ -261,6 +261,8 @@ unsigned char mi_pack(unsigned char * bufferin, int sizein,unsigned char * buffe
 	buffer =  (unsigned char*)malloc(sizein * 10);
 	buffer2 = (unsigned char*)malloc(sizein * 10);
 
+	mode = -1;	
+
 	if( buffer && buffer2)
 	{
 		memset(buffer, 0, sizein * 10);
@@ -271,7 +273,7 @@ unsigned char mi_pack(unsigned char * bufferin, int sizein,unsigned char * buffe
 		lzw_compress(bufferin,buffer,sizein,&newsize_lzw);
 		rlepack(bufferin,sizein,buffer2,&newsize_rle);
 
-		mode=0;
+		mode = 0;
 
 		// Note : only lzw mode for this project.
 		//if(newsize_rle<sizein && newsize_rle< newsize_lzw)
