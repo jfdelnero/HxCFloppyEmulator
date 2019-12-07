@@ -879,7 +879,7 @@ Main_Window::Main_Window()
 #endif
 
 #ifndef OEM_MODE
-	bitmap_hxc2001_backgnd_bmp->unpacked_data=mi_unpack(bitmap_hxc2001_backgnd_bmp->data,bitmap_hxc2001_backgnd_bmp->csize ,bitmap_hxc2001_backgnd_bmp->data, bitmap_hxc2001_backgnd_bmp->size);
+	bitmap_hxc2001_backgnd_bmp->unpacked_data=data_unpack(bitmap_hxc2001_backgnd_bmp->data,bitmap_hxc2001_backgnd_bmp->csize ,bitmap_hxc2001_backgnd_bmp->data, bitmap_hxc2001_backgnd_bmp->size);
 	convert8b24b(bitmap_hxc2001_backgnd_bmp,0x00);
 	group.image(new Fl_Tiled_Image(new Fl_RGB_Image((const unsigned char*)bitmap_hxc2001_backgnd_bmp->unpacked_data,bitmap_hxc2001_backgnd_bmp->Xsize, bitmap_hxc2001_backgnd_bmp->Ysize, 3, 0)));
 	group.align(FL_ALIGN_TEXT_OVER_IMAGE);
@@ -1167,7 +1167,7 @@ Main_Window::Main_Window()
 	// About window
 	this->about_window=new About_box();
 
-	data_COPYING_FULL->unpacked_data=mi_unpack(data_COPYING_FULL->data,data_COPYING_FULL->csize ,data_COPYING_FULL->data, data_COPYING_FULL->size);
+	data_COPYING_FULL->unpacked_data=data_unpack(data_COPYING_FULL->data,data_COPYING_FULL->csize ,data_COPYING_FULL->data, data_COPYING_FULL->size);
 
 	license_txt=(char*)data_COPYING_FULL->unpacked_data;
 	license_txt[data_COPYING_FULL->size - 1] = 0;
