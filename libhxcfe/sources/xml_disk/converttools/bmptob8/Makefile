@@ -26,5 +26,8 @@ clean:
 
 mrproper: clean
 	rm -rf $(EXEC)
+	rm -rf Debug*
+	rm -rf Release*
+	rm -rf *.obj *.ncb *.plg *.opt
 
 .PHONY: clean mrproper

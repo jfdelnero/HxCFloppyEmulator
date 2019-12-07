@@ -85,7 +85,7 @@ uint8_t * extractbmpdata(char *bmpfile,bmpinfo *info)
 		if(info->type==0xff)
 			adj_filesize = filesize;
 
-		if(info->type==9) 
+		if(info->type==9)
 			adj_filesize += (3*256);
 
 		if(info->type==1)
@@ -164,7 +164,7 @@ uint8_t * extractbmpdata(char *bmpfile,bmpinfo *info)
 error:
 	if(file)
 		fclose(file);
-	
+
 	if(dbuffer)
 		free(dbuffer);
 
@@ -261,7 +261,7 @@ int mi_pack(unsigned char * bufferin, int sizein,unsigned char * bufferout, int 
 	buffer =  (unsigned char*)malloc(sizein * 10);
 	buffer2 = (unsigned char*)malloc(sizein * 10);
 
-	mode = -1;	
+	mode = -1;
 
 	if( buffer && buffer2)
 	{
