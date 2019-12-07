@@ -123,7 +123,7 @@ rawfile_loader_window::rawfile_loader_window() {
       o->labelsize(12);
       o->callback((Fl_Callback*)raw_loader_window_bt_loadcfg, (void*)(this));
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(377, 270, 70, 30, getString(STR_RAWLOADERWINDOW_0022));
+    { Fl_Button* o = new Fl_Button(377, 270, 70, 30, getString(STR_COMMON_CLOSE));
       o->labelsize(12);
       o->callback((Fl_Callback*)cb_Close);
     } // Fl_Button* o

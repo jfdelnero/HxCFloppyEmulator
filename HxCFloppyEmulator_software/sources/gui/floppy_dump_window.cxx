@@ -49,7 +49,7 @@ floppy_dump_window::floppy_dump_window() {
       } // Fl_Output* current_status
       o->end();
     } // Fl_Group* o
-    { Fl_Button* o = new Fl_Button(215, 130, 80, 25, getString(STR_FLOPPYDUMPWINDOW_0010));
+    { Fl_Button* o = new Fl_Button(215, 130, 80, 25, getString(STR_COMMON_OK));
       o->callback((Fl_Callback*)floppy_dump_ok, (void*)(this));
     } // Fl_Button* o
     { Fl_Button* o = new Fl_Button(315, 130, 80, 25, getString(STR_FLOPPYDUMPWINDOW_0011));

@@ -58,7 +58,7 @@ floppy_infos_window::floppy_infos_window() {
       } // Fl_Text_Display* object_txt
       o->end();
     } // Fl_Group* o
-    { Fl_Button* o = new Fl_Button(1158, 465, 105, 26, getString(STR_FLOPPYVIEWERWINDOW_0006));
+    { Fl_Button* o = new Fl_Button(1158, 465, 105, 26, getString(STR_COMMON_OK));
       o->callback((Fl_Callback*)floppy_infos_ok, (void*)(this));
     } // Fl_Button* o
     { floppy_map_disp = new Fl_Group(0, 1, 1000, 500, getString(STR_FLOPPYVIEWERWINDOW_0007));

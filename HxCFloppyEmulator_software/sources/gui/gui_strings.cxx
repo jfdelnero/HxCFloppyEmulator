@@ -47,6 +47,8 @@
 
 string_entry strings_list[]=
 {
+	{ STR_COMMON_OK, "Ok" },
+	{ STR_COMMON_CLOSE, "Close" },
 #ifndef OEM_MODE
 	{ STR_SDSETTINGSWINDOW_0001, "SDCard HxC Floppy Emulator settings" },
 	{ STR_SDSETTINGSWINDOW_0002, "SD HxC Floppy Emulator Usage settings" },
@@ -92,7 +94,6 @@ string_entry strings_list[]=
 	{ STR_SDSETTINGSWINDOW_0034, "Drive B" },
 	{ STR_SDSETTINGSWINDOW_0035, "Load config file" },
 	{ STR_SDSETTINGSWINDOW_0036, "Save config file" },
-	{ STR_SDSETTINGSWINDOW_0037, "OK" },
 
 	{ STR_BATCHCONVERTWINDOW_0001, "Floppy Disk Images Batch converter" },
 	{ STR_BATCHCONVERTWINDOW_0002, "Target file format :" },
@@ -106,7 +107,6 @@ string_entry strings_list[]=
 
 	{ STR_FSGENERATORWINDOW_0001, "DOS Floppy Disk File Browser" },
 	{ STR_FSGENERATORWINDOW_0002, "Create Disk" },
-	{ STR_FSGENERATORWINDOW_0003, "Close" },
 	{ STR_FSGENERATORWINDOW_0004, "File system type :" },
 	{ STR_FSGENERATORWINDOW_0005, "FS_Tree" },
 	{ STR_FSGENERATORWINDOW_0006, "Delete" },
@@ -124,7 +124,6 @@ string_entry strings_list[]=
 	{ STR_FLOPPYDUMPWINDOW_0007, "Double sided" },
 	{ STR_FLOPPYDUMPWINDOW_0008, "Double step" },
 	{ STR_FLOPPYDUMPWINDOW_0009, "Status" },
-	{ STR_FLOPPYDUMPWINDOW_0010, "OK" },
 	{ STR_FLOPPYDUMPWINDOW_0011, "Read Disk" },
 	{ STR_FLOPPYDUMPWINDOW_0012, "Floppy Map" },
 
@@ -180,14 +179,12 @@ string_entry strings_list[]=
 	{ STR_USBSETTINGSWINDOW_0020, "Mode" },
 	{ STR_USBSETTINGSWINDOW_0021, "Auto" },
 	{ STR_USBSETTINGSWINDOW_0022, "Double Step" },
-	{ STR_USBSETTINGSWINDOW_0023, "OK" },
 
 	{ STR_FLOPPYVIEWERWINDOW_0001, "Visual Floppy disk" },
 	{ STR_FLOPPYVIEWERWINDOW_0002, "Track / Side selection" },
 	{ STR_FLOPPYVIEWERWINDOW_0003, "Track number" },
 	{ STR_FLOPPYVIEWERWINDOW_0004, "Side number" },
 	{ STR_FLOPPYVIEWERWINDOW_0005, "Status" },
-	{ STR_FLOPPYVIEWERWINDOW_0006, "OK" },
 	{ STR_FLOPPYVIEWERWINDOW_0007, "Floppy Map" },
 	{ STR_FLOPPYVIEWERWINDOW_0008, "View" },
 	{ STR_FLOPPYVIEWERWINDOW_0009, "full y time scale (us)" },
@@ -231,7 +228,6 @@ string_entry strings_list[]=
 	{ STR_RAWLOADERWINDOW_0019, "Create Empty Floppy" },
 	{ STR_RAWLOADERWINDOW_0020, "Save config" },
 	{ STR_RAWLOADERWINDOW_0021, "Load config" },
-	{ STR_RAWLOADERWINDOW_0022, "Close" },
 	{ STR_RAWLOADERWINDOW_0023, "Sector size" },
 	{ STR_RAWLOADERWINDOW_0024, "Track type" },
 	{ STR_RAWLOADERWINDOW_0025, "GAP3 lenght" },

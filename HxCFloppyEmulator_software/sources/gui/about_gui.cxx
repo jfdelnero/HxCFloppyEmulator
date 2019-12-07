@@ -46,6 +46,7 @@ extern "C"
 #include "license_gui.h"
 
 #include "main.h"
+#include "gui_strings.h"
 
 extern s_gui_context * guicontext;
 
@@ -278,7 +279,7 @@ About_box::About_box()
 
 	cur_ypos += BUTTON_SIZE_Y;
 
-	button_ok = new Fl_Button(cur_xpos, cur_ypos, BUTTON_SIZE_X / 2, BUTTON_SIZE_Y, "OK" ); // Fl_Button* o
+	button_ok = new Fl_Button(cur_xpos, cur_ypos, BUTTON_SIZE_X / 2, BUTTON_SIZE_Y, getString(STR_COMMON_OK) ); // Fl_Button* o
 	button_ok->callback(close,0);
 
 	o = new Fl_Box(200, 5, 320+6, 200+6);

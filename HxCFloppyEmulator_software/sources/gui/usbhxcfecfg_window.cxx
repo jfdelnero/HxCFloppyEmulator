@@ -131,7 +131,7 @@ usbhxcfecfg_window::usbhxcfecfg_window() {
       } // Fl_Choice* choice_ifmode
       o->end();
     } // Fl_Group* o
-    { Fl_Button* o = new Fl_Button(420, 200, 140, 25, getString(STR_USBSETTINGSWINDOW_0023));
+    { Fl_Button* o = new Fl_Button(420, 200, 140, 25, getString(STR_COMMON_OK));
       o->callback((Fl_Callback*)cb_OK);
     } // Fl_Button* o
     window->end();
