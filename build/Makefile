@@ -13,6 +13,7 @@ HxCFloppyEmulator_cmdline: libhxcfe libusbhxcfe
 	$(MAKE) -C ../HxCFloppyEmulator_cmdline/trunk/build/
 
 fltk:
+	chmod +x ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/prepare_fltk.sh
 	cd ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/ && ./prepare_fltk.sh
 	$(MAKE) -C ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.3.x/ DIRS=src
 
