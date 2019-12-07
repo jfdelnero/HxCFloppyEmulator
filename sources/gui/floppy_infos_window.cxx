@@ -13,7 +13,7 @@ extern "C"
 #include "cb_floppy_infos_window.h"
 #include "fl_mouse_box.h"
 floppy_infos_window::floppy_infos_window() {
-  { window = new Fl_Double_Window(1275, 540, getString(STR_FLOPPYVIEWERWINDOW_0001));
+  { window = new Fl_Window(1275, 540, getString(STR_FLOPPYVIEWERWINDOW_0001));
     window->user_data((void*)(this));
     { Fl_Group* o = new Fl_Group(1000, 372, 275, 84, getString(STR_FLOPPYVIEWERWINDOW_0002));
       o->box(FL_ENGRAVED_FRAME);

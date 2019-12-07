@@ -3,6 +3,7 @@
 #ifndef floppy_infos_window_h
 #define floppy_infos_window_h
 #include <FL/Fl.H>
+#include <FL/Fl_Window.H>
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Value_Slider.H>
@@ -22,7 +23,7 @@ extern void disk_infos_window_bt_edit_callback(Fl_Button*, void*);
 class floppy_infos_window {
 public:
   floppy_infos_window();
-  Fl_Double_Window *window;
+  Fl_Window *window;
   Fl_Value_Slider *track_number_slide;
   Fl_Value_Slider *side_number_slide;
   Fl_Output *x_pos;
