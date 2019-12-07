@@ -39,10 +39,7 @@ class About_box : public Fl_Window {
 	Fl_Button *button_ok;
 	Fl_Button *button_forum;
 	Fl_Button *button_facebook;
-	Fl_Progress* track_pos;
-	Fl_Text_Display* file_name_txt;
 	Fl_Box*  o;
-	Fl_Window *window;
 
 	char windowname[128];
 
