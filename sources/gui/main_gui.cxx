@@ -846,11 +846,14 @@ Main_Window::Main_Window()
 	char * temp;
 	infothread * infoth;
 	USBStats stats;
+	intptr_t tmp_intptr;
 
 	txtindex=0;
 	i=0;
 	evt_txt=0;
 
+	// First lock() call to Enable lock/unlock threads support.
+	Fl::lock();
 
 	guicontext->loading = 0;
 	guicontext->exporting = 0;
@@ -889,7 +892,8 @@ Main_Window::Main_Window()
 		{
 			txt_buttons_main[i].button = new Fl_Button(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*j), BUTTON_XSIZE, BUTTON_YSIZE, getString(txt_buttons_main[i].label_id));
 			txt_buttons_main[i].button->labelsize(12);
-			txt_buttons_main[i].button->callback(bt_clicked,(void*)i);
+			tmp_intptr = i;
+			txt_buttons_main[i].button->callback(bt_clicked,(void*)tmp_intptr);
 
 			Fl_Box *box = new Fl_Box(FL_NO_BOX,BUTTON_XPOS+BUTTON_XSIZE,BUTTON_YPOS+(BUTTON_YSIZE/4)+(BUTTON_YSTEP*j),BUTTON_XSIZE*4,BUTTON_YSIZE/2,getString(txt_buttons_main[i].desc_id));
 			box->align(FL_ALIGN_INSIDE|FL_ALIGN_LEFT);
