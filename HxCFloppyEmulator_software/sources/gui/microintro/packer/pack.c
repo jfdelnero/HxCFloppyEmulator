@@ -1,31 +1,47 @@
-/*===========================================================================--
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
------------H----H--X----X-----CCCCC----22222----0000-----0000------11----------
-----------H----H----X-X-----C--------------2---0----0---0----0--1--1-----------
----------HHHHHH-----X------C----------22222---0----0---0----0-----1------------
---------H----H----X--X----C----------2-------0----0---0----0-----1-------------
--------H----H---X-----X---CCCCC-----222222----0000-----0000----1111------------
--------------------------------------------------------------------------------
------------------------------------------ http://jeanfrancoisdelnero.free.fr --
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
-------------------- official Infoticaires 2006 invitation ---------------------
------------------- French Retro-Gaming party in Courcelles --------------------
---------------------------- www.obsolete-tears.com ----------------------------
-----------------------------  Jeff -  14/06/2006  -----------------------------
---===========================================================================*/
+/*
+//
+// Copyright (C) 2006-2019 Jean-François DEL NERO
+//
+// This file is part of HxCFloppyEmulator.
+//
+// HxCFloppyEmulator may be used and distributed without restriction provided
+// that this copyright statement is not removed from the file and that any
+// derivative work contains the original copyright notice and the associated
+// disclaimer.
+//
+// HxCFloppyEmulator is free software; you can redistribute it
+// and/or modify  it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// HxCFloppyEmulator is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//   See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with HxCFloppyEmulator; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+//
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> 
+#include <string.h>
+
+#include <stdint.h>
+
 #include "lzw.h"
 #include "rle.h"
 
-unsigned char * mi_unpack(unsigned char * bufferin, unsigned long sizein,unsigned char * bufferout, unsigned long sizeout)
+unsigned char * data_unpack(unsigned char * bufferin, uint32_t sizein,unsigned char * bufferout, uint32_t sizeout)
 {
 	unsigned char* buffer;
-	buffer=(unsigned char*)malloc(sizeout+100);
+
+	buffer = (unsigned char*)malloc(sizeout+100);
+	if( !buffer )
+		return NULL;
+
 	if(bufferin[0]&0x01)
 	{
 		lzw_expand(bufferin+1,buffer, sizeout );
@@ -35,5 +51,5 @@ unsigned char * mi_unpack(unsigned char * bufferin, unsigned long sizein,unsigne
 		memcpy(buffer,bufferin+1,sizeout);
 	}
 
-	return  buffer;
+	return buffer;
 };

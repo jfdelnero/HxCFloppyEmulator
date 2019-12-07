@@ -50,6 +50,9 @@
 #ifdef WIN32  
 #include <windows.h>
 #endif
+
+#include <stdint.h>
+
 #include "hxcmod.h"
 
 #include "microintro.h"
@@ -265,10 +268,10 @@ uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 	ui_context->blurbuffer=(unsigned int *)malloc(ui_context->xsize*ui_context->ysize*sizeof(unsigned int));
 	memset(ui_context->blurbuffer,0,ui_context->xsize*ui_context->ysize*sizeof(unsigned int));
 
-	bitmap_sob_bmp->unpacked_data=mi_unpack(bitmap_sob_bmp->data,bitmap_sob_bmp->csize ,bitmap_sob_bmp->data, bitmap_sob_bmp->size);
+	bitmap_sob_bmp->unpacked_data=data_unpack(bitmap_sob_bmp->data,bitmap_sob_bmp->csize ,bitmap_sob_bmp->data, bitmap_sob_bmp->size);
 	convert8b16b(bitmap_sob_bmp,(unsigned short)0xFFFF);
 
-	bitmap_hxc2001_bmp->unpacked_data=mi_unpack(bitmap_hxc2001_bmp->data,bitmap_hxc2001_bmp->csize ,bitmap_hxc2001_bmp->data, bitmap_hxc2001_bmp->size);
+	bitmap_hxc2001_bmp->unpacked_data=data_unpack(bitmap_hxc2001_bmp->data,bitmap_hxc2001_bmp->csize ,bitmap_hxc2001_bmp->data, bitmap_hxc2001_bmp->size);
 	convert8b16b(bitmap_hxc2001_bmp,(unsigned short)0xFFFF);
 
 	ui_context->modctx = malloc( sizeof(modcontext) );
@@ -285,19 +288,19 @@ uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 		switch(rand()&3)
 		{
 			case 0:
-				data_maktone_class_cracktro15_mod->unpacked_data=mi_unpack(data_maktone_class_cracktro15_mod->data,data_maktone_class_cracktro15_mod->csize ,data_maktone_class_cracktro15_mod->data, data_maktone_class_cracktro15_mod->size);
+				data_maktone_class_cracktro15_mod->unpacked_data=data_unpack(data_maktone_class_cracktro15_mod->data,data_maktone_class_cracktro15_mod->csize ,data_maktone_class_cracktro15_mod->data, data_maktone_class_cracktro15_mod->size);
 				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_maktone_class_cracktro15_mod->unpacked_data, data_maktone_class_cracktro15_mod->size);
 			break;
 			case 1:
-				data_jozz_cognition_mod->unpacked_data=mi_unpack(data_jozz_cognition_mod->data,data_jozz_cognition_mod->csize ,data_jozz_cognition_mod->data, data_jozz_cognition_mod->size);
+				data_jozz_cognition_mod->unpacked_data=data_unpack(data_jozz_cognition_mod->data,data_jozz_cognition_mod->csize ,data_jozz_cognition_mod->data, data_jozz_cognition_mod->size);
 				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_jozz_cognition_mod->unpacked_data, data_jozz_cognition_mod->size);
 			break;
 			case 2:
-				data_zandax_supplydas_booze_mod->unpacked_data=mi_unpack(data_zandax_supplydas_booze_mod->data,data_zandax_supplydas_booze_mod->csize ,data_zandax_supplydas_booze_mod->data, data_zandax_supplydas_booze_mod->size);
+				data_zandax_supplydas_booze_mod->unpacked_data=data_unpack(data_zandax_supplydas_booze_mod->data,data_zandax_supplydas_booze_mod->csize ,data_zandax_supplydas_booze_mod->data, data_zandax_supplydas_booze_mod->size);
 				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_zandax_supplydas_booze_mod->unpacked_data, data_zandax_supplydas_booze_mod->size);
 			break;
 			case 3:
-				data_vim_not_again_mod->unpacked_data=mi_unpack(data_vim_not_again_mod->data,data_vim_not_again_mod->csize ,data_vim_not_again_mod->data, data_vim_not_again_mod->size);
+				data_vim_not_again_mod->unpacked_data=data_unpack(data_vim_not_again_mod->data,data_vim_not_again_mod->csize ,data_vim_not_again_mod->data, data_vim_not_again_mod->size);
 				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_vim_not_again_mod->unpacked_data, data_vim_not_again_mod->size);
 			break;
 
@@ -334,22 +337,22 @@ void uintro_reset(uintro_context * ui_context)
 	{
 		case 0:
 			if(!data_maktone_class_cracktro15_mod->unpacked_data)
-				data_maktone_class_cracktro15_mod->unpacked_data=mi_unpack(data_maktone_class_cracktro15_mod->data,data_maktone_class_cracktro15_mod->csize ,data_maktone_class_cracktro15_mod->data, data_maktone_class_cracktro15_mod->size);
+				data_maktone_class_cracktro15_mod->unpacked_data=data_unpack(data_maktone_class_cracktro15_mod->data,data_maktone_class_cracktro15_mod->csize ,data_maktone_class_cracktro15_mod->data, data_maktone_class_cracktro15_mod->size);
 			hxcmod_load((modcontext*)ui_context->modctx,(void*)data_maktone_class_cracktro15_mod->unpacked_data,data_maktone_class_cracktro15_mod->size);
 		break;
 		case 1:
 			if(!data_jozz_cognition_mod->unpacked_data)
-				data_jozz_cognition_mod->unpacked_data=mi_unpack(data_jozz_cognition_mod->data,data_jozz_cognition_mod->csize ,data_jozz_cognition_mod->data, data_jozz_cognition_mod->size);
+				data_jozz_cognition_mod->unpacked_data=data_unpack(data_jozz_cognition_mod->data,data_jozz_cognition_mod->csize ,data_jozz_cognition_mod->data, data_jozz_cognition_mod->size);
 			hxcmod_load((modcontext*)ui_context->modctx,(void*)data_jozz_cognition_mod->unpacked_data,data_jozz_cognition_mod->size);
 		break;
 		case 2:
 			if(!data_zandax_supplydas_booze_mod->unpacked_data)
-				data_zandax_supplydas_booze_mod->unpacked_data=mi_unpack(data_zandax_supplydas_booze_mod->data,data_zandax_supplydas_booze_mod->csize ,data_zandax_supplydas_booze_mod->data, data_zandax_supplydas_booze_mod->size);
+				data_zandax_supplydas_booze_mod->unpacked_data=data_unpack(data_zandax_supplydas_booze_mod->data,data_zandax_supplydas_booze_mod->csize ,data_zandax_supplydas_booze_mod->data, data_zandax_supplydas_booze_mod->size);
 			hxcmod_load((modcontext*)ui_context->modctx,(void*)data_zandax_supplydas_booze_mod->unpacked_data,data_zandax_supplydas_booze_mod->size);
 		break;
 		case 3:
 			if(!data_vim_not_again_mod->unpacked_data)
-				data_vim_not_again_mod->unpacked_data=mi_unpack(data_vim_not_again_mod->data,data_vim_not_again_mod->csize ,data_vim_not_again_mod->data, data_vim_not_again_mod->size);
+				data_vim_not_again_mod->unpacked_data=data_unpack(data_vim_not_again_mod->data,data_vim_not_again_mod->csize ,data_vim_not_again_mod->data, data_vim_not_again_mod->size);
 			hxcmod_load((modcontext*)ui_context->modctx,(void*)(data_vim_not_again_mod->unpacked_data),data_vim_not_again_mod->size);
 		break;
 
