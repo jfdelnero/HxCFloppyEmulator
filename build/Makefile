@@ -167,7 +167,6 @@ pack.o : ../sources/gui/microintro/packer/pack.c
 rle.o : ../sources/gui/microintro/packer/rle.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-
 clean:
 	rm -rf *.o
 	rm -rf *.so
@@ -175,5 +174,6 @@ clean:
 mrproper: clean
 	rm -rf $(EXEC)
 	rm -rf *.map *.ncb *.opt *.plg *.dll *.exe *.bak
+	$(MAKE) -C ../sources/gui/microintro/converttools/bmptob8 mrproper
 
 .PHONY: clean mrproper
