@@ -4,15 +4,16 @@ CPP=g++
 
 UNAME := $(shell uname)
 
-INCLUDEPATH = -I ../sources -I ../../../libhxcfe/trunk/sources -I ../sources/  -I ../sources/gui -I ../sources/thirdpartylibs/fltk/fltk-1.3.x/ -I ../../../libusbhxcfe/trunk/sources -I ../../../libhxcadaptor/trunk/sources -I ../sources/gui/microintro/
+BASEDIR=../sources
+INCLUDES = -I$(BASEDIR) -I ../../../libhxcfe/trunk/sources -I $(BASEDIR)/gui -I $(BASEDIR)/thirdpartylibs/fltk/fltk-1.3.x/ -I ../../../libusbhxcfe/trunk/sources -I ../../../libhxcadaptor/trunk/sources -I $(BASEDIR)/gui/microintro/
 
 DEBUG ?= 0
 
 ifeq ($(DEBUG), 1)
-	CFLAGS=-O0 $(INCLUDEPATH) -Wall -g -DDEBUG -fsanitize=address -fno-omit-frame-pointer
+	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG -fsanitize=address -fno-omit-frame-pointer
 	LDFLAGS= -lc -lm -ldl -lpthread -lasan
 else
-	CFLAGS=-O3 $(INCLUDEPATH) -Wall
+	CFLAGS=-O3 $(INCLUDES) -Wall
 	LDFLAGS= -lc -lm -ldl -lpthread -s
 endif
 
@@ -41,7 +42,7 @@ LDFLAGS += -framework Cocoa -arch x86_64 -mmacosx-version-min=10.9
 LIBHXCFE = libhxcfe.dylib
 LIBUSBHXCFE = libusbhxcfe.dylib
 else
-LDFLAGS += $(shell ../sources/thirdpartylibs/fltk/fltk-1.3.x/fltk-config --ldflags)
+LDFLAGS += $(shell $(BASEDIR)/thirdpartylibs/fltk/fltk-1.3.x/fltk-config --ldflags)
 endif
 
 EXEC=hxcfloppyemulator
@@ -51,9 +52,20 @@ FTDIFLOPPYEMU=usb_hxcfloppyemulator.o variablebitrate.o
 GUI = main_gui.o msg_txt.o gui_strings.o about_gui.o batch_converter_window.o floppy_dump_window.o floppy_infos_window.o license_gui.o log.o parameters.o rawfile_loader_window.o sdhxcfecfg_window.o usbhxcfecfg_window.o cb_batch_converter_window.o cb_floppy_dump_window.o cb_floppy_infos_window.o cb_rawfile_loader_window.o cb_sdhxcfecfg_window.o cb_usbhxcfecfg_window.o cb_filesystem_generator_window.o filesystem_generator_window.o cb_edittool_window.o edittool_window.o
 
 MICROINTRO = microintro.o lzw.o pack.o rle.o hxcmod.o
-FLTKLIB = ../sources/thirdpartylibs/fltk/fltk-1.3.x/lib/libfltk.a ../sources/thirdpartylibs/fltk/fltk-1.3.x/lib/libfltk_images.a
+FLTKLIB = $(BASEDIR)/thirdpartylibs/fltk/fltk-1.3.x/lib/libfltk.a $(BASEDIR)/thirdpartylibs/fltk/fltk-1.3.x/lib/libfltk_images.a
 
-all: $(EXEC)
+
+all: DATA_FILES $(EXEC)
+
+DATA_FILES: bmptoh
+	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh sob.bmp -BMP8P
+	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh hxc2001.bmp -BMP8P
+	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh hxc2001_backgnd.bmp -BMP8P
+	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh zandax_supplydas_booze.mod -DATA
+	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh maktone_class_cracktro15.mod -DATA
+	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh jozz_cognition.mod -DATA
+	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh vim_not_again.mod -DATA
+	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh COPYING_FULL -DATA
 
 hxcfloppyemulator: main.o utils.o $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) $(LIBUSBHXCFE) ../../../build/libhxcadaptor.a
 	$(CPP) -o $@    $^ $(LDFLAGS)
@@ -65,107 +77,110 @@ $(LIBHXCFE): ../../../build/$(LIBHXCFE)
 $(LIBUSBHXCFE): ../../../build/$(LIBUSBHXCFE)
 	ln ../../../build/$(LIBUSBHXCFE)  $(LIBUSBHXCFE)
 
-main.o: ../sources/main.cxx
+main.o: $(BASEDIR)/main.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-utils.o: ../sources/utils.cxx
+utils.o: $(BASEDIR)/utils.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-loader.o: ../sources/loader.cxx
+loader.o: $(BASEDIR)/loader.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-soft_cfg_file.o: ../sources/soft_cfg_file.cxx
+soft_cfg_file.o: $(BASEDIR)/soft_cfg_file.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-about_gui.o : ../sources/gui/about_gui.cxx
+about_gui.o : $(BASEDIR)/gui/about_gui.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-batch_converter_window.o : ../sources/gui/batch_converter_window.cxx
+batch_converter_window.o : $(BASEDIR)/gui/batch_converter_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-cb_batch_converter_window.o : ../sources/gui/cb_batch_converter_window.cxx
+cb_batch_converter_window.o : $(BASEDIR)/gui/cb_batch_converter_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-cb_floppy_dump_window.o : ../sources/gui/cb_floppy_dump_window.cxx
+cb_floppy_dump_window.o : $(BASEDIR)/gui/cb_floppy_dump_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-cb_floppy_infos_window.o : ../sources/gui/cb_floppy_infos_window.cxx
+cb_floppy_infos_window.o : $(BASEDIR)/gui/cb_floppy_infos_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-cb_edittool_window.o : ../sources/gui/cb_edittool_window.cxx
+cb_edittool_window.o : $(BASEDIR)/gui/cb_edittool_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-cb_rawfile_loader_window.o : ../sources/gui/cb_rawfile_loader_window.cxx
+cb_rawfile_loader_window.o : $(BASEDIR)/gui/cb_rawfile_loader_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-cb_sdhxcfecfg_window.o : ../sources/gui/cb_sdhxcfecfg_window.cxx
+cb_sdhxcfecfg_window.o : $(BASEDIR)/gui/cb_sdhxcfecfg_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-cb_usbhxcfecfg_window.o : ../sources/gui/cb_usbhxcfecfg_window.cxx
+cb_usbhxcfecfg_window.o : $(BASEDIR)/gui/cb_usbhxcfecfg_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-cb_filesystem_generator_window.o : ../sources/gui/cb_filesystem_generator_window.cxx
+cb_filesystem_generator_window.o : $(BASEDIR)/gui/cb_filesystem_generator_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-fileselector.o : ../sources/gui/fileselector.cxx
+fileselector.o : $(BASEDIR)/gui/fileselector.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-filesystem_generator_window.o : ../sources/gui/filesystem_generator_window.cxx
+filesystem_generator_window.o : $(BASEDIR)/gui/filesystem_generator_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-fl_dnd_box.o : ../sources/gui/fl_dnd_box.cxx
+fl_dnd_box.o : $(BASEDIR)/gui/fl_dnd_box.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-floppy_dump_window.o : ../sources/gui/floppy_dump_window.cxx
+floppy_dump_window.o : $(BASEDIR)/gui/floppy_dump_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-floppy_infos_window.o : ../sources/gui/floppy_infos_window.cxx
+floppy_infos_window.o : $(BASEDIR)/gui/floppy_infos_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-edittool_window.o : ../sources/gui/edittool_window.cxx
+edittool_window.o : $(BASEDIR)/gui/edittool_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-license_gui.o : ../sources/gui/license_gui.cxx
+license_gui.o : $(BASEDIR)/gui/license_gui.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-log.o : ../sources/gui/log.cxx
+log.o : $(BASEDIR)/gui/log.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-parameters.o : ../sources/gui/parameters.cxx
+parameters.o : $(BASEDIR)/gui/parameters.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-main_gui.o : ../sources/gui/main_gui.cxx
+main_gui.o : $(BASEDIR)/gui/main_gui.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-msg_txt.o : ../sources/gui/msg_txt.cxx
+msg_txt.o : $(BASEDIR)/gui/msg_txt.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-gui_strings.o : ../sources/gui/gui_strings.cxx
+gui_strings.o : $(BASEDIR)/gui/gui_strings.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-rawfile_loader_window.o : ../sources/gui/rawfile_loader_window.cxx
+rawfile_loader_window.o : $(BASEDIR)/gui/rawfile_loader_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-sdhxcfecfg_window.o : ../sources/gui/sdhxcfecfg_window.cxx
+sdhxcfecfg_window.o : $(BASEDIR)/gui/sdhxcfecfg_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-usbhxcfecfg_window.o : ../sources/gui/usbhxcfecfg_window.cxx
+usbhxcfecfg_window.o : $(BASEDIR)/gui/usbhxcfecfg_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
-microintro.o : ../sources/gui/microintro/microintro.c
+microintro.o : $(BASEDIR)/gui/microintro/microintro.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-hxcmod.o : ../sources/gui/microintro/hxcmod.c
+hxcmod.o : $(BASEDIR)/gui/microintro/hxcmod.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-lzw.o : ../sources/gui/microintro/packer/lzw.c
+lzw.o : $(BASEDIR)/gui/microintro/packer/lzw.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-pack.o : ../sources/gui/microintro/packer/pack.c
+pack.o : $(BASEDIR)/gui/microintro/packer/pack.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-rle.o : ../sources/gui/microintro/packer/rle.c
+rle.o : $(BASEDIR)/gui/microintro/packer/rle.c
 	$(CC) -o $@ -c $< $(CFLAGS)
+
+bmptoh:
+	cd $(BASEDIR)/gui/microintro/converttools/bmptob8 && $(MAKE)
 
 clean:
 	rm -rf *.o
@@ -174,6 +189,6 @@ clean:
 mrproper: clean
 	rm -rf $(EXEC)
 	rm -rf *.map *.ncb *.opt *.plg *.dll *.exe *.bak
-	$(MAKE) -C ../sources/gui/microintro/converttools/bmptob8 mrproper
+	$(MAKE) -C $(BASEDIR)/gui/microintro/converttools/bmptob8 mrproper
 
 .PHONY: clean mrproper
