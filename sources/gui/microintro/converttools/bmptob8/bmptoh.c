@@ -1,11 +1,18 @@
 #include <stdio.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
 
+#ifdef WIN32
 #include "stdint.h"
-
 #include <windows.h>
+#else
+#include <stdint.h>
+#include "bmp_file.h"
+#endif
+
 #include "../../packer/pack.h"
+#include "../../packer/lzw.h"
+#include "../../packer/rle.h"
 
 typedef struct {
 	uint32_t xres;
@@ -16,13 +23,12 @@ typedef struct {
 	uint8_t pack;
 } bmpinfo;
 
-
-char * extractbmpdata(char *bmpfile,bmpinfo *info)
+uint8_t * extractbmpdata(char *bmpfile,bmpinfo *info)
 {
 	FILE * file;
 	int p,m,i,j,o,k;
 	int32_t s;
-	uint32_t taille,taille2;
+	uint32_t filesize,adj_filesize;
 	uint8_t * dbuffer;
 	uint8_t vc;
 
@@ -30,52 +36,69 @@ char * extractbmpdata(char *bmpfile,bmpinfo *info)
 	BITMAPINFOHEADER bmih;
 	uint8_t pallette[256*8];
 
+	dbuffer = NULL;
+
+	memset(&bmph,0,sizeof(BITMAPFILEHEADER));
+	memset(&bmih,0,sizeof(BITMAPINFOHEADER));
+
+	s = 0;
 
 	file=fopen(bmpfile,"rb");
-	if(file!=NULL)
+	if( file )
 	{
-		//Determination taille fichier
+		//Get the file size
 		fseek(file,0,SEEK_END);
-		taille=ftell(file);
+		filesize = ftell(file);
 		fseek(file,0,SEEK_SET);
 
-		// lecture entetes
+		// read header
 		if(info->type!=0xff)
 		{
-		fread(&bmph,sizeof(bmph),1,file);
-		fread(&bmih,sizeof(bmih),1,file);
+			if(fread(&bmph,sizeof(bmph),1,file) != 1)
+				goto error;
 
+			if(fread(&bmih,sizeof(bmih),1,file) != 1)
+				goto error;
 
-		info->xres=bmih.biWidth;
-		info->yres=bmih.biHeight;
+			info->xres=bmih.biWidth;
+			info->yres=bmih.biHeight;
 
 			if(info->type==9)
 			{
-				fread(&pallette,256*4,1,file);
+				if(fread(&pallette,256*4,1,file) != 1)
+					goto error;
 			}
 
+			s=bmih.biWidth;
+			do
+			{
+				s=s-4;
+			}while(s>=4);
+
+			if(s!=0)
+				s=4-s;
 		}
 		//info->type=bmih.biBitCount;
 
-		s=bmih.biWidth;
-		do
-		{
-			s=s-4;
-		}while(s>=4);
+		adj_filesize=((filesize-bmph.bfOffBits)-(s*bmih.biHeight));
 
-		if(s!=0)
-		s=4-s;
+		if(info->type==0xff)
+			adj_filesize = filesize;
 
-		taille2=((taille-bmph.bfOffBits)-(s*bmih.biHeight));
-		if(info->type==0xff) taille2=taille;
+		if(info->type==9)
+			adj_filesize += (3*256);
 
-		if(info->type==9) taille2=taille2+(3*256);
-
-		if(info->type==1) 	info->size=taille2/8;
-		else	info->size=taille2;
+		if(info->type==1)
+			info->size = adj_filesize/8;
+		else
+			info->size = adj_filesize;
 
 		//mem data
-		dbuffer=(char *) malloc(taille2+100);
+		dbuffer = (uint8_t *) malloc(adj_filesize+100);
+		if(!dbuffer)
+			goto error;
+
+		memset(dbuffer,0,adj_filesize+100);
 
 		p=0;
 		j=0;
@@ -86,24 +109,20 @@ char * extractbmpdata(char *bmpfile,bmpinfo *info)
 				dbuffer[(i*3)]=pallette[(i*4)];
 				dbuffer[(i*3)+1]=pallette[(i*4)+1];
 				dbuffer[(i*3)+2]=pallette[(i*4)+2];
-
-
 			}
+
 			p=3*256;
 			j=p;
 		}
 
-
 		fseek(file,bmph.bfOffBits,SEEK_SET);
-
-
 
 		m=0;
 
 		k=0;
 		vc=0;
 
-		for(i=0;i<(int)(taille2-j);i++)
+		for(i=0;i<(int)(adj_filesize-j);i++)
 		{
 
 			if(info->type==1)
@@ -135,15 +154,21 @@ char * extractbmpdata(char *bmpfile,bmpinfo *info)
 					m=0;
 				}
 			}
-
-
 		}
+
 		fclose(file);
 		return dbuffer;
 	}
 	return NULL;
 
+error:
+	if(file)
+		fclose(file);
 
+	if(dbuffer)
+		free(dbuffer);
+
+	return NULL;
 }
 
 char  buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
@@ -160,12 +185,18 @@ char  buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
 	{
 		if(temp[i]=='.') temp[i]='_';
 	}
-	if(info->type!=0xff) sprintf(temp2,"data_bmp_%s.h",temp);
-	else sprintf(temp2,"data_%s.h",temp);
+
+	if(info->type!=0xff)
+		sprintf(temp2,"data_bmp_%s.h",temp);
+	else
+		sprintf(temp2,"data_%s.h",temp);
+
 	printf("Create %s :",temp2);
 
+	file2 = fopen(temp2,"w");
+	if(!file2)
+		return -1;
 
-	file2=fopen(temp2,"w");
 	if(info->type!=0xff)
 	{
 		fprintf(file2,"//////////////////////////////\n//\n//\n// Created by Binary2Header V0.6\n// (c) HxC2001\n// (c) PowerOfAsm\n//\n");
@@ -207,48 +238,52 @@ char  buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
 	}
 
 	fprintf(file2,"};\n");
-	if(info->type!=0xff) fprintf(file2,"\n\nstatic bmaptype bitmap_%s[]=\n{\n\t{ %d, %d, %d, %d, %d, data_bmp%s, 0 }\n};\n",temp,info->type,info->xres,info->yres,info->size,info->csize,temp);
-	else fprintf(file2,"\n\nstatic datatype data_%s[]=\n{\n\t{ %d, %d, %d, data__%s, 0 }\n};\n",temp,info->type,info->size,info->csize,temp);
+
+	if(info->type!=0xff)
+		fprintf(file2,"\n\nstatic bmaptype bitmap_%s[]=\n{\n\t{ %d, %d, %d, %d, %d, data_bmp%s, 0 }\n};\n",temp,info->type,info->xres,info->yres,info->size,info->csize,temp);
+	else
+		fprintf(file2,"\n\nstatic datatype data_%s[]=\n{\n\t{ %d, %d, %d, data__%s, 0 }\n};\n",temp,info->type,info->size,info->csize,temp);
+
 	fclose(file2);
 	return 0;
 }
 
 
-unsigned char mi_pack(unsigned char * bufferin, unsigned long sizein,unsigned char * bufferout, int * sizeout)
+int mi_pack(unsigned char * bufferin, int sizein,unsigned char * bufferout, int * sizeout)
 {
 	unsigned char* buffer;
 	unsigned char* buffer2;
-	unsigned long  newsize;
-	unsigned long  newsize_lzw;
-	unsigned long  newsize_rle;
+	int  newsize;
+	int  newsize_lzw;
+	int  newsize_rle;
 	int mode;
-
 
 	buffer =  (unsigned char*)malloc(sizein * 10);
 	buffer2 = (unsigned char*)malloc(sizein * 10);
+
+	mode = -1;
 
 	if( buffer && buffer2)
 	{
 		memset(buffer, 0, sizein * 10);
 		memset(buffer2, 0, sizein * 10);
 
+		newsize_lzw = sizein * 10;
+
 		lzw_compress(bufferin,buffer,sizein,&newsize_lzw);
 		rlepack(bufferin,sizein,buffer2,&newsize_rle);
 
-		mode=0;
+		mode = 0;
 
 		// Note : only lzw mode for this project.
 		//if(newsize_rle<sizein && newsize_rle< newsize_lzw)
 		//	mode=1; //rle
 
-		if(newsize_lzw<sizein && newsize_lzw< newsize_rle)
+		if( newsize_lzw >= 0 && newsize_lzw<sizein && newsize_lzw< newsize_rle)
 			mode=2; //lzw
-
-		printf("mode : %d\n",mode);
 
 		switch(mode)
 		{
-
 			case 0:
 				memcpy((buffer2+1),bufferin,sizein);
 				buffer2[0]=0x0;
@@ -264,6 +299,7 @@ unsigned char mi_pack(unsigned char * bufferin, unsigned long sizein,unsigned ch
 			break;
 
 			case 2:
+				newsize = sizein * 10;
 				lzw_compress(bufferin,buffer+1,sizein,(int*)&newsize);
 				buffer[0]=0x1;
 				memcpy(bufferout,buffer,newsize+1);
@@ -271,6 +307,7 @@ unsigned char mi_pack(unsigned char * bufferin, unsigned long sizein,unsigned ch
 			break;
 
 			case 3:
+				newsize = sizein * 10;
 				rlepack(bufferin,sizein,buffer2,(int*)&newsize);
 				lzw_compress(buffer2,buffer+1,newsize,(int*)&newsize_lzw);
 				buffer[0]=0x3;
@@ -283,7 +320,7 @@ unsigned char mi_pack(unsigned char * bufferin, unsigned long sizein,unsigned ch
 		free(buffer2);
 	}
 
-	return 0;
+	return mode;
 };
 
 
@@ -293,33 +330,38 @@ int main(int argc, char* argv[])
 	bmpinfo infoo;
 	unsigned char * dbuffer;
 	unsigned char * cbuffer;
-	int size,i;
-	printf("Binary2Header V0.6\nHxC2001\n");
-	if(argc==1)printf("Usage:\n");
+	int size,i,mode;
+
+	printf("Binary2Header V0.6 - (c)HxC2001\n");
+
+	memset(&infoo,0,sizeof(bmpinfo));
+
+	if(argc==1)
+		printf("Usage:\n");
 	else
 	{
 		i=argc-1;
 		do{
 			if(strcmp("-BMP8",argv[i])==0)  infoo.type=8;
-			if(strcmp("-BMP8P",argv[i])==0)  infoo.type=9;
+			if(strcmp("-BMP8P",argv[i])==0) infoo.type=9;
 			if(strcmp("-BMP1",argv[i])==0)  infoo.type=1;
 			if(strcmp("-DATA",argv[i])==0)  infoo.type=0xff;
 			i--;
 		}while(i);
 
-		dbuffer=NULL;
-		dbuffer=(unsigned char *)extractbmpdata(argv[1],&infoo);
+		dbuffer = (unsigned char *)extractbmpdata(argv[1],&infoo);
 
 		if(dbuffer!=NULL)
 		{
-			printf("%d\n",infoo.size+100+1024);
 			cbuffer=(unsigned char *)malloc(infoo.size+100+1024);
 			if(cbuffer!=NULL)
 			{
-				printf("Pack...\n");
+				memset(cbuffer,0,infoo.size+100+1024);
 
-				mi_pack(dbuffer,infoo.size,cbuffer, &size);
-				printf("build include file...\n");
+				mode = mi_pack(dbuffer,infoo.size,cbuffer, &size);
+
+				printf("Generate header file... (Pack mode : %d, Source size : %d bytes, Final data size : %d bytes)\n",mode,infoo.size,size);
+
 				infoo.csize=size;
 				buildincludefile(argv[1],&infoo,cbuffer);
 
