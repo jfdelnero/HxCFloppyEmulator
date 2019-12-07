@@ -295,7 +295,9 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 			if (!DeviceIoControl(h, IOCTL_FD_GET_TRACK_TIME, 0, 0, &rotationtime, sizeof(rotationtime), &ret, NULL))
 			{
 				sprintf(tempstr,"Error during RPM checking :%d ",GetLastError());
+				Fl::lock();
 				params->windowshwd->global_status->value(tempstr);
+				Fl::unlock();
 
 				CUI_affiche(MSG_DEBUG,"Leaving Floppy dump: IOCTL_FD_GET_TRACK_TIME error %d...",GetLastError());
 				closedevice(h);
@@ -313,7 +315,10 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 
 			CUI_affiche(MSG_DEBUG,"Drive RPM: %d",rpm);
 			sprintf(tempstr,"Drive RPM: %d",rpm);
+
+			Fl::lock();
 			params->windowshwd->global_status->value(tempstr);
+			Fl::unlock();
 
 			if(rpm>280 && rpm<320) rpm=300;
 			if(rpm>340 && rpm<380) rpm=360;
@@ -321,7 +326,9 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 			bitrate=500000;
 
 			sprintf(tempstr,"Starting reading disk...");
+			Fl::lock();
 			params->windowshwd->global_status->value(tempstr);
+			Fl::unlock();
 
 			for(i=0;i<params->number_of_track;i++)
 			{
@@ -330,7 +337,6 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 				{
 					for(j=0;j<params->number_of_side;j++)
 					{
-
 						l=0;
 						o=i*xsize*3;
 						if(j)
@@ -344,11 +350,11 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 							guicontext->mapfloppybuffer[o++]=0x55;
 							guicontext->mapfloppybuffer[o++]=0x55;
 							guicontext->mapfloppybuffer[o]=0x55;
+
 							if(i&1)
 								guicontext->mapfloppybuffer[o]=0xA5;
-							o++;
 
-							//o++;
+							o++;
 							l--;
 						}
 					}
@@ -357,12 +363,9 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 
 			for(i=0;i<params->number_of_track;i++)
 			{
-
 				for(j=0;j<params->number_of_side;j++)
 				{
-
 					seek(h,i*params->double_step, j);
-
 
 					l=0;
 					do
@@ -453,7 +456,6 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 								guicontext->mapfloppybuffer[o++]=0xFF;
 								guicontext->mapfloppybuffer[o++]=0xFF;
 								guicontext->mapfloppybuffer[o++]=0xFF;
-								//o++;
 								l--;
 							}
 							o=o+6;
@@ -470,7 +472,6 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 					hxcfe_pushTrack (fb,rpm,i,j,trackformat);
 					hxcfe_setTrackBitrate(fb,bitrate);
 
-
 					for(k=0;k<sr->count;k++)
 					{
 						CUI_affiche(MSG_DEBUG,"Sector %.2d, Track ID: %.3d, Head ID:%d, Size: %d bytes, Bitrate:%dkbits/s, %s",sr->Header[k].sector,sr->Header[k].cyl,sr->Header[k].head,128<<sr->Header[k].size,bitrate/1000,trackformat==IBMFORMAT_SD?"FM":"MFM");
@@ -483,6 +484,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 						{
 							rwp.flags=0x00;
 						}
+
 						rwp.cyl=sr->Header[k].cyl;
 						rwp.phead=j;
 						rwp.head=sr->Header[k].head;
@@ -490,6 +492,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 						rwp.size=sr->Header[k].size;
 						rwp.eot=sr->Header[k].sector+1;
 						rwp.gap=10;
+
 						if((128<<sr->Header[k].size)>128)
 						{
 							rwp.datalen=255;
@@ -518,7 +521,6 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 									guicontext->mapfloppybuffer[o++]=0xFF;
 									guicontext->mapfloppybuffer[o++]=0xFF;
 									guicontext->mapfloppybuffer[o++]=0x00;
-									//o++;
 									l--;
 								}
 								o=o+6;
@@ -554,7 +556,6 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 								l--;
 							}
 							o=o+6;
-
 						}
 						else
 						{
@@ -580,14 +581,18 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 						numberofsector_read++;
 
 						sprintf(tempstr,"%d Sector(s) Read, %d bytes, %d Bad sector(s)",numberofsector_read,total_size,number_of_bad_sector);
-						params->windowshwd->current_status->value(tempstr);
 
+						Fl::lock();
+						params->windowshwd->current_status->value(tempstr);
+						Fl::unlock();
 					}
 
 					hxcfe_popTrack(fb);
 
 					sprintf(tempstr,"Track %d side %d: %d sectors, %dkbits/s, %s",i,j,sr->count,bitrate/1000,((trackformat==ISOFORMAT_SD) || (trackformat==IBMFORMAT_SD) )?"FM":"MFM");
+					Fl::lock();
 					params->windowshwd->global_status->value(tempstr);
+					Fl::unlock();
 				}
 			}
 
@@ -596,10 +601,12 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 			params->floppydisk=hxcfe_getFloppy(fb);
 			load_floppy(params->floppydisk,"Floppy Dump Image");
 
+			Fl::lock();
 			sprintf(tempstr,"Done !");
 			params->windowshwd->global_status->value(tempstr);
 			sprintf(tempstr,"%d Sector(s) Read, %d bytes, %d Bad sector(s)",numberofsector_read,total_size,number_of_bad_sector);
 			params->windowshwd->current_status->value(tempstr);
+			Fl::unlock();
 
 			CUI_affiche(MSG_DEBUG,"Done ! %d sectors read, %d bad sector(s), %d bytes read",numberofsector_read,number_of_bad_sector,total_size);
 
@@ -613,7 +620,10 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 	}
 
 	sprintf(tempstr,"Error while opening fdrawcmd, see: http://simonowen.com/fdrawcmd");
+
+	Fl::lock();
 	params->windowshwd->global_status->value(tempstr);
+	Fl::unlock();
 
 	free(tempstr);
 

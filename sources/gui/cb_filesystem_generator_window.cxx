@@ -1373,8 +1373,10 @@ int getfilesthread(void* floppycontext,void* hw_context)
 	{
 		fsw=fsparams2->fsw;
 
+		Fl::lock();
 		fsw->txtout_freesize->color(FL_WHITE);
 		fsw->txtout_freesize->redraw();
+		Fl::unlock();
 
 		fsmng = hxcfe_initFsManager(guicontext->hxcfe);
 		if (fsmng)
@@ -1386,13 +1388,17 @@ int getfilesthread(void* floppycontext,void* hw_context)
 			{
 				while(flt_item)
 				{
+					Fl::lock();
 					fsw->fs_browser->item_pathname((char*)&itempath, sizeof(itempath), flt_item);
+					Fl::unlock();
 
 					if(strstr(itempath,"            |"))
 						*strstr(itempath,"            |") = 0;
 
 					getdir(fsw,fsmng,itempath+2,fsparams2->files,0);
+					Fl::lock();
 					flt_item = fsw->fs_browser->next_selected_item(flt_item);
+					Fl::unlock();
 				}
 			}
 			else
@@ -1410,8 +1416,11 @@ int getfilesthread(void* floppycontext,void* hw_context)
 		free(fsparams2);
 
 		fsw->FATAccessInProgress = 0;
+
+		Fl::lock();
 		fsw->txtout_freesize->color(FL_WHITE);
 		fsw->txtout_freesize->redraw();
+		Fl::unlock();
 
 	}
 
@@ -1488,8 +1497,10 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 	{
 		fsw=fsparams2->fsw;
 
+		Fl::lock();
 		fsw->txtout_freesize->color(FL_WHITE);
 		fsw->txtout_freesize->redraw();
+		Fl::unlock();
 
 		filecount=0;
 		i=0;
@@ -1538,12 +1549,16 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 					flt_item = fsw->fs_browser->first_selected_item();
 					if(flt_item)
 					{
+						Fl::lock();
 						fsw->fs_browser->item_pathname((char*)&itempath, sizeof(itempath), flt_item);
+						Fl::unlock();
 						strncpy(basepath,itempath+2,sizeof(basepath));
 					}
 
+					Fl::lock();
 					fsw->fs_browser->clear();
 					fsw->fs_browser->selectmode(FL_TREE_SELECT_MULTI);
+					Fl::unlock();
 
 					fsmng = hxcfe_initFsManager(guicontext->hxcfe);
 					if (fsmng)
@@ -1554,13 +1569,11 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 						if ( dirhandle <= 0 )
 						{
 							memset(basepath,0,sizeof(basepath));
-
 						}
 						else
 						{
 							hxcfe_closeDir(fsmng,dirhandle);
 						}
-
 
 						ret = 0;
 						i=0;
@@ -1611,8 +1624,10 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 		free(fsparams2);
 
 		fsw->FATAccessInProgress = 0;
+		Fl::lock();
 		fsw->txtout_freesize->color(FL_WHITE);
 		fsw->txtout_freesize->redraw();
+		Fl::unlock();
 	}
 
 	return 0;
