@@ -16,16 +16,15 @@
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
-
 #ifndef MODPLAY_DEF
 #define MODPLAY_DEF
 
 // Basic type
-typedef unsigned char	muchar;
+typedef unsigned char   muchar;
 typedef signed   char   mchar;
-typedef unsigned short	muint;
-typedef          short	mint;
-typedef unsigned long	mulong;
+typedef unsigned short  muint;
+typedef          short  mint;
+typedef unsigned long   mulong;
 
 #ifdef HXCMOD_8BITS_OUTPUT
 	#ifdef HXCMOD_UNSIGNED_OUTPUT
@@ -41,7 +40,12 @@ typedef unsigned long	mulong;
 	#endif
 #endif
 
-#define NUMMAXCHANNELS 32
+#ifdef HXCMOD_MAXCHANNELS
+	#define NUMMAXCHANNELS HXCMOD_MAXCHANNELS
+#else
+	#define NUMMAXCHANNELS 32
+#endif
+
 #define MAXNOTES 12*12
 #define SAMPLE_RATE 44100
 //
@@ -83,10 +87,35 @@ typedef struct {
 //
 typedef struct {
 	mchar * sampdata;
+	mulong  length;
+	mulong  reppnt;
+	mulong  replen;
 	muint   sampnum;
-	muint   length;
-	muint   reppnt;
-	muint   replen;
+
+	mchar * nxt_sampdata;
+	mulong  nxt_length;
+	mulong  nxt_reppnt;
+	mulong  nxt_replen;
+	muint   update_nxt_repeat;
+
+	mchar * dly_sampdata;
+	mulong  dly_length;
+	mulong  dly_reppnt;
+	mulong  dly_replen;
+	muint   note_delay;
+
+	mchar * lst_sampdata;
+	mulong  lst_length;
+	mulong  lst_reppnt;
+	mulong  lst_replen;
+	muint   retrig_cnt;
+	muint   retrig_param;
+
+	muint   funkoffset;
+	mint    funkspeed;
+
+	mint    glissando;
+
 	mulong  samppos;
 	muint   period;
 	muchar  volume;
@@ -94,7 +123,6 @@ typedef struct {
 	muchar  effect;
 	muchar  parameffect;
 	muint   effect_code;
-
 
 	mint    decalperiod;
 	mint    portaspeed;
@@ -131,6 +159,7 @@ typedef struct {
 	mulong  patternticks;
 	mulong  patterntickse;
 	mulong  patternticksaim;
+	muint   tick_cnt;
 	mulong  sampleticksconst;
 
 	mulong  samplenb;
@@ -150,6 +179,10 @@ typedef struct {
 	mint    stereo_separation;
 	mint    bits;
 	mint    filter;
+
+#ifdef EFFECTS_USAGE_STATE
+	int effects_event_counts[32];
+#endif
 
 } modcontext;
 
@@ -174,7 +207,7 @@ typedef struct tracker_state_
 	int cur_pattern_pos;
 	int cur_pattern_table_pos;
 	unsigned int buf_index;
-	track_state tracks[32];
+	track_state tracks[NUMMAXCHANNELS];
 }tracker_state;
 
 typedef struct tracker_state_instrument_
@@ -216,6 +249,7 @@ typedef struct tracker_buffer_state_
 //   The optional trkbuf parameter can be used to get detailed status of the player. Put NULL/0 is unused.
 // -------------------------------------------
 // void hxcmod_unload( modcontext * modctx )
+//
 // - "Unload" / clear the player status.
 // -------------------------------------------
 ///////////////////////////////////////////////////////////////////////////////////
@@ -227,4 +261,3 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 void hxcmod_unload( modcontext * modctx );
 
 #endif
-
