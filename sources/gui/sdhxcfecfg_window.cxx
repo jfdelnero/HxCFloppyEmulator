@@ -226,7 +226,7 @@ sdhxcfecfg_window::sdhxcfecfg_window() {
       o->labelsize(12);
       o->callback((Fl_Callback*)sdhxcfecfg_window_bt_save, (void*)(this));
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(473, 262, 90, 25,getString(STR_SDSETTINGSWINDOW_0037));
+    { Fl_Button* o = new Fl_Button(473, 262, 90, 25,getString(STR_COMMON_OK));
       o->labelsize(12);
       o->callback((Fl_Callback*)cb_OK, (void*)(this));
     } // Fl_Button* o

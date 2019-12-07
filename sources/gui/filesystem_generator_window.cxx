@@ -13,7 +13,7 @@ filesystem_generator_window::filesystem_generator_window() {
       bt_injectdir->labelsize(12);
       bt_injectdir->callback((Fl_Callback*)filesystem_generator_window_bt_injectdir);
     } // Fl_Button* bt_injectdir
-    { bt_cancel = new Fl_Button(610, 379, 90, 25, getString(STR_FSGENERATORWINDOW_0003));
+    { bt_cancel = new Fl_Button(610, 379, 90, 25, getString(STR_COMMON_CLOSE));
       bt_cancel->labelsize(12);
       bt_cancel->callback((Fl_Callback*)filesystem_generator_window_bt_close);
     } // Fl_Button* bt_cancel

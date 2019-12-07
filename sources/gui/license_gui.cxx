@@ -49,6 +49,7 @@
 #include <stdlib.h>
 #include <stdarg.h> 
 #include <time.h>
+#include "gui_strings.h"
 
 #include "fl_includes.h"
 
@@ -84,14 +85,13 @@ License_box::License_box()
 	xsize=600;
 	ysize=400;
 
-
 	buf=new Fl_Text_Buffer;
 
 	txt_displ=new Fl_Text_Display(5, 5, xsize-(5*2), ysize-((5*2)+40));
 	buf->append((char*)license_txt);	
 	txt_displ->buffer(buf);
 
-	button_ok=new Fl_Button(xsize-100, ysize-35, 80, 30, "OK" ); // Fl_Button* o
+	button_ok=new Fl_Button(xsize-100, ysize-35, 80, 30, getString(STR_COMMON_OK) ); // Fl_Button* o
 	button_ok->callback(close_license,0);
 
 	this->end();
