@@ -174,5 +174,6 @@ clean:
 
 mrproper: clean
 	rm -rf $(EXEC)
+	rm -rf *.map *.ncb *.opt *.plg *.dll *.exe *.bak
 
 .PHONY: clean mrproper
