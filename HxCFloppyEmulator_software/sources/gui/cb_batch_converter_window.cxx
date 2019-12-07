@@ -132,6 +132,64 @@ ff_type ff_type_list[]=
 	{ -1,"",0,0}
 };
 
+void batchconverter_set_progress_status(s_gui_context * guicontext, char * str, Fl_Color color, float value)
+{
+	Main_Window * mw;
+
+	Fl::lock();
+
+	if(!guicontext)
+		goto error;
+
+	mw = (Main_Window*) guicontext->main_window;
+
+	if(!mw)
+		goto error;
+
+	mw->batchconv_window->progress_indicator->selection_color(color);
+	mw->batchconv_window->progress_indicator->label(str);
+
+	if(value>=0)
+	{
+		mw->batchconv_window->progress_indicator->value(value);
+	}
+
+	Fl::unlock();
+
+	return;
+
+error:
+	Fl::unlock();
+
+	return;
+
+}
+
+void batchconverter_set_status_string(batchconverterparams * params, char * str)
+{
+	Fl::lock();
+
+	if(!params)
+		goto error;
+
+	if(!params->windowshwd)
+		goto error;
+
+	if(!params->windowshwd->strout_convert_status)
+		goto error;
+
+	params->windowshwd->strout_convert_status->value((const char*)str);
+
+	Fl::unlock();
+
+	return;
+
+error:
+	Fl::unlock();
+
+	return;
+}
+
 int progress_callback_bc(unsigned int current,unsigned int total, void * user)
 {
 	s_gui_context * guicontext;
@@ -142,7 +200,9 @@ int progress_callback_bc(unsigned int current,unsigned int total, void * user)
 
 	if(total)
 	{
+		Fl::lock();
 		mw->batchconv_window->progress_indicator->value(((float)current/(float)total)*100);
+		Fl::unlock();
 	}
 
 	return 0;
@@ -165,9 +225,8 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 	tempstr = (char*)malloc(MAX_TMP_STR_SIZE);
 	if(!tempstr)
 	{
-		mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(255,10,10));
-		mw->batchconv_window->progress_indicator->label("Error");
-		params->windowshwd->strout_convert_status->value((const char*)"Alloc Error !");
+		batchconverter_set_progress_status(guicontext,(char*)"Error", fl_rgb_color(255,10,10), -1);
+		batchconverter_set_status_string(params, (char*)"Alloc Error !");
 
 		return 0;
 	}
@@ -183,13 +242,12 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 		filenb=0;
 		while(filelist[filenb] && !abort_trigger)
 		{
-			mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(50,255,50));
-			mw->batchconv_window->progress_indicator->label("Reading");
+			batchconverter_set_progress_status(guicontext,(char*)"Reading", fl_rgb_color(50,255,50), -1);
 
 			if(filelist[filenb])
 			{
 				snprintf((char*)tempstr,MAX_TMP_STR_SIZE,"%s",hxc_getfilenamebase(filelist[filenb],0));
-				params->windowshwd->strout_convert_status->value((const char*)tempstr);
+				batchconverter_set_status_string(params, tempstr);
 			}
 
 			if(!params->rawfilemode)
@@ -231,8 +289,7 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 
 				if(ret!=HXCFE_NOERROR || !thefloppydisk)
 				{
-					mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(255,10,10));
-					mw->batchconv_window->progress_indicator->label("Error");
+					batchconverter_set_progress_status(guicontext,(char*)"Error", fl_rgb_color(255,10,10), -1);
 
 					switch(ret)
 					{
@@ -252,8 +309,8 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 				}
 				else
 				{
-					mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(220,255,10));
-					mw->batchconv_window->progress_indicator->label("Writing");
+					batchconverter_set_progress_status(guicontext,(char*)"Writing", fl_rgb_color(220,255,10), -1);
+
 					j=strlen(filelist[filenb]);
 					while(filelist[filenb][j]!=DIR_SEPARATOR_CHAR && j)
 					{
@@ -299,7 +356,7 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 					strcat(destinationfile,ff_type_list[output_file_format].ext);
 
 					snprintf((char*)tempstr,MAX_TMP_STR_SIZE,"%s",hxc_getfilenamebase(destinationfile,0));
-					params->windowshwd->strout_convert_status->value((const char*)tempstr);
+					batchconverter_set_status_string(params, tempstr);
 
 					loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,(char*)ff_type_list[output_file_format].plug_id);
 					if(ret>=0)
@@ -319,13 +376,13 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 					if(!ret)
 					{
 						snprintf(tempstr,MAX_TMP_STR_SIZE,"%s created",hxc_getfilenamebase(destinationfile,NULL));
-						params->windowshwd->strout_convert_status->value((const char*)tempstr);
+						batchconverter_set_status_string(params, tempstr);
 						params->numberoffileconverted++;
 					}
 					else
 					{
 						snprintf(tempstr,MAX_TMP_STR_SIZE,"Error cannot create %s",hxc_getfilenamebase(destinationfile,NULL));
-						params->windowshwd->strout_convert_status->value((const char*)tempstr);
+						batchconverter_set_status_string(params, tempstr);
 					}
 
 					free(destinationfile);
@@ -336,9 +393,7 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 
 		}
 
-		mw->batchconv_window->progress_indicator->label("Done");
-		mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(80,80,255));
-		mw->batchconv_window->progress_indicator->value(100);
+		batchconverter_set_progress_status(guicontext,(char*)"Done", fl_rgb_color(80,80,255), 100);
 
 		hxcfe_imgDeInitLoader( imgldr_ctx );
 	}
@@ -358,7 +413,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 	char * destinationfile;
 	HXCFE_FLOPPY * thefloppydisk;
 	unsigned char * fullpath;
-	unsigned char * tempstr;
+	char * tempstr;
 	int loaderid;
 	Main_Window* mw;
 	int disklayout;
@@ -384,7 +439,6 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 			{
 				if(!abort_trigger)
 				{
-
 					if(FindFileData.isdirectory)
 					{
 						if(strcmp(".",FindFileData.filename)!=0 && strcmp("..",FindFileData.filename)!=0)
@@ -400,11 +454,12 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 
 							CUI_affiche(MSG_INFO_1,(char*)"Entering directory %s",FindFileData.filename);
 
-							tempstr=(unsigned char*)malloc(MAX_TMP_STR_SIZE);
+							tempstr = (char*)malloc(MAX_TMP_STR_SIZE);
 							if(tempstr)
 							{
-								snprintf((char*)tempstr,MAX_TMP_STR_SIZE,"Entering directory %s",FindFileData.filename);
-								params->windowshwd->strout_convert_status->value((const char*)tempstr);
+								snprintf(tempstr,MAX_TMP_STR_SIZE,"Entering directory %s",FindFileData.filename);
+
+								batchconverter_set_status_string(params, tempstr);
 							}
 
 							if(browse_and_convert_directory(floppycontext,(char*)fullpath,destinationfolder,file,output_file_format,params))
@@ -414,27 +469,28 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 								if(tempstr)
 									free(tempstr);
 								hxc_find_close(hfindfile);
-								mw->batchconv_window->progress_indicator->label("Done");
-								mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(80,80,255));
-								mw->batchconv_window->progress_indicator->value(100);
+
+								batchconverter_set_progress_status(guicontext,(char*)"Done", fl_rgb_color(80,80,255), 100);
+
 								return 1;
 							}
 							free(destinationfolder);
 							free(fullpath);
+
 							CUI_affiche(MSG_INFO_1,(char*)"Leaving directory %s",FindFileData.filename);
 
 							if(tempstr)
 							{
-								snprintf((char*)tempstr,MAX_TMP_STR_SIZE,"Leaving directory %s",FindFileData.filename);
-								params->windowshwd->strout_convert_status->value((const char*)tempstr);
+								snprintf(tempstr,MAX_TMP_STR_SIZE,"Leaving directory %s",FindFileData.filename);
+
+								batchconverter_set_status_string(params, tempstr);
 								free(tempstr);
 							}
 						}
 					}
 					else
 					{
-						mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(50,255,50));
-						mw->batchconv_window->progress_indicator->label("Reading");
+						batchconverter_set_progress_status(guicontext,(char*)"Reading", fl_rgb_color(50,255,50), -1);
 
 						CUI_affiche(MSG_INFO_1,(char*)"converting file %s, %dB",FindFileData.filename,FindFileData.size);
 						if(FindFileData.size)
@@ -443,11 +499,13 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 							fullpath=(unsigned char*)malloc(strlen(FindFileData.filename)+strlen(folder)+2);
 							sprintf((char*)fullpath,"%s" DIR_SEPARATOR "%s",folder,FindFileData.filename);
 
-							tempstr = (unsigned char*)malloc(MAX_TMP_STR_SIZE);
+							tempstr = (char*)malloc(MAX_TMP_STR_SIZE);
 							if(tempstr)
 							{
-								snprintf((char*)tempstr,MAX_TMP_STR_SIZE,"%s",FindFileData.filename);
-								params->windowshwd->strout_convert_status->value((const char*)tempstr);
+								snprintf(tempstr,MAX_TMP_STR_SIZE,"%s",FindFileData.filename);
+
+								batchconverter_set_status_string(params, tempstr);
+
 								free(tempstr);
 							}
 
@@ -456,7 +514,6 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 
 							if(loaderid>=0 || params->rawfilemode)
 							{
-
 								if(!params->rawfilemode)
 								{
 									thefloppydisk = hxcfe_imgLoad(imgldr_ctx,(char*)fullpath,loaderid,&ret);
@@ -465,7 +522,10 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 								{
 									mw = (Main_Window*)guicontext->main_window;
 
+									Fl::lock();
 									disklayout = mw->rawloader_window->choice_disklayout->value();
+									Fl::unlock();
+
 									if(disklayout>=1)
 									{
 										rfb = hxcfe_initXmlFloppy(guicontext->hxcfe);
@@ -496,8 +556,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 
 							if(ret!=HXCFE_NOERROR || !thefloppydisk)
 							{
-								mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(255,10,10));
-								mw->batchconv_window->progress_indicator->label("Error");
+								batchconverter_set_progress_status(guicontext,(char*)"Error", fl_rgb_color(255,10,10), -1);
 
 								switch(ret)
 								{
@@ -517,8 +576,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 							}
 							else
 							{
-								mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(220,255,10));
-								mw->batchconv_window->progress_indicator->label("Writing");
+								batchconverter_set_progress_status(guicontext,(char*)"Writing", fl_rgb_color(220,255,10), -1);
 
 								destinationfile=(char*)malloc(strlen(FindFileData.filename)+strlen(destfolder)+strlen(ff_type_list[output_file_format].ext)+1+2);
 								sprintf(destinationfile,"%s%c%s",destfolder,DIR_SEPARATOR_CHAR,FindFileData.filename);
@@ -537,11 +595,13 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 								//printf("Creating file %s\n",destinationfile);
 								strcat(destinationfile,ff_type_list[output_file_format].ext);
 
-								tempstr = (unsigned char*)malloc(MAX_TMP_STR_SIZE);
+								tempstr = (char*)malloc(MAX_TMP_STR_SIZE);
 								if(tempstr)
 								{
-									snprintf((char*)tempstr,MAX_TMP_STR_SIZE,"%s",hxc_getfilenamebase(destinationfile,0));
-									params->windowshwd->strout_convert_status->value((const char*)tempstr);
+									snprintf(tempstr,MAX_TMP_STR_SIZE,"%s",hxc_getfilenamebase(destinationfile,0));
+
+									batchconverter_set_status_string(params, tempstr);
+
 									free(tempstr);
 								}
 
@@ -563,7 +623,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 
 								hxcfe_imgUnload(imgldr_ctx,thefloppydisk);
 
-								tempstr = (unsigned char*)malloc(MAX_TMP_STR_SIZE);
+								tempstr = (char*)malloc(MAX_TMP_STR_SIZE);
 
 								i=strlen(destinationfile);
 								do
@@ -575,8 +635,9 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 								{
 									if(tempstr)
 									{
-										snprintf((char*)tempstr,MAX_TMP_STR_SIZE,"%s created",&destinationfile[i]);
-										params->windowshwd->strout_convert_status->value((const char*)tempstr);
+										snprintf(tempstr,MAX_TMP_STR_SIZE,"%s created",&destinationfile[i]);
+
+										batchconverter_set_status_string(params, tempstr);
 									}
 									params->numberoffileconverted++;
 								}
@@ -584,8 +645,8 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 								{
 									if(tempstr)
 									{
-										snprintf((char*)tempstr,MAX_TMP_STR_SIZE,"Error cannot create %s",&destinationfile[i]);
-										params->windowshwd->strout_convert_status->value((const char*)tempstr);
+										snprintf(tempstr,MAX_TMP_STR_SIZE,"Error cannot create %s",&destinationfile[i]);
+										batchconverter_set_status_string(params, tempstr);
 									}
 								}
 
@@ -606,9 +667,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 
 		hxcfe_imgDeInitLoader( imgldr_ctx );
 
-		mw->batchconv_window->progress_indicator->label("Done");
-		mw->batchconv_window->progress_indicator->selection_color(fl_rgb_color(80,80,255));
-		mw->batchconv_window->progress_indicator->value(100);
+		batchconverter_set_progress_status(guicontext,(char*)"Done", fl_rgb_color(80,80,255), 100);
 	}
 	return 0;
 }
@@ -648,12 +707,14 @@ int convertthread(void* floppycontext,void* hw_context)
 		if(tempstr)
 		{
 			snprintf(tempstr,MAX_TMP_STR_SIZE,"%d files converted!",(int)bcparams.numberoffileconverted);
-			bcparams.windowshwd->strout_convert_status->value((const char*)tempstr);
+			batchconverter_set_status_string(&bcparams, tempstr);
 			free(tempstr);
 		}
 	}
 
+	Fl::lock();
 	bcw->bt_convert->activate();
+	Fl::unlock();
 	return 0;
 }
 
@@ -732,7 +793,8 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 		if(tempstr)
 		{
 			snprintf(tempstr,MAX_TMP_STR_SIZE,"%d files converted!",(int)bcparams.numberoffileconverted);
-			bcparams.windowshwd->strout_convert_status->value((const char*)tempstr);
+			batchconverter_set_status_string(&bcparams, tempstr);
+
 			free(tempstr);
 		}
 
@@ -827,6 +889,7 @@ void batch_converter_window_inputasrawfile(Fl_Check_Button* cb, void*)
 	{
 		mw->rawloader_window->window->show();
 	}
+
 }
 
 void dnd_bc_conv(const char *urls)

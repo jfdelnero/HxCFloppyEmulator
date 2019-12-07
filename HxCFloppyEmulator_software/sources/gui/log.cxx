@@ -103,8 +103,10 @@ int CUI_affiche(int MSGTYPE,char * chaine, ...)
 	if(((MSGTYPE == MSG_DEBUG ) && logsfifo.debug_msg) || (logsfifo.log_msg && (MSGTYPE!=MSG_DEBUG)) )
 	{
 		va_list marker;
-		va_start( marker, chaine );
 
+		Fl::lock();
+
+		va_start( marker, chaine );
 
 		if(!logsfifo.fifotab[logsfifo.in&(LOGFIFOSIZE-1)])
 		{
@@ -162,8 +164,9 @@ int CUI_affiche(int MSGTYPE,char * chaine, ...)
 			}
 		}
 
-
 		va_end( marker );
+
+		Fl::unlock();
 	}
 
 	return 0;
