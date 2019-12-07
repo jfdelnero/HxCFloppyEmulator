@@ -29,7 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "types.h"
+#include <stdint.h>
 
 #include "lzw.h"
 #include "rle.h"
