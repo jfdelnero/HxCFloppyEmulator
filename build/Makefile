@@ -783,10 +783,9 @@ fat_write.o : $(BASEDIR)/thirdpartylibs/FATIOlib/fat_write.c
 
 bmptoh:
 	cd $(BASEDIR)/xml_disk/converttools/bmptob8 && $(MAKE)
-	mv $(BASEDIR)/xml_disk/converttools/bmptob8/bmptoh $(BASEDIR)/xml_disk/converttools/
 
 $(BASEDIR)/xml_disk/DiskLayouts/%.h : $(BASEDIR)/xml_disk/DiskLayouts/xml_files/%.xml
-	cd $(BASEDIR)/xml_disk/DiskLayouts/xml_files/ && ../../converttools/bmptoh $(basename $(notdir $<.xml)) -DATA && mv data_$(basename $(notdir $<))_xml.h ..
+	cd $(BASEDIR)/xml_disk/DiskLayouts/xml_files/ && ../../converttools/bmptob8/bmptoh $(basename $(notdir $<.xml)) -DATA && mv data_$(basename $(notdir $<))_xml.h ..
 
 $(BASEDIR)/init_script.h : $(BASEDIR)/init.script
 	cd $(BASEDIR)/ && $(BASEDIR)/xml_disk/converttools/bmptoh $(basename $(notdir $<.script)) -DATA && mv data_$(basename $(notdir $<))_script.h init_script.h
