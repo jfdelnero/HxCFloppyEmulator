@@ -12,12 +12,6 @@ class Main_Window : public Fl_Window {
 
 	char *evt_txt;
 
-	int	xsize;
-	int	ysize;
-	int	xpos_size;
-	int	ypos_size;
-
-	int	window_active;
 	unsigned int txtindex;
 	Fl_File_Chooser		*fc_load;
 	Fl_File_Chooser		*fc_save;

@@ -28,33 +28,23 @@
 
 // License class...
 class License_box : public Fl_Window {
-  
 
-  Fl_Button *button_wesite;
-  Fl_Button *button_releasenotes;
-  Fl_Button *button_license;
-  Fl_Button *button_ok;
+		Fl_Button *button_ok;
 
-  Fl_Progress* track_pos;
-  Fl_Text_Display* file_name_txt;
-  Fl_Box*  o;
-  Fl_Window *window;
-  Fl_Text_Display * txt_displ;
-  Fl_Text_Buffer* buf;
-
+		Fl_Text_Display * txt_displ;
+		Fl_Text_Buffer* buf;
 
   public:
-	  int	xsize;
-	  int	ysize;
-	  int	xpos_size;
-	  int	ypos_size;
-	  int	window_active;
+		int xsize;
+		int ysize;
+		int xpos_size;
+		int ypos_size;
+		int window_active;
 
 
-	  License_box();
-	  virtual void hide();
+		License_box();
+		virtual void hide();
 		~License_box();
 
 };
-
 
