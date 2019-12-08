@@ -23,7 +23,7 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 
 -> Script support introduced.
 
--> GUI : New advanced/parameters window added.
+-> GUI : New advanced parameters window added.
 
 -> GUI : Script execution menu entry added.
 
