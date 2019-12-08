@@ -2132,6 +2132,7 @@ int32_t hxcfe_td_exportToBMP( HXCFE_TD *td, char * filename )
 			bmpRLE8b_write(filename,&bdata);
 		}
 
+		free(ptr);
 		free(ptrchar);
 	}
 	else
