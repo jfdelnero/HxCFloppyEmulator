@@ -406,6 +406,8 @@ char * hxc_getfilenamebase(char * fullpath,char * filenamebase, int type)
 	{
 		len=strlen(fullpath);
 
+		separator = DIR_SEPARATOR_CHAR; // system type by default
+
 		switch(type)
 		{
 			case SYS_PATH_TYPE:  // System based
