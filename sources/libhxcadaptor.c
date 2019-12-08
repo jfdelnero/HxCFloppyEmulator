@@ -397,25 +397,40 @@ char * hxc_strlower(char * str)
 	return str;
 }
 
-
-char * hxc_getfilenamebase(char * fullpath,char * filenamebase)
+char * hxc_getfilenamebase(char * fullpath,char * filenamebase, int type)
 {
 	int len,i;
+	char separator;
 
 	if(fullpath)
 	{
 		len=strlen(fullpath);
 
+		switch(type)
+		{
+			case SYS_PATH_TYPE:  // System based
+				separator = DIR_SEPARATOR_CHAR;
+			break;
+
+			case UNIX_PATH_TYPE:    // Unix style
+				separator = '/';
+			break;
+
+			case WINDOWS_PATH_TYPE: // Windows style
+				separator = '\\';
+			break;
+		}
+
 		i=0;
 		if(len)
 		{
 			i=len-1;
-			while(i &&	( fullpath[i] != DIR_SEPARATOR_CHAR && fullpath[i]!=':') )
+			while(i &&	( fullpath[i] != separator && fullpath[i]!=':') )
 			{
 				i--;
 			}
 
-			if( fullpath[i] == DIR_SEPARATOR_CHAR || fullpath[i]==':' )
+			if( fullpath[i] == separator || fullpath[i]==':' )
 			{
 				i++;
 			}
@@ -437,12 +452,12 @@ char * hxc_getfilenamebase(char * fullpath,char * filenamebase)
 	return 0;
 }
 
-char * hxc_getfilenameext(char * fullpath,char * filenameext)
+char * hxc_getfilenameext(char * fullpath,char * filenameext, int type )
 {
 	char * filename;
 	int len,i;
 
-	filename=hxc_getfilenamebase(fullpath,0);
+	filename=hxc_getfilenamebase(fullpath,0,type);
 
 	if(filename)
 	{
@@ -484,7 +499,7 @@ char * hxc_getfilenameext(char * fullpath,char * filenameext)
 	return 0;
 }
 
-int hxc_getfilenamewext(char * fullpath,char * filenamewext)
+int hxc_getfilenamewext(char * fullpath,char * filenamewext, int type)
 {
 	char * filename;
 	char * ext;
@@ -493,8 +508,8 @@ int hxc_getfilenamewext(char * fullpath,char * filenamewext)
 	len = 0;
 	if(fullpath)
 	{
-		filename = hxc_getfilenamebase(fullpath,0);
-		ext = hxc_getfilenameext(fullpath,0);
+		filename = hxc_getfilenamebase(fullpath,0,type);
+		ext = hxc_getfilenameext(fullpath,0,type);
 
 		len = ext-filename;
 
@@ -513,7 +528,7 @@ int hxc_getfilenamewext(char * fullpath,char * filenamewext)
 	return len;
 }
 
-int hxc_getpathfolder(char * fullpath,char * folder)
+int hxc_getpathfolder(char * fullpath,char * folder,int type)
 {
 	int len;
 	char * filenameptr;
@@ -521,7 +536,7 @@ int hxc_getpathfolder(char * fullpath,char * folder)
 	len = 0;
 	if(fullpath)
 	{
-		filenameptr = hxc_getfilenamebase(fullpath,0);
+		filenameptr = hxc_getfilenamebase(fullpath,0,type);
 
 		len = filenameptr-fullpath;
 
@@ -535,16 +550,16 @@ int hxc_getpathfolder(char * fullpath,char * folder)
 	return len;
 }
 
-int hxc_checkfileext(char * path,char *ext)
+int hxc_checkfileext(char * path,char *ext,int type)
 {
 	char pathext[16];
 	char srcext[16];
 
 	if(path && ext)
 	{
-		if( ( strlen(hxc_getfilenameext(path,0)) < 16 )  && ( strlen(ext) < 16 ))
+		if( ( strlen(hxc_getfilenameext(path,0,type)) < 16 )  && ( strlen(ext) < 16 ))
 		{
-			hxc_getfilenameext(path,(char*)&pathext);
+			hxc_getfilenameext(path,(char*)&pathext,type);
 			hxc_strlower(pathext);
 
 			strcpy((char*)srcext,ext);

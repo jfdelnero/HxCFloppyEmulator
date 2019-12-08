@@ -72,11 +72,18 @@ int  hxc_mkdir( char * folder );
 
 char * hxc_getcurrentdirectory( char *currentdirectory, int buffersize );
 
-char * hxc_getfilenamebase( char * fullpath, char * filenamebase );
-char * hxc_getfilenameext( char * fullpath, char * filenameext );
-int hxc_getfilenamewext( char * fullpath, char * filenamewext );
-int hxc_getpathfolder( char * fullpath, char * folder );
-int hxc_checkfileext( char * path, char *ext );
+enum
+{
+	SYS_PATH_TYPE = 0,
+	UNIX_PATH_TYPE,
+	WINDOWS_PATH_TYPE,
+};
+
+char * hxc_getfilenamebase( char * fullpath, char * filenamebase, int type );
+char * hxc_getfilenameext( char * fullpath, char * filenameext, int type );
+int hxc_getfilenamewext( char * fullpath, char * filenamewext, int type );
+int hxc_getpathfolder( char * fullpath, char * folder, int type );
+int hxc_checkfileext( char * path, char *ext, int type );
 int hxc_getfilesize( char * path );
 
 #ifdef __cplusplus
