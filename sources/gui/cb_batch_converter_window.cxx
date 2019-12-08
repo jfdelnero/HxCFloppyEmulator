@@ -246,7 +246,7 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 
 			if(filelist[filenb])
 			{
-				snprintf((char*)tempstr,MAX_TMP_STR_SIZE,"%s",hxc_getfilenamebase(filelist[filenb],0));
+				snprintf((char*)tempstr,MAX_TMP_STR_SIZE,"%s",hxc_getfilenamebase(filelist[filenb],0,SYS_PATH_TYPE));
 				batchconverter_set_status_string(params, tempstr);
 			}
 
@@ -355,7 +355,7 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 
 					strcat(destinationfile,ff_type_list[output_file_format].ext);
 
-					snprintf((char*)tempstr,MAX_TMP_STR_SIZE,"%s",hxc_getfilenamebase(destinationfile,0));
+					snprintf((char*)tempstr,MAX_TMP_STR_SIZE,"%s",hxc_getfilenamebase(destinationfile,0,SYS_PATH_TYPE));
 					batchconverter_set_status_string(params, tempstr);
 
 					loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,(char*)ff_type_list[output_file_format].plug_id);
@@ -375,13 +375,13 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 
 					if(!ret)
 					{
-						snprintf(tempstr,MAX_TMP_STR_SIZE,"%s created",hxc_getfilenamebase(destinationfile,NULL));
+						snprintf(tempstr,MAX_TMP_STR_SIZE,"%s created",hxc_getfilenamebase(destinationfile,NULL,SYS_PATH_TYPE));
 						batchconverter_set_status_string(params, tempstr);
 						params->numberoffileconverted++;
 					}
 					else
 					{
-						snprintf(tempstr,MAX_TMP_STR_SIZE,"Error cannot create %s",hxc_getfilenamebase(destinationfile,NULL));
+						snprintf(tempstr,MAX_TMP_STR_SIZE,"Error cannot create %s",hxc_getfilenamebase(destinationfile,NULL,SYS_PATH_TYPE));
 						batchconverter_set_status_string(params, tempstr);
 					}
 
@@ -598,7 +598,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 								tempstr = (char*)malloc(MAX_TMP_STR_SIZE);
 								if(tempstr)
 								{
-									snprintf(tempstr,MAX_TMP_STR_SIZE,"%s",hxc_getfilenamebase(destinationfile,0));
+									snprintf(tempstr,MAX_TMP_STR_SIZE,"%s",hxc_getfilenamebase(destinationfile,0,SYS_PATH_TYPE));
 
 									batchconverter_set_status_string(params, tempstr);
 

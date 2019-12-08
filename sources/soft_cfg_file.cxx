@@ -47,7 +47,7 @@ int load_last_cfg()
 
 	hxc_getcurrentdirectory(executablepath,TMP_PATH_SIZE);
 
-	tmp_ptr = hxc_getfilenamebase(executablepath,NULL);
+	tmp_ptr = hxc_getfilenamebase(executablepath,NULL,SYS_PATH_TYPE);
 	snprintf( tmp_ptr, TMP_PATH_SIZE - ( 11 + (tmp_ptr - (char*)&executablepath)),"config.dat");
 
 	f=hxc_fopen(executablepath,"rb");
@@ -87,7 +87,7 @@ int save_cfg()
 
 	hxc_getcurrentdirectory(executablepath,TMP_PATH_SIZE);
 
-	tmp_ptr = hxc_getfilenamebase(executablepath,NULL);
+	tmp_ptr = hxc_getfilenamebase(executablepath,NULL,SYS_PATH_TYPE);
 	snprintf( tmp_ptr, TMP_PATH_SIZE - ( 11 + (tmp_ptr - (char*)&executablepath)),"config.dat");
 
 	f=hxc_fopen(executablepath,"wb");
