@@ -15,7 +15,7 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
-6 December 2019 : HxCFloppyEmulator 2.2.1.1
+8 December 2019 : HxCFloppyEmulator 2.2.2.1
 
 -> macOS Catalina support : Switch to 64bits build + minimum OS version needed changed to 10.9 (Mavericks)
 
@@ -29,8 +29,6 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 
 -> Command line tool : Script execution option added.
 
--> Linux : Use the fltk build automatic flags to match with the system graphic stack.
-
 -> Floppy Stream dump analysis bitmap export support. (Stream HFE, SCP, KryoFlux Raw)
 
 -> SPS CAPS library loader support added for Linux.
@@ -41,9 +39,14 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 
 -> Game Doctor SF3 / SF7 file support added.
 
--> zlib updated : zlib 1.2.11
+-> zlib updated to v1.2.11
 
--> General : Codes fixes and improvements.
+-> FLTK updated to v1.3.5 for all platforms.
+
+-> Linux build : Automatic FLTK package download and preparation.
+                 FLTK build : Use the fltk automatic flags to match with your graphic stack.
+
+-> General : Lots of codes fixes and improvements !
 
 *********************************************************/
 
