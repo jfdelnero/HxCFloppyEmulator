@@ -291,9 +291,10 @@ Log_box::Log_box()
 
 	old_index=0;
 
-	tick_log(this);
 	this->end();
 	this->label("Logs");
+
+	Fl::repeat_timeout(0.40, tick_log, this);
 
 	return ;
 

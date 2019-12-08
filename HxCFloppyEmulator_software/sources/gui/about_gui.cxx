@@ -311,7 +311,7 @@ About_box::About_box()
 	audiostarted = 0;
 	demostate = 0;
 
-	tick(this);
-
+	Fl::add_timeout( 0.02, tick, (void*)this);
+	
 	return;
 }

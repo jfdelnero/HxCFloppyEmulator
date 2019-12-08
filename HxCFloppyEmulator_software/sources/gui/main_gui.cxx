@@ -1044,7 +1044,7 @@ Main_Window::Main_Window()
 
 		hxc_createcriticalsection(guicontext->hxcfe,1);
 
-		tick_dump(fdump_window);
+		Fl::add_timeout(0.02, tick_dump, (void*)fdump_window);
 
 		#ifdef GUI_DEBUG
 		print_dbg((char*)"Main_Window : Floppy dump window done !");
@@ -1089,7 +1089,7 @@ Main_Window::Main_Window()
 		infos_window->iso_fm_bt->value(1);
 		infos_window->iso_mfm_bt->value(1);
 
-		tick_infos(infos_window);
+		Fl::add_timeout(0.1, tick_infos, (void*)infos_window);
 
 		#ifdef GUI_DEBUG
 		print_dbg((char*)"Main_Window : Floppy viewer window done !");
@@ -1174,7 +1174,7 @@ Main_Window::Main_Window()
 		fs_window->fs_browser->redraw();
 		fs_window->fs_browser->show_self();
 
-		tick_fs(fs_window);
+		Fl::add_timeout(0.1, tick_fs, (void*)fs_window);
 
 		#ifdef GUI_DEBUG
 		print_dbg((char*)"Main_Window : File system window done !");
@@ -1321,7 +1321,7 @@ Main_Window::Main_Window()
 
 	txtindex = 0;
 
-	tick_mw(this);
+	Fl::add_timeout( 0.1, tick_mw, (void*)this);
 
 #ifdef STANDALONEFSBROWSER
 	fs_window->window->show();
