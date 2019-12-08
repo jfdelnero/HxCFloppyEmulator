@@ -67,7 +67,7 @@ int CPCDSK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile->path,"dsk"))
+	if(hxc_checkfileext(imgfile->path,"dsk",SYS_PATH_TYPE))
 	{
 		fileheader = (cpcdsk_fileheader *)imgfile->file_header;
 

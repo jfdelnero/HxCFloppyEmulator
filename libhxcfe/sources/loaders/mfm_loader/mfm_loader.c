@@ -67,7 +67,7 @@ int MFM_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MFM_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile->path,"mfm"))
+	if(hxc_checkfileext(imgfile->path,"mfm",SYS_PATH_TYPE))
 	{
 		header = (MFMIMG *)&imgfile->file_header;
 

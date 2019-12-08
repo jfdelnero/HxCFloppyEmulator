@@ -490,7 +490,7 @@ int32_t hxcfe_imgCheckFileCompatibility( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR
 			if(fileext[j] == ',')
 				j++;
 
-			ret = hxc_checkfileext( file_infos->path, temp_ext );
+			ret = hxc_checkfileext( file_infos->path, temp_ext, SYS_PATH_TYPE );
 		}while(fileext[j] && !ret);
 
 		if( !ret )
@@ -540,7 +540,7 @@ int32_t hxcfe_preloadImgInfos(HXCFE_IMGLDR * imgldr_ctx, char * imgname, HXCFE_I
 		hxc_fclose(f);
 	}
 
-	strncpy(file_infos->file_extension, hxc_getfilenameext( imgname, 0 ), sizeof(file_infos->file_extension));
+	strncpy(file_infos->file_extension, hxc_getfilenameext( imgname, 0, SYS_PATH_TYPE ), sizeof(file_infos->file_extension));
 	strncpy(file_infos->path, imgname, sizeof(file_infos->path));
 
 	return HXCFE_NOERROR;

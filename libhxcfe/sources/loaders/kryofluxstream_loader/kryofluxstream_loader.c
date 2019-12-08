@@ -124,7 +124,7 @@ int KryoFluxStream_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_F
 		}
 		else
 		{
-			hxc_getfilenamebase(imgfile->path,(char*)&filename);
+			hxc_getfilenamebase(imgfile->path,(char*)&filename,SYS_PATH_TYPE);
 			hxc_strlower((char*)&filename);
 			found=0;
 
@@ -165,7 +165,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,flo
 
 	floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
 
-	floppycontext->hxc_printf(MSG_DEBUG,"Loading %s...",hxc_getfilenamebase(file,0));
+	floppycontext->hxc_printf(MSG_DEBUG,"Loading %s...",hxc_getfilenamebase(file,0,SYS_PATH_TYPE));
 
 	fxs = hxcfe_initFxStream(floppycontext);
 	if(fxs)
@@ -238,9 +238,9 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 		{
 			backup_env = duplicate_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
 
-			len=hxc_getpathfolder(imgfile,0);
+			len=hxc_getpathfolder(imgfile,0,SYS_PATH_TYPE);
 			folder=(char*)malloc(len+1);
-			hxc_getpathfolder(imgfile,folder);
+			hxc_getpathfolder(imgfile,folder,SYS_PATH_TYPE);
 
 			if(staterep.st_mode&S_IFDIR)
 			{
@@ -248,7 +248,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 			}
 			else
 			{
-				hxc_getfilenamebase(imgfile,(char*)&fname);
+				hxc_getfilenamebase(imgfile,(char*)&fname,SYS_PATH_TYPE);
 				if(!strstr(fname,".0.raw") && !strstr(fname,".1.raw") )
 				{
 					free(folder);

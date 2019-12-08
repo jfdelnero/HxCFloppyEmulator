@@ -102,7 +102,7 @@ int SDDSpeccyDos_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FIL
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDDSpeccyDos_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile->path,"sdd"))
+	if(hxc_checkfileext(imgfile->path,"sdd",SYS_PATH_TYPE))
 	{
 		if( imgfile->file_size & 0xFF)
 		{

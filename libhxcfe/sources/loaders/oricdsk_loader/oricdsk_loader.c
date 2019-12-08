@@ -65,7 +65,7 @@ int OricDSK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFO
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"OricDSK_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile->path,"dsk"))
+	if(hxc_checkfileext(imgfile->path,"dsk",SYS_PATH_TYPE))
 	{
 		if( !strncmp((char*)imgfile->file_header,"MFM_DISK",8) ||
 		    !strncmp((char*)imgfile->file_header,"ORICDISK",8))

@@ -64,7 +64,7 @@ int Apple2_do_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEIN
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_do_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile->path,"do") || hxc_checkfileext(imgfile->path,"po"))
+	if( hxc_checkfileext(imgfile->path,"do",SYS_PATH_TYPE) || hxc_checkfileext(imgfile->path,"po",SYS_PATH_TYPE))
 	{
 		if( imgfile->file_size % (16*1*256) || ( (imgfile->file_size/(16*1*256)) > 50 ) )
 		{
@@ -125,7 +125,7 @@ int Apple2_do_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_do_libLoad_DiskFile %s",imgfile);
 
 	sector_order = (unsigned char *)&PhysicalToLogicalSectorMap_Dos33;
-	if(hxc_checkfileext(imgfile,"po"))
+	if(hxc_checkfileext(imgfile,"po",SYS_PATH_TYPE))
 	{
 		sector_order = (unsigned char *)&PhysicalToLogicalSectorMap_ProDos;
 	}

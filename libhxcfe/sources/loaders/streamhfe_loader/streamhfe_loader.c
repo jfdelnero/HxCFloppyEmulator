@@ -362,9 +362,9 @@ int STREAMHFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 		floppydisk->floppySectorPerTrack = -1;
 		floppydisk->floppyiftype = header.floppyinterfacemode;
 
-		len=hxc_getpathfolder(imgfile,0);
+		len=hxc_getpathfolder(imgfile,0,SYS_PATH_TYPE);
 		folder=(char*)malloc(len+1);
-		hxc_getpathfolder(imgfile,folder);
+		hxc_getpathfolder(imgfile,folder,SYS_PATH_TYPE);
 
 		filepath = malloc( strlen(imgfile) + 32 );
 		if(filepath)

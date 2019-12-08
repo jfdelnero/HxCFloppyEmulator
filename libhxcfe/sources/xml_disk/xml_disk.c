@@ -184,7 +184,7 @@ int is_ext_matching(char * filename,char * extlist)
 
 		if(ptr)
 		{
-			if( hxc_checkfileext(filename,ptr) )
+			if( hxc_checkfileext(filename,ptr,SYS_PATH_TYPE) )
 			{
 				return 1;
 			}
@@ -1039,7 +1039,7 @@ int32_t	hxcfe_setXmlFloppyLayoutFile(HXCFE_XMLLDR* xmlfb_ctx,char * filepath)
 	FILE * f;
 	AppData	*ad = (AppData *) xmlfb_ctx->ad;
 
-	if(hxc_checkfileext(filepath,"xml"))
+	if(hxc_checkfileext(filepath,"xml",SYS_PATH_TYPE))
 	{
 		f = hxc_fopen(filepath,"rb");
 		if( f )

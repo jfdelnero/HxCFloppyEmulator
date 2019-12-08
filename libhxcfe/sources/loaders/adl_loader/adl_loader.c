@@ -63,7 +63,7 @@ int ADL_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADL_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile->path,"adl") || hxc_checkfileext(imgfile->path,"adm") || hxc_checkfileext(imgfile->path,"adf") )
+	if( hxc_checkfileext(imgfile->path,"adl",SYS_PATH_TYPE) || hxc_checkfileext(imgfile->path,"adm",SYS_PATH_TYPE) || hxc_checkfileext(imgfile->path,"adf",SYS_PATH_TYPE) )
 	{
 		if(imgfile->file_size&0x1FF || (imgfile->file_size > 82*16*2*256 ) )
 		{

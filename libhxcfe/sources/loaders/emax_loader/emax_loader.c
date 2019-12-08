@@ -120,7 +120,7 @@ int EMAX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,ch
 
 	strcpy(os_filename,imgfile);
 
-	sprintf( hxc_getfilenamebase(os_filename,NULL),"emaxos.emx");
+	sprintf( hxc_getfilenamebase(os_filename,NULL,SYS_PATH_TYPE),"emaxos.emx");
 
 	f_os = hxc_fopen(os_filename,"rb");
 	if(f_os == NULL)

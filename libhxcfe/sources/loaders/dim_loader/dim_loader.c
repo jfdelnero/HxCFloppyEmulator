@@ -68,7 +68,7 @@ int DIM_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile->path,"dim") )
+	if( hxc_checkfileext(imgfile->path,"dim",SYS_PATH_TYPE) )
 	{
 		header = (dim_header *)&imgfile->file_header;
 		if(	header->id_header==0x4242)

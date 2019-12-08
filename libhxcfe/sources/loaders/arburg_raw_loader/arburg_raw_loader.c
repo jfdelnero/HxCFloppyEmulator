@@ -66,7 +66,7 @@ int ARBURG_RAW_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEI
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile->path,"arburgfd") )
+	if( hxc_checkfileext(imgfile->path,"arburgfd",SYS_PATH_TYPE) )
 	{
 		if( imgfile->file_size == (ARBURB_DATATRACK_SIZE*2*80) )
 		{

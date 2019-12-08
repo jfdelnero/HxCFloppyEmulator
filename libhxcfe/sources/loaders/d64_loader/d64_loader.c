@@ -73,7 +73,7 @@ int D64_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile->path,"d64"))
+	if(hxc_checkfileext(imgfile->path,"d64",SYS_PATH_TYPE))
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile : D64 file !");
 		return HXCFE_VALIDFILE;

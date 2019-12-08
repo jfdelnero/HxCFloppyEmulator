@@ -66,7 +66,7 @@ int SDU_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDU_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile->path,"sdu") )
+	if( hxc_checkfileext(imgfile->path,"sdu",SYS_PATH_TYPE) )
 	{
 		sduh = (sdu_header *)imgfile->file_header;
  

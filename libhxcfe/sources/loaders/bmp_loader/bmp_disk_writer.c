@@ -73,7 +73,7 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydis
 	{
 		hxcfe_td_setProgressCallback(td,&progress_callback,(void*)imgldr_ctx);
 
-		hxc_getfilenamewext(filename, (char*)&name );
+		hxc_getfilenamewext(filename, (char*)&name, SYS_PATH_TYPE);
 		hxcfe_td_setName( td , (char*)&name );
 
 		hxcfe_td_activate_analyzer(td, ISOIBM_MFM_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_ISOIBM_MFM_ENCODING", NULL)));

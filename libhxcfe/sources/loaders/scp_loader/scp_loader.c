@@ -76,7 +76,7 @@ int SCP_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCP_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile->path,"scp") )
+	if( hxc_checkfileext(imgfile->path,"scp",SYS_PATH_TYPE) )
 	{
 		scph = (scp_header *)&imgfile->file_header;
 
@@ -319,9 +319,9 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			backup_env = duplicate_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
 
-			len=hxc_getpathfolder(imgfile,0);
+			len=hxc_getpathfolder(imgfile,0,SYS_PATH_TYPE);
 			folder=(char*)malloc(len+1);
-			hxc_getpathfolder(imgfile,folder);
+			hxc_getpathfolder(imgfile,folder,SYS_PATH_TYPE);
 
 			filepath = malloc( strlen(imgfile) + 32 );
 			if(filepath)

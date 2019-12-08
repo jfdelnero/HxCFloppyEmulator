@@ -103,7 +103,7 @@ int IPF_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IPF_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile->path,"ipf") || hxc_checkfileext(imgfile->path,"ct") || hxc_checkfileext(imgfile->path,"ctr"))
+	if(hxc_checkfileext(imgfile->path,"ipf",SYS_PATH_TYPE) || hxc_checkfileext(imgfile->path,"ct",SYS_PATH_TYPE) || hxc_checkfileext(imgfile->path,"ctr",SYS_PATH_TYPE))
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IPF_libIsValidDiskFile : IPF file !");
 		if(init_caps_lib())
@@ -378,7 +378,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								memset(currentside->databuffer,0,len);
 
 								//flakey bits in track ?
-								if((ti.type & CTIT_FLAG_FLAKEY) && hxc_checkfileext(imgfile,"ipf") )
+								if((ti.type & CTIT_FLAG_FLAKEY) && hxc_checkfileext(imgfile,"ipf",SYS_PATH_TYPE) )
 								{
 									// This method is only valid with ipf files (fixed track size at each revolution...)
 									temptrack=(unsigned char *)malloc(len);

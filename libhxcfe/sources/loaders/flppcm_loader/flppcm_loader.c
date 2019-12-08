@@ -67,7 +67,7 @@ int FLPPCM_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FLPPCM_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile->path,"flp"))
+	if(hxc_checkfileext(imgfile->path,"flp",SYS_PATH_TYPE))
 	{
 		flp_header = (flp_header_t *)&imgfile->file_header;
 

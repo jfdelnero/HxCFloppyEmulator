@@ -203,8 +203,8 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 
 	FILE *f;
 
-	hxc_getpathfolder(filepath,fullp);
-	hxc_getfilenamewext(filepath,fullp2);
+	hxc_getpathfolder(filepath,fullp,SYS_PATH_TYPE);
+	hxc_getfilenamewext(filepath,fullp2,SYS_PATH_TYPE);
 	strcat(fullp,fullp2);
 	sprintf(fileext,"%.2d.%d.raw",tracknum,sidenum);
 	strcat(fullp,fileext);

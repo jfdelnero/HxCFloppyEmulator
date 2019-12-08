@@ -333,8 +333,8 @@ int JV3_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JV3_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile->path,"jv3") ||
-		hxc_checkfileext(imgfile->path,"dsk")
+	if( hxc_checkfileext(imgfile->path,"jv3",SYS_PATH_TYPE) ||
+		hxc_checkfileext(imgfile->path,"dsk",SYS_PATH_TYPE)
 		)
 	{
 

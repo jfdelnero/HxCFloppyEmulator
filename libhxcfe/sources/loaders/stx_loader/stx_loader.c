@@ -74,7 +74,7 @@ int STX_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STX_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile->path,"stx"))
+	if(hxc_checkfileext(imgfile->path,"stx",SYS_PATH_TYPE))
 	{
 		fileheader = (pasti_fileheader*)imgfile->file_header;
 

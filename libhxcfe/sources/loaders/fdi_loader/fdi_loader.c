@@ -67,7 +67,7 @@ int FDI_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDI_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile->path,"fdi") )
+	if( hxc_checkfileext(imgfile->path,"fdi",SYS_PATH_TYPE) )
 	{
 		f_header = (fdi_header *)imgfile->file_header;
 

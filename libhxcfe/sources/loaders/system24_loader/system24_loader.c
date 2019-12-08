@@ -66,7 +66,7 @@ int System24_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINF
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"System24_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile->path,"s24"))
+	if(hxc_checkfileext(imgfile->path,"s24",SYS_PATH_TYPE))
 	{
 		if(  ( imgfile->file_size % ( 2 * ( ( 2048 * 5 ) + 1024 + 256 ) ) ) && ( imgfile->file_size % ( 2 * ( 8192 + ( 1024 * 3 ) + 512 + 256 ) ) ) )
 		{

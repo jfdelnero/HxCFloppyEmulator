@@ -64,7 +64,7 @@ int FD_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * i
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"fd_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile->path,"fd") )
+	if( hxc_checkfileext(imgfile->path,"fd",SYS_PATH_TYPE) )
 	{
 		if((imgfile->file_size == 327680) || (imgfile->file_size == 655360))
 		{

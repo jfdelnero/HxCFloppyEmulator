@@ -144,7 +144,7 @@ int ANA_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ANA_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile->path,"ana"))
+	if(hxc_checkfileext(imgfile->path,"ana",SYS_PATH_TYPE))
 	{
 		ret = AnaDisk_SanityCheck(imgldr_ctx,imgfile->path,0,0,0,0);
 
