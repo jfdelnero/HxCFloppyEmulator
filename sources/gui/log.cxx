@@ -266,18 +266,25 @@ Log_box::Log_box()
 	xsize=640;
 	ysize=400;
 
-	buf=new Fl_Text_Buffer;
+	buf = new Fl_Text_Buffer;
+	if(buf)
+	{
+		txt_displ = new Fl_Text_Display(5, 5, xsize-(5*2), ysize-((5*2)+30));
+		if(txt_displ)
+		{
+			txt_displ->textsize(10);
+			txt_displ->color((Fl_Color)FL_LIGHT2);
+			txt_displ->buffer(buf);
+		}
+	}
 
-	txt_displ=new Fl_Text_Display(5, 5, xsize-(5*2), ysize-((5*2)+30));
-	txt_displ->textsize(10);
-	txt_displ->color((Fl_Color)FL_LIGHT2);
-	txt_displ->buffer(buf);
+	button_ok = new Fl_Button(5, ysize-35, 80, 30, "Close" );
+	if(button_ok)
+		button_ok->callback(close_log,0);
 
-	button_ok=new Fl_Button(5, ysize-35, 80, 30, "Close" );
-	button_ok->callback(close_log,0);
-
-	button_savelog=new Fl_Button(10+80, ysize-35, 80, 30, "Set log file" );
-	button_savelog->callback(savelog_log,0);
+	button_savelog = new Fl_Button(10+80, ysize-35, 80, 30, "Set log file" );
+	if(button_savelog)
+		button_savelog->callback(savelog_log,0);
 
 	guicontext->logfile=0;
 
@@ -294,10 +301,9 @@ Log_box::Log_box()
 	this->end();
 	this->label("Logs");
 
-	Fl::repeat_timeout(0.40, tick_log, this);
+	Fl::add_timeout(0.40, tick_log, this);
 
-	return ;
-
+	return;
 }
 
 
