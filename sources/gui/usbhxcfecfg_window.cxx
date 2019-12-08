@@ -136,5 +136,6 @@ usbhxcfecfg_window::usbhxcfecfg_window() {
     } // Fl_Button* o
     window->end();
   } // Fl_Double_Window* window
-  tick_usb(this);
+
+  Fl::add_timeout(0.50, tick_usb, this);
 }
