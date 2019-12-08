@@ -416,7 +416,7 @@ int hxcfe_execScriptRam( HXCFE* hxcfe, unsigned char * script_buffer, int buffer
 		if(!script_buffer[buffer_offset])
 			break;
 
-	}while(1);
+	}while(buffer_offset < buffersize);
 
 	return err;
 }
