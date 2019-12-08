@@ -137,7 +137,7 @@ int load_floppy_image(char *filename)
 
 		guicontext->loadedfloppy=0;
 
-		hxc_getfilenamebase(filename,guicontext->bufferfilename);
+		hxc_getfilenamebase(filename,guicontext->bufferfilename, SYS_PATH_TYPE);
 
 		loaderid = hxcfe_imgAutoSetectLoader(imgldr_ctx,filename,0);
 
@@ -159,7 +159,7 @@ int load_floppy_image(char *filename)
 	#endif
 			if(filename)
 			{
-				hxc_getfilenamebase(filename,guicontext->bufferfilename);
+				hxc_getfilenamebase(filename,guicontext->bufferfilename, SYS_PATH_TYPE);
 			}
 			else
 			{
@@ -346,7 +346,7 @@ int loadrawfile(HXCFE* floppycontext,cfgrawfile * rfc,char * file)
 			guicontext->loadstatus = ret;
 
 			if(file)
-				strcpy(guicontext->bufferfilename,hxc_getfilenamebase(file,0));
+				strcpy(guicontext->bufferfilename,hxc_getfilenamebase(file,0,SYS_PATH_TYPE));
 			else
 				strcpy(guicontext->bufferfilename,"Empty Floppy");
 		}
