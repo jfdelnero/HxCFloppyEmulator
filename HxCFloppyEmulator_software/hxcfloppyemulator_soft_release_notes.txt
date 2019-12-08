@@ -46,7 +46,7 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -> Linux build : Automatic FLTK package download and preparation.
                  FLTK build : Use the fltk automatic flags to match with your graphic stack.
 
--> General : Lots of codes fixes and improvements !
+-> General : Lots of code fixes and improvements !
 
 *********************************************************/
 
