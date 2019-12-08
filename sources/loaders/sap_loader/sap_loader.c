@@ -68,7 +68,7 @@ int SAP_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SAP_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile->path,"sap"))
+	if(hxc_checkfileext(imgfile->path,"sap",SYS_PATH_TYPE))
 	{
 		sapid = sap_OpenArchive(imgfile->path, &floppyformat);
 		if(sapid!=SAP_ERROR)

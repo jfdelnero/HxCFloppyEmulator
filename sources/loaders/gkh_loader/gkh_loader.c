@@ -66,7 +66,7 @@ int GKH_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"GKH_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile->path,"gkh"))
+	if( hxc_checkfileext(imgfile->path,"gkh",SYS_PATH_TYPE))
 	{
 		header = (gkh_header *)imgfile->file_header;
 

@@ -163,7 +163,7 @@ int AFI_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"AFI_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile->path,"afi"))
+	if(hxc_checkfileext(imgfile->path,"afi",SYS_PATH_TYPE))
 	{
 
 		header = (AFIIMG *)imgfile->file_header;

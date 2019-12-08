@@ -68,14 +68,14 @@ int is_gamedoctor_file(char * imgfile)
 {
 	char * tmp_ptr;
 
-	if( hxc_checkfileext(imgfile,"078") || \
-		hxc_checkfileext(imgfile,"068") || \
-		hxc_checkfileext(imgfile,"058") || \
-		hxc_checkfileext(imgfile,"048") || \
-		hxc_checkfileext(imgfile,"gd3") || \
-		hxc_checkfileext(imgfile,"gd7") )
+	if( hxc_checkfileext(imgfile,"078",SYS_PATH_TYPE) || \
+		hxc_checkfileext(imgfile,"068",SYS_PATH_TYPE) || \
+		hxc_checkfileext(imgfile,"058",SYS_PATH_TYPE) || \
+		hxc_checkfileext(imgfile,"048",SYS_PATH_TYPE) || \
+		hxc_checkfileext(imgfile,"gd3",SYS_PATH_TYPE) || \
+		hxc_checkfileext(imgfile,"gd7",SYS_PATH_TYPE) )
 	{
-		tmp_ptr = hxc_getfilenamebase(imgfile,NULL);
+		tmp_ptr = hxc_getfilenamebase(imgfile,NULL,SYS_PATH_TYPE);
 		if(tmp_ptr)
 		{
 			if( (tmp_ptr[0] == 's' || tmp_ptr[0] == 'S' ) && \
@@ -150,7 +150,7 @@ int snes_smc_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINF
 			return HXCFE_VALIDFILE;
 		}
 
-		if( hxc_checkfileext(imgfile->path,"smc") )
+		if( hxc_checkfileext(imgfile->path,"smc",SYS_PATH_TYPE) )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"snes_smc_libIsValidDiskFile : File type : Super Pro Fighter SMC?");
 			return HXCFE_VALIDFILE;

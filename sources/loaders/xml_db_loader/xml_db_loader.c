@@ -105,7 +105,7 @@ int XMLDB_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 
 	hxc_fclose(f);
 
-	if(hxc_checkfileext(imgfile,"xml") && filesize!=0)
+	if(hxc_checkfileext(imgfile,"xml",SYS_PATH_TYPE) && filesize!=0)
 	{
 		rfb = hxcfe_initXmlFloppy(imgldr_ctx->hxcfe);
 		if(rfb)

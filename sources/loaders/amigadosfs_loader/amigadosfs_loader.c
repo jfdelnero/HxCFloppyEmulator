@@ -343,7 +343,7 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flopp
 			}
 
 			memset(repname,0,strlen(imgfile)+1);
-			hxc_getfilenamebase( imgfile, repname );
+			hxc_getfilenamebase( imgfile, repname, SYS_PATH_TYPE );
 
 			if(!strlen(repname))
 				strcpy(repname, DEFAULT_DISK_NAME);

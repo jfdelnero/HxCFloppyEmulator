@@ -187,7 +187,7 @@ int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		}
 	}
 
-	hxc_getfilenamewext(imgfile,filename);
+	hxc_getfilenamewext(imgfile,filename,SYS_PATH_TYPE);
 
 	//Disk name
 	for(i=0;i<12;i++)

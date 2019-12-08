@@ -64,7 +64,7 @@ int MSA_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MSA_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile->path,"msa"))
+	if(hxc_checkfileext(imgfile->path,"msa",SYS_PATH_TYPE))
 	{
 		if(imgfile->file_header[0]==0x0E && imgfile->file_header[1]==0x0F && imgfile->file_header[2]==0x00)
 		{

@@ -64,7 +64,7 @@ int EXTADF_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EXTADF_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile->path,"adf") )
+	if( hxc_checkfileext(imgfile->path,"adf",SYS_PATH_TYPE) )
 	{
 		if(!strncmp((char*)imgfile->file_header,"UAE-1ADF",8))
 		{

@@ -65,7 +65,7 @@ int VFDDAT_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VFDDAT_libIsValidDiskFile");
 	if(imgfile)
 	{
-		if(!hxc_checkfileext( imgfile->path,"dat"))
+		if(!hxc_checkfileext( imgfile->path,"dat",SYS_PATH_TYPE))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VFDDAT_libIsValidDiskFile : non DAT file !");
 			return HXCFE_BADFILE;

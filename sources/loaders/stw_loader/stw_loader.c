@@ -67,7 +67,7 @@ int STW_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STW_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile->path,"stw"))
+	if(hxc_checkfileext(imgfile->path,"stw",SYS_PATH_TYPE))
 	{
 		header = (STWIMG *)&imgfile->file_header;
 

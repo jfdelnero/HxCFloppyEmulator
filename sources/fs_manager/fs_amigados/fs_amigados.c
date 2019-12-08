@@ -622,7 +622,7 @@ int32_t amigados_openFile(HXCFE_FSMNG * fsmng, char * filename)
 	{
 		if( adfParentDir(adfvolume) == RC_OK )
 		{
-			hxc_getfilenamebase(filename,filen);
+			hxc_getfilenamebase(filename,filen,UNIX_PATH_TYPE);
 
 			file = adfOpenFile(adfvolume, filen, "r");
 			if(file)
@@ -657,11 +657,11 @@ int32_t amigados_createFile(HXCFE_FSMNG * fsmng, char * filename)
 	}
 	if(i == 128) return HXCFE_ACCESSERROR;
 
-	hxc_getpathfolder(filename,folderpath);
+	hxc_getpathfolder(filename,folderpath,UNIX_PATH_TYPE);
 
 	if( changedir(fsmng,folderpath,&snum,1) ==  RC_OK)
 	{
-		hxc_getfilenamebase(filename,filen);
+		hxc_getfilenamebase(filename,filen,UNIX_PATH_TYPE);
 
 		file = adfOpenFile(adfvolume, filen, "w");
 		if(file)
@@ -720,11 +720,11 @@ int32_t amigados_deleteFile(HXCFE_FSMNG * fsmng, char * filename)
 	if(!adfvolume)
 		return HXCFE_ACCESSERROR;
 
-	hxc_getpathfolder(filename,folderpath);
+	hxc_getpathfolder(filename,folderpath,UNIX_PATH_TYPE);
 
 	if( changedir(fsmng,folderpath,&snum,1) ==  RC_OK)
 	{
-		hxc_getfilenamebase(filename,filen);
+		hxc_getfilenamebase(filename,filen,UNIX_PATH_TYPE);
 
 		if(adfRemoveEntry(adfvolume, adfvolume->curDirPtr, filen) == RC_OK)
 		{
@@ -761,11 +761,11 @@ int32_t amigados_createDir( HXCFE_FSMNG * fsmng,char * foldername)
 	if(!adfvolume)
 		return HXCFE_ACCESSERROR;
 
-	hxc_getpathfolder(foldername,folderpath);
+	hxc_getpathfolder(foldername,folderpath,UNIX_PATH_TYPE);
 
 	if( changedir(fsmng,folderpath,&snum,1) ==  RC_OK)
 	{
-		hxc_getfilenamebase(foldername,filen);
+		hxc_getfilenamebase(foldername,filen,UNIX_PATH_TYPE);
 
 		if(adfCreateDir(adfvolume, adfvolume->curDirPtr, filen) == RC_OK)
 		{

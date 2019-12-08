@@ -113,7 +113,7 @@ int EMUII_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 
 	strcpy(os_filename,imgfile);
 
-	sprintf( hxc_getfilenamebase(os_filename,NULL),"emuiios.emuiifd");
+	sprintf( hxc_getfilenamebase(os_filename,NULL,SYS_PATH_TYPE),"emuiios.emuiifd");
 
 	f_os=hxc_fopen(os_filename,"rb");
 	if(f_os==NULL)

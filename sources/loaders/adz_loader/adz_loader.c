@@ -71,11 +71,11 @@ int ADZ_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile->path,"adz") || hxc_checkfileext(imgfile->path,"gz"))
+	if(hxc_checkfileext(imgfile->path,"adz",SYS_PATH_TYPE) || hxc_checkfileext(imgfile->path,"gz",SYS_PATH_TYPE))
 	{
-		if(hxc_checkfileext(imgfile->path,"gz"))
+		if(hxc_checkfileext(imgfile->path,"gz",SYS_PATH_TYPE))
 		{
-			if( !strstr(hxc_getfilenamebase(imgfile->path,0),".adf.gz") )
+			if( !strstr(hxc_getfilenamebase(imgfile->path,0,SYS_PATH_TYPE),".adf.gz") )
 			{
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ADZ_libIsValidDiskFile : non ADZ file !");
 				return HXCFE_BADFILE;

@@ -76,7 +76,7 @@ int IMZ_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 	char filename_inzip[256];
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMZ_libIsValidDiskFile");
-	if( hxc_checkfileext(imgfile->path,"imz"))
+	if( hxc_checkfileext(imgfile->path,"imz",SYS_PATH_TYPE))
 	{
 		uf = unzOpen (imgfile->path);
 		if (!uf)

@@ -114,7 +114,7 @@ int DMK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 			return HXCFE_VALIDFILE;
 		}
 
-		if(hxc_checkfileext( imgfile->path,"dmk"))
+		if(hxc_checkfileext( imgfile->path,"dmk",SYS_PATH_TYPE))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DMK_libIsValidDiskFile : DMK file !");
 			return HXCFE_VALIDFILE;

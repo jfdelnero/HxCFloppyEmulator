@@ -79,7 +79,7 @@ int FAT12FLOPPY_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILE
 			i=0;
 			do
 			{
-				if( configlist[i].dir && hxc_checkfileext(imgfile->path,configlist[i].dirext))
+				if( configlist[i].dir && hxc_checkfileext(imgfile->path,configlist[i].dirext,SYS_PATH_TYPE))
 				{
 					found=1;
 				}
@@ -104,7 +104,7 @@ int FAT12FLOPPY_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILE
 			i=0;
 			do
 			{
-				if( !configlist[i].dir && hxc_checkfileext(imgfile->path,configlist[i].dirext))
+				if( !configlist[i].dir && hxc_checkfileext(imgfile->path,configlist[i].dirext,SYS_PATH_TYPE))
 				{
 					found=1;
 				}
@@ -152,7 +152,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppy
 	if(!parameters)
 	{
 		i=0;
-		while(!hxc_checkfileext(imgfile,configlist[i].dirext) && strlen(configlist[i].dirext))
+		while(!hxc_checkfileext(imgfile,configlist[i].dirext,SYS_PATH_TYPE) && strlen(configlist[i].dirext))
 		{
 			i++;
 		}
@@ -161,7 +161,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppy
 	{
 		sprintf(dummyext,"dummy.%s",(char*)parameters);
 		i=0;
-		while(!hxc_checkfileext(dummyext,configlist[i].dirext) && strlen(configlist[i].dirext))
+		while(!hxc_checkfileext(dummyext,configlist[i].dirext,SYS_PATH_TYPE) && strlen(configlist[i].dirext))
 		{
 			i++;
 		}

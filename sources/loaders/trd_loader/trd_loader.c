@@ -64,7 +64,7 @@ int TRD_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TRD_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile->path,"trd"))
+	if(hxc_checkfileext(imgfile->path,"trd",SYS_PATH_TYPE))
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TRD_libIsValidDiskFile : TRD file !");
 		return HXCFE_VALIDFILE;

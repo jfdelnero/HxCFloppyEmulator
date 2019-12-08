@@ -134,7 +134,7 @@ int MSX_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MSX_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile->path,"img") || hxc_checkfileext(imgfile->path,"dsk") )
+	if( hxc_checkfileext(imgfile->path,"img",SYS_PATH_TYPE) || hxc_checkfileext(imgfile->path,"dsk",SYS_PATH_TYPE) )
 	{
 		if(imgfile->file_size&0x1FF || !imgfile->file_size )
 		{
