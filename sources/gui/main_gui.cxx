@@ -147,14 +147,13 @@ const char * plugid_lst[]=
 	PLUGIN_HEATHKIT
 };
 
-static void tick_main(void *v) {
-
-	Main_Window *window;
-
-	window=(Main_Window *)v;
-	window->make_current();
-	Fl::repeat_timeout(0.10, tick_main, v);
+#ifdef GUI_DEBUG
+void print_dbg(char * str)
+{
+	printf("%s\n",str);
+	fflush(stdout);
 }
+#endif
 
 void menu_clicked(Fl_Widget * w, void * fc_ptr)
 {
@@ -662,7 +661,6 @@ static void tick_mw(void *v) {
 		tempstr2[i + j] = 0;
 
 		window->file_name_txt->value((const char*)tempstr2);
-		//SetDlgItemText(hwndDlg,IDC_EDIT_STATUS,tempstr2);
 
 		guicontext->txtindex++;
 	}
@@ -852,6 +850,10 @@ Main_Window::Main_Window()
 	i=0;
 	evt_txt=0;
 
+	#ifdef GUI_DEBUG
+	print_dbg((char*)"Main_Window : Entering Main_Window");
+	#endif
+
 	// First lock() call to Enable lock/unlock threads support.
 	Fl::lock();
 
@@ -867,8 +869,19 @@ Main_Window::Main_Window()
 	hxcfe_setOutputFunc(guicontext->hxcfe,CUI_affiche);
 
 #ifndef STANDALONEFSBROWSER
-	guicontext->usbhxcfe=libusbhxcfe_init(guicontext->hxcfe);
+	guicontext->usbhxcfe = libusbhxcfe_init(guicontext->hxcfe);
 #endif
+
+	if(!guicontext->usbhxcfe)
+	{
+		printf("Error while loading libusbhxcfe ! USB HxC Floppy Emulator support disabled !\n");
+	}
+	else
+	{
+		#ifdef GUI_DEBUG
+		print_dbg((char*)"Main_Window : libusbhxcfe init done !");
+		#endif
+	}
 
 	Fl::scheme("gtk+");
 
@@ -891,56 +904,101 @@ Main_Window::Main_Window()
 		if(strlen(getString(txt_buttons_main[i].label_id)))
 		{
 			txt_buttons_main[i].button = new Fl_Button(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*j), BUTTON_XSIZE, BUTTON_YSIZE, getString(txt_buttons_main[i].label_id));
-			txt_buttons_main[i].button->labelsize(12);
-			tmp_intptr = i;
-			txt_buttons_main[i].button->callback(bt_clicked,(void*)tmp_intptr);
+			if(txt_buttons_main[i].button)
+			{
+				txt_buttons_main[i].button->labelsize(12);
+				tmp_intptr = i;
+				txt_buttons_main[i].button->callback(bt_clicked,(void*)tmp_intptr);
+			}
 
 			Fl_Box *box = new Fl_Box(FL_NO_BOX,BUTTON_XPOS+BUTTON_XSIZE,BUTTON_YPOS+(BUTTON_YSIZE/4)+(BUTTON_YSTEP*j),BUTTON_XSIZE*4,BUTTON_YSIZE/2,getString(txt_buttons_main[i].desc_id));
-			box->align(FL_ALIGN_INSIDE|FL_ALIGN_LEFT);
-			//box->labelfont(FL_BOLD);
-			box->labelsize(12);
-			//box->labeltype(FL_EMBOSSED_LABEL);
-			box->labeltype(FL_ENGRAVED_LABEL);
+			if(box)
+			{
+				box->align(FL_ALIGN_INSIDE|FL_ALIGN_LEFT);
+				box->labelsize(12);
+				box->labeltype(FL_ENGRAVED_LABEL);
+			}
 			j++;
 		}
 	}
 
+	#ifdef GUI_DEBUG
+	print_dbg((char*)"Main_Window : Buttons and background are set !");
+	#endif
+
 	file_name_txt = new Fl_Output(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*j++), WINDOW_XSIZE-(BUTTON_XPOS*2), 25);
-	file_name_txt->labelsize(12);
-	file_name_txt->textsize(12);
-	file_name_txt->align(FL_ALIGN_TOP_LEFT);
-	file_name_txt->value("No disk loaded.");
-	file_name_txt->box(FL_PLASTIC_UP_BOX);
+	if(file_name_txt)
+	{
+		file_name_txt->labelsize(12);
+		file_name_txt->textsize(12);
+		file_name_txt->align(FL_ALIGN_TOP_LEFT);
+		file_name_txt->value("No disk loaded.");
+		file_name_txt->box(FL_PLASTIC_UP_BOX);
+	}
+	else
+	{
+		printf("Error while allocation file_name_txt !\n");
+	}
 
 	track_pos_str = new Fl_Output(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*j++)-10, WINDOW_XSIZE-(BUTTON_XPOS*2), 25);
-	track_pos_str->labelsize(12);
-	track_pos_str->textsize(12);
-	track_pos_str->align(FL_ALIGN_TOP_LEFT);
-	track_pos_str->box(FL_PLASTIC_UP_BOX);
+	if(track_pos_str)
+	{
+		track_pos_str->labelsize(12);
+		track_pos_str->textsize(12);
+		track_pos_str->align(FL_ALIGN_TOP_LEFT);
+		track_pos_str->box(FL_PLASTIC_UP_BOX);
+	}
+	else
+	{
+		printf("Error while allocation track_pos_str !\n");
+	}
 
 	track_pos = new Fl_Progress(BUTTON_XPOS, BUTTON_YPOS+(BUTTON_YSTEP*j++)-18, WINDOW_XSIZE-(BUTTON_XPOS*2), 25);
-	track_pos->box(FL_THIN_UP_BOX);
-	track_pos->selection_color((Fl_Color)137);
-	track_pos->minimum(0);
-	track_pos->maximum(255);
-	track_pos->value(0);
+	if(track_pos)
+	{
+		track_pos->box(FL_THIN_UP_BOX);
+		track_pos->selection_color((Fl_Color)137);
+		track_pos->minimum(0);
+		track_pos->maximum(255);
+		track_pos->value(0);
 
-	track_pos->box(FL_PLASTIC_UP_BOX);
+		track_pos->box(FL_PLASTIC_UP_BOX);
+	}
+	else
+	{
+		printf("Error while allocation track_pos !\n");
+	}
 
 	group.end();
+
+	#ifdef GUI_DEBUG
+	print_dbg((char*)"Main_Window : Track position indicator set !");
+	#endif
 
 	txt_buttons_main[0].button->callback(load_file_image,0);
 	txt_buttons_main[4].button->callback(save_file_image,0);
 
-	menutable[1].user_data_=fc_load;
-	menutable[4].user_data_=fc_save;
+	menutable[1].user_data_ = fc_load;
+	menutable[4].user_data_ = fc_save;
 	Fl_Menu_Bar menubar(0,0,WINDOW_XSIZE,24);
 	menubar.menu(menutable);
 
 	// Fl_DND_Box is constructed with the same dimensions and at the same position as Fl_Scroll
 	Fl_DND_Box *o = new Fl_DND_Box(0, 0,WINDOW_XSIZE, 400, 0);
-	o->callback(dnd_cb);
+	if(o)
+	{
+		o->callback(dnd_cb);
+	}
+	else
+	{
+		printf("Error while allocation Drag & drop box !\n");
+	}
+
 	end();
+
+	#ifdef GUI_DEBUG
+	print_dbg((char*)"Main_Window : Main window done !");
+	#endif
 
 #ifndef OEM_MODE
 	label(NOMFENETRE);
@@ -952,8 +1010,6 @@ Main_Window::Main_Window()
 	show();
 #endif
 
-	//tick_main(this);
-
 	user_data((void*)(this));
 
 	load_last_cfg();
@@ -964,169 +1020,237 @@ Main_Window::Main_Window()
 
 	//////////////////////////////////////////////
 	// Floppy dump window
-	this->fdump_window=new floppy_dump_window();
-	this->fdump_window->double_sided->value(1);
-	this->fdump_window->double_step->value(0);
-	this->fdump_window->number_of_retry->value(10);
-	this->fdump_window->number_of_track->value(80);
-	this->fdump_window->sel_drive_a->value(1);
-	this->fdump_window->sel_drive_b->value(0);
-	guicontext->xsize=460;
-	guicontext->ysize=200;
-	guicontext->mapfloppybuffer=(unsigned char*)malloc(guicontext->xsize * guicontext->ysize * 4);
-	memset(guicontext->mapfloppybuffer,0,guicontext->xsize*guicontext->ysize*4);
-	tick_dump(this->fdump_window);
+	fdump_window = new floppy_dump_window();
+	if(fdump_window)
+	{
+		fdump_window->double_sided->value(1);
+		fdump_window->double_step->value(0);
+		fdump_window->number_of_retry->value(10);
+		fdump_window->number_of_track->value(80);
+		fdump_window->sel_drive_a->value(1);
+		fdump_window->sel_drive_b->value(0);
 
-	hxc_createcriticalsection(guicontext->hxcfe,1);
+		guicontext->xsize=460;
+		guicontext->ysize=200;
+		guicontext->mapfloppybuffer = (unsigned char*)malloc(guicontext->xsize * guicontext->ysize * 4);
+		if(!guicontext->mapfloppybuffer)
+		{
+			printf("Error while allocating the floppy dump frame buffer !\n");
+		}
+		else
+		{
+			memset(guicontext->mapfloppybuffer,0,guicontext->xsize*guicontext->ysize*4);
+		}
+
+		hxc_createcriticalsection(guicontext->hxcfe,1);
+
+		tick_dump(fdump_window);
+
+		#ifdef GUI_DEBUG
+		print_dbg((char*)"Main_Window : Floppy dump window done !");
+		#endif
+	}
 
 	//////////////////////////////////////////////
 	// Floppy view window
-	this->infos_window=new floppy_infos_window();
-	this->infos_window->x_offset->bounds(0.0, 100);
-	this->infos_window->x_offset->value(85);
-	this->infos_window->x_time->scrollvalue((300*1000)+ (250 * 1000),1,1000,(1000*1000) + (250 * 1000));
-	this->infos_window->x_time->step(1000);
-	this->infos_window->y_time->scrollvalue(16,1,2,64);
-	this->infos_window->track_view_bt->value(1);
-	this->infos_window->disc_view_bt->value(0);
-	guicontext->td = hxcfe_td_init(guicontext->hxcfe,this->infos_window->floppy_map_disp->w(),this->infos_window->floppy_map_disp->h());
-	guicontext->flayoutframebuffer = (unsigned char*)malloc( this->infos_window->floppy_map_disp->w() * this->infos_window->floppy_map_disp->h() * 3);
-	if(guicontext->flayoutframebuffer)
+	infos_window = new floppy_infos_window();
+	if(infos_window)
 	{
-		memset(guicontext->flayoutframebuffer,0,this->infos_window->floppy_map_disp->w()*this->infos_window->floppy_map_disp->h() * 3);
-		hxc_createevent(guicontext->hxcfe,10);
+		infos_window->x_offset->bounds(0.0, 100);
+		infos_window->x_offset->value(85);
+		infos_window->x_time->scrollvalue((300*1000)+ (250 * 1000),1,1000,(1000*1000) + (250 * 1000));
+		infos_window->x_time->step(1000);
+		infos_window->y_time->scrollvalue(16,1,2,64);
+		infos_window->track_view_bt->value(1);
+		infos_window->disc_view_bt->value(0);
 
-		infoth = (infothread *)malloc(sizeof(infothread));
-		infoth->window = (floppy_infos_window*)(this->infos_window);
-		infoth->guicontext = guicontext;
-		hxc_createthread(guicontext->hxcfe,(void*)infoth,&InfosThreadProc,0);
+		guicontext->td = hxcfe_td_init(guicontext->hxcfe,infos_window->floppy_map_disp->w(),infos_window->floppy_map_disp->h());
+		guicontext->flayoutframebuffer = (unsigned char*)malloc( infos_window->floppy_map_disp->w() * infos_window->floppy_map_disp->h() * 3);
+		if(guicontext->flayoutframebuffer)
+		{
+			memset(guicontext->flayoutframebuffer,0,infos_window->floppy_map_disp->w()*infos_window->floppy_map_disp->h() * 3);
+			hxc_createevent(guicontext->hxcfe,10);
 
+			infoth = (infothread *)malloc(sizeof(infothread));
+			if(infoth)
+			{
+				memset(infoth,0,sizeof(infothread));
+				infoth->window = (floppy_infos_window*)(infos_window);
+				infoth->guicontext = guicontext;
+				hxc_createthread(guicontext->hxcfe,(void*)infoth,&InfosThreadProc,0);
+			}
+		}
+
+		infos_window->buf = new Fl_Text_Buffer;
+		if(infos_window->buf)
+			infos_window->object_txt->buffer(infos_window->buf);
+
+		infos_window->amiga_mfm_bt->value(1);
+		infos_window->iso_fm_bt->value(1);
+		infos_window->iso_mfm_bt->value(1);
+
+		tick_infos(infos_window);
+
+		#ifdef GUI_DEBUG
+		print_dbg((char*)"Main_Window : Floppy viewer window done !");
+		#endif
 	}
-	this->infos_window->buf=new Fl_Text_Buffer;
-	this->infos_window->object_txt->buffer(this->infos_window->buf);
-	this->infos_window->amiga_mfm_bt->value(1);
-	this->infos_window->iso_fm_bt->value(1);
-	this->infos_window->iso_mfm_bt->value(1);
 
-	tick_infos(this->infos_window);
 	guicontext->updatefloppyinfos++;
 	guicontext->updatefloppyfs++;
 
 	//////////////////////////////////////////////
-	// Floppy view window
+	// Track editor window
+	trackedit_window = new trackedittool_window();
+	if(trackedit_window)
+	{
+		infos_window->x_offset->bounds(0.0, 100);
+		trackedit_window->edit_startpoint->value("0");
+		trackedit_window->edit_endpoint->value("0");
+		trackedit_window->edit_bitrate->value("250000");
+		trackedit_window->edit_bitrate2->value("250000");
+		trackedit_window->edit_rpm->value("300");
+		trackedit_window->edit_fillflakey->value("1");
+		trackedit_window->edit_shiftbit->value("0");
+		trackedit_window->edit_editbuffer->value("010");
 
-	this->trackedit_window = new trackedittool_window();
-	this->infos_window->x_offset->bounds(0.0, 100);
-	this->trackedit_window->edit_startpoint->value("0");
-	this->trackedit_window->edit_endpoint->value("0");
-	this->trackedit_window->edit_bitrate->value("250000");
-	this->trackedit_window->edit_bitrate2->value("250000");
-	this->trackedit_window->edit_rpm->value("300");
-	this->trackedit_window->edit_fillflakey->value("1");
-	this->trackedit_window->edit_shiftbit->value("0");
-	this->trackedit_window->edit_editbuffer->value("010");
+		#ifdef GUI_DEBUG
+		print_dbg((char*)"Main_Window : Track editor window done !");
+		#endif
+	}
 
 	//////////////////////////////////////////////
 	// Batch convert window
-	this->batchconv_window=new batch_converter_window();
-	batchconv_window->choice_file_format->menu(format_choices);
-	batchconv_window->choice_file_format->value(0);
-	batchconv_window->hlptxt->wrap(FL_INPUT_WRAP);
-	batchconv_window->hlptxt->textsize(10);
-	batchconv_window->hlptxt->readonly(FL_INPUT_READONLY);
-	batchconv_window->hlptxt->static_value("To convert a large quantity of floppy images, set the source directory and the target directory (the SDCard). Drag&Drop mode : Just set the target directory and drag&drop the floppy images on this window.");
-	batchconv_window->progress_indicator->minimum(0);
-	batchconv_window->progress_indicator->maximum(100);
+	batchconv_window = new batch_converter_window();
+	if(batchconv_window)
+	{
+		batchconv_window->choice_file_format->menu(format_choices);
+		batchconv_window->choice_file_format->value(0);
+		batchconv_window->hlptxt->wrap(FL_INPUT_WRAP);
+		batchconv_window->hlptxt->textsize(10);
+		batchconv_window->hlptxt->readonly(FL_INPUT_READONLY);
+		batchconv_window->hlptxt->static_value("To convert a large quantity of floppy images, set the source directory and the target directory (the SDCard). Drag&Drop mode : Just set the target directory and drag&drop the floppy images on this window.");
+		batchconv_window->progress_indicator->minimum(0);
+		batchconv_window->progress_indicator->maximum(100);
 
+		#ifdef GUI_DEBUG
+		print_dbg((char*)"Main_Window : Batch converter window done !");
+		#endif
+	}
 
 	//////////////////////////////////////////////
 	// File system window
-	this->fs_window=new filesystem_generator_window();
-
+	fs_window = new filesystem_generator_window();
+	if(fs_window)
+	{
 #ifdef STANDALONEFSBROWSER
 	#ifdef WIN32
 		fs_window->window->icon((char *)LoadIcon(fl_display, MAKEINTRESOURCE(101)));
 	#endif
 #endif
 
-	fs_window->choice_filesystype->menu(fs_choices);
-	fs_window->choice_filesystype->value(11);
-	fs_window->disk_selector->lstep(10);
+		fs_window->choice_filesystype->menu(fs_choices);
+		fs_window->choice_filesystype->value(11);
+		fs_window->disk_selector->lstep(10);
 #ifndef STANDALONEFSBROWSER
-	fs_window->disk_selector->hide();
+		fs_window->disk_selector->hide();
 #endif
-	fs_window->hlptxt->wrap(FL_INPUT_WRAP);
-	fs_window->hlptxt->textsize(10);
-	fs_window->hlptxt->readonly(FL_INPUT_READONLY);
+		fs_window->hlptxt->wrap(FL_INPUT_WRAP);
+		fs_window->hlptxt->textsize(10);
+		fs_window->hlptxt->readonly(FL_INPUT_READONLY);
 
-	fs_window->hlptxt->static_value("To add your files to the disk just Drag&Drop them on the file browser to the left !");
-	guicontext->last_loaded_image_path[0] = 0;
-	guicontext->loaded_img_modified = 0;
+		fs_window->hlptxt->static_value("To add your files to the disk just Drag&Drop them on the file browser to the left !");
+		guicontext->last_loaded_image_path[0] = 0;
+		guicontext->loaded_img_modified = 0;
 #ifdef STANDALONEFSBROWSER
-	fs_window->choice_filesystype->deactivate();
-	fs_window->bt_injectdir->deactivate();
-	load_indexed_fileimage(0);
+		fs_window->choice_filesystype->deactivate();
+		fs_window->bt_injectdir->deactivate();
+		load_indexed_fileimage(0);
 #endif
-	fs_window->fs_browser->clear();
-	fs_window->fs_browser->selectmode(FL_TREE_SELECT_MULTI);
-	fs_window->fs_browser->root_label("/");
-	fs_window->fs_browser->showroot(1);
-	fs_window->fs_browser->redraw();
-	fs_window->fs_browser->show_self();
+		fs_window->fs_browser->clear();
+		fs_window->fs_browser->selectmode(FL_TREE_SELECT_MULTI);
+		fs_window->fs_browser->root_label("/");
+		fs_window->fs_browser->showroot(1);
+		fs_window->fs_browser->redraw();
+		fs_window->fs_browser->show_self();
 
-	tick_fs(this->fs_window);
+		tick_fs(fs_window);
+
+		#ifdef GUI_DEBUG
+		print_dbg((char*)"Main_Window : File system window done !");
+		#endif
+	}
 
 	//////////////////////////////////////////////
 	// Raw floppy window
-	this->rawloader_window=new rawfile_loader_window();
-	rawloader_window->choice_sectorsize->menu(sectorsize_choices);
-	rawloader_window->choice_sectorsize->value(2);
-	rawloader_window->choice_numberofside->menu(nbside_choices);
-	rawloader_window->choice_numberofside->value(1);
-	rawloader_window->choice_tracktype->menu(track_type_choices);
-	rawloader_window->choice_tracktype->value(3);
-	rawloader_window->choice_numberofside->value(1);
-	rawloader_window->chk_autogap3->value(1);
-	rawloader_window->innum_rpm->value(300);
-	rawloader_window->innum_sectoridstart->value(1);
-	rawloader_window->innum_bitrate->value(250000);
-	rawloader_window->innum_sectorpertrack->value(9);
-	rawloader_window->numin_formatvalue->value(246);
-	rawloader_window->innum_nbtrack->value(80);
-	rawloader_window->numin_gap3->value(84);
-	rawloader_window->numin_interleave->value(1);
-	rawloader_window->numin_skew->value(0);
-
-	rawloader_window->hlptxt->wrap(FL_INPUT_WRAP);
-	rawloader_window->hlptxt->textsize(10);
-	rawloader_window->hlptxt->readonly(FL_INPUT_READONLY);
-
-	rawloader_window->hlptxt->static_value("To batch convert RAW files you can use the Batch Converter function and check the RAW files mode check box.");
-
-	raw_loader_window_datachanged(rawloader_window->numin_skew, 0);
-
-	rfb=hxcfe_initXmlFloppy(guicontext->hxcfe);
-	i = 0;
-	while(i< hxcfe_numberOfXmlLayout(rfb) )
+	rawloader_window = new rawfile_loader_window();
+	if(rawloader_window)
 	{
-		temp = (char*)hxcfe_getXmlLayoutDesc(rfb,i);
-		if(temp)
-		{
-			disklayout_choices[i+2].text = (const char*)malloc(strlen(temp)+1);
-			if(disklayout_choices[i+2].text)
-				strcpy((char*)disklayout_choices[i+2].text, temp);
-		}
-		i++;
-	}
-	hxcfe_deinitXmlFloppy(rfb);
+		rawloader_window->choice_sectorsize->menu(sectorsize_choices);
+		rawloader_window->choice_sectorsize->value(2);
+		rawloader_window->choice_numberofside->menu(nbside_choices);
+		rawloader_window->choice_numberofside->value(1);
+		rawloader_window->choice_tracktype->menu(track_type_choices);
+		rawloader_window->choice_tracktype->value(3);
+		rawloader_window->choice_numberofside->value(1);
+		rawloader_window->chk_autogap3->value(1);
+		rawloader_window->innum_rpm->value(300);
+		rawloader_window->innum_sectoridstart->value(1);
+		rawloader_window->innum_bitrate->value(250000);
+		rawloader_window->innum_sectorpertrack->value(9);
+		rawloader_window->numin_formatvalue->value(246);
+		rawloader_window->innum_nbtrack->value(80);
+		rawloader_window->numin_gap3->value(84);
+		rawloader_window->numin_interleave->value(1);
+		rawloader_window->numin_skew->value(0);
 
-	rawloader_window->choice_disklayout->menu(disklayout_choices);
-	rawloader_window->choice_disklayout->value(0);
+		rawloader_window->hlptxt->wrap(FL_INPUT_WRAP);
+		rawloader_window->hlptxt->textsize(10);
+		rawloader_window->hlptxt->readonly(FL_INPUT_READONLY);
+
+		rawloader_window->hlptxt->static_value("To batch convert RAW files you can use the Batch Converter function and check the RAW files mode check box.");
+
+		raw_loader_window_datachanged(rawloader_window->numin_skew, 0);
+
+		#ifdef GUI_DEBUG
+		print_dbg((char*)"Main_Window : Adding xml format descriptions");
+		#endif
+
+		rfb = hxcfe_initXmlFloppy(guicontext->hxcfe);
+		if(rfb)
+		{
+			i = 0;
+			while(i< hxcfe_numberOfXmlLayout(rfb) )
+			{
+				temp = (char*)hxcfe_getXmlLayoutDesc(rfb,i);
+				if(temp)
+				{
+					disklayout_choices[i+2].text = (const char*)malloc(strlen(temp)+1);
+					if(disklayout_choices[i+2].text)
+						strcpy((char*)disklayout_choices[i+2].text, temp);
+				}
+				i++;
+			}
+			hxcfe_deinitXmlFloppy(rfb);
+		}
+
+		rawloader_window->choice_disklayout->menu(disklayout_choices);
+		rawloader_window->choice_disklayout->value(0);
+
+		#ifdef GUI_DEBUG
+		print_dbg((char*)"Main_Window : Raw floppy window done !");
+		#endif
+	}
 
 	//////////////////////////////////////////////
 	// Log window
-	this->log_box=new Log_box();
-
+	log_box = new Log_box();
+	if(log_box)
+	{
+#ifdef GUI_DEBUG
+		print_dbg((char*)"Main_Window : Log window done !");
+#endif
+	}
 	//////////////////////////////////////////////
 	// SD FE CFG window
 	guicontext->backlight_tmr = 20;
@@ -1135,59 +1259,82 @@ Main_Window::Main_Window()
 	guicontext->step_sound = 0xE8;
 	guicontext->ui_sound = 0x40;
 
-	this->sdcfg_window=new sdhxcfecfg_window();
-	sdcfg_window->choice_hfeifmode->menu(if_choices);
-	sdcfg_window->slider_scrolltxt_speed->scrollvalue(0xFF-guicontext->lcd_scroll,1,0,(255-64));
-	sdcfg_window->slider_stepsound_level->scrollvalue(0xFF-guicontext->step_sound,1,0x00, 0xFF-0xD8);
-	sdcfg_window->slider_uisound_level->scrollvalue(guicontext->ui_sound,1,0,128);
-	sdcfg_window->valslider_device_backlight_timeout->scrollvalue(guicontext->backlight_tmr,1,0,256);
-	sdcfg_window->valslider_device_standby_timeout->scrollvalue(guicontext->standby_tmr,1,0,256);
-	sdcfg_window->chk_loadlastloaded->set();
-	sdcfg_window->chk_enable_twodrives_emu->set();
-	sdcfg_window->choice_pin02_drva->menu(pincfg_choices);
-	sdcfg_window->choice_pin34_drva->menu(pincfg_choices);
-	sdcfg_window->choice_pin02_drvb->menu(pincfg_choices);
-	sdcfg_window->choice_pin34_drvb->menu(pincfg_choices);
-	sdcfg_window->choice_interfacemode_drva_cfg->menu(feifcfg_choices);
-	sdcfg_window->choice_interfacemode_drvb_cfg->menu(feifcfg_choices);
+	sdcfg_window = new sdhxcfecfg_window();
+	if(sdcfg_window)
+	{
+		sdcfg_window->choice_hfeifmode->menu(if_choices);
+		sdcfg_window->slider_scrolltxt_speed->scrollvalue(0xFF-guicontext->lcd_scroll,1,0,(255-64));
+		sdcfg_window->slider_stepsound_level->scrollvalue(0xFF-guicontext->step_sound,1,0x00, 0xFF-0xD8);
+		sdcfg_window->slider_uisound_level->scrollvalue(guicontext->ui_sound,1,0,128);
+		sdcfg_window->valslider_device_backlight_timeout->scrollvalue(guicontext->backlight_tmr,1,0,256);
+		sdcfg_window->valslider_device_standby_timeout->scrollvalue(guicontext->standby_tmr,1,0,256);
+		sdcfg_window->chk_loadlastloaded->set();
+		sdcfg_window->chk_enable_twodrives_emu->set();
+		sdcfg_window->choice_pin02_drva->menu(pincfg_choices);
+		sdcfg_window->choice_pin34_drva->menu(pincfg_choices);
+		sdcfg_window->choice_pin02_drvb->menu(pincfg_choices);
+		sdcfg_window->choice_pin34_drvb->menu(pincfg_choices);
+		sdcfg_window->choice_interfacemode_drva_cfg->menu(feifcfg_choices);
+		sdcfg_window->choice_interfacemode_drvb_cfg->menu(feifcfg_choices);
+
+		#ifdef GUI_DEBUG
+		print_dbg((char*)"Main_Window : SD settings window done !");
+		#endif
+	}
+
 	//////////////////////////////////////////////
 	// USB FE CFG window
 #ifndef STANDALONEFSBROWSER
 	libusbhxcfe_getStats(guicontext->hxcfe,guicontext->usbhxcfe,&stats,0);
 #endif
-	this->usbcfg_window=new usbhxcfecfg_window();
-	usbcfg_window->choice_ifmode->menu(if_choices);
+	usbcfg_window = new usbhxcfecfg_window();
+	if(usbcfg_window)
+	{
+		usbcfg_window->choice_ifmode->menu(if_choices);
 
 #ifndef STANDALONEFSBROWSER
-	usbcfg_window->slider_usbpacket_size->scrollvalue(stats.packetsize,128,512,4096-(512-128));
+		usbcfg_window->slider_usbpacket_size->scrollvalue(stats.packetsize,128,512,4096-(512-128));
 #endif
-	usbcfg_window->rbt_ds0->value(1);
+		usbcfg_window->rbt_ds0->value(1);
+
+		#ifdef GUI_DEBUG
+		print_dbg((char*)"Main_Window : USB HxC settings window done !");
+		#endif
+	}
 
 	//////////////////////////////////////////////
 	// About window
-	this->about_window=new About_box();
+	about_window = new About_box();
+	if(about_window)
+	{
+		data_COPYING_FULL->unpacked_data=data_unpack(data_COPYING_FULL->data,data_COPYING_FULL->csize ,data_COPYING_FULL->data, data_COPYING_FULL->size);
 
-	data_COPYING_FULL->unpacked_data=data_unpack(data_COPYING_FULL->data,data_COPYING_FULL->csize ,data_COPYING_FULL->data, data_COPYING_FULL->size);
+		license_txt=(char*)data_COPYING_FULL->unpacked_data;
+		license_txt[data_COPYING_FULL->size - 1] = 0;
 
-	license_txt=(char*)data_COPYING_FULL->unpacked_data;
-	license_txt[data_COPYING_FULL->size - 1] = 0;
-
+		#ifdef GUI_DEBUG
+		print_dbg((char*)"Main_Window : About window done !");
+		#endif
+	}
 
 	sync_if_config();
 
-	txtindex=0;
+	txtindex = 0;
+
 	tick_mw(this);
 
 #ifdef STANDALONEFSBROWSER
 	fs_window->window->show();
 #endif
 
-//	Fl::dnd_text_ops(1);
+	#ifdef GUI_DEBUG
+	print_dbg((char*)"Main_Window : All done !");
+	#endif
+
 	Fl::run();
 }
 
 Main_Window::~Main_Window()
 {
-	Fl::remove_timeout(tick_main,0);
 }
 
