@@ -1,6 +1,10 @@
-#ifdef IPF_SUPPORT 
+#ifdef IPF_SUPPORT
 
 #include <windows.h>
+
+#include "internal_libhxcfe.h"
+#include "libhxcfe.h"
+
 #include "thirdpartylibs/capslib/Comtype.h"
 #include "thirdpartylibs/capslib/CapsAPI.h"
 
@@ -28,10 +32,12 @@ CAPSUNLOCKALLTRACKS pCAPSUnlockAllTracks=0;
 CAPSGETVERSIONINFO pCAPSGetVersionInfo=0;
 CAPSREMIMAGE pCAPSRemImage=0;
 
-int init_caps_lib()
+int init_caps_lib(HXCFE* hxcfe)
 {
 	HMODULE h;
 	uint32_t ret;
+	char * libname;
+
 	if(pCAPSInit && \
 	   pCAPSAddImage &&  \
 	   pCAPSLockImageMemory && \
@@ -48,7 +54,16 @@ int init_caps_lib()
 	}
 	else
 	{
-		h = LoadLibrary ("CAPSImg.dll");
+		libname = hxcfe_getEnvVar( hxcfe, "WINDOWS_SPSCAPS_LIB_NAME", 0 );
+		if(!libname)
+		{
+#ifdef DEBUG
+			printf("Library name not defined !\n");
+#endif
+			return 0;
+		}
+
+		h = LoadLibrary (libname);
 		if(h)
 		{
 			ret=(uint32_t )GetProcAddress (h, "CAPSInit");
@@ -97,9 +112,7 @@ int init_caps_lib()
 
 			return 1;
 		}
-
 	}
-
 
 	return 0;
 };

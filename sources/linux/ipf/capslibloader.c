@@ -47,7 +47,8 @@
 
 #include <stdint.h>
 
-#define CAPS_LIB_NAME "libcapsimage.so.5.1"
+#include "internal_libhxcfe.h"
+#include "libhxcfe.h"
 
 typedef uint8_t BYTE;
 typedef uint32_t DWORD;
@@ -90,8 +91,6 @@ typedef struct _lib_funcs_def
 	func_ptr *ptr;
 }lib_funcs_def;
 
-#define CAPS_LIB_NAME "libcapsimage.so.5.1"
-
 lib_funcs_def capslib_lib_funcs_def[]=
 {
 	{"CAPSInit",            (func_ptr *)&pCAPSInit},
@@ -108,11 +107,12 @@ lib_funcs_def capslib_lib_funcs_def[]=
 	{ 0, 0 }
 };
 
-int init_caps_lib()
+int init_caps_lib(HXCFE* hxcfe)
 {
 	int i;
 	HMODULE h = 0;
 	void* ret;
+	char * libname;
 
 	i = 0;
 	while( capslib_lib_funcs_def[i].name )
@@ -126,11 +126,20 @@ int init_caps_lib()
 	if( !capslib_lib_funcs_def[i].name )
 		return 1;
 
-	h = dlopen(CAPS_LIB_NAME, RTLD_LAZY);
+	libname = hxcfe_getEnvVar( hxcfe, "LINUX_SPSCAPS_LIB_NAME", 0 );
+	if(!libname)
+	{
+#ifdef DEBUG
+		printf("Library name not defined !\n");
+#endif
+		return 0;
+	}
+
+	h = dlopen(libname, RTLD_LAZY);
 	if(!h)
 	{
 #ifdef DEBUG
-		printf("Can't load "CAPS_LIB_NAME" !\n");
+		printf("Can't load %s !\n",libname);
 #endif
 		return 0;
 	}
