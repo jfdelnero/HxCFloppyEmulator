@@ -2,6 +2,8 @@
 
 #include <windows.h>
 
+#include <stdint.h>
+
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
