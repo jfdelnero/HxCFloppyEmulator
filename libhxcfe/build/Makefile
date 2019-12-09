@@ -788,7 +788,7 @@ $(BASEDIR)/xml_disk/DiskLayouts/%.h : $(BASEDIR)/xml_disk/DiskLayouts/xml_files/
 	cd $(BASEDIR)/xml_disk/DiskLayouts/xml_files/ && ../../converttools/bmptob8/bmptoh $(basename $(notdir $<.xml)) -DATA && mv data_$(basename $(notdir $<))_xml.h ..
 
 $(BASEDIR)/init_script.h : $(BASEDIR)/init.script
-	cd $(BASEDIR)/ && $(BASEDIR)/xml_disk/converttools/bmptoh $(basename $(notdir $<.script)) -DATA && mv data_$(basename $(notdir $<))_script.h init_script.h
+	cd $(BASEDIR)/ && $(BASEDIR)/xml_disk/converttools/bmptob8/bmptoh $(basename $(notdir $<.script)) -DATA && mv data_$(basename $(notdir $<))_script.h init_script.h
 
 clean:
 	rm -rf *.o
