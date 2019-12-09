@@ -106,7 +106,7 @@ int IPF_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 	if(hxc_checkfileext(imgfile->path,"ipf",SYS_PATH_TYPE) || hxc_checkfileext(imgfile->path,"ct",SYS_PATH_TYPE) || hxc_checkfileext(imgfile->path,"ctr",SYS_PATH_TYPE))
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IPF_libIsValidDiskFile : IPF file !");
-		if(init_caps_lib())
+		if(init_caps_lib(imgldr_ctx->hxcfe))
 		{
 			return HXCFE_VALIDFILE;
 		}

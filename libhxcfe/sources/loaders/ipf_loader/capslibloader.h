@@ -1,1 +1,1 @@
-int init_caps_lib();
+int init_caps_lib(HXCFE* hxcfe);
