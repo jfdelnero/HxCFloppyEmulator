@@ -2115,6 +2115,26 @@ SOURCE=..\sources\loaders\streamhfe_loader\streamhfe_loader.h
 SOURCE=..\sources\loaders\streamhfe_loader\streamhfe_writer.c
 # End Source File
 # End Group
+# Begin Group "QD"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\qd_loader\qd_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\qd_loader\qd_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\qd_loader\qd_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\qd_loader\qd_writer.c
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 
