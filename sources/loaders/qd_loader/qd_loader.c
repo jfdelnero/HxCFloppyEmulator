@@ -97,6 +97,7 @@ int QD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 	qdhfefileformatheader header;
 	qdtrack trackdesc;
 	unsigned int i,j;
+	int startswpos,stopswpos;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
 
@@ -119,7 +120,7 @@ int QD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 
 		floppydisk->floppyNumberOfTrack = header.number_of_track;
 		floppydisk->floppyNumberOfSide = header.number_of_side;
-		floppydisk->floppyBitRate = header.bitRate;
+		floppydisk->floppyBitRate = header.bitRate / 2;
 		floppydisk->floppySectorPerTrack=-1;
 		floppydisk->floppyiftype = ATARIST_DD_FLOPPYMODE;
 
@@ -157,8 +158,13 @@ int QD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 												trackdesc.offset,
 												trackdesc.track_len);
 
-			currentcylinder->sides[i&1] = tg_alloctrack(floppydisk->floppyBitRate, UNKNOWN_ENCODING, 0, trackdesc.track_len*8,2500,-2500,0x00);
+			startswpos = (int)((float)(trackdesc.start_sw_position * 4 * 1000) / (float)floppydisk->floppyBitRate) * 1000;
+			stopswpos = (int)((float)(trackdesc.stop_sw_position * 4 * 1000) / (float)floppydisk->floppyBitRate) * 1000;
+
+			currentcylinder->sides[i&1] = tg_alloctrack(floppydisk->floppyBitRate, UNKNOWN_ENCODING, 0, trackdesc.track_len*8,20*1000,startswpos,0x00);
 			currentside = currentcylinder->sides[i&1];
+
+			fillindex(stopswpos,currentside,20*1000,1,0);
 
 			currentside->number_of_sector = floppydisk->floppySectorPerTrack;
 
