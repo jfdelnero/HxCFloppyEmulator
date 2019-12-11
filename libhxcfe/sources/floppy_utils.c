@@ -59,7 +59,8 @@
 
 int32_t us2index(int32_t startindex,HXCFE_SIDE * track,uint32_t us,unsigned char fill,char fillorder)
 {
-	uint32_t time,freq;
+	uint32_t freq;
+	uint64_t time;
 
 	if(!us)
 		return startindex;
@@ -84,7 +85,7 @@ int32_t us2index(int32_t startindex,HXCFE_SIDE * track,uint32_t us,unsigned char
 				if(freq)
 					time = time + (((1000000000/2)/freq));
 
-			}while(us>(time/1000));
+			}while(us>(uint32_t)(time/1000));
 
 			return startindex;
 		}
@@ -107,7 +108,7 @@ int32_t us2index(int32_t startindex,HXCFE_SIDE * track,uint32_t us,unsigned char
 
 					time = time + (((1000000000/2) / freq));
 
-				}while(us>(time/1000));
+				}while(us>(uint32_t)(time/1000));
 			}
 			return startindex;
 		}
@@ -130,7 +131,7 @@ int32_t us2index(int32_t startindex,HXCFE_SIDE * track,uint32_t us,unsigned char
 				if(freq)
 					time = time + (( (1000000000/2) / freq));
 
-			}while(us>(time/1000));
+			}while(us>(uint32_t)(time/1000));
 
 			return startindex;
 		}
@@ -150,7 +151,7 @@ int32_t us2index(int32_t startindex,HXCFE_SIDE * track,uint32_t us,unsigned char
 						startindex=track->tracklen-1;
 
 					time = time + (((1000000000/2)/freq));
-				}while(us>(time/1000));
+				}while(us>(uint32_t)(time/1000));
 			}
 			return startindex;
 		}
