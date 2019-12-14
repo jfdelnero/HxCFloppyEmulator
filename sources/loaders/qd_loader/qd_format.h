@@ -24,59 +24,56 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 */
+///////////////////////////////////////////////////////////////////////////////////
+//-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
+//-----------H----H--X----X-----CCCCC----22222----0000-----0000------11----------//
+//----------H----H----X-X-----C--------------2---0----0---0----0--1--1-----------//
+//---------HHHHHH-----X------C----------22222---0----0---0----0-----1------------//
+//--------H----H----X--X----C----------2-------0----0---0----0-----1-------------//
+//-------H----H---X-----X---CCCCC-----222222----0000-----0000----1111------------//
+//-------------------------------------------------------------------------------//
+//----------------------------------------------------- http://hxc2001.free.fr --//
+///////////////////////////////////////////////////////////////////////////////////
+// File : qd_format.h
+// Contains: HxC Quickdisk floppy image format /
+//           (c) HxC2001 / Jean-François DEL NERO
+//
+// Written by: Jean François DEL NERO
+//
+// Change History (most recent first):
+///////////////////////////////////////////////////////////////////////////////////
 
 // All structure datas are packed !
 #pragma pack(1)
 
 typedef struct qdhfefileformatheader_
 {
-	unsigned char HEADERSIGNATURE[8]; //HXCQDDRV
-	uint32_t formatrevision;
-	uint32_t number_of_track; // 1
-	uint32_t number_of_side;  // x
-	uint32_t track_encoding;
+	unsigned char HEADERSIGNATURE[8]; // "HXCQDDRV"
+	uint32_t formatrevision;          // 0
+	uint32_t number_of_track;         // Should be 1, but we can store multiple disks in one file
+	uint32_t number_of_side;          // 1 or 2
+	uint32_t track_encoding;          //
 	uint32_t write_protected;
-	uint32_t bitRate;   // (cells rate / s)
+	uint32_t bitRate;                 // (cells rate / s)
 	uint32_t flags;
-	uint32_t track_list_offset;
-} qdhfefileformatheader;
+	uint32_t track_list_offset;       // In bytes
+}qdhfefileformatheader;
+
+// The qdtrack array can be found after the file header.
+// The array file position is 512 bytes aligned.
+// Number of elements in the qdtrack array : number_of_track * number_of_side
+// Here is one qdtrack element :
 
 typedef struct qdtrack_
 {
-	uint32_t offset;
-	uint32_t track_len;
-	uint32_t start_sw_position;
-	uint32_t stop_sw_position;
+	uint32_t offset;                  // Absolute file offset
+	uint32_t track_len;               // In bytes.
+	uint32_t start_sw_position;       // start switch track offset, in bytes
+	uint32_t stop_sw_position;        // end switch track offset, in bytes
 }qdtrack;
 
-
-typedef struct MFMIMG_
-{
-	uint8_t  headername[7];          // "HXCMFM\0"
-
-	uint16_t number_of_track;
-	uint8_t  number_of_side;         // Number of elements in the MFMTRACKIMG array : number_of_track * number_of_side
-
-	uint16_t floppyRPM;              // Rotation per minute.
-	uint16_t floppyBitRate;          // 250 = 250Kbits/s, 300 = 300Kbits/s...
-	uint8_t  floppyiftype;
-
-	uint32_t mfmtracklistoffset;    // Offset of the MFMTRACKIMG array from the beginning of the file in number of uint8_ts.
-}MFMIMG;
-
-// Right after this header, the MFMTRACKIMG array is present.
-// Number of element in the MFMTRACKIMG array : number_of_track * number_of_side
-// Here is one MFMTRACKIMG element :
-
-typedef struct MFMTRACKIMG_
-{
-	uint16_t track_number;
-	uint8_t  side_number;
-	uint32_t mfmtracksize;          // MFM/FM Track size in bytes
-	uint32_t mfmtrackoffset;        // Offset of the track data from the beginning of the file in number of bytes.
-}MFMTRACKIMG;
-
-// After this array, track datas can be found.
-// Each data byte must be sent to the floppy interface from the bit 7 to the bit 0.
+// Tracks cell datas can be found after the track description array.
+// Each data byte must be sent to the QD floppy interface from the bit 0 to the bit 7.
 
 #pragma pack()

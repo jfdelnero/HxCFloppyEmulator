@@ -24,6 +24,24 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 */
+///////////////////////////////////////////////////////////////////////////////////
+//-------------------------------------------------------------------------------//
+//-------------------------------------------------------------------------------//
+//-----------H----H--X----X-----CCCCC----22222----0000-----0000------11----------//
+//----------H----H----X-X-----C--------------2---0----0---0----0--1--1-----------//
+//---------HHHHHH-----X------C----------22222---0----0---0----0-----1------------//
+//--------H----H----X--X----C----------2-------0----0---0----0-----1-------------//
+//-------H----H---X-----X---CCCCC-----222222----0000-----0000----1111------------//
+//-------------------------------------------------------------------------------//
+//----------------------------------------------------- http://hxc2001.free.fr --//
+///////////////////////////////////////////////////////////////////////////////////
+// File : qd_loader.c
+// Contains: HxC Quickdisk floppy image writer
+//
+// Written by: Jean François DEL NERO
+//
+// Change History (most recent first):
+///////////////////////////////////////////////////////////////////////////////////
 
 #include <string.h>
 #include <stdio.h>
@@ -37,131 +55,178 @@
 #include "qd_loader.h"
 #include "qd_format.h"
 
+#include "tracks/luts.h"
+
 #include "libhxcadaptor.h"
 
 int QD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 
-	FILE * hxcmfmfile;
-
-	MFMTRACKIMG mfmtrackdesc;
-	MFMIMG mfmheader;
+	FILE * hxcqdfile;
+	qdhfefileformatheader header;
+	qdtrack * track_blocks;
 	unsigned char * mfmtrack;
-	int32_t * offsettrack;
 	int mfmsize;
-	unsigned int i,j;
-	unsigned int trackpos;
+	int qd_mfmsize;
+
+	unsigned char tmp_sector[512];
+
+	unsigned int i,j,k,l;
+	unsigned int tracks_block_size;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write QD file %s...",filename);
 
-	hxcmfmfile=hxc_fopen(filename,"wb");
-	if(hxcmfmfile)
+	track_blocks = NULL;
+	mfmtrack = NULL;
+
+	hxcqdfile = hxc_fopen(filename,"wb");
+	if(hxcqdfile)
 	{
-		sprintf((char*)&mfmheader.headername,"HXCMFM");
-		mfmheader.number_of_track=floppy->floppyNumberOfTrack;
-		mfmheader.number_of_side=floppy->floppyNumberOfSide;
-		mfmheader.floppyBitRate=floppy->floppyBitRate/1000;
+		memset(&tmp_sector,0,sizeof(tmp_sector));
+		memset(&header,0,sizeof(qdhfefileformatheader));
+		memcpy((char*)&header.HEADERSIGNATURE,"HXCQDDRV",8);
 
-		if(floppy->floppyBitRate!=VARIABLEBITRATE)
+		header.number_of_track = floppy->floppyNumberOfTrack;
+		header.number_of_side = floppy->floppyNumberOfSide;
+		header.bitRate = floppy->floppyBitRate * 2;
+
+		if(floppy->floppyBitRate == VARIABLEBITRATE)
 		{
-			mfmheader.floppyBitRate=floppy->floppyBitRate/1000;
+			header.bitRate = 203128;
 		}
-		else
+
+		header.track_list_offset = 512;
+
+		fwrite(&header,sizeof(header),1,hxcqdfile);
+		fwrite(&tmp_sector,sizeof(tmp_sector) - sizeof(qdhfefileformatheader),1,hxcqdfile);
+
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d Tracks, %d side(s)",header.number_of_track,header.number_of_side);
+
+		tracks_block_size = ((header.number_of_track*header.number_of_side)+1)*sizeof(qdtrack);
+
+		if( tracks_block_size & 0x1FF )
 		{
-			mfmheader.floppyBitRate=floppy->tracks[0]->sides[0]->timingbuffer[(floppy->tracks[0]->sides[0]->tracklen/8)/2]/1000;
+			tracks_block_size = (tracks_block_size & ~0x1FF) + 0x200;
 		}
 
-		mfmheader.floppyRPM=0;//floppy->floppyRPM;
-		mfmheader.floppyiftype=(unsigned char)floppy->floppyiftype;
-		mfmheader.mfmtracklistoffset=sizeof(mfmheader);
-		fwrite(&mfmheader,sizeof(mfmheader),1,hxcmfmfile);
+		track_blocks = (qdtrack*) malloc(tracks_block_size);
+		if(!track_blocks)
+			goto error;
 
-		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d Tracks, %d side(s)",mfmheader.number_of_track,mfmheader.number_of_side);
+		memset(track_blocks,0,tracks_block_size);
 
-		offsettrack=(int32_t*) malloc(((mfmheader.number_of_track*mfmheader.number_of_side)+1)*sizeof(int32_t));
+		fwrite(track_blocks,tracks_block_size,1,hxcqdfile);
 
-		i=0;
-		trackpos=sizeof(mfmheader)+(sizeof(mfmtrackdesc)*(mfmheader.number_of_track*mfmheader.number_of_side));
-		if(trackpos&0x1FF)
-		{
-			trackpos=(trackpos&(~0x1FF))+0x200;
-		}
+		k = 0;
+		i = 0;
 		do
 		{
-			for(j=0;j<(mfmheader.number_of_side);j++)
+			hxcfe_imgCallProgressCallback(imgldr_ctx,i,(header.number_of_track) );
+
+			for(j=0;j<(header.number_of_side);j++)
 			{
-				memset(&mfmtrackdesc,0,sizeof(mfmtrackdesc));
- 				mfmsize=floppy->tracks[i]->sides[j]->tracklen;
+				mfmsize = floppy->tracks[i]->sides[j]->tracklen;
 				if(mfmsize&7)
-					mfmsize=(mfmsize/8)+1;
+					mfmsize = (mfmsize/8)+1;
 				else
-					mfmsize=mfmsize/8;
+					mfmsize = mfmsize/8;
 
-				mfmtrackdesc.mfmtracksize=mfmsize;
-				mfmtrackdesc.side_number=j;
-				mfmtrackdesc.track_number=i;
-				offsettrack[(i*mfmheader.number_of_side)+j]=(int32_t)trackpos;
-				mfmtrackdesc.mfmtrackoffset=trackpos;
+				if(mfmsize&0x1FF)
+					qd_mfmsize = ((mfmsize & ~0x1FF) + 0x200);
+				else
+					qd_mfmsize = mfmsize;
 
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Write Track %d:%d [%x] %x bytes",i,j,mfmtrackdesc.mfmtrackoffset,mfmsize);
-				trackpos=trackpos+mfmsize;
-				if(trackpos&0x1FF)
+				track_blocks[k].offset = ftell(hxcqdfile);
+				track_blocks[k].track_len = qd_mfmsize;
+
+				mfmtrack = (unsigned char*) malloc(qd_mfmsize);
+				if(!mfmtrack)
+					goto error;
+
+				memset(mfmtrack,0x01,qd_mfmsize);
+				for(l=0;l<mfmsize;l++)
 				{
-					trackpos=(trackpos&(~0x1FF))+0x200;
+					mfmtrack[l] = LUT_ByteBitsInverter[floppy->tracks[i]->sides[j]->databuffer[l]];
 				}
 
-				fwrite(&mfmtrackdesc,sizeof(mfmtrackdesc),1,hxcmfmfile);
+				fwrite(mfmtrack,qd_mfmsize,1,hxcqdfile);
 
-			}
+				track_blocks[k].start_sw_position = 0;
+				track_blocks[k].stop_sw_position = 0;
 
-			i++;
-		}while(i<(mfmheader.number_of_track));
-
-		mfmtrack=NULL;
-		i=0;
-		do
-		{
-			hxcfe_imgCallProgressCallback(imgldr_ctx,i,(mfmheader.number_of_track) );
-
-			for(j=0;j<(mfmheader.number_of_side);j++)
-			{
-				memset(&mfmtrackdesc,0,sizeof(mfmtrackdesc));
-				mfmsize=floppy->tracks[i]->sides[j]->tracklen;
-				if(mfmsize&7)
-					mfmsize=(mfmsize/8)+1;
-				else
-					mfmsize=mfmsize/8;
-
-				mfmtrack=(unsigned char*) malloc(mfmsize);
-
-				if(ftell(hxcmfmfile)<offsettrack[(i*mfmheader.number_of_side)+j])
+				l = 0;
+				while(l<mfmsize && !floppy->tracks[i]->sides[j]->indexbuffer[l])
 				{
-					memset(mfmtrack,0,offsettrack[(i*mfmheader.number_of_side)+j]-ftell(hxcmfmfile));
-					fwrite(mfmtrack,offsettrack[(i*mfmheader.number_of_side)+j]-ftell(hxcmfmfile),1,hxcmfmfile);
+					l++;
 				}
 
-				memcpy(mfmtrack,floppy->tracks[i]->sides[j]->databuffer,mfmsize);
+				if(l<mfmsize)
+				{
+					if( ( l & 0x1FF ) >= 0x100 )
+						track_blocks[k].start_sw_position = ((l & ~0x1FF) + 0x200);
+					else
+						track_blocks[k].start_sw_position = ((l & ~0x1FF));
 
-				fwrite(mfmtrack,mfmsize,1,hxcmfmfile);
+					while(l<mfmsize && floppy->tracks[i]->sides[j]->indexbuffer[l])
+					{
+						l++;
+					}
+
+					while(l<mfmsize && !floppy->tracks[i]->sides[j]->indexbuffer[l])
+					{
+						l++;
+					}
+
+					if(l<mfmsize)
+					{
+						if( (l & 0x1FF) >= 0x100 )
+							track_blocks[k].stop_sw_position = ((l & ~0x1FF) + 0x200);
+						else
+							track_blocks[k].stop_sw_position = ((l & ~0x1FF));
+
+					}
+				}
+
+				fseek(hxcqdfile,512,SEEK_SET);
+
+				fwrite(track_blocks,tracks_block_size,1,hxcqdfile);
+
+				fseek(hxcqdfile,0,SEEK_END);
 
 				free(mfmtrack);
+				mfmtrack = NULL;
 
+				k++;
 			}
 
 			i++;
-		}while(i<(mfmheader.number_of_track));
+		}while(i<(header.number_of_track));
 
-		free(offsettrack);
+		free(track_blocks);
 
-		hxc_fclose(hxcmfmfile);
+		hxc_fclose(hxcqdfile);
 
 		return 0;
 	}
 	else
 	{
-		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"QD_libWrite_DiskFile : Cannot create %s!",filename);
 
 		return -1;
 	}
+
+error:
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"QD_libWrite_DiskFile : Memory allocation error !");
+
+	if(track_blocks)
+		free(track_blocks);
+
+	if(mfmtrack)
+		free(mfmtrack);
+
+	if(hxcqdfile)
+		hxc_fclose(hxcqdfile);
+
+	return -1;
 }
 

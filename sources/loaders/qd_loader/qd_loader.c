@@ -36,9 +36,9 @@
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
 // File : qd_loader.c
-// Contains: MFM floppy image loader
+// Contains: HxC Quickdisk floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -111,7 +111,7 @@ int QD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 	}
 
 	memset(&header,0,sizeof(qdhfefileformatheader));
-	memset(&trackdesc,0,sizeof(MFMTRACKIMG));
+	memset(&trackdesc,0,sizeof(qdtrack));
 
 	hxc_fread(&header,sizeof(header),f);
 
@@ -196,8 +196,8 @@ int QD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * f
 
 int QD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-	static const char plug_id[]="HXCQD_IMG";
-	static const char plug_desc[]="HXC QD IMG Loader";
+	static const char plug_id[]="HXC_QD";
+	static const char plug_desc[]="HXC Quickdisk image Loader";
 	static const char plug_ext[]="qd";
 
 	plugins_ptr plug_funcs=
