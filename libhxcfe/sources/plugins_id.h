@@ -78,3 +78,4 @@
 #define	PLUGIN_IPF					"SPS_IPF"
 #define	PLUGIN_NORTHSTAR			"NORTHSTAR"
 #define	PLUGIN_HEATHKIT				"HEATHKIT"
+#define	PLUGIN_HXC_QD				"HXC_QD"
