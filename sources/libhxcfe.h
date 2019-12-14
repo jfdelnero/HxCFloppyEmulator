@@ -386,6 +386,9 @@ int32_t                hxcfe_FDC_SCANSECTOR  ( HXCFE* floppycontext, uint8_t tra
 #define EMU_SHUGART_FLOPPYMODE           0x0B
 #define S950_DD_FLOPPYMODE               0x0C
 #define S950_HD_FLOPPYMODE               0x0D
+#define S950_DD_HD_FLOPPYMODE            0x0E
+#define IBMPC_DD_HD_FLOPPYMODE           0x0F
+#define QUICKDISK_FLOPPYMODE             0x10
 
 // Track Encoding types
 
