@@ -106,13 +106,16 @@ interfacemode interfacemodelist[]=
 	{EMU_SHUGART_FLOPPYMODE,		"EMU_SHUGART_FLOPPYMODE",		"E-mu Interface" },
 	{S950_DD_FLOPPYMODE,			"S950_DD_FLOPPYMODE",			"Akai S900/S950 Interface (800KB/DD Disk)" },
 	{S950_HD_FLOPPYMODE,			"S950_HD_FLOPPYMODE",			"Akai S950 Interface (1.6MB/HD Disk)" },
+	{S950_DD_HD_FLOPPYMODE,			"S950_DD_HD_FLOPPYMODE",		"Akai S950 Interface (Automatic density selection)" },
+	{IBMPC_DD_HD_FLOPPYMODE,		"IBMPC_DD_HD_FLOPPYMODE",		"PC Interface (Automatic density selection)" },
+	{QUICKDISK_FLOPPYMODE,			"QUICKDISK_FLOPPYMODE",			"Quickdisk Interface" },
 	{-1,"",	""},
 };
 
 int32_t hxcfe_getFloppyInterfaceModeID( HXCFE* floppycontext, char * ifmode )
 {
 	int i;
-	
+
 	if(floppycontext)
 	{
 		i=0;
@@ -124,13 +127,13 @@ int32_t hxcfe_getFloppyInterfaceModeID( HXCFE* floppycontext, char * ifmode )
 
 		return interfacemodelist[i].ifmodeid;
 	}
-	
+
 	return 0;
 }
 
 const char * hxcfe_getFloppyInterfaceModeName( HXCFE* floppycontext, int32_t ifmodeid )
 {
-	
+
 	int i;
 
 	if(floppycontext)
@@ -177,7 +180,7 @@ const char * hxcfe_getFloppyInterfaceModeDesc( HXCFE* floppycontext, int32_t ifm
 
 const char * hxcfe_getTrackEncodingName( HXCFE* floppycontext,int32_t trackencodingid )
 {
-	
+
 	int i;
 
 	if(floppycontext)
