@@ -168,6 +168,7 @@ Fl_Menu_Item format_choices[]=
 	{ "XML - XML file image",0,format_choice_cb,(void*)PLUGIN_GENERIC_XML},
 	{ "NSI - Northstar file image",0,format_choice_cb,(void*)PLUGIN_NORTHSTAR},
 	{ "H8D - Heathkit file image",0,format_choice_cb,(void*)PLUGIN_HEATHKIT},
+	{ "QD  - HxC Quickdisk file format",0,format_choice_cb,(void*)PLUGIN_HXC_QD},
 	{0}
 };
 

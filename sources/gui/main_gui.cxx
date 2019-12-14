@@ -144,7 +144,8 @@ const char * plugid_lst[]=
 	PLUGIN_DISK_BMP,
 	PLUGIN_GENERIC_XML,
 	PLUGIN_NORTHSTAR,
-	PLUGIN_HEATHKIT
+	PLUGIN_HEATHKIT,
+	PLUGIN_HXC_QD
 };
 
 #ifdef GUI_DEBUG
@@ -500,6 +501,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"XML file\t*.xml\n"
 					"NSI file\t*.nsi\n"
 					"H8D file\t*.h8d\n"
+					"QD file (Quickdisk HxC Floppy Emulator file format)\t*.qd\n"
 					);
 
 
