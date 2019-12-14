@@ -122,7 +122,7 @@ int QD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 		floppydisk->floppyNumberOfSide = header.number_of_side;
 		floppydisk->floppyBitRate = header.bitRate / 2;
 		floppydisk->floppySectorPerTrack=-1;
-		floppydisk->floppyiftype = ATARIST_DD_FLOPPYMODE;
+		floppydisk->floppyiftype = QUICKDISK_FLOPPYMODE;
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"QD File : %d track, %d side, %d bit/s, %d sectors, mode %d",
 			floppydisk->floppyNumberOfTrack,
