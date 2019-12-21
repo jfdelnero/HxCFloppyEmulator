@@ -60,9 +60,3 @@ set SCPLOADER_BMPEXPORT 0
 
 set STREAMHFELOADER_BITRATE 0
 set STREAMHFELOADER_BMPEXPORT 0
-
-# Linux and Windows sps caps library name 
-
-set LINUX_SPSCAPS_LIB_NAME libcapsimage.so.5.1
-set WINDOWS_SPSCAPS_LIB_NAME CAPSImg.dll
-

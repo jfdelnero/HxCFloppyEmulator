@@ -36,26 +36,31 @@
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
 // File : capslibloader.c
-// Contains: Linux SPS CAPS library loader
+// Contains: Windows, Linux, mac OS SPS CAPS library loader
 //
 // Written by: Jean-François DEL NERO, Riku Anttila
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifdef IPF_SUPPORT
+#ifdef WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
 
 #include <stdint.h>
 
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
 
+#ifndef WIN32
 typedef uint8_t BYTE;
 typedef uint32_t DWORD;
 typedef uint16_t WORD;
 typedef void* HMODULE;
+#endif
 
-#include <dlfcn.h>
 #include "thirdpartylibs/capslib/Comtype.h"
 #include "thirdpartylibs/capslib/CapsAPI.h"
 
@@ -126,21 +131,22 @@ int init_caps_lib(HXCFE* hxcfe)
 	if( !capslib_lib_funcs_def[i].name )
 		return 1;
 
-	libname = hxcfe_getEnvVar( hxcfe, "LINUX_SPSCAPS_LIB_NAME", 0 );
+	libname = hxcfe_getEnvVar( hxcfe, "SPSCAPS_LIB_NAME", 0 );
 	if(!libname)
 	{
-#ifdef DEBUG
-		printf("Library name not defined !\n");
-#endif
+		hxcfe->hxc_printf(MSG_ERROR,"init_caps_lib : Library name not defined !",libname);
+
 		return 0;
 	}
 
+#ifdef WIN32
+	h = LoadLibrary (libname);
+#else
 	h = dlopen(libname, RTLD_LAZY);
+#endif
 	if(!h)
 	{
-#ifdef DEBUG
-		printf("Can't load %s !\n",libname);
-#endif
+		hxcfe->hxc_printf(MSG_ERROR,"init_caps_lib : Can't load %s ! Library not found ?",libname);
 		return 0;
 	}
 
@@ -148,11 +154,17 @@ int init_caps_lib(HXCFE* hxcfe)
 	i = 0;
 	while( capslib_lib_funcs_def[i].name )
 	{
-		ret = (void*)dlsym (h, capslib_lib_funcs_def[i].name);
+		#ifdef WIN32
+			ret = (void*)GetProcAddress (h, capslib_lib_funcs_def[i].name);
+		#else
+			ret = (void*)dlsym (h, capslib_lib_funcs_def[i].name);
+		#endif
+
 		if( ret )
 			*capslib_lib_funcs_def[i].ptr = (void*)ret;
 		else
 			break; // Missing entry ?
+
 		i++;
 	}
 
@@ -161,9 +173,20 @@ int init_caps_lib(HXCFE* hxcfe)
 		return 1;
 
 	// One or more function missing...
+	hxcfe->hxc_printf(MSG_ERROR,"init_caps_lib : Can't load the needed entries from %s ! Bad library ?",libname);
+
+#ifdef WIN32
+	FreeLibrary(h);
+#else
 	dlclose(h);
+#endif
+
+	i = 0;
+	while( capslib_lib_funcs_def[i].name )
+	{
+		capslib_lib_funcs_def[i].ptr = 0;
+		i++;
+	}
 
 	return 0;
 };
-
-#endif
