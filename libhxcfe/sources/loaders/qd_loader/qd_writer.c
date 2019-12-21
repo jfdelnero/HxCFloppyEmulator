@@ -71,7 +71,8 @@ int QD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * f
 
 	unsigned char tmp_sector[512];
 
-	unsigned int i,j,k,l;
+	unsigned int i,j,k;
+	int l;
 	unsigned int tracks_block_size;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write QD file %s...",filename);
