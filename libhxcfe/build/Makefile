@@ -17,13 +17,6 @@ else
 	LDFLAGS= -shared -lc -lm -ldl -s
 endif
 
-DISKLOADERPLUGINS_IPF=
-
-ifeq ($(UNAME), Linux)
-	CFLAGS:=$(CFLAGS) -DIPF_SUPPORT
-	DISKLOADERPLUGINS_IPF= ipf_loader.o capslibloader.o
-endif
-
 EXEC=libhxcfe.so
 
 ifeq ($(UNAME), Linux)
@@ -72,7 +65,7 @@ DISKLOADERPLUGINS = raw_amiga.o raw_iso.o copyqm_loader.o crctable.o adf_loader.
 					krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o system24_loader.o kryofluxstream_loader.o \
 					kryofluxstream.o fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o \
 					northstar_loader.o  xml_loader.o flppcm_loader.o stw_loader.o vfddat_loader.o ana_loader.o atr_loader.o hfev3_loader.o hfev3_writer.o \
-					hfev3_trackgen.o heathkit_loader.o sdu_loader.o xml_db_loader.o streamhfe_loader.o qd_loader.o
+					hfev3_trackgen.o heathkit_loader.o sdu_loader.o xml_db_loader.o streamhfe_loader.o qd_loader.o ipf_loader.o capslibloader.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
@@ -94,7 +87,7 @@ BASE = floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o crc.o std_c
 		trackeditor.o sector_extractor.o display_track.o fluxStreamAnalyzer.o script_exec.o env.o
 
 LIBS_OBJS = $(BASE) $(FS_SUPPORT) $(ADFLIBOBJ) $(ENCODING_SUPPORT) $(TRACK_FORMATS_SUPPORT) $(DISKLOADERPLUGINS) \
-			$(DISKWRITERPLUGINS) $(DISKLOADERPLUGINS_IPF) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(LZ4OBJ) \
+			$(DISKWRITERPLUGINS) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(LZ4OBJ) \
 			$(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB)
 
 all: SCRIPT_FILE XML_FILES $(EXEC)
@@ -482,10 +475,8 @@ ipf_loader.o : $(BASEDIR)/loaders/ipf_loader/ipf_loader.c $(BASEDIR)/loaders/ipf
 ipf_writer.o : $(BASEDIR)/loaders/ipf_loader/ipf_writer.c $(BASEDIR)/loaders/ipf_loader/ipf_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-ifeq ($(UNAME), Linux)
-capslibloader.o : $(BASEDIR)/linux/ipf/capslibloader.c
+capslibloader.o : $(BASEDIR)/misc/capslib_loader/capslibloader.c
 	$(CC) -o $@ -c $< $(CFLAGS)
-endif
 
 fdi_loader.o : $(BASEDIR)/loaders/fdi_loader/fdi_loader.c $(BASEDIR)/loaders/fdi_loader/fdi_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)

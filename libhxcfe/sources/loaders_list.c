@@ -44,9 +44,7 @@
 #include "./loaders/dms_loader/dms_loader.h"
 #include "./loaders/msa_loader/msa_loader.h"
 #include "./loaders/amigadosfs_loader/amigadosfs_loader.h"
-#ifdef IPF_SUPPORT 
-	#include "./loaders/ipf_loader/ipf_loader.h"
-#endif
+#include "./loaders/ipf_loader/ipf_loader.h"
 #include "./loaders/st_loader/st_loader.h"
 #include "./loaders/stx_loader/stx_loader.h"
 #include "./loaders/cpcdsk_loader/cpcdsk_loader.h"
@@ -155,9 +153,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)OricDSK_libGetPluginInfo,
 	(GETPLUGININFOS)ST_libGetPluginInfo,
 	(GETPLUGININFOS)W30_libGetPluginInfo,
-	#ifdef IPF_SUPPORT
 	(GETPLUGININFOS)IPF_libGetPluginInfo,
-	#endif
 	(GETPLUGININFOS)TI99V9T9_libGetPluginInfo,
 	(GETPLUGININFOS)AMIGADOSFSDK_libGetPluginInfo,
 	(GETPLUGININFOS)Prophet_libGetPluginInfo,

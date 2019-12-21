@@ -24,8 +24,5 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 */
-#ifdef IPF_SUPPORT 
 
 int IPF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue);
-
-#endif

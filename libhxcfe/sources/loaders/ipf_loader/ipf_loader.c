@@ -42,7 +42,6 @@
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
-#ifdef IPF_SUPPORT
 
 #include <string.h>
 #include <stdlib.h>
@@ -616,6 +615,3 @@ int IPF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 			plug_ext
 			);
 }
-
-
-#endif

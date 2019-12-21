@@ -507,18 +507,6 @@ SOURCE=..\sources\thirdpartylibs\xdms\vfile.c
 SOURCE=..\sources\thirdpartylibs\xdms\vfile.h
 # End Source File
 # End Group
-# Begin Group "CAPS"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=..\sources\win32\ipf\capslibloader.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\sources\win32\ipf\capslibloader.h
-# End Source File
-# End Group
 # Begin Group "LIBSAP"
 
 # PROP Default_Filter ""
@@ -2451,6 +2439,18 @@ SOURCE=..\sources\stream_analyzer\fluxStreamAnalyzer.h
 # Begin Group "misc"
 
 # PROP Default_Filter ""
+# Begin Group "capslibloader"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\misc\capslib_loader\capslibloader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\misc\capslib_loader\capslibloader.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\sources\misc\env.c
