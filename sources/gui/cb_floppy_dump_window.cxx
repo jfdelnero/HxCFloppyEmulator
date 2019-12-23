@@ -283,8 +283,8 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 
 			fb=hxcfe_initFloppy(hxcfe,params->number_of_track,params->number_of_side);
 			hxcfe_setSectorFill(fb,0xF6);
-			hxcfe_setIndexPosition(fb,-2500,0);
-			hxcfe_setIndexLength(fb,2500);
+			hxcfe_setIndexPosition(fb,0,-2500,0);
+			hxcfe_setIndexLength(fb,0,2500);
 
 			seek(h,0, 0);
 
