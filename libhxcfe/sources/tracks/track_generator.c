@@ -460,6 +460,36 @@ void tg_initTrackEncoder(track_generator *tg)
 	tg->mfm_last_bit=0xFFFF;
 }
 
+int32_t tg_timeToSize(track_generator *tg,int32_t trackencoding,int32_t bitrate,int32_t time)
+{
+	int cellsize;
+
+	switch(trackencoding)
+	{
+		case IBMFORMAT_SD:
+		case ISOFORMAT_SD:
+		case TYCOMFORMAT_SD:
+		case DECRX02_SDDD:
+			cellsize = 4 * 8;
+			break;
+
+		case IBMFORMAT_DD:
+		case ISOFORMAT_DD:
+		case ISOFORMAT_DD11S:
+		case MEMBRAINFORMAT_DD:
+		case UKNCFORMAT_DD:
+		case AED6200P_DD:
+			cellsize = 2 * 8;
+			break;
+
+		default:
+			cellsize = 2 * 8;
+			break;
+	}
+
+	return (int32_t)( ( ((float)((float)time/(float)1000000) * (float)bitrate*2) ) / (float)cellsize );
+}
+
 int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t bitrate,int32_t numberofsector,HXCFE_SECTCFG * sectorconfigtab,int32_t pregaplen,int32_t * track_period)
 {
 	int32_t j;
@@ -1271,6 +1301,12 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 	interleavetab = compute_interleave_tab(interleave,skew,number_of_sector);
 
 	tg_initTrackEncoder(&tg);
+
+	if(pregap & 0x40000000)
+	{
+		// Compute gap
+		pregap = tg_timeToSize( &tg, trackencoding, bitrate, pregap & ~0xC0000000);
+	}
 
 	// get minimum track size
 	tracksize = tg_computeMinTrackSize(&tg,trackencoding,bitrate,number_of_sector,sectorconfigtab,pregap,&track_period);
