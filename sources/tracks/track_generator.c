@@ -503,8 +503,7 @@ int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t
 		}
 
 		if(total_track_size && bitrate)
- 			tck_period=tck_period+(100000/(bitrate/(total_track_size*4)));
-
+ 			tck_period=tck_period+ (int)( (float)100000 * ((float)(total_track_size*4)/(float)bitrate));
 
 		for(j=0;j<numberofsector;j++)
 		{
@@ -557,8 +556,7 @@ int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t
 			total_track_size=total_track_size+track_size;
 
 			if( sectorconfigtab[0].bitrate && track_size )
-				tck_period=tck_period+(10000000/((sectorconfigtab[0].bitrate*100)/(track_size*4)));
-
+				tck_period=tck_period+ (int)( (float)10000000 * ((float)(track_size*4)/(float)(sectorconfigtab[0].bitrate*100)));
 		}
 
 		if(track_period)
@@ -1278,10 +1276,16 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 	tracksize = tg_computeMinTrackSize(&tg,trackencoding,bitrate,number_of_sector,sectorconfigtab,pregap,&track_period);
 
 	if(rpm)
-		wanted_trackperiod=(100000*60)/rpm;
+	{
+		if(rpm & 0x40000000)
+			wanted_trackperiod = rpm & ~0xC0000000;
+		else
+			wanted_trackperiod = (100000*60)/rpm;
+	}
 	else
+	{
 		wanted_trackperiod=(100000*60)/300;
-
+	}
 	// compute the adjustable gap3 length
 	// how many gap3 we need to compute ?
 	gap3tocompute=0;
@@ -1373,7 +1377,19 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 	// adjust the track length to get the right rpm.
 	if(wanted_trackperiod>track_period)
 	{
-		tracksize=tracksize+((((wanted_trackperiod-track_period) * ((bitrate/4)/4) )/(12500/4)));
+		while( wanted_trackperiod>track_period )
+		{
+			if(wanted_trackperiod - track_period > 40000)
+			{
+				tracksize += (((40000 * ((bitrate/4)/4) )/(12500/4)));
+				track_period += 40000;
+			}
+			else
+			{
+				tracksize += ((((wanted_trackperiod-track_period) * ((bitrate/4)/4) )/(12500/4)));
+				track_period += (wanted_trackperiod - track_period);
+			}
+		}
 	}
 
 	if(tracksize<0)

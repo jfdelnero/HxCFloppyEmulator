@@ -1035,6 +1035,7 @@ int libGetPluginInfo( HXCFE_IMGLDR * imgldr_ctx, uint32_t infotype, void * retur
 HXCFE_FLPGEN* hxcfe_initFloppy( HXCFE* floppycontext, int32_t nb_of_track, int32_t nb_of_side )
 {
 	HXCFE_FLPGEN* fb_ctx;
+	int i;
 
 	fb_ctx = 0;
 
@@ -1076,8 +1077,14 @@ HXCFE_FLPGEN* hxcfe_initFloppy( HXCFE* floppycontext, int32_t nb_of_track, int32
 
 		fb_ctx->fb_stack[0].sectors_size = 512;
 
-		fb_ctx->fb_stack[0].indexlen=2500;
-		fb_ctx->fb_stack[0].indexpos=-2500;
+		for(i=0;i<MAX_NUMBER_OF_INDEX;i++)
+		{
+			fb_ctx->fb_stack[0].indexlen[i] = 0;
+			fb_ctx->fb_stack[0].indexpos[i] = 0;
+		}
+
+		fb_ctx->fb_stack[0].indexlen[0] = 2500;
+		fb_ctx->fb_stack[0].indexpos[0] = -2500;
 		fb_ctx->fb_stack[0].sectorunderindex=0;
 
 		fb_ctx->fb_stack[0].numberofsector = 0;
@@ -1348,15 +1355,21 @@ int32_t hxcfe_setSideSkew ( HXCFE_FLPGEN* fb_ctx, int32_t skew )
 	return HXCFE_NOERROR;
 }
 
-int32_t hxcfe_setIndexPosition ( HXCFE_FLPGEN* fb_ctx, int32_t position, int32_t allowsector )
+int32_t hxcfe_setIndexPosition ( HXCFE_FLPGEN* fb_ctx, int32_t index_number, int32_t position, int32_t allowsector )
 {
-	fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].indexpos = position;
+	if(index_number < MAX_NUMBER_OF_INDEX)
+	{
+		fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].indexpos[index_number] = position;
+	}
 	return HXCFE_NOERROR;
 }
 
-int32_t hxcfe_setIndexLength ( HXCFE_FLPGEN* fb_ctx, int32_t Length )
+int32_t hxcfe_setIndexLength ( HXCFE_FLPGEN* fb_ctx, int32_t index_number, int32_t Length )
 {
-	fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].indexlen = Length;
+	if(index_number < MAX_NUMBER_OF_INDEX)
+	{
+		fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].indexlen[index_number] = Length;
+	}
 	return HXCFE_NOERROR;
 }
 
@@ -1601,7 +1614,15 @@ int32_t hxcfe_popTrack ( HXCFE_FLPGEN* fb_ctx )
 																							current_fb_track_state->rpm,
 																							current_fb_track_state->type,
 																							current_fb_track_state->pregap,
-																							current_fb_track_state->indexlen|sui_flag,current_fb_track_state->indexpos);
+																							current_fb_track_state->indexlen[0] | sui_flag,current_fb_track_state->indexpos[0]);
+																							
+			for(i=1;i<MAX_NUMBER_OF_INDEX;i++)
+			{
+				if(current_fb_track_state->indexlen[i])
+				{
+					fillindex(current_fb_track_state->indexpos[i],currentcylinder->sides[current_fb_track_state->side_number],current_fb_track_state->indexlen[i],1,0);
+				}
+			}
 
 			for(i=0;i<current_fb_track_state->numberofsector;i++)
 			{
@@ -1954,8 +1975,16 @@ HXCFE_FLOPPY* hxcfe_getFloppy ( HXCFE_FLPGEN* fb_ctx )
 																			(unsigned char)trackencoding,
 																			255,
 																			0,
-																			fb_ctx->fb_stack[0].indexlen,
-																			fb_ctx->fb_stack[0].indexpos);
+																			fb_ctx->fb_stack[0].indexlen[0],
+																			fb_ctx->fb_stack[0].indexpos[0]);
+																			
+						for(i=1;i<MAX_NUMBER_OF_INDEX;i++)
+						{
+							if(fb_ctx->fb_stack[0].indexlen[i])
+							{
+								fillindex(fb_ctx->fb_stack[0].indexpos[0],fb_ctx->floppydisk->tracks[j]->sides[i],fb_ctx->fb_stack[0].indexlen[i],1,0);
+							}
+						}																			
 					}
 				}
 			}

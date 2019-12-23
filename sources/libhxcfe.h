@@ -245,8 +245,8 @@ int32_t                hxcfe_setSideSkew ( HXCFE_FLPGEN* fb_ctx, int32_t skew );
 
 int32_t                hxcfe_setTrackPreGap ( HXCFE_FLPGEN* fb_ctx, int32_t pregap );
 
-int32_t                hxcfe_setIndexPosition ( HXCFE_FLPGEN* fb_ctx, int32_t position, int32_t allowsector );
-int32_t                hxcfe_setIndexLength ( HXCFE_FLPGEN* fb_ctx, int32_t Length );
+int32_t                hxcfe_setIndexPosition ( HXCFE_FLPGEN* fb_ctx, int32_t index_number, int32_t position, int32_t allowsector );
+int32_t                hxcfe_setIndexLength ( HXCFE_FLPGEN* fb_ctx, int32_t index_number, int32_t Length );
 
 int32_t                hxcfe_setTrackBitrate ( HXCFE_FLPGEN* fb_ctx, int32_t bitrate );
 
