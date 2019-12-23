@@ -1,6 +1,8 @@
 #define STACK_SIZE 0x80
 #define NUMBEROFSECTOR_MAX 0x200
 
+#define MAX_NUMBER_OF_INDEX 64
+
 typedef struct _fb_track_state
 {
 	HXCFE_SECTCFG sectorconfig;
@@ -17,8 +19,8 @@ typedef struct _fb_track_state
 	int32_t bitrate;
 	int32_t interface_mode;
 
-	int32_t indexlen;
-	int32_t indexpos;
+	int32_t indexlen[MAX_NUMBER_OF_INDEX];
+	int32_t indexpos[MAX_NUMBER_OF_INDEX];
 	int32_t sectorunderindex;
 
 	int32_t numberofsector_min;

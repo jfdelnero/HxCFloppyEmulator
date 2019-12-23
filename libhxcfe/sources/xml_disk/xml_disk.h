@@ -35,6 +35,7 @@ enum
 	PREGAP,
 	FORMATVALUE,
 	RPM,
+	TRACK_LENGTH,
 	SECTORIDSTART,
 	TRACKLIST,
 	TRACK,
@@ -57,7 +58,9 @@ enum
 	SECTORID_SECTOR,
 	SIDEID_SECTOR,
 	TRACK_GAP3,
-	TRACK_PREGAP
+	TRACK_PREGAP,
+	SET_INDEX_LENGTH,
+	SET_INDEX_POSITION
 };
 
 keyword keyword_list[]=
@@ -86,8 +89,11 @@ keyword keyword_list[]=
 	{"gap3",						GAP3,						LAYOUT},
 	{"pregap",						PREGAP,						LAYOUT},
 	{"rpm",							RPM,						LAYOUT},
+	{"track_len_us",				TRACK_LENGTH,				LAYOUT},
 	{"start_sector_id",				SECTORIDSTART,				LAYOUT},
 	{"track_list",					TRACKLIST,					LAYOUT},
+	{"index_len_us",				SET_INDEX_LENGTH,			LAYOUT},
+	{"add_index_us",				SET_INDEX_POSITION,			LAYOUT},
 	{"track",						TRACK,						TRACKLIST},
 	{"data_offset",					DATAOFFSET,					TRACK},
 	{"format",						FORMAT_TRACK,				TRACK},
@@ -99,6 +105,8 @@ keyword keyword_list[]=
 	{"pregap",						TRACK_PREGAP,				TRACK},
 	{"skew",						SKEW_TRACK,					TRACK},
 	{"interleave",					INTERLEAVE_TRACK,			TRACK},
+	{"index_len_us",				SET_INDEX_LENGTH,			TRACK},
+	{"add_index_us",				SET_INDEX_POSITION,			TRACK},
 	{"sector",						SECTOR,						SECTORLIST},
 	{"track_id",					TRACKID_SECTOR,				SECTOR},
 	{"side_id",						SIDEID_SECTOR,				SECTOR},

@@ -129,6 +129,9 @@ typedef struct app_data
 	int32_t nb_sectors_per_track;
 	int32_t sector_size;
 
+	int32_t index_length;
+	int32_t cur_index_number;
+
 } AppData;
 
 char * get_ext(int index,char * bufin,char * bufferout)
@@ -593,6 +596,10 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 			if(!ad->xmlcheck)
 				hxcfe_setRPM (ad->fb,(unsigned short)atoi(buffer));
 		break;
+		case TRACK_LENGTH:
+			if(!ad->xmlcheck)
+				hxcfe_setRPM (ad->fb,(atoi(buffer)/10) | 0x40000000);
+		break;
 		case SECTORIDSTART:
 			if(!ad->xmlcheck)
 				hxcfe_setStartSectorID(ad->fb,(unsigned char)atoi(buffer));
@@ -688,6 +695,17 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 					}
 				}
 			}
+		break;
+
+		case SET_INDEX_LENGTH:
+			ad->index_length = atoi(buffer);
+			hxcfe_setIndexLength(ad->fb,ad->cur_index_number,ad->index_length);
+		break;
+
+		case SET_INDEX_POSITION:
+			hxcfe_setIndexLength(ad->fb,ad->cur_index_number,ad->index_length);
+			hxcfe_setIndexPosition(ad->fb,ad->cur_index_number,atoi(buffer),1);
+			ad->cur_index_number++;
 		break;
 	}
 
@@ -876,6 +894,9 @@ HXCFE_XMLLDR* hxcfe_initXmlFloppy( HXCFE* floppycontext )
 		ad->max_nb_of_tracks = -1;
 		ad->nb_of_tracks = -1;
 		ad->file_size = -1;
+
+		ad->cur_index_number = 0;
+		ad->index_length = 0;
 
 		i=0;
 		while( disklayout_list[i])
