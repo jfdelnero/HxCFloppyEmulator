@@ -587,6 +587,10 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 			if(!ad->xmlcheck)
 				hxcfe_setTrackPreGap (ad->fb,(unsigned short)atoi(buffer));
 		break;
+		case TRACK_PREGAP_US:
+			if(!ad->xmlcheck)
+				hxcfe_setTrackPreGap (ad->fb,atoi(buffer) | 0x40000000);
+		break;
 		case TRACK_GAP3:
 		case GAP3:
 			if(!ad->xmlcheck)
