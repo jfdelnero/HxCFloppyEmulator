@@ -27,6 +27,8 @@ X XXXXXXX 2019 : HxCFloppyEmulator 2.X.X.X (Work in Progress)
  
 -> New XML format : Olivetti TOP 100 / Triumph-Adler Gabriele PFS typewriter Quickdisk format.
 
+-> Windows "Save as" file selector : Fix the overwrite prompt regression.
+
 *********************************************************/
 
 /*********************************************************
