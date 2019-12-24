@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- HxC Floppy Emulator Disk Layout -->
+<disk_layout>
+	<disk_layout_name>QD_TRIUMPH_ADLER</disk_layout_name>
+	<disk_layout_description>Olivetti TOP 100 / Triumph-Adler typewriter Quickdisk raw image</disk_layout_description>
+	<prefered_file_extension>img</prefered_file_extension>
+	<interface_mode>QUICKDISK_FLOPPYMODE</interface_mode>
+	<file_size>59392</file_size>
+	<layout>
+		<number_of_track>1</number_of_track>
+		<number_of_side>1</number_of_side>
+		<format>IBM_MFM</format>
+		<start_sector_id>0</start_sector_id>
+		<interleave>2</interleave>
+		<sector_per_track>58</sector_per_track>
+		<sector_size>1024</sector_size>
+		<formatvalue>0</formatvalue>
+		<gap3>60</gap3>
+		<bitrate>101694</bitrate>
+		<pregap_us>660000</pregap_us>
+		<track_len_us>8000000</track_len_us>
+		<index_len_us>10000</index_len_us>
+		<add_index_us>500000</add_index_us>
+		<add_index_us>7000000</add_index_us>
+	</layout>
+</disk_layout>
