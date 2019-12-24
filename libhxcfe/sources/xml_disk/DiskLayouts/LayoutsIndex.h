@@ -59,6 +59,7 @@
 #include "data_DiskLayout_Tatung_Einstein_DD_400KB_xml.h"
 #include "data_DiskLayout_TRS80_JV1_xml.h"
 #include "data_DiskLayout_Coat_A_Matic_Robox_RC9400_DD_289KB_xml.h"
+#include "data_DiskLayout_QD_Triumph_Adler_Typewriter_xml.h"
 
 datatype * disklayout_list[]=
 {
@@ -123,5 +124,6 @@ datatype * disklayout_list[]=
 	data_DiskLayout_DEC_RX55_xml,
 	data_DiskLayout_Unitel_Videotex_xml,
 	data_DiskLayout_Coat_A_Matic_Robox_RC9400_DD_289KB_xml,
+	data_DiskLayout_QD_Triumph_Adler_Typewriter_xml,
 	0
 };
