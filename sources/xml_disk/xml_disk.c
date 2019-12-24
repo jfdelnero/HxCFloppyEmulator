@@ -702,13 +702,20 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 		break;
 
 		case SET_INDEX_LENGTH:
-			ad->index_length = atoi(buffer);
-			hxcfe_setIndexLength(ad->fb,ad->cur_index_number,ad->index_length);
+			if(!ad->xmlcheck)
+			{
+				ad->index_length = atoi(buffer);
+				hxcfe_setIndexLength(ad->fb,ad->cur_index_number,ad->index_length);
+			}
 		break;
 
 		case SET_INDEX_POSITION:
-			hxcfe_setIndexLength(ad->fb,ad->cur_index_number,ad->index_length);
-			hxcfe_setIndexPosition(ad->fb,ad->cur_index_number,atoi(buffer),1);
+			if(!ad->xmlcheck)
+			{
+				hxcfe_setIndexLength(ad->fb,ad->cur_index_number,ad->index_length);
+				hxcfe_setIndexPosition(ad->fb,ad->cur_index_number,atoi(buffer),1);
+			}
+
 			ad->cur_index_number++;
 		break;
 	}
