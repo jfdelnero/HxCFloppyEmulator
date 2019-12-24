@@ -17,9 +17,15 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 /*********************************************************
 X XXXXXXX 2019 : HxCFloppyEmulator 2.X.X.X (Work in Progress)
 
--> macOS : CAPS libs loader added (IPF, CTRAW...).
+-> macOS : CAPSlib loader added (IPF, CTRAW...). (Windows/Linux/macOS CAPSlib loaders code merged)
 
 -> New Loader/Writer : HxC Quickdisk images.
+
+-> XML loader : Add new properties and fix long track to support Quickdisk and Hardsectored disks.
+                New proprerties (micro-seconds time length/position parameters) :  
+                index_len_us , add_index_us, track_len_us, pregap_us.
+ 
+-> New XML format : Olivetti TOP 100 / Triumph-Adler Gabriele PFS typewriter Quickdisk format.
 
 *********************************************************/
 
