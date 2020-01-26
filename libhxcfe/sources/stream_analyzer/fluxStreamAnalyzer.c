@@ -1937,7 +1937,10 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 	int	next_locked_block;
 	int previous_locked_block;
 
+	double search_depth;
 	s_match * match_table;
+	char * conv_error;
+	char * tmp_str;
 
 	int32_t i;
 
@@ -1952,6 +1955,14 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 	end_dump_reached = 0;
 
 	pl = 0;
+
+	conv_error = NULL;
+	tmp_str = hxcfe_getEnvVar( fxs->hxcfe, "FLUXSTREAM_OVERLAPSEARCHDEPTH", NULL);
+	search_depth = strtod( tmp_str, &conv_error);
+	if(conv_error == tmp_str)
+	{
+		search_depth = (double)SEARCHDEPTH;
+	}
 
 	if(track_dump->nb_of_pulses)
 	{
@@ -2008,8 +2019,8 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 				}while( (cur_time_len < index_tickpediod) && (j < track_dump->nb_of_pulses) );
 
-				tick_down_max = time_to_tick((uint32_t)((double)indexperiod * (double)SEARCHDEPTH));
-				tick_up_max =   time_to_tick((uint32_t)((double)indexperiod * (double)SEARCHDEPTH));
+				tick_down_max = time_to_tick((uint32_t)((double)indexperiod * search_depth));
+				tick_up_max =   time_to_tick((uint32_t)((double)indexperiod * search_depth));
 
 				searchstate = 0;
 
@@ -2097,7 +2108,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 								j++;
 							}while( (cur_time_len < (tb->blocks[block_num].tickoffset - tb->blocks[previousmatchedblock].tickoffset) ) && (j < track_dump->nb_of_pulses) );
 
-							tick_down_max = (uint32_t)((double)(tb->blocks[block_num].tickoffset - tb->blocks[previousmatchedblock].tickoffset) * (double)SEARCHDEPTH*2);
+							tick_down_max = (uint32_t)((double)(tb->blocks[block_num].tickoffset - tb->blocks[previousmatchedblock].tickoffset) * (double)search_depth*2);
 							tick_up_max =   tick_down_max;
 #ifdef FLUXSTREAMDBG
 							floppycontext->hxc_printf(MSG_DEBUG,"Block %d : Match block distance : %d",block_num,previousmatchedblock);
@@ -2119,8 +2130,8 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 							}while( (cur_time_len < index_tickpediod) && (j < track_dump->nb_of_pulses) );
 
-							tick_down_max = time_to_tick((uint32_t)((double)indexperiod * (double)SEARCHDEPTH*2));
-							tick_up_max =   time_to_tick((uint32_t)((double)indexperiod * (double)SEARCHDEPTH*2));
+							tick_down_max = time_to_tick((uint32_t)((double)indexperiod * (double)search_depth*2));
+							tick_up_max =   time_to_tick((uint32_t)((double)indexperiod * (double)search_depth*2));
 
 #ifdef FLUXSTREAMDBG
 							floppycontext->hxc_printf(MSG_DEBUG,"Block %d : index distance (period : %d) tick_down_max : %d, tick_up_max : %d",block_num,indexperiod,tick_to_time(tick_down_max),tick_to_time(tick_up_max));
