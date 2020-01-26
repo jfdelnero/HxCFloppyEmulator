@@ -88,7 +88,7 @@ typedef struct Index_
 	uint32_t 	type;
 }Index;
 
-uint32_t get_tick_from_reversal(uint32_t* buffer,uint32_t reversal)
+static uint32_t get_tick_from_reversal(uint32_t* buffer,uint32_t reversal)
 {
 	uint32_t i;
 	uint32_t tick;
