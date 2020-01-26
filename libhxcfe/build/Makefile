@@ -65,13 +65,14 @@ DISKLOADERPLUGINS = raw_amiga.o raw_iso.o copyqm_loader.o crctable.o adf_loader.
 					krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o system24_loader.o kryofluxstream_loader.o \
 					kryofluxstream.o fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o \
 					northstar_loader.o  xml_loader.o flppcm_loader.o stw_loader.o vfddat_loader.o ana_loader.o atr_loader.o hfev3_loader.o hfev3_writer.o \
-					hfev3_trackgen.o heathkit_loader.o sdu_loader.o xml_db_loader.o streamhfe_loader.o qd_loader.o ipf_loader.o capslibloader.o
+					hfev3_trackgen.o heathkit_loader.o sdu_loader.o xml_db_loader.o streamhfe_loader.o qd_loader.o ipf_loader.o capslibloader.o \
+					hxcstream_loader.o hxcstream.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
 					kryofluxstream_writer.o adf_writer.o bmp_writer.o bmp_disk_writer.o bmp_file.o xml_writer.o trd_writer.o stx_writer.o st_writer.o \
 					stw_writer.o dim_writer.o adz_writer.o ipf_writer.o fd_writer.o northstar_loader.o northstar_writer.o heathkit_writer.o vdk_writer.o \
-					xml_db_writer.o streamhfe_writer.o qd_writer.o
+					xml_db_writer.o streamhfe_writer.o qd_writer.o hxcstream_writer.o
 
 TRACK_FORMATS_SUPPORT = luts.o track_types_defs.o aed6200p_track.o amiga_mfm_track.o apple2_gcr_track.o arburg_track.o emu_emulator_fm_track.o c64_gcr_track.o \
 						heathkit_fm_track.o iso_ibm_fm_track.o iso_ibm_mfm_track.o membrain_mfm_track.o northstar_mfm_track.o tycom_fm_track.o dec_rx02_track.o
@@ -311,6 +312,15 @@ streamhfe_loader.o : $(BASEDIR)/loaders/streamhfe_loader/streamhfe_loader.c $(BA
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 streamhfe_writer.o : $(BASEDIR)/loaders/streamhfe_loader/streamhfe_writer.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+hxcstream_loader.o : $(BASEDIR)/loaders/hxcstream_loader/hxcstream_loader.c $(BASEDIR)/loaders/hxcstream_loader/hxcstream_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+hxcstream_writer.o : $(BASEDIR)/loaders/hxcstream_loader/hxcstream_writer.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+hxcstream.o : $(BASEDIR)/loaders/hxcstream_loader/hxcstream.c $(BASEDIR)/loaders/hxcstream_loader/hxcstream.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 copyqm_loader.o : $(BASEDIR)/loaders/copyqm_loader/copyqm_loader.c $(BASEDIR)/loaders/copyqm_loader/crctable.c $(BASEDIR)/loaders/copyqm_loader/copyqm_loader.h

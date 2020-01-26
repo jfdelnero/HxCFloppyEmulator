@@ -2123,6 +2123,34 @@ SOURCE=..\sources\loaders\qd_loader\qd_loader.h
 SOURCE=..\sources\loaders\qd_loader\qd_writer.c
 # End Source File
 # End Group
+# Begin Group "HxC_Stream"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\hxcstream_loader\hxcstream.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\hxcstream_loader\hxcstream.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\hxcstream_loader\hxcstream_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\hxcstream_loader\hxcstream_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\hxcstream_loader\hxcstream_loader.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\hxcstream_loader\hxcstream_writer.c
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 
