@@ -126,6 +126,7 @@
 #include "./loaders/sdu_loader/sdu_loader.h"
 #include "./loaders/xml_db_loader/xml_db_loader.h"
 #include "./loaders/qd_loader/qd_loader.h"
+#include "./loaders/hxcstream_loader/hxcstream_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -219,6 +220,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)Northstar_libGetPluginInfo,
 	(GETPLUGININFOS)Heathkit_libGetPluginInfo,
 	(GETPLUGININFOS)QD_libGetPluginInfo,
+	(GETPLUGININFOS)HxCStream_libGetPluginInfo,
 
 	//(GETPLUGININFOS)VFDDAT_libGetPluginInfo,
 
