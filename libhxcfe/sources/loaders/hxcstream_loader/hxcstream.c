@@ -147,7 +147,6 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 	FILE* f;
 	uint32_t filesize;
 	HXCFE_TRKSTREAM * track_dump;
-	uint32_t chunk_offset;
 	uint32_t crc32,packet_offset;
 	packed_io_header * pio_header;
 	packed_stream_header * stream_header;
@@ -160,7 +159,6 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 	int total_nb_words, nb_words;
 
 	track_dump=0;
-	chunk_offset = 0;
 	hxcstreambuffer = NULL;
 	iostreambuf = NULL;
 	stream = NULL;
