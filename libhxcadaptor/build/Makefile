@@ -30,11 +30,14 @@ EXEC=libhxcadaptor.a
 
 all: $(EXEC)
 
-libhxcadaptor.a: libhxcadaptor.o fs.o
+libhxcadaptor.a: libhxcadaptor.o fs.o network.o
 	$(AR) r $@    $^
 	cp $@ ../../../build
 
 libhxcadaptor.o: $(BASEDIR)/libhxcadaptor.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+network.o: $(BASEDIR)/network.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 fs.o: $(BASEDIR)/fs.c
