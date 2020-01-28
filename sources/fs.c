@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2018 Jean-François DEL NERO
+// Copyright (C) 2006-2020 Jean-François DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
@@ -35,12 +35,12 @@
 //-------------------------------------------------------------------------------//
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
-//	File	:	fs.c
-//	Contains:	UTF-8	/	Ascii	path	file	system	functions
+// File : fs.c
+// Contains: UTF-8 / Ascii path file system functions
 //
-//	Written	by:	DEL	NERO	Jean	Francois
+// Written by: Jean-François DEL NERO
 //
-//	Change	History	(most	recent	first):
+// Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <assert.h>
