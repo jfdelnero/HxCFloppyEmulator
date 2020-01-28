@@ -93,6 +93,10 @@ SOURCE=..\sources\fs.c
 
 SOURCE=..\sources\libhxcadaptor.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\network.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -104,6 +108,10 @@ SOURCE=..\sources\fs.h
 # Begin Source File
 
 SOURCE=..\sources\libhxcadaptor.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\network.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
