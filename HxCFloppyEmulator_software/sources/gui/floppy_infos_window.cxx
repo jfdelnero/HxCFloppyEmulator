@@ -12,6 +12,7 @@ extern "C"
 
 #include "cb_floppy_infos_window.h"
 #include "fl_mouse_box.h"
+
 floppy_infos_window::floppy_infos_window() {
   { window = new Fl_Window(1275, 540, getString(STR_FLOPPYVIEWERWINDOW_0001));
     window->user_data((void*)(this));
