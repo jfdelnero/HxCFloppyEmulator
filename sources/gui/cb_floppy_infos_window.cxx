@@ -60,6 +60,7 @@
 
 #include "floppy_dump_window.h"
 #include "floppy_infos_window.h"
+#include "floppy_streamer_window.h"
 #include "rawfile_loader_window.h"
 #include "sdhxcfecfg_window.h"
 #include "usbhxcfecfg_window.h"
@@ -109,7 +110,7 @@ static int progress_callback(unsigned int current,unsigned int total,void * td,v
 	return 0;
 }
 
-double adjust_timescale(double slide)
+static double adjust_timescale(double slide)
 {
 	if(slide >= 250 * 1000)
 	{

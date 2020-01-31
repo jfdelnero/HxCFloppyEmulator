@@ -62,6 +62,7 @@
 
 #include "floppy_dump_window.h"
 #include "floppy_infos_window.h"
+#include "floppy_streamer_window.h"
 #include "rawfile_loader_window.h"
 #include "sdhxcfecfg_window.h"
 #include "usbhxcfecfg_window.h"

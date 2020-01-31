@@ -21,6 +21,7 @@ class Main_Window : public Fl_Window {
 
  	batch_converter_window *batchconv_window;
 	filesystem_generator_window *fs_window;
+	floppy_streamer_window * streamer_window;
 	floppy_dump_window *fdump_window;
 	floppy_infos_window *infos_window;
 	rawfile_loader_window *rawloader_window;

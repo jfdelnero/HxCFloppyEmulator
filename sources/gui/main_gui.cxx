@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2019 Jean-François DEL NERO
+// Copyright (C) 2006-2020 Jean-François DEL NERO
 //
 // This file is part of HxCFloppyEmulator.
 //
@@ -60,6 +60,7 @@
 
 #include "floppy_dump_window.h"
 #include "floppy_infos_window.h"
+#include "floppy_streamer_window.h"
 #include "rawfile_loader_window.h"
 #include "sdhxcfecfg_window.h"
 #include "usbhxcfecfg_window.h"
@@ -101,6 +102,7 @@ extern "C"
 
 #include "cb_floppy_dump_window.h"
 #include "cb_floppy_infos_window.h"
+#include "cb_floppy_streamer_window.h"
 
 #include "msg_txt.h"
 
@@ -584,7 +586,7 @@ void sync_if_config()
 		hxcfe_floppySetDoubleStep(guicontext->hxcfe,guicontext->loadedfloppy,guicontext->doublestep);
 	}
 
-#ifndef STANDALONEFSBROWSER
+#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
 	if(guicontext->usbhxcfe)
 		libusbhxcfe_setInterfaceMode(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->interfacemode,guicontext->doublestep,guicontext->driveid);
 #endif
@@ -689,7 +691,7 @@ static void tick_mw(void *v) {
 		}
 	}
 
-#ifndef STANDALONEFSBROWSER
+#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
 	if(!guicontext->exporting)
 	{
 
@@ -844,7 +846,10 @@ Main_Window::Main_Window()
 	int i,j;
 	HXCFE_XMLLDR* rfb;
 	char * temp;
+#ifndef HXC_STREAMER_MODE
 	infothread * infoth;
+#endif
+	streamthread * streamth;
 	USBStats stats;
 	intptr_t tmp_intptr;
 
@@ -870,7 +875,7 @@ Main_Window::Main_Window()
 	guicontext->hxcfe=hxcfe_init();
 	hxcfe_setOutputFunc(guicontext->hxcfe,CUI_affiche);
 
-#ifndef STANDALONEFSBROWSER
+#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
 	guicontext->usbhxcfe = libusbhxcfe_init(guicontext->hxcfe);
 #endif
 
@@ -1008,7 +1013,7 @@ Main_Window::Main_Window()
 	label("Floppy Emulator Toolbox v" STR_FILE_VERSION2);
 #endif
 
-#ifndef STANDALONEFSBROWSER
+#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
 	show();
 #endif
 
@@ -1055,6 +1060,8 @@ Main_Window::Main_Window()
 
 	//////////////////////////////////////////////
 	// Floppy view window
+#ifndef HXC_STREAMER_MODE
+
 	infos_window = new floppy_infos_window();
 	if(infos_window)
 	{
@@ -1100,7 +1107,69 @@ Main_Window::Main_Window()
 
 	guicontext->updatefloppyinfos++;
 	guicontext->updatefloppyfs++;
+#endif
 
+#ifdef HXC_STREAMER_MODE
+	//////////////////////////////////////////////
+	// Floppy view window
+	streamer_window = new floppy_streamer_window();
+	if(streamer_window)
+	{
+		streamer_window->x_offset->bounds(0.0, 100);
+		streamer_window->x_offset->value(85);
+		streamer_window->x_time->scrollvalue((300*1000)+ (250 * 1000),1,1000,(1000*1000) + (250 * 1000));
+		streamer_window->x_time->step(1000);
+		streamer_window->y_time->scrollvalue(16,1,2,64);
+
+		guicontext->td = hxcfe_td_init(guicontext->hxcfe,streamer_window->floppy_map_disp->w(),streamer_window->floppy_map_disp->h());
+		guicontext->flayoutframebuffer = (unsigned char*)malloc( streamer_window->floppy_map_disp->w() * streamer_window->floppy_map_disp->h() * 4);
+		if(guicontext->flayoutframebuffer)
+		{
+			memset(guicontext->flayoutframebuffer,0,streamer_window->floppy_map_disp->w()*streamer_window->floppy_map_disp->h() * 4);
+			hxc_createevent(guicontext->hxcfe,10);
+
+			streamth = (streamthread *)malloc(sizeof(infothread));
+			if(streamth)
+			{
+				memset(streamth,0,sizeof(infothread));
+				streamth->window = (floppy_streamer_window*)(streamer_window);
+				streamth->guicontext = guicontext;
+				hxc_createthread(guicontext->hxcfe,(void*)streamth,&StreamerThreadProc,0);
+				hxc_createthread(guicontext->hxcfe,(void*)streamth,&StreamerThreadRxStatusProc,0);
+				hxc_createthread(guicontext->hxcfe,(void*)streamth,&StreamerThreadRxDataProc,0);
+			}
+		}
+
+/*		streamer_window->buf = new Fl_Text_Buffer;
+		if(streamer_window->buf)
+			streamer_window->object_txt->buffer(infos_window->buf);
+*/
+		streamer_window->amiga_mfm_bt->value(1);
+		streamer_window->iso_fm_bt->value(1);
+		streamer_window->iso_mfm_bt->value(1);
+		streamer_window->server_address->value("192.168.20.7");
+
+		streamer_window->track_number_slide->scrollvalue((int)0,1,0,86);
+		streamer_window->side_number_slide->scrollvalue((int)0,1,0,2);
+
+		streamer_window->index_delay->value("50000");
+		streamer_window->dump_lenght->value("800");
+		streamer_window->max_track->value("82");
+		streamer_window->min_track->value("0");
+		streamer_window->Side_0->value(1);
+		streamer_window->Side_1->value(1);
+
+
+
+		Fl::add_timeout(0.1, streamer_tick_infos, (void*)streamer_window);
+
+		#ifdef GUI_DEBUG
+		print_dbg((char*)"Main_Window : Streamer window done !");
+		#endif
+	}
+#endif
+
+#ifndef HXC_STREAMER_MODE
 	//////////////////////////////////////////////
 	// Track editor window
 	trackedit_window = new trackedittool_window();
@@ -1120,6 +1189,7 @@ Main_Window::Main_Window()
 		print_dbg((char*)"Main_Window : Track editor window done !");
 		#endif
 	}
+#endif
 
 	//////////////////////////////////////////////
 	// Batch convert window
@@ -1286,7 +1356,7 @@ Main_Window::Main_Window()
 
 	//////////////////////////////////////////////
 	// USB FE CFG window
-#ifndef STANDALONEFSBROWSER
+#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
 	libusbhxcfe_getStats(guicontext->hxcfe,guicontext->usbhxcfe,&stats,0);
 #endif
 	usbcfg_window = new usbhxcfecfg_window();
@@ -1294,7 +1364,7 @@ Main_Window::Main_Window()
 	{
 		usbcfg_window->choice_ifmode->menu(if_choices);
 
-#ifndef STANDALONEFSBROWSER
+#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
 		usbcfg_window->slider_usbpacket_size->scrollvalue(stats.packetsize,128,512,4096-(512-128));
 #endif
 		usbcfg_window->rbt_ds0->value(1);
@@ -1327,6 +1397,10 @@ Main_Window::Main_Window()
 
 #ifdef STANDALONEFSBROWSER
 	fs_window->window->show();
+#endif
+
+#ifdef HXC_STREAMER_MODE
+	streamer_window->window->show();
 #endif
 
 	#ifdef GUI_DEBUG

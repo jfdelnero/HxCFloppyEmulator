@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2019 Jean-François DEL NERO
+// Copyright (C) 2006-2020 Jean-François DEL NERO
 //
 // This file is part of HxCFloppyEmulator.
 //
@@ -55,6 +55,7 @@
 
 #include "floppy_dump_window.h"
 #include "floppy_infos_window.h"
+#include "floppy_streamer_window.h"
 #include "rawfile_loader_window.h"
 #include "sdhxcfecfg_window.h"
 #include "usbhxcfecfg_window.h"
