@@ -505,6 +505,8 @@ uint32_t               hxcfe_FxStream_GetRevolutionIndex( HXCFE_FXSA * fxs, HXCF
 uint32_t               hxcfe_FxStream_GetRevolutionPeriod( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, int32_t revolution );
 uint32_t               hxcfe_FxStream_GetMeanRevolutionPeriod( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std );
 
+HXCFE_TRKSTREAM*       hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned char * buffer_in,int buffer_size);
+
 void                   hxcfe_deinitFxStream( HXCFE_FXSA * fxs );
 
 #define FXSTRM_INDEX_MAININDEX   0x00000001
