@@ -330,3 +330,176 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 
 	return track_dump;
 }
+
+HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned char * buffer_in,int buffer_size)
+{
+	chunk_header * header;
+	uint32_t filesize;
+	HXCFE_TRKSTREAM * track_dump;
+	uint32_t crc32,packet_offset,end_packet_offset;
+	packed_io_header * pio_header;
+	packed_stream_header * stream_header;
+	metadata_header * metadata;
+	unsigned char * hxcstreambuf;
+	uint16_t * iostreambuf;
+	uint32_t * stream;
+	int nb_pulses,total_nb_pulses,old_index,cnt_io,i,j,totalcnt;
+	int sampleperiod;
+	int total_nb_words, nb_words;
+	int buffer_offset;
+
+	buffer_offset = 0;
+	track_dump = 0;
+	iostreambuf = NULL;
+	stream = NULL;
+	total_nb_pulses = 0;
+	total_nb_words = 0;
+	nb_words = 0;
+	sampleperiod = HXCSTREAM_NS_PER_TICK;
+
+	if(fxs)
+	{
+		filesize = buffer_size;
+
+		while( (uint32_t)buffer_offset < filesize)
+		{
+			
+			header = (chunk_header*)&buffer_in[buffer_offset];
+			buffer_offset += sizeof(chunk_header);
+
+			if(header->header != HXCSTREAM_HEADERSIGN && header->size > filesize)
+			{
+				break;
+			}
+
+			buffer_offset = buffer_offset - sizeof(chunk_header);
+
+			crc32 = std_crc32(0xFFFFFFFF, (void*)&buffer_in[buffer_offset], header->size - 4);
+			if(crc32 != *((uint32_t*)&buffer_in[buffer_offset + header->size - 4]))
+			{
+				// BAD CRC !
+				break;
+			}
+
+
+			packet_offset = buffer_offset + sizeof(chunk_header);
+			end_packet_offset = buffer_offset + header->size;
+
+			buffer_offset += header->size;
+
+
+			while( packet_offset < end_packet_offset - 4 )
+			{
+				switch(*((uint32_t*)&buffer_in[packet_offset]))
+				{
+					case 0x00000000:
+						// metadata
+						metadata = (metadata_header *)&buffer_in[packet_offset];
+
+						if(strstr( ((char*)metadata + sizeof(metadata_header)), "sample_rate_hz 25000000"))
+							sampleperiod = 40000;
+
+						if(strstr( ((char*)metadata + sizeof(metadata_header)), "sample_rate_hz 50000000"))
+							sampleperiod = 20000;
+
+						packet_offset += (metadata->payload_size + sizeof(chunkblock_header));
+					break;
+
+					case 0x00000001:
+						// IO packet
+						pio_header = (packed_io_header *)&buffer_in[packet_offset];
+
+						nb_words = pio_header->unpacked_size;
+
+						iostreambuf = realloc(iostreambuf, total_nb_words + pio_header->unpacked_size);
+						if(iostreambuf)
+						{
+							LZ4_decompress_safe ((const char*)(pio_header) + sizeof(packed_io_header), (char*)&iostreambuf[total_nb_words/2], pio_header->packed_size, pio_header->unpacked_size);
+							cnt_io = pio_header->unpacked_size / 2;
+						}
+
+						total_nb_words += nb_words;
+						cnt_io = total_nb_words / 2;
+
+						packet_offset += (pio_header->payload_size + sizeof(chunkblock_header));
+					break;
+					case 0x00000002:
+						// stream packet
+						stream_header = (packed_stream_header *)&buffer_in[packet_offset];
+
+						hxcstreambuf = malloc(stream_header->unpacked_size);
+						if(hxcstreambuf)
+						{
+							LZ4_decompress_safe ((const char*)(stream_header) + sizeof(packed_stream_header), (char*)hxcstreambuf, stream_header->packed_size, stream_header->unpacked_size);
+							nb_pulses = stream_header->number_of_pulses;
+
+							stream = realloc(stream,(total_nb_pulses+nb_pulses+1)*sizeof(uint32_t));
+							if(stream)
+							{
+								memset(&stream[total_nb_pulses],0x00,(nb_pulses+1)*sizeof(uint32_t));
+								conv_stream(&stream[total_nb_pulses],hxcstreambuf, nb_pulses);
+							}
+							free(hxcstreambuf);
+
+							total_nb_pulses += nb_pulses;
+						}
+
+						packet_offset += (stream_header->packed_size + sizeof(packed_stream_header));
+					break;
+					default:
+						// Unknown block !
+						if(iostreambuf)
+							free(iostreambuf);
+
+						if(stream)
+							free(stream);
+
+						return NULL;
+					break;
+				}
+
+				if(packet_offset&3)
+					packet_offset = (packet_offset&~3) + 4;
+			}
+		}
+
+		if(stream)
+		{
+			hxcfe_FxStream_setResolution(fxs,sampleperiod);
+
+			track_dump = hxcfe_FxStream_ImportStream(fxs,stream,32,total_nb_pulses);
+
+			j = 0;
+			old_index = 0;
+			for(i=0;i<cnt_io;i++)
+			{
+				if( (iostreambuf[i]&1) != old_index )
+				{
+					old_index = iostreambuf[i]&1;
+
+					if(old_index)
+					{
+						totalcnt = 0;
+						j = 0;
+						while(totalcnt < (i*16) && j < total_nb_pulses)
+						{
+							totalcnt += stream[j];
+							j++;
+						}
+						hxcfe_FxStream_AddIndex(fxs,track_dump,j,0,FXSTRM_INDEX_MAININDEX);
+					}
+				}
+			}
+		}
+
+		if(iostreambuf)
+			free(iostreambuf);
+
+		if(stream)
+			free(stream);
+
+		return track_dump;
+	}
+
+	return track_dump;
+}
