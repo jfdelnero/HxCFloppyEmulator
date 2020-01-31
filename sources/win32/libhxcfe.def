@@ -92,6 +92,8 @@ EXPORTS
    hxcfe_td_getlastpulselist    @130
    hxcfe_td_setProgressCallback @131
    hxcfe_td_setName				@132
+   hxcfe_td_draw_stream_track   @133
+   hxcfe_td_exportToBMP         @134
 
    hxcfe_generateFloppy			@150
 
@@ -199,3 +201,20 @@ EXPORTS
    hxcfe_reverseFloppy          @523
    hxcfe_deleteSide1            @524
    hxcfe_allocSide1             @525
+
+   hxcfe_initFxStream                      @600
+   hxcfe_FxStream_setResolution            @601
+   hxcfe_FxStream_setBitrate               @602
+   hxcfe_FxStream_setPhaseCorrectionFactor @603
+   hxcfe_FxStream_setFilterParameters      @604
+   hxcfe_FxStream_ImportStream             @605
+   hxcfe_FxStream_AddIndex                 @606
+   hxcfe_FxStream_AnalyzeAndGetTrack       @607
+   hxcfe_FxStream_ExportToBmp              @608
+   hxcfe_FxStream_FreeStream               @609
+   hxcfe_FxStream_GetNumberOfRevolution    @610
+   hxcfe_FxStream_GetRevolutionIndex       @611
+   hxcfe_FxStream_GetRevolutionPeriod      @612
+   hxcfe_FxStream_GetMeanRevolutionPeriod  @613
+   hxcfe_FxStream_ImportHxCStreamBuffer    @614
+   hxcfe_deinitFxStream                    @615
