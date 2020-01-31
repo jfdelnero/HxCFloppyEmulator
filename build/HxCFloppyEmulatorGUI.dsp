@@ -140,6 +140,14 @@ SOURCE=..\sources\gui\floppy_infos_window.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\sources\gui\floppy_streamer_window.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\gui\floppy_streamer_window.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\gui\rawfile_loader_window.cxx
 # End Source File
 # Begin Source File
@@ -258,6 +266,14 @@ SOURCE=..\sources\gui\cb_floppy_infos_window.cxx
 # Begin Source File
 
 SOURCE=..\sources\gui\cb_floppy_infos_window.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\gui\cb_floppy_streamer_window.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\gui\cb_floppy_streamer_window.h
 # End Source File
 # Begin Source File
 
