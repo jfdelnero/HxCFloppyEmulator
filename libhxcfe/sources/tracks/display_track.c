@@ -1193,7 +1193,8 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 
 	td->noloop_trackmode = 1;
 
-	memset(td->framebuffer,0x000000,td->xsize*td->ysize);
+	memset(td->framebuffer,0x000000,td->xsize*td->ysize*4);
+
 	//////////////////////////////////////////
 	// Scatter drawing
 	total_offset = 0;
