@@ -49,7 +49,7 @@ EXEC=hxcfloppyemulator
 
 FTDIFLOPPYEMU=usb_hxcfloppyemulator.o variablebitrate.o
 
-GUI = main_gui.o msg_txt.o gui_strings.o about_gui.o batch_converter_window.o floppy_dump_window.o floppy_infos_window.o license_gui.o log.o parameters.o rawfile_loader_window.o sdhxcfecfg_window.o usbhxcfecfg_window.o cb_batch_converter_window.o cb_floppy_dump_window.o cb_floppy_infos_window.o cb_rawfile_loader_window.o cb_sdhxcfecfg_window.o cb_usbhxcfecfg_window.o cb_filesystem_generator_window.o filesystem_generator_window.o cb_edittool_window.o edittool_window.o
+GUI = main_gui.o msg_txt.o gui_strings.o about_gui.o batch_converter_window.o floppy_dump_window.o floppy_infos_window.o license_gui.o log.o parameters.o rawfile_loader_window.o sdhxcfecfg_window.o usbhxcfecfg_window.o cb_batch_converter_window.o cb_floppy_dump_window.o cb_floppy_infos_window.o cb_rawfile_loader_window.o cb_sdhxcfecfg_window.o cb_usbhxcfecfg_window.o cb_filesystem_generator_window.o filesystem_generator_window.o cb_edittool_window.o edittool_window.o floppy_streamer_window.o cb_floppy_streamer_window.o
 
 MICROINTRO = microintro.o lzw.o pack.o rle.o hxcmod.o
 FLTKLIB = $(BASEDIR)/thirdpartylibs/fltk/fltk-1.3.x/lib/libfltk.a $(BASEDIR)/thirdpartylibs/fltk/fltk-1.3.x/lib/libfltk_images.a
@@ -104,6 +104,9 @@ cb_floppy_dump_window.o : $(BASEDIR)/gui/cb_floppy_dump_window.cxx
 cb_floppy_infos_window.o : $(BASEDIR)/gui/cb_floppy_infos_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
+cb_floppy_streamer_window.o : $(BASEDIR)/gui/cb_floppy_streamer_window.cxx
+	$(CPP) -o $@ -c $< $(CFLAGS)
+
 cb_edittool_window.o : $(BASEDIR)/gui/cb_edittool_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
@@ -132,6 +135,9 @@ floppy_dump_window.o : $(BASEDIR)/gui/floppy_dump_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
 floppy_infos_window.o : $(BASEDIR)/gui/floppy_infos_window.cxx
+	$(CPP) -o $@ -c $< $(CFLAGS)
+
+floppy_streamer_window.o : $(BASEDIR)/gui/floppy_streamer_window.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
 
 edittool_window.o : $(BASEDIR)/gui/edittool_window.cxx

@@ -91,7 +91,7 @@ int load_floppy(HXCFE_FLOPPY * floppydisk,char * defaultfilename)
 	}
 	else
 	{
-#ifndef STANDALONEFSBROWSER
+#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
 		libusbhxcfe_loadFloppy(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy);
 #endif
 
@@ -154,7 +154,7 @@ int load_floppy_image(char *filename)
 		else
 		{
 			sync_if_config();
-	#ifndef STANDALONEFSBROWSER
+	#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
 			libusbhxcfe_loadFloppy(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy);
 	#endif
 			if(filename)
@@ -337,7 +337,7 @@ int loadrawfile(HXCFE* floppycontext,cfgrawfile * rfc,char * file)
 
 		sync_if_config();
 
-#ifndef STANDALONEFSBROWSER
+#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
 		libusbhxcfe_loadFloppy(guicontext->hxcfe,guicontext->usbhxcfe,guicontext->loadedfloppy);
 #endif
 
