@@ -163,6 +163,21 @@ int network_read(void * network_connection, unsigned char * buffer, int size,int
 	return size;
 }
 
+int network_read2(void * network_connection, unsigned char * buffer, int size,int timeout)
+{
+	int bytesRecv;
+	int offset;
+	hxc_tcp_stat * tcp_stat;
+
+	tcp_stat = (hxc_tcp_stat *)network_connection;
+
+	offset=0;
+
+		bytesRecv = recv(tcp_stat->m_socket, (char*)&buffer[offset], size - offset, 0);
+
+	return bytesRecv;
+}
+
 int network_write(void * network_connection, unsigned char * buffer, int size,int timeout)
 {
 	int bytesSent;

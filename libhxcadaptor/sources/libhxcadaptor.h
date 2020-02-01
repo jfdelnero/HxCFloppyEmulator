@@ -90,6 +90,7 @@ int hxc_getfilesize( char * path );
 
 void * network_connect(char * address,unsigned short port);
 int network_read(void * network_connection, unsigned char * buffer, int size,int timeout);
+int network_read2(void * network_connection, unsigned char * buffer, int size,int timeout);
 int network_write(void * network_connection, unsigned char * buffer, int size,int timeout);
 int network_close(void * network_connection);
 
