@@ -113,7 +113,32 @@ void streamer_tick_infos(void *w)
 		td = guicontext->td;
 		if(td)
 		{
-			fl_draw_image((unsigned char *)guicontext->flayoutframebuffer, window->floppy_map_disp->x(), window->floppy_map_disp->y(), hxcfe_td_getframebuffer_xres(td), hxcfe_td_getframebuffer_yres(td), 3, 0);
+			if( (window->floppy_map_disp->w() != hxcfe_td_getframebuffer_xres(td)) || (window->floppy_map_disp->h() != hxcfe_td_getframebuffer_yres(td)) )
+			{
+				// Resized... Realloc needed
+
+				hxcfe_td_deinit(guicontext->td);
+
+				guicontext->td = NULL;
+				td = NULL;
+
+				guicontext->td = hxcfe_td_init(guicontext->hxcfe,window->floppy_map_disp->w(),window->floppy_map_disp->h());
+				if(guicontext->td)
+				{
+					td = guicontext->td;
+					if(guicontext->flayoutframebuffer)
+						free(guicontext->flayoutframebuffer);
+
+					guicontext->flayoutframebuffer = (unsigned char*)malloc( hxcfe_td_getframebuffer_xres(td) * hxcfe_td_getframebuffer_yres(td) * 3);
+					if(guicontext->flayoutframebuffer)
+					{
+						memset(guicontext->flayoutframebuffer,0,hxcfe_td_getframebuffer_xres(td)*hxcfe_td_getframebuffer_yres(td) * 3);
+					}
+				}
+			}
+
+			if(td)
+				 fl_draw_image((unsigned char *)guicontext->flayoutframebuffer, window->floppy_map_disp->x(), window->floppy_map_disp->y(), hxcfe_td_getframebuffer_xres(td), hxcfe_td_getframebuffer_yres(td), 3, 0);
 		}
 	}
 

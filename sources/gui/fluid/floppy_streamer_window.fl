@@ -7,11 +7,11 @@ class floppy_streamer_window {open
   Function {floppy_streamer_window()} {open
   } {
     Fl_Window window {
-      label {Visual Floppy disk} open selected
-      xywh {18 76 1330 620} type Double visible
+      label {Ludo Floppy Disk Toolkit} open
+      xywh {320 103 1325 620} type Double resizable visible
     } {
       Fl_Group {} {
-        label {Track / Side selection} open
+        label {Track / Side selection}
         xywh {1050 331 275 84} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {
         Fl_Value_Slider track_number_slide {
@@ -28,7 +28,7 @@ class floppy_streamer_window {open
         }
       }
       Fl_Group {} {
-        label Status open
+        label Status
         xywh {1050 1 275 248} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL labelsize 12 align 21
       } {
         Fl_Output x_pos {
@@ -45,17 +45,11 @@ class floppy_streamer_window {open
           xywh {1055 67 265 178} labelsize 10 textsize 10
         }
       }
-      Fl_Button {} {
-        label Connect
-        user_data this
-        callback floppy_streamer_connect
-        xywh {1220 589 105 26}
-      }
       Fl_Group floppy_map_disp {
-        label {Floppy Map} open
-        xywh {0 1 1050 576} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+        label {Track stream} selected
+        xywh {0 1 1050 576} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21 resizable
       } {}
-      Fl_Group {} {open
+      Fl_Group {} {
         xywh {0 575 1050 45} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {
         Fl_Value_Slider y_time {
@@ -78,7 +72,7 @@ class floppy_streamer_window {open
         }
       }
       Fl_Group {} {
-        label {Track analysis format} open
+        label {Track analysis format}
         xywh {1050 246 275 84} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
       } {
         Fl_Light_Button iso_mfm_bt {
@@ -154,94 +148,115 @@ class floppy_streamer_window {open
           xywh {1233 309 76 15} labelsize 10
         }
       }
-      Fl_Input server_address {
-        label Server
-        xywh {1105 590 110 25}
+      Fl_Group {} {
+        xywh {1050 415 275 80} box ENGRAVED_FRAME
+      } {
+        Fl_Button {} {
+          label {-}
+          user_data this
+          callback floppy_streamer_down
+          xywh {1052 420 23 20}
+        }
+        Fl_Button {} {
+          label {+}
+          user_data this
+          callback floppy_streamer_trackup
+          xywh {1076 420 23 20}
+        }
+        Fl_Button {} {
+          label {Read Disk}
+          user_data this
+          callback floppy_streamer_readdisk
+          xywh {1100 420 78 40}
+        }
+        Fl_Button {} {
+          label recal
+          user_data this
+          callback floppy_streamer_recalibrate
+          xywh {1051 466 48 21}
+        }
+        Fl_Button {} {
+          label {Read Track}
+          user_data this
+          callback floppy_streamer_readtrack
+          xywh {1178 420 85 40}
+        }
+        Fl_Button {} {
+          label {STOP !}
+          user_data this
+          callback floppy_streamer_stop
+          xywh {1100 462 222 25}
+        }
+        Fl_Button {} {
+          label move
+          user_data this
+          callback floppy_streamer_movehead
+          xywh {1051 441 48 21}
+        }
+        Fl_Button {} {
+          label {Spy bus}
+          user_data this
+          callback floppy_streamer_spybus
+          xywh {1263 420 59 40}
+        }
       }
-      Fl_Button {} {
-        label {Read Disk}
-        user_data this
-        callback floppy_streamer_readdisk
-        xywh {1102 417 78 40}
+      Fl_Group {} {
+        xywh {1048 587 277 32} box ENGRAVED_FRAME
+      } {
+        Fl_Input server_address {
+          label Server
+          xywh {1108 587 110 32}
+        }
+        Fl_Button {} {
+          label Connect
+          user_data this
+          callback floppy_streamer_connect
+          xywh {1223 587 102 32}
+        }
       }
-      Fl_Button {} {
-        label {+}
-        user_data this
-        callback floppy_streamer_trackup
-        xywh {1077 418 23 20}
+      Fl_Group {} {
+        xywh {1050 495 275 80} box ENGRAVED_FRAME
+      } {
+        Fl_Input max_track {
+          label {Max track}
+          xywh {1134 521 40 15} labelsize 10 textsize 10
+        }
+        Fl_Input min_track {
+          label {Min track}
+          xywh {1134 506 40 15} labelsize 10 textsize 10
+        }
+        Fl_Light_Button Side_0 {
+          label {Side 0}
+          xywh {1177 505 80 15} labelsize 10
+        }
+        Fl_Light_Button Side_1 {
+          label {Side 1}
+          xywh {1177 520 80 15} labelsize 10
+        }
+        Fl_Light_Button double_step {
+          label {Double step}
+          xywh {1177 535 80 15} labelsize 10
+        }
+        Fl_Input index_delay {
+          label {Index delay (us)}
+          xywh {1134 549 40 15} labelsize 10 textsize 10
+        }
+        Fl_Input dump_lenght {
+          label {lenght (ms)}
+          xywh {1134 534 40 15} labelsize 10 textsize 10
+        }
+        Fl_Light_Button ignore_index {
+          label {Ignore index}
+          xywh {1177 550 80 15} labelsize 10
+        }
+        Fl_Light_Button high_res {
+          label {50Mhz }
+          xywh {1259 505 61 15} labelsize 10
+        }
       }
-      Fl_Button {} {
-        label {-}
-        user_data this
-        callback floppy_streamer_down
-        xywh {1052 418 23 20}
-      }
-      Fl_Button {} {
-        label recal
-        user_data this
-        callback floppy_streamer_recalibrate
-        xywh {1052 464 48 21}
-      }
-      Fl_Button {} {
-        label {Read Track}
-        user_data this
-        callback floppy_streamer_readtrack
-        xywh {1180 417 85 40}
-      }
-      Fl_Button {} {
-        label {STOP !}
-        user_data this
-        callback floppy_streamer_stop
-        xywh {1103 460 222 25}
-      }
-      Fl_Input max_track {
-        label {Max track}
-        xywh {1134 516 40 15} labelsize 10 textsize 10
-      }
-      Fl_Input min_track {
-        label {Min track}
-        xywh {1134 501 40 15} labelsize 10 textsize 10
-      }
-      Fl_Light_Button Side_0 {
-        label {Side 0}
-        xywh {1177 500 80 15} labelsize 10
-      }
-      Fl_Light_Button Side_1 {
-        label {Side 1}
-        xywh {1177 515 80 15} labelsize 10
-      }
-      Fl_Light_Button double_step {
-        label {Double step}
-        xywh {1177 530 80 15} labelsize 10
-      }
-      Fl_Input index_delay {
-        label {Index delay (us)}
-        xywh {1134 544 40 15} labelsize 10 textsize 10
-      }
-      Fl_Input dump_lenght {
-        label {lenght (ms)}
-        xywh {1134 529 40 15} labelsize 10 textsize 10
-      }
-      Fl_Light_Button ignore_index {
-        label {Ignore index}
-        xywh {1177 545 80 15} labelsize 10
-      }
-      Fl_Button {} {
-        label move
-        user_data this
-        callback floppy_streamer_movehead
-        xywh {1052 439 48 21}
-      }
-      Fl_Light_Button high_res {
-        label {50Mhz }
-        xywh {1260 500 65 15} labelsize 10
-      }
-      Fl_Button {} {
-        label {Spy bus}
-        user_data this
-        callback floppy_streamer_spybus
-        xywh {1265 417 59 40}
-      }
+      Fl_Group {} {open
+        xywh {1049 573 275 15} box ENGRAVED_FRAME
+      } {}
     }
   }
 }
