@@ -175,9 +175,6 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,flo
 		track_dump=DecodeHxCStreamFile(floppycontext,fxs,file,timecoef);
 		if(track_dump)
 		{
-			hxcfe_FxStream_ExportToBmp(fxs,track_dump, "Test.bmp");
-
-
 			hxcfe_FxStream_setBitrate(fxs,bitrate);
 
 			hxcfe_FxStream_setPhaseCorrectionFactor(fxs,phasecorrection);
