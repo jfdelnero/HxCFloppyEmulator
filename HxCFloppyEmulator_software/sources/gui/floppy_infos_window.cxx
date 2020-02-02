@@ -68,6 +68,7 @@ floppy_infos_window::floppy_infos_window() {
       floppy_map_disp->labelsize(12);
       floppy_map_disp->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
       floppy_map_disp->end();
+      Fl_Group::current()->resizable(floppy_map_disp);
     } // Fl_Group* floppy_map_disp
     { Fl_Group* o = new Fl_Group(0, 500, 1275, 41, getString(STR_FLOPPYVIEWERWINDOW_0008));
       o->box(FL_ENGRAVED_FRAME);

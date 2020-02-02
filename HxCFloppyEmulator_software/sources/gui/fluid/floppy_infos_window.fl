@@ -8,7 +8,7 @@ class floppy_infos_window {open
   } {
     Fl_Window window {
       label {Visual Floppy disk} open
-      xywh {43 121 1275 540} type Double visible
+      xywh {553 192 1275 540} type Double resizable visible
     } {
       Fl_Group {} {
         label {Track / Side selection} open
@@ -53,10 +53,10 @@ class floppy_infos_window {open
       }
       Fl_Group floppy_map_disp {
         label {Floppy Map} open
-        xywh {0 1 1000 500} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+        xywh {0 1 1000 500} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21 resizable
       } {}
       Fl_Group {} {
-        label View open
+        label View open selected
         xywh {0 500 1275 41} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {
         Fl_Value_Slider y_time {
@@ -163,7 +163,7 @@ class floppy_infos_window {open
         Fl_Light_Button decrx02_bt {
           label {DEC RX02}
           user_data this
-          callback disk_infos_window_callback selected
+          callback disk_infos_window_callback
           xywh {1183 350 76 15} labelsize 10
         }
       }

@@ -9,21 +9,21 @@
 extern void disk_streamer_window_callback(Fl_Value_Slider*, void*);
 #include <FL/Fl_Output.H>
 #include <FL/Fl_Text_Display.H>
-#include <FL/Fl_Button.H>
-extern void floppy_streamer_connect(Fl_Button*, void*);
 #include <FL/Fl_Slider.H>
 extern void disk_streamer_window_callback(Fl_Slider*, void*);
 #include <FL/Fl_Light_Button.H>
 extern void disk_streamer_window_callback(Fl_Light_Button*, void*);
-#include <FL/Fl_Input.H>
-extern void floppy_streamer_readdisk(Fl_Button*, void*);
-extern void floppy_streamer_trackup(Fl_Button*, void*);
+#include <FL/Fl_Button.H>
 extern void floppy_streamer_down(Fl_Button*, void*);
+extern void floppy_streamer_trackup(Fl_Button*, void*);
+extern void floppy_streamer_readdisk(Fl_Button*, void*);
 extern void floppy_streamer_recalibrate(Fl_Button*, void*);
 extern void floppy_streamer_readtrack(Fl_Button*, void*);
 extern void floppy_streamer_stop(Fl_Button*, void*);
 extern void floppy_streamer_movehead(Fl_Button*, void*);
 extern void floppy_streamer_spybus(Fl_Button*, void*);
+#include <FL/Fl_Input.H>
+extern void floppy_streamer_connect(Fl_Button*, void*);
 
 class floppy_streamer_window {
 public:

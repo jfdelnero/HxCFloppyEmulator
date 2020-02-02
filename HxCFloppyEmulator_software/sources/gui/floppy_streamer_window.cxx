@@ -14,7 +14,7 @@ extern "C"
 #include "fl_mouse_box.h"
 
 floppy_streamer_window::floppy_streamer_window() {
-  { window = new Fl_Double_Window(1330, 620, "Visual Floppy disk");
+  { window = new Fl_Double_Window(1325, 620, "Ludo Floppy Disk Toolkit");
     window->user_data((void*)(this));
     { Fl_Group* o = new Fl_Group(1050, 331, 275, 84, "Track / Side selection");
       o->box(FL_ENGRAVED_FRAME);
@@ -59,15 +59,13 @@ floppy_streamer_window::floppy_streamer_window() {
       } // Fl_Text_Display* object_txt
       o->end();
     } // Fl_Group* o
-    { Fl_Button* o = new Fl_Button(1220, 589, 105, 26, "Connect");
-      o->callback((Fl_Callback*)floppy_streamer_connect, (void*)(this));
-    } // Fl_Button* o
-    { floppy_map_disp = new Fl_Group(0, 1, 1050, 576, "Floppy Map");
+    { floppy_map_disp = new Fl_Group(0, 1, 1050, 576, "Track stream");
       floppy_map_disp->box(FL_ENGRAVED_FRAME);
       floppy_map_disp->labeltype(FL_EMBOSSED_LABEL);
       floppy_map_disp->labelsize(12);
       floppy_map_disp->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
       floppy_map_disp->end();
+      Fl_Group::current()->resizable(floppy_map_disp);
     } // Fl_Group* floppy_map_disp
     { Fl_Group* o = new Fl_Group(0, 575, 1050, 45);
       o->box(FL_ENGRAVED_FRAME);
@@ -148,63 +146,82 @@ floppy_streamer_window::floppy_streamer_window() {
       } // Fl_Light_Button* decrx02_bt
       o->end();
     } // Fl_Group* o
-    { server_address = new Fl_Input(1105, 590, 110, 25, "Server");
-    } // Fl_Input* server_address
-    { Fl_Button* o = new Fl_Button(1102, 417, 78, 40, "Read Disk");
-      o->callback((Fl_Callback*)floppy_streamer_readdisk, (void*)(this));
-    } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(1077, 418, 23, 20, "+");
-      o->callback((Fl_Callback*)floppy_streamer_trackup, (void*)(this));
-    } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(1052, 418, 23, 20, "-");
-      o->callback((Fl_Callback*)floppy_streamer_down, (void*)(this));
-    } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(1052, 464, 48, 21, "recal");
-      o->callback((Fl_Callback*)floppy_streamer_recalibrate, (void*)(this));
-    } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(1180, 417, 85, 40, "Read Track");
-      o->callback((Fl_Callback*)floppy_streamer_readtrack, (void*)(this));
-    } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(1103, 460, 222, 25, "STOP !");
-      o->callback((Fl_Callback*)floppy_streamer_stop, (void*)(this));
-    } // Fl_Button* o
-    { max_track = new Fl_Input(1134, 516, 40, 15, "Max track");
-      max_track->labelsize(10);
-      max_track->textsize(10);
-    } // Fl_Input* max_track
-    { min_track = new Fl_Input(1134, 501, 40, 15, "Min track");
-      min_track->labelsize(10);
-      min_track->textsize(10);
-    } // Fl_Input* min_track
-    { Side_0 = new Fl_Light_Button(1177, 500, 80, 15, "Side 0");
-      Side_0->labelsize(10);
-    } // Fl_Light_Button* Side_0
-    { Side_1 = new Fl_Light_Button(1177, 515, 80, 15, "Side 1");
-      Side_1->labelsize(10);
-    } // Fl_Light_Button* Side_1
-    { double_step = new Fl_Light_Button(1177, 530, 80, 15, "Double step");
-      double_step->labelsize(10);
-    } // Fl_Light_Button* double_step
-    { index_delay = new Fl_Input(1134, 544, 40, 15, "Index delay (us)");
-      index_delay->labelsize(10);
-      index_delay->textsize(10);
-    } // Fl_Input* index_delay
-    { dump_lenght = new Fl_Input(1134, 529, 40, 15, "lenght (ms)");
-      dump_lenght->labelsize(10);
-      dump_lenght->textsize(10);
-    } // Fl_Input* dump_lenght
-    { ignore_index = new Fl_Light_Button(1177, 545, 80, 15, "Ignore index");
-      ignore_index->labelsize(10);
-    } // Fl_Light_Button* ignore_index
-    { Fl_Button* o = new Fl_Button(1052, 439, 48, 21, "move");
-      o->callback((Fl_Callback*)floppy_streamer_movehead, (void*)(this));
-    } // Fl_Button* o
-    { high_res = new Fl_Light_Button(1260, 500, 65, 15, "50Mhz ");
-      high_res->labelsize(10);
-    } // Fl_Light_Button* high_res
-    { Fl_Button* o = new Fl_Button(1265, 417, 59, 40, "Spy bus");
-      o->callback((Fl_Callback*)floppy_streamer_spybus, (void*)(this));
-    } // Fl_Button* o
+    { Fl_Group* o = new Fl_Group(1050, 415, 275, 80);
+      o->box(FL_ENGRAVED_FRAME);
+      { Fl_Button* o = new Fl_Button(1052, 420, 23, 20, "-");
+        o->callback((Fl_Callback*)floppy_streamer_down, (void*)(this));
+      } // Fl_Button* o
+      { Fl_Button* o = new Fl_Button(1076, 420, 23, 20, "+");
+        o->callback((Fl_Callback*)floppy_streamer_trackup, (void*)(this));
+      } // Fl_Button* o
+      { Fl_Button* o = new Fl_Button(1100, 420, 78, 40, "Read Disk");
+        o->callback((Fl_Callback*)floppy_streamer_readdisk, (void*)(this));
+      } // Fl_Button* o
+      { Fl_Button* o = new Fl_Button(1051, 466, 48, 21, "recal");
+        o->callback((Fl_Callback*)floppy_streamer_recalibrate, (void*)(this));
+      } // Fl_Button* o
+      { Fl_Button* o = new Fl_Button(1178, 420, 85, 40, "Read Track");
+        o->callback((Fl_Callback*)floppy_streamer_readtrack, (void*)(this));
+      } // Fl_Button* o
+      { Fl_Button* o = new Fl_Button(1100, 462, 222, 25, "STOP !");
+        o->callback((Fl_Callback*)floppy_streamer_stop, (void*)(this));
+      } // Fl_Button* o
+      { Fl_Button* o = new Fl_Button(1051, 441, 48, 21, "move");
+        o->callback((Fl_Callback*)floppy_streamer_movehead, (void*)(this));
+      } // Fl_Button* o
+      { Fl_Button* o = new Fl_Button(1263, 420, 59, 40, "Spy bus");
+        o->callback((Fl_Callback*)floppy_streamer_spybus, (void*)(this));
+      } // Fl_Button* o
+      o->end();
+    } // Fl_Group* o
+    { Fl_Group* o = new Fl_Group(1048, 587, 277, 32);
+      o->box(FL_ENGRAVED_FRAME);
+      { server_address = new Fl_Input(1108, 587, 110, 32, "Server");
+      } // Fl_Input* server_address
+      { Fl_Button* o = new Fl_Button(1223, 587, 102, 32, "Connect");
+        o->callback((Fl_Callback*)floppy_streamer_connect, (void*)(this));
+      } // Fl_Button* o
+      o->end();
+    } // Fl_Group* o
+    { Fl_Group* o = new Fl_Group(1050, 495, 275, 80);
+      o->box(FL_ENGRAVED_FRAME);
+      { max_track = new Fl_Input(1134, 521, 40, 15, "Max track");
+        max_track->labelsize(10);
+        max_track->textsize(10);
+      } // Fl_Input* max_track
+      { min_track = new Fl_Input(1134, 506, 40, 15, "Min track");
+        min_track->labelsize(10);
+        min_track->textsize(10);
+      } // Fl_Input* min_track
+      { Side_0 = new Fl_Light_Button(1177, 505, 80, 15, "Side 0");
+        Side_0->labelsize(10);
+      } // Fl_Light_Button* Side_0
+      { Side_1 = new Fl_Light_Button(1177, 520, 80, 15, "Side 1");
+        Side_1->labelsize(10);
+      } // Fl_Light_Button* Side_1
+      { double_step = new Fl_Light_Button(1177, 535, 80, 15, "Double step");
+        double_step->labelsize(10);
+      } // Fl_Light_Button* double_step
+      { index_delay = new Fl_Input(1134, 549, 40, 15, "Index delay (us)");
+        index_delay->labelsize(10);
+        index_delay->textsize(10);
+      } // Fl_Input* index_delay
+      { dump_lenght = new Fl_Input(1134, 534, 40, 15, "lenght (ms)");
+        dump_lenght->labelsize(10);
+        dump_lenght->textsize(10);
+      } // Fl_Input* dump_lenght
+      { ignore_index = new Fl_Light_Button(1177, 550, 80, 15, "Ignore index");
+        ignore_index->labelsize(10);
+      } // Fl_Light_Button* ignore_index
+      { high_res = new Fl_Light_Button(1259, 505, 61, 15, "50Mhz ");
+        high_res->labelsize(10);
+      } // Fl_Light_Button* high_res
+      o->end();
+    } // Fl_Group* o
+    { Fl_Group* o = new Fl_Group(1049, 573, 275, 15);
+      o->box(FL_ENGRAVED_FRAME);
+      o->end();
+    } // Fl_Group* o
     window->end();
   } // Fl_Double_Window* window
 }

@@ -87,24 +87,24 @@ char fullstr[256*1024];
 
 static int progress_callback(unsigned int current,unsigned int total,void * td,void * user)
 {
-	int i,j,k;
 	s_gui_context * guicontext;
-	HXCFE_TD * ltd;
 	unsigned char *ptr1;
+	unsigned char *ptr2;
+	int total_pixels;
+
 
 	guicontext = (s_gui_context *)user;
 
-	ltd = td;
+	ptr1 = (unsigned char*)hxcfe_td_getframebuffer(td);
+	ptr2 = guicontext->flayoutframebuffer;
 
-	ptr1 = (unsigned char*)hxcfe_td_getframebuffer(ltd);
-	k=0;
-	j=0;
-	for(i=0;i<hxcfe_td_getframebuffer_xres(ltd)*hxcfe_td_getframebuffer_yres(ltd);i++)
+	total_pixels = hxcfe_td_getframebuffer_xres(td) * hxcfe_td_getframebuffer_yres(td);
+	while(total_pixels--)
 	{
-		guicontext->flayoutframebuffer[j++]=ptr1[k+0];
-		guicontext->flayoutframebuffer[j++]=ptr1[k+1];
-		guicontext->flayoutframebuffer[j++]=ptr1[k+2];
-		k=k+4;
+		*ptr2++ = *ptr1++;
+		*ptr2++ = *ptr1++;
+		*ptr2++ = *ptr1++;
+		ptr1++;
 	}
 
 	return 0;
@@ -283,6 +283,32 @@ void tick_infos(void *w) {
 		td = guicontext->td;
 		if(td)
 		{
+
+			if( (window->floppy_map_disp->w() != hxcfe_td_getframebuffer_xres(td)) || (window->floppy_map_disp->h() != hxcfe_td_getframebuffer_yres(td)) )
+			{
+				// Resized... Realloc needed
+
+				hxcfe_td_deinit(guicontext->td);
+
+				guicontext->td = NULL;
+				td = NULL;
+
+				guicontext->td = hxcfe_td_init(guicontext->hxcfe,window->floppy_map_disp->w(),window->floppy_map_disp->h());
+				if(guicontext->td)
+				{
+					td = guicontext->td;
+					if(guicontext->flayoutframebuffer)
+						free(guicontext->flayoutframebuffer);
+
+					guicontext->flayoutframebuffer = (unsigned char*)malloc( hxcfe_td_getframebuffer_xres(td) * hxcfe_td_getframebuffer_yres(td) * 3);
+					if(guicontext->flayoutframebuffer)
+					{
+						memset(guicontext->flayoutframebuffer,0,hxcfe_td_getframebuffer_xres(td)*hxcfe_td_getframebuffer_yres(td) * 3);
+						guicontext->updatefloppyinfos = 1;
+					}
+				}
+			}
+
 			if(guicontext->updatefloppyinfos)
 			{
 				hxc_entercriticalsection(guicontext->hxcfe,1);
