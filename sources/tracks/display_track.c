@@ -1824,6 +1824,7 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	HXCFE_SIDE * currentside;
 	unsigned int color;
 	int y_pos,x_pos_1,x_pos_2,ytypepos;
+	int max_diameter;
 	float track_ep;
 	int xpos;
 	char tempstr[512];
@@ -1851,6 +1852,15 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	x_pos_1 = td->xsize/4;
 	x_pos_2 = td->xsize - (td->xsize/4);
 
+	if( td->ysize < (td->xsize / 2) )
+	{
+		max_diameter = td->ysize - (td->ysize /2); 
+	}
+	else
+	{
+		max_diameter = (td->xsize/2) - (td->xsize / 4);
+	}
+
 	sprintf(tempstr,"libhxcfe v%s",STR_FILE_VERSION2);
 	putstring8x8(td,1,td->ysize - (8 + 1),tempstr,0xAAAAAA,0x000000,0,0);
 
@@ -1861,13 +1871,13 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	}
 
 	color = 0x131313;
-	for(i=25;i<(td->ysize-(y_pos));i++)
+	for(i=25;i<max_diameter;i++)
 	{
 		circle(td,x_pos_1,y_pos,i,color);
 		circle(td,x_pos_2,y_pos,i,color);
 	}
 
-	track_ep = (float)( (td->ysize-(y_pos)) - 60 ) /((float) floppydisk->floppyNumberOfTrack+1);
+	track_ep = (float)( max_diameter - 60 ) /((float) floppydisk->floppyNumberOfTrack+1);
 	for(track=0;track<floppydisk->floppyNumberOfTrack;track++)
 	{
 		td->hxc_setprogress(track*floppydisk->floppyNumberOfSide,floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide*2,td,td->progress_userdata);
@@ -1907,7 +1917,7 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 
 			tracksize = currentside->tracklen;
 
-			track_ep = (float)( (td->ysize-(y_pos)) - 60 ) /((float) floppydisk->floppyNumberOfTrack+1);
+			track_ep = (float)( max_diameter - 60 ) /((float) floppydisk->floppyNumberOfTrack+1);
 
 			//////////////////////////////////////////
 			// Sector drawing
@@ -2002,7 +2012,7 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 
 	for(track=0;track<floppydisk->floppyNumberOfTrack+1;track++)
 	{
-		track_ep=(float)( (td->ysize-(y_pos)) - 60 ) /((float) floppydisk->floppyNumberOfTrack+1);
+		track_ep=(float)( max_diameter - 60 ) /((float) floppydisk->floppyNumberOfTrack+1);
 
 		draw_circle (td,0xF8F8F8,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)) + 1,1,(int)0);
 		draw_circle (td,0xF8F8F8,0,(float)((float)((float)2 * PI)),x_pos_2,y_pos,60 + (int)(((floppydisk->floppyNumberOfTrack-track) * track_ep)) + 1,1,(int)0);
