@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2018 Jean-François DEL NERO
+// Copyright (C) 2006-2020 Jean-François DEL NERO
 //
 // This file is part of HxCFloppyEmulator.
 //
@@ -166,16 +166,15 @@ void printlibmodule(HXCFE* hxcfe)
 		while(i<numberofloader)
 		{
 			ptr = hxcfe_imgGetLoaderName(imgldr_ctx,i);
-			printf("%s",ptr );
-			for(j=0;j<(int)(20-strlen(ptr));j++) printf(" ");
+			printf("%s;",ptr );
 
-			printf("(%c%c)",hxcfe_imgGetLoaderAccess(imgldr_ctx,i)&1?'R':' ',hxcfe_imgGetLoaderAccess(imgldr_ctx,i)&2?'W':' ');
+			printf("%c%c;",hxcfe_imgGetLoaderAccess(imgldr_ctx,i)&1?'R':' ',hxcfe_imgGetLoaderAccess(imgldr_ctx,i)&2?'W':' ');
 
 			ptr = hxcfe_imgGetLoaderDesc(imgldr_ctx,i);
-			printf(" :  %s",ptr);
+			printf("%s;",ptr);
 
-			for(j=0;j<(int)(38-strlen(ptr));j++) printf(" ");
-			printf("(*.%s)\n",hxcfe_imgGetLoaderExt(imgldr_ctx,i));
+			//for(j=0;j<(int)(38-strlen(ptr));j++) printf(" ");
+			printf("*.%s;\n",hxcfe_imgGetLoaderExt(imgldr_ctx,i));
 			i++;
 		}
 
@@ -988,7 +987,7 @@ int main(int argc, char* argv[])
 	hxcfe_setOutputFunc(hxcfe,&CUI_affiche);
 
 	printf("HxC Floppy Emulator : Floppy image file converter v2.0.3.1\n");
-	printf("Copyright (C) 2006-2019 Jean-Francois DEL NERO\n");
+	printf("Copyright (C) 2006-2020 Jean-Francois DEL NERO\n");
 	printf("This program comes with ABSOLUTELY NO WARRANTY\n");
 	printf("This is free software, and you are welcome to redistribute it\n");
 	printf("under certain conditions;\n\n");
