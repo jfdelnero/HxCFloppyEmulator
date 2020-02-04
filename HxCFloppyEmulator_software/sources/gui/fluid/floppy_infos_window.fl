@@ -8,11 +8,11 @@ class floppy_infos_window {open
   } {
     Fl_Window window {
       label {Visual Floppy disk} open
-      xywh {553 192 1275 540} type Double resizable visible
+      xywh {91 263 1275 540} type Single resizable visible
     } {
       Fl_Group {} {
-        label {Track / Side selection} open
-        xywh {1000 372 275 84} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+        label {Track / Side selection} open selected
+        xywh {1000 372 275 118} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {
         Fl_Value_Slider track_number_slide {
           label {Track number}
@@ -26,6 +26,12 @@ class floppy_infos_window {open
           callback disk_infos_window_callback
           xywh {1005 420 265 19} type Horizontal labelsize 12 textsize 12
         }
+        Fl_Choice view_mode {
+          label {View mode}
+          user_data this
+          callback disk_infos_window_callback open
+          xywh {1090 462 180 20} down_box BORDER_BOX
+        } {}
       }
       Fl_Group {} {
         label Status open
@@ -45,18 +51,12 @@ class floppy_infos_window {open
           xywh {1005 68 265 215} labelsize 10 textsize 10
         }
       }
-      Fl_Button {} {
-        label OK
-        user_data this
-        callback floppy_infos_ok
-        xywh {1158 465 105 26}
-      }
       Fl_Group floppy_map_disp {
         label {Floppy Map} open
         xywh {0 1 1000 500} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21 resizable
       } {}
       Fl_Group {} {
-        label View open selected
+        label View open
         xywh {0 500 1275 41} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {
         Fl_Value_Slider y_time {
@@ -71,23 +71,23 @@ class floppy_infos_window {open
           callback disk_infos_window_callback
           xywh {45 505 305 20} type {Horz Knob} labelsize 12 textsize 12
         }
-        Fl_Round_Button track_view_bt {
-          label {Track view mode}
-          user_data this
-          callback disk_infos_window_callback
-          xywh {1021 512 110 16} type Radio down_box ROUND_DOWN_BOX
-        }
-        Fl_Round_Button disc_view_bt {
-          label {Disk view mode}
-          user_data this
-          callback disk_infos_window_callback
-          xywh {1151 512 103 16} type Radio down_box ROUND_DOWN_BOX
-        }
         Fl_Slider x_time {
           label {full x time scale}
           user_data this
           callback disk_infos_window_callback
           xywh {370 505 305 20} type Horizontal labelsize 12
+        }
+        Fl_Button bt_edit {
+          label {Edit tools}
+          user_data this
+          callback disk_infos_window_bt_edit_callback
+          xywh {1020 506 105 26} labelsize 10
+        }
+        Fl_Button {} {
+          label OK
+          user_data this
+          callback floppy_infos_ok
+          xywh {1150 506 105 26}
         }
       }
       Fl_Group {} {
@@ -166,12 +166,6 @@ class floppy_infos_window {open
           callback disk_infos_window_callback
           xywh {1183 350 76 15} labelsize 10
         }
-      }
-      Fl_Button bt_edit {
-        label {Edit tools}
-        user_data this
-        callback disk_infos_window_bt_edit_callback
-        xywh {1010 465 105 26} labelsize 10
       }
     }
   }

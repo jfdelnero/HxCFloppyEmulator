@@ -203,7 +203,7 @@ void update_graph(floppy_infos_window * w)
 				if(valmodif)
 					w->side_number_slide->value(side);
 
-				if(!w->disc_view_bt->value())
+				if(w->view_mode->value() == 0)
 				{
 					sprintf(tempstr,"Track : %d Side : %d ",track,side);
 					w->side_number_slide->activate();
@@ -383,17 +383,16 @@ int InfosThreadProc(void* floppycontext,void* context)
 
 			if(guicontext->trackviewerfloppy)
 			{
-				if(w->track_view_bt->value())
+				if(w->view_mode->value() != 0)
 				{
-					hxcfe_td_draw_track(td,guicontext->trackviewerfloppy,(int)w->track_number_slide->value(),(int)w->side_number_slide->value());
+					hxcfe_td_select_view_type( td, w->view_mode->value());
+					hxcfe_td_setProgressCallback(td,progress_callback,(void*)guicontext);
+					hxcfe_td_draw_disk(td,guicontext->trackviewerfloppy);
 				}
 				else
 				{
-					if(w->disc_view_bt->value())
-					{
-						hxcfe_td_setProgressCallback(td,progress_callback,(void*)guicontext);
-						hxcfe_td_draw_disk(td,guicontext->trackviewerfloppy);
-					}
+					hxcfe_td_select_view_type( td, w->view_mode->value());
+					hxcfe_td_draw_track(td,guicontext->trackviewerfloppy,(int)w->track_number_slide->value(),(int)w->side_number_slide->value());
 				}
 			}
 
@@ -499,7 +498,7 @@ int isTheRightSector(floppy_infos_window *fiw,s_sectorlist * sl,int xpos,int ypo
 	float pos_angle;
 	int distance,side;
 
-	if(fiw->disc_view_bt->value())
+	if(fiw->view_mode->value() != 0)
 	{
 		disp_xsize=fiw->floppy_map_disp->w();
 		disp_ysize=fiw->floppy_map_disp->h();
@@ -557,7 +556,7 @@ int isTheRightPulse(floppy_infos_window *fiw,s_pulseslist * pl,int xpos,int ypos
 
 	disp_ysize=fiw->floppy_map_disp->h();
 
-	if(!fiw->disc_view_bt->value())
+	if(!fiw->view_mode->value())
 	{
 		if( ( xpos>=pl->x_pos1 && xpos<=pl->x_pos2 ) &&
 			( ypos>=(disp_ysize - 250) && ypos<=(disp_ysize - 40)) )
@@ -571,7 +570,7 @@ int isTheRightPulse(floppy_infos_window *fiw,s_pulseslist * pl,int xpos,int ypos
 
 int isTheRightPulseFlakey(floppy_infos_window *fiw,s_pulseslist * pl,int xpos,int ypos)
 {
-	if(!fiw->disc_view_bt->value())
+	if(!fiw->view_mode->value())
 	{
 		if( ( xpos>=pl->x_pos1 && xpos<=pl->x_pos2 ) &&
 			( ypos>=30 && ypos<=50) )
@@ -585,7 +584,7 @@ int isTheRightPulseFlakey(floppy_infos_window *fiw,s_pulseslist * pl,int xpos,in
 
 int isTheRightPulseIndex(floppy_infos_window *fiw,s_pulseslist * pl,int xpos,int ypos)
 {
-	if(!fiw->disc_view_bt->value())
+	if(!fiw->view_mode->value())
 	{
 		if( ( xpos>=pl->x_pos1 && xpos<=pl->x_pos2 ) &&
 			( ypos>=10 && ypos<=27) )
@@ -664,7 +663,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 			if(valmodif)
 				fiw->side_number_slide->value(side);
 
-			if(!fiw->disc_view_bt->value())
+			if(!fiw->view_mode->value())
 			{
 				curside = hxcfe_getSide(guicontext->hxcfe,guicontext->loadedfloppy,track,side);
 
@@ -721,10 +720,9 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 			}
 			else
 			{
-				if(fiw->disc_view_bt->value())
+				if(fiw->view_mode->value())
 				{
-					fiw->track_view_bt->value(1);
-					fiw->disc_view_bt->value(0);
+					fiw->view_mode->value(0);
 					fiw->side_number_slide->activate();
 					fiw->track_number_slide->activate();
 					fiw->x_offset->activate();
@@ -757,7 +755,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 		ypos=disp_ysize-ypos;
 
-		if(!fiw->disc_view_bt->value())
+		if(!fiw->view_mode->value())
 		{
 			sprintf(str,"x position : %.3f ms",	(xpos * stepperpix_x)/1000);
 			fiw->x_pos->value(str);
@@ -772,7 +770,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 		fiw->object_txt->textsize(9);
 		fiw->object_txt->textfont(FL_SCREEN);
 
-		if(!fiw->disc_view_bt->value())
+		if(!fiw->view_mode->value())
 			hxc_entercriticalsection(guicontext->hxcfe,1);
 
 		sl = hxcfe_td_getlastsectorlist(guicontext->td);
@@ -788,7 +786,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 				if( isTheRightSector(fiw,sl,xpos,ypos) )
 				{
-					if(fiw->disc_view_bt->value())
+					if(fiw->view_mode->value())
 					{
 						sprintf(str,"Track : %d Side : %d ",sl->track,sl->side);
 						fiw->global_status->value(str);
@@ -983,7 +981,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 		}
 
-		if(!fiw->disc_view_bt->value())
+		if(!fiw->view_mode->value())
 			hxc_leavecriticalsection(guicontext->hxcfe,1);
 
 	}

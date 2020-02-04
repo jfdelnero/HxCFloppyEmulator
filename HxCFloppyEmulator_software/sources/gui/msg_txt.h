@@ -21,6 +21,8 @@ extern Fl_Menu_Item nbside_choices[];
 
 extern Fl_Menu_Item disklayout_choices[];
 
+extern Fl_Menu_Item track_display_view_modes_choices[];
+
 /*
 extern platform platformlist[];
 */
