@@ -55,6 +55,7 @@
 
 #include "floppy_dump_window.h"
 #include "floppy_infos_window.h"
+#include "cb_floppy_infos_window.h"
 #include "floppy_streamer_window.h"
 #include "rawfile_loader_window.h"
 #include "sdhxcfecfg_window.h"
@@ -335,6 +336,10 @@ Fl_Menu_Item disklayout_choices[512]=
 	{0}
 };
 
+Fl_Menu_Item track_display_view_modes_choices[512]=
+{
+	{0}
+};
 /*
 const platform platformlist[]=
 {

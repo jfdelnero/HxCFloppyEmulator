@@ -1070,8 +1070,7 @@ Main_Window::Main_Window()
 		infos_window->x_time->scrollvalue((300*1000)+ (250 * 1000),1,1000,(1000*1000) + (250 * 1000));
 		infos_window->x_time->step(1000);
 		infos_window->y_time->scrollvalue(16,1,2,64);
-		infos_window->track_view_bt->value(1);
-		infos_window->disc_view_bt->value(0);
+		infos_window->view_mode->value(0);
 
 		guicontext->td = hxcfe_td_init(guicontext->hxcfe,infos_window->floppy_map_disp->w(),infos_window->floppy_map_disp->h());
 		guicontext->flayoutframebuffer = (unsigned char*)malloc( infos_window->floppy_map_disp->w() * infos_window->floppy_map_disp->h() * 3);
@@ -1089,6 +1088,22 @@ Main_Window::Main_Window()
 				hxc_createthread(guicontext->hxcfe,(void*)infoth,&InfosThreadProc,0);
 			}
 		}
+
+		i = 0;
+		while( hxcfe_td_get_view_mode_name(guicontext->td,i) )
+		{
+			temp = (char*)hxcfe_td_get_view_mode_name(guicontext->td,i);
+			if(temp)
+			{
+				track_display_view_modes_choices[i].text = (const char*)malloc(strlen(temp)+1);
+				if(track_display_view_modes_choices[i].text)
+					strcpy((char*)track_display_view_modes_choices[i].text, temp);
+			}
+			i++;
+		}
+
+		infos_window->view_mode->menu(track_display_view_modes_choices);
+		infos_window->view_mode->value(0);
 
 		infos_window->buf = new Fl_Text_Buffer;
 		if(infos_window->buf)

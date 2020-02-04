@@ -16,7 +16,7 @@ extern "C"
 floppy_infos_window::floppy_infos_window() {
   { window = new Fl_Window(1275, 540, getString(STR_FLOPPYVIEWERWINDOW_0001));
     window->user_data((void*)(this));
-    { Fl_Group* o = new Fl_Group(1000, 372, 275, 84, getString(STR_FLOPPYVIEWERWINDOW_0002));
+    { Fl_Group* o = new Fl_Group(1000, 372, 275, 118, "Track / Side selection");
       o->box(FL_ENGRAVED_FRAME);
       o->labeltype(FL_EMBOSSED_LABEL);
       o->labelsize(12);
@@ -33,6 +33,10 @@ floppy_infos_window::floppy_infos_window() {
         side_number_slide->textsize(12);
         side_number_slide->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Value_Slider* side_number_slide
+      { view_mode = new Fl_Choice(1090, 462, 180, 20, "View mode");
+        view_mode->down_box(FL_BORDER_BOX);
+        view_mode->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Choice* view_mode
       o->end();
     } // Fl_Group* o
     { Fl_Group* o = new Fl_Group(1000, 2, 275, 284, getString(STR_FLOPPYVIEWERWINDOW_0005));
@@ -59,9 +63,6 @@ floppy_infos_window::floppy_infos_window() {
       } // Fl_Text_Display* object_txt
       o->end();
     } // Fl_Group* o
-    { Fl_Button* o = new Fl_Button(1158, 465, 105, 26, getString(STR_COMMON_OK));
-      o->callback((Fl_Callback*)floppy_infos_ok, (void*)(this));
-    } // Fl_Button* o
     { floppy_map_disp = new Fl_Group(0, 1, 1000, 500, getString(STR_FLOPPYVIEWERWINDOW_0007));
       floppy_map_disp->box(FL_ENGRAVED_FRAME);
       floppy_map_disp->labeltype(FL_EMBOSSED_LABEL);
@@ -87,21 +88,18 @@ floppy_infos_window::floppy_infos_window() {
         x_offset->textsize(12);
         x_offset->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Value_Slider* x_offset
-      { track_view_bt = new Fl_Round_Button(1021, 512, 110, 16, getString(STR_FLOPPYVIEWERWINDOW_0011));
-        track_view_bt->type(102);
-        track_view_bt->down_box(FL_ROUND_DOWN_BOX);
-        track_view_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
-      } // Fl_Round_Button* track_view_bt
-      { disc_view_bt = new Fl_Round_Button(1151, 512, 103, 16, getString(STR_FLOPPYVIEWERWINDOW_0012));
-        disc_view_bt->type(102);
-        disc_view_bt->down_box(FL_ROUND_DOWN_BOX);
-        disc_view_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
-      } // Fl_Round_Button* disc_view_bt
       { x_time = new Fl_Slider(370, 505, 305, 20, getString(STR_FLOPPYVIEWERWINDOW_0013));
         x_time->type(1);
         x_time->labelsize(12);
         x_time->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Slider* x_time
+      { bt_edit = new Fl_Button(1020, 506, 105, 26, "Edit tools");
+        bt_edit->labelsize(10);
+        bt_edit->callback((Fl_Callback*)disk_infos_window_bt_edit_callback, (void*)(this));
+      } // Fl_Button* bt_edit
+      { Fl_Button* o = new Fl_Button(1150, 506, 105, 26, "OK");
+        o->callback((Fl_Callback*)floppy_infos_ok, (void*)(this));
+      } // Fl_Button* o
       o->end();
     } // Fl_Group* o
     { Fl_Group* o = new Fl_Group(1000, 287, 275, 84, getString(STR_FLOPPYVIEWERWINDOW_0014));
@@ -159,14 +157,10 @@ floppy_infos_window::floppy_infos_window() {
       } // Fl_Light_Button* decrx02_bt
       o->end();
     } // Fl_Group* o
-    { bt_edit = new Fl_Button(1010, 465, 105, 26, getString(STR_FLOPPYVIEWERWINDOW_0027));
-      bt_edit->labelsize(10);
-      bt_edit->callback((Fl_Callback*)disk_infos_window_bt_edit_callback, (void*)(this));
-    } // Fl_Button* bt_edit
 
 	Fl_Mouse_Box *m = new Fl_Mouse_Box(floppy_map_disp->x(), floppy_map_disp->y(),floppy_map_disp->w(), floppy_map_disp->h(), 0);
 	m->callback(mouse_di_cb);
 
     window->end();
-  } // Fl_Double_Window* window
+  } // Fl_Window* window
 }
