@@ -88,26 +88,26 @@ typedef struct _HXCFE_XMLLDR
 
 typedef struct _HXCFE_TD
 {
-    HXCFE * hxcfe;
+	HXCFE * hxcfe;
 
-    int32_t    xsize,ysize;
-    int32_t    x_us,y_us;
-    int32_t    x_start_us;
-    uint32_t * framebuffer;
+	int32_t    xsize,ysize;
+	int32_t    x_us,y_us;
+	int32_t    x_start_us;
+	uint32_t * framebuffer;
+	void * sl;
 
-    void * sl;
-
-    uint32_t enabledtrackmode;
+	uint32_t enabledtrackmode;
+	int32_t  disk_type;
 
 	uint32_t noloop_trackmode;
 
-    void * pl;
+	void * pl;
 
-    HXCFE_TDPROGRESSOUT_FUNC hxc_setprogress;
+	HXCFE_TDPROGRESSOUT_FUNC hxc_setprogress;
 
 	char * name;
 
-    void * progress_userdata;
+	void * progress_userdata;
 }HXCFE_TD;
 
 #define _HXCFE_TD_
@@ -115,10 +115,10 @@ typedef struct _HXCFE_TD
 
 typedef struct _s_index_evt
 {
-    uint32_t dump_offset;
-    uint32_t cellpos;
-    int32_t  tick_offset;
-    uint32_t clk;
+	uint32_t dump_offset;
+	uint32_t cellpos;
+	int32_t  tick_offset;
+	uint32_t clk;
 	uint32_t flags;
 }s_index_evt;
 
@@ -126,10 +126,10 @@ typedef struct _s_index_evt
 
 typedef struct _HXCFE_TRKSTREAM
 {
-    uint32_t	* track_dump;
-    uint32_t	nb_of_pulses;
-    s_index_evt	index_evt_tab[MAX_NB_OF_INDEX];
-    uint32_t	nb_of_index;
+	uint32_t	* track_dump;
+	uint32_t	nb_of_pulses;
+	s_index_evt	index_evt_tab[MAX_NB_OF_INDEX];
+	uint32_t	nb_of_index;
 }HXCFE_TRKSTREAM;
 
 #define _HXCFE_TRKSTREAM_
@@ -137,14 +137,14 @@ typedef struct _HXCFE_TRKSTREAM
 
 typedef struct _HXCFE_FXSA
 {
-    HXCFE * hxcfe;
+	HXCFE * hxcfe;
 
-    // step resolution (ps)
-    int32_t steptime;
+	// step resolution (ps)
+	int32_t steptime;
 
-    int32_t phasecorrection;
+	int32_t phasecorrection;
 
-    int32_t defaultbitrate;
+	int32_t defaultbitrate;
 
 	int32_t filter;
 	int32_t filterpasses;
@@ -156,10 +156,10 @@ typedef struct _HXCFE_FXSA
 
 typedef struct _fs_config
 {
-    char * name;
-    char * desc;
-    int32_t    fsID;
-    int32_t    type;
+	char * name;
+	char * desc;
+	int32_t    fsID;
+	int32_t    type;
 }fs_config;
 
 extern fs_config fs_config_table[];

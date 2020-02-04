@@ -470,6 +470,8 @@ typedef struct s_pulseslist_
 HXCFE_TD*              hxcfe_td_init( HXCFE* floppycontext, uint32_t xsize, uint32_t ysize );
 void                   hxcfe_td_setparams( HXCFE_TD *td, uint32_t x_us, uint32_t y_us, uint32_t x_start_us );
 void                   hxcfe_td_activate_analyzer( HXCFE_TD *td, int32_t TRACKTYPE, int32_t enable );
+char *                 hxcfe_td_get_view_mode_name( HXCFE_TD *td, int32_t disk_type);
+void                   hxcfe_td_select_view_type( HXCFE_TD *td, int32_t disk_type);
 void                   hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track, int32_t side );
 void                   hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream );
 s_sectorlist *         hxcfe_td_getlastsectorlist( HXCFE_TD *td );
