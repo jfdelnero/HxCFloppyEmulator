@@ -278,7 +278,6 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 						for( ; length != 0; ++length )
 						{
 							drv_qm_update_crc( &crc, (unsigned char)c );
-							crc = crc32r_table[(c ^ (unsigned char)crc) & 0x3f ] ^ (crc >> 8);
 						}
 					}
 					else
@@ -290,9 +289,7 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 							/* Update CRC (and write pos) */
 							while ( length-- )
 							{
-								drv_qm_update_crc( &crc,
-									flatimg[curwritepos++] );
-								crc = crc32r_table[(flatimg[curwritepos++] ^ (unsigned char)crc) & 0x3f ] ^ (crc >> 8);
+								drv_qm_update_crc( &crc, flatimg[curwritepos++] );
 							}
 							if ( res )
 							{
