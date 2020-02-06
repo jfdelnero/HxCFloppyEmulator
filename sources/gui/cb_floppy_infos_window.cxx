@@ -288,6 +288,8 @@ void tick_infos(void *w) {
 			{
 				// Resized... Realloc needed
 
+				hxc_entercriticalsection(guicontext->hxcfe,1);
+
 				hxcfe_td_deinit(guicontext->td);
 
 				guicontext->td = NULL;
@@ -307,6 +309,8 @@ void tick_infos(void *w) {
 						guicontext->updatefloppyinfos = 1;
 					}
 				}
+
+				hxc_leavecriticalsection(guicontext->hxcfe,1);
 			}
 
 			if(guicontext->updatefloppyinfos)
