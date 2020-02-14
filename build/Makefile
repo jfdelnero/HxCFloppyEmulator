@@ -41,6 +41,7 @@ endif
 ifeq ($(TARGET), mingw32)
 CC=i686-w64-mingw32-gcc
 CPP=i686-w64-mingw32-g++
+RESC=i686-w64-mingw32-windres
 LDFLAGS += -static-libgcc -static-libstdc++ -lwinmm -lws2_32
 LIBHXCFE= libhxcfe.dll
 LIBUSBHXCFE= libusbhxcfe.dll
@@ -50,6 +51,7 @@ endif
 ifeq ($(TARGET), mingw64)
 CC=x86_64-w64-mingw32-gcc
 CPP=x86_64-w64-mingw32-g++
+RESC=x86_64-w64-mingw32-windres
 LDFLAGS += -static-libgcc -static-libstdc++ -lwinmm -lws2_32
 LIBHXCFE= libhxcfe.dll
 LIBUSBHXCFE= libusbhxcfe.dll
@@ -85,7 +87,7 @@ DATA_FILES: bmptoh
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh vim_not_again.mod -DATA
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh COPYING_FULL -DATA
 
-hxcfloppyemulator.exe: main.o utils.o $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) $(LIBUSBHXCFE) ../../../build/libhxcadaptor.a
+hxcfloppyemulator.exe: win32_hxcfloppy_res.o main.o utils.o $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) $(LIBUSBHXCFE) ../../../build/libhxcadaptor.a
 	$(CPP) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
@@ -98,6 +100,9 @@ $(LIBHXCFE): ../../../build/$(LIBHXCFE)
 
 $(LIBUSBHXCFE): ../../../build/$(LIBUSBHXCFE)
 	ln ../../../build/$(LIBUSBHXCFE)  $(LIBUSBHXCFE)
+
+win32_hxcfloppy_res.o: $(BASEDIR)/win32/hxcfloppy.rc
+	$(RESC) $< $@
 
 main.o: $(BASEDIR)/main.cxx
 	$(CPP) -o $@ -c $< $(CFLAGS)
