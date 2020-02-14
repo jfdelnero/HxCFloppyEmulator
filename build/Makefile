@@ -26,12 +26,14 @@ endif
 
 ifeq ($(TARGET), mingw32)
 CC=i686-w64-mingw32-gcc
+RESC=i686-w64-mingw32-windres
 LDFLAGS += -static-libgcc ../sources/win32/libhxcfe.def
 EXEC=libhxcfe.dll
 endif
 
 ifeq ($(TARGET), mingw64)
 CC=x86_64-w64-mingw32-gcc
+RESC=x86_64-w64-mingw32-windres
 LDFLAGS += -static-libgcc ../sources/win32/libhxcfe.def
 EXEC=libhxcfe.dll
 endif
@@ -110,7 +112,8 @@ XML_FILES: bmptoh $(XML_DSKLAYOUT_OUTPUTS)
 
 SCRIPT_FILE: bmptoh $(BASEDIR)/init_script.h
 
-libhxcfe.dll: $(LIBS_OBJS) ../../../build/libhxcadaptor.a
+
+libhxcfe.dll: win32_libhxcfe_res.o $(LIBS_OBJS) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
@@ -125,6 +128,9 @@ libhxcfe.a: $(LIBS_OBJS)
 libhxcfe.so: $(LIBS_OBJS) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
+
+win32_libhxcfe_res.o: $(BASEDIR)/win32/libhxcfe.rc
+	$(RESC) $< $@
 
 floppy_loader.o: $(BASEDIR)/floppy_loader.c $(BASEDIR)/init_script.h
 	$(CC) -o $@ -c $< $(CFLAGS)
