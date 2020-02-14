@@ -75,8 +75,10 @@
 #include "gui_strings.h"
 
 #ifdef WIN32
-#include "win32\resource.h"
-#define intptr_t int
+#include "win32/resource.h"
+ #if !defined(__MINGW32__) && !defined(__MINGW64__)
+  #define intptr_t int
+ #endif
 #endif
 
 extern "C"
