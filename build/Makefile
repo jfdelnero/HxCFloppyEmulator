@@ -2,7 +2,7 @@
 CC=gcc
 AR=ar
 
-UNAME := $(shell uname)
+TARGET := $(shell uname)
 
 BASEDIR=../sources
 INCLUDES = -I$(BASEDIR)/ -I ../../../libhxcfe/trunk/sources -I ../sources/win32 -I ../../../libhxcadaptor/trunk/sources
@@ -11,21 +11,34 @@ DEBUG ?= 0
 
 ifeq ($(DEBUG), 1)
 	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG -fsanitize=address -fno-omit-frame-pointer
-	LDFLAGS= -shared -lc -lm -ldl -lasan
+	LDFLAGS= -shared -s -lasan
 else
 	CFLAGS=-O3 $(INCLUDES) -Wall
-	LDFLAGS= -shared -lc -lm -ldl -s
+	LDFLAGS= -shared
 endif
 
 EXEC=libusbhxcfe.so
 
-ifeq ($(UNAME), Linux)
+ifeq ($(TARGET), Linux)
 CFLAGS += -fPIC -Wl,-Map,foo.map
+LDFLAGS += -g -lc -lm  -ldl
 endif
 
-ifeq ($(UNAME), Darwin)
+ifeq ($(TARGET), mingw32)
+CC=i686-w64-mingw32-gcc
+LDFLAGS += -static-libgcc ../sources/win32/libusbhxcfe.def -s
+EXEC=libusbhxcfe.dll
+endif
+
+ifeq ($(TARGET), mingw64)
+CC=x86_64-w64-mingw32-gcc
+LDFLAGS += -static-libgcc ../sources/win32/libusbhxcfe.def -s
+EXEC=libusbhxcfe.dll
+endif
+
+ifeq ($(TARGET), Darwin)
 CFLAGS += -arch x86_64 -mmacosx-version-min=10.9
-LDFLAGS += -arch x86_64 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libusbhxcfe.dylib -mmacosx-version-min=10.9
+LDFLAGS +=  -lc -lm -ldl -s -arch x86_64 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libusbhxcfe.dylib -mmacosx-version-min=10.9
 EXEC=libusbhxcfe.dylib
 endif
 
@@ -35,8 +48,8 @@ endif
 
 all: $(EXEC)
 
-libusbhxcfe.dll: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o
-	$(AR) r $@    $^ 
+libusbhxcfe.dll: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o ../../../build/libhxcadaptor.a
+	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
 libusbhxcfe.dylib: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o
@@ -71,5 +84,6 @@ clean:
 
 mrproper: clean
 	rm -rf $(EXEC)
+	rm -rf *.dll
 
 .PHONY: clean mrproper
