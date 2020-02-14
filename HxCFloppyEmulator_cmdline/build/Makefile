@@ -1,7 +1,7 @@
 #CC=i386-pc-linux-gcc
 CC=gcc
 
-UNAME := $(shell uname)
+TARGET := $(shell uname)
 
 INCLUDES = -I ../sources -I ../../../libhxcfe/trunk/sources -I ../../../libusbhxcfe/trunk/sources
 
@@ -9,34 +9,54 @@ DEBUG ?= 0
 
 ifeq ($(DEBUG), 1)
 	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG -fsanitize=address -fno-omit-frame-pointer
-	LDFLAGS= -lc -lm -ldl -lpthread -lasan
+	LDFLAGS= -lasan
 else
 	CFLAGS=-O3 $(INCLUDES) -Wall
-	LDFLAGS= -lc -lm -ldl -lpthread -s
+	LDFLAGS= -s
 endif
 
+EXEC=hxcfe
 LIBHXCFE = libhxcfe.so
 LIBUSBHXCFE = libusbhxcfe.so
 
-ifeq ($(UNAME), Darwin)
+ifeq ($(TARGET), Darwin)
 CFLAGS += -arch x86_64 -mmacosx-version-min=10.9
-LDFLAGS += -arch x86_64 -mmacosx-version-min=10.9
+LDFLAGS += -lc -lm -ldl -lpthread -arch x86_64 -mmacosx-version-min=10.9
 LIBHXCFE= libhxcfe.dylib
 LIBUSBHXCFE= libusbhxcfe.dylib
 endif
 
-ifeq ($(UNAME), Linux)
-LDFLAGS += -Wl,-rpath=. -Wl,-Map,foo.map
+ifeq ($(TARGET), Linux)
+LDFLAGS += -lc -lm -ldl -lpthread -Wl,-rpath=. -Wl,-Map,foo.map
+endif
+
+ifeq ($(TARGET), mingw32)
+CC=i686-w64-mingw32-gcc
+LDFLAGS += -static-libgcc
+EXEC=hxcfe.exe
+LIBHXCFE= libhxcfe.dll
+LIBUSBHXCFE= libusbhxcfe.dll
+endif
+
+ifeq ($(TARGET), mingw64)
+CC=x86_64-w64-mingw32-gcc
+LDFLAGS += -static-libgcc
+EXEC=hxcfe.exe
+LIBHXCFE= libhxcfe.dll
+LIBUSBHXCFE= libusbhxcfe.dll
 endif
 
 ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
 LIBHXCFE= libhxcfe.dll
 LIBUSBHXCFE= libusbhxcfe.dll
+LDFLAGS += -lc -lm -ldl -lpthread
 endif
 
-EXEC=hxcfe
-
 all: $(EXEC)
+
+hxcfe.exe:  hxcfe.o utils.o ../../../build/libhxcadaptor.a $(LIBHXCFE) $(LIBUSBHXCFE)
+	$(CC) -o $@    $^ $(LDFLAGS)
+	cp $@ ../../../build
 
 hxcfe:  hxcfe.o utils.o ../../../build/libhxcadaptor.a $(LIBHXCFE) $(LIBUSBHXCFE)
 	$(CC) -o $@    $^ $(LDFLAGS)
@@ -57,6 +77,8 @@ utils.o: ../sources/utils.c
 clean:
 	rm -rf *.o
 	rm -rf *.so
+	rm -rf *.dll
+	rm -rf *.exe
 
 mrproper: clean
 	rm -rf $(EXEC)
