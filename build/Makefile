@@ -1,3 +1,5 @@
+TARGET := $(shell uname)
+
 all: HxCFloppyEmulator_cmdline HxCFloppyEmulator_software
 
 libhxcadaptor:
@@ -15,7 +17,15 @@ HxCFloppyEmulator_cmdline: libhxcfe libusbhxcfe
 fltk:
 	chmod +x ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/prepare_fltk.sh
 	cd ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/ && ./prepare_fltk.sh
-	$(MAKE) -C ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.3.x/ DIRS=src
+ifeq ($(TARGET), mingw32)
+		cd ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.3.x/ && export LDFLAGS='-static-libstdc++ -static-libgcc' && ./configure --host=i686-w64-mingw32 --prefix=/usr/share/mingw-w64
+		$(MAKE) -C ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.3.x/ DIRS=src CC=i686-w64-mingw32-gcc CPP=i686-w64-mingw32-g++ LDFLAGS='-static-libstdc++ -static-libgcc'
+else ifeq ($(TARGET), mingw64)
+		cd ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.3.x/ && export LDFLAGS='-static-libstdc++ -static-libgcc' && ./configure --host=x86_64-w64-mingw32 --prefix=/usr/share/mingw-w64
+		$(MAKE) -C ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.3.x/ DIRS=src CC=x86_64-w64-mingw32-gcc CPP=x86_64-w64-mingw32-g++ LDFLAGS='-static-libstdc++ -static-libgcc'
+else
+		$(MAKE) -C ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.3.x/ DIRS=src
+endif
 
 HxCFloppyEmulator_software: libhxcfe libusbhxcfe fltk
 	$(MAKE) -C ../HxCFloppyEmulator_software/trunk/build/
