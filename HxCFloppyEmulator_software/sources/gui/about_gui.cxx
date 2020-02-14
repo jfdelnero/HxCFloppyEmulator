@@ -102,7 +102,7 @@ int startAudioOut()
 			pwfx.wBitsPerSample=16;
 			pwfx.cbSize=0;
 
-			waveOutOpen(&shwd,WAVE_MAPPER,&pwfx,(unsigned long)&SoundHandlerProc,0,CALLBACK_FUNCTION);
+			waveOutOpen(&shwd,WAVE_MAPPER,&pwfx,(DWORD_PTR)&SoundHandlerProc,0,CALLBACK_FUNCTION);
 			pwhOut1.lpData=(char*)buffer1;
 			pwhOut1.dwBufferLength=sizeof(buffer1);
 			pwhOut1.dwFlags=0;

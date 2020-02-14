@@ -81,7 +81,9 @@ void save_file_image(Fl_Widget * w, void * fc_ptr) ;
 extern s_gui_context * guicontext;
 
 #ifdef WIN32
- #define intptr_t int
+ #if !defined(__MINGW32__) && !defined(__MINGW64__)
+  #define intptr_t int
+ #endif
  #define SEPARATOR '\\'
  #define PATHSEPARATOR "\\"
 #else

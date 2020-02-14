@@ -2,19 +2,21 @@
 CC=gcc
 CPP=g++
 
-UNAME := $(shell uname)
+TARGET := $(shell uname)
 
 BASEDIR=../sources
 INCLUDES = -I$(BASEDIR) -I ../../../libhxcfe/trunk/sources -I $(BASEDIR)/gui -I $(BASEDIR)/thirdpartylibs/fltk/fltk-1.3.x/ -I ../../../libusbhxcfe/trunk/sources -I ../../../libhxcadaptor/trunk/sources -I $(BASEDIR)/gui/microintro/
 
 DEBUG ?= 0
 
+EXEC=hxcfloppyemulator
+
 ifeq ($(DEBUG), 1)
 	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG -fsanitize=address -fno-omit-frame-pointer
-	LDFLAGS= -lc -lm -ldl -lpthread -lasan
+	LDFLAGS= -lasan
 else
 	CFLAGS=-O3 $(INCLUDES) -Wall
-	LDFLAGS= -lc -lm -ldl -lpthread -s
+	LDFLAGS= -s
 endif
 
 ifdef IPF_LIB_SUPPORT
@@ -27,8 +29,8 @@ endif
 LIBHXCFE = libhxcfe.so
 LIBUSBHXCFE = libusbhxcfe.so
 
-ifeq ($(UNAME), Linux)
-LDFLAGS += -Wl,-rpath=.  -Wl,-Map,foo.map
+ifeq ($(TARGET), Linux)
+LDFLAGS += -lc -lm -ldl -lpthread -Wl,-rpath=.  -Wl,-Map,foo.map
 endif
 
 ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
@@ -36,16 +38,32 @@ LIBHXCFE = libhxcfe.dll
 LIBUSBHXCFE = libusbhxcfe.dll
 endif
 
-ifeq ($(UNAME), Darwin)
+ifeq ($(TARGET), mingw32)
+CC=i686-w64-mingw32-gcc
+CPP=i686-w64-mingw32-g++
+LDFLAGS += -static-libgcc -static-libstdc++ -lwinmm -lws2_32
+LIBHXCFE= libhxcfe.dll
+LIBUSBHXCFE= libusbhxcfe.dll
+EXEC=hxcfloppyemulator.exe
+endif
+
+ifeq ($(TARGET), mingw64)
+CC=x86_64-w64-mingw32-gcc
+CPP=x86_64-w64-mingw32-g++
+LDFLAGS += -static-libgcc -static-libstdc++ -lwinmm -lws2_32
+LIBHXCFE= libhxcfe.dll
+LIBUSBHXCFE= libusbhxcfe.dll
+EXEC=hxcfloppyemulator.exe
+endif
+
+ifeq ($(TARGET), Darwin)
 CFLAGS += -DOSX -arch x86_64 -mmacosx-version-min=10.9
-LDFLAGS += -framework Cocoa -arch x86_64 -mmacosx-version-min=10.9
+LDFLAGS += -lc -lm -ldl -lpthread -framework Cocoa -arch x86_64 -mmacosx-version-min=10.9
 LIBHXCFE = libhxcfe.dylib
 LIBUSBHXCFE = libusbhxcfe.dylib
 else
 LDFLAGS += $(shell $(BASEDIR)/thirdpartylibs/fltk/fltk-1.3.x/fltk-config --ldflags)
 endif
-
-EXEC=hxcfloppyemulator
 
 FTDIFLOPPYEMU=usb_hxcfloppyemulator.o variablebitrate.o
 
@@ -66,6 +84,10 @@ DATA_FILES: bmptoh
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh jozz_cognition.mod -DATA
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh vim_not_again.mod -DATA
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh COPYING_FULL -DATA
+
+hxcfloppyemulator.exe: main.o utils.o $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) $(LIBUSBHXCFE) ../../../build/libhxcadaptor.a
+	$(CPP) -o $@    $^ $(LDFLAGS)
+	cp $@ ../../../build
 
 hxcfloppyemulator: main.o utils.o $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) $(LIBUSBHXCFE) ../../../build/libhxcadaptor.a
 	$(CPP) -o $@    $^ $(LDFLAGS)
@@ -191,6 +213,7 @@ bmptoh:
 clean:
 	rm -rf *.o
 	rm -rf *.so
+	rm -rf *.dll
 
 mrproper: clean
 	rm -rf $(EXEC)
