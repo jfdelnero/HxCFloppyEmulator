@@ -7,7 +7,9 @@ typedef void *PVOID;
 typedef BYTE *PBYTE;
 typedef WORD *PWORD;
 typedef DWORD *PDWORD;
+#if !defined(__MINGW32__) && !defined(__MINGW64__)
 typedef int8_t *PCHAR;
+#endif
 typedef int32_t IOREG;
 
 typedef uint8_t  UBYTE;
