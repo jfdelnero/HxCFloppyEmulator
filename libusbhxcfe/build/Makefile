@@ -26,12 +26,14 @@ endif
 
 ifeq ($(TARGET), mingw32)
 CC=i686-w64-mingw32-gcc
+RESC=i686-w64-mingw32-windres
 LDFLAGS += -static-libgcc ../sources/win32/libusbhxcfe.def -s
 EXEC=libusbhxcfe.dll
 endif
 
 ifeq ($(TARGET), mingw64)
 CC=x86_64-w64-mingw32-gcc
+RESC=x86_64-w64-mingw32-windres
 LDFLAGS += -static-libgcc ../sources/win32/libusbhxcfe.def -s
 EXEC=libusbhxcfe.dll
 endif
@@ -48,21 +50,24 @@ endif
 
 all: $(EXEC)
 
-libusbhxcfe.dll: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o ../../../build/libhxcadaptor.a
+libusbhxcfe.dll: win32_libusbhxcfe_res.o usb_hxcfloppyemulator.o variablebitrate.o ftdi.o ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
 libusbhxcfe.dylib: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o
-	$(AR) r $@    $^ 
+	$(AR) r $@    $^
 	cp $@ ../../../build
 
 libusbhxcfe.a: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o
-	$(AR) r $@    $^ 
+	$(AR) r $@    $^
 	cp $@ ../../../build
 
 libusbhxcfe.so: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
+
+win32_libusbhxcfe_res.o: $(BASEDIR)/win32/libusbhxcfe.rc
+	$(RESC) $< $@
 
 usb_hxcfloppyemulator.o: $(BASEDIR)/usb_hxcfloppyemulator.c
 	$(CC) -o $@ -c $< $(CFLAGS)
