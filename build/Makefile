@@ -2,7 +2,7 @@
 CC=gcc
 AR=ar
 
-UNAME := $(shell uname)
+TARGET := $(shell uname)
 
 BASEDIR=../sources
 INCLUDES = -I$(BASEDIR)/ -I ../../../libhxcadaptor/trunk/sources
@@ -11,16 +11,29 @@ DEBUG ?= 0
 
 ifeq ($(DEBUG), 1)
 	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG -fsanitize=address -fno-omit-frame-pointer
-	LDFLAGS= -shared -lc -lm -ldl -lasan
+	LDFLAGS= -shared -lasan
 else
 	CFLAGS=-O3 $(INCLUDES) -Wall
-	LDFLAGS= -shared -lc -lm -ldl -s
+	LDFLAGS= -shared -s
 endif
 
 EXEC=libhxcfe.so
 
-ifeq ($(UNAME), Linux)
+ifeq ($(TARGET), Linux)
 CFLAGS += -fPIC -Wl,-Map,foo.map
+LDFLAGS += -g -lc -lm  -ldl
+endif
+
+ifeq ($(TARGET), mingw32)
+CC=i686-w64-mingw32-gcc
+LDFLAGS += -static-libgcc ../sources/win32/libhxcfe.def
+EXEC=libhxcfe.dll
+endif
+
+ifeq ($(TARGET), mingw64)
+CC=x86_64-w64-mingw32-gcc
+LDFLAGS += -static-libgcc ../sources/win32/libhxcfe.def
+EXEC=libhxcfe.dll
 endif
 
 ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
@@ -28,9 +41,9 @@ LDFLAGS= -g -shared -lc -lm  -ldl
 EXEC=libhxcfe.dll
 endif
 
-ifeq ($(UNAME), Darwin)
+ifeq ($(TARGET), Darwin)
 CFLAGS += -arch x86_64 -mmacosx-version-min=10.9
-LDFLAGS +=-arch x86_64 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libhxcfe.dylib -mmacosx-version-min=10.9
+LDFLAGS += -lc -lm -ldl -arch x86_64 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libhxcfe.dylib -mmacosx-version-min=10.9
 EXEC=libhxcfe.dylib
 endif
 
@@ -802,6 +815,7 @@ clean:
 
 mrproper: clean
 	rm -rf $(EXEC)
+	rm -rf *.dll
 	$(MAKE) -C ../sources/xml_disk/converttools/bmptob8 mrproper
 
 .PHONY: clean mrproper
