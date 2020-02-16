@@ -7,7 +7,7 @@ set FLUXSTREAM_BITRATE_FILTER_WINDOW 24
 set FLUXSTREAM_PHASE_CORRECTION_DIVISOR 8
 set FLUXSTREAM_RPMFIX NONE                   # NONE / 360TO300RPM / 300TO360RPM
 set FLUXSTREAM_SKIPBLOCKSDETECTION 0
-set FLUXSTREAM_OVERLAPSEARCHDEPTH 0.025        # Exact track revolution overlap search depth (index to index lenght pourcent variation)
+set FLUXSTREAM_OVERLAPSEARCHDEPTH 0.015      # Exact track revolution overlap search depth (index to index lenght pourcent variation)
 set FLUXSTREAM_INITIAL_BITRATE 0
 set FLUXSTREAM_NOPLLPRESYNC 0
 
