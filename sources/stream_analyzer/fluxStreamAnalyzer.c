@@ -2130,8 +2130,8 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 							}while( (cur_time_len < index_tickpediod) && (j < track_dump->nb_of_pulses) );
 
-							tick_down_max = time_to_tick((uint32_t)((double)indexperiod * (double)search_depth*2));
-							tick_up_max =   time_to_tick((uint32_t)((double)indexperiod * (double)search_depth*2));
+							tick_down_max = time_to_tick((uint32_t)((double)indexperiod * (double)0.0125));
+							tick_up_max =   time_to_tick((uint32_t)((double)indexperiod * (double)0.0125));
 
 #ifdef FLUXSTREAMDBG
 							floppycontext->hxc_printf(MSG_DEBUG,"Block %d : index distance (period : %d) tick_down_max : %d, tick_up_max : %d",block_num,indexperiod,tick_to_time(tick_down_max),tick_to_time(tick_up_max));
