@@ -146,7 +146,7 @@ int Apple2_do_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 		bitrate=250000;
 		rpm=283;
 		interleave=1;
-		gap3len=20;
+		gap3len=0;
 		trackformat=APPLE2_GCR6A2;
 		floppydisk->floppyNumberOfSide=1;
 		floppydisk->floppySectorPerTrack=16;
