@@ -389,9 +389,11 @@ void tg_addAppleSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 	sectorconfig->startsectorindex=tg->last_bit_offset/8;
 
 	// Sync bytes
+	// 14 Self Synch 0xFFs
 	for (i = 0; i < 14; i++)
 	{
 		pushTrackCode(tg,0xFF,0xFF,currentside,DIRECT_ENCODING);
+		tg->last_bit_offset += (2*2); // 2 zeros synch
 	}
 
 	// Sector header start
@@ -425,6 +427,7 @@ void tg_addAppleSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 	for (i = 0; i < 6; i++)
 	{
 		pushTrackCode(tg,0xFF,0xFF,currentside,DIRECT_ENCODING);
+		tg->last_bit_offset += (2*2); // 2 zeros synch
 	}
 
 	// Sector data block start
