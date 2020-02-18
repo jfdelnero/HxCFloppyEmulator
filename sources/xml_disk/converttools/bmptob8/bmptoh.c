@@ -6,7 +6,7 @@
 #include "stdint.h"
 #include <windows.h>
 #else
-#include <stdint.h>
+#include <inttypes.h>
 #include "bmp_file.h"
 #endif
 
