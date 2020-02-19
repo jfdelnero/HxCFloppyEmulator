@@ -127,13 +127,12 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 	uint32_t * cellstreampos;
 
 	uint32_t nxt_index;
-	uint32_t cell_value;
+	uint32_t cell_accumulator;
 	uint32_t nbindex;
 	uint32_t stream_ofs;
+	uint32_t stream_pos;
 	uint32_t cellpos;
-	uint32_t streamend;
-
-	uint32_t overflowvalue;
+	uint32_t oobEnd;
 
 	uint32_t filesize;
 
@@ -144,9 +143,11 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 	uint32_t next_index_stream_pos;
 	uint32_t Prev_Max_Index_Tick;
 	uint32_t Next_Max_Index_Tick;
+	uint8_t  cur_op,cur_op_len;
+	int      new_cell_available;
 
-	track_dump=0;
-	overflowvalue=0;
+	track_dump = NULL;
+	kfstreambuffer = NULL;
 
 	if(fxs)
 	{
@@ -180,178 +181,232 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 				if(cellstreampos)
 					free(cellstreampos);
 
-				return 0;
+				if(kfstreambuffer)
+					free(kfstreambuffer);
+
+				return NULL;
 			}
 
 			memset(cellstream,0,filesize*sizeof(uint32_t));
 			memset(cellstreampos,0,filesize*sizeof(uint32_t));
 
-			cell_value = 0;
+			cell_accumulator = 0;
 			stream_ofs = 0;
+			stream_pos = 0;
 			nbindex = 0;
 			cellpos = 0;
-			streamend = 0;
-			do
+			oobEnd = 0;
+			while( ( stream_ofs < filesize ) && !oobEnd)
 			{
-				switch(kfstreambuffer[stream_ofs])
+				cur_op = kfstreambuffer[stream_ofs];
+				cur_op_len = 0;
+
+				// Set Operation / Data code lenght
+				switch (cur_op)
 				{
-					case 0x00:
-					case 0x01:
-					case 0x02:
-					case 0x03:
-					case 0x04:
-					case 0x05:
-					case 0x06:
-					case 0x07:
-						// 2 Bytes Flux (short)
-						cell_value = ( kfstreambuffer[stream_ofs] << 8 ) | kfstreambuffer[stream_ofs + 1];
-						cell_value += overflowvalue;
-
-						overflowvalue = 0;
-
-						cellstream[cellpos] = (uint32_t)((float)cell_value * timecoef);
-						cellstreampos[cellpos++] = stream_ofs;
-
-						stream_ofs += 2;
+					case KF_STREAM_OP_NOP1:
+						cur_op_len = 1;
 					break;
-
-					case 0x0A:	// Nop 3
-						stream_ofs += 3;
+					case KF_STREAM_OP_NOP2:
+						cur_op_len = 2;
 					break;
-					case 0x09:	// Nop 2
-						stream_ofs += 2;
+					case KF_STREAM_OP_NOP3:
+						cur_op_len = 3;
 					break;
-					case 0x08:	// Nop 1
-						stream_ofs += 1;
+					case KF_STREAM_OP_OVERFLOW:
+						cur_op_len = 1;
 					break;
-						//
-
-					//0x0B Overflow16 1 Next cell value is increased by 0×10000 (16-bits).
-					//                  Decoding of *this* cell should continue at next stream position
-					case 0x0B:
-						overflowvalue += 0x10000;
-						stream_ofs++;
+					case KF_STREAM_OP_VALUE16:
+						cur_op_len = 3;
 					break;
+					case KF_STREAM_OP_OOB:
+						oob = (s_oob_header*)&kfstreambuffer[stream_ofs];
 
-					//0x0C Value16 3 New cell value: Upper 8 bits are offset+1 in the stream, lower 8-bits are offset+2
-					case 0x0C:
-						// 2 Bytes Flux (full)
-						cell_value = ( kfstreambuffer[stream_ofs + 1] << 8 ) | kfstreambuffer[stream_ofs + 2];
-						cell_value += overflowvalue;
-						overflowvalue=0;
-
-						cellstream[cellpos] = (uint32_t)((float)cell_value * timecoef);
-						cellstreampos[cellpos++] = stream_ofs;
-
-						stream_ofs += 3;
-					break;
-
-					case 0x0D:
-
-						oob=(s_oob_header*)&kfstreambuffer[stream_ofs];
-
-		#ifdef KFSTREAMDBG
-						floppycontext->hxc_printf(MSG_DEBUG,"OOB 0x%.2x 0x%.2x Size:0x%.4x",oob->Sign,oob->Type,oob->Size);
-		#endif
-
-						switch(oob->Type)
+						cur_op_len = sizeof(s_oob_header);
+						if (filesize - stream_ofs >= cur_op_len)
 						{
-							case 0x01:
-		#ifdef KFSTREAMDBG
-								floppycontext->hxc_printf(MSG_DEBUG,"---Stream Read---");
-		#endif
-
-		#ifdef KFSTREAMDBG
-								streamRead = (s_oob_StreamRead*) &kfstreambuffer[stream_ofs + sizeof(s_oob_header) ];
-								floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X TrTime: 0x%.8X",streamRead->StreamPosition,streamRead->TrTime);
-		#endif
-								break;
-
-							case 0x02:
-								floppycontext->hxc_printf(MSG_DEBUG,"---Index--- : %d sp:%d",nbindex,cellpos);
-
-								diskIndex=	(s_oob_DiskIndex*) &kfstreambuffer[stream_ofs + sizeof(s_oob_header) ];
-
-								floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X SysClk: 0x%.8X Timer: 0x%.8X",diskIndex->StreamPosition,diskIndex->SysClk,diskIndex->Timer);
-
-								if(nbindex < MAX_INDEX)
-								{
-									index_events[nbindex].StreamPosition = diskIndex->StreamPosition;
-									index_events[nbindex].SysClk = diskIndex->SysClk;
-									index_events[nbindex].Timer = diskIndex->Timer;
-									index_events[nbindex].CellPos = 0;
-									index_events[nbindex].IndexTime = 0;
-									index_events[nbindex].PreIcTime = 0;
-									index_events[nbindex].PostIcTime = 0;
-									index_events[nbindex].Prev_Index_Tick = 0;
-									index_events[nbindex].Next_Index_Tick = 0;
-									nbindex++;
-								}
-								else
-								{
-									floppycontext->hxc_printf(MSG_ERROR,"DecodeKFStreamFile : nbindex >= MAX_INDEX (%d)!",MAX_INDEX);
-								}
-								break;
-
-							case 0x03:
-		#ifdef KFSTREAMDBG
-								floppycontext->hxc_printf(MSG_DEBUG,"---Stream End---");
-		#endif
-
-		#ifdef KFSTREAMDBG
-								streamEnd =	(s_oob_StreamEnd*) &kfstreambuffer[stream_ofs + sizeof(s_oob_header) ];
-								floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X Result: 0x%.8X",streamEnd->StreamPosition,streamEnd->Result);
-		#endif
-							break;
-
-							case 0x04:
-		#ifdef KFSTREAMDBG
-								floppycontext->hxc_printf(MSG_DEBUG,"---String---");
-		#endif
-		#ifdef KFSTREAMDBG
-								tempstr = malloc(oob->Size+1);
-								if( tempstr )
-								{
-									memset(tempstr,0,oob->Size+1);
-									memcpy(tempstr,&kfstreambuffer[stream_ofs + sizeof(s_oob_header)],oob->Size);
-
-									floppycontext->hxc_printf(MSG_DEBUG,"String : %s",tempstr);
-									free(tempstr);
-								}
-		#endif
-							break;
-
-							case 0x0D:
-								streamend = 1;
-							break;
-
-							default:
-								floppycontext->hxc_printf(MSG_DEBUG,"Unknown OOB : 0x%.2x 0x%.2x Size:0x%.4x",oob->Sign,oob->Type,oob->Size);
-								break;
-
+							cur_op_len = sizeof(s_oob_header);
+							if (oob->Type != OOBTYPE_End)
+							{
+								cur_op_len += oob->Size;
+							}
 						}
-
-						if(!streamend)
-							stream_ofs += ( oob->Size + sizeof(s_oob_header) );
-
 					break;
 
 					default:
-						// 8 bit short value
-						cell_value = kfstreambuffer[stream_ofs];
-						cell_value += overflowvalue;
-						overflowvalue=0;
+						if (cur_op >= KF_STREAM_DAT_BYTE)
+						{
+							cur_op_len = 1;
+						}
+						else
+						{
+							if (!(cur_op & ~KF_STREAM_DAT_MASK_SHORT))
+								cur_op_len = 2;
+							else
+							{
+								if(cellstream)
+									free(cellstream);
 
-						cellstream[cellpos] = (uint32_t)((float)cell_value * timecoef);
-						cellstreampos[cellpos++] = stream_ofs;
+								if(cellstreampos)
+									free(cellstreampos);
 
-						stream_ofs++;
+								if(kfstreambuffer)
+									free(kfstreambuffer);
+
+								return NULL;
+							}
+						}
 					break;
 				}
 
-			}while( ( stream_ofs < filesize ) && !streamend);
+				// Bad operation/data size ?
+				if (filesize - stream_ofs < cur_op_len)
+				{
+					if(cellstream)
+						free(cellstream);
 
-			cellstream[cellpos] = (uint32_t)((float)cell_value * timecoef);
+					if(cellstreampos)
+						free(cellstreampos);
+
+					if(kfstreambuffer)
+						free(kfstreambuffer);
+
+					return NULL;
+				}
+
+				new_cell_available = 0;
+
+				switch(cur_op)
+				{
+					//0x0B Overflow16 1 Next cell value is increased by 0×10000 (16-bits).
+					//                  Decoding of *this* cell should continue at next stream position
+					case KF_STREAM_OP_OVERFLOW:
+						cell_accumulator +=  0x10000;
+					break;
+
+					//0x0C Value16 3 New cell value: Upper 8 bits are offset+1 in the stream, lower 8-bits are offset+2
+					case KF_STREAM_OP_VALUE16:
+						// 2 Bytes Flux (full)
+						cell_accumulator += ( kfstreambuffer[stream_ofs + 1] << 8 ) | kfstreambuffer[stream_ofs + 2];
+						new_cell_available = 1;
+					break;
+
+					default:
+						if (cur_op >= KF_STREAM_DAT_BYTE)
+						{
+							cell_accumulator += cur_op;
+							new_cell_available = 1;
+						}
+						else
+						{
+							if (!(cur_op & ~KF_STREAM_DAT_MASK_SHORT))
+							{
+								cell_accumulator += (((uint32_t)cur_op)<<8) | kfstreambuffer[stream_ofs + 1];
+								new_cell_available = 1;
+							}
+						}
+					break;
+				}
+
+				if( cur_op != KF_STREAM_OP_OOB )
+				{
+					if(new_cell_available)
+					{
+						cellstream[cellpos] = (uint32_t)((float)cell_accumulator * timecoef);
+						cellstreampos[cellpos] = stream_pos;
+						cellpos++;
+						cell_accumulator = 0;
+					}
+
+					stream_pos += cur_op_len;
+				}
+				else
+				{
+					oob = (s_oob_header*)&kfstreambuffer[stream_ofs];
+
+					switch(oob->Type)
+					{
+						case OOBTYPE_Stream_Read:
+	#ifdef KFSTREAMDBG
+							floppycontext->hxc_printf(MSG_DEBUG,"---Stream Read---");
+	#endif
+
+	#ifdef KFSTREAMDBG
+							streamRead = (s_oob_StreamRead*) &kfstreambuffer[stream_ofs + sizeof(s_oob_header) ];
+							floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X TrTime: 0x%.8X",streamRead->StreamPosition,streamRead->TrTime);
+	#endif
+							break;
+
+						case OOBTYPE_Index:
+							floppycontext->hxc_printf(MSG_DEBUG,"---Index--- : %d sp:%d",nbindex,cellpos);
+
+							diskIndex=	(s_oob_DiskIndex*) &kfstreambuffer[stream_ofs + sizeof(s_oob_header) ];
+
+							floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X SysClk: 0x%.8X Timer: 0x%.8X",diskIndex->StreamPosition,diskIndex->SysClk,diskIndex->Timer);
+
+							if(nbindex < MAX_INDEX)
+							{
+								index_events[nbindex].StreamPosition = diskIndex->StreamPosition;
+								index_events[nbindex].SysClk = diskIndex->SysClk;
+								index_events[nbindex].Timer = diskIndex->Timer;
+								index_events[nbindex].CellPos = 0;
+								index_events[nbindex].IndexTime = 0;
+								index_events[nbindex].PreIcTime = 0;
+								index_events[nbindex].PostIcTime = 0;
+								index_events[nbindex].Prev_Index_Tick = 0;
+								index_events[nbindex].Next_Index_Tick = 0;
+								nbindex++;
+							}
+							else
+							{
+								floppycontext->hxc_printf(MSG_ERROR,"DecodeKFStreamFile : nbindex >= MAX_INDEX (%d)!",MAX_INDEX);
+							}
+							break;
+
+						case OOBTYPE_Stream_End:
+	#ifdef KFSTREAMDBG
+							floppycontext->hxc_printf(MSG_DEBUG,"---Stream End---");
+	#endif
+
+	#ifdef KFSTREAMDBG
+							streamEnd =	(s_oob_StreamEnd*) &kfstreambuffer[stream_ofs + sizeof(s_oob_header) ];
+							floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X Result: 0x%.8X",streamEnd->StreamPosition,streamEnd->Result);
+	#endif
+						break;
+
+						case OOBTYPE_String:
+	#ifdef KFSTREAMDBG
+							floppycontext->hxc_printf(MSG_DEBUG,"---String---");
+	#endif
+	#ifdef KFSTREAMDBG
+							tempstr = malloc(oob->Size+1);
+							if( tempstr )
+							{
+								memset(tempstr,0,oob->Size+1);
+								memcpy(tempstr,&kfstreambuffer[stream_ofs + sizeof(s_oob_header)],oob->Size);
+
+								floppycontext->hxc_printf(MSG_DEBUG,"String : %s",tempstr);
+								free(tempstr);
+							}
+	#endif
+						break;
+
+						case OOBTYPE_End:
+							oobEnd = 1;
+						break;
+
+						default:
+							oob = (s_oob_header*)&kfstreambuffer[stream_ofs];
+							floppycontext->hxc_printf(MSG_DEBUG,"Unknown OOB : 0x%.2x 0x%.2x Size:0x%.4x",oob->Sign,oob->Type,oob->Size);
+						break;
+
+					}
+				}
+
+				stream_ofs += cur_op_len;
+			};
+
+			cellstream[cellpos] = (uint32_t)((float)cell_accumulator * timecoef);
 			cellstreampos[cellpos] = stream_ofs;
 
 			totalcell = cellpos;
@@ -383,7 +438,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 								}
 							}
 
-							index_events[nxt_index].CellPos = next_index_stream_pos;//next_cell_pos;
+							index_events[nxt_index].CellPos = next_cell_pos;
 
 							index_cell_time = cellstream[next_cell_pos];
 
