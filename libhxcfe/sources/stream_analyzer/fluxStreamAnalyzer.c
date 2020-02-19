@@ -3658,6 +3658,9 @@ void hxcfe_FxStream_ExportToBmp(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream, char 
 		hxcfe_td_activate_analyzer(td, APPLEII_GCR2_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_APPLEII_GCR2_ENCODING", NULL)));
 		hxcfe_td_activate_analyzer(td, ARBURGDAT_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_ARBURGDAT_ENCODING", NULL)));
 		hxcfe_td_activate_analyzer(td, ARBURGSYS_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_ARBURGSYS_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, NORTHSTAR_HS_MFM_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_NORTHSTAR_HS_MFM_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, HEATHKIT_HS_FM_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_HEATHKIT_HS_FM_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, DEC_RX02_M2FM_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_DEC_RX02_M2FM_ENCODING", NULL)));
 
 		hxcfe_td_setparams(td,atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_XTOTALTIME", NULL)),atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_YTOTALTIME", NULL) ),0);
 
