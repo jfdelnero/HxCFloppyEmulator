@@ -8,26 +8,39 @@
 -- Contact: hxc2001<at>hxc2001.com --------------------- https://hxc2001.com --
 -------------------------------------------------------------------------------
 HxC Floppy Emulator project
-(c) 2006-2019 Jean-François DEL NERO / (c) HxC2001
+(c) 2006-2020 Jean-François DEL NERO / (c) HxC2001
 Forum    : http://torlus.com/floppy/forum
 Facebook : https://www.facebook.com/groups/hxc2001
 Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
-X XXXXXXX 2019 : HxCFloppyEmulator 2.X.X.X (Work in Progress)
+X XXXXXXX 2020 : HxCFloppyEmulator 2.X.X.X (Work in Progress)
 
 -> macOS : CAPSlib loader added (IPF, CTRAW...). (Windows/Linux/macOS CAPSlib loaders code merged)
 
 -> New Loader/Writer : HxC Quickdisk images.
 
 -> XML loader : Add new properties and fix long track to support Quickdisk and Hardsectored disks.
-                New proprerties (micro-seconds time length/position parameters) :  
+                New proprerties (micro-seconds time length/position parameters) :
                 index_len_us , add_index_us, track_len_us, pregap_us.
- 
+
 -> New XML format : Olivetti TOP 100 / Triumph-Adler Gabriele PFS typewriter Quickdisk format.
 
 -> Windows "Save as" file selector : Fix the overwrite prompt regression.
+
+-> Kryoflux stream loader : Code re-factored and fixed.
+
+-> Disk viewer : Resizeable window.
+
+-> Disk viewer : Realistic physical floppy disk state representation (3"1/2 135TPI, 5"1/4 96TPI, 5"1/4 48TPI, 8" 48TPI).
+
+-> Apple II : Track generator fixed : GCR 6&2 Sync bits and sector GAP fixed.
+
+-> QM loader : Regression fixed.
+
+-> Windows target : Moving from VC 6.0 to MinGW32 / MinGW64. 32 bits and 64 bits release supported.
+                    General performance significantly increased.
 
 *********************************************************/
 
