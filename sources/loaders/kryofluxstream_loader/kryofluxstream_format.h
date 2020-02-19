@@ -50,9 +50,20 @@ typedef struct s_oob_DiskIndex_
 	uint32_t 	SysClk;
 }s_oob_DiskIndex;
 
-#define OOBTYPE_Stream_Read 0x01  // Start of flux transition timing data block (multiple per track)
-#define OOBTYPE_Index       0x02  // Index Index signal data
-#define OOBTYPE_Stream_End  0x03  // Stream End Signifies there are no more stream read blocks (one per track)
-#define OOBTYPE_End         0x0D  // End of data (no more data to process) 
+#define KF_STREAM_OP_NOP1        0x08
+#define KF_STREAM_OP_NOP2        0x09
+#define KF_STREAM_OP_NOP3        0x0A
+#define KF_STREAM_OP_OVERFLOW    0x0B
+#define KF_STREAM_OP_VALUE16     0x0C
+#define KF_STREAM_OP_OOB         0x0D
+
+#define KF_STREAM_DAT_MASK_SHORT 0x07
+#define KF_STREAM_DAT_BYTE       0x0E
+
+#define OOBTYPE_Stream_Read      0x01  // Start of flux transition timing data block (multiple per track)
+#define OOBTYPE_Index            0x02  // Index Index signal data
+#define OOBTYPE_Stream_End       0x03  // Stream End Signifies there are no more stream read blocks (one per track)
+#define OOBTYPE_String           0x04  // String info
+#define OOBTYPE_End              0x0D  // End of data (no more data to process) 
 
 #pragma pack()
