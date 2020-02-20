@@ -468,7 +468,7 @@ typedef struct s_pulseslist_
 }s_pulseslist;
 
 HXCFE_TD*              hxcfe_td_init( HXCFE* floppycontext, uint32_t xsize, uint32_t ysize );
-void                   hxcfe_td_setparams( HXCFE_TD *td, uint32_t x_us, uint32_t y_us, uint32_t x_start_us );
+void                   hxcfe_td_setparams( HXCFE_TD *td, uint32_t x_us, uint32_t y_us, uint32_t x_start_us, uint32_t flags );
 void                   hxcfe_td_activate_analyzer( HXCFE_TD *td, int32_t TRACKTYPE, int32_t enable );
 char *                 hxcfe_td_get_view_mode_name( HXCFE_TD *td, int32_t disk_type);
 void                   hxcfe_td_select_view_type( HXCFE_TD *td, int32_t disk_type);
@@ -484,6 +484,9 @@ int32_t                hxcfe_td_setName( HXCFE_TD *td, char * name );
 int32_t                hxcfe_td_exportToBMP( HXCFE_TD *td, char * filename );
 void                   hxcfe_td_deinit( HXCFE_TD *td );
 s_pulseslist *         hxcfe_td_getlastpulselist( HXCFE_TD *td );
+
+#define TD_FLAG_HICONTRAST (0x1 << 0)
+#define TD_FLAG_BIGDOT     (0x1 << 1)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Flux Stream Analyzer                                                                           //

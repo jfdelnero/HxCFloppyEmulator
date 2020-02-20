@@ -126,7 +126,7 @@ int32_t hxcfe_td_setProgressCallback( HXCFE_TD *td, HXCFE_TDPROGRESSOUT_FUNC pro
 	return 0;
 }
 
-void hxcfe_td_setparams( HXCFE_TD *td, uint32_t x_us, uint32_t y_us, uint32_t x_start_us )
+void hxcfe_td_setparams( HXCFE_TD *td, uint32_t x_us, uint32_t y_us, uint32_t x_start_us, uint32_t flags )
 {
 	if(td)
 	{
@@ -134,6 +134,8 @@ void hxcfe_td_setparams( HXCFE_TD *td, uint32_t x_us, uint32_t y_us, uint32_t x_
 		td->y_us=y_us;
 
 		td->x_start_us=x_start_us;
+
+		td->flags = flags;
 	}
 }
 
@@ -1181,10 +1183,10 @@ extern int tracktypelist[];
 
 void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 {
-	int i,j;
+	int i,j,x,y;
 	int xpos,ypos;
 	char tmp_str[64];
-	uint32_t total_offset,cur_ticks,curcol;
+	uint32_t total_offset,cur_ticks,curcol,contrast;
 	HXCFE_SIDE* side;
 	HXCFE_FLOPPY *fp;
 
@@ -1209,7 +1211,10 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 
 		if ( ( xpos < td->xsize ) && ( ( ypos < td->ysize ) && ( ypos >= 0 ) ) )
 		{
-			td->framebuffer[(td->xsize*ypos) + xpos]++;
+			if((td->framebuffer[(td->xsize*ypos) + xpos] & 0xFFFF) < 255)
+			{
+				td->framebuffer[(td->xsize*ypos) + xpos] = ( (td->framebuffer[(td->xsize*ypos) + xpos] + 1) | 0x7F000000);
+			}
 		}
 	}
 
@@ -1217,18 +1222,52 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	{
 		for(xpos = 0; xpos < td->xsize; xpos++)
 		{
+			if(!td->framebuffer[(td->xsize*ypos) + xpos])
+				td->framebuffer[(td->xsize*ypos) + xpos] = 0xFFFFFF;
+		}
+	}
+
+	contrast = 32;
+	if(td->flags & TD_FLAG_HICONTRAST)
+		contrast = 128;
+
+	for(ypos = 0; ypos < td->ysize; ypos++)
+	{
+		for(xpos = 0; xpos < td->xsize; xpos++)
+		{
 			curcol = td->framebuffer[(td->xsize*ypos) + xpos];
 
-			curcol = curcol * 32;
-
-			if(curcol>255)
+			if(curcol & 0x7F000000)
 			{
-				curcol = 255;
+				curcol = (curcol&0x00FFFFFF) * contrast;
+
+				if(curcol>255)
+				{
+					curcol = 255;
+				}
+
+				curcol = 0xFFFFFF - (curcol<<8 | curcol << 16 | curcol);
+
+				td->framebuffer[(td->xsize*ypos) + xpos] = curcol;
+
+				if(td->flags & TD_FLAG_BIGDOT)
+				{
+					for(x=0;x<3;x++)
+					{
+						for(y=0;y<3;y++)
+						{
+							if( xpos + x - 1 >= 0 && xpos + x + 1 < td->xsize)
+							{
+								if( ypos + y - 1 >= 0 && ypos + y + 1 < td->ysize)
+								{
+									if(!(td->framebuffer[(td->xsize*(ypos + y - 1)) + (xpos + x - 1)] & 0x7F000000))
+										td->framebuffer[(td->xsize*(ypos + y - 1)) + (xpos + x - 1)] = curcol;
+								}
+							}
+						}
+					}
+				}
 			}
-
-			curcol = 0xFFFFFF - (curcol<<8 | curcol << 16 | curcol);
-
-			td->framebuffer[(td->xsize*ypos) + xpos] = curcol;
 		}
 	}
 
