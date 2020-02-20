@@ -71,7 +71,7 @@
 
 #define MAXPULSESKEW 25
 
-//#define FLUXSTREAMDBG 1
+#define FLUXSTREAMDBG 1
 
 #define SECONDPASSANALYSIS 1
 
@@ -3644,6 +3644,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 void hxcfe_FxStream_ExportToBmp(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream, char * filename)
 {
 	HXCFE_TD * td;
+	uint32_t flags;
 
 	td = hxcfe_td_init(fxs->hxcfe,atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_XSIZE", NULL) ),atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_YSIZE", NULL) ));
 	if(td)
@@ -3662,7 +3663,19 @@ void hxcfe_FxStream_ExportToBmp(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream, char 
 		hxcfe_td_activate_analyzer(td, HEATHKIT_HS_FM_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_HEATHKIT_HS_FM_ENCODING", NULL)));
 		hxcfe_td_activate_analyzer(td, DEC_RX02_M2FM_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_DEC_RX02_M2FM_ENCODING", NULL)));
 
-		hxcfe_td_setparams(td,atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_XTOTALTIME", NULL)),atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_YTOTALTIME", NULL) ),0);
+		flags = 0;
+
+		if( atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_STREAM_HIGHCONTRAST", NULL)) )
+		{
+			flags |= TD_FLAG_HICONTRAST;
+		}
+
+		if( atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_STREAM_BIG_DOTS", NULL)) )
+		{
+			flags |= TD_FLAG_BIGDOT;
+		}
+
+		hxcfe_td_setparams(td,atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_XTOTALTIME", NULL)),atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_YTOTALTIME", NULL) ),0, flags);
 
 		hxcfe_td_draw_stream_track( td, stream );
 

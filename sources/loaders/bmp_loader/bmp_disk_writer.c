@@ -87,7 +87,7 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydis
 		hxcfe_td_activate_analyzer(td, ARBURGDAT_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_ARBURGDAT_ENCODING", NULL)));
 		hxcfe_td_activate_analyzer(td, ARBURGSYS_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_ARBURGSYS_ENCODING", NULL)));
 
-		hxcfe_td_setparams(td,atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_XTOTALTIME", NULL)),atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_YTOTALTIME", NULL) ),90*1000);
+		hxcfe_td_setparams(td,atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_XTOTALTIME", NULL)),atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_YTOTALTIME", NULL) ),90*1000, 0);
 
 		ptr = malloc(td->xsize*td->ysize*4);
 		if(ptr)

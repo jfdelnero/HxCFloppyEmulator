@@ -93,6 +93,7 @@ typedef struct _HXCFE_TD
 	int32_t    xsize,ysize;
 	int32_t    x_us,y_us;
 	int32_t    x_start_us;
+	uint32_t   flags;
 	uint32_t * framebuffer;
 	void * sl;
 

@@ -478,121 +478,123 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 			track_dump = hxcfe_FxStream_ImportStream(fxs,cellstream,32,cellpos);
 
-#ifdef KF_STREAM_ALL_REVS_IN_ONE
-			hxcfe_FxStream_AddIndex(fxs,index_events[0].CellPos,index_events[0].Timer);
-			hxcfe_FxStream_AddIndex(fxs,track_dump,index_events[0].CellPos,index_events[nbindex-1].Timer);
-#else
-
 			for(i=0;i<nbindex;i++)
 			{
 				index_events[i].type = FXSTRM_INDEX_MAININDEX;
 			}
-
-			// Hard sector indexes detection
-			if(nbindex > 1)
+			
+			if( atoi( hxcfe_getEnvVar( fxs->hxcfe, "FLUXSTREAM_ALL_REVOLUTIONS_IN_ONE", NULL)) )
 			{
+				hxcfe_FxStream_AddIndex(fxs,track_dump,index_events[0].CellPos,index_events[0].Timer,index_events[0].type);
+				hxcfe_FxStream_AddIndex(fxs,track_dump,index_events[nbindex-1].CellPos,index_events[nbindex-1].Timer,index_events[nbindex-1].type);
+			}
+			else
+			{
+				// Hard sector indexes detection
+				if(nbindex > 1)
+				{
+					for( i = 0; i < nbindex ; i++ )
+					{
+						if(i)
+						{
+							index_events[i].Prev_Index_Tick = get_tick_from_reversal(cellstream,index_events[i].CellPos) - \
+															  get_tick_from_reversal(cellstream,index_events[i - 1].CellPos);
+						}
+
+						if( i < (nbindex - 1))
+						{
+							index_events[i].Next_Index_Tick = get_tick_from_reversal(cellstream,index_events[i + 1].CellPos) - \
+															  get_tick_from_reversal(cellstream,index_events[i].CellPos);
+						}
+					}
+				}
+
+				Prev_Max_Index_Tick = 0;
+				Next_Max_Index_Tick = 0;
 				for( i = 0; i < nbindex ; i++ )
 				{
-					if(i)
+					if( Prev_Max_Index_Tick < index_events[i].Prev_Index_Tick )
 					{
-						index_events[i].Prev_Index_Tick = get_tick_from_reversal(cellstream,index_events[i].CellPos) - \
-														  get_tick_from_reversal(cellstream,index_events[i - 1].CellPos);
+						Prev_Max_Index_Tick = index_events[i].Prev_Index_Tick;
 					}
 
-					if( i < (nbindex - 1))
+					if( Next_Max_Index_Tick < index_events[i].Next_Index_Tick )
 					{
-						index_events[i].Next_Index_Tick = get_tick_from_reversal(cellstream,index_events[i + 1].CellPos) - \
-														  get_tick_from_reversal(cellstream,index_events[i].CellPos);
+						Next_Max_Index_Tick = index_events[i].Next_Index_Tick;
 					}
 				}
-			}
 
-			Prev_Max_Index_Tick = 0;
-			Next_Max_Index_Tick = 0;
-			for( i = 0; i < nbindex ; i++ )
-			{
-				if( Prev_Max_Index_Tick < index_events[i].Prev_Index_Tick )
+				// Max index delta is < to 50 ms, load this track as an hard sectored track.
+				if ( (Next_Max_Index_Tick * ((float)KF_NS_PER_TICK * 10E-10)) < 50 && (Prev_Max_Index_Tick * ((float)KF_NS_PER_TICK * 10E-10)) < 50 )
 				{
-					Prev_Max_Index_Tick = index_events[i].Prev_Index_Tick;
-				}
-
-				if( Next_Max_Index_Tick < index_events[i].Next_Index_Tick )
-				{
-					Next_Max_Index_Tick = index_events[i].Next_Index_Tick;
-				}
-			}
-
-			// Max index delta is < to 50 ms, load this track as an hard sectored track.
-			if ( (Next_Max_Index_Tick * ((float)KF_NS_PER_TICK * 10E-10)) < 50 && (Prev_Max_Index_Tick * ((float)KF_NS_PER_TICK * 10E-10)) < 50 )
-			{
-				for( i = 0; i < nbindex ; i++ )
-				{
-					if ( ( index_events[i].Prev_Index_Tick > ( Prev_Max_Index_Tick / 4 ) * 3 ) &&
-						 ( index_events[i].Next_Index_Tick > ( Next_Max_Index_Tick / 4 ) * 3 ) )
+					for( i = 0; i < nbindex ; i++ )
 					{
-						index_events[i].type = FXSTRM_INDEX_SECTORINDEX;
-					}
-					else
-					{
-						if ( ( index_events[i].Prev_Index_Tick > ( Prev_Max_Index_Tick / 4 ) * 3 ) ||
+						if ( ( index_events[i].Prev_Index_Tick > ( Prev_Max_Index_Tick / 4 ) * 3 ) &&
 							 ( index_events[i].Next_Index_Tick > ( Next_Max_Index_Tick / 4 ) * 3 ) )
 						{
 							index_events[i].type = FXSTRM_INDEX_SECTORINDEX;
 						}
 						else
 						{
-							if( index_events[i].Prev_Index_Tick && index_events[i].Next_Index_Tick )
+							if ( ( index_events[i].Prev_Index_Tick > ( Prev_Max_Index_Tick / 4 ) * 3 ) ||
+								 ( index_events[i].Next_Index_Tick > ( Next_Max_Index_Tick / 4 ) * 3 ) )
 							{
-								index_events[i].type = FXSTRM_INDEX_MAININDEX;
+								index_events[i].type = FXSTRM_INDEX_SECTORINDEX;
+							}
+							else
+							{
+								if( index_events[i].Prev_Index_Tick && index_events[i].Next_Index_Tick )
+								{
+									index_events[i].type = FXSTRM_INDEX_MAININDEX;
+								}
 							}
 						}
 					}
-				}
 
-				if( ( index_events[0].Next_Index_Tick > ( Next_Max_Index_Tick / 4 ) * 3 ))
-				{
-					index_events[0].type = FXSTRM_INDEX_SECTORINDEX;
-				}
-				else
-				{
-					if( ( index_events[1].Next_Index_Tick > ( Next_Max_Index_Tick / 4 ) * 3 ))
-					{
-						index_events[0].type = FXSTRM_INDEX_MAININDEX;
-					}
-					else
+					if( ( index_events[0].Next_Index_Tick > ( Next_Max_Index_Tick / 4 ) * 3 ))
 					{
 						index_events[0].type = FXSTRM_INDEX_SECTORINDEX;
 					}
-				}
-
-				if( ( index_events[nbindex-1].Prev_Index_Tick < ( Next_Max_Index_Tick / 4 ) * 3 ))
-				{
-					if ( ( index_events[nbindex-2].Prev_Index_Tick < ( Prev_Max_Index_Tick / 4 ) * 3 ) &&
-						 ( index_events[nbindex-2].Next_Index_Tick < ( Next_Max_Index_Tick / 4 ) * 3 ) )
+					else
 					{
-						index_events[nbindex-1].type = FXSTRM_INDEX_SECTORINDEX;
+						if( ( index_events[1].Next_Index_Tick > ( Next_Max_Index_Tick / 4 ) * 3 ))
+						{
+							index_events[0].type = FXSTRM_INDEX_MAININDEX;
+						}
+						else
+						{
+							index_events[0].type = FXSTRM_INDEX_SECTORINDEX;
+						}
+					}
+
+					if( ( index_events[nbindex-1].Prev_Index_Tick < ( Next_Max_Index_Tick / 4 ) * 3 ))
+					{
+						if ( ( index_events[nbindex-2].Prev_Index_Tick < ( Prev_Max_Index_Tick / 4 ) * 3 ) &&
+							 ( index_events[nbindex-2].Next_Index_Tick < ( Next_Max_Index_Tick / 4 ) * 3 ) )
+						{
+							index_events[nbindex-1].type = FXSTRM_INDEX_SECTORINDEX;
+						}
+						else
+						{
+							index_events[nbindex-1].type = FXSTRM_INDEX_MAININDEX;
+						}
 					}
 					else
 					{
-						index_events[nbindex-1].type = FXSTRM_INDEX_MAININDEX;
+						index_events[nbindex-1].type = FXSTRM_INDEX_SECTORINDEX;
 					}
 				}
-				else
+
+				for( i = 0; i < nbindex ; i++ )
 				{
-					index_events[nbindex-1].type = FXSTRM_INDEX_SECTORINDEX;
+					floppycontext->hxc_printf(MSG_DEBUG,"Index %d : Prev delta %f ms, Next delta %f ms, Type : 0x%x",i, \
+								(float)index_events[i].Prev_Index_Tick * ((float)KF_NS_PER_TICK * 10E-10), \
+								(float)index_events[i].Next_Index_Tick * ((float)KF_NS_PER_TICK * 10E-10), \
+								index_events[i].type);
+
+					hxcfe_FxStream_AddIndex(fxs,track_dump,index_events[i].CellPos,index_events[i].Timer,index_events[i].type);
 				}
 			}
-
-			for( i = 0; i < nbindex ; i++ )
-			{
-				floppycontext->hxc_printf(MSG_DEBUG,"Index %d : Prev delta %f ms, Next delta %f ms, Type : 0x%x",i, \
-							(float)index_events[i].Prev_Index_Tick * ((float)KF_NS_PER_TICK * 10E-10), \
-							(float)index_events[i].Next_Index_Tick * ((float)KF_NS_PER_TICK * 10E-10), \
-							index_events[i].type);
-
-				hxcfe_FxStream_AddIndex(fxs,track_dump,index_events[i].CellPos,index_events[i].Timer,index_events[i].type);
-			}
-#endif
 
 			free(cellstream);
 			free(cellstreampos);
