@@ -217,6 +217,10 @@ void menu_clicked(Fl_Widget * w, void * fc_ptr)
 
 			mw->parameters_box->show();
 		break;
+		case 16:
+			mw->streamer_window->window->show();
+		break;
+		
 	}
 
 }
@@ -1126,9 +1130,8 @@ Main_Window::Main_Window()
 	guicontext->updatefloppyfs++;
 #endif
 
-#ifdef HXC_STREAMER_MODE
 	//////////////////////////////////////////////
-	// Floppy view window
+	// Streamer / Pauline view window
 	streamer_window = new floppy_streamer_window();
 	if(streamer_window)
 	{
@@ -1138,11 +1141,11 @@ Main_Window::Main_Window()
 		streamer_window->x_time->step(1000);
 		streamer_window->y_time->scrollvalue(16,1,2,64);
 
-		guicontext->td = hxcfe_td_init(guicontext->hxcfe,streamer_window->floppy_map_disp->w(),streamer_window->floppy_map_disp->h());
-		guicontext->flayoutframebuffer = (unsigned char*)malloc( streamer_window->floppy_map_disp->w() * streamer_window->floppy_map_disp->h() * 4);
-		if(guicontext->flayoutframebuffer)
+		guicontext->td_stream = hxcfe_td_init(guicontext->hxcfe,streamer_window->floppy_map_disp->w(),streamer_window->floppy_map_disp->h());
+		guicontext->stream_frame_buffer = (unsigned char*)malloc( streamer_window->floppy_map_disp->w() * streamer_window->floppy_map_disp->h() * 4);
+		if(guicontext->stream_frame_buffer)
 		{
-			memset(guicontext->flayoutframebuffer,0,streamer_window->floppy_map_disp->w()*streamer_window->floppy_map_disp->h() * 4);
+			memset(guicontext->stream_frame_buffer,0,streamer_window->floppy_map_disp->w()*streamer_window->floppy_map_disp->h() * 4);
 			hxc_createevent(guicontext->hxcfe,10);
 
 			streamth = (streamthread *)malloc(sizeof(infothread));
@@ -1176,15 +1179,12 @@ Main_Window::Main_Window()
 		streamer_window->Side_0->value(1);
 		streamer_window->Side_1->value(1);
 
-
-
 		Fl::add_timeout(0.1, streamer_tick_infos, (void*)streamer_window);
 
 		#ifdef GUI_DEBUG
 		print_dbg((char*)"Main_Window : Streamer window done !");
 		#endif
 	}
-#endif
 
 #ifndef HXC_STREAMER_MODE
 	//////////////////////////////////////////////

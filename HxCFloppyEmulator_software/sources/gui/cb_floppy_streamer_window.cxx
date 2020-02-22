@@ -96,55 +96,6 @@ typedef struct _chunk_header
 FILE * fstreamin = NULL;
 #pragma pack()
 
-void update_graph(floppy_streamer_window * w)
-{
-
-}
-
-void streamer_tick_infos(void *w)
-{
-	HXCFE_TD * td;
-	floppy_streamer_window *window;
-	window=(floppy_streamer_window *)w;
-
-	if(window->window->shown())
-	{
-		window->window->make_current();
-		td = guicontext->td;
-		if(td)
-		{
-			if( (window->floppy_map_disp->w() != hxcfe_td_getframebuffer_xres(td)) || (window->floppy_map_disp->h() != hxcfe_td_getframebuffer_yres(td)) )
-			{
-				// Resized... Realloc needed
-
-				hxcfe_td_deinit(guicontext->td);
-
-				guicontext->td = NULL;
-				td = NULL;
-
-				guicontext->td = hxcfe_td_init(guicontext->hxcfe,window->floppy_map_disp->w(),window->floppy_map_disp->h());
-				if(guicontext->td)
-				{
-					td = guicontext->td;
-					if(guicontext->flayoutframebuffer)
-						free(guicontext->flayoutframebuffer);
-
-					guicontext->flayoutframebuffer = (unsigned char*)malloc( hxcfe_td_getframebuffer_xres(td) * hxcfe_td_getframebuffer_yres(td) * 3);
-					if(guicontext->flayoutframebuffer)
-					{
-						memset(guicontext->flayoutframebuffer,0,hxcfe_td_getframebuffer_xres(td)*hxcfe_td_getframebuffer_yres(td) * 3);
-					}
-				}
-			}
-
-			if(td)
-				 fl_draw_image((unsigned char *)guicontext->flayoutframebuffer, window->floppy_map_disp->x(), window->floppy_map_disp->y(), hxcfe_td_getframebuffer_xres(td), hxcfe_td_getframebuffer_yres(td), 3, 0);
-		}
-	}
-
-	Fl::repeat_timeout(0.1, streamer_tick_infos, w);
-}
-
 static double adjust_timescale(double slide)
 {
 	if(slide >= 250 * 1000)
@@ -158,6 +109,66 @@ static double adjust_timescale(double slide)
 	}
 
 	return slide;
+}
+
+void update_graph(floppy_streamer_window * w)
+{
+
+}
+
+void streamer_tick_infos(void *w)
+{
+	HXCFE_TD * td;
+	uint32_t flags;
+	floppy_streamer_window *window;
+	window=(floppy_streamer_window *)w;
+
+	if(window->window->shown())
+	{
+		window->window->make_current();
+		td = guicontext->td_stream;
+		if(td)
+		{
+			if( (window->floppy_map_disp->w() != hxcfe_td_getframebuffer_xres(td)) || (window->floppy_map_disp->h() != hxcfe_td_getframebuffer_yres(td)) )
+			{
+				// Resized... Realloc needed
+
+				hxcfe_td_deinit(guicontext->td_stream);
+
+				guicontext->td_stream = NULL;
+				td = NULL;
+
+				guicontext->td_stream = hxcfe_td_init(guicontext->hxcfe,window->floppy_map_disp->w(),window->floppy_map_disp->h());
+				if(guicontext->td_stream)
+				{
+					td = guicontext->td_stream;
+					if(guicontext->stream_frame_buffer)
+						free(guicontext->stream_frame_buffer);
+
+					flags = 0;
+
+					if(window->high_contrast->value())
+						flags |= TD_FLAG_HICONTRAST;
+
+					if(window->fat_dots->value())
+						flags |= TD_FLAG_BIGDOT;
+
+					hxcfe_td_setparams(td,(int)(adjust_timescale(window->x_time->value())),(int)window->y_time->value(),0,flags);
+
+					guicontext->stream_frame_buffer = (unsigned char*)malloc( hxcfe_td_getframebuffer_xres(td) * hxcfe_td_getframebuffer_yres(td) * 3);
+					if(guicontext->stream_frame_buffer)
+					{
+						memset(guicontext->stream_frame_buffer,0,hxcfe_td_getframebuffer_xres(td)*hxcfe_td_getframebuffer_yres(td) * 3);
+					}
+				}
+			}
+
+			if(td)
+				 fl_draw_image((unsigned char *)guicontext->stream_frame_buffer, window->floppy_map_disp->x(), window->floppy_map_disp->y(), hxcfe_td_getframebuffer_xres(td), hxcfe_td_getframebuffer_yres(td), 3, 0);
+		}
+	}
+
+	Fl::repeat_timeout(0.1, streamer_tick_infos, w);
 }
 
 int StreamerThreadRxStatusProc(void* floppycontext,void* context)
@@ -261,6 +272,7 @@ int StreamerThreadProc(void* floppycontext,void* context)
 	unsigned long * offset_table;
 	int offset_table_index;
 	FILE * f;
+	uint32_t flags;
 
 	chunk_header * ch;
 	int ret;
@@ -354,7 +366,7 @@ int StreamerThreadProc(void* floppycontext,void* context)
 
 											file_offset += ch->size;
 
-											td = (HXCFE_TD *)guicontext->td;
+											td = (HXCFE_TD *)guicontext->td_stream;
 
 											hxcfe_td_activate_analyzer(td,ISOIBM_MFM_ENCODING,w->iso_mfm_bt->value());
 											hxcfe_td_activate_analyzer(td,ISOIBM_FM_ENCODING,w->iso_fm_bt->value());
@@ -371,14 +383,22 @@ int StreamerThreadProc(void* floppycontext,void* context)
 											hxcfe_td_activate_analyzer(td,HEATHKIT_HS_FM_ENCODING,w->heathkit_bt->value());
 											hxcfe_td_activate_analyzer(td,DEC_RX02_M2FM_ENCODING,w->decrx02_bt->value());
 
-											hxcfe_td_setparams(td,(int)(adjust_timescale(w->x_time->value())),(int)w->y_time->value(),0,0);
+											flags = 0;
+
+											if(w->high_contrast->value())
+												flags |= TD_FLAG_HICONTRAST;
+
+											if(w->fat_dots->value())
+												flags |= TD_FLAG_BIGDOT;
+
+											hxcfe_td_setparams(td,(int)(adjust_timescale(w->x_time->value())),(int)w->y_time->value(),0,flags);
 
 											if(trkstream)
 											{
 												hxcfe_td_draw_stream_track( td, trkstream );
 
 												ptr1 = (unsigned char*)hxcfe_td_getframebuffer(td);
-												ptr2 = (unsigned char*)guicontext->flayoutframebuffer;
+												ptr2 = (unsigned char*)guicontext->stream_frame_buffer;
 												nbpixel = hxcfe_td_getframebuffer_xres(td)*hxcfe_td_getframebuffer_yres(td);
 												for(i=0;i<nbpixel;i++)
 												{
@@ -388,7 +408,7 @@ int StreamerThreadProc(void* floppycontext,void* context)
 													ptr1++;
 												}
 
-												//fl_draw_image((unsigned char *)guicontext->flayoutframebuffer, w->floppy_map_disp->x(), w->floppy_map_disp->y(), hxcfe_td_getframebuffer_xres(td), hxcfe_td_getframebuffer_yres(td), 3, 0);
+												//fl_draw_image((unsigned char *)guicontext->stream_frame_buffer, w->floppy_map_disp->x(), w->floppy_map_disp->y(), hxcfe_td_getframebuffer_xres(td), hxcfe_td_getframebuffer_yres(td), 3, 0);
 
 												hxcfe_FxStream_FreeStream( fxsa, trkstream );
 											}
@@ -447,7 +467,7 @@ error:
 
 	if(full_track_buffer)
 		free(full_track_buffer);
-	
+
 	return -1;
 }
 
