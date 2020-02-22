@@ -42,6 +42,9 @@ typedef struct s_gui_context_
 
 	int updatefloppyfs;
 
+	HXCFE_TD * td_stream;
+	unsigned char * stream_frame_buffer;
+
 	char last_loaded_image_path[DEFAULT_TEXT_BUFFER_SIZE];
 	int loaded_img_modified;
 

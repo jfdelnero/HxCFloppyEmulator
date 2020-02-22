@@ -102,7 +102,7 @@ Fl_Menu_Item menutable[] = {
 	{"Batch convert files images", FL_ALT+'b', menu_clicked,(void*)2},
 	{"Dump a Floppy disk", FL_ALT+'d', menu_clicked,(void*)7},
 	{"Track Analyzer", FL_ALT+'a', menu_clicked,(void*)10},
-
+	{"Pauline control interface", FL_ALT+'p', menu_clicked,(void*)16},
 	{0},
 #ifndef OEM_MODE
   {"&Settings",FL_F+2,0,0,FL_SUBMENU},

@@ -7,8 +7,8 @@ class floppy_streamer_window {open
   Function {floppy_streamer_window()} {open
   } {
     Fl_Window window {
-      label {Ludo Floppy Disk Toolkit} open selected
-      xywh {731 156 1330 620} type Double hide
+      label {Ludo Floppy Disk Toolkit} open
+      xywh {439 164 1330 620} type Single resizable visible
     } {
       Fl_Group {} {
         label {Track / Side selection} open
@@ -49,7 +49,7 @@ class floppy_streamer_window {open
         label Connect
         user_data this
         callback floppy_streamer_connect
-        xywh {1220 589 105 26}
+        xywh {1240 589 85 28}
       }
       Fl_Group floppy_map_disp {
         label {Track stream} open
@@ -155,8 +155,8 @@ class floppy_streamer_window {open
         }
       }
       Fl_Input server_address {
-        label Server
-        xywh {1105 590 110 25}
+        label {Pauline IP}
+        xywh {1125 589 110 25} labelsize 8
       }
       Fl_Button {} {
         label {Read Disk}
@@ -196,11 +196,11 @@ class floppy_streamer_window {open
       }
       Fl_Input max_track {
         label {Max track}
-        xywh {1134 516 40 15} labelsize 10 textsize 10
+        xywh {1134 516 40 15} labelsize 8 textsize 10
       }
       Fl_Input min_track {
         label {Min track}
-        xywh {1134 501 40 15} labelsize 10 textsize 10
+        xywh {1134 501 40 15} labelsize 8 textsize 10
       }
       Fl_Light_Button Side_0 {
         label {Side 0}
@@ -216,11 +216,11 @@ class floppy_streamer_window {open
       }
       Fl_Input index_delay {
         label {Index delay (us)}
-        xywh {1134 544 40 15} labelsize 10 textsize 10
+        xywh {1134 544 40 15} labelsize 8 textsize 10
       }
       Fl_Input dump_lenght {
         label {lenght (ms)}
-        xywh {1134 529 40 15} labelsize 10 textsize 10
+        xywh {1134 529 40 15} labelsize 8 textsize 10
       }
       Fl_Light_Button ignore_index {
         label {Ignore index}
@@ -241,6 +241,14 @@ class floppy_streamer_window {open
         user_data this
         callback floppy_streamer_spybus
         xywh {1265 417 59 40}
+      }
+      Fl_Light_Button high_contrast {
+        label {High contrast} selected
+        xywh {1130 565 107 15} labelsize 10
+      }
+      Fl_Light_Button fat_dots {
+        label {Fat dots}
+        xywh {1240 565 84 15} labelsize 10
       }
     }
   }

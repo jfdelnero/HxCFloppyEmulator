@@ -3,32 +3,32 @@
 #ifndef floppy_streamer_window_h
 #define floppy_streamer_window_h
 #include <FL/Fl.H>
-#include <FL/Fl_Double_Window.H>
+#include <FL/Fl_Window.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Value_Slider.H>
 extern void disk_streamer_window_callback(Fl_Value_Slider*, void*);
 #include <FL/Fl_Output.H>
 #include <FL/Fl_Text_Display.H>
+#include <FL/Fl_Button.H>
+extern void floppy_streamer_connect(Fl_Button*, void*);
 #include <FL/Fl_Slider.H>
 extern void disk_streamer_window_callback(Fl_Slider*, void*);
 #include <FL/Fl_Light_Button.H>
 extern void disk_streamer_window_callback(Fl_Light_Button*, void*);
-#include <FL/Fl_Button.H>
-extern void floppy_streamer_down(Fl_Button*, void*);
-extern void floppy_streamer_trackup(Fl_Button*, void*);
+#include <FL/Fl_Input.H>
 extern void floppy_streamer_readdisk(Fl_Button*, void*);
+extern void floppy_streamer_trackup(Fl_Button*, void*);
+extern void floppy_streamer_down(Fl_Button*, void*);
 extern void floppy_streamer_recalibrate(Fl_Button*, void*);
 extern void floppy_streamer_readtrack(Fl_Button*, void*);
 extern void floppy_streamer_stop(Fl_Button*, void*);
 extern void floppy_streamer_movehead(Fl_Button*, void*);
 extern void floppy_streamer_spybus(Fl_Button*, void*);
-#include <FL/Fl_Input.H>
-extern void floppy_streamer_connect(Fl_Button*, void*);
 
 class floppy_streamer_window {
 public:
   floppy_streamer_window();
-  Fl_Double_Window *window;
+  Fl_Window *window;
   Fl_Value_Slider *track_number_slide;
   Fl_Value_Slider *side_number_slide;
   Fl_Output *x_pos;
@@ -61,5 +61,7 @@ public:
   Fl_Input *dump_lenght;
   Fl_Light_Button *ignore_index;
   Fl_Light_Button *high_res;
+  Fl_Light_Button *high_contrast;
+  Fl_Light_Button *fat_dots;
 };
 #endif
