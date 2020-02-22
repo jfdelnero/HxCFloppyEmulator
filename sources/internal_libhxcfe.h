@@ -99,6 +99,7 @@ typedef struct _HXCFE_TD
 
 	uint32_t enabledtrackmode;
 	int32_t  disk_type;
+	int32_t  bands_type;
 
 	uint32_t noloop_trackmode;
 

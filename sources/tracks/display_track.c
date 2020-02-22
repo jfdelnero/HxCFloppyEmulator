@@ -734,8 +734,8 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	int i,j,old_i;
 
 	double timingoffset_offset;
-	int	   buffer_offset;
-
+	int buffer_offset;
+	int y;
 	double timingoffset;
 	double timingoffset2;
 	int interbit;
@@ -1177,14 +1177,127 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	sprintf(tmp_str,"T:%.3d S:%.1d",track,side);
 	putstring8x8(td,1,1,tmp_str,0x000,0x000,0,1);
 
+	// Vertical rule
+	for(i=0;i < 80*10;i++)
+	{
+		ypos = (td->ysize - 1) - (double)(((double)1/(((double)td->y_us/(double)td->ysize))) * ((double)i/(double)10));
+
+		for(xpos=0;xpos < 2; xpos++)
+		{
+			if ( ( xpos < td->xsize ) && ( ( ypos < td->ysize ) && ( ypos >= 0 ) ) )
+				td->framebuffer[(td->xsize*ypos) + xpos] = 0x000000;
+		}
+	}
+
+	for(i=0;i < 80;i++)
+	{
+		ypos = (td->ysize - 1) - ((1/((double)td->y_us/(double)td->ysize)) * (double)i);
+
+		for(xpos=(8*4);xpos < ((8*4)+6); xpos++)
+		{
+			if ( ( xpos < td->xsize ) && ( ( ypos < td->ysize ) && ( ypos >= 0 ) ) )
+				td->framebuffer[(td->xsize*ypos) + xpos] = 0x000000;
+		}
+
+		sprintf(tmp_str,"%.2duS",i);
+		putstring8x8(td,1,ypos - 4,tmp_str,0x00,0xFFFFFF,0,1);
+	}
+
+
+	// 100 us
+	i = 0;
+	while(i< (100/(((double)td->xsize/(double)td->x_us))) )
+	{
+		ypos = (td->ysize - 1);
+		xpos = i * ( 100/((double)((double)td->x_us/(double)td->xsize))  );
+
+		for(y=0;y<1;y++)
+		{
+			if ( ( xpos < (int)td->xsize ) && ( ( (ypos + y - 1) < (int)td->ysize ) && ( (ypos + y - 1) >= 0 ) ) )
+				td->framebuffer[(td->xsize*(ypos + y - 1)) + xpos] = 0x000000;
+		}
+
+		i++;
+	}
+
+	// 1 ms
+	i = 0;
+	while(i< (1000/(((double)td->xsize/(double)td->x_us))) )
+	{
+		ypos = (td->ysize - 1);
+		xpos = i * ( 1000/((double)((double)td->x_us/(double)td->xsize))  );
+
+		if( xpos < (int)td->xsize )
+		{
+			for(y=ypos - 4;y<ypos;y++)
+			{
+				if ( y>=0 &&  y < (unsigned int)td->ysize )
+					td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
+			}
+		}
+		i++;
+	}
+
+	// 10 ms
+	i = 0;
+	while(i< (10000/(((double)td->xsize/(double)td->x_us))) )
+	{
+		ypos = (td->ysize - 1);
+		xpos = i * ( 10000/((double)((double)td->x_us/(double)td->xsize))  );
+
+		if( xpos < (int)td->xsize )
+		{
+			for(y=ypos - 8;y<ypos;y++)
+			{
+				if ( y>=0 &&  y < (unsigned int)td->ysize )
+					td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
+			}
+		}
+
+		i++;
+	}
 }
 
 extern int tracktypelist[];
 
+int32_t bands_no_band[]={0,90000,-1,-1};
+int32_t bands_dd_mfm[]={3500,4600, 5400,6600, 7400,8600,-1,-1};
+int32_t bands_hd_mfm[]={1250,2250, 2750,3250, 3750,4250,-1,-1};
+int32_t bands_dd_fm[]={3000,5000, 7000,8000,-1,-1};
+int32_t bands_hd_fm[]={1500,2500, 3500,4500,-1,-1};
+
+int32_t * bands_type[]={
+	bands_no_band,
+	bands_dd_mfm,
+	bands_hd_mfm,
+	bands_dd_fm,
+	bands_hd_fm,
+	NULL
+};
+
+int is_valid_timing(HXCFE_TD *td, int ps )
+{
+	int32_t * bands;
+	int i;
+
+	bands = bands_type[td->bands_type];
+
+	i = 0;
+	while( bands[i] >= 0 )
+	{
+		if( ps > bands[i] && ps <= bands[i+1])
+			return 1;
+
+		i += 2;
+	}
+
+	return 0;
+}
+
 void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 {
-	int i,j,x,y;
-	int xpos,ypos;
+	int i,j,x,y,tmp;
+	int xpos,ypos,bad_timing;
 	char tmp_str[64];
 	uint32_t total_offset,cur_ticks,curcol,contrast;
 	HXCFE_SIDE* side;
@@ -1193,9 +1306,22 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	int bitrate;
 	uint32_t * histo;
 
+	float x_us_per_pixel,y_us_per_pixel;
+	float x_tick_to_pix;
+	float y_tick_to_pix;
+	float tick_to_ps;
+
 	td->noloop_trackmode = 1;
 
 	memset(td->framebuffer,0x000000,td->xsize*td->ysize*4);
+
+	x_us_per_pixel = ((float)((float)td->x_us/(float)td->xsize));
+	y_us_per_pixel = ((float)((float)td->y_us/(float)td->ysize));
+
+	x_tick_to_pix = ( (float)1.0 / x_us_per_pixel ) * ( (float)1000000 / (float)TICKFREQ );
+	y_tick_to_pix = ( (float)1.0 / y_us_per_pixel ) * ( (float)1000000 / (float)TICKFREQ );
+
+	tick_to_ps = (float) ( (float)1000000000 / (float)TICKFREQ);
 
 	//////////////////////////////////////////
 	// Scatter drawing
@@ -1205,26 +1331,30 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 		cur_ticks = track_stream->track_dump[i];
 		total_offset += cur_ticks;
 
-		xpos = (int)( ((double)total_offset / (double) (TICKFREQ / 1000000)) / ((double)((double)td->x_us/(double)td->xsize)) );
-
-		ypos = td->ysize - (int)( (double)( (double)cur_ticks / (double) (TICKFREQ / 1000000) )/ (double)((double)td->y_us/(double)td->ysize));
+		xpos = (int)( (float)total_offset * x_tick_to_pix );
+		ypos = td->ysize - (int)( (float)cur_ticks * y_tick_to_pix );
 
 		if ( ( xpos < td->xsize ) && ( ( ypos < td->ysize ) && ( ypos >= 0 ) ) )
 		{
 			if((td->framebuffer[(td->xsize*ypos) + xpos] & 0xFFFF) < 255)
 			{
-				td->framebuffer[(td->xsize*ypos) + xpos] = ( (td->framebuffer[(td->xsize*ypos) + xpos] + 1) | 0x7F000000);
+				if( is_valid_timing(td,(int)((float)cur_ticks * tick_to_ps )) )
+				{
+					td->framebuffer[(td->xsize*ypos) + xpos] = ( (td->framebuffer[(td->xsize*ypos) + xpos] + 1) | 0x01000000);
+				}
+				else
+				{
+					td->framebuffer[(td->xsize*ypos) + xpos] = ( (td->framebuffer[(td->xsize*ypos) + xpos] + 1) | 0x03000000);
+				}
 			}
 		}
 	}
 
-	for(ypos = 0; ypos < td->ysize; ypos++)
+	tmp = td->ysize * td->xsize;
+	for(i = 0; i < tmp; i++)
 	{
-		for(xpos = 0; xpos < td->xsize; xpos++)
-		{
-			if(!td->framebuffer[(td->xsize*ypos) + xpos])
-				td->framebuffer[(td->xsize*ypos) + xpos] = 0xFFFFFF;
-		}
+		if(!td->framebuffer[i])
+			td->framebuffer[i] = 0xFFFFFF;
 	}
 
 	contrast = 32;
@@ -1239,6 +1369,11 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 
 			if(curcol & 0x7F000000)
 			{
+				if(curcol & 0x02000000)
+					bad_timing = 1;
+				else
+					bad_timing = 0;
+
 				curcol = (curcol&0x00FFFFFF) * contrast;
 
 				if(curcol>255)
@@ -1246,11 +1381,14 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 					curcol = 255;
 				}
 
-				curcol = 0xFFFFFF - (curcol<<8 | curcol << 16 | curcol);
+				if(!bad_timing)
+					curcol = 0xFFFFFF - (curcol<<8 | curcol << 16 | curcol);
+				else
+					curcol = 0x0000FF;
 
 				td->framebuffer[(td->xsize*ypos) + xpos] = curcol;
 
-				if(td->flags & TD_FLAG_BIGDOT)
+				if( td->flags & TD_FLAG_BIGDOT )
 				{
 					for(x=0;x<3;x++)
 					{
@@ -1283,7 +1421,7 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 			total_offset += track_stream->track_dump[j];
 		}
 
-		xpos = (int)( ((double)total_offset / (double) (TICKFREQ / 1000000)) / ((double)((double)td->x_us/(double)td->xsize)) );
+		xpos = (int)( (float)total_offset * x_tick_to_pix );
 		ypos = 0;
 
 		if ( ( xpos < td->xsize ) && ( ypos < td->ysize ) )
@@ -1338,10 +1476,90 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	}
 
 	// Print pixel density
-	sprintf(tmp_str,"xres: %f us/pix",((double)((double)td->x_us/(double)td->xsize)));
+	sprintf(tmp_str,"xres: %f us/pix",x_us_per_pixel);
 	putstring8x8(td,1,1,tmp_str,0xFFFFFF,0x000000,0,0);
-	sprintf(tmp_str,"yres: %f us/pix",(double)((double)td->y_us/(double)td->ysize));
+	sprintf(tmp_str,"yres: %f us/pix",y_us_per_pixel);
 	putstring8x8(td,1,1+8,tmp_str,0xFFFFFF,0x000000,0,0);
+
+	// Vertical rule
+	for(i=0;i < 80*10;i++)
+	{
+		ypos = (td->ysize - 1) - (float)(((float)1/y_us_per_pixel) * ((float)i/(float)10));
+
+		for(xpos=0;xpos < 2; xpos++)
+		{
+			if ( ( xpos < td->xsize ) && ( ( ypos < td->ysize ) && ( ypos >= 0 ) ) )
+				td->framebuffer[(td->xsize*ypos) + xpos] = 0x000000;
+		}
+	}
+
+	for(i=0;i < 80;i++)
+	{
+		ypos = (td->ysize - 1) - ((1/y_us_per_pixel) * (float)i);
+
+		for(xpos=(8*4);xpos < ((8*4)+6); xpos++)
+		{
+			if ( ( xpos < td->xsize ) && ( ( ypos < td->ysize ) && ( ypos >= 0 ) ) )
+				td->framebuffer[(td->xsize*ypos) + xpos] = 0x000000;
+		}
+
+		sprintf(tmp_str,"%.2duS",i);
+		putstring8x8(td,1,ypos - 4,tmp_str,0x00,0xFFFFFF,0,1);
+	}
+
+	// Rule : 100 us steps
+	i = 0;
+	while(i< (100/(((float)td->xsize/(float)td->x_us))) )
+	{
+		ypos = (td->ysize - 1);
+		xpos = i * ( 100/((float)((float)td->x_us/(float)td->xsize))  );
+
+		for(y=0;y<1;y++)
+		{
+			if ( ( xpos < (int)td->xsize ) && ( ( (ypos + y - 1) < (int)td->ysize ) && ( (ypos + y - 1) >= 0 ) ) )
+				td->framebuffer[(td->xsize*(ypos + y - 1)) + xpos] = 0x000000;
+		}
+
+		i++;
+	}
+
+	// Rule : 1 ms steps
+	i = 0;
+	while(i< (1000/(((float)td->xsize/(float)td->x_us))) )
+	{
+		ypos = (td->ysize - 1);
+		xpos = i * ( 1000/((float)((float)td->x_us/(float)td->xsize))  );
+
+		if( xpos < (int)td->xsize )
+		{
+			for(y=ypos - 3;y<ypos;y++)
+			{
+				if ( y>=0 &&  y < (unsigned int)td->ysize )
+					td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
+			}
+		}
+
+		i++;
+	}
+
+	// Rule : 10 ms steps
+	i = 0;
+	while(i< (10000/(((float)td->xsize/(float)td->x_us))) )
+	{
+		ypos = (td->ysize - 1);
+		xpos = i * ( 10000/((float)((float)td->x_us/(float)td->xsize))  );
+
+		if( xpos < (int)td->xsize )
+		{
+			for(y=ypos - 6;y<ypos;y++)
+			{
+				if ( y>=0 &&  y < (unsigned int)td->ysize )
+					td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
+			}
+		}
+
+		i++;
+	}
 }
 
 int32_t hxcfe_td_setName( HXCFE_TD *td, char * name )
