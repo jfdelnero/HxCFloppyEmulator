@@ -325,7 +325,7 @@ int getblock(unsigned char *p, unsigned short size, unsigned char *e)
 	return eof;
 }
 
-unsigned char * unpack(unsigned char *packeddata,unsigned int size)
+unsigned char * unpack(unsigned char *packeddata,unsigned int size, unsigned int * unpacked_size)
 {
 
 	unsigned char * buffer,* finalbuffer;
@@ -333,41 +333,47 @@ unsigned char * unpack(unsigned char *packeddata,unsigned int size)
 
 	init_decompress();
 
-	buffer_size=size;
-	buffer_offset=0;
-	buffer_ptr=packeddata+sizeof(TELEDISK_HEADER);
+	finalbuffer = 0;
 
+	buffer_size = size;
+	buffer_offset = 0;
+
+	buffer_ptr = packeddata + sizeof(TELEDISK_HEADER);
+
+	Eof = 0;
 
 	j=0;
 	buffer=0;
-	buffer=(unsigned char*)realloc(	buffer,512);
-	do
-	{
 
+	buffer = (unsigned char*) realloc( buffer,512);
+	while( (Eof!=255) && buffer)
+	{
 		//getblock(buffer, 128, 0);
-		i=0;
+		i = 0;
 		do
 		{
-
-			buffer[j]=getbyte();
-			j++;
+			buffer[j++] = getbyte();
 			i++;
 		}while(i<512 && (Eof!=255));
-		buffer=(unsigned char*)realloc(	buffer,j+512);
-
-	}while(Eof!=255);
-
-	finalbuffer=0;
-	finalbuffer=malloc(j+sizeof(TELEDISK_HEADER));
-	if(finalbuffer)
-	{
-		memcpy(finalbuffer,packeddata,sizeof(TELEDISK_HEADER));
-		memcpy(&finalbuffer[sizeof(TELEDISK_HEADER)],buffer,j);
-
+	
+		buffer = (unsigned char*)realloc( buffer,j+512);
 	}
 
-	free(packeddata);
-	free(buffer);
+	if(buffer)
+	{
+		finalbuffer = malloc(j+sizeof(TELEDISK_HEADER));
+		if(finalbuffer)
+		{
+			memcpy(finalbuffer,packeddata,sizeof(TELEDISK_HEADER));
+			memcpy(&finalbuffer[sizeof(TELEDISK_HEADER)],buffer,j);
+
+			if(unpacked_size)
+				*unpacked_size = (sizeof(TELEDISK_HEADER) + j);
+		}
+
+		free(packeddata);
+		free(buffer);
+	}
 
 	return finalbuffer;
 }
