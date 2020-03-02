@@ -228,6 +228,9 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	unsigned char * fileimage;
 	uint32_t fileimage_buffer_offset;
 
+	fileimage = NULL;
+	sectorconfig = NULL;
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TeleDisk_libLoad_DiskFile %s",imgfile);
 
 	hxcfe_imgCallProgressCallback(imgldr_ctx,0,100 );
@@ -248,7 +251,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		return HXCFE_BADFILE;
 	}
 
-	fileimage_buffer_offset=0;
+	fileimage_buffer_offset = 0;
 	fileimage=(unsigned char*)malloc(filesize+512);
 	if(!fileimage)
 	{
@@ -261,8 +264,11 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	hxc_fclose(f);
 
 
-	td_header=(TELEDISK_HEADER*)&fileimage[fileimage_buffer_offset];
-	fileimage_buffer_offset=fileimage_buffer_offset+sizeof(TELEDISK_HEADER);
+	td_header = (TELEDISK_HEADER*)&fileimage[fileimage_buffer_offset];
+	fileimage_buffer_offset += sizeof(TELEDISK_HEADER);
+	if(fileimage_buffer_offset > filesize)
+		goto error_bad_file;
+
 
 	if ( ((td_header->TXT[0]!='t') || (td_header->TXT[1]!='d')) && ((td_header->TXT[0]!='T') || (td_header->TXT[1]!='D')))
 	{
@@ -301,7 +307,13 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	if(((td_header->TXT[0]=='t') && (td_header->TXT[1]=='d')))
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"TeleDisk_libLoad_DiskFile : Advanced compression");
-		fileimage=unpack(fileimage,filesize);
+		fileimage = unpack(fileimage,filesize,&filesize);
+
+		if(!fileimage)
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"TeleDisk_libLoad_DiskFile : Unpack failure !");
+			return HXCFE_BADFILE;
+		}
 	}
 
 	td_header=(TELEDISK_HEADER*)&fileimage[0];
@@ -312,7 +324,10 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0xA097,0x0000);
 
 		td_comment=(TELEDISK_COMMENT *)&fileimage[fileimage_buffer_offset];
-		fileimage_buffer_offset=fileimage_buffer_offset+sizeof(TELEDISK_COMMENT);
+		fileimage_buffer_offset += sizeof(TELEDISK_COMMENT);
+		if(fileimage_buffer_offset > filesize)
+			goto error_bad_file;
+
 
 		//hxc_fread( &td_comment, sizeof(td_comment), f );
 		ptr=(unsigned char*)td_comment;
@@ -323,14 +338,15 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		}
 
 		memcpy(&tempdata,&fileimage[fileimage_buffer_offset],td_comment->Len);
-		fileimage_buffer_offset=fileimage_buffer_offset+td_comment->Len;
+		fileimage_buffer_offset += td_comment->Len;
+		if(fileimage_buffer_offset > filesize)
+			goto error_bad_file;
 
-		ptr=(unsigned char*)&tempdata;
+		ptr = (unsigned char*)&tempdata;
 		for(i=0;i<td_comment->Len;i++)
 		{
 			CRC16_Update(&CRC16_High,&CRC16_Low, ptr[i],(unsigned char*)crctable );
 		}
-
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"TeleDisk_libLoad_DiskFile : Creation date: %.2d/%.2d/%.4d %.2d:%.2d:%.2d",td_comment->bDay,\
 																							td_comment->bMon+1,\
@@ -338,19 +354,22 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 																							td_comment->bHour,\
 																							td_comment->bMin,\
 																							td_comment->bSec);
+
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"TeleDisk_libLoad_DiskFile : Comment: %s",tempdata);
 
 	}
 
-	interleave=1;
-	numberoftrack=0;
+	interleave = 1;
+	numberoftrack = 0;
 
-	file_offset=fileimage_buffer_offset;
+	file_offset = fileimage_buffer_offset;
 
 	floppydisk->floppyNumberOfSide=td_header->Surface;
 
 	td_track_header=(TELEDISK_TRACK_HEADER  *)&fileimage[fileimage_buffer_offset];
-	fileimage_buffer_offset=fileimage_buffer_offset+sizeof(TELEDISK_TRACK_HEADER);
+	fileimage_buffer_offset += sizeof(TELEDISK_TRACK_HEADER);
+	if(fileimage_buffer_offset > filesize)
+		goto error_bad_file;
 
 	while(td_track_header->SecPerTrk!=0xFF)
 	{
@@ -369,18 +388,25 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		for ( i=0;i < td_track_header->SecPerTrk;i++ )
 		{
 			td_sector_header=(TELEDISK_SECTOR_HEADER  *)&fileimage[fileimage_buffer_offset];
-			fileimage_buffer_offset=fileimage_buffer_offset+sizeof(TELEDISK_SECTOR_HEADER);
+			fileimage_buffer_offset += sizeof(TELEDISK_SECTOR_HEADER);
+			if(fileimage_buffer_offset > filesize)
+				goto error_bad_file;
 
 			if  ( (td_sector_header->Syndrome & 0x30) == 0 && (td_sector_header->SLen & 0xf8) == 0 )
 			{
 				//fileimage_buffer_offset=fileimage_buffer_offset+sizeof(unsigned short);
 
 				datalen=(unsigned short*)&fileimage[fileimage_buffer_offset];
-				fileimage_buffer_offset=fileimage_buffer_offset+(*datalen)+2;
+				fileimage_buffer_offset += ((*datalen)+2);
+				if(fileimage_buffer_offset > filesize)
+					goto error_bad_file;
 			}
 		}
+
 		td_track_header=(TELEDISK_TRACK_HEADER  *)&fileimage[fileimage_buffer_offset];
-		fileimage_buffer_offset=fileimage_buffer_offset+sizeof(TELEDISK_TRACK_HEADER);
+		fileimage_buffer_offset += sizeof(TELEDISK_TRACK_HEADER);
+		if(fileimage_buffer_offset > filesize)
+			goto error_bad_file;
 	}
 
 	floppydisk->floppyNumberOfTrack=numberoftrack+1;
@@ -414,7 +440,9 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	fileimage_buffer_offset=file_offset;
 
 	td_track_header=(TELEDISK_TRACK_HEADER  *)&fileimage[fileimage_buffer_offset];
-	fileimage_buffer_offset=fileimage_buffer_offset+sizeof(TELEDISK_TRACK_HEADER);
+	fileimage_buffer_offset += sizeof(TELEDISK_TRACK_HEADER);
+	if(fileimage_buffer_offset > filesize)
+		goto error_bad_file;
 
 	while(td_track_header->SecPerTrk!=0xFF)
 	{
@@ -467,12 +495,14 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		}
 		////////////////////////////////////////////////////////
 
-		sectorconfig=(HXCFE_SECTCFG  *)malloc(sizeof(HXCFE_SECTCFG)*td_track_header->SecPerTrk);
+		sectorconfig = (HXCFE_SECTCFG  *)malloc(sizeof(HXCFE_SECTCFG)*td_track_header->SecPerTrk);
 		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*td_track_header->SecPerTrk);
 		for ( i=0;i < td_track_header->SecPerTrk;i++ )
 		{
 			td_sector_header=(TELEDISK_SECTOR_HEADER  *)&fileimage[fileimage_buffer_offset];
-			fileimage_buffer_offset=fileimage_buffer_offset+sizeof(TELEDISK_SECTOR_HEADER);
+			fileimage_buffer_offset += sizeof(TELEDISK_SECTOR_HEADER);
+			if(fileimage_buffer_offset > filesize)
+				goto error_bad_file;
 
 			sectorconfig[i].cylinder=td_sector_header->Cyl;
 			sectorconfig[i].head=td_sector_header->Side;
@@ -506,7 +536,9 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 				datalen=(unsigned short*)&fileimage[fileimage_buffer_offset];
 				memcpy(&tempdata,&fileimage[fileimage_buffer_offset],(*datalen)+2);
-				fileimage_buffer_offset=fileimage_buffer_offset+(*datalen)+2;
+				fileimage_buffer_offset += ((*datalen)+2);
+				if(fileimage_buffer_offset > filesize)
+					goto error_bad_file;
 
 				RLEExpander(tempdata,sectorconfig[i].input_data,(int)*datalen);
 			}
@@ -526,10 +558,12 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			hxcfe_freeSectorConfigData( 0, &sectorconfig[i] );
 		}
 		free(sectorconfig);
+		sectorconfig = NULL;
 
 		td_track_header=(TELEDISK_TRACK_HEADER  *)&fileimage[fileimage_buffer_offset];
-		fileimage_buffer_offset=fileimage_buffer_offset+sizeof(TELEDISK_TRACK_HEADER);
-
+		fileimage_buffer_offset += sizeof(TELEDISK_TRACK_HEADER);
+		if(fileimage_buffer_offset > filesize)
+			goto error_bad_file;
 	}
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
@@ -541,6 +575,24 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
 	return HXCFE_NOERROR;
+
+error_bad_file:
+	if(fileimage)
+		free(fileimage);
+
+	if(sectorconfig)
+	{
+		for ( i=0;i < td_track_header->SecPerTrk;i++ )
+		{
+			hxcfe_freeSectorConfigData( 0, &sectorconfig[i] );
+		}
+
+		free(sectorconfig);
+	}
+
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"TeleDisk_libLoad_DiskFile : Unexpected end of file ! : offset %d > file size (%d)",fileimage_buffer_offset,filesize);
+
+	return HXCFE_BADFILE;
 }
 
 int TeleDisk_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
