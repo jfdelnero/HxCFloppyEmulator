@@ -595,10 +595,13 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 									sprintf(tempstr,"E-mu %.3dB ",sc->sectorsize);
 								break;
 								case APPLE2_GCR5A3:
-									sprintf(tempstr,"Apple II 5A3 %.3dB ",sc->sectorsize);
+									sprintf(tempstr,"Apple II GCR5A3 %.3dB ",sc->sectorsize);
 								break;
 								case APPLE2_GCR6A2:
-									sprintf(tempstr,"Apple II 6A2 %.3dB ",sc->sectorsize);
+									sprintf(tempstr,"Apple II GCR6A2 %.3dB ",sc->sectorsize);
+								break;
+								case APPLEMAC_GCR6A2:
+									sprintf(tempstr,"Apple Macintosh GCR6A2 %.3dB ",sc->sectorsize);
 								break;
 								case ARBURG_DAT:
 									sprintf(tempstr,"Arburg DATA %.3dB ",sc->sectorsize);
@@ -1293,6 +1296,72 @@ int is_valid_timing(HXCFE_TD *td, int ps )
 
 	return 0;
 }
+
+int hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream, int stream_index,uint16_t * sound_buffer, int nbsamples, int samplerate)
+{
+	int i;
+	int cur_ticks_count;
+	int ticks_window,ticks_sampleshift;
+	int pulses_count;
+	int next_start_index;
+	int next_start_remain;
+	int next_start_updated;
+
+	td->hxcfe->hxc_printf(MSG_INFO_1,"hxcfe_td_stream_to_sound: stream_index:%d  track_stream->nb_of_pulses : %d",stream_index,track_stream->nb_of_pulses);
+
+	// | Stream window scan : Count pulses |    - cnt 1
+	//      | Stream window scan : Count pulses |    - cnt 2 (+22uS - 44100)
+	//           | Stream window scan : Count pulses |    - cnt 3 (+22uS - 44100)
+	// | cnt 1 | cnt 2 | cnt 3 |  calc mean
+	// min / max / mean buffer normalise
+
+	ticks_window = (int)(( (float)TICKFREQ / (float)1000000 ) * (float)200); // 200 us
+	ticks_sampleshift = (int)(( (float)TICKFREQ / (float)1000000 ) * (float)((float)((float)1000000/(float)samplerate) ));
+
+	if( stream_index >= track_stream->nb_of_pulses)
+		return stream_index;
+
+	next_start_updated = 0;
+	next_start_remain = 0;
+	next_start_index = stream_index;
+
+	for(i=0;i<nbsamples;i++)
+	{
+		pulses_count = 0;
+		cur_ticks_count = next_start_remain;
+		stream_index = next_start_index;
+		next_start_updated = 0;
+
+		while(cur_ticks_count < ticks_window && stream_index < track_stream->nb_of_pulses )
+		{
+			cur_ticks_count += track_stream->track_dump[stream_index];
+
+			if( !next_start_updated && (cur_ticks_count >= ticks_sampleshift) )
+			{
+				next_start_index = stream_index;
+				next_start_remain = cur_ticks_count - ticks_sampleshift;
+				next_start_updated = 1;
+	td->hxcfe->hxc_printf(MSG_INFO_1,"hxcfe_td_stream_to_sound: >>next_start_index:%d - next_start_remain:%d",next_start_index,pulses_count,cur_ticks_count,ticks_window,ticks_sampleshift);
+				
+			}
+
+			if(cur_ticks_count >= ticks_window)
+			{
+				break;
+			}
+			else
+				pulses_count++;
+
+			stream_index++;			
+		}
+	td->hxcfe->hxc_printf(MSG_INFO_1,"hxcfe_td_stream_to_sound: >>stream_index:%d - pulses_count:%d cur_ticks_count:%d ticks_window:%d ticks_sampleshift:%d",stream_index,pulses_count,cur_ticks_count,ticks_window,ticks_sampleshift);
+
+		sound_buffer[i] = pulses_count;
+	}
+
+	return stream_index;
+}
+
 
 void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 {

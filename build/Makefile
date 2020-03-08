@@ -90,7 +90,8 @@ DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_w
 					xml_db_writer.o streamhfe_writer.o qd_writer.o hxcstream_writer.o
 
 TRACK_FORMATS_SUPPORT = luts.o track_types_defs.o aed6200p_track.o amiga_mfm_track.o apple2_gcr_track.o arburg_track.o emu_emulator_fm_track.o c64_gcr_track.o \
-						heathkit_fm_track.o iso_ibm_fm_track.o iso_ibm_mfm_track.o membrain_mfm_track.o northstar_mfm_track.o tycom_fm_track.o dec_rx02_track.o
+						heathkit_fm_track.o iso_ibm_fm_track.o iso_ibm_mfm_track.o membrain_mfm_track.o northstar_mfm_track.o tycom_fm_track.o dec_rx02_track.o \
+						apple_mac_gcr_track.o
 
 ENCODING_SUPPORT = fm_encoding.o mfm_encoding.o dec_m2fm_encoding.o
 
@@ -175,6 +176,9 @@ amiga_mfm_track.o : $(BASEDIR)/tracks/track_formats/amiga_mfm_track.c $(BASEDIR)
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 apple2_gcr_track.o : $(BASEDIR)/tracks/track_formats/apple2_gcr_track.c $(BASEDIR)/tracks/track_formats/apple2_gcr_track.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+apple_mac_gcr_track.o : $(BASEDIR)/tracks/track_formats/apple_mac_gcr_track.c $(BASEDIR)/tracks/track_formats/apple_mac_gcr_track.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 arburg_track.o : $(BASEDIR)/tracks/track_formats/arburg_track.c $(BASEDIR)/tracks/track_formats/arburg_track.h

@@ -34,8 +34,8 @@
 //-------------------------------------------------------------------------------//
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
-// File : apple2_gcr_track.c
-// Contains: Apple II track support.
+// File : apple_mac_gcr_track.c
+// Contains: Apple Macintosh track support.
 //
 // Written by: Jean-François DEL NERO
 //
@@ -81,20 +81,40 @@ static unsigned char byte_translation_SixAndTwo[] = {
       0xf7, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff
 };
 
-static unsigned short byte_read_translation_SixAndTwo[256];
-
-#if 0
-static unsigned char byte_translation_FiveAndThree[] = {
-      0xAB, 0xAD, 0xAE, 0xAF, 0xB5, 0xB6, 0xB7, 0xBA,
-      0xBB, 0xBD, 0xBE, 0xBF, 0xD6, 0xD7, 0xDA, 0xDB,
-      0xDD, 0xDE, 0xDF, 0xEA, 0xEB, 0xED, 0xEE, 0xEF,
-      0xF5, 0xF6, 0xF7, 0xFA, 0xFB, 0xFD, 0xFE, 0xFF
+static const unsigned char SixAndTwo_to_byte_translation[] = {
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,   /* 0x00 */
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,   /* 0x10 */
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,   /* 0x20 */
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,   /* 0x30 */
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,   /* 0x40 */
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,   /* 0x50 */
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,   /* 0x60 */
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,   /* 0x70 */
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,   /* 0x80 */
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x01,   /* 0x90 */
+      0xff, 0xff, 0x02, 0x03, 0xff, 0x04, 0x05, 0x06,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x07, 0x08,   /* 0xA0 */
+      0xff, 0xff, 0xff, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
+      0xff, 0xff, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13,   /* 0xB0 */
+      0xff, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,   /* 0xC0 */
+      0xff, 0xff, 0xff, 0x1B, 0xff, 0x1C, 0x1D, 0x1E,
+      0xff, 0xff, 0xff, 0x1F, 0xff, 0xff, 0x20, 0x21,   /* 0xD0 */
+      0xff, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28,
+      0xff, 0xff, 0xff, 0xff, 0xff, 0x29, 0x2A, 0x2B,   /* 0xE0 */
+      0xff, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32,
+      0xff, 0xff, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,   /* 0xF0 */
+      0xff, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F
 };
-#endif
-
-#if 0
-static unsigned short byte_read_translation_FiveAndThree[256];
-#endif
 
 /////////////////////////////////////////////////////////
 
@@ -119,83 +139,123 @@ static void NybbleSector6and2( unsigned char * dataIn, unsigned char * nybbleOut
 }
 #endif
 
-static uint32_t DeNybbleSector6and2(unsigned char * dataOut,unsigned char * input_data,uint32_t intput_data_size,uint32_t bit_offset,unsigned char * crc_error)
+int cellstobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit)
 {
-	unsigned char buff1_offset;
-	unsigned char byte;
-	unsigned char nibblebuf[512];
-	unsigned char nibblebuf2[512];
-	unsigned char xor;
-	unsigned short word,k;
-	int bit_i,i;
+	int i;
+	int bitshift;
+	unsigned char binbyte;
 
-	for(i=0;i<256;i++)
+	i = 0;
+	bitshift = 0;
+	binbyte = 0;
+	do
 	{
-		byte_read_translation_SixAndTwo[i] = 0xFFFF;
-	}
+		//0C0D0C0D
 
-	for(i=0;i<sizeof(byte_translation_SixAndTwo);i++)
-	{
-		byte_read_translation_SixAndTwo[byte_translation_SixAndTwo[i]] = i;
-	}
+		binbyte = (unsigned char)( binbyte | (getbit(input_data,(bit_offset+1)%input_data_size)<<3) | getbit(input_data,(bit_offset+3)%input_data_size)<<2) | (getbit(input_data,(bit_offset+5)%input_data_size)<<1) | (getbit(input_data,(bit_offset+7)%input_data_size)<<0);
 
-	memset(nibblebuf,0,512);
+		bitshift += 4;
 
-	for(bit_i=0;bit_i<(342 + 1) * 8;bit_i++)
-	{
-		if(getbit(input_data,(bit_offset + (bit_i*2) +1)%intput_data_size ) )
+		if(bitshift == 8)
 		{
-			nibblebuf[bit_i>>3] = nibblebuf[bit_i>>3] | (0x80>>(bit_i&7));
+			decod_data[i] = binbyte;
+			bitshift = 0;
+			binbyte = 0;
+			i++;
 		}
-	}
+		else
+		{
+			binbyte = (unsigned char)( binbyte << 4 );
+		}
 
-	xor = 0;
-	k=0;
-	for(i=341; i >= 256; i-- )
+		bit_offset = (bit_offset+8)%input_data_size;
+
+	}while(i<decod_data_size);
+
+	return bit_offset;
+}
+
+// Function written by Nathan Woods and R. Belmont
+// MESS (sony_denibblize35 / ap_dsk35.cpp)
+
+static void DeNybbleSector6and2(uint8_t *out, const uint8_t *nib_ptr, uint8_t *checksum)
+{
+	int i, j;
+	uint32_t c1,c2,c3,c4;
+	uint8_t val;
+	uint8_t w1,w2,w3=0,w4;
+	uint8_t b1[175],b2[175],b3[175];
+
+	j = 0;
+	for (i=0; i<=174; i++)
 	{
-		word = byte_read_translation_SixAndTwo[nibblebuf[k]];
-		k++;
+		w4 = nib_ptr[j++];
+		w1 = nib_ptr[j++];
+		w2 = nib_ptr[j++];
 
-		byte = (word&0xFF) ^ xor;
-		nibblebuf2[i] = byte;
-		xor = byte;
+		if (i != 174) w3 = nib_ptr[j++];
+
+		b1[i] = (w1 & 0x3F) | ((w4 << 2) & 0xC0);
+		b2[i] = (w2 & 0x3F) | ((w4 << 4) & 0xC0);
+		b3[i] = (w3 & 0x3F) | ((w4 << 6) & 0xC0);
 	}
 
-	for(i = 0; i < 256; i++ )
+	/* Copy from the user's buffer to our buffer, while computing
+	 * the three-byte data checksum
+	 */
+
+	i = 0;
+	j = 0;
+	c1 = 0;
+	c2 = 0;
+	c3 = 0;
+	while (1)
 	{
-		word = byte_read_translation_SixAndTwo[nibblebuf[k]];
-		k++;
+		c1 = (c1 & 0xFF) << 1;
+		if (c1 & 0x0100)
+			c1++;
 
-		byte = (word&0xFF) ^ xor;
-		nibblebuf2[i] = byte;
-		xor = byte;
-	}
+		val = (b1[j] ^ c1) & 0xFF;
+		c3 += val;
+		if (c1 & 0x0100)
+		{
+			c3++;
+			c1 &= 0xFF;
+		}
+		out[i++] = val;
 
-	if (xor != byte_read_translation_SixAndTwo[nibblebuf[k]])
-	{
-		if(crc_error)
-			*crc_error = 0xFF;
-	}
-	else
-	{
-		if(crc_error)
-			*crc_error = 0x00;
-	}
+		val = (b2[j] ^ c3) & 0xFF;
+		c2 += val;
+		if (c3 > 0xFF)
+		{
+			c2++;
+			c3 &= 0xFF;
+		}
+		out[i++] = val;
 
-	buff1_offset = 0;
-	for (i=0;i<256;i++)
-	{
-		buff1_offset = (buff1_offset + 85) % 86;
-		byte = nibblebuf2[ 256 + buff1_offset];
-		nibblebuf2[256 + buff1_offset] = byte >> 2;
-		dataOut[i] = (nibblebuf2[i]<<2) | ((byte&2)>>1) | ((byte&1)<<1);
-	}
+		if (i == 524) break;
 
-	return (bit_offset + (bit_i*2))%intput_data_size;
+		val = (b3[j] ^ c2) & 0xFF;
+		c1 += val;
+		if (c2 > 0xFF)
+		{
+			c1++;
+			c2 &= 0xFF;
+		}
+		out[i++] = val;
+		j++;
+	}
+	c4 =  ((c1 & 0xC0) >> 6) | ((c2 & 0xC0) >> 4) | ((c3 & 0xC0) >> 2);
+	b3[174] = 0;
+
+	checksum[0] = c1 & 0x3F;
+	checksum[1] = c2 & 0x3F;
+	checksum[2] = c3 & 0x3F;
+	checksum[3] = c4 & 0x3F;
 }
 
 // 6 and 2 GCR encoding
-int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
+int get_next_AppleMacGCR_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {
 	int bit_offset,old_bit_offset;
 	int sector_size;
@@ -204,6 +264,8 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 	unsigned char CRC16_Low,datachksumerr;
 	int sector_extractor_sm;
 	int i;
+	unsigned char nibble_sector_data[1 + 699 + 3 + 3 ];
+	uint8_t checksum[4];
 
 	bit_offset=track_offset;
 	memset(sector,0,sizeof(HXCFE_SECTCFG));
@@ -215,10 +277,11 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 		switch(sector_extractor_sm)
 		{
 			case LOOKFOR_GAP1:
-				//0xD5 0xAA 0x96
-				// 1101 0101 1010 1010 1001 0110
+				// 0xD5 0xAA 0x96
+				//    D        5        A        A        9        6
+				// 1101     0101     1010     1010     1001     0110
 				// 01010001 00010001 01000100 01000100 01000001 00010100
-				// 0x51 11 44 44 41 14
+				//     0x51     0x11     0x44     0x44     0x41     0x14
 
 				fm_buffer[0]=0x51;
 				fm_buffer[1]=0x11;
@@ -241,14 +304,16 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 
 			case LOOKFOR_ADDM:
 
-				bit_offset = bit_offset + ( 6 * 8 );
-				sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_buffer,7,bit_offset,0);
+				memset(tmp_buffer,0,sizeof(tmp_buffer));
+
+				bit_offset += ( 6 * 8 );
+				sector->endsectorindex = cellstobin(track->databuffer,track->tracklen,tmp_buffer,7,bit_offset,0);
 				if(1)
 				{
-					tmp_buffer[0] = LUT_Byte2ShortOddBitsExpander[tmp_buffer[0]>>4]<<1 | (LUT_Byte2ShortOddBitsExpander[tmp_buffer[0]&0xF]);
-					tmp_buffer[1] = LUT_Byte2ShortOddBitsExpander[tmp_buffer[1]>>4]<<1 | (LUT_Byte2ShortOddBitsExpander[tmp_buffer[1]&0xF]);
-					tmp_buffer[2] = LUT_Byte2ShortOddBitsExpander[tmp_buffer[2]>>4]<<1 | (LUT_Byte2ShortOddBitsExpander[tmp_buffer[2]&0xF]);
-					tmp_buffer[3] = LUT_Byte2ShortOddBitsExpander[tmp_buffer[3]>>4]<<1 | (LUT_Byte2ShortOddBitsExpander[tmp_buffer[3]&0xF]);
+					for(i=0;i<5;i++)
+					{
+						tmp_buffer[i] = SixAndTwo_to_byte_translation[tmp_buffer[i]];
+					}
 
 					CRC16_Low = 0x00;
 					for(i=0;i<4;i++)
@@ -256,10 +321,9 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 						CRC16_Low = tmp_buffer[i] ^ CRC16_Low;
 					}
 
-
-					sector->cylinder = tmp_buffer[1];
-					sector->head = 0;
-					sector->sector = tmp_buffer[2];
+					sector->cylinder = ((tmp_buffer[2]&3)<<6) | (tmp_buffer[0]&0x3F);
+					sector->head = (tmp_buffer[2]>> 5) & 1;
+					sector->sector = tmp_buffer[1];
 
 					sector->startsectorindex = bit_offset;
 					sector->startdataindex = sector->endsectorindex;
@@ -277,19 +341,20 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 
 					sector->use_alternate_header_crc = 0x00;
 
-					sector->header_crc = tmp_buffer[3] ;
+					sector->header_crc = tmp_buffer[4] ;
 
-					if(!CRC16_Low)
+					if( (CRC16_Low&0x3F) == (tmp_buffer[4]) )
 					{ // crc ok !!!
 
 						sector->use_alternate_header_crc = 0x00;
-						floppycontext->hxc_printf(MSG_DEBUG,"Valid Apple II sector header found - Sect:%d",tmp_buffer[2]);
+						floppycontext->hxc_printf(MSG_DEBUG,"Valid Apple Macintosh sector header found - Sect:%d",tmp_buffer[2]);
 						old_bit_offset=bit_offset;
 
-						// 0xD5 0xAA 0xad
-						// 1101 0101 1010 1010 1010 1101
+						// 0xD5 0xAA 0xAD
+						//    D        5        A        A        A        D
+						// 1101     0101     1010     1010     1010     1101
 						// 01010001 00010001 01000100 01000100 01000100 01010001
-						// 0x51 11 44 44 44 51
+						//     0x51      0x11    0x44     0x44     0x44     0x51
 
 						fm_buffer[0]=0x51;
 						fm_buffer[1]=0x11;
@@ -302,24 +367,51 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 
 						if((bit_offset-old_bit_offset<((88+10)*8*2)) && bit_offset!=-1)
 						{
-
-							sector_size = 256;
+							sector_size = 512;
 							sector->sectorsize = sector_size;
-							sector->trackencoding = APPLE2_GCR6A2;
+							sector->trackencoding = APPLEMAC_GCR6A2;
 
 							sector->use_alternate_datamark = 0x00;
 							sector->alternate_datamark = 0x00;
 
 							sector->startdataindex=bit_offset;
 
-							sector->input_data =(unsigned char*)malloc(sector_size+2);
+							sector->input_data =(unsigned char*)malloc(sector_size+12+2);
 							if(sector->input_data)
 							{
-								memset(sector->input_data,0,sector_size+2);
+								memset(sector->input_data,0,sector_size+12+2);
 
-								sector->endsectorindex = DeNybbleSector6and2(sector->input_data,track->databuffer,track->tracklen,bit_offset+(6 * 8),&datachksumerr);
+								bit_offset = (bit_offset+(6*8)) % track->tracklen;
 
-								sector->data_crc = 0x00;
+								sector->endsectorindex = cellstobin(track->databuffer,track->tracklen,nibble_sector_data,sizeof(nibble_sector_data),bit_offset,0);
+
+								for(i=0;i<sizeof(nibble_sector_data);i++)
+								{
+									nibble_sector_data[i] = SixAndTwo_to_byte_translation[nibble_sector_data[i]];
+								}
+
+								DeNybbleSector6and2(sector->input_data, (uint8_t*)&nibble_sector_data[1], (uint8_t*)&checksum);
+
+								memcpy(sector->input_data, &sector->input_data[12],512);
+
+								if(
+									(checksum[3] == nibble_sector_data[700]) &&
+									(checksum[2] == nibble_sector_data[701]) &&
+									(checksum[1] == nibble_sector_data[702]) &&
+									(checksum[0] == nibble_sector_data[703])
+								)
+								{
+									datachksumerr = 0;
+								}
+								else
+								{
+									datachksumerr = 1;
+								}
+
+								sector->data_crc = (nibble_sector_data[700] << 24 ) | \
+								                   (nibble_sector_data[701] << 16 ) | \
+								                   (nibble_sector_data[702] << 8 ) | \
+								                   (nibble_sector_data[703] << 0 );
 
 								if(!datachksumerr)
 								{ // crc ok !!!
@@ -373,14 +465,9 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 	return bit_offset;
 }
 
-// TODO : older 5 and 3 GCR encoding
-int get_next_A2GCR1_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
+void tg_addAppleMacSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
-	return -1;
-}
 
-void tg_addAppleSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
-{
 	int32_t   trackenc;
 	unsigned char   sector_buffer[300];
 	int32_t   startindex,j,i;
@@ -507,7 +594,7 @@ void tg_addAppleSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 		}
 	}
 
-	trackenc = APPLEII_GCR2_ENCODING;
+	trackenc = APPLEMAC_GCR_ENCODING;
 
 	if(currentside->track_encoding_buffer)
 	{

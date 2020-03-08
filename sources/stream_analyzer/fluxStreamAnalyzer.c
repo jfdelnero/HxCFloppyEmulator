@@ -182,19 +182,19 @@ int detectpeaks(HXCFE* floppycontext,uint32_t *histogram)
 
 		pourcenttotal = pourcenttotal + stattab[i].pourcent;
 
-		if(ret<1113 && ret>=905)
+		if(ret<(TICKFREQ/224618) && ret>=(TICKFREQ/276243))
 		{
 			total250k=total250k+stattab[i].occurence;
 			pourcent250k = pourcent250k + stattab[i].pourcent;
 		}
 
-		if(ret<905 && ret>707)
+		if(ret<(TICKFREQ/276243) && ret>=(TICKFREQ/353606))
 		{
 			total300k=total300k+stattab[i].occurence;
 			pourcent300k = pourcent300k + stattab[i].pourcent;
 		}
 
-		if(ret<572 && ret>437)
+		if(ret<(TICKFREQ/437062) && ret>(TICKFREQ/572082))
 		{
 			total500k=total500k+stattab[i].occurence;
 			pourcent500k = pourcent500k + stattab[i].pourcent;
@@ -207,26 +207,26 @@ int detectpeaks(HXCFE* floppycontext,uint32_t *histogram)
 
 	if(pourcent500k > 2)
 	{
-		return 500;
+		return TICKFREQ/500000;
 	}
 
 	if((pourcent300k > 2) && (pourcent300k>pourcent250k))
 	{
-		return 833;
+		return TICKFREQ/300000;
 	}
 
 	if((pourcent250k > 2) && (pourcent250k>pourcent300k))
 	{
-		return 1000;
+		return TICKFREQ/250000;
 	}
 
 	if((pourcent300k>pourcent250k))
 	{
-		return 833;
+		return TICKFREQ/300000;
 	}
 	else
 	{
-		return 1000;
+		return TICKFREQ/250000;
 	}
 }
 
@@ -3657,6 +3657,7 @@ void hxcfe_FxStream_ExportToBmp(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream, char 
 		hxcfe_td_activate_analyzer(td, TYCOM_FM_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_TYCOM_FM_ENCODING", NULL)));
 		hxcfe_td_activate_analyzer(td, APPLEII_GCR1_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_APPLEII_GCR1_ENCODING", NULL)));
 		hxcfe_td_activate_analyzer(td, APPLEII_GCR2_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_APPLEII_GCR2_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, APPLEMAC_GCR_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_APPLEMAC_GCR_ENCODING", NULL)));
 		hxcfe_td_activate_analyzer(td, ARBURGDAT_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_ARBURGDAT_ENCODING", NULL)));
 		hxcfe_td_activate_analyzer(td, ARBURGSYS_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_ARBURGSYS_ENCODING", NULL)));
 		hxcfe_td_activate_analyzer(td, NORTHSTAR_HS_MFM_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_NORTHSTAR_HS_MFM_ENCODING", NULL)));

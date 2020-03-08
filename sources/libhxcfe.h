@@ -224,6 +224,7 @@ HXCFE_FLOPPY *         hxcfe_floppyDuplicate( HXCFE* floppycontext, HXCFE_FLOPPY
 #define NORTHSTAR_HS_DD                  0x10
 #define HEATHKIT_HS_SD                   0x11
 #define DECRX02_SDDD                     0x12
+#define APPLEMAC_GCR6A2                  0x13
 
 #define DIRECT_ENCODING                  0xFE
 
@@ -408,6 +409,7 @@ int32_t                hxcfe_FDC_SCANSECTOR  ( HXCFE* floppycontext, uint8_t tra
 #define NORTHSTAR_HS_MFM_ENCODING        0x0D
 #define HEATHKIT_HS_FM_ENCODING          0x0E
 #define DEC_RX02_M2FM_ENCODING           0x0F
+#define APPLEMAC_GCR_ENCODING            0x10
 
 #define UNKNOWN_ENCODING                 0xFF
 
@@ -484,6 +486,7 @@ int32_t                hxcfe_td_setName( HXCFE_TD *td, char * name );
 int32_t                hxcfe_td_exportToBMP( HXCFE_TD *td, char * filename );
 void                   hxcfe_td_deinit( HXCFE_TD *td );
 s_pulseslist *         hxcfe_td_getlastpulselist( HXCFE_TD *td );
+int                    hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream, int stream_index,uint16_t * sound_buffer, int nbsamples, int samplerate);
 
 #define TD_FLAG_HICONTRAST (0x1 << 0)
 #define TD_FLAG_BIGDOT     (0x1 << 1)
