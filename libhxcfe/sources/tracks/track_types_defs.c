@@ -435,6 +435,41 @@ isoibm_config formatstab[]=
 		0x00,0x00,0				// post crc data glith
 	},
 	{
+		APPLEMAC_GCR6A2,
+
+		0xFF,00,				// post index gap4 config
+
+		0x00,00,				// index sync config
+
+		0x00,0x00,0,			// index mark coding
+		0x00,0x00,0,
+
+		0xFF,20,				// gap1 config
+
+		0x00,12,				// h sync config
+
+		0x00,12,				// d sync config
+
+		0x00,0xFF,4,			// address mark coding
+		0xFA,0x00,2,
+
+		0xFF,8,					// gap2 config
+
+		0x00,0xFF,4,			// data mark coding
+		0xFA,0x00,2,
+
+		0xFF,84,				// gap3 config
+
+		0xFF,255,				// gap4 config
+
+		0xFF,0xFF,0xFF,0xFF,	// Track - Side - Sector - Size
+
+		0x0000,0x0000,			// crc, initial value
+
+		0x00,0x00,0,			// post crc header glith
+		0x00,0x00,0				// post crc data glith
+	},	
+	{
 		ARBURG_DAT,
 
 		0x00,00,				// post index gap4 config

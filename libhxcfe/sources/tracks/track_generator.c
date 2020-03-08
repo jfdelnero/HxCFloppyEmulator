@@ -59,6 +59,7 @@
 #include "tracks/track_formats/aed6200p_track.h"
 #include "tracks/track_formats/amiga_mfm_track.h"
 #include "tracks/track_formats/apple2_gcr_track.h"
+#include "tracks/track_formats/apple_mac_gcr_track.h"
 #include "tracks/track_formats/arburg_track.h"
 #include "tracks/track_formats/dec_rx02_track.h"
 #include "tracks/track_formats/emu_emulator_fm_track.h"
@@ -289,6 +290,7 @@ int32_t pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE 
 
 		case APPLE2_GCR5A3:
 		case APPLE2_GCR6A2:
+		case APPLEMAC_GCR6A2:
 		case DIRECT_ENCODING:
 			if( tg->last_bit_offset & 7)
 			{
@@ -775,6 +777,10 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 			currentside->track_encoding = APPLEII_GCR2_ENCODING;
 		break;
 
+		case APPLEMAC_GCR6A2:
+			currentside->track_encoding = APPLEMAC_GCR_ENCODING;
+		break;
+
 		case AMIGAFORMAT_DD:
 			currentside->track_encoding = AMIGA_MFM_ENCODING;
 		break;
@@ -1201,6 +1207,10 @@ void tg_addSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_
 		case APPLE2_GCR5A3:
 		case APPLE2_GCR6A2:
 			tg_addAppleSectorToTrack(tg,sectorconfig,currentside);
+			break;
+
+		case APPLEMAC_GCR6A2:
+			tg_addAppleMacSectorToTrack(tg,sectorconfig,currentside);
 			break;
 
 		case NORTHSTAR_HS_DD:

@@ -84,6 +84,7 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydis
 		hxcfe_td_activate_analyzer(td, TYCOM_FM_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_TYCOM_FM_ENCODING", NULL)));
 		hxcfe_td_activate_analyzer(td, APPLEII_GCR1_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_APPLEII_GCR1_ENCODING", NULL)));
 		hxcfe_td_activate_analyzer(td, APPLEII_GCR2_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_APPLEII_GCR2_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, APPLEMAC_GCR_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_APPLEMAC_GCR_ENCODING", NULL)));
 		hxcfe_td_activate_analyzer(td, ARBURGDAT_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_ARBURGDAT_ENCODING", NULL)));
 		hxcfe_td_activate_analyzer(td, ARBURGSYS_ENCODING, atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_ARBURGSYS_ENCODING", NULL)));
 

@@ -61,6 +61,7 @@
 #include "tracks/track_formats/aed6200p_track.h"
 #include "tracks/track_formats/amiga_mfm_track.h"
 #include "tracks/track_formats/apple2_gcr_track.h"
+#include "tracks/track_formats/apple_mac_gcr_track.h"
 #include "tracks/track_formats/arburg_track.h"
 #include "tracks/track_formats/dec_rx02_track.h"
 #include "tracks/track_formats/emu_emulator_fm_track.h"
@@ -194,6 +195,9 @@ HXCFE_SECTCFG* hxcfe_getNextSector( HXCFE_SECTORACCESS* ss_ctx, int32_t track, i
 		break;
 		case APPLEII_GCR2_ENCODING:
 			bitoffset = get_next_A2GCR2_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
+		break;
+		case APPLEMAC_GCR_ENCODING:
+			bitoffset = get_next_AppleMacGCR_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
 		case ARBURGDAT_ENCODING:
 			bitoffset = get_next_Arburg_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
@@ -561,6 +565,7 @@ int32_t hxcfe_getFloppySize( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t * n
 	typetab[i++]=EMU_FM_ENCODING;
 	typetab[i++]=APPLEII_GCR1_ENCODING;
 	typetab[i++]=APPLEII_GCR2_ENCODING;
+	typetab[i++]=APPLEMAC_GCR_ENCODING;
 	typetab[i++]=-1;
 
 	ss_ctx=hxcfe_initSectorAccess(floppycontext,fp);

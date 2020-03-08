@@ -2184,6 +2184,14 @@ SOURCE=..\sources\tracks\track_formats\apple2_gcr_track.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\sources\tracks\track_formats\apple_mac_gcr_track.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\apple_mac_gcr_track.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\sources\tracks\track_formats\arburg_track.c
 # End Source File
 # Begin Source File
