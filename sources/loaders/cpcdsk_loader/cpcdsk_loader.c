@@ -350,7 +350,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 					else
 					{
 
-						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"\nnnumber %d - empty !\n ",i);
+						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"\nnumber %d - empty !\n ",i);
 
 						if(!floppydisk->tracks[t])
 						{
