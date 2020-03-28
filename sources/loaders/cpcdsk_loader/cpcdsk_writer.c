@@ -139,20 +139,25 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 					}
 
 					trackinfooffset=ftell(cpcdskfile);
-					fwrite(&cpcdsk_th,sizeof(cpcdsk_trackheader),1,cpcdskfile);
-					sectorlistoffset=ftell(cpcdskfile);
 
 					if(nbsector)
 					{
-						if(cpcdsk_fh->number_of_sides<(i+1))cpcdsk_fh->number_of_sides=i+1;
-						if(cpcdsk_fh->number_of_tracks<(j+1))cpcdsk_fh->number_of_tracks=j+1;
+						fwrite(&cpcdsk_th,sizeof(cpcdsk_trackheader),1,cpcdskfile);
 
+						sectorlistoffset = ftell(cpcdskfile);
+
+						if(cpcdsk_fh->number_of_sides<(i+1))
+							cpcdsk_fh->number_of_sides=i+1;
+
+						if(cpcdsk_fh->number_of_tracks<(j+1))
+							cpcdsk_fh->number_of_tracks=j+1;
 
 						memset(&cpcdsk_s,0,sizeof(cpcdsk_sector));
 						for(k=0;k<nbsector;k++)
 						{
 							fwrite(&cpcdsk_s,sizeof(cpcdsk_sector),1,cpcdskfile);
 						}
+
 						memset(tmp_str,0,0x100);
 						fwrite(&tmp_str,0x100-(((sizeof(cpcdsk_sector)*nbsector)+sizeof(cpcdsk_trackheader))%0x100),1,cpcdskfile);
 
@@ -263,11 +268,11 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 						}while(k<nbsector);
 
 						k=0;
-						do
+						while(k<nbsector)
 						{
 							hxcfe_freeSectorConfig( ss, sca[k] );
 							k++;
-						}while(k<nbsector);
+						};
 
 						if(sca)
 							free(sca);
@@ -280,9 +285,16 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 						log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
 						strcat(log_str,tmp_str);
 
+						disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt] = (char)( (ftell(cpcdskfile)-trackinfooffset) / 256 );
+					}
+					else
+					{
+						// Unformatted track ...
+						// A size of "0" indicates an unformatted track.
+						// In this case there is no data, and no track information block for this track in the image file! 
+						disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt] = 0;
 					}
 
-					disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt] = (char)( (ftell(cpcdskfile)-trackinfooffset) / 256 );
 					track_cnt++;
 
 					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,log_str);
