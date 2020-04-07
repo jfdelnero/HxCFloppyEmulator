@@ -31,6 +31,12 @@ X XXXXXXX 2020 : HxCFloppyEmulator 2.X.X.X (Work in Progress)
 
 -> Kryoflux stream loader : Code re-factored and fixed.
 
+-> IPF Loader : Disable the CAPS library DI_LOCK_INDEX option (fake index track buffer realignment).
+
+-> CPC EDSK writer : Fix EDSK export with unformatted track(s).
+
+-> Macintosh disk support : Macintosh GCR decoding, CLV disks stream import (WIP!).
+
 -> Disk viewer : Resizeable window.
 
 -> Disk viewer : Realistic physical floppy disk state representation (3"1/2 135TPI, 5"1/4 96TPI, 5"1/4 48TPI, 8" 48TPI).
