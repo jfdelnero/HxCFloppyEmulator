@@ -35,6 +35,8 @@ X XXXXXXX 2020 : HxCFloppyEmulator 2.X.X.X (Work in Progress)
 
 -> CPC EDSK writer : Fix EDSK export with unformatted track(s).
 
+-> SCP Writer : Randomize stream on weak-bits.
+
 -> Macintosh disk support : Macintosh GCR decoding, CLV disks stream import (WIP!).
 
 -> Disk viewer : Resizeable window.
