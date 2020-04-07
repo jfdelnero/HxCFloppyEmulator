@@ -273,11 +273,12 @@ int StreamerThreadProc(void* floppycontext,void* context)
 	int offset_table_index;
 	FILE * f;
 	uint32_t flags;
-
 	chunk_header * ch;
 	int ret;
 	HXCFE_FXSA * fxsa;
 	HXCFE_TRKSTREAM* trkstream;
+	uint16_t * wavebuf;
+	int snd_stream_index,snd_stream_index_old;
 
 	streamth = (streamthread*)context;
 	guicontext = (s_gui_context *)streamth->guicontext;
@@ -376,6 +377,7 @@ int StreamerThreadProc(void* floppycontext,void* context)
 											hxcfe_td_activate_analyzer(td,TYCOM_FM_ENCODING,w->tycom_bt->value());
 											hxcfe_td_activate_analyzer(td,APPLEII_GCR1_ENCODING,w->apple2_bt->value());
 											hxcfe_td_activate_analyzer(td,APPLEII_GCR2_ENCODING,w->apple2_bt->value());
+											hxcfe_td_activate_analyzer(td,APPLEMAC_GCR_ENCODING,w->apple2_bt->value());
 											hxcfe_td_activate_analyzer(td,ARBURGDAT_ENCODING,w->arburg_bt->value());
 											hxcfe_td_activate_analyzer(td,ARBURGSYS_ENCODING,w->arburg_bt->value());
 											hxcfe_td_activate_analyzer(td,AED6200P_MFM_ENCODING,w->aed6200p_bt->value());
