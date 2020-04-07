@@ -131,7 +131,7 @@ class floppy_infos_window {open
           xywh {1099 305 76 15} labelsize 10
         }
         Fl_Light_Button apple2_bt {
-          label {Apple II}
+          label {Apple}
           user_data this
           callback disk_infos_window_callback
           xywh {1015 350 76 15} labelsize 10

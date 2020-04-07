@@ -118,7 +118,7 @@ class floppy_streamer_window {open
           xywh {1149 264 76 15} labelsize 10
         }
         Fl_Light_Button apple2_bt {
-          label {Apple II}
+          label {Apple}
           user_data this
           callback disk_streamer_window_callback
           xywh {1065 309 76 15} labelsize 10
