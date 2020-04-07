@@ -1,5 +1,6 @@
 #CC=i386-pc-linux-gcc
 CC=gcc
+BUILD_CC=gcc
 CPP=g++
 
 TARGET := $(shell uname)
@@ -213,7 +214,7 @@ rle.o : $(BASEDIR)/gui/microintro/packer/rle.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 bmptoh:
-	cd $(BASEDIR)/gui/microintro/converttools/bmptob8 && $(MAKE)
+	cd $(BASEDIR)/gui/microintro/converttools/bmptob8 && $(MAKE) CC=${BUILD_CC}
 
 clean:
 	rm -rf *.o
