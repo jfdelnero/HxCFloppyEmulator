@@ -96,6 +96,7 @@ EXPORTS
    hxcfe_td_exportToBMP         @134
    hxcfe_td_select_view_type    @135
    hxcfe_td_get_view_mode_name  @136
+   hxcfe_td_stream_to_sound     @137
 
    hxcfe_generateFloppy			@150
 
