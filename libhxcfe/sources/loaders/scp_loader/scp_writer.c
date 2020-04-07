@@ -77,6 +77,7 @@ uint32_t update_checksum(uint32_t checksum,unsigned char * buffer,unsigned int s
 unsigned short getNextPulse(HXCFE_SIDE * track,int * offset,int * rollover)
 {
 	int i;
+	unsigned char tmp_byte;
 	float totaltime;
 
 	*rollover = 0x00;
@@ -107,7 +108,17 @@ unsigned short getNextPulse(HXCFE_SIDE * track,int * offset,int * rollover)
 			return 0xFFFF;
 		}
 
-		if( track->databuffer[(*offset)>>3] & (0x80 >> ((*offset) & 7) ) )
+		if(track->flakybitsbuffer)
+		{
+			tmp_byte =  (track->databuffer[(*offset)>>3] & (0x80 >> ((*offset) & 7) )) ^ \
+						( ( track->flakybitsbuffer[(*offset)>>3] & (rand() & 0xFF) ) & (0x80 >> ((*offset) & 7) ));
+		}
+		else
+		{
+			tmp_byte = (track->databuffer[(*offset)>>3] & (0x80 >> ((*offset) & 7) ));
+		}
+
+		if( tmp_byte )
 		{
 			return (int)((float)totaltime/(float)25);
 		}
