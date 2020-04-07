@@ -122,7 +122,7 @@ floppy_streamer_window::floppy_streamer_window() {
         eemu_bt->labelsize(10);
         eemu_bt->callback((Fl_Callback*)disk_streamer_window_callback, (void*)(this));
       } // Fl_Light_Button* eemu_bt
-      { apple2_bt = new Fl_Light_Button(1065, 309, 76, 15, "Apple II");
+      { apple2_bt = new Fl_Light_Button(1065, 309, 76, 15, "Apple");
         apple2_bt->labelsize(10);
         apple2_bt->callback((Fl_Callback*)disk_streamer_window_callback, (void*)(this));
       } // Fl_Light_Button* apple2_bt
