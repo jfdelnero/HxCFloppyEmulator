@@ -98,6 +98,9 @@ extern  CAPSUNLOCKALLTRACKS pCAPSUnlockAllTracks;
 extern  CAPSGETVERSIONINFO pCAPSGetVersionInfo;
 extern  CAPSREMIMAGE pCAPSRemImage;
 
+#define INDEX_POSITION  0
+#define INDEX_DURATION  2000
+
 int IPF_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IPF_libIsValidDiskFile");
@@ -268,7 +271,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	cvi.type = LIB_TYPE;
 	pCAPSGetVersionInfo (&cvi, 0);
 
-	flag = DI_LOCK_DENVAR/*|DI_LOCK_DENNOISE|DI_LOCK_NOISE*/|DI_LOCK_UPDATEFD|DI_LOCK_TYPE | DI_LOCK_INDEX;
+	flag = DI_LOCK_DENVAR/*|DI_LOCK_DENNOISE|DI_LOCK_NOISE*/|DI_LOCK_UPDATEFD|DI_LOCK_TYPE;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CAPS: library version %d.%d (flags=%08X)", cvi.release, cvi.revision, cvi.flag);
 	oldlib = (cvi.flag & (DI_LOCK_TRKBIT | DI_LOCK_OVLBIT)) != (DI_LOCK_TRKBIT | DI_LOCK_OVLBIT);
@@ -316,7 +319,11 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				floppydisk->floppyBitRate=250000;
 				rpm=300;
 				floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
-				floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+
+				floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+				if(!floppydisk->tracks)
+					goto alloc_error;
+
 				memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 				for(i=ci2.mincylinder;i<=ci2.maxcylinder;i++)
@@ -345,8 +352,14 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							{
 								floppydisk->tracks[i] = (HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
 								currentcylinder = floppydisk->tracks[i];
+								if( !currentcylinder )
+									goto alloc_error;
+
 								currentcylinder->number_of_side = floppydisk->floppyNumberOfSide;
 								currentcylinder->sides = (HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
+								if( !currentcylinder->sides )
+									goto alloc_error;
+
 								memset(currentcylinder->sides,0,sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
 
 								currentcylinder->floppyRPM=rpm;
@@ -356,9 +369,12 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								currentcylinder = floppydisk->tracks[i];
 							}
 
-							currentcylinder->sides[j]=malloc(sizeof(HXCFE_SIDE));
-							memset(currentcylinder->sides[j],0,sizeof(HXCFE_SIDE));
-							currentside=currentcylinder->sides[j];
+							currentcylinder->sides[j] = malloc(sizeof(HXCFE_SIDE));
+							currentside = currentcylinder->sides[j];
+							if( !currentside )
+								goto alloc_error;
+
+							memset(currentside,0,sizeof(HXCFE_SIDE));
 
 							currentside->flakybitsbuffer=0;
 							currentside->track_encoding=AMIGA_MFM_ENCODING;
@@ -373,7 +389,10 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								currentside->tracklen=ti.tracklen*sizefactor;
 								len=(currentside->tracklen>>3)+16;
 
-								currentside->databuffer=malloc(len);
+								currentside->databuffer = malloc(len);
+								if( !currentside->databuffer )
+									goto alloc_error;
+
 								memset(currentside->databuffer,0,len);
 
 								//flakey bits in track ?
@@ -392,7 +411,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 										currentside->tracklen=trackcopy(currentside->databuffer,ti.trackbuf,overlap,ti.tracklen,(unsigned char)((ti.overlap<0)?0xFF:0x00));
 
 										currentside->flakybitsbuffer = malloc(len);
-										if(currentside->flakybitsbuffer)
+										if(!currentside->flakybitsbuffer)
 										{
 											memset(currentside->flakybitsbuffer,0x00,len);
 
@@ -452,10 +471,17 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							else
 							{
 								currentside->tracklen=12500*8;
+
 								len=currentside->tracklen>>3;
-								currentside->databuffer=malloc(len);
+
+								currentside->databuffer = malloc(len);
+								if( !currentside->databuffer )
+									goto alloc_error;
 								memset(currentside->databuffer,0,len);
-								currentside->flakybitsbuffer=malloc(len);
+
+								currentside->flakybitsbuffer = malloc(len);
+								if( !currentside->flakybitsbuffer )
+									goto alloc_error;
 								memset(currentside->flakybitsbuffer,0xFF,len);
 							}
 
@@ -471,9 +497,16 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							{
 								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Variable bit rate!!!");
 								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"timelen     : %d",ti.timelen);
-								len=ti.timelen*sizeof(uint32_t);
-								if(currentside->tracklen&7) len=len+4;
-								currentside->timingbuffer=malloc(len);
+
+								len = ti.timelen*sizeof(uint32_t);
+
+								if(currentside->tracklen&7)
+									len=len+4;
+
+								currentside->timingbuffer = malloc(len);
+								if(!currentside->timingbuffer)
+									goto alloc_error;
+
 								memset(currentside->timingbuffer,0,len);
 								k=0;
 								do
@@ -515,15 +548,15 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 							currentside->number_of_sector=ti.sectorcnt;
 
-							len=currentside->tracklen>>3;
-							if(currentside->tracklen&0x7) len++;
+							len = currentside->tracklen>>3;
+							if(currentside->tracklen&0x7)
+								len++;
 
+							currentside->indexbuffer = malloc(len);
+							if( !currentside->indexbuffer )
+								goto alloc_error;
 
-							currentside->indexbuffer=malloc(len);
 							memset(currentside->indexbuffer,0,len);
-							fillindex(-2500,currentside,2500,TRUE,0);
-							//fillindex(0,currentside,3200,0);
-
 						}
 						else
 						{
@@ -531,19 +564,28 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							if(!floppydisk->tracks[i])
 							{
 								floppydisk->tracks[i]=(HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
-								currentcylinder=floppydisk->tracks[i];
+								currentcylinder = floppydisk->tracks[i];
+								if( !currentcylinder )
+									goto alloc_error;
+
+								
 								currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-								currentcylinder->sides=(HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
+								currentcylinder->sides = (HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
+								if(!currentcylinder->sides)
+									goto alloc_error;
 								memset(currentcylinder->sides,0,sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
 
-								currentcylinder->floppyRPM=rpm;
+								currentcylinder->floppyRPM = rpm;
 							}
 							else
 							{
 								currentcylinder=floppydisk->tracks[i];
 							}
 
-							currentcylinder->sides[j]=malloc(sizeof(HXCFE_SIDE));
+							currentcylinder->sides[j] = malloc(sizeof(HXCFE_SIDE));
+							if(!currentcylinder->sides[j])
+								goto alloc_error;
+
 							memset(currentcylinder->sides[j],0,sizeof(HXCFE_SIDE));
 							currentside=currentcylinder->sides[j];
 
@@ -551,18 +593,29 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							currentside->timingbuffer=0;
 							currentside->bitrate = 250000;
 							currentside->tracklen=12500 * 8;
-							currentside->databuffer=malloc(currentside->tracklen>>3);
+							currentside->databuffer = malloc(currentside->tracklen>>3);
+							if(!currentside->databuffer)
+								goto alloc_error;
+
 							memset(currentside->databuffer,0x11,currentside->tracklen>>3);
 
-							currentside->flakybitsbuffer=malloc(currentside->tracklen>>3);
+							currentside->flakybitsbuffer = malloc(currentside->tracklen>>3);
+							if(!currentside->flakybitsbuffer)
+								goto alloc_error;
+
 							memset(currentside->flakybitsbuffer,0xFF,currentside->tracklen>>3);
 
-							currentside->indexbuffer=malloc(currentside->tracklen>>3);
-							memset(currentside->indexbuffer,0,currentside->tracklen>>3);
-							//fillindex(-2500,currentside,2500,TRUE,0);
+							currentside->indexbuffer = malloc(currentside->tracklen>>3);
+							if(!currentside->indexbuffer)
+								goto alloc_error;
 
+							memset(currentside->indexbuffer,0,currentside->tracklen>>3);
 						}
 
+						if(currentside)
+						{
+							fillindex(INDEX_POSITION,currentside,INDEX_DURATION,TRUE,0);
+						}
 					}
 
 				}
@@ -586,6 +639,11 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	}
 
+	return HXCFE_INTERNALERROR;
+
+alloc_error:
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"IPF Loader : Memory allocation error !");
+	// TODO : Free the allocated buffers
 
 	return HXCFE_INTERNALERROR;
 }
