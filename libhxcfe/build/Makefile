@@ -1,5 +1,6 @@
 #CC=i386-pc-linux-gcc
 CC=gcc
+BUILD_CC=gcc
 AR=ar
 
 TARGET := $(shell uname)
@@ -812,7 +813,7 @@ fat_write.o : $(BASEDIR)/thirdpartylibs/FATIOlib/fat_write.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 bmptoh:
-	cd $(BASEDIR)/xml_disk/converttools/bmptob8 && $(MAKE)
+	cd $(BASEDIR)/xml_disk/converttools/bmptob8 && $(MAKE) CC=$(BUILD_CC)
 
 $(BASEDIR)/xml_disk/DiskLayouts/%.h : $(BASEDIR)/xml_disk/DiskLayouts/xml_files/%.xml
 	cd $(BASEDIR)/xml_disk/DiskLayouts/xml_files/ && ../../converttools/bmptob8/bmptoh $(basename $(notdir $<.xml)) -DATA && mv data_$(basename $(notdir $<))_xml.h ..
