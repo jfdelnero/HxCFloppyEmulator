@@ -2405,11 +2405,11 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 		case 0:
 		break;
 		case 1:
-			disc(td,x_pos_1 - um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, 10000 ), \
+			disc(td,x_pos_1 + um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, 10000 ), \
 			          y_pos, \
 			          um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, 1250 ), \
 			          0x00000000,0x808080);
-			disc(td,x_pos_2 - um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, 10000 ), \
+			disc(td,x_pos_2 + um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, 10000 ), \
 			          y_pos, \
 			          um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, 1250 ), \
 			          0x00000000,0x808080);
