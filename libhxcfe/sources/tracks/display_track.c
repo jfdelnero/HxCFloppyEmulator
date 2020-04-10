@@ -831,6 +831,10 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	if(!xresstep)
 		return;
 
+	if(td->name)
+	{
+		putstring8x8(td,td->xsize - (strlen(td->name)*8) ,1,td->name,0xAAAAAA,0x000000,0,0);
+	}
 
 	//////////////////////////////////////////
 	// Scatter drawing
