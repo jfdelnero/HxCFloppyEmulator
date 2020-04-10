@@ -50,6 +50,8 @@
 #include <sys/stat.h>
 #include <math.h>
 #include <stdint.h>
+#include <string.h>
+#include <time.h>
 
 #include "fl_includes.h"
 
@@ -94,6 +96,8 @@ typedef struct _chunk_header
 #define HXCSTREAM_HEADERSIGN 0x484B4843
 
 FILE * fstreamin = NULL;
+char tmp_stream_file_name[256];
+
 #pragma pack()
 
 static double adjust_timescale(double slide)
@@ -205,10 +209,24 @@ int StreamerThreadRxDataProc(void* floppycontext,void* context)
 	unsigned char * buffer;
 	chunk_header * ch;
 	int ret,failure;
+	time_t time_now;
+	struct tm * time_info;
 
 	buffer =(unsigned char*) malloc(MAX_CHUNKSIZE);
 	if(!buffer)
 		return -1;
+
+	memset(tmp_stream_file_name,0,sizeof(tmp_stream_file_name));
+
+	// Get system time
+	time(&time_now);
+	time_info = localtime(&time_now);
+	sprintf(tmp_stream_file_name,"pauline_tmp_buffer_%.4d-%.2d-%.2d_%.2dh%.2dm%.2ds.hxcstream",time_info->tm_year + 1900, \
+	                                                                                       time_info->tm_mon+1, \
+	                                                                                       time_info->tm_mday, \
+	                                                                                       time_info->tm_hour, \
+	                                                                                       time_info->tm_min, \
+	                                                                                       time_info->tm_sec );
 
 	ret = 0;
 	ch = (chunk_header *)buffer;
@@ -227,7 +245,7 @@ int StreamerThreadRxDataProc(void* floppycontext,void* context)
 					ret = network_read(dat_connection, (unsigned char*)&buffer[sizeof(chunk_header)], ch->size - sizeof(chunk_header),0);
 
 					if(!fstreamin)
-						fstreamin = fopen("tmp.hxcstream","wb");
+						fstreamin = fopen(tmp_stream_file_name,"wb");
 
 					if(fstreamin)
 					{
@@ -321,7 +339,7 @@ int StreamerThreadProc(void* floppycontext,void* context)
 
 			hxc_pause(50);
 
-			f = fopen("tmp.hxcstream","rb");
+			f = fopen(tmp_stream_file_name,"rb");
 			if(f)
 			{
 				do
