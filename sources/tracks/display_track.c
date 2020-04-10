@@ -2053,8 +2053,16 @@ s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int t
 					// Right Line
 					draw_circle (td,0xFF6666,(float)((float)2 * PI)*(endsector_timingoffset/track_timing),(float)((float)2 * PI)*(endsector_timingoffset/track_timing),xpos,ypos,diam,0,thickness,mirror);
 
-					sl->start_angle = (float)((float)2 * PI)*(startsector_timingoffset/track_timing);
-					sl->end_angle = (float)((float)2 * PI)*(endsector_timingoffset/track_timing);
+					if(!mirror)
+					{
+						sl->start_angle = (float)((float)2 * PI)*(startsector_timingoffset/track_timing);
+						sl->end_angle = (float)((float)2 * PI)*(endsector_timingoffset/track_timing);
+					}
+					else
+					{
+						sl->end_angle = (float)(2 * PI)-((float)2 * PI)*(startsector_timingoffset/track_timing);
+						sl->start_angle = (float)(2 * PI)-((float)2 * PI)*(endsector_timingoffset/track_timing);						
+					}
 
 					sl->diameter = diam;
 					sl->thickness = thickness;
@@ -2577,7 +2585,6 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 
 	draw_circle (td,0xEFEFEF,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,start_tracks_space_radius[0] - (int)(((max_physical_tracks[0]+1) * track_ep[0])) + 1,1,(int)0,1);
 	draw_circle (td,0xEFEFEF,0,(float)((float)((float)2 * PI)),x_pos_2,y_pos,start_tracks_space_radius[1] - (int)(((max_physical_tracks[0]+1) * track_ep[1])) + 1,1,(int)0,0);
-
 
 	if(floppy_dimension[physical_dim].window[0] >= 0)
 	{
