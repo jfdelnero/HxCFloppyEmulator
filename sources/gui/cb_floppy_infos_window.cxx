@@ -351,6 +351,8 @@ int InfosThreadProc(void* floppycontext,void* context)
 		{
 			hxc_entercriticalsection(guicontext->hxcfe,1);
 
+			td = (HXCFE_TD *)guicontext->td;
+
 			if(guicontext->trackviewerfloppy_updateneeded)
 			{
 				guicontext->trackviewerfloppy_updateneeded = 0;
@@ -363,10 +365,13 @@ int InfosThreadProc(void* floppycontext,void* context)
 				if(guicontext->loadedfloppy)
 				{
 					guicontext->trackviewerfloppy = hxcfe_floppyDuplicate(guicontext->hxcfe,guicontext->loadedfloppy);
+					if(strlen(guicontext->bufferfilename))
+					{
+						hxcfe_td_setName( td, guicontext->bufferfilename );
+					}
 				}
-			}
 
-			td = (HXCFE_TD *)guicontext->td;
+			}
 
 			hxcfe_td_activate_analyzer(td,ISOIBM_MFM_ENCODING,w->iso_mfm_bt->value());
 			hxcfe_td_activate_analyzer(td,ISOIBM_FM_ENCODING,w->iso_fm_bt->value());
