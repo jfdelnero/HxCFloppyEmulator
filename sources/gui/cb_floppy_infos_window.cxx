@@ -370,7 +370,6 @@ int InfosThreadProc(void* floppycontext,void* context)
 						hxcfe_td_setName( td, guicontext->bufferfilename );
 					}
 				}
-
 			}
 
 			hxcfe_td_activate_analyzer(td,ISOIBM_MFM_ENCODING,w->iso_mfm_bt->value());
