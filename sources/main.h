@@ -59,4 +59,6 @@ typedef struct s_gui_context_
 
 	int exit;
 
+	char pauline_ip_address[DEFAULT_TEXT_BUFFER_SIZE];
+
 }s_gui_context;
