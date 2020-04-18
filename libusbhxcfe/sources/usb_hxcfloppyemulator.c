@@ -422,7 +422,7 @@ int32_t ftdichiplistener(HXCFE* floppycontext,USBHXCFE * hw_context)
 	hw_context->usbstats.dataout=0;
 	hw_context->usbstats.synclost=0;
 	if(!hw_context->usbstats.packetsize)
-		hw_context->usbstats.packetsize=1664;
+		hw_context->usbstats.packetsize = atoi(hxcfe_getEnvVar( floppycontext, "USB_HXCFLOPPYEMULATOR_DEFAULT_PACKET_SIZE", NULL ));
 	hw_context->usbstats.totalpacketsent=0;
 	hw_context->usbstats.packetsent=0;
 	hw_context->usbstats.totaldataout=0;
@@ -780,7 +780,7 @@ int32_t ftdichiplistener(HXCFE* floppycontext,USBHXCFE * hw_context)
 
 					srambuffer[15]=0xCC;
 					srambuffer[16]=ctrl_byte;
-;
+
 					if(!checkalignement)
 						srambuffer[8]=0x33; // synchro
 
