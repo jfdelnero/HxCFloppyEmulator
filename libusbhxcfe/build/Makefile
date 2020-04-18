@@ -50,7 +50,7 @@ endif
 
 all: $(EXEC)
 
-libusbhxcfe.dll: win32_libusbhxcfe_res.o usb_hxcfloppyemulator.o variablebitrate.o ftdi.o ../../../build/libhxcadaptor.a
+libusbhxcfe.dll: win32_libusbhxcfe_res.o usb_hxcfloppyemulator.o variablebitrate.o ftdi.o ../../../build/libhxcadaptor.a ../../../build/libhxcfe.dll
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
