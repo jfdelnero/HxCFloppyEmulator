@@ -73,3 +73,18 @@ set SCPLOADER_BMPEXPORT 0
 
 set STREAMHFELOADER_BITRATE 0
 set STREAMHFELOADER_BMPEXPORT 0
+
+#
+# 2008 USB HxC Floppy Emulator parameters
+# ( FTDI + CPLD based hardware )
+#
+
+set USB_HXCFLOPPYEMULATOR_DEFAULT_PACKET_SIZE 1664
+
+#
+# Pauline Parameters
+# (High-end high resolution Floppy emulator / Floppy dumper)
+#
+
+set PAULINE_DEFAULT_IP_ADDRESS "192.168.20.7"
+
