@@ -1167,6 +1167,11 @@ Main_Window::Main_Window()
 		streamer_window->amiga_mfm_bt->value(1);
 		streamer_window->iso_fm_bt->value(1);
 		streamer_window->iso_mfm_bt->value(1);
+
+		memset(guicontext->pauline_ip_address,0,sizeof(guicontext->pauline_ip_address));
+
+		hxcfe_getEnvVar( guicontext->hxcfe, (char*)"PAULINE_DEFAULT_IP_ADDRESS", guicontext->pauline_ip_address );
+
 		streamer_window->server_address->value("192.168.20.7");
 
 		streamer_window->track_number_slide->scrollvalue((int)0,1,0,86);
