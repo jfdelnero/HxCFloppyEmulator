@@ -75,6 +75,12 @@ set STREAMHFELOADER_BITRATE 0
 set STREAMHFELOADER_BMPEXPORT 0
 
 #
+# IPF Loader flags/parameters
+#
+
+set LOADER_IPF_CAPS_DI_LOCK_INDEX 0
+
+#
 # 2008 USB HxC Floppy Emulator parameters
 # ( FTDI + CPLD based hardware )
 #

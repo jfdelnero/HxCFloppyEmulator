@@ -271,33 +271,35 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	cvi.type = LIB_TYPE;
 	pCAPSGetVersionInfo (&cvi, 0);
 
-	flag = DI_LOCK_DENVAR/*|DI_LOCK_DENNOISE|DI_LOCK_NOISE*/|DI_LOCK_UPDATEFD|DI_LOCK_TYPE;
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CAPS: library version %d.%d (flags=%08X)", cvi.release, cvi.revision, cvi.flag);
+
 	oldlib = (cvi.flag & (DI_LOCK_TRKBIT | DI_LOCK_OVLBIT)) != (DI_LOCK_TRKBIT | DI_LOCK_OVLBIT);
-	sizefactor=8;
+
+	sizefactor = 8;
+
+	flag = DI_LOCK_DENVAR | DI_LOCK_UPDATEFD | DI_LOCK_TYPE;
+
+	if( atoi(hxcfe_getEnvVar( imgldr_ctx->hxcfe, "LOADER_IPF_CAPS_DI_LOCK_INDEX", NULL ) ))
+	{
+		flag |= DI_LOCK_INDEX;
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"CAPS DI_LOCK_INDEX flag enabled");		
+	}
 
 	if (!oldlib)
 	{
-		sizefactor=1;
-		flag |= DI_LOCK_TRKBIT | DI_LOCK_OVLBIT;
+		sizefactor = 1;
+		flag |= ( DI_LOCK_TRKBIT | DI_LOCK_OVLBIT );
 	}
 
-//	for (i = 0; i < 4; i++)
-//		caps_cont[i] = pCAPSAddImage ();
+	img = pCAPSAddImage();
 
-
-	//flag=DI_LOCK_DENVAR|DI_LOCK_UPDATEFD|DI_LOCK_TYPE;
-
-
-	img=pCAPSAddImage();
-
-	if(img!=-1)
+	if(img != -1)
 	{
 		if(pCAPSLockImageMemory(img, fileimg,filesize,0)!=imgeUnsupported )
 		{
 			pCAPSLoadImage(img, flag);
 			pCAPSGetImageInfo(&ci2, img);
+
 			////// debug //////
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Image Info: %s",imgfile);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Type     : %.8x",ci2.type);
