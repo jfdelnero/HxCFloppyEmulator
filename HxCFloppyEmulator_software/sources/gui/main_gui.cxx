@@ -1188,7 +1188,7 @@ Main_Window::Main_Window()
 
 		hxcfe_getEnvVar( guicontext->hxcfe, (char*)"PAULINE_DEFAULT_IP_ADDRESS", guicontext->pauline_ip_address );
 
-		streamer_window->server_address->value("192.168.20.7");
+		streamer_window->server_address->value(guicontext->pauline_ip_address);
 
 		streamer_window->track_number_slide->scrollvalue((int)0,1,0,86);
 		streamer_window->side_number_slide->scrollvalue((int)0,1,0,2);
