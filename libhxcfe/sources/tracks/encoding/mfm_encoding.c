@@ -66,16 +66,47 @@ int mfmtobin(unsigned char * input_data,int input_data_size,unsigned char * deco
 {
 	int i,j;
 	unsigned char b,c1,c2;
+	int first_loop_data_size;
 
 	i = 0;
 	b = 0x80;
 
-	bit_offset = bit_offset%input_data_size;
-	j = bit_offset>>3;
+	bit_offset %= input_data_size;
+	j = bit_offset >> 3;
 
-	do
+	first_loop_data_size =  (input_data_size - bit_offset) / 16;
+
+	if(first_loop_data_size > decod_data_size)
+		first_loop_data_size = decod_data_size;
+
+	// First loop without modulo.
+	while(i<first_loop_data_size)
 	{
+		c1 = (unsigned char)( input_data[j] & (0x80>>(bit_offset&7)) );
+		bit_offset++;
+		j = bit_offset>>3;
 
+		c2 = (unsigned char)( input_data[j] & (0x80>>(bit_offset&7)) );
+		bit_offset++;
+		j = bit_offset>>3;
+
+		if( !c1 && c2 )
+			decod_data[i] = (unsigned char)( decod_data[i] | b );
+		else
+			decod_data[i] = (unsigned char)( decod_data[i] & ~b );
+
+		b = (unsigned char)( b>>1 );
+		if(!b)
+		{
+			b=0x80;
+			i++;
+		}
+	}
+
+	bit_offset%= input_data_size;
+
+	while(i<decod_data_size)
+	{
 		c1 = (unsigned char)( input_data[j] & (0x80>>(bit_offset&7)) );
 		bit_offset = (bit_offset+1)%input_data_size;
 		j = bit_offset>>3;
@@ -95,8 +126,7 @@ int mfmtobin(unsigned char * input_data,int input_data_size,unsigned char * deco
 			b=0x80;
 			i++;
 		}
-
-	}while(i<decod_data_size);
+	}
 
 	return bit_offset;
 }
