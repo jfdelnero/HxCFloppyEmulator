@@ -81,7 +81,9 @@ all: DATA_FILES $(EXEC)
 DATA_FILES: bmptoh
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh sob.bmp -BMP8P
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh hxc2001.bmp -BMP8P
+	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh hxc2001_2.bmp -BMP8P
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh hxc2001_backgnd.bmp -BMP8P
+	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh pauline.bmp -BMP8P
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh zandax_supplydas_booze.mod -DATA
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh maktone_class_cracktro15.mod -DATA
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh jozz_cognition.mod -DATA

@@ -76,6 +76,7 @@
 #include "usb_hxcfloppyemulator.h"
 
 #include "main.h"
+#include "utils.h"
 #include "loader.h"
 #include "fl_mouse_box.h"
 
@@ -84,6 +85,8 @@
 extern s_gui_context * guicontext;
 void * cmd_connection;
 void * dat_connection;
+
+extern bmaptype * pauline_bmp;
 
 #pragma pack(1)
 typedef struct _chunk_header
@@ -162,7 +165,8 @@ void streamer_tick_infos(void *w)
 					guicontext->stream_frame_buffer = (unsigned char*)malloc( hxcfe_td_getframebuffer_xres(td) * hxcfe_td_getframebuffer_yres(td) * 3);
 					if(guicontext->stream_frame_buffer)
 					{
-						memset(guicontext->stream_frame_buffer,0,hxcfe_td_getframebuffer_xres(td)*hxcfe_td_getframebuffer_yres(td) * 3);
+						memset(guicontext->stream_frame_buffer,0xFF,hxcfe_td_getframebuffer_xres(td)*hxcfe_td_getframebuffer_yres(td) * 3);
+						splash_sprite(pauline_bmp,guicontext->stream_frame_buffer, hxcfe_td_getframebuffer_xres(td), hxcfe_td_getframebuffer_yres(td), hxcfe_td_getframebuffer_xres(td) / 2 - pauline_bmp->Xsize / 2, hxcfe_td_getframebuffer_yres(td) / 2 - pauline_bmp->Ysize / 2);
 					}
 				}
 			}
@@ -427,8 +431,6 @@ int StreamerThreadProc(void* floppycontext,void* context)
 													*ptr2++ = *ptr1++;
 													ptr1++;
 												}
-
-												//fl_draw_image((unsigned char *)guicontext->stream_frame_buffer, w->floppy_map_disp->x(), w->floppy_map_disp->y(), hxcfe_td_getframebuffer_xres(td), hxcfe_td_getframebuffer_yres(td), 3, 0);
 
 												hxcfe_FxStream_FreeStream( fxsa, trkstream );
 											}
