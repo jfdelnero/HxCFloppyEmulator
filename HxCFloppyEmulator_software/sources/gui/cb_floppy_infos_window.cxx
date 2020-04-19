@@ -74,6 +74,7 @@
 #include "usb_hxcfloppyemulator.h"
 
 #include "main.h"
+#include "utils.h"
 #include "loader.h"
 #include "fl_mouse_box.h"
 
@@ -84,6 +85,8 @@ extern s_gui_context * guicontext;
 char fullstr[256*1024];
 
 #define PI    ((float)  3.141592654f)
+
+extern bmaptype * hxc2001_2_bmp;
 
 static int progress_callback(unsigned int current,unsigned int total,void * td,void * user)
 {
@@ -305,7 +308,9 @@ void tick_infos(void *w) {
 					guicontext->flayoutframebuffer = (unsigned char*)malloc( hxcfe_td_getframebuffer_xres(td) * hxcfe_td_getframebuffer_yres(td) * 3);
 					if(guicontext->flayoutframebuffer)
 					{
-						memset(guicontext->flayoutframebuffer,0,hxcfe_td_getframebuffer_xres(td)*hxcfe_td_getframebuffer_yres(td) * 3);
+						memset(guicontext->flayoutframebuffer,0xFF,hxcfe_td_getframebuffer_xres(td)*hxcfe_td_getframebuffer_yres(td) * 3);
+						splash_sprite(hxc2001_2_bmp,guicontext->flayoutframebuffer, hxcfe_td_getframebuffer_xres(td), hxcfe_td_getframebuffer_yres(td), hxcfe_td_getframebuffer_xres(td) / 2 - hxc2001_2_bmp->Xsize / 2, hxcfe_td_getframebuffer_yres(td) / 2 - hxc2001_2_bmp->Ysize / 2);
+
 						guicontext->updatefloppyinfos = 1;
 					}
 				}
@@ -405,15 +410,18 @@ int InfosThreadProc(void* floppycontext,void* context)
 				}
 			}
 
-			ptr1 = (unsigned char*)hxcfe_td_getframebuffer(td);
-			ptr2 = (unsigned char*)guicontext->flayoutframebuffer;
-			nbpixel = hxcfe_td_getframebuffer_xres(td)*hxcfe_td_getframebuffer_yres(td);
-			for(i=0;i<nbpixel;i++)
+			if(guicontext->loadedfloppy)
 			{
-				*ptr2++ = *ptr1++;
-				*ptr2++ = *ptr1++;
-				*ptr2++ = *ptr1++;
-				ptr1++;
+				ptr1 = (unsigned char*)hxcfe_td_getframebuffer(td);
+				ptr2 = (unsigned char*)guicontext->flayoutframebuffer;
+				nbpixel = hxcfe_td_getframebuffer_xres(td)*hxcfe_td_getframebuffer_yres(td);
+				for(i=0;i<nbpixel;i++)
+				{
+					*ptr2++ = *ptr1++;
+					*ptr2++ = *ptr1++;
+					*ptr2++ = *ptr1++;
+					ptr1++;
+				}
 			}
 
 			hxc_leavecriticalsection(guicontext->hxcfe,1);

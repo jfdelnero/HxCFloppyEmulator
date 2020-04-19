@@ -46,6 +46,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "utils.h"
 
 char * URIfilepathparser(char * URI,int size)
 {
@@ -151,3 +152,26 @@ char * URIfilepathparser(char * URI,int size)
 	}
 }
 
+void splash_sprite(bmaptype * bmp,unsigned char * dest_buffer, int xsize, int ysize, int xpos, int ypos)
+{
+	int i,j;
+	int offset;
+	int src_offset;
+
+	for(j=0;j<bmp->Ysize;j++)
+	{
+		for(i=0;i<bmp->Xsize;i++)
+		{
+			if( ( (xpos + i) >=0 && (xpos + i) < xsize) &&
+				( (ypos + j) >=0 && (ypos + j) < ysize) )
+			{
+				offset = (((ypos + j) * xsize) + (xpos + i)) * 3;
+				src_offset = ((j * bmp->Xsize) + i) * 3;
+
+				dest_buffer[offset + 0] = bmp->unpacked_data[src_offset + 0];
+				dest_buffer[offset + 1] = bmp->unpacked_data[src_offset + 1];
+				dest_buffer[offset + 2] = bmp->unpacked_data[src_offset + 2];
+			}
+		}
+	}
+}

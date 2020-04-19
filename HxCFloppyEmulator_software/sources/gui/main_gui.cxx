@@ -85,6 +85,8 @@ extern "C"
 {
 	#include "microintro/data/data_bmp_hxc2001_backgnd_bmp.h"
 	#include "microintro/data/data_COPYING_FULL.h"
+	#include "microintro/data/data_bmp_pauline_bmp.h"
+	#include "microintro/data/data_bmp_hxc2001_2_bmp.h"
 
 	#include "microintro/packer/pack.h"
 
@@ -111,6 +113,8 @@ extern "C"
 extern s_gui_context * guicontext;
 
 char * license_txt;
+bmaptype * pauline_bmp;
+bmaptype * hxc2001_2_bmp;
 
 const char * plugid_lst[]=
 {
@@ -1071,6 +1075,10 @@ Main_Window::Main_Window()
 	infos_window = new floppy_infos_window();
 	if(infos_window)
 	{
+		bitmap_hxc2001_2_bmp->unpacked_data=data_unpack(bitmap_hxc2001_2_bmp->data,bitmap_hxc2001_2_bmp->csize ,bitmap_hxc2001_2_bmp->data, bitmap_hxc2001_2_bmp->size);
+		convert8b24b(bitmap_hxc2001_2_bmp,0x00);
+		hxc2001_2_bmp = bitmap_hxc2001_2_bmp;
+
 		infos_window->x_offset->bounds(0.0, 100);
 		infos_window->x_offset->value(85);
 		infos_window->x_time->scrollvalue((300*1000)+ (250 * 1000),1,1000,(1000*1000) + (250 * 1000));
@@ -1082,7 +1090,9 @@ Main_Window::Main_Window()
 		guicontext->flayoutframebuffer = (unsigned char*)malloc( infos_window->floppy_map_disp->w() * infos_window->floppy_map_disp->h() * 3);
 		if(guicontext->flayoutframebuffer)
 		{
-			memset(guicontext->flayoutframebuffer,0,infos_window->floppy_map_disp->w()*infos_window->floppy_map_disp->h() * 3);
+			memset(guicontext->flayoutframebuffer,0xFF,infos_window->floppy_map_disp->w()*infos_window->floppy_map_disp->h() * 3);
+			splash_sprite(hxc2001_2_bmp,guicontext->flayoutframebuffer, infos_window->floppy_map_disp->w(), infos_window->floppy_map_disp->h(), infos_window->floppy_map_disp->w() / 2 - hxc2001_2_bmp->Xsize / 2, infos_window->floppy_map_disp->h() / 2 - hxc2001_2_bmp->Ysize / 2);
+
 			hxc_createevent(guicontext->hxcfe,10);
 
 			infoth = (infothread *)malloc(sizeof(infothread));
@@ -1135,6 +1145,10 @@ Main_Window::Main_Window()
 	streamer_window = new floppy_streamer_window();
 	if(streamer_window)
 	{
+		bitmap_pauline_bmp->unpacked_data=data_unpack(bitmap_pauline_bmp->data,bitmap_pauline_bmp->csize ,bitmap_pauline_bmp->data, bitmap_pauline_bmp->size);
+		convert8b24b(bitmap_pauline_bmp,0x00);
+		pauline_bmp = bitmap_pauline_bmp;
+
 		streamer_window->x_offset->bounds(0.0, 100);
 		streamer_window->x_offset->value(85);
 		streamer_window->x_time->scrollvalue((300*1000)+ (250 * 1000),1,1000,(1000*1000) + (250 * 1000));
@@ -1145,7 +1159,9 @@ Main_Window::Main_Window()
 		guicontext->stream_frame_buffer = (unsigned char*)malloc( streamer_window->floppy_map_disp->w() * streamer_window->floppy_map_disp->h() * 4);
 		if(guicontext->stream_frame_buffer)
 		{
-			memset(guicontext->stream_frame_buffer,0,streamer_window->floppy_map_disp->w()*streamer_window->floppy_map_disp->h() * 4);
+			memset(guicontext->stream_frame_buffer,0xFF,streamer_window->floppy_map_disp->w()*streamer_window->floppy_map_disp->h() * 4);
+			splash_sprite(pauline_bmp,guicontext->stream_frame_buffer, streamer_window->floppy_map_disp->w(), streamer_window->floppy_map_disp->h(), streamer_window->floppy_map_disp->w() / 2 - pauline_bmp->Xsize / 2, streamer_window->floppy_map_disp->h() / 2 - pauline_bmp->Ysize / 2);
+
 			hxc_createevent(guicontext->hxcfe,10);
 
 			streamth = (streamthread *)malloc(sizeof(infothread));
