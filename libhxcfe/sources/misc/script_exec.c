@@ -401,19 +401,19 @@ int hxcfe_execScriptRam( HXCFE* hxcfe, unsigned char * script_buffer, int buffer
 	{
 		memset(line,0,MAX_CFG_STRING_SIZE);
 		line_offset = 0;
-		while( script_buffer[buffer_offset] && script_buffer[buffer_offset]!='\n' && script_buffer[buffer_offset]!='\r' && (buffer_offset < buffersize) && (line_offset < MAX_CFG_STRING_SIZE - 1))
+		while( (buffer_offset < buffersize) && script_buffer[buffer_offset] && script_buffer[buffer_offset]!='\n' && script_buffer[buffer_offset]!='\r' && (line_offset < MAX_CFG_STRING_SIZE - 1))
 		{
 			line[line_offset++] = script_buffer[buffer_offset++];
 		}
 
-		while( script_buffer[buffer_offset] && (script_buffer[buffer_offset]=='\n' || script_buffer[buffer_offset]=='\r') )
+		while( (buffer_offset < buffersize) && script_buffer[buffer_offset] && (script_buffer[buffer_offset]=='\n' || script_buffer[buffer_offset]=='\r') )
 		{
 			buffer_offset++;
 		}
 
 		hxcfe_execScriptLine(hxcfe, line);
 
-		if(!script_buffer[buffer_offset])
+		if( (buffer_offset >= buffersize) || !script_buffer[buffer_offset])
 			break;
 
 	}while(buffer_offset < buffersize);
