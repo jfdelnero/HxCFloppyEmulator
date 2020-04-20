@@ -483,7 +483,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 				index_events[i].type = FXSTRM_INDEX_MAININDEX;
 			}
 			
-			if( atoi( hxcfe_getEnvVar( fxs->hxcfe, "FLUXSTREAM_ALL_REVOLUTIONS_IN_ONE", NULL)) )
+			if( hxcfe_getEnvVarValue( fxs->hxcfe, "FLUXSTREAM_ALL_REVOLUTIONS_IN_ONE" ) )
 			{
 				hxcfe_FxStream_AddIndex(fxs,track_dump,index_events[0].CellPos,index_events[0].Timer,index_events[0].type);
 				hxcfe_FxStream_AddIndex(fxs,track_dump,index_events[nbindex-1].CellPos,index_events[nbindex-1].Timer,index_events[nbindex-1].type);

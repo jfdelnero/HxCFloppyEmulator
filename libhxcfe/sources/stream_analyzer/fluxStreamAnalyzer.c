@@ -430,7 +430,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 
 	HXCFE_SIDE* hxcfe_track;
 
-	centralvalue = atoi( hxcfe_getEnvVar( floppycontext, "FLUXSTREAM_INITIAL_BITRATE", NULL) );
+	centralvalue = hxcfe_getEnvVarValue( floppycontext, "FLUXSTREAM_INITIAL_BITRATE");
 	if(!centralvalue)
 	{
 		centralvalue = initialvalue;
@@ -513,7 +513,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 		else
 			i = 0;
 
-		if( !atoi( hxcfe_getEnvVar( floppycontext, "FLUXSTREAM_NOPLLPRESYNC", NULL) ) )
+		if( !hxcfe_getEnvVarValue( floppycontext, "FLUXSTREAM_NOPLLPRESYNC" ) )
 		{
 			if(!pl)
 			{
@@ -1967,7 +1967,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 	if(track_dump->nb_of_pulses)
 	{
 		// Only one revolution -> No flakey bits detection : return a dummy buffer.
-		if( ( hxcfe_FxStream_GetNumberOfRevolution(fxs,track_dump) == 1 ) || atoi( hxcfe_getEnvVar( fxs->hxcfe, "FLUXSTREAM_SKIPBLOCKSDETECTION", NULL)) )
+		if( ( hxcfe_FxStream_GetNumberOfRevolution(fxs,track_dump) == 1 ) ||  hxcfe_getEnvVarValue( fxs->hxcfe, "FLUXSTREAM_SKIPBLOCKSDETECTION") )
 		{
 			pl = alloc_pulses_link_array(track_dump->nb_of_pulses);
 			if(pl)
@@ -2799,11 +2799,11 @@ HXCFE_FXSA * hxcfe_initFxStream(HXCFE * hxcfe)
 			memset(fxs,0,sizeof(HXCFE_FXSA));
 
 			// Default low pass filter setting
-			fxs->filterpasses = atoi( hxcfe_getEnvVar( hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES", NULL) );
-			fxs->filter = atoi( hxcfe_getEnvVar( hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW", NULL) );
+			fxs->filterpasses = hxcfe_getEnvVarValue( hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES" );
+			fxs->filter = hxcfe_getEnvVarValue( hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW" );
 
 			fxs->hxcfe = hxcfe;
-			fxs->phasecorrection = atoi( hxcfe_getEnvVar( hxcfe, "FLUXSTREAM_PHASE_CORRECTION_DIVISOR", NULL) );
+			fxs->phasecorrection = hxcfe_getEnvVarValue( hxcfe, "FLUXSTREAM_PHASE_CORRECTION_DIVISOR" );
 			return fxs;
 		}
 	}
@@ -3646,37 +3646,37 @@ void hxcfe_FxStream_ExportToBmp(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream, char 
 	HXCFE_TD * td;
 	uint32_t flags;
 
-	td = hxcfe_td_init(fxs->hxcfe,atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_XSIZE", NULL) ),atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_YSIZE", NULL) ));
+	td = hxcfe_td_init(fxs->hxcfe, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_XSIZE" ), hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_YSIZE" ) );
 	if(td)
 	{
-		hxcfe_td_activate_analyzer(td, ISOIBM_MFM_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_ISOIBM_MFM_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, ISOIBM_FM_ENCODING,  atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_ISOIBM_FM_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, AMIGA_MFM_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_AMIGA_MFM_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, EMU_FM_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_EMU_FM_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, MEMBRAIN_MFM_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_MEMBRAIN_MFM_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, TYCOM_FM_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_TYCOM_FM_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, APPLEII_GCR1_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_APPLEII_GCR1_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, APPLEII_GCR2_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_APPLEII_GCR2_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, APPLEMAC_GCR_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_APPLEMAC_GCR_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, ARBURGDAT_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_ARBURGDAT_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, ARBURGSYS_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_ARBURGSYS_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, NORTHSTAR_HS_MFM_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_NORTHSTAR_HS_MFM_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, HEATHKIT_HS_FM_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_HEATHKIT_HS_FM_ENCODING", NULL)));
-		hxcfe_td_activate_analyzer(td, DEC_RX02_M2FM_ENCODING, atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_ENABLE_DEC_RX02_M2FM_ENCODING", NULL)));
+		hxcfe_td_activate_analyzer(td, ISOIBM_MFM_ENCODING, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_ISOIBM_MFM_ENCODING"));
+		hxcfe_td_activate_analyzer(td, ISOIBM_FM_ENCODING,  hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_ISOIBM_FM_ENCODING"));
+		hxcfe_td_activate_analyzer(td, AMIGA_MFM_ENCODING, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_AMIGA_MFM_ENCODING"));
+		hxcfe_td_activate_analyzer(td, EMU_FM_ENCODING, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_EMU_FM_ENCODING"));
+		hxcfe_td_activate_analyzer(td, MEMBRAIN_MFM_ENCODING, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_MEMBRAIN_MFM_ENCODING"));
+		hxcfe_td_activate_analyzer(td, TYCOM_FM_ENCODING, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_TYCOM_FM_ENCODING"));
+		hxcfe_td_activate_analyzer(td, APPLEII_GCR1_ENCODING, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_APPLEII_GCR1_ENCODING"));
+		hxcfe_td_activate_analyzer(td, APPLEII_GCR2_ENCODING, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_APPLEII_GCR2_ENCODING"));
+		hxcfe_td_activate_analyzer(td, APPLEMAC_GCR_ENCODING, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_APPLEMAC_GCR_ENCODING"));
+		hxcfe_td_activate_analyzer(td, ARBURGDAT_ENCODING, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_ARBURGDAT_ENCODING"));
+		hxcfe_td_activate_analyzer(td, ARBURGSYS_ENCODING, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_ARBURGSYS_ENCODING"));
+		hxcfe_td_activate_analyzer(td, NORTHSTAR_HS_MFM_ENCODING, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_NORTHSTAR_HS_MFM_ENCODING"));
+		hxcfe_td_activate_analyzer(td, HEATHKIT_HS_FM_ENCODING, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_HEATHKIT_HS_FM_ENCODING"));
+		hxcfe_td_activate_analyzer(td, DEC_RX02_M2FM_ENCODING, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_DEC_RX02_M2FM_ENCODING"));
 
 		flags = 0;
 
-		if( atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_STREAM_HIGHCONTRAST", NULL)) )
+		if( hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_STREAM_HIGHCONTRAST" ) )
 		{
 			flags |= TD_FLAG_HICONTRAST;
 		}
 
-		if( atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_STREAM_BIG_DOTS", NULL)) )
+		if( hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_STREAM_BIG_DOTS" ) )
 		{
 			flags |= TD_FLAG_BIGDOT;
 		}
 
-		hxcfe_td_setparams(td,atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_XTOTALTIME", NULL)),atoi( hxcfe_getEnvVar( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_YTOTALTIME", NULL) ),0, flags);
+		hxcfe_td_setparams(td, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_XTOTALTIME" ), hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_YTOTALTIME" ),0, flags);
 
 		hxcfe_td_draw_stream_track( td, stream );
 
