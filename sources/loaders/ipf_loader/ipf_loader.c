@@ -279,7 +279,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	flag = DI_LOCK_DENVAR | DI_LOCK_UPDATEFD | DI_LOCK_TYPE;
 
-	if( atoi(hxcfe_getEnvVar( imgldr_ctx->hxcfe, "LOADER_IPF_CAPS_DI_LOCK_INDEX", NULL ) ))
+	if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOADER_IPF_CAPS_DI_LOCK_INDEX" ) )
 	{
 		flag |= DI_LOCK_INDEX;
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"CAPS DI_LOCK_INDEX flag enabled");		

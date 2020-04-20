@@ -182,6 +182,40 @@ char * hxcfe_getEnvVar( HXCFE* hxcfe, char * varname, char * varvalue)
 	}
 }
 
+int hxcfe_getEnvVarValue( HXCFE* hxcfe, char * varname)
+{
+	int value;
+	char * str_return;
+
+	value = 0;
+
+	if(!varname)
+		return 0;
+
+	str_return = hxcfe_getEnvVar( hxcfe, varname, NULL);
+
+	if(str_return)
+	{
+		if( strlen(str_return) > 2 )
+		{
+			if( str_return[0]=='0' && ( str_return[0]=='x' || str_return[0]=='X'))
+			{
+				value = (int)strtol(str_return, NULL, 0);
+			}
+			else
+			{
+				value = atoi(str_return);
+			}
+		}
+		else
+		{
+			value = atoi(str_return);
+		}
+	}
+
+	return value;
+}
+
 char * hxcfe_getEnvVarIndex( HXCFE* hxcfe, int index, char * varvalue)
 {
 	int i;

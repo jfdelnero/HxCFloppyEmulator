@@ -265,12 +265,12 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 			sprintf(filepath,"%s%s",folder,"config.script");
 			hxcfe_execScriptFile(imgldr_ctx->hxcfe, filepath);
 
-			if( atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "HXCSTREAMLOADER_DOUBLE_STEP", NULL)) & 1 )
+			if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "HXCSTREAMLOADER_DOUBLE_STEP" ) & 1 )
 				trackstep = 2;
 			else
 				trackstep = 1;
 
-			singleside =  atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "HXCSTREAMLOADER_SINGLE_SIDE", NULL))&1;
+			singleside =  hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "HXCSTREAMLOADER_SINGLE_SIDE" ) & 1;
 
 			timecoef=1;
 			if( !strcmp(hxcfe_getEnvVar( imgldr_ctx->hxcfe, "FLUXSTREAM_RPMFIX", NULL),"360TO300RPM") )
@@ -283,11 +283,11 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 				timecoef=(float)0.833;
 			}
 
-			phasecorrection = atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "FLUXSTREAM_PHASE_CORRECTION_DIVISOR", NULL));
-			filterpasses = atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES", NULL));
-			filter = atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW", NULL));
-			bitrate = atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "HXCSTREAMLOADER_BITRATE", NULL));
-			bmp_export = atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "HXCSTREAMLOADER_BMPEXPORT", NULL));
+			phasecorrection = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_PHASE_CORRECTION_DIVISOR" );
+			filterpasses = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES" );
+			filter = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW" );
+			bitrate = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "HXCSTREAMLOADER_BITRATE" );
+			bmp_export = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "HXCSTREAMLOADER_BMPEXPORT" );
 
 			track=0;
 			side=0;

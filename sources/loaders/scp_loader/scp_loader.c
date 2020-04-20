@@ -375,22 +375,22 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			nbside = 1;
 
-			if( atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "SCPLOADER_DOUBLE_STEP", NULL) )&1 )
+			if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "SCPLOADER_DOUBLE_STEP" ) & 1 )
 				trackstep = 2;
 			else
 				trackstep = 1;
 
-			if( atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV", NULL) )&1 )
+			if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV" ) & 1 )
 				mac_clv = 1;
 			else
 				mac_clv = 0;
 
-			singleside =  atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "SCPLOADER_SINGLE_SIDE", NULL))&1;
-			phasecorrection = atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "FLUXSTREAM_PHASE_CORRECTION_DIVISOR", NULL));
-			filterpasses = atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES", NULL));
-			filter = atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW", NULL));
-			bitrate = atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "SCPLOADER_BITRATE", NULL));
-			bmp_export = atoi( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "SCPLOADER_BMPEXPORT", NULL));
+			singleside = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "SCPLOADER_SINGLE_SIDE" )&1;
+			phasecorrection = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_PHASE_CORRECTION_DIVISOR" );
+			filterpasses = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES" );
+			filter = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW" );
+			bitrate = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "SCPLOADER_BITRATE" );
+			bmp_export = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "SCPLOADER_BMPEXPORT" );
 
 			timecoef = 1;
 			if( !strcmp(hxcfe_getEnvVar( imgldr_ctx->hxcfe, "FLUXSTREAM_RPMFIX", NULL),"360TO300RPM") )
