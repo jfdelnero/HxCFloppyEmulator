@@ -63,5 +63,8 @@ public:
   Fl_Light_Button *high_res;
   Fl_Light_Button *high_contrast;
   Fl_Light_Button *fat_dots;
+  Fl_Input *dump_name;
+  Fl_Input *index_name;
+  Fl_Input *comment;
 };
 #endif

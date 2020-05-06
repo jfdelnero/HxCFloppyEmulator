@@ -1200,6 +1200,9 @@ Main_Window::Main_Window()
 		streamer_window->Side_0->value(1);
 		streamer_window->Side_1->value(1);
 
+		streamer_window->dump_name->value("untitled");
+		streamer_window->index_name->value("AUTO");
+
 		Fl::add_timeout(0.1, streamer_tick_infos, (void*)streamer_window);
 
 		#ifdef GUI_DEBUG

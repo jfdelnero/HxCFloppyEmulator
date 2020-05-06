@@ -8,41 +8,41 @@ class floppy_streamer_window {open
   } {
     Fl_Window window {
       label {Ludo Floppy Disk Toolkit} open
-      xywh {439 164 1330 620} type Single resizable visible
+      xywh {36 347 1330 620} type Single resizable visible
     } {
       Fl_Group {} {
         label {Track / Side selection} open
-        xywh {1050 331 275 84} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+        xywh {1050 306 275 84} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {
         Fl_Value_Slider track_number_slide {
           label {Track number}
           user_data this
           callback disk_streamer_window_callback
-          xywh {1056 347 269 19} type Horizontal labelsize 12 textsize 12
+          xywh {1056 322 269 19} type Horizontal labelsize 12 textsize 12
         }
         Fl_Value_Slider side_number_slide {
           label {Side number}
           user_data this
           callback disk_streamer_window_callback
-          xywh {1055 379 270 19} type Horizontal labelsize 12 textsize 12
+          xywh {1055 354 270 19} type Horizontal labelsize 12 textsize 12
         }
       }
       Fl_Group {} {
-        label Status open
-        xywh {1050 1 275 248} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL labelsize 12 align 21
+        label Status open selected
+        xywh {1050 50 275 172} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL labelsize 12 align 21
       } {
         Fl_Output x_pos {
-          xywh {1055 16 265 15} labelsize 10 textsize 10
+          xywh {1055 65 265 15} labelsize 10 textsize 10
         }
         Fl_Output y_pos {
-          xywh {1055 32 265 15} labelsize 10 textsize 10
+          xywh {1055 81 265 15} labelsize 10 textsize 10
         }
         Fl_Output global_status {
-          xywh {1055 48 265 16} labelsize 10 textsize 10
+          xywh {1055 97 265 16} labelsize 10 textsize 10
         }
         Fl_Text_Display object_txt {
           user_data this
-          xywh {1055 67 265 178} labelsize 10 textsize 10
+          xywh {1055 116 265 101} labelsize 10 textsize 10
         }
       }
       Fl_Button {} {
@@ -79,79 +79,79 @@ class floppy_streamer_window {open
       }
       Fl_Group {} {
         label {Track analysis format} open
-        xywh {1050 246 275 84} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
+        xywh {1050 221 275 84} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
       } {
         Fl_Light_Button iso_mfm_bt {
           label {ISO MFM}
           user_data this
           callback disk_streamer_window_callback
-          xywh {1065 264 76 15} labelsize 10
+          xywh {1065 239 76 15} labelsize 10
         }
         Fl_Light_Button iso_fm_bt {
           label {ISO FM}
           user_data this
           callback disk_streamer_window_callback
-          xywh {1065 279 76 15} labelsize 10
+          xywh {1065 254 76 15} labelsize 10
         }
         Fl_Light_Button amiga_mfm_bt {
           label {AMIGA MFM}
           user_data this
           callback disk_streamer_window_callback
-          xywh {1065 294 76 15} labelsize 10
+          xywh {1065 269 76 15} labelsize 10
         }
         Fl_Light_Button membrain_bt {
           label MEMBRAIN
           user_data this
           callback disk_streamer_window_callback
-          xywh {1149 294 76 15} labelsize 10
+          xywh {1149 269 76 15} labelsize 10
         }
         Fl_Light_Button tycom_bt {
           label TYCOM
           user_data this
           callback disk_streamer_window_callback
-          xywh {1149 279 76 15} labelsize 10
+          xywh {1149 254 76 15} labelsize 10
         }
         Fl_Light_Button eemu_bt {
           label {E-Emu}
           user_data this
           callback disk_streamer_window_callback
-          xywh {1149 264 76 15} labelsize 10
+          xywh {1149 239 76 15} labelsize 10
         }
         Fl_Light_Button apple2_bt {
-          label {Apple}
+          label Apple
           user_data this
           callback disk_streamer_window_callback
-          xywh {1065 309 76 15} labelsize 10
+          xywh {1065 284 76 15} labelsize 10
         }
         Fl_Light_Button arburg_bt {
           label Arburg
           user_data this
           callback disk_streamer_window_callback
-          xywh {1149 309 76 15} labelsize 10
+          xywh {1149 284 76 15} labelsize 10
         }
         Fl_Light_Button aed6200p_bt {
           label {AED 6200P}
           user_data this
           callback disk_streamer_window_callback
-          xywh {1233 264 76 15} labelsize 10
+          xywh {1233 239 76 15} labelsize 10
         }
         Fl_Light_Button northstar_bt {
           label NORTHSTAR
           user_data this
           callback disk_streamer_window_callback
-          xywh {1233 279 76 15} labelsize 10
+          xywh {1233 254 76 15} labelsize 10
         }
         Fl_Light_Button heathkit_bt {
           label HEATHKIT
           user_data this
           callback disk_streamer_window_callback
-          xywh {1233 294 76 15} labelsize 10
+          xywh {1233 269 76 15} labelsize 10
         }
         Fl_Light_Button decrx02_bt {
           label {DEC RX02}
           user_data this
           callback disk_streamer_window_callback
-          xywh {1233 309 76 15} labelsize 10
+          xywh {1233 284 76 15} labelsize 10
         }
       }
       Fl_Input server_address {
@@ -162,93 +162,105 @@ class floppy_streamer_window {open
         label {Read Disk}
         user_data this
         callback floppy_streamer_readdisk
-        xywh {1102 417 78 40}
+        xywh {1102 393 78 40}
       }
       Fl_Button {} {
         label {+}
         user_data this
         callback floppy_streamer_trackup
-        xywh {1077 418 23 20}
+        xywh {1077 394 23 20}
       }
       Fl_Button {} {
         label {-}
         user_data this
         callback floppy_streamer_down
-        xywh {1052 418 23 20}
+        xywh {1052 394 23 20}
       }
       Fl_Button {} {
         label recal
         user_data this
         callback floppy_streamer_recalibrate
-        xywh {1052 464 48 21}
+        xywh {1052 440 48 21}
       }
       Fl_Button {} {
         label {Read Track}
         user_data this
         callback floppy_streamer_readtrack
-        xywh {1180 417 85 40}
+        xywh {1180 393 85 40}
       }
       Fl_Button {} {
         label {STOP !}
         user_data this
         callback floppy_streamer_stop
-        xywh {1103 460 222 25}
+        xywh {1103 436 222 25}
       }
       Fl_Input max_track {
         label {Max track}
-        xywh {1134 516 40 15} labelsize 8 textsize 10
+        xywh {1134 480 40 15} labelsize 8 textsize 10
       }
       Fl_Input min_track {
         label {Min track}
-        xywh {1134 501 40 15} labelsize 8 textsize 10
+        xywh {1134 465 40 15} labelsize 8 textsize 10
       }
       Fl_Light_Button Side_0 {
         label {Side 0}
-        xywh {1177 500 80 15} labelsize 10
+        xywh {1177 464 80 15} labelsize 10
       }
       Fl_Light_Button Side_1 {
         label {Side 1}
-        xywh {1177 515 80 15} labelsize 10
+        xywh {1177 479 80 15} labelsize 10
       }
       Fl_Light_Button double_step {
         label {Double step}
-        xywh {1177 530 80 15} labelsize 10
+        xywh {1177 494 80 15} labelsize 10
       }
       Fl_Input index_delay {
         label {Index delay (us)}
-        xywh {1134 544 40 15} labelsize 8 textsize 10
+        xywh {1134 508 40 15} labelsize 8 textsize 10
       }
       Fl_Input dump_lenght {
         label {lenght (ms)}
-        xywh {1134 529 40 15} labelsize 8 textsize 10
+        xywh {1134 493 40 15} labelsize 8 textsize 10
       }
       Fl_Light_Button ignore_index {
         label {Ignore index}
-        xywh {1177 545 80 15} labelsize 10
+        xywh {1177 509 80 15} labelsize 10
       }
       Fl_Button {} {
         label move
         user_data this
         callback floppy_streamer_movehead
-        xywh {1052 439 48 21}
+        xywh {1052 415 48 21}
       }
       Fl_Light_Button high_res {
         label {50Mhz }
-        xywh {1260 500 65 15} labelsize 10
+        xywh {1260 464 65 15} labelsize 10
       }
       Fl_Button {} {
         label {Spy bus}
         user_data this
         callback floppy_streamer_spybus
-        xywh {1265 417 59 40}
+        xywh {1265 393 59 40}
       }
       Fl_Light_Button high_contrast {
-        label {High contrast} selected
-        xywh {1130 565 107 15} labelsize 10
+        label {High contrast}
+        xywh {1130 529 107 15} labelsize 10
       }
       Fl_Light_Button fat_dots {
         label {Fat dots}
-        xywh {1240 565 84 15} labelsize 10
+        xywh {1240 529 84 15} labelsize 10
+      }
+      Fl_Input dump_name {
+        label Name
+        xywh {1095 4 230 19} labelsize 8 textsize 10
+      }
+      Fl_Input index_name {
+        label {N°}
+        xywh {1281 24 44 20} labelsize 8 textsize 10
+      }
+      Fl_Input comment {
+        label Comment
+        xywh {1095 24 170 19} labelsize 8 textsize 10
       }
     }
   }
