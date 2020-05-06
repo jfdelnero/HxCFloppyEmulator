@@ -179,6 +179,22 @@ void streamer_tick_infos(void *w)
 	Fl::repeat_timeout(0.1, streamer_tick_infos, w);
 }
 
+static void clean_string(char * str)
+{
+	int i;
+
+	i = 0;
+
+	while(str[i])
+	{
+		if(str[i] == '\r' || str[i] == '\n')
+		{
+			str[i] = ' ';
+		}
+		i++;
+	}
+
+}
 int StreamerThreadRxStatusProc(void* floppycontext,void* context)
 {
 	char tmpstr[1024];
@@ -194,6 +210,7 @@ int StreamerThreadRxStatusProc(void* floppycontext,void* context)
 		{
 			memset(tmpstr,0,sizeof(tmpstr));
 			network_read2(cmd_connection, (unsigned char*)tmpstr, sizeof(tmpstr),0);
+			clean_string(tmpstr);
 			w->global_status->value(tmpstr);
 		}
 		else
@@ -520,10 +537,32 @@ void floppy_streamer_connect(Fl_Button*, void* w)
 	}
 }
 
+static int isdigit(char c)
+{
+	if(c>=0 && c<='9')
+		return 1;
+
+	return 0;
+}
+
+static int digits_only(const char *s)
+{
+	while (*s)
+	{
+		if (isdigit(*s++) == 0)
+			return 0;
+	}
+
+	return 1;
+}
+
 void floppy_streamer_readdisk(Fl_Button*, void* w)
 {
 	char tmp[256];
+	int index;
+	char index_mode[32];
 	floppy_streamer_window *fdw;
+
 	fdw=(floppy_streamer_window *)w;
 
 	if(cmd_connection && dat_connection)
@@ -534,7 +573,31 @@ void floppy_streamer_readdisk(Fl_Button*, void* w)
 		sprintf(tmp,"dump_time %d\n",atoi(fdw->dump_lenght->value()));
 		network_write(cmd_connection, (unsigned char*)tmp, strlen(tmp),2);
 
-		sprintf(tmp,"dump 0 %d %d %d %d %d %d %d 0\n",atoi(fdw->min_track->value()),atoi(fdw->max_track->value()), (fdw->Side_0->value()^1)&1 , fdw->Side_1->value() ,fdw->high_res->value(),fdw->double_step->value(),fdw->ignore_index->value());
+		if(strlen(fdw->index_name->value()) && digits_only(fdw->index_name->value()))
+		{
+			index = atoi(fdw->index_name->value());
+			strcat(index_mode,"MANUAL_INDEX_NAME");
+		}
+		else
+		{
+			index = 1;
+			strcat(index_mode,"AUTO_INDEX_NAME");
+		}
+
+		sprintf(tmp,"dump 0 %d %d %d %d %d %d %d %d \"%s\" \"%s\" %d %s\n",atoi(fdw->min_track->value()), \
+													  atoi(fdw->max_track->value()), \
+													 (fdw->Side_0->value()^1)&1 , \
+													  fdw->Side_1->value() , \
+													  fdw->high_res->value(), \
+													  fdw->double_step->value(), \
+													  fdw->ignore_index->value(), \
+													  0, \
+													  fdw->dump_name->value(), \
+													  fdw->comment->value(), \
+													  index, \
+													  index_mode \
+													  );
+
 		network_write(cmd_connection, (unsigned char*)tmp, strlen(tmp),2);
 	}
 }
@@ -542,7 +605,10 @@ void floppy_streamer_readdisk(Fl_Button*, void* w)
 void floppy_streamer_readtrack(Fl_Button*, void* w)
 {
 	char tmp[256];
+	int index;
+	char index_mode[32];
 	floppy_streamer_window *fdw;
+
 	fdw=(floppy_streamer_window *)w;
 
 	if(cmd_connection)
@@ -553,7 +619,29 @@ void floppy_streamer_readtrack(Fl_Button*, void* w)
 		sprintf(tmp,"dump_time %d\n",atoi(fdw->dump_lenght->value()));
 		network_write(cmd_connection, (unsigned char*)tmp, strlen(tmp),2);
 
-		sprintf(tmp,"dump 0 -1 -1 %g %g %d %d %d 0\n",fdw->side_number_slide->value(),fdw->side_number_slide->value(),fdw->high_res->value(),fdw->double_step->value(),fdw->ignore_index->value());
+		if(strlen(fdw->index_name->value()) && digits_only(fdw->index_name->value()))
+		{
+			index = atoi(fdw->index_name->value());
+			strcat(index_mode,"MANUAL_INDEX_NAME");
+		}
+		else
+		{
+			index = 1;
+			strcat(index_mode,"AUTO_INDEX_NAME");
+		}
+
+		sprintf(tmp,"dump 0 -1 -1 %g %g %d %d %d %d \"%s\" \"%s\" %d %s\n",fdw->side_number_slide->value(), \
+														fdw->side_number_slide->value(), \
+														fdw->high_res->value(), \
+														fdw->double_step->value(), \
+														fdw->ignore_index->value(), \
+														0, \
+														fdw->dump_name->value(), \
+														fdw->comment->value(), \
+														index, \
+														index_mode \
+														);
+
 		network_write(cmd_connection, (unsigned char*)tmp, strlen(tmp),2);
 	}
 }
