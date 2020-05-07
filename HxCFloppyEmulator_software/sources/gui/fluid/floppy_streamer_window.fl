@@ -8,7 +8,7 @@ class floppy_streamer_window {open
   } {
     Fl_Window window {
       label {Ludo Floppy Disk Toolkit} open
-      xywh {36 347 1330 620} type Single resizable visible
+      xywh {35 121 1330 620} type Single resizable visible
     } {
       Fl_Group {} {
         label {Track / Side selection} open
@@ -28,21 +28,21 @@ class floppy_streamer_window {open
         }
       }
       Fl_Group {} {
-        label Status open selected
-        xywh {1050 50 275 172} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL labelsize 12 align 21
+        label Status open
+        xywh {1050 58 275 163} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL labelsize 12 align 21
       } {
         Fl_Output x_pos {
-          xywh {1055 65 265 15} labelsize 10 textsize 10
+          xywh {1055 76 265 15} labelsize 10 textsize 10
         }
         Fl_Output y_pos {
-          xywh {1055 81 265 15} labelsize 10 textsize 10
+          xywh {1055 92 265 15} labelsize 10 textsize 10
         }
         Fl_Output global_status {
-          xywh {1055 97 265 16} labelsize 10 textsize 10
+          xywh {1055 108 265 16} labelsize 10 textsize 10
         }
         Fl_Text_Display object_txt {
           user_data this
-          xywh {1055 116 265 101} labelsize 10 textsize 10
+          xywh {1055 126 265 87} labelsize 10 textsize 10
         }
       }
       Fl_Button {} {
@@ -52,7 +52,7 @@ class floppy_streamer_window {open
         xywh {1240 589 85 28}
       }
       Fl_Group floppy_map_disp {
-        label {Track stream} open
+        label {Track stream} open selected
         xywh {0 1 1050 576} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {}
       Fl_Group {} {open
@@ -252,15 +252,15 @@ class floppy_streamer_window {open
       }
       Fl_Input dump_name {
         label Name
-        xywh {1095 4 230 19} labelsize 8 textsize 10
+        xywh {1095 4 230 23} labelsize 8 textsize 10
       }
       Fl_Input index_name {
         label {N°}
-        xywh {1281 24 44 20} labelsize 8 textsize 10
+        xywh {1281 30 44 23} labelsize 8 textsize 10
       }
       Fl_Input comment {
         label Comment
-        xywh {1095 24 170 19} labelsize 8 textsize 10
+        xywh {1095 30 170 23} labelsize 8 textsize 10
       }
     }
   }

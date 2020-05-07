@@ -35,24 +35,24 @@ floppy_streamer_window::floppy_streamer_window() {
       } // Fl_Value_Slider* side_number_slide
       o->end();
     } // Fl_Group* o
-    { Fl_Group* o = new Fl_Group(1050, 50, 275, 172, "Status");
+    { Fl_Group* o = new Fl_Group(1050, 58, 275, 163, "Status");
       o->box(FL_ENGRAVED_FRAME);
       o->labeltype(FL_ENGRAVED_LABEL);
       o->labelsize(12);
       o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-      { x_pos = new Fl_Output(1055, 65, 265, 15);
+      { x_pos = new Fl_Output(1055, 76, 265, 15);
         x_pos->labelsize(10);
         x_pos->textsize(10);
       } // Fl_Output* x_pos
-      { y_pos = new Fl_Output(1055, 81, 265, 15);
+      { y_pos = new Fl_Output(1055, 92, 265, 15);
         y_pos->labelsize(10);
         y_pos->textsize(10);
       } // Fl_Output* y_pos
-      { global_status = new Fl_Output(1055, 97, 265, 16);
+      { global_status = new Fl_Output(1055, 108, 265, 16);
         global_status->labelsize(10);
         global_status->textsize(10);
       } // Fl_Output* global_status
-      { object_txt = new Fl_Text_Display(1055, 116, 265, 101);
+      { object_txt = new Fl_Text_Display(1055, 126, 265, 87);
         object_txt->labelsize(10);
         object_txt->textsize(10);
         object_txt->user_data((void*)(this));
@@ -212,15 +212,15 @@ floppy_streamer_window::floppy_streamer_window() {
     { fat_dots = new Fl_Light_Button(1240, 529, 84, 15, "Fat dots");
       fat_dots->labelsize(10);
     } // Fl_Light_Button* fat_dots
-    { dump_name = new Fl_Input(1095, 4, 230, 19, "Name");
+    { dump_name = new Fl_Input(1095, 4, 230, 23, "Name");
       dump_name->labelsize(8);
       dump_name->textsize(10);
     } // Fl_Input* dump_name
-    { index_name = new Fl_Input(1281, 24, 44, 20, "N\302\260");
+    { index_name = new Fl_Input(1281, 30, 44, 23, "N\302\260");
       index_name->labelsize(8);
       index_name->textsize(10);
     } // Fl_Input* index_name
-    { comment = new Fl_Input(1095, 24, 170, 19, "Comment");
+    { comment = new Fl_Input(1095, 30, 170, 23, "Comment");
       comment->labelsize(8);
       comment->textsize(10);
     } // Fl_Input* comment
