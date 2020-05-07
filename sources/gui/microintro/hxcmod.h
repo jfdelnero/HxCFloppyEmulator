@@ -19,6 +19,13 @@
 #ifndef MODPLAY_DEF
 #define MODPLAY_DEF
 
+#ifndef HXCMOD_SLOW_TARGET
+	#define HXCMOD_STATE_REPORT_SUPPORT 1
+	#define HXCMOD_OUTPUT_FILTER 1
+	#define HXCMOD_OUTPUT_STEREO_MIX 1
+	#define HXCMOD_CLIPPING_CHECK 1
+#endif
+
 // Basic type
 typedef unsigned char   muchar;
 typedef signed   char   mchar;
@@ -26,11 +33,17 @@ typedef unsigned short  muint;
 typedef          short  mint;
 typedef unsigned long   mulong;
 
+#ifdef HXCMOD_16BITS_TARGET
+	typedef unsigned short  mssize;
+#else
+	typedef unsigned long   mssize;
+#endif
+
 #ifdef HXCMOD_8BITS_OUTPUT
 	#ifdef HXCMOD_UNSIGNED_OUTPUT
-	typedef unsigned char msample;
+	typedef unsigned char  msample;
 	#else
-	typedef signed char   msample;
+	typedef signed char    msample;
 	#endif
 #else
 	#ifdef HXCMOD_UNSIGNED_OUTPUT
@@ -47,7 +60,7 @@ typedef unsigned long   mulong;
 #endif
 
 #define MAXNOTES 12*12
-#define SAMPLE_RATE 44100
+
 //
 // MOD file structures
 //
@@ -87,29 +100,29 @@ typedef struct {
 //
 typedef struct {
 	mchar * sampdata;
-	mulong  length;
-	mulong  reppnt;
-	mulong  replen;
-	muint   sampnum;
+	muint   length;
+	muint   reppnt;
+	muint   replen;
+	muchar  sampnum;
 
 	mchar * nxt_sampdata;
-	mulong  nxt_length;
-	mulong  nxt_reppnt;
-	mulong  nxt_replen;
-	muint   update_nxt_repeat;
+	muint   nxt_length;
+	muint   nxt_reppnt;
+	muint   nxt_replen;
+	muchar  update_nxt_repeat;
 
 	mchar * dly_sampdata;
-	mulong  dly_length;
-	mulong  dly_reppnt;
-	mulong  dly_replen;
-	muint   note_delay;
+	muint   dly_length;
+	muint   dly_reppnt;
+	muint   dly_replen;
+	muchar  note_delay;
 
 	mchar * lst_sampdata;
-	mulong  lst_length;
-	mulong  lst_reppnt;
-	mulong  lst_replen;
-	muint   retrig_cnt;
-	muint   retrig_param;
+	muint   lst_length;
+	muint   lst_reppnt;
+	muint   lst_replen;
+	muchar  retrig_cnt;
+	muchar  retrig_param;
 
 	muint   funkoffset;
 	mint    funkspeed;
@@ -117,9 +130,9 @@ typedef struct {
 	mint    glissando;
 
 	mulong  samppos;
+	mulong  sampinc;
 	muint   period;
 	muchar  volume;
-	mulong  ticks;
 	muchar  effect;
 	muchar  parameffect;
 	muint   effect_code;
@@ -131,7 +144,6 @@ typedef struct {
 	mint    Arpperiods[3];
 	muchar  ArpIndex;
 
-	mint    oldk;
 	muchar  volumeslide;
 
 	muchar  vibraparam;
@@ -150,19 +162,33 @@ typedef struct {
 	mchar * sampledata[31];
 	note *  patterndata[128];
 
+#ifdef HXCMOD_16BITS_TARGET
+	muint   playrate;
+#else
 	mulong  playrate;
+#endif
+
 	muint   tablepos;
 	muint   patternpos;
 	muint   patterndelay;
-	muint   jump_loop_effect;
+	muchar  jump_loop_effect;
 	muchar  bpm;
+
+#ifdef HXCMOD_16BITS_TARGET
+	muint   patternticks;
+	muint   patterntickse;
+	muint   patternticksaim;
+	muint   patternticksem;
+	muint   tick_cnt;
+#else
 	mulong  patternticks;
 	mulong  patterntickse;
 	mulong  patternticksaim;
-	muint   tick_cnt;
-	mulong  sampleticksconst;
+	mulong  patternticksem;
+	mulong  tick_cnt;
+#endif
 
-	mulong  samplenb;
+	mulong  sampleticksconst;
 
 	channel channels[NUMMAXCHANNELS];
 
@@ -240,7 +266,7 @@ typedef struct tracker_buffer_state_
 // - "Load" a MOD from memory (from "mod_data" with size "mod_data_size").
 //   Return 1 if success. 0 in case of error.
 // -------------------------------------------
-// void hxcmod_fillbuffer( modcontext * modctx, unsigned short * outbuffer, unsigned long nbsample, tracker_buffer_state * trkbuf )
+// void hxcmod_fillbuffer( modcontext * modctx, unsigned short * outbuffer, mssize nbsample, tracker_buffer_state * trkbuf )
 //
 // - Generate and return the next samples chunk to outbuffer.
 //   nbsample specify the number of stereo 16bits samples you want.
@@ -255,9 +281,9 @@ typedef struct tracker_buffer_state_
 ///////////////////////////////////////////////////////////////////////////////////
 
 int  hxcmod_init( modcontext * modctx );
-int  hxcmod_setcfg( modcontext * modctx, int samplerate, int stereo_separation, int filter);
+int  hxcmod_setcfg( modcontext * modctx, int samplerate, int stereo_separation, int filter );
 int  hxcmod_load( modcontext * modctx, void * mod_data, int mod_data_size );
-void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long nbsample, tracker_buffer_state * trkbuf );
+void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, mssize nbsample, tracker_buffer_state * trkbuf );
 void hxcmod_unload( modcontext * modctx );
 
 #endif

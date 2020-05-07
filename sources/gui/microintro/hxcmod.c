@@ -39,7 +39,7 @@
 // - "Load" a MOD from memory (from "mod_data" with size "mod_data_size").
 //   Return 1 if success. 0 in case of error.
 // -------------------------------------------
-// void hxcmod_fillbuffer( modcontext * modctx, unsigned short * outbuffer, unsigned long nbsample, tracker_buffer_state * trkbuf )
+// void hxcmod_fillbuffer( modcontext * modctx, unsigned short * outbuffer, mssize nbsample, tracker_buffer_state * trkbuf )
 //
 // - Generate and return the next samples chunk to outbuffer.
 //   nbsample specify the number of stereo 16bits samples you want.
@@ -128,7 +128,7 @@ typedef struct modtype_
 	int numberofchannels;
 }modtype;
 
-modtype modlist[]=
+static modtype modlist[]=
 {
 	{ "M!K!",4},
 	{ "M.K.",4},
@@ -214,11 +214,11 @@ static void doFunk(channel * cptr)
 		if( cptr->funkoffset > 128 )
 		{
 			cptr->funkoffset = 0;
-			if( cptr->sampdata && cptr->length && (cptr->replen > 2) )
+			if( cptr->sampdata && cptr->length && (cptr->replen > 1) )
 			{
-				if( ( (cptr->samppos) >> 10 ) >= (unsigned long)(cptr->replen+cptr->reppnt) )
+				if( ( (cptr->samppos) >> 11 ) >= (unsigned long)(cptr->replen+cptr->reppnt) )
 				{
-					cptr->samppos = ((unsigned long)(cptr->reppnt)<<10) + (cptr->samppos % ((unsigned long)(cptr->replen+cptr->reppnt)<<10));
+					cptr->samppos = ((unsigned long)(cptr->reppnt)<<11) + (cptr->samppos % ((unsigned long)(cptr->replen+cptr->reppnt)<<11));
 				}
 
 				// Note : Directly modify the sample in the mod buffer...
@@ -236,6 +236,7 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 	muchar effect_op;
 	muchar effect_param,effect_param_l,effect_param_h;
 	muint enable_nxt_smp;
+
 	sample = (nptr->sampperiod & 0xF0) | (nptr->sampeffect >> 4);
 	period = ((nptr->sampperiod & 0xF) << 8) | nptr->period;
 	effect = ((nptr->sampeffect & 0xF) << 8) | nptr->effect;
@@ -266,9 +267,9 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 					{
 						// Immediately (re)trigger the new note
 						cptr->sampdata = mod->sampledata[cptr->sampnum];
-						cptr->length = GET_BGI_W( mod->song.samples[cptr->sampnum].length ) * 2;
-						cptr->reppnt = GET_BGI_W( mod->song.samples[cptr->sampnum].reppnt ) * 2;
-						cptr->replen = GET_BGI_W( mod->song.samples[cptr->sampnum].replen ) * 2;
+						cptr->length = GET_BGI_W( mod->song.samples[cptr->sampnum].length );
+						cptr->reppnt = GET_BGI_W( mod->song.samples[cptr->sampnum].reppnt );
+						cptr->replen = GET_BGI_W( mod->song.samples[cptr->sampnum].replen );
 
 						cptr->lst_sampdata = cptr->sampdata;
 						cptr->lst_length = cptr->length;
@@ -278,9 +279,9 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 					else
 					{
 						cptr->dly_sampdata = mod->sampledata[cptr->sampnum];
-						cptr->dly_length = GET_BGI_W( mod->song.samples[cptr->sampnum].length ) * 2;
-						cptr->dly_reppnt = GET_BGI_W( mod->song.samples[cptr->sampnum].reppnt ) * 2;
-						cptr->dly_replen = GET_BGI_W( mod->song.samples[cptr->sampnum].replen ) * 2;
+						cptr->dly_length = GET_BGI_W( mod->song.samples[cptr->sampnum].length );
+						cptr->dly_reppnt = GET_BGI_W( mod->song.samples[cptr->sampnum].reppnt );
+						cptr->dly_replen = GET_BGI_W( mod->song.samples[cptr->sampnum].replen );
 						cptr->note_delay = effect_param_l;
 					}
 					// Cancel any delayed note...
@@ -300,11 +301,11 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 			{
 				// Prepare the next sample retrigger after the current one
 				cptr->nxt_sampdata = mod->sampledata[cptr->sampnum];
-				cptr->nxt_length = GET_BGI_W( mod->song.samples[cptr->sampnum].length ) * 2;
-				cptr->nxt_reppnt = GET_BGI_W( mod->song.samples[cptr->sampnum].reppnt ) * 2;
-				cptr->nxt_replen = GET_BGI_W( mod->song.samples[cptr->sampnum].replen ) * 2;
+				cptr->nxt_length = GET_BGI_W( mod->song.samples[cptr->sampnum].length );
+				cptr->nxt_reppnt = GET_BGI_W( mod->song.samples[cptr->sampnum].reppnt );
+				cptr->nxt_replen = GET_BGI_W( mod->song.samples[cptr->sampnum].replen );
 
-				if(cptr->nxt_replen<=2)   // Protracker : don't play the sample if not looped...
+				if(cptr->nxt_replen < 2)   // Protracker : don't play the sample if not looped...
 					cptr->nxt_sampdata = 0;
 
 				cptr->update_nxt_repeat = 1;
@@ -832,20 +833,34 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 			widest usage.
 			*/
 
-			if( effect_param < 0x20 )
+
+			if( effect_param )
 			{
-				if( effect_param )
+
+				if( effect_param < 0x20 )
 				{
 					mod->song.speed = effect_param;
-					mod->patternticksaim = (long)mod->song.speed * ((mod->playrate * 5 ) / (((long)2 * (long)mod->bpm)));
 				}
-			}
+				else
+				{   // effect_param >= 0x20
+					///	 HZ = 2 * BPM / 5
+					mod->bpm = effect_param;
+				}
 
-			if( effect_param >= 0x20 )
-			{
-				///	 HZ = 2 * BPM / 5
-				mod->bpm = effect_param;
-				mod->patternticksaim = (long)mod->song.speed * ((mod->playrate * 5 ) / (((long)2 * (long)mod->bpm)));
+#ifdef HXCMOD_16BITS_TARGET
+				// song.speed = 1 <> 31
+				// playrate = 8000 <> 22050
+				// bpm = 32 <> 255
+
+				mod->patternticksem = (muint)( ( (mulong)mod->playrate * 5 ) / ( (muint)mod->bpm * 2 ) );
+#else
+				// song.speed = 1 <> 31
+				// playrate = 8000 <> 96000
+				// bpm = 32 <> 255
+
+				mod->patternticksem = ( ( mod->playrate * 5 ) / ( (mulong)mod->bpm * 2 ) );
+#endif
+				mod->patternticksaim = mod->song.speed * mod->patternticksem;
 			}
 
 		break;
@@ -1036,7 +1051,7 @@ static void workeffect( modcontext * modctx, note * nptr, channel * cptr )
 				case EFFECT_E_NOTE_DELAY:
 					if( cptr->note_delay )
 					{
-						if( ( cptr->note_delay - 1 ) == modctx->tick_cnt )
+						if( (unsigned char)( cptr->note_delay - 1 ) == modctx->tick_cnt )
 						{
 							cptr->sampdata = cptr->dly_sampdata;
 							cptr->length = cptr->dly_length;
@@ -1247,12 +1262,25 @@ int hxcmod_load( modcontext * modctx, void * mod_data, int mod_data_size )
 			modctx->patternpos = 0;
 			modctx->song.speed = 6;
 			modctx->bpm = 125;
-			modctx->samplenb = 0;
 
-			modctx->patternticks = (((long)modctx->song.speed * modctx->playrate * 5)/ (2 * modctx->bpm)) + 1;
-			modctx->patternticksaim = ((long)modctx->song.speed * modctx->playrate * 5) / (2 * modctx->bpm);
+#ifdef HXCMOD_16BITS_TARGET
+			// song.speed = 1 <> 31
+			// playrate = 8000 <> 22050
+			// bpm = 32 <> 255
 
-			modctx->sampleticksconst = 3546894UL / modctx->playrate; //8448*428/playrate;
+			modctx->patternticksem = (muint)( ( (mulong)modctx->playrate * 5 ) / ( (muint)modctx->bpm * 2 ) );
+#else
+			// song.speed = 1 <> 31
+			// playrate = 8000 <> 96000
+			// bpm = 32 <> 255
+
+			modctx->patternticksem = ( ( modctx->playrate * 5 ) / ( (mulong)modctx->bpm * 2 ) );
+#endif
+			modctx->patternticksaim = modctx->song.speed * modctx->patternticksem;
+
+			modctx->patternticks = modctx->patternticksaim + 1;
+
+			modctx->sampleticksconst = ((3546894UL * 16) / modctx->playrate) << 6; //8448*428/playrate;
 
 			for(i=0; i < modctx->number_of_channels; i++)
 			{
@@ -1269,16 +1297,26 @@ int hxcmod_load( modcontext * modctx, void * mod_data, int mod_data_size )
 	return 0;
 }
 
-void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long nbsample, tracker_buffer_state * trkbuf )
+void hxcmod_fillbuffer(modcontext * modctx, msample * outbuffer, mssize nbsample, tracker_buffer_state * trkbuf)
 {
-	unsigned long i, j;
+	mssize i;
+	muint  j;
+	muint c;
+
 	unsigned long k;
-	unsigned int c;
 	unsigned int state_remaining_steps;
+
+#ifdef HXCMOD_OUTPUT_FILTER
 #ifndef HXCMOD_MONO_OUTPUT
-	int l,ll,tl;
+	int ll,tl;
 #endif
-	int r,lr,tr;
+	int lr,tr;
+#endif
+
+#ifndef HXCMOD_MONO_OUTPUT
+	int l;
+#endif
+	int r;
 
 	short finalperiod;
 	note	*nptr;
@@ -1290,6 +1328,7 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 		{
 			state_remaining_steps = 0;
 
+#ifdef HXCMOD_STATE_REPORT_SUPPORT
 			if( trkbuf )
 			{
 				trkbuf->cur_rd_index = 0;
@@ -1301,11 +1340,14 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 					memcopy(trkbuf->instruments[i].name,modctx->song.samples[i].name,sizeof(trkbuf->instruments[i].name));
 				}
 			}
-
-#ifndef HXCMOD_MONO_OUTPUT
-			ll = modctx->last_l_sample;
 #endif
+
+#ifdef HXCMOD_OUTPUT_FILTER
+	#ifndef HXCMOD_MONO_OUTPUT
+			ll = modctx->last_l_sample;
+	#endif
 			lr = modctx->last_r_sample;
+#endif
 
 			for (i = 0; i < nbsample; i++)
 			{
@@ -1325,7 +1367,25 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 
 						for(c=0;c<modctx->number_of_channels;c++)
 						{
-							worknote((note*)(nptr+c), (channel*)(cptr+c),(char)(c+1),modctx);
+							worknote((note*)(nptr), (channel*)(cptr),(char)(c+1),modctx);
+
+							if (cptr->period != 0)
+							{
+								finalperiod = cptr->period - cptr->decalperiod - cptr->vibraperiod;
+								if (finalperiod)
+								{
+									cptr->sampinc = ((modctx->sampleticksconst) / finalperiod);
+								}
+								else
+								{
+									cptr->sampinc = 0;
+								}
+							}
+							else
+								cptr->sampinc = 0;
+
+							nptr++;
+							cptr++;
 						}
 
 						if( !modctx->jump_loop_effect )
@@ -1351,7 +1411,7 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 
 				}
 
-				if( modctx->patterntickse++ > (modctx->patternticksaim/modctx->song.speed) )
+				if (modctx->patterntickse++ > modctx->patternticksem)
 				{
 					nptr = modctx->patterndata[modctx->song.patterntable[modctx->tablepos]];
 					nptr = nptr + modctx->patternpos;
@@ -1359,7 +1419,25 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 
 					for(c=0;c<modctx->number_of_channels;c++)
 					{
-						workeffect( modctx, nptr+c, cptr+c );
+						workeffect( modctx, nptr, cptr );
+
+						if (cptr->period != 0)
+						{
+							finalperiod = cptr->period - cptr->decalperiod - cptr->vibraperiod;
+							if (finalperiod)
+							{
+								cptr->sampinc = ((modctx->sampleticksconst) / finalperiod);
+							}
+							else
+							{
+								cptr->sampinc = 0;
+							}
+						}
+						else
+							cptr->sampinc = 0;
+
+						nptr++;
+						cptr++;
 					}
 
 					modctx->tick_cnt++;
@@ -1368,6 +1446,7 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 
 				//---------------------------------------
 
+#ifdef HXCMOD_STATE_REPORT_SUPPORT
 				if( trkbuf && !state_remaining_steps )
 				{
 					if( trkbuf->nb_of_state < trkbuf->nb_max_of_state )
@@ -1375,6 +1454,7 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 						memclear(&trkbuf->track_state_buf[trkbuf->nb_of_state],0,sizeof(tracker_state));
 					}
 				}
+#endif
 
 #ifndef HXCMOD_MONO_OUTPUT
 				l=0;
@@ -1385,17 +1465,11 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 				{
 					if( cptr->period != 0 )
 					{
-						finalperiod = cptr->period - cptr->decalperiod - cptr->vibraperiod;
-						if( finalperiod )
-						{
-							cptr->samppos += ( (modctx->sampleticksconst<<10) / finalperiod );
-						}
+						cptr->samppos += cptr->sampinc;
 
-						cptr->ticks++;
-
-						if( cptr->replen<=2 )
+						if( cptr->replen < 2 )
 						{
-							if( ( cptr->samppos >> 10) >= cptr->length )
+							if( ( cptr->samppos >> 11) >= cptr->length )
 							{
 								cptr->length = 0;
 								cptr->reppnt = 0;
@@ -1416,14 +1490,14 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 								}
 
 								if( cptr->length )
-									cptr->samppos = cptr->samppos % (((unsigned long)cptr->length)<<10);
+									cptr->samppos = cptr->samppos % (((unsigned long)cptr->length)<<11);
 								else
 									cptr->samppos = 0;
 							}
 						}
 						else
 						{
-							if( ( cptr->samppos >> 10 ) >= (unsigned long)(cptr->replen+cptr->reppnt) )
+							if( ( cptr->samppos >> 11 ) >= (unsigned long)(cptr->replen+cptr->reppnt) )
 							{
 								if( cptr->update_nxt_repeat )
 								{
@@ -1442,7 +1516,7 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 
 								if( cptr->sampdata )
 								{
-									cptr->samppos = ((unsigned long)(cptr->reppnt)<<10) + (cptr->samppos % ((unsigned long)(cptr->replen+cptr->reppnt)<<10));
+									cptr->samppos = ((unsigned long)(cptr->reppnt)<<11) + (cptr->samppos % ((unsigned long)(cptr->replen+cptr->reppnt)<<11));
 								}
 							}
 						}
@@ -1455,17 +1529,20 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 							r += ( cptr->sampdata[k] *  cptr->volume );
 						}
 #else
-						if( cptr->sampdata!=0 && ( ((j&3)==1) || ((j&3)==2) ) )
+						if (cptr->sampdata != 0)
 						{
-							r += ( cptr->sampdata[k] *  cptr->volume );
-						}
-
-						if( cptr->sampdata!=0 && ( ((j&3)==0) || ((j&3)==3) ) )
-						{
-							l += ( cptr->sampdata[k] *  cptr->volume );
+							if ( !(j & 3) || ((j & 3) == 3) )
+							{
+								l += (cptr->sampdata[k] * cptr->volume);
+							}
+							else
+							{
+								r += (cptr->sampdata[k] * cptr->volume);
+							}
 						}
 #endif
 
+#ifdef HXCMOD_STATE_REPORT_SUPPORT
 						if( trkbuf && !state_remaining_steps )
 						{
 							if( trkbuf->nb_of_state < trkbuf->nb_max_of_state )
@@ -1479,14 +1556,19 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 								trkbuf->track_state_buf[trkbuf->nb_of_state].speed = modctx->song.speed;
 								trkbuf->track_state_buf[trkbuf->nb_of_state].tracks[j].cur_effect = cptr->effect_code;
 								trkbuf->track_state_buf[trkbuf->nb_of_state].tracks[j].cur_parameffect = cptr->parameffect;
-								trkbuf->track_state_buf[trkbuf->nb_of_state].tracks[j].cur_period = finalperiod;
+								if(cptr->sampinc)
+									trkbuf->track_state_buf[trkbuf->nb_of_state].tracks[j].cur_period = (muint)(modctx->sampleticksconst / cptr->sampinc);
+								else
+									trkbuf->track_state_buf[trkbuf->nb_of_state].tracks[j].cur_period = 0;
 								trkbuf->track_state_buf[trkbuf->nb_of_state].tracks[j].cur_volume = cptr->volume;
 								trkbuf->track_state_buf[trkbuf->nb_of_state].tracks[j].instrument_number = (unsigned char)cptr->sampnum;
 							}
 						}
+#endif
 					}
 				}
 
+#ifdef HXCMOD_STATE_REPORT_SUPPORT
 				if( trkbuf && !state_remaining_steps )
 				{
 					state_remaining_steps = trkbuf->sample_step;
@@ -1495,11 +1577,14 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 						trkbuf->nb_of_state++;
 				}
 				else
+#endif
 				{
 					state_remaining_steps--;
 				}
 
 #ifdef HXCMOD_MONO_OUTPUT
+
+	#ifdef HXCMOD_OUTPUT_FILTER
 				tr = (short)r;
 
 				if ( modctx->filter )
@@ -1507,32 +1592,39 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 					// Filter
 					r = (r+lr)>>1;
 				}
+	#endif
 
+	#ifdef HXCMOD_CLIPPING_CHECK
 				// Level limitation
 				if( r > 32767 ) r = 32767;
 				if( r < -32768 ) r = -32768;
-
+	#endif
 				// Store the final sample.
 	#ifdef HXCMOD_8BITS_OUTPUT
 
 		#ifdef HXCMOD_UNSIGNED_OUTPUT
-				outbuffer[i] = (r >> 8) + 127;
+				*outbuffer++ = (r >> 8) + 127;
 		#else
-				outbuffer[i] = r >> 8;
+				*outbuffer++ = r >> 8;
 		#endif
 
 	#else
 
 		#ifdef HXCMOD_UNSIGNED_OUTPUT
-				outbuffer[i] = r + 32767;
+				*outbuffer++ = r + 32767;
 		#else
-				outbuffer[i] = r;
+				*outbuffer++ = r;
 		#endif
 
 	#endif
 
+	#ifdef HXCMOD_OUTPUT_FILTER
 				lr = tr;
+	#endif
+
 #else
+
+	#ifdef HXCMOD_OUTPUT_FILTER
 				tl = (short)l;
 				tr = (short)r;
 
@@ -1542,56 +1634,64 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 					l = (l+ll)>>1;
 					r = (r+lr)>>1;
 				}
+	#endif
 
+	#ifdef HXCMOD_OUTPUT_STEREO_MIX
 				if ( modctx->stereo_separation == 1 )
 				{
 					// Left & Right Stereo panning
 					l = (l+(r>>1));
 					r = (r+(l>>1));
 				}
+	#endif
 
+	#ifdef HXCMOD_CLIPPING_CHECK
 				// Level limitation
 				if( l > 32767 ) l = 32767;
 				if( l < -32768 ) l = -32768;
 				if( r > 32767 ) r = 32767;
 				if( r < -32768 ) r = -32768;
-
+	#endif
 				// Store the final sample.
 
 
 	#ifdef HXCMOD_8BITS_OUTPUT
 
 		#ifdef HXCMOD_UNSIGNED_OUTPUT
-				outbuffer[(i*2)]   = ( l >> 8 ) + 127;
-				outbuffer[(i*2)+1] = ( r >> 8 ) + 127;
+				*outbuffer++ = ( l >> 8 ) + 127;
+				*outbuffer++ = ( r >> 8 ) + 127;
 		#else
-				outbuffer[(i*2)]   = l >> 8;
-				outbuffer[(i*2)+1] = r >> 8;
+				*outbuffer++ = l >> 8;
+				*outbuffer++ = r >> 8;
 		#endif
 
 	#else
 
 		#ifdef HXCMOD_UNSIGNED_OUTPUT
-				outbuffer[(i*2)]   = l + 32767;
-				outbuffer[(i*2)+1] = r + 32767;
+				*outbuffer++ = l + 32767;
+				*outbuffer++ = r + 32767;
 		#else
-				outbuffer[(i*2)]   = l;
-				outbuffer[(i*2)+1] = r;
+				*outbuffer++ = l;
+				*outbuffer++ = r;
 		#endif
 
 	#endif
+
+	#ifdef HXCMOD_OUTPUT_FILTER
 				ll = tl;
 				lr = tr;
+	#endif
+
 #endif // HXCMOD_MONO_OUTPUT
 
 			}
 
-#ifndef HXCMOD_MONO_OUTPUT
+#ifdef HXCMOD_OUTPUT_FILTER
+	#ifndef HXCMOD_MONO_OUTPUT
 			modctx->last_l_sample = ll;
-#endif
+	#endif
 			modctx->last_r_sample = lr;
-
-			modctx->samplenb = modctx->samplenb+nbsample;
+#endif
 		}
 		else
 		{
@@ -1601,11 +1701,12 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 #ifdef HXCMOD_MONO_OUTPUT
 				outbuffer[i] = 0;
 #else
-				outbuffer[(i*2)]   = 0;
-				outbuffer[(i*2)+1] = 0;
+				*outbuffer++ = 0;
+				*outbuffer++ = 0;
 #endif
 			}
 
+#ifdef HXCMOD_STATE_REPORT_SUPPORT
 			if(trkbuf)
 			{
 				trkbuf->nb_of_state = 0;
@@ -1614,6 +1715,7 @@ void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, unsigned long 
 				memclear(trkbuf->track_state_buf,0,sizeof(tracker_state) * trkbuf->nb_max_of_state);
 				memclear(trkbuf->instruments,0,sizeof(trkbuf->instruments));
 			}
+#endif
 		}
 	}
 }
@@ -1634,8 +1736,6 @@ void hxcmod_unload( modcontext * modctx )
 		modctx->patterntickse = 0;
 		modctx->patternticksaim = 0;
 		modctx->sampleticksconst = 0;
-
-		modctx->samplenb = 0;
 
 		memclear(modctx->channels,0,sizeof(modctx->channels));
 
