@@ -547,13 +547,23 @@ static int isdigit(char c)
 
 static int digits_only(const char *s)
 {
+	int len;
+
+	len = 0;
+
 	while (*s)
 	{
 		if (isdigit(*s++) == 0)
+		{
 			return 0;
+		}
+		else
+		{
+			len++;
+		}
 	}
 
-	return 1;
+	return len;
 }
 
 void floppy_streamer_readdisk(Fl_Button*, void* w)
@@ -576,12 +586,12 @@ void floppy_streamer_readdisk(Fl_Button*, void* w)
 		if(strlen(fdw->index_name->value()) && digits_only(fdw->index_name->value()))
 		{
 			index = atoi(fdw->index_name->value());
-			strcat(index_mode,"MANUAL_INDEX_NAME");
+			strcpy(index_mode,"MANUAL_INDEX_NAME");
 		}
 		else
 		{
 			index = 1;
-			strcat(index_mode,"AUTO_INDEX_NAME");
+			strcpy(index_mode,"AUTO_INDEX_NAME");
 		}
 
 		sprintf(tmp,"dump 0 %d %d %d %d %d %d %d %d \"%s\" \"%s\" %d %s\n",atoi(fdw->min_track->value()), \
@@ -619,15 +629,15 @@ void floppy_streamer_readtrack(Fl_Button*, void* w)
 		sprintf(tmp,"dump_time %d\n",atoi(fdw->dump_lenght->value()));
 		network_write(cmd_connection, (unsigned char*)tmp, strlen(tmp),2);
 
-		if(strlen(fdw->index_name->value()) && digits_only(fdw->index_name->value()))
+		if( digits_only(fdw->index_name->value()) )
 		{
 			index = atoi(fdw->index_name->value());
-			strcat(index_mode,"MANUAL_INDEX_NAME");
+			strcpy(index_mode,"MANUAL_INDEX_NAME");
 		}
 		else
 		{
 			index = 1;
-			strcat(index_mode,"AUTO_INDEX_NAME");
+			strcpy(index_mode,"AUTO_INDEX_NAME");
 		}
 
 		sprintf(tmp,"dump 0 -1 -1 %g %g %d %d %d %d \"%s\" \"%s\" %d %s\n",fdw->side_number_slide->value(), \
