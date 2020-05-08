@@ -66,7 +66,8 @@
 #include "libhxcadaptor.h"
 #include "tracks/crc.h"
 
-//#define PASTI_DBG 1
+// Enable the debug outputs by default
+#define PASTI_DBG 1
 
 int STX_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
@@ -611,6 +612,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 									{
 										sectorconfig[j].use_alternate_datamark = 0xFF;
 										sectorconfig[j].alternate_datamark = 0x00;
+										sectorconfig[j].flags |= TRACKGEN_NO_DATA;
 									}
 
 									sectorconfig[j].missingdataaddressmark=0;
@@ -881,6 +883,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							{
 								sectorconfig[j].use_alternate_datamark = 0xFF;
 								sectorconfig[j].alternate_datamark = 0x00;
+								sectorconfig[j].flags |= TRACKGEN_NO_DATA;
 							}
 
 							sectorconfig[j].alternate_sector_size_id=sector[j].sector_size;
