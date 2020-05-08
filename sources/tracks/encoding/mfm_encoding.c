@@ -246,7 +246,8 @@ int32_t BuildMFMCylinder(uint8_t * mfm_buffer,int32_t mfm_size,uint8_t * track_c
 // Fast Bin to MFM converter
 void FastMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track_data,int size)
 {
-	unsigned short i,l;
+	int l;
+	unsigned int i;
 	uint8_t  byte;
 	uint16_t lastbit;
 	uint16_t mfm_code;
@@ -255,11 +256,11 @@ void FastMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * trac
 	mfm_buffer=&side->databuffer[tg->last_bit_offset/8];
 
 	// MFM Encoding
-	lastbit=tg->mfm_last_bit;
+	lastbit = tg->mfm_last_bit;
 	i=0;
 	for(l=0;l<size;l++)
 	{
-		byte =track_data[l];
+		byte = track_data[l];
 		mfm_code = (uint16_t)(LUT_Byte2MFM[byte] & lastbit);
 
 		mfm_buffer[i++] = (uint8_t)(mfm_code>>8);
@@ -269,7 +270,7 @@ void FastMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * trac
 	}
 
 	tg->mfm_last_bit = lastbit;
-	tg->last_bit_offset=tg->last_bit_offset+(i*8);
+	tg->last_bit_offset = tg->last_bit_offset+(i*8);
 
 	return;
 }
