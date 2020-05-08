@@ -199,8 +199,12 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 							}
 							else
 							{
+								sector_header.FDC_status = 0x10;
+
 								if(sc->use_alternate_header_crc)
 									sector_header.FDC_status = 0x18;
+
+								sector_header.sector_speed_timing = 0;
 							}
 							sector_header.sector_size = size_to_code(sc->sectorsize);
 
@@ -239,46 +243,50 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 							fseek(stxdskfile,0,SEEK_END);
 
-							sector_header.sector_pos = tracksectsize;
-							fwrite(sc->input_data,sc->sectorsize,1,stxdskfile);
-
-							fseek(stxdskfile,cur_track_file_offset + sizeof(pasti_trackheader) + (sizeof(pasti_sector)*sect_cnt),SEEK_SET);
-
-							fwrite(&sector_header,sizeof(pasti_sector),1,stxdskfile);
-
-							if( sector_header.FDC_status & 0x80 )
+							if( sc->input_data )
 							{
-								if( flakey_mask_buffer )
+								sector_header.sector_pos = tracksectsize;
+								fwrite(sc->input_data,sc->sectorsize,1,stxdskfile);
+
+								fseek(stxdskfile,cur_track_file_offset + sizeof(pasti_trackheader) + (sizeof(pasti_sector)*sect_cnt),SEEK_SET);
+
+								fwrite(&sector_header,sizeof(pasti_sector),1,stxdskfile);
+
+								if( sector_header.FDC_status & 0x80 )
 								{
-									// Save Flakey bits
-
-									// Skip Data mark
-									cellnumber = ( sc->startdataindex + ( (3+1)*8*2) ) % floppy->tracks[i]->sides[j]->tracklen;
-									cellcnt = 0;
-									do
+									if( flakey_mask_buffer )
 									{
-										flakeystate = hxcfe_getCellFlakeyState( imgldr_ctx->hxcfe, floppy->tracks[i]->sides[j], cellnumber);
+										// Save Flakey bits
 
-										if(flakeystate > 0)
+										// Skip Data mark
+										cellnumber = ( sc->startdataindex + ( (3+1)*8*2) ) % floppy->tracks[i]->sides[j]->tracklen;
+										cellcnt = 0;
+										do
 										{
-											if( cellcnt < (sc->sectorsize*8*2) )
+											flakeystate = hxcfe_getCellFlakeyState( imgldr_ctx->hxcfe, floppy->tracks[i]->sides[j], cellnumber);
+
+											if(flakeystate > 0)
 											{
-												flakey_mask_buffer[flakey_mask_offset + (cellcnt>>4)] =
-														( flakey_mask_buffer[flakey_mask_offset + (cellcnt>>4)] ^ (0x80>>((cellcnt>>1)&0x7)) ) & flakey_mask_buffer[flakey_mask_offset + (cellcnt>>4)];
+												if( cellcnt < (sc->sectorsize*8*2) )
+												{
+													flakey_mask_buffer[flakey_mask_offset + (cellcnt>>4)] =
+															( flakey_mask_buffer[flakey_mask_offset + (cellcnt>>4)] ^ (0x80>>((cellcnt>>1)&0x7)) ) & flakey_mask_buffer[flakey_mask_offset + (cellcnt>>4)];
+												}
 											}
-										}
 
-										cellnumber = (cellnumber+1) % floppy->tracks[i]->sides[j]->tracklen;
-										cellcnt++;
-									}while(cellnumber!=sc->endsectorindex);
+											cellnumber = (cellnumber+1) % floppy->tracks[i]->sides[j]->tracklen;
+											cellcnt++;
+										}while(cellnumber!=sc->endsectorindex);
 
-									flakey_mask_offset += sc->sectorsize;
+										flakey_mask_offset += sc->sectorsize;
+									}
 								}
+
+								tracksize += sc->sectorsize;
+								tracksectsize += sc->sectorsize;
 							}
 
 							sect_cnt++;
-							tracksize += sc->sectorsize;
-							tracksectsize += sc->sectorsize;
 
 						}
 					}while(sc);
