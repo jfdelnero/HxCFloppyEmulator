@@ -40,6 +40,8 @@ typedef struct track_generator_
 
 #ifndef _HXCFE_SECTCFG_
 
+#define TRACKGEN_NO_DATA 0x00000001
+
 typedef struct _HXCFE_SECTCFG
 {
 	int32_t        head;
@@ -82,6 +84,8 @@ typedef struct _HXCFE_SECTCFG
 
 	uint8_t        fill_byte;
 	uint8_t        fill_byte_used;				// Set to indicate that the sector is filled with "fill_byte"
+	
+	uint32_t       flags;
 }HXCFE_SECTCFG;
 
 #define _HXCFE_SECTCFG_

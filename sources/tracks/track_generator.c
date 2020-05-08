@@ -988,135 +988,140 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 		pushTrackCode(tg,formatstab[trackencoding].data_gap2,0xFF,currentside,sectorconfig->trackencoding);
 	}
 
-	// sync
-	for(i=0;i<formatstab[trackencoding].len_dsync;i++)
+	if( !(sectorconfig->flags & TRACKGEN_NO_DATA) )
 	{
-		pushTrackCode(tg,formatstab[trackencoding].data_dsync,0xFF,currentside,sectorconfig->trackencoding);
-	}
-
-	//02 CRC The CRC of the data
-	CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,formatstab[trackencoding].crc_poly,formatstab[trackencoding].crc_initial);
-
-	// data mark
-	for(i=0;i<formatstab[trackencoding].len_datamarkp1;i++)
-	{
-		pushTrackCode(tg,formatstab[trackencoding].data_datamarkp1,formatstab[trackencoding].clock_datamarkp1,currentside,sectorconfig->trackencoding);
-		CRC16_Update(&CRC16_High,&CRC16_Low, formatstab[trackencoding].data_datamarkp1,(unsigned char*)&crctable );
-	}
-
-	if(sectorconfig->use_alternate_datamark)
-	{
-		for(i=0;i<formatstab[trackencoding].len_datamarkp2;i++)
+		
+		// sync
+		for(i=0;i<formatstab[trackencoding].len_dsync;i++)
 		{
-			pushTrackCode(tg,(uint8_t)sectorconfig->alternate_datamark,formatstab[trackencoding].clock_datamarkp2,currentside,sectorconfig->trackencoding);
-			CRC16_Update(&CRC16_High,&CRC16_Low, (uint8_t)sectorconfig->alternate_datamark,(unsigned char*)&crctable );
+			pushTrackCode(tg,formatstab[trackencoding].data_dsync,0xFF,currentside,sectorconfig->trackencoding);
 		}
-	}
-	else
-	{
-		for(i=0;i<formatstab[trackencoding].len_datamarkp2;i++)
+
+		//02 CRC The CRC of the data
+		CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,formatstab[trackencoding].crc_poly,formatstab[trackencoding].crc_initial);
+
+		// data mark
+		for(i=0;i<formatstab[trackencoding].len_datamarkp1;i++)
 		{
-			pushTrackCode(tg,formatstab[trackencoding].data_datamarkp2,formatstab[trackencoding].clock_datamarkp2,currentside,sectorconfig->trackencoding);
-			CRC16_Update(&CRC16_High,&CRC16_Low, formatstab[trackencoding].data_datamarkp2,(unsigned char*)&crctable );
+			pushTrackCode(tg,formatstab[trackencoding].data_datamarkp1,formatstab[trackencoding].clock_datamarkp1,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, formatstab[trackencoding].data_datamarkp1,(unsigned char*)&crctable );
 		}
-	}
 
-	data_part_encoding = sectorconfig->trackencoding;
+		if(sectorconfig->use_alternate_datamark)
+		{
+			for(i=0;i<formatstab[trackencoding].len_datamarkp2;i++)
+			{
+				pushTrackCode(tg,(uint8_t)sectorconfig->alternate_datamark,formatstab[trackencoding].clock_datamarkp2,currentside,sectorconfig->trackencoding);
+				CRC16_Update(&CRC16_High,&CRC16_Low, (uint8_t)sectorconfig->alternate_datamark,(unsigned char*)&crctable );
+			}
+		}
+		else
+		{
+			for(i=0;i<formatstab[trackencoding].len_datamarkp2;i++)
+			{
+				pushTrackCode(tg,formatstab[trackencoding].data_datamarkp2,formatstab[trackencoding].clock_datamarkp2,currentside,sectorconfig->trackencoding);
+				CRC16_Update(&CRC16_High,&CRC16_Low, formatstab[trackencoding].data_datamarkp2,(unsigned char*)&crctable );
+			}
+		}
 
-	if( formatstab[trackencoding].indexformat == DECRX02_SDDD)
-	{
-		// DEC RX02 : Encode the Data + CRC in MFM.
-		data_part_encoding = ISOFORMAT_DD;
-		tg->mfm_last_bit = 0x7FFF;
-		tg->last_bit_offset++;
-	}
+		data_part_encoding = sectorconfig->trackencoding;
 
-	startdatabitindex = tg->last_bit_offset;
-	sectorconfig->startdataindex = tg->last_bit_offset/8;
-	if(sectorconfig->input_data)
-	{
-		if( tg->last_bit_offset & 7 )
+		if( formatstab[trackencoding].indexformat == DECRX02_SDDD)
+		{
+			// DEC RX02 : Encode the Data + CRC in MFM.
+			data_part_encoding = ISOFORMAT_DD;
+			tg->mfm_last_bit = 0x7FFF;
+			tg->last_bit_offset++;
+		}
+
+		startdatabitindex = tg->last_bit_offset;
+		sectorconfig->startdataindex = tg->last_bit_offset/8;
+		if(sectorconfig->input_data)
+		{
+			if( tg->last_bit_offset & 7 )
+			{
+				for(i=0;i<sectorsize;i++)
+				{
+					pushTrackCode(tg,sectorconfig->input_data[i],0xFF,currentside,data_part_encoding);
+				}
+			}
+			else
+			{
+				FastMFMFMgenerator(tg,currentside,sectorconfig->input_data,sectorsize,data_part_encoding);
+			}
+
+			// data crc
+			for(i=0;i<sectorsize;i++)
+			{
+				CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->input_data[i],(unsigned char*)&crctable );
+			}
+		}
+		else
 		{
 			for(i=0;i<sectorsize;i++)
 			{
-				pushTrackCode(tg,sectorconfig->input_data[i],0xFF,currentside,data_part_encoding);
+				pushTrackCode(tg,sectorconfig->fill_byte,0xFF,currentside,data_part_encoding);
+				CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->fill_byte,(unsigned char*)&crctable );
 			}
 		}
-		else
-		{
-			FastMFMFMgenerator(tg,currentside,sectorconfig->input_data,sectorsize,data_part_encoding);
-		}
 
-		// data crc
-		for(i=0;i<sectorsize;i++)
+		if(sectorconfig->weak_bits_mask)
 		{
-			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->input_data[i],(unsigned char*)&crctable );
-		}
-	}
-	else
-	{
-		for(i=0;i<sectorsize;i++)
-		{
-			pushTrackCode(tg,sectorconfig->fill_byte,0xFF,currentside,data_part_encoding);
-			CRC16_Update(&CRC16_High,&CRC16_Low, sectorconfig->fill_byte,(unsigned char*)&crctable );
-		}
-	}
-
-	if(sectorconfig->weak_bits_mask)
-	{
-		if( currentside->flakybitsbuffer)
-		{
-			for(i=0;i<sectorsize*8;i++)
+			if( currentside->flakybitsbuffer)
 			{
-				if(sectorconfig->weak_bits_mask[i>>3] & (0x80 >> (i&7)))
+				for(i=0;i<sectorsize*8;i++)
 				{
-					k = (int)((float)( tg->last_bit_offset - ( sectorconfig->startdataindex * 8 ) ) * (float)( (float)i / (float)(sectorsize*8) ) );
+					if(sectorconfig->weak_bits_mask[i>>3] & (0x80 >> (i&7)))
+					{
+						k = (int)((float)( tg->last_bit_offset - ( sectorconfig->startdataindex * 8 ) ) * (float)( (float)i / (float)(sectorsize*8) ) );
 
-					currentside->flakybitsbuffer[sectorconfig->startdataindex + (k>>3)] |= ( 0x80 >> (k&7) );
+						currentside->flakybitsbuffer[sectorconfig->startdataindex + (k>>3)] |= ( 0x80 >> (k&7) );
+					}
 				}
 			}
 		}
-	}
 
-	if(sectorconfig->use_alternate_data_crc&0x2)
-	{
-		// alternate crc
-		pushTrackCode(tg,(unsigned char)(sectorconfig->data_crc&0xFF),     0xFF,currentside,data_part_encoding);
-		pushTrackCode(tg,(unsigned char)((sectorconfig->data_crc>>8)&0xFF),0xFF,currentside,data_part_encoding);
-	}
-	else
-	{
-		//bad crc
-		if(sectorconfig->use_alternate_data_crc&0x1)
+		if(sectorconfig->use_alternate_data_crc&0x2)
 		{
-			pushTrackCode(tg,(unsigned char)(CRC16_High^0x21),0xFF,currentside,data_part_encoding);
-			pushTrackCode(tg,(unsigned char)(CRC16_Low ^0x20),0xFF,currentside,data_part_encoding);
+			// alternate crc
+			pushTrackCode(tg,(unsigned char)(sectorconfig->data_crc&0xFF),     0xFF,currentside,data_part_encoding);
+			pushTrackCode(tg,(unsigned char)((sectorconfig->data_crc>>8)&0xFF),0xFF,currentside,data_part_encoding);
 		}
 		else
 		{
-			pushTrackCode(tg,CRC16_High,0xFF,currentside,data_part_encoding);
-			pushTrackCode(tg,CRC16_Low ,0xFF,currentside,data_part_encoding);
+			//bad crc
+			if(sectorconfig->use_alternate_data_crc&0x1)
+			{
+				pushTrackCode(tg,(unsigned char)(CRC16_High^0x21),0xFF,currentside,data_part_encoding);
+				pushTrackCode(tg,(unsigned char)(CRC16_Low ^0x20),0xFF,currentside,data_part_encoding);
+			}
+			else
+			{
+				pushTrackCode(tg,CRC16_High,0xFF,currentside,data_part_encoding);
+				pushTrackCode(tg,CRC16_Low ,0xFF,currentside,data_part_encoding);
+			}
 		}
-	}
 
-	if( formatstab[trackencoding].indexformat == DECRX02_SDDD )
-	{
-		// DEC RX02 : Convert/Patch the encoded MFM to DEC M2FM.
-		mfmtodecm2fm( currentside->databuffer, currentside->tracklen, startdatabitindex, ((256+2)*8*2) );
-	}
-
-	// add extra desync
-	for(i=0;i<formatstab[trackencoding].postdcrc_len;i++)
-	{
-		pushTrackCode(tg,formatstab[trackencoding].postdcrc_glitch_data,formatstab[trackencoding].postdcrc_glitch_clock,currentside,sectorconfig->trackencoding);
-	}
-
-	//gap3
-	if(sectorconfig->gap3!=255)
-	{
-		for(i=0;i<sectorconfig->gap3;i++)
+		if( formatstab[trackencoding].indexformat == DECRX02_SDDD )
 		{
-			pushTrackCode(tg,formatstab[trackencoding].data_gap3,0xFF,currentside,sectorconfig->trackencoding);
+			// DEC RX02 : Convert/Patch the encoded MFM to DEC M2FM.
+			mfmtodecm2fm( currentside->databuffer, currentside->tracklen, startdatabitindex, ((256+2)*8*2) );
+		}
+
+		// add extra desync
+		for(i=0;i<formatstab[trackencoding].postdcrc_len;i++)
+		{
+			pushTrackCode(tg,formatstab[trackencoding].postdcrc_glitch_data,formatstab[trackencoding].postdcrc_glitch_clock,currentside,sectorconfig->trackencoding);
+		}
+
+		//gap3
+		if(sectorconfig->gap3!=255)
+		{
+			for(i=0;i<sectorconfig->gap3;i++)
+			{
+				pushTrackCode(tg,formatstab[trackencoding].data_gap3,0xFF,currentside,sectorconfig->trackencoding);
+			}
+
 		}
 	}
 
