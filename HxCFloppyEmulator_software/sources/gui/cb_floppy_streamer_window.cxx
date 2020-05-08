@@ -675,6 +675,19 @@ void floppy_streamer_spybus(Fl_Button*, void* w)
 	}
 }
 
+void floppy_streamer_clear_bt(Fl_Button*, void* w)
+{
+	floppy_streamer_window *fdw;
+
+	fdw=(floppy_streamer_window *)w;
+
+	fdw->dump_name->value("");
+	fdw->comment->value("");
+	fdw->index_name->value("");
+
+	Fl::focus(fdw->dump_name);
+}
+
 void floppy_streamer_stop(Fl_Button*, void* w)
 {
 	char tmpstr[64];
