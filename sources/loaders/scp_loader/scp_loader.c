@@ -454,10 +454,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					if(mac_clv)
 						timecoef = (float)400.00 / mac_clv_track2rpm(j); 
 
-					if(nbside == 2)
-						curside = decodestream(imgldr_ctx->hxcfe,f,(j<<1)|(i&1),tracksoffset[(j<<1)|(i&1)],&rpm,timecoef,phasecorrection,scph.number_of_revolution,1 + scph.resolution,bitrate,filter,filterpasses,bmp_export);
-					else
-						curside = decodestream(imgldr_ctx->hxcfe,f,j<<1,tracksoffset[j],&rpm,timecoef,phasecorrection,scph.number_of_revolution,1 + scph.resolution,bitrate,filter,filterpasses,bmp_export);
+					curside = decodestream(imgldr_ctx->hxcfe,f,(j<<1)|(i&1),tracksoffset[(j<<1)|(i&1)],&rpm,timecoef,phasecorrection,scph.number_of_revolution,1 + scph.resolution,bitrate,filter,filterpasses,bmp_export);
 
 					if(!floppydisk->tracks[j/trackstep])
 					{

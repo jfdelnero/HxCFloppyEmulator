@@ -366,15 +366,15 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 			fseek(f,0,SEEK_END);
 
-			tracksoffset[i] = LITTLEENDIAN_DWORD(ftell(f));
-
 			if(floppy->floppyNumberOfSide == 2)
 			{
+				tracksoffset[i] = LITTLEENDIAN_DWORD(ftell(f));
 				write_scp_track(f,floppy->tracks[i>>1]->sides[i&1],&track_checksum,i,scph.number_of_revolution);
 			}
 			else
 			{
-				write_scp_track(f,floppy->tracks[i]->sides[0],&track_checksum,i,scph.number_of_revolution);
+				tracksoffset[i * 2] = LITTLEENDIAN_DWORD(ftell(f));
+				write_scp_track(f,floppy->tracks[i]->sides[0],&track_checksum,i * 2,scph.number_of_revolution);
 			}
 
 			file_checksum = file_checksum + track_checksum;
@@ -390,7 +390,6 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 		hxc_fclose(f);
 	}
-
 
 	return 0;
 }
