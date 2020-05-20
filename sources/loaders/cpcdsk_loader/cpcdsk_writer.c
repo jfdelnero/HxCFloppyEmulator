@@ -51,6 +51,7 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 	char   disk_info_block[256];
 	char rec_mode;
 	int32_t sectorsize;
+	int32_t tracksize;
 	int32_t track_cnt,weak_sector;
 	int32_t sectorlistoffset,trackinfooffset;
 	cpcdsk_fileheader * cpcdsk_fh;
@@ -129,9 +130,13 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 						default:
 							cpcdsk_th.datarate=0;
 							break;
-
 					}
 
+					if(cpcdsk_fh->number_of_sides<(i+1))
+						cpcdsk_fh->number_of_sides=i+1;
+
+					if(cpcdsk_fh->number_of_tracks<(j+1))
+						cpcdsk_fh->number_of_tracks=j+1;
 
 					if(nbsector)
 					{
@@ -145,12 +150,6 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 						fwrite(&cpcdsk_th,sizeof(cpcdsk_trackheader),1,cpcdskfile);
 
 						sectorlistoffset = ftell(cpcdskfile);
-
-						if(cpcdsk_fh->number_of_sides<(i+1))
-							cpcdsk_fh->number_of_sides=i+1;
-
-						if(cpcdsk_fh->number_of_tracks<(j+1))
-							cpcdsk_fh->number_of_tracks=j+1;
 
 						memset(&cpcdsk_s,0,sizeof(cpcdsk_sector));
 						for(k=0;k<nbsector;k++)
@@ -285,7 +284,15 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 						log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
 						strcat(log_str,tmp_str);
 
-						disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt] = (char)( (ftell(cpcdskfile)-trackinfooffset) / 256 );
+						tracksize = (ftell(cpcdskfile)-trackinfooffset);
+						disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt] = (char)( tracksize / 256 );
+						if(tracksize & 0xFF)
+						{
+							disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt]++;
+							//Padding...
+							memset(&tmp_str,0,256);
+							fwrite(&tmp_str,256 - (tracksize & 0xFF),1,cpcdskfile);
+						}
 					}
 					else
 					{
