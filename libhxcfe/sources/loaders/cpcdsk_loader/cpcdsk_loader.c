@@ -61,6 +61,8 @@
 
 #include "libhxcadaptor.h"
 
+//#define CPCDSK_DBG 1
+
 int CPCDSK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	cpcdsk_fileheader * fileheader;
@@ -135,6 +137,19 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 		hxc_fread(&fileheader,sizeof(fileheader),f);
 
+#ifdef CPCDSK_DBG
+		char tmp_str[64];
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"------ CPC DSK File Header ------");
+		strncpy(tmp_str,&fileheader.headertag,sizeof(fileheader.headertag)-1);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Header Tag: %s",tmp_str);
+		strncpy(tmp_str,&fileheader.creatorname,sizeof(fileheader.creatorname)-1);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Creator Name: %s",tmp_str);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Number of tracks: %d",fileheader.number_of_tracks);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Number of sides: %d",fileheader.number_of_sides);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Size per tracks: 0x%.4X",fileheader.size_of_a_track);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"---------------------------------");
+#endif
+
 		if( !strncmp((char*)&fileheader.headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",16))
 		{
 			extendformat=1;
@@ -154,6 +169,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 				return HXCFE_BADFILE;
 			}
 		}
+
 		tracksizetab=0;
 
 		if(extendformat)
@@ -161,6 +177,13 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 			// read the tracks size array.
 			tracksizetab=(unsigned char *)malloc(fileheader.number_of_sides*fileheader.number_of_tracks);
 			hxc_fread(tracksizetab,fileheader.number_of_sides*fileheader.number_of_tracks,f);
+
+#ifdef CPCDSK_DBG
+			for(i=0;i<fileheader.number_of_sides*fileheader.number_of_tracks;i++)
+			{
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %.2d:%d Size : 0x%.4X",i>>1,i&1,tracksizetab[i]<<8);
+			}
+#endif
 		}
 
 		floppydisk->floppyBitRate=250000;
@@ -183,8 +206,11 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 		for(i=0;i<(fileheader.number_of_sides*fileheader.number_of_tracks);i++)
 		{
-
 			hxcfe_imgCallProgressCallback(imgldr_ctx,i,fileheader.number_of_sides*fileheader.number_of_tracks);
+
+#ifdef CPCDSK_DBG
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %.2d:%d Position : 0x%.8X",i>>1,i&1,trackposition);
+#endif
 
 			fseek (f , trackposition , SEEK_SET);
 
