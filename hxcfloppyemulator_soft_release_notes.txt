@@ -15,7 +15,12 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
-X XXXXXXX 2020 : HxCFloppyEmulator 2.X.X.X (Work in Progress)
+X XXXXXXX 2020 : HxCFloppyEmulator 2.4.1.8 (Beta version - Work in Progress)
+
+(Download : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip)
+
+-> New hardware support introduced : Pauline ! The ultimate stream based floppy drive simulator / floppy dumper :)
+   Pauline control and real time stream viewer window added.
 
 -> macOS : CAPSlib loader added (IPF, CTRAW...). (Windows/Linux/macOS CAPSlib loaders code merged)
 
@@ -31,11 +36,18 @@ X XXXXXXX 2020 : HxCFloppyEmulator 2.X.X.X (Work in Progress)
 
 -> Kryoflux stream loader : Code re-factored and fixed.
 
--> IPF Loader : Disable the CAPS library DI_LOCK_INDEX option (fake index track buffer realignment).
+-> IPF Loader : The CAPS library DI_LOCK_INDEX flag turned off by default (fake index track buffer realignment).
+				Can be enabled with the LOADER_IPF_CAPS_DI_LOCK_INDEX parameter.
 
 -> CPC EDSK writer : Fix EDSK export with unformatted track(s).
+                     Fix export with unaligned track size.
+                     Keep the last unformatted tracks.
 
 -> SCP Writer : Randomize stream on weak-bits.
+
+-> SCP Writer : Fix single sided disks export.
+
+-> STX Writer : Support sectors headers without data part.
 
 -> Macintosh disk support : Macintosh GCR decoding, CLV disks stream import (WIP!).
 
