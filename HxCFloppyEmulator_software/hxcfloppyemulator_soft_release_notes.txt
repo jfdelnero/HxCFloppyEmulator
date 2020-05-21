@@ -15,7 +15,7 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
-X XXXXXXX 2020 : HxCFloppyEmulator 2.4.1.8 (Beta version - Work in Progress)
+X XXXXXXX 2020 : HxCFloppyEmulator 2.4.1.9 (Beta version - Work in Progress)
 
 (Download : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip)
 
@@ -37,11 +37,13 @@ X XXXXXXX 2020 : HxCFloppyEmulator 2.4.1.8 (Beta version - Work in Progress)
 -> Kryoflux stream loader : Code re-factored and fixed.
 
 -> IPF Loader : The CAPS library DI_LOCK_INDEX flag turned off by default (fake index track buffer realignment).
-				Can be enabled with the LOADER_IPF_CAPS_DI_LOCK_INDEX parameter.
+                Can be enabled with the LOADER_IPF_CAPS_DI_LOCK_INDEX parameter.
 
 -> CPC EDSK writer : Fix EDSK export with unformatted track(s).
                      Fix export with unaligned track size.
                      Keep the last unformatted tracks.
+                     Discard the second side if unformatted. (parameter CPCDSK_WRITER_DISCARD_UNFORMATTED_SIDE)
+                     Limit the sector data size to 6144 bytes. (parameter CPCDSK_WRITER_LIMIT_SECTOR_SIZE)
 
 -> SCP Writer : Randomize stream on weak-bits.
 
