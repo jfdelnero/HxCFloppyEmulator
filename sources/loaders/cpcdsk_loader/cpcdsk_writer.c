@@ -42,6 +42,8 @@
 
 #include "floppy_utils.h"
 
+#include "version.h"
+
 int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int32_t i,j,k,l,m,nbsector;
@@ -57,11 +59,16 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 	cpcdsk_fileheader * cpcdsk_fh;
 	cpcdsk_trackheader cpcdsk_th;
 	cpcdsk_sector cpcdsk_s;
+	int flag_limit_sector_size;
+	int flag_discard_unformatted_2side;
 
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG** sca;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write CPCDSK file %s...",filename);
+
+	flag_limit_sector_size = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "CPCDSK_WRITER_LIMIT_SECTOR_SIZE" );
+	flag_discard_unformatted_2side = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "CPCDSK_WRITER_DISCARD_UNFORMATTED_SIDE" );
 
 	log_str=0;
 	cpcdskfile=hxc_fopen(filename,"wb");
@@ -71,7 +78,9 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 
 		cpcdsk_fh = (cpcdsk_fileheader *)&disk_info_block;
 		strncpy((char*)&cpcdsk_fh->headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",sizeof(cpcdsk_fh->headertag));
-		strncpy((char*)&cpcdsk_fh->creatorname,"HxCFloppyEmu\r\n",sizeof(cpcdsk_fh->creatorname));
+
+		snprintf((char*)&cpcdsk_fh->creatorname,sizeof(cpcdsk_fh->creatorname),"HxC%s",STR_FILE_VERSION2);
+		cpcdsk_fh->creatorname[sizeof(cpcdsk_fh->creatorname)-1] = 0;
 
 		fwrite(&disk_info_block,0x100,1,cpcdskfile);
 		track_cnt=0;
@@ -93,17 +102,15 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 					memset(log_str,0,strlen(tmp_str)+1);
 					strcat(log_str,tmp_str);
 
-					rec_mode=0;
-					rec_mode=2;
+					rec_mode = 2;  // MFM
 					sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector);
 					if(!sca)
 					{
 						sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector);
-						rec_mode=1;
+						rec_mode = 1; // FM
 						if(!nbsector)
 						{
-							rec_mode=0;
-							sca = hxcfe_getAllTrackSectors(ss,j,i,AMIGA_MFM_ENCODING,&nbsector);
+							rec_mode = 0; // Unknown
 						}
 					}
 
@@ -114,7 +121,7 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 					cpcdsk_th.gap3_length=78;
 					cpcdsk_th.filler_byte=0xE5;
 					cpcdsk_th.number_of_sector = nbsector;
-					cpcdsk_th.rec_mode=rec_mode;
+					cpcdsk_th.rec_mode = rec_mode;
 
 					switch(floppy->tracks[j]->sides[i]->bitrate)
 					{
@@ -178,6 +185,15 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 							cpcdsk_s.side = sca[k]->head;
 							cpcdsk_s.track = sca[k]->cylinder;
 							cpcdsk_s.sector_size_code = size_to_code(sca[k]->sectorsize);
+
+							if(flag_limit_sector_size)
+							{
+								// Limit the sector data size to 6144...
+								// Some emulators don't like bigger sectors...
+								if(sca[k]->sectorsize > 6144)
+									sca[k]->sectorsize = 6144;
+							}
+
 							cpcdsk_s.data_length = sca[k]->sectorsize;
 
 							// ID part CRC ERROR ?
@@ -298,7 +314,7 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 					{
 						// Unformatted track ...
 						// A size of "0" indicates an unformatted track.
-						// In this case there is no data, and no track information block for this track in the image file! 
+						// In this case there is no data, and no track information block for this track in the image file!
 						disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt] = 0;
 					}
 
@@ -314,6 +330,31 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 
 		}
 
+		// It appears that some emulators don't like 2 sides disk
+		// with the second side unformatted
+		if( floppy->floppyNumberOfSide == 2 && flag_discard_unformatted_2side)
+		{
+			i = 0;
+			while(i<floppy->floppyNumberOfTrack && !disk_info_block[sizeof(cpcdsk_fileheader)+ 1 + i*2])
+			{
+				i++;
+			}
+
+			if(i==floppy->floppyNumberOfTrack)
+			{
+				// Side 2 empty, discard it.
+				i = 0;
+				while(i<floppy->floppyNumberOfTrack && !disk_info_block[sizeof(cpcdsk_fileheader)+ 1 + i*2])
+				{
+					disk_info_block[sizeof(cpcdsk_fileheader) + i] = disk_info_block[sizeof(cpcdsk_fileheader) + i*2];
+					if(i)
+						disk_info_block[sizeof(cpcdsk_fileheader) + i*2] = 0;
+					i++;
+				}
+				cpcdsk_fh->number_of_sides = 1;
+			}
+
+		}
 		fseek(cpcdskfile,0,SEEK_SET);
 		fwrite(&disk_info_block,0x100,1,cpcdskfile);
 
