@@ -119,7 +119,7 @@ static int copy_param(char * dest, char * line, int offs)
 
 	i = 0;
 	insidequote = 0;
-	while( !is_end_line(line[offs]) && ( insidequote || !is_space(line[offs]) ) )
+	while( !is_end_line(line[offs]) && ( insidequote || !is_space(line[offs]) ) && (i < (MAX_CFG_STRING_SIZE - 1)) )
 	{
 		if(line[offs] != '"')
 		{
@@ -195,7 +195,7 @@ static int extract_cmd(char * line, char * command)
 
 	if( !is_end_line(line[offs]) )
 	{
-		while( !is_end_line(line[offs]) && !is_space(line[offs]) )
+		while( !is_end_line(line[offs]) && !is_space(line[offs]) && i < (MAX_CFG_STRING_SIZE - 1) )
 		{
 			command[i] = line[offs];
 			offs++;
