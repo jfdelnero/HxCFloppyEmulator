@@ -17,6 +17,9 @@
 # (*.hxcstream / Pauline stream dump) and the stream hfe loader (*.hfe / High
 # resolutions stream floppy images for Pauline).
 #
+# Note : In the HxC software you can view and modify all these variables in
+#        the "Settings" -> "Internal Parameters" window.
+#
 
 # ----------------------------------------------------------------------------
 # ----------------------------------------------------------------------------
@@ -75,7 +78,7 @@ set FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV 0
 #
 # Set 1 here to disable the pulses analysis to link them between the
 # revolutions and find the the exact track overlap.
-# This part can take a lot of CPU time to if you just want to have
+# This part can take a lot of CPU time so if you just want to have
 # a quick preview set this to 1.
 #
 
