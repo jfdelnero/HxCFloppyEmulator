@@ -68,8 +68,8 @@
 
 fn_diskio_read media_read_callback;
 fn_diskio_write media_write_callback;
-HXCFE* floppycontext;
-HXCFE_FSMNG * gb_fsmng;
+
+static HXCFE_FSMNG * gb_fsmng;
 
 static void lba2chs(HXCFE_FSMNG * fsmng,int32_t lba, int32_t *track, int32_t *head, int32_t *sector)
 {
