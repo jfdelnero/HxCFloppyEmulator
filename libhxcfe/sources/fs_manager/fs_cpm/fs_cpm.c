@@ -61,8 +61,7 @@
 
 #include "libcpmfs/libcpmfs.h"
 
-HXCFE* floppycontext;
-HXCFE_FSMNG * gb_fsmng;
+static HXCFE_FSMNG * gb_fsmng;
 
 cpmfs fs;
 

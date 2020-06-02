@@ -66,8 +66,8 @@
 #include "thirdpartylibs/adflib/Lib/adf_err.h"
 #include "thirdpartylibs/adflib/Lib/adf_dir.h"
 
-HXCFE* floppycontext;
-HXCFE_FSMNG * gb_fsmng;
+static HXCFE* floppycontext;
+static HXCFE_FSMNG * gb_fsmng;
 
 //struct Device * adfdevice;
 //struct Volume * adfvolume;
