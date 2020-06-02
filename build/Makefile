@@ -82,7 +82,7 @@ DISKLOADERPLUGINS = raw_amiga.o raw_iso.o copyqm_loader.o crctable.o adf_loader.
 					kryofluxstream.o fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o \
 					northstar_loader.o  xml_loader.o flppcm_loader.o stw_loader.o vfddat_loader.o ana_loader.o atr_loader.o hfev3_loader.o hfev3_writer.o \
 					hfev3_trackgen.o heathkit_loader.o sdu_loader.o xml_db_loader.o streamhfe_loader.o qd_loader.o ipf_loader.o capslibloader.o \
-					hxcstream_loader.o hxcstream.o
+					hxcstream_loader.o hxcstream.o dfi_loader.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
@@ -288,6 +288,9 @@ scp_loader.o : $(BASEDIR)/loaders/scp_loader/scp_loader.c $(BASEDIR)/loaders/scp
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 scp_writer.o : $(BASEDIR)/loaders/scp_loader/scp_writer.c $(BASEDIR)/loaders/scp_loader/scp_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+dfi_loader.o : $(BASEDIR)/loaders/discferret_dfi_loader/dfi_loader.c $(BASEDIR)/loaders/discferret_dfi_loader/dfi_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 bmp_loader.o : $(BASEDIR)/loaders/bmp_loader/bmp_loader.c $(BASEDIR)/loaders/bmp_loader/bmp_loader.h

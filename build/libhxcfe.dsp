@@ -2151,6 +2151,22 @@ SOURCE=..\sources\loaders\hxcstream_loader\hxcstream_loader.h
 SOURCE=..\sources\loaders\hxcstream_loader\hxcstream_writer.c
 # End Source File
 # End Group
+# Begin Group "discferret_dfi"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\discferret_dfi_loader\dfi_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\discferret_dfi_loader\dfi_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\discferret_dfi_loader\dfi_loader.h
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 
