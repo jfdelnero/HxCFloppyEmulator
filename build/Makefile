@@ -30,12 +30,16 @@ endif
 HxCFloppyEmulator_software: libhxcfe libusbhxcfe fltk
 	$(MAKE) -C ../HxCFloppyEmulator_software/trunk/build/
 
-clean:
+clean_fltk:
+ifneq ("$(wildcard ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.3.x/Makefile)","")
+	$(MAKE) -C ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.3.x/ clean
+endif
+
+clean: clean_fltk
 	$(MAKE) -C ../libhxcadaptor/trunk/build/ clean
 	$(MAKE) -C ../libhxcfe/trunk/build/ clean
 	$(MAKE) -C ../libusbhxcfe/trunk/build/ clean
 	$(MAKE) -C ../HxCFloppyEmulator_cmdline/trunk/build/ clean
-	$(MAKE) -C ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.3.x/ clean
 	$(MAKE) -C ../HxCFloppyEmulator_software/trunk/build/ clean
 
 mrproper:
