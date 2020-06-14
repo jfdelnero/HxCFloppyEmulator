@@ -322,8 +322,6 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 		}
 		else
 		{
-			hxc_fclose(f);
-
 			return NULL;
 		}
 	}
