@@ -128,6 +128,7 @@
 #include "./loaders/qd_loader/qd_loader.h"
 #include "./loaders/hxcstream_loader/hxcstream_loader.h"
 #include "./loaders/discferret_dfi_loader/dfi_loader.h"
+#include "./loaders/a2r_loader/a2r_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -210,6 +211,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)System24_libGetPluginInfo,
 	(GETPLUGININFOS)SCP_libGetPluginInfo,
 	(GETPLUGININFOS)DFI_libGetPluginInfo,
+	(GETPLUGININFOS)A2R_libGetPluginInfo,
 	(GETPLUGININFOS)Apple2_nib_libGetPluginInfo,
 	(GETPLUGININFOS)Apple2_do_libGetPluginInfo,
 	(GETPLUGININFOS)SDDSpeccyDos_libGetPluginInfo,

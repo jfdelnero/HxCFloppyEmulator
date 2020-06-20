@@ -173,6 +173,15 @@ set DFILOADER_SINGLE_SIDE 0                          # Skip the side 1.
 set DFILOADER_BITRATE 0                              # Force the bitrate. (no auto-detection)
 set DFILOADER_BMPEXPORT 0                            # Export/plot the inputs stream tracks to BMP images.
 
+#
+# AppleSauceFDC A2R Stream loader parameters
+#
+
+set A2RLOADER_DOUBLE_STEP 0                          # Skip the odd tracks.
+set A2RLOADER_SINGLE_SIDE 0                          # Skip the side 1.
+set A2RLOADER_BITRATE 0                              # Force the bitrate. (no auto-detection)
+set A2RLOADER_BMPEXPORT 0                            # Export/plot the inputs stream tracks to BMP images.
+
 # ----------------------------------------------------------------------------
 # ----------------------------------------------------------------------------
 
