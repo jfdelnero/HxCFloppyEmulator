@@ -8,13 +8,19 @@ BASEDIR=../sources
 INCLUDES = -I$(BASEDIR)/ -I ../../../libhxcfe/trunk/sources -I ../../../libusbhxcfe/trunk/sources
 
 DEBUG ?= 0
+DEBUG_ASAN ?= 0
 
 ifeq ($(DEBUG), 1)
-	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG -fsanitize=address -fno-omit-frame-pointer
+	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG
 	LDFLAGS= -shared
 else
 	CFLAGS=-O3 $(INCLUDES) -Wall
-	LDFLAGS= -shared -s 
+	LDFLAGS= -shared -s
+endif
+
+ifeq ($(DEBUG_ASAN), 1)
+	CFLAGS += -fsanitize=address -fno-omit-frame-pointer
+	LDFLAGS += -static-libasan -fsanitize=address
 endif
 
 ifeq ($(TARGET), Linux)
