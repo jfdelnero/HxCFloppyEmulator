@@ -2167,6 +2167,22 @@ SOURCE=..\sources\loaders\discferret_dfi_loader\dfi_loader.c
 SOURCE=..\sources\loaders\discferret_dfi_loader\dfi_loader.h
 # End Source File
 # End Group
+# Begin Group "A2R"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\sources\loaders\a2r_loader\a2r_format.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\a2r_loader\a2r_loader.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\a2r_loader\a2r_loader.h
+# End Source File
+# End Group
 # End Group
 # Begin Group "tracks"
 
