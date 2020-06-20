@@ -8,13 +8,19 @@ BASEDIR=../sources
 INCLUDES = -I$(BASEDIR)/ -I ../../../libhxcfe/trunk/sources -I ../sources/win32 -I ../../../libhxcadaptor/trunk/sources
 
 DEBUG ?= 0
+DEBUG_ASAN ?= 0
 
 ifeq ($(DEBUG), 1)
-	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG -fsanitize=address -fno-omit-frame-pointer
-	LDFLAGS= -shared -s -lasan
+	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG
+	LDFLAGS= -shared -s
 else
 	CFLAGS=-O3 $(INCLUDES) -Wall
 	LDFLAGS= -shared
+endif
+
+ifeq ($(DEBUG_ASAN), 1)
+	CFLAGS += -fsanitize=address -fno-omit-frame-pointer
+	LDFLAGS += -static-libasan -fsanitize=address
 endif
 
 EXEC=libusbhxcfe.so
