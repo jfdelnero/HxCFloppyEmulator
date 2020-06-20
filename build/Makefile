@@ -9,22 +9,28 @@ BASEDIR=../sources
 INCLUDES = -I$(BASEDIR) -I ../../../libhxcfe/trunk/sources -I $(BASEDIR)/gui -I $(BASEDIR)/thirdpartylibs/fltk/fltk-1.3.x/ -I ../../../libusbhxcfe/trunk/sources -I ../../../libhxcadaptor/trunk/sources -I $(BASEDIR)/gui/microintro/
 
 DEBUG ?= 0
+DEBUG_ASAN ?= 0
 
 EXEC=hxcfloppyemulator
 
 ifeq ($(DEBUG), 1)
-	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG -fsanitize=address -fno-omit-frame-pointer
-	LDFLAGS= -lasan
+	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG
+	LDFLAGS=
 else
 	CFLAGS=-O3 $(INCLUDES) -Wall
 	LDFLAGS= -s
 endif
 
+ifeq ($(DEBUG_ASAN), 1)
+	CFLAGS += -fsanitize=address -fno-omit-frame-pointer
+	LDFLAGS += -static-libasan -fsanitize=address
+endif
+
 ifdef IPF_LIB_SUPPORT
-    CFLAGS += -DIPF_SUPPORT
-    DISKLOADERPLUGINS_IPF= ipf_loader.o libcapsimage.so.2.0
+	CFLAGS += -DIPF_SUPPORT
+	DISKLOADERPLUGINS_IPF= ipf_loader.o libcapsimage.so.2.0
 else
-    DISKLOADERPLUGINS_IPF=
+	DISKLOADERPLUGINS_IPF=
 endif
 
 LIBHXCFE = libhxcfe.so
