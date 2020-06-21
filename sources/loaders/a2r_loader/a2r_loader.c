@@ -211,6 +211,8 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int foffset,filesize;
 	int stream_start_pos;
 	int max_location;
+	int skip_inter_tracks;
+	int track_pos;
 
 	a2r_header  a2rh;
 	a2r_info    info;
@@ -255,6 +257,8 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				mac_clv = 1;
 			else
 				mac_clv = 0;
+
+			skip_inter_tracks = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "A2RLOADER_SKIP_INTER_TRACKS" );
 
 			singleside = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "A2RLOADER_SINGLE_SIDE" )&1;
 			phasecorrection = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_PHASE_CORRECTION_DIVISOR" );
@@ -343,6 +347,9 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					floppydisk->floppyiftype = GENERIC_SHUGART_DD_FLOPPYMODE;
 					floppydisk->floppyBitRate = VARIABLEBITRATE;
 					floppydisk->floppyNumberOfTrack = max_location;
+					if(skip_inter_tracks)
+						floppydisk->floppyNumberOfTrack /= 4;
+
 					if(singleside)
 						floppydisk->floppyNumberOfSide = 1;
 					else
@@ -350,8 +357,8 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 					floppydisk->floppySectorPerTrack = -1;
 
-					floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*(max_location+1));
-					memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*(max_location+1));
+					floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*(floppydisk->floppyNumberOfTrack+1));
+					memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*(floppydisk->floppyNumberOfTrack+1));
 
 					str_offset = 0;
 					while( str_offset < a2r_chunkh.chunk_size - 1)
@@ -374,7 +381,7 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							memset(tmp_buffer,0,capture.data_length + 1);
 							hxc_fread(tmp_buffer, capture.data_length, f);
 
-							if(last_location != capture.location)
+							if( (last_location != capture.location) && (!skip_inter_tracks || !(capture.location&3) ) )
 							{
 								curside = import_a2r_stream(imgldr_ctx->hxcfe, &capture, tmp_buffer, capture.data_length, &rpm, bitrate, phasecorrection, filter, filterpasses, bmp_export );
 								last_location = capture.location;
@@ -415,12 +422,16 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 								if(capture.location <= max_location)
 								{
-									if(!floppydisk->tracks[capture.location])
+									track_pos = capture.location;
+									if(skip_inter_tracks)
+										track_pos /= 4;
+									
+									if(!floppydisk->tracks[track_pos])
 									{
-										floppydisk->tracks[capture.location] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+										floppydisk->tracks[track_pos] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 									}
 
-									currentcylinder=floppydisk->tracks[capture.location];
+									currentcylinder=floppydisk->tracks[track_pos];
 									currentcylinder->sides[0] = curside;
 								}
 
