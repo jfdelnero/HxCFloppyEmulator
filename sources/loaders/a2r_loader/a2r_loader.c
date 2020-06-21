@@ -36,7 +36,7 @@
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
 // File : a2r_loader.c
-// Contains: A2R Stream floppy image loader
+// Contains: AppleSauce A2R Stream floppy image loader
 //
 // Written by: Jean-François DEL NERO
 //
@@ -163,6 +163,10 @@ static HXCFE_SIDE* import_a2r_stream(HXCFE* floppycontext, a2r_capture * capture
 				{
 					if(rpm)
 						*rpm = (short)( 60 / GetTrackPeriod(floppycontext,currentside) );
+				}
+				else
+				{
+					floppycontext->hxc_printf(MSG_ERROR,"import_a2r_stream : null track !");
 				}
 
 				if( bmpexport )
@@ -409,20 +413,18 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 									}
 								}
 
-								hxcfe_imgCallProgressCallback(imgldr_ctx,capture.location,max_location );
-
-							}
-
-
-							if(capture.location <= max_location)
-							{
-								if(!floppydisk->tracks[capture.location])
+								if(capture.location <= max_location)
 								{
-									floppydisk->tracks[capture.location] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+									if(!floppydisk->tracks[capture.location])
+									{
+										floppydisk->tracks[capture.location] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+									}
+
+									currentcylinder=floppydisk->tracks[capture.location];
+									currentcylinder->sides[0] = curside;
 								}
 
-								currentcylinder=floppydisk->tracks[capture.location];
-								currentcylinder->sides[0] = curside;
+								hxcfe_imgCallProgressCallback(imgldr_ctx,capture.location,max_location );
 							}
 
 							free(tmp_buffer);
