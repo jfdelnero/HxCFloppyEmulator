@@ -25,6 +25,7 @@ extern void floppy_streamer_recalibrate(Fl_Button*, void*);
 extern void floppy_streamer_connect(Fl_Button*, void*);
 #include <FL/Fl_Slider.H>
 extern void disk_streamer_window_callback(Fl_Slider*, void*);
+#include <FL/Fl_Choice.H>
 
 class floppy_streamer_window {
 public:
@@ -67,5 +68,6 @@ public:
   Fl_Value_Slider *x_offset;
   Fl_Slider *x_time;
   Fl_Value_Slider *y_time;
+  Fl_Choice *drive_choice;
 };
 #endif

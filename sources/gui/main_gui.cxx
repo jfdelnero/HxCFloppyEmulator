@@ -1203,6 +1203,9 @@ Main_Window::Main_Window()
 		streamer_window->dump_name->value("untitled");
 		streamer_window->index_name->value("AUTO");
 
+		streamer_window->drive_choice->menu(drives_choices);
+		streamer_window->drive_choice->value(0);
+
 		Fl::add_timeout(0.1, streamer_tick_infos, (void*)streamer_window);
 
 		#ifdef GUI_DEBUG
