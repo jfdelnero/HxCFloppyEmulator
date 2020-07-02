@@ -74,6 +74,8 @@
 
 #include "gui_strings.h"
 
+#include "plugins_id.h"
+
 #ifdef WIN32
 #include "win32/resource.h"
  #if !defined(__MINGW32__) && !defined(__MINGW64__)

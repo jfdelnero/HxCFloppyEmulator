@@ -80,6 +80,8 @@
 
 #include "gui_strings.h"
 
+#include "plugins_id.h"
+
 main_button_list  txt_buttons_main[]=
 {
 	{0,STR_MAINWINDOW_0002,STR_MAINWINDOW_0003},

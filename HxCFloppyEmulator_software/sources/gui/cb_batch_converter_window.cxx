@@ -81,6 +81,8 @@
 
 #include "fileselector.h"
 
+#include "plugins_id.h"
+
 batchconverterparams bcparams;
 int abort_trigger;
 extern s_gui_context * guicontext;
