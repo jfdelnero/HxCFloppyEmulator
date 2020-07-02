@@ -23,6 +23,8 @@ extern Fl_Menu_Item disklayout_choices[];
 
 extern Fl_Menu_Item track_display_view_modes_choices[];
 
+extern Fl_Menu_Item drives_choices[];
+
 /*
 extern platform platformlist[];
 */

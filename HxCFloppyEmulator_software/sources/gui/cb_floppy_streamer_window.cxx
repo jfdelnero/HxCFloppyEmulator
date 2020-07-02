@@ -594,7 +594,9 @@ void floppy_streamer_readdisk(Fl_Button*, void* w)
 			strcpy(index_mode,"AUTO_INDEX_NAME");
 		}
 
-		sprintf(tmp,"dump 0 %d %d %d %d %d %d %d %d \"%s\" \"%s\" %d %s\n",atoi(fdw->min_track->value()), \
+		sprintf(tmp,"dump %d %d %d %d %d %d %d %d %d \"%s\" \"%s\" %d %s\n", \
+													  fdw->drive_choice->value(),
+													  atoi(fdw->min_track->value()), \
 													  atoi(fdw->max_track->value()), \
 													 (fdw->Side_0->value()^1)&1 , \
 													  fdw->Side_1->value() , \
@@ -640,7 +642,9 @@ void floppy_streamer_readtrack(Fl_Button*, void* w)
 			strcpy(index_mode,"AUTO_INDEX_NAME");
 		}
 
-		sprintf(tmp,"dump 0 -1 -1 %g %g %d %d %d %d \"%s\" \"%s\" %d %s\n",fdw->side_number_slide->value(), \
+		sprintf(tmp,"dump %d -1 -1 %g %g %d %d %d %d \"%s\" \"%s\" %d %s\n", \
+														fdw->drive_choice->value(), \
+														fdw->side_number_slide->value(), \
 														fdw->side_number_slide->value(), \
 														fdw->high_res->value(), \
 														fdw->double_step->value(), \
@@ -670,7 +674,7 @@ void floppy_streamer_spybus(Fl_Button*, void* w)
 		sprintf(tmp,"dump_time %d\n",atoi(fdw->dump_lenght->value()));
 		network_write(cmd_connection, (unsigned char*)tmp, strlen(tmp),2);
 
-		sprintf(tmp,"dump 0 -1 -1 %g %g %d %d %d 1\n",fdw->side_number_slide->value(),fdw->side_number_slide->value(),fdw->high_res->value(),fdw->double_step->value(),fdw->ignore_index->value());
+		sprintf(tmp,"dump %d -1 -1 %g %g %d %d %d 1\n",fdw->drive_choice->value(),fdw->side_number_slide->value(),fdw->side_number_slide->value(),fdw->high_res->value(),fdw->double_step->value(),fdw->ignore_index->value());
 		network_write(cmd_connection, (unsigned char*)tmp, strlen(tmp),2);
 	}
 }
@@ -702,10 +706,13 @@ void floppy_streamer_stop(Fl_Button*, void* w)
 void floppy_streamer_trackup(Fl_Button*, void* w)
 {
 	char tmpstr[64];
+	floppy_streamer_window *fdw;
+
+	fdw=(floppy_streamer_window *)w;
 
 	if(cmd_connection)
 	{
-		sprintf(tmpstr,"headstep 0 1\n");
+		sprintf(tmpstr,"headstep %d 1\n",fdw->drive_choice->value());
 		network_write(cmd_connection, (unsigned char*)tmpstr, strlen(tmpstr),2);
 	}
 }
@@ -713,10 +720,13 @@ void floppy_streamer_trackup(Fl_Button*, void* w)
 void floppy_streamer_down(Fl_Button*, void* w)
 {
 	char tmpstr[64];
+	floppy_streamer_window *fdw;
+
+	fdw=(floppy_streamer_window *)w;
 
 	if(cmd_connection)
 	{
-		sprintf(tmpstr,"headstep 0 -1\n");
+		sprintf(tmpstr,"headstep %d -1\n",fdw->drive_choice->value());
 		network_write(cmd_connection, (unsigned char*)tmpstr, strlen(tmpstr),2);
 	}
 }
@@ -724,10 +734,13 @@ void floppy_streamer_down(Fl_Button*, void* w)
 void floppy_streamer_recalibrate(Fl_Button*, void* w)
 {
 	char tmpstr[64];
+	floppy_streamer_window *fdw;
+
+	fdw=(floppy_streamer_window *)w;
 
 	if(cmd_connection)
 	{
-		sprintf(tmpstr,"recalibrate 0\n");
+		sprintf(tmpstr,"recalibrate %d\n",fdw->drive_choice->value());
 		network_write(cmd_connection, (unsigned char*)tmpstr, strlen(tmpstr),2);
 	}
 }
@@ -740,7 +753,7 @@ void floppy_streamer_movehead(Fl_Button*, void* w)
 
 	if(cmd_connection)
 	{
-		sprintf(tmpstr,"movehead 0 %g\n",fdw->track_number_slide->value());
+		sprintf(tmpstr,"movehead %d %g\n",fdw->drive_choice->value(),fdw->track_number_slide->value());
 		network_write(cmd_connection, (unsigned char*)tmpstr, strlen(tmpstr),2);
 	}
 }

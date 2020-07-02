@@ -375,3 +375,12 @@ const track_type track_type_list[]=
 	{ -1,"",0},
 	{ 0,0,0}
 };
+
+Fl_Menu_Item drives_choices[]=
+{
+	{ "Drive 0",0,NULL,(void*)0},
+	{ "Drive 1",0,NULL,(void*)1},
+	{ "Drive 2",0,NULL,(void*)2},
+	{ "Drive 3",0,NULL,(void*)3},
+	{0}
+};
