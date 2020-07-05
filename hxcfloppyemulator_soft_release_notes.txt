@@ -32,6 +32,8 @@ X XXXXXXX 2020 : HxCFloppyEmulator 2.4.1.9 (Beta version - Work in Progress)
 
 -> New XML format : Olivetti TOP 100 / Triumph-Adler Gabriele PFS typewriter Quickdisk format.
 
+-> New XML format : SORD M68 HD disk.
+
 -> Windows "Save as" file selector : Fix the overwrite prompt regression.
 
 -> Kryoflux stream loader : Code re-factored and fixed.
