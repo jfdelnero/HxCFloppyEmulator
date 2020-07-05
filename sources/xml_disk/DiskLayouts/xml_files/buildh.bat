@@ -59,6 +59,7 @@
 ..\..\converttools\bmptoh DiskLayout_UKNC_800KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Unitel_Videotex.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Coat_A_Matic_Robox_RC9400_DD_289KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_SORD_M68_HD_998KB.xml -DATA
 
 move *.h ..
 

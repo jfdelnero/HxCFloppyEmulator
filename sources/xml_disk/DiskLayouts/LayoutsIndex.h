@@ -60,6 +60,7 @@
 #include "data_DiskLayout_TRS80_JV1_xml.h"
 #include "data_DiskLayout_Coat_A_Matic_Robox_RC9400_DD_289KB_xml.h"
 #include "data_DiskLayout_QD_Triumph_Adler_Typewriter_xml.h"
+#include "data_DiskLayout_SORD_M68_HD_998KB_xml.h"
 
 datatype * disklayout_list[]=
 {
@@ -110,6 +111,7 @@ datatype * disklayout_list[]=
 	data_DiskLayout_LIF_3_50_1232KB_xml,
 	data_DiskLayout_LIF_5_25_264KB_xml,
 	data_DiskLayout_AED6200P_xml,
+	data_DiskLayout_SORD_M68_HD_998KB_xml,
 	data_DiskLayout_Tatung_Einstein_DD_200KB_xml,
 	data_DiskLayout_Tatung_Einstein_DD_400KB_xml,
 	data_DiskLayout_Timex_FDD3000_80T2S_xml,
