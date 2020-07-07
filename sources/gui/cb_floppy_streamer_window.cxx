@@ -703,6 +703,35 @@ void floppy_streamer_stop(Fl_Button*, void* w)
 	}
 }
 
+void floppy_streamer_eject(Fl_Button*, void* w)
+{
+	char tmpstr[64];
+	floppy_streamer_window *fdw;
+
+	fdw=(floppy_streamer_window *)w;
+
+	if(cmd_connection)
+	{
+		sprintf(tmpstr,"ejectdisk %d\n",fdw->drive_choice->value());
+		network_write(cmd_connection, (unsigned char*)tmpstr, strlen(tmpstr),2);
+	}
+}
+
+void floppy_streamer_mode3(Fl_Light_Button* b, void* w)
+{
+	char tmpstr[64];
+
+	if(cmd_connection)
+	{
+		if(b->value())
+			sprintf(tmpstr,"setio DRIVES_PORT_PIN02_OUT\n");
+		else
+			sprintf(tmpstr,"cleario DRIVES_PORT_PIN02_OUT\n");
+
+		network_write(cmd_connection, (unsigned char*)tmpstr, strlen(tmpstr),2);
+	}
+}
+
 void floppy_streamer_trackup(Fl_Button*, void* w)
 {
 	char tmpstr[64];
