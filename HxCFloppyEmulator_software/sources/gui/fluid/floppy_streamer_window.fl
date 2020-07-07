@@ -13,7 +13,7 @@ class floppy_streamer_window {open
       Fl_Button {} {
         label Clear
         user_data this
-        callback floppy_streamer_clear_bt selected
+        callback floppy_streamer_clear_bt
         xywh {1270 54 55 22}
       }
       Fl_Input dump_name {
@@ -166,7 +166,7 @@ class floppy_streamer_window {open
         label {STOP !}
         user_data this
         callback floppy_streamer_stop
-        xywh {1103 474 222 25}
+        xywh {1103 474 162 25}
       }
       Fl_Button {} {
         label {+}
@@ -234,7 +234,7 @@ class floppy_streamer_window {open
       }
       Fl_Light_Button fat_dots {
         label {Fat dots}
-        xywh {1240 567 84 15} labelsize 10
+        xywh {1240 568 84 15} labelsize 10
       }
       Fl_Input server_address {
         label {Pauline IP}
@@ -275,8 +275,19 @@ class floppy_streamer_window {open
         Fl_Choice drive_choice {
           label Drive
           user_data this open
-          xywh {1107 314 210 22} down_box BORDER_BOX labelsize 12 textsize 12
+          xywh {1090 314 210 22} down_box BORDER_BOX labelsize 12 textsize 12
         } {}
+      }
+      Fl_Light_Button mode3 {
+        label {mode 3}
+        callback floppy_streamer_mode3 selected
+        xywh {1260 517 65 15} labelsize 10
+      }
+      Fl_Button {} {
+        label Eject
+        user_data this
+        callback floppy_streamer_eject
+        xywh {1265 474 60 25}
       }
     }
   }

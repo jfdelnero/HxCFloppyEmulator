@@ -26,6 +26,8 @@ extern void floppy_streamer_connect(Fl_Button*, void*);
 #include <FL/Fl_Slider.H>
 extern void disk_streamer_window_callback(Fl_Slider*, void*);
 #include <FL/Fl_Choice.H>
+extern void floppy_streamer_mode3(Fl_Light_Button*, void*);
+extern void floppy_streamer_eject(Fl_Button*, void*);
 
 class floppy_streamer_window {
 public:
@@ -69,5 +71,6 @@ public:
   Fl_Slider *x_time;
   Fl_Value_Slider *y_time;
   Fl_Choice *drive_choice;
+  Fl_Light_Button *mode3;
 };
 #endif

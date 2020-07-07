@@ -145,7 +145,7 @@ floppy_streamer_window::floppy_streamer_window() {
     { Fl_Button* o = new Fl_Button(1265, 431, 59, 40, "Spy bus");
       o->callback((Fl_Callback*)floppy_streamer_spybus, (void*)(this));
     } // Fl_Button* o
-    { Fl_Button* o = new Fl_Button(1103, 474, 222, 25, "STOP !");
+    { Fl_Button* o = new Fl_Button(1103, 474, 162, 25, "STOP !");
       o->callback((Fl_Callback*)floppy_streamer_stop, (void*)(this));
     } // Fl_Button* o
     { Fl_Button* o = new Fl_Button(1077, 432, 23, 20, "+");
@@ -194,7 +194,7 @@ floppy_streamer_window::floppy_streamer_window() {
     { high_contrast = new Fl_Light_Button(1135, 568, 100, 15, "High contrast");
       high_contrast->labelsize(10);
     } // Fl_Light_Button* high_contrast
-    { fat_dots = new Fl_Light_Button(1240, 567, 84, 15, "Fat dots");
+    { fat_dots = new Fl_Light_Button(1240, 568, 84, 15, "Fat dots");
       fat_dots->labelsize(10);
     } // Fl_Light_Button* fat_dots
     { server_address = new Fl_Input(1125, 589, 110, 25, "Pauline IP");
@@ -232,7 +232,7 @@ floppy_streamer_window::floppy_streamer_window() {
       o->labeltype(FL_EMBOSSED_LABEL);
       o->labelsize(12);
       o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-      { drive_choice = new Fl_Choice(1107, 314, 210, 22, "Drive");
+      { drive_choice = new Fl_Choice(1090, 314, 210, 22, "Drive");
         drive_choice->down_box(FL_BORDER_BOX);
         drive_choice->labelsize(12);
         drive_choice->textsize(12);
@@ -240,6 +240,13 @@ floppy_streamer_window::floppy_streamer_window() {
       } // Fl_Choice* drive_choice
       o->end();
     } // Fl_Group* o
+    { mode3 = new Fl_Light_Button(1260, 517, 65, 15, "mode 3");
+      mode3->labelsize(10);
+      mode3->callback((Fl_Callback*)floppy_streamer_mode3);
+    } // Fl_Light_Button* mode3
+    { Fl_Button* o = new Fl_Button(1265, 474, 60, 25, "Eject");
+      o->callback((Fl_Callback*)floppy_streamer_eject, (void*)(this));
+    } // Fl_Button* o
     window->end();
     window->resizable(window);
   } // Fl_Window* window
