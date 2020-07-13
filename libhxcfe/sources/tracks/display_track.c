@@ -1412,6 +1412,7 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	int i,j,x,y,tmp;
 	int step_size;
 	int xpos,ypos,bad_timing;
+	int last_index_xpos;
 	char tmp_str[64];
 	uint32_t total_offset,cur_ticks,curcol,contrast;
 	HXCFE_SIDE* side;
@@ -1426,7 +1427,7 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	float tick_to_ps;
 	float xpos_step;
 	float float_xpos;
-
+	float index_period;
 
 	td->noloop_trackmode = 1;
 
@@ -1528,6 +1529,9 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 
 	//////////////////////////////////////////
 	// Draw indexes
+
+	last_index_xpos = -1;
+
 	for(i=0;i < (int)track_stream->nb_of_index;i++)
 	{
 		j = 0;
@@ -1551,6 +1555,23 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 				}
 			}
 		}
+
+		if(last_index_xpos != -1)
+		{
+			index_period = ((float)(xpos - last_index_xpos )*x_us_per_pixel);
+			sprintf(tmp_str,"%.2f RPM / %.2f ms", (float)(60 * 1000) / (index_period / (float)1000), index_period / (float)1000 );
+
+			if(xpos - last_index_xpos > strlen(tmp_str)*8)
+			{
+				tmp = ((xpos - last_index_xpos) - (strlen(tmp_str)*8)) / 2;
+			}
+			else
+				tmp = 8;
+
+			putstring8x8(td,last_index_xpos + tmp, 8,tmp_str,0x000000,0x000000,0,1);
+		}
+
+		last_index_xpos = xpos;
 	}
 
 	bitrate = 500;
