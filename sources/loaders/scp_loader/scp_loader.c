@@ -199,7 +199,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 
 								if(trackbuf[k])
 								{
-									trackbuf_dword[realnumberofpulses] = (uint32_t)((float)curpulselength * timecoef);
+									trackbuf_dword[realnumberofpulses] = curpulselength;
 									curpulselength = 0;
 									realnumberofpulses++;
 									revonumberofpulses++;
@@ -217,7 +217,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 						}
 
 						// dummy pulse
-						trackbuf_dword[realnumberofpulses] = (uint32_t)((float)300 * timecoef);;
+						trackbuf_dword[realnumberofpulses] = 300;
 						realnumberofpulses++;
 
 					}
@@ -239,6 +239,8 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 								hxcfe_FxStream_AddIndex(fxs,track_dump,offset,0,FXSTRM_INDEX_MAININDEX);
 							}
 						}
+
+						hxcfe_FxStream_ChangeSpeed(fxs,track_dump,timecoef);
 
 						currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
 
@@ -452,7 +454,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Load Track %.3d Side %d",j,i);
 
 					if(mac_clv)
-						timecoef = (float)400.00 / mac_clv_track2rpm(j); 
+						timecoef = (float)400.00 / mac_clv_track2rpm(j);
 
 					curside = decodestream(imgldr_ctx->hxcfe,f,(j<<1)|(i&1),tracksoffset[(j<<1)|(i&1)],&rpm,timecoef,phasecorrection,scph.number_of_revolution,1 + scph.resolution,bitrate,filter,filterpasses,bmp_export);
 

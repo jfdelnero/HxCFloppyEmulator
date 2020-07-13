@@ -511,6 +511,7 @@ int32_t                hxcfe_FxStream_GetNumberOfRevolution( HXCFE_FXSA * fxs, H
 uint32_t               hxcfe_FxStream_GetRevolutionIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, int32_t revolution );
 uint32_t               hxcfe_FxStream_GetRevolutionPeriod( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, int32_t revolution );
 uint32_t               hxcfe_FxStream_GetMeanRevolutionPeriod( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std );
+void                   hxcfe_FxStream_ChangeSpeed( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, float speedchange );
 
 HXCFE_TRKSTREAM*       hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned char * buffer_in,int buffer_size);
 

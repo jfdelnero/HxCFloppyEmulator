@@ -1969,6 +1969,11 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 		// Only one revolution -> No flakey bits detection : return a dummy buffer.
 		if( ( hxcfe_FxStream_GetNumberOfRevolution(fxs,track_dump) == 1 ) ||  hxcfe_getEnvVarValue( fxs->hxcfe, "FLUXSTREAM_SKIPBLOCKSDETECTION") )
 		{
+
+#ifdef FLUXSTREAMDBG
+			floppycontext->hxc_printf(MSG_DEBUG,"ScanAndFindRepeatedBlocks : No flakey bits detection : return a dummy buffer.");
+#endif
+
 			pl = alloc_pulses_link_array(track_dump->nb_of_pulses);
 			if(pl)
 			{
@@ -2852,6 +2857,10 @@ HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, 
 	uint32_t total_tick_computed;
 	unsigned int i;
 
+#ifdef FLUXSTREAMDBG
+	fxs->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_FxStream_ImportStream : in buffer : %p, wordsize : %d, number of words : %d",stream,wordsize,nbword);
+#endif
+
 	track_dump = malloc(sizeof(HXCFE_TRKSTREAM));
 	if(track_dump)
 	{
@@ -2925,6 +2934,7 @@ HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, 
 void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t streamposition, int32_t tickoffset, uint32_t flags )
 {
 	uint32_t cellpos,i;
+
 	if(fxs)
 	{
 		if(std)
@@ -2955,6 +2965,39 @@ void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t 
 			else
 			{
 				fxs->hxcfe->hxc_printf(MSG_ERROR,"hxcfe_FxStream_AddIndex : streamposition beyond of stream limit ! (%d >= %d)",streamposition,std->nb_of_pulses);
+			}
+		}
+	}
+}
+
+void hxcfe_FxStream_ChangeSpeed( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, float speedchange )
+{
+	uint32_t cellpos,streamposition,i,j;
+	if(fxs)
+	{
+		if(std)
+		{
+			if(speedchange && (speedchange != 1.0))
+			{
+				for(i=0;i<std->nb_of_pulses;i++)
+				{
+					std->track_dump[i] = (uint32_t)(((float)std->track_dump[i] ) * speedchange);
+				}
+
+				for(i=0;i<std->nb_of_index;i++)
+				{
+					streamposition = std->index_evt_tab[i].dump_offset;
+
+					cellpos = 0;
+
+					for(j=0;j < streamposition;j++)
+					{
+						cellpos = cellpos + std->track_dump[j];
+					}
+
+					std->index_evt_tab[i].cellpos = cellpos;
+					std->index_evt_tab[i].tick_offset = (int)(((float)std->index_evt_tab[i].tick_offset ) * speedchange);
+				}
 			}
 		}
 	}
@@ -3277,7 +3320,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 	pulses_link * pl;
 	pulses_link * pl_reversed;
 
-	int32_t first_index;
+	int32_t first_index,next_index;
 	uint32_t track_len;
 	uint32_t nb_of_revolutions,revolution;
 	int32_t i;
@@ -3414,11 +3457,11 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 				for(revolution = 0; revolution < nb_of_revolutions; revolution++)
 				{
+					first_index = getNearestValidIndex(pl,std->index_evt_tab[hxcfe_FxStream_GetRevolutionIndex( fxs, std, revolution )].dump_offset,pl->number_of_pulses);
 
 #ifdef FLUXSTREAMDBG
-					fxs->hxcfe->hxc_printf(MSG_DEBUG,"Revolution %d track generation...",revolution);
+					fxs->hxcfe->hxc_printf(MSG_DEBUG,"Revolution %d track generation... First valid index position : %d",revolution,first_index);
 #endif
-					first_index = getNearestValidIndex(pl,std->index_evt_tab[hxcfe_FxStream_GetRevolutionIndex( fxs, std, revolution )].dump_offset,pl->number_of_pulses);
 
 					track_len = 0;
 					i = first_index;
@@ -3435,6 +3478,40 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 					fxs->hxcfe->hxc_printf(MSG_DEBUG,"First valid index : %d [max : %d] - track length : %d - overlap : %d",first_index,std->nb_of_pulses,track_len,pl->forward_link[first_index]);
 #endif
 
+#if 1
+					if(pl->forward_link[first_index] == 1)
+					{
+#ifdef FLUXSTREAMDBG
+						fxs->hxcfe->hxc_printf(MSG_DEBUG,"Dummy overlap - Use the index to index track lenght instead");
+#endif
+						first_index = std->index_evt_tab[hxcfe_FxStream_GetRevolutionIndex( fxs, std, revolution )].dump_offset;
+
+						if( hxcfe_FxStream_GetRevolutionIndex( fxs, std, revolution ) < std->nb_of_index + 1)
+						{
+							next_index = std->index_evt_tab[hxcfe_FxStream_GetRevolutionIndex( fxs, std, revolution ) + 1 ].dump_offset;
+						}
+						else
+						{
+							next_index = std->nb_of_pulses;
+#ifdef FLUXSTREAMDBG
+							fxs->hxcfe->hxc_printf(MSG_DEBUG,"No second index... Use the remaining track...");
+#endif
+
+						}
+
+						track_len = 0;
+						i = first_index;
+						if( i < (int32_t)std->nb_of_pulses)
+						{
+							do
+							{
+								pl->forward_link[ i ] = next_index + i;
+								track_len = track_len + std->track_dump[i];
+								i++;
+							}while( ( i < (int32_t)std->nb_of_pulses ) && ( i < next_index ) );
+						}
+					}
+#endif
 					if(track_len)
 					{
 						rpm = (short)((double)(1 * 60 * 1000) / (double)( (double)tick_to_time(track_len) / (double)100000));

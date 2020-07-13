@@ -172,9 +172,11 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,flo
 	fxs = hxcfe_initFxStream(floppycontext);
 	if(fxs)
 	{
-		track_dump=DecodeHxCStreamFile(floppycontext,fxs,file,timecoef);
+		track_dump=DecodeHxCStreamFile(floppycontext,fxs,file);
 		if(track_dump)
 		{
+			hxcfe_FxStream_ChangeSpeed(fxs,track_dump,timecoef);
+
 			hxcfe_FxStream_setBitrate(fxs,bitrate);
 
 			hxcfe_FxStream_setPhaseCorrectionFactor(fxs,phasecorrection);

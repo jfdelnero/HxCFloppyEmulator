@@ -228,14 +228,6 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext, streamhfe_track_def * trac
 				trackbuf_dword[p++] = 300;
 			}
 
-			if( timecoef != 1 )
-			{
-				for(i=0;i<p;i++)
-				{
-					trackbuf_dword[i] = (uint32_t)((float)trackbuf_dword[i] * timecoef);
-				}
-			}
-
 			hxcfe_FxStream_setResolution(fxs,DEFAULT_BITS_PERIOD);
 
 			track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf_dword,32, p);
@@ -248,6 +240,8 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext, streamhfe_track_def * trac
 				{
 					hxcfe_FxStream_AddIndex(fxs,track_dump,index_position[i],0,FXSTRM_INDEX_MAININDEX);
 				}
+
+				hxcfe_FxStream_ChangeSpeed(fxs,track_dump,timecoef);
 
 				currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
 
