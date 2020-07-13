@@ -279,7 +279,7 @@ class floppy_streamer_window {open
         } {}
       }
       Fl_Light_Button mode3 {
-        label {mode 3}
+        label {Alt.RPM}
         callback floppy_streamer_mode3 selected
         xywh {1260 517 65 15} labelsize 10
       }
