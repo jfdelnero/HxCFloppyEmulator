@@ -103,7 +103,7 @@ static uint32_t get_tick_from_reversal(uint32_t* buffer,uint32_t reversal)
 	return tick;
 }
 
-HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char * file,float timecoef)
+HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char * file)
 {
 	uint32_t i;
 	s_oob_header		* oob;
@@ -312,7 +312,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 				{
 					if(new_cell_available)
 					{
-						cellstream[cellpos] = (uint32_t)((float)cell_accumulator * timecoef);
+						cellstream[cellpos] = cell_accumulator;
 						cellstreampos[cellpos] = stream_pos;
 						cellpos++;
 						cell_accumulator = 0;
@@ -406,7 +406,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 				stream_ofs += cur_op_len;
 			};
 
-			cellstream[cellpos] = (uint32_t)((float)cell_accumulator * timecoef);
+			cellstream[cellpos] = cell_accumulator;
 			cellstreampos[cellpos] = stream_ofs;
 
 			totalcell = cellpos;

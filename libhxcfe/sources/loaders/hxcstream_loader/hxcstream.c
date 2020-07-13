@@ -140,7 +140,7 @@ uint32_t * conv_stream(uint32_t * trackbuf_dword, unsigned char * unpacked_data,
 	return trackbuf_dword;
 }
 
-HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char * file,float timecoef)
+HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char * file)
 {
 	chunk_header header;
 	unsigned char * hxcstreambuffer;
@@ -285,6 +285,7 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 
 			if(stream)
 			{
+
 				hxcfe_FxStream_setResolution(fxs,sampleperiod);
 
 				track_dump = hxcfe_FxStream_ImportStream(fxs,stream,32,total_nb_pulses);
