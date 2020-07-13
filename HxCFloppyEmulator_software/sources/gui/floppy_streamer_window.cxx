@@ -240,7 +240,7 @@ floppy_streamer_window::floppy_streamer_window() {
       } // Fl_Choice* drive_choice
       o->end();
     } // Fl_Group* o
-    { mode3 = new Fl_Light_Button(1260, 517, 65, 15, "mode 3");
+    { mode3 = new Fl_Light_Button(1260, 517, 65, 15, "Alt.RPM");
       mode3->labelsize(10);
       mode3->callback((Fl_Callback*)floppy_streamer_mode3);
     } // Fl_Light_Button* mode3
