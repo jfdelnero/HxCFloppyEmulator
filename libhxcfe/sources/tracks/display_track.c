@@ -757,9 +757,13 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	float timingoffset2;
 	int interbit;
 	int bitrate;
+	int old_index_state;
 	int xpos,ypos,old_xpos;
 	int endfill,loopcnt;
-	float xresstep;
+	int last_index_xpos;
+	float last_index_timingoffset;
+	int tmp;
+	float xresstep,index_period;
 	s_sectorlist * sl,*oldsl;
 	s_pulseslist * pl,*oldpl;
 	HXCFE_SIDE * currentside;
@@ -1024,6 +1028,9 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	timingoffset=0;
 	loopcnt = 0;
 	endfill=0;
+	last_index_xpos = -1;
+	last_index_timingoffset = 0;
+	old_index_state = 0;
 	do
 	{
 		do
@@ -1036,6 +1043,28 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 			{
 				if( currentside->indexbuffer[i>>3] )
 				{
+					if(!old_index_state)
+					{
+						if(last_index_xpos != -1)
+						{
+							index_period = ((float)(timingoffset - last_index_timingoffset ));
+							sprintf(tmp_str,"%.2f RPM / %.2f ms", (float)(60 * 1000) / (index_period / (float)1000), index_period / (float)1000 );
+
+							if(xpos - last_index_xpos > strlen(tmp_str)*8)
+							{
+								tmp = ((xpos - last_index_xpos) - (strlen(tmp_str)*8)) / 2;
+							}
+							else
+								tmp = 8;
+
+							putstring8x8(td,last_index_xpos + tmp, 16,tmp_str,0x000000,0x000000,0,1);
+						}
+
+						last_index_xpos = xpos;
+						last_index_timingoffset = timingoffset;
+						old_index_state = 1;
+					}
+
 					for(j=10;j<12;j++)
 					{
 						col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos];
@@ -1046,6 +1075,7 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 				}
 				else
 				{
+					old_index_state = 0;
 					for(j=25;j<27;j++)
 					{
 						col=(s_col *)&td->framebuffer[(td->xsize*j) + xpos];
