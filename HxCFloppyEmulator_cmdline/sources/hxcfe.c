@@ -37,6 +37,7 @@
 #include <stdint.h>
 
 #include "libhxcfe.h"
+#include "plugins_id.h"
 
 #include "utils.h"
 
