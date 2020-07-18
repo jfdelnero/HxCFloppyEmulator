@@ -6,13 +6,19 @@ TARGET := $(shell uname)
 INCLUDES = -I ../sources -I ../../../libhxcfe/trunk/sources -I ../../../libusbhxcfe/trunk/sources
 
 DEBUG ?= 0
+DEBUG_ASAN ?= 0
 
 ifeq ($(DEBUG), 1)
-	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG -fsanitize=address -fno-omit-frame-pointer
-	LDFLAGS= -lasan
+	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG
+	LDFLAGS=
 else
 	CFLAGS=-O3 $(INCLUDES) -Wall
 	LDFLAGS= -s
+endif
+
+ifeq ($(DEBUG_ASAN), 1)
+	CFLAGS += -fsanitize=address -fno-omit-frame-pointer
+	LDFLAGS += -static-libasan -fsanitize=address
 endif
 
 EXEC=hxcfe
@@ -68,7 +74,7 @@ $(LIBHXCFE): ../../../build/$(LIBHXCFE)
 $(LIBUSBHXCFE): ../../../build/$(LIBUSBHXCFE)
 	ln ../../../build/$(LIBUSBHXCFE)  $(LIBUSBHXCFE)
 
-hxcfe.o: ../sources/hxcfe.c 
+hxcfe.o: ../sources/hxcfe.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 utils.o: ../sources/utils.c
