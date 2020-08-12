@@ -51,9 +51,23 @@ v1.7 - 10/27/18
 
 * Added resolution to previously reserved byte offset 0x0B.
 
+v1.8 - 08/26/19
+
+* Clarified TRACK LENGTH and changed copyright date.
+
+v1.9 - 09/17/19
+
+* Added OTHER manufacturer and disk types.
+
+v2.0 - 05/06/20
+
+* Changed copyright date.
+* Clarified how single sided images should be skipping every other TDH when converting
+  and single sided disk image.
+
 --------------------------------------------------------------------------------------
 
-This information is copyright (C) 2012-2017 By Jim Drew.  Permissions is granted
+This information is copyright (C) 2012-2019 By Jim Drew.  Permission is granted
 for inclusion with any source code when keeping this copyright notice.
 
 ======================================================================================
@@ -143,6 +157,9 @@ BYTE 0x0A is the head number(s) contained in the image.  This value is either 0,
 If the value is 0 then both heads are contained in the image, which has always been the
 default for all SCP images (except C64).  A value of 1 means just side 0 (bottom) is
 contained in the image, and a value of 2 means just side 1 (top) is contained in the image.
+NOTE: any program creating SCP image files should set this byte correctly.  Single sided
+disk images need to make sure that the TDH headers are correctly skipped based on which
+head is being used.
 
 BYTE 0x0B is resolution of the capture.  The base resolution is 25ns.  So a value of 0
 is the standard 25ns capture.  If the value is non-zero, then it is a multiplier value
@@ -175,6 +192,28 @@ each entry has its own header starting with "TRK" as the first 3 bytes of the he
 the track number as the 4th byte.
 
 When imaging a single side only, the track data header entry will skip every other entry.
+So, images containing just the bottom head with have even TDH entries (0,2,4, etc.) and
+images containing just the top head will have odd TDG entries (1,3,5, etc.).
+
+Exmaples:
+
+SSSD TRS-80 40 track disk:
+
+BYTE 0x0A = 0x01
+TDH entries 0,2,4,6, etc. are used for all 40 tracks.
+
+SSSD TRS-80 80 track disk
+
+BYTE 0xA = 0x01
+TDH entries 0,2,4,6, etc. are used for all 80 tracks.
+
+Atari ST 80 track, top side only image
+BYTE 0x0A = 0x02
+TDH entries 1,3,5,7, etc. are used for all 80 tracks.
+
+It's perfectly permissible to have all tracks/heads for any disk type - however, for 5.25"
+disks that prohibits you from flippy the disk over and using the backside!
+
 
 BYTES 0x00-0x02 ASCII 'TRK'
 
@@ -328,17 +367,18 @@ BYTES 0x2C-0x2F contains the ASCII of "FPCS" as the last 4 bytes of the file.
 ;                   0100 = TANDY
 ;                   0101 = TEXAS INSTRUMENTS
 ;                   0110 = ROLAND
+;                   1000 = OTHER
 ;
 ;					SEE DISK TYPE BIT DEFINITIONS BELOW
 ;
 ; 0005              NUMBER OF REVOLUTIONS (1-5)
 ; 0006              START TRACK (0-165)
 ; 0007              END TRACK (0-165)
-; 0008              FLAGS BITS (0=INDEX, 1=TPI, 2=RPM, 3=TYPE)
+; 0008              FLAGS BITS (0=INDEX, 1=TPI, 2=RPM, 3=TYPE, 4=MODE, 5=FOOTER)
 ; 0009              BIT CELL ENCODING (0=16 BITS, >0=NUMBER OF BITS USED)
 ; 000A              NUMBER OF HEADS
-; 000B              RESERVED
-; 000C-F            32 BIT CHECKSUM OF DATA FROM 0x10-EOF
+; 000B              RESOLUTION (BASE 25), ie 0=25ns, 1=50ns, 2=75ns, 3=100ns, etc.
+; 000C-F            32 BIT CHECKSUM OF DATA FROM 0x10-EOF (END OF FILE)
 ; 0010              OFFSET TO 1st TRACK DATA HEADER (4 bytes of 0 if track is skipped)
 ; 0014              OFFSET TO 2nd TRACK DATA HEADER (4 bytes of 0 if track is skipped)
 ; 0018              OFFSET TO 3rd TRACK DATA HEADER (4 bytes of 0 if track is skipped)
@@ -399,6 +439,7 @@ man_PC = 0x30                      ; 0011 xxxx
 man_Tandy = 0x40                   ; 0100 xxxx
 man_TI = 0x50                      ; 0101 xxxx
 man_Roland = 0x60                  ; 0110 xxxx
+man_Other = 0x80                   ; 1000 xxxx
 
 ; DISK TYPE BIT DEFINITIONS
 ;
@@ -438,6 +479,14 @@ disk_TI994A = 0x00                 ; xxxx 0000
 ; ROLAND DISK TYPES
 disk_D20 = 0x00                    ; xxxx 0000
 
+; OTHER DISK TYPES
+disk_360 = 0x00                    ; xxxx 0000
+disk_12M = 0x01                    ; xxxx 0001
+disk_Rrsvd1 = 0x02                 ; xxxx 0010
+disk_Rsrvd2 = 0x03                 ; xxxx 0011
+disk_720 = 0x04                    ; xxxx 0100
+disk_144M = 0x05                   ; xxxx 0101
+
 
 ; ------------------------------------------------------------------
 ; TRACK DATA HEADER FORMAT
@@ -467,7 +516,11 @@ disk_D20 = 0x00                    ; xxxx 0000
 ;
 ; INDEX TIME = 32 BIT VALUE, TIME IN NANOSECONDS/25ns FOR ONE REVOLUTION
 ;
-; i.e. 0x7A1200 = 8000000, 8000000*25 = 200000000 = 200.00000ms
+; i.e. 0x007A1200 = 8000000, 8000000*25 = 200000000 = 200.00000ms
+;
+; TRACK LENGTH = NUMBER OF BITCELLS FOR THIS TRACK
+;
+; i.e. 0x00015C8F = 89231 bitcell entries in the TRACK DATA area
 ;
 ; TRACK DATA = 16 BIT VALUE, TIME IN NANOSECONDS/25ns FOR ONE BIT CELL TIME
 ;
