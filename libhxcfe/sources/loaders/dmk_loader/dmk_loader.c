@@ -38,7 +38,7 @@
 // File : dmk_loader.c
 // Contains: DMK TRS-80 floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -259,7 +259,7 @@ HXCFE_SIDE* DMKpatchtrack(HXCFE* floppycontext,unsigned char * trackdata, unsign
 			trackclk[(idamoffset[k]&0x3FFF)-0x80+0]=0xC7;
 			trackclk[(idamoffset[k]&0x3FFF)-0x80+trackstep]=0xC7;
 
-			j=8*(trackstep*2);
+			j = 8 * (trackstep+1);
 			i=(idamoffset[k]&0x3FFF)-0x80;
 			do
 			{
@@ -272,7 +272,7 @@ HXCFE_SIDE* DMKpatchtrack(HXCFE* floppycontext,unsigned char * trackdata, unsign
 					j=64;
 				}
 
-			   j++;
+				j++;
 			}while(j<64);
 
 			sectorbegin=((idamoffset[k]&0x3FFF)-0x80);
