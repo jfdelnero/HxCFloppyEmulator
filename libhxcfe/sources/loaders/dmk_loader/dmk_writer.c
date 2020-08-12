@@ -218,9 +218,52 @@ int DMK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 						nbsector_mfm = 0;
 						nbsector_fm = 0;
 
+						// Byte align the track...
+						// TODO : Align each sectors ID Mark and Data Mark individually
+						//        (Needed for stream based images sources)
+
 						sca_mfm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector_mfm);
+						if(sca_mfm)
+						{
+							if(sca_mfm[0]->startsectorindex&0xF)
+							{
+								hxcfe_shiftTrackData( imgldr_ctx->hxcfe, floppy->tracks[j]->sides[i], 0x10 - (sca_mfm[0]->startsectorindex&0xF) );
+							}
+
+							k=0;
+							do
+							{
+								hxcfe_freeSectorConfig(ss,sca_mfm[k]);
+								k++;
+							}while(k<nbsector_mfm);
+
+							if(sca_mfm)
+								free(sca_mfm);
+
+							sca_mfm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector_mfm);
+
+						}
 
 						sca_fm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector_fm);
+						if(sca_fm)
+						{
+							if(sca_fm[0]->startsectorindex&0xF)
+							{
+								hxcfe_shiftTrackData( imgldr_ctx->hxcfe, floppy->tracks[j]->sides[i], 0x10 - (sca_fm[0]->startsectorindex&0xF) );
+
+								k=0;
+								do
+								{
+									hxcfe_freeSectorConfig(ss,sca_fm[k]);
+									k++;
+								}while(k<nbsector_fm);
+
+								if(sca_fm)
+									free(sca_fm);
+
+								sca_fm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector_fm);
+							}
+						}
 
 						if(nbsector_mfm)
 						{
