@@ -62,7 +62,7 @@
 
 #include "misc/env.h"
 
-uint32_t update_checksum(uint32_t checksum,unsigned char * buffer,unsigned int size)
+static uint32_t update_checksum(uint32_t checksum,unsigned char * buffer,unsigned int size)
 {
 	unsigned int i;
 
@@ -74,7 +74,7 @@ uint32_t update_checksum(uint32_t checksum,unsigned char * buffer,unsigned int s
 	return checksum;
 }
 
-unsigned short getNextPulse(HXCFE_SIDE * track,int * offset,int * rollover)
+static unsigned short getNextPulse(HXCFE_SIDE * track,int * offset,int * rollover)
 {
 	int i;
 	unsigned char tmp_byte;
@@ -270,8 +270,6 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			tracknumber = 83*2;
 		}
 
-		scph.start_track = 0;
-		scph.end_track = tracknumber - 1;
 		scph.number_of_revolution = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "SCPEXPORT_NUMBER_OF_REVOLUTIONS" );
 
 		scph.disk_type = 0x15;
@@ -300,8 +298,6 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 			case C64_DD_FLOPPYMODE:
 				scph.disk_type = 0x00;
-				tracknumber *= 2;
-				scph.end_track = tracknumber - 1;
 				break;
 
 			case S950_HD_FLOPPYMODE:
@@ -333,14 +329,20 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		{
 			case 1:
 				scph.number_of_heads = 1;
+				scph.start_track = 0;
+				scph.end_track = (tracknumber * 2) - 1;
 				break;
 
 			case 2:
 				scph.number_of_heads = 0;
+				scph.start_track = 0;
+				scph.end_track = tracknumber - 1;
 				break;
 
 			default:
 				scph.number_of_heads = 0;
+				scph.start_track = 0;
+				scph.end_track = tracknumber - 1;
 				break;
 		}
 
