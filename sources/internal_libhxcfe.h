@@ -76,7 +76,6 @@ int32_t hxcfe_imgCheckFileCompatibility( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR
 
 #define _HXCFE_IMGLDR_
 
-
 typedef struct _HXCFE_XMLLDR
 {
 	void * xml_parser;
@@ -85,6 +84,19 @@ typedef struct _HXCFE_XMLLDR
 
 #define _HXCFE_XMLLDR_
 
+#define MAX_MARKER 32
+
+typedef struct _HXCFE_TD_MARKER
+{
+	int32_t cell_pos;
+
+	uint32_t type;
+
+	uint32_t color;
+
+	uint32_t flags;
+
+}HXCFE_TD_MARKER;
 
 typedef struct _HXCFE_TD
 {
@@ -110,6 +122,8 @@ typedef struct _HXCFE_TD
 	char * name;
 
 	void * progress_userdata;
+
+	HXCFE_TD_MARKER markers[MAX_MARKER];
 }HXCFE_TD;
 
 #define _HXCFE_TD_

@@ -473,6 +473,7 @@ void                   hxcfe_td_setparams( HXCFE_TD *td, uint32_t x_us, uint32_t
 void                   hxcfe_td_activate_analyzer( HXCFE_TD *td, int32_t TRACKTYPE, int32_t enable );
 char *                 hxcfe_td_get_view_mode_name( HXCFE_TD *td, int32_t disk_type);
 void                   hxcfe_td_select_view_type( HXCFE_TD *td, int32_t disk_type);
+void                   hxcfe_td_set_marker( HXCFE_TD *td, int32_t cell_pos, int32_t marker_id, uint32_t type, uint32_t color, uint32_t flags );
 void                   hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track, int32_t side );
 void                   hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream );
 s_sectorlist *         hxcfe_td_getlastsectorlist( HXCFE_TD *td );
@@ -489,6 +490,8 @@ int                    hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_TRKSTREAM* 
 
 #define TD_FLAG_HICONTRAST (0x1 << 0)
 #define TD_FLAG_BIGDOT     (0x1 << 1)
+
+#define TD_MARKER_FLAG_ENABLE (0x1 << 0)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Flux Stream Analyzer                                                                           //
