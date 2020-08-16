@@ -59,6 +59,8 @@ X XXXXXXX 2020 : HxCFloppyEmulator 2.4.1.9 (Beta version - Work in Progress)
 
 -> Disk viewer : Realistic physical floppy disk state representation (3"1/2 135TPI, 5"1/4 96TPI, 5"1/4 48TPI, 8" 48TPI).
 
+-> Disk viewer : Track markers support.
+
 -> Apple II : Track generator fixed : GCR 6&2 Sync bits and sector GAP fixed.
 
 -> QM loader : Regression fixed.
