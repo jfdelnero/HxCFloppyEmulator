@@ -278,7 +278,11 @@ void tick_infos(void *w) {
 
 	HXCFE_TD * td;
 	floppy_infos_window *window;
+	trackedittool_window *tew;
+	Main_Window *mwindow;
+
 	window=(floppy_infos_window *)w;
+	mwindow = (Main_Window *)guicontext->main_window;
 
 	if(window->window->shown())
 	{
@@ -304,6 +308,14 @@ void tick_infos(void *w) {
 					td = guicontext->td;
 					if(guicontext->flayoutframebuffer)
 						free(guicontext->flayoutframebuffer);
+
+					tew = (trackedittool_window *)mwindow->trackedit_window;
+
+					if(atoi(tew->edit_startpoint->value()) || atoi(tew->edit_endpoint->value()))
+					{
+						hxcfe_td_set_marker( td, atoi(tew->edit_startpoint->value()), 0, 0, 0, TD_MARKER_FLAG_ENABLE );
+						hxcfe_td_set_marker( td, atoi(tew->edit_endpoint->value()), 1, 1, 0, TD_MARKER_FLAG_ENABLE );
+					}
 
 					guicontext->flayoutframebuffer = (unsigned char*)malloc( hxcfe_td_getframebuffer_xres(td) * hxcfe_td_getframebuffer_yres(td) * 3);
 					if(guicontext->flayoutframebuffer)
@@ -722,9 +734,13 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						{
 							case 1:
 								tew->edit_startpoint->value(str);
+								hxcfe_td_set_marker( guicontext->td, atoi(tew->edit_startpoint->value()), 0, 0, 0, TD_MARKER_FLAG_ENABLE );
+								guicontext->updatefloppyinfos = 1;
 							break;
 							case 2:
 								tew->edit_endpoint->value(str);
+								hxcfe_td_set_marker( guicontext->td, atoi(tew->edit_endpoint->value()), 1, 1, 0, TD_MARKER_FLAG_ENABLE );
+								guicontext->updatefloppyinfos = 1;
 							break;
 						}
 						guicontext->pointer_mode = 0;
