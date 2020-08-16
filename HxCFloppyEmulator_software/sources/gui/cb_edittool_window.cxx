@@ -94,6 +94,18 @@ void edittool_window_bt_endpoint_callback(Fl_Button *o, void *v)
 	guicontext->pointer_mode = 2;
 }
 
+void edittool_window_edit_startpoint_callback(Fl_Int_Input* edit, void*)
+{
+	hxcfe_td_set_marker( guicontext->td, atoi(edit->value()), 0, 0, 0, TD_MARKER_FLAG_ENABLE );
+	guicontext->updatefloppyinfos = 1;
+}
+
+void edittool_window_edit_endpoint_callback(Fl_Int_Input* edit, void*)
+{
+	hxcfe_td_set_marker( guicontext->td, atoi(edit->value()), 1, 1, 0, TD_MARKER_FLAG_ENABLE );
+	guicontext->updatefloppyinfos = 1;
+}
+
 void edittool_window_bt_setbitrate_callback(Fl_Button *o, void *v)
 {
 	Main_Window *window;

@@ -7,7 +7,7 @@ class trackedittool_window {open
   Function {trackedittool_window()} {open
   } {
     Fl_Window window {
-      label {Track edition toolbar} open selected
+      label {Track edition toolbar} open
       xywh {439 251 220 375} type Double labelsize 12 visible
     } {
       Fl_Button bt_copy {
@@ -41,9 +41,11 @@ class trackedittool_window {open
         xywh {7 67 113 16} labelsize 10
       }
       Fl_Input edit_startpoint {
+        callback edittool_window_edit_startpoint_callback
         xywh {125 3 85 16} type Int labelsize 10 textsize 10
       }
       Fl_Input edit_endpoint {
+        callback edittool_window_edit_endpoint_callback selected
         xywh {125 19 85 16} type Int labelsize 10 textsize 10
       }
       Fl_Button bt_insert {

@@ -11,6 +11,8 @@ extern void edittool_window_bt_endpoint_callback(Fl_Button*, void*);
 extern void edittool_window_bt_paste_callback(Fl_Button*, void*);
 extern void edittool_window_bt_fill_callback(Fl_Button*, void*);
 #include <FL/Fl_Int_Input.H>
+extern void edittool_window_edit_startpoint_callback(Fl_Int_Input*, void*);
+extern void edittool_window_edit_endpoint_callback(Fl_Int_Input*, void*);
 extern void edittool_window_bt_insert_callback(Fl_Button*, void*);
 extern void edittool_window_bt_delete_callback(Fl_Button*, void*);
 extern void edittool_window_bt_flakeypattern_callback(Fl_Button*, void*);

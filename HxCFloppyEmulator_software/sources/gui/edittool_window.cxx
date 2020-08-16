@@ -31,11 +31,13 @@ trackedittool_window::trackedittool_window() {
       edit_startpoint->type(2);
       edit_startpoint->labelsize(10);
       edit_startpoint->textsize(10);
+      edit_startpoint->callback((Fl_Callback*)edittool_window_edit_startpoint_callback);
     } // Fl_Int_Input* edit_startpoint
     { edit_endpoint = new Fl_Int_Input(125, 19, 85, 16);
       edit_endpoint->type(2);
       edit_endpoint->labelsize(10);
       edit_endpoint->textsize(10);
+      edit_endpoint->callback((Fl_Callback*)edittool_window_edit_endpoint_callback);
     } // Fl_Int_Input* edit_endpoint
     { bt_insert = new Fl_Button(7, 83, 113, 16, getString(STR_EDITTOOLWINDOW_0007));
       bt_insert->labelsize(10);
