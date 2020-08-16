@@ -748,7 +748,7 @@ void hxcfe_td_activate_analyzer( HXCFE_TD *td, int32_t TRACKTYPE, int32_t enable
 void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track, int32_t side )
 {
 	int tracksize;
-	int i,j,old_i;
+	int i,j,old_i,m;
 	int step_size;
 	float timingoffset_offset;
 	int buffer_offset;
@@ -785,7 +785,7 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	y_tick_to_pix = ( (float)1.0 / y_us_per_pixel ) * ( (float)1000000 / (float)TICKFREQ );
 
 	tick_to_ps = (float) ( (float)1000000000 / (float)TICKFREQ);
-	
+
 	sl=td->sl;
 	while(sl)
 	{
@@ -1334,6 +1334,110 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 		float_xpos += xpos_step;
 		i++;
 	}
+
+	// Markers
+	for( m = 0; m < MAX_MARKER ; m++ )
+	{
+		if( td->markers[m].flags & TD_MARKER_FLAG_ENABLE)
+		{
+			//////////////////////////////////////////
+			// Markers drawing
+
+			tracksize = currentside->tracklen;
+			timingoffset = 0;
+			i = buffer_offset;
+			old_i = buffer_offset;
+
+			loopcnt = 0;
+			endfill = 0;
+
+			do
+			{
+				do
+				{
+					if(td->markers[m].cell_pos == i)
+					{
+						if(currentside->bitrate == VARIABLEBITRATE)
+							bitrate = currentside->timingbuffer[i>>3];
+
+						xpos = (int)( timingoffset / (xresstep) );
+
+						if(xpos>=td->xsize)
+							endfill=1;
+						else
+						{
+							int y_off;
+							int x_off;
+							int k;
+
+							for(y = 0; y<td->ysize;y++)
+							{
+								if( !(y & 3) )
+									td->framebuffer[(td->xsize*y) + xpos] = td->markers[m].color;
+							}
+
+							switch(td->markers[m].type)
+							{
+								case 0:
+
+									x_off = 0;
+									y_off = 30;
+									k = 13;
+									while( k>0 )
+									{
+										for(j=0;j<k;j++)
+										{
+											if( (y_off + k) < td->ysize && (xpos + x_off) < td->xsize)
+											{
+												td->framebuffer[(td->xsize*(y_off + j)) + xpos + x_off] = td->markers[m].color;
+											}
+										}
+										y_off++;
+										k = k - 2;
+										x_off++;
+									}
+								break;
+								case 1:
+									x_off = 0;
+									y_off = 30;
+									k = 13;
+									while( k>0 )
+									{
+										for(j=0;j<k;j++)
+										{
+											if( (y_off + k) < td->ysize && (xpos - x_off) < td->xsize && (xpos - x_off) >= 0)
+											{
+												td->framebuffer[(td->xsize*(y_off + j)) + xpos - x_off] = td->markers[m].color;
+											}
+										}
+										y_off++;
+										k = k - 2;
+										x_off++;
+									}
+								break;
+							}
+						}
+					}
+
+					if(currentside->bitrate==VARIABLEBITRATE)
+						bitrate = currentside->timingbuffer[i>>3];
+
+					timingoffset=timingoffset + ((float)(500000)/(float)bitrate);
+
+					i++;
+
+				}while(i<tracksize && !endfill);
+
+				xpos= (int)( timingoffset / xresstep );
+				if(xpos>td->xsize)
+					endfill=1;
+
+				i=0;
+
+			}while(!endfill);
+
+		}
+	}
 }
 
 extern int tracktypelist[];
@@ -1429,7 +1533,8 @@ int hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream, int s
 
 			stream_index++;
 		}
-	td->hxcfe->hxc_printf(MSG_INFO_1,"hxcfe_td_stream_to_sound: >>stream_index:%d - pulses_count:%d cur_ticks_count:%d ticks_window:%d ticks_sampleshift:%d",stream_index,pulses_count,cur_ticks_count,ticks_window,ticks_sampleshift);
+
+		td->hxcfe->hxc_printf(MSG_INFO_1,"hxcfe_td_stream_to_sound: >>stream_index:%d - pulses_count:%d cur_ticks_count:%d ticks_window:%d ticks_sampleshift:%d",stream_index,pulses_count,cur_ticks_count,ticks_window,ticks_sampleshift);
 
 		sound_buffer[i] = pulses_count;
 	}
@@ -2863,4 +2968,18 @@ void hxcfe_td_deinit(HXCFE_TD *td)
 		free(td->name);
 
 	free(td);
+}
+
+void hxcfe_td_set_marker( HXCFE_TD *td, int32_t cell_pos, int32_t marker_id, uint32_t type, uint32_t color, uint32_t flags )
+{
+	if(!td)
+		return;
+
+	if( marker_id < 0 || marker_id > MAX_MARKER - 1)
+		return;
+
+	td->markers[marker_id].cell_pos = cell_pos;
+	td->markers[marker_id].type = type;
+	td->markers[marker_id].flags = flags;
+	td->markers[marker_id].color = color;
 }
