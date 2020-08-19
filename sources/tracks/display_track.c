@@ -749,7 +749,6 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 {
 	int tracksize;
 	int i,j,old_i,m;
-	int step_size;
 	float timingoffset_offset;
 	int buffer_offset;
 	int y;
@@ -769,22 +768,13 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	HXCFE_SIDE * currentside;
 	s_col * col;
 
-	float x_us_per_pixel,y_us_per_pixel;
-	float x_tick_to_pix;
-	float y_tick_to_pix;
-	float tick_to_ps;
+	float x_us_per_pixel;
 	float xpos_step;
 	float float_xpos;
 
 	char tmp_str[32];
 
 	x_us_per_pixel = ((float)((float)td->x_us/(float)td->xsize));
-	y_us_per_pixel = ((float)((float)td->y_us/(float)td->ysize));
-
-	x_tick_to_pix = ( (float)1.0 / x_us_per_pixel ) * ( (float)1000000 / (float)TICKFREQ );
-	y_tick_to_pix = ( (float)1.0 / y_us_per_pixel ) * ( (float)1000000 / (float)TICKFREQ );
-
-	tick_to_ps = (float) ( (float)1000000000 / (float)TICKFREQ);
 
 	sl=td->sl;
 	while(sl)
@@ -1271,13 +1261,12 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 
 	// Rule : 100 us steps
 	i = 0;
-	step_size = ( 100 / ((float)td->xsize/(float)td->x_us) );
 	xpos_step = ( 100 / x_us_per_pixel );
 	float_xpos = 0;
-	while( i < step_size )
+	xpos = 0;
+	while( xpos < td->xsize )
 	{
 		ypos = (td->ysize - 1);
-		xpos = (int)float_xpos;
 
 		for(y=0;y<1;y++)
 		{
@@ -1286,53 +1275,47 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 		}
 
 		float_xpos += xpos_step;
-		i++;
+		xpos = (int)float_xpos;
 	}
+
+	
 
 	// Rule : 1 ms steps
 	i = 0;
-	step_size = ( 1000 / ((float)td->xsize/(float)td->x_us) );
 	xpos_step = ( 1000 / x_us_per_pixel );
 	float_xpos = 0;
-	while( i < step_size )
+	xpos = 0;
+	while( xpos < td->xsize )
 	{
 		ypos = (td->ysize - 1);
-		xpos = (int)float_xpos;
 
-		if( xpos < (int)td->xsize )
+		for(y=ypos - 4;y<ypos;y++)
 		{
-			for(y=ypos - 4;y<ypos;y++)
-			{
-				if ( y>=0 &&  y < (unsigned int)td->ysize )
-					td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
-			}
+			if ( y>=0 &&  y < (unsigned int)td->ysize )
+				td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
 		}
 
 		float_xpos += xpos_step;
-		i++;
+		xpos = (int)float_xpos;
 	}
 
 	// Rule : 10 ms steps
 	i = 0;
-	step_size = ( 10000 / ((float)td->xsize/(float)td->x_us) );
 	xpos_step = ( 10000 / x_us_per_pixel );
 	float_xpos = 0;
-	while( i < step_size )
+	xpos = 0;
+	while( xpos < td->xsize )
 	{
 		ypos = (td->ysize - 1);
-		xpos = (int)float_xpos;
 
-		if( xpos < (int)td->xsize )
+		for(y=ypos - 8;y<ypos;y++)
 		{
-			for(y=ypos - 8;y<ypos;y++)
-			{
-				if ( y>=0 &&  y < (unsigned int)td->ysize )
-					td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
-			}
+			if ( y>=0 &&  y < (unsigned int)td->ysize )
+				td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
 		}
 
 		float_xpos += xpos_step;
-		i++;
+		xpos = (int)float_xpos;
 	}
 
 	// Markers
@@ -1545,7 +1528,6 @@ int hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream, int s
 void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 {
 	int i,j,x,y,tmp;
-	int step_size;
 	int xpos,ypos,bad_timing;
 	int last_index_xpos;
 	int last_index_total_offset;
@@ -1784,13 +1766,12 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 
 	// Rule : 100 us steps
 	i = 0;
-	step_size = ( 100 / ((float)td->xsize/(float)td->x_us) );
 	xpos_step = ( 100 / x_us_per_pixel );
 	float_xpos = 0;
-	while( i < step_size )
+	xpos = 0;
+	while( xpos < td->xsize )
 	{
 		ypos = (td->ysize - 1);
-		xpos = (int)float_xpos;
 
 		for(y=0;y<1;y++)
 		{
@@ -1799,53 +1780,45 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 		}
 
 		float_xpos += xpos_step;
-		i++;
+		xpos = (int)float_xpos;
 	}
 
 	// Rule : 1 ms steps
 	i = 0;
-	step_size = ( 1000 / ((float)td->xsize/(float)td->x_us) );
 	xpos_step = ( 1000 / x_us_per_pixel );
 	float_xpos = 0;
-	while( i < step_size )
+	xpos = 0;
+	while( xpos < td->xsize )
 	{
 		ypos = (td->ysize - 1);
-		xpos = (int)float_xpos;
 
-		if( xpos < (int)td->xsize )
+		for(y=ypos - 3;y<ypos;y++)
 		{
-			for(y=ypos - 3;y<ypos;y++)
-			{
-				if ( y>=0 &&  y < (unsigned int)td->ysize )
-					td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
-			}
+			if ( y>=0 &&  y < (unsigned int)td->ysize )
+				td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
 		}
 
 		float_xpos += xpos_step;
-		i++;
+		xpos = (int)float_xpos;
 	}
 
 	// Rule : 10 ms steps
 	i = 0;
-	step_size = ( 10000 / ((float)td->xsize/(float)td->x_us) );
 	xpos_step = ( 10000 / x_us_per_pixel );
 	float_xpos = 0;
-	while( i < step_size )
+	xpos = 0;
+	while( xpos < td->xsize )
 	{
 		ypos = (td->ysize - 1);
-		xpos = (int)float_xpos;
 
-		if( xpos < (int)td->xsize )
+		for(y=ypos - 6;y<ypos;y++)
 		{
-			for(y=ypos - 6;y<ypos;y++)
-			{
-				if ( y>=0 &&  y < (unsigned int)td->ysize )
-					td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
-			}
+			if ( y>=0 &&  y < (unsigned int)td->ysize )
+				td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
 		}
 
 		float_xpos += xpos_step;
-		i++;
+		xpos = (int)float_xpos;
 	}
 }
 
