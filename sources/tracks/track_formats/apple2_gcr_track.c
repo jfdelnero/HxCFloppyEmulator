@@ -283,10 +283,10 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 					{ // crc ok !!!
 
 						sector->use_alternate_header_crc = 0x00;
-						floppycontext->hxc_printf(MSG_DEBUG,"Valid Apple II sector header found - Sect:%d",tmp_buffer[2]);
+						floppycontext->hxc_printf(MSG_DEBUG,"Valid Apple II 6 and 2 GCR sector header found - Sect:%d",tmp_buffer[2]);
 						old_bit_offset=bit_offset;
 
-						// 0xD5 0xAA 0xad
+						// 0xD5 0xAA 0xAD
 						// 1101 0101 1010 1010 1010 1101
 						// 01010001 00010001 01000100 01000100 01000100 01010001
 						// 0x51 11 44 44 44 51
