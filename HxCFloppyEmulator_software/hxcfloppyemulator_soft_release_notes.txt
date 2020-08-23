@@ -15,7 +15,7 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
-X XXXXXXX 2020 : HxCFloppyEmulator 2.4.1.9 (Beta version - Work in Progress)
+X XXXXXXX 2020 : HxCFloppyEmulator 2.4.4.1 (Beta version - Work in Progress)
 
 (Download : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip)
 
@@ -70,6 +70,8 @@ X XXXXXXX 2020 : HxCFloppyEmulator 2.4.1.9 (Beta version - Work in Progress)
 
 -> Windows target : Moving from VC 6.0 to MinGW32 / MinGW64. 32 bits and 64 bits release supported.
                     General performance significantly increased.
+
+-> Stream Analyzer : Perfectly aligned revolutions (index+stream) issue fixed. (Some good tracks marked as weak issue).
 
 *********************************************************/
 
