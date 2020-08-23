@@ -1676,7 +1676,7 @@ uint32_t getNearestValidIndex(pulses_link * pl,uint32_t center,uint32_t limit)
 	return pl->number_of_pulses - 1;
 }
 
-uint32_t searchBestOverlap(HXCFE_TRKSTREAM * track_dump, pulsesblock * src_block, uint32_t repeat_index, uint32_t tick_down_max, uint32_t tick_up_max, s_match * match_table,int * searchstate,int fullcompare)
+uint32_t searchBestOverlap(HXCFE* floppycontext,HXCFE_TRKSTREAM * track_dump, pulsesblock * src_block, uint32_t repeat_index, uint32_t tick_down_max, uint32_t tick_up_max, s_match * match_table,int * searchstate,int fullcompare)
 {
 	uint32_t i_down,i_up;
 	uint32_t tick_up;
@@ -1723,6 +1723,9 @@ uint32_t searchBestOverlap(HXCFE_TRKSTREAM * track_dump, pulsesblock * src_block
 			}
 
 		}while( tick_up < tick_up_max);
+
+		// i_down = 0 case already tested in the previous loop !
+		i_down = 1;
 
 		do
 		{
@@ -1820,6 +1823,20 @@ uint32_t searchBestOverlap(HXCFE_TRKSTREAM * track_dump, pulsesblock * src_block
 	// -> different offset match at 100%
 	if( match_table[mt_i-1].no == 0 && match_table[mt_i-2].no == 0 && match_table[mt_i-1].yes )
 	{
+#ifdef FLUXSTREAMDBG
+		int i,c;
+
+		c = 0;
+		for(i=0;i<mt_i;i++)
+		{
+			if(!match_table[i].no)
+			{
+				c++;
+			}
+		}
+		floppycontext->hxc_printf(MSG_DEBUG,"searchBestOverlap : MULTI_MATCH : %d / %d",c,tick_down_max+tick_up_max);
+#endif
+
 		*searchstate = 1;
 	}
 
@@ -2031,7 +2048,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 				if(j < track_dump->nb_of_pulses )
 				{
-					searchBestOverlap(track_dump, &tb->blocks[block_num], j - 1, tick_down_max, tick_up_max, match_table,&searchstate,0);
+					searchBestOverlap(floppycontext,track_dump, &tb->blocks[block_num], j - 1, tick_down_max, tick_up_max, match_table,&searchstate,0);
 				}
 
 				block_num++;
@@ -2147,7 +2164,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 						if(j < track_dump->nb_of_pulses )
 						{
 
-							mt_i = searchBestOverlap(track_dump, &tb->blocks[block_num], j - 1, tick_down_max, tick_up_max, match_table,&searchstate,1);
+							mt_i = searchBestOverlap(floppycontext,track_dump, &tb->blocks[block_num], j - 1, tick_down_max, tick_up_max, match_table,&searchstate,1);
 
 							switch(searchstate)
 							{
