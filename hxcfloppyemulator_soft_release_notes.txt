@@ -53,6 +53,10 @@ X XXXXXXX 2020 : HxCFloppyEmulator 2.4.4.1 (Beta version - Work in Progress)
 
 -> STX Writer : Support sectors headers without data part.
 
+-> TRS80 DMK Loader : Fix FM / SD track ID / Data mark clock patching.
+
+-> TRS80 DMK Writer : Byte align tracks (WIP).
+
 -> Macintosh disk support : Macintosh GCR decoding, CLV disks stream import (WIP!).
 
 -> Disk viewer : Resizeable window.
@@ -442,7 +446,7 @@ MacOS X : Executable now compiled with the "-mmacosx-version-min=10.5" option
 /*********************************************************
 08 December 2013: HxCFloppyEmulator 2.0.18.4
 
-TRS80 DMK Loaded : Image Sanity check -> Minimum track number changed from 30 to 1 track.
+TRS80 DMK Loader : Image Sanity check -> Minimum track number changed from 30 to 1 track.
 
 Predefined raw formats added : Ensoniq Mirage 440KB, E-mu Emax DD 800KB, GeneralMusic GEM S3 1600KB, GeneralMusic GEM WX 1440KB.
 
