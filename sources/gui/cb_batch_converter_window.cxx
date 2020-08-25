@@ -321,7 +321,8 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 						j--;
 					}
 
-					if(loaderid != hxcfe_imgGetLoaderID(imgldr_ctx,(char*)PLUGIN_SKF) || !j)
+					if( ( (loaderid != hxcfe_imgGetLoaderID(imgldr_ctx,(char*)PLUGIN_SKF)) &&
+						  (loaderid != hxcfe_imgGetLoaderID(imgldr_ctx,(char*)PLUGIN_PAULINE_STREAM)) ) || !j)
 					{
 						if(filelist[filenb][j]==DIR_SEPARATOR_CHAR)
 							j++;
