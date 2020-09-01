@@ -1815,31 +1815,33 @@ uint32_t searchBestOverlap(HXCFE* floppycontext,HXCFE_TRKSTREAM * track_dump, pu
 	*searchstate = 0;
 
 	// -> Only one offset match at 100% -> We have found the overlap
-	if( match_table[mt_i-1].no == 0 && match_table[mt_i-2].no != 0 && match_table[mt_i-1].yes )
+	if( mt_i >= 2 )
 	{
-		*searchstate = 2;
-	}
-
-	// -> different offset match at 100%
-	if( match_table[mt_i-1].no == 0 && match_table[mt_i-2].no == 0 && match_table[mt_i-1].yes )
-	{
-#ifdef FLUXSTREAMDBG
-		int i,c;
-
-		c = 0;
-		for(i=0;i<mt_i;i++)
+		if( match_table[mt_i-1].no == 0 && match_table[mt_i-2].no != 0 && match_table[mt_i-1].yes )
 		{
-			if(!match_table[i].no)
-			{
-				c++;
-			}
+			*searchstate = 2;
 		}
-		floppycontext->hxc_printf(MSG_DEBUG,"searchBestOverlap : MULTI_MATCH : %d / %d",c,tick_down_max+tick_up_max);
-#endif
 
-		*searchstate = 1;
+		// -> different offset match at 100%
+		if( match_table[mt_i-1].no == 0 && match_table[mt_i-2].no == 0 && match_table[mt_i-1].yes )
+		{
+	#ifdef FLUXSTREAMDBG
+			int i,c;
+
+			c = 0;
+			for(i=0;i<mt_i;i++)
+			{
+				if(!match_table[i].no)
+				{
+					c++;
+				}
+			}
+			floppycontext->hxc_printf(MSG_DEBUG,"searchBestOverlap : MULTI_MATCH : %d / %d",c,tick_down_max+tick_up_max);
+	#endif
+
+			*searchstate = 1;
+		}
 	}
-
 	return mt_i;
 }
 
