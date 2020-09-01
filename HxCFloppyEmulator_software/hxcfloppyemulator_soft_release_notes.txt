@@ -47,6 +47,8 @@ X XXXXXXX 2020 : HxCFloppyEmulator 2.4.4.1 (Beta version - Work in Progress)
                      Discard the second side if unformatted. (parameter CPCDSK_WRITER_DISCARD_UNFORMATTED_SIDE)
                      Limit the sector data size to 6144 bytes. (parameter CPCDSK_WRITER_LIMIT_SECTOR_SIZE)
 
+-> SCP Loader : Input file sanity checks added.
+
 -> SCP Writer : Randomize stream on weak-bits.
 
 -> SCP Writer : Fix single sided disks export.
