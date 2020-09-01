@@ -322,7 +322,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int mac_clv;
 
 	scp_header scph;
-	uint32_t tracksoffset[83*2];
+	uint32_t tracksoffset[MAX_NUMBER_OF_TRACKS];
 	envvar_entry * backup_env;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SCP_libLoad_DiskFile");
@@ -441,6 +441,25 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			floppydisk->floppySectorPerTrack = -1;
 
 			hxc_fread(tracksoffset,sizeof(tracksoffset),f);
+
+			if( floppydisk->floppyNumberOfTrack*trackstep > MAX_NUMBER_OF_TRACKS )
+			{
+				floppydisk->floppyNumberOfTrack = MAX_NUMBER_OF_TRACKS / trackstep;
+			}
+
+			k = 0;
+			for(j=0;j<floppydisk->floppyNumberOfTrack*trackstep;j=j+trackstep)
+			{
+				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+				{
+					if( tracksoffset[(j<<1)|(i&1)] )
+					{
+						k = (j<<1)|(i&1);
+					}
+				}
+			}
+
+			floppydisk->floppyNumberOfTrack = ((k >> 1) + 1) / trackstep;
 
 			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);

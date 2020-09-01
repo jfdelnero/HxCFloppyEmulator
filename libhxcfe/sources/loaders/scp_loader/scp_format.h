@@ -606,4 +606,6 @@ typedef struct scp_track_header_
 	uint32_t track_data_checksum;
 }scp_track_header;
 
+#define MAX_NUMBER_OF_TRACKS 168
+
 #pragma pack()
