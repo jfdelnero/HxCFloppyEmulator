@@ -215,7 +215,14 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 						hxcfe_FxStream_ExportToBmp(fxs,track_dump, tmp_filename);
 					}
 
-					hxcfe_FxStream_FreeStream(fxs,track_dump);
+					if(currentside)
+					{
+						currentside->stream_dump = track_dump;
+					}
+					else
+					{
+						hxcfe_FxStream_FreeStream(fxs,track_dump);
+					}
 				}
 
 				free(trackbuf_dword);
