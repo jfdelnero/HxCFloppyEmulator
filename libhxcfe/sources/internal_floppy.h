@@ -32,6 +32,27 @@
 #define VARIABLEBITRATE                    -1
 #define VARIABLEENCODING                 1
 
+typedef struct _s_index_evt
+{
+    uint32_t dump_offset;
+    uint32_t cellpos;
+    int32_t  tick_offset;
+    uint32_t clk;
+    uint32_t flags;
+}s_index_evt;
+
+#define MAX_NB_OF_INDEX 512
+
+typedef struct _HXCFE_TRKSTREAM
+{
+    uint32_t	* track_dump;
+    uint32_t	nb_of_pulses;
+    s_index_evt	index_evt_tab[MAX_NB_OF_INDEX];
+    uint32_t	nb_of_index;
+}HXCFE_TRKSTREAM;
+
+#define _HXCFE_TRKSTREAM_
+
 typedef struct _HXCFE_SIDE
 {
     int32_t         number_of_sector;        // Number of sectors per track (if know) -> -1 if unknow.
@@ -45,9 +66,11 @@ typedef struct _HXCFE_SIDE
     int32_t         track_encoding;
 
     int32_t         tracklen;                // databuffer/timingbuffer/flakybitsbuffer/indexbuffer length
+
+    HXCFE_TRKSTREAM * stream_dump;
+
 }HXCFE_SIDE;
 #define _HXCFE_SIDE_
-
 
 
 typedef struct _HXCFE_CYLINDER

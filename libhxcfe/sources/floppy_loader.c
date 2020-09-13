@@ -838,9 +838,8 @@ HXCFE_FLOPPY * hxcfe_floppyDuplicate( HXCFE* floppycontext, HXCFE_FLOPPY * flopp
 {
 	int i,j;
 	HXCFE_FLOPPY * fp;
-	int bufferlen;
 
-	fp = 0;
+	fp = NULL;
 	if(floppydisk)
 	{
 		fp = malloc(sizeof(HXCFE_FLOPPY));
@@ -865,50 +864,7 @@ HXCFE_FLOPPY * hxcfe_floppyDuplicate( HXCFE* floppycontext, HXCFE_FLOPPY * flopp
 
 							for(i=0;i<fp->tracks[j]->number_of_side;i++)
 							{
-								fp->tracks[j]->sides[i] = (HXCFE_SIDE*)malloc(sizeof(HXCFE_SIDE));
-								if(fp->tracks[j]->sides[i] && floppydisk->tracks[j]->sides[i])
-								{
-									memcpy(fp->tracks[j]->sides[i],floppydisk->tracks[j]->sides[i],sizeof(HXCFE_SIDE));
-
-									bufferlen = fp->tracks[j]->sides[i]->tracklen / 8;
-									if(fp->tracks[j]->sides[i]->tracklen&7)
-										bufferlen++;
-
-									if(fp->tracks[j]->sides[i]->databuffer)
-									{
-										fp->tracks[j]->sides[i]->databuffer = malloc(bufferlen);
-										if(fp->tracks[j]->sides[i]->databuffer)
-											memcpy(fp->tracks[j]->sides[i]->databuffer,floppydisk->tracks[j]->sides[i]->databuffer,bufferlen);
-									}
-
-									if(fp->tracks[j]->sides[i]->flakybitsbuffer)
-									{
-										fp->tracks[j]->sides[i]->flakybitsbuffer = malloc(bufferlen);
-										if(fp->tracks[j]->sides[i]->flakybitsbuffer)
-											memcpy(fp->tracks[j]->sides[i]->flakybitsbuffer,floppydisk->tracks[j]->sides[i]->flakybitsbuffer,bufferlen);
-									}
-
-									if(fp->tracks[j]->sides[i]->indexbuffer)
-									{
-										fp->tracks[j]->sides[i]->indexbuffer = malloc(bufferlen);
-										if(fp->tracks[j]->sides[i]->indexbuffer)
-											memcpy(fp->tracks[j]->sides[i]->indexbuffer,floppydisk->tracks[j]->sides[i]->indexbuffer,bufferlen);
-									}
-
-									if(fp->tracks[j]->sides[i]->timingbuffer)
-									{
-										fp->tracks[j]->sides[i]->timingbuffer = malloc(bufferlen * sizeof(uint32_t));
-										if(fp->tracks[j]->sides[i]->timingbuffer)
-											memcpy(fp->tracks[j]->sides[i]->timingbuffer,floppydisk->tracks[j]->sides[i]->timingbuffer,bufferlen * sizeof(uint32_t));
-									}
-
-									if(fp->tracks[j]->sides[i]->track_encoding_buffer)
-									{
-										fp->tracks[j]->sides[i]->track_encoding_buffer = malloc(bufferlen);
-										if(fp->tracks[j]->sides[i]->track_encoding_buffer)
-											memcpy(fp->tracks[j]->sides[i]->track_encoding_buffer,floppydisk->tracks[j]->sides[i]->track_encoding_buffer,bufferlen);
-									}
-								}
+								fp->tracks[j]->sides[i] = hxcfe_duplicateSide( floppycontext, floppydisk->tracks[j]->sides[i] );
 							}
 						}
 					}

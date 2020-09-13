@@ -195,7 +195,14 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,flo
 			if(rpm && currentside)
 				*rpm = (short)( 60 / GetTrackPeriod(floppycontext,currentside) );
 
-			hxcfe_FxStream_FreeStream(fxs,track_dump);
+			if(currentside)
+			{
+				currentside->stream_dump = track_dump;
+			}
+			else
+			{
+				hxcfe_FxStream_FreeStream(fxs,track_dump);
+			}
 		}
 
 		hxcfe_deinitFxStream(fxs);

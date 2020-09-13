@@ -81,7 +81,7 @@ HXCFE_SIDE * hxcfe_duplicateSide( HXCFE* floppycontext, HXCFE_SIDE * side )
 	HXCFE_SIDE * new_side;
 	int track_wordsize;
 
-	new_side = 0;
+	new_side = NULL;
 
 	if(side)
 	{
@@ -136,6 +136,35 @@ HXCFE_SIDE * hxcfe_duplicateSide( HXCFE* floppycontext, HXCFE_SIDE * side )
 					memcpy(new_side->track_encoding_buffer, side->track_encoding_buffer,track_wordsize );
 			}
 
+			new_side->stream_dump = NULL;
+
+			if( side->stream_dump )
+			{
+				if( side->stream_dump->track_dump && side->stream_dump->nb_of_pulses)
+				{
+					new_side->stream_dump = malloc( sizeof(HXCFE_TRKSTREAM) );
+					if( new_side->stream_dump )
+					{
+						memcpy(new_side->stream_dump,side->stream_dump,sizeof(HXCFE_TRKSTREAM));
+
+						new_side->stream_dump->track_dump = malloc(side->stream_dump->nb_of_pulses*sizeof(uint32_t));
+						if( new_side->stream_dump->track_dump )
+						{
+							memcpy(new_side->stream_dump->track_dump,side->stream_dump->track_dump,side->stream_dump->nb_of_pulses*sizeof(uint32_t));
+						}
+						else
+						{
+							free(new_side->stream_dump);
+							new_side->stream_dump = NULL;
+						}
+					}
+				}
+				else
+				{
+					new_side->stream_dump = NULL;
+				}
+			}
+
 			new_side->bitrate = side->bitrate;
 			new_side->number_of_sector = side->number_of_sector;
 			new_side->track_encoding = side->track_encoding;
@@ -164,6 +193,16 @@ void hxcfe_freeSide( HXCFE* floppycontext, HXCFE_SIDE * side )
 
 		if(side->track_encoding_buffer)
 			free(side->track_encoding_buffer);
+
+		if(side->stream_dump)
+		{
+			if(side->stream_dump->track_dump)
+			{
+				free(side->stream_dump->track_dump);
+			}
+
+			free(side->stream_dump);
+		}
 
 		free(side);
 	}
@@ -446,15 +485,15 @@ int32_t hxcfe_removeCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_
 			{
 
 				if( (cellnumber + numberofcells) < currentside->tracklen )
+				{
 					loopcnt = currentside->tracklen - ( cellnumber + numberofcells);
+				}
 				else
 				{
-
 					loopcnt = (currentside->tracklen - ( numberofcells ));
 					currentside->tracklen = cellnumber;
 					cellnumber = 0;
 					numberofcells = currentside->tracklen - loopcnt;
-
 				}
 
 				for(i=0;i<loopcnt;i++)
