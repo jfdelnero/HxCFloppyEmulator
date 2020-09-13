@@ -1571,7 +1571,7 @@ int32_t hxcfe_popTrack ( HXCFE_FLPGEN* fb_ctx )
 																							current_fb_track_state->type,
 																							current_fb_track_state->pregap,
 																							current_fb_track_state->indexlen[0] | sui_flag,current_fb_track_state->indexpos[0]);
-																							
+
 			for(i=1;i<MAX_NUMBER_OF_INDEX;i++)
 			{
 				if(current_fb_track_state->indexlen[i])
@@ -1933,14 +1933,14 @@ HXCFE_FLOPPY* hxcfe_getFloppy ( HXCFE_FLPGEN* fb_ctx )
 																			0,
 																			fb_ctx->fb_stack[0].indexlen[0],
 																			fb_ctx->fb_stack[0].indexpos[0]);
-																			
+
 						for(i=1;i<MAX_NUMBER_OF_INDEX;i++)
 						{
 							if(fb_ctx->fb_stack[0].indexlen[i])
 							{
 								fillindex(fb_ctx->fb_stack[0].indexpos[0],fb_ctx->floppydisk->tracks[j]->sides[i],fb_ctx->fb_stack[0].indexlen[i],1,0);
 							}
-						}																			
+						}
 					}
 				}
 			}

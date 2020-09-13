@@ -62,7 +62,7 @@ typedef struct _HXCFE_SIDE
     uint8_t       * flakybitsbuffer;         // if equal to zero no flakey/weak bits information.
     uint8_t       * indexbuffer;             // index state buffer signal 1->asserted 0->non asserted.
     uint8_t       * track_encoding_buffer;   // track encoding indication buffer.
-    
+
     int32_t         track_encoding;
 
     int32_t         tracklen;                // databuffer/timingbuffer/flakybitsbuffer/indexbuffer length
