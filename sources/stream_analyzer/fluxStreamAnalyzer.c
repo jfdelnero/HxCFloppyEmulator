@@ -437,7 +437,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 	}
 	else
 	{
-		floppycontext->hxc_printf(MSG_DEBUG,"ScanAndDecodeStream : Measured bitrate : %d, Forced value : %d",(int)(TICKFREQ/initialvalue), centralvalue);		
+		floppycontext->hxc_printf(MSG_DEBUG,"ScanAndDecodeStream : Measured bitrate : %d, Forced value : %d",(int)(TICKFREQ/initialvalue), centralvalue);
 		centralvalue = (int)(TICKFREQ/centralvalue);
 	}
 
@@ -3774,7 +3774,7 @@ void hxcfe_FxStream_ExportToBmp(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream, char 
 
 		hxcfe_td_setparams(td, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_XTOTALTIME" ), hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_STREAM_DEFAULT_YTOTALTIME" ),0, flags);
 
-		hxcfe_td_draw_stream_track( td, stream );
+		hxcfe_td_draw_trkstream( td, stream );
 
 		hxcfe_td_exportToBMP( td, filename );
 
