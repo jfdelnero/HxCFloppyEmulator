@@ -36,9 +36,9 @@
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
 // File : utils.cxx
-// Contains: 
+// Contains: miscellaneous stuffs
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -115,8 +115,8 @@ char * URIfilepathparser(char * URI,int size)
 						{
 							i++;
 						}
-	
-							
+
+
 					}
 					else
 					{
@@ -124,11 +124,11 @@ char * URIfilepathparser(char * URI,int size)
 						j++;
 						i++;
 					}
-				
+
 					path[j] = 0;
 				}
 			}
-			
+
 			return path;
 		}
 		else
