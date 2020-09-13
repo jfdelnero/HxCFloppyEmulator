@@ -793,7 +793,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 		ypos=disp_ysize-ypos;
 
-		if(!fiw->view_mode->value())
+		if(fiw->view_mode->value() <= 1)
 		{
 			sprintf(str,"x position : %.3f ms",	(xpos * stepperpix_x)/1000);
 			fiw->x_pos->value(str);
