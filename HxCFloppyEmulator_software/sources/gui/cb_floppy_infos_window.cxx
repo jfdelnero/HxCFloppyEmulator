@@ -36,9 +36,9 @@
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
 // File : cb_floppy_infos_window.cxx
-// Contains:
+// Contains: Disk viewer callbacks.
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -206,7 +206,7 @@ void update_graph(floppy_infos_window * w)
 				if(valmodif)
 					w->side_number_slide->value(side);
 
-				if(w->view_mode->value() == 0)
+				if(w->view_mode->value() <= 1)
 				{
 					sprintf(tempstr,"Track : %d Side : %d ",track,side);
 					w->side_number_slide->activate();
@@ -409,16 +409,21 @@ int InfosThreadProc(void* floppycontext,void* context)
 
 			if(guicontext->trackviewerfloppy)
 			{
-				if(w->view_mode->value() != 0)
+				switch(w->view_mode->value())
 				{
-					hxcfe_td_select_view_type( td, w->view_mode->value());
-					hxcfe_td_setProgressCallback(td,progress_callback,(void*)guicontext);
-					hxcfe_td_draw_disk(td,guicontext->trackviewerfloppy);
-				}
-				else
-				{
-					hxcfe_td_select_view_type( td, w->view_mode->value());
-					hxcfe_td_draw_track(td,guicontext->trackviewerfloppy,(int)w->track_number_slide->value(),(int)w->side_number_slide->value());
+					case 0:
+						hxcfe_td_select_view_type( td, w->view_mode->value());
+						hxcfe_td_draw_track(td,guicontext->trackviewerfloppy,(int)w->track_number_slide->value(),(int)w->side_number_slide->value());
+					break;
+					case 1:
+						hxcfe_td_select_view_type( td, w->view_mode->value());
+						hxcfe_td_draw_stream_track(td,guicontext->trackviewerfloppy,(int)w->track_number_slide->value(),(int)w->side_number_slide->value());
+					break;
+					default:
+						hxcfe_td_select_view_type( td, w->view_mode->value());
+						hxcfe_td_setProgressCallback(td,progress_callback,(void*)guicontext);
+						hxcfe_td_draw_disk(td,guicontext->trackviewerfloppy);
+					break;
 				}
 			}
 
@@ -527,7 +532,7 @@ int isTheRightSector(floppy_infos_window *fiw,s_sectorlist * sl,int xpos,int ypo
 	float pos_angle;
 	int distance,side;
 
-	if(fiw->view_mode->value() != 0)
+	if(fiw->view_mode->value() > 1)
 	{
 		disp_xsize=fiw->floppy_map_disp->w();
 		disp_ysize=fiw->floppy_map_disp->h();
@@ -753,7 +758,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 			}
 			else
 			{
-				if(fiw->view_mode->value())
+				if(fiw->view_mode->value()>1)
 				{
 					fiw->view_mode->value(0);
 					fiw->side_number_slide->activate();
@@ -803,7 +808,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 		fiw->object_txt->textsize(9);
 		fiw->object_txt->textfont(FL_SCREEN);
 
-		if(!fiw->view_mode->value())
+		if(fiw->view_mode->value()<=1)
 			hxc_entercriticalsection(guicontext->hxcfe,1);
 
 		sl = hxcfe_td_getlastsectorlist(guicontext->td);
@@ -819,7 +824,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 				if( isTheRightSector(fiw,sl,xpos,ypos) )
 				{
-					if(fiw->view_mode->value())
+					if(fiw->view_mode->value() > 1)
 					{
 						sprintf(str,"Track : %d Side : %d ",sl->track,sl->side);
 						fiw->global_status->value(str);
@@ -1014,7 +1019,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 		}
 
-		if(!fiw->view_mode->value())
+		if(fiw->view_mode->value()<=1)
 			hxc_leavecriticalsection(guicontext->hxcfe,1);
 
 	}
