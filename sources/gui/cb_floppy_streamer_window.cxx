@@ -38,7 +38,7 @@
 // File : cb_floppy_streamer_window.cxx
 // Contains: Floppy Streamer GUI.
 //
-// Written by: Jean François DEL NERO
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -436,7 +436,7 @@ int StreamerThreadProc(void* floppycontext,void* context)
 
 											if(trkstream)
 											{
-												hxcfe_td_draw_stream_track( td, trkstream );
+												hxcfe_td_draw_trkstream( td, trkstream );
 
 												ptr1 = (unsigned char*)hxcfe_td_getframebuffer(td);
 												ptr2 = (unsigned char*)guicontext->stream_frame_buffer;

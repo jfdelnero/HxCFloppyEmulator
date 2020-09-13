@@ -15,7 +15,7 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
-X XXXXXXX 2020 : HxCFloppyEmulator 2.4.4.1 (Beta version - Work in Progress)
+X XXXXXXX 2020 : HxCFloppyEmulator 2.5.1.1 (Beta version - Work in Progress)
 
 (Download : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip)
 
@@ -66,6 +66,8 @@ X XXXXXXX 2020 : HxCFloppyEmulator 2.4.4.1 (Beta version - Work in Progress)
 -> Disk viewer : Realistic physical floppy disk state representation (3"1/2 135TPI, 5"1/4 96TPI, 5"1/4 48TPI, 8" 48TPI).
 
 -> Disk viewer : Track markers support.
+
+-> Disk viewer : New stream viewer mode !
 
 -> Apple II : Track generator fixed : GCR 6&2 Sync bits and sector GAP fixed.
 
