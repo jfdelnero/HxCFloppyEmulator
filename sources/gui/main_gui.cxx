@@ -226,7 +226,7 @@ void menu_clicked(Fl_Widget * w, void * fc_ptr)
 		case 16:
 			mw->streamer_window->window->show();
 		break;
-		
+
 	}
 
 }
