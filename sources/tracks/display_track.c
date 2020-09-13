@@ -1527,7 +1527,10 @@ int hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream, int s
 
 void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 {
+	int buffer_offset;
+	int total_tick;
 	int i,j,x,y,tmp;
+	int t_ofs1,t_ofs2;
 	int xpos,ypos,bad_timing;
 	int last_index_xpos;
 	int last_index_total_offset;
@@ -1559,10 +1562,34 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 
 	tick_to_ps = (float) ( (float)1000000000 / (float)TICKFREQ);
 
+	if(0)//(td->x_start_us)
+	{
+		total_tick = 0;
+		for (i = 0; i < (int)track_stream->nb_of_pulses; i++)
+		{
+			total_tick += track_stream->track_dump[i];
+		}
+
+		i = 0;
+		t_ofs2= ((float)( td->x_start_us ) / (float)(100 * 1000)) * total_tick;
+		t_ofs1=0;
+		while((i<(int)track_stream->nb_of_pulses) && t_ofs2>t_ofs1)
+		{
+			t_ofs1 += track_stream->track_dump[i];
+			i++;
+		};
+
+		buffer_offset = i;
+	}
+	else
+	{
+		buffer_offset = 0;
+	}
+
 	//////////////////////////////////////////
 	// Scatter drawing
 	total_offset = 0;
-	for (i = 0; i < (int)track_stream->nb_of_pulses; i++)
+	for (i = buffer_offset; i < (int)track_stream->nb_of_pulses; i++)
 	{
 		cur_ticks = track_stream->track_dump[i];
 		total_offset += cur_ticks;
@@ -1653,7 +1680,15 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 
 	for(i=0;i < (int)track_stream->nb_of_index;i++)
 	{
-		j = 0;
+		if( buffer_offset <= (int)track_stream->index_evt_tab[i].dump_offset )
+		{
+			break;
+		}
+	}
+
+	for(;i < (int)track_stream->nb_of_index;i++)
+	{
+		j = buffer_offset;
 		total_offset = 0;
 		while( ( j < (int)track_stream->index_evt_tab[i].dump_offset ) && ( j < (int)track_stream->nb_of_pulses ) )
 		{
@@ -1878,7 +1913,16 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_
 	{
 		if(currentside->stream_dump)
 		{
-			//td->flags |= TD_FLAG_HICONTRAST;
+			if( hxcfe_getEnvVarValue( td->hxcfe, "BMPEXPORT_STREAM_HIGHCONTRAST" ) )
+			{
+				td->flags |= TD_FLAG_HICONTRAST;
+			}
+
+			if( hxcfe_getEnvVarValue( td->hxcfe, "BMPEXPORT_STREAM_BIG_DOTS" ) )
+			{
+				td->flags |= TD_FLAG_BIGDOT;
+			}
+
 			hxcfe_td_draw_trkstream( td, currentside->stream_dump );
 		}
 		else
