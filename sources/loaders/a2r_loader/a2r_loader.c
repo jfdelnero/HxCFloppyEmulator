@@ -175,7 +175,14 @@ static HXCFE_SIDE* import_a2r_stream(HXCFE* floppycontext, a2r_capture * capture
 					hxcfe_FxStream_ExportToBmp(fxs,track_dump, tmp_filename);
 				}
 
-				hxcfe_FxStream_FreeStream(fxs,track_dump);
+				if(currentside)
+				{
+					currentside->stream_dump = track_dump;
+				}
+				else
+				{
+					hxcfe_FxStream_FreeStream(fxs,track_dump);
+				}
 			}
 
 			hxcfe_deinitFxStream(fxs);
