@@ -1278,7 +1278,7 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 		xpos = (int)float_xpos;
 	}
 
-	
+
 
 	// Rule : 1 ms steps
 	i = 0;
@@ -1525,7 +1525,7 @@ int hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream, int s
 	return stream_index;
 }
 
-void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
+void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 {
 	int i,j,x,y,tmp;
 	int xpos,ypos,bad_timing;
@@ -1820,7 +1820,77 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 		float_xpos += xpos_step;
 		xpos = (int)float_xpos;
 	}
+
+	td->noloop_trackmode = 0;
 }
+
+void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track, int32_t side )
+{
+	s_sectorlist * sl,*oldsl;
+	s_pulseslist * pl,*oldpl;
+	HXCFE_SIDE * currentside;
+	char tempstr[512];
+	sl=td->sl;
+	while(sl)
+	{
+
+		oldsl = sl->next_element;
+		//sl = sl->next_element;
+
+		hxcfe_freeSectorConfig( 0, sl->sectorconfig );
+
+		free(sl);
+
+		sl = oldsl;
+	}
+	td->sl=0;
+
+	pl=td->pl;
+	while(pl)
+	{
+
+		oldpl = pl->next_element;
+
+		free(pl);
+
+		pl = oldpl;
+	}
+	td->pl=0;
+
+	if(track>=floppydisk->floppyNumberOfTrack) track = floppydisk->floppyNumberOfTrack - 1;
+	if(track<0) track = 0;
+
+	if(side>=floppydisk->floppyNumberOfSide) side = floppydisk->floppyNumberOfSide - 1;
+	if(side<0) side = 0;
+
+	if(!floppydisk->floppyNumberOfTrack || !floppydisk->floppyNumberOfSide)
+	{
+		memset(td->framebuffer,0xCC,td->xsize*td->ysize*sizeof(unsigned int));
+
+		sprintf(tempstr,"This track doesn't exist !");
+		putstring8x8(td,(td->xsize/2) - ((strlen(tempstr)*8)/2),td->ysize / 2,tempstr,0x000000,0xCCCCCC,0,0);
+		return;
+	}
+
+	currentside=floppydisk->tracks[track]->sides[side];
+
+	if(currentside)
+	{
+		if(currentside->stream_dump)
+		{
+			//td->flags |= TD_FLAG_HICONTRAST;
+			hxcfe_td_draw_trkstream( td, currentside->stream_dump );
+		}
+		else
+		{
+			memset(td->framebuffer,0xCC,td->xsize*td->ysize*sizeof(unsigned int));
+
+			sprintf(tempstr,"This track doesn't have any stream information !");
+			putstring8x8(td,(td->xsize/2) - ((strlen(tempstr)*8)/2),td->ysize / 2,tempstr,0x000000,0xCCCCCC,0,0);
+		}
+	}
+}
+
 
 int32_t hxcfe_td_setName( HXCFE_TD *td, char * name )
 {
@@ -2412,6 +2482,7 @@ typedef struct physical_floppy_dim_
 physical_floppy_dim floppy_dimension[]=
 {//                        total_radius_um  hole_radius_um  center_to_tracks_radius_um  tracks_space_radius_um   track_witdh_um      track_spacing_um            window                  Index type
 	{	"Track view",         50000,          13000,         { 15000, 15000 },           { 35000, 35000 },       { 300, 300 },          { 0, 0 },      { -1,     0,    0,     0 }        , 0},
+	{	"Stream view",        50000,          13000,         { 15000, 15000 },           { 35000, 35000 },       { 300, 300 },          { 0, 0 },      { -1,     0,    0,     0 }        , 0},
 	{	"Dummy disk",         50000,          13000,         { 15000, 15000 },           { 35000, 35000 },       { 300, 300 },          { 0, 0 },      { -1,     0,    0,     0 }        , 0},
 	{	"3\"1/2 135 TPI",     43000,          12000,         { 23946, 22446 },           { 15754, 15754 },       { 115, 115 },          { 187, 187 },  { 19000, -4500, 42500, 4500 }     , 1},
 	{	"5\"1/4 96 TPI",      65000,          14500,         { 35000, 35000 },           { 22224, 22224 },       { 160, 160 },          { 264, 264 },  { 33000, -6500, 60000, 6500 }     , 2},
