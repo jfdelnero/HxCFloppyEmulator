@@ -1529,7 +1529,7 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 {
 	int buffer_offset;
 	int total_tick;
-	int i,j,x,y,tmp;
+	int i,old_i,j,x,y,tmp;
 	int t_ofs1,t_ofs2;
 	int xpos,ypos,bad_timing;
 	int last_index_xpos;
@@ -1538,6 +1538,7 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	uint32_t total_offset,cur_ticks,curcol,contrast;
 	HXCFE_SIDE* side;
 	HXCFE_FLOPPY *fp;
+	int tracksize;
 
 	int bitrate;
 	uint32_t * histo;
@@ -1549,6 +1550,9 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	float xpos_step;
 	float float_xpos;
 	float index_period;
+	float timingoffset,timingoffset2;
+	float timingoffset_offset;
+	HXCFE_SIDE * currentside;
 
 	td->noloop_trackmode = 1;
 
@@ -1560,9 +1564,21 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	x_tick_to_pix = ( (float)1.0 / x_us_per_pixel ) * ( (float)1000000 / (float)TICKFREQ );
 	y_tick_to_pix = ( (float)1.0 / y_us_per_pixel ) * ( (float)1000000 / (float)TICKFREQ );
 
+	if( hxcfe_getEnvVarValue( td->hxcfe, "BMPEXPORT_STREAM_HIGHCONTRAST" ) || (x_us_per_pixel < 200) )
+	{
+		td->flags |= TD_FLAG_HICONTRAST;
+	}
+
+	if( hxcfe_getEnvVarValue( td->hxcfe, "BMPEXPORT_STREAM_BIG_DOTS" ) || (x_us_per_pixel < 16) )
+	{
+		td->flags |= TD_FLAG_BIGDOT;
+	}
+
+	timingoffset_offset = 0;
+
 	tick_to_ps = (float) ( (float)1000000000 / (float)TICKFREQ);
 
-	if(0)//(td->x_start_us)
+	if(td->x_start_us)
 	{
 		total_tick = 0;
 		for (i = 0; i < (int)track_stream->nb_of_pulses; i++)
@@ -1751,13 +1767,37 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 		fp = makefloppyfromtrack(side);
 		if(fp)
 		{
+			old_i = 0;
+			i = 0;
+			timingoffset_offset = 0;
+
+			if( td->x_start_us )
+			{
+				currentside = fp->tracks[0]->sides[0];
+
+				tracksize = currentside->tracklen;
+
+				timingoffset = ( getOffsetTiming(currentside,tracksize,0,0));
+
+				timingoffset2 = ( timingoffset * td->x_start_us ) / (100 * 1000);
+				timingoffset = 0;
+				while((i<tracksize) && timingoffset2>timingoffset)
+				{
+					timingoffset = getOffsetTiming(currentside,i,timingoffset,old_i);
+					old_i = i;
+					i++;
+				};
+
+				timingoffset_offset = timingoffset;
+			}
+
 			//////////////////////////////////////////
 			// Sector drawing
 			for(i=0;i<32;i++)
 			{
 				if(td->enabledtrackmode & (0x00000001<<i) )
 				{
-					display_sectors(td,fp,0,0,0,i);
+					display_sectors(td,fp,0,0,timingoffset_offset,i);
 				}
 			}
 
@@ -1913,16 +1953,6 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_
 	{
 		if(currentside->stream_dump)
 		{
-			if( hxcfe_getEnvVarValue( td->hxcfe, "BMPEXPORT_STREAM_HIGHCONTRAST" ) )
-			{
-				td->flags |= TD_FLAG_HICONTRAST;
-			}
-
-			if( hxcfe_getEnvVarValue( td->hxcfe, "BMPEXPORT_STREAM_BIG_DOTS" ) )
-			{
-				td->flags |= TD_FLAG_BIGDOT;
-			}
-
 			hxcfe_td_draw_trkstream( td, currentside->stream_dump );
 		}
 		else
