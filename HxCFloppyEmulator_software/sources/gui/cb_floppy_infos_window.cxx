@@ -88,6 +88,9 @@ char fullstr[256*1024];
 
 extern bmaptype * hxc2001_2_bmp;
 
+float x_offset_track = 85;
+float x_offset_stream = 0;
+
 static int progress_callback(unsigned int current,unsigned int total,void * td,void * user)
 {
 	s_gui_context * guicontext;
@@ -260,7 +263,6 @@ void update_graph(floppy_infos_window * w)
 					sprintf(tempstr,"Number of side : %d\n",hxcfe_getTrackNumberOfSide(guicontext->hxcfe,guicontext->trackviewerfloppy,track));
 					w->buf->append((char*)tempstr);
 
-
 					sprintf(tempstr,"\nInterface mode:\n%s\n%s\n",
 						hxcfe_getFloppyInterfaceModeName(guicontext->hxcfe,guicontext->interfacemode),
 						hxcfe_getFloppyInterfaceModeDesc(guicontext->hxcfe,guicontext->interfacemode)
@@ -356,9 +358,13 @@ int InfosThreadProc(void* floppycontext,void* context)
 	floppy_infos_window *w;
 	unsigned char *ptr1;
 	unsigned char *ptr2;
+	int view_mode, old_view_mode;
 
 	infoth = (infothread*)context;
 	w = infoth->window;
+
+	old_view_mode = w->view_mode->value();
+	view_mode = old_view_mode;
 
 	do
 	{
@@ -409,15 +415,44 @@ int InfosThreadProc(void* floppycontext,void* context)
 
 			if(guicontext->trackviewerfloppy)
 			{
-				switch(w->view_mode->value())
+				view_mode = w->view_mode->value();
+
+				if(old_view_mode != view_mode)
+				{
+					if(old_view_mode == 0)
+					{
+						x_offset_track = w->x_offset->value();
+					}
+
+					if(old_view_mode == 1)
+					{
+						x_offset_stream = w->x_offset->value();
+					}
+				}
+
+				switch(view_mode)
 				{
 					case 0:
 						hxcfe_td_select_view_type( td, w->view_mode->value());
 						hxcfe_td_draw_track(td,guicontext->trackviewerfloppy,(int)w->track_number_slide->value(),(int)w->side_number_slide->value());
+
+						if(old_view_mode != view_mode)
+						{
+							w->x_offset->value(x_offset_track);
+
+							guicontext->updatefloppyinfos = 1;
+						}
 					break;
 					case 1:
 						hxcfe_td_select_view_type( td, w->view_mode->value());
 						hxcfe_td_draw_stream_track(td,guicontext->trackviewerfloppy,(int)w->track_number_slide->value(),(int)w->side_number_slide->value());
+
+						if(old_view_mode != view_mode)
+						{
+							w->x_offset->value(x_offset_stream);
+
+							guicontext->updatefloppyinfos = 1;
+						}
 					break;
 					default:
 						hxcfe_td_select_view_type( td, w->view_mode->value());
@@ -425,6 +460,8 @@ int InfosThreadProc(void* floppycontext,void* context)
 						hxcfe_td_draw_disk(td,guicontext->trackviewerfloppy);
 					break;
 				}
+
+				old_view_mode = view_mode;
 			}
 
 			if(guicontext->loadedfloppy)
