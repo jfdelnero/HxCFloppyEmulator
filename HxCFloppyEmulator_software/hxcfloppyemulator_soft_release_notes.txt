@@ -15,7 +15,7 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
-X XXXXXXX 2020 : HxCFloppyEmulator 2.5.1.1 (Beta version - Work in Progress)
+X XXXXXXX 2020 : HxCFloppyEmulator 2.5.1.2 (Beta version - Work in Progress)
 
 (Download : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip)
 
