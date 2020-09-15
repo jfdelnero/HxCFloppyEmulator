@@ -148,8 +148,7 @@ void printhelp(char* argv[])
 
 void printlibmodule(HXCFE* hxcfe)
 {
-
-	int i,j;
+	int i;
 	int numberofloader;
 	const char* ptr;
 	HXCFE_IMGLDR * imgldr_ctx;
@@ -174,7 +173,7 @@ void printlibmodule(HXCFE* hxcfe)
 			ptr = hxcfe_imgGetLoaderDesc(imgldr_ctx,i);
 			printf("%s;",ptr);
 
-			//for(j=0;j<(int)(38-strlen(ptr));j++) printf(" ");
+			//for(int j=0;j<(int)(38-strlen(ptr));j++) printf(" ");
 			printf("*.%s;\n",hxcfe_imgGetLoaderExt(imgldr_ctx,i));
 			i++;
 		}
