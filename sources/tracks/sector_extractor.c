@@ -629,10 +629,13 @@ int32_t hxcfe_readSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t
 	nbsectorread=0;
 
 	if(fdcstatus)
-		*fdcstatus = FDC_NOERROR;
+		*fdcstatus = FDC_ACCESS_ERROR;
 
 	if ( side < ss_ctx->fp->floppyNumberOfSide && track < ss_ctx->fp->floppyNumberOfTrack )
 	{
+		if(fdcstatus)
+			*fdcstatus = FDC_NOERROR;
+
 		do
 		{
 			sc = hxcfe_searchSector ( ss_ctx, track, side, sector + nbsectorread, type);
@@ -643,6 +646,11 @@ int32_t hxcfe_readSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t
 					if(sc->input_data)
 					{
 						memcpy(&buffer[sectorsize*(sc->sector-sector)],sc->input_data,sectorsize);
+					}
+					else
+					{
+						if(fdcstatus)
+							*fdcstatus = FDC_NO_DATA;
 					}
 
 					if(sc->use_alternate_data_crc)
@@ -685,10 +693,13 @@ int32_t hxcfe_writeSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_
 	nbsectorwrite=0;
 
 	if(fdcstatus)
-		*fdcstatus = FDC_NOERROR;
+		*fdcstatus = FDC_ACCESS_ERROR;
 
 	if ( side < ss_ctx->fp->floppyNumberOfSide && track < ss_ctx->fp->floppyNumberOfTrack )
 	{
+		if(fdcstatus)
+			*fdcstatus = FDC_NOERROR;
+
 		do
 		{
 			sc = hxcfe_searchSector ( ss_ctx, track, side, sector + nbsectorwrite, type);
@@ -737,7 +748,6 @@ int32_t hxcfe_writeSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_
 	}
 
 	return nbsectorwrite;
-
 }
 
 void hxcfe_freeSectorConfigData( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SECTCFG* sc )
