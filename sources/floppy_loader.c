@@ -800,6 +800,134 @@ int32_t hxcfe_imgExport( HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * newfloppy, ch
 	return HXCFE_BADPARAMETER;
 }
 
+int32_t hxcfe_imgFormatGuidedExport( HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * ref_floppy, HXCFE_FLOPPY * floppy_to_export, char* imgname, int32_t moduleID )
+{
+	int ret,i,j,l,len;
+	int32_t fdcstatus;
+	plugins_ptr func_ptr;
+	image_plugin* plugin_ptr;
+	HXCFE_SECTORACCESS* ref_sect_access;
+	HXCFE_SECTORACCESS* src_sect_access;
+	HXCFE_SECTORACCESS* new_sect_access;
+	HXCFE_FLOPPY * new_floppy;
+	HXCFE_SECTCFG* sect_ref;
+	unsigned char * sect_buf;
+	int type;
+
+	type = ISOIBM_MFM_ENCODING;
+
+	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
+	char tag_string[64+1];
+
+	if(hxcfe_checkLoaderID(imgldr_ctx,moduleID)==HXCFE_NOERROR)
+	{
+		ref_sect_access = hxcfe_initSectorAccess( imgldr_ctx->hxcfe, ref_floppy );
+		if(!ref_sect_access)
+			return HXCFE_BADPARAMETER;
+
+		new_floppy = hxcfe_floppyDuplicate( imgldr_ctx->hxcfe, ref_floppy );
+		if(!new_floppy)
+			return HXCFE_BADPARAMETER;
+
+		new_sect_access = hxcfe_initSectorAccess( imgldr_ctx->hxcfe, new_floppy );
+		if(!new_sect_access)
+			return HXCFE_BADPARAMETER;
+
+		src_sect_access = hxcfe_initSectorAccess( imgldr_ctx->hxcfe, floppy_to_export );
+		if(!src_sect_access)
+			return HXCFE_BADPARAMETER;
+
+		for(i=0;i<ref_floppy->floppyNumberOfTrack;i++)
+		{
+			for(j=0;j<ref_floppy->floppyNumberOfSide;j++)
+			{
+				hxcfe_resetSearchTrackPosition(ref_sect_access);
+				do
+				{
+					sect_ref = hxcfe_getNextSector( ref_sect_access, i, j, type);
+					if(sect_ref)
+					{
+						hxcfe_readSectorData( src_sect_access, i, j, sect_ref->sector, 1, sect_ref->sectorsize, type, sect_ref->input_data, &fdcstatus );
+
+						sect_buf = NULL;
+						if(fdcstatus != FDC_NOERROR)
+						{
+							switch(fdcstatus)
+							{
+								case FDC_BAD_DATA_CRC:
+									snprintf(tag_string,sizeof(tag_string)-1,"<ERROR DATA_CRC T:%.3d H:%c S:%.3d>",i,'0'+(j&1),sect_ref->sector);
+								break;
+								case FDC_NO_DATA:
+									snprintf(tag_string,sizeof(tag_string)-1,"<ERROR NO_DATA  T:%.3d H:%c S:%.3d>",i,'0'+(j&1),sect_ref->sector);
+								break;
+								case FDC_SECTOR_NOT_FOUND:
+									snprintf(tag_string,sizeof(tag_string)-1,"<ERROR NOTFOUND T:%.3d H:%c S:%.3d>",i,'0'+(j&1),sect_ref->sector);
+								break;
+								case FDC_ACCESS_ERROR:
+									snprintf(tag_string,sizeof(tag_string)-1,"<ERROR ACCESS   T:%.3d H:%c S:%.3d>",i,'0'+(j&1),sect_ref->sector);
+								break;
+							}
+
+							imgldr_ctx->hxcfe->hxc_printf(MSG_WARNING,"Source file sector error : %s", tag_string );
+
+							if(sect_ref->sectorsize > 0)
+							{
+								sect_buf = malloc(sect_ref->sectorsize + 1);
+								if(sect_buf)
+								{
+									memset(sect_buf,0,sect_ref->sectorsize + 1);
+									len = strlen(tag_string);
+									if(len)
+									{
+										for(l=0;l<sect_ref->sectorsize / len;l++)
+										{
+											strcat((char*)sect_buf,tag_string);
+										}
+									}
+								}
+							}
+						}
+
+						if(sect_buf)
+						{
+							hxcfe_writeSectorData( new_sect_access, i, j, sect_ref->sector, 1, sect_ref->sectorsize, type, sect_buf, &fdcstatus );
+							free(sect_buf);
+						}
+						else
+						{
+							hxcfe_writeSectorData( new_sect_access, i, j, sect_ref->sector, 1, sect_ref->sectorsize, type, sect_ref->input_data, &fdcstatus );
+						}
+
+						hxcfe_freeSectorConfigData( 0, sect_ref );
+					}
+				}while(sect_ref);
+			}
+		}
+
+		hxcfe_deinitSectorAccess( ref_sect_access );
+		hxcfe_deinitSectorAccess( new_sect_access );
+		hxcfe_deinitSectorAccess( src_sect_access );
+
+		ret=plugin_ptr[moduleID].infos_handler(imgldr_ctx->hxcfe,GETFUNCPTR,&func_ptr);
+		if(ret==HXCFE_NOERROR)
+		{
+			if(func_ptr.libWrite_DiskFile)
+			{
+				ret=func_ptr.libWrite_DiskFile(imgldr_ctx,new_floppy,imgname,0);
+				return ret;
+			}
+			else
+			{
+				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"No export support in %s!",hxcfe_imgGetLoaderName(imgldr_ctx,moduleID) );
+				return HXCFE_UNSUPPORTEDFILE;
+			}
+		}
+	}
+
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Bad plugin ID : 0x%x",moduleID);
+	return HXCFE_BADPARAMETER;
+}
+
 int32_t hxcfe_floppyUnload( HXCFE* floppycontext, HXCFE_FLOPPY * floppydisk )
 {
 	int i,j;

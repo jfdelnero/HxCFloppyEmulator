@@ -117,6 +117,7 @@ EXPORTS
    hxcfe_imgGetLoaderDesc		@171
    hxcfe_imgGetLoaderName		@172
    hxcfe_imgGetLoaderExt		@173
+   hxcfe_imgFormatGuidedExport  @174
 
    hxcfe_initXmlFloppy			@200
    hxcfe_numberOfXmlLayout		@201
