@@ -256,3 +256,14 @@ set USB_HXCFLOPPYEMULATOR_DEFAULT_PACKET_SIZE 1664
 #
 
 set PAULINE_DEFAULT_IP_ADDRESS "192.168.20.7"
+
+#
+# hxcfe_floppySectorBySectorCopy behavior setting in
+# case of source image read error during the sectors copy.
+#
+# >=0 : Clear the destination sector with the SECTORBYSECTORCOPY_SECTOR_ERROR_TAG value
+#  -1 : Write the destination sector with the error informations
+#  -2 : Don't write/change the destination sector.
+#
+
+set SECTORBYSECTORCOPY_SECTOR_ERROR_TAG -1
