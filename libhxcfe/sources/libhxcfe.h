@@ -191,6 +191,7 @@ HXCFE_FLOPPY *         hxcfe_imgLoad(HXCFE_IMGLDR * imgldr_ctx, char* imgname, i
 HXCFE_FLOPPY *         hxcfe_imgLoadEx( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_t moduleID, int32_t * err_ret, void * parameters );
 int32_t                hxcfe_imgUnload( HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * floppydisk );
 int32_t                hxcfe_imgExport( HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * newfloppy, char* imgname, int32_t moduleID );
+int32_t                hxcfe_imgFormatGuidedExport( HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * ref_floppy, HXCFE_FLOPPY * floppy_to_export, char* imgname, int32_t moduleID );
 int32_t                hxcfe_imgSetProgressCallback( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDRPROGRESSOUT_FUNC progress_func, void * userdata );
 
 void                   hxcfe_imgDeInitLoader( HXCFE_IMGLDR * imgldr_ctx );
@@ -352,6 +353,7 @@ void                   hxcfe_deinitSectorAccess( HXCFE_SECTORACCESS* ss_ctx );
 #define FDC_BAD_DATA_CRC                 0x01
 #define FDC_NO_DATA                      0x02
 #define FDC_SECTOR_NOT_FOUND             0x03
+#define FDC_ACCESS_ERROR                 0x04
 
 HXCFE_FDCCTRL *    hxcfe_initFDC ( HXCFE* floppycontext );
 
