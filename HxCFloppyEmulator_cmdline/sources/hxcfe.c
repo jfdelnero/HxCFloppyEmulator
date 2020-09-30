@@ -364,7 +364,10 @@ int sectorbysectorfilecopy(HXCFE* hxcfe,char * infile,char * reffile,char * outf
 				if(loaderid>=0)
 				{
 					hxcfe_floppySetInterfaceMode(hxcfe,floppydisk,ifmode);
-					hxcfe_imgFormatGuidedExport(imgldr_ctx,refdisk,floppydisk,outfile,loaderid);
+
+					hxcfe_floppySectorBySectorCopy( hxcfe, refdisk, floppydisk, 0 );
+
+					hxcfe_imgExport(imgldr_ctx,refdisk,outfile,loaderid);
 				}
 				else
 				{
