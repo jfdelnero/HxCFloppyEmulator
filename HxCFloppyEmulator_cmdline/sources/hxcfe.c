@@ -133,6 +133,7 @@ void printhelp(char* argv[])
 	printf("  -finput:[filename]\t\t: Input file image \n");
 	printf("  -foutput:[filename]\t\t: Output file image \n");
 	printf("  -conv:[FORMAT] \t\t: Convert the input file\n");
+	printf("  -reffile:[filename] \t\t: Sector to sector copy mode. To be used with -conv : specify the format reference image\n");
 	printf("  -uselayout:[DISKLAYOUT]\t: Use the Layout [DISKLAYOUT]\n");
 	printf("  -usb:[DRIVE] \t\t\t: start the usb floppy emulator\n");
 	printf("  -infos\t\t\t: Print informations about the input file\n");
@@ -305,6 +306,73 @@ int convertfile(HXCFE* hxcfe,char * infile,char * outfile,char * outformat,int i
 				}
 
 				hxcfe_imgUnload(imgldr_ctx,floppydisk);
+			}
+		}
+
+		hxcfe_imgDeInitLoader(imgldr_ctx);
+	}
+
+	return 0;
+}
+
+int sectorbysectorfilecopy(HXCFE* hxcfe,char * infile,char * reffile,char * outfile,char * outformat,int ifmode)
+{
+	int loaderid,refloaderid;
+	int ret,ret_ref;
+	HXCFE_FLOPPY * floppydisk;
+	HXCFE_FLOPPY * refdisk;
+	HXCFE_IMGLDR * imgldr_ctx;
+
+	imgldr_ctx = hxcfe_imgInitLoader(hxcfe);
+	if(imgldr_ctx)
+	{
+		loaderid = hxcfe_imgAutoSetectLoader(imgldr_ctx,infile,0);
+
+		refloaderid = hxcfe_imgAutoSetectLoader(imgldr_ctx,reffile,0);
+
+		if(loaderid>=0 && refloaderid>=0)
+		{
+			floppydisk = hxcfe_imgLoad(imgldr_ctx,infile,loaderid,&ret);
+			refdisk = hxcfe_imgLoad(imgldr_ctx,reffile,refloaderid,&ret_ref);
+
+			if(ret!=HXCFE_NOERROR || ret_ref!=HXCFE_NOERROR || !floppydisk || !refdisk)
+			{
+				switch(ret)
+				{
+					case HXCFE_UNSUPPORTEDFILE:
+						printf("Load error!: Image file not yet supported!\n");
+					break;
+					case HXCFE_FILECORRUPTED:
+						printf("Load error!: File corrupted ? Read error ?\n");
+					break;
+					case HXCFE_ACCESSERROR:
+						printf("Load error!:  Read file error!\n");
+					break;
+					default:
+						printf("Load error! error %d\n",ret);
+					break;
+				}
+			}
+			else
+			{
+				if(ifmode<0)
+				{
+					ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
+				}
+
+				loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,outformat);
+				if(loaderid>=0)
+				{
+					hxcfe_floppySetInterfaceMode(hxcfe,floppydisk,ifmode);
+					hxcfe_imgFormatGuidedExport(imgldr_ctx,refdisk,floppydisk,outfile,loaderid);
+				}
+				else
+				{
+					printf("Cannot Find the Loader %s ! Please use the -modulelist option to see possible values.\n",outformat);
+				}
+
+				hxcfe_imgUnload(imgldr_ctx,floppydisk);
+				hxcfe_imgUnload(imgldr_ctx,refdisk);
 			}
 		}
 
@@ -970,6 +1038,7 @@ int main(int argc, char* argv[])
 	char filename[512];
 	char filetoget[512];
 	char ofilename[512];
+	char reffile[512];
 	char outputformat[512];
 	char layoutformat[128];
 	char temp[512];
@@ -1014,7 +1083,7 @@ int main(int argc, char* argv[])
 	}
 
 	memset(filename,0,sizeof(filename));
-	// Script execution option	
+	// Script execution option
 	if(isOption(argc,argv,"script",(char*)&filename)>0)
 	{
 		if( strlen(filename) )
@@ -1102,7 +1171,14 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			convertfile(hxcfe,filename,ofilename,outputformat,interfacemode);
+			if(isOption(argc,argv,"reffile",(char*)&reffile)>0)
+			{
+				sectorbysectorfilecopy(hxcfe,filename,reffile,ofilename,outputformat,interfacemode);
+			}
+			else
+			{
+				convertfile(hxcfe,filename,ofilename,outputformat,interfacemode);
+			}
 		}
 	}
 
