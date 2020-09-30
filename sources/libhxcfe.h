@@ -191,7 +191,6 @@ HXCFE_FLOPPY *         hxcfe_imgLoad(HXCFE_IMGLDR * imgldr_ctx, char* imgname, i
 HXCFE_FLOPPY *         hxcfe_imgLoadEx( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_t moduleID, int32_t * err_ret, void * parameters );
 int32_t                hxcfe_imgUnload( HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * floppydisk );
 int32_t                hxcfe_imgExport( HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * newfloppy, char* imgname, int32_t moduleID );
-int32_t                hxcfe_imgFormatGuidedExport( HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * ref_floppy, HXCFE_FLOPPY * floppy_to_export, char* imgname, int32_t moduleID );
 int32_t                hxcfe_imgSetProgressCallback( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDRPROGRESSOUT_FUNC progress_func, void * userdata );
 
 void                   hxcfe_imgDeInitLoader( HXCFE_IMGLDR * imgldr_ctx );
@@ -201,6 +200,7 @@ int32_t                hxcfe_getNumberOfSide( HXCFE* floppycontext, HXCFE_FLOPPY
 
 int32_t                hxcfe_floppyUnload( HXCFE* floppycontext, HXCFE_FLOPPY * floppydisk );
 HXCFE_FLOPPY *         hxcfe_floppyDuplicate( HXCFE* floppycontext, HXCFE_FLOPPY * floppydisk );
+int32_t                hxcfe_floppySectorBySectorCopy( HXCFE* floppycontext, HXCFE_FLOPPY * dest_floppy, HXCFE_FLOPPY * src_floppy, int dest_format_ref );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Custom Image/floppy generation functions                                                       //
