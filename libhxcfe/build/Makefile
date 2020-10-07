@@ -94,7 +94,7 @@ DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_w
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
 					kryofluxstream_writer.o adf_writer.o bmp_writer.o bmp_disk_writer.o bmp_file.o xml_writer.o trd_writer.o stx_writer.o st_writer.o \
 					stw_writer.o dim_writer.o adz_writer.o ipf_writer.o fd_writer.o northstar_loader.o northstar_writer.o heathkit_writer.o vdk_writer.o \
-					xml_db_writer.o streamhfe_writer.o qd_writer.o hxcstream_writer.o
+					xml_db_writer.o streamhfe_writer.o qd_writer.o hxcstream_writer.o oricdsk_writer.o
 
 TRACK_FORMATS_SUPPORT = luts.o track_types_defs.o aed6200p_track.o amiga_mfm_track.o apple2_gcr_track.o arburg_track.o emu_emulator_fm_track.o c64_gcr_track.o \
 						heathkit_fm_track.o iso_ibm_fm_track.o iso_ibm_mfm_track.o membrain_mfm_track.o northstar_mfm_track.o tycom_fm_track.o dec_rx02_track.o \
@@ -542,6 +542,9 @@ fat12.o : $(BASEDIR)/loaders/fat12floppy_loader/fat12.c $(BASEDIR)/loaders/fat12
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 oricdsk_loader.o : $(BASEDIR)/loaders/oricdsk_loader/oricdsk_loader.c $(BASEDIR)/loaders/oricdsk_loader/oricdsk_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+oricdsk_writer.o : $(BASEDIR)/loaders/oricdsk_loader/oricdsk_writer.c $(BASEDIR)/loaders/oricdsk_loader/oricdsk_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 afi_loader.o : $(BASEDIR)/loaders/afi_loader/afi_loader.c $(BASEDIR)/loaders/afi_loader/afi_loader.h
