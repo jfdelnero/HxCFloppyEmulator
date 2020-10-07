@@ -119,6 +119,7 @@ ff_type ff_type_list[]=
 	{ FF_STW, "STW - ATARI ST STW file format",PLUGIN_ATARIST_STW,".stw"},
 	{ FF_FD, "FD - Thomson file image format",PLUGIN_THOMSON_FD,".fd"},
 	{ FF_AMSTRADDSK, "DSK - Amstrad CPC DSK file format",PLUGIN_AMSTRADCPC_DSK,".dsk"},
+	{ FF_ORICDSK, "DSK - Oric DSK file format",PLUGIN_ORIC_DSK,".dsk"},
 	{ FF_HDDDA2_HFE,"HFE - HDDD A2 Support",PLUGIN_HXC_HDDD_A2,".hfe"},
 	{ FF_EHFE,"HFE - Rev 2 - Experimental",PLUGIN_HXC_EXTHFE,".hfe"},
 	{ FF_HFEV3,"HFE - Rev 3 - Experimental",PLUGIN_HXC_HFEV3,".hfe"},

@@ -159,6 +159,7 @@ Fl_Menu_Item format_choices[]=
 	{ "STW - STW file format",0,format_choice_cb,(void*)PLUGIN_ATARIST_STW},
 	{ "FD - Thomson FD file format",0,format_choice_cb,(void*)PLUGIN_THOMSON_FD},
 	{ "DSK - Amstrad CPC DSK file format",0,format_choice_cb,(void*)PLUGIN_AMSTRADCPC_DSK},
+	{ "DSK - Oric DSK file format",0,format_choice_cb,(void*)PLUGIN_ORIC_DSK},
 	{ "HFE - SD HxC Floppy Emulator (HDDD A2 Support)",0,format_choice_cb,(void*)PLUGIN_HXC_HDDD_A2},
 	{ "HFE - Rev 2 - Experimental",0,format_choice_cb,(void*)PLUGIN_HXC_EXTHFE},
 	{ "HFE - Rev 3 - Experimental",0,format_choice_cb,(void*)PLUGIN_HXC_HFEV3},
