@@ -126,6 +126,7 @@ const char * plugid_lst[]=
 	PLUGIN_HXC_AFI,
 	PLUGIN_RAW_LOADER,
 	PLUGIN_AMSTRADCPC_DSK,
+	PLUGIN_ORIC_DSK,
 	PLUGIN_IMD_IMG,
 	PLUGIN_AMIGA_ADF,
 	PLUGIN_AMIGA_ADZ,
@@ -486,6 +487,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"AFI file (Advanced File image format)\t*.afi\n"
 					"IMG file (RAW Sector file format)\t*.img\n"
 					"CPC DSK file\t*.dsk\n"
+					"Oric DSK file\t*.dsk\n"
 					"IMD file\t*.imd\n"
 					"ADF file\t*.adf\n"
 					"ADZ file\t*.adz\n"
