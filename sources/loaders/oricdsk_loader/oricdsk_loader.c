@@ -414,6 +414,8 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 	return HXCFE_BADFILE;
 }
 
+int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
+
 int OricDSK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
@@ -425,7 +427,7 @@ int OricDSK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * 
 	{
 		(ISVALIDDISKFILE)	OricDSK_libIsValidDiskFile,
 		(LOADDISKFILE)		OricDSK_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
+		(WRITEDISKFILE)		OricDSK_libWrite_DiskFile,
 		(GETPLUGININFOS)	OricDSK_libGetPluginInfo
 	};
 
