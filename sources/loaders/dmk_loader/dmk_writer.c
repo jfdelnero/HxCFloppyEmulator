@@ -45,11 +45,6 @@
 
 #include "libhxcadaptor.h"
 
-static int gettrackbit(unsigned char * input_data,int bit_offset)
-{
-	return ((input_data[bit_offset>>3]>>(0x7-(bit_offset&0x7))))&0x01;
-}
-
 void setdmktrackbit(unsigned char * input_data,int bit_offset,int state)
 {
 	if(state)

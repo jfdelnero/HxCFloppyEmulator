@@ -58,6 +58,7 @@
 
 #include "floppy_loader.h"
 #include "floppy_utils.h"
+#include "tracks/trackutils.h"
 
 #include "fluxStreamAnalyzer.h"
 
@@ -385,11 +386,6 @@ static void quickSort(s_match * table, int start, int end)
 }
 
 //#define USE_PLL_BITRATE 1
-
-int gettrackbit(unsigned char * input_data,int bit_offset)
-{
-	return ((input_data[bit_offset>>3]>>(0x7-(bit_offset&0x7))))&0x01;
-}
 
 HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initialvalue,HXCFE_TRKSTREAM * track,pulses_link * pl,uint32_t start_index, short rpm,int phasecorrection)
 {
