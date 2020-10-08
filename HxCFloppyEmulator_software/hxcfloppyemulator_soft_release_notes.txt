@@ -15,7 +15,7 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
-X XXXXXXX 2020 : HxCFloppyEmulator 2.5.1.2 (Beta version - Work in Progress)
+X XXXXXXX 2020 : HxCFloppyEmulator 2.5.2.1 (Beta version - Work in Progress)
 
 (Download : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip)
 
@@ -25,6 +25,8 @@ X XXXXXXX 2020 : HxCFloppyEmulator 2.5.1.2 (Beta version - Work in Progress)
 -> macOS : CAPSlib loader added (IPF, CTRAW...). (Windows/Linux/macOS CAPSlib loaders code merged)
 
 -> New Loader/Writer : HxC Quickdisk images.
+
+-> New Writer : Oric DSK images ("MFM_DISK" format).
 
 -> XML loader : Add new properties and fix long track to support Quickdisk and Hardsectored disks.
                 New proprerties (micro-seconds time length/position parameters) :
