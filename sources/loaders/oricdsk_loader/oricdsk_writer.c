@@ -41,36 +41,38 @@
 #include "libhxcadaptor.h"
 
 #include "floppy_utils.h"
+#include "tracks/trackutils.h"
 
 #include "version.h"
 
+void setoricdsktrackbit(unsigned char * input_data,int bit_offset,int state)
+{
+	if(state)
+	{
+		input_data[bit_offset>>3] = input_data[bit_offset>>3] |  (0x80 >> ( bit_offset&0x7 ) );
+	}
+	else
+	{
+		input_data[bit_offset>>3] = input_data[bit_offset>>3] & ~(0x80 >> ( bit_offset&0x7 ) );
+	}
+
+	return;
+}
+
+#define ORICDSK_TRACK_SIZE 6400
+
 int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-	int32_t i,j,k,l,m,nbsector;
+	int32_t i,j,k;
 	FILE * oricdskfile;
-	char * log_str;
 	char   tmp_str[256];
-	char   disk_info_block[256];
-	char rec_mode;
-	int32_t sectorsize;
-	int32_t tracksize;
-	int32_t track_cnt,weak_sector;
-	int32_t sectorlistoffset,trackinfooffset;
-	int flag_limit_sector_size;
-	int flag_discard_unformatted_2side;
 	oricdsk_fileheader  * header;
-	unsigned char oric_disk_track[6400];
 
 	int32_t nbsector_mfm,nbsector_fm;
 
-	int32_t tabindex;
-	int32_t bit_offset;
-
 	unsigned char * track_buf = NULL;
 	unsigned char * tmp_fm_track_buf = NULL;
-	unsigned short tab_ptr_value;
 	int32_t databitoffset;
-	unsigned char mfm_buffer[16];
 	int32_t track_size;
 
 	HXCFE_SECTORACCESS* ss = NULL;
@@ -80,7 +82,6 @@ int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,cha
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write Oric DSK file %s...",filename);
 
-	log_str=0;
 	oricdskfile = hxc_fopen(filename,"wb");
 	if( oricdskfile )
 	{
@@ -96,7 +97,7 @@ int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,cha
 
 		fwrite((char*)&tmp_str,sizeof(tmp_str),1,oricdskfile);
 
-		track_buf = malloc(6400);
+		track_buf = malloc(ORICDSK_TRACK_SIZE);
 		if(!track_buf)
 		{
 			hxc_fclose(oricdskfile);
@@ -104,7 +105,7 @@ int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,cha
 			return HXCFE_INTERNALERROR;
 		}
 
-		memset(track_buf,0,6400);
+		memset(track_buf,0,ORICDSK_TRACK_SIZE);
 
 		ss=hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 		if(ss)
@@ -115,7 +116,7 @@ int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,cha
 				{
 					track_size = 6250;
 
-					memset(track_buf,0x00,6400);
+					memset(track_buf,0x00,ORICDSK_TRACK_SIZE);
 
 					hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppy->floppyNumberOfTrack*2);
 
@@ -147,7 +148,6 @@ int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,cha
 							free(sca_mfm);
 
 						sca_mfm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector_mfm);
-
 					}
 
 					sca_fm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector_fm);
@@ -186,37 +186,13 @@ int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,cha
 						{
 							if(gettrackbit(floppy->tracks[j]->sides[i]->databuffer,k+databitoffset))
 							{
-								setdmktrackbit(track_buf,k/2,0xFF);
+								setoricdsktrackbit(track_buf,k/2,0xFF);
 							}
 							else
 							{
-								setdmktrackbit(track_buf,k/2,0x00);
+								setoricdsktrackbit(track_buf,k/2,0x00);
 							}
 						}
-
-						mfm_buffer[0]=0x44;
-						mfm_buffer[1]=0x89;
-						mfm_buffer[2]=0x44;
-						mfm_buffer[3]=0x89;
-						mfm_buffer[4]=0x44;
-						mfm_buffer[5]=0x89;
-						mfm_buffer[6]=0x55;
-						mfm_buffer[7]=0x54;
-						bit_offset = -1;
-						tabindex = 0;
-						do
-						{
-							bit_offset=searchBitStream(floppy->tracks[j]->sides[i]->databuffer,floppy->tracks[j]->sides[i]->tracklen,-1,mfm_buffer,8*8,bit_offset+1);
-							if(bit_offset!=-1)
-							{
-								if(tabindex<0x40)
-								{
-									tab_ptr_value = (( (bit_offset + (3*8*2)) / 16 ) + 0x80) & 0x7FFF;
-									tabindex++;
-								}
-							}
-
-						}while(bit_offset!=-1);
 
 						k=0;
 						do
@@ -242,33 +218,13 @@ int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,cha
 							{
 								if(gettrackbit(floppy->tracks[j]->sides[i]->databuffer,k+databitoffset))
 								{
-									setdmktrackbit(tmp_fm_track_buf,k/4,0xFF);
+									setoricdsktrackbit(tmp_fm_track_buf,k/4,0xFF);
 								}
 								else
 								{
-									setdmktrackbit(tmp_fm_track_buf,k/4,0x00);
+									setoricdsktrackbit(tmp_fm_track_buf,k/4,0x00);
 								}
 							}
-
-							mfm_buffer[0]=0x55;
-							mfm_buffer[1]=0x11;
-							mfm_buffer[2]=0x15;
-							mfm_buffer[3]=0x54;
-							bit_offset = -1;
-							tabindex = 0;
-							do
-							{
-								bit_offset=searchBitStream(floppy->tracks[j]->sides[i]->databuffer,floppy->tracks[j]->sides[i]->tracklen,-1,mfm_buffer,4*8,bit_offset+1);
-								if(bit_offset!=-1)
-								{
-									if(tabindex<0x40)
-									{
-										tab_ptr_value = (( (bit_offset) / 16 ) + 0x80) & 0x7FFF;
-
-										tabindex++;
-									}
-								}
-							}while(bit_offset!=-1);
 
 							for(k=0;k<track_size;k=k+2)
 							{
