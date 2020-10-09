@@ -79,7 +79,6 @@ int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,cha
 	HXCFE_SECTCFG** sca_mfm = NULL;
 	HXCFE_SECTCFG** sca_fm = NULL;
 
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write Oric DSK file %s...",filename);
 
 	oricdskfile = hxc_fopen(filename,"wb");
@@ -93,7 +92,7 @@ int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,cha
 
 		header->number_of_side = floppy->floppyNumberOfSide;
 		header->number_of_tracks = floppy->floppyNumberOfTrack;
-		header->number_of_sectors_geometrie = 0;
+		header->number_of_sectors_geometrie = 1;
 
 		fwrite((char*)&tmp_str,sizeof(tmp_str),1,oricdskfile);
 
@@ -105,22 +104,18 @@ int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,cha
 			return HXCFE_INTERNALERROR;
 		}
 
-		memset(track_buf,0,ORICDSK_TRACK_SIZE);
-
 		ss=hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 		if(ss)
 		{
-			for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
+			for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
 			{
-				for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
+				for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
 				{
 					track_size = 6250;
 
-					memset(track_buf,0x00,ORICDSK_TRACK_SIZE);
+					memset(track_buf,0x4E,ORICDSK_TRACK_SIZE);
 
 					hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppy->floppyNumberOfTrack*2);
-
-					memset(track_buf,0xAA,track_size);
 
 					nbsector_mfm = 0;
 					nbsector_fm = 0;
@@ -246,7 +241,7 @@ int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,cha
 							free(sca_fm);
 					}
 
-					fwrite(track_buf,track_size,1,oricdskfile);
+					fwrite(track_buf,ORICDSK_TRACK_SIZE,1,oricdskfile);
 				}
 			}
 
