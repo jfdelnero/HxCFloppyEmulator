@@ -87,9 +87,6 @@ int OricDSK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFO
 	}
 }
 
-
-
-
 #pragma pack(1)
 typedef struct mfmformatsect_
 {
@@ -122,7 +119,6 @@ int issector(mfmformatsect * sector)
 
 		i++;
 	}while(i<3);
-
 
 	i=0;
 	do
@@ -158,6 +154,9 @@ HXCFE_SECTCFG * extractsector(HXCFE* floppycontext,unsigned char *data,unsigned 
 	mfmformatsect * testsector;
 
 	tabsector=(HXCFE_SECTCFG *)malloc(sizeof(HXCFE_SECTCFG)*32);
+	if(!tabsector)
+		return NULL;
+
 	memset(tabsector,0,sizeof(HXCFE_SECTCFG)*32);
 
 	i=0;
@@ -213,6 +212,109 @@ HXCFE_SECTCFG * extractsector(HXCFE* floppycontext,unsigned char *data,unsigned 
 	return tabsector;
 }
 
+HXCFE_SIDE* ORICDSKpatchtrack(HXCFE* floppycontext,unsigned char * trackdata,unsigned int tracklen)
+{
+	int i,c2_cnt,a1_cnt;
+	unsigned int lastdensity,tracksize,k;
+	unsigned char trackformat;
+	unsigned int  final_tracklen;
+
+	HXCFE_SIDE* currentside;
+	unsigned char * trackclk;
+
+	track_generator tg;
+
+	trackformat=ISOFORMAT_DD;
+
+	trackclk = malloc(tracklen);
+	if(!trackclk)
+		return NULL;
+
+	memset(trackclk,0xFF,tracklen);
+
+	k=0;
+
+	a1_cnt = 0;
+	c2_cnt = 0;
+
+	i = 0;
+	while( i < tracklen)
+	{
+		if(trackdata[i] == 0xC2)
+		{
+			a1_cnt = 0;
+			c2_cnt++;
+		}else
+		{
+			if(trackdata[i] == 0xA1)
+			{
+				c2_cnt = 0;
+				a1_cnt++;
+			}
+			else
+			{
+				if(a1_cnt == 3)
+				{
+					switch(trackdata[i])
+					{
+						case 0xF8:
+						case 0xF9:
+						case 0xFA:
+						case 0xFB:
+						case 0xFE:
+							trackclk[i-1] = 0x0A;
+							trackclk[i-2] = 0x0A;
+							trackclk[i-3] = 0x0A;
+						break;
+					}
+				}
+
+				if(c2_cnt == 3)
+				{
+					switch(trackdata[i])
+					{
+						case 0xFC:
+							trackclk[i-1] = 0x0A;
+							trackclk[i-2] = 0x0A;
+							trackclk[i-3] = 0x0A;
+						break;
+					}
+				}
+
+				a1_cnt = 0;
+				c2_cnt = 0;
+			}
+		}
+
+		i++;
+	}
+
+	final_tracklen = tracklen * 2;
+	lastdensity=ISOFORMAT_DD;
+
+	// alloc the track...
+	tg_initTrackEncoder(&tg);
+
+	tracksize=final_tracklen*8;
+	if(tracksize&0x1F)
+		tracksize=(tracksize&(~0x1F))+0x20;
+
+	currentside=tg_initTrack(&tg,tracksize,0,trackformat,DEFAULT_DD_BITRATE,0,0);
+
+	k=0;
+	do
+	{
+		pushTrackCode(&tg,trackdata[k],trackclk[k],currentside,lastdensity);
+		k++;
+	}while(k<tracklen);
+
+	tg_completeTrack(&tg,currentside,trackformat);
+
+	free(trackclk);
+
+	return currentside;
+}
+
 int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
@@ -228,8 +330,16 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SECTCFG * sectlist;
 	oricdsk_fileheader * fileheader;
+	int regenerate_mode;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"OricDSK_libLoad_DiskFile %s",imgfile);
+
+	regenerate_mode = 1;
+
+	if(hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "ORICDSK_LOADER_REGENERATE_TRACK" ) == 0)
+	{
+		regenerate_mode = 0;
+	}
 
 	f = hxc_fopen(imgfile,"rb");
 	if( f == NULL )
@@ -244,6 +354,12 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 	{
 		mfmformat=0;
 		fileheader=(oricdsk_fileheader *) malloc(256);
+		if(!fileheader)
+		{
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
+		}
+
 		hxc_fread(fileheader,256,f);
 		sectorsize=256; // OricDSK file support only 256bytes/sector floppies.
 		gap3len=255;
@@ -262,7 +378,7 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 			mfmformat=1;
 			geometrie=fileheader->number_of_sectors_geometrie;
 			floppydisk->floppySectorPerTrack=-1;
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"OricDSK_libLoad_DiskFile MFM_DISK %d tracks %d sides geometrie %d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,geometrie);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"OricDSK_libLoad_DiskFile MFM_DISK %d tracks %d sides geometrie %d (regenerate mode : %d)",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,geometrie,regenerate_mode);
 		}
 		else
 		{
@@ -281,119 +397,136 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 
 		switch(mfmformat)
 		{
+			case 0:// "OLD" format
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ORICDISK format !");
 
-		case 0:// "OLD" format
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ORICDISK format !");
+				trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 
-			trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
-
-			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-			{
-				for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-				{
-
-					hxcfe_imgCallProgressCallback(imgldr_ctx,j + (i*floppydisk->floppyNumberOfTrack),(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide) );
-
-					if(!floppydisk->tracks[j])
-						floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-
-					currentcylinder = floppydisk->tracks[j];
-
-					file_offset=((j*(sectorsize*floppydisk->floppySectorPerTrack))+
-						(sectorsize*(floppydisk->floppySectorPerTrack)*floppydisk->floppyNumberOfTrack*i))+256;
-
-					fseek (f , file_offset , SEEK_SET);
-					hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
-
-					currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,1,0,floppydisk->floppyBitRate,currentcylinder->floppyRPM,IBMFORMAT_DD,gap3len,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
-				}
-
-			}
-			free(trackdata);
-			break;
-
-		case 1:// "New" format
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MFM_DISK format !");
-
-			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-
-			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-			{
-				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-			}
-
-			switch(geometrie)
-			{
-			case 1:
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Geometrie 1:  11111..000000!");
-				tracksize=(((filesize-256)/fileheader->number_of_side)/fileheader->number_of_tracks);
+				floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+				memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
 					for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 					{
+
 						hxcfe_imgCallProgressCallback(imgldr_ctx,j + (i*floppydisk->floppyNumberOfTrack),(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide) );
 
-						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"------------------ Track %d, side %d -------------------",j,i);
-						currentcylinder=floppydisk->tracks[j];
+						if(!floppydisk->tracks[j])
+							floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 
-						file_offset=(i*floppydisk->floppyNumberOfTrack*tracksize)+(j*tracksize)+256;
+						currentcylinder = floppydisk->tracks[j];
 
-						trackdata=(unsigned char *) malloc(tracksize);
+						file_offset=((j*(sectorsize*floppydisk->floppySectorPerTrack))+
+							(sectorsize*(floppydisk->floppySectorPerTrack)*floppydisk->floppyNumberOfTrack*i))+256;
+
 						fseek (f , file_offset , SEEK_SET);
-						hxc_fread(trackdata,tracksize,f);
+						hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
 
-						trackdatatab=(unsigned char*)malloc(256*1024);
-						sectlist=extractsector(imgldr_ctx->hxcfe,trackdatatab,trackdata,tracksize,&numberofsector);
-
-						currentcylinder->sides[i]=tg_generateTrackEx((unsigned short)numberofsector,sectlist,interleave,(unsigned char)(j*2),DEFAULT_DD_BITRATE,rpm,IBMFORMAT_DD,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
-
-						free(trackdatatab);
-						free(sectlist);
-						free(trackdata);
+						currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,1,0,floppydisk->floppyBitRate,currentcylinder->floppyRPM,IBMFORMAT_DD,gap3len,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
 					}
+
 				}
-				break;
+				free(trackdata);
+			break;
 
-			case 0:
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Geometrie 0 ?: using Geometrie 2");
-			case 2:
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Geometrie 2:  01010101010...!");
+			case 1:// "New" format
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"MFM_DISK format !");
 
-				tracksize=(((filesize-256)/fileheader->number_of_side)/fileheader->number_of_tracks);
+				floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+				memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 				for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 				{
-					currentcylinder=floppydisk->tracks[j];
+					floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+				}
+
+				switch(geometrie)
+				{
+				case 1:
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Geometrie 1:  11111..000000!");
+					tracksize=(((filesize-256)/fileheader->number_of_side)/fileheader->number_of_tracks);
+
+					trackdata = (unsigned char *) malloc(tracksize);
+					trackdatatab = (unsigned char*) malloc(256*1024);
 
 					for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 					{
-						hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide) );
+						for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+						{
+							hxcfe_imgCallProgressCallback(imgldr_ctx,j + (i*floppydisk->floppyNumberOfTrack),(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide) );
 
-						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"------------------ Track %d, side %d -------------------",j,i);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"------------------ Track %d, side %d -------------------",j,i);
+							currentcylinder=floppydisk->tracks[j];
 
-						file_offset=(j*tracksize*floppydisk->floppyNumberOfSide) + (i*tracksize) + 256;
+							file_offset=(i*floppydisk->floppyNumberOfTrack*tracksize)+(j*tracksize)+256;
 
-						trackdata=(unsigned char *) malloc(tracksize);
+							fseek (f , file_offset , SEEK_SET);
 
-						fseek (f , file_offset , SEEK_SET);
-						hxc_fread(trackdata,tracksize,f);
+							memset(trackdata,0x4E,tracksize);
+							hxc_fread(trackdata,tracksize,f);
 
-						trackdatatab=(unsigned char*)malloc(256*1024);
-						sectlist=extractsector(imgldr_ctx->hxcfe,trackdatatab,trackdata,tracksize,&numberofsector);
-
-						currentcylinder->sides[i]=tg_generateTrackEx((unsigned short)numberofsector,sectlist,interleave,(unsigned char)(j*2),DEFAULT_DD_BITRATE,rpm,IBMFORMAT_DD,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
-
-						free(trackdatatab);
-						free(sectlist);
-						free(trackdata);
+							if(regenerate_mode)
+							{
+								sectlist=extractsector(imgldr_ctx->hxcfe,trackdatatab,trackdata,tracksize,&numberofsector);
+								currentcylinder->sides[i]=tg_generateTrackEx((unsigned short)numberofsector,sectlist,interleave,(unsigned char)(j*2),DEFAULT_DD_BITRATE,rpm,IBMFORMAT_DD,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
+								free(sectlist);
+							}
+							else
+							{
+								currentcylinder->sides[i] = ORICDSKpatchtrack(imgldr_ctx->hxcfe,trackdata,tracksize);
+							}
+						}
 					}
-				}
+
+					free(trackdatatab);
+					free(trackdata);
 				break;
 
-			default:
+				case 0:
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Geometrie 0 ?: using Geometrie 2");
+				case 2:
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Geometrie 2:  01010101010...!");
+
+					tracksize=(((filesize-256)/fileheader->number_of_side)/fileheader->number_of_tracks);
+
+					trackdata=(unsigned char *) malloc(tracksize);
+					trackdatatab=(unsigned char*) malloc(256*1024);
+
+					for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+					{
+						currentcylinder=floppydisk->tracks[j];
+
+						for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+						{
+							hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide) );
+
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"------------------ Track %d, side %d -------------------",j,i);
+
+							file_offset=(j*tracksize*floppydisk->floppyNumberOfSide) + (i*tracksize) + 256;
+
+							fseek (f , file_offset , SEEK_SET);
+
+							memset(trackdata,0x4E,tracksize);
+							hxc_fread(trackdata,tracksize,f);
+
+							if(regenerate_mode)
+							{
+								sectlist=extractsector(imgldr_ctx->hxcfe,trackdatatab,trackdata,tracksize,&numberofsector);
+								currentcylinder->sides[i]=tg_generateTrackEx((unsigned short)numberofsector,sectlist,interleave,(unsigned char)(j*2),DEFAULT_DD_BITRATE,rpm,IBMFORMAT_DD,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
+								free(sectlist);
+							}
+							else
+							{
+								currentcylinder->sides[i]= ORICDSKpatchtrack(imgldr_ctx->hxcfe,trackdata,tracksize);
+							}
+						}
+					}
+
+					free(trackdatatab);
+					free(trackdata);
+				break;
+
+				default:
 				break;
 			}
 		break;
