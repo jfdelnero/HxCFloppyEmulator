@@ -244,6 +244,13 @@ set CPCDSK_WRITER_LIMIT_SECTOR_SIZE 1                 # Limit the sector data to
 set CPCDSK_WRITER_DISCARD_UNFORMATTED_SIDE 1
 
 #
+# Oric DSK Loader / Writer parameters
+#
+
+set ORICDSK_LOADER_REGENERATE_TRACK 1                 # Extract the sectors data and regenerate
+                                                      # the whole track.
+
+#
 # 2008 USB HxC Floppy Emulator parameters
 # ( FTDI + CPLD based hardware )
 #
