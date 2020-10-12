@@ -61,6 +61,11 @@
 #include "data_DiskLayout_Coat_A_Matic_Robox_RC9400_DD_289KB_xml.h"
 #include "data_DiskLayout_QD_Triumph_Adler_Typewriter_xml.h"
 #include "data_DiskLayout_SORD_M68_HD_998KB_xml.h"
+#include "data_DiskLayout_FLEX_SSDD_80T_358KB_xml.h"
+#include "data_DiskLayout_FLEX_DSDD_80T_716KB_xml"
+#include "data_DiskLayout_FLEX_DSDD_80T_716KB_PADDED_xml"
+#include "data_DiskLayout_FLEX_DSDD_40T_356KB_xml.h"
+#include "data_DiskLayout_FLEX_DSDD_40T_356KB_PADDED_xml.h"
 
 datatype * disklayout_list[]=
 {
@@ -127,5 +132,10 @@ datatype * disklayout_list[]=
 	data_DiskLayout_Unitel_Videotex_xml,
 	data_DiskLayout_Coat_A_Matic_Robox_RC9400_DD_289KB_xml,
 	data_DiskLayout_QD_Triumph_Adler_Typewriter_xml,
+	data_DiskLayout_FLEX_SSDD_80T_358KB_xml,
+	data_DiskLayout_FLEX_DSDD_80T_716KB_xml,
+	data_DiskLayout_FLEX_DSDD_80T_716KB_PADDED_xml,
+	data_DiskLayout_FLEX_DSDD_40T_356KB_xml,
+	data_DiskLayout_FLEX_DSDD_40T_356KB_PADDED_xml,
 	0
 };
