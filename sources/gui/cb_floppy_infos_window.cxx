@@ -410,6 +410,7 @@ int InfosThreadProc(void* floppycontext,void* context)
 			hxcfe_td_activate_analyzer(td,NORTHSTAR_HS_MFM_ENCODING,w->northstar_bt->value());
 			hxcfe_td_activate_analyzer(td,HEATHKIT_HS_FM_ENCODING,w->heathkit_bt->value());
 			hxcfe_td_activate_analyzer(td,DEC_RX02_M2FM_ENCODING,w->decrx02_bt->value());
+			//hxcfe_td_activate_analyzer(td,QD_MO5_ENCODING,1);
 
 			hxcfe_td_setparams(td,(int)(adjust_timescale(w->x_time->value())),(int)w->y_time->value(),(int)(w->x_offset->value()*1000),0);
 
@@ -917,8 +918,11 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						case DECRX02_SDDD:
 							sprintf(str,"DEC RX02 Sector");
 						break;
+						case QD_MO5_MFM:
+							sprintf(str,"QD MO5 Sector");
+						break;
 						default:
-							sprintf(str,"Unknow Sector");
+							sprintf(str,"Unknown Sector type");
 						break;
 					}
 					fiw->buf->append((char*)str);
