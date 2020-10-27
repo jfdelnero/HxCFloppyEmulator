@@ -71,6 +71,7 @@
 #include "tracks/track_formats/membrain_mfm_track.h"
 #include "tracks/track_formats/northstar_mfm_track.h"
 #include "tracks/track_formats/tycom_fm_track.h"
+#include "tracks/track_formats/qd_mo5_track.h"
 
 #include "trackutils.h"
 
@@ -213,6 +214,9 @@ HXCFE_SECTCFG* hxcfe_getNextSector( HXCFE_SECTORACCESS* ss_ctx, int32_t track, i
 		break;
 		case HEATHKIT_HS_FM_ENCODING:
 			bitoffset = get_next_FM_Heathkit_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
+		break;
+		case QD_MO5_ENCODING:
+			bitoffset = get_next_QDMO5_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
 		default:
 			bitoffset=-1;
