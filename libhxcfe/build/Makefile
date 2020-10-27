@@ -98,7 +98,7 @@ DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_w
 
 TRACK_FORMATS_SUPPORT = luts.o track_types_defs.o aed6200p_track.o amiga_mfm_track.o apple2_gcr_track.o arburg_track.o emu_emulator_fm_track.o c64_gcr_track.o \
 						heathkit_fm_track.o iso_ibm_fm_track.o iso_ibm_mfm_track.o membrain_mfm_track.o northstar_mfm_track.o tycom_fm_track.o dec_rx02_track.o \
-						apple_mac_gcr_track.o
+						apple_mac_gcr_track.o qd_mo5_track.o
 
 ENCODING_SUPPORT = fm_encoding.o mfm_encoding.o dec_m2fm_encoding.o
 
@@ -210,6 +210,9 @@ iso_ibm_mfm_track.o : $(BASEDIR)/tracks/track_formats/iso_ibm_mfm_track.c $(BASE
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 membrain_mfm_track.o : $(BASEDIR)/tracks/track_formats/membrain_mfm_track.c $(BASEDIR)/tracks/track_formats/membrain_mfm_track.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+qd_mo5_track.o : $(BASEDIR)/tracks/track_formats/qd_mo5_track.c $(BASEDIR)/tracks/track_formats/qd_mo5_track.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 northstar_mfm_track.o : $(BASEDIR)/tracks/track_formats/northstar_mfm_track.c $(BASEDIR)/tracks/track_formats/northstar_mfm_track.h
