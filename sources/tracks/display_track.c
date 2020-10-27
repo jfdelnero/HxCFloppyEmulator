@@ -630,7 +630,9 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 										sprintf(tempstr,"AED 6200P %.3dB DM: ??",sc->sectorsize);
 									break;
 								break;
-
+								case QD_MO5_MFM:
+									sprintf(tempstr,"QD MO5 %.3dB",sc->sectorsize);
+								break;
 							}
 
 							if(sc->fill_byte_used)
@@ -687,6 +689,9 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 								break;
 								case AED6200P_DD:
 									sprintf(tempstr,"AED 6200P Data ?");
+								break;
+								case QD_MO5_MFM:
+									sprintf(tempstr,"QD MO5 Data ?");
 								break;
 							}
 							putstring8x8(td,xpos_startheader,225,tempstr,0x000,0x000,1,1);
@@ -2525,6 +2530,7 @@ const static type_list track_type_list[]=
 	{ARBURG_DAT,        "Arburg DATA"},
 	{ARBURG_SYS,        "Arburg SYSTEM"},
 	{AED6200P_DD,       "AED 6200P"},
+	{QD_MO5_MFM,        "QD MO5"},
 	{0,0}
 };
 
