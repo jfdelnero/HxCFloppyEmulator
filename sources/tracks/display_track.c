@@ -833,6 +833,7 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	timingoffset = ( getOffsetTiming(currentside,tracksize,0,0));
 
 	timingoffset2=( timingoffset * td->x_start_us ) / (100 * 1000);
+
 	timingoffset=0;
 	while((i<tracksize) && timingoffset2>timingoffset)
 	{
@@ -841,9 +842,9 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 		i++;
 	};
 
-	buffer_offset=i;
-	timingoffset_offset=timingoffset;
+	timingoffset_offset = getOffsetTiming(currentside,i,0,0);
 
+	buffer_offset=i;
 	bitrate = currentside->bitrate;
 
 	tracksize=currentside->tracklen;
@@ -1116,7 +1117,7 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 				timingoffset2=getOffsetTiming(currentside,i+1,timingoffset,i);
 
 				old_i=i;
-				xpos = (int)( timingoffset / xresstep ) - (int)(( timingoffset2 - timingoffset) / (xresstep *2) );
+				xpos = (int)(( timingoffset / xresstep ) - (( timingoffset2 - timingoffset) / (xresstep *2) ));
 
 				if(xpos>=0 && (xpos<td->xsize) )
 				{
@@ -1793,7 +1794,7 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 					i++;
 				};
 
-				timingoffset_offset = timingoffset;
+				timingoffset_offset = getOffsetTiming(currentside,i,0,0);
 			}
 
 			//////////////////////////////////////////
