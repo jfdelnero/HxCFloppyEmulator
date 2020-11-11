@@ -476,7 +476,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 			hxcfe_FxStream_setResolution(fxs,KF_NS_PER_TICK);
 
-			track_dump = hxcfe_FxStream_ImportStream(fxs,cellstream,32,cellpos);
+			track_dump = hxcfe_FxStream_ImportStream(fxs,cellstream,32,cellpos, HXCFE_STREAMCHANNEL_TYPE_RLEEVT, "data",NULL);
 
 			for(i=0;i<nbindex;i++)
 			{

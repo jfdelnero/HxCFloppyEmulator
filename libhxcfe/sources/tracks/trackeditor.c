@@ -79,7 +79,7 @@ HXCFE_SIDE * hxcfe_getSide( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t tra
 HXCFE_SIDE * hxcfe_duplicateSide( HXCFE* floppycontext, HXCFE_SIDE * side )
 {
 	HXCFE_SIDE * new_side;
-	int track_wordsize;
+	int track_wordsize, i;
 
 	new_side = NULL;
 
@@ -140,28 +140,32 @@ HXCFE_SIDE * hxcfe_duplicateSide( HXCFE* floppycontext, HXCFE_SIDE * side )
 
 			if( side->stream_dump )
 			{
-				if( side->stream_dump->track_dump && side->stream_dump->nb_of_pulses)
+				new_side->stream_dump = malloc( sizeof(HXCFE_TRKSTREAM) );
+				if( new_side->stream_dump )
 				{
-					new_side->stream_dump = malloc( sizeof(HXCFE_TRKSTREAM) );
-					if( new_side->stream_dump )
-					{
-						memcpy(new_side->stream_dump,side->stream_dump,sizeof(HXCFE_TRKSTREAM));
+					memcpy(new_side->stream_dump,side->stream_dump,sizeof(HXCFE_TRKSTREAM));
 
-						new_side->stream_dump->track_dump = malloc(side->stream_dump->nb_of_pulses*sizeof(uint32_t));
-						if( new_side->stream_dump->track_dump )
+					for(i=0;i<MAX_NB_OF_STREAMCHANNEL;i++)
+					{
+						if( side->stream_dump->channels[i].stream && side->stream_dump->channels[i].nb_of_pulses)
 						{
-							memcpy(new_side->stream_dump->track_dump,side->stream_dump->track_dump,side->stream_dump->nb_of_pulses*sizeof(uint32_t));
+							new_side->stream_dump->channels[i].stream = malloc(side->stream_dump->channels[i].nb_of_pulses*sizeof(uint32_t));
+							if( new_side->stream_dump->channels[i].stream )
+							{
+								memcpy(new_side->stream_dump->channels[i].stream,side->stream_dump->channels[i].stream,side->stream_dump->channels[i].nb_of_pulses*sizeof(uint32_t));
+							}
+							else
+							{
+								new_side->stream_dump->channels[i].stream = NULL;
+								new_side->stream_dump->channels[i].nb_of_pulses = 0;
+							}
 						}
 						else
 						{
-							free(new_side->stream_dump);
-							new_side->stream_dump = NULL;
+							new_side->stream_dump->channels[i].stream = NULL;
+							new_side->stream_dump->channels[i].nb_of_pulses = 0;
 						}
 					}
-				}
-				else
-				{
-					new_side->stream_dump = NULL;
 				}
 			}
 
@@ -177,6 +181,8 @@ HXCFE_SIDE * hxcfe_duplicateSide( HXCFE* floppycontext, HXCFE_SIDE * side )
 
 void hxcfe_freeSide( HXCFE* floppycontext, HXCFE_SIDE * side )
 {
+	int i;
+
 	if(side)
 	{
 		if(side->databuffer)
@@ -196,13 +202,19 @@ void hxcfe_freeSide( HXCFE* floppycontext, HXCFE_SIDE * side )
 
 		if(side->stream_dump)
 		{
-			if(side->stream_dump->track_dump)
+			for(i=0;i<MAX_NB_OF_STREAMCHANNEL;i++)
 			{
-				free(side->stream_dump->track_dump);
+				if(side->stream_dump->channels[i].stream)
+				{
+					free(side->stream_dump->channels[i].stream);
+				}
 			}
 
 			free(side->stream_dump);
 		}
+
+		if(side->cell_to_tick)
+			free(side->cell_to_tick);
 
 		free(side);
 	}

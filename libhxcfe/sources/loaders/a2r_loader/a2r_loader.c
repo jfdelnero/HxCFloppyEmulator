@@ -145,13 +145,13 @@ static HXCFE_SIDE* import_a2r_stream(HXCFE* floppycontext, a2r_capture * capture
 		{
 		//	hxcfe_FxStream_setBitrate(fxs,bitrate);
 
-     	//	hxcfe_FxStream_setPhaseCorrectionFactor(fxs,phasecorrection);
+		//	hxcfe_FxStream_setPhaseCorrectionFactor(fxs,phasecorrection);
 
 		//	hxcfe_FxStream_setFilterParameters(fxs,filterpasses,filter);
 
 			hxcfe_FxStream_setResolution(fxs,125000); // 125 ns per tick
 
-			track_dump = hxcfe_FxStream_ImportStream(fxs,tmp_stream,32,(offset_out));
+			track_dump = hxcfe_FxStream_ImportStream(fxs,tmp_stream,32,(offset_out),HXCFE_STREAMCHANNEL_TYPE_RLEEVT, "data", NULL);
 			if(track_dump)
 			{
 				hxcfe_FxStream_AddIndex(fxs,track_dump,0,0,FXSTRM_INDEX_MAININDEX);

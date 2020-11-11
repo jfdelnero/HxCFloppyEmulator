@@ -191,6 +191,12 @@ void freelist(struct s_sectorlist_ * element)
 	return;
 }
 
+
+//
+// timingoffset -> uS
+// start -> track bit start point
+// offset -> track bit offset
+//
 float getOffsetTiming(HXCFE_SIDE *currentside,int offset,float timingoffset,int start)
 {
 	int i,j,totaloffset,partial_offset;
@@ -212,6 +218,28 @@ float getOffsetTiming(HXCFE_SIDE *currentside,int offset,float timingoffset,int 
 
 	i = start;
 	j = start%tracklen;
+
+	if(currentside->cell_to_tick)
+	{
+		uint32_t start_tick,tracklen_tick,end_tick,offset_tick;
+
+		start_tick = currentside->cell_to_tick[i>>3];
+		tracklen_tick = currentside->cell_to_tick[(tracklen-1)>>3];
+		end_tick = currentside->cell_to_tick[((( totaloffset ))%tracklen)>>3];
+
+		if(end_tick >= start_tick)
+		{
+			offset_tick = end_tick - start_tick;
+		}
+		else
+		{
+			offset_tick = (tracklen_tick - start_tick) + end_tick;
+		}
+
+		timingoffset = timingoffset + (float)((float)offset_tick / (float)(TICKFREQ/1000000));
+
+		return timingoffset;
+	}
 
 	if(currentside->bitrate==VARIABLEBITRATE)
 	{
@@ -342,6 +370,227 @@ void putstring8x8(HXCFE_TD *td,int x_pos,int y_pos,char * str,uint32_t color,uin
 			}
 			i++;
 		}
+	}
+}
+
+void hxcfe_td_draw_markers( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track, int32_t side, int buffer_offset )
+{
+	int tracksize;
+	int i,j,m;
+	int y;
+	float timingoffset;
+	int bitrate;
+	int xpos;
+	int endfill;
+	float xresstep;
+	HXCFE_SIDE * currentside;
+
+	xresstep = (float)td->x_us/(float)td->xsize;
+	currentside=floppydisk->tracks[track]->sides[side];
+	bitrate = currentside->bitrate;
+
+	// Markers
+	for( m = 0; m < MAX_MARKER ; m++ )
+	{
+		if( td->markers[m].flags & TD_MARKER_FLAG_ENABLE)
+		{
+			//////////////////////////////////////////
+			// Markers drawing
+
+			tracksize = currentside->tracklen;
+			timingoffset = 0;
+			i = buffer_offset;
+
+			endfill = 0;
+
+			do
+			{
+				do
+				{
+					if(td->markers[m].cell_pos == i)
+					{
+						if(currentside->bitrate == VARIABLEBITRATE)
+							bitrate = currentside->timingbuffer[i>>3];
+
+						xpos = (int)( timingoffset / (xresstep) );
+
+						if(xpos>=td->xsize)
+							endfill=1;
+						else
+						{
+							int y_off;
+							int x_off;
+							int k;
+
+							for(y = 0; y<td->ysize;y++)
+							{
+								if( !(y & 3) )
+									td->framebuffer[(td->xsize*y) + xpos] = td->markers[m].color;
+							}
+
+							switch(td->markers[m].type)
+							{
+								case 0:
+
+									x_off = 0;
+									y_off = 30;
+									k = 13;
+									while( k>0 )
+									{
+										for(j=0;j<k;j++)
+										{
+											if( (y_off + k) < td->ysize && (xpos + x_off) < td->xsize)
+											{
+												td->framebuffer[(td->xsize*(y_off + j)) + xpos + x_off] = td->markers[m].color;
+											}
+										}
+										y_off++;
+										k = k - 2;
+										x_off++;
+									}
+								break;
+								case 1:
+									x_off = 0;
+									y_off = 30;
+									k = 13;
+									while( k>0 )
+									{
+										for(j=0;j<k;j++)
+										{
+											if( (y_off + k) < td->ysize && (xpos - x_off) < td->xsize && (xpos - x_off) >= 0)
+											{
+												td->framebuffer[(td->xsize*(y_off + j)) + xpos - x_off] = td->markers[m].color;
+											}
+										}
+										y_off++;
+										k = k - 2;
+										x_off++;
+									}
+								break;
+							}
+						}
+					}
+
+					if(currentside->bitrate==VARIABLEBITRATE)
+						bitrate = currentside->timingbuffer[i>>3];
+
+					timingoffset=timingoffset + ((float)(500000)/(float)bitrate);
+
+					i++;
+
+				}while(i<tracksize && !endfill);
+
+				xpos= (int)( timingoffset / xresstep );
+				if(xpos>td->xsize)
+					endfill=1;
+
+				i=0;
+
+			}while(!endfill);
+		}
+	}
+}
+
+void hxcfe_td_draw_rules( HXCFE_TD *td )
+{
+	int i,y;
+	int xpos,ypos;
+	char tmp_str[64];
+
+	float x_us_per_pixel,y_us_per_pixel;
+	float xpos_step;
+	float float_xpos;
+
+	x_us_per_pixel = ((float)((float)td->x_us/(float)td->xsize));
+	y_us_per_pixel = ((float)((float)td->y_us/(float)td->ysize));
+
+	// Print pixel density
+	sprintf(tmp_str,"xres: %f us/pix",x_us_per_pixel);
+	putstring8x8(td,1,1,tmp_str,0xFFFFFF,0x000000,0,0);
+	sprintf(tmp_str,"yres: %f us/pix",y_us_per_pixel);
+	putstring8x8(td,1,1+8,tmp_str,0xFFFFFF,0x000000,0,0);
+
+	// Vertical rule
+	for(i=0;i < 80*10;i++)
+	{
+		ypos = (td->ysize - 1) - (float)(((float)1/y_us_per_pixel) * ((float)i/(float)10));
+
+		for(xpos=0;xpos < 2; xpos++)
+		{
+			if ( ( xpos < td->xsize ) && ( ( ypos < td->ysize ) && ( ypos >= 0 ) ) )
+				td->framebuffer[(td->xsize*ypos) + xpos] = 0x000000;
+		}
+	}
+
+	for(i=0;i < 80;i++)
+	{
+		ypos = (td->ysize - 1) - ((1/y_us_per_pixel) * (float)i);
+
+		for(xpos=(8*4);xpos < ((8*4)+6); xpos++)
+		{
+			if ( ( xpos < td->xsize ) && ( ( ypos < td->ysize ) && ( ypos >= 0 ) ) )
+				td->framebuffer[(td->xsize*ypos) + xpos] = 0x000000;
+		}
+
+		sprintf(tmp_str,"%.2duS",i);
+		putstring8x8(td,1,ypos - 4,tmp_str,0x00,0xFFFFFF,0,1);
+	}
+
+	// Rule : 100 us steps
+	i = 0;
+	xpos_step = ( 100 / x_us_per_pixel );
+	float_xpos = 0;
+	xpos = 0;
+	while( xpos < td->xsize )
+	{
+		ypos = (td->ysize - 1);
+
+		for(y=0;y<1;y++)
+		{
+			if ( ( xpos < (int)td->xsize ) && ( ( (ypos + y - 1) < (int)td->ysize ) && ( (ypos + y - 1) >= 0 ) ) )
+				td->framebuffer[(td->xsize*(ypos + y - 1)) + xpos] = 0x000000;
+		}
+
+		float_xpos += xpos_step;
+		xpos = (int)float_xpos;
+	}
+
+	// Rule : 1 ms steps
+	i = 0;
+	xpos_step = ( 1000 / x_us_per_pixel );
+	float_xpos = 0;
+	xpos = 0;
+	while( xpos < td->xsize )
+	{
+		ypos = (td->ysize - 1);
+
+		for(y=ypos - 3;y<ypos;y++)
+		{
+			if ( y>=0 &&  y < (unsigned int)td->ysize )
+				td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
+		}
+
+		float_xpos += xpos_step;
+		xpos = (int)float_xpos;
+	}
+
+	// Rule : 10 ms steps
+	i = 0;
+	xpos_step = ( 10000 / x_us_per_pixel );
+	float_xpos = 0;
+	xpos = 0;
+	while( xpos < td->xsize )
+	{
+		ypos = (td->ysize - 1);
+
+		for(y=ypos - 6;y<ypos;y++)
+		{
+			if ( y>=0 &&  y < (unsigned int)td->ysize )
+				td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
+		}
+
+		float_xpos += xpos_step;
+		xpos = (int)float_xpos;
 	}
 }
 
@@ -753,10 +1002,9 @@ void hxcfe_td_activate_analyzer( HXCFE_TD *td, int32_t TRACKTYPE, int32_t enable
 void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track, int32_t side )
 {
 	int tracksize;
-	int i,j,old_i,m;
+	int i,j,old_i;
 	float timingoffset_offset;
 	int buffer_offset;
-	int y;
 	float timingoffset;
 	float timingoffset2;
 	int interbit;
@@ -773,13 +1021,7 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	HXCFE_SIDE * currentside;
 	s_col * col;
 
-	float x_us_per_pixel;
-	float xpos_step;
-	float float_xpos;
-
 	char tmp_str[32];
-
-	x_us_per_pixel = ((float)((float)td->x_us/(float)td->xsize));
 
 	sl=td->sl;
 	while(sl)
@@ -1239,194 +1481,9 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	sprintf(tmp_str,"T:%.3d S:%.1d",track,side);
 	putstring8x8(td,1,1,tmp_str,0x000,0x000,0,1);
 
-	// Vertical rule
-	for(i=0;i < 80*10;i++)
-	{
-		ypos = (td->ysize - 1) - (float)(((float)1/(((float)td->y_us/(float)td->ysize))) * ((float)i/(float)10));
+	hxcfe_td_draw_rules( td );
 
-		for(xpos=0;xpos < 2; xpos++)
-		{
-			if ( ( xpos < td->xsize ) && ( ( ypos < td->ysize ) && ( ypos >= 0 ) ) )
-				td->framebuffer[(td->xsize*ypos) + xpos] = 0x000000;
-		}
-	}
-
-	for(i=0;i < 80;i++)
-	{
-		ypos = (td->ysize - 1) - ((1/((float)td->y_us/(float)td->ysize)) * (float)i);
-
-		for(xpos=(8*4);xpos < ((8*4)+6); xpos++)
-		{
-			if ( ( xpos < td->xsize ) && ( ( ypos < td->ysize ) && ( ypos >= 0 ) ) )
-				td->framebuffer[(td->xsize*ypos) + xpos] = 0x000000;
-		}
-
-		sprintf(tmp_str,"%.2duS",i);
-		putstring8x8(td,1,ypos - 4,tmp_str,0x00,0xFFFFFF,0,1);
-	}
-
-	// Rule : 100 us steps
-	i = 0;
-	xpos_step = ( 100 / x_us_per_pixel );
-	float_xpos = 0;
-	xpos = 0;
-	while( xpos < td->xsize )
-	{
-		ypos = (td->ysize - 1);
-
-		for(y=0;y<1;y++)
-		{
-			if ( ( xpos < (int)td->xsize ) && ( ( (ypos + y - 1) < (int)td->ysize ) && ( (ypos + y - 1) >= 0 ) ) )
-				td->framebuffer[(td->xsize*(ypos + y - 1)) + xpos] = 0x000000;
-		}
-
-		float_xpos += xpos_step;
-		xpos = (int)float_xpos;
-	}
-
-
-
-	// Rule : 1 ms steps
-	i = 0;
-	xpos_step = ( 1000 / x_us_per_pixel );
-	float_xpos = 0;
-	xpos = 0;
-	while( xpos < td->xsize )
-	{
-		ypos = (td->ysize - 1);
-
-		for(y=ypos - 4;y<ypos;y++)
-		{
-			if ( y>=0 &&  y < (unsigned int)td->ysize )
-				td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
-		}
-
-		float_xpos += xpos_step;
-		xpos = (int)float_xpos;
-	}
-
-	// Rule : 10 ms steps
-	i = 0;
-	xpos_step = ( 10000 / x_us_per_pixel );
-	float_xpos = 0;
-	xpos = 0;
-	while( xpos < td->xsize )
-	{
-		ypos = (td->ysize - 1);
-
-		for(y=ypos - 8;y<ypos;y++)
-		{
-			if ( y>=0 &&  y < (unsigned int)td->ysize )
-				td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
-		}
-
-		float_xpos += xpos_step;
-		xpos = (int)float_xpos;
-	}
-
-	// Markers
-	for( m = 0; m < MAX_MARKER ; m++ )
-	{
-		if( td->markers[m].flags & TD_MARKER_FLAG_ENABLE)
-		{
-			//////////////////////////////////////////
-			// Markers drawing
-
-			tracksize = currentside->tracklen;
-			timingoffset = 0;
-			i = buffer_offset;
-			old_i = buffer_offset;
-
-			loopcnt = 0;
-			endfill = 0;
-
-			do
-			{
-				do
-				{
-					if(td->markers[m].cell_pos == i)
-					{
-						if(currentside->bitrate == VARIABLEBITRATE)
-							bitrate = currentside->timingbuffer[i>>3];
-
-						xpos = (int)( timingoffset / (xresstep) );
-
-						if(xpos>=td->xsize)
-							endfill=1;
-						else
-						{
-							int y_off;
-							int x_off;
-							int k;
-
-							for(y = 0; y<td->ysize;y++)
-							{
-								if( !(y & 3) )
-									td->framebuffer[(td->xsize*y) + xpos] = td->markers[m].color;
-							}
-
-							switch(td->markers[m].type)
-							{
-								case 0:
-
-									x_off = 0;
-									y_off = 30;
-									k = 13;
-									while( k>0 )
-									{
-										for(j=0;j<k;j++)
-										{
-											if( (y_off + k) < td->ysize && (xpos + x_off) < td->xsize)
-											{
-												td->framebuffer[(td->xsize*(y_off + j)) + xpos + x_off] = td->markers[m].color;
-											}
-										}
-										y_off++;
-										k = k - 2;
-										x_off++;
-									}
-								break;
-								case 1:
-									x_off = 0;
-									y_off = 30;
-									k = 13;
-									while( k>0 )
-									{
-										for(j=0;j<k;j++)
-										{
-											if( (y_off + k) < td->ysize && (xpos - x_off) < td->xsize && (xpos - x_off) >= 0)
-											{
-												td->framebuffer[(td->xsize*(y_off + j)) + xpos - x_off] = td->markers[m].color;
-											}
-										}
-										y_off++;
-										k = k - 2;
-										x_off++;
-									}
-								break;
-							}
-						}
-					}
-
-					if(currentside->bitrate==VARIABLEBITRATE)
-						bitrate = currentside->timingbuffer[i>>3];
-
-					timingoffset=timingoffset + ((float)(500000)/(float)bitrate);
-
-					i++;
-
-				}while(i<tracksize && !endfill);
-
-				xpos= (int)( timingoffset / xresstep );
-				if(xpos>td->xsize)
-					endfill=1;
-
-				i=0;
-
-			}while(!endfill);
-
-		}
-	}
+	hxcfe_td_draw_markers( td, floppydisk, track, side, buffer_offset );
 }
 
 extern int tracktypelist[];
@@ -1465,7 +1522,7 @@ int is_valid_timing(HXCFE_TD *td, int ps )
 	return 0;
 }
 
-int hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream, int stream_index,uint16_t * sound_buffer, int nbsamples, int samplerate)
+int hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_STREAMCHANNEL* stream_channel, int stream_index,uint16_t * sound_buffer, int nbsamples, int samplerate)
 {
 	int i;
 	int cur_ticks_count;
@@ -1475,7 +1532,7 @@ int hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream, int s
 	int next_start_remain;
 	int next_start_updated;
 
-	td->hxcfe->hxc_printf(MSG_INFO_1,"hxcfe_td_stream_to_sound: stream_index:%d  track_stream->nb_of_pulses : %d",stream_index,track_stream->nb_of_pulses);
+	td->hxcfe->hxc_printf(MSG_INFO_1,"hxcfe_td_stream_to_sound: stream_index:%d  stream_channel->nb_of_pulses : %d",stream_index,stream_channel->nb_of_pulses);
 
 	// | Stream window scan : Count pulses |    - cnt 1
 	//      | Stream window scan : Count pulses |    - cnt 2 (+22uS - 44100)
@@ -1486,7 +1543,7 @@ int hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream, int s
 	ticks_window = (int)(( (float)TICKFREQ / (float)1000000 ) * (float)200); // 200 us
 	ticks_sampleshift = (int)(( (float)TICKFREQ / (float)1000000 ) * (float)((float)((float)1000000/(float)samplerate) ));
 
-	if( stream_index >= track_stream->nb_of_pulses)
+	if( stream_index >= stream_channel->nb_of_pulses)
 		return stream_index;
 
 	next_start_updated = 0;
@@ -1500,9 +1557,9 @@ int hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream, int s
 		stream_index = next_start_index;
 		next_start_updated = 0;
 
-		while(cur_ticks_count < ticks_window && stream_index < track_stream->nb_of_pulses )
+		while(cur_ticks_count < ticks_window && stream_index < stream_channel->nb_of_pulses )
 		{
-			cur_ticks_count += track_stream->track_dump[stream_index];
+			cur_ticks_count += stream_channel->stream[stream_index];
 
 			if( !next_start_updated && (cur_ticks_count >= ticks_sampleshift) )
 			{
@@ -1534,10 +1591,10 @@ int hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream, int s
 void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 {
 	int buffer_offset;
-	int total_tick;
-	int i,old_i,j,x,y,tmp;
+	int total_tick,max_total_tick;
+	int i,j,x,y,tmp;
 	int t_ofs1,t_ofs2;
-	int xpos,ypos,bad_timing;
+	int xpos_start,xpos,ypos,bad_timing;
 	int last_index_xpos;
 	int last_index_total_offset;
 	char tmp_str[64];
@@ -1545,20 +1602,23 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	HXCFE_SIDE* side;
 	HXCFE_FLOPPY *fp;
 	int tracksize;
+	int tick_to_remove;
 
 	int bitrate;
+	int channel,bitstate,bitstate2;
 	uint32_t * histo;
 
 	float x_us_per_pixel,y_us_per_pixel;
 	float x_tick_to_pix;
 	float y_tick_to_pix;
 	float tick_to_ps;
-	float xpos_step;
-	float float_xpos;
 	float index_period;
 	float timingoffset,timingoffset2;
 	float timingoffset_offset;
 	HXCFE_SIDE * currentside;
+
+	int channel_maxtick[MAX_NB_OF_STREAMCHANNEL];
+	int channel_buffer_offset[MAX_NB_OF_STREAMCHANNEL];
 
 	td->noloop_trackmode = 1;
 
@@ -1580,57 +1640,138 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 		td->flags |= TD_FLAG_BIGDOT;
 	}
 
-	timingoffset_offset = 0;
-
 	tick_to_ps = (float) ( (float)1000000000 / (float)TICKFREQ);
+
+	memset(channel_buffer_offset,0,sizeof(channel_buffer_offset));
+
+	max_total_tick = 0;
 
 	if(td->x_start_us)
 	{
-		total_tick = 0;
-		for (i = 0; i < (int)track_stream->nb_of_pulses; i++)
+		memset(channel_maxtick,0,sizeof(channel_maxtick));
+
+		for(channel = 0;channel < MAX_NB_OF_STREAMCHANNEL; channel++ )
 		{
-			total_tick += track_stream->track_dump[i];
-		}
-
-		i = 0;
-		t_ofs2= ((float)( td->x_start_us ) / (float)(100 * 1000)) * total_tick;
-		t_ofs1=0;
-		while((i<(int)track_stream->nb_of_pulses) && t_ofs2>t_ofs1)
-		{
-			t_ofs1 += track_stream->track_dump[i];
-			i++;
-		};
-
-		buffer_offset = i;
-	}
-	else
-	{
-		buffer_offset = 0;
-	}
-
-	//////////////////////////////////////////
-	// Scatter drawing
-	total_offset = 0;
-	for (i = buffer_offset; i < (int)track_stream->nb_of_pulses; i++)
-	{
-		cur_ticks = track_stream->track_dump[i];
-		total_offset += cur_ticks;
-
-		xpos = (int)( (float)total_offset * x_tick_to_pix );
-		ypos = td->ysize - (int)( (float)cur_ticks * y_tick_to_pix );
-
-		if ( ( xpos < td->xsize ) && ( ( ypos < td->ysize ) && ( ypos >= 0 ) ) )
-		{
-			if((td->framebuffer[(td->xsize*ypos) + xpos] & 0xFFFF) < 255)
+			if(track_stream->channels[channel].stream && track_stream->channels[channel].nb_of_pulses)
 			{
-				if( is_valid_timing(td,(int)((float)cur_ticks * tick_to_ps )) )
+				total_tick = 0;
+				for (i = 0; i < (int)track_stream->channels[channel].nb_of_pulses; i++)
 				{
-					td->framebuffer[(td->xsize*ypos) + xpos] = ( (td->framebuffer[(td->xsize*ypos) + xpos] + 1) | 0x01000000);
+					total_tick += track_stream->channels[channel].stream[i];
 				}
-				else
+
+				channel_maxtick[channel] = total_tick;
+
+				td->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_td_draw_trkstream: chn %d , tick %d , pulses %d\n",channel,total_tick,track_stream->channels[channel].nb_of_pulses);
+
+				if(total_tick > max_total_tick)
+					max_total_tick = total_tick;
+			}
+		}
+	}
+
+	for(channel = 0;channel < MAX_NB_OF_STREAMCHANNEL; channel++ )
+	{
+		if(track_stream->channels[channel].stream && track_stream->channels[channel].nb_of_pulses)
+		{
+			tick_to_remove = 0;
+			timingoffset_offset = 0;
+			bitstate2 = 0;
+			if(td->x_start_us)
+			{
+				i = 0;
+				t_ofs2= ((float)( td->x_start_us ) / (float)(100 * 1000)) * max_total_tick;
+				t_ofs1= track_stream->channels[channel].stream[i];
+				while((i<(int)track_stream->channels[channel].nb_of_pulses) && t_ofs2>t_ofs1)
 				{
-					td->framebuffer[(td->xsize*ypos) + xpos] = ( (td->framebuffer[(td->xsize*ypos) + xpos] + 1) | 0x03000000);
-				}
+					t_ofs1 += track_stream->channels[channel].stream[++i];
+					bitstate2 ^= 1;
+				};
+
+				tick_to_remove = t_ofs2 - ( t_ofs1 - track_stream->channels[channel].stream[i] );
+
+				buffer_offset = i;
+			}
+			else
+			{
+				buffer_offset = 0;
+			}
+
+			channel_buffer_offset[channel] = buffer_offset;
+
+			switch(track_stream->channels[channel].type)
+			{
+				case HXCFE_STREAMCHANNEL_TYPE_RLEEVT:
+					//////////////////////////////////////////
+					// Scatter drawing
+					total_offset = 0;
+					for (i = buffer_offset; i < (int)track_stream->channels[channel].nb_of_pulses; i++)
+					{
+						cur_ticks = track_stream->channels[channel].stream[i];
+
+						cur_ticks -= tick_to_remove;
+						tick_to_remove =0;
+
+						total_offset += cur_ticks;
+
+						xpos = (int)( (float)total_offset * x_tick_to_pix );
+						ypos = td->ysize - (int)( (float)cur_ticks * y_tick_to_pix );
+
+						if ( ( xpos < td->xsize ) && ( ( ypos < td->ysize ) && ( ypos >= 0 ) ) )
+						{
+							if((td->framebuffer[(td->xsize*ypos) + xpos] & 0xFFFF) < 255)
+							{
+								if( is_valid_timing(td,(int)((float)cur_ticks * tick_to_ps )) )
+								{
+									td->framebuffer[(td->xsize*ypos) + xpos] = ( (td->framebuffer[(td->xsize*ypos) + xpos] + 1) | 0x01000000);
+								}
+								else
+								{
+									td->framebuffer[(td->xsize*ypos) + xpos] = ( (td->framebuffer[(td->xsize*ypos) + xpos] + 1) | 0x03000000);
+								}
+							}
+						}
+					}
+				break;
+
+				case HXCFE_STREAMCHANNEL_TYPE_RLETOGGLESTATE_0:
+				case HXCFE_STREAMCHANNEL_TYPE_RLETOGGLESTATE_1:
+
+					total_offset = 0;
+					xpos_start = 0;
+					bitstate = 0;
+
+					if( track_stream->channels[channel].type == HXCFE_STREAMCHANNEL_TYPE_RLETOGGLESTATE_1)
+						bitstate = 1;
+
+					for (i = buffer_offset; i < (int)track_stream->channels[channel].nb_of_pulses; i++)
+					{
+						cur_ticks = track_stream->channels[channel].stream[i];
+
+						cur_ticks -= tick_to_remove;
+						tick_to_remove =0;
+
+						total_offset += cur_ticks;
+
+						xpos = (int)( (float)total_offset * x_tick_to_pix );
+
+						if(bitstate ^ bitstate2)
+							ypos = (channel * 15) + 20;
+						else
+							ypos = (channel * 15) + 30;
+
+						bitstate ^= 1;
+
+						for(;xpos_start<xpos;xpos_start++)
+						{
+							if ( ( xpos_start < td->xsize ) && ( ( ypos < td->ysize ) && ( ypos >= 0 ) ) )
+							{
+								td->framebuffer[(td->xsize*ypos) + xpos_start] = 0xFF0000;
+							}
+						}
+					}
+
+				break;
 			}
 		}
 	}
@@ -1702,7 +1843,7 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 
 	for(i=0;i < (int)track_stream->nb_of_index;i++)
 	{
-		if( buffer_offset <= (int)track_stream->index_evt_tab[i].dump_offset )
+		if( channel_buffer_offset[0] <= (int)track_stream->index_evt_tab[i].dump_offset )
 		{
 			break;
 		}
@@ -1710,12 +1851,12 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 
 	for(;i < (int)track_stream->nb_of_index;i++)
 	{
-		j = buffer_offset;
+		j = channel_buffer_offset[0];
 		total_offset = 0;
-		while( ( j < (int)track_stream->index_evt_tab[i].dump_offset ) && ( j < (int)track_stream->nb_of_pulses ) )
+		while( ( j < (int)track_stream->index_evt_tab[i].dump_offset ) && ( j < (int)track_stream->channels[0].nb_of_pulses ) )
 		{
 			j++;
-			total_offset += track_stream->track_dump[j];
+			total_offset += track_stream->channels[0].stream[j];
 		}
 
 		xpos = (int)( (float)total_offset * x_tick_to_pix );
@@ -1755,7 +1896,7 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	histo = (uint32_t*)malloc(65536* sizeof(uint32_t));
 	if(histo)
 	{
-		computehistogram(track_stream->track_dump, track_stream->nb_of_pulses, histo);
+		computehistogram(track_stream->channels[0].stream, track_stream->channels[0].nb_of_pulses, histo);
 
 		bitrate = detectpeaks(td->hxcfe,histo);
 
@@ -1773,28 +1914,40 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 		fp = makefloppyfromtrack(side);
 		if(fp)
 		{
-			old_i = 0;
 			i = 0;
 			timingoffset_offset = 0;
 
 			if( td->x_start_us )
 			{
+				int track_size_bytes;
+				uint32_t start_tick,ticks_point,cur_tick;
+
 				currentside = fp->tracks[0]->sides[0];
 
 				tracksize = currentside->tracklen;
 
-				timingoffset = ( getOffsetTiming(currentside,tracksize,0,0));
+				if(tracksize & 0x7)
+					track_size_bytes = (tracksize >> 3);
+				else
+					track_size_bytes = ((tracksize >> 3) - 1);
+
+				timingoffset = ((float)(currentside->cell_to_tick[track_size_bytes] - currentside->cell_to_tick[0]) / (float)(TICKFREQ/1000000));
 
 				timingoffset2 = ( timingoffset * td->x_start_us ) / (100 * 1000);
-				timingoffset = 0;
-				while((i<tracksize) && timingoffset2>timingoffset)
+
+				ticks_point = (uint32_t)(timingoffset2 * (float)(TICKFREQ/1000000));
+
+				start_tick = currentside->cell_to_tick[0];
+
+				cur_tick = 0;
+				i = 0;
+				while((i<track_size_bytes) && ticks_point>cur_tick)
 				{
-					timingoffset = getOffsetTiming(currentside,i,timingoffset,old_i);
-					old_i = i;
+					cur_tick = currentside->cell_to_tick[i] - start_tick;
 					i++;
 				};
 
-				timingoffset_offset = getOffsetTiming(currentside,i,0,0);
+				timingoffset_offset = ((float)(cur_tick) / (float)(TICKFREQ/1000000));
 			}
 
 			//////////////////////////////////////////
@@ -1811,95 +1964,6 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 		}
 
 		hxcfe_freeSide(td->hxcfe,side);
-	}
-
-	// Print pixel density
-	sprintf(tmp_str,"xres: %f us/pix",x_us_per_pixel);
-	putstring8x8(td,1,1,tmp_str,0xFFFFFF,0x000000,0,0);
-	sprintf(tmp_str,"yres: %f us/pix",y_us_per_pixel);
-	putstring8x8(td,1,1+8,tmp_str,0xFFFFFF,0x000000,0,0);
-
-	// Vertical rule
-	for(i=0;i < 80*10;i++)
-	{
-		ypos = (td->ysize - 1) - (float)(((float)1/y_us_per_pixel) * ((float)i/(float)10));
-
-		for(xpos=0;xpos < 2; xpos++)
-		{
-			if ( ( xpos < td->xsize ) && ( ( ypos < td->ysize ) && ( ypos >= 0 ) ) )
-				td->framebuffer[(td->xsize*ypos) + xpos] = 0x000000;
-		}
-	}
-
-	for(i=0;i < 80;i++)
-	{
-		ypos = (td->ysize - 1) - ((1/y_us_per_pixel) * (float)i);
-
-		for(xpos=(8*4);xpos < ((8*4)+6); xpos++)
-		{
-			if ( ( xpos < td->xsize ) && ( ( ypos < td->ysize ) && ( ypos >= 0 ) ) )
-				td->framebuffer[(td->xsize*ypos) + xpos] = 0x000000;
-		}
-
-		sprintf(tmp_str,"%.2duS",i);
-		putstring8x8(td,1,ypos - 4,tmp_str,0x00,0xFFFFFF,0,1);
-	}
-
-	// Rule : 100 us steps
-	i = 0;
-	xpos_step = ( 100 / x_us_per_pixel );
-	float_xpos = 0;
-	xpos = 0;
-	while( xpos < td->xsize )
-	{
-		ypos = (td->ysize - 1);
-
-		for(y=0;y<1;y++)
-		{
-			if ( ( xpos < (int)td->xsize ) && ( ( (ypos + y - 1) < (int)td->ysize ) && ( (ypos + y - 1) >= 0 ) ) )
-				td->framebuffer[(td->xsize*(ypos + y - 1)) + xpos] = 0x000000;
-		}
-
-		float_xpos += xpos_step;
-		xpos = (int)float_xpos;
-	}
-
-	// Rule : 1 ms steps
-	i = 0;
-	xpos_step = ( 1000 / x_us_per_pixel );
-	float_xpos = 0;
-	xpos = 0;
-	while( xpos < td->xsize )
-	{
-		ypos = (td->ysize - 1);
-
-		for(y=ypos - 3;y<ypos;y++)
-		{
-			if ( y>=0 &&  y < (unsigned int)td->ysize )
-				td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
-		}
-
-		float_xpos += xpos_step;
-		xpos = (int)float_xpos;
-	}
-
-	// Rule : 10 ms steps
-	i = 0;
-	xpos_step = ( 10000 / x_us_per_pixel );
-	float_xpos = 0;
-	xpos = 0;
-	while( xpos < td->xsize )
-	{
-		ypos = (td->ysize - 1);
-
-		for(y=ypos - 6;y<ypos;y++)
-		{
-			if ( y>=0 &&  y < (unsigned int)td->ysize )
-				td->framebuffer[(td->xsize*y) + xpos] = 0x000000;
-		}
-
-		float_xpos += xpos_step;
-		xpos = (int)float_xpos;
 	}
 
 	td->noloop_trackmode = 0;
@@ -1960,6 +2024,8 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_
 		if(currentside->stream_dump)
 		{
 			hxcfe_td_draw_trkstream( td, currentside->stream_dump );
+			hxcfe_td_draw_rules( td );
+
 		}
 		else
 		{

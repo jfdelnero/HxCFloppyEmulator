@@ -42,11 +42,27 @@ typedef struct _s_index_evt
 }s_index_evt;
 
 #define MAX_NB_OF_INDEX 512
+#define MAX_NB_OF_STREAMCHANNEL 32
+
+#define HXCFE_STREAMCHANNEL_TYPE_NONE             0x00000000
+#define HXCFE_STREAMCHANNEL_TYPE_RLEEVT           0x00000001
+#define HXCFE_STREAMCHANNEL_TYPE_RLETOGGLESTATE_0 0x00000002
+#define HXCFE_STREAMCHANNEL_TYPE_RLETOGGLESTATE_1 0x00000003
+
+typedef struct _HXCFE_STREAMCHANNEL
+{
+	uint32_t    * stream;
+	uint32_t    nb_of_pulses;
+	uint32_t    flags;
+	uint32_t    type;
+	char        stream_name[64];
+}HXCFE_STREAMCHANNEL;
+
+#define _HXCFE_STREAMCHANNEL_
 
 typedef struct _HXCFE_TRKSTREAM
 {
-    uint32_t	* track_dump;
-    uint32_t	nb_of_pulses;
+    HXCFE_STREAMCHANNEL channels[MAX_NB_OF_STREAMCHANNEL];
     s_index_evt	index_evt_tab[MAX_NB_OF_INDEX];
     uint32_t	nb_of_index;
 }HXCFE_TRKSTREAM;
@@ -69,6 +85,7 @@ typedef struct _HXCFE_SIDE
 
     HXCFE_TRKSTREAM * stream_dump;
 
+    uint32_t        * cell_to_tick;
 }HXCFE_SIDE;
 #define _HXCFE_SIDE_
 

@@ -405,7 +405,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 	unsigned char *flakeytrack;
 	unsigned char *indextrack;
 	uint32_t *trackbitrate;
-
+	uint32_t *tickposition;
 #ifndef USE_PLL_BITRATE
 	float byteduration;
 	float partialduration;
@@ -421,6 +421,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 #endif
 	uint32_t nextindex_pos;
 	uint32_t nextindex;
+	uint32_t tickoffset;
 
 	pll_stat pll;
 
@@ -447,7 +448,9 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 
 	hxcfe_track = 0;
 
-	if(start_index < track->nb_of_pulses)
+	tickposition = NULL;
+
+	if(start_index < track->channels[0].nb_of_pulses)
 	{
 		// Work buffer allocation.
 
@@ -488,20 +491,26 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 		bitoffset=0;
 		if(!pl)
 		{
-			size = track->nb_of_pulses - start_index;
+			size = track->channels[0].nb_of_pulses - start_index;
 		}
 		else
 		{
-			if( ( start_index + (pl->forward_link[start_index] - start_index ) ) < track->nb_of_pulses )
+			if( ( start_index + (pl->forward_link[start_index] - start_index ) ) < track->channels[0].nb_of_pulses )
 			{
 				size = ( pl->forward_link[start_index] - (start_index) );
 			}
 			else
 			{
 				floppycontext->hxc_printf(MSG_ERROR,"ScanAndDecodeStream : End of the stream flux passed ! Bad Stream flux ?");
-				size = track->nb_of_pulses - start_index;
+				size = track->channels[0].nb_of_pulses - start_index;
 			}
 		}
+
+		if(!fxs)
+			tickposition=(uint32_t*)malloc((size+1)*sizeof(uint32_t));
+
+		if(tickposition)
+			memset(tickposition,0,(size+1)*sizeof(uint32_t));
 
 		bitoffset=0;
 		if(start_index>2000)
@@ -515,7 +524,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 			{
 				while(i<(int)start_index)
 				{
-					value = track->track_dump[i];
+					value = track->channels[0].stream[i];
 					cellcode = getCellTiming(&pll,value,0,1,phasecorrection);
 					i++;
 				};
@@ -524,7 +533,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 			{
 				while(i<(int)start_index)
 				{
-					value = track->track_dump[i];
+					value = track->channels[0].stream[i];
 					cellcode = getCellTiming(&pll,value,0,pl->forward_link[i],phasecorrection);
 					i++;
 				};
@@ -557,11 +566,14 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 		nextindex = i;
 		nextindex_pos = track->index_evt_tab[i].dump_offset;
 
+		tickoffset = 0;
 		bitoffset=0;
 		for(i=0;i<size;i++)
 		{
 
-			value = track->track_dump[start_index + i];
+			value = track->channels[0].stream[start_index + i];
+
+			tickoffset += value;
 
 			if(!pl)
 				cellcode = getCellTiming(&pll,value,0,1,phasecorrection);
@@ -605,7 +617,11 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 
 #ifdef USE_PLL_BITRATE
 			if( (bitoffset>>3) < TEMPBUFSIZE )
+			{
 				trackbitrate[(bitoffset>>3)] = (int)((float)(TICKFREQ)/(float)((float)((pll.pump_charge*2)/16)));
+				if(tickposition)
+					tickposition[(old_bitoffset>>3)] = tickoffset;
+			}
 #else
 			code_array[in_ptr&31] = cellcode;
 			value_array[in_ptr&31] = (float)value;
@@ -649,6 +665,8 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 				if( (old_bitoffset>>3) < TEMPBUFSIZE )
 				{
 					trackbitrate[(old_bitoffset>>3)] = (uint32_t)((float)(TICKFREQ*4)/(float)byteduration);
+					if(tickposition)
+						tickposition[(old_bitoffset>>3)] = tickoffset;
 					old_bitoffset += 8;
 				}
 			};
@@ -664,6 +682,8 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 			if( (old_bitoffset>>3) < TEMPBUFSIZE )
 			{
 				trackbitrate[(old_bitoffset>>3)] = (uint32_t)((float)(TICKFREQ)/(float)(byteduration/4));
+				if(tickposition)
+					tickposition[(old_bitoffset>>3)] = tickoffset;
 				old_bitoffset += 8;
 			}
 
@@ -734,12 +754,22 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 			memcpy(hxcfe_track->databuffer,outtrack,tracksize);
 			memcpy(hxcfe_track->flakybitsbuffer,flakeytrack,tracksize);
 			memcpy(hxcfe_track->timingbuffer,trackbitrate, tracksize * sizeof(uint32_t));
+
+			if(tickposition)
+			{
+				hxcfe_track->cell_to_tick = malloc(tracksize * sizeof(uint32_t));
+				if(hxcfe_track->cell_to_tick)
+				{
+					memcpy(hxcfe_track->cell_to_tick,tickposition, tracksize * sizeof(uint32_t));
+				}
+			}
+
 			memset(hxcfe_track->indexbuffer,0,tracksize);
 
 			// add sector/track index
 			for(i=0;i<bitoffset;i++)
 			{
-				if(gettrackbit(indextrack,i))
+				if(getbit(indextrack,i))
 				{
 					us2index(i % bitoffset,hxcfe_track,2000,1,0);
 				}
@@ -747,6 +777,9 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 
 			hxcfe_track->bitrate = VARIABLEBITRATE;
 		}
+
+		if(tickposition)
+			free(tickposition);
 
 		free(trackbitrate);
 		free(indextrack);
@@ -823,11 +856,11 @@ static uint32_t GetDumpTimelength(HXCFE_TRKSTREAM * track_dump)
 
 	if(track_dump)
 	{
-		nb_pulses = track_dump->nb_of_pulses;
+		nb_pulses = track_dump->channels[0].nb_of_pulses;
 
 		for(i=0;i<nb_pulses;i++)
 		{
-			len = len + track_dump->track_dump[i];
+			len = len + track_dump->channels[0].stream[i];
 		}
 	}
 
@@ -855,14 +888,14 @@ static track_blocks * AllocateBlocks(HXCFE_TRKSTREAM * track_dump, int blocktime
 			blocklen = time_to_tick( blocktimelength * 100 + ( ( number_of_blocks%7 ) * 75 ) );
 
 			len = 0;
-			while(len < blocklen && j < track_dump->nb_of_pulses)
+			while(len < blocklen && j < track_dump->channels[0].nb_of_pulses)
 			{
-				len = len + track_dump->track_dump[j];
+				len = len + track_dump->channels[0].stream[j];
 				j++;
 			};
 			number_of_blocks++;
 
-		}while(j < track_dump->nb_of_pulses);
+		}while(j < track_dump->channels[0].nb_of_pulses);
 
 		// Allocate and init the blocks.
 		trackb->number_of_blocks = number_of_blocks;
@@ -882,9 +915,9 @@ static track_blocks * AllocateBlocks(HXCFE_TRKSTREAM * track_dump, int blocktime
 				trackb->blocks[i].start_index = j;
 
 				len = 0;
-				while(len < blocklen && j < track_dump->nb_of_pulses)
+				while(len < blocklen && j < track_dump->channels[0].nb_of_pulses)
 				{
-					len = len + track_dump->track_dump[j];
+					len = len + track_dump->channels[0].stream[j];
 					j++;
 				};
 
@@ -900,7 +933,7 @@ static track_blocks * AllocateBlocks(HXCFE_TRKSTREAM * track_dump, int blocktime
 				tickoffset = tickoffset + len;
 				i++;
 
-			}while(j < track_dump->nb_of_pulses);
+			}while(j < track_dump->channels[0].nb_of_pulses);
 
 			return trackb;
 		}
@@ -927,7 +960,7 @@ static void compareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32_t 
 	good_pulses = 0;
 	src_number_of_pulses = src_block->number_of_pulses;
 
-	if( dst_block_offset >= td->nb_of_pulses)
+	if( dst_block_offset >= td->channels[0].nb_of_pulses)
 	{
 		if(pulses_ok)
 			*pulses_ok = 0;
@@ -938,21 +971,21 @@ static void compareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32_t 
 		return;
 	}
 
-	if(dst_block_offset + src_number_of_pulses >= td->nb_of_pulses)
+	if(dst_block_offset + src_number_of_pulses >= td->channels[0].nb_of_pulses)
 	{
-		src_number_of_pulses = td->nb_of_pulses - dst_block_offset;
+		src_number_of_pulses = td->channels[0].nb_of_pulses - dst_block_offset;
 	}
 
 	src_block->overlap_offset = dst_block_offset;
 
-	start_ptr = &td->track_dump[src_block->start_index];
-	dst_ptr = &td->track_dump[dst_block_offset];
-	last_dump_ptr = &td->track_dump[td->nb_of_pulses - 2];
+	start_ptr = &td->channels[0].stream[src_block->start_index];
+	dst_ptr = &td->channels[0].stream[dst_block_offset];
+	last_dump_ptr = &td->channels[0].stream[td->channels[0].nb_of_pulses - 2];
 
 	if(partial)
-		last_block_ptr = &td->track_dump[src_block->start_index + (src_number_of_pulses/100)];
+		last_block_ptr = &td->channels[0].stream[src_block->start_index + (src_number_of_pulses/100)];
 	else
-		last_block_ptr = &td->track_dump[src_block->start_index + (src_number_of_pulses)];
+		last_block_ptr = &td->channels[0].stream[src_block->start_index + (src_number_of_pulses)];
 
 	if( dst_ptr < last_dump_ptr && start_ptr < last_block_ptr )
 	{
@@ -1216,7 +1249,7 @@ static void compareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32_t 
 		}
 	}
 
-	src_block->overlap_size = dst_ptr - &td->track_dump[dst_block_offset];
+	src_block->overlap_size = dst_ptr - &td->channels[0].stream[dst_block_offset];
 
 	if(pulses_ok)
 		*pulses_ok = good_pulses;
@@ -1240,18 +1273,18 @@ static int fastcompareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32
 
 	errorcntdown = 16;
 
-	if(dst_block_offset + src_block->number_of_pulses >= td->nb_of_pulses)
+	if(dst_block_offset + src_block->number_of_pulses >= td->channels[0].nb_of_pulses)
 	{
 		return 0;
 	}
 
 	src_block->overlap_offset = dst_block_offset;
 
-	start_ptr = &td->track_dump[src_block->start_index];
-	dst_ptr = &td->track_dump[dst_block_offset];
-	last_dump_ptr = &td->track_dump[td->nb_of_pulses - 2];
+	start_ptr = &td->channels[0].stream[src_block->start_index];
+	dst_ptr = &td->channels[0].stream[dst_block_offset];
+	last_dump_ptr = &td->channels[0].stream[td->channels[0].nb_of_pulses - 2];
 
-	last_block_ptr = &td->track_dump[src_block->start_index + (src_block->number_of_pulses)];
+	last_block_ptr = &td->channels[0].stream[src_block->start_index + (src_block->number_of_pulses)];
 
 	if( dst_ptr < last_dump_ptr && start_ptr < last_block_ptr )
 	{
@@ -1307,7 +1340,7 @@ static uint32_t detectflakeybits(HXCFE_TRKSTREAM * td,pulsesblock * src_block, u
 	good_pulses = 0;
 	src_number_of_pulses = src_block->number_of_pulses;
 
-	if(dst_block_offset >= td->nb_of_pulses)
+	if(dst_block_offset >= td->channels[0].nb_of_pulses)
 	{
 		if(pulses_ok)
 			*pulses_ok = 0;
@@ -1318,25 +1351,25 @@ static uint32_t detectflakeybits(HXCFE_TRKSTREAM * td,pulsesblock * src_block, u
 		return 0;
 	}
 
-	if(dst_block_offset + src_number_of_pulses >= td->nb_of_pulses)
+	if(dst_block_offset + src_number_of_pulses >= td->channels[0].nb_of_pulses)
 	{
-		src_number_of_pulses = td->nb_of_pulses - dst_block_offset;
+		src_number_of_pulses = td->channels[0].nb_of_pulses - dst_block_offset;
 	}
 
-	srcptr        = td->track_dump;
+	srcptr        = td->channels[0].stream;
 
-	start_ptr     = &td->track_dump[src_block->start_index];
-	dst_ptr       = &td->track_dump[dst_block_offset];
-	last_dump_ptr = &td->track_dump[td->nb_of_pulses - 2];
-	last_block_ptr= &td->track_dump[src_block->start_index + src_number_of_pulses];
+	start_ptr     = &td->channels[0].stream[src_block->start_index];
+	dst_ptr       = &td->channels[0].stream[dst_block_offset];
+	last_dump_ptr = &td->channels[0].stream[td->channels[0].nb_of_pulses - 2];
+	last_block_ptr= &td->channels[0].stream[src_block->start_index + src_number_of_pulses];
 
 	if(maxptr == 0xFFFFFFFF)
 	{
-		maxptr5 = &td->track_dump[td->nb_of_pulses-1];
+		maxptr5 = &td->channels[0].stream[td->channels[0].nb_of_pulses-1];
 	}
 	else
 	{
-		maxptr5 = &td->track_dump[maxptr];
+		maxptr5 = &td->channels[0].stream[maxptr];
 	}
 
 	if( dst_ptr < last_dump_ptr && start_ptr < last_block_ptr )
@@ -1463,10 +1496,10 @@ static uint32_t compare_block_timebased(HXCFE* floppycontext,HXCFE_TRKSTREAM * t
 	i = src_start_index;
 	forward_link = &pl->forward_link[i];
 	total_tick_source = 0;
-	while( ( i < src_last_index ) && ( i < td->nb_of_pulses ) )
+	while( ( i < src_last_index ) && ( i < td->channels[0].nb_of_pulses ) )
 	{
 		*(forward_link++) = -1;
-		total_tick_source = total_tick_source + td->track_dump[i];
+		total_tick_source = total_tick_source + td->channels[0].stream[i];
 		i++;
 	};
 
@@ -1476,9 +1509,9 @@ static uint32_t compare_block_timebased(HXCFE* floppycontext,HXCFE_TRKSTREAM * t
 
 	i = dst_start_index;
 	total_tick_destination = 0;
-	while(i< dst_last_index && i < td->nb_of_pulses)
+	while(i< dst_last_index && i < td->channels[0].nb_of_pulses)
 	{
-		total_tick_destination = total_tick_destination + td->track_dump[i];
+		total_tick_destination = total_tick_destination + td->channels[0].stream[i];
 		i++;
 	};
 
@@ -1497,7 +1530,7 @@ static uint32_t compare_block_timebased(HXCFE* floppycontext,HXCFE_TRKSTREAM * t
 	total_tick_source2 = 0;
 	while(i <= src_last_index)
 	{
-		total_tick_source2 = total_tick_source2 + td->track_dump[i];
+		total_tick_source2 = total_tick_source2 + td->channels[0].stream[i];
 
 		time_index = tick_to_time(total_tick_source2) / 10;
 
@@ -1510,7 +1543,7 @@ static uint32_t compare_block_timebased(HXCFE* floppycontext,HXCFE_TRKSTREAM * t
 	total_tick_destination = 0;
 	while(i <= dst_last_index)
 	{
-		total_tick_destination = total_tick_destination + td->track_dump[i];
+		total_tick_destination = total_tick_destination + td->channels[0].stream[i];
 
 		time_index = tick_to_time((uint32_t)((double)total_tick_destination*timefactor)) / 10;
 
@@ -1687,7 +1720,7 @@ uint32_t searchBestOverlap(HXCFE* floppycontext,HXCFE_TRKSTREAM * track_dump, pu
 	i_up = 0;
 	i_down = 0;
 
-	memset(match_table , 0,sizeof(s_match) * track_dump->nb_of_pulses);
+	memset(match_table , 0,sizeof(s_match) * track_dump->channels[0].nb_of_pulses);
 
 	mt_i = 0;
 
@@ -1697,7 +1730,7 @@ uint32_t searchBestOverlap(HXCFE* floppycontext,HXCFE_TRKSTREAM * track_dump, pu
 		{
 			if(tick_up < tick_up_max)
 			{
-				if(repeat_index + i_up < track_dump->nb_of_pulses)
+				if(repeat_index + i_up < track_dump->channels[0].nb_of_pulses)
 				{
 					// compare the block
 					//mmx_blk_compare (uint32_t * src_ptr,uint32_t * dst_ptr,uint32_t * last_src_ptr,uint32_t * last_dst_ptr, int * bad_pulses, int * good_pulses);
@@ -1707,10 +1740,10 @@ uint32_t searchBestOverlap(HXCFE* floppycontext,HXCFE_TRKSTREAM * track_dump, pu
 					match_table[mt_i].no = bad;
 					match_table[mt_i].offset = repeat_index + i_up;
 
-					tick_up = tick_up + track_dump->track_dump[repeat_index + i_up];
+					tick_up = tick_up + track_dump->channels[0].stream[repeat_index + i_up];
 					i_up++;
 
-					if(mt_i < track_dump->nb_of_pulses ) mt_i++;
+					if(mt_i < track_dump->channels[0].nb_of_pulses ) mt_i++;
 				}
 				else
 				{
@@ -1727,7 +1760,7 @@ uint32_t searchBestOverlap(HXCFE* floppycontext,HXCFE_TRKSTREAM * track_dump, pu
 		{
 			if(tick_down < tick_down_max)
 			{
-				if(repeat_index - i_down < track_dump->nb_of_pulses)
+				if(repeat_index - i_down < track_dump->channels[0].nb_of_pulses)
 				{
 					// compare the block
 					compareblock(track_dump,src_block, repeat_index - i_down,&good,&bad,0);
@@ -1736,10 +1769,10 @@ uint32_t searchBestOverlap(HXCFE* floppycontext,HXCFE_TRKSTREAM * track_dump, pu
 					match_table[mt_i].no = bad;
 					match_table[mt_i].offset = repeat_index - i_down;
 
-					tick_down = tick_down + track_dump->track_dump[repeat_index - i_down];
+					tick_down = tick_down + track_dump->channels[0].stream[repeat_index - i_down];
 					i_down++;
 
-					if(mt_i< track_dump->nb_of_pulses ) mt_i++;
+					if(mt_i< track_dump->channels[0].nb_of_pulses ) mt_i++;
 				}
 				else
 				{
@@ -1760,7 +1793,7 @@ uint32_t searchBestOverlap(HXCFE* floppycontext,HXCFE_TRKSTREAM * track_dump, pu
 
 			if(tick_up < tick_up_max)
 			{
-				if(repeat_index + i_up < track_dump->nb_of_pulses)
+				if(repeat_index + i_up < track_dump->channels[0].nb_of_pulses)
 				{
 					// compare the block
 					if(fastcompareblock(track_dump,src_block, repeat_index + i_up))
@@ -1768,7 +1801,7 @@ uint32_t searchBestOverlap(HXCFE* floppycontext,HXCFE_TRKSTREAM * track_dump, pu
 						goodblockfound = 1;
 					}
 
-					tick_up = tick_up + track_dump->track_dump[repeat_index + i_up];
+					tick_up = tick_up + track_dump->channels[0].stream[repeat_index + i_up];
 					i_up++;
 				}
 				else
@@ -1779,7 +1812,7 @@ uint32_t searchBestOverlap(HXCFE* floppycontext,HXCFE_TRKSTREAM * track_dump, pu
 
 			if(tick_down < tick_down_max)
 			{
-				if(repeat_index - i_down < track_dump->nb_of_pulses)
+				if(repeat_index - i_down < track_dump->channels[0].nb_of_pulses)
 				{
 					// compare the block
 					if(fastcompareblock(track_dump,src_block, repeat_index - i_down))
@@ -1787,7 +1820,7 @@ uint32_t searchBestOverlap(HXCFE* floppycontext,HXCFE_TRKSTREAM * track_dump, pu
 						goodblockfound = 1;
 					}
 
-					tick_down = tick_down + track_dump->track_dump[repeat_index - i_down];
+					tick_down = tick_down + track_dump->channels[0].stream[repeat_index - i_down];
 					i_down++;
 				}
 				else
@@ -1848,9 +1881,9 @@ static int GetTickCnt(HXCFE_TRKSTREAM * track_dump,unsigned int start, unsigned 
 
 	ticknum = 0;
 	i = start;
-	while( (i< track_dump->nb_of_pulses) && ( i < end ) )
+	while( (i< track_dump->channels[0].nb_of_pulses) && ( i < end ) )
 	{
-		ticknum = ticknum + track_dump->track_dump[i];
+		ticknum = ticknum + track_dump->channels[0].stream[i];
 		i++;
 	}
 
@@ -1979,7 +2012,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 		search_depth = (double)SEARCHDEPTH;
 	}
 
-	if(track_dump->nb_of_pulses)
+	if(track_dump->channels[0].nb_of_pulses)
 	{
 		// Only one revolution -> No flakey bits detection : return a dummy buffer.
 		if( ( hxcfe_FxStream_GetNumberOfRevolution(fxs,track_dump) == 1 ) ||  hxcfe_getEnvVarValue( fxs->hxcfe, "FLUXSTREAM_SKIPBLOCKSDETECTION") )
@@ -1989,7 +2022,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 			floppycontext->hxc_printf(MSG_DEBUG,"ScanAndFindRepeatedBlocks : No flakey bits detection : return a dummy buffer.");
 #endif
 
-			pl = alloc_pulses_link_array(track_dump->nb_of_pulses);
+			pl = alloc_pulses_link_array(track_dump->channels[0].nb_of_pulses);
 			if(pl)
 			{
 				for(i=0;i<pl->number_of_pulses;i++)
@@ -2009,12 +2042,12 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 			return pl;
 		}
 
-		match_table = malloc(sizeof(s_match) * track_dump->nb_of_pulses);
+		match_table = malloc(sizeof(s_match) * track_dump->channels[0].nb_of_pulses);
 		if(match_table)
 		{
-			memset(match_table , 0,sizeof(s_match) * track_dump->nb_of_pulses);
+			memset(match_table , 0,sizeof(s_match) * track_dump->channels[0].nb_of_pulses);
 
-			pl = alloc_pulses_link_array(track_dump->nb_of_pulses);
+			pl = alloc_pulses_link_array(track_dump->channels[0].nb_of_pulses);
 
 #ifdef FLUXSTREAMDBG
 			floppycontext->hxc_printf(MSG_DEBUG,"Number of pulses : %d",pl->number_of_pulses);
@@ -2033,25 +2066,25 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 				do
 				{
 
-					cur_time_len = cur_time_len + track_dump->track_dump[j];
+					cur_time_len = cur_time_len + track_dump->channels[0].stream[j];
 
 					j++;
 
-				}while( (cur_time_len < index_tickpediod) && (j < track_dump->nb_of_pulses) );
+				}while( (cur_time_len < index_tickpediod) && (j < track_dump->channels[0].nb_of_pulses) );
 
 				tick_down_max = time_to_tick((uint32_t)((double)indexperiod * search_depth));
 				tick_up_max =   time_to_tick((uint32_t)((double)indexperiod * search_depth));
 
 				searchstate = 0;
 
-				if(j < track_dump->nb_of_pulses )
+				if(j < track_dump->channels[0].nb_of_pulses )
 				{
 					searchBestOverlap(floppycontext,track_dump, &tb->blocks[block_num], j - 1, tick_down_max, tick_up_max, match_table,&searchstate,0);
 				}
 
 				block_num++;
 
-			}while( !searchstate && ( (block_num<tb->number_of_blocks) && (j < track_dump->nb_of_pulses)  && !end_dump_reached));
+			}while( !searchstate && ( (block_num<tb->number_of_blocks) && (j < track_dump->channels[0].nb_of_pulses)  && !end_dump_reached));
 
 
 			/////////////////////////////////////////////////////////////////////////////////
@@ -2123,10 +2156,10 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 							do
 							{
 
-								cur_time_len = cur_time_len + track_dump->track_dump[j];
+								cur_time_len = cur_time_len + track_dump->channels[0].stream[j];
 
 								j++;
-							}while( (cur_time_len < (tb->blocks[block_num].tickoffset - tb->blocks[previousmatchedblock].tickoffset) ) && (j < track_dump->nb_of_pulses) );
+							}while( (cur_time_len < (tb->blocks[block_num].tickoffset - tb->blocks[previousmatchedblock].tickoffset) ) && (j < track_dump->channels[0].nb_of_pulses) );
 
 							tick_down_max = (uint32_t)((double)(tb->blocks[block_num].tickoffset - tb->blocks[previousmatchedblock].tickoffset) * (double)search_depth*2);
 							tick_up_max =   tick_down_max;
@@ -2144,11 +2177,11 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 							do
 							{
 
-								cur_time_len = cur_time_len + track_dump->track_dump[j];
+								cur_time_len = cur_time_len + track_dump->channels[0].stream[j];
 
 								j++;
 
-							}while( (cur_time_len < index_tickpediod) && (j < track_dump->nb_of_pulses) );
+							}while( (cur_time_len < index_tickpediod) && (j < track_dump->channels[0].nb_of_pulses) );
 
 							tick_down_max = time_to_tick((uint32_t)((double)indexperiod * (double)0.0125));
 							tick_up_max =   time_to_tick((uint32_t)((double)indexperiod * (double)0.0125));
@@ -2159,7 +2192,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 						}
 
-						if(j < track_dump->nb_of_pulses )
+						if(j < track_dump->channels[0].nb_of_pulses )
 						{
 
 							mt_i = searchBestOverlap(floppycontext,track_dump, &tb->blocks[block_num], j - 1, tick_down_max, tick_up_max, match_table,&searchstate,1);
@@ -2296,7 +2329,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 						block_num++;
 					}
 
-				}while( (block_num<tb->number_of_blocks) && (j < track_dump->nb_of_pulses)  && !end_dump_reached);
+				}while( (block_num<tb->number_of_blocks) && (j < track_dump->channels[0].nb_of_pulses)  && !end_dump_reached);
 			}
 
 			/////////////////////////////////////////////////////////
@@ -2672,9 +2705,9 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 				{
 					for(i=tb->blocks[block_num].start_index;i<tb->blocks[block_num].number_of_pulses;i++)
 					{
-						if((i<(int32_t)track_dump->nb_of_pulses) && pl->forward_link[i]>=0)
+						if((i<(int32_t)track_dump->channels[0].nb_of_pulses) && pl->forward_link[i]>=0)
 						{
-							if(pl->forward_link[i]<(int32_t)track_dump->nb_of_pulses)
+							if(pl->forward_link[i]<(int32_t)track_dump->channels[0].nb_of_pulses)
 							{
 								if(!pl->forward_link[pl->forward_link[i]])
 								{
@@ -2695,7 +2728,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 						for(i=tb->blocks[block_num].start_index;i<tb->blocks[block_num].number_of_pulses;i++)
 						{
-							if((i<(int32_t)track_dump->nb_of_pulses) && pl->forward_link[i]<0)
+							if((i<(int32_t)track_dump->channels[0].nb_of_pulses) && pl->forward_link[i]<0)
 							{
 								pl->forward_link[i] = 1 + i;
 							}
@@ -2715,11 +2748,11 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 				}
 			}
 
-			/*for(i=0;i<track_dump->nb_of_pulses;i++)
+			/*for(i=0;i<track_dump->channels[0].nb_of_pulses;i++)
 			{
-				//if(track_dump->track_dump[i] > 0x100)
+				//if(track_dump->channels[0].stream[i] > 0x100)
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"offset:%d , val :%d",i,track_dump->track_dump[i]);
+					floppycontext->hxc_printf(MSG_DEBUG,"offset:%d , val :%d",i,track_dump->channels[0].stream[i]);
 				}
 			}*/
 
@@ -2864,51 +2897,63 @@ void hxcfe_FxStream_setFilterParameters( HXCFE_FXSA * fxs, int32_t number_of_pas
 	}
 }
 
-HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, int32_t wordsize, uint32_t nbword )
+HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, int32_t wordsize, uint32_t nbword, uint32_t type, char * name, HXCFE_TRKSTREAM * trk_stream)
 {
-	HXCFE_TRKSTREAM* track_dump;
 	uint32_t total_tick;
 	uint32_t total_tick_transposed;
 	uint32_t total_tick_computed;
-	unsigned int i;
+	unsigned int i,channel;
 
 #ifdef FLUXSTREAMDBG
 	fxs->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_FxStream_ImportStream : in buffer : %p, wordsize : %d, number of words : %d",stream,wordsize,nbword);
 #endif
 
-	track_dump = malloc(sizeof(HXCFE_TRKSTREAM));
-	if(track_dump)
+	if(!trk_stream)
 	{
-		memset( track_dump, 0, sizeof(HXCFE_TRKSTREAM) );
+		trk_stream = malloc(sizeof(HXCFE_TRKSTREAM));
+		memset( trk_stream, 0, sizeof(HXCFE_TRKSTREAM) );
+	}
 
-		track_dump->track_dump = malloc( nbword * sizeof(uint32_t) );
-		if( track_dump->track_dump )
+	channel = 0;
+	while(channel<MAX_NB_OF_STREAMCHANNEL && trk_stream->channels[channel].stream)
+	{
+		channel++;
+	}
+
+	if(trk_stream && (channel<MAX_NB_OF_STREAMCHANNEL) )
+	{
+		trk_stream->channels[channel].stream_name[64-1] = 0;
+		strncpy(trk_stream->channels[channel].stream_name,name,64 - 1);
+		trk_stream->channels[channel].type = type;
+
+		trk_stream->channels[channel].stream = malloc( nbword * sizeof(uint32_t) );
+		if( trk_stream->channels[channel].stream )
 		{
 			total_tick = 0;
 			total_tick_transposed = 0;
-			memset( track_dump->track_dump, 0, nbword * sizeof(uint32_t) );
+			memset( trk_stream->channels[channel].stream, 0, nbword * sizeof(uint32_t) );
 			for( i = 0 ; i < nbword ; i++ )
 			{
 				switch(wordsize)
 				{
 					case 8:
-						track_dump->track_dump[i] = *(((uint8_t*)stream) + i);
+						trk_stream->channels[channel].stream[i] = *(((uint8_t*)stream) + i);
 					break;
 					case 16:
-						track_dump->track_dump[i] = *(((uint16_t*)stream) + i);
+						trk_stream->channels[channel].stream[i] = *(((uint16_t*)stream) + i);
 					break;
 					case 32:
-						track_dump->track_dump[i] = *(((uint32_t*)stream) + i);
+						trk_stream->channels[channel].stream[i] = *(((uint32_t*)stream) + i);
 					break;
 					default:
 					break;
 				}
 
-				total_tick += track_dump->track_dump[i];
+				total_tick += trk_stream->channels[channel].stream[i];
 
-				track_dump->track_dump[i] = (uint32_t)((float)track_dump->track_dump[i] * (float)((float)fxs->steptime/(float)(1E12 / TICKFREQ)));
+				trk_stream->channels[channel].stream[i] = (uint32_t)((float)trk_stream->channels[channel].stream[i] * (float)((float)fxs->steptime/(float)(1E12 / TICKFREQ)));
 
-				total_tick_transposed += track_dump->track_dump[i];
+				total_tick_transposed += trk_stream->channels[channel].stream[i];
 
 				total_tick_computed = (uint32_t)((float)total_tick * (float)((float)fxs->steptime/(float)(1E12 / TICKFREQ)));
 
@@ -2919,28 +2964,28 @@ HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, 
 					if( total_tick_transposed < total_tick_computed )
 					{
 						total_tick_transposed++;
-						track_dump->track_dump[i]++;
+						trk_stream->channels[channel].stream[i]++;
 					}
 					else
 					{
-						if( track_dump->track_dump[i] > 1 )
+						if( trk_stream->channels[channel].stream[i] > 1 )
 						{
 							total_tick_transposed--;
-							track_dump->track_dump[i]--;
+							trk_stream->channels[channel].stream[i]--;
 						}
 					}
 				}
 			}
 
-			track_dump->nb_of_pulses = nbword;
+			trk_stream->channels[channel].nb_of_pulses = nbword;
 		}
 		else
 		{
-			free(track_dump);
+			free(trk_stream);
 			return 0;
 		}
 
-		return track_dump;
+		return trk_stream;
 	}
 
 	return 0;
@@ -2954,7 +2999,7 @@ void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t 
 	{
 		if(std)
 		{
-			if(streamposition < std->nb_of_pulses)
+			if(streamposition < std->channels[0].nb_of_pulses)
 			{
 #ifdef FLUXSTREAMDBG
 				fxs->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_FxStream_AddIndex : streamposition %d (%d us) - tickoffset %d - flags : 0x%.8X",streamposition,tick_to_time(GetTickCnt(std,0, streamposition)),tickoffset,flags);
@@ -2968,7 +3013,7 @@ void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t 
 
 					for(i = 0;i < streamposition;i++)
 					{
-						cellpos = cellpos + std->track_dump[i];
+						cellpos = cellpos + std->channels[0].stream[i];
 					}
 
 					std->index_evt_tab[std->nb_of_index].cellpos = cellpos;
@@ -2979,7 +3024,7 @@ void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t 
 			}
 			else
 			{
-				fxs->hxcfe->hxc_printf(MSG_ERROR,"hxcfe_FxStream_AddIndex : streamposition beyond of stream limit ! (%d >= %d)",streamposition,std->nb_of_pulses);
+				fxs->hxcfe->hxc_printf(MSG_ERROR,"hxcfe_FxStream_AddIndex : streamposition beyond of stream limit ! (%d >= %d)",streamposition,std->channels[0].nb_of_pulses);
 			}
 		}
 	}
@@ -2994,9 +3039,9 @@ void hxcfe_FxStream_ChangeSpeed( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, float 
 		{
 			if(speedchange && (speedchange != 1.0))
 			{
-				for(i=0;i<std->nb_of_pulses;i++)
+				for(i=0;i<std->channels[0].nb_of_pulses;i++)
 				{
-					std->track_dump[i] = (uint32_t)(((float)std->track_dump[i] ) * speedchange);
+					std->channels[0].stream[i] = (uint32_t)(((float)std->channels[0].stream[i] ) * speedchange);
 				}
 
 				for(i=0;i<std->nb_of_index;i++)
@@ -3007,7 +3052,7 @@ void hxcfe_FxStream_ChangeSpeed( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, float 
 
 					for(j=0;j < streamposition;j++)
 					{
-						cellpos = cellpos + std->track_dump[j];
+						cellpos = cellpos + std->channels[0].stream[j];
 					}
 
 					std->index_evt_tab[i].cellpos = cellpos;
@@ -3238,12 +3283,12 @@ HXCFE_TRKSTREAM * duplicate_track_stream(HXCFE_TRKSTREAM * trks)
 		if(new_trks)
 		{
 			memcpy(new_trks,trks,sizeof(HXCFE_TRKSTREAM));
-			if(trks->nb_of_pulses && trks->track_dump)
+			if(trks->channels[0].nb_of_pulses && trks->channels[0].stream)
 			{
-				new_trks->track_dump = malloc(trks->nb_of_pulses * sizeof(uint32_t));
-				if(new_trks->track_dump)
+				new_trks->channels[0].stream = malloc(trks->channels[0].nb_of_pulses * sizeof(uint32_t));
+				if(new_trks->channels[0].stream)
 				{
-					memcpy(new_trks->track_dump,trks->track_dump,trks->nb_of_pulses * sizeof(uint32_t));
+					memcpy(new_trks->channels[0].stream,trks->channels[0].stream,trks->channels[0].nb_of_pulses * sizeof(uint32_t));
 				}
 			}
 		}
@@ -3259,19 +3304,19 @@ HXCFE_TRKSTREAM * reverse_track_stream(HXCFE_TRKSTREAM * trks)
 
 	if(trks)
 	{
-		if(trks->track_dump && trks->nb_of_pulses)
+		if(trks->channels[0].stream && trks->channels[0].nb_of_pulses)
 		{
-			reversed_track = malloc(trks->nb_of_pulses * sizeof(uint32_t));
+			reversed_track = malloc(trks->channels[0].nb_of_pulses * sizeof(uint32_t));
 			if(reversed_track)
 			{
-				for(i=0;i<trks->nb_of_pulses;i++)
+				for(i=0;i<trks->channels[0].nb_of_pulses;i++)
 				{
-					reversed_track[i] = trks->track_dump[(trks->nb_of_pulses - 1) - i];
+					reversed_track[i] = trks->channels[0].stream[(trks->channels[0].nb_of_pulses - 1) - i];
 				}
 
-				free(trks->track_dump);
+				free(trks->channels[0].stream);
 
-				trks->track_dump = reversed_track;
+				trks->channels[0].stream = reversed_track;
 			}
 		}
 	}
@@ -3373,7 +3418,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 		// Allocate the blocks.
 		tb = AllocateBlocks(std, BLOCK_TIME);
 
-		hxcfe->hxc_printf(MSG_DEBUG,"Track dump length : %d us, number of block : %d, Number of pulses : %d",totallen/100,tb->number_of_blocks,std->nb_of_pulses);
+		hxcfe->hxc_printf(MSG_DEBUG,"Track dump length : %d us, number of block : %d, Number of pulses : %d",totallen/100,tb->number_of_blocks,std->channels[0].nb_of_pulses);
 
 		// Get the index period.
 		indexperiod = hxcfe_FxStream_GetMeanRevolutionPeriod(fxs,std);
@@ -3480,17 +3525,17 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 					track_len = 0;
 					i = first_index;
-					if( i < (int32_t)std->nb_of_pulses)
+					if( i < (int32_t)std->channels[0].nb_of_pulses)
 					{
 						do
 						{
-							track_len = track_len + std->track_dump[i];
+							track_len = track_len + std->channels[0].stream[i];
 							i++;
-						}while( ( i < (int32_t)std->nb_of_pulses ) && ( i < pl->forward_link[first_index] ) );
+						}while( ( i < (int32_t)std->channels[0].nb_of_pulses ) && ( i < pl->forward_link[first_index] ) );
 					}
 
 #ifdef FLUXSTREAMDBG
-					fxs->hxcfe->hxc_printf(MSG_DEBUG,"First valid index : %d [max : %d] - track length : %d - overlap : %d",first_index,std->nb_of_pulses,track_len,pl->forward_link[first_index]);
+					fxs->hxcfe->hxc_printf(MSG_DEBUG,"First valid index : %d [max : %d] - track length : %d - overlap : %d",first_index,std->channels[0].nb_of_pulses,track_len,pl->forward_link[first_index]);
 #endif
 
 #if 1
@@ -3507,7 +3552,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 						}
 						else
 						{
-							next_index = std->nb_of_pulses;
+							next_index = std->channels[0].nb_of_pulses;
 #ifdef FLUXSTREAMDBG
 							fxs->hxcfe->hxc_printf(MSG_DEBUG,"No second index... Use the remaining track...");
 #endif
@@ -3516,14 +3561,14 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 						track_len = 0;
 						i = first_index;
-						if( i < (int32_t)std->nb_of_pulses)
+						if( i < (int32_t)std->channels[0].nb_of_pulses)
 						{
 							do
 							{
 								pl->forward_link[ i ] = next_index + i;
-								track_len = track_len + std->track_dump[i];
+								track_len = track_len + std->channels[0].stream[i];
 								i++;
-							}while( ( i < (int32_t)std->nb_of_pulses ) && ( i < next_index ) );
+							}while( ( i < (int32_t)std->channels[0].nb_of_pulses ) && ( i < next_index ) );
 						}
 					}
 #endif
@@ -3548,22 +3593,22 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 							track_len = 0;
 							do
 							{
-								track_len = track_len + std->track_dump[first_index + i];
+								track_len = track_len + std->channels[0].stream[first_index + i];
 								i++;
-							}while(i < (int32_t)std->nb_of_pulses && track_len<time_to_tick(indexperiod));
+							}while(i < (int32_t)std->channels[0].nb_of_pulses && track_len<time_to_tick(indexperiod));
 							pl->forward_link[first_index] = first_index + i;
 						}
 
 						if( !fxs->defaultbitrate )
 						{
 							histo = (uint32_t*)malloc(65536* sizeof(uint32_t));
-							if((first_index + (pl->forward_link[first_index] - first_index))<(int32_t)std->nb_of_pulses)
+							if((first_index + (pl->forward_link[first_index] - first_index))<(int32_t)std->channels[0].nb_of_pulses)
 							{
-								computehistogram(&std->track_dump[first_index],pl->forward_link[first_index] - first_index,histo);
+								computehistogram(&std->channels[0].stream[first_index],pl->forward_link[first_index] - first_index,histo);
 							}
 							else
 							{
-								computehistogram(&std->track_dump[first_index],std->nb_of_pulses - first_index,histo);
+								computehistogram(&std->channels[0].stream[first_index],std->channels[0].nb_of_pulses - first_index,histo);
 								hxcfe->hxc_printf(MSG_ERROR,"hxcfe_FxStream_AnalyzeAndGetTrack : End of the stream flux passed ! Bad Stream flux ?");
 							}
 
@@ -3755,6 +3800,7 @@ void hxcfe_FxStream_ExportToBmp(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream, char 
 		hxcfe_td_activate_analyzer(td, NORTHSTAR_HS_MFM_ENCODING, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_NORTHSTAR_HS_MFM_ENCODING"));
 		hxcfe_td_activate_analyzer(td, HEATHKIT_HS_FM_ENCODING, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_HEATHKIT_HS_FM_ENCODING"));
 		hxcfe_td_activate_analyzer(td, DEC_RX02_M2FM_ENCODING, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_DEC_RX02_M2FM_ENCODING"));
+		hxcfe_td_activate_analyzer(td, QD_MO5_ENCODING, hxcfe_getEnvVarValue( fxs->hxcfe, "BMPEXPORT_ENABLE_QD_MO5_ENCODING"));
 
 		flags = 0;
 
@@ -3784,9 +3830,9 @@ void hxcfe_FxStream_FreeStream(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream)
 	{
 		if(stream)
 		{
-			if(stream->track_dump)
+			if(stream->channels[0].stream)
 			{
-				free(stream->track_dump);
+				free(stream->channels[0].stream);
 			}
 
 			free(stream);

@@ -81,6 +81,11 @@ typedef void HXCFE_TRKSTREAM;
 #define _HXCFE_TRKSTREAM_
 #endif
 
+#ifndef _HXCFE_STREAMCHANNEL_
+typedef void HXCFE_STREAMCHANNEL;
+#define _HXCFE_STREAMCHANNEL_
+#endif
+
 #ifndef _HXCFE_FXSA_
 typedef void HXCFE_FXSA;
 #define _HXCFE_FXSA_
@@ -490,7 +495,7 @@ int32_t                hxcfe_td_setName( HXCFE_TD *td, char * name );
 int32_t                hxcfe_td_exportToBMP( HXCFE_TD *td, char * filename );
 void                   hxcfe_td_deinit( HXCFE_TD *td );
 s_pulseslist *         hxcfe_td_getlastpulselist( HXCFE_TD *td );
-int                    hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream, int stream_index,uint16_t * sound_buffer, int nbsamples, int samplerate);
+int                    hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_STREAMCHANNEL* stream_channel, int stream_index,uint16_t * sound_buffer, int nbsamples, int samplerate);
 
 #define TD_FLAG_HICONTRAST (0x1 << 0)
 #define TD_FLAG_BIGDOT     (0x1 << 1)
@@ -508,7 +513,7 @@ void                   hxcfe_FxStream_setBitrate( HXCFE_FXSA * fxs, int32_t bitr
 void                   hxcfe_FxStream_setPhaseCorrectionFactor( HXCFE_FXSA * fxs, int32_t phasefactor );
 void                   hxcfe_FxStream_setFilterParameters( HXCFE_FXSA * fxs, int32_t number_of_passes, int32_t step );
 
-HXCFE_TRKSTREAM *      hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, int32_t wordsize, uint32_t nbword );
+HXCFE_TRKSTREAM *      hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, int32_t wordsize, uint32_t nbword, uint32_t type, char * name, HXCFE_TRKSTREAM * trk_stream );
 void                   hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t streamposition, int32_t tickoffset, uint32_t flags );
 HXCFE_SIDE *           hxcfe_FxStream_AnalyzeAndGetTrack( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std );
 void                   hxcfe_FxStream_ExportToBmp( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * stream, char * filename );
