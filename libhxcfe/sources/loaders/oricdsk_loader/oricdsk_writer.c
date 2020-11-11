@@ -179,7 +179,7 @@ int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,cha
 
 						for(k=0;k<track_size*8*2;k=k+2)
 						{
-							if(gettrackbit(floppy->tracks[j]->sides[i]->databuffer,k+databitoffset))
+							if(getbit(floppy->tracks[j]->sides[i]->databuffer,k+databitoffset))
 							{
 								setoricdsktrackbit(track_buf,k/2,0xFF);
 							}
@@ -211,7 +211,7 @@ int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,cha
 
 							for(k=0;k<track_size*8*2;k=k+4)
 							{
-								if(gettrackbit(floppy->tracks[j]->sides[i]->databuffer,k+databitoffset))
+								if(getbit(floppy->tracks[j]->sides[i]->databuffer,k+databitoffset))
 								{
 									setoricdsktrackbit(tmp_fm_track_buf,k/4,0xFF);
 								}
