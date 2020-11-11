@@ -192,7 +192,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 
 				hxcfe_FxStream_setResolution(fxs,10000); // 10 ns per tick
 
-				track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf_dword,32,(pulses_cnt));
+				track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf_dword,32,(pulses_cnt), HXCFE_STREAMCHANNEL_TYPE_RLEEVT, "data", NULL);
 				if(track_dump)
 				{
 					hxcfe_FxStream_AddIndex(fxs,track_dump,0,0,FXSTRM_INDEX_MAININDEX);

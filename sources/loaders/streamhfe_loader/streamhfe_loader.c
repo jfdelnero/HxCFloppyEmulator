@@ -230,7 +230,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext, streamhfe_track_def * trac
 
 			hxcfe_FxStream_setResolution(fxs,DEFAULT_BITS_PERIOD);
 
-			track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf_dword,32, p);
+			track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf_dword,32, p, HXCFE_STREAMCHANNEL_TYPE_RLEEVT, "data", NULL);
 			if(track_dump)
 			{
 				offset = 0;
