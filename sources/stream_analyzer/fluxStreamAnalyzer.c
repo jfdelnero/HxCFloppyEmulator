@@ -507,10 +507,10 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 		}
 
 		if(!fxs)
-			tickposition=(uint32_t*)malloc((size+1)*sizeof(uint32_t));
+			tickposition=(uint32_t*)malloc(TEMPBUFSIZE*sizeof(uint32_t));
 
 		if(tickposition)
-			memset(tickposition,0,(size+1)*sizeof(uint32_t));
+			memset(tickposition,0,TEMPBUFSIZE*sizeof(uint32_t));
 
 		bitoffset=0;
 		if(start_index>2000)
