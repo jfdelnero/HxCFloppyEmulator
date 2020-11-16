@@ -65,6 +65,10 @@
 #include "data/data_maktone_class_cracktro15_mod.h"
 #include "data/data_vim_not_again_mod.h"
 #include "data/data_zandax_supplydas_booze_mod.h"
+#include "data/data_meo_sleeping_waste_mod.h"
+#include "data/data_nao_gabber_astro_mod.h"
+#include "data/data_jason_shortness_mod.h"
+#include "data/data_physical_presence_mod.h"
 
 typedef struct scrolltab_
 {
@@ -97,6 +101,8 @@ scrolltab scroll[]=
 	{108,166,34,160,0},  // barrieres
 	{-1,0,0,0,0}
 };
+
+static int modcnt=0;
 
 void putsprite(uintro_context * democontext,unsigned int x,unsigned int y,unsigned int * buffer,unsigned int sx,unsigned int sy,unsigned int * sprite)
 {
@@ -282,29 +288,42 @@ uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 		hxcmod_init( (modcontext*)ui_context->modctx );
 		hxcmod_setcfg( (modcontext*)ui_context->modctx, 44100, 1, 1);
 
-#ifdef WIN32    
-		srand(GetTickCount());
-#endif
-		switch(rand()&3)
+		switch(modcnt&7)
 		{
 			case 0:
-				data_maktone_class_cracktro15_mod->unpacked_data=data_unpack(data_maktone_class_cracktro15_mod->data,data_maktone_class_cracktro15_mod->csize ,data_maktone_class_cracktro15_mod->data, data_maktone_class_cracktro15_mod->size);
-				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_maktone_class_cracktro15_mod->unpacked_data, data_maktone_class_cracktro15_mod->size);
+				data_nao_gabber_astro_mod->unpacked_data=data_unpack(data_nao_gabber_astro_mod->data,data_nao_gabber_astro_mod->csize ,data_nao_gabber_astro_mod->data, data_nao_gabber_astro_mod->size);
+				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_nao_gabber_astro_mod->unpacked_data, data_nao_gabber_astro_mod->size);
 			break;
 			case 1:
-				data_jozz_cognition_mod->unpacked_data=data_unpack(data_jozz_cognition_mod->data,data_jozz_cognition_mod->csize ,data_jozz_cognition_mod->data, data_jozz_cognition_mod->size);
-				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_jozz_cognition_mod->unpacked_data, data_jozz_cognition_mod->size);
+				data_physical_presence_mod->unpacked_data=data_unpack(data_physical_presence_mod->data,data_physical_presence_mod->csize ,data_physical_presence_mod->data, data_physical_presence_mod->size);
+				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_physical_presence_mod->unpacked_data, data_physical_presence_mod->size);
 			break;
 			case 2:
 				data_zandax_supplydas_booze_mod->unpacked_data=data_unpack(data_zandax_supplydas_booze_mod->data,data_zandax_supplydas_booze_mod->csize ,data_zandax_supplydas_booze_mod->data, data_zandax_supplydas_booze_mod->size);
 				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_zandax_supplydas_booze_mod->unpacked_data, data_zandax_supplydas_booze_mod->size);
 			break;
 			case 3:
+				data_jason_shortness_mod->unpacked_data=data_unpack(data_jason_shortness_mod->data,data_jason_shortness_mod->csize ,data_jason_shortness_mod->data, data_jason_shortness_mod->size);
+				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_jason_shortness_mod->unpacked_data, data_jason_shortness_mod->size);
+			break;
+			case 4:
+				data_meo_sleeping_waste_mod->unpacked_data=data_unpack(data_meo_sleeping_waste_mod->data,data_meo_sleeping_waste_mod->csize ,data_meo_sleeping_waste_mod->data, data_meo_sleeping_waste_mod->size);
+				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_meo_sleeping_waste_mod->unpacked_data, data_meo_sleeping_waste_mod->size);
+			break;
+			case 5:
+				data_maktone_class_cracktro15_mod->unpacked_data=data_unpack(data_maktone_class_cracktro15_mod->data,data_maktone_class_cracktro15_mod->csize ,data_maktone_class_cracktro15_mod->data, data_maktone_class_cracktro15_mod->size);
+				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_maktone_class_cracktro15_mod->unpacked_data, data_maktone_class_cracktro15_mod->size);
+			break;
+			case 6:
+				data_jozz_cognition_mod->unpacked_data=data_unpack(data_jozz_cognition_mod->data,data_jozz_cognition_mod->csize ,data_jozz_cognition_mod->data, data_jozz_cognition_mod->size);
+				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_jozz_cognition_mod->unpacked_data, data_jozz_cognition_mod->size);
+			break;
+			case 7:
 				data_vim_not_again_mod->unpacked_data=data_unpack(data_vim_not_again_mod->data,data_vim_not_again_mod->csize ,data_vim_not_again_mod->data, data_vim_not_again_mod->size);
 				hxcmod_load((modcontext*)ui_context->modctx, (void*)data_vim_not_again_mod->unpacked_data, data_vim_not_again_mod->size);
 			break;
-
 		}
+		modcnt++;
 	}
 
 	return ui_context;
@@ -330,20 +349,20 @@ void uintro_reset(uintro_context * ui_context)
 	memset(ui_context->framebuffer,0,ui_context->xsize*ui_context->ysize*sizeof(unsigned int));
 	memset(ui_context->blurbuffer,0,ui_context->xsize*ui_context->ysize*sizeof(unsigned int));
 
-#ifdef WIN32    
-	srand(GetTickCount());
-#endif
-	switch(rand()&3)
+	hxcmod_init( (modcontext*)ui_context->modctx );
+	hxcmod_setcfg( (modcontext*)ui_context->modctx, 44100, 1, 1);
+
+	switch(modcnt&7)
 	{
 		case 0:
-			if(!data_maktone_class_cracktro15_mod->unpacked_data)
-				data_maktone_class_cracktro15_mod->unpacked_data=data_unpack(data_maktone_class_cracktro15_mod->data,data_maktone_class_cracktro15_mod->csize ,data_maktone_class_cracktro15_mod->data, data_maktone_class_cracktro15_mod->size);
-			hxcmod_load((modcontext*)ui_context->modctx,(void*)data_maktone_class_cracktro15_mod->unpacked_data,data_maktone_class_cracktro15_mod->size);
+			if(!data_nao_gabber_astro_mod->unpacked_data)
+				data_nao_gabber_astro_mod->unpacked_data=data_unpack(data_nao_gabber_astro_mod->data,data_nao_gabber_astro_mod->csize ,data_nao_gabber_astro_mod->data, data_nao_gabber_astro_mod->size);
+			hxcmod_load((modcontext*)ui_context->modctx, (void*)data_nao_gabber_astro_mod->unpacked_data, data_nao_gabber_astro_mod->size);
 		break;
 		case 1:
-			if(!data_jozz_cognition_mod->unpacked_data)
-				data_jozz_cognition_mod->unpacked_data=data_unpack(data_jozz_cognition_mod->data,data_jozz_cognition_mod->csize ,data_jozz_cognition_mod->data, data_jozz_cognition_mod->size);
-			hxcmod_load((modcontext*)ui_context->modctx,(void*)data_jozz_cognition_mod->unpacked_data,data_jozz_cognition_mod->size);
+			if(!data_physical_presence_mod->unpacked_data)
+				data_physical_presence_mod->unpacked_data=data_unpack(data_physical_presence_mod->data,data_physical_presence_mod->csize ,data_physical_presence_mod->data, data_physical_presence_mod->size);
+			hxcmod_load((modcontext*)ui_context->modctx, (void*)data_physical_presence_mod->unpacked_data, data_physical_presence_mod->size);
 		break;
 		case 2:
 			if(!data_zandax_supplydas_booze_mod->unpacked_data)
@@ -351,12 +370,33 @@ void uintro_reset(uintro_context * ui_context)
 			hxcmod_load((modcontext*)ui_context->modctx,(void*)data_zandax_supplydas_booze_mod->unpacked_data,data_zandax_supplydas_booze_mod->size);
 		break;
 		case 3:
+			if(!data_jason_shortness_mod->unpacked_data)
+				data_jason_shortness_mod->unpacked_data=data_unpack(data_jason_shortness_mod->data,data_jason_shortness_mod->csize ,data_jason_shortness_mod->data, data_jason_shortness_mod->size);
+			hxcmod_load((modcontext*)ui_context->modctx, (void*)data_jason_shortness_mod->unpacked_data, data_jason_shortness_mod->size);
+		break;
+		case 4:
+			if(!data_meo_sleeping_waste_mod->unpacked_data)
+				data_meo_sleeping_waste_mod->unpacked_data=data_unpack(data_meo_sleeping_waste_mod->data,data_meo_sleeping_waste_mod->csize ,data_meo_sleeping_waste_mod->data, data_meo_sleeping_waste_mod->size);
+			hxcmod_load((modcontext*)ui_context->modctx, (void*)data_meo_sleeping_waste_mod->unpacked_data, data_meo_sleeping_waste_mod->size);
+		break;
+		case 5:
+			if(!data_maktone_class_cracktro15_mod->unpacked_data)
+				data_maktone_class_cracktro15_mod->unpacked_data=data_unpack(data_maktone_class_cracktro15_mod->data,data_maktone_class_cracktro15_mod->csize ,data_maktone_class_cracktro15_mod->data, data_maktone_class_cracktro15_mod->size);
+			hxcmod_load((modcontext*)ui_context->modctx,(void*)data_maktone_class_cracktro15_mod->unpacked_data,data_maktone_class_cracktro15_mod->size);
+		break;
+		case 6:
+			if(!data_jozz_cognition_mod->unpacked_data)
+				data_jozz_cognition_mod->unpacked_data=data_unpack(data_jozz_cognition_mod->data,data_jozz_cognition_mod->csize ,data_jozz_cognition_mod->data, data_jozz_cognition_mod->size);
+			hxcmod_load((modcontext*)ui_context->modctx,(void*)data_jozz_cognition_mod->unpacked_data,data_jozz_cognition_mod->size);
+		break;
+		case 7:
 			if(!data_vim_not_again_mod->unpacked_data)
 				data_vim_not_again_mod->unpacked_data=data_unpack(data_vim_not_again_mod->data,data_vim_not_again_mod->csize ,data_vim_not_again_mod->data, data_vim_not_again_mod->size);
 			hxcmod_load((modcontext*)ui_context->modctx,(void*)(data_vim_not_again_mod->unpacked_data),data_vim_not_again_mod->size);
 		break;
-
 	}
+
+	modcnt++;
 }
 
 

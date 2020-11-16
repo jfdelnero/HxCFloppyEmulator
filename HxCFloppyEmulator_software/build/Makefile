@@ -94,6 +94,10 @@ DATA_FILES: bmptoh
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh maktone_class_cracktro15.mod -DATA
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh jozz_cognition.mod -DATA
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh vim_not_again.mod -DATA
+	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh meo_sleeping_waste.mod -DATA
+	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh physical_presence.mod -DATA
+	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh jason_shortness.mod -DATA
+	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh nao_gabber_astro.mod -DATA
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh COPYING_FULL -DATA
 
 HxCFloppyEmulator.exe: win32_hxcfloppy_res.o main.o utils.o $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) $(LIBUSBHXCFE) ../../../build/libhxcadaptor.a
