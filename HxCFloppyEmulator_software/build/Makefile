@@ -6,7 +6,7 @@ CPP=g++
 TARGET := $(shell uname)
 
 BASEDIR=../sources
-INCLUDES = -I$(BASEDIR) -I ../../../libhxcfe/trunk/sources -I $(BASEDIR)/gui -I $(BASEDIR)/thirdpartylibs/fltk/fltk-1.3.x/ -I ../../../libusbhxcfe/trunk/sources -I ../../../libhxcadaptor/trunk/sources -I $(BASEDIR)/gui/microintro/
+INCLUDES = -I$(BASEDIR) -I ../../../libhxcfe/trunk/sources -I $(BASEDIR)/gui -I $(BASEDIR)/thirdpartylibs/fltk/fltk-1.x.x/ -I ../../../libusbhxcfe/trunk/sources -I ../../../libhxcadaptor/trunk/sources -I $(BASEDIR)/gui/microintro/
 
 DEBUG ?= 0
 DEBUG_ASAN ?= 0
@@ -71,7 +71,7 @@ LDFLAGS += -lc -lm -ldl -lpthread -framework Cocoa -arch x86_64 -mmacosx-version
 LIBHXCFE = libhxcfe.dylib
 LIBUSBHXCFE = libusbhxcfe.dylib
 else
-LDFLAGS += $(shell $(BASEDIR)/thirdpartylibs/fltk/fltk-1.3.x/fltk-config --ldflags)
+LDFLAGS += $(shell $(BASEDIR)/thirdpartylibs/fltk/fltk-1.x.x/fltk-config --ldflags)
 endif
 
 FTDIFLOPPYEMU=usb_hxcfloppyemulator.o variablebitrate.o
@@ -79,7 +79,7 @@ FTDIFLOPPYEMU=usb_hxcfloppyemulator.o variablebitrate.o
 GUI = main_gui.o msg_txt.o gui_strings.o about_gui.o batch_converter_window.o floppy_dump_window.o floppy_infos_window.o license_gui.o log.o parameters.o rawfile_loader_window.o sdhxcfecfg_window.o usbhxcfecfg_window.o cb_batch_converter_window.o cb_floppy_dump_window.o cb_floppy_infos_window.o cb_rawfile_loader_window.o cb_sdhxcfecfg_window.o cb_usbhxcfecfg_window.o cb_filesystem_generator_window.o filesystem_generator_window.o cb_edittool_window.o edittool_window.o floppy_streamer_window.o cb_floppy_streamer_window.o
 
 MICROINTRO = microintro.o lzw.o pack.o rle.o hxcmod.o
-FLTKLIB = $(BASEDIR)/thirdpartylibs/fltk/fltk-1.3.x/lib/libfltk.a $(BASEDIR)/thirdpartylibs/fltk/fltk-1.3.x/lib/libfltk_images.a
+FLTKLIB = $(BASEDIR)/thirdpartylibs/fltk/fltk-1.x.x/lib/libfltk.a $(BASEDIR)/thirdpartylibs/fltk/fltk-1.x.x/lib/libfltk_images.a
 
 
 all: DATA_FILES $(EXEC)
