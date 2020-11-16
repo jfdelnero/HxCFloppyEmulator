@@ -1,0 +1,84 @@
+diff -Naur fltk-1.4.0/FL/Fl_Image.H fltk-1.4.x/FL/Fl_Image.H
+--- fltk-1.4.0/FL/Fl_Image.H	2019-03-03 09:40:23.000000000 +0100
++++ fltk-1.4.x/FL/Fl_Image.H	2019-12-07 17:56:21.712142000 +0100
+@@ -62,9 +62,13 @@
+ class FL_EXPORT Fl_Image {
+   friend class Fl_Graphics_Driver;
+ public:
+-  static const int ERR_NO_IMAGE    = -1;
++/*static const int ERR_NO_IMAGE    = -1;
+   static const int ERR_FILE_ACCESS = -2;
+-  static const int ERR_FORMAT      = -3;
++  static const int ERR_FORMAT      = -3;*/
++
++  enum{ERR_NO_IMAGE = -1};
++  enum{ERR_FILE_ACCESS = -2};
++  enum{ERR_FORMAT = -3};
+ 
+ private:
+   int w_, h_, d_, ld_, count_;
+diff -Naur fltk-1.4.0/src/fl_gleam.cxx fltk-1.4.x/src/fl_gleam.cxx
+--- fltk-1.4.0/src/fl_gleam.cxx	2019-03-03 09:40:23.000000000 +0100
++++ fltk-1.4.x/src/fl_gleam.cxx	2019-12-07 15:05:03.265096039 +0100
+@@ -64,7 +64,8 @@
+   whether this was intended or by accident.
+ */
+ 
+-static void shade_rect_top_bottom(int x, int y, int w, int h, Fl_Color fg1, Fl_Color fg2, float th) {
++static void shade_rect_top_bottom(int x, int y, int w, int h, Fl_Color fg1, Fl_Color fg2, float th) {
++  int i;
+   // calculate background size w/o borders
+   x += 2; y += 2; w -= 4; h -= 4;
+   // draw the shiny background using maximum limits
+@@ -75,7 +76,7 @@
+   float step_size_bottom = h_bottom > 1 ? (0.999f/float(h_bottom)) : 1;
+   // draw the gradient at the top of the widget
+   float k = 1;
+-  for (int i = 0; i < h_top; i++, k -= step_size_top) {
++  for (i = 0; i < h_top; i++, k -= step_size_top) {
+     gleam_color(fl_color_average(fl_color_average(fg1, fg2, th), fg1, k));
+     fl_xyline(x, y+i, x+w-1);
+   }
+@@ -86,7 +87,7 @@
+ 
+   // draw the gradient at the bottom of the widget
+   k = 1;
+-  for (int i = 0; i < h_bottom; i++, k -= step_size_bottom) {
++  for (i = 0; i < h_bottom; i++, k -= step_size_bottom) {
+     gleam_color(fl_color_average(fg1, fl_color_average(fg1, fg2, th), k));
+     fl_xyline(x, y+h_top+h_flat+i, x+w-1);
+   }
+diff -Naur fltk-1.4.0/src/Fl_Native_File_Chooser_WIN32.cxx fltk-1.4.x/src/Fl_Native_File_Chooser_WIN32.cxx
+--- fltk-1.4.0/src/Fl_Native_File_Chooser_WIN32.cxx	2019-03-03 09:40:23.000000000 +0100
++++ fltk-1.4.x/src/Fl_Native_File_Chooser_WIN32.cxx	2019-12-24 08:42:37.739708000 +0100
+@@ -387,13 +387,16 @@
+ 
+ // SHOW FILE BROWSER
+ int Fl_WinAPI_Native_File_Chooser_Driver::showfile() {
++  WCHAR * tmp_ptr;
+   bool unixpath = IsUnixPath(_directory) | IsUnixPath(_preset_file);    // caller uses unix paths?
++
+   ClearOFN();
+   clear_pathnames();
+   size_t fsize = FNFC_MAX_PATH;
+-  _ofn_ptr->Flags |= OFN_NOVALIDATE;    // prevent disabling of front slashes
++  //_ofn_ptr->Flags |= OFN_NOVALIDATE;    // prevent disabling of front slashes
+   _ofn_ptr->Flags |= OFN_HIDEREADONLY;  // hide goofy readonly flag
+   // USE NEW BROWSER
++  _ofn_ptr->Flags |= OFN_PATHMUSTEXIST | OFN_LONGNAMES;
+   _ofn_ptr->Flags |= OFN_EXPLORER;      // use newer explorer windows
+   _ofn_ptr->Flags |= OFN_ENABLESIZING;  // allow window to be resized (hey, why not?)
+   _ofn_ptr->Flags |= OFN_NOCHANGEDIR;   // XXX: docs say ineffective on XP/2K/NT, but set it anyway..
+@@ -416,6 +419,12 @@
+   }
+   // SPACE FOR RETURNED FILENAME
+   _ofn_ptr->lpstrFile    = new WCHAR[fsize];
++
++  tmp_ptr = new WCHAR[8];
++  tmp_ptr[0] = 0;
++  tmp_ptr[1] = 0;
++  _ofn_ptr->lpstrDefExt = tmp_ptr;  
++
+   _ofn_ptr->nMaxFile     = (DWORD)(fsize-1);
+   _ofn_ptr->lpstrFile[0] = 0;
+   _ofn_ptr->lpstrFile[1] = 0;           // dnull
