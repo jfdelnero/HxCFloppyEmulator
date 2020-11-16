@@ -26,6 +26,10 @@
 	#define HXCMOD_CLIPPING_CHECK 1
 #endif
 
+// Warning : The following option
+// required 32KB of additional RAM :
+// #define HXCMOD_USE_PRECALC_VOLUME_TABLE 1
+
 // Basic type
 typedef unsigned char   muchar;
 typedef signed   char   mchar;
@@ -133,9 +137,14 @@ typedef struct {
 	mulong  sampinc;
 	muint   period;
 	muchar  volume;
+#ifdef HXCMOD_USE_PRECALC_VOLUME_TABLE
+	mint  * volume_table;
+#endif
 	muchar  effect;
 	muchar  parameffect;
 	muint   effect_code;
+
+	mulong  last_set_offset;
 
 	mint    decalperiod;
 	mint    portaspeed;
@@ -194,8 +203,6 @@ typedef struct {
 
 	muint   number_of_channels;
 
-	muint   fullperiod[MAXNOTES * 8];
-
 	muint   mod_loaded;
 
 	mint    last_r_sample;
@@ -208,6 +215,11 @@ typedef struct {
 
 #ifdef EFFECTS_USAGE_STATE
 	int effects_event_counts[32];
+#endif
+
+#ifdef HXCMOD_USE_PRECALC_VOLUME_TABLE
+	mint    precalc_volume_array[65*256];
+	mint  * volume_selection_table[65];
 #endif
 
 } modcontext;

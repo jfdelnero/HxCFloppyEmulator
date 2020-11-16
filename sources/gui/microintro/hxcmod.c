@@ -92,10 +92,15 @@
 #define EFFECT_SET_TEMPO             0xF2 // Supported
 
 #define PERIOD_TABLE_LENGTH  MAXNOTES
-#define FULL_PERIOD_TABLE_LENGTH  ( PERIOD_TABLE_LENGTH * 8 )
+
+
+//
+// Finetuning periods -> Amiga period * 2^(-finetune/12/8)
+//
 
 static const short periodtable[]=
 {
+	// Finetune 0 (* 1.000000), Offset 0x0000
 	27392, 25856, 24384, 23040, 21696, 20480, 19328, 18240, 17216, 16256, 15360, 14496,
 	13696, 12928, 12192, 11520, 10848, 10240,  9664,  9120,  8606,  8128,  7680,  7248,
 	 6848,  6464,  6096,  5760,  5424,  5120,  4832,  4560,  4304,  4064,  3840,  3624,
@@ -107,7 +112,225 @@ static const short periodtable[]=
 	  107,   101,    95,    90,    85,    80,    75,    71,    67,    63,    60,    56,
 	   53,    50,    47,    45,    42,    40,    37,    35,    33,    31,    30,    28,
 	   27,    25,    24,    22,    21,    20,    19,    18,    17,    16,    15,    14,
+	   13,    13,    12,    11,    11,    10,     9,     9,     8,     8,     7,     7,
+
+	// Finetune 1 (* 0.992806), Offset 0x0120
+	27195, 25670, 24209, 22874, 21540, 20333, 19189, 18109, 17092, 16139, 15249, 14392,
+	13597, 12835, 12104, 11437, 10770, 10166,  9594,  9054,  8544,  8070,  7625,  7196,
+	 6799,  6417,  6052,  5719,  5385,  5083,  4797,  4527,  4273,  4035,  3812,  3598,
+	 3399,  3209,  3026,  2859,  2692,  2542,  2399,  2264,  2137,  2017,  1906,  1799,
+	 1700,  1604,  1513,  1430,  1346,  1271,  1199,  1132,  1068,  1009,   953,   899,
+	  850,   802,   757,   715,   673,   635,   600,   566,   534,   504,   477,   450,
+	  425,   401,   378,   357,   337,   318,   300,   283,   267,   252,   238,   224,
+	  212,   201,   189,   179,   169,   159,   150,   142,   134,   126,   119,   112,
+	  106,   100,    94,    89,    84,    79,    74,    70,    67,    63,    60,    56,
+	   53,    50,    47,    45,    42,    40,    37,    35,    33,    31,    30,    28,
+	   27,    25,    24,    22,    21,    20,    19,    18,    17,    16,    15,    14,
+	   13,    13,    12,    11,    11,    10,     9,     9,     8,     8,     7,     7,
+
+	// Finetune 2 (* 0.985663), Offset 0x0240
+	26999, 25485, 24034, 22710, 21385, 20186, 19051, 17978, 16969, 16023, 15140, 14288,
+	13500, 12743, 12017, 11355, 10692, 10093,  9525,  8989,  8483,  8011,  7570,  7144,
+	 6750,  6371,  6009,  5677,  5346,  5047,  4763,  4495,  4242,  4006,  3785,  3572,
+	 3375,  3186,  3004,  2839,  2673,  2523,  2381,  2247,  2121,  2003,  1892,  1786,
+	 1687,  1593,  1502,  1419,  1337,  1262,  1191,  1124,  1061,  1001,   946,   893,
+	  844,   796,   751,   710,   668,   631,   595,   562,   530,   501,   473,   447,
+	  422,   398,   376,   355,   334,   315,   298,   281,   265,   250,   237,   223,
+	  211,   199,   187,   177,   168,   158,   149,   141,   133,   125,   118,   111,
+	  105,   100,    94,    89,    84,    79,    74,    70,    66,    62,    59,    55,
+	   52,    49,    46,    44,    41,    39,    36,    34,    33,    31,    30,    28,
+	   27,    25,    24,    22,    21,    20,    19,    18,    17,    16,    15,    14,
+	   13,    13,    12,    11,    11,    10,     9,     9,     8,     8,     7,     7,
+
+	// Finetune 3 (* 0.978572), Offset 0x0360
+	26805, 25302, 23862, 22546, 21231, 20041, 18914, 17849, 16847, 15908, 15031, 14185,
+	13403, 12651, 11931, 11273, 10616, 10021,  9457,  8925,  8422,  7954,  7515,  7093,
+	 6701,  6325,  5965,  5637,  5308,  5010,  4728,  4462,  4212,  3977,  3758,  3546,
+	 3351,  3163,  2983,  2818,  2654,  2505,  2364,  2231,  2106,  1988,  1879,  1773,
+	 1675,  1581,  1491,  1409,  1327,  1253,  1182,  1116,  1053,   994,   939,   887,
+	  838,   791,   746,   705,   663,   626,   591,   558,   526,   497,   470,   443,
+	  419,   395,   373,   352,   332,   313,   296,   279,   263,   249,   235,   221,
+	  209,   198,   186,   176,   166,   157,   148,   140,   132,   124,   117,   111,
+	  105,    99,    93,    88,    83,    78,    73,    69,    66,    62,    59,    55,
+	   52,    49,    46,    44,    41,    39,    36,    34,    32,    30,    29,    27,
+	   26,    24,    23,    22,    21,    20,    19,    18,    17,    16,    15,    14,
+	   13,    13,    12,    11,    11,    10,     9,     9,     8,     8,     7,     7,
+
+	// Finetune 4 (* 0.971532), Offset 0x0480
+	26612, 25120, 23690, 22384, 21078, 19897, 18778, 17721, 16726, 15793, 14923, 14083,
+	13306, 12560, 11845, 11192, 10539,  9948,  9389,  8860,  8361,  7897,  7461,  7042,
+	 6653,  6280,  5922,  5596,  5270,  4974,  4694,  4430,  4181,  3948,  3731,  3521,
+	 3327,  3140,  2961,  2798,  2635,  2487,  2347,  2215,  2091,  1974,  1865,  1760,
+	 1663,  1570,  1481,  1399,  1317,  1244,  1174,  1108,  1045,   987,   933,   880,
+	  832,   785,   740,   700,   659,   622,   587,   554,   523,   494,   466,   440,
+	  416,   392,   370,   350,   329,   311,   293,   277,   261,   247,   233,   220,
+	  208,   196,   185,   175,   165,   155,   147,   139,   131,   123,   117,   110,
+	  104,    98,    92,    87,    83,    78,    73,    69,    65,    61,    58,    54,
+	   51,    49,    46,    44,    41,    39,    36,    34,    32,    30,    29,    27,
+	   26,    24,    23,    21,    20,    19,    18,    17,    17,    16,    15,    14,
+	   13,    13,    12,    11,    11,    10,     9,     9,     8,     8,     7,     7,
+
+	// Finetune 5 (* 0.964542), Offset 0x05a0
+	26421, 24939, 23519, 22223, 20927, 19754, 18643, 17593, 16606, 15680, 14815, 13982,
+	13210, 12470, 11760, 11112, 10463,  9877,  9321,  8797,  8301,  7840,  7408,  6991,
+	 6605,  6235,  5880,  5556,  5232,  4938,  4661,  4398,  4151,  3920,  3704,  3496,
+	 3303,  3117,  2940,  2778,  2616,  2469,  2330,  2199,  2076,  1960,  1852,  1748,
+	 1651,  1559,  1470,  1389,  1308,  1235,  1165,  1100,  1038,   980,   926,   874,
+	  826,   779,   735,   694,   654,   617,   583,   550,   519,   490,   463,   437,
+	  413,   390,   367,   347,   327,   309,   291,   275,   259,   245,   231,   218,
+	  206,   195,   183,   174,   164,   154,   146,   138,   130,   122,   116,   109,
+	  103,    97,    92,    87,    82,    77,    72,    68,    65,    61,    58,    54,
+	   51,    48,    45,    43,    41,    39,    36,    34,    32,    30,    29,    27,
+	   26,    24,    23,    21,    20,    19,    18,    17,    16,    15,    14,    14,
+	   13,    13,    12,    11,    11,    10,     9,     9,     8,     8,     7,     7,
+
+	// Finetune 6 (* 0.957603), Offset 0x06c0
+	26231, 24760, 23350, 22063, 20776, 19612, 18509, 17467, 16486, 15567, 14709, 13881,
+	13115, 12380, 11675, 11032, 10388,  9806,  9254,  8733,  8241,  7783,  7354,  6941,
+	 6558,  6190,  5838,  5516,  5194,  4903,  4627,  4367,  4122,  3892,  3677,  3470,
+	 3279,  3095,  2919,  2758,  2597,  2451,  2314,  2183,  2061,  1946,  1839,  1735,
+	 1639,  1547,  1459,  1379,  1299,  1226,  1157,  1092,  1030,   973,   919,   868,
+	  820,   774,   730,   689,   649,   613,   578,   546,   515,   486,   460,   434,
+	  410,   387,   365,   345,   325,   306,   289,   273,   258,   243,   230,   216,
+	  205,   193,   182,   172,   163,   153,   145,   137,   129,   122,   115,   108,
+	  102,    97,    91,    86,    81,    77,    72,    68,    64,    60,    57,    54,
+	   51,    48,    45,    43,    40,    38,    35,    34,    32,    30,    29,    27,
+	   26,    24,    23,    21,    20,    19,    18,    17,    16,    15,    14,    13,
+	   12,    12,    11,    11,    11,    10,     9,     9,     8,     8,     7,     7,
+
+	// Finetune 7 (* 0.950714), Offset 0x07e0
+	26042, 24582, 23182, 21904, 20627, 19471, 18375, 17341, 16367, 15455, 14603, 13782,
+	13021, 12291, 11591, 10952, 10313,  9735,  9188,  8671,  8182,  7727,  7301,  6891,
+	 6510,  6145,  5796,  5476,  5157,  4868,  4594,  4335,  4092,  3864,  3651,  3445,
+	 3255,  3073,  2898,  2738,  2578,  2434,  2297,  2168,  2046,  1932,  1825,  1723,
+	 1628,  1536,  1449,  1369,  1289,  1217,  1148,  1084,  1023,   966,   913,   861,
+	  814,   768,   724,   685,   645,   608,   574,   542,   511,   483,   456,   431,
+	  407,   384,   362,   342,   322,   304,   287,   271,   256,   241,   228,   215,
+	  203,   192,   181,   171,   162,   152,   144,   136,   128,   121,   114,   107,
+	  102,    96,    90,    86,    81,    76,    71,    68,    64,    60,    57,    53,
+	   50,    48,    45,    43,    40,    38,    35,    33,    31,    29,    29,    27,
+	   26,    24,    23,    21,    20,    19,    18,    17,    16,    15,    14,    13,
+	   12,    12,    11,    10,    10,    10,     9,     9,     8,     8,     7,     7,
+
+	// Finetune -8 (* 1.059463), Offset 0x0900
+	29021, 27393, 25834, 24410, 22986, 21698, 20477, 19325, 18240, 17223, 16273, 15358,
+	14510, 13697, 12917, 12205, 11493, 10849, 10239,  9662,  9118,  8611,  8137,  7679,
+	 7255,  6848,  6458,  6103,  5747,  5424,  5119,  4831,  4560,  4306,  4068,  3839,
+	 3628,  3424,  3229,  3051,  2873,  2712,  2560,  2416,  2280,  2153,  2034,  1920,
+	 1814,  1712,  1615,  1526,  1437,  1356,  1280,  1208,  1140,  1076,  1017,   960,
+	  907,   856,   807,   763,   718,   678,   640,   604,   570,   538,   509,   480,
+	  453,   428,   404,   381,   359,   339,   320,   302,   285,   269,   254,   239,
+	  227,   214,   201,   191,   180,   170,   160,   152,   143,   135,   127,   120,
+	  113,   107,   101,    95,    90,    85,    79,    75,    71,    67,    64,    59,
+	   56,    53,    50,    48,    44,    42,    39,    37,    35,    33,    32,    30,
+	   29,    26,    25,    23,    22,    21,    20,    19,    18,    17,    16,    15,
+	   14,    14,    13,    12,    12,    11,    10,    10,     8,     8,     7,     7,
+
+	// Finetune -7 (* 1.051841), Offset 0x0a20
+	28812, 27196, 25648, 24234, 22821, 21542, 20330, 19186, 18108, 17099, 16156, 15247,
+	14406, 13598, 12824, 12117, 11410, 10771, 10165,  9593,  9052,  8549,  8078,  7624,
+	 7203,  6799,  6412,  6059,  5705,  5385,  5082,  4796,  4527,  4275,  4039,  3812,
+	 3602,  3400,  3206,  3029,  2853,  2693,  2541,  2398,  2264,  2137,  2020,  1906,
+	 1801,  1700,  1603,  1515,  1426,  1346,  1271,  1199,  1132,  1069,  1010,   953,
+	  900,   850,   802,   757,   713,   673,   635,   600,   566,   534,   505,   476,
+	  450,   425,   401,   379,   357,   337,   318,   300,   283,   267,   252,   238,
+	  225,   212,   200,   189,   179,   168,   159,   150,   142,   134,   126,   119,
+	  113,   106,   100,    95,    89,    84,    79,    75,    70,    66,    63,    59,
+	   56,    53,    49,    47,    44,    42,    39,    37,    35,    33,    32,    29,
+	   28,    26,    25,    23,    22,    21,    20,    19,    18,    17,    16,    15,
+	   14,    14,    13,    12,    12,    11,     9,     9,     8,     8,     7,     7,
+
+	// Finetune -6 (* 1.044274), Offset 0x0b40
+	28605, 27001, 25464, 24060, 22657, 21387, 20184, 19048, 17978, 16976, 16040, 15138,
+	14302, 13500, 12732, 12030, 11328, 10693, 10092,  9524,  8987,  8488,  8020,  7569,
+	 7151,  6750,  6366,  6015,  5664,  5347,  5046,  4762,  4495,  4244,  4010,  3784,
+	 3576,  3375,  3183,  3008,  2832,  2673,  2523,  2381,  2247,  2122,  2005,  1892,
+	 1788,  1688,  1591,  1504,  1416,  1337,  1261,  1190,  1124,  1061,  1003,   946,
+	  894,   844,   796,   752,   708,   668,   631,   595,   562,   530,   501,   473,
+	  447,   422,   398,   376,   354,   334,   315,   298,   281,   265,   251,   236,
+	  223,   211,   198,   188,   178,   167,   158,   149,   141,   133,   125,   118,
+	  112,   105,    99,    94,    89,    84,    78,    74,    70,    66,    63,    58,
+	   55,    52,    49,    47,    44,    42,    39,    37,    34,    32,    31,    29,
+	   28,    26,    25,    23,    22,    21,    20,    19,    18,    17,    16,    15,
+	   14,    14,    13,    11,    11,    10,     9,     9,     8,     8,     7,     7,
+
+	// Finetune -5 (* 1.036761), Offset 0x0c60
+	28399, 26806, 25280, 23887, 22494, 21233, 20039, 18911, 17849, 16854, 15925, 15029,
+	14199, 13403, 12640, 11943, 11247, 10616, 10019,  9455,  8922,  8427,  7962,  7514,
+	 7100,  6702,  6320,  5972,  5623,  5308,  5010,  4728,  4462,  4213,  3981,  3757,
+	 3550,  3351,  3160,  2986,  2812,  2654,  2505,  2364,  2231,  2107,  1991,  1879,
+	 1775,  1675,  1580,  1493,  1406,  1327,  1252,  1182,  1116,  1053,   995,   939,
+	  887,   838,   790,   746,   703,   664,   626,   591,   558,   527,   498,   470,
+	  444,   419,   395,   373,   351,   332,   313,   295,   279,   263,   249,   234,
+	  222,   209,   197,   187,   176,   166,   157,   148,   140,   132,   124,   117,
+	  111,   105,    98,    93,    88,    83,    78,    74,    69,    65,    62,    58,
+	   55,    52,    49,    47,    44,    41,    38,    36,    34,    32,    31,    29,
+	   28,    26,    25,    23,    22,    21,    20,    19,    18,    17,    16,    15,
+	   13,    13,    12,    11,    11,    10,     9,     9,     8,     8,     7,     7,
+
+	// Finetune -4 (* 1.029302), Offset 0x0d80
+	28195, 26614, 25099, 23715, 22332, 21080, 19894, 18774, 17720, 16732, 15810, 14921,
+	14097, 13307, 12549, 11858, 11166, 10540,  9947,  9387,  8858,  8366,  7905,  7460,
+	 7049,  6653,  6275,  5929,  5583,  5270,  4974,  4694,  4430,  4183,  3953,  3730,
+	 3524,  3327,  3137,  2964,  2791,  2635,  2487,  2347,  2215,  2092,  1976,  1865,
+	 1762,  1663,  1569,  1482,  1396,  1318,  1243,  1173,  1108,  1046,   988,   933,
+	  881,   832,   784,   741,   698,   659,   622,   587,   554,   523,   494,   466,
+	  441,   416,   392,   371,   349,   329,   311,   293,   277,   261,   247,   233,
+	  220,   208,   196,   185,   175,   165,   155,   147,   139,   131,   124,   116,
+	  110,   104,    98,    93,    87,    82,    77,    73,    69,    65,    62,    58,
+	   55,    51,    48,    46,    43,    41,    38,    36,    34,    32,    31,    29,
+	   28,    26,    25,    23,    22,    21,    20,    19,    17,    16,    15,    14,
+	   13,    13,    12,    11,    11,    10,     9,     9,     8,     8,     7,     7,
+
+	// Finetune -3 (* 1.021897), Offset 0x0ea0
+	27992, 26422, 24918, 23545, 22171, 20928, 19751, 18639, 17593, 16612, 15696, 14813,
+	13996, 13211, 12459, 11772, 11086, 10464,  9876,  9320,  8794,  8306,  7848,  7407,
+	 6998,  6606,  6229,  5886,  5543,  5232,  4938,  4660,  4398,  4153,  3924,  3703,
+	 3499,  3303,  3115,  2943,  2771,  2616,  2469,  2330,  2199,  2076,  1962,  1852,
+	 1749,  1651,  1557,  1472,  1386,  1308,  1234,  1165,  1100,  1038,   981,   926,
+	  875,   826,   779,   736,   693,   654,   617,   582,   550,   519,   491,   463,
+	  437,   413,   389,   368,   346,   327,   309,   291,   275,   260,   245,   231,
+	  219,   206,   194,   184,   174,   164,   154,   146,   138,   130,   123,   115,
+	  109,   103,    97,    92,    87,    82,    77,    73,    68,    64,    61,    57,
+	   54,    51,    48,    46,    43,    41,    38,    36,    34,    32,    31,    29,
+	   28,    26,    25,    22,    21,    20,    19,    18,    17,    16,    15,    14,
+	   13,    13,    12,    11,    11,    10,     9,     9,     8,     8,     7,     7,
+
+	// Finetune -2 (* 1.014545), Offset 0x0fc0
+	27790, 26232, 24739, 23375, 22012, 20778, 19609, 18505, 17466, 16492, 15583, 14707,
+	13895, 13116, 12369, 11688, 11006, 10389,  9805,  9253,  8731,  8246,  7792,  7353,
+	 6948,  6558,  6185,  5844,  5503,  5194,  4902,  4626,  4367,  4123,  3896,  3677,
+	 3474,  3279,  3092,  2922,  2751,  2597,  2451,  2313,  2183,  2062,  1948,  1838,
+	 1737,  1640,  1546,  1461,  1376,  1299,  1226,  1157,  1092,  1031,   974,   919,
+	  868,   820,   773,   730,   688,   649,   613,   578,   546,   515,   487,   460,
+	  434,   410,   387,   365,   344,   325,   306,   289,   273,   258,   243,   229,
+	  217,   205,   193,   183,   172,   162,   153,   145,   137,   129,   122,   115,
+	  109,   102,    96,    91,    86,    81,    76,    72,    68,    64,    61,    57,
+	   54,    51,    48,    46,    43,    41,    38,    36,    33,    31,    30,    28,
+	   27,    25,    24,    22,    21,    20,    19,    18,    17,    16,    15,    14,
+	   13,    13,    12,    11,    11,    10,     9,     9,     8,     8,     7,     7,
+
+	// Finetune -1 (* 1.007246), Offset 0x10e0
+	27590, 26043, 24561, 23207, 21853, 20628, 19468, 18372, 17341, 16374, 15471, 14601,
+	13795, 13022, 12280, 11603, 10927, 10314,  9734,  9186,  8668,  8187,  7736,  7301,
+	 6898,  6511,  6140,  5802,  5463,  5157,  4867,  4593,  4335,  4093,  3868,  3650,
+	 3449,  3255,  3070,  2901,  2732,  2579,  2434,  2297,  2168,  2047,  1934,  1825,
+	 1724,  1628,  1535,  1450,  1366,  1289,  1217,  1148,  1084,  1023,   967,   913,
+	  862,   814,   768,   725,   683,   645,   608,   574,   542,   512,   483,   456,
+	  431,   407,   384,   363,   341,   322,   304,   287,   271,   256,   242,   228,
+	  216,   203,   191,   181,   171,   161,   152,   144,   136,   128,   121,   114,
+	  108,   102,    96,    91,    86,    81,    76,    72,    67,    63,    60,    56,
+	   53,    50,    47,    45,    42,    40,    37,    35,    33,    31,    30,    28,
+	   27,    25,    24,    22,    21,    20,    19,    18,    17,    16,    15,    14,
 	   13,    13,    12,    11,    11,    10,     9,     9,     8,     8,     7,     7
+};
+
+static const short * periodtable_finetune_ptr[]=
+{
+	&periodtable[0x0000], &periodtable[0x0090], &periodtable[0x0120], &periodtable[0x01B0],
+	&periodtable[0x0240], &periodtable[0x02D0], &periodtable[0x0360], &periodtable[0x03F0],
+	&periodtable[0x0480], &periodtable[0x0510], &periodtable[0x05A0], &periodtable[0x0630],
+	&periodtable[0x06C0], &periodtable[0x0750], &periodtable[0x07E0], &periodtable[0x0870]
 };
 
 static const short sintable[]={
@@ -191,13 +414,16 @@ static void memclear( void * dest, unsigned char value, unsigned long size )
 	}
 }
 
-static int getnote( modcontext * mod, unsigned short period, int finetune )
+static int getnote( modcontext * mod, unsigned short period )
 {
 	int i;
+	const short * ptr;
 
-	for(i = 0; i < FULL_PERIOD_TABLE_LENGTH; i++)
+	ptr = periodtable_finetune_ptr[0];
+
+	for(i = 0; i < MAXNOTES; i++)
 	{
-		if(period >= mod->fullperiod[i])
+		if(period >= ptr[i])
 		{
 			return i;
 		}
@@ -236,6 +462,7 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 	muchar effect_op;
 	muchar effect_param,effect_param_l,effect_param_h;
 	muint enable_nxt_smp;
+	const short * period_table_ptr;
 
 	sample = (nptr->sampperiod & 0xF0) | (nptr->sampeffect >> 4);
 	period = ((nptr->sampperiod & 0xF) << 8) | nptr->period;
@@ -324,6 +551,9 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 		{
 			cptr->volume = mod->song.samples[cptr->sampnum].volume;
 			cptr->volumeslide = 0;
+#ifdef HXCMOD_USE_PRECALC_VOLUME_TABLE
+			cptr->volume_table = mod->volume_selection_table[cptr->volume];
+#endif
 		}
 
 		if( ( effect_op != EFFECT_TONE_PORTAMENTO ) && ( effect_op != EFFECT_VOLSLIDE_TONEPORTA ) )
@@ -337,14 +567,8 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 		{
 			if( cptr->finetune )
 			{
-				if( cptr->finetune <= 7 )
-				{
-					period = mod->fullperiod[getnote(mod,period,0) + cptr->finetune];
-				}
-				else
-				{
-					period = mod->fullperiod[getnote(mod,period,0) - (16 - (cptr->finetune)) ];
-				}
+				period_table_ptr = periodtable_finetune_ptr[cptr->finetune&0xF];
+				period = period_table_ptr[getnote(mod,period)];
 			}
 
 			cptr->period = period;
@@ -385,21 +609,23 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 
 				cptr->ArpIndex = 0;
 
-				curnote = getnote(mod,cptr->period,cptr->finetune);
+				curnote = getnote(mod,cptr->period);
 
 				cptr->Arpperiods[0] = cptr->period;
 
-				arpnote = curnote + (((cptr->parameffect>>4)&0xF)*8);
-				if( arpnote >= FULL_PERIOD_TABLE_LENGTH )
-					arpnote = FULL_PERIOD_TABLE_LENGTH - 1;
+				period_table_ptr = periodtable_finetune_ptr[cptr->finetune&0xF];
 
-				cptr->Arpperiods[1] = mod->fullperiod[arpnote];
+				arpnote = curnote + (((cptr->parameffect>>4)&0xF));
+				if( arpnote >= MAXNOTES )
+					arpnote = (MAXNOTES) - 1;
 
-				arpnote = curnote + (((cptr->parameffect)&0xF)*8);
-				if( arpnote >= FULL_PERIOD_TABLE_LENGTH )
-					arpnote = FULL_PERIOD_TABLE_LENGTH - 1;
+				cptr->Arpperiods[1] = period_table_ptr[arpnote];
 
-				cptr->Arpperiods[2] = mod->fullperiod[arpnote];
+				arpnote = curnote + (((cptr->parameffect)&0xF));
+				if( arpnote >= MAXNOTES )
+					arpnote = (MAXNOTES) - 1;
+
+				cptr->Arpperiods[2] = period_table_ptr[arpnote];
 			}
 		break;
 
@@ -520,9 +746,15 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 			The offset is measured in words. If no sample is given, yet one is
 			still playing on this channel, it should be retriggered to the new
 			offset using the current volume.
+			If xy is 00, the previous value is used.
 			*/
 
 			cptr->samppos = ( ( ((muint)effect_param_h) << 12) + ( (((muint)effect_param_l) << 8) ) ) << 10;
+
+			if(!cptr->samppos)
+				cptr->samppos = cptr->last_set_offset;
+
+			cptr->last_set_offset = cptr->samppos;
 		break;
 
 		case EFFECT_VOLUME_SLIDE:
@@ -563,6 +795,13 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 			*/
 
 			cptr->volume = effect_param;
+
+			if(cptr->volume > 64)
+				cptr->volume = 64;
+
+#ifdef HXCMOD_USE_PRECALC_VOLUME_TABLE
+			cptr->volume_table = mod->volume_selection_table[cptr->volume];
+#endif
 		break;
 
 		case EFFECT_PATTERN_BREAK:
@@ -636,6 +875,9 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 					cptr->volume += effect_param_l;
 					if( cptr->volume > 64 )
 						cptr->volume = 64;
+#ifdef HXCMOD_USE_PRECALC_VOLUME_TABLE
+					cptr->volume_table = mod->volume_selection_table[cptr->volume];
+#endif
 				break;
 
 				case EFFECT_E_FINE_VOLSLIDE_DOWN:
@@ -649,6 +891,9 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 					cptr->volume -= effect_param_l;
 					if( cptr->volume > 200 )
 						cptr->volume = 0;
+#ifdef HXCMOD_USE_PRECALC_VOLUME_TABLE
+					cptr->volume_table = mod->volume_selection_table[cptr->volume];
+#endif
 				break;
 
 				case EFFECT_E_SET_FINETUNE:
@@ -664,18 +909,8 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 
 					if( period )
 					{
-						if( cptr->finetune )
-						{
-							if( cptr->finetune <= 7 )
-							{
-								period = mod->fullperiod[getnote(mod,period,0) + cptr->finetune];
-							}
-							else
-							{
-								period = mod->fullperiod[getnote(mod,period,0) - (16 - (cptr->finetune)) ];
-							}
-						}
-
+						period_table_ptr = periodtable_finetune_ptr[cptr->finetune&0xF];
+						period = period_table_ptr[getnote(mod,period)];
 						cptr->period = period;
 					}
 
@@ -767,7 +1002,12 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 					cptr->effect = EFFECT_E_NOTE_CUT;
 					cptr->cut_param = effect_param_l;
 					if( !cptr->cut_param )
+					{
 						cptr->volume = 0;
+#ifdef HXCMOD_USE_PRECALC_VOLUME_TABLE
+						cptr->volume_table = mod->volume_selection_table[cptr->volume];
+#endif
+					}
 				break;
 
 				case EFFECT_E_NOTE_DELAY:
@@ -971,6 +1211,9 @@ static void workeffect( modcontext * modctx, note * nptr, channel * cptr )
 					if( cptr->volume > 63 )
 						cptr->volume = 0;
 				}
+#ifdef HXCMOD_USE_PRECALC_VOLUME_TABLE
+				cptr->volume_table = modctx->volume_selection_table[cptr->volume];
+#endif
 			}
 		break;
 
@@ -1000,6 +1243,9 @@ static void workeffect( modcontext * modctx, note * nptr, channel * cptr )
 					if( cptr->volume > 64 )
 						cptr->volume = 0;
 				}
+#ifdef HXCMOD_USE_PRECALC_VOLUME_TABLE
+				cptr->volume_table = modctx->volume_selection_table[cptr->volume];
+#endif
 			}
 
 		break;
@@ -1020,6 +1266,9 @@ static void workeffect( modcontext * modctx, note * nptr, channel * cptr )
 				if( cptr->volume > 64 )
 					cptr->volume = 0;
 			}
+#ifdef HXCMOD_USE_PRECALC_VOLUME_TABLE
+			cptr->volume_table = modctx->volume_selection_table[cptr->volume];
+#endif
 		break;
 
 		case EFFECT_EXTENDED:
@@ -1031,7 +1280,12 @@ static void workeffect( modcontext * modctx, note * nptr, channel * cptr )
 						cptr->cut_param--;
 
 					if( !cptr->cut_param )
+					{
 						cptr->volume = 0;
+#ifdef HXCMOD_USE_PRECALC_VOLUME_TABLE
+						cptr->volume_table = modctx->volume_selection_table[cptr->volume];
+#endif
+					}
 				break;
 
 				case EFFECT_E_RETRIGGER_NOTE:
@@ -1081,8 +1335,10 @@ static void workeffect( modcontext * modctx, note * nptr, channel * cptr )
 ///////////////////////////////////////////////////////////////////////////////////
 int hxcmod_init(modcontext * modctx)
 {
-	muint i,j;
-
+#ifdef HXCMOD_USE_PRECALC_VOLUME_TABLE
+	muint c;
+	mint  i,j;
+#endif
 	if( modctx )
 	{
 		memclear(modctx,0,sizeof(modcontext));
@@ -1092,13 +1348,19 @@ int hxcmod_init(modcontext * modctx)
 		modctx->bits = 16;
 		modctx->filter = 1;
 
-		for(i=0;i<PERIOD_TABLE_LENGTH - 1;i++)
+#ifdef HXCMOD_USE_PRECALC_VOLUME_TABLE
+		c = 0;
+		for(i=0;i<65;i++)
 		{
-			for(j=0;j<8;j++)
+			for(j=-128;j<128;j++)
 			{
-				modctx->fullperiod[(i*8) + j] = periodtable[i] - ((( periodtable[i] - periodtable[i+1] ) / 8) * j);
+				modctx->precalc_volume_array[c] = i * j;
+				c++;
 			}
+
+			modctx->volume_selection_table[i] = &modctx->precalc_volume_array[(i*256) + 128];
 		}
+#endif
 
 		return 1;
 	}
@@ -1286,6 +1548,9 @@ int hxcmod_load( modcontext * modctx, void * mod_data, int mod_data_size )
 			{
 				modctx->channels[i].volume = 0;
 				modctx->channels[i].period = 0;
+#ifdef HXCMOD_USE_PRECALC_VOLUME_TABLE
+				modctx->channels[i].volume_table = modctx->volume_selection_table[0];
+#endif
 			}
 
 			modctx->mod_loaded = 1;
@@ -1526,18 +1791,30 @@ void hxcmod_fillbuffer(modcontext * modctx, msample * outbuffer, mssize nbsample
 #ifdef HXCMOD_MONO_OUTPUT
 						if( cptr->sampdata!=0 )
 						{
+#ifdef HXCMOD_USE_PRECALC_VOLUME_TABLE
+							r += cptr->volume_table[cptr->sampdata[k]];
+#else
 							r += ( cptr->sampdata[k] *  cptr->volume );
+#endif
 						}
 #else
 						if (cptr->sampdata != 0)
 						{
 							if ( !(j & 3) || ((j & 3) == 3) )
 							{
+#ifdef HXCMOD_USE_PRECALC_VOLUME_TABLE
+								l += cptr->volume_table[cptr->sampdata[k]];
+#else
 								l += (cptr->sampdata[k] * cptr->volume);
+#endif
 							}
 							else
 							{
+#ifdef HXCMOD_USE_PRECALC_VOLUME_TABLE
+								r += cptr->volume_table[cptr->sampdata[k]];
+#else
 								r += (cptr->sampdata[k] * cptr->volume);
+#endif
 							}
 						}
 #endif
