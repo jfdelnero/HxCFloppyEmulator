@@ -830,6 +830,10 @@ SOURCE=..\sources\loaders\oricdsk_loader\oricdsk_loader.c
 
 SOURCE=..\sources\loaders\oricdsk_loader\oricdsk_loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\sources\loaders\oricdsk_loader\oricdsk_writer.c
+# End Source File
 # End Group
 # Begin Group "MFM"
 
@@ -2293,6 +2297,14 @@ SOURCE=..\sources\tracks\track_formats\northstar_mfm_track.c
 # Begin Source File
 
 SOURCE=..\sources\tracks\track_formats\northstar_mfm_track.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\qd_mo5_track.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\sources\tracks\track_formats\qd_mo5_track.h
 # End Source File
 # Begin Source File
 
