@@ -1107,6 +1107,17 @@ uint32_t gettestpattern(unsigned long patternvalue)
 	return pattern;
 }
 
+int repair_sector_type_list[]=
+{
+	ISOIBM_MFM_ENCODING,
+	ISOIBM_FM_ENCODING,
+	AMIGA_MFM_ENCODING,
+	EMU_FM_ENCODING,
+	ARBURGSYS_ENCODING,
+	ARBURGDAT_ENCODING,
+	-1
+};
+
 int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track, int32_t side, int32_t start_cellnumber, int32_t numberofcells )
 {
 	int32_t i,test_pattern_size;
@@ -1116,11 +1127,26 @@ int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track
 	HXCFE_SECTCFG** sc_list;
 	HXCFE_SECTCFG* sc;
 	int32_t nb_sectorfound,sectorpos,good_pattern;
-
-	int32_t tab[5]={0,1,1,-3,-1};
+	int type,retrep,cellnumber;
 	uint32_t test_pattern;
 
+	if(numberofcells > 16)
+	{   // Scan mode
+		cellnumber = start_cellnumber;
+		do
+		{
+			printf("hxcfe_localRepair : bitoffset %d...\n",cellnumber);
+
+			retrep = hxcfe_localRepair( floppycontext, fp, track, side, cellnumber, 8 );
+
+			cellnumber += 6;
+		}while(retrep != 1 && cellnumber < (start_cellnumber+numberofcells) );
+
+		return retrep;
+	}
+
 	good_pattern = 0;
+
 	if(fp && floppycontext)
 	{
 		if( ( track < fp->floppyNumberOfTrack ) && ( side < fp->floppyNumberOfSide ) )
@@ -1130,7 +1156,16 @@ int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track
 			currentside = fp->tracks[track]->sides[side];
 
 			sa = hxcfe_initSectorAccess( floppycontext, fp );
-			sc_list = hxcfe_getAllTrackISOSectors( sa, track, side, &nb_sectorfound );
+
+			i = 0;
+			sc_list = NULL;
+			nb_sectorfound = 0;
+			while(!sc_list && repair_sector_type_list[i] >=0 && !nb_sectorfound)
+			{
+				type = repair_sector_type_list[i];
+				sc_list = hxcfe_getAllTrackSectors(  sa, track, side, type,&nb_sectorfound );
+				i++;
+			}
 
 			sectorpos = -1;
 			if(nb_sectorfound)
@@ -1150,6 +1185,8 @@ int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track
 			{
 				test_pattern_size = numberofcells;
 
+				printf("hxcfe_localRepair : Pattern size = %d + 2 bits...\n",test_pattern_size);
+
 				if( numberofcells && ( test_pattern_size < 28 ) )
 				{
 					// Back up...
@@ -1162,26 +1199,19 @@ int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track
 						}
 					}
 
+					hxcfe_removeCell( floppycontext, currentside, start_cellnumber, test_pattern_size );
+
+					test_pattern_size = 0;
 					loop = 0;
 					do
 					{
-						if(tab[loop]>0)
+						if(test_pattern_size < numberofcells + 2)
 						{
-							hxcfe_insertCell( floppycontext, currentside, start_cellnumber, 0,  tab[loop] );
-							test_pattern_size += tab[loop];
+							hxcfe_insertCell( floppycontext, currentside, start_cellnumber, 0,  1 );
+							test_pattern_size++;
+						}
 
-						}
-						else
-						{
-							if(tab[loop]<0)
-							{
-								if( test_pattern_size > 0 )
-								{
-									hxcfe_removeCell( floppycontext, currentside, start_cellnumber, -tab[loop] );
-									test_pattern_size += tab[loop];
-								}
-							}
-						}
+						printf("hxcfe_localRepair : testing %d bits patterns...\n",test_pattern_size);
 
 						if( test_pattern_size > 0 )
 						{
@@ -1202,11 +1232,12 @@ int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track
 									}
 								}
 
-
 								// Test Sector State...
+								hxcfe_clearTrackCache(sa);
 								hxcfe_resetSearchTrackPosition( sa );
 
-								sc = hxcfe_searchSector ( sa, track, side, sc_list[sectorpos]->sector, ISOIBM_MFM_ENCODING );
+								sc = hxcfe_searchSector ( sa, track, side, sc_list[sectorpos]->sector, type );
+
 								if( sc )
 								{
 									if(!sc->use_alternate_data_crc)
@@ -1221,14 +1252,24 @@ int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track
 						}
 
 						loop++;
-					}while( ( loop < 5 ) && ( test_pattern_size > 0 ) && !good_pattern);
+					}while( ( test_pattern_size < numberofcells + 2) && ( test_pattern_size > 0 ) && !good_pattern);
 
 					// Not found... restore the old state
 					if(!good_pattern)
 					{
-						hxcfe_insertCell( floppycontext, currentside, start_cellnumber, 0,  2 );
-						test_pattern_size += 2;
-						for(i = 0; i < test_pattern_size;i++)
+						printf("Not found... restoring...\n");
+						if(test_pattern_size < numberofcells)
+						{
+							hxcfe_insertCell( floppycontext, currentside, numberofcells - start_cellnumber, 0,  1 );
+							test_pattern_size++;
+						}
+						else
+						{
+							if(test_pattern_size > numberofcells)
+								hxcfe_removeCell( floppycontext, currentside, start_cellnumber, test_pattern_size - numberofcells );
+						}
+
+						for(i = 0; i < numberofcells;i++)
 						{
 							if( old_pattern & (0x00000001 << i) )
 							{
@@ -1239,6 +1280,33 @@ int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track
 								hxcfe_setCellState( floppycontext, currentside, (start_cellnumber + i) % currentside->tracklen, 0 );
 							}
 						}
+					}
+					else
+					{
+						printf("Found ! The sector appears to be fixed ! :)\n");
+						printf("Original pattern (%.2d bits): ",numberofcells);
+
+						for(i = 0; i < numberofcells;i++)
+						{
+							if(old_pattern & (0x00000001 << i))
+								printf("1");
+							else
+								printf("0");
+						}
+
+						printf("\nNew pattern (%.2d bits)     : ",test_pattern_size);
+						for(i = 0; i < test_pattern_size;i++)
+						{
+							if(hxcfe_getCellState( floppycontext, currentside, (start_cellnumber + i) % currentside->tracklen))
+							{
+								printf("1");
+							}
+							else
+							{
+								printf("0");
+							}
+						}
+						printf("\n");
 					}
 				}
 			}
@@ -1260,7 +1328,6 @@ int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track
 				return HXCFE_NOERROR;
 			else
 				return 1; // Repaired...
-
 		}
 	}
 	return HXCFE_BADPARAMETER;
