@@ -463,6 +463,30 @@ HXCFE_SECTCFG** hxcfe_getAllTrackISOSectors( HXCFE_SECTORACCESS* ss_ctx, int32_t
 	return scarray;
 }
 
+void hxcfe_clearTrackCache(HXCFE_SECTORACCESS* ss_ctx)
+{
+	int i,t,s;
+	SECTORSEARCHTRACKCACHE * trackcache;
+
+	if(ss_ctx->track_cache)
+	{
+		for(t=0;t<ss_ctx->fp->floppyNumberOfTrack;t++)
+		{
+			for(s=0;s<ss_ctx->fp->floppyNumberOfSide;s++)
+			{
+				trackcache = &ss_ctx->track_cache[(t<<1) | (s&1)];
+
+				i = 0;
+				while( i < trackcache->nb_sector_cached )
+				{
+					memset(&trackcache->sectorcache[i],0,sizeof(HXCFE_SECTCFG));
+					i++;
+				}
+				trackcache->nb_sector_cached = 0;
+			}
+		}
+	}
+}
 
 HXCFE_SECTCFG* hxcfe_searchSector ( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t id, int32_t type )
 {
