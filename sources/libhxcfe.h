@@ -349,6 +349,8 @@ int32_t                hxcfe_writeSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_
 void                   hxcfe_freeSectorConfigData( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SECTCFG* sc );
 void                   hxcfe_freeSectorConfig( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SECTCFG* sc );
 
+void                   hxcfe_clearTrackCache(HXCFE_SECTORACCESS* ss_ctx);
+
 void                   hxcfe_deinitSectorAccess( HXCFE_SECTORACCESS* ss_ctx );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
