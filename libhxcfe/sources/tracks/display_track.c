@@ -1663,7 +1663,17 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 				channel_maxtick[channel] = total_tick;
 
 				td->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_td_draw_trkstream: chn %d , tick %d , pulses %d\n",channel,total_tick,track_stream->channels[channel].nb_of_pulses);
+#if 0
+				printf("hxcfe_td_draw_trkstream: chn %d , tick %d , pulses %d\n",channel,total_tick,track_stream->channels[channel].nb_of_pulses);
 
+				if(track_stream->channels[channel].nb_of_pulses<16)
+				{
+					for(i=0;i<track_stream->channels[channel].nb_of_pulses;i++)
+					{
+						printf("%d , tick  %d\n",i,track_stream->channels[channel].stream[i]);
+					}
+				}
+#endif
 				if(total_tick > max_total_tick)
 					max_total_tick = total_tick;
 			}
@@ -1694,6 +1704,7 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 			}
 			else
 			{
+				t_ofs2 = 0;
 				buffer_offset = 0;
 			}
 
@@ -1749,7 +1760,8 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 						cur_ticks = track_stream->channels[channel].stream[i];
 
 						cur_ticks -= tick_to_remove;
-						tick_to_remove =0;
+
+						tick_to_remove = 0;
 
 						total_offset += cur_ticks;
 
@@ -2025,7 +2037,6 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_
 		{
 			hxcfe_td_draw_trkstream( td, currentside->stream_dump );
 			hxcfe_td_draw_rules( td );
-
 		}
 		else
 		{
