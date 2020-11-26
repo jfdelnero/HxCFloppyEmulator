@@ -198,6 +198,8 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 					if(crc32 != *((uint32_t*)&hxcstreambuffer[header.size - 4]))
 					{
 						// BAD CRC !
+						floppycontext->hxc_printf(MSG_ERROR,"DecodeHxCStreamFile: Bad CRC !\n");
+
 						hxc_fclose(f);
 						free(hxcstreambuffer);
 						return NULL;
@@ -264,6 +266,8 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 								packet_offset += (stream_header->packed_size + sizeof(packed_stream_header));
 							break;
 							default:
+								floppycontext->hxc_printf(MSG_ERROR,"DecodeHxCStreamFile: Unknown block !\n");
+
 								// Unknown block !
 								hxc_fclose(f);
 
@@ -339,7 +343,7 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 						}
 						else
 						{
-							strncpy(name_str,str1,sizeof(name_str) - 1);							
+							strncpy(name_str,str1,sizeof(name_str) - 1);
 						}
 
 						old_index = (iostreambuf[0]&(1<<j));
@@ -375,6 +379,31 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 								}
 								totalcnt++;
 							}
+
+							stream[k++] = totalcnt*16;
+
+#if 0
+							int t;
+
+							if(k < 16)
+							{
+								for(t=0;t<k;t++)
+								{
+									printf(">>%d %d\n",t,stream[t]);
+								}
+							}
+
+							int total_ticks;
+							total_ticks = 0;
+							for(t=0;t<k;t++)
+							{
+								total_ticks += stream[t];
+							}
+
+							printf("[chn %d] %d\n",j,total_ticks);
+#endif
+
+							floppycontext->hxc_printf(MSG_DEBUG,"DecodeHxCStreamFile: io_channel %d , pulses %d , io_cnt %d\n",j,k,cnt_io);
 
 							if((iostreambuf[0]&(1<<j)))
 								track_dump = hxcfe_FxStream_ImportStream(fxs,stream,32,k, HXCFE_STREAMCHANNEL_TYPE_RLETOGGLESTATE_1, name_str, track_dump);
@@ -415,10 +444,13 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 	unsigned char * hxcstreambuf;
 	uint16_t * iostreambuf;
 	uint32_t * stream;
-	int nb_pulses,total_nb_pulses,old_index,cnt_io,i,j,totalcnt;
+	int nb_pulses,total_nb_pulses,old_index,cnt_io,i,j,k,totalcnt;
 	int sampleperiod;
 	int total_nb_words, nb_words;
 	int buffer_offset;
+	char temp_str[512];
+	char name_str[512];
+	char * str1,* str2;
 
 	buffer_offset = 0;
 	track_dump = 0;
@@ -562,13 +594,106 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 					}
 				}
 			}
+
+			free(stream);
+
+			for(j=0;j<16;j++)
+			{
+				sprintf(temp_str,"io_channel %d ",j);
+
+				str1 = strstr( ((char*)metadata + sizeof(metadata_header)), temp_str);
+
+				if(str1)
+				{
+					int str_size;
+					str2 = strchr(str1,0xA);
+					str1 += strlen(temp_str);
+					memset(name_str,0,sizeof(name_str));
+					if(str2)
+					{
+						str_size = (str2-str1);
+						if(str_size > sizeof(name_str) - 1)
+							str_size = sizeof(name_str) - 1;
+
+						strncpy(name_str,str1,str_size);
+					}
+					else
+					{
+						strncpy(name_str,str1,sizeof(name_str) - 1);
+					}
+
+					old_index = (iostreambuf[0]&(1<<j));
+					k = 0;
+
+					for(i=0;i<cnt_io;i++)
+					{
+						if( (iostreambuf[i]&(1<<j)) != old_index )
+						{
+							old_index = (iostreambuf[i]&(1<<j));
+							k++;
+						}
+					}
+
+					stream = malloc( ( k + 1 ) * sizeof(uint32_t) );
+
+					if(stream)
+					{
+						memset(stream,0,( k + 1 ) * sizeof(uint32_t));
+						old_index = (iostreambuf[0]&(1<<j));
+						totalcnt = 0;
+						k = 0;
+
+						for(i=0;i<cnt_io;i++)
+						{
+							if( (iostreambuf[i]&(1<<j)) != old_index )
+							{
+								old_index = (iostreambuf[i]&(1<<j));
+
+								stream[k++] = totalcnt*16;
+
+								totalcnt = 0;
+							}
+							totalcnt++;
+						}
+
+						stream[k++] = totalcnt*16;
+
+#if 0
+						int t;
+
+						if(k < 16)
+						{
+							for(t=0;t<k;t++)
+							{
+								printf(">>%d %d\n",t,stream[t]);
+							}
+						}
+
+						int total_ticks;
+						total_ticks = 0;
+						for(t=0;t<k;t++)
+						{
+							total_ticks += stream[t];
+						}
+
+						printf("[chn %d] %d\n",j,total_ticks);
+#endif
+
+						fxs->hxcfe->hxc_printf(MSG_DEBUG,"DecodeHxCStreamFile: io_channel %d , pulses %d , io_cnt %d\n",j,k,cnt_io);
+
+						if((iostreambuf[0]&(1<<j)))
+							track_dump = hxcfe_FxStream_ImportStream(fxs,stream,32,k, HXCFE_STREAMCHANNEL_TYPE_RLETOGGLESTATE_1, name_str, track_dump);
+						else
+							track_dump = hxcfe_FxStream_ImportStream(fxs,stream,32,k, HXCFE_STREAMCHANNEL_TYPE_RLETOGGLESTATE_0, name_str, track_dump);
+
+						free(stream);
+					}
+				}
+			}
 		}
 
 		if(iostreambuf)
 			free(iostreambuf);
-
-		if(stream)
-			free(stream);
 
 		return track_dump;
 	}
