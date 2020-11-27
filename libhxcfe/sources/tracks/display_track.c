@@ -1978,6 +1978,8 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 		hxcfe_freeSide(td->hxcfe,side);
 	}
 
+	hxcfe_td_draw_rules( td );
+
 	td->noloop_trackmode = 0;
 }
 
@@ -2036,7 +2038,6 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_
 		if(currentside->stream_dump)
 		{
 			hxcfe_td_draw_trkstream( td, currentside->stream_dump );
-			hxcfe_td_draw_rules( td );
 		}
 		else
 		{
