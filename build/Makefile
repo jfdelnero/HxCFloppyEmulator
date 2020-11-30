@@ -235,7 +235,7 @@ clean:
 
 mrproper: clean
 	rm -rf $(EXEC)
-	rm -rf *.map *.ncb *.opt *.plg *.dll *.exe *.bak
+	rm -rf *.map *.ncb *.opt *.plg *.dll *.exe *.bak *.dylib
 	$(MAKE) -C $(BASEDIR)/gui/microintro/converttools/bmptob8 mrproper
 
 .PHONY: clean mrproper
