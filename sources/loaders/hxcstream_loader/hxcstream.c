@@ -297,24 +297,32 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 
 				track_dump = hxcfe_FxStream_ImportStream(fxs,stream,32,total_nb_pulses, HXCFE_STREAMCHANNEL_TYPE_RLEEVT, "data", NULL);
 
-				j = 0;
-				old_index = 0;
-				for(i=0;i<cnt_io;i++)
+				if( hxcfe_getEnvVarValue( fxs->hxcfe, "FLUXSTREAM_ALL_REVOLUTIONS_IN_ONE" ) )
 				{
-					if( (iostreambuf[i]&1) != old_index )
+					hxcfe_FxStream_AddIndex(fxs,track_dump,0,0,FXSTRM_INDEX_MAININDEX);
+					hxcfe_FxStream_AddIndex(fxs,track_dump,total_nb_pulses-1,0,FXSTRM_INDEX_MAININDEX);
+				}
+				else
+				{
+					j = 0;
+					old_index = 0;
+					for(i=0;i<cnt_io;i++)
 					{
-						old_index = iostreambuf[i]&1;
-
-						if(old_index)
+						if( (iostreambuf[i]&1) != old_index )
 						{
-							totalcnt = 0;
-							j = 0;
-							while(totalcnt < (i*16) && j < total_nb_pulses)
+							old_index = iostreambuf[i]&1;
+
+							if(old_index)
 							{
-								totalcnt += stream[j];
-								j++;
+								totalcnt = 0;
+								j = 0;
+								while(totalcnt < (i*16) && j < total_nb_pulses)
+								{
+									totalcnt += stream[j];
+									j++;
+								}
+								hxcfe_FxStream_AddIndex(fxs,track_dump,j,0,FXSTRM_INDEX_MAININDEX);
 							}
-							hxcfe_FxStream_AddIndex(fxs,track_dump,j,0,FXSTRM_INDEX_MAININDEX);
 						}
 					}
 				}
@@ -573,24 +581,33 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 
 			track_dump = hxcfe_FxStream_ImportStream(fxs,stream,32,total_nb_pulses,HXCFE_STREAMCHANNEL_TYPE_RLEEVT, "data", NULL);
 
-			j = 0;
-			old_index = 0;
-			for(i=0;i<cnt_io;i++)
+			if( hxcfe_getEnvVarValue( fxs->hxcfe, "FLUXSTREAM_ALL_REVOLUTIONS_IN_ONE" ) )
 			{
-				if( (iostreambuf[i]&1) != old_index )
-				{
-					old_index = iostreambuf[i]&1;
+				hxcfe_FxStream_AddIndex(fxs,track_dump,0,0,FXSTRM_INDEX_MAININDEX);
+				hxcfe_FxStream_AddIndex(fxs,track_dump,total_nb_pulses-1,0,FXSTRM_INDEX_MAININDEX);
+			}
+			else
+			{
+				j = 0;
 
-					if(old_index)
+				old_index = 0;
+				for(i=0;i<cnt_io;i++)
+				{
+					if( (iostreambuf[i]&1) != old_index )
 					{
-						totalcnt = 0;
-						j = 0;
-						while(totalcnt < (i*16) && j < total_nb_pulses)
+						old_index = iostreambuf[i]&1;
+
+						if(old_index)
 						{
-							totalcnt += stream[j];
-							j++;
+							totalcnt = 0;
+							j = 0;
+							while(totalcnt < (i*16) && j < total_nb_pulses)
+							{
+								totalcnt += stream[j];
+								j++;
+							}
+							hxcfe_FxStream_AddIndex(fxs,track_dump,j,0,FXSTRM_INDEX_MAININDEX);
 						}
-						hxcfe_FxStream_AddIndex(fxs,track_dump,j,0,FXSTRM_INDEX_MAININDEX);
 					}
 				}
 			}
