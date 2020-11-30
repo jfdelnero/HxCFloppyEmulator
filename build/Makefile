@@ -845,6 +845,7 @@ clean:
 mrproper: clean
 	rm -rf $(EXEC)
 	rm -rf *.dll
+	rm -rf *.dylib
 	$(MAKE) -C ../sources/xml_disk/converttools/bmptob8 mrproper
 
 .PHONY: clean mrproper
