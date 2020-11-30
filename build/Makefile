@@ -96,5 +96,6 @@ clean:
 mrproper: clean
 	rm -rf $(EXEC)
 	rm -rf *.dll
+	rm -rf *.dylib
 
 .PHONY: clean mrproper
