@@ -88,5 +88,6 @@ clean:
 
 mrproper: clean
 	rm -rf $(EXEC)
+	rm -rf *.dylib
 
 .PHONY: clean mrproper
