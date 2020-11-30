@@ -57,6 +57,7 @@ mrproper:
 	-rm -rf *.lib
 	-rm -rf *.ncb
 	-rm -rf *.exp
+	-rm -rf *.dylib
 	-rm -rf hxcfloppyemulator
 	-rm -f  hxcfe
 	-rm -rf Debug_*
