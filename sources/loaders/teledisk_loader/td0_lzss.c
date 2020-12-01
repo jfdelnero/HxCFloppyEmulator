@@ -44,7 +44,7 @@
 #define ROOT		(TSIZE-1)			// Root position
 #define MAX_FREQ	0x8000				// Update when cumulative frequency reaches this value
 
-unsigned short
+static unsigned short
 	parent[TSIZE+N_CHAR],	// parent nodes (0..T-1) and leaf positions (rest)
 	son[TSIZE],				// pointers to child nodes (son[], son[]+1)
 	freq[TSIZE+1],			// frequency table
@@ -55,21 +55,21 @@ unsigned short
 	GBj,					// Decoder index
 	GBk;					// Decoder index
 
-unsigned char
+static unsigned char
 	GBstate,				// Decoder state
 	Eof,					// End-of-file indicator
 	ring_buff[SBSIZE+LASIZE-1];	// text buffer for match strings
 
-int buffer_offset;
-int buffer_size;
-unsigned char * buffer_ptr;
+static int buffer_offset;
+static int buffer_size;
+static unsigned char * buffer_ptr;
 
 
 /*
  * LZSS decoder - based in part on Haruhiko Okumura's LZHUF.C
  */
 
-const unsigned char d_code_lzss[256] = {		// Huffman decoder tables
+static const unsigned char d_code_lzss[256] = {		// Huffman decoder tables
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
@@ -87,7 +87,7 @@ const unsigned char d_code_lzss[256] = {		// Huffman decoder tables
 0x28, 0x28, 0x29, 0x29, 0x2A, 0x2A, 0x2B, 0x2B, 0x2C, 0x2C, 0x2D, 0x2D, 0x2E, 0x2E, 0x2F, 0x2F,
 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F };
 
-const unsigned char d_len_lzss[] = { 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7 };
+static const unsigned char d_len_lzss[] = { 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7 };
 
 /*
  * Initialise the decompressor trees and state variables
