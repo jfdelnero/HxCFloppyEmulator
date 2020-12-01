@@ -38,13 +38,13 @@ int init_deep_tabs=1;
 #define MAX_FREQ    0x8000      /* updates tree when the */
 
 
-USHORT freq[T + 1]; /* frequency table */
+static USHORT freq[T + 1]; /* frequency table */
 
-USHORT prnt[T + N_CHAR]; /* pointers to parent nodes, except for the */
+static USHORT prnt[T + N_CHAR]; /* pointers to parent nodes, except for the */
 				/* elements [T..T + N_CHAR - 1] which are used to get */
 				/* the positions of leaves corresponding to the codes. */
 
-USHORT son[T];   /* pointers to child nodes (son[], son[] + 1) */
+static USHORT son[T];   /* pointers to child nodes (son[], son[] + 1) */
 
 
 
