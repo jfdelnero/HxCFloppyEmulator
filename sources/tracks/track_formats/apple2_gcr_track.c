@@ -70,7 +70,7 @@
 /////////////////////////////////////////////////////////
 // Apple II Translation tables
 /////////////////////////////////////////////////////////
-static unsigned char byte_translation_SixAndTwo[] = {
+static unsigned char byte_translation_SixAndTwo[64] = {
       0x96, 0x97, 0x9a, 0x9b, 0x9d, 0x9e, 0x9f, 0xa6,
       0xa7, 0xab, 0xac, 0xad, 0xae, 0xaf, 0xb2, 0xb3,
       0xb4, 0xb5, 0xb6, 0xb7, 0xb9, 0xba, 0xbb, 0xbc,
@@ -119,6 +119,30 @@ static void NybbleSector6and2( unsigned char * dataIn, unsigned char * nybbleOut
 }
 #endif
 
+#if 0
+uint8_t kInvDiskBytes62[256];
+#define kInvInvalidValue 0xff
+
+void CalcNibbleInvTables(void)
+{
+	unsigned int i;
+
+	/*
+	memset(kInvDiskBytes53, kInvInvalidValue, sizeof(kInvDiskBytes53));
+	for (i = 0; i < sizeof(kDiskBytes53); i++)
+	{
+		kInvDiskBytes53[kDiskBytes53[i]] = i;
+	}
+	*/
+
+	memset(kInvDiskBytes62, kInvInvalidValue, sizeof(kInvDiskBytes62));
+    for (i = 0; i < sizeof(byte_translation_SixAndTwo); i++)
+	{
+		kInvDiskBytes62[byte_translation_SixAndTwo[i]] = i;
+	}
+}
+#endif
+
 static uint32_t DeNybbleSector6and2(unsigned char * dataOut,unsigned char * input_data,uint32_t intput_data_size,uint32_t bit_offset,unsigned char * crc_error)
 {
 	unsigned char buff1_offset;
@@ -141,7 +165,7 @@ static uint32_t DeNybbleSector6and2(unsigned char * dataOut,unsigned char * inpu
 
 	memset(nibblebuf,0,512);
 
-	for(bit_i=0;bit_i<(342 + 1) * 8;bit_i++)
+	for(bit_i=0;bit_i<(1 + 342 + 1) * 8;bit_i++)
 	{
 		if(getbit(input_data,(bit_offset + (bit_i*2) +1)%intput_data_size ) )
 		{
@@ -205,6 +229,12 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 	int sector_extractor_sm;
 	int i;
 
+	#ifdef DBG_A2_GCR
+	int jj;
+	unsigned char test_buffer[2048+1];
+	unsigned char test_buffer2[64];
+	#endif
+
 	bit_offset=track_offset;
 	memset(sector,0,sizeof(HXCFE_SECTCFG));
 
@@ -215,7 +245,9 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 		switch(sector_extractor_sm)
 		{
 			case LOOKFOR_GAP1:
-				//0xD5 0xAA 0x96
+
+				// Sector header prolog
+				// 0xD5 0xAA 0x96
 				// 1101 0101 1010 1010 1001 0110
 				// 01010001 00010001 01000100 01000100 01000001 00010100
 				// 0x51 11 44 44 41 14
@@ -226,6 +258,7 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 				fm_buffer[3]=0x44;
 				fm_buffer[4]=0x41;
 				fm_buffer[5]=0x14;
+
 
 				bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*6,bit_offset);
 
@@ -241,6 +274,18 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 
 			case LOOKFOR_ADDM:
 
+				#ifdef DBG_A2_GCR
+				i = 0;
+				memset(test_buffer,0,sizeof(test_buffer));
+				test_buffer[i++] = 'A';
+				do
+				{
+					test_buffer[i] = '0' + getbit(track->databuffer,( (bit_offset + i) % track->tracklen));
+					i++;
+				}while(i<1024);
+				floppycontext->hxc_printf(MSG_DEBUG,test_buffer);
+				#endif
+
 				bit_offset = bit_offset + ( 6 * 8 );
 				sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_buffer,7,bit_offset,0);
 				if(1)
@@ -250,12 +295,15 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 					tmp_buffer[2] = LUT_Byte2ShortOddBitsExpander[tmp_buffer[2]>>4]<<1 | (LUT_Byte2ShortOddBitsExpander[tmp_buffer[2]&0xF]);
 					tmp_buffer[3] = LUT_Byte2ShortOddBitsExpander[tmp_buffer[3]>>4]<<1 | (LUT_Byte2ShortOddBitsExpander[tmp_buffer[3]&0xF]);
 
+					#ifdef DBG_A2_GCR
+					floppycontext->hxc_printf(MSG_DEBUG,"DBG %.2X %.2X %.2X %.2X %.2X %.2X %.2X",tmp_buffer[0],tmp_buffer[1],tmp_buffer[2],tmp_buffer[3],tmp_buffer[4],tmp_buffer[5],tmp_buffer[6]);
+					#endif
+
 					CRC16_Low = 0x00;
 					for(i=0;i<4;i++)
 					{
 						CRC16_Low = tmp_buffer[i] ^ CRC16_Low;
 					}
-
 
 					sector->cylinder = tmp_buffer[1];
 					sector->head = 0;
@@ -279,72 +327,145 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 
 					sector->header_crc = tmp_buffer[3] ;
 
+
+					old_bit_offset=bit_offset;
+
 					if(!CRC16_Low)
 					{ // crc ok !!!
 
-						sector->use_alternate_header_crc = 0x00;
-						floppycontext->hxc_printf(MSG_DEBUG,"Valid Apple II 6 and 2 GCR sector header found - Sect:%d",tmp_buffer[2]);
-						old_bit_offset=bit_offset;
+						#ifdef DBG_A2_GCR
+						i = 0;
+ 						memset(test_buffer,0,sizeof(test_buffer));
+						test_buffer[i++] = 'D';
+						do
+						{
+							test_buffer[i] = '0' + getbit(track->databuffer,( (bit_offset + i) % track->tracklen));
+							i++;
+						}while(i<1024);
+						floppycontext->hxc_printf(MSG_DEBUG,test_buffer);
+						#endif
 
-						// 0xD5 0xAA 0xAD
-						// 1101 0101 1010 1010 1010 1101
-						// 01010001 00010001 01000100 01000100 01000100 01010001
-						// 0x51 11 44 44 44 51
+						// Sector header epilog
+						// 0xDE 0xAA 0xEB
+						// 1101 1110 1010 1010 1110 1011
+						// 01010001 01010100 01000100 01000100 01010100 01000101
+						// 0x51 54 44 44 54 45
 
 						fm_buffer[0]=0x51;
-						fm_buffer[1]=0x11;
+						fm_buffer[1]=0x54;
 						fm_buffer[2]=0x44;
 						fm_buffer[3]=0x44;
-						fm_buffer[4]=0x44;
-						fm_buffer[5]=0x51;
+						fm_buffer[4]=0x54;
+						fm_buffer[5]=0x45;
 
-						bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*6,bit_offset+(4*8));
+						bit_offset = searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,(8*4),bit_offset );
 
-						if((bit_offset-old_bit_offset<((88+10)*8*2)) && bit_offset!=-1)
+						if(bit_offset!=-1)
 						{
+							bit_offset += (8*6);
+							sector->use_alternate_header_crc = 0x00;
+							floppycontext->hxc_printf(MSG_DEBUG,"Valid Apple II 6 and 2 GCR sector header found - Sect:%d",tmp_buffer[2]);
+							old_bit_offset = bit_offset;
 
-							sector_size = 256;
-							sector->sectorsize = sector_size;
-							sector->trackencoding = APPLE2_GCR6A2;
+							// 0xD5 0xAA 0xAD
+							// 1101 0101 1010 1010 1010 1101
+							// 01010001 00010001 01000100 01000100 01000100 01010001
+							// 0x51 11 44 44 44 51
+							fm_buffer[0]=0x51;
+							fm_buffer[1]=0x11;
+							fm_buffer[2]=0x44;
+							fm_buffer[3]=0x44;
+							fm_buffer[4]=0x44;
+							fm_buffer[5]=0x51;
 
-							sector->use_alternate_datamark = 0x00;
-							sector->alternate_datamark = 0x00;
+							bit_offset = searchBitStream(track->databuffer,track->tracklen,(64*8),fm_buffer,8*6,bit_offset);
 
-							sector->startdataindex=bit_offset;
+							#ifdef DBG_A2_GCR
+							jj = bit_offset;
+							#endif
 
-							sector->input_data =(unsigned char*)malloc(sector_size+2);
-							if(sector->input_data)
+							if((bit_offset-old_bit_offset<((88+10)*8*2)) && bit_offset!=-1)
 							{
-								memset(sector->input_data,0,sector_size+2);
 
-								sector->endsectorindex = DeNybbleSector6and2(sector->input_data,track->databuffer,track->tracklen,bit_offset+(6 * 8),&datachksumerr);
+								sector_size = 256;
+								sector->sectorsize = sector_size;
+								sector->trackencoding = APPLE2_GCR6A2;
 
-								sector->data_crc = 0x00;
+								sector->use_alternate_datamark = 0x00;
+								sector->alternate_datamark = 0x00;
 
-								if(!datachksumerr)
-								{ // crc ok !!!
-									floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
-									sector->use_alternate_data_crc = 0x00;
-								}
-								else
+								sector->startdataindex=bit_offset;
+
+								sector->input_data =(unsigned char*)malloc(sector_size+2);
+								if(sector->input_data)
 								{
-									floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
-									sector->use_alternate_data_crc = 0xFF;
+									memset(sector->input_data,0,sector_size+2);
+
+									bit_offset = chgbitptr( track->tracklen, bit_offset, (6*8));
+
+									sector->endsectorindex = DeNybbleSector6and2(sector->input_data,track->databuffer,track->tracklen,bit_offset,&datachksumerr);
+
+									sector->data_crc = 0x00;
+
+									if(!datachksumerr)
+									{ // crc ok !!!
+
+										#ifdef DBG_A2_GCR
+										floppycontext->hxc_printf(MSG_DEBUG,"DBG2 %d",i);
+										i = 0;
+										memset(test_buffer,0,sizeof(test_buffer));
+										strcpy(test_buffer,"TST: ");
+										do
+										{
+											sprintf(test_buffer2,"%d",getbit(track->databuffer,( (jj + i) % track->tracklen)));
+											strcat(test_buffer, test_buffer2);
+											i++;
+										}while(i<1024);
+										floppycontext->hxc_printf(MSG_DEBUG,test_buffer);
+
+										i = 0;
+										memset(test_buffer,0,sizeof(test_buffer));
+										strcpy(test_buffer,"TST2: ");
+										do
+										{
+											sprintf(test_buffer2,"%d",getbit(track->databuffer,( (bit_offset + i) % track->tracklen)));
+											strcat(test_buffer, test_buffer2);
+											i++;
+										}while(i<1024);
+										floppycontext->hxc_printf(MSG_DEBUG,test_buffer);
+										#endif
+
+										floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
+										sector->use_alternate_data_crc = 0x00;
+									}
+									else
+									{
+										floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
+										sector->use_alternate_data_crc = 0xFF;
+									}
 								}
+
+								bit_offset=bit_offset+(sector_size*4);
+
+								sector_extractor_sm=ENDOFSECTOR;
 
 							}
-
-							bit_offset=bit_offset+(sector_size*4);
-
-							sector_extractor_sm=ENDOFSECTOR;
-
+							else
+							{
+								bit_offset=old_bit_offset+1;
+								floppycontext->hxc_printf(MSG_DEBUG,"No data!");
+								sector_extractor_sm=ENDOFSECTOR;
+							}
 						}
 						else
 						{
 							bit_offset=old_bit_offset+1;
-							floppycontext->hxc_printf(MSG_DEBUG,"No data!");
+							floppycontext->hxc_printf(MSG_DEBUG,"No data! 2");
 							sector_extractor_sm=ENDOFSECTOR;
+							sector->use_alternate_data_crc = 0xFF;
 						}
+
+
 					}
 					else
 					{
