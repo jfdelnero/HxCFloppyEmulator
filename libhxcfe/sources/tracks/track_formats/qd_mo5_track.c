@@ -74,12 +74,9 @@ int get_next_QDMO5_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG 
 	unsigned char mfm_buffer[32];
 	unsigned char tmp_buffer[32];
 	unsigned char * tmp_sector;
-	unsigned char CRC16_High;
-	unsigned char CRC16_Low;
 	unsigned char checksum;
 	int sector_extractor_sm;
 	int k;
-	unsigned char crctable[32];
 
 	memset(sector,0,sizeof(HXCFE_SECTCFG));
 
