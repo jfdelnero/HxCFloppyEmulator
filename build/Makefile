@@ -39,8 +39,9 @@ LDFLAGS += -lc -lm -ldl
 endif
 
 ifeq ($(TARGET), Darwin)
-CFLAGS += -arch x86_64 -mmacosx-version-min=10.13
-LDFLAGS += -lc -lm -ldl -arch x86_64 -mmacosx-version-min=10.13
+MACOSX_MIN_VER ?= 10.13
+CFLAGS += -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
+LDFLAGS += -lc -lm -ldl -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
 endif
 
 EXEC=libhxcadaptor.a
