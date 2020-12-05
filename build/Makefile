@@ -45,8 +45,9 @@ EXEC=libusbhxcfe.dll
 endif
 
 ifeq ($(TARGET), Darwin)
-CFLAGS += -arch x86_64 -mmacosx-version-min=10.13
-LDFLAGS +=  -lc -lm -ldl -s -arch x86_64 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libusbhxcfe.dylib -mmacosx-version-min=10.13
+MACOSX_MIN_VER ?= 10.13
+CFLAGS += -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
+LDFLAGS +=  -lc -lm -ldl -s -arch x86_64 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libusbhxcfe.dylib -mmacosx-version-min=${MACOSX_MIN_VER}
 EXEC=libusbhxcfe.dylib
 endif
 
