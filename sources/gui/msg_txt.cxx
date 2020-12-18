@@ -287,6 +287,8 @@ Fl_Menu_Item pincfg_choices[]=
 	{ "nDiskChange 2",0,NULL,(void*)PIN_CFG_NOTDC2},
 	{ "DiskChange 3",0,NULL,(void*)PIN_CFG_DC3},
 	{ "nDiskChange 3",0,NULL,(void*)PIN_CFG_NOTDC3},
+	{ "DiskChange 4",0,NULL,(void*)PIN_CFG_DC4},
+	{ "nDiskChange 4",0,NULL,(void*)PIN_CFG_NOTDC4},
 	{ 0,0,0,(void*)0},
 	{0}
 };
