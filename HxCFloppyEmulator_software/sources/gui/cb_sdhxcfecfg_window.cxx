@@ -102,6 +102,8 @@ int pincfg_choices_values[]=
 	PIN_CFG_NOTDC2,
 	PIN_CFG_DC3,
 	PIN_CFG_NOTDC3,
+	PIN_CFG_DC4,
+	PIN_CFG_NOTDC4,
 	0
 };
 

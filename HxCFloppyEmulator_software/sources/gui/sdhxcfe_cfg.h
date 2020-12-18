@@ -49,3 +49,5 @@ typedef struct sdhxcfecfgfile_
 #define PIN_CFG_DC2			9
 #define PIN_CFG_NOTDC3		10
 #define PIN_CFG_DC3			11
+#define PIN_CFG_NOTDC4		12
+#define PIN_CFG_DC4			13
