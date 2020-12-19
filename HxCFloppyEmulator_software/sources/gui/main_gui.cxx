@@ -878,6 +878,8 @@ Main_Window::Main_Window()
 	// First lock() call to Enable lock/unlock threads support.
 	Fl::lock();
 
+	hxc2001_2_bmp = NULL;
+
 	guicontext->loading = 0;
 	guicontext->exporting = 0;
 
@@ -1044,15 +1046,28 @@ Main_Window::Main_Window()
 	fdump_window = new floppy_dump_window();
 	if(fdump_window)
 	{
-		fdump_window->double_sided->value(1);
+		fdump_window->side_0->value(1);
+		fdump_window->side_1->value(1);
 		fdump_window->double_step->value(0);
-		fdump_window->number_of_retry->value(10);
-		fdump_window->number_of_track->value(80);
+		fdump_window->start_track->value(0);
+		fdump_window->end_track->value(79);
 		fdump_window->sel_drive_a->value(1);
 		fdump_window->sel_drive_b->value(0);
 
-		guicontext->xsize=460;
-		guicontext->ysize=200;
+		fdump_window->FM125->value(1);
+		fdump_window->FM150->value(1);
+		fdump_window->FM250->value(1);
+		fdump_window->FM500->value(0);
+		fdump_window->MFM250->value(1);
+		fdump_window->MFM300->value(1);
+		fdump_window->MFM500->value(1);
+		fdump_window->MFM1000->value(0);
+		fdump_window->double_step->value(0);
+
+		fdump_window->number_of_retry->value(3);
+
+		guicontext->xsize = fdump_window->layout_area->w();
+		guicontext->ysize = fdump_window->layout_area->h();
 		guicontext->mapfloppybuffer = (unsigned char*)malloc(guicontext->xsize * guicontext->ysize * 4);
 		if(!guicontext->mapfloppybuffer)
 		{
@@ -1060,7 +1075,15 @@ Main_Window::Main_Window()
 		}
 		else
 		{
-			memset(guicontext->mapfloppybuffer,0,guicontext->xsize*guicontext->ysize*4);
+			if(!hxc2001_2_bmp)
+			{
+				bitmap_hxc2001_2_bmp->unpacked_data=data_unpack(bitmap_hxc2001_2_bmp->data,bitmap_hxc2001_2_bmp->csize ,bitmap_hxc2001_2_bmp->data, bitmap_hxc2001_2_bmp->size);
+				convert8b24b(bitmap_hxc2001_2_bmp,0x00);
+				hxc2001_2_bmp = bitmap_hxc2001_2_bmp;
+			}
+				
+			memset(guicontext->mapfloppybuffer,0xFF,guicontext->xsize*guicontext->ysize*4);
+			splash_sprite(hxc2001_2_bmp,guicontext->mapfloppybuffer, guicontext->xsize, guicontext->ysize, guicontext->xsize / 2 - hxc2001_2_bmp->Xsize / 2, guicontext->ysize / 2 - hxc2001_2_bmp->Ysize / 2);
 		}
 
 		hxc_createcriticalsection(guicontext->hxcfe,1);
@@ -1079,9 +1102,12 @@ Main_Window::Main_Window()
 	infos_window = new floppy_infos_window();
 	if(infos_window)
 	{
-		bitmap_hxc2001_2_bmp->unpacked_data=data_unpack(bitmap_hxc2001_2_bmp->data,bitmap_hxc2001_2_bmp->csize ,bitmap_hxc2001_2_bmp->data, bitmap_hxc2001_2_bmp->size);
-		convert8b24b(bitmap_hxc2001_2_bmp,0x00);
-		hxc2001_2_bmp = bitmap_hxc2001_2_bmp;
+		if(!hxc2001_2_bmp)
+		{
+			bitmap_hxc2001_2_bmp->unpacked_data=data_unpack(bitmap_hxc2001_2_bmp->data,bitmap_hxc2001_2_bmp->csize ,bitmap_hxc2001_2_bmp->data, bitmap_hxc2001_2_bmp->size);
+			convert8b24b(bitmap_hxc2001_2_bmp,0x00);
+			hxc2001_2_bmp = bitmap_hxc2001_2_bmp;
+		}
 
 		infos_window->x_offset->bounds(0.0, 100);
 		infos_window->x_offset->value(85);
