@@ -120,7 +120,7 @@ typedef void HXCFE_SECTCFG;
 // UI Output callback functions                                                                   //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifndef _HXCFE_PRINTF_FUNC_
-typedef int32_t (*HXCFE_PRINTF_FUNC)(int32_t MSGTYPE, char * string, ... );
+typedef int32_t (*HXCFE_PRINTF_FUNC)(int32_t MSGTYPE, const char * string, ... );
 #define _HXCFE_PRINTF_FUNC_
 #endif
 

@@ -72,7 +72,7 @@
 
 #include "xml_disk/packer/pack.h"
 
-int dummy_output(int MSGTYPE,char * chaine, ...)
+int dummy_output(int MSGTYPE,const char * chaine, ...)
 {
 	return 0;
 }
