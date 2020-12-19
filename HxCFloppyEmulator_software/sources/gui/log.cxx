@@ -94,7 +94,7 @@ char * logs_buffer;
 #define _vsnprintf vsnprintf
 #endif
 
-int CUI_affiche(int MSGTYPE,char * chaine, ...)
+int CUI_affiche(int MSGTYPE,const char * chaine, ...)
 {
 	FILE * debugfile;
 	char lineheader[32];
