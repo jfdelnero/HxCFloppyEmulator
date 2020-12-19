@@ -28,7 +28,7 @@
 #include "internal_floppy.h"
 
 
-typedef int (*HXCFE_PRINTF_FUNC)(int MSGTYPE,char * string, ...);
+typedef int (*HXCFE_PRINTF_FUNC)(int MSGTYPE, const char * string, ...);
 #define _HXCFE_PRINTF_FUNC_
 
 typedef int (*HXCFE_TRACKPOSOUT_FUNC)(unsigned int current,unsigned int total);
