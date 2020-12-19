@@ -413,7 +413,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 										currentside->tracklen=trackcopy(currentside->databuffer,ti.trackbuf,overlap,ti.tracklen,(unsigned char)((ti.overlap<0)?0xFF:0x00));
 
 										currentside->flakybitsbuffer = malloc(len);
-										if(!currentside->flakybitsbuffer)
+										if(currentside->flakybitsbuffer)
 										{
 											memset(currentside->flakybitsbuffer,0x00,len);
 
