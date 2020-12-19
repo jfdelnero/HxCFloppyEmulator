@@ -32,7 +32,7 @@ typedef struct filefoundinfo_
 }filefoundinfo;
 
 int hxc_setevent( HXCFE* floppycontext, unsigned char id );
-unsigned long hxc_createevent( HXCFE* floppycontext, unsigned char id );
+uintptr_t hxc_createevent( HXCFE* floppycontext, unsigned char id );
 int hxc_waitevent( HXCFE* floppycontext, int id, int timeout );
 void hxc_pause( int ms );
 int hxc_createthread( HXCFE* floppycontext, void* hwcontext, THREADFUNCTION thread, int priority );

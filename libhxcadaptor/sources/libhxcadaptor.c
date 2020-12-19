@@ -146,19 +146,19 @@ int hxc_setevent(HXCFE* floppycontext,unsigned char id)
 	return 0;
 }
 
-unsigned long hxc_createevent(HXCFE* floppycontext,unsigned char id)
+uintptr_t hxc_createevent(HXCFE* floppycontext,unsigned char id)
 {
 #ifdef WIN32
 
-	eventtab[id]=CreateEvent(NULL,FALSE,FALSE,NULL);
-	return (unsigned long)eventtab[id];
+	eventtab[id] = CreateEvent(NULL,FALSE,FALSE,NULL);
+	return (uintptr_t)eventtab[id];
 
 #else
 
 	eventtab[id]=(EVENT_HANDLE*)malloc(sizeof(EVENT_HANDLE));
 	pthread_mutex_init(&eventtab[id]->eMutex, NULL);
 	pthread_cond_init(&eventtab[id]->eCondVar, NULL);
-	return (unsigned long)eventtab[id];
+	return (uintptr_t)eventtab[id];
 #endif
 }
 
