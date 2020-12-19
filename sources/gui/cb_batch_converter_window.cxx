@@ -483,7 +483,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 							free(destinationfolder);
 							free(fullpath);
 
-							CUI_affiche(MSG_INFO_1,(char*)"Leaving directory %s",FindFileData.filename);
+							CUI_affiche(MSG_INFO_1,"Leaving directory %s",FindFileData.filename);
 
 							if(tempstr)
 							{
@@ -498,7 +498,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 					{
 						batchconverter_set_progress_status(guicontext,(char*)"Reading", fl_rgb_color(50,255,50), -1);
 
-						CUI_affiche(MSG_INFO_1,(char*)"converting file %s, %dB",FindFileData.filename,FindFileData.size);
+						CUI_affiche(MSG_INFO_1,"converting file %s, %dB",FindFileData.filename,FindFileData.size);
 						if(FindFileData.size)
 						{
 
