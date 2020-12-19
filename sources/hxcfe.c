@@ -45,7 +45,7 @@
 
 int verbose;
 
-int CUI_affiche(int MSGTYPE,char * chaine, ...)
+int CUI_affiche(int MSGTYPE,const char * chaine, ...)
 {
 	if(MSGTYPE!=MSG_DEBUG || verbose)
 	{
