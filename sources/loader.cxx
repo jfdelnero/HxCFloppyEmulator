@@ -65,7 +65,7 @@ extern s_gui_context * guicontext;
 extern const track_type track_type_list[];
 extern void sync_if_config();
 
-int load_floppy(HXCFE_FLOPPY * floppydisk,char * defaultfilename)
+int load_floppy(HXCFE_FLOPPY * floppydisk,const char * defaultfilename)
 {
 	HXCFE_IMGLDR * imgldr_ctx;
 	int ret;
