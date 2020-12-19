@@ -304,7 +304,7 @@ void filesystem_generator_window_bt_injectdir(Fl_Button* bt, void*)
 		fgw->txtout_freesize->redraw();
 
 		floppy=hxcfe_generateFloppy(guicontext->hxcfe,(char*)"",s,0);
-		load_floppy(floppy,(char*)"Disk_Image");
+		load_floppy(floppy, "Disk_Image");
 
 		#ifdef STANDALONEFSBROWSER
 		if(guicontext->loadedfloppy)
