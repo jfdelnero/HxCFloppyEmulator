@@ -487,12 +487,16 @@ int32_t close_ftdichip(void * ftdihandle)
 
 int32_t purge_ftdichip(void* ftdihandle,uint32_t buffer)
 {
+#if defined(FTDILIB)
 	int32_t ret;
+
+	ret = 0;
+#endif
 
 #ifdef DEBUG
 	printf("---purge_ftdichip---\n");
 #endif
-	ret = 0;
+
 #if defined(FTDILIB)
 
 	p_ftdi_usb_purge_rx_buffer((ftdi_context)ftdihandle);
@@ -572,7 +576,7 @@ int32_t write_ftdichip(void* ftdihandle,unsigned char * buffer,uint32_t size)
 #if defined(FTDILIB)
 	int32_t dwWritten;
 #else
-	uint32_t dwWritten;
+	DWORD dwWritten;
 #endif
 
 #ifdef DEBUG
@@ -588,7 +592,6 @@ int32_t write_ftdichip(void* ftdihandle,unsigned char * buffer,uint32_t size)
 	}
 
 	return dwWritten;
-
 #else
 
 	if(pFT_Write ((FT_HANDLE*)ftdihandle, buffer, size,&dwWritten)!=FT_OK)
@@ -596,8 +599,7 @@ int32_t write_ftdichip(void* ftdihandle,unsigned char * buffer,uint32_t size)
 		return -1;
 	}
 
-	return dwWritten;
-
+	return (int32_t)dwWritten;
 #endif
 
 }
@@ -607,7 +609,7 @@ int32_t read_ftdichip(void* ftdihandle,unsigned char * buffer,uint32_t size)
 #if defined(FTDILIB)
 	int32_t nb_of_byte;
 #else
-	uint32_t returnvalue;
+	DWORD returnvalue;
 #endif
 
 #ifdef DEBUG
@@ -639,7 +641,8 @@ int32_t read_ftdichip(void* ftdihandle,unsigned char * buffer,uint32_t size)
 	{
 		return -1;
 	}
-	return returnvalue;
+
+	return (int32_t)returnvalue;
 
 #endif
 }
@@ -679,11 +682,21 @@ int32_t getfifostatus_ftdichip(void* ftdihandle,int32_t * txlevel,int32_t *rxlev
 	return 0;
 
 #else
+	DWORD tmp_rxlevel,tmp_txlevel;
 
-	if(pFT_GetStatus((FT_HANDLE*)ftdihandle,(uint32_t*)rxlevel,(uint32_t*)txlevel,(DWORD*)event)!=FT_OK)
+	tmp_rxlevel = (DWORD)(*rxlevel);
+	tmp_txlevel = (DWORD)(*txlevel);
+
+	if(pFT_GetStatus((FT_HANDLE*)ftdihandle,&tmp_rxlevel,&tmp_txlevel,(DWORD*)event)!=FT_OK)
 	{
+		*rxlevel = (int32_t)tmp_rxlevel;
+		*txlevel = (int32_t)tmp_txlevel;
+
 		return -1;
 	}
+
+	*rxlevel = (int32_t)tmp_rxlevel;
+	*txlevel = (int32_t)tmp_txlevel;
 
 	return 0;
 
