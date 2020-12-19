@@ -46,4 +46,4 @@ class Log_box : public Fl_Window {
 };
 
 
-int CUI_affiche(int MSGTYPE,char * chaine, ...);
+int CUI_affiche(int MSGTYPE,const char * chaine, ...);
