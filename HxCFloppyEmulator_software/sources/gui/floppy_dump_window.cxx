@@ -14,7 +14,7 @@ floppy_dump_window::floppy_dump_window() {
         sel_drive_a->type(102);
         sel_drive_a->down_box(FL_ROUND_DOWN_BOX);
       } // Fl_Round_Button* sel_drive_a
-      { sel_drive_b = new Fl_Round_Button(146, 18, 90, 31, "Drive \"B:\"");
+      { sel_drive_b = new Fl_Round_Button(143, 22, 90, 24, "Drive \"B:\"");
         sel_drive_b->type(102);
         sel_drive_b->down_box(FL_ROUND_DOWN_BOX);
       } // Fl_Round_Button* sel_drive_b
@@ -62,7 +62,7 @@ floppy_dump_window::floppy_dump_window() {
       { side_1 = new Fl_Check_Button(132, 106, 70, 16, "Side 1");
         side_1->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* side_1
-      { double_step = new Fl_Check_Button(6, 130, 70, 16, "Double step");
+      { double_step = new Fl_Check_Button(6, 130, 104, 16, "Double step");
         double_step->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* double_step
       { Fl_Group* o = new Fl_Group(26, 80, 15, 15);
@@ -74,28 +74,28 @@ floppy_dump_window::floppy_dump_window() {
       o->box(FL_ENGRAVED_FRAME);
       o->labeltype(FL_EMBOSSED_LABEL);
       o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-      { FM125 = new Fl_Check_Button(3, 180, 70, 16, "FM/SD 125Kb/s");
+      { FM125 = new Fl_Check_Button(3, 180, 127, 16, "FM/SD 125Kb/s");
         FM125->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* FM125
-      { FM150 = new Fl_Check_Button(3, 196, 70, 16, "FM/SD 150Kb/s");
+      { FM150 = new Fl_Check_Button(3, 196, 127, 16, "FM/SD 150Kb/s");
         FM150->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* FM150
-      { FM250 = new Fl_Check_Button(3, 211, 70, 16, "FM/SD 250Kb/s");
+      { FM250 = new Fl_Check_Button(3, 211, 127, 16, "FM/SD 250Kb/s");
         FM250->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* FM250
-      { MFM250 = new Fl_Check_Button(141, 180, 70, 16, "MFM/DD 250Kb/s");
+      { MFM250 = new Fl_Check_Button(141, 180, 139, 16, "MFM/DD 250Kb/s");
         MFM250->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* MFM250
-      { MFM500 = new Fl_Check_Button(141, 209, 70, 16, "MFM/HD 500Kb/s");
+      { MFM500 = new Fl_Check_Button(141, 209, 139, 16, "MFM/HD 500Kb/s");
         MFM500->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* MFM500
-      { MFM1000 = new Fl_Check_Button(141, 224, 70, 16, "MFM/ED 1Mb/s");
+      { MFM1000 = new Fl_Check_Button(141, 224, 124, 16, "MFM/ED 1Mb/s");
         MFM1000->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* MFM1000
-      { FM500 = new Fl_Check_Button(3, 225, 70, 16, "FM/SD 500Kb/s");
+      { FM500 = new Fl_Check_Button(3, 225, 127, 16, "FM/SD 500Kb/s");
         FM500->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* FM500
-      { MFM300 = new Fl_Check_Button(141, 194, 70, 16, "MFM/DD 300Kb/s");
+      { MFM300 = new Fl_Check_Button(141, 194, 139, 16, "MFM/DD 300Kb/s");
         MFM300->down_box(FL_DOWN_BOX);
       } // Fl_Check_Button* MFM300
       o->end();
@@ -105,7 +105,7 @@ floppy_dump_window::floppy_dump_window() {
       o->labeltype(FL_EMBOSSED_LABEL);
       o->labelsize(12);
       o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-      { Fl_Button* o = new Fl_Button(96, 303, 80, 21, "Stop !");
+      { Fl_Button* o = new Fl_Button(194, 303, 80, 21, "Stop !");
         o->callback((Fl_Callback*)floppy_dump_stop, (void*)(this));
       } // Fl_Button* o
       { Fl_Button* o = new Fl_Button(15, 303, 80, 21, "Read Disk");
