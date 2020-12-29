@@ -45,13 +45,20 @@ char* path(struct Volume *vol, SECTNUM parent)
     tmpPath = NULL;
     adfReadEntryBlock(vol, parent, &entryBlk);
     len = min(entryBlk.nameLen, MAXNAMELEN);
-    memcpy(tmpPath,entryBlk.name,len);
-    tmpPath[len]='\0';
-/*    if (entryBlk.parent!=vol->rootBlock) {
-        return(strcat(path(vol,entryBlk.parent), tmpPath));
+
+    if(tmpPath)
+    {
+        memcpy(tmpPath,entryBlk.name,len);
+        tmpPath[len]='\0';
+        /*    
+        if (entryBlk.parent!=vol->rootBlock) {
+            return(strcat(path(vol,entryBlk.parent), tmpPath));
+        }
+        else
+        */
     }
-    else
-   */     return(tmpPath);
+
+    return(tmpPath);
 }
 
 
@@ -74,9 +81,9 @@ return RC_OK;
             printf("path=%s\n",path(vol,entry.parent));
 */
 #if defined (WIN32)
-		*name = _strdup("");
+        *name = _strdup("");
 #else
-		*name = strdup("");
+        *name = strdup("");
 #endif
         if (*name==NULL)
             return RC_MALLOC;
