@@ -569,11 +569,22 @@ int isTheRightSector(floppy_infos_window *fiw,s_sectorlist * sl,int xpos,int ypo
 	int disp_xsize,disp_ysize;
 	float pos_angle;
 	int distance,side;
+	int min_distance,max_distance;
 
 	if(fiw->view_mode->value() > 1)
 	{
 		disp_xsize=fiw->floppy_map_disp->w();
 		disp_ysize=fiw->floppy_map_disp->h();
+
+
+		min_distance = sl->diameter - sl->thickness;
+		max_distance = sl->diameter;
+
+		if(min_distance < 0)
+			min_distance = 0;
+
+		if(min_distance > max_distance)
+			max_distance = min_distance;
 
 		if(xpos<(disp_xsize/2))
 		{
@@ -590,9 +601,10 @@ int isTheRightSector(floppy_infos_window *fiw,s_sectorlist * sl,int xpos,int ypo
 
 		if(sl->end_angle < PI*2)
 		{
-			if( ( pos_angle>=sl->start_angle && pos_angle<=sl->end_angle ) &&
-				( distance>=(sl->diameter) && distance<=(sl->diameter + sl->thickness) ) &&
-				sl->side == side
+			if(
+				( ( pos_angle >= sl->start_angle ) && ( pos_angle <= sl->end_angle ) ) &&
+				( ( distance >= min_distance ) && ( distance <= max_distance ) ) &&
+				( sl->side == side )
 				)
 			{
 				return 1;
@@ -600,9 +612,10 @@ int isTheRightSector(floppy_infos_window *fiw,s_sectorlist * sl,int xpos,int ypo
 		}
 		else
 		{	// Sector over index case...
-			if( ( pos_angle>=sl->start_angle || pos_angle<=(sl->end_angle-(PI*2)) ) &&
-				( distance>=(sl->diameter) && distance<=(sl->diameter + sl->thickness) ) &&
-				sl->side == side
+			if(
+				( ( pos_angle >= sl->start_angle ) || ( pos_angle <= (sl->end_angle-(PI*2) ) ) ) &&
+				( ( distance >= min_distance ) && ( distance <= max_distance ) ) &&
+				( sl->side == side )
 				)
 			{
 				return 1;
