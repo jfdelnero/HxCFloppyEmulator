@@ -46,6 +46,8 @@ typedef struct _HXCFE
 	HXCFE_TRACKPOSOUT_FUNC hxc_settrackpos;
 	void * image_handlers;
 	void * envvar;
+
+	char * license;
 }HXCFE;
 
 #define _HXCFE_
