@@ -877,6 +877,7 @@ Main_Window::Main_Window()
 
 	// First lock() call to Enable lock/unlock threads support.
 	Fl::lock();
+	Fl::visual(FL_RGB);
 
 	hxc2001_2_bmp = NULL;
 
