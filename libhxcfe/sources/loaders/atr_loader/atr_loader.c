@@ -62,6 +62,18 @@
 
 #include "libhxcadaptor.h"
 
+#include "tracks/luts.h"
+
+void negate_buffer(unsigned char * buffer, int size)
+{
+	int i;
+
+	for(i=0;i<size;i++)
+	{
+		buffer[i] = ~buffer[i];
+	}
+}
+
 int ATR_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	atr_header * fileheader;
@@ -87,7 +99,6 @@ int ATR_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 }
 
 
-
 int ATR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 
@@ -100,7 +111,10 @@ int ATR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int gap3len,interleave;
 	int sectorsize,rpm;
 	int bitrate,mixedsectorsize;
+	int image_tracks_size;
+	int image_track0_size;
 	atr_header fileheader;
+	unsigned char tmp_sector[256*3];
 
 	HXCFE_SECTCFG* sectorconfig = NULL;
 	HXCFE_CYLINDER* currentcylinder = NULL;
@@ -125,37 +139,48 @@ int ATR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 		bitrate = 250000;
 		rpm = 300;
-		interleave = 1;
+		interleave = 9;
 		gap3len = 30;
 
 		sectorsize = fileheader.sector_size;
-		floppydisk->floppyNumberOfSide = 1;
 		mixedsectorsize=0;
-
+		floppydisk->floppyNumberOfSide = 1;
 		floppydisk->floppyNumberOfTrack = 40;
+		floppydisk->floppySectorPerTrack = 18;
+		trackformat=IBMFORMAT_DD;
 
-		if( filesize == 183952 )
+		image_tracks_size = floppydisk->floppySectorPerTrack * sectorsize;
+		image_track0_size = image_tracks_size;
+
+		if( filesize == 183952 || filesize == 368272 )
 		{
+			interleave = 15;
+
 			trackformat=IBMFORMAT_DD;
+
 			floppydisk->floppyNumberOfSide = 1;
-			floppydisk->floppySectorPerTrack = 18;
-			floppydisk->floppyNumberOfTrack = 40;
+
+			if(filesize == 368272)
+				floppydisk->floppyNumberOfSide = 2;
+
 			mixedsectorsize=1;
+
 			if( sectorsize == 256 )
 			{
 				if( !((filesize-16) % 128) && ((filesize-16) % 256) )
 				{
 					//Logical format.
-
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Logical format");
 				}
 				else
 				{
 					//Physical or Weird formats.
-
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Physical or Weird formats.");
 				}
-
 			}
 
+			image_tracks_size = floppydisk->floppySectorPerTrack * sectorsize;
+			image_track0_size = (image_tracks_size - (3*sectorsize)) + (3*128);
 		}
 
 		if( filesize < 183952 )
@@ -163,6 +188,9 @@ int ATR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			trackformat=IBMFORMAT_SD;
 			floppydisk->floppySectorPerTrack = 26;
 			floppydisk->floppyNumberOfTrack = 40;
+
+			image_tracks_size = floppydisk->floppySectorPerTrack * sectorsize;
+			image_track0_size = image_tracks_size;
 		}
 
 		if( filesize < 131088 )
@@ -170,6 +198,9 @@ int ATR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			trackformat=IBMFORMAT_SD;
 			floppydisk->floppySectorPerTrack = 18;
 			floppydisk->floppyNumberOfTrack = 40;
+
+			image_tracks_size = floppydisk->floppySectorPerTrack * sectorsize;
+			image_track0_size = image_tracks_size;
 		}
 
 		floppydisk->floppyBitRate = bitrate;
@@ -200,7 +231,7 @@ int ATR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			{
 				hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
 
-				fseek (f , file_offset , SEEK_SET);
+				fseek (f, file_offset , SEEK_SET);
 
 				if( (j == 0) && mixedsectorsize)
 					hxc_fread(trackdata,(sectorsize*(floppydisk->floppySectorPerTrack-3)) + 128*3,f);
@@ -209,6 +240,8 @@ int ATR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				track_offset = 0;
 				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
+				memset(tmp_sector,0x00,sizeof(tmp_sector));
+
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
 				{
 					sectorconfig[k].cylinder = j;
@@ -216,10 +249,12 @@ int ATR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					sectorconfig[k].sector = k + 1;
 					sectorconfig[k].bitrate = floppydisk->floppyBitRate;
 					sectorconfig[k].gap3 = gap3len;
+
 					if( (j == 0) && k < 3 && mixedsectorsize)
 					{
-						sectorconfig[k].input_data=&trackdata[track_offset];
-						sectorconfig[k].sectorsize = 128;
+						memcpy(&tmp_sector[k*256],&trackdata[track_offset],128);
+						sectorconfig[k].input_data=&tmp_sector[k*256];
+						sectorconfig[k].sectorsize = 256;
 						track_offset += 128;
 					}
 					else
@@ -229,10 +264,17 @@ int ATR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						track_offset += sectorsize;
 					}
 
-					sectorconfig[k].trackencoding=trackformat;
+					sectorconfig[k].trackencoding = trackformat;
+
+					negate_buffer(sectorconfig[k].input_data, sectorconfig[k].sectorsize);
 				}
 
 				currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,0,2500,-2500);
+
+				if(!i && !j)
+					file_offset += image_track0_size;
+				else
+					file_offset += image_tracks_size;
 			}
 		}
 
@@ -254,14 +296,14 @@ alloc_error:
 
 	if( floppydisk->tracks )
 		free( floppydisk->tracks );
-	
+
 	if( trackdata )
 		free( trackdata );
 
 	if( sectorconfig )
 		free( sectorconfig );
 
-	return HXCFE_INTERNALERROR;	
+	return HXCFE_INTERNALERROR;
 }
 
 
