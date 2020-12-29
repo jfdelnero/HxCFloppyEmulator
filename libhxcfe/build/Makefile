@@ -115,12 +115,11 @@ LIBS_OBJS = $(BASE) $(FS_SUPPORT) $(ADFLIBOBJ) $(ENCODING_SUPPORT) $(TRACK_FORMA
 			$(DISKWRITERPLUGINS) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(LZ4OBJ) \
 			$(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB)
 
-all: SCRIPT_FILE XML_FILES $(EXEC)
+all: SCRIPT_FILE $(BASEDIR)/licensetxt.h XML_FILES $(EXEC)
 
 XML_FILES: bmptoh $(XML_DSKLAYOUT_OUTPUTS)
 
 SCRIPT_FILE: bmptoh $(BASEDIR)/init_script.h
-
 
 libhxcfe.dll: win32_libhxcfe_res.o $(LIBS_OBJS) ../../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
@@ -839,6 +838,9 @@ $(BASEDIR)/xml_disk/DiskLayouts/%.h : $(BASEDIR)/xml_disk/DiskLayouts/xml_files/
 
 $(BASEDIR)/init_script.h : $(BASEDIR)/init.script
 	cd $(BASEDIR)/ && $(BASEDIR)/xml_disk/converttools/bmptob8/bmptoh $(basename $(notdir $<.script)) -DATA && mv data_$(basename $(notdir $<))_script.h init_script.h
+
+$(BASEDIR)/licensetxt.h : $(BASEDIR)/../COPYING_FULL
+	cd $(BASEDIR) && $(BASEDIR)/xml_disk/converttools/bmptob8/bmptoh $< -DATA && mv data_$(basename $(notdir $<)).h licensetxt.h
 
 clean:
 	rm -rf *.o

@@ -204,7 +204,17 @@ const char * hxcfe_getVersion(HXCFE* floppycontext)
 
 const char * hxcfe_getLicense(HXCFE* floppycontext)
 {
-	return (char*)licensetxt;
+	if(floppycontext)
+	{
+		if(!floppycontext->license)
+		{
+			floppycontext->license = data_unpack(data_COPYING_FULL->data,data_COPYING_FULL->csize,0,data_COPYING_FULL->size);
+		}
+
+		return (char*)floppycontext->license;
+	}
+
+	return NULL;
 }
 
 void hxcfe_deinit(HXCFE* hxcfe)
@@ -213,9 +223,14 @@ void hxcfe_deinit(HXCFE* hxcfe)
 	{
 		hxcfe->hxc_printf(MSG_INFO_0,"Stopping HxCFloppyEmulator...");
 
-		if(	hxcfe->image_handlers )
+		if( hxcfe->image_handlers )
 		{
 			free( hxcfe->image_handlers );
+		}
+
+		if( hxcfe->license )
+		{
+			free( hxcfe->license );
 		}
 
 		free( hxcfe );
