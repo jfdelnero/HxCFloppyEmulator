@@ -156,7 +156,7 @@ int mfmtodecm2fm(unsigned char * input_data,int input_data_size,int bit_offset,i
 			}
 			else
 			{
-				if(!off&1)
+				if( !(off & 1) )
 					aligned = 1;
 				else
 					aligned = 0;
