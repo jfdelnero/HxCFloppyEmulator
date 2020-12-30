@@ -195,16 +195,10 @@ static uint32_t DeNybbleSector6and2(unsigned char * dataOut,unsigned char * inpu
 		xor = byte;
 	}
 
-	if (xor != byte_read_translation_SixAndTwo[nibblebuf[k]])
-	{
-		if(crc_error)
-			*crc_error = 0xFF;
-	}
-	else
-	{
-		if(crc_error)
-			*crc_error = 0x00;
-	}
+	word = byte_read_translation_SixAndTwo[nibblebuf[k]];
+
+	if(crc_error)
+		*crc_error = ((word&0xFF) ^ xor);
 
 	buff1_offset = 0;
 	for (i=0;i<256;i++)
@@ -405,7 +399,14 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 
 									sector->endsectorindex = DeNybbleSector6and2(sector->input_data,track->databuffer,track->tracklen,bit_offset,&datachksumerr);
 
-									sector->data_crc = 0x00;
+									if(datachksumerr)
+									{
+										// TOCHECK : Some disk appears to need this... Is it a kind of copy protection ?
+										bit_offset = chgbitptr( track->tracklen, bit_offset,  2);
+										sector->endsectorindex = DeNybbleSector6and2(sector->input_data,track->databuffer,track->tracklen,bit_offset,&datachksumerr);
+									}
+
+									sector->data_crc = datachksumerr;
 
 									if(!datachksumerr)
 									{ // crc ok !!!
