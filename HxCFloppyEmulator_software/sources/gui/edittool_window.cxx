@@ -152,7 +152,7 @@ trackedittool_window::trackedittool_window() {
     { bt_repair = new Fl_Button(7, 163, 113, 16, getString(STR_EDITTOOLWINDOW_0022));
       bt_repair->labelsize(10);
       bt_repair->callback((Fl_Callback*)edittool_window_bt_repair_callback, (void*)(this));
-      bt_repair->deactivate();
+      //bt_repair->deactivate();
     } // Fl_Button* bt_repair
     { bt_reversedisk = new Fl_Button(121, 310, 95, 16, getString(STR_EDITTOOLWINDOW_0023));
       bt_reversedisk->labelsize(10);
