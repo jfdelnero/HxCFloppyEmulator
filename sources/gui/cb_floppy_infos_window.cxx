@@ -91,6 +91,8 @@ extern bmaptype * hxc2001_2_bmp;
 float x_offset_track = 85;
 float x_offset_stream = 0;
 
+#define MAX_TRACK_MODES_INDEX 2
+
 static int progress_callback(unsigned int current,unsigned int total,void * td,void * user)
 {
 	s_gui_context * guicontext;
@@ -209,7 +211,7 @@ void update_graph(floppy_infos_window * w)
 				if(valmodif)
 					w->side_number_slide->value(side);
 
-				if(w->view_mode->value() <= 1)
+				if(w->view_mode->value() <= MAX_TRACK_MODES_INDEX)
 				{
 					sprintf(tempstr,"Track : %d Side : %d ",track,side);
 					w->side_number_slide->activate();
@@ -425,7 +427,7 @@ int InfosThreadProc(void* floppycontext,void* context)
 						x_offset_track = w->x_offset->value();
 					}
 
-					if(old_view_mode == 1)
+					if(old_view_mode == 1 || old_view_mode == 2)
 					{
 						x_offset_stream = w->x_offset->value();
 					}
@@ -445,6 +447,7 @@ int InfosThreadProc(void* floppycontext,void* context)
 						}
 					break;
 					case 1:
+					case 2:
 						hxcfe_td_select_view_type( td, w->view_mode->value());
 						hxcfe_td_draw_stream_track(td,guicontext->trackviewerfloppy,(int)w->track_number_slide->value(),(int)w->side_number_slide->value());
 
@@ -571,7 +574,7 @@ int isTheRightSector(floppy_infos_window *fiw,s_sectorlist * sl,int xpos,int ypo
 	int distance,side;
 	int min_distance,max_distance;
 
-	if(fiw->view_mode->value() > 1)
+	if(fiw->view_mode->value() > MAX_TRACK_MODES_INDEX)
 	{
 		disp_xsize=fiw->floppy_map_disp->w();
 		disp_ysize=fiw->floppy_map_disp->h();
@@ -809,7 +812,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 			}
 			else
 			{
-				if(fiw->view_mode->value()>1)
+				if(fiw->view_mode->value()>MAX_TRACK_MODES_INDEX)
 				{
 					fiw->view_mode->value(0);
 					fiw->side_number_slide->activate();
@@ -844,7 +847,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 		ypos=disp_ysize-ypos;
 
-		if(fiw->view_mode->value() <= 1)
+		if(fiw->view_mode->value() <= MAX_TRACK_MODES_INDEX)
 		{
 			sprintf(str,"x position : %.3f ms",	(xpos * stepperpix_x)/1000);
 			fiw->x_pos->value(str);
@@ -859,7 +862,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 		fiw->object_txt->textsize(9);
 		fiw->object_txt->textfont(FL_SCREEN);
 
-		if(fiw->view_mode->value()<=1)
+		if(fiw->view_mode->value()<=MAX_TRACK_MODES_INDEX)
 			hxc_entercriticalsection(guicontext->hxcfe,1);
 
 		sl = hxcfe_td_getlastsectorlist(guicontext->td);
@@ -875,7 +878,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 				if( isTheRightSector(fiw,sl,xpos,ypos) )
 				{
-					if(fiw->view_mode->value() > 1)
+					if(fiw->view_mode->value() > MAX_TRACK_MODES_INDEX)
 					{
 						sprintf(str,"Track : %d Side : %d ",sl->track,sl->side);
 						fiw->global_status->value(str);
@@ -1073,7 +1076,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 		}
 
-		if(fiw->view_mode->value()<=1)
+		if(fiw->view_mode->value() <= MAX_TRACK_MODES_INDEX)
 			hxc_leavecriticalsection(guicontext->hxcfe,1);
 
 	}
