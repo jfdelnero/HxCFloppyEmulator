@@ -47,7 +47,7 @@ set BMPEXPORT_STREAM_DEFAULT_XTOTALTIME 2000000      # 200*1000*10 -> 200ms * 10
 set BMPEXPORT_STREAM_DEFAULT_YTOTALTIME 16           # 16us
 set BMPEXPORT_STREAM_BIG_DOTS           0            # Set it to be able to see
                                                      # a single bit error.
-set BMPEXPORT_STREAM_HIGHCONTRAST       0            # Increase the contrast.
+set BMPEXPORT_STREAM_HIGHCONTRAST       1            # Increase the contrast.
 
 #
 # FLUXSTREAM_RPMFIX - Change the stream replay speed.
