@@ -8,7 +8,7 @@
 -- Contact: hxc2001<at>hxc2001.com --------------------- https://hxc2001.com --
 -------------------------------------------------------------------------------
 HxC Floppy Emulator project
-(c) 2006-2021 Jean-FranÁois DEL NERO / (c) HxC2001
+(c) 2006-2021 Jean-Fran√ßois DEL NERO / (c) HxC2001
 Website  : https://hxc2001.com
 Forum    : https://torlus.com/floppy/forum
 Facebook : https://www.facebook.com/groups/hxc2001
@@ -84,7 +84,8 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -> Disk viewer : Track markers support.
 
 -> Disk viewer : New stream viewer modes !
-                 See the stream files at the signal level : SuperCard Pro *.SCP, Kryoflux *.raw, Pauline Stream HFE, DiscFerret *.DFI, AppleSauce *.A2R...
+                 You can see the stream files at the signal level ! :
+                 SuperCard Pro *.SCP, Kryoflux *.raw, Pauline Stream HFE, DiscFerret *.DFI, AppleSauce *.A2R...
 
 -> QuickDisk Thomson MO5 Sector/track support added (Set "BMPEXPORT_ENABLE_QD_MO5_ENCODING" to 1 to enable it).
 
@@ -97,14 +98,16 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -> S900 raw files support : Low level/track format now match with the real S900 to fix the compatibility
                             with the Oberheim DPX-1.
 
--> Windows target : Moving from VC 6.0 to MinGW32 / MinGW64. 32 bits and 64 bits release supported.
+-> Windows target : Now use MinGW32 / MinGW64 instead of VC 6.0 to build the software.
+                    32 bits and 64 bits targets supported.
                     Speed performances significantly increased.
 
--> Stream Analyzer : Perfectly aligned revolutions (index+stream) issue fixed. (Some good tracks was marked as weak/bad).
+-> Flux Stream Analyzer : Perfectly aligned revolutions (index+stream) issue fixed.
+                          (Some good tracks was marked as weak/bad).
 
 -> Flux Stream Analyzer : Revolution overlap search depth reduced to 1.5% (+/- 3ms) -> Faster execution.
 
--> Floppy disk dump window redesigned.More options added.
+-> Floppy disk dump window redesigned. More options added.
 
 -> USB HxC Floppy Emulator : Packet size can be set with the USB_HXCFLOPPYEMULATOR_DEFAULT_PACKET_SIZE variable.
 
@@ -846,8 +849,8 @@ and to Kris Van de Cappelle (EMXP developer) for the tests and EmuII technicals 
 
 /*********************************************************
 06/08/2010: HxCFloppyEmulator 1.3.12.0
--> New file Support : SAM CoupÈ MGT file image support added.
--> New file Support : SAM CoupÈ SAD file image support added.
+-> New file Support : SAM Coup√© MGT file image support added.
+-> New file Support : SAM Coup√© SAD file image support added.
 -> New file Support : Emu EMAX & Emu EMAX 2 (*.EM1 & *.EM2) file support added.
    Note : The operating system image (emaxos.emx) must be present in the same folder than the bank files.
 -> New file Support : Ensoniq Mirage file support. (the file must have the *.EDM extension)
@@ -1247,7 +1250,7 @@ ST_FloppyLoader.dll
 
 /*********************************************************
 01/10/2006: HxCFloppyEmulator 0.7.1.0
-- Passage ‡ la 0.7.1 pour corriger un bug avec les disquettes ST de 10 secteurs / par piste...
+- Passage √† la 0.7.1 pour corriger un bug avec les disquettes ST de 10 secteurs / par piste...
 *********************************************************/
 
 
@@ -1255,14 +1258,14 @@ ST_FloppyLoader.dll
 01/10/2006: HxCFloppyEmulator 0.7.0.0
 - Ajout du support des images PC IMG.
 
-- Support du format IPF (caps) (en bit rate constant ‡ cette date.). Il faut placer
-le fichier CAPSImg.dll au mÍme niveau que l'exe
-        Attention certain systËme de protection ne passent toujours pas avec
-l'interface ! C'est le cas avec les disquettes possÈdant un bit rate non
+- Support du format IPF (caps) (en bit rate constant √† cette date.). Il faut placer
+le fichier CAPSImg.dll au m√™me niveau que l'exe
+        Attention certain syst√®me de protection ne passent toujours pas avec
+l'interface ! C'est le cas avec les disquettes poss√©dant un bit rate non
 constant. Il faudrait que l'interface puisse faire varier sont bit rate
-en cours d'utilisation, ce qui n'est bien sur pas encore le cas. (support du variable-bitrate ‡ la version 1.0.0.0)
+en cours d'utilisation, ce qui n'est bien sur pas encore le cas. (support du variable-bitrate √† la version 1.0.0.0)
 
-- Refonte complÍte de la mecannique interne...
+- Refonte compl√®te de la mecannique interne...
 *********************************************************/
 
 
@@ -1274,35 +1277,35 @@ en cours d'utilisation, ce qui n'est bien sur pas encore le cas. (support du var
 
 /*********************************************************
 24/09/2006: HxCFloppyEmulator 0.4.0.0
-- Support des Disquettes ST de 11 secteurs par track finalisÈ (Les 11 secteurs rentrent au chausse pieds ! : 2 octets de libre sur une piste standard a 300 rpm!)
-- AmÈlioration du loader des fichiers *.ST : plus besoin d'utiliser le fichier stfileformat.txt.
+- Support des Disquettes ST de 11 secteurs par track finalis√© (Les 11 secteurs rentrent au chausse pieds ! : 2 octets de libre sur une piste standard a 300 rpm!)
+- Am√©lioration du loader des fichiers *.ST : plus besoin d'utiliser le fichier stfileformat.txt.
 
-- (ExpÈrimental) PossibilitÈ de charger des images de 1.44Mo (18 secteurs)
+- (Exp√©rimental) Possibilit√© de charger des images de 1.44Mo (18 secteurs)
 et 3Mo (36 secteurs) pour ST. (triche sur la longueur des pistes-> 150 rpm et 75rpm)
-(le TOS 1.62 a l'air d'apprÈcier assez moyennement la disquette de 3Mo -> Reboot au dÈbut de la copie de la disquette ;-)  )
+(le TOS 1.62 a l'air d'appr√©cier assez moyennement la disquette de 3Mo -> Reboot au d√©but de la copie de la disquette ;-)  )
 
-- Correction du bug de chargement sur les fichiers images protÈgÈs en Ècritures.
+- Correction du bug de chargement sur les fichiers images prot√©g√©s en √©critures.
 
 - Une petite information en plus sur l'interface graphique.
 
-- PossibilitÈ de charger une image en double cliquant dessus (faire l'association format - soft ‡ l'aide de Windows).
+- Possibilit√© de charger une image en double cliquant dessus (faire l'association format - soft √† l'aide de Windows).
 *********************************************************/
 
 
 /*********************************************************
 03/09/2006: HxCFloppyEmu 0.3.0.0
 - version publique initiale.
-Support de l'interface sur USB basÈe sur le chip FTDI et un CPLD.
+Support de l'interface sur USB bas√©e sur le chip FTDI et un CPLD.
 Support des formats ST / MSA / ADF.
 *********************************************************/
 
 
 /*********************************************************
 ~01/06/2006: HxCFloppyEmu 0.2.0.0
-- Passage ‡ l'USB avec le chip FTDI FT245 (merci ‡ toi Jace pour ton conseil, bon produit effectivement ;-) )
+- Passage √† l'USB avec le chip FTDI FT245 (merci √† toi Jace pour ton conseil, bon produit effectivement ;-) )
 - Passage sur CPLD.
 Support des formats ST / ADF.
-Cette version a ÈtÈ prÈsentÈe aux Infoticaires 2006.
+Cette version a √©t√© pr√©sent√©e aux Infoticaires 2006.
 *********************************************************/
 
 
@@ -1316,7 +1319,7 @@ Support des formats ST / ADF.
 
 /*********************************************************
 20/03/2006-24/03/2006: HxCFloppyEmu 0.0.0.0
-Tout dÈbut du projet :
-- Mise au point de la carte sur port parallËle
+Tout d√©but du projet :
+- Mise au point de la carte sur port parall√®le
 - premiers morceaux de code pour encoder les tracks d'une image ST puis ADF.
 *********************************************************/
