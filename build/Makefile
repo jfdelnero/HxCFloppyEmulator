@@ -233,6 +233,7 @@ clean:
 	rm -rf *.o
 	rm -rf *.so
 	rm -rf *.dll
+	rm -rf *.map
 
 mrproper: clean
 	rm -rf $(EXEC)
