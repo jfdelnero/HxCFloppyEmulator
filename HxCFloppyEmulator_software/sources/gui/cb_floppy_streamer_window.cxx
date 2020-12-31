@@ -316,8 +316,10 @@ int StreamerThreadProc(void* floppycontext,void* context)
 	int ret;
 	HXCFE_FXSA * fxsa;
 	HXCFE_TRKSTREAM* trkstream;
+#if 0
 	uint16_t * wavebuf;
 	int snd_stream_index,snd_stream_index_old;
+#endif
 
 	streamth = (streamthread*)context;
 	guicontext = (s_gui_context *)streamth->guicontext;
