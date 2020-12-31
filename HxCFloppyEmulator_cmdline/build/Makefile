@@ -86,6 +86,7 @@ clean:
 	rm -rf *.so
 	rm -rf *.dll
 	rm -rf *.exe
+	rm -rf *.map
 
 mrproper: clean
 	rm -rf $(EXEC)
