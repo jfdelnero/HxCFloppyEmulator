@@ -96,7 +96,7 @@ int A2R_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 }
 
 
-static HXCFE_SIDE* import_a2r_stream(HXCFE* floppycontext, a2r_capture * captureinfo, unsigned char * stream, int size, short * rpm, int bitrate, int phasecorrection, int filter, int filterpasses,int bmpexport )
+static HXCFE_SIDE* import_a2r_stream(HXCFE* floppycontext, a2r_capture * captureinfo, unsigned char * stream, int size, short * rpm, float timecoef, int bitrate, int phasecorrection, int filter, int filterpasses,int bmpexport )
 {
 	uint32_t * tmp_stream;
 	uint32_t cumul,offset_in,offset_out;
@@ -154,6 +154,8 @@ static HXCFE_SIDE* import_a2r_stream(HXCFE* floppycontext, a2r_capture * capture
 			track_dump = hxcfe_FxStream_ImportStream(fxs,tmp_stream,32,(offset_out),HXCFE_STREAMCHANNEL_TYPE_RLEEVT, "data", NULL);
 			if(track_dump)
 			{
+				hxcfe_FxStream_ChangeSpeed(fxs,track_dump,timecoef);
+
 				hxcfe_FxStream_AddIndex(fxs,track_dump,0,0,FXSTRM_INDEX_MAININDEX);
 				hxcfe_FxStream_AddIndex(fxs,track_dump,index_stream_pos,0,FXSTRM_INDEX_MAININDEX);
 
@@ -202,7 +204,7 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	short rpm;
 	unsigned short i,j;
 	int k,l,len;
-	int trackstep,singleside;
+	int singleside;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE * curside;
 	int nbside;
@@ -214,7 +216,7 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int phasecorrection;
 	int filterpasses,filter;
 	int bitrate,bmp_export;
-	int mac_clv;
+	//int mac_clv;
 	int foffset,filesize;
 	int stream_start_pos;
 	int max_location;
@@ -243,8 +245,6 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		minside=0;
 		maxside=0;
 
-		mac_clv = 0;
-
 		filesize = hxc_getfilesize(imgfile);
 
 		if(filesize < 8)
@@ -254,17 +254,12 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		if(f)
 		{
 			nbside = 1;
-
-			if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "A2RLOADER_DOUBLE_STEP" ) & 1 )
-				trackstep = 2;
-			else
-				trackstep = 1;
-
+/*
 			if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV" ) & 1 )
 				mac_clv = 1;
 			else
 				mac_clv = 0;
-
+*/
 			skip_inter_tracks = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "A2RLOADER_SKIP_INTER_TRACKS" );
 
 			singleside = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "A2RLOADER_SINGLE_SIDE" )&1;
@@ -390,7 +385,7 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 							if( (last_location != capture.location) && (!skip_inter_tracks || !(capture.location&3) ) )
 							{
-								curside = import_a2r_stream(imgldr_ctx->hxcfe, &capture, tmp_buffer, capture.data_length, &rpm, bitrate, phasecorrection, filter, filterpasses, bmp_export );
+								curside = import_a2r_stream(imgldr_ctx->hxcfe, &capture, tmp_buffer, capture.data_length, &rpm, timecoef, bitrate, phasecorrection, filter, filterpasses, bmp_export );
 								last_location = capture.location;
 
 								if(curside)
