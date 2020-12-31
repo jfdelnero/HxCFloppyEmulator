@@ -327,6 +327,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int filterpasses,filter;
 	int bitrate,bmp_export;
 	int mac_clv;
+	int track_offset_cyl_step,track_offset_head_step;
 
 	scp_header scph;
 	uint32_t tracksoffset[MAX_NUMBER_OF_TRACKS];
@@ -344,6 +345,8 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		maxside=0;
 
 		mac_clv = 0;
+		track_offset_cyl_step = 2;
+		track_offset_head_step = 1;
 
 		f = hxc_fopen(imgfile,"rb");
 		if(f)
@@ -384,7 +387,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			nbside = 1;
 
-			if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "SCPLOADER_DOUBLE_STEP" ) & 1 )
+			if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "SCPLOADER_DOUBLE_STEP" ) > 0 )
 				trackstep = 2;
 			else
 				trackstep = 1;
@@ -440,10 +443,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			floppydisk->floppyiftype = GENERIC_SHUGART_DD_FLOPPYMODE;
 			floppydisk->floppyBitRate = VARIABLEBITRATE;
 			floppydisk->floppyNumberOfTrack = nbtrack;
-			if(singleside)
-				floppydisk->floppyNumberOfSide = 1;
-			else
-				floppydisk->floppyNumberOfSide = nbside;
+			floppydisk->floppyNumberOfSide = nbside;
 
 			floppydisk->floppySectorPerTrack = -1;
 
@@ -454,17 +454,30 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				floppydisk->floppyNumberOfTrack = MAX_NUMBER_OF_TRACKS / trackstep;
 			}
 
+
+			if( floppydisk->floppyNumberOfSide == 1)
+			{
+				if( tracksoffset[0] && tracksoffset[1] )
+				{
+					track_offset_cyl_step = 1;
+					track_offset_head_step = 0;
+				}
+			}
+
 			k = 0;
 			for(j=0;j<floppydisk->floppyNumberOfTrack*trackstep;j=j+trackstep)
 			{
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
-					if( tracksoffset[(j<<1)|(i&1)] )
+					if( tracksoffset[(track_offset_cyl_step * j) + ( track_offset_head_step * i )] )
 					{
 						k = (j<<1)|(i&1);
 					}
 				}
 			}
+
+			if(singleside)
+				floppydisk->floppyNumberOfSide = 1;
 
 			floppydisk->floppyNumberOfTrack = ((k >> 1) + 1) / trackstep;
 
@@ -484,7 +497,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 					rpm = 300;
 
-					curside = decodestream(imgldr_ctx->hxcfe,f,(j<<1)|(i&1),tracksoffset[(j<<1)|(i&1)],&rpm,timecoef,phasecorrection,scph.number_of_revolution,1 + scph.resolution,bitrate,filter,filterpasses,bmp_export);
+					curside = decodestream(imgldr_ctx->hxcfe,f,(j<<1)|(i&1),tracksoffset[(track_offset_cyl_step*j) + (track_offset_head_step*i)],&rpm,timecoef,phasecorrection,scph.number_of_revolution,1 + scph.resolution,bitrate,filter,filterpasses,bmp_export);
 
 					if(!floppydisk->tracks[j/trackstep])
 					{
