@@ -180,57 +180,58 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 		block_buf = malloc(BIGENDIAN_DWORD( dfibh.data_length ));
 		if(block_buf)
 		{
-			fread(block_buf,BIGENDIAN_DWORD( dfibh.data_length ),1,f);
-
-			pulses_cnt = dfi_rev2_decode( NULL, NULL, BIGENDIAN_DWORD( dfibh.data_length ), block_buf, NULL);
-
-			trackbuf_dword = malloc((pulses_cnt+1)*sizeof(uint32_t));
-			if(trackbuf_dword)
+			if( fread(block_buf,BIGENDIAN_DWORD( dfibh.data_length ),1,f) == 1 )
 			{
-				memset(trackbuf_dword,0x00,(pulses_cnt+1)*sizeof(uint32_t));
-				dfi_rev2_decode( NULL, NULL, BIGENDIAN_DWORD( dfibh.data_length ), block_buf, trackbuf_dword);
+				pulses_cnt = dfi_rev2_decode( NULL, NULL, BIGENDIAN_DWORD( dfibh.data_length ), block_buf, NULL);
 
-				hxcfe_FxStream_setResolution(fxs,10000); // 10 ns per tick
-
-				track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf_dword,32,(pulses_cnt), HXCFE_STREAMCHANNEL_TYPE_RLEEVT, "data", NULL);
-				if(track_dump)
+				trackbuf_dword = malloc((pulses_cnt+1)*sizeof(uint32_t));
+				if(trackbuf_dword)
 				{
-					hxcfe_FxStream_AddIndex(fxs,track_dump,0,0,FXSTRM_INDEX_MAININDEX);
+					memset(trackbuf_dword,0x00,(pulses_cnt+1)*sizeof(uint32_t));
+					dfi_rev2_decode( NULL, NULL, BIGENDIAN_DWORD( dfibh.data_length ), block_buf, trackbuf_dword);
 
-					dfi_rev2_decode( fxs, track_dump, BIGENDIAN_DWORD( dfibh.data_length ), block_buf, NULL);
+					hxcfe_FxStream_setResolution(fxs,10000); // 10 ns per tick
 
-					hxcfe_FxStream_ChangeSpeed(fxs,track_dump,timecoef);
-
-					currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
-
-					if(currentside)
+					track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf_dword,32,(pulses_cnt), HXCFE_STREAMCHANNEL_TYPE_RLEEVT, "data", NULL);
+					if(track_dump)
 					{
-						if(rpm)
-							*rpm = (short)( 60 / GetTrackPeriod(floppycontext,currentside) );
+						hxcfe_FxStream_AddIndex(fxs,track_dump,0,0,FXSTRM_INDEX_MAININDEX);
+
+						dfi_rev2_decode( fxs, track_dump, BIGENDIAN_DWORD( dfibh.data_length ), block_buf, NULL);
+
+						hxcfe_FxStream_ChangeSpeed(fxs,track_dump,timecoef);
+
+						currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
+
+						if(currentside)
+						{
+							if(rpm)
+								*rpm = (short)( 60 / GetTrackPeriod(floppycontext,currentside) );
+						}
+
+						if( bmpexport )
+						{
+							sprintf(tmp_filename,"track%.2d.%d.bmp",track>>1,track&1);
+							hxcfe_FxStream_ExportToBmp(fxs,track_dump, tmp_filename);
+						}
+
+						if(currentside)
+						{
+							currentside->stream_dump = track_dump;
+						}
+						else
+						{
+							hxcfe_FxStream_FreeStream(fxs,track_dump);
+						}
 					}
 
-					if( bmpexport )
-					{
-						sprintf(tmp_filename,"track%.2d.%d.bmp",track>>1,track&1);
-						hxcfe_FxStream_ExportToBmp(fxs,track_dump, tmp_filename);
-					}
-
-					if(currentside)
-					{
-						currentside->stream_dump = track_dump;
-					}
-					else
-					{
-						hxcfe_FxStream_FreeStream(fxs,track_dump);
-					}
+					free(trackbuf_dword);
 				}
 
-				free(trackbuf_dword);
+				hxcfe_deinitFxStream(fxs);
+
+				free(block_buf);
 			}
-
-			hxcfe_deinitFxStream(fxs);
-
-			free(block_buf);
 		}
 	}
 
