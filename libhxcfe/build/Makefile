@@ -60,6 +60,9 @@ endif
 XML_DSKLAYOUT_INPUTS  := $(wildcard $(BASEDIR)/xml_disk/DiskLayouts/xml_files/DiskLayout_*.xml)
 XML_DSKLAYOUT_OUTPUTS := $(patsubst $(BASEDIR)/xml_disk/DiskLayouts/xml_files/%.xml,$(BASEDIR)/xml_disk/DiskLayouts/%.h,$(XML_DSKLAYOUT_INPUTS))
 
+BMP_DATAFILES_INPUTS  := $(wildcard $(BASEDIR)/misc/data/*.bmp)
+BMP_DATAFILES_OUTPUTS := $(patsubst $(BASEDIR)/misc/data/%.bmp,$(BASEDIR)/misc/data/%.h,$(BMP_DATAFILES_INPUTS))
+
 # Create a list of all the output files you want to generate
 OUTPUTS := $(patsubst ./input/%.txt,./output/%.out,$(INPUTS))
 
@@ -115,9 +118,11 @@ LIBS_OBJS = $(BASE) $(FS_SUPPORT) $(ADFLIBOBJ) $(ENCODING_SUPPORT) $(TRACK_FORMA
 			$(DISKWRITERPLUGINS) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(LZ4OBJ) \
 			$(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB)
 
-all: SCRIPT_FILE $(BASEDIR)/licensetxt.h XML_FILES $(EXEC)
+all: SCRIPT_FILE $(BASEDIR)/licensetxt.h XML_FILES BMP_FILES $(EXEC)
 
 XML_FILES: bmptoh $(XML_DSKLAYOUT_OUTPUTS)
+
+BMP_FILES: bmptoh $(BMP_DATAFILES_OUTPUTS)
 
 SCRIPT_FILE: bmptoh $(BASEDIR)/init_script.h
 
@@ -836,12 +841,15 @@ bmptoh:
 $(BASEDIR)/xml_disk/DiskLayouts/%.h : $(BASEDIR)/xml_disk/DiskLayouts/xml_files/%.xml bmptoh
 	cd $(BASEDIR)/xml_disk/DiskLayouts/xml_files/ && ../../converttools/bmptob8/bmptoh $(basename $(notdir $<.xml)) -DATA && mv data_$(basename $(notdir $<))_xml.h ..
 
-$(BASEDIR)/init_script.h : $(BASEDIR)/init.script
+$(BASEDIR)/init_script.h : $(BASEDIR)/init.script bmptoh
 	cd $(BASEDIR)/ && $(BASEDIR)/xml_disk/converttools/bmptob8/bmptoh $(basename $(notdir $<.script)) -DATA && mv data_$(basename $(notdir $<))_script.h init_script.h
 
-$(BASEDIR)/licensetxt.h : $(BASEDIR)/../COPYING_FULL
+$(BASEDIR)/licensetxt.h : $(BASEDIR)/../COPYING_FULL bmptoh
 	cd $(BASEDIR) && $(BASEDIR)/xml_disk/converttools/bmptob8/bmptoh $< -DATA && mv data_$(basename $(notdir $<)).h licensetxt.h
 
+$(BASEDIR)/misc/data/%.h: $(BASEDIR)/misc/data/%.bmp bmptoh
+	cd $(BASEDIR)/misc/data/ && ../../xml_disk/converttools/bmptob8/bmptoh $(basename $(notdir $<.bmp)) -BMP8P
+	
 clean:
 	rm -rf *.o
 
