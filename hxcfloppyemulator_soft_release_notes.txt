@@ -9,24 +9,29 @@
 -------------------------------------------------------------------------------
 HxC Floppy Emulator project
 (c) 2006-2021 Jean-François DEL NERO / (c) HxC2001
-Forum    : http://torlus.com/floppy/forum
+Website  : https://hxc2001.com
+Forum    : https://torlus.com/floppy/forum
 Facebook : https://www.facebook.com/groups/hxc2001
 Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
-X XXXXXXX 2020 : HxCFloppyEmulator 2.5.2.1 (Beta version - Work in Progress)
-
-(Download : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip)
+31 December 2020 : HxCFloppyEmulator 2.5.5.1
 
 -> New hardware support introduced : Pauline ! The ultimate stream based floppy drive simulator / floppy dumper :)
-   Pauline control and real time stream viewer window added.
+   Pauline control and real time stream viewer window added. ( https://www.youtube.com/watch?v=PZiyms6lo4U )
 
 -> macOS : CAPSlib loader added (IPF, CTRAW...). (Windows/Linux/macOS CAPSlib loaders code merged)
+
+-> macOS : macOS Big Sure support fixed.
 
 -> New Loader/Writer : HxC Quickdisk images.
 
 -> New Writer : Oric DSK images ("MFM_DISK" format).
+
+-> New Loader : DiscFerret *.DFI stream files. (WIP!)
+
+-> New Loader : AppleSauce *.A2R stream files. (WIP!)
 
 -> XML loader : Add new properties and fix long track to support Quickdisk and Hardsectored disks.
                 New proprerties (micro-seconds time length/position parameters) :
@@ -34,7 +39,11 @@ X XXXXXXX 2020 : HxCFloppyEmulator 2.5.2.1 (Beta version - Work in Progress)
 
 -> New XML format : Olivetti TOP 100 / Triumph-Adler Gabriele PFS typewriter Quickdisk format.
 
+-> New XML format : FLEX disk formats.
+
 -> New XML format : SORD M68 HD disk.
+
+-> New XML format : Bung MGD2 disk.
 
 -> Windows "Save as" file selector : Fix the overwrite prompt regression.
 
@@ -42,12 +51,15 @@ X XXXXXXX 2020 : HxCFloppyEmulator 2.5.2.1 (Beta version - Work in Progress)
 
 -> IPF Loader : The CAPS library DI_LOCK_INDEX flag turned off by default (fake index track buffer realignment).
                 Can be enabled with the LOADER_IPF_CAPS_DI_LOCK_INDEX parameter.
+                "Weak bits" support fixed.
 
 -> CPC EDSK writer : Fix EDSK export with unformatted track(s).
                      Fix export with unaligned track size.
                      Keep the last unformatted tracks.
                      Discard the second side if unformatted. (parameter CPCDSK_WRITER_DISCARD_UNFORMATTED_SIDE)
                      Limit the sector data size to 6144 bytes. (parameter CPCDSK_WRITER_LIMIT_SECTOR_SIZE)
+
+-> Atari ATR Loader : Loader fixed.
 
 -> SCP Loader : Input file sanity checks added.
 
@@ -57,9 +69,11 @@ X XXXXXXX 2020 : HxCFloppyEmulator 2.5.2.1 (Beta version - Work in Progress)
 
 -> STX Writer : Support sectors headers without data part.
 
+-> TD0 Loader : More robust with corrupted images.
+
 -> TRS80 DMK Loader : Fix FM / SD track ID / Data mark clock patching.
 
--> TRS80 DMK Writer : Byte align tracks (WIP).
+-> TRS80 DMK Writer : Byte align tracks (WIP!).
 
 -> Macintosh disk support : Macintosh GCR decoding, CLV disks stream import (WIP!).
 
@@ -69,9 +83,14 @@ X XXXXXXX 2020 : HxCFloppyEmulator 2.5.2.1 (Beta version - Work in Progress)
 
 -> Disk viewer : Track markers support.
 
--> Disk viewer : New stream viewer mode !
+-> Disk viewer : New stream viewer modes !
+                 See the stream files at the signal level : SuperCard Pro *.SCP, Kryoflux *.raw, Pauline Stream HFE, DiscFerret *.DFI, AppleSauce *.A2R...
+
+-> QuickDisk Thomson MO5 Sector/track support added (Set "BMPEXPORT_ENABLE_QD_MO5_ENCODING" to 1 to enable it).
 
 -> Apple II : Track generator fixed : GCR 6&2 Sync bits and sector GAP fixed.
+
+-> Apple II : Various fixes in the track analyzer.
 
 -> QM loader : Regression fixed.
 
@@ -79,9 +98,17 @@ X XXXXXXX 2020 : HxCFloppyEmulator 2.5.2.1 (Beta version - Work in Progress)
                             with the Oberheim DPX-1.
 
 -> Windows target : Moving from VC 6.0 to MinGW32 / MinGW64. 32 bits and 64 bits release supported.
-                    General performance significantly increased.
+                    Speed performances significantly increased.
 
--> Stream Analyzer : Perfectly aligned revolutions (index+stream) issue fixed. (Some good tracks marked as weak issue).
+-> Stream Analyzer : Perfectly aligned revolutions (index+stream) issue fixed. (Some good tracks was marked as weak/bad).
+
+-> Flux Stream Analyzer : Revolution overlap search depth reduced to 1.5% (+/- 3ms) -> Faster execution.
+
+-> Floppy disk dump window redesigned.More options added.
+
+-> USB HxC Floppy Emulator : Packet size can be set with the USB_HXCFLOPPYEMULATOR_DEFAULT_PACKET_SIZE variable.
+
+-> And a plethora of others improvements and fixes !
 
 *********************************************************/
 
