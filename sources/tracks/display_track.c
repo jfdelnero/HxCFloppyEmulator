@@ -71,6 +71,9 @@
 #include "loaders/bmp_loader/bmp_loader.h"
 #include "loaders/bmp_loader/bmp_file.h"
 
+#include "xml_disk/packer/pack.h"
+#include "misc/data/data_bmp_hxc2001_logo_bmp.h"
+
 #define PI    ((float)  3.141592654f)
 
 int dummy_graph_progress(unsigned int current,unsigned int total,void * td,void * user)
@@ -94,6 +97,11 @@ HXCFE_TD * hxcfe_td_init(HXCFE* floppycontext,uint32_t xsize,uint32_t ysize)
 		td->y_us=64;
 
 		td->x_start_us=0;
+
+		if(!bitmap_hxc2001_logo_bmp->unpacked_data)
+		{
+			bitmap_hxc2001_logo_bmp->unpacked_data = data_unpack(bitmap_hxc2001_logo_bmp->data,bitmap_hxc2001_logo_bmp->csize ,bitmap_hxc2001_logo_bmp->data, bitmap_hxc2001_logo_bmp->size);
+		}
 
 		td->framebuffer = malloc(td->xsize*td->ysize*sizeof(unsigned int));
 
@@ -369,6 +377,54 @@ void putstring8x8(HXCFE_TD *td,int x_pos,int y_pos,char * str,uint32_t color,uin
 				putchar8x8(td,x_pos+(i*8),y_pos,str[i],color,bgcolor,vertical,transparent);
 			}
 			i++;
+		}
+	}
+}
+
+void splash_sprite(bmaptype * bmp,uint32_t * dest_buffer, int xsize, int ysize, int xpos, int ypos)
+{
+	int i,j;
+	int offset;
+	int src_offset;
+	uint32_t pixel;
+	int src_r,src_g,src_b;
+	int dest_r,dest_g,dest_b;
+
+	for(j=0;j<bmp->Ysize;j++)
+	{
+		for(i=0;i<bmp->Xsize;i++)
+		{
+			if( ( (xpos + i) >=0 && (xpos + i) < xsize) &&
+				( (ypos + j) >=0 && (ypos + j) < ysize) )
+			{
+				offset = (((ypos + j) * xsize) + (xpos + i));
+				src_offset = (3*256) + (((j * bmp->Xsize) + i));
+
+				src_r = bmp->unpacked_data[ (bmp->unpacked_data[src_offset] * 3) + 2 ];
+				src_g = bmp->unpacked_data[ (bmp->unpacked_data[src_offset] * 3) + 1 ];
+				src_b = bmp->unpacked_data[ (bmp->unpacked_data[src_offset] * 3) + 0 ];
+
+				if( !(src_r==255 && src_g==0 && src_b==255) )
+				{
+					dest_r = (dest_buffer[offset]>>0) & 0xFF;
+					dest_g = (dest_buffer[offset]>>8) & 0xFF;
+					dest_b = (dest_buffer[offset]>>16) & 0xFF;
+
+					dest_r = (dest_r + src_r) / 2;
+					dest_g = (dest_g + src_g) / 2;
+					dest_b = (dest_b + src_b) / 2;
+
+					if(dest_r>255) dest_r = 255;
+					if(dest_g>255) dest_g = 255;
+					if(dest_b>255) dest_b = 255;
+
+					pixel =  (dest_r<<0) |
+							 (dest_g<<8) |
+							 (dest_b<<16);
+
+					dest_buffer[offset] = pixel;
+				}
+			}
 		}
 	}
 }
@@ -1484,6 +1540,8 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	hxcfe_td_draw_rules( td );
 
 	hxcfe_td_draw_markers( td, floppydisk, track, side, buffer_offset );
+
+	splash_sprite(bitmap_hxc2001_logo_bmp,td->framebuffer, td->xsize, td->ysize, td->xsize - (bitmap_hxc2001_logo_bmp->Xsize + 16), td->ysize - (bitmap_hxc2001_logo_bmp->Ysize + 16));
 }
 
 extern int tracktypelist[];
@@ -2046,6 +2104,8 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_
 			sprintf(tempstr,"This track doesn't have any stream information !");
 			putstring8x8(td,(td->xsize/2) - ((strlen(tempstr)*8)/2),td->ysize / 2,tempstr,0x000000,0xCCCCCC,0,0);
 		}
+
+		splash_sprite(bitmap_hxc2001_logo_bmp,td->framebuffer, td->xsize, td->ysize, td->xsize - (bitmap_hxc2001_logo_bmp->Xsize + 16), td->ysize - (bitmap_hxc2001_logo_bmp->Ysize + 16));
 	}
 }
 
@@ -2873,8 +2933,13 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	{
 		sprintf(tempstr,"This image doesn't fit on a %s disk !",floppy_dimension[physical_dim].type_name);
 		putstring8x8(td,(td->xsize/2) - ((strlen(tempstr)*8)/2),td->ysize / 2,tempstr,0x0000FF,0x000000,0,0);
+
+		splash_sprite(bitmap_hxc2001_logo_bmp,td->framebuffer, td->xsize, td->ysize, td->xsize - (bitmap_hxc2001_logo_bmp->Xsize + 16), td->ysize - (bitmap_hxc2001_logo_bmp->Ysize + 16));
+
 		return;
 	}
+
+	splash_sprite(bitmap_hxc2001_logo_bmp,td->framebuffer, td->xsize, td->ysize, td->xsize - (bitmap_hxc2001_logo_bmp->Xsize + 16), td->ysize - (bitmap_hxc2001_logo_bmp->Ysize + 16));
 
 	for(track=0;track<max_physical_tracks[0];track++)
 	{
@@ -3022,6 +3087,8 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	}
 
 	td->hxc_setprogress(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide,floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide,td,td->progress_userdata);
+
+	splash_sprite(bitmap_hxc2001_logo_bmp,td->framebuffer, td->xsize, td->ysize, td->xsize - (bitmap_hxc2001_logo_bmp->Xsize + 16), td->ysize - (bitmap_hxc2001_logo_bmp->Ysize + 16));
 }
 
 void * hxcfe_td_getframebuffer(HXCFE_TD *td)
