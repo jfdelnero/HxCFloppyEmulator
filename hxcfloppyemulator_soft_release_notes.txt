@@ -1,4 +1,4 @@
--------------------------------------------------------------------------------
+﻿-------------------------------------------------------------------------------
 -----------H----H--X----X-----CCCCC-----22222----0000-----0000-----11----------
 ----------H----H----X-X-----C--------------2---0----0---0----0---1-1-----------
 ---------HHHHHH-----X------C----------22222---0----0---0----0-----1------------
@@ -23,7 +23,7 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 
 -> macOS : CAPSlib loader added (IPF, CTRAW...). (Windows/Linux/macOS CAPSlib loaders code merged)
 
--> macOS : macOS Big Sure support fixed.
+-> macOS : macOS Big Sur support fixed.
 
 -> New Loader/Writer : HxC Quickdisk images.
 
