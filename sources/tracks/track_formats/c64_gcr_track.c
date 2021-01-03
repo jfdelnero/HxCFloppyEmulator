@@ -34,8 +34,8 @@
 //-------------------------------------------------------------------------------//
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
-// File : northstar_mfm_track.c
-// Contains: Northstar MFM hardsectored track support
+// File : c64_gcr_track.c
+// Contains: Commodore 64 GCR track support
 //
 // Written by: Jean-François DEL NERO
 //
