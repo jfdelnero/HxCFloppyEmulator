@@ -278,32 +278,52 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 	return currentside;
 }
 
-typedef struct mac_clv_def_
+struct clv_def
 {
 	int max_track;
 	float rpm;
-}mac_clv_def;
+};
 
-mac_clv_def mac_clv_track[]=
+const struct clv_def mac_clv_track[]=
 {
 	{15,  393.3807},
 	{31,  429.1723},
 	{47,  472.1435},
 	{63,  524.5672},
-	{255, 590.1098}
+	{256, 590.1098}
 };
 
-float mac_clv_track2rpm(int track)
+const struct clv_def c64_clv_track[]=
 {
-	int i;
+	{18,  243.75024375},
+	{25,  262.5002625},
+	{31,  281.249648438},
+	{256, 300.0000}
+};
 
-	i = 0;
-	while( track <= mac_clv_track[i].max_track )
+float clv_track2rpm(int track, int type)
+{
+	const struct clv_def *def;
+
+	switch (type)
 	{
-		i++;
+		case 1:
+			def = (const struct clv_def*)&mac_clv_track[0];
+		break;
+		case 2:
+			def = (const struct clv_def*)&c64_clv_track[0];
+		break;
+		default:
+			return 300;
+		break;
 	}
 
-	return mac_clv_track[i].rpm;
+	while( def->max_track < track )
+	{
+		def++;
+	}
+
+	return def->rpm;
 }
 
 int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -326,7 +346,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int phasecorrection;
 	int filterpasses,filter;
 	int bitrate,bmp_export;
-	int mac_clv;
+	int mac_clv,c64_clv;
 	int track_offset_cyl_step,track_offset_head_step;
 
 	scp_header scph;
@@ -345,6 +365,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		maxside=0;
 
 		mac_clv = 0;
+		c64_clv = 0;
 		track_offset_cyl_step = 2;
 		track_offset_head_step = 1;
 
@@ -392,10 +413,8 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			else
 				trackstep = 1;
 
-			if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV" ) & 1 )
-				mac_clv = 1;
-			else
-				mac_clv = 0;
+			mac_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV" );
+			c64_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_C64CLV" );
 
 			singleside = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "SCPLOADER_SINGLE_SIDE" )&1;
 			phasecorrection = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_PHASE_CORRECTION_DIVISOR" );
@@ -493,7 +512,10 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Load Track %.3d Side %d",j,i);
 
 					if(mac_clv)
-						timecoef = (float)400.00 / mac_clv_track2rpm(j);
+						timecoef = (float)mac_clv / clv_track2rpm(j,1);
+
+					if(c64_clv)
+						timecoef = (float)c64_clv / clv_track2rpm(j,2);
 
 					rpm = 300;
 

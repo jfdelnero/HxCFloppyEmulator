@@ -240,7 +240,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 	return currentside;
 }
 
-extern float mac_clv_track2rpm(int track);
+extern float clv_track2rpm(int track, int type);
 
 int DFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
@@ -262,7 +262,7 @@ int DFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int phasecorrection;
 	int filterpasses,filter;
 	int bitrate,bmp_export;
-	int mac_clv;
+	int mac_clv,c64_clv;
 	int filesize;
 	int format_rev;
 
@@ -365,10 +365,8 @@ int DFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			else
 				trackstep = 1;
 
-			if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV" ) & 1 )
-				mac_clv = 1;
-			else
-				mac_clv = 0;
+			mac_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV" );
+			c64_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_C64CLV" );
 
 			singleside = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "DFILOADER_SINGLE_SIDE" )&1;
 			phasecorrection = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_PHASE_CORRECTION_DIVISOR" );
@@ -412,7 +410,10 @@ int DFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Load Track %.3d Side %d",j,i);
 
 					if(mac_clv)
-						timecoef = (float)400.00 / mac_clv_track2rpm(j);
+						timecoef = (float)mac_clv / clv_track2rpm(j,1);
+
+					if(c64_clv)
+						timecoef = (float)c64_clv / clv_track2rpm(j,2);
 
 					curside = decodestream(imgldr_ctx->hxcfe,f,(j<<1)|(i&1),tracksoffset[(j<<1)|(i&1)],&rpm,timecoef,phasecorrection,1,1 + 24,bitrate,filter,filterpasses,bmp_export,format_rev);
 
