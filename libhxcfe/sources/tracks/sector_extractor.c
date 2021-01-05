@@ -63,6 +63,7 @@
 #include "tracks/track_formats/apple2_gcr_track.h"
 #include "tracks/track_formats/apple_mac_gcr_track.h"
 #include "tracks/track_formats/arburg_track.h"
+#include "tracks/track_formats/c64_gcr_track.h"
 #include "tracks/track_formats/dec_rx02_track.h"
 #include "tracks/track_formats/emu_emulator_fm_track.h"
 #include "tracks/track_formats/heathkit_fm_track.h"
@@ -217,6 +218,9 @@ HXCFE_SECTCFG* hxcfe_getNextSector( HXCFE_SECTORACCESS* ss_ctx, int32_t track, i
 		break;
 		case QD_MO5_ENCODING:
 			bitoffset = get_next_QDMO5_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
+		break;
+		case C64_GCR_ENCODING:
+			bitoffset = get_next_C64_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
 		default:
 			bitoffset=-1;
