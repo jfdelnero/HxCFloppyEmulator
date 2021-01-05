@@ -938,6 +938,9 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 								case QD_MO5_MFM:
 									sprintf(tempstr,"QD MO5 %.3dB",sc->sectorsize);
 								break;
+								case C64_GCR:
+									sprintf(tempstr,"C64 GCR %.3dB",sc->sectorsize);
+								break;
 							}
 
 							if(sc->fill_byte_used)
@@ -1049,9 +1052,9 @@ void hxcfe_td_activate_analyzer( HXCFE_TD *td, int32_t TRACKTYPE, int32_t enable
 	if(td && TRACKTYPE<32)
 	{
 		if(enable)
-			td->enabledtrackmode = td->enabledtrackmode | (0x00000001 << TRACKTYPE);
+			td->enabledtrackmode |=  (0x00000001 << TRACKTYPE);
 		else
-			td->enabledtrackmode = td->enabledtrackmode & ( ~(0x00000001 << TRACKTYPE) );
+			td->enabledtrackmode &= ~(0x00000001 << TRACKTYPE);
 	}
 }
 
@@ -2670,6 +2673,7 @@ const static type_list track_type_list[]=
 	{ARBURG_SYS,        "Arburg SYSTEM"},
 	{AED6200P_DD,       "AED 6200P"},
 	{QD_MO5_MFM,        "QD MO5"},
+	{C64_GCR,           "C64 GCR"},
 	{0,0}
 };
 
