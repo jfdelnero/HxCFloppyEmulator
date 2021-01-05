@@ -211,7 +211,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,flo
 	return currentside;
 }
 
-extern float mac_clv_track2rpm(int track);
+extern float clv_track2rpm(int track, int type);
 
 int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
@@ -237,7 +237,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 	int bitrate;
 	int filterpasses,filter;
 	int bmp_export;
-	int mac_clv;
+	int mac_clv,c64_clv;
 	envvar_entry * backup_env;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"KryoFluxStream_libLoad_DiskFile");
@@ -280,10 +280,8 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 			else
 				trackstep = 1;
 
-			if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV" ) & 1 )
-				mac_clv = 1;
-			else
-				mac_clv = 0;
+			mac_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV" );
+			c64_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_C64CLV" );
 
 			singleside = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "KFRAWLOADER_SINGLE_SIDE" )&1;
 
@@ -377,7 +375,10 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 					sprintf(filepath,"%s%s%.2d.%d.raw",folder,fname,j,i);
 
 					if(mac_clv)
-						timecoef = (float)400.00 / mac_clv_track2rpm(j);
+						timecoef = (float)mac_clv / clv_track2rpm(j,1);
+
+					if(c64_clv)
+						timecoef = (float)c64_clv / clv_track2rpm(j,2);
 
 					rpm = 300;
 					curside = decodestream(imgldr_ctx->hxcfe,filepath,&rpm,timecoef,phasecorrection,bitrate,filter,filterpasses,bmp_export);

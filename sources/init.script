@@ -68,10 +68,21 @@ set FLUXSTREAM_RPMFIX NONE                  # NONE / 360TO300RPM / 300TO360RPM
 # FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV - Enable the Macintosh CLV mode.
 #
 # When enabled the stream speed is modified according to the
-# track number.
+# track number. Set the drive RPM used to make the dump.
+# (example : 300)
 #
 
 set FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV 0
+
+#
+# FLUXSTREAM_IMPORT_PCCAV_TO_C64CLV - Enable the C64 CLV mode.
+#
+# When enabled the stream speed is modified according to the
+# track number. Set the drive RPM used to make the dump.
+# (example : 300)
+#
+
+set FLUXSTREAM_IMPORT_PCCAV_TO_C64CLV 0
 
 #
 # FLUXSTREAM_SKIPBLOCKSDETECTION
