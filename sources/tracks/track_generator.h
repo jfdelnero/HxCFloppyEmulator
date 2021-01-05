@@ -36,6 +36,8 @@ typedef struct track_generator_
 {
 	int32_t  last_bit_offset;
 	uint16_t mfm_last_bit;
+
+	void * disk_formats_LUT[256];
 }track_generator;
 
 #ifndef _HXCFE_SECTCFG_
