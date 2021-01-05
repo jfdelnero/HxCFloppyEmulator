@@ -350,27 +350,30 @@ void tg_addAmigaSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 {
 
 	int32_t  i;
-	int32_t  trackencoding,trackenc;
+	int32_t  trackenc;
 	int32_t  startindex,j;
 	uint8_t  header[4];
 	uint8_t  headerparity[2];
 	uint8_t  sectorparity[2];
 
+	isoibm_config * configptr;
+
+	configptr = tg->disk_formats_LUT[sectorconfig->trackencoding];
+
 	startindex=tg->last_bit_offset/8;
 
 	sectorconfig->startsectorindex=tg->last_bit_offset/8;
-	trackencoding=sectorconfig->trackencoding-1;
 
 	// sync
-	for(i=0;i<formatstab[trackencoding].len_ssync;i++)
+	for(i=0;i<configptr->len_ssync;i++)
 	{
-		pushTrackCode(tg,formatstab[trackencoding].data_ssync,0xFF,currentside,sectorconfig->trackencoding);
+		pushTrackCode(tg,configptr->data_ssync,0xFF,currentside,sectorconfig->trackencoding);
 	}
 
 	// add mark
-	for(i=0;i<formatstab[trackencoding].len_addrmarkp1;i++)
+	for(i=0;i<configptr->len_addrmarkp1;i++)
 	{
-		pushTrackCode(tg,formatstab[trackencoding].data_addrmarkp1,formatstab[trackencoding].clock_addrmarkp1,currentside,sectorconfig->trackencoding);
+		pushTrackCode(tg,configptr->data_addrmarkp1,configptr->clock_addrmarkp1,currentside,sectorconfig->trackencoding);
 	}
 
 	headerparity[0]=0;
@@ -392,15 +395,15 @@ void tg_addAmigaSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 	headerparity[1]^=(LUT_Byte2EvenBits[header[2]]<<4)|(LUT_Byte2EvenBits[header[3]]);
 
 	// gap2
-	for(i=0;i<formatstab[trackencoding].len_gap2;i++)
+	for(i=0;i<configptr->len_gap2;i++)
 	{
-		pushTrackCode(tg,formatstab[trackencoding].data_gap2,0xFF,currentside,sectorconfig->trackencoding);
+		pushTrackCode(tg,configptr->data_gap2,0xFF,currentside,sectorconfig->trackencoding);
 	}
 
-	for(i=0;i<formatstab[trackencoding].len_gap2;i=i+2)
+	for(i=0;i<configptr->len_gap2;i=i+2)
 	{
-		headerparity[0]^=formatstab[trackencoding].data_gap2;
-		headerparity[1]^=formatstab[trackencoding].data_gap2;
+		headerparity[0]^=configptr->data_gap2;
+		headerparity[1]^=configptr->data_gap2;
 	}
 
 	pushTrackCode(tg,0x00,0xFF,currentside,sectorconfig->trackencoding);
@@ -448,7 +451,7 @@ void tg_addAmigaSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,H
 	{
 		for(i=0;i<sectorconfig->gap3;i++)
 		{
-			pushTrackCode(tg,formatstab[trackencoding].data_gap3,0xFF,currentside,sectorconfig->trackencoding);
+			pushTrackCode(tg,configptr->data_gap3,0xFF,currentside,sectorconfig->trackencoding);
 		}
 	}
 

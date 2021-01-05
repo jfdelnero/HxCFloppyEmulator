@@ -61,6 +61,7 @@
 #include "tracks/track_formats/apple2_gcr_track.h"
 #include "tracks/track_formats/apple_mac_gcr_track.h"
 #include "tracks/track_formats/arburg_track.h"
+#include "tracks/track_formats/c64_gcr_track.h"
 #include "tracks/track_formats/dec_rx02_track.h"
 #include "tracks/track_formats/emu_emulator_fm_track.h"
 #include "tracks/track_formats/heathkit_fm_track.h"
@@ -351,48 +352,6 @@ void FastMFMFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * tr
 	return;
 }
 
-int ISOIBMGetTrackSize(int TRACKTYPE,unsigned int numberofsector,unsigned int sectorsize,unsigned int gap3len,HXCFE_SECTCFG * sectorconfigtab)
-{
-	unsigned int i,j;
-	isoibm_config * configptr;
-	uint32_t finalsize,headersize;
-	uint32_t totaldatasize;
-
-
-	configptr=NULL;
-	i=0;
-	while (formatstab[i].indexformat!=TRACKTYPE &&  formatstab[i].indexformat!=0)
-	{
-		i++;
-	};
-
-	configptr=&formatstab[i];
-	totaldatasize=0;
-	if(sectorconfigtab)
-	{
-		sectorsize=0;
-		for(j=0;j<numberofsector;j++)
-		{
-			totaldatasize=totaldatasize+(sectorconfigtab[j].sectorsize);
-		}
-	}
-
-	headersize = 0;
-
-	if(configptr->sector_id) headersize++;
-	if(configptr->sector_size_id) headersize++;
-	if(configptr->side_id) headersize++;
-	if(configptr->track_id) headersize++;
-
-	finalsize=configptr->len_gap4a+configptr->len_isync+configptr->len_indexmarkp1+configptr->len_indexmarkp2 + \
-			  configptr->len_gap1 +  \
-			  numberofsector*( configptr->len_ssync + configptr->len_addrmarkp1 + configptr->len_addrmarkp2 + headersize + 2 +configptr->len_gap2 + configptr->len_dsync + configptr->len_datamarkp1 + configptr->len_datamarkp2 + sectorsize + 2 + gap3len) +\
-			  totaldatasize;
-
-	return finalsize;
-
-}
-
 unsigned char* compute_interleave_tab(int interleave,int skew,int numberofsector)
 {
 
@@ -458,8 +417,32 @@ int searchgap3value(unsigned int numberofsector,HXCFE_SECTCFG * sectorconfigtab)
 }
 void tg_initTrackEncoder(track_generator *tg)
 {
+	int i,j;
+
 	memset(tg,0,sizeof(track_generator));
 	tg->mfm_last_bit=0xFFFF;
+
+	i = 0;
+	while( formatstab[i].indexformat )
+	{
+		i++;
+	}
+
+	for(j=0;j<256;j++)
+	{
+		tg->disk_formats_LUT[j] = (void*)&formatstab[i];
+	}
+
+	i = 0;
+	while( formatstab[i].indexformat )
+	{
+		if(formatstab[i].indexformat < 256)
+		{
+			tg->disk_formats_LUT[formatstab[i].indexformat] = (void*)&formatstab[i];
+		}
+		i++;
+	}
+
 }
 
 int32_t tg_timeToSize(track_generator *tg,int32_t trackencoding,int32_t bitrate,int32_t time)
@@ -503,10 +486,9 @@ int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t
 	total_track_size = 0;
 	if(tg)
 	{
-		configptr=0;
 		tck_period=0;
 
-		configptr=&formatstab[trackencoding-1];
+		configptr = tg->disk_formats_LUT[trackencoding];
 
 		total_track_size=(configptr->len_gap4a+pregaplen)+configptr->len_isync+configptr->len_indexmarkp1+configptr->len_indexmarkp2 + \
 						 configptr->len_gap1;
@@ -548,7 +530,8 @@ int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t
 			{
 				gap3 = (uint8_t)(sectorconfigtab[j].gap3);
 			}
-			configptr=&formatstab[sectorconfigtab[j].trackencoding-1];
+
+			configptr = tg->disk_formats_LUT[sectorconfigtab[j].trackencoding];
 
 			sector_size = sectorconfigtab[j].sectorsize;
 			if(sectorconfigtab[j].trackencoding == TYCOMFORMAT_SD || sectorconfigtab[j].trackencoding == DECRX02_SDDD)
@@ -606,6 +589,7 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 	int variable_param,tracklen;
 	int32_t i;
 	int32_t startindex;
+	isoibm_config * configptr;
 
 	startindex=tg->last_bit_offset/8;
 
@@ -621,6 +605,8 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 	if(tracksize&7) tracklen++;
 
 	currentside->tracklen=tracksize;
+
+	configptr = tg->disk_formats_LUT[trackencoding];
 
 	if(numberofsector)
 	{
@@ -715,32 +701,32 @@ HXCFE_SIDE * tg_initTrack(track_generator *tg,int32_t tracksize,int32_t numberof
 	if(numberofsector)
 	{
 		//gap4a (post index gap4)
-		for(i=0;i< ( formatstab[trackencoding-1].len_gap4a + pregap );i++)
+		for(i=0;i< ( configptr->len_gap4a + pregap );i++)
 		{
-			pushTrackCode(tg,formatstab[trackencoding-1].data_gap4a,0xFF,currentside,trackencoding);
+			pushTrackCode(tg,configptr->data_gap4a,0xFF,currentside,trackencoding);
 		}
 
 		//i sync
-		for(i=0;i<formatstab[trackencoding-1].len_isync;i++)
+		for(i=0;i<configptr->len_isync;i++)
 		{
-			pushTrackCode(tg,formatstab[trackencoding-1].data_isync,0xFF,currentside,trackencoding);
+			pushTrackCode(tg,configptr->data_isync,0xFF,currentside,trackencoding);
 		}
 
 		// index mark
-		for(i=0;i<formatstab[trackencoding-1].len_indexmarkp1;i++)
+		for(i=0;i<configptr->len_indexmarkp1;i++)
 		{
-			pushTrackCode(tg,formatstab[trackencoding-1].data_indexmarkp1,formatstab[trackencoding-1].clock_indexmarkp1,currentside,trackencoding);
+			pushTrackCode(tg,configptr->data_indexmarkp1,configptr->clock_indexmarkp1,currentside,trackencoding);
 		}
 
-		for(i=0;i<formatstab[trackencoding-1].len_indexmarkp2;i++)
+		for(i=0;i<configptr->len_indexmarkp2;i++)
 		{
-			pushTrackCode(tg,formatstab[trackencoding-1].data_indexmarkp2,formatstab[trackencoding-1].clock_indexmarkp2,currentside,trackencoding);
+			pushTrackCode(tg,configptr->data_indexmarkp2,configptr->clock_indexmarkp2,currentside,trackencoding);
 		}
 
 		// gap1
-		for(i=0;i<formatstab[trackencoding-1].len_gap1;i++)
+		for(i=0;i<configptr->len_gap1;i++)
 		{
-			pushTrackCode(tg,formatstab[trackencoding-1].data_gap1,0xFF,currentside,trackencoding);
+			pushTrackCode(tg,configptr->data_gap1,0xFF,currentside,trackencoding);
 		}
 	}
 
@@ -841,51 +827,53 @@ alloc_error:
 void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
 	int32_t  i,j,k;
-	uint8_t  c,trackencoding,trackenc;
+	uint8_t  c,trackenc;
 	uint8_t  CRC16_High;
 	uint8_t  CRC16_Low;
 	uint8_t  crctable[32];
 	int32_t  startindex,sectorsize;
 	int data_part_encoding;
 	int startdatabitindex;
+	isoibm_config * configptr;
 
 	startindex=tg->last_bit_offset/8;
 
 	sectorconfig->startsectorindex = tg->last_bit_offset/8;
-	trackencoding = (uint8_t)(sectorconfig->trackencoding-1);
+
+	configptr = tg->disk_formats_LUT[sectorconfig->trackencoding];
 
 	// sync
-	for(i=0;i<formatstab[trackencoding].len_ssync;i++)
+	for(i=0;i<configptr->len_ssync;i++)
 	{
-		pushTrackCode(tg,formatstab[trackencoding].data_ssync,0xFF,currentside,sectorconfig->trackencoding);
+		pushTrackCode(tg,configptr->data_ssync,0xFF,currentside,sectorconfig->trackencoding);
 	}
 
-	CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,formatstab[trackencoding].crc_poly,formatstab[trackencoding].crc_initial);
+	CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,configptr->crc_poly,configptr->crc_initial);
 	// add mark
-	for(i=0;i<formatstab[trackencoding].len_addrmarkp1;i++)
+	for(i=0;i<configptr->len_addrmarkp1;i++)
 	{
-		pushTrackCode(tg,formatstab[trackencoding].data_addrmarkp1,formatstab[trackencoding].clock_addrmarkp1,currentside,sectorconfig->trackencoding);
-		CRC16_Update(&CRC16_High,&CRC16_Low, formatstab[trackencoding].data_addrmarkp1,(unsigned char*)&crctable);
+		pushTrackCode(tg,configptr->data_addrmarkp1,configptr->clock_addrmarkp1,currentside,sectorconfig->trackencoding);
+		CRC16_Update(&CRC16_High,&CRC16_Low, configptr->data_addrmarkp1,(unsigned char*)&crctable);
 	}
 
 	if(sectorconfig->use_alternate_addressmark)
 	{
-		for(i=0;i<formatstab[trackencoding].len_addrmarkp2;i++)
+		for(i=0;i<configptr->len_addrmarkp2;i++)
 		{
-			pushTrackCode(tg,(uint8_t)sectorconfig->alternate_addressmark,formatstab[trackencoding].clock_addrmarkp2,currentside,sectorconfig->trackencoding);
+			pushTrackCode(tg,(uint8_t)sectorconfig->alternate_addressmark,configptr->clock_addrmarkp2,currentside,sectorconfig->trackencoding);
 			CRC16_Update(&CRC16_High,&CRC16_Low, (uint8_t)(sectorconfig->alternate_addressmark),(unsigned char*)&crctable );
 		}
 	}
 	else
 	{
-		for(i=0;i<formatstab[trackencoding].len_addrmarkp2;i++)
+		for(i=0;i<configptr->len_addrmarkp2;i++)
 		{
-			pushTrackCode(tg,formatstab[trackencoding].data_addrmarkp2,formatstab[trackencoding].clock_addrmarkp2,currentside,sectorconfig->trackencoding);
-			CRC16_Update(&CRC16_High,&CRC16_Low, formatstab[trackencoding].data_addrmarkp2,(unsigned char*)&crctable );
+			pushTrackCode(tg,configptr->data_addrmarkp2,configptr->clock_addrmarkp2,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, configptr->data_addrmarkp2,(unsigned char*)&crctable );
 		}
 	}
 
-	if(formatstab[trackencoding].indexformat==MEMBRAINFORMAT_DD)
+	if(configptr->indexformat==MEMBRAINFORMAT_DD)
 	{
 		c = (uint8_t)(sectorconfig->cylinder>>3);
 		pushTrackCode(tg,c,0xFF,currentside,sectorconfig->trackencoding);
@@ -900,21 +888,21 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 	else
 	{
 		// track number
-		if(formatstab[trackencoding].track_id)
+		if(configptr->track_id)
 		{
 			pushTrackCode(tg,(uint8_t)sectorconfig->cylinder,0xFF,currentside,sectorconfig->trackencoding);
 			CRC16_Update(&CRC16_High,&CRC16_Low, (uint8_t)sectorconfig->cylinder,(unsigned char*)&crctable );
 		}
 
 		//01 Side # The side number this is (0 or 1)
-		if(formatstab[trackencoding].side_id)
+		if(configptr->side_id)
 		{
 			pushTrackCode(tg,(uint8_t)sectorconfig->head,  0xFF,currentside,sectorconfig->trackencoding);
 			CRC16_Update(&CRC16_High,&CRC16_Low, (uint8_t)sectorconfig->head,(unsigned char*)&crctable );
 		}
 
 		//01 Sector # The sector number
-		if(formatstab[trackencoding].sector_id)
+		if(configptr->sector_id)
 		{
 			pushTrackCode(tg,(uint8_t)sectorconfig->sector,0xFF,currentside,sectorconfig->trackencoding);
 			CRC16_Update(&CRC16_High,&CRC16_Low, (uint8_t)sectorconfig->sector,(unsigned char*)&crctable );
@@ -924,7 +912,7 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 
 		sectorsize = 128;
 
-		if(formatstab[trackencoding].sector_size_id)
+		if(configptr->sector_size_id)
 		{
 			sectorsize = sectorconfig->sectorsize;
 			if(sectorconfig->use_alternate_sector_size_id)
@@ -940,7 +928,7 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 				}
 			}
 
-			if( formatstab[trackencoding].indexformat == DECRX02_SDDD )
+			if( configptr->indexformat == DECRX02_SDDD )
 			{
 				// DEC RX02 : Size field always set to 0.
 				c = 0;
@@ -977,56 +965,57 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 	}
 
 	// add extra desync
-	for(i=0;i<formatstab[trackencoding].posthcrc_len;i++)
+	for(i=0;i<configptr->posthcrc_len;i++)
 	{
-		pushTrackCode(tg,formatstab[trackencoding].posthcrc_glitch_data,formatstab[trackencoding].posthcrc_glitch_clock,currentside,sectorconfig->trackencoding);
+		pushTrackCode(tg,configptr->posthcrc_glitch_data,configptr->posthcrc_glitch_clock,currentside,sectorconfig->trackencoding);
 	}
 
 	// gap2
-	for(i=0;i<formatstab[trackencoding].len_gap2;i++)
+	for(i=0;i<configptr->len_gap2;i++)
 	{
-		pushTrackCode(tg,formatstab[trackencoding].data_gap2,0xFF,currentside,sectorconfig->trackencoding);
+		pushTrackCode(tg,configptr->data_gap2,0xFF,currentside,sectorconfig->trackencoding);
 	}
 
 	if( !(sectorconfig->flags & TRACKGEN_NO_DATA) )
 	{
-		
+
 		// sync
-		for(i=0;i<formatstab[trackencoding].len_dsync;i++)
+		for(i=0;i<configptr->len_dsync;i++)
 		{
-			pushTrackCode(tg,formatstab[trackencoding].data_dsync,0xFF,currentside,sectorconfig->trackencoding);
+			pushTrackCode(tg,configptr->data_dsync,0xFF,currentside,sectorconfig->trackencoding);
 		}
 
 		//02 CRC The CRC of the data
-		CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,formatstab[trackencoding].crc_poly,formatstab[trackencoding].crc_initial);
+		CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,configptr->crc_poly,configptr->crc_initial);
 
 		// data mark
-		for(i=0;i<formatstab[trackencoding].len_datamarkp1;i++)
+		for(i=0;i<configptr->len_datamarkp1;i++)
 		{
-			pushTrackCode(tg,formatstab[trackencoding].data_datamarkp1,formatstab[trackencoding].clock_datamarkp1,currentside,sectorconfig->trackencoding);
-			CRC16_Update(&CRC16_High,&CRC16_Low, formatstab[trackencoding].data_datamarkp1,(unsigned char*)&crctable );
+			pushTrackCode(tg,configptr->data_datamarkp1,configptr->clock_datamarkp1,currentside,sectorconfig->trackencoding);
+			CRC16_Update(&CRC16_High,&CRC16_Low, configptr->data_datamarkp1,(unsigned char*)&crctable );
 		}
 
 		if(sectorconfig->use_alternate_datamark)
 		{
-			for(i=0;i<formatstab[trackencoding].len_datamarkp2;i++)
+			for(i=0;i<configptr->len_datamarkp2;i++)
 			{
-				pushTrackCode(tg,(uint8_t)sectorconfig->alternate_datamark,formatstab[trackencoding].clock_datamarkp2,currentside,sectorconfig->trackencoding);
+				pushTrackCode(tg,(uint8_t)sectorconfig->alternate_datamark,configptr->clock_datamarkp2,currentside,sectorconfig->trackencoding);
 				CRC16_Update(&CRC16_High,&CRC16_Low, (uint8_t)sectorconfig->alternate_datamark,(unsigned char*)&crctable );
 			}
 		}
 		else
 		{
-			for(i=0;i<formatstab[trackencoding].len_datamarkp2;i++)
+			for(i=0;i<configptr->len_datamarkp2;i++)
 			{
-				pushTrackCode(tg,formatstab[trackencoding].data_datamarkp2,formatstab[trackencoding].clock_datamarkp2,currentside,sectorconfig->trackencoding);
-				CRC16_Update(&CRC16_High,&CRC16_Low, formatstab[trackencoding].data_datamarkp2,(unsigned char*)&crctable );
+				pushTrackCode(tg,configptr->data_datamarkp2,configptr->clock_datamarkp2,currentside,sectorconfig->trackencoding);
+				CRC16_Update(&CRC16_High,&CRC16_Low, configptr->data_datamarkp2,(unsigned char*)&crctable );
 			}
 		}
 
 		data_part_encoding = sectorconfig->trackencoding;
 
-		if( formatstab[trackencoding].indexformat == DECRX02_SDDD)
+
+		if( configptr->indexformat == DECRX02_SDDD)
 		{
 			// DEC RX02 : Encode the Data + CRC in MFM.
 			data_part_encoding = ISOFORMAT_DD;
@@ -1102,16 +1091,16 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 			}
 		}
 
-		if( formatstab[trackencoding].indexformat == DECRX02_SDDD )
+		if( configptr->indexformat == DECRX02_SDDD )
 		{
 			// DEC RX02 : Convert/Patch the encoded MFM to DEC M2FM.
 			mfmtodecm2fm( currentside->databuffer, currentside->tracklen, startdatabitindex, ((256+2)*8*2) );
 		}
 
 		// add extra desync
-		for(i=0;i<formatstab[trackencoding].postdcrc_len;i++)
+		for(i=0;i<configptr->postdcrc_len;i++)
 		{
-			pushTrackCode(tg,formatstab[trackencoding].postdcrc_glitch_data,formatstab[trackencoding].postdcrc_glitch_clock,currentside,sectorconfig->trackencoding);
+			pushTrackCode(tg,configptr->postdcrc_glitch_data,configptr->postdcrc_glitch_clock,currentside,sectorconfig->trackencoding);
 		}
 
 		//gap3
@@ -1119,7 +1108,7 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 		{
 			for(i=0;i<sectorconfig->gap3;i++)
 			{
-				pushTrackCode(tg,formatstab[trackencoding].data_gap3,0xFF,currentside,sectorconfig->trackencoding);
+				pushTrackCode(tg,configptr->data_gap3,0xFF,currentside,sectorconfig->trackencoding);
 			}
 
 		}
@@ -1234,6 +1223,9 @@ void tg_completeTrack(track_generator *tg, HXCFE_SIDE * currentside,int32_t trac
 	int32_t tracklen,trackoffset;
 	uint8_t c,oldval;
 	int32_t startindex,i;
+	isoibm_config * configptr;
+
+	configptr = tg->disk_formats_LUT[trackencoding];
 
 	tracklen=currentside->tracklen/8;
 	if(currentside->tracklen&7) tracklen++;
@@ -1242,12 +1234,12 @@ void tg_completeTrack(track_generator *tg, HXCFE_SIDE * currentside,int32_t trac
 	trackoffset=startindex;
 	while(trackoffset<tracklen)
 	{
-		pushTrackCode(tg,formatstab[trackencoding-1].data_gap4b,0xFF,currentside,trackencoding);
+		pushTrackCode(tg,configptr->data_gap4b,0xFF,currentside,trackencoding);
 		trackoffset=tg->last_bit_offset/8;
 	}
 
 	if( (trackencoding == IBMFORMAT_SD) || \
-	    (trackencoding == ISOFORMAT_SD) || \
+		(trackencoding == ISOFORMAT_SD) || \
 		(trackencoding == TYCOMFORMAT_SD) || \
 		(trackencoding == DECRX02_SDDD)
 	)

@@ -72,6 +72,9 @@
 
 #include "xml_disk/packer/pack.h"
 
+#include "tracks/track_types_defs.h"
+
+
 int dummy_output(int MSGTYPE,const char * chaine, ...)
 {
 	return 0;
