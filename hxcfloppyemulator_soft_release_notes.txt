@@ -16,6 +16,17 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
+XX January 2021 : HxCFloppyEmulator 2.5.X.X (Beta !)
+
+-> Hard-sectored support fixed.
+
+-> Stream : C64 sector format support added. (WIP!)
+
+-> Apple Macintosh CLV support fixed/improved. (WIP!)
+   
+*********************************************************/
+
+/*********************************************************
 31 December 2020 : HxCFloppyEmulator 2.5.5.1
 
 -> New hardware support introduced : Pauline ! The ultimate stream based floppy drive simulator / floppy dumper :)
