@@ -47,6 +47,8 @@ public:
   Fl_Light_Button *northstar_bt;
   Fl_Light_Button *heathkit_bt;
   Fl_Light_Button *decrx02_bt;
+  Fl_Light_Button *c64_bt;
+  Fl_Light_Button *qd_mo5_bt;
   Fl_Text_Buffer* buf;
   Fl_Text_Display * txt_displ;
 };
