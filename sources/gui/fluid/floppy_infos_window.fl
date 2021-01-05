@@ -8,29 +8,29 @@ class floppy_infos_window {open
   } {
     Fl_Window window {
       label {Visual Floppy disk} open
-      xywh {91 263 1275 540} type Single resizable visible
+      xywh {1 100 1275 540} type Single hide resizable
     } {
       Fl_Group {} {
-        label {Track / Side selection} open selected
-        xywh {1000 372 275 118} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+        label {Track / Side selection} open
+        xywh {1000 387 275 113} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
       } {
         Fl_Value_Slider track_number_slide {
           label {Track number}
           user_data this
           callback disk_infos_window_callback
-          xywh {1006 388 264 19} type Horizontal labelsize 12 textsize 12
+          xywh {1006 402 264 19} type Horizontal labelsize 12 textsize 12
         }
         Fl_Value_Slider side_number_slide {
           label {Side number}
           user_data this
           callback disk_infos_window_callback
-          xywh {1005 420 265 19} type Horizontal labelsize 12 textsize 12
+          xywh {1005 434 265 19} type Horizontal labelsize 12 textsize 12
         }
         Fl_Choice view_mode {
           label {View mode}
           user_data this
           callback disk_infos_window_callback open
-          xywh {1090 462 180 20} down_box BORDER_BOX
+          xywh {1090 472 180 20} down_box BORDER_BOX
         } {}
       }
       Fl_Group {} {
@@ -92,7 +92,7 @@ class floppy_infos_window {open
       }
       Fl_Group {} {
         label {Track analysis format} open
-        xywh {1000 287 275 84} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
+        xywh {1000 287 275 101} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
       } {
         Fl_Light_Button iso_mfm_bt {
           label {ISO MFM}
@@ -131,7 +131,7 @@ class floppy_infos_window {open
           xywh {1099 305 76 15} labelsize 10
         }
         Fl_Light_Button apple2_bt {
-          label {Apple}
+          label Apple
           user_data this
           callback disk_infos_window_callback
           xywh {1015 350 76 15} labelsize 10
@@ -165,6 +165,18 @@ class floppy_infos_window {open
           user_data this
           callback disk_infos_window_callback
           xywh {1183 350 76 15} labelsize 10
+        }
+        Fl_Light_Button c64_bt {
+          label C64
+          user_data this
+          callback disk_infos_window_callback
+          xywh {1015 365 76 15} labelsize 10
+        }
+        Fl_Light_Button qd_mo5_bt {
+          label {QD MO5}
+          user_data this
+          callback disk_infos_window_callback selected
+          xywh {1099 365 76 15} labelsize 10
         }
       }
     }

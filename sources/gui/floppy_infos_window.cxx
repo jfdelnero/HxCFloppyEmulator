@@ -16,24 +16,24 @@ extern "C"
 floppy_infos_window::floppy_infos_window() {
   { window = new Fl_Window(1275, 540, getString(STR_FLOPPYVIEWERWINDOW_0001));
     window->user_data((void*)(this));
-    { Fl_Group* o = new Fl_Group(1000, 372, 275, 118, "Track / Side selection");
+    { Fl_Group* o = new Fl_Group(1000, 387, 275, 113, "Track / Side selection");
       o->box(FL_ENGRAVED_FRAME);
       o->labeltype(FL_EMBOSSED_LABEL);
       o->labelsize(12);
       o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-      { track_number_slide = new Fl_Value_Slider(1006, 388, 264, 19, getString(STR_FLOPPYVIEWERWINDOW_0003));
+      { track_number_slide = new Fl_Value_Slider(1006, 402, 264, 19, getString(STR_FLOPPYVIEWERWINDOW_0003));
         track_number_slide->type(1);
         track_number_slide->labelsize(12);
         track_number_slide->textsize(12);
         track_number_slide->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Value_Slider* track_number_slide
-      { side_number_slide = new Fl_Value_Slider(1005, 420, 265, 19, getString(STR_FLOPPYVIEWERWINDOW_0004));
+      { side_number_slide = new Fl_Value_Slider(1005, 434, 265, 19, getString(STR_FLOPPYVIEWERWINDOW_0004));
         side_number_slide->type(1);
         side_number_slide->labelsize(12);
         side_number_slide->textsize(12);
         side_number_slide->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Value_Slider* side_number_slide
-      { view_mode = new Fl_Choice(1090, 462, 180, 20, "View mode");
+      { view_mode = new Fl_Choice(1090, 472, 180, 20, "View mode");
         view_mode->down_box(FL_BORDER_BOX);
         view_mode->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Choice* view_mode
@@ -102,7 +102,7 @@ floppy_infos_window::floppy_infos_window() {
       } // Fl_Button* o
       o->end();
     } // Fl_Group* o
-    { Fl_Group* o = new Fl_Group(1000, 287, 275, 84, getString(STR_FLOPPYVIEWERWINDOW_0014));
+    { Fl_Group* o = new Fl_Group(1000, 287, 275, 101, getString(STR_FLOPPYVIEWERWINDOW_0014));
       o->box(FL_ENGRAVED_FRAME);
       o->labeltype(FL_EMBOSSED_LABEL);
       o->labelsize(10);
@@ -155,6 +155,14 @@ floppy_infos_window::floppy_infos_window() {
         decrx02_bt->labelsize(10);
         decrx02_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* decrx02_bt
+      { c64_bt = new Fl_Light_Button(1015, 365, 76, 15, "C64");
+        c64_bt->labelsize(10);
+        c64_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* c64_bt
+      { qd_mo5_bt = new Fl_Light_Button(1099, 365, 76, 15, "QD MO5");
+        qd_mo5_bt->labelsize(10);
+        qd_mo5_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* qd_mo5_bt
       o->end();
     } // Fl_Group* o
 
