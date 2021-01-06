@@ -280,7 +280,8 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 				floppycontext->hxc_printf(MSG_DEBUG,test_buffer);
 				#endif
 
-				bit_offset = bit_offset + ( 6 * 8 );
+				bit_offset = chgbitptr( track->tracklen, bit_offset, ( 6 * 8 ));
+
 				sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_buffer,7,bit_offset,0);
 				if(1)
 				{
@@ -352,11 +353,11 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 						fm_buffer[4]=0x54;
 						fm_buffer[5]=0x45;
 
-						bit_offset = searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,(8*4),bit_offset );
+						bit_offset = searchBitStream(track->databuffer,track->tracklen,64*8,fm_buffer,(8*4),bit_offset );
 
 						if(bit_offset!=-1)
 						{
-							bit_offset += (8*6);
+							bit_offset = chgbitptr( track->tracklen, bit_offset, ( 6 * 8 ));
 							sector->use_alternate_header_crc = 0x00;
 							floppycontext->hxc_printf(MSG_DEBUG,"Valid Apple II 6 and 2 GCR sector header found - Sect:%d",tmp_buffer[2]);
 							old_bit_offset = bit_offset;
@@ -372,13 +373,13 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 							fm_buffer[4]=0x44;
 							fm_buffer[5]=0x51;
 
-							bit_offset = searchBitStream(track->databuffer,track->tracklen,(64*8),fm_buffer,8*6,bit_offset);
+							bit_offset = searchBitStream(track->databuffer,track->tracklen,64*8,fm_buffer,8*6,bit_offset);
 
 							#ifdef DBG_A2_GCR
 							jj = bit_offset;
 							#endif
 
-							if((bit_offset-old_bit_offset<((88+10)*8*2)) && bit_offset!=-1)
+							if( bit_offset!=-1 )
 							{
 
 								sector_size = 256;
@@ -446,38 +447,39 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 									}
 								}
 
-								bit_offset=bit_offset+(sector_size*4);
+								bit_offset = chgbitptr( track->tracklen, bit_offset, sector_size*4 );
 
 								sector_extractor_sm=ENDOFSECTOR;
 
 							}
 							else
 							{
-								bit_offset=old_bit_offset+1;
+								bit_offset = chgbitptr( track->tracklen, old_bit_offset, 1 );
+
 								floppycontext->hxc_printf(MSG_DEBUG,"No data!");
 								sector_extractor_sm=ENDOFSECTOR;
 							}
 						}
 						else
 						{
-							bit_offset=old_bit_offset+1;
+							bit_offset = chgbitptr( track->tracklen, old_bit_offset, 1 );
+
 							floppycontext->hxc_printf(MSG_DEBUG,"No data! 2");
 							sector_extractor_sm=ENDOFSECTOR;
 							sector->use_alternate_data_crc = 0xFF;
 						}
-
-
 					}
 					else
 					{
 						sector_extractor_sm=LOOKFOR_GAP1;
-						bit_offset++;
+
+						bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
 					}
 				}
 				else
 				{
 					sector_extractor_sm=LOOKFOR_GAP1;
-					bit_offset++;
+					bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
 				}
 			break;
 
