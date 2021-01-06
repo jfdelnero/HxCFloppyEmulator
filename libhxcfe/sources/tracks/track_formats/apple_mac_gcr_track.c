@@ -290,8 +290,7 @@ int get_next_AppleMacGCR_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 				fm_buffer[4]=0x41;
 				fm_buffer[5]=0x14;
 
-		//		bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*6,bit_offset);
-				bit_offset = slowSearchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*6,bit_offset);
+				bit_offset = searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*6,bit_offset);
 				if(bit_offset!=-1)
 				{
 					sector_extractor_sm=LOOKFOR_ADDM;
@@ -366,8 +365,8 @@ int get_next_AppleMacGCR_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 
 						bit_offset = chgbitptr( track->tracklen, bit_offset, ( 4 * 8 ));
 
-						bit_offset = searchBitStream(track->databuffer,track->tracklen,256*8*2,fm_buffer,8*6,bit_offset);
-						if( ( calcbitptrdist(track->tracklen, old_bit_offset, bit_offset) < ((88+10)*8*2) ) && bit_offset!=-1)
+						bit_offset = searchBitStream(track->databuffer,track->tracklen,64*8,fm_buffer,8*6,bit_offset);
+						if( bit_offset!=-1)
 						{
 							sector_size = 512;
 							sector->sectorsize = sector_size;
