@@ -105,6 +105,21 @@ int chgbitptr(int tracklen,int cur_offset,int offset)
 	}
 }
 
+int calcbitptrdist(int tracklen,int first_offset,int last_offset)
+{
+	first_offset %= tracklen;
+	last_offset %= tracklen;
+
+	if( last_offset >= first_offset )
+	{
+		return (last_offset - first_offset);
+	}
+	else
+	{
+		return (tracklen - first_offset) + last_offset;
+	}
+}
+
 int slowSearchBitStream(unsigned char * input_data,uint32_t input_data_size,int searchlen,unsigned char * chr_data,uint32_t chr_data_size,uint32_t bit_offset)
 {
 	uint32_t cur_startoffset;
