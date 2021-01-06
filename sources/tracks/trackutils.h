@@ -39,3 +39,4 @@ int  slowSearchBitStream(unsigned char * input_data,uint32_t input_data_size,int
 void sortbuffer(unsigned char * buffer,unsigned char * outbuffer,int size);
 
 int chgbitptr(int tracklen,int cur_offset,int offset);
+int calcbitptrdist(int tracklen,int first_offset,int last_offset);
