@@ -290,8 +290,8 @@ int get_next_AppleMacGCR_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 				fm_buffer[4]=0x41;
 				fm_buffer[5]=0x14;
 
-				bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*6,bit_offset);
-
+		//		bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*6,bit_offset);
+				bit_offset = slowSearchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*6,bit_offset);
 				if(bit_offset!=-1)
 				{
 					sector_extractor_sm=LOOKFOR_ADDM;
@@ -306,7 +306,8 @@ int get_next_AppleMacGCR_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 
 				memset(tmp_buffer,0,sizeof(tmp_buffer));
 
-				bit_offset += ( 6 * 8 );
+				bit_offset = chgbitptr( track->tracklen, bit_offset, ( 6 * 8 ));
+
 				sector->endsectorindex = cellstobin(track->databuffer,track->tracklen,tmp_buffer,7,bit_offset,0);
 				if(1)
 				{
@@ -363,9 +364,10 @@ int get_next_AppleMacGCR_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 						fm_buffer[4]=0x44;
 						fm_buffer[5]=0x51;
 
-						bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*6,bit_offset+(4*8));
+						bit_offset = chgbitptr( track->tracklen, bit_offset, ( 4 * 8 ));
 
-						if((bit_offset-old_bit_offset<((88+10)*8*2)) && bit_offset!=-1)
+						bit_offset = searchBitStream(track->databuffer,track->tracklen,256*8*2,fm_buffer,8*6,bit_offset);
+						if( ( calcbitptrdist(track->tracklen, old_bit_offset, bit_offset) < ((88+10)*8*2) ) && bit_offset!=-1)
 						{
 							sector_size = 512;
 							sector->sectorsize = sector_size;
@@ -381,7 +383,7 @@ int get_next_AppleMacGCR_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 							{
 								memset(sector->input_data,0,sector_size+12+2);
 
-								bit_offset = (bit_offset+(6*8)) % track->tracklen;
+								bit_offset = chgbitptr( track->tracklen, bit_offset, ( 6 * 8 ));
 
 								sector->endsectorindex = cellstobin(track->databuffer,track->tracklen,nibble_sector_data,sizeof(nibble_sector_data),bit_offset,0);
 
@@ -426,14 +428,14 @@ int get_next_AppleMacGCR_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 
 							}
 
-							bit_offset=bit_offset+(sector_size*4);
+							bit_offset = chgbitptr( track->tracklen, bit_offset, (sector_size*4));
 
 							sector_extractor_sm=ENDOFSECTOR;
 
 						}
 						else
 						{
-							bit_offset=old_bit_offset+1;
+							bit_offset = chgbitptr( track->tracklen, old_bit_offset, 1);
 							floppycontext->hxc_printf(MSG_DEBUG,"No data!");
 							sector_extractor_sm=ENDOFSECTOR;
 						}
@@ -441,13 +443,13 @@ int get_next_AppleMacGCR_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 					else
 					{
 						sector_extractor_sm=LOOKFOR_GAP1;
-						bit_offset++;
+						bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
 					}
 				}
 				else
 				{
 					sector_extractor_sm=LOOKFOR_GAP1;
-					bit_offset++;
+					bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
 				}
 			break;
 
