@@ -324,6 +324,14 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					minside=0;
 					maxside=0;
 
+					if( info.disk_type == 2 )
+					{
+						skip_inter_tracks = 0;
+						nbside = 2;
+					}
+					else
+						nbside = 1;
+
 					max_location = 0;
 					str_offset = 0;
 					while( str_offset < a2r_chunkh.chunk_size - 1)
@@ -340,15 +348,14 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 					fseek(f,stream_start_pos,SEEK_SET);
 
-					nbside = 1;
 					maxside = nbside;
-					maxtrack = max_location;
+					maxtrack = max_location / nbside;
 
-					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%d track (%d - %d), %d sides (%d - %d)",maxtrack - mintrack,mintrack,maxtrack,maxside - minside,minside,maxside);
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%d track (%d - %d), %d sides (%d - %d)",( maxtrack - mintrack ) + 1,mintrack,maxtrack,maxside - minside,minside,maxside);
 
 					floppydisk->floppyiftype = GENERIC_SHUGART_DD_FLOPPYMODE;
 					floppydisk->floppyBitRate = VARIABLEBITRATE;
-					floppydisk->floppyNumberOfTrack = max_location;
+					floppydisk->floppyNumberOfTrack = maxtrack + 1;
 					if(skip_inter_tracks)
 						floppydisk->floppyNumberOfTrack /= 4;
 
@@ -424,17 +431,21 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 								if(capture.location <= max_location)
 								{
-									track_pos = capture.location;
+									track_pos = capture.location >> (nbside-1);
 									if(skip_inter_tracks)
 										track_pos /= 4;
-									
+
 									if(!floppydisk->tracks[track_pos])
 									{
 										floppydisk->tracks[track_pos] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 									}
 
 									currentcylinder=floppydisk->tracks[track_pos];
-									currentcylinder->sides[0] = curside;
+									if(nbside == 2)
+										currentcylinder->sides[ capture.location & 1 ] = curside;
+									else
+										currentcylinder->sides[ 0 ] = curside;
+
 								}
 
 								hxcfe_imgCallProgressCallback(imgldr_ctx,capture.location,max_location );
