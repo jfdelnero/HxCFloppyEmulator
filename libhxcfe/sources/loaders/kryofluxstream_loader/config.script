@@ -51,4 +51,4 @@
 # PLL parameters.
 #
 
-#set FLUXSTREAM_PHASE_CORRECTION_DIVISOR 8 # Phase correction divisor
+#set FLUXSTREAM_PLL_PHASE_CORRECTION_DIVISOR 8 # Phase correction divisor
