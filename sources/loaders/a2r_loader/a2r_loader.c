@@ -263,7 +263,7 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			skip_inter_tracks = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "A2RLOADER_SKIP_INTER_TRACKS" );
 
 			singleside = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "A2RLOADER_SINGLE_SIDE" )&1;
-			phasecorrection = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_PHASE_CORRECTION_DIVISOR" );
+			phasecorrection = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_PLL_PHASE_CORRECTION_DIVISOR" );
 			filterpasses = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES" );
 			filter = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW" );
 			bitrate = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "A2RLOADER_BITRATE" );
