@@ -65,6 +65,7 @@ typedef struct _HXCFE_TRKSTREAM
     HXCFE_STREAMCHANNEL channels[MAX_NB_OF_STREAMCHANNEL];
     s_index_evt	index_evt_tab[MAX_NB_OF_INDEX];
     uint32_t	nb_of_index;
+	int         tick_freq;
 }HXCFE_TRKSTREAM;
 
 #define _HXCFE_TRKSTREAM_
@@ -86,6 +87,8 @@ typedef struct _HXCFE_SIDE
     HXCFE_TRKSTREAM * stream_dump;
 
     uint32_t        * cell_to_tick;
+	int               tick_freq;
+
 }HXCFE_SIDE;
 #define _HXCFE_SIDE_
 

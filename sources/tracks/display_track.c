@@ -244,7 +244,7 @@ float getOffsetTiming(HXCFE_SIDE *currentside,int offset,float timingoffset,int 
 			offset_tick = (tracklen_tick - start_tick) + end_tick;
 		}
 
-		timingoffset = timingoffset + (float)((float)offset_tick / (float)(TICKFREQ/1000000));
+		timingoffset = timingoffset + (float)((float)offset_tick / (float)(currentside->tick_freq/1000000));
 
 		return timingoffset;
 	}
@@ -1681,6 +1681,10 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	int channel_maxtick[MAX_NB_OF_STREAMCHANNEL];
 	int channel_buffer_offset[MAX_NB_OF_STREAMCHANNEL];
 
+	HXCFE_FXSA * fxs;
+
+	fxs = hxcfe_initFxStream( td->hxcfe );
+
 	td->noloop_trackmode = 1;
 
 	memset(td->framebuffer,0x000000,td->xsize*td->ysize*4);
@@ -1688,8 +1692,8 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	x_us_per_pixel = ((float)((float)td->x_us/(float)td->xsize));
 	y_us_per_pixel = ((float)((float)td->y_us/(float)td->ysize));
 
-	x_tick_to_pix = ( (float)1.0 / x_us_per_pixel ) * ( (float)1000000 / (float)TICKFREQ );
-	y_tick_to_pix = ( (float)1.0 / y_us_per_pixel ) * ( (float)1000000 / (float)TICKFREQ );
+	x_tick_to_pix = ( (float)1.0 / x_us_per_pixel ) * ( (float)1000000 / (float)track_stream->tick_freq );
+	y_tick_to_pix = ( (float)1.0 / y_us_per_pixel ) * ( (float)1000000 / (float)track_stream->tick_freq );
 
 	if( hxcfe_getEnvVarValue( td->hxcfe, "BMPEXPORT_STREAM_HIGHCONTRAST" ) || (x_us_per_pixel < 200) )
 	{
@@ -1701,7 +1705,7 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 		td->flags |= TD_FLAG_BIGDOT;
 	}
 
-	tick_to_ps = (float) ( (float)1000000000 / (float)TICKFREQ);
+	tick_to_ps = (float) ( (float)1000000000 / (float)track_stream->tick_freq);
 
 	memset(channel_buffer_offset,0,sizeof(channel_buffer_offset));
 
@@ -1948,7 +1952,7 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 
 		if(last_index_xpos != -1)
 		{
-			index_period = ((float)(total_offset - last_index_total_offset ) * ( (float)1000000 / (float)TICKFREQ ) );
+			index_period = ((float)(total_offset - last_index_total_offset ) * ( (float)1000000 / (float)track_stream->tick_freq ) );
 			sprintf(tmp_str,"%.2f RPM / %.2f ms", (float)(60 * 1000) / (index_period / (float)1000), index_period / (float)1000 );
 
 			if(xpos - last_index_xpos > strlen(tmp_str)*8)
@@ -1971,12 +1975,12 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	{
 		computehistogram(track_stream->channels[0].stream, track_stream->channels[0].nb_of_pulses, histo);
 
-		bitrate = detectpeaks(td->hxcfe,histo);
+		bitrate = detectpeaks(td->hxcfe,&fxs->pll,histo);
 
 		free(histo);
 	}
 
-	side = ScanAndDecodeStream(td->hxcfe, NULL, bitrate,track_stream,NULL,0, 0, 8);
+	side = ScanAndDecodeStream(td->hxcfe, fxs, bitrate,track_stream,NULL,0, 0, 8, 0x0001);
 	if(side)
 	{
 		cleanupTrack(side);
@@ -2004,11 +2008,11 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 				else
 					track_size_bytes = ((tracksize >> 3) - 1);
 
-				timingoffset = ((float)(currentside->cell_to_tick[track_size_bytes] - currentside->cell_to_tick[0]) / (float)(TICKFREQ/1000000));
+				timingoffset = ((float)(currentside->cell_to_tick[track_size_bytes] - currentside->cell_to_tick[0]) / (float)(track_stream->tick_freq/1000000));
 
 				timingoffset2 = ( timingoffset * td->x_start_us ) / (100 * 1000);
 
-				ticks_point = (uint32_t)(timingoffset2 * (float)(TICKFREQ/1000000));
+				ticks_point = (uint32_t)(timingoffset2 * (float)(track_stream->tick_freq/1000000));
 
 				start_tick = currentside->cell_to_tick[0];
 
@@ -2020,7 +2024,7 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 					i++;
 				};
 
-				timingoffset_offset = ((float)(cur_tick) / (float)(TICKFREQ/1000000));
+				timingoffset_offset = ((float)(cur_tick) / (float)(track_stream->tick_freq/1000000));
 			}
 
 			//////////////////////////////////////////
@@ -2038,6 +2042,8 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 
 		hxcfe_freeSide(td->hxcfe,side);
 	}
+
+	hxcfe_deinitFxStream( fxs );
 
 	hxcfe_td_draw_rules( td );
 
