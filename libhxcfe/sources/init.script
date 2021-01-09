@@ -118,16 +118,48 @@ set FLUXSTREAM_ALL_REVOLUTIONS_IN_ONE 0
 #
 
 # Set to 1 to skip the PLL pre-sync.
-set FLUXSTREAM_NOPLLPRESYNC 0
+
+set FLUXSTREAM_PLL_NO_PRESYNC 0
 
 # PLL Phase error to phase
 # correction divisor.
 
-set FLUXSTREAM_PHASE_CORRECTION_DIVISOR 8
+set FLUXSTREAM_PLL_PHASE_CORRECTION_DIVISOR 8
 
 # To force the PLL initial bitrate.
 # 0 -> AUTO
-set FLUXSTREAM_INITIAL_BITRATE 0
+
+set FLUXSTREAM_PLL_INITIAL_BITRATE 0
+
+# Set 1 to enable the GCR inter-bands rejection.
+# This appears to provide better results with Mac AppleSauce A2R dump.
+
+set FLUXSTREAM_PLL_GCR_INTER_BANDS_REJECTION 0
+
+#
+# "Expert" PLL settings Zone
+# Unless you know what you are doing, keep the default values.
+#
+
+set FLUXSTREAM_PLL_TICK_FREQUENCY  250000000         # Internal bitstream tick frequency.
+set FLUXSTREAM_PLL_MIN_MAX_PERCENT 18                # Min-Max PLL deviation in percent versus the central frequency.
+
+set FLUXSTREAM_PLL_MAX_ERROR_NS    680               # Max PLL error trigger level (in nS).
+                                                     # If the error is above this level, the corresponding
+													 # bit is marked as "flakey"
+
+# PLL correction ratio ("Fast" -> Used when getting closer to the central frequency)
+
+set FLUXSTREAM_PLL_FAST_CORRECTION_RATIO_N 15
+set FLUXSTREAM_PLL_FAST_CORRECTION_RATIO_D 16
+
+# PLL correction ratio ("Slow" -> Used when getting far from the central frequency)
+
+set FLUXSTREAM_PLL_SLOW_CORRECTION_RATIO_N 31
+set FLUXSTREAM_PLL_SLOW_CORRECTION_RATIO_D 32
+
+set FLUXSTREAM_ANALYSIS_WINDOW_SIZE_US 1000          # Analysis window size in uS
+set FLUXSTREAM_ANALYSIS_REV2REV_MAX_PULSES_JITTER 10 # Max pulses duration jitter in percent
 
 #
 # Output bitrate filter settings

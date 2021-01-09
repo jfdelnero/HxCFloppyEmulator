@@ -130,6 +130,36 @@ typedef struct _HXCFE_TD
 
 #define _HXCFE_TD_
 
+typedef struct pll_stat_
+{
+	// current cell size (1 cell size)
+	int32_t pump_charge;
+
+	// current window phase
+	int32_t phase;
+
+	// center value
+	int32_t pll_max;
+	int32_t pivot;
+	int32_t pll_min;
+
+	int32_t last_error;
+
+	// last pulse phase
+	int32_t lastpulsephase;
+	
+	int     tick_freq;
+	int     pll_min_max_percent;
+
+	int     fast_correction_ratio_n,fast_correction_ratio_d;
+	int     slow_correction_ratio_n,slow_correction_ratio_d;
+	
+	int     gcr_inter_band_rejection;
+	
+	int     max_pll_error_ticks;
+
+}pll_stat;
+
 typedef struct _HXCFE_FXSA
 {
 	HXCFE * hxcfe;
@@ -143,7 +173,11 @@ typedef struct _HXCFE_FXSA
 
 	int32_t filter;
 	int32_t filterpasses;
+	
+	int     analysis_window_size;
+	int     analysis_rev2rev_max_pulses_jitter;
 
+	pll_stat pll;
 }HXCFE_FXSA;
 
 #define _HXCFE_FXSA_
