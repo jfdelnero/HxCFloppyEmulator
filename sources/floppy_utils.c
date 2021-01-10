@@ -79,7 +79,7 @@ int32_t us2index(int32_t startindex,HXCFE_SIDE * track,uint32_t us,unsigned char
 
 				startindex++;
 
-				if(startindex >= track->tracklen) 
+				if(startindex >= track->tracklen)
 					startindex = 0;
 
 				if(freq)
@@ -179,7 +179,7 @@ HXCFE_CYLINDER* allocCylinderEntry(int32_t rpm,int32_t number_of_side)
 	HXCFE_CYLINDER* cyl;
 
 	cyl = 0;
-	
+
 	if(number_of_side>0)
 	{
 		cyl=(HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
@@ -194,7 +194,7 @@ HXCFE_CYLINDER* allocCylinderEntry(int32_t rpm,int32_t number_of_side)
 		else
 		{
 			cyl->sides = (HXCFE_SIDE**)malloc( sizeof(HXCFE_SIDE*) * number_of_side );
-			memset( cyl->sides, 0, sizeof(HXCFE_SIDE*) * number_of_side );			
+			memset( cyl->sides, 0, sizeof(HXCFE_SIDE*) * number_of_side );
 		}
 	}
 
@@ -257,7 +257,7 @@ double MeasureTrackTiming(HXCFE* floppycontext,HXCFE_SIDE * curside,int32_t star
 
 	if(floppycontext)
 	{
-		if( (startpulse < curside->tracklen) && (endpulse < curside->tracklen) ) 
+		if( (startpulse < curside->tracklen) && (endpulse < curside->tracklen) )
 		{
 			if(startpulse<=endpulse)
 			{
@@ -265,7 +265,7 @@ double MeasureTrackTiming(HXCFE* floppycontext,HXCFE_SIDE * curside,int32_t star
 			}
 			else
 			{
-				lenbit = endpulse + (curside->tracklen - startpulse);			
+				lenbit = endpulse + (curside->tracklen - startpulse);
 			}
 
 			lenbyte = lenbit /8;
@@ -315,9 +315,9 @@ int floppyTrackTypeIdentification(HXCFE* floppycontext,HXCFE_FLOPPY *fp)
 	int32_t nb_sectorfound;
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG** scl;
-	
+
 	i = 0;
-	
+
 	first_track_encoding = UNKNOWN_ENCODING;
 
 	ss = hxcfe_initSectorAccess(floppycontext,fp);
@@ -352,7 +352,7 @@ int floppyTrackTypeIdentification(HXCFE* floppycontext,HXCFE_FLOPPY *fp)
 
 						hxcfe_freeSectorConfig  (ss,scl[sectnum]);
 					}
-					
+
 					free(scl);
 				}
 			}
