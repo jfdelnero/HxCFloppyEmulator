@@ -198,7 +198,7 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 					if(crc32 != *((uint32_t*)&hxcstreambuffer[header.size - 4]))
 					{
 						// BAD CRC !
-						floppycontext->hxc_printf(MSG_ERROR,"DecodeHxCStreamFile: Bad CRC !\n");
+						floppycontext->hxc_printf(MSG_ERROR,"DecodeHxCStreamFile: Bad CRC !");
 
 						hxc_fclose(f);
 						free(hxcstreambuffer);
@@ -266,7 +266,7 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 								packet_offset += (stream_header->packed_size + sizeof(packed_stream_header));
 							break;
 							default:
-								floppycontext->hxc_printf(MSG_ERROR,"DecodeHxCStreamFile: Unknown block !\n");
+								floppycontext->hxc_printf(MSG_ERROR,"DecodeHxCStreamFile: Unknown block !");
 
 								// Unknown block !
 								hxc_fclose(f);
@@ -411,7 +411,7 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 							printf("[chn %d] %d\n",j,total_ticks);
 #endif
 
-							floppycontext->hxc_printf(MSG_DEBUG,"DecodeHxCStreamFile: io_channel %d , pulses %d , io_cnt %d\n",j,k,cnt_io);
+							floppycontext->hxc_printf(MSG_DEBUG,"DecodeHxCStreamFile: io_channel %d , pulses %d , io_cnt %d",j,k,cnt_io);
 
 							if((iostreambuf[0]&(1<<j)))
 								track_dump = hxcfe_FxStream_ImportStream(fxs,stream,32,k, HXCFE_STREAMCHANNEL_TYPE_RLETOGGLESTATE_1, name_str, track_dump);
@@ -696,7 +696,7 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 						printf("[chn %d] %d\n",j,total_ticks);
 #endif
 
-						fxs->hxcfe->hxc_printf(MSG_DEBUG,"DecodeHxCStreamFile: io_channel %d , pulses %d , io_cnt %d\n",j,k,cnt_io);
+						fxs->hxcfe->hxc_printf(MSG_DEBUG,"DecodeHxCStreamFile: io_channel %d , pulses %d , io_cnt %d",j,k,cnt_io);
 
 						if((iostreambuf[0]&(1<<j)))
 							track_dump = hxcfe_FxStream_ImportStream(fxs,stream,32,k, HXCFE_STREAMCHANNEL_TYPE_RLETOGGLESTATE_1, name_str, track_dump);
