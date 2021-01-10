@@ -531,6 +531,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 				};
 			}
 		}
+
 		//
 		// "Decode" the stream...
 		//
@@ -1680,8 +1681,10 @@ uint32_t getNearestValidIndex(pulses_link * pl,uint32_t center,uint32_t limit)
 
 		if(offset_max < (int32_t)pl->number_of_pulses)
 		{
-			if(pl->forward_link[offset_max]>=0)
+			if( pl->forward_link[offset_max] >= 0 )
+			{
 				return (uint32_t)offset_max;
+			}
 		}
 
 	/*	if(offset_min >= 0)
@@ -2006,7 +2009,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 	if(track_dump->channels[0].nb_of_pulses)
 	{
 		// Only one revolution -> No flakey bits detection : return a dummy buffer.
-		if( ( hxcfe_FxStream_GetNumberOfRevolution(fxs,track_dump) == 1 ) ||  hxcfe_getEnvVarValue( fxs->hxcfe, "FLUXSTREAM_SKIPBLOCKSDETECTION") )
+		if( ( hxcfe_FxStream_GetNumberOfRevolution(fxs,track_dump) == 1 ) || hxcfe_getEnvVarValue( fxs->hxcfe, "FLUXSTREAM_SKIPBLOCKSDETECTION") )
 		{
 
 #ifdef FLUXSTREAMDBG
@@ -3553,7 +3556,6 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 				///////////////////////////////////////////////////////////////////////////
 
-
 #ifdef FLUXSTREAMDBG
 				fxs->hxcfe->hxc_printf(MSG_DEBUG,"Revolutions checking...");
 #endif
@@ -3567,7 +3569,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 					first_index = getNearestValidIndex(pl,std->index_evt_tab[hxcfe_FxStream_GetRevolutionIndex( fxs, std, revolution )].dump_offset,pl->number_of_pulses);
 
 #ifdef FLUXSTREAMDBG
-					fxs->hxcfe->hxc_printf(MSG_DEBUG,"Revolution %d track generation... First valid index position : %d",revolution,first_index);
+					fxs->hxcfe->hxc_printf(MSG_INFO_1,"Revolution %d track generation... First valid index position : %d",revolution,first_index);
 #endif
 
 					track_len = 0;
@@ -3584,6 +3586,36 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 #ifdef FLUXSTREAMDBG
 					fxs->hxcfe->hxc_printf(MSG_DEBUG,"First valid index : %d [max : %d] - track length : %d - overlap : %d",first_index,std->channels[0].nb_of_pulses,track_len,pl->forward_link[first_index]);
 #endif
+
+					if(!track_len)
+					{
+						int start_offset, end_offset, offset, index;
+
+						index = hxcfe_FxStream_GetRevolutionIndex( fxs, std, revolution );
+						if(index + 1 < std->nb_of_index)
+						{
+							start_offset = std->index_evt_tab[index].dump_offset;
+							end_offset = std->index_evt_tab[index + 1].dump_offset;
+							track_len = 0;
+							offset = start_offset;
+							while(offset < end_offset)
+							{
+								track_len += std->channels[0].stream[offset++];
+							}
+
+							i = 0;
+							while(i<std->channels[0].nb_of_pulses)
+							{
+								pl->forward_link[i] = 2;
+								i++;
+							}
+
+						#ifdef FLUXSTREAMDBG
+							fxs->hxcfe->hxc_printf(MSG_INFO_1,"Revolution %d Null track len : Recomputed size = %d, start index %d, start offset : %d, end offset : %d",revolution,track_len,index,start_offset,end_offset);
+						#endif
+
+						}
+					}
 
 #if 1
 					if(pl->forward_link[first_index] == 1)
@@ -3603,7 +3635,6 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 #ifdef FLUXSTREAMDBG
 							fxs->hxcfe->hxc_printf(MSG_DEBUG,"No second index... Use the remaining track...");
 #endif
-
 						}
 
 						track_len = 0;
@@ -3658,7 +3689,6 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 								computehistogram(&std->channels[0].stream[first_index],std->channels[0].nb_of_pulses - first_index,histo);
 								hxcfe->hxc_printf(MSG_ERROR,"hxcfe_FxStream_AnalyzeAndGetTrack : End of the stream flux passed ! Bad Stream flux ?");
 							}
-
 
 							bitrate = detectpeaks(hxcfe, &fxs->pll, histo);
 
