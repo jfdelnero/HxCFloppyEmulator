@@ -2709,7 +2709,7 @@ typedef struct physical_floppy_dim_
 // 77 tracks : 40746
 
 physical_floppy_dim floppy_dimension[]=
-{//                        total_radius_um  hole_radius_um  center_to_tracks_radius_um  tracks_space_radius_um   track_witdh_um      track_spacing_um            window                  Index type
+{   //                                 total_radius_um  hole_radius_um  center_to_tracks_radius_um  tracks_space_radius_um   track_witdh_um      track_spacing_um            window                  Index type
 	{	"Track view",                      50000,          13000,         { 15000, 15000 },           { 35000, 35000 },       { 300, 300 },          { 0, 0 },      { -1,     0,    0,     0 }        , 0},
 	{	"Stream view",                     50000,          13000,         { 15000, 15000 },           { 35000, 35000 },       { 300, 300 },          { 0, 0 },      { -1,     0,    0,     0 }        , 0},
 	{	"Stream view (Fat pixels)",        50000,          13000,         { 15000, 15000 },           { 35000, 35000 },       { 300, 300 },          { 0, 0 },      { -1,     0,    0,     0 }        , 0},
