@@ -227,7 +227,6 @@ HXCFE_SECTCFG* hxcfe_getNextSector( HXCFE_SECTORACCESS* ss_ctx, int32_t track, i
 		break;
 	}
 
-
 	if(bitoffset == tmp_bitoffset)
 	{
 		ss_ctx->bitoffset = -1;
