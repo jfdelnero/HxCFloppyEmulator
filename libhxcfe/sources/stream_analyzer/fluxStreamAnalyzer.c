@@ -2952,9 +2952,15 @@ HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, 
 	uint32_t total_tick_computed;
 	unsigned int i,channel;
 
+	if(!fxs)
+		return 0;
+
 #ifdef FLUXSTREAMDBG
 	fxs->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_FxStream_ImportStream : in buffer : %p, wordsize : %d, number of words : %d",stream,wordsize,nbword);
 #endif
+
+	if(!stream)
+		return 0;
 
 	if(!trk_stream)
 	{
@@ -3597,22 +3603,25 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 							start_offset = std->index_evt_tab[index].dump_offset;
 							end_offset = std->index_evt_tab[index + 1].dump_offset;
 							track_len = 0;
-							offset = start_offset;
-							while(offset < end_offset)
+							if( start_offset >= 0 && start_offset < end_offset && end_offset < std->channels[0].nb_of_pulses)
 							{
-								track_len += std->channels[0].stream[offset++];
-							}
+								offset = start_offset;
+								while(offset < end_offset)
+								{
+									track_len += std->channels[0].stream[offset++];
+								}
 
-							i = 0;
-							while(i<std->channels[0].nb_of_pulses)
-							{
-								pl->forward_link[i] = 2;
-								i++;
-							}
+								i = 0;
+								while(i<std->channels[0].nb_of_pulses)
+								{
+									pl->forward_link[i] = 2;
+									i++;
+								}
 
-						#ifdef FLUXSTREAMDBG
-							fxs->hxcfe->hxc_printf(MSG_INFO_1,"Revolution %d Null track len : Recomputed size = %d, start index %d, start offset : %d, end offset : %d",revolution,track_len,index,start_offset,end_offset);
-						#endif
+							#ifdef FLUXSTREAMDBG
+								fxs->hxcfe->hxc_printf(MSG_INFO_1,"Revolution %d Null track len : Recomputed size = %d, start index %d, start offset : %d, end offset : %d",revolution,track_len,index,start_offset,end_offset);
+							#endif
+							}
 
 						}
 					}
