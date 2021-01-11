@@ -257,7 +257,7 @@ static void DeNybbleSector6and2(uint8_t *out, const uint8_t *nib_ptr, uint8_t *c
 // 6 and 2 GCR encoding
 int get_next_AppleMacGCR_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {
-	int bit_offset,old_bit_offset;
+	int bit_offset,old_bit_offset,last_start_offset;
 	int sector_size;
 	unsigned char fm_buffer[32];
 	unsigned char tmp_buffer[32];
@@ -293,6 +293,7 @@ int get_next_AppleMacGCR_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 				bit_offset = searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*6,bit_offset);
 				if(bit_offset!=-1)
 				{
+					last_start_offset = bit_offset;
 					sector_extractor_sm=LOOKFOR_ADDM;
 				}
 				else
@@ -308,147 +309,148 @@ int get_next_AppleMacGCR_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 				bit_offset = chgbitptr( track->tracklen, bit_offset, ( 6 * 8 ));
 
 				sector->endsectorindex = cellstobin(track->databuffer,track->tracklen,tmp_buffer,7,bit_offset,0);
-				if(1)
+
+				for(i=0;i<5;i++)
 				{
-					for(i=0;i<5;i++)
-					{
-						tmp_buffer[i] = SixAndTwo_to_byte_translation[tmp_buffer[i]];
-					}
+					tmp_buffer[i] = SixAndTwo_to_byte_translation[tmp_buffer[i]];
+				}
 
-					CRC16_Low = 0x00;
-					for(i=0;i<4;i++)
-					{
-						CRC16_Low = tmp_buffer[i] ^ CRC16_Low;
-					}
+				CRC16_Low = 0x00;
+				for(i=0;i<4;i++)
+				{
+					CRC16_Low = tmp_buffer[i] ^ CRC16_Low;
+				}
 
-					sector->cylinder = ((tmp_buffer[2]&3)<<6) | (tmp_buffer[0]&0x3F);
-					sector->head = (tmp_buffer[2]>> 5) & 1;
-					sector->sector = tmp_buffer[1];
+				sector->cylinder = ((tmp_buffer[2]&3)<<6) | (tmp_buffer[0]&0x3F);
+				sector->head = (tmp_buffer[2]>> 5) & 1;
+				sector->sector = tmp_buffer[1];
 
-					sector->startsectorindex = bit_offset;
-					sector->startdataindex = sector->endsectorindex;
+				sector->startsectorindex = bit_offset;
+				sector->startdataindex = sector->endsectorindex;
 
-					sector->use_alternate_addressmark = 0x00;
-					sector->alternate_addressmark = 0x00;
+				sector->use_alternate_addressmark = 0x00;
+				sector->alternate_addressmark = 0x00;
 
-					sector->use_alternate_datamark = 0x00;
-					sector->alternate_datamark = 0x00;
+				sector->use_alternate_datamark = 0x00;
+				sector->alternate_datamark = 0x00;
 
-					if(track->timingbuffer)
-						sector->bitrate = track->timingbuffer[bit_offset/8];
-					else
-						sector->bitrate = track->bitrate;
+				if(track->timingbuffer)
+					sector->bitrate = track->timingbuffer[bit_offset/8];
+				else
+					sector->bitrate = track->bitrate;
+
+				sector->use_alternate_header_crc = 0x00;
+
+				sector->header_crc = tmp_buffer[4] ;
+
+				if( (CRC16_Low&0x3F) == (tmp_buffer[4]) )
+				{ // crc ok !!!
 
 					sector->use_alternate_header_crc = 0x00;
+					floppycontext->hxc_printf(MSG_DEBUG,"Valid Apple Macintosh sector header found - Sect:%d",tmp_buffer[2]);
+					old_bit_offset=bit_offset;
 
-					sector->header_crc = tmp_buffer[4] ;
+					// 0xD5 0xAA 0xAD
+					//    D        5        A        A        A        D
+					// 1101     0101     1010     1010     1010     1101
+					// 01010001 00010001 01000100 01000100 01000100 01010001
+					//     0x51      0x11    0x44     0x44     0x44     0x51
 
-					if( (CRC16_Low&0x3F) == (tmp_buffer[4]) )
-					{ // crc ok !!!
+					fm_buffer[0]=0x51;
+					fm_buffer[1]=0x11;
+					fm_buffer[2]=0x44;
+					fm_buffer[3]=0x44;
+					fm_buffer[4]=0x44;
+					fm_buffer[5]=0x51;
 
-						sector->use_alternate_header_crc = 0x00;
-						floppycontext->hxc_printf(MSG_DEBUG,"Valid Apple Macintosh sector header found - Sect:%d",tmp_buffer[2]);
-						old_bit_offset=bit_offset;
+					bit_offset = chgbitptr( track->tracklen, bit_offset, ( 4 * 8 ));
 
-						// 0xD5 0xAA 0xAD
-						//    D        5        A        A        A        D
-						// 1101     0101     1010     1010     1010     1101
-						// 01010001 00010001 01000100 01000100 01000100 01010001
-						//     0x51      0x11    0x44     0x44     0x44     0x51
+					bit_offset = searchBitStream(track->databuffer,track->tracklen,64*8,fm_buffer,8*6,bit_offset);
+					if( bit_offset!=-1)
+					{
+						sector_size = 512;
+						sector->sectorsize = sector_size;
+						sector->trackencoding = APPLEMAC_GCR6A2;
 
-						fm_buffer[0]=0x51;
-						fm_buffer[1]=0x11;
-						fm_buffer[2]=0x44;
-						fm_buffer[3]=0x44;
-						fm_buffer[4]=0x44;
-						fm_buffer[5]=0x51;
+						sector->use_alternate_datamark = 0x00;
+						sector->alternate_datamark = 0x00;
 
-						bit_offset = chgbitptr( track->tracklen, bit_offset, ( 4 * 8 ));
+						sector->startdataindex=bit_offset;
 
-						bit_offset = searchBitStream(track->databuffer,track->tracklen,64*8,fm_buffer,8*6,bit_offset);
-						if( bit_offset!=-1)
+						sector->input_data =(unsigned char*)malloc(sector_size+12+2);
+						if(sector->input_data)
 						{
-							sector_size = 512;
-							sector->sectorsize = sector_size;
-							sector->trackencoding = APPLEMAC_GCR6A2;
+							memset(sector->input_data,0,sector_size+12+2);
 
-							sector->use_alternate_datamark = 0x00;
-							sector->alternate_datamark = 0x00;
+							bit_offset = chgbitptr( track->tracklen, bit_offset, ( 6 * 8 ));
 
-							sector->startdataindex=bit_offset;
+							sector->endsectorindex = cellstobin(track->databuffer,track->tracklen,nibble_sector_data,sizeof(nibble_sector_data),bit_offset,0);
 
-							sector->input_data =(unsigned char*)malloc(sector_size+12+2);
-							if(sector->input_data)
+							for(i=0;i<sizeof(nibble_sector_data);i++)
 							{
-								memset(sector->input_data,0,sector_size+12+2);
-
-								bit_offset = chgbitptr( track->tracklen, bit_offset, ( 6 * 8 ));
-
-								sector->endsectorindex = cellstobin(track->databuffer,track->tracklen,nibble_sector_data,sizeof(nibble_sector_data),bit_offset,0);
-
-								for(i=0;i<sizeof(nibble_sector_data);i++)
-								{
-									nibble_sector_data[i] = SixAndTwo_to_byte_translation[nibble_sector_data[i]];
-								}
-
-								DeNybbleSector6and2(sector->input_data, (uint8_t*)&nibble_sector_data[1], (uint8_t*)&checksum);
-
-								memcpy(sector->input_data, &sector->input_data[12],512);
-
-								if(
-									(checksum[3] == nibble_sector_data[700]) &&
-									(checksum[2] == nibble_sector_data[701]) &&
-									(checksum[1] == nibble_sector_data[702]) &&
-									(checksum[0] == nibble_sector_data[703])
-								)
-								{
-									datachksumerr = 0;
-								}
-								else
-								{
-									datachksumerr = 1;
-								}
-
-								sector->data_crc = (nibble_sector_data[700] << 24 ) | \
-								                   (nibble_sector_data[701] << 16 ) | \
-								                   (nibble_sector_data[702] << 8 ) | \
-								                   (nibble_sector_data[703] << 0 );
-
-								if(!datachksumerr)
-								{ // crc ok !!!
-									floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
-									sector->use_alternate_data_crc = 0x00;
-								}
-								else
-								{
-									floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
-									sector->use_alternate_data_crc = 0xFF;
-								}
-
+								nibble_sector_data[i] = SixAndTwo_to_byte_translation[nibble_sector_data[i]];
 							}
 
-							bit_offset = chgbitptr( track->tracklen, bit_offset, (sector_size*4));
+							DeNybbleSector6and2(sector->input_data, (uint8_t*)&nibble_sector_data[1], (uint8_t*)&checksum);
 
-							sector_extractor_sm=ENDOFSECTOR;
+							memcpy(sector->input_data, &sector->input_data[12],512);
+
+							if(
+								(checksum[3] == nibble_sector_data[700]) &&
+								(checksum[2] == nibble_sector_data[701]) &&
+								(checksum[1] == nibble_sector_data[702]) &&
+								(checksum[0] == nibble_sector_data[703])
+							)
+							{
+								datachksumerr = 0;
+							}
+							else
+							{
+								datachksumerr = 1;
+							}
+
+							sector->data_crc = (nibble_sector_data[700] << 24 ) | \
+											   (nibble_sector_data[701] << 16 ) | \
+											   (nibble_sector_data[702] << 8 ) | \
+											   (nibble_sector_data[703] << 0 );
+
+							if(!datachksumerr)
+							{ // crc ok !!!
+								floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
+								sector->use_alternate_data_crc = 0x00;
+							}
+							else
+							{
+								floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
+								sector->use_alternate_data_crc = 0xFF;
+							}
 
 						}
-						else
-						{
-							bit_offset = chgbitptr( track->tracklen, old_bit_offset, 1);
-							floppycontext->hxc_printf(MSG_DEBUG,"No data!");
-							sector_extractor_sm=ENDOFSECTOR;
-						}
+
+						bit_offset = chgbitptr( track->tracklen, bit_offset, (sector_size*4));
+
+						sector_extractor_sm=ENDOFSECTOR;
+
+					}
+					else
+					{
+						bit_offset = chgbitptr( track->tracklen, old_bit_offset, 1);
+						floppycontext->hxc_printf(MSG_DEBUG,"No data!");
+						sector_extractor_sm = ENDOFSECTOR;							
+					}
+				}
+				else
+				{
+					if( bit_offset < last_start_offset )
+					{
+						sector_extractor_sm=ENDOFTRACK;
+						bit_offset = -1;
 					}
 					else
 					{
 						sector_extractor_sm=LOOKFOR_GAP1;
 						bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
 					}
-				}
-				else
-				{
-					sector_extractor_sm=LOOKFOR_GAP1;
-					bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
 				}
 			break;
 
