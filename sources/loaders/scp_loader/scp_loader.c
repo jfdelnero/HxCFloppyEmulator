@@ -137,13 +137,24 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 			totallength = 0;
 			for(i=0;i<revolution;i++)
 			{
+				if(!trkh.index_position[i].track_length || (trkh.index_position[i].track_length > 512*1024))
+				{
+					floppycontext->hxc_printf(MSG_DEBUG,"Track %d Revolution %d : Null sized or invalid revolution !",track,revolution);
+					revolution = i;
+					if(!i)
+					{
+						hxcfe_deinitFxStream(fxs);
+						return NULL;
+					}
+					break;
+				}
+
 				totallength += trkh.index_position[i].track_length;
 
 #ifdef SCPDEBUG
 				floppycontext->hxc_printf(MSG_DEBUG,"Revolution %d : %d words - offset 0x%x - index time : %d",i,trkh.index_position[i].track_length,trkh.index_position[i].track_offset,(trkh.index_position[i].index_time));
 #endif
 			}
-
 
 #ifdef SCPDEBUG
 			floppycontext->hxc_printf(MSG_DEBUG,"Total track length : [0x%X - 0x%X] - %d bytes",foffset + trkh.index_position[0].track_offset,foffset + trkh.index_position[0].track_offset + ((totallength*sizeof(unsigned short))-1),totallength*sizeof(unsigned short));
@@ -219,8 +230,8 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 						// dummy pulse
 						trackbuf_dword[realnumberofpulses] = 300;
 						realnumberofpulses++;
-
 					}
+
 					free(trackbuf);
 
 					hxcfe_FxStream_setResolution(fxs,25000*resolution); // 25 ns per tick
