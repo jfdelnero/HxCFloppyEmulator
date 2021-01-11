@@ -164,6 +164,12 @@ int CUI_affiche(int MSGTYPE,const char * chaine, ...)
 			}
 		}
 
+#ifdef STDOUT_DBG_OUTPUT
+		printf("%s",lineheader);
+		printf("%s",fullline);
+		printf("\n");
+#endif
+
 		va_end( marker );
 
 		Fl::unlock();
