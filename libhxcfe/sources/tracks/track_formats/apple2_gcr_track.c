@@ -215,7 +215,7 @@ static uint32_t DeNybbleSector6and2(unsigned char * dataOut,unsigned char * inpu
 // 6 and 2 GCR encoding
 int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {
-	int bit_offset,old_bit_offset;
+	int bit_offset,old_bit_offset,last_start_offset;
 	int sector_size;
 	unsigned char fm_buffer[32];
 	unsigned char tmp_buffer[32];
@@ -255,9 +255,9 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 
 
 				bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*6,bit_offset);
-
 				if(bit_offset!=-1)
 				{
+					last_start_offset = bit_offset;
 					sector_extractor_sm=LOOKFOR_ADDM;
 				}
 				else
@@ -449,7 +449,7 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 
 								bit_offset = chgbitptr( track->tracklen, bit_offset, sector_size*4 );
 
-								sector_extractor_sm=ENDOFSECTOR;
+								sector_extractor_sm = ENDOFSECTOR;
 
 							}
 							else
@@ -471,15 +471,33 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 					}
 					else
 					{
-						sector_extractor_sm=LOOKFOR_GAP1;
-
 						bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
+
+						if( bit_offset < last_start_offset )
+						{
+							sector_extractor_sm = ENDOFTRACK;
+							bit_offset = -1;
+						}
+						else
+						{
+							sector_extractor_sm = LOOKFOR_GAP1;
+						}
+
 					}
 				}
 				else
 				{
-					sector_extractor_sm=LOOKFOR_GAP1;
 					bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
+
+					if( bit_offset < last_start_offset )
+					{
+						sector_extractor_sm = ENDOFTRACK;
+						bit_offset = -1;
+					}
+					else
+					{
+						sector_extractor_sm = LOOKFOR_GAP1;
+					}
 				}
 			break;
 
