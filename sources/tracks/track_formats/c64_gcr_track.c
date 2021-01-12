@@ -428,7 +428,7 @@ int32_t BuildGCRTrack(int numberofsector,int sectorsize,int tracknumber,int side
 // C64 GCR encoding
 int get_next_C64_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {
-	int bit_offset,old_bit_offset;
+	int bit_offset,old_bit_offset,last_start_offset;
 	int sector_size;
 	unsigned char fm_buffer[32];
 	unsigned char tmp_buffer[32];
@@ -473,6 +473,7 @@ int get_next_C64_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 
 				if(bit_offset!=-1)
 				{
+					last_start_offset = bit_offset;					
 					sector_extractor_sm=LOOKFOR_ADDM;
 				}
 				else
@@ -532,103 +533,102 @@ int get_next_C64_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 
 					old_bit_offset=bit_offset;
 
-					if(!CRC16_Low)
-					{ // crc ok !!!
+					sector->use_alternate_header_crc = 0x00;
+					floppycontext->hxc_printf(MSG_DEBUG,"Valid C64 GCR sector header found - Sect:%d",tmp_buffer[2]);
+					old_bit_offset = bit_offset;
 
-						sector->use_alternate_header_crc = 0x00;
-						floppycontext->hxc_printf(MSG_DEBUG,"Valid C64 GCR sector header found - Sect:%d",tmp_buffer[2]);
-						old_bit_offset = bit_offset;
+					// Sector header prolog
+					// 0xFF 0xFF 0x52  (0xFF 0xFF GCR(0x07)) (00010001000100010101)
+					// 1111 1111 1111 1111 01010010
+					// 01010101 01010101 01010101 01010101  00010001 00010001
+					// 0x55     0x55     0x55     0x55      0x11     0x11
 
-						// Sector header prolog
-						// 0xFF 0xFF 0x52  (0xFF 0xFF GCR(0x07)) (00010001000100010101)
-						// 1111 1111 1111 1111 01010010
-						// 01010101 01010101 01010101 01010101  00010001 00010001
-						// 0x55     0x55     0x55     0x55      0x11     0x11
+					fm_buffer[0]=0x55;
+					fm_buffer[1]=0x55;
+					fm_buffer[2]=0x55;
+					fm_buffer[3]=0x55;
+					fm_buffer[4]=0x55;
+					fm_buffer[5]=0x55;
+					fm_buffer[6]=0x11;
+					fm_buffer[7]=0x11;
+					fm_buffer[8]=0x10;
 
-						fm_buffer[0]=0x55;
-						fm_buffer[1]=0x55;
-						fm_buffer[2]=0x55;
-						fm_buffer[3]=0x55;
-						fm_buffer[4]=0x55;
-						fm_buffer[5]=0x55;
-						fm_buffer[6]=0x11;
-						fm_buffer[7]=0x11;
-						fm_buffer[8]=0x10;
+					bit_offset = searchBitStream(track->databuffer,track->tracklen,(64*8),fm_buffer,8*8,bit_offset);
 
-						bit_offset = searchBitStream(track->databuffer,track->tracklen,(64*8),fm_buffer,8*8,bit_offset);
+					#ifdef DBG_A2_GCR
+					jj = bit_offset;
+					#endif
 
-						#ifdef DBG_A2_GCR
-						jj = bit_offset;
-						#endif
+					if((bit_offset-old_bit_offset<((88+10)*8*2)) && bit_offset!=-1)
+					{
+						sector->startdataindex=bit_offset;
 
-						if((bit_offset-old_bit_offset<((88+10)*8*2)) && bit_offset!=-1)
+						sector_size = 256;
+						sector->sectorsize = sector_size;
+						sector->trackencoding = C64_GCR;
+
+						sector->use_alternate_datamark = 0x00;
+						sector->alternate_datamark = 0x00;
+
+						sector->input_data =(unsigned char*)malloc(sector_size+2);
+						if(sector->input_data)
 						{
-							sector->startdataindex=bit_offset;
+							memset(sector->input_data,0,sector_size+2);
 
-							sector_size = 256;
-							sector->sectorsize = sector_size;
-							sector->trackencoding = C64_GCR;
+							bit_offset = chgbitptr( track->tracklen, bit_offset, (6*8) + 1);
 
-							sector->use_alternate_datamark = 0x00;
-							sector->alternate_datamark = 0x00;
+							bit_offset = c64gcrtobyte(track->databuffer,track->tracklen,bit_offset, &sector->input_data[0]);
 
-							sector->input_data =(unsigned char*)malloc(sector_size+2);
-							if(sector->input_data)
+							datachksumerr = 0;
+							for(i=0;i<256+1;i++)
 							{
-								memset(sector->input_data,0,sector_size+2);
+								bit_offset = c64gcrtobyte(track->databuffer,track->tracklen,bit_offset, &sector->input_data[i]);
+								datachksumerr ^= sector->input_data[i];
+							}
 
-								bit_offset = chgbitptr( track->tracklen, bit_offset, (6*8) + 1);
+							sector->endsectorindex = bit_offset;//DeNybbleSector6and2(sector->input_data,track->databuffer,track->tracklen,bit_offset,&datachksumerr);
 
-								bit_offset = c64gcrtobyte(track->databuffer,track->tracklen,bit_offset, &sector->input_data[0]);
+							sector->data_crc = sector->input_data[256];
 
-								datachksumerr = 0;
-								for(i=0;i<256+1;i++)
-								{
-									bit_offset = c64gcrtobyte(track->databuffer,track->tracklen,bit_offset, &sector->input_data[i]);
-									datachksumerr ^= sector->input_data[i];
-								}
+							if(!datachksumerr)
+							{ // crc ok !!!
 
-								sector->endsectorindex = bit_offset;//DeNybbleSector6and2(sector->input_data,track->databuffer,track->tracklen,bit_offset,&datachksumerr);
-
-								sector->data_crc = sector->input_data[256];
-
-								if(!datachksumerr)
-								{ // crc ok !!!
-
-									floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
-									sector->use_alternate_data_crc = 0x00;
-								}
-								else
-								{
-									floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
-									sector->use_alternate_data_crc = 0xFF;
-								}
+								floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
+								sector->use_alternate_data_crc = 0x00;
 							}
 							else
 							{
-								bit_offset=bit_offset+(sector_size*4);
+								floppycontext->hxc_printf(MSG_DEBUG,"crc data error!");
+								sector->use_alternate_data_crc = 0xFF;
 							}
-
-							sector_extractor_sm=ENDOFSECTOR;
-
 						}
 						else
 						{
-							bit_offset=old_bit_offset+1;
-							floppycontext->hxc_printf(MSG_DEBUG,"No data!");
-							sector_extractor_sm=ENDOFSECTOR;
+							bit_offset=bit_offset+(sector_size*4);
 						}
+
+						sector_extractor_sm=ENDOFSECTOR;
+
 					}
 					else
 					{
-						sector_extractor_sm=LOOKFOR_GAP1;
-						bit_offset++;
+						bit_offset=old_bit_offset+1;
+						floppycontext->hxc_printf(MSG_DEBUG,"No data!");
+						sector_extractor_sm=ENDOFSECTOR;
 					}
 				}
 				else
 				{
-					sector_extractor_sm=LOOKFOR_GAP1;
-					bit_offset++;
+					if( bit_offset < last_start_offset )
+					{
+						sector_extractor_sm=ENDOFTRACK;
+						bit_offset = -1;
+					}
+					else
+					{
+						sector_extractor_sm=LOOKFOR_GAP1;
+						bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
+					}
 				}
 			break;
 
