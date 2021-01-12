@@ -71,6 +71,7 @@
 int get_next_AMIGAMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector_conf,int track_offset)
 {
 	int bit_offset;
+	int last_start_offset;
 	int start_sector_bit_offset;
 	int sector_size;
 
@@ -113,6 +114,7 @@ int get_next_AMIGAMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 
 				if(bit_offset!=-1)
 				{
+					last_start_offset = bit_offset;
 					sector_extractor_sm=LOOKFOR_ADDM;
 				}
 				else
@@ -210,18 +212,20 @@ int get_next_AMIGAMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 				}
 				else
 				{
-					bit_offset = chgbitptr(track->tracklen,bit_offset,(8*2)+1);
-					if(!bit_offset)
-						sector_extractor_sm = ENDOFTRACK;
-					else
-						sector_extractor_sm = LOOKFOR_GAP1;
-
 					sector_conf->use_alternate_header_crc = 0xFF;
-
 					sector_conf->endsectorindex = sector_conf->startdataindex;
 
+					bit_offset = chgbitptr( track->tracklen, bit_offset, (8*2)+1 );
+					if( bit_offset < last_start_offset )
+					{	// track position roll-over ? -> End
+						sector_extractor_sm = ENDOFTRACK;
+						bit_offset = -1;
+					}
+					else
+					{
+						sector_extractor_sm = LOOKFOR_GAP1;
+					}
 				}
-
 			break;
 
 			case ENDOFTRACK:

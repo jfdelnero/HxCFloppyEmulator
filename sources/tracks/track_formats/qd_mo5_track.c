@@ -115,7 +115,7 @@ int get_next_QDMO5_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG 
 
 			case LOOKFOR_ADDM:
 
-				bit_offset += (10*8);
+				bit_offset = chgbitptr( track->tracklen, bit_offset, ( 10 * 8 ));
 
 				tmp_bit_offset = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,16,bit_offset,0);
 
@@ -130,7 +130,7 @@ int get_next_QDMO5_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG 
 				sector->header_crc = 0x00;
 				sector->use_alternate_header_crc = 0xFF;
 
-				sector->startsectorindex=bit_offset;
+				sector->startsectorindex = bit_offset;
 
 				if(track->timingbuffer)
 					sector->bitrate = track->timingbuffer[bit_offset/8];
@@ -140,7 +140,8 @@ int get_next_QDMO5_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG 
 				floppycontext->hxc_printf(MSG_DEBUG,"Valid QD MO5 sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
 				sector->use_alternate_header_crc = 0;
 
-				bit_offset++;
+				bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
+
 				sector_size = sector->sectorsize;
 				bit_offset_bak = bit_offset;
 
@@ -164,7 +165,7 @@ int get_next_QDMO5_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG 
 					memset(tmp_sector,0,1+sector_size+1);
 
 					sector->startdataindex=bit_offset;
-					bit_offset += (10*8);
+					bit_offset = chgbitptr( track->tracklen, bit_offset, ( 10 * 8 ));
 					sector->endsectorindex=mfmtobin(track->databuffer,track->tracklen,tmp_sector,1 + sector_size + 1,bit_offset,0);
 					sector->alternate_datamark = tmp_sector[0];
 					sector->use_alternate_datamark = 0xFF;
@@ -197,7 +198,7 @@ int get_next_QDMO5_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG 
 					// "Empty" sector detection
 					checkEmptySector(sector);
 
-					bit_offset++;
+					bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
 
 					sector_extractor_sm=ENDOFSECTOR;
 				}
@@ -206,7 +207,7 @@ int get_next_QDMO5_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG 
 					sector->startdataindex = tmp_bit_offset;
 					sector->endsectorindex = tmp_bit_offset;
 
-					bit_offset = bit_offset_bak + 1;
+					bit_offset = chgbitptr( track->tracklen, bit_offset_bak, 1);
 
 					sector_extractor_sm=ENDOFSECTOR;
 				}

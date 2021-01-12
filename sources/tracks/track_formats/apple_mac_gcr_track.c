@@ -436,20 +436,20 @@ int get_next_AppleMacGCR_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 					{
 						bit_offset = chgbitptr( track->tracklen, old_bit_offset, 1);
 						floppycontext->hxc_printf(MSG_DEBUG,"No data!");
-						sector_extractor_sm = ENDOFSECTOR;							
+						sector_extractor_sm = ENDOFSECTOR;
 					}
 				}
 				else
 				{
+					bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
 					if( bit_offset < last_start_offset )
-					{
-						sector_extractor_sm=ENDOFTRACK;
+					{	// track position roll-over ? -> End
+						sector_extractor_sm = ENDOFTRACK;
 						bit_offset = -1;
 					}
 					else
 					{
-						sector_extractor_sm=LOOKFOR_GAP1;
-						bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
+						sector_extractor_sm = LOOKFOR_GAP1;
 					}
 				}
 			break;

@@ -71,6 +71,7 @@ int get_next_EMU_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 
 	int bit_offset,old_bit_offset;
 	int sector_size;
+	int last_start_offset;
 	unsigned char fm_buffer[32];
 	unsigned char tmp_buffer[32];
 	unsigned char CRC16_High;
@@ -79,7 +80,7 @@ int get_next_EMU_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 	int k;
 	unsigned char crctable[32];
 
-	bit_offset=track_offset;
+	bit_offset = track_offset;
 	memset(sector,0,sizeof(HXCFE_SECTCFG));
 
 	sector_extractor_sm=LOOKFOR_GAP1;
@@ -102,11 +103,12 @@ int get_next_EMU_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 
 				if(bit_offset!=-1)
 				{
-					sector_extractor_sm=LOOKFOR_ADDM;
+					last_start_offset = bit_offset;
+					sector_extractor_sm = LOOKFOR_ADDM;
 				}
 				else
 				{
-					sector_extractor_sm=ENDOFTRACK;
+					sector_extractor_sm = ENDOFTRACK;
 				}
 			break;
 
@@ -155,11 +157,9 @@ int get_next_EMU_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 						fm_buffer[6]=0x54;
 						fm_buffer[7]=0x45;
 
-						bit_offset = searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*8,bit_offset+(4*8*4));
-
-						if((bit_offset-old_bit_offset<((88+16)*8*2)) && bit_offset!=-1)
+						bit_offset = searchBitStream(track->databuffer,track->tracklen,((88+16)*8*2),fm_buffer,8*8,bit_offset+(4*8*4));
+						if(bit_offset!=-1)
 						{
-
 							sector->cylinder = LUT_ByteBitsInverter[tmp_buffer[2]]>>1;
 							sector->head = LUT_ByteBitsInverter[tmp_buffer[2]]&1;
 							sector->sector = 1;
@@ -207,28 +207,46 @@ int get_next_EMU_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 								checkEmptySector(sector);
 							}
 
-							bit_offset=bit_offset+(sector_size*4);
+							bit_offset = chgbitptr( track->tracklen, bit_offset, sector_size*4);
 
 							sector_extractor_sm=ENDOFSECTOR;
 
 						}
 						else
 						{
-							bit_offset=old_bit_offset+1;
+							bit_offset = chgbitptr( track->tracklen, old_bit_offset, 1);
+
 							floppycontext->hxc_printf(MSG_DEBUG,"No data!");
+
 							sector_extractor_sm=ENDOFSECTOR;
 						}
 					}
 					else
 					{
-						sector_extractor_sm=LOOKFOR_GAP1;
-						bit_offset++;
+						bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
+						if( bit_offset < last_start_offset )
+						{	// track position roll-over ? -> End
+							sector_extractor_sm = ENDOFTRACK;
+							bit_offset = -1;
+						}
+						else
+						{
+							sector_extractor_sm = LOOKFOR_GAP1;
+						}
 					}
 				}
 				else
 				{
-					sector_extractor_sm=LOOKFOR_GAP1;
-					bit_offset++;
+					bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
+					if( bit_offset < last_start_offset )
+					{	// track position roll-over ? -> End
+						sector_extractor_sm = ENDOFTRACK;
+						bit_offset = -1;
+					}
+					else
+					{
+						sector_extractor_sm = LOOKFOR_GAP1;
+					}
 				}
 			break;
 
@@ -241,173 +259,9 @@ int get_next_EMU_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 			break;
 
 		}
-	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+	}while( (sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR) );
 
 	return bit_offset;
-}
-
-
-int analysis_and_extract_sector_EMUIIFM(HXCFE* floppycontext,HXCFE_SIDE * track,sect_track * sectors)
-{
-	int bit_offset,old_bit_offset;
-	int sector_size;
-	unsigned char fm_buffer[32];
-	unsigned char tmp_buffer[32];
-	unsigned char * tmp_sector;
-	unsigned char CRC16_High;
-	unsigned char CRC16_Low;
-	int sector_extractor_sm;
-	int number_of_sector;
-	int k;
-	unsigned char crctable[32];
-	bit_offset=0;
-	number_of_sector=0;
-
-	sector_extractor_sm=LOOKFOR_GAP1;
-
-	do
-	{
-		switch(sector_extractor_sm)
-		{
-			case LOOKFOR_GAP1:
-/*				fm_buffer[0]=0x55;
-				fm_buffer[1]=0x55;
-				fm_buffer[2]=0x54;
-				fm_buffer[3]=0x54;
-				fm_buffer[4]=0x54;
-				fm_buffer[5]=0x45;
-				fm_buffer[6]=0x45;
-				fm_buffer[7]=0x54;*/
-
-				fm_buffer[0]=0x45;
-				fm_buffer[1]=0x45;
-				fm_buffer[2]=0x55;
-				fm_buffer[3]=0x55;
-				fm_buffer[4]=0x45;
-				fm_buffer[5]=0x54;
-				fm_buffer[6]=0x54;
-				fm_buffer[7]=0x45;
-
-
-				bit_offset = searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*8,bit_offset);
-
-				if(bit_offset!=-1)
-				{
-					sector_extractor_sm=LOOKFOR_ADDM;
-				}
-				else
-				{
-					sector_extractor_sm=ENDOFTRACK;
-				}
-			break;
-
-			case LOOKFOR_ADDM:
-				fmtobin(track->databuffer,track->tracklen,tmp_buffer,5,bit_offset,0);
-				if((LUT_ByteBitsInverter[tmp_buffer[0]]==0xFA) && (LUT_ByteBitsInverter[tmp_buffer[1]]==0x96))
-				{
-					CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x8005,0x0000);
-					for(k=0;k<3;k++)
-					CRC16_Update(&CRC16_High,&CRC16_Low, tmp_buffer[2+k],(unsigned char*)crctable );
-
-
-					if(!CRC16_High && !CRC16_Low)
-					{ // crc ok !!!
-						number_of_sector++;
-						floppycontext->hxc_printf(MSG_DEBUG,"Valid EmuII FM sector header found - Sect:%d",LUT_ByteBitsInverter[tmp_buffer[2]]);
-						old_bit_offset=bit_offset;
-
-						sector_size = 0xE00;
-
-						//11111011
-						fm_buffer[0]=0x45;
-						fm_buffer[1]=0x45;
-						fm_buffer[2]=0x55;
-						fm_buffer[3]=0x55;
-						fm_buffer[4]=0x45;
-						fm_buffer[5]=0x54;
-						fm_buffer[6]=0x54;
-						fm_buffer[7]=0x45;
-
-						bit_offset = searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,8*8,bit_offset+(4*8*4));
-
-						if((bit_offset-old_bit_offset<((88+16)*8*2)) && bit_offset!=-1)
-						{
-							sectors->number_of_sector++;
-							sectors->sectorlist=(sect_sector **)realloc(sectors->sectorlist,sizeof(sect_sector *)*sectors->number_of_sector);
-							sectors->sectorlist[sectors->number_of_sector-1]=(sect_sector*)malloc(sizeof(sect_sector));
-							memset(sectors->sectorlist[sectors->number_of_sector-1],0,sizeof(sect_sector));
-
-							sectors->sectorlist[sectors->number_of_sector-1]->track_id=LUT_ByteBitsInverter[tmp_buffer[2]]>>1;
-							sectors->sectorlist[sectors->number_of_sector-1]->side_id=LUT_ByteBitsInverter[tmp_buffer[2]]&1;
-							sectors->sectorlist[sectors->number_of_sector-1]->sector_id=1;
-							sectors->sectorlist[sectors->number_of_sector-1]->sectorsize=0xE00;
-
-							tmp_sector=(unsigned char*)malloc(sector_size+2);
-							memset(tmp_sector,0,sector_size+2);
-
-							fmtobin(track->databuffer,track->tracklen,tmp_sector,sector_size+2,bit_offset+(8 *8),0);
-
-							CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x8005,0x0000);
-							for(k=0;k<sector_size+2;k++)
-							{
-								CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
-							}
-
-							if(!CRC16_High && !CRC16_Low)
-							{ // crc ok !!!
-								floppycontext->hxc_printf(MSG_DEBUG,"Data CRC Ok. (0x%.4X)",(( tmp_sector[k-2]<<8 ) | tmp_sector[k-1]));
-							}
-							else
-							{
-								floppycontext->hxc_printf(MSG_DEBUG,"Data CRC ERROR ! (0x%.4X)",(( tmp_sector[k-2]<<8 ) | tmp_sector[k-1]));
-							}
-
-							for(k=0;k<sector_size;k++)
-							{
-								tmp_sector[k]=LUT_ByteBitsInverter[tmp_sector[k]];
-							}
-
-							sectors->sectorlist[sectors->number_of_sector-1]->buffer=(unsigned char*)malloc(sector_size);
-							memcpy(sectors->sectorlist[sectors->number_of_sector-1]->buffer,tmp_sector,sector_size);
-							free(tmp_sector);
-
-							bit_offset=bit_offset+(sector_size*4);
-
-						}
-						else
-						{
-							bit_offset=old_bit_offset+1;
-							floppycontext->hxc_printf(MSG_DEBUG,"No data!");
-
-						}
-					}
-					else
-					{
-						sector_extractor_sm=LOOKFOR_GAP1;
-						bit_offset++;
-					}
-				}
-				else
-				{
-					sector_extractor_sm=LOOKFOR_GAP1;
-					bit_offset++;
-				}
-
-				sector_extractor_sm=LOOKFOR_GAP1;
-			break;
-
-			case ENDOFTRACK:
-
-			break;
-
-			default:
-				sector_extractor_sm=ENDOFTRACK;
-			break;
-
-		}
-	}while(	sector_extractor_sm!=ENDOFTRACK);
-
-	return number_of_sector;
 }
 
 int32_t BuildEmuIITrack(HXCFE* floppycontext,int tracknumber,int sidenumber,unsigned char* datain,unsigned char * fmdata,int32_t * fmsizebuffer,int trackformat)

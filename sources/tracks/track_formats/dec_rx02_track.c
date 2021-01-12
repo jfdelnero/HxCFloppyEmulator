@@ -71,6 +71,7 @@
 int get_next_dec_rx02_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {
 	int bit_offset,old_bit_offset;
+	int last_start_offset;
 	unsigned char fm_buffer[32];
 	unsigned char tmp_buffer[32];
 	unsigned char tmp_sector[1 + 256 + 2];
@@ -80,7 +81,7 @@ int get_next_dec_rx02_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 	int k,i;
 	unsigned char crctable[32];
 
-    //        C D C D  C D C D
+	//        C D C D  C D C D
 	//0xF8 - 00010100 01000100 // 0x1444
 	//0xF9 - 00010100 01000101 // 0x1445
 	//0xFA - 00010100 01010100 // 0x1454
@@ -108,6 +109,7 @@ int get_next_dec_rx02_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 
 				if(bit_offset!=-1)
 				{
+					last_start_offset = bit_offset;
 					sector_extractor_sm=LOOKFOR_ADDM;
 				}
 				else
@@ -258,14 +260,30 @@ int get_next_dec_rx02_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 					}
 					else
 					{
-						sector_extractor_sm=LOOKFOR_GAP1;
-						bit_offset++;
+						bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
+						if( bit_offset < last_start_offset )
+						{	// track position roll-over ? -> End
+							sector_extractor_sm = ENDOFTRACK;
+							bit_offset = -1;
+						}
+						else
+						{
+							sector_extractor_sm = LOOKFOR_GAP1;
+						}
 					}
 				}
 				else
 				{
-					sector_extractor_sm=LOOKFOR_GAP1;
-					bit_offset++;
+					bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
+					if( bit_offset < last_start_offset )
+					{	// track position roll-over ? -> End
+						sector_extractor_sm = ENDOFTRACK;
+						bit_offset = -1;
+					}
+					else
+					{
+						sector_extractor_sm = LOOKFOR_GAP1;
+					}
 				}
 			break;
 
