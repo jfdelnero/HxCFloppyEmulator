@@ -112,7 +112,7 @@ int get_next_MFM_Northstar_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 					if(j < 1000)
 						sector_extractor_sm=LOOKFOR_ADDM;
 					else
-						bit_offset++;
+						bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
 				}
 				else
 				{
@@ -124,7 +124,7 @@ int get_next_MFM_Northstar_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 				tmp_bit_offset = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,2 + 512 + 1,bit_offset + (8 * 7 * 2),0);
 				if( tmp_buffer[0] == 0xFB )
 				{
-					sector->startdataindex = bit_offset + (8 * 9 * 2) ;
+					sector->startdataindex = chgbitptr( track->tracklen, bit_offset, (8 * 9 * 2) );
 					sector->endsectorindex = tmp_bit_offset;
 
 					checksum = 0x00;
@@ -172,7 +172,7 @@ int get_next_MFM_Northstar_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 					sector->input_data=(unsigned char*)malloc(sector_size);
 					memcpy(sector->input_data,&tmp_buffer[2],sector_size);
 
-					bit_offset++;
+					bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
 
 					sector_extractor_sm=ENDOFSECTOR;
 

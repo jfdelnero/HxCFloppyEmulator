@@ -70,6 +70,7 @@
 int get_next_TYCOMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {
 	int bit_offset,old_bit_offset;
+	int last_start_offset;
 	int sector_size;
 	unsigned char fm_buffer[32];
 	unsigned char tmp_buffer[32];
@@ -105,6 +106,7 @@ int get_next_TYCOMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCF
 
 				if(bit_offset!=-1)
 				{
+					last_start_offset = bit_offset;
 					sector_extractor_sm=LOOKFOR_ADDM;
 				}
 				else
@@ -211,21 +213,37 @@ int get_next_TYCOMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCF
 						}
 						else
 						{
-							bit_offset=old_bit_offset+1;
+							bit_offset = chgbitptr( track->tracklen, old_bit_offset, 1);
 							floppycontext->hxc_printf(MSG_DEBUG,"No data!");
 							sector_extractor_sm=ENDOFSECTOR;
 						}
 					}
 					else
 					{
-						sector_extractor_sm=LOOKFOR_GAP1;
-						bit_offset++;
+						bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
+						if( bit_offset < last_start_offset )
+						{	// track position roll-over ? -> End
+							sector_extractor_sm = ENDOFTRACK;
+							bit_offset = -1;
+						}
+						else
+						{
+							sector_extractor_sm = LOOKFOR_GAP1;
+						}
 					}
 				}
 				else
 				{
-					sector_extractor_sm=LOOKFOR_GAP1;
-					bit_offset++;
+					bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
+					if( bit_offset < last_start_offset )
+					{	// track position roll-over ? -> End
+						sector_extractor_sm = ENDOFTRACK;
+						bit_offset = -1;
+					}
+					else
+					{
+						sector_extractor_sm = LOOKFOR_GAP1;
+					}
 				}
 			break;
 

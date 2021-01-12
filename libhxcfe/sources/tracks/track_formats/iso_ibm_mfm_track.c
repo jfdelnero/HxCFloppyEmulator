@@ -70,6 +70,7 @@
 int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {
 	int bit_offset_bak,bit_offset,tmp_bit_offset;
+	int last_start_offset;
 	int sector_size;
 	unsigned char mfm_buffer[32];
 	unsigned char tmp_buffer[32];
@@ -103,6 +104,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 
 				if(bit_offset!=-1)
 				{
+					last_start_offset = bit_offset;
 					sector_extractor_sm=LOOKFOR_ADDM;
 				}
 				else
@@ -151,7 +153,8 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 						floppycontext->hxc_printf(MSG_DEBUG,"Bad MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
 					}
 
-					bit_offset++;
+					bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
+
 					sector_size = sectorsize[tmp_buffer[7]&0x7];
 					bit_offset_bak = bit_offset;
 
@@ -165,7 +168,6 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 
 					if((bit_offset!=-1))
 					{
-
 						tmp_sector=(unsigned char*)malloc(3+1+sector_size+2);
 						memset(tmp_sector,0,3+1+sector_size+2);
 
@@ -206,7 +208,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 							checkEmptySector(sector);
 
 							if(sector->alternate_datamark!=0xFE)
-								bit_offset++;
+								bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
 						}
 						else
 						{
@@ -221,7 +223,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 						sector->startdataindex = tmp_bit_offset;
 						sector->endsectorindex = tmp_bit_offset;
 
-						bit_offset = bit_offset_bak + 1;
+						bit_offset = chgbitptr( track->tracklen, bit_offset_bak, 1 );
 
 						sector_extractor_sm=ENDOFSECTOR;
 					}
@@ -242,17 +244,25 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 						sector->alternate_sector_size_id = 0;
 						sector->trackencoding = ISOFORMAT_DD;
 						sector->alternate_datamark = tmp_buffer[3];
-						sector->use_alternate_datamark= 0xFF;
+						sector->use_alternate_datamark = 0xFF;
 						sector->header_crc = 0;
-						bit_offset++;
-						bit_offset_bak=bit_offset;
+						bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
+						bit_offset_bak = bit_offset;
 
 						sector_extractor_sm=ENDOFSECTOR;
 					}
 					else
 					{
-						bit_offset++;
-						sector_extractor_sm=LOOKFOR_GAP1;
+						bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
+						if( bit_offset < last_start_offset )
+						{	// track position roll-over ? -> End
+							sector_extractor_sm = ENDOFTRACK;
+							bit_offset = -1;
+						}
+						else
+						{
+							sector_extractor_sm = LOOKFOR_GAP1;
+						}
 					}
 				}
 			break;

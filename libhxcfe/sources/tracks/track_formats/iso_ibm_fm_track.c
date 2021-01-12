@@ -70,6 +70,7 @@
 int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset)
 {
 	int bit_offset,old_bit_offset;
+	int last_start_offset;
 	int sector_size;
 	unsigned char fm_buffer[32];
 	unsigned char tmp_buffer[32];
@@ -108,11 +109,12 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 
 				if(bit_offset!=-1)
 				{
-					sector_extractor_sm=LOOKFOR_ADDM;
+					last_start_offset = bit_offset;
+					sector_extractor_sm = LOOKFOR_ADDM;
 				}
 				else
 				{
-					sector_extractor_sm=ENDOFTRACK;
+					sector_extractor_sm = ENDOFTRACK;
 				}
 			break;
 
@@ -242,14 +244,30 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 					}
 					else
 					{
-						sector_extractor_sm=LOOKFOR_GAP1;
-						bit_offset++;
+						bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
+						if( bit_offset < last_start_offset )
+						{	// track position roll-over ? -> End
+							sector_extractor_sm = ENDOFTRACK;
+							bit_offset = -1;
+						}
+						else
+						{
+							sector_extractor_sm = LOOKFOR_GAP1;
+						}
 					}
 				}
 				else
 				{
-					sector_extractor_sm=LOOKFOR_GAP1;
-					bit_offset++;
+					bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
+					if( bit_offset < last_start_offset )
+					{	// track position roll-over ? -> End
+						sector_extractor_sm = ENDOFTRACK;
+						bit_offset = -1;
+					}
+					else
+					{
+						sector_extractor_sm = LOOKFOR_GAP1;
+					}
 				}
 			break;
 

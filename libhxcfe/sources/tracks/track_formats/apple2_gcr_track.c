@@ -474,7 +474,7 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 						bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
 
 						if( bit_offset < last_start_offset )
-						{
+						{	// track position roll-over ? -> End
 							sector_extractor_sm = ENDOFTRACK;
 							bit_offset = -1;
 						}
@@ -488,9 +488,8 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 				else
 				{
 					bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
-
 					if( bit_offset < last_start_offset )
-					{
+					{	// track position roll-over ? -> End
 						sector_extractor_sm = ENDOFTRACK;
 						bit_offset = -1;
 					}
