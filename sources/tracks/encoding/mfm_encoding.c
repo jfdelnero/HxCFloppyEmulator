@@ -104,6 +104,7 @@ int mfmtobin(unsigned char * input_data,int input_data_size,unsigned char * deco
 	}
 
 	bit_offset%= input_data_size;
+	j = bit_offset>>3;
 
 	while(i<decod_data_size)
 	{
