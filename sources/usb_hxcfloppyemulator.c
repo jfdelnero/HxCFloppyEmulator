@@ -38,7 +38,7 @@
 // File : usb_hxcfloppyemulator.c
 // Contains: USB HxC FE support functions
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -306,7 +306,7 @@ int32_t FillBuffer(HXCFE* floppycontext,USBHXCFE * hw_context,uint8_t * paquetbu
 
 
 	bytecopied=0;
-	if(final_buffer_len)
+	if(final_buffer_len && randomtrackptr && trackptr)
 	{
 
 		hw_context->trackbuffer_pos=hw_context->trackbuffer_pos % final_buffer_len;
@@ -892,81 +892,92 @@ int32_t libusbhxcfe_loadFloppy(HXCFE* floppycontext,USBHXCFE * hwif,HXCFE_FLOPPY
 
 		for(i=0;i<hwif->number_of_track;i++)
 		{
+			if(hwif->precalcusbtrack[i].usbtrack)
 				free(hwif->precalcusbtrack[i].usbtrack);
+
+			if(hwif->precalcusbtrack[i].randomusbtrack)
 				free(hwif->precalcusbtrack[i].randomusbtrack);
+
+			hwif->precalcusbtrack[i].usbtrack = NULL;
+			hwif->precalcusbtrack[i].randomusbtrack = NULL;
 		}
 
-		//final_buffer=(uint8_t*) malloc(BUFFERSIZE);
-		//final_randombuffer=(uint8_t*) malloc(BUFFERSIZE);
 		hwif->number_of_track=(uint8_t)floppydisk->floppyNumberOfTrack;
 		for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
 		{
+			final_buffer = NULL;
+			final_randombuffer = NULL;
 
-				//memset(final_buffer,0,BUFFERSIZE);
-				//memset(final_randombuffer,0,BUFFERSIZE);
+			if(floppydisk->tracks[i]->number_of_side==2)
+			{
+			final_buffer_len=GetNewTrackRevolution(floppycontext,
+				floppydisk->tracks[i]->sides[0]->indexbuffer,
+				floppydisk->tracks[i]->sides[0]->databuffer,
+				floppydisk->tracks[i]->sides[0]->tracklen,
+				floppydisk->tracks[i]->sides[1]->databuffer,
+				floppydisk->tracks[i]->sides[1]->tracklen,
+				floppydisk->tracks[i]->sides[0]->flakybitsbuffer,
+				floppydisk->tracks[i]->sides[1]->flakybitsbuffer,
+				floppydisk->tracks[i]->sides[0]->bitrate,
+				floppydisk->tracks[i]->sides[0]->timingbuffer,
+				floppydisk->tracks[i]->sides[1]->bitrate,
+				floppydisk->tracks[i]->sides[1]->timingbuffer,
+				&final_buffer,
+				&final_randombuffer,
+				0,
+				0,
+				0,
+				0,
+				0);
+			}
+			else
+			{
+			final_buffer_len=GetNewTrackRevolution(floppycontext,
+				floppydisk->tracks[i]->sides[0]->indexbuffer,
+				floppydisk->tracks[i]->sides[0]->databuffer,
+				floppydisk->tracks[i]->sides[0]->tracklen,
+				floppydisk->tracks[i]->sides[0]->databuffer,
+				floppydisk->tracks[i]->sides[0]->tracklen,
+				floppydisk->tracks[i]->sides[0]->flakybitsbuffer,
+				floppydisk->tracks[i]->sides[0]->flakybitsbuffer,
+				floppydisk->tracks[i]->sides[0]->bitrate,
+				floppydisk->tracks[i]->sides[0]->timingbuffer,
+				floppydisk->tracks[i]->sides[0]->bitrate,
+				floppydisk->tracks[i]->sides[0]->timingbuffer,
+				&final_buffer,
+				&final_randombuffer,
+				0,
+				0,
+				0,
+				0,
+				0);
 
-				if(floppydisk->tracks[i]->number_of_side==2)
-				{
-				final_buffer_len=GetNewTrackRevolution(floppycontext,
-					floppydisk->tracks[i]->sides[0]->indexbuffer,
-					floppydisk->tracks[i]->sides[0]->databuffer,
-					floppydisk->tracks[i]->sides[0]->tracklen,
-					floppydisk->tracks[i]->sides[1]->databuffer,
-					floppydisk->tracks[i]->sides[1]->tracklen,
-					floppydisk->tracks[i]->sides[0]->flakybitsbuffer,
-					floppydisk->tracks[i]->sides[1]->flakybitsbuffer,
-					floppydisk->tracks[i]->sides[0]->bitrate,
-					floppydisk->tracks[i]->sides[0]->timingbuffer,
-					floppydisk->tracks[i]->sides[1]->bitrate,
-					floppydisk->tracks[i]->sides[1]->timingbuffer,
-					&final_buffer,
-					&final_randombuffer,
-					0,
-					0,
-					0,
-					0,
-					0);
-				}
-				else
-				{
-				final_buffer_len=GetNewTrackRevolution(floppycontext,
-					floppydisk->tracks[i]->sides[0]->indexbuffer,
-					floppydisk->tracks[i]->sides[0]->databuffer,
-					floppydisk->tracks[i]->sides[0]->tracklen,
-					floppydisk->tracks[i]->sides[0]->databuffer,
-					floppydisk->tracks[i]->sides[0]->tracklen,
-					floppydisk->tracks[i]->sides[0]->flakybitsbuffer,
-					floppydisk->tracks[i]->sides[0]->flakybitsbuffer,
-					floppydisk->tracks[i]->sides[0]->bitrate,
-					floppydisk->tracks[i]->sides[0]->timingbuffer,
-					floppydisk->tracks[i]->sides[0]->bitrate,
-					floppydisk->tracks[i]->sides[0]->timingbuffer,
-					&final_buffer,
-					&final_randombuffer,
-					0,
-					0,
-					0,
-					0,
-					0);
+			}
 
-				}
+			if(final_buffer_len>0 && final_randombuffer && final_buffer)
+			{
+				hwif->precalcusbtrack[i].usbtrack = (uint8_t *)malloc(final_buffer_len);
+				if(hwif->precalcusbtrack[i].usbtrack)
+					memcpy(hwif->precalcusbtrack[i].usbtrack,final_buffer,final_buffer_len);
 
-				hwif->precalcusbtrack[i].usbtrack=(uint8_t *)malloc(final_buffer_len);
-				hwif->precalcusbtrack[i].randomusbtrack=(uint8_t *)malloc(final_buffer_len);
+				hwif->precalcusbtrack[i].randomusbtrack = (uint8_t *)malloc(final_buffer_len);
+				if(hwif->precalcusbtrack[i].randomusbtrack)
+					memcpy(hwif->precalcusbtrack[i].randomusbtrack,final_randombuffer,final_buffer_len);
+
 				hwif->precalcusbtrack[i].tracklen=final_buffer_len;
 
-				memcpy(hwif->precalcusbtrack[i].usbtrack,final_buffer,final_buffer_len);
-				memcpy(hwif->precalcusbtrack[i].randomusbtrack,final_randombuffer,final_buffer_len);
-
-
 				floppycontext->hxc_printf(MSG_DEBUG,"USB Track %d Size: %d bytes",i,final_buffer_len);
+			}
 
-				if(final_randombuffer)
-					free(final_randombuffer);
-				if(final_buffer)
-					free(final_buffer);
+			if(final_randombuffer)
+				free(final_randombuffer);
 
-				#ifdef DEBUGVB
+			if(final_buffer)
+				free(final_buffer);
+
+			#ifdef DEBUGVB
+				if(hwif->precalcusbtrack[i].usbtrack && final_buffer_len)
+				{
 					sprintf(fdebug_name,"usb_track_%d.bin",i);
 					fdebug=(FILE*) fopen(fdebug_name,"w+b");
 					if(fdebug)
@@ -974,16 +985,13 @@ int32_t libusbhxcfe_loadFloppy(HXCFE* floppycontext,USBHXCFE * hwif,HXCFE_FLOPPY
 						fwrite(hwif->precalcusbtrack[i].usbtrack,1,final_buffer_len,fdebug);
 						fclose(fdebug);
 					}
-				#endif
-
-
+				}
+			#endif
 		}
 
 
 		hwif->interface_mode=(uint8_t)floppydisk->floppyiftype;
 		hwif->floppychanged=1;
-
-
 
 		floppycontext->hxc_printf(MSG_INFO_0,"Starting emulation...");
 		hwif->start_emulation=1;
@@ -993,7 +1001,6 @@ int32_t libusbhxcfe_loadFloppy(HXCFE* floppycontext,USBHXCFE * hwif,HXCFE_FLOPPY
 
 int32_t libusbhxcfe_ejectFloppy(HXCFE* floppycontext,USBHXCFE * hwif)
 {
-
 	return 0;
 }
 
