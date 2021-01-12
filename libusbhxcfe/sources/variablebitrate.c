@@ -36,9 +36,9 @@
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
 // File : variablebitrate.c
-// Contains: USB HxC FE data generator 
+// Contains: USB HxC FE data generator
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -186,14 +186,18 @@ uint32_t * realloc_time_buffer(uint32_t * buffer,uint32_t numberofbit,uint32_t f
 		}
 	}
 
-	l=newsize-1;
-	i=nbelement-1;
-	while(i && l && !ptr[l])
+	if(newsize && nbelement)
 	{
-		ptr[l]=buffer[i];
-		l--;
-		i--;
+		l=newsize-1;
+		i=nbelement-1;
+		while(i && l && !ptr[l])
+		{
+			ptr[l]=buffer[i];
+			l--;
+			i--;
+		}
 	}
+
 	return ptr;
 }
 
@@ -207,10 +211,10 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 
 	int32_t tick_offset_h0;
 	int32_t tick_offset_h1;
-	
+
 	uint32_t trackzoneindex0;
 	uint32_t trackzoneindex1;
-	
+
 	uint32_t trackparthead0index,trackparthead1index;
 	int32_t lencode_track0,lencode_track1;
 
@@ -229,18 +233,20 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 
 	int lencode_track0_error=0;
 	int lencode_track1_error=0;
-	
+
 	int numberofpart,indexstart,newzoneindex,sizefactor;
-	
 
 #ifdef DEBUGVB
 	floppycontext->hxc_printf(MSG_DEBUG,"********************************************************************");
-#endif 
+#endif
+
+	if( lendatah0 < 64 || lendatah1 < 64 )
+		return 0;
 
 	sizefactor=1;
 	if( (lendatah0&7) || (lendatah1&7) )
 	{
-		sizefactor=8;	
+		sizefactor=8;
 	}
 
 
@@ -255,21 +261,21 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 
 	if(timeh0)
 		timeh0=realloc_time_buffer(timeh0,lendatah0,sizefactor);
-	
+
 	if(timeh1)
 		timeh1=realloc_time_buffer(timeh1,lendatah1,sizefactor);
 
 	lendatah0=((lendatah0*sizefactor)/8);
 	lendatah1=((lendatah1*sizefactor)/8);
 
-	trackzoneindex0=0;	
+	trackzoneindex0=0;
 	trackzoneindex1=0;
 
 	if(lendatah0>lendatah1)
 		finalsizebuffer=(lendatah0*2)+(32000*sizefactor);
 	else
 		finalsizebuffer=(lendatah1*2)+(32000*sizefactor);
-	
+
 	finalbuffer=malloc(finalsizebuffer);
 	memset(finalbuffer,0,finalsizebuffer);
 	randomfinalbuffer=malloc(finalsizebuffer);
@@ -280,7 +286,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 
 	/////////////////////////////////////////////////////////////
 	// delimitation des zones de bitrate
-	 
+
 	// head 0
 	if(fixedbitrateh0==VARIABLEBITRATE)
 	{
@@ -324,11 +330,11 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 
 #ifdef DEBUGVB
 	floppycontext->hxc_printf(MSG_DEBUG,"GetNewTrackRevolution : head 0 number of time zone = %d!",trackzoneindex1 );
-#endif 
+#endif
 
 	// head 1
 	if(fixedbitrateh1==VARIABLEBITRATE)
-	{	
+	{
 		trackzonebuffer_1[0].bitrate=timeh1[0];
 		trackzonebuffer_1[0].start=0;
 		i=0;
@@ -337,7 +343,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			if(trackzonebuffer_1[trackzoneindex1].bitrate!=timeh1[i])
 			{
 				trackzonebuffer_1[trackzoneindex1].end=i-1;
-				
+
 				/*
 				t=trackzonebuffer_1[trackzoneindex1].end-trackzonebuffer_1[trackzoneindex1].start;
 				t=t/128;
@@ -366,12 +372,12 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 		trackzonebuffer_1[0].end=lendatah1-1;
 		trackzoneindex1=0;
 	}
+
 #ifdef DEBUGVB
 	floppycontext->hxc_printf(MSG_DEBUG,"GetNewTrackRevolution : head 1 number of time zone = %d!",trackzoneindex1 );
-#endif 
+#endif
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// debug
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef DEBUGVB
@@ -386,7 +392,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 											 trackzonebuffer_0[i].end-trackzonebuffer_0[i].start
 											 );
 	}
-	
+
 	floppycontext->hxc_printf(MSG_DEBUG,"GetNewTrackRevolution: Head1:");
 	for(i=0;i<trackzoneindex1+1;i++)
 	{
@@ -399,11 +405,11 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	}
 #endif
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// "etalement"/separation des zones si necessaire
-	
+
 	i=0;
 	newzoneindex=0;
 	indexstart=0;
@@ -411,7 +417,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	{
 		numberofpart=((trackzonebuffer_0[i].end-trackzonebuffer_0[i].start)/BITRATEBLOCKSIZE)+1;
 
-		
+
 		if(numberofpart)
 		{
 			for(j=0;j<(uint32_t)numberofpart;j++)
@@ -433,7 +439,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			trackzonebuffer_temp[newzoneindex].end=trackzonebuffer_0[i].end;
 			newzoneindex++;
 		}
-		
+
 		i++;
 	}while(i<=trackzoneindex0);
 
@@ -447,7 +453,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	{
 		numberofpart=((trackzonebuffer_1[i].end-trackzonebuffer_1[i].start)/BITRATEBLOCKSIZE)+1;
 
-		
+
 		if(numberofpart)
 		{
 			for(j=0;j<(uint32_t)numberofpart;j++)
@@ -469,7 +475,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			trackzonebuffer_temp[newzoneindex].end=trackzonebuffer_1[i].end;
 			newzoneindex++;
 		}
-		
+
 		i++;
 	}while(i<=trackzoneindex1);
 
@@ -477,7 +483,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	memcpy(trackzonebuffer_1,trackzonebuffer_temp,sizeof(trackzonebuffer_1));
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// debug
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef DEBUGVB
@@ -492,7 +498,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 											 trackzonebuffer_0[i].end-trackzonebuffer_0[i].start
 											 );
 	}
-	
+
 	floppycontext->hxc_printf(MSG_DEBUG,"GetNewTrackRevolution: Head1:");
 	for(i=0;i<trackzoneindex1+1;i++)
 	{
@@ -507,16 +513,16 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 
 	/////////////////////////////////////////////////////////////
 	// calcul de la granularité de chaque zone
-	
+
 	// head 0
 	i=0;
 	do
-	{		
+	{
 		time_base=(float)FLOPPYEMUFREQ/((float)trackzonebuffer_0[i].bitrate);
 		bloclen=(trackzonebuffer_0[i].end-trackzonebuffer_0[i].start)+1;
 
 		trackzonebuffer_0[i].code1=(unsigned char)floor(time_base);
-			
+
 		if(time_base-trackzonebuffer_0[i].code1)
 		{
 			trackzonebuffer_0[i].code1lenint=(uint32_t)((time_base-trackzonebuffer_0[i].code1)*bloclen);
@@ -529,7 +535,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			trackzonebuffer_0[i].code1lenint=0;
 			trackzonebuffer_0[i].code2lenint=bloclen;
 		}
-			
+
 		//correction:
 		if((trackzonebuffer_0[i].code2lenint+trackzonebuffer_0[i].code1lenint)!=bloclen)
 		{
@@ -538,15 +544,15 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 				trackzonebuffer_0[i].code2lenint++;
 			}
 			else
-			{	
+			{
 				trackzonebuffer_0[i].code1lenint++;
 			}
 		}
-			
+
 		i++;
 
 	}while(i<=trackzoneindex0);
-	
+
 	// head 1
 	i=0;
 	do
@@ -555,7 +561,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 		bloclen=(trackzonebuffer_1[i].end-trackzonebuffer_1[i].start)+1;
 
 		trackzonebuffer_1[i].code1=(unsigned char)floor(time_base);
-			
+
 		if(time_base-trackzonebuffer_1[i].code1)
 		{
 			trackzonebuffer_1[i].code1lenint=(int)((time_base-trackzonebuffer_1[i].code1)*bloclen);
@@ -578,7 +584,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 				trackzonebuffer_1[i].code2lenint++;
 			}
 			else
-			{	
+			{
 				trackzonebuffer_1[i].code1lenint++;
 			}
 		}
@@ -586,10 +592,10 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 		i++;
 
 	}while(i<=trackzoneindex1);
-	
+
 	/////////////////////////////////////////////////////////////
 	// construction de la liste des zone a générer.
-	
+
 	// head 0
 	i=0;
 	j=0;
@@ -605,7 +611,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 				floppycontext->hxc_printf(MSG_ERROR,"GetNewTrackRevolution : trackpartbuffer_0 overrun !");
 
 		}
-		
+
 		if(trackzonebuffer_0[i].code1lenint)
 		{
 			trackpartbuffer_0[j].code=trackzonebuffer_0[i].code2;
@@ -615,7 +621,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			else
 				floppycontext->hxc_printf(MSG_ERROR,"GetNewTrackRevolution : trackpartbuffer_0 overrun !");
 		}
-		
+
 		i++;
 	}while(i<=trackzoneindex0);
 	numberofzoneh0=j;
@@ -624,7 +630,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	i=0;
 	j=0;
 	do
-	{ 
+	{
 		if(trackzonebuffer_1[i].code2lenint)
 		{
 			trackpartbuffer_1[j].code=trackzonebuffer_1[i].code1;
@@ -634,7 +640,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			else
 				floppycontext->hxc_printf(MSG_ERROR,"GetNewTrackRevolution : trackpartbuffer_1 overrun !");
 		}
-		
+
 		if(trackzonebuffer_1[i].code1lenint)
 		{
 			trackpartbuffer_1[j].code=trackzonebuffer_1[i].code2;
@@ -649,7 +655,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	}while(i<=trackzoneindex1);
 	numberofzoneh1=j;
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// debug
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef DEBUGVB
@@ -665,7 +671,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 		k=k%finalsizebuffer;
 	}
 	floppycontext->hxc_printf(MSG_DEBUG,"Total track Head0: %d timing : %dns",j,k/10);
-	
+
 
 	floppycontext->hxc_printf(MSG_DEBUG,"GetNewTrackRevolution: Head1:");
 	j=0;
@@ -750,7 +756,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 		else
 		{
 
-			// faut t'il configurer le bitrate en face 0 ? (changement de zone de bitrate)		
+			// faut t'il configurer le bitrate en face 0 ? (changement de zone de bitrate)
 			if(lencode_track0<=0)
 			{
 				if(trackparthead0index<numberofzoneh0)
@@ -788,7 +794,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 					k=(k+1)%finalsizebuffer;
 					finalbuffer[k]=speedcfg_track1-2;
 					k=(k+1)%finalsizebuffer;
-				}	
+				}
 			}
 
 		}
@@ -817,15 +823,15 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			}*/
 		}
 		inserttimecode--;
-		
-		
+
+
 		deltatick=tick_offset_h0-tick_offset_h1;
-		
+
 
 		// si pas de decalage temporel entre les 2 face : pas de compensation
 		if(!((abs(deltatick)>(speedcfg_track0*4)) || (abs(deltatick)>(speedcfg_track1*4))))
 		{
-			
+
 			datah0tmp=0;
 			randomh0tmp=0;
 			datah1tmp=0;
@@ -847,7 +853,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			{
 				datah0tmp=NOP_H1_OPCODE|NOP_H0_OPCODE;
 			}
-	
+
 			if(j<lendatah1)
 			{
 				datah1tmp=datah1[j];
@@ -863,18 +869,18 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			{
 				datah1tmp=NOP_H1_OPCODE|NOP_H0_OPCODE;
 			}
-			
+
 			// fusion des 2 faces
-			finalbuffer[k]=(datah0tmp&0xf0) | (datah1tmp>>4); 
-			randomfinalbuffer[k]=(randomh0tmp&0xf0) | (randomh1tmp>>4); 
+			finalbuffer[k]=(datah0tmp&0xf0) | (datah1tmp>>4);
+			randomfinalbuffer[k]=(randomh0tmp&0xf0) | (randomh1tmp>>4);
 			k=(k+1)%finalsizebuffer;
-			finalbuffer[k]=((datah0tmp<<4)&0xf0) | (datah1tmp&0x0f); 
-			randomfinalbuffer[k]=((randomh0tmp<<4)&0xf0) | (randomh1tmp&0x0f); 
+			finalbuffer[k]=((datah0tmp<<4)&0xf0) | (datah1tmp&0x0f);
+			randomfinalbuffer[k]=((randomh0tmp<<4)&0xf0) | (randomh1tmp&0x0f);
 			k=(k+1)%finalsizebuffer;
 
 			tick_offset_h0=tick_offset_h0+((speedcfg_track0)*4);
 			tick_offset_h1=tick_offset_h1+((speedcfg_track1)*4);
-			
+
 			if(lencode_track0>0)
 			{
 				lencode_track0--;
@@ -885,7 +891,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			{
 				lencode_track0_error++;
 			}
-			
+
 			if(lencode_track1>0)
 			{
 				lencode_track1--;
@@ -905,7 +911,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 				// track 0 plus loin que trask 1 (bitrate track 0 < bitrate track 1)
 				// inserer nop sur track 0
 				// compense h0
-					
+
 				datah1tmp=0;
 				randomh1tmp=0;
 
@@ -919,17 +925,17 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 				{
 					datah1tmp=NOP_H1_OPCODE|NOP_H0_OPCODE;
 				}
-		
 
-				finalbuffer[k]=(NOP_H0_OPCODE) | (datah1tmp>>4); 
-				randomfinalbuffer[k]=(randomh1tmp>>4); 
+
+				finalbuffer[k]=(NOP_H0_OPCODE) | (datah1tmp>>4);
+				randomfinalbuffer[k]=(randomh1tmp>>4);
 				k=(k+1)%finalsizebuffer;
-				finalbuffer[k]=(NOP_H0_OPCODE) | (datah1tmp&0x0f); 
-				randomfinalbuffer[k]=(randomh1tmp&0x0f); 
+				finalbuffer[k]=(NOP_H0_OPCODE) | (datah1tmp&0x0f);
+				randomfinalbuffer[k]=(randomh1tmp&0x0f);
 				k=(k+1)%finalsizebuffer;
 
 				tick_offset_h1=tick_offset_h1+((speedcfg_track1)*4);
-					
+
 				if(lencode_track1>0)
 				{
 					lencode_track1--;
@@ -939,17 +945,17 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 				else
 				{
 					lencode_track1_error++;
-				}		
+				}
 			}
-			else					
+			else
 			{
 				//(4*3) 00000000000000000000
 				//(4*6) 1N1N1N1N1N1N1N1N1N1N
-				
+
 				// track 1 plus loin que trask 0 (bitrate track 1 < bitrate track 0)
 				// inserer nop sur track 1
 				// compense h1
-						
+
 				datah0tmp=0;
 				randomh0tmp=0;
 
@@ -965,12 +971,12 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 				{
 					datah0tmp=NOP_H1_OPCODE|NOP_H0_OPCODE;
 				}
-						
-				finalbuffer[k]=(datah0tmp&0xf0) | (NOP_H1_OPCODE); 
-				randomfinalbuffer[k]=(randomh0tmp&0xf0); 
+
+				finalbuffer[k]=(datah0tmp&0xf0) | (NOP_H1_OPCODE);
+				randomfinalbuffer[k]=(randomh0tmp&0xf0);
 				k=(k+1)%finalsizebuffer;
-				finalbuffer[k]=((datah0tmp<<4)&0xf0) | (NOP_H1_OPCODE); 
-				randomfinalbuffer[k]=((randomh0tmp<<4)&0xf0); 
+				finalbuffer[k]=((datah0tmp<<4)&0xf0) | (NOP_H1_OPCODE);
+				randomfinalbuffer[k]=((randomh0tmp<<4)&0xf0);
 				k=(k+1)%finalsizebuffer;
 
 				tick_offset_h0=tick_offset_h0+((speedcfg_track0)*4);
@@ -984,12 +990,12 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 				else
 				{
 					lencode_track0_error++;
-				}		
+				}
 			}
 		}
-						
+
 	}while(!((trackparthead0index>=numberofzoneh0 && trackparthead1index>=numberofzoneh1) && (!(lencode_track1>0) && !(lencode_track0>0))));
-		
+
 	free(datah0);
 	free(datah1);
 	free(index_h0);
@@ -998,13 +1004,13 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 		free(randomh0);
 	if(randomh1)
 		free(randomh1);
-		
+
 	if(timeh0)
 		free(timeh0);
-		
+
 	if(timeh1)
 		free(timeh1);
-		
+
 	return k;
 }
 
@@ -1024,21 +1030,21 @@ int checkbuffer(unsigned char * buffer,int sizebf)
 	static unsigned char *buf1=0;
 	char  dbugfile[1*1024];
 
-	
+
 	if(!hfileh0)
 	{
 		sprintf(dbugfile,"d:\\h0.bin");
-		hfileh0=fopen(dbugfile,"w");	
+		hfileh0=fopen(dbugfile,"w");
 		buf0=malloc(1024*1024);
 	}
 
 	if(!hfileh1)
 	{
 		sprintf(dbugfile,"d:\\h1.bin");
-		hfileh1=fopen(dbugfile,"w");	
+		hfileh1=fopen(dbugfile,"w");
 		buf1=malloc(1024*1024);
 	}
-	
+
 	size0=0;
 	size1=0;
 	cmd_index0=0;
@@ -1080,7 +1086,7 @@ int checkbuffer(unsigned char * buffer,int sizebf)
 				i++;
 				break;
 		}
-	
+
 	}while(i<sizebf);
 	/////////////////////////////////////
 	// head 1
@@ -1116,19 +1122,17 @@ int checkbuffer(unsigned char * buffer,int sizebf)
 				i++;
 				break;
 		}
-	
+
 	}while(i<sizebf);
 
 	size0=size0/2;
 	size1=size1/2;
 
-
-
-		#ifdef DEBUGMODE 
-			fwrite(buf0,size0,1,hfileh0);
-			fwrite(buf1,size1,1,hfileh1);
-		#endif
+	#ifdef DEBUGMODE
+		fwrite(buf0,size0,1,hfileh0);
+		fwrite(buf1,size1,1,hfileh1);
+	#endif
 
  return 0;
 }
-#endif 
+#endif
