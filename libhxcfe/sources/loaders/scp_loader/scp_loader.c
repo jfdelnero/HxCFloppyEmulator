@@ -295,6 +295,18 @@ struct clv_def
 	float rpm;
 };
 
+const struct clv_def victor_clv_track[]=
+{
+	{3,   237.9},
+	{15,  224.5},
+	{26,  212.2},
+	{37,  199.9},
+	{48,  187.6},
+	{59,  175.3},
+	{70,  163.0},
+	{79,  149.6}
+};
+
 const struct clv_def mac_clv_track[]=
 {
 	{15,  393.3807},
@@ -323,6 +335,9 @@ float clv_track2rpm(int track, int type)
 		break;
 		case 2:
 			def = (const struct clv_def*)&c64_clv_track[0];
+		break;
+		case 3:
+			def = (const struct clv_def*)&victor_clv_track[0];
 		break;
 		default:
 			return 300;
@@ -357,7 +372,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int phasecorrection;
 	int filterpasses,filter;
 	int bitrate,bmp_export;
-	int mac_clv,c64_clv;
+	int mac_clv,c64_clv,victor9k_clv;
 	int track_offset_cyl_step,track_offset_head_step;
 
 	scp_header scph;
@@ -377,6 +392,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 		mac_clv = 0;
 		c64_clv = 0;
+		victor9k_clv = 0;
 		track_offset_cyl_step = 2;
 		track_offset_head_step = 1;
 
@@ -426,6 +442,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			mac_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV" );
 			c64_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_C64CLV" );
+			victor9k_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_VICTOR9KCLV" );
 
 			singleside = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "SCPLOADER_SINGLE_SIDE" )&1;
 			phasecorrection = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_PLL_PHASE_CORRECTION_DIVISOR" );
@@ -528,6 +545,9 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					if(c64_clv)
 						timecoef = (float)c64_clv / clv_track2rpm(j,2);
 
+					if(victor9k_clv)
+						timecoef = (float)victor9k_clv / clv_track2rpm(j,3);
+					
 					rpm = 300;
 
 					curside = decodestream(imgldr_ctx->hxcfe,f,(j<<1)|(i&1),tracksoffset[(track_offset_cyl_step*j) + (track_offset_head_step*i)],&rpm,timecoef,phasecorrection,scph.number_of_revolution,1 + scph.resolution,bitrate,filter,filterpasses,bmp_export);

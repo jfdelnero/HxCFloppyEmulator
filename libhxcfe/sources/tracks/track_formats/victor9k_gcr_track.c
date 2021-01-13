@@ -424,7 +424,8 @@ int get_next_Victor9k_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 	int sector_size;
 	unsigned char fm_buffer[32];
 	unsigned char tmp_buffer[32];
-	unsigned char CRC16_Low,datachksumerr;
+	unsigned char CRC16_Low;
+	int datachksumerr;
 	int sector_extractor_sm;
 	int i;
 
@@ -445,11 +446,12 @@ int get_next_Victor9k_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 		{
 			case LOOKFOR_GAP1:
 
-				// Sector header prolog
-				// 0xFF 0xFF 0x52  (0xFF 0xFF GCR(0x08))
-				// 1111 1111 1111 1111 01010010
-				// 01010101 01010101 01010101 01010101  00010001 00000100
-				// 0x55     0x55     0x55     0x55      0x11     0x04
+
+				// Sector header prolog (0x0xfffffeab)
+				// 0xFF 0xFF 0x55  (0xFF 0xFF GCR(0xxx))
+				// 1111 1111 1111 1111 01010101
+				// 01010101 01010101 01010101 01010101  00010001 00010001
+				// 0x55     0x55     0x55     0x55      0x11     0x11
 
 				fm_buffer[0]=0x55;
 				fm_buffer[1]=0x55;
@@ -458,8 +460,8 @@ int get_next_Victor9k_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 				fm_buffer[4]=0x55;
 				fm_buffer[5]=0x55;
 				fm_buffer[6]=0x11;
-				fm_buffer[7]=0x04;
-				fm_buffer[8]=0x10;
+				fm_buffer[7]=0x11;
+				fm_buffer[8]=0x00;
 
 				bit_offset=searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,(8*8),bit_offset);
 
@@ -491,18 +493,19 @@ int get_next_Victor9k_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 				bit_offset = chgbitptr( track->tracklen, bit_offset, ( 6 * 8 ) + 1);
 
 				sector->startsectorindex = bit_offset;
-
+printf("---\n");
 				for(i=0;i<6;i++)
 				{
 					bit_offset = victor9kgcrtobyte(track->databuffer,track->tracklen,bit_offset, &tmp_buffer[i]);
+					printf("%x\n",tmp_buffer[i]);
 				}
 
 				sector->endsectorindex = bit_offset;
 
-				CRC16_Low = tmp_buffer[1] ^ tmp_buffer[2] ^ tmp_buffer[3] ^ tmp_buffer[4] ^ tmp_buffer[5];
+				CRC16_Low = tmp_buffer[1] + tmp_buffer[2] - tmp_buffer[3];
 				if( !CRC16_Low )
 				{
-					sector->cylinder = tmp_buffer[3];
+					sector->cylinder = tmp_buffer[1];
 					sector->head = 0;
 					sector->sector = tmp_buffer[2];
 
@@ -521,7 +524,7 @@ int get_next_Victor9k_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 
 					sector->use_alternate_header_crc = 0x00;
 
-					sector->header_crc = tmp_buffer[1] ;
+					sector->header_crc = tmp_buffer[3] ;
 
 					old_bit_offset=bit_offset;
 
@@ -532,8 +535,8 @@ int get_next_Victor9k_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 					// Sector header prolog
 					// 0xFF 0xFF 0x52  (0xFF 0xFF GCR(0x07)) (00010001000100010101)
 					// 1111 1111 1111 1111 01010010
-					// 01010101 01010101 01010101 01010101  00010001 00010001
-					// 0x55     0x55     0x55     0x55      0x11     0x11
+					// 01010101 01010101 01010101 01010101  00010001 00000100
+					// 0x55     0x55     0x55     0x55      0x11     0x04
 
 					fm_buffer[0]=0x55;
 					fm_buffer[1]=0x55;
@@ -542,7 +545,7 @@ int get_next_Victor9k_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 					fm_buffer[4]=0x55;
 					fm_buffer[5]=0x55;
 					fm_buffer[6]=0x11;
-					fm_buffer[7]=0x11;
+					fm_buffer[7]=0x04;
 					fm_buffer[8]=0x10;
 
 					bit_offset = searchBitStream(track->databuffer,track->tracklen,(64*8),fm_buffer,8*8,bit_offset);
@@ -555,7 +558,7 @@ int get_next_Victor9k_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 					{
 						sector->startdataindex=bit_offset;
 
-						sector_size = 256;
+						sector_size = 512;
 						sector->sectorsize = sector_size;
 						sector->trackencoding = VICTOR9K_GCR;
 
@@ -572,15 +575,23 @@ int get_next_Victor9k_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 							bit_offset = victor9kgcrtobyte(track->databuffer,track->tracklen,bit_offset, &sector->input_data[0]);
 
 							datachksumerr = 0;
-							for(i=0;i<256+1;i++)
+							for(i=0;i<512 + 2;i++)
 							{
 								bit_offset = victor9kgcrtobyte(track->databuffer,track->tracklen,bit_offset, &sector->input_data[i]);
-								datachksumerr ^= sector->input_data[i];
+								if(i<512)
+									datachksumerr += sector->input_data[i];
 							}
+							
+							datachksumerr &= 0xFFFF;
 
+							printf("I: 0x%.4X\n", (sector->input_data[512] + (256*(int)sector->input_data[512+1])));
+							printf("J: 0x%.4X\n", datachksumerr);
+
+							datachksumerr -= (sector->input_data[512] + (256*(int)sector->input_data[512+1]));
+							
 							sector->endsectorindex = bit_offset;//DeNybbleSector6and2(sector->input_data,track->databuffer,track->tracklen,bit_offset,&datachksumerr);
 
-							sector->data_crc = sector->input_data[256];
+							sector->data_crc = (sector->input_data[512] + (256*(int)sector->input_data[512+1]));
 
 							if(!datachksumerr)
 							{ // crc ok !!!
@@ -629,7 +640,7 @@ int get_next_Victor9k_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 			break;
 
 			default:
-				sector_extractor_sm=ENDOFTRACK;
+				sector_extractor_sm = ENDOFTRACK;
 			break;
 
 		}
