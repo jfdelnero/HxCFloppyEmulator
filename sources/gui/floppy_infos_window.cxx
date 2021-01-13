@@ -159,10 +159,14 @@ floppy_infos_window::floppy_infos_window() {
         c64_bt->labelsize(10);
         c64_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* c64_bt
-      { qd_mo5_bt = new Fl_Light_Button(1099, 365, 76, 15, "QD MO5");
+      { qd_mo5_bt = new Fl_Light_Button(1183, 365, 76, 15, "QD MO5");
         qd_mo5_bt->labelsize(10);
         qd_mo5_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* qd_mo5_bt
+      { victor9k_bt = new Fl_Light_Button(1099, 365, 76, 15, "Victor 9K");
+        victor9k_bt->labelsize(10);
+        victor9k_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* victor9k_bt
       o->end();
     } // Fl_Group* o
 

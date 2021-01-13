@@ -8,7 +8,7 @@ class floppy_infos_window {open
   } {
     Fl_Window window {
       label {Visual Floppy disk} open
-      xywh {1 100 1275 540} type Single hide resizable
+      xywh {1 100 1275 540} type Single resizable visible
     } {
       Fl_Group {} {
         label {Track / Side selection} open
@@ -92,7 +92,7 @@ class floppy_infos_window {open
       }
       Fl_Group {} {
         label {Track analysis format} open
-        xywh {1000 287 275 101} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
+        xywh {1000 287 275 102} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
       } {
         Fl_Light_Button iso_mfm_bt {
           label {ISO MFM}
@@ -175,7 +175,13 @@ class floppy_infos_window {open
         Fl_Light_Button qd_mo5_bt {
           label {QD MO5}
           user_data this
-          callback disk_infos_window_callback selected
+          callback disk_infos_window_callback
+          xywh {1183 365 76 15} labelsize 10
+        }
+        Fl_Light_Button victor9k_bt {
+          label {Victor 9K}
+          user_data this
+          callback disk_infos_window_callback
           xywh {1099 365 76 15} labelsize 10
         }
       }
