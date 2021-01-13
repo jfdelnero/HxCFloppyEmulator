@@ -161,7 +161,7 @@ int c64gcrtobyte(unsigned char * input_data,int input_data_size,int bit_offset, 
 }
 
 // GCR encoder
-unsigned char * BuildGCRCylinder(int * gcrtracksize,unsigned char * track,unsigned char * nongcrpart,int size)
+unsigned char * BuildC64GCRCylinder(int * gcrtracksize,unsigned char * track,unsigned char * nongcrpart,int size)
 {
 	int i,j,k,l;
 
@@ -273,16 +273,7 @@ unsigned char * BuildGCRCylinder(int * gcrtracksize,unsigned char * track,unsign
 
 }
 
-int GCRGetTrackSize(unsigned int numberofsector,unsigned int sectorsize)
-{
-	uint32_t finalsize;
-
-	finalsize= ( 5 + 8 + 9 + 5 + 260 + 12) * numberofsector;
-
-	return finalsize;
-}
-
-int32_t BuildGCRTrack(int numberofsector,int sectorsize,int tracknumber,int sidenumber,unsigned char* datain,unsigned char * mfmdata,int32_t * mfmsizebuffer)
+int32_t BuildC64GCRTrack(int numberofsector,int sectorsize,int tracknumber,int sidenumber,unsigned char* datain,unsigned char * mfmdata,int32_t * mfmsizebuffer)
 {
 	int i,j,k,l,t;
 	unsigned char *tempdata;
@@ -391,7 +382,7 @@ int32_t BuildGCRTrack(int numberofsector,int sectorsize,int tracknumber,int side
 				}
 			}
 
-			temptrack = BuildGCRCylinder(&temptracksize,tempdata,tempnongcr,j);
+			temptrack = BuildC64GCRCylinder(&temptracksize,tempdata,tempnongcr,j);
 			if(temptrack)
 			{
 				memset(mfmdata,0x22,*mfmsizebuffer);
