@@ -530,8 +530,8 @@ int get_next_C64_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 					old_bit_offset = bit_offset;
 
 					// Sector header prolog
-					// 0xFF 0xFF 0x52  (0xFF 0xFF GCR(0x07)) (00010001000100010101)
-					// 1111 1111 1111 1111 01010010
+					// 0xFF 0xFF 0x55  (0xFF 0xFF GCR(0x07)) (00010001000100010101)
+					// 1111 1111 1111 1111 01010101
 					// 01010101 01010101 01010101 01010101  00010001 00010001
 					// 0x55     0x55     0x55     0x55      0x11     0x11
 
