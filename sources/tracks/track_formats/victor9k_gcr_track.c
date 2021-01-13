@@ -493,11 +493,10 @@ int get_next_Victor9k_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 				bit_offset = chgbitptr( track->tracklen, bit_offset, ( 6 * 8 ) + 1);
 
 				sector->startsectorindex = bit_offset;
-printf("---\n");
+
 				for(i=0;i<6;i++)
 				{
 					bit_offset = victor9kgcrtobyte(track->databuffer,track->tracklen,bit_offset, &tmp_buffer[i]);
-					printf("%x\n",tmp_buffer[i]);
 				}
 
 				sector->endsectorindex = bit_offset;
@@ -584,9 +583,6 @@ printf("---\n");
 							
 							datachksumerr &= 0xFFFF;
 
-							printf("I: 0x%.4X\n", (sector->input_data[512] + (256*(int)sector->input_data[512+1])));
-							printf("J: 0x%.4X\n", datachksumerr);
-
 							datachksumerr -= (sector->input_data[512] + (256*(int)sector->input_data[512+1]));
 							
 							sector->endsectorindex = bit_offset;//DeNybbleSector6and2(sector->input_data,track->databuffer,track->tracklen,bit_offset,&datachksumerr);
@@ -595,7 +591,6 @@ printf("---\n");
 
 							if(!datachksumerr)
 							{ // crc ok !!!
-
 								floppycontext->hxc_printf(MSG_DEBUG,"crc data ok.");
 								sector->use_alternate_data_crc = 0x00;
 							}
