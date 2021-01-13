@@ -2680,6 +2680,7 @@ const static type_list track_type_list[]=
 	{AED6200P_DD,       "AED 6200P"},
 	{QD_MO5_MFM,        "QD MO5"},
 	{C64_GCR,           "C64 GCR"},
+	{VICTOR9K_GCR,      "Victor 9000 GCR"},
 	{0,0}
 };
 

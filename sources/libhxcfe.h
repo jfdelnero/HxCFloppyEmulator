@@ -232,6 +232,7 @@ int32_t                hxcfe_floppySectorBySectorCopy( HXCFE* floppycontext, HXC
 #define APPLEMAC_GCR6A2                  0x13
 #define QD_MO5_MFM                       0x14
 #define C64_GCR                          0x15
+#define VICTOR9K_GCR                     0x16
 
 #define DIRECT_ENCODING                  0xFE
 
@@ -422,6 +423,7 @@ int32_t                hxcfe_FDC_SCANSECTOR  ( HXCFE* floppycontext, uint8_t tra
 #define APPLEMAC_GCR_ENCODING            0x10
 #define QD_MO5_ENCODING                  0x11
 #define C64_GCR_ENCODING                 0x12
+#define VICTOR9K_GCR_ENCODING            0x13
 #define UNKNOWN_ENCODING                 0xFF
 
 enum {

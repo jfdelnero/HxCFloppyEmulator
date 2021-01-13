@@ -89,6 +89,7 @@ trackmode trackmodelist[]=
 	{DEC_RX02_M2FM_ENCODING,        "DEC_RX02_M2FM_ENCODING", "" },
 	{QD_MO5_ENCODING,               "QD_MO5_ENCODING","" },
 	{C64_GCR_ENCODING,              "C64_GCR_ENCODING","" },
+	{VICTOR9K_GCR_ENCODING,         "VICTOR9K_GCR_ENCODING","" },
 	{UNKNOWN_ENCODING,              "UNKNOWN_ENCODING", "" },
 	{-1,"", ""},
 };

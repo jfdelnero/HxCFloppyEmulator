@@ -89,6 +89,7 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydis
 		hxcfe_td_activate_analyzer(td, ARBURGSYS_ENCODING, hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_ARBURGSYS_ENCODING" ));
 		hxcfe_td_activate_analyzer(td, QD_MO5_ENCODING, hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_QD_MO5_ENCODING" ));
 		hxcfe_td_activate_analyzer(td, C64_GCR_ENCODING, hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_C64_GCR_ENCODING"));
+		hxcfe_td_activate_analyzer(td, VICTOR9K_GCR_ENCODING, hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_VICTOR9000_GCR_ENCODING"));
 
 		hxcfe_td_setparams(td,hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_XTOTALTIME" ),hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_YTOTALTIME"  ),90*1000, 0);
 
