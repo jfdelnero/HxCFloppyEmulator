@@ -237,7 +237,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 	int bitrate;
 	int filterpasses,filter;
 	int bmp_export;
-	int mac_clv,c64_clv;
+	int mac_clv,c64_clv,victor9k_clv;
 	envvar_entry * backup_env;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"KryoFluxStream_libLoad_DiskFile");
@@ -282,7 +282,8 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 			mac_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV" );
 			c64_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_C64CLV" );
-
+			victor9k_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_VICTOR9KCLV" );
+ 
 			singleside = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "KFRAWLOADER_SINGLE_SIDE" )&1;
 
 			timecoef=1;
@@ -379,6 +380,9 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 					if(c64_clv)
 						timecoef = (float)c64_clv / clv_track2rpm(j,2);
+
+					if(victor9k_clv)
+						timecoef = (float)victor9k_clv / clv_track2rpm(j,3);
 
 					rpm = 300;
 					curside = decodestream(imgldr_ctx->hxcfe,filepath,&rpm,timecoef,phasecorrection,bitrate,filter,filterpasses,bmp_export);
