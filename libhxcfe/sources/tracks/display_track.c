@@ -448,7 +448,7 @@ void hxcfe_td_draw_markers( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t tra
 	// Markers
 	for( m = 0; m < MAX_MARKER ; m++ )
 	{
-		if( td->markers[m].flags & TD_MARKER_FLAG_ENABLE)
+		if( td->markers[m].flags & TD_MARKER_FLAG_ENABLE )
 		{
 			//////////////////////////////////////////
 			// Markers drawing
@@ -551,7 +551,7 @@ void hxcfe_td_draw_rules( HXCFE_TD *td )
 {
 	int i,y;
 	int xpos,ypos;
-	char tmp_str[64];
+	char tmp_str[256];
 
 	float x_us_per_pixel,y_us_per_pixel;
 	float xpos_step;
@@ -561,10 +561,8 @@ void hxcfe_td_draw_rules( HXCFE_TD *td )
 	y_us_per_pixel = ((float)((float)td->y_us/(float)td->ysize));
 
 	// Print pixel density
-	sprintf(tmp_str,"xres: %f us/pix",x_us_per_pixel);
-	putstring8x8(td,1,1,tmp_str,0xFFFFFF,0x000000,0,0);
-	sprintf(tmp_str,"yres: %f us/pix",y_us_per_pixel);
-	putstring8x8(td,1,1+8,tmp_str,0xFFFFFF,0x000000,0,0);
+	sprintf(tmp_str,"x:%.3f uS/pix y:%.3f uS/pix",x_us_per_pixel,y_us_per_pixel);
+	putstring8x8(td,1+8*6,1,tmp_str,0x000000,0xFFFFFF,0,1);
 
 	// Vertical rule
 	for(i=0;i < 80*10;i++)
@@ -1080,7 +1078,7 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	HXCFE_SIDE * currentside;
 	s_col * col;
 
-	char tmp_str[32];
+	char tmp_str[256];
 
 	sl=td->sl;
 	while(sl)
@@ -1114,7 +1112,6 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 
 	if(side>=floppydisk->floppyNumberOfSide) side = floppydisk->floppyNumberOfSide - 1;
 	if(side<0) side = 0;
-
 
 	if(!floppydisk->floppyNumberOfTrack || !floppydisk->floppyNumberOfSide)
 	{
@@ -1163,8 +1160,13 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 
 	if(td->name)
 	{
-		putstring8x8(td,td->xsize - (strlen(td->name)*8) ,1,td->name,0xAAAAAA,0x000000,0,0);
+		sprintf(tmp_str,"%s T:%.3d S:%.1d",td->name,track,side);
 	}
+	else
+	{
+		sprintf(tmp_str,"T:%.3d S:%.1d",track,side);
+	}
+	putstring8x8(td,td->xsize - (strlen(tmp_str)*8) ,1,tmp_str,0xAAAAAA,0x000000,0,1);
 
 	//////////////////////////////////////////
 	// Scatter drawing
@@ -1537,12 +1539,12 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 		}
 	}
 
-	sprintf(tmp_str,"T:%.3d S:%.1d",track,side);
-	putstring8x8(td,1,1,tmp_str,0x000,0x000,0,1);
-
 	hxcfe_td_draw_rules( td );
 
 	hxcfe_td_draw_markers( td, floppydisk, track, side, buffer_offset );
+
+	sprintf(tmp_str,"libhxcfe v%s",STR_FILE_VERSION2);
+	putstring8x8(td,td->xsize - (8 + 1),td->ysize - (8*3 + 1),tmp_str,0x000000,0xFFFFFF,1,1);
 
 	splash_sprite(bitmap_hxc2001_logo_bmp,td->framebuffer, td->xsize, td->ysize, td->xsize - (bitmap_hxc2001_logo_bmp->Xsize + 16), td->ysize - (bitmap_hxc2001_logo_bmp->Ysize + 16));
 }
@@ -1658,7 +1660,7 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	int xpos_start,xpos,ypos,bad_timing;
 	int last_index_xpos;
 	int last_index_total_offset;
-	char tmp_str[64];
+	char tmp_str[256];
 	uint32_t total_offset,cur_ticks,curcol,contrast;
 	HXCFE_SIDE* side;
 	HXCFE_FLOPPY *fp;
@@ -1962,7 +1964,7 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 			else
 				tmp = 8;
 
-			putstring8x8(td,last_index_xpos + tmp, 8,tmp_str,0x000000,0x000000,0,1);
+			putstring8x8(td,last_index_xpos + tmp, 8 + 2,tmp_str,0x000000,0x000000,0,1);
 		}
 		last_index_total_offset = total_offset;
 		last_index_xpos = xpos;
@@ -2047,6 +2049,11 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 
 	hxcfe_td_draw_rules( td );
 
+	sprintf(tmp_str,"libhxcfe v%s",STR_FILE_VERSION2);
+	putstring8x8(td,td->xsize - (8 + 1),td->ysize - (8*3 + 1),tmp_str,0x000000,0xFFFFFF,1,1);
+
+	splash_sprite(bitmap_hxc2001_logo_bmp,td->framebuffer, td->xsize, td->ysize, td->xsize - (bitmap_hxc2001_logo_bmp->Xsize + 16), td->ysize - (bitmap_hxc2001_logo_bmp->Ysize + 16));
+
 	td->noloop_trackmode = 0;
 }
 
@@ -2055,7 +2062,7 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_
 	s_sectorlist * sl,*oldsl;
 	s_pulseslist * pl,*oldpl;
 	HXCFE_SIDE * currentside;
-	char tempstr[512];
+	char tmp_str[512];
 	sl=td->sl;
 	while(sl)
 	{
@@ -2093,8 +2100,8 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_
 	{
 		memset(td->framebuffer,0xCC,td->xsize*td->ysize*sizeof(unsigned int));
 
-		sprintf(tempstr,"This track doesn't exist !");
-		putstring8x8(td,(td->xsize/2) - ((strlen(tempstr)*8)/2),td->ysize / 2,tempstr,0x000000,0xCCCCCC,0,0);
+		sprintf(tmp_str,"This track doesn't exist !");
+		putstring8x8(td,(td->xsize/2) - ((strlen(tmp_str)*8)/2),td->ysize / 2,tmp_str,0x000000,0xCCCCCC,0,0);
 		return;
 	}
 
@@ -2105,16 +2112,30 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_
 		if(currentside->stream_dump)
 		{
 			hxcfe_td_draw_trkstream( td, currentside->stream_dump );
+
+			if(td->name)
+			{
+				sprintf(tmp_str,"%s T:%.3d S:%.1d",td->name,track,side);
+			}
+			else
+			{
+				sprintf(tmp_str,"T:%.3d S:%.1d",track,side);
+			}
+
+			putstring8x8(td,td->xsize - (strlen(tmp_str)*8) ,1,tmp_str,0x000000,0xFFFFFF,0,1);
 		}
 		else
 		{
 			memset(td->framebuffer,0xCC,td->xsize*td->ysize*sizeof(unsigned int));
 
-			sprintf(tempstr,"This track doesn't have any stream information !");
-			putstring8x8(td,(td->xsize/2) - ((strlen(tempstr)*8)/2),td->ysize / 2,tempstr,0x000000,0xCCCCCC,0,0);
-		}
+			sprintf(tmp_str,"This track doesn't have any stream information !");
+			putstring8x8(td,(td->xsize/2) - ((strlen(tmp_str)*8)/2),td->ysize / 2,tmp_str,0x000000,0xCCCCCC,0,0);
 
-		splash_sprite(bitmap_hxc2001_logo_bmp,td->framebuffer, td->xsize, td->ysize, td->xsize - (bitmap_hxc2001_logo_bmp->Xsize + 16), td->ysize - (bitmap_hxc2001_logo_bmp->Ysize + 16));
+			sprintf(tmp_str,"libhxcfe v%s",STR_FILE_VERSION2);
+			putstring8x8(td,td->xsize - (8 + 1),td->ysize - (8*3 + 1),tmp_str,0x000000,0xFFFFFF,1,1);
+
+			splash_sprite(bitmap_hxc2001_logo_bmp,td->framebuffer, td->xsize, td->ysize, td->xsize - (bitmap_hxc2001_logo_bmp->Xsize + 16), td->ysize - (bitmap_hxc2001_logo_bmp->Ysize + 16));
+		}
 	}
 }
 
@@ -2871,12 +2892,12 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	}
 
 	sprintf(tempstr,"libhxcfe v%s",STR_FILE_VERSION2);
-	putstring8x8(td,1,td->ysize - (8 + 1),tempstr,0xAAAAAA,0x000000,0,0);
+	putstring8x8(td,td->xsize - (8 + 1),td->ysize - (8*3 + 1),tempstr,0xAAAAAA,0x000000,1,0);
 
 	if(td->name)
 	{
-		putstring8x8(td,1,td->ysize - (8*4),td->name,0xAAAAAA,0x000000,1,0);
-		putstring8x8(td,(td->xsize/2) + 1,td->ysize - (8*4),td->name,0xAAAAAA,0x000000,1,0);
+		putstring8x8( td, td->xsize - ((strlen(td->name)*8) + 8),1,td->name,0xAAAAAA,0x000000,0,1);
+		putstring8x8( td, (td->xsize/2) - ( (strlen(td->name)*8) + 8),1,td->name,0xAAAAAA,0x000000,0,1);
 	}
 
 	color = 0x131313;
