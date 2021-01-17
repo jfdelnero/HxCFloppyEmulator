@@ -16,14 +16,29 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
-XX January 2021 : HxCFloppyEmulator 2.5.X.X (Beta !)
+18 January 2021 : HxCFloppyEmulator 2.5.6.6
+
+-> C64 sector format support added.
+
+-> Victor 9000 sector format support added.
+
+-> Disk viewer : 48 TPI disks -> Max tracks increased to 43 tracks.
+
+-> Tracks/Disk viewer : Some minor graphical changes.
+
+-> Stream analyzer : All internals PLL parameters can be set/changed in
+                     the configuration file (see init.script for more details).
+
+-> AppleSauce *.A2R : 3"1/2 disks dump support.
 
 -> Hard-sectored support fixed.
 
--> Stream : C64 sector format support added. (WIP!)
+-> Apple Macintosh CLV support fixed/improved.
 
--> Apple Macintosh CLV support fixed/improved. (WIP!)
-   
+-> Stream analyzer : Some fixes and improvements.
+
+-> Sectors decoders : Some fixes and improvements.
+
 *********************************************************/
 
 /*********************************************************
