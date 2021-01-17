@@ -3580,13 +3580,29 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 					track_len = 0;
 					i = first_index;
+
 					if( i < (int32_t)std->channels[0].nb_of_pulses)
 					{
-						do
+						if( pl->forward_link[first_index] == (first_index+1) )
+						{   // Dummy buffer case
+							int next_index,offset;
+							next_index = getNearestValidIndex(pl,std->index_evt_tab[hxcfe_FxStream_GetRevolutionIndex( fxs, std, revolution ) + 1].dump_offset,pl->number_of_pulses);
+
+							offset = i;
+							while(offset < next_index)
+							{
+								track_len += std->channels[0].stream[offset++];
+							}
+
+						}
+						else
 						{
-							track_len = track_len + std->channels[0].stream[i];
-							i++;
-						}while( ( i < (int32_t)std->channels[0].nb_of_pulses ) && ( i < pl->forward_link[first_index] ) );
+							do
+							{
+								track_len = track_len + std->channels[0].stream[i];
+								i++;
+							}while( ( i < (int32_t)std->channels[0].nb_of_pulses ) && ( i < pl->forward_link[first_index] ) );
+						}
 					}
 
 #ifdef FLUXSTREAMDBG
