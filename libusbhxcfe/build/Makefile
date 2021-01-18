@@ -12,10 +12,10 @@ DEBUG_ASAN ?= 0
 
 ifeq ($(DEBUG), 1)
 	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG
-	LDFLAGS= -shared -s
+	LDFLAGS= -shared
 else
 	CFLAGS=-O3 $(INCLUDES) -Wall
-	LDFLAGS= -shared
+	LDFLAGS= -shared -s
 endif
 
 ifeq ($(DEBUG_ASAN), 1)
@@ -33,21 +33,21 @@ endif
 ifeq ($(TARGET), mingw32)
 CC=i686-w64-mingw32-gcc
 RESC=i686-w64-mingw32-windres
-LDFLAGS += -static-libgcc ../sources/win32/libusbhxcfe.def -s
+LDFLAGS += -static-libgcc ../sources/win32/libusbhxcfe.def
 EXEC=libusbhxcfe.dll
 endif
 
 ifeq ($(TARGET), mingw64)
 CC=x86_64-w64-mingw32-gcc
 RESC=x86_64-w64-mingw32-windres
-LDFLAGS += -static-libgcc ../sources/win32/libusbhxcfe.def -s
+LDFLAGS += -static-libgcc ../sources/win32/libusbhxcfe.def
 EXEC=libusbhxcfe.dll
 endif
 
 ifeq ($(TARGET), Darwin)
 MACOSX_MIN_VER ?= 10.13
 CFLAGS += -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
-LDFLAGS +=  -lc -lm -ldl -s -arch x86_64 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libusbhxcfe.dylib -mmacosx-version-min=${MACOSX_MIN_VER}
+LDFLAGS +=  -lc -lm -ldl -arch x86_64 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libusbhxcfe.dylib -mmacosx-version-min=${MACOSX_MIN_VER}
 EXEC=libusbhxcfe.dylib
 endif
 
