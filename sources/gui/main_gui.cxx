@@ -1082,9 +1082,11 @@ Main_Window::Main_Window()
 				convert8b24b(bitmap_hxc2001_2_bmp,0x00);
 				hxc2001_2_bmp = bitmap_hxc2001_2_bmp;
 			}
-				
+
 			memset(guicontext->mapfloppybuffer,0xFF,guicontext->xsize*guicontext->ysize*4);
+#ifndef OEM_MODE
 			splash_sprite(hxc2001_2_bmp,guicontext->mapfloppybuffer, guicontext->xsize, guicontext->ysize, guicontext->xsize / 2 - hxc2001_2_bmp->Xsize / 2, guicontext->ysize / 2 - hxc2001_2_bmp->Ysize / 2);
+#endif
 		}
 
 		hxc_createcriticalsection(guicontext->hxcfe,1);
@@ -1122,8 +1124,9 @@ Main_Window::Main_Window()
 		if(guicontext->flayoutframebuffer)
 		{
 			memset(guicontext->flayoutframebuffer,0xFF,infos_window->floppy_map_disp->w()*infos_window->floppy_map_disp->h() * 3);
+#ifndef OEM_MODE
 			splash_sprite(hxc2001_2_bmp,guicontext->flayoutframebuffer, infos_window->floppy_map_disp->w(), infos_window->floppy_map_disp->h(), infos_window->floppy_map_disp->w() / 2 - hxc2001_2_bmp->Xsize / 2, infos_window->floppy_map_disp->h() / 2 - hxc2001_2_bmp->Ysize / 2);
-
+#endif
 			hxc_createevent(guicontext->hxcfe,10);
 
 			infoth = (infothread *)malloc(sizeof(infothread));
@@ -1191,8 +1194,9 @@ Main_Window::Main_Window()
 		if(guicontext->stream_frame_buffer)
 		{
 			memset(guicontext->stream_frame_buffer,0xFF,streamer_window->floppy_map_disp->w()*streamer_window->floppy_map_disp->h() * 4);
+#ifndef OEM_MODE
 			splash_sprite(pauline_bmp,guicontext->stream_frame_buffer, streamer_window->floppy_map_disp->w(), streamer_window->floppy_map_disp->h(), streamer_window->floppy_map_disp->w() / 2 - pauline_bmp->Xsize / 2, streamer_window->floppy_map_disp->h() / 2 - pauline_bmp->Ysize / 2);
-
+#endif
 			hxc_createevent(guicontext->hxcfe,10);
 
 			streamth = (streamthread *)malloc(sizeof(infothread));
