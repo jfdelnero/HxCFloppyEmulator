@@ -49,6 +49,10 @@
 
 #include <stdint.h>
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 //#define DEBUGVB 1
 
 #include "internal_libhxcfe.h"
@@ -520,6 +524,10 @@ int32_t ftdichiplistener(HXCFE* floppycontext,USBHXCFE * hw_context)
 			}
 
 		}while(init_failed);
+
+#ifdef WIN32
+		SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+#endif
 
 		// detection terminee
 		// on rentre dans la boucle de fonctionnement
