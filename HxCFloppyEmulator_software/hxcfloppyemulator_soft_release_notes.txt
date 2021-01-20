@@ -16,6 +16,14 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
+XXXXXX 2021 : HxCFloppyEmulator 2.5.X.X (Work in progress / Beta version !)
+
+Windows : Turn the process in high priority when the USB HxC Floppy Emulator is detected.
+          Fix most of the Sync lost events.
+
+*********************************************************/
+
+/*********************************************************
 18 January 2021 : HxCFloppyEmulator 2.5.6.6
 
 -> C64 sector format support added.
