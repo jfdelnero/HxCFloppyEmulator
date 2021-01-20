@@ -70,7 +70,7 @@ extern s_gui_context * guicontext;
 void getWindowState(rawfile_loader_window *rlw,cfgrawfile *rfc)
 {
 	memset(rfc,0,sizeof(cfgrawfile));
-	
+
 	if(rlw->chk_autogap3->value())
 		rfc->autogap3=0xff;
 	else
@@ -115,7 +115,7 @@ void getWindowState(rawfile_loader_window *rlw,cfgrawfile *rfc)
 }
 
 void setWindowState(rawfile_loader_window *rlw,cfgrawfile *rfc)
-{	
+{
 	if(rfc->autogap3)
 		rlw->chk_autogap3->value(1);
 	else
@@ -158,7 +158,7 @@ void setWindowState(rawfile_loader_window *rlw,cfgrawfile *rfc)
 	rlw->choice_tracktype->value(rfc->tracktype);
 	rlw->numin_skew->value(rfc->skew);
 	rlw->numin_pregap->value(rfc->pregap);
-	
+
 }
 
 void raw_loader_window_datachanged(Fl_Widget* w, void*)
@@ -197,7 +197,7 @@ void raw_loader_window_datachanged(Fl_Widget* w, void*)
 
 	xmlload = -1;
 
-	v = rlw->choice_disklayout->value(); 
+	v = rlw->choice_disklayout->value();
 	if(v > 0)
 	{
 		if(v==1)
@@ -223,7 +223,7 @@ void raw_loader_window_datachanged(Fl_Widget* w, void*)
 						hxcfe_deinitXmlFloppy(rfb);
 					}
 				}
-				
+
 				if(xmlload>0)
 				{
 					memset(guicontext->xml_file_path,0,sizeof(guicontext->xml_file_path));
@@ -351,7 +351,7 @@ void raw_loader_window_bt_loadrawfile(Fl_Button* bt, void*)
 	rlw->strout_totalsize->value((const char*)temp);
 
 	if(!fileselector((char*)"Select raw file",(char*)file,0,(char*)"*.img",0,0))
-	{	
+	{
 		disklayout = rlw->choice_disklayout->value();
 		if(disklayout>=1)
 		{

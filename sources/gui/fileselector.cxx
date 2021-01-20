@@ -6,7 +6,7 @@ int fileselector(char * title,char * str,char *filename,char *filter,int save,in
 {
 	char * path;
 	Fl_Native_File_Chooser fnfc;
-  
+
 	fnfc.title(title);
 
 	fnfc.options(Fl_Native_File_Chooser::SAVEAS_CONFIRM|Fl_Native_File_Chooser::NEW_FOLDER|Fl_Native_File_Chooser::USE_FILTER_EXT);
@@ -28,7 +28,7 @@ int fileselector(char * title,char * str,char *filename,char *filter,int save,in
 
 	fnfc.filter(filter);
 
-	if(filename)	
+	if(filename)
 	{
 		fnfc.preset_file(filename);
 	}
@@ -44,7 +44,7 @@ int fileselector(char * title,char * str,char *filename,char *filter,int save,in
 			break; // CANCEL
 		}
 		default:
-		{			
+		{
 			path=(char*)fnfc.filename();
 			sprintf(str,"%s",path);
 			return 0;
