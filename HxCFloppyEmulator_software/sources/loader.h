@@ -8,7 +8,7 @@
 		unsigned char sectorsize;
 		unsigned long numberoftrack;
 		unsigned char tracktype;
-		unsigned char sidecfg;	
+		unsigned char sidecfg;
 		unsigned long gap3;
 		unsigned long rpm;
 		unsigned long bitrate;

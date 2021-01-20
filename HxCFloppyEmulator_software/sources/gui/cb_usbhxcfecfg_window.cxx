@@ -70,7 +70,7 @@ void tick_usb(void *v) {
 	USBStats stats;
 	int status;
 	usbhxcfecfg_window *window;
-	
+
 	window=(usbhxcfecfg_window *)v;
 
 #if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)

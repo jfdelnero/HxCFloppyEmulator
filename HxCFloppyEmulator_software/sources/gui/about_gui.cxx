@@ -312,6 +312,6 @@ About_box::About_box()
 	demostate = 0;
 
 	Fl::add_timeout( 0.02, tick, (void*)this);
-	
+
 	return;
 }

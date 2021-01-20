@@ -261,10 +261,10 @@ string_entry strings_list[]=
 	{ STR_MAINWINDOW_0018, "Track Analyzer" },
 	{ STR_MAINWINDOW_0019, "Low level tracks viewer" },
 	{ STR_MAINWINDOW_0020, "" },
-	
+
 	{ 0x0000, 0x0000 }
 };
-	
+
 const char * getString(unsigned int str_id)
 {
 	int i;
