@@ -149,6 +149,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 	HXCFE_TRKSTREAM *track_dump;
 	HXCFE_FXSA * fxs;
 	char tmp_filename[512];
+	int tick_period,freq;
 
 	uint32_t * trackbuf_dword;
 	uint8_t * block_buf;
@@ -167,6 +168,16 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 	floppycontext->hxc_printf(MSG_INFO_1,"head : %d",BIGENDIAN_WORD( dfibh.head ));
 	floppycontext->hxc_printf(MSG_INFO_1,"sector : %d",BIGENDIAN_WORD( dfibh.sector ));
 	floppycontext->hxc_printf(MSG_INFO_1,"data_length : 0x%.4X",BIGENDIAN_DWORD( dfibh.data_length ));
+
+	freq = hxcfe_getEnvVarValue( floppycontext, "DFILOADER_SAMPLE_FREQUENCY_MHZ" );
+	tick_period = 10000;  // 10 ns per tick
+
+	if(freq>0 && freq <= 1000)
+	{
+		tick_period = (int)((float)tick_period * (float)((float)100  / (float)freq));
+	}
+
+	floppycontext->hxc_printf(MSG_INFO_1,"Sample tick period : %d ps", tick_period);
 
 	fxs = hxcfe_initFxStream(floppycontext);
 	if(fxs)
@@ -190,7 +201,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 					memset(trackbuf_dword,0x00,(pulses_cnt+1)*sizeof(uint32_t));
 					dfi_rev2_decode( NULL, NULL, BIGENDIAN_DWORD( dfibh.data_length ), block_buf, trackbuf_dword);
 
-					hxcfe_FxStream_setResolution(fxs,10000); // 10 ns per tick
+					hxcfe_FxStream_setResolution(fxs, tick_period);
 
 					track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf_dword,32,(pulses_cnt), HXCFE_STREAMCHANNEL_TYPE_RLEEVT, "data", NULL);
 					if(track_dump)
