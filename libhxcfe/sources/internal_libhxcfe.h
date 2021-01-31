@@ -147,15 +147,15 @@ typedef struct pll_stat_
 
 	// last pulse phase
 	int32_t lastpulsephase;
-	
+
 	int     tick_freq;
 	int     pll_min_max_percent;
 
 	int     fast_correction_ratio_n,fast_correction_ratio_d;
 	int     slow_correction_ratio_n,slow_correction_ratio_d;
-	
+
 	int     gcr_inter_band_rejection;
-	
+
 	int     max_pll_error_ticks;
 
 }pll_stat;
@@ -173,7 +173,7 @@ typedef struct _HXCFE_FXSA
 
 	int32_t filter;
 	int32_t filterpasses;
-	
+
 	int     analysis_window_size;
 	int     analysis_rev2rev_max_pulses_jitter;
 
