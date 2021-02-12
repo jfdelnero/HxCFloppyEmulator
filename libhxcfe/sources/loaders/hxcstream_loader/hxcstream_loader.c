@@ -71,6 +71,8 @@
 #include "misc/env.h"
 #include "misc/script_exec.h"
 
+extern float clv_track2rpm(int track, int type);
+
 int HxCStream_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	int found,track,side;
@@ -232,7 +234,7 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 	HXCFE_SIDE * curside;
 	int nbtrack,nbside;
 	float timecoef;
-
+	int mac_clv,c64_clv,victor9k_clv;
 	int phasecorrection;
 	int bitrate;
 	int filterpasses,filter;
@@ -245,6 +247,10 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 	if(imgfile)
 	{
+		mac_clv = 0;
+		c64_clv = 0;
+		victor9k_clv = 0;
+
 		if(!hxc_stat(imgfile,&staterep))
 		{
 			backup_env = duplicate_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
@@ -273,6 +279,10 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 			filepath = malloc( strlen(imgfile) + 32 );
 			sprintf(filepath,"%s%s",folder,"config.script");
 			hxcfe_execScriptFile(imgldr_ctx->hxcfe, filepath);
+
+			mac_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV" );
+			c64_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_C64CLV" );
+			victor9k_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_VICTOR9KCLV" );
 
 			if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "HXCSTREAMLOADER_DOUBLE_STEP" ) & 1 )
 				trackstep = 2;
@@ -367,6 +377,15 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
 					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),(floppydisk->floppyNumberOfTrack*trackstep)*2 );
+
+					if(mac_clv)
+						timecoef = (float)mac_clv / clv_track2rpm(j,1);
+
+					if(c64_clv)
+						timecoef = (float)c64_clv / clv_track2rpm(j,2);
+
+					if(victor9k_clv)
+						timecoef = (float)victor9k_clv / clv_track2rpm(j,3);
 
 					sprintf(filepath,"%s%s%.2d.%d.hxcstream",folder,fname,j,i);
 
