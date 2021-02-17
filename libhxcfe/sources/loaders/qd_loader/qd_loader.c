@@ -73,7 +73,7 @@ int QD_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * i
 	{
 		header = (qdhfefileformatheader *)&imgfile->file_header;
 
-		if( !strncmp((char*)header->HEADERSIGNATURE,"HXCQDDRV",8))
+		if( !strncmp((char*)header->HEADERSIGNATURE,"HXCQDDRV",8) || (header->HEADERSIGNATURE[3] == 'Q' && header->HEADERSIGNATURE[4] == 'D') )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"QD_libIsValidDiskFile : QD file !");
 			return HXCFE_VALIDFILE;
@@ -115,8 +115,16 @@ int QD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 
 	hxc_fread(&header,sizeof(header),f);
 
-	if(!strncmp((char*)header.HEADERSIGNATURE,"HXCQDDRV",8))
+	if(!strncmp((char*)header.HEADERSIGNATURE,"HXCQDDRV",8) || (header.HEADERSIGNATURE[3] == 'Q' && header.HEADERSIGNATURE[4] == 'D'))
 	{
+		if( !header.number_of_track && !header.number_of_side && !header.bitRate && !header.track_list_offset)
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_WARNING,"Malformed QD File - Guessing some parameters...");
+			header.number_of_track = 1;
+			header.number_of_side = 1;
+			header.track_list_offset = 512;
+			header.bitRate = 203128;
+		}
 
 		floppydisk->floppyNumberOfTrack = header.number_of_track;
 		floppydisk->floppyNumberOfSide = header.number_of_side;
