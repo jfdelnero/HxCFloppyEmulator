@@ -310,6 +310,8 @@ Fl_Menu_Item feifcfg_choices[]=
 	{ "Amiga HD",0,NULL,(void*)AMIGA_HD_FLOPPYMODE},
 	{ "Amstrad CPC",0,NULL,(void*)CPC_DD_FLOPPYMODE},
 	{ "MSX 2",0,NULL,(void*)MSX2_DD_FLOPPYMODE},
+	{ "IBM PC DD/HD (Auto)",0,NULL,(void*)IBMPC_DD_HD_FLOPPYMODE},
+	{ "AKAI S950 DD/HD (Auto)",0,NULL,(void*)S950_DD_HD_FLOPPYMODE},
 	{ "Custom",0,NULL,(void*)0x80},
 	{ 0,0,0,(void*)0},
 	{0}
