@@ -77,7 +77,7 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 		memset(disk_info_block,0,0x100);
 
 		cpcdsk_fh = (cpcdsk_fileheader *)&disk_info_block;
-		strncpy((char*)&cpcdsk_fh->headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",sizeof(cpcdsk_fh->headertag));
+		memcpy((char*)&cpcdsk_fh->headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",sizeof(cpcdsk_fh->headertag));
 
 		snprintf((char*)&cpcdsk_fh->creatorname,sizeof(cpcdsk_fh->creatorname),"HxC%s",STR_FILE_VERSION2);
 		cpcdsk_fh->creatorname[sizeof(cpcdsk_fh->creatorname)-1] = 0;
