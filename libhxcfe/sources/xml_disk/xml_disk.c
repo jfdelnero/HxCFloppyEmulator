@@ -464,13 +464,16 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 	switch(ad->current_state)
 	{
 		case DISK_LAYOUT_NAME:
-			strncpy((char*)&ad->name,(char*)buffer,XML_STRING_MAXSIZE);
+			strncpy((char*)&ad->name,(char*)buffer,XML_STRING_MAXSIZE - 1);
+			ad->name[XML_STRING_MAXSIZE - 1] = 0;
 		break;
 		case DISK_LAYOUT_DESCRIPTION:
-			strncpy((char*)&ad->description,(char*)buffer,XML_STRING_MAXSIZE);
+			strncpy((char*)&ad->description,(char*)buffer,XML_STRING_MAXSIZE - 1);
+			ad->description[XML_STRING_MAXSIZE - 1] = 0;
 		break;
 		case FILEEXT:
-			strncpy((char*)&ad->file_extensions,(char*)buffer,XML_STRING_MAXSIZE);
+			strncpy((char*)&ad->file_extensions,(char*)buffer,XML_STRING_MAXSIZE - 1);
+			ad->file_extensions[XML_STRING_MAXSIZE - 1] = 0;
 		break;
 		case INTERFACE_MODE:
 			ad->interface_mode = hxcfe_getFloppyInterfaceModeID(ad->floppycontext,(char*)buffer);
