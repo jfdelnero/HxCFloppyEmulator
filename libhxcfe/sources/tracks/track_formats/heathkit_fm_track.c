@@ -306,9 +306,21 @@ void tg_addHeathkitSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfi
 
 	if(currentside->indexbuffer)
 	{
-		if( sectorconfig->sector == 9 )
+		// Hard-sectored Heathkit H8 disks use track to track sector skew of 5
+		// -> need to place the main index on sector 9 for even tracks and sector 4 for odd tracks...
+		if(sectorconfig->cylinder & 1)
 		{
-			us2index( (tg->last_bit_offset + 5000) % currentside->tracklen,currentside,2000,1,0);
+			if( sectorconfig->sector == 4 )
+			{
+				us2index( (tg->last_bit_offset + 5000) % currentside->tracklen,currentside,2000,1,0);
+			}
+		}
+		else
+		{
+			if( sectorconfig->sector == 9 )
+			{
+				us2index( (tg->last_bit_offset + 5000) % currentside->tracklen,currentside,2000,1,0);
+			}
 		}
 
 		us2index( tg->last_bit_offset % currentside->tracklen,currentside,2000,1,0);
