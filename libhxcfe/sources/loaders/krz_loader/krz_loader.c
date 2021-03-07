@@ -61,7 +61,7 @@
 
 #include "../fat12floppy_loader/fat12.h"
 
-extern unsigned char msdos_bootsector;
+extern unsigned char msdos_bootsector[];
 
 int KRZ_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {

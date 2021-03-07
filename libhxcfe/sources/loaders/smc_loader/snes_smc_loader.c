@@ -62,7 +62,7 @@
 
 #include "libhxcadaptor.h"
 
-extern unsigned char msdos_bootsector;
+extern unsigned char msdos_bootsector[];
 
 int is_gamedoctor_file(char * imgfile)
 {
