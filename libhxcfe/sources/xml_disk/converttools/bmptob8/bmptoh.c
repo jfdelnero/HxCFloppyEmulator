@@ -196,7 +196,7 @@ int buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
 	FILE * file2;
 
 	char temp[128];
-	char temp2[128];
+	char temp2[256];
 
 	j = strlen(includefile);
 	if(j)
