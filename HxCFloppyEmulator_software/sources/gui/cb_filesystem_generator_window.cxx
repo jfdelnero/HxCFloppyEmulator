@@ -263,7 +263,8 @@ int checkfileext(char * path,char *ext)
 			getfilenameext(path,(char*)&pathext);
 			hxc_strlower(pathext);
 
-			strncpy((char*)srcext,ext,sizeof(srcext));
+			strncpy((char*)srcext,ext,sizeof(srcext) - 1);
+			srcext[sizeof(srcext) - 1] = 0;
 			hxc_strlower(srcext);
 
 			if(!strncmp(pathext,srcext,sizeof(pathext)))
@@ -384,7 +385,9 @@ int displaydir(HXCFE_FSMNG  * fsmng,filesystem_generator_window *fgw,char * fold
 					totalsize = totalsize + dirent.size;
 				}
 
-				strncpy(fullpath,folder,sizeof(fullpath));
+				strncpy(fullpath,folder,sizeof(fullpath) - 1);
+				fullpath[sizeof(fullpath) - 1] = 0;
+
 				sec_strncat(fullpath,dirent.entryname,sizeof(fullpath));
 
 				if(dir)
@@ -449,7 +452,7 @@ int getdir(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,c
 {
 	char fullpath[1024];
 	char fullpathdst[1024];
-	char progresstxt[1024];
+	char progresstxt[1024*3];
 	int dirhandle;
 	int filesize;
 	int ret;
@@ -479,7 +482,8 @@ int getdir(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,c
 					dir = 1;
 				}
 
-				strncpy(fullpathdst,dstfolder,sizeof(fullpathdst));
+				strncpy(fullpathdst,dstfolder,sizeof(fullpathdst)-1);
+				fullpathdst[sizeof(fullpathdst)-1] = 0;
 
 				if(fullpathdst[strlen(fullpathdst)-1] != SEPARATOR)
 				{
@@ -488,7 +492,8 @@ int getdir(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,c
 
 				sec_strncat(fullpathdst,dirent.entryname,sizeof(fullpathdst));
 
-				strncpy(fullpath,folder,sizeof(fullpath));
+				strncpy(fullpath,folder,sizeof(fullpath)-1);
+				fullpath[sizeof(fullpath)-1] = 0;
 				sec_strncat(fullpath,dirent.entryname,sizeof(fullpath));
 
 				if(dir)
@@ -518,7 +523,7 @@ int getdir(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,c
 						memset(membuf,0,dirent.size);
 					}
 
-					sprintf(progresstxt,"Reading %s ...",fullpath);
+					snprintf(progresstxt,sizeof(progresstxt),"Reading %s ...",fullpath);
 					fsw->txtout_freesize->value(progresstxt);
 					fsw->txtout_freesize->redraw();
 
@@ -532,7 +537,7 @@ int getdir(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,c
 							{
 								if(hxcfe_readFile( fsmng,floppyfile,membuf,dirent.size) != dirent.size )
 								{
-									sprintf(progresstxt,"Read file %s failed !!!",fullpath);
+									snprintf(progresstxt,sizeof(progresstxt),"Read file %s failed !!!",fullpath);
 									fsw->txtout_freesize->value(progresstxt);
 									fsw->txtout_freesize->color(FL_RED);
 									fsw->txtout_freesize->redraw();
@@ -542,7 +547,7 @@ int getdir(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,c
 							}
 							else
 							{
-								sprintf(progresstxt,"Cannot open file %s !!!",fullpath);
+								snprintf(progresstxt,sizeof(progresstxt),"Cannot open file %s !!!",fullpath);
 								fsw->txtout_freesize->value(progresstxt);
 								fsw->txtout_freesize->color(FL_RED);
 								fsw->txtout_freesize->redraw();
@@ -550,7 +555,7 @@ int getdir(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,c
 
 							if(!fwrite(membuf,dirent.size,1,f))
 							{
-								sprintf(progresstxt,"Write file %s failed !!!",fullpathdst);
+								snprintf(progresstxt,sizeof(progresstxt),"Write file %s failed !!!",fullpathdst);
 								fsw->txtout_freesize->value(progresstxt);
 								fsw->txtout_freesize->color(FL_RED);
 								fsw->txtout_freesize->redraw();
@@ -561,7 +566,7 @@ int getdir(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,c
 					}
 					else
 					{
-						sprintf(progresstxt,"Cannot create local file %s !!!",fullpathdst);
+						snprintf(progresstxt,sizeof(progresstxt),"Cannot create local file %s !!!",fullpathdst);
 						fsw->txtout_freesize->value(progresstxt);
 						fsw->txtout_freesize->color(FL_RED);
 						fsw->txtout_freesize->redraw();
@@ -580,7 +585,7 @@ int getdir(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,c
 	}
 	else
 	{
-		sprintf(progresstxt,"Reading %s ...",folder);
+		snprintf(progresstxt,sizeof(progresstxt),"Reading %s ...",folder);
 		fsw->txtout_freesize->value(progresstxt);
 		fsw->txtout_freesize->redraw();
 
@@ -600,7 +605,7 @@ int getdir(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,c
 
 			if(hxcfe_readFile( fsmng,floppyfile,membuf,filesize) != filesize )
 			{
-				sprintf(progresstxt,"Read file %s failed !!!",folder);
+				snprintf(progresstxt,sizeof(progresstxt),"Read file %s failed !!!",folder);
 				fsw->txtout_freesize->value(progresstxt);
 				fsw->txtout_freesize->color(FL_RED);
 				fsw->txtout_freesize->redraw();
@@ -608,7 +613,8 @@ int getdir(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,c
 
 			hxcfe_closeFile(fsmng, floppyfile);
 
-			strncpy(fullpathdst,dstfolder,sizeof(fullpathdst));
+			strncpy(fullpathdst,dstfolder,sizeof(fullpathdst)-1);
+			fullpathdst[sizeof(fullpathdst)-1] = 0;
 
 			if(fullpathdst[strlen(fullpathdst)-1] != SEPARATOR)
 			{
@@ -630,7 +636,7 @@ int getdir(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,c
 				{
 					if(!fwrite(membuf,filesize,1,f))
 					{
-						sprintf(progresstxt,"Write file %s failed !!!",fullpathdst);
+						snprintf(progresstxt,sizeof(progresstxt),"Write file %s failed !!!",fullpathdst);
 						fsw->txtout_freesize->value(progresstxt);
 						fsw->txtout_freesize->color(FL_RED);
 						fsw->txtout_freesize->redraw();
@@ -640,7 +646,7 @@ int getdir(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,c
 			}
 			else
 			{
-				sprintf(progresstxt,"Cannot create local file %s !!!",fullpathdst);
+				snprintf(progresstxt,sizeof(progresstxt),"Cannot create local file %s !!!",fullpathdst);
 				fsw->txtout_freesize->value(progresstxt);
 				fsw->txtout_freesize->color(FL_RED);
 				fsw->txtout_freesize->redraw();
@@ -657,7 +663,7 @@ int getdir(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,c
 int deltree(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,int level)
 {
 	char fullpath[1024];
-	char progresstxt[1024];
+	char progresstxt[2048];
 	int dirhandle;
 	int ret;
 	int dir;
@@ -687,7 +693,8 @@ int deltree(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,
 					dir = 1;
 				}
 
-				strncpy(fullpath,folder,sizeof(fullpath));
+				strncpy(fullpath,folder,sizeof(fullpath)-1);
+				fullpath[sizeof(fullpath)-1] = 0;
 				sec_strncat(fullpath,dirent.entryname,sizeof(fullpath));
 
 				if(dir)
@@ -709,7 +716,7 @@ int deltree(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,
 				}
 				else
 				{
-					sprintf(progresstxt,"Delete %s ...",fullpath);
+					snprintf(progresstxt,sizeof(progresstxt),"Delete %s ...",fullpath);
 					fsw->txtout_freesize->value(progresstxt);
 					fsw->txtout_freesize->redraw();
 
@@ -1073,7 +1080,8 @@ int load_indexed_fileimage(int index)
 				findfile_handle = hxc_find_first_file(cur_directory,"*.hfe",&fi);
 				if(findfile_handle)
 				{
-					strncpy(filename,fi.filename,sizeof(filename));
+					strncpy(filename,fi.filename,sizeof(filename)-1);
+					filename[sizeof(filename)-1] = 0;
 				}
 				else
 				{
@@ -1083,7 +1091,8 @@ int load_indexed_fileimage(int index)
 			}
 			else
 			{
-				strncpy(filename,fi.filename,sizeof(filename));
+				strncpy(filename,fi.filename,sizeof(filename)-1);
+				filename[sizeof(filename)-1] = 0;
 			}
 
 			hxc_find_close(findfile_handle);
@@ -1151,7 +1160,7 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 	unsigned char * buffer;
 	char fullpath[1024];
 	char srcfullpath[1024];
-	char progresstxt[1024];
+	char progresstxt[1024*3];
 	void * findfile_handle;
 	filefoundinfo ffi;
 
@@ -1164,7 +1173,8 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 
 	if(entry.st_mode&S_IFDIR)
 	{
-		strncpy(fullpath,dstpath,sizeof(fullpath));
+		strncpy(fullpath,dstpath,sizeof(fullpath)-1);
+		fullpath[sizeof(fullpath)-1] = 0;
 
 		// Is the folder already there ?
 		ret = 0;
@@ -1190,11 +1200,13 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 					{
 						if(strcmp(ffi.filename,".") && strcmp(ffi.filename,".."))
 						{
-							strncpy(srcfullpath,srcpath,sizeof(srcfullpath));
+							strncpy(srcfullpath,srcpath,sizeof(srcfullpath)-1);
+							srcfullpath[sizeof(srcfullpath)-1] = 0;
 							sec_strncat(srcfullpath,PATHSEPARATOR,sizeof(srcfullpath));
 							sec_strncat(srcfullpath,ffi.filename,sizeof(srcfullpath));
 
-							strncpy(fullpath,dstpath,sizeof(fullpath));
+							strncpy(fullpath,dstpath,sizeof(fullpath)-1);
+							fullpath[sizeof(fullpath)-1] = 0;
 							sec_strncat(fullpath,"/",sizeof(fullpath));
 							sec_strncat(fullpath,ffi.filename,sizeof(fullpath));
 							if(addentry(fsw, fsmng, srcfullpath, fullpath)<0)
@@ -1206,11 +1218,13 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 					}
 					else
 					{
-						strncpy(srcfullpath,srcpath,sizeof(srcfullpath));
+						strncpy(srcfullpath,srcpath,sizeof(srcfullpath)-1);
+						srcfullpath[sizeof(srcfullpath)-1] = 0;
 						sec_strncat(srcfullpath,PATHSEPARATOR,sizeof(srcfullpath));
 						sec_strncat(srcfullpath,ffi.filename,sizeof(srcfullpath));
 
-						strncpy(fullpath,dstpath,sizeof(fullpath));
+						strncpy(fullpath,dstpath,sizeof(fullpath)-1);
+						fullpath[sizeof(fullpath)-1] = 0;
 						sec_strncat(fullpath,"/",sizeof(fullpath));
 						sec_strncat(fullpath,ffi.filename,sizeof(fullpath));
 						if(addentry(fsw, fsmng, srcfullpath, fullpath)<0)
@@ -1272,7 +1286,8 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 						}
 					}
 
-					strncpy(fullpath,dstpath,sizeof(fullpath));
+					strncpy(fullpath,dstpath,sizeof(fullpath)-1);
+					fullpath[sizeof(fullpath)-1] = 0;
 					file_handle = hxcfe_createFile(fsmng,fullpath );
 					if(file_handle>0)
 					{
@@ -1284,7 +1299,7 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 
 						if( wsize != size )
 						{
-							sprintf(progresstxt,"Error: %s Write failed !!! No more space ? ",fullpath);
+							snprintf(progresstxt,sizeof(progresstxt),"Error: %s Write failed !!! No more space ? ",fullpath);
 							printsize(&progresstxt[strlen(progresstxt)],size);
 							strcat(progresstxt," Needed ! ");
 
@@ -1481,7 +1496,7 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 	HXCFE* floppyem;
 	filesystem_generator_window *fsw;
 	s_param_fs_params * fsparams2;
-	char fullpath[1024];
+	char fullpath[1024*2];
 	char basepath[1024];
 	char itempath[512];
 	int filecount,i,j,k;
@@ -1554,7 +1569,8 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 						Fl::lock();
 						fsw->fs_browser->item_pathname((char*)&itempath, sizeof(itempath), flt_item);
 						Fl::unlock();
-						strncpy(basepath,itempath+2,sizeof(basepath));
+						strncpy(basepath,itempath+2,sizeof(basepath)-1);
+						basepath[sizeof(basepath)-1] = 0;
 					}
 
 					Fl::lock();
