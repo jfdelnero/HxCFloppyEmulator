@@ -260,6 +260,7 @@ int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 
 				packedsize = 0;
 				number_of_pulses = 0;
+				track_size = 0;
 
 				stream_track = convert_track(imgldr_ctx, floppy->tracks[i]->sides[j],&track_size,&stream_track_size, &number_of_pulses);
 				if(stream_track)
