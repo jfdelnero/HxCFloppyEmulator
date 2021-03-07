@@ -566,8 +566,11 @@ int32_t hxcfe_preloadImgInfos(HXCFE_IMGLDR * imgldr_ctx, char * imgname, HXCFE_I
 		hxc_fclose(f);
 	}
 
-	strncpy(file_infos->file_extension, hxc_getfilenameext( imgname, 0, SYS_PATH_TYPE ), sizeof(file_infos->file_extension));
+	strncpy(file_infos->file_extension, hxc_getfilenameext( imgname, 0, SYS_PATH_TYPE ), sizeof(file_infos->file_extension)-1);
+	file_infos->file_extension[sizeof(file_infos->file_extension)-1] = 0;
+
 	strncpy(file_infos->path, imgname, sizeof(file_infos->path));
+	file_infos->path[sizeof(file_infos->path)-1] = 0;
 
 	return HXCFE_NOERROR;
 }
