@@ -383,7 +383,8 @@ void * hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 			{
 				fileinfo->isdirectory = 0;
 				fileinfo->size = fileStat.st_size;
-				strncpy(fileinfo->filename,hxc_getfilenamebase(folder,NULL,SYS_PATH_TYPE),256);
+				strncpy(fileinfo->filename,hxc_getfilenamebase(folder,NULL,SYS_PATH_TYPE),FILEFOUND_NAMESIZE - 1);
+				fileinfo->filename[FILEFOUND_NAMESIZE - 1] = 0;
 				return (void*)-1;
 			}
 		}

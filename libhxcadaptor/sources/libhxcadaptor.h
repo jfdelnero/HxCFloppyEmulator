@@ -13,6 +13,8 @@ int snprintf(char *outBuf, size_t size, const char *format, ...);
 #define DIR_SEPARATOR_CHAR '/'
 #endif
 
+#define FILEFOUND_NAMESIZE 256
+
 /////////////// Thread functions ////////////////
 
 typedef int (*THREADFUNCTION) (void* floppyemulator,void* hwemulator);
@@ -27,7 +29,7 @@ typedef struct threadinit_
 typedef struct filefoundinfo_
 {
 	int isdirectory;
-	char filename[256];
+	char filename[FILEFOUND_NAMESIZE];
 	int size;
 }filefoundinfo;
 
@@ -37,7 +39,7 @@ int hxc_waitevent( HXCFE* floppycontext, int id, int timeout );
 void hxc_pause( int ms );
 int hxc_createthread( HXCFE* floppycontext, void* hwcontext, THREADFUNCTION thread, int priority );
 
-unsigned long hxc_createcriticalsection( HXCFE* floppycontext, unsigned char id );
+void * hxc_createcriticalsection( HXCFE* floppycontext, unsigned char id );
 void hxc_entercriticalsection( HXCFE* floppycontext, unsigned char id );
 void hxc_leavecriticalsection( HXCFE* floppycontext, unsigned char id );
 void hxc_destroycriticalsection( HXCFE* floppycontext, unsigned char id );

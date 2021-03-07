@@ -204,12 +204,12 @@ int hxc_waitevent(HXCFE* floppycontext,int id,int timeout)
 #endif
 }
 
-unsigned long hxc_createcriticalsection(HXCFE* floppycontext,unsigned char id)
+void* hxc_createcriticalsection(HXCFE* floppycontext,unsigned char id)
 {
 #ifdef WIN32
 
 	InitializeCriticalSection(&criticalsectiontab[id]);
-	return (unsigned long)&criticalsectiontab[id];
+	return (void*)&criticalsectiontab[id];
 
 #else
 	//create mutex attribute variable
@@ -229,7 +229,7 @@ unsigned long hxc_createcriticalsection(HXCFE* floppycontext,unsigned char id)
 	// Mutex attribute can be destroy after initializing the mutex variable
 	pthread_mutexattr_destroy(&mAttr);
 
-	return (unsigned long)&criticalsectiontab[id];
+	return (void*)&criticalsectiontab[id];
 #endif
 }
 
