@@ -196,7 +196,7 @@ int buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
 	FILE * file2;
 
 	char temp[128];
-	char temp2[128];
+	char temp2[128*2];
 
 	j = strlen(includefile);
 	if(j)
@@ -220,9 +220,9 @@ int buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
 	}
 
 	if(info->type!=0xff)
-		sprintf(temp2,"data_bmp_%s.h",temp);
+		snprintf(temp2,sizeof(temp2),"data_bmp_%s.h",temp);
 	else
-		sprintf(temp2,"data_%s.h",temp);
+		snprintf(temp2,sizeof(temp2),"data_%s.h",temp);
 
 	printf("Create %s :",temp2);
 
