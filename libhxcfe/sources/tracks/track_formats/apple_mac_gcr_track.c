@@ -393,7 +393,10 @@ int get_next_AppleMacGCR_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 
 							DeNybbleSector6and2(sector->input_data, (uint8_t*)&nibble_sector_data[1], (uint8_t*)&checksum);
 
-							memcpy(sector->input_data, &sector->input_data[12],512);
+							for(i=0;i<512;i++)
+							{
+								sector->input_data[i] = sector->input_data[i + 12];
+							}
 
 							if(
 								(checksum[3] == nibble_sector_data[700]) &&
