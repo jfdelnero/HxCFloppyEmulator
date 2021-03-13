@@ -76,6 +76,8 @@ typedef struct track_state_
 	int32_t set;
 }track_state;
 
+#define MAX_TRACKS_NB 256
+
 typedef struct app_data
 {
 	HXCFE* floppycontext;
@@ -93,7 +95,7 @@ typedef struct app_data
 	HXCFE_FLPGEN * fb;
 	HXCFE_FLOPPY* floppy;
 
-	track_state ts[256*2];
+	track_state ts[MAX_TRACKS_NB*2];
 
 	int32_t xmlcheck;
 
@@ -933,7 +935,7 @@ HXCFE_XMLLDR* hxcfe_initXmlFloppy( HXCFE* floppycontext )
 		ad->statestack[0].track_type = IBMFORMAT_DD;
 		ad->p = rfw->xml_parser;
 
-		memset(ad->ts,0,sizeof(track_state)*256);
+		memset(ad->ts,0,sizeof(track_state)*MAX_TRACKS_NB*2);
 
 		XML_ParserReset(rfw->xml_parser, NULL);
 
@@ -1114,6 +1116,8 @@ HXCFE_FLOPPY* hxcfe_generateXmlFloppy ( HXCFE_XMLLDR* xmlfb_ctx, uint8_t * rambu
 	ad->image_data = rambuffer;
 	ad->buffer_size = buffersize;
 
+	memset(ad->ts,0,sizeof(track_state)*MAX_TRACKS_NB*2);
+
 	XML_ParserReset(xmlfb_ctx->xml_parser, NULL);
 	XML_SetUserData(xmlfb_ctx->xml_parser, (void *) ad);
 	XML_SetElementHandler(xmlfb_ctx->xml_parser, start, end);
@@ -1222,6 +1226,8 @@ int32_t hxcfe_isMatchingXmlFloppy ( HXCFE_XMLLDR* xmlfb_ctx, char * filename, ui
 
 	ad->image_data = rambuffer;
 	ad->buffer_size = buffersize;
+
+	memset(ad->ts,0,sizeof(track_state)*MAX_TRACKS_NB*2);
 
 	XML_ParserReset(xmlfb_ctx->xml_parser, NULL);
 	XML_SetUserData(xmlfb_ctx->xml_parser, (void *) ad);
