@@ -421,8 +421,14 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 int KryoFluxStream_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int i,j, nbrevolutions;
+	int track_step;
 
 	nbrevolutions = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "KFRAWEXPORT_NUMBER_OF_REVOLUTIONS" );
+
+	track_step = 1;
+
+	if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "KFRAWEXPORT_DOUBLE_STEP" ) == 1 )
+		track_step = 2;
 
 	for(j=0;j<floppy->floppyNumberOfSide;j++)
 	{
@@ -430,7 +436,7 @@ int KryoFluxStream_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * flo
 		{
 			hxcfe_imgCallProgressCallback(imgldr_ctx,i + (j*floppy->floppyNumberOfTrack),floppy->floppyNumberOfTrack*floppy->floppyNumberOfSide );
 
-			write_kf_stream_track(imgldr_ctx, filename,floppy->tracks[i]->sides[j],i,j,nbrevolutions);
+			write_kf_stream_track(imgldr_ctx, filename,floppy->tracks[i]->sides[j],i*track_step,j,nbrevolutions);
 		}
 	}
 
