@@ -64,6 +64,8 @@
 
 #include "thirdpartylibs/lz4/lib/lz4lib.h"
 
+#define SHIFTER_FREQ 25000000
+
 // 0XXXXXXX  < 128
 // 10XXXXXX XXXXXXXX < 16K
 // 110XXXXX XXXXXXXX XXXXXXXX < 6M
@@ -74,40 +76,67 @@ unsigned char * convert_track(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side,unsig
 	unsigned int j,k;
 	unsigned int tracklen,bitrate;
 	unsigned int track_time;
-
+	int data_state,weak_state;
 	unsigned int final_track_len;
-	unsigned int timepos,oldbitpos,bitpos;
+	int timepos,oldbitpos,bitpos;
 
 	unsigned char  * data_track;
 	unsigned int bits_delta,nb_pulses;
+	float adjust_factor;
 
 	track_time = 0;
 
 	tracklen = side->tracklen;
 	bitrate = side->bitrate;
 
-	for(j=0;j<tracklen;j++)
+	if(side->timingbuffer)
 	{
-		getbit(side->databuffer,j);
-
-		if(side->timingbuffer)
+		for(j=0;j<tracklen;j++)
 		{
 			bitrate = side->timingbuffer[j/8];
+			track_time += ( (1*1000*1000*1000) / (bitrate*2));
 		}
-
-		track_time += ( (1*1000*1000*1000) / (bitrate*2));
+	}
+	else
+	{
+		for(j=0;j<tracklen;j++)
+		{
+			track_time += ( (1*1000*1000*1000) / (bitrate*2));
+		}
 	}
 
+	adjust_factor = 1;
+
 	final_track_len = ( track_time / (DEFAULT_BITS_PERIOD / 1000) );
+
+	if( final_track_len < ((float)SHIFTER_FREQ * ((float)0.24) ) && \
+	    final_track_len > ((float)SHIFTER_FREQ * ((float)0.18) )
+	)
+	{
+		// 300 RPM
+		adjust_factor = (float)(((float)SHIFTER_FREQ * ((float)0.2) ) / (float)final_track_len);
+	}
+
+	if( final_track_len < ((float)SHIFTER_FREQ * ((float)0.18) ) && \
+	    final_track_len > ((float)SHIFTER_FREQ * ((float)0.13) )
+	)
+	{
+		// 360 RPM
+		adjust_factor = (float)(((float)SHIFTER_FREQ * ((float)0.166) ) / (float)final_track_len);
+	}
+
+	final_track_len = (unsigned int)((float)final_track_len * adjust_factor);
 
 	if(final_track_len & 0x1F)
 		final_track_len = (final_track_len & ~0x1F) + 0x20;
 
-	data_track = malloc(tracklen);
+	printf(">>I>%d\n",final_track_len);
+
+	data_track = malloc(tracklen*2);
 
 	if( data_track )
 	{
-		memset(data_track,0,tracklen);
+		memset(data_track,0,tracklen*2);
 
 		track_time = 0;
 
@@ -115,12 +144,20 @@ unsigned char * convert_track(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side,unsig
 		nb_pulses = 0;
 
 		oldbitpos = 0;
+
+		weak_state = 0;
 		for(j=0;j<tracklen;j++)
 		{
-			if(getbit(side->databuffer,j))
+			data_state = getbit(side->databuffer,j);
+			if(side->flakybitsbuffer)
+			{
+				weak_state = getbit(side->flakybitsbuffer,j);
+			}
+
+			if( data_state || weak_state )
 			{
 				timepos = track_time;
-				bitpos = timepos / (DEFAULT_BITS_PERIOD / 1000);
+				bitpos = (unsigned int)((float)( timepos / (DEFAULT_BITS_PERIOD / 1000) ) * adjust_factor);
 
 				bits_delta = bitpos - oldbitpos;
 				if( bits_delta < 0x00000080)
@@ -164,6 +201,13 @@ unsigned char * convert_track(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side,unsig
 
 				nb_pulses++;
 
+				if(weak_state)
+				{
+					bitpos++;
+					data_track[k++] = 1;
+					nb_pulses++;
+				}
+
 				oldbitpos = bitpos;
 			}
 
@@ -197,8 +241,11 @@ int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 	unsigned int track_size,number_of_pulses;
 	unsigned char tempbuf[512];
 	unsigned int max_packed_size;
+	int step;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write Stream HFE file %s.",filename);
+
+	step = 1;
 
 	if(!floppy->floppyNumberOfTrack)
 	{
@@ -216,7 +263,7 @@ int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 		FILEHEADER->formatrevision = 0;
 
 		FILEHEADER->flags = 0x00000000;
-		FILEHEADER->number_of_track=(unsigned char)floppy->floppyNumberOfTrack;
+		FILEHEADER->number_of_track=(unsigned char)floppy->floppyNumberOfTrack * step;
 		FILEHEADER->number_of_side=floppy->floppyNumberOfSide;
 		FILEHEADER->bits_period = DEFAULT_BITS_PERIOD;
 
@@ -262,7 +309,7 @@ int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 				number_of_pulses = 0;
 				track_size = 0;
 
-				stream_track = convert_track(imgldr_ctx, floppy->tracks[i]->sides[j],&track_size,&stream_track_size, &number_of_pulses);
+				stream_track = convert_track(imgldr_ctx, floppy->tracks[i/step]->sides[j],&track_size,&stream_track_size, &number_of_pulses);
 				if(stream_track)
 				{
 					max_packed_size = LZ4_compressBound(stream_track_size);
