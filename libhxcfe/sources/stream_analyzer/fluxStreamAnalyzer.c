@@ -38,7 +38,7 @@
 // File : fluxStreamAnalyzer.c
 // Contains: Flux (pulses) Stream analyzer
 //
-// Written by: DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
