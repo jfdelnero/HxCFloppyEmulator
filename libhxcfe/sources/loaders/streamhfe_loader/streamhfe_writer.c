@@ -130,8 +130,6 @@ unsigned char * convert_track(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side,unsig
 	if(final_track_len & 0x1F)
 		final_track_len = (final_track_len & ~0x1F) + 0x20;
 
-	printf(">>I>%d\n",final_track_len);
-
 	data_track = malloc(tracklen*2);
 
 	if( data_track )
@@ -153,6 +151,9 @@ unsigned char * convert_track(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side,unsig
 			{
 				weak_state = getbit(side->flakybitsbuffer,j);
 			}
+			
+			if(j> tracklen - 300)
+				weak_state = 1;
 
 			if( data_state || weak_state )
 			{
