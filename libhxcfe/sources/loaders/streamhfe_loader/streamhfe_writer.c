@@ -151,9 +151,6 @@ unsigned char * convert_track(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side,unsig
 			{
 				weak_state = getbit(side->flakybitsbuffer,j);
 			}
-			
-			if(j> tracklen - 300)
-				weak_state = 1;
 
 			if( data_state || weak_state )
 			{
