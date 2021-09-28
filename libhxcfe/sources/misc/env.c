@@ -198,7 +198,7 @@ int hxcfe_getEnvVarValue( HXCFE* hxcfe, char * varname)
 	{
 		if( strlen(str_return) > 2 )
 		{
-			if( str_return[0]=='0' && ( str_return[0]=='x' || str_return[0]=='X'))
+			if( str_return[0]=='0' && ( str_return[1]=='x' || str_return[1]=='X'))
 			{
 				value = (int)strtol(str_return, NULL, 0);
 			}
