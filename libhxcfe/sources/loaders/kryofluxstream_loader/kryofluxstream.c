@@ -567,21 +567,24 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 						}
 					}
 
-					if( ( index_events[nbindex-1].Prev_Index_Tick < ( Next_Max_Index_Tick / 4 ) * 3 ))
+					if(nbindex)
 					{
-						if ( ( index_events[nbindex-2].Prev_Index_Tick < ( Prev_Max_Index_Tick / 4 ) * 3 ) &&
-							 ( index_events[nbindex-2].Next_Index_Tick < ( Next_Max_Index_Tick / 4 ) * 3 ) )
+						if( ( index_events[nbindex-1].Prev_Index_Tick < ( Next_Max_Index_Tick / 4 ) * 3 ))
 						{
-							index_events[nbindex-1].type = FXSTRM_INDEX_SECTORINDEX;
+							if ( ( index_events[nbindex-2].Prev_Index_Tick < ( Prev_Max_Index_Tick / 4 ) * 3 ) &&
+								 ( index_events[nbindex-2].Next_Index_Tick < ( Next_Max_Index_Tick / 4 ) * 3 ) )
+							{
+								index_events[nbindex-1].type = FXSTRM_INDEX_SECTORINDEX;
+							}
+							else
+							{
+								index_events[nbindex-1].type = FXSTRM_INDEX_MAININDEX;
+							}
 						}
 						else
 						{
-							index_events[nbindex-1].type = FXSTRM_INDEX_MAININDEX;
+							index_events[nbindex-1].type = FXSTRM_INDEX_SECTORINDEX;
 						}
-					}
-					else
-					{
-						index_events[nbindex-1].type = FXSTRM_INDEX_SECTORINDEX;
 					}
 				}
 
