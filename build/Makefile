@@ -23,6 +23,9 @@ ifeq ($(TARGET), mingw32)
 else ifeq ($(TARGET), mingw64)
 		cd ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.x.x/ && export LDFLAGS='-static-libstdc++ -static-libgcc' && ./configure --host=x86_64-w64-mingw32 --prefix=/usr/share/mingw-w64
 		$(MAKE) -C ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.x.x/ DIRS=src CC=x86_64-w64-mingw32-gcc CPP=x86_64-w64-mingw32-g++
+else ifeq ($(TARGET), Darwin)
+		cd ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.x.x/ && export CFLAGS='-arch x86_64' && export CXXFLAGS='-arch x86_64' && export LDFLAGS='-arch x86_64' && ./configure --host=x86_64-apple-darwin
+		$(MAKE) -C ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.x.x/ DIRS=src
 else
 		$(MAKE) -C ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.x.x/ DIRS=src
 endif
