@@ -14,7 +14,7 @@
 		<sector_per_track>26</sector_per_track>
 		<sector_size>256</sector_size>
 		<interleave>2</interleave>
-		<formatvalue>0x40</formatvalue>
+		<formatvalue>0xE5</formatvalue>
 		<gap3>54</gap3>
 		<bitrate>500000</bitrate>
 		<pregap>0</pregap>
