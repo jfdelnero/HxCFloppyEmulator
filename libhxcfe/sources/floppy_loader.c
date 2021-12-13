@@ -113,6 +113,8 @@ HXCFE* hxcfe_init(void)
 
 		hxcfe_setEnvVar(hxcfe, "LIBVERSION", "v"STR_FILE_VERSION2);
 
+		hxcfe_initScript(hxcfe);
+
 		hxcfe->hxc_printf(MSG_INFO_0,"Starting HxCFloppyEmulator...");
 
 		init_script = data_unpack(data_init_script->data,data_init_script->csize,0,data_init_script->size);
@@ -225,6 +227,8 @@ void hxcfe_deinit(HXCFE* hxcfe)
 	if( hxcfe )
 	{
 		hxcfe->hxc_printf(MSG_INFO_0,"Stopping HxCFloppyEmulator...");
+
+		hxcfe_deinitScript(hxcfe);
 
 		if( hxcfe->image_handlers )
 		{

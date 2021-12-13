@@ -139,6 +139,10 @@ typedef int32_t (*HXCFE_TDPROGRESSOUT_FUNC)(uint32_t current, uint32_t total, vo
 #define _HXCFE_TDPROGRESSOUT_FUNC_
 #endif
 
+#ifndef _script_printf_func_
+typedef int (* SCRIPT_PRINTF_FUNC)(void * ctx, int MSGTYPE, char * string, ... );
+#define _script_printf_func_
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Init functions                                                                                 //
@@ -163,9 +167,12 @@ int                    hxcfe_getEnvVarValue( HXCFE* hxcfe, char * varname);
 // Scripts support functions                                                                      //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+int                    hxcfe_initScript( HXCFE * hxcfectx );
+void                   hxcfe_setScriptOutputFunc( HXCFE * hxcfectx, SCRIPT_PRINTF_FUNC ext_printf );
 int                    hxcfe_execScriptFile( HXCFE* hxcfe, char * script_path );
 int                    hxcfe_execScriptRam( HXCFE* hxcfe, unsigned char * script_buffer, int buffersize );
 int                    hxcfe_execScriptLine( HXCFE * hxcfe, char * line );
+int                    hxcfe_deinitScript( HXCFE * hxcfectx );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // stdio printf functions                                                                         //
@@ -177,6 +184,7 @@ int                    hxcfe_execScriptLine( HXCFE * hxcfe, char * line );
 #define MSG_WARNING                      2
 #define MSG_ERROR                        3
 #define MSG_DEBUG                        4
+#define MSG_NONE                         5
 
 int32_t                hxcfe_setOutputFunc( HXCFE* floppycontext, HXCFE_PRINTF_FUNC hxc_printf );
 

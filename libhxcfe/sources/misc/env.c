@@ -35,8 +35,8 @@
 //-------------------------------------------------------------------------------//
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
-// File : script_exec.c
-// Contains: script execution functions
+// File : env.c
+// Contains: Internal variables support.
 //
 // Written by: Jean-François DEL NERO
 //
@@ -46,41 +46,26 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
-#include "types.h"
-
-#include "internal_libhxcfe.h"
-#include "tracks/track_generator.h"
-#include "sector_search.h"
-#include "libhxcfe.h"
-#include "floppy_loader.h"
-
-#include "libhxcadaptor.h"
-
-#include "version.h"
+#include <stdint.h>
 
 #include "env.h"
 
-#define MAX_CFG_STRING_SIZE 1024
-
-int hxcfe_setEnvVar( HXCFE* hxcfe, char * varname, char * varvalue )
+envvar_entry * setEnvVar( envvar_entry * env, char * varname, char * varvalue )
 {
 	int i;
 	envvar_entry * tmp_envvars;
 
 	i = 0;
 
-	tmp_envvars = (envvar_entry *)hxcfe->envvar;
+	tmp_envvars = (envvar_entry *)env;
 
 	if(!tmp_envvars)
 	{
 		tmp_envvars = malloc(sizeof(envvar_entry) );
 		if(!tmp_envvars)
-			return -1;
+			goto alloc_error;
 
 		memset( tmp_envvars,0,sizeof(envvar_entry));
-
-		hxcfe->envvar = (void*)tmp_envvars;
 	}
 
 	// is the variable already there
@@ -107,7 +92,7 @@ int hxcfe_setEnvVar( HXCFE* hxcfe, char * varname, char * varvalue )
 			tmp_envvars[i].varvalue = malloc(strlen(varvalue)+1);
 
 			if(!tmp_envvars[i].varvalue)
-				return -1;
+				goto alloc_error;
 
 			memset(tmp_envvars[i].varvalue,0,strlen(varvalue)+1);
 			if(varvalue)
@@ -121,7 +106,7 @@ int hxcfe_setEnvVar( HXCFE* hxcfe, char * varname, char * varvalue )
 		{
 			tmp_envvars[i].name = malloc(strlen(varname)+1);
 			if(!tmp_envvars[i].name)
-				return -1;
+				goto alloc_error;
 
 			memset(tmp_envvars[i].name,0,strlen(varname)+1);
 			strcpy(tmp_envvars[i].name,varname);
@@ -131,7 +116,7 @@ int hxcfe_setEnvVar( HXCFE* hxcfe, char * varname, char * varvalue )
 				tmp_envvars[i].varvalue = malloc(strlen(varvalue)+1);
 
 				if(!tmp_envvars[i].varvalue)
-					return -1;
+					goto alloc_error;
 
 				memset(tmp_envvars[i].varvalue,0,strlen(varvalue)+1);
 				if(varvalue)
@@ -143,19 +128,21 @@ int hxcfe_setEnvVar( HXCFE* hxcfe, char * varname, char * varvalue )
 		}
 	}
 
-	hxcfe->envvar = (void*)tmp_envvars;
+	return tmp_envvars;
 
-	return 1;
+alloc_error:
+	return NULL;
 }
 
-char * hxcfe_getEnvVar( HXCFE* hxcfe, char * varname, char * varvalue)
+char * getEnvVar( envvar_entry * env, char * varname, char * varvalue)
 {
 	int i;
+
 	envvar_entry * tmp_envvars;
 
 	i = 0;
 
-	tmp_envvars = (envvar_entry *)hxcfe->envvar;
+	tmp_envvars = (envvar_entry *)env;
 	if(!tmp_envvars)
 		return NULL;
 
@@ -182,9 +169,9 @@ char * hxcfe_getEnvVar( HXCFE* hxcfe, char * varname, char * varvalue)
 	}
 }
 
-int hxcfe_getEnvVarValue( HXCFE* hxcfe, char * varname)
+env_var_value getEnvVarValue( envvar_entry * env, char * varname)
 {
-	int value;
+	env_var_value value;
 	char * str_return;
 
 	value = 0;
@@ -192,7 +179,7 @@ int hxcfe_getEnvVarValue( HXCFE* hxcfe, char * varname)
 	if(!varname)
 		return 0;
 
-	str_return = hxcfe_getEnvVar( hxcfe, varname, NULL);
+	str_return = getEnvVar( env, varname, NULL);
 
 	if(str_return)
 	{
@@ -200,7 +187,7 @@ int hxcfe_getEnvVarValue( HXCFE* hxcfe, char * varname)
 		{
 			if( str_return[0]=='0' && ( str_return[1]=='x' || str_return[1]=='X'))
 			{
-				value = (int)strtol(str_return, NULL, 0);
+				value = (env_var_value)STRTOVALUE(str_return, NULL, 0);
 			}
 			else
 			{
@@ -216,14 +203,14 @@ int hxcfe_getEnvVarValue( HXCFE* hxcfe, char * varname)
 	return value;
 }
 
-char * hxcfe_getEnvVarIndex( HXCFE* hxcfe, int index, char * varvalue)
+char * getEnvVarIndex( envvar_entry * env, int index, char * varvalue)
 {
 	int i;
 	envvar_entry * tmp_envvars;
 
 	i = 0;
 
-	tmp_envvars = (envvar_entry *)hxcfe->envvar;
+	tmp_envvars = (envvar_entry *)env;
 	if(!tmp_envvars)
 		return NULL;
 
