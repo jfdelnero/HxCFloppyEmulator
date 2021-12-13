@@ -57,7 +57,24 @@ int CUI_affiche(int MSGTYPE,const char * chaine, ...)
 
 		va_end( marker );
 	}
-    return 0;
+
+	return 0;
+}
+
+int SCRIPT_CUI_affiche(void * ctx, int MSGTYPE, char * string, ... )
+{
+	if( MSGTYPE!=MSG_DEBUG )
+	{
+		va_list marker;
+		va_start( marker, string );
+
+		vprintf(string,marker);
+		printf("\n");
+
+		va_end( marker );
+	}
+
+	return 0;
 }
 
 int isOption(int argc, char* argv[],char * paramtosearch,char * argtoparam)
@@ -1057,6 +1074,7 @@ int main(int argc, char* argv[])
 
 	hxcfe=hxcfe_init();
 	hxcfe_setOutputFunc(hxcfe,&CUI_affiche);
+	hxcfe_setScriptOutputFunc(hxcfe,&SCRIPT_CUI_affiche);
 
 	printf("HxC Floppy Emulator : Floppy image file converter v2.5.5.1\n");
 	printf("Copyright (C) 2006-2021 Jean-Francois DEL NERO\n");
