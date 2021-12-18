@@ -129,6 +129,7 @@
 #include "./loaders/hxcstream_loader/hxcstream_loader.h"
 #include "./loaders/discferret_dfi_loader/dfi_loader.h"
 #include "./loaders/a2r_loader/a2r_loader.h"
+#include "./loaders/micraln_loader/micraln_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -225,7 +226,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)Heathkit_libGetPluginInfo,
 	(GETPLUGININFOS)QD_libGetPluginInfo,
 	(GETPLUGININFOS)HxCStream_libGetPluginInfo,
-
+	(GETPLUGININFOS)MicralN_libGetPluginInfo,
 	//(GETPLUGININFOS)VFDDAT_libGetPluginInfo,
 
 	(GETPLUGININFOS)XMLDB_libGetPluginInfo,

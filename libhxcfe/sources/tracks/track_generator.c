@@ -235,6 +235,7 @@ int32_t pushTrackCode(track_generator *tg,uint8_t data,uint8_t clock,HXCFE_SIDE 
 		case TYCOMFORMAT_SD:
 		case HEATHKIT_HS_SD:
 		case DECRX02_SDDD:
+		case MICRALN_HS_SD:
 			if( tg->last_bit_offset & 7)
 			{
 				getFMcode(tg,data,clock,(unsigned char*)&tmp_encoded_data);
@@ -1160,6 +1161,10 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 			currentside->track_encoding = HEATHKIT_HS_FM_ENCODING;
 		break;
 
+		case MICRALN_HS_SD:
+			currentside->track_encoding = MICRALN_HS_FM_ENCODING;
+		break;
+
 		default:
 			trackenc = ISOIBM_MFM_ENCODING;
 		break;
@@ -1192,29 +1197,32 @@ void tg_addSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_
 		case UKNCFORMAT_DD:
 		case AED6200P_DD:
 			tg_addISOSectorToTrack(tg,sectorconfig,currentside);
-			break;
+		break;
 
 		case AMIGAFORMAT_DD:
 			tg_addAmigaSectorToTrack(tg,sectorconfig,currentside);
-			break;
+		break;
 
 		case APPLE2_GCR5A3:
 		case APPLE2_GCR6A2:
 			tg_addAppleSectorToTrack(tg,sectorconfig,currentside);
-			break;
+		break;
 
 		case APPLEMAC_GCR6A2:
 			tg_addAppleMacSectorToTrack(tg,sectorconfig,currentside);
-			break;
+		break;
 
 		case NORTHSTAR_HS_DD:
 			tg_addNorthstarSectorToTrack(tg,sectorconfig,currentside);
-			break;
+		break;
 
 		case HEATHKIT_HS_SD:
 			tg_addHeathkitSectorToTrack(tg,sectorconfig,currentside);
 		break;
 
+		case MICRALN_HS_SD:
+			tg_addMicralNSectorToTrack(tg,sectorconfig,currentside);
+		break;
 	}
 }
 

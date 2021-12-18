@@ -90,6 +90,7 @@ trackmode trackmodelist[]=
 	{QD_MO5_ENCODING,               "QD_MO5_ENCODING","" },
 	{C64_GCR_ENCODING,              "C64_GCR_ENCODING","" },
 	{VICTOR9K_GCR_ENCODING,         "VICTOR9K_GCR_ENCODING","" },
+	{MICRALN_HS_FM_ENCODING,        "MICRALN_HS_FM_ENCODING","" },	
 	{UNKNOWN_ENCODING,              "UNKNOWN_ENCODING", "" },
 	{-1,"", ""},
 };

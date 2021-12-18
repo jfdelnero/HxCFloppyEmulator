@@ -92,7 +92,7 @@ DISKLOADERPLUGINS = raw_amiga.o raw_iso.o copyqm_loader.o crctable.o adf_loader.
 					kryofluxstream.o fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o \
 					northstar_loader.o  xml_loader.o flppcm_loader.o stw_loader.o vfddat_loader.o ana_loader.o atr_loader.o hfev3_loader.o hfev3_writer.o \
 					hfev3_trackgen.o heathkit_loader.o sdu_loader.o xml_db_loader.o streamhfe_loader.o qd_loader.o ipf_loader.o capslibloader.o \
-					hxcstream_loader.o hxcstream.o dfi_loader.o a2r_loader.o
+					hxcstream_loader.o hxcstream.o dfi_loader.o a2r_loader.o micraln_loader.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
@@ -102,7 +102,7 @@ DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_w
 
 TRACK_FORMATS_SUPPORT = luts.o track_types_defs.o aed6200p_track.o amiga_mfm_track.o apple2_gcr_track.o arburg_track.o emu_emulator_fm_track.o c64_gcr_track.o \
 						heathkit_fm_track.o iso_ibm_fm_track.o iso_ibm_mfm_track.o membrain_mfm_track.o northstar_mfm_track.o tycom_fm_track.o dec_rx02_track.o \
-						apple_mac_gcr_track.o qd_mo5_track.o victor9k_gcr_track.o
+						apple_mac_gcr_track.o qd_mo5_track.o victor9k_gcr_track.o micraln_fm_track.o
 
 ENCODING_SUPPORT = fm_encoding.o mfm_encoding.o dec_m2fm_encoding.o
 
@@ -211,6 +211,9 @@ victor9k_gcr_track.o : $(BASEDIR)/tracks/track_formats/victor9k_gcr_track.c $(BA
 heathkit_fm_track.o : $(BASEDIR)/tracks/track_formats/heathkit_fm_track.c $(BASEDIR)/tracks/track_formats/heathkit_fm_track.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+micraln_fm_track.o : $(BASEDIR)/tracks/track_formats/micraln_fm_track.c $(BASEDIR)/tracks/track_formats/micraln_fm_track.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
 iso_ibm_fm_track.o : $(BASEDIR)/tracks/track_formats/iso_ibm_fm_track.c $(BASEDIR)/tracks/track_formats/iso_ibm_fm_track.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
@@ -239,6 +242,9 @@ display_track.o : $(BASEDIR)/tracks/display_track.c $(BASEDIR)/tracks/display_tr
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 fluxStreamAnalyzer.o : $(BASEDIR)/stream_analyzer/fluxStreamAnalyzer.c $(BASEDIR)/stream_analyzer/fluxStreamAnalyzer.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+streamConvert.o : $(BASEDIR)/stream_analyzer/streamConvert.c $(BASEDIR)/stream_analyzer/fluxStreamAnalyzer.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 fs_manager.o : $(BASEDIR)/fs_manager/fs_manager.c $(BASEDIR)/fs_manager/fs_manager.h
@@ -684,6 +690,9 @@ heathkit_loader.o : $(BASEDIR)/loaders/heathkit_loader/heathkit_loader.c $(BASED
 heathkit_writer.o : $(BASEDIR)/loaders/heathkit_loader/heathkit_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+micraln_loader.o : $(BASEDIR)/loaders/micraln_loader/micraln_loader.c $(BASEDIR)/loaders/micraln_loader/micraln_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
 adf_hd.o : $(BASEDIR)/thirdpartylibs/adflib/Lib/adf_hd.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 adf_disk.o : $(BASEDIR)/thirdpartylibs/adflib/Lib/adf_disk.c
@@ -852,7 +861,7 @@ $(BASEDIR)/licensetxt.h : $(BASEDIR)/../COPYING_FULL bmptoh
 
 $(BASEDIR)/misc/data/%.h: $(BASEDIR)/misc/data/%.bmp bmptoh
 	cd $(BASEDIR)/misc/data/ && ../../xml_disk/converttools/bmptob8/bmptoh $(basename $(notdir $<.bmp)) -BMP8P
-	
+
 clean:
 	rm -rf *.o
 
