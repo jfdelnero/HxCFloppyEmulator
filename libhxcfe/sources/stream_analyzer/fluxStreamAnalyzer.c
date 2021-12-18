@@ -349,34 +349,34 @@ static int getCellTiming(pll_stat * pll,int current_pulsevalue,int * badpulse,in
 
 static void exchange(s_match *  table, int a, int b)
 {
-    s_match temp;
+	s_match temp;
 	temp = table[a];
-    table[a] = table[b];
-    table[b] = temp;
+	table[a] = table[b];
+	table[b] = temp;
 }
 
 static void quickSort(s_match * table, int start, int end)
 {
-    int left = start-1;
-    int right = end+1;
-    const int pivot = table[start].yes;
+	int left = start-1;
+	int right = end+1;
+	const int pivot = table[start].yes;
 
-    if(start >= end)
-        return;
+	if(start >= end)
+		return;
 
-    for(;;)
-    {
-        do right--; while(table[right].yes > pivot);
-        do left++; while(table[left].yes < pivot);
+	for(;;)
+	{
+		do right--; while(table[right].yes > pivot);
+		do left++; while(table[left].yes < pivot);
 
-        if(left < right)
-            exchange(table, left, right);
-        else
+		if(left < right)
+			exchange(table, left, right);
+		else
 			break;
-    }
+	}
 
-    quickSort(table, start, right);
-    quickSort(table, right+1, end);
+	quickSort(table, start, right);
+	quickSort(table, right+1, end);
 }
 
 //#define USE_PLL_BITRATE 1
@@ -596,14 +596,14 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 			if(!pl)
 			{
 				if( ( fxs->pll.last_error > (fxs->pll.max_pll_error_ticks * 16) ) || ( fxs->pll.last_error < -( fxs->pll.max_pll_error_ticks * 16) ) )
-				{	// flakey bits or invalid bit...
+				{   // flakey bits or invalid bit...
 					settrackbit(flakeytrack,TEMPBUFSIZE,0xFF,bitoffset,1);
 				}
 			}
 			else
 			{
 				if((pl->forward_link[start_index + i]<0 && pl->backward_link[start_index + i]<0) || ( ( fxs->pll.last_error > ( fxs->pll.max_pll_error_ticks *16) ) || ( fxs->pll.last_error < -( fxs->pll.max_pll_error_ticks * 16) )))
-				{	// flakey bits or invalid bit...
+				{   // flakey bits or invalid bit...
 					settrackbit(flakeytrack,TEMPBUFSIZE,0xFF,bitoffset,1);
 				}
 			}
@@ -1636,7 +1636,7 @@ static int getNearestMatchedBlock(pulsesblock * pb, int dir, int currentblock,in
 
 			if(pb[currentblock].locked  &&
 				(   ( pb[currentblock].state == ONEMATCH_STATE ) ||
-					( pb[currentblock].state == MATCH_STATE ) )	)
+					( pb[currentblock].state == MATCH_STATE ) ) )
 			{
 				cntblock++;
 				if( cntblock == 3 )
@@ -1658,7 +1658,7 @@ static int getNearestMatchedBlock(pulsesblock * pb, int dir, int currentblock,in
 
 			if(pb[currentblock].locked  &&
 				(   ( pb[currentblock].state == ONEMATCH_STATE ) ||
-					( pb[currentblock].state == MATCH_STATE ) )	)
+					( pb[currentblock].state == MATCH_STATE ) ) )
 			{
 				return currentblock;
 			}
@@ -1687,7 +1687,7 @@ uint32_t getNearestValidIndex(pulses_link * pl,uint32_t center,uint32_t limit)
 			}
 		}
 
-	/*	if(offset_min >= 0)
+	/*  if(offset_min >= 0)
 		{
 			if(pl->forward_link[offset_min]>=0)
 				return (uint32_t)offset_min;
@@ -1976,7 +1976,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 	int end_dump_reached;
 
-	int	next_locked_block;
+	int next_locked_block;
 	int previous_locked_block;
 
 	double search_depth;
@@ -2304,7 +2304,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 											floppycontext->hxc_printf(MSG_DEBUG,"Block %d (%d index) full match not found. Best position : %d - %d ok %d bad. - DOESN'T Match with the previous block !",block_num,tb->blocks[block_num].number_of_pulses,match_table[mt_i-1].offset,match_table[mt_i-1].yes,match_table[mt_i-1].no);
 											c=0;
 										#endif
-									/*	if(block_num)
+									/*  if(block_num)
 										{
 											if( tb->blocks[block_num-1].locked )
 												tb->blocks[block_num].overlap_offset = tb->blocks[block_num-1].overlap_offset + tb->blocks[block_num-1].overlap_size;
@@ -3041,6 +3041,12 @@ HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, 
 			return 0;
 		}
 
+/*
+		if(trk_stream)
+		{
+			hxcfe_FxStream_JitterFilter(fxs,trk_stream);
+		}
+*/
 		return trk_stream;
 	}
 
@@ -3284,7 +3290,7 @@ void freefloppy(HXCFE_FLOPPY * fp)
 		if(fp->tracks[0]->sides)
 		 free(fp->tracks[0]->sides);
 
-    	if(fp->tracks)
+		if(fp->tracks)
 		 free(fp->tracks);
 
 		free(fp);
@@ -3324,6 +3330,7 @@ int tracktypelist[]=
 	ARBURGDAT_ENCODING,
 	NORTHSTAR_HS_MFM_ENCODING,
 	HEATHKIT_HS_FM_ENCODING,
+	MICRALN_HS_FM_ENCODING,
 	UNKNOWN_ENCODING
 };
 
@@ -3399,7 +3406,7 @@ void printsidestat(HXCFE_FXSA * fxs,HXCFE_SIDE * side)
 	{
 		for(i=0;i<side->tracklen;i++)
 		{
-			if(	side->flakybitsbuffer[i>>3] & (0x80>>(i&7)) )
+			if( side->flakybitsbuffer[i>>3] & (0x80>>(i&7)) )
 			{
 				nbbadbit++;
 			}
@@ -3413,7 +3420,7 @@ void printsidestat(HXCFE_FXSA * fxs,HXCFE_SIDE * side)
 	{
 		for(i=0;i<side->tracklen;i++)
 		{
-			if(	side->databuffer[i>>3] & (0x80>>(i&7)) )
+			if( side->databuffer[i>>3] & (0x80>>(i&7)) )
 			{
 				nbbit++;
 			}
@@ -3950,3 +3957,45 @@ void hxcfe_deinitFxStream(HXCFE_FXSA * fxs)
 		free(fxs);
 	}
 }
+
+#if 0
+void hxcfe_FxStream_JitterFilter(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream)
+{
+	int i,o1,o2;
+	int old,error;
+
+	if(fxs)
+	{
+		if(stream)
+		{
+			if(stream->channels[0].stream)
+			{
+				old = (stream->channels[0].stream[i] - stream->channels[0].stream[i - 1] );
+				for(i=1;i<stream->channels[0].nb_of_pulses;i++)
+				{
+					error = ( stream->channels[0].stream[i] - stream->channels[0].stream[i - 1] );
+
+					if( 0 ) //abs(error) < 150 ) //stream->channels[0].stream[i]  / 8 )
+					{
+						o1 = stream->channels[0].stream[i - 1];
+						o2 = stream->channels[0].stream[i + 0];
+
+						// fix jitter
+
+						stream->channels[0].stream[i - 1] += error/4;
+						stream->channels[0].stream[i] -= error/4;
+
+						//if( ( (error/2 + error/2) != error) && error > 1)
+						  //  stream->channels[0].stream[i - 1]++;
+
+						//printf("before : %d - %d | after : %d - %d\n",o1,o2,stream->channels[0].stream[i - 1],stream->channels[0].stream[i + 0]);
+
+					}
+					//stream->channels[0].stream[i] = (stream->channels[0].stream[i]/32)*32;
+				}
+			}
+		}
+	}
+}
+
+#endif

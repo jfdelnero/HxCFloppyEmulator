@@ -53,3 +53,15 @@ HXCFE_FLOPPY * makefloppyfromtrack(HXCFE_SIDE * side);
 void freefloppy(HXCFE_FLOPPY * fp);
 void computehistogram(uint32_t *indata,int size,uint32_t *outdata);
 int detectpeaks(HXCFE* floppycontext, pll_stat *pll, uint32_t *histogram);
+void hxcfe_FxStream_JitterFilter(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream);
+
+typedef struct streamconv_
+{
+	uint32_t stream_in_mode;
+	uint32_t bitstream_pos;
+}streamconv;
+
+streamconv * initStreamConvert(HXCFE_SIDE *curside);
+
+void deinitStreamConvert(streamconv * sc);
+
