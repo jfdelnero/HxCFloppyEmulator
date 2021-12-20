@@ -415,6 +415,7 @@ int InfosThreadProc(void* floppycontext,void* context)
 			hxcfe_td_activate_analyzer(td,QD_MO5_ENCODING,w->qd_mo5_bt->value());
 			hxcfe_td_activate_analyzer(td,C64_GCR_ENCODING,w->c64_bt->value());
 			hxcfe_td_activate_analyzer(td,VICTOR9K_GCR_ENCODING,w->victor9k_bt->value());
+			hxcfe_td_activate_analyzer(td,MICRALN_HS_FM_ENCODING,w->heathkit_bt->value());
 
 			hxcfe_td_setparams(td,(int)(adjust_timescale(w->x_time->value())),(int)w->y_time->value(),(int)(w->x_offset->value()*1000),0);
 
