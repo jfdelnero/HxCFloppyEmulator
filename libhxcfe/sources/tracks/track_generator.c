@@ -70,6 +70,7 @@
 #include "tracks/track_formats/membrain_mfm_track.h"
 #include "tracks/track_formats/northstar_mfm_track.h"
 #include "tracks/track_formats/tycom_fm_track.h"
+#include "tracks/track_formats/micraln_fm_track.h"
 
 #include "tracks/encoding/mfm_encoding.h"
 #include "tracks/encoding/fm_encoding.h"
