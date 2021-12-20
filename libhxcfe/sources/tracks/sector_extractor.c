@@ -74,6 +74,7 @@
 #include "tracks/track_formats/tycom_fm_track.h"
 #include "tracks/track_formats/qd_mo5_track.h"
 #include "tracks/track_formats/victor9k_gcr_track.h"
+#include "tracks/track_formats/micraln_fm_track.h"
 
 #include "trackutils.h"
 
@@ -225,6 +226,9 @@ HXCFE_SECTCFG* hxcfe_getNextSector( HXCFE_SECTORACCESS* ss_ctx, int32_t track, i
 		break;
 		case VICTOR9K_GCR_ENCODING:
 			bitoffset = get_next_Victor9k_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
+		break;
+		case MICRALN_HS_FM_ENCODING:
+			bitoffset = get_next_FM_MicralN_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
 
 		default:
