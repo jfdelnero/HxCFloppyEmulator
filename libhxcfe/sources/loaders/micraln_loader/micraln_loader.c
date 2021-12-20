@@ -62,7 +62,7 @@
 
 int MicralN_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "MicralN_libIsValidDiskFile", "mic", (40*32*2*128) );
+	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "MicralN_libIsValidDiskFile", "mic", (64*32*1*128) );
 }
 
 int MicralN_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -90,16 +90,17 @@ int MicralN_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 	}
 
 	filesize = hxc_fgetsize(f);
+
     sectorsize = 128;
 
 	trackformat=MICRALN_HS_SD;
 
-	if( !(filesize % (40*32*2*sectorsize) ) )
+	if( !(filesize % (64*32*1*sectorsize) ) )
 	{
 		gap3len=30;
 		interleave=1;
 		floppydisk->floppySectorPerTrack = 32;
-		floppydisk->floppyNumberOfTrack = 40;
+		floppydisk->floppyNumberOfTrack = 64;
 		floppydisk->floppyNumberOfSide = filesize / ( floppydisk->floppySectorPerTrack * sectorsize * floppydisk->floppyNumberOfTrack);
 
 		floppydisk->floppyBitRate = 500000;
