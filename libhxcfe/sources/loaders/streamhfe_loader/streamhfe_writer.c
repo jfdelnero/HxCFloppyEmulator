@@ -238,7 +238,7 @@ int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 	unsigned int stream_track_size;
 	unsigned int track_size,number_of_pulses;
 	unsigned char tempbuf[512];
-	unsigned int max_packed_size;
+	unsigned int max_packed_size,track_index;
 	int step;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write Stream HFE file %s.",filename);
@@ -277,7 +277,7 @@ int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 
 		FILEHEADER->track_list_offset = ftell(hxcstreamhfefile);
 
-		tracklistlen=((((((FILEHEADER->number_of_track * FILEHEADER->number_of_side)+1)*sizeof(streamhfe_track_def))/512)+1));
+		tracklistlen=( ((((FILEHEADER->number_of_track * FILEHEADER->number_of_side)+1)*sizeof(streamhfe_track_def))/512) + 1 );
 
 		tracks_def = (streamhfe_track_def *) malloc(tracklistlen*512);
 		memset(tracks_def,0x00,tracklistlen*512);
@@ -299,8 +299,13 @@ int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 			j=0;
 			while(j<(FILEHEADER->number_of_side))
 			{
-				tracks_def[(i<<1) | (j&1)].flags = STREAMHFE_TRKFLAG_PACKED;
-				tracks_def[(i<<1) | (j&1)].packed_data_offset = ftell(hxcstreamhfefile);
+				if(FILEHEADER->number_of_side==2)
+					track_index = (i<<1) | (j&1);
+				else
+					track_index = i;
+
+				tracks_def[track_index].flags = STREAMHFE_TRKFLAG_PACKED;
+				tracks_def[track_index].packed_data_offset = ftell(hxcstreamhfefile);
 				stream_track_size = 0;
 
 				packedsize = 0;
@@ -323,10 +328,10 @@ int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 					free(packed_track);
 				}
 
-				tracks_def[(i<<1) | (j&1)].packed_data_size = packedsize;
-				tracks_def[(i<<1) | (j&1)].unpacked_data_size = stream_track_size;
-				tracks_def[(i<<1) | (j&1)].track_len = track_size;
-				tracks_def[(i<<1) | (j&1)].nb_pulses = number_of_pulses;
+				tracks_def[track_index].packed_data_size = packedsize;
+				tracks_def[track_index].unpacked_data_size = stream_track_size;
+				tracks_def[track_index].track_len = track_size;
+				tracks_def[track_index].nb_pulses = number_of_pulses;
 
 				j++;
 			}
