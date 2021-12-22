@@ -215,6 +215,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)A2R_libGetPluginInfo,
 	(GETPLUGININFOS)Apple2_nib_libGetPluginInfo,
 	(GETPLUGININFOS)Apple2_do_libGetPluginInfo,
+	(GETPLUGININFOS)Apple2_po_libGetPluginInfo,
 	(GETPLUGININFOS)SDDSpeccyDos_libGetPluginInfo,
 	(GETPLUGININFOS)BMP_libGetPluginInfo,
 	(GETPLUGININFOS)BMP_Disk_libGetPluginInfo,
