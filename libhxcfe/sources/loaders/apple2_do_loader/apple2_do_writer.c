@@ -54,17 +54,18 @@ int Apple2_do_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 
 	if( hxc_checkfileext(filename,"po",SYS_PATH_TYPE) )
 	{
-		sector_mapping = &PhysicalToLogicalSectorMap_ProDos;
+		sector_mapping = (unsigned char *)&PhysicalToLogicalSectorMap_ProDos;
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write PO file %s...",filename);
 	}
 	else
 	{
-		sector_mapping = &PhysicalToLogicalSectorMap_Dos33;
+		sector_mapping = (unsigned char *)&PhysicalToLogicalSectorMap_Dos33;
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write DO file %s...",filename);
 	}
 
-	track_type_id=0;
-	log_str=0;
+	track_type_id = 0;
+	log_str = 0;
+	sectorsize = -1;
 
 	rawfile=hxc_fopen(filename,"wb");
 	if(rawfile)
@@ -131,7 +132,7 @@ int Apple2_do_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 							if(track_buffer)
 							{
 								memset(track_buffer,0,total_track_size);
-								sectorsize=sca[0]->sectorsize;
+								sectorsize = sca[0]->sectorsize;
 								for(l=0;l<256;l++)
 								{
 
