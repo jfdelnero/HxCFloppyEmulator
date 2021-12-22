@@ -66,7 +66,7 @@
 
 #define HXCSTREAM_NS_PER_TICK 40000 // 40,000 ns per tick
 
-uint32_t * conv_stream(uint32_t * trackbuf_dword, unsigned char * unpacked_data, uint32_t pulses_count)
+uint32_t * conv_stream(uint32_t * trackbuf_dword, unsigned char * unpacked_data, unsigned int unpacked_data_size, uint32_t pulses_count)
 {
 	unsigned int k,l,p;
 	unsigned char c;
@@ -81,7 +81,7 @@ uint32_t * conv_stream(uint32_t * trackbuf_dword, unsigned char * unpacked_data,
 		k = 0;
 		l = 0;
 		cumul = 0;
-		while(l < pulses_count )
+		while(l < pulses_count && k < unpacked_data_size)
 		{
 			c  = unpacked_data[k++];
 
@@ -165,9 +165,12 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 	hxcstreambuffer = NULL;
 	iostreambuf = NULL;
 	stream = NULL;
+	metadata = NULL;
+	str1 = NULL;
 	total_nb_pulses = 0;
 	total_nb_words = 0;
 	nb_words = 0;
+	cnt_io = 0;
 	sampleperiod = HXCSTREAM_NS_PER_TICK;
 
 	if(fxs)
@@ -251,16 +254,18 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 								{
 									LZ4_decompress_safe ((const char*)(stream_header) + sizeof(packed_stream_header), (char*)hxcstreambuf, stream_header->packed_size, stream_header->unpacked_size);
 									nb_pulses = stream_header->number_of_pulses;
-
-									stream = realloc(stream,(total_nb_pulses+nb_pulses+1)*sizeof(uint32_t));
-									if(stream)
+									if(nb_pulses > 0 && nb_pulses < (500*1000*1000))
 									{
-										memset(&stream[total_nb_pulses],0x00,(nb_pulses+1)*sizeof(uint32_t));
-										conv_stream(&stream[total_nb_pulses],hxcstreambuf, nb_pulses);
-									}
-									free(hxcstreambuf);
+										stream = realloc(stream,(total_nb_pulses+nb_pulses+1)*sizeof(uint32_t));
+										if(stream)
+										{
+											memset(&stream[total_nb_pulses],0x00,(nb_pulses+1)*sizeof(uint32_t));
+											conv_stream(&stream[total_nb_pulses],hxcstreambuf, stream_header->unpacked_size, nb_pulses);
+										}
+										free(hxcstreambuf);
 
-									total_nb_pulses += nb_pulses;
+										total_nb_pulses += nb_pulses;
+									}
 								}
 
 								packet_offset += (stream_header->packed_size + sizeof(packed_stream_header));
@@ -290,7 +295,7 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 				}
 			}
 
-			if(stream)
+			if(stream && iostreambuf)
 			{
 
 				hxcfe_FxStream_setResolution(fxs,sampleperiod);
@@ -333,7 +338,8 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 				{
 					sprintf(temp_str,"io_channel %d ",j);
 
-					str1 = strstr( ((char*)metadata + sizeof(metadata_header)), temp_str);
+					if(metadata)
+						str1 = strstr( ((char*)metadata + sizeof(metadata_header)), temp_str);
 
 					if(str1)
 					{
@@ -424,8 +430,11 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 				}
 			}
 
-			free(hxcstreambuffer);
-			free(iostreambuf);
+			if(hxcstreambuffer)
+				free(hxcstreambuffer);
+
+			if(iostreambuf)
+				free(iostreambuf);
 
 			hxc_fclose(f);
 
@@ -464,6 +473,8 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 	track_dump = 0;
 	iostreambuf = NULL;
 	stream = NULL;
+	metadata = NULL;
+	str1 = NULL;
 	total_nb_pulses = 0;
 	total_nb_words = 0;
 	nb_words = 0;
@@ -549,7 +560,7 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 							if(stream)
 							{
 								memset(&stream[total_nb_pulses],0x00,(nb_pulses+1)*sizeof(uint32_t));
-								conv_stream(&stream[total_nb_pulses],hxcstreambuf, nb_pulses);
+								conv_stream(&stream[total_nb_pulses],hxcstreambuf, stream_header->unpacked_size, nb_pulses);
 							}
 							free(hxcstreambuf);
 
@@ -618,7 +629,8 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 			{
 				sprintf(temp_str,"io_channel %d ",j);
 
-				str1 = strstr( ((char*)metadata + sizeof(metadata_header)), temp_str);
+				if(metadata)
+					str1 = strstr( ((char*)metadata + sizeof(metadata_header)), temp_str);
 
 				if(str1)
 				{
