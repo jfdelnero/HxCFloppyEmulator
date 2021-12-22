@@ -156,7 +156,9 @@ const char * plugid_lst[]=
 	PLUGIN_GENERIC_XML,
 	PLUGIN_NORTHSTAR,
 	PLUGIN_HEATHKIT,
-	PLUGIN_HXC_QD
+	PLUGIN_HXC_QD,
+	PLUGIN_APPLE2_DO,
+	PLUGIN_APPLE2_PO
 };
 
 #ifdef GUI_DEBUG
@@ -518,6 +520,8 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"NSI file\t*.nsi\n"
 					"H8D file\t*.h8d\n"
 					"QD file (Quickdisk HxC Floppy Emulator file format)\t*.qd\n"
+					"Apple II DO (Dos 3.3) file\t*.do\n"
+					"Apple II PO (ProDos) file\t*.po\n"
 					);
 
 

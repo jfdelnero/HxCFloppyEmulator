@@ -176,6 +176,8 @@ Fl_Menu_Item format_choices[]=
 	{ "NSI - Northstar file image",0,format_choice_cb,(void*)PLUGIN_NORTHSTAR},
 	{ "H8D - Heathkit file image",0,format_choice_cb,(void*)PLUGIN_HEATHKIT},
 	{ "QD  - HxC Quickdisk file format",0,format_choice_cb,(void*)PLUGIN_HXC_QD},
+	{ "DO - Apple II file image (Dos 3.3)",0,format_choice_cb,(void*)PLUGIN_APPLE2_DO},
+	{ "PO - Apple II file image (ProDos)",0,format_choice_cb,(void*)PLUGIN_APPLE2_PO},
 	{0}
 };
 
