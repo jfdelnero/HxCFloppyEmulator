@@ -27,7 +27,7 @@ Hard-sectored H8D Heathkit images: Fix odd tracks main index skew.
 
 QuickDisk files loader : Support "HxC-like-but-not-exactly-hxc" QD images files.
 
-DiscFerret DFI Loader : New DFILOADER_SAMPLE_FREQUENCY_MHZ parameter to change 
+DiscFerret DFI Loader : New DFILOADER_SAMPLE_FREQUENCY_MHZ parameter to change
                         the default sample frequency.
 
 HxC stream (Pauline) : Support CLV convertion parameters :
@@ -40,6 +40,9 @@ SD HxC Interface modes settings : Add PC/S950 auto density configurations.
 GCC 9 : Fix warning messages during the compilation.
 
 Apple II *.do/*.dsk/*.po file writer.
+
+SCP export : The "Disk Type" field can be forced in the configuration file
+             and the "SCPEXPORT_DISK_TYPE" variable.
 
 *********************************************************/
 
