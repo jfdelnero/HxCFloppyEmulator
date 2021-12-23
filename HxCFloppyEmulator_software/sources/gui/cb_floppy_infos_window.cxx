@@ -919,6 +919,9 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						case APPLE2_GCR6A2:
 							sprintf(str,"AppleII 6A2 Sector");
 						break;
+						case APPLEMAC_GCR6A2:
+							sprintf(str,"Apple Macintosh Sector");
+						break;
 						case ARBURG_DAT:
 							sprintf(str,"Arburg SD Sector");
 						break;
@@ -942,6 +945,9 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						break;
 						case C64_GCR:
 							sprintf(str,"C64 GCR Sector");
+						break;
+						case MICRALN_HS_SD:
+							sprintf(str,"R2E Micral N");
 						break;
 						default:
 							sprintf(str,"Unknown Sector type");
