@@ -2694,6 +2694,7 @@ const static type_list track_type_list[]=
 	{TYCOMFORMAT_SD,    "TYFM"},
 	{MEMBRAINFORMAT_DD, "MEMBRAIN"},
 	{EMUFORMAT_SD,      "E-mu"},
+	{APPLEMAC_GCR6A2,   "Apple Macintosh"},
 	{APPLE2_GCR5A3,     "Apple II 5A3"},
 	{APPLE2_GCR6A2,     "Apple II 6A2"},
 	{ARBURG_DAT,        "Arburg DATA"},
@@ -2702,6 +2703,10 @@ const static type_list track_type_list[]=
 	{QD_MO5_MFM,        "QD MO5"},
 	{C64_GCR,           "C64 GCR"},
 	{VICTOR9K_GCR,      "Victor 9000 GCR"},
+	{DECRX02_SDDD ,     "DEC RX02"},
+	{MICRALN_HS_SD,     "R2E Micral N"},
+	{NORTHSTAR_HS_DD,   "NorthStar"},
+	{HEATHKIT_HS_SD,    "Heathkit"},
 	{0,0}
 };
 
