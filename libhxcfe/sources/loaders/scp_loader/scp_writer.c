@@ -313,9 +313,24 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 				break;
 		}
 
+		if( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "SCPEXPORT_DISK_TYPE", NULL ) )
+		{
+			scph.disk_type = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "SCPEXPORT_DISK_TYPE" );
+		}
+
 		scph.flags = INDEXMARK;
 		if(floppy->floppyNumberOfTrack>42)
 			scph.flags |= DISK_96TPI;
+
+		if( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "SCPEXPORT_DISK_96TPI", NULL ) )
+		{
+			scph.flags |= DISK_96TPI;
+		}
+
+		if( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "SCPEXPORT_DISK_48TPI", NULL ) )
+		{
+			scph.flags &= ~DISK_96TPI;
+		}
 
 		if(floppy->tracks[0])
 		{

@@ -278,6 +278,12 @@ set SCPEXPORT_NUMBER_OF_REVOLUTIONS 3                # Number of revolutions gen
 set KFRAWEXPORT_NUMBER_OF_REVOLUTIONS 3              # Number of revolutions generated to the exported KF raw files
 set KFRAWEXPORT_DOUBLE_STEP 0                        # Generate 40 tracks dump for 80 tracks drives.
 
+#set SCPEXPORT_DISK_TYPE    0x15                     # Uncomment to force/change the SCP Disk Type field
+                                                     # Please refer to the SCP documentation for more details
+
+#set SCPEXPORT_DISK_96TPI   1                        # Uncomment one of the following lines to force the 
+#set SCPEXPORT_DISK_48TPI   1                        # TPI flag
+
 #
 # IPF Loader flags/parameters
 #
