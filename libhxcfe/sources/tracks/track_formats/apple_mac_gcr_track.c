@@ -428,6 +428,8 @@ int get_next_AppleMacGCR_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 								sector->use_alternate_data_crc = 0xFF;
 							}
 
+							// "Empty" sector detection
+							checkEmptySector(sector);
 						}
 
 						bit_offset = chgbitptr( track->tracklen, bit_offset, (sector_size*4));

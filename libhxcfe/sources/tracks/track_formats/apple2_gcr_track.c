@@ -447,6 +447,9 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 									}
 								}
 
+								// "Empty" sector detection
+								checkEmptySector(sector);
+
 								bit_offset = chgbitptr( track->tracklen, bit_offset, sector_size*4 );
 
 								sector_extractor_sm = ENDOFSECTOR;
