@@ -428,6 +428,9 @@ static int exec_cmd( script_ctx * ctx, char * command,char * line)
 
 	cmdlist = (cmd_list*)ctx->cmdlist;
 
+	if(!cmdlist)
+		return SCRIPT_INTERNAL_ERROR;
+
 	i = 0;
 	while(cmdlist[i].func)
 	{
@@ -1393,12 +1396,18 @@ int hxcfe_execScriptLine( HXCFE * hxcfe,char * line )
 	if(!hxcfe)
 		return SCRIPT_INTERNAL_ERROR;
 
+	if(!hxcfe->scriptctx)
+		return SCRIPT_INTERNAL_ERROR;
+
 	return execute_line_script( hxcfe->scriptctx, line );
 }
 
 int hxcfe_execScriptFile( HXCFE* hxcfe, char * script_path )
 {
 	if(!hxcfe)
+		return SCRIPT_INTERNAL_ERROR;
+
+	if(!hxcfe->scriptctx)
 		return SCRIPT_INTERNAL_ERROR;
 
 	return execute_file_script( hxcfe->scriptctx, script_path );
@@ -1409,6 +1418,9 @@ int hxcfe_execScriptRam( HXCFE* hxcfe, unsigned char * script_buffer, int buffer
 	if(!hxcfe)
 		return SCRIPT_INTERNAL_ERROR;
 
+	if(!hxcfe->scriptctx)
+		return SCRIPT_INTERNAL_ERROR;
+	
 	return execute_ram_script( hxcfe->scriptctx, script_buffer, buffersize );
 }
 
@@ -1417,6 +1429,9 @@ int hxcfe_deinitScript( HXCFE* hxcfe )
 	if(!hxcfe)
 		return SCRIPT_CMD_BAD_PARAMETER;
 
+	if(!hxcfe->scriptctx)
+		return SCRIPT_INTERNAL_ERROR;
+	
 	deinit_script(hxcfe->scriptctx);
 
 	hxcfe->scriptctx = NULL;

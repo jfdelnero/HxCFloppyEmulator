@@ -101,9 +101,11 @@ HXCFE* hxcfe_init(void)
 	int nb_xml_loader;
 	int i,j;
 	int ret;
-	unsigned char * init_script;
+	unsigned char * init_script_buf;
 
-	hxcfe=malloc(sizeof(HXCFE));
+	init_script_buf = NULL;
+
+	hxcfe = malloc(sizeof(HXCFE));
 	if( hxcfe )
 	{
 		memset(hxcfe,0,sizeof(HXCFE));
@@ -113,16 +115,18 @@ HXCFE* hxcfe_init(void)
 
 		hxcfe_setEnvVar(hxcfe, "LIBVERSION", "v"STR_FILE_VERSION2);
 
-		hxcfe_initScript(hxcfe);
+		if ( hxcfe_initScript(hxcfe) != HXCFE_NOERROR )
+			goto init_error;
 
 		hxcfe->hxc_printf(MSG_INFO_0,"Starting HxCFloppyEmulator...");
 
-		init_script = data_unpack(data_init_script->data,data_init_script->csize,0,data_init_script->size);
-		if(init_script)
+		init_script_buf = data_unpack(data_init_script->data,data_init_script->csize,0,data_init_script->size);
+		if(init_script_buf)
 		{
-			hxcfe_execScriptRam(hxcfe, init_script, data_init_script->size);
+			if( hxcfe_execScriptRam(hxcfe, init_script_buf, data_init_script->size)  != HXCFE_NOERROR )
+				goto init_error;
 
-			free(init_script);
+			free(init_script_buf);
 		}
 
 #if defined(WIN32)
@@ -193,6 +197,16 @@ HXCFE* hxcfe_init(void)
 	}
 
 	return hxcfe;
+
+init_error:
+
+	if(hxcfe)
+		free(hxcfe);
+
+	if(init_script_buf)
+		free(init_script_buf);
+
+	return NULL;
 }
 
 int32_t hxcfe_setOutputFunc( HXCFE* floppycontext, HXCFE_PRINTF_FUNC hxc_printf )
