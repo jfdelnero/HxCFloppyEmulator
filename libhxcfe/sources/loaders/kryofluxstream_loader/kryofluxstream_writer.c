@@ -61,60 +61,7 @@
 
 #include "misc/env.h"
 
-// Get the next cell value.
-static int32_t getNextPulse(HXCFE_SIDE * track,int * offset,int * rollover)
-{
-	int i,startpoint;
-	float totaltime;
-
-	*rollover = 0x00;
-
-	if(track->timingbuffer)
-	{
-		totaltime = ((float)(1000*1000*1000) / (float)(track->timingbuffer[(*offset)>>3]*2));
-	}
-	else
-	{
-		totaltime = ((float)(1000*1000*1000) / (float)(track->bitrate*2));
-	}
-
-	startpoint = *offset % track->tracklen;
-	i=1;
-	for(;;)
-	{
-		*offset = (*offset) +1;
-
-		if( (*offset) >= track->tracklen )
-		{
-			*offset = ((*offset) % track->tracklen);
-			*rollover = 0xFF;
-		}
-
-		if( startpoint == *offset ) // starting point reached ? -> No pulse in this track !
-		{
-			*rollover = 0x01;
-			return  (uint32_t)((float)totaltime/(float)(41.619));
-		}
-
-		if( track->databuffer[(*offset)>>3] & (0x80 >> ((*offset) & 7) ) )
-		{
-			return  (uint32_t)((float)totaltime/(float)(41.619));
-		}
-		else
-		{
-			i++;
-
-			if(track->timingbuffer)
-			{
-				totaltime += ((float)(1000*1000*1000) / (float)(track->timingbuffer[(*offset)>>3]*2));
-			}
-			else
-			{
-				totaltime += ((float)(1000*1000*1000) / (float)(track->bitrate*2));
-			}
-		}
-	}
-}
+#include "stream_analyzer/fluxStreamAnalyzer.h"
 
 int nextbyte(FILE *f,int i,unsigned char * trackbuffer)
 {
@@ -185,11 +132,7 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 	uint32_t value;
 
 	int streampos,streamsize;
-	int trackoffset;
-	int trackrollover;
 	unsigned int i,j;
-
-	unsigned char old_index_state;
 
 	uint32_t totalcelllen;
 	uint32_t iclk;
@@ -202,6 +145,11 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 	s_oob_DiskIndex  oobdi;
 
 	FILE *f;
+	streamconv * strconv;
+
+	strconv = initStreamConvert(track, 41619, 0x00FFFFFF);
+	if(!strconv)
+		return 0;
 
 	hxc_getpathfolder(filepath,fullp,SYS_PATH_TYPE);
 	hxc_getfilenamewext(filepath,fullp2,SYS_PATH_TYPE);
@@ -214,13 +162,9 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 	f = hxc_fopen(fullp,"wb");
 	if(f)
 	{
-		trackoffset = 0;
-		trackrollover = 0;
 		streamsize = 0;
 
-		old_index_state = track->indexbuffer[trackoffset>>3];
-
-		getNextPulse(track,&trackoffset,&trackrollover);
+		StreamConvert_getNextPulse(strconv);
 
 		streampos = 0;
 
@@ -238,11 +182,11 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 		SRcntdown = 0x7FF4;
 
 		iclk = 0;
-		if(trackrollover != 0x01) // If no pulse, don't process the track.
+		if(strconv->rollover != 0x01) // If no pulse, don't process the track.
 		{
-			trackoffset = (int)((float)track->tracklen * 0.75);
+			strconv->bitstream_pos = (int)((float)track->tracklen * 0.75);
 
-			getNextPulse(track,&trackoffset,&trackrollover);
+			StreamConvert_getNextPulse(strconv);
 
 			for(j=0;j<revolution + 2;j++)
 			{
@@ -254,7 +198,7 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 				{
 					streamsize = 0;
 
-					value = getNextPulse(track,&trackoffset,&trackrollover);
+					value = StreamConvert_getNextPulse(strconv);
 
 					totalcelllen += value;
 
@@ -310,7 +254,7 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 					}
 
 					// Index pulse ?
-					if(	 !old_index_state && track->indexbuffer[trackoffset>>3] )
+					if( strconv->index_event )
 					{
 						if(i)
 						{
@@ -335,8 +279,6 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 
 						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"write_kf_stream_track : Index added (Stream pos : %d, Sysclk : %d)",oobdi.StreamPosition,oobdi.SysClk);
 					}
-
-					old_index_state = track->indexbuffer[trackoffset>>3];
 
 					SRcntdown--;
 
@@ -371,13 +313,13 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 
 					if( j == ( revolution  + 1 ) )
 					{
-						if( trackoffset > (int)((float)track->tracklen * 0.15) )
+						if( strconv->bitstream_pos > (int)((float)track->tracklen * 0.15) )
 						{
-							trackrollover = 0x01;
+							strconv->rollover = 0x01;
 						}
 					}
 
-				}while(!trackrollover);
+				}while(!strconv->rollover);
 
 				if(i)
 				{

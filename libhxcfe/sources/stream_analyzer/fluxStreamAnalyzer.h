@@ -59,9 +59,20 @@ typedef struct streamconv_
 {
 	uint32_t stream_in_mode;
 	uint32_t bitstream_pos;
+
+	HXCFE_SIDE * track;
+
+	float    stream_period_ps;
+	float    overflow_value;
+	int      rollover;
+
+	uint8_t index_state;
+	uint8_t old_index_state;
+	uint8_t index_event;
+
 }streamconv;
 
-streamconv * initStreamConvert(HXCFE_SIDE *curside);
-
+streamconv * initStreamConvert(HXCFE_SIDE * track, float stream_period_ps, float overflowvalue);
+uint32_t StreamConvert_getNextPulse(streamconv * sc);
 void deinitStreamConvert(streamconv * sc);
 

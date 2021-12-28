@@ -65,136 +65,108 @@
 #include "libhxcadaptor.h"
 
 #include "misc/env.h"
-/*
-streamconv * iniStreamConvert()
+
+
+streamconv * initStreamConvert(HXCFE_SIDE * track, float stream_period_ps, float overflowvalue)
 {
-    streamconv * sc;
+	streamconv * sc;
 
-    sc = malloc(sizeof(streamconv));
-    if(sc)
-    {
+	sc = malloc(sizeof(streamconv));
+	if(sc)
+	{
+		memset(sc,0,sizeof(streamconv));
 
-    }
+		sc->stream_period_ps = stream_period_ps;
+		sc->track = track;
+		sc->overflow_value = overflowvalue;
+		sc->old_index_state = track->indexbuffer[sc->bitstream_pos>>3];
+	}
 
-    return sc;
+	return sc;
 }
-static unsigned short getNextPulse(HXCFE_SIDE * track,int * offset,int * rollover)
+
+uint32_t StreamConvert_getNextPulse(streamconv * sc)
 {
-	int i;
+	int i,startpoint;
 	unsigned char tmp_byte;
 	float totaltime;
 
-	*rollover = 0x00;
+	sc->rollover = 0x00;
+	sc->index_event = 0;
 
-	if(track->timingbuffer)
+	if(sc->track->timingbuffer)
 	{
-		totaltime = ((float)(1000*1000*1000) / (float)(track->timingbuffer[(*offset)>>3]*2));
+		totaltime = ((float)(1000*1000*1000) / (float)(sc->track->timingbuffer[sc->bitstream_pos>>3]*2));
 	}
 	else
 	{
-		totaltime = ((float)(1000*1000*1000) / (float)(track->bitrate*2));
+		totaltime = ((float)(1000*1000*1000) / (float)(sc->track->bitrate*2));
 	}
 
+	startpoint = sc->bitstream_pos % sc->track->tracklen;
 	i=1;
 	do
 	{
-		*offset = (*offset) +1;
+		sc->bitstream_pos++;
 
-		if( (*offset) >= track->tracklen )
+		if( sc->bitstream_pos >= sc->track->tracklen )
 		{
-			*offset = ((*offset) % track->tracklen);
-			*rollover = 0xFF;
+			sc->bitstream_pos = (sc->bitstream_pos % sc->track->tracklen);
+			sc->rollover = 0xFF;
+		}
+
+		if( startpoint == sc->bitstream_pos ) // starting point reached ? -> No pulse in this track !
+		{
+			sc->rollover = 0x01;
+			return  (uint32_t)((float)totaltime/(float)(sc->stream_period_ps/1000.0));
 		}
 
 		// Overflow...
-		if(totaltime >= (65536*25) )
+		if(totaltime >= sc->overflow_value)
 		{
-			return 0xFFFF;
+			return sc->overflow_value-1;
 		}
 
-		if(track->flakybitsbuffer)
+		sc->index_state = sc->track->indexbuffer[sc->bitstream_pos>>3];
+		if(sc->index_state && !sc->old_index_state)
 		{
-			tmp_byte =  (track->databuffer[(*offset)>>3] & (0x80 >> ((*offset) & 7) )) ^ \
-						( ( track->flakybitsbuffer[(*offset)>>3] & (rand() & 0xFF) ) & (0x80 >> ((*offset) & 7) ));
+			sc->index_event = 1;
+		}
+		sc->old_index_state = sc->index_state;
+
+		if(sc->track->flakybitsbuffer)
+		{
+			tmp_byte =  (sc->track->databuffer[sc->bitstream_pos>>3] & (0x80 >> (sc->bitstream_pos & 7) )) ^ \
+						( ( sc->track->flakybitsbuffer[sc->bitstream_pos>>3] & (rand() & 0xFF) ) & (0x80 >> (sc->bitstream_pos & 7) ));
 		}
 		else
 		{
-			tmp_byte = (track->databuffer[(*offset)>>3] & (0x80 >> ((*offset) & 7) ));
+			tmp_byte = (sc->track->databuffer[sc->bitstream_pos>>3] & (0x80 >> (sc->bitstream_pos & 7) ));
 		}
 
 		if( tmp_byte )
 		{
-			return (int)((float)totaltime/(float)25);
+			return (int)((float)totaltime/(float)(sc->stream_period_ps/1000.0));
 		}
 		else
 		{
 			i++;
 
-			if(track->timingbuffer)
+			if(sc->track->timingbuffer)
 			{
-				totaltime += ((float)(1000*1000*1000) / (float)(track->timingbuffer[(*offset)>>3]*2));
+				totaltime += ((float)(1000*1000*1000) / (float)(sc->track->timingbuffer[sc->bitstream_pos>>3]*2));
 			}
 			else
 			{
-				totaltime += ((float)(1000*1000*1000) / (float)(track->bitrate*2));
+				totaltime += ((float)(1000*1000*1000) / (float)(sc->track->bitrate*2));
 			}
 		}
 	}while(1);
 }
 
-// Get the next cell value.
-static int32_t getNextPulse(HXCFE_SIDE * track,int * offset,int * rollover)
+void deinitStreamConvert(streamconv * sc)
 {
-	int i,startpoint;
-	float totaltime;
-
-	*rollover = 0x00;
-
-	if(track->timingbuffer)
-	{
-		totaltime = ((float)(1000*1000*1000) / (float)(track->timingbuffer[(*offset)>>3]*2));
-	}
-	else
-	{
-		totaltime = ((float)(1000*1000*1000) / (float)(track->bitrate*2));
-	}
-
-	startpoint = *offset % track->tracklen;
-	i=1;
-	for(;;)
-	{
-		*offset = (*offset) +1;
-
-		if( (*offset) >= track->tracklen )
-		{
-			*offset = ((*offset) % track->tracklen);
-			*rollover = 0xFF;
-		}
-
-		if( startpoint == *offset ) // starting point reached ? -> No pulse in this track !
-		{
-			*rollover = 0x01;
-			return  (uint32_t)((float)totaltime/(float)(41.619));
-		}
-
-		if( track->databuffer[(*offset)>>3] & (0x80 >> ((*offset) & 7) ) )
-		{
-			return  (uint32_t)((float)totaltime/(float)(41.619));
-		}
-		else
-		{
-			i++;
-
-			if(track->timingbuffer)
-			{
-				totaltime += ((float)(1000*1000*1000) / (float)(track->timingbuffer[(*offset)>>3]*2));
-			}
-			else
-			{
-				totaltime += ((float)(1000*1000*1000) / (float)(track->bitrate*2));
-			}
-		}
-	}
+	if(sc)
+		free(sc);
 }
 
-*/

@@ -62,6 +62,8 @@
 
 #include "misc/env.h"
 
+#include "stream_analyzer/fluxStreamAnalyzer.h"
+
 static uint32_t update_checksum(uint32_t checksum,unsigned char * buffer,unsigned int size)
 {
 	unsigned int i;
@@ -74,70 +76,6 @@ static uint32_t update_checksum(uint32_t checksum,unsigned char * buffer,unsigne
 	return checksum;
 }
 
-static unsigned short getNextPulse(HXCFE_SIDE * track,int * offset,int * rollover)
-{
-	int i;
-	unsigned char tmp_byte;
-	float totaltime;
-
-	*rollover = 0x00;
-
-	if(track->timingbuffer)
-	{
-		totaltime = ((float)(1000*1000*1000) / (float)(track->timingbuffer[(*offset)>>3]*2));
-	}
-	else
-	{
-		totaltime = ((float)(1000*1000*1000) / (float)(track->bitrate*2));
-	}
-
-	i=1;
-	do
-	{
-		*offset = (*offset) +1;
-
-		if( (*offset) >= track->tracklen )
-		{
-			*offset = ((*offset) % track->tracklen);
-			*rollover = 0xFF;
-		}
-
-		// Overflow...
-		if(totaltime >= (65536*25) )
-		{
-			return 0xFFFF;
-		}
-
-		if(track->flakybitsbuffer)
-		{
-			tmp_byte =  (track->databuffer[(*offset)>>3] & (0x80 >> ((*offset) & 7) )) ^ \
-						( ( track->flakybitsbuffer[(*offset)>>3] & (rand() & 0xFF) ) & (0x80 >> ((*offset) & 7) ));
-		}
-		else
-		{
-			tmp_byte = (track->databuffer[(*offset)>>3] & (0x80 >> ((*offset) & 7) ));
-		}
-
-		if( tmp_byte )
-		{
-			return (int)((float)totaltime/(float)25);
-		}
-		else
-		{
-			i++;
-
-			if(track->timingbuffer)
-			{
-				totaltime += ((float)(1000*1000*1000) / (float)(track->timingbuffer[(*offset)>>3]*2));
-			}
-			else
-			{
-				totaltime += ((float)(1000*1000*1000) / (float)(track->bitrate*2));
-			}
-		}
-	}while(1);
-}
-
 uint32_t write_scp_track(FILE *f,HXCFE_SIDE * track,uint32_t * csum,int tracknum,unsigned int revolution)
 {
 	uint32_t checksum,file_checksum,size,offset,totalsize;
@@ -147,13 +85,15 @@ uint32_t write_scp_track(FILE *f,HXCFE_SIDE * track,uint32_t * csum,int tracknum
 	char timestamp[64];
 	scp_track_header trkh;
 	int fpos;
-	int trackoffset;
-	int trackrollover;
 	time_t curtimecnt;
 	struct tm * curtime;
-
+	streamconv * strconv;
 	checksum = 0;
 	file_checksum = 0;
+	
+	strconv = initStreamConvert(track, DEFAULT_SCP_PERIOD, (DEFAULT_SCP_PERIOD/1000)*65536);
+	if(!strconv)
+		return 0;
 
 	memset(&trkh,0,sizeof(scp_track_header));
 
@@ -167,10 +107,7 @@ uint32_t write_scp_track(FILE *f,HXCFE_SIDE * track,uint32_t * csum,int tracknum
 
 	memset(trackbuffer,0,sizeof(trackbuffer));
 
-	trackoffset = 0;
-	trackrollover = 0;
-
-	getNextPulse(track,&trackoffset,&trackrollover);
+	StreamConvert_getNextPulse(strconv);
 
 	offset = sizeof(scp_track_header);
 	total_time = 0;
@@ -185,7 +122,7 @@ uint32_t write_scp_track(FILE *f,HXCFE_SIDE * track,uint32_t * csum,int tracknum
 		total_time = 0;
 		do
 		{
-			trackbuffer[i] = getNextPulse(track,&trackoffset,&trackrollover);
+			trackbuffer[i] = StreamConvert_getNextPulse(strconv);
 
 			total_time += trackbuffer[i];
 
@@ -199,7 +136,7 @@ uint32_t write_scp_track(FILE *f,HXCFE_SIDE * track,uint32_t * csum,int tracknum
 				checksum = update_checksum(checksum,(unsigned char*)trackbuffer,sizeof(trackbuffer));
 				size = size + sizeof(trackbuffer);
 			}
-		}while(!trackrollover);
+		}while(!strconv->rollover);
 
 		if(i)
 		{
@@ -240,6 +177,8 @@ uint32_t write_scp_track(FILE *f,HXCFE_SIDE * track,uint32_t * csum,int tracknum
 
 	if(csum)
 		*csum = file_checksum;
+
+	deinitStreamConvert(strconv);
 
 	return totalsize;
 }

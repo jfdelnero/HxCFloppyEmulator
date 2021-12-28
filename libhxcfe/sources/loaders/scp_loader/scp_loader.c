@@ -234,7 +234,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 
 					free(trackbuf);
 
-					hxcfe_FxStream_setResolution(fxs,25000*resolution); // 25 ns per tick
+					hxcfe_FxStream_setResolution(fxs,DEFAULT_SCP_PERIOD*resolution); // 25 ns per tick
 
 					track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf_dword,32,(realnumberofpulses), HXCFE_STREAMCHANNEL_TYPE_RLEEVT, "data", NULL);
 					if(track_dump)

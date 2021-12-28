@@ -608,4 +608,6 @@ typedef struct scp_track_header_
 
 #define MAX_NUMBER_OF_TRACKS 168
 
+#define DEFAULT_SCP_PERIOD 25000
+
 #pragma pack()
