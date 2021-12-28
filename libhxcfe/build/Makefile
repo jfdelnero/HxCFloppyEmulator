@@ -112,7 +112,7 @@ XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
 
 BASE = floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o crc.o std_crc32.o track_generator.o trackutils.o \
-		trackeditor.o sector_extractor.o display_track.o fluxStreamAnalyzer.o script_exec.o env.o
+		trackeditor.o sector_extractor.o display_track.o fluxStreamAnalyzer.o streamConvert.o script_exec.o env.o
 
 LIBS_OBJS = $(BASE) $(FS_SUPPORT) $(ADFLIBOBJ) $(ENCODING_SUPPORT) $(TRACK_FORMATS_SUPPORT) $(DISKLOADERPLUGINS) \
 			$(DISKWRITERPLUGINS) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(LZ4OBJ) \
