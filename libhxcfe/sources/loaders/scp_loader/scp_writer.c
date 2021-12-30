@@ -76,11 +76,11 @@ static uint32_t update_checksum(uint32_t checksum,unsigned char * buffer,unsigne
 	return checksum;
 }
 
-uint32_t write_scp_track(FILE *f,HXCFE_SIDE * track,uint32_t * csum,int tracknum,unsigned int revolution)
+uint32_t write_scp_track(HXCFE_IMGLDR* imgldr_ctx,FILE *f,HXCFE_SIDE * track,uint32_t * csum,int tracknum,unsigned int revolution)
 {
 	uint32_t checksum,file_checksum,size,offset,totalsize;
 	unsigned short trackbuffer[256];
-	unsigned int i,j;
+	unsigned int i,index;
 	uint32_t total_time;
 	char timestamp[64];
 	scp_track_header trkh;
@@ -90,8 +90,8 @@ uint32_t write_scp_track(FILE *f,HXCFE_SIDE * track,uint32_t * csum,int tracknum
 	streamconv * strconv;
 	checksum = 0;
 	file_checksum = 0;
-	
-	strconv = initStreamConvert(track, DEFAULT_SCP_PERIOD, (DEFAULT_SCP_PERIOD/1000)*65536);
+
+	strconv = initStreamConvert(imgldr_ctx->hxcfe,track, DEFAULT_SCP_PERIOD, (DEFAULT_SCP_PERIOD/1000)*65536,0,0,revolution+1,5000000);
 	if(!strconv)
 		return 0;
 
@@ -113,7 +113,8 @@ uint32_t write_scp_track(FILE *f,HXCFE_SIDE * track,uint32_t * csum,int tracknum
 	total_time = 0;
 	totalsize = 0;
 
-	for(j=0;j<revolution;j++)
+	index = 0;
+	while(!strconv->stream_end_event)
 	{
 		i = 0;
 
@@ -136,7 +137,7 @@ uint32_t write_scp_track(FILE *f,HXCFE_SIDE * track,uint32_t * csum,int tracknum
 				checksum = update_checksum(checksum,(unsigned char*)trackbuffer,sizeof(trackbuffer));
 				size = size + sizeof(trackbuffer);
 			}
-		}while(!strconv->rollover);
+		}while(!strconv->index_event && !strconv->stream_end_event);
 
 		if(i)
 		{
@@ -145,9 +146,14 @@ uint32_t write_scp_track(FILE *f,HXCFE_SIDE * track,uint32_t * csum,int tracknum
 			size = size + ( i * sizeof(unsigned short) );
 		}
 
-		trkh.index_position[j].index_time = LITTLEENDIAN_DWORD(total_time);
-		trkh.index_position[j].track_length = LITTLEENDIAN_DWORD(size/2);
-		trkh.index_position[j].track_offset = LITTLEENDIAN_DWORD(offset);
+		if(strconv->index_event)
+		{
+			trkh.index_position[index].index_time = LITTLEENDIAN_DWORD(total_time);
+			trkh.index_position[index].track_length = LITTLEENDIAN_DWORD(size/2);
+			trkh.index_position[index].track_offset = LITTLEENDIAN_DWORD(offset);
+
+			index++;
+		}
 
 		totalsize += size;
 
@@ -325,12 +331,12 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			if(floppy->floppyNumberOfSide == 2)
 			{
 				tracksoffset[i] = LITTLEENDIAN_DWORD(ftell(f));
-				write_scp_track(f,floppy->tracks[i>>1]->sides[i&1],&track_checksum,i,scph.number_of_revolution);
+				write_scp_track(imgldr_ctx,f,floppy->tracks[i>>1]->sides[i&1],&track_checksum,i,scph.number_of_revolution);
 			}
 			else
 			{
 				tracksoffset[i * 2] = LITTLEENDIAN_DWORD(ftell(f));
-				write_scp_track(f,floppy->tracks[i]->sides[0],&track_checksum,i * 2,scph.number_of_revolution);
+				write_scp_track(imgldr_ctx,f,floppy->tracks[i]->sides[0],&track_checksum,i * 2,scph.number_of_revolution);
 			}
 
 			file_checksum = file_checksum + track_checksum;

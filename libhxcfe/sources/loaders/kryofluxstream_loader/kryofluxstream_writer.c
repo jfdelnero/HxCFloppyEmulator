@@ -132,7 +132,7 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 	uint32_t value;
 
 	int streampos,streamsize;
-	unsigned int i,j;
+	unsigned int i;
 
 	uint32_t totalcelllen;
 	uint32_t iclk;
@@ -147,7 +147,7 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 	FILE *f;
 	streamconv * strconv;
 
-	strconv = initStreamConvert(track, 41619, 0x00FFFFFF);
+	strconv = initStreamConvert(imgldr_ctx->hxcfe,track, 41619, 0x00FFFFFF,0,0,revolution+1,5000000);
 	if(!strconv)
 		return 0;
 
@@ -182,151 +182,139 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 		SRcntdown = 0x7FF4;
 
 		iclk = 0;
-		if(strconv->rollover != 0x01) // If no pulse, don't process the track.
+		if(!strconv->stream_end_event) // If no pulse, don't process the track.
 		{
-			strconv->bitstream_pos = (int)((float)track->tracklen * 0.75);
-
 			StreamConvert_getNextPulse(strconv);
 
-			for(j=0;j<revolution + 2;j++)
+			totalcelllen = 0;
+
+			i = 0;
+
+			do
 			{
-				i = 0;
+				streamsize = 0;
 
-				totalcelllen = 0;
+				value = StreamConvert_getNextPulse(strconv);
 
-				do
+				totalcelllen += value;
+
+				// Encode cell value...
+				if( ( (value >= 0xE) && (value < 0x100) ) )
 				{
-					streamsize = 0;
-
-					value = StreamConvert_getNextPulse(strconv);
-
-					totalcelllen += value;
-
-					// Encode cell value...
-					if( ( (value >= 0xE) && (value < 0x100) ) )
+					trackbuffer[i] = (unsigned char)value;
+					i = nextbyte(f,i,trackbuffer);
+					streamsize = 1;
+				}
+				else
+				{
+					if( (value <= 0xD) || (value >= 0x100 && value < 0x800) )
 					{
-						trackbuffer[i] = (unsigned char)value;
+						trackbuffer[i] = (unsigned char)( value >> 8 );
 						i = nextbyte(f,i,trackbuffer);
-						streamsize = 1;
+						trackbuffer[i] = (unsigned char)( value & 0xFF );
+						i = nextbyte(f,i,trackbuffer);
+						streamsize = 2;
 					}
 					else
 					{
-						if( (value <= 0xD) || (value >= 0x100 && value < 0x800) )
+						if(value < 0x10000)
 						{
+							trackbuffer[i] = 0x0C; // Value16
+							i = nextbyte(f,i,trackbuffer);
 							trackbuffer[i] = (unsigned char)( value >> 8 );
 							i = nextbyte(f,i,trackbuffer);
 							trackbuffer[i] = (unsigned char)( value & 0xFF );
 							i = nextbyte(f,i,trackbuffer);
-							streamsize = 2;
+							streamsize = 3;
 						}
 						else
 						{
-							if(value < 0x10000)
+							streamsize = 0;
+							do
 							{
-								trackbuffer[i] = 0x0C; // Value16
+								trackbuffer[i] = 0x0B; // Overflow16
 								i = nextbyte(f,i,trackbuffer);
-								trackbuffer[i] = (unsigned char)( value >> 8 );
-								i = nextbyte(f,i,trackbuffer);
-								trackbuffer[i] = (unsigned char)( value & 0xFF );
-								i = nextbyte(f,i,trackbuffer);
-								streamsize = 3;
-							}
-							else
-							{
-								streamsize = 0;
-								do
-								{
-									trackbuffer[i] = 0x0B; // Overflow16
-									i = nextbyte(f,i,trackbuffer);
-									streamsize++;
-								}while(value>= 0x10000);
+								streamsize++;
+							}while(value>= 0x10000);
 
-								trackbuffer[i] = 0x0C; // Value16
-								i = nextbyte(f,i,trackbuffer);
-								trackbuffer[i] = (unsigned char)( value >> 8 );
-								i = nextbyte(f,i,trackbuffer);
-								trackbuffer[i] = (unsigned char)( value & 0xFF );
-								i = nextbyte(f,i,trackbuffer);
+							trackbuffer[i] = 0x0C; // Value16
+							i = nextbyte(f,i,trackbuffer);
+							trackbuffer[i] = (unsigned char)( value >> 8 );
+							i = nextbyte(f,i,trackbuffer);
+							trackbuffer[i] = (unsigned char)( value & 0xFF );
+							i = nextbyte(f,i,trackbuffer);
 
-								streamsize+=3;
-							}
+							streamsize+=3;
 						}
 					}
-
-					// Index pulse ?
-					if( strconv->index_event )
-					{
-						if(i)
-						{
-							fwrite(trackbuffer,i,1,f);
-						}
-
-						streamsize += alignOOB(f);
-
-						i=0;
-						memset(&oobh,0,sizeof(s_oob_header));
-						oobh.Sign = 0xD;
-						oobh.Size = sizeof(s_oob_DiskIndex);
-						oobh.Type = OOBTYPE_Index;
-						fwrite(&oobh,sizeof(s_oob_header),1,f);
-
-						memset(&oobdi,0,sizeof(s_oob_DiskIndex));
-						oobdi.StreamPosition = streampos + streamsize;
-						iclk = iclk + ((totalcelllen/16) * 2);
-						oobdi.SysClk = iclk;
-						totalcelllen = 0;
-						fwrite(&oobdi,sizeof(s_oob_DiskIndex),1,f);
-
-						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"write_kf_stream_track : Index added (Stream pos : %d, Sysclk : %d)",oobdi.StreamPosition,oobdi.SysClk);
-					}
-
-					SRcntdown--;
-
-					// Time to add a Stream Read OOB ?
-					if(!SRcntdown)
-					{
-						if(i)
-						{
-							fwrite(trackbuffer,i,1,f);
-						}
-						i=0;
-
-						streamsize += alignOOB(f);
-
-						i=0;
-						memset(&oobh,0,sizeof(s_oob_header));
-						oobh.Sign = 0xD;
-						oobh.Size = sizeof(s_oob_StreamRead);
-						oobh.Type = OOBTYPE_Stream_Read;
-						fwrite(&oobh,sizeof(s_oob_header),1,f);
-
-						memset(&oobsr,0,sizeof(s_oob_StreamRead));
-						oobsr.StreamPosition = streampos + streamsize;
-						oobsr.TrTime = 0x0;
-						fwrite(&oobsr,sizeof(s_oob_StreamRead),1,f);
-
-						SRcntdown = 0x7FF4;
-
-					}
-
-					streampos += streamsize;
-
-					if( j == ( revolution  + 1 ) )
-					{
-						if( strconv->bitstream_pos > (int)((float)track->tracklen * 0.15) )
-						{
-							strconv->rollover = 0x01;
-						}
-					}
-
-				}while(!strconv->rollover);
-
-				if(i)
-				{
-					fwrite(trackbuffer,i,1,f);
-					i = 0;
 				}
+
+				// Index pulse ?
+				if( strconv->index_event )
+				{
+					if(i)
+					{
+						fwrite(trackbuffer,i,1,f);
+					}
+
+					streamsize += alignOOB(f);
+
+					i=0;
+					memset(&oobh,0,sizeof(s_oob_header));
+					oobh.Sign = 0xD;
+					oobh.Size = sizeof(s_oob_DiskIndex);
+					oobh.Type = OOBTYPE_Index;
+					fwrite(&oobh,sizeof(s_oob_header),1,f);
+
+					memset(&oobdi,0,sizeof(s_oob_DiskIndex));
+					oobdi.StreamPosition = streampos + streamsize;
+					iclk = iclk + ((totalcelllen/16) * 2);
+					oobdi.SysClk = iclk;
+					totalcelllen = 0;
+					fwrite(&oobdi,sizeof(s_oob_DiskIndex),1,f);
+
+					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"write_kf_stream_track : Index added (Stream pos : %d, Sysclk : %d)",oobdi.StreamPosition,oobdi.SysClk);
+				}
+
+				SRcntdown--;
+
+				// Time to add a Stream Read OOB ?
+				if(!SRcntdown)
+				{
+					if(i)
+					{
+						fwrite(trackbuffer,i,1,f);
+					}
+					i=0;
+
+					streamsize += alignOOB(f);
+
+					i=0;
+					memset(&oobh,0,sizeof(s_oob_header));
+					oobh.Sign = 0xD;
+					oobh.Size = sizeof(s_oob_StreamRead);
+					oobh.Type = OOBTYPE_Stream_Read;
+					fwrite(&oobh,sizeof(s_oob_header),1,f);
+
+					memset(&oobsr,0,sizeof(s_oob_StreamRead));
+					oobsr.StreamPosition = streampos + streamsize;
+					oobsr.TrTime = 0x0;
+					fwrite(&oobsr,sizeof(s_oob_StreamRead),1,f);
+
+					SRcntdown = 0x7FF4;
+
+				}
+
+				streampos += streamsize;
+
+			}while(!strconv->stream_end_event);
+
+			if(i)
+			{
+				fwrite(trackbuffer,i,1,f);
+				i = 0;
 			}
+
 		}
 		else
 		{

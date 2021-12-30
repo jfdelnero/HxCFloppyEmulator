@@ -57,8 +57,15 @@ void hxcfe_FxStream_JitterFilter(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream);
 
 typedef struct streamconv_
 {
+	HXCFE* hxcfe;
+
 	uint32_t stream_in_mode;
 	uint32_t bitstream_pos;
+	uint32_t start_bitstream_pos;
+	uint32_t end_bitstream_pos;
+
+	int      start_revolution;
+	int      end_revolution;
 
 	HXCFE_SIDE * track;
 
@@ -66,13 +73,18 @@ typedef struct streamconv_
 	float    overflow_value;
 	int      rollover;
 
-	uint8_t index_state;
-	uint8_t old_index_state;
-	uint8_t index_event;
+	int      current_revolution;
+
+	uint8_t  index_state;
+	uint8_t  old_index_state;
+	uint8_t  index_event;
+	uint8_t  stream_end_event;
 
 }streamconv;
 
-streamconv * initStreamConvert(HXCFE_SIDE * track, float stream_period_ps, float overflowvalue);
+streamconv * initStreamConvert(HXCFE* hxcfe, HXCFE_SIDE * track, float stream_period_ps, float overflowvalue,int start_revolution,float start_offset,int end_revolution,float end_offset);
 uint32_t StreamConvert_getNextPulse(streamconv * sc);
+uint32_t StreamConvert_search_index(streamconv * sc, int index);
+uint32_t StreamConvert_setPosition(streamconv * sc, int revolution, float offset);
 void deinitStreamConvert(streamconv * sc);
 
