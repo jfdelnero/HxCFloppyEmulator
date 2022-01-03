@@ -170,6 +170,14 @@ set FLUXSTREAM_ANALYSIS_REV2REV_MAX_PULSES_JITTER 10 # Max pulses duration jitte
 set FLUXSTREAM_BITRATE_FILTER_PASSES 2               # number of filter passes.
 set FLUXSTREAM_BITRATE_FILTER_WINDOW 24              # Filter window size.
 
+
+#
+# Stream files (SCP/Kryoflux...) export mode 
+#
+
+set FLUXSTREAM_NO_STREAM_TO_STREAM_CONVERT 0         # 0 - Stream to stream support enabled.
+                                                     # 1 - Stream to stream support disabled (old behavior).
+
 #
 # ---- Specific raw format parameters ----
 #

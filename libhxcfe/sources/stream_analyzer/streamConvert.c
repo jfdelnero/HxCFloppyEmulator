@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2021 Jean-François DEL NERO
+// Copyright (C) 2006-2022 Jean-François DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
@@ -118,7 +118,17 @@ streamconv * initStreamConvert(HXCFE* hxcfe, HXCFE_SIDE * track, float stream_pe
 		sc->current_revolution = sc->start_revolution;
 		sc->bitstream_pos = sc->start_bitstream_pos % sc->track->tracklen ;
 
+		sc->stream_source = 0;
 
+		if( sc->track->stream_dump )
+		{
+			if( !hxcfe_getEnvVarValue( hxcfe, "FLUXSTREAM_NO_STREAM_TO_STREAM_CONVERT" ) )
+			{
+				sc->stream_source = 1;
+				sc->fxs = hxcfe_initFxStream(sc->hxcfe);
+				sc->bitstream_pos = sc->track->stream_dump->index_evt_tab[hxcfe_FxStream_GetRevolutionIndex( sc->fxs, sc->track->stream_dump, start_revolution )].dump_offset;
+			}
+		}
 	}
 
 	return sc;
@@ -158,53 +168,63 @@ uint32_t StreamConvert_moveOffset(streamconv * sc, float offset)
 
 	totaltime = 0;
 
-	if(offset >= 0)
+	if(sc->track->stream_dump && sc->stream_source)
 	{
-		while( (totaltime <= offset) && !sc->stream_end_event )
-		{
-			if(sc->track->timingbuffer)
-			{
-				totaltime += ((float)(1000*1000*1000) / (float)(sc->track->timingbuffer[sc->bitstream_pos>>3]*2));
-			}
-			else
-			{
-				totaltime += ((float)(1000*1000*1000) / (float)(sc->track->bitrate*2));
-			}
-
-			sc->bitstream_pos++;
-		}
-
-		if(!sc->stream_end_event)
-			return 1;
-		else
-			return 0;
+		//
+		return 1;
 	}
 	else
 	{
-		while( (totaltime <= (-offset) ) && sc->bitstream_pos )
+		if(offset >= 0)
 		{
-			if(sc->track->timingbuffer)
+			while( (totaltime <= offset) && !sc->stream_end_event )
 			{
-				totaltime += ((float)(1000*1000*1000) / (float)(sc->track->timingbuffer[sc->bitstream_pos>>3]*2));
+				if(sc->track->timingbuffer)
+				{
+					totaltime += ((float)(1000*1000*1000) / (float)(sc->track->timingbuffer[sc->bitstream_pos>>3]*2));
+				}
+				else
+				{
+					totaltime += ((float)(1000*1000*1000) / (float)(sc->track->bitrate*2));
+				}
+
+				sc->bitstream_pos++;
 			}
+
+			if(!sc->stream_end_event)
+				return 1;
 			else
+				return 0;
+		}
+		else
+		{
+			while( (totaltime <= (-offset) ) && sc->bitstream_pos )
 			{
-				totaltime += ((float)(1000*1000*1000) / (float)(sc->track->bitrate*2));
+				if(sc->track->timingbuffer)
+				{
+					totaltime += ((float)(1000*1000*1000) / (float)(sc->track->timingbuffer[sc->bitstream_pos>>3]*2));
+				}
+				else
+				{
+					totaltime += ((float)(1000*1000*1000) / (float)(sc->track->bitrate*2));
+				}
+
+				sc->bitstream_pos--;
 			}
 
-			sc->bitstream_pos--;
+			if(sc->bitstream_pos)
+				return 1;
+			else
+				return 0;
 		}
-
-		if(sc->bitstream_pos)
-			return 1;
-		else
-			return 0;
 	}
 }
 
 uint32_t StreamConvert_setPosition(streamconv * sc, int revolution, float offset)
 {
 	sc->current_revolution = 0;
+
+	sc->conv_error = 0;
 
 	if(StreamConvert_search_index(sc, revolution))
 	{
@@ -218,94 +238,154 @@ uint32_t StreamConvert_getNextPulse(streamconv * sc)
 {
 	int i,startpoint;
 	unsigned char tmp_byte;
-	float totaltime;
+	double totaltime,resampled_value_f;
+	uint32_t tmp_val, resampled_value;
 
 	sc->rollover = 0x00;
 	sc->index_event = 0;
 
-	if(sc->track->timingbuffer)
+	if(sc->track->stream_dump && sc->stream_source)
 	{
-		totaltime = ((float)(1000*1000*1000) / (float)(sc->track->timingbuffer[sc->bitstream_pos>>3]*2));
-	}
-	else
-	{
-		totaltime = ((float)(1000*1000*1000) / (float)(sc->track->bitrate*2));
-	}
+		totaltime = sc->track->stream_dump->channels[0].stream[sc->bitstream_pos];
 
-	startpoint = sc->bitstream_pos % sc->track->tracklen;
-	i=1;
-	do
-	{
+		startpoint = sc->bitstream_pos % sc->track->stream_dump->channels[0].nb_of_pulses;
+
+		tmp_val = sc->track->stream_dump->channels[0].stream[sc->bitstream_pos];
+
 		sc->bitstream_pos++;
 
-		if( sc->bitstream_pos >= sc->track->tracklen )
+		i = 0;
+		while( (i<sc->track->stream_dump->nb_of_index) && \
+			(sc->track->stream_dump->index_evt_tab[i].dump_offset < sc->bitstream_pos) )
 		{
-			sc->current_revolution++;
-			sc->bitstream_pos = (sc->bitstream_pos % sc->track->tracklen);
-			sc->rollover = 0xFF;
+			i++;
 		}
 
-		if( sc->current_revolution >= sc->end_revolution )
-		{
-			if( sc->bitstream_pos >= sc->end_bitstream_pos )
-			{
-				sc->stream_end_event = 1;
-				//return 1;
-			}
-		}
-
-		if( startpoint == sc->bitstream_pos ) // starting point reached ? -> No pulse in this track !
-		{
-			sc->rollover = 0x01;
-			return  (uint32_t)((float)totaltime/(float)(sc->stream_period_ps/1000.0));
-		}
-
-		// Overflow...
-		if(totaltime >= sc->overflow_value)
-		{
-			return sc->overflow_value-1;
-		}
-
-		sc->index_state = sc->track->indexbuffer[sc->bitstream_pos>>3];
-		if(sc->index_state && !sc->old_index_state)
+		if(
+			( i < sc->track->stream_dump->nb_of_index ) &&
+			( sc->track->stream_dump->index_evt_tab[i].dump_offset == sc->bitstream_pos ) )
 		{
 			sc->index_event = 1;
 		}
-		sc->old_index_state = sc->index_state;
 
-		if(sc->track->flakybitsbuffer)
+		if( sc->bitstream_pos >= sc->track->stream_dump->channels[0].nb_of_pulses )
 		{
-			tmp_byte =  (sc->track->databuffer[sc->bitstream_pos>>3] & (0x80 >> (sc->bitstream_pos & 7) )) ^ \
-						( ( sc->track->flakybitsbuffer[sc->bitstream_pos>>3] & (rand() & 0xFF) ) & (0x80 >> (sc->bitstream_pos & 7) ));
+			sc->stream_end_event = 1;
+		}
+
+		resampled_value_f = (double)tmp_val * (double)( (double)(((double)(1000*1000*1000)/TICKFREQ)*1000) / sc->stream_period_ps  );
+
+		resampled_value = (uint32_t)(resampled_value_f + 0.5);
+
+		sc->conv_error += (resampled_value_f - resampled_value);
+
+		if(sc->conv_error >= 1)
+		{
+			resampled_value++;
+			sc->conv_error--;
+		}
+
+		if(sc->conv_error <= -1)
+		{
+			resampled_value--;
+			sc->conv_error++;
+		}
+
+		return resampled_value;
+	}
+	else
+	{
+		if(sc->track->timingbuffer)
+		{
+			totaltime = ((float)(1000*1000*1000) / (float)(sc->track->timingbuffer[sc->bitstream_pos>>3]*2));
 		}
 		else
 		{
-			tmp_byte = (sc->track->databuffer[sc->bitstream_pos>>3] & (0x80 >> (sc->bitstream_pos & 7) ));
+			totaltime = ((float)(1000*1000*1000) / (float)(sc->track->bitrate*2));
 		}
 
-		if( tmp_byte )
+		startpoint = sc->bitstream_pos % sc->track->tracklen;
+		i=1;
+		do
 		{
-			return (int)((float)totaltime/(float)(sc->stream_period_ps/1000.0));
-		}
-		else
-		{
-			i++;
+			sc->bitstream_pos++;
 
-			if(sc->track->timingbuffer)
+			if( sc->bitstream_pos >= sc->track->tracklen )
 			{
-				totaltime += ((float)(1000*1000*1000) / (float)(sc->track->timingbuffer[sc->bitstream_pos>>3]*2));
+				sc->current_revolution++;
+				sc->bitstream_pos = (sc->bitstream_pos % sc->track->tracklen);
+				sc->rollover = 0xFF;
+			}
+
+			if( sc->current_revolution >= sc->end_revolution )
+			{
+				if( sc->bitstream_pos >= sc->end_bitstream_pos )
+				{
+					sc->stream_end_event = 1;
+					//return 1;
+				}
+			}
+
+			if( startpoint == sc->bitstream_pos ) // starting point reached ? -> No pulse in this track !
+			{
+				sc->rollover = 0x01;
+				return  (uint32_t)((float)totaltime/(float)(sc->stream_period_ps/1000.0));
+			}
+
+			// Overflow...
+			if(totaltime >= sc->overflow_value)
+			{
+				return sc->overflow_value-1;
+			}
+
+			sc->index_state = sc->track->indexbuffer[sc->bitstream_pos>>3];
+			if(sc->index_state && !sc->old_index_state)
+			{
+				sc->index_event = 1;
+			}
+			sc->old_index_state = sc->index_state;
+
+			if(sc->track->flakybitsbuffer)
+			{
+				tmp_byte =  (sc->track->databuffer[sc->bitstream_pos>>3] & (0x80 >> (sc->bitstream_pos & 7) )) ^ \
+							( ( sc->track->flakybitsbuffer[sc->bitstream_pos>>3] & (rand() & 0xFF) ) & (0x80 >> (sc->bitstream_pos & 7) ));
 			}
 			else
 			{
-				totaltime += ((float)(1000*1000*1000) / (float)(sc->track->bitrate*2));
+				tmp_byte = (sc->track->databuffer[sc->bitstream_pos>>3] & (0x80 >> (sc->bitstream_pos & 7) ));
 			}
-		}
-	}while(1);
+
+			if( tmp_byte )
+			{
+				return (int)((float)totaltime/(float)(sc->stream_period_ps/1000.0));
+			}
+			else
+			{
+				i++;
+
+				if(sc->track->timingbuffer)
+				{
+					totaltime += ((float)(1000*1000*1000) / (float)(sc->track->timingbuffer[sc->bitstream_pos>>3]*2));
+				}
+				else
+				{
+					totaltime += ((float)(1000*1000*1000) / (float)(sc->track->bitrate*2));
+				}
+			}
+		}while(1);
+	}
 }
 
 void deinitStreamConvert(streamconv * sc)
 {
 	if(sc)
+	{
+		if(sc->fxs)
+		{
+			hxcfe_deinitFxStream(sc->fxs);
+		}
+
 		free(sc);
+	}
 }
 

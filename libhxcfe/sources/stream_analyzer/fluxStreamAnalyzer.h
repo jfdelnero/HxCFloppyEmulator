@@ -68,9 +68,11 @@ typedef struct streamconv_
 	int      end_revolution;
 
 	HXCFE_SIDE * track;
+	HXCFE_FXSA * fxs;
 
 	float    stream_period_ps;
 	float    overflow_value;
+	double   conv_error;
 	int      rollover;
 
 	int      current_revolution;
@@ -80,6 +82,7 @@ typedef struct streamconv_
 	uint8_t  index_event;
 	uint8_t  stream_end_event;
 
+	int      stream_source;
 }streamconv;
 
 streamconv * initStreamConvert(HXCFE* hxcfe, HXCFE_SIDE * track, float stream_period_ps, float overflowvalue,int start_revolution,float start_offset,int end_revolution,float end_offset);
