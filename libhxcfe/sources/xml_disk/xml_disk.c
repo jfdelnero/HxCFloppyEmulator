@@ -583,6 +583,10 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 				{
 					ad->statestack[ad->stack_ptr].track_type = AED6200P_DD;
 				}
+				if(!strcmp(buffer,"VICTOR9K_GCR"))
+				{
+					ad->statestack[ad->stack_ptr].track_type = VICTOR9K_GCR;
+				}
 
 				hxcfe_setTrackType(ad->fb,ad->statestack[ad->stack_ptr].track_type);
 			}
