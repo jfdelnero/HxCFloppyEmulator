@@ -158,7 +158,7 @@ int HxCStream_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEIN
 	return HXCFE_BADPARAMETER;
 }
 
-static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,float timecoef,int phasecorrection,int bitrate,int filter,int filterpasses, int bmpexport)
+static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,float timecoef,int phasecorrection,int bitrate,int filter,int filterpasses, int bmpexport,int track,int side)
 {
 	HXCFE_SIDE* currentside;
 
@@ -185,6 +185,8 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,flo
 
 			hxcfe_FxStream_setFilterParameters(fxs,filterpasses,filter);
 
+			fxs->pll.track = track;
+			fxs->pll.side = side;
 			currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
 
 			if( bmpexport )
@@ -390,7 +392,7 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 					sprintf(filepath,"%s%s%.2d.%d.hxcstream",folder,fname,j,i);
 
 					rpm = 300;
-					curside = decodestream(imgldr_ctx->hxcfe,filepath,&rpm,timecoef,phasecorrection,bitrate,filter,filterpasses,bmp_export);
+					curside = decodestream(imgldr_ctx->hxcfe,filepath,&rpm,timecoef,phasecorrection,bitrate,filter,filterpasses,bmp_export,j,i);
 
 					if(!floppydisk->tracks[j/trackstep])
 					{

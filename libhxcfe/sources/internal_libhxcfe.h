@@ -162,6 +162,10 @@ typedef struct pll_stat_
 
 	int     max_pll_error_ticks;
 
+	int     band_mode;
+	int     bands_separators[16];
+	int     track;
+	int     side;
 }pll_stat;
 
 typedef struct _HXCFE_FXSA

@@ -243,6 +243,8 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext, streamhfe_track_def * trac
 
 				hxcfe_FxStream_ChangeSpeed(fxs,track_dump,timecoef);
 
+				fxs->pll.track = track;
+				fxs->pll.side = side;
 				currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
 
 				if(currentside)

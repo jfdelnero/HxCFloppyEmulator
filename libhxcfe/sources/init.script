@@ -172,6 +172,12 @@ set FLUXSTREAM_BITRATE_FILTER_WINDOW 24              # Filter window size.
 
 
 #
+# Victor 9000 Bands mode pll
+#
+
+set FLUXSTREAM_ANALYSIS_USE_VICTOR_TIMING 0
+
+#
 # Stream files (SCP/Kryoflux...) export mode 
 #
 

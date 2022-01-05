@@ -78,6 +78,20 @@
 
 HXCFE* floppycont;
 
+int victor_9k_bands_def[]=
+{
+	0,  1,2142, 3,3600, 5,5200, 0,
+	4,  1,2492, 3,3800, 5,5312, 0,
+	16, 1,2550, 3,3966, 5,5552, 0,
+	27, 1,2723, 3,4225, 5,5852, 0,
+	38, 1,2950, 3,4500, 5,6450, 0,
+	48, 1,3150, 3,4836, 5,6800, 0,
+	60, 1,3400, 3,5250, 5,7500, 0,
+	71, 1,3800, 3,5600, 5,8000, 0,
+
+	-1, 0,   0, 0,   0, 0,   0, 0
+};
+
 static void settrackbit(uint8_t * dstbuffer,int dstsize,uint8_t byte,int bitoffset,int size)
 {
 	int i,j;
@@ -85,7 +99,7 @@ static void settrackbit(uint8_t * dstbuffer,int dstsize,uint8_t byte,int bitoffs
 	i = bitoffset;
 	for(j = 0; j < size;j++)
 	{
-		if( (i>>3) < dstsize)
+		if( i>=0 && ( (i>>3) < dstsize) )
 		{
 			if(byte&((0x80)>>(j&7)))
 				dstbuffer[(i>>3)] = (uint8_t)(dstbuffer[(i>>3)]|( (0x80>>(i&7))));
@@ -226,6 +240,26 @@ int detectpeaks(HXCFE* floppycontext, pll_stat *pll, uint32_t *histogram)
 	}
 }
 
+static int getBandCells(pll_stat * pll,int current_pulsevalue)
+{
+	int i,ret;
+
+	ret = 1;
+
+	i = 0;
+	while( ( i < 16 ) && ( (pll->bands_separators[i] == -1) || (pll->bands_separators[i] < current_pulsevalue) ) )
+	{
+		//printf(">>%d\n",pll->bands_separators[i]);
+		i++;
+	}
+
+	if(i<16)
+		ret = i + 1 ;
+
+	//printf(">%d  -  %d\n",current_pulsevalue,ret);
+	return ret;
+}
+
 static int getCellTiming(pll_stat * pll,int current_pulsevalue,int * badpulse,int overlapval,int phasecorrection)
 {
 	int blankcell;
@@ -233,6 +267,11 @@ static int getCellTiming(pll_stat * pll,int current_pulsevalue,int * badpulse,in
 	int current_pulse_position;
 
 	blankcell = 0;
+
+	if(pll->band_mode)
+	{
+		return getBandCells(pll, current_pulsevalue);
+	}
 
 	current_pulsevalue = current_pulsevalue * 16;
 
@@ -2834,6 +2873,86 @@ void AdjustTrackPeriod(HXCFE* floppycontext,HXCFE_SIDE * curside_S0,HXCFE_SIDE *
 	}
 }
 
+int set_pll_cfg(HXCFE * hxcfe, pll_stat *pll, int * cfg_table, int current_track, HXCFE_TRKSTREAM * std)
+{
+	int track_index,i,j;
+	uint32_t * histo;
+	int val,total;
+
+	track_index = 0;
+
+	for(i=0;i<16;i++)
+	{
+		pll->bands_separators[i] = -1;
+	}
+
+	if( cfg_table[track_index*8] == -1 )
+		return 0;
+
+	while( (cfg_table[track_index*8] != -1) && (cfg_table[track_index*8] <= current_track) )
+	{
+		track_index++;
+	}
+
+	if(track_index)
+		track_index--;
+
+	histo = (uint32_t*)malloc(65536* sizeof(uint32_t));
+
+	if(std)
+	{
+		computehistogram(&std->channels[0].stream[0],std->channels[0].nb_of_pulses,histo);
+	}
+
+	i = 0;
+	while( cfg_table[(track_index*8) + 1 + i] )
+	{
+		val = ( (double)cfg_table[(track_index*8) + 1 + i + 1]  / (double)( (double)(((double)(1000*1000*1000)/TICKFREQ)) ) );
+
+		if(!i)
+		{
+			if(std)
+			{
+				if(val < 65536)
+				{
+					#define FILTERLEN 10
+					do
+					{
+						total = 0;
+						for(j=0;j<FILTERLEN;j++)
+						{
+							total += histo[val + j];
+
+							if(total > 10)
+							{
+								break;
+							}
+						}
+
+						if(j<FILTERLEN)
+							val += FILTERLEN/2;
+
+					}while(j<FILTERLEN);
+				}
+			}
+		}
+
+		pll->bands_separators[ cfg_table[ (track_index*8) + 1 + i] ] = val;
+
+#ifdef FLUXSTREAMDBG
+		hxcfe->hxc_printf(MSG_DEBUG,">>>>>> %d %d: %d-%d <<<<<<<\n",current_track, track_index , cfg_table[(track_index*8) + 1 + i] ,pll->bands_separators[ cfg_table[ (track_index*8) + 1 + i] ]);
+#endif
+
+		i = i + 2;
+	}
+
+	pll->bands_separators[15] = ( (double)20000  / (double)( (double)(((double)(1000*1000*1000)/TICKFREQ)) ) );
+
+	free(histo);
+
+	return 1;
+}
+
 HXCFE_FXSA * hxcfe_initFxStream(HXCFE * hxcfe)
 {
 	HXCFE_FXSA * fxs;
@@ -2904,6 +3023,15 @@ HXCFE_FXSA * hxcfe_initFxStream(HXCFE * hxcfe)
 			v = hxcfe_getEnvVarValue( hxcfe, "FLUXSTREAM_ANALYSIS_REV2REV_MAX_PULSES_JITTER" );
 			if(v)
 				fxs->analysis_rev2rev_max_pulses_jitter = ((float)256/(float)100) * (float)v;
+
+			v = hxcfe_getEnvVarValue( hxcfe, "FLUXSTREAM_ANALYSIS_USE_VICTOR_TIMING" );
+			if(v)
+			{
+				if(set_pll_cfg(hxcfe,&fxs->pll,(int*)&victor_9k_bands_def, 0,NULL))
+				{
+					fxs->pll.band_mode = 1;
+				}
+			}
 
 			return fxs;
 		}
@@ -3478,6 +3606,11 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 	if(hxcfe_FxStream_GetNumberOfRevolution(fxs,std) >= 1)
 	{
+		if(fxs->pll.band_mode)
+		{
+			set_pll_cfg(hxcfe,&fxs->pll,(int*)&victor_9k_bands_def, fxs->pll.track, std);
+		}
+
 		// Get the total track dump time length. (in 10th of nano seconds)
 		totallen = GetDumpTimelength(fxs,std);
 
