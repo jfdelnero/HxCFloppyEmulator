@@ -89,6 +89,7 @@ int get_next_MFM_Northstar_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 		switch(sector_extractor_sm)
 		{
 			case LOOKFOR_GAP1:
+				memset(mfm_buffer,0x00,sizeof(mfm_buffer));
 				memset(tmp_buffer,0x00,sizeof(tmp_buffer));
 				tmp_buffer[7] = 0xFB;
 				bintomfm(mfm_buffer,sizeof(mfm_buffer)*8,tmp_buffer,8,0);
