@@ -939,6 +939,9 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 								case C64_GCR:
 									sprintf(tempstr,"C64 GCR %.3dB",sc->sectorsize);
 								break;
+								case VICTOR9K_GCR:
+									sprintf(tempstr,"VICTOR 9K GCR %.3dB",sc->sectorsize);
+								break;
 							}
 
 							if(sc->fill_byte_used)
@@ -998,6 +1001,9 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 								break;
 								case QD_MO5_MFM:
 									sprintf(tempstr,"QD MO5 Data ?");
+								break;
+								case VICTOR9K_GCR:
+									sprintf(tempstr,"Victor 9K Data ?");								
 								break;
 							}
 							putstring8x8(td,xpos_startheader,225,tempstr,0x000,0x000,1,1);
@@ -1759,7 +1765,7 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 				i = 0;
 				t_ofs2= ((float)( td->x_start_us ) / (float)(100 * 1000)) * max_total_tick;
 				t_ofs1= track_stream->channels[channel].stream[i];
-				while((i<(int)track_stream->channels[channel].nb_of_pulses) && t_ofs2>t_ofs1)
+				while((i<(int)(track_stream->channels[channel].nb_of_pulses - 1)) && t_ofs2>t_ofs1)
 				{
 					t_ofs1 += track_stream->channels[channel].stream[++i];
 					bitstate2 ^= 1;
