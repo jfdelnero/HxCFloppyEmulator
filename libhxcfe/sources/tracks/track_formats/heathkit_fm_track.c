@@ -121,7 +121,7 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 
 				bit_offset = searchBitStream(track->databuffer,track->tracklen,-1,fm_buffer,4*8*4,bit_offset);
 
-				if(bit_offset!=-1)
+				if(bit_offset!=-1 && ( (bit_offset + (4*8*4)) < track->tracklen ) )
 				{
 					if( track->indexbuffer[ (bit_offset + (4*8*4))  / 8 ] )
 					{
