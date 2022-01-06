@@ -122,7 +122,7 @@ streamconv * initStreamConvert(HXCFE* hxcfe, HXCFE_SIDE * track, float stream_pe
 
 		if( sc->track->stream_dump )
 		{
-			if( !hxcfe_getEnvVarValue( hxcfe, "FLUXSTREAM_NO_STREAM_TO_STREAM_CONVERT" ) )
+			if( hxcfe_getEnvVarValue( hxcfe, "FLUXSTREAM_STREAM_TO_STREAM_CONVERT" ) )
 			{
 				sc->stream_source = 1;
 				sc->fxs = hxcfe_initFxStream(sc->hxcfe);
