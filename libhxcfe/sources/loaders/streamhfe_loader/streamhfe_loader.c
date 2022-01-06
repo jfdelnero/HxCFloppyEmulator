@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2021 Jean-François DEL NERO
+// Copyright (C) 2006-2022 Jean-François DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
@@ -244,7 +244,6 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext, streamhfe_track_def * trac
 				hxcfe_FxStream_ChangeSpeed(fxs,track_dump,timecoef);
 
 				fxs->pll.track = track;
-				fxs->pll.side = side;
 				currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
 
 				if(currentside)
