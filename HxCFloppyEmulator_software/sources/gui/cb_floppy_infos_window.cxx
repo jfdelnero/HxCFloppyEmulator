@@ -949,6 +949,9 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 						case MICRALN_HS_SD:
 							sprintf(str,"R2E Micral N");
 						break;
+						case VICTOR9K_GCR:
+							sprintf(str,"Victor 9000");
+						break;
 						default:
 							sprintf(str,"Unknown Sector type");
 						break;
