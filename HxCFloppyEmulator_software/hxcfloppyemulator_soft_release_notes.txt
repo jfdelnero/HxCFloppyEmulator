@@ -8,7 +8,7 @@
 -- Contact: hxc2001<at>hxc2001.com --------------------- https://hxc2001.com --
 -------------------------------------------------------------------------------
 HxC Floppy Emulator project
-(c) 2006-2021 Jean-François DEL NERO / (c) HxC2001
+(c) 2006-2022 Jean-François DEL NERO / (c) HxC2001
 Website  : https://hxc2001.com
 Forum    : https://torlus.com/floppy/forum
 Facebook : https://www.facebook.com/groups/hxc2001
@@ -16,7 +16,8 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
-XXXXXX 2021 : HxCFloppyEmulator 2.5.X.X (Work in progress / Beta version !)
+XXXXXX 2022 : HxCFloppyEmulator 2.5.X.X (Work in progress / Beta version !)
+              (Last update : 6 January 2022)
 
 Windows : Turn the process in high priority when the USB HxC Floppy Emulator is detected.
           Fix most of the Sync lost events.
@@ -43,6 +44,18 @@ Apple II *.do/*.dsk/*.po file writer.
 
 SCP export : The "Disk Type" field can be forced in the configuration file
              and the "SCPEXPORT_DISK_TYPE" variable.
+
+Stream files export (SCP/KF Raw/...) : Direct stream to stream support
+             If the current loaded tracks have a stream dump in memory then
+             these streams are now just resampled and then exported to the stream file.
+             If you want to use the old behavior and export the analyzed tracks instead then
+             set the "FLUXSTREAM_STREAM_TO_STREAM_CONVERT" variable to 0.
+
+Stream analyzer : Bands mode "PLL" -> better Victor 9000 disks support (Work-in-progress)
+
+Stream analyzer : Better Apple II and Macintosh support.
+
+Some memory related bug fixes.
 
 *********************************************************/
 
