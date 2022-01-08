@@ -81,6 +81,7 @@ typedef struct _HXCFE_SECTCFG
 	int32_t        bitrate;
 
 	uint8_t      * input_data;
+	int32_t      * input_data_index;
 
 	uint8_t      * weak_bits_mask;
 

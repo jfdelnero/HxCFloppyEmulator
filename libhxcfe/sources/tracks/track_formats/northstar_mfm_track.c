@@ -122,7 +122,7 @@ int get_next_MFM_Northstar_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 			break;
 
 			case LOOKFOR_ADDM:
-				tmp_bit_offset = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,2 + 512 + 1,bit_offset + (8 * 7 * 2),0);
+				tmp_bit_offset = mfmtobin(track->databuffer,NULL,track->tracklen,tmp_buffer,2 + 512 + 1,bit_offset + (8 * 7 * 2),0);
 				if( tmp_buffer[0] == 0xFB )
 				{
 					sector->startdataindex = chgbitptr( track->tracklen, bit_offset, (8 * 9 * 2) );

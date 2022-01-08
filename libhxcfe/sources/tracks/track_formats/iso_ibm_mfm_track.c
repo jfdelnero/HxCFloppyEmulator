@@ -75,6 +75,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 	unsigned char mfm_buffer[32];
 	unsigned char tmp_buffer[32];
 	unsigned char * tmp_sector;
+	int * tmp_sector_index;
 	unsigned char CRC16_High;
 	unsigned char CRC16_Low;
 	int sector_extractor_sm;
@@ -114,7 +115,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 			break;
 
 			case LOOKFOR_ADDM:
-				tmp_bit_offset = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,3+7,bit_offset,0);
+				tmp_bit_offset = mfmtobin(track->databuffer,NULL,track->tracklen,tmp_buffer,3+7,bit_offset,0);
 				if(tmp_buffer[3]==0xFE)
 				{
 					CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
@@ -171,8 +172,12 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 						tmp_sector=(unsigned char*)malloc(3+1+sector_size+2);
 						memset(tmp_sector,0,3+1+sector_size+2);
 
+						tmp_sector_index=(int*)malloc((3+1+sector_size+2) * sizeof(int));
+						if(tmp_sector_index)
+							memset(tmp_sector_index,0,(3+1+sector_size+2) * sizeof(int));
+
 						sector->startdataindex = bit_offset;
-						sector->endsectorindex = mfmtobin(track->databuffer,track->tracklen,tmp_sector,3+1+sector_size+2,bit_offset,0);
+						sector->endsectorindex = mfmtobin(track->databuffer,tmp_sector_index,track->tracklen,tmp_sector,3+1+sector_size+2,bit_offset,0);
 
 						if(tmp_sector[3] != 0xFE)
 						{
@@ -201,7 +206,20 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 							if(sector->input_data)
 							{
 								memcpy(sector->input_data,&tmp_sector[4],sector_size);
+
+								if(tmp_sector_index)
+								{
+									sector->input_data_index = (int*)malloc(sector_size*sizeof(int));
+									if(sector->input_data_index)
+									{
+										memcpy(sector->input_data_index,&tmp_sector_index[4],sector_size*sizeof(int));
+									}
+								}
 							}
+
+							if(tmp_sector_index)
+								free(tmp_sector_index);
+
 							free(tmp_sector);
 
 							// "Empty" sector detection
@@ -234,7 +252,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 					{
 						sector->startsectorindex = bit_offset;
 						sector->startdataindex = bit_offset;
-						sector->endsectorindex = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,3+7,bit_offset,0);
+						sector->endsectorindex = mfmtobin(track->databuffer,NULL,track->tracklen,tmp_buffer,3+7,bit_offset,0);
  						floppycontext->hxc_printf(MSG_DEBUG,"get_next_MFM_sector : Data sector without sector header !?!");
 
 						sector->cylinder = 0;

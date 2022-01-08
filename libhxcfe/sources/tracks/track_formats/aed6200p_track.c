@@ -111,7 +111,7 @@ int get_next_AED6200P_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 			break;
 
 			case LOOKFOR_ADDM:
-				tmp_bit_offset = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,7,bit_offset,0);
+				tmp_bit_offset = mfmtobin(track->databuffer,NULL,track->tracklen,tmp_buffer,7,bit_offset,0);
 				if(1)
 				{
 					CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
@@ -177,7 +177,7 @@ int get_next_AED6200P_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 						memset(tmp_sector,0,1+sector_size+2);
 
 						sector->startdataindex = bit_offset;
-						sector->endsectorindex = mfmtobin(track->databuffer,track->tracklen,tmp_sector,1+sector_size+2,bit_offset,0);
+						sector->endsectorindex = mfmtobin(track->databuffer,NULL,track->tracklen,tmp_sector,1+sector_size+2,bit_offset,0);
 
 						if(tmp_sector[0] != 0xC6)
 						{
@@ -236,7 +236,7 @@ int get_next_AED6200P_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 					{
 						sector->startsectorindex = bit_offset;
 						sector->startdataindex = bit_offset;
-						sector->endsectorindex = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,3+7,bit_offset,0);
+						sector->endsectorindex = mfmtobin(track->databuffer,NULL,track->tracklen,tmp_buffer,3+7,bit_offset,0);
  						floppycontext->hxc_printf(MSG_DEBUG,"get_next_MFM_sector : Data sector without sector header !?!");
 
 						sector->cylinder = 0;

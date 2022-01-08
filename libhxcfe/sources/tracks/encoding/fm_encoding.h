@@ -25,7 +25,7 @@
 //
 */
 
-int fmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit);
+int fmtobin(unsigned char * input_data,int * data_index_buf,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit);
 int bintofm(unsigned char * track_data,int track_data_size,unsigned char * bin_data,int bin_data_size,int bit_offset);
 
 void getFMcode(track_generator *tg,uint8_t data,uint8_t clock,uint8_t * dstbuf);

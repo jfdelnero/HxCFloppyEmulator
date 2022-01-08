@@ -648,6 +648,16 @@ void hxcfe_td_draw_rules( HXCFE_TD *td )
 	}
 }
 
+int isAsciiChar(char c)
+{
+	if( c >= 0x20 && c <= 0x7E )
+	{
+		return 1;
+	}
+
+	return 0;
+}
+
 s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,int side,float timingoffset_offset, int TRACKTYPE)
 {
 	int tracksize;
@@ -1003,7 +1013,7 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 									sprintf(tempstr,"QD MO5 Data ?");
 								break;
 								case VICTOR9K_GCR:
-									sprintf(tempstr,"Victor 9K Data ?");								
+									sprintf(tempstr,"Victor 9K Data ?");
 								break;
 							}
 							putstring8x8(td,xpos_startheader,225,tempstr,0x000,0x000,1,1);
@@ -1031,6 +1041,41 @@ s_sectorlist * display_sectors(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,
 								}
 							}
 						}
+
+						if(sc->input_data_index && sc->input_data && sc->sectorsize > 2)
+						{
+							int x1,x2;
+
+							timingoffset2 = getOffsetTiming(currentside,sc->input_data_index[0],timingoffset,old_i);
+							x1 = (int)( ( timingoffset2 - timingoffset_offset ) / xresstep );
+
+							timingoffset3 = getOffsetTiming(currentside,sc->input_data_index[1],timingoffset,old_i);
+							x2 = (int)( ( timingoffset3 - timingoffset_offset ) / xresstep );
+
+							if(x2-x1>=8)
+							{
+								for(i=0;i<sc->sectorsize;i++)
+								{
+									timingoffset3 = getOffsetTiming(currentside,sc->input_data_index[i],timingoffset,old_i);
+									xpos_tmp = (int)( ( timingoffset3 - timingoffset_offset ) / xresstep );
+									if( xpos_tmp < td->xsize )
+									{
+										if(x2-x1>=16)
+										{
+											sprintf(tempstr,"%.2X",sc->input_data[i]);
+											putstring8x8(td,xpos_tmp,225,tempstr,0x000,0x000,0,1);
+										}
+
+										if( isAsciiChar(sc->input_data[i]) )
+										{
+											sprintf(tempstr,"%c",sc->input_data[i]);
+											putstring8x8(td,xpos_tmp+4,225+10,tempstr,0xF25,0x000,0,1);
+										}
+									}
+								}
+							}
+						}
+
 					}
 				}while(sc);
 

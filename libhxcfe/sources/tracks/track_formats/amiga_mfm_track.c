@@ -129,9 +129,9 @@ int get_next_AMIGAMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 
 				bit_offset = chgbitptr(track->tracklen,bit_offset,-(8*2));
 
-				sector_conf->startdataindex = mfmtobin(track->databuffer,track->tracklen,sector_data,32,bit_offset,0);
+				sector_conf->startdataindex = mfmtobin(track->databuffer,NULL,track->tracklen,sector_data,32,bit_offset,0);
 
-				sector_conf->endsectorindex = mfmtobin(track->databuffer,track->tracklen,sector_data,544,bit_offset,0);
+				sector_conf->endsectorindex = mfmtobin(track->databuffer,NULL,track->tracklen,sector_data,544,bit_offset,0);
 
 				if(track->timingbuffer)
 					sector_conf->bitrate = track->timingbuffer[bit_offset/8];

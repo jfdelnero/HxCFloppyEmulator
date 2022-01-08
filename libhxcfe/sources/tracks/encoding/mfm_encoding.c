@@ -62,7 +62,7 @@
 // Decoding :  | 0 | 1 | 1 | 1 | 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 |
 // -----------------------------------------------------------------------------
 
-int mfmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit)
+int mfmtobin(unsigned char * input_data,int * data_index_buf,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit)
 {
 	int i,j;
 	unsigned char b,c1,c2;
@@ -78,6 +78,11 @@ int mfmtobin(unsigned char * input_data,int input_data_size,unsigned char * deco
 
 	if(first_loop_data_size > decod_data_size)
 		first_loop_data_size = decod_data_size;
+
+	if( data_index_buf && (i < decod_data_size) )
+	{
+		data_index_buf[i] = bit_offset;
+	}
 
 	// First loop without modulo.
 	while(i<first_loop_data_size)
@@ -100,6 +105,11 @@ int mfmtobin(unsigned char * input_data,int input_data_size,unsigned char * deco
 		{
 			b=0x80;
 			i++;
+
+			if( data_index_buf && (i < decod_data_size) )
+			{
+				data_index_buf[i] = bit_offset;
+			}
 		}
 	}
 
@@ -126,6 +136,11 @@ int mfmtobin(unsigned char * input_data,int input_data_size,unsigned char * deco
 		{
 			b=0x80;
 			i++;
+
+			if( data_index_buf && (i < decod_data_size) )
+			{
+				data_index_buf[i] = bit_offset;
+			}
 		}
 	}
 

@@ -282,7 +282,7 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 
 				bit_offset = chgbitptr( track->tracklen, bit_offset, ( 6 * 8 ));
 
-				sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_buffer,7,bit_offset,0);
+				sector->endsectorindex = fmtobin(track->databuffer,NULL,track->tracklen,tmp_buffer,7,bit_offset,0);
 				if(1)
 				{
 					tmp_buffer[0] = LUT_Byte2ShortOddBitsExpander[tmp_buffer[0]>>4]<<1 | (LUT_Byte2ShortOddBitsExpander[tmp_buffer[0]&0xF]);

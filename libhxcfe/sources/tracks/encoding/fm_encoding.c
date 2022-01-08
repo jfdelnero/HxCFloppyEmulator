@@ -51,7 +51,7 @@
 #include "tracks/trackutils.h"
 #include "fm_encoding.h"
 
-int fmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit)
+int fmtobin(unsigned char * input_data,int * data_index_buf,int input_data_size,unsigned char * decod_data,int decod_data_size,int bit_offset,int lastbit)
 {
 	int i;
 	int bitshift;
@@ -60,6 +60,12 @@ int fmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod
 	i = 0;
 	bitshift = 0;
 	binbyte = 0;
+
+	if( data_index_buf && (i < decod_data_size) )
+	{
+		data_index_buf[i] = bit_offset;
+	}
+
 	do
 	{
 		//0C0D0C0D
@@ -81,6 +87,14 @@ int fmtobin(unsigned char * input_data,int input_data_size,unsigned char * decod
 		}
 
 		bit_offset = (bit_offset+8)%input_data_size;
+
+		if(bitshift == 0)
+		{
+			if( data_index_buf && (i < decod_data_size) )
+			{
+				data_index_buf[i] = bit_offset;
+			}
+		}
 
 	}while(i<decod_data_size);
 

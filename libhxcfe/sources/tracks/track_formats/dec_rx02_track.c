@@ -119,7 +119,7 @@ int get_next_dec_rx02_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 			break;
 
 			case LOOKFOR_ADDM:
-				sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_buffer,7,bit_offset,0);
+				sector->endsectorindex = fmtobin(track->databuffer,NULL,track->tracklen,tmp_buffer,7,bit_offset,0);
 				if(tmp_buffer[0]==0xFE)
 				{
 					sector->startsectorindex = bit_offset;
@@ -202,7 +202,7 @@ int get_next_dec_rx02_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 
 							memset(tmp_sector,0,sizeof(tmp_sector));
 
-							sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_sector,1,bit_offset,0);
+							sector->endsectorindex = fmtobin(track->databuffer,NULL,track->tracklen,tmp_sector,1,bit_offset,0);
 							if (sector->alternate_datamark == 0xFD || sector->alternate_datamark == 0xF9)
 							{
 								sector->trackencoding = DECRX02_SDDD;
@@ -215,7 +215,7 @@ int get_next_dec_rx02_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 								sector->trackencoding = ISOFORMAT_SD;
 								sector->sectorsize = 128;
 
-								sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,&tmp_sector[1],sector->sectorsize+2,sector->endsectorindex,0);
+								sector->endsectorindex = fmtobin(track->databuffer,NULL,track->tracklen,&tmp_sector[1],sector->sectorsize+2,sector->endsectorindex,0);
 							}
 
 							CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);

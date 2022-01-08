@@ -140,7 +140,7 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 
 			case LOOKFOR_ADDM:
 
-				tmp_bit_offset = fmtobin(track->databuffer,track->tracklen,tmp_buffer,5,bit_offset + (4 * 8 * 3),0);
+				tmp_bit_offset = fmtobin(track->databuffer,NULL,track->tracklen,tmp_buffer,5,bit_offset + (4 * 8 * 3),0);
 				if( tmp_buffer[0] == LUT_ByteBitsInverter[0xFD] )
 				{
 					checksum = 0x00;
@@ -213,7 +213,7 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 						memset(tmp_sector,0,3+1+sector->sectorsize+1);
 
 						sector->startdataindex = (bit_offset + (3*8*4)) % track->tracklen;
-						sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_sector,3+1+sector->sectorsize+1,bit_offset,0);
+						sector->endsectorindex = fmtobin(track->databuffer,NULL,track->tracklen,tmp_sector,3+1+sector->sectorsize+1,bit_offset,0);
 
 						if(tmp_sector[3+0] == LUT_ByteBitsInverter[0xFD])
 						{

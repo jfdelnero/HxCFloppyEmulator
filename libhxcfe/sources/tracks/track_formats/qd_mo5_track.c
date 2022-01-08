@@ -117,7 +117,7 @@ int get_next_QDMO5_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG 
 
 				bit_offset = chgbitptr( track->tracklen, bit_offset, ( 10 * 8 ));
 
-				tmp_bit_offset = mfmtobin(track->databuffer,track->tracklen,tmp_buffer,16,bit_offset,0);
+				tmp_bit_offset = mfmtobin(track->databuffer,NULL,track->tracklen,tmp_buffer,16,bit_offset,0);
 
 				sector->cylinder = 0;
 				sector->head = 0;
@@ -166,7 +166,7 @@ int get_next_QDMO5_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG 
 
 					sector->startdataindex=bit_offset;
 					bit_offset = chgbitptr( track->tracklen, bit_offset, ( 10 * 8 ));
-					sector->endsectorindex=mfmtobin(track->databuffer,track->tracklen,tmp_sector,1 + sector_size + 1,bit_offset,0);
+					sector->endsectorindex=mfmtobin(track->databuffer,NULL,track->tracklen,tmp_sector,1 + sector_size + 1,bit_offset,0);
 					sector->alternate_datamark = tmp_sector[0];
 					sector->use_alternate_datamark = 0xFF;
 

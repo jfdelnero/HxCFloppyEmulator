@@ -799,6 +799,11 @@ void hxcfe_freeSectorConfigData( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SECTCFG* sc )
 
 		sc->input_data = NULL;
 
+		if(sc->input_data_index)
+			free(sc->input_data_index);
+
+		sc->input_data_index = NULL;
+
 		if(sc->weak_bits_mask)
 			free(sc->weak_bits_mask);
 

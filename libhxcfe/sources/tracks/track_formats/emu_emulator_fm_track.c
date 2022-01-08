@@ -114,7 +114,7 @@ int get_next_EMU_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 
 			case LOOKFOR_ADDM:
 
-				sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_buffer,5,bit_offset,0);
+				sector->endsectorindex = fmtobin(track->databuffer,NULL,track->tracklen,tmp_buffer,5,bit_offset,0);
 				if((LUT_ByteBitsInverter[tmp_buffer[0]]==0xFA) && (LUT_ByteBitsInverter[tmp_buffer[1]]==0x96))
 				{
 					sector->startsectorindex = bit_offset;
@@ -177,7 +177,7 @@ int get_next_EMU_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 							{
 								memset(sector->input_data,0,sector_size+2);
 
-								sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,sector->input_data,sector_size+2,bit_offset+(8 *8),0);
+								sector->endsectorindex = fmtobin(track->databuffer,NULL,track->tracklen,sector->input_data,sector_size+2,bit_offset+(8 *8),0);
 
 								CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x8005,0x0000);
 								for(k=0;k<sector_size+2;k++)

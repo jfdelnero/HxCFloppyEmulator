@@ -199,7 +199,7 @@ int get_next_Arburg_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 				{
 					memset(sector->input_data,0,sector_size+2);
 
-					sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,sector->input_data,sector_size,bit_offset,0);
+					sector->endsectorindex = fmtobin(track->databuffer,NULL,track->tracklen,sector->input_data,sector_size,bit_offset,0);
 
 					sector->data_crc = 0x0000;
 					sector->use_alternate_data_crc = 0x00;

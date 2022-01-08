@@ -116,7 +116,7 @@ int get_next_TYCOMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCF
 			break;
 
 			case LOOKFOR_ADDM:
-				sector->endsectorindex=fmtobin(track->databuffer,track->tracklen,tmp_buffer,7,bit_offset,0);
+				sector->endsectorindex=fmtobin(track->databuffer,NULL,track->tracklen,tmp_buffer,7,bit_offset,0);
 				if(tmp_buffer[0]==0xFE)
 				{
 					CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
@@ -179,7 +179,7 @@ int get_next_TYCOMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCF
 							memset(tmp_sector,0,1+sector_size+2);
 
 							sector->startdataindex=bit_offset;
-							sector->endsectorindex=fmtobin(track->databuffer,track->tracklen,tmp_sector,1+sector_size+2,bit_offset+(0*8),0);
+							sector->endsectorindex=fmtobin(track->databuffer,NULL,track->tracklen,tmp_sector,1+sector_size+2,bit_offset+(0*8),0);
 
 							CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
 							for(k=0;k<1+sector_size+2;k++)

@@ -93,6 +93,7 @@ int get_next_FM_MicralN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SEC
 	int i;
 	unsigned char fm_buffer[32];
 	unsigned char tmp_buffer[SECTOR_SIZE]; // Sync + Data + Checksum
+	int * tmp_sector_index;
 	unsigned char checksum;
 	int sector_extractor_sm;
 
@@ -157,7 +158,11 @@ int get_next_FM_MicralN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SEC
 
 			case LOOKFOR_ADDM:
 
-				tmp_bit_offset = fmtobin(track->databuffer,track->tracklen,tmp_buffer,SECTOR_SIZE,bit_offset + (4 * 8 * 3),0);
+				tmp_sector_index=(int*)malloc((SECTOR_SIZE) * sizeof(int));
+				if(tmp_sector_index)
+					memset(tmp_sector_index,0,(SECTOR_SIZE) * sizeof(int));
+
+				tmp_bit_offset = fmtobin(track->databuffer,tmp_sector_index,track->tracklen,tmp_buffer,SECTOR_SIZE,bit_offset + (4 * 8 * 3),0);
 				if( tmp_buffer[0] == SYNC_WORD )
 				{
 					checksum = CHECKSUM_INIT_VALUE;
@@ -194,11 +199,22 @@ int get_next_FM_MicralN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SEC
 					else
 						sector->bitrate = track->bitrate;
 
-					sector->input_data=(unsigned char*)malloc(sector->sectorsize);
-
-					for(i=0;i<sector->sectorsize;i++)
+					sector->input_data = (unsigned char*)malloc(sector->sectorsize);
+					if(sector->input_data)
 					{
-						sector->input_data[i] = tmp_buffer[1 + i];
+						for(i=0;i<sector->sectorsize;i++)
+						{
+							sector->input_data[i] = tmp_buffer[1 + i];
+						}
+
+						if(tmp_sector_index)
+						{
+							sector->input_data_index = (int*)malloc(sector->sectorsize*sizeof(int));
+							if(sector->input_data_index)
+							{
+								memcpy(sector->input_data_index,&tmp_sector_index[1],sector->sectorsize*sizeof(int));
+							}
+						}
 					}
 
 					// "Empty" sector detection
@@ -218,6 +234,10 @@ int get_next_FM_MicralN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SEC
 
 					sector_extractor_sm = ENDOFSECTOR;
 				}
+
+				if(tmp_sector_index)
+					free(tmp_sector_index);
+
 			break;
 
 			case ENDOFTRACK:

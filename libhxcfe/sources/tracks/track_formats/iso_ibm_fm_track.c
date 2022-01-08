@@ -75,6 +75,7 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 	unsigned char fm_buffer[32];
 	unsigned char tmp_buffer[32];
 	unsigned char * tmp_sector;
+	int * tmp_sector_index;
 	unsigned char CRC16_High;
 	unsigned char CRC16_Low;
 	int sector_extractor_sm;
@@ -119,7 +120,7 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 			break;
 
 			case LOOKFOR_ADDM:
-				sector->endsectorindex = fmtobin(track->databuffer,track->tracklen,tmp_buffer,7,bit_offset,0);
+				sector->endsectorindex = fmtobin(track->databuffer,NULL,track->tracklen,tmp_buffer,7,bit_offset,0);
 				if(tmp_buffer[0]==0xFE)
 				{
 					sector->startsectorindex = bit_offset;
@@ -201,8 +202,12 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 							tmp_sector=(unsigned char*)malloc(1+sector_size+2);
 							memset(tmp_sector,0,1+sector_size+2);
 
+							tmp_sector_index=(int*)malloc((1+sector_size+2) * sizeof(int));
+							if(tmp_sector_index)
+								memset(tmp_sector_index,0,(1+sector_size+2) * sizeof(int));
+
 							sector->startdataindex=bit_offset;
-							sector->endsectorindex=fmtobin(track->databuffer,track->tracklen,tmp_sector,1+sector_size+2,bit_offset+(0*8),0);
+							sector->endsectorindex=fmtobin(track->databuffer,tmp_sector_index,track->tracklen,tmp_sector,1+sector_size+2,bit_offset+(0*8),0);
 
 							CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
 							for(k=0;k<1+sector_size+2;k++)
@@ -222,8 +227,24 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 								sector->use_alternate_data_crc=0xFF;
 							}
 
-							sector->input_data=(unsigned char*)malloc(sector_size);
-							memcpy(sector->input_data,&tmp_sector[1],sector_size);
+							sector->input_data = (unsigned char*)malloc(sector_size);
+							if(sector->input_data)
+							{
+								memcpy(sector->input_data,&tmp_sector[1],sector_size);
+
+								if(tmp_sector_index)
+								{
+									sector->input_data_index = (int*)malloc(sector_size*sizeof(int));
+									if(sector->input_data_index)
+									{
+										memcpy(sector->input_data_index,&tmp_sector_index[1],sector_size*sizeof(int));
+									}
+								}
+							}
+
+							if(tmp_sector_index)
+								free(tmp_sector_index);
+
 							free(tmp_sector);
 
 							// "Empty" sector detection

@@ -106,7 +106,7 @@ int decm2fmtobin(unsigned char * input_data,int input_data_size,unsigned char * 
 	}while(off != -1);
 
 	// Use the normal MFM decoding.
-	return mfmtobin(tmp_mfm_buffer, input_data_size+1, decod_data,decod_data_size, 1,lastbit) + bit_offset;
+	return mfmtobin(tmp_mfm_buffer, NULL, input_data_size+1, decod_data,decod_data_size, 1,lastbit) + bit_offset;
 }
 
 int mfmtodecm2fm(unsigned char * input_data,int input_data_size,int bit_offset,int size)
