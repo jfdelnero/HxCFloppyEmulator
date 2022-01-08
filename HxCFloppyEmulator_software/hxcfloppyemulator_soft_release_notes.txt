@@ -17,7 +17,7 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 
 /*********************************************************
 XXXXXX 2022 : HxCFloppyEmulator 2.5.X.X (Work in progress / Beta version !)
-              (Last update : 6 January 2022)
+              (Last update : 8 January 2022)
 
 Windows : Turn the process in high priority when the USB HxC Floppy Emulator is detected.
           Fix most of the Sync lost events.
@@ -54,6 +54,9 @@ Stream files export (SCP/KF Raw/...) : Direct stream to stream support
 Stream analyzer : Bands mode "PLL" -> better Victor 9000 disks support (Work-in-progress)
 
 Stream analyzer : Better Apple II and Macintosh support.
+
+Stream and track viewer : Print sectors content on the track view.
+                          (ISO/IBM SD/DD and Micral N track formats)
 
 Some memory related bug fixes.
 
