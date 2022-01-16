@@ -73,7 +73,7 @@
 #define SYNC_WORD 0xFF
 #define CHECKSUM_INIT_VALUE 0x00
 #define SECTOR_DATA_SIZE 128
-#define SECTOR_SIZE (1 + SECTOR_DATA_SIZE + 1) // Sync + Data + Checksum
+#define SECTOR_SIZE (1 + 2 + SECTOR_DATA_SIZE + 1) // Sync + Header + Data + Checksum
 
 
 uint8_t update_checksum(uint8_t checksum,uint8_t data)
@@ -168,7 +168,7 @@ int get_next_FM_MicralN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SEC
 					checksum = CHECKSUM_INIT_VALUE;
 					for(i=0;i<SECTOR_DATA_SIZE;i++)
 					{
-						checksum = update_checksum(checksum,tmp_buffer[ 1 + i ]);
+						checksum = update_checksum(checksum,tmp_buffer[ 1 + 2 + i ]);
 					}
 
 					sector->data_crc = checksum;
@@ -178,9 +178,9 @@ int get_next_FM_MicralN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SEC
 					sector->startdataindex = (sector->startsectorindex + (1*8*4)) % track->tracklen;
 					sector->endsectorindex = tmp_bit_offset;
 
-					sector->cylinder = 0;
+					sector->cylinder = tmp_buffer[ 2 ];
 					sector->head = 0;
-					sector->sector = 0;
+					sector->sector = tmp_buffer[ 1 ];
 					sector->sectorsize = SECTOR_DATA_SIZE;
 					sector->alternate_sector_size_id = 1;
 					sector->trackencoding = MICRALN_HS_SD;
@@ -204,7 +204,7 @@ int get_next_FM_MicralN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SEC
 					{
 						for(i=0;i<sector->sectorsize;i++)
 						{
-							sector->input_data[i] = tmp_buffer[1 + i];
+							sector->input_data[i] = tmp_buffer[1 + 2 + i];
 						}
 
 						if(tmp_sector_index)
