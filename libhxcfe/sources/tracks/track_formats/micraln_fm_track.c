@@ -280,7 +280,7 @@ void tg_addMicralNSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig
 		}
 
 		us2index( tg->last_bit_offset % currentside->tracklen,currentside,1000,1,0);
-		printf("devmem 0x%.8X 32 %d\n",0xFF200180+(sectorconfig->sector*4),(int)((float)(tg->last_bit_offset % currentside->tracklen)*(float)6.25));
+		printf("devmem 0x%.8X 32 %d\n",0xFF200180+(sectorconfig->sector*4),(int)((float)((tg->last_bit_offset + 9100) % currentside->tracklen)*(float)6.25));
 	}
 
 	for(i=0;i<16;i++)
@@ -288,19 +288,27 @@ void tg_addMicralNSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig
 		pushTrackCode(tg,GAP_VALUE,0xFF,currentside,MICRALN_HS_SD);
 	}
 
-	// sync
+	// Sync
 	pushTrackCode(tg,SYNC_WORD,0xFF,currentside,MICRALN_HS_SD);
 
-/*
-	// Sector
+	// Warning !!!
+	// The machine need these 2 bytes but their exact 
+	// meaning ("Sector" & "Track") are currently speculative.
+	// The Micral N boot ROM doesn't use them
+	// but expect 2 bytes after the sync word and before the
+	// sector data.
+
+	// Sector number
 	pushTrackCode(tg,sectorconfig->sector,0xFF,currentside,MICRALN_HS_SD);
 
 	// Track
 	pushTrackCode(tg,sectorconfig->cylinder,0xFF,currentside,MICRALN_HS_SD);
-*/
+
+	// (End of Warning)
+
 	checksum = CHECKSUM_INIT_VALUE;
 
-	// data
+	// Data
 	for(i=0;i<128;i++)
 	{
 		c = sectorconfig->input_data[ i ];
@@ -313,7 +321,7 @@ void tg_addMicralNSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig
 	// Checksum
 	pushTrackCode(tg,checksum,0xFF,currentside,MICRALN_HS_SD);
 
-	for(i=0;i<32;i++)
+	for(i=0;i<30;i++)
 	{
 		pushTrackCode(tg,GAP_VALUE,0xFF,currentside,MICRALN_HS_SD);
 	}
