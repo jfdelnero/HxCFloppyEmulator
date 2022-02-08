@@ -138,6 +138,11 @@ set FLUXSTREAM_PLL_INITIAL_BITRATE 0
 
 set FLUXSTREAM_PLL_GCR_INTER_BANDS_REJECTION 0
 
+# Set 1 to enable the FM inter-bands rejection.
+# This appears to provide better results with noisy FM disks.
+
+set FLUXSTREAM_PLL_FM_INTER_BANDS_REJECTION 0
+
 #
 # "Expert" PLL settings Zone
 # Unless you know what you are doing, keep the default values.
@@ -178,7 +183,7 @@ set FLUXSTREAM_BITRATE_FILTER_WINDOW 24              # Filter window size.
 set FLUXSTREAM_ANALYSIS_USE_VICTOR_TIMING 0
 
 #
-# Stream files (SCP/Kryoflux...) export mode 
+# Stream files (SCP/Kryoflux...) export mode
 #
 
 set FLUXSTREAM_STREAM_TO_STREAM_CONVERT 1         # 1 - Stream to stream support enabled.
@@ -295,7 +300,7 @@ set KFRAWEXPORT_DOUBLE_STEP 0                        # Generate 40 tracks dump f
 #set SCPEXPORT_DISK_TYPE    0x15                     # Uncomment to force/change the SCP Disk Type field
                                                      # Please refer to the SCP documentation for more details
 
-#set SCPEXPORT_DISK_96TPI   1                        # Uncomment one of the following lines to force the 
+#set SCPEXPORT_DISK_96TPI   1                        # Uncomment one of the following lines to force the
 #set SCPEXPORT_DISK_48TPI   1                        # TPI flag
 
 #

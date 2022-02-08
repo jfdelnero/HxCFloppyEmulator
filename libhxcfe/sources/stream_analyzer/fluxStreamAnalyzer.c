@@ -321,22 +321,50 @@ static int getCellTiming(pll_stat * pll,int current_pulsevalue,int * badpulse,in
 		blankcell = blankcell + 1;
 	}
 
-	if( pll->gcr_inter_band_rejection )
+	if( pll->inter_band_rejection )
 	{
-		if(blankcell == 3)
+		switch(pll->inter_band_rejection)
 		{
-			if((right_boundary - current_pulse_position) > pll->pump_charge / 2)
-				blankcell = 2;
-			else
-				blankcell = 4;
-		}
+			case 1:
+				// GCR
+				if(blankcell == 3)
+				{
+					if((right_boundary - current_pulse_position) > pll->pump_charge / 2)
+						blankcell = 2;
+					else
+						blankcell = 4;
+				}
 
-		if(blankcell == 5)
-		{
-			if((right_boundary - current_pulse_position) > pll->pump_charge / 2)
-				blankcell = 4;
-			else
-				blankcell = 6;
+				if(blankcell == 5)
+				{
+					if((right_boundary - current_pulse_position) > pll->pump_charge / 2)
+						blankcell = 4;
+					else
+						blankcell = 6;
+				}
+			break;
+
+			case 2:
+				// FM
+				if(blankcell == 1)
+				{
+					blankcell = 2;
+				}
+
+				if(blankcell == 3)
+				{
+					if((right_boundary - current_pulse_position) > pll->pump_charge / 2)
+						blankcell = 2;
+					else
+						blankcell = 4;
+				}
+
+				if(blankcell > 4)
+				{
+					blankcell = 4;
+				}
+			break;
+
 		}
 	}
 
@@ -2979,7 +3007,7 @@ HXCFE_FXSA * hxcfe_initFxStream(HXCFE * hxcfe)
 			fxs->pll.fast_correction_ratio_d = 16;
 			fxs->pll.slow_correction_ratio_n = 31;
 			fxs->pll.slow_correction_ratio_d = 32;
-			fxs->pll.gcr_inter_band_rejection = 0;
+			fxs->pll.inter_band_rejection = 0;
 			fxs->pll.pll_min_max_percent = 18;
 			fxs->pll.max_pll_error_ticks = (float)((float)fxs->pll.tick_freq * (float)1E-9) * (float)680;
 			fxs->analysis_rev2rev_max_pulses_jitter = DEFAULT_MAXPULSESKEW;
@@ -3006,7 +3034,11 @@ HXCFE_FXSA * hxcfe_initFxStream(HXCFE * hxcfe)
 
 			v = hxcfe_getEnvVarValue( hxcfe, "FLUXSTREAM_PLL_GCR_INTER_BANDS_REJECTION" );
 			if(v)
-				fxs->pll.gcr_inter_band_rejection = v;
+				fxs->pll.inter_band_rejection = 1;
+
+			v = hxcfe_getEnvVarValue( hxcfe, "FLUXSTREAM_PLL_FM_INTER_BANDS_REJECTION" );
+			if(v)
+				fxs->pll.inter_band_rejection = 2;
 
 			v = hxcfe_getEnvVarValue( hxcfe, "FLUXSTREAM_PLL_MIN_MAX_PERCENT" );
 			if(v)

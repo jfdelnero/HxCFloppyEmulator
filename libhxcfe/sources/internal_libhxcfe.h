@@ -158,7 +158,7 @@ typedef struct pll_stat_
 	int     fast_correction_ratio_n,fast_correction_ratio_d;
 	int     slow_correction_ratio_n,slow_correction_ratio_d;
 
-	int     gcr_inter_band_rejection;
+	int     inter_band_rejection;
 
 	int     max_pll_error_ticks;
 
