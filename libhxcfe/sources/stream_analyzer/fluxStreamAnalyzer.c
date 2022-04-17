@@ -3221,11 +3221,19 @@ void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t 
 	{
 		if(std)
 		{
-			if(streamposition < std->channels[0].nb_of_pulses)
+			if((streamposition <= std->channels[0].nb_of_pulses) && (std->channels[0].nb_of_pulses > 0) )
 			{
 #ifdef FLUXSTREAMDBG
 				fxs->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_FxStream_AddIndex : streamposition %d (%d us) - tickoffset %d - flags : 0x%.8X",streamposition,tick_to_time(fxs,GetTickCnt(std,0, streamposition)),tickoffset,flags);
 #endif
+
+				if( (streamposition == std->channels[0].nb_of_pulses) && std->channels[0].nb_of_pulses)
+				{
+					fxs->hxcfe->hxc_printf(MSG_WARNING,"hxcfe_FxStream_AddIndex : FIXME ! -> streamposition beyond of stream limit by ONE sample ! (%d >= %d). Moving it inside the stream...",streamposition,std->channels[0].nb_of_pulses);
+
+					streamposition--;
+				}
+
 				if(std->nb_of_index<MAX_NB_OF_INDEX)
 				{
 					std->index_evt_tab[std->nb_of_index].flags = flags;
@@ -3246,7 +3254,7 @@ void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t 
 			}
 			else
 			{
-				fxs->hxcfe->hxc_printf(MSG_ERROR,"hxcfe_FxStream_AddIndex : streamposition beyond of stream limit ! (%d >= %d)",streamposition,std->channels[0].nb_of_pulses);
+				fxs->hxcfe->hxc_printf(MSG_ERROR,"hxcfe_FxStream_AddIndex : streamposition beyond of stream limit ! (%d > %d)",streamposition,std->channels[0].nb_of_pulses);
 			}
 		}
 	}
