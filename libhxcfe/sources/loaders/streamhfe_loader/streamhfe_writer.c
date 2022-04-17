@@ -82,9 +82,15 @@ unsigned char * convert_track(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side,unsig
 
 	unsigned char  * data_track;
 	unsigned int bits_delta,nb_pulses;
+#ifdef MICRAL
+	int oldindexstate;
+#endif
 	float adjust_factor;
 
 	track_time = 0;
+#ifdef MICRAL
+	oldindexstate = 0;
+#endif
 
 	tracklen = side->tracklen;
 	bitrate = side->bitrate;
@@ -156,6 +162,23 @@ unsigned char * convert_track(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side,unsig
 			{
 				timepos = track_time;
 				bitpos = (unsigned int)((float)( timepos / (DEFAULT_BITS_PERIOD / 1000) ) * adjust_factor);
+
+#ifdef MICRAL
+//MO5.COM MICRAL N Project : Pauline Hard sectored Index devmem hack !
+//FIXME !!
+				if(side->indexbuffer)
+				{
+					if(!oldindexstate && side->indexbuffer[j/8])
+					{
+						printf("devmem 0x%.8X 32 %d\n",0xFF200180,bitpos/4);
+					}
+					
+					if(side->indexbuffer[j/8])
+						oldindexstate = 1;
+					else
+						oldindexstate = 0;
+				}
+#endif
 
 				bits_delta = bitpos - oldbitpos;
 				if( bits_delta < 0x00000080)
