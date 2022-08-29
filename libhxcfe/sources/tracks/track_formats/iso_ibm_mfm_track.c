@@ -165,7 +165,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 					mfm_buffer[3] = 0x89;
 					mfm_buffer[4] = 0x44;
 					mfm_buffer[5] = 0x89;
-					bit_offset = searchBitStream(track->databuffer,track->tracklen,(88+16)*8,mfm_buffer,6*8,bit_offset);
+					bit_offset = searchBitStream(track->databuffer,track->tracklen,(89+16)*8,mfm_buffer,6*8,bit_offset);
 
 					if((bit_offset!=-1))
 					{
