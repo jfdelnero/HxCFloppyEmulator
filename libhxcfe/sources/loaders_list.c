@@ -130,6 +130,7 @@
 #include "./loaders/discferret_dfi_loader/dfi_loader.h"
 #include "./loaders/a2r_loader/a2r_loader.h"
 #include "./loaders/micraln_loader/micraln_loader.h"
+#include "./loaders/fdx_loader/fdx_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -184,6 +185,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)JVC_libGetPluginInfo,
 	(GETPLUGININFOS)SVD_libGetPluginInfo,
 	(GETPLUGININFOS)D88_libGetPluginInfo,
+	(GETPLUGININFOS)FDX_libGetPluginInfo,
 	(GETPLUGININFOS)HDM_libGetPluginInfo,
 	(GETPLUGININFOS)RAW_libGetPluginInfo,
 	(GETPLUGININFOS)snes_smc_libGetPluginInfo,

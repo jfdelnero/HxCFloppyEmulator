@@ -1,0 +1,56 @@
+/*
+//
+// Copyright (C) 2006-2022 Jean-François DEL NERO
+//
+// This file is part of the HxCFloppyEmulator library
+//
+// HxCFloppyEmulator may be used and distributed without restriction provided
+// that this copyright statement is not removed from the file and that any
+// derivative work contains the original copyright notice and the associated
+// disclaimer.
+//
+// HxCFloppyEmulator is free software; you can redistribute it
+// and/or modify  it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// HxCFloppyEmulator is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+//   See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with HxCFloppyEmulator; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+//
+*/
+
+#pragma pack(1)
+
+typedef struct fdxheader_t_
+{
+	uint8_t  fdx_signature[3];               // Extension('F','D','X')
+	uint8_t  revision;                       // Revision (should be 3)
+	uint8_t  disk_name[60];                  // Disk name
+	uint8_t  pad[4];                         // Padding
+	int32_t  disk_type;                      // Type (0:2D 1:2DD 2:2HD 9:RAW)
+	int32_t  nb_of_cylinders;                // Number of cylinders
+	int32_t  nb_of_heads;                    // Number of heads
+	int32_t  default_bitrate;                // Transfer rate (with clock)
+	int32_t  disk_rpm;                       // RPM
+	uint32_t write_protect;                  // Write protect (0: OFF 1: ON)
+	uint32_t option;                         // Operation option
+	uint32_t unused;                         // Not used
+	int32_t  track_block_size;               // Track block lengh (byte number)
+	uint8_t  reserved[152];                  // Reserved (padding to 256 bytes header)
+} fdxheader_t;
+
+typedef struct fdxtrack_t_
+{
+	int32_t  cylinder;                       // Cylinder
+	int32_t  head;                           // Head
+	int32_t  index_bit_plase;                // Index hole place (bit number)
+	int32_t  bit_track_length;               // Track data lengh (bit number)
+} fdxtrack_t;
+
+#pragma pack()
