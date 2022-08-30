@@ -38,7 +38,7 @@
 // File : stx_writer.c
 // Contains: STX floppy image writer
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -82,12 +82,16 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	unsigned char * flakey_mask_buffer;
 	int flakey_mask_file_offset;
 	int flakey_mask_offset;
+	unsigned short rawtracksize;
+	int rawtrackdata;
 
 	pasti_fileheader header;
 	pasti_trackheader track_header;
 	pasti_sector sector_header;
 
-	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write MSA file %s...",filename);
+	rawtrackdata = 0;
+
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write STX file %s...",filename);
 
 	memset(&header,0,sizeof(pasti_fileheader));
 	header.headertag[0] = 'R';
@@ -166,7 +170,7 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 								sector_header.sector_speed_timing = (unsigned short)(((MeasureTrackTiming(imgldr_ctx->hxcfe,floppy->tracks[i]->sides[j],sc->startdataindex,sc->endsectorindex)*1000000)));
 							else
 								sector_header.sector_speed_timing = (unsigned short)((( MeasureTrackTiming(imgldr_ctx->hxcfe,floppy->tracks[i]->sides[j],0,sc->endsectorindex) +
-																    MeasureTrackTiming(imgldr_ctx->hxcfe,floppy->tracks[i]->sides[j],floppy->tracks[i]->sides[j]->tracklen - sc->startdataindex,floppy->tracks[i]->sides[j]->tracklen) ) * 1000000));
+																	MeasureTrackTiming(imgldr_ctx->hxcfe,floppy->tracks[i]->sides[j],floppy->tracks[i]->sides[j]->tracklen - sc->startdataindex,floppy->tracks[i]->sides[j]->tracklen) ) * 1000000));
 
 							sector_header.header_crc = (sc->header_crc>>8) | (sc->header_crc<<8);
 
@@ -302,7 +306,19 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 					free(flakey_mask_buffer);
 				}
 
-				track_header.track_block_size = tracksize + flakey_mask_size;
+				rawtracksize = 0;
+				if(rawtrackdata)
+				{
+					track_header.flags |= 0x0040;
+					rawtracksize = track_header.track_size;
+					fwrite(&rawtracksize,sizeof(rawtracksize),1,stxdskfile);
+
+					fwrite(floppy->tracks[i]->sides[j]->databuffer,rawtracksize,1,stxdskfile);
+
+					rawtracksize += 2;
+				}
+
+				track_header.track_block_size = tracksize + flakey_mask_size + rawtracksize;
 				track_header.numberofsector = sect_cnt;
 				track_header.flakey_mask_size = flakey_mask_size;
 
