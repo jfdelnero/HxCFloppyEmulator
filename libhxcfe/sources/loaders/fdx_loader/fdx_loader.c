@@ -227,7 +227,7 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				memset(currentside->databuffer,0x00,len);
 
-				k = (fdxtrackheader->index_bit_plase) % fdxtrackheader->bit_track_length;
+				k = (fdxtrackheader->index_bit_place) % fdxtrackheader->bit_track_length;
 				for(j=0;j<fdxtrackheader->bit_track_length;j++)
 				{
 					if( track_buffer[sizeof(fdxtrack_t) + (k>>3)] & (0x80>>(k&7)) )

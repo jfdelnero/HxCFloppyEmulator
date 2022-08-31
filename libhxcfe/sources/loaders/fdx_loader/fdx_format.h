@@ -25,6 +25,25 @@
 //
 */
 
+//
+// FDX68 file format documention translated from this page :
+//
+// http://retropc.net/gimons/fdx68/diskimage.html
+//
+
+//   This is the specification of the dedicated disk image format (FDX format).
+//
+//   With revision 3, the index and track size have been expanded to the bit level.
+//
+//   Image structure :
+//
+//        -> Header information (256 bytes of disk attributes)
+//        -> Track information (16 bytes of track attributes + track data) * number of tracks
+//
+//   Numbers are stored in little endian
+//
+//   File Header information :
+
 #pragma pack(1)
 
 typedef struct fdxheader_t_
@@ -36,21 +55,37 @@ typedef struct fdxheader_t_
 	int32_t  disk_type;                      // Type (0:2D 1:2DD 2:2HD 9:RAW)
 	int32_t  nb_of_cylinders;                // Number of cylinders
 	int32_t  nb_of_heads;                    // Number of heads
-	int32_t  default_bitrate;                // Transfer rate (with clock)
+	int32_t  default_bitrate;                // Transfer rate (with clock) [500|1000]
 	int32_t  disk_rpm;                       // RPM
 	uint32_t write_protect;                  // Write protect (0: OFF 1: ON)
-	uint32_t option;                         // Operation option
+	uint32_t option;                         // Behavior options (currently unused)
 	uint32_t unused;                         // Not used
-	int32_t  track_block_size;               // Track block lengh (byte number)
+	int32_t  track_block_size;               // Track block lengh (number of bytes)
 	uint8_t  reserved[152];                  // Reserved (padding to 256 bytes header)
 } fdxheader_t;
+
+//   Track Header information :
+//
+//   Fixed attribute information and variable length track data.
+//   The format of the track data is MFM/FM level encoded data or sampling level RAW data (disk_type = 9).
+//
+//   Tracks order :
+//   [C0H0][C0H1][C1H0][C1H1]...and continue in order of cylinder and head.
+//   The track data block length is track_block_size in the header information, and the number of track data blocks is cylinders * heads.
 
 typedef struct fdxtrack_t_
 {
 	int32_t  cylinder;                       // Cylinder
 	int32_t  head;                           // Head
-	int32_t  index_bit_plase;                // Index hole place (bit number)
-	int32_t  bit_track_length;               // Track data lengh (bit number)
+	int32_t  index_bit_place;                // Index hole place (bit number)
+	int32_t  bit_track_length;               // Track data length (bit number)
+	// Track data : header track_block_size - 16
 } fdxtrack_t;
+
+//
+// Additional informations:
+//
+// Weakbits/flakybits area seems to be set to 0 in the track data buffer.
+//
 
 #pragma pack()
