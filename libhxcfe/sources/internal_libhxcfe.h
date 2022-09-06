@@ -186,6 +186,11 @@ typedef struct _HXCFE_FXSA
 	int     analysis_rev2rev_max_pulses_jitter;
 
 	pll_stat pll;
+
+	int     out_index_length_us;
+
+	int     weak_cell_threshold;
+
 }HXCFE_FXSA;
 
 #define _HXCFE_FXSA_

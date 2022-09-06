@@ -175,6 +175,17 @@ set FLUXSTREAM_ANALYSIS_REV2REV_MAX_PULSES_JITTER 10 # Max pulses duration jitte
 set FLUXSTREAM_BITRATE_FILTER_PASSES 2               # number of filter passes.
 set FLUXSTREAM_BITRATE_FILTER_WINDOW 24              # Filter window size.
 
+#
+# Post analysis default index length setting
+#
+
+set FLUXSTREAM_ANALYSIS_OUT_INDEX_LENGTH -1          # -1 : Auto, > 0 index length in uS
+
+#
+# Weakbits cells threshold
+#
+
+set FLUXSTREAM_PLL_WEAKBITS_CELLCNT_THRESHOLD 6
 
 #
 # Victor 9000 Bands mode pll

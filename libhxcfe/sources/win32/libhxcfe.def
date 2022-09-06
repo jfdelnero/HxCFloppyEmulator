@@ -227,3 +227,4 @@ EXPORTS
    hxcfe_FxStream_ImportHxCStreamBuffer     @614
    hxcfe_deinitFxStream                     @615
    hxcfe_FxStream_ChangeSpeed               @616
+   hxcfe_FxStream_SetIndexLength            @617
