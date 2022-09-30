@@ -92,13 +92,13 @@ DISKLOADERPLUGINS = raw_amiga.o raw_iso.o copyqm_loader.o crctable.o adf_loader.
 					kryofluxstream.o fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o \
 					northstar_loader.o  xml_loader.o flppcm_loader.o stw_loader.o vfddat_loader.o ana_loader.o atr_loader.o hfev3_loader.o \
 					hfev3_trackgen.o heathkit_loader.o sdu_loader.o xml_db_loader.o streamhfe_loader.o qd_loader.o ipf_loader.o capslibloader.o \
-					hxcstream_loader.o hxcstream.o dfi_loader.o a2r_loader.o micraln_loader.o fdx_loader.o
+					hxcstream_loader.o hxcstream.o dfi_loader.o a2r_loader.o micraln_loader.o fdx_loader.o 86f_loader.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
 					kryofluxstream_writer.o adf_writer.o bmp_writer.o bmp_disk_writer.o bmp_file.o xml_writer.o trd_writer.o stx_writer.o st_writer.o \
 					stw_writer.o dim_writer.o adz_writer.o ipf_writer.o fd_writer.o northstar_loader.o northstar_writer.o heathkit_writer.o vdk_writer.o \
-					xml_db_writer.o streamhfe_writer.o qd_writer.o hxcstream_writer.o oricdsk_writer.o apple2_do_writer.o hfev3_writer.o fdx_writer.o
+					xml_db_writer.o streamhfe_writer.o qd_writer.o hxcstream_writer.o oricdsk_writer.o apple2_do_writer.o hfev3_writer.o fdx_writer.o 86f_writer.o
 
 TRACK_FORMATS_SUPPORT = luts.o track_types_defs.o aed6200p_track.o amiga_mfm_track.o apple2_gcr_track.o arburg_track.o emu_emulator_fm_track.o c64_gcr_track.o \
 						heathkit_fm_track.o iso_ibm_fm_track.o iso_ibm_mfm_track.o membrain_mfm_track.o northstar_mfm_track.o tycom_fm_track.o dec_rx02_track.o \
@@ -700,6 +700,12 @@ fdx_loader.o : $(BASEDIR)/loaders/fdx_loader/fdx_loader.c $(BASEDIR)/loaders/fdx
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 fdx_writer.o : $(BASEDIR)/loaders/fdx_loader/fdx_writer.c $(BASEDIR)/loaders/fdx_loader/fdx_loader.h $(BASEDIR)/loaders/fdx_loader/fdx_writer.h $(BASEDIR)/loaders/fdx_loader/fdx_format.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+86f_loader.o : $(BASEDIR)/loaders/86f_loader/86f_loader.c $(BASEDIR)/loaders/86f_loader/86f_loader.h $(BASEDIR)/loaders/86f_loader/86f_format.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+86f_writer.o : $(BASEDIR)/loaders/86f_loader/86f_writer.c $(BASEDIR)/loaders/86f_loader/86f_loader.h $(BASEDIR)/loaders/86f_loader/86f_writer.h $(BASEDIR)/loaders/86f_loader/86f_format.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 adf_hd.o : $(BASEDIR)/thirdpartylibs/adflib/Lib/adf_hd.c
