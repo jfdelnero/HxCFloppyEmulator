@@ -131,6 +131,7 @@
 #include "./loaders/a2r_loader/a2r_loader.h"
 #include "./loaders/micraln_loader/micraln_loader.h"
 #include "./loaders/fdx_loader/fdx_loader.h"
+#include "./loaders/86f_loader/86f_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -163,6 +164,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)AMIGADOSFSDK_libGetPluginInfo,
 	(GETPLUGININFOS)Prophet_libGetPluginInfo,
 	(GETPLUGININFOS)IMG_libGetPluginInfo,
+	(GETPLUGININFOS)F86_libGetPluginInfo,
 	(GETPLUGININFOS)FLPPCM_libGetPluginInfo,
 	(GETPLUGININFOS)MSX_libGetPluginInfo,
 	(GETPLUGININFOS)FAT12FLOPPY_libGetPluginInfo,
