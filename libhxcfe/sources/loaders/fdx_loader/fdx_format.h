@@ -26,7 +26,7 @@
 */
 
 //
-// FDX68 file format documention translated from this page :
+// FDX68 file format documentation translated from this page :
 //
 // http://retropc.net/gimons/fdx68/diskimage.html
 //
