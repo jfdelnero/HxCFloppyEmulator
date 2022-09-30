@@ -66,6 +66,8 @@
 #include "libhxcadaptor.h"
 #include "tracks/crc.h"
 
+#define FDX_NB_FAKE_REV 5
+
 #define FDX_DBG 1
 
 int FDX_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
@@ -97,10 +99,167 @@ int FDX_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 	}
 }
 
+int raw2stream(uint8_t * buf,uint32_t * stream_buffer,int size,int rev)
+{
+	int i,s,cnt,delta;
+	int off;
+
+	delta = 0;
+	cnt = 0;
+	s = 0;
+	for(i=0;i<(size*rev);i++)
+	{
+		off = i % size;
+
+		if((buf[off>>3] & (0x80>>(off&7))))
+		{
+			if(!s)
+			{
+				stream_buffer[cnt] = delta;
+				cnt++;
+				delta = 0;
+			}
+			else
+			{
+				delta++;
+			}
+
+			s = 1;
+		}
+		else
+		{
+			delta++;
+			s = 0;
+		}
+	}
+
+	return cnt;
+}
+
+int count_pulses(uint8_t * buf, int size)
+{
+	int i,s,cnt;
+
+	cnt = 0;
+	s = 0;
+	for(i=0;i<size;i++)
+	{
+		if((buf[i>>3] & (0x80>>(i&7))))
+		{
+			if(!s)
+			{
+				cnt++;
+			}
+
+			s = 1;
+		}
+		else
+		{
+			s = 0;
+		}
+	}
+
+	return cnt;
+}
+
+static HXCFE_SIDE* decodestream(HXCFE* floppycontext,uint8_t * track_buffer,int bit_track_length,int track,short * rpm,float timecoef,int phasecorrection,int revolution, int bitrate,int filter,int filterpasses, int bmpexport)
+{
+	HXCFE_SIDE* currentside;
+	int pulses_cnt;
+	HXCFE_TRKSTREAM *track_dump;
+	HXCFE_FXSA * fxs;
+	char tmp_filename[512];
+	int tick_period,freq;
+
+	uint32_t * trackbuf_dword;
+	
+	currentside=0;
+
+	floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
+
+	freq = hxcfe_getEnvVarValue( floppycontext, "FDXLOADER_SAMPLE_FREQUENCY_MHZ" );
+	tick_period = 10000;  // 10 ns per tick
+
+	if(freq>0 && freq <= 1000)
+	{
+		tick_period = (int)((float)tick_period * (float)((float)100  / (float)freq));
+	}
+
+	floppycontext->hxc_printf(MSG_INFO_1,"Sample tick period : %d ps", tick_period);
+
+	fxs = hxcfe_initFxStream(floppycontext);
+	if(fxs)
+	{
+		hxcfe_FxStream_setBitrate(fxs,bitrate);
+
+		hxcfe_FxStream_setPhaseCorrectionFactor(fxs,phasecorrection);
+
+		hxcfe_FxStream_setFilterParameters(fxs,filterpasses,filter);
+
+		pulses_cnt = count_pulses(track_buffer, bit_track_length);
+
+		#ifdef FDX_DBG
+		floppycontext->hxc_printf(MSG_DEBUG,"FDX RAW Track pulses count : %d",pulses_cnt);
+		#endif
+
+		trackbuf_dword = malloc((pulses_cnt+1)*sizeof(uint32_t)*FDX_NB_FAKE_REV);
+		if(trackbuf_dword)
+		{
+			memset(trackbuf_dword,0x00,(pulses_cnt+1)*sizeof(uint32_t) * FDX_NB_FAKE_REV);
+			pulses_cnt = raw2stream(track_buffer,trackbuf_dword,pulses_cnt,FDX_NB_FAKE_REV);
+
+			hxcfe_FxStream_setResolution(fxs, tick_period);
+
+			track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf_dword,32,(pulses_cnt), HXCFE_STREAMCHANNEL_TYPE_RLEEVT, "data", NULL);
+			if(track_dump)
+			{
+				hxcfe_FxStream_AddIndex(fxs,track_dump,0,0,FXSTRM_INDEX_MAININDEX);
+
+				hxcfe_FxStream_ChangeSpeed(fxs,track_dump,timecoef);
+
+				fxs->pll.track = track>>1;
+				fxs->pll.side = track&1;
+				currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
+
+				if(currentside)
+				{
+					if(rpm)
+						*rpm = (short)( 60 / GetTrackPeriod(floppycontext,currentside) );
+				}
+
+				if( bmpexport )
+				{
+					sprintf(tmp_filename,"track%.2d.%d.bmp",track>>1,track&1);
+					hxcfe_FxStream_ExportToBmp(fxs,track_dump, tmp_filename);
+				}
+
+				if(currentside)
+				{
+					currentside->stream_dump = track_dump;
+				}
+				else
+				{
+					hxcfe_FxStream_FreeStream(fxs,track_dump);
+				}
+			}
+
+			free(trackbuf_dword);
+		}
+
+		hxcfe_deinitFxStream(fxs);
+
+	}
+
+	floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
+
+	return currentside;
+}
+
 int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	int ret;
+	short rpm;
 	int i,j,k,len;
 	int tracknumber,sidenumber;
 	HXCFE_CYLINDER* currentcylinder;
@@ -108,6 +267,9 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	fdxheader_t fileheader;
 	fdxtrack_t * fdxtrackheader;
 	uint8_t * track_buffer;
+	int phasecorrection;
+	int bitrate;
+	int filterpasses,filter;
 
 	currentcylinder = 0;
 
@@ -117,6 +279,11 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	ret = HXCFE_NOERROR;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDX_libLoad_DiskFile %s",imgfile);
+
+	phasecorrection = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_PLL_PHASE_CORRECTION_DIVISOR" );
+	filterpasses = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES" );
+	filter = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW" );
+	bitrate = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FDXLOADER_BITRATE" );
 
 	f = hxc_fopen(imgfile,"rb");
 	if( f == NULL )
@@ -137,15 +304,15 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	{
 #ifdef FDX_DBG
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDX revision : %d",fileheader.revision);
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Disk name : %s",fileheader.disk_name);
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Disk type : 0x%X",fileheader.disk_type);
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Number of cylinders : %d",fileheader.nb_of_cylinders);
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Number of heads : %d",fileheader.nb_of_heads);
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Default bitrate : %d",fileheader.default_bitrate);
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Disk RPM : %d",fileheader.disk_rpm);
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Write Protect : %d",fileheader.write_protect);
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Options flags : 0x%.8X",fileheader.option);
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track block size : 0x%.8X",fileheader.track_block_size);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDX Disk name : %s",fileheader.disk_name);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDX Disk type : 0x%X",fileheader.disk_type);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDX Number of cylinders : %d",fileheader.nb_of_cylinders);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDX Number of heads : %d",fileheader.nb_of_heads);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDX Default bitrate : %d",fileheader.default_bitrate);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDX Disk RPM : %d",fileheader.disk_rpm);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDX Write Protect : %d",fileheader.write_protect);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDX Options flags : 0x%.8X",fileheader.option);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDX Track block size : 0x%.8X",fileheader.track_block_size);
 #endif
 
 		floppydisk->floppySectorPerTrack = -1;
@@ -177,7 +344,7 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			if( !hxc_fread( track_buffer, fileheader.track_block_size, f ) )
 			{
 				#ifdef FDX_DBG
-				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %d, Head %d",fdxtrackheader->cylinder,fdxtrackheader->head);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDX Cylinder: %d, Head: %d, Index position: %d, bit track length : %d",fdxtrackheader->cylinder,fdxtrackheader->head,fdxtrackheader->index_bit_place,fdxtrackheader->bit_track_length);
 				#endif
 
 				tracknumber = fdxtrackheader->cylinder;
@@ -210,33 +377,43 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				currentcylinder=floppydisk->tracks[tracknumber];
 
-				currentcylinder->sides[sidenumber] = tg_alloctrack(floppydisk->floppyBitRate,ISOIBM_MFM_ENCODING,300,fdxtrackheader->bit_track_length,2500,0,TG_ALLOCTRACK_ALLOCTIMIMGBUFFER|TG_ALLOCTRACK_ALLOCFLAKEYBUFFER);
-				if(!currentcylinder->sides[sidenumber])
+
+				switch(fileheader.disk_type)
 				{
-					ret = HXCFE_INTERNALERROR;
-					goto error;
-				}
+					case 9:
+						currentcylinder->sides[sidenumber] = decodestream(imgldr_ctx->hxcfe,track_buffer,fdxtrackheader->bit_track_length,i>>1,&rpm,1,phasecorrection,FDX_NB_FAKE_REV, bitrate, filter, filterpasses, 0);
+						len = currentcylinder->sides[sidenumber]->tracklen;
+					break;
 
+					default:
+						currentcylinder->sides[sidenumber] = tg_alloctrack(floppydisk->floppyBitRate,ISOIBM_MFM_ENCODING,fileheader.disk_rpm,fdxtrackheader->bit_track_length,3800,0,TG_ALLOCTRACK_ALLOCTIMIMGBUFFER|TG_ALLOCTRACK_ALLOCFLAKEYBUFFER);
+						if(!currentcylinder->sides[sidenumber])
+						{
+							ret = HXCFE_INTERNALERROR;
+							goto error;
+						}
 
-				currentside=currentcylinder->sides[sidenumber];
-				currentcylinder->number_of_side++;
+						currentside=currentcylinder->sides[sidenumber];
+						currentcylinder->number_of_side++;
+					
+						len = fdxtrackheader->bit_track_length/8;
+						if( fdxtrackheader->bit_track_length & 7 )
+							len++;
 
-				len = fdxtrackheader->bit_track_length/8;
-				if( fdxtrackheader->bit_track_length & 7 )
-					len++;
+						memset(currentside->databuffer,0x00,len);
 
-				memset(currentside->databuffer,0x00,len);
+						k = (fdxtrackheader->index_bit_place) % fdxtrackheader->bit_track_length;
+						for(j=0;j<fdxtrackheader->bit_track_length;j++)
+						{
+							if( track_buffer[sizeof(fdxtrack_t) + (k>>3)] & (0x80>>(k&7)) )
+							{
+								currentside->databuffer[j>>3] |= (0x80>>(j&7));
+							}
 
-				k = (fdxtrackheader->index_bit_place) % fdxtrackheader->bit_track_length;
-				for(j=0;j<fdxtrackheader->bit_track_length;j++)
-				{
-					if( track_buffer[sizeof(fdxtrack_t) + (k>>3)] & (0x80>>(k&7)) )
-					{
-						currentside->databuffer[j>>3] |= (0x80>>(j&7));
-					}
-
-					k++;
-					k %= fdxtrackheader->bit_track_length;
+							k++;
+							k %= fdxtrackheader->bit_track_length;
+						}
+					break;
 				}
 
 				for(j=0;j<len;j++)
