@@ -172,7 +172,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,uint8_t * track_buffer,int 
 	int tick_period,freq;
 
 	uint32_t * trackbuf_dword;
-	
+
 	currentside=0;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
@@ -381,8 +381,10 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				switch(fileheader.disk_type)
 				{
 					case 9:
+						len = 0;
 						currentcylinder->sides[sidenumber] = decodestream(imgldr_ctx->hxcfe,track_buffer,fdxtrackheader->bit_track_length,i>>1,&rpm,1,phasecorrection,FDX_NB_FAKE_REV, bitrate, filter, filterpasses, 0);
-						len = currentcylinder->sides[sidenumber]->tracklen;
+						if(currentcylinder->sides[sidenumber])
+							len = currentcylinder->sides[sidenumber]->tracklen;
 					break;
 
 					default:
@@ -395,7 +397,7 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 						currentside=currentcylinder->sides[sidenumber];
 						currentcylinder->number_of_side++;
-					
+
 						len = fdxtrackheader->bit_track_length/8;
 						if( fdxtrackheader->bit_track_length & 7 )
 							len++;
@@ -426,6 +428,9 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				}
 			}
 		}
+
+		hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
+
 	}
 
 	hxc_fclose(f);
