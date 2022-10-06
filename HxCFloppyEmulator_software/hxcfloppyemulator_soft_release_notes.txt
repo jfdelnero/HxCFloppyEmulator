@@ -17,7 +17,7 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 
 /*********************************************************
 XXXXXX 2022 : HxCFloppyEmulator 2.5.X.X (Work in progress / Beta version !)
-              (Last update : 30 August 2022)
+              (Last update : 6 October 2022)
 
 Windows : Turn the process in high priority when the USB HxC Floppy Emulator is detected.
           Fix most of the Sync lost events.
@@ -64,7 +64,10 @@ IMD File Writer : Fix track type when no supported sector are present on the tra
 
 Kryoflux Import : (WIP) Possible missing last index workaround.
 
-FDX support added : Revision 3 file format (TODO : Raw/stream variant)
+FDX support added : Revision 3 file format (standard and Raw/stream variants supported)
+Raw FDX export support added.
+
+86Box 86F support added : (WIP)
 
 *********************************************************/
 

@@ -158,7 +158,8 @@ const char * plugid_lst[]=
 	PLUGIN_HEATHKIT,
 	PLUGIN_HXC_QD,
 	PLUGIN_APPLE2_DO,
-	PLUGIN_APPLE2_PO
+	PLUGIN_APPLE2_PO,
+	PLUGIN_FDX68_FDX
 };
 
 #ifdef GUI_DEBUG
@@ -522,6 +523,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"QD file (Quickdisk HxC Floppy Emulator file format)\t*.qd\n"
 					"Apple II DO (Dos 3.3) file\t*.do\n"
 					"Apple II PO (ProDos) file\t*.po\n"
+					"FDX68 file (raw)\t*.fdx\n"
 					);
 
 

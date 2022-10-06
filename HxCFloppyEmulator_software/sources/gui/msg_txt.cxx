@@ -178,6 +178,7 @@ Fl_Menu_Item format_choices[]=
 	{ "QD  - HxC Quickdisk file format",0,format_choice_cb,(void*)PLUGIN_HXC_QD},
 	{ "DO - Apple II file image (Dos 3.3)",0,format_choice_cb,(void*)PLUGIN_APPLE2_DO},
 	{ "PO - Apple II file image (ProDos)",0,format_choice_cb,(void*)PLUGIN_APPLE2_PO},
+	{ "FDX - FDX68 raw file image (ProDos)",0,format_choice_cb,(void*)PLUGIN_FDX68_FDX},
 	{0}
 };
 
