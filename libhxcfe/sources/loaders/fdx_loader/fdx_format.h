@@ -88,4 +88,6 @@ typedef struct fdxtrack_t_
 // Weakbits/flakybits area seems to be set to 0 in the track data buffer.
 //
 
+#define FDX_RAW_TICK_PERIOD 264000 // 264 ns per tick (to be confirmed !)
+
 #pragma pack()

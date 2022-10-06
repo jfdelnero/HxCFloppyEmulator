@@ -82,3 +82,4 @@
 #define PLUGIN_HXC_QD               "HXC_QD"
 #define PLUGIN_APPLE2_DO            "APPLE2_DO"
 #define PLUGIN_APPLE2_PO            "APPLE2_PO"
+#define PLUGIN_FDX68_FDX            "FDX68_FDX"

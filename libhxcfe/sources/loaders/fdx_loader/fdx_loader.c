@@ -188,7 +188,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,uint8_t * track_buffer,int 
 	floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
 
 	freq = hxcfe_getEnvVarValue( floppycontext, "FDXLOADER_SAMPLE_FREQUENCY_MHZ" );
-	tick_period = 264000;  // 264 ns per tick (to be confirmed !)
+	tick_period = FDX_RAW_TICK_PERIOD;
 
 	if(freq>0 && freq <= 1000)
 	{
@@ -401,7 +401,7 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				{
 					case 9:
 						len = 0;
-						currentcylinder->sides[sidenumber] = decodestream(imgldr_ctx->hxcfe,track_buffer,fdxtrackheader->bit_track_length,i>>0,&rpm,1,phasecorrection,FDX_NB_FAKE_REV, bitrate, filter, filterpasses, 0);
+						currentcylinder->sides[sidenumber] = decodestream(imgldr_ctx->hxcfe,track_buffer+sizeof(fdxtrack_t),fdxtrackheader->bit_track_length,i>>0,&rpm,1,phasecorrection,FDX_NB_FAKE_REV, bitrate, filter, filterpasses, 0);
 						currentcylinder->number_of_side++;
 
 						if(currentcylinder->sides[sidenumber])
@@ -476,15 +476,15 @@ error:
 int FDX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
-	static const char plug_id[]="PC88_FDX";
-	static const char plug_desc[]="PC88 FDX Loader";
+	static const char plug_id[]="FDX68_FDX";
+	static const char plug_desc[]="FDX Loader";
 	static const char plug_ext[]="fdx";
 
 	plugins_ptr plug_funcs=
 	{
 		(ISVALIDDISKFILE)   FDX_libIsValidDiskFile,
 		(LOADDISKFILE)      FDX_libLoad_DiskFile,
-		(WRITEDISKFILE)     NULL, //FDX_libWrite_DiskFile,
+		(WRITEDISKFILE)     FDX_libWrite_DiskFile,
 		(GETPLUGININFOS)    FDX_libGetPluginInfo
 	};
 
