@@ -124,7 +124,7 @@ int raw2stream(uint8_t * buf,uint32_t * stream_buffer,int size,int rev, int * in
 		{
 			if(!s)
 			{
-				stream_buffer[cnt] = delta;
+				stream_buffer[cnt] = delta+1;
 				cnt++;
 				delta = 0;
 			}
