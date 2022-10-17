@@ -68,13 +68,13 @@ int FDX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	fdxheader_t fdx_header;
 	FILE * fdxfile;
 	char tmp_str[512];
-	int i,j;
+	int i,j,k;
 	int max_track_len;
 	double maxperiod,tmpperiod;
 	uint8_t * track_buffer;
 	fdxtrack_t * track_header;
 	streamconv * strconv;
-	uint32_t pulse_pos;
+	uint32_t pulse_pos,p;
 
 	hxcfe_imgCallProgressCallback(imgldr_ctx,0,floppy->floppyNumberOfTrack*2 );
 
@@ -161,15 +161,19 @@ int FDX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 				strconv = initStreamConvert(imgldr_ctx->hxcfe,floppy->tracks[i]->sides[j], FDX_RAW_TICK_PERIOD, 0x00FFFFFF,0,0,2,5000000);
 				if(strconv)
 				{
-					StreamConvert_getNextPulse(strconv);
-
-					pulse_pos = 0;
+					pulse_pos = StreamConvert_getNextPulse(strconv);
 					while(!strconv->stream_end_event)
 					{
-						pulse_pos += StreamConvert_getNextPulse(strconv);
+						p = StreamConvert_getNextPulse(strconv);
+						pulse_pos += p;
 
-						if(pulse_pos < track_header->bit_track_length)
-							track_buffer[sizeof(fdxtrack_t) + (pulse_pos>>3)] |= (0x80>>(pulse_pos&7));
+						for(k=0;k<3;k++)
+						{
+							if((pulse_pos+k) < track_header->bit_track_length)
+							{
+								track_buffer[sizeof(fdxtrack_t) + ((pulse_pos+k)>>3)] |= (0x80>>((pulse_pos+k)&7));
+							}
+						}
 					}
 
 					deinitStreamConvert(strconv);
