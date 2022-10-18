@@ -73,6 +73,8 @@ typedef struct streamconv_
 	float    stream_period_ps;
 	uint64_t stream_time_offset_ps;
 	uint64_t stream_prev_time_offset_ps;
+	uint64_t stream_total_time_ps;
+
 	float    overflow_value;
 	double   conv_error;
 	int      rollover;
@@ -92,4 +94,3 @@ uint32_t StreamConvert_getNextPulse(streamconv * sc);
 uint32_t StreamConvert_search_index(streamconv * sc, int index);
 uint32_t StreamConvert_setPosition(streamconv * sc, int revolution, float offset);
 void deinitStreamConvert(streamconv * sc);
-

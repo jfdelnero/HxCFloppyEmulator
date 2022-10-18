@@ -66,11 +66,10 @@
 
 #include "misc/env.h"
 
-
 streamconv * initStreamConvert(HXCFE* hxcfe, HXCFE_SIDE * track, float stream_period_ps, float overflowvalue,int start_revolution,float start_offset,int end_revolution,float end_offset)
 {
 	streamconv * sc;
-	int start_bitstream_pos;
+	int start_bitstream_pos,i;
 
 	sc = malloc(sizeof(streamconv));
 	if(sc)
@@ -128,6 +127,24 @@ streamconv * initStreamConvert(HXCFE* hxcfe, HXCFE_SIDE * track, float stream_pe
 				sc->fxs = hxcfe_initFxStream(sc->hxcfe);
 				sc->bitstream_pos = sc->track->stream_dump->index_evt_tab[hxcfe_FxStream_GetRevolutionIndex( sc->fxs, sc->track->stream_dump, start_revolution )].dump_offset;
 			}
+		}
+
+		if(!(sc->track->stream_dump && sc->stream_source))
+		{
+			i = 0;
+			sc->stream_total_time_ps = 0;
+			do
+			{
+				if(sc->track->timingbuffer)
+				{
+					sc->stream_total_time_ps += (((uint64_t)1E12)/(uint64_t)(sc->track->timingbuffer[i>>3]*2));
+				}
+				else
+				{
+					sc->stream_total_time_ps += (((uint64_t)1E12)/(uint64_t)(sc->track->bitrate*2));
+				}
+				i++;
+			}while(i<sc->track->tracklen);
 		}
 	}
 
@@ -329,9 +346,11 @@ uint32_t StreamConvert_getNextPulse(streamconv * sc)
 				sc->rollover = 0x01;
 
 				if(sc->stream_prev_time_offset_ps <= sc->stream_time_offset_ps)
-					delta = (sc->stream_time_offset_ps/(uint64_t)sc->stream_period_ps) - (sc->stream_prev_time_offset_ps/(uint64_t)sc->stream_period_ps);
+					delta = (sc->stream_time_offset_ps - sc->stream_prev_time_offset_ps) / (uint64_t)sc->stream_period_ps;
 				else
-					delta = 1;
+					delta = ( (sc->stream_total_time_ps - sc->stream_prev_time_offset_ps) + sc->stream_time_offset_ps ) / (uint64_t)sc->stream_period_ps;
+
+				sc->stream_prev_time_offset_ps = sc->stream_time_offset_ps;
 
 				return (uint32_t)delta;
 			}
@@ -362,9 +381,9 @@ uint32_t StreamConvert_getNextPulse(streamconv * sc)
 			if( tmp_byte )
 			{
 				if(sc->stream_prev_time_offset_ps <= sc->stream_time_offset_ps)
-					delta = (sc->stream_time_offset_ps/(uint64_t)sc->stream_period_ps) - (sc->stream_prev_time_offset_ps/(uint64_t)sc->stream_period_ps);
+					delta = (sc->stream_time_offset_ps/(uint64_t)sc->stream_period_ps) - (sc->stream_prev_time_offset_ps/ (uint64_t)sc->stream_period_ps);
 				else
-					delta = 1;
+					delta = ( (sc->stream_total_time_ps - sc->stream_prev_time_offset_ps) + sc->stream_time_offset_ps ) / (uint64_t)sc->stream_period_ps;
 
 				sc->stream_prev_time_offset_ps = sc->stream_time_offset_ps;
 
