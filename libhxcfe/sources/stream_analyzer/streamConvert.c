@@ -238,16 +238,14 @@ uint32_t StreamConvert_getNextPulse(streamconv * sc)
 {
 	int i,startpoint;
 	unsigned char tmp_byte;
-	double totaltime,resampled_value_f;
+	double resampled_value_f;
 	uint32_t tmp_val, resampled_value;
-
+	uint64_t delta;
 	sc->rollover = 0x00;
 	sc->index_event = 0;
 
 	if(sc->track->stream_dump && sc->stream_source)
 	{
-		totaltime = sc->track->stream_dump->channels[0].stream[sc->bitstream_pos];
-
 		startpoint = sc->bitstream_pos % sc->track->stream_dump->channels[0].nb_of_pulses;
 
 		tmp_val = sc->track->stream_dump->channels[0].stream[sc->bitstream_pos];
@@ -295,19 +293,18 @@ uint32_t StreamConvert_getNextPulse(streamconv * sc)
 	}
 	else
 	{
-		if(sc->track->timingbuffer)
-		{
-			totaltime = ((float)(1000*1000*1000) / (float)(sc->track->timingbuffer[sc->bitstream_pos>>3]*2));
-		}
-		else
-		{
-			totaltime = ((float)(1000*1000*1000) / (float)(sc->track->bitrate*2));
-		}
-
 		startpoint = sc->bitstream_pos % sc->track->tracklen;
-		i=1;
 		do
 		{
+			if(sc->track->timingbuffer)
+			{
+				sc->stream_time_offset_ps += (((uint64_t)1E12)/(uint64_t)(sc->track->timingbuffer[sc->bitstream_pos>>3]*2));
+			}
+			else
+			{
+				sc->stream_time_offset_ps += (((uint64_t)1E12)/(uint64_t)(sc->track->bitrate*2));
+			}
+
 			sc->bitstream_pos++;
 
 			if( sc->bitstream_pos >= sc->track->tracklen )
@@ -315,6 +312,7 @@ uint32_t StreamConvert_getNextPulse(streamconv * sc)
 				sc->current_revolution++;
 				sc->bitstream_pos = (sc->bitstream_pos % sc->track->tracklen);
 				sc->rollover = 0xFF;
+				sc->stream_time_offset_ps = 0;
 			}
 
 			if( sc->current_revolution >= sc->end_revolution )
@@ -329,14 +327,20 @@ uint32_t StreamConvert_getNextPulse(streamconv * sc)
 			if( startpoint == sc->bitstream_pos ) // starting point reached ? -> No pulse in this track !
 			{
 				sc->rollover = 0x01;
-				return  (uint32_t)((float)totaltime/(float)(sc->stream_period_ps/1000.0));
+
+				if(sc->stream_prev_time_offset_ps <= sc->stream_time_offset_ps)
+					delta = (sc->stream_time_offset_ps/(uint64_t)sc->stream_period_ps) - (sc->stream_prev_time_offset_ps/(uint64_t)sc->stream_period_ps);
+				else
+					delta = 1;
+
+				return (uint32_t)delta;
 			}
 
 			// Overflow...
-			if(totaltime >= sc->overflow_value)
+/*			if(totaltime >= sc->overflow_value)
 			{
 				return sc->overflow_value-1;
-			}
+			}*/
 
 			sc->index_state = sc->track->indexbuffer[sc->bitstream_pos>>3];
 			if(sc->index_state && !sc->old_index_state)
@@ -357,20 +361,14 @@ uint32_t StreamConvert_getNextPulse(streamconv * sc)
 
 			if( tmp_byte )
 			{
-				return (int)((float)totaltime/(float)(sc->stream_period_ps/1000.0));
-			}
-			else
-			{
-				i++;
-
-				if(sc->track->timingbuffer)
-				{
-					totaltime += ((float)(1000*1000*1000) / (float)(sc->track->timingbuffer[sc->bitstream_pos>>3]*2));
-				}
+				if(sc->stream_prev_time_offset_ps <= sc->stream_time_offset_ps)
+					delta = (sc->stream_time_offset_ps/(uint64_t)sc->stream_period_ps) - (sc->stream_prev_time_offset_ps/(uint64_t)sc->stream_period_ps);
 				else
-				{
-					totaltime += ((float)(1000*1000*1000) / (float)(sc->track->bitrate*2));
-				}
+					delta = 1;
+
+				sc->stream_prev_time_offset_ps = sc->stream_time_offset_ps;
+
+				return (uint32_t)delta;
 			}
 		}while(1);
 	}

@@ -71,6 +71,8 @@ typedef struct streamconv_
 	HXCFE_FXSA * fxs;
 
 	float    stream_period_ps;
+	uint64_t stream_time_offset_ps;
+	uint64_t stream_prev_time_offset_ps;
 	float    overflow_value;
 	double   conv_error;
 	int      rollover;
