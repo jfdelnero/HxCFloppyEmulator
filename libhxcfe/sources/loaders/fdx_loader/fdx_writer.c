@@ -103,7 +103,7 @@ int FDX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 		fdx_header.nb_of_cylinders = floppy->floppyNumberOfTrack;
 		fdx_header.nb_of_heads = floppy->floppyNumberOfSide;
-		fdx_header.default_bitrate = 500;
+		fdx_header.default_bitrate = ((double)((double)1E12 / (double)FDX_RAW_TICK_PERIOD ) / 1000);
 		fdx_header.disk_rpm = floppy->tracks[0]->floppyRPM;
 		if(fdx_header.disk_rpm < 0)
 			fdx_header.disk_rpm = 300;

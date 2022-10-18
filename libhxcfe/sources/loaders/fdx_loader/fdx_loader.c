@@ -171,7 +171,7 @@ int count_pulses(uint8_t * buf, int size)
 	return cnt;
 }
 
-static HXCFE_SIDE* decodestream(HXCFE* floppycontext,uint8_t * track_buffer,int bit_track_length,int track,short * rpm,float timecoef,int phasecorrection,int revolution, int bitrate,int filter,int filterpasses, int bmpexport)
+static HXCFE_SIDE* decodestream(HXCFE* floppycontext,uint8_t * track_buffer,int bit_track_length,int track,short * rpm,float timecoef,int phasecorrection,int revolution, int bitrate,int filter,int filterpasses, int bmpexport, int fdxfreq)
 {
 	HXCFE_SIDE* currentside;
 	int pulses_cnt;
@@ -188,7 +188,8 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,uint8_t * track_buffer,int 
 	floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
 
 	freq = hxcfe_getEnvVarValue( floppycontext, "FDXLOADER_SAMPLE_FREQUENCY_MHZ" );
-	tick_period = FDX_RAW_TICK_PERIOD;
+
+	tick_period = ((float)1E9/(float)fdxfreq);
 
 	if(freq>0 && freq <= 1000)
 	{
@@ -401,7 +402,7 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				{
 					case 9:
 						len = 0;
-						currentcylinder->sides[sidenumber] = decodestream(imgldr_ctx->hxcfe,track_buffer+sizeof(fdxtrack_t),fdxtrackheader->bit_track_length,i>>0,&rpm,1,phasecorrection,FDX_NB_FAKE_REV, bitrate, filter, filterpasses, 0);
+						currentcylinder->sides[sidenumber] = decodestream(imgldr_ctx->hxcfe,track_buffer+sizeof(fdxtrack_t),fdxtrackheader->bit_track_length,i>>0,&rpm,1,phasecorrection,FDX_NB_FAKE_REV, bitrate, filter, filterpasses, 0, fileheader.default_bitrate);
 						currentcylinder->number_of_side++;
 
 						if(currentcylinder->sides[sidenumber])

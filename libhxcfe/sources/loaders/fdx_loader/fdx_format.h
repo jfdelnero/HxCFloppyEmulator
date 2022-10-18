@@ -48,20 +48,20 @@
 
 typedef struct fdxheader_t_
 {
-	uint8_t  fdx_signature[3];               // Extension('F','D','X')
-	uint8_t  revision;                       // Revision (should be 3)
-	uint8_t  disk_name[60];                  // Disk name
-	uint8_t  pad[4];                         // Padding
-	int32_t  disk_type;                      // Type (0:2D 1:2DD 2:2HD 9:RAW)
-	int32_t  nb_of_cylinders;                // Number of cylinders
-	int32_t  nb_of_heads;                    // Number of heads
-	int32_t  default_bitrate;                // Transfer rate (with clock) [500|1000]
-	int32_t  disk_rpm;                       // RPM
-	uint32_t write_protect;                  // Write protect (0: OFF 1: ON)
-	uint32_t option;                         // Behavior options (currently unused)
-	uint32_t unused;                         // Not used
-	int32_t  track_block_size;               // Track block lengh (number of bytes)
-	uint8_t  reserved[152];                  // Reserved (padding to 256 bytes header)
+	uint8_t  fdx_signature[3];               // 0x000 - Extension('F','D','X')
+	uint8_t  revision;                       // 0x003 - Revision (should be 3)
+	uint8_t  disk_name[60];                  // 0x004 - Disk name
+	uint8_t  pad[4];                         // 0x040 - Padding
+	int32_t  disk_type;                      // 0x044 - Type (0:2D 1:2DD 2:2HD 9:RAW)
+	int32_t  nb_of_cylinders;                // 0x048 - Number of cylinders
+	int32_t  nb_of_heads;                    // 0x04C - Number of heads
+	int32_t  default_bitrate;                // 0x050 - Transfer rate (with clock) [500|1000]
+	int32_t  disk_rpm;                       // 0x054 - RPM
+	uint32_t write_protect;                  // 0x058 - Write protect (0: OFF 1: ON)
+	uint32_t option;                         // 0x05C - Behavior options (currently unused)
+	uint32_t unused;                         // 0x060 - Not used
+	int32_t  track_block_size;               // 0x064 - Track block lengh (number of bytes)
+	uint8_t  reserved[152];                  // 0x068 - Reserved (padding to 256 bytes header)
 } fdxheader_t;
 
 //   Track Header information :
