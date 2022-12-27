@@ -235,6 +235,7 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 								trackbuffer[i] = 0x0B; // Overflow16
 								i = nextbyte(f,i,trackbuffer);
 								streamsize++;
+								value -= 0x10000;
 							}while(value>= 0x10000);
 
 							trackbuffer[i] = 0x0C; // Value16
