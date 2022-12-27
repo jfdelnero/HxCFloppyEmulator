@@ -111,6 +111,9 @@ int raw_iso_loader(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk, FILE * f
 	hxcfe_setTrackInterleave ( fb_ctx, cfg->interleave );
 	hxcfe_setSectorFill ( fb_ctx, cfg->fill_value );
 
+	if(cfg->force_side_id >= 0)
+		hxcfe_setSectorHeadID ( fb_ctx, cfg->force_side_id );
+
 	flags = 0;
 
 	if(cfg->trk_grouped_by_sides)
@@ -148,5 +151,6 @@ void raw_iso_setdefcfg(raw_iso_cfg *rawcfg)
 		rawcfg->fill_value = 0xF6;
 		rawcfg->trk_grouped_by_sides = 0;
 		rawcfg->flip_sides = 0;
+		rawcfg->force_side_id = -1;
 	}
 }
