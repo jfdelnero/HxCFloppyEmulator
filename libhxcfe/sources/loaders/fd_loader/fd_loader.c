@@ -113,6 +113,7 @@ int FD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 	rawcfg.interface_mode = GENERIC_SHUGART_DD_FLOPPYMODE;
 
 	rawcfg.trk_grouped_by_sides = 1;
+	rawcfg.force_side_id = 0;
 
 	filesize = hxc_fgetsize(f_img);
 
