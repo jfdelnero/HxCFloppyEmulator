@@ -70,6 +70,8 @@ Raw FDX export support added.
 
 86Box 86F support added : (WIP)
 
+FD loader : Fix sectors side ID : All of them should use the ID 0.
+
 *********************************************************/
 
 /*********************************************************
