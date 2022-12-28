@@ -1204,6 +1204,8 @@ HXCFE_FLPGEN* hxcfe_initFloppy( HXCFE* floppycontext, int32_t nb_of_track, int32
 		fb_ctx->fb_stack[0].interleave=1;
 		fb_ctx->fb_stack[0].rpm=300;
 
+		fb_ctx->fb_stack[0].forced_side_id = -1;
+
 		fb_ctx->fb_stack[0].sectors_size = 512;
 
 		for(i=0;i<MAX_NUMBER_OF_INDEX;i++)
@@ -1630,12 +1632,20 @@ int32_t hxcfe_setSectorTrackID( HXCFE_FLPGEN* fb_ctx, int32_t track )
 	return HXCFE_NOERROR;
 }
 
+int32_t hxcfe_setDiskSectorsHeadID( HXCFE_FLPGEN* fb_ctx, int32_t head )
+{
+	fb_ctx->fb_stack[fb_ctx->fb_stack_pointer].forced_side_id = head;
+
+	return HXCFE_NOERROR;
+}
+
 int32_t hxcfe_setSectorHeadID( HXCFE_FLPGEN* fb_ctx, int32_t head )
 {
 	fb_track_state * cur_track;
 
 	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
 	cur_track->sc_stack[cur_track->sc_stack_pointer].head = head;
+
 	return HXCFE_NOERROR;
 }
 
@@ -1834,6 +1844,7 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 	int start_file_ofs;
 	int skew_per_track;
 	int skew_per_side;
+	int auto_side_id,side_id;
 	fb_track_state * cur_track;
 	FILE * filehandle;
 	HXCFE_SIDE* tmp_side;
@@ -1884,6 +1895,8 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 	type = cur_track->type;
 	skew_per_track = cur_track->skew;
 	skew_per_side = cur_track->side_skew;
+	auto_side_id = cur_track->forced_side_id;
+
 	fill_byte = cur_track->sc_stack[cur_track->sc_stack_pointer].fill_byte;
 
 	fb_ctx->floppycontext->hxc_printf(MSG_INFO_1,"Image Size:%dkB, %d tracks, %d side(s), %d sectors/track, interleave:%d,rpm:%d",(image_size-start_file_ofs)/1024,
@@ -1965,7 +1978,12 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 
 					hxcfe_setTrackSkew( fb_ctx, (skew_per_track*i) + (skew_per_side*j) );
 
-					ret = hxcfe_addSectors(fb_ctx,j,i,track_buffer,(sectorsize * numberofsector),numberofsector);
+					if(auto_side_id < 0)
+						side_id = j;
+					else
+						side_id = auto_side_id;
+
+					ret = hxcfe_addSectors(fb_ctx,side_id,i,track_buffer,(sectorsize * numberofsector),numberofsector);
 
 					hxcfe_popTrack (fb_ctx);
 

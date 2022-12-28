@@ -282,6 +282,7 @@ int32_t                hxcfe_setSectorFill ( HXCFE_FLPGEN* fb_ctx, int32_t fill 
 
 int32_t                hxcfe_setSectorTrackID( HXCFE_FLPGEN* fb_ctx, int32_t track );
 int32_t                hxcfe_setSectorHeadID( HXCFE_FLPGEN* fb_ctx, int32_t head );
+int32_t                hxcfe_setDiskSectorsHeadID( HXCFE_FLPGEN* fb_ctx, int32_t head );
 int32_t                hxcfe_setSectorID( HXCFE_FLPGEN* fb_ctx, int32_t id );
 
 int32_t                hxcfe_setSectorEncoding ( HXCFE_FLPGEN* fb_ctx, int32_t encoding );

@@ -70,6 +70,7 @@ EXPORTS
    hxcfe_popTrack                           @79
    hxcfe_getFloppy                          @80
    hxcfe_generateDisk                       @81
+   hxcfe_setDiskSectorsHeadID               @82
 
    hxcfe_initSectorAccess                   @100
    hxcfe_getNextSector                      @101

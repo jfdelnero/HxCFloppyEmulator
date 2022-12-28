@@ -13,6 +13,7 @@ typedef struct _fb_track_state
 	int32_t sectors_size;
 	int32_t skew;
 	int32_t side_skew;
+	int32_t forced_side_id;
 	int32_t type;
 	int32_t rpm;
 	int32_t pregap;

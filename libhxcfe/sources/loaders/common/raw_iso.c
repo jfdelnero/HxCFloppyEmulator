@@ -112,7 +112,7 @@ int raw_iso_loader(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk, FILE * f
 	hxcfe_setSectorFill ( fb_ctx, cfg->fill_value );
 
 	if(cfg->force_side_id >= 0)
-		hxcfe_setSectorHeadID ( fb_ctx, cfg->force_side_id );
+		hxcfe_setDiskSectorsHeadID( fb_ctx, cfg->force_side_id );
 
 	flags = 0;
 
