@@ -38,7 +38,7 @@
 // File : floppy_loader.c
 // Contains: Library interface functions
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -549,7 +549,7 @@ int32_t hxcfe_imgCheckFileCompatibility( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR
 		}
 	}
 
-	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%s : %s is an ADF file !", loadername, file_infos->path);
+	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%s : %s is an %s file !", loadername, file_infos->path,fileext);
 
 	return HXCFE_VALIDFILE;
 }
