@@ -19,6 +19,8 @@ typedef struct _HXCFE_SECTORACCESS
 	SECTORSEARCHTRACKCACHE * track_cache;
 
 	int32_t old_bitoffset;
+
+	uint32_t flags;
 }HXCFE_SECTORACCESS;
 
 #define _HXCFE_SECTORACCESS_

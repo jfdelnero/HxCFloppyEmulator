@@ -347,6 +347,8 @@ void                   hxcfe_deinitXmlFloppy( HXCFE_XMLLDR* xmlfb_ctx );
 
 HXCFE_SECTORACCESS*    hxcfe_initSectorAccess( HXCFE* floppycontext, HXCFE_FLOPPY *fp );
 
+void                   hxcfe_setSectorAccessFlags( HXCFE_SECTORACCESS* ss_ctx, uint32_t flags);
+
 HXCFE_SECTCFG*         hxcfe_getNextSector( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t type );
 HXCFE_SECTCFG*         hxcfe_searchSector ( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t id, int32_t type );
 void                   hxcfe_resetSearchTrackPosition( HXCFE_SECTORACCESS* ss_ctx );
@@ -364,6 +366,9 @@ void                   hxcfe_freeSectorConfig( HXCFE_SECTORACCESS* ss_ctx, HXCFE
 void                   hxcfe_clearTrackCache(HXCFE_SECTORACCESS* ss_ctx);
 
 void                   hxcfe_deinitSectorAccess( HXCFE_SECTORACCESS* ss_ctx );
+
+// Flags
+#define SECTORACCESS_IGNORE_SIDE_ID 0x00000001
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // FDC style functions                                                                            //
