@@ -106,6 +106,10 @@ HXCFE_SECTORACCESS* hxcfe_initSectorAccess(HXCFE* floppycontext,HXCFE_FLOPPY *fp
 	int i;
 
 	ss_ctx = (HXCFE_SECTORACCESS*) malloc(sizeof(HXCFE_SECTORACCESS));
+
+	if(!ss_ctx)
+		return ss_ctx;
+
 	memset(ss_ctx,0,sizeof(HXCFE_SECTORACCESS));
 
 	ss_ctx->fp = fp;
@@ -124,6 +128,11 @@ HXCFE_SECTORACCESS* hxcfe_initSectorAccess(HXCFE* floppycontext,HXCFE_FLOPPY *fp
 			{
 				ss_ctx->track_cache[i].nb_sector_cached = 0;
 			}
+		}
+		else
+		{
+			free(ss_ctx);
+			ss_ctx = NULL;
 		}
 	}
 
@@ -514,7 +523,7 @@ HXCFE_SECTCFG* hxcfe_searchSector ( HXCFE_SECTORACCESS* ss_ctx, int32_t track, i
 		i = 0;
 		while( i < trackcache->nb_sector_cached )
 		{
-			if((trackcache->sectorcache[i].sector == id) && (trackcache->sectorcache[i].cylinder == track) && (trackcache->sectorcache[i].head == side) )
+			if((trackcache->sectorcache[i].sector == id) && (trackcache->sectorcache[i].cylinder == track) && ( (trackcache->sectorcache[i].head == side) || (ss_ctx->flags & SECTORACCESS_IGNORE_SIDE_ID) ) )
 			{
 				ss_ctx->cur_side = side;
 				ss_ctx->cur_track = track;
@@ -567,6 +576,11 @@ HXCFE_SECTCFG* hxcfe_searchSector ( HXCFE_SECTORACCESS* ss_ctx, int32_t track, i
 	}while( sc );
 
 	return 0;
+}
+
+void hxcfe_setSectorAccessFlags( HXCFE_SECTORACCESS* ss_ctx, uint32_t flags)
+{
+	ss_ctx->flags = flags;
 }
 
 int32_t hxcfe_getSectorSize( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SECTCFG* sc )
@@ -1200,7 +1214,7 @@ int write_raw_file(HXCFE_IMGLDR * imgldr_ctx,FILE * f,HXCFE_FLOPPY * fp,int32_t 
 		return HXCFE_NOERROR;
 }
 
-int count_sector(HXCFE* floppycontext,HXCFE_FLOPPY * fp,int32_t startidsector,int32_t track,int32_t side,int32_t sectorsize,int32_t tracktype)
+int count_sector(HXCFE* floppycontext,HXCFE_FLOPPY * fp,int32_t startidsector,int32_t track,int32_t side,int32_t sectorsize,int32_t tracktype, uint32_t flags)
 {
 	int sect_cnt;
 	HXCFE_SECTORACCESS* ss;
@@ -1212,6 +1226,8 @@ int count_sector(HXCFE* floppycontext,HXCFE_FLOPPY * fp,int32_t startidsector,in
 		ss = hxcfe_initSectorAccess( floppycontext, fp );
 		if(ss)
 		{
+			hxcfe_setSectorAccessFlags( ss, flags);
+
 			do
 			{
 				scfg = hxcfe_searchSector ( ss, track, side, startidsector + sect_cnt, tracktype );

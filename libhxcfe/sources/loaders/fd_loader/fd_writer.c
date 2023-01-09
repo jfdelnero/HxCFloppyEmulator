@@ -62,11 +62,12 @@ int write_raw_FDfile(HXCFE_IMGLDR * imgldr_ctx,FILE * f,HXCFE_FLOPPY * fp,int32_
 		ss = hxcfe_initSectorAccess( imgldr_ctx->hxcfe, fp );
 		if(ss)
 		{
-			for( side = 0 ; side < nbofside; side++ )
-				{
-                     for( trk = 0 ; trk < nboftrack ; trk++ )
-			{
+			hxcfe_setSectorAccessFlags( ss, SECTORACCESS_IGNORE_SIDE_ID);
 
+			for( side = 0 ; side < nbofside; side++ )
+			{
+				for( trk = 0 ; trk < nboftrack ; trk++ )
+				{
 					for( sect = 0 ; sect < sectorpertrack ; sect++ )
 					{
 						scfg = hxcfe_searchSector ( ss, trk, side, startidsector + sect, tracktype );
@@ -135,8 +136,8 @@ int FD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * f
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write FD file %s...",filename);
 
-	sectorcnt_s0 = count_sector(imgldr_ctx->hxcfe,floppy,1,0,0,sectorsize,ISOIBM_MFM_ENCODING);
-	sectorcnt_s1 = count_sector(imgldr_ctx->hxcfe,floppy,1,0,1,sectorsize,ISOIBM_MFM_ENCODING);
+	sectorcnt_s0 = count_sector(imgldr_ctx->hxcfe,floppy,1,0,0,sectorsize,ISOIBM_MFM_ENCODING,SECTORACCESS_IGNORE_SIDE_ID);
+	sectorcnt_s1 = count_sector(imgldr_ctx->hxcfe,floppy,1,0,1,sectorsize,ISOIBM_MFM_ENCODING,SECTORACCESS_IGNORE_SIDE_ID);
 
 	if(sectorcnt_s0!=16){
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Error : Disk format doesn't match...",filename);
@@ -144,7 +145,7 @@ int FD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * f
 	}
 
 	nbtrack = 80;
-	while(nbtrack && !count_sector(imgldr_ctx->hxcfe,floppy,1,nbtrack-1,0,sectorsize,ISOIBM_MFM_ENCODING))
+	while(nbtrack && !count_sector(imgldr_ctx->hxcfe,floppy,1,nbtrack-1,0,sectorsize,ISOIBM_MFM_ENCODING,SECTORACCESS_IGNORE_SIDE_ID))
 	{
 		nbtrack--;
 	}

@@ -82,6 +82,7 @@ EXPORTS
    hxcfe_deinitSectorAccess                 @107
    hxcfe_writeSectorData                    @108
    hxcfe_resetSearchTrackPosition           @109
+   hxcfe_setSectorAccessFlags               @110
 
    hxcfe_td_init                            @120
    hxcfe_td_draw_track                      @121
