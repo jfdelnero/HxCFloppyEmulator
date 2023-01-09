@@ -67,8 +67,8 @@ int ADZ_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write ADZ file %s...",filename);
 
-	sectorcnt_s0 = count_sector(imgldr_ctx->hxcfe,floppy,0,0,0,sectorsize,AMIGA_MFM_ENCODING);
-	sectorcnt_s1 = count_sector(imgldr_ctx->hxcfe,floppy,0,0,1,sectorsize,AMIGA_MFM_ENCODING);
+	sectorcnt_s0 = count_sector(imgldr_ctx->hxcfe,floppy,0,0,0,sectorsize,AMIGA_MFM_ENCODING,NULL);
+	sectorcnt_s1 = count_sector(imgldr_ctx->hxcfe,floppy,0,0,1,sectorsize,AMIGA_MFM_ENCODING,NULL);
 
 	if(sectorcnt_s0!=11 && sectorcnt_s0!=22)
 	{
@@ -77,7 +77,7 @@ int ADZ_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	}
 
 	nbtrack = 85;
-	while(nbtrack && !count_sector(imgldr_ctx->hxcfe,floppy,0,nbtrack-1,0,sectorsize,AMIGA_MFM_ENCODING))
+	while(nbtrack && !count_sector(imgldr_ctx->hxcfe,floppy,0,nbtrack-1,0,sectorsize,AMIGA_MFM_ENCODING,NULL))
 	{
 		nbtrack--;
 	}
