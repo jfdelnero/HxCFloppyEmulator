@@ -46,8 +46,8 @@ endif
 
 ifeq ($(TARGET), Darwin)
 MACOSX_MIN_VER ?= 10.13
-CFLAGS += -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
-LDFLAGS +=  -lc -lm -ldl -arch x86_64 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libusbhxcfe.dylib -mmacosx-version-min=${MACOSX_MIN_VER}
+CFLAGS += -arch arm64 -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
+LDFLAGS +=  -lc -lm -ldl -arch arm64 -arch x86_64 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libusbhxcfe.dylib -mmacosx-version-min=${MACOSX_MIN_VER}
 EXEC=libusbhxcfe.dylib
 endif
 
@@ -61,12 +61,16 @@ libusbhxcfe.dll: win32_libusbhxcfe_res.o usb_hxcfloppyemulator.o variablebitrate
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
-libusbhxcfe.dylib: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o
-	$(AR) r $@    $^
+libusbhxcfe.dylib: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o ../../../build/libhxcadaptor.a ../../../build/libhxcfe.dylib
+	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../../build
 
 libusbhxcfe.a: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o
+ifeq ($(TARGET), Darwin)
+	libtool -o $@     $^
+else
 	$(AR) r $@    $^
+endif
 	cp $@ ../../../build
 
 libusbhxcfe.so: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o
