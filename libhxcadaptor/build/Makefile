@@ -40,8 +40,8 @@ endif
 
 ifeq ($(TARGET), Darwin)
 MACOSX_MIN_VER ?= 10.13
-CFLAGS += -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
-LDFLAGS += -lc -lm -ldl -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
+CFLAGS += -arch arm64 -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
+LDFLAGS += -lc -lm -ldl -arch arm64 -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
 endif
 
 EXEC=libhxcadaptor.a
@@ -49,7 +49,11 @@ EXEC=libhxcadaptor.a
 all: $(EXEC)
 
 libhxcadaptor.a: libhxcadaptor.o fs.o network.o
+ifeq ($(TARGET), Darwin)
+	libtool -o $@     $^
+else
 	$(AR) r $@    $^
+endif
 	cp $@ ../../../build
 
 libhxcadaptor.o: $(BASEDIR)/libhxcadaptor.c
