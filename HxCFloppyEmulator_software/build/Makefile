@@ -67,8 +67,8 @@ endif
 
 ifeq ($(TARGET), Darwin)
 MACOSX_MIN_VER ?= 10.13
-CFLAGS += -DOSX -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
-LDFLAGS += -lc -lm -ldl -lpthread -framework Cocoa -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
+CFLAGS += -DOSX -arch arm64 -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
+LDFLAGS += -lc -lm -ldl -lpthread -framework Cocoa -arch arm64 -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
 LIBHXCFE = libhxcfe.dylib
 LIBUSBHXCFE = libusbhxcfe.dylib
 else
