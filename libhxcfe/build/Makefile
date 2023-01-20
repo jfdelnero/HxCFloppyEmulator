@@ -52,8 +52,8 @@ endif
 
 ifeq ($(TARGET), Darwin)
 MACOSX_MIN_VER ?= 10.13
-CFLAGS += -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
-LDFLAGS += -lc -lm -ldl -arch x86_64 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libhxcfe.dylib -mmacosx-version-min=${MACOSX_MIN_VER}
+CFLAGS += -arch arm64 -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
+LDFLAGS += -lc -lm -ldl -arch arm64 -arch x86_64 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libhxcfe.dylib -mmacosx-version-min=${MACOSX_MIN_VER}
 EXEC=libhxcfe.dylib
 endif
 
@@ -92,7 +92,7 @@ DISKLOADERPLUGINS = raw_amiga.o raw_iso.o copyqm_loader.o crctable.o adf_loader.
 					kryofluxstream.o fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o \
 					northstar_loader.o  xml_loader.o flppcm_loader.o stw_loader.o vfddat_loader.o ana_loader.o atr_loader.o hfev3_loader.o \
 					hfev3_trackgen.o heathkit_loader.o sdu_loader.o xml_db_loader.o streamhfe_loader.o qd_loader.o ipf_loader.o capslibloader.o \
-					hxcstream_loader.o hxcstream.o dfi_loader.o a2r_loader.o micraln_loader.o fdx_loader.o 86f_loader.o
+					hxcstream_loader.o hxcstream.o dfi_loader.o a2r_loader.o micraln_loader.o fdx_loader.o 86f_loader.o logicanalyzer_loader.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
@@ -135,7 +135,11 @@ libhxcfe.dylib: $(LIBS_OBJS) ../../../build/libhxcadaptor.a
 	cp $@ ../../../build
 
 libhxcfe.a: $(LIBS_OBJS)
+ifeq ($(TARGET), Darwin)
+	libtool -o $@     $^
+else
 	$(AR) r $@    $^
+endif
 	cp $@ ../../../build
 
 libhxcfe.so: $(LIBS_OBJS) ../../../build/libhxcadaptor.a
@@ -404,6 +408,9 @@ cpcdsk_loader.o : $(BASEDIR)/loaders/cpcdsk_loader/cpcdsk_loader.c $(BASEDIR)/lo
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 cpcdsk_writer.o : $(BASEDIR)/loaders/cpcdsk_loader/cpcdsk_writer.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+logicanalyzer_loader.o : $(BASEDIR)/loaders/logicanalyzer_loader/logicanalyzer_loader.c $(BASEDIR)/loaders/logicanalyzer_loader/logicanalyzer_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 msa_loader.o : $(BASEDIR)/loaders/msa_loader/msa_loader.c $(BASEDIR)/loaders/msa_loader/msa_loader.h
