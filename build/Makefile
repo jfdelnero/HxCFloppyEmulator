@@ -5,7 +5,7 @@ all: HxCFloppyEmulator_cmdline HxCFloppyEmulator_software
 libhxcadaptor:
 	$(MAKE) -C ../libhxcadaptor/trunk/build/
 
-libhxcfe: libhxcadaptor
+libhxcfe: libhxcadaptor libhxcfe
 	$(MAKE) -C ../libhxcfe/trunk/build/
 
 libusbhxcfe: libhxcadaptor
@@ -24,8 +24,23 @@ else ifeq ($(TARGET), mingw64)
 		cd ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.x.x/ && export LDFLAGS='-static-libstdc++ -static-libgcc' && ./configure --host=x86_64-w64-mingw32 --prefix=/usr/share/mingw-w64
 		$(MAKE) -C ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.x.x/ DIRS=src CC=x86_64-w64-mingw32-gcc CPP=x86_64-w64-mingw32-g++
 else ifeq ($(TARGET), Darwin)
-		cd ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.x.x/ && export CFLAGS='-arch x86_64' && export CXXFLAGS='-arch x86_64' && export LDFLAGS='-arch x86_64' && ./configure --host=x86_64-apple-darwin
-		$(MAKE) -C ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.x.x/ DIRS=src
+		cd ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk && \
+		cp -a fltk-1.x.x fltk-1.x.x-arm64 && \
+		cd fltk-1.x.x-arm64 && \
+		export CFLAGS='-mmacosx-version-min=10.13 -arch arm64' && export CXXFLAGS='-mmacosx-version-min=10.13 -arch arm64' && export LDFLAGS='-mmacosx-version-min=10.13 -arch arm64' && ./configure --host=arm-apple-darwin
+		$(MAKE) -C ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.x.x-arm64/ DIRS=src
+		cd ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk && \
+		cp -a fltk-1.x.x fltk-1.x.x-x86_64 && \
+		cd fltk-1.x.x-x86_64 && \
+		export CFLAGS='-mmacosx-version-min=10.13 -arch x86_64' && export CXXFLAGS='-mmacosx-version-min=10.13 -arch x86_64' && export LDFLAGS='-mmacosx-version-min=10.13 -arch x86_64' && ./configure --host=x86_64-apple-darwin
+		$(MAKE) -C ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.x.x-x86_64/ DIRS=src
+		cd ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk && \
+		lipo fltk-1.x.x-x86_64/lib/libfltk.a fltk-1.x.x-arm64/lib/libfltk.a -create -output fltk-1.x.x/lib/libfltk.a && \
+		lipo fltk-1.x.x-x86_64/lib/libfltk_forms.a fltk-1.x.x-arm64/lib/libfltk_forms.a -create -output fltk-1.x.x/lib/libfltk_forms.a && \
+		lipo fltk-1.x.x-x86_64/lib/libfltk_gl.a fltk-1.x.x-arm64/lib/libfltk_gl.a -create -output fltk-1.x.x/lib/libfltk_gl.a && \
+		lipo fltk-1.x.x-x86_64/lib/libfltk_images.a fltk-1.x.x-arm64/lib/libfltk_images.a -create -output fltk-1.x.x/lib/libfltk_images.a
+		cd ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk && \
+		cp fltk-1.x.x-x86_64/FL/abi-version.h fltk-1.x.x/FL/abi-version.h
 else
 		$(MAKE) -C ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.x.x/ DIRS=src
 endif
@@ -70,5 +85,7 @@ mrproper:
 	-rm -rf Release_*
 	-rm -rf ADFOpus_*
 	-rm -rf ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.x.x
+	-rm -rf ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.x.x-arm64
+	-rm -rf ../HxCFloppyEmulator_software/trunk/sources/thirdpartylibs/fltk/fltk-1.x.x-x86_64
 
 .PHONY: libhxcadaptor libhxcfe libusbhxcfe HxCFloppyEmulator_cmdline HxCFloppyEmulator_software fltk mrproper clean
