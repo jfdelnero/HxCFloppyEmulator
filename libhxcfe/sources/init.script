@@ -1,0 +1,361 @@
+#
+# libhxcfe init script
+#
+# This script is built-in the HxC library and is executed at startup to apply
+# the default variables values.
+#
+# You can put a "config.script" file in the HxC Software folder to change one
+# or more of these variables if needed.
+# Your "config.script" will be executed right after this script at startup.
+# The syntax to use in your script is exactly the same.
+#
+# In the same way some images/streams loaders support the script execution and
+# try load and execute a "config.script" script from the image folder.
+# This allows you to apply specific settings for each of your streams if
+# needed. The loaders supporting this are currently the KryoFlux raw
+# loader (*.raw), the SCP loader (*.scp), the HxC stream loader
+# (*.hxcstream / Pauline stream dump) and the stream hfe loader (*.hfe / High
+# resolutions stream floppy images for Pauline).
+#
+# Note : In the HxC software you can view and modify all these variables in
+#        the "Settings" -> "Internal Parameters" window.
+#
+
+# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
+#
+# ------------------ Stream analyzer parameters ------------------
+#
+# These parameters are used for stream based images/flux
+# (Apply to Kryoflux raw files, SCP files, HxC stream  files,
+# stream hfe files...)
+#
+
+#
+# Stream BMP Export resolution and settings
+#
+# (Done before any processing if enabled, see
+# STREAMHFELOADER_BMPEXPORT,HXCSTREAMLOADER_BMPEXPORT,
+# KFRAWLOADER_BMPEXPORT,SCPLOADER_BMPEXPORT to enable
+# the bmp stream export)
+#
+
+set BMPEXPORT_STREAM_DEFAULT_XSIZE      8192
+set BMPEXPORT_STREAM_DEFAULT_YSIZE      480
+set BMPEXPORT_STREAM_DEFAULT_XTOTALTIME 2000000      # 200*1000*10 -> 200ms * 10 -> 10 revolution
+set BMPEXPORT_STREAM_DEFAULT_YTOTALTIME 16           # 16us
+set BMPEXPORT_STREAM_BIG_DOTS           0            # Set it to be able to see
+                                                     # a single bit error.
+set BMPEXPORT_STREAM_HIGHCONTRAST       1            # Increase the contrast.
+
+#
+# FLUXSTREAM_RPMFIX - Change the stream replay speed.
+#
+# NONE :
+# No stream speed change.
+#
+# 360TO300RPM :
+# 300 RPM disk dumped on a 360 RPM drive : Slow down the stream.
+#
+# 300TO360RPM :
+# 360 RPM disk dumped on a 300 RPM drive : Speed up the stream.
+#
+
+set FLUXSTREAM_RPMFIX NONE                  # NONE / 360TO300RPM / 300TO360RPM
+
+#
+# FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV - Enable the Macintosh CLV mode.
+#
+# When enabled the stream speed is modified according to the
+# track number. Set the drive RPM used to make the dump.
+# (example : 300)
+#
+
+set FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV 0
+
+#
+# FLUXSTREAM_IMPORT_PCCAV_TO_C64CLV - Enable the C64 CLV mode.
+#
+# When enabled the stream speed is modified according to the
+# track number. Set the drive RPM used to make the dump.
+# (example : 300)
+#
+
+set FLUXSTREAM_IMPORT_PCCAV_TO_C64CLV 0
+
+set FLUXSTREAM_IMPORT_PCCAV_TO_VICTOR9KCLV 0
+
+#
+# FLUXSTREAM_SKIPBLOCKSDETECTION
+#
+# Set 1 here to disable the pulses analysis to link them between the
+# revolutions and find the the exact track overlap.
+# This part can take a lot of CPU time so if you just want to have
+# a quick preview set this to 1.
+#
+
+set FLUXSTREAM_SKIPBLOCKSDETECTION 0
+
+#
+# Exact track revolution overlap search depth (index to index lenght pourcent
+# variation)
+# With unstable index signal you may need to increase this value.
+# (If you get some tracks with all sectors fine but all the track marked as
+# flakey/weak you probably have an unstable index signal - try to increase
+# this value to 0.02 or 0.03).
+#
+
+set FLUXSTREAM_OVERLAPSEARCHDEPTH 0.015
+
+#
+# Experimental :
+# Ignore the index and threat all the stream as one revolution.
+#
+
+set FLUXSTREAM_ALL_REVOLUTIONS_IN_ONE 0
+
+#
+# PLL settings
+#
+
+# Set to 1 to skip the PLL pre-sync.
+
+set FLUXSTREAM_PLL_NO_PRESYNC 0
+
+# PLL Phase error to phase
+# correction divisor.
+
+set FLUXSTREAM_PLL_PHASE_CORRECTION_DIVISOR 8
+
+# To force the PLL initial bitrate.
+# 0 -> AUTO
+
+set FLUXSTREAM_PLL_INITIAL_BITRATE 0
+
+# Set 1 to enable the GCR inter-bands rejection.
+# This appears to provide better results with Mac AppleSauce A2R dump.
+
+set FLUXSTREAM_PLL_GCR_INTER_BANDS_REJECTION 0
+
+# Set 1 to enable the FM inter-bands rejection.
+# This appears to provide better results with noisy FM disks.
+
+set FLUXSTREAM_PLL_FM_INTER_BANDS_REJECTION 0
+
+#
+# "Expert" PLL settings Zone
+# Unless you know what you are doing, keep the default values.
+#
+
+set FLUXSTREAM_PLL_TICK_FREQUENCY  250000000         # Internal bitstream tick frequency.
+set FLUXSTREAM_PLL_MIN_MAX_PERCENT 18                # Min-Max PLL deviation in percent versus the central frequency.
+
+set FLUXSTREAM_PLL_MAX_ERROR_NS    680               # Max PLL error trigger level (in nS).
+                                                     # If the error is above this level, the corresponding
+													 # bit is marked as "flakey"
+
+# PLL correction ratio ("Fast" -> Used when getting closer to the central frequency)
+
+set FLUXSTREAM_PLL_FAST_CORRECTION_RATIO_N 15
+set FLUXSTREAM_PLL_FAST_CORRECTION_RATIO_D 16
+
+# PLL correction ratio ("Slow" -> Used when getting far from the central frequency)
+
+set FLUXSTREAM_PLL_SLOW_CORRECTION_RATIO_N 31
+set FLUXSTREAM_PLL_SLOW_CORRECTION_RATIO_D 32
+
+set FLUXSTREAM_ANALYSIS_WINDOW_SIZE_US 1000          # Analysis window size in uS
+set FLUXSTREAM_ANALYSIS_REV2REV_MAX_PULSES_JITTER 10 # Max pulses duration jitter in percent
+
+#
+# Output bitrate filter settings
+#
+
+set FLUXSTREAM_BITRATE_FILTER_PASSES 2               # number of filter passes.
+set FLUXSTREAM_BITRATE_FILTER_WINDOW 24              # Filter window size.
+
+#
+# Post analysis default index length setting
+#
+
+set FLUXSTREAM_ANALYSIS_OUT_INDEX_LENGTH -1          # -1 : Auto, > 0 index length in uS
+
+#
+# Weakbits cells threshold
+#
+
+set FLUXSTREAM_PLL_WEAKBITS_CELLCNT_THRESHOLD 6
+
+#
+# Victor 9000 Bands mode pll
+#
+
+set FLUXSTREAM_ANALYSIS_USE_VICTOR_TIMING 0
+
+#
+# Stream files (SCP/Kryoflux...) export mode
+#
+
+set FLUXSTREAM_STREAM_TO_STREAM_CONVERT 1         # 1 - Stream to stream support enabled.
+                                                  # 0 - Stream to stream support disabled (old behavior).
+
+#
+# ---- Specific raw format parameters ----
+#
+
+#
+# HFE stream loader parameters
+# (Pauline Floppy simulation files)
+#
+
+set STREAMHFELOADER_BITRATE 0                        # Force the bitrate. (no auto-detection)
+set STREAMHFELOADER_BMPEXPORT 0                      # Export/plot the inputs stream tracks to BMP images.
+
+#
+# HxC Stream loader parameters
+#
+
+set HXCSTREAMLOADER_DOUBLE_STEP 0                    # Skip the odd files/tracks.
+set HXCSTREAMLOADER_SINGLE_SIDE 0                    # Skip the side 1 files.
+set HXCSTREAMLOADER_BITRATE 0                        # Force the bitrate. (no auto-detection)
+set HXCSTREAMLOADER_BMPEXPORT 0                      # Export/plot the inputs stream tracks to BMP images.
+
+#
+# KryoFlux raw loader parameters
+#
+
+set KFRAWLOADER_DOUBLE_STEP 0                        # Skip the odd files/tracks.
+set KFRAWLOADER_SINGLE_SIDE 0                        # Skip the side 1 files.
+set KFRAWLOADER_BITRATE 0                            # Force the bitrate. (no auto-detection)
+set KFRAWLOADER_BMPEXPORT 0                          # Export/plot the inputs stream tracks to BMP images.
+
+#
+# SuperCard Pro SCP Stream loader parameters
+#
+
+set SCPLOADER_DOUBLE_STEP 0                          # Skip the odd tracks.
+set SCPLOADER_SINGLE_SIDE 0                          # Skip the side 1.
+set SCPLOADER_BITRATE 0                              # Force the bitrate. (no auto-detection)
+set SCPLOADER_BMPEXPORT 0                            # Export/plot the inputs stream tracks to BMP images.
+
+#
+# DiscFerret DFI Stream loader parameters
+#
+
+set DFILOADER_DOUBLE_STEP 0                          # Skip the odd tracks.
+set DFILOADER_SINGLE_SIDE 0                          # Skip the side 1.
+set DFILOADER_BITRATE 0                              # Force the bitrate. (no auto-detection)
+set DFILOADER_BMPEXPORT 0                            # Export/plot the inputs stream tracks to BMP images.
+set DFILOADER_SAMPLE_FREQUENCY_MHZ 100               # Default sample frequency.
+
+#
+# AppleSauceFDC A2R Stream loader parameters
+#
+
+set A2RLOADER_SINGLE_SIDE 0                          # Skip the side 1.
+set A2RLOADER_BITRATE 0                              # Force the bitrate. (no auto-detection)
+set A2RLOADER_BMPEXPORT 0                            # Export/plot the inputs stream tracks to BMP images.
+set A2RLOADER_SKIP_INTER_TRACKS 1                    # Skip inter tracks. Just process the normal tracks.
+
+# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
+#
+# Tracks BMP writer parameters
+#
+
+set BMPEXPORT_DEFAULT_XSIZE 1024                     # BMP X size
+set BMPEXPORT_DEFAULT_YSIZE 480                      # BMP Y size
+set BMPEXPORT_DEFAULT_XTOTALTIME 240000              # 240ms
+set BMPEXPORT_DEFAULT_YTOTALTIME 16                  # 16us
+
+#
+# Disk BMP writer parameters
+#
+
+set BMPDISKEXPORT_DEFAULT_XSIZE 1920
+set BMPDISKEXPORT_DEFAULT_YSIZE 940
+
+#
+# sector/formats decoder enabled during the picture export.
+# (Used by the bmp writers and the flux stream importer)
+#
+
+set BMPEXPORT_ENABLE_ISOIBM_MFM_ENCODING 1
+set BMPEXPORT_ENABLE_ISOIBM_FM_ENCODING 1
+set BMPEXPORT_ENABLE_AMIGA_MFM_ENCODING 1
+set BMPEXPORT_ENABLE_EMU_FM_ENCODING 1
+set BMPEXPORT_ENABLE_MEMBRAIN_MFM_ENCODING 1
+set BMPEXPORT_ENABLE_TYCOM_FM_ENCODING 1
+set BMPEXPORT_ENABLE_APPLEII_GCR1_ENCODING 1
+set BMPEXPORT_ENABLE_APPLEII_GCR2_ENCODING 1
+set BMPEXPORT_ENABLE_APPLEMAC_GCR_ENCODING 1
+set BMPEXPORT_ENABLE_ARBURGDAT_ENCODING 0
+set BMPEXPORT_ENABLE_ARBURGSYS_ENCODING 0
+set BMPEXPORT_ENABLE_NORTHSTAR_HS_MFM_ENCODING 0
+set BMPEXPORT_ENABLE_HEATHKIT_HS_FM_ENCODING 0
+set BMPEXPORT_ENABLE_DEC_RX02_M2FM_ENCODING 0
+set BMPEXPORT_ENABLE_QD_MO5_ENCODING 0
+set BMPEXPORT_ENABLE_C64_GCR_ENCODING 0
+set BMPEXPORT_ENABLE_VICTOR9000_GCR_ENCODING 0
+
+#
+# Stream writers options
+#
+
+set SCPEXPORT_NUMBER_OF_REVOLUTIONS 3                # Number of revolutions generated to the exported SCP file
+set KFRAWEXPORT_NUMBER_OF_REVOLUTIONS 3              # Number of revolutions generated to the exported KF raw files
+set KFRAWEXPORT_DOUBLE_STEP 0                        # Generate 40 tracks dump for 80 tracks drives.
+
+#set SCPEXPORT_DISK_TYPE    0x15                     # Uncomment to force/change the SCP Disk Type field
+                                                     # Please refer to the SCP documentation for more details
+
+#set SCPEXPORT_DISK_96TPI   1                        # Uncomment one of the following lines to force the
+#set SCPEXPORT_DISK_48TPI   1                        # TPI flag
+
+#
+# IPF Loader flags/parameters
+#
+
+set LOADER_IPF_CAPS_DI_LOCK_INDEX 0
+#set SPSCAPS_LIB_NAME CAPSImg.dll
+
+#
+# CPC DSK Loader / Writer parameters
+#
+
+set CPCDSK_WRITER_LIMIT_SECTOR_SIZE 1                 # Limit the sector data to 6144 bytes
+set CPCDSK_WRITER_DISCARD_UNFORMATTED_SIDE 1
+
+#
+# Oric DSK Loader / Writer parameters
+#
+
+set ORICDSK_LOADER_REGENERATE_TRACK 1                 # Extract the sectors data and regenerate
+                                                      # the whole track.
+
+#
+# 2008 USB HxC Floppy Emulator parameters
+# ( FTDI + CPLD based hardware )
+#
+
+set USB_HXCFLOPPYEMULATOR_DEFAULT_PACKET_SIZE 1664
+
+#
+# Pauline Parameters
+# (High-end high resolution Floppy drive simulator / Floppy dumper)
+#
+
+set PAULINE_DEFAULT_IP_ADDRESS "192.168.20.7"
+
+#
+# hxcfe_floppySectorBySectorCopy behavior setting in
+# case of source image read error during the sectors copy.
+#
+# >=0 : Clear the destination sector with the SECTORBYSECTORCOPY_SECTOR_ERROR_TAG value
+#  -1 : Write the destination sector with the error informations
+#  -2 : Don't write/change the destination sector.
+#
+
+set SECTORBYSECTORCOPY_SECTOR_ERROR_TAG -1

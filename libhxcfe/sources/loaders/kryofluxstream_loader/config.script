@@ -1,0 +1,54 @@
+#
+# Kryoflux stream HxC loader settings
+#
+# File to copy into your kf raw dump
+# stream folder to tweak the analysis.
+#
+
+#
+# To force the bitrate selection uncomment the following line and set the bitrate.
+#
+
+#set KFRAWLOADER_BITRATE 500
+
+#
+# To skip the odd tracks of a double step disk, uncomment the following line.
+#
+
+#set KFRAWLOADER_DOUBLE_STEP 1
+
+#
+# To analyse only the side 0, uncomment the following line.
+#
+
+#set KFRAWLOADER_SINGLE_SIDE 1
+
+#
+# If the dump is a 360 RPM disk made from a 300 RPM drive or vice and versa
+# uncomment one of the following line according to the speed correction to apply.
+#
+
+#set FLUXSTREAM_RPMFIX 300TO360RPM  # 300 RPM dump of a 360 RPM disk
+
+#set FLUXSTREAM_RPMFIX 360TO300RPM  # 360 RPM dump of a 300 RPM disk
+
+#
+# Pre process stream export to BMP file.
+# For debug/investigation purpose.
+#
+
+#set KFRAWLOADER_BMPEXPORT 1
+
+#
+# Post-process bitrate filter settings.
+# Set to 0 one of the parameters to disable the filter.
+#
+
+#set FLUXSTREAM_BITRATE_FILTER_PASSES 2  # Number of passes
+#set FLUXSTREAM_BITRATE_FILTER_WINDOW 24  # Window size
+
+#
+# PLL parameters.
+#
+
+#set FLUXSTREAM_PLL_PHASE_CORRECTION_DIVISOR 8 # Phase correction divisor
