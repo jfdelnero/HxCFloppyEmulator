@@ -5,7 +5,7 @@ AR=ar
 TARGET := $(shell uname)
 
 BASEDIR=../sources
-INCLUDES = -I$(BASEDIR)/ -I ../../../libhxcfe/trunk/sources -I ../../../libusbhxcfe/trunk/sources
+INCLUDES = -I$(BASEDIR)/ -I ../../libhxcfe/sources -I ../../libusbhxcfe/sources
 
 DEBUG ?= 0
 DEBUG_ASAN ?= 0
@@ -54,7 +54,7 @@ ifeq ($(TARGET), Darwin)
 else
 	$(AR) r $@    $^
 endif
-	cp $@ ../../../build
+	cp $@ ../../build
 
 libhxcadaptor.o: $(BASEDIR)/libhxcadaptor.c
 	$(CC) -o $@ -c $< $(CFLAGS)

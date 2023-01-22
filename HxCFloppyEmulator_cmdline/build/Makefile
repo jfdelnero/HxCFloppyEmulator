@@ -3,7 +3,7 @@ CC=gcc
 
 TARGET := $(shell uname)
 
-INCLUDES = -I ../sources -I ../../../libhxcfe/trunk/sources -I ../../../libusbhxcfe/trunk/sources
+INCLUDES = -I ../sources -I ../../libhxcfe/sources -I ../../libusbhxcfe/sources
 
 DEBUG ?= 0
 DEBUG_ASAN ?= 0
@@ -61,19 +61,19 @@ endif
 
 all: $(EXEC)
 
-hxcfe.exe:  hxcfe.o utils.o ../../../build/libhxcadaptor.a $(LIBHXCFE) $(LIBUSBHXCFE)
+hxcfe.exe:  hxcfe.o utils.o ../../build/libhxcadaptor.a $(LIBHXCFE) $(LIBUSBHXCFE)
 	$(CC) -o $@    $^ $(LDFLAGS)
-	cp $@ ../../../build
+	cp $@ ../../build
 
-hxcfe:  hxcfe.o utils.o ../../../build/libhxcadaptor.a $(LIBHXCFE) $(LIBUSBHXCFE)
+hxcfe:  hxcfe.o utils.o ../../build/libhxcadaptor.a $(LIBHXCFE) $(LIBUSBHXCFE)
 	$(CC) -o $@    $^ $(LDFLAGS)
-	cp $@ ../../../build
+	cp $@ ../../build
 
-$(LIBHXCFE): ../../../build/$(LIBHXCFE)
-	ln ../../../build/$(LIBHXCFE)  $(LIBHXCFE)
+$(LIBHXCFE): ../../build/$(LIBHXCFE)
+	ln ../../build/$(LIBHXCFE)  $(LIBHXCFE)
 
-$(LIBUSBHXCFE): ../../../build/$(LIBUSBHXCFE)
-	ln ../../../build/$(LIBUSBHXCFE)  $(LIBUSBHXCFE)
+$(LIBUSBHXCFE): ../../build/$(LIBUSBHXCFE)
+	ln ../../build/$(LIBUSBHXCFE)  $(LIBUSBHXCFE)
 
 hxcfe.o: ../sources/hxcfe.c
 	$(CC) -o $@ -c $< $(CFLAGS)

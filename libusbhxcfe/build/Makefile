@@ -5,7 +5,7 @@ AR=ar
 TARGET := $(shell uname)
 
 BASEDIR=../sources
-INCLUDES = -I$(BASEDIR)/ -I ../../../libhxcfe/trunk/sources -I ../sources/win32 -I ../../../libhxcadaptor/trunk/sources
+INCLUDES = -I$(BASEDIR)/ -I ../../libhxcfe/sources -I ../sources/win32 -I ../../libhxcadaptor/sources
 
 DEBUG ?= 0
 DEBUG_ASAN ?= 0
@@ -57,13 +57,13 @@ endif
 
 all: $(EXEC)
 
-libusbhxcfe.dll: win32_libusbhxcfe_res.o usb_hxcfloppyemulator.o variablebitrate.o ftdi.o ../../../build/libhxcadaptor.a ../../../build/libhxcfe.dll
+libusbhxcfe.dll: win32_libusbhxcfe_res.o usb_hxcfloppyemulator.o variablebitrate.o ftdi.o ../../build/libhxcadaptor.a ../../build/libhxcfe.dll
 	$(CC) -o $@    $^ $(LDFLAGS)
-	cp $@ ../../../build
+	cp $@ ../../build
 
-libusbhxcfe.dylib: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o ../../../build/libhxcadaptor.a ../../../build/libhxcfe.dylib
+libusbhxcfe.dylib: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o ../../build/libhxcadaptor.a ../../build/libhxcfe.dylib
 	$(CC) -o $@    $^ $(LDFLAGS)
-	cp $@ ../../../build
+	cp $@ ../../build
 
 libusbhxcfe.a: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o
 ifeq ($(TARGET), Darwin)
@@ -71,11 +71,11 @@ ifeq ($(TARGET), Darwin)
 else
 	$(AR) r $@    $^
 endif
-	cp $@ ../../../build
+	cp $@ ../../build
 
 libusbhxcfe.so: usb_hxcfloppyemulator.o variablebitrate.o ftdi.o
 	$(CC) -o $@    $^ $(LDFLAGS)
-	cp $@ ../../../build
+	cp $@ ../../build
 
 win32_libusbhxcfe_res.o: $(BASEDIR)/win32/libusbhxcfe.rc
 	$(RESC) $< $@

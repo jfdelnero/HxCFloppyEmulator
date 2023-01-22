@@ -29,7 +29,7 @@ mkdir ${GUI_PATH}/Contents/MacOS
 mkdir ${GUI_PATH}/Contents/Frameworks
 
 echo APPLnone > ${GUI_PATH}/Contents/PkgInfo
-iconutil --convert icns --output ${GUI_PATH}/Contents/Resources/icons.icns ../HxCFloppyEmulator_software/trunk/sources/mac/icons/hxcfloppyemulator.iconset/
+iconutil --convert icns --output ${GUI_PATH}/Contents/Resources/icons.icns ../HxCFloppyEmulator_software/sources/mac/icons/hxcfloppyemulator.iconset/
 cp hxcfloppyemulator ${GUI_PATH}/Contents/MacOS/${GUI_EXEC}
 chmod 755 ${GUI_PATH}/Contents/MacOS/${GUI_EXEC}
 cp libhxcfe.dylib ${GUI_PATH}/Contents/Frameworks

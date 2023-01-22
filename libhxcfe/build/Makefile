@@ -6,7 +6,7 @@ AR=ar
 TARGET := $(shell uname)
 
 BASEDIR=../sources
-INCLUDES = -I$(BASEDIR)/ -I ../../../libhxcadaptor/trunk/sources
+INCLUDES = -I$(BASEDIR)/ -I ../../libhxcadaptor/sources
 
 DEBUG ?= 0
 DEBUG_ASAN ?= 0
@@ -126,13 +126,13 @@ BMP_FILES: bmptoh $(BMP_DATAFILES_OUTPUTS)
 
 SCRIPT_FILE: bmptoh $(BASEDIR)/init_script.h
 
-libhxcfe.dll: win32_libhxcfe_res.o $(LIBS_OBJS) ../../../build/libhxcadaptor.a
+libhxcfe.dll: win32_libhxcfe_res.o $(LIBS_OBJS) ../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
-	cp $@ ../../../build
+	cp $@ ../../build
 
-libhxcfe.dylib: $(LIBS_OBJS) ../../../build/libhxcadaptor.a
+libhxcfe.dylib: $(LIBS_OBJS) ../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
-	cp $@ ../../../build
+	cp $@ ../../build
 
 libhxcfe.a: $(LIBS_OBJS)
 ifeq ($(TARGET), Darwin)
@@ -140,11 +140,11 @@ ifeq ($(TARGET), Darwin)
 else
 	$(AR) r $@    $^
 endif
-	cp $@ ../../../build
+	cp $@ ../../build
 
-libhxcfe.so: $(LIBS_OBJS) ../../../build/libhxcadaptor.a
+libhxcfe.so: $(LIBS_OBJS) ../../build/libhxcadaptor.a
 	$(CC) -o $@    $^ $(LDFLAGS)
-	cp $@ ../../../build
+	cp $@ ../../build
 
 win32_libhxcfe_res.o: $(BASEDIR)/win32/libhxcfe.rc
 	$(RESC) $< $@

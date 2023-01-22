@@ -6,7 +6,7 @@ CPP=g++
 TARGET := $(shell uname)
 
 BASEDIR=../sources
-INCLUDES = -I$(BASEDIR) -I ../../../libhxcfe/trunk/sources -I $(BASEDIR)/gui -I $(BASEDIR)/thirdpartylibs/fltk/fltk-1.x.x/ -I ../../../libusbhxcfe/trunk/sources -I ../../../libhxcadaptor/trunk/sources -I $(BASEDIR)/gui/microintro/
+INCLUDES = -I$(BASEDIR) -I ../../libhxcfe/sources -I $(BASEDIR)/gui -I $(BASEDIR)/thirdpartylibs/fltk/fltk-1.x.x/ -I ../../libusbhxcfe/sources -I ../../libhxcadaptor/sources -I $(BASEDIR)/gui/microintro/
 
 DEBUG ?= 0
 DEBUG_ASAN ?= 0
@@ -101,19 +101,19 @@ DATA_FILES: bmptoh
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh nao_gabber_astro.mod -DATA
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh ../../../../COPYING_FULL -DATA
 
-HxCFloppyEmulator.exe: win32_hxcfloppy_res.o main.o utils.o $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) $(LIBUSBHXCFE) ../../../build/libhxcadaptor.a
+HxCFloppyEmulator.exe: win32_hxcfloppy_res.o main.o utils.o $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) $(LIBUSBHXCFE) ../../build/libhxcadaptor.a
 	$(CPP) -o $@    $^ $(LDFLAGS)
-	cp $@ ../../../build
+	cp $@ ../../build
 
-hxcfloppyemulator: main.o utils.o $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) $(LIBUSBHXCFE) ../../../build/libhxcadaptor.a
+hxcfloppyemulator: main.o utils.o $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) $(LIBUSBHXCFE) ../../build/libhxcadaptor.a
 	$(CPP) -o $@    $^ $(LDFLAGS)
-	cp $@ ../../../build
+	cp $@ ../../build
 
-$(LIBHXCFE): ../../../build/$(LIBHXCFE)
-	ln ../../../build/$(LIBHXCFE)  $(LIBHXCFE)
+$(LIBHXCFE): ../../build/$(LIBHXCFE)
+	ln ../../build/$(LIBHXCFE)  $(LIBHXCFE)
 
-$(LIBUSBHXCFE): ../../../build/$(LIBUSBHXCFE)
-	ln ../../../build/$(LIBUSBHXCFE)  $(LIBUSBHXCFE)
+$(LIBUSBHXCFE): ../../build/$(LIBUSBHXCFE)
+	ln ../../build/$(LIBUSBHXCFE)  $(LIBUSBHXCFE)
 
 win32_hxcfloppy_res.o: $(BASEDIR)/win32/hxcfloppy.rc
 	$(RESC) $< $@
