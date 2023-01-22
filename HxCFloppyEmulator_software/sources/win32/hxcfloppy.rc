@@ -9,7 +9,7 @@
 //
 #include "windows.h"
 
-#include "../version.h"
+#include "../../../build/version.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS

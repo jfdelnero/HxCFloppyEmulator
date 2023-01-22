@@ -3,7 +3,7 @@ CC=gcc
 
 TARGET := $(shell uname)
 
-INCLUDES = -I ../sources -I ../../libhxcfe/sources -I ../../libusbhxcfe/sources
+INCLUDES = -I ../sources -I ../../libhxcfe/sources -I ../../libusbhxcfe/sources -I ../../build
 
 DEBUG ?= 0
 DEBUG_ASAN ?= 0

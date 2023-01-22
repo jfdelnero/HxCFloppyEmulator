@@ -6,7 +6,7 @@ AR=ar
 TARGET := $(shell uname)
 
 BASEDIR=../sources
-INCLUDES = -I$(BASEDIR)/ -I ../../libhxcadaptor/sources
+INCLUDES = -I$(BASEDIR)/ -I ../../libhxcadaptor/sources -I ../../build
 
 DEBUG ?= 0
 DEBUG_ASAN ?= 0
