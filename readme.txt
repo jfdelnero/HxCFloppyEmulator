@@ -56,3 +56,33 @@ System calls helper/wrapper library.
 
 Build folder.
 -------------------------------------------------------------------------------
+
+How to build it ?
+-----------------
+
+Linux target :
+-----------------
+
+(Linux build environment)
+
+cd build
+make
+
+Windows target :
+-----------------
+
+(Linux or WSL2 + mingw32 build environment)
+
+cd build
+make TARGET=mingw32   # 32 bits build
+
+make TARGET=mingw64   # 64 bits build
+
+macOS target :
+-----------------
+
+(macOS + Xcode build environment)
+
+cd build
+make TARGET=Darwin
+./maccreatebundle
