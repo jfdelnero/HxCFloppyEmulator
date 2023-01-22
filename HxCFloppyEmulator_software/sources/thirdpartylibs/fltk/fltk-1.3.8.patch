@@ -1,0 +1,32 @@
+diff -Naur fltk-1.3.8/src/Fl_Native_File_Chooser_WIN32.cxx fltk-1.3.x/src/Fl_Native_File_Chooser_WIN32.cxx
+--- fltk-1.3.8/src/Fl_Native_File_Chooser_WIN32.cxx	2021-03-03 09:40:23.000000000 +0100
++++ fltk-1.3.x/src/Fl_Native_File_Chooser_WIN32.cxx	2021-12-03 08:42:37.739708000 +0100
+@@ -315,11 +315,14 @@
+ 
+ // SHOW FILE BROWSER
+ int Fl_Native_File_Chooser::showfile() {
++  WCHAR * tmp_ptr;
++
+   ClearOFN();
+   clear_pathnames();
+   size_t fsize = FNFC_MAX_PATH;
+-  _ofn_ptr->Flags |= OFN_NOVALIDATE;	// prevent disabling of front slashes
++  //_ofn_ptr->Flags |= OFN_NOVALIDATE;	// prevent disabling of front slashes
+   _ofn_ptr->Flags |= OFN_HIDEREADONLY;	// hide goofy readonly flag
++  _ofn.Flags |= OFN_PATHMUSTEXIST | OFN_LONGNAMES;
+   // USE NEW BROWSER
+   _ofn_ptr->Flags |= OFN_EXPLORER;	// use newer explorer windows
+   _ofn_ptr->Flags |= OFN_ENABLESIZING;	// allow window to be resized (hey, why not?)
+@@ -343,6 +346,12 @@
+   }
+   // SPACE FOR RETURNED FILENAME
+   _ofn_ptr->lpstrFile    = new WCHAR[fsize];
++
++  tmp_ptr = new WCHAR[8];
++  tmp_ptr[0] = 0;
++  tmp_ptr[1] = 0;
++  _ofn_ptr->lpstrDefExt = tmp_ptr;
++
+   _ofn_ptr->nMaxFile     = (DWORD) fsize-1;
+   _ofn_ptr->lpstrFile[0] = 0;
+   _ofn_ptr->lpstrFile[1] = 0;		// dnull

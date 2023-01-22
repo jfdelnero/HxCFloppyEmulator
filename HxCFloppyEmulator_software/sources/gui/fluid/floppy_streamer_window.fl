@@ -1,0 +1,294 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0304
+header_name {.h}
+code_name {.cxx}
+class floppy_streamer_window {open
+} {
+  Function {floppy_streamer_window()} {open
+  } {
+    Fl_Window window {
+      label {Ludo Floppy Disk Toolkit} open
+      xywh {16 64 1330 620} type Single resizable visible
+    } {
+      Fl_Button {} {
+        label Clear
+        user_data this
+        callback floppy_streamer_clear_bt
+        xywh {1270 54 55 22}
+      }
+      Fl_Input dump_name {
+        label Name
+        xywh {1095 4 230 23} labelsize 8 textsize 10
+      }
+      Fl_Input comment {
+        label Comment
+        xywh {1095 29 230 23} labelsize 8 textsize 10
+      }
+      Fl_Input index_name {
+        label {N°}
+        xywh {1095 54 170 23} labelsize 8 textsize 10
+      }
+      Fl_Group {} {
+        label Status open
+        xywh {1050 81 275 129} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL labelsize 12 align 21
+      } {
+        Fl_Output x_pos {
+          xywh {1055 103 265 15} labelsize 10 textsize 10
+        }
+        Fl_Output y_pos {
+          xywh {1055 119 265 15} labelsize 10 textsize 10
+        }
+        Fl_Output global_status {
+          xywh {1055 135 265 16} labelsize 10 textsize 10
+        }
+        Fl_Text_Display object_txt {
+          user_data this
+          xywh {1055 154 265 50} labelsize 10 textsize 10
+        }
+      }
+      Fl_Group {} {
+        label {Track analysis format} open
+        xywh {1050 210 275 84} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
+      } {
+        Fl_Light_Button iso_mfm_bt {
+          label {ISO MFM}
+          user_data this
+          callback disk_streamer_window_callback
+          xywh {1065 228 76 15} labelsize 10
+        }
+        Fl_Light_Button iso_fm_bt {
+          label {ISO FM}
+          user_data this
+          callback disk_streamer_window_callback
+          xywh {1065 243 76 15} labelsize 10
+        }
+        Fl_Light_Button amiga_mfm_bt {
+          label {AMIGA MFM}
+          user_data this
+          callback disk_streamer_window_callback
+          xywh {1065 258 76 15} labelsize 10
+        }
+        Fl_Light_Button apple2_bt {
+          label Apple
+          user_data this
+          callback disk_streamer_window_callback
+          xywh {1065 273 76 15} labelsize 10
+        }
+        Fl_Light_Button eemu_bt {
+          label {E-Emu}
+          user_data this
+          callback disk_streamer_window_callback
+          xywh {1149 228 76 15} labelsize 10
+        }
+        Fl_Light_Button tycom_bt {
+          label TYCOM
+          user_data this
+          callback disk_streamer_window_callback
+          xywh {1149 243 76 15} labelsize 10
+        }
+        Fl_Light_Button membrain_bt {
+          label MEMBRAIN
+          user_data this
+          callback disk_streamer_window_callback
+          xywh {1149 258 76 15} labelsize 10
+        }
+        Fl_Light_Button arburg_bt {
+          label Arburg
+          user_data this
+          callback disk_streamer_window_callback
+          xywh {1149 273 76 15} labelsize 10
+        }
+        Fl_Light_Button aed6200p_bt {
+          label {AED 6200P}
+          user_data this
+          callback disk_streamer_window_callback
+          xywh {1233 228 76 15} labelsize 10
+        }
+        Fl_Light_Button northstar_bt {
+          label NORTHSTAR
+          user_data this
+          callback disk_streamer_window_callback
+          xywh {1233 243 76 15} labelsize 10
+        }
+        Fl_Light_Button heathkit_bt {
+          label HEATHKIT
+          user_data this
+          callback disk_streamer_window_callback
+          xywh {1233 258 76 15} labelsize 10
+        }
+        Fl_Light_Button decrx02_bt {
+          label {DEC RX02}
+          user_data this
+          callback disk_streamer_window_callback
+          xywh {1233 273 76 15} labelsize 10
+        }
+      }
+      Fl_Group {} {
+        label {Track / Side selection} open
+        xywh {1050 344 275 84} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+      } {
+        Fl_Value_Slider track_number_slide {
+          label {Track number}
+          user_data this
+          callback disk_streamer_window_callback
+          xywh {1056 360 269 19} type Horizontal labelsize 12 textsize 12
+        }
+        Fl_Value_Slider side_number_slide {
+          label {Side number}
+          user_data this
+          callback disk_streamer_window_callback
+          xywh {1055 392 270 19} type Horizontal labelsize 12 textsize 12
+        }
+      }
+      Fl_Group floppy_map_disp {
+        label {Track stream} open
+        xywh {0 1 1050 576} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+      } {}
+      Fl_Button {} {
+        label {Read Disk}
+        user_data this
+        callback floppy_streamer_readdisk
+        xywh {1102 431 78 40}
+      }
+      Fl_Button {} {
+        label {Read Track}
+        user_data this
+        callback floppy_streamer_readtrack
+        xywh {1180 431 85 40}
+      }
+      Fl_Button {} {
+        label {Spy bus}
+        user_data this
+        callback floppy_streamer_spybus
+        xywh {1265 431 59 40}
+      }
+      Fl_Button {} {
+        label {STOP !}
+        user_data this
+        callback floppy_streamer_stop
+        xywh {1103 474 162 25}
+      }
+      Fl_Button {} {
+        label {+}
+        user_data this
+        callback floppy_streamer_trackup
+        xywh {1077 432 23 20}
+      }
+      Fl_Button {} {
+        label {-}
+        user_data this
+        callback floppy_streamer_down
+        xywh {1052 432 23 20}
+      }
+      Fl_Button {} {
+        label move
+        user_data this
+        callback floppy_streamer_movehead
+        xywh {1052 453 48 21}
+      }
+      Fl_Button {} {
+        label recal
+        user_data this
+        callback floppy_streamer_recalibrate
+        xywh {1052 478 48 21}
+      }
+      Fl_Input min_track {
+        label {Min track}
+        xywh {1134 503 40 15} labelsize 8 textsize 10
+      }
+      Fl_Input max_track {
+        label {Max track}
+        xywh {1134 518 40 15} labelsize 8 textsize 10
+      }
+      Fl_Input dump_lenght {
+        label {lenght (ms)}
+        xywh {1134 531 40 15} labelsize 8 textsize 10
+      }
+      Fl_Input index_delay {
+        label {Index delay (us)}
+        xywh {1134 546 40 15} labelsize 8 textsize 10
+      }
+      Fl_Light_Button Side_0 {
+        label {Side 0}
+        xywh {1177 502 80 15} labelsize 10
+      }
+      Fl_Light_Button Side_1 {
+        label {Side 1}
+        xywh {1177 517 80 15} labelsize 10
+      }
+      Fl_Light_Button double_step {
+        label {Double step}
+        xywh {1177 532 80 15} labelsize 10
+      }
+      Fl_Light_Button ignore_index {
+        label {Ignore index}
+        xywh {1177 547 80 15} labelsize 10
+      }
+      Fl_Light_Button high_res {
+        label {50Mhz }
+        xywh {1260 502 65 15} labelsize 10
+      }
+      Fl_Light_Button high_contrast {
+        label {High contrast}
+        xywh {1135 568 100 15} labelsize 10
+      }
+      Fl_Light_Button fat_dots {
+        label {Fat dots}
+        xywh {1240 568 84 15} labelsize 10
+      }
+      Fl_Input server_address {
+        label {Pauline IP}
+        xywh {1125 589 110 25} labelsize 8
+      }
+      Fl_Button {} {
+        label Connect
+        user_data this
+        callback floppy_streamer_connect
+        xywh {1240 589 85 28}
+      }
+      Fl_Group {} {open
+        xywh {0 575 1050 45} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+      } {
+        Fl_Value_Slider x_offset {
+          label {x offset (% of the track len)}
+          user_data this
+          callback disk_streamer_window_callback
+          xywh {17 577 300 24} type {Horz Knob} labelsize 12 textsize 12
+        }
+        Fl_Slider x_time {
+          label {full x time scale}
+          user_data this
+          callback disk_streamer_window_callback
+          xywh {382 577 301 25} type Horizontal labelsize 12
+        }
+        Fl_Value_Slider y_time {
+          label {full y time scale (us)}
+          user_data this
+          callback disk_streamer_window_callback
+          xywh {727 577 300 25} type {Horz Knob} labelsize 12 textsize 12
+        }
+      }
+      Fl_Group {} {
+        label {Disk drive} open
+        xywh {1050 294 275 48} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+      } {
+        Fl_Choice drive_choice {
+          label Drive
+          user_data this open
+          xywh {1090 314 210 22} down_box BORDER_BOX labelsize 12 textsize 12
+        } {}
+      }
+      Fl_Light_Button mode3 {
+        label {Alt.RPM}
+        callback floppy_streamer_mode3 selected
+        xywh {1260 517 65 15} labelsize 10
+      }
+      Fl_Button {} {
+        label Eject
+        user_data this
+        callback floppy_streamer_eject
+        xywh {1265 474 60 25}
+      }
+    }
+  }
+}

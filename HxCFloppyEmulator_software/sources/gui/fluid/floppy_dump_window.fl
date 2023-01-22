@@ -1,0 +1,134 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0304
+header_name {.h}
+code_name {.cxx}
+class floppy_dump_window {open
+} {
+  Function {floppy_dump_window()} {open
+  } {
+    Fl_Window window {
+      label {Floppy disk dump} open
+      xywh {40 91 975 430} type Double visible
+    } {
+      Fl_Group {} {
+        label {Drive selection} open
+        xywh {1 1 289 55} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+      } {
+        Fl_Round_Button sel_drive_a {
+          label {Drive "A:"}
+          xywh {11 22 90 23} type Radio down_box ROUND_DOWN_BOX
+        }
+        Fl_Round_Button sel_drive_b {
+          label {Drive "B:"}
+          xywh {143 22 90 24} type Radio down_box ROUND_DOWN_BOX
+        }
+      }
+      Fl_Group {} {
+        label Status
+        xywh {1 335 289 90} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL align 21
+      } {
+        Fl_Output global_status {
+          xywh {18 357 255 25} labelsize 12 textsize 12
+        }
+        Fl_Output current_status {
+          xywh {18 387 255 25} labelsize 12 textsize 12
+        }
+      }
+      Fl_Group {} {
+        label {Floppy Map} open
+        xywh {289 1 681 424} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+      } {
+        Fl_Box layout_area {
+          label {Disk layout}
+          xywh {295 23 670 397}
+        }
+      }
+      Fl_Group {} {
+        label {Tracks selection} open
+        xywh {1 55 289 105} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+      } {
+        Fl_Value_Input start_track {
+          label {Start track}
+          xywh {76 80 50 20} labelsize 12 textsize 12
+        }
+        Fl_Value_Input end_track {
+          label {End track}
+          xywh {197 81 50 19} labelsize 12 textsize 12
+        }
+        Fl_Check_Button side_0 {
+          label {Side 0}
+          xywh {6 106 70 16} down_box DOWN_BOX
+        }
+        Fl_Check_Button side_1 {
+          label {Side 1}
+          xywh {132 106 70 16} down_box DOWN_BOX
+        }
+        Fl_Check_Button double_step {
+          label {Double step}
+          xywh {6 130 104 16} down_box DOWN_BOX
+        }
+        Fl_Group {} {open
+          xywh {26 80 15 15}
+        } {}
+      }
+      Fl_Group {} {
+        label {Densities selection} open
+        xywh {1 159 289 90} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL align 21
+      } {
+        Fl_Check_Button FM125 {
+          label {FM/SD 125Kb/s}
+          xywh {3 180 127 16} down_box DOWN_BOX
+        }
+        Fl_Check_Button FM150 {
+          label {FM/SD 150Kb/s}
+          xywh {3 196 127 16} down_box DOWN_BOX
+        }
+        Fl_Check_Button FM250 {
+          label {FM/SD 250Kb/s}
+          xywh {3 211 127 16} down_box DOWN_BOX
+        }
+        Fl_Check_Button MFM250 {
+          label {MFM/DD 250Kb/s}
+          xywh {141 180 139 16} down_box DOWN_BOX
+        }
+        Fl_Check_Button MFM500 {
+          label {MFM/HD 500Kb/s}
+          xywh {141 209 139 16} down_box DOWN_BOX
+        }
+        Fl_Check_Button MFM1000 {
+          label {MFM/ED 1Mb/s}
+          xywh {141 224 124 16} down_box DOWN_BOX
+        }
+        Fl_Check_Button FM500 {
+          label {FM/SD 500Kb/s}
+          xywh {3 225 127 16} down_box DOWN_BOX
+        }
+        Fl_Check_Button MFM300 {
+          label {MFM/DD 300Kb/s}
+          xywh {141 194 139 16} down_box DOWN_BOX
+        }
+      }
+      Fl_Group {} {
+        label Operations open
+        xywh {1 248 289 90} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 12 align 21
+      } {
+        Fl_Button {} {
+          label {Stop !}
+          user_data this
+          callback floppy_dump_stop
+          xywh {194 303 80 21}
+        }
+        Fl_Button {} {
+          label {Read Disk}
+          user_data this
+          callback floppy_dump_window_bt_read
+          xywh {15 303 80 21}
+        }
+        Fl_Value_Input number_of_retry {
+          label Retry selected
+          xywh {51 276 55 18} labelsize 12 textsize 12
+        }
+      }
+    }
+  }
+}

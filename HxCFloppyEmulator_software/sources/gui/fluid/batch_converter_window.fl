@@ -1,0 +1,64 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0304
+header_name {.h}
+code_name {.cxx}
+class batch_converter_window {open
+} {
+  Function {batch_converter_window()} {open
+  } {
+    Fl_Window window {
+      label {Floppy Disk Images Batch converter} open
+      xywh {745 248 400 285} type Double visible
+    } {
+      Fl_Choice choice_file_format {
+        label {Target file format :} open
+        xywh {10 19 381 23} down_box BORDER_BOX labelsize 12 align 5 textsize 12
+      } {}
+      Fl_Input strin_src_dir {
+        label {Source directory}
+        xywh {10 63 271 25} labelsize 12 align 5 textsize 12
+      }
+      Fl_Input strin_dst_dir {
+        label {Target directory}
+        xywh {10 131 271 24} labelsize 12 align 5 textsize 12
+      }
+      Fl_Output strout_convert_status {
+        xywh {10 164 381 30} box PLASTIC_UP_BOX align 5
+      }
+      Fl_Button bt_select_src {
+        label Select
+        callback batch_converter_window_bt_select_src
+        xywh {295 62 95 25}
+      }
+      Fl_Button bt_select_dst {
+        label Select
+        callback batch_converter_window_bt_select_dst
+        xywh {295 130 95 25}
+      }
+      Fl_Button bt_convert {
+        label Convert
+        callback batch_converter_window_bt_convert
+        xywh {181 198 100 25}
+      }
+      Fl_Button bt_cancel {
+        label Cancel
+        callback batch_converter_window_bt_cancel
+        xywh {290 198 100 25}
+      }
+      Fl_Output hlptxt {selected
+        xywh {11 193 379 90} box NO_BOX align 37 deactivate
+      }
+      Fl_Check_Button chkbox_rawinputsfiles {
+        label {Treat input files as RAW files}
+        user_data this
+        callback batch_converter_window_inputasrawfile
+        xywh {9 95 200 15} down_box DOWN_BOX
+      }
+      Fl_Progress progress_indicator {
+        user_data this
+        callback batch_converter_window_progress_indicator
+        xywh {11 198 165 20} selection_color 149
+      }
+    }
+  }
+}

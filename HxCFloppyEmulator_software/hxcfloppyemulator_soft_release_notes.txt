@@ -1,0 +1,1410 @@
+﻿-------------------------------------------------------------------------------
+-----------H----H--X----X-----CCCCC-----22222----0000-----0000-----11----------
+----------H----H----X-X-----C--------------2---0----0---0----0---1-1-----------
+---------HHHHHH-----X------C----------22222---0----0---0----0-----1------------
+--------H----H----X--X----C----------2-------0----0---0----0-----1-------------
+-------H----H---X-----X---CCCCC-----22222----0000-----0000----11111------------
+-------------------------------------------------------------------------------
+-- Contact: hxc2001<at>hxc2001.com --------------------- https://hxc2001.com --
+-------------------------------------------------------------------------------
+HxC Floppy Emulator project
+(c) 2006-2022 Jean-François DEL NERO / (c) HxC2001
+Website  : https://hxc2001.com
+Forum    : https://torlus.com/floppy/forum
+Facebook : https://www.facebook.com/groups/hxc2001
+Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
+-------------------------------------------------------------------------------
+
+/*********************************************************
+XXXXXX 2022 : HxCFloppyEmulator 2.5.X.X (Work in progress / Beta version !)
+              (Last update : 27 December 2022)
+
+Windows : Turn the process in high priority when the USB HxC Floppy Emulator is detected.
+          Fix most of the Sync lost events.
+
+XML generated disks : clear the internal tracks status -> fix the command line tool.
+
+Hard-sectored H8D Heathkit images: Fix odd tracks main index skew.
+
+QuickDisk files loader : Support "HxC-like-but-not-exactly-hxc" QD images files.
+
+DiscFerret DFI Loader : New DFILOADER_SAMPLE_FREQUENCY_MHZ parameter to change
+                        the default sample frequency.
+
+HxC stream (Pauline) : Support CLV convertion parameters :
+                       - FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV (Dump drive's CAV RPM)
+                       - FLUXSTREAM_IMPORT_PCCAV_TO_C64CLV (Dump drive's CAV RPM)
+                       - FLUXSTREAM_IMPORT_PCCAV_TO_VICTOR9KCLV (Dump drive's CAV RPM)
+
+SD HxC Interface modes settings : Add PC/S950 auto density configurations.
+
+GCC 9 : Fix warning messages during the compilation.
+
+Apple II *.do/*.dsk/*.po file writer.
+
+SCP export : The "Disk Type" field can be forced in the configuration file
+             and the "SCPEXPORT_DISK_TYPE" variable.
+
+Stream files export (SCP/KF Raw/...) : Direct stream to stream support
+             If the current loaded tracks have a stream dump in memory then
+             these streams are now just resampled and then exported to the stream file.
+             If you want to use the old behavior and export the analyzed tracks instead then
+             set the "FLUXSTREAM_STREAM_TO_STREAM_CONVERT" variable to 0.
+
+Stream analyzer : Bands mode "PLL" -> better Victor 9000 disks support (Work-in-progress)
+
+Stream analyzer : Better Apple II and Macintosh support.
+
+Stream and track viewer : Print sectors content on the track view.
+                          (ISO/IBM SD/DD and Micral N track formats)
+
+Some memory related bug fixes.
+
+IMD File Writer : Fix track type when no supported sector are present on the track.
+
+Kryoflux Import : (WIP) Possible missing last index workaround.
+Kryoflux export : Possible dead lock fixed.
+
+FDX support added : Revision 3 file format (standard and Raw/stream variants supported)
+Raw FDX export support added.
+
+86Box 86F support added : (WIP)
+
+FD loader : Fix sectors side ID : All of them should use the ID 0.
+
+*********************************************************/
+
+/*********************************************************
+18 January 2021 : HxCFloppyEmulator 2.5.6.6
+
+-> C64 sector format support added.
+
+-> Victor 9000 sector format support added.
+
+-> Disk viewer : 48 TPI disks -> Max tracks increased to 43 tracks.
+
+-> Tracks/Disk viewer : Some minor graphical changes.
+
+-> Stream analyzer : All internals PLL parameters can be set/changed in
+                     the configuration file (see init.script for more details).
+
+-> AppleSauce *.A2R : 3"1/2 disks dump support.
+
+-> Hard-sectored support fixed.
+
+-> Apple Macintosh CLV support fixed/improved.
+
+-> Stream analyzer : Some fixes and improvements.
+
+-> Sectors decoders : Some fixes and improvements.
+
+*********************************************************/
+
+/*********************************************************
+31 December 2020 : HxCFloppyEmulator 2.5.5.1
+
+-> New hardware support introduced : Pauline ! The ultimate stream based floppy drive simulator / floppy dumper :)
+   Pauline control and real time stream viewer window added. ( https://www.youtube.com/watch?v=PZiyms6lo4U )
+
+-> macOS : CAPSlib loader added (IPF, CTRAW...). (Windows/Linux/macOS CAPSlib loaders code merged)
+
+-> macOS : macOS Big Sur support fixed.
+
+-> New Loader/Writer : HxC Quickdisk images.
+
+-> New Writer : Oric DSK images ("MFM_DISK" format).
+
+-> New Loader : DiscFerret *.DFI stream files. (WIP!)
+
+-> New Loader : AppleSauce *.A2R stream files. (WIP!)
+
+-> XML loader : Add new properties and fix long track to support Quickdisk and Hardsectored disks.
+                New proprerties (micro-seconds time length/position parameters) :
+                index_len_us , add_index_us, track_len_us, pregap_us.
+
+-> New XML format : Olivetti TOP 100 / Triumph-Adler Gabriele PFS typewriter Quickdisk format.
+
+-> New XML format : FLEX disk formats.
+
+-> New XML format : SORD M68 HD disk.
+
+-> New XML format : Bung MGD2 disk.
+
+-> Windows "Save as" file selector : Fix the overwrite prompt regression.
+
+-> Kryoflux stream loader : Code re-factored and fixed.
+
+-> IPF Loader : The CAPS library DI_LOCK_INDEX flag turned off by default (fake index track buffer realignment).
+                Can be enabled with the LOADER_IPF_CAPS_DI_LOCK_INDEX parameter.
+                "Weak bits" support fixed.
+
+-> CPC EDSK writer : Fix EDSK export with unformatted track(s).
+                     Fix export with unaligned track size.
+                     Keep the last unformatted tracks.
+                     Discard the second side if unformatted. (parameter CPCDSK_WRITER_DISCARD_UNFORMATTED_SIDE)
+                     Limit the sector data size to 6144 bytes. (parameter CPCDSK_WRITER_LIMIT_SECTOR_SIZE)
+
+-> Atari ATR Loader : Loader fixed.
+
+-> SCP Loader : Input file sanity checks added.
+
+-> SCP Writer : Randomize stream on weak-bits.
+
+-> SCP Writer : Fix single sided disks export.
+
+-> STX Writer : Support sectors headers without data part.
+
+-> TD0 Loader : More robust with corrupted images.
+
+-> TRS80 DMK Loader : Fix FM / SD track ID / Data mark clock patching.
+
+-> TRS80 DMK Writer : Byte align tracks (WIP!).
+
+-> Macintosh disk support : Macintosh GCR decoding, CLV disks stream import (WIP!).
+
+-> Disk viewer : Resizeable window.
+
+-> Disk viewer : Realistic physical floppy disk state representation (3"1/2 135TPI, 5"1/4 96TPI, 5"1/4 48TPI, 8" 48TPI).
+
+-> Disk viewer : Track markers support.
+
+-> Disk viewer : New stream viewer modes !
+                 You can see the stream files at the signal level ! :
+                 SuperCard Pro *.SCP, Kryoflux *.raw, Pauline Stream HFE, DiscFerret *.DFI, AppleSauce *.A2R...
+
+-> QuickDisk Thomson MO5 Sector/track support added (Set "BMPEXPORT_ENABLE_QD_MO5_ENCODING" to 1 to enable it).
+
+-> Apple II : Track generator fixed : GCR 6&2 Sync bits and sector GAP fixed.
+
+-> Apple II : Various fixes in the track analyzer.
+
+-> QM loader : Regression fixed.
+
+-> S900 raw files support : Low level/track format now match with the real S900 to fix the compatibility
+                            with the Oberheim DPX-1.
+
+-> Windows target : Now use MinGW32 / MinGW64 instead of VC 6.0 to build the software.
+                    32 bits and 64 bits targets supported.
+                    Speed performances significantly increased.
+
+-> Flux Stream Analyzer : Perfectly aligned revolutions (index+stream) issue fixed.
+                          (Some good tracks was marked as weak/bad).
+
+-> Flux Stream Analyzer : Revolution overlap search depth reduced to 1.5% (+/- 3ms) -> Faster execution.
+
+-> Floppy disk dump window redesigned. More options added.
+
+-> USB HxC Floppy Emulator : Packet size can be set with the USB_HXCFLOPPYEMULATOR_DEFAULT_PACKET_SIZE variable.
+
+-> And a plethora of others improvements and fixes !
+
+*********************************************************/
+
+/*********************************************************
+8 December 2019 : HxCFloppyEmulator 2.2.2.1
+
+-> macOS Catalina support : Switch to 64bits build + minimum OS version needed changed to 10.9 (Mavericks)
+
+-> Internal environment variables support to tweak/change the default internal library settings/behavior.
+
+-> Script support introduced.
+
+-> GUI : New advanced parameters window added.
+
+-> GUI : Script execution menu entry added.
+
+-> Command line tool : Script execution option added.
+
+-> Floppy Stream dump analysis bitmap export support. (Stream HFE, SCP, KryoFlux Raw)
+
+-> SPS CAPS library loader support added for Linux.
+
+-> SCP loader : Fix/set the number of heads to 2 when the number of head(s) field is set to 0.
+
+-> New files Support : Kurzweil K25 (K2500) and K26 (K2600) file support.
+
+-> Game Doctor SF3 / SF7 file support added.
+
+-> zlib updated to v1.2.11
+
+-> FLTK updated to v1.3.5 for all platforms.
+
+-> Linux build : Automatic FLTK package download and preparation.
+                 FLTK build : Use the fltk automatic flags to match with your graphic stack.
+
+-> General : Lots of code fixes and improvements !
+
+*********************************************************/
+
+/*********************************************************
+22 May 2019 : HxCFloppyEmulator 2.1.24.1
+
+DEC RX02 M2FM encoding/decoding support added.
+
+HFEv3 : weakbits support added.
+
+Acorn ADF support : regression fixed.
+
+*********************************************************/
+
+/*********************************************************
+29 March 2019 : HxCFloppyEmulator 2.1.23.1
+
+New XML format : Coat-A-Matic 9400 / Robox RC9400 format.
+
+Amiga Image loader (ADF, DMS,...) : Fix the v2.1.20.1 left sector(s) field regression !
+Update recommended for Amiga users !
+
+*********************************************************/
+
+/*********************************************************
+28 January 2019 : HxCFloppyEmulator 2.1.22.3
+
+Raw loader: Fix global disk bitrate value. (HD disks bitrate issue)
+
+*********************************************************/
+
+/*********************************************************
+17 January 2019 : HxCFloppyEmulator 2.1.22.2
+
+CPCDSK loader: v2.1.20.1 Regression fixed. (null sector data length field support).
+
+*********************************************************/
+
+/*********************************************************
+15 January 2019 : HxCFloppyEmulator 2.1.22.1
+
+Track editor : New Side1 add/delete button.
+HFE v3 loader: Regression fixed.
+
+*********************************************************/
+
+/*********************************************************
+01 January 2019 : HxCFloppyEmulator 2.1.21.1
+
+Dos disk browser : Amiga HD (1760KB) disk creation support.
+Dos disk browser : Amiga HD (1760KB) disk support fixed.
+TeleDisk loader fixed : Bad CRC checking fixed.
+
+*********************************************************/
+
+/*********************************************************
+22 December 2018 : HxCFloppyEmulator 2.1.20.1
+
+General : Faster/better file images identification and loader.
+General : Many loaders now use the new generic raw file loader.
+General : Lots of code improvements.
+Internal tracks generator : Now support "weak" sectors.
+HFEv3 writer : Remove any possible parasitic opcodes coming from the stream.
+New Loader : NEC PC98/PC88 FDI.
+CPCDSK loader/writer : Now support the SAMDisk method for DSK with weak bits.
+Roland DD XML : Fix tracks skew.
+New XML format : ABB disks formats.
+New XML format : Automatix RAIL DD disk format.
+New XML format : COMX disks formats.
+New XML format : DEC RX55 format.
+New XML format : Didaktik Spectrum disk format.
+New XML format : Dynacord HD disks formats.
+New XML format : Gravograph ISIS 640KB disk format.
+New XML format : Memotech disks formats.
+New XML format : Oerlikon Balzers disks formats.
+New XML format : OpusDiscovery disk format.
+New XML format : Oric Jasmin disk format.
+New XML format : OS9 DD disks formats.
+New XML format : PUMA arm robot disks formats.
+New XML format : Tatung Einstein disks formats.
+New XML format : Timex FDD3000 formats.
+New XML format : TRS80 disk format.
+New XML format : Unitel Videotex format.
+New file image support : SAB Diskette Utility / *.SDU floppy image.
+SCP Loader/Writer : Fix single sided SCP file export.
+New writer : Dragon VDK format.
+
+Change urls to point to the main hxc2001 domain + switch to https.
+
+*********************************************************/
+
+/*********************************************************
+27 May 2018: HxCFloppyEmulator 2.1.11.1
+
+Hard-sectored H8D Heathkit raw file Loader & Writer added !
+
+*********************************************************/
+
+/*********************************************************
+24 May 2018: HxCFloppyEmulator 2.1.10.1
+
+Kryoflux Stream Loader (*XX.X.raw) & Stream analyzer : Hard-sectored images support and various fixes !
+Kryoflux Stream Loader (*XX.X.raw) : bmpexport.txt config file to generate the full stream track graph.
+
+NSI Northstar raw file Loader & Writer added !
+
+*********************************************************/
+
+/*********************************************************
+12 May 2018: HxCFloppyEmulator 2.1.9.3
+
+Kryoflux Stream Loader (*XX.X.raw) : Another fix for the index position !
+Kryoflux Stream Loader (*XX.X.raw) : filter.txt config file to adjust the internal bitrate filter.
+
+Flux Stream Analyzer : Internal filter can now be set.
+
+ADF Writer : Amiga ADF HD file (22 Sectors/track) support added.
+
+*********************************************************/
+
+/*********************************************************
+11 April 2018: HxCFloppyEmulator 2.1.9.2
+
+Kryoflux Stream Loader (*XX.X.raw) : Loader & writer index position fixed.
+
+*********************************************************/
+
+
+/*********************************************************
+18 March 2018: HxCFloppyEmulator 2.1.9.1
+
+-> Acorn BBC file format loader (*.ADL/ADM/ADF) fixed.
+
+*********************************************************/
+
+/*********************************************************
+18 March 2018: HxCFloppyEmulator 2.1.9.0
+
+New XML format definitions :
+  - Acorn ADFS (160K).
+  - Acorn ADFM (320K).
+  - Acorn ADFL (640K).
+  - Dynacord Add-one.
+
+Stream importer :
+  - More debug/error messages,
+  - unconventional index period support.
+
+*********************************************************/
+
+/*********************************************************
+21 January 2018: HxCFloppyEmulator 2.1.8.0
+
+New Loader : Atari ATR file image loader.
+
+New Write & Loader : HFE V3 : variable bitrate and other proctections support.
+                     (Experimental ! The file format definition is not yet finished !)
+
+Kryoflux raw files Writer : Fix dead lock with tracks without pulse.
+
+Amiga DOS image browser : 85 tracks AmigaDos image support.
+
+Disk Image browser (FAT & AmigaDOS) : Fix null-sized file import issue.
+
+Disk Image browser (FAT & AmigaDOS) : Can now delete folders.
+
+All image loaders : Fix possible track skew calculation error.
+
+Emax image loader : GAP fixed to 30.
+
+Thomson *.FD loader : Sector interleave set to 7
+
+Command line tool : -uselayout option can be now used to specify external xml disk layout file.
+*********************************************************/
+
+/*********************************************************
+22 January 2017: HxCFloppyEmulator 2.1.6.0
+
+XML format definitions : Korg DSS1 DD disks added.
+
+XML format definitions : Emax II disks added.
+
+Command line tool : USB loader -> Raw loader added.
+
+Amstrad DSK file added to the batch converter export list.
+
+New Writer : Thomson *.FD writer.
+
+Thomson *.FD loader fixed : Side 1 ID corrected to 0.
+
+D88 Writer fixed : Cylinder and Side ID correctly set.
+
+ImageDisk (*.IMD) export : Deleted data mark and data CRC error flags supported.
+
+FAT12/16 Disk browser : Entries First cluster readback corrected. (With high word uninitialized).
+
+IMG loader : More disk sizes support added.
+
+DosDiskBrowser : 1.743MB & 1.764MB added.
+
+64bits systems : Batch converter and Dos Disk browser issues fixed.
+
+MacOS X & Linux version : file export -> Auto-append the file extension.
+
+Track editor : Disk flux stream reverse function.
+
+Track viewer & editor : GUI layout changed/updated.
+
+*********************************************************/
+
+/*********************************************************
+01 January 2016: HxCFloppyEmulator 2.1.4.0
+
+New Loader : *.ANA AnaDisk file loader.
+
+New Loader : VFDDAT file loader.
+
+New Loader : Densei Sirius VFD DAT Loader.
+
+New Writer : *.DIM writer.
+
+New Writer : *.ADZ writer.
+
+New Writer : *.TRD Writer.
+
+New Loader : Atari ST *.STW Loader.
+
+New Writer : Atari ST *.STW Writer.
+
+New Writer : Atari ST *.ST Writer.
+
+New Writer : Atari ST *.STX Writer.
+
+STX Loader/Writer : Weak bits mask support added, Loader/writer improved.
+
+SCP Loader/Writer : Loader/writer improved.
+
+D88 Loader : Gap3 setting corrected.
+
+Dos disk browser : More disks layouts.
+
+libhxcfe : New track support : AED6200P.
+
+XML format definitions : Mictrotan 65 TANDOS.
+
+Flux Stream Analyzer : Possible segmentation fault corrected.
+
+Flux Stream Analyzer : Input filtering reduced.
+
+Kryoflux Stream Loader (*XX.X.raw) / analyser : NFA over index support added.
+
+Track editor : Add & Remove track functions added.
+
+Track editor : RPM & Bitrate change functions added.
+
+Track editor : Insertion function added.
+
+Track editor : Negative offset support.
+
+Disk viewer : Image CRC32, library version and file name displayed.
+
+Disk viewer : Track(s) type displayed.
+
+Disk viewer : Cells density displayed.
+
+Progess bar added for the loaders/writers.
+
+SD/USB Emulator setting window : Advanced pinout settings added.
+
+Code sources fixes/changes for GCC, Clang and VS2015 x86 & x64 compilation support.
+
+And many more fixes and improvements...
+*********************************************************/
+
+/*********************************************************
+05 October 2014: HxCFloppyEmulator 2.0.26.0
+
+New Loader : PC Magazine (FLP) file format support added.
+
+GUI - Track viewer window : Track editing functionality added, internal sanity check added.
+
+libhxcfe : Casio FZF loader -> non sector-aligned file image size issue corrected.
+
+libhxcfe : Generic flux stream analyzer enhanced - Track encoding & RPM correctly reported.
+
+Batch converter : Now use the folder name for the output filename while converting KF stream files (raw).
+
+FAT12 Disk Browser:  PC98 FAT disk support enhanced, free space reporting corrected.
+
+Raw Loader - Predefined raw formats added (XML) :
+- Logical Interchange Format (LIF) 3"1/2 264KB (single side).
+- Logical Interchange Format (LIF) 3"1/2 616KB (double side).
+- Logical Interchange Format (LIF) 3"1/2 1232KB (HD).
+- Logical Interchange Format (LIF) 5"1/4 264KB.
+*********************************************************/
+
+/*********************************************************
+25 may 2014: HxCFloppyEmulator 2.0.22.0
+
+GUI - Track viewer window : New viewer mode -> Disk surface view mode.
+
+Raw loader :  UKNC Russian computer support added.
+
+New Writer : BMP file (Disk/circular layout) -> Disk layout can now be exported into a BMP file (for disk analysis) !
+
+libhxcfe : Correction of the UTF8 path support in some loaders/writers.
+
+New Loader : SPS CT Raw file format support added. (NOTE : No weak bits support for the moment !)
+
+libhxcfe : Generic flux stream analyzer enhanced.
+
+Disk Browser : ADFLib fseek corrected.
+*********************************************************/
+
+/*********************************************************
+03 January 2014: HxCFloppyEmulator 2.0.20.1
+
+Disk Browser : AmigaDOS disk support added ! Amiga Files can be read/write/deleted with the Disk Browser !
+
+New Writer : XML files -> Disk layout can now be exported into XML !
+
+New Loader : XML files -> A disk can be generated from an XML file !
+
+Raw Loader : An XML file can now be used as disk layout !
+
+General : Low level sector reader and track display speed-optimized.
+
+MacOS X : Executable now compiled with the "-mmacosx-version-min=10.5" option
+          -> Leopard,Snow Leopard,Lion,Mountain Lion & Mavericks supported.
+*********************************************************/
+
+/*********************************************************
+08 December 2013: HxCFloppyEmulator 2.0.18.4
+
+TRS80 DMK Loader : Image Sanity check -> Minimum track number changed from 30 to 1 track.
+
+Predefined raw formats added : Ensoniq Mirage 440KB, E-mu Emax DD 800KB, GeneralMusic GEM S3 1600KB, GeneralMusic GEM WX 1440KB.
+
+libhxcfe : Track Generator -> hxcfe_setTrackType function added.
+
+libhxcfe : Track alteration functions -> hxcfe_getSide & hxcfe_shiftTrackData function added.
+
+libhxcfe : XML floppy file definition -> <track_list></track_list> Track definition fields working.
+
+New track support : Data disk Arburg format.
+
+New track support : System disk Arburg format.
+
+New Writer : SSD Speccy DOS file.
+
+New Writer : Amiga ADF files.
+
+New Loader : SCP files (SuperCard Pro) (WIP).
+
+New Writer : SCP files (SuperCard Pro) (WIP).
+
+New Writer : Kryoflux raw files.
+
+New Writer : BMP file (Disk layout picture).
+
+libhxcfe : Transitions level flux analyzer functions.
+
+libhxcfe : Generic flux stream analyzer enhanced.
+
+ADF, DMS, MSA, ST Loaders : 4 empty tracks added at the end of the disk.
+
+D88 Loader : Odd track number issue corrected.
+
+CPC EDSK writer : Some missing flag support added. (Deleted address mark & CRC flags).
+
+Sega System24 Loader : New format added ( 8192B + 3*1024B + 512B + 256B sectors).
+
+Floppy Dump : Default step rate set at 16ms.
+
+zlib updated : zlib 1.2.8
+
+Amiga/UAE Extended ADF file loader : Amiga DOS track offset loading corrected.
+*********************************************************/
+
+/*********************************************************
+06 August 2013: HxCFloppyEmulator 2.0.16.0
+
+FAT12 Loader/generator : Files size, disk size & disk free size displayed, lots of sanity checks added.
+
+TRS80 Writer : Bad free() removed.
+
+General : Software passed with valgrind : Some memory leaks and possible issues corrected !
+*********************************************************/
+
+/*********************************************************
+16 July 2013: HxCFloppyEmulator 2.0.15.1
+
+FAT12 Loader/generator : Default file creation date set to 1985 to avoid issue with non year 2000 compatibles machines (Kawasaki JS30 robots...).
+
+Apple 2 Sectors generator : End of sector sync corrected, 6&2 GCR encoder corrected.
+
+Track viewer : Sectors on track boundary display issue corrected.
+*********************************************************/
+
+/*********************************************************
+14 July 2013: HxCFloppyEmulator 2.0.15.0
+
+New Loader : SpeccyDos *.SDD support added
+
+New Loader : Apple 2 DOS 3.3 (*.DO) & ProDOS (*.PO) raw file image added.
+
+New Writer : HFE file with the HDDD A2 support for Apple II (http://www.bootzero.com/HDDD_A2_v1.2/HDDD_A2v1.2.html)
+
+New Writer : Atari ST MSA file.
+
+New Writer : TRS 80 *.JV3 file. (Done by David Barr ! Thanks to him :) )
+
+New Writer : TRS 80 *.DMK file.
+
+New Writer : PC88 *.D88 file.
+
+FAT12 Loader/generator : Atari ST 902KB  format corrected.
+
+FAT12 Loader/generator : Atari ST 4.23MB format corrected.
+
+HFE File Writer : Track padding function corrected.
+
+EDE File Loader : edt & edv file support added, ASR 10 gap3 adjusted to 36.
+
+JV3 File Loader : Sector interleaving correctly implemented.
+
+IMD File Writer : No allocated sector issue corrected.
+
+XDMS Lib : UTF8 path support added.
+
+LIBSAP Lib : UTF8 path support added.
+
+New Track/Sector support : GCR "6 and 2" Apple II DOS 3.3/ProDos.
+
+FAT12 Disk Browser:  Handle freeing corrected
+
+Raw Loader - Predefined raw formats added :
+- Roland W30/S330/W50/S50/S550 DD Floppy Disk.
+- OS9 1280KB Floppy Disk.
+- Linn/Forat 9000 Floppy Disk.
+- KORG T3 3"5 HD Floppy Disk.
+- Atari ST 3"5 DD Floppy Disk
+- Standard 3"5 DOS ED Floppy Disk
+- Special 2.5MB DOS EXHD Floppy Disk
+- Special 4.5MB DOS EXHD Floppy Disk.
+- Special 6.78MB DOS EXHD Floppy Disk.
+Updated:
+- Ensoniq EPS 3"5 HD Floppy Disk : Gap3 adjusted.
+- Standard 3"5 DOS HD Floppy Disk : Gap3 adjusted.
+- Standard 3"5 DOS DD Floppy Disk : Gap3 adjusted.
+
+GUI - Drag & Drop Support : URI type path support added (Linux).
+
+GUI - Track viewer window : New buttons to enable/disable track format analysis.
+
+GUI - Log window : New buttons to enable/disable logs messages.
+*********************************************************/
+
+/*********************************************************
+24/03/2013: HxCFloppyEmulator 2.0.12.2
+
+- The HxC Floppy Software was completely reworked - Main changes since the version 1.6.11.16 :
+
+New Features / Changes / Issues solved :
+
+-> GUI now Based on FLTK : http://www.fltk.org/
+
+-> Windows / Mac / Linux support ( http://torlus.com/floppy/forum/viewtopic.php?f=1&t=1120  ;) )
+
+-> New library : libhxcfe -> Contains the floppy management functions (track generator/images loaders/analyser/file system layer...).
+
+-> New library : libusbhxcfe -> Contains the HxC USB Floppy Emulator support layer.
+
+-> New Integrated DOS Disk browser : Can generate / add / get / remove files from any DOS HFE files.
+
+-> New Track Viewer/Analyser : Low level floppy track is now analysed and displayed.
+
+-> "Load Raw image" : Predefined floppy disk format description in XML (based on Expat XML Parser)
+
+-> New low level Track format : TYCOM (custom FM) & MEMBRAIN (custom MFM)
+
+-> Floppy disk dump : "missing sector" issue with some FDC corrected.
+
+-> FM Track format : desync added to the end of the track to solve the SCAN command issue with some FDC.
+
+-> Disk Browser : Support of special/custom 2.5MB DD & 4.5MB HD FAT floppy disk format.
+
+-> Batch converter : It is now possible to batch convert RAW images files.
+
+-> Track pregap support/setting added.
+
+-> Some issues corrected & enhancement in the following loader : D88,JV3,DMK,IMD,AFI,EDE,OricDSK,Emax...
+
+-> New file export support : TI99/4A V9T9 file image
+
+-> New Loader : Kryoflux Stream Loader (*XX.X.raw) / analyser.
+
+-> New Loader : Sega System24 Loader (*.S24)
+
+-> New Loader : Apple 2 NIB image support added. (*.NIB)
+
+-> New Loader : Casio FZF floppy image support added.
+
+-> W30 Loader : Roland S50/S330/S550 image support added.
+
+-> HFE Files : New alternate format flags for the track 0 side 0 & side 1.
+
+-> Sanity check function added to some loader.
+
+-> And a lot of minor corrections/enhancement too.
+
+*********************************************************/
+
+/*********************************************************
+04/03/2012: HxCFloppyEmulator 1.6.11.16
+
+-> Akai S950 DD & Akai S950 HD interface mode support added (need firmware v1.6.4.4 or more)
+*********************************************************/
+
+/*********************************************************
+09/10/2011: HxCFloppyEmulator 1.6.11.15
+
+-> zlib updated : zlib 1.2.5
+-> New files Support : Winimage *.IMZ file.
+-> New files Support : *.GHK (Ensoniq EPS) file image support.
+-> Oric DSK : Deleted address mark support added!
+-> TI99/4A TI99PC99 loader : sector search function corrected.
+-> TI99 V9T9 format : New disk geometry supported, double sided disk support corrected.
+*********************************************************/
+
+/*********************************************************
+04/09/2011: HxCFloppyEmulator 1.6.11.6
+
+-> New files Support : Roland W30 file image support.
+-> BUG : HFE writer buffer overflow corrected.
+-> SAP Thomson file support Enhanced.
+-> STT Atari ST file support : Track signature check added.
+-> Pasti / STX Atari ST file support : Support enhanced, lots of bugs corrected.
+-> CamputersLynx LDF file format : CamputerLynx support corrected. (Tested by John Koushappas).
+-> Amiga ADF file support : HD disk support.
+-> CPC/Spectrum DSK file support: CRC Error handling corrected.
+-> DMK file support: DMK file format detection enhanced.
+-> Ensoniq SQ-80 : Ensoniq SQ-80 disk format corrected.
+-> IPF File format (http://www.softpres.org/)
+   - unaligned track size support added.
+-> MSX File format : 16*2*256*80 file image support added.
+-> TI99 V9T9 format : Start sector id corrected.
+-> USB support layer : unaligned track size support added, some bugs corrected.
+*********************************************************/
+
+/*********************************************************
+15/06/2011: HxCFloppyEmulator 1.6.9.0
+
+-> New files Support : Kurzweil KRZ file support.
+-> New files Support : EDE EDM (Ensoniq Mirage) file image support.
+-> a new "About" window ;).
+*********************************************************/
+
+/*********************************************************
+22/05/2011: HxCFloppyEmulator 1.6.8.1
+
+-> Amiga/UAE Extended ADF file (new format) loader : crash corrected (Bitrate corrected).
+-> All Amiga loader (IPF,ADF,DMS...) : Index timing adjusted.
+-> Track encoder : Amiga track post gap corrected.
+*********************************************************/
+
+/*********************************************************
+17/05/2011: HxCFloppyEmulator 1.6.8.0
+
+Major update:
+
+-> New track generator implemented :
+   - Better implementation.
+   - More powerful API
+   - Less memory usage
+   - Multi format support : ISO, IBM, Amiga.
+   - Variable bitrate support.
+   - Auto GAP3 calculation.
+-> Use of the new track generator for Most of file loaders:
+   - Code clean up.
+   - Code size optimization.
+-> New files Support : *.ADF Amiga/UAE Extended ADF file format (old and new format)
+-> New files Support : *.ADF Acorn  file format
+-> New files Support : *.SSD/*.DSD Acorn BBC file format.
+-> New files Support : *.ADL Acorn BBC file format.
+-> New files Support : *.D77/*.88D/*.D8U/*.2D/*.D68
+-> New files Support : *.FDI file format. (Zx Spectrum...)
+-> New files Support : *.LDF (CamputersLynx) file format. (Beta)
+-> New files Support : *.D81 file format (C64+1581). (Beta)
+-> New files Support : *.DMK file format (TRS-80)
+-> New files Support : *.vegasdsk file format ("Tavernier" / Vegas 6809)
+-> D88 files Support : 1DD format support
+-> Ensoniq file support: skew, interleave corrected.
+-> Fat12 floppy generator : Random Serial number.
+-> JV3 files support : MFM track support corrected.
+-> Index timing corrected.
+-> RAW file loader window :
+   - New parameter : Skew, Auto Gap
+-> SDCard Settings window :
+   - New boot mode parameters.
+-> Floppy dump :
+   - Retry parameter.
+   - Floppy disk sectors layout view.
+-> MacOsX xtools support correction.
+
+And many others corrections and improvements :-)
+*********************************************************/
+
+/*********************************************************
+21/01/2011: HxCFloppyEmulator 1.5.2.1
+-> BUG : Floppy dump tool broken. fixed.
+*********************************************************/
+
+/*********************************************************
+11/01/2011: HxCFloppyEmulator 1.5.2.0
+-> New files Support : Atari ST DIM image (*.DIM) added.
+-> New files Support : TI99 V9T9 (*.V9T9 / *.PC99) added.
+-> IPF File format (http://www.softpres.org/)
+	> overlap bug corrected
+-> Internal : Tracklen is now the number of bit in the track.
+-> Internal/HFE generator : Track encoding code now set correctly.
+-> ISO/IBM track generator : ISO FM track data mark value corrected/changed to 0xFB
+*********************************************************/
+
+/*********************************************************
+22/12/2010: HxCFloppyEmulator 1.5.1.0
+-> New files Support : Jeff Vavasour Color Computer Disk Image format (*.JVC) added.
+-> Floppy disk dump tool/ HFE conversion : Bitrate value are now corrected.
+-> Floppy disk dump tool : a small GUI change.
+-> D88 file format support improved.
+-> HDM file support : gap len increased to 116.
+-> FAT12 Floppy Generator enhanced : More FAT12 floppy format available, FAT geometry adjusted/corrected.
+-> FAT12 Floppy Generator : Sources files on the PC side are now correctly closed in case of fail.
+-> E-Mu SP1200 support : E-Mu SP1200 RAW file image support added (*.sp1200fd)
+-> ISO/IBM track generator : Skew/interleave generator bug corrected.
+*********************************************************/
+
+/*********************************************************
+15/11/2010: HxCFloppyEmulator 1.5.0.0
+-> New Feature : Floppy disk dump tool : To use this tool you need the fdrawcmd driver (http://simonowen.com/fdrawcmd).
+-> E-Mu Emulator I support : E-Mu Emulator I FM track support added (generator & sector extractor)
+-> E-Mu Emulator I support : E-Mu Emulator I RAW file image support added (*.emuiifd)
+*********************************************************/
+
+/*********************************************************
+09/11/2010: HxCFloppyEmulator 1.4.0.1
+-> GUI : SDCard buzzer sound volume control added.
+*********************************************************/
+
+/*********************************************************
+07/11/2010: HxCFloppyEmulator 1.4.0.0
+-> GUI reworked.
+-> Double step drive emulation support added.
+-> IMD Loader : Default interface mode change to Shugart.
+-> RAW Loader : Default interface mode change to Shugart.
+-> USB HxC Floppy Emulator : Shugart mode corrected.
+*********************************************************/
+
+/*********************************************************
+19/10/2010: HxCFloppyEmulator 1.3.16.0
+-> E-Mu Emulator II support : E-Mu Emulator II FM track support added (generator & sector extractor)
+-> E-Mu Emulator II support : E-Mu Emulator II RAW file image support added (*.emuiifd)
+-> E-Mu Emulator II support : E-Mu Emulator II *.EII file support added.
+Credits & Thanks:
+E-Mu Emulator II support was possible thanks to Jan Kiefer who supply all necessary materials and supports,
+to The Software Preservation Society team for the reverse engineering of the EmuII Floppy disk format,
+and to Kris Van de Cappelle (EMXP developer) for the tests and EmuII technicals informations.
+*********************************************************/
+
+/*********************************************************
+20/09/2010: HxCFloppyEmulator 1.3.15.1
+-> Teledisk file Support : FM track support corrected.
+*********************************************************/
+
+/*********************************************************
+19/09/2010: HxCFloppyEmulator 1.3.15.0
+-> New file Support : Teledisk (*.TD0) File format. (Akai S900...)
+*********************************************************/
+
+/*********************************************************
+04/09/2010: HxCFloppyEmulator 1.3.14.0
+-> New file Support : Prophet IMG File format.
+-> ST/MSA : Track skew corrected.
+-> ST : Disk geometry detection corrected/enhanced : All ST files should work now.
+-> GUI: Settings and last used path are now saved.
+-> "Load RAW Image" : New "Skew" parameter.
+-> HFE file Writer : Speed up while writing to a sdcard.
+-> IPF : CAPSImg.dll removed to be in conformance with the SPS license.
+*********************************************************/
+
+/*********************************************************
+22/08/2010: HxCFloppyEmulator 1.3.13.0
+-> New file Support : TRS-80 JV3 File format.                        (done by Gustavo E A P A Batista)
+-> JV1 file Support : GAP & Interleave corrected
+-> New file Support : Steem (Atari ST) STT File image support added.
+-> ISO track generator : "Use alternate data mark" bug corrected.    (done by Gustavo E A P A Batista)
+-> CPC/ZX (E)DSK :  DELETED SECTOR data mark flag support added.
+*********************************************************/
+
+/*********************************************************
+06/08/2010: HxCFloppyEmulator 1.3.12.0
+-> New file Support : SAM Coupé MGT file image support added.
+-> New file Support : SAM Coupé SAD file image support added.
+-> New file Support : Emu EMAX & Emu EMAX 2 (*.EM1 & *.EM2) file support added.
+   Note : The operating system image (emaxos.emx) must be present in the same folder than the bank files.
+-> New file Support : Ensoniq Mirage file support. (the file must have the *.EDM extension)
+-> CPC DSK : Random crash bug corrected.
+*********************************************************/
+
+/*********************************************************
+07/07/2010: HxCFloppyEmulator 1.3.11.0
+-> New file Support : Oberheim DPX1 file image support added.
+*********************************************************/
+
+/*********************************************************
+23/06/2010: HxCFloppyEmulator 1.3.10.0
+-> New file Support : VDK file format (Dragon 32/64 floppy disks).
+*********************************************************/
+
+/*********************************************************
+19/06/2010: HxCFloppyEmulator 1.3.9.4
+-> IPF File format (http://www.softpres.org/)
+	> overlap bug corrected
+-> MSX/IMG/ST :
+    	> Many loader crash/bug fix
+-> HFE file Writer :
+	> Crash fix (crash if wrote a 0 track floppy image)
+*********************************************************/
+
+/*********************************************************
+19/06/2010: HxCFloppyEmulator 1.3.9.3
+-> IPF File format (http://www.softpres.org/)
+	>upgrade to the RC ipf library 6 / Include official headers
+-> USB HxC Floppy Emulator :
+    	> Atari ST/STE/Falcon :"Write protect" disk change emulation implemented (disk change detection is now working correctly).
+-> TI99/4A TI99PC99 loader :
+	> FM bitrate corrected, Interface mode set to Shugart.
+-> HFE file Writer :
+	End of track padding.
+*********************************************************/
+
+/*********************************************************
+06/06/2010: HxCFloppyEmulator 1.3.9.2
+-> IPF File format (http://www.softpres.org/)
+	>upgrade to the RC ipf library 5 : New plateforms supported by this format : Atari ST, PC, ...
+
+-> SD HxC Floppy Emulator settings window : new parameters added (need to upgrade the firmware to v1.1.2.0):
+	> "Head step sound" volume
+	> "Scroll text speed"
+	> "Load last loaded floppy"
+*********************************************************/
+
+/*********************************************************
+23/05/2010: HxCFloppyEmulator 1.3.9.1
+-> Bug : Convert window take account of Interface Settings (target type)
+*********************************************************/
+
+/*********************************************************
+10/05/2010: HxCFloppyEmulator 1.3.9.0
+-> New : CPC DSK Extractor added (Extended CPC Dsk format).
+-> New file Support : FD (Thomson TO8D) file image support.
+*********************************************************/
+
+/*********************************************************
+20/04/2010: HxCFloppyEmulator 1.3.8.0
+-> FM sector extractor dead lock bug corrected.
+-> "Create FS FLoppy":  New floppy format : 4318KB Atari ST floppy (FAT12 - 254tracks, 17 Sectors, 2 sides)
+-> Log window: Memory leak bug corrected
+-> New window: SD HxC Floppy Emulator settings window
+*********************************************************/
+
+/*********************************************************
+23/01/2010: HxCFloppyEmulator 1.3.7.0
+-> New files Support : Ensoniq EDE file support.
+*********************************************************/
+
+/*********************************************************
+22/01/2010: HxCFloppyEmulator 1.3.6.0
+-> New files Support : Apricot APRIDISK file support.
+-> "Load RAW Image" : New "Sector ID start" parameter (ensoniq eps support).
+*********************************************************/
+
+/*********************************************************
+20/12/2009: HxCFloppyEmulator 1.3.5.0
+-> "Create FS FLoppy":  New floppy format : "Big" HD floppy (FAT12 - 127tracks, 26 Sectors, 2 sides, 500kbits/s)
+-> "Create FS FLoppy":  1.68MB format Bug corrected.
+-> "FAT12 Floppy":  Empty sector filled with 0xE6.
+-> RAW sector Extractor: AmigaDOS sector format support added.
+*********************************************************/
+
+
+/*********************************************************
+28/11/2009: HxCFloppyEmulator 1.3.4.0
+-> New files Support : TI99 PC99 file support (MFM and FM mode).
+-> "Create FS FLoppy":  New floppy format : 902KB Atari ST floppy (FAT12 - 82tracks, 11 Sectors, 2 sides)
+-> "Load RAW Image" : FM track format bug corrected.
+->  raw_file_writer : FM track sector extraction added.
+*********************************************************/
+
+
+/*********************************************************
+07/11/2009: HxCFloppyEmulator 1.3.3.0
+-> New files Support : *.HDM and *.XDF (x68000: - 360rpm,500kb/s,8 1024B sectors, 2 sides,77 tracks).
+*********************************************************/
+
+
+/*********************************************************
+01/11/2009: HxCFloppyEmulator 1.3.2.0
+-> IPF Loader: Index signal generation improved.
+-> USB HxC Floppy Emulator :
+	-Variable bitrate emulation improved.
+	-Up to 4 USB Floppy Emulator can be used in the same time now.
+-> New file Support : D88 file format (PC88 floppy disks).
+*********************************************************/
+
+
+/*********************************************************
+27/09/2009: HxCFloppyEmulator 1.3.1.1
+-> GUI: Manual Interface mode behavior corrected.
+-> SMC loader : Super UFO & Super Pro Fighter file support added.
+*********************************************************/
+
+
+/*********************************************************
+20/09/2009: HxCFloppyEmulator 1.3.1.0
+-> GUI: Drag&drop converting possible on the "Batch converting" window (you just need to select the target directory before)
+-> SMC loader : file detection modified: read the file header. SMD file support added. smc/smd part file support.
+-> File system creation : 1.68MB ms dos floppy added.
+*********************************************************/
+
+
+/*********************************************************
+08/08/2009: HxCFloppyEmulator 1.3.0.0
+-> Windows GUI redesigned.
+-> Windows GUI: Batch conversion tool added.
+-> Memory leak corrected in the iso/ibm track builder.
+-> file Handle leak corrected.
+-> VTrucco file format (*.VTR) support added (read & write) (variant of the SDCard HxC Floppy Emulator hardware).
+*********************************************************/
+
+
+/*********************************************************
+19/07/2009: HxCFloppyEmulator 1.2.1.1
+-> HFE file Writer/loader : bits reversing code optimisation.
+-> Index generation : for all file format based on ISO track, the index signal timing was changed (duration of 2.5ms before the first sector)
+-> USB HxC Floppy Emulator : a bug was corrected regarding the index signal generation.
+-> USB HxC Floppy Emulator : interface settings now take effect even if no floppy disk are loaded.
+-> GPL license text added in the about dialog box.
+*********************************************************/
+
+
+/*********************************************************
+12/07/2009: HxCFloppyEmulator 1.2.1.0
+-> New feature : new custom RAW floppy format loader GUI.
+-> New file Support : SAP (Thomson TO8)    file image support (need beta tester).
+-> New file Support : JV1 (TRS-80 Model 1) file image support (need beta tester).
+-> internal : binary to MFM encoder speedup (MFM converter fully rewritten).
+*********************************************************/
+
+
+/*********************************************************
+18/05/2009: HxCFloppyEmulator 1.2.0.13
+-> FAT12 filesystem generator : file time&date added. fat BPB_Media code corrected. win95 boot sector.
+-> Logs : Logs dialog box added.
+-> New functionality : MFM ISO Sector data extractor (Menu disk -> Write IMG file).
+*********************************************************/
+
+
+/*********************************************************
+20/03/2009: HxCFloppyEmulator 1.2.0.12
+-> New file Support : ZX Spectrum BetaDisk TRD file format.
+-> New file Support : ZX Spectrum BetaDisk SCL file format.
+*********************************************************/
+
+
+/*********************************************************
+04/03/2009: HxCFloppyEmulator 1.2.0.11
+-> GCR encoding support added.
+-> New file Support : D64 file format (Commodore 64). (Experimental only at this date).
+-> HFE file interface mode can now be changed through the settings dialog box.
+*********************************************************/
+
+
+/*********************************************************
+22/02/2009: HxCFloppyEmulator 1.2.0.10
+->  IPF File format (http://www.softpres.org/)
+	-> An important bug regarding the track type identification corrected (reported by RichAplin / Cyclone 20 project)
+	-> in-track weak bits fully supported (SuperHang-On,...)
+*********************************************************/
+
+
+/*********************************************************
+16/02/2009: HxCFloppyEmulator 1.2.0.9
+->  AFI File format (Advanced Floppy Image)
+	-Some memory usage optimization and bug corrected.
+*********************************************************/
+
+
+/*********************************************************
+07/01/2009: HxCFloppyEmulator 1.2.0.8
+-> New disk image file format : AFI (Advanced Floppy Image)
+	-> Track based file format
+	-> MFM / FM / GCR / RAW support
+	-> Hard sectored track supported
+	-> Variable bitrate support
+	-> "Weak bits" support
+	-> file data packed. (zlib)
+
+
+-> Sources tree modification:
+	-> external libs/source code moved to common/libs
+*********************************************************/
+
+
+/*********************************************************
+07/12/2008: HxCFloppyEmulator 1.2.0.7
+-> Linux port : libftdi support
+*********************************************************/
+
+
+/*********************************************************
+28/10/2008: HxCFloppyEmulator 1.2.0.6
+-> Snes SMC loader is working again ;-).
+*********************************************************/
+
+
+/*********************************************************
+26/10/2008: HxCFloppyEmulator 1.2.0.5
+-> IMD floppy image loader added : (http://www.classiccmp.org/dunfield/img/index.htm)
+-> FM encoding support added.
+-> Floppy change detection bug corrected in PC mode.
+*********************************************************/
+
+
+/*********************************************************
+07/10/2008: HxCFloppyEmulator 1.2.0.4
+-> FAT12 floppy builder : A bug in the file checker corrected.
+-> HFE floppy image loader added.
+*********************************************************/
+
+
+/*********************************************************
+27/09/2008: HxCFloppyEmulator 1.2.0.3
+-> CopyQM Loader : A bug in the file checker corrected.
+-> CPC DSK Loader: Empty tracks (0 sector) are now correctly handled.
+-> Amiga Dos File system plugin : some bug corrected, floppy name/creation date support added.
+-> USB Floppy Emulator: DSKCHG timing changed in Amiga mode (fix the disk-change detection under workbench)
+-> Many memory leaks and potential bug found and fixed thanks to PurifyPlus.
+*********************************************************/
+
+
+/*********************************************************
+08/08/2008: HxCFloppyEmulator 1.2.0.2 beta
+-> After some months ( ;-) ), the Oric support was finally tested on the real hardware at the Infoticaires 2008 convention !
+At this occasion, most part of the Oric DSK loader was rewritten.
+-> FTDI usb latency set to 4ms (2ms before).
+-> Default Process priority class changed from HIGHL_PRIORITY_CLASS to ABOVE_NORMAL_PRIORITY_CLASS.
+*********************************************************/
+
+
+/*********************************************************
+18/06/2008: HxCFloppyEmulator 1.2.0.1 beta
+-> most parts of the software have been rewritten to have an C ANSI code.
+-> all plugins are now into the main executable.
+-> First STX/Pasti loader : load unprotected floppy, and run some title. Improvement in next version ;-)
+-> MSX2 dsk support added.
+-> improvement of the CPC dsk loader: a bug around some tags corrected, improvement of copy protected dsk support.
+-> new config dialog and config file support.
+-> log file support (for debuging).
+-> and many and many others changes... ;-)
+*********************************************************/
+
+
+/*********************************************************
+25/03/2008: HxCFloppyEmulator 1.0.0.0
+-> Add variable bitrate + flakey/weak-bits support: All copy protection are now supported ;-)
+-> Internal engine rewritten to support the new CPLD core !
+Tested successfully on these machines/OS:
+CoreDUO 2 / Windows XP SP2
+Pentium III 700Mhz  / Windows XP SP1
+Pentium II 300Mhz  / Windows 2000
+Pentium 133Mhz  / Windows 98
+Pentium 90Mhz  / Windows 98
+
+!v!v!v!v!v!v!v! Warning: older CPLD bitstream are not supported anymore !: !v!v!v!v!v!v!v!
+Please upgrade your CPLD with the new bitstream:
+http://hxc2001.free.fr/floppy_drive_emulator/HxCFloppyEmulator_ipcore.zip
+HxCFloppyEmu_CPLD_EPM7128S_250308.pof
+
+*********************************************************/
+
+
+/*********************************************************
+21/02/2008: HxCFloppyEmulator 0.9.1.9
+New menu to write *.hfe file for the StandAlone version of the HXCFloppyEmulator.
+*********************************************************/
+
+
+/*********************************************************
+08/02/2008: HxCFloppyEmulator 0.9.1.8
+New hardware supported : the Super famicom wildcard (floppy based)
+you can now drag&drop smc files ;)
+*********************************************************/
+
+
+/*********************************************************
+07/02/2008: HxCFloppyEmulator 0.9.1.7
+- Files system based plugins :
+To create a FAT12/Amigados virtual floppy from pc files, put files in an folder and drag and drop this folder to the HxCFloppyEmulator software.
+Folder naming convention:
+*.amigados : create an amigados virtual floppy from this folder. (AMIGADOSFSDK_FloppyLoader.dll)
+*.fat1440 : create an FAT12/HD 1.44MB virtual floppy from this folder. (FATDK_FloppyLoader.dll)
+*.fat720 : create an FAT12/DD 720KB virtual floppy from this folder. (FATDK_FloppyLoader.dll)
+*.fatst : create an FAT12/DD atari ST virtual floppy from this folder. (FATDK_FloppyLoader.dll)
+*.fatbigst : create an big 3MB FAT12/DD atari ST virtual floppy from this folder. (experimental) (FATDK_FloppyLoader.dll)
+*********************************************************/
+
+
+/*********************************************************
+26/01/2008: HxCFloppyEmulator 0.9.1.6
+- IPF Floppy Loader plugin : overlapped track support added/corrected: IPF Team 17 games seems to work well now :).
+*********************************************************/
+
+
+/*********************************************************
+29/11/2007: HxCFloppyEmulator 0.9.1.5
+- SDCARD writer for the prototype of the MCU based version of the emulator. (this functionality is locked in the public release)
+*********************************************************/
+
+
+/*********************************************************
+26/11/2007: HxCFloppyEmulator 0.9.1.4
+- ADZ floppy loader added.
+*********************************************************/
+
+
+/*********************************************************
+25/11/2007: HxCFloppyEmulator 0.9.1.3
+- DMS file support: replacement of undms by x-dms dms loader.
+- pc files to AmigaDos floppy plugin converter added
+*********************************************************/
+
+
+/*********************************************************
+07/11/2007: HxCFloppyEmulator 0.9.1.1
+- CPC file loader bugs corrected : images with multi sectors size supported now.
+(Midline Process demo)
+*********************************************************/
+
+
+/*********************************************************
+04/11/2007: HxCFloppyEmulator 0.9.1.0
+- The usb interface can be plugged/unplugged while the application is running.
+- DSK Oric files support. plugin added.
+*********************************************************/
+
+
+/*********************************************************
+18/09/2007: HxCFloppyEmulator 0.9.0.5
+- Amiga Track lenght corrected (amiga bitrate > 250kbits)
+*********************************************************/
+
+
+/*********************************************************
+03/08/2007: HxCFloppyEmulator 0.9.0.3
+- a bug in the CopyQM loader corrected.
+*********************************************************/
+
+
+/*********************************************************
+22/07/2007: HxCFloppyEmulator 0.9.0.2
+- floppy track extraction : 512 bytes alignement
+*********************************************************/
+
+
+/*********************************************************
+21/07/2007: HxCFloppyEmulator 0.9.0.1
+- new functionnality : floppy track extraction to an mfm file. (for debug / exporting to another device)
+*********************************************************/
+
+
+/*********************************************************
+16/07/2007: HxCFloppyEmulator 0.9.0.0
+- standard/extended CPC Dsk images support added
+- Korg-DSS1 / CopyQM images support added
+
+Plugins support added.
+
+Plugins list :
+ADF_FloppyLoader.dll
+CopyQM_FloppyLoader.dll
+CPCDSK_FloppyLoader.dll
+DMS_FloppyLoader.dll
+IMG_FloppyLoader.dll
+IPF_FloppyLoader.dll
+MSA_FloppyLoader.dll
+ST_FloppyLoader.dll
+*********************************************************/
+
+
+/*********************************************************
+01/10/2006: HxCFloppyEmulator 0.7.1.0
+- Passage à la 0.7.1 pour corriger un bug avec les disquettes ST de 10 secteurs / par piste...
+*********************************************************/
+
+
+/*********************************************************
+01/10/2006: HxCFloppyEmulator 0.7.0.0
+- Ajout du support des images PC IMG.
+
+- Support du format IPF (caps) (en bit rate constant à cette date.). Il faut placer
+le fichier CAPSImg.dll au même niveau que l'exe
+        Attention certain système de protection ne passent toujours pas avec
+l'interface ! C'est le cas avec les disquettes possédant un bit rate non
+constant. Il faudrait que l'interface puisse faire varier sont bit rate
+en cours d'utilisation, ce qui n'est bien sur pas encore le cas. (support du variable-bitrate à la version 1.0.0.0)
+
+- Refonte complète de la mecannique interne...
+*********************************************************/
+
+
+/*********************************************************
+25/09/2006: HxCFloppyEmulator 0.5.0.0
+- Support des fichiers images *.DMS (amiga)
+*********************************************************/
+
+
+/*********************************************************
+24/09/2006: HxCFloppyEmulator 0.4.0.0
+- Support des Disquettes ST de 11 secteurs par track finalisé (Les 11 secteurs rentrent au chausse pieds ! : 2 octets de libre sur une piste standard a 300 rpm!)
+- Amélioration du loader des fichiers *.ST : plus besoin d'utiliser le fichier stfileformat.txt.
+
+- (Expérimental) Possibilité de charger des images de 1.44Mo (18 secteurs)
+et 3Mo (36 secteurs) pour ST. (triche sur la longueur des pistes-> 150 rpm et 75rpm)
+(le TOS 1.62 a l'air d'apprécier assez moyennement la disquette de 3Mo -> Reboot au début de la copie de la disquette ;-)  )
+
+- Correction du bug de chargement sur les fichiers images protégés en écritures.
+
+- Une petite information en plus sur l'interface graphique.
+
+- Possibilité de charger une image en double cliquant dessus (faire l'association format - soft à l'aide de Windows).
+*********************************************************/
+
+
+/*********************************************************
+03/09/2006: HxCFloppyEmu 0.3.0.0
+- version publique initiale.
+Support de l'interface sur USB basée sur le chip FTDI et un CPLD.
+Support des formats ST / MSA / ADF.
+*********************************************************/
+
+
+/*********************************************************
+~01/06/2006: HxCFloppyEmu 0.2.0.0
+- Passage à l'USB avec le chip FTDI FT245 (merci à toi Jace pour ton conseil, bon produit effectivement ;-) )
+- Passage sur CPLD.
+Support des formats ST / ADF.
+Cette version a été présentée aux Infoticaires 2006.
+*********************************************************/
+
+
+/*********************************************************
+02/04/2006: HxCFloppyEmu 0.1.0.0
+- Version graphique initiale.
+Support de l'interface sur port parallel.
+Support des formats ST / ADF.
+*********************************************************/
+
+
+/*********************************************************
+20/03/2006-24/03/2006: HxCFloppyEmu 0.0.0.0
+Tout début du projet :
+- Mise au point de la carte sur port parallèle
+- premiers morceaux de code pour encoder les tracks d'une image ST puis ADF.
+*********************************************************/
