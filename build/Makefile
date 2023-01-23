@@ -5,10 +5,10 @@ all: HxCFloppyEmulator_cmdline HxCFloppyEmulator_software
 libhxcadaptor:
 	$(MAKE) -C ../libhxcadaptor/build/
 
-libhxcfe: libhxcadaptor libhxcfe
+libhxcfe: libhxcadaptor
 	$(MAKE) -C ../libhxcfe/build/
 
-libusbhxcfe: libhxcadaptor
+libusbhxcfe: libhxcadaptor libhxcfe
 	$(MAKE) -C ../libusbhxcfe/build/
 
 HxCFloppyEmulator_cmdline: libhxcfe libusbhxcfe
