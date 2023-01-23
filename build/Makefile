@@ -27,12 +27,12 @@ else ifeq ($(TARGET), Darwin)
 		cd ../HxCFloppyEmulator_software/sources/thirdpartylibs/fltk && \
 		cp -a fltk-1.x.x fltk-1.x.x-arm64 && \
 		cd fltk-1.x.x-arm64 && \
-		export CFLAGS='-mmacosx-version-min=10.13 -arch arm64' && export CXXFLAGS='-mmacosx-version-min=10.13 -arch arm64' && export LDFLAGS='-mmacosx-version-min=10.13 -arch arm64' && ./configure --host=arm-apple-darwin
+		export CFLAGS='-mmacosx-version-min=11 -arch arm64' && export CXXFLAGS='-mmacosx-version-min=11 -arch arm64' && export LDFLAGS='-mmacosx-version-min=11 -arch arm64' && ./configure --host=arm-apple-darwin
 		$(MAKE) -C ../HxCFloppyEmulator_software/sources/thirdpartylibs/fltk/fltk-1.x.x-arm64/ DIRS=src
 		cd ../HxCFloppyEmulator_software/sources/thirdpartylibs/fltk && \
 		cp -a fltk-1.x.x fltk-1.x.x-x86_64 && \
 		cd fltk-1.x.x-x86_64 && \
-		export CFLAGS='-mmacosx-version-min=10.13 -arch x86_64' && export CXXFLAGS='-mmacosx-version-min=10.13 -arch x86_64' && export LDFLAGS='-mmacosx-version-min=10.13 -arch x86_64' && ./configure --host=x86_64-apple-darwin
+		export CFLAGS='-mmacosx-version-min=10.9 -arch x86_64' && export CXXFLAGS='-mmacosx-version-min=10.9 -arch x86_64' && export LDFLAGS='-mmacosx-version-min=10.9 -arch x86_64' && ./configure --host=x86_64-apple-darwin
 		$(MAKE) -C ../HxCFloppyEmulator_software/sources/thirdpartylibs/fltk/fltk-1.x.x-x86_64/ DIRS=src
 		cd ../HxCFloppyEmulator_software/sources/thirdpartylibs/fltk && \
 		lipo fltk-1.x.x-x86_64/lib/libfltk.a fltk-1.x.x-arm64/lib/libfltk.a -create -output fltk-1.x.x/lib/libfltk.a && \
