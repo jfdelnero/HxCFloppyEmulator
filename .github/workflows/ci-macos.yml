@@ -1,0 +1,26 @@
+name: CI (macOS)
+
+on:
+  push:
+    paths:
+      - '**'
+  pull_request:
+    paths:
+      - '**'
+
+permissions:
+  contents: read
+
+jobs:
+  build-macos:
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Build
+        run: cd build && make -j2
+      - name: Package
+        run: cd build && ./maccreatebundle
+      - uses: actions/upload-artifact@master
+        with:
+          name: hxcfloppyemulator-macos-${{ github.sha }}
+          path: build/HxCFloppyEmulator.dmg
