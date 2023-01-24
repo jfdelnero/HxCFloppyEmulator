@@ -428,6 +428,8 @@ int DFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					if(c64_clv)
 						timecoef = (float)c64_clv / clv_track2rpm(j,2);
 
+					rpm = 300;
+
 					curside = decodestream(imgldr_ctx->hxcfe,f,(j<<1)|(i&1),tracksoffset[(j<<1)|(i&1)],&rpm,timecoef,phasecorrection,1,1 + 24,bitrate,filter,filterpasses,bmp_export,format_rev);
 
 					if(!floppydisk->tracks[j/trackstep])
