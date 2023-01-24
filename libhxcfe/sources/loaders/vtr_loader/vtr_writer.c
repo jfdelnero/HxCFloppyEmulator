@@ -84,9 +84,9 @@ int VTR_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		FILEHEADER->track_list_offset=1;
 		FILEHEADER->write_protected=1;
 
-		sprintf((char*)&FILEHEADER->CREDITS,"based on original project from Jean Francois Del Nero HxC Floppy Emulator");
+		sprintf((char*)&FILEHEADER->CREDITS,"based on the HxC Floppy Emulator project.");
 
-        fwrite(FILEHEADER,512,1,hxcpicfile);
+		fwrite(FILEHEADER,512,1,hxcpicfile);
 
 		tracklistlen=(((((FILEHEADER->number_of_track+1)*sizeof(vtrucco_pictrack))/512)+1));
 		offsettrack=(unsigned char*) malloc(tracklistlen*512);
