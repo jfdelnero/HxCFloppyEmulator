@@ -12,7 +12,7 @@
 // File : hxcmod.c
 // Contains: a tiny mod player
 //
-// Written by: Jean François DEL NERO
+// Written by: Jean-François DEL NERO
 //
 // You are free to do what you want with this code.
 // A credit is always appreciated if you include it into your prod :)
@@ -447,9 +447,11 @@ static void doFunk(channel * cptr)
 					cptr->samppos = ((unsigned long)(cptr->reppnt)<<11) + (cptr->samppos % ((unsigned long)(cptr->replen+cptr->reppnt)<<11));
 				}
 
+#ifndef HXCMOD_MOD_FILE_IN_ROM
 				// Note : Directly modify the sample in the mod buffer...
 				// The current Invert Loop effect implementation can't be played from ROM.
 				cptr->sampdata[cptr->samppos >> 10] = -1 - cptr->sampdata[cptr->samppos >> 10];
+#endif
 			}
 		}
 	}
@@ -813,12 +815,21 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 			exception above).
 			*/
 
-			mod->patternpos = ( (muint)(effect_param_h) * 10 + effect_param_l ) * mod->number_of_channels;
-			mod->jump_loop_effect = 1;
-			mod->tablepos++;
-			if(mod->tablepos >= mod->song.length)
-				mod->tablepos = 0;
+			mod->patternpos = ( ((muint)(effect_param_h) * 10) + effect_param_l );
 
+			if(mod->patternpos >= 64)
+				mod->patternpos = 63;
+
+			mod->patternpos *= mod->number_of_channels;
+
+			if(!mod->jump_loop_effect)
+			{
+				mod->tablepos++;
+				if(mod->tablepos >= mod->song.length)
+					mod->tablepos = 0;
+			}
+
+			mod->jump_loop_effect = 1;
 		break;
 
 		case EFFECT_EXTENDED:
@@ -1406,7 +1417,7 @@ int hxcmod_load( modcontext * modctx, void * mod_data, int mod_data_size )
 #ifdef FULL_STATE
 			memclear(&(modctx->effects_event_counts),0,sizeof(modctx->effects_event_counts));
 #endif
-			memcopy(&(modctx->song.title),modmemory,1084);
+			memcopy(&(modctx->song),modmemory,1084);
 
 			i = 0;
 			modctx->number_of_channels = 0;

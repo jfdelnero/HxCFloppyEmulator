@@ -19,6 +19,10 @@
 #ifndef MODPLAY_DEF
 #define MODPLAY_DEF
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef HXCMOD_SLOW_TARGET
 	#define HXCMOD_STATE_REPORT_SUPPORT 1
 	#define HXCMOD_OUTPUT_FILTER 1
@@ -298,4 +302,8 @@ int  hxcmod_load( modcontext * modctx, void * mod_data, int mod_data_size );
 void hxcmod_fillbuffer( modcontext * modctx, msample * outbuffer, mssize nbsample, tracker_buffer_state * trkbuf );
 void hxcmod_unload( modcontext * modctx );
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* MODPLAY_DEF */
