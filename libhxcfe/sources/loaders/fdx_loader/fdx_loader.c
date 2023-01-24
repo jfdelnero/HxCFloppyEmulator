@@ -217,7 +217,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,uint8_t * track_buffer,int 
 		if(trackbuf_dword)
 		{
 			memset(trackbuf_dword,0x00,(pulses_cnt+1)*sizeof(uint32_t) * FDX_NB_FAKE_REV);
-			pulses_cnt = raw2stream(track_buffer,trackbuf_dword,bit_track_length,FDX_NB_FAKE_REV,&indexarray);
+			pulses_cnt = raw2stream(track_buffer,trackbuf_dword,bit_track_length,FDX_NB_FAKE_REV,(int*)&indexarray);
 
 			hxcfe_FxStream_setResolution(fxs, tick_period);
 
