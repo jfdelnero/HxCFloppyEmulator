@@ -60,8 +60,8 @@ int Northstar_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write Northstar file %s...",filename);
 
-	sectorcnt_s0 = count_sector(imgldr_ctx->hxcfe,floppy,0,0,0,sectorsize,NORTHSTAR_HS_MFM_ENCODING,NULL);
-	sectorcnt_s1 = count_sector(imgldr_ctx->hxcfe,floppy,0,0,1,sectorsize,NORTHSTAR_HS_MFM_ENCODING,NULL);
+	sectorcnt_s0 = count_sector(imgldr_ctx->hxcfe,floppy,0,0,0,sectorsize,NORTHSTAR_HS_MFM_ENCODING,0x0000);
+	sectorcnt_s1 = count_sector(imgldr_ctx->hxcfe,floppy,0,0,1,sectorsize,NORTHSTAR_HS_MFM_ENCODING,0x0000);
 
 	if(sectorcnt_s0 != 10)
 	{
@@ -70,7 +70,7 @@ int Northstar_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 	}
 
 	nbtrack = 35;
-	while(nbtrack && !count_sector(imgldr_ctx->hxcfe,floppy,0,nbtrack-1,0,sectorsize,NORTHSTAR_HS_MFM_ENCODING,NULL))
+	while(nbtrack && !count_sector(imgldr_ctx->hxcfe,floppy,0,nbtrack-1,0,sectorsize,NORTHSTAR_HS_MFM_ENCODING,0x0000))
 	{
 		nbtrack--;
 	}
