@@ -16,8 +16,8 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
-XXXXXX 2022 : HxCFloppyEmulator 2.5.X.X (Work in progress / Beta version !)
-              (Last update : 27 December 2022)
+XXXXXX 2023 : HxCFloppyEmulator 2.14.X.X (Work in progress / Beta version !)
+              (Last update : 27 January 2023)
 
 Windows : Turn the process in high priority when the USB HxC Floppy Emulator is detected.
           Fix most of the Sync lost events.
@@ -71,6 +71,9 @@ Raw FDX export support added.
 86Box 86F support added : (WIP)
 
 FD loader : Fix sectors side ID : All of them should use the ID 0.
+
+Logic analyzer capture loader : Can now load tracks captured with a simple logic analyzer.
+                                (Saleae logic analyzer or similar).
 
 *********************************************************/
 
