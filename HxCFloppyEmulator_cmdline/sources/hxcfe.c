@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2023 Jean-François DEL NERO
+// Copyright (C) 2006-2023 Jean-Franï¿½ois DEL NERO
 //
 // This file is part of HxCFloppyEmulator.
 //
@@ -42,6 +42,8 @@
 #include "utils.h"
 
 #include "usb_hxcfloppyemulator.h"
+
+#include "version.h"
 
 int verbose;
 
@@ -1076,7 +1078,7 @@ int main(int argc, char* argv[])
 	hxcfe_setOutputFunc(hxcfe,&CUI_affiche);
 	hxcfe_setScriptOutputFunc(hxcfe,&SCRIPT_CUI_affiche);
 
-	printf("HxC Floppy Emulator : Floppy image file converter v2.5.5.1\n");
+	printf("HxC Floppy Emulator : Floppy image file converter v"STR_FILE_VERSION2"\n");
 	printf("Copyright (C) 2006-2023 Jean-Francois DEL NERO\n");
 	printf("This program comes with ABSOLUTELY NO WARRANTY\n");
 	printf("This is free software, and you are welcome to redistribute it\n");
