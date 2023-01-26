@@ -93,15 +93,22 @@ typedef struct la_stats_
 	int first_idx_pos;
 	int last_idx_pos;
 	int sample_rate;
+
+	int start_offset;
+	int end_offset;
+
+	uint32_t * stream;
+	uint32_t * index_array;
 } la_stats;
 
-uint32_t * binlogicfile2stream(HXCFE_IMGLDR * imgldr_ctx,char * file, la_stats * la)
+int binlogicfile2stream(HXCFE_IMGLDR * imgldr_ctx,char * file, la_stats * la)
 {
 	FILE * f;
 	int size,offset,total_size,block_size,i;
 	uint8_t data_buffer[TMP_BUFFER_SIZE];
 	uint8_t old_idx_state,old_dat_state;
 	int rev_dat_pulses,rev_cnt;
+	uint32_t delta;
 
 	old_idx_state = 0x00;
 	old_dat_state = 0x00;
@@ -110,8 +117,10 @@ uint32_t * binlogicfile2stream(HXCFE_IMGLDR * imgldr_ctx,char * file, la_stats *
 	la->first_idx_pos = -1;
 	la->last_idx_pos = -1;
 	la->index_cnt = 0;
+
 	rev_dat_pulses = -1;
 	rev_cnt = 0;
+	delta = 0;
 
 	f = fopen(file,"r");
 	if(f)
@@ -120,19 +129,49 @@ uint32_t * binlogicfile2stream(HXCFE_IMGLDR * imgldr_ctx,char * file, la_stats *
 		size = ftell(f);
 		fseek(f,0,SEEK_SET);
 
+		if(la->end_offset>0)
+		{
+			if(size > la->end_offset)
+			{
+				size = la->end_offset + 1;
+			}
+			else
+			{
+				la->end_offset = size - 1;
+			}
+		}
+
+		if(la->start_offset>0)
+		{
+			size = size - la->start_offset;
+
+			fseek(f,la->start_offset,SEEK_SET);
+		}
+
+		if (size < 0)
+			size = 0;
+
 		total_size = size;
 		offset = 0;
 		while( offset < total_size )
 		{
 			if(size >= TMP_BUFFER_SIZE)
 			{
-				fread(&data_buffer,TMP_BUFFER_SIZE,1,f);
+				if ( fread(&data_buffer,TMP_BUFFER_SIZE,1,f) != 1 )
+				{
+					fclose(f);
+					return -1;
+				}
 
 				block_size = TMP_BUFFER_SIZE;
 			}
 			else
 			{
-				fread(&data_buffer,size,1,f);
+				if ( fread(&data_buffer,size,1,f) != 1 )
+				{
+					fclose(f);
+					return -1;
+				}
 
 				block_size = size;
 			}
@@ -145,6 +184,11 @@ uint32_t * binlogicfile2stream(HXCFE_IMGLDR * imgldr_ctx,char * file, la_stats *
 				{
 					if(la->dat_pulse_cnt > 4000)
 					{
+						if(la->index_array)
+						{
+							la->index_array[la->index_cnt] = la->dat_pulse_cnt;
+						}
+
 						la->index_cnt++;
 
 						la->last_idx_pos = offset + i;
@@ -159,12 +203,19 @@ uint32_t * binlogicfile2stream(HXCFE_IMGLDR * imgldr_ctx,char * file, la_stats *
 					{
 						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"binlogicfile2stream : rev %d : %d data pulses",rev_cnt,rev_dat_pulses);
 					}
+
 					rev_dat_pulses = 0;
 					rev_cnt++;
 				}
 
 				if( old_dat_state && !(data_buffer[i] & (0x1<<la->dat_pos)) )
 				{
+					if(la->stream)
+					{
+						la->stream[la->dat_pulse_cnt] = delta;
+						//printf("%d : %d \n",la->dat_pulse_cnt,delta);
+						delta = 0;
+					}
 					la->dat_pulse_cnt++;
 					la->last_dat_pos = offset + i;
 
@@ -174,6 +225,8 @@ uint32_t * binlogicfile2stream(HXCFE_IMGLDR * imgldr_ctx,char * file, la_stats *
 
 				old_idx_state = (data_buffer[i] & (0x1<<la->idx_pos));
 				old_dat_state = (data_buffer[i] & (0x1<<la->dat_pos));
+
+				delta++;
 			}
 
 			offset += block_size;
@@ -184,24 +237,97 @@ uint32_t * binlogicfile2stream(HXCFE_IMGLDR * imgldr_ctx,char * file, la_stats *
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"binlogicfile2stream : Can't open %s !", file);
 	}
+
+	return 0;
+}
+
+static HXCFE_SIDE* decodestream(HXCFE* floppycontext,uint32_t * trackbuf_dword,int pulses_cnt,uint32_t * indexarray, int nbindex,int track,short * rpm,float timecoef,int phasecorrection, int bitrate,int filter,int filterpasses, int bmpexport, int lafreq)
+{
+	HXCFE_SIDE* currentside;
+	HXCFE_TRKSTREAM *track_dump;
+	HXCFE_FXSA * fxs;
+	char tmp_filename[512];
+	int tick_period,freq;
+	int i;
+
+	currentside=0;
+
+	floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
+
+	tick_period = ((double)(1*1E12)/(double)lafreq);
+
+	floppycontext->hxc_printf(MSG_INFO_1,"Sample tick period : %d ps", tick_period);
+
+	fxs = hxcfe_initFxStream(floppycontext);
+	if(fxs)
+	{
+		hxcfe_FxStream_setBitrate(fxs,bitrate);
+
+		hxcfe_FxStream_setPhaseCorrectionFactor(fxs,phasecorrection);
+
+		hxcfe_FxStream_setFilterParameters(fxs,filterpasses,filter);
+
+		#ifdef LA_DBG
+		floppycontext->hxc_printf(MSG_DEBUG,"LA RAW Track pulses count : %d",pulses_cnt);
+		#endif
+
+		hxcfe_FxStream_setResolution(fxs, tick_period);
+
+		track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf_dword,32,(pulses_cnt), HXCFE_STREAMCHANNEL_TYPE_RLEEVT, "data", NULL);
+		if(track_dump)
+		{
+			for(i=0;i<nbindex;i++)
+			{
+				hxcfe_FxStream_AddIndex(fxs,track_dump,indexarray[i],0,FXSTRM_INDEX_MAININDEX);
+			}
+
+			hxcfe_FxStream_ChangeSpeed(fxs,track_dump,timecoef);
+
+			fxs->pll.track = track>>1;
+			fxs->pll.side = track&1;
+			currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
+
+			if(currentside)
+			{
+				if(rpm)
+					*rpm = (short)( 60 / GetTrackPeriod(floppycontext,currentside) );
+			}
+
+			if( bmpexport )
+			{
+				sprintf(tmp_filename,"track%.2d.%d.bmp",track>>1,track&1);
+				hxcfe_FxStream_ExportToBmp(fxs,track_dump, tmp_filename);
+			}
+
+			if(currentside)
+			{
+				currentside->stream_dump = track_dump;
+			}
+			else
+			{
+				hxcfe_FxStream_FreeStream(fxs,track_dump);
+			}
+		}
+		else
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"hxcfe_FxStream_ImportStream failed !");
+		}
+
+		hxcfe_deinitFxStream(fxs);
+
+	}
+
+	floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
+
+	return currentside;
 }
 
 int logicanalyzer_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-	FILE * f;
-	char * filepath;
-	char * folder;
-	char fname[512];
-	int mintrack,maxtrack;
-	int minside,maxside,singleside;
-	unsigned short i,j;
-	int trackstep;
 	HXCFE_CYLINDER* currentcylinder;
-	int len;
-	int found,track,side;
 	struct stat staterep;
 	HXCFE_SIDE * curside;
-	int nbtrack,nbside;
+	short rpm;
 
 	envvar_entry * backup_env;
 	la_stats la;
@@ -216,14 +342,7 @@ int logicanalyzer_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 		{
 			backup_env = duplicate_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
 
-			track=0;
-			side=0;
-			found=0;
-
-			mintrack=0;
-			maxtrack=0;
-			minside=0;
-			maxside=0;
+			memset(&la,0,sizeof(la_stats));
 
 			la.idx_pos = -1;
 			if( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "LOGICANALYZER_INDEX_BIT", NULL) )
@@ -237,9 +356,19 @@ int logicanalyzer_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 			if( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "LOGICANALYZER_SAMPLERATE", NULL) )
 				la.sample_rate = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_SAMPLERATE" );
 
+			la.start_offset = -1;
+			if( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "LOGICANALYZER_IMPORT_START_OFFSET", NULL) )
+				la.start_offset = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_IMPORT_START_OFFSET" );
+
+			la.end_offset = -1;
+			if( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "LOGICANALYZER_IMPORT_END_OFFSET", NULL) )
+				la.end_offset = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_IMPORT_END_OFFSET" );
+
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Index bit = %d",la.idx_pos);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Data bit = %d",la.dat_pos);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Sample rate = %d Hz",la.sample_rate);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Start offset = %d",la.start_offset);
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : End offset = %d",la.end_offset);
 
 			binlogicfile2stream(imgldr_ctx,imgfile, &la);
 
@@ -248,6 +377,47 @@ int logicanalyzer_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Index pulses count = %d",la.index_cnt);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : First index position = %d",la.first_idx_pos);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Last Index position = %d",la.last_idx_pos);
+
+			if(la.dat_pulse_cnt>0)
+			{
+				la.stream = malloc(la.dat_pulse_cnt * sizeof(uint32_t));
+				if(la.stream)
+					memset(la.stream,0,la.dat_pulse_cnt * sizeof(uint32_t));
+			}
+
+			if(la.index_cnt>0)
+			{
+				la.index_array = malloc(la.index_cnt * sizeof(uint32_t));
+				if(la.index_array)
+					memset(la.index_array,0,la.index_cnt * sizeof(uint32_t));
+			}
+
+			binlogicfile2stream(imgldr_ctx,imgfile, &la);
+
+			floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
+			floppydisk->floppyBitRate=VARIABLEBITRATE;
+			floppydisk->floppyNumberOfTrack=1;
+			floppydisk->floppyNumberOfSide=1;
+			floppydisk->floppySectorPerTrack=-1;
+
+			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+
+			curside = decodestream(imgldr_ctx->hxcfe,la.stream,la.dat_pulse_cnt,la.index_array, la.index_cnt,0,&rpm,1.0,
+						hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_PLL_PHASE_CORRECTION_DIVISOR" ), \
+						hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_BITRATE" ), \
+						hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW" ), \
+						hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES" ), \
+						hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_BMPEXPORT" ), \
+						hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_SAMPLERATE" ));
+
+			if(!floppydisk->tracks[0])
+			{
+				floppydisk->tracks[0]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+			}
+
+			currentcylinder=floppydisk->tracks[0];
+			currentcylinder->sides[0]=curside;
 
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
@@ -265,10 +435,9 @@ int logicanalyzer_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 
 int logicanalyzer_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="LOGICANALYZER";
 	static const char plug_desc[]="Logic Analyzer Stream Loader";
-	static const char plug_ext[]="bin";
+	static const char plug_ext[]="logicbin8bits";
 
 	plugins_ptr plug_funcs=
 	{

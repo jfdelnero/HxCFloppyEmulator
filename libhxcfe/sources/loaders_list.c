@@ -132,6 +132,7 @@
 #include "./loaders/micraln_loader/micraln_loader.h"
 #include "./loaders/fdx_loader/fdx_loader.h"
 #include "./loaders/86f_loader/86f_loader.h"
+#include "./loaders/logicanalyzer_loader/logicanalyzer_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -233,6 +234,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)HxCStream_libGetPluginInfo,
 	(GETPLUGININFOS)MicralN_libGetPluginInfo,
 	//(GETPLUGININFOS)VFDDAT_libGetPluginInfo,
+	(GETPLUGININFOS)logicanalyzer_libGetPluginInfo,
 
 	(GETPLUGININFOS)XMLDB_libGetPluginInfo,
 
