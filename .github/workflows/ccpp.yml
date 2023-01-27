@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    paths:
+      - '**'
+  pull_request:
+    paths:
+      - '**'
+
+permissions:
+  contents: read
+
+jobs:
+  build-linux:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@main
+        - name: Build
+          run: cd build && make -j2
+
