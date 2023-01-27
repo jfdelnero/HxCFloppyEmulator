@@ -231,6 +231,7 @@ int binlogicfile2stream(HXCFE_IMGLDR * imgldr_ctx,char * file, la_stats * la)
 
 			offset += block_size;
 		}
+
 		fclose(f);
 	}
 	else
@@ -247,7 +248,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,uint32_t * trackbuf_dword,i
 	HXCFE_TRKSTREAM *track_dump;
 	HXCFE_FXSA * fxs;
 	char tmp_filename[512];
-	int tick_period,freq;
+	int tick_period;
 	int i;
 
 	currentside=0;
@@ -392,41 +393,59 @@ int logicanalyzer_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 					memset(la.index_array,0,la.index_cnt * sizeof(uint32_t));
 			}
 
-			binlogicfile2stream(imgldr_ctx,imgfile, &la);
-
-			floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-			floppydisk->floppyBitRate=VARIABLEBITRATE;
-			floppydisk->floppyNumberOfTrack=1;
-			floppydisk->floppyNumberOfSide=1;
-			floppydisk->floppySectorPerTrack=-1;
-
-			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-
-			curside = decodestream(imgldr_ctx->hxcfe,la.stream,la.dat_pulse_cnt,la.index_array, la.index_cnt,0,&rpm,1.0,
-						hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_PLL_PHASE_CORRECTION_DIVISOR" ), \
-						hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_BITRATE" ), \
-						hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW" ), \
-						hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES" ), \
-						hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_BMPEXPORT" ), \
-						hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_SAMPLERATE" ));
-
-			if(!floppydisk->tracks[0])
+			if( la.stream && la.index_array )
 			{
-				floppydisk->tracks[0]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+				binlogicfile2stream(imgldr_ctx,imgfile, &la);
+
+				floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
+				floppydisk->floppyBitRate=VARIABLEBITRATE;
+				floppydisk->floppyNumberOfTrack=1;
+				floppydisk->floppyNumberOfSide=1;
+				floppydisk->floppySectorPerTrack=-1;
+
+				floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+				memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+
+				rpm = 300;
+
+				curside = decodestream(imgldr_ctx->hxcfe,la.stream,la.dat_pulse_cnt,la.index_array, la.index_cnt,0,&rpm,1.0,
+							hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_PLL_PHASE_CORRECTION_DIVISOR" ), \
+							hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_BITRATE" ), \
+							hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW" ), \
+							hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES" ), \
+							hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_BMPEXPORT" ), \
+							hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_SAMPLERATE" ));
+
+				if(!floppydisk->tracks[0])
+				{
+					floppydisk->tracks[0]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+				}
+
+				currentcylinder=floppydisk->tracks[0];
+				currentcylinder->sides[0]=curside;
+
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+
+				hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
+
+				free_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
+				imgldr_ctx->hxcfe->envvar = backup_env;
+
+				free(la.stream);
+				free(la.index_array);
+
+				return HXCFE_NOERROR;
 			}
+			else
+			{
+				if( la.stream )
+					free(la.stream);
 
-			currentcylinder=floppydisk->tracks[0];
-			currentcylinder->sides[0]=curside;
+				if( la.index_array )
+					free(la.index_array);
 
-			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-
-			hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
-
-			free_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
-			imgldr_ctx->hxcfe->envvar = backup_env;
-
-			return HXCFE_NOERROR;
+				return HXCFE_BADFILE;
+			}
 		}
 	}
 
