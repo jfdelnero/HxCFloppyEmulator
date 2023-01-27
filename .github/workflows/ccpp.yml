@@ -13,11 +13,9 @@ permissions:
 
 jobs:
   build-linux:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@main
-      - name: Build
-        run: cd build && make -j2
+    - name: Build
+      run: cd build && make -j2
 
