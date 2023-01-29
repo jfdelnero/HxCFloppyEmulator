@@ -53,6 +53,9 @@ ifneq ("$(wildcard ../HxCFloppyEmulator_software/sources/thirdpartylibs/fltk/flt
 	$(MAKE) -C ../HxCFloppyEmulator_software/sources/thirdpartylibs/fltk/fltk-1.x.x/ clean
 endif
 
+tests: all
+	cd ../tests/ && ./run.sh
+
 clean: clean_fltk
 	$(MAKE) -C ../libhxcadaptor/build/ clean
 	$(MAKE) -C ../libhxcfe/build/ clean
@@ -87,5 +90,6 @@ mrproper:
 	-rm -rf ../HxCFloppyEmulator_software/sources/thirdpartylibs/fltk/fltk-1.x.x
 	-rm -rf ../HxCFloppyEmulator_software/sources/thirdpartylibs/fltk/fltk-1.x.x-arm64
 	-rm -rf ../HxCFloppyEmulator_software/sources/thirdpartylibs/fltk/fltk-1.x.x-x86_64
+	-rm -rf ../tests/run
 
 .PHONY: libhxcadaptor libhxcfe libusbhxcfe HxCFloppyEmulator_cmdline HxCFloppyEmulator_software fltk mrproper clean
