@@ -19,3 +19,9 @@ jobs:
     - name: Build
       run: cd build && make tests -j2
 
+  build-windows:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@main
+    - name: Build
+      run: sudo apt install -q -y mingw-w64 && cd build && make TARGET=mingw64 -j2
