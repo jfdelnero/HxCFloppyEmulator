@@ -1,4 +1,4 @@
-export VERSION="2.1.26.1"
+export VERSION=`cat version.h | grep "define STR_FILE_VERSION2" | sed 's/.*STR_FILE_VERSION2 //' `
 export NAME="HxCFloppyEmulator"
 export DMGNAME="HxCFloppyEmulator"
 
@@ -59,4 +59,3 @@ cat << EOF > ${GUI_PATH}/Contents/info.plist
 EOF
 
 hdiutil create ${DMGNAME}.dmg -srcfolder ${CLI_PATH} -srcfolder ${GUI_PATH} -ov -volname ${DMGNAME}
-
