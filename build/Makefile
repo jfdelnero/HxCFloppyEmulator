@@ -91,5 +91,7 @@ mrproper:
 	-rm -rf ../HxCFloppyEmulator_software/sources/thirdpartylibs/fltk/fltk-1.x.x-arm64
 	-rm -rf ../HxCFloppyEmulator_software/sources/thirdpartylibs/fltk/fltk-1.x.x-x86_64
 	-rm -rf ../tests/run
+	-rm -rf HxCFloppyEmulator_Software
+	-rm -rf *.zip
 
 .PHONY: libhxcadaptor libhxcfe libusbhxcfe HxCFloppyEmulator_cmdline HxCFloppyEmulator_software fltk mrproper clean

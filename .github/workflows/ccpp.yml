@@ -19,9 +19,28 @@ jobs:
     - name: Build
       run: cd build && make tests -j2
 
-  build-windows:
+  build-windows-x86:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@main
+    - name: Build
+      run: sudo apt install -q -y mingw-w64 && cd build && make TARGET=mingw32 -j2
+    - name: Package
+      run: cd build && ./windowscreatezip.sh _x86
+    - uses: actions/upload-artifact@main
+      with:
+        name: hxcfloppyemulator-winx86-${{ github.sha }}
+        path: build/HxCFloppyEmulator_Software_win_x86.zip
+
+  build-windows-x64:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@main
     - name: Build
       run: sudo apt install -q -y mingw-w64 && cd build && make TARGET=mingw64 -j2
+    - name: Package
+      run: cd build && ./windowscreatezip.sh _x64
+    - uses: actions/upload-artifact@main
+      with:
+        name: hxcfloppyemulator-winx64-${{ github.sha }}
+        path: build/HxCFloppyEmulator_Software_win_x64.zip
