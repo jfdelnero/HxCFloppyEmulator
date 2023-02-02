@@ -76,7 +76,7 @@ void tick_usb(void *v) {
 #if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
 	status=libusbhxcfe_getStats(guicontext->hxcfe,guicontext->usbhxcfe,&stats,0);
 
-	sprintf(tempstr,"%d (%d p/s)",(int)stats.totalpacketsent,(int)stats.packetsent);
+	snprintf(tempstr,sizeof(tempstr),"%d (%d p/s)",(int)stats.totalpacketsent,(int)stats.packetsent);
 	stats.packetsent=0;
 	window->strout_packetsent->value((const char*)tempstr);
 
@@ -84,24 +84,24 @@ void tick_usb(void *v) {
 
 	if(stats.totaldataout<(1024*1024))
 	{
-		sprintf(tempstr,"%d bytes",(int)stats.totaldataout);
+		snprintf(tempstr,sizeof(tempstr),"%d bytes",(int)stats.totaldataout);
 	}
 	else
 	{
 		if(stats.totaldataout<(1024*1024*1024))
 		{
-			sprintf(tempstr,"%4.2f MB",(float)(stats.totaldataout)/(float)(1024*1024));
+			snprintf(tempstr,sizeof(tempstr),"%4.2f MB",(float)(stats.totaldataout)/(float)(1024*1024));
 		}
 		else
 		{
-			sprintf(tempstr,"%4.2f GB",(float)(stats.totaldataout)/(float)(1024*1024*1024));
+			snprintf(tempstr,sizeof(tempstr),"%4.2f GB",(float)(stats.totaldataout)/(float)(1024*1024*1024));
 		}
 	}
 	window->strout_datasent->value((const char*)tempstr);
 
 
 	datathroughput=stats.dataout * 2;
-	sprintf(tempstr,"%d bytes/second",(int)datathroughput);
+	snprintf(tempstr,sizeof(tempstr),"%d bytes/second",(int)datathroughput);
 	window->strout_datathroughput->value((const char*)tempstr);
 
 	period=0;
@@ -118,10 +118,10 @@ void tick_usb(void *v) {
 		}
 	}
 
-	sprintf(tempstr,"%d ms",(int)period*2);
+	snprintf(tempstr,sizeof(tempstr),"%d ms",(int)period*2);
 	window->strout_maxsettletime->value((const char*)tempstr);
 
-	sprintf(tempstr,"%d ms",(int)period);
+	snprintf(tempstr,sizeof(tempstr),"%d ms",(int)period);
 	window->strout_minsettletime->value((const char*)tempstr);
 
 	switch(status)

@@ -217,7 +217,7 @@ void OpenURLInBrowser(Fl_Widget *,void* u)
 
 		url=(char*)u;
 
-		sprintf(commandString, "open %s", url);
+		snprintf(commandString,sizeof(commandString), "open %s", url);
 		system(commandString);
 	#elif defined (__amigaos4__)
 		char * url;

@@ -733,7 +733,7 @@ int deltree(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,
 				hxcfe_closeDir(fsmng,dirhandle);
 
 				// current folder empty... delete it.
-				sprintf(progresstxt,"Delete %s ...",folder);
+				snprintf(progresstxt,sizeof(progresstxt),"Delete %s ...",folder);
 				fsw->txtout_freesize->value(progresstxt);
 				fsw->txtout_freesize->redraw();
 
@@ -750,7 +750,7 @@ int deltree(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,char * folder,
 	}
 	else
 	{
-		sprintf(progresstxt,"Delete %s ...",folder);
+		snprintf(progresstxt,sizeof(progresstxt),"Delete %s ...",folder);
 		fsw->txtout_freesize->value(progresstxt);
 		fsw->txtout_freesize->redraw();
 
@@ -795,7 +795,7 @@ void browse_floppy_disk(filesystem_generator_window *fgw,int lastoperationerror)
 					{
 						if(lastoperationerror>=0)
 						{
-							sprintf(statustxt,"| Disk size : ");
+							snprintf(statustxt,sizeof(statustxt),"| Disk size : ");
 							printsize(&statustxt[strlen(statustxt)],hxcfe_getTotalFsSpace(fsmng));
 							strcat(statustxt," | File size : ");
 							printsize(&statustxt[strlen(statustxt)],totalsize);
@@ -999,7 +999,7 @@ int load_indexed_fileimage(int index)
 	cur_index = index;
 
 	hxc_getcurrentdirectory(cur_directory,sizeof(cur_directory));
-	sprintf(fullpath,"%s%c%s",cur_directory,SEPARATOR,"HXCSDFE.CFG");
+	snprintf(fullpath,sizeof(fullpath)"%s%c%s",cur_directory,SEPARATOR,"HXCSDFE.CFG");
 
 	memset(filebuffer,0,8*1024);
 	filecfg = (sdhxcfecfgfile *)&filebuffer;
@@ -1013,8 +1013,8 @@ int load_indexed_fileimage(int index)
 	if(filecfg->indexed_mode)
 	{
 
-		sprintf(filename,"DSKA%.4d.HFE",cur_index);
-		sprintf(fullpath,"%s%c%s",cur_directory,SEPARATOR,filename);
+		snprintf(filename,sizeof(filename),"DSKA%.4d.HFE",cur_index);
+		snprintf(fullpath,"%s%c%s",cur_directory,SEPARATOR,filename);
 
 		write_back_fileimage();
 
@@ -1027,8 +1027,8 @@ int load_indexed_fileimage(int index)
 		else
 		{
 			cur_index = 0;
-			sprintf(filename,"DSKA%.4d.HFE",cur_index);
-			sprintf(fullpath,"%s%c%s",cur_directory,SEPARATOR,filename);
+			snprintf(filename,sizeof(filename),"DSKA%.4d.HFE",cur_index);
+			snprintf(fullpath,sizeof(fullpath),"%s%c%s",cur_directory,SEPARATOR,filename);
 			f = hxc_fopen (fullpath,"rb");
 			if(f)
 			{
@@ -1108,7 +1108,7 @@ int load_indexed_fileimage(int index)
 
 		if(cur_index>=0)
 		{
-			sprintf(fullpath,"%s%c%s",cur_directory,SEPARATOR,filename);
+			snprintf(fullpath,sizeof(fullpath),"%s%c%s",cur_directory,SEPARATOR,filename);
 			if(load_floppy_image(fullpath) == HXCFE_NOERROR)
 			{
 				strcpy(guicontext->last_loaded_image_path,fullpath);
@@ -1164,7 +1164,7 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 	void * findfile_handle;
 	filefoundinfo ffi;
 
-	sprintf(progresstxt,"Adding %s ...",dstpath);
+	snprintf(progresstxt,sizeof(progresstxt),"Adding %s ...",dstpath);
 	fsw->txtout_freesize->value(progresstxt);
 
 	hxc_stat(srcpath,&entry);
@@ -1243,7 +1243,7 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 		}
 		else
 		{
-			sprintf(progresstxt,"Cannot create folder %s !!!",fullpath);
+			snprintf(progresstxt,sizeof(progresstxt),"Cannot create folder %s !!!",fullpath);
 			fsw->txtout_freesize->value(progresstxt);
 			fsw->txtout_freesize->color(FL_RED);
 
@@ -1258,7 +1258,7 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 			fseek(f,0,SEEK_END);
 			size = ftell(f);
 
-			sprintf(progresstxt,"Adding %s (",dstpath);
+			snprintf(progresstxt,sizeof(progresstxt),"Adding %s (",dstpath);
 			printsize(&progresstxt[strlen(progresstxt)],size);
 			strcat(progresstxt,") ...");
 			fsw->txtout_freesize->value(progresstxt);
@@ -1277,7 +1277,7 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 					{
 						if(!fread(buffer,size,1,f))
 						{
-							sprintf(progresstxt,"Cannot read source file %s !!!",srcpath);
+							snprintf(progresstxt,sizeof(progresstxt),"Cannot read source file %s !!!",srcpath);
 							fsw->txtout_freesize->value(progresstxt);
 							fsw->txtout_freesize->color(FL_RED);
 							free(buffer);
@@ -1324,7 +1324,7 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 					}
 					else
 					{
-						sprintf(progresstxt,"Cannot create %s !!!",dstpath);
+						snprintf(progresstxt,sizeof(progresstxt),"Cannot create %s !!!",dstpath);
 						fsw->txtout_freesize->value(progresstxt);
 						fsw->txtout_freesize->color(FL_RED);
 
@@ -1340,7 +1340,7 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 				}
 				else
 				{
-					sprintf(progresstxt,"No enough system memory !!!");
+					snprintf(progresstxt,sizeof(progresstxt),"No enough system memory !!!");
 					fsw->txtout_freesize->value(progresstxt);
 					fsw->txtout_freesize->color(FL_RED);
 
@@ -1351,7 +1351,7 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 			}
 			else
 			{
-				sprintf(progresstxt,"File too big !!!");
+				snprintf(progresstxt,sizeof(progresstxt),"File too big !!!");
 				fsw->txtout_freesize->value(progresstxt);
 				fsw->txtout_freesize->color(FL_RED);
 
@@ -1363,7 +1363,7 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 		}
 		else
 		{
-			sprintf(progresstxt,"Cannot open source file %s !!!",srcpath);
+			snprintf(progresstxt,sizeof(progresstxt),"Cannot open source file %s !!!",srcpath);
 			fsw->txtout_freesize->value(progresstxt);
 			fsw->txtout_freesize->color(FL_RED);
 
@@ -1599,7 +1599,7 @@ int draganddropfsthread(void* floppycontext,void* hw_context)
 						{
 							hxc_stat(filelist[i],&entry);
 
-							sprintf(fullpath,"%s/%s",basepath,getfilenamebase(filelist[i],0));
+							snprintf(fullpath,sizeof(fullpath),"%s/%s",basepath,getfilenamebase(filelist[i],0));
 
 							if(filelist[i] && strlen(filelist[i]) )
 							{

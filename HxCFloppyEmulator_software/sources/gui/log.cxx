@@ -43,20 +43,7 @@
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Box.H>
-#include <FL/filename.H>
-#include <FL/Fl_Button.H>
-#include <FL/Fl_Menu_Bar.H>
-#include <FL/Fl_Progress.H>
-#include <FL/Fl_Text_Display.H>
-#include <FL/Fl_Timer.H>
-#include <FL/Fl_Text_Buffer.H>
-#include <FL/Fl_Text_Display.H>
-#include <FL/Fl_File_Browser.H>
-#include <FL/Fl_File_Chooser.H>
-#include <FL/Fl_Native_File_Chooser.H>
+#include "fl_includes.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -213,8 +200,12 @@ void savelog_log(Fl_Widget *w, void * t)
 				guicontext->logfile=0;
 				free(logfile);
 			}
-			logfile=(char*)malloc(1024);
-			sprintf(logfile,"%s",(char*)fnfc.filename());
+
+			logfile=(char*)malloc(MAX_TMP_STR_SIZE);
+			if(logfile)
+			{
+				snprintf(logfile,MAX_TMP_STR_SIZE,"%s",(char*)fnfc.filename());
+			}
 			guicontext->logfile=logfile;
 			break;
 		}

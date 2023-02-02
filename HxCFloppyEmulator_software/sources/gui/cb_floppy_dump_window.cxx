@@ -186,7 +186,7 @@ HANDLE opendevice(int drive)
 
 	char drv_name[512];
 
-	sprintf(drv_name,"\\\\.\\fdraw%d",drive);
+	snprintf(drv_name,sizeof(drv_name),"\\\\.\\fdraw%d",drive);
 
 	h = CreateFile(drv_name, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 	if (h == INVALID_HANDLE_VALUE)
@@ -291,7 +291,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 
 	CUI_affiche(MSG_DEBUG,"Starting Floppy dump...");
 
-	tempstr=(char*)malloc(1024);
+	tempstr=(char*)malloc(MAX_TMP_STR_SIZE);
 
 	if(checkversion())
 	{
@@ -307,7 +307,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 			fb = hxcfe_initFloppy(hxcfe,params->start_track + params->number_of_track,params->end_side+1);
 			if(!fb)
 			{
-				sprintf(tempstr,"Internal error ! Can't generate the virtual floppy");
+				snprintf(tempstr,MAX_TMP_STR_SIZE,"Internal error ! Can't generate the virtual floppy");
 				Fl::lock();
 				params->windowshwd->global_status->value(tempstr);
 				Fl::unlock();
@@ -327,7 +327,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 
 			seek(h,0, 0);
 
-			sprintf(tempstr,"Checking drive RPM...");
+			snprintf(tempstr,MAX_TMP_STR_SIZE,"Checking drive RPM...");
 
 			params->windowshwd->global_status->value(tempstr);
 
@@ -335,7 +335,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 
 			if (!DeviceIoControl(h, IOCTL_FD_GET_TRACK_TIME, 0, 0, &rotationtime, sizeof(rotationtime), &ret, NULL))
 			{
-				sprintf(tempstr,"Error during RPM checking :%ld ",GetLastError());
+				snprintf(tempstr,MAX_TMP_STR_SIZE,"Error during RPM checking :%ld ",GetLastError());
 				Fl::lock();
 				params->windowshwd->global_status->value(tempstr);
 				Fl::unlock();
@@ -357,7 +357,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 
 			if(rotationtime < 50000)
 			{
-				sprintf(tempstr,"Bad RPM value ! (%d ms period)",rotationtime);
+				snprintf(tempstr,MAX_TMP_STR_SIZE,"Bad RPM value ! (%d ms period)",rotationtime);
 				Fl::lock();
 				params->windowshwd->global_status->value(tempstr);
 				Fl::unlock();
@@ -374,7 +374,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 			rpm=(unsigned short)(60000/(rotationtime/1000));
 
 			CUI_affiche(MSG_DEBUG,"Drive RPM: %d",rpm);
-			sprintf(tempstr,"Drive RPM: %d",rpm);
+			snprintf(tempstr,MAX_TMP_STR_SIZE,"Drive RPM: %d",rpm);
 
 			Fl::lock();
 			params->windowshwd->global_status->value(tempstr);
@@ -388,7 +388,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 
 			bitrate=500000;
 
-			sprintf(tempstr,"Starting reading disk...");
+			snprintf(tempstr,MAX_TMP_STR_SIZE,"Starting reading disk...");
 			Fl::lock();
 			params->windowshwd->global_status->value(tempstr);
 			Fl::unlock();
@@ -665,7 +665,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 						total_size=total_size+sectordata_size;
 						numberofsector_read++;
 
-						sprintf(tempstr,"%d Sector(s) Read, %d bytes, %d Bad sector(s)",numberofsector_read,total_size,number_of_bad_sector);
+						snprintf(tempstr,MAX_TMP_STR_SIZE,"%d Sector(s) Read, %d bytes, %d Bad sector(s)",numberofsector_read,total_size,number_of_bad_sector);
 
 						Fl::lock();
 						params->windowshwd->current_status->value(tempstr);
@@ -674,7 +674,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 
 					hxcfe_popTrack(fb);
 
-					sprintf(tempstr,"Track %d side %d: %d sectors, %dkbits/s, %s",i,j,sr->count,bitrate/1000,((trackformat==ISOFORMAT_SD) || (trackformat==IBMFORMAT_SD) )?"FM":"MFM");
+					snprintf(tempstr,MAX_TMP_STR_SIZE,"Track %d side %d: %d sectors, %dkbits/s, %s",i,j,sr->count,bitrate/1000,((trackformat==ISOFORMAT_SD) || (trackformat==IBMFORMAT_SD) )?"FM":"MFM");
 					Fl::lock();
 					params->windowshwd->global_status->value(tempstr);
 					Fl::unlock();
@@ -688,12 +688,12 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 
 			Fl::lock();
 			if(!fdp.stop)
-				sprintf(tempstr,"Done !");
+				snprintf(tempstr,MAX_TMP_STR_SIZE,"Done !");
 			else
-				sprintf(tempstr,"Stopped !");
+				snprintf(tempstr,MAX_TMP_STR_SIZE,"Stopped !");
 
 			params->windowshwd->global_status->value(tempstr);
-			sprintf(tempstr,"%d Sector(s) Read, %d bytes, %d Bad sector(s)",numberofsector_read,total_size,number_of_bad_sector);
+			snprintf(tempstr,MAX_TMP_STR_SIZE,"%d Sector(s) Read, %d bytes, %d Bad sector(s)",numberofsector_read,total_size,number_of_bad_sector);
 			params->windowshwd->current_status->value(tempstr);
 			Fl::unlock();
 
@@ -708,7 +708,7 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 		}
 	}
 
-	sprintf(tempstr,"Error while opening fdrawcmd, see: https://simonowen.com/fdrawcmd");
+	snprintf(tempstr,MAX_TMP_STR_SIZE,"Error while opening fdrawcmd, see: https://simonowen.com/fdrawcmd");
 
 	Fl::lock();
 	params->windowshwd->global_status->value(tempstr);
@@ -796,7 +796,7 @@ void floppy_dump_window_bt_read(Fl_Button* bt, void*)
 
 	fdp.flopemu=guicontext->hxcfe;
 
-	sprintf(tempstr,"%d Sector(s) Read, %d bytes, %d Bad sector(s)",0,0,0);
+	snprintf(tempstr,sizeof(tempstr),"%d Sector(s) Read, %d bytes, %d Bad sector(s)",0,0,0);
 	fdw->current_status->value(tempstr);
 
 	fdp.stop = 0;

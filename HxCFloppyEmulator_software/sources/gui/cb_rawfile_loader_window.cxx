@@ -179,11 +179,11 @@ void raw_loader_window_datachanged(Fl_Widget* w, void*)
 	if(rlw->choice_numberofside->value())
 		totalsector=totalsector*2;
 
-	sprintf((char*)temp,"%d",totalsector);
+	snprintf((char*)temp,sizeof(temp),"%d",totalsector);
 
 	rlw->strout_totalsector->value((const char*)temp);
 	totalsize = totalsector * (128<<rlw->choice_sectorsize->value());
-	sprintf((char*)temp,"%d",totalsize);
+	snprintf((char*)temp,sizeof(temp),"%d",totalsize);
 	rlw->strout_totalsize->value((const char*)temp);
 
 	if(!rlw->chk_autogap3->value())
@@ -343,11 +343,11 @@ void raw_loader_window_bt_loadrawfile(Fl_Button* bt, void*)
 	if(rlw->choice_numberofside->value())
 		totalsector=totalsector*2;
 
-	sprintf((char*)temp,"%d",totalsector);
+	snprintf((char*)temp,sizeof(temp),"%d",totalsector);
 
 	rlw->strout_totalsector->value((const char*)temp);
 	totalsize=totalsector * (128<<rlw->choice_sectorsize->value());
-	sprintf((char*)temp,"%d",totalsize);
+	snprintf((char*)temp,sizeof(temp),"%d",totalsize);
 	rlw->strout_totalsize->value((const char*)temp);
 
 	if(!fileselector((char*)"Select raw file",(char*)file,0,(char*)"*.img",0,0))
@@ -390,11 +390,11 @@ void raw_loader_window_bt_createemptyfloppy(Fl_Button* bt, void*)
 	if(rlw->choice_numberofside->value())
 		totalsector=totalsector*2;
 
-	sprintf((char*)temp,"%d",totalsector);
+	snprintf((char*)temp,sizeof(temp),"%d",totalsector);
 
 	rlw->strout_totalsector->value((const char*)temp);
 	totalsize=totalsector * (128<<rlw->choice_sectorsize->value());
-	sprintf((char*)temp,"%d",totalsize);
+	snprintf((char*)temp,sizeof(temp),"%d",totalsize);
 	rlw->strout_totalsize->value((const char*)temp);
 
 	getWindowState(rlw,&rfc);

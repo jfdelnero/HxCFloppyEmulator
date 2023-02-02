@@ -242,7 +242,7 @@ int StreamerThreadRxDataProc(void* floppycontext,void* context)
 	// Get system time
 	time(&time_now);
 	time_info = localtime(&time_now);
-	sprintf(tmp_stream_file_name,"pauline_tmp_buffer_%.4d-%.2d-%.2d_%.2dh%.2dm%.2ds.hxcstream",time_info->tm_year + 1900, \
+	snprintf(tmp_stream_file_name,sizeof(tmp_stream_file_name),"pauline_tmp_buffer_%.4d-%.2d-%.2d_%.2dh%.2dm%.2ds.hxcstream",time_info->tm_year + 1900, \
 	                                                                                       time_info->tm_mon+1, \
 	                                                                                       time_info->tm_mday, \
 	                                                                                       time_info->tm_hour, \
@@ -579,10 +579,10 @@ void floppy_streamer_readdisk(Fl_Button*, void* w)
 
 	if(cmd_connection && dat_connection)
 	{
-		sprintf(tmp,"index_to_dump %d\n",atoi(fdw->index_delay->value()));
+		snprintf(tmp,sizeof(tmp),"index_to_dump %d\n",atoi(fdw->index_delay->value()));
 		network_write(cmd_connection, (unsigned char*)tmp, strlen(tmp),2);
 
-		sprintf(tmp,"dump_time %d\n",atoi(fdw->dump_lenght->value()));
+		snprintf(tmp,sizeof(tmp),"dump_time %d\n",atoi(fdw->dump_lenght->value()));
 		network_write(cmd_connection, (unsigned char*)tmp, strlen(tmp),2);
 
 		if(strlen(fdw->index_name->value()) && digits_only(fdw->index_name->value()))
@@ -596,7 +596,7 @@ void floppy_streamer_readdisk(Fl_Button*, void* w)
 			strcpy(index_mode,"AUTO_INDEX_NAME");
 		}
 
-		sprintf(tmp,"dump %d %d %d %d %d %d %d %d %d \"%s\" \"%s\" %d %s\n", \
+		snprintf(tmp,sizeof(tmp),"dump %d %d %d %d %d %d %d %d %d \"%s\" \"%s\" %d %s\n", \
 													  fdw->drive_choice->value(),
 													  atoi(fdw->min_track->value()), \
 													  atoi(fdw->max_track->value()), \
@@ -627,10 +627,10 @@ void floppy_streamer_readtrack(Fl_Button*, void* w)
 
 	if(cmd_connection)
 	{
-		sprintf(tmp,"index_to_dump %d\n",atoi(fdw->index_delay->value()));
+		snprintf(tmp,sizeof(tmp),"index_to_dump %d\n",atoi(fdw->index_delay->value()));
 		network_write(cmd_connection, (unsigned char*)tmp, strlen(tmp),2);
 
-		sprintf(tmp,"dump_time %d\n",atoi(fdw->dump_lenght->value()));
+		snprintf(tmp,sizeof(tmp),"dump_time %d\n",atoi(fdw->dump_lenght->value()));
 		network_write(cmd_connection, (unsigned char*)tmp, strlen(tmp),2);
 
 		if( digits_only(fdw->index_name->value()) )
@@ -644,7 +644,7 @@ void floppy_streamer_readtrack(Fl_Button*, void* w)
 			strcpy(index_mode,"AUTO_INDEX_NAME");
 		}
 
-		sprintf(tmp,"dump %d -1 -1 %g %g %d %d %d %d \"%s\" \"%s\" %d %s\n", \
+		snprintf(tmp,sizeof(tmp),"dump %d -1 -1 %g %g %d %d %d %d \"%s\" \"%s\" %d %s\n", \
 														fdw->drive_choice->value(), \
 														fdw->side_number_slide->value(), \
 														fdw->side_number_slide->value(), \
@@ -665,18 +665,19 @@ void floppy_streamer_readtrack(Fl_Button*, void* w)
 void floppy_streamer_spybus(Fl_Button*, void* w)
 {
 	char tmp[256];
+
 	floppy_streamer_window *fdw;
 	fdw=(floppy_streamer_window *)w;
 
 	if(cmd_connection)
 	{
-		sprintf(tmp,"index_to_dump %d\n",atoi(fdw->index_delay->value()));
+		snprintf(tmp,sizeof(tmp),"index_to_dump %d\n",atoi(fdw->index_delay->value()));
 		network_write(cmd_connection, (unsigned char*)tmp, strlen(tmp),2);
 
-		sprintf(tmp,"dump_time %d\n",atoi(fdw->dump_lenght->value()));
+		snprintf(tmp,sizeof(tmp),"dump_time %d\n",atoi(fdw->dump_lenght->value()));
 		network_write(cmd_connection, (unsigned char*)tmp, strlen(tmp),2);
 
-		sprintf(tmp,"dump %d -1 -1 %g %g %d %d %d 1\n",fdw->drive_choice->value(),fdw->side_number_slide->value(),fdw->side_number_slide->value(),fdw->high_res->value(),fdw->double_step->value(),fdw->ignore_index->value());
+		snprintf(tmp,sizeof(tmp),"dump %d -1 -1 %g %g %d %d %d 1\n",fdw->drive_choice->value(),fdw->side_number_slide->value(),fdw->side_number_slide->value(),fdw->high_res->value(),fdw->double_step->value(),fdw->ignore_index->value());
 		network_write(cmd_connection, (unsigned char*)tmp, strlen(tmp),2);
 	}
 }
@@ -700,7 +701,7 @@ void floppy_streamer_stop(Fl_Button*, void* w)
 
 	if(cmd_connection)
 	{
-		sprintf(tmpstr,"stop\n");
+		snprintf(tmpstr,sizeof(tmpstr),"stop\n");
 		network_write(cmd_connection, (unsigned char*)tmpstr, strlen(tmpstr),2);
 	}
 }
@@ -714,7 +715,7 @@ void floppy_streamer_eject(Fl_Button*, void* w)
 
 	if(cmd_connection)
 	{
-		sprintf(tmpstr,"ejectdisk %d\n",fdw->drive_choice->value());
+		snprintf(tmpstr,sizeof(tmpstr),"ejectdisk %d\n",fdw->drive_choice->value());
 		network_write(cmd_connection, (unsigned char*)tmpstr, strlen(tmpstr),2);
 	}
 }
@@ -726,9 +727,9 @@ void floppy_streamer_mode3(Fl_Light_Button* b, void* w)
 	if(cmd_connection)
 	{
 		if(b->value())
-			sprintf(tmpstr,"setio DRIVES_PORT_PIN02_OUT\n");
+			snprintf(tmpstr,sizeof(tmpstr),"setio DRIVES_PORT_PIN02_OUT\n");
 		else
-			sprintf(tmpstr,"cleario DRIVES_PORT_PIN02_OUT\n");
+			snprintf(tmpstr,sizeof(tmpstr),"cleario DRIVES_PORT_PIN02_OUT\n");
 
 		network_write(cmd_connection, (unsigned char*)tmpstr, strlen(tmpstr),2);
 	}
@@ -743,7 +744,7 @@ void floppy_streamer_trackup(Fl_Button*, void* w)
 
 	if(cmd_connection)
 	{
-		sprintf(tmpstr,"headstep %d 1\n",fdw->drive_choice->value());
+		snprintf(tmpstr,sizeof(tmpstr),"headstep %d 1\n",fdw->drive_choice->value());
 		network_write(cmd_connection, (unsigned char*)tmpstr, strlen(tmpstr),2);
 	}
 }
@@ -757,7 +758,7 @@ void floppy_streamer_down(Fl_Button*, void* w)
 
 	if(cmd_connection)
 	{
-		sprintf(tmpstr,"headstep %d -1\n",fdw->drive_choice->value());
+		snprintf(tmpstr,sizeof(tmpstr),"headstep %d -1\n",fdw->drive_choice->value());
 		network_write(cmd_connection, (unsigned char*)tmpstr, strlen(tmpstr),2);
 	}
 }
@@ -771,7 +772,7 @@ void floppy_streamer_recalibrate(Fl_Button*, void* w)
 
 	if(cmd_connection)
 	{
-		sprintf(tmpstr,"recalibrate %d\n",fdw->drive_choice->value());
+		snprintf(tmpstr,sizeof(tmpstr),"recalibrate %d\n",fdw->drive_choice->value());
 		network_write(cmd_connection, (unsigned char*)tmpstr, strlen(tmpstr),2);
 	}
 }
@@ -784,7 +785,7 @@ void floppy_streamer_movehead(Fl_Button*, void* w)
 
 	if(cmd_connection)
 	{
-		sprintf(tmpstr,"movehead %d %g\n",fdw->drive_choice->value(),fdw->track_number_slide->value());
+		snprintf(tmpstr,sizeof(tmpstr),"movehead %d %g\n",fdw->drive_choice->value(),fdw->track_number_slide->value());
 		network_write(cmd_connection, (unsigned char*)tmpstr, strlen(tmpstr),2);
 	}
 }

@@ -87,8 +87,6 @@ batchconverterparams bcparams;
 int abort_trigger;
 extern s_gui_context * guicontext;
 
-#define MAX_TMP_STR_SIZE 8*1024
-
 typedef struct s_param_bc_params_
 {
 	char * files;
@@ -224,7 +222,7 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 	int loaderid;
 	cfgrawfile rfc;
 	Main_Window* mw;
-	int disklayout;
+	int disklayout,path_str_size;
 	HXCFE_XMLLDR* rfb;
 	HXCFE_IMGLDR* imgldr_ctx;
 
@@ -347,10 +345,14 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 						}
 					}
 
-					destinationfile=(char*)malloc(strlen(&filelist[filenb][j])+strlen(destfolder)+strlen(ff_type_list[output_file_format].ext)+2);
-					sprintf(destinationfile,"%s%c%s",destfolder,DIR_SEPARATOR_CHAR,&filelist[filenb][j]);
-					i=strlen(destinationfile);
+					path_str_size = strlen(&filelist[filenb][j]) + strlen(destfolder) + strlen(ff_type_list[output_file_format].ext) + 2;
+					destinationfile = (char*)malloc(path_str_size);
+					if(!destinationfile)
+						goto error;
 
+					snprintf(destinationfile,path_str_size,"%s%c%s",destfolder,DIR_SEPARATOR_CHAR,&filelist[filenb][j]);
+
+					i=strlen(destinationfile);
 					do
 					{
 						i--;
@@ -360,6 +362,7 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 					{
 						destinationfile[i]='_';
 					}
+
 					ret=1;
 
 					strcat(destinationfile,ff_type_list[output_file_format].ext);
@@ -381,6 +384,7 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 					}
 
 					hxcfe_imgUnload(imgldr_ctx,thefloppydisk);
+					thefloppydisk = NULL;
 
 					if(!ret)
 					{
@@ -410,6 +414,18 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 	free(tempstr);
 
 	return 0;
+
+error:
+	if( tempstr )
+		free( tempstr );
+
+	if( imgldr_ctx )
+		hxcfe_imgDeInitLoader( imgldr_ctx );
+
+	if( thefloppydisk )
+		hxcfe_imgUnload(imgldr_ctx,thefloppydisk);
+
+	return -1;
 }
 
 int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destfolder,char * file,int output_file_format,batchconverterparams * params)
@@ -417,7 +433,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 	void* hfindfile;
 	filefoundinfo FindFileData;
 	int bbool;
-	int ret,i;
+	int ret,i,path_str_size;
 	char * destinationfolder;
 	char * destinationfile;
 	HXCFE_FLOPPY * thefloppydisk;
@@ -452,14 +468,23 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 					{
 						if(strcmp(".",FindFileData.filename)!=0 && strcmp("..",FindFileData.filename)!=0)
 						{
-							destinationfolder=(char*)malloc(strlen(FindFileData.filename)+strlen(destfolder)+2);
-							sprintf(destinationfolder,"%s" DIR_SEPARATOR "%s",destfolder,FindFileData.filename);
+							path_str_size = strlen(FindFileData.filename) + strlen(destfolder) + 2;
+
+							destinationfolder=(char*)malloc(path_str_size);
+							if(!destinationfolder)
+								goto error;
+
+							snprintf(destinationfolder,path_str_size,"%s" DIR_SEPARATOR "%s",destfolder,FindFileData.filename);
 
 							//printf("Creating directory %s\n",destinationfolder);
 							hxc_mkdir(destinationfolder);
 
-							fullpath=(unsigned char*)malloc(strlen(FindFileData.filename)+strlen(folder)+2);
-							sprintf((char*)fullpath,"%s%c%s",folder,DIR_SEPARATOR_CHAR,FindFileData.filename);
+							path_str_size = strlen(FindFileData.filename) + strlen(folder) + 2;
+							fullpath = (unsigned char*)malloc(path_str_size);
+							if(!fullpath)
+								goto error;
+
+							snprintf((char*)fullpath,path_str_size,"%s%c%s",folder,DIR_SEPARATOR_CHAR,FindFileData.filename);
 
 							CUI_affiche(MSG_INFO_1,(char*)"Entering directory %s",FindFileData.filename);
 
@@ -483,6 +508,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 
 								return 1;
 							}
+
 							free(destinationfolder);
 							free(fullpath);
 
@@ -504,9 +530,13 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 						CUI_affiche(MSG_INFO_1,"converting file %s, %dB",FindFileData.filename,FindFileData.size);
 						if(FindFileData.size)
 						{
+							path_str_size = strlen(FindFileData.filename) + strlen(folder) + 2;
 
-							fullpath=(unsigned char*)malloc(strlen(FindFileData.filename)+strlen(folder)+2);
-							sprintf((char*)fullpath,"%s" DIR_SEPARATOR "%s",folder,FindFileData.filename);
+							fullpath = (unsigned char*)malloc(path_str_size);
+							if(!fullpath)
+								goto error;
+
+							snprintf((char*)fullpath,path_str_size,"%s" DIR_SEPARATOR "%s",folder,FindFileData.filename);
 
 							tempstr = (char*)malloc(MAX_TMP_STR_SIZE);
 							if(tempstr)
@@ -587,10 +617,14 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 							{
 								batchconverter_set_progress_status(guicontext,(char*)"Writing", fl_rgb_color(220,255,10), -1);
 
-								destinationfile=(char*)malloc(strlen(FindFileData.filename)+strlen(destfolder)+strlen(ff_type_list[output_file_format].ext)+1+2);
-								sprintf(destinationfile,"%s%c%s",destfolder,DIR_SEPARATOR_CHAR,FindFileData.filename);
+								path_str_size = strlen(FindFileData.filename) + strlen(destfolder) + strlen(ff_type_list[output_file_format].ext) + 1 + 2;
+								destinationfile = (char*)malloc(path_str_size);
+								if(!destinationfile)
+									goto error;
 
-								i=strlen(destinationfile);
+								snprintf(destinationfile,path_str_size,"%s%c%s",destfolder,DIR_SEPARATOR_CHAR,FindFileData.filename);
+
+								i = strlen(destinationfile);
 								do
 								{
 									i--;
@@ -678,6 +712,10 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 
 		batchconverter_set_progress_status(guicontext,(char*)"Done", fl_rgb_color(80,80,255), 100);
 	}
+
+	return 0;
+
+error:
 	return 0;
 }
 

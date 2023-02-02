@@ -19,6 +19,8 @@
 
 #include <FL/fl_ask.H>
 
+#define MAX_TMP_STR_SIZE 8*1024
+
 #ifdef WIN32
 #include <windows.h>
 extern FL_EXPORT HINSTANCE fl_display;
