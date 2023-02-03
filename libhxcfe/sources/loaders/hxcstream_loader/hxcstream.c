@@ -70,17 +70,14 @@ uint32_t * conv_stream(uint32_t * trackbuf_dword, unsigned char * unpacked_data,
 {
 	unsigned int k,l,p;
 	unsigned char c;
-	uint32_t tmp_dword,cumul;
+	uint32_t tmp_dword;
 
 	if( pulses_count )
 	{
 		p = 0;
-
-		cumul = 0;
-
 		k = 0;
 		l = 0;
-		cumul = 0;
+
 		while(l < pulses_count && k < unpacked_data_size)
 		{
 			c  = unpacked_data[k++];
@@ -88,7 +85,6 @@ uint32_t * conv_stream(uint32_t * trackbuf_dword, unsigned char * unpacked_data,
 			if( !(c & 0x80) )
 			{
 				trackbuf_dword[p++] = c;
-				cumul += c;
 			}
 			else
 			{
@@ -96,7 +92,6 @@ uint32_t * conv_stream(uint32_t * trackbuf_dword, unsigned char * unpacked_data,
 				{
 					tmp_dword = (((uint32_t)(c & 0x3F) << 8) | unpacked_data[k++]);
 					trackbuf_dword[p++] = tmp_dword;
-					cumul += tmp_dword;
 				}
 				else
 				{
@@ -107,7 +102,6 @@ uint32_t * conv_stream(uint32_t * trackbuf_dword, unsigned char * unpacked_data,
 						tmp_dword |= ((uint32_t)unpacked_data[k++]<<0);
 
 						trackbuf_dword[p++] = tmp_dword;
-						cumul += tmp_dword;
 					}
 					else
 					{
@@ -119,7 +113,6 @@ uint32_t * conv_stream(uint32_t * trackbuf_dword, unsigned char * unpacked_data,
 							tmp_dword |= ((uint32_t)unpacked_data[k++]<<0);
 
 							trackbuf_dword[p++] = tmp_dword;
-							cumul += tmp_dword;
 						}
 						else
 						{

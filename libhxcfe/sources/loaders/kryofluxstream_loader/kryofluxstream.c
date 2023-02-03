@@ -137,7 +137,6 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 	uint32_t filesize;
 
 	uint32_t totalcell;
-	uint32_t total_index_time;
 	uint32_t next_cell_pos;
 	uint32_t index_cell_time;
 	uint32_t next_index_stream_pos;
@@ -413,15 +412,12 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 			if(nbindex)
 			{
-				total_index_time = 0;
 				nxt_index = 0;
 				next_cell_pos = 0;
 				next_index_stream_pos = index_events[nxt_index].StreamPosition;
 
 				for (cellpos=0; cellpos < totalcell; cellpos++)
 				{
-					total_index_time += cellstream[cellpos];
-
 					next_cell_pos = cellpos + 1;
 
 					if( nxt_index < nbindex )
@@ -466,9 +462,6 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 							{
 								next_index_stream_pos = 0;
 							}
-
-							if(next_cell_pos)
-								total_index_time = 0;
 						}
 					}
 				}
