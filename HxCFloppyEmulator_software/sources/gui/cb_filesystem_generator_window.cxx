@@ -112,20 +112,19 @@ void filesystem_generator_window_browser_fs(class Fl_Tree *,void *)
 
 void printsize(char * buffer,int size)
 {
-
 	if(size < 1024)
 	{
-		sprintf(buffer,"%d B",size);
+		snprintf(buffer,MAX_TMP_STR_SIZE,"%d B",size);
 	}
 	else
 	{
 		if(size < 1024*1024)
 		{
-			sprintf(buffer,"%d.%.2d KB",(size/1024),(((size-((size/1024)*1024))*100)/1024));
+			snprintf(buffer,MAX_TMP_STR_SIZE,"%d.%.2d KB",(size/1024),(((size-((size/1024)*1024))*100)/1024));
 		}
 		else
 		{
-			sprintf(buffer,"%d.%.2d MB",(size/(1024*1024)),(((size-((size/(1024*1024))*1024*1024))*100)/(1024*1024)));
+			snprintf(buffer,MAX_TMP_STR_SIZE,"%d.%.2d MB",(size/(1024*1024)),(((size-((size/(1024*1024))*1024*1024))*100)/(1024*1024)));
 		}
 	}
 }
@@ -355,7 +354,7 @@ void tick_fs(void *w) {
 int displaydir(HXCFE_FSMNG  * fsmng,filesystem_generator_window *fgw,char * folder,int level)
 {
 	char fullpath[512];
-	char fullpath2[512];
+	char fullpath2[MAX_TMP_STR_SIZE];
 	int dirhandle;
 	int ret;
 	int dir;
@@ -769,7 +768,7 @@ void browse_floppy_disk(filesystem_generator_window *fgw,int lastoperationerror)
 {
 	HXCFE_FSMNG  * fsmng;
 	int totalsize;
-	char statustxt[512];
+	char statustxt[MAX_TMP_STR_SIZE];
 
 	fgw->fs_browser->clear();
 	fgw->fs_browser->selectmode(FL_TREE_SELECT_MULTI);
@@ -862,7 +861,7 @@ void browse_floppy_disk(filesystem_generator_window *fgw,int lastoperationerror)
 		fgw->fs_browser->redraw();
 		//fgw->fs_browser->show_self();
 
-		sprintf(statustxt,"No DOS Image Loaded !");
+		snprintf(statustxt,sizeof(statustxt),"No DOS Image Loaded !");
 		fgw->txtout_freesize->value((const char*)statustxt);
 	}
 }
@@ -1158,9 +1157,9 @@ int addentry(filesystem_generator_window *fsw,HXCFE_FSMNG  * fsmng,  char * srcp
 	int size,file_handle,ret,dirhandle,wsize;
 	struct stat entry;
 	unsigned char * buffer;
-	char fullpath[1024];
-	char srcfullpath[1024];
-	char progresstxt[1024*3];
+	char fullpath[MAX_TMP_STR_SIZE];
+	char srcfullpath[MAX_TMP_STR_SIZE];
+	char progresstxt[MAX_TMP_STR_SIZE*2];
 	void * findfile_handle;
 	filefoundinfo ffi;
 
