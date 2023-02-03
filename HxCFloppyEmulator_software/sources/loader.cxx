@@ -163,7 +163,7 @@ int load_floppy_image(char *filename)
 			}
 			else
 			{
-				sprintf(guicontext->bufferfilename,"Empty Floppy");
+				snprintf(guicontext->bufferfilename,sizeof(guicontext->bufferfilename),"Empty Floppy");
 			}
 		}
 
