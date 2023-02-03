@@ -768,36 +768,36 @@ u_rle.o :   $(BASEDIR)/thirdpartylibs/xdms/xdms-1.3.2/src/u_rle.c
 
 
 adler32.o : $(BASEDIR)/thirdpartylibs/zlib/adler32.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
+	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ -DSTDC
 compress.o : $(BASEDIR)/thirdpartylibs/zlib/compress.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
+	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ -DSTDC
 crc32.o : $(BASEDIR)/thirdpartylibs/zlib/crc32.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
+	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ -DSTDC
 deflate.o : $(BASEDIR)/thirdpartylibs/zlib/deflate.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
+	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ -DSTDC
 gzlib.o : $(BASEDIR)/thirdpartylibs/zlib/gzlib.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
+	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ -DSTDC
 gzread.o : $(BASEDIR)/thirdpartylibs/zlib/gzread.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
+	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ -DSTDC
 gzwrite.o : $(BASEDIR)/thirdpartylibs/zlib/gzwrite.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
+	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ -DSTDC
 gzclose.o : $(BASEDIR)/thirdpartylibs/zlib/gzclose.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
+	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ -DSTDC
 
 infback.o : $(BASEDIR)/thirdpartylibs/zlib/infback.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
+	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ -DSTDC
 inffast.o : $(BASEDIR)/thirdpartylibs/zlib/inffast.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
+	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ -DSTDC
 inflate.o : $(BASEDIR)/thirdpartylibs/zlib/inflate.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
+	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ -DSTDC
 inftrees.o : $(BASEDIR)/thirdpartylibs/zlib/inftrees.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
+	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ -DSTDC
 trees.o : $(BASEDIR)/thirdpartylibs/zlib/trees.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
+	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ -DSTDC
 uncompr.o : $(BASEDIR)/thirdpartylibs/zlib/uncompr.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
+	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ -DSTDC
 zutil.o : $(BASEDIR)/thirdpartylibs/zlib/zutil.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
+	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ -DSTDC
 
 ioapi.o : $(BASEDIR)/thirdpartylibs/zlib/contrib/minizip/ioapi.c
 	$(CC) -o $@ -c $< -I$(BASEDIR)/thirdpartylibs/zlib/ $(CFLAGS) -DNOLONGFILESUPPORT -DUSE_FILE32API -DIOAPI_NO_64
