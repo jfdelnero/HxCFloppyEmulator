@@ -45,6 +45,10 @@
 
 #define _script_ctx_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef _script_printf_func_
 typedef int (* SCRIPT_PRINTF_FUNC)(void * ctx, int MSGTYPE, char * string, ... );
 #define _script_printf_func_
@@ -105,3 +109,7 @@ int  execute_line_script( script_ctx * ctx, char * line );
 int  execute_ram_script( script_ctx * ctx, unsigned char * script_buffer, int buffersize );
 void setOutputFunc_script( script_ctx * ctx, SCRIPT_PRINTF_FUNC ext_printf );
 script_ctx * deinit_script(script_ctx * ctx);
+
+#ifdef __cplusplus
+}
+#endif

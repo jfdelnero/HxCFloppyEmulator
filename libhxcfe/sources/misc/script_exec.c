@@ -143,7 +143,7 @@ static int is_variable(char * command)
 {
 	if(strlen(command)>1)
 	{
-		if(command[0] == '$' && command[1] && ( command[1] != ' ' || command[1] != '\t' ))
+		if(command[0] == '$' && command[1] && (command[1] != ' ' && command[1] != '\t') )
 			return 1;
 		else
 			return 0;
@@ -286,6 +286,8 @@ static int get_param_str( script_ctx * ctx, char * line, int param_offset,char *
 static env_var_value str_to_int(char * str)
 {
 	env_var_value value;
+
+	value = 0;
 
 	if(str)
 	{
@@ -671,7 +673,7 @@ int execute_file_script( script_ctx * ctx, char * filename )
 
 	err = SCRIPT_INTERNAL_ERROR;
 
-	ctx->script_file = fopen(filename,"r");
+	ctx->script_file = fopen(filename,"rb");
 	if(ctx->script_file)
 	{
 		strncpy(ctx->script_file_path,filename,DEFAULT_BUFLEN);
@@ -1420,7 +1422,7 @@ int hxcfe_execScriptRam( HXCFE* hxcfe, unsigned char * script_buffer, int buffer
 
 	if(!hxcfe->scriptctx)
 		return SCRIPT_INTERNAL_ERROR;
-	
+
 	return execute_ram_script( hxcfe->scriptctx, script_buffer, buffersize );
 }
 
@@ -1431,7 +1433,7 @@ int hxcfe_deinitScript( HXCFE* hxcfe )
 
 	if(!hxcfe->scriptctx)
 		return SCRIPT_INTERNAL_ERROR;
-	
+
 	deinit_script(hxcfe->scriptctx);
 
 	hxcfe->scriptctx = NULL;
