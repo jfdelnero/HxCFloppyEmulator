@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2023 Jean-François DEL NERO
+// Copyright (C) 2006-2023 Jean-Franï¿½ois DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
@@ -393,7 +393,6 @@ int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	JV3SectorHeader sh[JV3_HEADER_MAX];
 	JV3SectorsOffsets *pOffset, *SectorsOffsets;
 	unsigned char write_protected;
-	unsigned int inc;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JV3_libLoad_DiskFile %s",imgfile);
 
@@ -442,7 +441,6 @@ int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			{
 				hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
 
-				inc = 0;                                    // used to build track data
 				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 				sector_found=0;
 
@@ -452,21 +450,14 @@ int JV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				{
 					pOffset = GetSectorPosition(SectorsOffsets,NumberofEntries,cur_pos);
 
-		    		if (pOffset == NULL)
+		    		if (pOffset)
 					{
-						inc += SectorSize;
-					}
-					else
-					{
-
 						sectorconfig[sector_found].sectorsize=pOffset->size;
 						sectorconfig[sector_found].input_data=malloc(sectorconfig[sector_found].sectorsize);
 						memset(sectorconfig[sector_found].input_data,0,sectorconfig[sector_found].sectorsize);
 
 						fseek(f, pOffset->offset, SEEK_SET);
 						hxc_fread(sectorconfig[sector_found].input_data,pOffset->size,f);
-
-						inc += pOffset->size;
 
 						if (pOffset->DAM != 0xFB)
 						{
