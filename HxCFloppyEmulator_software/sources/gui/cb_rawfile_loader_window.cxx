@@ -165,7 +165,7 @@ void raw_loader_window_datachanged(Fl_Widget* w, void*)
 {
 	int totalsector,totalsize;
 	int temp[256],v;
-	char file[512];
+	char file[MAX_TMP_STR_SIZE];
 	rawfile_loader_window *rlw;
 	Fl_Window *dw;
 	HXCFE_XMLLDR* rfb;
@@ -325,7 +325,7 @@ void raw_loader_window_bt_loadrawfile(Fl_Button* bt, void*)
 {
 	int totalsector,totalsize;
 	int temp[256];
-	char file[1024];
+	char file[MAX_TMP_STR_SIZE];
 	int disklayout;
 	rawfile_loader_window *rlw;
 	Fl_Window *dw;
@@ -422,7 +422,7 @@ void raw_loader_window_bt_createemptyfloppy(Fl_Button* bt, void*)
 void raw_loader_window_bt_savecfg(Fl_Button* bt, void*)
 {
 	FILE * fpf_file;
-	char file[1024];
+	char file[MAX_TMP_STR_SIZE];
 	cfgrawfile rfc;
 	rawfile_loader_window *rlw;
 	Fl_Window *dw;
@@ -448,7 +448,7 @@ void raw_loader_window_bt_savecfg(Fl_Button* bt, void*)
 void raw_loader_window_bt_loadcfg(Fl_Button* bt, void*)
 {
 	FILE * fpf_file;
-	char file[1024];
+	char file[MAX_TMP_STR_SIZE];
 	cfgrawfile rfc;
 	rawfile_loader_window *rlw;
 	Fl_Window *dw;

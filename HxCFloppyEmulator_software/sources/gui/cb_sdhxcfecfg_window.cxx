@@ -43,8 +43,11 @@
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "fl_includes.h"
+
 #include "sdhxcfecfg_window.h"
 #include "cb_sdhxcfecfg_window.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -385,7 +388,7 @@ void sdhxcfecfg_window_datachanged(Fl_Widget* w, void*)
 
 void sdhxcfecfg_window_bt_load(Fl_Button* bt, void*)
 {
-	int temp[512];
+	int temp[MAX_TMP_STR_SIZE];
 	FILE *f;
 	sdhxcfecfg_window *sdcfgw;
 	Fl_Window *dw;
@@ -409,7 +412,7 @@ void sdhxcfecfg_window_bt_load(Fl_Button* bt, void*)
 
 void sdhxcfecfg_window_bt_save(Fl_Button* bt, void*)
 {
-	int temp[512];
+	int temp[MAX_TMP_STR_SIZE];
 	FILE *f;
 	sdhxcfecfg_window *sdcfgw;
 	Fl_Window *dw;

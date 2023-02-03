@@ -43,8 +43,12 @@ int fileselector(char * title,char * str,char *filename,char *filter,int save,in
 		}
 		default:
 		{
+			str[0] = 0;
 			path=(char*)fnfc.filename();
-			sprintf(str,"%s",path);
+			if(path)
+			{
+				snprintf(str,MAX_TMP_STR_SIZE,"%s",path);
+			}
 			return 0;
 			break; // FILE CHOSEN
 		}
@@ -62,7 +66,7 @@ int select_dir(char * title,char * str)
 	fnfc.filter("\t*.*\n");
 
 	// Show native chooser
-	switch ( fnfc.show() ) 
+	switch ( fnfc.show() )
 	{
 		case -1:
 		{
