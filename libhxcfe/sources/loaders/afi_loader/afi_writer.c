@@ -85,7 +85,7 @@ unsigned short getcrc(void * buffer1, int size1,void * buffer2, int size2)
 int adddatablock(FILE* f,int typecode,int compressdata,unsigned char* data,int datalen,int bitsperelement)
 {
 	int i;
-	uint32_t actualdestbufferlen;
+	unsigned long actualdestbufferlen;
 	AFIDATA     afidata;
 	unsigned char *tempcompressbuffer;
 	unsigned short tempcrc;
@@ -106,20 +106,26 @@ int adddatablock(FILE* f,int typecode,int compressdata,unsigned char* data,int d
 	{
 		actualdestbufferlen = compressBound(datalen);
 		tempcompressbuffer = (unsigned char*)malloc(actualdestbufferlen);
-		compress2(tempcompressbuffer, &actualdestbufferlen,
-             data, datalen,
-             Z_BEST_COMPRESSION);
-		afidata.unpacked_size = datalen;
-		afidata.packed_size = actualdestbufferlen;
-		afidata.packer_id = AFI_COMPRESS_GZIP;
+		if(tempcompressbuffer)
+		{
+			compress2(tempcompressbuffer, &actualdestbufferlen,
+				 data, datalen,
+				 Z_BEST_COMPRESSION);
+			afidata.unpacked_size = datalen;
+			afidata.packed_size = actualdestbufferlen;
+			afidata.packer_id = AFI_COMPRESS_GZIP;
+		}
 	}
 	else
 	{
 		tempcompressbuffer = (unsigned char*)malloc(datalen);
-		memcpy(tempcompressbuffer,data,datalen);
-		afidata.unpacked_size = datalen;
-		afidata.packed_size = datalen; // no comp
-		afidata.packer_id = AFI_COMPRESS_NONE;
+		if(tempcompressbuffer)
+		{
+			memcpy(tempcompressbuffer,data,datalen);
+			afidata.unpacked_size = datalen;
+			afidata.packed_size = datalen; // no comp
+			afidata.packer_id = AFI_COMPRESS_NONE;
+		}
 	}
 
 	fwrite(&afidata,sizeof(afidata),1,f);
@@ -459,10 +465,13 @@ int AFI_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 					else
 					{
 						tempweakbitstrack=(unsigned char *)malloc(bytelen);
-						memset(tempweakbitstrack,0,bytelen);
+						if(tempweakbitstrack)
+						{
+							memset(tempweakbitstrack,0,bytelen);
 
-						block_size=adddatablock(hxcafifile,AFI_DATA_WEAKBITS,compressdata,tempweakbitstrack,bytelen,1);
-						free(tempweakbitstrack);
+							block_size=adddatablock(hxcafifile,AFI_DATA_WEAKBITS,compressdata,tempweakbitstrack,bytelen,1);
+							free(tempweakbitstrack);
+						}
 					}
 					//--------------------------------------------
 					data_list[3]=dataposition;
@@ -485,7 +494,7 @@ int AFI_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 				}
 			}
 
-			temp_fileptr=ftell(hxcafifile); 
+			temp_fileptr=ftell(hxcafifile);
 			tempcrc=getcrc(&afitracklist,sizeof(afitracklist),track_list,afitracklist.number_of_track*sizeof(uint32_t));
 			fseek(hxcafifile,track_listptr,SEEK_SET);
 			fwrite(track_list,afitracklist.number_of_track*sizeof(uint32_t),1,hxcafifile);
