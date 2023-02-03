@@ -459,7 +459,7 @@ fzf_loader.o : $(BASEDIR)/loaders/fzf_loader/fzf_loader.c $(BASEDIR)/loaders/fzf
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 imz_loader.o : $(BASEDIR)/loaders/imz_loader/imz_loader.c $(BASEDIR)/loaders/imz_loader/imz_loader.h
-	$(CC) -o $@ -c $< $(CFLAGS)
+	$(CC) -o $@ -c $< -I$(BASEDIR)/thirdpartylibs/zlib/ $(CFLAGS)
 
 d64_loader.o : $(BASEDIR)/loaders/d64_loader/d64_loader.c $(BASEDIR)/loaders/d64_loader/d64_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
@@ -800,13 +800,13 @@ zutil.o : $(BASEDIR)/thirdpartylibs/zlib/zutil.c
 	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
 
 ioapi.o : $(BASEDIR)/thirdpartylibs/zlib/contrib/minizip/ioapi.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DNOLONGFILESUPPORT -DUSE_FILE32API -DIOAPI_NO_64
+	$(CC) -o $@ -c $< -I$(BASEDIR)/thirdpartylibs/zlib/ $(CFLAGS) -DNOLONGFILESUPPORT -DUSE_FILE32API -DIOAPI_NO_64
 mztools.o : $(BASEDIR)/thirdpartylibs/zlib/contrib/minizip/mztools.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DUSE_FILE32API -DIOAPI_NO_64
+	$(CC) -o $@ -c $< -I$(BASEDIR)/thirdpartylibs/zlib/ $(CFLAGS) -DUSE_FILE32API -DIOAPI_NO_64
 unzip.o : $(BASEDIR)/thirdpartylibs/zlib/contrib/minizip/unzip.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DUSE_FILE32API -DIOAPI_NO_64
+	$(CC) -o $@ -c $< -I$(BASEDIR)/thirdpartylibs/zlib/ $(CFLAGS) -DUSE_FILE32API -DIOAPI_NO_64
 zip.o : $(BASEDIR)/thirdpartylibs/zlib/contrib/minizip/zip.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DUSE_FILE32API -DIOAPI_NO_64
+	$(CC) -o $@ -c $< -I$(BASEDIR)/thirdpartylibs/zlib/ $(CFLAGS) -DUSE_FILE32API -DIOAPI_NO_64
 
 lz4.o : $(BASEDIR)/thirdpartylibs/lz4/lib/lz4.c
 	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
@@ -827,13 +827,13 @@ rle.o : ../sources/xml_disk/packer/rle.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 xmlparse.o : ../sources/thirdpartylibs/expat/expat-2.5.0/lib/xmlparse.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DHAVE_MEMMOVE
+	$(CC) -o $@ -c $< -I../sources/thirdpartylibs/expat/expat-2.5.0/lib/ $(CFLAGS) -DHAVE_MEMMOVE -DXML_DEV_URANDOM
 
 xmlrole.o : ../sources/thirdpartylibs/expat/expat-2.5.0/lib/xmlrole.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DHAVE_MEMMOVE
+	$(CC) -o $@ -c $< -I../sources/thirdpartylibs/expat/expat-2.5.0/lib/ $(CFLAGS) -DHAVE_MEMMOVE -DXML_DEV_URANDOM
 
 xmltok.o : ../sources/thirdpartylibs/expat/expat-2.5.0/lib/xmltok.c
-	$(CC) -o $@ -c $< $(CFLAGS) -DHAVE_MEMMOVE
+	$(CC) -o $@ -c $< -I../sources/thirdpartylibs/expat/expat-2.5.0/lib/ $(CFLAGS) -DHAVE_MEMMOVE -DXML_DEV_URANDOM
 
 
 ftdi_d2xxmode.o : ftdi.c ftdi.h ftd2xx.h WinTypes.h
