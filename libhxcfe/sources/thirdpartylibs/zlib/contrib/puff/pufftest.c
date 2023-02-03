@@ -92,7 +92,7 @@ int main(int argc, char **argv)
     char *arg, *name = NULL;
     unsigned char *source = NULL, *dest;
     size_t len = 0;
-    uint32_t sourcelen, destlen;
+    unsigned long sourcelen, destlen;
 
     /* process arguments */
     while (arg = *++argv, --argc)
@@ -133,7 +133,7 @@ int main(int argc, char **argv)
 
     /* test inflate data with offset skip */
     len -= skip;
-    sourcelen = (uint32_t)len;
+    sourcelen = (unsigned long)len;
     ret = puff(NIL, &destlen, source + skip, &sourcelen);
     if (ret)
         fprintf(stderr, "puff() failed with return code %d\n", ret);
@@ -143,7 +143,7 @@ int main(int argc, char **argv)
                                      len - sourcelen);
     }
 
-    /* if requested, inflate again and write decompressd data to stdout */
+    /* if requested, inflate again and write decompressed data to stdout */
     if (put && ret == 0) {
         if (fail)
             destlen >>= 1;

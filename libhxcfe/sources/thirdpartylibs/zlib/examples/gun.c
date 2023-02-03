@@ -43,7 +43,7 @@
    gun will also decompress files made by Unix compress, which uses LZW
    compression.  These files are automatically detected by virtue of their
    magic header bytes.  Since the end of Unix compress stream is marked by the
-   end-of-file, they cannot be concantenated.  If a Unix compress stream is
+   end-of-file, they cannot be concatenated.  If a Unix compress stream is
    encountered in an input file, it is the last stream in that file.
 
    Like gunzip and uncompress, the file attributes of the original compressed
@@ -119,8 +119,8 @@ local unsigned in(void *in_desc, z_const unsigned char **buf)
 struct outd {
     int outfile;
     int check;                  /* true if checking crc and total */
-    uint32_t crc;
-    uint32_t total;
+    unsigned long crc;
+    unsigned long total;
 };
 
 /* Write output buffer and update the CRC-32 and total bytes written.  write()

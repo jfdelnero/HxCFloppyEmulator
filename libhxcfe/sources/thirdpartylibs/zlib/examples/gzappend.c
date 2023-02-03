@@ -33,7 +33,7 @@
  *                      - Add L to constants in lseek() calls
  *                      - Remove some debugging information in error messages
  *                      - Use new data_type definition for zlib 1.2.1
- *                      - Simplfy and unify file operations
+ *                      - Simplify and unify file operations
  *                      - Finish off gzip file in gztack()
  *                      - Use deflatePrime() instead of adding empty blocks
  *                      - Keep gzip file clean on appended file read errors
@@ -54,7 +54,7 @@
    block boundary to facilitate locating and modifying the last block bit at
    the start of the final deflate block.  Also whether using Z_BLOCK or not,
    another required feature of zlib 1.2.x is that inflate() now provides the
-   number of unusued bits in the last input byte used.  gzappend will not work
+   number of unused bits in the last input byte used.  gzappend will not work
    with versions of zlib earlier than 1.2.1.
 
    gzappend first decompresses the gzip file internally, discarding all but
@@ -137,7 +137,7 @@ local void rotate(unsigned char *list, unsigned len, unsigned rot)
     /* do simple left shift by one */
     if (rot == 1) {
         tmp = *list;
-        memcpy(list, list + 1, len - 1);
+        memmove(list, list + 1, len - 1);
         *last = tmp;
         return;
     }
@@ -220,14 +220,14 @@ local void skip(file *in, unsigned n)
 }
 
 /* read a four-byte unsigned integer, little-endian, from in */
-uint32_t read4(file *in)
+unsigned long read4(file *in)
 {
-    uint32_t val;
+    unsigned long val;
 
     val = read1(in);
     val += (unsigned)read1(in) << 8;
-    val += (uint32_t)read1(in) << 16;
-    val += (uint32_t)read1(in) << 24;
+    val += (unsigned long)read1(in) << 16;
+    val += (unsigned long)read1(in) << 24;
     return val;
 }
 
@@ -260,7 +260,7 @@ local int gzscan(char *name, z_stream *strm, int level)
 {
     int ret, lastbit, left, full;
     unsigned have;
-    uint32_t crc, tot;
+    unsigned long crc, tot;
     unsigned char *window;
     off_t lastoff, end;
     file gz;

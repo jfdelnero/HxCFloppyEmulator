@@ -12,7 +12,6 @@
 */
 
 #include <stdlib.h>
-#include <stdint.h>
 
 #include "zlib.h"
 #include "ioapi.h"
@@ -29,6 +28,11 @@
 
 // see Include/shared/winapifamily.h in the Windows Kit
 #if defined(WINAPI_FAMILY_PARTITION) && (!(defined(IOWIN32_USING_WINRT_API)))
+
+#if !defined(WINAPI_FAMILY_ONE_PARTITION)
+#define WINAPI_FAMILY_ONE_PARTITION(PartitionSet, Partition) ((WINAPI_FAMILY & PartitionSet) == Partition)
+#endif
+
 #if WINAPI_FAMILY_ONE_PARTITION(WINAPI_FAMILY, WINAPI_PARTITION_APP)
 #define IOWIN32_USING_WINRT_API 1
 #endif
@@ -277,7 +281,7 @@ long ZCALLBACK win32_tell_file_func (voidpf opaque,voidpf stream)
             ret = -1;
         }
         else
-            ret=(int32_t)pos.LowPart;
+            ret=(long)pos.LowPart;
     }
     return ret;
 }

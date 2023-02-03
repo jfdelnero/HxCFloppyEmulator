@@ -43,7 +43,7 @@
  *                      - Use pointers instead of long to specify source and
  *                        destination sizes to avoid arbitrary 4 GB limits
  * 1.2  17 Mar 2002     - Add faster version of decode(), doubles speed (!),
- *                        but leave simple version for readabilty
+ *                        but leave simple version for readability
  *                      - Make sure invalid distances detected if pointers
  *                        are 16 bits
  *                      - Fix fixed codes table error
@@ -98,13 +98,13 @@
 struct state {
     /* output state */
     unsigned char *out;         /* output buffer */
-    uint32_t outlen;       /* available space at out */
-    uint32_t outcnt;       /* bytes written to out so far */
+    unsigned long outlen;       /* available space at out */
+    unsigned long outcnt;       /* bytes written to out so far */
 
     /* input state */
     const unsigned char *in;    /* input buffer */
-    uint32_t inlen;        /* available input at in */
-    uint32_t incnt;        /* bytes read so far */
+    unsigned long inlen;        /* available input at in */
+    unsigned long incnt;        /* bytes read so far */
     int bitbuf;                 /* bit buffer */
     int bitcnt;                 /* number of bits in bit buffer */
 
@@ -132,7 +132,7 @@ local int bits(struct state *s, int need)
     while (s->bitcnt < need) {
         if (s->incnt == s->inlen)
             longjmp(s->env, 1);         /* out of input */
-        val |= (int32_t)(s->in[s->incnt++]) << s->bitcnt;  /* load eight bits */
+        val |= (long)(s->in[s->incnt++]) << s->bitcnt;  /* load eight bits */
         s->bitcnt += 8;
     }
 
@@ -624,7 +624,7 @@ local int fixed(struct state *s)
  *   are themselves compressed using Huffman codes and run-length encoding.  In
  *   the list of code lengths, a 0 symbol means no code, a 1..15 symbol means
  *   that length, and the symbols 16, 17, and 18 are run-length instructions.
- *   Each of 16, 17, and 18 are follwed by extra bits to define the length of
+ *   Each of 16, 17, and 18 are followed by extra bits to define the length of
  *   the run.  16 copies the last length 3 to 6 times.  17 represents 3 to 10
  *   zero lengths, and 18 represents 11 to 138 zero lengths.  Unused symbols
  *   are common, hence the special coding for zero lengths.
@@ -791,9 +791,9 @@ local int dynamic(struct state *s)
  *   expected values to check.
  */
 int puff(unsigned char *dest,           /* pointer to destination pointer */
-         uint32_t *destlen,        /* amount of output space */
+         unsigned long *destlen,        /* amount of output space */
          const unsigned char *source,   /* pointer to source data pointer */
-         uint32_t *sourcelen)      /* amount of input available */
+         unsigned long *sourcelen)      /* amount of input available */
 {
     struct state s;             /* input/output state */
     int last, type;             /* block information */
