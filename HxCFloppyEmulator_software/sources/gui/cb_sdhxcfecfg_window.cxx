@@ -127,8 +127,10 @@ int getmenuindex(int value,int * indexarray, int size)
 void fill_cfg(sdhxcfecfg_window *sdcfgw,sdhxcfecfgfile * filecfg)
 {
 	int user_data;
-	memset(filebuffer,0,8192);
-	sprintf(filecfg->signature,"HXCFECFGV1.0");
+
+	memset(filebuffer,0,sizeof(filebuffer));
+
+	snprintf(filecfg->signature,sizeof(filecfg->signature), "HXCFECFGV1.0");
 
 	if((unsigned char)sdcfgw->slider_uisound_level->value())
 	{
