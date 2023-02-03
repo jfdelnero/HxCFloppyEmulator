@@ -94,10 +94,17 @@ int FDX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 		hxc_getfilenamebase(filename,(char*)&tmp_str, SYS_PATH_TYPE);
 
+#if __GNUC__ && !__clang__
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-truncation"
+
+#endif
 		strncpy((char*)&fdx_header.disk_name,tmp_str,60-1);
+
+#if __GNUC__ && !__clang__
 #pragma GCC diagnostic pop
+#endif
 
 		fdx_header.disk_type = 9; // raw
 
