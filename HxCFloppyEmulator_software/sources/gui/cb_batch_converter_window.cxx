@@ -875,7 +875,7 @@ void batch_converter_window_bt_convert(Fl_Button* bt, void*)
 
 void batch_converter_window_bt_select_src(Fl_Button* bt, void*)
 {
-	char dirstr[512];
+	char dirstr[MAX_TMP_STR_SIZE];
 	batch_converter_window *bcw;
 	Fl_Window *dw;
 
@@ -895,7 +895,7 @@ void batch_converter_window_progress_indicator(Fl_Progress * flp,void *)
 
 void batch_converter_window_bt_select_dst(Fl_Button* bt, void*)
 {
-	char dirstr[512];
+	char dirstr[MAX_TMP_STR_SIZE];
 	batch_converter_window *bcw;
 	Fl_Window *dw;
 

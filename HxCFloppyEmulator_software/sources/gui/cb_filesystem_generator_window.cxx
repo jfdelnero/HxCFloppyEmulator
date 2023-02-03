@@ -1447,7 +1447,7 @@ void filesystem_generator_window_bt_getfiles(Fl_Button *bt,void *)
 {
 	filesystem_generator_window *fgw;
 	Fl_Window *dw;
-	char dirstr[512];
+	char dirstr[MAX_TMP_STR_SIZE];
 	s_param_fs_params * fsparams;
 
 	dw=((Fl_Window*)(bt->parent()));

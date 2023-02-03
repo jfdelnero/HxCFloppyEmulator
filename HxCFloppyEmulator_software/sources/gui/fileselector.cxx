@@ -1,6 +1,4 @@
-#include <FL/Fl_File_Browser.H>
-#include <FL/Fl_File_Chooser.H>
-#include <FL/Fl_Native_File_Chooser.H>
+#include "fl_includes.h"
 
 int fileselector(char * title,char * str,char *filename,char *filter,int save,int dir)
 {
@@ -62,8 +60,10 @@ int select_dir(char * title,char * str)
 	fnfc.title(title);
 	fnfc.type(Fl_Native_File_Chooser::BROWSE_DIRECTORY);
 	fnfc.filter("\t*.*\n");
+
 	// Show native chooser
-	switch ( fnfc.show() ) {
+	switch ( fnfc.show() ) 
+	{
 		case -1:
 		{
 			break; // ERROR
@@ -74,11 +74,18 @@ int select_dir(char * title,char * str)
 		}
 		default:
 		{
+			str[0] = 0;
 			dir=(char*)fnfc.filename();
-			sprintf(str,"%s",dir);
+			if(dir)
+			{
+				snprintf(str,MAX_TMP_STR_SIZE,"%s",dir);
+			}
+
 			return 0;
+
 			break; // FILE CHOSEN
 		}
 	}
+
 	return -1;
 }
