@@ -815,7 +815,7 @@ libsap.o : $(BASEDIR)/thirdpartylibs/libsap/libsap.c   $(BASEDIR)/thirdpartylibs
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 xml_disk.o : ../sources/xml_disk/xml_disk.c
-	$(CC) -o $@ -c $< $(CFLAGS)  -I ../sources/thirdpartylibs/expat/expat-2.1.0/lib
+	$(CC) -o $@ -c $< $(CFLAGS)  -I ../sources/thirdpartylibs/expat/expat-2.5.0/lib
 
 lzw.o : ../sources/xml_disk/packer/lzw.c
 	$(CC) -o $@ -c $< $(CFLAGS)
@@ -826,13 +826,13 @@ pack.o : ../sources/xml_disk/packer/pack.c
 rle.o : ../sources/xml_disk/packer/rle.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-xmlparse.o : ../sources/thirdpartylibs/expat/expat-2.1.0/lib/xmlparse.c
+xmlparse.o : ../sources/thirdpartylibs/expat/expat-2.5.0/lib/xmlparse.c
 	$(CC) -o $@ -c $< $(CFLAGS) -DHAVE_MEMMOVE
 
-xmlrole.o : ../sources/thirdpartylibs/expat/expat-2.1.0/lib/xmlrole.c
+xmlrole.o : ../sources/thirdpartylibs/expat/expat-2.5.0/lib/xmlrole.c
 	$(CC) -o $@ -c $< $(CFLAGS) -DHAVE_MEMMOVE
 
-xmltok.o : ../sources/thirdpartylibs/expat/expat-2.1.0/lib/xmltok.c
+xmltok.o : ../sources/thirdpartylibs/expat/expat-2.5.0/lib/xmltok.c
 	$(CC) -o $@ -c $< $(CFLAGS) -DHAVE_MEMMOVE
 
 
