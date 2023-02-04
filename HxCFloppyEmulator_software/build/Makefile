@@ -83,7 +83,10 @@ GUI = main_gui.o msg_txt.o gui_strings.o about_gui.o batch_converter_window.o fl
 MICROINTRO = microintro.o lzw.o pack.o rle.o hxcmod.o
 FLTKLIB = $(BASEDIR)/thirdpartylibs/fltk/fltk-1.x.x/lib/libfltk.a $(BASEDIR)/thirdpartylibs/fltk/fltk-1.x.x/lib/libfltk_images.a
 
-all: fltk DATA_FILES $(EXEC)
+all:
+	$(MAKE) fltk
+	$(MAKE) DATA_FILES
+	$(MAKE) $(EXEC)
 
 fltk:
 	chmod +x ../sources/thirdpartylibs/fltk/prepare_fltk.sh
