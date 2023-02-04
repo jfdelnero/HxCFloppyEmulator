@@ -144,7 +144,7 @@ unsigned short msapacktrack(unsigned char * inputtrack,int insize,unsigned char 
 int MSA_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int i,j,k,id;
-	int nbsector;
+	int nbsector,maxtrack;
 
 	FILE * msadskfile;
 	HXCFE_SECTORACCESS* ss;
@@ -153,6 +153,9 @@ int MSA_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	unsigned char * flat_track;
 	unsigned char * packed_track;
 	unsigned short outsize;
+	unsigned short trk_sectorcnt[256*2];
+	unsigned char sidesflags;
+
 	msa_header msah;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write MSA file %s...",filename);
@@ -194,7 +197,70 @@ int MSA_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		hxcfe_deinitSectorAccess(ss);
 	}
 
+	memset(trk_sectorcnt,0,sizeof(trk_sectorcnt));
+
+	ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
+	if(ss)
+	{
+		for(j = 0; (j < (int)floppy->floppyNumberOfTrack); j++)
+		{
+			for(i = 0; i < (int)floppy->floppyNumberOfSide; i++)
+			{
+				for(k=0;k<nbsector;k++)
+				{
+					sc = hxcfe_searchSector(ss,j,i,k+1,ISOIBM_MFM_ENCODING);
+					if(sc)
+					{
+						if(sc->sectorsize == 512)
+						{
+							trk_sectorcnt[(j<<1) + (i&1)]++;
+						}
+						hxcfe_freeSectorConfig( ss, sc );
+					}
+				}
+			}
+		}
+
+		hxcfe_deinitSectorAccess(ss);
+	}
+
+	sidesflags = 0;
+	maxtrack = 0;
+	i = 256 - 1;
+	do
+	{
+		if( (trk_sectorcnt[0] == trk_sectorcnt[i]) && !maxtrack)
+			maxtrack = i>>1;
+
+		if(trk_sectorcnt[i])
+		{
+			if(i&1)
+				sidesflags |= 0x2;
+			else
+				sidesflags |= 0x1;
+		}
+
+		i--;
+	}while(i);
+
 	msah.number_of_sector_per_track = BIGENDIAN_WORD(nbsector);
+	msah.number_of_track = BIGENDIAN_WORD( maxtrack );
+
+	switch(sidesflags)
+	{
+		case 0x00:
+			msah.number_of_side = BIGENDIAN_WORD(0);
+		break;
+		case 0x01:
+			msah.number_of_side = BIGENDIAN_WORD(0);
+		break;
+		case 0x02:
+			msah.number_of_side = BIGENDIAN_WORD(0);
+		break;
+		case 0x03:
+			msah.number_of_side = BIGENDIAN_WORD(1);
+		break;
+	}
 
 	if(nbsector)
 	{
@@ -213,11 +279,14 @@ int MSA_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 				ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 				if(ss)
 				{
-					for(j = 0; (j < (int)floppy->floppyNumberOfTrack); j++)
+					for(j = 0; (j < (int)BIGENDIAN_WORD(msah.number_of_track)+1); j++)
 					{
-						for(i = 0; i < (int)floppy->floppyNumberOfSide; i++)
+						for(i = 0; i < (int)BIGENDIAN_WORD(msah.number_of_side)+1; i++)
 						{
-							hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),floppy->floppyNumberOfTrack*2 );
+							hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),BIGENDIAN_WORD(msah.number_of_track)*2 );
+
+							memset(packed_track,0,nbsector * 512 * 4);
+							memset(flat_track,0,nbsector * 512);
 
 							for(k=0;k<nbsector;k++)
 							{
@@ -251,7 +320,6 @@ int MSA_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 		if(packed_track)
 			free(packed_track);
-
 	}
 
 	return 0;

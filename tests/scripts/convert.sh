@@ -17,8 +17,9 @@ rm *_T.IMG
 ./hxcfe -finput:$1 -foutput:I015.HFE -conv:HXC_STREAMHFE
 ./hxcfe -finput:$1 -foutput:I016.D88 -conv:NEC_D88
 ./hxcfe -finput:$1 -foutput:I017.MFM -conv:HXCMFM_IMG
-#./hxcfe -finput:$1 -foutput:I018.DIM -conv:ATARIST_DIM
-#./hxcfe -finput:$1 -foutput:I019.TRD -conv:ZXSPECTRUM_TRD
+./hxcfe -finput:$1 -foutput:I018.MSA -conv:ATARIST_MSA
+#./hxcfe -finput:$1 -foutput:I019.DIM -conv:ATARIST_DIM
+#./hxcfe -finput:$1 -foutput:I020.TRD -conv:ZXSPECTRUM_TRD
 
 
 ./hxcfe -finput:I001.IMG -foutput:I001_T.IMG -conv:RAW_LOADER
@@ -38,8 +39,9 @@ rm *_T.IMG
 ./hxcfe -finput:I015.HFE -foutput:I015_T.IMG -conv:RAW_LOADER
 ./hxcfe -finput:I016.D88 -foutput:I016_T.IMG -conv:RAW_LOADER
 ./hxcfe -finput:I017.MFM -foutput:I017_T.IMG -conv:RAW_LOADER
-#./hxcfe -finput:I018.DIM -foutput:I018_T.IMG -conv:RAW_LOADER
-#./hxcfe -finput:I019.TRD -foutput:I019_T.IMG -conv:RAW_LOADER
+./hxcfe -finput:I018.MSA -foutput:I018_T.IMG -conv:RAW_LOADER
+#./hxcfe -finput:I019.DIM -foutput:I019_T.IMG -conv:RAW_LOADER
+#./hxcfe -finput:I020.TRD -foutput:I020_T.IMG -conv:RAW_LOADER
 
 echo > convert_res.txt
 for i in ./*_T.IMG; do diff -s "$i" I001_T.IMG >> convert_res.txt; done
@@ -50,7 +52,7 @@ export success_cnt=`cat convert_res.txt | grep "identical" | wc -l`
 
 echo Convert success count : $success_cnt
 
-if [ "$success_cnt" -ne "17" ]
+if [ "$success_cnt" -ne "18" ]
 then
 	echo "CONVERT $1 : FAILED" >> tests_results.txt
   echo "One or more tests have failed !";
