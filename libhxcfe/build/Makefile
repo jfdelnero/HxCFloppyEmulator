@@ -51,9 +51,10 @@ EXEC=libhxcfe.dll
 endif
 
 ifeq ($(TARGET), Darwin)
+MACOSX_ARCH ?= -arch arm64 -arch x86_64
 MACOSX_MIN_VER ?= 10.9
-CFLAGS += -arch arm64 -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
-LDFLAGS += -lc -lm -ldl -arch arm64 -arch x86_64 -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libhxcfe.dylib -mmacosx-version-min=${MACOSX_MIN_VER}
+CFLAGS += ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
+LDFLAGS += -lc -lm -ldl ${MACOSX_ARCH} -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libhxcfe.dylib -mmacosx-version-min=${MACOSX_MIN_VER}
 EXEC=libhxcfe.dylib
 endif
 

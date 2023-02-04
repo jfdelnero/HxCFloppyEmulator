@@ -66,9 +66,10 @@ EXEC=HxCFloppyEmulator.exe
 endif
 
 ifeq ($(TARGET), Darwin)
+MACOSX_ARCH ?= -arch arm64 -arch x86_64
 MACOSX_MIN_VER ?= 10.9
-CFLAGS += -DOSX -arch arm64 -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
-LDFLAGS += -lc -lm -ldl -lpthread -framework Cocoa -arch arm64 -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
+CFLAGS += -DOSX ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
+LDFLAGS += -lc -lm -ldl -lpthread -framework Cocoa ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
 LIBHXCFE = libhxcfe.dylib
 LIBUSBHXCFE = libusbhxcfe.dylib
 else
@@ -82,8 +83,38 @@ GUI = main_gui.o msg_txt.o gui_strings.o about_gui.o batch_converter_window.o fl
 MICROINTRO = microintro.o lzw.o pack.o rle.o hxcmod.o
 FLTKLIB = $(BASEDIR)/thirdpartylibs/fltk/fltk-1.x.x/lib/libfltk.a $(BASEDIR)/thirdpartylibs/fltk/fltk-1.x.x/lib/libfltk_images.a
 
+all: fltk DATA_FILES $(EXEC)
 
-all: DATA_FILES $(EXEC)
+fltk:
+	chmod +x ../sources/thirdpartylibs/fltk/prepare_fltk.sh
+	cd ../sources/thirdpartylibs/fltk/ && ./prepare_fltk.sh
+ifeq ($(TARGET), mingw32)
+		cd ../sources/thirdpartylibs/fltk/fltk-1.x.x/ && export LDFLAGS='-static-libstdc++ -static-libgcc' && ./configure --host=i686-w64-mingw32 --prefix=/usr/share/mingw-w64
+		$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x/ DIRS=src CC=i686-w64-mingw32-gcc CPP=i686-w64-mingw32-g++
+else ifeq ($(TARGET), mingw64)
+		cd ../sources/thirdpartylibs/fltk/fltk-1.x.x/ && export LDFLAGS='-static-libstdc++ -static-libgcc' && ./configure --host=x86_64-w64-mingw32 --prefix=/usr/share/mingw-w64
+		$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x/ DIRS=src CC=x86_64-w64-mingw32-gcc CPP=x86_64-w64-mingw32-g++
+else ifeq ($(TARGET), Darwin)
+		cd ../sources/thirdpartylibs/fltk && \
+		cp -a fltk-1.x.x fltk-1.x.x-arm64 && \
+		cd fltk-1.x.x-arm64 && \
+		export CFLAGS='-mmacosx-version-min=11 -arch arm64' && export CXXFLAGS='-mmacosx-version-min=11 -arch arm64' && export LDFLAGS='-mmacosx-version-min=11 -arch arm64' && ./configure --host=arm-apple-darwin
+		$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x-arm64/ DIRS=src
+		cd ../sources/thirdpartylibs/fltk && \
+		cp -a fltk-1.x.x fltk-1.x.x-x86_64 && \
+		cd fltk-1.x.x-x86_64 && \
+		export CFLAGS='-mmacosx-version-min=10.9 -arch x86_64' && export CXXFLAGS='-mmacosx-version-min=10.9 -arch x86_64' && export LDFLAGS='-mmacosx-version-min=10.9 -arch x86_64' && ./configure --host=x86_64-apple-darwin
+		$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x-x86_64/ DIRS=src
+		cd ../sources/thirdpartylibs/fltk && \
+		lipo fltk-1.x.x-x86_64/lib/libfltk.a fltk-1.x.x-arm64/lib/libfltk.a -create -output fltk-1.x.x/lib/libfltk.a && \
+		lipo fltk-1.x.x-x86_64/lib/libfltk_forms.a fltk-1.x.x-arm64/lib/libfltk_forms.a -create -output fltk-1.x.x/lib/libfltk_forms.a && \
+		lipo fltk-1.x.x-x86_64/lib/libfltk_gl.a fltk-1.x.x-arm64/lib/libfltk_gl.a -create -output fltk-1.x.x/lib/libfltk_gl.a && \
+		lipo fltk-1.x.x-x86_64/lib/libfltk_images.a fltk-1.x.x-arm64/lib/libfltk_images.a -create -output fltk-1.x.x/lib/libfltk_images.a
+		cd ../sources/thirdpartylibs/fltk && \
+		cp fltk-1.x.x-x86_64/FL/abi-version.h fltk-1.x.x/FL/abi-version.h
+else
+		$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x/ DIRS=src
+endif
 
 DATA_FILES: bmptoh
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh sob.bmp -BMP8P
@@ -235,9 +266,17 @@ clean:
 	rm -rf *.dll
 	rm -rf *.map
 
+clean_fltk:
+ifneq ("$(wildcard ../sources/thirdpartylibs/fltk/fltk-1.x.x/Makefile)","")
+	$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x/ clean
+endif
+
 mrproper: clean
 	rm -rf $(EXEC)
 	rm -rf *.map *.ncb *.opt *.plg *.dll *.exe *.bak *.dylib
 	$(MAKE) -C $(BASEDIR)/gui/microintro/converttools/bmptob8 mrproper
+	-rm -rf ../sources/thirdpartylibs/fltk/fltk-1.x.x
+	-rm -rf ../sources/thirdpartylibs/fltk/fltk-1.x.x-arm64
+	-rm -rf ../sources/thirdpartylibs/fltk/fltk-1.x.x-x86_64
 
 .PHONY: clean mrproper
