@@ -66,8 +66,6 @@
 #include "libhxcadaptor.h"
 #include "tracks/crc.h"
 
-#define F86_NB_FAKE_REV 5
-
 #define F86_DBG 1
 
 int F86_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
