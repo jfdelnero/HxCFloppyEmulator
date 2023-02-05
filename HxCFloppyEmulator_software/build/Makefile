@@ -119,16 +119,20 @@ ifneq (,$(findstring arm64,$(MACOSX_ARCH)))
 		lipo fltk-1.x.x-x86_64/lib/libfltk_forms.a fltk-1.x.x-arm64/lib/libfltk_forms.a -create -output fltk-1.x.x/lib/libfltk_forms.a && \
 		lipo fltk-1.x.x-x86_64/lib/libfltk_gl.a fltk-1.x.x-arm64/lib/libfltk_gl.a -create -output fltk-1.x.x/lib/libfltk_gl.a && \
 		lipo fltk-1.x.x-x86_64/lib/libfltk_images.a fltk-1.x.x-arm64/lib/libfltk_images.a -create -output fltk-1.x.x/lib/libfltk_images.a
-		cd ../sources/thirdpartylibs/fltk && \
+		-cd ../sources/thirdpartylibs/fltk && \
 		cp fltk-1.x.x-x86_64/FL/abi-version.h fltk-1.x.x/FL/abi-version.h
+		-cd ../sources/thirdpartylibs/fltk && \
+		cp fltk-1.x.x-x86_64/FL/fl_config.h fltk-1.x.x/FL/fl_config.h
 else
 		cd ../sources/thirdpartylibs/fltk && \
 		cp fltk-1.x.x-x86_64/lib/libfltk.a fltk-1.x.x/lib/libfltk.a && \
 		cp fltk-1.x.x-x86_64/lib/libfltk_forms.a fltk-1.x.x/lib/libfltk_forms.a && \
 		cp fltk-1.x.x-x86_64/lib/libfltk_gl.a fltk-1.x.x/lib/libfltk_gl.a && \
 		cp fltk-1.x.x-x86_64/lib/libfltk_images.a fltk-1.x.x/lib/libfltk_images.a
-		cd ../sources/thirdpartylibs/fltk && \
+		-cd ../sources/thirdpartylibs/fltk && \
 		cp fltk-1.x.x-x86_64/FL/abi-version.h fltk-1.x.x/FL/abi-version.h
+		-cd ../sources/thirdpartylibs/fltk && \
+		cp fltk-1.x.x-x86_64/FL/fl_config.h fltk-1.x.x/FL/fl_config.h
 endif
 else
 ifneq (,$(findstring arm64,$(MACOSX_ARCH)))
@@ -137,8 +141,10 @@ ifneq (,$(findstring arm64,$(MACOSX_ARCH)))
 		cp fltk-1.x.x-arm64/lib/libfltk_forms.a fltk-1.x.x/lib/libfltk_forms.a && \
 		cp fltk-1.x.x-arm64/lib/libfltk_gl.a fltk-1.x.x/lib/libfltk_gl.a && \
 		cp fltk-1.x.x-arm64/lib/libfltk_images.a fltk-1.x.x/lib/libfltk_images.a
-		cd ../sources/thirdpartylibs/fltk && \
+		-cd ../sources/thirdpartylibs/fltk && \
 		cp fltk-1.x.x-arm64/FL/abi-version.h fltk-1.x.x/FL/abi-version.h
+		-cd ../sources/thirdpartylibs/fltk && \
+		cp fltk-1.x.x-arm64/FL/fl_config.h fltk-1.x.x/FL/fl_config.h
 endif
 endif
 else
