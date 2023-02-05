@@ -26,9 +26,10 @@ LIBHXCFE = libhxcfe.so
 LIBUSBHXCFE = libusbhxcfe.so
 
 ifeq ($(TARGET), Darwin)
+MACOSX_ARCH ?= -arch arm64 -arch x86_64
 MACOSX_MIN_VER ?= 10.9
-CFLAGS += -arch arm64 -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
-LDFLAGS += -lc -lm -ldl -lpthread -arch arm64 -arch x86_64 -mmacosx-version-min=${MACOSX_MIN_VER}
+CFLAGS += ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
+LDFLAGS += -lc -lm -ldl -lpthread ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
 LIBHXCFE= libhxcfe.dylib
 LIBUSBHXCFE= libusbhxcfe.dylib
 endif
