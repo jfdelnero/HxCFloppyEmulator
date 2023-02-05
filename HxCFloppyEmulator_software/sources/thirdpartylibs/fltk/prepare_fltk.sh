@@ -17,7 +17,7 @@ if [[ ! -d fltk-1.x.x ]]; then
 	wget $DOWNLOADURL -nc || exit 1
 	tar -xzf ${ARCHIVENAMEBASE}.tar.gz
 	mv ${FOLDERNAME} fltk-1.x.x
-	if [ -n ${PATCHFILE} ]; then
+	if [[ -n ${PATCHFILE} ]]; then
 		patch -i ../${PATCHFILE} -p1 -d fltk-1.x.x
 	fi
 fi
