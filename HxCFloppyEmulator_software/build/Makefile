@@ -98,16 +98,22 @@ else ifeq ($(TARGET), mingw64)
 		cd ../sources/thirdpartylibs/fltk/fltk-1.x.x/ && export LDFLAGS='-static-libstdc++ -static-libgcc' && ./configure --host=x86_64-w64-mingw32 --prefix=/usr/share/mingw-w64
 		$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x/ DIRS=src CC=x86_64-w64-mingw32-gcc CPP=x86_64-w64-mingw32-g++
 else ifeq ($(TARGET), Darwin)
+ifneq (,$(findstring arm64,$(MACOSX_ARCH)))
 		cd ../sources/thirdpartylibs/fltk && \
 		cp -a fltk-1.x.x fltk-1.x.x-arm64 && \
 		cd fltk-1.x.x-arm64 && \
 		export CFLAGS='-mmacosx-version-min=11 -arch arm64' && export CXXFLAGS='-mmacosx-version-min=11 -arch arm64' && export LDFLAGS='-mmacosx-version-min=11 -arch arm64' && ./configure --host=arm-apple-darwin
 		$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x-arm64/ DIRS=src
+endif
+ifneq (,$(findstring x86_64,$(MACOSX_ARCH)))
 		cd ../sources/thirdpartylibs/fltk && \
 		cp -a fltk-1.x.x fltk-1.x.x-x86_64 && \
 		cd fltk-1.x.x-x86_64 && \
 		export CFLAGS='-mmacosx-version-min=10.9 -arch x86_64' && export CXXFLAGS='-mmacosx-version-min=10.9 -arch x86_64' && export LDFLAGS='-mmacosx-version-min=10.9 -arch x86_64' && ./configure --host=x86_64-apple-darwin
 		$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x-x86_64/ DIRS=src
+endif
+ifneq (,$(findstring x86_64,$(MACOSX_ARCH)))
+ifneq (,$(findstring arm64,$(MACOSX_ARCH)))
 		cd ../sources/thirdpartylibs/fltk && \
 		lipo fltk-1.x.x-x86_64/lib/libfltk.a fltk-1.x.x-arm64/lib/libfltk.a -create -output fltk-1.x.x/lib/libfltk.a && \
 		lipo fltk-1.x.x-x86_64/lib/libfltk_forms.a fltk-1.x.x-arm64/lib/libfltk_forms.a -create -output fltk-1.x.x/lib/libfltk_forms.a && \
@@ -115,6 +121,26 @@ else ifeq ($(TARGET), Darwin)
 		lipo fltk-1.x.x-x86_64/lib/libfltk_images.a fltk-1.x.x-arm64/lib/libfltk_images.a -create -output fltk-1.x.x/lib/libfltk_images.a
 		cd ../sources/thirdpartylibs/fltk && \
 		cp fltk-1.x.x-x86_64/FL/abi-version.h fltk-1.x.x/FL/abi-version.h
+else
+		cd ../sources/thirdpartylibs/fltk && \
+		cp fltk-1.x.x-x86_64/lib/libfltk.a fltk-1.x.x/lib/libfltk.a && \
+		cp fltk-1.x.x-x86_64/lib/libfltk_forms.a fltk-1.x.x/lib/libfltk_forms.a && \
+		cp fltk-1.x.x-x86_64/lib/libfltk_gl.a fltk-1.x.x/lib/libfltk_gl.a && \
+		cp fltk-1.x.x-x86_64/lib/libfltk_images.a fltk-1.x.x/lib/libfltk_images.a
+		cd ../sources/thirdpartylibs/fltk && \
+		cp fltk-1.x.x-x86_64/FL/abi-version.h fltk-1.x.x/FL/abi-version.h
+endif
+else
+ifneq (,$(findstring arm64,$(MACOSX_ARCH)))
+		cd ../sources/thirdpartylibs/fltk && \
+		cp fltk-1.x.x-arm64/lib/libfltk.a fltk-1.x.x/lib/libfltk.a && \
+		cp fltk-1.x.x-arm64/lib/libfltk_forms.a fltk-1.x.x/lib/libfltk_forms.a && \
+		cp fltk-1.x.x-arm64/lib/libfltk_gl.a fltk-1.x.x/lib/libfltk_gl.a && \
+		cp fltk-1.x.x-arm64/lib/libfltk_images.a fltk-1.x.x/lib/libfltk_images.a
+		cd ../sources/thirdpartylibs/fltk && \
+		cp fltk-1.x.x-arm64/FL/abi-version.h fltk-1.x.x/FL/abi-version.h
+endif
+endif
 else
 		$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x/ DIRS=src
 endif
