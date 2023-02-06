@@ -998,7 +998,7 @@ int load_indexed_fileimage(int index)
 	cur_index = index;
 
 	hxc_getcurrentdirectory(cur_directory,sizeof(cur_directory));
-	snprintf(fullpath,sizeof(fullpath)"%s%c%s",cur_directory,SEPARATOR,"HXCSDFE.CFG");
+	snprintf(fullpath,sizeof(fullpath),"%s%c%s",cur_directory,SEPARATOR,"HXCSDFE.CFG");
 
 	memset(filebuffer,0,8*1024);
 	filecfg = (sdhxcfecfgfile *)&filebuffer;
@@ -1013,7 +1013,7 @@ int load_indexed_fileimage(int index)
 	{
 
 		snprintf(filename,sizeof(filename),"DSKA%.4d.HFE",cur_index);
-		snprintf(fullpath,"%s%c%s",cur_directory,SEPARATOR,filename);
+		snprintf(fullpath,sizeof(fullpath),"%s%c%s",cur_directory,SEPARATOR,filename);
 
 		write_back_fileimage();
 
