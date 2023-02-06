@@ -16,8 +16,7 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 -------------------------------------------------------------------------------
 
 /*********************************************************
-XXXXXX 2023 : HxCFloppyEmulator 2.14.X.X (Work in progress / Beta version !)
-              (Last update : 27 January 2023)
+6 February 2023 : HxCFloppyEmulator 2.14.4.1
 
 -> Windows : Turn the process in high priority when the USB HxC Floppy Emulator is detected.
              Fix most of the Sync lost events.
@@ -58,6 +57,8 @@ XXXXXX 2023 : HxCFloppyEmulator 2.14.X.X (Work in progress / Beta version !)
 
 -> Some memory related bug fixed.
 
+-> Possible crashes related to the track / disk view window fixed.
+
 -> IMD File Writer : Fix track type when no supported sector are present on the track.
 
 -> MSA File Writer : Don't write the last unformatted tracks.
@@ -93,12 +94,18 @@ XXXXXX 2023 : HxCFloppyEmulator 2.14.X.X (Work in progress / Beta version !)
 	The track should be read during at least to 2 revolutions ( 3 index pulses ). Save the dump in raw binary mode.
 	Change the binary dump file extension to ".logicbin8bits".
 	Before loading the file into the hxc software you may need to set the LOGICANALYZER_IMPORT_START_OFFSET and LOGICANALYZER_IMPORT_END_OFFSET
-	to define the region of interest in the file. You can use PulseView or similar software to roughly get the values to use.
+	variables to define the region of interest in the file. You can use PulseView or similar software to roughly get the values to use.
 
 	TODO / Work in progress :
 
 	- Add the xx.y file naming convention to load multiple track files (xx=track number, y=side number)
 	- Add the dir,step,side, track 0 signals support to load a whole disk from one single file.
+
+-> zlib updated to the version v1.2.13 : Security and bugs fixes.
+
+-> expat lib updated to the version v2.5.0 : Security and bugs fixes.
+
+-> lz4 lib updated to the version v1.9.4 : Bugs fixes.
 
 -> Development / build process:
 
