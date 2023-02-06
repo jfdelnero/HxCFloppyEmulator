@@ -111,11 +111,11 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 
 	- GCC 9 / 11 : Fix warning messages during the compilation.
 
-	- Clang / macOs : Fix warning messages during the compilation.
+	- Clang / macOS : Fix warning messages during the compilation.
 
 	- Repository changed to Git and moved to Github : https://github.com/jfdelnero/HxCFloppyEmulator
 
-	- Continuous integration build enabled: Linux, Windows x86 + x64, macOs arm + x64 CI build.
+	- Continuous integration build enabled: Linux, Windows x86 + x64, macOS arm + x64 CI build.
 
 	- Auto-tests scripts added. (Linux)
 
