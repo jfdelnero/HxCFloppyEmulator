@@ -19,61 +19,98 @@ Twitter  : https://twitter.com/jfdelnero (or hashtag #hxc2001)
 XXXXXX 2023 : HxCFloppyEmulator 2.14.X.X (Work in progress / Beta version !)
               (Last update : 27 January 2023)
 
-Windows : Turn the process in high priority when the USB HxC Floppy Emulator is detected.
-          Fix most of the Sync lost events.
+-> Windows : Turn the process in high priority when the USB HxC Floppy Emulator is detected.
+             Fix most of the Sync lost events.
 
-XML generated disks : clear the internal tracks status -> fix the command line tool.
+-> XML generated disks : Clear the internal tracks status -> fix the command line tool.
 
-Hard-sectored H8D Heathkit images: Fix odd tracks main index skew.
+-> Hard-sectored H8D Heathkit images: Fix odd tracks main index skew.
 
-QuickDisk files loader : Support "HxC-like-but-not-exactly-hxc" QD images files.
+-> QuickDisk files loader : Support "HxC-like-but-not-exactly-hxc" QD images files.
 
-DiscFerret DFI Loader : New DFILOADER_SAMPLE_FREQUENCY_MHZ parameter to change
-                        the default sample frequency.
+-> DiscFerret DFI Loader : New DFILOADER_SAMPLE_FREQUENCY_MHZ parameter to change
+                           the default sample frequency.
 
-HxC stream (Pauline) : Support CLV convertion parameters :
-                       - FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV (Dump drive's CAV RPM)
-                       - FLUXSTREAM_IMPORT_PCCAV_TO_C64CLV (Dump drive's CAV RPM)
-                       - FLUXSTREAM_IMPORT_PCCAV_TO_VICTOR9KCLV (Dump drive's CAV RPM)
+-> HxC stream (Pauline) : Support CLV convertion parameters :
+                          - FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV (Dump drive's CAV RPM)
+                          - FLUXSTREAM_IMPORT_PCCAV_TO_C64CLV (Dump drive's CAV RPM)
+                          - FLUXSTREAM_IMPORT_PCCAV_TO_VICTOR9KCLV (Dump drive's CAV RPM)
 
-SD HxC Interface modes settings : Add PC/S950 auto density configurations.
+-> SD HxC Interface modes settings : Add PC/S950 auto density configurations.
 
-GCC 9 : Fix warning messages during the compilation.
+-> Apple II *.do/*.dsk/*.po file writer.
 
-Apple II *.do/*.dsk/*.po file writer.
+-> SCP writer : The "Disk Type" field can be forced in the configuration file
+                and the "SCPEXPORT_DISK_TYPE" variable.
 
-SCP export : The "Disk Type" field can be forced in the configuration file
-             and the "SCPEXPORT_DISK_TYPE" variable.
+-> Stream files writers (SCP/KF Raw/...) : Direct stream to stream support
+               If the current loaded tracks have a stream dump in memory then
+               these streams are now just resampled and then exported to the stream file.
+               If you want to use the old behavior and export the analyzed tracks instead then
+               set the "FLUXSTREAM_STREAM_TO_STREAM_CONVERT" variable to 0.
 
-Stream files export (SCP/KF Raw/...) : Direct stream to stream support
-             If the current loaded tracks have a stream dump in memory then
-             these streams are now just resampled and then exported to the stream file.
-             If you want to use the old behavior and export the analyzed tracks instead then
-             set the "FLUXSTREAM_STREAM_TO_STREAM_CONVERT" variable to 0.
+-> Stream analyzer : Bands mode "PLL" -> better Victor 9000 disks support (Work-in-progress)
 
-Stream analyzer : Bands mode "PLL" -> better Victor 9000 disks support (Work-in-progress)
+-> Stream analyzer : Better Apple II and Macintosh support.
 
-Stream analyzer : Better Apple II and Macintosh support.
+-> Stream and track viewer : Print sectors content on the track view.
+                             (ISO/IBM SD/DD and Micral N track formats)
 
-Stream and track viewer : Print sectors content on the track view.
-                          (ISO/IBM SD/DD and Micral N track formats)
+-> Some memory related bug fixed.
 
-Some memory related bug fixes.
+-> IMD File Writer : Fix track type when no supported sector are present on the track.
 
-IMD File Writer : Fix track type when no supported sector are present on the track.
+-> MSA File Writer : Don't write the last unformatted tracks.
 
-Kryoflux Import : (WIP) Possible missing last index workaround.
-Kryoflux export : Possible dead lock fixed.
+-> Kryoflux Import : (WIP) Possible missing last index workaround.
+-> Kryoflux writer : Possible dead lock fixed.
 
-FDX support added : Revision 3 file format (standard and Raw/stream variants supported)
-Raw FDX export support added.
+-> FDX support added : Revision 3 file format (standard and Raw/stream variants supported)
+-> Raw FDX writer support added.
 
-86Box 86F support added : (WIP)
+-> 86Box 86F support added : (WIP)
 
-FD loader : Fix sectors side ID : All of them should use the ID 0.
+-> FD loader : Fix sectors side ID : All of them should use the ID 0.
 
-Logic analyzer capture loader : Can now load tracks captured with a simple logic analyzer.
-                                (Saleae logic analyzer or similar).
+-> Logic analyzer capture loader :
+
+	Can now load tracks captured with a simple logic analyzer. (Saleae logic analyzer or similar).
+
+	The current state/limitations are :
+
+	Need only 2 jumper wires : data (floppy pin 30) & index (floppy pin 8).
+	Load only a track at a time.
+	The sample rate is set by default at 16MHz. This can be changed through the "LOGICANALYZER_SAMPLERATE" variable.
+	The floppy data signal is mapped by default to the bit 0. This can be changed through the "LOGICANALYZER_DATA_BIT" variable.
+	The floppy index signal is mapped by default to the bit 3. This can be changed through the "LOGICANALYZER_INDEX_BIT" variable.
+	The supported input file format is a raw 8bits binary format (change the file extension to ".logicbin8bits").
+	Each byte in the file is a sample.
+
+	How to use it ? :
+
+	Connect the ground, data and index wires : machine ground to vss/gnd wire, floppy pin 30 to wire 0, floppy pin 8 to wire 3.
+	Start the machine, start the logic analyzer software. Start the capture and on the machine use any software/way to read a particular track.
+	The track should be read during at least to 2 revolutions ( 3 index pulses ). Save the dump in raw binary mode.
+	Change the binary dump file extension to ".logicbin8bits".
+	Before loading the file into the hxc software you may need to set the LOGICANALYZER_IMPORT_START_OFFSET and LOGICANALYZER_IMPORT_END_OFFSET
+	to define the region of interest in the file. You can use PulseView or similar software to roughly get the values to use.
+
+	TODO / Work in progress :
+
+	- Add the xx.y file naming convention to load multiple track files (xx=track number, y=side number)
+	- Add the dir,step,side, track 0 signals support to load a whole disk from one single file.
+
+-> Development / build process:
+
+	- GCC 9 / 11 : Fix warning messages during the compilation.
+
+	- Clang / macOs : Fix warning messages during the compilation.
+
+	- Repository changed to Git and moved to Github : https://github.com/jfdelnero/HxCFloppyEmulator
+
+	- Continuous integration build enabled: Linux, Windows x86 + x64, macOs arm + x64 CI build.
+
+	- Auto-tests scripts added. (Linux)
 
 *********************************************************/
 
