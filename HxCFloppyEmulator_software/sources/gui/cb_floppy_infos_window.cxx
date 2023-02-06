@@ -383,8 +383,12 @@ int InfosThreadProc(void* floppycontext,void* context)
 				guicontext->trackviewerfloppy_updateneeded = 0;
 				if(guicontext->trackviewerfloppy)
 				{
-					hxcfe_floppyUnload(guicontext->hxcfe,guicontext->trackviewerfloppy);
+					hxc_entercriticalsection(guicontext->hxcfe,2);
+					HXCFE_FLOPPY * tmp_floppy;
+					tmp_floppy = guicontext->trackviewerfloppy;
 					guicontext->trackviewerfloppy = 0;
+					hxcfe_floppyUnload(guicontext->hxcfe,tmp_floppy);
+					hxc_leavecriticalsection(guicontext->hxcfe,2);
 				}
 
 				if(guicontext->loadedfloppy)
@@ -871,7 +875,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 		sl = hxcfe_td_getlastsectorlist(guicontext->td);
 		fullstr[0]=0;
 
-		while(sl)
+		while(sl && guicontext->trackviewerfloppy)
 		{
 			if(sl->sectorconfig)
 			{
@@ -988,8 +992,15 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 					{
 						track=(int)fiw->track_number_slide->value();
 						side=(int)fiw->side_number_slide->value();
-						snprintf(str,sizeof(str),"Number of cells:%d\n",
-							( ( hxcfe_getTrackLength(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side) - hxcfe_getSectorConfigStartSectorIndex(guicontext->hxcfe,sl->sectorconfig) ) + hxcfe_getSectorConfigEndSectorIndex(guicontext->hxcfe,sl->sectorconfig) ) );
+
+						hxc_entercriticalsection(guicontext->hxcfe,2);
+						if(guicontext->trackviewerfloppy)
+						{
+							snprintf(str,sizeof(str),"Number of cells:%d\n",
+								( ( hxcfe_getTrackLength(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side) - hxcfe_getSectorConfigStartSectorIndex(guicontext->hxcfe,sl->sectorconfig) ) + hxcfe_getSectorConfigEndSectorIndex(guicontext->hxcfe,sl->sectorconfig) ) );
+						}
+						hxc_leavecriticalsection(guicontext->hxcfe,2);
+
 					}
 
 					fiw->buf->append((char*)str);
@@ -1041,9 +1052,10 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 			sl = sl->next_element;
 		}
 
+		hxc_entercriticalsection(guicontext->hxcfe,2);
+
 		if(guicontext->trackviewerfloppy)
 		{
-
 			track = (int)fiw->track_number_slide->value();
 			track = valuesanitycheck(track,0, hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->trackviewerfloppy),&valmodif);
 			if(valmodif)
@@ -1087,9 +1099,9 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 				fiw->object_txt->buffer(fiw->buf);
 			}
-
-
 		}
+
+		hxc_leavecriticalsection(guicontext->hxcfe,2);
 
 		if(fiw->view_mode->value() <= MAX_TRACK_MODES_INDEX)
 			hxc_leavecriticalsection(guicontext->hxcfe,1);

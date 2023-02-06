@@ -1096,6 +1096,7 @@ Main_Window::Main_Window()
 		}
 
 		hxc_createcriticalsection(guicontext->hxcfe,1);
+		hxc_createcriticalsection(guicontext->hxcfe,2);
 
 		Fl::add_timeout(0.02, tick_dump, (void*)fdump_window);
 
