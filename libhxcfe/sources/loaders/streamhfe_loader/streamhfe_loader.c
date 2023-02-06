@@ -64,7 +64,7 @@
 
 #include "tracks/luts.h"
 
-#include "thirdpartylibs/lz4/lib/lz4lib.h"
+#include "thirdpartylibs/lz4/lib/lz4.h"
 
 #include "misc/env.h"
 #include "misc/script_exec.h"

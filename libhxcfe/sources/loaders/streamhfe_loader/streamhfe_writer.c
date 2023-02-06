@@ -62,7 +62,7 @@
 
 #include "tracks/luts.h"
 
-#include "thirdpartylibs/lz4/lib/lz4lib.h"
+#include "thirdpartylibs/lz4/lib/lz4.h"
 
 #define SHIFTER_FREQ 25000000
 

@@ -1,6 +1,6 @@
 /*
     util.h - utility functions
-    Copyright (C) 2016-present, Przemyslaw Skibinski, Yann Collet
+    Copyright (C) 2016-2020, Przemyslaw Skibinski, Yann Collet
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,16 +33,21 @@ extern "C" {
 #include <stddef.h>       /* size_t, ptrdiff_t */
 #include <stdlib.h>       /* malloc */
 #include <string.h>       /* strlen, strncpy */
-#include <stdio.h>        /* fprintf */
+#include <stdio.h>        /* fprintf, fileno */
 #include <assert.h>
 #include <sys/types.h>    /* stat, utime */
 #include <sys/stat.h>     /* stat */
-#if defined(_MSC_VER)
+#if defined(_WIN32)
 #  include <sys/utime.h>  /* utime */
 #  include <io.h>         /* _chmod */
 #else
 #  include <unistd.h>     /* chown, stat */
+# if PLATFORM_POSIX_VERSION < 200809L
 #  include <utime.h>      /* utime */
+# else
+#  include <fcntl.h>      /* AT_FDCWD */
+#  include <sys/stat.h>   /* for utimensat */
+# endif
 #endif
 #include <time.h>         /* time */
 #include <limits.h>       /* INT_MAX */
@@ -117,6 +122,36 @@ extern "C" {
 #endif
 
 
+/*-****************************************
+*  stat() functions
+******************************************/
+#if defined(_MSC_VER)
+#  define UTIL_TYPE_stat __stat64
+#  define UTIL_stat _stat64
+#  define UTIL_fstat _fstat64
+#  define UTIL_STAT_MODE_ISREG(st_mode) ((st_mode) & S_IFREG)
+#elif   defined(__MINGW32__) && defined (__MSVCRT__)
+#  define UTIL_TYPE_stat _stati64
+#  define UTIL_stat _stati64
+#  define UTIL_fstat _fstati64
+#  define UTIL_STAT_MODE_ISREG(st_mode) ((st_mode) & S_IFREG)
+#else
+#  define UTIL_TYPE_stat stat
+#  define UTIL_stat stat
+#  define UTIL_fstat fstat
+#  define UTIL_STAT_MODE_ISREG(st_mode) (S_ISREG(st_mode))
+#endif
+
+
+/*-****************************************
+*  fileno() function
+******************************************/
+#if defined(_MSC_VER)
+#  define UTIL_fileno _fileno
+#else
+#  define UTIL_fileno fileno
+#endif
+
 /* *************************************
 *  Constants
 ***************************************/
@@ -138,6 +173,39 @@ extern "C" {
 #else
 #  define UTIL_STATIC static  /* this version may generate warnings for unused static functions; disable the relevant warning */
 #endif
+
+
+
+/*-****************************************
+*  Allocation functions
+******************************************/
+/*
+ * A modified version of realloc().
+ * If UTIL_realloc() fails the original block is freed.
+*/
+UTIL_STATIC void* UTIL_realloc(void* ptr, size_t size)
+{
+    void* const newptr = realloc(ptr, size);
+    if (newptr) return newptr;
+    free(ptr);
+    return NULL;
+}
+
+
+/*-****************************************
+*  String functions
+******************************************/
+/*
+ * A modified version of realloc().
+ * If UTIL_realloc() fails the original block is freed.
+*/
+UTIL_STATIC int UTIL_sameString(const char* a, const char* b)
+{
+    assert(a!=NULL && b!=NULL);  /* unsupported scenario */
+    if (a==NULL) return 0;
+    if (b==NULL) return 0;
+    return !strcmp(a,b);
+}
 
 
 /*-****************************************
@@ -282,19 +350,30 @@ UTIL_STATIC void UTIL_waitForNextTick(void)
 
 
 UTIL_STATIC int UTIL_isRegFile(const char* infilename);
+UTIL_STATIC int UTIL_isRegFD(int fd);
 
 
 UTIL_STATIC int UTIL_setFileStat(const char *filename, stat_t *statbuf)
 {
     int res = 0;
-    struct utimbuf timebuf;
 
     if (!UTIL_isRegFile(filename))
         return -1;
 
-    timebuf.actime = time(NULL);
-    timebuf.modtime = statbuf->st_mtime;
-    res += utime(filename, &timebuf);  /* set access and modification times */
+    {
+#if defined(_WIN32) || (PLATFORM_POSIX_VERSION < 200809L)
+        struct utimbuf timebuf;
+        timebuf.actime = time(NULL);
+        timebuf.modtime = statbuf->st_mtime;
+        res += utime(filename, &timebuf);  /* set access and modification times */
+#else
+        struct timespec timebuf[2];
+        memset(timebuf, 0, sizeof(timebuf));
+        timebuf[0].tv_nsec = UTIME_NOW;
+        timebuf[1].tv_sec = statbuf->st_mtime;
+        res += utimensat(AT_FDCWD, filename, timebuf, 0);  /* set access and modification times */
+#endif
+    }
 
 #if !defined(_WIN32)
     res += chown(filename, statbuf->st_uid, statbuf->st_gid);  /* Copy ownership */
@@ -307,6 +386,19 @@ UTIL_STATIC int UTIL_setFileStat(const char *filename, stat_t *statbuf)
 }
 
 
+UTIL_STATIC int UTIL_getFDStat(int fd, stat_t *statbuf)
+{
+    int r;
+#if defined(_MSC_VER)
+    r = _fstat64(fd, statbuf);
+    if (r || !(statbuf->st_mode & S_IFREG)) return 0;   /* No good... */
+#else
+    r = fstat(fd, statbuf);
+    if (r || !S_ISREG(statbuf->st_mode)) return 0;   /* No good... */
+#endif
+    return 1;
+}
+
 UTIL_STATIC int UTIL_getFileStat(const char* infilename, stat_t *statbuf)
 {
     int r;
@@ -318,6 +410,17 @@ UTIL_STATIC int UTIL_getFileStat(const char* infilename, stat_t *statbuf)
     if (r || !S_ISREG(statbuf->st_mode)) return 0;   /* No good... */
 #endif
     return 1;
+}
+
+
+UTIL_STATIC int UTIL_isRegFD(int fd)
+{
+    stat_t statbuf;
+#ifdef _WIN32
+    /* Windows runtime library always open file descriptors 0, 1 and 2 in text mode, therefore we can't use them for binary I/O */
+    if(fd < 3) return 0;
+#endif
+    return UTIL_getFDStat(fd, &statbuf); /* Only need to know whether it is a regular file */
 }
 
 
@@ -343,22 +446,30 @@ UTIL_STATIC U32 UTIL_isDirectory(const char* infilename)
 }
 
 
+UTIL_STATIC U64 UTIL_getOpenFileSize(FILE* file)
+{
+    int r;
+    int fd;
+    struct UTIL_TYPE_stat statbuf;
+
+    fd = UTIL_fileno(file);
+    if (fd < 0) {
+        perror("fileno");
+        exit(1);
+    }
+    r = UTIL_fstat(fd, &statbuf);
+    if (r || !UTIL_STAT_MODE_ISREG(statbuf.st_mode)) return 0;   /* No good... */
+    return (U64)statbuf.st_size;
+}
+
+
 UTIL_STATIC U64 UTIL_getFileSize(const char* infilename)
 {
     int r;
-#if defined(_MSC_VER)
-    struct __stat64 statbuf;
-    r = _stat64(infilename, &statbuf);
-    if (r || !(statbuf.st_mode & S_IFREG)) return 0;   /* No good... */
-#elif defined(__MINGW32__) && defined (__MSVCRT__)
-    struct _stati64 statbuf;
-    r = _stati64(infilename, &statbuf);
-    if (r || !(statbuf.st_mode & S_IFREG)) return 0;   /* No good... */
-#else
-    struct stat statbuf;
-    r = stat(infilename, &statbuf);
-    if (r || !S_ISREG(statbuf.st_mode)) return 0;   /* No good... */
-#endif
+    struct UTIL_TYPE_stat statbuf;
+
+    r = UTIL_stat(infilename, &statbuf);
+    if (r || !UTIL_STAT_MODE_ISREG(statbuf.st_mode)) return 0;   /* No good... */
     return (U64)statbuf.st_size;
 }
 
@@ -370,19 +481,6 @@ UTIL_STATIC U64 UTIL_getTotalFileSize(const char** fileNamesTable, unsigned nbFi
     for (n=0; n<nbFiles; n++)
         total += UTIL_getFileSize(fileNamesTable[n]);
     return total;
-}
-
-
-/*
- * A modified version of realloc().
- * If UTIL_realloc() fails the original block is freed.
-*/
-UTIL_STATIC void* UTIL_realloc(void* ptr, size_t size)
-{
-    void* const newptr = realloc(ptr, size);
-    if (newptr) return newptr;
-    free(ptr);
-    return NULL;
 }
 
 
@@ -459,22 +557,23 @@ UTIL_STATIC int UTIL_prepareFileList(const char* dirName, char** bufStart, size_
 {
     DIR* dir;
     struct dirent * entry;
-    int dirLength, nbFiles = 0;
+    size_t dirLength;
+    int nbFiles = 0;
 
     if (!(dir = opendir(dirName))) {
         fprintf(stderr, "Cannot open directory '%s': %s\n", dirName, strerror(errno));
         return 0;
     }
 
-    dirLength = (int)strlen(dirName);
+    dirLength = strlen(dirName);
     errno = 0;
     while ((entry = readdir(dir)) != NULL) {
         char* path;
-        int fnameLength, pathLength;
+        size_t fnameLength, pathLength;
         if (strcmp (entry->d_name, "..") == 0 ||
             strcmp (entry->d_name, ".") == 0) continue;
-        fnameLength = (int)strlen(entry->d_name);
-        path = (char*) malloc(dirLength + fnameLength + 2);
+        fnameLength = strlen(entry->d_name);
+        path = (char*)malloc(dirLength + fnameLength + 2);
         if (!path) { closedir(dir); return 0; }
         memcpy(path, dirName, dirLength);
         path[dirLength] = '/';
@@ -487,7 +586,7 @@ UTIL_STATIC int UTIL_prepareFileList(const char* dirName, char** bufStart, size_
             if (*bufStart == NULL) { free(path); closedir(dir); return 0; }
         } else {
             if (*bufStart + *pos + pathLength >= *bufEnd) {
-                ptrdiff_t newListSize = (*bufEnd - *bufStart) + LIST_SIZE_INCREASE;
+                size_t const newListSize = (size_t)(*bufEnd - *bufStart) + LIST_SIZE_INCREASE;
                 *bufStart = (char*)UTIL_realloc(*bufStart, newListSize);
                 *bufEnd = *bufStart + newListSize;
                 if (*bufStart == NULL) { free(path); closedir(dir); return 0; }
@@ -542,15 +641,15 @@ UTIL_createFileList(const char** inputNames, unsigned inputNamesNb,
 
     for (i=0, pos=0, nbFiles=0; i<inputNamesNb; i++) {
         if (!UTIL_isDirectory(inputNames[i])) {
-            size_t const len = strlen(inputNames[i]);
+            size_t const len = strlen(inputNames[i]) + 1;  /* include nul char */
             if (pos + len >= bufSize) {
                 while (pos + len >= bufSize) bufSize += LIST_SIZE_INCREASE;
                 buf = (char*)UTIL_realloc(buf, bufSize);
                 if (!buf) return NULL;
             }
             assert(pos + len < bufSize);
-            strncpy(buf + pos, inputNames[i], bufSize - pos);
-            pos += len + 1;
+            memcpy(buf + pos, inputNames[i], len);
+            pos += len;
             nbFiles++;
         } else {
             char* bufend = buf + bufSize;
@@ -586,8 +685,8 @@ UTIL_createFileList(const char** inputNames, unsigned inputNamesNb,
 UTIL_STATIC void
 UTIL_freeFileList(const char** filenameTable, char* allocatedBuffer)
 {
-    if (allocatedBuffer) free(allocatedBuffer);
-    if (filenameTable) free((void*)filenameTable);
+    free(allocatedBuffer);
+    free((void*)filenameTable);
 }
 
 

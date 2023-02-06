@@ -53,7 +53,7 @@
 #include "libhxcfe.h"
 
 #include "tracks/std_crc32.h"
-#include "thirdpartylibs/lz4/lib/lz4lib.h"
+#include "thirdpartylibs/lz4/lib/lz4.h"
 
 #include "floppy_loader.h"
 #include "floppy_utils.h"
