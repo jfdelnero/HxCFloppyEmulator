@@ -28,7 +28,7 @@ EXEC=libhxcfe.so
 
 ifeq ($(TARGET), Linux)
 CFLAGS += -fPIC -Wl,-Map,foo.map
-LDFLAGS += -g -lc -lm  -ldl
+LDFLAGS += -lc -lm  -ldl
 endif
 
 ifeq ($(TARGET), mingw32)
@@ -46,7 +46,7 @@ EXEC=libhxcfe.dll
 endif
 
 ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
-LDFLAGS= -g -shared -lc -lm  -ldl
+LDFLAGS= -shared -lc -lm  -ldl
 EXEC=libhxcfe.dll
 endif
 

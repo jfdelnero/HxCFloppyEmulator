@@ -27,7 +27,7 @@ EXEC=libusbhxcfe.so
 
 ifeq ($(TARGET), Linux)
 CFLAGS += -fPIC -Wl,-Map,foo.map
-LDFLAGS += -g -lc -lm  -ldl
+LDFLAGS += -lc -lm  -ldl
 endif
 
 ifeq ($(TARGET), mingw32)
