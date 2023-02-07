@@ -26,10 +26,23 @@ Facebook : https://www.facebook.com/groups/hxc2001/
 Twitter :  https://twitter.com/jfdelnero
 -------------------------------------------------------------------------------
 
--------------------------------------------------------------------------------
-.\libhxcfe\
+This software is the HxC Floppy Emulators hardwares and firmwares companion.
 
-The main HxC Floppy Emulator library
+Features :
+
+ - Import and convert many floppy image file formats.
+ - Import, analyze and convert floppy stream files images.
+ - Create/Browse DOS and AmigaDOS floppy images.
+ - Create floppy disk images with custom sector layout.
+ - Low level track and disk inspection.
+ - Floppy disk read function.
+
+ And many more !
+
+-------------------------------------------------------------------------------
+.\HxCFloppyEmulator_software\
+
+HxC Floppy Emulator GUI software
 (Windows, Linux, macOS)
 -------------------------------------------------------------------------------
 .\HxCFloppyEmulator_cmdline\
@@ -37,9 +50,9 @@ The main HxC Floppy Emulator library
 HxC Floppy Emulator command line software
 (Windows, Linux, macOS)
 -------------------------------------------------------------------------------
-.\HxCFloppyEmulator_software\
+.\libhxcfe\
 
-HxC Floppy Emulator GUI software
+The main HxC Floppy Emulator library
 (Windows, Linux, macOS)
 -------------------------------------------------------------------------------
 .\libusbhxcfe\
