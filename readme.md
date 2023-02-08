@@ -2,10 +2,7 @@
 
 *The [HxC Floppy Emulators hardwares and firmwares](https://hxc2001.com/) companion.*
 
-![CI Badge][ci-badge]
-![Version Badge][version-badge]
-
-![Banner](/doc/imgs/banner.jpg?raw=true "Banner")
+![HxCFloppyEmulator](/doc/imgs/banner.jpg?raw=true "HxCFloppyEmulator")
 
 ### Features
 
@@ -92,11 +89,16 @@ HxC Floppy Emulator project
 Generic/universal floppy disk drive emulators
 
 Copyright (C) 2006-2023  Jean-François DEL NERO / HxC2001
+
 Email :    hxc2001(at)hxc2001.com
+
 Website :  https://hxc2001.com
            http://hxc2001.free.fr/floppy_drive_emulator
+
 Forum :    https://torlus.com/floppy/forum
+
 Facebook : https://www.facebook.com/groups/hxc2001/
+
 Twitter :  https://twitter.com/jfdelnero
 
 -------------------------------------------------------------------------------
