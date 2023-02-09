@@ -2,6 +2,8 @@
 
 *The [HxC Floppy Emulators hardwares and firmwares](https://hxc2001.com/) companion.*
 
+![CI Badge](https://github.com/jfdelnero/HxCFloppyEmulator/actions/workflows/ccpp.yml/badge.svg)
+
 ![HxCFloppyEmulator](/doc/imgs/banner.jpg?raw=true "HxCFloppyEmulator")
 
 ### Features
