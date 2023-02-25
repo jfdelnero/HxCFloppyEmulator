@@ -329,19 +329,77 @@ int logicanalyzer_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 	struct stat staterep;
 	HXCFE_SIDE * curside;
 	short rpm;
+	int mintrack,maxtrack;
+	int minside,maxside,singleside;
+	int nbtrack,nbside;
+	int found,track,side;
+	char fname[512];
+	char * folder;
+	int len,trackstep,singlefile;
+	char * filepath;
+	FILE * f;
+	int i,j;
 
 	envvar_entry * backup_env;
 	la_stats la;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"logicanalyzer_libLoad_DiskFile");
 
+	folder = NULL;
 	backup_env = NULL;
+	filepath = NULL;
+	singleside = 0;
+	singlefile = 1;
 
 	if(imgfile)
 	{
 		if(!hxc_stat(imgfile,&staterep))
 		{
 			backup_env = duplicate_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
+			if(!backup_env)
+				goto error;
+
+			len = hxc_getpathfolder(imgfile,0,SYS_PATH_TYPE);
+
+			folder = (char*)malloc(len+1);
+			if(!folder)
+				goto error;
+
+			hxc_getpathfolder(imgfile,folder,SYS_PATH_TYPE);
+
+			if(staterep.st_mode&S_IFDIR)
+			{
+				sprintf(fname,"track");
+			}
+			else
+			{
+				hxc_getfilenamebase(imgfile,(char*)&fname,SYS_PATH_TYPE);
+				if(!strstr(fname,".0.logicbin8bits") && !strstr(fname,".1.logicbin8bits") )
+				{
+					if(!strstr(fname,".logicbin8bits"))
+					{
+						free(folder);
+						return HXCFE_BADFILE;
+					}
+					else
+					{
+						singlefile = 1;
+					}
+				}
+				else
+				{
+					singlefile = 0;
+					fname[strlen(fname)-18]=0;
+				}
+
+			}
+
+			filepath = malloc( strlen(imgfile) + 32 );
+			if(!filepath)
+				goto error;
+
+			sprintf(filepath,"%s%s",folder,"config.script");
+			hxcfe_execScriptFile(imgldr_ctx->hxcfe, filepath);
 
 			memset(&la,0,sizeof(la_stats));
 
@@ -365,66 +423,159 @@ int logicanalyzer_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 			if( hxcfe_getEnvVar( imgldr_ctx->hxcfe, "LOGICANALYZER_IMPORT_END_OFFSET", NULL) )
 				la.end_offset = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_IMPORT_END_OFFSET" );
 
+			if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_DOUBLE_STEP" ) & 1 )
+				trackstep = 2;
+			else
+				trackstep = 1;
+
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Index bit = %d",la.idx_pos);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Data bit = %d",la.dat_pos);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Sample rate = %d Hz",la.sample_rate);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Start offset = %d",la.start_offset);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : End offset = %d",la.end_offset);
 
-			binlogicfile2stream(imgldr_ctx,imgfile, &la);
+			track = 0;
+			side = 0;
+			mintrack=0;
+			maxtrack=0;
+			minside=0;
+			maxside=0;
+			found = 0;
 
-			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Data pulses count = %d",la.dat_pulse_cnt);
-			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Last Data position = %d",la.last_dat_pos);
-			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Index pulses count = %d",la.index_cnt);
-			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : First index position = %d",la.first_idx_pos);
-			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Last Index position = %d",la.last_idx_pos);
-
-			if(la.dat_pulse_cnt>0)
+			if(!singlefile)
 			{
-				la.stream = malloc(la.dat_pulse_cnt * sizeof(uint32_t));
-				if(la.stream)
-					memset(la.stream,0,la.dat_pulse_cnt * sizeof(uint32_t));
+				do
+				{
+					sprintf(filepath,"%s%s%.2d.%d.logicbin8bits",folder,fname,track,side);
+					f = hxc_fopen(filepath,"rb");
+					if(f)
+					{
+						if(mintrack>track)
+							mintrack = track;
+
+						if(maxtrack<track)
+							maxtrack = track;
+
+						if(minside>side)
+							minside = side;
+
+						if(maxside<side)
+							maxside = side;
+
+						found=1;
+
+						hxc_fclose(f);
+					}
+					side++;
+					if(side>1)
+					{
+						side = 0;
+						track=track+trackstep;
+					}
+				}while(track<84);
+			}
+			else
+			{
+				found = 1;
+				minside = 0;
+				maxside = 0;
+				mintrack = 0;
+				maxtrack = 0;
+				singleside = 1;
+				trackstep = 1;
 			}
 
-			if(la.index_cnt>0)
+			if( found )
 			{
-				la.index_array = malloc(la.index_cnt * sizeof(uint32_t));
-				if(la.index_array)
-					memset(la.index_array,0,la.index_cnt * sizeof(uint32_t));
-			}
+				nbside=(maxside-minside)+1;
+				if(singleside)
+					nbside = 1;
+				nbtrack=(maxtrack-mintrack)+1;
+				if(trackstep==2)
+					nbtrack=(nbtrack/trackstep) + 1;
 
-			if( la.stream && la.index_array )
-			{
-				binlogicfile2stream(imgldr_ctx,imgfile, &la);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%d track (%d - %d), %d sides (%d - %d)",nbtrack,mintrack,maxtrack,nbside,minside,maxside);
 
 				floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 				floppydisk->floppyBitRate=VARIABLEBITRATE;
-				floppydisk->floppyNumberOfTrack=1;
-				floppydisk->floppyNumberOfSide=1;
+				floppydisk->floppyNumberOfTrack=nbtrack;
+				floppydisk->floppyNumberOfSide=nbside;
 				floppydisk->floppySectorPerTrack=-1;
 
-				floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+				floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+				if(!floppydisk->tracks)
+					goto error;
+
 				memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
-				rpm = 300;
-
-				curside = decodestream(imgldr_ctx->hxcfe,la.stream,la.dat_pulse_cnt,la.index_array, la.index_cnt,0,&rpm,1.0,
-							hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_PLL_PHASE_CORRECTION_DIVISOR" ), \
-							hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_BITRATE" ), \
-							hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW" ), \
-							hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES" ), \
-							hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_BMPEXPORT" ), \
-							hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_SAMPLERATE" ));
-
-				if(!floppydisk->tracks[0])
+				for(j=0;j<floppydisk->floppyNumberOfTrack*trackstep;j=j+trackstep)
 				{
-					floppydisk->tracks[0]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+					for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+					{
+						hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),(floppydisk->floppyNumberOfTrack*trackstep)*2 );
+
+						if(singlefile)
+							sprintf(filepath,"%s",imgfile);
+						else
+							sprintf(filepath,"%s%s%.2d.%d.logicbin8bits",folder,fname,j,i);
+
+						rpm = 300;
+
+						la.dat_pulse_cnt = 0;
+						la.index_cnt = 0;
+
+						binlogicfile2stream(imgldr_ctx,filepath, &la);
+
+						if(la.dat_pulse_cnt>0)
+						{
+							la.stream = malloc(la.dat_pulse_cnt * sizeof(uint32_t));
+							if(la.stream)
+								memset(la.stream,0,la.dat_pulse_cnt * sizeof(uint32_t));
+						}
+
+						if(la.index_cnt>0)
+						{
+							la.index_array = malloc(la.index_cnt * sizeof(uint32_t));
+							if(la.index_array)
+								memset(la.index_array,0,la.index_cnt * sizeof(uint32_t));
+						}
+
+						binlogicfile2stream(imgldr_ctx,filepath, &la);
+
+						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Data pulses count = %d",la.dat_pulse_cnt);
+						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Last Data position = %d",la.last_dat_pos);
+						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Index pulses count = %d",la.index_cnt);
+						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : First index position = %d",la.first_idx_pos);
+						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"logicanalyzer_libLoad_DiskFile : Last Index position = %d",la.last_idx_pos);
+
+						curside = decodestream(imgldr_ctx->hxcfe,la.stream,la.dat_pulse_cnt,la.index_array, la.index_cnt,0,&rpm,1.0,
+									hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_PLL_PHASE_CORRECTION_DIVISOR" ), \
+									hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_BITRATE" ), \
+									hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_WINDOW" ), \
+									hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_BITRATE_FILTER_PASSES" ), \
+									hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_BMPEXPORT" ), \
+									hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_SAMPLERATE" ));
+
+						if(la.index_array)
+							free(la.index_array);
+
+						if(la.stream)
+							free(la.stream);
+
+						la.stream = NULL;
+						la.index_array = NULL;
+
+						if(!floppydisk->tracks[j/trackstep])
+						{
+							floppydisk->tracks[j/trackstep] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+						}
+
+						currentcylinder = floppydisk->tracks[j/trackstep];
+						currentcylinder->sides[i] = curside;
+					}
 				}
 
-				currentcylinder=floppydisk->tracks[0];
-				currentcylinder->sides[0]=curside;
-
-				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"tracks files successfully loaded and encoded!");
 
 				hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
@@ -450,6 +601,16 @@ int logicanalyzer_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 	}
 
 	return HXCFE_BADFILE;
+
+error:
+	if(folder)
+		free(folder);
+
+	if(filepath)
+		free(filepath);
+
+	return HXCFE_INTERNALERROR;
+
 }
 
 int logicanalyzer_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
