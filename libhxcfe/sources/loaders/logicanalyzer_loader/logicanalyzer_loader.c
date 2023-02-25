@@ -182,7 +182,7 @@ int binlogicfile2stream(HXCFE_IMGLDR * imgldr_ctx,char * file, la_stats * la)
 			{
 				if( old_idx_state && !(data_buffer[i] & (0x1<<la->idx_pos)) )
 				{
-					if(la->dat_pulse_cnt > 4000)
+					if(la->dat_pulse_cnt > 100)
 					{
 						if(la->index_array)
 						{
