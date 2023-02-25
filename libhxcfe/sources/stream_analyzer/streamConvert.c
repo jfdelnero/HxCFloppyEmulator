@@ -86,6 +86,16 @@ streamconv * initStreamConvert(HXCFE* hxcfe, HXCFE_SIDE * track, float stream_pe
 		sc->old_index_state = track->indexbuffer[sc->bitstream_pos>>3];
 
 		sc->end_revolution = end_revolution;
+
+		if( !sc->track->stream_dump || !hxcfe_getEnvVarValue( hxcfe, "FLUXSTREAM_STREAM_TO_STREAM_CONVERT" ) )
+		{
+			if(start_revolution < 0)
+				start_revolution = 0;
+
+			if(start_offset<0)
+				start_offset = 0;
+		}
+
 		sc->start_revolution = 0;
 		sc->end_bitstream_pos = sc->track->tracklen-1;
 
@@ -125,7 +135,14 @@ streamconv * initStreamConvert(HXCFE* hxcfe, HXCFE_SIDE * track, float stream_pe
 			{
 				sc->stream_source = 1;
 				sc->fxs = hxcfe_initFxStream(sc->hxcfe);
-				sc->bitstream_pos = sc->track->stream_dump->index_evt_tab[hxcfe_FxStream_GetRevolutionIndex( sc->fxs, sc->track->stream_dump, start_revolution )].dump_offset;
+				if( start_revolution >= 0 )
+				{
+					sc->bitstream_pos = sc->track->stream_dump->index_evt_tab[hxcfe_FxStream_GetRevolutionIndex( sc->fxs, sc->track->stream_dump, start_revolution )].dump_offset;
+				}
+				else
+				{
+					sc->bitstream_pos = 0;
+				}
 			}
 		}
 
@@ -242,6 +259,16 @@ uint32_t StreamConvert_setPosition(streamconv * sc, int revolution, float offset
 	sc->current_revolution = 0;
 
 	sc->conv_error = 0;
+
+	if( revolution < 0 )
+	{
+		sc->bitstream_pos = 0;
+
+		if( offset >= 0 )
+			return StreamConvert_moveOffset(sc, offset);
+		else
+			return 0;
+	}
 
 	if(StreamConvert_search_index(sc, revolution))
 	{
