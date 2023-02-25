@@ -91,7 +91,7 @@ uint32_t write_scp_track(HXCFE_IMGLDR* imgldr_ctx,FILE *f,HXCFE_SIDE * track,uin
 	checksum = 0;
 	file_checksum = 0;
 
-	strconv = initStreamConvert(imgldr_ctx->hxcfe,track, DEFAULT_SCP_PERIOD, (DEFAULT_SCP_PERIOD/1000)*65536,0,0,revolution+1,5000000);
+	strconv = initStreamConvert(imgldr_ctx->hxcfe,track, DEFAULT_SCP_PERIOD, (DEFAULT_SCP_PERIOD/1000)*65536,-1,-1,revolution+1,5000000);
 	if(!strconv)
 		return 0;
 
