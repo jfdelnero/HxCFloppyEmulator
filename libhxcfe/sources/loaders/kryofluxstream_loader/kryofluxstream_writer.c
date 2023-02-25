@@ -147,7 +147,7 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 	FILE *f;
 	streamconv * strconv;
 
-	strconv = initStreamConvert(imgldr_ctx->hxcfe,track, 41619, 0x00FFFFFF,0,0,revolution+1,5000000);
+	strconv = initStreamConvert(imgldr_ctx->hxcfe,track, 41619, 0x00FFFFFF,-1,-1,revolution+1,5000000);
 	if(!strconv)
 		return 0;
 
