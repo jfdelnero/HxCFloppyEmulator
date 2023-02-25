@@ -2199,6 +2199,26 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 					pl->forward_link[i] = i + 1;
 				}
 
+				if( hxcfe_FxStream_GetNumberOfRevolution(fxs,track_dump) == 1 )
+				{
+					int start_index_pos,end_index_pos;
+
+					start_index_pos = hxcfe_FxStream_GetRevolutionIndex( fxs, track_dump, 0 );
+					end_index_pos = hxcfe_FxStream_GetRevolutionIndex( fxs, track_dump, 1 );
+
+					if(start_index_pos < end_index_pos)
+					{
+						// fix index forward link.
+						if(
+							( track_dump->index_evt_tab[start_index_pos].dump_offset < track_dump->index_evt_tab[end_index_pos].dump_offset ) &&
+							( ( track_dump->index_evt_tab[start_index_pos].dump_offset >= 0 ) &&  ( track_dump->index_evt_tab[end_index_pos].dump_offset >= 0 ) )
+						)
+						{
+							pl->forward_link[ track_dump->index_evt_tab[start_index_pos].dump_offset ] =  track_dump->index_evt_tab[end_index_pos].dump_offset;
+						}
+					}
+				}
+
 				for(i=0;i<pl->number_of_pulses;i++)
 				{
 					if( ( pl->forward_link[i] >= 0 ) && ( pl->forward_link[i] < (int32_t)pl->number_of_pulses ) )
@@ -4024,23 +4044,33 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 						if( !fxs->defaultbitrate )
 						{
 							histo = (uint32_t*)malloc(65536* sizeof(uint32_t));
-							if((first_index + (pl->forward_link[first_index] - first_index))<(int32_t)std->channels[0].nb_of_pulses)
+							if(histo)
 							{
-								computehistogram(&std->channels[0].stream[first_index],pl->forward_link[first_index] - first_index,histo);
+								if((first_index + (pl->forward_link[first_index] - first_index))<(int32_t)std->channels[0].nb_of_pulses)
+								{
+									hxcfe->hxc_printf(MSG_DEBUG,"Compute histogram from offset %d to offset %d... (pl->forward_link[first_index] = %d)",first_index, first_index + (pl->forward_link[first_index] - first_index), pl->forward_link[first_index] );
+									computehistogram(&std->channels[0].stream[first_index],pl->forward_link[first_index] - first_index,histo);
+								}
+								else
+								{
+									hxcfe->hxc_printf(MSG_DEBUG,"Compute histogram from offset %d to offset %d (end buffer)...",first_index, first_index + (std->channels[0].nb_of_pulses - first_index) );
+									computehistogram(&std->channels[0].stream[first_index],std->channels[0].nb_of_pulses - first_index,histo);
+									hxcfe->hxc_printf(MSG_ERROR,"hxcfe_FxStream_AnalyzeAndGetTrack : End of the stream flux passed ! Bad Stream flux ?");
+								}
+
+								bitrate = detectpeaks(hxcfe, &fxs->pll, histo);
+
+								hxcfe->hxc_printf(MSG_DEBUG,"%d RPM, Bitrate: %d",rpm,(int)(fxs->pll.tick_freq/bitrate) );
+
+								hxcfe->hxc_printf(MSG_DEBUG,"Cells analysing...");
+
+								free(histo);
 							}
 							else
 							{
-								computehistogram(&std->channels[0].stream[first_index],std->channels[0].nb_of_pulses - first_index,histo);
-								hxcfe->hxc_printf(MSG_ERROR,"hxcfe_FxStream_AnalyzeAndGetTrack : End of the stream flux passed ! Bad Stream flux ?");
+								bitrate = 0;
+								hxcfe->hxc_printf(MSG_ERROR,"hxcfe_FxStream_AnalyzeAndGetTrack : Alloc error...");
 							}
-
-							bitrate = detectpeaks(hxcfe, &fxs->pll, histo);
-
-							hxcfe->hxc_printf(MSG_DEBUG,"%d RPM, Bitrate: %d",rpm,(int)(fxs->pll.tick_freq/bitrate) );
-
-							hxcfe->hxc_printf(MSG_DEBUG,"Cells analysing...");
-
-							free(histo);
 						}
 						else
 						{
