@@ -84,6 +84,8 @@ int KryoFluxStream_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_F
 		if( imgfile->is_dir )
 		{
 			filepath = malloc( strlen(imgfile->path) + 32 );
+			if(!filepath)
+				return HXCFE_BADFILE;
 
 			track=0;
 			side=0;
@@ -245,15 +247,23 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"KryoFluxStream_libLoad_DiskFile");
 
 	backup_env = NULL;
+	folder = NULL;
+	filepath = NULL;
 
 	if(imgfile)
 	{
 		if(!hxc_stat(imgfile,&staterep))
 		{
 			backup_env = duplicate_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
+			if(!backup_env)
+				goto error;
 
-			len=hxc_getpathfolder(imgfile,0,SYS_PATH_TYPE);
-			folder=(char*)malloc(len+1);
+			len = hxc_getpathfolder(imgfile,0,SYS_PATH_TYPE);
+
+			folder = (char*)malloc(len+1);
+			if(!folder)
+				goto error;
+
 			hxc_getpathfolder(imgfile,folder,SYS_PATH_TYPE);
 
 			if(staterep.st_mode&S_IFDIR)
@@ -270,10 +280,12 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 				}
 
 				fname[strlen(fname)-8]=0;
-
 			}
 
 			filepath = malloc( strlen(imgfile) + 32 );
+			if(!filepath)
+				goto error;
+
 			sprintf(filepath,"%s%s",folder,"config.script");
 			hxcfe_execScriptFile(imgldr_ctx->hxcfe, filepath);
 
@@ -285,7 +297,7 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 			mac_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV" );
 			c64_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_C64CLV" );
 			victor9k_clv = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_VICTOR9KCLV" );
- 
+
 			singleside = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "KFRAWLOADER_SINGLE_SIDE" )&1;
 
 			timecoef=1;
@@ -364,7 +376,10 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 			floppydisk->floppyNumberOfSide=nbside;
 			floppydisk->floppySectorPerTrack=-1;
 
-			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			if(!floppydisk->tracks)
+				goto error;
+
 			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 			rpm = 300;
@@ -391,11 +406,11 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 					if(!floppydisk->tracks[j/trackstep])
 					{
-						floppydisk->tracks[j/trackstep]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+						floppydisk->tracks[j/trackstep] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 					}
 
-					currentcylinder=floppydisk->tracks[j/trackstep];
-					currentcylinder->sides[i]=curside;
+					currentcylinder = floppydisk->tracks[j/trackstep];
+					currentcylinder->sides[i] = curside;
 				}
 			}
 
@@ -427,9 +442,16 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 	}
 
 	return HXCFE_BADFILE;
+
+error:
+	if(folder)
+		free(folder);
+
+	if(filepath)
+		free(filepath);
+
+	return HXCFE_INTERNALERROR;
 }
-
-
 
 int KryoFluxStream_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
