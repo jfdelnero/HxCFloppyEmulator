@@ -156,8 +156,11 @@ uintptr_t hxc_createevent(HXCFE* floppycontext,unsigned char id)
 #else
 
 	eventtab[id]=(EVENT_HANDLE*)malloc(sizeof(EVENT_HANDLE));
-	pthread_mutex_init(&eventtab[id]->eMutex, NULL);
-	pthread_cond_init(&eventtab[id]->eCondVar, NULL);
+	if(eventtab[id])
+	{
+		pthread_mutex_init(&eventtab[id]->eMutex, NULL);
+		pthread_cond_init(&eventtab[id]->eCondVar, NULL);
+	}
 	return (uintptr_t)eventtab[id];
 #endif
 }
@@ -290,16 +293,21 @@ int hxc_createthread(HXCFE* floppycontext,void* hwcontext,THREADFUNCTION thread,
 
 	threadinit *threadinitptr;
 
-	threadinitptr=(threadinit*)malloc(sizeof(threadinit));
-	threadinitptr->thread=thread;
-	threadinitptr->hxcfloppyemulatorcontext=floppycontext;
-	threadinitptr->hwcontext=hwcontext;
+	sit = 0;
 
-	thread_handle = CreateThread(NULL,8*1024,&ThreadProc,threadinitptr,0,&sit);
-
-	if(!thread_handle)
+	threadinitptr = (threadinit*)malloc(sizeof(threadinit));
+	if(threadinitptr)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"hxc_createthread : CreateThread failed -> 0x.8X", GetLastError());
+		threadinitptr->thread=thread;
+		threadinitptr->hxcfloppyemulatorcontext=floppycontext;
+		threadinitptr->hwcontext=hwcontext;
+
+		thread_handle = CreateThread(NULL,8*1024,&ThreadProc,threadinitptr,0,&sit);
+
+		if(!thread_handle)
+		{
+			floppycontext->hxc_printf(MSG_ERROR,"hxc_createthread : CreateThread failed -> 0x.8X", GetLastError());
+		}
 	}
 
 	return sit;
@@ -331,17 +339,20 @@ int hxc_createthread(HXCFE* floppycontext,void* hwcontext,THREADFUNCTION thread,
 	/* set the new scheduling param */
 	pthread_attr_setschedparam (&threadattrib, &param);
 
-	threadinitptr=(threadinit *)malloc(sizeof(threadinit));
-	threadinitptr->thread=thread;
-	threadinitptr->hxcfloppyemulatorcontext=floppycontext;
-	threadinitptr->hwcontext=hwcontext;
-
-	ret = pthread_create(&threadid, &threadattrib,ThreadProc, threadinitptr);
-	if(ret)
+	threadinitptr = (threadinit*)malloc(sizeof(threadinit));
+	if(threadinitptr)
 	{
-		floppycontext->hxc_printf(MSG_ERROR,"hxc_createthread : pthread_create failed -> %d",ret);
-	}
+		threadinitptr->thread=thread;
+		threadinitptr->hxcfloppyemulatorcontext=floppycontext;
+		threadinitptr->hwcontext=hwcontext;
 
+		ret = pthread_create(&threadid, &threadattrib,ThreadProc, threadinitptr);
+		if(ret)
+		{
+			floppycontext->hxc_printf(MSG_ERROR,"hxc_createthread : pthread_create failed -> %d",ret);
+			free(threadinitptr);
+		}
+	}
 	return sit;
 #endif
 

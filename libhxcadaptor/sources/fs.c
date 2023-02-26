@@ -348,12 +348,18 @@ void * hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 
 	if(file)
 	{
-		folderstr=(char *) malloc(strlen(folder)+strlen(file)+2);
+		folderstr = (char *)malloc(strlen(folder)+strlen(file)+2);
+		if(!folderstr)
+			goto alloc_error;
+
 		sprintf((char *)folderstr,"%s\\%s",folder,file);
 	}
 	else
 	{
-		folderstr = (char *) malloc(strlen(folder)+1);
+		folderstr = (char *)malloc(strlen(folder)+1);
+		if(!folderstr)
+			goto alloc_error;
+
 		sprintf((char *)folderstr,"%s",folder);
 	}
 
@@ -380,6 +386,9 @@ void * hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 		free(folderstr);
 		return 0;
 	}
+
+alloc_error:
+	return 0;
 
 #else
 	struct dirent *d;
@@ -410,7 +419,7 @@ void * hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 		d = readdir (dir);
 		if(d)
 		{
-			tmpstr = malloc (strlen(folder) + strlen(d->d_name) + 4 );
+			tmpstr = malloc(strlen(folder) + strlen(d->d_name) + 4 );
 			if(tmpstr)
 			{
 				strcpy(tmpstr,folder);
@@ -499,7 +508,7 @@ int hxc_find_next_file(void* handleff, char *folder, char *file, filefoundinfo* 
 	ret = 0;
 	if(d)
 	{
-		tmpstr = malloc (strlen(folder) + strlen(d->d_name) + 4 );
+		tmpstr = malloc(strlen(folder) + strlen(d->d_name) + 4 );
 		if(tmpstr)
 		{
 			strcpy(tmpstr,folder);

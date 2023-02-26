@@ -1194,11 +1194,17 @@ HXCFE_FLPGEN* hxcfe_initFloppy( HXCFE* floppycontext, int32_t nb_of_track, int32
 		fb_ctx->floppydisk->floppySectorPerTrack=-1;
 
 		fb_ctx->floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*fb_ctx->floppydisk->floppyNumberOfTrack);
+		if(!fb_ctx->floppydisk->tracks)
+			goto alloc_error;
+
 		memset(fb_ctx->floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*fb_ctx->floppydisk->floppyNumberOfTrack);
 
 		fb_ctx->fb_stack_pointer=0;
 
 		fb_ctx->fb_stack = (fb_track_state*)malloc(sizeof(fb_track_state)*STACK_SIZE);
+		if(!fb_ctx->fb_stack)
+			goto alloc_error;
+
 		memset(fb_ctx->fb_stack,0,sizeof(fb_track_state)*STACK_SIZE);
 
 		fb_ctx->fb_stack[0].interleave=1;
@@ -1359,7 +1365,8 @@ int32_t hxcfe_pushTrack ( HXCFE_FLPGEN* fb_ctx, uint32_t rpm, int32_t number, in
 			{
 				data_to_realloc = cur_track->sectortab[i].input_data;
 				cur_track->sectortab[i].input_data = (unsigned char * )malloc(cur_track->sectortab[i].sectorsize);
-				memcpy(cur_track->sectortab[i].input_data,data_to_realloc,cur_track->sectortab[i].sectorsize);
+				if(cur_track->sectortab[i].input_data)
+					memcpy(cur_track->sectortab[i].input_data,data_to_realloc,cur_track->sectortab[i].sectorsize);
 			}
 			i++;
 		}
@@ -2199,6 +2206,9 @@ HXCFE_FLOPPY* hxcfe_sanityCheck(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk)
 		{
 			floppycontext->hxc_printf(MSG_WARNING,"Sanity Checker : No track allocated ? Please Check the Loader !");
 			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			if(!floppydisk->tracks)
+				goto alloc_error;
+
 			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 		}
 
@@ -2246,6 +2256,9 @@ HXCFE_FLOPPY* hxcfe_sanityCheck(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk)
 							// Realloc buffer
 							floppydisk->tracks[truenumberoftrack]->number_of_side = numberofside;
 							floppydisk->tracks[truenumberoftrack]->sides=(HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*numberofside);
+							if(!floppydisk->tracks[truenumberoftrack]->sides)
+								goto alloc_error;
+
 							memset(floppydisk->tracks[truenumberoftrack]->sides,0,sizeof(HXCFE_SIDE*)*numberofside);
 
 							if(tmpsides && oldnumberofside)
@@ -2284,6 +2297,9 @@ HXCFE_FLOPPY* hxcfe_sanityCheck(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk)
 				if(!currentside)
 				{
 					currentside=(HXCFE_SIDE*)malloc(sizeof(HXCFE_SIDE));
+					if(!currentside)
+						goto alloc_error;
+
 					memset(currentside,0,sizeof(HXCFE_SIDE));
 				}
 
@@ -2305,22 +2321,33 @@ HXCFE_FLOPPY* hxcfe_sanityCheck(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk)
 						currentside->tracklen = 12500*8;
 
 					currentside->databuffer=malloc(currentside->tracklen/8);
+					if(!currentside->databuffer)
+						goto alloc_error;
+
 					memset(currentside->databuffer,0x01,currentside->tracklen/8);
+
 					currentside->indexbuffer=malloc(currentside->tracklen/8);
+					if(!currentside->indexbuffer)
+						goto alloc_error;
+
 					memset(currentside->indexbuffer,0x00,currentside->tracklen/8);
 					if(floppydisk->floppyBitRate!=-1)
 						currentside->bitrate=floppydisk->floppyBitRate;
 					else
 						currentside->bitrate=250000;
 					fillindex(0,currentside,2500,1,0);
-
 				}
+
 				truenumberofside++;
 			}
 			truenumberoftrack++;
 		}
 	}
 	return floppydisk;
+
+alloc_error:
+	floppycontext->hxc_printf(MSG_WARNING,"Sanity Checker :  Memory allocation error !",truenumberoftrack);
+	return NULL;
 }
 
 fs_config fs_config_table[]=
@@ -2399,7 +2426,7 @@ HXCFE_FLOPPY * hxcfe_generateFloppy( HXCFE* floppycontext, char* path, int32_t f
 
 	plugin_ptr = (image_plugin*)floppycontext->image_handlers;
 
-	newfloppy=0;
+	newfloppy = 0;
 
 	imgldr_ctx = hxcfe_imgInitLoader(floppycontext);
 	if(imgldr_ctx)
@@ -2421,17 +2448,24 @@ HXCFE_FLOPPY * hxcfe_generateFloppy( HXCFE* floppycontext, char* path, int32_t f
 			if(ret==HXCFE_NOERROR)
 			{
 				newfloppy=malloc(sizeof(HXCFE_FLOPPY));
-				memset(newfloppy,0,sizeof(HXCFE_FLOPPY));
-				floppycontext->hxc_printf(MSG_INFO_0,"file loader found!");
-				ret=func_ptr.libLoad_DiskFile(imgldr_ctx,newfloppy,path,fs_config_table[i].name);
-				if(ret!=HXCFE_NOERROR)
+				if(newfloppy)
 				{
-					free(newfloppy);
-					newfloppy=0;
-				}
-				if(err_ret) *err_ret=ret;
+					memset(newfloppy,0,sizeof(HXCFE_FLOPPY));
 
-				hxcfe_imgDeInitLoader(imgldr_ctx);
+					floppycontext->hxc_printf(MSG_INFO_0,"file loader found!");
+
+					ret=func_ptr.libLoad_DiskFile(imgldr_ctx,newfloppy,path,fs_config_table[i].name);
+					if(ret!=HXCFE_NOERROR)
+					{
+						free(newfloppy);
+						newfloppy=0;
+					}
+
+					if(err_ret)
+						*err_ret=ret;
+
+					hxcfe_imgDeInitLoader(imgldr_ctx);
+				}
 
 				return newfloppy;
 			}
@@ -2440,7 +2474,9 @@ HXCFE_FLOPPY * hxcfe_generateFloppy( HXCFE* floppycontext, char* path, int32_t f
 		floppycontext->hxc_printf(MSG_ERROR,"Bad plugin ID : 0x%x",moduleID);
 
 		ret=HXCFE_BADPARAMETER;
-		if(err_ret) *err_ret=ret;
+
+		if(err_ret)
+			*err_ret=ret;
 
 		hxcfe_imgDeInitLoader(imgldr_ctx);
 	}

@@ -166,6 +166,9 @@ int detectpeaks(HXCFE* floppycontext, pll_stat *pll, uint32_t *histogram)
 	}
 
 	stattab = malloc(sizeof(stathisto) * (nbval+1) );
+	if(!stattab)
+		return 0;
+
 	memset(stattab,0,sizeof(stathisto) * (nbval+1) );
 
 	k=0;

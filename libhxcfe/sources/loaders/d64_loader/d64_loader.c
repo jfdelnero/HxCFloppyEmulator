@@ -128,10 +128,12 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			errormap_size=683;
 			errormap=(unsigned char*)malloc(errormap_size);
-			memset(errormap,0,errormap_size);
-			fseek(f,errormap_size,SEEK_END);
-			hxc_fread(errormap,errormap_size,f);
-
+			if(errormap)
+			{
+				memset(errormap,0,errormap_size);
+				fseek(f,errormap_size,SEEK_END);
+				hxc_fread(errormap,errormap_size,f);
+			}
 			break;
 
 		case 196608:
@@ -145,10 +147,12 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			errormap_size=768;
 			errormap=(unsigned char*)malloc(errormap_size);
-			memset(errormap,0,errormap_size);
-			fseek(f,errormap_size,SEEK_END);
-			hxc_fread(errormap,errormap_size,f);
-
+			if(errormap)
+			{
+				memset(errormap,0,errormap_size);
+				fseek(f,errormap_size,SEEK_END);
+				hxc_fread(errormap,errormap_size,f);
+			}
 			break;
 
 		default:
@@ -272,7 +276,8 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		free(trackdata);
 	}
 
-	if(errormap) free(errormap);
+	if(errormap)
+		free(errormap);
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
