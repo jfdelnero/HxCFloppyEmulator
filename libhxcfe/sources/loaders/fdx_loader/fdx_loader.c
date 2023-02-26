@@ -311,7 +311,7 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	}
 
 	memset( &fileheader,0,sizeof(fdxheader_t));
-	if(hxc_fread( &fileheader, sizeof(fdxheader_t), f ))
+	if( hxc_fread( &fileheader, sizeof(fdxheader_t), f ) <= 0 )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Can't read the file header %s !",imgfile);
 		fclose(f);
@@ -361,7 +361,7 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		{
 			hxcfe_imgCallProgressCallback(imgldr_ctx,i,floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide );
 
-			if( !hxc_fread( track_buffer, fileheader.track_block_size, f ) )
+			if( hxc_fread( track_buffer, fileheader.track_block_size, f ) > 0 )
 			{
 				#ifdef FDX_DBG
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDX Cylinder: %d, Head: %d, Index position: %d, bit track length : %d",fdxtrackheader->cylinder,fdxtrackheader->head,fdxtrackheader->index_bit_place,fdxtrackheader->bit_track_length);

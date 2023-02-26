@@ -216,7 +216,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 			memset(&trackheader,0,sizeof(trackheader));
 
-			if( ( ftell(f) == (int32_t)trackposition ) && !hxc_fread(&trackheader,sizeof(trackheader),f) )
+			if( ( ftell(f) == (int32_t)trackposition ) && hxc_fread(&trackheader,sizeof(trackheader),f)>0 )
 			{
 
 				t=trackheader.track_number;

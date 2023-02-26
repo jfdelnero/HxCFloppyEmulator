@@ -175,9 +175,9 @@ int getnextsector(int32_t track,int32_t side,AnaDisk_sectorheader * sectorheader
 		ret = hxc_fread(sectorheader,sizeof(AnaDisk_sectorheader),f);
 		lastdatapos = ftell(f);
 		fseek(f,sectorheader->data_len,SEEK_CUR);
-	}while( !ret && !feof(f) && ( sectorheader->cylinder != track || sectorheader->side != side) );
+	}while( ret>0 && !feof(f) && ( sectorheader->cylinder != track || sectorheader->side != side) );
 
-	if( !ret || feof(f) )
+	if( ret>0 || feof(f) )
 	{
 		return 0;
 	}

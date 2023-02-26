@@ -253,18 +253,32 @@ FILE *hxc_fopen (const char *filename, const char *mode)
 
 int hxc_fread(void * ptr, size_t size, FILE *f)
 {
-
+	int error;
 #if defined (DEBUG)
 	printf("hxc_fread : ptr=%p size=%zu file:%p\n",ptr,size,f);
 #endif
 
 	if( fread(ptr,size,1,f) != 1 )
 	{
-		return 1; // Error
+		if(feof(f) || size == 0 )
+		{
+#if defined (DEBUG)
+			printf("hxc_fread : EOF !\n");
+#endif
+			return 0;
+		}
+
+		error = ferror(f);
+
+#if defined (DEBUG)
+		printf("hxc_fread : Error %d !\n",error);
+#endif
+
+		return -error; // Error
 	}
 	else
 	{
-		return 0; // No Error
+		return 1; // No Error
 	}
 }
 

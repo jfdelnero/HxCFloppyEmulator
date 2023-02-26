@@ -38,7 +38,7 @@
 // File : imd_loader.c
 // Contains: IMD floppy image loader.
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -137,7 +137,7 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		do
 		{
 
-			if(!hxc_fread(&trackcfg,sizeof(trackcfg),f))
+			if(hxc_fread(&trackcfg,sizeof(trackcfg),f)>0)
 			{
 				fseek(f,trackcfg.number_of_sector,SEEK_CUR);
 				if(trackcfg.physical_head & SEC_CYL_MAP)
@@ -235,9 +235,8 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		{
 			hxcfe_imgCallProgressCallback(imgldr_ctx,i,(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide) );
 
-			if(!hxc_fread(&trackcfg,sizeof(trackcfg),f))
+			if(hxc_fread(&trackcfg,sizeof(trackcfg),f)>0)
 			{
-
 				sectorconfig = (HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*trackcfg.number_of_sector);
 				if(!sectorconfig)
 					goto alloc_error;

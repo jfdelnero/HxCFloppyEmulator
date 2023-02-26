@@ -128,7 +128,7 @@ int F86_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	}
 
 	memset( &fileheader,0,sizeof(f86header_t));
-	if(hxc_fread( &fileheader, sizeof(f86header_t), f ))
+	if( hxc_fread( &fileheader, sizeof(f86header_t), f ) <= 0 )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Can't read the file header %s !",imgfile);
 		fclose(f);
@@ -184,7 +184,7 @@ int F86_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 #endif
 
-		if(hxc_fread( &tracks_offset_array, sizeof(tracks_offset_array), f ))
+		if( hxc_fread( &tracks_offset_array, sizeof(tracks_offset_array), f ) <= 0 )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Can't read the tracks offset %s !",imgfile);
 			fclose(f);
@@ -245,7 +245,7 @@ int F86_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			{
 				fseek(f,tracks_offset_array[i],SEEK_SET);
 
-				if( !hxc_fread( &cur_track_header, sizeof(cur_track_header), f ) )
+				if( hxc_fread( &cur_track_header, sizeof(cur_track_header), f ) > 0 )
 				{
 					#ifdef F86_DBG
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"86F Cylinder: %d, Head: %d, nb of bitcells: %d, Index position: %d",i>>1,i&1,cur_track_header.number_of_bit_cells,cur_track_header.index_position);

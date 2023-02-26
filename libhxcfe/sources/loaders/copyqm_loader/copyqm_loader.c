@@ -38,7 +38,7 @@
 // File : copyqm_loader.c
 // Contains: CopyQm floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -203,7 +203,7 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 				if ( !(res < 0) )
 				{
 					res = hxc_fread(comment_buf, comentlen, f_img);
-					if ( !res )
+					if ( res > 0 )
 					{
 						comment_buf[comentlen] = 0;
 						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Disk info:\n%s",comment_buf);
@@ -248,7 +248,7 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 				/* Read the length */
 				unsigned char lengthBuf[2];
 				res = hxc_fread( lengthBuf, 2, f_img );
-				if ( res )
+				if ( res <= 0 )
 				{
 					if ( feof( f_img ) )
 					{
@@ -291,7 +291,8 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 							{
 								drv_qm_update_crc( &crc, flatimg[curwritepos++] );
 							}
-							if ( res )
+
+							if ( res <= 0 )
 							{
 								free(flatimg);
 								hxc_fclose(f_img);
