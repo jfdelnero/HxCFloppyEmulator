@@ -35,10 +35,10 @@
 //-------------------------------------------------------------------------------//
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
-// File : HFE_DiskFile.c
+// File : hfe_loader.c
 // Contains: HFE floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -62,7 +62,7 @@
 
 #include "tracks/luts.h"
 
-char * trackencodingcode[]=
+const char * trackencodingcode[]=
 {
 	"ISOIBM_MFM_ENCODING",
 	"AMIGA_MFM_ENCODING",
@@ -71,8 +71,7 @@ char * trackencodingcode[]=
 	"UNKNOWN_ENCODING"
 };
 
-
-char * interfacemodecode[]=
+const char * interfacemodecode[]=
 {
 	"IBMPC_DD_FLOPPYMODE",
 	"IBMPC_HD_FLOPPYMODE",
@@ -123,11 +122,19 @@ int HFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int i,j,k,l,offset,offset2;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
-    pictrack* trackoffsetlist;
-    unsigned int tracks_base;
-    unsigned char * hfetrack;
+	pictrack* trackoffsetlist;
+	unsigned int tracks_base;
+	unsigned char * hfetrack;
 	int nbofblock,tracklen;
 
+	trackoffsetlist = NULL;
+	currentcylinder = NULL;
+	currentside = NULL;
+	hfetrack = NULL;
+	f = NULL;
+	floppydisk->tracks = NULL;
+
+	memset(&header,0,sizeof(picfileformatheader));
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFE_libLoad_DiskFile %s",imgfile);
 
@@ -138,100 +145,145 @@ int HFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
+	// Reading the header
 	hxc_fread(&header,sizeof(header),f);
 
 	if(!strncmp((char*)header.HEADERSIGNATURE,"HXCPICFE",8))
 	{
-
-		floppydisk->floppyNumberOfTrack=header.number_of_track;
-		floppydisk->floppyNumberOfSide=header.number_of_side;
-		floppydisk->floppyBitRate=header.bitRate*1000;
-		floppydisk->floppySectorPerTrack=-1;
-		floppydisk->floppyiftype=header.floppyinterfacemode;
-
-
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFE File : %d track, %d side, %d bit/s, %d sectors, interface mode %s, track encoding:%s",
-			floppydisk->floppyNumberOfTrack,
-			floppydisk->floppyNumberOfSide,
-			floppydisk->floppyBitRate,
-			floppydisk->floppySectorPerTrack,
-			floppydisk->floppyiftype<0xC?interfacemodecode[floppydisk->floppyiftype]:"Unknow!",
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFE File : Format v%d, %d track, %d side, %d bit/s, interface mode %s, track encoding:%s",
+			header.formatrevision+1,
+			header.number_of_track,
+			header.number_of_side,
+			header.bitRate*1000,
+			floppydisk->floppyiftype<0xC?interfacemodecode[header.floppyinterfacemode]:"Unknow!",
 			(header.track_encoding&(~3))?trackencodingcode[4]:trackencodingcode[header.track_encoding&0x3]);
 
-        trackoffsetlist=(pictrack*)malloc(sizeof(pictrack)* header.number_of_track);
-        memset(trackoffsetlist,0,sizeof(pictrack)* header.number_of_track);
-        fseek( f,512,SEEK_SET);
-        hxc_fread( trackoffsetlist,sizeof(pictrack)* header.number_of_track,f);
+		if( header.formatrevision != 0 )
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"HFE File : Format version %d currently not supported !",header.formatrevision+1);
 
-        tracks_base= 512+( (((sizeof(pictrack)* header.number_of_track)/512)+1)*512);
-        fseek( f,tracks_base,SEEK_SET);
+			hxc_fclose(f);
+			return HXCFE_BADFILE;
+		}
 
-		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if( !header.number_of_track || !header.number_of_side )
+		{
+			// Nothing to Load ?!
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"HFE File : 0 track or side ! Nothing to load !");
+
+			hxc_fclose(f);
+			return HXCFE_BADFILE;
+		}
+
+		if( !header.bitRate )
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"HFE File : Null bitrate !");
+
+			hxc_fclose(f);
+			return HXCFE_BADFILE;
+		}
+
+		floppydisk->floppyNumberOfTrack = header.number_of_track;
+		floppydisk->floppyNumberOfSide = header.number_of_side;
+		floppydisk->floppyBitRate = header.bitRate*1000;
+		floppydisk->floppySectorPerTrack = -1;
+		floppydisk->floppyiftype=header.floppyinterfacemode;
+
+		trackoffsetlist = (pictrack*)malloc(sizeof(pictrack)* header.number_of_track);
+		if(!trackoffsetlist)
+			goto alloc_error;
+
+		memset(trackoffsetlist,0,sizeof(pictrack)* header.number_of_track);
+		fseek( f,512,SEEK_SET);
+		hxc_fread( trackoffsetlist,sizeof(pictrack)* header.number_of_track,f);
+
+		tracks_base= 512 + ( (((sizeof(pictrack)* header.number_of_track)/512)+1)*512);
+		fseek( f,tracks_base,SEEK_SET);
+
+		floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if(!floppydisk->tracks)
+			goto alloc_error;
+
 		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 		for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
 		{
-
 			fseek(f,(trackoffsetlist[i].offset*512),SEEK_SET);
 			if(trackoffsetlist[i].track_len&0x1FF)
 			{
-				tracklen=(trackoffsetlist[i].track_len&(~0x1FF))+0x200;
+				tracklen = (trackoffsetlist[i].track_len&(~0x1FF))+0x200;
 			}
 			else
 			{
-				tracklen=trackoffsetlist[i].track_len;
+				tracklen = trackoffsetlist[i].track_len;
 			}
 
-			hfetrack=(unsigned char*)malloc( tracklen );
+			if(!tracklen)
+			{
+				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"HFE File : Invalid track %d lentght ! Stopping here !",i);
+				break;
+			}
 
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFE File : reading track %d, track size:%d - file offset:%.8X",
-				i,tracklen,(trackoffsetlist[i].offset*512));
+			hfetrack = (unsigned char*)malloc( tracklen );
+			if(!hfetrack)
+				goto alloc_error;
+
+			memset(hfetrack,0,tracklen);
+
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFE File : reading track %d, track size:%d - file offset:%.8X", i, tracklen, (trackoffsetlist[i].offset*512));
 
 			hxc_fread( hfetrack,tracklen,f);
 
+			floppydisk->tracks[i] = (HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
+			if( !floppydisk->tracks[i] )
+				goto alloc_error;
 
-			floppydisk->tracks[i]=(HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
-			currentcylinder=floppydisk->tracks[i];
-			currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-			currentcylinder->sides=(HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
+			currentcylinder = floppydisk->tracks[i];
+			currentcylinder->number_of_side = floppydisk->floppyNumberOfSide;
+			currentcylinder->sides = (HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
+			if( !currentcylinder->sides )
+				goto alloc_error;
+
 			memset(currentcylinder->sides,0,sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
 			currentcylinder->floppyRPM = header.floppyRPM;
 
-
-		/*	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
-			trackdesc.track_number,
-			trackdesc.side_number,
-			trackdesc.mfmtrackoffset,
-			trackdesc.mfmtracksize);
-*/
 			for(j=0;j<currentcylinder->number_of_side;j++)
 			{
 				hxcfe_imgCallProgressCallback(imgldr_ctx,(i<<1) + (j&1),floppydisk->floppyNumberOfTrack*2 );
 
-				currentcylinder->sides[j]=malloc(sizeof(HXCFE_SIDE));
-				memset(currentcylinder->sides[j],0,sizeof(HXCFE_SIDE));
-				currentside=currentcylinder->sides[j];
+				currentcylinder->sides[j] = malloc(sizeof(HXCFE_SIDE));
+				if(!currentcylinder->sides[j])
+					goto alloc_error;
 
-				currentside->number_of_sector=floppydisk->floppySectorPerTrack;
+				memset(currentcylinder->sides[j],0,sizeof(HXCFE_SIDE));
+				currentside = currentcylinder->sides[j];
+
+				currentside->number_of_sector = floppydisk->floppySectorPerTrack;
 				currentside->tracklen=tracklen/2;
 
-				currentside->databuffer=malloc(currentside->tracklen);
+				currentside->databuffer = malloc(currentside->tracklen);
+				if(!currentside->databuffer)
+					goto alloc_error;
+
 				memset(currentside->databuffer,0,currentside->tracklen);
 
 				currentside->flakybitsbuffer=0;
 
-				currentside->indexbuffer=malloc(currentside->tracklen);
+				currentside->indexbuffer = malloc(currentside->tracklen);
+				if(!currentside->indexbuffer)
+					goto alloc_error;
+
 				memset(currentside->indexbuffer,0,currentside->tracklen);
 
 				for(k=0;k<256;k++)
 				{
-					currentside->indexbuffer[k]=0xFF;
+					currentside->indexbuffer[k] = 0xFF;
 				}
 
-				currentside->timingbuffer=0;
-				currentside->bitrate=floppydisk->floppyBitRate;
+				currentside->timingbuffer = 0;
+				currentside->bitrate = floppydisk->floppyBitRate;
 
-				currentside->track_encoding=header.track_encoding;
+				currentside->track_encoding = header.track_encoding;
 
 				if( i == 0 )
 				{
@@ -251,18 +303,18 @@ int HFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					}
 				}
 
-				nbofblock=(currentside->tracklen/256);
+				nbofblock = (currentside->tracklen/256);
 				for(k=0;k<nbofblock;k++)
 				{
 					for(l=0;l<256;l++)
 					{
-						offset=(k*256)+l;
-						offset2=(k*512)+l+(256*j);
-						currentside->databuffer[offset]=LUT_ByteBitsInverter[hfetrack[offset2]];
+						offset = (k*256)+l;
+						offset2 = (k*512)+l+(256*j);
+						currentside->databuffer[offset] = LUT_ByteBitsInverter[hfetrack[offset2]];
 					}
 				}
 
-				currentside->tracklen=currentside->tracklen*8;
+				currentside->tracklen = currentside->tracklen*8;
 
 				if(!currentcylinder->floppyRPM)
 					currentcylinder->floppyRPM = (short)( 60 / GetTrackPeriod(imgldr_ctx->hxcfe,currentside) );
@@ -270,17 +322,59 @@ int HFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			}
 
 			free(hfetrack);
+			hfetrack = NULL;
 		}
 
 		free(trackoffsetlist);
 
 		hxc_fclose(f);
+
+		hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
+
 		return HXCFE_NOERROR;
 	}
 
 	hxc_fclose(f);
-	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"bad header");
+
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"HFE File : Bad file header !");
+
 	return HXCFE_BADFILE;
+
+alloc_error:
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"HFE File : Internal memory allocation error ! Please report !");
+
+	if(floppydisk->tracks)
+	{
+		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+		{
+			if(floppydisk->tracks[j])
+			{
+				if(floppydisk->tracks[j]->sides)
+				{
+					for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+					{
+						hxcfe_freeSide(imgldr_ctx->hxcfe,floppydisk->tracks[j]->sides[i]);
+					}
+
+					free(floppydisk->tracks[j]->sides);
+				}
+
+				free(floppydisk->tracks[j]);
+			}
+		}
+		free(floppydisk->tracks);
+	}
+
+	if(f)
+		hxc_fclose(f);
+
+	if(hfetrack)
+		free(hfetrack);
+
+	if(trackoffsetlist)
+		free(trackoffsetlist);
+
+	return HXCFE_INTERNALERROR;
 }
 
 int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
@@ -294,10 +388,10 @@ int HFE_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	HFE_libIsValidDiskFile,
-		(LOADDISKFILE)		HFE_libLoad_DiskFile,
-		(WRITEDISKFILE)		HFE_libWrite_DiskFile,
-		(GETPLUGININFOS)	HFE_libGetPluginInfo
+		(ISVALIDDISKFILE)   HFE_libIsValidDiskFile,
+		(LOADDISKFILE)      HFE_libLoad_DiskFile,
+		(WRITEDISKFILE)     HFE_libWrite_DiskFile,
+		(GETPLUGININFOS)    HFE_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -322,10 +416,10 @@ int EXTHFE_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * r
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	0,
-		(LOADDISKFILE)		0,
-		(WRITEDISKFILE)		EXTHFE_libWrite_DiskFile,
-		(GETPLUGININFOS)	EXTHFE_libGetPluginInfo
+		(ISVALIDDISKFILE)   0,
+		(LOADDISKFILE)      0,
+		(WRITEDISKFILE)     EXTHFE_libWrite_DiskFile,
+		(GETPLUGININFOS)    EXTHFE_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -350,10 +444,10 @@ int HFE_HDDD_A2_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,voi
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	0,
-		(LOADDISKFILE)		0,
-		(WRITEDISKFILE)		HFE_HDDD_A2_libWrite_DiskFile,
-		(GETPLUGININFOS)	HFE_HDDD_A2_libGetPluginInfo
+		(ISVALIDDISKFILE)   0,
+		(LOADDISKFILE)      0,
+		(WRITEDISKFILE)     HFE_HDDD_A2_libWrite_DiskFile,
+		(GETPLUGININFOS)    HFE_HDDD_A2_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
