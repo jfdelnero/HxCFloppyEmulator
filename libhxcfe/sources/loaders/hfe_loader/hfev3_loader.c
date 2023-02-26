@@ -38,7 +38,7 @@
 // File : hfev3_loader.c
 // Contains: HFE V3 floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -457,6 +457,9 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 		free(trackoffsetlist);
 
 		hxc_fclose(f);
+
+		hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
+
 		return HXCFE_NOERROR;
 	}
 
@@ -465,6 +468,7 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 	return HXCFE_BADFILE;
 
 alloc_error:
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"HFE File : Internal memory allocation error ! Please report !");
 
 	if(floppydisk->tracks)
 	{
