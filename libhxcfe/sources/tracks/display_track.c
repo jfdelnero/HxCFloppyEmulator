@@ -1134,7 +1134,6 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	sl=td->sl;
 	while(sl)
 	{
-
 		oldsl = sl->next_element;
 		//sl = sl->next_element;
 
@@ -1231,6 +1230,20 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 				if(currentside->bitrate == VARIABLEBITRATE)
 					bitrate = currentside->timingbuffer[i>>3];
 
+				if(bitrate <= 0)
+				{
+					// Invalid bitrate...
+					if(currentside->bitrate == VARIABLEBITRATE)
+						sprintf(tmp_str,"ERROR : Invalid bitrate -> bitrate[%d] == %d ! Please check the loader or report the issue !",i>>3,bitrate);
+					else
+						sprintf(tmp_str,"ERROR : Invalid bitrate -> bitrate == %d ! Please check the loader or report the issue !",bitrate);
+
+					putstring8x8(td,td->xsize/2 - (strlen(tmp_str)*8)/2 ,td->ysize/2,tmp_str,0x0000FF,0x000000,0,1);
+
+					td->hxcfe->hxc_printf(MSG_ERROR,tmp_str);
+					return;
+				}
+
 				xpos= (int)( timingoffset / (xresstep) );
 				ypos= td->ysize - (int)( ( (float) ((interbit+1) * 500000) / (float) bitrate ) / (float)((float)td->y_us/(float)td->ysize));
 
@@ -1278,13 +1291,14 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 			if(currentside->bitrate==VARIABLEBITRATE)
 				bitrate = currentside->timingbuffer[i>>3];
 
-			timingoffset=timingoffset + ((float)(500000)/(float)bitrate);
+			timingoffset += ((float)(500000)/(float)bitrate);
 
 			i++;
 
 		}while(i<tracksize && !endfill);
 
 		xpos= (int)( timingoffset / xresstep );
+
 		if(xpos>td->xsize)
 			endfill=1;
 
@@ -1385,7 +1399,7 @@ void hxcfe_td_draw_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track
 	{
 		do
 		{
-			timingoffset=getOffsetTiming(currentside,i,timingoffset,old_i);
+			timingoffset = getOffsetTiming(currentside,i,timingoffset,old_i);
 			old_i=i;
 			xpos= (int)( timingoffset / xresstep );
 
