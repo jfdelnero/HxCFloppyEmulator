@@ -174,8 +174,8 @@ int VEGASDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			sectorconfig[k].gap3=255;
 			sectorconfig[k].trackencoding=ISOFORMAT_SD;
 			sectorconfig[k].input_data=malloc(sectorconfig[k].sectorsize);
-			hxc_fread(sectorconfig[k].input_data,256,f);
-
+			if(sectorconfig[k].input_data)
+				hxc_fread(sectorconfig[k].input_data,256,f);
 		}
 
 		currentcylinder->sides[i]=tg_generateTrackEx(10,(HXCFE_SECTCFG *)&sectorconfig,5,0,floppydisk->floppyBitRate,rpm,ISOFORMAT_SD,0,2500,-2500);
