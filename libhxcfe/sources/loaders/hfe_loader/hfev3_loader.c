@@ -399,8 +399,7 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 
 								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEv3 : T%.3dS%d Off[%.5d] : SKIPBITS_OPCODE : %d 0x%.2X",i,j,l,next_data_bitskip,hfetrack2[l+2]);
 
-								if(next_data_bitskip>8)
-									next_data_bitskip = 8;
+								next_data_bitskip &= 0x7;
 
 								bitoffset_in += 8*2;
 								l += 2;
