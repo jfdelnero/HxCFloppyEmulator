@@ -64,7 +64,6 @@
 
 #include "tracks/luts.h"
 
-//#define DEBUGVB 1
 
 static char * trackencodingcode[]=
 {
@@ -188,8 +187,9 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 	pictrack* trackoffsetlist = NULL;
 	unsigned char * hfetrack = NULL;
 	unsigned char * hfetrack2 = NULL;
-	int nbofblock,tracklen,bitrate,bitskip;
+	int nbofblock,tracklen,bitrate;
 	unsigned char tmp_randmask;
+	unsigned int next_data_bitskip;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEV3_libLoad_DiskFile %s",imgfile);
 
@@ -211,7 +211,7 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 		floppydisk->floppySectorPerTrack=-1;
 		floppydisk->floppyiftype=header.floppyinterfacemode;
 
-		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFE V3 File : %d track, %d side, %d bit/s, %d sectors, interface mode %s, track encoding:%s",
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEv3 : %d track, %d side, %d bit/s, %d sectors, interface mode %s, track encoding:%s",
 			floppydisk->floppyNumberOfTrack,
 			floppydisk->floppyNumberOfSide,
 			floppydisk->floppyBitRate,
@@ -219,16 +219,16 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 			floppydisk->floppyiftype<0xC?interfacemodecode[floppydisk->floppyiftype]:"Unknow!",
 			(header.track_encoding&(~3))?trackencodingcode[4]:trackencodingcode[header.track_encoding&0x3]);
 
-        trackoffsetlist=(pictrack*)malloc(sizeof(pictrack)* header.number_of_track);
+		trackoffsetlist=(pictrack*)malloc(sizeof(pictrack)* header.number_of_track);
 		if(!trackoffsetlist)
 			goto alloc_error;
 
-        memset(trackoffsetlist,0,sizeof(pictrack)* header.number_of_track);
-        fseek( f,512,SEEK_SET);
-        hxc_fread( trackoffsetlist,sizeof(pictrack)* header.number_of_track,f);
+		memset(trackoffsetlist,0,sizeof(pictrack)* header.number_of_track);
+		fseek( f,512,SEEK_SET);
+		hxc_fread( trackoffsetlist,sizeof(pictrack)* header.number_of_track,f);
 
-        tracks_base= 512+( (((sizeof(pictrack)* header.number_of_track)/512)+1)*512);
-        fseek( f,tracks_base,SEEK_SET);
+		tracks_base= 512+( (((sizeof(pictrack)* header.number_of_track)/512)+1)*512);
+		fseek( f,tracks_base,SEEK_SET);
 
 		floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 		if(!floppydisk->tracks)
@@ -258,7 +258,7 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 			memset(hfetrack, 0, tracklen);
 			memset(hfetrack2, 0, tracklen);
 
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFE V3 File : reading track %d, track size:%d - file offset:%.8X",
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEv3 : reading track %d, track size:%d - file offset:%.8X",
 				i,tracklen,(trackoffsetlist[i].offset*512));
 
 			hxc_fread( hfetrack,tracklen,f);
@@ -352,6 +352,7 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 				l = 0;
 				bitoffset_in = 0;
 				bitoffset_out = 0;
+				next_data_bitskip = 0;
 				k = 0;
 				while(k < currentside->tracklen && l < currentside->tracklen)
 				{
@@ -360,17 +361,17 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 						switch( hfetrack2[l] )
 						{
 							case NOP_OPCODE:
-#ifdef DEBUGVB
-								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T%.3dS%d Off[%.5d] : NOP_OPCODE",i,j,l);
-#endif
+
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEv3 : T%.3dS%d Off[%.5d] : NOP_OPCODE",i,j,l);
+
 								l++;
 								bitoffset_in += 8;
 								break;
 
 							case SETINDEX_OPCODE:
-#ifdef DEBUGVB
-								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T%.3dS%d Off[%.5d] : SETINDEX_OPCODE",i,j,l);
-#endif
+
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEv3 : T%.3dS%d Off[%.5d] : SETINDEX_OPCODE",i,j,l);
+
 								setbits(currentside->indexbuffer,bitoffset_out,1, 256*8, currentside->tracklen*8);
 
 								l++;
@@ -384,48 +385,51 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 								}
 								else
 								{
-									imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"T%.3dS%d Off[%.5d] : SETBITRATE_OPCODE : %d. NULL Rate divisor !",i,j,l,hfetrack2[l+1]);
+									imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"HFEv3 : T%.3dS%d Off[%.5d] : SETBITRATE_OPCODE : %d. NULL Rate divisor !",i,j,l,hfetrack2[l+1]);
 								}
-#ifdef DEBUGVB
-								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T%.3dS%d Off[%.5d] : SETBITRATE_OPCODE : %d - %d",i,j,l,hfetrack2[l+1],bitrate);
-#endif
+
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEv3 : T%.3dS%d Off[%.5d] : SETBITRATE_OPCODE : %d - %d",i,j,l,hfetrack2[l+1],bitrate);
+
 								l += 2;
 								bitoffset_in += 8*2;
 								break;
 
 							case SKIPBITS_OPCODE:
-								bitskip = hfetrack2[l+1];
-#ifdef DEBUGVB
-								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T%.3dS%d Off[%.5d] : SKIPBITS_OPCODE : %d 0x%.2X",i,j,l,bitskip,hfetrack2[l+2]);
-#endif
+								next_data_bitskip = hfetrack2[l+1];
 
-								cpybits(currentside->databuffer,bitoffset_out,&hfetrack2[l+2],bitskip , 8-bitskip,currentside->tracklen*8,tracklen*8);
-								bitoffset_out+= (8-bitskip);
-								bitoffset_in += 8*3;
-								l += 3;
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEv3 : T%.3dS%d Off[%.5d] : SKIPBITS_OPCODE : %d 0x%.2X",i,j,l,next_data_bitskip,hfetrack2[l+2]);
+
+								if(next_data_bitskip>8)
+									next_data_bitskip = 8;
+
+								bitoffset_in += 8*2;
+								l += 2;
 							break;
 
 							case RAND_OPCODE:
-#ifdef DEBUGVB
-								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T%.3dS%d Off[%.5d] : RAND_OPCODE",i,j,l);
-#endif
+
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEv3 : T%.3dS%d Off[%.5d] : RAND_OPCODE",i,j,l);
+
 								tmp_randmask = rand();
 								tmp_randmask = tmp_randmask  & 0x54;
 
-								cpybits(currentside->databuffer,bitoffset_out,&tmp_randmask,0, 8,currentside->tracklen*8,tracklen*8);
+								cpybits(currentside->databuffer,bitoffset_out,&tmp_randmask,0, 8 - next_data_bitskip,currentside->tracklen*8,tracklen*8);
 								tmp_randmask = 0xFF;
-								bitoffset_out = cpybits(currentside->flakybitsbuffer,bitoffset_out,&tmp_randmask,0, 8,currentside->tracklen*8,tracklen*8);
+								bitoffset_out = cpybits(currentside->flakybitsbuffer,bitoffset_out,&tmp_randmask,0, 8 - next_data_bitskip,currentside->tracklen*8,tracklen*8);
 
 								currentside->timingbuffer[k] = bitrate;
 								bitoffset_in += 8;
+
+								next_data_bitskip = 0;
+
 								k++;
 								l++;
 							break;
 
 							default:
-#ifdef DEBUGVB
-								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T%.3dS%d Off[%.5d] : Unknown Opcode !?! : 0x%.2X",hfetrack2[l]);
-#endif
+
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEv3 : T%.3dS%d Off[%.5d] : Unknown Opcode !?! : 0x%.2X",hfetrack2[l]);
+
 								l++;
 								bitoffset_in += 8;
 								break;
@@ -433,10 +437,11 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 					}
 					else
 					{
-						bitoffset_out = cpybits(currentside->databuffer,bitoffset_out,hfetrack2,bitoffset_in, 8,currentside->tracklen*8,tracklen*8);
+						bitoffset_out = cpybits(currentside->databuffer,bitoffset_out,hfetrack2,bitoffset_in + next_data_bitskip, 8 - next_data_bitskip,currentside->tracklen*8,tracklen*8);
 
 						currentside->timingbuffer[k] = bitrate;
 						bitoffset_in += 8;
+						next_data_bitskip = 0;
 						k++;
 						l++;
 					}
