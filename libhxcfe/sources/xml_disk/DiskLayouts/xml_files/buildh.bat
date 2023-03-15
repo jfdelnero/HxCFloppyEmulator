@@ -51,6 +51,7 @@
 ..\..\converttools\bmptoh DiskLayout_OS9_1280KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_PUMA_Robot_640KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Roland_W30_S330_W50_S50_S550_DD_720KB.xml -DATA
+..\..\converttools\bmptoh DiskLayout_Roland_MC50_MC300_MC500_DD_720KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Tatung_Einstein_DD_200KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Tatung_Einstein_DD_400KB.xml -DATA
 ..\..\converttools\bmptoh DiskLayout_Timex_FDD3000_40T1S.xml -DATA
