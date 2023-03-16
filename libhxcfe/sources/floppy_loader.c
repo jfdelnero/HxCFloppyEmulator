@@ -2159,7 +2159,7 @@ HXCFE_FLOPPY* hxcfe_sanityCheck(HXCFE* floppycontext,HXCFE_FLOPPY * floppydisk)
 	int numberofside,oldnumberofside,truenumberofside;
 	int needanewpass;
 	int i;
-	HXCFE_SIDE	**		tmpsides;
+	HXCFE_SIDE ** tmpsides;
 	HXCFE_SIDE * currentside;
 
 	if(floppydisk)
