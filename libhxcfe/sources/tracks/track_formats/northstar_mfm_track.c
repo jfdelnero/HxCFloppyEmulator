@@ -171,12 +171,12 @@ int get_next_MFM_Northstar_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 					sector_size = 512;
 
 					sector->input_data=(unsigned char*)malloc(sector_size);
-					memcpy(sector->input_data,&tmp_buffer[2],sector_size);
+					if(sector->input_data)
+						memcpy(sector->input_data,&tmp_buffer[2],sector_size);
 
 					bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
 
 					sector_extractor_sm=ENDOFSECTOR;
-
 				}
 			break;
 

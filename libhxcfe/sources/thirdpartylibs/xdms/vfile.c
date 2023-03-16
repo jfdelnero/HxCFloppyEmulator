@@ -33,11 +33,21 @@ HXCFILE * HXC_fopen(const char * filename, const char * mode)
 	HXCFILE * handle;
 
 	handle=(HXCFILE *)malloc(sizeof(HXCFILE));
-	handle->buffer=(unsigned char*)malloc(4096);
-	handle->true_buffersize=4096;
-	handle->buffersize=0;
-	handle->ptr=0;
-
+	if(handle)
+	{
+		handle->buffer=(unsigned char*)malloc(4096);
+		if(handle->buffer)
+		{
+			handle->true_buffersize=4096;
+			handle->buffersize=0;
+			handle->ptr=0;
+		}
+		else
+		{
+			free(handle);
+			handle = NULL;
+		}
+	}
 	return handle;
 
 }
