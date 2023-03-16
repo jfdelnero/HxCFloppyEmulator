@@ -162,6 +162,16 @@ streamconv * initStreamConvert(HXCFE* hxcfe, HXCFE_SIDE * track, float stream_pe
 				}
 				i++;
 			}while(i<sc->track->tracklen);
+
+			if(sc->track->timingbuffer)
+			{
+				sc->stream_time_offset_ps += ( ((uint64_t)1E12)/(uint64_t)(sc->track->timingbuffer[sc->bitstream_pos>>3]*2) );
+			}
+			else
+			{
+				sc->stream_time_offset_ps += ( ((uint64_t)1E12)/(uint64_t)(sc->track->bitrate*2) );
+			}
+
 		}
 	}
 
