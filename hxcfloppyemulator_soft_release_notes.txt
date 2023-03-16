@@ -17,6 +17,31 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
+XX March 2023 : HxCFloppyEmulator 2.14.X.X - (Work in progress/beta version)
+
+-> Many fixes and improvements into the flux stream management :
+
+  - One revolution only / 2 indexes support fixed.
+
+  - Fix stream files formats export : No more glitch after the first revolution index. (fix SCP and KF export).
+
+-> Kryoflux writer : stream to stream conversion : Don't index align the stream.
+
+-> SCP writer : stream to stream conversion : Don't align output stream to the next index.
+
+-> Logic analyzer capture loader : nameTT.S.logicbin8bits file name convention support. (TT=track S=side)
+
+-> New XML format : MC50/MC300/MC500 formats and empty data disk.
+
+-> Track display : fix possible infinite loop : check the bitrate value and stop + report if needed.
+
+-> HFEv3 loader : Support RAND_OPCODE right after SKIPBITS_OPCODE.
+
+-> Many internal code improvements and fixes.
+
+*********************************************************/
+
+/*********************************************************
 6 February 2023 : HxCFloppyEmulator 2.14.4.1
 
 -> Windows : Turn the process in high priority when the USB HxC Floppy Emulator is detected.
