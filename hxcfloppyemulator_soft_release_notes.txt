@@ -17,7 +17,10 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
-XX March 2023 : HxCFloppyEmulator 2.14.X.X - (Work in progress/beta version)
+** **** 2023 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
+
+*** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
+*** Last update : v2.14.5.1, 17 Mar 2023 ***
 
 -> Many fixes and improvements into the flux stream management :
 
@@ -25,7 +28,7 @@ XX March 2023 : HxCFloppyEmulator 2.14.X.X - (Work in progress/beta version)
 
   - Fix stream files formats export : No more glitch after the first revolution index. (fix SCP and KF export).
 
--> Kryoflux writer : stream to stream conversion : Don't index align the stream.
+-> Kryoflux writer : stream to stream conversion : Don't align output stream to the next index.
 
 -> SCP writer : stream to stream conversion : Don't align output stream to the next index.
 
