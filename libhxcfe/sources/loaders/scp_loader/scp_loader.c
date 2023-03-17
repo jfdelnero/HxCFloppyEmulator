@@ -467,24 +467,28 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			mintrack = scph.start_track;
 			maxtrack = scph.end_track;
 
-			nbtrack=(maxtrack-mintrack)+1;
+			nbtrack = (maxtrack-mintrack) + 1;
 
-			if( scph.number_of_heads )
+			switch(scph.number_of_heads)
 			{
-				nbside = scph.number_of_heads;
-				nbtrack = nbtrack / scph.number_of_heads;
-			}
-			else
-			{
-				if( scph.disk_type == 0x00 ) // C64 ?
-				{
+				case 1:
 					nbside = 1;
-				}
-				else
-				{
+					nbtrack = nbtrack / 2;
+				break;
+				case 2:
 					nbside = 2;
-					nbtrack = nbtrack / nbside;
-				}
+				break;
+				default:
+					if( scph.disk_type == 0x00 ) // C64 ?
+					{
+						nbside = 1;
+					}
+					else
+					{
+						nbside = 2;
+						nbtrack = nbtrack / nbside;
+					}
+				break;
 			}
 
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%d track (%d - %d), %d sides (%d - %d)",nbtrack,mintrack,maxtrack,nbside,minside,maxside);
@@ -549,7 +553,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 					if(victor9k_clv)
 						timecoef = (float)victor9k_clv / clv_track2rpm(j,3);
-					
+
 					rpm = 300;
 
 					curside = decodestream(imgldr_ctx->hxcfe,f,(j<<1)|(i&1),tracksoffset[(track_offset_cyl_step*j) + (track_offset_head_step*i)],&rpm,timecoef,phasecorrection,scph.number_of_revolution,1 + scph.resolution,bitrate,filter,filterpasses,bmp_export);

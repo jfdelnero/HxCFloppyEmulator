@@ -20,7 +20,7 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 ** **** 2023 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
 
 *** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
-*** Last update : v2.14.5.1, 17 Mar 2023 ***
+*** Last update : v2.14.5.2, 17 Mar 2023 ***
 
 -> Many fixes and improvements into the flux stream management :
 
@@ -31,6 +31,8 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -> Kryoflux writer : stream to stream conversion : Don't align output stream to the next index.
 
 -> SCP writer : stream to stream conversion : Don't align output stream to the next index.
+
+-> SCP loader : Fix singled-sided images support (fix the number of tracks/cylinder).
 
 -> Logic analyzer capture loader : nameTT.S.logicbin8bits file name convention support. (TT=track S=side)
 
