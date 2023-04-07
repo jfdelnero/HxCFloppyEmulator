@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!--v1.0-->
+<html lang="en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><link rel="stylesheet" type="text/css" href="dim_files/primary.css"></head>
+<body><h1>DCU/DCP File Format</h1>
+<h2>File format documentation</h2>
+<p>Along with the headerless XDF file format (just a different extension
+ of a BKDSK headerless image), this is the primary floppy format for 
+X68000 disk images.
+</p><p>The DIM format is similar to the DCP/DCU format, but the media 
+byte values are different, and it contains a second header (which 
+doesn't appear to be used for anything)
+</p><p>The details below are taken from posts on the FMV forums, in the 
+case of the general header layout, and my notes on observed media bytes.
+</p><pre>Header:
+-------
+0x00 - Media byte (See below)
+0x01-0xA0 - 160 sector present bytes, like DCU/DCP
+0xA1-0xAA - 10 bytes of 0x00
+0xAB-0xB7 - 13 byte string "DIFC HEADER  "
+0xB8-0xFD - 70 bytes of 0x00
+0xFE-0xFF - WORD (0x16?)
+0x100 - Start of data (Stored in C/H/S sequence)
+
+Media Byte:
+-----------
+DIM    DCP  Format  Geometry
+0x00 = 0x02 (2HS)   (9sec/trk 1440k)
+0x01 = 0x02 (2HS)   (9sec/trk 1440k)
+0x02 = 0x01 (2HC)   (15sec/trk 1200k) [80/2/15/512]
+0x03 = 0x09 (2HQ)   (18sec/trk 1440k) IBM 1.44MB 2HD format
+</pre>
+<h3>Additional Notes</h3>
+<pre><b>Conversion Errors</b>
+VFIC unfortunately has a conversion bug regarding this format:
+"It detects 2HS images as 2HC and sets the wrong media flag in the header. Even worse if you convert such an image to another format the size is reduced to 1.2MB (2HC format).
+
+To correct such an image open it in a hex editor and change the first byte from 02h to 01h.
+
+Since all X68000 images in TOSEC have been converted to DIM format a few other games are also affected.
+Check the 1.4MB images. If the media flag (first byte) is 03h (2HDE format) or 09h (2HQ format) then the image is OK. If it is 02h change it to 01h."
+
+FIVEC will warn you if you open a DIM file corrupted in this manner
+</pre>
+<h3>HexEditor View</h3>
+<img src="dim_files/dim.png"><br><br>
+<br><br><a href="https://www.pc98.org/project/fivec.html">Back to the main page</a>
+<br><br>
+</body></html>

@@ -46,6 +46,7 @@
 #define PLUGIN_SVD                  "SVD"
 #define PLUGIN_NEC_D88              "NEC_D88"
 #define PLUGIN_X68000_HDM           "X68000_HDM"
+#define PLUGIN_X68000_DIM           "X68000_DIM"
 #define PLUGIN_SNES_SMC             "SNES_SMC"
 #define PLUGIN_KURZWEIL_KRZ         "KURZWEIL_KRZ"
 #define PLUGIN_VEGAS6809            "VEGAS6809"
