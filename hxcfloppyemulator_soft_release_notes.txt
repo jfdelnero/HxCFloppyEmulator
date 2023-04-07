@@ -20,7 +20,7 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 ** **** 2023 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
 
 *** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
-*** Last update : v2.14.5.2, 17 Mar 2023 ***
+*** Last update : v2.14.6.1, 7 Apr 2023 ***
 
 -> Many fixes and improvements into the flux stream management :
 
@@ -41,6 +41,10 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -> Track display : fix possible infinite loop : check the bitrate value and stop + report if needed.
 
 -> HFEv3 loader : Support RAND_OPCODE right after SKIPBITS_OPCODE.
+
+-> New X68000 DIM file image loader.
+
+-> New Apple II 2MG file image loader. (WIP - To be completed)
 
 -> Many internal code improvements and fixes.
 
