@@ -68,8 +68,8 @@ BMP_DATAFILES_OUTPUTS := $(patsubst $(BASEDIR)/misc/data/%.bmp,$(BASEDIR)/misc/d
 OUTPUTS := $(patsubst ./input/%.txt,./output/%.out,$(INPUTS))
 
 ADFLIBOBJ= adf_hd.o adf_disk.o adf_raw.o adf_bitm.o adf_dump.o\
-        adf_util.o adf_env.o adf_nativ.o adf_dir.o adf_file.o adf_cache.o \
-        adf_link.o adf_salv.o
+		adf_util.o adf_env.o adf_nativ.o adf_dir.o adf_file.o adf_cache.o \
+		adf_link.o adf_salv.o
 
 XDMSLIBOBJ = getbits.o crc_csum.o maketbl.o pfile.o getbits.o tables.o u_deep.o u_heavy.o u_init.o u_medium.o u_quick.o u_rle.o
 
@@ -82,18 +82,19 @@ MINIZIPOBJ = ioapi.o mztools.o unzip.o zip.o
 FATIOLIB = fat_access.o fat_cache.o fat_filelib.o fat_format.o fat_misc.o fat_string.o fat_table.o fat_write.o fat_list.o
 
 DISKLOADERPLUGINS = raw_amiga.o raw_iso.o copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosfs_loader.o vfile.o cpcdsk_loader.o \
-					msa_loader.o msx_loader.o smc_loader.o st_loader.o stx_loader.o img_loader.o dms_loader.o mfm_loader.o\
-					oricdsk_loader.o d64_loader.o trd_loader.o scl_loader.o fat12floppy_loader.o fat12.o\
-					hfe_loader.o imd_loader.o afi_loader.o sap_loader.o libsap.o jv1_loader.o vtr_loader.o d88_loader.o hdm_loader.o\
-					ti99pc99_loader.o apridisk_loader.o ede_loader.o fd_loader.o vdk_loader.o dpx_loader.o mgt_loader.o emax_loader.o\
-					ensoniq_mirage_loader.o sad_loader.o jv3_loader.o stt_loader.o prophet_loader.o teledisk_loader.o td0_lzss.o\
+					msa_loader.o msx_loader.o smc_loader.o st_loader.o stx_loader.o img_loader.o dms_loader.o mfm_loader.o \
+					oricdsk_loader.o d64_loader.o trd_loader.o scl_loader.o fat12floppy_loader.o fat12.o \
+					hfe_loader.o imd_loader.o afi_loader.o sap_loader.o libsap.o jv1_loader.o vtr_loader.o d88_loader.o hdm_loader.o \
+					ti99pc99_loader.o apridisk_loader.o ede_loader.o fd_loader.o vdk_loader.o dpx_loader.o mgt_loader.o emax_loader.o \
+					ensoniq_mirage_loader.o sad_loader.o jv3_loader.o stt_loader.o prophet_loader.o teledisk_loader.o td0_lzss.o \
 					emuii_raw_loader.o emuii_loader.o emui_raw_loader.o jvc_loader.o dim_loader.o ti99v9t9_loader.o d81_loader.o  acornadf_loader.o \
-					camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o fdi_loader.o fdi_nec_loader.o ssd_dsd_loader.o adl_loader.o \
-					krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o system24_loader.o kryofluxstream_loader.o \
-					kryofluxstream.o fzf_loader.o apple2_nib_loader.o apple2_do_loader.o sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o \
-					northstar_loader.o  xml_loader.o flppcm_loader.o stw_loader.o vfddat_loader.o ana_loader.o atr_loader.o hfev3_loader.o \
-					hfev3_trackgen.o heathkit_loader.o sdu_loader.o xml_db_loader.o streamhfe_loader.o qd_loader.o ipf_loader.o capslibloader.o \
-					hxcstream_loader.o hxcstream.o dfi_loader.o a2r_loader.o micraln_loader.o fdx_loader.o 86f_loader.o logicanalyzer_loader.o
+					camputerslynxldf_loader.o vegasdsk_loader.o dmk_loader.o oldextadf_loader.o extadf_loader.o fdi_loader.o fdi_nec_loader.o \
+					ssd_dsd_loader.o adl_loader.o krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o \
+					system24_loader.o kryofluxstream_loader.o kryofluxstream.o fzf_loader.o apple2_nib_loader.o apple2_do_loader.o \
+					sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o northstar_loader.o  xml_loader.o flppcm_loader.o stw_loader.o \
+					vfddat_loader.o ana_loader.o atr_loader.o hfev3_loader.o hfev3_trackgen.o heathkit_loader.o sdu_loader.o xml_db_loader.o \
+					streamhfe_loader.o qd_loader.o ipf_loader.o capslibloader.o hxcstream_loader.o hxcstream.o dfi_loader.o a2r_loader.o \
+					micraln_loader.o fdx_loader.o 86f_loader.o logicanalyzer_loader.o apple2_2mg_loader.o dim_x68k_loader.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
@@ -629,6 +630,9 @@ jvc_loader.o : $(BASEDIR)/loaders/jvc_loader/jvc_loader.c $(BASEDIR)/loaders/jvc
 hdm_loader.o : $(BASEDIR)/loaders/hdm_loader/hdm_loader.c $(BASEDIR)/loaders/hdm_loader/hdm_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
+dim_x68k_loader.o : $(BASEDIR)/loaders/dim_x68k_loader/dim_x68k_loader.c $(BASEDIR)/loaders/dim_x68k_loader/dim_x68k_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
 emuii_loader.o : $(BASEDIR)/loaders/emuii_loader/emuii_loader.c $(BASEDIR)/loaders/emuii_loader/emuii_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
@@ -675,6 +679,9 @@ apple2_do_loader.o : $(BASEDIR)/loaders/apple2_do_loader/apple2_do_loader.c $(BA
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 apple2_do_writer.o : $(BASEDIR)/loaders/apple2_do_loader/apple2_do_writer.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+apple2_2mg_loader.o : $(BASEDIR)/loaders/apple2_2mg_loader/apple2_2mg_loader.c $(BASEDIR)/loaders/apple2_2mg_loader/apple2_2mg_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 sdd_speccydos_loader.o : $(BASEDIR)/loaders/sdd_speccydos_loader/sdd_speccydos_loader.c $(BASEDIR)/loaders/sdd_speccydos_loader/sdd_speccydos_loader.h

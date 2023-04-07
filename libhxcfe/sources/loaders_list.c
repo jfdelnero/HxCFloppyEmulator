@@ -88,6 +88,7 @@
 #include "./loaders/emuii_loader/emuii_loader.h"
 #include "./loaders/emui_raw_loader/emui_raw_loader.h"
 #include "./loaders/jvc_loader/jvc_loader.h"
+#include "./loaders/dim_x68k_loader/dim_x68k_loader.h"
 #include "./loaders/dim_loader/dim_loader.h"
 #include "./loaders/dmk_loader/dmk_loader.h"
 #include "./loaders/raw_loader/raw_loader.h"
@@ -112,6 +113,7 @@
 #include "./loaders/apple2_nib_loader/apple2_nib_loader.h"
 #include "./loaders/sdd_speccydos_loader/sdd_speccydos_loader.h"
 #include "./loaders/apple2_do_loader/apple2_do_loader.h"
+#include "./loaders/apple2_2mg_loader/apple2_2mg_loader.h"
 #include "./loaders/arburg_raw_loader/arburg_raw_loader.h"
 #include "./loaders/scp_loader/scp_loader.h"
 #include "./loaders/bmp_loader/bmp_loader.h"
@@ -133,6 +135,7 @@
 #include "./loaders/fdx_loader/fdx_loader.h"
 #include "./loaders/86f_loader/86f_loader.h"
 #include "./loaders/logicanalyzer_loader/logicanalyzer_loader.h"
+#include "./loaders/dim_x68k_loader/dim_x68k_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -148,6 +151,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)ADL_libGetPluginInfo,
 	(GETPLUGININFOS)ACORNADF_libGetPluginInfo,
 	(GETPLUGININFOS)CPCDSK_libGetPluginInfo,
+	(GETPLUGININFOS)DIM_x68k_libGetPluginInfo,
 	(GETPLUGININFOS)DIM_libGetPluginInfo,
 	(GETPLUGININFOS)STX_libGetPluginInfo,
 	(GETPLUGININFOS)STT_libGetPluginInfo,
@@ -221,6 +225,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)Apple2_nib_libGetPluginInfo,
 	(GETPLUGININFOS)Apple2_do_libGetPluginInfo,
 	(GETPLUGININFOS)Apple2_po_libGetPluginInfo,
+	(GETPLUGININFOS)Apple2_2mg_libGetPluginInfo,
 	(GETPLUGININFOS)SDDSpeccyDos_libGetPluginInfo,
 	(GETPLUGININFOS)BMP_libGetPluginInfo,
 	(GETPLUGININFOS)BMP_Disk_libGetPluginInfo,
