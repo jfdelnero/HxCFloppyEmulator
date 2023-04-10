@@ -42,7 +42,7 @@ v1.5 - 01/12/16
 
 * Extended track range.  This should not affect any programs using .scp image files
   that followed the guidelines.
-  
+
 v1.6 - 12/05/17
 
 * Added extension footer, courtesy of Natalia Portillo.
@@ -107,10 +107,10 @@ produced.  The bits are defined as follows:
 
 Bit 0 - INDEX, cleared if the image did not use the index mark for queuing tracks
                set is the image used the index mark to queue tracks
-			   
+
 Bit 1 - TPI, cleared if the drive is a 48TPI drive
              set if the drive is a 96TPI drive
-			 
+
 Bit 2 - RPM, cleared if the drive is a 300 RPM drive
              set if the drive is a 360 RPM drive
 
@@ -122,7 +122,7 @@ Bit 4 - MODE, cleared if the image is read-only
 
 Bit 5 - FOOTER, cleared if the image does not contain an extension footer
                 set if the image contains an extension footer
-  
+
 FLAGS bit 0 is used to determine when the reading of flux data started.  If this bit is
 set then the flux data was read immediately after the index pulse was detected.  If
 this bit is clear then the flux data was read starting at some random location on the
@@ -262,7 +262,7 @@ multiple times) with SuperCard Pro's imager..  No break or skew occurs.  However
 possible that flux data could be located anywhere in the file because everything is
 offset based.  For simplicity, please try to keep the revolutions sequential.  SuperCard
 Pro's imaging software always stores the revolutions sequentially.
- 
+
 
 TIMESTAMP INFORMATION
 ----------------------------
@@ -320,7 +320,7 @@ Applications supporting any version of this footer are required to store their n
 this footer. If the value is 0, the string is not present in the file.
 
 BYTES 0x14-0x17 contains the offset from the start of the file where the null-terminated
-UTF-8 string containing the user comments is stored. If the value is 0, the string is not   
+UTF-8 string containing the user comments is stored. If the value is 0, the string is not
 present in the file.
 
 BYTES 0x18-0x1F contains the little-endian signed 64-bit count of seconds since
@@ -573,13 +573,14 @@ TDH_OFFSET = 0x0C                  ; offset to flux data from start of TDH (1st 
 #define DISK_96TPI    0x02
 #define DISK_360RPM   0x04
 #define DISK_RWENABLE 0x08
+#define FLUX_CREATOR  0x80
 
 #pragma pack(1)
 
 typedef struct scp_header_
 {
-	uint8_t  sign[3];				// "SCP"
-	uint8_t  version;				// Version<<4|Revision
+	uint8_t  sign[3];               // "SCP"
+	uint8_t  version;               // Version<<4|Revision
 	uint8_t  disk_type;
 	uint8_t  number_of_revolution;
 	uint8_t  start_track;
@@ -600,10 +601,10 @@ typedef struct scp_index_pos_
 
 typedef struct scp_track_header_
 {
-	uint8_t  trk_sign[3];				// "TRK"
+	uint8_t  trk_sign[3];               // "TRK"
 	uint8_t  track_number;
-	scp_index_pos index_position[5];
-	uint32_t track_data_checksum;
+	scp_index_pos index_position[];     // sizeof(scp_index_pos) * number of revolutions.
+	//uint32_t track_data_checksum;
 }scp_track_header;
 
 #define MAX_NUMBER_OF_TRACKS 168

@@ -96,14 +96,14 @@ int SCP_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 	}
 }
 
-static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t foffset,short * rpm,float timecoef,int phasecorrection,int revolution, int resolution,int bitrate,int filter,int filterpasses, int bmpexport)
+static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t foffset,short * rpm,float timecoef,int phasecorrection,int nb_of_revs, int resolution,int bitrate,int filter,int filterpasses, int bmpexport)
 {
 	HXCFE_SIDE* currentside;
 	int totallength,i,k,offset;
 
 	HXCFE_TRKSTREAM *track_dump;
 	HXCFE_FXSA * fxs;
-	scp_track_header trkh;
+	scp_track_header * trkh;
 	char tmp_filename[512];
 
 	unsigned short * trackbuf;
@@ -119,6 +119,12 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 
 	floppycontext->hxc_printf(MSG_DEBUG,"Loading SCP track...");
 
+	if(nb_of_revs <= 0)
+	{
+		floppycontext->hxc_printf(MSG_ERROR,"Track with bad revolution(s) count ! (%d)",nb_of_revs);
+		return NULL;
+	}
+
 	fxs = hxcfe_initFxStream(floppycontext);
 	if(fxs)
 	{
@@ -130,34 +136,44 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 
 		fseek(f,foffset,SEEK_SET);
 
-		hxc_fread(&trkh,sizeof(scp_track_header),f);
+		trkh = malloc( sizeof(scp_track_header) + ( nb_of_revs * sizeof(scp_index_pos) ) + sizeof(uint32_t) );
+		if(!trkh)
+		{
+			floppycontext->hxc_printf(MSG_ERROR,"Track header allocation failed !");
+			hxcfe_deinitFxStream(fxs);
+			return NULL;
+		}
 
-		if(!strncmp((char*)&trkh.trk_sign,"TRK",3))
+		memset(trkh,0,sizeof(scp_track_header) + ( nb_of_revs * sizeof(scp_index_pos) ) + sizeof(uint32_t));
+		hxc_fread(trkh,sizeof(scp_track_header) + ( nb_of_revs * sizeof(scp_index_pos) ) + sizeof(uint32_t),f);
+
+		if(!strncmp((char*)trkh->trk_sign,"TRK",3))
 		{
 			totallength = 0;
-			for(i=0;i<revolution;i++)
+			for(i=0;i<nb_of_revs;i++)
 			{
-				if(!trkh.index_position[i].track_length || (trkh.index_position[i].track_length > 512*1024))
+				if(!trkh->index_position[i].track_length || (trkh->index_position[i].track_length > 512*1024))
 				{
-					floppycontext->hxc_printf(MSG_DEBUG,"Track %d Revolution %d : Null sized or invalid revolution !",track,revolution);
-					revolution = i;
+					floppycontext->hxc_printf(MSG_ERROR,"Track %d Revolution %d : Null sized or invalid revolution !",track,nb_of_revs);
+					nb_of_revs = i;
 					if(!i)
 					{
 						hxcfe_deinitFxStream(fxs);
+						free(trkh);
 						return NULL;
 					}
 					break;
 				}
 
-				totallength += trkh.index_position[i].track_length;
+				totallength += trkh->index_position[i].track_length;
 
 #ifdef SCPDEBUG
-				floppycontext->hxc_printf(MSG_DEBUG,"Revolution %d : %d words - offset 0x%x - index time : %d",i,trkh.index_position[i].track_length,trkh.index_position[i].track_offset,(trkh.index_position[i].index_time));
+				floppycontext->hxc_printf(MSG_DEBUG,"Revolution %d : %d words - offset 0x%x - index time : %d",i,trkh->index_position[i].track_length,trkh->index_position[i].track_offset,(trkh->index_position[i].index_time));
 #endif
 			}
 
 #ifdef SCPDEBUG
-			floppycontext->hxc_printf(MSG_DEBUG,"Total track length : [0x%X - 0x%X] - %d bytes",foffset + trkh.index_position[0].track_offset,foffset + trkh.index_position[0].track_offset + ((totallength*sizeof(unsigned short))-1),totallength*sizeof(unsigned short));
+			floppycontext->hxc_printf(MSG_DEBUG,"Total track length : [0x%X - 0x%X] - %d bytes",foffset + trkh->index_position[0].track_offset,foffset + trkh->index_position[0].track_offset + ((totallength*sizeof(unsigned short))-1),totallength*sizeof(unsigned short));
 #endif
 
 			totallength++;
@@ -171,19 +187,19 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 
 					offset = 0;
 
-					for(i=0;i<revolution;i++)
+					for(i=0;i<nb_of_revs;i++)
 					{
-						fseek(f,foffset + trkh.index_position[i].track_offset,SEEK_SET);
+						fseek(f,foffset + trkh->index_position[i].track_offset,SEEK_SET);
 
-						hxc_fread(&trackbuf[offset], (trkh.index_position[i].track_length*sizeof(unsigned short)), f);
+						hxc_fread(&trackbuf[offset], (trkh->index_position[i].track_length*sizeof(unsigned short)), f);
 
 #ifdef SCPDEBUG
 						floppycontext->hxc_printf(MSG_DEBUG,"SCP read stream - offset [0x%X - 0x%X] : %d bytes",
-							 foffset + trkh.index_position[i].track_offset,
-							 (foffset + trkh.index_position[i].track_offset) + ((trkh.index_position[i].track_length*sizeof(unsigned short)) - 1 ),
-							(trkh.index_position[i].track_length*sizeof(unsigned short)));
+							 foffset + trkh->index_position[i].track_offset,
+							 (foffset + trkh->index_position[i].track_offset) + ((trkh->index_position[i].track_length*sizeof(unsigned short)) - 1 ),
+							(trkh->index_position[i].track_length*sizeof(unsigned short)));
 #endif
-						offset += (trkh.index_position[i].track_length);
+						offset += (trkh->index_position[i].track_length);
 					}
 
 					for(i=0;i<totallength;i++)
@@ -200,11 +216,11 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 						curpulselength = 0;
 						k = 0;
 
-						for(i=0;i<revolution;i++)
+						for(i=0;i<nb_of_revs;i++)
 						{
 							revonumberofpulses = 0;
 
-							for(j=0;j<trkh.index_position[i].track_length;j++)
+							for(j=0;j<trkh->index_position[i].track_length;j++)
 							{
 								curpulselength += trackbuf[k];
 
@@ -223,7 +239,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 								k++;
 							}
 
-							trkh.index_position[i].track_length = revonumberofpulses;
+							trkh->index_position[i].track_length = revonumberofpulses;
 
 						}
 
@@ -239,14 +255,14 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 					track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf_dword,32,(realnumberofpulses), HXCFE_STREAMCHANNEL_TYPE_RLEEVT, "data", NULL);
 					if(track_dump)
 					{
-						if(revolution)
+						if(nb_of_revs)
 						{
 							offset = 0;
 							hxcfe_FxStream_AddIndex(fxs,track_dump,offset,0,FXSTRM_INDEX_MAININDEX);
 
-							for(i=0;i<revolution;i++)
+							for(i=0;i<nb_of_revs;i++)
 							{
-								offset += (trkh.index_position[i].track_length);
+								offset += (trkh->index_position[i].track_length);
 								hxcfe_FxStream_AddIndex(fxs,track_dump,offset,0,FXSTRM_INDEX_MAININDEX);
 							}
 						}
@@ -282,6 +298,8 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 				}
 			}
 		}
+
+		free(trkh);
 
 		hxcfe_deinitFxStream(fxs);
 	}
