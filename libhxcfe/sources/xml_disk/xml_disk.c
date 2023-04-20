@@ -818,7 +818,7 @@ static void XMLCALL start(void *data, const char *el, const char **attr)
 					hxcfe_setSectorTrackID(ad->fb,(unsigned char)(track>>1));
 					hxcfe_setSectorID(ad->fb,(unsigned char)sector);
 					hxcfe_setSectorSize(ad->fb,sectorsize);
-					if(ad->ts[track].base_adress + ad->ts[track].track_size + sectorsize < ad->buffer_size)
+					if(ad->ts[track].base_adress + ad->ts[track].track_size + sectorsize <= ad->buffer_size)
 					{
 						hxcfe_setSectorData(ad->fb,&ad->image_data[ad->ts[track].base_adress + ad->ts[track].track_size],sectorsize);
 					}

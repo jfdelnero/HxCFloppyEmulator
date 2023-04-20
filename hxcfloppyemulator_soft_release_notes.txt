@@ -20,7 +20,7 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 ** **** 2023 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
 
 *** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
-*** Last update : v2.14.6.2, 10 Apr 2023 ***
+*** Last update : v2.14.6.3, 20 Apr 2023 ***
 
 -> Many fixes and improvements into the flux stream management :
 
@@ -47,6 +47,8 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -> New X68000 DIM file image loader.
 
 -> New Apple II 2MG file image loader. (WIP - To be completed)
+
+-> XML raw loader : Fix images last sector loading. 
 
 -> Many internal code improvements and fixes.
 
