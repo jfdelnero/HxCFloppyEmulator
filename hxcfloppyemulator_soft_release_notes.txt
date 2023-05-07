@@ -1305,7 +1305,7 @@ Pentium 90Mhz  / Windows 98
 
 !v!v!v!v!v!v!v! Warning: older CPLD bitstream are not supported anymore !: !v!v!v!v!v!v!v!
 Please upgrade your CPLD with the new bitstream:
-http://hxc2001.free.fr/floppy_drive_emulator/HxCFloppyEmulator_ipcore.zip
+https://hxc2001.com/floppy_drive_emulator/HxCFloppyEmulator_ipcore.zip
 HxCFloppyEmu_CPLD_EPM7128S_250308.pof
 
 *********************************************************/

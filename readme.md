@@ -21,7 +21,7 @@
 
 https://hxc2001.com
 
-http://hxc2001.free.fr/floppy_drive_emulator
+https://hxc2001.com/floppy_drive_emulator/
 
 ### Forum
 
@@ -104,7 +104,7 @@ Copyright (C) 2006-2023  Jean-François DEL NERO / HxC2001
 Email :    hxc2001(at)hxc2001.com
 
 Website :  https://hxc2001.com
-           http://hxc2001.free.fr/floppy_drive_emulator
+           https://hxc2001.com/floppy_drive_emulator/
 
 Forum :    https://torlus.com/floppy/forum
 
