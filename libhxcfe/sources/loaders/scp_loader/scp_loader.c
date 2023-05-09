@@ -491,7 +491,10 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			{
 				case 1:
 					nbside = 1;
-					nbtrack = nbtrack / 2;
+					if( nbtrack & 1 )
+						nbtrack = (nbtrack / 2) + 1;
+					else
+						nbtrack = (nbtrack / 2);
 				break;
 				case 2:
 					nbside = 2;
@@ -504,7 +507,10 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					else
 					{
 						nbside = 2;
-						nbtrack = nbtrack / nbside;
+						if( nbtrack & 1 )
+							nbtrack = ( nbtrack / nbside ) + 1;
+						else
+							nbtrack = nbtrack / nbside;
 					}
 				break;
 			}
