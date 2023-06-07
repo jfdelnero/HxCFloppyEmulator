@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0304
+version 1.0308
 header_name {.h}
 code_name {.cxx}
 class trackedittool_window {open
@@ -45,7 +45,7 @@ class trackedittool_window {open
         xywh {125 3 85 16} type Int labelsize 10 textsize 10
       }
       Fl_Input edit_endpoint {
-        callback edittool_window_edit_endpoint_callback selected
+        callback edittool_window_edit_endpoint_callback
         xywh {125 19 85 16} type Int labelsize 10 textsize 10
       }
       Fl_Button bt_insert {
@@ -82,8 +82,8 @@ class trackedittool_window {open
         xywh {125 131 85 16} type Int labelsize 10 textsize 10
       }
       Fl_Input edit_editbuffer {
-        user_data this
-        xywh {7 348 207 22} type Int labelsize 10 textsize 10
+        user_data this selected
+        xywh {7 348 208 22} type Int labelsize 10 textsize 10
       }
       Fl_Button bt_shift {
         label Shift
@@ -131,13 +131,13 @@ class trackedittool_window {open
         label {Add Track}
         user_data this
         callback edittool_window_bt_addtrack_callback
-        xywh {7 278 113 16} labelsize 9
+        xywh {7 278 113 16} labelsize 10
       }
       Fl_Button bt_removetrack {
-        label {Remove Track}
+        label {Remove Last Track}
         user_data this
         callback edittool_window_bt_removetrack_callback
-        xywh {7 294 113 16} labelsize 9
+        xywh {7 294 113 16} labelsize 10
       }
       Fl_Input edit_rpm {
         user_data this
@@ -153,7 +153,7 @@ class trackedittool_window {open
         label {Remove Odd Tracks}
         user_data this
         callback edittool_window_bt_removeoddtracks_callback
-        xywh {7 310 113 16} labelsize 9
+        xywh {7 310 113 16} labelsize 10
       }
       Fl_Button bt_shifttracks {
         label {Shift Tracks}
@@ -187,7 +187,19 @@ class trackedittool_window {open
         label {Add/Delete Side 1}
         user_data this
         callback edittool_window_bt_add_delete_side1_callback
-        xywh {120 246 95 16} labelsize 10
+        xywh {121 246 95 16} labelsize 10
+      }
+      Fl_Button bt_removecurtrack {
+        label {Remove Track}
+        user_data this
+        callback edittool_window_bt_removecurtrack_callback
+        xywh {121 294 95 16} labelsize 10
+      }
+      Fl_Button bt_inserttrack {
+        label {Insert Track}
+        user_data this
+        callback edittool_window_bt_inserttrack_callback
+        xywh {121 278 95 16} labelsize 10
       }
     }
   }

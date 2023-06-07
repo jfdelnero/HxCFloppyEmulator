@@ -873,11 +873,39 @@ void edittool_window_bt_addtrack_callback(Fl_Button *o, void *v)
 	hxc_leavecriticalsection(guicontext->hxcfe,1);
 }
 
+void edittool_window_bt_inserttrack_callback(Fl_Button *o, void *v)
+{
+	Main_Window *window;
+	trackedittool_window *tew;
+
+	window = (Main_Window *)guicontext->main_window;
+	tew = (trackedittool_window *)window->trackedit_window;
+
+	hxc_entercriticalsection(guicontext->hxcfe,1);
+
+	// TODO
+
+	guicontext->updatefloppyinfos = 1;
+
+	hxc_leavecriticalsection(guicontext->hxcfe,1);
+}
+
 void edittool_window_bt_removetrack_callback(Fl_Button *o, void *v)
 {
 	hxc_entercriticalsection(guicontext->hxcfe,1);
 
 	hxcfe_removeLastTrack(guicontext->hxcfe, guicontext->loadedfloppy);
+
+	guicontext->updatefloppyinfos = 1;
+
+	hxc_leavecriticalsection(guicontext->hxcfe,1);
+}
+
+void edittool_window_bt_removecurtrack_callback(Fl_Button *o, void *v)
+{
+	hxc_entercriticalsection(guicontext->hxcfe,1);
+
+	// TODO
 
 	guicontext->updatefloppyinfos = 1;
 

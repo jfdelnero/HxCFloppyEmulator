@@ -144,13 +144,15 @@ string_entry strings_list[]=
 	{ STR_EDITTOOLWINDOW_0015, "Set Disk Bitrate" },
 	{ STR_EDITTOOLWINDOW_0016, "Set Disk RPM" },
 	{ STR_EDITTOOLWINDOW_0017, "Add Track" },
-	{ STR_EDITTOOLWINDOW_0018, "Remove Track" },
+	{ STR_EDITTOOLWINDOW_0018, "Remove Last Track" },
 	{ STR_EDITTOOLWINDOW_0019, "Remove Odd Tracks" },
 	{ STR_EDITTOOLWINDOW_0020, "Shift Tracks" },
 	{ STR_EDITTOOLWINDOW_0021, "Swap sides" },
 	{ STR_EDITTOOLWINDOW_0022, "Repair" },
 	{ STR_EDITTOOLWINDOW_0023, "Reverse Tracks" },
 	{ STR_EDITTOOLWINDOW_0024, "Add/Delete Side 1" },
+	{ STR_EDITTOOLWINDOW_0025, "Insert Track" },
+	{ STR_EDITTOOLWINDOW_0026, "Remove Track" },
 
 #ifndef OEM_MODE
 	{ STR_USBSETTINGSWINDOW_0001, "USB HxC Floppy Emulator settings and status" },
