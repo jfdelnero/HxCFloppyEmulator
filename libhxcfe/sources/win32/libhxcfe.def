@@ -211,6 +211,8 @@ EXPORTS
    hxcfe_reverseFloppy                      @523
    hxcfe_deleteSide1                        @524
    hxcfe_allocSide1                         @525
+   hxcfe_removeTrack                        @526
+   hxcfe_insertTrack                        @527
 
    hxcfe_initFxStream                       @600
    hxcfe_FxStream_setResolution             @601

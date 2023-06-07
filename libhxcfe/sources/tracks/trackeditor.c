@@ -911,29 +911,50 @@ int32_t hxcfe_removeOddTracks( HXCFE* floppycontext, HXCFE_FLOPPY * fp)
 	return HXCFE_BADPARAMETER;
 }
 
+int32_t hxcfe_removeTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int track, int flags)
+{
+	int i;
+
+	if(fp)
+	{
+		if(track < fp->floppyNumberOfTrack)
+		{
+			if(fp->tracks[track]->number_of_side>0)
+			{
+				hxcfe_freeSide( floppycontext, fp->tracks[track]->sides[0] );
+			}
+
+			if(fp->tracks[track]->number_of_side>1)
+			{
+				hxcfe_freeSide( floppycontext, fp->tracks[track]->sides[1] );
+			}
+
+			free(fp->tracks[track]);
+
+			for(i = track; i < fp->floppyNumberOfTrack - 1; i++ )
+			{
+				fp->tracks[i] = fp->tracks[i + 1];
+			}
+
+			fp->tracks[fp->floppyNumberOfTrack - 1] = NULL;
+
+			fp->floppyNumberOfTrack--;
+
+			return HXCFE_NOERROR;
+		}
+	}
+
+	return HXCFE_BADPARAMETER;
+}
 
 int32_t hxcfe_removeLastTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp)
 {
 	if(fp)
 	{
 		if(fp->floppyNumberOfTrack)
-		{
-			if(fp->tracks[fp->floppyNumberOfTrack-1]->number_of_side>0)
-			{
-				hxcfe_freeSide( floppycontext, fp->tracks[fp->floppyNumberOfTrack-1]->sides[0] );
-			}
-
-			if(fp->tracks[fp->floppyNumberOfTrack-1]->number_of_side>1)
-			{
-				hxcfe_freeSide( floppycontext, fp->tracks[fp->floppyNumberOfTrack-1]->sides[1] );
-			}
-
-			free(fp->tracks[fp->floppyNumberOfTrack-1]);
-
-			fp->floppyNumberOfTrack--;
-		}
-
-		return HXCFE_NOERROR;
+			return hxcfe_removeTrack( floppycontext, fp, fp->floppyNumberOfTrack - 1, 0 );
+		else
+			return HXCFE_NOERROR;
 	}
 
 	return HXCFE_BADPARAMETER;
@@ -1004,16 +1025,26 @@ int32_t hxcfe_allocSide1( HXCFE* floppycontext, HXCFE_FLOPPY * fp )
 	return HXCFE_BADPARAMETER;
 }
 
-int32_t hxcfe_addTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp, uint32_t bitrate, int32_t rpm )
+int32_t hxcfe_insertTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp, uint32_t bitrate, int32_t rpm, int track )
 {
 	HXCFE_CYLINDER ** oldcylinderarray;
 	HXCFE_CYLINDER ** newcylinderarray;
-	int i;
+	int i,j;
 
 	if(fp)
 	{
 		if(fp->floppyNumberOfTrack<256)
 		{
+
+			if(fp->floppyNumberOfTrack)
+			{
+				if(track > ( fp->floppyNumberOfTrack ) )
+					track = ( fp->floppyNumberOfTrack );
+			}
+			else
+			{
+				track = 0;
+			}
 
 			fp->floppyNumberOfTrack++;
 
@@ -1022,16 +1053,25 @@ int32_t hxcfe_addTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp, uint32_t bitrat
 			newcylinderarray = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*(fp->floppyNumberOfTrack));
 			if(newcylinderarray)
 			{
-				memcpy(newcylinderarray,oldcylinderarray,sizeof(HXCFE_CYLINDER*)*(fp->floppyNumberOfTrack-1));
+				j = 0;
+				for(i=0;i<track;i++)
+				{
+					newcylinderarray[i] = oldcylinderarray[j++];
+				}
 
-				newcylinderarray[fp->floppyNumberOfTrack-1] = allocCylinderEntry(rpm,fp->floppyNumberOfSide);
+				for(i=track + 1; i<fp->floppyNumberOfTrack;i++)
+				{
+					newcylinderarray[i] = oldcylinderarray[j++];
+				}
+
+				newcylinderarray[track] = allocCylinderEntry(rpm,fp->floppyNumberOfSide);
 
 				for(i=0;i<fp->floppyNumberOfSide;i++)
 				{
-					newcylinderarray[fp->floppyNumberOfTrack-1]->sides[i] = tg_generateTrack(0,512,0,0,0,1,1,0,bitrate,rpm,ISOFORMAT_DD,34,0,2500,-2500);
+					newcylinderarray[track]->sides[i] = tg_generateTrack(0,512,0,0,0,1,1,0,bitrate,rpm,ISOFORMAT_DD,34,0,2500,-2500);
 				}
 
-				if(newcylinderarray[fp->floppyNumberOfTrack-1]->sides[0])
+				if(newcylinderarray[track]->sides[0])
 				{
 					fp->tracks = newcylinderarray;
 
@@ -1039,8 +1079,8 @@ int32_t hxcfe_addTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp, uint32_t bitrat
 				}
 				else
 				{
-					free(newcylinderarray[fp->floppyNumberOfTrack-1]->sides);
-					free(newcylinderarray[fp->floppyNumberOfTrack-1]);
+					free(newcylinderarray[track]->sides);
+					free(newcylinderarray[track]);
 					free(newcylinderarray);
 
 					fp->floppyNumberOfTrack--;
@@ -1052,6 +1092,16 @@ int32_t hxcfe_addTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp, uint32_t bitrat
 
 			return HXCFE_NOERROR;
 		}
+	}
+
+	return HXCFE_BADPARAMETER;
+}
+
+int32_t hxcfe_addTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp, uint32_t bitrate, int32_t rpm )
+{
+	if(fp)
+	{
+		return hxcfe_insertTrack( floppycontext, fp, bitrate, rpm, fp->floppyNumberOfTrack );
 	}
 
 	return HXCFE_BADPARAMETER;

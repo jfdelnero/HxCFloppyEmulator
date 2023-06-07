@@ -876,14 +876,23 @@ void edittool_window_bt_addtrack_callback(Fl_Button *o, void *v)
 void edittool_window_bt_inserttrack_callback(Fl_Button *o, void *v)
 {
 	Main_Window *window;
+	floppy_infos_window *fiw;
 	trackedittool_window *tew;
-
-	window = (Main_Window *)guicontext->main_window;
-	tew = (trackedittool_window *)window->trackedit_window;
+	int valmodif;
+	int track;
 
 	hxc_entercriticalsection(guicontext->hxcfe,1);
 
-	// TODO
+	window = (Main_Window *)guicontext->main_window;
+	fiw = (floppy_infos_window *)window->infos_window;
+	tew = (trackedittool_window *)window->trackedit_window;
+
+	track = (int)fiw->track_number_slide->value();
+	track = valuesanitycheck(track,0, hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy),&valmodif);
+	if(valmodif)
+		fiw->track_number_slide->value(track);
+
+	hxcfe_insertTrack( guicontext->hxcfe, guicontext->loadedfloppy, atoi(tew->edit_bitrate2->value()), atoi(tew->edit_rpm->value()), track );
 
 	guicontext->updatefloppyinfos = 1;
 
@@ -903,9 +912,22 @@ void edittool_window_bt_removetrack_callback(Fl_Button *o, void *v)
 
 void edittool_window_bt_removecurtrack_callback(Fl_Button *o, void *v)
 {
+	Main_Window *window;
+	floppy_infos_window *fiw;
+	int valmodif;
+	int track;
+
 	hxc_entercriticalsection(guicontext->hxcfe,1);
 
-	// TODO
+	window = (Main_Window *)guicontext->main_window;
+	fiw = (floppy_infos_window *)window->infos_window;
+
+	track = (int)fiw->track_number_slide->value();
+	track = valuesanitycheck(track,0, hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->loadedfloppy),&valmodif);
+	if(valmodif)
+		fiw->track_number_slide->value(track);
+
+	hxcfe_removeTrack( guicontext->hxcfe, guicontext->loadedfloppy, track, 0 );
 
 	guicontext->updatefloppyinfos = 1;
 

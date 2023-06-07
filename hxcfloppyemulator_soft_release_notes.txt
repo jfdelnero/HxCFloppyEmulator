@@ -20,7 +20,7 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 ** **** 2023 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
 
 *** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
-*** Last update : v2.14.6.4, 9 May 2023 ***
+*** Last update : v2.14.7.1, 7 Jun 2023 ***
 
 -> Many fixes and improvements into the flux stream management :
 
@@ -53,6 +53,8 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -> XML raw loader : Fix images last sector loading. 
 
 -> Many internal code improvements and fixes.
+
+-> Track editor : New "insert" and "remove" track operations.
 
 *********************************************************/
 

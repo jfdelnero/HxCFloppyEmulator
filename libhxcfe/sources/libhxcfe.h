@@ -581,6 +581,8 @@ int32_t                hxcfe_setTrackRPM( HXCFE* floppycontext, HXCFE_SIDE * sid
 int32_t                hxcfe_removeOddTracks( HXCFE* floppycontext, HXCFE_FLOPPY * fp );
 int32_t                hxcfe_removeLastTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp );
 int32_t                hxcfe_addTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp, uint32_t bitrate, int32_t rpm );
+int32_t                hxcfe_removeTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int track, int flags );
+int32_t                hxcfe_insertTrack( HXCFE* floppycontext, HXCFE_FLOPPY * fp, uint32_t bitrate, int32_t rpm, int track );
 
 int32_t                hxcfe_deleteSide1( HXCFE* floppycontext, HXCFE_FLOPPY * fp );
 int32_t                hxcfe_allocSide1( HXCFE* floppycontext, HXCFE_FLOPPY * fp );
