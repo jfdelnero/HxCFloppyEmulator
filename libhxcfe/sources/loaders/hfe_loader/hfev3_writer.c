@@ -171,6 +171,10 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 		FILEHEADER->formatrevision=0;
 		FILEHEADER->track_list_offset=1;
 		FILEHEADER->write_protected=1;
+		if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "HFE_WRITER_WRITENOTALLOWED" ) )
+		{
+			FILEHEADER->write_allowed = 0;
+		}
 
 		if(floppy->tracks[floppy->floppyNumberOfTrack/2]->sides[0]->track_encoding)
 		{

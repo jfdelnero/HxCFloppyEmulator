@@ -104,6 +104,7 @@ int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	pictrack * track;
 
 	FILE * hxcpicfile;
+	unsigned char tmp_buf[512];
 
 	picfileformatheader * FILEHEADER;
 	unsigned char * mfmtracks0,*mfmtracks1,*mfmtrackfinal,*mfmtemp;
@@ -115,20 +116,26 @@ int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	unsigned int tracksize;
 	unsigned char factor;
 
+	mfmtemp = NULL;
+	mfmtracks0 = NULL;
+	mfmtracks1 = NULL;
+	mfmtrackfinal = NULL;
+
 	factor=1;// factor=1-> 50% duty cycle  // factor=2-> 25% duty cycle
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write HFE file %s for the standalone emulator.",filename);
 
 	if(!floppy->floppyNumberOfTrack)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create zero track HFE file");
-		return -1;
+		return HXCFE_BADPARAMETER;
 	}
 
 	hxcpicfile=rfopen(filename,"wb",&rf);
 
 	if(hxcpicfile)
 	{
-		FILEHEADER=(picfileformatheader *) malloc(512);
+		FILEHEADER = (picfileformatheader *) &tmp_buf;
+
 		memset(FILEHEADER,0xFF,512);
 		memcpy(&FILEHEADER->HEADERSIGNATURE,"HXCPICFE",8);
 
@@ -156,6 +163,11 @@ int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		FILEHEADER->formatrevision=0;
 		FILEHEADER->track_list_offset=1;
 		FILEHEADER->write_protected=1;
+
+		if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "HFE_WRITER_WRITENOTALLOWED" ) )
+		{
+			FILEHEADER->write_allowed = 0;
+		}
 
 		if(floppy->tracks[floppy->floppyNumberOfTrack/2]->sides[0]->track_encoding)
 		{
@@ -331,8 +343,12 @@ int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 					}
 
 				}
-				if(factor>1)
+
+				if(mfmtemp)
+				{
 					free(mfmtemp);
+					mfmtemp = NULL;
+				}
 
 				for(k=0;k<tracksize/256;k++)
 				{
@@ -379,8 +395,6 @@ int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		rfclose(hxcpicfile,&rf);
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
-
-		free(FILEHEADER);
 
 		return 0;
 	}
