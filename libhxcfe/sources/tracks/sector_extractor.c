@@ -64,6 +64,7 @@
 #include "tracks/track_formats/apple_mac_gcr_track.h"
 #include "tracks/track_formats/arburg_track.h"
 #include "tracks/track_formats/c64_gcr_track.h"
+#include "tracks/track_formats/centurion_mfm_track.h"
 #include "tracks/track_formats/dec_rx02_track.h"
 #include "tracks/track_formats/emu_emulator_fm_track.h"
 #include "tracks/track_formats/heathkit_fm_track.h"
@@ -239,7 +240,9 @@ HXCFE_SECTCFG* hxcfe_getNextSector( HXCFE_SECTORACCESS* ss_ctx, int32_t track, i
 		case MICRALN_HS_FM_ENCODING:
 			bitoffset = get_next_FM_MicralN_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
 		break;
-
+		case CENTURION_MFM_ENCODING:
+			bitoffset = get_next_Centurion_MFM_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
+		break;
 		default:
 			bitoffset=-1;
 		break;
