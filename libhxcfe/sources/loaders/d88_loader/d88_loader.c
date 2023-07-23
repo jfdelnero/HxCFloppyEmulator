@@ -122,9 +122,7 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				indexstr[0]=0;
 			}
 		}
-
 	}
-
 
 	f = hxc_fopen(str_file,"rb");
 	if( f == NULL )
@@ -166,6 +164,7 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		hxc_fclose(f);
 		return HXCFE_BADFILE;
 	}
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d floppy in this file.",partcount);
 	fseek(f,0,SEEK_SET);
 	//////////////////////////////////////////////////////
@@ -235,20 +234,39 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"write protected disk");
 	}
 
-
 	fseek(f,basefileptr+sizeof(d88_fileheader),SEEK_SET);
-	hxc_fread(&track_offset,sizeof(uint32_t),f);
 
-	number_of_track=(track_offset-sizeof(d88_fileheader))/sizeof(uint32_t);
-	do
+	track_offset = 0;
+	number_of_track = 0;
+
+	if(hxc_fread(&track_offset,sizeof(uint32_t),f) <= 0)
 	{
-		fseek(f,basefileptr+sizeof(d88_fileheader)+((number_of_track-1)*sizeof(uint32_t)),SEEK_SET);
-		hxc_fread(&track_offset,sizeof(uint32_t),f);
-		if(!track_offset)
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Can't read track(s) offset ?");
+		hxc_fclose(f);
+		return HXCFE_BADFILE;
+	}
+
+	if(track_offset >= (sizeof(d88_fileheader) + sizeof(uint32_t)) )
+	{
+		// Get the real number of tracks...
+		number_of_track = (track_offset - sizeof(d88_fileheader))/sizeof(uint32_t);
+		do
 		{
-			number_of_track--;
-		}
-	}while(number_of_track && !track_offset);
+			fseek(f,basefileptr+sizeof(d88_fileheader)+((number_of_track-1)*sizeof(uint32_t)),SEEK_SET);
+			hxc_fread(&track_offset,sizeof(uint32_t),f);
+			if(!track_offset)
+			{
+				number_of_track--;
+			}
+		} while(number_of_track>0 && !track_offset);
+	}
+
+	if(number_of_track <= 0)
+	{
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"No track to load ?");
+		hxc_fclose(f);
+		return HXCFE_BADFILE;
+	}
 
 	if( ( number_of_track > 60*2 ) && ( number_of_track < 80*2 ) )
 	{

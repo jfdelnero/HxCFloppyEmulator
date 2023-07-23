@@ -20,7 +20,7 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 ** **** 2023 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
 
 *** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
-*** Last update : v2.14.9.1, 15 July 2023 ***
+*** Last update : v2.14.9.2, 23 July 2023 ***
 
 -> Many fixes and improvements into the flux stream management :
 
@@ -59,6 +59,8 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -> HFE writers : New "HFE_WRITER_WRITENOTALLOWED" parameter : Set it to 1 to write protect the exported hfe files.
 
 -> HxC stream (Pauline) : Auto detect and load properly hard-sectored dumps.
+
+-> D88 loader : Fix possible infinite loop with corrupted image.
 
 *********************************************************/
 
