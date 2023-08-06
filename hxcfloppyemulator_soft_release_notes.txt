@@ -20,7 +20,7 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 ** **** 2023 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
 
 *** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
-*** Last update : v2.14.9.2, 23 July 2023 ***
+*** Last update : v2.14.10.1, 6 August 2023 ***
 
 -> Many fixes and improvements into the flux stream management :
 
@@ -61,6 +61,10 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -> HxC stream (Pauline) : Auto detect and load properly hard-sectored dumps.
 
 -> D88 loader : Fix possible infinite loop with corrupted image.
+
+-> Batch converter : New BATCHCONVERT_KEEP_SOURCE_FILE_NAME_EXTENSION setting to enable/disable the source file extension to the output file name.
+
+-> BMP export : New Stream tracks mode export.
 
 *********************************************************/
 
