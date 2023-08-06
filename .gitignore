@@ -1,6 +1,7 @@
 *.obj
 *.o
 *.dll
+*.exe
 *.so
 *.map
 *.a
