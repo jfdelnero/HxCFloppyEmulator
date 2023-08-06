@@ -57,11 +57,12 @@
 
 #include "bmp_loader.h"
 
-int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
+int BMP_Tracks_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * filename);
+int BMP_StreamTracks_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * filename);
 
 int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 
-int BMP_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
+int BMP_Tracks_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 
 	static const char plug_id[]="BMP_IMAGE";
@@ -72,8 +73,34 @@ int BMP_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 	{
 		(ISVALIDDISKFILE)	0,
 		(LOADDISKFILE)		0,
-		(WRITEDISKFILE)		BMP_libWrite_DiskFile,
-		(GETPLUGININFOS)	BMP_libGetPluginInfo
+		(WRITEDISKFILE)		BMP_Tracks_libWrite_DiskFile,
+		(GETPLUGININFOS)	BMP_Tracks_libGetPluginInfo
+	};
+
+	return libGetPluginInfo(
+			imgldr_ctx,
+			infotype,
+			returnvalue,
+			plug_id,
+			plug_desc,
+			&plug_funcs,
+			plug_ext
+			);
+}
+
+int BMP_StreamTracks_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
+{
+
+	static const char plug_id[]="BMP_STREAM_IMAGE";
+	static const char plug_desc[]="BMP stream floppy tracks layout image generator";
+	static const char plug_ext[]="bmp";
+
+	plugins_ptr plug_funcs=
+	{
+		(ISVALIDDISKFILE)	0,
+		(LOADDISKFILE)		0,
+		(WRITEDISKFILE)		BMP_StreamTracks_libWrite_DiskFile,
+		(GETPLUGININFOS)	BMP_StreamTracks_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

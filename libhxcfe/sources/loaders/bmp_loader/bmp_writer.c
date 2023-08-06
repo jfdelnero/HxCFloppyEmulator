@@ -120,7 +120,7 @@ unsigned char getPixelCode(uint32_t pix,uint32_t * pal,int * nbcol)
 	return 0;
 }
 
-int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * filename)
+static int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * filename, int streammode)
 {
 	int ret,i,j,k;
 	int cur_col,cur_row;
@@ -158,7 +158,26 @@ int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		hxcfe_td_activate_analyzer(td, VICTOR9K_GCR_ENCODING, hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_VICTOR9000_GCR_ENCODING"));
 		hxcfe_td_activate_analyzer(td, MICRALN_HS_FM_ENCODING, hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPEXPORT_ENABLE_MICRALN_HS_FM_ENCODING"));
 
-		hxcfe_td_setparams(td,hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_XTOTALTIME"),hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_YTOTALTIME" ),90*1000, 0);
+		if(streammode)
+		{
+			uint32_t flags = 0;
+
+			if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPEXPORT_STREAM_HIGHCONTRAST" ) )
+			{
+				flags |= TD_FLAG_HICONTRAST;
+			}
+
+			if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPEXPORT_STREAM_BIG_DOTS" ) )
+			{
+				flags |= TD_FLAG_BIGDOT;
+			}
+
+			hxcfe_td_setparams(td, hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPEXPORT_STREAM_DEFAULT_XTOTALTIME" ), hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPEXPORT_STREAM_DEFAULT_YTOTALTIME" ),0, flags);
+		}
+		else
+		{
+			hxcfe_td_setparams(td,hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_XTOTALTIME"),hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPEXPORT_DEFAULT_YTOTALTIME" ),90*1000, 0);
+		}
 
 		max_row = 32;
 
@@ -194,7 +213,15 @@ int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),floppydisk->floppyNumberOfTrack*2 );
 
 					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Generate track BMP %d:%d",j,i);
-					hxcfe_td_draw_track(td,floppydisk,j,i);
+
+					if(streammode)
+					{
+						hxcfe_td_draw_stream_track(td,floppydisk,j,i);
+					}
+					else
+					{
+						hxcfe_td_draw_track(td,floppydisk,j,i);
+					}
 
 					copyPict((uint32_t *)ptr,nb_col*td->xsize,nb_row*td->ysize,cur_col*td->xsize,cur_row*td->ysize,(uint32_t *)td->framebuffer,td->xsize,td->ysize);
 
@@ -332,3 +359,12 @@ int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return ret;
 }
 
+int BMP_Tracks_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * filename)
+{
+	return BMP_libWrite_DiskFile(imgldr_ctx,floppydisk,filename, 0);
+}
+
+int BMP_StreamTracks_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * filename)
+{
+	return BMP_libWrite_DiskFile(imgldr_ctx,floppydisk,filename, 1);
+}

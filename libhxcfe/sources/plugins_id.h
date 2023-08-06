@@ -74,6 +74,7 @@
 #define PLUGIN_SCP                  "SCP_FLUX_STREAM"
 #define PLUGIN_AUTOSELECT           "AUTOSELECT"
 #define PLUGIN_BMP                  "BMP_IMAGE"
+#define PLUGIN_STREAM_BMP           "BMP_STREAM_IMAGE"
 #define PLUGIN_DISK_BMP             "BMP_DISK_IMAGE"
 #define PLUGIN_SKF                  "KRYOFLUXSTREAM"
 #define PLUGIN_GENERIC_XML          "GENERIC_XML"
