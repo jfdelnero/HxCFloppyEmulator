@@ -1,10 +1,10 @@
 #!/bin/bash
 
 if [[ $OSTYPE == 'darwin'* ]]; then
-export DOWNLOADURL=https://www.fltk.org/pub/fltk/snapshots/fltk-1.4.x-20230203-8178d005.tar.gz
-export ARCHIVENAMEBASE=fltk-1.4.x-20230203-8178d005
+export DOWNLOADURL=https://www.fltk.org/pub/fltk/snapshots/fltk-1.4.x-20230804-ee4ab86c.tar.gz
+export ARCHIVENAMEBASE=fltk-1.4.x-20230804-ee4ab86c
 export PATCHFILE=
-export FOLDERNAME=fltk-1.4.x-20230203-8178d005
+export FOLDERNAME=fltk-1.4.x-20230804-ee4ab86c
 else
 export DOWNLOADURL=https://www.fltk.org/pub/fltk/1.3.8/fltk-1.3.8-source.tar.gz
 export ARCHIVENAMEBASE=fltk-1.3.8-source
