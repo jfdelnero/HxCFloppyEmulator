@@ -62,6 +62,7 @@ typedef struct envvar_entry_
 envvar_entry * setEnvVar( envvar_entry * env, char * varname, char * varvalue);
 char * getEnvVar( envvar_entry * env, char * varname, char * varvalue);
 env_var_value getEnvVarValue( envvar_entry * env, char * varname);
+envvar_entry * setEnvVarValue( envvar_entry * env, char * varname, env_var_value value);
 char * getEnvVarIndex( envvar_entry * env, int index, char * varvalue);
 envvar_entry * duplicate_env_vars(envvar_entry * src);
 void free_env_vars(envvar_entry * src);

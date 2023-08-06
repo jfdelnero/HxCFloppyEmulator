@@ -162,6 +162,7 @@ int                    hxcfe_setEnvVar( HXCFE* hxcfe, char * varname, char * var
 char *                 hxcfe_getEnvVar( HXCFE* hxcfe, char * varname, char * varvalue );
 char *                 hxcfe_getEnvVarIndex( HXCFE* hxcfe, int index, char * varvalue );
 int                    hxcfe_getEnvVarValue( HXCFE* hxcfe, char * varname);
+int                    hxcfe_setEnvVarValue( HXCFE* hxcfe, char * varname, int value );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Scripts support functions                                                                      //

@@ -10,6 +10,7 @@ EXPORTS
    hxcfe_getEnvVar                          @11
    hxcfe_getEnvVarIndex                     @12
    hxcfe_getEnvVarValue                     @13
+   hxcfe_setEnvVarValue                     @14
 
    hxcfe_execScriptFile                     @15
    hxcfe_execScriptRam                      @16

@@ -203,6 +203,17 @@ env_var_value getEnvVarValue( envvar_entry * env, char * varname)
 	return value;
 }
 
+envvar_entry * setEnvVarValue( envvar_entry * env, char * varname, env_var_value value)
+{
+	char tmp_str[128];
+
+	tmp_str[128 - 1] = 0;
+
+	snprintf(tmp_str,sizeof(tmp_str) - 1, "%d",value);
+
+	return setEnvVar( env, varname, tmp_str );
+}
+
 char * getEnvVarIndex( envvar_entry * env, int index, char * varvalue)
 {
 	int i;

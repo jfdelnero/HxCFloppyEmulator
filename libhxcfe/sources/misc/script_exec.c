@@ -1472,3 +1472,20 @@ int hxcfe_getEnvVarValue( HXCFE* hxcfe, char * varname)
 {
 	return getEnvVarValue( hxcfe->envvar, varname);
 }
+
+int hxcfe_setEnvVarValue( HXCFE* hxcfe, char * varname, int value )
+{
+	envvar_entry * tmp_env;
+
+	tmp_env = setEnvVarValue( hxcfe->envvar, varname, value );
+
+	if( tmp_env )
+	{
+		hxcfe->envvar = tmp_env;
+		return SCRIPT_NO_ERROR;
+	}
+	else
+	{
+		return SCRIPT_MEM_ERROR;
+	}
+}
