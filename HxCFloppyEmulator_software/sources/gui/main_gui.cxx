@@ -462,7 +462,7 @@ void load_file_image(Fl_Widget * w, void * fc_ptr)
 
 void save_file_image(Fl_Widget * w, void * fc_ptr)
 {
-	int i;
+	int i,keepsrcext;
 	Fl_Native_File_Chooser fnfc;
 	unsigned char deffilename[DEFAULT_TEXT_BUFFER_SIZE + 128];
 
@@ -472,12 +472,20 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 	}
 	else
 	{
+		keepsrcext = hxcfe_getEnvVarValue( guicontext->hxcfe, (char*)"BATCHCONVERT_KEEP_SOURCE_FILE_NAME_EXTENSION");
+
 		snprintf((char*)deffilename, sizeof(deffilename), "%s", guicontext->bufferfilename);
 
 		i=0;
 		while(deffilename[i]!=0)
 		{
-			if(deffilename[i]=='.')deffilename[i]='_';
+			if(deffilename[i]=='.')
+			{
+				if(keepsrcext)
+					deffilename[i] = '_';
+				else
+					deffilename[i] = 0;
+			}
 			i++;
 		}
 

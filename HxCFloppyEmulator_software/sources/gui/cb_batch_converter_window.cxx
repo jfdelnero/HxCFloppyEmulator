@@ -220,7 +220,7 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 	int i,j,filenb,ret;
 	char *destinationfile,* tempstr;
 	HXCFE_FLOPPY * thefloppydisk;
-	int loaderid;
+	int loaderid,keepsrcext;
 	cfgrawfile rfc;
 	Main_Window* mw;
 	int disklayout,path_str_size;
@@ -239,6 +239,8 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 	}
 
 	memset(tempstr,0,MAX_TMP_STR_SIZE);
+
+	keepsrcext = hxcfe_getEnvVarValue( floppycontext, (char*)"BATCHCONVERT_KEEP_SOURCE_FILE_NAME_EXTENSION");
 
 	thefloppydisk = 0;
 	imgldr_ctx = hxcfe_imgInitLoader( floppycontext );
@@ -361,7 +363,10 @@ int draganddropconvert(HXCFE* floppycontext,char ** filelist,char * destfolder,i
 
 					if(i)
 					{
-						destinationfile[i]='_';
+						if(keepsrcext)
+							destinationfile[i]='_';
+						else
+							destinationfile[i] = 0;
 					}
 
 					ret=1;
@@ -440,7 +445,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 	HXCFE_FLOPPY * thefloppydisk;
 	unsigned char * fullpath;
 	char * tempstr;
-	int loaderid;
+	int loaderid,keepsrcext;
 	Main_Window* mw;
 	int disklayout;
 	HXCFE_XMLLDR* rfb;
@@ -455,6 +460,9 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 	imgldr_ctx = hxcfe_imgInitLoader( floppycontext );
 	if(imgldr_ctx)
 	{
+
+		keepsrcext = hxcfe_getEnvVarValue( floppycontext, (char*)"BATCHCONVERT_KEEP_SOURCE_FILE_NAME_EXTENSION");
+
 		hxcfe_imgSetProgressCallback(imgldr_ctx,progress_callback_bc,(void*)guicontext);
 
 		hfindfile = hxc_find_first_file(folder,file, &FindFileData);
@@ -633,7 +641,10 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 
 								if(i)
 								{
-									destinationfile[i]='_';
+									if(keepsrcext)
+										destinationfile[i] = '_';
+									else
+										destinationfile[i] = 0;
 								}
 
 								//printf("Creating file %s\n",destinationfile);

@@ -377,3 +377,15 @@ set PAULINE_DEFAULT_IP_ADDRESS "192.168.20.7"
 #
 
 set SECTORBYSECTORCOPY_SECTOR_ERROR_TAG -1
+
+#
+# Set this variable to 1 to keep the source file image
+# name extension when using the batch converter.
+#
+# adf to hfe converion example : myfile.adf -> myfile_adf.hfe
+#
+# Set 0 it to forget the source file extentsion :
+# adf to hfe converion example : myfile.adf -> myfile.hfe
+#
+
+set BATCHCONVERT_KEEP_SOURCE_FILE_NAME_EXTENSION 1
