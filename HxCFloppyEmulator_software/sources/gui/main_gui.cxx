@@ -171,6 +171,47 @@ void print_dbg(char * str)
 }
 #endif
 
+void save_ui_state(HXCFE* hxcfe)
+{
+	char * savefilepath;
+	char * param_name;
+	char tmp_value[512];
+	int i;
+	FILE *f;
+
+	savefilepath = hxcfe_getEnvVar( hxcfe, (char*)"UISTATE_SAVE_FILE", 0 );
+	if(savefilepath)
+	{
+		if(strlen(savefilepath))
+		{
+			f = hxc_fopen(savefilepath,"wb");
+			if(f)
+			{
+				fprintf(f,"#\n# HxC Floppy Emulator user interface save file\n#\n\n");
+
+				i = 0;
+				while( hxcfe_getEnvVarIndex( hxcfe, i, NULL ) )
+				{
+					tmp_value[0] = 0;
+					param_name = hxcfe_getEnvVarIndex( hxcfe, i, (char*)&tmp_value );
+					if(param_name)
+					{
+						if( !strncmp(param_name,"LASTSTATE_", 10) )
+						{
+							fprintf(f,"set %s \"%s\"\n", param_name,tmp_value  );
+						}
+					}
+					i++;
+				}
+
+				fprintf(f,"\n");
+
+				fclose(f);
+			}
+		}
+	}
+}
+
 void menu_clicked(Fl_Widget * w, void * fc_ptr)
 {
 	intptr_t i;
@@ -1300,6 +1341,10 @@ Main_Window::Main_Window()
 		batchconv_window->hlptxt->static_value("To convert a large quantity of floppy images, set the source directory and the target directory (the SDCard). Drag&Drop mode : Just set the target directory and drag&drop the floppy images on this window.");
 		batchconv_window->progress_indicator->minimum(0);
 		batchconv_window->progress_indicator->maximum(100);
+
+		batchconv_window->strin_src_dir->value( hxcfe_getEnvVar( guicontext->hxcfe, (char*)"LASTSTATE_BATCHCONVERTER_SRC_DIR", NULL ) );
+		batchconv_window->strin_dst_dir->value( hxcfe_getEnvVar( guicontext->hxcfe, (char*)"LASTSTATE_BATCHCONVERTER_DST_DIR", NULL ) );
+		batchconv_window->choice_file_format->value( hxcfe_getEnvVarValue( guicontext->hxcfe, (char*)"LASTSTATE_BATCHCONVERTER_TARGETFORMAT") );
 
 		#ifdef GUI_DEBUG
 		print_dbg((char*)"Main_Window : Batch converter window done !");

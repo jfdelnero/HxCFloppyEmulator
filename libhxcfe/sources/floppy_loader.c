@@ -97,6 +97,7 @@ HXCFE* hxcfe_init(void)
 	HXCFE* hxcfe;
 	HXCFE_IMGLDR *imgldr_ctx;
 	image_plugin* plugin_ptr;
+	char * savefilepath;
 	int nb_loader;
 	int nb_xml_loader;
 	int i,j;
@@ -138,6 +139,21 @@ HXCFE* hxcfe_init(void)
 #endif
 
 		hxcfe_execScriptFile(hxcfe, "config.script");
+
+		savefilepath = hxcfe_getEnvVar( hxcfe, "UISTATE_SAVE_FILE", 0 );
+		if(savefilepath)
+		{
+			if(strlen(savefilepath))
+			{
+				hxcfe_execScriptFile(hxcfe, savefilepath);
+			}
+			else
+			{
+				hxcfe_execScriptLine( hxcfe, "set UISTATE_SAVE_FILE laststate.script" );
+				savefilepath = hxcfe_getEnvVar( hxcfe, "UISTATE_SAVE_FILE", 0 );
+				hxcfe_execScriptFile(hxcfe, savefilepath);
+			}
+		}
 
 		nb_loader = 0;
 		// Count how many static loaders we have.

@@ -882,6 +882,12 @@ void batch_converter_window_bt_convert(Fl_Button* bt, void*)
 	bcw=(batch_converter_window *)dw->user_data();
 	bcw->bt_convert->deactivate();
 	abort_trigger = 0;
+
+	hxcfe_setEnvVar( guicontext->hxcfe, (char*)"LASTSTATE_BATCHCONVERTER_SRC_DIR", (char*)bcw->strin_src_dir->value() );
+	hxcfe_setEnvVar( guicontext->hxcfe, (char*)"LASTSTATE_BATCHCONVERTER_DST_DIR", (char*)bcw->strin_dst_dir->value() );
+	hxcfe_setEnvVarValue(guicontext->hxcfe, (char*)"LASTSTATE_BATCHCONVERTER_TARGETFORMAT", bcw->choice_file_format->value() );
+	save_ui_state(guicontext->hxcfe);
+
 	hxc_createthread(guicontext->hxcfe,bcw,&convertthread,0);
 }
 
@@ -897,6 +903,8 @@ void batch_converter_window_bt_select_src(Fl_Button* bt, void*)
 	if(!select_dir((char*)"Select source",(char*)&dirstr))
 	{
 		bcw->strin_src_dir->value(dirstr);
+		hxcfe_setEnvVar( guicontext->hxcfe, (char*)"LASTSTATE_BATCHCONVERTER_SRC_DIR", dirstr );
+		save_ui_state(guicontext->hxcfe);
 	}
 }
 
@@ -917,6 +925,8 @@ void batch_converter_window_bt_select_dst(Fl_Button* bt, void*)
 	if(!select_dir((char*)"Select destination",(char*)&dirstr))
 	{
 		bcw->strin_dst_dir->value(dirstr);
+		hxcfe_setEnvVar( guicontext->hxcfe, (char*)"LASTSTATE_BATCHCONVERTER_DST_DIR", dirstr );
+		save_ui_state(guicontext->hxcfe);
 	}
 }
 
