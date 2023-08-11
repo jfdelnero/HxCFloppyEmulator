@@ -26,6 +26,13 @@ endif
 
 EXEC=libhxcfe.so
 
+ifeq ($(TARGET), FreeBSD)
+CC=cc
+BUILD_CC=cc
+CFLAGS += -fPIC -Wl,-Map,foo.map
+LDFLAGS += -lc -lm  -ldl
+endif
+
 ifeq ($(TARGET), Linux)
 CFLAGS += -fPIC -Wl,-Map,foo.map
 LDFLAGS += -lc -lm  -ldl

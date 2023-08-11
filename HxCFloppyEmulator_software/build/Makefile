@@ -36,6 +36,14 @@ endif
 LIBHXCFE = libhxcfe.so
 LIBUSBHXCFE = libusbhxcfe.so
 
+ifeq ($(TARGET), FreeBSD)
+CC=cc
+CPP=c++
+BUILD_CC=cc
+CFLAGS += -I/usr/local/include
+LDFLAGS += -lc -lm -ldl -lpthread -Wl,-rpath=.  -Wl,-Map,foo.map
+endif
+
 ifeq ($(TARGET), Linux)
 LDFLAGS += -lc -lm -ldl -lpthread -Wl,-rpath=.  -Wl,-Map,foo.map
 endif
@@ -89,8 +97,7 @@ all:
 	$(MAKE) $(EXEC)
 
 fltk:
-	chmod +x ../sources/thirdpartylibs/fltk/prepare_fltk.sh
-	cd ../sources/thirdpartylibs/fltk/ && ./prepare_fltk.sh
+	cd ../sources/thirdpartylibs/fltk/ && bash ./prepare_fltk.sh
 ifeq ($(TARGET), mingw32)
 		cd ../sources/thirdpartylibs/fltk/fltk-1.x.x/ && export LDFLAGS='-static-libstdc++ -static-libgcc' && ./configure --host=i686-w64-mingw32 --prefix=/usr/share/mingw-w64
 		$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x/ DIRS=src CC=i686-w64-mingw32-gcc CPP=i686-w64-mingw32-g++

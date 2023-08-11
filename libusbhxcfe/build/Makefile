@@ -1,5 +1,5 @@
 #CC=i386-pc-linux-gcc
-CC=gcc
+#CC=gcc
 AR=ar
 
 TARGET := $(shell uname)
@@ -24,6 +24,12 @@ ifeq ($(DEBUG_ASAN), 1)
 endif
 
 EXEC=libusbhxcfe.so
+
+ifeq ($(TARGET), FreeBSD)
+CC=cc
+CFLAGS += -fPIC -Wl,-Map,foo.map
+LDFLAGS += -lc -lm  -ldl
+endif
 
 ifeq ($(TARGET), Linux)
 CFLAGS += -fPIC -Wl,-Map,foo.map
