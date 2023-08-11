@@ -1,5 +1,5 @@
 #CC=i386-pc-linux-gcc
-#CC=gcc
+CC=gcc
 AR=ar
 
 TARGET := $(shell uname)
