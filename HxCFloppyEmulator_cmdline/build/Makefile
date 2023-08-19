@@ -34,6 +34,11 @@ LIBHXCFE= libhxcfe.dylib
 LIBUSBHXCFE= libusbhxcfe.dylib
 endif
 
+ifeq ($(TARGET), FreeBSD)
+CC=cc
+LDFLAGS += -lc -lm -ldl -lpthread -Wl,-rpath=. -Wl,-Map,foo.map
+endif
+
 ifeq ($(TARGET), Linux)
 LDFLAGS += -lc -lm -ldl -lpthread -Wl,-rpath=. -Wl,-Map,foo.map
 endif

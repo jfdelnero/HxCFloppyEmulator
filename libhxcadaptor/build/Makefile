@@ -23,6 +23,12 @@ ifeq ($(DEBUG_ASAN), 1)
 	LDFLAGS += -static-libasan -fsanitize=address
 endif
 
+ifeq ($(TARGET), FreeBSD)
+CFLAGS += -fPIC -Wl,-Map,foo.map
+LDFLAGS += -lc -lm -ldl
+CC=cc
+endif
+
 ifeq ($(TARGET), Linux)
 CFLAGS += -fPIC -Wl,-Map,foo.map
 LDFLAGS += -lc -lm -ldl
