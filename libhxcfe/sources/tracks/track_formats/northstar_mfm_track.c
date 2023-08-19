@@ -197,7 +197,7 @@ int get_next_MFM_Northstar_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 void tg_addNorthstarSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
 
-	int32_t  i,dd;
+	int32_t  i;
 	int32_t  trackenc;
 	int32_t  startindex,j;
 	uint8_t  checksum;
@@ -206,25 +206,17 @@ void tg_addNorthstarSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconf
 
 	sectorconfig->startsectorindex=tg->last_bit_offset/8;
 
-	// Preamble 33 bytes of zero
-	for(i=0;i<7;i++)
-	{
-		pushTrackCode(tg,0x00,0xFF,currentside,NORTHSTAR_HS_DD);
-	}
-
-	dd = 250;
-
 	if(currentside->indexbuffer)
 	{
 		if( sectorconfig->sector == 9 )
 		{
-			us2index( (tg->last_bit_offset + 5000 + dd) % currentside->tracklen,currentside,2000,1,0);
+			us2index( (tg->last_bit_offset + 5000 ) % currentside->tracklen,currentside,4000,1,0);
 		}
 
-		us2index( (tg->last_bit_offset + dd ) % currentside->tracklen,currentside,2000,1,0);
+		us2index( (tg->last_bit_offset) % currentside->tracklen,currentside,4000,1,0);
 	}
 
-	for(i=0;i<28;i++)
+	for(i=0;i<32;i++)
 	{
 		pushTrackCode(tg,0x00,0xFF,currentside,NORTHSTAR_HS_DD);
 	}
@@ -248,12 +240,12 @@ void tg_addNorthstarSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconf
 	// Checksum
 	pushTrackCode(tg,checksum,0xFF,currentside,NORTHSTAR_HS_DD);
 
-	// "Random"
-	for(i=0;i<76;i++)
+	// "zero"
+	for(i=0;i<78;i++)
 	{
 		if(tg->last_bit_offset < (currentside->tracklen - 1) )
 		{
-			pushTrackCode(tg,0xAA,0xFF,currentside,NORTHSTAR_HS_DD);
+			pushTrackCode(tg,0x00,0xFF,currentside,NORTHSTAR_HS_DD);
 		}
 	}
 
