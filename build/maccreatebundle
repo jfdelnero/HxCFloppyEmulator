@@ -1,4 +1,5 @@
-export VERSION=`cat version.h | grep "define STR_FILE_VERSION2" | sed 's/.*STR_FILE_VERSION2 //' `
+#!/usr/bin/env bash
+export VERSION=`grep "define STR_FILE_VERSION2" version.h | cut -f2 -d\"`
 export NAME="HxCFloppyEmulator"
 export DMGNAME="HxCFloppyEmulator"
 
@@ -8,46 +9,32 @@ export CLI_EXEC="hxcfe"
 export GUI_PATH="HxCFloppyEmulator.app"
 export GUI_EXEC="hxcfloppyemulator"
 
-echo Creating App bundle :
+echo Creating App bundle : ${NAME}
 
-echo HxCFloppyEmulator
+mkdir -p ${CLI_PATH}/{Frameworks,App}
+install hxcfe ${CLI_PATH}/App/${CLI_EXEC}
+install libhxcfe.dylib libusbhxcfe.dylib ${CLI_PATH}/Frameworks
 
-mkdir ${CLI_PATH}
-mkdir ${CLI_PATH}/Frameworks
-mkdir ${CLI_PATH}/App
-cp hxcfe ${CLI_PATH}/App/${CLI_EXEC}
-cp libhxcfe.dylib ${CLI_PATH}/Frameworks
-cp libusbhxcfe.dylib ${CLI_PATH}/Frameworks
-chmod 755 ${CLI_PATH}/App/hxcfe
-chmod 755 ${CLI_PATH}/Frameworks/libhxcfe.dylib
-chmod 755 ${CLI_PATH}/Frameworks/libusbhxcfe.dylib
-
-mkdir ${GUI_PATH}
-mkdir ${GUI_PATH}/Contents
-mkdir ${GUI_PATH}/Contents/Resources
-mkdir ${GUI_PATH}/Contents/MacOS
-mkdir ${GUI_PATH}/Contents/Frameworks
+mkdir -p ${GUI_PATH}/Contents/{Resources,MacOS,Frameworks}
 
 echo APPLnone > ${GUI_PATH}/Contents/PkgInfo
 iconutil --convert icns --output ${GUI_PATH}/Contents/Resources/icons.icns ../HxCFloppyEmulator_software/sources/mac/icons/hxcfloppyemulator.iconset/
-cp hxcfloppyemulator ${GUI_PATH}/Contents/MacOS/${GUI_EXEC}
-chmod 755 ${GUI_PATH}/Contents/MacOS/${GUI_EXEC}
-cp libhxcfe.dylib ${GUI_PATH}/Contents/Frameworks
-cp libusbhxcfe.dylib ${GUI_PATH}/Contents/Frameworks
-chmod 755 ${GUI_PATH}/Contents/Frameworks/libhxcfe.dylib
-chmod 755 ${GUI_PATH}/Contents/Frameworks/libusbhxcfe.dylib
+install hxcfloppyemulator ${GUI_PATH}/Contents/MacOS/${GUI_EXEC}
+install libhxcfe.dylib libusbhxcfe.dylib ${GUI_PATH}/Contents/Frameworks
 
 cat << EOF > ${GUI_PATH}/Contents/info.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
 <plist version="0.9">
 <dict>
+        <key>CFBundleIdentifier</key>
+        <string>com.hxc2001.${GUI_EXEC}</string>
         <key>CFBundleName</key>
         <string>${NAME}</string>
         <key>CFBundlePackageType</key>
         <string>APPL</string>
         <key>CFBundleVersion</key>
-        <string>59</string>
+        <string>1</string>
         <key>CFBundleShortVersionString</key>
         <string>${VERSION}</string>
         <key>CFBundleIconFile</key>

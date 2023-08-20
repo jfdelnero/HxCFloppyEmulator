@@ -65,33 +65,33 @@ Build folder.
 
 ## How to build it ?
 
-#### Linux target
+### Linux target
 
 (Linux build environment)
-
+```
 cd build
-
 make
+```
 
-#### Windows target
+### Windows target
 
 (Linux or WSL2 + mingw32 build environment)
 
+```
 cd build
-
 make TARGET=mingw32   # 32 bits build
-
 make TARGET=mingw64   # 64 bits build
+```
 
-#### macOS target
+### macOS target
 
 (macOS + Xcode build environment)
 
+```
 cd build
-
-make TARGET=Darwin
-
+make
 ./maccreatebundle
+```
 
 -------------------------------------------------------------------------------
 
@@ -99,7 +99,7 @@ HxC Floppy Emulator project
 
 Generic/universal floppy disk drive emulators
 
-Copyright (C) 2006-2023  Jean-François DEL NERO / HxC2001
+Copyright (C) 2006-2023  Jean-FranÃ§ois DEL NERO / HxC2001
 
 Email :    hxc2001(at)hxc2001.com
 
