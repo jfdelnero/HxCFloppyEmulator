@@ -27,12 +27,14 @@ cat << EOF > ${GUI_PATH}/Contents/info.plist
 <!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
 <plist version="0.9">
 <dict>
+        <key>CFBundleIdentifier</key>
+        <string>com.hxc2001.${GUI_EXEC}</string>
         <key>CFBundleName</key>
         <string>${NAME}</string>
         <key>CFBundlePackageType</key>
         <string>APPL</string>
         <key>CFBundleVersion</key>
-        <string>59</string>
+        <string>1</string>
         <key>CFBundleShortVersionString</key>
         <string>${VERSION}</string>
         <key>CFBundleIconFile</key>
