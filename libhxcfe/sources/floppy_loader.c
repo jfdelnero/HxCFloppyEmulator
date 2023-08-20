@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2023 Jean-François DEL NERO
+// Copyright (C) 2006-2023 Jean-Franï¿½ois DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
@@ -38,7 +38,7 @@
 // File : floppy_loader.c
 // Contains: Library interface functions
 //
-// Written by: Jean-François DEL NERO
+// Written by: Jean-Franï¿½ois DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -133,9 +133,9 @@ HXCFE* hxcfe_init(void)
 #if defined(WIN32)
 		hxcfe_execScriptLine( hxcfe, "set SPSCAPS_LIB_NAME CAPSImg.dll" );
 #elif __APPLE__
-		hxcfe_execScriptLine( hxcfe, "set SPSCAPS_LIB_NAME CAPSimage.framework/CAPSimage" );
+		hxcfe_execScriptLine( hxcfe, "set SPSCAPS_LIB_NAME CAPSImage.framework/CAPSImage,CAPSImg.framework/CAPSImg" );
 #else
-		hxcfe_execScriptLine( hxcfe, "set SPSCAPS_LIB_NAME libcapsimage.so.5.1" );
+		hxcfe_execScriptLine( hxcfe, "set SPSCAPS_LIB_NAME libcapsimage.so.5,libcapsimage.so.5.1,libcapsimage.so" );
 #endif
 
 		hxcfe_execScriptFile(hxcfe, "config.script");
