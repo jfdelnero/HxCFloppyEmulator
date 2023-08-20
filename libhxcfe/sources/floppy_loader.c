@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2023 Jean-Fran�ois DEL NERO
+// Copyright (C) 2006-2023 Jean-François DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
@@ -38,7 +38,7 @@
 // File : floppy_loader.c
 // Contains: Library interface functions
 //
-// Written by: Jean-Fran�ois DEL NERO
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
