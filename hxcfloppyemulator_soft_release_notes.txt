@@ -20,7 +20,7 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 ** **** 2023 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
 
 *** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
-*** Last update : v2.14.11.2, 19 August 2023 ***
+*** Last update : v2.14.12.1, 20 August 2023 ***
 
 -> Many fixes and improvements into the flux stream management :
 
@@ -69,6 +69,8 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -> User interface : Save and restore previous state (WIP, Done : batch converter window)
 
 -> NSI Northstar : Some index timings and formats fixes.
+
+-> macOS : Better CAPSlib/ipf lib support. (Renaud Guérin)
 
 *********************************************************/
 
