@@ -5,10 +5,9 @@
 *.so
 *.map
 *.a
+*.dylib
+*.app
+*.dmg
 hxcfe
 bmptoh
 hxcfloppyemulator
-HxCFloppyEmulator_software/sources/thirdpartylibs/fltk/fltk-1.x.x
-HxCFloppyEmulator_software/sources/thirdpartylibs/fltk/fltk-1.3.8-source.tar.gz
-HxCFloppyEmulator_software/sources/gui/fluid/*.h
-HxCFloppyEmulator_software/sources/gui/fluid/*.cxx
