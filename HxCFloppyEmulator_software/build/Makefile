@@ -1,24 +1,24 @@
-#CC=i386-pc-linux-gcc
-CC=gcc
-BUILD_CC=gcc
-CPP=g++
+#CC = i386-pc-linux-gcc
+CC = gcc
+BUILD_CC = gcc
+CPP = g++
 
 TARGET := $(shell uname)
 
-BASEDIR=../sources
+BASEDIR = ../sources
 INCLUDES = -I$(BASEDIR) -I ../../libhxcfe/sources -I $(BASEDIR)/gui -I $(BASEDIR)/thirdpartylibs/fltk/fltk-1.x.x/ -I ../../libusbhxcfe/sources -I ../../libhxcadaptor/sources -I ../../build -I $(BASEDIR)/gui/microintro/
 
 DEBUG ?= 0
 DEBUG_ASAN ?= 0
 
-EXEC=hxcfloppyemulator
+EXEC = hxcfloppyemulator
 
 ifeq ($(DEBUG), 1)
-	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG
-	LDFLAGS=
+	CFLAGS = -O0 $(INCLUDES) -Wall -g -DDEBUG
+	LDFLAGS =
 else
-	CFLAGS=-O3 $(INCLUDES) -Wall
-	LDFLAGS= -s
+	CFLAGS = -O3 $(INCLUDES) -Wall
+	LDFLAGS = -s
 endif
 
 ifeq ($(DEBUG_ASAN), 1)
@@ -28,60 +28,60 @@ endif
 
 ifdef IPF_LIB_SUPPORT
 	CFLAGS += -DIPF_SUPPORT
-	DISKLOADERPLUGINS_IPF= ipf_loader.o libcapsimage.so.2.0
+	DISKLOADERPLUGINS_IPF = ipf_loader.o libcapsimage.so.2.0
 else
-	DISKLOADERPLUGINS_IPF=
+	DISKLOADERPLUGINS_IPF =
 endif
 
 LIBHXCFE = libhxcfe.so
 LIBUSBHXCFE = libusbhxcfe.so
 
 ifeq ($(TARGET), FreeBSD)
-CC=cc
-CPP=c++
-BUILD_CC=cc
-CFLAGS += -I/usr/local/include
-LDFLAGS += -lc -lm -ldl -lpthread -Wl,-rpath=.  -Wl,-Map,foo.map
+	CC = cc
+	CPP = c++
+	BUILD_CC = cc
+	CFLAGS += -I/usr/local/include
+	LDFLAGS += -lc -lm -ldl -lpthread -Wl,-rpath=.  -Wl,-Map,foo.map
 endif
 
 ifeq ($(TARGET), Linux)
-LDFLAGS += -lc -lm -ldl -lpthread -Wl,-rpath=.  -Wl,-Map,foo.map
+	LDFLAGS += -lc -lm -ldl -lpthread -Wl,-rpath=.  -Wl,-Map,foo.map
 endif
 
 ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
-LIBHXCFE = libhxcfe.dll
-LIBUSBHXCFE = libusbhxcfe.dll
+	LIBHXCFE = libhxcfe.dll
+	LIBUSBHXCFE = libusbhxcfe.dll
 endif
 
 ifeq ($(TARGET), mingw32)
-CC=i686-w64-mingw32-gcc
-CPP=i686-w64-mingw32-g++
-RESC=i686-w64-mingw32-windres
-LDFLAGS += -static-libgcc -static-libstdc++ -lwinmm -lws2_32
-LIBHXCFE= libhxcfe.dll
-LIBUSBHXCFE= libusbhxcfe.dll
-EXEC=HxCFloppyEmulator.exe
+	CC = i686-w64-mingw32-gcc
+	CPP = i686-w64-mingw32-g++
+	RESC = i686-w64-mingw32-windres
+	LDFLAGS += -static-libgcc -static-libstdc++ -lwinmm -lws2_32
+	LIBHXCFE = libhxcfe.dll
+	LIBUSBHXCFE = libusbhxcfe.dll
+	EXEC = HxCFloppyEmulator.exe
 endif
 
 ifeq ($(TARGET), mingw64)
-CC=x86_64-w64-mingw32-gcc
-CPP=x86_64-w64-mingw32-g++
-RESC=x86_64-w64-mingw32-windres
-LDFLAGS += -static-libgcc -static-libstdc++ -lwinmm -lws2_32
-LIBHXCFE= libhxcfe.dll
-LIBUSBHXCFE= libusbhxcfe.dll
-EXEC=HxCFloppyEmulator.exe
+	CC = x86_64-w64-mingw32-gcc
+	CPP = x86_64-w64-mingw32-g++
+	RESC = x86_64-w64-mingw32-windres
+	LDFLAGS += -static-libgcc -static-libstdc++ -lwinmm -lws2_32
+	LIBHXCFE = libhxcfe.dll
+	LIBUSBHXCFE = libusbhxcfe.dll
+	EXEC = HxCFloppyEmulator.exe
 endif
 
 ifeq ($(TARGET), Darwin)
-MACOSX_ARCH ?= -arch arm64 -arch x86_64
-MACOSX_MIN_VER ?= 10.9
-CFLAGS += -DOSX ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
-LDFLAGS += -lc -lm -ldl -lpthread -framework Cocoa ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
-LIBHXCFE = libhxcfe.dylib
-LIBUSBHXCFE = libusbhxcfe.dylib
+	MACOSX_ARCH ?= -arch arm64 -arch x86_64
+	MACOSX_MIN_VER ?= 10.9
+	CFLAGS += -DOSX ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
+	LDFLAGS += -lc -lm -ldl -lpthread -framework Cocoa ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
+	LIBHXCFE = libhxcfe.dylib
+	LIBUSBHXCFE = libusbhxcfe.dylib
 else
-LDFLAGS += $(shell $(BASEDIR)/thirdpartylibs/fltk/fltk-1.x.x/fltk-config --ldflags)
+	LDFLAGS += $(shell $(BASEDIR)/thirdpartylibs/fltk/fltk-1.x.x/fltk-config --ldflags)
 endif
 
 FTDIFLOPPYEMU=usb_hxcfloppyemulator.o variablebitrate.o

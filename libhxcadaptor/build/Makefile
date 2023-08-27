@@ -1,21 +1,21 @@
 #CC=i386-pc-linux-gcc
-CC=gcc
-AR=ar
+CC = gcc
+AR = ar
 
 TARGET := $(shell uname)
 
-BASEDIR=../sources
+BASEDIR = ../sources
 INCLUDES = -I$(BASEDIR)/ -I ../../libhxcfe/sources -I ../../libusbhxcfe/sources -I ../../build
 
 DEBUG ?= 0
 DEBUG_ASAN ?= 0
 
 ifeq ($(DEBUG), 1)
-	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG
-	LDFLAGS= -shared
+	CFLAGS = -O0 $(INCLUDES) -Wall -g -DDEBUG
+	LDFLAGS = -shared
 else
-	CFLAGS=-O3 $(INCLUDES) -Wall
-	LDFLAGS= -shared -s
+	CFLAGS = -O3 $(INCLUDES) -Wall
+	LDFLAGS = -shared -s
 endif
 
 ifeq ($(DEBUG_ASAN), 1)
@@ -24,34 +24,36 @@ ifeq ($(DEBUG_ASAN), 1)
 endif
 
 ifeq ($(TARGET), FreeBSD)
-CFLAGS += -fPIC -Wl,-Map,foo.map
-LDFLAGS += -lc -lm -ldl
-CC=cc
+	CFLAGS += -fPIC -Wl,-Map,foo.map
+	LDFLAGS += -lc -lm -ldl
+	CC = cc
 endif
 
 ifeq ($(TARGET), Linux)
-CFLAGS += -fPIC -Wl,-Map,foo.map
-LDFLAGS += -lc -lm -ldl
+	CFLAGS += -fPIC -Wl,-Map,foo.map
+	LDFLAGS += -lc -lm -ldl
 endif
 
 ifeq ($(TARGET), mingw32)
-CC=i686-w64-mingw32-gcc
-LDFLAGS += -lc -lm -ldl
+	CC = i686-w64-mingw32-gcc
+	AR = i686-w64-mingw32-ar
+	LDFLAGS += -lc -lm -ldl
 endif
 
 ifeq ($(TARGET), mingw64)
-CC=x86_64-w64-mingw32-gcc
-LDFLAGS += -lc -lm -ldl
+	CC = x86_64-w64-mingw32-gcc
+	AR = x86_64-w64-mingw32-ar
+	LDFLAGS += -lc -lm -ldl
 endif
 
 ifeq ($(TARGET), Darwin)
-MACOSX_ARCH ?= -arch arm64 -arch x86_64
-MACOSX_MIN_VER ?= 10.9
-CFLAGS += ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
-LDFLAGS += -lc -lm -ldl ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
+	MACOSX_ARCH ?= -arch arm64 -arch x86_64
+	MACOSX_MIN_VER ?= 10.9
+	CFLAGS += ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
+	LDFLAGS += -lc -lm -ldl ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
 endif
 
-EXEC=libhxcadaptor.a
+EXEC = libhxcadaptor.a
 
 all: $(EXEC)
 

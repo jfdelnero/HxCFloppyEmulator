@@ -1,5 +1,5 @@
 #CC=i386-pc-linux-gcc
-CC=gcc
+CC = gcc
 
 TARGET := $(shell uname)
 
@@ -9,11 +9,11 @@ DEBUG ?= 0
 DEBUG_ASAN ?= 0
 
 ifeq ($(DEBUG), 1)
-	CFLAGS=-O0 $(INCLUDES) -Wall -g -DDEBUG
-	LDFLAGS=
+	CFLAGS =-O0 $(INCLUDES) -Wall -g -DDEBUG
+	LDFLAGS =
 else
-	CFLAGS=-O3 $(INCLUDES) -Wall
-	LDFLAGS= -s
+	CFLAGS =-O3 $(INCLUDES) -Wall
+	LDFLAGS = -s
 endif
 
 ifeq ($(DEBUG_ASAN), 1)
@@ -21,48 +21,48 @@ ifeq ($(DEBUG_ASAN), 1)
 	LDFLAGS += -static-libasan -fsanitize=address
 endif
 
-EXEC=hxcfe
+EXEC = hxcfe
 LIBHXCFE = libhxcfe.so
 LIBUSBHXCFE = libusbhxcfe.so
 
 ifeq ($(TARGET), Darwin)
-MACOSX_ARCH ?= -arch arm64 -arch x86_64
-MACOSX_MIN_VER ?= 10.9
-CFLAGS += ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
-LDFLAGS += -lc -lm -ldl -lpthread ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
-LIBHXCFE= libhxcfe.dylib
-LIBUSBHXCFE= libusbhxcfe.dylib
+	MACOSX_ARCH ?= -arch arm64 -arch x86_64
+	MACOSX_MIN_VER ?= 10.9
+	CFLAGS += ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
+	LDFLAGS += -lc -lm -ldl -lpthread ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
+	LIBHXCFE = libhxcfe.dylib
+	LIBUSBHXCFE = libusbhxcfe.dylib
 endif
 
 ifeq ($(TARGET), FreeBSD)
-CC=cc
-LDFLAGS += -lc -lm -ldl -lpthread -Wl,-rpath=. -Wl,-Map,foo.map
+	CC = cc
+	LDFLAGS += -lc -lm -ldl -lpthread -Wl,-rpath=. -Wl,-Map,foo.map
 endif
 
 ifeq ($(TARGET), Linux)
-LDFLAGS += -lc -lm -ldl -lpthread -Wl,-rpath=. -Wl,-Map,foo.map
+	LDFLAGS += -lc -lm -ldl -lpthread -Wl,-rpath=. -Wl,-Map,foo.map
 endif
 
 ifeq ($(TARGET), mingw32)
-CC=i686-w64-mingw32-gcc
-LDFLAGS += -static-libgcc
-EXEC=hxcfe.exe
-LIBHXCFE= libhxcfe.dll
-LIBUSBHXCFE= libusbhxcfe.dll
+	CC = i686-w64-mingw32-gcc
+	LDFLAGS += -static-libgcc
+	EXEC = hxcfe.exe
+	LIBHXCFE = libhxcfe.dll
+	LIBUSBHXCFE = libusbhxcfe.dll
 endif
 
 ifeq ($(TARGET), mingw64)
-CC=x86_64-w64-mingw32-gcc
-LDFLAGS += -static-libgcc
-EXEC=hxcfe.exe
-LIBHXCFE= libhxcfe.dll
-LIBUSBHXCFE= libusbhxcfe.dll
+	CC = x86_64-w64-mingw32-gcc
+	LDFLAGS += -static-libgcc
+	EXEC = hxcfe.exe
+	LIBHXCFE = libhxcfe.dll
+	LIBUSBHXCFE = libusbhxcfe.dll
 endif
 
 ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
-LIBHXCFE= libhxcfe.dll
-LIBUSBHXCFE= libusbhxcfe.dll
-LDFLAGS += -lc -lm -ldl -lpthread
+	LIBHXCFE = libhxcfe.dll
+	LIBUSBHXCFE = libusbhxcfe.dll
+	LDFLAGS += -lc -lm -ldl -lpthread
 endif
 
 all: $(EXEC)
