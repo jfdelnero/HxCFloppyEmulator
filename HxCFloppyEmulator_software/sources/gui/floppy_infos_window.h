@@ -50,6 +50,7 @@ public:
   Fl_Light_Button *c64_bt;
   Fl_Light_Button *qd_mo5_bt;
   Fl_Light_Button *victor9k_bt;
+  Fl_Light_Button *centurion_bt;
   Fl_Text_Buffer* buf;
   Fl_Text_Display * txt_displ;
 };

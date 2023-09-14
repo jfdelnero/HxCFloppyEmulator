@@ -35,7 +35,7 @@ class floppy_infos_window {open
       }
       Fl_Group {} {
         label Status open
-        xywh {1000 2 275 284} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL labelsize 12 align 21
+        xywh {1000 2 275 269} box ENGRAVED_FRAME labeltype ENGRAVED_LABEL labelsize 12 align 21
       } {
         Fl_Output x_pos {
           xywh {1005 17 265 15} labelsize 10 textsize 10
@@ -48,7 +48,7 @@ class floppy_infos_window {open
         }
         Fl_Text_Display object_txt {
           user_data this
-          xywh {1005 68 265 215} labelsize 10 textsize 10
+          xywh {1005 68 265 200} labelsize 10 textsize 10
         }
       }
       Fl_Group floppy_map_disp {
@@ -92,97 +92,103 @@ class floppy_infos_window {open
       }
       Fl_Group {} {
         label {Track analysis format} open
-        xywh {1000 287 275 102} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
+        xywh {1000 272 275 117} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 10 align 21
       } {
         Fl_Light_Button iso_mfm_bt {
           label {ISO MFM}
           user_data this
           callback disk_infos_window_callback
-          xywh {1015 305 76 15} labelsize 10
+          xywh {1015 290 76 15} labelsize 10
         }
         Fl_Light_Button iso_fm_bt {
           label {ISO FM}
           user_data this
           callback disk_infos_window_callback
-          xywh {1015 320 76 15} labelsize 10
+          xywh {1015 305 76 15} labelsize 10
         }
         Fl_Light_Button amiga_mfm_bt {
           label {AMIGA MFM}
           user_data this
           callback disk_infos_window_callback
-          xywh {1015 335 76 15} labelsize 10
+          xywh {1015 320 76 15} labelsize 10
         }
         Fl_Light_Button membrain_bt {
           label MEMBRAIN
           user_data this
           callback disk_infos_window_callback
-          xywh {1099 335 76 15} labelsize 10
+          xywh {1099 320 76 15} labelsize 10
         }
         Fl_Light_Button tycom_bt {
           label TYCOM
           user_data this
           callback disk_infos_window_callback
-          xywh {1099 320 76 15} labelsize 10
+          xywh {1099 305 76 15} labelsize 10
         }
         Fl_Light_Button eemu_bt {
           label {E-Emu}
           user_data this
           callback disk_infos_window_callback
-          xywh {1099 305 76 15} labelsize 10
+          xywh {1099 290 76 15} labelsize 10
         }
         Fl_Light_Button apple2_bt {
           label Apple
           user_data this
           callback disk_infos_window_callback
-          xywh {1015 350 76 15} labelsize 10
+          xywh {1015 335 76 15} labelsize 10
         }
         Fl_Light_Button arburg_bt {
           label Arburg
           user_data this
           callback disk_infos_window_callback
-          xywh {1099 350 76 15} labelsize 10
+          xywh {1099 335 76 15} labelsize 10
         }
         Fl_Light_Button aed6200p_bt {
           label {AED 6200P}
           user_data this
           callback disk_infos_window_callback
-          xywh {1183 305 76 15} labelsize 10
+          xywh {1183 290 76 15} labelsize 10
         }
         Fl_Light_Button northstar_bt {
           label NORTHSTAR
           user_data this
           callback disk_infos_window_callback
-          xywh {1183 320 76 15} labelsize 10
+          xywh {1183 305 76 15} labelsize 10
         }
         Fl_Light_Button heathkit_bt {
           label HEATHKIT
           user_data this
           callback disk_infos_window_callback
-          xywh {1183 335 76 15} labelsize 10
+          xywh {1183 320 76 15} labelsize 10
         }
         Fl_Light_Button decrx02_bt {
           label {DEC RX02}
           user_data this
           callback disk_infos_window_callback
-          xywh {1183 350 76 15} labelsize 10
+          xywh {1183 335 76 15} labelsize 10
         }
         Fl_Light_Button c64_bt {
           label C64
           user_data this
           callback disk_infos_window_callback
-          xywh {1015 365 76 15} labelsize 10
+          xywh {1015 350 76 15} labelsize 10
         }
         Fl_Light_Button qd_mo5_bt {
           label {QD MO5}
           user_data this
           callback disk_infos_window_callback
-          xywh {1183 365 76 15} labelsize 10
+          xywh {1183 350 76 15} labelsize 10
         }
         Fl_Light_Button victor9k_bt {
           label {Victor 9K}
           user_data this
           callback disk_infos_window_callback
-          xywh {1099 365 76 15} labelsize 10
+          xywh {1099 350 76 15} labelsize 10
+        }
+        Fl_Light_Button centurion_bt {
+          label Centurion
+          user_data this
+          callback disk_infos_window_callback selected
+          xywh {1015 365 76 15} labelsize 10
         }
       }
     }

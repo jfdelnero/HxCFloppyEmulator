@@ -1,0 +1,1 @@
+int get_next_Centurion_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,int track_offset);
