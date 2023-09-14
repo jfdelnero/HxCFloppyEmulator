@@ -39,7 +39,7 @@ floppy_infos_window::floppy_infos_window() {
       } // Fl_Choice* view_mode
       o->end();
     } // Fl_Group* o
-    { Fl_Group* o = new Fl_Group(1000, 2, 275, 284, getString(STR_FLOPPYVIEWERWINDOW_0005));
+    { Fl_Group* o = new Fl_Group(1000, 2, 275, 269, getString(STR_FLOPPYVIEWERWINDOW_0005));
       o->box(FL_ENGRAVED_FRAME);
       o->labeltype(FL_ENGRAVED_LABEL);
       o->labelsize(12);
@@ -102,71 +102,75 @@ floppy_infos_window::floppy_infos_window() {
       } // Fl_Button* o
       o->end();
     } // Fl_Group* o
-    { Fl_Group* o = new Fl_Group(1000, 287, 275, 101, getString(STR_FLOPPYVIEWERWINDOW_0014));
+    { Fl_Group* o = new Fl_Group(1000, 272, 275, 117, getString(STR_FLOPPYVIEWERWINDOW_0014));
       o->box(FL_ENGRAVED_FRAME);
       o->labeltype(FL_EMBOSSED_LABEL);
       o->labelsize(10);
       o->align(Fl_Align(FL_ALIGN_TOP_LEFT|FL_ALIGN_INSIDE));
-      { iso_mfm_bt = new Fl_Light_Button(1015, 305, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0015));
+      { iso_mfm_bt = new Fl_Light_Button(1015, 290, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0015));
         iso_mfm_bt->labelsize(10);
         iso_mfm_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* iso_mfm_bt
-      { iso_fm_bt = new Fl_Light_Button(1015, 320, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0016));
+      { iso_fm_bt = new Fl_Light_Button(1015, 305, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0016));
         iso_fm_bt->labelsize(10);
         iso_fm_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* iso_fm_bt
-      { amiga_mfm_bt = new Fl_Light_Button(1015, 335, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0017));
+      { amiga_mfm_bt = new Fl_Light_Button(1015, 320, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0017));
         amiga_mfm_bt->labelsize(10);
         amiga_mfm_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* amiga_mfm_bt
-      { membrain_bt = new Fl_Light_Button(1099, 335, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0018));
+      { membrain_bt = new Fl_Light_Button(1099, 320, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0018));
         membrain_bt->labelsize(10);
         membrain_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* membrain_bt
-      { tycom_bt = new Fl_Light_Button(1099, 320, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0019));
+      { tycom_bt = new Fl_Light_Button(1099, 305, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0019));
         tycom_bt->labelsize(10);
         tycom_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* tycom_bt
-      { eemu_bt = new Fl_Light_Button(1099, 305, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0020));
+      { eemu_bt = new Fl_Light_Button(1099, 290, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0020));
         eemu_bt->labelsize(10);
         eemu_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* eemu_bt
-      { apple2_bt = new Fl_Light_Button(1015, 350, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0021));
+      { apple2_bt = new Fl_Light_Button(1015, 335, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0021));
         apple2_bt->labelsize(10);
         apple2_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* apple2_bt
-      { arburg_bt = new Fl_Light_Button(1099, 350, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0022));
+      { arburg_bt = new Fl_Light_Button(1099, 335, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0022));
         arburg_bt->labelsize(10);
         arburg_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* arburg_bt
-      { aed6200p_bt = new Fl_Light_Button(1183, 305, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0023));
+      { aed6200p_bt = new Fl_Light_Button(1183, 290, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0023));
         aed6200p_bt->labelsize(10);
         aed6200p_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* aed6200p_bt
-      { northstar_bt = new Fl_Light_Button(1183, 320, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0024));
+      { northstar_bt = new Fl_Light_Button(1183, 305, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0024));
         northstar_bt->labelsize(10);
         northstar_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* northstar_bt
-      { heathkit_bt = new Fl_Light_Button(1183, 335, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0025));
+      { heathkit_bt = new Fl_Light_Button(1183, 320, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0025));
         heathkit_bt->labelsize(10);
         heathkit_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* heathkit_bt
-      { decrx02_bt = new Fl_Light_Button(1183, 350, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0026));
+      { decrx02_bt = new Fl_Light_Button(1183, 335, 76, 15, getString(STR_FLOPPYVIEWERWINDOW_0026));
         decrx02_bt->labelsize(10);
         decrx02_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* decrx02_bt
-      { c64_bt = new Fl_Light_Button(1015, 365, 76, 15, "C64");
+      { c64_bt = new Fl_Light_Button(1015, 350, 76, 15, "C64");
         c64_bt->labelsize(10);
         c64_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* c64_bt
-      { qd_mo5_bt = new Fl_Light_Button(1183, 365, 76, 15, "QD MO5");
+      { qd_mo5_bt = new Fl_Light_Button(1183, 350, 76, 15, "QD MO5");
         qd_mo5_bt->labelsize(10);
         qd_mo5_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* qd_mo5_bt
-      { victor9k_bt = new Fl_Light_Button(1099, 365, 76, 15, "Victor 9K");
+      { victor9k_bt = new Fl_Light_Button(1099, 350, 76, 15, "Victor 9K");
         victor9k_bt->labelsize(10);
         victor9k_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
       } // Fl_Light_Button* victor9k_bt
+      { centurion_bt = new Fl_Light_Button(1015, 365, 76, 15, "Centurion");
+        centurion_bt->labelsize(10);
+        centurion_bt->callback((Fl_Callback*)disk_infos_window_callback, (void*)(this));
+      } // Fl_Light_Button* centurion_bt
       o->end();
     } // Fl_Group* o
 
