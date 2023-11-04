@@ -87,7 +87,7 @@ typedef struct sockaddr SOCKADDR;
 #include "libhxcfe.h"
 #include "libhxcadaptor.h"
 
-void * network_connect(char * address,unsigned short port)
+void * network_connect(char * address, unsigned short port)
 {
 	hxc_tcp_stat * tcp_stat;
 #ifdef WIN32
@@ -127,7 +127,10 @@ void * network_connect(char * address,unsigned short port)
 #ifdef WIN32
 			WSACleanup();
 #endif
+			closesocket(tcp_stat->m_socket);
+
 			free(tcp_stat);
+
 			return (void*)NULL;
 		}
 
@@ -137,7 +140,7 @@ void * network_connect(char * address,unsigned short port)
 	return (void*)NULL;
 }
 
-int network_read(void * network_connection, unsigned char * buffer, int size,int timeout)
+int network_read(void * network_connection, unsigned char * buffer, int size, int timeout)
 {
 	int bytesRecv;
 	int offset;
@@ -163,7 +166,7 @@ int network_read(void * network_connection, unsigned char * buffer, int size,int
 	return size;
 }
 
-int network_read2(void * network_connection, unsigned char * buffer, int size,int timeout)
+int network_read2(void * network_connection, unsigned char * buffer, int size, int timeout)
 {
 	int bytesRecv;
 	int offset;
@@ -173,12 +176,12 @@ int network_read2(void * network_connection, unsigned char * buffer, int size,in
 
 	offset=0;
 
-		bytesRecv = recv(tcp_stat->m_socket, (char*)&buffer[offset], size - offset, 0);
+	bytesRecv = recv(tcp_stat->m_socket, (char*)&buffer[offset], size - offset, 0);
 
 	return bytesRecv;
 }
 
-int network_write(void * network_connection, unsigned char * buffer, int size,int timeout)
+int network_write(void * network_connection, unsigned char * buffer, int size, int timeout)
 {
 	int bytesSent;
 	int offset;

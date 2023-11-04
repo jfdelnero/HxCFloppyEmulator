@@ -429,7 +429,6 @@ alloc_error:
 				memset(&fileStat,0,sizeof(struct stat));
 				if(!lstat (tmpstr, &fileStat))
 				{
-
 					if ( S_ISDIR ( fileStat.st_mode ) )
 						fileinfo->isdirectory=1;
 					else
@@ -440,23 +439,16 @@ alloc_error:
 					strncpy(fileinfo->filename,d->d_name,256);
 
 					free(tmpstr);
+
 					return (void*)dir;
 				}
 
 				free(tmpstr);
 			}
-
-			closedir (dir);
-			dir=0;
-
 		}
 
 		closedir (dir);
-		dir=0;;
-	}
-	else
-	{
-		dir=0;
+		dir = 0;
 	}
 
 	return (void*)dir;
