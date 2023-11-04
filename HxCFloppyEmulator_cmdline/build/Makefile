@@ -7,18 +7,26 @@ INCLUDES = -I ../sources -I ../../libhxcfe/sources -I ../../libusbhxcfe/sources 
 
 DEBUG ?= 0
 DEBUG_ASAN ?= 0
+DEBUG_INFOS ?= 0
 
 ifeq ($(DEBUG), 1)
-	CFLAGS =-O0 $(INCLUDES) -Wall -g -DDEBUG
+	CFLAGS =-O0 $(INCLUDES) -Wall -DDEBUG
 	LDFLAGS =
+	DEBUG_INFOS = 1
 else
 	CFLAGS =-O3 $(INCLUDES) -Wall
-	LDFLAGS = -s
+	LDFLAGS =
 endif
 
 ifeq ($(DEBUG_ASAN), 1)
 	CFLAGS += -fsanitize=address -fno-omit-frame-pointer
 	LDFLAGS += -static-libasan -fsanitize=address
+endif
+
+ifeq ($(DEBUG_INFOS), 1)
+	CFLAGS += -g
+else
+	LDFLAGS += -s
 endif
 
 EXEC = hxcfe
