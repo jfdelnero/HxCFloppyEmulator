@@ -124,10 +124,11 @@ void * network_connect(char * address, unsigned short port)
 
 		if (connect(tcp_stat->m_socket, (SOCKADDR*)&tcp_stat->clientService, sizeof(tcp_stat->clientService)) == SOCKET_ERROR)
 		{
+			closesocket(tcp_stat->m_socket);
+
 #ifdef WIN32
 			WSACleanup();
 #endif
-			closesocket(tcp_stat->m_socket);
 
 			free(tcp_stat);
 
