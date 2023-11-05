@@ -51,6 +51,8 @@ void hxc_destroycriticalsection( HXCFE* floppycontext, unsigned char id );
 #endif
 char * hxc_strupper( char * str );
 char * hxc_strlower( char * str );
+char * hxc_dyn_strcat(char * deststr,char * srcstr);
+char * hxc_dyn_sprintfcat(char * deststr,char * srcstr, ...);
 
 /////////////// File functions ////////////////
 
