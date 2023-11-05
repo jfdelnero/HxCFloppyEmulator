@@ -71,7 +71,7 @@ int get_next_MEMBRAIN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 {
 	int bit_offset_bak,bit_offset,tmp_bit_offset;
 	int last_start_offset;
-	int sector_size;
+	unsigned int sector_size;
 	unsigned char mfm_buffer[32];
 	unsigned char tmp_buffer[32];
 	unsigned char * tmp_sector;
@@ -175,44 +175,51 @@ int get_next_MEMBRAIN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 
 					if((bit_offset!=-1))
 					{
-
-						tmp_sector=(unsigned char*)malloc(1+1+sector_size+2);
-						memset(tmp_sector,0,1+1+sector_size+2);
-
-						sector->startdataindex=bit_offset;
-						sector->endsectorindex=mfmtobin(track->databuffer,NULL,track->tracklen,tmp_sector,1+1+sector_size+2,bit_offset,0);
-						sector->alternate_datamark=tmp_sector[1];
-						sector->use_alternate_datamark=0xFF;
-
-						CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x8005,0x0000);
-						for(k=0;k<1+1+sector_size+2;k++)
+						tmp_sector = (unsigned char*)malloc(1+1+sector_size+2);
+						if( tmp_sector )
 						{
-							CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
-						}
+							memset(tmp_sector,0,1+1+sector_size+2);
 
-						sector->data_crc = ( tmp_sector[k-2]<<8 ) | tmp_sector[k-1] ;
+							sector->startdataindex = bit_offset;
+							sector->endsectorindex = mfmtobin(track->databuffer,NULL,track->tracklen,tmp_sector,1+1+sector_size+2,bit_offset,0);
+							sector->alternate_datamark = tmp_sector[1];
+							sector->use_alternate_datamark = 0xFF;
 
-						if(!CRC16_High && !CRC16_Low)
-						{ // crc ok !!!
-							floppycontext->hxc_printf(MSG_DEBUG,"Data CRC Ok. (0x%.4X)",sector->data_crc);
+							CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x8005,0x0000);
+							for(k=0;k<1+1+sector_size+2;k++)
+							{
+								CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
+							}
+							
+							sector->data_crc = ( tmp_sector[1+1+sector_size]<<8 ) | tmp_sector[1+1+sector_size+1] ;
+
+							if(!CRC16_High && !CRC16_Low)
+							{ // crc ok !!!
+								floppycontext->hxc_printf(MSG_DEBUG,"Data CRC Ok. (0x%.4X)",sector->data_crc);
+							}
+							else
+							{
+								floppycontext->hxc_printf(MSG_DEBUG,"Data CRC ERROR ! (0x%.4X)",sector->data_crc);
+								sector->use_alternate_data_crc=0xFF;
+							}
+
+							sector->input_data = (unsigned char*)malloc(sector_size);
+							if(sector->input_data)
+							{
+								memcpy(sector->input_data,&tmp_sector[2],sector_size);
+							}
+
+							// "Empty" sector detection
+							checkEmptySector(sector);
+
+							bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
+
+							free(tmp_sector);
 						}
 						else
 						{
-							floppycontext->hxc_printf(MSG_DEBUG,"Data CRC ERROR ! (0x%.4X)",sector->data_crc);
-							sector->use_alternate_data_crc=0xFF;
+							floppycontext->hxc_printf(MSG_ERROR,"get_next_MEMBRAIN_sector : Alloc error!");
 						}
-
-						sector->input_data = (unsigned char*)malloc(sector_size);
-						if(sector->input_data)
-						{
-							memcpy(sector->input_data,&tmp_sector[2],sector_size);
-						}
-						free(tmp_sector);
-
-						// "Empty" sector detection
-						checkEmptySector(sector);
-
-						bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
 
 						sector_extractor_sm=ENDOFSECTOR;
 					}
