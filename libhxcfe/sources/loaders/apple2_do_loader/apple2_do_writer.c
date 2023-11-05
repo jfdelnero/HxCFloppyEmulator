@@ -43,9 +43,8 @@
 int Apple2_do_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int32_t i,j,k,l,nbsector,sector;
-	FILE * rawfile;
+	FILE * outfile;
 	char * log_str;
-	char   tmp_str[256];
 	int32_t sectorsize,track_type_id;
 	unsigned char * sector_mapping;
 
@@ -64,148 +63,136 @@ int Apple2_do_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 	}
 
 	track_type_id = 0;
-	log_str = 0;
 	sectorsize = -1;
 
-	rawfile=hxc_fopen(filename,"wb");
-	if(rawfile)
+	outfile = hxc_fopen(filename,"wb");
+	if( !outfile )
 	{
-		ss=hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
-		if(ss)
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s !",filename);
+		return HXCFE_ACCESSERROR;
+	}
+
+	ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
+	if( !ss )
+		goto error;
+
+	for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
+	{
+		for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
 		{
-			for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
+			hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),(2*floppy->floppyNumberOfTrack) );
+
+			log_str = hxc_dyn_sprintfcat(NULL,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(outfile));
+
+			sca = NULL;
+
+			k=0;
+			do
 			{
-				for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
+				nbsector = 0;
+				switch(track_type_id)
 				{
-					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),(2*floppy->floppyNumberOfTrack) );
+					case 0:
+						sca = hxcfe_getAllTrackSectors(ss,j,i,APPLEII_GCR1_ENCODING,&nbsector);
+					break;
+					case 1:
+						sca = hxcfe_getAllTrackSectors(ss,j,i,APPLEII_GCR2_ENCODING,&nbsector);
+					break;
+					case 2:
+						sca = hxcfe_getAllTrackSectors(ss,j,i,APPLEII_HDDD_A2_GCR1_ENCODING,&nbsector);
+					break;
+					case 3:
+						sca = hxcfe_getAllTrackSectors(ss,j,i,APPLEII_HDDD_A2_GCR2_ENCODING,&nbsector);
+					break;
+				}
 
-					sprintf(tmp_str,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(rawfile));
+				if(!nbsector)
+					track_type_id=(track_type_id+1)%4;
 
-					log_str=0;
-					log_str=realloc(log_str,strlen(tmp_str)+1);
-					memset(log_str,0,strlen(tmp_str)+1);
-					strcat(log_str,tmp_str);
+				k++;
 
-					sca = 0;
+			}while(!nbsector && k<7);
 
-					k=0;
-					do
+			if(sca && nbsector)
+			{
+				int total_track_size;
+
+				total_track_size = 0;
+				for(l=0;l<nbsector;l++)
+				{
+					if(sca[l]->sectorsize > 0)
+						total_track_size += sca[l]->sectorsize;
+				}
+
+				if(total_track_size)
+				{
+					unsigned char *track_buffer = malloc(total_track_size);
+					if(track_buffer)
 					{
-						nbsector = 0;
-						switch(track_type_id)
+						memset(track_buffer,0,total_track_size);
+						sectorsize = sca[0]->sectorsize;
+						for(l=0;l<256;l++)
 						{
-							case 0:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,APPLEII_GCR1_ENCODING,&nbsector);
-							break;
-							case 1:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,APPLEII_GCR2_ENCODING,&nbsector);
-							break;
-							case 2:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,APPLEII_HDDD_A2_GCR1_ENCODING,&nbsector);
-							break;
-							case 3:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,APPLEII_HDDD_A2_GCR2_ENCODING,&nbsector);
-							break;
-						}
 
-						if(!nbsector)
-							track_type_id=(track_type_id+1)%4;
-
-						k++;
-
-					}while(!nbsector && k<7);
-
-					if(sca && nbsector)
-					{
-						int total_track_size;
-
-						total_track_size = 0;
-						for(l=0;l<nbsector;l++)
-						{
-							if(sca[l]->sectorsize > 0)
-								total_track_size += sca[l]->sectorsize;
-						}
-
-						if(total_track_size)
-						{
-							unsigned char *track_buffer = malloc(total_track_size);
-							if(track_buffer)
+							k=0;
+							do
 							{
-								memset(track_buffer,0,total_track_size);
-								sectorsize = sca[0]->sectorsize;
-								for(l=0;l<256;l++)
+								if(sca[k]->sector==l)
 								{
-
-									k=0;
-									do
+									if(sca[k]->sectorsize!=sectorsize)
 									{
-										if(sca[k]->sector==l)
-										{
-											if(sca[k]->sectorsize!=sectorsize)
-											{
-												sectorsize=-1;
-											}
+										sectorsize=-1;
+									}
 
-											sector = sector_mapping[(sca[k]->sector)];
+									sector = sector_mapping[(sca[k]->sector)];
 
-											if(sectorsize > 0 && sca[k]->input_data && ((sector * sectorsize) < total_track_size) && sector < 16)
-												memcpy(&track_buffer[sector*sectorsize],sca[k]->input_data,sectorsize);
+									if(sectorsize > 0 && sca[k]->input_data && ((sector * sectorsize) < total_track_size) && sector < 16)
+										memcpy(&track_buffer[sector*sectorsize],sca[k]->input_data,sectorsize);
 
-											sprintf(tmp_str,"%d ",sca[k]->sector);
-											log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
-											strcat(log_str,tmp_str);
-											break;
-										}
+									log_str = hxc_dyn_sprintfcat(NULL,"%d ",sca[k]->sector);
 
-										k++;
-									}while(k<nbsector);
+									break;
 								}
 
-								fwrite(track_buffer,total_track_size,1,rawfile);
-
-								free(track_buffer);
-							}
+								k++;
+							}while(k<nbsector);
 						}
 
-						k=0;
-						do
-						{
-							hxcfe_freeSectorConfig( ss, sca[k] );
-							k++;
-						}while(k<nbsector);
+						fwrite(track_buffer,total_track_size,1,outfile);
 
-						if(sectorsize!=-1)
-						{
-							sprintf(tmp_str,",%dB/s",sectorsize);
-						}
-						else
-						{
-							strcpy(tmp_str,"");
-						}
-
-						log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
-						strcat(log_str,tmp_str);
-
+						free(track_buffer);
 					}
+				}
 
-					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,log_str);
-					free(log_str);
+				k=0;
+				do
+				{
+					hxcfe_freeSectorConfig( ss, sca[k] );
+					k++;
+				}while(k<nbsector);
 
+				if(sectorsize!=-1)
+				{
+					log_str = hxc_dyn_sprintfcat(log_str,",%dB/s",sectorsize);
 				}
 			}
 
-			hxcfe_deinitSectorAccess(ss);
+			if(log_str)
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,log_str);
 
-			hxc_fclose(rawfile);
-
-			return HXCFE_NOERROR;
+			free(log_str);
 		}
-
-		hxc_fclose(rawfile);
-
-		return HXCFE_INTERNALERROR;
 	}
 
-	return HXCFE_ACCESSERROR;
-}
+	hxcfe_deinitSectorAccess(ss);
 
+	hxc_fclose(outfile);
+
+	return HXCFE_NOERROR;
+
+error:
+	if(outfile)
+		hxc_fclose(outfile);
+
+	return HXCFE_INTERNALERROR;
+}

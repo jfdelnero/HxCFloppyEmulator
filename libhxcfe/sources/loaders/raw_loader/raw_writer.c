@@ -43,146 +43,140 @@
 int RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int32_t i,j,k,l,nbsector;
-	FILE * rawfile;
+	FILE * outfile;
 	char * log_str;
-	char   tmp_str[256];
 	int32_t sectorsize,track_type_id;
 
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG** sca;
 
+	if( !imgldr_ctx || !floppy || !filename )
+	{
+		return HXCFE_BADPARAMETER;
+	}
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write RAW file %s...",filename);
 
 	track_type_id=0;
-	log_str=0;
 
-	rawfile=hxc_fopen(filename,"wb");
-	if(rawfile)
+	outfile = hxc_fopen(filename,"wb");
+	if( !outfile )
 	{
-		ss=hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
-		if(ss)
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s !",filename);
+		return HXCFE_ACCESSERROR;
+	}
+
+	ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
+	if(!ss)
+		goto error;
+
+	for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
+	{
+		for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
 		{
-			for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
+			hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),(2*floppy->floppyNumberOfTrack) );
+
+			log_str = hxc_dyn_sprintfcat(NULL,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(outfile));
+
+			sca = NULL;
+
+			k=0;
+			do
 			{
-				for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
+				nbsector = 0;
+				switch(track_type_id)
 				{
-					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),(2*floppy->floppyNumberOfTrack) );
+					case 0:
+						sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector);
+					break;
+					case 1:
+						sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector);
+					break;
+					case 2:
+						sca = hxcfe_getAllTrackSectors(ss,j,i,AMIGA_MFM_ENCODING,&nbsector);
+					break;
+					case 3:
+						sca = hxcfe_getAllTrackSectors(ss,j,i,EMU_FM_ENCODING,&nbsector);
+					break;
+					case 4:
+						sca = hxcfe_getAllTrackSectors(ss,j,i,TYCOM_FM_ENCODING,&nbsector);
+					break;
+					case 5:
+						sca = hxcfe_getAllTrackSectors(ss,j,i,MEMBRAIN_MFM_ENCODING,&nbsector);
+					break;
+					case 6:
+						sca = 0;
+						#ifdef AED6200P_SUPPORT
+							sca = hxcfe_getAllTrackSectors(ss,j,i,AED6200P_MFM_ENCODING,&nbsector);
+						#endif
+					break;
 
-					sprintf(tmp_str,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(rawfile));
+				}
 
-					log_str=0;
-					log_str=realloc(log_str,strlen(tmp_str)+1);
-					memset(log_str,0,strlen(tmp_str)+1);
-					strcat(log_str,tmp_str);
+				if(!nbsector)
+					track_type_id=(track_type_id+1)%7;
 
-					sca = 0;
+				k++;
+
+			}while(!nbsector && k<7);
+
+			if(sca && nbsector)
+			{
+				sectorsize = sca[0]->sectorsize;
+				for(l=0;l<256;l++)
+				{
 
 					k=0;
 					do
 					{
-						nbsector = 0;
-						switch(track_type_id)
+						if(sca[k]->sector==l)
 						{
-							case 0:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector);
-							break;
-							case 1:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector);
-							break;
-							case 2:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,AMIGA_MFM_ENCODING,&nbsector);
-							break;
-							case 3:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,EMU_FM_ENCODING,&nbsector);
-							break;
-							case 4:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,TYCOM_FM_ENCODING,&nbsector);
-							break;
-							case 5:
-								sca = hxcfe_getAllTrackSectors(ss,j,i,MEMBRAIN_MFM_ENCODING,&nbsector);
-							break;
-							case 6:
-								sca = 0;
-								#ifdef AED6200P_SUPPORT
-									sca = hxcfe_getAllTrackSectors(ss,j,i,AED6200P_MFM_ENCODING,&nbsector);
-								#endif
-							break;
+							if(sca[k]->sectorsize!=sectorsize)
+							{
+								sectorsize=-1;
+							}
 
+							if(sca[k]->input_data)
+								fwrite(sca[k]->input_data,sca[k]->sectorsize,1,outfile);
+
+							log_str = hxc_dyn_sprintfcat(log_str,"%d ",sca[k]->sector);
+
+							break;
 						}
-
-						if(!nbsector)
-							track_type_id=(track_type_id+1)%7;
 
 						k++;
+					}while(k<nbsector);
+				}
 
-					}while(!nbsector && k<7);
+				k=0;
+				do
+				{
+					hxcfe_freeSectorConfig( ss, sca[k] );
+					k++;
+				}while(k<nbsector);
 
-					if(sca && nbsector)
-					{
-						sectorsize=sca[0]->sectorsize;
-						for(l=0;l<256;l++)
-						{
-
-							k=0;
-							do
-							{
-								if(sca[k]->sector==l)
-								{
-									if(sca[k]->sectorsize!=sectorsize)
-									{
-										sectorsize=-1;
-									}
-									if(sca[k]->input_data)
-										fwrite(sca[k]->input_data,sca[k]->sectorsize,1,rawfile);
-
-									sprintf(tmp_str,"%d ",sca[k]->sector);
-									log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
-									strcat(log_str,tmp_str);
-									break;
-								}
-
-								k++;
-							}while(k<nbsector);
-						}
-
-						k=0;
-						do
-						{
-							hxcfe_freeSectorConfig( ss, sca[k] );
-							k++;
-						}while(k<nbsector);
-
-						if(sectorsize!=-1)
-						{
-							sprintf(tmp_str,",%dB/s",sectorsize);
-						}
-						else
-						{
-							strcpy(tmp_str,"");
-						}
-
-						log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
-						strcat(log_str,tmp_str);
-
-					}
-
-					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,log_str);
-					free(log_str);
-
+				if(sectorsize!=-1)
+				{
+					log_str = hxc_dyn_sprintfcat(log_str,",%dB/s",sectorsize);
 				}
 			}
 
-			hxcfe_deinitSectorAccess(ss);
+			if(log_str)
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,log_str);
 
-			hxc_fclose(rawfile);
-
-			return HXCFE_NOERROR;
+			free(log_str);
 		}
-
-		hxc_fclose(rawfile);
-
-		return HXCFE_INTERNALERROR;
 	}
 
-	return HXCFE_ACCESSERROR;
+	hxcfe_deinitSectorAccess(ss);
+
+	hxc_fclose(outfile);
+
+	return HXCFE_NOERROR;
+
+error:
+	if(outfile)
+		hxc_fclose(outfile);
+
+	return HXCFE_INTERNALERROR;
 }

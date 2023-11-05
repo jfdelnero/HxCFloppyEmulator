@@ -47,7 +47,7 @@
 int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int32_t i,j,k,l,m,nbsector;
-	FILE * cpcdskfile;
+	FILE * outfile;
 	char * log_str;
 	char   tmp_str[256];
 	char   disk_info_block[256];
@@ -65,301 +65,304 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG** sca;
 
+	if( !imgldr_ctx || !floppy || !filename )
+	{
+		return HXCFE_BADPARAMETER;
+	}
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write CPCDSK file %s...",filename);
 
 	flag_limit_sector_size = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "CPCDSK_WRITER_LIMIT_SECTOR_SIZE" );
 	flag_discard_unformatted_2side = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "CPCDSK_WRITER_DISCARD_UNFORMATTED_SIDE" );
 
-	log_str=0;
-	cpcdskfile=hxc_fopen(filename,"wb");
-	if(cpcdskfile)
+	outfile = hxc_fopen(filename,"wb");
+	if( !outfile )
 	{
-		memset(disk_info_block,0,0x100);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s !",filename);
+		return HXCFE_ACCESSERROR;
+	}
 
-		cpcdsk_fh = (cpcdsk_fileheader *)&disk_info_block;
-		memcpy((char*)&cpcdsk_fh->headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",sizeof(cpcdsk_fh->headertag));
+	memset(disk_info_block,0,0x100);
 
-		snprintf((char*)&cpcdsk_fh->creatorname,sizeof(cpcdsk_fh->creatorname),"HxC%s",STR_FILE_VERSION2);
-		cpcdsk_fh->creatorname[sizeof(cpcdsk_fh->creatorname)-1] = 0;
+	cpcdsk_fh = (cpcdsk_fileheader *)&disk_info_block;
+	memcpy((char*)&cpcdsk_fh->headertag,"EXTENDED CPC DSK File\r\nDisk-Info\r\n",sizeof(cpcdsk_fh->headertag));
 
-		fwrite(&disk_info_block,0x100,1,cpcdskfile);
-		track_cnt=0;
+	snprintf((char*)&cpcdsk_fh->creatorname,sizeof(cpcdsk_fh->creatorname),"HxC%s",STR_FILE_VERSION2);
+	cpcdsk_fh->creatorname[sizeof(cpcdsk_fh->creatorname)-1] = 0;
 
-		ss=hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
+	fwrite(&disk_info_block,0x100,1,outfile);
+	track_cnt=0;
 
-		if(ss)
+	ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe, floppy);
+	if(!ss)
+		goto error;
+
+	for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
+	{
+		for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
 		{
-			for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
+			log_str = hxc_dyn_sprintfcat(NULL,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(outfile));
+
+			hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),floppy->floppyNumberOfTrack*2 );
+
+			rec_mode = 2;  // MFM
+			sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector);
+			if(!sca)
 			{
-				for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
+				sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector);
+				rec_mode = 1; // FM
+				if(!nbsector)
 				{
-					sprintf(tmp_str,"track:%.2d:%d file offset:0x%.6x, sectors: ",j,i,(unsigned int)ftell(cpcdskfile));
+					rec_mode = 0; // Unknown
+				}
+			}
 
-					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),floppy->floppyNumberOfTrack*2 );
+			memset(&cpcdsk_th,0,sizeof(cpcdsk_trackheader));
+			sprintf((char*)&cpcdsk_th.headertag,"Track-Info\r\n");
+			cpcdsk_th.side_number=i;
+			cpcdsk_th.track_number=j;
+			cpcdsk_th.gap3_length=78;
+			cpcdsk_th.filler_byte=0xE5;
+			cpcdsk_th.number_of_sector = nbsector;
+			cpcdsk_th.rec_mode = rec_mode;
 
-					log_str=0;
-					log_str=realloc(log_str,strlen(tmp_str)+1);
-					memset(log_str,0,strlen(tmp_str)+1);
-					strcat(log_str,tmp_str);
+			switch(floppy->tracks[j]->sides[i]->bitrate)
+			{
+				case 250000:
+					cpcdsk_th.datarate=1;
+					break;
+				case 500000:
+					cpcdsk_th.datarate=2;
+					break;
+				case 1000000:
+					cpcdsk_th.datarate=3;
+					break;
+				default:
+					cpcdsk_th.datarate=0;
+					break;
+			}
 
-					rec_mode = 2;  // MFM
-					sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector);
-					if(!sca)
+			if(cpcdsk_fh->number_of_sides<(i+1))
+				cpcdsk_fh->number_of_sides=i+1;
+
+			if(cpcdsk_fh->number_of_tracks<(j+1))
+				cpcdsk_fh->number_of_tracks=j+1;
+
+			if(nbsector)
+			{
+				cpcdsk_th.sector_size_code=size_to_code(sca[0]->sectorsize);
+			}
+
+			trackinfooffset=ftell(outfile);
+
+			if(nbsector)
+			{
+				fwrite(&cpcdsk_th,sizeof(cpcdsk_trackheader),1,outfile);
+
+				sectorlistoffset = ftell(outfile);
+
+				memset(&cpcdsk_s,0,sizeof(cpcdsk_sector));
+				for(k=0;k<nbsector;k++)
+				{
+					fwrite(&cpcdsk_s,sizeof(cpcdsk_sector),1,outfile);
+				}
+
+				memset(tmp_str,0,0x100);
+				fwrite(&tmp_str,0x100-(((sizeof(cpcdsk_sector)*nbsector)+sizeof(cpcdsk_trackheader))%0x100),1,outfile);
+
+				sectorsize=sca[0]->sectorsize;
+
+				k=0;
+				do
+				{
+					memset(&cpcdsk_s,0,sizeof(cpcdsk_sector));
+
+					weak_sector = 0;
+
+					if(sca[k]->sectorsize!=sectorsize)
 					{
-						sca = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector);
-						rec_mode = 1; // FM
-						if(!nbsector)
+						sectorsize=-1;
+					}
+
+					cpcdsk_s.sector_id = sca[k]->sector;
+					cpcdsk_s.side = sca[k]->head;
+					cpcdsk_s.track = sca[k]->cylinder;
+					cpcdsk_s.sector_size_code = size_to_code(sca[k]->sectorsize);
+
+					if(flag_limit_sector_size)
+					{
+						// Limit the sector data size to 6144...
+						// Some emulators don't like bigger sectors...
+						if(sca[k]->sectorsize > 6144)
+							sca[k]->sectorsize = 6144;
+					}
+
+					cpcdsk_s.data_length = sca[k]->sectorsize;
+
+					// ID part CRC ERROR ?
+					if(sca[k]->use_alternate_header_crc)
+					{
+						cpcdsk_s.fdc_status_reg1 |= 0x20;
+					}
+
+					// Data part CRC ERROR ?
+					if(sca[k]->use_alternate_data_crc)
+					{
+						cpcdsk_s.fdc_status_reg1 |= 0x20;
+						cpcdsk_s.fdc_status_reg2 |= 0x20;
+						if( sca[k]->weak_bits_mask )
 						{
-							rec_mode = 0; // Unknown
+							l = 0;
+							do
+							{
+								if( sca[k]->weak_bits_mask[l] )
+								{
+									weak_sector = 1;
+								}
+								l++;
+							}while( !weak_sector && l < sca[k]->sectorsize );
 						}
 					}
 
-					memset(&cpcdsk_th,0,sizeof(cpcdsk_trackheader));
-					sprintf((char*)&cpcdsk_th.headertag,"Track-Info\r\n");
-					cpcdsk_th.side_number=i;
-					cpcdsk_th.track_number=j;
-					cpcdsk_th.gap3_length=78;
-					cpcdsk_th.filler_byte=0xE5;
-					cpcdsk_th.number_of_sector = nbsector;
-					cpcdsk_th.rec_mode = rec_mode;
-
-					switch(floppy->tracks[j]->sides[i]->bitrate)
+					// Deleted Data Address Mark ?
+					if(sca[k]->alternate_datamark)
 					{
-						case 250000:
-							cpcdsk_th.datarate=1;
-							break;
-						case 500000:
-							cpcdsk_th.datarate=2;
-							break;
-						case 1000000:
-							cpcdsk_th.datarate=3;
-							break;
-						default:
-							cpcdsk_th.datarate=0;
-							break;
-					}
-
-					if(cpcdsk_fh->number_of_sides<(i+1))
-						cpcdsk_fh->number_of_sides=i+1;
-
-					if(cpcdsk_fh->number_of_tracks<(j+1))
-						cpcdsk_fh->number_of_tracks=j+1;
-
-					if(nbsector)
-					{
-						cpcdsk_th.sector_size_code=size_to_code(sca[0]->sectorsize);
-					}
-
-					trackinfooffset=ftell(cpcdskfile);
-
-					if(nbsector)
-					{
-						fwrite(&cpcdsk_th,sizeof(cpcdsk_trackheader),1,cpcdskfile);
-
-						sectorlistoffset = ftell(cpcdskfile);
-
-						memset(&cpcdsk_s,0,sizeof(cpcdsk_sector));
-						for(k=0;k<nbsector;k++)
+						if(sca[k]->alternate_datamark == 0xF8)
 						{
-							fwrite(&cpcdsk_s,sizeof(cpcdsk_sector),1,cpcdskfile);
+							cpcdsk_s.fdc_status_reg2 |= 0x40;
 						}
+					}
 
-						memset(tmp_str,0,0x100);
-						fwrite(&tmp_str,0x100-(((sizeof(cpcdsk_sector)*nbsector)+sizeof(cpcdsk_trackheader))%0x100),1,cpcdskfile);
+					if( weak_sector )
+					{
+						cpcdsk_s.data_length *= 3;
+					}
 
-						sectorsize=sca[0]->sectorsize;
+					fseek(outfile,sectorlistoffset+(k*sizeof(cpcdsk_sector)),SEEK_SET);
+					fwrite(&cpcdsk_s,sizeof(cpcdsk_sector),1,outfile);
 
-						k=0;
-						do
+					fseek(outfile,0,SEEK_END);
+					if(sca[k]->input_data)
+					{
+						if(weak_sector)
 						{
-							memset(&cpcdsk_s,0,sizeof(cpcdsk_sector));
+							unsigned char * tmp_buf;
 
-							weak_sector = 0;
-
-							if(sca[k]->sectorsize!=sectorsize)
+							tmp_buf = malloc(sca[k]->sectorsize);
+							if(tmp_buf)
 							{
-								sectorsize=-1;
-							}
-
-							cpcdsk_s.sector_id = sca[k]->sector;
-							cpcdsk_s.side = sca[k]->head;
-							cpcdsk_s.track = sca[k]->cylinder;
-							cpcdsk_s.sector_size_code = size_to_code(sca[k]->sectorsize);
-
-							if(flag_limit_sector_size)
-							{
-								// Limit the sector data size to 6144...
-								// Some emulators don't like bigger sectors...
-								if(sca[k]->sectorsize > 6144)
-									sca[k]->sectorsize = 6144;
-							}
-
-							cpcdsk_s.data_length = sca[k]->sectorsize;
-
-							// ID part CRC ERROR ?
-							if(sca[k]->use_alternate_header_crc)
-							{
-								cpcdsk_s.fdc_status_reg1 |= 0x20;
-							}
-
-							// Data part CRC ERROR ?
-							if(sca[k]->use_alternate_data_crc)
-							{
-								cpcdsk_s.fdc_status_reg1 |= 0x20;
-								cpcdsk_s.fdc_status_reg2 |= 0x20;
-								if( sca[k]->weak_bits_mask )
+								for(l=0;l<3;l++)
 								{
-									l = 0;
-									do
+									memcpy(tmp_buf, sca[k]->input_data, sca[k]->sectorsize);
+									for(m=0;m<sca[k]->sectorsize;m++)
 									{
-										if( sca[k]->weak_bits_mask[l] )
-										{
-											weak_sector = 1;
-										}
-										l++;
-									}while( !weak_sector && l < sca[k]->sectorsize );
-								}
-							}
-
-							// Deleted Data Address Mark ?
-							if(sca[k]->alternate_datamark)
-							{
-								if(sca[k]->alternate_datamark == 0xF8)
-								{
-									cpcdsk_s.fdc_status_reg2 |= 0x40;
-								}
-							}
-
-							if( weak_sector )
-							{
-								cpcdsk_s.data_length *= 3;
-							}
-
-							fseek(cpcdskfile,sectorlistoffset+(k*sizeof(cpcdsk_sector)),SEEK_SET);
-							fwrite(&cpcdsk_s,sizeof(cpcdsk_sector),1,cpcdskfile);
-
-							fseek(cpcdskfile,0,SEEK_END);
-							if(sca[k]->input_data)
-							{
-								if(weak_sector)
-								{
-									unsigned char * tmp_buf;
-
-									tmp_buf = malloc(sca[k]->sectorsize);
-									if(tmp_buf)
-									{
-										for(l=0;l<3;l++)
-										{
-											memcpy(tmp_buf, sca[k]->input_data, sca[k]->sectorsize);
-											for(m=0;m<sca[k]->sectorsize;m++)
-											{
-												tmp_buf[m] = tmp_buf[m] ^ ( rand() & sca[k]->weak_bits_mask[m] );
-											}
-
-											fwrite(tmp_buf,sca[k]->sectorsize,1,cpcdskfile);
-										}
-
-										free(tmp_buf);
+										tmp_buf[m] = tmp_buf[m] ^ ( rand() & sca[k]->weak_bits_mask[m] );
 									}
+
+									fwrite(tmp_buf,sca[k]->sectorsize,1,outfile);
 								}
-								else
-								{
-									fwrite(sca[k]->input_data,sca[k]->sectorsize,1,cpcdskfile);
-								}
+
+								free(tmp_buf);
 							}
-							else
-							{
-								for(l=0;l<(int)sca[k]->sectorsize;l++)
-								{
-									fputc(sca[k]->fill_byte,cpcdskfile);
-								}
-							}
-
-							sprintf(tmp_str,"%d ",sca[k]->sector);
-							log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
-							strcat(log_str,tmp_str);
-							k++;
-
-						}while(k<nbsector);
-
-						k=0;
-						while(k<nbsector)
-						{
-							hxcfe_freeSectorConfig( ss, sca[k] );
-							k++;
-						};
-
-						if(sca)
-							free(sca);
-
-						if(sectorsize!=-1)
-						{
-							sprintf(tmp_str,",%dB/s",sectorsize);
 						}
-
-						log_str=realloc(log_str,strlen(log_str)+strlen(tmp_str)+1);
-						strcat(log_str,tmp_str);
-
-						tracksize = (ftell(cpcdskfile)-trackinfooffset);
-						disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt] = (char)( tracksize / 256 );
-						if(tracksize & 0xFF)
+						else
 						{
-							disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt]++;
-							//Padding...
-							memset(&tmp_str,0,256);
-							fwrite(&tmp_str,256 - (tracksize & 0xFF),1,cpcdskfile);
+							fwrite(sca[k]->input_data,sca[k]->sectorsize,1,outfile);
 						}
 					}
 					else
 					{
-						// Unformatted track ...
-						// A size of "0" indicates an unformatted track.
-						// In this case there is no data, and no track information block for this track in the image file!
-						disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt] = 0;
+						for(l=0;l<(int)sca[k]->sectorsize;l++)
+						{
+							fputc(sca[k]->fill_byte,outfile);
+						}
 					}
 
-					track_cnt++;
+					log_str = hxc_dyn_sprintfcat(log_str,"%d ",sca[k]->sector);
 
-					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,log_str);
-					free(log_str);
+					k++;
 
+				}while(k<nbsector);
+
+				k=0;
+				while(k<nbsector)
+				{
+					hxcfe_freeSectorConfig( ss, sca[k] );
+					k++;
+				};
+
+				if(sca)
+					free(sca);
+
+				if(sectorsize!=-1)
+				{
+					log_str = hxc_dyn_sprintfcat(log_str,",%dB/s",sectorsize);
+				}
+
+				tracksize = (ftell(outfile)-trackinfooffset);
+				disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt] = (char)( tracksize / 256 );
+				if(tracksize & 0xFF)
+				{
+					disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt]++;
+					//Padding...
+					memset(&tmp_str,0,256);
+					fwrite(&tmp_str,256 - (tracksize & 0xFF),1,outfile);
 				}
 			}
+			else
+			{
+				// Unformatted track ...
+				// A size of "0" indicates an unformatted track.
+				// In this case there is no data, and no track information block for this track in the image file!
+				disk_info_block[sizeof(cpcdsk_fileheader)+track_cnt] = 0;
+			}
 
-			hxcfe_deinitSectorAccess(ss);
+			track_cnt++;
 
+			if(log_str)
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,log_str);
+
+			free(log_str);
+		}
+	}
+
+	hxcfe_deinitSectorAccess(ss);
+
+	// It appears that some emulators don't like 2 sides disk
+	// with the second side unformatted
+	if( floppy->floppyNumberOfSide == 2 && flag_discard_unformatted_2side)
+	{
+		i = 0;
+		while(i<floppy->floppyNumberOfTrack && !disk_info_block[sizeof(cpcdsk_fileheader)+ 1 + i*2])
+		{
+			i++;
 		}
 
-		// It appears that some emulators don't like 2 sides disk
-		// with the second side unformatted
-		if( floppy->floppyNumberOfSide == 2 && flag_discard_unformatted_2side)
+		if(i==floppy->floppyNumberOfTrack)
 		{
+			// Side 2 empty, discard it.
 			i = 0;
 			while(i<floppy->floppyNumberOfTrack && !disk_info_block[sizeof(cpcdsk_fileheader)+ 1 + i*2])
 			{
+				disk_info_block[sizeof(cpcdsk_fileheader) + i] = disk_info_block[sizeof(cpcdsk_fileheader) + i*2];
+				if(i)
+					disk_info_block[sizeof(cpcdsk_fileheader) + i*2] = 0;
 				i++;
 			}
-
-			if(i==floppy->floppyNumberOfTrack)
-			{
-				// Side 2 empty, discard it.
-				i = 0;
-				while(i<floppy->floppyNumberOfTrack && !disk_info_block[sizeof(cpcdsk_fileheader)+ 1 + i*2])
-				{
-					disk_info_block[sizeof(cpcdsk_fileheader) + i] = disk_info_block[sizeof(cpcdsk_fileheader) + i*2];
-					if(i)
-						disk_info_block[sizeof(cpcdsk_fileheader) + i*2] = 0;
-					i++;
-				}
-				cpcdsk_fh->number_of_sides = 1;
-			}
-
+			cpcdsk_fh->number_of_sides = 1;
 		}
-		fseek(cpcdskfile,0,SEEK_SET);
-		fwrite(&disk_info_block,0x100,1,cpcdskfile);
-
-		hxc_fclose(cpcdskfile);
 	}
 
-	return 0;
+	fseek(outfile,0,SEEK_SET);
+	fwrite(&disk_info_block,0x100,1,outfile);
+
+	hxc_fclose(outfile);
+
+	return HXCFE_NOERROR;
+
+error:
+	if(outfile)
+		hxc_fclose(outfile);
+
+	return HXCFE_INTERNALERROR;
 }
