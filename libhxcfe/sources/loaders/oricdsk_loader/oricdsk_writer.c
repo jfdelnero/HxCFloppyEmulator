@@ -64,14 +64,14 @@ void setoricdsktrackbit(unsigned char * input_data,int bit_offset,int state)
 int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int32_t i,j,k;
-	FILE * oricdskfile;
+	FILE * outfile;
 	char   tmp_str[256];
 	oricdsk_fileheader  * header;
 
 	int32_t nbsector_mfm,nbsector_fm;
 
-	unsigned char * track_buf = NULL;
-	unsigned char * tmp_fm_track_buf = NULL;
+	unsigned char * track_buffer = NULL;
+	unsigned char * tmp_fm_track_buffer = NULL;
 	int32_t databitoffset;
 	int32_t track_size;
 
@@ -81,181 +81,186 @@ int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,cha
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write Oric DSK file %s...",filename);
 
-	oricdskfile = hxc_fopen(filename,"wb");
-	if( oricdskfile )
+	outfile = hxc_fopen(filename,"wb");
+	if( !outfile )
 	{
-		memset(&tmp_str,0,sizeof(tmp_str));
-
-		header = (oricdsk_fileheader*)&tmp_str;
-
-		memcpy((char*)&header->headertag,"MFM_DISK",8);
-
-		header->number_of_side = floppy->floppyNumberOfSide;
-		header->number_of_tracks = floppy->floppyNumberOfTrack;
-		header->number_of_sectors_geometrie = 1;
-
-		fwrite((char*)&tmp_str,sizeof(tmp_str),1,oricdskfile);
-
-		track_buf = malloc(ORICDSK_TRACK_SIZE);
-		if(!track_buf)
-		{
-			hxc_fclose(oricdskfile);
-
-			return HXCFE_INTERNALERROR;
-		}
-
-		ss=hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
-		if(ss)
-		{
-			for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
-			{
-				for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
-				{
-					track_size = 6250;
-
-					memset(track_buf,0x4E,ORICDSK_TRACK_SIZE);
-
-					hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppy->floppyNumberOfTrack*2);
-
-					nbsector_mfm = 0;
-					nbsector_fm = 0;
-
-					// Byte align the track...
-					// TODO : Align each sectors ID Mark and Data Mark individually
-					//        (Needed for stream based images sources)
-
-					sca_mfm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector_mfm);
-					if(sca_mfm)
-					{
-						if(sca_mfm[0]->startsectorindex&0xF)
-						{
-							hxcfe_shiftTrackData( imgldr_ctx->hxcfe, floppy->tracks[j]->sides[i], 0x10 - (sca_mfm[0]->startsectorindex&0xF) );
-						}
-
-						k=0;
-						do
-						{
-							hxcfe_freeSectorConfig(ss,sca_mfm[k]);
-							k++;
-						}while(k<nbsector_mfm);
-
-						if(sca_mfm)
-							free(sca_mfm);
-
-						sca_mfm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector_mfm);
-					}
-
-					sca_fm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector_fm);
-					if(sca_fm)
-					{
-						if(sca_fm[0]->startsectorindex&0xF)
-						{
-							hxcfe_shiftTrackData( imgldr_ctx->hxcfe, floppy->tracks[j]->sides[i], 0x10 - (sca_fm[0]->startsectorindex&0xF) );
-
-							k=0;
-							do
-							{
-								hxcfe_freeSectorConfig(ss,sca_fm[k]);
-								k++;
-							}while(k<nbsector_fm);
-
-							if(sca_fm)
-								free(sca_fm);
-
-							sca_fm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector_fm);
-						}
-					}
-
-					if(nbsector_mfm)
-					{
-						if(sca_mfm[0]->startsectorindex&1)
-						{
-							databitoffset = 0;
-						}
-						else
-						{
-							databitoffset = 1;
-						}
-
-						for(k=0;k<track_size*8*2;k=k+2)
-						{
-							if(getbit(floppy->tracks[j]->sides[i]->databuffer,k+databitoffset))
-							{
-								setoricdsktrackbit(track_buf,k/2,0xFF);
-							}
-							else
-							{
-								setoricdsktrackbit(track_buf,k/2,0x00);
-							}
-						}
-
-						k=0;
-						do
-						{
-							hxcfe_freeSectorConfig(ss,sca_mfm[k]);
-							k++;
-						}while(k<nbsector_mfm);
-
-						if(sca_mfm)
-							free(sca_mfm);
-					}
-
-					if(nbsector_fm)
-					{
-						tmp_fm_track_buf = malloc(track_size+1);
-						if(tmp_fm_track_buf)
-						{
-							memset(tmp_fm_track_buf,0xAA,track_size);
-
-							databitoffset = ( 3 - (sca_fm[0]->startsectorindex&3) );
-
-							for(k=0;k<track_size*8*2;k=k+4)
-							{
-								if(getbit(floppy->tracks[j]->sides[i]->databuffer,k+databitoffset))
-								{
-									setoricdsktrackbit(tmp_fm_track_buf,k/4,0xFF);
-								}
-								else
-								{
-									setoricdsktrackbit(tmp_fm_track_buf,k/4,0x00);
-								}
-							}
-
-							for(k=0;k<track_size;k=k+2)
-							{
-								track_buf[k + 0] = tmp_fm_track_buf[k/2];
-								track_buf[k + 1] = tmp_fm_track_buf[k/2];
-							}
-
-							free(tmp_fm_track_buf);
-						}
-
-						k=0;
-						do
-						{
-							hxcfe_freeSectorConfig(ss,sca_fm[k]);
-							k++;
-						}while(k<nbsector_fm);
-
-						if(sca_fm)
-							free(sca_fm);
-					}
-
-					fwrite(track_buf,ORICDSK_TRACK_SIZE,1,oricdskfile);
-				}
-			}
-
-			hxcfe_deinitSectorAccess(ss);
-		}
-
-		free(track_buf);
-
-		hxc_fclose(oricdskfile);
-	}
-	else
-	{
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s !",filename);
 		return HXCFE_ACCESSERROR;
 	}
 
-	return 0;
+	memset(&tmp_str,0,sizeof(tmp_str));
+
+	header = (oricdsk_fileheader*)&tmp_str;
+
+	memcpy((char*)&header->headertag,"MFM_DISK",8);
+
+	header->number_of_side = floppy->floppyNumberOfSide;
+	header->number_of_tracks = floppy->floppyNumberOfTrack;
+	header->number_of_sectors_geometrie = 1;
+
+	fwrite((char*)&tmp_str,sizeof(tmp_str),1,outfile);
+
+	track_buffer = malloc(ORICDSK_TRACK_SIZE);
+	if(!track_buffer)
+		goto error;
+
+	track_size = 6250;
+
+	tmp_fm_track_buffer = malloc(track_size+1);
+	if( !tmp_fm_track_buffer )
+		goto error;
+
+	ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
+	if( !ss )
+		goto error;
+
+	for(i=0;i<(int)floppy->floppyNumberOfSide;i++)
+	{
+		for(j=0;j<(int)floppy->floppyNumberOfTrack;j++)
+		{
+			memset(track_buffer,0x4E,ORICDSK_TRACK_SIZE);
+
+			hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppy->floppyNumberOfTrack*2);
+
+			nbsector_mfm = 0;
+			nbsector_fm = 0;
+
+			// Byte align the track...
+			// TODO : Align each sectors ID Mark and Data Mark individually
+			//        (Needed for stream based images sources)
+
+			sca_mfm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector_mfm);
+			if(sca_mfm)
+			{
+				if(sca_mfm[0]->startsectorindex&0xF)
+				{
+					hxcfe_shiftTrackData( imgldr_ctx->hxcfe, floppy->tracks[j]->sides[i], 0x10 - (sca_mfm[0]->startsectorindex&0xF) );
+				}
+
+				k=0;
+				do
+				{
+					hxcfe_freeSectorConfig(ss,sca_mfm[k]);
+					k++;
+				}while(k<nbsector_mfm);
+
+				if(sca_mfm)
+					free(sca_mfm);
+
+				sca_mfm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector_mfm);
+			}
+
+			sca_fm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector_fm);
+			if(sca_fm)
+			{
+				if(sca_fm[0]->startsectorindex&0xF)
+				{
+					hxcfe_shiftTrackData( imgldr_ctx->hxcfe, floppy->tracks[j]->sides[i], 0x10 - (sca_fm[0]->startsectorindex&0xF) );
+
+					k=0;
+					do
+					{
+						hxcfe_freeSectorConfig(ss,sca_fm[k]);
+						k++;
+					}while(k<nbsector_fm);
+
+					if(sca_fm)
+						free(sca_fm);
+
+					sca_fm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector_fm);
+				}
+			}
+
+			if(nbsector_mfm && sca_mfm)
+			{
+				if(sca_mfm[0]->startsectorindex&1)
+				{
+					databitoffset = 0;
+				}
+				else
+				{
+					databitoffset = 1;
+				}
+
+				for(k=0;k<track_size*8*2;k=k+2)
+				{
+					if(getbit(floppy->tracks[j]->sides[i]->databuffer,k+databitoffset))
+					{
+						setoricdsktrackbit(track_buffer,k/2,0xFF);
+					}
+					else
+					{
+						setoricdsktrackbit(track_buffer,k/2,0x00);
+					}
+				}
+
+				k=0;
+				do
+				{
+					hxcfe_freeSectorConfig(ss,sca_mfm[k]);
+					k++;
+				}while(k<nbsector_mfm);
+
+				free(sca_mfm);
+			}
+
+			if(nbsector_fm && sca_fm)
+			{
+				memset(tmp_fm_track_buffer,0xAA,track_size);
+
+				databitoffset = ( 3 - (sca_fm[0]->startsectorindex&3) );
+
+				for(k=0;k<track_size*8*2;k=k+4)
+				{
+					if(getbit(floppy->tracks[j]->sides[i]->databuffer,k+databitoffset))
+					{
+						setoricdsktrackbit(tmp_fm_track_buffer,k/4,0xFF);
+					}
+					else
+					{
+						setoricdsktrackbit(tmp_fm_track_buffer,k/4,0x00);
+					}
+				}
+
+				for(k=0;k<track_size;k=k+2)
+				{
+					track_buffer[k + 0] = tmp_fm_track_buffer[k/2];
+					track_buffer[k + 1] = tmp_fm_track_buffer[k/2];
+				}
+
+				k=0;
+				do
+				{
+					hxcfe_freeSectorConfig(ss,sca_fm[k]);
+					k++;
+				}while(k<nbsector_fm);
+
+				free(sca_fm);
+			}
+
+			fwrite(track_buffer,ORICDSK_TRACK_SIZE,1,outfile);
+		}
+	}
+
+	hxcfe_deinitSectorAccess(ss);
+
+	free(tmp_fm_track_buffer);
+
+	free(track_buffer);
+
+	hxc_fclose(outfile);
+
+	return HXCFE_NOERROR;
+
+error:
+	if(outfile)
+		hxc_fclose(outfile);
+
+	if(track_buffer)
+		free(track_buffer);
+
+	if(tmp_fm_track_buffer)
+		free(tmp_fm_track_buffer);
+
+	return HXCFE_INTERNALERROR;
 }
