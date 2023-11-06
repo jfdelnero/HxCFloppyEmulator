@@ -118,9 +118,11 @@ int Apple2_do_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 	int bitrate;
 	unsigned char * sector_order;
 
-
 	HXCFE_SECTCFG* sectorconfig;
 	HXCFE_CYLINDER* currentcylinder;
+
+	sectorconfig = NULL;
+	currentcylinder = NULL;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_do_libLoad_DiskFile %s",imgfile);
 
@@ -159,9 +161,14 @@ int Apple2_do_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,bitrate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
 
 		sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
+		if(!sectorconfig)
+			goto error;
+
 		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 
-		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+		trackdata = (unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+		if(!trackdata)
+			goto error;
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
@@ -192,20 +199,42 @@ int Apple2_do_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 					sectorconfig[k].trackencoding=trackformat;
 				}
 
-				currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,20,2500,-2500);
+				currentcylinder->sides[i] = tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,20,2500,-2500);
 			}
 		}
 
+		free(trackdata);
 		free(sectorconfig);
-		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		hxc_fclose(f);
+
 		return HXCFE_NOERROR;
 	}
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
+
 	return HXCFE_BADFILE;
+
+error:
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Alloc / Internal error !",imgfile);
+
+	if(trackdata)
+		free(trackdata);
+
+	if(sectorconfig)
+		free(sectorconfig);
+
+	if(f)
+		hxc_fclose(f);
+
+	if(floppydisk->tracks)
+		free(floppydisk->tracks);
+
+	floppydisk->tracks = NULL;
+
+	return HXCFE_INTERNALERROR;
 }
 
 
