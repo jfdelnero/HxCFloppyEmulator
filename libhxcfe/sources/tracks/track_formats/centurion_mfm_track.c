@@ -177,6 +177,9 @@ int get_next_Centurion_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 							if(sector->input_data_index)
 								free(sector->input_data_index);
 
+							sector->input_data = NULL;
+							sector->input_data_index = NULL;
+
 							floppycontext->hxc_printf(MSG_ERROR, "get_next_Centurion_MFM_sector : Allocation error !\n");
 							return -1;
 						}
