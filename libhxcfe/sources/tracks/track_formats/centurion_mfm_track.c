@@ -30,7 +30,6 @@ int get_next_Centurion_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 	int sector_extractor_sm;
 	unsigned char mfm_buffer[32];
 	unsigned char tmp_buffer[32];
-	int last_start_offset;
 	unsigned char CRC16_High;
 	unsigned char CRC16_Low;
 	unsigned char crctable[32];
@@ -58,7 +57,6 @@ int get_next_Centurion_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 
 				if(bit_offset!=-1)
 				{
-					last_start_offset = bit_offset;
 					floppycontext->hxc_printf(MSG_DEBUG, "Found Centurion MFM sector mark at offset %d\n", bit_offset);
 					sector_extractor_sm=LOOKFOR_ADDM;
 				}
@@ -141,32 +139,46 @@ int get_next_Centurion_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 
 						// Read data bytes
 						sector->input_data = (unsigned char*)malloc(sector->sectorsize);
-						memset(sector->input_data, 0, sector->sectorsize);
-
 						sector->input_data_index = (int*)malloc(sector->sectorsize*sizeof(int));
-						memset(sector->input_data_index, 0, sector->sectorsize * sizeof(int));
 
-						bit_offset = mfmtobin(track->databuffer,sector->input_data_index,track->tracklen,sector->input_data,sector->sectorsize,bit_offset,0);
-
-						for(k=0; k < sector->sectorsize; k++)
+						if( sector->input_data && sector->input_data_index)
 						{
-							CRC16_Update(&CRC16_High,&CRC16_Low, sector->input_data[k],(unsigned char*)crctable );
-						}
+							memset(sector->input_data, 0, sector->sectorsize);
+							memset(sector->input_data_index, 0, sector->sectorsize * sizeof(int));
 
-						// Data CRC is immediately after
-						bit_offset = mfmtobin(track->databuffer, NULL, track->tracklen, tmp_buffer, 2, bit_offset, 0);
-						sector->data_crc = (tmp_buffer[0] << 8) | tmp_buffer[1];
-						CRC16_Update(&CRC16_High,&CRC16_Low, tmp_buffer[0],(unsigned char*)crctable );
-						CRC16_Update(&CRC16_High,&CRC16_Low, tmp_buffer[1],(unsigned char*)crctable );
+							bit_offset = mfmtobin(track->databuffer,sector->input_data_index,track->tracklen,sector->input_data,sector->sectorsize,bit_offset,0);
 
-						if(!CRC16_High && !CRC16_Low)
-						{ // crc ok !!!
-							floppycontext->hxc_printf(MSG_DEBUG, "Valid Centurion MFM data found - Cyl: %d Sect:%d\n", sector->cylinder, sector->sector);
-							sector->use_alternate_data_crc = 0;
+							for(k=0; k < sector->sectorsize; k++)
+							{
+								CRC16_Update(&CRC16_High,&CRC16_Low, sector->input_data[k],(unsigned char*)crctable );
+							}
+
+							// Data CRC is immediately after
+							bit_offset = mfmtobin(track->databuffer, NULL, track->tracklen, tmp_buffer, 2, bit_offset, 0);
+							sector->data_crc = (tmp_buffer[0] << 8) | tmp_buffer[1];
+							CRC16_Update(&CRC16_High,&CRC16_Low, tmp_buffer[0],(unsigned char*)crctable );
+							CRC16_Update(&CRC16_High,&CRC16_Low, tmp_buffer[1],(unsigned char*)crctable );
+
+							if(!CRC16_High && !CRC16_Low)
+							{ // crc ok !!!
+								floppycontext->hxc_printf(MSG_DEBUG, "Valid Centurion MFM data found - Cyl: %d Sect:%d\n", sector->cylinder, sector->sector);
+								sector->use_alternate_data_crc = 0;
+							}
+							else
+							{
+								floppycontext->hxc_printf(MSG_DEBUG, "Bad Centurion MFM data found - Cyl: %d, Sect:%d\n", sector->cylinder, sector->sector);
+							}
 						}
 						else
 						{
-							floppycontext->hxc_printf(MSG_DEBUG, "Bad Centurion MFM data found - Cyl: %d, Sect:%d\n", sector->cylinder, sector->sector);
+							if(sector->input_data)
+								free(sector->input_data);
+
+							if(sector->input_data_index)
+								free(sector->input_data_index);
+
+							floppycontext->hxc_printf(MSG_ERROR, "get_next_Centurion_MFM_sector : Allocation error !\n");
+							return -1;
 						}
 					} else {
 						floppycontext->hxc_printf(MSG_DEBUG, "Don't know how to decode Centurion MFM sector key %d", sector_key);
