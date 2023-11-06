@@ -237,9 +237,24 @@ int ANA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			floppydisk->floppyiftype);
 
 		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if( !floppydisk->tracks )
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Allocation error !");
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
+		}
+
 		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
-		sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*128);
+		sectorconfig = (HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*128);
+		if( !sectorconfig )
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Allocation error !");
+			free(floppydisk->tracks);
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
+		}
+
 		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*128);
 
 		for(j=0;j<(unsigned int)(floppydisk->floppyNumberOfSide);j++)
@@ -259,9 +274,11 @@ int ANA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					if(sector_header.data_len)
 					{
 						sectorconfig[sectorfound].input_data = malloc(sector_header.data_len);
-						hxc_fread(sectorconfig[sectorfound].input_data,sector_header.data_len,f);
+						if(sectorconfig[sectorfound].input_data)
+						{
+							hxc_fread(sectorconfig[sectorfound].input_data,sector_header.data_len,f);
+						}
 					}
-
 
 					/*
 					// Some AnaDisk images should have the first track in FM, but nothing
