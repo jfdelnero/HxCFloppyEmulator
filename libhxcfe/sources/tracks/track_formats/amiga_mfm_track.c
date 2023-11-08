@@ -199,8 +199,11 @@ int get_next_AMIGAMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 						sector_conf->use_alternate_data_crc = 0xFF;
 					}
 
-					sector_conf->input_data=(unsigned char*)malloc(sector_size);
-					memcpy(sector_conf->input_data,&sector_data[32],sector_size);
+					sector_conf->input_data = (unsigned char*)malloc(sector_size);
+					if( sector_conf->input_data )
+					{
+						memcpy(sector_conf->input_data,&sector_data[32],sector_size);
+					}
 
 					// "Empty" sector detection
 					checkEmptySector(sector_conf);

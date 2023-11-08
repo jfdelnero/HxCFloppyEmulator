@@ -146,12 +146,13 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 
 					sector->use_alternate_header_crc = 0xFF;
 					CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
-					for(k=0;k<7;k++)
+					#define ISO_FM_HEADER_SIZE 7
+					for(k=0;k<ISO_FM_HEADER_SIZE;k++)
 					{
 						CRC16_Update(&CRC16_High,&CRC16_Low, tmp_buffer[k],(unsigned char*)crctable );
 					}
 
-					sector->header_crc = ( tmp_buffer[k-2]<<8 ) | tmp_buffer[k-1] ;
+					sector->header_crc = ( tmp_buffer[ISO_FM_HEADER_SIZE-2]<<8 ) | tmp_buffer[ISO_FM_HEADER_SIZE-1] ;
 
 
 					if(!CRC16_High && !CRC16_Low)
@@ -199,15 +200,22 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 							sector->use_alternate_datamark = 0xFF;
 							sector->alternate_datamark=0xF8 + (i-1);
 
+							tmp_sector_index = NULL;
+
 							tmp_sector=(unsigned char*)malloc(1+sector_size+2);
+							if(!tmp_sector)
+								goto error;
+
 							memset(tmp_sector,0,1+sector_size+2);
 
 							tmp_sector_index=(int*)malloc((1+sector_size+2) * sizeof(int));
-							if(tmp_sector_index)
-								memset(tmp_sector_index,0,(1+sector_size+2) * sizeof(int));
+							if(!tmp_sector_index)
+								goto error;
 
-							sector->startdataindex=bit_offset;
-							sector->endsectorindex=fmtobin(track->databuffer,tmp_sector_index,track->tracklen,tmp_sector,1+sector_size+2,bit_offset+(0*8),0);
+							memset(tmp_sector_index,0,(1+sector_size+2) * sizeof(int));
+
+							sector->startdataindex = bit_offset;
+							sector->endsectorindex = fmtobin(track->databuffer,tmp_sector_index,track->tracklen,tmp_sector,1+sector_size+2,bit_offset+(0*8),0);
 
 							CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
 							for(k=0;k<1+sector_size+2;k++)
@@ -215,7 +223,7 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 								CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
 							}
 
-							sector->data_crc = ( tmp_sector[k-2]<<8 ) | tmp_sector[k-1] ;
+							sector->data_crc = ( tmp_sector[1+sector_size]<<8 ) | tmp_sector[1+sector_size+1] ;
 
 							if(!CRC16_High && !CRC16_Low)
 							{ // crc ok !!!
@@ -242,9 +250,7 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 								}
 							}
 
-							if(tmp_sector_index)
-								free(tmp_sector_index);
-
+							free(tmp_sector_index);
 							free(tmp_sector);
 
 							// "Empty" sector detection
@@ -304,6 +310,15 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
 
 	return bit_offset;
+
+error:
+	if(tmp_sector)
+		free(tmp_sector);
+
+	if(tmp_sector_index)
+		free(tmp_sector_index);
+
+	return -1;
 }
 
 int write_FM_sectordata(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,unsigned char * buffer,int buffersize)

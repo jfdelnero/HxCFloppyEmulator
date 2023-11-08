@@ -169,12 +169,19 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 
 					if((bit_offset!=-1))
 					{
+						tmp_sector_index = NULL;
+
 						tmp_sector=(unsigned char*)malloc(3+1+sector_size+2);
+						if(!tmp_sector)
+							goto error;
+
 						memset(tmp_sector,0,3+1+sector_size+2);
 
 						tmp_sector_index=(int*)malloc((3+1+sector_size+2) * sizeof(int));
-						if(tmp_sector_index)
-							memset(tmp_sector_index,0,(3+1+sector_size+2) * sizeof(int));
+						if(!tmp_sector_index)
+							goto error;
+
+						memset(tmp_sector_index,0,(3+1+sector_size+2) * sizeof(int));
 
 						sector->startdataindex = bit_offset;
 						sector->endsectorindex = mfmtobin(track->databuffer,tmp_sector_index,track->tracklen,tmp_sector,3+1+sector_size+2,bit_offset,0);
@@ -297,6 +304,15 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
 
 	return bit_offset;
+
+error:
+	if(tmp_sector)
+		free(tmp_sector);
+
+	if(tmp_sector_index)
+		free(tmp_sector_index);
+
+	return -1;
 }
 
 int write_MFM_sectordata(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * sector,unsigned char * buffer,int buffersize)

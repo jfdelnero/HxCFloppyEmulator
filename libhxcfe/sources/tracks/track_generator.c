@@ -361,36 +361,53 @@ unsigned char* compute_interleave_tab(int interleave,int skew,int numberofsector
 	uint8_t *interleave_tab;
 	uint8_t *allocated_tab;
 
-	interleave_tab=(uint8_t *)malloc(numberofsector*sizeof(uint8_t));
-	if(numberofsector)
+	interleave_tab = NULL;
+	allocated_tab = NULL;
+
+	if( numberofsector > 0 )
 	{
-		if(interleave_tab)
+		interleave_tab = (uint8_t *)malloc(numberofsector*sizeof(uint8_t));
+		if( !interleave_tab )
+			goto error;
+
+		memset(interleave_tab,0,numberofsector*sizeof(uint8_t));
+
+		allocated_tab = (uint8_t *)malloc(numberofsector*sizeof(uint8_t));
+		if( !allocated_tab )
+			goto error;
+
+		memset(allocated_tab,0,numberofsector*sizeof(uint8_t));
+
+		j=skew%(numberofsector);
+		i=0;
+		do
 		{
-			allocated_tab=(uint8_t *)malloc(numberofsector*sizeof(uint8_t));
-			memset(interleave_tab,0,numberofsector*sizeof(uint8_t));
-			memset(allocated_tab,0,numberofsector*sizeof(uint8_t));
-
-			j=skew%(numberofsector);
-			i=0;
-			do
+			while(allocated_tab[j])
 			{
-				while(allocated_tab[j])
-				{
-					j=(j+1)%(numberofsector);
-				}
-				interleave_tab[j] = (uint8_t)i;
-				allocated_tab[j] = 0xFF;
-				j=(j+interleave)%(numberofsector);
-				i++;
-			}while(i<numberofsector);
+				j=(j+1)%(numberofsector);
+			}
 
-			free(allocated_tab);
-		}
+			interleave_tab[j] = (uint8_t)i;
+			allocated_tab[j] = 0xFF;
+
+			j=(j+interleave)%(numberofsector);
+			i++;
+		}while(i<numberofsector);
+
+		free(allocated_tab);
 	}
 
 	return interleave_tab;
-}
 
+error:
+	if( interleave_tab )
+		free(interleave_tab);
+
+	if( allocated_tab )
+		free( allocated_tab );
+
+	return NULL;
+}
 
 int searchgap3value(unsigned int numberofsector,HXCFE_SECTCFG * sectorconfigtab)
 {

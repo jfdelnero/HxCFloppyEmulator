@@ -173,7 +173,10 @@ int get_next_AED6200P_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 					{
 						bit_offset = chgbitptr(track->tracklen,bit_offset,4 );
 
-						tmp_sector=(unsigned char*)malloc(1+sector_size+2);
+						tmp_sector = (unsigned char*)malloc(1+sector_size+2);
+						if( !tmp_sector )
+							return -1;
+
 						memset(tmp_sector,0,1+sector_size+2);
 
 						sector->startdataindex = bit_offset;
@@ -202,8 +205,11 @@ int get_next_AED6200P_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 								sector->use_alternate_data_crc=0xFF;
 							}
 
-							sector->input_data=(unsigned char*)malloc(sector_size);
-							memcpy(sector->input_data,&tmp_sector[1],sector_size);
+							sector->input_data = (unsigned char*)malloc(sector_size);
+							if( sector->input_data )
+							{
+								memcpy(sector->input_data,&tmp_sector[1],sector_size);
+							}
 							free(tmp_sector);
 
 							// "Empty" sector detection

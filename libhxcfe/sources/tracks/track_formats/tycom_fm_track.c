@@ -176,6 +176,9 @@ int get_next_TYCOMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCF
 							sector->alternate_datamark=0xF8 + (i-1);
 
 							tmp_sector=(unsigned char*)malloc(1+sector_size+2);
+							if(!tmp_sector)
+								goto error;
+
 							memset(tmp_sector,0,1+sector_size+2);
 
 							sector->startdataindex=bit_offset;
@@ -199,8 +202,11 @@ int get_next_TYCOMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCF
 								sector->use_alternate_data_crc=0xFF;
 							}
 
-							sector->input_data=(unsigned char*)malloc(sector_size);
-							memcpy(sector->input_data,&tmp_sector[1],sector_size);
+							sector->input_data = (unsigned char*)malloc(sector_size);
+							if (sector->input_data)
+							{
+								memcpy(sector->input_data,&tmp_sector[1],sector_size);
+							}
 							free(tmp_sector);
 
 							// "Empty" sector detection

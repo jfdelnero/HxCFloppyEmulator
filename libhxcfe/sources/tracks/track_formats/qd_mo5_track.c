@@ -162,6 +162,9 @@ int get_next_QDMO5_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG 
 				if((bit_offset!=-1))
 				{
 					tmp_sector=(unsigned char*)malloc(1+sector_size+1);
+					if( !tmp_sector )
+						return -1;
+
 					memset(tmp_sector,0,1+sector_size+1);
 
 					sector->startdataindex=bit_offset;
