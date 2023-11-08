@@ -177,7 +177,7 @@ int get_next_TYCOMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCF
 
 							tmp_sector=(unsigned char*)malloc(1+sector_size+2);
 							if(!tmp_sector)
-								goto error;
+								return -1;
 
 							memset(tmp_sector,0,1+sector_size+2);
 
