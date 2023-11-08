@@ -3236,89 +3236,82 @@ int32_t hxcfe_td_exportToBMP( HXCFE_TD *td, char * filename )
 
 	ptrchar = 0;
 
-	ptr = malloc((td->xsize*td->ysize*4));
-	if(ptr)
-	{
-		memset(ptr,0,(td->xsize*td->ysize*4));
-	}
-	else
+	ptr = malloc( td->xsize * td->ysize * sizeof(uint32_t) );
+	if(!ptr)
 		goto alloc_error;
 
+	memset(ptr,0,(td->xsize * td->ysize * sizeof(uint32_t)));
+
 	ptrchar = malloc((td->xsize*td->ysize));
+	if(!ptrchar)
+		goto alloc_error;
 
-	if(ptrchar)
+	td->hxcfe->hxc_printf(MSG_INFO_1,"Converting image...");
+	nbcol = 0;
+
+	k=0;
+	for(i=0;i< ( td->ysize );i++)
 	{
-		td->hxcfe->hxc_printf(MSG_INFO_1,"Converting image...");
-		nbcol = 0;
+		for(j=0;j< (td->xsize );j++)
+		{
+			ptrchar[k] = getPixelCode(td->framebuffer[k],(uint32_t*)&pal,&nbcol);
+			k++;
+		}
+	}
 
+	if(nbcol>=256)
+	{
+		k = 0;
+		for(i=0;i< ( td->ysize );i++)
+		{
+			for(j=0;j< ( td->xsize );j++)
+			{
+				ptrchar[k] = ptrchar[k] & 0xF8F8F8;
+				k++;
+			}
+		}
+
+		for(i=0;i<256;i++)
+		{
+			pal[i]=i|(i<<8)|(i<<16);
+		}
+
+		nbcol = 0;
 		k=0;
 		for(i=0;i< ( td->ysize );i++)
 		{
-			for(j=0;j< (td->xsize );j++)
+			for(j=0;j< ( td->xsize );j++)
 			{
 				ptrchar[k] = getPixelCode(td->framebuffer[k],(uint32_t*)&pal,&nbcol);
 				k++;
 			}
 		}
+	}
 
-		if(nbcol>=256)
-		{
-			k = 0;
-			for(i=0;i< ( td->ysize );i++)
-			{
-				for(j=0;j< ( td->xsize );j++)
-				{
-					ptrchar[k] = ptrchar[k] & 0xF8F8F8;
-					k++;
-				}
-			}
+	td->hxcfe->hxc_printf(MSG_INFO_1,"Writing %s...",filename);
 
-			for(i=0;i<256;i++)
-			{
-				pal[i]=i|(i<<8)|(i<<16);
-			}
-
-			nbcol = 0;
-			k=0;
-			for(i=0;i< ( td->ysize );i++)
-			{
-				for(j=0;j< ( td->xsize );j++)
-				{
-					ptrchar[k] = getPixelCode(td->framebuffer[k],(uint32_t*)&pal,&nbcol);
-					k++;
-				}
-			}
-		}
-
-		td->hxcfe->hxc_printf(MSG_INFO_1,"Writing %s...",filename);
-
-		if(nbcol>=256)
-		{
-			bdata.nb_color = 16;
-			bdata.xsize = td->xsize;
-			bdata.ysize = td->ysize;
-			bdata.data = (uint32_t*)ptr;
-			bdata.palette = 0;
-			bmp16b_write(filename,&bdata);
-		}
-		else
-		{
-			bdata.nb_color = 8;
-			bdata.xsize = td->xsize;
-			bdata.ysize = td->ysize;
-			bdata.data = (uint32_t*)ptrchar;
-			bdata.palette = (unsigned char*)&pal;
-
-			bmpRLE8b_write(filename,&bdata);
-		}
-
-		free(ptr);
-		free(ptrchar);
+	if(nbcol>=256)
+	{
+		bdata.nb_color = 16;
+		bdata.xsize = td->xsize;
+		bdata.ysize = td->ysize;
+		bdata.data = (uint32_t*)ptr;
+		bdata.palette = 0;
+		bmp16b_write(filename,&bdata);
 	}
 	else
 	{
-		goto alloc_error;
+		bdata.nb_color = 8;
+		bdata.xsize = td->xsize;
+		bdata.ysize = td->ysize;
+		bdata.data = (uint32_t*)ptrchar;
+		bdata.palette = (unsigned char*)&pal;
+
+		bmpRLE8b_write(filename,&bdata);
 	}
+
+	free(ptr);
+	free(ptrchar);
 
 	return 0;
 
