@@ -700,3 +700,42 @@ int hxc_getfilesize(char * path)
 
 	return filesize;
 }
+
+FILE * hxc_ram_fopen(char* fn, char * mode, HXCRAMFILE * rf)
+{
+	if(!rf)
+		return NULL;
+
+	rf->ramfile = NULL;
+	rf->ramfile_size = 0;
+
+	return (FILE *)1;
+};
+
+int hxc_ram_fwrite(void * buffer,int size,int mul,FILE * file,HXCRAMFILE * rf)
+{
+	rf->ramfile = realloc(rf->ramfile,rf->ramfile_size+size);
+	if(rf->ramfile)
+	{
+		memcpy(&rf->ramfile[rf->ramfile_size],buffer,size);
+		rf->ramfile_size = rf->ramfile_size + size;
+	}
+	else
+	{
+		rf->ramfile_size = 0;
+		size = 0;
+	}
+
+	return size;
+}
+
+int hxc_ram_fclose(FILE *f,HXCRAMFILE * rf)
+{
+	if(rf->ramfile)
+	{
+		free(rf->ramfile);
+		rf->ramfile = NULL;
+	}
+
+	return 0;
+};

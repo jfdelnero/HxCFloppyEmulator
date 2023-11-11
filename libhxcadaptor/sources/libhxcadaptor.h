@@ -90,6 +90,16 @@ int hxc_getpathfolder( char * fullpath, char * folder, int type );
 int hxc_checkfileext( char * path, char *ext, int type );
 int hxc_getfilesize( char * path );
 
+typedef struct HXCRAMFILE_
+{
+	uint8_t * ramfile;
+	int32_t ramfile_size;
+}HXCRAMFILE;
+
+FILE * hxc_ram_fopen(char* fn, char * mode, HXCRAMFILE * rf);
+int hxc_ram_fwrite(void * buffer,int size,int mul,FILE * file,HXCRAMFILE * rf);
+int hxc_ram_fclose(FILE *f,HXCRAMFILE * rf);
+
 /////////////// Network functions ////////////////
 
 void * network_connect(char * address,unsigned short port);
