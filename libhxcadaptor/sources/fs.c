@@ -202,7 +202,7 @@ FILE *hxc_fopen (const char *filename, const char *mode)
 			}
 		}
 
-		fd = hxc_open (filename, rwflags|oflags, 0666);
+		fd = hxc_open (filename, rwflags|oflags, (unsigned int)0666);
 		if(fd==-1)
 			return NULL;
 
