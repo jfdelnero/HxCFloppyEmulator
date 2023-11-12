@@ -127,6 +127,9 @@ void computehistogram(uint32_t *indata,int size,uint32_t *outdata)
 {
 	int i;
 
+	if( !indata || !outdata )
+		return;
+
 	memset(outdata,0,sizeof(uint32_t) * (65536) );
 	for(i=0;i<size;i++)
 	{
@@ -872,7 +875,8 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 			tracksize = ( bitoffset >> 3 );
 		}
 
-		if( tracksize >= TEMPBUFSIZE ) tracksize = TEMPBUFSIZE - 1;
+		if( tracksize >= TEMPBUFSIZE )
+			tracksize = TEMPBUFSIZE - 1;
 
 		// Bitrate Filter
 		if(tracksize)
@@ -932,6 +936,10 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 				{
 					memcpy(hxcfe_track->cell_to_tick,tickposition, tracksize * sizeof(uint32_t));
 				}
+			}
+			else
+			{
+				hxcfe_track->cell_to_tick = NULL;
 			}
 
 			hxcfe_track->tick_freq = fxs->pll.tick_freq;
@@ -2174,7 +2182,7 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 
 	end_dump_reached = 0;
 
-	pl = 0;
+	pl = NULL;
 
 	conv_error = NULL;
 	tmp_str = hxcfe_getEnvVar( fxs->hxcfe, "FLUXSTREAM_OVERLAPSEARCHDEPTH", NULL);
@@ -2240,6 +2248,11 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 			memset(match_table , 0,sizeof(s_match) * track_dump->channels[0].nb_of_pulses);
 
 			pl = alloc_pulses_link_array(track_dump->channels[0].nb_of_pulses);
+			if(!pl)
+			{
+				free(match_table);
+				return NULL;
+			}
 
 #ifdef FLUXSTREAMDBG
 			floppycontext->hxc_printf(MSG_DEBUG,"Number of pulses : %d",pl->number_of_pulses);
@@ -3057,6 +3070,8 @@ int set_pll_cfg(HXCFE * hxcfe, pll_stat *pll, int * cfg_table, int current_track
 		track_index--;
 
 	histo = (uint32_t*)malloc(65536* sizeof(uint32_t));
+	if(!histo)
+		goto error;
 
 	if(std)
 	{
@@ -3110,6 +3125,11 @@ int set_pll_cfg(HXCFE * hxcfe, pll_stat *pll, int * cfg_table, int current_track
 	free(histo);
 
 	return 1;
+error:
+	if(histo)
+		free(histo);
+
+	return 0;
 }
 
 HXCFE_FXSA * hxcfe_initFxStream(HXCFE * hxcfe)
@@ -3815,6 +3835,10 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 		// Allocate the blocks.
 		tb = AllocateBlocks(fxs, std, fxs->analysis_window_size);
+		if(!tb)
+		{
+			return NULL;
+		}
 
 		hxcfe->hxc_printf(MSG_DEBUG,"Track dump length : %d us, number of block : %d, Number of pulses : %d",totallen/100,tb->number_of_blocks,std->channels[0].nb_of_pulses);
 
