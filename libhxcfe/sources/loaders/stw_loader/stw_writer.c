@@ -44,7 +44,6 @@
 
 int STW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-
 	FILE * stwfile;
 
 	STWTRACKIMG stwtrackdesc;
@@ -59,7 +58,6 @@ int STW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	stwfile=hxc_fopen(filename,"w+b");
 	if(stwfile)
 	{
-
 		sprintf((char*)&stwheader.headername,"STW");
 		stwheader.version = BIGENDIAN_WORD( 0x0100 );
 		stwheader.number_of_track = floppy->floppyNumberOfTrack;
@@ -87,7 +85,12 @@ int STW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 		fwrite(&stwheader,sizeof(stwheader),1,stwfile);
 
-		mfmtrack=(unsigned char*) malloc(mfmsize);
+		mfmtrack = (unsigned char*) malloc(mfmsize);
+		if(!mfmtrack)
+		{
+			hxc_fclose(stwfile);
+			return HXCFE_INTERNALERROR;
+		}
 
 		for( i = 0 ; i < stwheader.number_of_track ; i++ )
 		{
@@ -117,12 +120,12 @@ int STW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 		hxc_fclose(stwfile);
 
-		return 0;
+		return HXCFE_NOERROR;
 	}
 	else
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
 
-		return -1;
+		return HXCFE_ACCESSERROR;
 	}
 }
