@@ -38,7 +38,7 @@
 // File : adz_loader.c
 // Contains: ADZ floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -97,7 +97,7 @@ int ADZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int ret;
 	int i;
 	unsigned int filesize;
-	unsigned char* flatimg;
+	unsigned char *flatimg, *tmp_ptr;
 	gzFile file;
 	int err;
 
@@ -110,23 +110,31 @@ int ADZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
-	i=0;
-	filesize=0;
-	flatimg=(unsigned char*)malloc(UNPACKBUFFER);
+	i = 0;
+	filesize = 0;
+
+	flatimg = (unsigned char*)malloc(UNPACKBUFFER);
+	if( !flatimg )
+		goto error;
+
 	do
 	{
-		if(!flatimg)
-		{
-			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Unpack error!");
-			gzclose(file);
-			return HXCFE_BADFILE;
-		}
-
 		err = gzread(file, flatimg+filesize,UNPACKBUFFER );
 		filesize += err;
 		if(err>0)
 		{
-			flatimg = (unsigned char *)realloc(flatimg,filesize+UNPACKBUFFER);
+			tmp_ptr = (unsigned char *)realloc(flatimg,filesize+UNPACKBUFFER);
+			if(!tmp_ptr)
+				goto error;
+
+			flatimg = tmp_ptr;
+		}
+		else
+		{
+			if(!gzeof(file))
+			{
+				goto error;
+			}
 		}
 		i++;
 	}while(err>0);
@@ -138,6 +146,15 @@ int ADZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	free(flatimg);
 
 	return ret;
+
+error:
+	if( flatimg )
+		free(flatimg);
+
+	if( file )
+		gzclose(file);
+
+	return HXCFE_BADFILE;
 }
 
 int ADZ_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
