@@ -159,7 +159,10 @@ int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char *
 							if(rc==RC_OK)
 							{
 
-								fullpath=malloc(strlen(FindFileData.filename)+strlen(folder)+2);
+								fullpath = malloc(strlen(FindFileData.filename)+strlen(folder)+2);
+								if( !fullpath )
+									return 0;
+
 								sprintf(fullpath,"%s"DIR_SEPARATOR"%s",folder,FindFileData.filename);
 
 								if(ScanFile(floppycontext,adfvolume,fullpath,file))
@@ -196,69 +199,72 @@ int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char *
 			{
 				if(adfCountFreeBlocks(adfvolume)>4)
 				{
-						floppycontext->hxc_printf(MSG_INFO_1,"Adding file %s, %dB",FindFileData.filename,FindFileData.size);
-						adffile = adfOpenFile(adfvolume, FindFileData.filename, "w");
-						if(adffile)
+					floppycontext->hxc_printf(MSG_INFO_1,"Adding file %s, %dB",FindFileData.filename,FindFileData.size);
+					adffile = adfOpenFile(adfvolume, FindFileData.filename, "w");
+					if(adffile)
+					{
+						if(FindFileData.size)
 						{
-							if(FindFileData.size)
+							fullpath = malloc(strlen(FindFileData.filename)+strlen(folder)+2);
+							if( !fullpath )
+								return 0;
+
+							sprintf(fullpath,"%s"DIR_SEPARATOR"%s",folder,FindFileData.filename);
+
+							ftemp=hxc_fopen(fullpath,"rb");
+							if(ftemp)
 							{
-								fullpath=malloc(strlen(FindFileData.filename)+strlen(folder)+2);
-								sprintf(fullpath,"%s"DIR_SEPARATOR"%s",folder,FindFileData.filename);
+								filesize = hxc_fgetsize(ftemp);
 
-								ftemp=hxc_fopen(fullpath,"rb");
-								if(ftemp)
+								do
 								{
-									filesize = hxc_fgetsize(ftemp);
-
-									do
+									if(filesize>=512)
 									{
-										if(filesize>=512)
-										{
-											size=512;
-										}
-										else
-										{
-											size=filesize;
-										}
-										hxc_fread(&tempbuffer,size,ftemp);
+										size=512;
+									}
+									else
+									{
+										size=filesize;
+									}
+									hxc_fread(&tempbuffer,size,ftemp);
 
-										byte_written=adfWriteFile(adffile, size, tempbuffer);
-										if((byte_written!=size) || (adfCountFreeBlocks(adfvolume)<2) )
-										{
-											floppycontext->hxc_printf(MSG_ERROR,"Error while writting the file %s. No more free block ?",FindFileData.filename);
-											adfCloseFile(adffile);
-											hxc_fclose(ftemp);
-											free(fullpath);
-											return 1;
-										}
-										filesize=filesize-512;
-
-									}while( (filesize>0) && (byte_written==size));
-
-
-									/*fileimg=(unsigned char*)malloc(filesize);
-									memset(fileimg,0,filesize);
-									hxc_fread(fileimg,filesize,ftemp);
-									adfWriteFile(adffile, filesize, fileimg);
-									free(fileimg);*/
-
-									adfCloseFile(adffile);
-									hxc_fclose(ftemp);
-									free(fullpath);
-								}
-								else
-								{
-										floppycontext->hxc_printf(MSG_ERROR,"Error : Cannot open %s !!!",fullpath);
+									byte_written=adfWriteFile(adffile, size, tempbuffer);
+									if((byte_written!=size) || (adfCountFreeBlocks(adfvolume)<2) )
+									{
+										floppycontext->hxc_printf(MSG_ERROR,"Error while writting the file %s. No more free block ?",FindFileData.filename);
+										adfCloseFile(adffile);
+										hxc_fclose(ftemp);
 										free(fullpath);
 										return 1;
-								}
+									}
+									filesize=filesize-512;
+
+								}while( (filesize>0) && (byte_written==size));
+
+
+								/*fileimg=(unsigned char*)malloc(filesize);
+								memset(fileimg,0,filesize);
+								hxc_fread(fileimg,filesize,ftemp);
+								adfWriteFile(adffile, filesize, fileimg);
+								free(fileimg);*/
+
+								adfCloseFile(adffile);
+								hxc_fclose(ftemp);
+								free(fullpath);
+							}
+							else
+							{
+									floppycontext->hxc_printf(MSG_ERROR,"Error : Cannot open %s !!!",fullpath);
+									free(fullpath);
+									return 1;
 							}
 						}
-						else
-						{
-							floppycontext->hxc_printf(MSG_ERROR,"Error : Cannot create %s, %dB!!!",FindFileData.filename,FindFileData.size);
-							 return 1;
-						}
+					}
+					else
+					{
+						floppycontext->hxc_printf(MSG_ERROR,"Error : Cannot create %s, %dB!!!",FindFileData.filename,FindFileData.size);
+						 return 1;
+					}
 				}
 				else
 				{
