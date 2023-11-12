@@ -115,12 +115,12 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"JVC_libLoad_DiskFile %s",imgfile);
 
 	gap3len=255;
-	interleave=1;
-	skew=1;
-	file_offset=0;
-	trackdata=0;
-	sectorsize=512;
-	trackformat=0;
+	interleave = 1;
+	skew = 1;
+	file_offset = 0;
+	trackdata = NULL;
+	sectorsize = 512;
+	trackformat = 0;
 
 	f = hxc_fopen(imgfile,"rb");
 	if( f == NULL )
@@ -171,6 +171,13 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 	rpm=300;
 
+	trackdata = malloc(sectorpertrack * 256);
+	if(!trackdata)
+	{
+		hxc_fclose(f);
+		return HXCFE_INTERNALERROR;
+	}
+
 	if(filesize!=0)
 	{
 
@@ -191,7 +198,14 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				indexptr = 0;
 				sectorindex=0;
 
-				sectorconfig=malloc(sizeof(HXCFE_SECTCFG) * sectorpertrack);
+				sectorconfig = malloc(sizeof(HXCFE_SECTCFG) * sectorpertrack);
+				if(!sectorconfig)
+				{
+					free(trackdata);
+					hxc_fclose(f);
+					return(HXCFE_INTERNALERROR);
+				}
+
 				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG) * sectorpertrack);
 
 				for (sector = 0; sector < sectorpertrack; sector++)
