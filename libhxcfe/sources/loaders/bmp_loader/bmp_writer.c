@@ -315,7 +315,7 @@ static int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppyd
 					bdata.nb_color = 16;
 					bdata.xsize = td->xsize * nb_col;
 					bdata.ysize = td->ysize * nb_row;
-					bdata.data = (uint32_t*)ptr;
+					bdata.data = (void*)ptr;
 					bdata.palette = 0;
 
 					bmp16b_write(filename,&bdata);
@@ -325,7 +325,7 @@ static int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppyd
 					bdata.nb_color = 8;
 					bdata.xsize = td->xsize * nb_col;
 					bdata.ysize = td->ysize * nb_row;
-					bdata.data = (uint32_t*)ptrchar;
+					bdata.data = (void*)ptrchar;
 					bdata.palette = (unsigned char*)&pal;
 
 					bmpRLE8b_write(filename,&bdata);
