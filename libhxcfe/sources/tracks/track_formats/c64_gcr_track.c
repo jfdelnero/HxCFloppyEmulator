@@ -207,7 +207,8 @@ unsigned char * BuildC64GCRCylinder(int * gcrtracksize,unsigned char * track,uns
 	k=0;
 	j=0;
 	l=0;
-	do
+
+	while( l < size )
 	{
 		byte=track[l];
 		nongcrcode=nongcrpart[l];
@@ -218,7 +219,6 @@ unsigned char * BuildC64GCRCylinder(int * gcrtracksize,unsigned char * track,uns
 
 			for(j=0;j<5;j++)
 			{
-
 				if(gcrcode & (0x10>>j))
 				{
 					finalbuffer[k] |= (0x80>>shift2);
@@ -237,7 +237,8 @@ unsigned char * BuildC64GCRCylinder(int * gcrtracksize,unsigned char * track,uns
 			}
 		}
 		else
-		{//non gcr - direct copy
+		{
+			//non gcr - direct copy
 			quartet = (byte>>(4-shift)) & 0xF;
 
 			for(j=0;j<4;j++)
@@ -266,11 +267,9 @@ unsigned char * BuildC64GCRCylinder(int * gcrtracksize,unsigned char * track,uns
 			shift = 0;
 			l++;
 		}
-
-	}while(l<size);
+	}
 
 	return finalbuffer;
-
 }
 
 int32_t BuildC64GCRTrack(int numberofsector,int sectorsize,int tracknumber,int sidenumber,unsigned char* datain,unsigned char * mfmdata,int32_t * mfmsizebuffer)

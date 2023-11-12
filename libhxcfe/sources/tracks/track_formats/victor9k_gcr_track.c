@@ -207,7 +207,8 @@ unsigned char * BuildVictor9kGCRCylinder(int * gcrtracksize,unsigned char * trac
 	k=0;
 	j=0;
 	l=0;
-	do
+
+	while(l<size)
 	{
 		byte=track[l];
 		nongcrcode=nongcrpart[l];
@@ -266,8 +267,7 @@ unsigned char * BuildVictor9kGCRCylinder(int * gcrtracksize,unsigned char * trac
 			shift = 0;
 			l++;
 		}
-
-	}while(l<size);
+	};
 
 	return finalbuffer;
 
@@ -580,11 +580,11 @@ int get_next_Victor9k_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 								if(i<512)
 									datachksumerr += sector->input_data[i];
 							}
-							
+
 							datachksumerr &= 0xFFFF;
 
 							datachksumerr -= (sector->input_data[512] + (256*(int)sector->input_data[512+1]));
-							
+
 							sector->endsectorindex = bit_offset;//DeNybbleSector6and2(sector->input_data,track->databuffer,track->tracklen,bit_offset,&datachksumerr);
 
 							sector->data_crc = (sector->input_data[512] + (256*(int)sector->input_data[512+1]));
