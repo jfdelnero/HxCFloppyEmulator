@@ -70,37 +70,9 @@ void addpad(unsigned char * track,int mfmsize,int tracksize)
 	}
 }
 
-typedef struct RAMFILE_
-{
-	uint8_t * ramfile;
-	int32_t ramfile_size;
-}RAMFILE;
-
-FILE * rfopen(char* fn,char * mode,RAMFILE * rf)
-{
-	rf->ramfile=0;
-	rf->ramfile_size=0;
-	return (FILE *)1;
-};
-
-int rfwrite(void * buffer,int size,int mul,FILE * file,RAMFILE * rf)
-{
-	rf->ramfile = realloc(rf->ramfile,rf->ramfile_size+size);
-	memcpy(&rf->ramfile[rf->ramfile_size],buffer,size);
-	rf->ramfile_size = rf->ramfile_size + size;
-	return size;
-}
-
-int rfclose(FILE *f,RAMFILE * rf)
-{
-	if(rf->ramfile)
-		free(rf->ramfile);
-	return 0;
-};
-
 int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-	RAMFILE rf;
+	HXCRAMFILE rf;
 	pictrack * track;
 
 	FILE * hxcpicfile;
@@ -130,7 +102,7 @@ int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		return HXCFE_BADPARAMETER;
 	}
 
-	hxcpicfile=rfopen(filename,"wb",&rf);
+	hxcpicfile = hxc_ram_fopen(filename,"wb",&rf);
 
 	if(hxcpicfile)
 	{
@@ -201,7 +173,7 @@ int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		else
 			FILEHEADER->single_step=0xFF;
 
-		rfwrite(FILEHEADER,512,1,hxcpicfile,&rf);
+		hxc_ram_fwrite(FILEHEADER,512,1,hxcpicfile,&rf);
 
 		tracklistlen=((((((FILEHEADER->number_of_track)+1)*sizeof(pictrack))/512)+1));
 		offsettrack=(unsigned char*) malloc(tracklistlen*512);
@@ -253,7 +225,7 @@ int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			i++;
 		};
 
-		rfwrite(offsettrack,512*tracklistlen,1,hxcpicfile,&rf);
+		hxc_ram_fwrite(offsettrack,512*tracklistlen,1,hxcpicfile,&rf);
 
 		i=0;
 		while(i<(FILEHEADER->number_of_track))
@@ -366,7 +338,7 @@ int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 				}
 
 
-				rfwrite(mfmtrackfinal,tracksize*2,1,hxcpicfile,&rf);
+				hxc_ram_fwrite(mfmtrackfinal,tracksize*2,1,hxcpicfile,&rf);
 
 				free(mfmtracks0);
 				free(mfmtracks1);
@@ -387,12 +359,12 @@ int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		}
 		else
 		{
-			rfclose(hxcpicfile,&rf);
+			hxc_ram_fclose(hxcpicfile,&rf);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
 			return -1;
 		}
 
-		rfclose(hxcpicfile,&rf);
+		hxc_ram_fclose(hxcpicfile,&rf);
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
 

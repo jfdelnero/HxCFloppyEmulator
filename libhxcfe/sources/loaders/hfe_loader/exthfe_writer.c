@@ -73,19 +73,9 @@ void extaddpad(unsigned char * track,int mfmsize,int tracksize)
 	}
 }
 
-typedef struct RAMFILE_
-{
-	uint8_t * ramfile;
-	int32_t ramfile_size;
-}RAMFILE;
-
-FILE * rfopen(char* fn,char * mode,RAMFILE * rf);
-int rfwrite(void * buffer,int size,int mul,FILE * file,RAMFILE * rf);
-int rfclose(FILE *f,RAMFILE * rf);
-
 int EXTHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-	RAMFILE rf;
+	HXCRAMFILE rf;
 	picexttrack * track;
 
 	FILE * hxcpicfile;
@@ -103,7 +93,7 @@ int EXTHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 	factor=1;// factor=1-> 50% duty cycle  // factor=2-> 25% duty cycle
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write HFE file %s for the standalone emulator.",filename);
 
-	hxcpicfile = rfopen(filename,"wb",&rf);
+	hxcpicfile = hxc_ram_fopen(filename,"wb",&rf);
 
 	if(hxcpicfile)
 	{
@@ -166,7 +156,7 @@ int EXTHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 		else
 			FILEHEADER->single_step=0xFF;
 
-		rfwrite(FILEHEADER,512,1,hxcpicfile,&rf);
+		hxc_ram_fwrite(FILEHEADER,512,1,hxcpicfile,&rf);
 
 		tracklistlen=((((((FILEHEADER->number_of_track)+1)*sizeof(picexttrack))/512)+1));
 		offsettrack=(unsigned char*) malloc(tracklistlen*512);
@@ -218,7 +208,7 @@ int EXTHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 			i++;
 		};
 
-		rfwrite(offsettrack,512*tracklistlen,1,hxcpicfile,&rf);
+		hxc_ram_fwrite(offsettrack,512*tracklistlen,1,hxcpicfile,&rf);
 
 		i=0;
 		while(i<(FILEHEADER->number_of_track))
@@ -327,7 +317,7 @@ int EXTHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 				}
 
 
-				rfwrite(mfmtrackfinal,tracksize*2,1,hxcpicfile,&rf);
+				hxc_ram_fwrite(mfmtrackfinal,tracksize*2,1,hxcpicfile,&rf);
 
 				free(mfmtracks0);
 				free(mfmtracks1);
@@ -347,12 +337,12 @@ int EXTHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 		}
 		else
 		{
-			rfclose(hxcpicfile,&rf);
+			hxc_ram_fclose(hxcpicfile,&rf);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
 			return -1;
 		}
 
-		rfclose(hxcpicfile,&rf);
+		hxc_ram_fclose(hxcpicfile,&rf);
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
 
