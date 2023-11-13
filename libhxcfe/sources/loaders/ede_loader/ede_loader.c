@@ -35,10 +35,10 @@
 //-------------------------------------------------------------------------------//
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
-// File : ede_DiskFile.c
+// File : ede_loader.c
 // Contains: ede floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -71,7 +71,6 @@ int EDE_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 		hxc_checkfileext(imgfile->path,"edv",SYS_PATH_TYPE)
 		)
 	{
-
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile : EDE file !");
 
 		if((imgfile->file_header[0]==0x0D) && (imgfile->file_header[1]==0x0A))
@@ -121,17 +120,14 @@ int EDE_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 	}
 }
 
-
-
 int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
 	FILE * f;
 	unsigned int filesize;
 	int i,j,l,k;
 	int gap3len,interleave;
 	int rpm,sectorsize;
-	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_CYLINDER *currentcylinder;
 	unsigned char header_buffer[512];
 	int header_offset;
 	int blocknum;
@@ -139,7 +135,7 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	unsigned char bitmask;
 	unsigned char trackformat;
 	int skew;
-	HXCFE_SECTCFG  * sectorconfig;
+	HXCFE_SECTCFG *sectorconfig;
 	unsigned int sectorsizelayout[32];
 	unsigned int sectoridlayout[32];
 
@@ -158,7 +154,6 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	if((filesize!=0) && (header_buffer[0]==0x0D) && (header_buffer[1]==0x0A))
 	{
-
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		sectorsize=512;
 		rpm=300;
@@ -166,7 +161,6 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		skew=0;
 		switch(header_buffer[0x1FF])
 		{
-
 			case 0x01:
 				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"Mirage (DD) format");
 				header_offset=0xA0;
@@ -177,11 +171,16 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				floppydisk->floppySectorPerTrack=6;
 				gap3len=255;
 				interleave=1;
-				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
-				for(k=1;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k-1;
+
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+					sectorsizelayout[k]=sectorsize;
+
+				for(k=1;k<floppydisk->floppySectorPerTrack;k++)
+					sectoridlayout[k]=k-1;
+
 				sectoridlayout[0]=5;
 				sectorsizelayout[0]=512;
-				break;
+			break;
 
 			case 0x02:
 				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"SQ-80 (DD) format");
@@ -194,11 +193,16 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				floppydisk->floppySectorPerTrack=6;
 				gap3len=255;
 				interleave=1;
-				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
-				for(k=1;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k-1;
+
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+					sectorsizelayout[k]=sectorsize;
+
+				for(k=1;k<floppydisk->floppySectorPerTrack;k++)
+					sectoridlayout[k]=k-1;
+
 				sectoridlayout[0]=5;
 				sectorsizelayout[0]=512;
-				break;
+			break;
 
 			case 0x03:
 				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"EPS (DD) format");
@@ -210,9 +214,13 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				gap3len=36;
 				interleave=1;
 				skew=2;
-				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
-				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k;
-				break;
+
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+					sectorsizelayout[k]=sectorsize;
+
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+					sectoridlayout[k]=k;
+			break;
 
 			case 0x04:
 				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"VFX-SD (DD) format");
@@ -223,9 +231,13 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				floppydisk->floppySectorPerTrack=10;
 				gap3len=36;
 				interleave=1;
-				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
-				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k;
-				break;
+
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+					sectorsizelayout[k]=sectorsize;
+
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+					sectoridlayout[k]=k;
+			break;
 
 			case 0xcb:
 				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"ASR-10 HD format");
@@ -239,9 +251,13 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				gap3len = 36;
 				interleave=1;
 				skew=2;
-				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
-				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k;
-				break;
+
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+					sectorsizelayout[k]=sectorsize;
+
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+					sectoridlayout[k]=k;
+			break;
 
 			case 0xcc:
 				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"TS-10/12 HD format");
@@ -254,9 +270,13 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				gap3len=40;
 				interleave=1;
 				skew=2;
-				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
-				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k;
-				break;
+
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+					sectorsizelayout[k]=sectorsize;
+
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+					sectoridlayout[k]=k;
+			break;
 
 			case 0x07:
 				floppydisk->floppyiftype=IBMPC_DD_FLOPPYMODE;
@@ -269,9 +289,13 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				gap3len=40;
 				interleave=1;
 				skew=2;
-				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectorsizelayout[k]=sectorsize;
-				for(k=0;k<floppydisk->floppySectorPerTrack;k++)sectoridlayout[k]=k;
-				break;
+
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+					sectorsizelayout[k]=sectorsize;
+
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+					sectoridlayout[k]=k;
+			break;
 
 			default:
 				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Unknow format : %x !",header_buffer[0x1FF]);
@@ -282,20 +306,31 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 		number_of_block=floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide*floppydisk->floppySectorPerTrack;
 
-		sectorconfig=malloc(sizeof(HXCFE_SECTCFG) * floppydisk->floppySectorPerTrack);
+		sectorconfig = malloc(sizeof(HXCFE_SECTCFG) * floppydisk->floppySectorPerTrack);
+		if(!sectorconfig)
+		{
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
+		}
+
 		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG) * floppydisk->floppySectorPerTrack);
 
 		blocknum=0;
 		bitmask=0x80;
 
-		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if( !floppydisk->tracks )
+		{
+			free(sectorconfig);
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
+		}
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
-
-			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+			floppydisk->tracks[j] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 			currentcylinder=floppydisk->tracks[j];
 
 			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
@@ -305,52 +340,55 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
 				{
-					sectorconfig[k].head=i;
-					sectorconfig[k].cylinder=j;
-					sectorconfig[k].sector=sectoridlayout[k];
-					sectorconfig[k].sectorsize=sectorsizelayout[k];
-					sectorconfig[k].bitrate=floppydisk->floppyBitRate;
-					sectorconfig[k].gap3=gap3len;
-					sectorconfig[k].trackencoding=trackformat;
-					sectorconfig[k].input_data=malloc(sectorsize);
-					memset(sectorconfig[k].input_data,0,sectorsize);
-
-					if(blocknum<number_of_block)
+					sectorconfig[k].head = i;
+					sectorconfig[k].cylinder = j;
+					sectorconfig[k].sector = sectoridlayout[k];
+					sectorconfig[k].sectorsize = sectorsizelayout[k];
+					sectorconfig[k].bitrate = floppydisk->floppyBitRate;
+					sectorconfig[k].gap3 = gap3len;
+					sectorconfig[k].trackencoding = trackformat;
+					sectorconfig[k].input_data = malloc(sectorsize);
+					if(sectorconfig[k].input_data)
 					{
-						if(!(header_buffer[header_offset]&bitmask))
+						memset(sectorconfig[k].input_data,0,sectorsize);
+
+						if(blocknum<number_of_block)
 						{
-							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d File offset: 0x%.8x",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize,ftell(f));
-							hxc_fread(sectorconfig[k].input_data,sectorsize,f);
+							if(!(header_buffer[header_offset]&bitmask))
+							{
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d File offset: 0x%.8x",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize,ftell(f));
+								hxc_fread(sectorconfig[k].input_data,sectorsize,f);
+							}
+							else
+							{
+								imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d File offset: ----------",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize);
+								for(l=0;l<(sectorconfig[k].sectorsize/2);l++)
+								{
+									sectorconfig[k].input_data[(l*2)]=0x6D;
+									sectorconfig[k].input_data[(l*2)+1]=0xB6;
+								}
+							}
+							bitmask=bitmask>>1;
+							if(!bitmask)
+							{
+								header_offset++;
+								bitmask=0x80;
+							}
+							blocknum++;
 						}
 						else
 						{
-							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d File offset: ----------",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize);
+							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize);
 							for(l=0;l<(sectorconfig[k].sectorsize/2);l++)
 							{
 								sectorconfig[k].input_data[(l*2)]=0x6D;
 								sectorconfig[k].input_data[(l*2)+1]=0xB6;
 							}
 						}
-						bitmask=bitmask>>1;
-						if(!bitmask)
-						{
-							header_offset++;
-							bitmask=0x80;
-						}
-						blocknum++;
-					}
-					else
-					{
-						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"T:%.3d S:%d Sector:%.2d Size:%.4d",j,i,sectorconfig[k].sector,sectorconfig[k].sectorsize);
-						for(l=0;l<(sectorconfig[k].sectorsize/2);l++)
-						{
-							sectorconfig[k].input_data[(l*2)]=0x6D;
-							sectorconfig[k].input_data[(l*2)+1]=0xB6;
-						}
 					}
 				}
 
-				currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,128,2500,-2500);
+				currentcylinder->sides[i] = tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,(((j<<1)|(i&1))*skew),floppydisk->floppyBitRate,rpm,trackformat,128,2500,-2500);
 
 				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
 				{
@@ -374,7 +412,6 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int EDE_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="ENSONIQ_EDE";
 	static const char plug_desc[]="ENSONIQ EDE Loader";
 	static const char plug_ext[]="ede";
@@ -397,4 +434,3 @@ int EDE_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 			plug_ext
 			);
 }
-
