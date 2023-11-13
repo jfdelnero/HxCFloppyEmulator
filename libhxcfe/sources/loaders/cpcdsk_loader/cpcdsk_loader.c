@@ -120,7 +120,11 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 	//HXCFE_SIDE* currentside;
 	unsigned char * temp_buffer;
 
-	currentcylinder = 0;
+	sectorconfig = NULL;
+	currentcylinder = NULL;
+	tracksizetab = NULL;
+	realloctracktable = NULL;
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCDSK_libLoad_DiskFile %s",imgfile);
 
 	f = hxc_fopen(imgfile,"rb");
@@ -170,12 +174,13 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 			}
 		}
 
-		tracksizetab=0;
-
 		if(extendformat)
 		{
 			// read the tracks size array.
-			tracksizetab=(unsigned char *)malloc(fileheader.number_of_sides*fileheader.number_of_tracks);
+			tracksizetab = (unsigned char *)malloc(fileheader.number_of_sides*fileheader.number_of_tracks);
+			if( !tracksizetab )
+				goto error;
+
 			hxc_fread(tracksizetab,fileheader.number_of_sides*fileheader.number_of_tracks,f);
 
 #ifdef CPCDSK_DBG
@@ -194,10 +199,12 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 		tracksize=fileheader.size_of_a_track;
 		rpm=300;
 
-		sectorconfig=0;
 		interleave=1;
 
 		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if(!floppydisk->tracks)
+			goto error;
+
 		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d Side(s)\n",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide);
@@ -219,8 +226,8 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 			if( ( ftell(f) == (int32_t)trackposition ) && hxc_fread(&trackheader,sizeof(trackheader),f)>0 )
 			{
 
-				t=trackheader.track_number;
-				s=trackheader.side_number;
+				t = trackheader.track_number;
+				s = trackheader.side_number;
 
 				if(!strncmp((char*)&trackheader.headertag,"Track-Info\r\n",10) && (t<fileheader.number_of_tracks))//12))
 				{
@@ -233,16 +240,19 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 					{
 						// description d'une track au delà du nombre de track max !
 						// realloc necessaire
-						if(trackheader.track_number>=floppydisk->floppyNumberOfTrack)
+						if(trackheader.track_number >= floppydisk->floppyNumberOfTrack)
 						{
 							floppydisk->floppyNumberOfTrack=trackheader.track_number+1;
 							realloctracktable=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*trackheader.track_number);
+							if(!realloctracktable)
+								goto error;
+
 							memset(realloctracktable,0,sizeof(HXCFE_CYLINDER*)*trackheader.track_number);
 							memcpy(realloctracktable,floppydisk->tracks,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+
 							free(floppydisk->tracks);
 							floppydisk->tracks=realloctracktable;
 						}
-
 
 						if(!floppydisk->tracks[t])
 						{
@@ -250,12 +260,14 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 							currentcylinder = floppydisk->tracks[t];
 						}
 
-
 						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"\nnumber %d - track:%d side:%d sector:%d sc:%d gap3:%d fill:%x recmode:%d bitrate:%d\n ",i,trackheader.track_number,trackheader.side_number,trackheader.number_of_sector,trackheader.sector_size_code,trackheader.gap3_length,trackheader.filler_byte,trackheader.rec_mode,trackheader.datarate);
 
 						if(trackheader.number_of_sector)
 						{
-							sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*trackheader.number_of_sector);
+							sectorconfig = (HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*trackheader.number_of_sector);
+							if( !sectorconfig )
+								goto error;
+
 							memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*trackheader.number_of_sector);
 
 							gap3len=trackheader.gap3_length;
@@ -272,6 +284,8 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 								sectorconfig[j].sector = sector.sector_id;
 								sectorconfig[j].sectorsize = 128<<(sector.sector_size_code&7);
 								sectorconfig[j].input_data = malloc(sectorconfig[j].sectorsize);
+								if( !sectorconfig[j].input_data )
+									goto error;
 
 								fseek (f, trackposition+0x100+sectorposition/*sizeof(trackheader)+(sizeof(sector)*j)*/, SEEK_SET);
 								hxc_fread(sectorconfig[j].input_data,sectorconfig[j].sectorsize,f);
@@ -344,7 +358,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 						if(trackheader.number_of_sector)
 						{
 							free(sectorconfig);
-							sectorconfig=0;
+							sectorconfig = NULL;
 						}
 
 						///////////////////////
@@ -375,7 +389,6 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 					}
 					else
 					{
-
 						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"\nnumber %d - empty !\n ",i);
 
 						if(!floppydisk->tracks[t])
@@ -435,6 +448,33 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
+
+error:
+
+	hxcfe_floppyUnload(imgldr_ctx->hxcfe, floppydisk );
+
+	if(f)
+		hxc_fclose(f);
+
+	if(tracksizetab)
+		free(tracksizetab);
+
+	if( sectorconfig )
+	{
+		for(j=0;j<trackheader.number_of_sector;j++)
+		{
+			if(sectorconfig[j].input_data)
+			{
+				free(sectorconfig[j].input_data);
+			}
+		}
+		free(sectorconfig);
+	}
+
+	if( realloctracktable )
+		free(realloctracktable);
+
+	return HXCFE_INTERNALERROR;
 }
 
 int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);

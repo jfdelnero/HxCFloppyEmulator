@@ -35,10 +35,10 @@
 //-------------------------------------------------------------------------------//
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
-// File : D88_loader.c
-// Contains: D88 floppy image loader.
+// File : apridisk_loader.c
+// Contains: Apricot disk floppy image loader.
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -82,8 +82,6 @@ int ApriDisk_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINF
 	return HXCFE_BADPARAMETER;
 }
 
-
-
 int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
@@ -112,11 +110,17 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	totalfilesize = hxc_fgetsize(f);
 
-	file_buffer=(unsigned char *) malloc(totalfilesize);
+	file_buffer = (unsigned char *) malloc(totalfilesize);
+	if(!file_buffer)
+	{
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Allocation error !");
+		return HXCFE_INTERNALERROR;
+	}
+
 	memset(file_buffer,0,totalfilesize);
 	hxc_fread(file_buffer,totalfilesize,f);
 
-	fileindex=0;
+	fileindex = 0;
 	//////////////////////////////////////////////////////
 	// Header check
 	if(strcmp(APRIDISK_HeaderString,(char*)&file_buffer[fileindex]))
@@ -139,162 +143,177 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 		for(j=0;j<=1;j++)
 		{
-			number_of_sector=0;
-			sectorconfig=0;
-			fileindex=128;
+			number_of_sector = 0;
+			sectorconfig = NULL;
+			fileindex = 128;
 			rpm=600;
 			newtrack=0;
 			interleave=1;
 
 			do
 			{
-
 				data_record=(apridisk_data_record *)&file_buffer[fileindex];
-				fileindex=fileindex+sizeof(apridisk_data_record);
+				fileindex += sizeof(apridisk_data_record);
 
 				switch(data_record->item_type)
 				{
-				case DATA_RECORD_DELETED:
-					if(data_record->header_size>sizeof(apridisk_data_record))
-					{
-						fileindex=fileindex+(data_record->header_size-sizeof(apridisk_data_record));
-					}
-					fileindex=fileindex+(data_record->data_size);
+					case DATA_RECORD_DELETED:
+						if(data_record->header_size>sizeof(apridisk_data_record))
+						{
+							fileindex += (data_record->header_size-sizeof(apridisk_data_record));
+						}
+						fileindex += (data_record->data_size);
 					break;
 
-				case DATA_RECORD_SECTOR:
-					if(data_record->header_size>sizeof(apridisk_data_record))
-					{
-						fileindex=fileindex+(data_record->header_size-sizeof(apridisk_data_record));
-					}
-					if((data_record->cylinder==i) && (data_record->head==j))
-					{
-
-						if((j+1)>(floppydisk->floppyNumberOfSide))
+					case DATA_RECORD_SECTOR:
+						if(data_record->header_size>sizeof(apridisk_data_record))
 						{
-							floppydisk->floppyNumberOfSide=j+1;
+							fileindex += (data_record->header_size-sizeof(apridisk_data_record));
 						}
 
-						if((i+1)>(floppydisk->floppyNumberOfTrack))
+						if((data_record->cylinder==i) && (data_record->head==j))
 						{
-							floppydisk->floppyNumberOfTrack=i+1;
-							newtrack=1;
+							if((j+1)>(floppydisk->floppyNumberOfSide))
+							{
+								floppydisk->floppyNumberOfSide=j+1;
+							}
+
+							if((i+1)>(floppydisk->floppyNumberOfTrack))
+							{
+								floppydisk->floppyNumberOfTrack=i+1;
+								newtrack=1;
+							}
+
+							data_record->item_type=DATA_RECORD_DELETED;
+
+							sectorconfig = (HXCFE_SECTCFG*)realloc(sectorconfig,sizeof(HXCFE_SECTCFG)*(number_of_sector+1));
+							if(sectorconfig)
+							{
+								memset(&sectorconfig[number_of_sector],0,sizeof(HXCFE_SECTCFG));
+
+								sectorconfig[number_of_sector].cylinder = i;
+								sectorconfig[number_of_sector].head = j;
+								sectorconfig[number_of_sector].sector = data_record->sector;
+								sectorconfig[number_of_sector].trackencoding = IBMFORMAT_DD;
+								sectorconfig[number_of_sector].bitrate = floppydisk->floppyBitRate;
+								sectorconfig[number_of_sector].gap3 = 255;
+
+								switch(data_record->compression)
+								{
+									case DATA_NOT_COMPRESSED:
+										sectorconfig[number_of_sector].sectorsize = data_record->data_size;
+										sectorconfig[number_of_sector].input_data = malloc(data_record->data_size);
+										if(sectorconfig[number_of_sector].input_data)
+										{
+											memcpy(sectorconfig[number_of_sector].input_data,&file_buffer[fileindex],data_record->data_size);
+										}
+										fileindex += data_record->data_size;
+									break;
+
+									case DATA_COMPRESSED:
+										compressed_dataitem=(apridisk_compressed_data *)&file_buffer[fileindex];
+
+										sectorconfig[number_of_sector].sectorsize = compressed_dataitem->count;
+										sectorconfig[number_of_sector].input_data = malloc(compressed_dataitem->count);
+										if(sectorconfig[number_of_sector].input_data)
+										{
+											memset(sectorconfig[number_of_sector].input_data,compressed_dataitem->byte,compressed_dataitem->count);
+										}
+										fileindex += data_record->data_size;
+									break;
+
+									default:
+										imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Unknow compression id (%.4x) !",data_record->compression);
+										sectorconfig[number_of_sector].input_data = NULL;
+									break;
+								}
+							}
+
+							number_of_sector++;
+
+						}
+						else
+						{
+							fileindex += data_record->data_size;
 						}
 
-						data_record->item_type=DATA_RECORD_DELETED;
+						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libLoad_DiskFile: item DATA_RECORD_SECTOR found. Header size=%d, Data size=%d, Sector=%d Head=%d Cylinder=%d",data_record->header_size,data_record->data_size,data_record->sector,data_record->head,data_record->cylinder);
+					break;
 
-
-						sectorconfig=(HXCFE_SECTCFG*)realloc(sectorconfig,sizeof(HXCFE_SECTCFG)*(number_of_sector+1));
-						memset(&sectorconfig[number_of_sector],0,sizeof(HXCFE_SECTCFG));
-
-						sectorconfig[number_of_sector].cylinder=i;
-						sectorconfig[number_of_sector].head=j;
-						sectorconfig[number_of_sector].sector=data_record->sector;
-						sectorconfig[number_of_sector].trackencoding=IBMFORMAT_DD;
-						sectorconfig[number_of_sector].bitrate=floppydisk->floppyBitRate;
-						sectorconfig[number_of_sector].gap3=255;
-
-						switch(data_record->compression)
+					case DATA_RECORD_COMMENT:
+						if(data_record->header_size>sizeof(apridisk_data_record))
 						{
-						case DATA_NOT_COMPRESSED:
-							sectorconfig[number_of_sector].sectorsize=data_record->data_size;
-							sectorconfig[number_of_sector].input_data=malloc(data_record->data_size);
-							memcpy(sectorconfig[number_of_sector].input_data,&file_buffer[fileindex],data_record->data_size);
-							fileindex=fileindex+data_record->data_size;
-							break;
-
-						case DATA_COMPRESSED:
-							compressed_dataitem=(apridisk_compressed_data *)&file_buffer[fileindex];
-
-							sectorconfig[number_of_sector].sectorsize=compressed_dataitem->count;
-							sectorconfig[number_of_sector].input_data=malloc(compressed_dataitem->count);
-
-							memset(sectorconfig[number_of_sector].input_data,compressed_dataitem->byte,compressed_dataitem->count);
-							fileindex=fileindex+data_record->data_size;
-
-							break;
-
-						default:
-							imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Unknow compression id (%.4x) !",data_record->compression);
-							sectorconfig[number_of_sector].input_data=0;
-							break;
+							fileindex += (data_record->header_size-sizeof(apridisk_data_record));
 						}
-
-						number_of_sector++;
-
-					}
-					else
-					{
-						fileindex=fileindex+data_record->data_size;
-					}
-
-					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libLoad_DiskFile: item DATA_RECORD_SECTOR found. Header size=%d, Data size=%d, Sector=%d Head=%d Cylinder=%d",data_record->header_size,data_record->data_size,data_record->sector,data_record->head,data_record->cylinder);
+						fileindex += data_record->data_size;
 					break;
 
-				case DATA_RECORD_COMMENT:
-					if(data_record->header_size>sizeof(apridisk_data_record))
-					{
-						fileindex=fileindex+(data_record->header_size-sizeof(apridisk_data_record));
-					}
-					fileindex=fileindex+data_record->data_size;
+					case DATA_RECORD_CREATOR:
+
+						if(data_record->header_size>sizeof(apridisk_data_record))
+						{
+							fileindex += (data_record->header_size-sizeof(apridisk_data_record));
+						}
+						fileindex += data_record->data_size;
 					break;
 
-				case DATA_RECORD_CREATOR:
-
-					if(data_record->header_size>sizeof(apridisk_data_record))
-					{
-						fileindex=fileindex+(data_record->header_size-sizeof(apridisk_data_record));
-					}
-					fileindex=fileindex+data_record->data_size;
+					default:
+						return HXCFE_BADFILE;
 					break;
+				}
+			}while(fileindex<totalfilesize);
 
-				default:
-					return HXCFE_BADFILE;
-					break;
-
+			if(newtrack)
+			{
+				floppydisk->tracks = (HXCFE_CYLINDER**)realloc(floppydisk->tracks,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+				if(floppydisk->tracks)
+				{
+					floppydisk->tracks[i] = (HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
+					if(floppydisk->tracks[i])
+						memset(floppydisk->tracks[i],0,sizeof(HXCFE_CYLINDER));
+				}
 			}
 
-		}while(fileindex<totalfilesize);
+			currentcylinder = NULL;
 
-		if(newtrack)
-		{
-			floppydisk->tracks=(HXCFE_CYLINDER**)realloc(floppydisk->tracks,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			floppydisk->tracks[i]=(HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
-			memset(floppydisk->tracks[i],0,sizeof(HXCFE_CYLINDER));
-		}
+			if(floppydisk->tracks)
+				currentcylinder = floppydisk->tracks[floppydisk->floppyNumberOfTrack-1];
 
-		currentcylinder=floppydisk->tracks[floppydisk->floppyNumberOfTrack-1];
-		currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
-		currentcylinder->sides=(HXCFE_SIDE**)realloc(currentcylinder->sides,sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
-		//memset(currentcylinder->sides,0,sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
+			if( currentcylinder )
+			{
+				currentcylinder->number_of_side = floppydisk->floppyNumberOfSide;
+				currentcylinder->sides = (HXCFE_SIDE**)realloc(currentcylinder->sides,sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
+				//memset(currentcylinder->sides,0,sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
 
-		currentcylinder->floppyRPM=rpm;
+				currentcylinder->floppyRPM = rpm;
+				if(currentcylinder->sides)
+				{
+					currentside = tg_generateTrackEx((unsigned short)number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,IBMFORMAT_DD,0,2500 | NO_SECTOR_UNDER_INDEX,-2500);
+					if(currentcylinder->number_of_side>j)
+						currentcylinder->sides[j] = currentside;
+				}
+			}
 
-		currentside=tg_generateTrackEx((unsigned short)number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,IBMFORMAT_DD,0,2500 | NO_SECTOR_UNDER_INDEX,-2500);
-		if(currentcylinder->number_of_side>j)
-			currentcylinder->sides[j]=currentside;
+			if(sectorconfig)
+			{
+				for(k=0;k<number_of_sector;k++)
+				{
+					hxcfe_freeSectorConfigData( 0, &sectorconfig[k] );
+				}
 
-		for(k=0;k<number_of_sector;k++)
-		{
-			hxcfe_freeSectorConfigData( 0, &sectorconfig[k] );
-		}
-
-		if(number_of_sector)
-			free(sectorconfig);
-
+				free(sectorconfig);
+			}
 		}
 
 		number_of_sector=0;
 	}
 
-
 	// Comment & creator extraction.
 	fileindex=128;
 	do
 	{
-
 		data_record=(apridisk_data_record *)&file_buffer[fileindex];
-		fileindex=fileindex+sizeof(apridisk_data_record);
+		fileindex += sizeof(apridisk_data_record);
 
 		switch(data_record->item_type)
 		{
@@ -303,16 +322,16 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 				{
 					fileindex=fileindex+(data_record->header_size-sizeof(apridisk_data_record));
 				}
-				fileindex=fileindex+(data_record->data_size);
-				break;
+				fileindex += data_record->data_size;
+			break;
 
 			case DATA_RECORD_SECTOR:
 				if(data_record->header_size>sizeof(apridisk_data_record))
 				{
 					fileindex=fileindex+(data_record->header_size-sizeof(apridisk_data_record));
 				}
-				fileindex=fileindex+data_record->data_size;
-				break;
+				fileindex += data_record->data_size;
+			break;
 
 			case DATA_RECORD_COMMENT:
 				if(data_record->header_size>sizeof(apridisk_data_record))
@@ -320,8 +339,8 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 					fileindex=fileindex+(data_record->header_size-sizeof(apridisk_data_record));
 				}
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libLoad_DiskFile: item DATA_RECORD_COMMENT found: %s",&file_buffer[fileindex]);
-				fileindex=fileindex+data_record->data_size;
-				break;
+				fileindex += data_record->data_size;
+			break;
 
 			case DATA_RECORD_CREATOR:
 				if(data_record->header_size>sizeof(apridisk_data_record))
@@ -329,18 +348,14 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 					fileindex=fileindex+(data_record->header_size-sizeof(apridisk_data_record));
 				}
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libLoad_DiskFile: item DATA_RECORD_CREATOR found: %s",&file_buffer[fileindex]);
-				fileindex=fileindex+data_record->data_size;
-				break;
+				fileindex += data_record->data_size;
+			break;
 
-				default:
+			default:
 				return HXCFE_BADFILE;
-				break;
-
-			}
-
-		}while(fileindex<totalfilesize);
-
-
+			break;
+		}
+	}while(fileindex<totalfilesize);
 
 	free(file_buffer);
 
@@ -374,4 +389,3 @@ int ApriDisk_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void *
 			plug_ext
 			);
 }
-

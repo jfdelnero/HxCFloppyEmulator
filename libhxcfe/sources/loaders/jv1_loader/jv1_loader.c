@@ -38,7 +38,7 @@
 // File : jv1_loader.c
 // Contains: JV1 TRS80 floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -88,7 +88,6 @@ int JV1_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 int JV1_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
 	FILE * f;
 	unsigned int filesize;
 	int i,j,k;
@@ -115,72 +114,91 @@ int JV1_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	if( filesize )
 	{
+		sectorsize=256; // JV1 file support only 256bytes/sector floppies.
 
-			sectorsize=256; // JV1 file support only 256bytes/sector floppies.
+		bitrate=250000;
+		rpm=300;
+		interleave=3;
+		gap3len=15;
+		trackformat=IBMFORMAT_SD;
+		floppydisk->floppyNumberOfSide=1;
+		floppydisk->floppySectorPerTrack=10;
+		floppydisk->floppyNumberOfTrack=filesize/( floppydisk->floppyNumberOfSide*floppydisk->floppySectorPerTrack*256);
 
-            bitrate=250000;
-            rpm=300;
-            interleave=3;
-            gap3len=15;
-			trackformat=IBMFORMAT_SD;
-            floppydisk->floppyNumberOfSide=1;
-            floppydisk->floppySectorPerTrack=10;
-            floppydisk->floppyNumberOfTrack=filesize/( floppydisk->floppyNumberOfSide*floppydisk->floppySectorPerTrack*256);
+		floppydisk->floppyBitRate=bitrate;
+		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
+		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
-			floppydisk->floppyBitRate=bitrate;
-			floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,bitrate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
 
-			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,bitrate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
+		sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
+		if( !sectorconfig )
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR, "JV1_libLoad_DiskFile : Allocation error !\n");
+			hxc_fclose(f);
 
-			sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
-			memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
+			return HXCFE_INTERNALERROR;
+		}
+		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 
-			trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+		trackdata = (unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+		if( !trackdata )
+		{
+			free(sectorconfig);
 
-			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR, "JV1_libLoad_DiskFile : Allocation error !\n");
+			hxc_fclose(f);
+
+			return HXCFE_INTERNALERROR;
+		}
+
+		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+		{
+			floppydisk->tracks[j] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+			currentcylinder = floppydisk->tracks[j];
+
+			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
+				hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
 
-				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-				currentcylinder=floppydisk->tracks[j];
+				file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
+					(sectorsize*(floppydisk->floppySectorPerTrack)*i);
 
-				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+				fseek (f , file_offset , SEEK_SET);
+				hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
+
+				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
 				{
-					hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2 );
-
-					file_offset=(sectorsize*(j*floppydisk->floppySectorPerTrack*floppydisk->floppyNumberOfSide))+
-						(sectorsize*(floppydisk->floppySectorPerTrack)*i);
-
-					fseek (f , file_offset , SEEK_SET);
-					hxc_fread(trackdata,sectorsize*floppydisk->floppySectorPerTrack,f);
-
-					memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
-					for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+					sectorconfig[k].cylinder=j;
+					sectorconfig[k].head=i;
+					sectorconfig[k].sector=k;
+					if(j==17)
 					{
-						sectorconfig[k].cylinder=j;
-						sectorconfig[k].head=i;
-						sectorconfig[k].sector=k;
-						if(j==17)
-						{
-							sectorconfig[k].use_alternate_datamark=1;
-							sectorconfig[k].alternate_datamark=0xFA;
-						}
-						sectorconfig[k].bitrate=floppydisk->floppyBitRate;
-						sectorconfig[k].gap3=gap3len;
-						sectorconfig[k].sectorsize=sectorsize;
-						sectorconfig[k].input_data=&trackdata[k*sectorsize];
-						sectorconfig[k].trackencoding=trackformat;
+						sectorconfig[k].use_alternate_datamark=1;
+						sectorconfig[k].alternate_datamark=0xFA;
 					}
+					sectorconfig[k].bitrate=floppydisk->floppyBitRate;
+					sectorconfig[k].gap3=gap3len;
+					sectorconfig[k].sectorsize=sectorsize;
+					sectorconfig[k].input_data=&trackdata[k*sectorsize];
+					sectorconfig[k].trackencoding=trackformat;
+				}
 
+				if(currentcylinder)
+				{
 					currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,trackformat,0,2500,-2500);
 				}
 			}
+		}
 
-			free(sectorconfig);
-			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+		free(sectorconfig);
+		free(trackdata);
 
-			hxc_fclose(f);
-			return HXCFE_NOERROR;
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+
+		hxc_fclose(f);
+		return HXCFE_NOERROR;
 	}
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
@@ -198,10 +216,10 @@ int JV1_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	JV1_libIsValidDiskFile,
-		(LOADDISKFILE)		JV1_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	JV1_libGetPluginInfo
+		(ISVALIDDISKFILE)   JV1_libIsValidDiskFile,
+		(LOADDISKFILE)      JV1_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    JV1_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

@@ -38,7 +38,7 @@
 // File : raw_loader.c
 // Contains: RAW floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -77,7 +77,8 @@ int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int gap3len,interleave,skew,curskew,tracktype,firstsectorid;
 	int sectorsize,rpm;
 
-	f=0;
+	trackdata = NULL;
+	f = NULL;
 
 	if(imgfile)
 	{
@@ -123,6 +124,8 @@ int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	floppydisk->floppyBitRate=bitrate;
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	if(!floppydisk->tracks)
+		goto error;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"%d bytes sectors, %d sectors/tracks,interleaving %d, skew %d, %d tracks, %d side(s), gap3 %d, %d rpm, %d bits/s",
 		sectorsize,
@@ -168,12 +171,13 @@ int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	};
 
-	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+	trackdata = (unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+	if(!trackdata)
+		goto error;
 
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
-
-		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+		floppydisk->tracks[j] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 
 		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 		{
@@ -235,17 +239,36 @@ int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				else
 					curskew=(j*skew);
 
-				floppydisk->tracks[j]->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,(unsigned char)firstsectorid,interleave,curskew,floppydisk->floppyBitRate,rpm,tracktype,gap3len,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
+				floppydisk->tracks[j]->sides[i] = tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,(unsigned char)firstsectorid,interleave,curskew,floppydisk->floppyBitRate,rpm,tracktype,gap3len,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
 			}
 		}
 	}
 
-	free(trackdata);
-	if(f) hxc_fclose(f);
+	if(trackdata)
+		free(trackdata);
+
+	if(f) 
+		hxc_fclose(f);
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 	return HXCFE_NOERROR;
+	
+error:
+	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Alloc / Internal error !",imgfile);
+			
+	if(trackdata)
+		free(trackdata);
+
+	if(f) 
+		hxc_fclose(f);
+	
+	if(floppydisk->tracks)
+		free(floppydisk->tracks);
+	
+	floppydisk->tracks = NULL;
+
+	return HXCFE_INTERNALERROR;	
 }
 
 int RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
