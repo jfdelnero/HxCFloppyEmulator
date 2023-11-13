@@ -43,6 +43,7 @@
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
 
+//#define MICRAL 1
 
 #include <string.h>
 #include <stdio.h>
@@ -83,13 +84,14 @@ unsigned char * convert_track(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side,unsig
 	unsigned char  * data_track;
 	unsigned int bits_delta,nb_pulses;
 #ifdef MICRAL
-	int oldindexstate;
+	int oldindexstate,index_cnt;
 #endif
 	float adjust_factor;
 
 	track_time = 0;
 #ifdef MICRAL
 	oldindexstate = 0;
+	index_cnt = 0;
 #endif
 
 	tracklen = side->tracklen;
@@ -170,7 +172,8 @@ unsigned char * convert_track(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side,unsig
 				{
 					if(!oldindexstate && side->indexbuffer[j/8])
 					{
-						printf("devmem 0x%.8X 32 %d\n",0xFF200180,bitpos/4);
+						printf("devmem 0x%.8X 32 %d\n",0xFF200180+(index_cnt*4),bitpos/4);
+						index_cnt++;
 					}
 					
 					if(side->indexbuffer[j/8])
