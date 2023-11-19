@@ -619,12 +619,12 @@ int32_t hxcfe_imgAutoSetectLoader( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int
 	image_plugin* plugin_ptr;
 	HXCFE_IMGLDR_FILEINFOS file_infos;
 
-	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
-
 	ret = HXCFE_BADPARAMETER;
 
 	if( imgldr_ctx )
 	{
+		plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
+
 		hxcfe = imgldr_ctx->hxcfe;
 
 		hxcfe->hxc_printf(MSG_INFO_0,"Checking %s",imgname);
@@ -731,12 +731,12 @@ HXCFE_FLOPPY * hxcfe_imgLoadEx( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_
 	image_plugin* plugin_ptr;
 	HXCFE_IMGLDR_FILEINFOS file_infos;
 
-	plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
-
 	newfloppy = 0;
 
 	if(imgldr_ctx)
 	{
+		plugin_ptr = (image_plugin*)imgldr_ctx->hxcfe->image_handlers;
+
 		hxcfe = imgldr_ctx->hxcfe;
 
 		hxcfe->hxc_printf(MSG_INFO_0,"Loading %s",imgname);
@@ -1384,6 +1384,7 @@ int32_t hxcfe_pushTrack ( HXCFE_FLPGEN* fb_ctx, uint32_t rpm, int32_t number, in
 				cur_track->sectortab[i].input_data = (unsigned char * )malloc(cur_track->sectortab[i].sectorsize);
 				if(cur_track->sectortab[i].input_data)
 					memcpy(cur_track->sectortab[i].input_data,data_to_realloc,cur_track->sectortab[i].sectorsize);
+				free(data_to_realloc);
 			}
 			i++;
 		}
@@ -1539,13 +1540,13 @@ int32_t hxcfe_setSectorData( HXCFE_FLPGEN* fb_ctx, uint8_t * buffer, int32_t siz
 	if(cur_sector->input_data)
 	{
 		free(cur_sector->input_data);
-		cur_sector->input_data = 0;
+		cur_sector->input_data = NULL;
 	}
 
 	if(cur_sector->weak_bits_mask)
 	{
 		free(cur_sector->weak_bits_mask);
-		cur_sector->weak_bits_mask = 0;
+		cur_sector->weak_bits_mask = NULL;
 	}
 
 	if(buffer)
