@@ -228,6 +228,7 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	a2r_capture capture;
 	int str_offset;
 	envvar_entry * backup_env;
+	envvar_entry * tmp_env;
 	int last_location;
 
 	a2r_chunk_header a2r_chunkh;
@@ -289,7 +290,15 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				return HXCFE_BADFILE;
 			}
 
-			backup_env = duplicate_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
+			tmp_env = initEnv( (envvar_entry *)imgldr_ctx->hxcfe->envvar, NULL );
+			if(!tmp_env)
+			{
+				hxc_fclose(f);
+				return HXCFE_INTERNALERROR;
+			}
+
+			backup_env = imgldr_ctx->hxcfe->envvar;
+			imgldr_ctx->hxcfe->envvar = tmp_env;
 
 			len=hxc_getpathfolder(imgfile,0,SYS_PATH_TYPE);
 			folder=(char*)malloc(len+1);
@@ -528,8 +537,9 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
-			free_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
+			tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
 			imgldr_ctx->hxcfe->envvar = backup_env;
+			deinitEnv( tmp_env );
 
 			if(folder)
 				free(folder);

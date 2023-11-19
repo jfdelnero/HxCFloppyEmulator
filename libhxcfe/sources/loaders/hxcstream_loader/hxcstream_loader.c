@@ -242,6 +242,7 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 	int filterpasses,filter;
 	int bmp_export;
 	envvar_entry * backup_env;
+	envvar_entry * tmp_env;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HxCStream_libLoad_DiskFile");
 
@@ -255,7 +256,14 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 		if(!hxc_stat(imgfile,&staterep))
 		{
-			backup_env = duplicate_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
+			tmp_env = initEnv( (envvar_entry *)imgldr_ctx->hxcfe->envvar, NULL );
+			if(!tmp_env)
+			{
+				return HXCFE_INTERNALERROR;
+			}
+
+			backup_env = imgldr_ctx->hxcfe->envvar;
+			imgldr_ctx->hxcfe->envvar = tmp_env;
 
 			len=hxc_getpathfolder(imgfile,0,SYS_PATH_TYPE);
 			folder=(char*)malloc(len+1);
@@ -270,6 +278,10 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 				hxc_getfilenamebase(imgfile,(char*)&fname,SYS_PATH_TYPE);
 				if(!strstr(fname,".0.hxcstream") && !strstr(fname,".1.hxcstream") )
 				{
+					tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
+					imgldr_ctx->hxcfe->envvar = backup_env;
+					deinitEnv( tmp_env );
+
 					free(folder);
 					return HXCFE_BADFILE;
 				}
@@ -346,8 +358,9 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 			if(!found)
 			{
-				free_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
+				tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
 				imgldr_ctx->hxcfe->envvar = backup_env;
+				deinitEnv( tmp_env );
 
 				free( folder );
 				free( filepath );
@@ -424,8 +437,9 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 			hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
-			free_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
+			tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
 			imgldr_ctx->hxcfe->envvar = backup_env;
+			deinitEnv( tmp_env );
 
 			return HXCFE_NOERROR;
 		}

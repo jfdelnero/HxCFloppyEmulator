@@ -285,6 +285,7 @@ int DFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	uint32_t tracksoffset[83*2];
 	envvar_entry * backup_env;
+	envvar_entry * tmp_env;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DFI_libLoad_DiskFile");
 
@@ -318,7 +319,15 @@ int DFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			if(!strncmp((char*)&dfih.sign,"DFE2",4))
 				format_rev = 2;
 
-			backup_env = duplicate_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
+			tmp_env = initEnv( (envvar_entry *)imgldr_ctx->hxcfe->envvar, NULL );
+			if(!tmp_env)
+			{
+				hxc_fclose(f);
+				return HXCFE_INTERNALERROR;
+			}
+
+			backup_env = imgldr_ctx->hxcfe->envvar;
+			imgldr_ctx->hxcfe->envvar = tmp_env;
 
 			len=hxc_getpathfolder(imgfile,0,SYS_PATH_TYPE);
 			folder=(char*)malloc(len+1);
@@ -495,8 +504,9 @@ int DFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
-			free_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
+			tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
 			imgldr_ctx->hxcfe->envvar = backup_env;
+			deinitEnv( tmp_env );
 
 			if(folder)
 				free(folder);

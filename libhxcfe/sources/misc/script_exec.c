@@ -255,7 +255,7 @@ static int get_param( script_ctx * ctx, char * line, int param_offset,char * par
 				return 1;
 			}
 
-			if( !getEnvVar( *((envvar_entry **)ctx->env), (char*)&var_str[1], param) )
+			if( !getEnvVarDat( (envvar_entry *)ctx->env, (char*)&var_str[1], param, DEFAULT_BUFLEN) )
 			{
 				copy_param(param, line, offs);
 			}
@@ -331,7 +331,7 @@ static env_var_value get_script_variable( script_ctx * ctx, char * varname)
 	}
 
 	if(varname[0] == '$')
-		value = getEnvVarValue( *((envvar_entry **)ctx->env), (char*)&varname[1]);
+		value = getEnvVarValue( (envvar_entry *)ctx->env, (char*)&varname[1]);
 	else
 		value = str_to_int((char*)varname);
 
@@ -366,7 +366,7 @@ static void set_script_variable( script_ctx * ctx, char * varname, env_var_value
 	if(varname[0] == '$' && varname[1])
 	{
 		sprintf(tmp_str,"0x"LONGHEXSTR,value);
-		*((envvar_entry **)ctx->env) = (void *)setEnvVar( *((envvar_entry **)ctx->env), (char*)&varname[1], tmp_str );
+		setEnvVarDat( (envvar_entry *)ctx->env, (char*)&varname[1], tmp_str );
 
 		return;
 	}
@@ -382,7 +382,7 @@ script_ctx * init_script(void * app_ctx, unsigned int flags, void * env)
 	{
 		memset(ctx,0,sizeof(script_ctx));
 
-		ctx->env = ((envvar_entry**)env);
+		ctx->env = (envvar_entry*)env;
 
 		setOutputFunc_script( ctx, dummy_script_printf );
 
@@ -975,7 +975,7 @@ static int cmd_print_env_var( script_ctx * ctx, char * line )
 
 	if(i>=0)
 	{
-		ptr = getEnvVar( *((envvar_entry **)ctx->env), (char*)&varname, (char*)&varvalue );
+		ptr = getEnvVarDat( (envvar_entry *)ctx->env, (char*)&varname, (char*)&varvalue, DEFAULT_BUFLEN );
 		if(ptr)
 		{
 			ctx->script_printf( ctx, MSG_INFO_1, "%s = %s", varname, varvalue );
@@ -1028,7 +1028,7 @@ static int cmd_print( script_ctx * ctx, char * line)
 				}
 				else
 				{
-					ptr = getEnvVar( *((envvar_entry **)ctx->env), &tmp_str[1], NULL);
+					ptr = getEnvVarDat( (envvar_entry *)ctx->env, &tmp_str[1], NULL, 0);
 					if( ptr )
 					{
 						strncat((char*)str,ptr,sizeof(str) - 1);
@@ -1108,10 +1108,9 @@ static int cmd_call( script_ctx * ctx, char * line )
 
 	if(offs>=0)
 	{
-
 		ret = SCRIPT_INTERNAL_ERROR;
 
-		new_ctx = init_script((void*)hxcfectx,0x00000000,(void*)&hxcfectx->envvar);
+		new_ctx = init_script((void*)hxcfectx,0x00000000,(void*)hxcfectx->envvar);
 		if(new_ctx)
 		{
 			new_ctx->script_printf = ctx->script_printf;
@@ -1177,7 +1176,6 @@ static int cmd_set_env_var( script_ctx * ctx, char * line )
 	int i,j,ret;
 	char varname[DEFAULT_BUFLEN];
 	char varvalue[DEFAULT_BUFLEN];
-	envvar_entry * tmp_env;
 
 	ret = SCRIPT_CMD_BAD_PARAMETER;
 
@@ -1186,10 +1184,8 @@ static int cmd_set_env_var( script_ctx * ctx, char * line )
 
 	if(i>=0 && j>=0)
 	{
-		tmp_env = setEnvVar( *((envvar_entry **)ctx->env), (char*)&varname, (char*)&varvalue );
-		if(tmp_env)
+		if( setEnvVarDat( (envvar_entry *)ctx->env, (char*)&varname, (char*)&varvalue ) >= 0)
 		{
-			*((envvar_entry **)ctx->env) = tmp_env;
 			ret = SCRIPT_NO_ERROR;
 		}
 		else
@@ -1322,7 +1318,7 @@ static int cmd_initarray( script_ctx * ctx, char * line)
 
 		if(size)
 		{
-			ptr = getEnvVar( *((envvar_entry **)ctx->env),(char*)&varname, NULL);
+			ptr = getEnvVarDat( (envvar_entry *)ctx->env,(char*)&varname, NULL, 0);
 			if(ptr)
 			{
 				arrayresize(ptr, size, (unsigned char)(str_to_int((char*)&varvalue)&0xFF));
@@ -1338,7 +1334,7 @@ static int cmd_initarray( script_ctx * ctx, char * line)
 			}
 
 			if(ptr)
-				*((envvar_entry **)ctx->env) = (void *)setEnvVar( *((envvar_entry **)ctx->env), (char*)&varname[1], ptr );
+				setEnvVarDat( (envvar_entry *)ctx->env, (char*)&varname[1], ptr );
 		}
 		ret = SCRIPT_NO_ERROR;
 	}
@@ -1380,7 +1376,7 @@ cmd_list script_commands_list[] =
 
 int hxcfe_initScript(HXCFE * hxcfectx)
 {
-	hxcfectx->scriptctx = init_script((void*)hxcfectx,0x00000000,(void*)&hxcfectx->envvar);
+	hxcfectx->scriptctx = init_script((void*)hxcfectx,0x00000000,(void*)hxcfectx->envvar);
 
 	if(!hxcfectx->scriptctx)
 		return SCRIPT_INTERNAL_ERROR;
@@ -1443,13 +1439,8 @@ int hxcfe_deinitScript( HXCFE* hxcfe )
 
 int hxcfe_setEnvVar( HXCFE* hxcfe, char * varname, char * varvalue )
 {
-	envvar_entry * tmp_env;
-
-	tmp_env = setEnvVar( hxcfe->envvar, varname, varvalue );
-
-	if( tmp_env )
+	if( setEnvVarDat( hxcfe->envvar, varname, varvalue ) >= 0 )
 	{
-		hxcfe->envvar = tmp_env;
 		return SCRIPT_NO_ERROR;
 	}
 	else
@@ -1460,12 +1451,12 @@ int hxcfe_setEnvVar( HXCFE* hxcfe, char * varname, char * varvalue )
 
 char * hxcfe_getEnvVar( HXCFE* hxcfe, char * varname, char * varvalue)
 {
-	return getEnvVar( hxcfe->envvar, varname, varvalue);
+	return getEnvVarDat( hxcfe->envvar, varname, varvalue, DEFAULT_BUFLEN);
 }
 
 char * hxcfe_getEnvVarIndex( HXCFE* hxcfe, int index, char * varvalue)
 {
-	return getEnvVarIndex( hxcfe->envvar, index, varvalue);
+	return getEnvVarDatIndex( hxcfe->envvar, index, varvalue, DEFAULT_BUFLEN);
 }
 
 int hxcfe_getEnvVarValue( HXCFE* hxcfe, char * varname)
@@ -1475,13 +1466,8 @@ int hxcfe_getEnvVarValue( HXCFE* hxcfe, char * varname)
 
 int hxcfe_setEnvVarValue( HXCFE* hxcfe, char * varname, int value )
 {
-	envvar_entry * tmp_env;
-
-	tmp_env = setEnvVarValue( hxcfe->envvar, varname, value );
-
-	if( tmp_env )
+	if( setEnvVarValue( hxcfe->envvar, varname, value ) >= 0 )
 	{
-		hxcfe->envvar = tmp_env;
 		return SCRIPT_NO_ERROR;
 	}
 	else

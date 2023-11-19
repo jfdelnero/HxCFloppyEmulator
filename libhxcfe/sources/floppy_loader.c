@@ -114,6 +114,7 @@ HXCFE* hxcfe_init(void)
 		hxcfe->hxc_printf = &dummy_output;
 		hxcfe->hxc_settrackpos = &dummy_trackpos;
 
+		hxcfe->envvar = initEnv( NULL, NULL );
 		hxcfe_setEnvVar(hxcfe, "LIBVERSION", "v"STR_FILE_VERSION2);
 
 		if ( hxcfe_initScript(hxcfe) != HXCFE_NOERROR )

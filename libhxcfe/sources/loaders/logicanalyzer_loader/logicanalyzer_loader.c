@@ -341,6 +341,7 @@ int logicanalyzer_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 	int i,j;
 
 	envvar_entry * backup_env;
+	envvar_entry * tmp_env;
 	la_stats la;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"logicanalyzer_libLoad_DiskFile");
@@ -355,9 +356,12 @@ int logicanalyzer_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 	{
 		if(!hxc_stat(imgfile,&staterep))
 		{
-			backup_env = duplicate_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
-			if(!backup_env)
+			tmp_env = initEnv( (envvar_entry *)imgldr_ctx->hxcfe->envvar, NULL );
+			if(!tmp_env)
 				goto error;
+
+			backup_env = imgldr_ctx->hxcfe->envvar;
+			imgldr_ctx->hxcfe->envvar = tmp_env;
 
 			len = hxc_getpathfolder(imgfile,0,SYS_PATH_TYPE);
 
@@ -378,6 +382,10 @@ int logicanalyzer_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 				{
 					if(!strstr(fname,".logicbin8bits"))
 					{
+						tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
+						imgldr_ctx->hxcfe->envvar = backup_env;
+						deinitEnv( tmp_env );
+
 						free(folder);
 						return HXCFE_BADFILE;
 					}
@@ -579,8 +587,9 @@ int logicanalyzer_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 
 				hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
-				free_env_vars((envvar_entry *)imgldr_ctx->hxcfe->envvar);
+				tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
 				imgldr_ctx->hxcfe->envvar = backup_env;
+				deinitEnv( tmp_env );
 
 				free(la.stream);
 				free(la.index_array);
@@ -589,6 +598,10 @@ int logicanalyzer_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 			}
 			else
 			{
+				tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
+				imgldr_ctx->hxcfe->envvar = backup_env;
+				deinitEnv( tmp_env );
+
 				if( la.stream )
 					free(la.stream);
 
@@ -608,6 +621,13 @@ error:
 
 	if(filepath)
 		free(filepath);
+
+	if( backup_env )
+	{
+		tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
+		imgldr_ctx->hxcfe->envvar = backup_env;
+		deinitEnv( tmp_env );
+	}
 
 	return HXCFE_INTERNALERROR;
 

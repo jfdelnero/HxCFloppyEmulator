@@ -53,16 +53,29 @@
 #define STRTOVALUE strtoul
 #endif
 
+//#define STATIC_ENV_BUFFER 1
+#define ENV_PAGE_SIZE (16*1024)
+#define ENV_MAX_TOTAL_BUFFER_SIZE (1024 * 1024) // 1MB
+#define ENV_MAX_STRING_SIZE 512
+
 typedef struct envvar_entry_
 {
-	char * name;
-	char * varvalue;
+#ifdef STATIC_ENV_BUFFER
+	unsigned char buf[ENV_PAGE_SIZE];
+#else
+	unsigned char * buf;
+#endif
+	unsigned int  bufsize;
 }envvar_entry;
 
-envvar_entry * setEnvVar( envvar_entry * env, char * varname, char * varvalue);
-char * getEnvVar( envvar_entry * env, char * varname, char * varvalue);
-env_var_value getEnvVarValue( envvar_entry * env, char * varname);
-envvar_entry * setEnvVarValue( envvar_entry * env, char * varname, env_var_value value);
-char * getEnvVarIndex( envvar_entry * env, int index, char * varvalue);
-envvar_entry * duplicate_env_vars(envvar_entry * src);
-void free_env_vars(envvar_entry * src);
+envvar_entry * initEnv( envvar_entry * env, envvar_entry * dst );
+
+int setEnvVarDat( envvar_entry * env, char * varname, char * vardata );
+int setEnvVarValue( envvar_entry * env, char * varname, env_var_value value );
+
+char * getEnvVarDat( envvar_entry * env, char * varname, char * vardata, int maxsize );
+env_var_value getEnvVarValue( envvar_entry * env, char * varname );
+
+char * getEnvVarDatIndex( envvar_entry * env, int index, char * vardata, int maxsize );
+
+void deinitEnv( envvar_entry * env );
