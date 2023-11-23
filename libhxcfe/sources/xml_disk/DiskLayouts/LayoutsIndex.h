@@ -68,6 +68,7 @@
 #include "data_DiskLayout_FLEX_DSDD_80T_716KB_PADDED_xml.h"
 #include "data_DiskLayout_FLEX_DSDD_40T_356KB_xml.h"
 #include "data_DiskLayout_FLEX_DSDD_40T_356KB_PADDED_xml.h"
+#include "data_DiskLayout_Sharp_X68000_2HD_1232KB_xml.h"
 
 datatype * disklayout_list[]=
 {
@@ -141,5 +142,6 @@ datatype * disklayout_list[]=
 	data_DiskLayout_TRS80_JV1_xml,
 	data_DiskLayout_UKNC_800KB_xml,
 	data_DiskLayout_Unitel_Videotex_xml,
+	data_DiskLayout_Sharp_X68000_2HD_1232KB_xml,
 	0
 };
