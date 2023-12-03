@@ -38,7 +38,7 @@
 // File : oldextadf_loader.c
 // Contains: OLD Extended ADF floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -98,7 +98,7 @@ int OLDEXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 	int gap3len,skew,trackformat,interleave;
 	int sectorsize;
 
-	tracktable = 0;
+	tracktable = NULL;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"OLDEXTADF_libLoad_DiskFile %s",imgfile);
 
@@ -125,7 +125,10 @@ int OLDEXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 	if(!strncmp((char*)header,"UAE--ADF",8))
 	{
 		numberoftrack=160;
-		tracktable=malloc(4*numberoftrack);
+		tracktable = malloc(4*numberoftrack);
+		if( !tracktable )
+			goto alloc_error;
+
 		memset(tracktable,0,4*numberoftrack);
 
 		hxc_fread(tracktable,4*numberoftrack,f);
@@ -138,13 +141,16 @@ int OLDEXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 	interleave=1;
 	gap3len=0;
 	skew=0;
-	trackformat=AMIGAFORMAT_DD;
+	trackformat = AMIGAFORMAT_DD;
 
 	floppydisk->floppySectorPerTrack=-1;
 	floppydisk->floppyNumberOfSide=2;
 	floppydisk->floppyBitRate=DEFAULT_AMIGA_BITRATE;
 	floppydisk->floppyiftype=AMIGA_DD_FLOPPYMODE;
-	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+
+	floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	if(!floppydisk->tracks)
+		goto alloc_error;
 
 	tracklen=(DEFAULT_AMIGA_BITRATE/(DEFAULT_AMIGA_RPM/60))/4;
 
@@ -152,7 +158,6 @@ int OLDEXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
-
 		floppydisk->tracks[j]=allocCylinderEntry(DEFAULT_AMIGA_RPM,floppydisk->floppyNumberOfSide);
 		currentcylinder=floppydisk->tracks[j];
 
@@ -171,8 +176,6 @@ int OLDEXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 					if(tracktable[(4*trackindex)+0] || tracktable[(4*trackindex)+1] )
 					{
-
-
 						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"[%.3d:%.1X] Reading Non-DOS track at 0x%.8x, Size : 0x%.8x",j,i,ftell(f),tracksize);
 
 						currentcylinder->sides[i]=tg_alloctrack(DEFAULT_AMIGA_BITRATE,AMIGA_MFM_ENCODING,DEFAULT_AMIGA_RPM,(tracksize+2)*8,2500,-100,0x00);
@@ -183,16 +186,15 @@ int OLDEXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 						hxc_fread(&currentcylinder->sides[i]->databuffer[2],tracksize,f);
 
 						currentcylinder->sides[i]->number_of_sector=floppydisk->floppySectorPerTrack;
-
-
 					}
 					else
 					{
-
-
 						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"[%.3d:%.1X] Reading DOS track at 0x%.8x, Size : 0x%.8x",j,i,ftell(f),tracksize);
 
-						trackdata=(unsigned char*)malloc(tracksize);
+						trackdata = (unsigned char*)malloc(tracksize);
+
+						if( !trackdata )
+							goto alloc_error;
 
 						hxc_fread(trackdata,tracksize,f);
 
@@ -213,19 +215,27 @@ int OLDEXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 				currentcylinder->sides[i]=tg_alloctrack(DEFAULT_AMIGA_BITRATE,AMIGA_MFM_ENCODING,DEFAULT_AMIGA_RPM,(tracklen)*8,2500,-11360,0x00);
 			}
 
-
 			trackindex++;
-
 		}
 	}
 
-	if(tracktable)	free(tracktable);
+	free(tracktable);
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
+
 	hxc_fclose(f);
 
 	hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 
 	return HXCFE_NOERROR;
+
+alloc_error:
+
+	free(tracktable);
+
+	hxc_fclose(f);
+
+	return HXCFE_INTERNALERROR;
 }
 
 int OLDEXTADF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
