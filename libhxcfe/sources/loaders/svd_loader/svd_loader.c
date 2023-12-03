@@ -38,7 +38,7 @@
 // File : svd_loader.c
 // Contains: SVD floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -106,7 +106,7 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int trackformat;
 	int major,minor;
 	int sectorpertrack,numberoftrack,numberofside,sectsize,wprot;
-	unsigned char	blockbuf[256];
+	unsigned char blockbuf[256];
 	char linebuffer[80];
 	int	blanks,indexptr,sector;
 	HXCFE_SECTCFG * sectorconfig;
@@ -171,15 +171,14 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 	rpm=300;
 
-	trackdata = malloc(sectorpertrack * 256);
-	if(!trackdata)
-	{
-		hxc_fclose(f);
-		return HXCFE_INTERNALERROR;
-	}
-
 	if(filesize!=0)
 	{
+		trackdata = malloc(sectorpertrack * 256);
+		if(!trackdata)
+		{
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
+		}
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
@@ -192,7 +191,6 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
 
 				hxc_fread(blockbuf,256,f);
-
 
 				blanks=0;
 				indexptr = 0;
@@ -326,6 +324,9 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				}
 
 				currentcylinder->sides[i]=tg_generateTrack(trackdata,sectorsize,floppydisk->floppySectorPerTrack,(unsigned char)j,(unsigned char)i,1,interleave,((j<<1)|(i&1))*skew,floppydisk->floppyBitRate,currentcylinder->floppyRPM,trackformat,gap3len,0,2500 | NO_SECTOR_UNDER_INDEX,-2500);
+
+				free(sectorconfig);
+				sectorconfig = NULL;
 			}
 		}
 
@@ -368,4 +369,3 @@ int SVD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 			plug_ext
 			);
 }
-
