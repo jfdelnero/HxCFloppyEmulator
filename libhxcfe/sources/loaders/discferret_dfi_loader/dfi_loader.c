@@ -142,7 +142,7 @@ int dfi_rev2_decode(HXCFE_FXSA * fxs, HXCFE_TRKSTREAM *track_dump,int size, unsi
 	return pulses_cnt;
 }
 
-static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t foffset,short * rpm,float timecoef,int phasecorrection,int revolution, int resolution,int bitrate,int filter,int filterpasses, int bmpexport, int formatrev)
+static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,short * rpm,float timecoef,int phasecorrection,int revolution, int resolution,int bitrate,int filter,int filterpasses, int bmpexport, int formatrev)
 {
 	HXCFE_SIDE* currentside;
 	int pulses_cnt;
@@ -243,8 +243,9 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,uint32_t
 
 				hxcfe_deinitFxStream(fxs);
 
-				free(block_buf);
 			}
+
+			free(block_buf);
 		}
 	}
 
@@ -283,7 +284,6 @@ int DFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	dfi_block_header dfibh;
 
-	uint32_t tracksoffset[83*2];
 	envvar_entry * backup_env;
 	envvar_entry * tmp_env;
 
@@ -330,7 +330,18 @@ int DFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			imgldr_ctx->hxcfe->envvar = tmp_env;
 
 			len=hxc_getpathfolder(imgfile,0,SYS_PATH_TYPE);
-			folder=(char*)malloc(len+1);
+			folder = (char*)malloc(len+1);
+			if( !folder )
+			{
+				hxc_fclose(f);
+
+				tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
+				imgldr_ctx->hxcfe->envvar = backup_env;
+				deinitEnv( tmp_env );
+
+				return HXCFE_INTERNALERROR;
+			}
+
 			hxc_getpathfolder(imgfile,folder,SYS_PATH_TYPE);
 
 			filepath = malloc( strlen(imgfile) + 32 );
@@ -421,6 +432,17 @@ int DFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			floppydisk->floppySectorPerTrack = -1;
 
 			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			if(!floppydisk->tracks)
+			{
+				hxc_fclose(f);
+
+				tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
+				imgldr_ctx->hxcfe->envvar = backup_env;
+				deinitEnv( tmp_env );
+
+				return HXCFE_INTERNALERROR;
+			}
+
 			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 			for(j=0;j<floppydisk->floppyNumberOfTrack*trackstep;j=j+trackstep)
@@ -439,7 +461,7 @@ int DFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 					rpm = 300;
 
-					curside = decodestream(imgldr_ctx->hxcfe,f,(j<<1)|(i&1),tracksoffset[(j<<1)|(i&1)],&rpm,timecoef,phasecorrection,1,1 + 24,bitrate,filter,filterpasses,bmp_export,format_rev);
+					curside = decodestream(imgldr_ctx->hxcfe,f,(j<<1)|(i&1),&rpm,timecoef,phasecorrection,1,1 + 24,bitrate,filter,filterpasses,bmp_export,format_rev);
 
 					if(!floppydisk->tracks[j/trackstep])
 					{
