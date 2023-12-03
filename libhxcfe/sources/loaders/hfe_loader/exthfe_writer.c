@@ -69,7 +69,6 @@ void extaddpad(unsigned char * track,int mfmsize,int tracksize)
 			if(j<tracksize)track[j++]=LUT_ByteBitsInverter[0xAA];
 		}
 		while(j<tracksize);
-
 	}
 }
 
@@ -79,6 +78,8 @@ int EXTHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 	picexttrack * track;
 
 	FILE * hxcpicfile;
+
+	unsigned char temp_buf[512];
 
 	picfileformatextheader * FILEHEADER;
 	unsigned char * mfmtracks0,*mfmtracks1,*mfmtrackfinal,*mfmtemp;
@@ -97,7 +98,7 @@ int EXTHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 
 	if(hxcpicfile)
 	{
-		FILEHEADER=(picfileformatextheader *) malloc(512);
+		FILEHEADER = (picfileformatextheader *) &temp_buf;
 		memset(FILEHEADER,0xFF,512);
 		memcpy(&FILEHEADER->HEADERSIGNATURE,"HXCPICFE",8);
 
@@ -323,7 +324,6 @@ int EXTHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 				free(mfmtracks1);
 				free(mfmtrackfinal);
 
-
 			i++;
 		};
 
@@ -339,22 +339,19 @@ int EXTHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 		{
 			hxc_ram_fclose(hxcpicfile,&rf);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
-			return -1;
+			return HXCFE_ACCESSERROR;
 		}
 
 		hxc_ram_fclose(hxcpicfile,&rf);
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
 
-		free(FILEHEADER);
-
-		return 0;
+		return HXCFE_NOERROR;
 	}
 	else
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
 
-		return -1;
+		return HXCFE_ACCESSERROR;
 	}
-
 }
