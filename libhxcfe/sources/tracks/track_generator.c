@@ -1330,7 +1330,7 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 	track_generator tg;
 	HXCFE_SIDE * currentside;
 
-	if(!sectorconfigtab)
+	if(!sectorconfigtab && number_of_sector)
 		return NULL;
 
 	// compute the sectors interleaving.
