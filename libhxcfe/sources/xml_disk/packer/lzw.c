@@ -84,9 +84,9 @@ typedef struct {
 	char character;
 } DICTIONARY;
 
-DICTIONARY * dict;
+DICTIONARY * dict = NULL;
 
-char * decode_stack;
+char * decode_stack = NULL;
 unsigned int next_code;
 int current_code_bits;
 unsigned int next_bump_code;
@@ -229,6 +229,9 @@ void InitializeDictionary()
 {
 	unsigned int i;
 
+	if(!dict)
+		return;
+
 	for ( i = 0 ; i < TABLE_SIZE ; i++ )
 		dict[i].code_value = UNUSED;
 
@@ -240,14 +243,20 @@ void InitializeDictionary()
 
 void InitializeStorage()
 {
-	dict = (DICTIONARY *)malloc(TABLE_SIZE*sizeof(DICTIONARY));
-	decode_stack = (char *)malloc(TABLE_SIZE*sizeof(char));
+	if(!dict)
+		dict = (DICTIONARY *)malloc(TABLE_SIZE*sizeof(DICTIONARY));
+
+	if(!decode_stack)
+		decode_stack = (char *)malloc(TABLE_SIZE*sizeof(char));
 }
 
 void FreeStorage()
 {
 	free(dict);
+	dict = NULL;
+
 	free(decode_stack);
+	decode_stack = NULL;
 }
 
 ubyte *lzw_compress( ubyte *inputbuf, ubyte *outputbuf, int input_size, int *output_size )
@@ -259,6 +268,8 @@ ubyte *lzw_compress( ubyte *inputbuf, ubyte *outputbuf, int input_size, int *out
 	int i;
 
 	output = OpenOutputBitBuf();
+	if( !output )
+		return NULL;
 
 	if ( outputbuf == NULL )
 	{
@@ -338,9 +349,18 @@ ubyte *lzw_expand( ubyte *inputbuf, ubyte *outputbuf, int length )
 	unsigned int count;
 	int counter;
 
-	input = OpenInputBitBuf( inputbuf );
 	if ( outputbuf == NULL )
 		outputbuf = (ubyte *)malloc(length*sizeof(ubyte));
+
+	if ( outputbuf == NULL )
+		return NULL;
+
+	input = OpenInputBitBuf( inputbuf );
+	if( input == NULL )
+	{
+		free(input);
+		return NULL;
+	}
 
 	InitializeStorage();
 	counter = 0;
@@ -364,6 +384,7 @@ ubyte *lzw_expand( ubyte *inputbuf, ubyte *outputbuf, int length )
 		{
 			//printf( "ERROR:Tried to write %d\n", old_code );
 			//exit(1);
+			CloseInputBitBuf( input );
 			return 0;
 		}
 
