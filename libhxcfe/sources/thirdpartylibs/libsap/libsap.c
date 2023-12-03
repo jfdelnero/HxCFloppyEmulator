@@ -417,7 +417,7 @@ static int get_dskf(int format, const unsigned char trk20_data[])
 static int extract_dir_entry(int format, char buffer[], int buffer_size, int n, const unsigned char trk20_data[])
 {
    const unsigned char *entry_data;
-   char name[TO_NAME_LENGTH+1], ext[TO_EXT_LENGTH+1], date[9], *comment;
+   char name[TO_NAME_LENGTH+1], ext[TO_EXT_LENGTH+1], date[16], *comment;
    unsigned char ftype, dtype;
    int i, len, size;
 
