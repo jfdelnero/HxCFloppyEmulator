@@ -903,10 +903,14 @@ HXCFE_XMLLDR* hxcfe_initXmlFloppy( HXCFE* floppycontext )
 
 		rfw->xml_parser = XML_ParserCreate(NULL);
 		ad = malloc(sizeof(AppData));
-		if(!ad)
+		if(!ad || !rfw->xml_parser)
 		{
+			free(ad);
+			XML_ParserFree(rfw->xml_parser);
+			free(rfw);
 			return 0;
 		}
+
 		memset(ad,0,sizeof(AppData));
 
 		ad->interface_mode = -1;
