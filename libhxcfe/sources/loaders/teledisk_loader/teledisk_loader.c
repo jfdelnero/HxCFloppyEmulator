@@ -108,99 +108,96 @@ int TeleDisk_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINF
 
 int RLEExpander(unsigned char *src,unsigned char *dst,int blocklen)
 {
-  unsigned char *s1,*s2,d1,d2;
-  unsigned char type;
-  unsigned short len,len2,rlen;
+	unsigned char *s1,*s2,d1,d2;
+	unsigned char type;
+	unsigned short len,len2,rlen;
 
-  unsigned int uBlock;
-  unsigned int uCount;
+	unsigned int uBlock;
+	unsigned int uCount;
 
-  s2=dst;
+	if( !dst )
+		return -1;
 
-  len=(src[1]<<8)|src[0];
-  type=src[2];
-  len--;
-  src=src+3;
+	s2 = dst;
 
-  switch ( type )
-  {
-    case 0:
-    {
-	  memcpy(dst,src,len);
-      rlen=len;
-      break;
-    }
+	len=(src[1]<<8)|src[0];
+	type = src[2];
+	len--;
+	src += 3;
 
-	case 1:
-    {
-      len=(src[1]<<8) | src[0];
-      rlen=len<<1;
-      d1=src[2];
-	  d2=src[3];
-      while (len--)
-	  {
-		  *dst++=d1;
-		  *dst++=d2;
-	  }
-	  src=src+4;
-      break;
-    }
-
-	case 2:
+	switch ( type )
 	{
-		rlen=0;
-		len2=len;
-		s1=&src[0];
-		s2=dst;
-		do
-		{
-			if( !s1[0])
+		case 0:
+			memcpy(dst,src,len);
+			rlen=len;
+		break;
+
+		case 1:
+			len = (src[1]<<8) | src[0];
+			rlen = len<<1;
+			d1 = src[2];
+			d2 = src[3];
+			while (len--)
 			{
-				len2--;
-
-				len=s1[1];
-				s1=s1+2;
-				len2--;
-
-				memcpy(s2,s1,len);
-				rlen=rlen+len;
-				s2=s2+len;
-				s1=s1+len;
-
-				len2=len2-len;
+				*dst++ = d1;
+				*dst++ = d2;
 			}
-			else
+			src=src+4;
+		break;
+
+		case 2:
+			rlen=0;
+			len2=len;
+			s1=&src[0];
+			s2=dst;
+			do
 			{
-				uBlock = 1<<*s1;
-				s1++;
-				len2--;
-
-				uCount = *s1;
-				s1++;
-				len2--;
-
-				while(uCount)
+				if( !s1[0])
 				{
+					len2--;
+
+					len=s1[1];
+					s1 += 2;
+					len2--;
+
+					memcpy(s2,s1,len);
+					rlen=rlen+len;
+					s2 += len;
+					s1 += len;
+
+					len2=len2-len;
+				}
+				else
+				{
+					uBlock = 1<<*s1;
+					s1++;
+					len2--;
+
+					uCount = *s1;
+					s1++;
+					len2--;
+
+					while(uCount)
+					{
 						memcpy(s2, s1, uBlock);
 						rlen=rlen+uBlock;
-						s2=s2+uBlock;
+						s2 += uBlock;
 						uCount--;
+					}
+
+					s1 += uBlock;
+					len2 = len2-uBlock;
 				}
 
-				s1=s1 + uBlock;
-				len2=len2-uBlock;
-			}
+			}while(len2);
+		break;
 
-		}while(len2);
-    }
+		default:
+			rlen=-1;
+		break;
+	}
 
-    default:
-    {
-      rlen=-1;
-    }
-  }
-
-  return rlen;
+	return rlen;
 }
 
 
@@ -259,6 +256,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		hxc_fclose(f);
 		return HXCFE_INTERNALERROR;
 	}
+
 	memset(fileimage,0,filesize+512);
 	hxc_fread(fileimage,filesize,f);
 	hxc_fclose(f);
@@ -377,13 +375,13 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		{
 			numberoftrack=td_track_header->PhysCyl;
 		}
+
 		CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0xA097,0x0000);
 		ptr=(unsigned char*)td_track_header;
 		for(i=0;i<0xA;i++)
 		{
 			CRC16_Update(&CRC16_High,&CRC16_Low, ptr[i],(unsigned char*)crctable );
 		}
-
 
 		for ( i=0;i < td_track_header->SecPerTrk;i++ )
 		{
@@ -412,6 +410,12 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	floppydisk->floppyNumberOfTrack=numberoftrack+1;
 	floppydisk->floppySectorPerTrack=-1;
 	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	if(!floppydisk->tracks)
+	{
+		free(fileimage);
+		return HXCFE_INTERNALERROR;
+	}
+
 	memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 	//Source disk density (0 = 250K bps,  1 = 300K bps,  2 = 500K bps ; +128 = single-density FM)
@@ -469,6 +473,11 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		if(!floppydisk->tracks[td_track_header->PhysCyl])
 		{
 			floppydisk->tracks[td_track_header->PhysCyl]=(HXCFE_CYLINDER*)malloc(sizeof(HXCFE_CYLINDER));
+			if( !floppydisk->tracks[td_track_header->PhysCyl] )
+			{
+				free(fileimage);
+				return HXCFE_INTERNALERROR;
+			}
 			memset(floppydisk->tracks[td_track_header->PhysCyl],0,sizeof(HXCFE_CYLINDER));
 		}
 
@@ -476,7 +485,13 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
 		if(!currentcylinder->sides)
 		{
-			currentcylinder->sides=(HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
+			currentcylinder->sides = (HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
+			if( !currentcylinder->sides )
+			{
+				free(fileimage);
+				return HXCFE_INTERNALERROR;
+			}
+
 			memset(currentcylinder->sides,0,sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
 		}
 
@@ -489,6 +504,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		{
 			CRC16_Update(&CRC16_High,&CRC16_Low, ptr[i],(unsigned char*)crctable );
 		}
+
 		if(CRC16_Low!=td_track_header->CRC)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"!!!! Track header CRC Error !!!!");
@@ -496,6 +512,12 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		////////////////////////////////////////////////////////
 
 		sectorconfig = (HXCFE_SECTCFG  *)malloc(sizeof(HXCFE_SECTCFG)*td_track_header->SecPerTrk);
+		if( !sectorconfig )
+		{
+			free(fileimage);
+			return HXCFE_INTERNALERROR;
+		}
+
 		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*td_track_header->SecPerTrk);
 		for ( i=0;i < td_track_header->SecPerTrk;i++ )
 		{
@@ -511,7 +533,6 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			sectorconfig[i].bitrate=floppydisk->floppyBitRate;
 			sectorconfig[i].gap3=255;
 			sectorconfig[i].trackencoding=trackformat;
-
 
 			if(td_sector_header->Syndrome & 0x04)
 			{
@@ -529,7 +550,7 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 				sectorconfig[i].missingdataaddressmark=1;
 			}
 
-			sectorconfig[i].input_data=malloc(sectorconfig[i].sectorsize);
+			sectorconfig[i].input_data = malloc(sectorconfig[i].sectorsize);
 			if  ( (td_sector_header->Syndrome & 0x30) == 0 && (td_sector_header->SLen & 0xf8) == 0 )
 			{
 				//fileimage_buffer_offset=fileimage_buffer_offset+sizeof(unsigned short);
@@ -544,7 +565,8 @@ int TeleDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			}
 			else
 			{
-				memset(sectorconfig[i].input_data,0,sectorconfig[i].sectorsize);
+				if(sectorconfig[i].input_data)
+					memset(sectorconfig[i].input_data,0,sectorconfig[i].sectorsize);
 			}
 
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"track:%d, side:%d, sector:%d, sectorsize:%d, flag:%.2x",sectorconfig[i].cylinder,sectorconfig[i].head,sectorconfig[i].sector,sectorconfig[i].sectorsize,td_sector_header->Syndrome);
