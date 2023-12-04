@@ -50,6 +50,7 @@ int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned
 	unsigned char * newentry;
 	unsigned char * subnewentry;
 	char tempstr[256];
+	char * ptr;
 	int lefttoread;
 	int fatclusternb;
 	char * fullpath;
@@ -80,15 +81,17 @@ int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned
 						floppycontext->hxc_printf(MSG_INFO_1,"Adding directory %s",FindFileData.filename);
 
 						hxc_strupper(tempstr);
-						if(strchr(tempstr,'.'))
+
+						ptr = strchr(tempstr,'.');
+						if(ptr)
 						{
-							memcpy(&entry->DIR_Name[8],strchr(tempstr,'.')+1,strlen(strchr(tempstr,'.')+1));
-							*strchr(tempstr,'.')=0;
+							memcpy(&entry->DIR_Name[8],ptr+1,strlen(ptr+1));
+							*ptr = '\0';
 						}
+
 						memcpy(entry->DIR_Name,tempstr,strlen(tempstr));
 						entry->DIR_Attr=entry->DIR_Attr|0x10;
 						entry->DIR_FileSize=FindFileData.size;
-
 
 						fatclusternb=findfreecluster(fattable,numberofcluster);
 						if(fatclusternb==-1)
@@ -167,9 +170,9 @@ int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned
 						i++;
 					}
 
-					if(strchr(tempstr,'.'))
+					ptr = strchr(tempstr,'.');
+					if( ptr )
 					{
-
 						i=0;
 						while(tempstr[i]!='.')
 						{
@@ -178,9 +181,8 @@ int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned
 
 						j=0;
 						i++;
-						while(tempstr[i]  && (j<3))
+						while(tempstr[i] && (j<3))
 						{
-
 							if(tempstr[i]==' ')
 							{
 								newentry[8+j]='_';
@@ -193,11 +195,9 @@ int ScanFileAndAddToFAT(HXCFE* floppycontext,char * folder,char * file, unsigned
 							j++;
 						}
 
-
-						memcpy(newentry+8,strchr(tempstr,'.')+1,strlen(strchr(tempstr,'.')+1));
-						*strchr(tempstr,'.')=0;
+						memcpy(newentry+8,ptr+1,strlen(ptr+1));
+						*ptr = '\0';
 					}
-
 
 					entry->DIR_FileSize=FindFileData.size;
 					if(FindFileData.size)
