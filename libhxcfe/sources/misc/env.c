@@ -485,62 +485,82 @@ char * getEnvVarDatIndex( envvar_entry * env, int index, char * vardata, int max
 	return NULL; // Not found.
 }
 
-envvar_entry * initEnv(envvar_entry * env, envvar_entry * dst)
+envvar_entry * initEnv(envvar_entry * src, envvar_entry * dst)
 {
-	if(!env)
+	if( !dst )
 	{
 #ifdef STATIC_ENV_BUFFER
 		return NULL;
 #else
-		env = malloc( sizeof(envvar_entry) );
-		if(!env)
+		dst = malloc( sizeof(envvar_entry) );
+		if(!dst)
 			return NULL;
 
-		memset( env,0,sizeof(envvar_entry));
+		memset( dst, 0, sizeof(envvar_entry) );
 
-		env->bufsize = ENV_PAGE_SIZE;
-		env->buf = malloc(env->bufsize);
-		if(!env->buf)
+		if( src )
+			dst->bufsize = src->bufsize;
+		else
+			dst->bufsize = ENV_PAGE_SIZE;
+
+		dst->buf = malloc(dst->bufsize);
+		if(!dst->buf)
 		{
-			free(env);
+			free(dst);
 			return NULL;
 		}
-		memset(env->buf,0,env->bufsize);
 
-		return env;
+		if( src )
+			memcpy( dst->buf, src->buf, src->bufsize );
+		else
+			memset( dst->buf, 0, dst->bufsize );
+
+		return dst;
 #endif
 	}
 	else
 	{
 #ifdef STATIC_ENV_BUFFER
-		if(!dst)
-			return NULL;
 
-		memset(&dst,0,sizeof(envvar_entry));
+		memset( dst, 0, sizeof(envvar_entry) );
 		dst->bufsize = ENV_PAGE_SIZE;
-#else
-		envvar_entry * tmp_envvars;
-
-		if(!env->buf)
-			return NULL;
-
-		tmp_envvars = malloc(sizeof(envvar_entry));
-		if(tmp_envvars)
+		if(src)
 		{
-			memset(tmp_envvars,0,sizeof(envvar_entry));
-			tmp_envvars->buf = malloc(env->bufsize);
-			if(!tmp_envvars->buf)
-			{
-				free(tmp_envvars);
-				return NULL;
-			}
-
-			tmp_envvars->bufsize = env->bufsize;
-
-			memcpy(tmp_envvars->buf,env->buf,env->bufsize);
-
-			return tmp_envvars;
+			memcpy( dst->buf, src->buf, dst->bufsize );
 		}
+		else
+		{
+			memset( dst->buf, 0, dst->bufsize );
+		}
+
+		return dst;
+#else
+		free(dst->buf);
+
+		dst->buf = NULL;
+
+		if( src )
+			dst->bufsize = src->bufsize;
+		else
+			dst->bufsize = ENV_PAGE_SIZE;
+
+		dst->buf = malloc(dst->bufsize);
+		if(!dst->buf)
+		{
+			dst->bufsize = 0;
+			return NULL;
+		}
+
+		if(src)
+		{
+			memcpy( dst->buf, src->buf, dst->bufsize );
+		}
+		else
+		{
+			memset( dst->buf, 0, dst->bufsize );
+		}
+
+		return dst;
 #endif
 	}
 

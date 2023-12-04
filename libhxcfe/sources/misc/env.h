@@ -68,7 +68,7 @@ typedef struct envvar_entry_
 	unsigned int  bufsize;
 }envvar_entry;
 
-envvar_entry * initEnv( envvar_entry * env, envvar_entry * dst );
+envvar_entry * initEnv( envvar_entry * src, envvar_entry * dst );
 
 int setEnvVarDat( envvar_entry * env, char * varname, char * vardata );
 int setEnvVarValue( envvar_entry * env, char * varname, env_var_value value );
