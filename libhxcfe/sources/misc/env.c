@@ -573,8 +573,7 @@ void deinitEnv(envvar_entry * env)
 	if(!env)
 		return;
 
-	if(env->buf)
-		free(env->buf);
+	free(env->buf);
 
 	free(env);
 #else

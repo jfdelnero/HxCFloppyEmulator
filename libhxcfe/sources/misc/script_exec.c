@@ -798,10 +798,7 @@ int execute_ram_script( script_ctx * ctx, unsigned char * script_buffer, int buf
 
 script_ctx * deinit_script(script_ctx * ctx)
 {
-	if(ctx)
-	{
-		free(ctx);
-	}
+	free(ctx);
 
 	ctx = NULL;
 

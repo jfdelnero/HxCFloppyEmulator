@@ -540,17 +540,10 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 
 		if( !outtrack || !flakeytrack || !indextrack || !trackbitrate )
 		{
-			if(outtrack)
-				free(outtrack);
-
-			if(flakeytrack)
-				free(flakeytrack);
-
-			if(indextrack)
-				free(indextrack);
-
-			if(trackbitrate)
-				free(trackbitrate);
+			free(outtrack);
+			free(flakeytrack);
+			free(indextrack);
+			free(trackbitrate);
 
 			return 0;
 		}
@@ -958,9 +951,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 			hxcfe_track->bitrate = VARIABLEBITRATE;
 		}
 
-		if(tickposition)
-			free(tickposition);
-
+		free(tickposition);
 		free(trackbitrate);
 		free(indextrack);
 		free(flakeytrack);
@@ -2090,12 +2081,8 @@ pulses_link * alloc_pulses_link_array(int numberofpulses)
 
 		if(!pl->backward_link || !pl->forward_link)
 		{
-			if(pl->backward_link)
-				free(pl->backward_link);
-
-			if(pl->forward_link)
-				free(pl->forward_link);
-
+			free(pl->backward_link);
+			free(pl->forward_link);
 			free(pl);
 
 			return 0;
@@ -2119,12 +2106,8 @@ void free_pulses_link_array(pulses_link * pl)
 {
 	if(pl)
 	{
-		if(pl->backward_link)
-			free(pl->backward_link);
-
-		if(pl->forward_link)
-			free(pl->forward_link);
-
+		free(pl->backward_link);
+		free(pl->forward_link);
 		free(pl);
 	}
 }
@@ -3126,8 +3109,7 @@ int set_pll_cfg(HXCFE * hxcfe, pll_stat *pll, int * cfg_table, int current_track
 
 	return 1;
 error:
-	if(histo)
-		free(histo);
+	free(histo);
 
 	return 0;
 }
@@ -3616,11 +3598,10 @@ void freefloppy(HXCFE_FLOPPY * fp)
 {
 	if(fp)
 	{
-		if(fp->tracks[0]->sides)
-		 free(fp->tracks[0]->sides);
-
 		if(fp->tracks)
-		 free(fp->tracks);
+			free(fp->tracks[0]->sides);
+
+		free(fp->tracks);
 
 		free(fp);
 	}
@@ -4309,10 +4290,7 @@ void hxcfe_FxStream_FreeStream(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream)
 	{
 		if(stream)
 		{
-			if(stream->channels[0].stream)
-			{
-				free(stream->channels[0].stream);
-			}
+			free(stream->channels[0].stream);
 
 			free(stream);
 		}
@@ -4321,10 +4299,7 @@ void hxcfe_FxStream_FreeStream(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * stream)
 
 void hxcfe_deinitFxStream(HXCFE_FXSA * fxs)
 {
-	if(fxs)
-	{
-		free(fxs);
-	}
+	free(fxs);
 }
 
 #if 0
