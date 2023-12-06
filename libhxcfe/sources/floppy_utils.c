@@ -38,7 +38,7 @@
 // File : floppy_utils.c
 // Contains: utils functions
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -214,8 +214,7 @@ HXCFE_CYLINDER* allocCylinderEntry(int32_t rpm,int32_t number_of_side)
 error:
 	if( cyl )
 	{
-		if(cyl->sides)
-			free(cyl->sides);
+		free(cyl->sides);
 
 		free(cyl);
 	}
