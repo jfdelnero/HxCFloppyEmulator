@@ -128,7 +128,7 @@ HXCFE* hxcfe_init(void)
 			if( hxcfe_execScriptRam(hxcfe, init_script_buf, data_init_script->size)  != HXCFE_NOERROR )
 				goto init_error;
 
-			free(init_script_buf);
+			free( init_script_buf );
 		}
 
 #if defined(WIN32)
@@ -203,7 +203,7 @@ HXCFE* hxcfe_init(void)
 				if( imgldr_ctx )
 					hxcfe_imgDeInitLoader(imgldr_ctx);
 
-				free(hxcfe);
+				free( hxcfe );
 
 				return NULL;
 			}
@@ -217,11 +217,9 @@ HXCFE* hxcfe_init(void)
 
 init_error:
 
-	if(hxcfe)
-		free(hxcfe);
+	free( hxcfe );
 
-	if(init_script_buf)
-		free(init_script_buf);
+	free( init_script_buf );
 
 	return NULL;
 }
@@ -261,15 +259,9 @@ void hxcfe_deinit(HXCFE* hxcfe)
 
 		hxcfe_deinitScript(hxcfe);
 
-		if( hxcfe->image_handlers )
-		{
-			free( hxcfe->image_handlers );
-		}
+		free( hxcfe->image_handlers );
 
-		if( hxcfe->license )
-		{
-			free( hxcfe->license );
-		}
+		free( hxcfe->license );
 
 		free( hxcfe );
 	}
@@ -714,10 +706,7 @@ HXCFE_IMGLDR *   hxcfe_imgInitLoader(HXCFE * hxcfe)
 
 void hxcfe_imgDeInitLoader(HXCFE_IMGLDR * imgldr_ctx)
 {
-	if(imgldr_ctx)
-	{
-		free(imgldr_ctx);
-	}
+	free( imgldr_ctx );
 
 	return;
 }
@@ -765,8 +754,8 @@ HXCFE_FLOPPY * hxcfe_imgLoadEx( HXCFE_IMGLDR * imgldr_ctx, char* imgname, int32_
 						ret = func_ptr.libLoad_DiskFile(imgldr_ctx,newfloppy,imgname,parameters);
 						if(ret != HXCFE_NOERROR)
 						{
-							free(newfloppy);
-							newfloppy = 0;
+							free( newfloppy );
+							newfloppy = NULL;
 						}
 
 						if(err_ret)
@@ -815,14 +804,15 @@ int32_t hxcfe_imgUnload( HXCFE_IMGLDR * imgldr_ctx, HXCFE_FLOPPY * floppydisk )
 				hxcfe_freeSide(imgldr_ctx->hxcfe,floppydisk->tracks[j]->sides[i]);
 			}
 
-			free(floppydisk->tracks[j]->sides);
-			free(floppydisk->tracks[j]);
-
+			free( floppydisk->tracks[j]->sides );
+			free( floppydisk->tracks[j] );
 		}
-		free(floppydisk->tracks);
 
-		free(floppydisk);
+		free( floppydisk->tracks );
+
+		free( floppydisk );
 	}
+
 	return 0;
 }
 
@@ -1269,16 +1259,14 @@ alloc_error:
 	{
 		if(fb_ctx->floppydisk)
 		{
-			if(fb_ctx->floppydisk->tracks)
-				free(fb_ctx->floppydisk->tracks);
+			free( fb_ctx->floppydisk->tracks );
 
-			free(fb_ctx->floppydisk);
+			free( fb_ctx->floppydisk );
 		}
 
-		if( fb_ctx->fb_stack )
-			free( fb_ctx->fb_stack );
+		free( fb_ctx->fb_stack );
 
-		free(fb_ctx);
+		free( fb_ctx );
 	}
 
 	return 0;
@@ -1337,7 +1325,7 @@ int32_t hxcfe_setNumberOfTrack ( HXCFE_FLPGEN* fb_ctx, int32_t numberoftrack )
 			memcpy(fb_ctx->floppydisk->tracks,tmptracks,sizeof(HXCFE_CYLINDER*)*numberoftrack);
 		}
 
-		free(tmptracks);
+		free( tmptracks );
 	}
 
 	return HXCFE_NOERROR;
@@ -1381,10 +1369,12 @@ int32_t hxcfe_pushTrack ( HXCFE_FLPGEN* fb_ctx, uint32_t rpm, int32_t number, in
 			if ( cur_track->sectortab[i].input_data )
 			{
 				data_to_realloc = cur_track->sectortab[i].input_data;
+
 				cur_track->sectortab[i].input_data = (unsigned char * )malloc(cur_track->sectortab[i].sectorsize);
 				if(cur_track->sectortab[i].input_data)
 					memcpy(cur_track->sectortab[i].input_data,data_to_realloc,cur_track->sectortab[i].sectorsize);
-				free(data_to_realloc);
+
+				free( data_to_realloc );
 			}
 			i++;
 		}
@@ -1537,17 +1527,11 @@ int32_t hxcfe_setSectorData( HXCFE_FLPGEN* fb_ctx, uint8_t * buffer, int32_t siz
 	cur_track = &fb_ctx->fb_stack[fb_ctx->fb_stack_pointer];
 	cur_sector = &cur_track->sc_stack[cur_track->sc_stack_pointer];
 
-	if(cur_sector->input_data)
-	{
-		free(cur_sector->input_data);
-		cur_sector->input_data = NULL;
-	}
+	free( cur_sector->input_data );
+	cur_sector->input_data = NULL;
 
-	if(cur_sector->weak_bits_mask)
-	{
-		free(cur_sector->weak_bits_mask);
-		cur_sector->weak_bits_mask = NULL;
-	}
+	free( cur_sector->weak_bits_mask );
+	cur_sector->weak_bits_mask = NULL;
 
 	if(buffer)
 	{
@@ -2068,16 +2052,16 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 
 	free( track_buffer );
 
-	free(fb_ctx->fb_stack);
-	free(fb_ctx);
+	free( fb_ctx->fb_stack );
+	free( fb_ctx );
 
 	return HXCFE_NOERROR;
 
 error:
 	free( track_buffer );
 
-	free(fb_ctx->fb_stack);
-	free(fb_ctx);
+	free( fb_ctx->fb_stack );
+	free( fb_ctx );
 
 	return HXCFE_INTERNALERROR;
 }
@@ -2164,8 +2148,8 @@ HXCFE_FLOPPY* hxcfe_getFloppy ( HXCFE_FLPGEN* fb_ctx )
 		fb_ctx->floppydisk->floppyBitRate=bitrate;
 
 		f = fb_ctx->floppydisk;
-		free(fb_ctx->fb_stack);
-		free(fb_ctx);
+		free( fb_ctx->fb_stack );
+		free( fb_ctx );
 	}
 
 	return f;
@@ -2475,8 +2459,8 @@ HXCFE_FLOPPY * hxcfe_generateFloppy( HXCFE* floppycontext, char* path, int32_t f
 					ret=func_ptr.libLoad_DiskFile(imgldr_ctx,newfloppy,path,fs_config_table[i].name);
 					if(ret!=HXCFE_NOERROR)
 					{
-						free(newfloppy);
-						newfloppy=0;
+						free( newfloppy );
+						newfloppy = NULL;
 					}
 
 					if(err_ret)
