@@ -38,7 +38,7 @@
 // File : d64_loader.c
 // Contains: Commodore 64 floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -96,11 +96,13 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int sectorsize;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
-	unsigned char * errormap;
+	unsigned char errormap[1024];
 	d64trackpos * tracklistpos;
 	int number_of_track;
 	int errormap_size;
 
+	tracklistpos = NULL;
+	trackdata = NULL;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D64_libLoad_DiskFile %s",imgfile);
 
@@ -114,7 +116,6 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	filesize = hxc_fgetsize(f);
 
 	errormap_size=0;
-	errormap=0;
 	switch(filesize)
 	{
 		case 174848:
@@ -127,13 +128,10 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			number_of_track=35;
 
 			errormap_size=683;
-			errormap=(unsigned char*)malloc(errormap_size);
-			if(errormap)
-			{
-				memset(errormap,0,errormap_size);
-				fseek(f,errormap_size,SEEK_END);
-				hxc_fread(errormap,errormap_size,f);
-			}
+			memset(errormap,0,errormap_size);
+			fseek(f,errormap_size,SEEK_END);
+			hxc_fread(errormap,errormap_size,f);
+
 			break;
 
 		case 196608:
@@ -146,13 +144,10 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			number_of_track=40;
 
 			errormap_size=768;
-			errormap=(unsigned char*)malloc(errormap_size);
-			if(errormap)
-			{
-				memset(errormap,0,errormap_size);
-				fseek(f,errormap_size,SEEK_END);
-				hxc_fread(errormap,errormap_size,f);
-			}
+			memset(errormap,0,errormap_size);
+			fseek(f,errormap_size,SEEK_END);
+			hxc_fread(errormap,errormap_size,f);
+
 			break;
 
 		default:
@@ -164,8 +159,10 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			break;
 	}
 
-
 	tracklistpos=(d64trackpos*)malloc(number_of_track*sizeof(d64trackpos));
+	if( !tracklistpos )
+		goto alloc_error;
+
 	memset(tracklistpos,0,number_of_track*sizeof(d64trackpos));
 
 	i=0;
@@ -230,8 +227,9 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
-
-		trackdata=(unsigned char*)malloc(sectorsize*tracklistpos[j].number_of_sector);
+		trackdata = (unsigned char*)malloc(sectorsize*tracklistpos[j].number_of_sector);
+		if( !trackdata )
+			goto alloc_error;
 
 		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 		currentcylinder=floppydisk->tracks[j];
@@ -242,19 +240,28 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			tracklen=(tracklistpos[j].bitrate/(rpm/60))/4;
 
-			currentcylinder->sides[i]=malloc(sizeof(HXCFE_SIDE));
+			currentcylinder->sides[i] = malloc(sizeof(HXCFE_SIDE));
+			if( !currentcylinder->sides[i] )
+				goto alloc_error;
+
 			memset(currentcylinder->sides[i],0,sizeof(HXCFE_SIDE));
 			currentside=currentcylinder->sides[i];
 
 			currentside->number_of_sector=tracklistpos[j].number_of_sector;
 			currentside->tracklen=tracklen;
 
-			currentside->databuffer=malloc(currentside->tracklen);
+			currentside->databuffer = malloc(currentside->tracklen);
+			if( !currentside->databuffer )
+				goto alloc_error;
+
 			memset(currentside->databuffer,0,currentside->tracklen);
 
 			currentside->flakybitsbuffer=0;
 
-			currentside->indexbuffer=malloc(currentside->tracklen);
+			currentside->indexbuffer = malloc(currentside->tracklen);
+			if( !currentside->indexbuffer )
+				goto alloc_error;
+
 			memset(currentside->indexbuffer,0,currentside->tracklen);
 
 			currentside->timingbuffer=0;
@@ -274,15 +281,23 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		}
 
 		free(trackdata);
+		trackdata = NULL;
 	}
-
-	if(errormap)
-		free(errormap);
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 	hxc_fclose(f);
 	return HXCFE_NOERROR;
+
+alloc_error:
+
+	free(trackdata);
+	free(tracklistpos);
+
+	if(f)
+		hxc_fclose(f);
+
+	return HXCFE_INTERNALERROR;
 }
 
 int D64_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)

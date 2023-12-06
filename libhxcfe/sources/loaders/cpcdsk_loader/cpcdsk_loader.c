@@ -38,7 +38,7 @@
 // File : cpcdsk_loader.c
 // Contains: CPCDSK floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -93,8 +93,6 @@ int CPCDSK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS
 		return HXCFE_BADFILE;
 	}
 }
-
-
 
 int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
@@ -179,7 +177,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 			// read the tracks size array.
 			tracksizetab = (unsigned char *)malloc(fileheader.number_of_sides*fileheader.number_of_tracks);
 			if( !tracksizetab )
-				goto error;
+				goto alloc_error;
 
 			hxc_fread(tracksizetab,fileheader.number_of_sides*fileheader.number_of_tracks,f);
 
@@ -203,13 +201,15 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 		if(!floppydisk->tracks)
-			goto error;
+			goto alloc_error;
 
 		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d Side(s)\n",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide);
 
 		trackposition=0x100;
+
+		currentcylinder = NULL;
 
 		for(i=0;i<(fileheader.number_of_sides*fileheader.number_of_tracks);i++)
 		{
@@ -245,7 +245,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 							floppydisk->floppyNumberOfTrack=trackheader.track_number+1;
 							realloctracktable=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*trackheader.track_number);
 							if(!realloctracktable)
-								goto error;
+								goto alloc_error;
 
 							memset(realloctracktable,0,sizeof(HXCFE_CYLINDER*)*trackheader.track_number);
 							memcpy(realloctracktable,floppydisk->tracks,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
@@ -266,7 +266,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 						{
 							sectorconfig = (HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*trackheader.number_of_sector);
 							if( !sectorconfig )
-								goto error;
+								goto alloc_error;
 
 							memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*trackheader.number_of_sector);
 
@@ -285,7 +285,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 								sectorconfig[j].sectorsize = 128<<(sector.sector_size_code&7);
 								sectorconfig[j].input_data = malloc(sectorconfig[j].sectorsize);
 								if( !sectorconfig[j].input_data )
-									goto error;
+									goto alloc_error;
 
 								fseek (f, trackposition+0x100+sectorposition/*sizeof(trackheader)+(sizeof(sector)*j)*/, SEEK_SET);
 								hxc_fread(sectorconfig[j].input_data,sectorconfig[j].sectorsize,f);
@@ -346,7 +346,9 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 							}
 						}
 
-						//
+						if(!currentcylinder)
+							goto alloc_error;
+
 						currentcylinder->floppyRPM = rpm;
 						currentcylinder->sides[s] = tg_generateTrackEx(trackheader.number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,300,IBMFORMAT_DD,0,2500|NO_SECTOR_UNDER_INDEX,-2500);
 
@@ -449,30 +451,25 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
 
-error:
+alloc_error:
 
 	hxcfe_floppyUnload(imgldr_ctx->hxcfe, floppydisk );
 
 	if(f)
 		hxc_fclose(f);
 
-	if(tracksizetab)
-		free(tracksizetab);
+	free(tracksizetab);
 
 	if( sectorconfig )
 	{
 		for(j=0;j<trackheader.number_of_sector;j++)
 		{
-			if(sectorconfig[j].input_data)
-			{
-				free(sectorconfig[j].input_data);
-			}
+			free(sectorconfig[j].input_data);
 		}
 		free(sectorconfig);
 	}
 
-	if( realloctracktable )
-		free(realloctracktable);
+	free(realloctracktable);
 
 	return HXCFE_INTERNALERROR;
 }
