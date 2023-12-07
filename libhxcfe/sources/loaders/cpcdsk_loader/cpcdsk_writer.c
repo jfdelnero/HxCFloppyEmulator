@@ -291,8 +291,7 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 					k++;
 				};
 
-				if(sca)
-					free(sca);
+				free(sca);
 
 				if(sectorsize!=-1)
 				{

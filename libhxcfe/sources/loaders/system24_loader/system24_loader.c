@@ -38,7 +38,7 @@
 // File : system24_loader.c
 // Contains: System24 floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -60,7 +60,6 @@
 
 
 #include "libhxcadaptor.h"
-
 
 int System24_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
@@ -281,6 +280,7 @@ int System24_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	floppydisk->floppyNumberOfTrack += 4;
 
 	free(trackdata);
+	free(sectorconfig);
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 	hxc_fclose(f);
@@ -291,22 +291,15 @@ alloc_error:
 	if ( f )
 		hxc_fclose( f );
 
-	if( floppydisk->tracks )
-		free( floppydisk->tracks );
-	
-	if( trackdata )
-		free( trackdata );
+	free( floppydisk->tracks );
+	free( trackdata );
+	free( sectorconfig );
 
-	if( sectorconfig )
-		free( sectorconfig );
-
-	return HXCFE_INTERNALERROR;	
-
+	return HXCFE_INTERNALERROR;
 }
 
 int System24_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="SYSTEM_24";
 	static const char plug_desc[]="System 24 loader";
 	static const char plug_ext[]="s24";

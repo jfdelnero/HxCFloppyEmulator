@@ -236,14 +236,9 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEv3 Track %d Size: %d bytes",i,final_buffer_len);
 
-		if(final_randombuffer)
-			free(final_randombuffer);
-
-		if(final_buffer_H0)
-			free(final_buffer_H0);
-
-		if(final_buffer_H1)
-			free(final_buffer_H1);
+		free(final_randombuffer);
+		free(final_buffer_H0);
+		free(final_buffer_H1);
 
 		/*
 		mfmsize=floppy->tracks[i]->sides[0]->tracklen;
@@ -387,20 +382,11 @@ error:
 	if( outfile )
 		hxc_fclose( outfile );
 
-	if( FILEHEADER )
-		free( FILEHEADER );
-
-	if( offsettrack )
-		free( offsettrack );
-
-	if( mfmtracks0 )
-		free(mfmtracks0);
-
-	if( mfmtracks1 )
-		free(mfmtracks1);
-
-	if( mfmtrackfinal )
-		free(mfmtrackfinal);
+	free( FILEHEADER );
+	free( offsettrack );
+	free(mfmtracks0);
+	free(mfmtracks1);
+	free(mfmtrackfinal);
 
 	return HXCFE_INTERNALERROR;
 }

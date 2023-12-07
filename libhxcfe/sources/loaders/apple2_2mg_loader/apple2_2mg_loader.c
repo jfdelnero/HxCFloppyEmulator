@@ -92,7 +92,6 @@ int Apple2_2mg_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEI
 
 int Apple2_2mg_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
 	FILE * f;
 	unsigned int filesize;
 	int i,j,k;
@@ -109,6 +108,11 @@ int Apple2_2mg_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 
 	HXCFE_SECTCFG* sectorconfig;
 	HXCFE_CYLINDER* currentcylinder;
+
+	f = NULL;
+	trackdata = NULL;
+	sector_order = NULL;
+	sectorconfig = NULL;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_2mg_libLoad_DiskFile %s",imgfile);
 
@@ -216,14 +220,21 @@ int Apple2_2mg_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 
 		floppydisk->floppyBitRate=bitrate;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if( !floppydisk->tracks )
+			goto alloc_error;
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"rpm %d bitrate:%d track:%d side:%d sector:%d",rpm,bitrate,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack);
 
-		sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
+		sectorconfig = (HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
+		if( !sectorconfig )
+			goto alloc_error;
+
 		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 
-		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+		trackdata = (unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+		if( !trackdata )
+			goto alloc_error;
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
@@ -260,15 +271,28 @@ int Apple2_2mg_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 		}
 
 		free(sectorconfig);
+		free(trackdata);
+
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 		hxc_fclose(f);
+
 		return HXCFE_NOERROR;
 	}
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
+
+alloc_error:
+
+	free(sectorconfig);
+	free(trackdata);
+
+	if(f)
+		hxc_fclose(f);
+
+	return HXCFE_INTERNALERROR;
 }
 
 
@@ -297,4 +321,3 @@ int Apple2_2mg_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void
 			plug_ext
 			);
 }
-

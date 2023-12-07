@@ -219,11 +219,9 @@ int QD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * f
 error:
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"QD_libWrite_DiskFile : Memory allocation error !");
 
-	if(track_blocks)
-		free(track_blocks);
+	free(track_blocks);
 
-	if(mfmtrack)
-		free(mfmtrack);
+	free(mfmtrack);
 
 	if(hxcqdfile)
 		hxc_fclose(hxcqdfile);

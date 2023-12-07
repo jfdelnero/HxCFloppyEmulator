@@ -564,11 +564,9 @@ int logicanalyzer_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 									hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_BMPEXPORT" ), \
 									hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOGICANALYZER_SAMPLERATE" ));
 
-						if(la.index_array)
-							free(la.index_array);
+						free(la.index_array);
 
-						if(la.stream)
-							free(la.stream);
+						free(la.stream);
 
 						la.stream = NULL;
 						la.index_array = NULL;

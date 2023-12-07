@@ -155,6 +155,8 @@ HXCFE_SIDE* DMKpatchtrack(HXCFE* floppycontext,unsigned char * trackdata, unsign
 
 	k=0;
 	track_density=malloc(tracklen+4);
+	if(!track_density)
+		return NULL;
 
 	if(idamoffset[k]&0x8000)
 	{
@@ -393,7 +395,6 @@ HXCFE_SIDE* DMKpatchtrack(HXCFE* floppycontext,unsigned char * trackdata, unsign
 
 int DMK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
 	FILE * f;
 	unsigned int filesize;
 	int i,j;
@@ -434,6 +435,11 @@ int DMK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		floppydisk->floppySectorPerTrack=-1;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if( !floppydisk->tracks )
+		{
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
+		}
 
 		rpm=300; // normal rpm
 
@@ -442,45 +448,44 @@ int DMK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		trackdata=(unsigned char*)malloc(dmk_h.track_len+16);
 		trackclk=(unsigned char*)malloc(dmk_h.track_len+16);
 
-		if( trackdata && trackclk )
+		if( !trackdata || !trackclk )
 		{
-
-			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-			{
-
-				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-				currentcylinder=floppydisk->tracks[j];
-
-				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-				{
-					hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
-
-					file_offset=sizeof(dmk_header)+((dmk_h.track_len)*(j*floppydisk->floppyNumberOfSide))+((dmk_h.track_len)*(i&1));
-					fseek (f , file_offset , SEEK_SET);
-					hxc_fread(&idam_offset_table,128,f);
-					hxc_fread(trackdata,dmk_h.track_len-128,f);
-					memset(trackclk,0xFF,dmk_h.track_len-128);
-
-					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %d Side %d Tracklen %d TTableOffset:0x%.8x",j,i,dmk_h.track_len,file_offset);
-
-					currentside=DMKpatchtrack(imgldr_ctx->hxcfe,trackdata, trackclk,idam_offset_table,dmk_h.track_len-128,&tracktotalsize, &dmk_h,j);
-					currentcylinder->sides[i]=currentside;
-					fillindex(-2500,currentside,2500,TRUE,1);
-
-				}
-			}
-
+			free(trackdata);
+			free(trackclk);
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
 		}
 
-		if(trackclk)
-			free(trackclk);
+		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+		{
+			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+			currentcylinder=floppydisk->tracks[j];
 
-		if(trackdata)
-			free(trackdata);
+			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+			{
+				hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
+
+				file_offset=sizeof(dmk_header)+((dmk_h.track_len)*(j*floppydisk->floppyNumberOfSide))+((dmk_h.track_len)*(i&1));
+				fseek (f , file_offset , SEEK_SET);
+				hxc_fread(&idam_offset_table,128,f);
+				hxc_fread(trackdata,dmk_h.track_len-128,f);
+				memset(trackclk,0xFF,dmk_h.track_len-128);
+
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %d Side %d Tracklen %d TTableOffset:0x%.8x",j,i,dmk_h.track_len,file_offset);
+
+				currentside=DMKpatchtrack(imgldr_ctx->hxcfe,trackdata, trackclk,idam_offset_table,dmk_h.track_len-128,&tracktotalsize, &dmk_h,j);
+				currentcylinder->sides[i]=currentside;
+				fillindex(-2500,currentside,2500,TRUE,1);
+			}
+		}
+
+		free(trackclk);
+		free(trackdata);
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 		hxc_fclose(f);
+
 		return HXCFE_NOERROR;
 	}
 
@@ -491,17 +496,16 @@ int DMK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int DMK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="TRS80_DMK";
 	static const char plug_desc[]="TRS80 DMK Loader";
 	static const char plug_ext[]="dmk";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	DMK_libIsValidDiskFile,
-		(LOADDISKFILE)		DMK_libLoad_DiskFile,
-		(WRITEDISKFILE)		DMK_libWrite_DiskFile,
-		(GETPLUGININFOS)	DMK_libGetPluginInfo
+		(ISVALIDDISKFILE)   DMK_libIsValidDiskFile,
+		(LOADDISKFILE)      DMK_libLoad_DiskFile,
+		(WRITEDISKFILE)     DMK_libWrite_DiskFile,
+		(GETPLUGININFOS)    DMK_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

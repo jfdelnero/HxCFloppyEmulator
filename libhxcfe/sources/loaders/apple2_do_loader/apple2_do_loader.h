@@ -25,10 +25,10 @@
 //
 */
 
-extern unsigned char LogicalToPhysicalSectorMap_Dos33[16];
-extern unsigned char PhysicalToLogicalSectorMap_Dos33[16];
-extern unsigned char LogicalToPhysicalSectorMap_ProDos[16];
-extern unsigned char PhysicalToLogicalSectorMap_ProDos[16];
+extern const unsigned char LogicalToPhysicalSectorMap_Dos33[16];
+extern const unsigned char PhysicalToLogicalSectorMap_Dos33[16];
+extern const unsigned char LogicalToPhysicalSectorMap_ProDos[16];
+extern const unsigned char PhysicalToLogicalSectorMap_ProDos[16];
 
 int Apple2_do_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue);
 int Apple2_po_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue);

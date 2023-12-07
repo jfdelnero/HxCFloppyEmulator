@@ -177,15 +177,15 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 	packed_stream_header * stream_header;
 	metadata_header * metadata;
 	unsigned char * hxcstreambuf;
-	uint16_t * iostreambuf;
-	uint32_t * stream;
+	uint16_t * iostreambuf, *tmp_w_ptr;
+	uint32_t * stream, *tmp_dw_ptr;
 	int nb_pulses,total_nb_pulses,old_index,cnt_io,i,j,k,totalcnt;
 	int sampleperiod;
 	int total_nb_words, nb_words;
 	char temp_str[512];
 	char name_str[512];
 	char * str1,* str2;
-	int nbindex;
+	int nbindex,tmp_size;
 	Index index_events[MAX_INDEX];
 	uint32_t Prev_Max_Index_Tick;
 	uint32_t Next_Max_Index_Tick;
@@ -222,7 +222,7 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 
 				fseek(f, ftell(f) - sizeof(chunk_header), SEEK_SET);
 
-				hxcstreambuffer = realloc(hxcstreambuffer,header.size);
+				hxcstreambuffer = malloc( header.size );
 				if( hxcstreambuffer )
 				{
 					hxc_fread(hxcstreambuffer,header.size,f);
@@ -262,12 +262,21 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 								pio_header = (packed_io_header *)&hxcstreambuffer[packet_offset];
 
 								nb_words = pio_header->unpacked_size;
+								tmp_size = total_nb_words + pio_header->unpacked_size;
+								if(tmp_size & (sizeof(uint16_t) - 1) )
+									tmp_size++;
 
-								iostreambuf = realloc(iostreambuf, total_nb_words + pio_header->unpacked_size);
-								if(iostreambuf)
+								tmp_w_ptr = realloc(iostreambuf, tmp_size);
+								if(tmp_w_ptr)
 								{
+									iostreambuf = tmp_w_ptr;
 									LZ4_decompress_safe ((const char*)(pio_header) + sizeof(packed_io_header), (char*)&iostreambuf[total_nb_words/2], pio_header->packed_size, pio_header->unpacked_size);
 									cnt_io = pio_header->unpacked_size / 2;
+								}
+								else
+								{
+									free(iostreambuf);
+									iostreambuf = NULL;
 								}
 
 								total_nb_words += nb_words;
@@ -286,16 +295,24 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 									nb_pulses = stream_header->number_of_pulses;
 									if(nb_pulses > 0 && nb_pulses < (500*1000*1000))
 									{
-										stream = realloc(stream,(total_nb_pulses+nb_pulses+1)*sizeof(uint32_t));
-										if(stream)
+										tmp_dw_ptr = realloc(stream,(total_nb_pulses+nb_pulses+1)*sizeof(uint32_t));
+										if(tmp_dw_ptr)
 										{
+											stream = tmp_dw_ptr;
 											memset(&stream[total_nb_pulses],0x00,(nb_pulses+1)*sizeof(uint32_t));
 											conv_stream(&stream[total_nb_pulses],hxcstreambuf, stream_header->unpacked_size, nb_pulses);
 										}
-										free(hxcstreambuf);
+										else
+										{
+											free(stream);
+											stream = NULL;
+										}
 
 										total_nb_pulses += nb_pulses;
 									}
+
+									free(hxcstreambuf);
+									hxcstreambuf = NULL;
 								}
 
 								packet_offset += (stream_header->packed_size + sizeof(packed_stream_header));
@@ -306,14 +323,9 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 								// Unknown block !
 								hxc_fclose(f);
 
-								if(hxcstreambuffer)
-									free(hxcstreambuffer);
-
-								if(iostreambuf)
-									free(iostreambuf);
-
-								if(stream)
-									free(stream);
+								free(hxcstreambuffer);
+								free(iostreambuf);
+								free(stream);
 
 								return NULL;
 							break;
@@ -322,6 +334,9 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 						if(packet_offset&3)
 							packet_offset = (packet_offset&~3) + 4;
 					}
+
+					free(hxcstreambuffer);
+					hxcstreambuffer = NULL;
 				}
 			}
 
@@ -485,6 +500,7 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 				}
 
 				free(stream);
+				stream = NULL;
 
 				for(j=0;j<16;j++)
 				{
@@ -577,16 +593,14 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 								track_dump = hxcfe_FxStream_ImportStream(fxs,stream,32,k, HXCFE_STREAMCHANNEL_TYPE_RLETOGGLESTATE_0, name_str, track_dump);
 
 							free(stream);
+							stream = NULL;
 						}
 					}
 				}
 			}
 
-			if(hxcstreambuffer)
-				free(hxcstreambuffer);
-
-			if(iostreambuf)
-				free(iostreambuf);
+			free(hxcstreambuffer);
+			free(iostreambuf);
 
 			hxc_fclose(f);
 
@@ -611,12 +625,13 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 	packed_stream_header * stream_header;
 	metadata_header * metadata;
 	unsigned char * hxcstreambuf;
-	uint16_t * iostreambuf;
-	uint32_t * stream;
+	uint16_t * iostreambuf, *tmp_w_ptr;
+	uint32_t * stream, *tmp_dw_ptr;
 	int nb_pulses,total_nb_pulses,old_index,cnt_io,i,j,k,totalcnt;
 	int sampleperiod;
 	int total_nb_words, nb_words;
 	int buffer_offset;
+	int tmp_size;
 	char temp_str[512];
 	char name_str[512];
 	char * str1,* str2;
@@ -686,11 +701,21 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 
 						nb_words = pio_header->unpacked_size;
 
-						iostreambuf = realloc(iostreambuf, total_nb_words + pio_header->unpacked_size);
-						if(iostreambuf)
+						tmp_size = total_nb_words + pio_header->unpacked_size;
+						if(tmp_size & 1)
+							tmp_size++;
+
+						tmp_w_ptr = realloc(iostreambuf, tmp_size);
+						if(tmp_w_ptr)
 						{
+							iostreambuf = tmp_w_ptr;
 							LZ4_decompress_safe ((const char*)(pio_header) + sizeof(packed_io_header), (char*)&iostreambuf[total_nb_words/2], pio_header->packed_size, pio_header->unpacked_size);
 							cnt_io = pio_header->unpacked_size / 2;
+						}
+						else
+						{
+							free(iostreambuf);
+							iostreambuf = NULL;
 						}
 
 						total_nb_words += nb_words;
@@ -706,28 +731,35 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 						if(hxcstreambuf)
 						{
 							LZ4_decompress_safe ((const char*)(stream_header) + sizeof(packed_stream_header), (char*)hxcstreambuf, stream_header->packed_size, stream_header->unpacked_size);
+
 							nb_pulses = stream_header->number_of_pulses;
 
-							stream = realloc(stream,(total_nb_pulses+nb_pulses+1)*sizeof(uint32_t));
-							if(stream)
+							tmp_dw_ptr = realloc(stream,(total_nb_pulses+nb_pulses+1)*sizeof(uint32_t));
+							if(tmp_dw_ptr)
 							{
+								stream = tmp_dw_ptr;
 								memset(&stream[total_nb_pulses],0x00,(nb_pulses+1)*sizeof(uint32_t));
 								conv_stream(&stream[total_nb_pulses],hxcstreambuf, stream_header->unpacked_size, nb_pulses);
 							}
-							free(hxcstreambuf);
+							else
+							{
+								free(stream);
+								stream = NULL;
+							}
 
 							total_nb_pulses += nb_pulses;
+
+							free(hxcstreambuf);
+							hxcstreambuf = NULL;
 						}
 
 						packet_offset += (stream_header->packed_size + sizeof(packed_stream_header));
 					break;
 					default:
 						// Unknown block !
-						if(iostreambuf)
-							free(iostreambuf);
 
-						if(stream)
-							free(stream);
+						free(iostreambuf);
+						free(stream);
 
 						return NULL;
 					break;
@@ -776,6 +808,7 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 			}
 
 			free(stream);
+			stream = NULL;
 
 			for(j=0;j<16;j++)
 			{
@@ -868,13 +901,13 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 							track_dump = hxcfe_FxStream_ImportStream(fxs,stream,32,k, HXCFE_STREAMCHANNEL_TYPE_RLETOGGLESTATE_0, name_str, track_dump);
 
 						free(stream);
+						stream = NULL;
 					}
 				}
 			}
 		}
 
-		if(iostreambuf)
-			free(iostreambuf);
+		free(iostreambuf);
 
 		return track_dump;
 	}

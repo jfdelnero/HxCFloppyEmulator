@@ -38,7 +38,7 @@
 // File : ti99pc99_loader.c
 // Contains: TI99 PC99 floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -79,7 +79,6 @@ int TI99PC99_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINF
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile : TI99 PC99 file !");
 		return HXCFE_VALIDFILE;
-
 	}
 
 	return HXCFE_BADPARAMETER;
@@ -111,9 +110,9 @@ int patchtrackFM(unsigned char * trackdata, unsigned char * trackclk,int trackle
 					CRC16_Update(&CRC16_High,&CRC16_Low, trackdata[l],(unsigned char*)crctable );
 					l++;
 				}
+
 				trackdata[i+5]=CRC16_High;
 				trackdata[i+6]=CRC16_Low;
-
 
 				j=12;
 				do
@@ -138,7 +137,6 @@ int patchtrackFM(unsigned char * trackdata, unsigned char * trackclk,int trackle
 							j=32;
 							nbofsector++;
 						}
-
 					}
 
 					j++;
@@ -165,7 +163,6 @@ int patchtrackMFM(unsigned char * trackdata, unsigned char * trackclk,int trackl
 	i=0;
 	do
 	{
-
 		if(trackdata[i]==0xA1 && trackdata[i+1]==0xA1 && trackdata[i+2]==0xA1 && trackdata[i+3]==0xFE)
 		{
 			l=i;
@@ -188,7 +185,6 @@ int patchtrackMFM(unsigned char * trackdata, unsigned char * trackclk,int trackl
 				}
 				trackdata[i+5]=CRC16_High;
 				trackdata[i+6]=CRC16_Low;
-
 
 				j=0;
 				do
@@ -224,11 +220,7 @@ int patchtrackMFM(unsigned char * trackdata, unsigned char * trackclk,int trackl
 					j++;
 				}while(j<64);
 
-
-
 			}
-
-
 		}
 
 		i++;
@@ -251,6 +243,9 @@ int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
 
+	trackclk = NULL;
+	trackdata = NULL;
+	f = NULL;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99PC99_libLoad_DiskFile %s",imgfile);
 
@@ -265,12 +260,13 @@ int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 	if( filesize )
 	{
-
 		fmmode=0;
 
 		if(filesize%3253 && filesize%6872)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"non TI99 PC99 file !");
+			hxc_fclose(f);
+
 			return HXCFE_BADFILE;
 		}
 
@@ -311,13 +307,20 @@ int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		floppydisk->floppySectorPerTrack=-1;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if(!floppydisk->tracks)
+			goto alloc_error;
 
 		rpm=300; // normal rpm
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
 
-		trackdata=(unsigned char*)malloc(tracklen);
+		trackdata = (unsigned char*)malloc(tracklen);
+		if(!trackdata)
+			goto alloc_error;
+
 		trackclk=(unsigned char*)malloc(tracklen);
+		if(!trackclk)
+			goto alloc_error;
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
@@ -332,12 +335,12 @@ int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 				if(fmmode)
 				{
 					floppydisk->tracks[j]->sides[i]=tg_alloctrack(floppydisk->floppyBitRate,ISOIBM_FM_ENCODING ,currentcylinder->floppyRPM,tracklen*4*8,2500,-2500,0x00);
-
 				}
 				else
 				{
 					floppydisk->tracks[j]->sides[i]=tg_alloctrack(floppydisk->floppyBitRate,ISOIBM_MFM_ENCODING,currentcylinder->floppyRPM,tracklen*2*8,2500,-2500,0x00);
 				}
+
 				currentside=currentcylinder->sides[i];
 
 				currentside->number_of_sector=floppydisk->floppySectorPerTrack;
@@ -347,7 +350,6 @@ int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 				hxc_fread(trackdata,tracklen,f);
 				memset(trackclk,0xFF,tracklen);
-
 
 				if(fmmode)
 				{
@@ -359,22 +361,33 @@ int TI99PC99_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 					patchtrackMFM(trackdata,trackclk,tracklen);
 					BuildMFMCylinder(currentside->databuffer,currentside->tracklen/8,trackclk,trackdata,tracklen);
 				}
-
 			}
-
 		}
 
 		free(trackdata);
+		free(trackclk);
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 		hxc_fclose(f);
+
 		return HXCFE_NOERROR;
 	}
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
+
 	return HXCFE_BADFILE;
+
+alloc_error:
+
+	free( trackclk );
+	free( trackdata );
+
+	if( f )
+		hxc_fclose(f);
+
+	return HXCFE_INTERNALERROR;
 }
 
 int TI99PC99_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
@@ -386,10 +399,10 @@ int TI99PC99_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void *
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	TI99PC99_libIsValidDiskFile,
-		(LOADDISKFILE)		TI99PC99_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	TI99PC99_libGetPluginInfo
+		(ISVALIDDISKFILE)   TI99PC99_libIsValidDiskFile,
+		(LOADDISKFILE)      TI99PC99_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    TI99PC99_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

@@ -38,7 +38,7 @@
 // File : emui_raw_loader.c
 // Contains: EmuII floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -75,7 +75,6 @@ int EMUI_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	unsigned char sector_data[0xE00];
 	int tracknumber,sidenumber;
 
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EMUI_RAW_libLoad_DiskFile %s",imgfile);
 
 	f = hxc_fopen(imgfile,"rb");
@@ -98,13 +97,18 @@ int EMUI_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 		floppydisk->floppySectorPerTrack,
 		floppydisk->floppyiftype);
 
-
 	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	if( !floppydisk->tracks )
+	{
+		hxc_fclose(f);
+
+		return HXCFE_INTERNALERROR;
+	}
+
 	memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 	for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
 	{
-
 		hxcfe_imgCallProgressCallback(imgldr_ctx,i,floppydisk->floppyNumberOfTrack);
 
 		tracknumber=i;
@@ -126,31 +130,30 @@ int EMUI_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			(0xE00*tracknumber*2)+(sidenumber*0xE00),
 			0xE00);
 
+		currentcylinder->sides[sidenumber]=tg_alloctrack(floppydisk->floppyBitRate,EMU_FM_ENCODING,currentcylinder->floppyRPM,((floppydisk->floppyBitRate/5)*2),2000,-2000,0x00);
+		currentside=currentcylinder->sides[sidenumber];
+		currentside->number_of_sector=floppydisk->floppySectorPerTrack;
 
-			currentcylinder->sides[sidenumber]=tg_alloctrack(floppydisk->floppyBitRate,EMU_FM_ENCODING,currentcylinder->floppyRPM,((floppydisk->floppyBitRate/5)*2),2000,-2000,0x00);
-			currentside=currentcylinder->sides[sidenumber];
-			currentside->number_of_sector=floppydisk->floppySectorPerTrack;
-
-			BuildEmuIITrack(imgldr_ctx->hxcfe,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,1);
+		BuildEmuIITrack(imgldr_ctx->hxcfe,tracknumber,sidenumber,sector_data,currentside->databuffer,&currentside->tracklen,1);
 	}
 
 	hxc_fclose(f);
+
 	return HXCFE_NOERROR;
 }
 
 int EMUI_RAW_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="EMULATORI";
 	static const char plug_desc[]="E-mu Emulator I dsk Loader";
 	static const char plug_ext[]="emufd";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	EMUI_RAW_libIsValidDiskFile,
-		(LOADDISKFILE)		EMUI_RAW_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	EMUI_RAW_libGetPluginInfo
+		(ISVALIDDISKFILE)   EMUI_RAW_libIsValidDiskFile,
+		(LOADDISKFILE)      EMUI_RAW_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    EMUI_RAW_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

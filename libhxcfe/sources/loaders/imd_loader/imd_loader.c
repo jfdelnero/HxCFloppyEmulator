@@ -494,20 +494,11 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_BADFILE;
 	
 alloc_error:
-	if(track_data)
-		free(track_data);
-
-	if(sectorheadmap)
-		free(sectorheadmap);
-
-	if(sectorcylmap)
-		free(sectorcylmap);
-
-	if(sectormap)
-		free(sectormap);
-
-	if(sectorconfig)
-		free(sectorconfig);
+	free(track_data);
+	free(sectorheadmap);
+	free(sectorcylmap);
+	free(sectormap);
+	free(sectorconfig);
 
 	return HXCFE_INTERNALERROR;
 }

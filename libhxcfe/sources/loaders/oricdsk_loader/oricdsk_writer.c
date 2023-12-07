@@ -144,8 +144,7 @@ int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,cha
 					k++;
 				}while(k<nbsector_mfm);
 
-				if(sca_mfm)
-					free(sca_mfm);
+				free(sca_mfm);
 
 				sca_mfm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector_mfm);
 			}
@@ -256,11 +255,8 @@ error:
 	if(outfile)
 		hxc_fclose(outfile);
 
-	if(track_buffer)
-		free(track_buffer);
-
-	if(tmp_fm_track_buffer)
-		free(tmp_fm_track_buffer);
+	free(track_buffer);
+	free(tmp_fm_track_buffer);
 
 	return HXCFE_INTERNALERROR;
 }

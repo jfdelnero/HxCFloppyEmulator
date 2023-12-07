@@ -232,8 +232,7 @@ int DMK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 								k++;
 							}while(k<nbsector_mfm);
 
-							if(sca_mfm)
-								free(sca_mfm);
+							free(sca_mfm);
 
 							sca_mfm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector_mfm);
 
@@ -253,8 +252,7 @@ int DMK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 									k++;
 								}while(k<nbsector_fm);
 
-								if(sca_fm)
-									free(sca_fm);
+								free(sca_fm);
 
 								sca_fm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector_fm);
 							}
@@ -318,8 +316,7 @@ int DMK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 								k++;
 							}while(k<nbsector_mfm);
 
-							if(sca_mfm)
-								free(sca_mfm);
+							free(sca_mfm);
 						}
 
 						if(nbsector_fm)
@@ -382,8 +379,7 @@ int DMK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 								k++;
 							}while(k<nbsector_fm);
 
-							if(sca_fm)
-								free(sca_fm);
+							free(sca_fm);
 						}
 
 						fwrite(&IDAMbuf,128,1,dmkdskfile);

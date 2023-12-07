@@ -174,14 +174,9 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 			if( !cellstream || !cellstreampos )
 			{
-				if(cellstream)
-					free(cellstream);
-
-				if(cellstreampos)
-					free(cellstreampos);
-
-				if(kfstreambuffer)
-					free(kfstreambuffer);
+				free(cellstream);
+				free(cellstreampos);
+				free(kfstreambuffer);
 
 				return NULL;
 			}
@@ -243,14 +238,9 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 								cur_op_len = 2;
 							else
 							{
-								if(cellstream)
-									free(cellstream);
-
-								if(cellstreampos)
-									free(cellstreampos);
-
-								if(kfstreambuffer)
-									free(kfstreambuffer);
+								free(cellstream);
+								free(cellstreampos);
+								free(kfstreambuffer);
 
 								return NULL;
 							}
@@ -261,14 +251,9 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 				// Bad operation/data size ?
 				if (filesize - stream_ofs < cur_op_len)
 				{
-					if(cellstream)
-						free(cellstream);
-
-					if(cellstreampos)
-						free(cellstreampos);
-
-					if(kfstreambuffer)
-						free(kfstreambuffer);
+					free(cellstream);
+					free(cellstreampos);
+					free(kfstreambuffer);
 
 					return NULL;
 				}
@@ -386,6 +371,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 								floppycontext->hxc_printf(MSG_DEBUG,"String : %s",tempstr);
 								free(tempstr);
+								tempstr = NULL;
 							}
 	#endif
 						break;

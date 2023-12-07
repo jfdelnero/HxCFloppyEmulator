@@ -496,14 +496,9 @@ alloc_error:
 		free(floppydisk->tracks);
 	}
 
-	if( trackoffsetlist )
-		free(trackoffsetlist);
-
-	if(hfetrack)
-		free(hfetrack);
-
-	if(hfetrack2)
-		free(hfetrack2);
+	free(trackoffsetlist);
+	free(hfetrack);
+	free(hfetrack2);
 
 	return HXCFE_INTERNALERROR;
 }

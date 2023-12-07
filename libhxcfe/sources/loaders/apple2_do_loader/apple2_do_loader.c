@@ -38,7 +38,7 @@
 // File : apple2_do_loader.c
 // Contains: DO Apple II floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -80,25 +80,25 @@ int Apple2_do_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEIN
 	return HXCFE_BADFILE;
 }
 
-unsigned char LogicalToPhysicalSectorMap_Dos33[16] =
+const unsigned char LogicalToPhysicalSectorMap_Dos33[16] =
 {
 	0x00, 0x0D, 0x0B, 0x09, 0x07, 0x05, 0x03, 0x01,
 	0x0E, 0x0C, 0x0A, 0x08, 0x06, 0x04, 0x02, 0x0F
 };
 
-unsigned char PhysicalToLogicalSectorMap_Dos33[16] =
+const unsigned char PhysicalToLogicalSectorMap_Dos33[16] =
 {
 	0x00, 0x07, 0x0E, 0x06, 0x0D, 0x05, 0x0C, 0x04,
 	0x0B, 0x03, 0x0A, 0x02, 0x09, 0x01, 0x08, 0x0F,
 };
 
-unsigned char LogicalToPhysicalSectorMap_ProDos[16] =
+const unsigned char LogicalToPhysicalSectorMap_ProDos[16] =
 {
 	0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E,
 	0x01, 0x03, 0x05, 0x07, 0x09, 0x0B, 0x0D, 0x0F,
 };
 
-unsigned char PhysicalToLogicalSectorMap_ProDos[16] =
+const unsigned char PhysicalToLogicalSectorMap_ProDos[16] =
 {
 	0x00, 0x08, 0x01, 0x09, 0x02, 0x0A, 0x03, 0x0B,
 	0x04, 0x0C, 0x05, 0x0D, 0x06, 0x0E, 0x07, 0x0F
@@ -123,6 +123,7 @@ int Apple2_do_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 	sectorconfig = NULL;
 	currentcylinder = NULL;
+	trackdata = NULL;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Apple2_do_libLoad_DiskFile %s",imgfile);
 
@@ -162,13 +163,13 @@ int Apple2_do_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 		sectorconfig=(HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 		if(!sectorconfig)
-			goto error;
+			goto alloc_error;
 
 		memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
 
 		trackdata = (unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 		if(!trackdata)
-			goto error;
+			goto alloc_error;
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
@@ -217,20 +218,16 @@ int Apple2_do_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 	return HXCFE_BADFILE;
 
-error:
+alloc_error:
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Alloc / Internal error !",imgfile);
 
-	if(trackdata)
-		free(trackdata);
-
-	if(sectorconfig)
-		free(sectorconfig);
+	free(trackdata);
+	free(sectorconfig);
 
 	if(f)
 		hxc_fclose(f);
 
-	if(floppydisk->tracks)
-		free(floppydisk->tracks);
+	free(floppydisk->tracks);
 
 	floppydisk->tracks = NULL;
 
@@ -268,17 +265,16 @@ int Apple2_do_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void 
 
 int Apple2_po_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[] = "APPLE2_PO";
 	static const char plug_desc[] = "Apple II PO Loader";
 	static const char plug_ext[] = "po";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	Apple2_do_libIsValidDiskFile,
-		(LOADDISKFILE)		Apple2_do_libLoad_DiskFile,
-		(WRITEDISKFILE)		Apple2_do_libWrite_DiskFile,
-		(GETPLUGININFOS)	Apple2_do_libGetPluginInfo
+		(ISVALIDDISKFILE)   Apple2_do_libIsValidDiskFile,
+		(LOADDISKFILE)      Apple2_do_libLoad_DiskFile,
+		(WRITEDISKFILE)     Apple2_do_libWrite_DiskFile,
+		(GETPLUGININFOS)    Apple2_do_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

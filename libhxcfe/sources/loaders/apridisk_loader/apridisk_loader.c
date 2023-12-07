@@ -114,11 +114,18 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 	if(!file_buffer)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Allocation error !");
+
+		hxc_fclose(f);
+
 		return HXCFE_INTERNALERROR;
 	}
 
 	memset(file_buffer,0,totalfilesize);
+
 	hxc_fread(file_buffer,totalfilesize,f);
+
+	hxc_fclose(f);
+	f = NULL;
 
 	fileindex = 0;
 	//////////////////////////////////////////////////////
@@ -258,6 +265,13 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 					break;
 
 					default:
+						for(k=0;k<number_of_sector;k++)
+						{
+							hxcfe_freeSectorConfigData( 0, &sectorconfig[k] );
+						}
+
+						free(sectorconfig);
+
 						return HXCFE_BADFILE;
 					break;
 				}

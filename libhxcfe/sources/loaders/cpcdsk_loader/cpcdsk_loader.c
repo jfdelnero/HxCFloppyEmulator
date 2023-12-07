@@ -437,8 +437,8 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 			}
 		}
 
-		if(tracksizetab) free(tracksizetab);
-		//if(sectorconfig) free(sectorconfig);
+		free(tracksizetab);
+		//free(sectorconfig);
 
 		hxc_fclose(f);
 

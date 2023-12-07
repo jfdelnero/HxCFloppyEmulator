@@ -83,11 +83,15 @@ int HxCStream_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEIN
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HxCStream_libIsValidDiskFile");
 
+	filepath = NULL;
+
 	if(imgfile)
 	{
 		if( imgfile->is_dir )
 		{
 			filepath = malloc( strlen(imgfile->path) + 32 );
+			if(!filepath)
+				return HXCFE_BADFILE;
 
 			track=0;
 			side=0;
@@ -247,6 +251,9 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HxCStream_libLoad_DiskFile");
 
 	backup_env = NULL;
+	f = NULL;
+	filepath = NULL;
+	folder = NULL;
 
 	if(imgfile)
 	{
@@ -266,7 +273,10 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 			imgldr_ctx->hxcfe->envvar = tmp_env;
 
 			len=hxc_getpathfolder(imgfile,0,SYS_PATH_TYPE);
-			folder=(char*)malloc(len+1);
+			folder = (char*)malloc(len+1);
+			if(!folder)
+				goto alloc_error;
+
 			hxc_getpathfolder(imgfile,folder,SYS_PATH_TYPE);
 
 			if(staterep.st_mode&S_IFDIR)
@@ -291,6 +301,9 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 			}
 
 			filepath = malloc( strlen(imgfile) + 32 );
+			if( !filepath )
+				goto alloc_error;
+
 			sprintf(filepath,"%s%s",folder,"config.script");
 			hxcfe_execScriptFile(imgldr_ctx->hxcfe, filepath);
 
@@ -347,6 +360,7 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 						found=1;
 					}
 					hxc_fclose(f);
+					f = NULL;
 				}
 				side++;
 				if(side>1)
@@ -383,6 +397,9 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 			floppydisk->floppySectorPerTrack=-1;
 
 			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			if(!floppydisk->tracks)
+				goto alloc_error;
+
 			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 			rpm = 300;
@@ -446,6 +463,23 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 	}
 
 	return HXCFE_BADFILE;
+
+alloc_error:
+
+	if( f )
+		hxc_fclose(f);
+		
+	free(filepath);
+	free(folder);
+
+	if(backup_env)
+	{
+		tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
+		imgldr_ctx->hxcfe->envvar = backup_env;
+		deinitEnv( tmp_env );
+	}
+
+	return HXCFE_INTERNALERROR;
 }
 
 int HxCStream_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)

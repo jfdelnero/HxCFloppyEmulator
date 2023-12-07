@@ -202,11 +202,9 @@ alloc_error:
 	if ( f )
 		hxc_fclose( f );
 
-	if( floppydisk->tracks )
-		free( floppydisk->tracks );
-	
-	if( trackdata )
-		free( trackdata );
+	free( floppydisk->tracks );
+
+	free( trackdata );
 
 	return HXCFE_INTERNALERROR;	
 }

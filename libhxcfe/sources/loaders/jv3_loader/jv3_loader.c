@@ -575,11 +575,8 @@ error:
 	if(f)
 		hxc_fclose(f);
 
-	if(sectorconfig)
-		free(sectorconfig);
-
-	if(SectorsOffsets)
-		free(SectorsOffsets);
+	free(sectorconfig);
+	free(SectorsOffsets);
 
 	return HXCFE_INTERNALERROR;
 }

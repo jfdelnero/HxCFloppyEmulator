@@ -530,8 +530,7 @@ int DFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			imgldr_ctx->hxcfe->envvar = backup_env;
 			deinitEnv( tmp_env );
 
-			if(folder)
-				free(folder);
+			free(folder);
 
 			return HXCFE_NOERROR;
 		}

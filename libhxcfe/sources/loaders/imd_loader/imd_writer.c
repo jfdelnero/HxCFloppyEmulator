@@ -357,8 +357,7 @@ int IMD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 					k++;
 				}while(k<nbsector);
 
-				if(sca)
-					free(sca);
+				free(sca);
 			}
 
 			track_cnt++;

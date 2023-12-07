@@ -343,8 +343,7 @@ error:
 	if(f)
 		hxc_fclose(f);
 
-	if(track_buffer)
-		free(track_buffer);
+	free(track_buffer);
 
 	return ret;
 }

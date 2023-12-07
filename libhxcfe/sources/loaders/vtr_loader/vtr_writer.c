@@ -43,10 +43,11 @@
 
 int VTR_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-
 	vtrucco_pictrack * track;
 
 	FILE * hxcpicfile;
+
+	unsigned char header_buffer[512];
 
 	vtrucco_picfileformatheader * FILEHEADER;
 	unsigned char * mfmtracks0,*mfmtracks1,*mfmtrackfinal;
@@ -57,13 +58,17 @@ int VTR_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	unsigned int tracklistlen;
 	unsigned int tracksize;
 
+	mfmtracks0 = NULL;
+	mfmtracks1 = NULL;
+	mfmtrackfinal = NULL;
+	offsettrack = NULL;
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write vtrucco-HFE file %s for the standalone emulator.",filename);
 
-	hxcpicfile=hxc_fopen(filename,"wb");
-
+	hxcpicfile = hxc_fopen(filename,"wb");
 	if(hxcpicfile)
 	{
-		FILEHEADER=(vtrucco_picfileformatheader *) malloc(512);
+		FILEHEADER=(vtrucco_picfileformatheader *) &header_buffer;
 		memset(FILEHEADER,0xFF,512);
 		memcpy((char*)&FILEHEADER->HEADERSIGNATURE,"VTrucco",7);
 
@@ -71,14 +76,14 @@ int VTR_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		FILEHEADER->number_of_side=(unsigned char)floppy->floppyNumberOfSide;
 		FILEHEADER->bitRate=floppy->floppyBitRate/1000;
 		FILEHEADER->floppyRPM=0;//floppy->floppyRPM;
-//		if(forceifmode==-1)
-//		{
+//      if(forceifmode==-1)
+//      {
 			FILEHEADER->floppyinterfacemode=(unsigned char)floppy->floppyiftype;
-//		}
-//		else
-//		{
-//			FILEHEADER->floppyinterfacemode=forceifmode;
-//		}
+//      }
+//      else
+//      {
+//          FILEHEADER->floppyinterfacemode=forceifmode;
+//      }
 		FILEHEADER->track_encoding=0;
 		FILEHEADER->formatrevision=0;
 		FILEHEADER->track_list_offset=1;
@@ -90,6 +95,9 @@ int VTR_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 		tracklistlen=(((((FILEHEADER->number_of_track+1)*sizeof(vtrucco_pictrack))/512)+1));
 		offsettrack=(unsigned char*) malloc(tracklistlen*512);
+		if(!offsettrack)
+			goto alloc_error;
+
 		memset(offsettrack,0xFF,tracklistlen*512);
 
 		i=0;
@@ -97,137 +105,149 @@ int VTR_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 		do
 		{
-				mfmsize=0;
-				mfmsize2=0;
+			mfmsize=0;
+			mfmsize2=0;
 
 
-				mfmsize=floppy->tracks[i]->sides[0]->tracklen;
-				if(mfmsize&7)
-					mfmsize=(mfmsize/8)+1;
+			mfmsize=floppy->tracks[i]->sides[0]->tracklen;
+			if(mfmsize&7)
+				mfmsize=(mfmsize/8)+1;
+			else
+				mfmsize=mfmsize/8;
+
+			if(floppy->tracks[i]->number_of_side==2)
+			{
+				mfmsize2=floppy->tracks[i]->sides[1]->tracklen;
+				if(mfmsize2&7)
+					mfmsize2=(mfmsize2/8)+1;
 				else
-					mfmsize=mfmsize/8;
+					mfmsize2=mfmsize2/8;
+			}
+
+			if(mfmsize2>mfmsize) mfmsize=mfmsize2;
+
+			track=(vtrucco_pictrack *)(offsettrack+(i*sizeof(vtrucco_pictrack)));
+			if(mfmsize*2>0xFFFF)
+			{
+				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Argg!! track %d too long (%x) and shorten to 0xFFFF !",i,mfmsize*2);
+				mfmsize=0x7FFF;
+			}
+			track->track_len=mfmsize*2;
+			track->offset=trackpos;
 
 
-				if(floppy->tracks[i]->number_of_side==2)
-				{
-					mfmsize2=floppy->tracks[i]->sides[1]->tracklen;
-					if(mfmsize2&7)
-						mfmsize2=(mfmsize2/8)+1;
-					else
-						mfmsize2=mfmsize2/8;
-				}
+			if((mfmsize*2)%512)
+				trackpos=trackpos+(((mfmsize*2)/512)+1);
+			else
+				trackpos=trackpos+((mfmsize*2)/512);
 
-				if(mfmsize2>mfmsize) mfmsize=mfmsize2;
+			//trackpos=trackpos+(((mfmsize*2)/512)+1);
 
-				track=(vtrucco_pictrack *)(offsettrack+(i*sizeof(vtrucco_pictrack)));
-				if(mfmsize*2>0xFFFF)
-				{
-					imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Argg!! track %d too long (%x) and shorten to 0xFFFF !",i,mfmsize*2);
-					mfmsize=0x7FFF;
-				}
-				track->track_len=mfmsize*2;
-				track->offset=trackpos;
-
-
-				if((mfmsize*2)%512)
-					trackpos=trackpos+(((mfmsize*2)/512)+1);
-				else
-					trackpos=trackpos+((mfmsize*2)/512);
-
-				//trackpos=trackpos+(((mfmsize*2)/512)+1);
 			i++;
 		}while(i<(FILEHEADER->number_of_track));
 
-        fwrite(offsettrack,512*tracklistlen,1,hxcpicfile);
+		fwrite(offsettrack,512*tracklistlen,1,hxcpicfile);
 
 		i=0;
 		do
 		{
-				hxcfe_imgCallProgressCallback(imgldr_ctx,i,FILEHEADER->number_of_track );
-				mfmsize=floppy->tracks[i]->sides[0]->tracklen;
-				if(mfmsize&7)
-					mfmsize=(mfmsize/8)+1;
+			hxcfe_imgCallProgressCallback(imgldr_ctx,i,FILEHEADER->number_of_track );
+			mfmsize=floppy->tracks[i]->sides[0]->tracklen;
+			if(mfmsize&7)
+				mfmsize=(mfmsize/8)+1;
+			else
+				mfmsize=mfmsize/8;
+
+			mfmsize2=0;
+			if(floppy->tracks[i]->number_of_side==2)
+			{
+				mfmsize2=floppy->tracks[i]->sides[1]->tracklen;
+				if(mfmsize2&7)
+					mfmsize2=(mfmsize2/8)+1;
 				else
-					mfmsize=mfmsize/8;
+					mfmsize2=mfmsize2/8;
+			}
+			if(mfmsize>0x7FFF)
+			{
+				mfmsize=0x7FFF;
+			}
+			if(mfmsize2>0x7FFF)
+			{
+				mfmsize2=0x7FFF;
+			}
+			track=(vtrucco_pictrack *)(offsettrack+(i*sizeof(vtrucco_pictrack)));
 
-				mfmsize2=0;
-				if(floppy->tracks[i]->number_of_side==2)
+			if(track->track_len%512)
+				tracksize=((track->track_len&(~0x1FF))+0x200)/2;
+			else
+				tracksize=track->track_len/2;
+
+			mfmtracks0=(unsigned char*) malloc(tracksize);
+			mfmtracks1=(unsigned char*) malloc(tracksize);
+			mfmtrackfinal=(unsigned char*) malloc(tracksize*2);
+
+			if( !mfmtracks0 || !mfmtracks1 || !mfmtrackfinal )
+				goto alloc_error;
+
+			memset(mfmtracks0,0x00,tracksize);
+			memset(mfmtracks1,0x00,tracksize);
+			memset(mfmtrackfinal,0x55,tracksize*2);
+
+			memcpy(mfmtracks0,floppy->tracks[i]->sides[0]->databuffer,mfmsize);
+
+			if(floppy->tracks[i]->number_of_side==2)
+				memcpy(mfmtracks1,floppy->tracks[i]->sides[1]->databuffer,mfmsize2);
+
+			for(k=0;k<tracksize/256;k++)
+			{
+				for(j=0;j<256;j++)
 				{
-					mfmsize2=floppy->tracks[i]->sides[1]->tracklen;
-					if(mfmsize2&7)
-						mfmsize2=(mfmsize2/8)+1;
-					else
-						mfmsize2=mfmsize2/8;
+					// inversion des bits pour le EUSART du PIC.
+
+					// head 0
+					mfmtrackfinal[(k*512)+j]=     LUT_ByteBitsInverter[mfmtracks0[(k*256)+j]];
+					// head 1
+					mfmtrackfinal[(k*512)+j+256]= LUT_ByteBitsInverter[mfmtracks1[(k*256)+j]];
+
 				}
-				if(mfmsize>0x7FFF)
-				{
-					mfmsize=0x7FFF;
-				}
-				if(mfmsize2>0x7FFF)
-				{
-					mfmsize2=0x7FFF;
-				}
-				track=(vtrucco_pictrack *)(offsettrack+(i*sizeof(vtrucco_pictrack)));
+			}
 
-				if(track->track_len%512)
-					tracksize=((track->track_len&(~0x1FF))+0x200)/2;
-				else
-					tracksize=track->track_len/2;
+			fwrite(mfmtrackfinal,tracksize*2,1,hxcpicfile);
 
-				mfmtracks0=(unsigned char*) malloc(tracksize);
-				mfmtracks1=(unsigned char*) malloc(tracksize);
-				mfmtrackfinal=(unsigned char*) malloc(tracksize*2);
-
-				memset(mfmtracks0,0x00,tracksize);
-				memset(mfmtracks1,0x00,tracksize);
-				memset(mfmtrackfinal,0x55,tracksize*2);
-
-				memcpy(mfmtracks0,floppy->tracks[i]->sides[0]->databuffer,mfmsize);
-
-				if(floppy->tracks[i]->number_of_side==2)
-					memcpy(mfmtracks1,floppy->tracks[i]->sides[1]->databuffer,mfmsize2);
-
-				for(k=0;k<tracksize/256;k++)
-				{
-
-					for(j=0;j<256;j++)
-					{
-						// inversion des bits pour le EUSART du PIC.
-
-						// head 0
-						mfmtrackfinal[(k*512)+j]=     LUT_ByteBitsInverter[mfmtracks0[(k*256)+j]];
-						// head 1
-						mfmtrackfinal[(k*512)+j+256]= LUT_ByteBitsInverter[mfmtracks1[(k*256)+j]];
-
-					}
-				}
-
-
-				fwrite(mfmtrackfinal,tracksize*2,1,hxcpicfile);
-
-				free(mfmtracks0);
-				free(mfmtracks1);
-				free(mfmtrackfinal);
-
+			free(mfmtracks0);
+			mfmtracks0 = NULL;
+			free(mfmtracks1);
+			mfmtracks1 = NULL;
+			free(mfmtrackfinal);
+			mfmtrackfinal = NULL;
 
 			i++;
 		}while(i<(FILEHEADER->number_of_track));
 
 		free(offsettrack);
+		offsettrack = NULL;
 
-        hxc_fclose(hxcpicfile);
+		hxc_fclose(hxcpicfile);
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
 
-		free(FILEHEADER);
-
-		return 0;
+		return HXCFE_NOERROR;
 	}
 	else
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
 
-		return -1;
+		return HXCFE_ACCESSERROR;
 	}
 
+alloc_error:
+	free(mfmtracks0);
+	free(mfmtracks1);
+	free(mfmtrackfinal);
+	free(offsettrack);
+
+	if( hxcpicfile )
+		hxc_fclose(hxcpicfile);
+
+	return HXCFE_INTERNALERROR;
 }

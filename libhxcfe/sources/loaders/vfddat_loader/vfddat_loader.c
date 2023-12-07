@@ -227,11 +227,9 @@ int VFDDAT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 			}
 		}
 
-		if(trackclk)
-			free(trackclk);
+		free(trackclk);
 
-		if(trackdata)
-			free(trackdata);
+		free(trackdata);
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 

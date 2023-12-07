@@ -51,7 +51,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 	int32_t density;
 	int file_offset;
 	int32_t sectorsize;
-	unsigned char * diskimage;
+	unsigned char * diskimage, *tmp_ptr;
 	int error;
 	int fm_fallback = 0;
 	HXCFE_SECTORACCESS* ss;
@@ -162,9 +162,13 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 					numberofsector = 9;
 					density = ISOIBM_FM_ENCODING;
 					imagesize = numberofsector * numberoftrack * numberofside * sectorsize;
-					diskimage = realloc(diskimage, imagesize);
-					if (!diskimage)
+					tmp_ptr = realloc(diskimage, imagesize);
+					if (!tmp_ptr)
+					{
+						free(diskimage);
 						return HXCFE_INTERNALERROR;
+					}
+					diskimage = tmp_ptr;
 					memset(diskimage,0xF6, imagesize);
 				}
 			}

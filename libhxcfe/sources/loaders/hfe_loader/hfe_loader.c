@@ -368,11 +368,9 @@ alloc_error:
 	if(f)
 		hxc_fclose(f);
 
-	if(hfetrack)
-		free(hfetrack);
+	free(hfetrack);
 
-	if(trackoffsetlist)
-		free(trackoffsetlist);
+	free(trackoffsetlist);
 
 	return HXCFE_INTERNALERROR;
 }

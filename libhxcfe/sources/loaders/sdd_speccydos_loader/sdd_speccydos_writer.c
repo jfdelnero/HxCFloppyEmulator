@@ -135,8 +135,7 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * flopp
 				hxc_fclose(sdddskfile);
 			}
 
-			if(flat_track)
-				free(flat_track);
+			free(flat_track);
 		}
 	}
 

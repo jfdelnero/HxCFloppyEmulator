@@ -148,8 +148,7 @@ int ADZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return ret;
 
 error:
-	if( flatimg )
-		free(flatimg);
+	free(flatimg);
 
 	if( file )
 		gzclose(file);

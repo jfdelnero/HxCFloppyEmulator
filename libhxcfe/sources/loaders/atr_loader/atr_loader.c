@@ -38,7 +38,7 @@
 // File : atr_loader.c
 // Contains: ATR Atari floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -295,14 +295,9 @@ alloc_error:
 	if ( f )
 		hxc_fclose( f );
 
-	if( floppydisk->tracks )
-		free( floppydisk->tracks );
-
-	if( trackdata )
-		free( trackdata );
-
-	if( sectorconfig )
-		free( sectorconfig );
+	free( floppydisk->tracks );
+	free( trackdata );
+	free( sectorconfig );
 
 	return HXCFE_INTERNALERROR;
 }
@@ -310,7 +305,6 @@ alloc_error:
 
 int ATR_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="ATARI_ATR";
 	static const char plug_desc[]="Atari ATR Loader";
 	static const char plug_ext[]="atr";

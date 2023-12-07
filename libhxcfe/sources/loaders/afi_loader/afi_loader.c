@@ -437,23 +437,21 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							break;
 							case AFI_COMPRESS_GZIP:
 								currentside->databuffer = malloc(datablock.unpacked_size);
-								temp_uncompressbuffer=malloc(datablock.packed_size);
+								temp_uncompressbuffer = malloc(datablock.packed_size);
 								if(currentside->databuffer && temp_uncompressbuffer)
 								{
 									hxc_fread(temp_uncompressbuffer,datablock.packed_size,f);
 									destLen = datablock.unpacked_size;
 									uncompress(currentside->databuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
 									free(temp_uncompressbuffer);
+									temp_uncompressbuffer = NULL;
 								}
 								else
 								{
-									if(currentside->databuffer)
-										free(currentside->databuffer);
-
-									if(temp_uncompressbuffer)
-										free(temp_uncompressbuffer);
-
+									free(currentside->databuffer);
 									currentside->databuffer = NULL;
+
+									free(temp_uncompressbuffer);
 									temp_uncompressbuffer = NULL;
 								}
 							break;
@@ -480,16 +478,14 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 									destLen=datablock.unpacked_size;
 									uncompress(currentside->databuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
 									free(temp_uncompressbuffer);
+									temp_uncompressbuffer = NULL;
 								}
 								else
 								{
-									if(currentside->databuffer)
-										free(currentside->databuffer);
-
-									if(temp_uncompressbuffer)
-										free(temp_uncompressbuffer);
-
+									free(currentside->databuffer);
 									currentside->databuffer = NULL;
+
+									free(temp_uncompressbuffer);
 									temp_uncompressbuffer = NULL;
 								}
 							break;
@@ -515,16 +511,14 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 									destLen=datablock.unpacked_size;
 									uncompress(currentside->indexbuffer, &destLen,temp_uncompressbuffer, datablock.packed_size);
 									free(temp_uncompressbuffer);
+									temp_uncompressbuffer = NULL;
 								}
 								else
 								{
-									if(currentside->indexbuffer)
-										free(currentside->indexbuffer);
-
-									if(temp_uncompressbuffer)
-										free(temp_uncompressbuffer);
-
+									free(currentside->indexbuffer);
 									currentside->indexbuffer = NULL;
+
+									free(temp_uncompressbuffer);
 									temp_uncompressbuffer = NULL;
 								}
 
@@ -565,20 +559,18 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 										{
 											currentside->bitrate=currentside->timingbuffer[0];
 											free(currentside->timingbuffer);
-											currentside->timingbuffer=0;
+											currentside->timingbuffer = NULL;
 										}
 
 										free(temp_timing);
+										temp_timing = NULL;
 									}
 									else
 									{
-										if(currentside->timingbuffer)
-											free(currentside->timingbuffer);
-
-										if(temp_timing)
-											free(temp_timing);
-
+										free(currentside->timingbuffer);
 										currentside->timingbuffer = NULL;
+
+										free(temp_timing);
 										temp_timing = NULL;
 									}
 
@@ -592,22 +584,29 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 									{
 										hxc_fread(temp_uncompressbuffer,datablock.packed_size,f);
 
-										destLen=datablock.unpacked_size;
+										destLen = datablock.unpacked_size;
+										if( destLen & ( sizeof(uint32_t) - 1 ) )
+											destLen = ( destLen & ~( sizeof(uint32_t) - 1 ) ) + sizeof(uint32_t);
+
 										temp_timing = malloc(destLen);
 										if(temp_timing)
 										{
 											uncompress((unsigned char*)temp_timing, &destLen,temp_uncompressbuffer, datablock.packed_size);
 
 											free(temp_uncompressbuffer);
+											temp_uncompressbuffer = NULL;
 
 											temp_uncompressbuffer_long = bitrate_rle_unpack(temp_timing,destLen/4,&destLen);
-
-											for(k=0;k<bytelen;k++)
+											if( temp_uncompressbuffer_long )
 											{
-												currentside->timingbuffer[k] = temp_uncompressbuffer_long[k*8];
-											}
+												for(k=0;k<bytelen;k++)
+												{
+													currentside->timingbuffer[k] = temp_uncompressbuffer_long[k*8];
+												}
 
-											free(temp_uncompressbuffer_long);
+												free(temp_uncompressbuffer_long);
+												temp_uncompressbuffer_long = NULL;
+											}
 
 											k=0;
 											do
@@ -619,21 +618,19 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 											{
 												currentside->bitrate=currentside->timingbuffer[0];
 												free(currentside->timingbuffer);
-												currentside->timingbuffer=0;
+												currentside->timingbuffer = NULL;
 											}
 										}
 
 										free(temp_timing);
+										temp_timing = NULL;
 									}
 									else
 									{
-										if(currentside->timingbuffer)
-											free(currentside->timingbuffer);
-
-										if(temp_uncompressbuffer)
-											free(temp_uncompressbuffer);
-
+										free(currentside->timingbuffer);
 										currentside->timingbuffer = NULL;
+
+										free(temp_uncompressbuffer);
 										temp_uncompressbuffer = NULL;
 									}
 								break;
@@ -662,7 +659,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 										{
 											currentside->bitrate=currentside->timingbuffer[0];
 											free(currentside->timingbuffer);
-											currentside->timingbuffer=0;
+											currentside->timingbuffer = NULL;
 										}
 									}
 								break;
@@ -686,20 +683,18 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 										{
 											currentside->bitrate = currentside->timingbuffer[0];
 											free(currentside->timingbuffer);
-											currentside->timingbuffer=0;
+											currentside->timingbuffer = NULL;
 										}
 
 										free(temp_uncompressbuffer);
+										temp_uncompressbuffer = NULL;
 									}
 									else
 									{
-										if(currentside->timingbuffer)
-											free(currentside->timingbuffer);
-
-										if(temp_uncompressbuffer)
-											free(temp_uncompressbuffer);
-
+										free(currentside->timingbuffer);
 										currentside->timingbuffer = NULL;
+
+										free(temp_uncompressbuffer);
 										temp_uncompressbuffer = NULL;
 									}
 								break;
@@ -731,7 +726,7 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 									if( k == datablock.packed_size )
 									{
 										free(currentside->flakybitsbuffer);
-										currentside->flakybitsbuffer=0;
+										currentside->flakybitsbuffer = NULL;
 									}
 								}
 								break;
@@ -754,20 +749,18 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 									if(k==datablock.unpacked_size)
 									{
 										free(currentside->flakybitsbuffer);
-										currentside->flakybitsbuffer=0;
+										currentside->flakybitsbuffer = NULL;
 									}
 
 									free(temp_uncompressbuffer);
+									temp_uncompressbuffer = NULL;
 								}
 								else
 								{
-									if(currentside->flakybitsbuffer)
-										free(currentside->flakybitsbuffer);
-
-									if(temp_uncompressbuffer)
-										free(temp_uncompressbuffer);
-
+									free(currentside->flakybitsbuffer);
 									currentside->flakybitsbuffer = NULL;
+
+									free(temp_uncompressbuffer);
 									temp_uncompressbuffer = NULL;
 								}
 								break;
@@ -784,10 +777,11 @@ int AFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			}
 
 			free(datalistoffset);
+			datalistoffset = NULL;
 		}
 
-		if(tracklistoffset)
-			free(tracklistoffset);
+		free(tracklistoffset);
+		tracklistoffset = NULL;
 
 		if((header.version_code_major == 0) && header.version_code_minor == 1)
 		{
@@ -853,10 +847,10 @@ int AFI_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	AFI_libIsValidDiskFile,
-		(LOADDISKFILE)		AFI_libLoad_DiskFile,
-		(WRITEDISKFILE)		AFI_libWrite_DiskFile,
-		(GETPLUGININFOS)	AFI_libGetPluginInfo
+		(ISVALIDDISKFILE)   AFI_libIsValidDiskFile,
+		(LOADDISKFILE)      AFI_libLoad_DiskFile,
+		(WRITEDISKFILE)     AFI_libWrite_DiskFile,
+		(GETPLUGININFOS)    AFI_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

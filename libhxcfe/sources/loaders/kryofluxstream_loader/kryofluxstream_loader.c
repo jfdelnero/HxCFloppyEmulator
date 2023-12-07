@@ -454,11 +454,8 @@ int KryoFluxStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 	return HXCFE_BADFILE;
 
 error:
-	if(folder)
-		free(folder);
-
-	if(filepath)
-		free(filepath);
+	free(folder);
+	free(filepath);
 
 	if( backup_env )
 	{

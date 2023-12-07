@@ -38,7 +38,7 @@
 // File : vtr_loader.c
 // Contains: VTR (VTrucco file format) floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -94,11 +94,13 @@ int VTR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int i,j,k,l,offset,offset2;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE* currentside;
-    vtrucco_pictrack* trackoffsetlist;
-    unsigned int tracks_base;
-    unsigned char * hfetrack;
+	vtrucco_pictrack* trackoffsetlist;
+	unsigned int tracks_base;
+	unsigned char * hfetrack;
 	int nbofblock,tracklen;
 
+	hfetrack = NULL;
+	trackoffsetlist = NULL;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VTR_libLoad_DiskFile %s",imgfile);
 
@@ -113,13 +115,11 @@ int VTR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	if(!strncmp((char*)header.HEADERSIGNATURE,"VTrucco",7))
 	{
-
 		floppydisk->floppyNumberOfTrack=header.number_of_track;
 		floppydisk->floppyNumberOfSide=header.number_of_side;
 		floppydisk->floppyBitRate=header.bitRate*1000;
 		floppydisk->floppySectorPerTrack=-1;
 		floppydisk->floppyiftype=header.floppyinterfacemode;
-
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"VTrucco File : %d track, %d side, %d bit/s, %d sectors, mode %d",
 			floppydisk->floppyNumberOfTrack,
@@ -128,21 +128,26 @@ int VTR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			floppydisk->floppySectorPerTrack,
 			floppydisk->floppyiftype);
 
-        trackoffsetlist=(vtrucco_pictrack*)malloc(sizeof(vtrucco_pictrack)* header.number_of_track);
-        memset(trackoffsetlist,0,sizeof(vtrucco_pictrack)* header.number_of_track);
-        fseek( f,512,SEEK_SET);
-        hxc_fread( trackoffsetlist,sizeof(vtrucco_pictrack)* header.number_of_track,f);
+		trackoffsetlist=(vtrucco_pictrack*)malloc(sizeof(vtrucco_pictrack)* header.number_of_track);
+		if(!trackoffsetlist)
+			goto alloc_error;
 
-        tracks_base= 512+( (((sizeof(vtrucco_pictrack)* header.number_of_track)/512)+1)*512);
-        fseek( f,tracks_base,SEEK_SET);
+		memset(trackoffsetlist,0,sizeof(vtrucco_pictrack)* header.number_of_track);
+
+		fseek( f,512,SEEK_SET);
+		hxc_fread( trackoffsetlist,sizeof(vtrucco_pictrack)* header.number_of_track,f);
+
+		tracks_base= 512+( (((sizeof(vtrucco_pictrack)* header.number_of_track)/512)+1)*512);
+		fseek( f,tracks_base,SEEK_SET);
 
 		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if(!floppydisk->tracks)
+			goto alloc_error;
 
+		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 		for(i=0;i<floppydisk->floppyNumberOfTrack;i++)
 		{
-
 			fseek(f,(trackoffsetlist[i].offset*512),SEEK_SET);
 			if(trackoffsetlist[i].track_len&0x1FF)
 			{
@@ -153,15 +158,19 @@ int VTR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				tracklen=trackoffsetlist[i].track_len;
 			}
 
-			hfetrack=(unsigned char*)malloc( tracklen );
+			hfetrack = (unsigned char*)malloc( tracklen );
+			if(!hfetrack)
+				goto alloc_error;
 
 			hxc_fread( hfetrack,tracklen,f);
 
-			floppydisk->tracks[i]=allocCylinderEntry(300,floppydisk->floppyNumberOfSide);
+			floppydisk->tracks[i] = allocCylinderEntry(300,floppydisk->floppyNumberOfSide);
+			if(!floppydisk->tracks[i])
+				goto alloc_error;
+
 			currentcylinder=floppydisk->tracks[i];
 
-
-		/*	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
+		/*  imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
 			trackdesc.track_number,
 			trackdesc.side_number,
 			trackdesc.mfmtrackoffset,
@@ -172,6 +181,9 @@ int VTR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				hxcfe_imgCallProgressCallback(imgldr_ctx,(i<<1) + (j&1),floppydisk->floppyNumberOfTrack*2 );
 
 				currentcylinder->sides[j]=malloc(sizeof(HXCFE_SIDE));
+				if(!currentcylinder->sides[j])
+					goto alloc_error;
+
 				memset(currentcylinder->sides[j],0,sizeof(HXCFE_SIDE));
 				currentside=currentcylinder->sides[j];
 
@@ -179,11 +191,17 @@ int VTR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				currentside->tracklen=tracklen/2;
 
 				currentside->databuffer=malloc(currentside->tracklen);
+				if(!currentside->databuffer)
+					goto alloc_error;
+
 				memset(currentside->databuffer,0,currentside->tracklen);
 
 				currentside->flakybitsbuffer=0;
 
-				currentside->indexbuffer=malloc(currentside->tracklen);
+				currentside->indexbuffer = malloc(currentside->tracklen);
+				if(!currentside->indexbuffer)
+					goto alloc_error;
+
 				memset(currentside->indexbuffer,0,currentside->tracklen);
 
 				for(k=0;k<256;k++)
@@ -210,6 +228,7 @@ int VTR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			}
 
 			free(hfetrack);
+			hfetrack = NULL;
 		}
 
 		free(trackoffsetlist);
@@ -221,23 +240,31 @@ int VTR_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	hxc_fclose(f);
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"bad header");
 	return HXCFE_BADFILE;
+
+alloc_error:
+	free(hfetrack);
+	free(trackoffsetlist);
+
+	if( f )
+		hxc_fclose(f);
+
+	return HXCFE_INTERNALERROR;
 }
 
 int VTR_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 
 int VTR_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="VTR_IMG";
 	static const char plug_desc[]="VTR IMG Loader";
 	static const char plug_ext[]="vtr";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	VTR_libIsValidDiskFile,
-		(LOADDISKFILE)		VTR_libLoad_DiskFile,
-		(WRITEDISKFILE)		VTR_libWrite_DiskFile,
-		(GETPLUGININFOS)	VTR_libGetPluginInfo
+		(ISVALIDDISKFILE)   VTR_libIsValidDiskFile,
+		(LOADDISKFILE)      VTR_libLoad_DiskFile,
+		(WRITEDISKFILE)     VTR_libWrite_DiskFile,
+		(GETPLUGININFOS)    VTR_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

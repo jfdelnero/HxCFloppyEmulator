@@ -264,6 +264,7 @@ int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 	unsigned int stream_track_size;
 	unsigned int track_size,number_of_pulses;
 	unsigned char tempbuf[512];
+	unsigned char header_buf[512];
 	unsigned int max_packed_size,track_index;
 	int step;
 
@@ -281,7 +282,7 @@ int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 
 	if(hxcstreamhfefile)
 	{
-		FILEHEADER=(streamhfe_fileheader *) malloc(512);
+		FILEHEADER=(streamhfe_fileheader *) &header_buf;
 		memset(FILEHEADER,0x00,512);
 		memcpy(&FILEHEADER->signature,"HxC_Stream_Image",16);
 		FILEHEADER->formatrevision = 0;
@@ -375,14 +376,12 @@ int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
 
-		free(FILEHEADER);
-
-		return 0;
+		return HXCFE_NOERROR;
 	}
 	else
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
 
-		return -1;
+		return HXCFE_ACCESSERROR;
 	}
 }
