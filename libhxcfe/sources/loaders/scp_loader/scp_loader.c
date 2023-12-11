@@ -38,11 +38,10 @@
 // File : scp_loader.c
 // Contains: SCP Stream floppy image loader
 //
-// Written by: DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
-
 
 #include <string.h>
 #include <stdlib.h>
@@ -440,15 +439,30 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			len=hxc_getpathfolder(imgfile,0,SYS_PATH_TYPE);
 			folder=(char*)malloc(len+1);
+			if(!folder)
+			{
+				hxc_fclose(f);
+				return HXCFE_INTERNALERROR;
+			}
+
 			hxc_getpathfolder(imgfile,folder,SYS_PATH_TYPE);
 
 			filepath = malloc( strlen(imgfile) + 32 );
-			if(filepath)
+			if(!filepath)
 			{
-				sprintf(filepath,"%s%s",folder,"config.script");
-				hxcfe_execScriptFile(imgldr_ctx->hxcfe, filepath);
-				free(filepath);
+				free(folder);
+				hxc_fclose(f);
+				return HXCFE_INTERNALERROR;
 			}
+
+			sprintf(filepath,"%s%s",folder,"config.script");
+			hxcfe_execScriptFile(imgldr_ctx->hxcfe, filepath);
+
+			free(filepath);
+			filepath = NULL;
+
+			free(folder);
+			folder = NULL;
 
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Loading SCP file...");
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Version : 0x%.2X",scph.version);
@@ -567,7 +581,13 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			floppydisk->floppyNumberOfTrack = ((k >> 1) + 1) / trackstep;
 
-			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			if(!floppydisk->tracks)
+			{
+				hxc_fclose(f);
+				return HXCFE_INTERNALERROR;
+			}
+
 			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 			for(j=0;j<floppydisk->floppyNumberOfTrack*trackstep;j=j+trackstep)
@@ -658,11 +678,10 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			imgldr_ctx->hxcfe->envvar = backup_env;
 			deinitEnv( tmp_env );
 
-			if(folder)
-				free(folder);
-
 			return HXCFE_NOERROR;
 		}
+
+		return HXCFE_ACCESSERROR;
 	}
 
 	return HXCFE_BADFILE;
@@ -676,10 +695,10 @@ int SCP_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	SCP_libIsValidDiskFile,
-		(LOADDISKFILE)		SCP_libLoad_DiskFile,
-		(WRITEDISKFILE)		SCP_libWrite_DiskFile,
-		(GETPLUGININFOS)	SCP_libGetPluginInfo
+		(ISVALIDDISKFILE)   SCP_libIsValidDiskFile,
+		(LOADDISKFILE)      SCP_libLoad_DiskFile,
+		(WRITEDISKFILE)     SCP_libWrite_DiskFile,
+		(GETPLUGININFOS)    SCP_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

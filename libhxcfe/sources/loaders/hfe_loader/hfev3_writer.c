@@ -89,6 +89,7 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 	FILE * ram_outfile;
 
 	picfileformatheader * FILEHEADER;
+	unsigned char header_buffer[512];
 	unsigned char * mfmtracks0,*mfmtracks1,*mfmtrackfinal;
 	unsigned char * offsettrack;
 	int mfmsize,mfmsize2;
@@ -119,10 +120,7 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 	mfmtrackfinal = NULL;
 	offsettrack = NULL;
 
-	FILEHEADER = (picfileformatheader *) malloc(512);
-	if( !FILEHEADER )
-		goto error;
-
+	FILEHEADER = (picfileformatheader *) header_buffer;
 	memset(FILEHEADER,0xFF,512);
 	memcpy(&FILEHEADER->HEADERSIGNATURE,"HXCHFEV3",8);
 
@@ -193,7 +191,7 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 
 	offsettrack = (unsigned char*) malloc(tracklistlen*512);
 	if( !offsettrack )
-		goto error;
+		goto alloc_error;
 
 	memset(offsettrack,0xFF,tracklistlen*512);
 
@@ -343,7 +341,7 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 		}
 		else
 		{
-			goto error;
+			goto alloc_error;
 		}
 
 		i++;
@@ -353,14 +351,13 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 	offsettrack = NULL;
 
 	if( !rf.ramfile )
-		goto error;
+		goto alloc_error;
 
 	outfile = hxc_fopen(filename,"wb");
 	if(!outfile)
 	{
 		hxc_ram_fclose(outfile,&rf);
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s !",filename);
-		free(FILEHEADER);
 
 		return HXCFE_ACCESSERROR;
 	}
@@ -372,17 +369,14 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
 
-	free(FILEHEADER);
-
 	return HXCFE_NOERROR;
 
-error:
-	hxc_ram_fclose(outfile,&rf);
+alloc_error:
+	hxc_ram_fclose(ram_outfile,&rf);
 
 	if( outfile )
 		hxc_fclose( outfile );
 
-	free( FILEHEADER );
 	free( offsettrack );
 	free(mfmtracks0);
 	free(mfmtracks1);

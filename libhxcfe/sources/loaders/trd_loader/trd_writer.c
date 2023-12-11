@@ -48,7 +48,7 @@ int TRD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	int nbside;
 	int sectorsize;
 	int file_offset;
-	int found;
+	int found,ret;
 
 	FILE * trddskfile;
 	HXCFE_SECTORACCESS* ss;
@@ -57,6 +57,8 @@ int TRD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	unsigned char datasector[256];
 	unsigned int sectorcnt;
 	int layoutformat;
+
+	ret = HXCFE_INTERNALERROR;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write TRD file %s...",filename);
 
@@ -67,7 +69,6 @@ int TRD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 	if(ss)
 	{
-
 		for(id = 1;id<=16;id++)
 		{
 			sc = hxcfe_searchSector(ss,0,0,id,ISOIBM_MFM_ENCODING);
@@ -177,10 +178,12 @@ int TRD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 	if(ss)
 	{
+		ret = HXCFE_ACCESSERROR;
 
 		trddskfile = hxc_fopen(filename,"wb");
 		if(trddskfile)
 		{
+			ret = HXCFE_NOERROR;
 
 			for(i=0;i<nbsector*nbtrack*nbside;i++)
 			{
@@ -227,5 +230,5 @@ int TRD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		hxcfe_deinitSectorAccess(ss);
 	}
 
-	return 0;
+	return ret;
 }

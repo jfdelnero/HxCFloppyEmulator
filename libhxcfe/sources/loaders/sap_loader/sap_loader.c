@@ -38,7 +38,7 @@
 // File : sap_loader.c
 // Contains: TO8D SAP floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +94,6 @@ int SAP_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 int SAP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	int i,j,k;
-	unsigned char* trackdata;
 	int gap3len,interleave;
 	int skew;
 	int rpm;
@@ -122,28 +121,27 @@ int SAP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	switch(floppyformat)
 	{
-
-	case SAP_FORMAT1:
-		sectorsize=SAP_SECTSIZE1;
-		floppydisk->floppyNumberOfTrack=SAP_NTRACKS1;
-		floppydisk->floppySectorPerTrack=SAP_NSECTS;
-		floppydisk->floppyNumberOfSide=1;
-		trackformat=ISOFORMAT_DD;
+		case SAP_FORMAT1:
+			sectorsize=SAP_SECTSIZE1;
+			floppydisk->floppyNumberOfTrack=SAP_NTRACKS1;
+			floppydisk->floppySectorPerTrack=SAP_NSECTS;
+			floppydisk->floppyNumberOfSide=1;
+			trackformat=ISOFORMAT_DD;
 		break;
 
-	case SAP_FORMAT2:
-		sectorsize=SAP_SECTSIZE2;
-		floppydisk->floppyNumberOfTrack=SAP_NTRACKS2;
-		floppydisk->floppySectorPerTrack=SAP_NSECTS;
-		floppydisk->floppyNumberOfSide=1;
-		trackformat=ISOFORMAT_SD;
-		break;
-	default:
-		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Unknow floppy format: %d !",floppyformat);
-		sap_CloseArchive(sapid);
-		return -1;
+		case SAP_FORMAT2:
+			sectorsize=SAP_SECTSIZE2;
+			floppydisk->floppyNumberOfTrack=SAP_NTRACKS2;
+			floppydisk->floppySectorPerTrack=SAP_NSECTS;
+			floppydisk->floppyNumberOfSide=1;
+			trackformat=ISOFORMAT_SD;
 		break;
 
+		default:
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Unknow floppy format: %d !",floppyformat);
+			sap_CloseArchive(sapid);
+			return -1;
+		break;
 	}
 
 	floppydisk->floppyBitRate=250000;
@@ -151,15 +149,11 @@ int SAP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 	rpm=300; // normal rpm
 
-
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks, %d side(s), %d sectors/track,%d bytes/sector gap3:%d, interleave:%d,rpm:%d",floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,sectorsize,gap3len,interleave,rpm);
-
-	trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
 
 	memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*SAP_NSECTS);
 	for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 	{
-
 		floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
 		currentcylinder=floppydisk->tracks[j];
 
@@ -192,29 +186,25 @@ int SAP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		}
 	}
 
-	free(trackdata);
-
 	sap_CloseArchive(sapid);
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 	return HXCFE_NOERROR;
-
 }
 
 int SAP_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="THOMSONTO8D_SAP";
 	static const char plug_desc[]="THOMSON TO8D SAP Loader";
 	static const char plug_ext[]="sap";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	SAP_libIsValidDiskFile,
-		(LOADDISKFILE)		SAP_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	SAP_libGetPluginInfo
+		(ISVALIDDISKFILE)   SAP_libIsValidDiskFile,
+		(LOADDISKFILE)      SAP_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    SAP_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -227,5 +217,3 @@ int SAP_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 			plug_ext
 			);
 }
-
-

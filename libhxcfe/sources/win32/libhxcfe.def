@@ -17,6 +17,7 @@ EXPORTS
    hxcfe_execScriptLine                     @17
    hxcfe_setScriptOutputFunc                @18
 
+   hxcfe_freeFloppy                         @21
    hxcfe_floppySectorBySectorCopy           @22
    hxcfe_floppyUnload                       @23
    hxcfe_floppyDuplicate                    @24

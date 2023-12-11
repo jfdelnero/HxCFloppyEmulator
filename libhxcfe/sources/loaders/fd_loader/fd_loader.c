@@ -38,7 +38,7 @@
 // File : fd_loader.c
 // Contains: Thomson FD floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 // Jan. 2017 :  T. Missonier (sourcezax@users.sourceforge.net) : Correction for double sided fd files. Added fd_writer support
@@ -141,17 +141,16 @@ int FD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 
 int FD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="THOMSON_FD";
 	static const char plug_desc[]="THOMSON FD Loader";
 	static const char plug_ext[]="fd";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	FD_libIsValidDiskFile,
-		(LOADDISKFILE)		FD_libLoad_DiskFile,
-		(WRITEDISKFILE)		FD_libWrite_DiskFile,
-		(GETPLUGININFOS)	FD_libGetPluginInfo
+		(ISVALIDDISKFILE)   FD_libIsValidDiskFile,
+		(LOADDISKFILE)      FD_libLoad_DiskFile,
+		(WRITEDISKFILE)     FD_libWrite_DiskFile,
+		(GETPLUGININFOS)    FD_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -164,4 +163,3 @@ int FD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retur
 			plug_ext
 			);
 }
-

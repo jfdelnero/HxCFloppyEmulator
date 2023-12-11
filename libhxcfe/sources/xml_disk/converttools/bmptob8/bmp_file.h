@@ -6,7 +6,7 @@ typedef struct bitmap_data_
 	int16_t ysize;
 	int16_t nb_color;
 	uint8_t * palette;
-	uint32_t  * data;
+	void    * data;
 }bitmap_data;
 
 typedef struct tagBITMAPFILEHEADER {

@@ -168,7 +168,7 @@ int JV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 					free(sectordata[i]);
 				}
 				else
-				{	
+				{
 					for(l=0;l<(int)sectorsizes[i];l++)
 					{
 						fputc(0,jv3dskfile);
@@ -180,7 +180,13 @@ int JV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		}
 
 		hxc_fclose(jv3dskfile);
+
+		return HXCFE_NOERROR;
+	}
+	else
+	{
+		return HXCFE_ACCESSERROR;
 	}
 
-	return 0;
+
 }

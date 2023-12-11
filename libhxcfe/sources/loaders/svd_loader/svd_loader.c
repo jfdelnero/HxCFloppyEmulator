@@ -94,7 +94,6 @@ int SVD_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
 	FILE * f;
 	unsigned int filesize;
 	int i,j,k,skew;
@@ -108,7 +107,7 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int sectorpertrack,numberoftrack,numberofside,sectsize,wprot;
 	unsigned char blockbuf[256];
 	char linebuffer[80];
-	int	blanks,indexptr,sector;
+	int blanks,indexptr,sector;
 	HXCFE_SECTCFG * sectorconfig;
 	int sectorindex;
 
@@ -208,19 +207,19 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				for (sector = 0; sector < sectorpertrack; sector++)
 				{
-					int	sectortype = blockbuf[indexptr++];
+					int sectortype = blockbuf[indexptr++];
 
 					//THIS_SECTOR.encoding = SVD_SECTOR_TYPE(sectortype);
 
 					if (SVD_SECTOR_TYPE(sectortype) == BLANK_SECTOR) {
-						/* blanks are always at the end...so if we see a blank, we're done	*/
-						/* with real data...however, we need to read in the blanks' data	*/
+						/* blanks are always at the end...so if we see a blank, we're done  */
+						/* with real data...however, we need to read in the blanks' data    */
 						blanks++;
 					}
 					else
 					{
 
-						/* there is a "standard" amount of data per header field in the	*/
+						/* there is a "standard" amount of data per header field in the */
 						/* track header...each format needs to advance the indexpr right.*/
 
 						switch(SVD_SECTOR_TYPE(sectortype))
@@ -247,7 +246,7 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							case H17_HSFM:
 								indexptr += 19;
 								if (sector == sectorpertrack - 1) {
-									indexptr += 5;		/* last sector has 5 extra		*/
+									indexptr += 5;      /* last sector has 5 extra      */
 								}
 								//THIS_SECTOR.sizecode = reflect(blockbuf[indexptr++]); /* sets the volume */
 								//THIS_SECTOR.id = reflect(blockbuf[indexptr++]);
@@ -255,14 +254,14 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								//THIS_SECTOR.headCRC = reflect(blockbuf[indexptr++]);
 								//THIS_SECTOR.dataCRC = reflect(blockbuf[indexptr++]);
 								//if (THIS_SECTOR.id != 0) {
-								//	floppy->volume = THIS_SECTOR.sizecode;
+								//  floppy->volume = THIS_SECTOR.sizecode;
 								//}
 								//THIS_SECTOR.size = 256;
 							break;
 
 							case RNIB:
-								/* no information is used with the RNIB format, but it is written/read	*/
-								/* here just to allow the tools to work better (arguable).		*/
+								/* no information is used with the RNIB format, but it is written/read  */
+								/* here just to allow the tools to work better (arguable).      */
 
 								//THIS_SECTOR.id = blockbuf[indexptr++];
 								//THIS_SECTOR.side = blockbuf[indexptr++];
@@ -270,7 +269,7 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								//THIS_SECTOR.sizecode = blockbuf[indexptr++];
 
 								//if (sector != 0) {
-								//	indexptr += 5;
+								//  indexptr += 5;
 								//}
 							break;
 
@@ -287,9 +286,9 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								THIS_SECTOR.sector = blockbuf[indexptr++];
 								THIS_SECTOR.hdrchecksum = blockbuf[indexptr++];
 */
-								/* ONLY 2 BYTES OF EPILOG - THIRD IS SVD STATIC	*/
+								/* ONLY 2 BYTES OF EPILOG - THIRD IS SVD STATIC */
 
-/*								for (i=0; i < 2; i++) {
+/*                              for (i=0; i < 2; i++) {
 								THIS_SECTOR.hdrepilog[i] = blockbuf[indexptr++];
 								}
 
@@ -299,9 +298,9 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								THIS_SECTOR.preload = blockbuf[indexptr++];
 								THIS_SECTOR.datachecksum = blockbuf[indexptr++];
 */
-								/* standard data for AGCR	*/
+								/* standard data for AGCR   */
 
-//								THIS_SECTOR.size = 256;
+//                              THIS_SECTOR.size = 256;
 							}
 							break;
 
@@ -336,7 +335,6 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 		hxc_fclose(f);
 		return HXCFE_NOERROR;
-
 	}
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
@@ -346,17 +344,16 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int SVD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="SVD";
 	static const char plug_desc[]="SVD Loader";
 	static const char plug_ext[]="svd";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	SVD_libIsValidDiskFile,
-		(LOADDISKFILE)		SVD_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	SVD_libGetPluginInfo
+		(ISVALIDDISKFILE)   SVD_libIsValidDiskFile,
+		(LOADDISKFILE)      SVD_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    SVD_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

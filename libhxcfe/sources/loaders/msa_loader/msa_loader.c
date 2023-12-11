@@ -38,7 +38,7 @@
 // File : msa_loader.c
 // Contains: MSA floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -252,46 +252,44 @@ int MSA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	}
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
-	return HXCFE_BADFILE;
 
+	return HXCFE_BADFILE;
 
 alloc_error:
 
-	if( flatimg )
-		free( flatimg );
-	if( tmpbuffer )
-		free( tmpbuffer );
+	free( flatimg );
+	free( tmpbuffer );
 
 	hxc_fclose(f);
+
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
 
 	return HXCFE_INTERNALERROR;
 
 corrupted_file:
 
-	if( flatimg )
-		free( flatimg );
-	if( tmpbuffer )
-		free( tmpbuffer );
+	free( flatimg );
+	free( tmpbuffer );
 
 	hxc_fclose(f);
 
-	return HXCFE_FILECORRUPTED;
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
 
+	return HXCFE_FILECORRUPTED;
 }
 
 int MSA_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="ATARIST_MSA";
 	static const char plug_desc[]="ATARI ST MSA Loader";
 	static const char plug_ext[]="msa";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	MSA_libIsValidDiskFile,
-		(LOADDISKFILE)		MSA_libLoad_DiskFile,
-		(WRITEDISKFILE)		MSA_libWrite_DiskFile,
-		(GETPLUGININFOS)	MSA_libGetPluginInfo
+		(ISVALIDDISKFILE)   MSA_libIsValidDiskFile,
+		(LOADDISKFILE)      MSA_libLoad_DiskFile,
+		(WRITEDISKFILE)     MSA_libWrite_DiskFile,
+		(GETPLUGININFOS)    MSA_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

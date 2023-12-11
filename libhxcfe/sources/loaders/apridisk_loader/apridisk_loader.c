@@ -334,7 +334,7 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			case DATA_RECORD_DELETED:
 				if(data_record->header_size>sizeof(apridisk_data_record))
 				{
-					fileindex=fileindex+(data_record->header_size-sizeof(apridisk_data_record));
+					fileindex += (data_record->header_size-sizeof(apridisk_data_record));
 				}
 				fileindex += data_record->data_size;
 			break;
@@ -342,7 +342,7 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			case DATA_RECORD_SECTOR:
 				if(data_record->header_size>sizeof(apridisk_data_record))
 				{
-					fileindex=fileindex+(data_record->header_size-sizeof(apridisk_data_record));
+					fileindex += (data_record->header_size-sizeof(apridisk_data_record));
 				}
 				fileindex += data_record->data_size;
 			break;
@@ -350,7 +350,7 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			case DATA_RECORD_COMMENT:
 				if(data_record->header_size>sizeof(apridisk_data_record))
 				{
-					fileindex=fileindex+(data_record->header_size-sizeof(apridisk_data_record));
+					fileindex += (data_record->header_size-sizeof(apridisk_data_record));
 				}
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libLoad_DiskFile: item DATA_RECORD_COMMENT found: %s",&file_buffer[fileindex]);
 				fileindex += data_record->data_size;
@@ -359,7 +359,7 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			case DATA_RECORD_CREATOR:
 				if(data_record->header_size>sizeof(apridisk_data_record))
 				{
-					fileindex=fileindex+(data_record->header_size-sizeof(apridisk_data_record));
+					fileindex += (data_record->header_size-sizeof(apridisk_data_record));
 				}
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ApriDisk_libLoad_DiskFile: item DATA_RECORD_CREATOR found: %s",&file_buffer[fileindex]);
 				fileindex += data_record->data_size;
@@ -380,17 +380,16 @@ int ApriDisk_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 int ApriDisk_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="APRIDISK";
 	static const char plug_desc[]="APRIDISK Loader";
 	static const char plug_ext[]="dsk";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	ApriDisk_libIsValidDiskFile,
-		(LOADDISKFILE)		ApriDisk_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	ApriDisk_libGetPluginInfo
+		(ISVALIDDISKFILE)   ApriDisk_libIsValidDiskFile,
+		(LOADDISKFILE)      ApriDisk_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    ApriDisk_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

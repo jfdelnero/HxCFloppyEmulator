@@ -204,8 +204,7 @@ error:
 	if(outfile)
 		hxc_fclose(outfile);
 
-	if(track_buffer)
-		free(track_buffer);
+	free(track_buffer);
 
 	return HXCFE_INTERNALERROR;
 }

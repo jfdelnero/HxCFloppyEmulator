@@ -76,7 +76,7 @@ int MicralN_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 	int gap3len,interleave;
 	int rpm;
 	int trackformat;
-    int sectorsize;
+	int sectorsize;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SECTCFG  sectorconfig[32];
 
@@ -91,7 +91,7 @@ int MicralN_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 
 	filesize = hxc_fgetsize(f);
 
-    sectorsize = 128;
+	sectorsize = 128;
 
 	trackformat=MICRALN_HS_SD;
 
@@ -106,86 +106,91 @@ int MicralN_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 		floppydisk->floppyBitRate = 500000;
 		floppydisk->floppyiftype = GENERIC_SHUGART_DD_FLOPPYMODE;
 		floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if( !floppydisk->tracks )
+		{
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
+		}
+
 		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 		rpm=300; // normal rpm
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
-		trackdata=(unsigned char*)malloc(floppydisk->floppySectorPerTrack*sectorsize);
-
-		if(trackdata)
+		trackdata = (unsigned char*)malloc(floppydisk->floppySectorPerTrack*sectorsize);
+		if(!trackdata)
 		{
-			trk = 0;
-			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-			{
-				for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-				{
-
-					if( !floppydisk->tracks[j] )
-					{
-						floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-					}
-
-					currentcylinder=floppydisk->tracks[j];
-
-					hxcfe_imgCallProgressCallback(imgldr_ctx,trk,floppydisk->floppyNumberOfTrack*2 );
-					trk++;
-
-					memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
-					for(k=0;k<floppydisk->floppySectorPerTrack;k++)
-					{
-						sectorconfig[k].head = i;
-						sectorconfig[k].cylinder = j;
-						sectorconfig[k].sector = k;
-						sectorconfig[k].sectorsize = sectorsize;
-						sectorconfig[k].bitrate = floppydisk->floppyBitRate;
-						sectorconfig[k].gap3 = gap3len;
-						sectorconfig[k].trackencoding = trackformat;
-						sectorconfig[k].input_data = &trackdata[k*sectorsize];
-					}
-
-					file_offset = ( ( floppydisk->floppySectorPerTrack * sectorsize ) * j * floppydisk->floppyNumberOfSide) + \
-									( ( floppydisk->floppySectorPerTrack * sectorsize ) * j * i);
-
-					fseek (f , file_offset , SEEK_SET);
-
-					hxc_fread(trackdata,(floppydisk->floppySectorPerTrack*sectorsize),f);
-
-					currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,1,0,floppydisk->floppyBitRate,rpm,trackformat,0,0,0);
-				}
-			}
-
-			free(trackdata);
-
-			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-
+			hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
 			hxc_fclose(f);
-			return HXCFE_NOERROR;
-
+			return HXCFE_INTERNALERROR;
 		}
+
+		trk = 0;
+		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+		{
+			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+			{
+				if( !floppydisk->tracks[j] )
+				{
+					floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+				}
+
+				currentcylinder=floppydisk->tracks[j];
+
+				hxcfe_imgCallProgressCallback(imgldr_ctx,trk,floppydisk->floppyNumberOfTrack*2 );
+				trk++;
+
+				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+				{
+					sectorconfig[k].head = i;
+					sectorconfig[k].cylinder = j;
+					sectorconfig[k].sector = k;
+					sectorconfig[k].sectorsize = sectorsize;
+					sectorconfig[k].bitrate = floppydisk->floppyBitRate;
+					sectorconfig[k].gap3 = gap3len;
+					sectorconfig[k].trackencoding = trackformat;
+					sectorconfig[k].input_data = &trackdata[k*sectorsize];
+				}
+
+				file_offset = ( ( floppydisk->floppySectorPerTrack * sectorsize ) * j * floppydisk->floppyNumberOfSide) + \
+								( ( floppydisk->floppySectorPerTrack * sectorsize ) * j * i);
+
+				fseek (f , file_offset , SEEK_SET);
+
+				hxc_fread(trackdata,(floppydisk->floppySectorPerTrack*sectorsize),f);
+
+				currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,1,0,floppydisk->floppyBitRate,rpm,trackformat,0,0,0);
+			}
+		}
+
+		free(trackdata);
+
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		hxc_fclose(f);
-		return HXCFE_FILECORRUPTED;
+
+		return HXCFE_NOERROR;
 	}
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
+
 	return HXCFE_BADFILE;
 }
 
 int MicralN_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="MICRAL_N";
 	static const char plug_desc[]="Micral N Loader";
 	static const char plug_ext[]="mic";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	MicralN_libIsValidDiskFile,
-		(LOADDISKFILE)		MicralN_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	MicralN_libGetPluginInfo
+		(ISVALIDDISKFILE)   MicralN_libIsValidDiskFile,
+		(LOADDISKFILE)      MicralN_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    MicralN_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

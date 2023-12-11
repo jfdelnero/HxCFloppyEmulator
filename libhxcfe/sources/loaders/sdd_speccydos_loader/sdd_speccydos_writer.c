@@ -47,6 +47,7 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * flopp
 	int i,j,k,id;
 	int nbsector;
 	int sectorsize;
+	int ret;
 
 	FILE * sdddskfile;
 	HXCFE_SECTORACCESS* ss;
@@ -87,12 +88,18 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * flopp
 		hxcfe_deinitSectorAccess(ss);
 	}
 
+	ret = HXCFE_BADFILE;
+
 	if(nbsector)
 	{
+		ret = HXCFE_INTERNALERROR;
+
 		flat_track = malloc(nbsector * sectorsize);
 		if(flat_track)
 		{
 			memset(flat_track,0,nbsector * sectorsize);
+
+			ret = HXCFE_ACCESSERROR;
 
 			sdddskfile = hxc_fopen(filename,"wb");
 			if(sdddskfile)
@@ -133,11 +140,12 @@ int SDDSpeccyDos_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * flopp
 				}
 
 				hxc_fclose(sdddskfile);
+				ret = HXCFE_NOERROR;
 			}
 
 			free(flat_track);
 		}
 	}
 
-	return 0;
+	return ret;
 }

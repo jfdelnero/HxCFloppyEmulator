@@ -38,7 +38,7 @@
 // File : emax_loader.c
 // Contains: Emax floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -83,7 +83,6 @@
 #define OS3_HIGH 1599
 #define TOTAL_BLKS ((BANK_HIGH-BANK_LOW)+(SAMPLE_HIGH-SAMPLE_LOW))
 #define TOTAL_OS ((OS1_HIGH-OS1_LOW)+(OS2_HIGH-OS2_LOW)+(OS3_HIGH-OS3_LOW))
-
 
 int EMAX_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
@@ -231,17 +230,16 @@ int EMAX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,ch
 
 int EMAX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="EMAX_EM";
 	static const char plug_desc[]="EMAX EM1 & EM2 Loader";
 	static const char plug_ext[]="em1";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	EMAX_libIsValidDiskFile,
-		(LOADDISKFILE)		EMAX_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	EMAX_libGetPluginInfo
+		(ISVALIDDISKFILE)   EMAX_libIsValidDiskFile,
+		(LOADDISKFILE)      EMAX_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    EMAX_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -254,4 +252,3 @@ int EMAX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * ret
 			plug_ext
 			);
 }
-

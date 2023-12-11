@@ -99,8 +99,6 @@ int CopyQm_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS
 	return HXCFE_BADPARAMETER;
 }
 
-
-
 int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f_img;
@@ -156,7 +154,6 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 			hxc_fclose(f_img);
 			return HXCFE_BADFILE;
 		}
-
 
 		/* I'm guessing sector size is at 3. Expandqm thinks 7 */
 		rawcfg.sector_size = get_u16( fileheader, 0x03 );
@@ -273,7 +270,7 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 					if ( c == EOF )
 					{
 						free(flatimg);
-						hxc_fclose(f_img);					
+						hxc_fclose(f_img);                  
 						return HXCFE_FILECORRUPTED;
 					}
 					/* Copy the byte into memory and update the offset */
@@ -337,17 +334,16 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 int CopyQm_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="COPYQM";
 	static const char plug_desc[]="COPYQM IMG Loader";
 	static const char plug_ext[]="dsk";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	CopyQm_libIsValidDiskFile,
-		(LOADDISKFILE)		CopyQm_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	CopyQm_libGetPluginInfo
+		(ISVALIDDISKFILE)   CopyQm_libIsValidDiskFile,
+		(LOADDISKFILE)      CopyQm_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    CopyQm_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

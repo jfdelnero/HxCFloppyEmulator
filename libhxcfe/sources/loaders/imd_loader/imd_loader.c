@@ -90,7 +90,7 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 {
 	FILE * f;
 	char fileheader[5];
-//	MFMTRACKIMG trackdesc;
+//  MFMTRACKIMG trackdesc;
 	unsigned int i,j,trackcount,headcount;
 	HXCFE_SECTCFG* sectorconfig = NULL;
 	HXCFE_CYLINDER* currentcylinder = NULL;
@@ -106,6 +106,7 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int32_t interleave,tracktype;
 	int32_t rpm;
 	unsigned char sectordatarecordcode,cdata;
+	unsigned int filesize;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMD_libLoad_DiskFile %s",imgfile);
 
@@ -118,18 +119,26 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
+	filesize = hxc_fgetsize(f);
+
 	memset(fileheader,0,sizeof(fileheader));
 
 	hxc_fread(&fileheader,sizeof(fileheader),f);
 
 	if(!strncmp(fileheader,"IMD ",4))
 	{
-
 		// recherche fin entete / comentaire(s).
+		i = 0;
 		do
 		{
-		}while(getc(f)!=0x1A);
+			i++;
+		}while(getc(f)!=0x1A && i<filesize);
 
+		if( i >= filesize )
+		{
+			hxc_fclose(f);
+			return HXCFE_BADFILE;			
+		}
 
 		// recuperation de la geometries du disque
 		trackcount=0;
@@ -208,7 +217,6 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		floppydisk->floppySectorPerTrack=-1;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 
-
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IMD File : %d track, %d side, %d bit/s, %d sectors, mode %d",
 			floppydisk->floppyNumberOfTrack,
 			floppydisk->floppyNumberOfSide,
@@ -225,11 +233,19 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 		fseek(f,0,SEEK_SET);
+
 		// recherche fin entete / comentaire(s).
+		i = 0;
 		do
 		{
-		}while(getc(f)!=0x1A);
+			i++;
+		}while(getc(f)!=0x1A && i<filesize);
 
+		if( i >= filesize )
+		{
+			hxc_fclose(f);
+			return HXCFE_BADFILE;			
+		}
 
 		for(i=0;i<(unsigned int)(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide);i++)
 		{
@@ -240,7 +256,7 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				sectorconfig = (HXCFE_SECTCFG*)malloc(sizeof(HXCFE_SECTCFG)*trackcfg.number_of_sector);
 				if(!sectorconfig)
 					goto alloc_error;
-		
+
 				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*trackcfg.number_of_sector);
 
 				// lecture map sector.
@@ -440,7 +456,7 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				}
 
 				currentcylinder = floppydisk->tracks[trackcfg.physical_cylinder];
-				
+
 
 				currentside = tg_generateTrackEx((unsigned short)trackcfg.number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,tracktype,pregap,2500 | NO_SECTOR_UNDER_INDEX,-2500);
 				currentcylinder->sides[trackcfg.physical_head&0xF] = currentside;
@@ -490,15 +506,19 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	}
 
 	hxc_fclose(f);
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"bad header");
+
 	return HXCFE_BADFILE;
-	
+
 alloc_error:
 	free(track_data);
 	free(sectorheadmap);
 	free(sectorcylmap);
 	free(sectormap);
 	free(sectorconfig);
+
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
 
 	return HXCFE_INTERNALERROR;
 }
@@ -507,17 +527,16 @@ int IMD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 int IMD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="IMD_IMG";
 	static const char plug_desc[]="ImageDisk IMD file Loader";
 	static const char plug_ext[]="imd";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	IMD_libIsValidDiskFile,
-		(LOADDISKFILE)		IMD_libLoad_DiskFile,
-		(WRITEDISKFILE)		IMD_libWrite_DiskFile,
-		(GETPLUGININFOS)	IMD_libGetPluginInfo
+		(ISVALIDDISKFILE)   IMD_libIsValidDiskFile,
+		(LOADDISKFILE)      IMD_libLoad_DiskFile,
+		(WRITEDISKFILE)     IMD_libWrite_DiskFile,
+		(GETPLUGININFOS)    IMD_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

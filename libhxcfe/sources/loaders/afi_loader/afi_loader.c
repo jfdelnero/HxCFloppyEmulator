@@ -38,7 +38,7 @@
 // File : afi_loader.c
 // Contains: AFI floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -840,7 +840,6 @@ int AFI_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 int AFI_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="HXC_AFI";
 	static const char plug_desc[]="HxC AFI file loader";
 	static const char plug_ext[]="afi";

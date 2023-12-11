@@ -38,7 +38,7 @@
 // File : raw_loader.c
 // Contains: Amiga disk raw image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////

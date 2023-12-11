@@ -84,8 +84,6 @@ int JV1_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 	return HXCFE_BADFILE;
 }
 
-
-
 int JV1_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
@@ -206,10 +204,8 @@ int JV1_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return HXCFE_BADFILE;
 }
 
-
 int JV1_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="TRS80_JV1";
 	static const char plug_desc[]="TRS80 JV1 Loader";
 	static const char plug_ext[]="jv1";

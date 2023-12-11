@@ -167,14 +167,17 @@ int VTR_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 				else
 					mfmsize2=mfmsize2/8;
 			}
+
 			if(mfmsize>0x7FFF)
 			{
 				mfmsize=0x7FFF;
 			}
+
 			if(mfmsize2>0x7FFF)
 			{
 				mfmsize2=0x7FFF;
 			}
+
 			track=(vtrucco_pictrack *)(offsettrack+(i*sizeof(vtrucco_pictrack)));
 
 			if(track->track_len%512)

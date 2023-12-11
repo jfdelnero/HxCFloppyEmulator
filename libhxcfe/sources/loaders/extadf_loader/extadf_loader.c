@@ -81,9 +81,6 @@ int EXTADF_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS
 	}
 }
 
-
-
-
 int EXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
@@ -245,22 +242,23 @@ alloc_error:
 
 	hxc_fclose(f);
 
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
+
 	return HXCFE_INTERNALERROR;
 }
 
 int EXTADF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="AMIGA_EXTADF";
 	static const char plug_desc[]="AMIGA EXTENDED ADF Loader";
 	static const char plug_ext[]="adf";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	EXTADF_libIsValidDiskFile,
-		(LOADDISKFILE)		EXTADF_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	EXTADF_libGetPluginInfo
+		(ISVALIDDISKFILE)   EXTADF_libIsValidDiskFile,
+		(LOADDISKFILE)      EXTADF_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    EXTADF_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -273,4 +271,3 @@ int EXTADF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * r
 			plug_ext
 			);
 }
-

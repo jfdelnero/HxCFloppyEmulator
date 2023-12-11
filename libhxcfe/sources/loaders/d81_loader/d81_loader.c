@@ -38,7 +38,7 @@
 // File : d81_loader.c
 // Contains: D81 floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -63,8 +63,6 @@ int D81_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 {
 	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "D81_libIsValidDiskFile", "d81", 512);
 }
-
-
 
 int D81_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
@@ -102,20 +100,18 @@ int D81_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return ret;
 }
 
-
 int D81_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="C64_D81";
 	static const char plug_desc[]="C64 D81 Loader";
 	static const char plug_ext[]="d81";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	D81_libIsValidDiskFile,
-		(LOADDISKFILE)		D81_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	D81_libGetPluginInfo
+		(ISVALIDDISKFILE)   D81_libIsValidDiskFile,
+		(LOADDISKFILE)      D81_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    D81_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

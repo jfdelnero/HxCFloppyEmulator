@@ -38,7 +38,7 @@
 // File : northstar_loader.c
 // Contains: Northstar floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -68,7 +68,6 @@ int Northstar_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEIN
 
 int Northstar_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
 	FILE * f;
 	unsigned int filesize;
 	int i,j,k,trk;
@@ -104,6 +103,12 @@ int Northstar_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 		floppydisk->floppyBitRate = 250000;
 		floppydisk->floppyiftype = GENERIC_SHUGART_DD_FLOPPYMODE;
 		floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if(!floppydisk->tracks)
+		{
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
+		}
+
 		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 		rpm=300; // normal rpm
@@ -111,6 +116,12 @@ int Northstar_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
 		trackdata=(unsigned char*)malloc(floppydisk->floppySectorPerTrack*512);
+		if(!trackdata)
+		{
+			hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
+		}
 
 		if(trackdata)
 		{
@@ -169,6 +180,7 @@ int Northstar_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 			return HXCFE_NOERROR;
 
 		}
+
 		hxc_fclose(f);
 		return HXCFE_FILECORRUPTED;
 	}
@@ -180,17 +192,16 @@ int Northstar_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 int Northstar_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="NORTHSTAR";
 	static const char plug_desc[]="Northstar Loader";
 	static const char plug_ext[]="nsi";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	Northstar_libIsValidDiskFile,
-		(LOADDISKFILE)		Northstar_libLoad_DiskFile,
-		(WRITEDISKFILE)		Northstar_libWrite_DiskFile,
-		(GETPLUGININFOS)	Northstar_libGetPluginInfo
+		(ISVALIDDISKFILE)   Northstar_libIsValidDiskFile,
+		(LOADDISKFILE)      Northstar_libLoad_DiskFile,
+		(WRITEDISKFILE)     Northstar_libWrite_DiskFile,
+		(GETPLUGININFOS)    Northstar_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

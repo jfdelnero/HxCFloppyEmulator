@@ -38,7 +38,7 @@
 // File : ensoniq_mirage_loader.c
 // Contains: Ensoniq mirage floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -142,7 +142,7 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 					sectorconfig[numberofsector-1].sectorsize=512;
 
 					file_offset=( (((numberofsector-1)*1024)+512) * floppydisk->floppyNumberOfSide * j ) +
-						        ( (((numberofsector-1)*1024)+512) * i );
+								( (((numberofsector-1)*1024)+512) * i );
 					fseek (f , file_offset , SEEK_SET);
 					hxc_fread(trackdata,(((numberofsector-1)*1024)+512),f);
 
@@ -169,17 +169,16 @@ int Ensoniq_mirage_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flo
 
 int Ensoniq_mirage_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="ENSONIQ_EDM";
 	static const char plug_desc[]="Ensoniq mirage EDM Loader";
 	static const char plug_ext[]="edm";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	Ensoniq_mirage_libIsValidDiskFile,
-		(LOADDISKFILE)		Ensoniq_mirage_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	Ensoniq_mirage_libGetPluginInfo
+		(ISVALIDDISKFILE)   Ensoniq_mirage_libIsValidDiskFile,
+		(LOADDISKFILE)      Ensoniq_mirage_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    Ensoniq_mirage_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -192,4 +191,3 @@ int Ensoniq_mirage_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,
 			plug_ext
 			);
 }
-

@@ -38,7 +38,7 @@
 // File : fdi_nec_loader.c
 // Contains: FDI floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -58,7 +58,6 @@
 
 #include "fdi_nec_loader.h"
 #include "fdi_nec_format.h"
-
 
 int FDINEC_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
@@ -85,8 +84,6 @@ int FDINEC_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS
 		return HXCFE_BADFILE;
 	}
 }
-
-
 
 int FDINEC_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
@@ -142,20 +139,18 @@ int FDINEC_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 }
 
-
 int FDINEC_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="NEC_FDI";
 	static const char plug_desc[]="NEC FDI Loader";
 	static const char plug_ext[]="fdi";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	FDINEC_libIsValidDiskFile,
-		(LOADDISKFILE)		FDINEC_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	FDINEC_libGetPluginInfo
+		(ISVALIDDISKFILE)   FDINEC_libIsValidDiskFile,
+		(LOADDISKFILE)      FDINEC_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    FDINEC_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

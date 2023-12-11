@@ -87,8 +87,6 @@ int FDI_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 	}
 }
 
-
-
 int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
@@ -130,7 +128,6 @@ int FDI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	fseek(f,f_header.diskdescription_offset,SEEK_SET);
 	hxc_fread(tempsector,f_header.data_offset - f_header.diskdescription_offset,f);
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Disk:%s",tempsector);
-
 
 	trackoffset=f_header.additionnal_infos_len+0xE;
 	fseek(f,trackoffset,SEEK_SET);
@@ -249,22 +246,23 @@ alloc_error:
 
 	hxc_fclose(f);
 
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
+
 	return HXCFE_INTERNALERROR;
 }
 
 int FDI_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="ZXSPECTRUM_FDI";
 	static const char plug_desc[]="ZX SPECTRUM FDI Loader";
 	static const char plug_ext[]="fdi";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	FDI_libIsValidDiskFile,
-		(LOADDISKFILE)		FDI_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	FDI_libGetPluginInfo
+		(ISVALIDDISKFILE)   FDI_libIsValidDiskFile,
+		(LOADDISKFILE)      FDI_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    FDI_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

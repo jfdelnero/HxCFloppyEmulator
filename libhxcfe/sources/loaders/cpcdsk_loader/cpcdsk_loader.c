@@ -453,7 +453,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 alloc_error:
 
-	hxcfe_floppyUnload(imgldr_ctx->hxcfe, floppydisk );
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
 
 	if(f)
 		hxc_fclose(f);
@@ -478,17 +478,16 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 
 int CPCDSK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="AMSTRADCPC_DSK";
 	static const char plug_desc[]="Amstrad CPC DSK Loader";
 	static const char plug_ext[]="dsk";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	CPCDSK_libIsValidDiskFile,
-		(LOADDISKFILE)		CPCDSK_libLoad_DiskFile,
-		(WRITEDISKFILE)		CPCDSK_libWrite_DiskFile,
-		(GETPLUGININFOS)	CPCDSK_libGetPluginInfo
+		(ISVALIDDISKFILE)   CPCDSK_libIsValidDiskFile,
+		(LOADDISKFILE)      CPCDSK_libLoad_DiskFile,
+		(WRITEDISKFILE)     CPCDSK_libWrite_DiskFile,
+		(GETPLUGININFOS)    CPCDSK_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

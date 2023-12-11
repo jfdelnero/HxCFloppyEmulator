@@ -38,7 +38,7 @@
 // File : teledisk_loader.c
 // Contains: Teledisk (TD0) floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +94,7 @@ int TeleDisk_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINF
 		if(((td_header->CRC[1]<<8)|td_header->CRC[0]) != ((CRC16_High<<8)|CRC16_Low))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"bad header crc !");
-     		return HXCFE_BADFILE;
+			return HXCFE_BADFILE;
 		}
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TeleDisk_libIsValidDiskFile : it's a TeleDisk file!");
@@ -619,17 +619,16 @@ error_bad_file:
 
 int TeleDisk_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="TELEDISK_TD0";
 	static const char plug_desc[]="TELEDISK TD0 Loader";
 	static const char plug_ext[]="td0";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	TeleDisk_libIsValidDiskFile,
-		(LOADDISKFILE)		TeleDisk_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	TeleDisk_libGetPluginInfo
+		(ISVALIDDISKFILE)   TeleDisk_libIsValidDiskFile,
+		(LOADDISKFILE)      TeleDisk_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    TeleDisk_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

@@ -38,7 +38,7 @@
 // File : adl_ssd_dsd_loader.c
 // Contains: BBC floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -114,17 +114,16 @@ int DSD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int DSD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="BBC_SSD_DSD";
 	static const char plug_desc[]="BBC SSD & DSD floppy image loader";
 	static const char plug_ext[]="dsd";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	DSD_libIsValidDiskFile,
-		(LOADDISKFILE)		DSD_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	DSD_libGetPluginInfo
+		(ISVALIDDISKFILE)   DSD_libIsValidDiskFile,
+		(LOADDISKFILE)      DSD_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    DSD_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -137,4 +136,3 @@ int DSD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 			plug_ext
 			);
 }
-

@@ -153,7 +153,7 @@ uint32_t trackcopy(unsigned char * dest,unsigned char * src,uint32_t overlap,uin
 	}
 
 	dest_tracklen=tracklen;
-/*	if(tracklen&0x7)
+/*  if(tracklen&0x7)
 	{
 	  j=j+(((tracklen&~0x7)+8)-tracklen);
 	  dest_tracklen=tracklen+(((tracklen&~0x7)+8)-tracklen);
@@ -199,7 +199,6 @@ uint32_t trackcopy(unsigned char * dest,unsigned char * src,uint32_t overlap,uin
 
 int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
 	unsigned int filesize;
 	unsigned int i,j,k,l,m,len;
 	unsigned char *fileimg;
@@ -227,6 +226,8 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IPF_libLoad_DiskFile %s",imgfile);
 
+	fileimg = NULL;
+	temptrack = NULL;
 	progresscnt = 0;
 
 	f = hxc_fopen(imgfile,"rb");
@@ -240,7 +241,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	if( filesize )
 	{
-		fileimg=(unsigned char*)malloc(filesize);
+		fileimg = (unsigned char*)malloc(filesize);
 
 		if(fileimg!=NULL)
 		{
@@ -282,7 +283,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "LOADER_IPF_CAPS_DI_LOCK_INDEX" ) )
 	{
 		flag |= DI_LOCK_INDEX;
-		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"CAPS DI_LOCK_INDEX flag enabled");		
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"CAPS DI_LOCK_INDEX flag enabled");
 	}
 
 	if (!oldlib)
@@ -346,7 +347,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Sectorcnt   : %d",ti.sectorcnt);
 							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"sectorsize  : %d",ti.sectorsize);
 							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Type        : %.8X",ti.type);
-							//	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"trackcnt    : %d\n",ti.trackcnt);
+							//  imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"trackcnt    : %d\n",ti.trackcnt);
 							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"tracklen     : %d %s",ti.tracklen*sizefactor,(ti.tracklen*sizefactor)&0x7?"non aligned !":"aligned");
 							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"overlap     : %d %s",ti.overlap*sizefactor,(ti.overlap*sizefactor)&0x7?"non aligned !":"aligned");
 
@@ -401,7 +402,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								if((ti.type & CTIT_FLAG_FLAKEY) && hxc_checkfileext(imgfile,"ipf",SYS_PATH_TYPE) )
 								{
 									// This method is only valid with ipf files (fixed track size at each revolution...)
-									temptrack=(unsigned char *)malloc(len);
+									temptrack = (unsigned char *)malloc(len);
 									if(temptrack)
 									{
 										memset(temptrack,0,len);
@@ -457,6 +458,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 										}
 
 										free(temptrack);
+										temptrack = NULL;
 									}
 
 								}
@@ -570,7 +572,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								if( !currentcylinder )
 									goto alloc_error;
 
-								
+
 								currentcylinder->number_of_side=floppydisk->floppyNumberOfSide;
 								currentcylinder->sides = (HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*currentcylinder->number_of_side);
 								if(!currentcylinder->sides)
@@ -625,7 +627,6 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			}
 
 			pCAPSUnlockAllTracks(img);
-
 		}
 
 		pCAPSUnlockImage(img);
@@ -634,35 +635,37 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		pCAPSRemImage(img);
 
 		free(fileimg);
+		fileimg = NULL;
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"IPF Loader : tracks file successfully loaded and encoded!");
 		return HXCFE_NOERROR;
-
-
 	}
 
 	return HXCFE_INTERNALERROR;
 
 alloc_error:
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"IPF Loader : Memory allocation error !");
-	// TODO : Free the allocated buffers
+
+	free( fileimg );
+	free( temptrack );
+
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
 
 	return HXCFE_INTERNALERROR;
 }
 
 int IPF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="SPS_IPF";
 	static const char plug_desc[]="SPS IPF Loader";
 	static const char plug_ext[]="ipf";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	IPF_libIsValidDiskFile,
-		(LOADDISKFILE)		IPF_libLoad_DiskFile,
-		(WRITEDISKFILE)		IPF_libWrite_DiskFile,
-		(GETPLUGININFOS)	IPF_libGetPluginInfo
+		(ISVALIDDISKFILE)   IPF_libIsValidDiskFile,
+		(LOADDISKFILE)      IPF_libLoad_DiskFile,
+		(WRITEDISKFILE)     IPF_libWrite_DiskFile,
+		(GETPLUGININFOS)    IPF_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

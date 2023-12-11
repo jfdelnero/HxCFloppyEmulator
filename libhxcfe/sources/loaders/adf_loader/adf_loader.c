@@ -38,7 +38,7 @@
 // File : adf_loader.c
 // Contains: ADF floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -87,17 +87,16 @@ int ADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int ADF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="AMIGA_ADF";
 	static const char plug_desc[]="AMIGA ADF Loader";
 	static const char plug_ext[]="adf";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	ADF_libIsValidDiskFile,
-		(LOADDISKFILE)		ADF_libLoad_DiskFile,
-		(WRITEDISKFILE)		ADF_libWrite_DiskFile,
-		(GETPLUGININFOS)	ADF_libGetPluginInfo
+		(ISVALIDDISKFILE)   ADF_libIsValidDiskFile,
+		(LOADDISKFILE)      ADF_libLoad_DiskFile,
+		(WRITEDISKFILE)     ADF_libWrite_DiskFile,
+		(GETPLUGININFOS)    ADF_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

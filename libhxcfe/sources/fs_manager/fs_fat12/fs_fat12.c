@@ -38,7 +38,7 @@
 // File : fs_fat12.c
 // Contains: DOS/FAT12 File system manager functions
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////

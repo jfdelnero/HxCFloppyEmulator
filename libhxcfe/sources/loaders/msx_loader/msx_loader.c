@@ -38,7 +38,7 @@
 // File : msx_loader.c
 // Contains: MSX IMG floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -171,8 +171,6 @@ int MSX_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 	}
 }
 
-
-
 int MSX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	raw_iso_cfg rawcfg;
@@ -212,17 +210,16 @@ int MSX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int MSX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="MSX_DSK";
 	static const char plug_desc[]="MSX DSK Loader";
 	static const char plug_ext[]="dsk";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	MSX_libIsValidDiskFile,
-		(LOADDISKFILE)		MSX_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	MSX_libGetPluginInfo
+		(ISVALIDDISKFILE)   MSX_libIsValidDiskFile,
+		(LOADDISKFILE)      MSX_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    MSX_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -235,4 +232,3 @@ int MSX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 			plug_ext
 			);
 }
-

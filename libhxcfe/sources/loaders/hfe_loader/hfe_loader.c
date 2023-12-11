@@ -251,29 +251,24 @@ int HFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			{
 				hxcfe_imgCallProgressCallback(imgldr_ctx,(i<<1) + (j&1),floppydisk->floppyNumberOfTrack*2 );
 
-				currentcylinder->sides[j] = malloc(sizeof(HXCFE_SIDE));
+				currentcylinder->sides[j] = calloc( 1, sizeof(HXCFE_SIDE));
 				if(!currentcylinder->sides[j])
 					goto alloc_error;
 
-				memset(currentcylinder->sides[j],0,sizeof(HXCFE_SIDE));
 				currentside = currentcylinder->sides[j];
 
 				currentside->number_of_sector = floppydisk->floppySectorPerTrack;
 				currentside->tracklen=tracklen/2;
 
-				currentside->databuffer = malloc(currentside->tracklen);
+				currentside->databuffer = calloc( 1, currentside->tracklen );
 				if(!currentside->databuffer)
 					goto alloc_error;
 
-				memset(currentside->databuffer,0,currentside->tracklen);
-
 				currentside->flakybitsbuffer=0;
 
-				currentside->indexbuffer = malloc(currentside->tracklen);
+				currentside->indexbuffer = calloc( 1, currentside->tracklen);
 				if(!currentside->indexbuffer)
 					goto alloc_error;
-
-				memset(currentside->indexbuffer,0,currentside->tracklen);
 
 				for(k=0;k<256;k++)
 				{
@@ -343,27 +338,7 @@ int HFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 alloc_error:
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"HFE File : Internal memory allocation error ! Please report !");
 
-	if(floppydisk->tracks)
-	{
-		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-		{
-			if(floppydisk->tracks[j])
-			{
-				if(floppydisk->tracks[j]->sides)
-				{
-					for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-					{
-						hxcfe_freeSide(imgldr_ctx->hxcfe,floppydisk->tracks[j]->sides[i]);
-					}
-
-					free(floppydisk->tracks[j]->sides);
-				}
-
-				free(floppydisk->tracks[j]);
-			}
-		}
-		free(floppydisk->tracks);
-	}
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
 
 	if(f)
 		hxc_fclose(f);
@@ -379,7 +354,6 @@ int HFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 int HFE_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="HXC_HFE";
 	static const char plug_desc[]="SD Card HxCFE HFE file Loader";
 	static const char plug_ext[]="hfe";
@@ -407,7 +381,6 @@ int EXTHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 
 int EXTHFE_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="HXC_EXTHFE";
 	static const char plug_desc[]="SD Card HxCFE EXTENDED HFE file Loader";
 	static const char plug_ext[]="hfe";
@@ -435,7 +408,6 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 
 int HFE_HDDD_A2_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="HXC_HDDD_A2_HFE";
 	static const char plug_desc[]="SD Card HxCFE HFE file Loader (HDDD A2 Support)";
 	static const char plug_ext[]="hfe";

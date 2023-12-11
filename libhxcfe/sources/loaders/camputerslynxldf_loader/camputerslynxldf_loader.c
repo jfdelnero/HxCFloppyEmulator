@@ -38,7 +38,7 @@
 // File : camputerslynxldf_loader.c
 // Contains: Camputers Lynx floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -197,17 +197,16 @@ int CAMPUTERSLYNX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flop
 
 int CAMPUTERSLYNX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="CAMPUTERSLYNX";
 	static const char plug_desc[]="CAMPUTERSLYNX Loader";
 	static const char plug_ext[]="ldf";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	CAMPUTERSLYNX_libIsValidDiskFile,
-		(LOADDISKFILE)		CAMPUTERSLYNX_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	CAMPUTERSLYNX_libGetPluginInfo
+		(ISVALIDDISKFILE)   CAMPUTERSLYNX_libIsValidDiskFile,
+		(LOADDISKFILE)      CAMPUTERSLYNX_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    CAMPUTERSLYNX_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

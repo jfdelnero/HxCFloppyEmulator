@@ -38,7 +38,7 @@
 // File : apple2_nib_loader.c
 // Contains: Apple 2 nib floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -76,7 +76,7 @@ int Apple2_nib_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 	unsigned int filesize;
 	int i,j;
 	unsigned int file_offset;
-	unsigned char* trackdata;
+	unsigned char trackdata[NIB_TRACK_SIZE];
 	int trackformat;
 	int rpm;
 	HXCFE_CYLINDER* currentcylinder;
@@ -113,12 +113,15 @@ int Apple2_nib_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 #endif
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if(!floppydisk->tracks)
+		{
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
+		}
 
 		rpm=300;
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s)",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide);
-
-		trackdata=(unsigned char*)malloc(NIB_TRACK_SIZE);
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
@@ -130,7 +133,7 @@ int Apple2_nib_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 			file_offset= NIB_TRACK_SIZE * j;
 
 			fseek (f , file_offset , SEEK_SET);
-			hxc_fread(trackdata,NIB_TRACK_SIZE,f);
+			hxc_fread(&trackdata,NIB_TRACK_SIZE,f);
 
 #ifdef HDDD_A2_SUPPORT
 			currentcylinder->sides[0] = tg_alloctrack(floppydisk->floppyBitRate,trackformat,rpm,NIB_TRACK_SIZE * 2 * 8 * 2,1000,0,0);
@@ -167,8 +170,6 @@ int Apple2_nib_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 #endif
 		}
 
-		free(trackdata);
-
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 		hxc_fclose(f);
@@ -177,23 +178,24 @@ int Apple2_nib_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 	}
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+
 	hxc_fclose(f);
+
 	return HXCFE_BADFILE;
 }
 
 int Apple2_nib_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="APPLE2_NIB";
 	static const char plug_desc[]="Apple II NIB Loader";
 	static const char plug_ext[]="nib";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	Apple2_nib_libIsValidDiskFile,
-		(LOADDISKFILE)		Apple2_nib_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	Apple2_nib_libGetPluginInfo
+		(ISVALIDDISKFILE)   Apple2_nib_libIsValidDiskFile,
+		(LOADDISKFILE)      Apple2_nib_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    Apple2_nib_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

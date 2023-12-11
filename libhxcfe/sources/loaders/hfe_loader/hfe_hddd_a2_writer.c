@@ -51,6 +51,7 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 	FILE * hxcpicfile;
 
 	picfileformatheader * FILEHEADER;
+	unsigned char header_buffer[512];
 	unsigned char * mfmtracks0,*mfmtracks1,*mfmtrackfinal;
 	unsigned char * offsettrack;
 	int mfmsize,mfmsize2,i_conv;
@@ -61,19 +62,23 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 
 	unsigned short fm_pulses;
 
+	mfmtracks0 = NULL;
+	mfmtracks1 = NULL;
+	mfmtrackfinal = NULL;
+	offsettrack = NULL;
+
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write HFE file %s for the standalone emulator (with HDDD A2 support).",filename);
 
 	if(!floppy->floppyNumberOfTrack)
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create zero track HFE file");
-		return -1;
+		return HXCFE_BADPARAMETER;
 	}
 
 	hxcpicfile=hxc_ram_fopen(filename,"wb",&rf);
-
 	if(hxcpicfile)
 	{
-		FILEHEADER=(picfileformatheader *) malloc(512);
+		FILEHEADER = (picfileformatheader *) header_buffer;
 		memset(FILEHEADER,0xFF,512);
 		memcpy(&FILEHEADER->HEADERSIGNATURE,"HXCPICFE",8);
 
@@ -133,7 +138,11 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 		hxc_ram_fwrite(FILEHEADER,512,1,hxcpicfile,&rf);
 
 		tracklistlen=((((((FILEHEADER->number_of_track)+1)*sizeof(pictrack))/512)+1));
+
 		offsettrack=(unsigned char*) malloc(tracklistlen*512);
+		if( !offsettrack )
+			goto alloc_error;
+
 		memset(offsettrack,0xFF,tracklistlen*512);
 
 		i=0;
@@ -141,45 +150,45 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 
 		while(i<(FILEHEADER->number_of_track))
 		{
-				hxcfe_imgCallProgressCallback(imgldr_ctx,i,(FILEHEADER->number_of_track) );
+			hxcfe_imgCallProgressCallback(imgldr_ctx,i,(FILEHEADER->number_of_track) );
 
-				mfmsize=0;
-				mfmsize2=0;
+			mfmsize=0;
+			mfmsize2=0;
 
-				mfmsize=floppy->tracks[i]->sides[0]->tracklen * 2;
-				if(mfmsize&7)
-					mfmsize=(mfmsize/8)+1;
+			mfmsize=floppy->tracks[i]->sides[0]->tracklen * 2;
+			if(mfmsize&7)
+				mfmsize=(mfmsize/8)+1;
+			else
+				mfmsize=mfmsize/8;
+
+
+			if(floppy->tracks[i]->number_of_side==2)
+			{
+				mfmsize2=floppy->tracks[i]->sides[1]->tracklen * 2;
+				if(mfmsize2&7)
+					mfmsize2=(mfmsize2/8)+1;
 				else
-					mfmsize=mfmsize/8;
+					mfmsize2=mfmsize2/8;
+			}
 
+			if(mfmsize2>mfmsize) mfmsize=mfmsize2;
 
-				if(floppy->tracks[i]->number_of_side==2)
-				{
-					mfmsize2=floppy->tracks[i]->sides[1]->tracklen * 2;
-					if(mfmsize2&7)
-						mfmsize2=(mfmsize2/8)+1;
-					else
-						mfmsize2=mfmsize2/8;
-				}
+			if(mfmsize*2>0xFFFF)
+			{
+				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Argg!! track %d too long (%x) and shorten to 0xFFFF !",i,mfmsize*2);
+				mfmsize=0x7FFF;
+			}
 
-				if(mfmsize2>mfmsize) mfmsize=mfmsize2;
+			track=(pictrack *)(offsettrack+(i*sizeof(pictrack)));
+			track->track_len=mfmsize*2;
+			track->offset=trackpos;
 
-				if(mfmsize*2>0xFFFF)
-				{
-					imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Argg!! track %d too long (%x) and shorten to 0xFFFF !",i,mfmsize*2);
-					mfmsize=0x7FFF;
-				}
+			if((mfmsize*2)%512)
+				trackpos=trackpos+(((mfmsize*2)/512)+1);
+			else
+				trackpos=trackpos+((mfmsize*2)/512);
 
-				track=(pictrack *)(offsettrack+(i*sizeof(pictrack)));
-				track->track_len=mfmsize*2;
-				track->offset=trackpos;
-
-				if((mfmsize*2)%512)
-					trackpos=trackpos+(((mfmsize*2)/512)+1);
-				else
-					trackpos=trackpos+((mfmsize*2)/512);
-
-				//trackpos=trackpos+(((mfmsize*2)/512)+1);
+			//trackpos=trackpos+(((mfmsize*2)/512)+1);
 			i++;
 		};
 
@@ -188,97 +197,101 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 		i=0;
 		while(i<(FILEHEADER->number_of_track))
 		{
+			mfmsize=floppy->tracks[i]->sides[0]->tracklen * 2;
+			if(mfmsize&7)
+				mfmsize=(mfmsize/8)+1;
+			else
+				mfmsize=mfmsize/8;
 
-				mfmsize=floppy->tracks[i]->sides[0]->tracklen * 2;
-				if(mfmsize&7)
-					mfmsize=(mfmsize/8)+1;
+			mfmsize2=0;
+			if(floppy->tracks[i]->number_of_side==2)
+			{
+				mfmsize2=floppy->tracks[i]->sides[1]->tracklen * 2;
+				if(mfmsize2&7)
+					mfmsize2=(mfmsize2/8)+1;
 				else
-					mfmsize=mfmsize/8;
+					mfmsize2=mfmsize2/8;
+			}
 
-				mfmsize2=0;
-				if(floppy->tracks[i]->number_of_side==2)
-				{
-					mfmsize2=floppy->tracks[i]->sides[1]->tracklen * 2;
-					if(mfmsize2&7)
-						mfmsize2=(mfmsize2/8)+1;
-					else
-						mfmsize2=mfmsize2/8;
-				}
+			if(mfmsize>0x7FFF)
+			{
+				mfmsize=0x7FFF;
+			}
+			if(mfmsize2>0x7FFF)
+			{
+				mfmsize2=0x7FFF;
+			}
+			track=(pictrack *)(offsettrack+(i*sizeof(pictrack)));
 
-				if(mfmsize>0x7FFF)
-				{
-					mfmsize=0x7FFF;
-				}
-				if(mfmsize2>0x7FFF)
-				{
-					mfmsize2=0x7FFF;
-				}
-				track=(pictrack *)(offsettrack+(i*sizeof(pictrack)));
+			if(track->track_len%512)
+				tracksize=((track->track_len&(~0x1FF))+0x200)/2;//(((track->track_len/512)+1)*512)/2;
+			else
+				tracksize=track->track_len/2;
 
-				if(track->track_len%512)
-					tracksize=((track->track_len&(~0x1FF))+0x200)/2;//(((track->track_len/512)+1)*512)/2;
-				else
-					tracksize=track->track_len/2;
+			mfmtracks0 = (unsigned char*) calloc( 1, tracksize );
+			mfmtracks1 = (unsigned char*) calloc( 1, tracksize );
+			mfmtrackfinal = (unsigned char*) malloc(tracksize*2);
 
-				mfmtracks0=(unsigned char*) malloc(tracksize);
-				mfmtracks1=(unsigned char*) malloc(tracksize);
-				mfmtrackfinal=(unsigned char*) malloc(tracksize*2);
+			if( !mfmtracks0 || !mfmtracks1 || !mfmtrackfinal)
+				goto alloc_error;
 
-				memset(mfmtracks0,0x00,tracksize);
-				memset(mfmtracks1,0x00,tracksize);
-				memset(mfmtrackfinal,0x55,tracksize*2);
+			memset(mfmtrackfinal,0x55,tracksize*2);
 
-				for(i_conv=0;i_conv<(mfmsize/2);i_conv++)
+			for(i_conv=0;i_conv<(mfmsize/2);i_conv++)
+			{
+				// Add the FM Clocks
+				fm_pulses = LUT_Byte2ShortEvenBitsExpander[floppy->tracks[i]->sides[0]->databuffer[i_conv]] | 0x2222;
+				mfmtracks0[(i_conv*2)+0] = fm_pulses >> 8;
+				mfmtracks0[(i_conv*2)+1] = fm_pulses &  0xFF;
+			}
+
+			addpad(mfmtracks0,mfmsize,tracksize);
+
+			if(floppy->tracks[i]->number_of_side==2)
+			{
+				for(i_conv=0;i_conv<(mfmsize2/2);i_conv++)
 				{
 					// Add the FM Clocks
-					fm_pulses = LUT_Byte2ShortEvenBitsExpander[floppy->tracks[i]->sides[0]->databuffer[i_conv]] | 0x2222;
-					mfmtracks0[(i_conv*2)+0] = fm_pulses >> 8;
-					mfmtracks0[(i_conv*2)+1] = fm_pulses &  0xFF;
+					fm_pulses = LUT_Byte2ShortEvenBitsExpander[floppy->tracks[i]->sides[1]->databuffer[i_conv]] | 0x2222;
+					mfmtracks1[(i_conv*2)+0] = fm_pulses >> 8;
+					mfmtracks1[(i_conv*2)+1] = fm_pulses &  0xFF;
 				}
+				addpad(mfmtracks1,mfmsize2,tracksize);
+			}
+			else
+			{
+				memset(mfmtracks1,0xAA,tracksize);
+			}
 
-				addpad(mfmtracks0,mfmsize,tracksize);
+			for(k=0;k<tracksize/256;k++)
+			{
 
-				if(floppy->tracks[i]->number_of_side==2)
+				for(j=0;j<256;j++)
 				{
-					for(i_conv=0;i_conv<(mfmsize2/2);i_conv++)
-					{
-						// Add the FM Clocks
-						fm_pulses = LUT_Byte2ShortEvenBitsExpander[floppy->tracks[i]->sides[1]->databuffer[i_conv]] | 0x2222;
-						mfmtracks1[(i_conv*2)+0] = fm_pulses >> 8;
-						mfmtracks1[(i_conv*2)+1] = fm_pulses &  0xFF;
-					}
-					addpad(mfmtracks1,mfmsize2,tracksize);
+					// inversion des bits pour le EUSART du PIC.
+
+					// head 0
+					mfmtrackfinal[(k*512)+j]=     LUT_ByteBitsInverter[mfmtracks0[(k*256)+j]];
+					// head 1
+					mfmtrackfinal[(k*512)+j+256]= LUT_ByteBitsInverter[mfmtracks1[(k*256)+j]];
+
 				}
-				else
-				{
-					memset(mfmtracks1,0xAA,tracksize);
-				}
+			}
 
-				for(k=0;k<tracksize/256;k++)
-				{
+			hxc_ram_fwrite(mfmtrackfinal,tracksize*2,1,hxcpicfile,&rf);
 
-					for(j=0;j<256;j++)
-					{
-						// inversion des bits pour le EUSART du PIC.
-
-						// head 0
-						mfmtrackfinal[(k*512)+j]=     LUT_ByteBitsInverter[mfmtracks0[(k*256)+j]];
-						// head 1
-						mfmtrackfinal[(k*512)+j+256]= LUT_ByteBitsInverter[mfmtracks1[(k*256)+j]];
-
-					}
-				}
-
-				hxc_ram_fwrite(mfmtrackfinal,tracksize*2,1,hxcpicfile,&rf);
-
-				free(mfmtracks0);
-				free(mfmtracks1);
-				free(mfmtrackfinal);
+			free(mfmtracks0);
+			mfmtracks0 = NULL;
+			free(mfmtracks1);
+			mfmtracks1 = NULL;
+			free(mfmtrackfinal);
+			mfmtrackfinal = NULL;
 
 			i++;
 		};
 
 		free(offsettrack);
+		offsettrack = NULL;
 
 		hxcpicfile=hxc_fopen(filename,"wb");
 		if(hxcpicfile)
@@ -290,22 +303,30 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 		{
 			hxc_ram_fclose(hxcpicfile,&rf);
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
-			return -1;
+			return HXCFE_ACCESSERROR;
 		}
 
 		hxc_ram_fclose(hxcpicfile,&rf);
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks written to the file",FILEHEADER->number_of_track);
 
-		free(FILEHEADER);
-
-		return 0;
+		return HXCFE_NOERROR;
 	}
 	else
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
 
-		return -1;
+		return HXCFE_ACCESSERROR;
 	}
 
+alloc_error:
+	if(hxcpicfile)
+		hxc_ram_fclose(hxcpicfile,&rf);
+
+	free( offsettrack );
+	free(mfmtracks0);
+	free(mfmtracks1);
+	free(mfmtrackfinal);
+
+	return HXCFE_INTERNALERROR;
 }

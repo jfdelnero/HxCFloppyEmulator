@@ -183,7 +183,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,uint8_t * track_buffer,int 
 	uint32_t * trackbuf_dword;
 	int i;
 
-	currentside=0;
+	currentside = NULL;
 
 	floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
 
@@ -214,58 +214,60 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,uint8_t * track_buffer,int 
 		#endif
 
 		trackbuf_dword = malloc((pulses_cnt+1)*sizeof(uint32_t)*FDX_NB_FAKE_REV);
-		if(trackbuf_dword)
+		if(!trackbuf_dword)
 		{
-			memset(trackbuf_dword,0x00,(pulses_cnt+1)*sizeof(uint32_t) * FDX_NB_FAKE_REV);
-			pulses_cnt = raw2stream(track_buffer,trackbuf_dword,bit_track_length,FDX_NB_FAKE_REV,(int*)&indexarray);
+			hxcfe_deinitFxStream(fxs);
+			return NULL;
+		}
 
-			hxcfe_FxStream_setResolution(fxs, tick_period);
+		memset(trackbuf_dword,0x00,(pulses_cnt+1)*sizeof(uint32_t) * FDX_NB_FAKE_REV);
+		pulses_cnt = raw2stream(track_buffer,trackbuf_dword,bit_track_length,FDX_NB_FAKE_REV,(int*)&indexarray);
 
-			track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf_dword,32,(pulses_cnt), HXCFE_STREAMCHANNEL_TYPE_RLEEVT, "data", NULL);
-			if(track_dump)
+		hxcfe_FxStream_setResolution(fxs, tick_period);
+
+		track_dump = hxcfe_FxStream_ImportStream(fxs,trackbuf_dword,32,(pulses_cnt), HXCFE_STREAMCHANNEL_TYPE_RLEEVT, "data", NULL);
+		if(track_dump)
+		{
+			for(i=0;i<FDX_NB_FAKE_REV;i++)
 			{
-				for(i=0;i<FDX_NB_FAKE_REV;i++)
-				{
-					hxcfe_FxStream_AddIndex(fxs,track_dump,indexarray[i],0,FXSTRM_INDEX_MAININDEX);
-				}
+				hxcfe_FxStream_AddIndex(fxs,track_dump,indexarray[i],0,FXSTRM_INDEX_MAININDEX);
+			}
 
-				hxcfe_FxStream_ChangeSpeed(fxs,track_dump,timecoef);
+			hxcfe_FxStream_ChangeSpeed(fxs,track_dump,timecoef);
 
-				fxs->pll.track = track>>1;
-				fxs->pll.side = track&1;
-				currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
+			fxs->pll.track = track>>1;
+			fxs->pll.side = track&1;
+			currentside = hxcfe_FxStream_AnalyzeAndGetTrack(fxs,track_dump);
 
-				if(currentside)
-				{
-					if(rpm)
-						*rpm = (short)( 60 / GetTrackPeriod(floppycontext,currentside) );
-				}
+			if(currentside)
+			{
+				if(rpm)
+					*rpm = (short)( 60 / GetTrackPeriod(floppycontext,currentside) );
+			}
 
-				if( bmpexport )
-				{
-					sprintf(tmp_filename,"track%.2d.%d.bmp",track>>1,track&1);
-					hxcfe_FxStream_ExportToBmp(fxs,track_dump, tmp_filename);
-				}
+			if( bmpexport )
+			{
+				sprintf(tmp_filename,"track%.2d.%d.bmp",track>>1,track&1);
+				hxcfe_FxStream_ExportToBmp(fxs,track_dump, tmp_filename);
+			}
 
-				if(currentside)
-				{
-					currentside->stream_dump = track_dump;
-				}
-				else
-				{
-					hxcfe_FxStream_FreeStream(fxs,track_dump);
-				}
+			if(currentside)
+			{
+				currentside->stream_dump = track_dump;
 			}
 			else
 			{
-				floppycontext->hxc_printf(MSG_DEBUG,"hxcfe_FxStream_ImportStream failed !");
+				hxcfe_FxStream_FreeStream(fxs,track_dump);
 			}
-
-			free(trackbuf_dword);
+		}
+		else
+		{
+			floppycontext->hxc_printf(MSG_DEBUG,"hxcfe_FxStream_ImportStream failed !");
 		}
 
-		hxcfe_deinitFxStream(fxs);
+		free(trackbuf_dword);
 
+		hxcfe_deinitFxStream(fxs);
 	}
 
 	floppycontext->hxc_printf(MSG_DEBUG,"------------------------------------------------");
@@ -343,7 +345,7 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		if(!track_buffer)
 		{
 			ret = HXCFE_INTERNALERROR;
-			goto error;
+			goto alloc_error;
 		}
 
 		fdxtrackheader = (fdxtrack_t*)track_buffer;
@@ -352,7 +354,7 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		if(!floppydisk->tracks)
 		{
 			ret = HXCFE_INTERNALERROR;
-			goto error;
+			goto alloc_error;
 		}
 
 		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
@@ -376,7 +378,7 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					if(!floppydisk->tracks[tracknumber])
 					{
 						ret = HXCFE_INTERNALERROR;
-						goto error;
+						goto alloc_error;
 					}
 
 					memset(floppydisk->tracks[tracknumber],0,sizeof(HXCFE_CYLINDER));
@@ -389,14 +391,13 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					if(!currentcylinder->sides)
 					{
 						ret = HXCFE_INTERNALERROR;
-						goto error;
+						goto alloc_error;
 					}
 
 					memset(currentcylinder->sides,0,sizeof(HXCFE_SIDE*)*2);
 				}
 
 				currentcylinder=floppydisk->tracks[tracknumber];
-
 
 				switch(fileheader.disk_type)
 				{
@@ -414,7 +415,7 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						if(!currentcylinder->sides[sidenumber])
 						{
 							ret = HXCFE_INTERNALERROR;
-							goto error;
+							goto alloc_error;
 						}
 
 						currentside=currentcylinder->sides[sidenumber];
@@ -459,24 +460,23 @@ int FDX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	hxc_fclose(f);
 
-	if(track_buffer)
-		free(track_buffer);
+	free(track_buffer);
 
 	return ret;
 
-error:
+alloc_error:
 	if(f)
 		hxc_fclose(f);
 
-	if(track_buffer)
-		free(track_buffer);
+	free(track_buffer);
+
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
 
 	return ret;
 }
 
 int FDX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="FDX68_FDX";
 	static const char plug_desc[]="FDX Loader";
 	static const char plug_ext[]="fdx";

@@ -35,10 +35,10 @@
 //-------------------------------------------------------------------------------//
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
-// File : ti99pc99_loader.c
-// Contains: TI99 PC99 floppy image loader
+// File : vdk_loader.c
+// Contains: Dragon 32 /64 VDK floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -152,17 +152,16 @@ int VDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int VDK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="DRAGON3264_VDK";
 	static const char plug_desc[]="DRAGON32 & 64 VDK Loader";
 	static const char plug_ext[]="vdk";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	VDK_libIsValidDiskFile,
-		(LOADDISKFILE)		VDK_libLoad_DiskFile,
-		(WRITEDISKFILE)		VDK_libWrite_DiskFile,
-		(GETPLUGININFOS)	VDK_libGetPluginInfo
+		(ISVALIDDISKFILE)   VDK_libIsValidDiskFile,
+		(LOADDISKFILE)      VDK_libLoad_DiskFile,
+		(WRITEDISKFILE)     VDK_libWrite_DiskFile,
+		(GETPLUGININFOS)    VDK_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -175,4 +174,3 @@ int VDK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 			plug_ext
 			);
 }
-

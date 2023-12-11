@@ -36,9 +36,9 @@
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
 // File : trd_loader.c
-// Contains: IMG floppy image loader
+// Contains: Spectrum Beta Disk (TR-DOS) TRD floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -207,20 +207,18 @@ int TRD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return ret;
 }
 
-
 int TRD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="ZXSPECTRUM_TRD";
 	static const char plug_desc[]="Zx Spectrum TRD Loader";
 	static const char plug_ext[]="trd";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	TRD_libIsValidDiskFile,
-		(LOADDISKFILE)		TRD_libLoad_DiskFile,
-		(WRITEDISKFILE)		TRD_libWrite_DiskFile,
-		(GETPLUGININFOS)	TRD_libGetPluginInfo
+		(ISVALIDDISKFILE)   TRD_libIsValidDiskFile,
+		(LOADDISKFILE)      TRD_libLoad_DiskFile,
+		(WRITEDISKFILE)     TRD_libWrite_DiskFile,
+		(GETPLUGININFOS)    TRD_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

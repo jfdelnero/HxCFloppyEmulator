@@ -38,7 +38,7 @@
 // File : ti99v9t9_loader.c
 // Contains: TI99 v9t9 floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -64,7 +64,7 @@
 #pragma pack(1)
 typedef struct ti99_vib
 {
-		int8_t  name[10];		// volume name (10 characters, pad with spaces)
+		int8_t  name[10];       // volume name (10 characters, pad with spaces)
 		uint8_t totsecsMSB;     // disk length in sectors (big-endian) (usually 360, 720 or 1440)
 		uint8_t totsecsLSB;
 		uint8_t secspertrack;   // sectors per track (usually 9 (FM) or 18 (MFM))
@@ -344,7 +344,6 @@ int TI99V9T9_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINF
 
 int TI99V9T9_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
 	FILE * f;
 	unsigned int filesize;
 	int i,j,ret;
@@ -389,10 +388,23 @@ int TI99V9T9_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			gap3len=24;
 		}
 
-		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		floppydisk->tracks = (HXCFE_CYLINDER**)calloc( 1, sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if(!floppydisk->tracks)
+		{
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
+		}
+
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
 
-		trackdata=(unsigned char*)malloc(sectorsize*floppydisk->floppySectorPerTrack);
+		trackdata=(unsigned char*)calloc( 1, sectorsize*floppydisk->floppySectorPerTrack);
+		if(!trackdata)
+		{
+			free(floppydisk->tracks);
+			floppydisk->tracks = NULL;
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
+		}
 
 		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 		{
@@ -441,17 +453,16 @@ int TI99V9T9_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 int TI99V9T9_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="TI994A_V9T9";
 	static const char plug_desc[]="TI99 4A V9T9 Loader";
 	static const char plug_ext[]="v9t9";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	TI99V9T9_libIsValidDiskFile,
-		(LOADDISKFILE)		TI99V9T9_libLoad_DiskFile,
-		(WRITEDISKFILE)		TI99V9T9_libWrite_DiskFile,
-		(GETPLUGININFOS)	TI99V9T9_libGetPluginInfo
+		(ISVALIDDISKFILE)   TI99V9T9_libIsValidDiskFile,
+		(LOADDISKFILE)      TI99V9T9_libLoad_DiskFile,
+		(WRITEDISKFILE)     TI99V9T9_libWrite_DiskFile,
+		(GETPLUGININFOS)    TI99V9T9_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -464,4 +475,3 @@ int TI99V9T9_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void *
 			plug_ext
 			);
 }
-

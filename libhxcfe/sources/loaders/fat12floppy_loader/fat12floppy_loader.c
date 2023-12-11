@@ -38,7 +38,7 @@
 // File : fat12floppy_loader.c
 // Contains: FAT12FLOPPY floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -290,17 +290,16 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppy
 
 int FAT12FLOPPY_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="FAT12FLOPPY";
 	static const char plug_desc[]="FAT12/MS DOS Loader";
 	static const char plug_ext[]="fat";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	FAT12FLOPPY_libIsValidDiskFile,
-		(LOADDISKFILE)		FAT12FLOPPY_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	FAT12FLOPPY_libGetPluginInfo
+		(ISVALIDDISKFILE)   FAT12FLOPPY_libIsValidDiskFile,
+		(LOADDISKFILE)      FAT12FLOPPY_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    FAT12FLOPPY_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -313,4 +312,3 @@ int FAT12FLOPPY_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,voi
 			plug_ext
 			);
 }
-

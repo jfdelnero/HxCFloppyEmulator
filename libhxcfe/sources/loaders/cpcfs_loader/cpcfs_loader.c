@@ -38,7 +38,7 @@
 // File : cpcfs_loader.c
 // Contains: CPCFSDK floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +67,6 @@ extern int ScanFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder
 
 int CPCFSDK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-
 	int pathlen;
 	char * filepath;
 
@@ -113,29 +112,27 @@ int CPCFSDK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFO
 
 int ScanCpcFile(HXCFE* floppycontext,struct Volume * adfvolume,char * folder,char * file)
 {
-
 	return 0;
 }
 
 int CPCFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-		return HXCFE_BADFILE;
+	return HXCFE_BADFILE;
 }
 
 
 int CPCFSDK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="CPC_FS";
 	static const char plug_desc[]="Amstrad CPC FS Loader";
 	static const char plug_ext[]="cpcfs";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	CPCFSDK_libIsValidDiskFile,
-		(LOADDISKFILE)		CPCFSDK_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	CPCFSDK_libGetPluginInfo
+		(ISVALIDDISKFILE)   CPCFSDK_libIsValidDiskFile,
+		(LOADDISKFILE)      CPCFSDK_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    CPCFSDK_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

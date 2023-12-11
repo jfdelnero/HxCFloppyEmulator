@@ -38,7 +38,7 @@
 // File : KryoFluxStream_loader.c
 // Contains: KryoFlux Stream floppy image loader
 //
-// Written by: DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -469,17 +469,16 @@ error:
 
 int KryoFluxStream_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="KRYOFLUXSTREAM";
 	static const char plug_desc[]="KryoFlux Stream Loader";
 	static const char plug_ext[]="raw";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	KryoFluxStream_libIsValidDiskFile,
-		(LOADDISKFILE)		KryoFluxStream_libLoad_DiskFile,
-		(WRITEDISKFILE)		KryoFluxStream_libWrite_DiskFile,
-		(GETPLUGININFOS)	KryoFluxStream_libGetPluginInfo
+		(ISVALIDDISKFILE)   KryoFluxStream_libIsValidDiskFile,
+		(LOADDISKFILE)      KryoFluxStream_libLoad_DiskFile,
+		(WRITEDISKFILE)     KryoFluxStream_libWrite_DiskFile,
+		(GETPLUGININFOS)    KryoFluxStream_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

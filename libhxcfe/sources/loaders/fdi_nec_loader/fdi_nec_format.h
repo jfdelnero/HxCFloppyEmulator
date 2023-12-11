@@ -38,7 +38,7 @@
 // File : fdi_nec_format.h
 // Contains: FDI header description
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////

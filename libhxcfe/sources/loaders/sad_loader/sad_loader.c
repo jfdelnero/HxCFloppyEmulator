@@ -38,7 +38,7 @@
 // File : sad_loader.c
 // Contains: SAD floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -131,17 +131,16 @@ int SAD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int SAD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="SAMCOUPE_SAD";
 	static const char plug_desc[]="SAM COUPE SAD Loader";
 	static const char plug_ext[]="sad";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	SAD_libIsValidDiskFile,
-		(LOADDISKFILE)		SAD_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	SAD_libGetPluginInfo
+		(ISVALIDDISKFILE)   SAD_libIsValidDiskFile,
+		(LOADDISKFILE)      SAD_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    SAD_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -154,4 +153,3 @@ int SAD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 			plug_ext
 			);
 }
-

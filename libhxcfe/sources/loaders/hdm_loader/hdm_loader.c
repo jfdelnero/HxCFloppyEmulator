@@ -38,7 +38,7 @@
 // File : hdm_loader.c
 // Contains: HDM X68000 floppy image loader
 //
-// Written by:	DEL NERO Jean Francois / VTrucco
+// Written by: Jean-François DEL NERO / VTrucco
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -57,7 +57,6 @@
 #include "loaders/common/raw_iso.h"
 
 #include "hdm_loader.h"
-
 
 int HDM_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
@@ -103,17 +102,16 @@ int HDM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int HDM_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="X68000_HDM";
 	static const char plug_desc[]="X68000 HDM file Loader";
 	static const char plug_ext[]="hdm";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	HDM_libIsValidDiskFile,
-		(LOADDISKFILE)		HDM_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	HDM_libGetPluginInfo
+		(ISVALIDDISKFILE)   HDM_libIsValidDiskFile,
+		(LOADDISKFILE)      HDM_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    HDM_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -126,4 +124,3 @@ int HDM_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 			plug_ext
 			);
 }
-

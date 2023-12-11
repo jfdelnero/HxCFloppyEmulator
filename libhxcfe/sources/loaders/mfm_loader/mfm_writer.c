@@ -155,12 +155,14 @@ int MFM_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 				fwrite(mfmtrack,mfmsize,1,hxcmfmfile);
 
 				free(mfmtrack);
+				mfmtrack = NULL;
 			}
 
 			i++;
 		}while(i<(mfmheader.number_of_track));
 
 		free(offsettrack);
+		offsettrack = NULL;
 
 		hxc_fclose(hxcmfmfile);
 

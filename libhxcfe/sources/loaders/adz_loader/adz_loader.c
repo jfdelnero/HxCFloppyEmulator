@@ -158,17 +158,16 @@ error:
 
 int ADZ_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="AMIGA_ADZ";
 	static const char plug_desc[]="AMIGA ADZ Loader";
 	static const char plug_ext[]="adz";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	ADZ_libIsValidDiskFile,
-		(LOADDISKFILE)		ADZ_libLoad_DiskFile,
-		(WRITEDISKFILE)		ADZ_libWrite_DiskFile,
-		(GETPLUGININFOS)	ADZ_libGetPluginInfo
+		(ISVALIDDISKFILE)   ADZ_libIsValidDiskFile,
+		(LOADDISKFILE)      ADZ_libLoad_DiskFile,
+		(WRITEDISKFILE)     ADZ_libWrite_DiskFile,
+		(GETPLUGININFOS)    ADZ_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

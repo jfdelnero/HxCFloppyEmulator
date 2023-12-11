@@ -38,7 +38,7 @@
 // File : jv3_loader.c
 // Contains: JV3 TRS80 floppy image loader
 //
-// Written by:	Gustavo E A P A Batista using JV1 loader as template
+// Written by:  Gustavo E A P A Batista using JV1 loader as template
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -583,17 +583,16 @@ error:
 
 int JV3_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="TRS80_JV3";
 	static const char plug_desc[]="TRS80 JV3 Loader";
 	static const char plug_ext[]="jv3";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	JV3_libIsValidDiskFile,
-		(LOADDISKFILE)		JV3_libLoad_DiskFile,
-		(WRITEDISKFILE)		JV3_libWrite_DiskFile,
-		(GETPLUGININFOS)	JV3_libGetPluginInfo
+		(ISVALIDDISKFILE)   JV3_libIsValidDiskFile,
+		(LOADDISKFILE)      JV3_libLoad_DiskFile,
+		(WRITEDISKFILE)     JV3_libWrite_DiskFile,
+		(GETPLUGININFOS)    JV3_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

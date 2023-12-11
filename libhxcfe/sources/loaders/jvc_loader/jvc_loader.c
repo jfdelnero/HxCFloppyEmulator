@@ -38,7 +38,7 @@
 // File : jvc_loader.c
 // Contains: JVC floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -202,26 +202,25 @@ alloc_error:
 	if ( f )
 		hxc_fclose( f );
 
-	free( floppydisk->tracks );
-
 	free( trackdata );
 
-	return HXCFE_INTERNALERROR;	
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
+
+	return HXCFE_INTERNALERROR;
 }
 
 int JVC_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="TRS80_JVC";
 	static const char plug_desc[]="TRS80 JVC Loader";
 	static const char plug_ext[]="jvc";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	JVC_libIsValidDiskFile,
-		(LOADDISKFILE)		JVC_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	JVC_libGetPluginInfo
+		(ISVALIDDISKFILE)   JVC_libIsValidDiskFile,
+		(LOADDISKFILE)      JVC_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    JVC_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -234,4 +233,3 @@ int JVC_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 			plug_ext
 			);
 }
-

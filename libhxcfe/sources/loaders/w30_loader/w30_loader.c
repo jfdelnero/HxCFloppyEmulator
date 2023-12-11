@@ -38,7 +38,7 @@
 // File : w30_loader.c
 // Contains: Roland W30 floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -104,17 +104,16 @@ int W30_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int W30_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="ROLAND_W30";
 	static const char plug_desc[]="Roland W30 file Loader";
 	static const char plug_ext[]="w30";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	W30_libIsValidDiskFile,
-		(LOADDISKFILE)		W30_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	W30_libGetPluginInfo
+		(ISVALIDDISKFILE)   W30_libIsValidDiskFile,
+		(LOADDISKFILE)      W30_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    W30_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

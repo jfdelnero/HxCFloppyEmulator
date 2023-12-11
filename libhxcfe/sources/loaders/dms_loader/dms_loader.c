@@ -38,7 +38,7 @@
 // File : dms_loader.c
 // Contains: DMS floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -104,17 +104,16 @@ int DMS_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int DMS_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="AMIGA_DMS";
 	static const char plug_desc[]="AMIGA DMS Loader";
 	static const char plug_ext[]="dms";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	DMS_libIsValidDiskFile,
-		(LOADDISKFILE)		DMS_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	DMS_libGetPluginInfo
+		(ISVALIDDISKFILE)   DMS_libIsValidDiskFile,
+		(LOADDISKFILE)      DMS_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    DMS_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

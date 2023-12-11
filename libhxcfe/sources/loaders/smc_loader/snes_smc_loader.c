@@ -35,10 +35,10 @@
 //-------------------------------------------------------------------------------//
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
-// File : snes_smc_DiskFile.c
+// File : snes_smc_loader.c
 // Contains: SMC rom floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -185,17 +185,16 @@ int snes_smc_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 int snes_smc_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="SNES_SMC";
 	static const char plug_desc[]="Super famicom SMC / Game Doctor Loader";
 	static const char plug_ext[]="smc";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	snes_smc_libIsValidDiskFile,
-		(LOADDISKFILE)		snes_smc_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	snes_smc_libGetPluginInfo
+		(ISVALIDDISKFILE)   snes_smc_libIsValidDiskFile,
+		(LOADDISKFILE)      snes_smc_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    snes_smc_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -208,4 +207,3 @@ int snes_smc_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void *
 			plug_ext
 			);
 }
-

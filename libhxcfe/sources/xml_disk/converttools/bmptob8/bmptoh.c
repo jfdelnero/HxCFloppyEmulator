@@ -183,8 +183,7 @@ error:
 	if(file)
 		fclose(file);
 
-	if(dbuffer)
-		free(dbuffer);
+	free(dbuffer);
 
 	return NULL;
 }
@@ -349,11 +348,9 @@ int mi_pack(unsigned char * bufferin, int sizein,unsigned char * bufferout, int 
 		}
 	}
 
-	if(buffer)
-		free(buffer);
+	free(buffer);
 
-	if(buffer2)
-		free(buffer2);
+	free(buffer2);
 
 	return mode;
 };

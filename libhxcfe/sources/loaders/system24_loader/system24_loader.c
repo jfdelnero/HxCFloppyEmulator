@@ -58,7 +58,6 @@
 
 #include "system24_loader.h"
 
-
 #include "libhxcadaptor.h"
 
 int System24_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
@@ -85,7 +84,6 @@ int System24_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINF
 
 int System24_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
 	FILE * f;
 	unsigned int filesize;
 	unsigned int file_offset;
@@ -168,7 +166,7 @@ int System24_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
 
 			file_offset=( j *  ( tracksize * 2 ) ) +
-				        ( i *  ( tracksize ) );
+						( i *  ( tracksize ) );
 
 			fseek (f , file_offset , SEEK_SET);
 			hxc_fread(trackdata,tracksize,f);
@@ -262,7 +260,6 @@ int System24_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 			}
 
 			currentcylinder->sides[i]=tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,1,0,500000,rpm,trackformat,100,2500|NO_SECTOR_UNDER_INDEX,-2500);
-
 		}
 	}
 
@@ -291,7 +288,8 @@ alloc_error:
 	if ( f )
 		hxc_fclose( f );
 
-	free( floppydisk->tracks );
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
+
 	free( trackdata );
 	free( sectorconfig );
 
@@ -306,10 +304,10 @@ int System24_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void *
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	System24_libIsValidDiskFile,
-		(LOADDISKFILE)		System24_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	System24_libGetPluginInfo
+		(ISVALIDDISKFILE)   System24_libIsValidDiskFile,
+		(LOADDISKFILE)      System24_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    System24_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

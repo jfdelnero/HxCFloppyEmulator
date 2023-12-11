@@ -106,32 +106,37 @@ int adddatablock(FILE* f,int typecode,int compressdata,unsigned char* data,int d
 	{
 		actualdestbufferlen = compressBound(datalen);
 		tempcompressbuffer = (unsigned char*)malloc(actualdestbufferlen);
-		if(tempcompressbuffer)
+		if(!tempcompressbuffer)
 		{
-			compress2(tempcompressbuffer, &actualdestbufferlen,
-				 data, datalen,
-				 Z_BEST_COMPRESSION);
-			afidata.unpacked_size = datalen;
-			afidata.packed_size = actualdestbufferlen;
-			afidata.packer_id = AFI_COMPRESS_GZIP;
+			return 0;
 		}
+
+		compress2(tempcompressbuffer, &actualdestbufferlen,
+			 data, datalen,
+			 Z_BEST_COMPRESSION);
+		afidata.unpacked_size = datalen;
+		afidata.packed_size = actualdestbufferlen;
+		afidata.packer_id = AFI_COMPRESS_GZIP;
 	}
 	else
 	{
 		tempcompressbuffer = (unsigned char*)malloc(datalen);
-		if(tempcompressbuffer)
+		if(!tempcompressbuffer)
 		{
-			memcpy(tempcompressbuffer,data,datalen);
-			afidata.unpacked_size = datalen;
-			afidata.packed_size = datalen; // no comp
-			afidata.packer_id = AFI_COMPRESS_NONE;
+			return 0;
 		}
+
+		memcpy(tempcompressbuffer,data,datalen);
+		afidata.unpacked_size = datalen;
+		afidata.packed_size = datalen; // no comp
+		afidata.packer_id = AFI_COMPRESS_NONE;
 	}
 
 	fwrite(&afidata,sizeof(afidata),1,f);
 	fwrite(tempcompressbuffer,afidata.packed_size,1,f);
 	tempcrc=getcrc(&afidata,sizeof(afidata),tempcompressbuffer,afidata.packed_size);
 	fwrite(&tempcrc,sizeof(tempcrc),1,f);            //temporary crc
+
 	free(tempcompressbuffer);
 	return afidata.packed_size;
 }
@@ -145,10 +150,8 @@ uint32_t * bitrate_rle_pack(uint32_t * bitrate,uint32_t len,uint32_t * outlen)
 
 	uint32_t * packed;
 
-
 	// 0x80 00 00 00
 	// 1XXXXXXX 00 00 00
-
 
 	nb_entry = 1;
 	cur_nb = 1;
@@ -190,11 +193,11 @@ uint32_t * bitrate_rle_pack(uint32_t * bitrate,uint32_t len,uint32_t * outlen)
 				j++;
 			}
 		}
-	}
 
-	entry = ( bitrate[i-1] & 0x00FFFFFF ) | ((0x80 |(cur_nb&0x7F)) << 24);
-	packed[j] = entry;
-	j++;
+		entry = ( bitrate[i-1] & 0x00FFFFFF ) | ((0x80 |(cur_nb&0x7F)) << 24);
+		packed[j] = entry;
+		j++;
+	}
 
 	*outlen = j;
 
@@ -518,14 +521,12 @@ int AFI_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 		hxc_fclose(hxcafifile);
 
-		return 0;
+		return HXCFE_NOERROR;
 	}
 	else
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Cannot create %s!",filename);
 
-		return -1;
+		return HXCFE_ACCESSERROR;
 	}
-
-
 }

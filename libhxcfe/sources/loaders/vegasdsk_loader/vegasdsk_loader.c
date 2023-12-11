@@ -38,7 +38,7 @@
 // File : vegasdsk_loader.c
 // Contains: vegas floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -226,28 +226,25 @@ alloc_error:
 	if ( f )
 		hxc_fclose( f );
 
-	if( floppydisk->tracks )
-		free( floppydisk->tracks );
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
 
-	if( floppy_data )
-		free( floppy_data );
+	free( floppy_data );
 
 	return HXCFE_INTERNALERROR;
 }
 
 int VEGASDSK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="VEGAS6809";
 	static const char plug_desc[]="VEGAS6809 image Loader";
 	static const char plug_ext[]="veg";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	VEGASDSK_libIsValidDiskFile,
-		(LOADDISKFILE)		VEGASDSK_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	VEGASDSK_libGetPluginInfo
+		(ISVALIDDISKFILE)   VEGASDSK_libIsValidDiskFile,
+		(LOADDISKFILE)      VEGASDSK_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    VEGASDSK_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

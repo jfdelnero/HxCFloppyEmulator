@@ -38,7 +38,7 @@
 // File : emuii_loader.c
 // Contains: Emax floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -94,8 +94,6 @@ int EMUII_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS 
 {
 	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "EMUII_libIsValidDiskFile", "eii", 0);
 }
-
-
 
 int EMUII_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
@@ -175,7 +173,7 @@ int EMUII_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 
 		if(!floppydisk->tracks[tracknumber])
 		{
-			floppydisk->tracks[tracknumber] = allocCylinderEntry(300,floppydisk->floppyNumberOfSide);	
+			floppydisk->tracks[tracknumber] = allocCylinderEntry(300,floppydisk->floppyNumberOfSide);
 		}
 
 		currentcylinder = floppydisk->tracks[tracknumber];
@@ -196,6 +194,7 @@ int EMUII_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 
 	hxc_fclose(f_eii);
 	hxc_fclose(f_os);
+
 	return HXCFE_NOERROR;
 
 alloc_error:
@@ -206,10 +205,11 @@ alloc_error:
 	if ( f_os )
 		hxc_fclose( f_os );
 
-	if( floppydisk->tracks )
-		free( floppydisk->tracks );
-	
-	return HXCFE_INTERNALERROR;	
+	free( floppydisk->tracks );
+
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
+
+	return HXCFE_INTERNALERROR;
 
 }
 
@@ -221,10 +221,10 @@ int EMUII_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * re
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	EMUII_libIsValidDiskFile,
-		(LOADDISKFILE)		EMUII_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	EMUII_libGetPluginInfo
+		(ISVALIDDISKFILE)   EMUII_libIsValidDiskFile,
+		(LOADDISKFILE)      EMUII_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    EMUII_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -237,4 +237,3 @@ int EMUII_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * re
 			plug_ext
 			);
 }
-

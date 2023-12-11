@@ -38,7 +38,7 @@
 // File : ipf_writer.c
 // Contains: IPF floppy image writer
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -93,8 +93,6 @@ int IPF_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	int nbside;
 	int sectorsize;
 	int i,j;
-
-	int writeret;
 
 	FILE * file;
 
@@ -176,9 +174,9 @@ int IPF_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		}
 
 		hxc_fclose(file);
+
+		return HXCFE_NOERROR;
 	}
 
-	writeret = 0;
-
-	return writeret;
+	return HXCFE_ACCESSERROR;
 }

@@ -38,7 +38,7 @@
 // File : dpx_loader.c
 // Contains: DPX floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +67,6 @@ int DPX_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 int DPX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
 	FILE * f;
 	unsigned int filesize;
 	int i,j,k;
@@ -79,6 +78,9 @@ int DPX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int trackformat;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SECTCFG  sectorconfig[6];
+
+	trackdata = NULL;
+	currentcylinder = NULL;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DPX_libLoad_DiskFile %s",imgfile);
 
@@ -96,7 +98,6 @@ int DPX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	if( filesize )
 	{
-
 		gap3len=30;
 		interleave=1;
 		floppydisk->floppyNumberOfSide=2;
@@ -108,13 +109,18 @@ int DPX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			floppydisk->floppyBitRate=250000;
 			floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+
+			floppydisk->tracks = (HXCFE_CYLINDER**)calloc( 1, sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack );
+			if( !floppydisk->tracks )
+				goto alloc_error;
 
 			rpm=300; // normal rpm
 
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
 			trackdata=(unsigned char*)malloc(((numberofsector-1)*1024)+512);
+			if( !trackdata )
+				goto alloc_error;
 
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 			{
@@ -167,21 +173,31 @@ int DPX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
+
+alloc_error:
+
+	if( f )
+		hxc_fclose(f);
+
+	free(trackdata);
+
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
+
+	return HXCFE_INTERNALERROR;
 }
 
 int DPX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="OBERHEIM_DPX";
 	static const char plug_desc[]="Oberheim DPX Loader";
 	static const char plug_ext[]="dpx";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	DPX_libIsValidDiskFile,
-		(LOADDISKFILE)		DPX_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	DPX_libGetPluginInfo
+		(ISVALIDDISKFILE)   DPX_libIsValidDiskFile,
+		(LOADDISKFILE)      DPX_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    DPX_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -194,4 +210,3 @@ int DPX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 			plug_ext
 			);
 }
-

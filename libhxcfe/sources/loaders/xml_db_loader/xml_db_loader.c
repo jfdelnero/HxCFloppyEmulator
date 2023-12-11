@@ -38,7 +38,7 @@
 // File : xml_db_loader.c
 // Contains: XML database floppy format loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -137,7 +137,6 @@ int XMLDB_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 			hxcfe_deinitXmlFloppy(rfb);
 		}
 	}
-
 
 	return HXCFE_BADFILE;
 }

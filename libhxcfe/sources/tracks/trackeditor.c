@@ -185,36 +185,35 @@ void hxcfe_freeSide( HXCFE* floppycontext, HXCFE_SIDE * side )
 
 	if(side)
 	{
-		if(side->databuffer)
-			free(side->databuffer);
+		free( side->databuffer );
+		side->databuffer = NULL;
 
-		if(side->flakybitsbuffer)
-			free(side->flakybitsbuffer);
+		free( side->flakybitsbuffer );
+		side->flakybitsbuffer = NULL;
 
-		if(side->indexbuffer)
-			free(side->indexbuffer);
+		free(side->indexbuffer);
+		side->indexbuffer = NULL;
 
-		if(side->timingbuffer)
-			free(side->timingbuffer);
+		free(side->timingbuffer);
+		side->timingbuffer = NULL;
 
-		if(side->track_encoding_buffer)
-			free(side->track_encoding_buffer);
+		free(side->track_encoding_buffer);
+		side->track_encoding_buffer = NULL;
 
 		if(side->stream_dump)
 		{
 			for(i=0;i<MAX_NB_OF_STREAMCHANNEL;i++)
 			{
-				if(side->stream_dump->channels[i].stream)
-				{
-					free(side->stream_dump->channels[i].stream);
-				}
+				free(side->stream_dump->channels[i].stream);
+				side->stream_dump->channels[i].stream = NULL;
 			}
 
 			free(side->stream_dump);
+			side->stream_dump = NULL;
 		}
 
-		if(side->cell_to_tick)
-			free(side->cell_to_tick);
+		free(side->cell_to_tick);
+		side->cell_to_tick = NULL;
 
 		free(side);
 	}
@@ -1207,6 +1206,9 @@ int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track
 
 			sa = hxcfe_initSectorAccess( floppycontext, fp );
 
+			if ( !sa )
+				return HXCFE_INTERNALERROR;
+
 			i = 0;
 			sc_list = NULL;
 			nb_sectorfound = 0;
@@ -1216,6 +1218,9 @@ int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track
 				sc_list = hxcfe_getAllTrackSectors(  sa, track, side, type,&nb_sectorfound );
 				i++;
 			}
+
+			if ( !sc_list )
+				return HXCFE_INTERNALERROR;
 
 			sectorpos = -1;
 			if(nb_sectorfound)

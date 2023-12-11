@@ -74,7 +74,6 @@ static char * trackencodingcode[]=
 	"UNKNOWN_ENCODING"
 };
 
-
 static char * interfacemodecode[]=
 {
 	"IBMPC_DD_FLOPPYMODE",
@@ -474,27 +473,7 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 alloc_error:
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"HFE File : Internal memory allocation error ! Please report !");
 
-	if(floppydisk->tracks)
-	{
-		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-		{
-			if(floppydisk->tracks[j])
-			{
-				if(floppydisk->tracks[j]->sides)
-				{
-					for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-					{
-						hxcfe_freeSide(imgldr_ctx->hxcfe,floppydisk->tracks[j]->sides[i]);
-					}
-
-					free(floppydisk->tracks[j]->sides);
-				}
-
-				free(floppydisk->tracks[j]);
-			}
-		}
-		free(floppydisk->tracks);
-	}
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
 
 	free(trackoffsetlist);
 	free(hfetrack);
@@ -507,17 +486,16 @@ int HFEV3_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char 
 
 int HFEV3_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="HXC_HFEV3";
 	static const char plug_desc[]="SD Card HxCFE HFE V3 file Loader";
 	static const char plug_ext[]="hfe";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	HFEV3_libIsValidDiskFile,
-		(LOADDISKFILE)		HFEV3_libLoad_DiskFile,
-		(WRITEDISKFILE)		HFEV3_libWrite_DiskFile,
-		(GETPLUGININFOS)	HFEV3_libGetPluginInfo
+		(ISVALIDDISKFILE)   HFEV3_libIsValidDiskFile,
+		(LOADDISKFILE)      HFEV3_libLoad_DiskFile,
+		(WRITEDISKFILE)     HFEV3_libWrite_DiskFile,
+		(GETPLUGININFOS)    HFEV3_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -530,4 +508,3 @@ int HFEV3_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * re
 			plug_ext
 			);
 }
-

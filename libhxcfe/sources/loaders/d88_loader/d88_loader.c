@@ -38,7 +38,7 @@
 // File : d88_loader.c
 // Contains: D88 floppy image loader.
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ int D88_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 		hxc_checkfileext(imgfile->path,"d77",SYS_PATH_TYPE) ||
 		hxc_checkfileext(imgfile->path,"88d",SYS_PATH_TYPE) ||
 		hxc_checkfileext(imgfile->path,"d8u",SYS_PATH_TYPE) ||
-		hxc_checkfileext(imgfile->path,"2d",SYS_PATH_TYPE)	||
+		hxc_checkfileext(imgfile->path,"2d",SYS_PATH_TYPE)  ||
 		hxc_checkfileext(imgfile->path,"d68",SYS_PATH_TYPE) )
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D88_libIsValidDiskFile : D88 file !");
@@ -478,17 +478,16 @@ int D88_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int D88_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="NEC_D88";
 	static const char plug_desc[]="NEC D88 Loader";
 	static const char plug_ext[]="d88";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	D88_libIsValidDiskFile,
-		(LOADDISKFILE)		D88_libLoad_DiskFile,
-		(WRITEDISKFILE)		D88_libWrite_DiskFile,
-		(GETPLUGININFOS)	D88_libGetPluginInfo
+		(ISVALIDDISKFILE)   D88_libIsValidDiskFile,
+		(LOADDISKFILE)      D88_libLoad_DiskFile,
+		(WRITEDISKFILE)     D88_libWrite_DiskFile,
+		(GETPLUGININFOS)    D88_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

@@ -329,7 +329,9 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		}
 
 		fclose(stxdskfile);
+
+		return HXCFE_NOERROR;
 	}
 
-	return 0;
+	return HXCFE_ACCESSERROR;
 }

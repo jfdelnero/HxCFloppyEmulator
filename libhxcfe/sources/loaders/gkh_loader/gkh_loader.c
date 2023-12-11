@@ -38,7 +38,7 @@
 // File : gkh_loader.c
 // Contains: Ensoniq GKH floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -170,17 +170,16 @@ int GKH_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int GKH_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="ENSONIQ_GKH";
 	static const char plug_desc[]="ENSONIQ GKH Loader";
 	static const char plug_ext[]="gkh";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	GKH_libIsValidDiskFile,
-		(LOADDISKFILE)		GKH_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	GKH_libGetPluginInfo
+		(ISVALIDDISKFILE)   GKH_libIsValidDiskFile,
+		(LOADDISKFILE)      GKH_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    GKH_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -193,4 +192,3 @@ int GKH_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 			plug_ext
 			);
 }
-

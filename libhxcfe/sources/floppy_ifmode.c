@@ -38,7 +38,7 @@
 // File : floppy_ifmode.c
 // Contains: Floppy Interface functions
 //
-// Written by:  DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -48,7 +48,6 @@
 #include <stdio.h>
 
 #include "types.h"
-
 
 #include "internal_libhxcfe.h"
 #include "libhxcfe.h"
@@ -90,7 +89,7 @@ trackmode trackmodelist[]=
 	{QD_MO5_ENCODING,               "QD_MO5_ENCODING","" },
 	{C64_GCR_ENCODING,              "C64_GCR_ENCODING","" },
 	{VICTOR9K_GCR_ENCODING,         "VICTOR9K_GCR_ENCODING","" },
-	{MICRALN_HS_FM_ENCODING,        "MICRALN_HS_FM_ENCODING","" },	
+	{MICRALN_HS_FM_ENCODING,        "MICRALN_HS_FM_ENCODING","" },
 	{UNKNOWN_ENCODING,              "UNKNOWN_ENCODING", "" },
 	{-1,"", ""},
 };

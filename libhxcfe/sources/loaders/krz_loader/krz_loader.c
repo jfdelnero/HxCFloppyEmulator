@@ -38,7 +38,7 @@
 // File : krz_loader.c
 // Contains: Kurzweil KRZ floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -67,8 +67,6 @@ int KRZ_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 {
 	return hxcfe_imgCheckFileCompatibility( imgldr_ctx, imgfile, "KRZ_libIsValidDiskFile", "krz", 0 );
 }
-
-
 
 int KRZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
@@ -159,7 +157,6 @@ int KRZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		free(flatimg);
 
 		return ret;
-
 	}
 	else
 	{
@@ -169,17 +166,16 @@ int KRZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int KRZ_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="KURZWEIL_KRZ";
 	static const char plug_desc[]="KURZWEIL KRZ Loader";
 	static const char plug_ext[]="krz";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	KRZ_libIsValidDiskFile,
-		(LOADDISKFILE)		KRZ_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	KRZ_libGetPluginInfo
+		(ISVALIDDISKFILE)   KRZ_libIsValidDiskFile,
+		(LOADDISKFILE)      KRZ_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    KRZ_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -192,6 +188,3 @@ int KRZ_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 			plug_ext
 			);
 }
-
-
-

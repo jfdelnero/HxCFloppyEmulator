@@ -38,7 +38,7 @@
 // File : scp_writer.c
 // Contains: SCP Stream floppy image writer
 //
-// Written by: DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -371,7 +371,9 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		fwrite(&scph,sizeof(scp_header),1,f);
 
 		hxc_fclose(f);
+		
+		return HXCFE_NOERROR;
 	}
 
-	return 0;
+	return HXCFE_ACCESSERROR;
 }

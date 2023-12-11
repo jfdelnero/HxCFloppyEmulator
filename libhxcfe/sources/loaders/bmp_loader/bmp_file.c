@@ -147,7 +147,9 @@ int bmp_load(char * file,bitmap_data * bdata)
 						}
 
 						free(linebuffer);
+						linebuffer = NULL;
 						free(palette);
+						palette = NULL;
 					break;
 
 					case 4:
@@ -176,7 +178,9 @@ int bmp_load(char * file,bitmap_data * bdata)
 						}
 
 						free(linebuffer);
+						linebuffer = NULL;
 						free(palette);
+						palette = NULL;
 					break;
 
 					case 8:
@@ -205,7 +209,9 @@ int bmp_load(char * file,bitmap_data * bdata)
 						}
 
 						free(linebuffer);
+						linebuffer = NULL;
 						free(palette);
+						palette = NULL;
 					break;
 
 					case 24:
@@ -234,6 +240,7 @@ int bmp_load(char * file,bitmap_data * bdata)
 						}
 
 						free(linebuffer);
+						linebuffer = NULL;
 					break;
 
 					case 32:
@@ -262,6 +269,7 @@ int bmp_load(char * file,bitmap_data * bdata)
 						}
 
 						free(linebuffer);
+						linebuffer = NULL;
 
 					break;
 
@@ -292,14 +300,10 @@ int bmp_load(char * file,bitmap_data * bdata)
 	return -3;
 
 error:
-	if( data_ptr )
-		free( data_ptr );
 
-	if( linebuffer )
-		free( linebuffer );
-
-	if( palette )
-		free( palette );
+	free( data_ptr );
+	free( linebuffer );
+	free( palette );
 
 	if( f )
 		fclose( f );
@@ -362,6 +366,7 @@ int bmp24b_write(char * file,bitmap_data * bdata)
 			}
 
 			free(linebuffer);
+			linebuffer = NULL;
 		}
 		hxc_fclose(f);
 	}
@@ -428,6 +433,7 @@ int bmp16b_write(char * file,bitmap_data * bdata)
 			}
 
 			free(linebuffer);
+			linebuffer = NULL;
 		}
 		hxc_fclose(f);
 	}
@@ -548,6 +554,7 @@ int bmpRLE8b_write(char * file,bitmap_data * bdata)
 			}
 
 			free(linebuffer);
+			linebuffer = NULL;
 		}
 
 		bitmap_header.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + sizeof(pal) + datasize;

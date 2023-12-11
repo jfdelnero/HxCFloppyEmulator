@@ -38,7 +38,7 @@
 // File : fzf_loader.c
 // Contains: Casio FZF floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -65,7 +65,6 @@ char * fzffiletype[]={
 	"voice",
 	"effects"
 };
-
 
 int FZF_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
@@ -218,34 +217,30 @@ int FZF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	return ret;
 
 alloc_error:
-	if(f)
-		hxc_fclose(f);
 
-	if(fzf_file)
-		free(fzf_file);
+	if ( f )
+		hxc_fclose( f );
 
-	if(floppy_data)
-		free(floppy_data);
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
 
-	if(floppydisk->tracks)
-		free(floppydisk->tracks);
+	free(fzf_file);
+	free(floppy_data);
 
 	return HXCFE_INTERNALERROR;
 }
 
 int FZF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="CASIO_FZF";
 	static const char plug_desc[]="Casio FZF file Loader";
 	static const char plug_ext[]="fzf";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	FZF_libIsValidDiskFile,
-		(LOADDISKFILE)		FZF_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	FZF_libGetPluginInfo
+		(ISVALIDDISKFILE)   FZF_libIsValidDiskFile,
+		(LOADDISKFILE)      FZF_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    FZF_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

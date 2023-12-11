@@ -38,7 +38,7 @@
 // File : raw_loader.c
 // Contains: RAW floppy image loader
 //
-// Written by: Jean François DEL NERO
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -244,48 +244,42 @@ int RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		}
 	}
 
-	if(trackdata)
-		free(trackdata);
+	free(trackdata);
 
-	if(f) 
+	if(f)
 		hxc_fclose(f);
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 	return HXCFE_NOERROR;
-	
+
 error:
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Alloc / Internal error !",imgfile);
-			
-	if(trackdata)
-		free(trackdata);
 
-	if(f) 
+	free(trackdata);
+
+	if(f)
 		hxc_fclose(f);
-	
-	if(floppydisk->tracks)
-		free(floppydisk->tracks);
-	
-	floppydisk->tracks = NULL;
 
-	return HXCFE_INTERNALERROR;	
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
+
+	return HXCFE_INTERNALERROR;
 }
 
 int RAW_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);
 
 int32_t RAW_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="RAW_LOADER";
 	static const char plug_desc[]="RAW Sector loader";
 	static const char plug_ext[]="img";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	0,//RAW_libIsValidDiskFile,
-		(LOADDISKFILE)		RAW_libLoad_DiskFile,
-		(WRITEDISKFILE)		RAW_libWrite_DiskFile,
-		(GETPLUGININFOS)	RAW_libGetPluginInfo
+		(ISVALIDDISKFILE)   0,//RAW_libIsValidDiskFile,
+		(LOADDISKFILE)      RAW_libLoad_DiskFile,
+		(WRITEDISKFILE)     RAW_libWrite_DiskFile,
+		(GETPLUGININFOS)    RAW_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

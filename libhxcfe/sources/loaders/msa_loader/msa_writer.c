@@ -264,63 +264,68 @@ int MSA_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 	if(nbsector)
 	{
-		packed_track =  malloc(nbsector * 512 * 4);
-		flat_track = malloc(nbsector * 512);
-		if(flat_track && packed_track)
+		packed_track =  calloc( 1, nbsector * 512 * 4);
+		flat_track = calloc( 1, nbsector * 512);
+		if(!flat_track || !packed_track)
 		{
-			memset(packed_track,0,nbsector * 512 * 4);
-			memset(flat_track,0,nbsector * 512);
-
-			msadskfile = hxc_fopen(filename,"wb");
-			if(msadskfile)
-			{
-				fwrite(&msah,sizeof(msa_header),1,msadskfile);
-
-				ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
-				if(ss)
-				{
-					for(j = 0; (j < (int)BIGENDIAN_WORD(msah.number_of_track)+1); j++)
-					{
-						for(i = 0; i < (int)BIGENDIAN_WORD(msah.number_of_side)+1; i++)
-						{
-							hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),BIGENDIAN_WORD(msah.number_of_track)*2 );
-
-							memset(packed_track,0,nbsector * 512 * 4);
-							memset(flat_track,0,nbsector * 512);
-
-							for(k=0;k<nbsector;k++)
-							{
-								sc = hxcfe_searchSector(ss,j,i,k+1,ISOIBM_MFM_ENCODING);
-								if(sc)
-								{
-									if(sc->sectorsize == 512)
-									{
-										if(sc->input_data)
-											memcpy((void*)&flat_track[k*512],sc->input_data,sc->sectorsize);
-									}
-
-									hxcfe_freeSectorConfig( ss, sc );
-								}
-							}
-
-							outsize = msapacktrack(flat_track,k*512,packed_track);
-							fwrite(packed_track,outsize,1,msadskfile);
-						}
-					}
-
-					hxcfe_deinitSectorAccess(ss);
-				}
-
-				hxc_fclose(msadskfile);
-			}
+			free(packed_track);
+			free(flat_track);
+			return HXCFE_INTERNALERROR;
 		}
 
-		if(flat_track)
-			free(flat_track);
+		msadskfile = hxc_fopen(filename,"wb");
+		if(msadskfile)
+		{
+			fwrite(&msah,sizeof(msa_header),1,msadskfile);
 
-		if(packed_track)
+			ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
+			if(ss)
+			{
+				for(j = 0; (j < (int)BIGENDIAN_WORD(msah.number_of_track)+1); j++)
+				{
+					for(i = 0; i < (int)BIGENDIAN_WORD(msah.number_of_side)+1; i++)
+					{
+						hxcfe_imgCallProgressCallback(imgldr_ctx,(j<<1) | (i&1),BIGENDIAN_WORD(msah.number_of_track)*2 );
+
+						memset(packed_track,0,nbsector * 512 * 4);
+						memset(flat_track,0,nbsector * 512);
+
+						for(k=0;k<nbsector;k++)
+						{
+							sc = hxcfe_searchSector(ss,j,i,k+1,ISOIBM_MFM_ENCODING);
+							if(sc)
+							{
+								if(sc->sectorsize == 512)
+								{
+									if(sc->input_data)
+										memcpy((void*)&flat_track[k*512],sc->input_data,sc->sectorsize);
+								}
+
+								hxcfe_freeSectorConfig( ss, sc );
+							}
+						}
+
+						outsize = msapacktrack(flat_track,k*512,packed_track);
+						fwrite(packed_track,outsize,1,msadskfile);
+					}
+				}
+
+				hxcfe_deinitSectorAccess(ss);
+			}
+
+			hxc_fclose(msadskfile);
+
+			free(flat_track);
 			free(packed_track);
+
+			return HXCFE_NOERROR;
+		}
+
+		free(flat_track);
+		free(packed_track);
+
+		return HXCFE_ACCESSERROR;
 	}
 
-	return 0;
+	return HXCFE_BADFILE;
 }

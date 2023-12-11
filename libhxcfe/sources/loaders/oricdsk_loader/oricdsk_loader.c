@@ -38,7 +38,7 @@
 // File : oricdsk_loader.c
 // Contains: OricDSK floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -329,6 +329,7 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 	int32_t interleave,gap3len;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SECTCFG * sectlist;
+	unsigned char header_buffer[256];
 	oricdsk_fileheader * fileheader;
 	int regenerate_mode;
 
@@ -357,9 +358,8 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 	if( filesize )
 	{
 		mfmformat=0;
-		fileheader = (oricdsk_fileheader *) malloc(256);
-		if(!fileheader)
-			goto error;
+		fileheader = (oricdsk_fileheader *) header_buffer;
+		memset(fileheader,0,sizeof(header_buffer));
 
 		hxc_fread(fileheader,256,f);
 		sectorsize=256; // OricDSK file support only 256bytes/sector floppies.
@@ -566,8 +566,6 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 			break;
 		}
 
-		free(fileheader);
-
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 		hxc_fclose(f);
 
@@ -587,7 +585,6 @@ error:
 	if(f)
 		hxc_fclose(f);
 
-	free(fileheader);
 	free(trackdatatab);
 	free(trackdata);
 
@@ -599,17 +596,16 @@ int OricDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,cha
 
 int OricDSK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="ORIC_DSK";
 	static const char plug_desc[]="ORIC DSK Loader";
 	static const char plug_ext[]="dsk";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	OricDSK_libIsValidDiskFile,
-		(LOADDISKFILE)		OricDSK_libLoad_DiskFile,
-		(WRITEDISKFILE)		OricDSK_libWrite_DiskFile,
-		(GETPLUGININFOS)	OricDSK_libGetPluginInfo
+		(ISVALIDDISKFILE)   OricDSK_libIsValidDiskFile,
+		(LOADDISKFILE)      OricDSK_libLoad_DiskFile,
+		(WRITEDISKFILE)     OricDSK_libWrite_DiskFile,
+		(GETPLUGININFOS)    OricDSK_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

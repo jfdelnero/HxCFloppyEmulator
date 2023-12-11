@@ -38,7 +38,7 @@
 // File : xml_disk.c
 // Contains: raw disk loader/creator
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////

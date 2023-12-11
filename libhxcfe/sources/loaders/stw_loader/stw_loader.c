@@ -38,7 +38,7 @@
 // File : stw_loader.c
 // Contains: STW floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -114,7 +114,6 @@ int STW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	if(!strncmp((char*)header.headername,"STW",3))
 	{
-
 		floppydisk->floppyNumberOfTrack = header.number_of_track;
 		floppydisk->floppyNumberOfSide = header.number_of_side;
 		floppydisk->floppyBitRate = 250000;
@@ -129,11 +128,16 @@ int STW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			floppydisk->floppyiftype);
 
 		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if(!floppydisk->tracks)
+		{
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
+		}
+
 		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 		for(i=0;i<(unsigned int)(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide);i++)
 		{
-
 			hxcfe_imgCallProgressCallback(imgldr_ctx,i,(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide) );
 
 			fseek(f,sizeof(header)+(i*(sizeof(trackdesc)+(BIGENDIAN_WORD(header.bytes_per_tracks)*2))),SEEK_SET);
@@ -160,11 +164,13 @@ int STW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		}
 
 		hxc_fclose(f);
+
 		return HXCFE_NOERROR;
 	}
 
 	hxc_fclose(f);
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"bad header");
+
 	return HXCFE_BADFILE;
 }
 
@@ -178,10 +184,10 @@ int STW_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	STW_libIsValidDiskFile,
-		(LOADDISKFILE)		STW_libLoad_DiskFile,
-		(WRITEDISKFILE)		STW_libWrite_DiskFile,
-		(GETPLUGININFOS)	STW_libGetPluginInfo
+		(ISVALIDDISKFILE)   STW_libIsValidDiskFile,
+		(LOADDISKFILE)      STW_libLoad_DiskFile,
+		(WRITEDISKFILE)     STW_libWrite_DiskFile,
+		(GETPLUGININFOS)    STW_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

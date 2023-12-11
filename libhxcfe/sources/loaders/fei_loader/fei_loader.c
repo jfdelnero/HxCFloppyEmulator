@@ -182,17 +182,16 @@ error:
 
 int FEI_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="FEI";
 	static const char plug_desc[]="FEI Loader";
 	static const char plug_ext[]="fei";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	FEI_libIsValidDiskFile,
-		(LOADDISKFILE)		FEI_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	FEI_libGetPluginInfo
+		(ISVALIDDISKFILE)   FEI_libIsValidDiskFile,
+		(LOADDISKFILE)      FEI_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    FEI_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -205,4 +204,3 @@ int FEI_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 			plug_ext
 			);
 }
-

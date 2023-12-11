@@ -38,7 +38,7 @@
 // File : amigadosfs_loader.c
 // Contains: AMIGADOSFSDK floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -293,12 +293,12 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flopp
 	int numberoftrack;
 	int numberofsectorpertrack;
 	int ret;
-    struct stat repstate;
+	struct stat repstate;
 	struct tm * ts;
 	struct DateTime reptime;
 	char * disk_format_name;
 
-//	FILE * debugadf;
+//  FILE * debugadf;
 	int rc;
 
 	numberoftrack = 80;
@@ -437,17 +437,16 @@ int AMIGADOSFSDK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flopp
 
 int AMIGADOSFSDK_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="AMIGA_FS";
 	static const char plug_desc[]="AMIGA FS Loader";
 	static const char plug_ext[]="amigados";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	AMIGADOSFSDK_libIsValidDiskFile,
-		(LOADDISKFILE)		AMIGADOSFSDK_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	AMIGADOSFSDK_libGetPluginInfo
+		(ISVALIDDISKFILE)   AMIGADOSFSDK_libIsValidDiskFile,
+		(LOADDISKFILE)      AMIGADOSFSDK_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    AMIGADOSFSDK_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

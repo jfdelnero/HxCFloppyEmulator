@@ -396,11 +396,9 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 			floppydisk->floppyNumberOfSide=nbside;
 			floppydisk->floppySectorPerTrack=-1;
 
-			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
-			if(!floppydisk->tracks)
+			floppydisk->tracks=(HXCFE_CYLINDER**)calloc( 1, sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			if( !floppydisk->tracks )
 				goto alloc_error;
-
-			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 			rpm = 300;
 
@@ -479,22 +477,23 @@ alloc_error:
 		deinitEnv( tmp_env );
 	}
 
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
+
 	return HXCFE_INTERNALERROR;
 }
 
 int HxCStream_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="HXCSTREAM";
 	static const char plug_desc[]="HxC Stream Loader";
 	static const char plug_ext[]="hxcstream";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	HxCStream_libIsValidDiskFile,
-		(LOADDISKFILE)		HxCStream_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,//HxCStream_libWrite_DiskFile,
-		(GETPLUGININFOS)	HxCStream_libGetPluginInfo
+		(ISVALIDDISKFILE)   HxCStream_libIsValidDiskFile,
+		(LOADDISKFILE)      HxCStream_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,//HxCStream_libWrite_DiskFile,
+		(GETPLUGININFOS)    HxCStream_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

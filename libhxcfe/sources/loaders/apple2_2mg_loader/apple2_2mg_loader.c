@@ -282,6 +282,7 @@ int Apple2_2mg_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
+
 	return HXCFE_BADFILE;
 
 alloc_error:
@@ -292,23 +293,23 @@ alloc_error:
 	if(f)
 		hxc_fclose(f);
 
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
+
 	return HXCFE_INTERNALERROR;
 }
 
-
 int Apple2_2mg_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[] = "APPLE2_2MG";
 	static const char plug_desc[] = "Apple II 2MG Loader";
 	static const char plug_ext[] = "2mg";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	Apple2_2mg_libIsValidDiskFile,
-		(LOADDISKFILE)		Apple2_2mg_libLoad_DiskFile,
-		(WRITEDISKFILE)		NULL,
-		(GETPLUGININFOS)	Apple2_2mg_libGetPluginInfo
+		(ISVALIDDISKFILE)   Apple2_2mg_libIsValidDiskFile,
+		(LOADDISKFILE)      Apple2_2mg_libLoad_DiskFile,
+		(WRITEDISKFILE)     NULL,
+		(GETPLUGININFOS)    Apple2_2mg_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

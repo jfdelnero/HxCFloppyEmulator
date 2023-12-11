@@ -38,7 +38,7 @@
 // File : qd_loader.c
 // Contains: HxC Quickdisk floppy image loader
 //
-// Written by: Jean François DEL NERO
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -210,10 +210,10 @@ int QD_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retur
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	QD_libIsValidDiskFile,
-		(LOADDISKFILE)		QD_libLoad_DiskFile,
-		(WRITEDISKFILE)		QD_libWrite_DiskFile,
-		(GETPLUGININFOS)	QD_libGetPluginInfo
+		(ISVALIDDISKFILE)   QD_libIsValidDiskFile,
+		(LOADDISKFILE)      QD_libLoad_DiskFile,
+		(WRITEDISKFILE)     QD_libWrite_DiskFile,
+		(GETPLUGININFOS)    QD_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

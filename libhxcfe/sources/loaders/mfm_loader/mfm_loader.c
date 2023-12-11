@@ -175,6 +175,8 @@ int MFM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 alloc_error:
 	hxc_fclose(f);
 
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
+
 	return HXCFE_INTERNALERROR;
 }
 
@@ -188,10 +190,10 @@ int MFM_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	MFM_libIsValidDiskFile,
-		(LOADDISKFILE)		MFM_libLoad_DiskFile,
-		(WRITEDISKFILE)		MFM_libWrite_DiskFile,
-		(GETPLUGININFOS)	MFM_libGetPluginInfo
+		(ISVALIDDISKFILE)   MFM_libIsValidDiskFile,
+		(LOADDISKFILE)      MFM_libLoad_DiskFile,
+		(WRITEDISKFILE)     MFM_libWrite_DiskFile,
+		(GETPLUGININFOS)    MFM_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

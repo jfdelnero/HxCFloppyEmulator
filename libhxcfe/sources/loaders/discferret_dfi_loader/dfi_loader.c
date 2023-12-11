@@ -239,6 +239,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,short * 
 					}
 
 					free(trackbuf_dword);
+					trackbuf_dword = NULL;
 				}
 
 				hxcfe_deinitFxStream(fxs);
@@ -246,6 +247,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,FILE * f,int track,short * 
 			}
 
 			free(block_buf);
+			block_buf = NULL;
 		}
 	}
 
@@ -350,6 +352,7 @@ int DFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				sprintf(filepath,"%s%s",folder,"config.script");
 				hxcfe_execScriptFile(imgldr_ctx->hxcfe, filepath);
 				free(filepath);
+				filepath = NULL;
 			}
 
 			fseek(f,0,SEEK_END);
@@ -531,6 +534,7 @@ int DFI_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			deinitEnv( tmp_env );
 
 			free(folder);
+			folder = NULL;
 
 			return HXCFE_NOERROR;
 		}

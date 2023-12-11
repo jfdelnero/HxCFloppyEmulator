@@ -38,7 +38,7 @@
 // File : vfddat_loader.c
 // Contains: Densei Sirius FDE VFD DAT loader.
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -107,8 +107,10 @@ static HXCFE_SIDE* VFDpatchtrack(HXCFE* floppycontext,unsigned char * trackdata,
 	idamoffset = (unsigned long*)header;
 
 	k=0;
-	track_density=malloc(tracklen+4);
-	
+	track_density = malloc(tracklen+4);
+	if(!track_density)
+		return NULL;
+
 	memset(track_density,ISOFORMAT_DD,tracklen);
 	trackformat=ISOFORMAT_DD;
 
@@ -125,7 +127,7 @@ static HXCFE_SIDE* VFDpatchtrack(HXCFE* floppycontext,unsigned char * trackdata,
 			trackclk[j+2]=0x0A;
 			trackclk[j+3]=0xFF;
 		}
-		
+
 		i++;
 	}
 
@@ -152,7 +154,6 @@ static HXCFE_SIDE* VFDpatchtrack(HXCFE* floppycontext,unsigned char * trackdata,
 
 int VFDDAT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
 	FILE * f;
 	unsigned int filesize;
 	int i,j;
@@ -191,6 +192,11 @@ int VFDDAT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 		floppydisk->floppySectorPerTrack=-1;
 		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if(!floppydisk->tracks)
+		{
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
+		}
 
 		rpm=360;
 
@@ -199,31 +205,33 @@ int VFDDAT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 		trackdata=(unsigned char*)malloc(track_len+16);
 		trackclk=(unsigned char*)malloc(track_len+16);
 
-		if( trackdata && trackclk )
+		if( !trackdata || !trackclk )
 		{
+			free(trackdata);
+			free(trackclk);
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
+		}
 
-			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+		for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+		{
+			floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+			currentcylinder=floppydisk->tracks[j];
+
+			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 			{
+				hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
 
-				floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-				currentcylinder=floppydisk->tracks[j];
+				file_offset=sizeof(header)+((track_len)*(j*floppydisk->floppyNumberOfSide))+((track_len)*(i&1));
+				fseek (f , file_offset , SEEK_SET);
+				hxc_fread(trackdata,track_len,f);
+				memset(trackclk,0xFF,track_len);
 
-				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-				{
-					hxcfe_imgCallProgressCallback(imgldr_ctx, (j<<1) + (i&1),floppydisk->floppyNumberOfTrack*2);
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %d Side %d Tracklen %d Track Offset:0x%.8x",j,i,track_len,file_offset);
 
-					file_offset=sizeof(header)+((track_len)*(j*floppydisk->floppyNumberOfSide))+((track_len)*(i&1));
-					fseek (f , file_offset , SEEK_SET);
-					hxc_fread(trackdata,track_len,f);
-					memset(trackclk,0xFF,track_len);
-
-					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Track %d Side %d Tracklen %d Track Offset:0x%.8x",j,i,track_len,file_offset);
-
-					currentside = VFDpatchtrack(imgldr_ctx->hxcfe,trackdata, trackclk,track_len,&tracktotalsize, (unsigned char*)&header,j);
-					currentcylinder->sides[i] = currentside;
-					fillindex(-2500,currentside,2500,TRUE,1);
-
-				}
+				currentside = VFDpatchtrack(imgldr_ctx->hxcfe,trackdata, trackclk,track_len,&tracktotalsize, (unsigned char*)&header,j);
+				currentcylinder->sides[i] = currentside;
+				fillindex(-2500,currentside,2500,TRUE,1);
 			}
 		}
 
@@ -244,17 +252,16 @@ int VFDDAT_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 
 int VFDDAT_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="VFD_DAT";
 	static const char plug_desc[]="PC98 VFD DAT";
 	static const char plug_ext[]="dat";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	VFDDAT_libIsValidDiskFile,
-		(LOADDISKFILE)		VFDDAT_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	VFDDAT_libGetPluginInfo
+		(ISVALIDDISKFILE)   VFDDAT_libIsValidDiskFile,
+		(LOADDISKFILE)      VFDDAT_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    VFDDAT_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -267,4 +274,3 @@ int VFDDAT_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * r
 			plug_ext
 			);
 }
-

@@ -248,6 +248,8 @@ alloc_error:
 	if( f )
 		hxc_fclose(f);
 
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
+
 	return HXCFE_INTERNALERROR;
 }
 

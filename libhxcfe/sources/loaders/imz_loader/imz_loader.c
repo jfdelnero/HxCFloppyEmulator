@@ -38,7 +38,7 @@
 // File : imz_loader.c
 // Contains: IMZ floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -103,8 +103,6 @@ int IMZ_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 	}
 }
 
-
-
 int IMZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	int32_t filesize;
@@ -128,16 +126,16 @@ int IMZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	unzGoToFirstFile(uf);
 
-    err = unzGetCurrentFileInfo(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
+	err = unzGetCurrentFileInfo(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
 	if (err!=UNZ_OK)
-    {
+	{
 		unzClose(uf);
 		return HXCFE_BADFILE;
 	}
 
 	err=unzOpenCurrentFile(uf);
 	if (err!=UNZ_OK)
-    {
+	{
 		unzClose(uf);
 		return HXCFE_BADFILE;
 	}
@@ -178,17 +176,16 @@ int IMZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int IMZ_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="RAW_IMZ";
 	static const char plug_desc[]="IBM PC IMZ Loader";
 	static const char plug_ext[]="imz";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	IMZ_libIsValidDiskFile,
-		(LOADDISKFILE)		IMZ_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	IMZ_libGetPluginInfo
+		(ISVALIDDISKFILE)   IMZ_libIsValidDiskFile,
+		(LOADDISKFILE)      IMZ_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    IMZ_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

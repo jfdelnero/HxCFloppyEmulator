@@ -387,12 +387,13 @@ alloc_error:
 	if( f )
 		hxc_fclose(f);
 
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
+
 	return HXCFE_INTERNALERROR;
 }
 
 int TI99PC99_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="TI994A_PC99";
 	static const char plug_desc[]="TI99 4A PC99 Loader";
 	static const char plug_ext[]="pc99";

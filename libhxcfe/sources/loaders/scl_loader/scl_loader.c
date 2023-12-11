@@ -35,10 +35,10 @@
 //-------------------------------------------------------------------------------//
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
-// File : scl_DiskFile.c
+// File : scl_loader.c
 // Contains: SCL floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -60,16 +60,16 @@
 #include "scl_loader.h"
 
 unsigned char dir_entry[34] =
-	{
-		0x01, 0x16, 0x00, 0xF0,
-		0x09, 0x10, 0x00, 0x00,
-		0x20, 0x20, 0x20, 0x20,
-		0x20, 0x20, 0x20, 0x20,
-		0x20, 0x00, 0x00, 0x64,
-		0x69, 0x73, 0x6B, 0x6E,
-		0x61, 0x6D, 0x65, 0x00,
-		0x00, 0x00, 0x46, 0x55
-	};
+{
+	0x01, 0x16, 0x00, 0xF0,
+	0x09, 0x10, 0x00, 0x00,
+	0x20, 0x20, 0x20, 0x20,
+	0x20, 0x20, 0x20, 0x20,
+	0x20, 0x00, 0x00, 0x64,
+	0x69, 0x73, 0x6B, 0x6E,
+	0x61, 0x6D, 0x65, 0x00,
+	0x00, 0x00, 0x46, 0x55
+};
 
 int SCL_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
@@ -104,10 +104,10 @@ unsigned int lsb2ui(unsigned char *mem)
 
 void ui2lsb(unsigned char *mem, unsigned int value)
 {
-  mem[0] = (value>>0 )&0xFF;
-  mem[1] = (value>>8 )&0xFF;
-  mem[2] = (value>>16)&0xFF;
-  mem[3] = (value>>24)&0xFF;
+	mem[0] = (value>>0 )&0xFF;
+	mem[1] = (value>>8 )&0xFF;
+	mem[2] = (value>>16)&0xFF;
+	mem[3] = (value>>24)&0xFF;
 }
 
 int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
@@ -170,7 +170,7 @@ int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	memset(trd_image,0, rawcfg.number_of_tracks * rawcfg.number_of_sides * rawcfg.number_of_sectors_per_track * 256);
 	memcpy(&trd_image[0x08E2], dir_entry, 32);
-    strncpy((char*)&trd_image[0x08F5], "HxCFE", 8);
+	strncpy((char*)&trd_image[0x08F5], "HxCFE", 8);
 
 	tmp = (char *) trd_image + 0x8E5;
 	trd_files = (unsigned char *) trd_image + 0x8E4;
@@ -248,17 +248,16 @@ int SCL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int SCL_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="ZXSPECTRUM_SCL";
 	static const char plug_desc[]="ZX SPECTRUM SCL Loader";
 	static const char plug_ext[]="scl";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	SCL_libIsValidDiskFile,
-		(LOADDISKFILE)		SCL_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	SCL_libGetPluginInfo
+		(ISVALIDDISKFILE)   SCL_libIsValidDiskFile,
+		(LOADDISKFILE)      SCL_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    SCL_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

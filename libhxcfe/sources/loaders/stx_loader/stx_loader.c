@@ -38,7 +38,7 @@
 // File : stx_loader.c
 // Contains: STX floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -391,7 +391,6 @@ void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * 
 
 int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
 	FILE * f;
 	int t;
 	int i,j,k,l;
@@ -840,7 +839,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							if( !sector || !sectorconfig )
 								goto alloc_error;
 
-							memset(sector,0,sizeof(pasti_sector)*trackheader.numberofsector);							
+							memset(sector,0,sizeof(pasti_sector)*trackheader.numberofsector);
 							memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)* trackheader.numberofsector);
 						}
 						else
@@ -1243,22 +1242,23 @@ alloc_error:
 	free(tempmask);
 	free(weaksectorbuffer);
 
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
+
 	return HXCFE_INTERNALERROR;
 }
 
 int STX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="ATARIST_STX";
 	static const char plug_desc[]="Atari ST STX/Pasti Loader";
 	static const char plug_ext[]="stx";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	STX_libIsValidDiskFile,
-		(LOADDISKFILE)		STX_libLoad_DiskFile,
-		(WRITEDISKFILE)		STX_libWrite_DiskFile,
-		(GETPLUGININFOS)	STX_libGetPluginInfo
+		(ISVALIDDISKFILE)   STX_libIsValidDiskFile,
+		(LOADDISKFILE)      STX_libLoad_DiskFile,
+		(WRITEDISKFILE)     STX_libWrite_DiskFile,
+		(GETPLUGININFOS)    STX_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -1271,4 +1271,3 @@ int STX_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 			plug_ext
 			);
 }
-

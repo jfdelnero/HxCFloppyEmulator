@@ -38,7 +38,7 @@
 // File : sdd_speccydos_loader.c
 // Contains: SpeccyDos SDD floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -160,22 +160,22 @@ int SDDSpeccyDos_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * flopp
 	}
 
 	hxc_fclose(f_img);
+
 	return HXCFE_FILECORRUPTED;
 }
 
 int SDDSpeccyDos_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="SPECCYDOS_SDD";
 	static const char plug_desc[]="Speccy DOS SDD File Loader";
 	static const char plug_ext[]="sdd";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	SDDSpeccyDos_libIsValidDiskFile,
-		(LOADDISKFILE)		SDDSpeccyDos_libLoad_DiskFile,
-		(WRITEDISKFILE)		SDDSpeccyDos_libWrite_DiskFile,
-		(GETPLUGININFOS)	SDDSpeccyDos_libGetPluginInfo
+		(ISVALIDDISKFILE)   SDDSpeccyDos_libIsValidDiskFile,
+		(LOADDISKFILE)      SDDSpeccyDos_libLoad_DiskFile,
+		(WRITEDISKFILE)     SDDSpeccyDos_libWrite_DiskFile,
+		(GETPLUGININFOS)    SDDSpeccyDos_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

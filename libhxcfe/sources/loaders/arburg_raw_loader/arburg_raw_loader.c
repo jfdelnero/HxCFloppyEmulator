@@ -38,7 +38,7 @@
 // File : arburg_raw_loader.c
 // Contains: Arburg floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -100,8 +100,8 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 	FILE * f;
 	unsigned short i;
 	int filesize;
-	HXCFE_CYLINDER*      currentcylinder;
-	HXCFE_SIDE*          currentside;
+	HXCFE_CYLINDER* currentcylinder;
+	HXCFE_SIDE*    currentside;
 	unsigned char  sector_data[ARBURB_SYSTEMTRACK_SIZE + 2];
 	unsigned short tracknumber,sidenumber;
 	int systemdisk;
@@ -121,7 +121,6 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 		systemdisk = 1;
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"ARBURG_RAW_libLoad_DiskFile : Arburg Data raw file !");
 	}
-
 
 	f = hxc_fopen(imgfile,"rb");
 	if( f == NULL )
@@ -143,8 +142,13 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 		floppydisk->floppySectorPerTrack,
 		floppydisk->floppyiftype);
 
-
 	floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+	if( !floppydisk->tracks )
+	{
+		hxc_fclose(f);
+		return HXCFE_INTERNALERROR;
+	}
+
 	memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 	for(i=0;i<floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide;i++)
@@ -173,11 +177,10 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 
 		if(!floppydisk->tracks[tracknumber])
 		{
-			floppydisk->tracks[tracknumber]=allocCylinderEntry(300,floppydisk->floppyNumberOfSide);
+			floppydisk->tracks[tracknumber] = allocCylinderEntry(300,floppydisk->floppyNumberOfSide);
 		}
 
 		currentcylinder=floppydisk->tracks[tracknumber];
-
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"read track %d side %d at offset 0x%x (0x%x bytes)",
 			tracknumber,
@@ -203,22 +206,22 @@ int ARBURG_RAW_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppyd
 	}
 
 	hxc_fclose(f);
+
 	return HXCFE_NOERROR;
 }
 
 int ARBURG_RAW_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="ARBURG";
 	static const char plug_desc[]="ARBURG RAW Loader";
 	static const char plug_ext[]="arburgfd";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	ARBURG_RAW_libIsValidDiskFile,
-		(LOADDISKFILE)		ARBURG_RAW_libLoad_DiskFile,
-		(WRITEDISKFILE)		ARBURG_RAW_libWrite_DiskFile,
-		(GETPLUGININFOS)	ARBURG_RAW_libGetPluginInfo
+		(ISVALIDDISKFILE)   ARBURG_RAW_libIsValidDiskFile,
+		(LOADDISKFILE)      ARBURG_RAW_libLoad_DiskFile,
+		(WRITEDISKFILE)     ARBURG_RAW_libWrite_DiskFile,
+		(GETPLUGININFOS)    ARBURG_RAW_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -231,4 +234,3 @@ int ARBURG_RAW_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void
 			plug_ext
 			);
 }
-

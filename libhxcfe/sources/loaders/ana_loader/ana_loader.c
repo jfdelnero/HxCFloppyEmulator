@@ -38,7 +38,7 @@
 // File : ana_loader.c
 // Contains: AnaDisk floppy image loader.
 //
-// Written by:	Jean-François DEL NERO
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -250,7 +250,7 @@ int ANA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		if( !sectorconfig )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Allocation error !");
-			free(floppydisk->tracks);
+			hxcfe_freeFloppy( imgldr_ctx->hxcfe, floppydisk );
 			hxc_fclose(f);
 			return HXCFE_INTERNALERROR;
 		}
@@ -337,17 +337,16 @@ int ANA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int ANA_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="ANA_IMG";
 	static const char plug_desc[]="AnaDisk file Loader";
 	static const char plug_ext[]="ana";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	ANA_libIsValidDiskFile,
-		(LOADDISKFILE)		ANA_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	ANA_libGetPluginInfo
+		(ISVALIDDISKFILE)   ANA_libIsValidDiskFile,
+		(LOADDISKFILE)      ANA_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    ANA_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

@@ -7,6 +7,8 @@
 
 int initFATPartion(int fattype,int numberofsector,FATPARTITION * fatpart)
 {
+	int ret;
+
 	switch(fattype)
 	{
 		case FATLIB_FAT12:
@@ -22,14 +24,22 @@ int initFATPartion(int fattype,int numberofsector,FATPARTITION * fatpart)
 			break;
 	}
 
+	ret = 0;
+
 	if(fatpart)
 	{
+		fatpart->FATType = fattype;
+		fatpart->rawdata = (unsigned char*)malloc( numberofsector * 512 );
 
-		fatpart->FATType=fattype;
-		fatpart->rawdata=(unsigned char*)malloc(numberofsector*512);
-		memset(fatpart->rawdata,0xF6,numberofsector*512);
-
+		if(fatpart->rawdata)
+			memset(fatpart->rawdata,0xF6,numberofsector*512);
+		else
+		{
+			fatpart->FATType = 0;
+			ret = -1;
+		}
 	}
-	return 0;
+
+	return ret;
 }
 

@@ -38,7 +38,7 @@
 // File : bmp_loader.c
 // Contains: BMP floppy tracks layout image generator
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -64,17 +64,16 @@ int BMP_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 
 int BMP_Tracks_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="BMP_IMAGE";
 	static const char plug_desc[]="BMP floppy tracks layout image generator";
 	static const char plug_ext[]="bmp";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	0,
-		(LOADDISKFILE)		0,
-		(WRITEDISKFILE)		BMP_Tracks_libWrite_DiskFile,
-		(GETPLUGININFOS)	BMP_Tracks_libGetPluginInfo
+		(ISVALIDDISKFILE)   0,
+		(LOADDISKFILE)      0,
+		(WRITEDISKFILE)     BMP_Tracks_libWrite_DiskFile,
+		(GETPLUGININFOS)    BMP_Tracks_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -90,17 +89,16 @@ int BMP_Tracks_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void
 
 int BMP_StreamTracks_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="BMP_STREAM_IMAGE";
 	static const char plug_desc[]="BMP stream floppy tracks layout image generator";
 	static const char plug_ext[]="bmp";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	0,
-		(LOADDISKFILE)		0,
-		(WRITEDISKFILE)		BMP_StreamTracks_libWrite_DiskFile,
-		(GETPLUGININFOS)	BMP_StreamTracks_libGetPluginInfo
+		(ISVALIDDISKFILE)   0,
+		(LOADDISKFILE)      0,
+		(WRITEDISKFILE)     BMP_StreamTracks_libWrite_DiskFile,
+		(GETPLUGININFOS)    BMP_StreamTracks_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -116,17 +114,16 @@ int BMP_StreamTracks_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotyp
 
 int BMP_Disk_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="BMP_DISK_IMAGE";
 	static const char plug_desc[]="BMP floppy layout (disk) image generator";
 	static const char plug_ext[]="bmp";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	0,
-		(LOADDISKFILE)		0,
-		(WRITEDISKFILE)		BMP_Disk_libWrite_DiskFile,
-		(GETPLUGININFOS)	BMP_Disk_libGetPluginInfo
+		(ISVALIDDISKFILE)   0,
+		(LOADDISKFILE)      0,
+		(WRITEDISKFILE)     BMP_Disk_libWrite_DiskFile,
+		(GETPLUGININFOS)    BMP_Disk_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

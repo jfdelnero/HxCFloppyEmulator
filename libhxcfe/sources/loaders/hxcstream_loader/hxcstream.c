@@ -637,7 +637,7 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 	char * str1,* str2;
 
 	buffer_offset = 0;
-	track_dump = 0;
+	track_dump = NULL;
 	iostreambuf = NULL;
 	stream = NULL;
 	metadata = NULL;
@@ -653,7 +653,6 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 
 		while( (uint32_t)buffer_offset < filesize)
 		{
-
 			header = (chunk_header*)&buffer_in[buffer_offset];
 			buffer_offset += sizeof(chunk_header);
 

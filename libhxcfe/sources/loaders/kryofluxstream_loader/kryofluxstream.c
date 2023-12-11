@@ -38,7 +38,7 @@
 // File : kryofluxstream.c
 // Contains: KryoFlux Stream file loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////

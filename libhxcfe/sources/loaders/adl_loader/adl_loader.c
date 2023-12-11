@@ -38,7 +38,7 @@
 // File : adl_ssd_dsd_loader.c
 // Contains: BBC floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -131,12 +131,10 @@ int ADL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				rawcfg.number_of_sectors_per_track = 16;
 			break;
 			default:
-
 				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Invalid file size : %d bytes",filesize);
 				hxc_fclose(f_img);
 				return HXCFE_FILECORRUPTED;
-
-				break;
+			break;
 		}
 
 		rawcfg.interface_mode = GENERIC_SHUGART_DD_FLOPPYMODE;
@@ -156,17 +154,16 @@ int ADL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int ADL_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="BBC_ADL";
 	static const char plug_desc[]="BBC ADL floppy image loader";
 	static const char plug_ext[]="adl";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	ADL_libIsValidDiskFile,
-		(LOADDISKFILE)		ADL_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	ADL_libGetPluginInfo
+		(ISVALIDDISKFILE)   ADL_libIsValidDiskFile,
+		(LOADDISKFILE)      ADL_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    ADL_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -179,4 +176,3 @@ int ADL_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 			plug_ext
 			);
 }
-

@@ -227,9 +227,7 @@ alloc_error:
 	if(f)
 		hxc_fclose(f);
 
-	free(floppydisk->tracks);
-
-	floppydisk->tracks = NULL;
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
 
 	return HXCFE_INTERNALERROR;
 }
@@ -239,17 +237,16 @@ int Apple2_do_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 
 int Apple2_do_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[] = "APPLE2_DO";
 	static const char plug_desc[] = "Apple II DO Loader";
 	static const char plug_ext[] = "do";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	Apple2_do_libIsValidDiskFile,
-		(LOADDISKFILE)		Apple2_do_libLoad_DiskFile,
-		(WRITEDISKFILE)		Apple2_do_libWrite_DiskFile,
-		(GETPLUGININFOS)	Apple2_do_libGetPluginInfo
+		(ISVALIDDISKFILE)   Apple2_do_libIsValidDiskFile,
+		(LOADDISKFILE)      Apple2_do_libLoad_DiskFile,
+		(WRITEDISKFILE)     Apple2_do_libWrite_DiskFile,
+		(GETPLUGININFOS)    Apple2_do_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

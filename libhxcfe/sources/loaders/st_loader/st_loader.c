@@ -38,7 +38,7 @@
 // File : st_loader.c
 // Contains: ST floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -255,17 +255,16 @@ int ST_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char
 
 int ST_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="ATARIST_ST";
 	static const char plug_desc[]="ATARI ST ST Loader";
 	static const char plug_ext[]="st";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	ST_libIsValidDiskFile,
-		(LOADDISKFILE)		ST_libLoad_DiskFile,
-		(WRITEDISKFILE)		ST_libWrite_DiskFile,
-		(GETPLUGININFOS)	ST_libGetPluginInfo
+		(ISVALIDDISKFILE)   ST_libIsValidDiskFile,
+		(LOADDISKFILE)      ST_libLoad_DiskFile,
+		(WRITEDISKFILE)     ST_libWrite_DiskFile,
+		(GETPLUGININFOS)    ST_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

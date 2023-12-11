@@ -38,7 +38,7 @@
 // File : xml_loader.c
 // Contains: XML floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -153,10 +153,10 @@ int XML_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	XML_libIsValidDiskFile,
-		(LOADDISKFILE)		XML_libLoad_DiskFile,
-		(WRITEDISKFILE)		XML_libWrite_DiskFile,
-		(GETPLUGININFOS)	XML_libGetPluginInfo
+		(ISVALIDDISKFILE)   XML_libIsValidDiskFile,
+		(LOADDISKFILE)      XML_libLoad_DiskFile,
+		(WRITEDISKFILE)     XML_libWrite_DiskFile,
+		(GETPLUGININFOS)    XML_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

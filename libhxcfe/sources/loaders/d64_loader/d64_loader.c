@@ -68,7 +68,6 @@ typedef struct d64trackpos_
 	int fileoffset;
 }d64trackpos;
 
-
 int D64_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"D64_libIsValidDiskFile");
@@ -291,28 +290,29 @@ int D64_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 alloc_error:
 
-	free(trackdata);
-	free(tracklistpos);
+	if ( f )
+		hxc_fclose( f );
 
-	if(f)
-		hxc_fclose(f);
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
+
+	free( trackdata );
+	free( tracklistpos );
 
 	return HXCFE_INTERNALERROR;
 }
 
 int D64_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="C64_D64";
 	static const char plug_desc[]="C64 D64 file image loader";
 	static const char plug_ext[]="d64";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	D64_libIsValidDiskFile,
-		(LOADDISKFILE)		D64_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	D64_libGetPluginInfo
+		(ISVALIDDISKFILE)   D64_libIsValidDiskFile,
+		(LOADDISKFILE)      D64_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    D64_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

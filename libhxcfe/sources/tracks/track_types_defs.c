@@ -37,7 +37,7 @@
 // File : track_types_defs.c
 // Contains: Track format definition
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////

@@ -38,7 +38,7 @@
 // File : flppcm_loader.c
 // Contains: FLP PC Magazine floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -151,10 +151,10 @@ int FLPPCM_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * r
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	FLPPCM_libIsValidDiskFile,
-		(LOADDISKFILE)		FLPPCM_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	FLPPCM_libGetPluginInfo
+		(ISVALIDDISKFILE)   FLPPCM_libIsValidDiskFile,
+		(LOADDISKFILE)      FLPPCM_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    FLPPCM_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
@@ -167,4 +167,3 @@ int FLPPCM_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * r
 			plug_ext
 			);
 }
-

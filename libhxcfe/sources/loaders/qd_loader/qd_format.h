@@ -39,7 +39,7 @@
 // Contains: HxC Quickdisk floppy image format /
 //           (c) HxC2001 / Jean-François DEL NERO
 //
-// Written by: Jean François DEL NERO
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////

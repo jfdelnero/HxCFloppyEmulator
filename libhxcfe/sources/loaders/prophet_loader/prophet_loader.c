@@ -38,7 +38,7 @@
 // File : prophet_loader.c
 // Contains: Prophet floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -84,7 +84,6 @@ int Prophet_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFO
 
 int Prophet_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
 	FILE * f;
 	unsigned int filesize;
 	int i,j,k;
@@ -96,6 +95,8 @@ int Prophet_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 	int trackformat;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SECTCFG  sectorconfig[6];
+
+	trackdata = NULL;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Prophet_libLoad_DiskFile %s",imgfile);
 
@@ -125,19 +126,23 @@ int Prophet_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 			floppydisk->floppyNumberOfTrack=floppydisk->floppyNumberOfTrack/2;
 		}
 
-
 		if(1)
 		{
 
 			floppydisk->floppyBitRate=250000;
 			floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
 			floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+			if(!floppydisk->tracks)
+				goto alloc_error;
 
 			rpm=300; // normal rpm
 
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
 			trackdata=(unsigned char*)malloc(((numberofsector-1)*1024)+512);
+			if(!trackdata)
+				goto alloc_error;
+
 			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
 			{
 
@@ -164,7 +169,7 @@ int Prophet_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 					sectorconfig[numberofsector-1].sectorsize=256;
 
 					file_offset=( (((numberofsector-1)*1024)+256) * floppydisk->floppyNumberOfSide * j ) +
-						        ( (((numberofsector-1)*1024)+256) * i );
+								( (((numberofsector-1)*1024)+256) * i );
 					fseek (f , file_offset , SEEK_SET);
 					hxc_fread(trackdata,(((numberofsector-1)*1024)+256),f);
 
@@ -187,21 +192,27 @@ int Prophet_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
 	hxc_fclose(f);
 	return HXCFE_BADFILE;
+	
+alloc_error:
+	free(trackdata);
+
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
+
+	return HXCFE_INTERNALERROR;
 }
 
 int Prophet_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="PROPHET2000";
 	static const char plug_desc[]="PROPHET 2000 Loader";
 	static const char plug_ext[]="img";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	Prophet_libIsValidDiskFile,
-		(LOADDISKFILE)		Prophet_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	Prophet_libGetPluginInfo
+		(ISVALIDDISKFILE)   Prophet_libIsValidDiskFile,
+		(LOADDISKFILE)      Prophet_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    Prophet_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

@@ -418,10 +418,10 @@ int EDE_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	EDE_libIsValidDiskFile,
-		(LOADDISKFILE)		EDE_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	EDE_libGetPluginInfo
+		(ISVALIDDISKFILE)   EDE_libIsValidDiskFile,
+		(LOADDISKFILE)      EDE_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    EDE_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

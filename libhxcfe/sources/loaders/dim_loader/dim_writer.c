@@ -104,17 +104,17 @@ int DIM_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			header.density = 0;
 
 		fwrite(&header,sizeof(dim_header),1,file);
-		
+
 		for(i=0;i<16;i++)
 			fputc(0x00,file);
 
 		writeret = write_raw_file(imgldr_ctx,file,floppy,1,nbsector,nbtrack,nbside,sectorsize,ISOIBM_MFM_ENCODING,0);
 
 		hxc_fclose(file);
-		
+
 		return writeret;
 	}
 
 	return HXCFE_ACCESSERROR;
-	
+
 }

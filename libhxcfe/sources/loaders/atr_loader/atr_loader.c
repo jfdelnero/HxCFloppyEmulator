@@ -299,6 +299,8 @@ alloc_error:
 	free( trackdata );
 	free( sectorconfig );
 
+	hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
+
 	return HXCFE_INTERNALERROR;
 }
 
@@ -311,10 +313,10 @@ int ATR_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	ATR_libIsValidDiskFile,
-		(LOADDISKFILE)		ATR_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	ATR_libGetPluginInfo
+		(ISVALIDDISKFILE)   ATR_libIsValidDiskFile,
+		(LOADDISKFILE)      ATR_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    ATR_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

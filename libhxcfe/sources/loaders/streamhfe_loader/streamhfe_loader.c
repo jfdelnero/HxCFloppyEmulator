@@ -38,7 +38,7 @@
 // File : streamhfe_loader.c
 // Contains: HFE floppy image loader
 //
-// Written by:	Jean-François DEL NERO
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -519,17 +519,16 @@ int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 
 int STREAMHFE_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="HXC_STREAMHFE";
 	static const char plug_desc[]="Stream HFE file Loader";
 	static const char plug_ext[]="hfe";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	STREAMHFE_libIsValidDiskFile,
-		(LOADDISKFILE)		STREAMHFE_libLoad_DiskFile,
-		(WRITEDISKFILE)		STREAMHFE_libWrite_DiskFile,
-		(GETPLUGININFOS)	STREAMHFE_libGetPluginInfo
+		(ISVALIDDISKFILE)   STREAMHFE_libIsValidDiskFile,
+		(LOADDISKFILE)      STREAMHFE_libLoad_DiskFile,
+		(WRITEDISKFILE)     STREAMHFE_libWrite_DiskFile,
+		(GETPLUGININFOS)    STREAMHFE_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

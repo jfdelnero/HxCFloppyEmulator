@@ -38,7 +38,7 @@
 // File : kryofluxstream_writer.c
 // Contains: Kryoflux Stream floppy image writer
 //
-// Written by: DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -371,5 +371,5 @@ int KryoFluxStream_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * flo
 		}
 	}
 
-	return 0;
+	return HXCFE_NOERROR;
 }

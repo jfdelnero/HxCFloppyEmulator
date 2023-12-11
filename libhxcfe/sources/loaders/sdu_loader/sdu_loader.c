@@ -62,14 +62,14 @@
 
 int SDU_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
-    sdu_header * sduh;
+	sdu_header * sduh;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDU_libIsValidDiskFile");
 
 	if( hxc_checkfileext(imgfile->path,"sdu",SYS_PATH_TYPE) )
 	{
 		sduh = (sdu_header *)imgfile->file_header;
- 
+
 		if( !strncmp((const char*)&sduh->signature,"SAB ",4))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDU_libIsValidDiskFile : SDU file !");
@@ -93,7 +93,7 @@ int SDU_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	raw_iso_cfg rawcfg;
 	int ret;
 	FILE * f_img;
-    sdu_header sduh;
+	sdu_header sduh;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"SDU_libLoad_DiskFile %s",imgfile);
 
@@ -104,7 +104,7 @@ int SDU_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
-    memset(&sduh, 0, sizeof(sduh));
+	memset(&sduh, 0, sizeof(sduh));
 
 	hxc_fread(&sduh,sizeof(sduh),f_img);
 
@@ -144,17 +144,16 @@ int SDU_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int SDU_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="SDU_IMG";
 	static const char plug_desc[]="SAB Diskette Utility Loader";
 	static const char plug_ext[]="sdu";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	SDU_libIsValidDiskFile,
-		(LOADDISKFILE)		SDU_libLoad_DiskFile,
-		(WRITEDISKFILE)		0,
-		(GETPLUGININFOS)	SDU_libGetPluginInfo
+		(ISVALIDDISKFILE)   SDU_libIsValidDiskFile,
+		(LOADDISKFILE)      SDU_libLoad_DiskFile,
+		(WRITEDISKFILE)     0,
+		(GETPLUGININFOS)    SDU_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

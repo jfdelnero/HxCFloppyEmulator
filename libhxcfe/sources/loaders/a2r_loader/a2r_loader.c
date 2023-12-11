@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2021 Jean-François DEL NERO
+// Copyright (C) 2006-2023 Jean-François DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
@@ -191,6 +191,7 @@ static HXCFE_SIDE* import_a2r_stream(HXCFE* floppycontext, a2r_capture * capture
 		}
 
 		free(tmp_stream);
+		tmp_stream = NULL;
 	}
 
 	return currentside;
@@ -254,7 +255,7 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		f = hxc_fopen(imgfile,"rb");
 		if(f)
 		{
-			nbside = 1;
+			nbside = 2;
 /*
 			if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "FLUXSTREAM_IMPORT_PCCAV_TO_MACCLV" ) & 1 )
 				mac_clv = 1;
@@ -301,7 +302,18 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			imgldr_ctx->hxcfe->envvar = tmp_env;
 
 			len=hxc_getpathfolder(imgfile,0,SYS_PATH_TYPE);
-			folder=(char*)malloc(len+1);
+			folder = (char*)malloc(len+1);
+			if( !folder )
+			{
+				hxc_fclose(f);
+
+				tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
+				imgldr_ctx->hxcfe->envvar = backup_env;
+				deinitEnv( tmp_env );
+
+				return HXCFE_INTERNALERROR;
+			}
+
 			hxc_getpathfolder(imgfile,folder,SYS_PATH_TYPE);
 
 			filepath = malloc( strlen(imgfile) + 32 );
@@ -310,6 +322,7 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				sprintf(filepath,"%s%s",folder,"config.script");
 				hxcfe_execScriptFile(imgldr_ctx->hxcfe, filepath);
 				free(filepath);
+				filepath = NULL;
 			}
 
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Loading A2R file...");
@@ -332,14 +345,6 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					maxtrack=0;
 					minside=0;
 					maxside=0;
-
-					if( info.disk_type == 2 )
-					{
-						skip_inter_tracks = 0;
-						nbside = 2;
-					}
-					else
-						nbside = 1;
 
 					max_location = 0;
 					str_offset = 0;
@@ -375,8 +380,17 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 					floppydisk->floppySectorPerTrack = -1;
 
-					floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*(floppydisk->floppyNumberOfTrack+1));
-					memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*(floppydisk->floppyNumberOfTrack+1));
+					floppydisk->tracks=(HXCFE_CYLINDER**)calloc( 1, sizeof(HXCFE_CYLINDER*)*(floppydisk->floppyNumberOfTrack+1) );
+					if(!floppydisk->tracks)
+					{
+						hxc_fclose(f);
+
+						tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
+						imgldr_ctx->hxcfe->envvar = backup_env;
+						deinitEnv( tmp_env );
+
+						return HXCFE_INTERNALERROR;
+					}
 
 					str_offset = 0;
 					while( str_offset < a2r_chunkh.chunk_size - 1)
@@ -461,6 +475,7 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							}
 
 							free(tmp_buffer);
+							tmp_buffer = NULL;
 						}
 
 						str_offset += sizeof(a2r_capture);
@@ -479,6 +494,7 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							hxc_fread(tmp_buffer, a2r_chunkh.chunk_size, f);
 							imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"A2R META :\n%s", tmp_buffer);
 							free(tmp_buffer);
+							tmp_buffer = NULL;
 						}
 					}
 					else
@@ -487,6 +503,14 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 						{
 							imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"A2R INFO CHUNK - %d bytes",a2r_chunkh.chunk_size);
 							hxc_fread(&info, sizeof(a2r_info), f);
+
+							if( info.disk_type == 2 )
+							{
+								skip_inter_tracks = 0;
+								nbside = 2;
+							}
+							else
+								nbside = 1;
 
 							switch(info.version)
 							{
@@ -541,8 +565,8 @@ int A2R_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			imgldr_ctx->hxcfe->envvar = backup_env;
 			deinitEnv( tmp_env );
 
-			if(folder)
-				free(folder);
+			free(folder);
+			folder = NULL;
 
 			return HXCFE_NOERROR;
 		}
@@ -559,10 +583,10 @@ int A2R_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	A2R_libIsValidDiskFile,
-		(LOADDISKFILE)		A2R_libLoad_DiskFile,
-		(WRITEDISKFILE)		NULL,
-		(GETPLUGININFOS)	A2R_libGetPluginInfo
+		(ISVALIDDISKFILE)   A2R_libIsValidDiskFile,
+		(LOADDISKFILE)      A2R_libLoad_DiskFile,
+		(WRITEDISKFILE)     NULL,
+		(GETPLUGININFOS)    A2R_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

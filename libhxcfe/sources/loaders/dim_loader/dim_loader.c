@@ -38,7 +38,7 @@
 // File : dim_loader.c
 // Contains: DIM floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ int DIM_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 	if( hxc_checkfileext(imgfile->path,"dim",SYS_PATH_TYPE) )
 	{
 		header = (dim_header *)&imgfile->file_header;
-		if(	header->id_header==0x4242)
+		if( header->id_header==0x4242)
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"DIM_libIsValidDiskFile : DIM file !");
 			return HXCFE_VALIDFILE;
@@ -164,17 +164,16 @@ int DIM_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int DIM_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="ATARIST_DIM";
 	static const char plug_desc[]="ATARI ST DIM Loader";
 	static const char plug_ext[]="dim";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	DIM_libIsValidDiskFile,
-		(LOADDISKFILE)		DIM_libLoad_DiskFile,
-		(WRITEDISKFILE)		DIM_libWrite_DiskFile,
-		(GETPLUGININFOS)	DIM_libGetPluginInfo
+		(ISVALIDDISKFILE)   DIM_libIsValidDiskFile,
+		(LOADDISKFILE)      DIM_libLoad_DiskFile,
+		(WRITEDISKFILE)     DIM_libWrite_DiskFile,
+		(GETPLUGININFOS)    DIM_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(

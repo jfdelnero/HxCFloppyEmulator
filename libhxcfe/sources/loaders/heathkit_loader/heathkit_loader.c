@@ -38,7 +38,7 @@
 // File : heathkit_loader.c
 // Contains: Heathkit floppy image loader
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -68,7 +68,6 @@ int Heathkit_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINF
 
 int Heathkit_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
 	FILE * f;
 	unsigned int filesize;
 	int i,j,k,trk;
@@ -107,111 +106,118 @@ int Heathkit_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydis
 
 		floppydisk->floppyBitRate = 250000;
 		floppydisk->floppyiftype = GENERIC_SHUGART_DD_FLOPPYMODE;
+
 		floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		if( !floppydisk->tracks )
+		{
+			hxc_fclose(f);
+			return HXCFE_INTERNALERROR;
+		}
+
 		memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
 		rpm=300; // normal rpm
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, gap3:%d, interleave:%d,rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,gap3len,interleave,rpm);
 
-		trackdata=(unsigned char*)malloc(floppydisk->floppySectorPerTrack*sectorsize);
-
-		if(trackdata)
+		trackdata = (unsigned char*)malloc(floppydisk->floppySectorPerTrack*sectorsize);
+		if( !trackdata )
 		{
-			// HDOS or CPM image ?
-			hxc_fread(trackdata,(floppydisk->floppySectorPerTrack*sectorsize),f);
-
-			for( i = 0x900; i < 0xA00 - 4 ; i++ )
-			{
-				if( !strncmp( (const char*)&trackdata[i], "HDOS", 4 ) )
-				{
-					// HDOS disk. Get the volume ID for track 1-39.
-					VolumeID = trackdata[0x900];
-					break;
-				}
-			}
-
-			trk = 0;
-			for(i=0;i<floppydisk->floppyNumberOfSide;i++)
-			{
-				for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
-				{
-
-					if( !floppydisk->tracks[j] )
-					{
-						floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
-					}
-
-					currentcylinder=floppydisk->tracks[j];
-
-					hxcfe_imgCallProgressCallback(imgldr_ctx,trk,floppydisk->floppyNumberOfTrack*2 );
-					trk++;
-
-					memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
-					for(k=0;k<floppydisk->floppySectorPerTrack;k++)
-					{
-						sectorconfig[k].head = i;
-						sectorconfig[k].cylinder = j;
-						sectorconfig[k].sector = k;
-						sectorconfig[k].sectorsize = sectorsize;
-						sectorconfig[k].bitrate = floppydisk->floppyBitRate;
-						sectorconfig[k].gap3 = gap3len;
-						sectorconfig[k].trackencoding = trackformat;
-						sectorconfig[k].input_data = &trackdata[k*sectorsize];
-
-						// Use the alternate_addressmark field as Volume field...
-						if( j == 0 )
-						{
-							sectorconfig[k].alternate_addressmark = 0x00;
-						}
-						else
-						{
-							sectorconfig[k].alternate_addressmark = VolumeID;
-						}
-					}
-
-					file_offset = ( ( floppydisk->floppySectorPerTrack * sectorsize ) * j * floppydisk->floppyNumberOfSide) + \
-									( ( floppydisk->floppySectorPerTrack * sectorsize ) * j * i);
-
-					fseek (f , file_offset , SEEK_SET);
-
-					hxc_fread(trackdata,(floppydisk->floppySectorPerTrack*sectorsize),f);
-
-					currentcylinder->sides[i] = tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,1,(j*skew),floppydisk->floppyBitRate,rpm,trackformat,0,0,0);
-				}
-			}
-
-			free(trackdata);
-
-			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
-
+			hxcfe_freeFloppy(imgldr_ctx->hxcfe, floppydisk );
 			hxc_fclose(f);
-			return HXCFE_NOERROR;
+			return HXCFE_INTERNALERROR;
 		}
+
+		// HDOS or CPM image ?
+		hxc_fread(trackdata,(floppydisk->floppySectorPerTrack*sectorsize),f);
+
+		for( i = 0x900; i < 0xA00 - 4 ; i++ )
+		{
+			if( !strncmp( (const char*)&trackdata[i], "HDOS", 4 ) )
+			{
+				// HDOS disk. Get the volume ID for track 1-39.
+				VolumeID = trackdata[0x900];
+				break;
+			}
+		}
+
+		trk = 0;
+		for(i=0;i<floppydisk->floppyNumberOfSide;i++)
+		{
+			for(j=0;j<floppydisk->floppyNumberOfTrack;j++)
+			{
+				if( !floppydisk->tracks[j] )
+				{
+					floppydisk->tracks[j]=allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
+				}
+
+				currentcylinder=floppydisk->tracks[j];
+
+				hxcfe_imgCallProgressCallback(imgldr_ctx,trk,floppydisk->floppyNumberOfTrack*2 );
+				trk++;
+
+				memset(sectorconfig,0,sizeof(HXCFE_SECTCFG)*floppydisk->floppySectorPerTrack);
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+				{
+					sectorconfig[k].head = i;
+					sectorconfig[k].cylinder = j;
+					sectorconfig[k].sector = k;
+					sectorconfig[k].sectorsize = sectorsize;
+					sectorconfig[k].bitrate = floppydisk->floppyBitRate;
+					sectorconfig[k].gap3 = gap3len;
+					sectorconfig[k].trackencoding = trackformat;
+					sectorconfig[k].input_data = &trackdata[k*sectorsize];
+
+					// Use the alternate_addressmark field as Volume field...
+					if( j == 0 )
+					{
+						sectorconfig[k].alternate_addressmark = 0x00;
+					}
+					else
+					{
+						sectorconfig[k].alternate_addressmark = VolumeID;
+					}
+				}
+
+				file_offset = ( ( floppydisk->floppySectorPerTrack * sectorsize ) * j * floppydisk->floppyNumberOfSide) + \
+								( ( floppydisk->floppySectorPerTrack * sectorsize ) * j * i);
+
+				fseek (f , file_offset , SEEK_SET);
+
+				hxc_fread(trackdata,(floppydisk->floppySectorPerTrack*sectorsize),f);
+
+				currentcylinder->sides[i] = tg_generateTrackEx(floppydisk->floppySectorPerTrack,sectorconfig,1,(j*skew),floppydisk->floppyBitRate,rpm,trackformat,0,0,0);
+			}
+		}
+
+		free(trackdata);
+
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 		hxc_fclose(f);
 
-		return HXCFE_FILECORRUPTED;
+		return HXCFE_NOERROR;
 	}
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"file size=%d !?",filesize);
+
 	hxc_fclose(f);
+
 	return HXCFE_BADFILE;
 }
 
 int Heathkit_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-
 	static const char plug_id[]="HEATHKIT";
 	static const char plug_desc[]="Heathkit Loader";
 	static const char plug_ext[]="h8d";
 
 	plugins_ptr plug_funcs=
 	{
-		(ISVALIDDISKFILE)	Heathkit_libIsValidDiskFile,
-		(LOADDISKFILE)		Heathkit_libLoad_DiskFile,
-		(WRITEDISKFILE)		Heathkit_libWrite_DiskFile,
-		(GETPLUGININFOS)	Heathkit_libGetPluginInfo
+		(ISVALIDDISKFILE)   Heathkit_libIsValidDiskFile,
+		(LOADDISKFILE)      Heathkit_libLoad_DiskFile,
+		(WRITEDISKFILE)     Heathkit_libWrite_DiskFile,
+		(GETPLUGININFOS)    Heathkit_libGetPluginInfo
 	};
 
 	return libGetPluginInfo(
