@@ -67,12 +67,24 @@ echo "cee7770810257f2063b5765ff24c2525  C004.IMG" | md5sum -c - >> convert2_res.
 ./hxcfe -finput:adc-cpm.td0 -foutput:C005.IMG -conv:RAW_LOADER
 echo "ac12f9cfcd68ff364598507f7ca1503e  C005.IMG" | md5sum -c - >> convert2_res.txt
 
+./hxcfe -finput:dos33_with_adt.do -foutput:C006.DO -conv:APPLE2_DO
+echo "7c350e5da3672bca4abbdbe67fdaf14a  C006.DO" | md5sum -c - >> convert2_res.txt
+
+./hxcfe -finput:Apple_DOS_3_3_January_1983.do -foutput:C007.DO -conv:APPLE2_DO
+echo "b13de32fd7a97d817744bf2dd71d5479  C007.DO" | md5sum -c - >> convert2_res.txt
+
+./hxcfe -finput:Apple_DOS_3_3_January_1983.nib -foutput:C008.DO -conv:APPLE2_DO
+echo "b13de32fd7a97d817744bf2dd71d5479  C008.DO" | md5sum -c - >> convert2_res.txt
+
+./hxcfe -finput:apridisk.dsk -foutput:C009.IMG -conv:RAW_LOADER
+echo "f35a690248f7afebc5180b4e81cceb88  C009.IMG" | md5sum -c - >> convert2_res.txt
+
 export success_cnt2=`cat convert2_res.txt | grep ": OK" | wc -l`
 
 export total_success=$(echo $(( $success_cnt + $success_cnt2 )))
 echo Convert success count : $total_success
 
-if [ "$total_success" -ne "23" ]
+if [ "$total_success" -ne "27" ]
 then
 	echo "CONVERT $1 : FAILED" >> tests_results.txt
   echo "One or more tests have failed !";
