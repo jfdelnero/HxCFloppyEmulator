@@ -533,10 +533,10 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 	{
 		// Work buffer allocation.
 
-		outtrack=(unsigned char*)malloc(TEMPBUFSIZE);
-		flakeytrack=(unsigned char*)malloc(TEMPBUFSIZE);
-		indextrack=(unsigned char*)malloc(TEMPBUFSIZE);
-		trackbitrate=(uint32_t*)malloc(TEMPBUFSIZE*sizeof(uint32_t));
+		outtrack = (unsigned char*)calloc(1,TEMPBUFSIZE);
+		flakeytrack = (unsigned char*)calloc(1,TEMPBUFSIZE);
+		indextrack = (unsigned char*)calloc(1,TEMPBUFSIZE);
+		trackbitrate = (uint32_t*)calloc(1,TEMPBUFSIZE*sizeof(uint32_t));
 
 		if( !outtrack || !flakeytrack || !indextrack || !trackbitrate )
 		{
@@ -545,13 +545,8 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 			free(indextrack);
 			free(trackbitrate);
 
-			return 0;
+			return NULL;
 		}
-
-		memset(outtrack,0,TEMPBUFSIZE);
-		memset(flakeytrack,0,TEMPBUFSIZE);
-		memset(indextrack,0,TEMPBUFSIZE);
-		memset(trackbitrate,0,TEMPBUFSIZE*sizeof(uint32_t));
 
 		for(i=0;i<TEMPBUFSIZE;i++)
 		{
@@ -579,10 +574,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 		}
 
 		if(flags & 1)
-			tickposition=(uint32_t*)malloc(TEMPBUFSIZE*sizeof(uint32_t));
-
-		if(tickposition)
-			memset(tickposition,0,TEMPBUFSIZE*sizeof(uint32_t));
+			tickposition = (uint32_t*)calloc( 1, TEMPBUFSIZE*sizeof(uint32_t));
 
 		bitoffset=0;
 		if(start_index>2000)
@@ -1688,12 +1680,15 @@ static uint32_t compare_block_timebased(HXCFE* floppycontext,HXCFE_TRKSTREAM * t
 
 	time_buffer_len = ((tick_to_time(fxs,total_tick_source)/10) + 1024);
 
-	time_pulse_array_src = malloc( time_buffer_len * sizeof(uint32_t));
-	memset(time_pulse_array_src, 0 , time_buffer_len * sizeof(uint32_t));
+	time_pulse_array_src = calloc( 1, time_buffer_len * sizeof(uint32_t) );
+	time_pulse_array_dst = calloc( 1, time_buffer_len * sizeof(uint32_t) );
 
-	time_pulse_array_dst = malloc( time_buffer_len * sizeof(uint32_t));
-	memset(time_pulse_array_dst, 0 ,time_buffer_len * sizeof(uint32_t));
-
+	if( time_buffer_len && (!time_pulse_array_src || !time_pulse_array_dst))
+	{
+		free(time_pulse_array_src);
+		free(time_pulse_array_dst);
+		return 0;
+	}
 
 	timefactor = (double)total_tick_source / (double)total_tick_destination ;
 
@@ -1761,7 +1756,6 @@ static uint32_t compare_block_timebased(HXCFE* floppycontext,HXCFE_TRKSTREAM * t
 
 	return 0;
 }
-
 
 enum
 {
@@ -2085,7 +2079,7 @@ pulses_link * alloc_pulses_link_array(int numberofpulses)
 			free(pl->forward_link);
 			free(pl);
 
-			return 0;
+			return NULL;
 		}
 
 		// -1 Uninitialized
@@ -3256,19 +3250,20 @@ HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, 
 	unsigned int i,channel;
 
 	if(!fxs)
-		return 0;
+		return NULL;
 
 #ifdef FLUXSTREAMDBG
 	fxs->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_FxStream_ImportStream : in buffer : %p, wordsize : %d, number of words : %d",stream,wordsize,nbword);
 #endif
 
 	if(!stream)
-		return 0;
+		return NULL;
 
 	if(!trk_stream)
 	{
-		trk_stream = malloc(sizeof(HXCFE_TRKSTREAM));
-		memset( trk_stream, 0, sizeof(HXCFE_TRKSTREAM) );
+		trk_stream = calloc( 1, sizeof(HXCFE_TRKSTREAM));
+		if(!trk_stream)
+			return NULL;
 	}
 
 	trk_stream->tick_freq = fxs->pll.tick_freq;
@@ -3341,9 +3336,8 @@ HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, 
 		else
 		{
 			free(trk_stream);
-			return 0;
+			return NULL;
 		}
-
 /*
 		if(trk_stream)
 		{
@@ -3353,7 +3347,7 @@ HXCFE_TRKSTREAM * hxcfe_FxStream_ImportStream( HXCFE_FXSA * fxs, void * stream, 
 		return trk_stream;
 	}
 
-	return 0;
+	return NULL;
 }
 
 void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t streamposition, int32_t tickoffset, uint32_t flags )
@@ -3571,22 +3565,28 @@ HXCFE_FLOPPY * makefloppyfromtrack(HXCFE_SIDE * side)
 {
 	HXCFE_FLOPPY * newfloppy;
 
-	newfloppy=malloc(sizeof(HXCFE_FLOPPY));
+	newfloppy = calloc( 1, sizeof(HXCFE_FLOPPY) );
 	if(newfloppy)
 	{
-		memset(newfloppy,0,sizeof(HXCFE_FLOPPY));
 		newfloppy->floppyBitRate = 250000;
 		newfloppy->floppyNumberOfSide = 1;
 		newfloppy->floppyNumberOfTrack = 1;
 		newfloppy->floppySectorPerTrack = -1;
 
-		newfloppy->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*newfloppy->floppyNumberOfTrack);
-		memset(newfloppy->tracks,0,sizeof(HXCFE_CYLINDER*)*newfloppy->floppyNumberOfTrack);
+		newfloppy->tracks=(HXCFE_CYLINDER**)calloc( 1, sizeof(HXCFE_CYLINDER*)*newfloppy->floppyNumberOfTrack );
+		if(!newfloppy->tracks)
+		{
+			free(newfloppy);
+			return NULL;
+		}
 
 		newfloppy->tracks[0] = allocCylinderEntry(0,newfloppy->floppyNumberOfSide);
-
-		newfloppy->tracks[0]->sides=(HXCFE_SIDE**)malloc(sizeof(HXCFE_SIDE*)*newfloppy->floppyNumberOfSide);
-		memset(newfloppy->tracks[0]->sides,0,sizeof(HXCFE_SIDE*)*newfloppy->floppyNumberOfSide);
+		if(!newfloppy->tracks[0])
+		{
+			free(newfloppy->tracks);
+			free(newfloppy);
+			return NULL;
+		}
 
 		newfloppy->tracks[0]->sides[0] = side;
 	}
@@ -3800,7 +3800,7 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 #ifdef FLUXSTREAMDBG
 	int patchedbits;
 #endif
-	currentside = 0;
+	currentside = NULL;
 
 	hxcfe = fxs->hxcfe;
 
@@ -4219,7 +4219,6 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 
 		free(tb->blocks);
 		free(tb);
-
 
 		/*j=currentside->tracklen/8;
 		if(currentside->tracklen&7) j++;
