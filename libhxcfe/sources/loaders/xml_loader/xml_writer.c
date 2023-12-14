@@ -207,23 +207,26 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 					gettracktype(ss,j,i,&nbsect,&firstsectid,(char*)&trackformat,&sectorsize);
 					fprintf(xmlfile,"\t\t\t\t<format>%s</format>\n",trackformat);
 
+					nb_sectorfound = 0;
+
 					sca = hxcfe_getAllTrackISOSectors(ss,j,i,&nb_sectorfound);
 					fprintf(xmlfile,"\t\t\t\t<sector_list>\n");
 
+					if(nb_sectorfound > 128 * 1024)
+						nb_sectorfound = 128 * 1024;
+
 					if(sca && nb_sectorfound)
 					{
-						sectoffset = malloc(sizeof(sect_offset*) * nb_sectorfound);
+						sectoffset = calloc( 1, sizeof(sect_offset*) * (int)nb_sectorfound);
 						if( !sectoffset )
 							goto alloc_error;
 
-						sorted_sectoffset = malloc(sizeof(sect_offset*) * nb_sectorfound);
+						sorted_sectoffset = calloc( 1, sizeof(sect_offset*) * (int)nb_sectorfound);
 						if( !sorted_sectoffset )
 							goto alloc_error;
 
 						if(sorted_sectoffset && sectoffset)
 						{
-							memset(sectoffset,0,sizeof(sect_offset*) * nb_sectorfound);
-							memset(sorted_sectoffset,0,sizeof(sect_offset*) * nb_sectorfound);
 							for(s=0;s<nb_sectorfound;s++)
 							{
 								sorted_sectoffset[s] = malloc(sizeof(sect_offset));
@@ -233,7 +236,7 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 								sorted_sectoffset[s]->offset = 0;
 							}
 
-							memcpy(sectoffset,sorted_sectoffset,sizeof(sect_offset*) * nb_sectorfound);
+							memcpy(sectoffset,sorted_sectoffset,sizeof(sect_offset*) * (int)nb_sectorfound);
 
 							quickSort(sorted_sectoffset, 0, nb_sectorfound - 1);
 
