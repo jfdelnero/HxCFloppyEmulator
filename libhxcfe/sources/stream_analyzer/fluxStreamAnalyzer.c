@@ -4270,6 +4270,9 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 																hxcfe_setCellState( fxs->hxcfe, currentside, scl[sectnum]->startsectorindex + k,
 																		hxcfe_getCellState( fxs->hxcfe, tmp_side, tmp_scfg->startsectorindex + k) );
 															}
+
+															hxcfe_freeSectorConfig(tmp_ss, tmp_scfg);
+															tmp_scfg = NULL;
 														}
 													}
 
