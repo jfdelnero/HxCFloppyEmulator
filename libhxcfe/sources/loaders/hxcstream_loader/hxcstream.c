@@ -645,6 +645,7 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 	total_nb_pulses = 0;
 	total_nb_words = 0;
 	nb_words = 0;
+	cnt_io = 0;
 	sampleperiod = HXCSTREAM_NS_PER_TICK;
 
 	if(fxs)
