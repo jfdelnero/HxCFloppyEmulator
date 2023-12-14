@@ -20,13 +20,16 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 ** **** 2023 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
 
 *** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
-*** Last update : v2.14.12.1, 20 August 2023 ***
+*** Last update : v2.15.1.1, 15 December 2023 ***
 
 -> Many fixes and improvements into the flux stream management :
 
   - One revolution only / 2 indexes support fixed.
 
   - Fix stream files formats export : No more glitch after the first revolution index. (fix SCP and KF export).
+
+  - Sectors recovery support - Can be disabled/enabled with the FLUXSTREAM_SECTORS_RECOVERY variable.
+    This feature try to automatically recover/fix bad sectors with copies present in others stream revolutions.
 
 -> Kryoflux writer : stream to stream conversion : Don't align output stream to the next index.
 
@@ -41,6 +44,8 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -> Logic analyzer capture loader : nameTT.S.logicbin8bits file name convention support. (TT=track S=side)
 
 -> New XML format : MC50/MC300/MC500 formats and empty data disk.
+
+-> New XML format : Sharp X68000 2HD disk.
 
 -> Track display : fix possible infinite loop : check the bitrate value and stop + report if needed.
 
@@ -71,6 +76,10 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -> NSI Northstar : Some index timings and formats fixes.
 
 -> macOS : Better CAPSlib/ipf lib support. (Renaud Guérin)
+
+-> New track format : Centurion MFM. (Rick Altherr)
+
+-> Code : gcc's -fanalyzer used against the libhxcfe library : Many possible issues fixed ! (WIP)
 
 *********************************************************/
 
