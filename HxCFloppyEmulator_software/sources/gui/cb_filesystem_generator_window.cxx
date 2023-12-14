@@ -1037,7 +1037,7 @@ int load_indexed_fileimage(int index)
 			else
 			{
 				hxcfe_floppyUnload(guicontext->hxcfe,guicontext->loadedfloppy);
-				guicontext->loadedfloppy=0;
+				guicontext->loadedfloppy = NULL;
 
 				guicontext->last_loaded_image_path[0]=0;
 				cur_index = -1;
