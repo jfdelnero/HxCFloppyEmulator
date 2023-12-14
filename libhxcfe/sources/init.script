@@ -109,6 +109,13 @@ set FLUXSTREAM_SKIPBLOCKSDETECTION 0
 set FLUXSTREAM_OVERLAPSEARCHDEPTH 0.015
 
 #
+# Try to recover/fix bad sectors with copies present in others revolutions.
+#
+
+set FLUXSTREAM_SECTORS_RECOVERY 1                    # 1 - Try to recover bad sectors with from others revolutions.
+                                                     # 0 - Disabled (old behavior).
+
+#
 # Experimental :
 # Ignore the index and threat all the stream as one revolution.
 #
@@ -153,7 +160,7 @@ set FLUXSTREAM_PLL_MIN_MAX_PERCENT 18                # Min-Max PLL deviation in 
 
 set FLUXSTREAM_PLL_MAX_ERROR_NS    680               # Max PLL error trigger level (in nS).
                                                      # If the error is above this level, the corresponding
-													 # bit is marked as "flakey"
+                                                     # bit is marked as "flakey"
 
 # PLL correction ratio ("Fast" -> Used when getting closer to the central frequency)
 
@@ -197,8 +204,8 @@ set FLUXSTREAM_ANALYSIS_USE_VICTOR_TIMING 0
 # Stream files (SCP/Kryoflux...) export mode
 #
 
-set FLUXSTREAM_STREAM_TO_STREAM_CONVERT 1         # 1 - Stream to stream support enabled.
-                                                  # 0 - Stream to stream support disabled (old behavior).
+set FLUXSTREAM_STREAM_TO_STREAM_CONVERT 1            # 1 - Stream to stream support enabled.
+                                                     # 0 - Stream to stream support disabled (old behavior).
 
 #
 # ---- Specific raw format parameters ----

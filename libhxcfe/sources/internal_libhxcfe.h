@@ -191,6 +191,7 @@ typedef struct _HXCFE_FXSA
 
 	int     weak_cell_threshold;
 
+	int32_t sector_recovery;
 }HXCFE_FXSA;
 
 #define _HXCFE_FXSA_

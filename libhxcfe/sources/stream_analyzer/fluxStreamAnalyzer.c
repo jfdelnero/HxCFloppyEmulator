@@ -3202,6 +3202,8 @@ HXCFE_FXSA * hxcfe_initFxStream(HXCFE * hxcfe)
 			if(v)
 				fxs->weak_cell_threshold = v;
 
+			fxs->sector_recovery = hxcfe_getEnvVarValue( hxcfe, "FLUXSTREAM_SECTORS_RECOVERY" );
+
 			return fxs;
 		}
 	}
@@ -3768,8 +3770,8 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 	int bitrate;
 	uint32_t totallen,indexperiod;
 	uint32_t * histo;
-	HXCFE_SIDE* currentside;
-	HXCFE_SIDE* revolutionside[MAX_NB_OF_INDEX];
+	HXCFE_SIDE * currentside, * tmp_side;
+	HXCFE_SIDE * revolutionside[MAX_NB_OF_INDEX];
 
 	pulses_link * pl;
 	pulses_link * pl_reversed;
@@ -3801,6 +3803,9 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 	int patchedbits;
 #endif
 	currentside = NULL;
+	track_len = 0;
+	rpm = 0;
+	bitrate = 0;
 
 	hxcfe = fxs->hxcfe;
 
@@ -3846,7 +3851,6 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 			hxcfe->hxc_printf(MSG_DEBUG,"...done");
 			if(pl)
 			{
-
 				///////////////////////////////////////////////////////////////////////////
 
 				reversed_std = duplicate_track_stream(std);
@@ -3866,7 +3870,6 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 					{
 						*(backward_link++) = *(forward_link--);
 					}
-
 
 					backward_link = pl->backward_link;
 					forward_link = pl->forward_link;
@@ -3940,7 +3943,6 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 							{
 								track_len += std->channels[0].stream[offset++];
 							}
-
 						}
 						else
 						{
@@ -4101,7 +4103,6 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 					{
 						revolutionside[revolution] = 0;
 					}
-
 				}
 
 				memset(qualitylevel,0,sizeof(qualitylevel));
@@ -4199,6 +4200,108 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 						currentside = revolutionside[revolution];
 						revolutionside[revolution] = 0;
 					}
+				}
+
+				// Try here to recover the left bad sectors from others revolutions.
+				if(currentside && bitrate && fxs->sector_recovery)
+				{
+					tmp_side = NULL;
+
+#ifdef FLUXSTREAMDBG
+					fxs->hxcfe->hxc_printf(MSG_DEBUG,"Sectors recovering ... :");
+#endif
+
+					fp = makefloppyfromtrack(currentside);
+
+					i = 0;
+					while( tracktypelist[i] != UNKNOWN_ENCODING )
+					{
+						ss = hxcfe_initSectorAccess(fxs->hxcfe,fp);
+
+						scl = hxcfe_getAllTrackSectors(ss,0,0,tracktypelist[i],&nb_sectorfound);
+
+						if(scl)
+						{
+							if(!tmp_side)
+							{
+								tmp_side = ScanAndDecodeStream(hxcfe,fxs,bitrate,std,NULL,0,rpm,fxs->phasecorrection,0);
+								cleanupTrack(tmp_side);
+							}
+
+							for(sectnum=0;sectnum<nb_sectorfound && tmp_side;sectnum++)
+							{
+								if( scl[sectnum]->use_alternate_data_crc && scl[sectnum]->input_data)
+								{
+									// Bad sector data...
+#ifdef FLUXSTREAMDBG
+									fxs->hxcfe->hxc_printf(MSG_DEBUG,"Bad sector -> head:%d sector:%d sectorsleft:%d cylinder:%d startsectorindex:%d startdataindex:%d endsectorindex:%d\n",scl[sectnum]->head,scl[sectnum]->sector,scl[sectnum]->sectorsleft,scl[sectnum]->cylinder,scl[sectnum]->startsectorindex,scl[sectnum]->startdataindex,scl[sectnum]->endsectorindex);
+#endif
+									if( scl[sectnum]->startsectorindex < scl[sectnum]->endsectorindex )
+									{
+
+										HXCFE_SECTCFG* tmp_scfg;
+
+										HXCFE_FLOPPY * tmp_fp = makefloppyfromtrack(tmp_side);
+										HXCFE_SECTORACCESS* tmp_ss = hxcfe_initSectorAccess( fxs->hxcfe, tmp_fp );
+										if( tmp_ss )
+										{
+											do
+											{
+												tmp_scfg = hxcfe_getNextSector(tmp_ss,0,0,tracktypelist[i]);
+												if( tmp_scfg )
+												{
+													if( (tmp_scfg->sector == scl[sectnum]->sector ) &&
+														(tmp_scfg->head == scl[sectnum]->head ) &&
+														(tmp_scfg->cylinder == scl[sectnum]->cylinder ) &&
+														(tmp_scfg->trackencoding == scl[sectnum]->trackencoding ) &&
+														(tmp_scfg->header_crc == scl[sectnum]->header_crc )
+													)
+													{
+														if( !tmp_scfg->use_alternate_data_crc && tmp_scfg->input_data)
+														{
+#ifdef FLUXSTREAMDBG
+															fxs->hxcfe->hxc_printf(MSG_DEBUG,"Recover sector s%d:c%d:h%d",tmp_scfg->sector,tmp_scfg->cylinder,tmp_scfg->head);
+#endif
+															hxcfe_removeCell( fxs->hxcfe, currentside, scl[sectnum]->startsectorindex,  scl[sectnum]->endsectorindex - scl[sectnum]->startsectorindex );
+															hxcfe_insertCell( fxs->hxcfe, currentside, scl[sectnum]->startsectorindex, 0,  tmp_scfg->endsectorindex - tmp_scfg->startsectorindex );
+
+															for(int k=0;k<tmp_scfg->endsectorindex - tmp_scfg->startsectorindex;k++)
+															{
+																hxcfe_setCellState( fxs->hxcfe, currentside, scl[sectnum]->startsectorindex + k,
+																		hxcfe_getCellState( fxs->hxcfe, tmp_side, tmp_scfg->startsectorindex + k) );
+															}
+														}
+													}
+
+													hxcfe_freeSectorConfig(tmp_ss, tmp_scfg);
+												}
+
+											}while( tmp_scfg );
+
+											hxcfe_deinitSectorAccess(tmp_ss);
+										}
+
+										freefloppy(tmp_fp);
+									}
+								}
+
+								hxcfe_freeSectorConfig  (ss,scl[sectnum]);
+							}
+							free(scl);
+						}
+
+						hxcfe_deinitSectorAccess(ss);
+
+						i++;
+					}
+
+					freefloppy(fp);
+
+#ifdef FLUXSTREAMDBG
+					fxs->hxcfe->hxc_printf(MSG_DEBUG,"... Sectors recovering done");
+#endif
+					hxcfe_freeSide(fxs->hxcfe,tmp_side);
+
 				}
 
 				if( currentside )
