@@ -106,6 +106,9 @@ HXCFE_SECTORACCESS* hxcfe_initSectorAccess(HXCFE* floppycontext,HXCFE_FLOPPY *fp
 	HXCFE_SECTORACCESS* ss_ctx;
 	int i;
 
+	if(!fp)
+		return NULL;
+
 	ss_ctx = (HXCFE_SECTORACCESS*) malloc(sizeof(HXCFE_SECTORACCESS));
 
 	if(!ss_ctx)
@@ -811,19 +814,13 @@ void hxcfe_freeSectorConfigData( HXCFE_SECTORACCESS* ss_ctx, HXCFE_SECTCFG* sc )
 {
 	if(sc)
 	{
-		if(sc->input_data)
-			free(sc->input_data);
-
+		free(sc->input_data);
 		sc->input_data = NULL;
 
-		if(sc->input_data_index)
-			free(sc->input_data_index);
-
+		free(sc->input_data_index);
 		sc->input_data_index = NULL;
 
-		if(sc->weak_bits_mask)
-			free(sc->weak_bits_mask);
-
+		free(sc->weak_bits_mask);
 		sc->weak_bits_mask = NULL;
 	}
 }
