@@ -47,7 +47,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#ifdef WIN32  
+#ifdef WIN32
 #include <windows.h>
 #endif
 
@@ -89,7 +89,7 @@ scrolltab scroll[]=
 	{80,160,8,100,0},
 	{88,168,8,120,0},
 	{96,176,12,140,0},
-	
+
 	{142,76,6,20,0},
 	{148,66,10,40,0},
 	{158,46,20,80,0},
@@ -97,7 +97,7 @@ scrolltab scroll[]=
 	{-2,0,22, 160,0},
 
 	{218,0,22, 160,0},
-	
+
 	{108,166,34,160,0},  // barrieres
 	{-1,0,0,0,0}
 };
@@ -124,14 +124,14 @@ void putsprite(uintro_context * democontext,unsigned int x,unsigned int y,unsign
 	{
 		f4 = f4 + ((float)sin( democontext->sprt_f2 )/(float)2);
 		ty=(unsigned char)((float)cos( f4 )*(float)2+(float)4);
-		
+
 		if(democontext->xsize<=(111+x+ty)) t2=(111+x+ty)-democontext->xsize;
 		else t2=0;
 
-		for(i=0;i<(sx-t2);i++) 
+		for(i=0;i<(sx-t2);i++)
 		{
 			adr=(j*democontext->xsize+i+start+ty);
-			
+
 			if(adr<(unsigned int)(democontext->xsize*democontext->ysize))
 			{
 				buffer[adr]=sprite[j*sx+i];
@@ -149,44 +149,47 @@ void convert8b16b(bmaptype * img,unsigned short transcolor)
 
 	switch(img->type)
 	{
-	case 9:
-		newbuffer=malloc(img->Ysize*img->Xsize*sizeof(unsigned int ));
-		for(i=0;i<img->Ysize;i++)
-		{
-			for(j=0;j<img->Xsize;j++)
+		case 9:
+			newbuffer = malloc(img->Ysize*img->Xsize*sizeof(unsigned int ));
+			if(!newbuffer)
+				return;
+
+			for(i=0;i<img->Ysize;i++)
 			{
-				// 11111 000000 11111
-				palletteindex=img->unpacked_data[3*256+((i*img->Xsize)+j)];
-				
-				
-				b=img->unpacked_data[palletteindex*3];
-				v=img->unpacked_data[palletteindex*3+1];
-				r=img->unpacked_data[palletteindex*3+2];
+				for(j=0;j<img->Xsize;j++)
+				{
+					// 11111 000000 11111
+					palletteindex = img->unpacked_data[3*256+((i*img->Xsize)+j)];
 
-				newbuffer[(i*img->Xsize)+j]=b | (v<<8) | (r<<16);// /*0x1F |*/ /*(0x7E<<4) */(0x1F <<11);//img->data[palletteindex+1]>>3;
+					b = img->unpacked_data[palletteindex*3];
+					v = img->unpacked_data[palletteindex*3+1];
+					r = img->unpacked_data[palletteindex*3+2];
 
+					newbuffer[(i*img->Xsize)+j]=b | (v<<8) | (r<<16);// /*0x1F |*/ /*(0x7E<<4) */(0x1F <<11);//img->data[palletteindex+1]>>3;
+				}
 			}
-		}
-		free(img->unpacked_data);
-		img->unpacked_data=(unsigned char*)newbuffer;
 
+			free(img->unpacked_data);
+			img->unpacked_data=(unsigned char*)newbuffer;
 		break;
-	case 1:
-		newbuffer=malloc(img->Ysize*img->Xsize*sizeof(unsigned int ));
-		for(i=0;i<((img->Ysize*img->Xsize)/8);i++)
-		{
-			for(j=0;j<8;j++)
+		case 1:
+			newbuffer=malloc(img->Ysize*img->Xsize*sizeof(unsigned int ));
+			if(!newbuffer)
+				return;
+
+			for(i=0;i<((img->Ysize*img->Xsize)/8);i++)
 			{
-
-				if(img->unpacked_data[i]&(0x80>>j)) newbuffer[i*8+j]=0xFFFF;
-				else newbuffer[i*8+j]=0;
-			
+				for(j=0;j<8;j++)
+				{
+					if(img->unpacked_data[i]&(0x80>>j))
+						newbuffer[i*8+j]=0xFFFF;
+					else
+						newbuffer[i*8+j]=0;
+				}
 			}
-			
-		}
 
-		free(img->unpacked_data);
-		img->unpacked_data=(unsigned char*)newbuffer;
+			free(img->unpacked_data);
+			img->unpacked_data=(unsigned char*)newbuffer;
 		break;
 	}
 }
@@ -202,30 +205,35 @@ void convert8b24b(bmaptype * img,unsigned short transcolor)
 	{
 	case 9:
 		newbuffer=malloc(img->Ysize*img->Xsize*3);
+		if(!newbuffer)
+			return;
+
 		for(i=0;i<img->Ysize;i++)
 		{
 			for(j=0;j<img->Xsize;j++)
 			{
 				// 11111 000000 11111
 				palletteindex=img->unpacked_data[3*256+((i*img->Xsize)+j)];
-				
-				
-				b=img->unpacked_data[palletteindex*3];
-				v=img->unpacked_data[palletteindex*3+1];
-				r=img->unpacked_data[palletteindex*3+2];
 
-				newbuffer[((i*img->Xsize)*3)+j*3+0]=r;
-				newbuffer[((i*img->Xsize)*3)+j*3+1]=v;
-				newbuffer[((i*img->Xsize)*3)+j*3+2]=b;
+				b = img->unpacked_data[palletteindex*3];
+				v = img->unpacked_data[palletteindex*3+1];
+				r = img->unpacked_data[palletteindex*3+2];
 
+				newbuffer[((i*img->Xsize)*3)+j*3+0] = r;
+				newbuffer[((i*img->Xsize)*3)+j*3+1] = v;
+				newbuffer[((i*img->Xsize)*3)+j*3+2] = b;
 			}
 		}
+
 		free(img->unpacked_data);
 		img->unpacked_data=(unsigned char*)newbuffer;
 
 		break;
 	case 1:
 		newbuffer=malloc(img->Ysize*img->Xsize*3);
+		if(!newbuffer)
+			return;
+
 		for(i=0;i<((img->Ysize*img->Xsize)/8);i++)
 		{
 			for(j=0;j<8;j++)
@@ -243,9 +251,7 @@ void convert8b24b(bmaptype * img,unsigned short transcolor)
 					newbuffer[(i*8)*3+(j*3)+1]=0x00;
 					newbuffer[(i*8)*3+(j*3)+2]=0x00;
 				}
-			
 			}
-			
 		}
 
 		free(img->unpacked_data);
@@ -259,25 +265,30 @@ uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 {
 	uintro_context * ui_context;
 
-	ui_context=(uintro_context *)malloc(sizeof(uintro_context));
-	memset(ui_context,0,sizeof(uintro_context));	
+	ui_context=(uintro_context *)calloc( 1, sizeof(uintro_context));
+	if(!ui_context)
+		return NULL;
 
 	ui_context->xsize=xsize;
 	ui_context->ysize=ysize;
 
 	ui_context->tick=0;
 
-	ui_context->framebuffer=(unsigned int *)malloc(ui_context->xsize*ui_context->ysize*sizeof(unsigned int));
-	memset(ui_context->framebuffer,0,ui_context->xsize*ui_context->ysize*sizeof(unsigned int));
+	ui_context->framebuffer = (unsigned int *)calloc( 1, ui_context->xsize*ui_context->ysize*sizeof(unsigned int));
+	ui_context->blurbuffer = (unsigned int *)calloc( 1, ui_context->xsize*ui_context->ysize*sizeof(unsigned int));
 
+	if( !ui_context->framebuffer || !ui_context->blurbuffer )
+	{
+		free(ui_context->blurbuffer);
+		free(ui_context->framebuffer);
+		free(ui_context);
+		return NULL;
+	}
 
-	ui_context->blurbuffer=(unsigned int *)malloc(ui_context->xsize*ui_context->ysize*sizeof(unsigned int));
-	memset(ui_context->blurbuffer,0,ui_context->xsize*ui_context->ysize*sizeof(unsigned int));
-
-	bitmap_sob_bmp->unpacked_data=data_unpack(bitmap_sob_bmp->data,bitmap_sob_bmp->csize ,bitmap_sob_bmp->data, bitmap_sob_bmp->size);
+	bitmap_sob_bmp->unpacked_data = data_unpack(bitmap_sob_bmp->data,bitmap_sob_bmp->csize ,bitmap_sob_bmp->data, bitmap_sob_bmp->size);
 	convert8b16b(bitmap_sob_bmp,(unsigned short)0xFFFF);
 
-	bitmap_hxc2001_bmp->unpacked_data=data_unpack(bitmap_hxc2001_bmp->data,bitmap_hxc2001_bmp->csize ,bitmap_hxc2001_bmp->data, bitmap_hxc2001_bmp->size);
+	bitmap_hxc2001_bmp->unpacked_data = data_unpack(bitmap_hxc2001_bmp->data,bitmap_hxc2001_bmp->csize ,bitmap_hxc2001_bmp->data, bitmap_hxc2001_bmp->size);
 	convert8b16b(bitmap_hxc2001_bmp,(unsigned short)0xFFFF);
 
 	ui_context->modctx = malloc( sizeof(modcontext) );
@@ -331,6 +342,9 @@ uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 
 void uintro_reset(uintro_context * ui_context)
 {
+	if(!ui_context)
+		return;
+
 	ui_context->col_f1 = 0;
 	ui_context->col_f2 = 0;
 	ui_context->col_f3 = 0;
@@ -402,6 +416,9 @@ void uintro_reset(uintro_context * ui_context)
 
 void uintro_getnext_soundsample(uintro_context * democontext,short* buffer,int size)
 {
+	if(!democontext)
+		return;
+
 	hxcmod_fillbuffer( (modcontext*)democontext->modctx, buffer, size/2,0);
 }
 
@@ -429,7 +446,7 @@ void colorize(uintro_context * democontext,bmaptype * bitmaptype)
 
 				ptr[i*bitmaptype->Xsize + j]=(r<<16)|(v<<8)|b;
 			}
-			
+
 			democontext->col_f1=democontext->col_f1+(float)0.0001;
 			democontext->col_f2=democontext->col_f2+(float)0.00011;
 			democontext->col_f3=democontext->col_f3+(float)0.000101;
@@ -442,8 +459,6 @@ void colorize(uintro_context * democontext,bmaptype * bitmaptype)
 	democontext->col_f3s=democontext->col_f3s+(float)0.0333;
 }
 
-
-
 void uintro_getnextframe(uintro_context * democontext)
 {
 	int i,j,k,l,totalpix;
@@ -454,7 +469,10 @@ void uintro_getnextframe(uintro_context * democontext)
 	unsigned int * blurbuffer;
 	int xsize,ysize,baroffset;
 	unsigned int pix;
-	
+
+	if(!democontext)
+		return;
+
 	xsize = democontext->xsize;
 	ysize = democontext->ysize;
 
@@ -468,9 +486,8 @@ void uintro_getnextframe(uintro_context * democontext)
 		democontext->tick=0;
 	}
 
-
 	k=0;
-	
+
 	for(i=0;i<totalpix;i++)
 	{
 		framebuffer[i]=0x00607080;
@@ -500,10 +517,10 @@ void uintro_getnextframe(uintro_context * democontext)
 		if(scroll[k].ysrc!=-2)
 		{
 
-			l=(((scroll[k].ysrc)*4)*bitmap_sob_bmp->Xsize);	
+			l=(((scroll[k].ysrc)*4)*bitmap_sob_bmp->Xsize);
 			baroffset = scroll[k].offset/32;
 
-			for(i=scroll[k].ydst;i<(scroll[k].ydst+scroll[k].len);i++) 
+			for(i=scroll[k].ydst;i<(scroll[k].ydst+scroll[k].len);i++)
 			{
 				src_ptr = (unsigned int*)&bitmap_sob_bmp->unpacked_data[l];
 				dst_ptr = (unsigned int*)&framebuffer[i*xsize];
@@ -512,7 +529,7 @@ void uintro_getnextframe(uintro_context * democontext)
 				{
 					pix = *(src_ptr++);
 					if(pix != 0x00FF00)
-					{						
+					{
 						dst_ptr[j] = pix;
 					}
 				}
@@ -521,7 +538,7 @@ void uintro_getnextframe(uintro_context * democontext)
 				{
 					pix = *(src_ptr++);
 					if(pix != 0x00FF00)
-					{						
+					{
 						dst_ptr[j] = pix;
 					}
 				}
@@ -549,22 +566,20 @@ void uintro_getnextframe(uintro_context * democontext)
 		scroll[k].offset=(scroll[k].offset+scroll[k].speed) % (xsize*32);
 		k++;
 	}
-
 }
-
 
 void uintro_deinit(uintro_context * democontext)
 {
-	if(data_maktone_class_cracktro15_mod->unpacked_data) free(data_maktone_class_cracktro15_mod->unpacked_data);
-	if(data_jozz_cognition_mod->unpacked_data) free(data_jozz_cognition_mod->unpacked_data);
-	if(data_zandax_supplydas_booze_mod->unpacked_data) free(data_zandax_supplydas_booze_mod->unpacked_data);
-	if(data_vim_not_again_mod->unpacked_data) free(data_vim_not_again_mod->unpacked_data);
+	free(data_maktone_class_cracktro15_mod->unpacked_data);
+	free(data_jozz_cognition_mod->unpacked_data);
+	free(data_zandax_supplydas_booze_mod->unpacked_data);
+	free(data_vim_not_again_mod->unpacked_data);
 
 	if(democontext->modctx)
 	{
 		hxcmod_unload( (modcontext*)democontext->modctx );
 		free(democontext->modctx);
-		democontext->modctx = 0;
+		democontext->modctx = NULL;
 	}
 
 	data_jozz_cognition_mod->unpacked_data=0;
