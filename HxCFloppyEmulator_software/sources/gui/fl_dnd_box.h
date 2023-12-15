@@ -21,7 +21,8 @@ class Fl_DND_Box : public Fl_Box
 
         virtual ~Fl_DND_Box()
         {
-            delete [] evt_txt;
+            free(evt_txt);
+            evt_txt = NULL;
         }
 
         int event()
@@ -57,10 +58,11 @@ class Fl_DND_Box : public Fl_Box
                     // make a copy of the DND payload
                     evt_len = Fl::event_length();
 
-                    delete [] evt_txt;
+                    free(evt_txt);
 
-                    evt_txt = new char[evt_len+1];
-                    strcpy(evt_txt, Fl::event_text());
+                    evt_txt = (char*)calloc( 1, evt_len+1 );
+                    if(evt_txt)
+                        strncpy(evt_txt, Fl::event_text(),evt_len);
 
                     // If there is a callback registered, call it.
                     // The callback must access Fl::event_text() to
