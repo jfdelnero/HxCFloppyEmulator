@@ -307,20 +307,21 @@ int hxc_createthread(HXCFE* floppycontext,void* hwcontext,THREADFUNCTION thread,
 		if(!thread_handle)
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"hxc_createthread : CreateThread failed -> 0x.8X", GetLastError());
+			free(threadinitptr);
+			return -2;
 		}
+
+		return 0;
 	}
 
-	return sit;
+	return -1;
 #else
 
-	unsigned long sit;
 	int ret;
 	pthread_t threadid;
 	pthread_attr_t threadattrib;
 	threadinit *threadinitptr;
 	struct sched_param param;
-
-	sit = 0;
 
 	pthread_attr_init(&threadattrib);
 
@@ -336,6 +337,7 @@ int hxc_createthread(HXCFE* floppycontext,void* hwcontext,THREADFUNCTION thread,
 		pthread_attr_setschedpolicy(&threadattrib,SCHED_OTHER);
 		param.sched_priority = sched_get_priority_max(SCHED_OTHER);
 	}
+
 	/* set the new scheduling param */
 	pthread_attr_setschedparam (&threadattrib, &param);
 
@@ -351,9 +353,14 @@ int hxc_createthread(HXCFE* floppycontext,void* hwcontext,THREADFUNCTION thread,
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"hxc_createthread : pthread_create failed -> %d",ret);
 			free(threadinitptr);
+
+			return -2;
 		}
+
+		return 0;
 	}
-	return sit;
+
+	return -1;
 #endif
 
 }
