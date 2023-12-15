@@ -124,10 +124,10 @@ void Parameters_box::create_editbox()
 			if(editboxarray[i].label)
 			{
 				strcpy(editboxarray[i].label,param_name);
+				editboxarray[i].input = new Fl_Input(xsize/2, 25 + 25*i, 120, 20, editboxarray[i].label);
+				editboxarray[i].input->value(tmp_value);
+				editboxarray[i].input->callback(input_cb);
 			}
-			editboxarray[i].input = new Fl_Input(xsize/2, 25 + 25*i, 120, 20, editboxarray[i].label);
-			editboxarray[i].input->value(tmp_value);
-			editboxarray[i].input->callback(input_cb);
 		}
 	}
 

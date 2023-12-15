@@ -188,14 +188,15 @@ HXCFE_FLOPPY * loadrawimage(HXCFE* floppycontext,cfgrawfile * rfc,char * file,in
 
 	*ret = HXCFE_ACCESSERROR;
 
-	f=0;
-	fp = 0;
+	trackbuffer = NULL;
+	f = NULL;
+	fp = NULL;
 	if(file)
 	{
 		f=hxc_fopen(file,"r+b");
 		if(!f)
 		{
-			return 0;
+			return NULL;
 		}
 	}
 
@@ -207,10 +208,14 @@ HXCFE_FLOPPY * loadrawimage(HXCFE* floppycontext,cfgrawfile * rfc,char * file,in
 		if(f)
 		{
 			trackbuffer=(unsigned char *)malloc((128<<rfc->sectorsize)*rfc->sectorpertrack);
-			memset(trackbuffer,rfc->fillvalue,(128<<rfc->sectorsize)*rfc->sectorpertrack);
+			if(!trackbuffer)
+			{
+				hxc_fclose(f);
+				return NULL;
+			}
 		}
 
-		fb=hxcfe_initFloppy(floppycontext,rfc->numberoftrack,nbside);
+		fb = hxcfe_initFloppy(floppycontext,rfc->numberoftrack,nbside);
 		if(fb)
 		{
 			*ret = HXCFE_NOERROR;
@@ -331,7 +336,6 @@ int loadrawfile(HXCFE* floppycontext,cfgrawfile * rfc,char * file)
 		}
 
 		strcpy(guicontext->bufferfilename,"");
-		guicontext->loadedfloppy=0;
 
 		guicontext->loadedfloppy = fp;
 
