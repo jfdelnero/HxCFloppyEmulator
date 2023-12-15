@@ -395,27 +395,43 @@ int launchexport(char * urls,HXCFE_FLOPPY * fp, char * type)
 {
 	exportthread * exportthread_params;
 
+	if(!strlen(urls))
+		return -3;
+
 	exportthread_params = (exportthread *)malloc(sizeof(exportthread));
 	if(exportthread_params)
 	{
-		if(strlen(urls))
+		exportthread_params->floppy = fp;
+
+		exportthread_params->urls = (char*)calloc( 1, strlen(urls) + 1 );
+		exportthread_params->type = (char*)calloc( 1, strlen(type) + 1 );
+
+		if( exportthread_params->urls && exportthread_params->type )
 		{
-			exportthread_params->urls =(char*)malloc(strlen(urls)+1);
-			memset(exportthread_params->urls,0,strlen(urls)+1);
-			memcpy(exportthread_params->urls,urls,strlen(urls));
+			memcpy( exportthread_params->urls, urls, strlen(urls) );
+			memcpy( exportthread_params->type, type, strlen(type) );
 
-			exportthread_params->type =(char*)malloc(strlen(type)+1);
-			memset(exportthread_params->type,0,strlen(type)+1);
-			memcpy(exportthread_params->type,type,strlen(type));
+			if( hxc_createthread(guicontext->hxcfe,(void*)exportthread_params,&export_thread,0) < 0 )
+			{
+				free(exportthread_params->urls);
+				free(exportthread_params->type);
+				free(exportthread_params);
+				return -2;
+			}
 
-			exportthread_params->floppy = fp;
-
-			hxc_createthread(guicontext->hxcfe,(void*)exportthread_params,&export_thread,0);
+			return 0;
 		}
+		else
+		{
+			free(exportthread_params->urls);
+			free(exportthread_params->type);
+			free(exportthread_params);
 
+			return -1;
+		}
 	}
 
-	return 0;
+	return -1;
 }
 
 typedef struct _loadthread
@@ -454,14 +470,28 @@ void load_file(const char *urls)
 
 			if(strlen(urls))
 			{
-				loadthread_params->urls =(char*)malloc(strlen(urls)+1);
-				memset(loadthread_params->urls,0,strlen(urls)+1);
-				memcpy(loadthread_params->urls,urls,strlen(urls));
+				loadthread_params->urls =(char*)calloc( 1, strlen(urls)+1);
+				if(loadthread_params->urls)
+				{
+					memcpy(loadthread_params->urls,urls,strlen(urls));
+				}
+				else
+				{
+					free(loadthread_params);
+					guicontext->loading = 0;
+					return;
+				}
 			}
 			else
 				loadthread_params->urls = 0;
 
-			hxc_createthread(guicontext->hxcfe,(void*)loadthread_params,&loading_thread,0);
+			if( hxc_createthread(guicontext->hxcfe,(void*)loadthread_params,&loading_thread,0) < 0 )
+			{
+				free(loadthread_params->urls);
+				free(loadthread_params);
+				guicontext->loading = 0;
+				return;
+			}
 		}
 		else
 		{

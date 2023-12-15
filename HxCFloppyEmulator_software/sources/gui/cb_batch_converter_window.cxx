@@ -658,6 +658,7 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 									batchconverter_set_status_string(params, tempstr);
 
 									free(tempstr);
+									tempstr = NULL;
 								}
 
 								loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,(char*)ff_type_list[output_file_format].plug_id);
@@ -706,8 +707,9 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 								}
 
 								free(destinationfile);
-								if(tempstr)
-									free(tempstr);
+								destinationfile = NULL;
+								free(tempstr);
+								tempstr = NULL;
 							}
 						}
 					}
@@ -816,8 +818,12 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 
 	filecount++;
 
-	filelist =(char **) malloc(sizeof(char *) * (filecount + 1) );
-	memset(filelist,0,sizeof(char *) * (filecount + 1) );
+	filelist = (char **) calloc( 1, sizeof(char *) * (filecount + 1) );
+
+	if( !filelist )
+	{
+		return -1;
+	}
 
 	i=0;
 	j=0;
@@ -870,6 +876,7 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 	free(bcparams2->files);
 
 	bcw->bt_convert->activate();
+
 	return 0;
 }
 

@@ -292,6 +292,8 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 	CUI_affiche(MSG_DEBUG,"Starting Floppy dump...");
 
 	tempstr=(char*)malloc(MAX_TMP_STR_SIZE);
+	if(!tempstr)
+		return -1;
 
 	if(checkversion())
 	{
@@ -302,7 +304,13 @@ int DumpThreadProc(void* floppycontext,void* hw_context)//( LPVOID lpParameter)
 			numberofsector_read=0;
 			number_of_bad_sector=0;
 
-			sr=(FD_SCAN_RESULT*)malloc(sizeof(FD_ID_HEADER)*MAX_SECTOR_NB + 1);
+			sr = (FD_SCAN_RESULT*)malloc(sizeof(FD_ID_HEADER)*MAX_SECTOR_NB + 1);
+			if(!sr)
+			{
+				free(tempstr);
+				closedevice(h);
+				return -1;
+			}
 
 			fb = hxcfe_initFloppy(hxcfe,params->start_track + params->number_of_track,params->end_side+1);
 			if(!fb)
