@@ -500,14 +500,9 @@ int StreamerThreadProc(void* floppycontext,void* context)
 	return 0;
 
 error:
-	if(buffer)
-		free(buffer);
-
-	if(offset_table)
-		free(offset_table);
-
-	if(full_track_buffer)
-		free(full_track_buffer);
+	free(buffer);
+	free(offset_table);
+	free(full_track_buffer);
 
 	return -1;
 }
