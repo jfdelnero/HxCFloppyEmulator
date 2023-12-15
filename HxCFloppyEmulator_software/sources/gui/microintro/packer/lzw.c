@@ -66,17 +66,25 @@ COPYRIGHT 1993-1998 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 
 #include "lzw.h"
 
-#define BITS				15
-#define MAX_CODE			( ( 1 << BITS ) - 1 )
-#define TABLE_SIZE			35023L
-#define END_OF_STREAM		256
-#define BUMP_CODE			257
-#define FLUSH_CODE			258
-#define FIRST_CODE			259
-#define UNUSED				-1
+#define BITS                15
+#define MAX_CODE            ( ( 1 << BITS ) - 1 )
+#define TABLE_SIZE          35023L
+#define END_OF_STREAM       256
+#define BUMP_CODE           257
+#define FLUSH_CODE          258
+#define FIRST_CODE          259
+#define UNUSED              -1
 
-unsigned int find_child_node( int parent_code, int child_character );
-unsigned int decode_string( unsigned int offset, unsigned int code );
+#define PACIFIER_COUNT 2047
+
+typedef struct bit_file {
+	ubyte *buf;
+	int current_byte;
+	ubyte mask;
+	int rack;
+	int pacifier_counter;
+	int length;
+} BIT_BUF;
 
 typedef struct {
 	int code_value;
@@ -84,14 +92,18 @@ typedef struct {
 	char character;
 } DICTIONARY;
 
-DICTIONARY * dict;
+typedef struct lzw_stat_
+{
+	DICTIONARY * dict;
+	char * decode_stack;
 
-char * decode_stack;
-unsigned int next_code;
-int current_code_bits;
-unsigned int next_bump_code;
+	unsigned int next_code;
+	int current_code_bits;
+	unsigned int next_bump_code;
+}lzw_stat;
 
-#define PACIFIER_COUNT 2047
+unsigned int find_child_node( lzw_stat * stat, int parent_code, int child_character );
+unsigned int decode_string( lzw_stat * stat, unsigned int offset, unsigned int code );
 
 BIT_BUF *OpenOutputBitBuf( )
 {
@@ -225,29 +237,29 @@ unsigned int InputBits( BIT_BUF *bit_buf, int bit_count )
 	return( return_value );
 }
 
-void InitializeDictionary()
+void InitializeDictionary(lzw_stat * stat)
 {
 	unsigned int i;
 
 	for ( i = 0 ; i < TABLE_SIZE ; i++ )
-		dict[i].code_value = UNUSED;
+		stat->dict[i].code_value = UNUSED;
 
-	next_code = FIRST_CODE;
+	stat->next_code = FIRST_CODE;
 
-	current_code_bits = 9;
-	next_bump_code = 511;
+	stat->current_code_bits = 9;
+	stat->next_bump_code = 511;
 }
 
-void InitializeStorage()
+void InitializeStorage(lzw_stat * stat)
 {
-	dict = (DICTIONARY *)malloc(TABLE_SIZE*sizeof(DICTIONARY));
-	decode_stack = (char *)malloc(TABLE_SIZE*sizeof(char));
+	stat->dict = (DICTIONARY *)malloc(TABLE_SIZE*sizeof(DICTIONARY));
+	stat->decode_stack = (char *)malloc(TABLE_SIZE*sizeof(char));
 }
 
-void FreeStorage()
+void FreeStorage(lzw_stat * stat)
 {
-	free(dict);
-	free(decode_stack);
+	free(stat->dict);
+	free(stat->decode_stack);
 }
 
 ubyte *lzw_compress( ubyte *inputbuf, ubyte *outputbuf, int input_size, int *output_size )
@@ -257,6 +269,9 @@ ubyte *lzw_compress( ubyte *inputbuf, ubyte *outputbuf, int input_size, int *out
 	int string_code;
 	unsigned int index;
 	int i;
+	lzw_stat stat;
+
+	memset(&stat,0,sizeof(lzw_stat));
 
 	output = OpenOutputBitBuf();
 
@@ -276,55 +291,55 @@ ubyte *lzw_compress( ubyte *inputbuf, ubyte *outputbuf, int input_size, int *out
 		output->buf = outputbuf;
 	}
 
-	InitializeStorage();
-	InitializeDictionary();
+	InitializeStorage(&stat);
+	InitializeDictionary(&stat);
 	string_code = ( *inputbuf++ );
 	for ( i=0 ; i<input_size ; i++ )
 	{
 		if ( output->current_byte+4 >= *output_size )
 		{
 			CloseOutputBitBuf( output );
-			FreeStorage();
+			FreeStorage(&stat);
 			free( outputbuf );
 			*output_size = -1;
 			return NULL;
 		}
 
 		character = ( *inputbuf++ );
-		index = find_child_node( string_code, character );
-		if ( dict[ index ].code_value != - 1 )
+		index = find_child_node( &stat, string_code, character );
+		if ( stat.dict[ index ].code_value != - 1 )
 		{
-			string_code = dict[ index ].code_value;
+			string_code = stat.dict[ index ].code_value;
 		}
 		else
 		{
-			dict[ index ].code_value = next_code++;
-			dict[ index ].parent_code = string_code;
-			dict[ index ].character = (char) character;
-			OutputBits( output,(uint32_t) string_code, current_code_bits );
+			stat.dict[ index ].code_value = stat.next_code++;
+			stat.dict[ index ].parent_code = string_code;
+			stat.dict[ index ].character = (char) character;
+			OutputBits( output,(uint32_t) string_code, stat.current_code_bits );
 			string_code = character;
 
-			if ( next_code > MAX_CODE )
+			if ( stat.next_code > MAX_CODE )
 			{
-				OutputBits( output,(uint32_t) FLUSH_CODE, current_code_bits );
-				InitializeDictionary();
+				OutputBits( output,(uint32_t) FLUSH_CODE, stat.current_code_bits );
+				InitializeDictionary(&stat);
 			}
-			else if ( next_code > next_bump_code )
+			else if ( stat.next_code > stat.next_bump_code )
 			{
-				OutputBits( output,(uint32_t) BUMP_CODE, current_code_bits );
-				current_code_bits++;
-				next_bump_code <<= 1;
-				next_bump_code |= 1;
+				OutputBits( output,(uint32_t) BUMP_CODE, stat.current_code_bits );
+				stat.current_code_bits++;
+				stat.next_bump_code <<= 1;
+				stat.next_bump_code |= 1;
 			}
 		}
 	}
-	OutputBits( output, (uint32_t) string_code, current_code_bits );
-	OutputBits( output, (uint32_t) END_OF_STREAM, current_code_bits);
+	OutputBits( output, (uint32_t) string_code, stat.current_code_bits );
+	OutputBits( output, (uint32_t) END_OF_STREAM, stat.current_code_bits);
 
 	*output_size = output->current_byte + 1;
 
 	CloseOutputBitBuf( output );
-	FreeStorage();
+	FreeStorage(&stat);
 
 	return outputbuf;
 }
@@ -337,18 +352,20 @@ ubyte *lzw_expand( ubyte *inputbuf, ubyte *outputbuf, int length )
 	int character;
 	unsigned int count;
 	int counter;
+	lzw_stat stat;
+
+	memset(&stat,0,sizeof(lzw_stat));
 
 	input = OpenInputBitBuf( inputbuf );
 	if ( outputbuf == NULL )
 		outputbuf = (ubyte *)malloc(length*sizeof(ubyte));
 
-	InitializeStorage();
+	InitializeStorage(&stat);
 	counter = 0;
 	for ( ; ; )
 	{
-
-		InitializeDictionary();
-		old_code = (unsigned int) InputBits( input, current_code_bits );
+		InitializeDictionary(&stat);
+		old_code = (unsigned int) InputBits( input, stat.current_code_bits );
 		if ( old_code == END_OF_STREAM )
 		{
 			CloseInputBitBuf( input );
@@ -370,11 +387,11 @@ ubyte *lzw_expand( ubyte *inputbuf, ubyte *outputbuf, int length )
 		for ( ; ; )
 		{
 
-			new_code = (unsigned int) InputBits( input, current_code_bits );
+			new_code = (unsigned int) InputBits( input, stat.current_code_bits );
 			if ( new_code == END_OF_STREAM )
 			{
 				CloseInputBitBuf( input );
-				FreeStorage();
+				FreeStorage(&stat);
 				return outputbuf;
 			}
 			if ( new_code == FLUSH_CODE )
@@ -382,59 +399,59 @@ ubyte *lzw_expand( ubyte *inputbuf, ubyte *outputbuf, int length )
 
 			if ( new_code == BUMP_CODE )
 			{
-				current_code_bits++;
+				stat.current_code_bits++;
 				continue;
 			}
 
-			if ( new_code >= next_code )
+			if ( new_code >= stat.next_code )
 			{
-				decode_stack[ 0 ] = (char) character;
-				count = decode_string( 1, old_code );
+				stat.decode_stack[ 0 ] = (char) character;
+				count = decode_string( &stat, 1, old_code );
 			}
 			else
 			{
-				count = decode_string( 0, new_code );
+				count = decode_string( &stat, 0, new_code );
 			}
 
-			character = decode_stack[ count - 1 ];
+			character = stat.decode_stack[ count - 1 ];
 			while ( count > 0 ) {
 				// This lets the case counter==length pass through.
 				// This is a hack.
 				if (counter<length) {
- 					//printf("%x ", ( ubyte ) decode_stack[ count ]);
-					outputbuf[counter++] = ( ubyte ) decode_stack[ --count ];
+					//printf("%x ", ( ubyte ) decode_stack[ count ]);
+					outputbuf[counter++] = ( ubyte ) stat.decode_stack[ --count ];
 
 				} else if (counter>length) {
-					printf( "ERROR:Tried to write %d\n", decode_stack[ --count ] );
+					printf( "ERROR:Tried to write %d\n", stat.decode_stack[ --count ] );
 					exit(1);
 				} else
 					count--;
 			}
-			dict[ next_code ].parent_code = old_code;
-			dict[ next_code ].character = (char) character;
-			next_code++;
+			stat.dict[ stat.next_code ].parent_code = old_code;
+			stat.dict[ stat.next_code ].character = (char) character;
+			stat.next_code++;
 			old_code = new_code;
 		}
 	}
 }
 
-unsigned int find_child_node( int parent_code, int child_character ) {
+unsigned int find_child_node( lzw_stat * stat, int parent_code, int child_character ) {
 	unsigned int index;
 	int offset;
 
 	index = ( child_character << ( BITS - 8 ) ) ^ parent_code;
 	if ( index == 0 )
 		offset = 1;
-    else
+	else
 		offset = TABLE_SIZE - index;
 
 	for ( ; ; )
 	{
-		if ( dict[ index ].code_value == UNUSED )
+		if ( stat->dict[ index ].code_value == UNUSED )
 			return( (unsigned int) index );
 
-		if ( dict[ index ].parent_code == parent_code &&
-			 dict[ index ].character == (char) child_character )
+		if ( stat->dict[ index ].parent_code == parent_code &&
+			 stat->dict[ index ].character == (char) child_character )
 			return( index );
 		if ( (int) index >= offset )
 			index -= offset;
@@ -443,11 +460,11 @@ unsigned int find_child_node( int parent_code, int child_character ) {
 	}
 }
 
-unsigned int decode_string( unsigned int count, unsigned int code ) {
+unsigned int decode_string( lzw_stat * stat, unsigned int count, unsigned int code ) {
 	while ( code > 255 ) {
-		decode_stack[ count++ ] = dict[ code ].character;
-		code = dict[ code ].parent_code;
+		stat->decode_stack[ count++ ] = stat->dict[ code ].character;
+		code = stat->dict[ code ].parent_code;
 	}
-	decode_stack[ count++ ] = (char) code;
+	stat->decode_stack[ count++ ] = (char) code;
 	return( count );
 }
