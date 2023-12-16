@@ -5,9 +5,9 @@ class Fl_DND_Box : public Fl_Box
 	public:
 
 		static void callback_deferred(void *v);
-		Fl_DND_Box(int X, int Y, int W, int H, const char *L = 0);
+		Fl_DND_Box(int X, int Y, int W, int H, const char *L);
 
-		virtual ~Fl_DND_Box();
+		~Fl_DND_Box();
 		int event();
 		const char* event_text();
 		int event_length();
