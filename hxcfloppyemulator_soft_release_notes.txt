@@ -17,29 +17,28 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
-** **** 2023 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
-
-*** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
-*** Last update : v2.15.1.1, 15 December 2023 ***
+23 December 2023 : HxCFloppyEmulator 2.15.1.2
 
 -> Many fixes and improvements into the flux stream management :
 
   - One revolution only / 2 indexes support fixed.
 
-  - Fix stream files formats export : No more glitch after the first revolution index. (fix SCP and KF export).
+  - Fix stream files formats export : No more glitch after the first revolution index. (Fix SCP and KF export).
 
   - Sectors recovery support - Can be disabled/enabled with the FLUXSTREAM_SECTORS_RECOVERY variable.
     This feature try to automatically recover/fix bad sectors with copies present in others stream revolutions.
+
+  - Default pulses timing jitter tolerance increased from 10% to 14% (Config file).
 
 -> Kryoflux writer : stream to stream conversion : Don't align output stream to the next index.
 
 -> SCP writer : stream to stream conversion : Don't align output stream to the next index.
 
--> SCP loader : Fix singled-sided images support (fix the number of tracks/cylinder).
+-> SCP loader : Fix singled-sided images support (Fix the number of tracks/cylinder).
 
 -> SCP loader : Fix broken support of SCP images with more than 5 revolutions.
 
--> SCP loader : Fix odd number of tracks + double step mode issue (last track missing).
+-> SCP loader : Fix odd number of tracks + double step mode issue (Last track missing).
 
 -> Logic analyzer capture loader : nameTT.S.logicbin8bits file name convention support. (TT=track S=side)
 
@@ -47,7 +46,7 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 
 -> New XML format : Sharp X68000 2HD disk.
 
--> Track display : fix possible infinite loop : check the bitrate value and stop + report if needed.
+-> Track display : Fix possible infinite loop : check the bitrate value and stop + report if needed.
 
 -> HFEv3 loader : Support RAND_OPCODE right after SKIPBITS_OPCODE.
 
@@ -56,8 +55,6 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -> New Apple II 2MG file image loader. (WIP - To be completed)
 
 -> XML raw loader : Fix images last sector loading.
-
--> Many internal code improvements and fixes.
 
 -> Track editor : New "insert" and "remove" track operations.
 
@@ -79,7 +76,9 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 
 -> New track format : Centurion MFM. (Rick Altherr)
 
--> Code : gcc's -fanalyzer used against the libhxcfe library : Many possible issues fixed ! (WIP)
+-> Code : gcc's -fanalyzer used against the libhxcfe library : Many possible issues fixed !
+
+-> Many internal code improvements and fixes.
 
 *********************************************************/
 
