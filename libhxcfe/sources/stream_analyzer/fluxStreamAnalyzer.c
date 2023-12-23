@@ -76,6 +76,8 @@
 
 #define SECONDPASSANALYSIS 1
 
+//#define EXPAND_MATCHING_BLOCK 1
+
 HXCFE* floppycont;
 
 int victor_9k_bands_def[]=
@@ -1084,7 +1086,6 @@ static track_blocks * AllocateBlocks(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM * track_du
 					j++;
 				};
 
-
 				trackb->blocks[i].timeoffset = timeoffset;
 				trackb->blocks[i].tickoffset = tickoffset;
 				trackb->blocks[i].end_index = j;
@@ -1421,6 +1422,306 @@ static void compareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32_t 
 		*pulses_failed = bad_pulses;
 
 }
+
+#ifdef EXPAND_MATCHING_BLOCK
+
+static int expandblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32_t dst_block_offset,uint32_t * pulses_ok,uint32_t * pulses_failed,int partial, int max_skew)
+{
+	int marge;
+	int time1,time2;
+	int bad_pulses,good_pulses;
+
+	uint32_t *start_ptr;
+	uint32_t *dst_ptr;
+	uint32_t *last_dump_ptr;
+	uint32_t *last_block_ptr;
+	uint32_t src_number_of_pulses;
+
+	bad_pulses = 0;
+	good_pulses = 0;
+	src_number_of_pulses = src_block->number_of_pulses;
+
+	if( dst_block_offset >= td->channels[0].nb_of_pulses)
+	{
+		if(pulses_ok)
+			*pulses_ok = 0;
+
+		if(pulses_failed)
+			*pulses_failed = 0;
+
+		return 0;
+	}
+
+	if(dst_block_offset + src_number_of_pulses >= td->channels[0].nb_of_pulses)
+	{
+		src_number_of_pulses = td->channels[0].nb_of_pulses - dst_block_offset;
+	}
+
+	src_block->overlap_offset = dst_block_offset;
+
+	start_ptr = &td->channels[0].stream[src_block->start_index];
+	dst_ptr = &td->channels[0].stream[dst_block_offset];
+	last_dump_ptr = &td->channels[0].stream[td->channels[0].nb_of_pulses - 2];
+
+	last_block_ptr = last_dump_ptr;
+
+	if( dst_ptr < last_dump_ptr && start_ptr < last_block_ptr )
+	{
+		time1 = *(start_ptr);
+		time2 = *(dst_ptr);
+
+		marge = ( ( time1 * max_skew ) >> 8 );
+
+		while( (dst_ptr + 8) < last_dump_ptr && (start_ptr+8) < last_block_ptr)
+		{
+			if( time2 > ( time1 + marge ) )
+			{
+				time1 = time1 + *(++start_ptr);
+
+				goto exit_func;
+			}
+			else
+			{
+				if( time2 < ( time1 - marge ) )
+				{
+					time2 = time2 + *(++dst_ptr);
+
+					goto exit_func;
+				}
+				else
+				{
+					time1 = *(++start_ptr);
+					time2 = *(++dst_ptr);
+
+					good_pulses++;
+
+					marge = ( ( time1 * max_skew ) >> 8 );
+				}
+			}
+
+			if( time2 > ( time1 + marge ) )
+			{
+				time1 = time1 + *(++start_ptr);
+
+				goto exit_func;
+			}
+			else
+			{
+				if( time2 < ( time1 - marge ) )
+				{
+					time2 = time2 + *(++dst_ptr);
+
+					goto exit_func;
+				}
+				else
+				{
+					time1 = *(++start_ptr);
+					time2 = *(++dst_ptr);
+
+					good_pulses++;
+
+					marge = ( ( time1 * max_skew ) >> 8 );
+				}
+			}
+
+			if( time2 > ( time1 + marge ) )
+			{
+				time1 = time1 + *(++start_ptr);
+
+				goto exit_func;
+			}
+			else
+			{
+				if( time2 < ( time1 - marge ) )
+				{
+					time2 = time2 + *(++dst_ptr);
+
+					goto exit_func;
+				}
+				else
+				{
+					time1 = *(++start_ptr);
+					time2 = *(++dst_ptr);
+
+					good_pulses++;
+
+					marge = ( ( time1 * max_skew ) >> 8 );
+				}
+			}
+
+			if( time2 > ( time1 + marge ) )
+			{
+				time1 = time1 + *(++start_ptr);
+
+				goto exit_func;
+			}
+			else
+			{
+				if( time2 < ( time1 - marge ) )
+				{
+					time2 = time2 + *(++dst_ptr);
+
+					goto exit_func;
+				}
+				else
+				{
+					time1 = *(++start_ptr);
+					time2 = *(++dst_ptr);
+
+					good_pulses++;
+
+					marge = ( ( time1 * max_skew ) >> 8 );
+				}
+			}
+
+
+			if( time2 > ( time1 + marge ) )
+			{
+				time1 = time1 + *(++start_ptr);
+
+				goto exit_func;
+			}
+			else
+			{
+				if( time2 < ( time1 - marge ) )
+				{
+					time2 = time2 + *(++dst_ptr);
+
+					goto exit_func;
+				}
+				else
+				{
+					time1 = *(++start_ptr);
+					time2 = *(++dst_ptr);
+
+					good_pulses++;
+
+					marge = ( ( time1 * max_skew ) >> 8 );
+				}
+			}
+
+
+			if( time2 > ( time1 + marge ) )
+			{
+				time1 = time1 + *(++start_ptr);
+
+				goto exit_func;
+			}
+			else
+			{
+				if( time2 < ( time1 - marge ) )
+				{
+					time2 = time2 + *(++dst_ptr);
+
+					goto exit_func;
+				}
+				else
+				{
+					time1 = *(++start_ptr);
+					time2 = *(++dst_ptr);
+
+					good_pulses++;
+
+					marge = ( ( time1 * max_skew ) >> 8 );
+				}
+			}
+
+
+			if( time2 > ( time1 + marge ) )
+			{
+				time1 = time1 + *(++start_ptr);
+
+				goto exit_func;
+			}
+			else
+			{
+				if( time2 < ( time1 - marge ) )
+				{
+					time2 = time2 + *(++dst_ptr);
+
+					goto exit_func;
+				}
+				else
+				{
+					time1 = *(++start_ptr);
+					time2 = *(++dst_ptr);
+
+					good_pulses++;
+
+					marge = ( ( time1 * max_skew ) >> 8 );
+				}
+			}
+
+			if( time2 > ( time1 + marge ) )
+			{
+				time1 = time1 + *(++start_ptr);
+
+				goto exit_func;
+			}
+			else
+			{
+				if( time2 < ( time1 - marge ) )
+				{
+					time2 = time2 + *(++dst_ptr);
+
+					goto exit_func;
+				}
+				else
+				{
+					time1 = *(++start_ptr);
+					time2 = *(++dst_ptr);
+
+					good_pulses++;
+
+					marge = ( ( time1 * max_skew ) >> 8 );
+				}
+			}
+
+		}
+
+		while( (dst_ptr) < last_dump_ptr && (start_ptr) < last_block_ptr)
+		{
+
+			if( time2 > ( time1 + marge ) )
+			{
+				time1 = time1 + *(++start_ptr);
+
+				goto exit_func;
+			}
+			else
+			{
+				if( time2 < ( time1 - marge ) )
+				{
+					time2 = time2 + *(++dst_ptr);
+
+					goto exit_func;
+				}
+				else
+				{
+					time1 = *(++start_ptr);
+					time2 = *(++dst_ptr);
+
+					good_pulses++;
+
+					marge = ( ( time1 * max_skew ) >> 8 );
+				}
+			}
+		}
+	}
+
+	src_block->overlap_size = dst_ptr - &td->channels[0].stream[dst_block_offset];
+
+exit_func:
+	if(pulses_ok)
+		*pulses_ok = good_pulses;
+
+	if(pulses_failed)
+		*pulses_failed = bad_pulses;
+
+	return good_pulses;
+
+}
+#endif
 
 static int fastcompareblock(HXCFE_TRKSTREAM * td,pulsesblock * src_block, uint32_t dst_block_offset, int max_skew)
 {
@@ -2392,6 +2693,65 @@ static pulses_link * ScanAndFindRepeatedBlocks(HXCFE* floppycontext,HXCFE_FXSA *
 									tb->blocks[block_num].overlap_size = tb->blocks[block_num].number_of_pulses;
 
 									tb->blocks[block_num].locked = 1;
+
+#ifdef EXPAND_MATCHING_BLOCK
+									// Try to expand this block
+									int tmp_ret;
+									tmp_ret = expandblock(track_dump,&tb->blocks[block_num], tb->blocks[block_num].overlap_offset,&good,&bad,0,fxs->analysis_rev2rev_max_pulses_jitter);
+									if(good && !bad)
+									{
+#ifdef FLUXSTREAMDBG
+										floppycontext->hxc_printf(MSG_DEBUG,"Match block resized from %d pulses to %d pulses",tb->blocks[block_num].overlap_size,tmp_ret);
+#endif
+
+										tb->blocks[block_num].overlap_size = tmp_ret;
+										tb->blocks[block_num].number_of_pulses = tmp_ret;
+
+										int blk_o_i = 0;
+										for( int blk_i = 0; blk_i < tb->number_of_blocks; blk_i++)
+										{
+											if( blk_i != block_num)
+											{
+												if( ( tb->blocks[blk_i].start_index >= tb->blocks[block_num].start_index ) &&
+													( tb->blocks[blk_i].start_index < ( tb->blocks[block_num].start_index + tb->blocks[block_num].overlap_size ) ) )
+												{
+													// starting inside the matching one
+													if(
+														( ( tb->blocks[blk_i].start_index + tb->blocks[blk_i].number_of_pulses ) <=
+														  ( tb->blocks[block_num].start_index + tb->blocks[block_num].number_of_pulses ) )
+														)
+													{
+														// Completly covered - remove it
+													}
+													else
+													{
+														// Partial - reajust start point
+														tb->blocks[blk_i].number_of_pulses -= ( ( tb->blocks[block_num].start_index + tb->blocks[block_num].number_of_pulses ) - tb->blocks[blk_i].start_index);
+														tb->blocks[blk_i].start_index = tb->blocks[block_num].start_index + tb->blocks[block_num].number_of_pulses;
+														if( tb->blocks[blk_i].number_of_pulses > 0)
+														{
+															memcpy(&tb->blocks[blk_o_i++],&tb->blocks[blk_i],sizeof(pulsesblock));
+														}
+													}
+												}
+												else
+												{
+													memcpy(&tb->blocks[blk_o_i++],&tb->blocks[blk_i],sizeof(pulsesblock));
+												}
+											}
+											else
+											{
+												memcpy(&tb->blocks[blk_o_i++],&tb->blocks[blk_i],sizeof(pulsesblock));
+											}
+										}
+
+#ifdef FLUXSTREAMDBG
+										floppycontext->hxc_printf(MSG_DEBUG,"Blocks count updated : %d -> %d",tb->number_of_blocks,blk_o_i);
+#endif
+
+										tb->number_of_blocks = blk_o_i;
+									}
+#endif
 
 									previous_block_matched++;
 								break;
