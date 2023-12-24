@@ -106,13 +106,38 @@ int WOZ_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 	}
 }
 
+static int get_woz_chunk(unsigned char * buf,  int buf_size, int offset, uint32_t chunk_id)
+{
+	woz_chunk * chunk;
+
+	if( offset < sizeof(woz_fileheader))
+		offset = sizeof(woz_fileheader);
+
+	while( offset < buf_size)
+	{
+		chunk = (woz_chunk *)	&buf[offset];
+
+		if (chunk->id == chunk_id)
+		{
+			return offset;
+		}
+
+		offset += (8 + chunk->size);
+	}
+
+	return -1;
+}
+
 int WOZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	FILE * f;
 	woz_fileheader fileheader;
+	woz_chunk * chunk;
+	int offset;
 	int filesize;
 	unsigned char * file_buffer;
 	uint32_t crc32;
+	char * tmp_str;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"WOZ_libLoad_DiskFile %s",imgfile);
 
@@ -178,6 +203,72 @@ int WOZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		hxc_fclose(f);
 		return HXCFE_BADFILE;
 	}
+
+	// Get and print the metadatas if available...
+	offset = get_woz_chunk(file_buffer,  filesize, 0, CHUNK_META);
+	if( offset > 0 )
+	{
+		chunk = (woz_chunk *)&file_buffer[offset];
+		if(chunk->size > 0 &&  chunk->size < 1*1024*1024 )
+		{
+			tmp_str = calloc( 1, chunk->size + 1);
+			if( tmp_str )
+			{
+				memcpy( tmp_str, chunk->data, chunk->size );
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%s",tmp_str);
+
+				free(tmp_str);
+			}
+		}
+	}
+
+	// Get the Info chunk
+	offset = get_woz_chunk(file_buffer,  filesize, 0, CHUNK_INFO);
+	if( offset < 0 )
+	{
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"No INFO Chunk ?!");
+		free(file_buffer);
+		hxc_fclose(f);
+		return HXCFE_BADFILE;
+	}
+
+	/*
+	offset = sizeof(woz_fileheader);
+	while( offset < filesize)
+	{
+
+		switch(chunk->id)
+		{
+			case CHUNK_INFO:
+				printf("info chunk id :0x%.8X\n",chunk->id);
+			break;
+			case CHUNK_TMAP:
+				printf("tmap chunk id :0x%.8X\n",chunk->id);
+			break;
+			case CHUNK_TRKS:
+				printf("trks chunk id :0x%.8X\n",chunk->id);
+			break;
+			case CHUNK_META:
+				if(chunk->size > 0 &&  chunk->size < 1*1024*1024 )
+				{
+					tmp_str = calloc( 1, chunk->size + 1);
+					if( tmp_str )
+					{
+						memcpy( tmp_str, chunk->data, chunk->size );
+						imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%s",tmp_str);
+
+						free(tmp_str);
+					}
+				}
+			break;
+
+			default:
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Unknown chunk id ! : 0x%.8X (size : %d)",chunk->id,chunk->size);
+			break;
+		}
+
+		offset += (8 + chunk->size);
+	}*/
 
 	free(file_buffer);
 
