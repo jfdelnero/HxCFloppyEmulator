@@ -136,6 +136,7 @@
 #include "./loaders/86f_loader/86f_loader.h"
 #include "./loaders/logicanalyzer_loader/logicanalyzer_loader.h"
 #include "./loaders/dim_x68k_loader/dim_x68k_loader.h"
+#include "./loaders/woz_loader/woz_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -226,6 +227,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)Apple2_do_libGetPluginInfo,
 	(GETPLUGININFOS)Apple2_po_libGetPluginInfo,
 	(GETPLUGININFOS)Apple2_2mg_libGetPluginInfo,
+	(GETPLUGININFOS)WOZ_libGetPluginInfo,
 	(GETPLUGININFOS)SDDSpeccyDos_libGetPluginInfo,
 	(GETPLUGININFOS)BMP_Tracks_libGetPluginInfo,
 	(GETPLUGININFOS)BMP_StreamTracks_libGetPluginInfo,
