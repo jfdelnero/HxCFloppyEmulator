@@ -17,6 +17,14 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
+** **** 2023 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
+
+*** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
+*** Last update : v2.15.2.1, 25 December 2023 ***
+
+-> New Applesauce WOZ file image loader.
+
+/*********************************************************
 23 December 2023 : HxCFloppyEmulator 2.15.1.2
 
 -> Many fixes and improvements into the flux stream management :
