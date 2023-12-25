@@ -137,6 +137,7 @@ int WOZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	woz_info * info;
 	woz_chunk * chunk;
 	woz_trk * trks;
+	woz_trk_v1 * trks_v1;
 	int offset;
 	int filesize;
 	unsigned char * file_buffer;
@@ -304,6 +305,7 @@ int WOZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	}
 
 	trks = (woz_trk*)&file_buffer[offset + 8];
+	trks_v1 = (woz_trk_v1*)&file_buffer[offset + 8];
 
 	max_track = 0;
 	switch( info->disk_type )
@@ -393,20 +395,39 @@ int WOZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			if( woz_track != 0xFF )
 			{
-				currentcylinder->sides[i] = tg_alloctrack(floppydisk->floppyBitRate,ISOIBM_MFM_ENCODING,rpm,trks[woz_track].bit_count*2,3800,0,0);
-				currentside = currentcylinder->sides[i];
-
-				if( trks[woz_track].starting_block * 512 < filesize)
+				if(info->version == 1)
 				{
-					track_dat = &file_buffer[(trks[woz_track].starting_block * 512)];
+					currentcylinder->sides[i] = tg_alloctrack(floppydisk->floppyBitRate,UNKNOWN_ENCODING,rpm,trks_v1[woz_track].bit_count*2,3800,0,0);
+					currentside = currentcylinder->sides[i];
 
-					for(k=0;k<trks[woz_track].bit_count;k++)
+					track_dat =(unsigned char*)&trks_v1[woz_track].bitstream;
+
+					for(k=0;k<trks_v1[woz_track].bit_count;k++)
 					{
 						if( track_dat[(k>>3)] & (0x80>>(k&7)) )
 						{
 							currentside->databuffer[(k*2)>>3] |= (0x80>>((k*2)&7));
 						}
 					}
+				}
+				else
+				{
+					currentcylinder->sides[i] = tg_alloctrack(floppydisk->floppyBitRate,UNKNOWN_ENCODING,rpm,trks[woz_track].bit_count*2,3800,0,0);
+					currentside = currentcylinder->sides[i];
+
+					if( trks[woz_track].starting_block * 512 < filesize)
+					{
+						track_dat = &file_buffer[(trks[woz_track].starting_block * 512)];
+
+						for(k=0;k<trks[woz_track].bit_count;k++)
+						{
+							if( track_dat[(k>>3)] & (0x80>>(k&7)) )
+							{
+								currentside->databuffer[(k*2)>>3] |= (0x80>>((k*2)&7));
+							}
+						}
+					}
+
 				}
 			}
 			else
