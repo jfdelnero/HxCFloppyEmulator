@@ -265,6 +265,12 @@ set A2RLOADER_BITRATE 0                              # Force the bitrate. (no au
 set A2RLOADER_BMPEXPORT 0                            # Export/plot the inputs stream tracks to BMP images.
 set A2RLOADER_SKIP_INTER_TRACKS 1                    # Skip inter tracks. Just process the normal tracks.
 
+#
+# WOZ loader parameters
+#
+
+set WOZLOADER_INTERTRACKSLOADING 0                   # Load 0.25,0.50 and 0.75 tracks positions
+
 # ----------------------------------------------------------------------------
 # ----------------------------------------------------------------------------
 

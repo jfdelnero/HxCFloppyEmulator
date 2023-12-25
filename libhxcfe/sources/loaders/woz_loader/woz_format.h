@@ -52,7 +52,6 @@ typedef struct woz_chunk_
 	uint8_t    data[];              // Data
 }woz_chunk;
 
-
 typedef struct woz_info_
 {
 	// Rev 1,2 & 3
@@ -70,12 +69,19 @@ typedef struct woz_info_
 	uint16_t  compatible_hw;        // 0x0001 = Apple ][, 0x0002 = Apple ][ Plus, 0x0004 = Apple //e (unenhanced), 0x0008 = Apple //c, 0x0010 = Apple //e Enhanced
 									// 0x0020 = Apple IIgs, 0x0040 = Apple //c Plus, 0x0080 = Apple ///, 0x0100 = Apple /// Plus
 	uint16_t  required_ram;         // In kB
-	uint16_t  largest_track;        // in 512 blocks number.
+	uint16_t  largest_track;        // In 512 blocks number.
 
 	// Rev 3
 	uint16_t flux_block;
 	uint16_t largest_flux_track;
 
 }woz_info;
+
+typedef struct woz_trk_
+{
+	uint16_t starting_block;        // 1 Block = 512 bytes. From the beginning of the file.
+	uint16_t block_count;           // Area size in blocks.
+	uint32_t bit_count;             // Number of bits to use.
+}woz_trk;
 
 #pragma pack()
