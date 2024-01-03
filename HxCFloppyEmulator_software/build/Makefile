@@ -8,6 +8,7 @@ TARGET := $(shell uname)
 BASEDIR = ../sources
 INCLUDES = -I$(BASEDIR) -I ../../libhxcfe/sources -I $(BASEDIR)/gui -I $(BASEDIR)/thirdpartylibs/fltk/fltk-1.x.x/ -I ../../libusbhxcfe/sources -I ../../libhxcadaptor/sources -I ../../build -I $(BASEDIR)/gui/microintro/
 
+FLTK1_4 ?= 0
 DEBUG ?= 0
 DEBUG_ASAN ?= 0
 DEBUG_INFOS ?= 0
@@ -108,7 +109,7 @@ all:
 	$(MAKE) $(EXEC)
 
 fltk:
-	cd ../sources/thirdpartylibs/fltk/ && bash ./prepare_fltk.sh
+	cd ../sources/thirdpartylibs/fltk/ && bash ./prepare_fltk.sh $(FLTK1_4)
 ifeq ($(TARGET), mingw32)
 		cd ../sources/thirdpartylibs/fltk/fltk-1.x.x/ && export LDFLAGS='-static-libstdc++ -static-libgcc' && ./configure --host=i686-w64-mingw32 --prefix=/usr/share/mingw-w64
 		$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x/ DIRS=src CC=i686-w64-mingw32-gcc CPP=i686-w64-mingw32-g++
