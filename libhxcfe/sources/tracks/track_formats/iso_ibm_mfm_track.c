@@ -119,7 +119,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 				if(tmp_buffer[3]==0xFE)
 				{
 					#define SECT_HEADER_SIZE (3+7)
-					
+
 					CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
 					for(k=0;k<SECT_HEADER_SIZE;k++)
 					{
@@ -200,7 +200,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 								CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
 							}
 
-							sector->data_crc = ( tmp_sector[SECT_DATA_SIZE]<<8 ) | tmp_sector[SECT_DATA_SIZE] ;
+							sector->data_crc = ( tmp_sector[SECT_DATA_SIZE-2]<<8 ) | tmp_sector[SECT_DATA_SIZE-1] ;
 
 							if(!CRC16_High && !CRC16_Low)
 							{ // crc ok !!!
