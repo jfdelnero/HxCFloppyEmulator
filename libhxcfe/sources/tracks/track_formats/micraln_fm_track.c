@@ -125,15 +125,16 @@ int get_next_FM_MicralN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SEC
 				else
 				{
 					// Search next index
-					while( !track->indexbuffer[ bit_offset / 8 ] )
+					while( (bit_offset < track->tracklen) && !track->indexbuffer[ bit_offset / 8 ] )
 					{
 						bit_offset++;
-						if( bit_offset > track->tracklen )
-						{
-							sector_extractor_sm=ENDOFTRACK;
-							bit_offset = -1;
-							break;
-						}
+					}
+
+					if( bit_offset >= track->tracklen )
+					{
+						sector_extractor_sm = ENDOFTRACK;
+						bit_offset = -1;
+						return bit_offset;
 					}
 				}
 
@@ -299,7 +300,7 @@ void tg_addMicralNSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig
 	pushTrackCode(tg,SYNC_WORD,0xFF,currentside,MICRALN_HS_SD);
 
 	// Warning !!!
-	// The machine need these 2 bytes but their exact 
+	// The machine need these 2 bytes but their exact
 	// meaning ("Sector" & "Track") are currently speculative.
 	// The Micral N boot ROM doesn't use them
 	// but expect 2 bytes after the sync word and before the
