@@ -8,7 +8,7 @@
 -- Contact: hxc2001<at>hxc2001.com --------------------- https://hxc2001.com --
 -------------------------------------------------------------------------------
 HxC Floppy Emulator project
-(c) 2006-2023 Jean-François DEL NERO / (c) HxC2001
+(c) 2006-2024 Jean-François DEL NERO / (c) HxC2001
 Website  : https://hxc2001.com
 Forum    : https://torlus.com/floppy/forum
 Facebook : https://www.facebook.com/groups/hxc2001
@@ -17,12 +17,15 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
-** **** 2023 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
-
-*** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
-*** Last update : v2.15.2.1, 25 December 2023 ***
+8 January 2024 : HxCFloppyEmulator 2.15.2.3
 
 -> New Applesauce WOZ file image loader.
+
+-> Track viewer : Fix MFM sectors CRC values.
+
+-> 2.15.1.2 Regression fix  : Random crashes with HxC stream (Pauline) files fixed.
+
+-> Some memory related fixes.
 
 /*********************************************************
 23 December 2023 : HxCFloppyEmulator 2.15.1.2
