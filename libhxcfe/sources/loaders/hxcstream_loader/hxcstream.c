@@ -176,6 +176,7 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 	packed_io_header * pio_header;
 	packed_stream_header * stream_header;
 	metadata_header * metadata;
+	unsigned char * metadata_buffer;
 	unsigned char * hxcstreambuf;
 	uint16_t * iostreambuf, *tmp_w_ptr;
 	uint32_t * stream, *tmp_dw_ptr;
@@ -196,6 +197,7 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 	iostreambuf = NULL;
 	stream = NULL;
 	metadata = NULL;
+	metadata_buffer = NULL;
 	str1 = NULL;
 	total_nb_pulses = 0;
 	total_nb_words = 0;
@@ -253,6 +255,15 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 
 								if(strstr( ((char*)metadata + sizeof(metadata_header)), "sample_rate_hz 50000000"))
 									sampleperiod = 20000;
+
+								if(!metadata_buffer)
+								{
+									metadata_buffer = calloc( 1, metadata->payload_size + sizeof(chunkblock_header) );
+									if( metadata_buffer )
+									{
+										memcpy( metadata_buffer, (unsigned char*)metadata, metadata->payload_size + sizeof(chunkblock_header) );
+									}
+								}
 
 								packet_offset += (metadata->payload_size + sizeof(chunkblock_header));
 							break;
@@ -506,8 +517,8 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 				{
 					sprintf(temp_str,"io_channel %d ",j);
 
-					if(metadata)
-						str1 = strstr( ((char*)metadata + sizeof(metadata_header)), temp_str);
+					if(metadata_buffer)
+						str1 = strstr( ((char*)metadata_buffer + sizeof(metadata_header)), temp_str);
 
 					if(str1)
 					{
@@ -601,6 +612,7 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 
 			free(hxcstreambuffer);
 			free(iostreambuf);
+			free(metadata_buffer);
 
 			hxc_fclose(f);
 
@@ -624,6 +636,7 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 	packed_io_header * pio_header;
 	packed_stream_header * stream_header;
 	metadata_header * metadata;
+	unsigned char * metadata_buffer;
 	unsigned char * hxcstreambuf;
 	uint16_t * iostreambuf, *tmp_w_ptr;
 	uint32_t * stream, *tmp_dw_ptr;
@@ -641,6 +654,7 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 	iostreambuf = NULL;
 	stream = NULL;
 	metadata = NULL;
+	metadata_buffer = NULL;
 	str1 = NULL;
 	total_nb_pulses = 0;
 	total_nb_words = 0;
@@ -692,7 +706,17 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 						if(strstr( ((char*)metadata + sizeof(metadata_header)), "sample_rate_hz 50000000"))
 							sampleperiod = 20000;
 
+						if(!metadata_buffer)
+						{
+							metadata_buffer = calloc( 1, metadata->payload_size + sizeof(chunkblock_header) );
+							if( metadata_buffer )
+							{
+								memcpy( metadata_buffer, (unsigned char*)metadata, metadata->payload_size + sizeof(chunkblock_header) );
+							}
+						}
+
 						packet_offset += (metadata->payload_size + sizeof(chunkblock_header));
+
 					break;
 
 					case 0x00000001:
@@ -814,8 +838,8 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 			{
 				sprintf(temp_str,"io_channel %d ",j);
 
-				if(metadata)
-					str1 = strstr( ((char*)metadata + sizeof(metadata_header)), temp_str);
+				if(metadata_buffer)
+					str1 = strstr( ((char*)metadata_buffer + sizeof(metadata_header)), temp_str);
 
 				if(str1)
 				{
@@ -908,6 +932,7 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 		}
 
 		free(iostreambuf);
+		free(metadata_buffer);
 
 		return track_dump;
 	}
