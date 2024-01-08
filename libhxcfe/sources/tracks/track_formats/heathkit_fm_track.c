@@ -107,15 +107,16 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 				else
 				{
 					// Search next index
-					while( !track->indexbuffer[ bit_offset / 8 ] )
+					while( bit_offset < track->tracklen && !track->indexbuffer[ bit_offset / 8 ] )
 					{
 						bit_offset++;
-						if( bit_offset >= track->tracklen )
-						{
-							sector_extractor_sm=ENDOFTRACK;
-							bit_offset = -1;
-							break;
-						}
+					}
+
+					if( bit_offset >= track->tracklen )
+					{
+						sector_extractor_sm=ENDOFTRACK;
+						bit_offset = -1;
+						break;
 					}
 				}
 
