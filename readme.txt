@@ -12,7 +12,7 @@ HxC Floppy Emulator project
 
 Generic/universal floppy disk drive emulators
 
-Copyright (C) 2006-2023  Jean-François DEL NERO / HxC2001
+Copyright (C) 2006-2024  Jean-François DEL NERO / HxC2001
 
 Email :    hxc2001(at)hxc2001.com
 
