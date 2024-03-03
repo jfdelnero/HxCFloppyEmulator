@@ -967,7 +967,14 @@ int write_back_fileimage()
 			imgldr_ctx = hxcfe_imgInitLoader(guicontext->hxcfe);
 			if(imgldr_ctx)
 			{
-				hxcfe_imgExport( imgldr_ctx, guicontext->loadedfloppy, guicontext->last_loaded_image_path, hxcfe_imgGetLoaderID(imgldr_ctx,"HXC_HFE") );
+				if( strstr(guicontext->last_loaded_image_path, ".img") || strstr(guicontext->last_loaded_image_path, ".IMG" ) )
+				{
+					hxcfe_imgExport( imgldr_ctx, guicontext->loadedfloppy, guicontext->last_loaded_image_path, hxcfe_imgGetLoaderID(imgldr_ctx,"RAW_LOADER") );
+				}
+				else
+				{
+					hxcfe_imgExport( imgldr_ctx, guicontext->loadedfloppy, guicontext->last_loaded_image_path, hxcfe_imgGetLoaderID(imgldr_ctx,"HXC_HFE") );
+				}
 
 				hxcfe_imgDeInitLoader(imgldr_ctx);
 			}
@@ -1002,8 +1009,8 @@ int load_indexed_fileimage(int index)
 
 	memset(filebuffer,0,8*1024);
 	filecfg = (sdhxcfecfgfile *)&filebuffer;
-	f=hxc_fopen((char*)fullpath,"r+b");
-	if(f)
+	f = hxc_fopen((char*)fullpath,"r+b");
+	if( f )
 	{
 		fread(filebuffer,8*1024,1,f);
 		hxc_fclose(f);
@@ -1012,12 +1019,18 @@ int load_indexed_fileimage(int index)
 	if(filecfg->indexed_mode)
 	{
 
-		snprintf(filename,sizeof(filename),"DSKA%.4d.HFE",cur_index);
-		snprintf(fullpath,sizeof(fullpath),"%s%c%s",cur_directory,SEPARATOR,filename);
+		snprintf(filename,sizeof(filename),"DSKA%.4d",cur_index);
+		snprintf(fullpath,sizeof(fullpath),"%s%c%s.HFE",cur_directory,SEPARATOR,filename);
 
 		write_back_fileimage();
 
 		f = hxc_fopen (fullpath,"rb");
+		if(!f)
+		{
+			snprintf(fullpath,sizeof(fullpath),"%s%c%s.IMG",cur_directory,SEPARATOR,filename);
+			f = hxc_fopen (fullpath,"rb");
+		}
+
 		if(f)
 		{
 			strcpy(guicontext->last_loaded_image_path,fullpath);
@@ -1026,10 +1039,16 @@ int load_indexed_fileimage(int index)
 		else
 		{
 			cur_index = 0;
-			snprintf(filename,sizeof(filename),"DSKA%.4d.HFE",cur_index);
-			snprintf(fullpath,sizeof(fullpath),"%s%c%s",cur_directory,SEPARATOR,filename);
+			snprintf(filename,sizeof(filename),"DSKA%.4d",cur_index);
+			snprintf(fullpath,sizeof(fullpath),"%s%c%s.HFE",cur_directory,SEPARATOR,filename);
 			f = hxc_fopen (fullpath,"rb");
-			if(f)
+			if(!f)
+			{
+				snprintf(fullpath,sizeof(fullpath),"%s%c%s.IMG",cur_directory,SEPARATOR,filename);
+				f = hxc_fopen (fullpath,"rb");
+			}
+
+			if( f )
 			{
 				strcpy(guicontext->last_loaded_image_path,fullpath);
 				fclose(f);
@@ -1039,12 +1058,12 @@ int load_indexed_fileimage(int index)
 				hxcfe_floppyUnload(guicontext->hxcfe,guicontext->loadedfloppy);
 				guicontext->loadedfloppy = NULL;
 
-				guicontext->last_loaded_image_path[0]=0;
+				guicontext->last_loaded_image_path[0] = 0;
 				cur_index = -1;
 			}
 		}
 
-		if(cur_index>=0)
+		if( cur_index >= 0 )
 		{
 			load_floppy_image(fullpath);
 		}
