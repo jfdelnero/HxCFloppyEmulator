@@ -885,7 +885,7 @@ static void tick_mw(void *v) {
 			window->usbcfg_window->chk_doublestep->value(0);
 	}
 
-	if(window->sdcfg_window->choice_interfacemode_drva_cfg->value() != 13)
+	if(window->sdcfg_window->choice_interfacemode_drva_cfg->value() != 15)
 	{
 		window->sdcfg_window->choice_pin02_drva->deactivate();
 		window->sdcfg_window->choice_pin34_drva->deactivate();
@@ -913,7 +913,7 @@ static void tick_mw(void *v) {
 		window->sdcfg_window->choice_interfacemode_drvb_cfg->activate();
 	}
 
-	if(window->sdcfg_window->choice_interfacemode_drvb_cfg->value() != 13 )
+	if(window->sdcfg_window->choice_interfacemode_drvb_cfg->value() != 15 )
 	{
 		window->sdcfg_window->choice_pin02_drvb->deactivate();
 		window->sdcfg_window->choice_pin34_drvb->deactivate();
