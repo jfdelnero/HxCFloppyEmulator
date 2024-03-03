@@ -93,6 +93,11 @@ else
 	LDFLAGS += $(shell $(BASEDIR)/thirdpartylibs/fltk/fltk-1.x.x/fltk-config --ldflags)
 endif
 
+ifdef STANDALONEFSBROWSER_BUILD
+	CFLAGS += -DSTANDALONEFSBROWSER
+	EXEC = DosDiskBrowser.exe
+endif
+
 FTDIFLOPPYEMU=usb_hxcfloppyemulator.o variablebitrate.o
 
 GUI = main_gui.o msg_txt.o gui_strings.o about_gui.o batch_converter_window.o floppy_dump_window.o floppy_infos_window.o license_gui.o \
@@ -187,6 +192,10 @@ DATA_FILES: bmptoh
 	cd $(BASEDIR)/gui/microintro/data/ && ../converttools/bmptob8/bmptoh ../../../../COPYING_FULL -DATA
 
 HxCFloppyEmulator.exe: win32_hxcfloppy_res.o main.o utils.o $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) $(LIBUSBHXCFE) ../../build/libhxcadaptor.a
+	$(CPP) -o $@    $^ $(LDFLAGS)
+	cp $@ ../../build
+
+DosDiskBrowser.exe: win32_hxcfloppy_res.o main.o utils.o $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) $(LIBUSBHXCFE) ../../build/libhxcadaptor.a
 	$(CPP) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../build
 
