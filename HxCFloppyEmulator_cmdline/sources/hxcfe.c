@@ -79,14 +79,26 @@ int SCRIPT_CUI_affiche(void * ctx, int MSGTYPE, char * string, ... )
 	return 0;
 }
 
-int isOption(int argc, char* argv[],char * paramtosearch,char * argtoparam)
+int isOption(int argc, char* argv[],char * paramtosearch,char * argtoparam, int * param_start_index)
 {
-	int param=1;
+	int param;
 	int i,j;
 
 	char option[512];
 
 	memset(option,0,sizeof(option));
+
+	param = 1;
+
+	if( param_start_index )
+	{
+		param = *param_start_index;
+	}
+
+	if(param < 1)
+	{
+		param = 1;
+	}
 
 	while(param<=argc)
 	{
@@ -122,6 +134,10 @@ int isOption(int argc, char* argv[],char * paramtosearch,char * argtoparam)
 								j++;
 							}
 							argtoparam[j]=0;
+
+							if(param_start_index)
+								*param_start_index = param;
+
 							return 1;
 						}
 						else
@@ -131,6 +147,9 @@ int isOption(int argc, char* argv[],char * paramtosearch,char * argtoparam)
 					}
 					else
 					{
+						if(param_start_index)
+							*param_start_index = param;
+
 						return 1;
 					}
 				}
@@ -165,6 +184,28 @@ void printhelp(char* argv[])
 	printf("  -list\t\t\t\t: List the content of the floppy image\n");
 	printf("  -getfile:[FILE]\t\t: Get a file from the floppy image\n");
 	printf("  -putfile:[FILE]\t\t: Put a file to the floppy image\n");
+
+	printf("\nUsage examples :\n");
+
+	printf("\n");
+	printf("Single output conversion -> Convert a disk image to HFE (use \"-modulelist\" to see the supported \"-conv\" file image formats) :\n\n");
+	printf("  %s -finput:\"path/input.img\" -conv:HXC_HFE -foutput:\"path/output.hfe\"\n",argv[0]);
+
+	printf("\n");
+	printf("Multiples-output conversion -> Convert a disk image to HFE and BMP :\n\n");
+	printf("  %s -finput:\"path/input.img\" -conv:HXC_HFE -foutput:\"path/output.hfe\" -conv:BMP_DISK_IMAGE -foutput:\"path/output.bmp\"\n",argv[0]);
+
+	printf("\n");
+	printf("Disk format/layout conversion -> Convert a raw disk image to HFE using a specific layout (use \"-rawlist\" to see the available layouts/formats) :\n\n");
+	printf("  %s -finput:\"path/input.img\" -uselayout:PUMA_ROBOT_DD_640KB -conv:HXC_HFE -foutput:\"path/output.hfe\"\n",argv[0]);
+
+	printf("\n");
+	printf("Disk format/layout generation -> Generate an empty HFE using a specific layout without any image (use \"-rawlist\" to see the available layouts/formats) :\n\n");
+	printf("  %s -uselayout:PUMA_ROBOT_DD_640KB -conv:HXC_HFE -foutput:\"path/output.hfe\"\n",argv[0]);
+
+	printf("\n");
+	printf("Sector by sector copy mode using a reference image : use \"reference.hfe\" as layout and copy and update each of its sectors from the \"input.hfe\" image to the \"output.hfe\".\n\n");
+	printf("  %s  -finput:\"path/input.hfe\" -conv:HXC_HFE -foutput:\"path/output.hfe\" -reffile:\"path/reference.hfe\"\n",argv[0]);
 
 	printf("\n");
 }
@@ -275,12 +316,14 @@ void printinterfacemode(HXCFE* hxcfe)
 
 }
 
-int convertfile(HXCFE* hxcfe,char * infile,char * outfile,char * outformat,int ifmode)
+HXCFE_FLOPPY * loadfile(HXCFE* hxcfe,char * infile)
 {
 	int loaderid;
 	int ret;
 	HXCFE_FLOPPY * floppydisk;
 	HXCFE_IMGLDR * imgldr_ctx;
+
+	floppydisk = NULL;
 
 	imgldr_ctx = hxcfe_imgInitLoader(hxcfe);
 	if(imgldr_ctx)
@@ -309,27 +352,68 @@ int convertfile(HXCFE* hxcfe,char * infile,char * outfile,char * outformat,int i
 					break;
 				}
 			}
-			else
-			{
-				if(ifmode<0)
-				{
-					ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
-				}
-
-				loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,outformat);
-				if(loaderid>=0)
-				{
-					hxcfe_floppySetInterfaceMode(hxcfe,floppydisk,ifmode);
-					hxcfe_imgExport(imgldr_ctx,floppydisk,outfile,loaderid);
-				}
-				else
-				{
-					printf("Cannot Find the Loader %s ! Please use the -modulelist option to see possible values.\n",outformat);
-				}
-
-				hxcfe_imgUnload(imgldr_ctx,floppydisk);
-			}
 		}
+
+		hxcfe_imgDeInitLoader(imgldr_ctx);
+	}
+
+	return floppydisk;
+}
+
+HXCFE_FLOPPY * unloadfile(HXCFE* hxcfe, HXCFE_FLOPPY * image)
+{
+	HXCFE_IMGLDR * imgldr_ctx;
+
+	if( image )
+	{
+		imgldr_ctx = hxcfe_imgInitLoader(hxcfe);
+		if( imgldr_ctx )
+		{
+			hxcfe_imgUnload(imgldr_ctx,image);
+			hxcfe_imgDeInitLoader(imgldr_ctx);
+		}
+	}
+
+	return NULL;
+}
+
+int convertfile(HXCFE* hxcfe, HXCFE_FLOPPY * floppydisk, char * infile,char * outfile,char * outformat,int ifmode)
+{
+	int loaderid;
+	HXCFE_FLOPPY * disk;
+	HXCFE_IMGLDR * imgldr_ctx;
+
+	if(!floppydisk)
+		disk = loadfile(hxcfe,infile);
+	else
+		disk = floppydisk;
+
+	if(!disk)
+	{
+		return -1;
+	}
+
+	imgldr_ctx = hxcfe_imgInitLoader(hxcfe);
+	if(imgldr_ctx)
+	{
+		if(ifmode<0)
+		{
+			ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,disk);
+		}
+
+		loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,outformat);
+		if(loaderid>=0)
+		{
+			hxcfe_floppySetInterfaceMode(hxcfe,disk,ifmode);
+			hxcfe_imgExport(imgldr_ctx,disk,outfile,loaderid);
+		}
+		else
+		{
+			printf("Cannot Find the Loader %s ! Please use the -modulelist option to see possible values.\n",outformat);
+		}
+
+		if(!floppydisk)
+			hxcfe_imgUnload(imgldr_ctx,disk);
 
 		hxcfe_imgDeInitLoader(imgldr_ctx);
 	}
@@ -337,69 +421,61 @@ int convertfile(HXCFE* hxcfe,char * infile,char * outfile,char * outformat,int i
 	return 0;
 }
 
-int sectorbysectorfilecopy(HXCFE* hxcfe,char * infile,char * reffile,char * outfile,char * outformat,int ifmode)
+int sectorbysectorfilecopy(HXCFE* hxcfe, HXCFE_FLOPPY * floppydisk, char * infile,char * reffile,char * outfile,char * outformat,int ifmode)
 {
-	int loaderid,refloaderid;
-	int ret,ret_ref;
-	HXCFE_FLOPPY * floppydisk;
+	int loaderid;
+	HXCFE_FLOPPY * disk;
 	HXCFE_FLOPPY * refdisk;
 	HXCFE_IMGLDR * imgldr_ctx;
+
+	if(!floppydisk)
+		disk = loadfile(hxcfe,infile);
+	else
+		disk = floppydisk;
+
+	refdisk = loadfile(hxcfe,reffile);
+	if( !refdisk )
+		printf("ERROR : Can't load reference image %s ...\n",reffile);
+
+	if( !disk )
+		printf("ERROR : Can't load source image ...\n");
+
+	if(!disk || !refdisk)
+	{
+		if(!floppydisk)
+			unloadfile( hxcfe, disk );
+
+		unloadfile( hxcfe, refdisk );
+
+		return -1;
+	}
 
 	imgldr_ctx = hxcfe_imgInitLoader(hxcfe);
 	if(imgldr_ctx)
 	{
-		loaderid = hxcfe_imgAutoSetectLoader(imgldr_ctx,infile,0);
-
-		refloaderid = hxcfe_imgAutoSetectLoader(imgldr_ctx,reffile,0);
-
-		if(loaderid>=0 && refloaderid>=0)
+		if(ifmode<0)
 		{
-			floppydisk = hxcfe_imgLoad(imgldr_ctx,infile,loaderid,&ret);
-			refdisk = hxcfe_imgLoad(imgldr_ctx,reffile,refloaderid,&ret_ref);
-
-			if(ret!=HXCFE_NOERROR || ret_ref!=HXCFE_NOERROR || !floppydisk || !refdisk)
-			{
-				switch(ret)
-				{
-					case HXCFE_UNSUPPORTEDFILE:
-						printf("Load error!: Image file not yet supported!\n");
-					break;
-					case HXCFE_FILECORRUPTED:
-						printf("Load error!: File corrupted ? Read error ?\n");
-					break;
-					case HXCFE_ACCESSERROR:
-						printf("Load error!:  Read file error!\n");
-					break;
-					default:
-						printf("Load error! error %d\n",ret);
-					break;
-				}
-			}
-			else
-			{
-				if(ifmode<0)
-				{
-					ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
-				}
-
-				loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,outformat);
-				if(loaderid>=0)
-				{
-					hxcfe_floppySetInterfaceMode(hxcfe,floppydisk,ifmode);
-
-					hxcfe_floppySectorBySectorCopy( hxcfe, refdisk, floppydisk, 0 );
-
-					hxcfe_imgExport(imgldr_ctx,refdisk,outfile,loaderid);
-				}
-				else
-				{
-					printf("Cannot Find the Loader %s ! Please use the -modulelist option to see possible values.\n",outformat);
-				}
-
-				hxcfe_imgUnload(imgldr_ctx,floppydisk);
-				hxcfe_imgUnload(imgldr_ctx,refdisk);
-			}
+			ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,disk);
 		}
+
+		loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,outformat);
+		if(loaderid>=0)
+		{
+			hxcfe_floppySetInterfaceMode(hxcfe,disk,ifmode);
+
+			hxcfe_floppySectorBySectorCopy( hxcfe, refdisk, disk, 0 );
+
+			hxcfe_imgExport(imgldr_ctx,refdisk,outfile,loaderid);
+		}
+		else
+		{
+			printf("Cannot Find the Loader %s ! Please use the -modulelist option to see possible values.\n",outformat);
+		}
+
+		if(!floppydisk)
+			hxcfe_imgUnload(imgldr_ctx,disk);
+
+		hxcfe_imgUnload(imgldr_ctx,refdisk);
 
 		hxcfe_imgDeInitLoader(imgldr_ctx);
 	}
@@ -431,12 +507,10 @@ int load_xml_layout(HXCFE_XMLLDR* rfb, char * layout)
 	return 0;
 }
 
-int convertrawfile(HXCFE* hxcfe,char * infile,char * layout,char * outfile,char * outformat,int ifmode)
+HXCFE_FLOPPY * rawloadfile(HXCFE* hxcfe, char * infile, char * layout)
 {
-	int loaderid;
 	HXCFE_FLOPPY * floppydisk;
 	HXCFE_XMLLDR* rfb;
-	HXCFE_IMGLDR * imgldr_ctx;
 
 	rfb = hxcfe_initXmlFloppy(hxcfe);
 
@@ -454,40 +528,8 @@ int convertrawfile(HXCFE* hxcfe,char * infile,char * layout,char * outfile,char 
 
 	hxcfe_deinitXmlFloppy(rfb);
 
-	if(!floppydisk)
-	{
-		printf("Load source image error!\n");
-	}
-	else
-	{
-		if(ifmode<0)
-		{
-			ifmode=hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
-		}
-
-		imgldr_ctx = hxcfe_imgInitLoader(hxcfe);
-		if(imgldr_ctx)
-		{
-			loaderid=hxcfe_imgGetLoaderID(imgldr_ctx,outformat);
-			if(loaderid>=0)
-			{
-				hxcfe_floppySetInterfaceMode(hxcfe,floppydisk,ifmode);
-				hxcfe_imgExport(imgldr_ctx,floppydisk,outfile,loaderid);
-			}
-			else
-			{
-				printf("Cannot Find the Loader %s ! Please use the -modulelist option to see possible values.\n",outformat);
-			}
-
-			hxcfe_imgUnload(imgldr_ctx,floppydisk);
-
-			hxcfe_imgDeInitLoader(imgldr_ctx);
-		}
-	}
-
-	return 0;
+	return floppydisk;
 }
-
 
 int usbloadrawfile(HXCFE* hxcfe, char * infile, char * layout, int drive, int doublestep, int ifmode)
 {
@@ -1057,7 +1099,6 @@ int putfile(HXCFE* hxcfe,char * infile,char *path)
 	return 0;
 }
 
-
 int main(int argc, char* argv[])
 {
 	char filename[512];
@@ -1070,7 +1111,9 @@ int main(int argc, char* argv[])
 	int loaderid;
 	int interfacemode;
 	int doublestep;
+	int param_index;
 	HXCFE_IMGLDR * imgldr_ctx;
+	HXCFE_FLOPPY * image;
 
 	HXCFE* hxcfe;
 
@@ -1090,27 +1133,27 @@ int main(int argc, char* argv[])
 	printf("libhxcfe version : %s\n\n",hxcfe_getVersion(hxcfe));
 
 	// License print...
-	if(isOption(argc,argv,"license",0)>0)
+	if(isOption(argc,argv,"license",0,NULL)>0)
 	{
 		printf("License :\n%s\n\n",hxcfe_getLicense(hxcfe));
 	}
 
 	// Verbose option...
-	if(isOption(argc,argv,"verbose",0)>0)
+	if(isOption(argc,argv,"verbose",0,NULL)>0)
 	{
 		printf("verbose mode\n");
 		verbose=1;
 	}
 
 	// help option...
-	if(isOption(argc,argv,"help",0)>0)
+	if(isOption(argc,argv,"help",0,NULL)>0)
 	{
 		printhelp(argv);
 	}
 
 	memset(filename,0,sizeof(filename));
 	// Script execution option
-	if(isOption(argc,argv,"script",(char*)&filename)>0)
+	if(isOption(argc,argv,"script",(char*)&filename,NULL)>0)
 	{
 		if( strlen(filename) )
 		{
@@ -1120,36 +1163,32 @@ int main(int argc, char* argv[])
 
 	memset(filename,0,sizeof(filename));
 	// Input file name option
-	if(isOption(argc,argv,"finput",(char*)&filename)>0)
+	if(isOption(argc,argv,"finput",(char*)&filename,NULL)>0)
 	{
 		printf("Input file : %s\n",filename);
 	}
 
-	// Output file name option
-	memset(ofilename,0,512);
-	isOption(argc,argv,"foutput",(char*)&ofilename);
-
 	// Module list option
-	if(isOption(argc,argv,"modulelist",0)>0)
+	if(isOption(argc,argv,"modulelist",0,NULL)>0)
 	{
 		printlibmodule(hxcfe);
 	}
 
 	// Interface mode list option
-	if(isOption(argc,argv,"interfacelist",0)>0)
+	if(isOption(argc,argv,"interfacelist",0,NULL)>0)
 	{
 		printinterfacemode(hxcfe);
 	}
 
 	// Interface mode list option
-	if(isOption(argc,argv,"rawlist",0)>0)
+	if(isOption(argc,argv,"rawlist",0,NULL)>0)
 	{
 		printdisklayout(hxcfe);
 	}
 
 	// Interface mode option
 	interfacemode=-1;
-	if(isOption(argc,argv,"ifmode",(char*)&temp)>0)
+	if(isOption(argc,argv,"ifmode",(char*)&temp,NULL)>0)
 	{
 		interfacemode=hxcfe_getFloppyInterfaceModeID(hxcfe,temp);
 		if(interfacemode<0)
@@ -1161,16 +1200,69 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	if(isOption(argc,argv,"infos",0)>0)
+	if(isOption(argc,argv,"infos",0,NULL)>0)
 	{
 		infofile(hxcfe,filename);
 	}
 
 	// Convert a file ?
-	if(isOption(argc,argv,"conv",0)>0)
+
+	image = NULL;
+
+	if(isOption(argc,argv,"conv",0,NULL) > 0)
 	{
+		if(isOption(argc,argv,"uselayout",(char*)&layoutformat,NULL)>0)
+		{
+			image = rawloadfile(hxcfe, filename, layoutformat);
+		}
+		else
+		{
+			image = loadfile(hxcfe, filename);
+		}
+
+		if(!image)
+		{
+			printf("Can't open/load source image\n");
+			return -1;
+		}
+	}
+
+	int next_conv_param_index, tmp_index;
+
+	param_index = 1;
+
+	// Get the first conv position.
+	isOption(argc,argv,"conv",0,&param_index);
+
+	ofilename[0] = '\0';
+	reffile[0] = '\0';
+
+	// Default output, filenames (take the first foutput option available before the first conv)
+	isOption(param_index,argv,"foutput",(char*)&ofilename,NULL);
+	isOption(param_index,argv,"reffile",(char*)&reffile,NULL);
+
+	param_index = 1;
+
+	while(isOption(argc,argv,"conv",0,&param_index) > 0)
+	{
+		// Default conversion format
 		strcpy(outputformat,PLUGIN_HXC_HFE);
-		isOption(argc,argv,"conv",(char*)&outputformat);
+
+		// Get the current wanted conversion format (if present)
+		isOption(argc,argv,"conv",(char*)&outputformat,&param_index);
+		tmp_index = param_index;
+
+		// Is there a next conv parameter ?
+
+		// Start from the current conv parameter
+		next_conv_param_index = param_index + 1;
+
+		// Get the next conv param index - if present
+		if( isOption(argc,argv,"conv",NULL,&next_conv_param_index) < 1 )
+			next_conv_param_index = argc;
+
+		// Output filename (take the first foutput option from this conv parameter and the next one)
+		isOption(next_conv_param_index,argv,"foutput",(char*)&ofilename,&tmp_index);
 
 		imgldr_ctx = hxcfe_imgInitLoader(hxcfe);
 		if(imgldr_ctx)
@@ -1178,6 +1270,7 @@ int main(int argc, char* argv[])
 			loaderid = hxcfe_imgGetLoaderID(imgldr_ctx,outputformat);
 			if( loaderid >= 0 )
 			{
+				// If there is no output file name specified, generate one from the input file name.
 				if(!strlen(ofilename))
 				{
 					get_filename(filename,ofilename);
@@ -1191,52 +1284,55 @@ int main(int argc, char* argv[])
 			hxcfe_imgDeInitLoader(imgldr_ctx);
 		}
 
-		if(isOption(argc,argv,"uselayout",(char*)&layoutformat)>0)
+		tmp_index = param_index;
+
+		if(isOption(next_conv_param_index,argv,"reffile",(char*)&reffile,&tmp_index)>0)
 		{
-			convertrawfile(hxcfe,filename,layoutformat,ofilename,outputformat,interfacemode);
+			sectorbysectorfilecopy(hxcfe,image,filename,reffile,ofilename,outputformat,interfacemode);
 		}
 		else
 		{
-			if(isOption(argc,argv,"reffile",(char*)&reffile)>0)
-			{
-				sectorbysectorfilecopy(hxcfe,filename,reffile,ofilename,outputformat,interfacemode);
-			}
-			else
-			{
-				convertfile(hxcfe,filename,ofilename,outputformat,interfacemode);
-			}
+			// Standard image conversion mode
+			convertfile(hxcfe,image,filename,ofilename,outputformat,interfacemode);
 		}
+
+		ofilename[0] = '\0';
+		reffile[0] = '\0';
+
+		param_index++;
 	}
 
-	if(isOption(argc,argv,"singlestep",0)>0)
+	unloadfile(hxcfe, image);
+
+	if(isOption(argc,argv,"singlestep",0,NULL)>0)
 	{
 		doublestep=0;
 	}
 
-	if(isOption(argc,argv,"doublestep",0)>0)
+	if(isOption(argc,argv,"doublestep",0,NULL)>0)
 	{
 		doublestep=0xFF;
 	}
 
-	if(isOption(argc,argv,"list",0)>0)
+	if(isOption(argc,argv,"list",0,NULL)>0)
 	{
 		imagedir(hxcfe,filename);
 	}
 
-	if(isOption(argc,argv,"getfile",(char*)&filetoget)>0)
+	if(isOption(argc,argv,"getfile",(char*)&filetoget,NULL)>0)
 	{
 		getfile(hxcfe,filename,filetoget);
 	}
 
-	if(isOption(argc,argv,"putfile",(char*)&filetoget)>0)
+	if(isOption(argc,argv,"putfile",(char*)&filetoget,NULL)>0)
 	{
 		putfile(hxcfe,filename,filetoget);
 	}
 
 	// Input file name option
-	if(isOption(argc,argv,"usb",(char*)&temp)>0)
+	if(isOption(argc,argv,"usb",(char*)&temp,NULL)>0)
 	{
-		if (isOption(argc, argv, "uselayout", (char*)&layoutformat)>0)
+		if (isOption(argc, argv, "uselayout", (char*)&layoutformat,NULL)>0)
 		{
 			usbloadrawfile(hxcfe, filename, layoutformat, temp[0] - '0', doublestep, interfacemode);
 		}
@@ -1246,18 +1342,18 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	if( (isOption(argc,argv,"help",0)<=0) &&
-		(isOption(argc,argv,"license",0)<=0) &&
-		(isOption(argc,argv,"modulelist",0)<=0) &&
-		(isOption(argc,argv,"interfacelist",0)<=0) &&
-		(isOption(argc,argv,"list",0)<=0) &&
-		(isOption(argc,argv,"getfile",0)<=0) &&
-		(isOption(argc,argv,"putfile",0)<=0) &&
-		(isOption(argc,argv,"conv",0)<=0) &&
-		(isOption(argc,argv,"script",0)<=0) &&
-		(isOption(argc,argv,"usb",0)<=0) &&
-		(isOption(argc,argv,"rawlist",0)<=0) &&
-		(isOption(argc,argv,"infos",0)<=0 )
+	if( (isOption(argc,argv,"help",0,NULL)<=0) &&
+		(isOption(argc,argv,"license",0,NULL)<=0) &&
+		(isOption(argc,argv,"modulelist",0,NULL)<=0) &&
+		(isOption(argc,argv,"interfacelist",0,NULL)<=0) &&
+		(isOption(argc,argv,"list",0,NULL)<=0) &&
+		(isOption(argc,argv,"getfile",0,NULL)<=0) &&
+		(isOption(argc,argv,"putfile",0,NULL)<=0) &&
+		(isOption(argc,argv,"conv",0,NULL)<=0) &&
+		(isOption(argc,argv,"script",0,NULL)<=0) &&
+		(isOption(argc,argv,"usb",0,NULL)<=0) &&
+		(isOption(argc,argv,"rawlist",0,NULL)<=0) &&
+		(isOption(argc,argv,"infos",0,NULL)<=0 )
 		)
 	{
 		printhelp(argv);

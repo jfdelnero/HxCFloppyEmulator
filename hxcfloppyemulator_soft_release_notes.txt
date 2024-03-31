@@ -17,6 +17,22 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
+** **** 2023 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
+
+*** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
+*** Last update : v2.15.4.1, 31 Marsh 2024 ***
+
+-> Command line hxcfe tool : Multiples-output image conversion support added.
+  Example : Convert a disk image to HFE and BMP :
+  hxcfe -finput:"path/input.img" -conv:HXC_HFE -foutput:"path/output.hfe" -conv:BMP_DISK_IMAGE -foutput:"path/output.bmp"
+
+-> DosDiskBrowser build : IMG files support added.
+
+-> SD HxC configuration window : Fix custom settings selection.
+
+/*********************************************************
+
+/*********************************************************
 8 January 2024 : HxCFloppyEmulator 2.15.2.3
 
 -> New Applesauce WOZ file image loader.
