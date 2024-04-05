@@ -189,6 +189,11 @@ int HFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		floppydisk->floppySectorPerTrack = -1;
 		floppydisk->floppyiftype=header.floppyinterfacemode;
 
+		if( !header.write_allowed )
+		{
+			hxcfe_floppySetFlags( imgldr_ctx->hxcfe, floppydisk, HXCFE_FLOPPY_WRPROTECTED_FLAG );
+		}
+
 		trackoffsetlist = (pictrack*)malloc(sizeof(pictrack)* header.number_of_track);
 		if(!trackoffsetlist)
 			goto alloc_error;

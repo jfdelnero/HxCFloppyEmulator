@@ -372,7 +372,7 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 					{
 						if( (iostreambuf[i]&1) != old_index )
 						{
-							old_index = iostreambuf[i]&1;
+							old_index = iostreambuf[i] & (0x1 << 0);
 
 							if(old_index)
 							{
@@ -396,6 +396,13 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 									index_events[nbindex].type = FXSTRM_INDEX_MAININDEX;
 
 									nbindex++;
+								}
+
+								// Check write protect state
+								if( iostreambuf[i] & (0x1 << 5) )
+								{
+									// set write protect flag
+									track_dump->flags |= (0x1<<0);
 								}
 							}
 						}
@@ -814,7 +821,7 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 				{
 					if( (iostreambuf[i]&1) != old_index )
 					{
-						old_index = iostreambuf[i]&1;
+						old_index = iostreambuf[i] & ( 0x1 << 0 ); // Index signal
 
 						if(old_index)
 						{
@@ -826,6 +833,13 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 								j++;
 							}
 							hxcfe_FxStream_AddIndex(fxs,track_dump,j,0,FXSTRM_INDEX_MAININDEX);
+
+							// Check write protect state
+							if( iostreambuf[i] & (0x1 << 5) )
+							{
+								// set write protect flag
+								track_dump->flags |= (0x1<<0);
+							}
 						}
 					}
 				}

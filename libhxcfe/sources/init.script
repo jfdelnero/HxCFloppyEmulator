@@ -350,7 +350,9 @@ set LOGICANALYZER_BITRATE 0
 # HFE Loader / Writer parameters
 #
 
-set HFE_WRITER_WRITENOTALLOWED 0                      # If != 0 -> Image is write protected.
+set HFE_WRITER_WRITENOTALLOWED 0                      # If = 0 -> Image is not write protected.
+                                                      # If = 1 -> Image is write protected.
+                                                      # If = 2 -> Use source image write protect state.
 
 #
 # CPC DSK Loader / Writer parameters

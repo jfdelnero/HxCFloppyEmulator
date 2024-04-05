@@ -126,9 +126,22 @@ int EXTHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 		FILEHEADER->formatrevision=1;
 		FILEHEADER->track_list_offset=1;
 		FILEHEADER->write_protected=1;
-		if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "HFE_WRITER_WRITENOTALLOWED" ) )
+
+		switch( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "HFE_WRITER_WRITENOTALLOWED" ) )
 		{
-			FILEHEADER->write_allowed = 0;
+			default:
+			case 0: // Write protect off
+				FILEHEADER->write_allowed = 0xFF;
+			break;
+			case 1: // Write protect on
+				FILEHEADER->write_allowed = 0x00;
+			break;
+			case 2: // From source
+				if( hxcfe_floppyGetFlags( imgldr_ctx->hxcfe, floppy ) & HXCFE_FLOPPY_WRPROTECTED_FLAG )
+				{
+					FILEHEADER->write_allowed = 0;
+				}
+			break;
 		}
 
 		if(floppy->tracks[floppy->floppyNumberOfTrack/2]->sides[0]->track_encoding)

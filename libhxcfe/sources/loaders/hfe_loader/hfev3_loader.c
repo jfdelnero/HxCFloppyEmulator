@@ -210,6 +210,11 @@ int HFEV3_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,c
 		floppydisk->floppySectorPerTrack=-1;
 		floppydisk->floppyiftype=header.floppyinterfacemode;
 
+		if( !header.write_allowed )
+		{
+			hxcfe_floppySetFlags( imgldr_ctx->hxcfe, floppydisk, HXCFE_FLOPPY_WRPROTECTED_FLAG );
+		}
+
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HFEv3 : %d track, %d side, %d bit/s, %d sectors, interface mode %s, track encoding:%s",
 			floppydisk->floppyNumberOfTrack,
 			floppydisk->floppyNumberOfSide,

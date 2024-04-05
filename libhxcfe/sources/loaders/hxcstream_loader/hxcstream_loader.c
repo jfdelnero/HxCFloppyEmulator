@@ -162,7 +162,7 @@ int HxCStream_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEIN
 	return HXCFE_BADPARAMETER;
 }
 
-static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,float timecoef,int phasecorrection,int bitrate,int filter,int filterpasses, int bmpexport,int track,int side)
+static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,int * wrprot, float timecoef,int phasecorrection,int bitrate,int filter,int filterpasses, int bmpexport,int track,int side)
 {
 	HXCFE_SIDE* currentside;
 
@@ -188,6 +188,11 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext,char * file,short * rpm,flo
 			hxcfe_FxStream_setPhaseCorrectionFactor(fxs,phasecorrection);
 
 			hxcfe_FxStream_setFilterParameters(fxs,filterpasses,filter);
+
+			if( track_dump->flags & (0x1<<0) )
+			{
+				*wrprot |= 1;
+			}
 
 			fxs->pll.track = track;
 			fxs->pll.side = side;
@@ -247,6 +252,7 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 	int bmp_export;
 	envvar_entry * backup_env;
 	envvar_entry * tmp_env;
+	int wrprot;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"HxCStream_libLoad_DiskFile");
 
@@ -254,6 +260,7 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 	f = NULL;
 	filepath = NULL;
 	folder = NULL;
+	wrprot = 0;
 
 	if(imgfile)
 	{
@@ -420,7 +427,7 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 					sprintf(filepath,"%s%s%.2d.%d.hxcstream",folder,fname,j,i);
 
 					rpm = 300;
-					curside = decodestream(imgldr_ctx->hxcfe,filepath,&rpm,timecoef,phasecorrection,bitrate,filter,filterpasses,bmp_export,j,i);
+					curside = decodestream(imgldr_ctx->hxcfe,filepath,&rpm,&wrprot,timecoef,phasecorrection,bitrate,filter,filterpasses,bmp_export,j,i);
 
 					if(!floppydisk->tracks[j/trackstep])
 					{
@@ -445,6 +452,12 @@ int HxCStream_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 				}
 			}
 
+			// set the write protect flag
+			if( wrprot )
+			{
+				hxcfe_floppySetFlags( imgldr_ctx->hxcfe, floppydisk, HXCFE_FLOPPY_WRPROTECTED_FLAG );
+			}
+
 			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"track file successfully loaded and encoded!");
 
 			free( folder );
@@ -466,7 +479,7 @@ alloc_error:
 
 	if( f )
 		hxc_fclose(f);
-		
+
 	free(filepath);
 	free(folder);
 
