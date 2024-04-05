@@ -162,6 +162,15 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			fprintf(xmlfile,"\t<prefered_file_extension>img</prefered_file_extension>\n");
 			fprintf(xmlfile,"\t<interface_mode>GENERIC_SHUGART_DD_FLOPPYMODE</interface_mode>\n");
 
+			if( hxcfe_floppyGetFlags( imgldr_ctx->hxcfe, floppy ) & HXCFE_FLOPPY_WRPROTECTED_FLAG )
+			{
+				fprintf(xmlfile,"\t<write_protected>1</write_protected>\n");
+			}
+			else
+			{
+				fprintf(xmlfile,"\t<write_protected>0</write_protected>\n");
+			}
+
 			fprintf(xmlfile,"\t<file_size>%d</file_size>\n",imagesize);
 
 			fprintf(xmlfile,"\t<layout>\n");
