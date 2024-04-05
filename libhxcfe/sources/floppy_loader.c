@@ -1113,6 +1113,19 @@ int32_t hxcfe_floppyGetDoubleStep( HXCFE* floppycontext, HXCFE_FLOPPY * newflopp
 int32_t hxcfe_floppySetDoubleStep( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy, int32_t doublestep )
 {
 	newfloppy->double_step=doublestep;
+
+	return HXCFE_NOERROR;
+}
+
+uint32_t hxcfe_floppyGetFlags( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy )
+{
+	return newfloppy->flags;
+}
+
+int32_t hxcfe_floppySetFlags( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy, uint32_t flags )
+{
+	newfloppy->flags = flags;
+
 	return HXCFE_NOERROR;
 }
 

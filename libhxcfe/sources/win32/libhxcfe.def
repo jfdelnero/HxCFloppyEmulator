@@ -29,6 +29,9 @@ EXPORTS
    hxcfe_floppySetInterfaceMode             @30
    hxcfe_floppyGetDoubleStep                @31
    hxcfe_floppySetDoubleStep                @32
+   hxcfe_floppyGetFlags                     @33
+   hxcfe_floppySetFlags                     @34
+
    hxcfe_getFloppyInterfaceModeID           @39
    hxcfe_getFloppyInterfaceModeName         @40
    hxcfe_getFloppyInterfaceModeDesc         @41

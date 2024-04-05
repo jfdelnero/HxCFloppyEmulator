@@ -3148,6 +3148,11 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 				i++;
 			}
 
+			if( hxcfe_floppyGetFlags( td->hxcfe, floppydisk ) & HXCFE_FLOPPY_WRPROTECTED_FLAG )
+				putstring8x8(td,1,ytypepos,"WrProt ON ",0xAAAAAA,0x000000,0,0);
+			else
+				putstring8x8(td,1,ytypepos,"WrProt OFF",0xAAAAAA,0x000000,0,0);
+
 			ytypepos = 31;
 			i = 0;
 			while(track_type_list[i].name)
@@ -3160,6 +3165,11 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 				}
 				i++;
 			}
+
+			if( hxcfe_floppyGetFlags( td->hxcfe, floppydisk ) & HXCFE_FLOPPY_WRPROTECTED_FLAG )
+				putstring8x8(td,(td->xsize/2)+1,ytypepos,"WrProt ON ",0xAAAAAA,0x000000,0,0);
+			else
+				putstring8x8(td,(td->xsize/2)+1,ytypepos,"WrProt OFF",0xAAAAAA,0x000000,0,0);
 
 		}
 	}

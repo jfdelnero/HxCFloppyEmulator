@@ -465,6 +465,11 @@ int32_t                hxcfe_floppySetInterfaceMode( HXCFE* floppycontext, HXCFE
 int32_t                hxcfe_floppyGetDoubleStep( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy );
 int32_t                hxcfe_floppySetDoubleStep( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy, int32_t doublestep );
 
+#define                HXCFE_FLOPPY_WRPROTECTED_FLAG (0x1<<0)
+
+uint32_t               hxcfe_floppyGetFlags( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy );
+int32_t                hxcfe_floppySetFlags( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy, uint32_t flags );
+
 int32_t                hxcfe_getFloppyInterfaceModeID( HXCFE* floppycontext, char * ifmode );
 
 const char *           hxcfe_getFloppyInterfaceModeName( HXCFE* floppycontext, int32_t ifmodeid );

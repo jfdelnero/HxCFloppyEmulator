@@ -115,6 +115,10 @@ typedef struct _HXCFE_FLOPPY
     int32_t         double_step;
 
     HXCFE_CYLINDER ** tracks;
+
+    // bit 0 : Write protected
+    uint32_t        flags;
+
 }HXCFE_FLOPPY;
 #define _HXCFE_FLOPPY_
 
