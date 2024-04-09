@@ -94,6 +94,8 @@ ZLIBOBJ = adler32.o compress.o crc32.o deflate.o gzlib.o gzread.o gzwrite.o gzcl
 
 LZ4OBJ = lz4.o
 
+LIBSPNG = spng.o
+
 MINIZIPOBJ = ioapi.o mztools.o unzip.o zip.o
 
 FATIOLIB = fat_access.o fat_cache.o fat_filelib.o fat_format.o fat_misc.o fat_string.o fat_table.o fat_write.o fat_list.o
@@ -135,7 +137,7 @@ BASE = floppy_loader.o floppy_utils.o floppy_ifmode.o loaders_list.o crc.o std_c
 
 LIBS_OBJS = $(BASE) $(FS_SUPPORT) $(ADFLIBOBJ) $(ENCODING_SUPPORT) $(TRACK_FORMATS_SUPPORT) $(DISKLOADERPLUGINS) \
 			$(DISKWRITERPLUGINS) $(XDMSLIBOBJ) $(ZLIBOBJ) $(MINIZIPOBJ) $(LZ4OBJ) \
-			$(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB)
+			$(XML_DISK) $(XML_PARSER_EXPAT) $(FATIOLIB) $(LIBSPNG)
 
 all: SCRIPT_FILE $(BASEDIR)/licensetxt.h XML_FILES BMP_FILES $(EXEC)
 
@@ -841,6 +843,9 @@ zip.o : $(BASEDIR)/thirdpartylibs/zlib/contrib/minizip/zip.c
 
 lz4.o : $(BASEDIR)/thirdpartylibs/lz4/lib/lz4.c
 	$(CC) -o $@ -c $< $(CFLAGS) -DNO_VIZ
+
+spng.o : $(BASEDIR)/thirdpartylibs/libspng/spng.c
+	$(CC) -o $@ -c $< $(CFLAGS)
 
 libsap.o : $(BASEDIR)/thirdpartylibs/libsap/libsap.c   $(BASEDIR)/thirdpartylibs/libsap/libsap.h
 	$(CC) -o $@ -c $< $(CFLAGS)
