@@ -71,6 +71,17 @@ int TI99PC99_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINF
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile : TI99PC99_libIsValidDiskFile");
 	if(imgfile)
 	{
+		if( 
+			!hxc_checkfileext(imgfile->path,"dsk",SYS_PATH_TYPE) &&
+			!hxc_checkfileext(imgfile->path,"pc99",SYS_PATH_TYPE) &&
+			!hxc_checkfileext(imgfile->path,"pc9",SYS_PATH_TYPE) &&
+			!hxc_checkfileext(imgfile->path,"tdf",SYS_PATH_TYPE)
+		)
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile : non TI99 PC99 file !");
+			return HXCFE_BADFILE;
+		}
+
 		if( (imgfile->file_size%3253 && imgfile->file_size%6872) || !imgfile->file_size )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99PC99_libIsValidDiskFile : non TI99 PC99 file !");

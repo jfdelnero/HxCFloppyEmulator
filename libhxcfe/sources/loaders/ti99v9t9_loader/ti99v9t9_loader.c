@@ -317,7 +317,10 @@ int TI99V9T9_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINF
 
 			case 2:
 
-				if( hxc_checkfileext(imgfile->path,"v9t9",SYS_PATH_TYPE) || hxc_checkfileext(imgfile->path,"pc99",SYS_PATH_TYPE) )
+				if( hxc_checkfileext(imgfile->path,"v9t9",SYS_PATH_TYPE) ||
+					hxc_checkfileext(imgfile->path,"pc99",SYS_PATH_TYPE) ||
+					hxc_checkfileext(imgfile->path,"sdf",SYS_PATH_TYPE)
+				)
 				{
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"TI99V9T9_libIsValidDiskFile : V9T9 file !");
 					return HXCFE_VALIDFILE;
