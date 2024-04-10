@@ -42,9 +42,86 @@
 
 #include "misc/env.h"
 
+#include "thirdpartylibs/libspng/spng.h"
+
 static int32_t progress_callback( uint32_t current, uint32_t total, void * td, void * user )
 {
 	return hxcfe_imgCallProgressCallback((HXCFE_IMGLDR*)user,current,total);
+}
+
+//
+// png export function - use libspng
+// Original code from the libspng example code : libspng/examples/example.c
+// https://github.com/randy408/libspng/blob/master/examples/example.c
+//
+
+int png_encode_image(void *image, size_t length, uint32_t width, uint32_t height, char * filename)
+{
+	int fmt;
+	int ret = 0;
+	spng_ctx *ctx = NULL;
+	struct spng_ihdr ihdr = {0}; /* zero-initialize to set valid defaults */
+
+	/* Creating an encoder context requires a flag */
+	ctx = spng_ctx_new(SPNG_CTX_ENCODER);
+
+	/* Encode to internal buffer managed by the library */
+	spng_set_option(ctx, SPNG_ENCODE_TO_BUFFER, 1);
+
+	/* Alternatively you can set an output FILE* or stream with spng_set_png_file() or spng_set_png_stream() */
+
+	/* Set image properties, this determines the destination image format */
+	ihdr.width = width;
+	ihdr.height = height;
+	ihdr.color_type = SPNG_COLOR_TYPE_TRUECOLOR_ALPHA;
+	ihdr.bit_depth = 8;
+	/* Valid color type, bit depth combinations: https://www.w3.org/TR/2003/REC-PNG-20031110/#table111 */
+
+	spng_set_ihdr(ctx, &ihdr);
+
+	/* When encoding fmt is the source format */
+	/* SPNG_FMT_PNG is a special value that matches the format in ihdr */
+	fmt = SPNG_FMT_PNG;
+
+	/* SPNG_ENCODE_FINALIZE will finalize the PNG with the end-of-file marker */
+	ret = spng_encode_image(ctx, image, length, fmt, SPNG_ENCODE_FINALIZE);
+
+	if(ret)
+	{
+		//printf("spng_encode_image() error: %s\n", spng_strerror(ret));
+		goto encode_error;
+	}
+
+	size_t png_size;
+	void *png_buf = NULL;
+
+	/* Get the internal buffer of the finished PNG */
+	png_buf = spng_get_png_buffer(ctx, &png_size, &ret);
+
+	if(png_buf == NULL)
+	{
+		//printf("spng_get_png_buffer() error: %s\n", spng_strerror(ret));
+	}
+	else
+	{
+		FILE * f;
+
+		f=fopen(filename,"wb");
+		if(f)
+		{
+			fwrite(png_buf,png_size,1,f);
+			fclose(f);
+		}
+	}
+
+	/* User owns the buffer after a successful call */
+	free(png_buf);
+
+encode_error:
+
+	spng_ctx_free(ctx);
+
+	return ret;
 }
 
 void copyPict(uint32_t * dest,int d_xsize,int d_ysize,int d_xpos,int d_ypos,uint32_t * src,int s_xsize,int s_ysize)
@@ -120,7 +197,7 @@ unsigned char getPixelCode(uint32_t pix,uint32_t * pal,int * nbcol)
 	return 0;
 }
 
-static int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * filename, int streammode)
+static int IMAGE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * filename, int streammode, int png)
 {
 	int ret,i,j,k;
 	int cur_col,cur_row;
@@ -259,43 +336,31 @@ static int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppyd
 				}
 			}
 
-			for(i=0;i<256;i++)
+			if( png )
 			{
-				pal[i]=i|(i<<8)|(i<<16);
-			}
+				ptrchar = (unsigned char *)ptr;
 
-			ptrchar = malloc((td->xsize*td->ysize)*nb_row*nb_col);
-			if(ptrchar)
-			{
-				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Converting image...");
-				nbcol = 0;
-				k=0;
-				for(i=0;i< ( nb_row * td->ysize );i++)
+				// Set alpha bytes
+				for(i=0;i<(td->xsize*td->ysize*nb_row*nb_col);i++)
 				{
-					for(j=0;j< ( nb_col * td->xsize );j++)
-					{
-						ptrchar[k] = getPixelCode(ptr[k],(uint32_t*)&pal,&nbcol);
-						k++;
-					}
+					ptrchar[(i*4) + 3] = 0xFF;
 				}
 
-				if(nbcol>=256)
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Writing %s...",filename);
+
+				png_encode_image(ptr, td->xsize*td->ysize*nb_row*nb_col*4, td->xsize*nb_col, td->ysize*nb_row, filename);
+			}
+			else
+			{
+				for(i=0;i<256;i++)
 				{
-					k = 0;
-					for(i=0;i< ( nb_row * td->ysize );i++)
-					{
-						for(j=0;j< ( nb_col * td->xsize );j++)
-						{
-							ptr[k] = ptr[k] & 0xF8F8F8;
-							k++;
-						}
-					}
+					pal[i]=i|(i<<8)|(i<<16);
+				}
 
-					for(i=0;i<256;i++)
-					{
-						pal[i]=i|(i<<8)|(i<<16);
-					}
-
+				ptrchar = malloc((td->xsize*td->ysize)*nb_row*nb_col);
+				if(ptrchar)
+				{
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Converting image...");
 					nbcol = 0;
 					k=0;
 					for(i=0;i< ( nb_row * td->ysize );i++)
@@ -306,38 +371,67 @@ static int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppyd
 							k++;
 						}
 					}
-				}
 
-				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Writing %s...",filename);
+					if(nbcol>=256)
+					{
+						k = 0;
+						for(i=0;i< ( nb_row * td->ysize );i++)
+						{
+							for(j=0;j< ( nb_col * td->xsize );j++)
+							{
+								ptr[k] = ptr[k] & 0xF8F8F8;
+								k++;
+							}
+						}
 
-				if(nbcol>=256)
-				{
-					bdata.nb_color = 16;
-					bdata.xsize = td->xsize * nb_col;
-					bdata.ysize = td->ysize * nb_row;
-					bdata.data = (void*)ptr;
-					bdata.palette = 0;
+						for(i=0;i<256;i++)
+						{
+							pal[i]=i|(i<<8)|(i<<16);
+						}
 
-					bmp16b_write(filename,&bdata);
+						nbcol = 0;
+						k=0;
+						for(i=0;i< ( nb_row * td->ysize );i++)
+						{
+							for(j=0;j< ( nb_col * td->xsize );j++)
+							{
+								ptrchar[k] = getPixelCode(ptr[k],(uint32_t*)&pal,&nbcol);
+								k++;
+							}
+						}
+					}
+
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Writing %s...",filename);
+
+					if(nbcol>=256)
+					{
+						bdata.nb_color = 16;
+						bdata.xsize = td->xsize * nb_col;
+						bdata.ysize = td->ysize * nb_row;
+						bdata.data = (void*)ptr;
+						bdata.palette = 0;
+
+						bmp16b_write(filename,&bdata);
+					}
+					else
+					{
+						bdata.nb_color = 8;
+						bdata.xsize = td->xsize * nb_col;
+						bdata.ysize = td->ysize * nb_row;
+						bdata.data = (void*)ptrchar;
+						bdata.palette = (unsigned char*)&pal;
+
+						bmpRLE8b_write(filename,&bdata);
+					}
+
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks written to the BMP file",floppydisk->floppyNumberOfTrack * floppydisk->floppyNumberOfSide);
+
+					free(ptrchar);
 				}
 				else
 				{
-					bdata.nb_color = 8;
-					bdata.xsize = td->xsize * nb_col;
-					bdata.ysize = td->ysize * nb_row;
-					bdata.data = (void*)ptrchar;
-					bdata.palette = (unsigned char*)&pal;
-
-					bmpRLE8b_write(filename,&bdata);
+					ret = HXCFE_INTERNALERROR;
 				}
-
-				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"%d tracks written to the BMP file",floppydisk->floppyNumberOfTrack * floppydisk->floppyNumberOfSide);
-
-				free(ptrchar);
-			}
-			else
-			{
-				ret = HXCFE_INTERNALERROR;
 			}
 
 			free(ptr);
@@ -361,10 +455,20 @@ static int BMP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppyd
 
 int BMP_Tracks_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * filename)
 {
-	return BMP_libWrite_DiskFile(imgldr_ctx,floppydisk,filename, 0);
+	return IMAGE_libWrite_DiskFile(imgldr_ctx,floppydisk,filename, 0, 0);
+}
+
+int PNG_Tracks_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * filename)
+{
+	return IMAGE_libWrite_DiskFile(imgldr_ctx,floppydisk,filename, 0, 1);
 }
 
 int BMP_StreamTracks_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * filename)
 {
-	return BMP_libWrite_DiskFile(imgldr_ctx,floppydisk,filename, 1);
+	return IMAGE_libWrite_DiskFile(imgldr_ctx,floppydisk,filename, 1, 0);
+}
+
+int PNG_StreamTracks_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * filename)
+{
+	return IMAGE_libWrite_DiskFile(imgldr_ctx,floppydisk,filename, 1, 1);
 }

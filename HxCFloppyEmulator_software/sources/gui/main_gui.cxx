@@ -152,8 +152,11 @@ const char * plugid_lst[]=
 	PLUGIN_IPF,
 	PLUGIN_SCP,
 	PLUGIN_BMP,
+	PLUGIN_PNG,
 	PLUGIN_STREAM_BMP,
+	PLUGIN_STREAM_PNG,
 	PLUGIN_DISK_BMP,
+	PLUGIN_DISK_PNG,
 	PLUGIN_GENERIC_XML,
 	PLUGIN_NORTHSTAR,
 	PLUGIN_HEATHKIT,
@@ -596,8 +599,11 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"SPS IPF file (WIP)\t*.ipf\n"
 					"SCP file\t*.scp\n"
 					"Tracks BMP file\t*.bmp\n"
+					"Tracks PNG file\t*.png\n"
 					"Stream Tracks BMP file\t*.bmp\n"
+					"Stream Tracks PNG file\t*.png\n"
 					"Disk BMP file\t*.bmp\n"
+					"Disk PNG file\t*.png\n"
 					"XML file\t*.xml\n"
 					"NSI file\t*.nsi\n"
 					"H8D file\t*.h8d\n"

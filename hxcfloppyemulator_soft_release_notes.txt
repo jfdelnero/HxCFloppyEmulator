@@ -20,7 +20,9 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 ** **** 2024 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
 
 *** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
-*** Last update : v2.15.5.1, 6 April 2024 ***
+*** Last update : v2.15.6.1, 10 April 2024 ***
+
+-> New Writer : PNG file (Disk/tracks and stream layouts) -> Disk layout can now be exported into a PNG file (for disk analysis) !
 
 -> HFE v1/v2/v3, hxcstream and xml write protect flag support implemented.
 
