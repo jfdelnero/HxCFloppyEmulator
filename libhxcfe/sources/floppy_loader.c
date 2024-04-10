@@ -238,7 +238,8 @@ const char * hxcfe_getLicense(HXCFE* floppycontext)
 	{
 		if(!floppycontext->license)
 		{
-			floppycontext->license = (char*)data_unpack(data_COPYING_FULL->data,data_COPYING_FULL->csize,0,data_COPYING_FULL->size);
+			floppycontext->license = (char*)data_unpack(data_COPYING_FULL->data,data_COPYING_FULL->csize,0,data_COPYING_FULL->size + 1);
+			floppycontext->license[data_COPYING_FULL->size] = 0;
 		}
 
 		return (char*)floppycontext->license;
