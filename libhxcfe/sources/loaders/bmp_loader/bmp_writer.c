@@ -42,6 +42,7 @@
 
 #include "misc/env.h"
 
+#define SPNG_STATIC 1
 #include "thirdpartylibs/libspng/spng.h"
 
 static int32_t progress_callback( uint32_t current, uint32_t total, void * td, void * user )
