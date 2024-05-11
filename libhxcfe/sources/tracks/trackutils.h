@@ -30,11 +30,11 @@ void setbit(unsigned char * input_data,int bit_offset,int state);
 
 void setfieldbit(unsigned char * dstbuffer,unsigned char byte,int bitoffset,int size);
 
-int  searchBitStream(unsigned char * input_data,uint32_t input_data_size,int searchlen, \
-					unsigned char * chr_data,uint32_t chr_data_size,uint32_t bit_offset);
+int  searchBitStream(unsigned char * input_data, int input_data_size, int searchlen, \
+                     unsigned char * chr_data, int chr_data_size, unsigned int bit_offset);
 
-int  slowSearchBitStream(unsigned char * input_data,uint32_t input_data_size,int searchlen, \
-						unsigned char * chr_data,uint32_t chr_data_size,uint32_t bit_offset);
+int slowSearchBitStream(unsigned char * input_data, int input_data_size, int searchlen, \
+                        unsigned char * chr_data, int chr_data_size, unsigned int bit_offset);
 
 void sortbuffer(unsigned char * buffer,unsigned char * outbuffer,int size);
 

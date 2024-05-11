@@ -120,10 +120,10 @@ int calcbitptrdist(int tracklen,int first_offset,int last_offset)
 	}
 }
 
-int slowSearchBitStream(unsigned char * input_data,uint32_t input_data_size,int searchlen,unsigned char * chr_data,uint32_t chr_data_size,uint32_t bit_offset)
+int slowSearchBitStream(unsigned char * input_data, int input_data_size, int searchlen, unsigned char * chr_data, int chr_data_size, unsigned int bit_offset)
 {
-	uint32_t cur_startoffset;
-	uint32_t i;
+	unsigned int cur_startoffset;
+	unsigned int i;
 	int tracksearchlen;
 	int len;
 
@@ -183,14 +183,14 @@ int slowSearchBitStream(unsigned char * input_data,uint32_t input_data_size,int 
 	return -1;
 }
 
-int searchBitStream(unsigned char * input_data,uint32_t input_data_size,int searchlen,unsigned char * chr_data,uint32_t chr_data_size,uint32_t bit_offset)
+int searchBitStream(unsigned char * input_data, int input_data_size, int searchlen, unsigned char * chr_data, int chr_data_size, unsigned int bit_offset)
 {
-	uint32_t i,j,trackoffset,cnt,starti;
+	unsigned int i,j,trackoffset,starti;
 	unsigned char stringtosearch[8][128];
 	unsigned char prev;
-	uint32_t tracksize;
+	int tracksize;
 	int searchsize;
-	int t;
+	int t,cnt;
 	int bitoffset;
 
 	cnt=(chr_data_size>>3);
