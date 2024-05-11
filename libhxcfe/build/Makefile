@@ -851,7 +851,7 @@ libsap.o : $(BASEDIR)/thirdpartylibs/libsap/libsap.c   $(BASEDIR)/thirdpartylibs
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 xml_disk.o : ../sources/xml_disk/xml_disk.c
-	$(CC) -o $@ -c $< $(CFLAGS)  -I ../sources/thirdpartylibs/expat/expat-2.5.0/lib
+	$(CC) -o $@ -c $< $(CFLAGS)  -I ../sources/thirdpartylibs/expat/lib
 
 lzw.o : ../sources/xml_disk/packer/lzw.c
 	$(CC) -o $@ -c $< $(CFLAGS)
@@ -862,14 +862,14 @@ pack.o : ../sources/xml_disk/packer/pack.c
 rle.o : ../sources/xml_disk/packer/rle.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-xmlparse.o : ../sources/thirdpartylibs/expat/expat-2.5.0/lib/xmlparse.c
-	$(CC) -o $@ -c $< -I../sources/thirdpartylibs/expat/expat-2.5.0/lib/ $(CFLAGS) -DHAVE_MEMMOVE -DXML_DEV_URANDOM
+xmlparse.o : ../sources/thirdpartylibs/expat/lib/xmlparse.c
+	$(CC) -o $@ -c $< -I../sources/thirdpartylibs/expat/lib/ $(CFLAGS) -DHAVE_MEMMOVE -DXML_DEV_URANDOM -DXML_GE=1
 
-xmlrole.o : ../sources/thirdpartylibs/expat/expat-2.5.0/lib/xmlrole.c
-	$(CC) -o $@ -c $< -I../sources/thirdpartylibs/expat/expat-2.5.0/lib/ $(CFLAGS) -DHAVE_MEMMOVE -DXML_DEV_URANDOM
+xmlrole.o : ../sources/thirdpartylibs/expat/lib/xmlrole.c
+	$(CC) -o $@ -c $< -I../sources/thirdpartylibs/expat/lib/ $(CFLAGS) -DHAVE_MEMMOVE -DXML_DEV_URANDOM -DXML_GE=1
 
-xmltok.o : ../sources/thirdpartylibs/expat/expat-2.5.0/lib/xmltok.c
-	$(CC) -o $@ -c $< -I../sources/thirdpartylibs/expat/expat-2.5.0/lib/ $(CFLAGS) -DHAVE_MEMMOVE -DXML_DEV_URANDOM
+xmltok.o : ../sources/thirdpartylibs/expat/lib/xmltok.c
+	$(CC) -o $@ -c $< -I../sources/thirdpartylibs/expat/lib/ $(CFLAGS) -DHAVE_MEMMOVE -DXML_DEV_URANDOM -DXML_GE=1
 
 
 ftdi_d2xxmode.o : ftdi.c ftdi.h ftd2xx.h WinTypes.h
