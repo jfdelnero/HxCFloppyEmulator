@@ -555,6 +555,9 @@ int32_t hxcfe_insertCell( HXCFE* floppycontext, HXCFE_SIDE * currentside, int32_
 	unsigned char * tmpbuffer;
 	uint32_t * tmpulongbuffer;
 
+	if( numberofcells <= 0)
+		return HXCFE_NOERROR;
+
 	if(currentside && floppycontext)
 	{
 		if(cellnumber < currentside->tracklen)
