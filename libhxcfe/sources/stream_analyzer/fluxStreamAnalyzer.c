@@ -94,6 +94,18 @@ int victor_9k_bands_def[]=
 	-1, 0,   0, 0,   0, 0,   0, 0
 };
 
+static int get_cells_size(int totallen, int start, int end)
+{
+	if( start <= end )
+	{
+		return end - start;
+	}
+	else
+	{
+		return (totallen - start) + end;
+	}
+}
+
 static void settrackbit(uint8_t * dstbuffer,int dstsize,uint8_t byte,int bitoffset,int size)
 {
 	int i,j;
@@ -4617,15 +4629,16 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 														(tmp_scfg->header_crc == scl[sectnum]->header_crc )
 													)
 													{
-														if( !tmp_scfg->use_alternate_data_crc && tmp_scfg->input_data)
+														if( !tmp_scfg->use_alternate_data_crc && tmp_scfg->input_data && ( tmp_scfg->startsectorindex < tmp_scfg->endsectorindex ) )
 														{
 #ifdef FLUXSTREAMDBG
 															fxs->hxcfe->hxc_printf(MSG_DEBUG,"Recover sector s%d:c%d:h%d",tmp_scfg->sector,tmp_scfg->cylinder,tmp_scfg->head);
 #endif
-															hxcfe_removeCell( fxs->hxcfe, currentside, scl[sectnum]->startsectorindex,  scl[sectnum]->endsectorindex - scl[sectnum]->startsectorindex );
-															hxcfe_insertCell( fxs->hxcfe, currentside, scl[sectnum]->startsectorindex, 0,  tmp_scfg->endsectorindex - tmp_scfg->startsectorindex );
 
-															for(int k=0;k<tmp_scfg->endsectorindex - tmp_scfg->startsectorindex;k++)
+															hxcfe_removeCell( fxs->hxcfe, currentside, scl[sectnum]->startsectorindex,  get_cells_size(currentside->tracklen, scl[sectnum]->startsectorindex, scl[sectnum]->endsectorindex) );
+															hxcfe_insertCell( fxs->hxcfe, currentside, scl[sectnum]->startsectorindex, 0,  get_cells_size(tmp_side->tracklen, tmp_scfg->startsectorindex, tmp_scfg->endsectorindex) );
+
+															for(int k=0;k<get_cells_size(tmp_side->tracklen, tmp_scfg->startsectorindex, tmp_scfg->endsectorindex);k++)
 															{
 																hxcfe_setCellState( fxs->hxcfe, currentside, scl[sectnum]->startsectorindex + k,
 																		hxcfe_getCellState( fxs->hxcfe, tmp_side, tmp_scfg->startsectorindex + k) );
