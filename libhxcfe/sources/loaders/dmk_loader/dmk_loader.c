@@ -102,7 +102,7 @@ int DMK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 
 						||
 
-							( (dmk_h->track_len>0x2940) || (dmk_h->track_len<0xB00) )
+							( (dmk_h->track_len>0x36B0) || (dmk_h->track_len<0xB00) )
 
 						)
 			{
@@ -142,8 +142,10 @@ HXCFE_SIDE* DMKpatchtrack(HXCFE* floppycontext,unsigned char * trackdata, unsign
 	HXCFE_SIDE* currentside;
 	track_generator tg;
 
-	lastptr=0;
-	bitrate=250000;
+	lastptr = 0;
+	bitrate = 250000;
+	if( tracklen > 9000 )
+		bitrate = 500000;
 
 	trackstep=1;
 	if(dmkh->flags&0xC0)
@@ -351,12 +353,10 @@ HXCFE_SIDE* DMKpatchtrack(HXCFE* floppycontext,unsigned char * trackdata, unsign
 
 	// alloc the track...
 	tg_initTrackEncoder(&tg);
-	tracksize=final_tracklen*8;
-	if(tracksize<((((20000) * (bitrate/4) )/(12500))))
-	{
-		tracksize=((((20000) * (bitrate/4) )/(12500)));
-	}
-	if(tracksize&0x1F) tracksize=(tracksize&(~0x1F))+0x20;
+	tracksize = final_tracklen*8;
+
+	if(tracksize&0x1F)
+		tracksize=(tracksize&(~0x1F))+0x20;
 
 	/*{
 		unsigned char fname[512];
@@ -368,8 +368,8 @@ HXCFE_SIDE* DMKpatchtrack(HXCFE* floppycontext,unsigned char * trackdata, unsign
 		savebuffer(fname,track_density, tracklen);
 	}*/
 
-	currentside=tg_initTrack(&tg,tracksize,0,trackformat,DEFAULT_DD_BITRATE,0,0);
-	currentside->number_of_sector=k;
+	currentside = tg_initTrack(&tg,tracksize,0,trackformat,bitrate,0,0);
+	currentside->number_of_sector = k;
 	k=0;
 	do
 	{
@@ -422,26 +422,37 @@ int DMK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	if( filesize )
 	{
-		hxc_fread(&dmk_h,sizeof(dmk_h),f);
-		floppydisk->floppyBitRate=250000;
+		hxc_fread(&dmk_h,sizeof(dmk_header),f);
+		floppydisk->floppyBitRate = 250000;
 
-		numberofside=2;
-		if(dmk_h.flags&SINGLE_SIDE) numberofside--;
+		if( dmk_h.track_len > 9000 )
+			floppydisk->floppyBitRate = 500000;
 
-		numberoftrack=dmk_h.track_number;
+		numberofside = 2;
+		if(dmk_h.flags & SINGLE_SIDE)
+			numberofside--;
 
-		floppydisk->floppyNumberOfTrack=numberoftrack;
-		floppydisk->floppyNumberOfSide=numberofside;
-		floppydisk->floppySectorPerTrack=-1;
-		floppydisk->floppyiftype=GENERIC_SHUGART_DD_FLOPPYMODE;
-		floppydisk->tracks=(HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
+		numberoftrack = dmk_h.track_number;
+
+		floppydisk->floppyNumberOfTrack = numberoftrack;
+		floppydisk->floppyNumberOfSide = numberofside;
+		floppydisk->floppySectorPerTrack = -1;
+		floppydisk->floppyiftype = GENERIC_SHUGART_DD_FLOPPYMODE;
+
+		floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 		if( !floppydisk->tracks )
 		{
 			hxc_fclose(f);
 			return HXCFE_INTERNALERROR;
 		}
 
-		rpm=300; // normal rpm
+		rpm = 300; // normal rpm
+
+		if( floppydisk->floppyBitRate == 500000 && dmk_h.track_len < 11000 ) // 360 RPM disk ?
+			rpm = 360;
+
+		if( floppydisk->floppyBitRate == 250000 && dmk_h.track_len < 5800 ) // 360 RPM disk ?
+			rpm = 360;
 
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"filesize:%dkB, %d tracks, %d side(s), %d sectors/track, rpm:%d",filesize/1024,floppydisk->floppyNumberOfTrack,floppydisk->floppyNumberOfSide,floppydisk->floppySectorPerTrack,rpm);
 
