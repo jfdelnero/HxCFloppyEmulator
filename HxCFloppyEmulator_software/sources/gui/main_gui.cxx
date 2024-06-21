@@ -947,7 +947,7 @@ static void tick_mw(void *v) {
 	Fl::repeat_timeout(0.10, tick_mw, v);
 }
 
-Main_Window::Main_Window()
+Main_Window::Main_Window(int argc, char **argv)
   : Fl_Window(WINDOW_XSIZE,428)
 {
 	int i,j;
@@ -1583,6 +1583,12 @@ Main_Window::Main_Window()
 	#ifdef GUI_DEBUG
 	print_dbg((char*)"Main_Window : All done !");
 	#endif
+
+	if(argc > 1)
+	{
+		if(argv[1])
+			load_file(argv[1]);
+	}
 
 	Fl::run();
 }

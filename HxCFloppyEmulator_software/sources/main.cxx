@@ -94,7 +94,7 @@ int main(int argc, char **argv)
 	{
 		memset(guicontext,0,sizeof(s_gui_context));
 
-		new Main_Window();
+		new Main_Window(argc, argv);
 
 		return 0;
 	}

@@ -36,7 +36,7 @@ class Main_Window : public Fl_Window {
 	Fl_Output* track_pos_str;
 	Fl_Output* file_name_txt;
 
-	Main_Window();
+	Main_Window(int argc, char **argv);
 	~Main_Window();
 };
 
