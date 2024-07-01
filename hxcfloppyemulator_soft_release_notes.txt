@@ -46,6 +46,8 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 
 -> expat updated to v2.6.2
 
+-> DMK export : align sectors ID (WIP)
+
 /*********************************************************
 
 /*********************************************************

@@ -154,6 +154,52 @@ int dmkbitlookingfor(unsigned char * input_data,uint32_t intput_data_size,int se
 	return bitoffset;
 }
 
+int align_sectors_id(HXCFE_IMGLDR* imgldr_ctx, HXCFE_SECTORACCESS* ss, HXCFE_FLOPPY * floppy, int track, int side)
+{
+	int32_t k,nbsector,ret;
+	HXCFE_SECTCFG** sca = NULL;
+	HXCFE_SIDE * currentside;
+
+	ret = 0;
+	currentside = floppy->tracks[track]->sides[side];
+
+	sca = hxcfe_getAllTrackISOSectors(ss,track,side,&nbsector);
+	if(sca)
+	{
+		k=0;
+		while(k<nbsector)
+		{
+			if(sca[0]->startsectorindex&0xF)
+			{
+				hxcfe_insertCell( imgldr_ctx->hxcfe, currentside, sca[0]->startsectorindex, 0,  0x10 - (sca[0]->startsectorindex&0xF) );
+				ret = 1;
+				break;
+			}
+
+			if(sca[0]->startdataindex&0xF)
+			{
+				hxcfe_insertCell( imgldr_ctx->hxcfe, currentside, sca[0]->startdataindex, 0,  0x10 - (sca[0]->startdataindex&0xF) );
+				ret = 1;
+				break;
+			}
+
+			k++;
+		}
+
+		k=0;
+		do
+		{
+			hxcfe_freeSectorConfig(ss,sca[k]);
+
+			k++;
+		}while(k<nbsector);
+
+		free(sca);
+	}
+
+	return ret;
+}
+
 int DMK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
 	int32_t i,j,k,nbsector_mfm,nbsector_fm;
@@ -214,49 +260,16 @@ int DMK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 						nbsector_fm = 0;
 
 						// Byte align the track...
-						// TODO : Align each sectors ID Mark and Data Mark individually
-						//        (Needed for stream based images sources)
+						// Align each sectors ID Mark and Data Mark individually
+						// (Needed for stream based images sources)
+
+						while ( align_sectors_id( imgldr_ctx, ss, floppy, j, i) )
+						{
+
+						}
 
 						sca_mfm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector_mfm);
-						if(sca_mfm)
-						{
-							if(sca_mfm[0]->startsectorindex&0xF)
-							{
-								hxcfe_shiftTrackData( imgldr_ctx->hxcfe, floppy->tracks[j]->sides[i], 0x10 - (sca_mfm[0]->startsectorindex&0xF) );
-							}
-
-							k=0;
-							do
-							{
-								hxcfe_freeSectorConfig(ss,sca_mfm[k]);
-								k++;
-							}while(k<nbsector_mfm);
-
-							free(sca_mfm);
-
-							sca_mfm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector_mfm);
-
-						}
-
 						sca_fm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector_fm);
-						if(sca_fm)
-						{
-							if(sca_fm[0]->startsectorindex&0xF)
-							{
-								hxcfe_shiftTrackData( imgldr_ctx->hxcfe, floppy->tracks[j]->sides[i], 0x10 - (sca_fm[0]->startsectorindex&0xF) );
-
-								k=0;
-								do
-								{
-									hxcfe_freeSectorConfig(ss,sca_fm[k]);
-									k++;
-								}while(k<nbsector_fm);
-
-								free(sca_fm);
-
-								sca_fm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_FM_ENCODING,&nbsector_fm);
-							}
-						}
 
 						if(nbsector_mfm)
 						{
