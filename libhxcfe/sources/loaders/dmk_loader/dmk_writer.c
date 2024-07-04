@@ -169,16 +169,16 @@ int align_sectors_id(HXCFE_IMGLDR* imgldr_ctx, HXCFE_SECTORACCESS* ss, HXCFE_FLO
 		k=0;
 		while(k<nbsector)
 		{
-			if(sca[0]->startsectorindex&0xF)
+			if(sca[k]->startsectorindex&0xF)
 			{
-				hxcfe_insertCell( imgldr_ctx->hxcfe, currentside, sca[0]->startsectorindex, 0,  0x10 - (sca[0]->startsectorindex&0xF) );
+				hxcfe_insertCell( imgldr_ctx->hxcfe, currentside, sca[k]->startsectorindex, 0,  0x10 - (sca[k]->startsectorindex&0xF) );
 				ret = 1;
 				break;
 			}
 
-			if(sca[0]->startdataindex&0xF)
+			if(sca[k]->startdataindex&0xF)
 			{
-				hxcfe_insertCell( imgldr_ctx->hxcfe, currentside, sca[0]->startdataindex, 0,  0x10 - (sca[0]->startdataindex&0xF) );
+				hxcfe_insertCell( imgldr_ctx->hxcfe, currentside, sca[k]->startdataindex, 0,  0x10 - (sca[k]->startdataindex&0xF) );
 				ret = 1;
 				break;
 			}
