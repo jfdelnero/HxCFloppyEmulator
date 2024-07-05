@@ -263,9 +263,15 @@ int DMK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 						// Align each sectors ID Mark and Data Mark individually
 						// (Needed for stream based images sources)
 
-						while ( align_sectors_id( imgldr_ctx, ss, floppy, j, i) )
+						k = 0;
+						while ( align_sectors_id( imgldr_ctx, ss, floppy, j, i) && (k < 4096) )
 						{
+							k++;
+						}
 
+						if( k >= 4096 )
+						{
+							imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"DMK track %d.%d : Failed to align the sectors !",j,i);
 						}
 
 						sca_mfm = hxcfe_getAllTrackSectors(ss,j,i,ISOIBM_MFM_ENCODING,&nbsector_mfm);
