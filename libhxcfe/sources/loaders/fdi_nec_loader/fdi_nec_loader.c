@@ -65,13 +65,19 @@ int FDINEC_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDINEC_libIsValidDiskFile");
 
-	if( hxc_checkfileext(imgfile->path,"fdi",SYS_PATH_TYPE) )
+	if( hxc_checkfileext(imgfile->path,"fdi",SYS_PATH_TYPE) || hxc_checkfileext(imgfile->path,"hdi",SYS_PATH_TYPE)  )
 	{
 		f_header = (fdi_nec_header *)imgfile->file_header;
 
 		if( f_header->signature || f_header->cylinders > (uint32_t)90 || imgfile->file_size > 1265664 || f_header->sectorsize % 128 || !f_header->headersize || f_header->headersize > (uint32_t) imgfile->file_size )
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"FDINEC_libIsValidDiskFile : non FDI file !");
+			return HXCFE_BADFILE;
+		}
+
+		if( hxc_checkfileext(imgfile->path,"hdi",SYS_PATH_TYPE) )
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"FDINEC_libIsValidDiskFile : HDI file ! : Hard disk image ! Not a floppy image !");
 			return HXCFE_BADFILE;
 		}
 
