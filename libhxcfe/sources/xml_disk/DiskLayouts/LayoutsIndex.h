@@ -16,6 +16,7 @@
 #include "data_DiskLayout_DOS_EXHD_4_5MB_xml.h"
 #include "data_DiskLayout_DOS_EXHD_6_78MB_xml.h"
 #include "data_DiskLayout_Roland_W30_S330_W50_S50_S550_DD_720KB_xml.h"
+#include "data_DiskLayout_Roland_W30_720KB_xml.h"
 #include "data_DiskLayout_Roland_MC50_MC300_MC500_DD_720KB_xml.h"
 #include "data_DiskLayout_LinnForat9K_720KB_xml.h"
 #include "data_DiskLayout_KorgDSS1_DD_800KB_xml.h"
@@ -132,6 +133,7 @@ datatype * disklayout_list[]=
 	data_DiskLayout_Oric_Jasmin_357KB_xml,
 	data_DiskLayout_PUMA_Robot_640KB_xml,
 	data_DiskLayout_QD_Triumph_Adler_Typewriter_xml,
+	data_DiskLayout_Roland_W30_720KB_xml,
 	data_DiskLayout_Roland_W30_S330_W50_S50_S550_DD_720KB_xml,
 	data_DiskLayout_Roland_MC50_MC300_MC500_DD_720KB_xml,
 	data_DiskLayout_SORD_M68_HD_998KB_xml,
