@@ -1,0 +1,4985 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- HxC Floppy Emulator Disk Layout -->
+<disk_layout>
+	<disk_layout_name>ALESIS_DATADISK_DD_800KB</disk_layout_name>
+	<disk_layout_description>Alesis DataDisk 3"5 DD Floppy Disk</disk_layout_description>
+	<prefered_file_extension>img</prefered_file_extension>
+	<interface_mode>GENERIC_SHUGART_DD_FLOPPYMODE</interface_mode>
+	<write_protected>0</write_protected>
+	<file_size>819200</file_size>
+	<layout>
+		<number_of_track>80</number_of_track>
+		<number_of_side>2</number_of_side>
+		<format>IBM_MFM</format>
+		<start_sector_id>1</start_sector_id>
+		<sector_per_track>5</sector_per_track>
+		<sector_size>1024</sector_size>
+		<formatvalue>0</formatvalue>
+		<gap3>23</gap3>
+		<bitrate>250000</bitrate>
+		<pregap>128</pregap>
+		<rpm>300</rpm>
+		<track_list>
+			<track track_number="00" side_number="0">
+				<data_offset>0x000000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<sector_data>416C657369732044617461204469736B20286329313938392E202044657369676E6564206279204661737420466F776172642044657369676E732C20496E632E536F667477617265206279204361726F6C204E616B61686172612E204861726477617265206C61796F7574206279204A6F73652056616C656E7A75656C612E20031C000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</sector_data>
+						<datamark>0xFB</datamark>
+						<data_offset>0x000000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0x00</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x000C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<sector_data>20456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000000020456D70747920200000000000FF000000</sector_data>
+						<datamark>0xFB</datamark>
+						<data_offset>0x000400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x001000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<sector_data>00010001000100010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</sector_data>
+						<datamark>0xFB</datamark>
+						<data_offset>0x000800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="00" side_number="1">
+				<data_offset>0x001400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x001400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x002000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x001800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x002400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x001C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="01" side_number="0">
+				<data_offset>0x002800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x002800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x003400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x002C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x003800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x003000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="01" side_number="1">
+				<data_offset>0x003C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x003C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x004800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x004000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x004C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x004400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="02" side_number="0">
+				<data_offset>0x005000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x005000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x005C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x005400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x006000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x005800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="02" side_number="1">
+				<data_offset>0x006400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x006400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x007000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x006800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x007400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x006C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="03" side_number="0">
+				<data_offset>0x007800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x007800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x008400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x007C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x008800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x008000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="03" side_number="1">
+				<data_offset>0x008C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x008C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x009800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x009000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x009C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x009400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="04" side_number="0">
+				<data_offset>0x00A000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00A000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00AC00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00A400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00B000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00A800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="04" side_number="1">
+				<data_offset>0x00B400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00B400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00C000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00B800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00C400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00BC00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="05" side_number="0">
+				<data_offset>0x00C800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00C800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00D400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00CC00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00D800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00D000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="05" side_number="1">
+				<data_offset>0x00DC00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00DC00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00E800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00E000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00EC00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00E400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="06" side_number="0">
+				<data_offset>0x00F000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00F000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00FC00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00F400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x010000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x00F800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="06" side_number="1">
+				<data_offset>0x010400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x010400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x011000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x010800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x011400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x010C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="07" side_number="0">
+				<data_offset>0x011800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x011800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x012400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x011C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x012800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x012000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="07" side_number="1">
+				<data_offset>0x012C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x012C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x013800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x013000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x013C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x013400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="08" side_number="0">
+				<data_offset>0x014000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x014000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x014C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x014400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x015000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x014800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="08" side_number="1">
+				<data_offset>0x015400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x015400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x016000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x015800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x016400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x015C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="09" side_number="0">
+				<data_offset>0x016800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x016800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x017400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x016C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x017800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x017000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="09" side_number="1">
+				<data_offset>0x017C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x017C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x018800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x018000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x018C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x018400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="10" side_number="0">
+				<data_offset>0x019000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x019000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x019C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x019400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01A000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x019800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="10" side_number="1">
+				<data_offset>0x01A400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01A400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01B000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01A800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01B400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01AC00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="11" side_number="0">
+				<data_offset>0x01B800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01B800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01C400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01BC00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01C800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01C000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="11" side_number="1">
+				<data_offset>0x01CC00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01CC00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01D800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01D000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01DC00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01D400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="12" side_number="0">
+				<data_offset>0x01E000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01E000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01EC00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01E400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01F000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01E800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="12" side_number="1">
+				<data_offset>0x01F400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01F400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x020000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01F800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x020400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x01FC00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="13" side_number="0">
+				<data_offset>0x020800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x020800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x021400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x020C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x021800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x021000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="13" side_number="1">
+				<data_offset>0x021C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x021C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x022800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x022000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x022C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x022400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="14" side_number="0">
+				<data_offset>0x023000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x023000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x023C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x023400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x024000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x023800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="14" side_number="1">
+				<data_offset>0x024400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x024400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x025000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x024800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x025400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x024C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="15" side_number="0">
+				<data_offset>0x025800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x025800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x026400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x025C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x026800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x026000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="15" side_number="1">
+				<data_offset>0x026C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x026C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x027800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x027000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x027C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x027400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="16" side_number="0">
+				<data_offset>0x028000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x028000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x028C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x028400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x029000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x028800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="16" side_number="1">
+				<data_offset>0x029400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x029400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02A000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x029800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02A400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x029C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="17" side_number="0">
+				<data_offset>0x02A800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02A800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02B400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02AC00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02B800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02B000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="17" side_number="1">
+				<data_offset>0x02BC00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02BC00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02C800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02C000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02CC00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02C400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="18" side_number="0">
+				<data_offset>0x02D000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02D000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02DC00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02D400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02E000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02D800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="18" side_number="1">
+				<data_offset>0x02E400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02E400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02F000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02E800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02F400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02EC00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="19" side_number="0">
+				<data_offset>0x02F800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02F800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x030400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x02FC00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x030800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x030000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="19" side_number="1">
+				<data_offset>0x030C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x030C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x031800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x031000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x031C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x031400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="20" side_number="0">
+				<data_offset>0x032000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x032000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x032C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x032400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x033000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x032800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="20" side_number="1">
+				<data_offset>0x033400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x033400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x034000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x033800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x034400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x033C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="21" side_number="0">
+				<data_offset>0x034800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x034800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x035400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x034C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x035800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x035000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="21" side_number="1">
+				<data_offset>0x035C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x035C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x036800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x036000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x036C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x036400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="22" side_number="0">
+				<data_offset>0x037000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x037000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x037C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x037400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x038000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x037800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="22" side_number="1">
+				<data_offset>0x038400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x038400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x039000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x038800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x039400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x038C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="23" side_number="0">
+				<data_offset>0x039800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x039800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03A400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x039C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03A800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03A000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="23" side_number="1">
+				<data_offset>0x03AC00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03AC00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03B800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03B000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03BC00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03B400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="24" side_number="0">
+				<data_offset>0x03C000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03C000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03CC00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03C400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03D000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03C800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="24" side_number="1">
+				<data_offset>0x03D400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03D400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03E000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03D800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03E400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03DC00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="25" side_number="0">
+				<data_offset>0x03E800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03E800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03F400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03EC00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03F800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03F000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="25" side_number="1">
+				<data_offset>0x03FC00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x03FC00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x040800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x040000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x040C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x040400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="26" side_number="0">
+				<data_offset>0x041000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x041000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x041C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x041400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x042000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x041800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="26" side_number="1">
+				<data_offset>0x042400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x042400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x043000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x042800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x043400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x042C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="27" side_number="0">
+				<data_offset>0x043800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x043800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x044400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x043C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x044800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x044000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="27" side_number="1">
+				<data_offset>0x044C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x044C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x045800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x045000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x045C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x045400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="28" side_number="0">
+				<data_offset>0x046000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x046000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x046C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x046400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x047000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x046800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="28" side_number="1">
+				<data_offset>0x047400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x047400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x048000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x047800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x048400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x047C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="29" side_number="0">
+				<data_offset>0x048800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x048800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x049400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x048C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x049800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x049000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="29" side_number="1">
+				<data_offset>0x049C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x049C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04A800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04A000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04AC00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04A400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="30" side_number="0">
+				<data_offset>0x04B000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04B000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04BC00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04B400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04C000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04B800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="30" side_number="1">
+				<data_offset>0x04C400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04C400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04D000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04C800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04D400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04CC00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="31" side_number="0">
+				<data_offset>0x04D800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04D800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04E400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04DC00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04E800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04E000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="31" side_number="1">
+				<data_offset>0x04EC00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04EC00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04F800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04F000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04FC00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x04F400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="32" side_number="0">
+				<data_offset>0x050000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x050000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x050C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x050400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x051000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x050800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="32" side_number="1">
+				<data_offset>0x051400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x051400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x052000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x051800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x052400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x051C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="33" side_number="0">
+				<data_offset>0x052800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x052800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x053400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x052C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x053800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x053000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="33" side_number="1">
+				<data_offset>0x053C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x053C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x054800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x054000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x054C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x054400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="34" side_number="0">
+				<data_offset>0x055000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x055000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x055C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x055400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x056000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x055800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="34" side_number="1">
+				<data_offset>0x056400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x056400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x057000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x056800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x057400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x056C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="35" side_number="0">
+				<data_offset>0x057800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x057800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x058400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x057C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x058800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x058000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="35" side_number="1">
+				<data_offset>0x058C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x058C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x059800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x059000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x059C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x059400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="36" side_number="0">
+				<data_offset>0x05A000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05A000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05AC00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05A400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05B000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05A800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="36" side_number="1">
+				<data_offset>0x05B400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05B400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05C000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05B800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05C400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05BC00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="37" side_number="0">
+				<data_offset>0x05C800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05C800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05D400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05CC00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05D800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05D000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="37" side_number="1">
+				<data_offset>0x05DC00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05DC00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05E800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05E000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05EC00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05E400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="38" side_number="0">
+				<data_offset>0x05F000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05F000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05FC00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05F400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x060000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x05F800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="38" side_number="1">
+				<data_offset>0x060400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x060400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x061000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x060800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x061400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x060C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="39" side_number="0">
+				<data_offset>0x061800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x061800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x062400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x061C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x062800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x062000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="39" side_number="1">
+				<data_offset>0x062C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x062C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x063800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x063000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x063C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x063400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="40" side_number="0">
+				<data_offset>0x064000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x064000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x064C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x064400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x065000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x064800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="40" side_number="1">
+				<data_offset>0x065400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x065400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x066000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x065800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x066400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x065C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="41" side_number="0">
+				<data_offset>0x066800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x066800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x067400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x066C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x067800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x067000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="41" side_number="1">
+				<data_offset>0x067C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x067C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x068800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x068000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x068C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x068400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="42" side_number="0">
+				<data_offset>0x069000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x069000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x069C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x069400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06A000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x069800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="42" side_number="1">
+				<data_offset>0x06A400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06A400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06B000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06A800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06B400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06AC00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="43" side_number="0">
+				<data_offset>0x06B800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06B800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06C400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06BC00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06C800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06C000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="43" side_number="1">
+				<data_offset>0x06CC00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06CC00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06D800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06D000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06DC00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06D400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="44" side_number="0">
+				<data_offset>0x06E000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06E000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06EC00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06E400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06F000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06E800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="44" side_number="1">
+				<data_offset>0x06F400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06F400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x070000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06F800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x070400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x06FC00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="45" side_number="0">
+				<data_offset>0x070800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x070800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x071400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x070C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x071800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x071000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="45" side_number="1">
+				<data_offset>0x071C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x071C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x072800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x072000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x072C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x072400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="46" side_number="0">
+				<data_offset>0x073000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x073000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x073C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x073400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x074000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x073800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="46" side_number="1">
+				<data_offset>0x074400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x074400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x075000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x074800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x075400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x074C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="47" side_number="0">
+				<data_offset>0x075800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x075800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x076400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x075C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x076800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x076000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="47" side_number="1">
+				<data_offset>0x076C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x076C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x077800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x077000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x077C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x077400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="48" side_number="0">
+				<data_offset>0x078000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x078000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x078C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x078400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x079000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x078800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="48" side_number="1">
+				<data_offset>0x079400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x079400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07A000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x079800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07A400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x079C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="49" side_number="0">
+				<data_offset>0x07A800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07A800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07B400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07AC00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07B800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07B000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="49" side_number="1">
+				<data_offset>0x07BC00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07BC00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07C800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07C000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07CC00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07C400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="50" side_number="0">
+				<data_offset>0x07D000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07D000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07DC00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07D400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07E000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07D800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="50" side_number="1">
+				<data_offset>0x07E400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07E400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07F000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07E800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07F400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07EC00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="51" side_number="0">
+				<data_offset>0x07F800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07F800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x080400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x07FC00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x080800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x080000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="51" side_number="1">
+				<data_offset>0x080C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x080C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x081800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x081000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x081C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x081400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="52" side_number="0">
+				<data_offset>0x082000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x082000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x082C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x082400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x083000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x082800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="52" side_number="1">
+				<data_offset>0x083400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x083400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x084000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x083800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x084400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x083C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="53" side_number="0">
+				<data_offset>0x084800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x084800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x085400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x084C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x085800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x085000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="53" side_number="1">
+				<data_offset>0x085C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x085C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x086800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x086000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x086C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x086400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="54" side_number="0">
+				<data_offset>0x087000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x087000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x087C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x087400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x088000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x087800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="54" side_number="1">
+				<data_offset>0x088400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x088400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x089000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x088800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x089400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x088C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="55" side_number="0">
+				<data_offset>0x089800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x089800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08A400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x089C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08A800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08A000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="55" side_number="1">
+				<data_offset>0x08AC00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08AC00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08B800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08B000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08BC00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08B400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="56" side_number="0">
+				<data_offset>0x08C000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08C000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08CC00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08C400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08D000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08C800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="56" side_number="1">
+				<data_offset>0x08D400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08D400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08E000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08D800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08E400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08DC00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="57" side_number="0">
+				<data_offset>0x08E800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08E800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08F400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08EC00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08F800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08F000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="57" side_number="1">
+				<data_offset>0x08FC00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x08FC00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x090800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x090000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x090C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x090400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="58" side_number="0">
+				<data_offset>0x091000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x091000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x091C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x091400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x092000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x091800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="58" side_number="1">
+				<data_offset>0x092400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x092400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x093000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x092800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x093400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x092C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="59" side_number="0">
+				<data_offset>0x093800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x093800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x094400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x093C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x094800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x094000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="59" side_number="1">
+				<data_offset>0x094C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x094C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x095800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x095000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x095C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x095400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="60" side_number="0">
+				<data_offset>0x096000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x096000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x096C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x096400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x097000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x096800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="60" side_number="1">
+				<data_offset>0x097400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x097400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x098000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x097800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x098400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x097C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="61" side_number="0">
+				<data_offset>0x098800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x098800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x099400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x098C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x099800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x099000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="61" side_number="1">
+				<data_offset>0x099C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x099C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09A800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09A000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09AC00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09A400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="62" side_number="0">
+				<data_offset>0x09B000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09B000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09BC00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09B400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09C000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09B800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="62" side_number="1">
+				<data_offset>0x09C400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09C400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09D000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09C800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09D400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09CC00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="63" side_number="0">
+				<data_offset>0x09D800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09D800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09E400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09DC00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09E800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09E000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="63" side_number="1">
+				<data_offset>0x09EC00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09EC00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09F800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09F000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09FC00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x09F400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="64" side_number="0">
+				<data_offset>0x0A0000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A0000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A0C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A0400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A1000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A0800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="64" side_number="1">
+				<data_offset>0x0A1400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A1400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A2000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A1800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A2400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A1C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="65" side_number="0">
+				<data_offset>0x0A2800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A2800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A3400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A2C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A3800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A3000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="65" side_number="1">
+				<data_offset>0x0A3C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A3C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A4800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A4000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A4C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A4400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="66" side_number="0">
+				<data_offset>0x0A5000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A5000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A5C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A5400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A6000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A5800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="66" side_number="1">
+				<data_offset>0x0A6400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A6400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A7000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A6800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A7400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A6C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="67" side_number="0">
+				<data_offset>0x0A7800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A7800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A8400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A7C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A8800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A8000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="67" side_number="1">
+				<data_offset>0x0A8C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A8C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A9800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A9000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A9C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0A9400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="68" side_number="0">
+				<data_offset>0x0AA000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AA000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AAC00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AA400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AB000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AA800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="68" side_number="1">
+				<data_offset>0x0AB400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AB400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AC000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AB800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AC400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0ABC00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="69" side_number="0">
+				<data_offset>0x0AC800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AC800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AD400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0ACC00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AD800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AD000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="69" side_number="1">
+				<data_offset>0x0ADC00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0ADC00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AE800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AE000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AEC00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AE400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="70" side_number="0">
+				<data_offset>0x0AF000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AF000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AFC00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AF400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B0000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0AF800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="70" side_number="1">
+				<data_offset>0x0B0400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B0400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B1000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B0800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B1400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B0C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="71" side_number="0">
+				<data_offset>0x0B1800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B1800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B2400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B1C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B2800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B2000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="71" side_number="1">
+				<data_offset>0x0B2C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B2C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B3800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B3000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B3C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B3400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="72" side_number="0">
+				<data_offset>0x0B4000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B4000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B4C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B4400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B5000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B4800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="72" side_number="1">
+				<data_offset>0x0B5400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B5400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B6000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B5800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B6400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B5C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="73" side_number="0">
+				<data_offset>0x0B6800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B6800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B7400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B6C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B7800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B7000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="73" side_number="1">
+				<data_offset>0x0B7C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B7C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B8800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B8000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B8C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B8400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="74" side_number="0">
+				<data_offset>0x0B9000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B9000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B9C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B9400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BA000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0B9800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="74" side_number="1">
+				<data_offset>0x0BA400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BA400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BB000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BA800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BB400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BAC00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="75" side_number="0">
+				<data_offset>0x0BB800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BB800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BC400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BBC00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BC800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BC000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="75" side_number="1">
+				<data_offset>0x0BCC00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BCC00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BD800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BD000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BDC00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BD400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="76" side_number="0">
+				<data_offset>0x0BE000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BE000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BEC00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BE400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BF000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BE800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="76" side_number="1">
+				<data_offset>0x0BF400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BF400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C0000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BF800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C0400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0BFC00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="77" side_number="0">
+				<data_offset>0x0C0800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C0800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C1400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C0C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C1800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C1000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="77" side_number="1">
+				<data_offset>0x0C1C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C1C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C2800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C2000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C2C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C2400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="78" side_number="0">
+				<data_offset>0x0C3000</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C3000</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C3C00</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C3400</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C4000</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C3800</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="78" side_number="1">
+				<data_offset>0x0C4400</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C4400</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C5000</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C4800</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C5400</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C4C00</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="79" side_number="0">
+				<data_offset>0x0C5800</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C5800</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C6400</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C5C00</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C6800</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C6000</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+			<track track_number="79" side_number="1">
+				<data_offset>0x0C6C00</data_offset>
+				<format>IBM_MFM</format>
+				<sector_list>
+					<sector sector_id="1" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C6C00</data_offset>
+					</sector>
+					<sector sector_id="4" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C7800</data_offset>
+					</sector>
+					<sector sector_id="2" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C7000</data_offset>
+					</sector>
+					<sector sector_id="5" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C7C00</data_offset>
+					</sector>
+					<sector sector_id="3" sector_size="1024">
+						<data_fill>0xE5</data_fill>
+						<datamark>0xFB</datamark>
+						<data_offset>0x0C7400</data_offset>
+					</sector>
+				</sector_list>
+			</track>
+		</track_list>
+	</layout>
+</disk_layout>

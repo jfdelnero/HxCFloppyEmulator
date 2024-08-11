@@ -70,6 +70,7 @@
 #include "data_DiskLayout_FLEX_DSDD_40T_356KB_xml.h"
 #include "data_DiskLayout_FLEX_DSDD_40T_356KB_PADDED_xml.h"
 #include "data_DiskLayout_Sharp_X68000_2HD_1232KB_xml.h"
+#include "data_DiskLayout_Alesis_DataDisk_DD_800KB_xml.h"
 
 datatype * disklayout_list[]=
 {
@@ -83,6 +84,7 @@ datatype * disklayout_list[]=
 	data_DiskLayout_AkaiS950_HD_1_6MB_xml,
 	data_DiskLayout_AkaiS950_DD_800KB_xml,
 	data_DiskLayout_AkaiS3000_HD_1_6MB_xml,
+	data_DiskLayout_Alesis_DataDisk_DD_800KB_xml,
 	data_DiskLayout_AmstradCPC_DD_xml,
 	data_DiskLayout_Automatix_RAIL_DD_400KB_xml,
 	data_DiskLayout_AtariST_DD_720KB_xml,
