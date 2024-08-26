@@ -78,7 +78,7 @@
 
 int dummy_graph_progress(unsigned int current,unsigned int total,void * td,void * user)
 {
-    return 0;
+	return 0;
 }
 
 HXCFE_TD * hxcfe_td_init(HXCFE* floppycontext,uint32_t xsize,uint32_t ysize)
@@ -2237,7 +2237,14 @@ s_pulseslist * hxcfe_td_getlastpulselist(HXCFE_TD *td)
 	return td->pl;
 }
 
-void plot(HXCFE_TD *td,int x,int y,uint32_t color,int op)
+uint32_t alpha(uint32_t dst, uint32_t src, uint8_t alpha_value)
+{
+	return  ( ( ( (uint32_t)(alpha_value) * ((src&0x0000FF)>>0) + (uint32_t)(255-alpha_value) * ((dst&0x0000FF)>>0) ) >> 8 ) & 0xFF ) | \
+			( ( (uint32_t)(alpha_value) * ((src&0x00FF00)>>8) + (uint32_t)(255-alpha_value) * ((dst&0x00FF00)>>8) ) & 0xFF00 ) | \
+			( ( ( (uint32_t)(alpha_value) * ((src&0xFF0000)>>16) + (uint32_t)(255-alpha_value) * ((dst&0xFF0000)>>16) ) << 8 ) & 0xFF0000);
+}
+
+void plot(HXCFE_TD *td, int x, int y, uint32_t color, uint8_t alpha_value, int op)
 {
 	unsigned char color_r,color_v,color_b;
 	uint32_t rdcolor;
@@ -2266,6 +2273,9 @@ void plot(HXCFE_TD *td,int x,int y,uint32_t color,int op)
 					td->framebuffer[(td->xsize*y)+x] = (color_b<<16) | (color_v<<8) | color_r;
 
 				break;
+				case 2:
+					td->framebuffer[(td->xsize*y)+x] = alpha(td->framebuffer[(td->xsize*y)+x], color, alpha_value);
+				break;
 			}
 		}
 	}
@@ -2288,21 +2298,19 @@ void circle(HXCFE_TD *td,int x_centre,int y_centre,int r,unsigned int color)
 
 	while(y>=x)
 	{
-		plot(td, x+x_centre, -y+y_centre  , color,0);   // 1 -
-		plot(td, y+x_centre, -x+y_centre  , color,0);   // 2 +
-		plot(td, x_centre + y, x+y_centre , color,0);   // 3 -
-		plot(td, x_centre + x, y+y_centre , color,0);   // 4 +
-		plot(td, -x+x_centre, y+y_centre  , color,0);   // 5 -
-		plot(td, -y+x_centre, x+y_centre  , color,0);   // 6 +
-		plot(td, -y+x_centre, -x+y_centre  , color,0);  // 7 -
-		plot(td, -x+x_centre, -y+y_centre  , color,0);  // 8 +
-
+		plot(td, x+x_centre, -y+y_centre  , color,0,0);   // 1 -
+		plot(td, y+x_centre, -x+y_centre  , color,0,0);   // 2 +
+		plot(td, x_centre + y, x+y_centre , color,0,0);   // 3 -
+		plot(td, x_centre + x, y+y_centre , color,0,0);   // 4 +
+		plot(td, -x+x_centre, y+y_centre  , color,0,0);   // 5 -
+		plot(td, -y+x_centre, x+y_centre  , color,0,0);   // 6 +
+		plot(td, -y+x_centre, -x+y_centre  , color,0,0);  // 7 -
+		plot(td, -x+x_centre, -y+y_centre  , color,0,0);  // 8 +
 
 		if (d >= 2*x)
 		{
 			d = d - ( 2 * x ) -1;
 			x = x+1;
-
 		}
 		else
 		{
@@ -2333,7 +2341,7 @@ void disc(HXCFE_TD *td,int x_centre,int y_centre,int r,unsigned int color,unsign
 	circle(td,x_centre,y_centre,r,bcolor);
 }
 
-void draw_circle (HXCFE_TD *td,uint32_t col,float start_angle,float stop_angle,int xpos,int ypos,int diametre,int op,int thickness,int counterclock)
+void draw_circle (HXCFE_TD *td,uint32_t col,uint8_t alpha_val,float start_angle,float stop_angle,int xpos,int ypos,int diametre,int op,int thickness,int counterclock)
 {
 	int x, y,i;
 	int length;
@@ -2357,7 +2365,7 @@ void draw_circle (HXCFE_TD *td,uint32_t col,float start_angle,float stop_angle,i
 				x = (int)((length) * cos (angle));
 				y = (int)((length) * sin (angle));
 
-				plot(td, x+xpos, -y+ypos  , col, op);
+				plot(td, x+xpos, -y+ypos  , col, alpha_val, op);
 
 				angle += angle_stepsize;
 			}while (angle < stop_angle );
@@ -2372,7 +2380,7 @@ void draw_circle (HXCFE_TD *td,uint32_t col,float start_angle,float stop_angle,i
 				x = (int)((length) * cos ((2*PI) - angle));
 				y = (int)((length) * sin ((2*PI) - angle));
 
-				plot(td, x+xpos, -y+ypos  , col, op);
+				plot(td, x+xpos, -y+ypos  , col, alpha_val, op);
 
 				angle += angle_stepsize;
 			}while (angle < stop_angle );
@@ -2383,7 +2391,7 @@ void draw_circle (HXCFE_TD *td,uint32_t col,float start_angle,float stop_angle,i
 	}while(i<(thickness));
 }
 
-void draw_density_circle (HXCFE_TD *td,uint32_t col,float start_angle,float stop_angle,int xpos,int ypos,int diametre,int op,int thickness,HXCFE_SIDE * side,int counterclock)
+void draw_density_circle (HXCFE_TD *td,uint32_t col, uint8_t alpha_val, float start_angle,float stop_angle,int xpos,int ypos,int diametre,int op,int thickness,HXCFE_SIDE * side,int counterclock)
 {
 	int x, y,i, x_old,y_old;
 	int length;
@@ -2475,7 +2483,7 @@ void draw_density_circle (HXCFE_TD *td,uint32_t col,float start_angle,float stop
 
 				lum = (uint8_t)((float)col * (float) ((float)bitcount/(float)totalcount) );
 
-				plot(td, x+xpos, -y+ypos  , (uint32_t)( (lum<<16) | ( (lum>>1) <<8) | (lum>>1)), op);
+				plot(td, x+xpos, -y+ypos  , (uint32_t)( (lum<<16) | ( (lum>>1) <<8) | (lum>>1)), alpha_val, op);
 
 				prev_offset = old_j;
 			}
@@ -2507,6 +2515,12 @@ s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int t
 	HXCFE_SECTCFG* sc;
 	HXCFE_SIDE * currentside;
 	s_sectorlist * sl,*oldsl;
+	uint32_t color_valid_sector_data,color_bad_sector_data,color_valid_empty_sector_data;
+	uint32_t color_headerless_sector_data;
+	uint32_t color_valid_sector_header,color_bad_sector_header;
+	uint32_t color_sector_boundary,color_sector_data_boundary;
+	int display_boundary;
+	int color_sector_alpha;
 
 	old_i=0;
 	loop=0;
@@ -2521,6 +2535,20 @@ s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int t
 
 	old_i=0;
 	timingoffset = 0;
+
+	color_valid_sector_data = hxcfe_getEnvVarValue( td->hxcfe, "BMPDISKEXPORT_COLOR_VALID_SECTOR_DATA" );
+	color_valid_empty_sector_data = hxcfe_getEnvVarValue( td->hxcfe, "BMPDISKEXPORT_COLOR_VALID_EMPTY_SECTOR_DATA" );
+	color_bad_sector_data = hxcfe_getEnvVarValue( td->hxcfe, "BMPDISKEXPORT_COLOR_BAD_SECTOR_DATA" );
+	color_headerless_sector_data = hxcfe_getEnvVarValue( td->hxcfe, "BMPDISKEXPORT_COLOR_HEADERLESS_SECTOR_DATA" );
+	color_sector_alpha = hxcfe_getEnvVarValue( td->hxcfe, "BMPDISKEXPORT_COLOR_ALPHA" );
+
+	color_valid_sector_header = hxcfe_getEnvVarValue( td->hxcfe, "BMPDISKEXPORT_COLOR_VALID_SECTOR_HEADER" );
+	color_bad_sector_header = hxcfe_getEnvVarValue( td->hxcfe, "BMPDISKEXPORT_COLOR_BAD_SECTOR_HEADER" );
+
+	color_sector_boundary = hxcfe_getEnvVarValue( td->hxcfe, "BMPDISKEXPORT_COLOR_SECTOR_BOUNDARY" );
+	color_sector_data_boundary = hxcfe_getEnvVarValue( td->hxcfe, "BMPDISKEXPORT_COLOR_SECTOR_DATA_BOUNDARY" );
+
+	display_boundary = hxcfe_getEnvVarValue( td->hxcfe, "BMPDISKEXPORT_DISPLAY_SECTOR_BOUNDARY" );
 
 	track_timing = (float)getOffsetTiming(currentside,tracksize,timingoffset,old_i);
 
@@ -2570,40 +2598,41 @@ s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int t
 					///////////////////////////////////////
 					if( sc->use_alternate_header_crc )
 					{
- 						color = 0xFF0000;
+						color = color_bad_sector_header;
 					}
 					else
 					{
-						color = 0x99FF99;
+						color = color_valid_sector_header;
 					}
 
-					draw_circle (td,color,(float)((float)2 * PI)*(startsector_timingoffset/track_timing),(float)((float)2 * PI)*(datasector_timingoffset/track_timing),xpos,ypos,diam,0,thickness,mirror);
+					draw_circle (td,color,color_sector_alpha, (float)((float)2 * PI)*(startsector_timingoffset/track_timing),(float)((float)2 * PI)*(datasector_timingoffset/track_timing),xpos,ypos,diam,2,thickness,mirror);
 
 					///////////////////////////////////////
 					// Data Block
 					///////////////////////////////////////
 					if(sc->startdataindex == sc->startsectorindex)
 					{
-						// CRC error -> Blue
-						color = 0xFF0000;
+						// Header less sector -> Blue
+						color = color_headerless_sector_data;
 					}
 					else
 					{
 						if(sc->use_alternate_data_crc)
 						{
 							// CRC error -> Red
-							color = 0x008FFA;
+							color = color_bad_sector_data;
 						}
 						else
 						{
 							if(!sc->fill_byte_used)
 							{
 								// Sector ok -> Green
-								color = 0x00FF00;
+								color = color_valid_sector_data;
 							}
 							else
 							{
-								color = 0x66EE00;
+								// Ok and "empty" (same value on all bytes)
+								color = color_valid_empty_sector_data;
 							}
 
 							if(crc32)
@@ -2616,16 +2645,20 @@ s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int t
 						}
 					}
 
-					draw_circle (td,color,(float)((float)2 * PI)*(datasector_timingoffset/track_timing),(float)((float)2 * PI)*(endsector_timingoffset/track_timing),xpos,ypos,diam,0,thickness,mirror);
+					draw_circle (td,color,color_sector_alpha, (float)((float)2 * PI)*(datasector_timingoffset/track_timing),(float)((float)2 * PI)*(endsector_timingoffset/track_timing),xpos,ypos,diam,2,thickness,mirror);
 
-					// Left Line
-					draw_circle (td,0xFF6666,(float)((float)2 * PI)*(startsector_timingoffset/track_timing),(float)((float)2 * PI)*(startsector_timingoffset/track_timing),xpos,ypos,diam,0,thickness,mirror);
+					// Sector limits...
+					if( display_boundary )
+					{
+						// Left Line
+						draw_circle (td,color_sector_boundary,255,(float)((float)2 * PI)*(startsector_timingoffset/track_timing),(float)((float)2 * PI)*(startsector_timingoffset/track_timing),xpos,ypos,diam,0,thickness,mirror);
 
-					// Data Line
-					draw_circle (td,0x7F6666,(float)((float)2 * PI)*(datasector_timingoffset/track_timing),(float)((float)2 * PI)*(datasector_timingoffset/track_timing),xpos,ypos,diam,0,thickness,mirror);
+						// Data Line
+						draw_circle (td,color_sector_data_boundary,255,(float)((float)2 * PI)*(datasector_timingoffset/track_timing),(float)((float)2 * PI)*(datasector_timingoffset/track_timing),xpos,ypos,diam,0,thickness,mirror);
 
-					// Right Line
-					draw_circle (td,0xFF6666,(float)((float)2 * PI)*(endsector_timingoffset/track_timing),(float)((float)2 * PI)*(endsector_timingoffset/track_timing),xpos,ypos,diam,0,thickness,mirror);
+						// Right Line
+						draw_circle (td,color_sector_boundary,255,(float)((float)2 * PI)*(endsector_timingoffset/track_timing),(float)((float)2 * PI)*(endsector_timingoffset/track_timing),xpos,ypos,diam,0,thickness,mirror);
+					}
 
 					if(!mirror)
 					{
@@ -2647,7 +2680,6 @@ s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int t
 		hxcfe_deinitSectorAccess(ss);
 		loop++;
 	}
-
 
 	td->sl=sl;
 
@@ -2842,7 +2874,7 @@ int um2pix(int totalpix, int size_um, int um )
 	return (int)( (float)totalpix * ((float)um / (float)size_um) );
 }
 
-void box(HXCFE_TD *td,int x1,int y1,int x2,int y2, uint32_t color, int op )
+void box(HXCFE_TD *td,int x1,int y1,int x2,int y2, uint32_t color, int alpha_val, int op )
 {
 	int t,i;
 
@@ -2862,14 +2894,14 @@ void box(HXCFE_TD *td,int x1,int y1,int x2,int y2, uint32_t color, int op )
 
 	for(i = x1; i < x2 ;i++)
 	{
-		plot(td, i, y1,color,op);
-		plot(td, i, y2,color,op);
+		plot(td, i, y1, color, alpha_val, op);
+		plot(td, i, y2, color, alpha_val, op);
 	}
 
 	for(i = y1; i < y2 ;i++)
 	{
-		plot(td, x1, i, color, op);
-		plot(td, x2, i, color, op);
+		plot(td, x1, i, color, alpha_val, op);
+		plot(td, x2, i, color, alpha_val, op);
 	}
 }
 
@@ -3048,7 +3080,7 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 		td->hxc_setprogress(track*floppydisk->floppyNumberOfSide,floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide*2,td,td->progress_userdata);
 
 		currentside = floppydisk->tracks[track]->sides[0];
-		draw_density_circle (td,0x0000FF,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,start_tracks_space_radius[0] - (int)((float)track * track_ep[0]),0,(int)track_ep[0],currentside,1);
+		draw_density_circle (td,0x0000FF,0xFF,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,start_tracks_space_radius[0] - (int)((float)track * track_ep[0]),0,(int)track_ep[0],currentside,1);
 
 		sprintf(tempstr,"Side %d, %d Tracks",0,track);
 		putstring8x8(td,1,1,tempstr,0xAAAAAA,0x000000,0,0);
@@ -3059,7 +3091,7 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 			putstring8x8(td,td->xsize/2,1,tempstr,0xAAAAAA,0x000000,0,0);
 
 			currentside = floppydisk->tracks[track]->sides[1];
-			draw_density_circle (td,0x0000FF,0,(float)((float)((float)2 * PI)),x_pos_2,y_pos,start_tracks_space_radius[1] - (int)((float)track * track_ep[1]),0,(int)track_ep[1],currentside,0);
+			draw_density_circle (td,0x0000FF,0xFF,0,(float)((float)((float)2 * PI)),x_pos_2,y_pos,start_tracks_space_radius[1] - (int)((float)track * track_ep[1]),0,(int)track_ep[1],currentside,0);
 		}
 	}
 
@@ -3110,9 +3142,9 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 						if( (xpos<2048))
 						{
 							if(!side)
-								draw_circle (td,0x0000FF,(float)((float)((float)2 * PI)*((float)xpos/(float)2048)),(float)((float)((float)2 * PI)*((float)xpos/(float)2048)),x_pos_1,y_pos,start_tracks_space_radius[0] - (int)((track * track_ep[0])),0,(int)track_ep[0],1);
+								draw_circle (td,0x0000FF,0xFF,(float)((float)((float)2 * PI)*((float)xpos/(float)2048)),(float)((float)((float)2 * PI)*((float)xpos/(float)2048)),x_pos_1,y_pos,start_tracks_space_radius[0] - (int)((track * track_ep[0])),0,(int)track_ep[0],1);
 							else
-								draw_circle (td,0x0000FF,(float)((float)((float)2 * PI)*((float)xpos/(float)2048)),(float)((float)((float)2 * PI)*((float)xpos/(float)2048)),x_pos_2,y_pos,start_tracks_space_radius[1] - (int)((track * track_ep[1])),0,(int)track_ep[1],0);
+								draw_circle (td,0x0000FF,0xFF,(float)((float)((float)2 * PI)*((float)xpos/(float)2048)),(float)((float)((float)2 * PI)*((float)xpos/(float)2048)),x_pos_2,y_pos,start_tracks_space_radius[1] - (int)((track * track_ep[1])),0,(int)track_ep[1],0);
 						}
 					}
 
@@ -3176,12 +3208,12 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 
 	for(track=0;track<max_physical_tracks[0]+1;track++)
 	{
-		draw_circle (td,0xF8F8F8,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,start_tracks_space_radius[0] - (int)((track * track_ep[0])) + 1,1,(int)0,1);
-		draw_circle (td,0xF8F8F8,0,(float)((float)((float)2 * PI)),x_pos_2,y_pos,start_tracks_space_radius[1] - (int)((track * track_ep[1])) + 1,1,(int)0,0);
+		draw_circle (td,0xF8F8F8,255,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,start_tracks_space_radius[0] - (int)((track * track_ep[0])) + 1,1,(int)0,1);
+		draw_circle (td,0xF8F8F8,255,0,(float)((float)((float)2 * PI)),x_pos_2,y_pos,start_tracks_space_radius[1] - (int)((track * track_ep[1])) + 1,1,(int)0,0);
 	}
 
-	draw_circle (td,0xEFEFEF,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,start_tracks_space_radius[0] - (int)(((max_physical_tracks[0]+1) * track_ep[0])) + 1,1,(int)0,1);
-	draw_circle (td,0xEFEFEF,0,(float)((float)((float)2 * PI)),x_pos_2,y_pos,start_tracks_space_radius[1] - (int)(((max_physical_tracks[0]+1) * track_ep[1])) + 1,1,(int)0,0);
+	draw_circle (td,0xEFEFEF,255,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,start_tracks_space_radius[0] - (int)(((max_physical_tracks[0]+1) * track_ep[0])) + 1,1,(int)0,1);
+	draw_circle (td,0xEFEFEF,255,0,(float)((float)((float)2 * PI)),x_pos_2,y_pos,start_tracks_space_radius[1] - (int)(((max_physical_tracks[0]+1) * track_ep[1])) + 1,1,(int)0,0);
 
 	if(floppy_dimension[physical_dim].window[0] >= 0)
 	{
@@ -3189,13 +3221,13 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 			   um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, floppy_dimension[physical_dim].window[1] ) + y_pos, \
 			   um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, floppy_dimension[physical_dim].window[2] ) + x_pos_1, \
 			   um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, floppy_dimension[physical_dim].window[3] ) + y_pos, \
-			   0x909090, 1 );
+			   0x909090, 255, 1 );
 
 		box(td,um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, floppy_dimension[physical_dim].window[0] ) + x_pos_2, \
 			   um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, floppy_dimension[physical_dim].window[1] ) + y_pos, \
 			   um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, floppy_dimension[physical_dim].window[2] ) + x_pos_2, \
 			   um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, floppy_dimension[physical_dim].window[3] ) + y_pos, \
-			   0x909090, 1 );
+			   0x909090, 255, 1 );
 	}
 
 	td->hxc_setprogress(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide,floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide,td,td->progress_userdata);
