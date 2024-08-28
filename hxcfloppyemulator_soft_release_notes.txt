@@ -20,7 +20,7 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 ** **** 2024 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
 
 *** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
-*** Last update : v2.15.8.4, 5 Jul 2024 ***
+*** Last update : v2.15.8.5, 28 Aug 2024 ***
 
 -> New Writer : PNG file (Disk/tracks and stream layouts) -> Disk layout can now be exported into a PNG file (for disk analysis) !
 
@@ -47,6 +47,9 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -> expat updated to v2.6.2
 
 -> DMK export : align all sectors ID (IDAM and DAM)
+
+-> EDE File Loader : Unidentified DD Image format code (0x00) support added.
+                     Tested against the Giebler Ensoniq Disk Extractor Shareware Version 1.0.9. (EDE109)
 
 /*********************************************************
 
