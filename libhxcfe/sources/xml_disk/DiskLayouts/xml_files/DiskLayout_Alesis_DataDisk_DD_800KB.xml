@@ -4,7 +4,7 @@
 	<disk_layout_name>ALESIS_DATADISK_DD_800KB</disk_layout_name>
 	<disk_layout_description>Alesis DataDisk 3"5 DD Floppy Disk</disk_layout_description>
 	<prefered_file_extension>img</prefered_file_extension>
-	<interface_mode>GENERIC_SHUGART_DD_FLOPPYMODE</interface_mode>
+	<interface_mode>IBMPC_DD_FLOPPYMODE</interface_mode>
 	<write_protected>0</write_protected>
 	<file_size>819200</file_size>
 	<layout>
