@@ -77,6 +77,9 @@ int EDE_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 		{
 			switch(imgfile->file_header[0x1FF])
 			{
+				case 0x00:
+					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : Unidentified (DD) format");
+				break;
 				case 0x01:
 					imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"EDE_libIsValidDiskFile : Mirage (DD) format");
 				break;
@@ -161,6 +164,26 @@ int EDE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		skew=0;
 		switch(header_buffer[0x1FF])
 		{
+			case 0x00:
+				// Not documented in the online EDE format descriptions.
+				// But apparently the Giebler Ensoniq Disk Extractor Shareware Version 1.0.9. (EDE109) can read this,
+				// although it can't identify the target machine...
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"Unidentified (DD) format");
+				header_offset=0xA0;
+				floppydisk->floppyBitRate=250000;
+				floppydisk->floppyNumberOfTrack=80;
+				floppydisk->floppyNumberOfSide=2;
+				floppydisk->floppySectorPerTrack=10;
+				gap3len=36;
+				interleave=1;
+				skew=0;
+
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+					sectorsizelayout[k]=sectorsize;
+
+				for(k=0;k<floppydisk->floppySectorPerTrack;k++)
+					sectoridlayout[k]=k;
+			break;
 			case 0x01:
 				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_0,"Mirage (DD) format");
 				header_offset=0xA0;
