@@ -58,6 +58,8 @@
 
 #include "loaders_list.h"
 
+#include "tracks/std_crc32.h"
+
 #include "version.h"
 #include "licensetxt.h"
 
@@ -2511,4 +2513,100 @@ int32_t hxcfe_getTrackNumberOfSide( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int
 	}
 
 	return 0;
+}
+
+int track_hash( HXCFE* floppycontext, HXCFE_FLOPPY * floppydisk, int track, int side, int type, uint32_t * crc32 )
+{
+	HXCFE_SECTORACCESS* ss;
+	HXCFE_SECTCFG* sc;
+
+	ss=hxcfe_initSectorAccess(floppycontext,floppydisk);
+	if(ss)
+	{
+		do
+		{
+			sc = hxcfe_getNextSector(ss,track,side,type);
+			if(sc)
+			{
+				///////////////////////////////////////
+				// Data Block
+				///////////////////////////////////////
+				if(sc->startdataindex == sc->startsectorindex)
+				{
+					// Header less sector
+				}
+				else
+				{
+					if(sc->use_alternate_data_crc)
+					{
+						// CRC error
+					}
+					else
+					{
+						if(crc32)
+						{
+							if(sc->input_data && !sc->use_alternate_data_crc)
+							{
+								*crc32 = std_crc32(*crc32, sc->input_data, sc->sectorsize);
+							}
+						}
+					}
+				}
+			}
+		}while(sc);
+
+		hxcfe_deinitSectorAccess(ss);
+	}
+
+	return 0;
+}
+
+int32_t hxcfe_getHash( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, int32_t side, int32_t sector, uint32_t formats, int hashtype, uint32_t flags, void * hashbuffer, int hashmaxsize )
+{
+	if(fp)
+	{
+		int i, maxtrack,maxside;
+		uint32_t crc32;
+
+		crc32 = 0x00000000;
+
+		if(track < 0)
+		{
+			track = 0;
+			maxtrack = fp->floppyNumberOfTrack;
+		}
+		else
+		{
+			maxtrack = track + 1;
+		}
+
+		if(side < 0)
+		{	
+			side = 0;
+			maxside = fp->floppyNumberOfSide;
+		}
+		else
+		{
+			maxside = side + 1;
+		}
+		
+		for(track=0; track < maxtrack; track++)
+		{
+			for(side=0; side < maxside; side++)
+			{
+				//////////////////////////////////////////
+				// Sector drawing
+				for(i=0;i<32;i++)
+				{
+					if( formats & (0x00000001<<i) )
+					{
+						track_hash( floppycontext, fp, track, side, i, &crc32 );
+					}
+				}
+			}
+		}
+
+		memcpy(hashbuffer,&crc32,sizeof(uint32_t));
+	}
+	return HXCFE_NOERROR;
 }

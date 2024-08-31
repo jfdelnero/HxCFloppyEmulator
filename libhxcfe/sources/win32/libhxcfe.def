@@ -41,6 +41,7 @@ EXPORTS
    hxcfe_getTrackLength                     @45
    hxcfe_getTrackRPM                        @46
    hxcfe_getTrackNumberOfSide               @47
+   hxcfe_getHash                            @48
 
    hxcfe_initFloppy                         @50
    hxcfe_pushTrack                          @51

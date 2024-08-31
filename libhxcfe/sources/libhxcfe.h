@@ -578,7 +578,14 @@ int32_t                hxcfe_getTrackBitrate( HXCFE* floppycontext, HXCFE_FLOPPY
 int32_t                hxcfe_getTrackEncoding( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, int32_t side );
 int32_t                hxcfe_getTrackLength( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, int32_t side );
 int32_t                hxcfe_getTrackRPM( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track );
-int32_t                hxcfe_getTrackNumberOfSide( HXCFE* floppycontext, HXCFE_FLOPPY * fp,int32_t track);
+int32_t                hxcfe_getTrackNumberOfSide( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track );
+
+#define                HASH_TYPE_CRC32          0x00000001
+#define                HASH_FLAG_DATA           (1<<0)
+#define                HASH_FLAG_METADATA       (1<<1)
+#define                HASH_FLAG_PHYSICALORDER  (1<<2)
+
+int32_t                hxcfe_getHash( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, int32_t side, int32_t sector, uint32_t formats, int hashtype, uint32_t flags, void * hashbuffer, int hashmaxsize );
 
 int32_t                hxcfe_shiftTrackData( HXCFE* floppycontext, HXCFE_SIDE * side, int32_t bitoffset );
 int32_t                hxcfe_rotateFloppy( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t bitoffset, int32_t total );
