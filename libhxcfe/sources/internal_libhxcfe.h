@@ -113,6 +113,7 @@ typedef struct _HXCFE_TD
 	int32_t    x_start_us;
 	uint32_t   flags;
 	uint32_t * framebuffer;
+	uint32_t * layers[16];
 	void * sl;
 
 	uint32_t enabledtrackmode;
