@@ -420,6 +420,10 @@ void render(HXCFE_TD *td)
 				*dst = alpha2(0x00000000, reg);
 			}
 		}
+		else
+		{
+			*dst = 0x00000000;
+		}
 
 		src++;
 		dst++;
