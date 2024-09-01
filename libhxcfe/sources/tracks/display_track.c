@@ -393,20 +393,63 @@ void box(HXCFE_TD *td,int layer, int x1,int y1,int x2,int y2, uint32_t color, in
 
 void render(HXCFE_TD *td)
 {
-	int i,j,size;
+	int i,size;
+	uint32_t *src;
+	uint32_t *dst, *end_dest;
+	register uint32_t reg;
 
 	size = td->xsize*td->ysize;
 
-	for(i=0;i<size;i++)
+	src = td->layers[0];
+	dst = td->framebuffer;
+
+	end_dest = dst + size;
+
+	while( dst < end_dest )
 	{
-		td->framebuffer[i] = alpha2(0x00000000, td->layers[0][i]);
+		reg = *src;
+
+		if( reg & 0xFF000000 )
+		{
+			if( ( reg & 0xFF000000 ) == 0xFF000000 )
+			{
+				*dst = reg;
+			}
+			else
+			{
+				*dst = alpha2(0x00000000, reg);
+			}
+		}
+
+		src++;
+		dst++;
 	}
 
-	for(j=1;j<3;j++)
+	for(i=1;i<3;i++)
 	{
-		for(i=0;i<size;i++)
+		src = td->layers[i];
+		dst = td->framebuffer;
+
+		end_dest = dst + size;
+
+		while( dst < end_dest )
 		{
-			td->framebuffer[i] = alpha2(td->framebuffer[i], td->layers[j][i]);
+			reg = *src;
+
+			if( reg & 0xFF000000 )
+			{
+				if( ( reg & 0xFF000000 ) == 0xFF000000 )
+				{
+					*dst = reg;
+				}
+				else
+				{
+					*dst = alpha2(*dst, reg);
+				}
+			}
+
+			src++;
+			dst++;
 		}
 	}
 }
@@ -3350,7 +3393,7 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	}
 
 	render(td);
-	
+
 	sprintf(tempstr,"CRC32: Processing");
 	putstring8x8(td,LAYER_TEXT,td->xsize/2 - (8*18),td->ysize - 9,tempstr,0xAAAAAA,0x000000,0,0);
 
@@ -3360,7 +3403,7 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 
 	sprintf(tempstr,"CRC32: 0x%.8X",crc32);
 	putstring8x8(td,LAYER_TEXT,td->xsize/2 - (8*18),td->ysize - 9,tempstr,0xAAAAAA,0x000000,0,0);
-	
+
 	render(td);
 
 }
