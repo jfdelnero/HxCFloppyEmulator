@@ -614,6 +614,8 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 			if(!ad->xmlcheck)
 				hxcfe_setRPM (ad->fb,(unsigned short)atoi(buffer));
 		break;
+		case DISK_CRC32:
+		break;
 		case TRACK_LENGTH:
 			if(!ad->xmlcheck)
 				hxcfe_setRPM (ad->fb,(atoi(buffer)/10) | 0x40000000);

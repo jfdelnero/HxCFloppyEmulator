@@ -135,6 +135,7 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG** sca;
 	sect_offset ** sorted_sectoffset,**sectoffset;
+	uint32_t crc32;
 
 	sectoffset = NULL;
 	sorted_sectoffset = NULL;
@@ -203,8 +204,11 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			fprintf(xmlfile,"\t\t<pregap>%d</pregap>\n",0);
 			fprintf(xmlfile,"\t\t<rpm>%d</rpm>\n",floppy->tracks[0]->floppyRPM);
 
-			fprintf(xmlfile,"\t\t<track_list>\n");
+			hxcfe_getHash( imgldr_ctx->hxcfe, floppy, -1, -1, -1, (0x1<<ISOIBM_FM_ENCODING) | (0x1<<ISOIBM_MFM_ENCODING), HASH_TYPE_CRC32, HASH_FLAG_DATA | HASH_FLAG_PHYSICALORDER, &crc32, sizeof(crc32) );
 
+			fprintf(xmlfile,"\t\t<crc32>0x%.8X</crc32>\n",crc32);
+
+			fprintf(xmlfile,"\t\t<track_list>\n");
 
 			for(j=0;j<floppy->floppyNumberOfTrack;j++)
 			{
