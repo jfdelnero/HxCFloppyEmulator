@@ -3220,10 +3220,9 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 		circle(td,LAYER_SUPPORT,x_pos_1,y_pos,i,color,255);
 	}
 
-	putstring8x8(td,LAYER_SUPPORT,x_pos_1 + 40,y_pos - 3, "---",0xCCCCCC,0x000000,0,1);
-
 	if( !side )
 	{
+		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) + 40,(y_pos - td->window_ypos) - 3, "---",0xCCCCCC,0x000000,0,1);		
 		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) - 24,(y_pos - td->window_ypos) + 8, "Side 0",0x666666,0x000000,0,1);
 		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) - 40,(y_pos - td->window_ypos) + 16,"Bottom side",0x666666,0x000000,0,1);
 		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) - 40,(y_pos - td->window_ypos) + 24,"Bottom view",0x666666,0x000000,0,1);
