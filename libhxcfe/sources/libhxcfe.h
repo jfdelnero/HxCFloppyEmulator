@@ -528,6 +528,7 @@ int32_t                hxcfe_td_exportToBMP( HXCFE_TD *td, char * filename );
 void                   hxcfe_td_deinit( HXCFE_TD *td );
 s_pulseslist *         hxcfe_td_getlastpulselist( HXCFE_TD *td );
 int                    hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_STREAMCHANNEL* stream_channel, int stream_index,uint16_t * sound_buffer, int nbsamples, int samplerate);
+int32_t                hxcfe_td_zoom_area( HXCFE_TD *td, uint32_t x1, uint32_t y1 ,uint32_t x2, uint32_t y2 );
 
 #define TD_FLAG_HICONTRAST (0x1 << 0)
 #define TD_FLAG_BIGDOT     (0x1 << 1)

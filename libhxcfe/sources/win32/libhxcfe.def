@@ -110,6 +110,7 @@ EXPORTS
    hxcfe_td_stream_to_sound                 @137
    hxcfe_td_set_marker                      @138
    hxcfe_td_draw_stream_track               @139
+   hxcfe_td_zoom_area                       @140
 
    hxcfe_generateFloppy                     @150
 

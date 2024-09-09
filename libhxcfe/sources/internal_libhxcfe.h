@@ -108,7 +108,15 @@ typedef struct _HXCFE_TD
 {
 	HXCFE * hxcfe;
 
+	// Window / Display size
 	int32_t    xsize,ysize;
+
+	// Zoomed full resolution
+	int32_t    virtual_xsize,virtual_ysize;
+
+	// Window x,y position
+	int32_t    window_xpos,window_ypos;
+
 	int32_t    x_us,y_us;
 	int32_t    x_start_us;
 	uint32_t   flags;

@@ -268,10 +268,13 @@ void plot(HXCFE_TD *td, int layer, int x, int y, uint32_t color, uint8_t alpha_v
 	unsigned char color_r,color_v,color_b;
 	uint32_t rdcolor;
 
-	if(x>=0 && x<td->xsize)
+	if( ( x >= td->window_xpos ) && ( x < ( td->window_xpos + td->xsize ) ) )
 	{
-		if(y>=0 && y<td->ysize)
+		if( ( y >= td->window_ypos ) && ( y < ( td->window_ypos + td->ysize ) ) )
 		{
+			x -= td->window_xpos;
+			y -= td->window_ypos;
+
 			switch(op)
 			{
 				case 0:
@@ -472,8 +475,15 @@ HXCFE_TD * hxcfe_td_init(HXCFE* floppycontext,uint32_t xsize,uint32_t ysize)
 	{
 		memset(td,0,sizeof(HXCFE_TD));
 		td->hxcfe = floppycontext;
+
 		td->xsize = xsize;
 		td->ysize = ysize;
+
+		td->virtual_xsize = xsize;
+		td->virtual_ysize = ysize;
+
+		td->window_xpos = 0;
+		td->window_ypos = 0;
 
 		td->x_us=200*1000;
 		td->y_us=64;
@@ -522,6 +532,118 @@ alloc_error:
 	free(td);
 
 	return NULL;
+}
+
+int32_t hxcfe_td_zoom_area( HXCFE_TD *td, uint32_t x1, uint32_t y1 ,uint32_t x2, uint32_t y2)
+{
+	uint32_t t;
+	float x_ratio, y_ratio, ratio;
+	int32_t new_virtual_xsize;
+	int32_t new_virtual_ysize;
+	int32_t x_center, y_center;
+
+#if 0
+	printf("zi: x1:%d y1:%d x2:%d y2:%d\n",x1,y1,x2,y2);
+	printf("zi: xsize:%d ysize:%d vxsize:%d vysize:%d\n",td->xsize,td->ysize,td->virtual_xsize,td->virtual_ysize);
+	printf("zi: xpos:%d ypos:%d\n",td->window_xpos,td->window_ypos);
+#endif
+
+	if( !x1 && !x2 && !y1 && !y2 )
+	{
+		// restore initial 1x zoom
+
+		td->virtual_xsize = td->xsize;
+		td->virtual_ysize = td->ysize;
+
+		td->window_xpos = 0;
+		td->window_ypos = 0;
+
+		return 0;
+	}
+	else
+	{
+		if( x1 > x2 )
+		{
+			t = x1;
+			x1 = x2;
+			x2 = t;
+		}
+
+		if( y1 > y2 )
+		{
+			t = y1;
+			y1 = y2;
+			y2 = t;
+		}
+
+		if(
+			( (x2 - x1 > 0) && (y2 - y1 > 0) ) &&
+			( (x1 < td->xsize ) && (x2 < td->xsize ) ) &&
+			( (y1 < td->ysize ) && (y2 < td->ysize ) )
+		)
+		{
+			// Valid parameters
+
+			x_ratio = (float) td->virtual_xsize / (float) (x2 - x1);
+			y_ratio = (float) td->virtual_ysize / (float) (y2 - y1);
+
+			if( x_ratio < y_ratio )
+				ratio = x_ratio;
+			else
+				ratio = y_ratio;
+
+			new_virtual_xsize = (int32_t)(ratio * (float)td->virtual_xsize);
+
+			if( new_virtual_xsize > 32*1024 )
+			{
+				ratio = (float)(32*1024) / (float)td->virtual_xsize;
+
+				new_virtual_xsize = (int32_t)(ratio * (float)td->virtual_xsize);
+			}
+
+			new_virtual_ysize = (int32_t)(ratio * (float)td->virtual_ysize);
+			if( new_virtual_ysize > 32*1024 )
+			{
+				ratio = (float)(32*1024) / (float)td->virtual_ysize;
+
+				new_virtual_ysize = (int32_t)(ratio * (float)td->virtual_ysize);
+				new_virtual_xsize = (int32_t)(ratio * (float)td->virtual_xsize);
+			}
+
+			x_center = (float)( ((x2 - x1) / 2) + x1 + td->window_xpos ) * ratio;
+			y_center = (float)( ((y2 - y1) / 2) + y1 + td->window_ypos ) * ratio;
+
+			td->window_xpos = x_center - (td->xsize / 2);
+			td->window_ypos = y_center - (td->ysize / 2);
+
+			if ( td->window_xpos + td->xsize >= new_virtual_xsize )
+				td->window_xpos = new_virtual_xsize - ( td->xsize + 1 );
+
+			if ( td->window_ypos + td->ysize >= new_virtual_ysize )
+				td->window_ypos = new_virtual_ysize - ( td->ysize + 1 );
+
+			if( td->window_xpos < 0 )
+				td->window_xpos = 0;
+
+			if( td->window_ypos < 0 )
+				td->window_ypos = 0;
+
+			td->virtual_xsize = new_virtual_xsize;
+			td->virtual_ysize = new_virtual_ysize;
+
+#if 0
+			printf("zo: x1:%d y1:%d x2:%d y2:%d\n",x1,y1,x2,y2);
+			printf("zo: xsize:%d ysize:%d vxsize:%d vysize:%d\n",td->xsize,td->ysize,td->virtual_xsize,td->virtual_ysize);
+			printf("zo: xpos:%d ypos:%d\n",td->window_xpos,td->window_ypos);
+#endif
+
+			return 0;
+		}
+		else
+		{
+			return -1;
+		}
+	}
 }
 
 int32_t hxcfe_td_setProgressCallback( HXCFE_TD *td, HXCFE_TDPROGRESSOUT_FUNC progress_func, void * userdata )
@@ -3047,13 +3169,13 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 	y_pos = y_center;
 	x_pos_1 = x_center;
 
-	if( td->ysize < (td->xsize / 2) )
+	if( td->virtual_ysize < (td->virtual_xsize / 2) )
 	{
-		total_radius = td->ysize - (td->ysize /2);
+		total_radius = td->virtual_ysize - (td->virtual_ysize /2);
 	}
 	else
 	{
-		total_radius = (td->xsize/2) - (td->xsize / 4);
+		total_radius = (td->virtual_xsize/2) - (td->virtual_xsize / 4);
 	}
 
 	center_hole_radius = (int)((float)total_radius * ((float)floppy_dimension[physical_dim].hole_radius_um / \
@@ -3102,18 +3224,18 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 
 	if( !side )
 	{
-		putstring8x8(td,LAYER_SUPPORT,x_pos_1 - 24,y_pos + 8, "Side 0",0x666666,0x000000,0,1);
-		putstring8x8(td,LAYER_SUPPORT,x_pos_1 - 40,y_pos + 16,"Bottom side",0x666666,0x000000,0,1);
-		putstring8x8(td,LAYER_SUPPORT,x_pos_1 - 40,y_pos + 24,"Bottom view",0x666666,0x000000,0,1);
-		putstring8x8(td,LAYER_SUPPORT,x_pos_1 - 4,y_pos - 44, "<-",0x666666,0x000000,0,1);
+		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) - 24,(y_pos - td->window_ypos) + 8, "Side 0",0x666666,0x000000,0,1);
+		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) - 40,(y_pos - td->window_ypos) + 16,"Bottom side",0x666666,0x000000,0,1);
+		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) - 40,(y_pos - td->window_ypos) + 24,"Bottom view",0x666666,0x000000,0,1);
+		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) - 4,(y_pos - td->window_ypos) - 44, "<-",0x666666,0x000000,0,1);
 	}
 	else
 	{
-		putstring8x8(td,LAYER_SUPPORT,x_pos_1 + 40,y_pos - 3, "---",0xCCCCCC,0x000000,0,1);
-		putstring8x8(td,LAYER_SUPPORT,x_pos_1 - 24,y_pos + 8, "Side 1",0x666666,0x000000,0,1);
-		putstring8x8(td,LAYER_SUPPORT,x_pos_1 - 32,y_pos + 16,"Top side",0x666666,0x000000,0,1);
-		putstring8x8(td,LAYER_SUPPORT,x_pos_1 - 32,y_pos + 24,"Top view",0x666666,0x000000,0,1);
-		putstring8x8(td,LAYER_SUPPORT,x_pos_1 - 4,y_pos - 44, "->",0x666666,0x000000,0,1);
+		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) + 40,(y_pos - td->window_ypos) - 3, "---",0xCCCCCC,0x000000,0,1);
+		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) - 24,(y_pos - td->window_ypos) + 8, "Side 1",0x666666,0x000000,0,1);
+		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) - 32,(y_pos - td->window_ypos) + 16,"Top side",0x666666,0x000000,0,1);
+		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) - 32,(y_pos - td->window_ypos) + 24,"Top view",0x666666,0x000000,0,1);
+		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) - 4,(y_pos - td->window_ypos) - 44, "->",0x666666,0x000000,0,1);
 	}
 
 	switch(floppy_dimension[physical_dim].index_type)
@@ -3277,25 +3399,25 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	}
 
 	sprintf(tempstr,"Side %d, %d Tracks",0,floppydisk->floppyNumberOfTrack);
-	putstring8x8(td,LAYER_TEXT,1,1,tempstr,0xAAAAAA,0x000000,0,0);
+	putstring8x8(td,LAYER_TEXT,1,1,tempstr,0xAAAAAA,0x000000,0,1);
 
 	if(floppydisk->floppyNumberOfSide == 2)
 	{
 		sprintf(tempstr,"Side %d, %d Tracks",1,floppydisk->floppyNumberOfTrack);
-		putstring8x8(td,LAYER_TEXT,td->xsize/2,1,tempstr,0xAAAAAA,0x000000,0,0);
+		putstring8x8(td,LAYER_TEXT,td->xsize/2,1,tempstr,0xAAAAAA,0x000000,0,1);
 	}
 
-	y_pos = td->ysize/2;
-	x_pos_1 = td->xsize/4;
-	x_pos_2 = td->xsize - (td->xsize/4);
+	y_pos = td->virtual_ysize/2;
+	x_pos_1 = td->virtual_xsize/4;
+	x_pos_2 = td->virtual_xsize - (td->virtual_xsize/4);
 
-	if( td->ysize < (td->xsize / 2) )
+	if( td->virtual_ysize < (td->virtual_xsize / 2) )
 	{
-		total_radius = td->ysize - (td->ysize /2);
+		total_radius = td->virtual_ysize - (td->virtual_ysize /2);
 	}
 	else
 	{
-		total_radius = (td->xsize/2) - (td->xsize / 4);
+		total_radius = (td->virtual_xsize/2) - (td->virtual_xsize / 4);
 	}
 
 	for(i=0;i<2;i++)
@@ -3346,13 +3468,13 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 		hxcfe_draw_side(td, floppydisk, x_pos_1, y_pos, 0);
 
 	sprintf(tempstr,"%d Sectors,%d bad", countSector(td->sl,0),countBadSectors(td->sl,0));
-	putstring8x8(td,LAYER_TEXT,1,11,tempstr,0xAAAAAA,0x000000,0,0);
+	putstring8x8(td,LAYER_TEXT,1,11,tempstr,0xAAAAAA,0x000000,0,1);
 
 	sprintf(tempstr,"%d Bytes", countSize(td->sl,0));
-	putstring8x8(td,LAYER_TEXT,1,21,tempstr,0xAAAAAA,0x000000,0,0);
+	putstring8x8(td,LAYER_TEXT,1,21,tempstr,0xAAAAAA,0x000000,0,1);
 
 	sprintf(tempstr,"CRC32: --------");
-	putstring8x8(td,LAYER_TEXT,td->xsize/2 - (8*18),td->ysize - 9,tempstr,0xAAAAAA,0x000000,0,0);
+	putstring8x8(td,LAYER_TEXT,td->xsize/2 - (8*18),td->ysize - 9,tempstr,0xAAAAAA,0x000000,0,1);
 
 	ytypepos = 31;
 	i = 0;
@@ -3360,17 +3482,17 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	{
 		if(countTrackType(td->sl,0,track_type_list[i].track_type))
 		{
-			putstring8x8(td,LAYER_TEXT,1,ytypepos,"             ",0xAAAAAA,0x000000,0,0);
-			putstring8x8(td,LAYER_TEXT,1,ytypepos,track_type_list[i].name,0xAAAAAA,0x000000,0,0);
+			putstring8x8(td,LAYER_TEXT,1,ytypepos,"             ",0xAAAAAA,0x000000,0,1);
+			putstring8x8(td,LAYER_TEXT,1,ytypepos,track_type_list[i].name,0xAAAAAA,0x000000,0,1);
 			ytypepos += 10;
 		}
 		i++;
 	}
 
 	if( hxcfe_floppyGetFlags( td->hxcfe, floppydisk ) & HXCFE_FLOPPY_WRPROTECTED_FLAG )
-		putstring8x8(td,LAYER_TEXT,1,ytypepos,"WrProt ON ",0xAAAAAA,0x000000,0,0);
+		putstring8x8(td,LAYER_TEXT,1,ytypepos,"WrProt ON ",0xAAAAAA,0x000000,0,1);
 	else
-		putstring8x8(td,LAYER_TEXT,1,ytypepos,"WrProt OFF",0xAAAAAA,0x000000,0,0);
+		putstring8x8(td,LAYER_TEXT,1,ytypepos,"WrProt OFF",0xAAAAAA,0x000000,0,1);
 
 	render(td);
 
@@ -3378,10 +3500,10 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 		hxcfe_draw_side(td, floppydisk, x_pos_2, y_pos, 1);
 
 	sprintf(tempstr,"%d Sectors,%d bad", countSector(td->sl,1),countBadSectors(td->sl,1));
-	putstring8x8(td,LAYER_TEXT,(td->xsize/2)+1,11,tempstr,0xAAAAAA,0x000000,0,0);
+	putstring8x8(td,LAYER_TEXT,(td->xsize/2)+1,11,tempstr,0xAAAAAA,0x000000,0,1);
 
 	sprintf(tempstr,"%d Bytes", countSize(td->sl,1));
-	putstring8x8(td,LAYER_TEXT,(td->xsize/2)+1,21,tempstr,0xAAAAAA,0x000000,0,0);
+	putstring8x8(td,LAYER_TEXT,(td->xsize/2)+1,21,tempstr,0xAAAAAA,0x000000,0,1);
 
 	ytypepos = 31;
 	i = 0;
@@ -3389,8 +3511,8 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	{
 		if(countTrackType(td->sl,1,track_type_list[i].track_type))
 		{
-			putstring8x8(td,LAYER_TEXT, (td->xsize/2)+1,ytypepos,"             ",0xAAAAAA,0x000000,0,0);
-			putstring8x8(td,LAYER_TEXT, (td->xsize/2)+1,ytypepos,track_type_list[i].name,0xAAAAAA,0x000000,0,0);
+			putstring8x8(td,LAYER_TEXT, (td->xsize/2)+1,ytypepos,"             ",0xAAAAAA,0x000000,0,1);
+			putstring8x8(td,LAYER_TEXT, (td->xsize/2)+1,ytypepos,track_type_list[i].name,0xAAAAAA,0x000000,0,1);
 			ytypepos += 10;
 		}
 		i++;
@@ -3399,14 +3521,14 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	render(td);
 
 	sprintf(tempstr,"CRC32: Processing");
-	putstring8x8(td,LAYER_TEXT,td->xsize/2 - (8*18),td->ysize - 9,tempstr,0xAAAAAA,0x000000,0,0);
+	putstring8x8(td,LAYER_TEXT,td->xsize/2 - (8*18),td->ysize - 9,tempstr,0xAAAAAA,0x000000,0,1);
 
 	render(td);
 
 	hxcfe_getHash( td->hxcfe, floppydisk, -1, -1, -1, td->enabledtrackmode, HASH_TYPE_CRC32, HASH_FLAG_DATA | HASH_FLAG_PHYSICALORDER, (void*)&crc32, sizeof(crc32) );
 
 	sprintf(tempstr,"CRC32: 0x%.8X",crc32);
-	putstring8x8(td,LAYER_TEXT,td->xsize/2 - (8*18),td->ysize - 9,tempstr,0xAAAAAA,0x000000,0,0);
+	putstring8x8(td,LAYER_TEXT,td->xsize/2 - (8*18),td->ysize - 9,tempstr,0xAAAAAA,0x000000,0,1);
 
 	render(td);
 
