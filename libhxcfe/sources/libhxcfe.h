@@ -529,6 +529,10 @@ void                   hxcfe_td_deinit( HXCFE_TD *td );
 s_pulseslist *         hxcfe_td_getlastpulselist( HXCFE_TD *td );
 int                    hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_STREAMCHANNEL* stream_channel, int stream_index,uint16_t * sound_buffer, int nbsamples, int samplerate);
 int32_t                hxcfe_td_zoom_area( HXCFE_TD *td, uint32_t x1, uint32_t y1 ,uint32_t x2, uint32_t y2 );
+int32_t                hxcfe_td_virt_xres( HXCFE_TD *td );
+int32_t                hxcfe_td_virt_yres( HXCFE_TD *td );
+int32_t                hxcfe_td_window_xpos( HXCFE_TD *td );
+int32_t                hxcfe_td_window_ypos( HXCFE_TD *td );
 
 #define TD_FLAG_HICONTRAST (0x1 << 0)
 #define TD_FLAG_BIGDOT     (0x1 << 1)

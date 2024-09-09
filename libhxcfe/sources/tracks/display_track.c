@@ -646,6 +646,26 @@ int32_t hxcfe_td_zoom_area( HXCFE_TD *td, uint32_t x1, uint32_t y1 ,uint32_t x2,
 	}
 }
 
+int32_t hxcfe_td_virt_xres( HXCFE_TD *td )
+{
+	return td->virtual_xsize;
+}
+
+int32_t hxcfe_td_virt_yres( HXCFE_TD *td )
+{
+	return td->virtual_ysize;
+}
+
+int32_t hxcfe_td_window_xpos( HXCFE_TD *td )
+{
+	return td->window_xpos;
+}
+
+int32_t hxcfe_td_window_ypos( HXCFE_TD *td )
+{
+	return td->window_ypos;
+}
+
 int32_t hxcfe_td_setProgressCallback( HXCFE_TD *td, HXCFE_TDPROGRESSOUT_FUNC progress_func, void * userdata )
 {
 	if(td)

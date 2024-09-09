@@ -111,6 +111,10 @@ EXPORTS
    hxcfe_td_set_marker                      @138
    hxcfe_td_draw_stream_track               @139
    hxcfe_td_zoom_area                       @140
+   hxcfe_td_virt_xres                       @141
+   hxcfe_td_virt_yres                       @142
+   hxcfe_td_window_xpos                     @143
+   hxcfe_td_window_ypos                     @144
 
    hxcfe_generateFloppy                     @150
 
