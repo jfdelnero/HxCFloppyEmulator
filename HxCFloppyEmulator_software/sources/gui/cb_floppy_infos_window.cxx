@@ -450,7 +450,8 @@ int InfosThreadProc(void* floppycontext,void* context)
 						if(old_view_mode != view_mode)
 						{
 							w->x_offset->value(x_offset_track);
-
+							// Reset zoom
+							hxcfe_td_zoom_area( td, 0, 0, 0, 0);
 							guicontext->updatefloppyinfos = 1;
 						}
 					break;
@@ -462,11 +463,18 @@ int InfosThreadProc(void* floppycontext,void* context)
 						if(old_view_mode != view_mode)
 						{
 							w->x_offset->value(x_offset_stream);
-
+							// Reset zoom
+							hxcfe_td_zoom_area( td, 0, 0, 0, 0);
 							guicontext->updatefloppyinfos = 1;
 						}
 					break;
 					default:
+						if(old_view_mode != view_mode)
+						{
+							// Reset zoom
+							hxcfe_td_zoom_area( td, 0, 0, 0, 0);
+						}
+
 						hxcfe_td_select_view_type( td, w->view_mode->value());
 						hxcfe_td_setProgressCallback(td,progress_callback,(void*)guicontext);
 						hxcfe_td_draw_disk(td,guicontext->trackviewerfloppy);
@@ -794,7 +802,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 		case FL_PUSH:
 
 			pushed = 1;
-			
+
 			ix=Fl::event_x();
 			iy=Fl::event_y();
 
@@ -910,7 +918,7 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 			if(pushed)
 			{
-				
+
 				{
 					if(fiw->view_mode->value()>MAX_TRACK_MODES_INDEX)
 					{
@@ -926,9 +934,9 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 				}
 
 				pushed = 0;
-				
+
 				return;
-				
+
 			}
 
 
