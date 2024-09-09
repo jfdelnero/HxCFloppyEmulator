@@ -3465,7 +3465,10 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	td->hxc_setprogress(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide,floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide,td,td->progress_userdata);
 
 	if(floppydisk->floppyNumberOfSide > 0)
-		hxcfe_draw_side(td, floppydisk, x_pos_1, y_pos, 0);
+	{
+		if( td->window_xpos < td->virtual_xsize / 2 )
+			hxcfe_draw_side(td, floppydisk, x_pos_1, y_pos, 0);
+	}
 
 	sprintf(tempstr,"%d Sectors,%d bad", countSector(td->sl,0),countBadSectors(td->sl,0));
 	putstring8x8(td,LAYER_TEXT,1,11,tempstr,0xAAAAAA,0x000000,0,1);
@@ -3497,8 +3500,10 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 	render(td);
 
 	if(floppydisk->floppyNumberOfSide > 1)
-		hxcfe_draw_side(td, floppydisk, x_pos_2, y_pos, 1);
-
+	{
+		if( td->window_xpos + td->xsize >= td->virtual_xsize / 2 )
+			hxcfe_draw_side(td, floppydisk, x_pos_2, y_pos, 1);
+	}
 	sprintf(tempstr,"%d Sectors,%d bad", countSector(td->sl,1),countBadSectors(td->sl,1));
 	putstring8x8(td,LAYER_TEXT,(td->xsize/2)+1,11,tempstr,0xAAAAAA,0x000000,0,1);
 
