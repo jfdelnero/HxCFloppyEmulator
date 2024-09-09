@@ -48,8 +48,8 @@ class Fl_Mouse_Box : public Fl_Box
                     evt = e;
                     return 1;
 
-
-				case FL_PUSH:
+                case FL_PUSH:
+                case FL_DRAG:
                 case FL_MOVE:
                     evt = e;
 
@@ -85,4 +85,3 @@ class Fl_Mouse_Box : public Fl_Box
 };
 
 extern void mouse_di_cb(Fl_Widget *o, void *v);
-
