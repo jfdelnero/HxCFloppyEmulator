@@ -77,6 +77,7 @@ int Fl_DND_Box::handle(int e)
 			// This allows caller to popup a window or change widget focus.
 			if(callback() && ((when() & FL_WHEN_RELEASE) || (when() & FL_WHEN_CHANGED)))
 				Fl::add_timeout(0.0, Fl_DND_Box::callback_deferred, (void*)this);
+
 			return 1;
 	}
 
