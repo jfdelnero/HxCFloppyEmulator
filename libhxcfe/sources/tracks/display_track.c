@@ -3123,15 +3123,15 @@ typedef struct physical_floppy_dim_
 
 physical_floppy_dim floppy_dimension[]=
 {   //                                 total_radius_um  hole_radius_um  center_to_tracks_radius_um  tracks_space_radius_um   track_witdh_um      track_spacing_um            window                  Index type
-	{	"Track view",                      50000,          13000,         { 15000, 15000 },           { 35000, 35000 },       { 300, 300 },          { 0, 0 },      { -1,     0,    0,     0 }        , 0},
-	{	"Stream view",                     50000,          13000,         { 15000, 15000 },           { 35000, 35000 },       { 300, 300 },          { 0, 0 },      { -1,     0,    0,     0 }        , 0},
-	{	"Stream view (Fat pixels)",        50000,          13000,         { 15000, 15000 },           { 35000, 35000 },       { 300, 300 },          { 0, 0 },      { -1,     0,    0,     0 }        , 0},
-	{	"Dummy disk",                      50000,          13000,         { 15000, 15000 },           { 35000, 35000 },       { 300, 300 },          { 0, 0 },      { -1,     0,    0,     0 }        , 0},
-	{	"3\"1/2 135 TPI",                  43000,          12000,         { 23946, 22446 },           { 15754, 15754 },       { 115, 115 },          { 187, 187 },  { 19000, -4500, 42500, 4500 }     , 1},
-	{	"5\"1/4 96 TPI",                   65000,          14500,         { 35000, 35000 },           { 22224, 22224 },       { 160, 160 },          { 264, 264 },  { 33000, -6500, 60000, 6500 }     , 2},
-	{	"5\"1/4 48 TPI",                   65000,          14500,         { 34500, 34500 },           { 22724, 22724 },       { 330, 330 },          { 529, 529 },  { 33000, -6500, 60000, 6500 }     , 2},
-	{	"8\" 48 TPI",                      99000,          19250,         { 54000, 54000 },           { 41576, 41576 },       { 330, 330 },          { 529, 529 },  { 50000, -6500, 98000, 6500 }     , 3},
-	{	NULL,                              43000,          12000,         { 21000, 21000 },           { 15805, 15805 },       { 300, 300 },          { 420, 420 },  { 50000, -6500, 98000, 6500 }     , 1}
+	{   "Track view",                      50000,          13000,         { 15000, 15000 },           { 35000, 35000 },       { 300, 300 },          { 0, 0 },      { -1,     0,    0,     0 }        , 0},
+	{   "Stream view",                     50000,          13000,         { 15000, 15000 },           { 35000, 35000 },       { 300, 300 },          { 0, 0 },      { -1,     0,    0,     0 }        , 0},
+	{   "Stream view (Fat pixels)",        50000,          13000,         { 15000, 15000 },           { 35000, 35000 },       { 300, 300 },          { 0, 0 },      { -1,     0,    0,     0 }        , 0},
+	{   "Dummy disk",                      50000,          13000,         { 15000, 15000 },           { 35000, 35000 },       { 300, 300 },          { 0, 0 },      { -1,     0,    0,     0 }        , 0},
+	{   "3\"1/2 135 TPI",                  43000,          12000,         { 23946, 22446 },           { 15754, 15754 },       { 115, 115 },          { 187, 187 },  { 19000, -4500, 42500, 4500 }     , 1},
+	{   "5\"1/4 96 TPI",                   65000,          14500,         { 35000, 35000 },           { 22224, 22224 },       { 160, 160 },          { 264, 264 },  { 33000, -6500, 60000, 6500 }     , 2},
+	{   "5\"1/4 48 TPI",                   65000,          14500,         { 34500, 34500 },           { 22724, 22724 },       { 330, 330 },          { 529, 529 },  { 33000, -6500, 60000, 6500 }     , 2},
+	{   "8\" 48 TPI",                      99000,          19250,         { 54000, 54000 },           { 41576, 41576 },       { 330, 330 },          { 529, 529 },  { 50000, -6500, 98000, 6500 }     , 3},
+	{   NULL,                              43000,          12000,         { 21000, 21000 },           { 15805, 15805 },       { 300, 300 },          { 420, 420 },  { 50000, -6500, 98000, 6500 }     , 1}
 };
 
 void hxcfe_td_select_view_type( HXCFE_TD *td, int32_t disk_type)
@@ -3175,7 +3175,7 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 	int start_tracks_space_radius;
 	//int end_tracks_space_radius;
 	int tracks_space_radius;
-	float track_ep;
+	float track_ep,g_track_ep;
 	int xpos;
 	int max_physical_tracks;
 	char tempstr[512];
@@ -3199,39 +3199,38 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 	}
 
 	center_hole_radius = (int)((float)total_radius * ((float)floppy_dimension[physical_dim].hole_radius_um / \
-	                                                  (float)floppy_dimension[physical_dim].total_radius_um));
+													  (float)floppy_dimension[physical_dim].total_radius_um));
 
-	for(i=0;i<2;i++)
+	//end_tracks_space_radius = (int)((float)total_radius * ((float)floppy_dimension[physical_dim].center_to_tracks_radius_um[i] /
+	//                             (float)floppy_dimension[physical_dim].total_radius_um));
+
+	start_tracks_space_radius = (int)((float)total_radius * ((float)(floppy_dimension[physical_dim].center_to_tracks_radius_um[side] + floppy_dimension[physical_dim].tracks_space_radius_um[side]) / \
+										 (float)floppy_dimension[physical_dim].total_radius_um));
+
+	tracks_space_radius = (int)((float)total_radius * ((float)floppy_dimension[physical_dim].tracks_space_radius_um[side] / \
+														  (float)floppy_dimension[physical_dim].total_radius_um));
+
+	if( floppy_dimension[physical_dim].track_spacing_um[side] > 0 )
 	{
-		//end_tracks_space_radius = (int)((float)total_radius * ((float)floppy_dimension[physical_dim].center_to_tracks_radius_um[i] /
-		//                             (float)floppy_dimension[physical_dim].total_radius_um));
-
-		start_tracks_space_radius = (int)((float)total_radius * ((float)(floppy_dimension[physical_dim].center_to_tracks_radius_um[side] + floppy_dimension[physical_dim].tracks_space_radius_um[side]) / \
-		                                     (float)floppy_dimension[physical_dim].total_radius_um));
-
-		tracks_space_radius = (int)((float)total_radius * ((float)floppy_dimension[physical_dim].tracks_space_radius_um[side] / \
-		                                                      (float)floppy_dimension[physical_dim].total_radius_um));
-
-		if( floppy_dimension[physical_dim].track_spacing_um[side] > 0 )
+		track_ep = ((float)total_radius * ((float)floppy_dimension[physical_dim].track_spacing_um[side] / \
+											  (float)floppy_dimension[physical_dim].total_radius_um));
+	}
+	else
+	{
+		track_ep = 1;
+		if(floppydisk->floppyNumberOfTrack)
 		{
-			track_ep = ((float)total_radius * ((float)floppy_dimension[physical_dim].track_spacing_um[side] / \
-		                                          (float)floppy_dimension[physical_dim].total_radius_um));
-		}
-		else
-		{
-			track_ep = 1;
-			if(floppydisk->floppyNumberOfTrack)
-			{
-				track_ep = ((float)tracks_space_radius / (float)floppydisk->floppyNumberOfTrack);
-			};
-		}
+			track_ep = ((float)tracks_space_radius / (float)floppydisk->floppyNumberOfTrack);
+		};
+	}
 
-		max_physical_tracks = floppydisk->floppyNumberOfTrack;
-		if((int)(max_physical_tracks * track_ep) > tracks_space_radius)
-		{
-			max_physical_tracks = (int)(tracks_space_radius / track_ep);
-			doesntfit = 1;
-		}
+	g_track_ep = track_ep;
+
+	max_physical_tracks = floppydisk->floppyNumberOfTrack;
+	if((int)(max_physical_tracks * track_ep) > tracks_space_radius)
+	{
+		max_physical_tracks = (int)(tracks_space_radius / track_ep);
+		doesntfit = 1;
 	}
 
 	color = hxcfe_getEnvVarValue( td->hxcfe, "BMPDISKEXPORT_COLOR_MEDIA_SUBSTRATE" );;
@@ -3242,7 +3241,7 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 
 	if( !side )
 	{
-		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) + 40,(y_pos - td->window_ypos) - 3, "---",0xCCCCCC,0x000000,0,1);		
+		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) + 40,(y_pos - td->window_ypos) - 3, "---",0xCCCCCC,0x000000,0,1);
 		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) - 24,(y_pos - td->window_ypos) + 8, "Side 0",0x666666,0x000000,0,1);
 		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) - 40,(y_pos - td->window_ypos) + 16,"Bottom side",0x666666,0x000000,0,1);
 		putstring8x8(td,LAYER_SUPPORT,(x_pos_1 - td->window_xpos) - 40,(y_pos - td->window_ypos) + 24,"Bottom view",0x666666,0x000000,0,1);
@@ -3263,21 +3262,21 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 		break;
 		case 1:
 			disc(td,LAYER_SUPPORT,x_pos_1 + um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, 10000 ), \
-			          y_pos, \
-			          um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, 1250 ), \
-			          0x00000000,0x808080, 255);
+					y_pos, \
+					um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, 1250 ), \
+					0x00000000,0x808080, 255);
 		break;
 		case 2:
 			disc(td,LAYER_SUPPORT,x_pos_1 + um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, 7000 ), \
-			          y_pos + um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, 24000 ),
-			          um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, 1000 ),
-			          0x00000000,0x808080, 255);
+					y_pos + um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, 24000 ),
+					um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, 1000 ),
+					0x00000000,0x808080, 255);
 		break;
 		case 3:
 			disc(td,LAYER_SUPPORT,x_pos_1 - um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, 39000 ), \
-			          y_pos + um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um,  4000 ),
-			          um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, 2000 ),
-			          0x00000000,0x808080, 255);
+					y_pos + um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um,  4000 ),
+					um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, 2000 ),
+					0x00000000,0x808080, 255);
 		break;
 	}
 
@@ -3298,7 +3297,7 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 		td->hxc_setprogress(track*floppydisk->floppyNumberOfSide,floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide*2,td,td->progress_userdata);
 
 		currentside = floppydisk->tracks[track]->sides[side];
-		draw_density_circle (td,LAYER_SUPPORT,0x0000FF,0xFF,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,start_tracks_space_radius - (int)((float)track * track_ep),0,(int)track_ep,currentside,(side & 1)^1);
+		draw_density_circle (td,LAYER_SUPPORT,0x0000FF,0xFF,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,start_tracks_space_radius - (int)((float)track * track_ep),0,(int)g_track_ep,currentside,(side & 1)^1);
 
 		if( !(track % 10) )
 			render(td);
@@ -3320,7 +3319,7 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 		{
 			if(td->enabledtrackmode & (0x00000001<<i) )
 			{
-				display_sectors_disk(td,floppydisk,track,side,0,i,x_pos_1,y_pos,start_tracks_space_radius - (int)(track * track_ep),(int)track_ep, (side & 1)^1);
+				display_sectors_disk(td,floppydisk,track,side,0,i,x_pos_1,y_pos,start_tracks_space_radius - (int)(track * track_ep),(int)g_track_ep, (side & 1)^1);
 			}
 		}
 
@@ -3334,7 +3333,7 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 					xpos= (int)((float)2048 * ((float)i/(float)tracksize));
 					if( (xpos<2048))
 					{
-						draw_circle (td,LAYER_IDENTIFICATION,0x0000FF,alpha,(float)((float)((float)2 * PI)*((float)xpos/(float)2048)),(float)((float)((float)2 * PI)*((float)xpos/(float)2048)),x_pos_1,y_pos,start_tracks_space_radius - (int)((track * track_ep)),0,(int)track_ep, (side & 1)^1);
+						draw_circle (td,LAYER_IDENTIFICATION,0x0000FF,alpha,(float)((float)((float)2 * PI)*((float)xpos/(float)2048)),(float)((float)((float)2 * PI)*((float)xpos/(float)2048)),x_pos_1,y_pos,start_tracks_space_radius - (int)((track * track_ep)),0,(int)g_track_ep, (side & 1)^1);
 					}
 				}
 
@@ -3350,13 +3349,18 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 
 	render(td);
 
-	for(track=0;track<max_physical_tracks+1;track++)
+	// Track to track separation
+	if( g_track_ep > 5.0)
 	{
-//		draw_circle (td,LAYER_IDENTIFICATION,0xF8F8F8,alpha,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,start_tracks_space_radius - (int)((track * track_ep)) + 1,1,(int)0,1);
+		for(track=0;track<max_physical_tracks+1;track++)
+		{
+			draw_circle (td,LAYER_TEXT,0x000000,50,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,start_tracks_space_radius - (int)((track * track_ep)) + 1,1,(int)0,1);
+		}
 	}
 
 	draw_circle (td,LAYER_IDENTIFICATION,0xEFEFEF,alpha,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,start_tracks_space_radius - (int)(((max_physical_tracks+1) * track_ep)) + 1,1,(int)0,1);
 
+	// mechanical details
 	if(floppy_dimension[physical_dim].window[0] >= 0)
 	{
 		box(td,LAYER_IDENTIFICATION,um2pix(total_radius, floppy_dimension[physical_dim].total_radius_um, floppy_dimension[physical_dim].window[0] ) + x_pos_1, \
@@ -3445,12 +3449,12 @@ void hxcfe_td_draw_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk)
 		//                             (float)floppy_dimension[physical_dim].total_radius_um));
 
 		tracks_space_radius[i] = (int)((float)total_radius * ((float)floppy_dimension[physical_dim].tracks_space_radius_um[i] / \
-		                                                      (float)floppy_dimension[physical_dim].total_radius_um));
+															(float)floppy_dimension[physical_dim].total_radius_um));
 
 		if( floppy_dimension[physical_dim].track_spacing_um[i] > 0 )
 		{
 			track_ep[i] = ((float)total_radius * ((float)floppy_dimension[physical_dim].track_spacing_um[i] / \
-		                                          (float)floppy_dimension[physical_dim].total_radius_um));
+												(float)floppy_dimension[physical_dim].total_radius_um));
 		}
 		else
 		{
