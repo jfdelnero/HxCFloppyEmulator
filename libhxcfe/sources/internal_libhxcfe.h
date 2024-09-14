@@ -139,6 +139,8 @@ typedef struct _HXCFE_TD
 	void * progress_userdata;
 
 	HXCFE_TD_MARKER markers[MAX_MARKER];
+
+	float angle_step;
 }HXCFE_TD;
 
 #define _HXCFE_TD_

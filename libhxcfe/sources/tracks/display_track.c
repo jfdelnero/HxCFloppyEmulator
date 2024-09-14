@@ -263,7 +263,7 @@ void clear_layers( HXCFE_TD *td )
 	}
 }
 
-void plot(HXCFE_TD *td, int layer, int x, int y, uint32_t color, uint8_t alpha_value, int op)
+static void plot(HXCFE_TD *td, int layer, int x, int y, uint32_t color, uint8_t alpha_value, int op)
 {
 	unsigned char color_r,color_v,color_b;
 	uint32_t rdcolor;
@@ -300,6 +300,331 @@ void plot(HXCFE_TD *td, int layer, int x, int y, uint32_t color, uint8_t alpha_v
 				break;
 			}
 		}
+	}
+}
+
+void line_fast(HXCFE_TD *td, int layer, int x1 ,int y1, int x2, int y2, unsigned int color, uint8_t alpha )
+{
+	int first_x,last_x;
+	int first_y,last_y;
+	int dx;
+	int dy;
+	int inc1,inc2;
+	int sub,remain,error;
+	int op;
+
+	op = 0;
+
+	if( x1 < x2 )
+	{
+		first_x = x1;
+		last_x = x2;
+		first_y = y1;
+		last_y = y2;
+	}
+	else
+	{
+		first_x = x2;
+		last_x = x1;
+		first_y = y2;
+		last_y = y1;
+	}
+
+	dx = last_x - first_x;
+	dy = last_y - first_y;
+
+	if ((!dx)&&(!dy))
+	{
+		return; // rien a tracer
+	}
+
+	if (dy<0)
+	{
+		dy = -dy;
+		inc1 = -1;
+		inc2 = 1;
+	}
+	else
+	{
+		inc1 = 1;
+		inc2 = 1;
+	}
+
+
+	if (dx>dy)
+	{
+		sub = dx - dy;
+		error = dy - ( dx >> 1);
+		remain = (dx + 1) >> 1;
+
+		do
+		{
+			plot(td, layer, first_x, first_y, color, alpha, op);
+			plot(td, layer, last_x, last_y, color, alpha, op);
+
+			first_x += inc2;
+			last_x -= inc2;
+			if (error>=0)
+			{
+				first_y += inc1;
+				last_y -= inc1;
+				error -= sub;
+			}
+			else
+				error += dy;
+
+		} while (--remain>0);
+
+		if ( !(dx&1) )
+			plot(td, layer, first_x, first_y, color, alpha, op);
+
+		return;
+	}
+	else
+	{
+		sub = dy - dx;
+		error = dx - ( dy >> 1 );
+		remain = ( dy + 1 ) >> 1;
+
+		do
+		{
+			plot(td, layer, first_x, first_y, color, alpha, op);
+			plot(td, layer, last_x, last_y, color, alpha, op);
+
+			first_y += inc1;
+			last_y -= inc1;
+
+			if ( error >= 0 )
+			{
+				first_x += inc2;
+				last_x -= inc2;
+				error -= sub;
+			}
+			else
+				error += dx;
+
+		} while ( --remain > 0 );
+
+		if ( !(dy&1) )
+			plot(td, layer, first_x, first_y, color, alpha, op);
+
+		return;
+	}
+}
+
+void line(HXCFE_TD *td, int layer, int first_x ,int first_y, int last_x, int last_y, unsigned int color, uint8_t alpha )
+{
+	int dx;
+	int dy;
+	int inc1,inc2;
+	int sub,remain,error;
+	int op;
+
+	op = 0;
+
+	dx = last_x - first_x;
+	dy = last_y - first_y;
+
+	if ((!dx)&&(!dy))
+	{
+		return; // rien a tracer
+	}
+
+	if ( dx < 0 )
+	{
+		dx = -dx;
+		inc2 = -1;
+	}
+	else
+	{
+		inc2 = 1;
+	}
+
+	if (dy<0)
+	{
+		dy = -dy;
+		inc1 = -1;
+	}
+	else
+	{
+		inc1 = 1;
+	}
+
+	if ( dx > dy )
+	{
+		sub = dx - dy;
+		error = dy - ( dx >> 1);
+
+		remain = (dx + 1);
+
+		do
+		{
+			plot(td, layer, first_x, first_y, color, alpha, op);
+
+			if (error>=0)
+			{
+				plot(td, layer, first_x + inc2, first_y, color, alpha, op);
+
+				first_y += inc1;
+				error -= sub;
+
+				plot(td, layer, first_x, first_y, color, alpha, op);
+			}
+			else
+				error += dy;
+
+			first_x += inc2;
+
+		} while ( --remain > 0 );
+
+		if ( !(dx&1) )
+			plot(td, layer, first_x, first_y, color, alpha, op);
+
+		return;
+	}
+	else
+	{
+		sub = dy - dx;
+		error = dx - ( dy >> 1 );
+
+		remain = ( dy + 1 );
+
+		do
+		{
+			plot(td, layer, first_x, first_y, color, alpha, op);
+
+			if ( error >= 0 )
+			{
+				plot(td, layer, first_x, first_y + inc1, color, alpha, op);
+
+				first_x += inc2;
+				error -= sub;
+
+				plot(td, layer, first_x, first_y, color, alpha, op);
+			}
+			else
+				error += dx;
+
+			first_y += inc1;
+
+		} while ( --remain > 0 );
+
+		if ( !(dy&1) )
+			plot(td, layer, first_x, first_y, color, alpha, op);
+
+		return;
+	}
+}
+
+static int dist(int x1, int y1, int x2, int y2 )
+{
+	return ( ( x1 - x2 ) * ( x1 - x2 ) ) + ( ( y1 - y2 ) * ( y1 - y2 ) );
+}
+
+void line_len(HXCFE_TD *td, int layer, int first_x ,int first_y, int last_x, int last_y, int len, unsigned int color, uint8_t alpha, int op)
+{
+	int dx;
+	int dy;
+	int inc1,inc2;
+	int sub,remain,error;
+	int start_x;
+	int start_y;
+
+	dx = last_x - first_x;
+	dy = last_y - first_y;
+
+	start_x = first_x;
+	start_y = first_y;
+
+	if ((!dx)&&(!dy))
+	{
+		return; // rien a tracer
+	}
+
+	if ( dx < 0 )
+	{
+		dx = -dx;
+		inc2 = -1;
+	}
+	else
+	{
+		inc2 = 1;
+	}
+
+	if (dy<0)
+	{
+		dy = -dy;
+		inc1 = -1;
+	}
+	else
+	{
+		inc1 = 1;
+	}
+
+	if ( dx > dy )
+	{
+		sub = dx - dy;
+		error = dy - ( dx >> 1);
+
+		remain = (dx + 1);
+
+		do
+		{
+			plot(td, layer, first_x, first_y, color, alpha, op);
+
+			if (error>=0)
+			{
+				plot(td, layer, first_x + inc2, first_y, color, alpha, op);
+
+				first_y += inc1;
+				error -= sub;
+
+				plot(td, layer, first_x, first_y, color, alpha, op);
+			}
+			else
+				error += dy;
+
+			first_x += inc2;
+
+		} while ( --remain > 0 && dist(start_x, start_y, first_x, first_y ) <= len );
+
+		//if ( !(dx&1) )
+		//	plot(td, layer, first_x, first_y, color, alpha, op);
+
+		return;
+	}
+	else
+	{
+		sub = dy - dx;
+		error = dx - ( dy >> 1 );
+
+		remain = ( dy + 1 );
+
+		do
+		{
+			plot(td, layer, first_x, first_y, color, alpha, op);
+
+			if ( error >= 0 )
+			{
+				plot(td, layer, first_x, first_y + inc1, color, alpha, op);
+
+				first_x += inc2;
+				error -= sub;
+
+				plot(td, layer, first_x, first_y, color, alpha, op);
+			}
+			else
+				error += dx;
+
+			first_y += inc1;
+
+
+		} while ( --remain > 0 && dist(start_x, start_y, first_x, first_y ) <= len );
+
+		//if ( !(dy&1) )
+		//	plot(td, layer, first_x, first_y, color, alpha, op);
+
+		return;
 	}
 }
 
@@ -340,6 +665,54 @@ void circle(HXCFE_TD *td,int layer,int x_centre,int y_centre,int r,unsigned int 
 			{
 				d = d+2*y-1;
 				y = y-1;
+			}
+			else
+			{
+				d = d+2*(y-x-1);
+				y = y-1;
+				x = x+1;
+			}
+		}
+	}
+}
+
+void circle_B(HXCFE_TD *td,int layer,int x_centre,int y_centre,int r,unsigned int color, uint8_t alpha)
+{
+	int x;
+	int y;
+	int d;
+
+	x = 0;
+	y = r;
+	d = r - 1;
+
+//    8  1
+//  7     2
+//  6     3
+//    5 4
+
+	while( y >= x )
+	{
+		line_len( td, layer, x + x_centre,  -y + y_centre, x_centre, y_centre, (r / 2) * (r / 2), x, alpha, 0);  // 1 -
+		line_len( td, layer, y + x_centre,  -x + y_centre, x_centre, y_centre,(r / 2) * (r / 2), x, alpha, 0 );  // 2 +
+		line_len( td, layer, x_centre + y,   x + y_centre, x_centre, y_centre,(r / 2) * (r / 2), x, alpha, 0 );  // 3 -
+		line_len( td, layer, x_centre + x,   y + y_centre, x_centre, y_centre,(r / 2) * (r / 2), x, alpha, 0 );  // 4 +
+		line_len( td, layer, -x + x_centre,  y + y_centre, x_centre, y_centre,(r / 2) * (r / 2), x, alpha, 0 );  // 5 -
+		line_len( td, layer, -y + x_centre,  x + y_centre, x_centre, y_centre,(r / 2) * (r / 2), x, alpha, 0 );  // 6 +
+		line_len( td, layer, -y + x_centre, -x + y_centre, x_centre, y_centre,(r / 2) * (r / 2), x, alpha, 0 );  // 7 -
+		line_len( td, layer, -x + x_centre, -y + y_centre, x_centre, y_centre,(r / 2) * (r / 2), x, alpha, 0 );  // 8 +
+
+		if ( d >= 2*x )
+		{
+			d = d - ( 2 * x ) -1;
+			x = x + 1;
+		}
+		else
+		{
+			if( d <= 2*(r-y) )
+			{
+				d = d+2*y-1;
+				y = y - 1;
 			}
 			else
 			{
@@ -489,6 +862,8 @@ HXCFE_TD * hxcfe_td_init(HXCFE* floppycontext,uint32_t xsize,uint32_t ysize)
 		td->y_us=64;
 
 		td->x_start_us=0;
+
+		td->angle_step = 0.001;
 
 		if(!bitmap_hxc2001_logo_bmp->unpacked_data)
 		{
@@ -2640,64 +3015,93 @@ s_pulseslist * hxcfe_td_getlastpulselist(HXCFE_TD *td)
 
 void draw_circle (HXCFE_TD *td,int layer, uint32_t col,uint8_t alpha_val,float start_angle,float stop_angle,int xpos,int ypos,int diametre,int op,int thickness,int counterclock)
 {
-	int x, y,i;
+	int x, y;
+	int x_tmp, y_tmp;
 	int length;
-	float angle = 0.0;
-	float angle_stepsize = (float)0.001;
+	float angle = 0.0, old_angle;
+	float angle_stepsize = (float)td->angle_step;
 
 	length = diametre;
 
-	if(op!=1) thickness++;
+	if(op!=1)
+		thickness++;
 
-	i = 0;
-	do
+	if(!counterclock)
 	{
-		if(!counterclock)
+		angle = start_angle;
+		old_angle = angle;
+
+		// go through all angles from 0 to 2 * PI radians
+		do //2 * 3.14159)
 		{
-			angle = start_angle;
-			// go through all angles from 0 to 2 * PI radians
-			do //2 * 3.14159)
+			// calculate x, y from a vector with known length and angle
+			x = (int)((length) * cos (angle));
+			y = (int)((length) * sin (angle));
+
+			line_len( td, layer, x+xpos, -y+ypos, xpos, ypos, thickness*thickness, col, alpha_val, op );
+
+			while ( old_angle < angle )
 			{
-				// calculate x, y from a vector with known length and angle
-				x = (int)((length) * cos (angle));
-				y = (int)((length) * sin (angle));
+				x_tmp = (int)((length) * cos (old_angle));
+				y_tmp = (int)((length) * sin (old_angle));
 
-				plot(td, layer, x+xpos, -y+ypos  , col, alpha_val, op);
+				if( (x!=x_tmp) || (y!=y_tmp) )
+				{
+					line_len( td, layer, x_tmp+xpos, -y_tmp+ypos, xpos, ypos, thickness*thickness, col, alpha_val, op );
+				}
 
-				angle += angle_stepsize;
-			}while (angle < stop_angle );
-		}
-		else
+				old_angle += (angle_stepsize / 10.0);
+			}
+
+			old_angle = angle;
+			angle += angle_stepsize;
+
+		}while (angle < stop_angle );
+	}
+	else
+	{
+		angle = start_angle;
+		old_angle = angle;
+
+		// go through all angles from 0 to 2 * PI radians
+		do //2 * 3.14159)
 		{
-			angle = start_angle;
-			// go through all angles from 0 to 2 * PI radians
-			do //2 * 3.14159)
+			// calculate x, y from a vector with known length and angle
+			x = (int)((length) * cos ((2*PI) - angle));
+			y = (int)((length) * sin ((2*PI) - angle));
+
+			line_len( td, layer, x+xpos, -y+ypos, xpos, ypos, thickness*thickness, col, alpha_val, op );
+
+			while ( old_angle < angle )
 			{
-				// calculate x, y from a vector with known length and angle
-				x = (int)((length) * cos ((2*PI) - angle));
-				y = (int)((length) * sin ((2*PI) - angle));
+				x_tmp = (int)((length) * cos ((2*PI) - old_angle));
+				y_tmp = (int)((length) * sin ((2*PI) - old_angle));
 
-				plot(td, layer, x+xpos, -y+ypos  , col, alpha_val, op);
+				if( (x!=x_tmp) || (y!=y_tmp) )
+				{
+					line_len( td, layer, x_tmp+xpos, -y_tmp+ypos, xpos, ypos, thickness*thickness, col, alpha_val, op );
+				}
 
-				angle += angle_stepsize;
-			}while (angle < stop_angle );
-		}
+				old_angle += (angle_stepsize / 10.0);
+			}
 
-		length--;
-		i++;
-	}while(i<(thickness));
+			old_angle = angle;
+			angle += angle_stepsize;
+
+		}while (angle < stop_angle );
+	}
 }
 
 void draw_density_circle (HXCFE_TD *td, int layer, uint32_t col, uint8_t alpha_val, float start_angle,float stop_angle,int xpos,int ypos,int diametre,int op,int thickness,HXCFE_SIDE * side,int counterclock)
 {
-	int x, y,i, x_old,y_old;
+	int x, y, x_old, y_old, x_tmp, y_tmp;
 	int length;
 	int old_j,j,k;
 
 	float timingoffset;
 	float track_timing,timingoffset2;
-	float angle = 0.0;
-	float angle_stepsize = (float)0.001;
+	float angle = 0.0, old_angle;
+	float angle_stepsize = (float)td->angle_step;
 	int tracksize;
 	int prev_offset;
 	int bitcount;
@@ -2712,89 +3116,105 @@ void draw_density_circle (HXCFE_TD *td, int layer, uint32_t col, uint8_t alpha_v
 
 	tracksize = side->tracklen;
 
-	i = 0;
+	timingoffset = 0;
+	old_j = 0;
+	j = 0;
+	prev_offset = 0;
+
+	//bitcount
+	angle = start_angle;
+	old_angle = angle;
+
+	if(!counterclock)
+	{
+		x_old = (int)((length) * cos (angle));
+		y_old = (int)((length) * sin (angle));
+	}
+	else
+	{
+		x_old = (int)((length) * cos ((2*PI) - angle));
+		y_old = (int)((length) * sin ((2*PI) - angle));
+	}
+
+	// go through all angles from 0 to 2 * PI radians
 	do
 	{
-		timingoffset = 0;
-		old_j = 0;
-		j = 0;
-		prev_offset = 0;
-
-		//bitcount
-		angle = start_angle;
+		// calculate x, y from a vector with known length and angle
 		if(!counterclock)
 		{
-			x_old = (int)((length) * cos (angle));
-			y_old = (int)((length) * sin (angle));
+			x = (int)((length) * cos (angle));
+			y = (int)((length) * sin (angle));
 		}
 		else
 		{
-			x_old = (int)((length) * cos ((2*PI) - angle));
-			y_old = (int)((length) * sin ((2*PI) - angle));
+			x = (int)((length) * cos ((2*PI) - angle));
+			y = (int)((length) * sin ((2*PI) - angle));
 		}
 
-		// go through all angles from 0 to 2 * PI radians
-		do
+		if( (x_old != x) || (y_old != y) )
 		{
-			// calculate x, y from a vector with known length and angle
-			if(!counterclock)
-			{
-				x = (int)((length) * cos (angle));
-				y = (int)((length) * sin (angle));
-			}
-			else
-			{
-				x = (int)((length) * cos ((2*PI) - angle));
-				y = (int)((length) * sin ((2*PI) - angle));
-			}
+			timingoffset2=( track_timing * ( angle / ( stop_angle - start_angle ) ) );
 
-
-			if( (x_old != x) || (y_old != y) )
+			while((j<tracksize) && timingoffset2>timingoffset)
 			{
-				timingoffset2=( track_timing * ( angle / ( stop_angle - start_angle ) ) );
+				timingoffset = getOffsetTiming(side,j,timingoffset,old_j);
+				old_j=j;
+				j++;
+			};
 
-				while((j<tracksize) && timingoffset2>timingoffset)
+			bitcount = 0;
+			totalcount = 0;
+			if(j - prev_offset)
+			{
+
+				mask = 0xFF >> (prev_offset&7);
+
+				for(k=0;k<(j - prev_offset);k+=8)
 				{
-					timingoffset = getOffsetTiming(side,j,timingoffset,old_j);
-					old_j=j;
-					j++;
-				};
+					bitcount = bitcount + LUT_Byte2HighBitsCount[(side->databuffer[(prev_offset+k)>>3])&mask];
+					totalcount = totalcount + LUT_Byte2HighBitsCount[mask];
+					if( (j - prev_offset) - k >= 8)
+						mask = 0xFF;
+					else
+						mask = 0xFF << ( 8 - ( (j - prev_offset) - k ) ) ;
+				}
+			}
 
-				bitcount = 0;
-				totalcount = 0;
-				if(j - prev_offset)
+			lum = (uint8_t)((float)col * (float) ((float)bitcount/(float)totalcount) );
+
+			line_len( td, layer, x+xpos, -y+ypos, xpos, ypos, thickness*thickness, (uint32_t)( (lum<<16) | ( (lum>>1) <<8) | (lum>>1)), alpha_val, op );  // 1 -
+
+			while ( old_angle < angle )
+			{
+				if(!counterclock)
 				{
-
-					mask = 0xFF >> (prev_offset&7);
-
-					for(k=0;k<(j - prev_offset);k+=8)
-					{
-						bitcount = bitcount + LUT_Byte2HighBitsCount[(side->databuffer[(prev_offset+k)>>3])&mask];
-						totalcount = totalcount + LUT_Byte2HighBitsCount[mask];
-						if( (j - prev_offset) - k >= 8)
-							mask = 0xFF;
-						else
-							mask = 0xFF << ( 8 - ( (j - prev_offset) - k ) ) ;
-					}
+					x_tmp = (int)((length) * cos (old_angle));
+					y_tmp = (int)((length) * sin (old_angle));
+				}
+				else
+				{
+					x_tmp = (int)((length) * cos ((2*PI) - old_angle));
+					y_tmp = (int)((length) * sin ((2*PI) - old_angle));
 				}
 
-				lum = (uint8_t)((float)col * (float) ((float)bitcount/(float)totalcount) );
+				if( (x!=x_tmp) || (y!=y_tmp) )
+				{
+					line_len( td, layer, x_tmp+xpos, -y_tmp+ypos, xpos, ypos, thickness*thickness, (uint32_t)( (lum<<16) | ( (lum>>1) <<8) | (lum>>1)), alpha_val, op );  // 1 -
+				}
 
-				plot(td, layer, x+xpos, -y+ypos  , (uint32_t)( (lum<<16) | ( (lum>>1) <<8) | (lum>>1)), alpha_val, op);
-
-				prev_offset = old_j;
+				old_angle += (angle_stepsize / 10.0);
 			}
 
-			angle += angle_stepsize;
+			prev_offset = old_j;
+		}
 
-			x_old = x;
-			y_old = y;
+		old_angle = angle;
+		angle += angle_stepsize;
 
-		}while (angle < stop_angle );
+		x_old = x;
+		y_old = y;
 
-		length--;
-		i++;
-	}while(i<(thickness));
+	}while (angle < stop_angle );
 }
 
 s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int track,int side,float timingoffset_offset, int TRACKTYPE,int xpos,int ypos,int diam,int thickness,int mirror)
@@ -3176,11 +3596,13 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 	//int end_tracks_space_radius;
 	int tracks_space_radius;
 	float track_ep,g_track_ep;
-	int xpos;
 	int max_physical_tracks;
 	char tempstr[512];
 	int physical_dim, doesntfit;
 	int alpha;
+	float track_timing;
+	int old_i;
+	float timingoffset;
 
 	alpha = hxcfe_getEnvVarValue( td->hxcfe, "BMPDISKEXPORT_COLOR_ALPHA" );
 	physical_dim = td->disk_type;
@@ -3303,6 +3725,10 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 			render(td);
 	}
 
+	// Clean up
+	for(i=0;i<track_ep + 1;i++)
+		circle(td,LAYER_SUPPORT,x_pos_1,y_pos,start_tracks_space_radius - (int)((track * track_ep)) + 1 - i,color, 0xFF);
+
 	render(td);
 
 	for(track=0;track<max_physical_tracks;track++)
@@ -3325,20 +3751,27 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 
 		if(currentside->flakybitsbuffer)
 		{
-			i=0;
+			// draw weakbits
+			old_i = 0;
+			timingoffset = 0;
+
+			track_timing = (float)getOffsetTiming(currentside,tracksize,timingoffset,old_i);
+
+			i = 0;
 			do
 			{
 				if( currentside->flakybitsbuffer[i>>3] & (0x80>>(i&7)) )
 				{
-					xpos= (int)((float)2048 * ((float)i/(float)tracksize));
-					if( (xpos<2048))
-					{
-						draw_circle (td,LAYER_IDENTIFICATION,0x0000FF,alpha,(float)((float)((float)2 * PI)*((float)xpos/(float)2048)),(float)((float)((float)2 * PI)*((float)xpos/(float)2048)),x_pos_1,y_pos,start_tracks_space_radius - (int)((track * track_ep)),0,(int)g_track_ep, (side & 1)^1);
-					}
+					// Weak bit found.
+					timingoffset = (float)getOffsetTiming(currentside,i,timingoffset,old_i);
+
+					old_i = i;
+
+					draw_circle (td,LAYER_IDENTIFICATION,0x0000FF,alpha,(float)((float)2 * PI)*(timingoffset/track_timing),(float)((float)2 * PI)*(timingoffset/track_timing),x_pos_1,y_pos,start_tracks_space_radius - (int)((track * track_ep)),0,(int)g_track_ep, (side & 1)^1);
 				}
 
 				i++;
-			}while(i<tracksize);
+			}while( i < tracksize);
 		}
 
 		if( !(track % 4) )
@@ -3347,6 +3780,10 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 		}
 	}
 
+	// Clean up
+	for(i=0;i<track_ep + 1;i++)
+		circle(td,LAYER_IDENTIFICATION,x_pos_1,y_pos,start_tracks_space_radius - (int)((track * track_ep)) + 1 - i,0x000000, 0x00);
+
 	render(td);
 
 	// Track to track separation
@@ -3354,11 +3791,11 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 	{
 		for(track=0;track<max_physical_tracks+1;track++)
 		{
-			draw_circle (td,LAYER_TEXT,0x000000,50,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,start_tracks_space_radius - (int)((track * track_ep)) + 1,1,(int)0,1);
+			circle(td,LAYER_TEXT,x_pos_1,y_pos,start_tracks_space_radius - (int)((track * track_ep)) + 1,0x000000, 50);
 		}
 	}
 
-	draw_circle (td,LAYER_IDENTIFICATION,0xEFEFEF,alpha,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,start_tracks_space_radius - (int)(((max_physical_tracks+1) * track_ep)) + 1,1,(int)0,1);
+	circle(td,LAYER_TEXT,x_pos_1,y_pos,start_tracks_space_radius - (int)(((max_physical_tracks+1) * track_ep)) + 1,0x000000, 50);
 
 	// mechanical details
 	if(floppy_dimension[physical_dim].window[0] >= 0)
