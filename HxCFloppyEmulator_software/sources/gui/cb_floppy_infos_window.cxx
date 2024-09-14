@@ -773,12 +773,6 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 	{
 		dragged = 0;
 		pushed = 0;
-		ix = 0;
-		iy = 0;
-		sx = 0;
-		sy = 0;
-		sw = 0;
-		sh = 0;
 		return;
 	}
 
