@@ -71,7 +71,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 {
 	int bit_offset_bak,bit_offset,tmp_bit_offset;
 	int last_start_offset;
-	int sector_size;
+	int sector_size, tmp_sector_size;
 	unsigned char mfm_buffer[32];
 	unsigned char tmp_buffer[32];
 	unsigned char * tmp_sector;
@@ -81,6 +81,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 	int sector_extractor_sm;
 	int k;
 	unsigned char crctable[32];
+	uint8_t mask;
 
 	memset(sector,0,sizeof(HXCFE_SECTCFG));
 
@@ -129,7 +130,14 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 					sector->cylinder = tmp_buffer[4];
 					sector->head = tmp_buffer[5];
 					sector->sector = tmp_buffer[6];
-					sector->sectorsize = sectorsize[tmp_buffer[7]&0x7];
+
+					mask = hxcfe_getEnvVarValue( floppycontext, "SECTOR_SIZE_FIELD_MASK" );
+					if( mask <= 0 && mask > 0xFF )
+					{
+						mask = 0x7;
+					}
+
+					sector->sectorsize = sectorsize[tmp_buffer[7] & mask];
 					sector->alternate_sector_size_id = tmp_buffer[7];
 					sector->trackencoding = ISOFORMAT_DD;
 					sector->alternate_datamark = 0x00;
@@ -148,17 +156,16 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 
 					if(!CRC16_High && !CRC16_Low)
 					{ // crc ok !!!
- 						floppycontext->hxc_printf(MSG_DEBUG,"Valid MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
+ 						floppycontext->hxc_printf(MSG_DEBUG,"Valid MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sector->sectorsize);
 						sector->use_alternate_header_crc = 0;
 					}
 					else
 					{
-						floppycontext->hxc_printf(MSG_DEBUG,"Bad MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
+						floppycontext->hxc_printf(MSG_DEBUG,"Bad MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sector->sectorsize);
 					}
 
 					bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
 
-					sector_size = sectorsize[tmp_buffer[7]&0x7];
 					bit_offset_bak = bit_offset;
 
 					mfm_buffer[0] = 0x44;
@@ -172,6 +179,8 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 					if((bit_offset!=-1))
 					{
 						tmp_sector_index = NULL;
+
+						sector_size = sector->sectorsize;
 
 						tmp_sector=(unsigned char*)malloc(3+1+sector_size+2);
 						if(!tmp_sector)
@@ -208,8 +217,33 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 							}
 							else
 							{
+#if 0
+								// size id field size auto detection
+								// Bad crc ... Is N a 2 bits field ? 
+								tmp_sector_size = sectorsize[tmp_buffer[7]&0x3];
+								CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
+								for(k=0;k<(3+1+tmp_sector_size+2);k++)
+								{
+									CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
+								}
+								
+								if(!CRC16_High && !CRC16_Low)
+								{
+									// Only 2 bits used in the sector size...
+									sector_size = tmp_sector_size;
+									sector->sectorsize = sector_size;
+									sector->endsectorindex = mfmtobin(track->databuffer,tmp_sector_index,track->tracklen,tmp_sector,3+1+sector_size+2,bit_offset,0);
+									floppycontext->hxc_printf(MSG_DEBUG,"Data CRC Ok. (0x%.4X)",sector->data_crc);
+								}
+								else
+								{
+									floppycontext->hxc_printf(MSG_DEBUG,"Data CRC ERROR ! (0x%.4X)",sector->data_crc);
+									sector->use_alternate_data_crc=0xFF;
+								}
+#else
 								floppycontext->hxc_printf(MSG_DEBUG,"Data CRC ERROR ! (0x%.4X)",sector->data_crc);
 								sector->use_alternate_data_crc=0xFF;
+#endif
 							}
 
 							sector->input_data = (unsigned char*)malloc(sector_size);
