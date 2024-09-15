@@ -20,7 +20,7 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 ** **** 2024 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
 
 *** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
-*** Last update : v2.16.2.1, 14 Sept 2024 ***
+*** Last update : v2.16.3.1, 16 Sept 2024 ***
 
 -> New Writer : PNG file (Disk/tracks and stream layouts) -> Disk layout can now be exported into a PNG file (for disk analysis) !
 
@@ -54,6 +54,8 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -> Disk viewer : Rendering enhanced : alpha blending and better drawing.
                  Zoom support.
                  Better weak bits placement precision.
+
+-> new SECTOR_SIZE_FIELD_MASK variable to set the sector size id mask.
 
 /*********************************************************
 
