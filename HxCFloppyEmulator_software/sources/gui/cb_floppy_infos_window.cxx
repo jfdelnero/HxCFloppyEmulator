@@ -836,20 +836,27 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 			if( guicontext->updating)
 				return;
 
-			pushed = 1;
-
-			ix = Fl::event_x();
-			iy = Fl::event_y();
-			sx = ix;
-			sy = iy;
-			sw = 0;
-			sh = 0;
-
 			pl = hxcfe_td_getlastpulselist(guicontext->td);
 
 			buttons_state = Fl::event_buttons();
-			if(buttons_state)
-			{
+			if( buttons_state & FL_BUTTON3 )
+			{   // Right mouse button - clear zoom
+				fl_overlay_clear();
+				hxcfe_td_zoom_area( guicontext->td, 0, 0, 0, 0);
+				hxc_setevent(guicontext->hxcfe,10);
+				dragged = 0;
+			}
+			else if( buttons_state & FL_BUTTON1 )
+			{   // Left mouse button
+				pushed = 1;
+
+				ix = Fl::event_x();
+				iy = Fl::event_y();
+				sx = ix;
+				sy = iy;
+				sw = 0;
+				sh = 0;
+
 				xpos=Fl::event_x() - disp_xpos;
 				if(xpos<0) xpos=0;
 				if(xpos>disp_xsize) xpos=disp_xsize-1;
