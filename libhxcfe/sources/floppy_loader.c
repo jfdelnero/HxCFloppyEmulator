@@ -2520,30 +2520,30 @@ int track_hash( HXCFE* floppycontext, HXCFE_FLOPPY * floppydisk, int track, int 
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG* sc;
 
-	ss=hxcfe_initSectorAccess(floppycontext,floppydisk);
-	if(ss)
+	ss = hxcfe_initSectorAccess(floppycontext,floppydisk);
+	if( ss )
 	{
 		do
 		{
 			sc = hxcfe_getNextSector(ss,track,side,type);
-			if(sc)
+			if( sc )
 			{
 				///////////////////////////////////////
 				// Data Block
 				///////////////////////////////////////
-				if(sc->startdataindex == sc->startsectorindex)
+				if( sc->startdataindex == sc->startsectorindex )
 				{
 					// Header less sector
 				}
 				else
 				{
-					if(sc->use_alternate_data_crc)
+					if( sc->use_alternate_data_crc )
 					{
 						// CRC error
 					}
 					else
 					{
-						if(crc32)
+						if( crc32 )
 						{
 							if(sc->input_data && !sc->use_alternate_data_crc)
 							{
@@ -2552,10 +2552,13 @@ int track_hash( HXCFE* floppycontext, HXCFE_FLOPPY * floppydisk, int track, int 
 						}
 					}
 				}
+
+				hxcfe_freeSectorConfig( ss, sc );
+
 			}
 		}while(sc);
 
-		hxcfe_deinitSectorAccess(ss);
+		hxcfe_deinitSectorAccess( ss );
 	}
 
 	return 0;
