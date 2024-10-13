@@ -117,11 +117,23 @@ uint32_t write_scp_track(HXCFE_IMGLDR* imgldr_ctx,FILE *f,HXCFE_SIDE * track,uin
 
 	memset(trackbuffer,0,sizeof(trackbuffer));
 
-	StreamConvert_getNextPulse(strconv);
-
 	offset = scp_trkh_size;
 	total_time = 0;
 	totalsize = 0;
+
+	// Need to start at the first index...
+	while(!strconv->index_event && !strconv->stream_end_event)
+	{
+		StreamConvert_getNextPulse(strconv);
+	}
+
+	// No index found ...
+	if(!strconv->index_event && strconv->stream_end_event)
+	{
+		// Restart ...
+		strconv->stream_end_event = 0;
+		StreamConvert_getNextPulse(strconv);
+	}
 
 	index = 0;
 	while( (!strconv->stream_end_event) && index < nb_of_revs)
@@ -371,7 +383,7 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		fwrite(&scph,sizeof(scp_header),1,f);
 
 		hxc_fclose(f);
-		
+
 		return HXCFE_NOERROR;
 	}
 
