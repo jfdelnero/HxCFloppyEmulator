@@ -66,6 +66,63 @@
 
 #include "misc/env.h"
 
+void StreamConvert_update_index_event(streamconv * sc)
+{
+	int i;
+
+	if(sc->track->stream_dump && sc->stream_source)
+	{
+		i = 0;
+		while( (i<sc->track->stream_dump->nb_of_index) && \
+			(sc->track->stream_dump->index_evt_tab[i].dump_offset < sc->bitstream_pos) )
+		{
+			i++;
+		}
+
+		if(
+			( i < sc->track->stream_dump->nb_of_index ) &&
+			( sc->track->stream_dump->index_evt_tab[i].dump_offset == sc->bitstream_pos ) )
+		{
+			sc->index_event = 1;
+		}
+		else
+		{
+			sc->index_event = 0;
+		}
+	}
+	else
+	{
+		if( !(sc->bitstream_pos>>3) )
+		{	// Start of the track : Just take the index state.
+			sc->index_state = sc->track->indexbuffer[sc->bitstream_pos>>3];
+			if(sc->index_state)
+			{
+				sc->index_event = 1;
+			}
+			else
+			{
+				sc->index_event = 0;
+			}
+			sc->old_index_state = sc->index_state;
+
+			return;
+		}
+		else
+		{
+			sc->index_state = sc->track->indexbuffer[sc->bitstream_pos>>3];
+			if(sc->index_state && !sc->track->indexbuffer[(sc->bitstream_pos>>3)-1])
+			{
+				sc->index_event = 1;
+			}
+			else
+			{
+				sc->index_event = 0;
+			}
+			sc->old_index_state = sc->index_state;
+		}
+	}
+}
+
 streamconv * initStreamConvert(HXCFE* hxcfe, HXCFE_SIDE * track, float stream_period_ps, float overflowvalue,int start_revolution,float start_offset,int end_revolution,float end_offset)
 {
 	streamconv * sc;
@@ -171,8 +228,9 @@ streamconv * initStreamConvert(HXCFE* hxcfe, HXCFE_SIDE * track, float stream_pe
 			{
 				sc->stream_time_offset_ps += ( ((uint64_t)1E12)/(uint64_t)(sc->track->bitrate*2) );
 			}
-
 		}
+
+		StreamConvert_update_index_event(sc);
 	}
 
 	return sc;
@@ -235,6 +293,8 @@ uint32_t StreamConvert_moveOffset(streamconv * sc, float offset)
 				sc->bitstream_pos++;
 			}
 
+			StreamConvert_update_index_event(sc);
+
 			if(!sc->stream_end_event)
 				return 1;
 			else
@@ -255,6 +315,8 @@ uint32_t StreamConvert_moveOffset(streamconv * sc, float offset)
 
 				sc->bitstream_pos--;
 			}
+
+			StreamConvert_update_index_event(sc);
 
 			if(sc->bitstream_pos)
 				return 1;
