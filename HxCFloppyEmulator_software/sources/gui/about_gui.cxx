@@ -48,6 +48,9 @@ extern "C"
 #include "main.h"
 #include "gui_strings.h"
 
+#define AUDIO_RATE    44100
+#define AUDIO_CHANNEL 2
+
 extern s_gui_context * guicontext;
 
 static char buffer2[1024*16];
@@ -81,6 +84,56 @@ void CALLBACK SoundHandlerProc(HWAVEOUT hwo,UINT uMsg,DWORD * dwInstance,DWORD *
 	}
 	return;
 }
+#else
+	#ifdef LINUX_AUDIOSUPPORT
+	#include <pulse/pulseaudio.h>
+
+	pa_threaded_mainloop *mainloop;
+	pa_mainloop_api *mainloop_api;
+	pa_context *context;
+	pa_stream *stream;
+	pa_sample_spec sample_specifications;
+	pa_channel_map map;
+	pa_stream_flags_t stream_flags;
+	pa_buffer_attr buffer_attr;
+
+	void context_state_cb(pa_context* context, void* mainloop)
+	{
+		pa_threaded_mainloop_signal((pa_threaded_mainloop *)mainloop, 0);
+	}
+
+	void stream_state_cb(pa_stream *s, void *mainloop)
+	{
+		pa_threaded_mainloop_signal((pa_threaded_mainloop *)mainloop, 0);
+	}
+
+	void stream_write_cb(pa_stream *stream, size_t requested_bytes, void *userdata)
+	{
+		size_t bytes_remaining = requested_bytes;
+
+		while (bytes_remaining > 0)
+		{
+			uint8_t *buffer = NULL;
+			size_t bytes_to_fill = AUDIO_RATE;
+
+			if (bytes_to_fill > bytes_remaining)
+				bytes_to_fill = bytes_remaining;
+
+			pa_stream_begin_write(stream, (void**) &buffer, &bytes_to_fill);
+
+			uintro_getnext_soundsample(gb_ui_context,(short*)buffer,bytes_to_fill/2);
+
+			pa_stream_write(stream, buffer, bytes_to_fill, NULL, 0LL, PA_SEEK_RELATIVE);
+
+			bytes_remaining -= bytes_to_fill;
+		}
+	}
+
+	void stream_success_cb(pa_stream *stream, int success, void *userdata)
+	{
+		return;
+	}
+	#endif
 #endif
 
 int startAudioOut()
@@ -95,12 +148,12 @@ int startAudioOut()
 		if(waveOutGetNumDevs()!=0)
 		{
 			pwfx.wFormatTag=1;
-			pwfx.nChannels=2;
-			pwfx.nSamplesPerSec=44100;
-			pwfx.nAvgBytesPerSec=pwfx.nSamplesPerSec*4;
-			pwfx.nBlockAlign=4;
-			pwfx.wBitsPerSample=16;
-			pwfx.cbSize=0;
+			pwfx.nChannels = AUDIO_CHANNEL;
+			pwfx.nSamplesPerSec = AUDIO_RATE;
+			pwfx.nBlockAlign = 2 * AUDIO_CHANNEL;
+			pwfx.nAvgBytesPerSec = pwfx.nSamplesPerSec * 2 * AUDIO_CHANNEL;
+			pwfx.wBitsPerSample = 16;
+			pwfx.cbSize = 0;
 
 			waveOutOpen(&shwd,WAVE_MAPPER,&pwfx,(DWORD_PTR)&SoundHandlerProc,0,CALLBACK_FUNCTION);
 			pwhOut1.lpData=(char*)buffer1;
@@ -122,6 +175,105 @@ int startAudioOut()
 			audiostarted = 1;
 		}
 
+		#else
+		#ifdef LINUX_AUDIOSUPPORT
+		mainloop = pa_threaded_mainloop_new();
+		if(!mainloop)
+			goto audio_init_error;
+
+		mainloop_api = pa_threaded_mainloop_get_api(mainloop);
+		if(!mainloop_api)
+			goto audio_init_error;
+
+		context = pa_context_new(mainloop_api, "HxCFloppyEmulator - About");
+		if(!context)
+			goto audio_init_error;
+
+		pa_context_set_state_callback(context, &context_state_cb, mainloop);
+
+		pa_threaded_mainloop_lock(mainloop);
+
+		pa_threaded_mainloop_start(mainloop);
+
+		pa_context_connect(context, NULL, PA_CONTEXT_NOAUTOSPAWN, NULL);
+
+		// Wait for the context to be ready
+		for(;;)
+		{
+			pa_context_state_t context_state = pa_context_get_state(context);
+			if (context_state == PA_CONTEXT_READY)
+				break;
+			pa_threaded_mainloop_wait(mainloop);
+		}
+
+		sample_specifications.format = PA_SAMPLE_S16NE;
+		sample_specifications.rate = AUDIO_RATE;
+		sample_specifications.channels = 2;
+
+		pa_channel_map_init_stereo(&map);
+
+		stream = pa_stream_new(context, "Playback", &sample_specifications, &map);
+		if(!stream)
+			goto audio_init_error;
+
+		pa_stream_set_state_callback(stream, stream_state_cb, mainloop);
+		pa_stream_set_write_callback(stream, stream_write_cb, mainloop);
+
+		// Recommended settings, i.e. server uses sensible values
+		buffer_attr.maxlength = (uint32_t) -1;
+		buffer_attr.tlength = (uint32_t) -1;
+		buffer_attr.prebuf = (uint32_t) -1;
+		buffer_attr.minreq = (uint32_t) -1;
+
+		stream_flags = (pa_stream_flags_t)(PA_STREAM_START_CORKED | PA_STREAM_INTERPOLATE_TIMING | PA_STREAM_NOT_MONOTONIC | PA_STREAM_AUTO_TIMING_UPDATE | PA_STREAM_ADJUST_LATENCY);
+
+		pa_stream_connect_playback(stream, NULL, &buffer_attr, stream_flags, NULL, NULL);
+
+		// Wait for the stream to be ready
+		for(;;)
+		{
+			pa_stream_state_t stream_state = pa_stream_get_state(stream);
+			if (stream_state == PA_STREAM_READY) break;
+			pa_threaded_mainloop_wait(mainloop);
+		}
+
+		pa_threaded_mainloop_unlock(mainloop);
+
+		// Uncork the stream so it will start playing
+		pa_stream_cork(stream, 0, stream_success_cb, mainloop);
+
+		audiostarted = 1;
+
+		return 0;
+
+audio_init_error:
+		if(mainloop)
+			pa_threaded_mainloop_stop(mainloop);
+
+		if(stream)
+		{
+			pa_stream_disconnect(stream);
+			pa_stream_unref(stream);
+			stream = NULL;
+		}
+
+		if(context)
+		{
+			pa_context_disconnect(context);
+			pa_context_unref(context);
+			context = NULL;
+		}
+
+		if(mainloop)
+		{
+			pa_threaded_mainloop_free(mainloop);
+			mainloop = NULL;
+		}
+
+		#endif
+
+		return 0;
+
 		#endif
 	}
 
@@ -130,12 +282,12 @@ int startAudioOut()
 
 int stopAudioOut()
 {
-
 	if(audiostarted)
 	{
 		audiostarted = 0;
 
 		#ifdef WIN32
+
 		waveOutReset(shwd);
 		waveOutBreakLoop(shwd);
 		waveOutBreakLoop(shwd);
@@ -144,6 +296,35 @@ int stopAudioOut()
 		waveOutUnprepareHeader(shwd,&pwhOut2,sizeof(WAVEHDR));
 
 		waveOutClose(shwd);
+
+		#else
+
+		#ifdef LINUX_AUDIOSUPPORT
+
+		if(mainloop)
+			pa_threaded_mainloop_stop(mainloop);
+
+		if(stream)
+		{
+			pa_stream_disconnect(stream);
+			pa_stream_unref(stream);
+			stream = NULL;
+		}
+
+		if(context)
+		{
+			pa_context_disconnect(context);
+			pa_context_unref(context);
+			context = NULL;
+		}
+
+		if(mainloop)
+		{
+			pa_threaded_mainloop_free(mainloop);
+			mainloop = NULL;
+		}
+		#endif
+
 		#endif
 	}
 
@@ -236,7 +417,7 @@ About_box::~About_box()
 
 	stopAudioOut();
 
-    uintro_deinit(this->ui_context);
+	uintro_deinit(this->ui_context);
 }
 
 #define BUTTONS_BLOCK_XPOS 5

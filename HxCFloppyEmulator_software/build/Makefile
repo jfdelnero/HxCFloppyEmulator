@@ -55,6 +55,12 @@ endif
 
 ifeq ($(TARGET), Linux)
 	LDFLAGS += -lc -lm -ldl -lpthread -Wl,-rpath=.  -Wl,-Map,foo.map
+
+	ifeq "$(shell echo '#include <pulse/pulseaudio.h>\nint main(){return 0;}' | $(CC) -xc -Wall -O -o /dev/null - 2>/dev/null && echo $$? )" "0"
+		CFLAGS += -DLINUX_AUDIOSUPPORT=1
+		LDFLAGS += -lpulse
+	endif
+
 endif
 
 ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
