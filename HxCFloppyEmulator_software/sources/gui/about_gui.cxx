@@ -134,6 +134,28 @@ void CALLBACK SoundHandlerProc(HWAVEOUT hwo,UINT uMsg,DWORD * dwInstance,DWORD *
 		return;
 	}
 	#endif
+
+	#ifdef __APPLE__
+	#include "AudioToolbox/AudioToolbox.h"
+
+	AudioQueueRef queue;
+	AudioQueueBuffer *abuf;
+	OSStatus status;
+	AudioStreamBasicDescription fmt = { 0 };
+	AudioQueueBufferRef buf_ref, buf_ref2;
+
+	void callback (void *ptr, AudioQueueRef queue, AudioQueueBufferRef buf_ref)
+	{
+		OSStatus status;
+		AudioQueueBuffer *buf = buf_ref;
+
+		uintro_getnext_soundsample(gb_ui_context,(short*)buf->mAudioData, buf->mAudioDataByteSize / 2);
+
+		status = AudioQueueEnqueueBuffer (queue, buf_ref, 0, NULL);
+	}
+
+	#endif
+
 #endif
 
 int startAudioOut()
@@ -272,6 +294,47 @@ audio_init_error:
 
 		#endif
 
+		#ifdef __APPLE__
+
+		fmt.mSampleRate = AUDIO_RATE;
+		fmt.mFormatID = kAudioFormatLinearPCM;
+		fmt.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
+		fmt.mFramesPerPacket = 1;
+		fmt.mChannelsPerFrame = AUDIO_CHANNEL;
+		fmt.mBytesPerPacket = fmt.mBytesPerFrame = 2 * AUDIO_CHANNEL;
+		fmt.mBitsPerChannel = 16;
+
+		status = AudioQueueNewOutput(&fmt, callback, NULL, CFRunLoopGetCurrent(), kCFRunLoopCommonModes, 0, &queue);
+
+		if (status == kAudioFormatUnsupportedDataFormatError)
+			goto audio_init_error;
+
+		status = AudioQueueAllocateBuffer (queue, AUDIO_RATE/2, &buf_ref);
+		abuf = buf_ref;
+
+		abuf->mAudioDataByteSize = AUDIO_RATE/2;
+
+		callback (NULL, queue, buf_ref);
+
+		status = AudioQueueAllocateBuffer (queue, AUDIO_RATE/2, &buf_ref2);
+
+		abuf = buf_ref2;
+		abuf->mAudioDataByteSize = AUDIO_RATE/2;
+
+		callback (NULL, queue, buf_ref2);
+
+		status = AudioQueueSetParameter (queue, kAudioQueueParam_Volume, 1.0);
+		status = AudioQueueStart (queue, NULL);
+
+		audiostarted = 1;
+
+		return 0;
+
+audio_init_error:
+		return 0;
+
+		#endif
+
 		return 0;
 
 		#endif
@@ -323,6 +386,11 @@ int stopAudioOut()
 			pa_threaded_mainloop_free(mainloop);
 			mainloop = NULL;
 		}
+		#endif
+
+		#ifdef __APPLE__
+		AudioQueueStop (queue, true);
+		AudioQueueDispose(queue, true);
 		#endif
 
 		#endif
