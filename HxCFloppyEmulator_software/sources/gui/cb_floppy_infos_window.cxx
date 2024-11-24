@@ -960,7 +960,35 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 			if(dragged)
 			{
 				fl_overlay_clear();
-				hxcfe_td_zoom_area( guicontext->td, ix, iy, Fl::event_x(), Fl::event_y());
+
+				if( fiw->view_mode->value() == 0 )
+				{
+					int x_tmp = Fl::event_x();
+					pl = hxcfe_td_getlastpulselist(guicontext->td);
+					while(pl)
+					{
+						if( x_tmp >= pl->x_pos1 && x_tmp <= pl->x_pos2 )
+						{
+							snprintf(str,sizeof(str),"%d",pl->pulse_number);
+							tew->edit_endpoint->value(str);
+
+							hxcfe_td_set_marker( guicontext->td, pl->pulse_number, 1, 1, 0, TD_MARKER_FLAG_ENABLE );
+						}
+
+						if( ix >= pl->x_pos1 && ix <= pl->x_pos2 )
+						{
+							snprintf(str,sizeof(str),"%d",pl->pulse_number);
+							tew->edit_startpoint->value(str);
+							hxcfe_td_set_marker( guicontext->td, pl->pulse_number, 0, 0, 0, TD_MARKER_FLAG_ENABLE );
+						}
+						pl = pl->next_element;
+					}
+				}
+				else
+				{
+					hxcfe_td_zoom_area( guicontext->td, ix, iy, Fl::event_x(), Fl::event_y());
+				}
+
 				hxc_setevent(guicontext->hxcfe,10);
 				dragged = 0;
 				return;
