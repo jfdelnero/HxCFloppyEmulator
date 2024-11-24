@@ -95,7 +95,6 @@ int ADZ_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 int ADZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
 	int ret;
-	int i;
 	unsigned int filesize;
 	unsigned char *flatimg, *tmp_ptr;
 	gzFile file;
@@ -110,7 +109,6 @@ int ADZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return HXCFE_ACCESSERROR;
 	}
 
-	i = 0;
 	filesize = 0;
 
 	flatimg = (unsigned char*)malloc(UNPACKBUFFER);
@@ -136,7 +134,6 @@ int ADZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				goto error;
 			}
 		}
-		i++;
 	}while(err>0);
 
 	gzclose(file);

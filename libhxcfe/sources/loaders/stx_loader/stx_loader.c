@@ -415,7 +415,6 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int trackpos,trackheaderpos;
 	int tracksize;
 	int presenceside[2];
-	int numberofweaksector;
 	unsigned int lastindex;
 	int weaksectortotalsize;
 	int tracklen;
@@ -573,7 +572,6 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					trackmode=1;
 				}
 
-				numberofweaksector=0;
 				weaksectortotalsize=0;
 				tracksize=0;
 
@@ -673,7 +671,6 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 									if((sector[j].FDC_status&0x80)==0x80)
 									{
-										numberofweaksector++;
 										weaksectortotalsize=weaksectortotalsize+sectorconfig[j].sectorsize;
 									}
 								}
@@ -900,8 +897,6 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 							if((sector[j].FDC_status&0x80)==0x80)
 							{
-								numberofweaksector++;
-
 								weaksectortotalsize=weaksectortotalsize+sectorconfig[j].sectorsize;
 							}
 
