@@ -510,7 +510,6 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 	float    value_array[32];
 	uint32_t in_ptr;
 	uint32_t out_ptr;
-	uint32_t fifolevel;
 	uint32_t leftbit;
 #endif
 	uint32_t nextindex_pos;
@@ -629,7 +628,6 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 		cumul_value = 0;
 		in_ptr = 0;
 		out_ptr = 0;
-		fifolevel = 0;
 #endif
 
 		i = 0;
@@ -738,10 +736,6 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 			code_array[in_ptr&31] = cellcode;
 			value_array[in_ptr&31] = (float)value;
 			in_ptr = (in_ptr + 1)&31;
-			/*if(fifolevel<32)
-				fifolevel++;
-			else
-				out_ptr = (out_ptr + 1)&31;*/
 
 			cumul_value += value;
 			cumul_code += cellcode;
@@ -758,7 +752,6 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 						leftbit = leftbit - code_array[out_ptr&31];
 
 						out_ptr = (out_ptr + 1)&31;
-						fifolevel--;
 					}
 					else
 					{

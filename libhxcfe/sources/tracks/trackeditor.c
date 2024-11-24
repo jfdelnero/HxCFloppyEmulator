@@ -1173,7 +1173,7 @@ int repair_sector_type_list[]=
 int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track, int32_t side, int32_t start_cellnumber, int32_t numberofcells )
 {
 	int32_t i,test_pattern_size;
-	uint32_t pattern,loop,old_pattern;
+	uint32_t pattern,old_pattern;
 	HXCFE_SIDE * currentside;
 	HXCFE_SECTORACCESS * sa;
 	HXCFE_SECTCFG** sc_list;
@@ -1260,7 +1260,6 @@ int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track
 					hxcfe_removeCell( floppycontext, currentside, start_cellnumber, test_pattern_size );
 
 					test_pattern_size = 0;
-					loop = 0;
 					do
 					{
 						if(test_pattern_size < numberofcells + 2)
@@ -1309,7 +1308,6 @@ int32_t hxcfe_localRepair( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t track
 							}while( (pattern & ((2<<(test_pattern_size-1))-1)) && !good_pattern);
 						}
 
-						loop++;
 					}while( ( test_pattern_size < numberofcells + 2) && ( test_pattern_size > 0 ) && !good_pattern);
 
 					// Not found... restore the old state

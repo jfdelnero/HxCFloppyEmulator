@@ -3227,7 +3227,6 @@ s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int t
 	float endsector_timingoffset;
 	float timingoffset;
 	int color;
-	int loop;
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG* sc;
 	HXCFE_SIDE * currentside;
@@ -3240,7 +3239,6 @@ s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int t
 	int color_sector_alpha;
 
 	old_i=0;
-	loop=0;
 
 	sl=td->sl;
 	oldsl=0;
@@ -3387,7 +3385,6 @@ s_sectorlist * display_sectors_disk(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk,int t
 		}while(sc);
 
 		hxcfe_deinitSectorAccess(ss);
-		loop++;
 	}
 
 	td->sl=sl;
