@@ -1,15 +1,15 @@
 #!/bin/bash
 
 if [ $OSTYPE == 'darwin'* ] || [ $1 = "1" ] ; then
-export DOWNLOADURL=https://www.fltk.org/pub/fltk/snapshots/fltk-1.4.x-20231229-a09c75e9.tar.gz
-export ARCHIVENAMEBASE=fltk-1.4.x-20231229-a09c75e9
+export DOWNLOADURL=https://www.fltk.org/pub/fltk/1.4.0/fltk-1.4.0-1-source.tar.gz
+export ARCHIVENAMEBASE=fltk-1.4.0-1-source
 export PATCHFILE=
-export FOLDERNAME=fltk-1.4.x-20231229-a09c75e9
+export FOLDERNAME=fltk-1.4.0-1
 else
-export DOWNLOADURL=https://www.fltk.org/pub/fltk/1.3.9/fltk-1.3.9-source.tar.gz
-export ARCHIVENAMEBASE=fltk-1.3.9-source
-export PATCHFILE=fltk-1.3.8.patch
-export FOLDERNAME=fltk-1.3.9
+export DOWNLOADURL=https://www.fltk.org/pub/fltk/1.4.0/fltk-1.4.0-1-source.tar.gz
+export ARCHIVENAMEBASE=fltk-1.4.0-1-source
+export PATCHFILE=fltk-1.4.x-vc6.patch
+export FOLDERNAME=fltk-1.4.0-1
 fi
 
 if [[ ! -d fltk-1.x.x ]]; then
