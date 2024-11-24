@@ -132,14 +132,14 @@ ifneq (,$(findstring arm64,$(MACOSX_ARCH)))
 		cd ../sources/thirdpartylibs/fltk && \
 		cp -a fltk-1.x.x fltk-1.x.x-arm64 && \
 		cd fltk-1.x.x-arm64 && \
-		export CFLAGS='-mmacosx-version-min=11 -arch arm64' && export CXXFLAGS='-mmacosx-version-min=11 -arch arm64' && export LDFLAGS='-mmacosx-version-min=11 -arch arm64' && ./configure --host=arm-apple-darwin --enable-localpng=no
+		export CFLAGS='-mmacosx-version-min=11 -arch arm64' && export CXXFLAGS='-mmacosx-version-min=11 -arch arm64' && export LDFLAGS='-mmacosx-version-min=11 -arch arm64' && ./configure --host=arm-apple-darwin --enable-localjpeg=yes --enable-localpng=yes --enable-localzlib=yes
 		$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x-arm64/ DIRS=src
 endif
 ifneq (,$(findstring x86_64,$(MACOSX_ARCH)))
 		cd ../sources/thirdpartylibs/fltk && \
 		cp -a fltk-1.x.x fltk-1.x.x-x86_64 && \
 		cd fltk-1.x.x-x86_64 && \
-		export CFLAGS='-mmacosx-version-min=10.9 -arch x86_64' && export CXXFLAGS='-mmacosx-version-min=10.9 -arch x86_64' && export LDFLAGS='-mmacosx-version-min=10.9 -arch x86_64' && ./configure --host=x86_64-apple-darwin --enable-localpng=no
+		export CFLAGS='-mmacosx-version-min=10.9 -arch x86_64' && export CXXFLAGS='-mmacosx-version-min=10.9 -arch x86_64' && export LDFLAGS='-mmacosx-version-min=10.9 -arch x86_64' && ./configure --host=x86_64-apple-darwin --enable-localjpeg=yes --enable-localpng=yes --enable-localzlib=yes
 		$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x-x86_64/ DIRS=src
 endif
 ifneq (,$(findstring x86_64,$(MACOSX_ARCH)))
