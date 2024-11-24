@@ -832,7 +832,7 @@ static int cmd_if( script_ctx * ctx, char * line)
 	int i;
 	int eval;
 	int ret;
-	int valid;
+	//int valid;
 	char params_str[5][DEFAULT_BUFLEN];
 	env_var_value value_1,value_2,tmp_val;
 	int op_offset;
@@ -846,12 +846,12 @@ static int cmd_if( script_ctx * ctx, char * line)
 		params_str[i][0] = 0;
 	}
 
-	valid = 0;
+	//valid = 0;
 	for(i=0;i<5;i++)
 	{
 		get_param( ctx, line, i, (char*)&params_str[i] );
-		if(strlen((char*)&params_str[i]))
-			valid++;
+		//if(strlen((char*)&params_str[i]))
+		//	valid++;
 	}
 
 	i = 0;

@@ -231,8 +231,8 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	float time_base;
 	uint32_t bloclen;
 
-	int lencode_track0_error=0;
-	int lencode_track1_error=0;
+	//int lencode_track0_error=0;
+	//int lencode_track1_error=0;
 
 	int numberofpart,indexstart,newzoneindex,sizefactor;
 
@@ -702,8 +702,8 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 	tick_offset_h1=0;
 	speedcfg_track0=0;
 	speedcfg_track1=0;
-	lencode_track0_error=0;
-	lencode_track1_error=0;
+	//lencode_track0_error=0;
+	//lencode_track1_error=0;
 
 	currentindex=index_h0[lendatah0-1];
 
@@ -884,23 +884,23 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 			if(lencode_track0>0)
 			{
 				lencode_track0--;
-				lencode_track0_error=0;
+				//lencode_track0_error=0;
 				i++;
 			}
 			else
 			{
-				lencode_track0_error++;
+				//lencode_track0_error++;
 			}
 
 			if(lencode_track1>0)
 			{
 				lencode_track1--;
-				lencode_track1_error=0;
+				//lencode_track1_error=0;
 				j++;
 			}
 			else
 			{
-				lencode_track1_error++;
+				//lencode_track1_error++;
 			}
 
 		}
@@ -939,12 +939,12 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 				if(lencode_track1>0)
 				{
 					lencode_track1--;
-					lencode_track1_error=0;
+					//lencode_track1_error=0;
 					j++;
 				}
 				else
 				{
-					lencode_track1_error++;
+					//lencode_track1_error++;
 				}
 			}
 			else
@@ -984,12 +984,12 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 				if(lencode_track0>0)
 				{
 					lencode_track0--;
-					lencode_track0_error=0;
+					//lencode_track0_error=0;
 					i++;
 				}
 				else
 				{
-					lencode_track0_error++;
+					//lencode_track0_error++;
 				}
 			}
 		}
