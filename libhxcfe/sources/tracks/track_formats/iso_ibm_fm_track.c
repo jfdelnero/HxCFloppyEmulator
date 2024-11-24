@@ -138,7 +138,7 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 					sector->sector = tmp_buffer[3];
 
 					mask = hxcfe_getEnvVarValue( floppycontext, "SECTOR_SIZE_FIELD_MASK" );
-					if( mask <= 0 && mask > 0xFF )
+					if( mask <= 0 )
 					{
 						mask = 0x7;
 					}

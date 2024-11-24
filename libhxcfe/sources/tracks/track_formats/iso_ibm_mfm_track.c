@@ -71,7 +71,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 {
 	int bit_offset_bak,bit_offset,tmp_bit_offset;
 	int last_start_offset;
-	int sector_size, tmp_sector_size;
+	int sector_size;
 	unsigned char mfm_buffer[32];
 	unsigned char tmp_buffer[32];
 	unsigned char * tmp_sector;
@@ -132,7 +132,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 					sector->sector = tmp_buffer[6];
 
 					mask = hxcfe_getEnvVarValue( floppycontext, "SECTOR_SIZE_FIELD_MASK" );
-					if( mask <= 0 && mask > 0xFF )
+					if( mask <= 0 )
 					{
 						mask = 0x7;
 					}
@@ -218,6 +218,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 							else
 							{
 #if 0
+								int tmp_sector_size;
 								// size id field size auto detection
 								// Bad crc ... Is N a 2 bits field ? 
 								tmp_sector_size = sectorsize[tmp_buffer[7]&0x3];
