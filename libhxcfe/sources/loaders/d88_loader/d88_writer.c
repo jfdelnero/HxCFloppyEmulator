@@ -56,8 +56,8 @@ int D88_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 	int mfmdd_found;
 	int mfmhd_found;
-	int fmdd_found;
-	int fmhd_found;
+	//int fmdd_found;
+	//int fmhd_found;
 
 	int maxtrack;
 
@@ -70,8 +70,8 @@ int D88_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 	mfmdd_found = 0;
 	mfmhd_found = 0;
-	fmdd_found = 0;
-	fmhd_found = 0;
+	//fmdd_found = 0;
+	//fmhd_found = 0;
 	maxtrack = 0;
 
 	outfile = hxc_fopen(filename,"wb");
@@ -136,11 +136,12 @@ int D88_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 							if(	sca[k]->trackencoding == ISOFORMAT_SD )
 							{
-
+								/*
 								if(sca[k]->bitrate>400000)
 									fmhd_found++;
 								else
 									fmdd_found++;
+								*/
 							}
 
 							d88_s.cylinder = sca[k]->cylinder;

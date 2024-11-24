@@ -107,7 +107,8 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int sectorpertrack,numberoftrack,numberofside,sectsize,wprot;
 	unsigned char blockbuf[256];
 	char linebuffer[80];
-	int blanks,indexptr,sector;
+	int indexptr,sector;
+	//int blanks;
 	HXCFE_SECTCFG * sectorconfig;
 	int sectorindex;
 
@@ -191,7 +192,7 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				hxc_fread(blockbuf,256,f);
 
-				blanks=0;
+				//blanks=0;
 				indexptr = 0;
 				sectorindex=0;
 
@@ -214,7 +215,7 @@ int SVD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					if (SVD_SECTOR_TYPE(sectortype) == BLANK_SECTOR) {
 						/* blanks are always at the end...so if we see a blank, we're done  */
 						/* with real data...however, we need to read in the blanks' data    */
-						blanks++;
+						//blanks++;
 					}
 					else
 					{

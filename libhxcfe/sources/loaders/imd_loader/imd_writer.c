@@ -56,7 +56,7 @@ int IMD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	unsigned char cylinder_numbering_map[256];
 	unsigned char side_numbering_map[256];
 
-	int32_t track_cnt,bitrate;
+	int32_t bitrate;
 
 	imd_trackheader imd_th;
 
@@ -87,8 +87,6 @@ int IMD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	memset(sector_numbering_map,0,sizeof(sector_numbering_map));
 	memset(cylinder_numbering_map,0,sizeof(cylinder_numbering_map));
 	memset(side_numbering_map,0,sizeof(side_numbering_map));
-
-	track_cnt=0;
 
 	ss = hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 	if( !ss )
@@ -359,8 +357,6 @@ int IMD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 				free(sca);
 			}
-
-			track_cnt++;
 
 			if(log_str)
 				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,log_str);
