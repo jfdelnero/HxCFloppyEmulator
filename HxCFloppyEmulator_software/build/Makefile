@@ -90,7 +90,7 @@ endif
 
 ifeq ($(TARGET), Darwin)
 	MACOSX_ARCH ?= -arch arm64 -arch x86_64
-	MACOSX_MIN_VER ?= 10.9
+	MACOSX_MIN_VER ?= 11
 	CFLAGS += -DOSX ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
 	LDFLAGS += -lc -lm -ldl -lpthread -framework Cocoa -framework AudioToolBox ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
 	LIBHXCFE = libhxcfe.dylib
