@@ -3106,7 +3106,10 @@ void draw_density_circle (HXCFE_TD *td, int layer, uint32_t col, uint8_t alpha_v
 	int prev_offset;
 	int bitcount;
 	int totalcount;
-	uint8_t lum,mask;
+	uint8_t mask;
+	uint32_t f_color;
+	float col_factor;
+	uint32_t r,g,b;
 
 	length = diametre;
 
@@ -3180,9 +3183,23 @@ void draw_density_circle (HXCFE_TD *td, int layer, uint32_t col, uint8_t alpha_v
 				}
 			}
 
-			lum = (uint8_t)((float)col * (float) ((float)bitcount/(float)totalcount) );
+			col_factor = (float) ( (float)bitcount/(float)totalcount ) * 2;
 
-			line_len( td, layer, x+xpos, -y+ypos, xpos, ypos, thickness*thickness, (uint32_t)( (lum<<16) | ( (lum>>1) <<8) | (lum>>1)), alpha_val, op );  // 1 -
+			b = (uint32_t)( (float)(col & 0xFF) * col_factor );
+			if( b > 255)
+				b = 255;
+
+			g = (uint32_t)( (float)((col >> 8) & 0xFF) * col_factor );
+			if( g > 255)
+				g = 255;
+
+			r = (uint32_t)( (float)((col >> 16) & 0xFF) * col_factor );
+			if( r > 255)
+				r = 255;
+
+			f_color = b | (g<<8) | (r<<16);
+
+			line_len( td, layer, x+xpos, -y+ypos, xpos, ypos, thickness*thickness, f_color, alpha_val, op );  // 1 -
 
 			while ( old_angle < angle )
 			{
@@ -3199,7 +3216,7 @@ void draw_density_circle (HXCFE_TD *td, int layer, uint32_t col, uint8_t alpha_v
 
 				if( (x!=x_tmp) || (y!=y_tmp) )
 				{
-					line_len( td, layer, x_tmp+xpos, -y_tmp+ypos, xpos, ypos, thickness*thickness, (uint32_t)( (lum<<16) | ( (lum>>1) <<8) | (lum>>1)), alpha_val, op );  // 1 -
+					line_len( td, layer, x_tmp+xpos, -y_tmp+ypos, xpos, ypos, thickness*thickness, f_color, alpha_val, op );  // 1 -
 				}
 
 				old_angle += (angle_stepsize / 10.0);
@@ -3586,7 +3603,7 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 	int i;
 	int track;
 	HXCFE_SIDE * currentside;
-	unsigned int color;
+	unsigned int color,color_bitsdensity;
 	int y_pos,x_pos_1;
 	int total_radius,center_hole_radius;
 	int start_tracks_space_radius;
@@ -3652,7 +3669,7 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 		doesntfit = 1;
 	}
 
-	color = hxcfe_getEnvVarValue( td->hxcfe, "BMPDISKEXPORT_COLOR_MEDIA_SUBSTRATE" );;
+	color = hxcfe_getEnvVarValue( td->hxcfe, "BMPDISKEXPORT_COLOR_MEDIA_SUBSTRATE" );
 	for(i=center_hole_radius;i<total_radius;i++)
 	{
 		circle(td,LAYER_SUPPORT,x_pos_1,y_pos,i,color,255);
@@ -3711,12 +3728,14 @@ void hxcfe_draw_side(HXCFE_TD *td,HXCFE_FLOPPY * floppydisk, int x_center, int y
 
 	render(td);
 
+	color_bitsdensity = hxcfe_getEnvVarValue( td->hxcfe, "BMPDISKEXPORT_COLOR_BITSDENSITY" );
+
 	for(track=0;track<max_physical_tracks;track++)
 	{
 		td->hxc_setprogress(track*floppydisk->floppyNumberOfSide,floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide*2,td,td->progress_userdata);
 
 		currentside = floppydisk->tracks[track]->sides[side];
-		draw_density_circle (td,LAYER_SUPPORT,0x0000FF,0xFF,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,start_tracks_space_radius - (int)((float)track * track_ep),0,(int)g_track_ep,currentside,(side & 1)^1);
+		draw_density_circle (td,LAYER_SUPPORT,color_bitsdensity,0xFF,0,(float)((float)((float)2 * PI)),x_pos_1,y_pos,start_tracks_space_radius - (int)((float)track * track_ep),0,(int)g_track_ep,currentside,(side & 1)^1);
 
 		if( !(track % 10) )
 			render(td);
