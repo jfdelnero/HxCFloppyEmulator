@@ -71,6 +71,7 @@
 #include "data_DiskLayout_FLEX_DSDD_40T_356KB_PADDED_xml.h"
 #include "data_DiskLayout_Sharp_X68000_2HD_1232KB_xml.h"
 #include "data_DiskLayout_Alesis_DataDisk_DD_800KB_xml.h"
+#include "data_DiskLayout_Analog_Devices_LTS_2020_xml.h"
 
 datatype * disklayout_list[]=
 {
@@ -147,5 +148,7 @@ datatype * disklayout_list[]=
 	data_DiskLayout_UKNC_800KB_xml,
 	data_DiskLayout_Unitel_Videotex_xml,
 	data_DiskLayout_Sharp_X68000_2HD_1232KB_xml,
+    data_DiskLayout_Analog_Devices_LTS_2020_xml,
 	0
 };
+
