@@ -88,3 +88,4 @@
 #define PLUGIN_APPLE2_DO            "APPLE2_DO"
 #define PLUGIN_APPLE2_PO            "APPLE2_PO"
 #define PLUGIN_FDX68_FDX            "FDX68_FDX"
+#define PLUGIN_MAME_MFI             "MAME_MFI"

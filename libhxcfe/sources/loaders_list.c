@@ -137,6 +137,7 @@
 #include "./loaders/logicanalyzer_loader/logicanalyzer_loader.h"
 #include "./loaders/dim_x68k_loader/dim_x68k_loader.h"
 #include "./loaders/woz_loader/woz_loader.h"
+#include "./loaders/mfi_loader/mfi_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -197,6 +198,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)HDM_libGetPluginInfo,
 	(GETPLUGININFOS)RAW_libGetPluginInfo,
 	(GETPLUGININFOS)snes_smc_libGetPluginInfo,
+	(GETPLUGININFOS)MFI_libGetPluginInfo,
 	//(GETPLUGININFOS)KRZ_libGetPluginInfo,
 	(GETPLUGININFOS)VEGASDSK_libGetPluginInfo,
 	(GETPLUGININFOS)DMK_libGetPluginInfo,
