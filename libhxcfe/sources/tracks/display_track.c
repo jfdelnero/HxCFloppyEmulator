@@ -2956,7 +2956,7 @@ void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_
 	{
 		if(currentside->stream_dump)
 		{
-			hxcfe_td_draw_trkstream( td, currentside->stream_dump );
+			draw_trkstream( td, currentside->stream_dump );
 
 			if(td->name)
 			{
