@@ -2496,7 +2496,7 @@ int hxcfe_td_stream_to_sound( HXCFE_TD *td, HXCFE_STREAMCHANNEL* stream_channel,
 	return stream_index;
 }
 
-void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
+static void draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 {
 	int buffer_offset;
 	int total_tick,max_total_tick;
@@ -2889,6 +2889,13 @@ void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
 	splash_sprite(bitmap_hxc2001_logo_bmp,td->layers[LAYER_TEXT], td->xsize, td->ysize, td->xsize - (bitmap_hxc2001_logo_bmp->Xsize + 16), td->ysize - (bitmap_hxc2001_logo_bmp->Ysize + 16),LOGOALPHA);
 
 	td->noloop_trackmode = 0;
+}
+
+void hxcfe_td_draw_trkstream( HXCFE_TD *td, HXCFE_TRKSTREAM* track_stream )
+{
+	draw_trkstream( td, track_stream );
+
+	render(td);
 }
 
 void hxcfe_td_draw_stream_track( HXCFE_TD *td, HXCFE_FLOPPY * floppydisk, int32_t track, int32_t side )
