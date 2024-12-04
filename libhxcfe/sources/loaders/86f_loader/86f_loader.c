@@ -291,7 +291,6 @@ int F86_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				}
 
 				currentside=currentcylinder->sides[sidenumber];
-				currentcylinder->number_of_side++;
 
 				len = cur_track_header.number_of_bit_cells/8;
 				if( cur_track_header.number_of_bit_cells & 7 )
@@ -326,10 +325,9 @@ int F86_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				}
 			}
-
-			hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
-
 		}
+
+		hxcfe_sanityCheck(imgldr_ctx->hxcfe,floppydisk);
 	}
 
 	hxc_fclose(f);
