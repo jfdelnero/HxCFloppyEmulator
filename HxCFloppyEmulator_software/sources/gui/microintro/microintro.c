@@ -70,6 +70,12 @@
 #include "data/data_jason_shortness_mod.h"
 #include "data/data_physical_presence_mod.h"
 
+#if defined(M_PI)
+#define PI M_PI
+#else
+#define PI ((double)(3.1415926535897932384626433832795))
+#endif
+
 typedef struct scrolltab_
 {
 	int ysrc;
@@ -114,9 +120,16 @@ void putsprite(uintro_context * democontext,unsigned int x,unsigned int y,unsign
 	start=y*democontext->xsize+x;
 	j=0;
 
-	democontext->sprt_f1 = democontext->sprt_f1+(float)0.5;
+	democontext->sprt_f1 += (float)0.5;
+	democontext->sprt_f2 += (float)0.01;
+
+	if( democontext->sprt_f1 >= (2.0*PI) )
+		democontext->sprt_f1 -= (2.0*PI);
+
+	if( democontext->sprt_f2 >= (2.0*PI) )
+		democontext->sprt_f2 -= (2.0*PI);
+
 	f4 = democontext->sprt_f1;
-	democontext->sprt_f2 = democontext->sprt_f2+(float)0.01;
 
 	if(democontext->xsize<=(111+x)) t2=(111+x)-democontext->xsize;
 
@@ -430,9 +443,9 @@ void colorize(uintro_context * democontext,bmaptype * bitmaptype)
 	unsigned char r,v,b;
 	ptr=(unsigned int *)bitmaptype->unpacked_data;
 
-	democontext->col_f1=democontext->col_f1s;
-	democontext->col_f2=democontext->col_f2s;
-	democontext->col_f3=democontext->col_f3s;
+	democontext->col_f1 = democontext->col_f1s;
+	democontext->col_f2 = democontext->col_f2s;
+	democontext->col_f3 = democontext->col_f3s;
 
 	for(i=0;i<bitmaptype->Ysize;i++)
 	{
@@ -450,13 +463,21 @@ void colorize(uintro_context * democontext,bmaptype * bitmaptype)
 			democontext->col_f1=democontext->col_f1+(float)0.0001;
 			democontext->col_f2=democontext->col_f2+(float)0.00011;
 			democontext->col_f3=democontext->col_f3+(float)0.000101;
-
 		}
 	}
 
 	democontext->col_f1s=democontext->col_f1s+(float)0.03;
 	democontext->col_f2s=democontext->col_f2s+(float)0.033;
 	democontext->col_f3s=democontext->col_f3s+(float)0.0333;
+
+	if( democontext->col_f1s >= (2.0*PI) )
+		democontext->col_f1s -= (2.0*PI);
+
+	if( democontext->col_f2s >= (2.0*PI) )
+		democontext->col_f2s -= (2.0*PI);
+
+	if( democontext->col_f3s >= (2.0*PI) )
+		democontext->col_f3s -= (2.0*PI);
 }
 
 void uintro_getnextframe(uintro_context * democontext)
@@ -508,8 +529,15 @@ void uintro_getnextframe(uintro_context * democontext)
 			bitmap_hxc2001_bmp->Ysize,
 			(unsigned int*)bitmap_hxc2001_bmp->unpacked_data);
 
-	democontext->f1=democontext->f1+(float)0.11;
-	democontext->f2=democontext->f2+(float)0.09;
+	democontext->f1 += (float)0.11;
+	democontext->f2 += (float)0.09;
+
+	if( democontext->f1 >= (2.0*PI) )
+		democontext->f1 -= (2.0*PI);
+
+	if( democontext->f2 >= (2.0*PI) )
+		democontext->f2 -= (2.0*PI);
+
 	////////////////////////
 
 	while(scroll[k].ysrc!=-1)
