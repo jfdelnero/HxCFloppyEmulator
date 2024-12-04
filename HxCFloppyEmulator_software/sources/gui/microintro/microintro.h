@@ -1,3 +1,5 @@
+#define SINCOS_TABLE_SIZE 1024
+#define SINCOS_TABLE_MAX  1024
 
 typedef struct uintro_context_
 {
@@ -11,17 +13,19 @@ typedef struct uintro_context_
 	unsigned int * background;
 	unsigned int * blurbuffer;
 
-	float f1,f2;
+	int f1,f2;
+	int col_f1,col_f1s;
+	int col_f2,col_f2s;
+	int col_f3,col_f3s;
 
-	float col_f1,col_f2,col_f3;
-	float col_f1s,col_f2s,col_f3s;
-
-	float sprt_f1,sprt_f2;
+	int sprt_f1,sprt_f2;
 
 	unsigned long tick;
 	unsigned char part;
 
 	void * modctx;
+
+	int sincos_table[SINCOS_TABLE_SIZE];
 }uintro_context;
 
 

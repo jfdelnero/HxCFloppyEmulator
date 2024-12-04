@@ -112,34 +112,32 @@ static int modcnt=0;
 
 void putsprite(uintro_context * democontext,unsigned int x,unsigned int y,unsigned int * buffer,unsigned int sx,unsigned int sy,unsigned int * sprite)
 {
-	float f4;
+	int f4;
 	unsigned int start,i,j,t2,adr;
 	unsigned char ty;
 
 	t2=0;
-	start=y*democontext->xsize+x;
+	start = y*democontext->xsize+x;
 	j=0;
 
-	democontext->sprt_f1 += (float)0.5;
-	democontext->sprt_f2 += (float)0.01;
+	democontext->sprt_f1 += 83443;
+	democontext->sprt_f2 += 1669;
 
-	if( democontext->sprt_f1 >= (2.0*PI) )
-		democontext->sprt_f1 -= (2.0*PI);
+	f4 = democontext->sprt_f1 >> 10;
 
-	if( democontext->sprt_f2 >= (2.0*PI) )
-		democontext->sprt_f2 -= (2.0*PI);
-
-	f4 = democontext->sprt_f1;
-
-	if(democontext->xsize<=(111+x)) t2=(111+x)-democontext->xsize;
+	if(democontext->xsize<=(111+x))
+		t2=(111+x)-democontext->xsize;
 
 	for(j=0;j<sy;j++)
 	{
-		f4 = f4 + ((float)sin( democontext->sprt_f2 )/(float)2);
-		ty=(unsigned char)((float)cos( f4 )*(float)2+(float)4);
+		f4 += (( democontext->sincos_table[ ((democontext->sprt_f2 >> 10) + 256) & (SINCOS_TABLE_SIZE - 1)] ) >> 3 );
 
-		if(democontext->xsize<=(111+x+ty)) t2=(111+x+ty)-democontext->xsize;
-		else t2=0;
+		ty = (unsigned char)((( democontext->sincos_table[ f4 & (SINCOS_TABLE_SIZE - 1)] * 2 ) >> 10) + 4 );
+
+		if(democontext->xsize<=(111+x+ty))
+			t2=(111+x+ty)-democontext->xsize;
+		else
+			t2=0;
 
 		for(i=0;i<(sx-t2);i++)
 		{
@@ -277,6 +275,7 @@ void convert8b24b(bmaptype * img,unsigned short transcolor)
 uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 {
 	uintro_context * ui_context;
+	int i;
 
 	ui_context=(uintro_context *)calloc( 1, sizeof(uintro_context));
 	if(!ui_context)
@@ -296,6 +295,12 @@ uintro_context * uintro_init(unsigned short xsize,unsigned short ysize)
 		free(ui_context->framebuffer);
 		free(ui_context);
 		return NULL;
+	}
+
+	// Precalc sin / cos table.
+	for(i=0;i<SINCOS_TABLE_SIZE;i++)
+	{
+		ui_context->sincos_table[i] = cos( ( (double)i / (double)SINCOS_TABLE_SIZE) * 2.0 * PI ) * SINCOS_TABLE_MAX;
 	}
 
 	bitmap_sob_bmp->unpacked_data = data_unpack(bitmap_sob_bmp->data,bitmap_sob_bmp->csize ,bitmap_sob_bmp->data, bitmap_sob_bmp->size);
@@ -441,6 +446,7 @@ void colorize(uintro_context * democontext,bmaptype * bitmaptype)
 	int i,j;
 	unsigned int * ptr;
 	unsigned char r,v,b;
+
 	ptr=(unsigned int *)bitmaptype->unpacked_data;
 
 	democontext->col_f1 = democontext->col_f1s;
@@ -453,31 +459,22 @@ void colorize(uintro_context * democontext,bmaptype * bitmaptype)
 		{
 			if(ptr[i*bitmaptype->Xsize + j])
 			{
-				r=(unsigned char)(cos(democontext->col_f1)*(float)120)+129;
-				v=(unsigned char)(sin(democontext->col_f2)*(float)120)+129;
-				b=(unsigned char)(cos(democontext->col_f3)*(float)120)+129;
+				r = (( democontext->sincos_table[ (democontext->col_f1>> 10) & (SINCOS_TABLE_SIZE - 1)] * 120 ) >> 10) + 129;
+				v = (( democontext->sincos_table[ ((democontext->col_f2>> 10) + 256 /*+90° : sin*/) & (SINCOS_TABLE_SIZE - 1)] * 120 ) >> 10) + 129;
+				b = (( democontext->sincos_table[ (democontext->col_f3>> 10) & (SINCOS_TABLE_SIZE - 1)] * 120 ) >> 10) + 129;
 
 				ptr[i*bitmaptype->Xsize + j]=(r<<16)|(v<<8)|b;
 			}
 
-			democontext->col_f1=democontext->col_f1+(float)0.0001;
-			democontext->col_f2=democontext->col_f2+(float)0.00011;
-			democontext->col_f3=democontext->col_f3+(float)0.000101;
+			democontext->col_f1 += 16;
+			democontext->col_f2 += 17;
+			democontext->col_f3 += 18;
 		}
 	}
 
-	democontext->col_f1s=democontext->col_f1s+(float)0.03;
-	democontext->col_f2s=democontext->col_f2s+(float)0.033;
-	democontext->col_f3s=democontext->col_f3s+(float)0.0333;
-
-	if( democontext->col_f1s >= (2.0*PI) )
-		democontext->col_f1s -= (2.0*PI);
-
-	if( democontext->col_f2s >= (2.0*PI) )
-		democontext->col_f2s -= (2.0*PI);
-
-	if( democontext->col_f3s >= (2.0*PI) )
-		democontext->col_f3s -= (2.0*PI);
+	democontext->col_f1s += 5007; //(((0.03 / (2.0 * PI))*SINCOS_TABLE_SIZE) * 1024);
+	democontext->col_f2s += 5507; //(((0.033 / (2.0 * PI))*SINCOS_TABLE_SIZE) * 1024);
+	democontext->col_f3s += 5557; //(((0.0333 / (2.0 * PI))*SINCOS_TABLE_SIZE) * 1024);
 }
 
 void uintro_getnextframe(uintro_context * democontext)
@@ -522,21 +519,15 @@ void uintro_getnextframe(uintro_context * democontext)
 	memset(democontext->blurbuffer,0,democontext->xsize*democontext->ysize*4);
 
 	putsprite(democontext,
-			(unsigned int)((float)cos(democontext->f1)*(float)x_coef_motion+((float)x_coef_motion*2)),
-			(unsigned int)((float)cos(democontext->f2)*(float)y_coef_motion+((float)y_coef_motion*2)),
+			(( democontext->sincos_table[ (democontext->f1>> 10) & (SINCOS_TABLE_SIZE - 1)] * x_coef_motion ) >> 10) + (x_coef_motion*2),
+			(( democontext->sincos_table[ (democontext->f2>> 10) & (SINCOS_TABLE_SIZE - 1)] * y_coef_motion ) >> 10) + (y_coef_motion*2),
 			democontext->blurbuffer,
 			bitmap_hxc2001_bmp->Xsize,
 			bitmap_hxc2001_bmp->Ysize,
 			(unsigned int*)bitmap_hxc2001_bmp->unpacked_data);
 
-	democontext->f1 += (float)0.11;
-	democontext->f2 += (float)0.09;
-
-	if( democontext->f1 >= (2.0*PI) )
-		democontext->f1 -= (2.0*PI);
-
-	if( democontext->f2 >= (2.0*PI) )
-		democontext->f2 -= (2.0*PI);
+	democontext->f1 += 18357; //(((0.11 / (2.0 * PI))*SINCOS_TABLE_SIZE) * 1024);
+	democontext->f2 += 15020; //(((0.09 / (2.0 * PI))*SINCOS_TABLE_SIZE) * 1024);
 
 	////////////////////////
 
