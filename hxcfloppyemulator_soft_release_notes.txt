@@ -20,7 +20,7 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 ** **** 2024 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
 
 *** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
-*** Last update : v2.16.6.1, 1 Dec 2024 ***
+*** Last update : v2.16.6.2, 11 Dec 2024 ***
 
 -> New Writer : PNG file (Disk/tracks and stream layouts) -> Disk layout can now be exported into a PNG file (for disk analysis) !
 
@@ -62,6 +62,8 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -> FLTK updated to v1.4.0-1 for all platforms.
 
 -> New Loader : Mame MFI files. (WIP!)
+
+-> IMD Loader/Writer : Missing data mark support.
 
 /*********************************************************
 

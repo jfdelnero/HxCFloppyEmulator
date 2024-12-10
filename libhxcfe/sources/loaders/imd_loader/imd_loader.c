@@ -375,6 +375,10 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					switch(sectordatarecordcode)
 					{
 						case 0x00:
+							sectorconfig[j].input_data = NULL;
+							sectorconfig[j].use_alternate_datamark = 1;
+							sectorconfig[j].alternate_datamark = 0x01;
+							sectorconfig[j].missingdataaddressmark = 1;
 						break;
 						case 0x01:
 							hxc_fread(&track_data[j*sectorsize],sectorsize,f);

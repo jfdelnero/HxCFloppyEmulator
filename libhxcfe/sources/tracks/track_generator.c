@@ -1007,27 +1007,42 @@ void tg_addISOSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXC
 		//02 CRC The CRC of the data
 		CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,configptr->crc_poly,configptr->crc_initial);
 
-		// data mark
-		for(i=0;i<configptr->len_datamarkp1;i++)
+		if( !sectorconfig->missingdataaddressmark )
 		{
-			pushTrackCode(tg,configptr->data_datamarkp1,configptr->clock_datamarkp1,currentside,sectorconfig->trackencoding);
-			CRC16_Update(&CRC16_High,&CRC16_Low, configptr->data_datamarkp1,(unsigned char*)&crctable );
-		}
-
-		if(sectorconfig->use_alternate_datamark)
-		{
-			for(i=0;i<configptr->len_datamarkp2;i++)
+			// data mark
+			for(i=0;i<configptr->len_datamarkp1;i++)
 			{
-				pushTrackCode(tg,(uint8_t)sectorconfig->alternate_datamark,configptr->clock_datamarkp2,currentside,sectorconfig->trackencoding);
-				CRC16_Update(&CRC16_High,&CRC16_Low, (uint8_t)sectorconfig->alternate_datamark,(unsigned char*)&crctable );
+				pushTrackCode(tg,configptr->data_datamarkp1,configptr->clock_datamarkp1,currentside,sectorconfig->trackencoding);
+				CRC16_Update(&CRC16_High,&CRC16_Low, configptr->data_datamarkp1,(unsigned char*)&crctable );
+			}
+
+			if(sectorconfig->use_alternate_datamark)
+			{
+				for(i=0;i<configptr->len_datamarkp2;i++)
+				{
+					pushTrackCode(tg,(uint8_t)sectorconfig->alternate_datamark,configptr->clock_datamarkp2,currentside,sectorconfig->trackencoding);
+					CRC16_Update(&CRC16_High,&CRC16_Low, (uint8_t)sectorconfig->alternate_datamark,(unsigned char*)&crctable );
+				}
+			}
+			else
+			{
+				for(i=0;i<configptr->len_datamarkp2;i++)
+				{
+					pushTrackCode(tg,configptr->data_datamarkp2,configptr->clock_datamarkp2,currentside,sectorconfig->trackencoding);
+					CRC16_Update(&CRC16_High,&CRC16_Low, configptr->data_datamarkp2,(unsigned char*)&crctable );
+				}
 			}
 		}
 		else
 		{
+			for(i=0;i<configptr->len_datamarkp1;i++)
+			{
+				pushTrackCode(tg,0x00,0xFF,currentside,sectorconfig->trackencoding);
+			}
+
 			for(i=0;i<configptr->len_datamarkp2;i++)
 			{
-				pushTrackCode(tg,configptr->data_datamarkp2,configptr->clock_datamarkp2,currentside,sectorconfig->trackencoding);
-				CRC16_Update(&CRC16_High,&CRC16_Low, configptr->data_datamarkp2,(unsigned char*)&crctable );
+				pushTrackCode(tg,0x00,0xFF,currentside,sectorconfig->trackencoding);
 			}
 		}
 

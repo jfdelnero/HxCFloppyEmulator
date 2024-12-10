@@ -305,41 +305,9 @@ int IMD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 					}
 					else
 					{
-						// Compressed
-						if(!sca[k]->use_alternate_data_crc)
-						{
-							// CRC ok
-							switch(sca[k]->alternate_datamark)
-							{
-								case 0xFB:
-									sector_type = 2;
-								break;
-								case 0xF8: // Deleted datamark
-									sector_type = 4;
-								break;
-								default:
-									sector_type = 2;
-								break;
-							}
-						}
-						else
-						{
-							// CRC Error
-							switch(sca[k]->alternate_datamark)
-							{
-								case 0xFB:
-									sector_type = 6;
-								break;
-								case 0xF8: // Deleted datamark
-									sector_type = 8;
-								break;
-								default:
-									sector_type = 6;
-								break;
-							}
-						}
+						// Missing Data mark
+						sector_type = 0;
 						fwrite(&sector_type,1,1,outfile);
-						fwrite(&sca[k]->fill_byte,1,1,outfile);
 					}
 
 					log_str = hxc_dyn_sprintfcat(log_str,"%d ",sca[k]->sector);
