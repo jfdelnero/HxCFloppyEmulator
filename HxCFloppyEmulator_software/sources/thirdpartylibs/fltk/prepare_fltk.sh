@@ -16,7 +16,17 @@ fi
 
 if [[ ! -d fltk-1.x.x ]]; then
 	wget $DOWNLOADURL -nc || exit 1
-	echo ${DOWNLOADHASH}  ${ARCHIVENAMEBASE}.tar.gz | md5sum -c -
+
+	export valid_md5=`echo ${DOWNLOADHASH} ${ARCHIVENAMEBASE}.tar.gz | md5sum -c - | grep ": OK" | wc -l`
+
+	if [ "$valid_md5" -ne "1" ]; then
+		echo "-----------------------------------------------------";
+		echo "-- ERROR : Invalid FLTK sources archive md5sum !!! --";
+		echo "--       Please check the download source !        --";
+		echo "-----------------------------------------------------";
+		exit 1;
+	fi
+
 	tar -xzf ${ARCHIVENAMEBASE}.tar.gz
 	mv ${FOLDERNAME} fltk-1.x.x
 	if [[ -n ${PATCHFILE} ]]; then
