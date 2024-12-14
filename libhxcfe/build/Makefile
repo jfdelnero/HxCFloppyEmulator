@@ -114,7 +114,7 @@ DISKLOADERPLUGINS = raw_amiga.o raw_iso.o copyqm_loader.o crctable.o adf_loader.
 					vfddat_loader.o ana_loader.o atr_loader.o hfev3_loader.o hfev3_trackgen.o heathkit_loader.o sdu_loader.o xml_db_loader.o \
 					streamhfe_loader.o qd_loader.o ipf_loader.o capslibloader.o hxcstream_loader.o hxcstream.o dfi_loader.o a2r_loader.o \
 					micraln_loader.o fdx_loader.o 86f_loader.o logicanalyzer_loader.o apple2_2mg_loader.o dim_x68k_loader.o woz_loader.o \
-					mfi_loader.o
+					mfi_loader.o pri_loader.o
 
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
@@ -750,6 +750,9 @@ woz_loader.o : $(BASEDIR)/loaders/woz_loader/woz_loader.c $(BASEDIR)/loaders/woz
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 mfi_loader.o : $(BASEDIR)/loaders/mfi_loader/mfi_loader.c $(BASEDIR)/loaders/mfi_loader/mfi_loader.h $(BASEDIR)/loaders/mfi_loader/mfi_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+pri_loader.o : $(BASEDIR)/loaders/pri_loader/pri_loader.c $(BASEDIR)/loaders/pri_loader/pri_loader.h $(BASEDIR)/loaders/pri_loader/pri_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 adf_hd.o : $(BASEDIR)/thirdpartylibs/adflib/Lib/adf_hd.c
