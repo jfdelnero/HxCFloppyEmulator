@@ -1,7 +1,7 @@
 #!/bin/bash
 
 md5_check () {
-	if [ $OSTYPE == 'darwin'* ]; then
+	if [ "$(uname)" == "Darwin" ]; then
 		export file_md5=`cat ${ARCHIVENAMEBASE}.tar.gz | md5`
 
 		if [ "$file_md5" -ne "${DOWNLOADHASH}" ]; then
@@ -36,8 +36,6 @@ fi
 
 if [[ ! -d fltk-1.x.x ]]; then
 	wget $DOWNLOADURL -nc || exit 1
-
-	export valid_md5=`echo ${DOWNLOADHASH} ${ARCHIVENAMEBASE}.tar.gz | md5sum -c - | grep ": OK" | wc -l`
 
 	md5_check
 	if [ "$?" -ne "1" ]; then
