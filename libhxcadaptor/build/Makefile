@@ -65,7 +65,7 @@ EXEC = libhxcadaptor.a
 
 all: $(EXEC)
 
-libhxcadaptor.a: libhxcadaptor.o fs.o network.o
+libhxcadaptor.a: libhxcadaptor.o fs.o network.o cache.o
 ifeq ($(TARGET), Darwin)
 	libtool -o $@     $^
 else
@@ -80,6 +80,9 @@ network.o: $(BASEDIR)/network.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 fs.o: $(BASEDIR)/fs.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+cache.o: $(BASEDIR)/cache.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 clean:
