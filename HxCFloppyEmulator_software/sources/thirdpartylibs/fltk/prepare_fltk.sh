@@ -1,5 +1,25 @@
 #!/bin/bash
 
+md5_check () {
+	if [ $OSTYPE == 'darwin'* ]; then
+		export file_md5=`cat ${ARCHIVENAMEBASE}.tar.gz | md5`
+
+		if [ "$file_md5" -ne "${DOWNLOADHASH}" ]; then
+			return 0;
+		else
+			return 1;
+		fi;
+	else
+		export valid_md5=`echo ${DOWNLOADHASH} ${ARCHIVENAMEBASE}.tar.gz | md5sum -c - | grep ": OK" | wc -l`
+
+		if [ "$valid_md5" -ne "1" ]; then
+			return 0;
+		else
+			return 1;
+		fi;
+	fi;
+}
+
 if [ $OSTYPE == 'darwin'* ] || [ $1 = "1" ] ; then
 export DOWNLOADURL=https://github.com/fltk/fltk/releases/download/release-1.4.1/fltk-1.4.1-source.tar.gz
 export DOWNLOADHASH="203eed9e14a7bd6ff0373c0f3f32ef07"
@@ -19,7 +39,8 @@ if [[ ! -d fltk-1.x.x ]]; then
 
 	export valid_md5=`echo ${DOWNLOADHASH} ${ARCHIVENAMEBASE}.tar.gz | md5sum -c - | grep ": OK" | wc -l`
 
-	if [ "$valid_md5" -ne "1" ]; then
+	md5_check
+	if [ "$?" -ne "1" ]; then
 		echo "-----------------------------------------------------";
 		echo "-- ERROR : Invalid FLTK sources archive md5sum !!! --";
 		echo "--       Please check the download source !        --";
