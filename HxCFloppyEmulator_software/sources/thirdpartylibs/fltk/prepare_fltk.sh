@@ -4,7 +4,7 @@ md5_check () {
 	if [ "$(uname)" == "Darwin" ]; then
 		export file_md5=`cat ${ARCHIVENAMEBASE}.tar.gz | md5`
 
-		if [ "${file_md5}" -ne "${DOWNLOADHASH}" ]; then
+		if [ "${file_md5}" != "${DOWNLOADHASH}" ]; then
 			return 0;
 		else
 			return 1;
