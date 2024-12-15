@@ -82,8 +82,6 @@
 
 extern s_gui_context * guicontext;
 
-char fullstr[256*1024];
-
 #define PI    ((float)  3.141592654f)
 
 extern bmaptype * hxc2001_2_bmp;
@@ -603,14 +601,14 @@ int getdistance(int xsize,int ysize,int x_pos,int y_pos)
 }
 
 
-int isTheRightSector(floppy_infos_window *fiw,HXCFE_TD * td,s_sectorlist * sl,int xpos,int ypos)
+int isTheRightSector(int view_mode,HXCFE_TD * td,s_sectorlist * sl,int xpos,int ypos)
 {
 	int disp_xsize,disp_ysize;
 	float pos_angle;
 	int distance,side;
 	int min_distance,max_distance;
 
-	if(fiw->view_mode->value() > MAX_TRACK_MODES_INDEX)
+	if(view_mode > MAX_TRACK_MODES_INDEX)
 	{
 		disp_xsize= hxcfe_td_virt_xres(td);
 		disp_ysize= hxcfe_td_virt_yres(td);
@@ -722,9 +720,201 @@ int isTheRightPulseIndex(floppy_infos_window *fiw,s_pulseslist * pl,int xpos,int
 	return 0;
 }
 
+char * gen_info_txt(char * outbuf, int view_mode, int track, int side, int start, int stop, int xpos, int ypos, s_sectorlist * sl)
+{
+	char str2[512];
+	unsigned int i;
+	unsigned char * sect_data;
+	unsigned int sectorsize;
+	unsigned char c;
+
+	while(sl && guicontext->trackviewerfloppy)
+	{
+		if(sl->sectorconfig)
+		{
+			sectorsize = hxcfe_getSectorConfigSectorSize(guicontext->hxcfe,sl->sectorconfig);
+
+			if( isTheRightSector(view_mode,guicontext->td,sl,xpos,ypos) )
+			{
+				switch(hxcfe_getSectorConfigEncoding(guicontext->hxcfe,sl->sectorconfig))
+				{
+					case ISOFORMAT_SD:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"FM Sector");
+					break;
+					case ISOFORMAT_DD:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"MFM Sector");
+					break;
+					case UKNCFORMAT_DD:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"UKNC Sector");
+					break;
+					case AMIGAFORMAT_DD:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"Amiga MFM Sector");
+					break;
+					case TYCOMFORMAT_SD:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"TYCOM Sector");
+					break;
+					case MEMBRAINFORMAT_DD:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"MEMBRAIN Sector");
+					break;
+					case EMUFORMAT_SD:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"E-mu Sector");
+					break;
+					case APPLE2_GCR5A3:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"AppleII 5A3 Sector");
+					break;
+					case APPLE2_GCR6A2:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"AppleII 6A2 Sector");
+					break;
+					case APPLEMAC_GCR6A2:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"Apple Macintosh Sector");
+					break;
+					case ARBURG_DAT:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"Arburg SD Sector");
+					break;
+					case ARBURG_SYS:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"Arburg SYS Sector");
+					break;
+					case AED6200P_DD:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"AED 6200P Sector");
+					break;
+					case NORTHSTAR_HS_DD:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"Northstar Sector");
+					break;
+					case HEATHKIT_HS_SD:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"Heathkit Sector");
+					break;
+					case DECRX02_SDDD:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"DEC RX02 Sector");
+					break;
+					case QD_MO5_MFM:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"QD MO5 Sector");
+					break;
+					case C64_GCR:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"C64 GCR Sector");
+					break;
+					case MICRALN_HS_SD:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"R2E Micral N");
+					break;
+					case VICTOR9K_GCR:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"Victor 9000");
+					break;
+					default:
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"Unknown Sector type");
+					break;
+				}
+
+				outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"\nSector ID:%.3d\nTrack ID:%.3d - Side ID:%.3d\nSize:%.5d (ID:0x%.2x)\n",
+					hxcfe_getSectorConfigSectorID(guicontext->hxcfe,sl->sectorconfig),
+					hxcfe_getSectorConfigTrackID(guicontext->hxcfe,sl->sectorconfig),
+					hxcfe_getSectorConfigSideID(guicontext->hxcfe,sl->sectorconfig),
+					sectorsize,
+					hxcfe_getSectorConfigSizeID(guicontext->hxcfe,sl->sectorconfig)
+					);
+
+				outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"DataMark:0x%.2X\nHead CRC:0x%.4X (%s)\nData CRC:0x%.4X (%s)\n",
+					hxcfe_getSectorConfigDataMark(guicontext->hxcfe,sl->sectorconfig),
+					hxcfe_getSectorConfigHCRC(guicontext->hxcfe,sl->sectorconfig),hxcfe_getSectorConfigHCRCStatus(guicontext->hxcfe,sl->sectorconfig)?"BAD CRC!":"Ok",
+					hxcfe_getSectorConfigDCRC(guicontext->hxcfe,sl->sectorconfig),hxcfe_getSectorConfigDCRCStatus(guicontext->hxcfe,sl->sectorconfig)?"BAD CRC!":"Ok");
+
+				outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"Start Sector cell:%d\nStart Sector Data cell:%d\nEnd Sector cell:%d\n",
+					hxcfe_getSectorConfigStartSectorIndex(guicontext->hxcfe,sl->sectorconfig),
+					hxcfe_getSectorConfigStartDataIndex(guicontext->hxcfe,sl->sectorconfig),
+					hxcfe_getSectorConfigEndSectorIndex(guicontext->hxcfe,sl->sectorconfig));
+
+				if( hxcfe_getSectorConfigStartSectorIndex(guicontext->hxcfe,sl->sectorconfig) <= hxcfe_getSectorConfigEndSectorIndex(guicontext->hxcfe,sl->sectorconfig) )
+				{
+					outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"Number of cells:%d\n",
+						hxcfe_getSectorConfigEndSectorIndex(guicontext->hxcfe,sl->sectorconfig) - hxcfe_getSectorConfigStartSectorIndex(guicontext->hxcfe,sl->sectorconfig));
+				}
+				else
+				{
+					hxc_entercriticalsection(guicontext->hxcfe,2);
+					if(guicontext->trackviewerfloppy)
+					{
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"Number of cells:%d\n",
+							( ( hxcfe_getTrackLength(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side) - hxcfe_getSectorConfigStartSectorIndex(guicontext->hxcfe,sl->sectorconfig) ) + hxcfe_getSectorConfigEndSectorIndex(guicontext->hxcfe,sl->sectorconfig) ) );
+					}
+					hxc_leavecriticalsection(guicontext->hxcfe,2);
+				}
+
+				sect_data = hxcfe_getSectorConfigInputData(guicontext->hxcfe,sl->sectorconfig);
+				if(sect_data)
+				{
+					for(i=0;i< sectorsize ;i++)
+					{
+						if(!(i&0x7))
+						{
+							if(i)
+							{
+								str2[8]=0;
+								outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"| ");
+								outbuf = hxc_dyn_sprintfcat(outbuf, str2);
+							}
+
+							outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"\n%.4X| ", i);
+						}
+
+						outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"%.2X ", sect_data[i]);
+
+						c='.';
+						if( (sect_data[i]>=32 && sect_data[i]<=126) )
+							c = sect_data[i];
+
+						str2[i&0x7]=c;
+					}
+
+					str2[8]=0;
+					outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"| ");
+					outbuf = hxc_dyn_sprintfcat(outbuf, str2);
+				}
+
+				outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"\n\n");
+			}
+		}
+		sl = sl->next_element;
+	}
+
+	return outbuf;
+}
+
+char * printsectorinfo(floppy_infos_window *fiw, int start, int stop, int xpos, int ypos, s_sectorlist * sl)
+{
+	char str[512];
+	char * full_str;
+
+	full_str = gen_info_txt(NULL, fiw->view_mode->value(), fiw->track_number_slide->value(), fiw->side_number_slide->value(), start, stop, xpos, ypos, sl);
+	/*if( full_str )
+	{
+		fiw->buf->append((char*)full_str);
+		//fiw->object_txt->textfont(FL_SCREEN);
+		//fiw->object_txt->textsize(8);
+		fiw->object_txt->buffer(fiw->buf);
+	}*/
+
+	if(fiw->view_mode->value() > MAX_TRACK_MODES_INDEX)
+	{
+		while(sl && guicontext->trackviewerfloppy)
+		{
+			if(sl->sectorconfig)
+			{
+				if( isTheRightSector(fiw->view_mode->value(),guicontext->td,sl,xpos,ypos) )
+				{
+					snprintf(str,sizeof(str),"Track : %d Side : %d ",sl->track,sl->side);
+					fiw->global_status->value(str);
+
+					fiw->track_number_slide->value(sl->track);
+					fiw->side_number_slide->value(sl->side);
+				}
+			}
+			sl = sl->next_element;
+		}
+	}
+
+	return full_str;
+}
+
 void mouse_di_cb(Fl_Widget *o, void *v)
 {
-	unsigned int i;
 	floppy_infos_window *fiw;
 	trackedittool_window *tew;
 	Fl_Window *dw;
@@ -733,15 +923,11 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 	double stepperpix_y;
 	int xpos,ypos,buttons_state;
 	char str[512];
-	char str2[512];
 	int track,side;
 	HXCFE_SIDE * curside;
-	unsigned char * sect_data;
-	unsigned int sectorsize;
 
 	int event,valmodif;
-
-	unsigned char c;
+	char * full_str;
 
 	s_sectorlist * sl;
 	s_pulseslist * pl;
@@ -1050,183 +1236,8 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 			if( !guicontext->updating )
 			{
 				sl = hxcfe_td_getlastsectorlist(guicontext->td);
-				fullstr[0]=0;
 
-				while(sl && guicontext->trackviewerfloppy)
-				{
-					if(sl->sectorconfig)
-					{
-						sectorsize = hxcfe_getSectorConfigSectorSize(guicontext->hxcfe,sl->sectorconfig);
-
-						fullstr[0]=0;
-
-						if( isTheRightSector(fiw,guicontext->td,sl,xpos,ypos) )
-						{
-							if(fiw->view_mode->value() > MAX_TRACK_MODES_INDEX)
-							{
-								snprintf(str,sizeof(str),"Track : %d Side : %d ",sl->track,sl->side);
-								fiw->global_status->value(str);
-
-								fiw->track_number_slide->value(sl->track);
-								fiw->side_number_slide->value(sl->side);
-							}
-
-							switch(hxcfe_getSectorConfigEncoding(guicontext->hxcfe,sl->sectorconfig))
-							{
-								case ISOFORMAT_SD:
-									snprintf(str,sizeof(str),"FM Sector");
-								break;
-								case ISOFORMAT_DD:
-									snprintf(str,sizeof(str),"MFM Sector");
-								break;
-								case UKNCFORMAT_DD:
-									snprintf(str,sizeof(str),"UKNC Sector");
-								break;
-								case AMIGAFORMAT_DD:
-									snprintf(str,sizeof(str),"Amiga MFM Sector");
-								break;
-								case TYCOMFORMAT_SD:
-									snprintf(str,sizeof(str),"TYCOM Sector");
-								break;
-								case MEMBRAINFORMAT_DD:
-									snprintf(str,sizeof(str),"MEMBRAIN Sector");
-								break;
-								case EMUFORMAT_SD:
-									snprintf(str,sizeof(str),"E-mu Sector");
-								break;
-								case APPLE2_GCR5A3:
-									snprintf(str,sizeof(str),"AppleII 5A3 Sector");
-								break;
-								case APPLE2_GCR6A2:
-									snprintf(str,sizeof(str),"AppleII 6A2 Sector");
-								break;
-								case APPLEMAC_GCR6A2:
-									snprintf(str,sizeof(str),"Apple Macintosh Sector");
-								break;
-								case ARBURG_DAT:
-									snprintf(str,sizeof(str),"Arburg SD Sector");
-								break;
-								case ARBURG_SYS:
-									snprintf(str,sizeof(str),"Arburg SYS Sector");
-								break;
-								case AED6200P_DD:
-									snprintf(str,sizeof(str),"AED 6200P Sector");
-								break;
-								case NORTHSTAR_HS_DD:
-									snprintf(str,sizeof(str),"Northstar Sector");
-								break;
-								case HEATHKIT_HS_SD:
-									snprintf(str,sizeof(str),"Heathkit Sector");
-								break;
-								case DECRX02_SDDD:
-									snprintf(str,sizeof(str),"DEC RX02 Sector");
-								break;
-								case QD_MO5_MFM:
-									snprintf(str,sizeof(str),"QD MO5 Sector");
-								break;
-								case C64_GCR:
-									snprintf(str,sizeof(str),"C64 GCR Sector");
-								break;
-								case MICRALN_HS_SD:
-									snprintf(str,sizeof(str),"R2E Micral N");
-								break;
-								case VICTOR9K_GCR:
-									snprintf(str,sizeof(str),"Victor 9000");
-								break;
-								default:
-									snprintf(str,sizeof(str),"Unknown Sector type");
-								break;
-							}
-							fiw->buf->append((char*)str);
-
-							snprintf(str,sizeof(str),"\nSector ID:%.3d\nTrack ID:%.3d - Side ID:%.3d\nSize:%.5d (ID:0x%.2x)\n",
-								hxcfe_getSectorConfigSectorID(guicontext->hxcfe,sl->sectorconfig),
-								hxcfe_getSectorConfigTrackID(guicontext->hxcfe,sl->sectorconfig),
-								hxcfe_getSectorConfigSideID(guicontext->hxcfe,sl->sectorconfig),
-								sectorsize,
-								hxcfe_getSectorConfigSizeID(guicontext->hxcfe,sl->sectorconfig)
-								);
-							fiw->buf->append((char*)str);
-
-							snprintf(str,sizeof(str),"DataMark:0x%.2X\nHead CRC:0x%.4X (%s)\nData CRC:0x%.4X (%s)\n",
-								hxcfe_getSectorConfigDataMark(guicontext->hxcfe,sl->sectorconfig),
-								hxcfe_getSectorConfigHCRC(guicontext->hxcfe,sl->sectorconfig),hxcfe_getSectorConfigHCRCStatus(guicontext->hxcfe,sl->sectorconfig)?"BAD CRC!":"Ok",
-								hxcfe_getSectorConfigDCRC(guicontext->hxcfe,sl->sectorconfig),hxcfe_getSectorConfigDCRCStatus(guicontext->hxcfe,sl->sectorconfig)?"BAD CRC!":"Ok");
-							fiw->buf->append((char*)str);
-
-							snprintf(str,sizeof(str),"Start Sector cell:%d\nStart Sector Data cell:%d\nEnd Sector cell:%d\n",
-								hxcfe_getSectorConfigStartSectorIndex(guicontext->hxcfe,sl->sectorconfig),
-								hxcfe_getSectorConfigStartDataIndex(guicontext->hxcfe,sl->sectorconfig),
-								hxcfe_getSectorConfigEndSectorIndex(guicontext->hxcfe,sl->sectorconfig));
-							fiw->buf->append((char*)str);
-
-							if( hxcfe_getSectorConfigStartSectorIndex(guicontext->hxcfe,sl->sectorconfig) <= hxcfe_getSectorConfigEndSectorIndex(guicontext->hxcfe,sl->sectorconfig) )
-							{
-								snprintf(str,sizeof(str),"Number of cells:%d\n",
-									hxcfe_getSectorConfigEndSectorIndex(guicontext->hxcfe,sl->sectorconfig) - hxcfe_getSectorConfigStartSectorIndex(guicontext->hxcfe,sl->sectorconfig));
-							}
-							else
-							{
-								track=(int)fiw->track_number_slide->value();
-								side=(int)fiw->side_number_slide->value();
-
-								hxc_entercriticalsection(guicontext->hxcfe,2);
-								if(guicontext->trackviewerfloppy)
-								{
-									snprintf(str,sizeof(str),"Number of cells:%d\n",
-										( ( hxcfe_getTrackLength(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side) - hxcfe_getSectorConfigStartSectorIndex(guicontext->hxcfe,sl->sectorconfig) ) + hxcfe_getSectorConfigEndSectorIndex(guicontext->hxcfe,sl->sectorconfig) ) );
-								}
-								hxc_leavecriticalsection(guicontext->hxcfe,2);
-							}
-
-							fiw->buf->append((char*)str);
-
-							sect_data = hxcfe_getSectorConfigInputData(guicontext->hxcfe,sl->sectorconfig);
-							if(sect_data)
-							{
-
-								for(i=0;i< sectorsize ;i++)
-								{
-									if(!(i&0x7))
-									{
-										if(i)
-										{
-											str2[8]=0;
-											strcat(fullstr,"| ");
-											strcat(fullstr,str2);
-										}
-
-										snprintf(str,sizeof(str),"\n%.4X| ",i);
-										strcat(fullstr,str);
-									}
-
-									snprintf(str,sizeof(str),"%.2X ",sect_data[i]);
-									strcat(fullstr,str);
-
-									c='.';
-									if( (sect_data[i]>=32 && sect_data[i]<=126) )
-										c = sect_data[i];
-
-									str2[i&0x7]=c;
-
-								}
-
-								str2[8]=0;
-								strcat(fullstr,"| ");
-								strcat(fullstr,str2);
-							}
-
-							strcat(fullstr,"\n\n");
-
-							fiw->buf->append((char*)fullstr);
-							//fiw->object_txt->textfont(FL_SCREEN);
-							//fiw->object_txt->textsize(8);
-							fiw->object_txt->buffer(fiw->buf);
-						}
-					}
-
-					sl = sl->next_element;
-				}
+				full_str = printsectorinfo(fiw, atoi(tew->edit_startpoint->value()), atoi(tew->edit_endpoint->value()), xpos, ypos, sl);
 
 				hxc_entercriticalsection(guicontext->hxcfe,2);
 
@@ -1244,38 +1255,33 @@ void mouse_di_cb(Fl_Widget *o, void *v)
 
 					if(hxcfe_getNumberOfTrack(guicontext->hxcfe,guicontext->trackviewerfloppy))
 					{
-						snprintf(str,sizeof(str),"Track RPM : %d RPM\n",hxcfe_getTrackRPM(guicontext->hxcfe,guicontext->trackviewerfloppy,track));
-						strcat(fullstr,str);
-
+						full_str = hxc_dyn_sprintfcat(full_str, (char*)"Track RPM : %d RPM\n",hxcfe_getTrackRPM(guicontext->hxcfe,guicontext->trackviewerfloppy,track));
 
 						if( hxcfe_getTrackBitrate(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side) == -1)
 						{
-							snprintf(str,sizeof(str),"\nBitrate : VARIABLE\n");
+							full_str = hxc_dyn_sprintfcat(full_str, (char*)"\nBitrate : VARIABLE\n");
 						}
 						else
 						{
-							snprintf(str,sizeof(str),"\nBitrate : %d bit/s\n",(int)hxcfe_getTrackBitrate(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side) );
+							full_str = hxc_dyn_sprintfcat(full_str, (char*)"\nBitrate : %d bit/s\n",(int)hxcfe_getTrackBitrate(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side) );
 						}
-						strcat(fullstr,str);
 
-						snprintf(str,sizeof(str),"\nTrack format :\n%s\n",hxcfe_getTrackEncodingName(guicontext->hxcfe,hxcfe_getTrackEncoding(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side)));
-						strcat(fullstr,str);
-						snprintf(str,sizeof(str),"\nTrack len : %d cells\n",(int)hxcfe_getTrackLength(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side));
-						strcat(fullstr,str);
-						snprintf(str,sizeof(str),"Number of side : %d\n",hxcfe_getTrackNumberOfSide(guicontext->hxcfe,guicontext->trackviewerfloppy,track));
-						strcat(fullstr,str);
+						full_str = hxc_dyn_sprintfcat(full_str, (char*)"\nTrack format :\n%s\n",hxcfe_getTrackEncodingName(guicontext->hxcfe,hxcfe_getTrackEncoding(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side)));
+						full_str = hxc_dyn_sprintfcat(full_str, (char*)"\nTrack len : %d cells\n",(int)hxcfe_getTrackLength(guicontext->hxcfe,guicontext->trackviewerfloppy,track,side));
+						full_str = hxc_dyn_sprintfcat(full_str, (char*)"Number of side : %d\n",hxcfe_getTrackNumberOfSide(guicontext->hxcfe,guicontext->trackviewerfloppy,track));
 
-						snprintf(str,sizeof(str),"\nInterface mode:\n%s\n%s\n",
+						full_str = hxc_dyn_sprintfcat(full_str, (char*)"\nInterface mode:\n%s\n%s\n",
 							hxcfe_getFloppyInterfaceModeName(guicontext->hxcfe,guicontext->interfacemode),
 							hxcfe_getFloppyInterfaceModeDesc(guicontext->hxcfe,guicontext->interfacemode));
 
-						strcat(fullstr,str);
-
-						fiw->buf->append((char*)fullstr);
-
-						fiw->object_txt->buffer(fiw->buf);
 					}
 				}
+
+				fiw->buf->append((char*)full_str);
+				fiw->object_txt->buffer(fiw->buf);
+
+				free(full_str);
+				full_str = NULL;
 
 				hxc_leavecriticalsection(guicontext->hxcfe,2);
 			}
