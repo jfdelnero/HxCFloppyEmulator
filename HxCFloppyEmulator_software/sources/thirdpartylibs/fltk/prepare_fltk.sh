@@ -22,13 +22,13 @@ md5_check () {
 
 if [ $OSTYPE == 'darwin'* ] || [ $1 = "1" ] ; then
 export DOWNLOADURL=https://github.com/fltk/fltk/releases/download/release-1.4.1/fltk-1.4.1-source.tar.gz
-export DOWNLOADHASH="203eed9e14a7bd6ff0373c0f3f32ef08"
+export DOWNLOADHASH="203eed9e14a7bd6ff0373c0f3f32ef07"
 export ARCHIVENAMEBASE=fltk-1.4.1-source
 export PATCHFILE=
 export FOLDERNAME=fltk-1.4.1
 else
 export DOWNLOADURL=https://github.com/fltk/fltk/releases/download/release-1.4.1/fltk-1.4.1-source.tar.gz
-export DOWNLOADHASH="203eed9e14a7bd6ff0373c0f3f32ef08"
+export DOWNLOADHASH="203eed9e14a7bd6ff0373c0f3f32ef07"
 export ARCHIVENAMEBASE=fltk-1.4.1-source
 export PATCHFILE=fltk-1.4.x-vc6.patch
 export FOLDERNAME=fltk-1.4.1
