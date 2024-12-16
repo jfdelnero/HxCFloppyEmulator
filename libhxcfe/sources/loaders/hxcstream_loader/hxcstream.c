@@ -98,25 +98,26 @@ static uint32_t get_tick_from_reversal(uint32_t* buffer,uint32_t reversal)
 	return tick;
 }
 
-uint32_t * conv_stream(uint32_t * trackbuf_dword, unsigned char * unpacked_data, unsigned int unpacked_data_size, uint32_t pulses_count)
+uint32_t * conv_stream(uint32_t * trackbuf_dword, unsigned char * unpacked_data, unsigned int unpacked_data_size, int * pulses_count)
 {
 	unsigned int k,l,p;
 	unsigned char c;
 	uint32_t tmp_dword;
 
-	if( pulses_count )
+	if( *pulses_count )
 	{
 		p = 0;
 		k = 0;
 		l = 0;
 
-		while(l < pulses_count && k < unpacked_data_size)
+		while( l < *pulses_count && k < unpacked_data_size )
 		{
 			c  = unpacked_data[k++];
 
 			if( !(c & 0x80) )
 			{
-				trackbuf_dword[p++] = c;
+				if(c)
+					trackbuf_dword[p++] = c;
 			}
 			else
 			{
@@ -157,9 +158,10 @@ uint32_t * conv_stream(uint32_t * trackbuf_dword, unsigned char * unpacked_data,
 			l++;
 		}
 
+		*pulses_count = p;
+
 		// dummy pulse
 		trackbuf_dword[p++] = 300;
-
 	}
 
 	return trackbuf_dword;
@@ -311,7 +313,7 @@ HXCFE_TRKSTREAM* DecodeHxCStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char 
 										{
 											stream = tmp_dw_ptr;
 											memset(&stream[total_nb_pulses],0x00,(nb_pulses+1)*sizeof(uint32_t));
-											conv_stream(&stream[total_nb_pulses],hxcstreambuf, stream_header->unpacked_size, nb_pulses);
+											conv_stream(&stream[total_nb_pulses],hxcstreambuf, stream_header->unpacked_size, &nb_pulses);
 										}
 										else
 										{
@@ -770,7 +772,7 @@ HXCFE_TRKSTREAM* hxcfe_FxStream_ImportHxCStreamBuffer(HXCFE_FXSA * fxs,unsigned 
 							{
 								stream = tmp_dw_ptr;
 								memset(&stream[total_nb_pulses],0x00,(nb_pulses+1)*sizeof(uint32_t));
-								conv_stream(&stream[total_nb_pulses],hxcstreambuf, stream_header->unpacked_size, nb_pulses);
+								conv_stream(&stream[total_nb_pulses],hxcstreambuf, stream_header->unpacked_size, &nb_pulses);
 							}
 							else
 							{
