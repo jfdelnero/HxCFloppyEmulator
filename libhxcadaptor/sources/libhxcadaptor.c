@@ -495,6 +495,12 @@ char * hxc_dyn_sprintfcat(char * deststr,char * srcstr, ...)
 {
 	char tmp_str[4096];
 	va_list args;
+
+	if(!srcstr)
+		return NULL;
+
+	tmp_str[0] = 0;
+
 	va_start(args, srcstr);
 
 	if( vsnprintf(tmp_str, sizeof(tmp_str), srcstr, args) >= 0 )
