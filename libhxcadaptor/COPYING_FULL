@@ -1,5 +1,5 @@
  HxC Floppy Emulator - A generic/universal floppy disk drive emulator
- Copyright (C) 2006-2024  Jean-François DEL NERO / HxC2001
+ Copyright (C) 2006-2025  Jean-François DEL NERO / HxC2001
 
  Email :    hxc2001(at)hxc2001.com
 
@@ -134,9 +134,9 @@ exceptions:
            the FLTK project (http://www.fltk.org).
  -----------------------------------------------------------------------------------------------
   ZLIB DATA COMPRESSION LIBRARY
-  zlib 1.2.8 is a general purpose data compression library.
+Copyright notice:
 
-  (C) 1995-2013 Jean-loup Gailly and Mark Adler
+ (C) 1995-2022 Jean-loup Gailly and Mark Adler
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -156,16 +156,6 @@ exceptions:
 
   Jean-loup Gailly        Mark Adler
   jloup@gzip.org          madler@alumni.caltech.edu
-
-If you use the zlib library in a product, we would appreciate *not* receiving
-lengthy legal documents to sign.  The sources are provided for free but without
-warranty of any kind.  The library has been entirely written by Jean-loup
-Gailly and Mark Adler; it does not include third-party code.
-
-If you redistribute modified sources, we would appreciate that you include in
-the file ChangeLog history information documenting your changes.  Please read
-the FAQ for more information on the distribution of modified source versions.
-
  -----------------------------------------------------------------------------------------------
  Expat XML parser
 
