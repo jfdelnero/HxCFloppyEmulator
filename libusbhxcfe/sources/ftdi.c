@@ -256,7 +256,11 @@ int32_t createlistenerthread(RDTHREADFUNCTION thread,int32_t priority,ftdi_conte
 	//pthread_attr_setprio(&threadattrib,4);
 	
 	pthread_attr_setschedpolicy(&threadattrib,SCHED_FIFO);
+
+#ifndef __EMSCRIPTEN__
 	param.sched_priority = sched_get_priority_max(SCHED_FIFO) ;
+#endif
+
 	/* set the new scheduling param */
 	pthread_attr_setschedparam (&threadattrib, &param);
 

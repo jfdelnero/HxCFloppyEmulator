@@ -60,15 +60,15 @@
 
 //#define DEBUGVB 1
 
-trackzone trackzonebuffer_0[2048*2];
-trackzone trackzonebuffer_1[2048*2];
+static trackzone trackzonebuffer_0[2048*2];
+static trackzone trackzonebuffer_1[2048*2];
 
-trackzone trackzonebuffer_temp[2048*2];
+static trackzone trackzonebuffer_temp[2048*2];
 
-trackpart trackpartbuffer_0[4096*2];
-trackpart trackpartbuffer_1[4096*2];
+static trackpart trackpartbuffer_0[4096*2];
+static trackpart trackpartbuffer_1[4096*2];
 
-void adjustrand(unsigned char * d, unsigned char * r)
+static void adjustrand(unsigned char * d, unsigned char * r)
 {
 	if ( (*d & 0xC0) == 0xC0)
 	{
