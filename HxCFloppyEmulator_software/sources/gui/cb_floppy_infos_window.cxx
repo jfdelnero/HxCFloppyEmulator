@@ -848,7 +848,7 @@ char * gen_info_txt(char * outbuf, int view_mode, int track, int side, int start
 							{
 								str2[8]=0;
 								outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"| ");
-								outbuf = hxc_dyn_sprintfcat(outbuf, "%s", str2);
+								outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"%s", str2);
 							}
 
 							outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"\n%.4X| ", i);
@@ -865,7 +865,7 @@ char * gen_info_txt(char * outbuf, int view_mode, int track, int side, int start
 
 					str2[8]=0;
 					outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"| ");
-					outbuf = hxc_dyn_sprintfcat(outbuf, "%s", str2);
+					outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"%s", str2);
 				}
 
 				outbuf = hxc_dyn_sprintfcat(outbuf, (char*)"\n\n");
