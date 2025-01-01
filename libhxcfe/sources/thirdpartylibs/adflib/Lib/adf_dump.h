@@ -34,7 +34,7 @@ PREFIX RETCODE adfCreateHdFile(struct Device* dev, char* volName, int volType);
 BOOL adfInitDumpDevice(struct Device* dev, char* name,BOOL);
 BOOL adfReadDumpSector(struct Device *dev, int32_t n, int size, unsigned char* buf);
 BOOL adfWriteDumpSector(struct Device *dev, int32_t n, int size, unsigned char* buf);
-void adfReleaseDumpDevice(struct Device *dev);
+RETCODE adfReleaseDumpDevice(struct Device *dev);
 
 
 #endif /* ADF_DUMP_H */
