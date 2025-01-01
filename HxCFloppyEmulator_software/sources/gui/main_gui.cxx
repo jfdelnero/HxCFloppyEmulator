@@ -275,7 +275,6 @@ void menu_clicked(Fl_Widget * w, void * fc_ptr)
 		case 16:
 			mw->streamer_window->window->show();
 		break;
-
 	}
 
 }
@@ -966,6 +965,12 @@ Main_Window::Main_Window(int argc, char **argv)
 
 	#ifdef GUI_DEBUG
 	print_dbg((char*)"Main_Window : Entering Main_Window");
+
+	print_dbg((char*)"Main_Window : Screen scaling supported = %d", Fl::screen_scaling_supported());
+	#endif
+
+	#if 0
+	Fl::screen_scale(Fl::screen_count() - 1,300);
 	#endif
 
 	// First lock() call to Enable lock/unlock threads support.
