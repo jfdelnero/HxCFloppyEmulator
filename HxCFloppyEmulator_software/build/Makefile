@@ -99,6 +99,16 @@ else
 	LDFLAGS += $(shell $(BASEDIR)/thirdpartylibs/fltk/fltk-1.x.x/fltk-config --ldflags)
 endif
 
+ifeq ($(TARGET), Emscripten)
+	CFLAGS += -I/usr/local/include
+	LDFLAGS += -lc -lm -ldl	
+	CC = emcc
+	CPP = em++
+	BUILD_CC = cc
+	LIBHXCFE = libhxcfe.a
+	LIBUSBHXCFE = libusbhxcfe.a	
+endif
+
 ifdef STANDALONEFSBROWSER_BUILD
 	CFLAGS += -DSTANDALONEFSBROWSER
 	EXEC = DosDiskBrowser.exe
@@ -330,6 +340,8 @@ bmptoh:
 	cd $(BASEDIR)/gui/microintro/converttools/bmptob8 && $(MAKE) CC=${BUILD_CC}
 
 clean:
+	rm -rf *.a
+	rm -rf *.wasm
 	rm -rf *.o
 	rm -rf *.so
 	rm -rf *.dll

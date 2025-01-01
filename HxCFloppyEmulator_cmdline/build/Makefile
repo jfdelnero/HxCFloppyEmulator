@@ -73,6 +73,15 @@ ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
 	LDFLAGS += -lc -lm -ldl -lpthread
 endif
 
+ifeq ($(TARGET), Emscripten)
+	CFLAGS +=
+	LDFLAGS += -static-libgcc
+	CC = emcc
+	EXEC = hxcfe.wasm
+	LIBHXCFE = libhxcfe.a
+	LIBUSBHXCFE = libusbhxcfe.a
+endif
+
 all: $(EXEC)
 
 hxcfe.exe:  hxcfe.o utils.o ../../build/libhxcadaptor.a $(LIBHXCFE) $(LIBUSBHXCFE)
@@ -80,6 +89,10 @@ hxcfe.exe:  hxcfe.o utils.o ../../build/libhxcadaptor.a $(LIBHXCFE) $(LIBUSBHXCF
 	cp $@ ../../build
 
 hxcfe:  hxcfe.o utils.o ../../build/libhxcadaptor.a $(LIBHXCFE) $(LIBUSBHXCFE)
+	$(CC) -o $@    $^ $(LDFLAGS)
+	cp $@ ../../build
+
+hxcfe.wasm:  hxcfe.o utils.o ../../build/libhxcadaptor.a $(LIBHXCFE) $(LIBUSBHXCFE)
 	$(CC) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../build
 
@@ -96,11 +109,13 @@ utils.o: ../sources/utils.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 clean:
+	rm -rf *.a
 	rm -rf *.o
 	rm -rf *.so
 	rm -rf *.dll
 	rm -rf *.exe
 	rm -rf *.map
+	rm -rf *.wasm
 
 mrproper: clean
 	rm -rf $(EXEC)

@@ -75,6 +75,12 @@ ifeq ($(TARGET), Darwin)
 	EXEC = libhxcfe.dylib
 endif
 
+ifeq ($(TARGET), Emscripten)
+	CC = emcc
+	AR = emar
+	EXEC = libhxcfe.a
+endif
+
 XML_DSKLAYOUT_INPUTS  := $(wildcard $(BASEDIR)/xml_disk/DiskLayouts/xml_files/DiskLayout_*.xml)
 XML_DSKLAYOUT_OUTPUTS := $(patsubst $(BASEDIR)/xml_disk/DiskLayouts/xml_files/%.xml,$(BASEDIR)/xml_disk/DiskLayouts/%.h,$(XML_DSKLAYOUT_INPUTS))
 
@@ -928,6 +934,7 @@ $(BASEDIR)/misc/data/%.h: $(BASEDIR)/misc/data/%.bmp bmptoh
 	cd $(BASEDIR)/misc/data/ && ../../xml_disk/converttools/bmptob8/bmptoh $(basename $(notdir $<.bmp)) -BMP8P
 
 clean:
+	rm -rf *.a
 	rm -rf *.o
 
 mrproper: clean

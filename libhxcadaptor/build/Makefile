@@ -61,6 +61,13 @@ ifeq ($(TARGET), Darwin)
 	LDFLAGS += -lc -lm -ldl ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
 endif
 
+ifeq ($(TARGET), Emscripten)
+	CFLAGS +=
+	LDFLAGS += -lc -lm -ldl
+	CC = emcc
+	AR = emar
+endif
+
 EXEC = libhxcadaptor.a
 
 all: $(EXEC)

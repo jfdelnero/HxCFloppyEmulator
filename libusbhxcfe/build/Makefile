@@ -68,6 +68,14 @@ ifeq ($(TARGET), Darwin)
 	EXEC = libusbhxcfe.dylib
 endif
 
+ifeq ($(TARGET), Emscripten)
+	CFLAGS +=
+	LDFLAGS += -lc -lm -ldl
+	CC = emcc
+	AR = emar
+	EXEC=libusbhxcfe.a
+endif
+
 ifeq ($(findstring CYGWIN,$(shell uname)),CYGWIN)
 	EXEC = libusbhxcfe.dll
 endif
@@ -113,6 +121,7 @@ ftdi_libftdimode.o : ftdi.c ftdi.h ftd2xx.h WinTypes.h
 	$(CC) -o $@ -c $< $(CFLAGS) -DFTDILIB
 
 clean:
+	rm -rf *.a
 	rm -rf *.o
 
 mrproper: clean

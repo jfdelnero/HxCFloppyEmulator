@@ -330,12 +330,16 @@ int hxc_createthread(HXCFE* floppycontext,void* hwcontext,THREADFUNCTION thread,
 	if(priority)
 	{
 		pthread_attr_setschedpolicy(&threadattrib,SCHED_FIFO);
+#ifndef __EMSCRIPTEN__
 		param.sched_priority = sched_get_priority_max(SCHED_FIFO);
+#endif
 	}
 	else
 	{
 		pthread_attr_setschedpolicy(&threadattrib,SCHED_OTHER);
+#ifndef __EMSCRIPTEN__
 		param.sched_priority = sched_get_priority_max(SCHED_OTHER);
+#endif
 	}
 
 	/* set the new scheduling param */
