@@ -27,11 +27,22 @@ export ARCHIVENAMEBASE=fltk-1.4.1-source
 export PATCHFILE=
 export FOLDERNAME=fltk-1.4.1
 else
-export DOWNLOADURL=https://github.com/fltk/fltk/releases/download/release-1.4.1/fltk-1.4.1-source.tar.gz
-export DOWNLOADHASH="203eed9e14a7bd6ff0373c0f3f32ef07"
-export ARCHIVENAMEBASE=fltk-1.4.1-source
-export PATCHFILE=fltk-1.4.x-vc6.patch
-export FOLDERNAME=fltk-1.4.1
+
+	if [ -z ${EMSDK+x} ]; then
+		export DOWNLOADURL=https://github.com/fltk/fltk/releases/download/release-1.4.1/fltk-1.4.1-source.tar.gz
+		export DOWNLOADHASH="203eed9e14a7bd6ff0373c0f3f32ef07"
+		export ARCHIVENAMEBASE=fltk-1.4.1-source
+		export PATCHFILE=fltk-1.4.x-vc6.patch
+		export FOLDERNAME=fltk-1.4.1
+	else
+		# https://github.com/MoAlyousef/fltk_wasm32_emscripten/tree/emscripten
+		# ("emscripten" branch)
+		export DOWNLOADURL=https://hxc2001.com/vrac/fltk-1.4.0-wasm32.tar.gz
+		export DOWNLOADHASH="06376aa9de275aabd1a9b11e89259ae9"
+		export ARCHIVENAMEBASE=fltk-1.4.0-wasm32
+		export PATCHFILE=
+		export FOLDERNAME=fltk-1.4.0-wasm32
+	fi
 fi
 
 if [[ ! -d fltk-1.x.x ]]; then
