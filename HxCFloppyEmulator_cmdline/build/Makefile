@@ -9,6 +9,8 @@ DEBUG ?= 0
 DEBUG_ASAN ?= 0
 DEBUG_INFOS ?= 0
 
+PTHREAD ?= 0
+
 ifeq ($(DEBUG), 1)
 	CFLAGS =-O0 $(INCLUDES) -Wall -DDEBUG
 	LDFLAGS =
@@ -76,6 +78,10 @@ endif
 ifeq ($(TARGET), Emscripten)
 	CFLAGS +=
 	LDFLAGS += -static-libgcc
+	ifeq ($(PTHREAD), 1)
+		CFLAGS += -pthread
+		LDFLAGS += -pthread -sPTHREAD_POOL_SIZE=4 -sTOTAL_MEMORY=64MB
+	endif
 	CC = emcc
 	EXEC = hxcfe.wasm
 	LIBHXCFE = libhxcfe.a

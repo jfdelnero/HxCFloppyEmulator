@@ -12,6 +12,8 @@ DEBUG ?= 0
 DEBUG_ASAN ?= 0
 DEBUG_INFOS ?= 0
 
+PTHREAD ?= 0
+
 ifeq ($(DEBUG), 1)
 	CFLAGS = -O0 $(INCLUDES) -Wall -DDEBUG
 	LDFLAGS = -shared
@@ -79,6 +81,12 @@ ifeq ($(TARGET), Emscripten)
 	CC = emcc
 	AR = emar
 	EXEC = libhxcfe.a
+	CFLAGS +=
+	LDFLAGS +=
+	ifeq ($(PTHREAD), 1)
+		CFLAGS += -pthread
+		LDFLAGS += -pthread -sPTHREAD_POOL_SIZE=4 -sTOTAL_MEMORY=64MB
+	endif
 endif
 
 XML_DSKLAYOUT_INPUTS  := $(wildcard $(BASEDIR)/xml_disk/DiskLayouts/xml_files/DiskLayout_*.xml)
