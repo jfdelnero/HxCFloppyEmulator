@@ -31,7 +31,7 @@
 #include "../../packer/lzw.h"
 #include "../../packer/rle.h"
 
-#define VERSION "0.7"
+#define VERSION "0.8"
 
 typedef struct {
 	uint32_t xres;
@@ -183,8 +183,7 @@ error:
 	if(file)
 		fclose(file);
 
-	if(dbuffer)
-		free(dbuffer);
+	free(dbuffer);
 
 	return NULL;
 }
@@ -241,7 +240,7 @@ int buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
 		fprintf(file2,"typedef  struct _bmaptype\n{\n    int type;\n    int Xsize;\n    int Ysize;\n    int size;\n    int csize;\n    unsigned char * data;\n    unsigned char * unpacked_data;\n}bmaptype;\n\n");
 		fprintf(file2,"#endif\n");
 		fprintf(file2,"\n");
-		fprintf(file2,"unsigned char data_bmp%s[] =\n{\n    ",temp);
+		fprintf(file2,"static unsigned char data_bmp%s[] =\n{\n    ",temp);
 	}
 	else
 	{
@@ -250,7 +249,7 @@ int buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
 		fprintf(file2,"typedef  struct _datatype\n{\n    int type;\n    int size;\n    int csize;\n    unsigned char * data;\n    unsigned char * unpacked_data;\n}datatype;\n\n");
 		fprintf(file2,"#endif\n");
 		fprintf(file2,"\n");
-		fprintf(file2,"unsigned char data__%s[] =\n{\n    ",temp);
+		fprintf(file2,"static unsigned char data__%s[] =\n{\n    ",temp);
 	}
 
 	l=0;
@@ -349,11 +348,9 @@ int mi_pack(unsigned char * bufferin, int sizein,unsigned char * bufferout, int 
 		}
 	}
 
-	if(buffer)
-		free(buffer);
+	free(buffer);
 
-	if(buffer2)
-		free(buffer2);
+	free(buffer2);
 
 	return mode;
 };

@@ -31,7 +31,7 @@
 #include "../../packer/lzw.h"
 #include "../../packer/rle.h"
 
-#define VERSION "0.7"
+#define VERSION "0.8"
 
 typedef struct {
 	uint32_t xres;
@@ -195,7 +195,7 @@ int buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
 	FILE * file2;
 
 	char temp[128];
-	char temp2[256];
+	char temp2[128*2];
 
 	j = strlen(includefile);
 	if(j)
@@ -219,9 +219,9 @@ int buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
 	}
 
 	if(info->type!=0xff)
-		sprintf(temp2,"data_bmp_%s.h",temp);
+		snprintf(temp2,sizeof(temp2),"data_bmp_%s.h",temp);
 	else
-		sprintf(temp2,"data_%s.h",temp);
+		snprintf(temp2,sizeof(temp2),"data_%s.h",temp);
 
 	printf("Create %s :",temp2);
 
@@ -240,7 +240,7 @@ int buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
 		fprintf(file2,"typedef  struct _bmaptype\n{\n    int type;\n    int Xsize;\n    int Ysize;\n    int size;\n    int csize;\n    unsigned char * data;\n    unsigned char * unpacked_data;\n}bmaptype;\n\n");
 		fprintf(file2,"#endif\n");
 		fprintf(file2,"\n");
-		fprintf(file2,"unsigned char data_bmp%s[] =\n{\n    ",temp);
+		fprintf(file2,"static unsigned char data_bmp%s[] =\n{\n    ",temp);
 	}
 	else
 	{
@@ -249,7 +249,7 @@ int buildincludefile(char *includefile,bmpinfo *info,unsigned char * dbuffer)
 		fprintf(file2,"typedef  struct _datatype\n{\n    int type;\n    int size;\n    int csize;\n    unsigned char * data;\n    unsigned char * unpacked_data;\n}datatype;\n\n");
 		fprintf(file2,"#endif\n");
 		fprintf(file2,"\n");
-		fprintf(file2,"unsigned char data__%s[] =\n{\n    ",temp);
+		fprintf(file2,"static unsigned char data__%s[] =\n{\n    ",temp);
 	}
 
 	l=0;
