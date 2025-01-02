@@ -100,13 +100,15 @@ else
 endif
 
 ifeq ($(TARGET), Emscripten)
-	CFLAGS += -I/usr/local/include
+	CFLAGS += -I/usr/local/include -pthread
 	LDFLAGS += -lc -lm -ldl	
 	CC = emcc
 	CPP = em++
 	BUILD_CC = cc
 	LIBHXCFE = libhxcfe.a
 	LIBUSBHXCFE = libusbhxcfe.a	
+	LDFLAGS += -lpthread -s WASM=1 -sALLOW_MEMORY_GROWTH -sASYNCIFY -sOFFSCREENCANVAS_SUPPORT=1 --bind
+	EXEC = hxcfloppyemulator.wasm
 endif
 
 ifdef STANDALONEFSBROWSER_BUILD
@@ -137,6 +139,8 @@ ifeq ($(TARGET), mingw32)
 else ifeq ($(TARGET), mingw64)
 		cd ../sources/thirdpartylibs/fltk/fltk-1.x.x/ && export LDFLAGS='-static-libstdc++ -static-libgcc' && ./configure --host=x86_64-w64-mingw32 --prefix=/usr/share/mingw-w64
 		$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x/ DIRS=src CC=x86_64-w64-mingw32-gcc CPP=x86_64-w64-mingw32-g++
+else ifeq ($(TARGET), Emscripten)
+		cd ../sources/thirdpartylibs/fltk/fltk-1.x.x/ && export LDFLAGS='-s WASM=1 -sALLOW_MEMORY_GROWTH -sASYNCIFY -sOFFSCREENCANVAS_SUPPORT=1 --bind' && emcmake cmake -DFLTK_BUILD_TEST:BOOL=OFF -DFLTK_USE_PTHREADS:BOOL=OFF -DFLTK_BUILD_FLUID:BOOL=OFF -DFLTK_BUILD_FLTK_OPTIONS:BOOL=OFF -DFLTK_BUILD_GL:BOOL=OFF && emmake make DIRS=src 
 else ifeq ($(TARGET), Darwin)
 ifneq (,$(findstring arm64,$(MACOSX_ARCH)))
 		cd ../sources/thirdpartylibs/fltk && \
@@ -216,6 +220,10 @@ DosDiskBrowser.exe: win32_hxcfloppy_res.o main.o utils.o $(GUI) $(MICROINTRO) lo
 	cp $@ ../../build
 
 hxcfloppyemulator: main.o utils.o $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) $(LIBUSBHXCFE) ../../build/libhxcadaptor.a
+	$(CPP) -o $@    $^ $(LDFLAGS)
+	cp $@ ../../build
+
+hxcfloppyemulator.wasm: main.o utils.o $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) $(LIBUSBHXCFE) ../../build/libhxcadaptor.a
 	$(CPP) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../build
 
