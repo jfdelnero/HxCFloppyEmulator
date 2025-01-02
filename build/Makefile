@@ -57,5 +57,6 @@ mrproper:
 	-rm -rf ../tests/run
 	-rm -rf HxCFloppyEmulator_Software
 	-rm -rf *.zip
+	-rm -rf *.wasm
 
 .PHONY: libhxcadaptor libhxcfe libusbhxcfe HxCFloppyEmulator_cmdline HxCFloppyEmulator_software mrproper clean
