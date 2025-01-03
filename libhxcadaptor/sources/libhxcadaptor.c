@@ -756,16 +756,3 @@ int hxc_ram_fclose(FILE *f,HXCRAMFILE * rf)
 
 	return 0;
 };
-
-#ifdef __EMSCRIPTEN__
-// TOFIX : wasm emscripten undefined functions workaround ...
-void _tzset_js(int32_t p1,int32_t p2,int32_t p3,int32_t p4)
-{
-
-}
-
-void _localtime_js(int64_t p1,int32_t p2)
-{
-
-}
-#endif
