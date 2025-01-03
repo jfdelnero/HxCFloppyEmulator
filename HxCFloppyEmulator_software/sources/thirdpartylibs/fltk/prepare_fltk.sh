@@ -37,8 +37,12 @@ else
 	else
 		# https://github.com/MoAlyousef/fltk_wasm32_emscripten/tree/emscripten
 		# ("emscripten" branch)
+		# + in Fl_Emscripten_Graphics_Driver.cxx
+		# let idata = new ImageData(new Uint8ClampedArray(HEAPF64.buffer, $1, $2), $3, $4);
+		# changed to :
+		# let idata = new ImageData(new Uint8ClampedArray(HEAPF64.buffer, $1, $2).slice(), $3, $4);
 		export DOWNLOADURL=https://hxc2001.com/vrac/fltk-1.4.0-wasm32.tar.gz
-		export DOWNLOADHASH="06376aa9de275aabd1a9b11e89259ae9"
+		export DOWNLOADHASH="16cba8128aaf4f24fcf748a08c764ea8"
 		export ARCHIVENAMEBASE=fltk-1.4.0-wasm32
 		export PATCHFILE=
 		export FOLDERNAME=fltk-1.4.0-wasm32
