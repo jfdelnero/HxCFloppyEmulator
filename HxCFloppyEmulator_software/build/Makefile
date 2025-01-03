@@ -113,7 +113,7 @@ ifeq ($(TARGET), Emscripten)
 	BUILD_CC = cc
 	LIBHXCFE = libhxcfe.a
 	LIBUSBHXCFE = libusbhxcfe.a
-	LDFLAGS += -lpthread -s WASM=1 -sALLOW_MEMORY_GROWTH -sASYNCIFY -sOFFSCREENCANVAS_SUPPORT=1 --bind --shell-file $(realpath $(BASEDIR))/gui/wasm/shell.html
+	LDFLAGS += -sSTACK_SIZE=262144 -sDEFAULT_PTHREAD_STACK_SIZE=262144 -lpthread -s WASM=1 -sALLOW_MEMORY_GROWTH -sASYNCIFY -sOFFSCREENCANVAS_SUPPORT=1 --bind --shell-file $(realpath $(BASEDIR))/gui/wasm/shell.html
 	EXEC = hxcfloppyemulator.html
 endif
 
@@ -147,9 +147,9 @@ else ifeq ($(TARGET), mingw64)
 		$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x/ DIRS=src CC=x86_64-w64-mingw32-gcc CPP=x86_64-w64-mingw32-g++
 else ifeq ($(TARGET), Emscripten)
 ifeq ($(PTHREAD), 1)
-	cd ../sources/thirdpartylibs/fltk/fltk-1.x.x/ && export LDFLAGS='-pthread -sPTHREAD_POOL_SIZE=4 -sTOTAL_MEMORY=64MB -s WASM=1 -sALLOW_MEMORY_GROWTH -sASYNCIFY -sOFFSCREENCANVAS_SUPPORT=1 --bind --shell-file $(realpath $(BASEDIR))/gui/wasm/shell.html' && emcmake cmake -DCMAKE_BUILD_TYPE=Release  -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -DFLTK_BUILD_TEST:BOOL=OFF -DFLTK_CFLAGS="-pthread" -DCMAKE_CXX_FLAGS="-pthread" -DCMAKE_C_FLAGS="-pthread" -DFLTK_USE_PTHREADS:BOOL=ON -DFLTK_BUILD_FLUID:BOOL=OFF -DFLTK_BUILD_FLTK_OPTIONS:BOOL=OFF -DFLTK_BUILD_GL:BOOL=OFF && emmake make DIRS=src
+	cd ../sources/thirdpartylibs/fltk/fltk-1.x.x/ && export LDFLAGS='-pthread -sSTACK_SIZE=262144 -sDEFAULT_PTHREAD_STACK_SIZE=262144 -sPTHREAD_POOL_SIZE=4 -sTOTAL_MEMORY=64MB -s WASM=1 -sALLOW_MEMORY_GROWTH -sASYNCIFY -sOFFSCREENCANVAS_SUPPORT=1 --bind --shell-file $(realpath $(BASEDIR))/gui/wasm/shell.html' && emcmake cmake -DCMAKE_BUILD_TYPE=Release  -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -DFLTK_BUILD_TEST:BOOL=OFF -DFLTK_CFLAGS="-pthread" -DCMAKE_CXX_FLAGS="-pthread" -DCMAKE_C_FLAGS="-pthread" -DFLTK_USE_PTHREADS:BOOL=ON -DFLTK_BUILD_FLUID:BOOL=OFF -DFLTK_BUILD_FLTK_OPTIONS:BOOL=OFF -DFLTK_BUILD_GL:BOOL=OFF && emmake make DIRS=src
 else
-	cd ../sources/thirdpartylibs/fltk/fltk-1.x.x/ && export LDFLAGS='-s WASM=1 -sALLOW_MEMORY_GROWTH -sASYNCIFY -sOFFSCREENCANVAS_SUPPORT=1 --bind --shell-file $(realpath $(BASEDIR))/gui/wasm/shell.html' && emcmake cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -DFLTK_BUILD_TEST:BOOL=OFF -DFLTK_USE_PTHREADS:BOOL=OFF -DFLTK_BUILD_FLUID:BOOL=OFF -DFLTK_BUILD_FLTK_OPTIONS:BOOL=OFF -DFLTK_BUILD_GL:BOOL=OFF && emmake make DIRS=src
+	cd ../sources/thirdpartylibs/fltk/fltk-1.x.x/ && export LDFLAGS='-sSTACK_SIZE=262144 -sDEFAULT_PTHREAD_STACK_SIZE=262144 -s WASM=1 -sALLOW_MEMORY_GROWTH -sASYNCIFY -sOFFSCREENCANVAS_SUPPORT=1 --bind --shell-file $(realpath $(BASEDIR))/gui/wasm/shell.html' && emcmake cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -DFLTK_BUILD_TEST:BOOL=OFF -DFLTK_USE_PTHREADS:BOOL=OFF -DFLTK_BUILD_FLUID:BOOL=OFF -DFLTK_BUILD_FLTK_OPTIONS:BOOL=OFF -DFLTK_BUILD_GL:BOOL=OFF && emmake make DIRS=src
 endif
 else ifeq ($(TARGET), Darwin)
 ifneq (,$(findstring arm64,$(MACOSX_ARCH)))

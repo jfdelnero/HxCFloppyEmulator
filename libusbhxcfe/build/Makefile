@@ -75,7 +75,7 @@ ifeq ($(TARGET), Emscripten)
 	LDFLAGS += -lc -lm -ldl
 	ifeq ($(PTHREAD), 1)
 		CFLAGS += -pthread
-		LDFLAGS += -pthread -sPTHREAD_POOL_SIZE=4 -sTOTAL_MEMORY=64MB
+		LDFLAGS += -pthread -sSTACK_SIZE=262144 -sDEFAULT_PTHREAD_STACK_SIZE=262144 -sPTHREAD_POOL_SIZE=4 -sTOTAL_MEMORY=64MB
 	endif
 	CC = emcc
 	AR = emar
