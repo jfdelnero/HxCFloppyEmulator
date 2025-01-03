@@ -62,6 +62,10 @@
 	#include <sched.h>
 #endif
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #include <errno.h>
 
 #include <stdint.h>
@@ -267,21 +271,25 @@ void hxc_destroycriticalsection(HXCFE* floppycontext,unsigned char id)
 
 #ifndef WIN32
 void hxc_msleep (unsigned int ms) {
-    int microsecs;
-    struct timeval tv;
-    microsecs = ms * 1000;
-    tv.tv_sec  = microsecs / 1000000;
-    tv.tv_usec = microsecs % 1000000;
-    select (0, NULL, NULL, NULL, &tv);
+	int microsecs;
+	struct timeval tv;
+	microsecs = ms * 1000;
+	tv.tv_sec  = microsecs / 1000000;
+	tv.tv_usec = microsecs % 1000000;
+	select (0, NULL, NULL, NULL, &tv);
 }
 #endif
 
 void hxc_pause(int ms)
 {
-#ifdef WIN32
-	Sleep(ms);
+#ifdef __EMSCRIPTEN__
+	emscripten_sleep(ms);
 #else
-	hxc_msleep(ms);
+	#ifdef WIN32
+		Sleep(ms);
+	#else
+		hxc_msleep(ms);
+	#endif
 #endif
 }
 
