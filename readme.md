@@ -69,7 +69,7 @@ Build folder.
 
 (Linux build environment)
 ```
-cd build
+cd hxc_floppy_emulator_sources_path/build
 make
 ```
 
@@ -88,9 +88,34 @@ make TARGET=mingw64   # 64 bits build
 (macOS + Xcode build environment)
 
 ```
-cd build
+cd hxc_floppy_emulator_sources_path/build
 make
 ./maccreatebundle
+```
+
+### Emscripten/Web target (experimental)
+
+Install the Emscripten build environment (to do once)
+
+```
+git clone https://github.com/emscripten-core/emsdk.git
+cd emsdk/
+git pull
+./emsdk install latest
+./emsdk activate latest
+```
+
+Set the Emscripten build environment
+
+```
+source "/emsdk_install_path/emsdk_env.sh"
+```
+
+Build the Emscripten HxC Floppy Emulator software
+
+```
+cd hxc_floppy_emulator_sources_path/build
+emmake make TARGET=Emscripten
 ```
 
 -------------------------------------------------------------------------------
