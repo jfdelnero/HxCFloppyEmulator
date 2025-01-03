@@ -11,7 +11,7 @@ DEBUG ?= 0
 DEBUG_ASAN ?= 0
 DEBUG_INFOS ?= 0
 
-PTHREAD ?= 0
+EM_PTHREAD ?= 1
 
 ifeq ($(DEBUG), 1)
 	CFLAGS = -O0 $(INCLUDES) -Wall -DDEBUG
@@ -66,7 +66,7 @@ endif
 ifeq ($(TARGET), Emscripten)
 	CFLAGS +=
 	LDFLAGS += -lc -lm -ldl
-	ifeq ($(PTHREAD), 1)
+	ifeq ($(EM_PTHREAD), 1)
 		CFLAGS += -pthread
 		LDFLAGS += -pthread -sSTACK_SIZE=262144 -sDEFAULT_PTHREAD_STACK_SIZE=262144 -sPTHREAD_POOL_SIZE=4 -sTOTAL_MEMORY=64MB
 	endif

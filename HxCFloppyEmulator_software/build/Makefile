@@ -13,7 +13,7 @@ DEBUG ?= 0
 DEBUG_ASAN ?= 0
 DEBUG_INFOS ?= 0
 
-PTHREAD ?= 0
+EM_PTHREAD ?= 1
 
 EXEC = hxcfloppyemulator
 
@@ -104,7 +104,7 @@ endif
 ifeq ($(TARGET), Emscripten)
 	CFLAGS += -I/usr/local/include
 	LDFLAGS += -lc -lm -ldl
-	ifeq ($(PTHREAD), 1)
+	ifeq ($(EM_PTHREAD), 1)
 		CFLAGS += -pthread
 		LDFLAGS += -pthread -sPTHREAD_POOL_SIZE=4 -sTOTAL_MEMORY=64MB
 	endif
@@ -146,7 +146,7 @@ else ifeq ($(TARGET), mingw64)
 		cd ../sources/thirdpartylibs/fltk/fltk-1.x.x/ && export LDFLAGS='-static-libstdc++ -static-libgcc' && ./configure --host=x86_64-w64-mingw32 --prefix=/usr/share/mingw-w64
 		$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x/ DIRS=src CC=x86_64-w64-mingw32-gcc CPP=x86_64-w64-mingw32-g++
 else ifeq ($(TARGET), Emscripten)
-ifeq ($(PTHREAD), 1)
+ifeq ($(EM_PTHREAD), 1)
 	cd ../sources/thirdpartylibs/fltk/fltk-1.x.x/ && export LDFLAGS='-pthread -sSTACK_SIZE=262144 -sDEFAULT_PTHREAD_STACK_SIZE=262144 -sPTHREAD_POOL_SIZE=4 -sTOTAL_MEMORY=64MB -s WASM=1 -sALLOW_MEMORY_GROWTH -sASYNCIFY -sOFFSCREENCANVAS_SUPPORT=1 --bind --shell-file $(realpath $(BASEDIR))/gui/wasm/shell.html' && emcmake cmake -DCMAKE_BUILD_TYPE=Release  -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -DFLTK_BUILD_TEST:BOOL=OFF -DFLTK_CFLAGS="-pthread" -DCMAKE_CXX_FLAGS="-pthread" -DCMAKE_C_FLAGS="-pthread" -DFLTK_USE_PTHREADS:BOOL=ON -DFLTK_BUILD_FLUID:BOOL=OFF -DFLTK_BUILD_FLTK_OPTIONS:BOOL=OFF -DFLTK_BUILD_GL:BOOL=OFF && emmake make DIRS=src
 else
 	cd ../sources/thirdpartylibs/fltk/fltk-1.x.x/ && export LDFLAGS='-sSTACK_SIZE=262144 -sDEFAULT_PTHREAD_STACK_SIZE=262144 -s WASM=1 -sALLOW_MEMORY_GROWTH -sASYNCIFY -sOFFSCREENCANVAS_SUPPORT=1 --bind --shell-file $(realpath $(BASEDIR))/gui/wasm/shell.html' && emcmake cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -DFLTK_BUILD_TEST:BOOL=OFF -DFLTK_USE_PTHREADS:BOOL=OFF -DFLTK_BUILD_FLUID:BOOL=OFF -DFLTK_BUILD_FLTK_OPTIONS:BOOL=OFF -DFLTK_BUILD_GL:BOOL=OFF && emmake make DIRS=src
