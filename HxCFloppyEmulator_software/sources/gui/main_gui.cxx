@@ -990,7 +990,7 @@ Main_Window::Main_Window(int argc, char **argv)
 	guicontext->hxcfe=hxcfe_init();
 	hxcfe_setOutputFunc(guicontext->hxcfe,CUI_affiche);
 
-#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
+#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE) && !defined(__EMSCRIPTEN__)
 	guicontext->usbhxcfe = libusbhxcfe_init(guicontext->hxcfe);
 #endif
 
