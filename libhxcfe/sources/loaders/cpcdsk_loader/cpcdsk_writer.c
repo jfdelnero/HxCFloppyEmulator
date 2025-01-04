@@ -64,6 +64,7 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG** sca;
+	int gap3_value;
 
 	if( !imgldr_ctx || !floppy || !filename )
 	{
@@ -72,6 +73,7 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write CPCDSK file %s...",filename);
 
+	gap3_value = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "CPCDSK_WRITER_GAP3_VALUE" );
 	flag_limit_sector_size = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "CPCDSK_WRITER_LIMIT_SECTOR_SIZE" );
 	flag_discard_unformatted_2side = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "CPCDSK_WRITER_DISCARD_UNFORMATTED_SIDE" );
 
@@ -119,9 +121,14 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 
 			memset(&cpcdsk_th,0,sizeof(cpcdsk_trackheader));
 			sprintf((char*)&cpcdsk_th.headertag,"Track-Info\r\n");
-			cpcdsk_th.side_number=i;
-			cpcdsk_th.track_number=j;
-			cpcdsk_th.gap3_length=78;
+			cpcdsk_th.side_number = i;
+			cpcdsk_th.track_number = j;
+
+			if(gap3_value >= 0)
+				cpcdsk_th.gap3_length = gap3_value;
+			else
+				cpcdsk_th.gap3_length = 78;
+
 			cpcdsk_th.filler_byte=0xE5;
 			cpcdsk_th.number_of_sector = nbsector;
 			cpcdsk_th.rec_mode = rec_mode;
@@ -151,9 +158,56 @@ int CPCDSK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char
 			if(nbsector)
 			{
 				cpcdsk_th.sector_size_code=size_to_code(sca[0]->sectorsize);
+
+				if( nbsector > 1 && gap3_value < 0 )
+				{
+					// Try to guess the gap3 to use.
+
+					int gap3_length, gapcnt;
+
+					gap3_length = 0;
+					gapcnt = 0;
+
+					for(k = 0; k < nbsector - 1 ; k++ )
+					{
+						if( sca[k]->endsectorindex >= 0 && sca[k+1]->startsectorindex >= 0 &&
+							sca[k]->endsectorindex < sca[k+1]->startsectorindex )
+						{
+							switch(rec_mode)
+							{
+								case 1: //FM
+									gap3_length += (sca[k+1]->startsectorindex - sca[k]->endsectorindex) / (8*4);
+									gapcnt++;
+								break;
+								case 2: //MFM
+									gap3_length += (sca[k+1]->startsectorindex - sca[k]->endsectorindex) / (8*2);
+									gapcnt++;
+								break;
+							}
+						}
+					}
+
+					gap3_length /= gapcnt;
+
+					if( gapcnt )
+					{
+						switch(rec_mode)
+						{
+							case 1: //FM
+								gap3_length -= 6;
+							break;
+							case 2: //MFM
+								gap3_length -= 12;
+							break;
+						}
+
+						if( gap3_length >= 0 )
+							cpcdsk_th.gap3_length = gap3_length;
+					}
+				}
 			}
 
-			trackinfooffset=ftell(outfile);
+			trackinfooffset = ftell(outfile);
 
 			if(nbsector)
 			{

@@ -1,4 +1,4 @@
-#
+f#
 # libhxcfe init script
 #
 # This script is built-in the HxC library and is executed at startup to apply
@@ -374,8 +374,9 @@ set HFE_WRITER_WRITENOTALLOWED 0                      # If = 0 -> Image is not w
 # CPC DSK Loader / Writer parameters
 #
 
-set CPCDSK_WRITER_LIMIT_SECTOR_SIZE 1                 # Limit the sector data to 6144 bytes
+set CPCDSK_WRITER_LIMIT_SECTOR_SIZE        1          # Limit the sector data to 6144 bytes
 set CPCDSK_WRITER_DISCARD_UNFORMATTED_SIDE 1
+set CPCDSK_WRITER_GAP3_VALUE              -1          # Set the desired value or -1 for auto
 
 #
 # Oric DSK Loader / Writer parameters
