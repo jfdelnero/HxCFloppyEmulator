@@ -376,7 +376,13 @@ set HFE_WRITER_WRITENOTALLOWED 0                      # If = 0 -> Image is not w
 
 set CPCDSK_WRITER_LIMIT_SECTOR_SIZE        1          # Limit the sector data to 6144 bytes
 set CPCDSK_WRITER_DISCARD_UNFORMATTED_SIDE 1
-set CPCDSK_WRITER_GAP3_VALUE              -1          # Set the desired value or -1 for auto
+set CPCDSK_WRITER_GAP3_VALUE              -1          # Set the desired GAP 3 value or -1 for auto
+
+#
+# SAP Loader parameters
+#
+
+set SAP_LOADER_GAP3_VALUE                 -1          # Set the desired GAP 3 value or -1 for auto
 
 #
 # Oric DSK Loader / Writer parameters

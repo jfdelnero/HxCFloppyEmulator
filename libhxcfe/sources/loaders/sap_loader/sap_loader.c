@@ -115,7 +115,10 @@ int SAP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		return -1;
 	}
 
-	gap3len = 255;
+	gap3len = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "SAP_LOADER_GAP3_VALUE" );
+	if(gap3len < 0)
+		gap3len = 255;
+
 	interleave = 7;
 	skew = 0;
 
@@ -166,7 +169,7 @@ int SAP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				sap_ReadSector(sapid, j, k+1, &sapsector);
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"[%.2d:%.2d]: Sect %.2d, Track %.2d, Format: 0x%.2x, Protect 0x%.2x",j,k,sapsector.sector,sapsector.track,sapsector.format,sapsector.protection);
 				sectorconfig[k].bitrate=250000;
-				sectorconfig[k].gap3=255;
+				sectorconfig[k].gap3=gap3len;
 				sectorconfig[k].head=0;
 				sectorconfig[k].trackencoding=trackformat;
 				sectorconfig[k].sector=sapsector.sector;
