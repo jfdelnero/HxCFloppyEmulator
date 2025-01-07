@@ -1266,7 +1266,14 @@ Main_Window::Main_Window(int argc, char **argv)
 		}
 
 		infos_window->view_mode->menu(track_display_view_modes_choices);
-		infos_window->view_mode->value(0);
+		infos_window->view_mode->value(3);
+		infos_window->side_number_slide->deactivate();
+		infos_window->track_number_slide->deactivate();
+		infos_window->x_offset->deactivate();
+		infos_window->x_time->deactivate();
+		infos_window->y_time->deactivate();
+		infos_window->x_pos->value("---");
+		infos_window->y_pos->value("---");
 
 		infos_window->buf = new Fl_Text_Buffer;
 		if(infos_window->buf)
