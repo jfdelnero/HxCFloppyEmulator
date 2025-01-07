@@ -270,6 +270,11 @@ void menu_clicked(Fl_Widget * w, void * fc_ptr)
 		case 15:
 			mw->parameters_box = new Parameters_box();
 
+			#ifdef __EMSCRIPTEN__
+			mw->parameters_box->position(64,64);
+			mw->parameters_box->border(1);
+			#endif
+
 			mw->parameters_box->show();
 		break;
 		case 16:
@@ -947,7 +952,11 @@ static void tick_mw(void *v) {
 }
 
 Main_Window::Main_Window(int argc, char **argv)
-  : Fl_Window(WINDOW_XSIZE,428)
+	#ifdef __EMSCRIPTEN__
+	: Fl_Window(64,64,WINDOW_XSIZE,428)
+	#else
+	: Fl_Window(WINDOW_XSIZE,428)
+	#endif
 {
 	int i,j;
 	HXCFE_XMLLDR* rfb;
@@ -1165,6 +1174,11 @@ Main_Window::Main_Window(int argc, char **argv)
 
 		fdump_window->number_of_retry->value(3);
 
+		#ifdef __EMSCRIPTEN__
+		fdump_window->window->position(64,64);
+		fdump_window->window->border(1);
+		#endif
+
 		guicontext->xsize = fdump_window->layout_area->w();
 		guicontext->ysize = fdump_window->layout_area->h();
 		guicontext->mapfloppybuffer = (unsigned char*)malloc(guicontext->xsize * guicontext->ysize * 4);
@@ -1262,6 +1276,12 @@ Main_Window::Main_Window(int argc, char **argv)
 		infos_window->iso_fm_bt->value(1);
 		infos_window->iso_mfm_bt->value(1);
 
+		#ifdef __EMSCRIPTEN__
+		infos_window->window->position(64,64);
+		infos_window->window->border(1);
+		infos_window->window->box(FL_THIN_DOWN_FRAME);
+		#endif
+
 		Fl::add_timeout(0.1, tick_infos, (void*)infos_window);
 
 		#ifdef GUI_DEBUG
@@ -1340,6 +1360,11 @@ Main_Window::Main_Window(int argc, char **argv)
 		streamer_window->drive_choice->menu(drives_choices);
 		streamer_window->drive_choice->value(0);
 
+		#ifdef __EMSCRIPTEN__
+		streamer_window->window->position(64,64);
+		streamer_window->window->border(1);
+		#endif
+
 		Fl::add_timeout(0.1, streamer_tick_infos, (void*)streamer_window);
 
 		#ifdef GUI_DEBUG
@@ -1362,6 +1387,11 @@ Main_Window::Main_Window(int argc, char **argv)
 		trackedit_window->edit_fillflakey->value("1");
 		trackedit_window->edit_shiftbit->value("0");
 		trackedit_window->edit_editbuffer->value("010");
+
+		#ifdef __EMSCRIPTEN__
+		trackedit_window->window->position(64,64);
+		trackedit_window->window->border(1);
+		#endif
 
 		#ifdef GUI_DEBUG
 		print_dbg((char*)"Main_Window : Track editor window done !");
@@ -1386,6 +1416,11 @@ Main_Window::Main_Window(int argc, char **argv)
 		batchconv_window->strin_src_dir->value( hxcfe_getEnvVar( guicontext->hxcfe, (char*)"LASTSTATE_BATCHCONVERTER_SRC_DIR", NULL ) );
 		batchconv_window->strin_dst_dir->value( hxcfe_getEnvVar( guicontext->hxcfe, (char*)"LASTSTATE_BATCHCONVERTER_DST_DIR", NULL ) );
 		batchconv_window->choice_file_format->value( hxcfe_getEnvVarValue( guicontext->hxcfe, (char*)"LASTSTATE_BATCHCONVERTER_TARGETFORMAT") );
+
+		#ifdef __EMSCRIPTEN__
+		batchconv_window->window->position(64,64);
+		batchconv_window->window->border(1);
+		#endif
 
 		#ifdef GUI_DEBUG
 		print_dbg((char*)"Main_Window : Batch converter window done !");
@@ -1427,6 +1462,11 @@ Main_Window::Main_Window(int argc, char **argv)
 		fs_window->fs_browser->showroot(1);
 		fs_window->fs_browser->redraw();
 		fs_window->fs_browser->show_self();
+
+		#ifdef __EMSCRIPTEN__
+		fs_window->window->position(64,64);
+		fs_window->window->border(1);
+		#endif
 
 		Fl::add_timeout(0.1, tick_fs, (void*)fs_window);
 
@@ -1491,6 +1531,11 @@ Main_Window::Main_Window(int argc, char **argv)
 		rawloader_window->choice_disklayout->menu(disklayout_choices);
 		rawloader_window->choice_disklayout->value(0);
 
+		#ifdef __EMSCRIPTEN__
+		rawloader_window->window->position(64,64);
+		rawloader_window->window->border(1);
+		#endif
+
 		#ifdef GUI_DEBUG
 		print_dbg((char*)"Main_Window : Raw floppy window done !");
 		#endif
@@ -1504,6 +1549,10 @@ Main_Window::Main_Window(int argc, char **argv)
 #ifdef GUI_DEBUG
 		print_dbg((char*)"Main_Window : Log window done !");
 #endif
+		#ifdef __EMSCRIPTEN__
+		log_box->position(64,64);
+		log_box->border(1);
+		#endif
 	}
 	//////////////////////////////////////////////
 	// SD FE CFG window
@@ -1531,6 +1580,11 @@ Main_Window::Main_Window(int argc, char **argv)
 		sdcfg_window->choice_interfacemode_drva_cfg->menu(feifcfg_choices);
 		sdcfg_window->choice_interfacemode_drvb_cfg->menu(feifcfg_choices);
 
+		#ifdef __EMSCRIPTEN__
+		sdcfg_window->window->position(64,64);
+		sdcfg_window->window->border(1);
+		#endif
+
 		#ifdef GUI_DEBUG
 		print_dbg((char*)"Main_Window : SD settings window done !");
 		#endif
@@ -1550,6 +1604,11 @@ Main_Window::Main_Window(int argc, char **argv)
 		usbcfg_window->slider_usbpacket_size->scrollvalue(stats.packetsize,128,512,4096-(512-128));
 #endif
 		usbcfg_window->rbt_ds0->value(1);
+
+		#ifdef __EMSCRIPTEN__
+		usbcfg_window->window->position(64,64);
+		usbcfg_window->window->border(1);
+		#endif
 
 		#ifdef GUI_DEBUG
 		print_dbg((char*)"Main_Window : USB HxC settings window done !");

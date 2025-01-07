@@ -560,6 +560,11 @@ About_box::About_box()
 	audiostarted = 0;
 	demostate = 0;
 
+	#ifdef __EMSCRIPTEN__
+	this->position(64,64);
+	this->border(1);
+	#endif
+
 	Fl::add_timeout( 0.02, tick, (void*)this);
 
 	return;
