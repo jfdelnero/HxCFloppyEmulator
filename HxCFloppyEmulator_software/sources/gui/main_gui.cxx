@@ -53,6 +53,10 @@
 #include <time.h>
 #include <stdint.h>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #include "sdhxcfe_cfg.h"
 #include "batch_converter_window.h"
 #include "filesystem_generator_window.h"
@@ -1668,3 +1672,44 @@ Main_Window::~Main_Window()
 {
 }
 
+#ifdef __EMSCRIPTEN__
+extern "C"
+{
+	void EMSCRIPTEN_KEEPALIVE upload_file(char * filename, char * folder, void * inBuffer, int inBufSize )
+	{
+		char filepath[512];
+		struct stat st = {0};
+		FILE * f;
+
+		snprintf(filepath,sizeof(filepath), "%s/%s",folder,filename);
+
+		printf("Upload : %s (%d B) \n",filepath,inBufSize);
+
+		if (stat(folder, &st) == -1)
+		{
+			mkdir(folder, 0700);
+		}
+
+		f = fopen(filepath,"wb");
+		if(f)
+		{
+			fwrite(inBuffer,inBufSize,1,f);
+			fclose(f);
+		}
+	}
+}
+
+extern "C"
+{
+	void EMSCRIPTEN_KEEPALIVE load_file_img(char * filename, char * folder)
+	{
+		char filepath[512];
+
+		snprintf(filepath,sizeof(filepath), "%s/%s",folder,filename);
+
+		printf("Load : %s\n",filepath);
+
+		load_file(filepath);
+	}
+}
+#endif

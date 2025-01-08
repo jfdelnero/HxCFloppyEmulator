@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HxC Floppy Emulator</title>
+
+		<script type="text/javascript">
+			function isWebAssemblyAvailable() {
+				try
+				{
+					if (typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function")
+					{
+						const module = new WebAssembly.Module(Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00));
+
+						if (module instanceof WebAssembly.Module)
+						    return new WebAssembly.Instance(module) instanceof WebAssembly.Instance;
+					}
+				}
+				catch (e)
+				{
+
+				}
+
+				return false;
+			}
+
+			var wasm_supported = 0;
+			var head = document.getElementsByTagName('head')[0];
+			var js = document.createElement("script");
+
+			wasm_supported = isWebAssemblyAvailable();
+
+			js.type = "text/javascript";
+
+			if (wasm_supported!=0)
+			{
+				js.src = "hxcfloppyemulator.js";
+			}
+			else
+			{
+			}
+
+			head.appendChild(js);
+
+		</script>
+
+		<script type="text/javascript" src="file_layer.js"></script>
+
+		<script type="text/javascript">
+
+			var fileloader=null;
+			var draganddropfile = document.querySelector('*');
+
+			function img_load(name,buffer)
+			{
+				var byteFileArray = new Int8Array(buffer);
+				var pointerToData = Module._malloc(byteFileArray.byteLength);
+
+				var namesize = lengthBytesUTF8(name) + 1;
+
+				var folder = "/upload";
+				var foldersize = lengthBytesUTF8(folder) + 1;
+
+				Module.HEAPU8.set(byteFileArray, pointerToData);
+
+				var nameptr = _malloc(namesize);
+				stringToUTF8Array(name, HEAP8, nameptr, namesize);
+
+				var folderptr = _malloc(foldersize);
+				stringToUTF8Array(folder, HEAP8, folderptr, foldersize);
+
+				Module._upload_file(nameptr, folderptr, pointerToData, byteFileArray.byteLength);
+
+				Module._load_file_img(nameptr, folderptr);
+
+				_free(nameptr);
+				_free(folderptr);
+			}
+
+			function init_loader()
+			{
+				if (fileloader == undefined)
+				{
+					fileloader = new HxCFILE_emscript_js();
+					if( fileloader == null )
+					{
+						document.getElementById("Mode").innerHTML = "<b>Current Mode :</b> Error";
+					}
+				}
+			}
+
+			draganddropfile.ondrop = function(e)
+			{
+				e.preventDefault();
+
+				var file = e.dataTransfer.files[0];
+
+				init_loader();
+				fileloader.load(file, function(buffer) { img_load(file.name,buffer); } );
+				console.log(file.name);
+			}
+
+			draganddropfile.ondragenter = function(e){e.preventDefault();}
+
+			draganddropfile.ondragover = function(e){e.preventDefault();}
+		</script>
+
+</head>
+
+<body>
+    HxC Floppy Emulator software<br>
+    <p id="Mode">Current Mode : Unknown</p>
+
+	<script type="text/javascript">
+		if (wasm_supported!=0)
+		{
+			document.getElementById("Mode").innerHTML = "<b>Current Mode :</b> WebAssembly";
+		}
+		else
+		{
+			document.getElementById("Mode").innerHTML = "<b>Current Mode :</b> Asm.js";
+		}
+	</script>
+
+</body>
+</html>
