@@ -275,7 +275,7 @@ void menu_clicked(Fl_Widget * w, void * fc_ptr)
 			mw->parameters_box = new Parameters_box();
 
 			#ifdef __EMSCRIPTEN__
-			mw->parameters_box->position(64,64);
+			mw->parameters_box->position(16,192);
 			mw->parameters_box->border(1);
 			#endif
 
@@ -957,7 +957,7 @@ static void tick_mw(void *v) {
 
 Main_Window::Main_Window(int argc, char **argv)
 	#ifdef __EMSCRIPTEN__
-	: Fl_Window(64,64,WINDOW_XSIZE,428)
+	: Fl_Window(16,192,WINDOW_XSIZE,428)
 	#else
 	: Fl_Window(WINDOW_XSIZE,428)
 	#endif
@@ -1179,7 +1179,7 @@ Main_Window::Main_Window(int argc, char **argv)
 		fdump_window->number_of_retry->value(3);
 
 		#ifdef __EMSCRIPTEN__
-		fdump_window->window->position(64,64);
+		fdump_window->window->position(16,192);
 		fdump_window->window->border(1);
 		#endif
 
@@ -1288,9 +1288,10 @@ Main_Window::Main_Window(int argc, char **argv)
 		infos_window->iso_mfm_bt->value(1);
 
 		#ifdef __EMSCRIPTEN__
-		infos_window->window->position(64,64);
+		infos_window->window->position(16 + 8 + WINDOW_XSIZE,192);
 		infos_window->window->border(1);
 		infos_window->window->box(FL_THIN_DOWN_FRAME);
+		infos_window->window->show();
 		#endif
 
 		Fl::add_timeout(0.1, tick_infos, (void*)infos_window);
@@ -1372,7 +1373,7 @@ Main_Window::Main_Window(int argc, char **argv)
 		streamer_window->drive_choice->value(0);
 
 		#ifdef __EMSCRIPTEN__
-		streamer_window->window->position(64,64);
+		streamer_window->window->position(16,192);
 		streamer_window->window->border(1);
 		#endif
 
@@ -1400,7 +1401,7 @@ Main_Window::Main_Window(int argc, char **argv)
 		trackedit_window->edit_editbuffer->value("010");
 
 		#ifdef __EMSCRIPTEN__
-		trackedit_window->window->position(64,64);
+		trackedit_window->window->position(16,192);
 		trackedit_window->window->border(1);
 		#endif
 
@@ -1429,7 +1430,7 @@ Main_Window::Main_Window(int argc, char **argv)
 		batchconv_window->choice_file_format->value( hxcfe_getEnvVarValue( guicontext->hxcfe, (char*)"LASTSTATE_BATCHCONVERTER_TARGETFORMAT") );
 
 		#ifdef __EMSCRIPTEN__
-		batchconv_window->window->position(64,64);
+		batchconv_window->window->position(16,192);
 		batchconv_window->window->border(1);
 		#endif
 
@@ -1475,7 +1476,7 @@ Main_Window::Main_Window(int argc, char **argv)
 		fs_window->fs_browser->show_self();
 
 		#ifdef __EMSCRIPTEN__
-		fs_window->window->position(64,64);
+		fs_window->window->position(16,192);
 		fs_window->window->border(1);
 		#endif
 
@@ -1543,7 +1544,7 @@ Main_Window::Main_Window(int argc, char **argv)
 		rawloader_window->choice_disklayout->value(0);
 
 		#ifdef __EMSCRIPTEN__
-		rawloader_window->window->position(64,64);
+		rawloader_window->window->position(16,192);
 		rawloader_window->window->border(1);
 		#endif
 
@@ -1561,7 +1562,7 @@ Main_Window::Main_Window(int argc, char **argv)
 		print_dbg((char*)"Main_Window : Log window done !");
 #endif
 		#ifdef __EMSCRIPTEN__
-		log_box->position(64,64);
+		log_box->position(16,192);
 		log_box->border(1);
 		#endif
 	}
@@ -1592,7 +1593,7 @@ Main_Window::Main_Window(int argc, char **argv)
 		sdcfg_window->choice_interfacemode_drvb_cfg->menu(feifcfg_choices);
 
 		#ifdef __EMSCRIPTEN__
-		sdcfg_window->window->position(64,64);
+		sdcfg_window->window->position(16,192);
 		sdcfg_window->window->border(1);
 		#endif
 
@@ -1617,7 +1618,7 @@ Main_Window::Main_Window(int argc, char **argv)
 		usbcfg_window->rbt_ds0->value(1);
 
 		#ifdef __EMSCRIPTEN__
-		usbcfg_window->window->position(64,64);
+		usbcfg_window->window->position(16,192);
 		usbcfg_window->window->border(1);
 		#endif
 

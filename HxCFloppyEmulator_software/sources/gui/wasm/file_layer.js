@@ -25,15 +25,14 @@ function HxCFILE_emscript_js()
 
 HxCFILE_emscript_js.prototype.load = function(input, callback)
 {
-	var player = this;
 	if (input instanceof File)
 	{
 		// Local file
-		var reader = new FileReader();
+		let reader = new FileReader();
 
 		reader.onload = function()
 		{
-			return callback(reader.result);
+			return callback(input.name,reader.result);
 		}.bind(this);
 
 		reader.readAsArrayBuffer(input);
@@ -41,7 +40,7 @@ HxCFILE_emscript_js.prototype.load = function(input, callback)
 	else
 	{
 		// "Http" File.
-		var XmlHttpReq = new XMLHttpRequest();
+		let XmlHttpReq = new XMLHttpRequest();
 
 		XmlHttpReq.open('GET', input, true);
 		XmlHttpReq.responseType = 'arraybuffer';
@@ -49,7 +48,7 @@ HxCFILE_emscript_js.prototype.load = function(input, callback)
 		{
 			if (XmlHttpReq.status === 200)
 			{
-				return callback(XmlHttpReq.response);
+				return callback("",XmlHttpReq.response);
 			}
 		}.bind(this);
 		XmlHttpReq.send();

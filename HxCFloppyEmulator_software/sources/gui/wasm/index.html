@@ -1,9 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HxC Floppy Emulator</title>
+
+<!-- STRMRK:"PAGEHEAD" -->
+	<head>
+		<link rel="stylesheet" type="text/css" href="../style.css">
+		<script type="text/javascript" src="../utils.js"></script>
+
+		<title>HxC2001 : Online HxC Floppy Emulator software</title>
+
+		<link rel="shortcut icon" href="../pofasm.ico" type="image/x-icon">
+		<link rel="icon" href="../pofasm.ico" type="image/x-icon">
+		<meta name="description" content="HxC Floppy Emulator software store">
+		<meta name="keywords" content="hxc floppy emulator,floppy disk drive, floppy replacement, floppy retrofit, cnc floppy emulator, gotek, disquette">
+		<meta http-equiv="content-Type" content="text/html; charset=utf-8">
+		<meta name="Author" content="HxC2001 Tech">
+		<meta name="Owner" content="HxC2001 Tech">
+		<meta name="Language" content="en">
+		<meta name="Identifier-url" content="https://hxc2001.com">
+		<meta name="dc.language" content="en">
+		<meta name="robots" content="index, follow">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 
 		<script type="text/javascript">
 			function isWebAssemblyAvailable() {
@@ -14,7 +30,7 @@
 						const module = new WebAssembly.Module(Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00));
 
 						if (module instanceof WebAssembly.Module)
-						    return new WebAssembly.Instance(module) instanceof WebAssembly.Instance;
+							return new WebAssembly.Instance(module) instanceof WebAssembly.Instance;
 					}
 				}
 				catch (e)
@@ -49,10 +65,32 @@
 
 		<script type="text/javascript">
 
+			var file_upload_cnt;
+			var file_upload_total;
+
 			var fileloader=null;
 			var draganddropfile = document.querySelector('*');
 
-			function img_load(name,buffer)
+			function img_load(name)
+			{
+				var namesize = lengthBytesUTF8(name) + 1;
+
+				var folder = "/upload";
+				var foldersize = lengthBytesUTF8(folder) + 1;
+
+				var nameptr = _malloc(namesize);
+				stringToUTF8Array(name, HEAP8, nameptr, namesize);
+
+				var folderptr = _malloc(foldersize);
+				stringToUTF8Array(folder, HEAP8, folderptr, foldersize);
+
+				Module._load_file_img(nameptr, folderptr);
+
+				_free(nameptr);
+				_free(folderptr);
+			}
+
+			function img_upload(name,buffer)
 			{
 				var byteFileArray = new Int8Array(buffer);
 				var pointerToData = Module._malloc(byteFileArray.byteLength);
@@ -72,7 +110,16 @@
 
 				Module._upload_file(nameptr, folderptr, pointerToData, byteFileArray.byteLength);
 
-				Module._load_file_img(nameptr, folderptr);
+				file_upload_cnt++;
+
+				if( file_upload_total )
+				{
+					if( file_upload_cnt >= file_upload_total )
+					{
+						Module._load_file_img(nameptr, folderptr);
+						file_upload_total = 0;
+					}
+				}
 
 				_free(nameptr);
 				_free(folderptr);
@@ -92,13 +139,33 @@
 
 			draganddropfile.ondrop = function(e)
 			{
+				var i;
+				var f;
+				var file;
+
 				e.preventDefault();
 
-				var file = e.dataTransfer.files[0];
-
 				init_loader();
-				fileloader.load(file, function(buffer) { img_load(file.name,buffer); } );
-				console.log(file.name);
+
+				file_upload_cnt = 0;
+				file_upload_total = 0;
+
+				var files = e.dataTransfer.files;
+				for (i = 0, f; f = files[i]; i++)
+				{
+					file_upload_total++;
+				}
+
+				console.log("Count :");
+				console.log(file_upload_total);
+				console.log("\n");
+
+				for (i = 0; i < file_upload_total; i++)
+				{
+					file = e.dataTransfer.files[i];
+					console.log(file.name);
+					fileloader.load(file, function(name,buffer) { img_upload(name,buffer); } );
+				}
 			}
 
 			draganddropfile.ondragenter = function(e){e.preventDefault();}
@@ -106,22 +173,183 @@
 			draganddropfile.ondragover = function(e){e.preventDefault();}
 		</script>
 
-</head>
+	</head>
+<!-- ENDMRK:"PAGEHEAD" -->
 
-<body>
-    HxC Floppy Emulator software<br>
-    <p id="Mode">Current Mode : Unknown</p>
+	<body data-pagefind-body>
 
-	<script type="text/javascript">
-		if (wasm_supported!=0)
-		{
-			document.getElementById("Mode").innerHTML = "<b>Current Mode :</b> WebAssembly";
-		}
-		else
-		{
-			document.getElementById("Mode").innerHTML = "<b>Current Mode :</b> Asm.js";
-		}
-	</script>
+		<!-- STRMRK:"SITEMENU" -->
+		<div  class="topnav_sticky"><div class="topnav" id="PageTopNav">
+			<a href="../" class="logo"><img alt="HxC2001" src="../img/hxc_fe_logo_1.png" width="46" height="46"></a>
+			<a href="../">Home</a>
+			<div class="dropdown">
+				<button class="dropbtn">Products
+					<i class="fa fa-caret-down"></i>
+				</button>
+				<div class="dropdown-content">
+					<a href="../floppy_drive_emulator/">SD HxC Floppy Emulators</a>
+					<a href="../docs/gotek-floppy-emulator-hxc-firmware/">HxC Firmware for Gotek floppy emulators</a>
+					<a href="../download/floppy_drive_emulator/support.htm">HxC Floppy Emulators compatibility list</a>
+				</div>
+			</div>
+			<a href="../showroom/">Showroom</a>
+			<a href="https://torlus.com/floppy/forum/" target="_blank" rel="noopener">Forum</a>
+			<div class="dropdown">
+				<button class="dropbtn">&#x1F6D2;Purchase
+					<i class="fa fa-caret-down"></i>
+				</button>
+				<div class="dropdown-content">
+					<a href="../floppy_drive_emulator/#SALESPOINTS">SD HxC Floppy Emulators</a>
+					<a href="../store/">HxC Firmware for Gotek floppy emulators</a>
+				</div>
+			</div>
+			<div class="dropdown">
+				<button class="dropbtn">&#x1F4BE;Download
+					<i class="fa fa-caret-down"></i>
+				</button>
+				<div class="dropdown-content">
+					<a href="../download/floppy_drive_emulator/">Softwares</a>
+					<a href="../download/floppy_drive_emulator/#sdhxc">SD HxC Floppy Emulators</a>
+					<a href="../download/floppy_drive_emulator/#slimsdhxc">Slim SD Card HxC Floppy Emulators</a>
+					<a href="../download/floppy_drive_emulator/#cpldusbhxc">USB HxC Floppy Emulators</a>
+					<a href="../download/floppy_drive_emulator/#stm32hxc">HxC firmwares for Gotek Floppy Emulators</a>
+				</div>
+			</div>
+			<a href="../contactus/">&#x1F4E7;Contact</a>
+			<a href="../search/">&#x1F50D;Search</a>
+			<a href="#" class="icon" onclick="return topnav_responsive()">Menu &#9776;</a>
+		</div></div>
+		<!-- ENDMRK:"SITEMENU" -->
 
-</body>
+		<div class="hxc2001">
+
+			<h1>Online HxC Floppy Emulator software</h1>
+
+			Drag and Drop your floppy files images to load them.<br>
+			<p id="Mode">Current Mode : Unknown</p>
+
+			<div id='spinner'></div>
+			<div id="status">Downloading...</div>
+
+			<div>
+				<progress value="0" max="100" id="progress" hidden=1></progress>
+			</div>
+
+			<script type='text/javascript'>
+				var statusElement = document.getElementById('status');
+				var progressElement = document.getElementById('progress');
+				var spinnerElement = document.getElementById('spinner');
+
+				var Module = {
+					setStatus: (text) => {
+						Module.setStatus.last ??= { time: Date.now(), text: '' };
+						if (text === Module.setStatus.last.text) return;
+						var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+						var now = Date.now();
+						if (m && now - Module.setStatus.last.time < 30) return; // if this is a progress update, skip it if too soon
+						Module.setStatus.last.time = now;
+						Module.setStatus.last.text = text;
+						if (m) {
+							text = m[1];
+							progressElement.value = parseInt(m[2])*100;
+							progressElement.max = parseInt(m[4])*100;
+							progressElement.hidden = false;
+							spinnerElement.hidden = false;
+						} else {
+							progressElement.value = null;
+							progressElement.max = null;
+							progressElement.hidden = true;
+							if (!text) spinnerElement.style.display = 'none';
+						}
+						statusElement.innerHTML = text;
+					},
+					totalDependencies: 0,
+					monitorRunDependencies: (left) => {
+						this.totalDependencies = Math.max(this.totalDependencies, left);
+						Module.setStatus(left ? 'Preparing...' : 'All downloads complete.');
+					}
+				};
+				Module.setStatus('Downloading...');
+				window.onerror = (event) => {
+				// TODO: do not warn on ok events like simulating an infinite loop or exitStatus
+				Module.setStatus('Exception thrown, see JavaScript console');
+				spinnerElement.style.display = 'none';
+				Module.setStatus = (text) => {
+				if (text) console.error('[post-exception status] ' + text);
+				};
+				};
+			</script>
+
+			<script type="text/javascript">
+				if (wasm_supported!=0)
+				{
+					document.getElementById("Mode").innerHTML = "<b>Current Mode :</b> WebAssembly";
+				}
+				else
+				{
+					document.getElementById("Mode").innerHTML = "<b>Current Mode :</b> Asm.js";
+				}
+			</script>
+
+		</div>
+
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+
+		<!-- STRMRK:"PAGEFOOTER" -->
+		<hr>
+
+		<table class="foot_page">
+			<tbody>
+				<tr>
+					<td>
+						HxC Floppy Emulator project
+					</td>
+					<td>
+						<a href="/mentions-legales/">Legal Mentions</a>
+					</td>
+					<td class="rightalign">
+						(C)2006-2025 HxC2001 / Jean-Fran&ccedil;ois DEL NERO
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<!-- ENDMRK:"PAGEFOOTER" -->
+
+	</body>
+
 </html>
