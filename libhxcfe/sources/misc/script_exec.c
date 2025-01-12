@@ -283,6 +283,53 @@ static int get_param_str( script_ctx * ctx, char * line, int param_offset,char *
 	return -1;
 }
 
+env_var_value strbin_to_val( char * str )
+{
+	int l;
+	env_var_value val;
+	env_var_value mask;
+
+	val = 0;
+
+	// -> end of the string
+	l = 0;
+	while(str[l])
+	{
+		l++;
+	}
+
+	// -> find the lowest bit
+	while(l)
+	{
+		if( str[l] == '1' || str[l] == '0' )
+		{
+			break;
+		}
+		l--;
+	};
+
+	mask = 0x1;
+	// convert
+	while(l >= 0)
+	{
+		if( str[l] != '1' && str[l] != '0' )
+		{
+			break;
+		}
+
+		if( str[l] == '1')
+		{
+			val |= mask;
+		}
+
+		mask <<= 1;
+
+		l--;
+	}
+
+	return val;
+}
+
 static env_var_value str_to_int(char * str)
 {
 	env_var_value value;
@@ -293,9 +340,27 @@ static env_var_value str_to_int(char * str)
 	{
 		if( strlen(str) > 2 )
 		{
-			if( str[0]=='0' && ( str[1]=='x' || str[1]=='X'))
+			if( str[0]=='0' )
 			{
-				value = (env_var_value)STRTOVALUE(str, NULL, 0);
+				switch( str[1] )
+				{
+					// hex
+					case 'x':
+					case 'X':
+						value = (env_var_value)STRTOVALUE(str, NULL, 0);
+					break;
+
+					// binary
+					case 'b':
+					case 'B':
+						value = strbin_to_val(str);
+					break;
+
+					// decimal
+					default:
+						value = atoi(str);
+					break;
+				}
 			}
 			else
 			{
