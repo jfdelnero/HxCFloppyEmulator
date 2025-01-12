@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@main
     - name: Build
-      run: cd build && make tests -j2
+      run: sudo apt install -q -y libx11-dev && cd build && make tests -j2
 
   build-windows-x86:
     runs-on: ubuntu-latest
