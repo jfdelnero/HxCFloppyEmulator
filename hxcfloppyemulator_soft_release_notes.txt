@@ -17,18 +17,15 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
-** **** 2025 : HxCFloppyEmulator *.*.*.* - (Work in progress/beta version)
-
-*** Latest beta version : https://hxc2001.com/download/floppy_drive_emulator/HxCFloppyEmulator_soft_beta.zip ***
-*** Last update : v2.16.9.2, 4 Jan 2025 ***
+12 January 2025 : HxCFloppyEmulator v2.16.10.1
 
 -> New Writer : PNG file (Disk/tracks and stream layouts) -> Disk layout can now be exported into a PNG file (for disk analysis) !
 
 -> HFE v1/v2/v3, hxcstream and xml write protect flag support implemented.
 
 -> Command line hxcfe tool : Multiples-output image conversion support added.
-  Example : Convert a disk image to HFE and BMP :
-  hxcfe -finput:"path/input.img" -conv:HXC_HFE -foutput:"path/output.hfe" -conv:BMP_DISK_IMAGE -foutput:"path/output.bmp"
+   Example : Convert a disk image to HFE and BMP :
+   hxcfe -finput:"path/input.img" -conv:HXC_HFE -foutput:"path/output.hfe" -conv:BMP_DISK_IMAGE -foutput:"path/output.bmp"
 
 -> DosDiskBrowser build : IMG files support added.
 
@@ -36,11 +33,14 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 
 -> Fix stream files import : Fix possible crash issue.
 
+-> hxcstream : manage null pulses.
+
 -> DMK loader : HD disk images support.
 
 -> Apple II : Sector decoder : fix and optimization.
 
 -> GUI : The software accept command line parameter to load image. (WIP)
+   e.g. : hxcfloppyemulator.exe file_image_path/image.img
 
 -> zlib updated to v1.3.1
 
@@ -54,12 +54,13 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -> Disk viewer : Rendering enhanced : alpha blending and better drawing.
                  Zoom support.
                  Better weak bits placement precision.
+                 GUI : Area zoom and selection changed to make it more natural/user friendly.
 
 -> New SECTOR_SIZE_FIELD_MASK variable to set the sector size id mask.
 
 -> SCP Writer : Align tracks to the first index.
 
--> FLTK updated to v1.4.0-1 for all platforms.
+-> FLTK updated to v1.4.1 for all platforms.
 
 -> New Loader : Mame MFI files. (WIP!)
 
@@ -67,11 +68,55 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 
 -> New Loader : Hampa Hug's PCE PRI. (WIP!)
 
--> New build target : Emscripten / Web page (Experimental state)
+-> New build target : Emscripten / Web page version
+   URL : https://hxc2001.com/hxcfesw/ (Warning : Experimental state !)
 
 -> SAP Loader (Thomson TO8) : SAP_LOADER_GAP3_VALUE setting to change/force the GAP 3 length.
 
 -> CPC EDSK writer : GAP 3 value guessing + CPCDSK_WRITER_GAP3_VALUE setting to force it to a specific length.
+
+-> 86Box 86F Loader Fixed.
+
+-> Script : Binary format support (0bxxxxx e.g. 0b101010)
+
+-> New XML formats definitions : Roland W30, Alesis DataDisk.
+
+-> XML export : CRC32 disk value added.
+
+-> Configuration file : New parameters :
+    (See init.script for more details)
+
+    # Default sectors size ID mask
+    SECTOR_SIZE_FIELD_MASK
+
+    # HFE Writer
+    HFE_WRITER_WRITENOTALLOWED
+    ( 0 -> Image is not write protected, 1 -> Image is write protected. 2 -> Use source image write protect state.)
+
+    # CPC DSK Loader / Writer parameters
+    CPCDSK_WRITER_LIMIT_SECTOR_SIZE        1   # 1 = Limit the sector data to 6144 bytes
+    CPCDSK_WRITER_DISCARD_UNFORMATTED_SIDE 1   # 1 = Remove/ignore unformatted side.
+    CPCDSK_WRITER_GAP3_VALUE              -1   # Set the desired GAP 3 value or -1 for auto
+
+    # SAP Loader parameters
+    SAP_LOADER_GAP3_VALUE                 -1   # Set the desired GAP 3 value or -1 for auto
+
+    # Disk viewer / bmp/png export color / alpha parameters
+    BMPDISKEXPORT_COLOR_VALID_SECTOR_HEADER
+    BMPDISKEXPORT_COLOR_BAD_SECTOR_HEADER
+
+    BMPDISKEXPORT_COLOR_HEADERLESS_SECTOR_DATA
+    BMPDISKEXPORT_COLOR_VALID_SECTOR_DATA
+    BMPDISKEXPORT_COLOR_VALID_EMPTY_SECTOR_DATA
+    BMPDISKEXPORT_COLOR_BAD_SECTOR_DATA
+    BMPDISKEXPORT_COLOR_MEDIA_SUBSTRATE
+    BMPDISKEXPORT_COLOR_BITSDENSITY
+
+    BMPDISKEXPORT_DISPLAY_SECTOR_BOUNDARY
+    BMPDISKEXPORT_COLOR_SECTOR_BOUNDARY
+    BMPDISKEXPORT_COLOR_SECTOR_DATA_BOUNDARY
+
+    BMPDISKEXPORT_COLOR_ALPHA                   # ( 0 <>100 )
 
 /*********************************************************
 
@@ -214,31 +259,31 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 
 -> Logic analyzer capture loader :
 
-	Can now load tracks captured with a simple logic analyzer. (Saleae logic analyzer or similar).
+    Can now load tracks captured with a simple logic analyzer. (Saleae logic analyzer or similar).
 
-	The current state/limitations are :
+    The current state/limitations are :
 
-	Need only 2 jumper wires : data (floppy pin 30) & index (floppy pin 8).
-	Load only a track at a time.
-	The sample rate is set by default at 16MHz. This can be changed through the "LOGICANALYZER_SAMPLERATE" variable.
-	The floppy data signal is mapped by default to the bit 0. This can be changed through the "LOGICANALYZER_DATA_BIT" variable.
-	The floppy index signal is mapped by default to the bit 3. This can be changed through the "LOGICANALYZER_INDEX_BIT" variable.
-	The supported input file format is a raw 8bits binary format (change the file extension to ".logicbin8bits").
-	Each byte in the file is a sample.
+    Need only 2 jumper wires : data (floppy pin 30) & index (floppy pin 8).
+    Load only a track at a time.
+    The sample rate is set by default at 16MHz. This can be changed through the "LOGICANALYZER_SAMPLERATE" variable.
+    The floppy data signal is mapped by default to the bit 0. This can be changed through the "LOGICANALYZER_DATA_BIT" variable.
+    The floppy index signal is mapped by default to the bit 3. This can be changed through the "LOGICANALYZER_INDEX_BIT" variable.
+    The supported input file format is a raw 8bits binary format (change the file extension to ".logicbin8bits").
+    Each byte in the file is a sample.
 
-	How to use it ? :
+    How to use it ? :
 
-	Connect the ground, data and index wires : machine ground to vss/gnd wire, floppy pin 30 to wire 0, floppy pin 8 to wire 3.
-	Start the machine, start the logic analyzer software. Start the capture and on the machine use any software/way to read a particular track.
-	The track should be read during at least to 2 revolutions ( 3 index pulses ). Save the dump in raw binary mode.
-	Change the binary dump file extension to ".logicbin8bits".
-	Before loading the file into the hxc software you may need to set the LOGICANALYZER_IMPORT_START_OFFSET and LOGICANALYZER_IMPORT_END_OFFSET
-	variables to define the region of interest in the file. You can use PulseView or similar software to roughly get the values to use.
+    Connect the ground, data and index wires : machine ground to vss/gnd wire, floppy pin 30 to wire 0, floppy pin 8 to wire 3.
+    Start the machine, start the logic analyzer software. Start the capture and on the machine use any software/way to read a particular track.
+    The track should be read during at least to 2 revolutions ( 3 index pulses ). Save the dump in raw binary mode.
+    Change the binary dump file extension to ".logicbin8bits".
+    Before loading the file into the hxc software you may need to set the LOGICANALYZER_IMPORT_START_OFFSET and LOGICANALYZER_IMPORT_END_OFFSET
+    variables to define the region of interest in the file. You can use PulseView or similar software to roughly get the values to use.
 
-	TODO / Work in progress :
+    TODO / Work in progress :
 
-	- Add the xx.y file naming convention to load multiple track files (xx=track number, y=side number)
-	- Add the dir,step,side, track 0 signals support to load a whole disk from one single file.
+    - Add the xx.y file naming convention to load multiple track files (xx=track number, y=side number)
+    - Add the dir,step,side, track 0 signals support to load a whole disk from one single file.
 
 -> zlib updated to the version v1.2.13 : Security and bugs fixes.
 
@@ -248,15 +293,15 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 
 -> Development / build process:
 
-	- GCC 9 / 11 : Fix warning messages during the compilation.
+    - GCC 9 / 11 : Fix warning messages during the compilation.
 
-	- Clang / macOS : Fix warning messages during the compilation.
+    - Clang / macOS : Fix warning messages during the compilation.
 
-	- Repository changed to Git and moved to Github : https://github.com/jfdelnero/HxCFloppyEmulator
+    - Repository changed to Git and moved to Github : https://github.com/jfdelnero/HxCFloppyEmulator
 
-	- Continuous integration build enabled: Linux, Windows x86 + x64, macOS arm + x64 CI build.
+    - Continuous integration build enabled: Linux, Windows x86 + x64, macOS arm + x64 CI build.
 
-	- Auto-tests scripts added. (Linux)
+    - Auto-tests scripts added. (Linux)
 
 *********************************************************/
 
@@ -1037,7 +1082,7 @@ And many others corrections and improvements :-)
 -> New files Support : Atari ST DIM image (*.DIM) added.
 -> New files Support : TI99 V9T9 (*.V9T9 / *.PC99) added.
 -> IPF File format (http://www.softpres.org/)
-	> overlap bug corrected
+    > overlap bug corrected
 -> Internal : Tracklen is now the number of bit in the track.
 -> Internal/HFE generator : Track encoding code now set correctly.
 -> ISO/IBM track generator : ISO FM track data mark value corrected/changed to 0xFB
@@ -1141,34 +1186,34 @@ and to Kris Van de Cappelle (EMXP developer) for the tests and EmuII technicals 
 /*********************************************************
 19/06/2010: HxCFloppyEmulator 1.3.9.4
 -> IPF File format (http://www.softpres.org/)
-	> overlap bug corrected
+    > overlap bug corrected
 -> MSX/IMG/ST :
-    	> Many loader crash/bug fix
+        > Many loader crash/bug fix
 -> HFE file Writer :
-	> Crash fix (crash if wrote a 0 track floppy image)
+    > Crash fix (crash if wrote a 0 track floppy image)
 *********************************************************/
 
 /*********************************************************
 19/06/2010: HxCFloppyEmulator 1.3.9.3
 -> IPF File format (http://www.softpres.org/)
-	>upgrade to the RC ipf library 6 / Include official headers
+    >upgrade to the RC ipf library 6 / Include official headers
 -> USB HxC Floppy Emulator :
-    	> Atari ST/STE/Falcon :"Write protect" disk change emulation implemented (disk change detection is now working correctly).
+        > Atari ST/STE/Falcon :"Write protect" disk change emulation implemented (disk change detection is now working correctly).
 -> TI99/4A TI99PC99 loader :
-	> FM bitrate corrected, Interface mode set to Shugart.
+    > FM bitrate corrected, Interface mode set to Shugart.
 -> HFE file Writer :
-	End of track padding.
+    End of track padding.
 *********************************************************/
 
 /*********************************************************
 06/06/2010: HxCFloppyEmulator 1.3.9.2
 -> IPF File format (http://www.softpres.org/)
-	>upgrade to the RC ipf library 5 : New plateforms supported by this format : Atari ST, PC, ...
+    >upgrade to the RC ipf library 5 : New plateforms supported by this format : Atari ST, PC, ...
 
 -> SD HxC Floppy Emulator settings window : new parameters added (need to upgrade the firmware to v1.1.2.0):
-	> "Head step sound" volume
-	> "Scroll text speed"
-	> "Load last loaded floppy"
+    > "Head step sound" volume
+    > "Scroll text speed"
+    > "Load last loaded floppy"
 *********************************************************/
 
 /*********************************************************
@@ -1229,8 +1274,8 @@ and to Kris Van de Cappelle (EMXP developer) for the tests and EmuII technicals 
 01/11/2009: HxCFloppyEmulator 1.3.2.0
 -> IPF Loader: Index signal generation improved.
 -> USB HxC Floppy Emulator :
-	-Variable bitrate emulation improved.
-	-Up to 4 USB Floppy Emulator can be used in the same time now.
+    -Variable bitrate emulation improved.
+    -Up to 4 USB Floppy Emulator can be used in the same time now.
 -> New file Support : D88 file format (PC88 floppy disks).
 *********************************************************/
 
@@ -1305,31 +1350,31 @@ and to Kris Van de Cappelle (EMXP developer) for the tests and EmuII technicals 
 /*********************************************************
 22/02/2009: HxCFloppyEmulator 1.2.0.10
 ->  IPF File format (http://www.softpres.org/)
-	-> An important bug regarding the track type identification corrected (reported by RichAplin / Cyclone 20 project)
-	-> in-track weak bits fully supported (SuperHang-On,...)
+    -> An important bug regarding the track type identification corrected (reported by RichAplin / Cyclone 20 project)
+    -> in-track weak bits fully supported (SuperHang-On,...)
 *********************************************************/
 
 
 /*********************************************************
 16/02/2009: HxCFloppyEmulator 1.2.0.9
 ->  AFI File format (Advanced Floppy Image)
-	-Some memory usage optimization and bug corrected.
+    -Some memory usage optimization and bug corrected.
 *********************************************************/
 
 
 /*********************************************************
 07/01/2009: HxCFloppyEmulator 1.2.0.8
 -> New disk image file format : AFI (Advanced Floppy Image)
-	-> Track based file format
-	-> MFM / FM / GCR / RAW support
-	-> Hard sectored track supported
-	-> Variable bitrate support
-	-> "Weak bits" support
-	-> file data packed. (zlib)
+    -> Track based file format
+    -> MFM / FM / GCR / RAW support
+    -> Hard sectored track supported
+    -> Variable bitrate support
+    -> "Weak bits" support
+    -> file data packed. (zlib)
 
 
 -> Sources tree modification:
-	-> external libs/source code moved to common/libs
+    -> external libs/source code moved to common/libs
 *********************************************************/
 
 
