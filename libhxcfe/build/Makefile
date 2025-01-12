@@ -52,6 +52,7 @@ ifeq ($(TARGET), mingw32)
 	CC = i686-w64-mingw32-gcc
 	AR = i686-w64-mingw32-ar
 	RESC = i686-w64-mingw32-windres
+	CFLAGS += -DSPNG_DISABLE_OPT=1
 	LDFLAGS += -static-libgcc ../sources/win32/libhxcfe.def
 	EXEC = libhxcfe.dll
 endif
