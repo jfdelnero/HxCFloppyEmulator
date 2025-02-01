@@ -125,7 +125,7 @@ int KRZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		*( (unsigned short*) &flatimg[0x11])=fatconfig.numberofrootentries; //Taille du répertoire racine (0 par défaut pour FAT32).
 		*( (unsigned short*) &flatimg[0x13])=fatconfig.nbofsector; //Nombre total de secteur 16-bit (0 par défaut pour FAT32).
 
-		if(	floppydisk->floppyBitRate==250000)
+		if( floppydisk->floppyBitRate == 250000 )
 		{
 			*( (unsigned char*)  &flatimg[0x15])=0xF9; //Type de disque (0xF8 pour les disques durs, 0xF0 pour les disquettes). 0xF9 Double sided, 80 tracks per side, 9 sectors per track
 		}

@@ -96,7 +96,7 @@ int MFM_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			for(j=0;j<(mfmheader.number_of_side);j++)
 			{
 				memset(&mfmtrackdesc,0,sizeof(mfmtrackdesc));
- 				mfmsize=floppy->tracks[i]->sides[j]->tracklen;
+				mfmsize=floppy->tracks[i]->sides[j]->tracklen;
 				if(mfmsize&7)
 					mfmsize=(mfmsize/8)+1;
 				else

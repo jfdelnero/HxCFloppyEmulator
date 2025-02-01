@@ -92,12 +92,12 @@ enum chunkcode
 	chunk_Flaky
 };
 
-enum dentype 
-{ 
+enum dentype
+{
 	denNoise     = 1,
-	denUniform   = 2, 
-	denCopylock  = 3, 
-	denSpeedlock = 6 
+	denUniform   = 2,
+	denCopylock  = 3,
+	denSpeedlock = 6
 };
 
 #pragma pack()

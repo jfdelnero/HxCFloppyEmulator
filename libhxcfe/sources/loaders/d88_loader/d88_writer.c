@@ -134,7 +134,7 @@ int D88_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 									mfmdd_found++;
 							}
 
-							if(	sca[k]->trackencoding == ISOFORMAT_SD )
+							if( sca[k]->trackencoding == ISOFORMAT_SD )
 							{
 								/*
 								if(sca[k]->bitrate>400000)
@@ -217,14 +217,14 @@ int D88_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	hxcfe_deinitSectorAccess(ss);
 
 	// Media flag. 00h = 2D, 10h = 2DD, 20h = 2HD.
-	if(	(maxtrack >= 46) )
+	if( (maxtrack >= 46) )
 	{
 		// 2DD : 300RPM, 250Kb/s, 2 sides, 80 tracks floppy format
 		// 2DD
 		d88_fh.media_flag = 0x10;
 	}
 
-	if(	(maxtrack >= 46) && (mfmhd_found>mfmdd_found))
+	if( (maxtrack >= 46) && (mfmhd_found>mfmdd_found))
 	{
 		// 2HD : 360RPM, 500Kb/s, 2 sides, 77 tracks floppy format
 		// 2HD

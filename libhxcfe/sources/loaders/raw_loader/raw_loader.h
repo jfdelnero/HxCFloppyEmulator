@@ -30,7 +30,7 @@
 		uint8_t  sectorsize;
 		uint32_t numberoftrack;
 		uint8_t  tracktype;
-		uint8_t  sidecfg;	
+		uint8_t  sidecfg;
 		uint32_t gap3;
 		uint32_t rpm;
 		uint32_t bitrate;
@@ -65,7 +65,7 @@
 		char * name;
 
 	}sectorsize_type;
-	
+
 	#define TWOSIDESFLOPPY 0x02
 	#define SIDE_INVERTED 0x04
 	#define SIDE0_FIRST 0x08

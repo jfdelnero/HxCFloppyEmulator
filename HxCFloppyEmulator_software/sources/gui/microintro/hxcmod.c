@@ -1094,7 +1094,7 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 				}
 				else
 				{   // effect_param >= 0x20
-					///	 HZ = 2 * BPM / 5
+					///  HZ = 2 * BPM / 5
 					mod->bpm = effect_param;
 				}
 
@@ -1595,7 +1595,7 @@ void hxcmod_fillbuffer(modcontext * modctx, msample * outbuffer, mssize nbsample
 	int r;
 
 	short finalperiod;
-	note	*nptr;
+	note    *nptr;
 	channel *cptr;
 
 	if( modctx && outbuffer )

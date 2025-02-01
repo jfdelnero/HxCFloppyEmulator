@@ -126,14 +126,14 @@ fat12config configlist[]=
 	{"fatst902",    0xFF, 82,2,11,300,250000,0,                 3,  0,2,ATARIST_DD_FLOPPYMODE,ISOFORMAT_DD11S,0xF9,2, 512, 112,1},
 	{"fatst160",    0xFF, 40,1, 9,300,250000,0,                84,  0,1,ATARIST_DD_FLOPPYMODE,   ISOFORMAT_DD,0xF9,2, 512, 112,1},
 	{"fatst360",    0xFF, 80,1, 9,300,250000,0,                84,  0,1,ATARIST_DD_FLOPPYMODE,   ISOFORMAT_DD,0xF9,2, 512, 112,1}, //Atari ST 3.5" SS
-	{"fatst",       0xFF, 80,2, 9,300,250000,0,                84,  0,1,ATARIST_DD_FLOPPYMODE,   ISOFORMAT_DD,0xF9,2, 512, 112,1}, //Atari ST 3.5" 
-	{"fat160a",	    0xFF, 40,1, 8,300,250000,win95_bootsector, 84,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_DD,0xFE,1, 512,  64,1}, //5.25" Single sided, 40 tracks per side, 8 sectors per track (160K). Also used for 8" 300 RPM
-	{"fat160b",	    0xFF, 40,1, 8,360,300000,win95_bootsector, 84,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_DD,0xFE,1, 512,  64,1}, //5.25" Single sided, 40 tracks per side, 8 sectors per track (160K). Also used for 8" 360 RPM
-	{"fat180a",	    0xFF, 40,1, 9,300,250000,win95_bootsector, 84,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_DD,0xFC,1, 512,  64,1}, //5.25" Single sided, 40 tracks per side, 9 sectors per track (180K) 300 RPM
-	{"fat180b",	    0xFF, 40,1, 9,360,300000,win95_bootsector, 84,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_DD,0xFC,1, 512,  64,1}, //5.25" Single sided, 40 tracks per side, 9 sectors per track (180K) 360 RPM
-	{"fat250" ,     0xFF, 77,1,26,300,250000,win95_bootsector, 24,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_SD,0xFE,4, 128,  68,1}, //8" Single sided, 77 tracks per side, 26 sectors per track (250K) 
-	{"fat500" ,     0xFF, 77,2,26,300,250000,win95_bootsector, 24,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_SD,0xFD,4, 128,  68,4}, //8" Double sided, 77 tracks per side, 26 sectors per track (500K) 
-	{"fat1232",     0xFF, 77,2, 8,300,250000,win95_bootsector, 24,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_SD,0xFE,1,1024, 192,1}, //8" Double sided, 77 tracks per side, 26 sectors per track (1232K) 
+	{"fatst",       0xFF, 80,2, 9,300,250000,0,                84,  0,1,ATARIST_DD_FLOPPYMODE,   ISOFORMAT_DD,0xF9,2, 512, 112,1}, //Atari ST 3.5"
+	{"fat160a",     0xFF, 40,1, 8,300,250000,win95_bootsector, 84,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_DD,0xFE,1, 512,  64,1}, //5.25" Single sided, 40 tracks per side, 8 sectors per track (160K). Also used for 8" 300 RPM
+	{"fat160b",     0xFF, 40,1, 8,360,300000,win95_bootsector, 84,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_DD,0xFE,1, 512,  64,1}, //5.25" Single sided, 40 tracks per side, 8 sectors per track (160K). Also used for 8" 360 RPM
+	{"fat180a",     0xFF, 40,1, 9,300,250000,win95_bootsector, 84,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_DD,0xFC,1, 512,  64,1}, //5.25" Single sided, 40 tracks per side, 9 sectors per track (180K) 300 RPM
+	{"fat180b",     0xFF, 40,1, 9,360,300000,win95_bootsector, 84,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_DD,0xFC,1, 512,  64,1}, //5.25" Single sided, 40 tracks per side, 9 sectors per track (180K) 360 RPM
+	{"fat250" ,     0xFF, 77,1,26,300,250000,win95_bootsector, 24,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_SD,0xFE,4, 128,  68,1}, //8" Single sided, 77 tracks per side, 26 sectors per track (250K)
+	{"fat500" ,     0xFF, 77,2,26,300,250000,win95_bootsector, 24,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_SD,0xFD,4, 128,  68,4}, //8" Double sided, 77 tracks per side, 26 sectors per track (500K)
+	{"fat1232",     0xFF, 77,2, 8,300,250000,win95_bootsector, 24,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_SD,0xFE,1,1024, 192,1}, //8" Double sided, 77 tracks per side, 26 sectors per track (1232K)
 	{"fat320ssa",   0xFF, 80,1, 8,300,250000,win95_bootsector, 84,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_DD,0xFA,2, 512, 112,1}, //5.25" Single sided, 80 tracks per side, 8 sectors per track (320K) 300 RPM
 	{"fat320ssb",   0xFF, 80,1, 8,360,300000,win95_bootsector, 84,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_DD,0xFA,2, 512, 112,1}, //5.25" Single sided, 80 tracks per side, 8 sectors per track (320K) 360 RPM
 	{"fat320dsa",   0xFF, 40,2, 8,300,250000,win95_bootsector, 84,  0,1,  IBMPC_DD_FLOPPYMODE,   IBMFORMAT_DD,0xFF,2, 512, 112,1}, //5.25" Double sided, 40 tracks per side, 8 sectors per track (320K) 300 RPM

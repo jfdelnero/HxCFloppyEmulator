@@ -113,13 +113,13 @@ int PRI_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 			crc32 = pri_crc ((void*)fileheader, sizeof(pri_chunk_header) + BIGENDIAN_DWORD(fileheader->size) + 4, 0x00000000);
 			if(!crc32)
 			{
-			    imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"PRI_libIsValidDiskFile : PRI file !");
-			    return HXCFE_VALIDFILE;
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"PRI_libIsValidDiskFile : PRI file !");
+				return HXCFE_VALIDFILE;
 			}
 			else
 			{
-			    imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"PRI_libIsValidDiskFile : Corrupted PRI file ?");
-			    return HXCFE_BADFILE;
+				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"PRI_libIsValidDiskFile : Corrupted PRI file ?");
+				return HXCFE_BADFILE;
 			}
 		}
 	}

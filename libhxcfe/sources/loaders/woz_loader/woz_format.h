@@ -90,7 +90,7 @@ typedef struct woz_trk_v1_
 	uint16_t bytes_count;           // 1 Block = 512 bytes. From the beginning of the file.
 	uint16_t bit_count;             // Number of bits to use.
 	uint16_t bit_splice_point;      // Index of first bit after track splice (write hint). If no splice information -> 0xFFFF.
-	uint8_t  splice_nibble;	        // Nibble value to use for splice (write hint).
+	uint8_t  splice_nibble;         // Nibble value to use for splice (write hint).
 	uint8_t  splice_bit_count;      // Bit count of splice nibble (write hint).
 	uint16_t reserved;              // RFU
 }woz_trk_v1;

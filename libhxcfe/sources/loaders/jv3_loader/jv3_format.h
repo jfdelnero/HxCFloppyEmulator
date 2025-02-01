@@ -33,7 +33,7 @@
 #define JV3_ERROR       0x08  /* 0=ok, 1=CRC error */
 #define JV3_NONIBM      0x04  /* 0=normal, 1=short */
 #define JV3_SIZE        0x03  /* in used sectors: 0=256,1=128,2=1024,3=512
-                                 in free sectors: 0=512,1=1024,2=128,3=256 */
+								 in free sectors: 0=512,1=1024,2=128,3=256 */
 #define JV3_FREE        0xFF  /* in track and sector fields of free sectors */
 #define JV3_FREEF       0xFC  /* in flags field, or'd with size code */
 

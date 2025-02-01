@@ -193,7 +193,7 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 
 					if( checksum == LUT_ByteBitsInverter[tmp_buffer[ 4 ]] )
 					{ // checksum ok !!!
- 						floppycontext->hxc_printf(MSG_DEBUG,"Valid FM Heathkit sector found - Cyl:%d Side:%d Sect:%d Size:%d",LUT_ByteBitsInverter[ tmp_buffer[2] ],tmp_buffer[5],LUT_ByteBitsInverter[ tmp_buffer[3] ],sectorsize[tmp_buffer[7]&0x7]);
+						floppycontext->hxc_printf(MSG_DEBUG,"Valid FM Heathkit sector found - Cyl:%d Side:%d Sect:%d Size:%d",LUT_ByteBitsInverter[ tmp_buffer[2] ],tmp_buffer[5],LUT_ByteBitsInverter[ tmp_buffer[3] ],sectorsize[tmp_buffer[7]&0x7]);
 					}
 					else
 					{
@@ -285,7 +285,7 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 			break;
 
 		}
-	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+	}while( (sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
 
 	return bit_offset;
 }

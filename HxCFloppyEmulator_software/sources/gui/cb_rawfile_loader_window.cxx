@@ -38,7 +38,7 @@
 // File : cb_rawfile_loader_window.cxx
 // Contains: RAW image loader window
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -339,7 +339,7 @@ void raw_loader_window_bt_loadrawfile(Fl_Button* bt, void*)
 
 	getWindowState(rlw,&rfc);
 
-	totalsector=(int)(rlw->innum_nbtrack->value() * 	rlw->innum_sectorpertrack->value());
+	totalsector=(int)(rlw->innum_nbtrack->value() * rlw->innum_sectorpertrack->value());
 	if(rlw->choice_numberofside->value())
 		totalsector=totalsector*2;
 
@@ -386,7 +386,7 @@ void raw_loader_window_bt_createemptyfloppy(Fl_Button* bt, void*)
 	rlw=(rawfile_loader_window *)dw->user_data();
 
 
-	totalsector=(int)(rlw->innum_nbtrack->value() * 	rlw->innum_sectorpertrack->value());
+	totalsector=(int)(rlw->innum_nbtrack->value() * rlw->innum_sectorpertrack->value());
 	if(rlw->choice_numberofside->value())
 		totalsector=totalsector*2;
 

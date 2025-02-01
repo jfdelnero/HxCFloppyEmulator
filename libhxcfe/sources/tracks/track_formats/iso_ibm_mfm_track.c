@@ -156,7 +156,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 
 					if(!CRC16_High && !CRC16_Low)
 					{ // crc ok !!!
- 						floppycontext->hxc_printf(MSG_DEBUG,"Valid MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sector->sectorsize);
+						floppycontext->hxc_printf(MSG_DEBUG,"Valid MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sector->sectorsize);
 						sector->use_alternate_header_crc = 0;
 					}
 					else
@@ -220,14 +220,14 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 #if 0
 								int tmp_sector_size;
 								// size id field size auto detection
-								// Bad crc ... Is N a 2 bits field ? 
+								// Bad crc ... Is N a 2 bits field ?
 								tmp_sector_size = sectorsize[tmp_buffer[7]&0x3];
 								CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
 								for(k=0;k<(3+1+tmp_sector_size+2);k++)
 								{
 									CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
 								}
-								
+
 								if(!CRC16_High && !CRC16_Low)
 								{
 									// Only 2 bits used in the sector size...
@@ -298,7 +298,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 						sector->startsectorindex = bit_offset;
 						sector->startdataindex = bit_offset;
 						sector->endsectorindex = mfmtobin(track->databuffer,NULL,track->tracklen,tmp_buffer,3+7,bit_offset,0);
- 						floppycontext->hxc_printf(MSG_DEBUG,"get_next_MFM_sector : Data sector without sector header !?!");
+						floppycontext->hxc_printf(MSG_DEBUG,"get_next_MFM_sector : Data sector without sector header !?!");
 
 						sector->cylinder = 0;
 						sector->head = 0;
@@ -318,7 +318,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 					{
 						bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
 						if( bit_offset < last_start_offset )
-						{	// track position roll-over ? -> End
+						{   // track position roll-over ? -> End
 							sector_extractor_sm = ENDOFTRACK;
 							bit_offset = -1;
 						}
@@ -339,7 +339,7 @@ int get_next_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * 
 			break;
 
 		}
-	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+	}while( (sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
 
 	return bit_offset;
 

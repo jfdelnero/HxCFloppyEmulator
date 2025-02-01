@@ -141,7 +141,7 @@ int get_next_MEMBRAIN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 
 					if(!CRC16_High && !CRC16_Low)
 					{ // crc ok !!!
- 						floppycontext->hxc_printf(MSG_DEBUG,"Valid MEMBRAIN MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
+						floppycontext->hxc_printf(MSG_DEBUG,"Valid MEMBRAIN MFM sector header found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
 						sector->use_alternate_header_crc = 0;
 					}
 					else
@@ -150,7 +150,7 @@ int get_next_MEMBRAIN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 
 						bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
 						if( bit_offset < last_start_offset )
-						{	// track position roll-over ? -> End
+						{   // track position roll-over ? -> End
 							sector_extractor_sm = ENDOFTRACK;
 							bit_offset = -1;
 						}
@@ -190,7 +190,7 @@ int get_next_MEMBRAIN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 							{
 								CRC16_Update(&CRC16_High,&CRC16_Low, tmp_sector[k],(unsigned char*)crctable );
 							}
-							
+
 							sector->data_crc = ( tmp_sector[1+1+sector_size]<<8 ) | tmp_sector[1+1+sector_size+1] ;
 
 							if(!CRC16_High && !CRC16_Low)
@@ -240,7 +240,7 @@ int get_next_MEMBRAIN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 						sector->startsectorindex = bit_offset;
 						sector->startdataindex = bit_offset;
 						sector->endsectorindex = mfmtobin(track->databuffer,NULL,track->tracklen,tmp_buffer,3+7,bit_offset,0);
- 						floppycontext->hxc_printf(MSG_DEBUG,"get_next_MEMBRAIN_sector : Data sector without sector header !?!");
+						floppycontext->hxc_printf(MSG_DEBUG,"get_next_MEMBRAIN_sector : Data sector without sector header !?!");
 
 						sector->cylinder = 0;
 						sector->head = 0;
@@ -260,7 +260,7 @@ int get_next_MEMBRAIN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 					{
 						bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
 						if( bit_offset < last_start_offset )
-						{	// track position roll-over ? -> End
+						{   // track position roll-over ? -> End
 							sector_extractor_sm = ENDOFTRACK;
 							bit_offset = -1;
 						}
@@ -281,7 +281,7 @@ int get_next_MEMBRAIN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 			break;
 
 		}
-	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+	}while( (sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR) );
 
 	return bit_offset;
 }

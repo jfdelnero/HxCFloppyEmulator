@@ -143,11 +143,11 @@ static HXCFE_SIDE* import_a2r_stream(HXCFE* floppycontext, a2r_capture * capture
 		fxs = hxcfe_initFxStream(floppycontext);
 		if(fxs)
 		{
-		//	hxcfe_FxStream_setBitrate(fxs,bitrate);
+		//  hxcfe_FxStream_setBitrate(fxs,bitrate);
 
-		//	hxcfe_FxStream_setPhaseCorrectionFactor(fxs,phasecorrection);
+		//  hxcfe_FxStream_setPhaseCorrectionFactor(fxs,phasecorrection);
 
-		//	hxcfe_FxStream_setFilterParameters(fxs,filterpasses,filter);
+		//  hxcfe_FxStream_setFilterParameters(fxs,filterpasses,filter);
 
 			hxcfe_FxStream_setResolution(fxs,125000); // 125 ns per tick
 

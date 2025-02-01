@@ -280,7 +280,7 @@ static HXCFE_SIDE* decodestream(HXCFE* floppycontext, streamhfe_track_def * trac
 	return currentside;
 }
 
-void fix_track(	HXCFE_SIDE * curside )
+void fix_track( HXCFE_SIDE * curside )
 {
 	int k,l,tracklen;
 	int previous_bit;

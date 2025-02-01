@@ -297,7 +297,7 @@ int32_t cpm_openFile(HXCFE_FSMNG * fsmng, char * filename)
 
 int32_t cpm_createFile(HXCFE_FSMNG * fsmng, char * filename)
 {
-    void *file;
+	void *file;
 	int32_t i;
 
 	i = 0;

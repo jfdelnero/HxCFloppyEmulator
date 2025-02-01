@@ -38,7 +38,7 @@
 // File : usb_hxcfloppyemulator.h
 // Contains: USB HxC FE support functions
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -60,13 +60,13 @@ typedef struct _USBStats
 {
 	uint32_t totaldataout;
 	uint32_t dataout;
-	
+
 	uint32_t synclost;
 
 	uint32_t packetsize;
 	uint32_t totalpacketsent;
 	uint32_t packetsent;
-	
+
 }USBStats;
 
 typedef struct usbtrack_
@@ -85,14 +85,14 @@ typedef struct USBHXCFE_
 
 	uint8_t       *randomlut;
 	uint32_t hw_handle;
-	
+
 	uint8_t       interface_mode;
 	uint32_t      drive_select_source;
 	uint8_t       double_step;
 
 	uint8_t       current_track;
 
-	//	unsigned char floppyloaded;
+	//  unsigned char floppyloaded;
 	uint8_t       floppychanged;
 
 	uint32_t      trackbuffer_pos;

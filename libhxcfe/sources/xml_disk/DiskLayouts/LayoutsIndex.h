@@ -148,7 +148,7 @@ datatype * disklayout_list[]=
 	data_DiskLayout_UKNC_800KB_xml,
 	data_DiskLayout_Unitel_Videotex_xml,
 	data_DiskLayout_Sharp_X68000_2HD_1232KB_xml,
-    data_DiskLayout_Analog_Devices_LTS_2020_xml,
+	data_DiskLayout_Analog_Devices_LTS_2020_xml,
 	0
 };
 

@@ -87,7 +87,7 @@ int OLDEXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 	unsigned int filesize;
 	int i,j;
 	unsigned char* trackdata;
-	int	tracklen;
+	int tracklen;
 	HXCFE_CYLINDER* currentcylinder;
 	int numberoftrack;
 

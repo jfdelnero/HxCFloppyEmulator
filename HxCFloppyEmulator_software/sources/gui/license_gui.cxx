@@ -38,7 +38,7 @@
 // File : license_gui.cxx
 // Contains: "About" window
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////

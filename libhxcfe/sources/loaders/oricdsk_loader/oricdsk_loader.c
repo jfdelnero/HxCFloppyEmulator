@@ -68,7 +68,7 @@ int OricDSK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFO
 	if(hxc_checkfileext(imgfile->path,"dsk",SYS_PATH_TYPE))
 	{
 		if( !strncmp((char*)imgfile->file_header,"MFM_DISK",8) ||
-		    !strncmp((char*)imgfile->file_header,"ORICDISK",8))
+			!strncmp((char*)imgfile->file_header,"ORICDISK",8))
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"OricDSK_libIsValidDiskFile : OricDSK file !");
 			return HXCFE_VALIDFILE;
@@ -383,7 +383,7 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 		}
 		else
 		{
-			if(	!strncmp((char*)&fileheader->headertag,"ORICDISK",8))
+			if( !strncmp((char*)&fileheader->headertag,"ORICDISK",8))
 			{
 				mfmformat=0;
 				geometrie=0;
@@ -514,7 +514,7 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 						trackdata=(unsigned char *) malloc(tracksize);
 						if( !trackdata )
 							goto error;
-						
+
 						trackdatatab=(unsigned char*) malloc(256*1024);
 						if( !trackdatatab )
 							goto error;

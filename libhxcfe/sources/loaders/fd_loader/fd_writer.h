@@ -24,7 +24,7 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 */
-/*Changelog 
+/*Changelog
   Jan 2017 : FD_writer.h (based on ST_writer)  by T. Missonier (sourcezax@users.sourceforge.net) */
 
 int FD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename);

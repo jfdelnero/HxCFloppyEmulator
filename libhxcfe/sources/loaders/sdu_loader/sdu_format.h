@@ -47,8 +47,8 @@
 
 typedef struct _sdu_header
 {
-	const uint8_t signature[21];	// SAB Diskette Utility\0
-	uint8_t  version[5];			// X.XX\0
+	const uint8_t signature[21];    // SAB Diskette Utility\0
+	uint8_t  version[5];            // X.XX\0
 	uint16_t flags;
 	uint16_t type;
 	uint16_t max_cylinder;
@@ -58,7 +58,7 @@ typedef struct _sdu_header
 	uint16_t cur_head;
 	uint16_t cur_sector;
 	uint16_t sector_size;
-	uint16_t track_size;			// = sector_size * max_sector
+	uint16_t track_size;            // = sector_size * max_sector
 } sdu_header;
 
 #pragma pack()

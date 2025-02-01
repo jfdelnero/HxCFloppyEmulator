@@ -156,7 +156,7 @@ void CalcNibbleInvTables(void)
 	*/
 
 	memset(kInvDiskBytes62, kInvInvalidValue, sizeof(kInvDiskBytes62));
-    for (i = 0; i < sizeof(byte_translation_SixAndTwo); i++)
+	for (i = 0; i < sizeof(byte_translation_SixAndTwo); i++)
 	{
 		kInvDiskBytes62[byte_translation_SixAndTwo[i]] = i;
 	}
@@ -353,7 +353,7 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 
 						#ifdef DBG_A2_GCR
 						i = 0;
- 						memset(test_buffer,0,sizeof(test_buffer));
+						memset(test_buffer,0,sizeof(test_buffer));
 						test_buffer[i++] = 'D';
 						do
 						{
@@ -500,7 +500,7 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 						bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
 
 						if( bit_offset < last_start_offset )
-						{	// track position roll-over ? -> End
+						{   // track position roll-over ? -> End
 							sector_extractor_sm = ENDOFTRACK;
 							bit_offset = -1;
 						}
@@ -515,7 +515,7 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 				{
 					bit_offset = chgbitptr( track->tracklen, bit_offset, 1 );
 					if( bit_offset < last_start_offset )
-					{	// track position roll-over ? -> End
+					{   // track position roll-over ? -> End
 						sector_extractor_sm = ENDOFTRACK;
 						bit_offset = -1;
 					}
@@ -535,7 +535,7 @@ int get_next_A2GCR2_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 			break;
 
 		}
-	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+	}while( (sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
 
 	return bit_offset;
 }
@@ -548,10 +548,10 @@ int get_next_A2GCR1_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG
 
 void tg_addAppleSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfig,HXCFE_SIDE * currentside)
 {
-	int32_t   trackenc;
+	int32_t         trackenc;
 	unsigned char   sector_buffer[300];
-	int32_t   startindex,j,i;
-	unsigned char	volume,checksum,nibbleval;
+	int32_t         startindex,j,i;
+	unsigned char   volume,checksum,nibbleval;
 
 	checksum = 0;
 	volume = 254;

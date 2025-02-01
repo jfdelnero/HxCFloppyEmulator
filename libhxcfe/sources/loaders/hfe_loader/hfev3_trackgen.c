@@ -789,7 +789,7 @@ int32_t GenOpcodesTrack(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * datah0
 		if(!inserttimecode)
 		{
 			inserttimecode=GRANULA;
-		/*	if(speedcfg_track1==speedcfg_track0)
+		/*  if(speedcfg_track1==speedcfg_track0)
 			{
 				finalbuffer[k]=SETBITRATE_H0_OPCODE | SETBITRATE_H1_OPCODE;
 				k++;

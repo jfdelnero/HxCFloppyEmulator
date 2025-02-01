@@ -64,7 +64,7 @@ typedef int (* SCRIPT_PRINTF_FUNC)(void * ctx, int MSGTYPE, char * string, ... )
 #define LONGHEXSTR "%.8X"
 #endif
 
-#define DEFAULT_BUFLEN 1024 
+#define DEFAULT_BUFLEN 1024
 #define MAX_LABEL_SIZE 64
 #define MAX_LABEL 256
 

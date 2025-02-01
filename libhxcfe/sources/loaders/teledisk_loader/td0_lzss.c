@@ -34,31 +34,31 @@
 #include "td0_lzss.h"
 
 // LZSS parameters
-#define SBSIZE		4096				// Size of Ring buffer
-#define LASIZE		60					// Size of Look-ahead buffer
-#define THRESHOLD	2					// Minimum match for compress
+#define SBSIZE      4096                // Size of Ring buffer
+#define LASIZE      60                  // Size of Look-ahead buffer
+#define THRESHOLD   2                   // Minimum match for compress
 
 // Huffman coding parameters
-#define N_CHAR	(256-THRESHOLD+LASIZE)	// Character code (= 0..N_CHAR-1)
-#define TSIZE		(N_CHAR*2-1)		// Size of table
-#define ROOT		(TSIZE-1)			// Root position
-#define MAX_FREQ	0x8000				// Update when cumulative frequency reaches this value
+#define N_CHAR  (256-THRESHOLD+LASIZE)  // Character code (= 0..N_CHAR-1)
+#define TSIZE       (N_CHAR*2-1)        // Size of table
+#define ROOT        (TSIZE-1)           // Root position
+#define MAX_FREQ    0x8000              // Update when cumulative frequency reaches this value
 
 static unsigned short
-	parent[TSIZE+N_CHAR],	// parent nodes (0..T-1) and leaf positions (rest)
-	son[TSIZE],				// pointers to child nodes (son[], son[]+1)
-	freq[TSIZE+1],			// frequency table
-	Bits, Bitbuff,			// buffered bit count and left-aligned bit buffer
-	GBcheck,				// Getbyte check down-counter
-	GBr,					// Ring buffer position
-	GBi,					// Decoder index
-	GBj,					// Decoder index
-	GBk;					// Decoder index
+	parent[TSIZE+N_CHAR],               // parent nodes (0..T-1) and leaf positions (rest)
+	son[TSIZE],                         // pointers to child nodes (son[], son[]+1)
+	freq[TSIZE+1],                      // frequency table
+	Bits, Bitbuff,                      // buffered bit count and left-aligned bit buffer
+	GBcheck,                            // Getbyte check down-counter
+	GBr,                                // Ring buffer position
+	GBi,                                // Decoder index
+	GBj,                                // Decoder index
+	GBk;                                // Decoder index
 
 static unsigned char
-	GBstate,				// Decoder state
-	Eof,					// End-of-file indicator
-	ring_buff[SBSIZE+LASIZE-1];	// text buffer for match strings
+	GBstate,                            // Decoder state
+	Eof,                                // End-of-file indicator
+	ring_buff[SBSIZE+LASIZE-1];         // text buffer for match strings
 
 static int buffer_offset;
 static int buffer_size;
@@ -69,7 +69,7 @@ static unsigned char * buffer_ptr;
  * LZSS decoder - based in part on Haruhiko Okumura's LZHUF.C
  */
 
-static const unsigned char d_code_lzss[256] = {		// Huffman decoder tables
+static const unsigned char d_code_lzss[256] = { // Huffman decoder tables
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
@@ -112,12 +112,12 @@ void init_decompress()
 	memset(&ring_buff,0,SBSIZE+LASIZE-1);
 
 
-	for(i = j = 0; i < N_CHAR; ++i) {		// Walk up
+	for(i = j = 0; i < N_CHAR; ++i) {       // Walk up
 		freq[i] = 1;
 		son[i] = i + TSIZE;
 		parent[i+TSIZE] = i; }
 
-	while(i <= ROOT) {						// Back down
+	while(i <= ROOT) {                      // Back down
 		freq[i] = freq[j] + freq[j+1];
 		son[i] = j;
 		parent[j] = parent[j+1] = i++;
@@ -136,7 +136,7 @@ void lzss_update(int c)
 {
 	unsigned short i, j, k, f, l;
 
-	if(freq[ROOT] == MAX_FREQ) {		// Tree is full - rebuild
+	if(freq[ROOT] == MAX_FREQ) {        // Tree is full - rebuild
 		// Halve cumulative freq for leaf nodes
 		for(i = j = 0; i < TSIZE; ++i) {
 			if(son[i] >= TSIZE) {
@@ -183,7 +183,7 @@ void lzss_update(int c)
 			c = l; }
 
 			c = parent[c];
-	} while(c);	// Repeat up to root
+	} while(c); // Repeat up to root
 }
 
 /*
@@ -284,26 +284,26 @@ int getbyte()
 
 	--GBcheck;
 
-	for(;;) {				// Decompressor state machine
-		if(Eof)					// End of file has been flagged
+	for(;;) {                   // Decompressor state machine
+		if(Eof)                 // End of file has been flagged
 			return -1;
-		if(!GBstate) {			// Not in the middle of a string
+		if(!GBstate) {          // Not in the middle of a string
 			c = lzss_DecodeChar();
-			if(c < 256) {		// Direct data extraction
+			if(c < 256) {       // Direct data extraction
 				ring_buff[GBr++] = (unsigned char)c;
 				GBr &= (SBSIZE-1);
 				return c; }
-			GBstate = 255;		// Begin extracting a compressed string
+			GBstate = 255;      // Begin extracting a compressed string
 			GBi = (GBr - lzss_DecodePosition() - 1) & (SBSIZE-1);
 			GBj = c - 255 + THRESHOLD;
 			GBk = 0; }
-		if(GBk < GBj) {			// Extract a compressed string
+		if(GBk < GBj) {         // Extract a compressed string
 			ring_buff[GBr] = ring_buff[(GBk++ + GBi) & (SBSIZE-1)];
 			c = ring_buff[GBr++];
 
 			GBr &= (SBSIZE-1);
 			return c; }
-		GBstate = 0; }			// Reset to non-string state
+		GBstate = 0; }          // Reset to non-string state
 }
 
 /*
@@ -319,7 +319,7 @@ int getblock(unsigned char *p, unsigned short size, unsigned char *e)
 		if((c = getbyte()) == -1) {
 			eof = (unsigned char)255;
 			//if(e)
-			//	error("EOF reading %s", e);
+			//  error("EOF reading %s", e);
 			break; }
 		*p++ = c; }
 	return eof;
@@ -355,7 +355,7 @@ unsigned char * unpack(unsigned char *packeddata,unsigned int size, unsigned int
 			buffer[j++] = getbyte();
 			i++;
 		}while(i<512 && (Eof!=255));
-	
+
 		buffer = (unsigned char*)realloc( buffer,j+512);
 	}
 

@@ -13,13 +13,13 @@ class Main_Window : public Fl_Window {
 	char *evt_txt;
 
 	unsigned int txtindex;
-	Fl_File_Chooser		*fc_load;
-	Fl_File_Chooser		*fc_save;
+	Fl_File_Chooser     *fc_load;
+	Fl_File_Chooser     *fc_save;
 
 
   public:
 
- 	batch_converter_window *batchconv_window;
+	batch_converter_window *batchconv_window;
 	filesystem_generator_window *fs_window;
 	floppy_streamer_window * streamer_window;
 	floppy_dump_window *fdump_window;

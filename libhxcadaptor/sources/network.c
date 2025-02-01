@@ -57,7 +57,7 @@
 
 #include <stdint.h>
 
-#ifdef	WIN32
+#ifdef  WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
@@ -77,8 +77,8 @@ typedef struct sockaddr SOCKADDR;
 #include <unistd.h>
 #include <dirent.h>
 
-#ifdef	OSX
-#	include <mach-o/dyld.h>
+#ifdef  OSX
+#   include <mach-o/dyld.h>
 #endif
 
 #endif

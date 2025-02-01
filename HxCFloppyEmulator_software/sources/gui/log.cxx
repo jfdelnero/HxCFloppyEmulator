@@ -38,7 +38,7 @@
 // File : log.cxx
 // Contains: log window
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////

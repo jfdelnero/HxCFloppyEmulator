@@ -117,21 +117,21 @@ Fl_Menu_Item menutable[] = {
 	{0},
 #else
   {"&Settings",FL_F+2,0,0,FL_SUBMENU},
-	{"Floppy Emulator settings",	FL_ALT+'l',menu_clicked,(void*)5},
+	{"Floppy Emulator settings",    FL_ALT+'l',menu_clicked,(void*)5},
 	{0},
 #endif
   {"&Look",FL_F+3,0,0,FL_SUBMENU},
-	{"Classic",	FL_ALT+'C',menu_clicked,(void*)11},
-	{"Plastic",	FL_ALT+'P',menu_clicked,(void*)12},
-	{"Gtk+",	FL_ALT+'G',menu_clicked,(void*)13},
-	{"Gleam",	FL_ALT+'E',menu_clicked,(void*)14},
+	{"Classic", FL_ALT+'C',menu_clicked,(void*)11},
+	{"Plastic", FL_ALT+'P',menu_clicked,(void*)12},
+	{"Gtk+",    FL_ALT+'G',menu_clicked,(void*)13},
+	{"Gleam",   FL_ALT+'E',menu_clicked,(void*)14},
 	{0},
   {"&Log",FL_F+4,0,0,FL_SUBMENU},
-	{"&Log",	FL_ALT+'l',menu_clicked,(void*)8},
+	{"&Log",    FL_ALT+'l',menu_clicked,(void*)8},
 	{0},
 #ifndef OEM_MODE
 	{"&About",0,0,0,FL_SUBMENU},
-	{"&HxCFloppyEmulator",	FL_ALT+'h',menu_clicked,(void*)9},
+	{"&HxCFloppyEmulator",  FL_ALT+'h',menu_clicked,(void*)9},
 #endif
 	{0},
   {0}

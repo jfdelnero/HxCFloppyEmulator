@@ -27,7 +27,7 @@ unsigned short GenCRC16TableEntry( const unsigned short index, const short NumBi
 {
 	int i;
 	unsigned short Ret;
-		
+
 	// Prepare the initial setup of the register so the index is at the
 	// top most bits.
 	Ret = index;
@@ -36,10 +36,10 @@ unsigned short GenCRC16TableEntry( const unsigned short index, const short NumBi
 	for( i = 0; i < NumBits; i++ ) {
 		if( Ret & 0x8000 )
 			Ret = (unsigned short)((Ret << 1) ^ Poly);
-		else 
+		else
 			Ret = (unsigned short)(Ret << 1);
 	}
-	
+
 	return Ret;
 }
 
@@ -51,11 +51,11 @@ void CRC16_Init( unsigned char *CRC16_High, unsigned char *CRC16_Low,unsigned ch
 {
 
 	unsigned short i, Count, te;
-	#define NUM_BITS 4			// Width of message chunk each iteration of the CRC algorithm
-	
+	#define NUM_BITS 4          // Width of message chunk each iteration of the CRC algorithm
+
 	// Setup the values to compute the table
-	Count = 1 << NUM_BITS;		// Number of entries in the table
-	
+	Count = 1 << NUM_BITS;      // Number of entries in the table
+
 	for( i = 0; i < Count; i++ ) {
 		te = GenCRC16TableEntry( i, NUM_BITS, polynome );
 		crctable[i+Count] = (unsigned char)(te>>8);
@@ -74,7 +74,7 @@ void CRC16_Init( unsigned char *CRC16_High, unsigned char *CRC16_Low,unsigned ch
  */
 void CRC16_Update4Bits(unsigned char *CRC16_High, unsigned char *CRC16_Low, unsigned char val ,unsigned char * crctable )
 {
-	unsigned char	t;
+	unsigned char   t;
 
 	// Step one, extract the Most significant 4 bits of the CRC register
 	t = (unsigned char)((*CRC16_High) >> 4);
@@ -96,7 +96,7 @@ void CRC16_Update4Bits(unsigned char *CRC16_High, unsigned char *CRC16_Low, unsi
  */
 void CRC16_Update(unsigned char *CRC16_High, unsigned char *CRC16_Low, unsigned char val,unsigned char * crctable)
 {
-	CRC16_Update4Bits(CRC16_High,CRC16_Low, (unsigned char)(val >> 4),crctable);		// High nibble first
-	CRC16_Update4Bits(CRC16_High,CRC16_Low, (unsigned char)(val & 0x0F), crctable);	// Low nibble
+	CRC16_Update4Bits(CRC16_High,CRC16_Low, (unsigned char)(val >> 4),crctable);        // High nibble first
+	CRC16_Update4Bits(CRC16_High,CRC16_Low, (unsigned char)(val & 0x0F), crctable);     // Low nibble
 }
 

@@ -36,12 +36,12 @@
 
 /////////////////////////////////////////////////////
 //Block tag
-#define AFI_IMG_TAG			"AFI_FLOPPY_IMG"
-#define AFI_DATA_TAG		"TRACKDATA"
-#define AFI_INFO_TAG		"AFI_INFO"
-#define AFI_STRING_TAG		"STRING"
-#define AFI_TRACKLIST_TAG	"TRACKLIST"
-#define AFI_TRACK_TAG		"TRACK"
+#define AFI_IMG_TAG         "AFI_FLOPPY_IMG"
+#define AFI_DATA_TAG        "TRACKDATA"
+#define AFI_INFO_TAG        "AFI_INFO"
+#define AFI_STRING_TAG      "STRING"
+#define AFI_TRACKLIST_TAG   "TRACKLIST"
+#define AFI_TRACK_TAG       "TRACK"
 
 /////////////////////////////////////////////////////
 //  file header
@@ -50,7 +50,7 @@ typedef struct AFIIMG_
 	uint8_t  afi_img_tag[STRINGTAGSIZE];
 
 	uint8_t  version_code_major;
-    uint8_t  version_code_minor;
+	uint8_t  version_code_minor;
 
 	uint32_t header_size;
 
@@ -68,8 +68,8 @@ typedef struct AFIIMGINFO_
 
 	uint32_t  floppy_info_size;
 
-    uint32_t  mediatype_code;
-    uint32_t  platformtype_code;
+	uint32_t  mediatype_code;
+	uint32_t  platformtype_code;
 
 	uint32_t  total_track;
 	uint32_t  start_track;
@@ -129,8 +129,8 @@ typedef struct AFITRACKLIST_
 	uint8_t  afi_img_track_list_tag[STRINGTAGSIZE];
 	uint32_t number_of_track;
 }AFITRACKLIST;
-//	uint32_t track_offset_list; //*number_of_track
-//	word  tracklist_crc;
+//  uint32_t track_offset_list; //*number_of_track
+//  word  tracklist_crc;
 
 //
 /////////////////////////////////////////////////////
@@ -147,8 +147,8 @@ typedef struct AFITRACK_
 
 	uint32_t number_of_data_chunk;
 }AFITRACK;
-//	uint32_t data_offset_list; //*number_of_data_chunk
-//	word  afi_track_crc;
+//  uint32_t data_offset_list; //*number_of_data_chunk
+//  word  afi_track_crc;
 
 // encoding mode
 enum {
@@ -187,8 +187,8 @@ typedef struct AFIDATA_
 	uint32_t unpacked_size;
 
 }AFIDATA;
-//	uint8_t data;//*packed_size
-//	uint16_t  afi_data_crc;
+//  uint8_t data;//*packed_size
+//  uint16_t  afi_data_crc;
 
 
 // data type
@@ -220,7 +220,7 @@ typedef struct AFI_DATACODE_
 enum {
 	AFI_COMPRESS_NONE,
 	AFI_COMPRESS_GZIP,
-	AFI_COMPRESS_RLE,	// RFU
+	AFI_COMPRESS_RLE,   // RFU
 	AFI_COMPRESS_LZW    // RFU
 };
 

@@ -124,7 +124,7 @@ unsigned short msapacktrack(unsigned char * inputtrack,int insize,unsigned char 
 	}
 
 	if((j-2)>=insize)
-	{	//Packed track too big : Discard compression
+	{   //Packed track too big : Discard compression
 		fsize = insize + 2;
 		outputtrack[0] = (insize>>8)&0xFF;
 		outputtrack[1] = insize&0xFF;

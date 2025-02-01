@@ -251,7 +251,7 @@ int get_next_FM_MicralN_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SEC
 			break;
 
 		}
-	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+	}while( (sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR) );
 
 	return bit_offset;
 

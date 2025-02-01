@@ -13,9 +13,9 @@ typedef struct dmk_header_
 	uint8_t  flags; // 0x10 - Single sided
 					// 0x40 - Single density
 					// 0x80 - Ignore density
-	
+
 	uint8_t  rsvd_1[(0xB-0x5)+1];
-	uint8_t  rsvd_2[(0xF-0xC)+1];	
+	uint8_t  rsvd_2[(0xF-0xC)+1];
 }dmk_header;
 
 #pragma pack()

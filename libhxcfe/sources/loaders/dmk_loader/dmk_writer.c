@@ -319,7 +319,7 @@ int DMK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 									{
 										tab_ptr_value = (( (bit_offset + (3*8*2)) / 16 ) + 0x80) & 0x7FFF;
 
-										IDAMbuf[(tabindex*2)] =		 tab_ptr_value & 0xFF;
+										IDAMbuf[(tabindex*2)]     = tab_ptr_value & 0xFF;
 										IDAMbuf[(tabindex*2 + 1)] = (tab_ptr_value>>8) | 0x80;
 
 										tabindex++;
@@ -374,7 +374,7 @@ int DMK_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 										{
 											tab_ptr_value = (( (bit_offset) / 16 ) + 0x80) & 0x7FFF;
 
-											IDAMbuf[(tabindex*2)] =		 tab_ptr_value & 0xFF;
+											IDAMbuf[(tabindex*2)] =      tab_ptr_value & 0xFF;
 											IDAMbuf[(tabindex*2 + 1)] = (tab_ptr_value>>8);
 
 											tabindex++;

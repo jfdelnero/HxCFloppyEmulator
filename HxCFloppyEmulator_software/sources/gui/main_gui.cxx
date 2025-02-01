@@ -1342,7 +1342,7 @@ Main_Window::Main_Window(int argc, char **argv)
 			}
 		}
 
-/*		streamer_window->buf = new Fl_Text_Buffer;
+/*      streamer_window->buf = new Fl_Text_Buffer;
 		if(streamer_window->buf)
 			streamer_window->object_txt->buffer(infos_window->buf);
 */

@@ -228,7 +228,7 @@ int get_next_TYCOMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCF
 					{
 						bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
 						if( bit_offset < last_start_offset )
-						{	// track position roll-over ? -> End
+						{   // track position roll-over ? -> End
 							sector_extractor_sm = ENDOFTRACK;
 							bit_offset = -1;
 						}
@@ -242,7 +242,7 @@ int get_next_TYCOMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCF
 				{
 					bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
 					if( bit_offset < last_start_offset )
-					{	// track position roll-over ? -> End
+					{   // track position roll-over ? -> End
 						sector_extractor_sm = ENDOFTRACK;
 						bit_offset = -1;
 					}
@@ -262,7 +262,7 @@ int get_next_TYCOMFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCF
 			break;
 
 		}
-	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+	}while( (sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR) );
 
 	return bit_offset;
 }

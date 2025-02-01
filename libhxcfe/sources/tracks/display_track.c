@@ -589,7 +589,7 @@ void line_len(HXCFE_TD *td, int layer, int first_x ,int first_y, int last_x, int
 		} while ( --remain > 0 && dist(start_x, start_y, first_x, first_y ) <= len );
 
 		//if ( !(dx&1) )
-		//	plot(td, layer, first_x, first_y, color, alpha, op);
+		//  plot(td, layer, first_x, first_y, color, alpha, op);
 
 		return;
 	}
@@ -622,7 +622,7 @@ void line_len(HXCFE_TD *td, int layer, int first_x ,int first_y, int last_x, int
 		} while ( --remain > 0 && dist(start_x, start_y, first_x, first_y ) <= len );
 
 		//if ( !(dy&1) )
-		//	plot(td, layer, first_x, first_y, color, alpha, op);
+		//  plot(td, layer, first_x, first_y, color, alpha, op);
 
 		return;
 	}

@@ -211,7 +211,7 @@ int AFI_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	FILE * hxcafifile;
 	AFIIMG      afiheader;
 	AFIIMGINFO  afiinfo;
-//	AFI_STRING  afistring;
+//  AFI_STRING  afistring;
 	AFITRACKLIST afitracklist;
 	AFITRACK   afitrack;
 	unsigned short tempcrc;
@@ -329,7 +329,7 @@ int AFI_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 			afiheader.track_list_offset=sizeof(AFIIMG);
 
-			fwrite(&afiheader,sizeof(afiheader),1,hxcafifile);	      //write temporary file header
+			fwrite(&afiheader,sizeof(afiheader),1,hxcafifile);        //write temporary file header
 			fwrite(&afitracklist,sizeof(afitracklist),1,hxcafifile);  //write temporary track list header
 			track_listptr=ftell(hxcafifile);
 			fwrite(track_list,afitracklist.number_of_track*sizeof(uint32_t),1,hxcafifile);
@@ -513,7 +513,7 @@ int AFI_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			temp_fileptr=ftell(hxcafifile);
 			fseek(hxcafifile,0,SEEK_SET);
 			afiheader.header_crc=getcrc(&afiheader,sizeof(afiheader)-2,0,0);
-			fwrite(&afiheader,sizeof(afiheader),1,hxcafifile);	      //write temporary file header
+			fwrite(&afiheader,sizeof(afiheader),1,hxcafifile);        //write temporary file header
 			fseek(hxcafifile,temp_fileptr,SEEK_SET);
 
 			free(track_list);

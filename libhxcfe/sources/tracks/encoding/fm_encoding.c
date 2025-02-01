@@ -166,7 +166,7 @@ void getFMcode(track_generator *tg,uint8_t data,uint8_t clock,uint8_t * dstbuf)
 			for(i=0;i<2;i++)
 			{
 				if(data&(0x80>>(i+(k*2)) ))
-				{	// 0x10
+				{   // 0x10
 					// 00010001)
 					*fm_code=*fm_code | ((0x10>>(i*4))<<24);
 				}
@@ -176,7 +176,7 @@ void getFMcode(track_generator *tg,uint8_t data,uint8_t clock,uint8_t * dstbuf)
 			for(i=0;i<2;i++)
 			{
 				if(clock&(0x80>>(i+(k*2)) ))
-				{	// 0x40
+				{   // 0x40
 					// 01000100)
 					*fm_code=*fm_code | ((0x40>>(i*4))<<24);
 				}
@@ -215,7 +215,7 @@ void BuildFMCylinder(uint8_t * buffer,int32_t fmtracksize,uint8_t * bufferclk,ui
 			for(i=0;i<2;i++)
 			{
 				if(byte&(0x80>>(i+(k*2)) ))
-				{	// 0x10
+				{   // 0x10
 					// 00010001)
 					buffer[j] = (uint8_t)(buffer[j] | (0x10>>(i*4)));
 				}
@@ -225,7 +225,7 @@ void BuildFMCylinder(uint8_t * buffer,int32_t fmtracksize,uint8_t * bufferclk,ui
 			for(i=0;i<2;i++)
 			{
 				if(clock&(0x80>>(i+(k*2)) ))
-				{	// 0x40
+				{   // 0x40
 					// 01000100)
 					buffer[j] = (uint8_t)( buffer[j] | (0x40>>(i*4)));
 				}
@@ -259,7 +259,7 @@ void FastFMgenerator(track_generator *tg,HXCFE_SIDE * side,unsigned char * track
 			for(i=0;i<2;i++)
 			{
 				if(byte&(0x80>>(i+(k*2)) ))
-				{	// 0x10
+				{   // 0x10
 					// 00010001)
 					fm_buffer[j] = (uint8_t)( fm_buffer[j] | (0x10>>(i*4)) );
 				}

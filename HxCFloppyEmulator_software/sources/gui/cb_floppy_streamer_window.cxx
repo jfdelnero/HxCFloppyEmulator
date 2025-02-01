@@ -243,11 +243,11 @@ int StreamerThreadRxDataProc(void* floppycontext,void* context)
 	time(&time_now);
 	time_info = localtime(&time_now);
 	snprintf(tmp_stream_file_name,sizeof(tmp_stream_file_name),"pauline_tmp_buffer_%.4d-%.2d-%.2d_%.2dh%.2dm%.2ds.hxcstream",time_info->tm_year + 1900, \
-	                                                                                       time_info->tm_mon+1, \
-	                                                                                       time_info->tm_mday, \
-	                                                                                       time_info->tm_hour, \
-	                                                                                       time_info->tm_min, \
-	                                                                                       time_info->tm_sec );
+																						time_info->tm_mon+1, \
+																						time_info->tm_mday, \
+																						time_info->tm_hour, \
+																						time_info->tm_min, \
+																						time_info->tm_sec );
 
 	ret = 0;
 	ch = (chunk_header *)buffer;

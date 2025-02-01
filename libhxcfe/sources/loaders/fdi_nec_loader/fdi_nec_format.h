@@ -47,7 +47,7 @@
 
 typedef struct fdi_nec_header_
 {
-	uint32_t signature;	// 0x00000000
+	uint32_t signature; // 0x00000000
 	uint32_t fddtype;   // 0x1X (1MB/640KB - 2DD)
 						// 0x70/0xF0 (640KB - 2DD)
 						// 0x30/0xB0 (1.44MB - 2HD)

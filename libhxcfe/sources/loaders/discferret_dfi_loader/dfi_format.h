@@ -62,10 +62,10 @@ Decoding data
 carry = 0
 For every byte in the stream:
   if (byte AND 0x7f) == 0x00:
-    carry = carry + 127
+	carry = carry + 127
   else:
-    emit((byte AND 0x7f) + carry)
-    carry = 0
+	emit((byte AND 0x7f) + carry)
+	carry = 0
 if carry > 0:
   emit(carry)
 
@@ -76,16 +76,16 @@ carry = 0   // running carry
 abspos = 0  // absolute timing position in stream
 For every byte in the stream:
   if ((byte AND 0x7f) == 0x7f):    // if lower 7 bit value is 0x7f
-    carry = carry + 127            // ... then there was a carry
-    abspos = abspos + 127
+	carry = carry + 127            // ... then there was a carry
+	abspos = abspos + 127
   else if (byte AND 0x80) != 0:    // if high bit set in byte
-    carry = carry + (byte & 0x7F)  // add lower 7 bit value to carry and absolute-position
-    abspos = abspos + (byte & 0x7F)
-    add_index_position(abspos)     // this store was caused by an index pulse: save its absolute position
+	carry = carry + (byte & 0x7F)  // add lower 7 bit value to carry and absolute-position
+	abspos = abspos + (byte & 0x7F)
+	add_index_position(abspos)     // this store was caused by an index pulse: save its absolute position
   else:                            // here byte < 0x7f
-    emit((byte AND 0x7f) + carry)  // this store was caused by a data transition: store the time-delta since last transition
-    abspos = abspos + (byte & 0x7F)
-    carry = 0                      // reset carry
+	emit((byte AND 0x7f) + carry)  // this store was caused by a data transition: store the time-delta since last transition
+	abspos = abspos + (byte & 0x7F)
+	carry = 0                      // reset carry
 
 // Carry may be nonzero at the end of this loop. In this case, there was an incomplete transition, which should be discarded.
 

@@ -203,7 +203,7 @@ int get_next_Centurion_MFM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 			break;
 
 		}
-	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+	}while( (sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR) );
 
 	return bit_offset;
 }

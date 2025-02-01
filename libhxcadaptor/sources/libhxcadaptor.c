@@ -38,7 +38,7 @@
 // File : libhxcadaptor.c
 // Contains: "Glue"/Os depend functions
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -555,7 +555,7 @@ char * hxc_getfilenamebase(char * fullpath,char * filenamebase, int type)
 		if(len)
 		{
 			i=len-1;
-			while(i &&	( fullpath[i] != separator && fullpath[i]!=':') )
+			while(i &&  ( fullpath[i] != separator && fullpath[i]!=':') )
 			{
 				i--;
 			}
@@ -598,7 +598,7 @@ char * hxc_getfilenameext(char * fullpath,char * filenameext, int type )
 		{
 			i=len-1;
 
-			while(i &&	( filename[i] != '.' ) )
+			while(i &&  ( filename[i] != '.' ) )
 			{
 				i--;
 			}

@@ -54,7 +54,7 @@ void extaddpad(unsigned char * track,int mfmsize,int tracksize)
 	if(i)
 	{
 		j=i+1;
-/*		do
+/*      do
 		{
 			track[j++]=track[i-1];
 			if(j<tracksize)

@@ -60,7 +60,7 @@
 
 #if !defined(FTDILIB)
 
-typedef FT_STATUS (WINAPI * FT_OPEN)(int32_t deviceNumber,	FT_HANDLE *pHandle);
+typedef FT_STATUS (WINAPI * FT_OPEN)(int32_t deviceNumber, FT_HANDLE *pHandle);
 typedef FT_STATUS (WINAPI * FT_READ)( FT_HANDLE ftHandle,LPVOID lpBuffer,DWORD nBufferSize,LPDWORD lpBytesReturned);
 typedef FT_STATUS (WINAPI * FT_WRITE)(FT_HANDLE ftHandle,LPVOID lpBuffer,DWORD nBufferSize,LPDWORD lpBytesWritten);
 typedef FT_STATUS (WINAPI * FT_GETSTATUS)(FT_HANDLE ftHandle,DWORD *dwRxBytes,DWORD *dwTxBytes,DWORD *dwEventDWord);
@@ -161,16 +161,16 @@ int32_t waitevent(EVENT_HANDLE* theevent,int32_t timeout)
 	timeoutstr.tv_nsec = (now.tv_usec * 1000);
 	retcode = 0;
 
-	retcode = pthread_cond_timedwait(&theevent->eCondVar, &theevent->eMutex, &timeoutstr);	
-	if (retcode == ETIMEDOUT) 
+	retcode = pthread_cond_timedwait(&theevent->eCondVar, &theevent->eMutex, &timeoutstr);
+	if (retcode == ETIMEDOUT)
 	{
 		pthread_mutex_unlock(&theevent->eMutex);
 		return 1;
-	} 
-	else 
+	}
+	else
 	{
 		pthread_mutex_unlock(&theevent->eMutex);
-		return 0; 
+		return 0;
 	}
 }
 
@@ -188,7 +188,7 @@ void * FTDIListenerThreadProc( void *lpParameter)
 {
 	listenerthreadinit *threadinitptr;
 	RDTHREADFUNCTION thread;
-	
+
 	threadinitptr=(listenerthreadinit*)lpParameter;
 	thread=threadinitptr->thread;
 
@@ -200,12 +200,12 @@ void * FTDIListenerThreadProc( void *lpParameter)
 int32_t FTDIListener(ftdi_context ftdihandle)
 {
 	int32_t returnvalue,i;
-	
+
 	#ifdef DEBUG
 	printf("FTDIListener\n");
-	#endif 
+	#endif
 	do
-	{	
+	{
 		do
 		{
 			returnvalue=p_ftdi_read_data(ftdihandle, RXBUFFER, 2);
@@ -213,7 +213,7 @@ int32_t FTDIListener(ftdi_context ftdihandle)
 		if(returnvalue>0)
 		{
 			for(i=0;i<returnvalue;i++)
-			{				
+			{
 				rx_fifo.BUFFER[(rx_fifo.ptr_in)&(BUFFERSIZE-1)]=RXBUFFER[i];
 				rx_fifo.ptr_in=(rx_fifo.ptr_in+1)&(BUFFERSIZE-1);
 			}
@@ -254,7 +254,7 @@ int32_t createlistenerthread(RDTHREADFUNCTION thread,int32_t priority,ftdi_conte
 	pthread_attr_setinheritsched(&threadattrib,PTHREAD_EXPLICIT_SCHED);
 	//pthread_attr_setsched(&threadattrib,SCHED_FIFO);
 	//pthread_attr_setprio(&threadattrib,4);
-	
+
 	pthread_attr_setschedpolicy(&threadattrib,SCHED_FIFO);
 
 #ifndef __EMSCRIPTEN__
@@ -271,9 +271,9 @@ int32_t createlistenerthread(RDTHREADFUNCTION thread,int32_t priority,ftdi_conte
 	ret = pthread_create(&threadid,0,FTDIListenerThreadProc, threadinitptr);
 	if(ret)
 	{
-#ifdef DEBUG		
+#ifdef DEBUG
 		printf("createlistenerthread : pthread_create failed -> %d",ret);
-#endif		
+#endif
 	}
 	return sit;
 }
@@ -302,7 +302,7 @@ int32_t ftdi_load_lib (HXCFE* floppycontext)
 		pFT_Purge = (FT_PURGE)GetProcAddress (h, "FT_Purge");
 		pFT_SetUSBParameters = (FT_SETUSBPARAMETERS)GetProcAddress (h, "FT_SetUSBParameters");
 		pFT_SetLatencyTimer = (FT_SETLATENCYTIMER)GetProcAddress (h, "FT_SetLatencyTimer");
-		pFT_SetEventNotification = 	(FT_SETEVENTNOTIFICATION)GetProcAddress (h, "FT_SetEventNotification");
+		pFT_SetEventNotification =  (FT_SETEVENTNOTIFICATION)GetProcAddress (h, "FT_SetEventNotification");
 
 		if(pFT_Write &&  pFT_Read && pFT_GetStatus && pFT_Open && pFT_Purge && pFT_SetUSBParameters && pFT_SetLatencyTimer && pFT_SetEventNotification)
 		{
@@ -348,7 +348,7 @@ int32_t ftdi_load_lib (HXCFE* floppycontext)
 	pFT_Purge = (FT_PURGE)dlsym(lib_handle, "FT_Purge");
 	pFT_SetUSBParameters = (FT_SETUSBPARAMETERS)dlsym(lib_handle, "FT_SetUSBParameters");
 	pFT_SetLatencyTimer = (FT_SETLATENCYTIMER)dlsym(lib_handle, "FT_SetLatencyTimer");
-	pFT_SetEventNotification = 	(FT_SETEVENTNOTIFICATION)dlsym(lib_handle,"FT_SetEventNotification");
+	pFT_SetEventNotification =  (FT_SETEVENTNOTIFICATION)dlsym(lib_handle,"FT_SetEventNotification");
 
 	if(pFT_Write &&  pFT_Read && pFT_GetStatus && pFT_Open && pFT_Purge && pFT_SetUSBParameters && pFT_SetLatencyTimer && pFT_SetEventNotification)
 	{
@@ -360,7 +360,7 @@ int32_t ftdi_load_lib (HXCFE* floppycontext)
 		floppycontext->hxc_printf(MSG_ERROR,"Error while loading FTDI library! Missing entry point ?");
 		return -3;
 	}
-	
+
 	#else // defined(FTDILIB)
 
 		lib_handle = dlopen("libftdi.so", RTLD_LOCAL|RTLD_LAZY);
@@ -376,15 +376,15 @@ int32_t ftdi_load_lib (HXCFE* floppycontext)
 		p_ftdi_usb_close =                (P_FTDI_USB_CLOSE)               dlsym(lib_handle, "ftdi_usb_close");
 		p_ftdi_usb_purge_rx_buffer =      (P_FTDI_USB_PURGE_RX_BUFFER)     dlsym(lib_handle, "ftdi_usb_purge_rx_buffer");
 		p_ftdi_usb_purge_tx_buffer =      (P_FTDI_USB_PURGE_TX_BUFFER)     dlsym(lib_handle, "ftdi_usb_purge_tx_buffer");
-		p_ftdi_usb_purge_buffers =        (P_FTDI_USB_PURGE_BUFFERS)       dlsym(lib_handle, "ftdi_usb_purge_buffers");	
+		p_ftdi_usb_purge_buffers =        (P_FTDI_USB_PURGE_BUFFERS)       dlsym(lib_handle, "ftdi_usb_purge_buffers");
 		p_ftdi_read_data_set_chunksize =  (P_FTDI_READ_DATA_SET_CHUNKSIZE) dlsym(lib_handle, "ftdi_read_data_set_chunksize");
 		p_ftdi_write_data_set_chunksize = (P_FTDI_WRITE_DATA_SET_CHUNKSIZE)dlsym(lib_handle, "ftdi_write_data_set_chunksize");
-		p_ftdi_set_latency_timer = 	      (P_FTDI_SET_LATENCY_TIMER)       dlsym(lib_handle, "ftdi_set_latency_timer");
-		p_ftdi_write_data = 	          (P_FTDI_WRITE_DATA)              dlsym(lib_handle, "ftdi_write_data");
+		p_ftdi_set_latency_timer =        (P_FTDI_SET_LATENCY_TIMER)       dlsym(lib_handle, "ftdi_set_latency_timer");
+		p_ftdi_write_data =               (P_FTDI_WRITE_DATA)              dlsym(lib_handle, "ftdi_write_data");
 		p_ftdi_read_data =                (P_FTDI_READ_DATA)               dlsym(lib_handle, "ftdi_read_data");
 
 		if( p_ftdi_new && p_ftdi_init &&  p_ftdi_usb_open && p_ftdi_usb_close && p_ftdi_usb_purge_rx_buffer &&
-		    p_ftdi_usb_purge_tx_buffer && p_ftdi_usb_purge_buffers && p_ftdi_read_data_set_chunksize && p_ftdi_write_data_set_chunksize &&
+			p_ftdi_usb_purge_tx_buffer && p_ftdi_usb_purge_buffers && p_ftdi_read_data_set_chunksize && p_ftdi_write_data_set_chunksize &&
 			p_ftdi_set_latency_timer && p_ftdi_write_data && p_ftdi_read_data)
 		{
 			ftdic = p_ftdi_new();
@@ -401,8 +401,8 @@ int32_t ftdi_load_lib (HXCFE* floppycontext)
 		{
 			floppycontext->hxc_printf(MSG_ERROR,"Error while loading FTDI library! Missing entry point ?");
 			return -3;
-		}		
-		
+		}
+
 		return 1;
 
 	#endif
@@ -509,7 +509,7 @@ int32_t purge_ftdichip(void* ftdihandle,uint32_t buffer)
 
 	rx_fifo.ptr_in=0;
 	rx_fifo.ptr_out=0;
-	
+
 	if(ret)
 	{
 		return -1;
@@ -586,7 +586,7 @@ int32_t write_ftdichip(void* ftdihandle,unsigned char * buffer,uint32_t size)
 #ifdef DEBUG
 	printf("---write_ftdichip---\n");
 #endif
-	
+
 #if defined(FTDILIB)
 
 	dwWritten=p_ftdi_write_data((ftdi_context)ftdihandle, buffer, size);

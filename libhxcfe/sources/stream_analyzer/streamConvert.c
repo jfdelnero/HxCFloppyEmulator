@@ -93,7 +93,7 @@ void StreamConvert_update_index_event(streamconv * sc)
 	else
 	{
 		if( !(sc->bitstream_pos>>3) )
-		{	// Start of the track : Just take the index state.
+		{   // Start of the track : Just take the index state.
 			sc->index_state = sc->track->indexbuffer[sc->bitstream_pos>>3];
 			if(sc->index_state)
 			{
@@ -455,7 +455,7 @@ uint32_t StreamConvert_getNextPulse(streamconv * sc)
 			}
 
 			// Overflow...
-/*			if(totaltime >= sc->overflow_value)
+/*          if(totaltime >= sc->overflow_value)
 			{
 				return sc->overflow_value-1;
 			}*/

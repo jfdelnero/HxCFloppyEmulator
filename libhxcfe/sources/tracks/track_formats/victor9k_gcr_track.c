@@ -157,7 +157,7 @@ int victor9kgcrtobyte(unsigned char * input_data,int input_data_size,int bit_off
 
 	*out_bin_byte =  ((nibble1<<4)&0xF0) | (nibble2&0xF);
 
- 	return bit_offset;
+	return bit_offset;
 }
 
 // GCR encoder
@@ -619,7 +619,7 @@ int get_next_Victor9k_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 				{
 					bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
 					if( bit_offset < last_start_offset )
-					{	// track position roll-over ? -> End
+					{   // track position roll-over ? -> End
 						sector_extractor_sm = ENDOFTRACK;
 						bit_offset = -1;
 					}
@@ -639,7 +639,7 @@ int get_next_Victor9k_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTC
 			break;
 
 		}
-	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+	}while( (sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
 
 	return bit_offset;
 }

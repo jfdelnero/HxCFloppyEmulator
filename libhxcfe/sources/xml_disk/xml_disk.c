@@ -452,7 +452,7 @@ uint32_t ahextoi(char * str)
 
 static void XMLCALL charhandler(void *data, const char *s, int len)
 {
-	AppData	*ad = (AppData *) data;
+	AppData *ad = (AppData *) data;
 	char * buffer;
 	unsigned int datamark;
 	unsigned int crc;
@@ -495,7 +495,7 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 		case WRITE_PROTECT:
 			ad->write_protect = atoi(buffer);
 		break;
-/*		case TRACKSIZE:
+/*      case TRACKSIZE:
 			ad->track_size = atoi(buffer);
 		break;*/
 		case MINNUMBEROFTRACKS:
@@ -744,7 +744,7 @@ static void XMLCALL start(void *data, const char *el, const char **attr)
 	int i;
 	int newstate;
 	int track,side,sector,sectorsize;
-	AppData	*ad = (AppData *) data;
+	AppData *ad = (AppData *) data;
 
 	sector = 0xFF;
 	sectorsize = 128;
@@ -993,7 +993,7 @@ void hxcfe_deinitXmlFloppy( HXCFE_XMLLDR* xmlfb_ctx )
 int32_t hxcfe_getXmlLayoutID( HXCFE_XMLLDR* xmlfb_ctx, char * container )
 {
 	int i;
-	AppData	*ad = (AppData *) xmlfb_ctx->ad;
+	AppData *ad = (AppData *) xmlfb_ctx->ad;
 
 	i = 0;
 	do
@@ -1022,7 +1022,7 @@ int32_t hxcfe_getXmlLayoutID( HXCFE_XMLLDR* xmlfb_ctx, char * container )
 
 const char* hxcfe_getXmlLayoutDesc( HXCFE_XMLLDR* xmlfb_ctx, int32_t moduleID )
 {
-	AppData	*ad = (AppData *) xmlfb_ctx->ad;
+	AppData *ad = (AppData *) xmlfb_ctx->ad;
 
 	if(hxcfe_numberOfXmlLayout(xmlfb_ctx) > moduleID)
 	{
@@ -1043,7 +1043,7 @@ const char* hxcfe_getXmlLayoutDesc( HXCFE_XMLLDR* xmlfb_ctx, int32_t moduleID )
 
 const char* hxcfe_getXmlLayoutName( HXCFE_XMLLDR* xmlfb_ctx, int32_t moduleID )
 {
-	AppData	*ad = (AppData *) xmlfb_ctx->ad;
+	AppData *ad = (AppData *) xmlfb_ctx->ad;
 
 	if(hxcfe_numberOfXmlLayout(xmlfb_ctx) > moduleID)
 	{
@@ -1062,7 +1062,7 @@ const char* hxcfe_getXmlLayoutName( HXCFE_XMLLDR* xmlfb_ctx, int32_t moduleID )
 	return NULL;
 }
 
-int32_t	hxcfe_numberOfXmlLayout( HXCFE_XMLLDR* xmlfb_ctx )
+int32_t hxcfe_numberOfXmlLayout( HXCFE_XMLLDR* xmlfb_ctx )
 {
 	int32_t i;
 
@@ -1076,9 +1076,9 @@ int32_t	hxcfe_numberOfXmlLayout( HXCFE_XMLLDR* xmlfb_ctx )
 }
 
 
-int32_t	hxcfe_selectXmlFloppyLayout( HXCFE_XMLLDR* xmlfb_ctx, int32_t layoutid )
+int32_t hxcfe_selectXmlFloppyLayout( HXCFE_XMLLDR* xmlfb_ctx, int32_t layoutid )
 {
-	AppData	*ad = (AppData *) xmlfb_ctx->ad;
+	AppData *ad = (AppData *) xmlfb_ctx->ad;
 
 	if(hxcfe_numberOfXmlLayout(xmlfb_ctx) > layoutid)
 	{
@@ -1089,11 +1089,11 @@ int32_t	hxcfe_selectXmlFloppyLayout( HXCFE_XMLLDR* xmlfb_ctx, int32_t layoutid )
 	return HXCFE_BADPARAMETER;
 }
 
-int32_t	hxcfe_setXmlFloppyLayoutFile(HXCFE_XMLLDR* xmlfb_ctx,char * filepath)
+int32_t hxcfe_setXmlFloppyLayoutFile(HXCFE_XMLLDR* xmlfb_ctx,char * filepath)
 {
 	char firstline[512];
 	FILE * f;
-	AppData	*ad = (AppData *) xmlfb_ctx->ad;
+	AppData *ad = (AppData *) xmlfb_ctx->ad;
 
 	if(hxc_checkfileext(filepath,"xml",SYS_PATH_TYPE))
 	{
@@ -1184,7 +1184,7 @@ static int is_size_matching( HXCFE_XMLLDR* xmlfb_ctx, int image_size)
 	int track_max;
 	int total_size;
 
-  	ad = xmlfb_ctx->ad;
+	ad = xmlfb_ctx->ad;
 
 	track_min = ad->nb_of_tracks;
 	track_max = ad->nb_of_tracks;
@@ -1392,7 +1392,7 @@ int32_t hxcfe_foundMatchingXmlFileFloppy (HXCFE_XMLLDR* xmlfb_ctx,char *file)
 				i = 0;
 				while( i < number_of_layout)
 				{
-					if(	hxcfe_selectXmlFloppyLayout( xmlfb_ctx, i ) == HXCFE_NOERROR )
+					if( hxcfe_selectXmlFloppyLayout( xmlfb_ctx, i ) == HXCFE_NOERROR )
 					{
 						ret = hxcfe_isMatchingXmlFloppy(xmlfb_ctx,file,buffer,filesize);
 

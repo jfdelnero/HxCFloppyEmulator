@@ -38,7 +38,7 @@
 // File : cb_filesystem_generator_window.cxx
 // Contains: Filesystem generator window callbacks
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -139,7 +139,7 @@ char * getfilenamebase(char * fullpath,char * filenamebase)
 	if(len)
 	{
 		i=len-1;
-		while(i &&	(fullpath[i]!='\\' && fullpath[i]!='/' && fullpath[i]!=':') )
+		while(i &&  (fullpath[i]!='\\' && fullpath[i]!='/' && fullpath[i]!=':') )
 		{
 			i--;
 		}
@@ -177,7 +177,7 @@ char * getfilenameext(char * fullpath,char * filenameext)
 	{
 		i=len-1;
 
-		while(i &&	( filename[i] != '.' ) )
+		while(i &&  ( filename[i] != '.' ) )
 		{
 			i--;
 		}

@@ -31,7 +31,7 @@
 */
 
 #pragma pack(1)
- 
+
 typedef struct AnaDisk_sectorheader_
 {
 	uint8_t  cylinder;               // ACYL  Actual cylinder, 1 byte

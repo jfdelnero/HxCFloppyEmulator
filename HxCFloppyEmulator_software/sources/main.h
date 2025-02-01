@@ -26,7 +26,7 @@ typedef struct s_gui_context_
 	int standby_tmr;
 	int step_sound;
 	int ui_sound;
-	int	lcd_scroll;
+	int lcd_scroll;
 
 	unsigned int txtindex;
 

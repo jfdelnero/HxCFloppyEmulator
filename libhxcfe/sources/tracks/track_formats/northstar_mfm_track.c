@@ -160,7 +160,7 @@ int get_next_MFM_Northstar_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 
 					if(tmp_buffer[2 + 512] == checksum)
 					{ // checksum ok !!!
- 						floppycontext->hxc_printf(MSG_DEBUG,"Valid MFM Northstar sector found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
+						floppycontext->hxc_printf(MSG_DEBUG,"Valid MFM Northstar sector found - Cyl:%d Side:%d Sect:%d Size:%d",tmp_buffer[4],tmp_buffer[5],tmp_buffer[6],sectorsize[tmp_buffer[7]&0x7]);
 					}
 					else
 					{
@@ -189,7 +189,7 @@ int get_next_MFM_Northstar_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_
 			break;
 
 		}
-	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+	}while( (sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR) );
 
 	return bit_offset;
 }

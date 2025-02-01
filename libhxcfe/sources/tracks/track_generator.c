@@ -536,7 +536,7 @@ int32_t tg_computeMinTrackSize(track_generator *tg,int32_t trackencoding,int32_t
 		}
 
 		if(total_track_size && bitrate)
- 			tck_period=tck_period+ (int)( (float)100000 * ((float)(total_track_size*4)/(float)bitrate));
+			tck_period=tck_period+ (int)( (float)100000 * ((float)(total_track_size*4)/(float)bitrate));
 
 		for(j=0;j<numberofsector;j++)
 		{

@@ -28,7 +28,7 @@
 
 #define FT_PURGE_RX         1
 #define FT_PURGE_TX         2
-#define FT_EVENT_RXCHAR		    1
+#define FT_EVENT_RXCHAR     1
 
 int32_t ftdi_load_lib (HXCFE* floppycontext);
 

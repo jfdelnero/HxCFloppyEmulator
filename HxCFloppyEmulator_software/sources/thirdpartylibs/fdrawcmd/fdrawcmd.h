@@ -114,181 +114,181 @@
 
 typedef struct tagFD_ID_HEADER
 {
-    BYTE cyl, head, sector, size;
+	BYTE cyl, head, sector, size;
 }
 FD_ID_HEADER, *PFD_ID_HEADER;
 
 typedef struct tagFD_SEEK_PARAMS
 {
-    BYTE cyl;
-    BYTE head;
+	BYTE cyl;
+	BYTE head;
 }
 FD_SEEK_PARAMS, *PFD_SEEK_PARAMS;
 
 typedef struct tagFD_RELATIVE_SEEK_PARAMS
 {
-    BYTE flags;                         // DIR
-    BYTE head;
-    BYTE offset;
+	BYTE flags;                         // DIR
+	BYTE head;
+	BYTE offset;
 }
 FD_RELATIVE_SEEK_PARAMS, *PFD_RELATIVE_SEEK_PARAMS;
 
 typedef struct tagFD_READ_WRITE_PARAMS
 {
-    BYTE flags;                         // MT MFM SK
-    BYTE phead;
-    BYTE cyl, head, sector, size;
-    BYTE eot, gap, datalen;
+	BYTE flags;                         // MT MFM SK
+	BYTE phead;
+	BYTE cyl, head, sector, size;
+	BYTE eot, gap, datalen;
 }
 FD_READ_WRITE_PARAMS, *PFD_READ_WRITE_PARAMS;
 
 typedef struct tagFD_CMD_RESULT
 {
-    BYTE st0, st1, st2;
-    BYTE cyl, head, sector, size;
+	BYTE st0, st1, st2;
+	BYTE cyl, head, sector, size;
 }
 FD_CMD_RESULT, *PFD_CMD_RESULT;
 
 typedef struct tagFD_FORMAT_PARAMS
 {
-    BYTE flags;                         // MFM
-    BYTE phead;
-    BYTE size, sectors, gap, fill;
+	BYTE flags;                         // MFM
+	BYTE phead;
+	BYTE size, sectors, gap, fill;
 
-    FD_ID_HEADER Header[];
+	FD_ID_HEADER Header[];
 }
 FD_FORMAT_PARAMS, *PFD_FORMAT_PARAMS;
 
 typedef struct tagFD_READ_ID_PARAMS
 {
-    BYTE flags;                         // MFM
-    BYTE head;
+	BYTE flags;                         // MFM
+	BYTE head;
 }
 FD_READ_ID_PARAMS, *PFD_READ_ID_PARAMS;
 
 typedef struct tagFD_CONFIGURE_PARAMS
 {
-    BYTE eis_efifo_poll_fifothr;        // b6 = enable implied seek, b5 = enable fifo, b4 = poll disable, b3-b0 = fifo threshold
-    BYTE pretrk;                        // precompensation start track
+	BYTE eis_efifo_poll_fifothr;        // b6 = enable implied seek, b5 = enable fifo, b4 = poll disable, b3-b0 = fifo threshold
+	BYTE pretrk;                        // precompensation start track
 }
 FD_CONFIGURE_PARAMS, *PFD_CONFIGURE_PARAMS;
 
 typedef struct tagFD_SPECIFY_PARAMS
 {
-    BYTE srt_hut;                       // b7-b4 = step rate, b3-b0 = head unload time
-    BYTE hlt_nd;                        // b7-b1 = head load time, b0 = non-DMA flag (unsupported)
+	BYTE srt_hut;                       // b7-b4 = step rate, b3-b0 = head unload time
+	BYTE hlt_nd;                        // b7-b1 = head load time, b0 = non-DMA flag (unsupported)
 }
 FD_SPECIFY_PARAMS, *PFD_SPECIFY_PARAMS;
 
 typedef struct tagFD_SENSE_PARAMS
 {
-    BYTE head;
+	BYTE head;
 }
 FD_SENSE_PARAMS, *PFD_SENSE_PARAMS;
 
 typedef struct tagFD_DRIVE_STATUS
 {
-    BYTE st3;
+	BYTE st3;
 }
 FD_DRIVE_STATUS, *PFD_DRIVE_STATUS;
 
 typedef struct tagFD_INTERRUPT_STATUS
 {
-    BYTE st0;                           // status register 0
-    BYTE pcn;                           // present cylinder number
+	BYTE st0;                           // status register 0
+	BYTE pcn;                           // present cylinder number
 }
 FD_INTERRUPT_STATUS, *PFD_INTERRUPT_STATUS;
 
 typedef struct tagFD_PERPENDICULAR_PARAMS
 {
-    BYTE ow_ds_gap_wgate;               // b7 = OW, b6 = 0, b5-b2 = drive select, b1 = gap2, b0 = write gate pre-erase loads
+	BYTE ow_ds_gap_wgate;               // b7 = OW, b6 = 0, b5-b2 = drive select, b1 = gap2, b0 = write gate pre-erase loads
 }
 FD_PERPENDICULAR_PARAMS, *PFD_PERPENDICULAR_PARAMS;
 
 typedef struct tagFD_LOCK_PARAMS
 {
-    BYTE lock;                          // b7 = lock
+	BYTE lock;                          // b7 = lock
 }
 FD_LOCK_PARAMS, *PFD_LOCK_PARAMS;
 
 typedef struct tagFD_LOCK_RESULT
 {
-    BYTE lock;                          // b4 = lock
+	BYTE lock;                          // b4 = lock
 }
 FD_LOCK_RESULT, *PFD_LOCK_RESULT;
 
 typedef struct tagFD_DUMPREG_RESULT
 {
-    BYTE pcn0, pcn1, pcn2, pcn3;        // present cylinder numbers
-    BYTE srt_hut;                       // b7-4 = step rate, b3-0 = head unload time
-    BYTE hlt_nd;                        // b7-1 = head load time, b0 = non-dma mode
-    BYTE sceot;                         // sector count / end of track
-    BYTE lock_d0123_gap_wgate;          // b7 = setting lock, b5-2 = drive selects, b1 = gap 2 (perpendicular), b0 = write gate
-    BYTE eis_efifo_poll_fifothr;        // b6 = implied seeks, b5 = fifo enable, b4 = poll disable, b3-0 = fifo threshold
-    BYTE pretrk;                        // pre-comp start track
+	BYTE pcn0, pcn1, pcn2, pcn3;        // present cylinder numbers
+	BYTE srt_hut;                       // b7-4 = step rate, b3-0 = head unload time
+	BYTE hlt_nd;                        // b7-1 = head load time, b0 = non-dma mode
+	BYTE sceot;                         // sector count / end of track
+	BYTE lock_d0123_gap_wgate;          // b7 = setting lock, b5-2 = drive selects, b1 = gap 2 (perpendicular), b0 = write gate
+	BYTE eis_efifo_poll_fifothr;        // b6 = implied seeks, b5 = fifo enable, b4 = poll disable, b3-0 = fifo threshold
+	BYTE pretrk;                        // pre-comp start track
 }
 FD_DUMPREG_RESULT, *PFD_DUMPREG_RESULT;
 
 typedef struct tagFD_SECTOR_OFFSET_PARAMS
 {
-    BYTE sectors;                       // number of sectors to skip after index
+	BYTE sectors;                       // number of sectors to skip after index
 }
 FD_SECTOR_OFFSET_PARAMS, *PFD_SECTOR_OFFSET_PARAMS;
 
 typedef struct tagFD_SHORT_WRITE_PARAMS
 {
-    DWORD length;                       // length to write before interrupting
-    DWORD finetune;                     // finetune delay in microseconds
+	DWORD length;                       // length to write before interrupting
+	DWORD finetune;                     // finetune delay in microseconds
 }
 FD_SHORT_WRITE_PARAMS, *PFD_SHORT_WRITE_PARAMS;
 
 typedef struct tagFD_SCAN_PARAMS
 {
-    BYTE flags;                         // MFM
-    BYTE head;
+	BYTE flags;                         // MFM
+	BYTE head;
 }
 FD_SCAN_PARAMS, *PFD_SCAN_PARAMS;
 
 typedef struct tagFD_SCAN_RESULT
 {
-    BYTE count;                         // count of returned headers
-    FD_ID_HEADER Header[];              // array of 'count' id fields
+	BYTE count;                         // count of returned headers
+	FD_ID_HEADER Header[];              // array of 'count' id fields
 }
 FD_SCAN_RESULT, *PFD_SCAN_RESULT;
 
 
 typedef struct tagFD_TIMED_ID_HEADER
 {
-    DWORD reltime;                      // time relative to index (in microseconds)
-    BYTE cyl, head, sector, size;
+	DWORD reltime;                      // time relative to index (in microseconds)
+	BYTE cyl, head, sector, size;
 }
 FD_TIMED_ID_HEADER, *PFD_TIMED_ID_HEADER;
 
 typedef struct tagFD_TIMED_SCAN_RESULT
 {
-    BYTE count;                         // count of returned headers
-    BYTE firstseen;                     // offset of first sector detected
-    DWORD tracktime;                    // total time for track (in microseconds)
-    FD_TIMED_ID_HEADER Header[];        // array of 'count' id fields
+	BYTE count;                         // count of returned headers
+	BYTE firstseen;                     // offset of first sector detected
+	DWORD tracktime;                    // total time for track (in microseconds)
+	FD_TIMED_ID_HEADER Header[];        // array of 'count' id fields
 }
 FD_TIMED_SCAN_RESULT, *PFD_TIMED_SCAN_RESULT;
 
 typedef struct tagFD_FDC_INFO
 {
-    BYTE ControllerType;                // FDC_TYPE_*
-    BYTE SpeedsAvailable;               // FDC_SPEED_* values ORed together
+	BYTE ControllerType;                // FDC_TYPE_*
+	BYTE SpeedsAvailable;               // FDC_SPEED_* values ORed together
 
-    BYTE BusType;
-    DWORD BusNumber;
-    DWORD ControllerNumber;
-    DWORD PeripheralNumber;
+	BYTE BusType;
+	DWORD BusNumber;
+	DWORD ControllerNumber;
+	DWORD PeripheralNumber;
 }
 FD_FDC_INFO, *PFD_FDC_INFO;
 
 typedef struct tagFD_RAW_READ_PARAMS
 {
-    BYTE flags;                         // MFM
-    BYTE head, size;
+	BYTE flags;                         // MFM
+	BYTE head, size;
 }
 FD_RAW_READ_PARAMS, *PFD_RAW_READ_PARAMS;
 

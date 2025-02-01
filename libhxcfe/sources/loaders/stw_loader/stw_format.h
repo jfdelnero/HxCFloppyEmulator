@@ -138,9 +138,9 @@ some code.
 
 typedef struct STWIMG_
 {
-	uint8_t  headername[4];			// "STW\0"
+	uint8_t  headername[4];         // "STW\0"
 
-	uint16_t version;				// 0x0100
+	uint16_t version;               // 0x0100
 
 	uint8_t  number_of_side;
 	uint8_t  number_of_track;
@@ -150,7 +150,7 @@ typedef struct STWIMG_
 
 typedef struct STWTRACKIMG_
 {
-	uint8_t  trkheader[3];			// "TRK"
+	uint8_t  trkheader[3];          // "TRK"
 	uint8_t  side_number;
 	uint8_t  track_number;
 }STWTRACKIMG;

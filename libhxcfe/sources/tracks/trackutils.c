@@ -241,7 +241,7 @@ int searchBitStream(unsigned char * input_data, int input_data_size, int searchl
 			}
 
 			if( j == cnt )
-			{	// found!
+			{   // found!
 				if( !( ( stringtosearch[i][0] ^ input_data[trackoffset] ) & (0xFF>>i) ) )
 				{
 					if( !( ( stringtosearch[i][j] ^ input_data[trackoffset + j] ) & (0xFF<<(8-i)) ) )

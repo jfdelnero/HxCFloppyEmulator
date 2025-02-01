@@ -64,7 +64,7 @@ int EDE_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"EDE_libIsValidDiskFile");
 
-	if(	hxc_checkfileext(imgfile->path,"ede",SYS_PATH_TYPE) ||
+	if( hxc_checkfileext(imgfile->path,"ede",SYS_PATH_TYPE) ||
 		hxc_checkfileext(imgfile->path,"eda",SYS_PATH_TYPE) ||
 		hxc_checkfileext(imgfile->path,"eds",SYS_PATH_TYPE) ||
 		hxc_checkfileext(imgfile->path,"edt",SYS_PATH_TYPE) ||

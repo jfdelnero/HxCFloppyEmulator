@@ -83,7 +83,7 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 	unsigned char crctable[32];
 	uint8_t mask;
 
-    //        C D C D  C D C D
+	//        C D C D  C D C D
 	//0xF8 - 00010100 01000100 // 0x1444
 	//0xF9 - 00010100 01000101 // 0x1445
 	//0xFA - 00010100 01010100 // 0x1454
@@ -281,7 +281,7 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 					{
 						bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
 						if( bit_offset < last_start_offset )
-						{	// track position roll-over ? -> End
+						{   // track position roll-over ? -> End
 							sector_extractor_sm = ENDOFTRACK;
 							bit_offset = -1;
 						}
@@ -295,7 +295,7 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 				{
 					bit_offset = chgbitptr( track->tracklen, bit_offset, 1);
 					if( bit_offset < last_start_offset )
-					{	// track position roll-over ? -> End
+					{   // track position roll-over ? -> End
 						sector_extractor_sm = ENDOFTRACK;
 						bit_offset = -1;
 					}
@@ -315,7 +315,7 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 			break;
 
 		}
-	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+	}while( (sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
 
 	return bit_offset;
 

@@ -123,30 +123,30 @@ static void lba2chs(HXCFE_FSMNG * fsmng,int32_t lba, int32_t *track, int32_t *he
  */
 RETCODE HxCADFLibInitDevice(struct Device* dev, char* name,BOOL ro)
 {
-    struct nativeDevice* nDev;
+	struct nativeDevice* nDev;
 
-    nDev = (struct nativeDevice*)dev->nativeDev;
+	nDev = (struct nativeDevice*)dev->nativeDev;
 
-    nDev = (struct nativeDevice*)malloc(sizeof(struct nativeDevice));
-    if (!nDev) {
-        (*adfEnv.eFct)("myInitDevice : malloc");
-        return RC_ERROR;
-    }
-    dev->nativeDev = nDev;
-    if (!ro)
-        /* check if device is writable, if not, force readOnly to TRUE */
-        dev->readOnly = FALSE;
-    else
-        /* mount device as read only */
-        dev->readOnly = TRUE;
+	nDev = (struct nativeDevice*)malloc(sizeof(struct nativeDevice));
+	if (!nDev) {
+		(*adfEnv.eFct)("myInitDevice : malloc");
+		return RC_ERROR;
+	}
+	dev->nativeDev = nDev;
+	if (!ro)
+		/* check if device is writable, if not, force readOnly to TRUE */
+		dev->readOnly = FALSE;
+	else
+		/* mount device as read only */
+		dev->readOnly = TRUE;
 
-    dev->size = gb_fsmng->trackperdisk *
+	dev->size = gb_fsmng->trackperdisk *
 				gb_fsmng->sidepertrack *
 				gb_fsmng->sectorpertrack *
 				gb_fsmng->sectorsize;
 
 
-    return RC_OK;
+	return RC_OK;
 }
 
 RETCODE HxCADFLibReadSector(struct Device *dev, int32_t sector, int32_t size, uint8_t* buf)
@@ -248,18 +248,18 @@ RETCODE HxCADFLibWriteSector(struct Device *dev, int32_t sector, int32_t size, u
 
 RETCODE HxCADFLibReleaseDevice(struct Device *dev)
 {
-    struct nativeDevice* nDev;
+	struct nativeDevice* nDev;
 
-    nDev = (struct nativeDevice*)dev->nativeDev;
+	nDev = (struct nativeDevice*)dev->nativeDev;
 
 	free(nDev);
 
-    return RC_OK;
+	return RC_OK;
 }
 
 BOOL HxCADFLibIsDevNative(char *devName)
 {
-    if(!strcmp("HXCDOSDISKBROWSER",devName))
+	if(!strcmp("HXCDOSDISKBROWSER",devName))
 	{
 		return 1;
 	}
@@ -268,15 +268,15 @@ BOOL HxCADFLibIsDevNative(char *devName)
 
 void HxCadfInitNativeFct()
 {
-    struct nativeFunctions *nFct;
+	struct nativeFunctions *nFct;
 
-    nFct = (struct nativeFunctions*)adfEnv.nativeFct;
+	nFct = (struct nativeFunctions*)adfEnv.nativeFct;
 
-    nFct->adfInitDevice = HxCADFLibInitDevice ;
-    nFct->adfNativeReadSector = HxCADFLibReadSector ;
-    nFct->adfNativeWriteSector = HxCADFLibWriteSector ;
-    nFct->adfReleaseDevice = HxCADFLibReleaseDevice ;
-    nFct->adfIsDevNative = HxCADFLibIsDevNative;
+	nFct->adfInitDevice = HxCADFLibInitDevice ;
+	nFct->adfNativeReadSector = HxCADFLibReadSector ;
+	nFct->adfNativeWriteSector = HxCADFLibWriteSector ;
+	nFct->adfReleaseDevice = HxCADFLibReleaseDevice ;
+	nFct->adfIsDevNative = HxCADFLibIsDevNative;
 }
 
 

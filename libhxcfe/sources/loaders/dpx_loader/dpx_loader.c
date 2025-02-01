@@ -148,7 +148,7 @@ int DPX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					sectorconfig[numberofsector-1].sectorsize=512;
 
 					file_offset=( (((numberofsector-1)*1024)+512) * floppydisk->floppyNumberOfSide * j ) +
-						        ( (((numberofsector-1)*1024)+512) * i );
+								( (((numberofsector-1)*1024)+512) * i );
 
 					fseek (f , file_offset , SEEK_SET);
 

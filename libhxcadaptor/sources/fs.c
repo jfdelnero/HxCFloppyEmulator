@@ -57,17 +57,17 @@
 
 #include <stdint.h>
 
-#ifdef	WIN32
-#	include <windows.h>
-#	include <io.h>
-#	include <fcntl.h>
-#	include <direct.h>
+#ifdef  WIN32
+#   include <windows.h>
+#   include <io.h>
+#   include <fcntl.h>
+#   include <direct.h>
 #else
-#	include <unistd.h>
-#	include <dirent.h>
+#   include <unistd.h>
+#   include <dirent.h>
 
-#ifdef	OSX
-#	include <mach-o/dyld.h>
+#ifdef  OSX
+#   include <mach-o/dyld.h>
 #endif
 
 #endif
@@ -80,7 +80,7 @@
 #ifdef WIN32
 
 
-int	convertpath	(const char * path, wchar_t * wpath)
+int convertpath (const char * path, wchar_t * wpath)
 {
 	if (!MultiByteToWideChar (CP_UTF8, 0, path, -1, wpath, MAX_PATH))
 	{
@@ -174,7 +174,7 @@ FILE *hxc_fopen (const char *filename, const char *mode)
 				case 'r':
 					rwflags = O_RDONLY;
 					break;
-		#ifdef	O_BINARY
+		#ifdef  O_BINARY
 				case 'b':
 					oflags |= O_BINARY;
 					break;
@@ -194,7 +194,7 @@ FILE *hxc_fopen (const char *filename, const char *mode)
 					rwflags = O_RDWR;
 					break;
 
-	#ifdef	O_TEXT
+	#ifdef  O_TEXT
 				case 't':
 					oflags |= O_TEXT;
 					break;
@@ -287,7 +287,7 @@ char * hxc_fgets(char * str, int num, FILE *f)
 	return fgets( str, num, f );
 }
 
-int	hxc_fclose(FILE * f)
+int hxc_fclose(FILE * f)
 {
 #if defined (DEBUG)
 	printf("hxc_fclose : file:%p\n",f);
@@ -304,7 +304,7 @@ int hxc_statex( const char *filename, struct stat *buf)
 #if defined (WIN32)
 	wchar_t wpath[MAX_PATH+1];
 
-	if(	convertpath(filename, wpath) < 0 )
+	if( convertpath(filename, wpath) < 0 )
 		return -1;
 
 	return _wstat (wpath,(struct _stat *)buf);
@@ -344,7 +344,7 @@ void * hxc_find_first_file(char *folder, char *file, filefoundinfo* fileinfo)
 	HANDLE hfindfile;
 	char *folderstr;
 	WIN32_FIND_DATAW FindFileData;
-	wchar_t	wpath[MAX_PATH+1];
+	wchar_t wpath[MAX_PATH+1];
 
 	if(file)
 	{

@@ -38,7 +38,7 @@
 // File : cb_batch_converter_window.cxx
 // Contains: Batch converter window
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -760,7 +760,7 @@ int convertthread(void* floppycontext,void* hw_context)
 	if(strlen(bcparams.sourcedir) && strlen(bcparams.destdir))
 	{
 
-		browse_and_convert_directory(	guicontext->hxcfe,
+		browse_and_convert_directory(   guicontext->hxcfe,
 										bcparams.sourcedir,
 										bcparams.destdir,
 										(char*)"*.*",
@@ -851,7 +851,7 @@ int draganddropconvertthread(void* floppycontext,void* hw_context)
 	if(filecount)
 	{
 
-		draganddropconvert(	guicontext->hxcfe,
+		draganddropconvert( guicontext->hxcfe,
 							filelist,
 							bcparams.destdir,
 							bcw->choice_file_format->value(),

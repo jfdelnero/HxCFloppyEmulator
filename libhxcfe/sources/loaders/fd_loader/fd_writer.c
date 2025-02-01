@@ -141,7 +141,7 @@ int FD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * f
 
 	if(sectorcnt_s0!=16){
 		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Error : Disk format doesn't match...",filename);
-                return HXCFE_FILECORRUPTED;
+				return HXCFE_FILECORRUPTED;
 	}
 
 	nbtrack = 80;

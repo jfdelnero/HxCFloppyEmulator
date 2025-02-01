@@ -75,17 +75,17 @@
 
 typedef struct Index_
 {
-	uint32_t 	StreamPosition;
-	uint32_t 	Timer;
-	uint32_t 	SysClk;
-	uint32_t 	CellPos;
-	uint32_t 	IndexTime;
-	uint32_t 	PreIcTime;
-	uint32_t 	PostIcTime;
+	uint32_t    StreamPosition;
+	uint32_t    Timer;
+	uint32_t    SysClk;
+	uint32_t    CellPos;
+	uint32_t    IndexTime;
+	uint32_t    PreIcTime;
+	uint32_t    PostIcTime;
 
-	uint32_t 	Prev_Index_Tick;
-	uint32_t 	Next_Index_Tick;
-	uint32_t 	type;
+	uint32_t    Prev_Index_Tick;
+	uint32_t    Next_Index_Tick;
+	uint32_t    type;
 }Index;
 
 static uint32_t get_tick_from_reversal(uint32_t* buffer,uint32_t reversal)
@@ -106,9 +106,9 @@ static uint32_t get_tick_from_reversal(uint32_t* buffer,uint32_t reversal)
 HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char * file)
 {
 	uint32_t i;
-	s_oob_header		* oob;
-	s_oob_DiskIndex		* diskIndex;
-	HXCFE_TRKSTREAM		* track_dump;
+	s_oob_header        * oob;
+	s_oob_DiskIndex     * diskIndex;
+	HXCFE_TRKSTREAM     * track_dump;
 
 	Index index_events[MAX_INDEX];
 
@@ -117,8 +117,8 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 	#ifdef KFSTREAMDBG
 
 	char * tempstr;
-	s_oob_StreamRead	* streamRead;
-	s_oob_StreamEnd		* streamEnd;
+	s_oob_StreamRead    * streamRead;
+	s_oob_StreamEnd     * streamEnd;
 
 	#endif
 
@@ -324,7 +324,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 						case OOBTYPE_Index:
 							floppycontext->hxc_printf(MSG_DEBUG,"---Index--- : %d sp:%d",nbindex,cellpos);
 
-							diskIndex=	(s_oob_DiskIndex*) &kfstreambuffer[stream_ofs + sizeof(s_oob_header) ];
+							diskIndex=  (s_oob_DiskIndex*) &kfstreambuffer[stream_ofs + sizeof(s_oob_header) ];
 
 							floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X SysClk: 0x%.8X Timer: 0x%.8X",diskIndex->StreamPosition,diskIndex->SysClk,diskIndex->Timer);
 
@@ -353,7 +353,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 	#endif
 
 	#ifdef KFSTREAMDBG
-							streamEnd =	(s_oob_StreamEnd*) &kfstreambuffer[stream_ofs + sizeof(s_oob_header) ];
+							streamEnd = (s_oob_StreamEnd*) &kfstreambuffer[stream_ofs + sizeof(s_oob_header) ];
 							floppycontext->hxc_printf(MSG_DEBUG,"StreamPosition: 0x%.8X Result: 0x%.8X",streamEnd->StreamPosition,streamEnd->Result);
 	#endif
 						break;

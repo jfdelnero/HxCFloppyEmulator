@@ -99,7 +99,7 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 
 		FILEHEADER->floppyinterfacemode=(unsigned char)floppy->floppyiftype;
 
-		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Floppy interface mode %s (%s)",	hxcfe_getFloppyInterfaceModeName(imgldr_ctx->hxcfe,FILEHEADER->floppyinterfacemode),
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Floppy interface mode %s (%s)",   hxcfe_getFloppyInterfaceModeName(imgldr_ctx->hxcfe,FILEHEADER->floppyinterfacemode),
 																			hxcfe_getFloppyInterfaceModeDesc(imgldr_ctx->hxcfe,FILEHEADER->floppyinterfacemode) );
 
 		FILEHEADER->track_encoding=0;
@@ -139,7 +139,7 @@ int HFE_HDDD_A2_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy
 			FILEHEADER->track_encoding = APPLEII_HDDD_A2_GCR2_ENCODING;
 		}
 
-		if( floppy->floppyNumberOfTrack	> 42 )
+		if( floppy->floppyNumberOfTrack > 42 )
 		{
 			FILEHEADER->single_step=0xFF;
 		}

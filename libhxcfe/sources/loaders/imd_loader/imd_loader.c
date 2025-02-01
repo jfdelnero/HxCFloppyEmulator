@@ -137,7 +137,7 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		if( i >= filesize )
 		{
 			hxc_fclose(f);
-			return HXCFE_BADFILE;			
+			return HXCFE_BADFILE;
 		}
 
 		// recuperation de la geometries du disque
@@ -244,7 +244,7 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		if( i >= filesize )
 		{
 			hxc_fclose(f);
-			return HXCFE_BADFILE;			
+			return HXCFE_BADFILE;
 		}
 
 		for(i=0;i<(unsigned int)(floppydisk->floppyNumberOfTrack*floppydisk->floppyNumberOfSide);i++)

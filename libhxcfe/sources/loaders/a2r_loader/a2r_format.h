@@ -29,20 +29,20 @@
 
 typedef struct a2r_header_
 {
-	uint8_t  sign[4];				// "A2R2"
-	uint8_t  ff_byte;				// 0xFF
+	uint8_t  sign[4];               // "A2R2"
+	uint8_t  ff_byte;               // 0xFF
 	uint8_t  lfcrlf[3];             // 0A 0D 0A / LF CR LF
 }a2r_header;
 
 typedef struct a2r_chunk_header_
 {
-	uint8_t  sign[4];				// "INFO" / "STRM" / "META"
+	uint8_t  sign[4];               // "INFO" / "STRM" / "META"
 	uint32_t  chunk_size;
 }a2r_chunk_header;
 
 typedef struct a2r_info_
 {
-	uint8_t  version;				// 1
+	uint8_t  version;               // 1
 	char     creator[32];
 	uint8_t  disk_type;             // 1 = 5.25, 2 = 3.5
 	uint8_t  write_protected;       // 1 = Floppy is write protected

@@ -38,7 +38,7 @@ typedef struct cpcdsk_fileheader_
 
 typedef struct cpcdsk_trackheader_
 {
- int8_t    headertag[13];  	// "Track-Info\r\n"
+ int8_t    headertag[13];   // "Track-Info\r\n"
  uint16_t  unused1;
  uint8_t   unused1b;
  uint8_t   track_number;

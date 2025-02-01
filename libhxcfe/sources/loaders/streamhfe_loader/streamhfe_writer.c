@@ -118,7 +118,7 @@ unsigned char * convert_track(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side,unsig
 	final_track_len = ( track_time / (DEFAULT_BITS_PERIOD / 1000) );
 
 	if( final_track_len < ((float)SHIFTER_FREQ * ((float)0.24) ) && \
-	    final_track_len > ((float)SHIFTER_FREQ * ((float)0.18) )
+		final_track_len > ((float)SHIFTER_FREQ * ((float)0.18) )
 	)
 	{
 		// 300 RPM
@@ -126,7 +126,7 @@ unsigned char * convert_track(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side,unsig
 	}
 
 	if( final_track_len < ((float)SHIFTER_FREQ * ((float)0.18) ) && \
-	    final_track_len > ((float)SHIFTER_FREQ * ((float)0.13) )
+		final_track_len > ((float)SHIFTER_FREQ * ((float)0.13) )
 	)
 	{
 		// 360 RPM
@@ -296,7 +296,7 @@ int STREAMHFE_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,c
 
 		FILEHEADER->floppyinterfacemode=(unsigned char)floppy->floppyiftype;
 
-		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Floppy interface mode %s (%s)",	hxcfe_getFloppyInterfaceModeName(imgldr_ctx->hxcfe,FILEHEADER->floppyinterfacemode),
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Floppy interface mode %s (%s)",   hxcfe_getFloppyInterfaceModeName(imgldr_ctx->hxcfe,FILEHEADER->floppyinterfacemode),
 																			hxcfe_getFloppyInterfaceModeDesc(imgldr_ctx->hxcfe,FILEHEADER->floppyinterfacemode) );
 
 		if(floppy->double_step)

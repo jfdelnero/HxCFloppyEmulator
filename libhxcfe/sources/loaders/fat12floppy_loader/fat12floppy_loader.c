@@ -278,7 +278,7 @@ int FAT12FLOPPY_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppy
 		free(flatimg);
 
 		return ret;
-	
+
 	}
 	else
 	{

@@ -10,7 +10,7 @@ typedef struct vdk_header_
 	uint8_t  file_source_ver;//Version of file source
 	uint8_t  number_of_track;//Number of tracks
 	uint8_t  number_of_sides;//Number of sides
-	uint8_t  flags;		     //Flags
+	uint8_t  flags;          //Flags
 	uint8_t  name_len;       //Compression flags and name length
 }vdk_header;
 

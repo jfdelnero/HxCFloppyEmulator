@@ -159,7 +159,7 @@ int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 		}
 		else
 		{
-			if(	!strncmp((char*)&fileheader.headertag,"MV - CPC",8))
+			if( !strncmp((char*)&fileheader.headertag,"MV - CPC",8) )
 			{
 				extendformat=0;
 				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"CPC Dsk standard file\n");

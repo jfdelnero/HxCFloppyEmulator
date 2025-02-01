@@ -46,9 +46,9 @@ typedef int (*GETPLUGININFOS)(void* imgldr_ctx,uint32_t infotype,void * returnva
 typedef struct plugins_ptr_
 {
 	ISVALIDDISKFILE libIsValidDiskFile;
-	LOADDISKFILE	libLoad_DiskFile;
-	WRITEDISKFILE	libWrite_DiskFile;
-	GETPLUGININFOS	libGetPluginInfos;
+	LOADDISKFILE    libLoad_DiskFile;
+	WRITEDISKFILE   libWrite_DiskFile;
+	GETPLUGININFOS  libGetPluginInfos;
 }plugins_ptr;
 
 

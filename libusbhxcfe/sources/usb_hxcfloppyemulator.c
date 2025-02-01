@@ -356,14 +356,14 @@ int32_t FillBuffer(HXCFE* floppycontext,USBHXCFE * hw_context,uint8_t * paquetbu
 		// ready, diskchg, etc...
 
 
-			/*  index_signal<=     		SRAM_DATA(0); -- change index state
-				ready_signal<=			SRAM_DATA(1);
-				diskchanged_signal<=	SRAM_DATA(2);
-				writeprotect_signal<=	SRAM_DATA(3);
-				amigareadymode<=		SRAM_DATA(4);
-				FLOPPY_SELdisable<=		SRAM_DATA(5);
-				FLOPPY_SELreg(0)<=		SRAM_DATA(6);
-				FLOPPY_SELreg(1)<=		SRAM_DATA(7);*/
+			/*  index_signal<=          SRAM_DATA(0); -- change index state
+				ready_signal<=          SRAM_DATA(1);
+				diskchanged_signal<=    SRAM_DATA(2);
+				writeprotect_signal<=   SRAM_DATA(3);
+				amigareadymode<=        SRAM_DATA(4);
+				FLOPPY_SELdisable<=     SRAM_DATA(5);
+				FLOPPY_SELreg(0)<=      SRAM_DATA(6);
+				FLOPPY_SELreg(1)<=      SRAM_DATA(7);*/
 
 		if(hw_context->drive_select_source>3)
 		{
@@ -1034,8 +1034,10 @@ int32_t libusbhxcfe_getStats(HXCFE* floppycontext,USBHXCFE * hwif,USBStats* stat
 		return hwif->status;
 	}
 	else
-	{	if(stats)
+	{
+		if(stats)
 			memset(stats,0,sizeof(USBStats));
+
 		return 0;
 	}
 

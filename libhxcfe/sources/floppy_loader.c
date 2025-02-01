@@ -1285,8 +1285,8 @@ int32_t hxcfe_getNumberOfSide( HXCFE* floppycontext, HXCFE_FLOPPY *fp )
 
 int32_t hxcfe_setNumberOfTrack ( HXCFE_FLPGEN* fb_ctx, int32_t numberoftrack )
 {
-	HXCFE_CYLINDER	**	tmptracks;
-	int	tmpfloppyNumberOfTrack;
+	HXCFE_CYLINDER ** tmptracks;
+	int tmpfloppyNumberOfTrack;
 
 	tmptracks = 0;
 	tmpfloppyNumberOfTrack = 0;
@@ -1905,7 +1905,7 @@ int32_t hxcfe_generateDisk( HXCFE_FLPGEN* fb_ctx, HXCFE_FLOPPY* floppy, void * f
 																																						interleave,
 																																						rpm);
 
-	track_buffer = malloc( sectorsize *	numberofsector );
+	track_buffer = malloc( sectorsize * numberofsector );
 	if( !track_buffer )
 		return HXCFE_INTERNALERROR;
 
@@ -2336,62 +2336,62 @@ alloc_error:
 
 fs_config fs_config_table[]=
 {
-	{"fatst",		"",FS_720KB_ATARI_FAT12,0},
-	{"fatst902",	"",FS_902KB_ATARI_FAT12,0},
-	{"fatst360",	"",FS_360KB_ATARI_FAT12,0},
-	{"amigados",	"3\"5        880KB DSDD AmigaDOS",FS_880KB_AMIGADOS,1},
+	{"fatst",       "",FS_720KB_ATARI_FAT12,0},
+	{"fatst902",    "",FS_902KB_ATARI_FAT12,0},
+	{"fatst360",    "",FS_360KB_ATARI_FAT12,0},
+	{"amigados",    "3\"5        880KB DSDD AmigaDOS",FS_880KB_AMIGADOS,1},
 
-	{"amigados_hd",	"3\"5       1760KB DSHD AmigaDOS",FS_1760KB_AMIGADOS,2},
+	{"amigados_hd", "3\"5       1760KB DSHD AmigaDOS",FS_1760KB_AMIGADOS,2},
 
-	{"fat160a",		"5\"25 & 8\" 160KB SSDD 300RPM FAT12",FS_5P25_300RPM_160KB_MSDOS_FAT12,0},
-	{"fat160b",		"5\"25 & 8\" 160KB SSDD 360RPM FAT12",FS_5P25_360RPM_160KB_MSDOS_FAT12,0},
+	{"fat160a",     "5\"25 & 8\" 160KB SSDD 300RPM FAT12",FS_5P25_300RPM_160KB_MSDOS_FAT12,0},
+	{"fat160b",     "5\"25 & 8\" 160KB SSDD 360RPM FAT12",FS_5P25_360RPM_160KB_MSDOS_FAT12,0},
 
-	{"fat180a",		"5\"25       180KB SSDD 300RPM FAT12",FS_5P25_300RPM_180KB_MSDOS_FAT12,0},
-	{"fat180b",		"5\"25       180KB SSDD 360RPM FAT12",FS_5P25_360RPM_180KB_MSDOS_FAT12,0},
+	{"fat180a",     "5\"25       180KB SSDD 300RPM FAT12",FS_5P25_300RPM_180KB_MSDOS_FAT12,0},
+	{"fat180b",     "5\"25       180KB SSDD 360RPM FAT12",FS_5P25_360RPM_180KB_MSDOS_FAT12,0},
 
-	{"fat320ssa",	"5\"25       320KB SSDD 300RPM FAT12",FS_5P25_SS_300RPM_320KB_MSDOS_FAT12,0},
-	{"fat320ssb",	"5\"25       320KB SSDD 360RPM FAT12",FS_5P25_SS_360RPM_320KB_MSDOS_FAT12,0},
+	{"fat320ssa",   "5\"25       320KB SSDD 300RPM FAT12",FS_5P25_SS_300RPM_320KB_MSDOS_FAT12,0},
+	{"fat320ssb",   "5\"25       320KB SSDD 360RPM FAT12",FS_5P25_SS_360RPM_320KB_MSDOS_FAT12,0},
 
-	{"fat320dsa",	"5\"25       320KB DSDD 300RPM FAT12",FS_5P25_DS_300RPM_320KB_MSDOS_FAT12,0},
-	{"fat320dsb",	"5\"25       320KB DSDD 360RPM FAT12",FS_5P25_DS_360RPM_320KB_MSDOS_FAT12,0},
+	{"fat320dsa",   "5\"25       320KB DSDD 300RPM FAT12",FS_5P25_DS_300RPM_320KB_MSDOS_FAT12,0},
+	{"fat320dsb",   "5\"25       320KB DSDD 360RPM FAT12",FS_5P25_DS_360RPM_320KB_MSDOS_FAT12,0},
 
-	{"fat360a",		"5\"25 & 8\" 360KB DSDD 300RPM FAT12",FS_5P25_DS_300RPM_360KB_MSDOS_FAT12,0},
-	{"fat360b",		"5\"25 & 8\" 360KB DSDD 360RPM FAT12",FS_5P25_DS_360RPM_360KB_MSDOS_FAT12,0},
+	{"fat360a",     "5\"25 & 8\" 360KB DSDD 300RPM FAT12",FS_5P25_DS_300RPM_360KB_MSDOS_FAT12,0},
+	{"fat360b",     "5\"25 & 8\" 360KB DSDD 360RPM FAT12",FS_5P25_DS_360RPM_360KB_MSDOS_FAT12,0},
 
-	{"fat640",		"3\"5        640KB DSDD FAT12",FS_3P5_DS_300RPM_640KB_MSDOS_FAT12,0},
+	{"fat640",      "3\"5        640KB DSDD FAT12",FS_3P5_DS_300RPM_640KB_MSDOS_FAT12,0},
 
-	{"fat720",		"3\"5        720KB DSDD FAT12",FS_720KB_MSDOS_FAT12,0},
-	{"fat738",		"3\"5        738KB DSDD FAT12",FS_738KB_MSDOS_FAT12,0},
-	{"fat800",		"3\"5        800KB DSDD FAT12",FS_800KB_MSDOS_FAT12,0},
-	{"fat820",		"3\"5        820KB DSDD FAT12",FS_820KB_MSDOS_FAT12,0},
+	{"fat720",      "3\"5        720KB DSDD FAT12",FS_720KB_MSDOS_FAT12,0},
+	{"fat738",      "3\"5        738KB DSDD FAT12",FS_738KB_MSDOS_FAT12,0},
+	{"fat800",      "3\"5        800KB DSDD FAT12",FS_800KB_MSDOS_FAT12,0},
+	{"fat820",      "3\"5        820KB DSDD FAT12",FS_820KB_MSDOS_FAT12,0},
 
-	{"fat1200",		"5\"25       1.2MB DSHD FAT12",FS_5P25_300RPM_1200KB_MSDOS_FAT12,0},
-	{"fat1230",		"5\"25       1.23MB DSHD FAT12",FS_5P25_300RPM_1230KB_MSDOS_FAT12,0},
+	{"fat1200",     "5\"25       1.2MB DSHD FAT12",FS_5P25_300RPM_1200KB_MSDOS_FAT12,0},
+	{"fat1230",     "5\"25       1.23MB DSHD FAT12",FS_5P25_300RPM_1230KB_MSDOS_FAT12,0},
 
-	{"fat1440",		"3\"5        1.44MB DSHD FAT12",FS_1_44MB_MSDOS_FAT12,0},
-	{"fat1476",		"3\"5        1.478MB DSHD FAT12",FS_1_476MB_MSDOS_FAT12,0},
+	{"fat1440",     "3\"5        1.44MB DSHD FAT12",FS_1_44MB_MSDOS_FAT12,0},
+	{"fat1476",     "3\"5        1.478MB DSHD FAT12",FS_1_476MB_MSDOS_FAT12,0},
 
-	{"fat1600",		"3\"5        1.6MB DSHD FAT12",FS_1_600MB_MSDOS_FAT12,0},
-	{"fat1640",		"3\"5        1.64MB DSHD FAT12",FS_1_640MB_MSDOS_FAT12,0},
-	{"fat1680",		"3\"5        1.68MB DSHD FAT12",FS_1_68MB_MSDOS_FAT12,0},
+	{"fat1600",     "3\"5        1.6MB DSHD FAT12",FS_1_600MB_MSDOS_FAT12,0},
+	{"fat1640",     "3\"5        1.64MB DSHD FAT12",FS_1_640MB_MSDOS_FAT12,0},
+	{"fat1680",     "3\"5        1.68MB DSHD FAT12",FS_1_68MB_MSDOS_FAT12,0},
 
-	{"fat1722",		"3\"5        1.722MB DSHD FAT12",FS_1_722MB_MSDOS_FAT12,0},
-	{"fat1743",		"3\"5        1.743MB DSHD FAT12",FS_1_743MB_MSDOS_FAT12,0},
-	{"fat1764",		"3\"5        1.764MB DSHD FAT12",FS_1_764MB_MSDOS_FAT12,0},
-	{"fat1785",		"3\"5        1.785MB DSHD FAT12",FS_1_785MB_MSDOS_FAT12,0},
+	{"fat1722",     "3\"5        1.722MB DSHD FAT12",FS_1_722MB_MSDOS_FAT12,0},
+	{"fat1743",     "3\"5        1.743MB DSHD FAT12",FS_1_743MB_MSDOS_FAT12,0},
+	{"fat1764",     "3\"5        1.764MB DSHD FAT12",FS_1_764MB_MSDOS_FAT12,0},
+	{"fat1785",     "3\"5        1.785MB DSHD FAT12",FS_1_785MB_MSDOS_FAT12,0},
 
-	{"fat2540",		"3\"5        2.50MB DSDD FAT12",FS_2_50MB_MSDOS_FAT12,0},
+	{"fat2540",     "3\"5        2.50MB DSDD FAT12",FS_2_50MB_MSDOS_FAT12,0},
 
-	{"fat2880",		"3\"5        2.88MB DSED FAT12",FS_2_88MB_MSDOS_FAT12,0},
-	{"fat3381",		"3\"5        3.38MB DSHD FAT12",FS_3_38MB_MSDOS_FAT12,0},
-	{"fatbigst",	"3\"5        3.42MB DSDD Atari FAT12",FS_3_42MB_ATARI_FAT12,0},
+	{"fat2880",     "3\"5        2.88MB DSED FAT12",FS_2_88MB_MSDOS_FAT12,0},
+	{"fat3381",     "3\"5        3.38MB DSHD FAT12",FS_3_38MB_MSDOS_FAT12,0},
+	{"fatbigst",    "3\"5        3.42MB DSDD Atari FAT12",FS_3_42MB_ATARI_FAT12,0},
 
-	{"fat5355",		"3\"5        5.35MB DSHD FAT12",FS_5_35MB_MSDOS_FAT12,0},
-	{"fat5355b",	"3\"5        5.35MB DSHD FAT12",FS_5_35MB_B_MSDOS_FAT12,0},
+	{"fat5355",     "3\"5        5.35MB DSHD FAT12",FS_5_35MB_MSDOS_FAT12,0},
+	{"fat5355b",    "3\"5        5.35MB DSHD FAT12",FS_5_35MB_B_MSDOS_FAT12,0},
 
-	{"fat6789",		"3\"5        6.78MB DSHD FAT12",FS_6_78MB_MSDOS_FAT12,0},
-	{"fatbig",		"",FS_16MB_MSDOS_FAT12,0},
-	{"fat4572",		"3\"5        4.50MB DSHD FAT12",FS_4_50MB_MSDOS_FAT12,0},
+	{"fat6789",     "3\"5        6.78MB DSHD FAT12",FS_6_78MB_MSDOS_FAT12,0},
+	{"fatbig",      "",FS_16MB_MSDOS_FAT12,0},
+	{"fat4572",     "3\"5        4.50MB DSHD FAT12",FS_4_50MB_MSDOS_FAT12,0},
 	{0,0,0,0}
 };
 
@@ -2584,7 +2584,7 @@ int32_t hxcfe_getHash( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, i
 		}
 
 		if(side < 0)
-		{	
+		{
 			side = 0;
 			maxside = fp->floppyNumberOfSide;
 		}
@@ -2592,7 +2592,7 @@ int32_t hxcfe_getHash( HXCFE* floppycontext, HXCFE_FLOPPY * fp, int32_t track, i
 		{
 			maxside = side + 1;
 		}
-		
+
 		for(track=0; track < maxtrack; track++)
 		{
 			for(side=0; side < maxside; side++)

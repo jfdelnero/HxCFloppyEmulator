@@ -225,7 +225,7 @@ int get_next_QDMO5_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG 
 			break;
 
 		}
-	}while(	(sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR));
+	}while( (sector_extractor_sm!=ENDOFTRACK) && (sector_extractor_sm!=ENDOFSECTOR) );
 
 	return bit_offset;
 }

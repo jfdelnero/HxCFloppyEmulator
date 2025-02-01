@@ -58,10 +58,10 @@ typedef struct _HXCFE_SECTCFG
 
 	int32_t        missingdataaddressmark;
 
-	int32_t        use_alternate_header_crc;	//0x1 -> Bad crc  , 0x2 alternate crc
+	int32_t        use_alternate_header_crc;    //0x1 -> Bad crc  , 0x2 alternate crc
 	uint32_t       data_crc;
 
-	int32_t        use_alternate_data_crc;		//0x1 -> Bad crc  , 0x2 alternate crc
+	int32_t        use_alternate_data_crc;      //0x1 -> Bad crc  , 0x2 alternate crc
 	uint32_t       header_crc;
 
 	int32_t        use_alternate_datamark;
@@ -86,8 +86,8 @@ typedef struct _HXCFE_SECTCFG
 	uint8_t      * weak_bits_mask;
 
 	uint8_t        fill_byte;
-	uint8_t        fill_byte_used;				// Set to indicate that the sector is filled with "fill_byte"
-	
+	uint8_t        fill_byte_used;              // Set to indicate that the sector is filled with "fill_byte"
+
 	uint32_t       flags;
 }HXCFE_SECTCFG;
 

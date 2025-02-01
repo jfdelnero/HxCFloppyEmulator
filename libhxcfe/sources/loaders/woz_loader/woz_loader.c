@@ -83,7 +83,7 @@ int WOZ_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 			}
 
 			if(   fileheader->pad != 0xFF ||
-			    ( fileheader->lfcrlf[0] != 0xA || fileheader->lfcrlf[1] != 0xD || fileheader->lfcrlf[2] != 0xA  )
+				( fileheader->lfcrlf[0] != 0xA || fileheader->lfcrlf[1] != 0xD || fileheader->lfcrlf[2] != 0xA  )
 			  )
 			{
 				imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"WOZ_libIsValidDiskFile : non WOZ file (bad header)!");
@@ -115,7 +115,7 @@ static int get_woz_chunk(unsigned char * buf,  int buf_size, int offset, uint32_
 
 	while( offset < buf_size)
 	{
-		chunk = (woz_chunk *)	&buf[offset];
+		chunk = (woz_chunk *)   &buf[offset];
 
 		if (chunk->id == chunk_id)
 		{
@@ -180,7 +180,7 @@ int WOZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	}
 
 	if(   fileheader.pad != 0xFF ||
-	    ( fileheader.lfcrlf[0] != 0xA || fileheader.lfcrlf[1] != 0xD || fileheader.lfcrlf[2] != 0xA  )
+		( fileheader.lfcrlf[0] != 0xA || fileheader.lfcrlf[1] != 0xD || fileheader.lfcrlf[2] != 0xA  )
 	  )
 	{
 		hxc_fclose(f);
@@ -320,7 +320,7 @@ int WOZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				}
 			}
 
-			if(	max_track < 36 )
+			if( max_track < 36 )
 				max_track = 36;
 
 			floppydisk->floppyNumberOfSide = 1;
@@ -345,7 +345,7 @@ int WOZ_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				i--;
 			}
 
-			if(	max_track < 82 )
+			if( max_track < 82 )
 				max_track = 82;
 
 			floppydisk->floppyNumberOfSide = 2;

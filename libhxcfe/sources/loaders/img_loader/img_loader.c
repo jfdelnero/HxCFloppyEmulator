@@ -125,7 +125,7 @@ int pc_imggetfloppyconfig(unsigned char * img,uint32_t filesize, raw_iso_cfg *ra
 		numberofsector = uimg[0x13]+(uimg[0x14]*256);
 		rawcfg->number_of_tracks = (numberofsector/(rawcfg->number_of_sectors_per_track * rawcfg->number_of_sides));
 
-	//	if((unsigned int)((*numberofsectorpertrack) * (*numberoftrack) * (*numberofside) *512)==filesize)
+	//  if((unsigned int)((*numberofsectorpertrack) * (*numberoftrack) * (*numberofside) *512)==filesize)
 		{
 			conffound=1;
 		}

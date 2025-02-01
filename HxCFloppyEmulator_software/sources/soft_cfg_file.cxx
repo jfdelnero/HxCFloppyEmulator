@@ -59,10 +59,10 @@ int load_last_cfg()
 		}
 		hxc_fclose(f);
 
-//		hwif->usbstats.packetsize=lastst->usb_packet_size;
-//		hwif->drive_select_source=lastst->drive_select_source;
-//		hwif->interface_mode=lastst->interface_mode;
-//		hwif->double_step=lastst->double_step;
+//      hwif->usbstats.packetsize=lastst->usb_packet_size;
+//      hwif->drive_select_source=lastst->drive_select_source;
+//      hwif->interface_mode=lastst->interface_mode;
+//      hwif->double_step=lastst->double_step;
 		guicontext->autoselectmode=lastst->autoselectmode;
 		guicontext->twistedcable=lastst->twistedcable;
 	}
@@ -93,12 +93,12 @@ int save_cfg()
 	f=hxc_fopen(executablepath,"wb");
 	if(f)
 	{
-	//	lastst->usb_packet_size=hwif->usbstats.packetsize;
-	//	lastst->drive_select_source=hwif->drive_select_source;
-	//	lastst->interface_mode=hwif->interface_mode;
-	//	lastst->autoselectmode=gui_context->autoselectmode;
-	//	lastst->twistedcable=gui_context->twistedcable;
-	//	lastst->double_step=hwif->double_step;
+	//  lastst->usb_packet_size=hwif->usbstats.packetsize;
+	//  lastst->drive_select_source=hwif->drive_select_source;
+	//  lastst->interface_mode=hwif->interface_mode;
+	//  lastst->autoselectmode=gui_context->autoselectmode;
+	//  lastst->twistedcable=gui_context->twistedcable;
+	//  lastst->double_step=hwif->double_step;
 		fwrite(lastst,sizeof(cfg_file_buffer),1,f);
 		hxc_fclose(f);
 	}

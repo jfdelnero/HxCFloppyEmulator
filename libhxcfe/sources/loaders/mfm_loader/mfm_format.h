@@ -42,7 +42,7 @@ typedef struct MFMIMG_
 	uint32_t mfmtracklistoffset;    // Offset of the MFMTRACKIMG array from the beginning of the file in number of uint8_ts.
 }MFMIMG;
 
-// Right after this header, the MFMTRACKIMG array is present. 
+// Right after this header, the MFMTRACKIMG array is present.
 // Number of element in the MFMTRACKIMG array : number_of_track * number_of_side
 // Here is one MFMTRACKIMG element :
 

@@ -308,7 +308,7 @@ int mi_pack(unsigned char * bufferin, int sizein,unsigned char * bufferout, int 
 
 		// Note : only lzw mode for this project.
 		//if(newsize_rle<sizein && newsize_rle< newsize_lzw)
-		//	mode=1; //rle
+		//  mode=1; //rle
 
 		if( newsize_lzw >= 0 && newsize_lzw<sizein && newsize_lzw< newsize_rle)
 			mode=2; //lzw

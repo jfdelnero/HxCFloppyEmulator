@@ -66,7 +66,7 @@ int IMD_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG** sca;
 
-//	struct DateTime reptime;
+//  struct DateTime reptime;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write IMD file %s...",filename);
 

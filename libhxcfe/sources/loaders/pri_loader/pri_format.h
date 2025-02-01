@@ -20,12 +20,12 @@ Unknown chunks should be skipped.
 Chunk format
 ------------------------------------------------------------------------
 
-offset	size	description
+offset  size    description
 
-0	4	Chunk ID
-4	4	Chunk size (n)
-0	n	Chunk data
-n	4	Chunk CRC
+0   4   Chunk ID
+4   4   Chunk size (n)
+0   n   Chunk data
+n   4   Chunk CRC
 
 	- The size does not include the chunk ID, chunk size or chunk CRC
 	  fields.
@@ -36,19 +36,19 @@ n	4	Chunk CRC
 CHUNK "PRI ": File header chunk
 ------------------------------------------------------------------------
 
-0	4	Magic ('PRI ')
-4	4	Size (4)
-0	2	Version (0)
-2	2	Reserved
-4	4	CRC
+0   4   Magic ('PRI ')
+4   4   Size (4)
+0   2   Version (0)
+2   2   Reserved
+4   4   CRC
 
 
 CHUNK "END ": End chunk
 ------------------------------------------------------------------------
 
-0	4	Magic ('END ')
-4	4	Size (0)
-0	4	CRC (0x3d64af78)
+0   4   Magic ('END ')
+4   4   Size (0)
+0   4   CRC (0x3d64af78)
 
 	- This chunk marks the end of the file. Any data that follows
 	  should be ignored.
@@ -57,10 +57,10 @@ CHUNK "END ": End chunk
 CHUNK "TEXT": Comments
 ------------------------------------------------------------------------
 
-0	4	Magic ('TEXT')
-4	4	Size (n)
-0	n	Data
-n	4	CRC
+0   4   Magic ('TEXT')
+4   4   Size (n)
+0   n   Data
+n   4   CRC
 
 	- Comments should be UTF-8, with lines separated by LF (0x0a).
 
@@ -71,13 +71,13 @@ n	4	CRC
 CHUNK "TRAK": Track header
 ------------------------------------------------------------------------
 
-0	4	Magic ('TRAK')
-4	4	Size (16)
-0	4	Cylinder
-4	4	Head
-8	4	Track length in bits
-12	4	Bit clock rate
-16	4	CRC
+0   4   Magic ('TRAK')
+4   4   Size (16)
+0   4   Cylinder
+4   4   Head
+8   4   Track length in bits
+12  4   Bit clock rate
+16  4   CRC
 
 The TRAK chunk starts a new track. All following chunks until the next
 TRAK chunk or until the END chunk refer to this track.
@@ -86,10 +86,10 @@ TRAK chunk or until the END chunk refer to this track.
 CHUNK "DATA": Track data
 ------------------------------------------------------------------------
 
-0	4	Magic ('DATA')
-4	4	Size (n)
-0	n	Track data
-n	4	CRC
+0   4   Magic ('DATA')
+4   4   Size (n)
+0   n   Track data
+n   4   CRC
 
 	- The most significant bit of every byte comes first.
 
@@ -101,12 +101,12 @@ n	4	CRC
 CHUNK "WEAK": Weak bit mask
 ------------------------------------------------------------------------
 
-0	4	Magic ('WEAK')
-4	4	Size (8*n)
-0	4	Bit offset
-4	4	Weak bit mask
+0   4   Magic ('WEAK')
+4   4   Size (8*n)
+0   4   Bit offset
+4   4   Weak bit mask
 ...
-8*n	4	CRC
+8*n 4   CRC
 
 	- The MSB of the bit mask corresponds to the bit offset specified.
 
@@ -114,12 +114,12 @@ CHUNK "WEAK": Weak bit mask
 CHUNK "BCLK": Alternate bit clock
 ------------------------------------------------------------------------
 
-0	4	Magic ('BCLK')
-4	4	Size (8*n)
-0	4	Bit offset
-4	4	New bit clock
+0   4   Magic ('BCLK')
+4   4   Size (8*n)
+0   4   Bit offset
+4   4   New bit clock
 ...
-8*n	4	CRC
+8*n 4   CRC
 
 The new bit clock starting at the specified bit offset is
 (new_bit_clock / 65536) * track_bit_clock

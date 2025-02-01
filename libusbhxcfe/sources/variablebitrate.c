@@ -136,7 +136,7 @@ unsigned char * realloc_buffer(unsigned char * buffer,uint32_t numberofbit,uint3
 				}
 				//else
 				//{
-				//	ptr[j>>3]=ptr[j>>3]&(~((0x80)>>(j&0x7)));
+				//  ptr[j>>3]=ptr[j>>3]&(~((0x80)>>(j&0x7)));
 				//}
 
 				j++;
@@ -803,7 +803,7 @@ int32_t GetNewTrackRevolution(HXCFE* floppycontext,uint8_t * index_h0,uint8_t * 
 		if(!inserttimecode)
 		{
 			inserttimecode=GRANULA;
-		/*	if(speedcfg_track1==speedcfg_track0)
+		/*  if(speedcfg_track1==speedcfg_track0)
 			{
 				finalbuffer[k]=SETBITRATE_H0_OPCODE | SETBITRATE_H1_OPCODE;
 				k++;

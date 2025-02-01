@@ -57,9 +57,9 @@ MSA only compresses runs of at least 4 identical bytes (after all, it would be w
 a run of only 3 identical bytes!). There is one exception to this rule: if a run of 2 or 3 $E5 bytes is found,
 that is stored appropriately enough as a run. Again, it would be wasteful to store 4 bytes for every single $E5 byte.
 
-The hacked release of MSA that enables the user to turn off compression completely simply stops MSA 
-from trying this compression and produces MSA images that are completely uncompressed. 
-This is okay because it is possible for MSA to produce such an image anyway, 
+The hacked release of MSA that enables the user to turn off compression completely simply stops MSA
+from trying this compression and produces MSA images that are completely uncompressed.
+This is okay because it is possible for MSA to produce such an image anyway,
 and such images are therefore 100% compatible with normal MSA versions (and MSA-to-ST of course).
 
 Note from The Atari Mafia:

@@ -125,7 +125,7 @@ int32_t hxcfe_getFSID(HXCFE* floppycontext, char * fsname)
 	return 0;
 }
 
-int32_t	hxcfe_numberOfFS(HXCFE* floppycontext)
+int32_t hxcfe_numberOfFS(HXCFE* floppycontext)
 {
 	int i;
 
@@ -201,7 +201,7 @@ int32_t hxcfe_mountImage(HXCFE_FSMNG * fsmng, HXCFE_FLOPPY *floppy)
 	int32_t ret;
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_mountImage");
 
-/*	if( fsmng->fs_selected == FS_880KB_AMIGADOS )
+/*  if( fsmng->fs_selected == FS_880KB_AMIGADOS )
 		return amigados_mountImage(fsmng, floppy);
 	else
 		return fat12_mountImage(fsmng, floppy);*/

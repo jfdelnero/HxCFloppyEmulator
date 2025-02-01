@@ -34,11 +34,11 @@
 
 typedef struct _s_index_evt
 {
-    uint32_t dump_offset;
-    uint32_t cellpos;
-    int32_t  tick_offset;
-    uint32_t clk;
-    uint32_t flags;
+	uint32_t dump_offset;
+	uint32_t cellpos;
+	int32_t  tick_offset;
+	uint32_t clk;
+	uint32_t flags;
 }s_index_evt;
 
 #define MAX_NB_OF_INDEX 512
@@ -51,43 +51,43 @@ typedef struct _s_index_evt
 
 typedef struct _HXCFE_STREAMCHANNEL
 {
-    uint32_t    * stream;
-    uint32_t    nb_of_pulses;
-    uint32_t    flags;
-    uint32_t    type;
-    char        stream_name[64];
+	uint32_t    * stream;
+	uint32_t    nb_of_pulses;
+	uint32_t    flags;
+	uint32_t    type;
+	char        stream_name[64];
 }HXCFE_STREAMCHANNEL;
 
 #define _HXCFE_STREAMCHANNEL_
 
 typedef struct _HXCFE_TRKSTREAM
 {
-    HXCFE_STREAMCHANNEL channels[MAX_NB_OF_STREAMCHANNEL];
-    s_index_evt	index_evt_tab[MAX_NB_OF_INDEX];
-    uint32_t    nb_of_index;
-    int         tick_freq;
-    uint32_t    flags;
+	HXCFE_STREAMCHANNEL channels[MAX_NB_OF_STREAMCHANNEL];
+	s_index_evt index_evt_tab[MAX_NB_OF_INDEX];
+	uint32_t    nb_of_index;
+	int         tick_freq;
+	uint32_t    flags;
 }HXCFE_TRKSTREAM;
 
 #define _HXCFE_TRKSTREAM_
 
 typedef struct _HXCFE_SIDE
 {
-    int32_t         number_of_sector;        // Number of sectors per track (if know) -> -1 if unknow.
-    uint8_t       * databuffer;              // data buffer.
-    int32_t         bitrate;                 // if equal to VARIABLEBITRATE timingbuffer must be used.
-    uint32_t      * timingbuffer;            // bitrate buffer.
-    uint8_t       * flakybitsbuffer;         // if equal to zero no flakey/weak bits information.
-    uint8_t       * indexbuffer;             // index state buffer signal 1->asserted 0->non asserted.
-    uint8_t       * track_encoding_buffer;   // track encoding indication buffer.
+	int32_t         number_of_sector;        // Number of sectors per track (if know) -> -1 if unknow.
+	uint8_t       * databuffer;              // data buffer.
+	int32_t         bitrate;                 // if equal to VARIABLEBITRATE timingbuffer must be used.
+	uint32_t      * timingbuffer;            // bitrate buffer.
+	uint8_t       * flakybitsbuffer;         // if equal to zero no flakey/weak bits information.
+	uint8_t       * indexbuffer;             // index state buffer signal 1->asserted 0->non asserted.
+	uint8_t       * track_encoding_buffer;   // track encoding indication buffer.
 
-    int32_t         track_encoding;
+	int32_t         track_encoding;
 
-    int32_t         tracklen;                // databuffer/timingbuffer/flakybitsbuffer/indexbuffer length
+	int32_t         tracklen;                // databuffer/timingbuffer/flakybitsbuffer/indexbuffer length
 
-    HXCFE_TRKSTREAM * stream_dump;
+	HXCFE_TRKSTREAM * stream_dump;
 
-    uint32_t        * cell_to_tick;
+	uint32_t        * cell_to_tick;
 	int               tick_freq;
 
 }HXCFE_SIDE;
@@ -96,9 +96,9 @@ typedef struct _HXCFE_SIDE
 
 typedef struct _HXCFE_CYLINDER
 {
-    int32_t         floppyRPM;                // rotation par minute (informatif/optionnel)
-    int32_t         number_of_side;
-    HXCFE_SIDE  **  sides;
+	int32_t         floppyRPM;                // rotation par minute (informatif/optionnel)
+	int32_t         number_of_side;
+	HXCFE_SIDE  **  sides;
 }HXCFE_CYLINDER;
 #define _HXCFE_CYLINDER_
 
@@ -106,19 +106,19 @@ typedef struct _HXCFE_CYLINDER
 
 typedef struct _HXCFE_FLOPPY
 {
-    int32_t         floppyBitRate;
+	int32_t         floppyBitRate;
 
-    int32_t         floppyNumberOfSide;
-    int32_t         floppyNumberOfTrack;
-    int32_t         floppySectorPerTrack;
+	int32_t         floppyNumberOfSide;
+	int32_t         floppyNumberOfTrack;
+	int32_t         floppySectorPerTrack;
 
-    int32_t         floppyiftype;
-    int32_t         double_step;
+	int32_t         floppyiftype;
+	int32_t         double_step;
 
-    HXCFE_CYLINDER ** tracks;
+	HXCFE_CYLINDER ** tracks;
 
-    // bit 0 : Write protected
-    uint32_t        flags;
+	// bit 0 : Write protected
+	uint32_t        flags;
 
 }HXCFE_FLOPPY;
 #define _HXCFE_FLOPPY_

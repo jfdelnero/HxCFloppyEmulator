@@ -38,7 +38,7 @@
 // File : cb_sdhxcfecfg_window.cxx
 // Contains: SD HxC Setting window
 //
-// Written by:	DEL NERO Jean Francois
+// Written by: Jean-François DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////

@@ -116,8 +116,8 @@ typedef struct mfiheader_t_
 	uint8_t  mfi_signature[16];      // "MESSFLOPPYIMAGE" or "MAMEFLOPPYIMAGE"
 	uint32_t cyl_count;              //
 	uint32_t head_count;             //
-    uint32_t form_factor;
-    uint32_t variant;
+	uint32_t form_factor;
+	uint32_t variant;
 } mfiheader_t;
 
 //   Track Header information :

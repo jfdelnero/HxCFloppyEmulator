@@ -448,13 +448,13 @@ int32_t                hxcfe_FDC_SCANSECTOR  ( HXCFE* floppycontext, uint8_t tra
 #define UNKNOWN_ENCODING                 0xFF
 
 enum {
-    DOUBLESTEP = 1,
-    INTERFACEMODE = 2
+	DOUBLESTEP = 1,
+	INTERFACEMODE = 2
 };
 
 enum {
-    SET = 0,
-    GET = 1
+	SET = 0,
+	GET = 1
 };
 
 int32_t                hxcfe_floppyGetSetParams( HXCFE* floppycontext, HXCFE_FLOPPY * newfloppy, uint8_t dir, uint16_t param, void * value );
@@ -482,30 +482,30 @@ const char *           hxcfe_getTrackEncodingName( HXCFE* floppycontext, int32_t
 
 typedef struct s_sectorlist_
 {
-    HXCFE_SECTCFG * sectorconfig;
+	HXCFE_SECTCFG * sectorconfig;
 
-    int32_t side, track;
+	int32_t side, track;
 
-    // track mode
-    int32_t x_pos1, y_pos1;
-    int32_t x_pos2, y_pos2;
+	// track mode
+	int32_t x_pos1, y_pos1;
+	int32_t x_pos2, y_pos2;
 
-    // disc mode
-    float start_angle, end_angle;
-    int32_t   diameter, thickness;
+	// disc mode
+	float start_angle, end_angle;
+	int32_t   diameter, thickness;
 
-    struct s_sectorlist_ * next_element;
+	struct s_sectorlist_ * next_element;
 }s_sectorlist;
 
 typedef struct s_pulseslist_
 {
-    int32_t side, track;
+	int32_t side, track;
 
-    int32_t pulse_number;
+	int32_t pulse_number;
 
-    int32_t x_pos1, x_pos2;
+	int32_t x_pos1, x_pos2;
 
-    struct s_pulseslist_ * next_element;
+	struct s_pulseslist_ * next_element;
 }s_pulseslist;
 
 HXCFE_TD*              hxcfe_td_init( HXCFE* floppycontext, uint32_t xsize, uint32_t ysize );
@@ -649,69 +649,69 @@ int32_t                hxcfe_getSectorConfigDCRCStatus( HXCFE* floppycontext, HX
 
 enum
 {
-    FS_720KB_ATARI_FAT12=0,
-    FS_902KB_ATARI_FAT12,
-    FS_360KB_ATARI_FAT12,
-    FS_880KB_AMIGADOS,
+	FS_720KB_ATARI_FAT12=0,
+	FS_902KB_ATARI_FAT12,
+	FS_360KB_ATARI_FAT12,
+	FS_880KB_AMIGADOS,
 
-    FS_5P25_300RPM_160KB_MSDOS_FAT12,
-    FS_5P25_360RPM_160KB_MSDOS_FAT12,
+	FS_5P25_300RPM_160KB_MSDOS_FAT12,
+	FS_5P25_360RPM_160KB_MSDOS_FAT12,
 
-    FS_5P25_300RPM_180KB_MSDOS_FAT12,
-    FS_5P25_360RPM_180KB_MSDOS_FAT12,
+	FS_5P25_300RPM_180KB_MSDOS_FAT12,
+	FS_5P25_360RPM_180KB_MSDOS_FAT12,
 
-    FS_5P25_SS_300RPM_320KB_MSDOS_FAT12,
-    FS_5P25_SS_360RPM_320KB_MSDOS_FAT12,
+	FS_5P25_SS_300RPM_320KB_MSDOS_FAT12,
+	FS_5P25_SS_360RPM_320KB_MSDOS_FAT12,
 
-    FS_5P25_DS_300RPM_320KB_MSDOS_FAT12,
-    FS_5P25_DS_360RPM_320KB_MSDOS_FAT12,
+	FS_5P25_DS_300RPM_320KB_MSDOS_FAT12,
+	FS_5P25_DS_360RPM_320KB_MSDOS_FAT12,
 
-    FS_5P25_DS_300RPM_360KB_MSDOS_FAT12,
-    FS_5P25_DS_360RPM_360KB_MSDOS_FAT12,
+	FS_5P25_DS_300RPM_360KB_MSDOS_FAT12,
+	FS_5P25_DS_360RPM_360KB_MSDOS_FAT12,
 
-    FS_3P5_DS_300RPM_640KB_MSDOS_FAT12,
+	FS_3P5_DS_300RPM_640KB_MSDOS_FAT12,
 
-    FS_720KB_MSDOS_FAT12,
+	FS_720KB_MSDOS_FAT12,
 
-    FS_5P25_300RPM_1200KB_MSDOS_FAT12,
+	FS_5P25_300RPM_1200KB_MSDOS_FAT12,
 
-    FS_1_44MB_MSDOS_FAT12,
-    FS_1_68MB_MSDOS_FAT12,
-    FS_2_88MB_MSDOS_FAT12,
-    FS_3_38MB_MSDOS_FAT12,
-    FS_3_42MB_ATARI_FAT12,
-    FS_6_78MB_MSDOS_FAT12,
-    FS_16MB_MSDOS_FAT12,
-    FS_4_50MB_MSDOS_FAT12,
-    FS_2_50MB_MSDOS_FAT12,
+	FS_1_44MB_MSDOS_FAT12,
+	FS_1_68MB_MSDOS_FAT12,
+	FS_2_88MB_MSDOS_FAT12,
+	FS_3_38MB_MSDOS_FAT12,
+	FS_3_42MB_ATARI_FAT12,
+	FS_6_78MB_MSDOS_FAT12,
+	FS_16MB_MSDOS_FAT12,
+	FS_4_50MB_MSDOS_FAT12,
+	FS_2_50MB_MSDOS_FAT12,
 
-    FS_5_35MB_MSDOS_FAT12,
-    FS_5_35MB_B_MSDOS_FAT12,
+	FS_5_35MB_MSDOS_FAT12,
+	FS_5_35MB_B_MSDOS_FAT12,
 
-    FS_738KB_MSDOS_FAT12,
-    FS_800KB_MSDOS_FAT12,
-    FS_820KB_MSDOS_FAT12,
+	FS_738KB_MSDOS_FAT12,
+	FS_800KB_MSDOS_FAT12,
+	FS_820KB_MSDOS_FAT12,
 
-    FS_5P25_300RPM_1230KB_MSDOS_FAT12,
+	FS_5P25_300RPM_1230KB_MSDOS_FAT12,
 
-    FS_1_476MB_MSDOS_FAT12,
-    FS_1_600MB_MSDOS_FAT12,
-    FS_1_640MB_MSDOS_FAT12,
-    FS_1_722MB_MSDOS_FAT12,
+	FS_1_476MB_MSDOS_FAT12,
+	FS_1_600MB_MSDOS_FAT12,
+	FS_1_640MB_MSDOS_FAT12,
+	FS_1_722MB_MSDOS_FAT12,
 	FS_1_743MB_MSDOS_FAT12,
 	FS_1_764MB_MSDOS_FAT12,
-    FS_1_785MB_MSDOS_FAT12,
+	FS_1_785MB_MSDOS_FAT12,
 
-    FS_1760KB_AMIGADOS
+	FS_1760KB_AMIGADOS
 
 };
 
 typedef struct FSENTRY_
 {
-    int32_t isdir;
-    int32_t size;
-    char entryname[512];
-    uint32_t flags;
+	int32_t isdir;
+	int32_t size;
+	char entryname[512];
+	uint32_t flags;
 }HXCFE_FSENTRY;
 
 int32_t                hxcfe_getFSID( HXCFE* floppycontext, char * fsname );

@@ -87,7 +87,7 @@ int EXTADF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 	unsigned int filesize;
 	int i,j;
 	unsigned char* trackdata;
-	int	tracklen;
+	int tracklen;
 	HXCFE_CYLINDER* currentcylinder;
 	unsigned int numberoftrack;
 

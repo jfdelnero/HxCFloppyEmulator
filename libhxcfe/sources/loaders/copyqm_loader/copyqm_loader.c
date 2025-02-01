@@ -270,7 +270,7 @@ int CopyQm_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,
 					if ( c == EOF )
 					{
 						free(flatimg);
-						hxc_fclose(f_img);                  
+						hxc_fclose(f_img);
 						return HXCFE_FILECORRUPTED;
 					}
 					/* Copy the byte into memory and update the offset */
