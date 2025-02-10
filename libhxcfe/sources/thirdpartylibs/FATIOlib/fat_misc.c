@@ -30,9 +30,9 @@
 //-----------------------------------------------------------------------------
 // Patchs / Improvements added to the original version :
 // - FAT12 support added
-// - Non-standard sector size support added (PC98...). 
+// - Non-standard sector size support added (PC98...).
 // - can remove a folder
-// - Functions to get Free & total space added. 
+// - Functions to get Free & total space added.
 // - default file date set at file creation
 // - various fixes.
 // Jean-François DEL NERO
@@ -133,10 +133,13 @@ int fatfs_entry_lfn_text(struct fat_dir_entry *entry)
 #if FATFS_INC_LFN_SUPPORT
 int fatfs_entry_lfn_invalid(struct fat_dir_entry *entry)
 {
-    if ( (entry->Name[0]==FILE_HEADER_BLANK)  ||
-         (entry->Name[0]==FILE_HEADER_DELETED)||
-         (entry->Attr==FILE_ATTR_VOLUME_ID) ||
-         (entry->Attr & FILE_ATTR_SYSHID) )
+    if ( (entry->Name[0] == FILE_HEADER_BLANK)   ||
+         (entry->Name[0] == FILE_HEADER_DELETED) ||
+         (entry->Attr == FILE_ATTR_VOLUME_ID)
+#if FATFS_SYSHID
+         || ( entry->Attr & FILE_ATTR_SYSHID )
+#endif
+       )
         return 1;
     else
         return 0;
@@ -152,7 +155,10 @@ int fatfs_entry_lfn_exists(struct lfn_cache *lfn, struct fat_dir_entry *entry)
          (entry->Name[0]!=FILE_HEADER_BLANK) &&
          (entry->Name[0]!=FILE_HEADER_DELETED) &&
          (entry->Attr!=FILE_ATTR_VOLUME_ID) &&
-         (!(entry->Attr&FILE_ATTR_SYSHID)) &&
+#if FATFS_SYSHID
+         ( !(entry->Attr & FILE_ATTR_SYSHID) ) &&
+#endif
+
          (lfn->no_of_strings) )
         return 1;
     else
@@ -167,8 +173,11 @@ int fatfs_entry_sfn_only(struct fat_dir_entry *entry)
     if ( (entry->Attr!=FILE_ATTR_LFN_TEXT) &&
          (entry->Name[0]!=FILE_HEADER_BLANK) &&
          (entry->Name[0]!=FILE_HEADER_DELETED) &&
-         (entry->Attr!=FILE_ATTR_VOLUME_ID) &&
-         (!(entry->Attr&FILE_ATTR_SYSHID)) )
+         (entry->Attr!=FILE_ATTR_VOLUME_ID)
+#if FATFS_SYSHID
+         && (!(entry->Attr&FILE_ATTR_SYSHID))
+#endif
+       )
         return 1;
     else
         return 0;
