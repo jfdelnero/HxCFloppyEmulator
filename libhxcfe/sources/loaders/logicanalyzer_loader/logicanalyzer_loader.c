@@ -122,7 +122,7 @@ int binlogicfile2stream(HXCFE_IMGLDR * imgldr_ctx,char * file, la_stats * la)
 	rev_cnt = 0;
 	delta = 0;
 
-	f = fopen(file,"r");
+	f = hxc_fopen(file,"r");
 	if(f)
 	{
 		fseek(f,0,SEEK_END);
@@ -159,7 +159,7 @@ int binlogicfile2stream(HXCFE_IMGLDR * imgldr_ctx,char * file, la_stats * la)
 			{
 				if ( fread(&data_buffer,TMP_BUFFER_SIZE,1,f) != 1 )
 				{
-					fclose(f);
+					hxc_fclose(f);
 					return -1;
 				}
 
@@ -169,7 +169,7 @@ int binlogicfile2stream(HXCFE_IMGLDR * imgldr_ctx,char * file, la_stats * la)
 			{
 				if ( fread(&data_buffer,size,1,f) != 1 )
 				{
-					fclose(f);
+					hxc_fclose(f);
 					return -1;
 				}
 
@@ -232,7 +232,7 @@ int binlogicfile2stream(HXCFE_IMGLDR * imgldr_ctx,char * file, la_stats * la)
 			offset += block_size;
 		}
 
-		fclose(f);
+		hxc_fclose(f);
 	}
 	else
 	{

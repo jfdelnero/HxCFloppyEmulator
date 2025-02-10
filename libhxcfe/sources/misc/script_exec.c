@@ -755,7 +755,7 @@ int execute_file_script( script_ctx * ctx, char * filename )
 
 	err = SCRIPT_INTERNAL_ERROR;
 
-	ctx->script_file = fopen(filename,"rb");
+	ctx->script_file = hxc_fopen(filename,"rb");
 	if(ctx->script_file)
 	{
 		strncpy(ctx->script_file_path,filename,DEFAULT_BUFLEN);
@@ -787,7 +787,7 @@ int execute_file_script( script_ctx * ctx, char * filename )
 				err = execute_line_script(ctx, ctx->pre_command);
 				if(err != SCRIPT_NO_ERROR)
 				{
-					fclose(ctx->script_file);
+					hxc_fclose(ctx->script_file);
 					return err;
 				}
 			}
@@ -806,7 +806,7 @@ int execute_file_script( script_ctx * ctx, char * filename )
 			}while(1);
 		}
 
-		fclose(ctx->script_file);
+		hxc_fclose(ctx->script_file);
 
 		err = SCRIPT_NO_ERROR;
 	}

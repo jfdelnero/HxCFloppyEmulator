@@ -107,11 +107,11 @@ int png_encode_image(void *image, size_t length, uint32_t width, uint32_t height
 	{
 		FILE * f;
 
-		f=fopen(filename,"wb");
+		f=hxc_fopen(filename,"wb");
 		if(f)
 		{
 			fwrite(png_buf,png_size,1,f);
-			fclose(f);
+			hxc_fclose(f);
 		}
 	}
 
