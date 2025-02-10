@@ -38,7 +38,6 @@ class About_box : public Fl_Window {
 	Fl_Button *button_license;
 	Fl_Button *button_ok;
 	Fl_Button *button_forum;
-	Fl_Button *button_facebook;
 	Fl_Box*  o;
 
 	char windowname[128];

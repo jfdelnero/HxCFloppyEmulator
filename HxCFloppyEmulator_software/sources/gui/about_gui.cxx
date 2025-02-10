@@ -510,11 +510,8 @@ About_box::About_box()
 
 	cur_ypos += BUTTON_SIZE_Y;
 
-	button_forum = new Fl_Button(cur_xpos, cur_ypos, BUTTON_SIZE_X / 2, BUTTON_SIZE_Y, "Forum");
+	button_forum = new Fl_Button(cur_xpos, cur_ypos, BUTTON_SIZE_X, BUTTON_SIZE_Y, "Forum");
 	button_forum->callback(OpenURLInBrowser,(void*)"http://torlus.com/floppy/forum");
-
-	button_facebook = new Fl_Button(cur_xpos + (BUTTON_SIZE_X / 2), cur_ypos, BUTTON_SIZE_X / 2, BUTTON_SIZE_Y, "Facebook");
-	button_facebook->callback(OpenURLInBrowser,(void*)"https://www.facebook.com/groups/hxc2001/");
 
 	cur_ypos += BUTTON_SIZE_Y;
 
