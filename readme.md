@@ -133,9 +133,5 @@ Website :  https://hxc2001.com
 
 Forum :    https://torlus.com/floppy/forum
 
-Facebook : https://www.facebook.com/groups/hxc2001/
-
-Twitter :  https://twitter.com/jfdelnero
-
 -------------------------------------------------------------------------------
 
