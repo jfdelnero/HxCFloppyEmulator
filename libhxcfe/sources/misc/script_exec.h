@@ -108,6 +108,7 @@ int  execute_file_script( script_ctx * ctx, char * filename );
 int  execute_line_script( script_ctx * ctx, char * line );
 int  execute_ram_script( script_ctx * ctx, unsigned char * script_buffer, int buffersize );
 void setOutputFunc_script( script_ctx * ctx, SCRIPT_PRINTF_FUNC ext_printf );
+void * setget_env_script(script_ctx * ctx, void * env);
 script_ctx * deinit_script(script_ctx * ctx);
 
 #ifdef __cplusplus

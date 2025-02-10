@@ -362,6 +362,7 @@ int STREAMHFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 		backup_env = imgldr_ctx->hxcfe->envvar;
 		imgldr_ctx->hxcfe->envvar = tmp_env;
+		setget_env_script(imgldr_ctx->hxcfe->scriptctx, tmp_env);
 
 		floppydisk->floppyNumberOfTrack = header.number_of_track;
 		floppydisk->floppyNumberOfSide = header.number_of_side;
@@ -493,6 +494,8 @@ int STREAMHFE_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydi
 
 		tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
 		imgldr_ctx->hxcfe->envvar = backup_env;
+		setget_env_script(imgldr_ctx->hxcfe->scriptctx, backup_env);
+
 		deinitEnv( tmp_env );
 
 		return HXCFE_NOERROR;
@@ -509,6 +512,7 @@ error:
 	{
 		tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
 		imgldr_ctx->hxcfe->envvar = backup_env;
+		setget_env_script(imgldr_ctx->hxcfe->scriptctx, backup_env);
 		deinitEnv( tmp_env );
 	}
 

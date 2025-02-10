@@ -436,12 +436,19 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			backup_env = imgldr_ctx->hxcfe->envvar;
 			imgldr_ctx->hxcfe->envvar = tmp_env;
+			setget_env_script(imgldr_ctx->hxcfe->scriptctx, tmp_env);
 
 			len=hxc_getpathfolder(imgfile,0,SYS_PATH_TYPE);
 			folder=(char*)malloc(len+1);
 			if(!folder)
 			{
 				hxc_fclose(f);
+
+				tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
+				imgldr_ctx->hxcfe->envvar = backup_env;
+				setget_env_script(imgldr_ctx->hxcfe->scriptctx, backup_env);
+				deinitEnv( tmp_env );
+
 				return HXCFE_INTERNALERROR;
 			}
 
@@ -452,6 +459,12 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			{
 				free(folder);
 				hxc_fclose(f);
+
+				tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
+				imgldr_ctx->hxcfe->envvar = backup_env;
+				setget_env_script(imgldr_ctx->hxcfe->scriptctx, backup_env);
+				deinitEnv( tmp_env );
+
 				return HXCFE_INTERNALERROR;
 			}
 
@@ -676,6 +689,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			tmp_env = (envvar_entry *)imgldr_ctx->hxcfe->envvar;
 			imgldr_ctx->hxcfe->envvar = backup_env;
+			setget_env_script(imgldr_ctx->hxcfe->scriptctx, backup_env);
 			deinitEnv( tmp_env );
 
 			return HXCFE_NOERROR;

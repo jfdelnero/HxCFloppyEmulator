@@ -462,6 +462,23 @@ script_ctx * init_script(void * app_ctx, unsigned int flags, void * env)
 	return ctx;
 }
 
+void * setget_env_script(script_ctx * ctx, void * env)
+{
+	void * ret_env;
+
+	ret_env = NULL;
+
+	if(ctx)
+	{
+		ret_env = ctx->env;
+
+		if( env )
+			ctx->env = (envvar_entry*)env;
+	}
+
+	return ret_env;
+}
+
 static int extract_cmd( script_ctx * ctx, char * line, char * command)
 {
 	int offs,i;
