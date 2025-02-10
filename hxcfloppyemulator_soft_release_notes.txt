@@ -18,7 +18,7 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 10 February 2025 : HxCFloppyEmulator v2.16.10.2
 
 -> "config.script" loading/execution support fixed (issues #29 and #30)
-   (utf path support and internal environnement issues fixed).
+   (utf path support and internal environment variables issues fixed).
 
 -> FAT/DOS Disk browser : It doesn't hide system and hidden files anymore.
 
