@@ -15,6 +15,16 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
+11 February 2025 : HxCFloppyEmulator v2.16.11.1
+
+-> XML export/import :
+    Better multi-format tracks support. 
+    You can now specify/change the density/format for each 
+    individual sector with the <format> tag.
+
+*********************************************************/
+
+/*********************************************************
 10 February 2025 : HxCFloppyEmulator v2.16.10.2
 
 -> "config.script" loading/execution support fixed (issues #29 and #30)
