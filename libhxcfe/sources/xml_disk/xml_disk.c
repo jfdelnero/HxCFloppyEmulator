@@ -550,6 +550,7 @@ static void XMLCALL charhandler(void *data, const char *s, int len)
 
 			ad->fill_value = ahextoi(buffer);
 		break;
+		case FORMAT_SECTOR:
 		case FORMAT_TRACK:
 		case FORMAT:
 			if(!ad->xmlcheck)

@@ -63,7 +63,8 @@ enum
 	TRACK_PREGAP,
 	TRACK_PREGAP_US,
 	SET_INDEX_LENGTH,
-	SET_INDEX_POSITION
+	SET_INDEX_POSITION,
+	FORMAT_SECTOR
 };
 
 keyword keyword_list[]=
@@ -126,5 +127,6 @@ keyword keyword_list[]=
 	{"sector_data",                 SECTORDATA_SECTOR,          SECTOR},
 	{"sector_size",                 SECTORSIZE_SECTOR,          SECTOR},
 	{"data_offset",                 DATAOFFSETSECTOR,           SECTOR},
+	{"format",                      FORMAT_SECTOR,              SECTOR},
 	{0,0,0}
 };

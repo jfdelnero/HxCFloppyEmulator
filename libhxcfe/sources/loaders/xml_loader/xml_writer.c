@@ -40,7 +40,7 @@
 
 #include "libhxcadaptor.h"
 
-void gettracktype(HXCFE_SECTORACCESS* ss,int track,int side,int * nbsect,int *firstsectid,char * format,int *sectorsize)
+void gettracktype(HXCFE_SECTORACCESS* ss,int track,int side,int * nbsect,int *firstsectid,char * format,int * format_id, int *sectorsize)
 {
 	int i;
 	HXCFE_SECTCFG** sca;
@@ -49,42 +49,39 @@ void gettracktype(HXCFE_SECTORACCESS* ss,int track,int side,int * nbsect,int *fi
 	*sectorsize = 512;
 	*firstsectid = 1;
 	sprintf(format,"IBM_MFM");
+	*format_id = IBMFORMAT_DD;
 	*nbsect = 0;
 
-	sca = hxcfe_getAllTrackSectors(ss,track,side,ISOIBM_MFM_ENCODING,&nb_sectorfound);
+	sca = hxcfe_getAllTrackISOSectors(ss,track,side,&nb_sectorfound);
 	if(nb_sectorfound)
 	{
 		*sectorsize = sca[0]->sectorsize;
 		*firstsectid = 0xFF;
 		*nbsect = nb_sectorfound;
-		for(i=0;i<nb_sectorfound;i++)
-		{
 
-			sprintf(format,"IBM_MFM");
-			if(sca[i]->sector<*firstsectid)
-				*firstsectid = sca[i]->sector;
-			hxcfe_freeSectorConfig  (ss,sca[i]);
-		}
-		free(sca);
-	}
-
-	sca = hxcfe_getAllTrackSectors(ss,track,side,ISOIBM_FM_ENCODING,&nb_sectorfound);
-	if(nb_sectorfound)
-	{
-		*sectorsize = sca[0]->sectorsize;
-		*firstsectid = 0xFF;
-		*nbsect = nb_sectorfound;
-		for(i=0;i<nb_sectorfound;i++)
+		if(
+			( sca[0]->trackencoding == IBMFORMAT_SD ) ||
+			( sca[0]->trackencoding == ISOFORMAT_SD )
+		 )
 		{
 			sprintf(format,"IBM_FM");
+			*format_id = IBMFORMAT_SD;
+		}
+		else
+		{
+			sprintf(format,"IBM_MFM");
+			*format_id = IBMFORMAT_DD;
+		}
+
+		for(i=0;i<nb_sectorfound;i++)
+		{
 			if(sca[i]->sector<*firstsectid)
 				*firstsectid = sca[i]->sector;
 			hxcfe_freeSectorConfig  (ss,sca[i]);
 		}
+
 		free(sca);
 	}
-
-
 }
 
 typedef struct sect_offset_
@@ -136,6 +133,7 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	HXCFE_SECTCFG** sca;
 	sect_offset ** sorted_sectoffset,**sectoffset;
 	uint32_t crc32;
+	int trackformatid;
 
 	sectoffset = NULL;
 	sorted_sectoffset = NULL;
@@ -179,7 +177,7 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 			fprintf(xmlfile,"\t\t<number_of_track>%d</number_of_track>\n",floppy->floppyNumberOfTrack);
 			fprintf(xmlfile,"\t\t<number_of_side>%d</number_of_side>\n",floppy->floppyNumberOfSide);
 
-			gettracktype(ss,0,0,&nbsect,&firstsectid,(char*)&trackformat,&sectorsize);
+			gettracktype(ss,0,0,&nbsect,&firstsectid,(char*)&trackformat,&trackformatid,&sectorsize);
 
 			fprintf(xmlfile,"\t\t<format>%s</format>\n",trackformat);
 
@@ -217,7 +215,7 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 					fprintf(xmlfile,"\t\t\t<track track_number=\"%.2d\" side_number=\"%d\">\n",j,i);
 					fprintf(xmlfile,"\t\t\t\t<data_offset>0x%.6X</data_offset>\n",fileoffset);
 
-					gettracktype(ss,j,i,&nbsect,&firstsectid,(char*)&trackformat,&sectorsize);
+					gettracktype(ss,j,i,&nbsect,&firstsectid,(char*)&trackformat,&trackformatid,&sectorsize);
 					fprintf(xmlfile,"\t\t\t\t<format>%s</format>\n",trackformat);
 
 					nb_sectorfound = 0;
@@ -266,6 +264,29 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 							{
 
 								fprintf(xmlfile,"\t\t\t\t\t<sector sector_id=\"%d\" sector_size=\"%d\">\n",sca[s]->sector,sca[s]->sectorsize);
+
+								if( ( trackformatid != IBMFORMAT_SD ) &&
+									(
+										( sca[s]->trackencoding == IBMFORMAT_SD ) ||
+										( sca[s]->trackencoding == ISOFORMAT_SD )
+									)
+								)
+								{
+									fprintf(xmlfile,"\t\t\t\t\t\t<format>IBM_FM</format>\n");
+								}
+								else
+								{
+									if( ( trackformatid != IBMFORMAT_DD ) &&
+										(
+											( sca[s]->trackencoding == IBMFORMAT_DD ) ||
+											( sca[s]->trackencoding == ISOFORMAT_DD )
+										)
+									)
+									{
+										fprintf(xmlfile,"\t\t\t\t\t\t<format>IBM_MFM</format>\n");
+									}
+								}
+
 								if(sca[s]->fill_byte_used)
 								{
 									fprintf(xmlfile,"\t\t\t\t\t\t<data_fill>0x%.2X</data_fill>\n",sca[s]->fill_byte);
