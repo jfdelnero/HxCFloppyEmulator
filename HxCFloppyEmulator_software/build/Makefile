@@ -202,7 +202,7 @@ ifneq (,$(findstring arm64,$(MACOSX_ARCH)))
 endif
 endif
 else
-		$(MAKE) -C ../sources/thirdpartylibs/fltk/fltk-1.x.x/ DIRS=src
+	cd ../sources/thirdpartylibs/fltk/fltk-1.x.x/ && ./autogen.sh && ./configure && $(MAKE)
 endif
 
 DATA_FILES: bmptoh
