@@ -101,6 +101,7 @@ ff_type ff_type_list[]=
 	{ FF_VTR,"VTR - VTrucco Floppy Emulator file format",PLUGIN_VTR_IMG,".vtr"},
 	{ FF_RAW,"RAW - RAW sectors file format",PLUGIN_RAW_LOADER,".img"},
 	{ FF_IMD,"IMD - IMD sectors file format",PLUGIN_IMD_IMG,".imd"},
+	{ FF_MFI,"MFI - Mame MFI file format",PLUGIN_MAME_MFI,".mfi"},
 	{ FF_ADF,"ADF - ADF sectors file format",PLUGIN_AMIGA_ADF,".adf"},
 	{ FF_ADZ,"ADZ - ADZ sectors file format",PLUGIN_AMIGA_ADZ,".adz"},
 	{ FF_JV3,"JV3 - JV3 TRS80 file format",PLUGIN_TRS80_JV3,".jv3"},
@@ -694,8 +695,9 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 								{
 									if(tempstr)
 									{
-										snprintf(tempstr,MAX_TMP_STR_SIZE,"%s created",&destinationfile[i]);
-
+										int l = snprintf(tempstr,MAX_TMP_STR_SIZE,"%s created",&destinationfile[i]);
+										if(l>=0)
+											tempstr[l] = 0;
 										batchconverter_set_status_string(params, tempstr);
 									}
 									params->numberoffileconverted++;
@@ -704,7 +706,9 @@ int browse_and_convert_directory(HXCFE* floppycontext,char * folder,char * destf
 								{
 									if(tempstr)
 									{
-										snprintf(tempstr,MAX_TMP_STR_SIZE,"Error cannot create %s",&destinationfile[i]);
+										int l = snprintf(tempstr,MAX_TMP_STR_SIZE,"Error cannot create %s",&destinationfile[i]);
+										if(l>=0)
+											tempstr[l] = 0;
 										batchconverter_set_status_string(params, tempstr);
 									}
 								}

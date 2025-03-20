@@ -36,7 +36,7 @@
 //----------------------------------------------------- http://hxc2001.free.fr --//
 ///////////////////////////////////////////////////////////////////////////////////
 // File : mfi_writer.c
-// Contains: MFI floppy image writer
+// Contains: Mame MFI floppy image writer
 //
 // Written by: Jean-François DEL NERO
 //
@@ -52,15 +52,196 @@
 #include "internal_libhxcfe.h"
 #include "tracks/track_generator.h"
 #include "libhxcfe.h"
-#include "86f_loader.h"
-#include "86f_writer.h"
-#include "86f_format.h"
+#include "mfi_loader.h"
+#include "mfi_writer.h"
+#include "mfi_format.h"
 #include "floppy_utils.h"
 #include "tracks/sector_extractor.h"
 #include "libhxcadaptor.h"
 
+#include "thirdpartylibs/zlib/zlib.h"
+
+#include "stream_analyzer/fluxStreamAnalyzer.h"
+
+#define DEFAULT_BITS_PERIOD 1000 // ps -> 1GHz
+
+uint8_t * write_mfi_track(HXCFE_IMGLDR* imgldr_ctx,FILE *f,HXCFE_SIDE * track,mfitrack_t * mfitrk, unsigned int nb_of_revs, int * unpackedsize, int * packed_size)
+{
+	uint32_t size,totalsize;
+	uint32_t * trackbuffer;
+	unsigned int i,index;
+	uint32_t total_time;
+	streamconv * strconv;
+	uLongf packedsize;
+	uint8_t * pack;
+
+	trackbuffer = NULL;
+
+	strconv = initStreamConvert(imgldr_ctx->hxcfe,track, DEFAULT_BITS_PERIOD, (DEFAULT_BITS_PERIOD/1000)*65536,-1,-1,nb_of_revs+1,5000000);
+	if(!strconv)
+	{
+		return 0;
+	}
+
+	total_time = 0;
+	totalsize = 0;
+	size = 0;
+
+	// Need to start at the first index...
+	while(!strconv->index_event && !strconv->stream_end_event)
+	{
+		StreamConvert_getNextPulse(strconv);
+	}
+
+	// No index found ...
+	if(!strconv->index_event && strconv->stream_end_event)
+	{
+		// Restart ...
+		strconv->stream_end_event = 0;
+		StreamConvert_getNextPulse(strconv);
+	}
+
+	trackbuffer = calloc(1, 64*1024 * sizeof(uint32_t) );
+
+	index = 0;
+	total_time = 0;
+
+	while( (!strconv->stream_end_event) && index < nb_of_revs)
+	{
+		i = 0;
+		size = 0;
+
+		do
+		{
+			trackbuffer[i] = StreamConvert_getNextPulse(strconv);
+
+			total_time += trackbuffer[i];
+
+			i++;
+
+			if( !( i & ((64*1024)-1) ) )
+			{
+				trackbuffer = realloc(trackbuffer, i + ( 64*1024 * sizeof(uint32_t) ) );
+				size = size + (i * sizeof(uint32_t) );
+			}
+
+		}while(!strconv->index_event && !strconv->stream_end_event);
+
+		if( i )
+		{
+			size = size + ( i * sizeof(uint32_t) );
+		}
+
+		if(strconv->index_event)
+		{
+			index++;
+			break;
+		}
+
+		totalsize += size;
+	}
+
+	packedsize = size;
+
+	pack = calloc( 1, size + (8*1024) );
+
+	if( pack )
+	{
+		compress(pack, &packedsize, (const Bytef *)trackbuffer, size);
+		*packed_size = packedsize;
+		*unpackedsize = size;
+	}
+
+	free(trackbuffer);
+
+	deinitStreamConvert(strconv);
+
+	return pack;
+}
+
 // Main writer function
 int MFI_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-	return 0;
+	int ret;
+	mfiheader_t header;
+	mfitrack_t * track_header_array = NULL;
+	FILE * mfidskfile;
+	int trk,head;
+	int idx;
+	int trkoffset;
+	int unpackedsize, packedsize;
+	uint8_t * pack;
+
+	ret = HXCFE_NOERROR;
+	mfidskfile = NULL;
+
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write MFI file %s...",filename);
+
+	memset((void*)&header,0,sizeof(mfiheader_t));
+	strcpy((char*)&header.mfi_signature,"MAMEFLOPPYIMAGE");
+
+	header.cyl_count = floppy->floppyNumberOfTrack;
+	header.head_count = floppy->floppyNumberOfSide;
+
+	track_header_array = (mfitrack_t*)calloc(1, sizeof(mfitrack_t)*floppy->floppyNumberOfTrack * floppy->floppyNumberOfSide);
+	if(!track_header_array)
+	{
+		ret = HXCFE_INTERNALERROR;
+		goto error;
+	}
+
+	mfidskfile = hxc_fopen(filename,"wb");
+	if(!mfidskfile)
+	{
+		ret = HXCFE_ACCESSERROR;
+		goto error;
+	}
+
+	fwrite(&header,sizeof(mfiheader_t),1,mfidskfile);
+
+	fwrite(track_header_array,sizeof(mfitrack_t)*floppy->floppyNumberOfTrack * floppy->floppyNumberOfSide,1,mfidskfile);
+
+	trkoffset = sizeof(mfiheader_t) + (sizeof(mfitrack_t)*floppy->floppyNumberOfTrack * floppy->floppyNumberOfSide);
+
+	for(trk=0;trk<floppy->floppyNumberOfTrack;trk++)
+	{
+		for(head=0;head<floppy->floppyNumberOfSide;head++)
+		{
+			idx = ( (trk*floppy->floppyNumberOfSide) + head );
+
+			track_header_array[idx].offset = trkoffset;
+
+			pack = write_mfi_track(imgldr_ctx, mfidskfile, floppy->tracks[trk]->sides[head], &track_header_array[idx], 1, &unpackedsize, &packedsize);
+			if(pack)
+			{
+				fwrite( pack, packedsize, 1, mfidskfile);
+
+				trkoffset += packedsize;
+
+				track_header_array[idx].compressed_size = packedsize;
+				track_header_array[idx].uncompressed_size = unpackedsize;
+
+				free(pack);
+			}
+
+			hxcfe_imgCallProgressCallback(imgldr_ctx,head + (trk*floppy->floppyNumberOfTrack),floppy->floppyNumberOfTrack*floppy->floppyNumberOfSide );
+
+		}
+	}
+
+	fseek(mfidskfile, sizeof(mfiheader_t), SEEK_SET);
+
+	fwrite(track_header_array,sizeof(mfitrack_t)*floppy->floppyNumberOfTrack * floppy->floppyNumberOfSide,1,mfidskfile);
+
+	fclose(mfidskfile);
+
+	return ret;
+
+error:
+	free(track_header_array);
+
+	if(mfidskfile)
+		fclose(mfidskfile);
+
+	return ret;
 }

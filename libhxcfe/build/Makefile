@@ -135,7 +135,8 @@ DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_w
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
 					kryofluxstream_writer.o adf_writer.o bmp_writer.o bmp_disk_writer.o bmp_file.o xml_writer.o trd_writer.o stx_writer.o st_writer.o \
 					stw_writer.o dim_writer.o adz_writer.o ipf_writer.o fd_writer.o northstar_loader.o northstar_writer.o heathkit_writer.o vdk_writer.o \
-					xml_db_writer.o streamhfe_writer.o qd_writer.o hxcstream_writer.o oricdsk_writer.o apple2_do_writer.o hfev3_writer.o fdx_writer.o 86f_writer.o
+					xml_db_writer.o streamhfe_writer.o qd_writer.o hxcstream_writer.o oricdsk_writer.o apple2_do_writer.o hfev3_writer.o fdx_writer.o 86f_writer.o \
+					mfi_writer.o
 
 TRACK_FORMATS_SUPPORT = luts.o track_types_defs.o aed6200p_track.o amiga_mfm_track.o apple2_gcr_track.o arburg_track.o emu_emulator_fm_track.o c64_gcr_track.o \
 						heathkit_fm_track.o iso_ibm_fm_track.o iso_ibm_mfm_track.o membrain_mfm_track.o northstar_mfm_track.o tycom_fm_track.o dec_rx02_track.o \
@@ -765,6 +766,9 @@ woz_loader.o : $(BASEDIR)/loaders/woz_loader/woz_loader.c $(BASEDIR)/loaders/woz
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 mfi_loader.o : $(BASEDIR)/loaders/mfi_loader/mfi_loader.c $(BASEDIR)/loaders/mfi_loader/mfi_loader.h $(BASEDIR)/loaders/mfi_loader/mfi_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+mfi_writer.o : $(BASEDIR)/loaders/mfi_loader/mfi_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 pri_loader.o : $(BASEDIR)/loaders/pri_loader/pri_loader.c $(BASEDIR)/loaders/pri_loader/pri_loader.h $(BASEDIR)/loaders/pri_loader/pri_loader.h

@@ -34,6 +34,7 @@
 #define PLUGIN_PAULINE_STREAM       "HXCSTREAM"
 #define PLUGIN_VTR_IMG              "VTR_IMG"
 #define PLUGIN_IMD_IMG              "IMD_IMG"
+#define PLUGIN_MAME_MFI             "MAME_MFI"
 #define PLUGIN_HXC_AFI              "HXC_AFI"
 #define PLUGIN_C64_D64              "C64_D64"
 #define PLUGIN_C64_D81              "C64_D81"

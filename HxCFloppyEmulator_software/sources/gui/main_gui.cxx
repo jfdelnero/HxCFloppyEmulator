@@ -132,6 +132,7 @@ const char * plugid_lst[]=
 	PLUGIN_AMSTRADCPC_DSK,
 	PLUGIN_ORIC_DSK,
 	PLUGIN_IMD_IMG,
+	PLUGIN_MAME_MFI,
 	PLUGIN_AMIGA_ADF,
 	PLUGIN_AMIGA_ADZ,
 	PLUGIN_TI994A_V9T9,
@@ -583,6 +584,7 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"CPC DSK file\t*.dsk\n"
 					"Oric DSK file\t*.dsk\n"
 					"IMD file\t*.imd\n"
+					"MFI Mame file\t*.mfi\n"
 					"ADF file\t*.adf\n"
 					"ADZ file\t*.adz\n"
 					"TI99/4A V9T9 DSK file\t*.dsk\n"

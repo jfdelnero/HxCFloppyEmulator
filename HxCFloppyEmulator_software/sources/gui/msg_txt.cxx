@@ -145,6 +145,7 @@ Fl_Menu_Item format_choices[]=
 	{ "VTR - VTrucco Floppy Emulator file format",0,format_choice_cb,(void*)PLUGIN_VTR_IMG},
 	{ "RAW - RAW sectors file format",0,format_choice_cb,(void*)PLUGIN_RAW_IMG},
 	{ "IMD - IMD sectors file format",0,format_choice_cb,(void*)PLUGIN_IMD_IMG},
+	{ "MFI - MFI Mame file format",0,format_choice_cb,(void*)PLUGIN_MAME_MFI},
 	{ "ADF - ADF sectors file format",0,format_choice_cb,(void*)PLUGIN_AMIGA_ADF},
 	{ "ADZ - ADZ sectors file format",0,format_choice_cb,(void*)PLUGIN_AMIGA_ADZ},
 	{ "JV3 - JV3 TRS80 file format",0,format_choice_cb,(void*)PLUGIN_TRS80_JV3},

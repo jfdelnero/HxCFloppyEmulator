@@ -461,7 +461,7 @@ int MFI_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * retu
 	{
 		(ISVALIDDISKFILE)   MFI_libIsValidDiskFile,
 		(LOADDISKFILE)      MFI_libLoad_DiskFile,
-		(WRITEDISKFILE)     0,//MFI_libWrite_DiskFile,
+		(WRITEDISKFILE)     MFI_libWrite_DiskFile,
 		(GETPLUGININFOS)    MFI_libGetPluginInfo
 	};
 
