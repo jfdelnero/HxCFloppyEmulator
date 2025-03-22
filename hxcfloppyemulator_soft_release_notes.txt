@@ -15,7 +15,7 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
-21 March 2025 : HxCFloppyEmulator v2.16.12.2
+22 March 2025 : HxCFloppyEmulator v2.16.12.2
 
 -> New Writer : Mame MFI files.
 
