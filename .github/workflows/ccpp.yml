@@ -24,7 +24,7 @@ jobs:
     steps:
     - uses: actions/checkout@main
     - name: Build
-      run: sudo apt install -q -y mingw-w64 && cd build && make TARGET=mingw32 -j2
+      run: sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu/ focal main universe" && sudo apt install -q -y mingw-w64=7.0.0-2 && cd build && make TARGET=mingw32 -j2
     - name: Package
       run: cd build && ./windowscreatezip.sh _x86
     - uses: actions/upload-artifact@main
