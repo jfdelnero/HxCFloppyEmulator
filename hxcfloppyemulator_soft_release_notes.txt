@@ -15,11 +15,13 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
-21 March 2025 : HxCFloppyEmulator v2.16.12.1
+21 March 2025 : HxCFloppyEmulator v2.16.12.2
 
 -> New Writer : Mame MFI files.
 
 -> FLTK updated to v1.4.2
+
+-> CI : Fix Windows XP x86 support
 
 *********************************************************/
 
