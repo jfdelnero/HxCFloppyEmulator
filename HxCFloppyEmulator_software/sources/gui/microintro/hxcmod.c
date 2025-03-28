@@ -12,7 +12,7 @@
 // File : hxcmod.c
 // Contains: a tiny mod player
 //
-// Written by: Jean-François DEL NERO
+// Written by: Jean-FranÃ§ois DEL NERO
 //
 // You are free to do what you want with this code.
 // A credit is always appreciated if you include it into your prod :)
@@ -414,12 +414,12 @@ static void memclear( void * dest, unsigned char value, unsigned long size )
 	}
 }
 
-static int getnote( modcontext * mod, unsigned short period )
+static int getnote( modcontext * mod, unsigned short period, unsigned char finetune )
 {
 	int i;
 	const short * ptr;
 
-	ptr = periodtable_finetune_ptr[0];
+	ptr = periodtable_finetune_ptr[finetune&0xF];
 
 	for(i = 0; i < MAXNOTES; i++)
 	{
@@ -564,18 +564,19 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 				cptr->samppos = 0;
 		}
 
-		cptr->decalperiod = 0;
 		if( period )
 		{
 			if( cptr->finetune )
 			{
 				period_table_ptr = periodtable_finetune_ptr[cptr->finetune&0xF];
-				period = period_table_ptr[getnote(mod,period)];
+				period = period_table_ptr[getnote(mod,period,0)];
 			}
 
 			cptr->period = period;
 		}
 	}
+
+	cptr->decalperiod = 0;
 
 	cptr->effect = 0;
 	cptr->parameffect = 0;
@@ -611,7 +612,7 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 
 				cptr->ArpIndex = 0;
 
-				curnote = getnote(mod,cptr->period);
+				curnote = getnote(mod,cptr->period,cptr->finetune);
 
 				cptr->Arpperiods[0] = cptr->period;
 
@@ -916,14 +917,14 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 					more info on finetune values).
 					*/
 
-					cptr->finetune = effect_param_l;
-
 					if( period )
 					{
-						period_table_ptr = periodtable_finetune_ptr[cptr->finetune&0xF];
-						period = period_table_ptr[getnote(mod,period)];
+						period_table_ptr = periodtable_finetune_ptr[effect_param_l&0xF];
+						period = period_table_ptr[getnote(mod,period,cptr->finetune)];
 						cptr->period = period;
 					}
+
+					cptr->finetune = effect_param_l;
 
 				break;
 
@@ -1094,7 +1095,7 @@ static void worknote( note * nptr, channel * cptr,char t,modcontext * mod )
 				}
 				else
 				{   // effect_param >= 0x20
-					///  HZ = 2 * BPM / 5
+					///	 HZ = 2 * BPM / 5
 					mod->bpm = effect_param;
 				}
 
@@ -1134,11 +1135,11 @@ static void workeffect( modcontext * modctx, note * nptr, channel * cptr )
 
 			if( cptr->parameffect )
 			{
-				cptr->decalperiod = cptr->period - cptr->Arpperiods[cptr->ArpIndex];
-
 				cptr->ArpIndex++;
 				if( cptr->ArpIndex>2 )
 					cptr->ArpIndex = 0;
+
+				cptr->decalperiod = cptr->period - cptr->Arpperiods[cptr->ArpIndex];
 			}
 		break;
 
