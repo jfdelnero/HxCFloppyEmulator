@@ -61,14 +61,6 @@
 
 #include "libhxcadaptor.h"
 
-/*
-#define KF_MCLOCK 48054857,14 //(((18432000 * 73) / 14) / 2)
-#define KF_SCLOCK ((float)KF_MCLOCK / (float)2)
-#define KF_ICLOCK (KF_MCLOCK / 16)
-*/
-
-#define KF_NS_PER_TICK 41619 // 41,619 ns per tick
-
 #define MAX_INDEX 128
 
 //#define KFSTREAMDBG 1
@@ -114,9 +106,10 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 	FILE* f;
 
+	char * tempstr;
+
 	#ifdef KFSTREAMDBG
 
-	char * tempstr;
 	s_oob_StreamRead    * streamRead;
 	s_oob_StreamEnd     * streamEnd;
 
@@ -147,6 +140,13 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 
 	track_dump = NULL;
 	kfstreambuffer = NULL;
+
+	double sck;
+	double sampleperiod;
+	char *sck_strpos;
+
+	sck = DEFAULT_KF_SCLOCK;
+	sampleperiod = (1E9/sck) * 1000.0; // default 41.619 ns
 
 	if(fxs)
 	{
@@ -362,18 +362,53 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 	#ifdef KFSTREAMDBG
 							floppycontext->hxc_printf(MSG_DEBUG,"---String---");
 	#endif
-	#ifdef KFSTREAMDBG
 							tempstr = malloc(oob->Size+1);
 							if( tempstr )
 							{
 								memset(tempstr,0,oob->Size+1);
 								memcpy(tempstr,&kfstreambuffer[stream_ofs + sizeof(s_oob_header)],oob->Size);
 
+	#ifdef KFSTREAMDBG
 								floppycontext->hxc_printf(MSG_DEBUG,"String : %s",tempstr);
+	#endif
+
+								sck_strpos = strstr(tempstr, "sck=");
+								if( sck_strpos )
+								{
+									char tmpstrfreq[64];
+									int str_i;
+									sck_strpos += strlen("sck=");
+									str_i = 0;
+									while( *sck_strpos != 0 && *sck_strpos != ',' && str_i<(sizeof(tmpstrfreq) - 1))
+									{
+										if( (*sck_strpos >= '0' && *sck_strpos <= '9') || *sck_strpos == '.' )
+										{
+											tmpstrfreq[str_i++] = *sck_strpos;
+										}
+										sck_strpos++;
+									}
+									tmpstrfreq[str_i++] = 0;
+									sck = atof(tmpstrfreq);
+
+									floppycontext->hxc_printf(MSG_DEBUG,"sck: %.16f",sck);
+
+									if( sck >= (4 * 1000000) && sck <= (250 * 1000000) )
+									{
+										// ns per tick
+										sampleperiod = (1E9/sck) * 1000.0;
+										floppycontext->hxc_printf(MSG_DEBUG,"sampleperiod: %.16f",sampleperiod);
+									}
+									else
+									{
+										floppycontext->hxc_printf(MSG_ERROR,"sck is out of range! (%.16f)",sck);
+										sck = DEFAULT_KF_SCLOCK;
+										sampleperiod = (1E9/sck) * 1000.0;
+									}
+								}
+
 								free(tempstr);
 								tempstr = NULL;
 							}
-	#endif
 						break;
 
 						case OOBTYPE_End:
@@ -453,7 +488,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 				}
 			}
 
-			hxcfe_FxStream_setResolution(fxs,KF_NS_PER_TICK);
+			hxcfe_FxStream_setResolution(fxs,(int)sampleperiod);
 
 			track_dump = hxcfe_FxStream_ImportStream(fxs,cellstream,32,cellpos, HXCFE_STREAMCHANNEL_TYPE_RLEEVT, "data",NULL);
 
@@ -504,7 +539,7 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 				}
 
 				// Max index delta is < to 50 ms, load this track as an hard sectored track.
-				if ( (Next_Max_Index_Tick * ((float)KF_NS_PER_TICK * 10E-10)) < 50 && (Prev_Max_Index_Tick * ((float)KF_NS_PER_TICK * 10E-10)) < 50 )
+				if ( (Next_Max_Index_Tick * (sampleperiod * 10E-10)) < 50 && (Prev_Max_Index_Tick * (sampleperiod * 10E-10)) < 50 )
 				{
 					for( i = 0; i < nbindex ; i++ )
 					{
@@ -570,8 +605,8 @@ HXCFE_TRKSTREAM* DecodeKFStreamFile(HXCFE* floppycontext,HXCFE_FXSA * fxs,char *
 				for( i = 0; i < nbindex ; i++ )
 				{
 					floppycontext->hxc_printf(MSG_DEBUG,"Index %d : Prev delta %f ms, Next delta %f ms, Type : 0x%x",i, \
-								(float)index_events[i].Prev_Index_Tick * ((float)KF_NS_PER_TICK * 10E-10), \
-								(float)index_events[i].Next_Index_Tick * ((float)KF_NS_PER_TICK * 10E-10), \
+								(float)index_events[i].Prev_Index_Tick * (sampleperiod * 10E-10), \
+								(float)index_events[i].Next_Index_Tick * (sampleperiod * 10E-10), \
 								index_events[i].type);
 
 					hxcfe_FxStream_AddIndex(fxs,track_dump,index_events[i].CellPos,index_events[i].Timer,index_events[i].type);

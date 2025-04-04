@@ -66,4 +66,7 @@ typedef struct s_oob_DiskIndex_
 #define OOBTYPE_String           0x04  // String info
 #define OOBTYPE_End              0x0D  // End of data (no more data to process)
 
+#define DEFAULT_KF_MCLOCK (double)48054857.14285714         // (((18432000 * 73) / 14) / 2)
+#define DEFAULT_KF_SCLOCK (double)(DEFAULT_KF_MCLOCK / 2)   // Default 41.619 ns per tick
+
 #pragma pack()
