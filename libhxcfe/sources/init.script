@@ -336,6 +336,7 @@ set BMPEXPORT_ENABLE_VICTOR9000_GCR_ENCODING 0
 set SCPEXPORT_NUMBER_OF_REVOLUTIONS 3                # Number of revolutions generated to the exported SCP file
 set KFRAWEXPORT_NUMBER_OF_REVOLUTIONS 3              # Number of revolutions generated to the exported KF raw files
 set KFRAWEXPORT_DOUBLE_STEP 0                        # Generate 40 tracks dump for 80 tracks drives.
+set KFRAWEXPORT_SAMPLE_FREQUENCY 24027428.57142857   # KF raw sample frequency
 
 #set SCPEXPORT_DISK_TYPE    0x15                     # Uncomment to force/change the SCP Disk Type field
                                                      # Please refer to the SCP documentation for more details

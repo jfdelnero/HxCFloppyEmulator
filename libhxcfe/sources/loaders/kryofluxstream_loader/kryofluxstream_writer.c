@@ -46,6 +46,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "types.h"
 
@@ -122,7 +123,7 @@ int alignOOB(FILE * f)
 	return j;
 }
 
-uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_SIDE * track,int tracknum,int sidenum,unsigned int revolution)
+uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_SIDE * track,int tracknum,int sidenum,unsigned int revolution,double sck)
 {
 	char fullp[512];
 	char fullp2[512];
@@ -147,7 +148,13 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 	FILE *f;
 	streamconv * strconv;
 
-	strconv = initStreamConvert(imgldr_ctx->hxcfe,track, 41619, 0x00FFFFFF,-1,-1,revolution+1,5000000);
+	char * envstr;
+	char kfinfobuffer[256];
+
+	time_t curtimecnt;
+	struct tm * curtime;
+
+	strconv = initStreamConvert(imgldr_ctx->hxcfe,track, (float)(1E9/sck) * 1000.0, 0x00FFFFFF,-1,-1,revolution+1,5000000);
 	if(!strconv)
 		return 0;
 
@@ -159,6 +166,9 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"write_kf_stream_track : Creating %s (trk %d, side %d, rev %d)",fullp,tracknum,sidenum,revolution);
 
+	time(&curtimecnt);
+	curtime = localtime(&curtimecnt);
+
 	f = hxc_fopen(fullp,"wb");
 	if(f)
 	{
@@ -167,6 +177,30 @@ uint32_t write_kf_stream_track(HXCFE_IMGLDR * imgldr_ctx,char * filepath,HXCFE_S
 		StreamConvert_getNextPulse(strconv);
 
 		streampos = 0;
+
+		// KFInfo : host datetime
+		snprintf(kfinfobuffer,sizeof(kfinfobuffer)-1,"host_date=%04d.%02d.%02d, host_time=%02d:%02d:%02d",curtime->tm_year+1900,curtime->tm_mon+1,curtime->tm_mday,curtime->tm_hour,curtime->tm_min,curtime->tm_sec);
+		kfinfobuffer[sizeof(kfinfobuffer)-1] = 0;
+		memset(&oobh,0,sizeof(s_oob_header));
+		oobh.Sign = 0xD;
+		oobh.Size = strlen(kfinfobuffer)+1;
+		oobh.Type = OOBTYPE_String;
+		fwrite(&oobh,sizeof(s_oob_header),1,f);
+		fwrite(kfinfobuffer,1,oobh.Size,f);
+
+		// KFInfo : software information and clocks
+		envstr = hxcfe_getEnvVar(imgldr_ctx->hxcfe,"LIBVERSION",0);
+		if(envstr)
+		{
+			snprintf(kfinfobuffer,sizeof(kfinfobuffer)-1,"name=%s, version=%s, sck=%.7f, ick=%.7f","libhxcfe",envstr,sck,(double)(sck/8));
+			kfinfobuffer[sizeof(kfinfobuffer)-1] = 0;
+			memset(&oobh,0,sizeof(s_oob_header));
+			oobh.Sign = 0xD;
+			oobh.Size = strlen(kfinfobuffer)+1;
+			oobh.Type = OOBTYPE_String;
+			fwrite(&oobh,sizeof(s_oob_header),1,f);
+			fwrite(kfinfobuffer,1,oobh.Size,f);
+		}
 
 		memset(&oobh,0,sizeof(s_oob_header));
 		oobh.Sign = 0xD;
@@ -354,6 +388,9 @@ int KryoFluxStream_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * flo
 	int i,j, nbrevolutions;
 	int track_step;
 
+	char * tmp_str;
+	double sck;
+
 	nbrevolutions = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "KFRAWEXPORT_NUMBER_OF_REVOLUTIONS" );
 
 	track_step = 1;
@@ -361,13 +398,24 @@ int KryoFluxStream_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * flo
 	if( hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "KFRAWEXPORT_DOUBLE_STEP" ) == 1 )
 		track_step = 2;
 
+	sck = DEFAULT_KF_SCLOCK;
+	tmp_str = hxcfe_getEnvVar( imgldr_ctx->hxcfe, "KFRAWEXPORT_SAMPLE_FREQUENCY", NULL);
+	if( tmp_str )
+	{
+		sck = atof(tmp_str);
+		if( !( sck >= (4 * 1000000) && sck <= (250 * 1000000) ) )
+		{
+			sck = (double)DEFAULT_KF_SCLOCK;
+		}
+	}
+
 	for(j=0;j<floppy->floppyNumberOfSide;j++)
 	{
 		for(i=0;i<floppy->floppyNumberOfTrack;i++)
 		{
 			hxcfe_imgCallProgressCallback(imgldr_ctx,i + (j*floppy->floppyNumberOfTrack),floppy->floppyNumberOfTrack*floppy->floppyNumberOfSide );
 
-			write_kf_stream_track(imgldr_ctx, filename,floppy->tracks[i]->sides[j],i*track_step,j,nbrevolutions);
+			write_kf_stream_track(imgldr_ctx, filename,floppy->tracks[i]->sides[j],i*track_step,j,nbrevolutions,sck);
 		}
 	}
 
