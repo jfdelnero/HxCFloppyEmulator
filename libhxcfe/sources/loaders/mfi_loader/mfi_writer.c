@@ -67,7 +67,7 @@
 
 uint8_t * write_mfi_track(HXCFE_IMGLDR* imgldr_ctx,FILE *f,HXCFE_SIDE * track,mfitrack_t * mfitrk, unsigned int nb_of_revs, int * unpackedsize, int * packed_size)
 {
-	uint32_t size,totalsize;
+	uint32_t totalsize;
 	uint32_t * trackbuffer;
 	unsigned int i,index;
 	uint32_t total_time;
@@ -76,6 +76,7 @@ uint8_t * write_mfi_track(HXCFE_IMGLDR* imgldr_ctx,FILE *f,HXCFE_SIDE * track,mf
 	uint8_t * pack;
 
 	trackbuffer = NULL;
+	pack = NULL;
 
 	strconv = initStreamConvert(imgldr_ctx->hxcfe,track, DEFAULT_BITS_PERIOD, (DEFAULT_BITS_PERIOD/1000)*65536,-1,-1,nb_of_revs+1,5000000);
 	if(!strconv)
@@ -85,7 +86,6 @@ uint8_t * write_mfi_track(HXCFE_IMGLDR* imgldr_ctx,FILE *f,HXCFE_SIDE * track,mf
 
 	total_time = 0;
 	totalsize = 0;
-	size = 0;
 
 	// Need to start at the first index...
 	while(!strconv->index_event && !strconv->stream_end_event)
@@ -102,15 +102,17 @@ uint8_t * write_mfi_track(HXCFE_IMGLDR* imgldr_ctx,FILE *f,HXCFE_SIDE * track,mf
 	}
 
 	trackbuffer = calloc(1, 64*1024 * sizeof(uint32_t) );
+	if(!trackbuffer)
+	{
+		return 0;
+	}
 
 	index = 0;
 	total_time = 0;
 
-	while( (!strconv->stream_end_event) && index < nb_of_revs)
+	while( (!strconv->stream_end_event) && index < nb_of_revs && trackbuffer)
 	{
 		i = 0;
-		size = 0;
-
 		do
 		{
 			trackbuffer[i] = StreamConvert_getNextPulse(strconv);
@@ -121,35 +123,34 @@ uint8_t * write_mfi_track(HXCFE_IMGLDR* imgldr_ctx,FILE *f,HXCFE_SIDE * track,mf
 
 			if( !( i & ((64*1024)-1) ) )
 			{
-				trackbuffer = realloc(trackbuffer, i + ( 64*1024 * sizeof(uint32_t) ) );
-				size = size + (i * sizeof(uint32_t) );
+				trackbuffer = realloc(trackbuffer, ( i * sizeof(uint32_t) ) + ( 64*1024 * sizeof(uint32_t) ) );
+
+				if(trackbuffer)
+					memset(&trackbuffer[i],0,( 64*1024 * sizeof(uint32_t) ));
 			}
 
-		}while(!strconv->index_event && !strconv->stream_end_event);
+		}while(!strconv->index_event && !strconv->stream_end_event && trackbuffer);
 
-		if( i )
-		{
-			size = size + ( i * sizeof(uint32_t) );
-		}
+		totalsize = ( i * sizeof(uint32_t) );
 
 		if(strconv->index_event)
 		{
 			index++;
 			break;
 		}
-
-		totalsize += size;
 	}
 
-	packedsize = size;
+	packedsize = totalsize;
 
-	pack = calloc( 1, size + (8*1024) );
-
-	if( pack )
+	if(totalsize && trackbuffer)
 	{
-		compress(pack, &packedsize, (const Bytef *)trackbuffer, size);
-		*packed_size = packedsize;
-		*unpackedsize = size;
+		pack = calloc( 1, totalsize + (64*1024) );
+		if( pack )
+		{
+			compress(pack, &packedsize, (const Bytef *)trackbuffer, totalsize);
+			*packed_size = packedsize;
+			*unpackedsize = totalsize;
+		}
 	}
 
 	free(trackbuffer);
@@ -208,6 +209,8 @@ int MFI_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		for(head=0;head<floppy->floppyNumberOfSide;head++)
 		{
 			idx = ( (trk*floppy->floppyNumberOfSide) + head );
+
+			hxcfe_imgCallProgressCallback(imgldr_ctx,idx,floppy->floppyNumberOfTrack*floppy->floppyNumberOfSide);
 
 			track_header_array[idx].offset = trkoffset;
 
