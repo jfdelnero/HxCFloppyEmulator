@@ -15,6 +15,19 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
+6 April 2025 : HxCFloppyEmulator v2.16.13.1
+
+-> Mame MFI writer : Fix memory allocation error/crashes.
+
+-> Kryoflux writer : The default sample frequency can be changed with the 
+                     KFRAWEXPORT_SAMPLE_FREQUENCY variable. (patch by uru2)
+
+-> Kryoflux Stream Loader : Support different sample rate setting from the
+                            KFInfo string. (patch by uru2)
+
+*********************************************************/
+
+/*********************************************************
 22 March 2025 : HxCFloppyEmulator v2.16.12.2
 
 -> New Writer : Mame MFI files.
