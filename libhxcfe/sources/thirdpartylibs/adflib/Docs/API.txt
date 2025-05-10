@@ -209,7 +209,7 @@ The structure 'struct nativeFunctions' must have at least :
   BOOL (*adfNativeReadSector)(struct Device*, long, int, unsigned char*)
   BOOL (*adfNativeWriteSector)(struct Device*, long, int, unsigned char*)
   BOOL (*adfIsDevNative)(char*)
-  void (*adfReleaseDevice)()
+  void (*adfReleaseDevice)(struct Device *)
 
 
 For example, adfMountDev() calls adfInitDevice() this way :
