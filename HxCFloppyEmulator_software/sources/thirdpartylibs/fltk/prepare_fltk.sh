@@ -10,6 +10,7 @@ md5_check () {
 			return 1;
 		fi;
 	else
+		export LC_ALL=C
 		export valid_md5=`echo ${DOWNLOADHASH} ${ARCHIVENAMEBASE}.tar.gz | md5sum -c - | grep ": OK" | wc -l`
 
 		if [ "$valid_md5" -ne "1" ]; then
