@@ -37,7 +37,7 @@ jobs:
     steps:
     - uses: actions/checkout@main
     - name: Build
-      run: sudo apt install -q -y mingw-w64 && cd build && make TARGET=mingw32 STANDALONEFSBROWSER_BUILD -j2
+      run: sudo apt install -q -y mingw-w64 && cd build && make TARGET=mingw32 STANDALONEFSBROWSER_BUILD=1 -j2
     - name: Package
       run: cd build && ./windowsdiskbrowsercreatezip.sh _x86
     - uses: actions/upload-artifact@main
