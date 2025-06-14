@@ -1,46 +1,67 @@
 #!/usr/bin/env bash
 export VERSION=`grep "define STR_FILE_VERSION2" version.h | cut -f2 -d\"`
-export NAME="HxCFloppyEmulator"
-export DMGNAME="HxCFloppyEmulator"
 
-export CLI_PATH="hxcfe_cmdline"
-export CLI_EXEC="hxcfe"
+if [ "$1" = "HXCSOFT" ]; then
+	export NAME="HxCFloppyEmulator"
+	export DMGNAME="HxCFloppyEmulator"
 
-export GUI_PATH="HxCFloppyEmulator.app"
-export GUI_EXEC="hxcfloppyemulator"
+	export CLI_PATH="hxcfe_cmdline"
+	export CLI_EXEC="hxcfe"
 
-echo Creating App bundle : ${NAME}
+	export GUI_PATH="HxCFloppyEmulator.app"
+	export GUI_EXEC="hxcfloppyemulator"
 
-mkdir -p ${CLI_PATH}/{Frameworks,App}
-install hxcfe ${CLI_PATH}/App/${CLI_EXEC}
-install libhxcfe.dylib libusbhxcfe.dylib ${CLI_PATH}/Frameworks
+	echo Creating App bundle : ${NAME}
 
-mkdir -p ${GUI_PATH}/Contents/{Resources,MacOS,Frameworks}
+	mkdir -p ${CLI_PATH}/{Frameworks,App}
+	install hxcfe ${CLI_PATH}/App/${CLI_EXEC}
+	install libhxcfe.dylib libusbhxcfe.dylib ${CLI_PATH}/Frameworks
 
-echo APPLnone > ${GUI_PATH}/Contents/PkgInfo
-iconutil --convert icns --output ${GUI_PATH}/Contents/Resources/icons.icns ../HxCFloppyEmulator_software/sources/mac/icons/hxcfloppyemulator.iconset/
-install hxcfloppyemulator ${GUI_PATH}/Contents/MacOS/${GUI_EXEC}
-install libhxcfe.dylib libusbhxcfe.dylib ${GUI_PATH}/Contents/Frameworks
+	mkdir -p ${GUI_PATH}/Contents/{Resources,MacOS,Frameworks}
+
+	echo APPLnone > ${GUI_PATH}/Contents/PkgInfo
+	iconutil --convert icns --output ${GUI_PATH}/Contents/Resources/icons.icns ../HxCFloppyEmulator_software/sources/mac/icons/hxcfloppyemulator.iconset/
+	install hxcfloppyemulator ${GUI_PATH}/Contents/MacOS/${GUI_EXEC}
+	install libhxcfe.dylib libusbhxcfe.dylib ${GUI_PATH}/Contents/Frameworks
+
+fi
+
+if [ "$1" = "DOSDISKBROWSER" ]; then
+	export NAME="DosDiskBrowser"
+	export DMGNAME="DosDiskBrowser"
+
+	export GUI_PATH="DosDiskBrowser.app"
+	export GUI_EXEC="dosdiskbrowser"
+
+	echo Creating App bundle : ${NAME}
+
+	mkdir -p ${GUI_PATH}/Contents/{Resources,MacOS,Frameworks}
+
+	echo APPLnone > ${GUI_PATH}/Contents/PkgInfo
+	iconutil --convert icns --output ${GUI_PATH}/Contents/Resources/icons.icns ../HxCFloppyEmulator_software/sources/mac/icons/hxcfloppyemulator.iconset/
+	install hxcfloppyemulator ${GUI_PATH}/Contents/MacOS/${GUI_EXEC}
+	install libhxcfe.dylib ${GUI_PATH}/Contents/Frameworks
+fi
 
 cat << EOF > ${GUI_PATH}/Contents/info.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
 <plist version="0.9">
 <dict>
-        <key>CFBundleIdentifier</key>
-        <string>com.hxc2001.${GUI_EXEC}</string>
-        <key>CFBundleName</key>
-        <string>${NAME}</string>
-        <key>CFBundlePackageType</key>
-        <string>APPL</string>
-        <key>CFBundleVersion</key>
-        <string>1</string>
-        <key>CFBundleShortVersionString</key>
-        <string>${VERSION}</string>
-        <key>CFBundleIconFile</key>
-        <string>icons.icns</string>
-        <key>CFBundleSignature</key>
-        <string>none</string>
+		<key>CFBundleIdentifier</key>
+		<string>com.hxc2001.${GUI_EXEC}</string>
+		<key>CFBundleName</key>
+		<string>${NAME}</string>
+		<key>CFBundlePackageType</key>
+		<string>APPL</string>
+		<key>CFBundleVersion</key>
+		<string>1</string>
+		<key>CFBundleShortVersionString</key>
+		<string>${VERSION}</string>
+		<key>CFBundleIconFile</key>
+		<string>icons.icns</string>
+		<key>CFBundleSignature</key>
+		<string>none</string>
 </dict>
 </plist>
 EOF

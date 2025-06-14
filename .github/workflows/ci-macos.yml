@@ -19,8 +19,21 @@ jobs:
       - name: Build
         run: cd build && make -j2
       - name: Package
-        run: cd build && ./maccreatebundle
+        run: cd build && ./maccreatebundle HXCSOFT
       - uses: actions/upload-artifact@master
         with:
           name: hxcfloppyemulator-macos-${{ github.sha }}
           path: build/HxCFloppyEmulator.dmg
+
+  build-hxcdiskbrowser-macos:
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Build
+        run: cd build && make STANDALONEFSBROWSER_BUILD=1 -j2
+      - name: Package
+        run: cd build && ./maccreatebundle DOSDISKBROWSER
+      - uses: actions/upload-artifact@master
+        with:
+          name: hxcfloppyemulator-dosdiskbrowser-macos-${{ github.sha }}
+          path: build/DosDiskBrowser.dmg

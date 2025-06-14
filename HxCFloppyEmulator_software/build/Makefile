@@ -119,7 +119,17 @@ endif
 
 ifdef STANDALONEFSBROWSER_BUILD
 	CFLAGS += -DSTANDALONEFSBROWSER
+
+	EXEC = dosdiskbrowser
+
+ifeq ($(TARGET), mingw64)
 	EXEC = DosDiskBrowser.exe
+endif
+
+ifeq ($(TARGET), mingw32)
+	EXEC = DosDiskBrowser.exe
+endif
+
 endif
 
 FTDIFLOPPYEMU=usb_hxcfloppyemulator.o variablebitrate.o
@@ -225,6 +235,10 @@ HxCFloppyEmulator.exe: win32_hxcfloppy_res.o main.o utils.o $(GUI) $(MICROINTRO)
 	$(CPP) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../build
 
+dosdiskbrowser: main.o utils.o $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) ../../build/libhxcadaptor.a
+	$(CPP) -o $@    $^ $(LDFLAGS)
+	cp $@ ../../build
+	
 DosDiskBrowser.exe: win32_hxcfloppy_res.o main.o utils.o $(GUI) $(MICROINTRO) loader.o soft_cfg_file.o fileselector.o $(FLTKLIB) $(LIBHXCFE) $(LIBUSBHXCFE) ../../build/libhxcadaptor.a
 	$(CPP) -o $@    $^ $(LDFLAGS)
 	cp $@ ../../build
