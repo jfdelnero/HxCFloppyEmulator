@@ -39,7 +39,7 @@ if [ "$1" = "DOSDISKBROWSER" ]; then
 
 	echo APPLnone > ${GUI_PATH}/Contents/PkgInfo
 	iconutil --convert icns --output ${GUI_PATH}/Contents/Resources/icons.icns ../HxCFloppyEmulator_software/sources/mac/icons/hxcfloppyemulator.iconset/
-	install hxcfloppyemulator ${GUI_PATH}/Contents/MacOS/${GUI_EXEC}
+	install dosdiskbrowser ${GUI_PATH}/Contents/MacOS/${GUI_EXEC}
 	install libhxcfe.dylib ${GUI_PATH}/Contents/Frameworks
 fi
 
