@@ -24,6 +24,31 @@ if [ "$1" = "HXCSOFT" ]; then
 	install hxcfloppyemulator ${GUI_PATH}/Contents/MacOS/${GUI_EXEC}
 	install libhxcfe.dylib libusbhxcfe.dylib ${GUI_PATH}/Contents/Frameworks
 
+	cat << EOF > ${GUI_PATH}/Contents/info.plist
+	<?xml version="1.0" encoding="UTF-8"?>
+	<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+	<plist version="0.9">
+	<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.hxc2001.${GUI_EXEC}</string>
+			<key>CFBundleName</key>
+			<string>${NAME}</string>
+			<key>CFBundlePackageType</key>
+			<string>APPL</string>
+			<key>CFBundleVersion</key>
+			<string>1</string>
+			<key>CFBundleShortVersionString</key>
+			<string>${VERSION}</string>
+			<key>CFBundleIconFile</key>
+			<string>icons.icns</string>
+			<key>CFBundleSignature</key>
+			<string>none</string>
+	</dict>
+	</plist>
+	EOF
+
+	hdiutil create ${DMGNAME}.dmg -srcfolder ${CLI_PATH} -srcfolder ${GUI_PATH} -ov -volname ${DMGNAME}
+
 fi
 
 if [ "$1" = "DOSDISKBROWSER" ]; then
@@ -41,29 +66,31 @@ if [ "$1" = "DOSDISKBROWSER" ]; then
 	iconutil --convert icns --output ${GUI_PATH}/Contents/Resources/icons.icns ../HxCFloppyEmulator_software/sources/mac/icons/hxcfloppyemulator.iconset/
 	install dosdiskbrowser ${GUI_PATH}/Contents/MacOS/${GUI_EXEC}
 	install libhxcfe.dylib ${GUI_PATH}/Contents/Frameworks
+	
+	cat << EOF > ${GUI_PATH}/Contents/info.plist
+	<?xml version="1.0" encoding="UTF-8"?>
+	<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+	<plist version="0.9">
+	<dict>
+			<key>CFBundleIdentifier</key>
+			<string>com.hxc2001.${GUI_EXEC}</string>
+			<key>CFBundleName</key>
+			<string>${NAME}</string>
+			<key>CFBundlePackageType</key>
+			<string>APPL</string>
+			<key>CFBundleVersion</key>
+			<string>1</string>
+			<key>CFBundleShortVersionString</key>
+			<string>${VERSION}</string>
+			<key>CFBundleIconFile</key>
+			<string>icons.icns</string>
+			<key>CFBundleSignature</key>
+			<string>none</string>
+	</dict>
+	</plist>
+	EOF
+
+	hdiutil create ${DMGNAME}.dmg -srcfolder ${GUI_PATH} -ov -volname ${DMGNAME}
+
 fi
 
-cat << EOF > ${GUI_PATH}/Contents/info.plist
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
-<plist version="0.9">
-<dict>
-		<key>CFBundleIdentifier</key>
-		<string>com.hxc2001.${GUI_EXEC}</string>
-		<key>CFBundleName</key>
-		<string>${NAME}</string>
-		<key>CFBundlePackageType</key>
-		<string>APPL</string>
-		<key>CFBundleVersion</key>
-		<string>1</string>
-		<key>CFBundleShortVersionString</key>
-		<string>${VERSION}</string>
-		<key>CFBundleIconFile</key>
-		<string>icons.icns</string>
-		<key>CFBundleSignature</key>
-		<string>none</string>
-</dict>
-</plist>
-EOF
-
-hdiutil create ${DMGNAME}.dmg -srcfolder ${CLI_PATH} -srcfolder ${GUI_PATH} -ov -volname ${DMGNAME}
