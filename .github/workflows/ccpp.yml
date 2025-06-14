@@ -26,7 +26,7 @@ jobs:
     - name: Build
       run: sudo apt install -q -y mingw-w64 && cd build && make TARGET=mingw32 -j2
     - name: Package
-      run: cd build && ./windowscreatezip.sh _x86
+      run: cd build && ./windowscreatezip.sh _x86 HXCSOFT
     - uses: actions/upload-artifact@main
       with:
         name: hxcfloppyemulator-winx86-${{ github.sha }}
@@ -39,7 +39,7 @@ jobs:
     - name: Build
       run: sudo apt install -q -y mingw-w64 && cd build && make TARGET=mingw32 STANDALONEFSBROWSER_BUILD=1 -j2
     - name: Package
-      run: cd build && ./windowsdiskbrowsercreatezip.sh _x86
+      run: cd build && ./windowscreatezip.sh _x86 DOSDISKBROWSER
     - uses: actions/upload-artifact@main
       with:
         name: hxcfloppyemulator-dosdiskbrowser-winx86-${{ github.sha }}
@@ -52,7 +52,7 @@ jobs:
     - name: Build
       run: sudo apt install -q -y mingw-w64 && cd build && make TARGET=mingw64 -j2
     - name: Package
-      run: cd build && ./windowscreatezip.sh _x64
+      run: cd build && ./windowscreatezip.sh _x64 HXCSOFT
     - uses: actions/upload-artifact@main
       with:
         name: hxcfloppyemulator-winx64-${{ github.sha }}
