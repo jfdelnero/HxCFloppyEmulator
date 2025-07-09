@@ -134,7 +134,7 @@ HXCFE* hxcfe_init(void)
 #if defined(WIN32)
 		hxcfe_execScriptLine( hxcfe, "set SPSCAPS_LIB_NAME CAPSImg.dll" );
 #elif __APPLE__
-		hxcfe_execScriptLine( hxcfe, "set SPSCAPS_LIB_NAME CAPSImage.framework/CAPSImage,CAPSImg.framework/CAPSImg" );
+		hxcfe_execScriptLine( hxcfe, "set SPSCAPS_LIB_NAME @rpath/CAPSImage.framework/CAPSImage,@rpath/CAPSImg.framework/CAPSImg" );
 #else
 		hxcfe_execScriptLine( hxcfe, "set SPSCAPS_LIB_NAME libcapsimage.so.5,libcapsimage.so.5.1,libcapsimage.so" );
 #endif

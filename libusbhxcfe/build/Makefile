@@ -66,7 +66,9 @@ ifeq ($(TARGET), Darwin)
 	MACOSX_ARCH ?= -arch arm64 -arch x86_64
 	MACOSX_MIN_VER ?= 10.9
 	CFLAGS += ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
-	LDFLAGS +=  -lc -lm -ldl ${MACOSX_ARCH} -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libusbhxcfe.dylib -mmacosx-version-min=${MACOSX_MIN_VER}
+	# Load libhxcfe from the same directory as this library.
+	RPATHS = -Wl,-rpath,@loader_path
+	LDFLAGS +=  -lc -lm -ldl ${MACOSX_ARCH} -dynamiclib -current_version 2.0 -install_name @rpath/libusbhxcfe.dylib -mmacosx-version-min=${MACOSX_MIN_VER} ${RPATHS}
 	EXEC = libusbhxcfe.dylib
 endif
 

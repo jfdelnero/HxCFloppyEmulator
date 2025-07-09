@@ -73,8 +73,11 @@ endif
 ifeq ($(TARGET), Darwin)
 	MACOSX_ARCH ?= -arch arm64 -arch x86_64
 	MACOSX_MIN_VER ?= 10.9
+	# Search paths for other dylibs (like CAPSImage)
+	# @loader_path = same directory as this lib.
+	RPATHS = -Wl,-rpath,@loader_path,-rpath,/Library/Frameworks,-rpath,/usr/local/lib
 	CFLAGS += ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
-	LDFLAGS += -lc -lm -ldl ${MACOSX_ARCH} -dynamiclib -current_version 2.0 -install_name @executable_path/../Frameworks/libhxcfe.dylib -mmacosx-version-min=${MACOSX_MIN_VER}
+	LDFLAGS += -lc -lm -ldl ${MACOSX_ARCH} -dynamiclib -current_version 2.0 -install_name @rpath/libhxcfe.dylib -mmacosx-version-min=${MACOSX_MIN_VER} ${RPATHS}
 	EXEC = libhxcfe.dylib
 endif
 
