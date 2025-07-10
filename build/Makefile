@@ -48,7 +48,7 @@ mrproper:
 	-rm -rf *.dylib
 	-rm -rf *.dmg
 	-rm -rf *.app
-	-rm -rf hxcfe_cmdline
+	-rm -rf dosdiskbrowser
 	-rm -rf hxcfloppyemulator
 	-rm -f  hxcfe
 	-rm -rf Debug_*
