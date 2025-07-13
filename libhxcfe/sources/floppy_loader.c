@@ -1021,7 +1021,8 @@ int32_t hxcfe_floppySectorBySectorCopy( HXCFE* floppycontext, HXCFE_FLOPPY * des
 						}
 						else
 						{
-							hxcfe_writeSectorData( new_sect_access, i, j, sect_ref->sector, 1, sect_ref->sectorsize, types[type_index], sect_ref->input_data, &fdcstatus );
+							if(sect_ref->input_data)
+								hxcfe_writeSectorData( new_sect_access, i, j, sect_ref->sector, 1, sect_ref->sectorsize, types[type_index], sect_ref->input_data, &fdcstatus );
 						}
 
 						hxcfe_freeSectorConfigData( 0, sect_ref );
