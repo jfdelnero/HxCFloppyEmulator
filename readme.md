@@ -25,7 +25,7 @@ https://hxc2001.com/floppy_drive_emulator/
 
 ### Forum
 
-https://torlus.com/floppy/forum
+https://hxc2001.com/floppy/forum
 
 ### Repository content
 
@@ -131,7 +131,7 @@ Email :    hxc2001(at)hxc2001.com
 Website :  https://hxc2001.com
            https://hxc2001.com/floppy_drive_emulator/
 
-Forum :    https://torlus.com/floppy/forum
+Forum :    https://hxc2001.com/floppy/forum
 
 -------------------------------------------------------------------------------
 

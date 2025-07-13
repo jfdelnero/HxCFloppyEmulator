@@ -511,7 +511,7 @@ About_box::About_box()
 	cur_ypos += BUTTON_SIZE_Y;
 
 	button_forum = new Fl_Button(cur_xpos, cur_ypos, BUTTON_SIZE_X, BUTTON_SIZE_Y, "Forum");
-	button_forum->callback(OpenURLInBrowser,(void*)"http://torlus.com/floppy/forum");
+	button_forum->callback(OpenURLInBrowser,(void*)"https://hxc2001.com/floppy/forum");
 
 	cur_ypos += BUTTON_SIZE_Y;
 

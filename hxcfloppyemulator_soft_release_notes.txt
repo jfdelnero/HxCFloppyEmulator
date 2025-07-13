@@ -10,7 +10,7 @@
 HxC Floppy Emulator project
 (c) 2006-2025 Jean-François DEL NERO / (c) HxC2001
 Website  : https://hxc2001.com
-Forum    : https://torlus.com/floppy/forum
+Forum    : https://hxc2001.com/floppy/forum
 Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
@@ -975,7 +975,7 @@ New Features / Changes / Issues solved :
 
 -> GUI now Based on FLTK : http://www.fltk.org/
 
--> Windows / Mac / Linux support ( http://torlus.com/floppy/forum/viewtopic.php?f=1&t=1120  ;) )
+-> Windows / Mac / Linux support ( https://hxc2001.com/floppy/forum/viewtopic.php?f=1&t=1120  ;) )
 
 -> New library : libhxcfe -> Contains the floppy management functions (track generator/images loaders/analyser/file system layer...).
 
