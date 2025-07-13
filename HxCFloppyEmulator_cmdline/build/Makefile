@@ -38,8 +38,10 @@ LIBUSBHXCFE = libusbhxcfe.so
 ifeq ($(TARGET), Darwin)
 	MACOSX_ARCH ?= -arch arm64 -arch x86_64
 	MACOSX_MIN_VER ?= 10.9
+	# Allow the CLI to run from the App bundle or from somewhere like /usr/local/bin (with libs in /usr/local/lib)
+	RPATHS = -Wl,-rpath,@executable_path/../Frameworks,-rpath,@executable_path/../lib
 	CFLAGS += ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
-	LDFLAGS += -lc -lm -ldl -lpthread ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER}
+	LDFLAGS += -lc -lm -ldl -lpthread ${MACOSX_ARCH} -mmacosx-version-min=${MACOSX_MIN_VER} ${RPATHS}
 	LIBHXCFE = libhxcfe.dylib
 	LIBUSBHXCFE = libusbhxcfe.dylib
 endif
