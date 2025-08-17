@@ -48,7 +48,7 @@ struct nativeFunctions{
 	RETCODE (*adfNativeReadSector)(struct Device*, int32_t, int, unsigned char*);
 	RETCODE (*adfNativeWriteSector)(struct Device*, int32_t, int, unsigned char*);
 	BOOL (*adfIsDevNative)(char*);
-	RETCODE (*adfReleaseDevice)();
+	RETCODE (*adfReleaseDevice)(struct Device*);
 };
 
 void adfInitNativeFct();
