@@ -454,7 +454,14 @@ int OricDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk
 				{
 					case 1:
 						imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Geometrie 1:  11111..000000!");
+
 						tracksize=(((filesize-256)/fileheader->number_of_side)/fileheader->number_of_tracks);
+
+						if( tracksize > 9000 || (tracksize & 0xFF) )
+						{
+							imgldr_ctx->hxcfe->hxc_printf(MSG_WARNING,"Wrongly sized images ? Fall back to 6400 bytes tracks !");
+							tracksize = 6400;
+						}
 
 						trackdata = (unsigned char *) malloc(tracksize);
 						if( !trackdata )
