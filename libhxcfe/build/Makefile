@@ -129,7 +129,7 @@ DISKLOADERPLUGINS = raw_amiga.o raw_iso.o copyqm_loader.o crctable.o adf_loader.
 					ssd_dsd_loader.o adl_loader.o krz_loader.o w30_loader.o fei_loader.o svd_loader.o gkh_loader.o imz_loader.o raw_loader.o \
 					system24_loader.o kryofluxstream_loader.o kryofluxstream.o fzf_loader.o apple2_nib_loader.o apple2_do_loader.o \
 					sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o northstar_loader.o  xml_loader.o flppcm_loader.o stw_loader.o \
-					vfddat_loader.o ana_loader.o atr_loader.o hfev3_loader.o hfev3_trackgen.o heathkit_loader.o sdu_loader.o xml_db_loader.o \
+					vfddat_loader.o ana_loader.o atr_loader.o hfev3_loader.o hfev3_trackgen.o heathkit_loader.o h17_loader.o sdu_loader.o xml_db_loader.o \
 					streamhfe_loader.o qd_loader.o ipf_loader.o capslibloader.o hxcstream_loader.o hxcstream.o dfi_loader.o a2r_loader.o \
 					micraln_loader.o fdx_loader.o 86f_loader.o logicanalyzer_loader.o apple2_2mg_loader.o dim_x68k_loader.o woz_loader.o \
 					mfi_loader.o pri_loader.o
@@ -137,7 +137,7 @@ DISKLOADERPLUGINS = raw_amiga.o raw_iso.o copyqm_loader.o crctable.o adf_loader.
 DISKWRITERPLUGINS = cpcdsk_writer.o mfm_writer.o hfe_writer.o raw_writer.o afi_writer.o exthfe_writer.o imd_writer.o vtr_writer.o ti99v9t9_writer.o \
 					jv3_writer.o dmk_writer.o d88_writer.o msa_writer.o hfe_hddd_a2_writer.o arburg_raw_writer.o sdd_speccydos_writer.o scp_writer.o \
 					kryofluxstream_writer.o adf_writer.o bmp_writer.o bmp_disk_writer.o bmp_file.o xml_writer.o trd_writer.o stx_writer.o st_writer.o \
-					stw_writer.o dim_writer.o adz_writer.o ipf_writer.o fd_writer.o northstar_loader.o northstar_writer.o heathkit_writer.o vdk_writer.o \
+					stw_writer.o dim_writer.o adz_writer.o ipf_writer.o fd_writer.o northstar_loader.o northstar_writer.o heathkit_writer.o h17_writer.o vdk_writer.o \
 					xml_db_writer.o streamhfe_writer.o qd_writer.o hxcstream_writer.o oricdsk_writer.o apple2_do_writer.o hfev3_writer.o fdx_writer.o 86f_writer.o \
 					mfi_writer.o
 
@@ -748,6 +748,12 @@ heathkit_loader.o : $(BASEDIR)/loaders/heathkit_loader/heathkit_loader.c $(BASED
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 heathkit_writer.o : $(BASEDIR)/loaders/heathkit_loader/heathkit_writer.c
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+h17_loader.o : $(BASEDIR)/loaders/h17_loader/h17_loader.c $(BASEDIR)/loaders/h17_loader/h17_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+h17_writer.o : $(BASEDIR)/loaders/h17_loader/h17_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 micraln_loader.o : $(BASEDIR)/loaders/micraln_loader/micraln_loader.c $(BASEDIR)/loaders/micraln_loader/micraln_loader.h

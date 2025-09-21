@@ -139,6 +139,7 @@
 #include "./loaders/woz_loader/woz_loader.h"
 #include "./loaders/mfi_loader/mfi_loader.h"
 #include "./loaders/pri_loader/pri_loader.h"
+#include "./loaders/h17_loader/h17_loader.h"
 
 const GETPLUGININFOS staticplugins[]=
 {
@@ -244,6 +245,7 @@ const GETPLUGININFOS staticplugins[]=
 	(GETPLUGININFOS)ANA_libGetPluginInfo,
 	(GETPLUGININFOS)ATR_libGetPluginInfo,
 	(GETPLUGININFOS)Northstar_libGetPluginInfo,
+	(GETPLUGININFOS)H17_libGetPluginInfo,
 	(GETPLUGININFOS)Heathkit_libGetPluginInfo,
 	(GETPLUGININFOS)QD_libGetPluginInfo,
 	(GETPLUGININFOS)HxCStream_libGetPluginInfo,

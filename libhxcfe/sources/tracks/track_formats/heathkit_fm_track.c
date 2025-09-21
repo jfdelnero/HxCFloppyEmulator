@@ -179,7 +179,7 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 					sector->use_alternate_datamark = 0xFF;
 
 					// Volume (hijack the alternate_addressmark field to transport it...)
-					sector->alternate_addressmark = LUT_ByteBitsInverter[ tmp_buffer[1] ];
+					sector->alternate_addressmark = (LUT_ByteBitsInverter[ tmp_buffer[1] ] << 8) | 0xFD;
 					sector->use_alternate_addressmark = 0x00;
 					sector->header_crc = LUT_ByteBitsInverter[tmp_buffer[ 4 ]];
 
@@ -336,12 +336,15 @@ void tg_addHeathkitSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfi
 	checksum = 0x00;
 
 	// sync
-	pushTrackCode(tg,LUT_ByteBitsInverter[0xFD],0xFF,currentside,HEATHKIT_HS_SD);
+	if(sectorconfig->use_alternate_addressmark)
+		pushTrackCode(tg,LUT_ByteBitsInverter[(sectorconfig->alternate_addressmark)&0xFF],0xFF,currentside,HEATHKIT_HS_SD);
+	else
+		pushTrackCode(tg,LUT_ByteBitsInverter[0xFD],0xFF,currentside,HEATHKIT_HS_SD);
 
 	// Volume (hijack the alternate_addressmark field to transport it...)
-	pushTrackCode(tg,LUT_ByteBitsInverter[sectorconfig->alternate_addressmark],0xFF,currentside,HEATHKIT_HS_SD);
+	pushTrackCode(tg,LUT_ByteBitsInverter[(sectorconfig->alternate_addressmark>>8)&0xFF],0xFF,currentside,HEATHKIT_HS_SD);
 
-	checksum ^= sectorconfig->alternate_addressmark;
+	checksum ^= (sectorconfig->alternate_addressmark>>8)&0xFF;
 	checksum = (checksum >> 7) | (checksum << 1);
 
 	// Track
@@ -357,7 +360,23 @@ void tg_addHeathkitSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfi
 	checksum = (checksum >> 7) | (checksum << 1);
 
 	// Header Checksum
-	pushTrackCode(tg,LUT_ByteBitsInverter[checksum],0xFF,currentside,HEATHKIT_HS_SD);
+	switch(sectorconfig->use_alternate_header_crc)
+	{
+		case 0x01:
+			// Header Checksum
+			pushTrackCode(tg,LUT_ByteBitsInverter[checksum] ^ 0x42,0xFF,currentside,HEATHKIT_HS_SD);
+		break;
+
+		case 0x02:
+			// Header Checksum
+			pushTrackCode(tg,LUT_ByteBitsInverter[sectorconfig->header_crc&0xFF],0xFF,currentside,HEATHKIT_HS_SD);
+		break;
+
+		default:
+			// Header Checksum
+			pushTrackCode(tg,LUT_ByteBitsInverter[checksum],0xFF,currentside,HEATHKIT_HS_SD);
+		break;
+	}
 
 	checksum = 0x00;
 
@@ -367,7 +386,10 @@ void tg_addHeathkitSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfi
 	}
 
 	// data sync
-	pushTrackCode(tg,LUT_ByteBitsInverter[0xFD],0xFF,currentside,HEATHKIT_HS_SD);
+	if(sectorconfig->use_alternate_datamark)
+		pushTrackCode(tg,LUT_ByteBitsInverter[(sectorconfig->alternate_datamark)&0xFF],0xFF,currentside,HEATHKIT_HS_SD);
+	else
+		pushTrackCode(tg,LUT_ByteBitsInverter[0xFD],0xFF,currentside,HEATHKIT_HS_SD);
 
 	// data
 	for(i=0;i<256;i++)
@@ -378,7 +400,23 @@ void tg_addHeathkitSectorToTrack(track_generator *tg,HXCFE_SECTCFG * sectorconfi
 	}
 
 	// Data Checksum
-	pushTrackCode(tg,LUT_ByteBitsInverter[checksum],0xFF,currentside,HEATHKIT_HS_SD);
+	switch(sectorconfig->use_alternate_data_crc)
+	{
+		case 0x01:
+			// Data Checksum
+			pushTrackCode(tg,LUT_ByteBitsInverter[checksum] ^ 0x42,0xFF,currentside,HEATHKIT_HS_SD);
+		break;
+
+		case 0x02:
+			// Data Checksum
+			pushTrackCode(tg,LUT_ByteBitsInverter[sectorconfig->data_crc&0xFF],0xFF,currentside,HEATHKIT_HS_SD);
+		break;
+
+		default:
+			// Data Checksum
+			pushTrackCode(tg,LUT_ByteBitsInverter[checksum],0xFF,currentside,HEATHKIT_HS_SD);
+		break;
+	}
 
 	pushTrackCode(tg,0x00,0xFF,currentside,HEATHKIT_HS_SD);
 
