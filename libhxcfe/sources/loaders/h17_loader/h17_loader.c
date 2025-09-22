@@ -432,7 +432,7 @@ int H17_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 int H17_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
-	static const char plug_id[]="HEATHKIT";
+	static const char plug_id[]="H17_HEATHKIT";
 	static const char plug_desc[]="H17 Heathkit Loader";
 	static const char plug_ext[]="h17";
 

@@ -85,6 +85,7 @@
 #define PLUGIN_IPF                  "SPS_IPF"
 #define PLUGIN_NORTHSTAR            "NORTHSTAR"
 #define PLUGIN_HEATHKIT             "HEATHKIT"
+#define PLUGIN_H17HEATHKIT          "H17_HEATHKIT"
 #define PLUGIN_HXC_QD               "HXC_QD"
 #define PLUGIN_APPLE2_DO            "APPLE2_DO"
 #define PLUGIN_APPLE2_PO            "APPLE2_PO"
