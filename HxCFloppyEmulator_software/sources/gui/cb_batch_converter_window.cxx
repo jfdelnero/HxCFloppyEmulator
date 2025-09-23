@@ -136,6 +136,7 @@ ff_type ff_type_list[]=
 	{ FF_XML,"XML - XML file image",PLUGIN_GENERIC_XML,".xml"},
 	{ FF_NORTHSTAR,"NSI - Northstar file image",PLUGIN_NORTHSTAR,".nsi"},
 	{ FF_HEATHKIT,"H8D - Heathkit file image",PLUGIN_HEATHKIT,".h8d"},
+	{ FF_H17HEATHKIT,"H17 - H17 Heathkit file image",PLUGIN_H17HEATHKIT,".h17"},
 	{ FF_HXCQD,"QD - HxC Quickdisk file image",PLUGIN_HXC_QD,".qd"},
 	{ FF_APPLEII_DO,"DO - Apple II file image (Dos 3.3)",PLUGIN_APPLE2_DO,".do"},
 	{ FF_APPLEII_PO,"PO - Apple II file image (ProDos)",PLUGIN_APPLE2_PO,".po"},
