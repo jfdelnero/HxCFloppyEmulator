@@ -224,14 +224,14 @@ int get_next_FM_Heathkit_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SE
 
 							for(i=0;i<sector->sectorsize;i++)
 							{
-								checksum ^= LUT_ByteBitsInverter[ tmp_buffer[ 3 + 1 + i ] ];
+								checksum ^= LUT_ByteBitsInverter[ tmp_sector[ 3 + 1 + i ] ];
 								checksum = (checksum >> 7) | (checksum << 1);
 							}
 
 							sector->data_crc = checksum;
 							sector->use_alternate_data_crc = 0x00;
 
-							if( checksum == LUT_ByteBitsInverter[tmp_buffer[ 3 + 1 +sector->sectorsize ]] )
+							if( checksum == LUT_ByteBitsInverter[tmp_sector[ 3 + 1 +sector->sectorsize ]] )
 							{ // crc ok !!!
 								floppycontext->hxc_printf(MSG_DEBUG,"Data CRC Ok. (0x%.4X)",sector->data_crc);
 							}
