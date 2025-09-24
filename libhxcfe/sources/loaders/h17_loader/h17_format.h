@@ -90,7 +90,18 @@ typedef struct h17_Parm_
 typedef struct h17_sect_metadata_
 {
 	uint32_t Offset;
+
+	// Sector_Status bits :
+	// 0 Missing Header Sync
+	// 1 Wrong Track
+	// 2 Invalid Sector
+	// 3 Invalid Header Checksum
+	// 4 Missing Data Sync
+	// 5 Invalid Data Checksum
+	// 6 Sector was unreadable
+	// 7 Reserved
 	uint8_t  Sector_Status;
+
 	uint8_t  HSync;
 	uint8_t  Volume;
 	uint8_t  Track;

@@ -390,6 +390,22 @@ int H17_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								sectorconfig[k].use_alternate_data_crc = 0x02;
 								sectorconfig[k].data_crc = sect_meta->Data_Checksum;
 
+								if( sect_meta->Sector_Status & 0x01 )
+								{
+									sectorconfig[k].alternate_addressmark = 0x00;
+								}
+
+								if( sect_meta->Sector_Status & 0x10 )
+								{
+									sectorconfig[k].alternate_datamark = 0x00;
+								}
+
+								if( sect_meta->Sector_Status & 0x40 )
+								{
+									sectorconfig[k].alternate_addressmark = 0x00;
+									sectorconfig[k].alternate_datamark = 0x00;
+								}
+
 								fseek (f , BIGENDIAN_DWORD(sect_meta->Offset) , SEEK_SET);
 
 								hxc_fread(&trackdata[k*sectorsize],sectorsize,f);
