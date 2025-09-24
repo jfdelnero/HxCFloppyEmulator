@@ -76,7 +76,7 @@
 #define SECTOR_SIZE (1 + 2 + SECTOR_DATA_SIZE + 1) // Sync + Header + Data + Checksum
 
 
-uint8_t update_checksum(uint8_t checksum,uint8_t data)
+static uint8_t update_checksum(uint8_t checksum,uint8_t data)
 {
 	uint8_t  for_carry,carry;
 
