@@ -15,11 +15,27 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
+XX XXXX 2025 : HxCFloppyEmulator beta version (v2.16.14.1)
+
+-> New loader/writer : H17Disk Heathkit H17 Hard-sectored Disk Image (*.h17)
+
+-> Oric DSK loader : Set the tracks size to the 6400 bytes default value
+                     with malformed/bad sized images
+
+-> FLTK updated to v1.4.4
+
+-> adflib : gcc 15.x build fixed
+
+-> macOS : Fix macOS dynamic libraries loading for better CAPSImage + CLI relocation support
+
+*********************************************************/
+
+/*********************************************************
 6 April 2025 : HxCFloppyEmulator v2.16.13.1
 
 -> Mame MFI writer : Fix memory allocation error/crashes.
 
--> Kryoflux writer : The default sample frequency can be changed with the 
+-> Kryoflux writer : The default sample frequency can be changed with the
                      KFRAWEXPORT_SAMPLE_FREQUENCY variable. (patch by uru2)
 
 -> Kryoflux Stream Loader : Support different sample rate setting from the
@@ -42,8 +58,8 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 11 February 2025 : HxCFloppyEmulator v2.16.11.1
 
 -> XML export/import :
-    Better multi-format tracks support. 
-    You can now specify/change the density/format for each 
+    Better multi-format tracks support.
+    You can now specify/change the density/format for each
     individual sector with the <format> tag.
 
 *********************************************************/
