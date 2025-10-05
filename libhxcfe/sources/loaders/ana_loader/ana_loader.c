@@ -175,9 +175,9 @@ int getnextsector(int32_t track,int32_t side,AnaDisk_sectorheader * sectorheader
 		ret = hxc_fread(sectorheader,sizeof(AnaDisk_sectorheader),f);
 		lastdatapos = ftell(f);
 		fseek(f,sectorheader->data_len,SEEK_CUR);
-	}while( ret>0 && !feof(f) && ( sectorheader->cylinder != track || sectorheader->side != side) );
+	}while( ret>0 && !feof(f) && ( ( sectorheader->cylinder != track ) || ( sectorheader->side != side ) ) );
 
-	if( ret>0 || feof(f) )
+	if( ret<=0 || feof(f) )
 	{
 		return 0;
 	}
@@ -265,7 +265,7 @@ int ANA_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 				sectorfound = 0;
 
-				while(getnextsector(i,j,&sector_header,f))
+				while(getnextsector(i,j,&sector_header,f) && sectorfound < 128)
 				{
 					imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"Side %d Track %d Sector %d Data len %d",sector_header.logical_side,sector_header.logical_cylinder,sector_header.logical_sector,sector_header.data_len);
 
