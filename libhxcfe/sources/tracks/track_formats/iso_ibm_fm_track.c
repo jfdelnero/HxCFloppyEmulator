@@ -189,17 +189,20 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 //;            1   1    1   1    1   1       0   1   -- FD
 
 						//11111011
-						fm_buffer[0]=0x55;
-						fm_buffer[1]=0x11;
-						fm_buffer[2]=0x14;
-						fm_buffer[3]=0x55;
+
+						fm_buffer[0]=0x44;
+						fm_buffer[1]=0x44;
+						fm_buffer[2]=0x55;
+						fm_buffer[3]=0x11;
+						fm_buffer[4]=0x14;
+						fm_buffer[5]=0x55;
 
 						i=0;
 						do
 						{
-							fm_buffer[2] = (datamark[i] >> 8) & 0xFF;
-							fm_buffer[3] = datamark[i] & 0xFF;
-							bit_offset = searchBitStream(track->databuffer,track->tracklen,((88+16)*8*2),fm_buffer,4*8,old_bit_offset);
+							fm_buffer[4] = (datamark[i] >> 8) & 0xFF;
+							fm_buffer[5] = datamark[i] & 0xFF;
+							bit_offset = searchBitStream(track->databuffer,track->tracklen,((88+16)*8*2),fm_buffer,6*8,old_bit_offset);
 							i++;
 						}while(i<6 && bit_offset==-1 );
 
@@ -222,8 +225,8 @@ int get_next_FM_sector(HXCFE* floppycontext,HXCFE_SIDE * track,HXCFE_SECTCFG * s
 
 							memset(tmp_sector_index,0,(1+sector_size+2) * sizeof(int));
 
-							sector->startdataindex = bit_offset;
-							sector->endsectorindex = fmtobin(track->databuffer,tmp_sector_index,track->tracklen,tmp_sector,1+sector_size+2,bit_offset+(0*8),0);
+							sector->startdataindex = bit_offset+(2*8);
+							sector->endsectorindex = fmtobin(track->databuffer,tmp_sector_index,track->tracklen,tmp_sector,1+sector_size+2,bit_offset+(2*8),0);
 
 							CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)crctable,0x1021,0xFFFF);
 							for(k=0;k<1+sector_size+2;k++)
