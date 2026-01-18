@@ -132,11 +132,13 @@ exceptions:
 
            [program/widget] is based in part on the work of
            the FLTK project (http://www.fltk.org).
+
  -----------------------------------------------------------------------------------------------
-  ZLIB DATA COMPRESSION LIBRARY
+ ZLIB DATA COMPRESSION LIBRARY
+
 Copyright notice:
 
- (C) 1995-2022 Jean-loup Gailly and Mark Adler
+ (C) 1995-2025 Jean-loup Gailly and Mark Adler
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -156,12 +158,12 @@ Copyright notice:
 
   Jean-loup Gailly        Mark Adler
   jloup@gzip.org          madler@alumni.caltech.edu
+
  -----------------------------------------------------------------------------------------------
  Expat XML parser
 
-Copyright (c) 1998, 1999, 2000 Thai Open Source Software Center Ltd
-                               and Clark Cooper
-Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006 Expat maintainers.
+Copyright (c) 1998-2000 Thai Open Source Software Center Ltd and Clark Cooper
+Copyright (c) 2001-2025 Expat maintainers
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
