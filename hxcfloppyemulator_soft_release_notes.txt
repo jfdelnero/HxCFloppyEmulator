@@ -8,7 +8,7 @@
 -- Contact: hxc2001<at>hxc2001.com --------------------- https://hxc2001.com --
 -------------------------------------------------------------------------------
 HxC Floppy Emulator project
-(c) 2006-2025 Jean-François DEL NERO / (c) HxC2001
+(c) 2006-2026 Jean-François DEL NERO / (c) HxC2001
 Website  : https://hxc2001.com
 Forum    : https://hxc2001.com/floppy/forum
 Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
