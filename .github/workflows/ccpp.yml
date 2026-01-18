@@ -17,14 +17,14 @@ jobs:
     steps:
     - uses: actions/checkout@main
     - name: Build
-      run: sudo apt install -q -y libx11-dev libfreetype6 libfreetype6-dev libxft-dev libxft2 && cd build && make tests -j2
+      run: sudo apt update && sudo apt install -q -y libx11-dev libfreetype6 libfreetype6-dev libxft-dev libxft2 && cd build && make tests -j2
 
   build-windows-x86:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@main
     - name: Build
-      run: sudo apt install -q -y mingw-w64 && cd build && make TARGET=mingw32 -j2
+      run: sudo apt update && sudo apt install -q -y mingw-w64 && cd build && make TARGET=mingw32 -j2
     - name: Package
       run: cd build && ./windowscreatezip.sh _x86 HXCSOFT
     - uses: actions/upload-artifact@main
@@ -37,7 +37,7 @@ jobs:
     steps:
     - uses: actions/checkout@main
     - name: Build
-      run: sudo apt install -q -y mingw-w64 && cd build && make TARGET=mingw32 STANDALONEFSBROWSER_BUILD=1 -j2
+      run: sudo apt update && sudo apt install -q -y mingw-w64 && cd build && make TARGET=mingw32 STANDALONEFSBROWSER_BUILD=1 -j2
     - name: Package
       run: cd build && ./windowscreatezip.sh _x86 DOSDISKBROWSER
     - uses: actions/upload-artifact@main
@@ -50,7 +50,7 @@ jobs:
     steps:
     - uses: actions/checkout@main
     - name: Build
-      run: sudo apt install -q -y mingw-w64 && cd build && make TARGET=mingw64 -j2
+      run: sudo apt update && sudo apt install -q -y mingw-w64 && cd build && make TARGET=mingw64 -j2
     - name: Package
       run: cd build && ./windowscreatezip.sh _x64 HXCSOFT
     - uses: actions/upload-artifact@main
