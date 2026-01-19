@@ -15,7 +15,7 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
-XX XXXX 2025 : HxCFloppyEmulator beta version (v2.16.14.1)
+XX XXXX 2026 : HxCFloppyEmulator beta version (v2.16.15.1)
 
 -> New loader/writer : H17Disk Heathkit H17 Hard-sectored Disk Image (*.h17)
 
@@ -27,6 +27,12 @@ XX XXXX 2025 : HxCFloppyEmulator beta version (v2.16.14.1)
 -> adflib : gcc 15.x build fixed
 
 -> macOS : Fix macOS dynamic libraries loading for better CAPSImage + CLI relocation support
+
+-> AnaDisk file loader (*.ana) fixed.
+
+-> libexpat updated to v2.7.3
+
+-> FAT/DOS Disk browser : Don't cache fat table -> Fix issues with damaged / protected disks.
 
 *********************************************************/
 
