@@ -379,9 +379,11 @@ HXCFE_FLOPPY * unloadfile(HXCFE* hxcfe, HXCFE_FLOPPY * image)
 
 int convertfile(HXCFE* hxcfe, HXCFE_FLOPPY * floppydisk, char * infile,char * outfile,char * outformat,int ifmode)
 {
-	int loaderid;
+	int loaderid,ret;
 	HXCFE_FLOPPY * disk;
 	HXCFE_IMGLDR * imgldr_ctx;
+
+	ret = -1;
 
 	if(!floppydisk)
 		disk = loadfile(hxcfe,infile);
@@ -405,7 +407,10 @@ int convertfile(HXCFE* hxcfe, HXCFE_FLOPPY * floppydisk, char * infile,char * ou
 		if(loaderid>=0)
 		{
 			hxcfe_floppySetInterfaceMode(hxcfe,disk,ifmode);
-			hxcfe_imgExport(imgldr_ctx,disk,outfile,loaderid);
+			if( hxcfe_imgExport(imgldr_ctx,disk,outfile,loaderid) == HXCFE_NOERROR )
+			{
+				ret = 0;
+			}
 		}
 		else
 		{
@@ -418,15 +423,17 @@ int convertfile(HXCFE* hxcfe, HXCFE_FLOPPY * floppydisk, char * infile,char * ou
 		hxcfe_imgDeInitLoader(imgldr_ctx);
 	}
 
-	return 0;
+	return ret;
 }
 
 int sectorbysectorfilecopy(HXCFE* hxcfe, HXCFE_FLOPPY * floppydisk, char * infile,char * reffile,char * outfile,char * outformat,int ifmode)
 {
-	int loaderid;
+	int loaderid,ret;
 	HXCFE_FLOPPY * disk;
 	HXCFE_FLOPPY * refdisk;
 	HXCFE_IMGLDR * imgldr_ctx;
+
+	ret = -1;
 
 	if(!floppydisk)
 		disk = loadfile(hxcfe,infile);
@@ -465,7 +472,10 @@ int sectorbysectorfilecopy(HXCFE* hxcfe, HXCFE_FLOPPY * floppydisk, char * infil
 
 			hxcfe_floppySectorBySectorCopy( hxcfe, refdisk, disk, 0 );
 
-			hxcfe_imgExport(imgldr_ctx,refdisk,outfile,loaderid);
+			if( hxcfe_imgExport(imgldr_ctx,refdisk,outfile,loaderid) == HXCFE_NOERROR )
+			{
+				ret = 0;
+			}
 		}
 		else
 		{
@@ -480,7 +490,7 @@ int sectorbysectorfilecopy(HXCFE* hxcfe, HXCFE_FLOPPY * floppydisk, char * infil
 		hxcfe_imgDeInitLoader(imgldr_ctx);
 	}
 
-	return 0;
+	return ret;
 }
 
 int load_xml_layout(HXCFE_XMLLDR* rfb, char * layout)
@@ -1114,11 +1124,13 @@ int main(int argc, char* argv[])
 	int interfacemode;
 	int doublestep;
 	int param_index;
+	int ret;
 	HXCFE_IMGLDR * imgldr_ctx;
 	HXCFE_FLOPPY * image;
 
 	HXCFE* hxcfe;
 
+	ret=0;
 	verbose=0;
 	doublestep=-1;
 
@@ -1266,6 +1278,8 @@ int main(int argc, char* argv[])
 		// Output filename (take the first foutput option from this conv parameter and the next one)
 		isOption(next_conv_param_index,argv,"foutput",(char*)&ofilename,&tmp_index);
 
+		ret = -1;
+
 		imgldr_ctx = hxcfe_imgInitLoader(hxcfe);
 		if(imgldr_ctx)
 		{
@@ -1290,12 +1304,12 @@ int main(int argc, char* argv[])
 
 		if(isOption(next_conv_param_index,argv,"reffile",(char*)&reffile,&tmp_index)>0)
 		{
-			sectorbysectorfilecopy(hxcfe,image,filename,reffile,ofilename,outputformat,interfacemode);
+			ret = sectorbysectorfilecopy(hxcfe,image,filename,reffile,ofilename,outputformat,interfacemode);
 		}
 		else
 		{
 			// Standard image conversion mode
-			convertfile(hxcfe,image,filename,ofilename,outputformat,interfacemode);
+			ret = convertfile(hxcfe,image,filename,ofilename,outputformat,interfacemode);
 		}
 
 		ofilename[0] = '\0';
@@ -1363,7 +1377,7 @@ int main(int argc, char* argv[])
 
 	hxcfe_deinit(hxcfe);
 
-	return 0;
+	return ret;
 }
 
 
