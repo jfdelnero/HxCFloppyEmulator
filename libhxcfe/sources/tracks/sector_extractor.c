@@ -599,44 +599,46 @@ uint8_t * hxcfe_getSectorData(HXCFE_SECTORACCESS* ss_ctx,HXCFE_SECTCFG* sc)
 	return sc->input_data;
 }
 
-int32_t hxcfe_getFloppySize( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t * nbsector )
+int32_t hxcfe_getFloppySize( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t * nbsector, int32_t * nbbadsector )
 {
 	HXCFE_SECTORACCESS* ss_ctx;
 	HXCFE_SECTCFG* sc;
 	int floppysize;
 	int nbofsector;
+	int nbofbadsectors;
 	int track;
 	int side;
 	int i,type,secfound,t;
 	int typetab[16];
 
-	floppysize=0;
-	nbofsector=0;
+	floppysize = 0;
+	nbofsector = 0;
+	nbofbadsectors = 0;
 
-	type=0;
-	secfound=0;
+	type = 0;
+	secfound = 0;
 
-	i=0;
-	typetab[i++]=ISOIBM_MFM_ENCODING;
-	typetab[i++]=AMIGA_MFM_ENCODING;
-	typetab[i++]=ISOIBM_FM_ENCODING;
-	typetab[i++]=TYCOM_FM_ENCODING;
-	typetab[i++]=MEMBRAIN_MFM_ENCODING;
-	typetab[i++]=EMU_FM_ENCODING;
-	typetab[i++]=APPLEII_GCR1_ENCODING;
-	typetab[i++]=APPLEII_GCR2_ENCODING;
-	typetab[i++]=APPLEMAC_GCR_ENCODING;
-	typetab[i++]=-1;
+	i = 0;
+	typetab[i++] = ISOIBM_MFM_ENCODING;
+	typetab[i++] = AMIGA_MFM_ENCODING;
+	typetab[i++] = ISOIBM_FM_ENCODING;
+	typetab[i++] = TYCOM_FM_ENCODING;
+	typetab[i++] = MEMBRAIN_MFM_ENCODING;
+	typetab[i++] = EMU_FM_ENCODING;
+	typetab[i++] = APPLEII_GCR1_ENCODING;
+	typetab[i++] = APPLEII_GCR2_ENCODING;
+	typetab[i++] = APPLEMAC_GCR_ENCODING;
+	typetab[i++] = -1;
 
-	ss_ctx=hxcfe_initSectorAccess(floppycontext,fp);
+	ss_ctx = hxcfe_initSectorAccess(floppycontext,fp);
 	if(ss_ctx)
 	{
 		for(track=0;track<fp->floppyNumberOfTrack;track++)
 		{
 			for(side=0;side<fp->floppyNumberOfSide;side++)
 			{
-				secfound=0;
-				type=0;
+				secfound = 0;
+				type = 0;
 
 				while(typetab[type]!=-1 && !secfound)
 				{
@@ -648,7 +650,20 @@ int32_t hxcfe_getFloppySize( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t * n
 						{
 							floppysize=floppysize+sc->sectorsize;
 							nbofsector++;
-							secfound=1;
+
+							if( sc->use_alternate_data_crc == 0x1 )
+							{
+								nbofbadsectors++;
+							}
+							else
+							{
+								if(!sc->input_data)
+								{
+									nbofbadsectors++;
+								}
+							}
+
+							secfound = 1;
 
 							hxcfe_freeSectorConfig(ss_ctx,sc);
 						}
@@ -665,20 +680,22 @@ int32_t hxcfe_getFloppySize( HXCFE* floppycontext, HXCFE_FLOPPY *fp, int32_t * n
 
 				if(secfound)
 				{
-					t=typetab[0];
-					typetab[0]=typetab[type];
-					typetab[type]=t;
+					t = typetab[0];
+					typetab[0] = typetab[type];
+					typetab[type] = t;
 				}
 			}
 		}
 	}
 
 	if(nbsector)
-		*nbsector=nbofsector;
+		*nbsector = nbofsector;
+
+	if(nbbadsector)
+		*nbbadsector = nbofbadsectors;
 
 	hxcfe_deinitSectorAccess(ss_ctx);
 	return floppysize;
-
 }
 
 int32_t hxcfe_readSectorData( HXCFE_SECTORACCESS* ss_ctx, int32_t track, int32_t side, int32_t sector, int32_t numberofsector, int32_t sectorsize, int32_t type, uint8_t * buffer, int32_t * fdcstatus )

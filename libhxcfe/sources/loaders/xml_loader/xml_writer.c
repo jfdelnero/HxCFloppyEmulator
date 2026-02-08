@@ -146,7 +146,7 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	xmlfile=hxc_fopen(filename,"w+");
 	if(xmlfile)
 	{
-		imagesize = hxcfe_getFloppySize(imgldr_ctx->hxcfe,floppy,0);
+		imagesize = hxcfe_getFloppySize(imgldr_ctx->hxcfe,floppy,0,0);
 
 		ss=hxcfe_initSectorAccess(imgldr_ctx->hxcfe,floppy);
 		if(ss)

@@ -656,7 +656,7 @@ int infofile(HXCFE* hxcfe,char * infile)
 	int loaderid;
 	int ret;
 	HXCFE_FLOPPY * floppydisk;
-	int ifmode,nbofsector;
+	int ifmode,nbofsector,nbofbadsector;
 	HXCFE_IMGLDR * imgldr_ctx;
 
 	printf("---------------------------------------------------------------------------\n");
@@ -699,8 +699,9 @@ int infofile(HXCFE* hxcfe,char * infile)
 				printf("Floppy interface mode : %s - %s\n",hxcfe_getFloppyInterfaceModeName(hxcfe,ifmode),hxcfe_getFloppyInterfaceModeDesc(hxcfe,ifmode));
 				printf("Number of Track : %d\n",hxcfe_getNumberOfTrack(hxcfe,floppydisk) );
 				printf("Number of Side : %d\n",hxcfe_getNumberOfSide(hxcfe,floppydisk) );
-				printf("Total Size : %d Bytes, ",hxcfe_getFloppySize (hxcfe,floppydisk,&nbofsector));
-				printf("Number of sectors : %d",nbofsector);
+				printf("Total Size : %d Bytes, ",hxcfe_getFloppySize (hxcfe,floppydisk,&nbofsector,&nbofbadsector));
+				printf("Number of sectors : %d, ",nbofsector);
+				printf("Number of bad sectors : %d\n",nbofbadsector);
 
 				ifmode = hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
 
@@ -781,7 +782,7 @@ int imagedir(HXCFE* hxcfe,char * infile)
 	int loaderid;
 	int ret;
 	HXCFE_FLOPPY * floppydisk;
-	int ifmode,nbofsector;
+	int ifmode,nbofsector,nbofbadsector;
 	HXCFE_FSMNG  * fsmng;
 	HXCFE_IMGLDR * imgldr_ctx;
 
@@ -825,8 +826,9 @@ int imagedir(HXCFE* hxcfe,char * infile)
 				printf("Floppy interface mode : %s - %s\n",hxcfe_getFloppyInterfaceModeName(hxcfe,ifmode),hxcfe_getFloppyInterfaceModeDesc(hxcfe,ifmode));
 				printf("Number of Track : %d\n",hxcfe_getNumberOfTrack(hxcfe,floppydisk) );
 				printf("Number of Side : %d\n",hxcfe_getNumberOfSide(hxcfe,floppydisk) );
-				printf("Total Size : %d Bytes, ",hxcfe_getFloppySize (hxcfe,floppydisk,&nbofsector));
-				printf("Number of sectors : %d\n",nbofsector);
+				printf("Total Size : %d Bytes, ",hxcfe_getFloppySize (hxcfe,floppydisk,&nbofsector,&nbofbadsector));
+				printf("Number of sectors : %d, ",nbofsector);
+				printf("Number of bad sectors : %d\n",nbofbadsector);
 
 				ifmode = hxcfe_floppyGetInterfaceMode(hxcfe,floppydisk);
 

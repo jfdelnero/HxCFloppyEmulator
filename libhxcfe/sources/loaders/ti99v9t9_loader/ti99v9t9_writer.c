@@ -59,7 +59,7 @@ int TI99V9T9_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,ch
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write TI99 V9T9 file %s...",filename);
 
-	imagesize=hxcfe_getFloppySize(imgldr_ctx->hxcfe,floppy,&nbsector);
+	imagesize=hxcfe_getFloppySize(imgldr_ctx->hxcfe,floppy,&nbsector,NULL);
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Disk size : %d Bytes %d Sectors",imagesize,nbsector);
 
