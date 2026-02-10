@@ -78,6 +78,7 @@
 #include "data_DiskLayout_Seattle_Computer_Gazelle_DSSD_500KB_xml.h"
 #include "data_DiskLayout_Seattle_Computer_Gazelle_SSDD_616KB_xml.h"
 #include "data_DiskLayout_Seattle_Computer_Gazelle_DSDD_1232KB_xml.h"
+#include "data_DiskLayout_Kaypro_DSDD_400KB_xml.h"
 
 datatype * disklayout_list[]=
 {
@@ -161,6 +162,7 @@ datatype * disklayout_list[]=
 	data_DiskLayout_Seattle_Computer_Gazelle_DSSD_500KB_xml,
 	data_DiskLayout_Seattle_Computer_Gazelle_SSDD_616KB_xml,
 	data_DiskLayout_Seattle_Computer_Gazelle_DSDD_1232KB_xml,
+	data_DiskLayout_Kaypro_DSDD_400KB_xml,
 	0
 };
 
