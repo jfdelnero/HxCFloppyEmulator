@@ -73,6 +73,7 @@
 #include "data_DiskLayout_Alesis_DataDisk_DD_800KB_xml.h"
 #include "data_DiskLayout_Analog_Devices_LTS_2020_xml.h"
 #include "data_DiskLayout_Videobit_Sistema_S80_SD_100KB_xml.h"
+#include "data_DiskLayout_Otrona_Attache_xml.h"
 
 datatype * disklayout_list[]=
 {
@@ -151,6 +152,7 @@ datatype * disklayout_list[]=
 	data_DiskLayout_Sharp_X68000_2HD_1232KB_xml,
 	data_DiskLayout_Analog_Devices_LTS_2020_xml,
 	data_DiskLayout_Videobit_Sistema_S80_SD_100KB_xml,
+	data_DiskLayout_Otrona_Attache_xml,
 	0
 };
 
