@@ -74,6 +74,10 @@
 #include "data_DiskLayout_Analog_Devices_LTS_2020_xml.h"
 #include "data_DiskLayout_Videobit_Sistema_S80_SD_100KB_xml.h"
 #include "data_DiskLayout_Otrona_Attache_xml.h"
+#include "data_DiskLayout_Seattle_Computer_Gazelle_SSSD_250KB_xml.h"
+#include "data_DiskLayout_Seattle_Computer_Gazelle_DSSD_500KB_xml.h"
+#include "data_DiskLayout_Seattle_Computer_Gazelle_SSDD_616KB_xml.h"
+#include "data_DiskLayout_Seattle_Computer_Gazelle_DSDD_1232KB_xml.h"
 
 datatype * disklayout_list[]=
 {
@@ -153,6 +157,10 @@ datatype * disklayout_list[]=
 	data_DiskLayout_Analog_Devices_LTS_2020_xml,
 	data_DiskLayout_Videobit_Sistema_S80_SD_100KB_xml,
 	data_DiskLayout_Otrona_Attache_xml,
+	data_DiskLayout_Seattle_Computer_Gazelle_SSSD_250KB_xml,
+	data_DiskLayout_Seattle_Computer_Gazelle_DSSD_500KB_xml,
+	data_DiskLayout_Seattle_Computer_Gazelle_SSDD_616KB_xml,
+	data_DiskLayout_Seattle_Computer_Gazelle_DSDD_1232KB_xml,
 	0
 };
 
