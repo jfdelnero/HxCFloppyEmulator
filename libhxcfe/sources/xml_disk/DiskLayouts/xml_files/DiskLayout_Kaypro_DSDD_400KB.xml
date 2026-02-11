@@ -19,7 +19,6 @@
 		<bitrate>250000</bitrate>
 		<pregap>0</pregap>
 		<rpm>300</rpm>
-		<crc32>0x44A5E187</crc32>
 		<track_list>
 			<track track_number="00" side_number="0">
 				<data_offset>0x000000</data_offset>
