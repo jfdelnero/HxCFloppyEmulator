@@ -69,7 +69,8 @@ int CPCDSK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"CPCDSK_libIsValidDiskFile");
 
-	if(hxc_checkfileext(imgfile->path,"dsk",SYS_PATH_TYPE))
+	// Note: *.KDI > Spectrum Kempston DOS Interface 
+	if( hxc_checkfileext(imgfile->path,"dsk",SYS_PATH_TYPE) || hxc_checkfileext(imgfile->path,"kdi",SYS_PATH_TYPE) )
 	{
 		fileheader = (cpcdsk_fileheader *)imgfile->file_header;
 
@@ -96,7 +97,6 @@ int CPCDSK_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS
 
 int CPCDSK_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
 {
-
 	FILE * f;
 	unsigned int filesize;
 	int tracksize;
