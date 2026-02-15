@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- HxC Floppy Emulator Disk Layout -->
+<disk_layout>
+	<disk_layout_name>RESEARCH_MACHINES_DSDD</disk_layout_name>
+	<disk_layout_description>Research Machines DSDD Floppy Disk (380Z/480Z)</disk_layout_description>
+	<prefered_file_extension>dsk</prefered_file_extension>
+	<interface_mode>GENERIC_SHUGART_DD_FLOPPYMODE</interface_mode>
+	<file_size>363520</file_size>
+	<layout>
+		<number_of_track>40</number_of_track>
+		<number_of_side>2</number_of_side>
+		<format>IBM_MFM</format>
+		<start_sector_id>1</start_sector_id>
+		<sector_per_track>9</sector_per_track>
+		<sector_size>512</sector_size>
+		<interleave>1</interleave>
+		<skew_per_side>0</skew_per_side>
+		<skew_per_track>0</skew_per_track>
+		<formatvalue>0xE5</formatvalue>
+		<gap3>54</gap3>
+		<bitrate>250000</bitrate>
+		<pregap>0</pregap>
+		<rpm>300</rpm>
+		<track_list>
+			<track track_number="00" side_number="0">
+				<format>IBM_FM</format>
+				<gap3>26</gap3>
+				<skew>1</skew>
+				<data_offset>0x000000</data_offset>
+				<sector_list>
+					<sector sector_id="1" sector_size="128"></sector>
+					<sector sector_id="2" sector_size="128"></sector>
+					<sector sector_id="3" sector_size="128"></sector>
+					<sector sector_id="4" sector_size="128"></sector>
+					<sector sector_id="5" sector_size="128"></sector>
+					<sector sector_id="6" sector_size="128"></sector>
+					<sector sector_id="7" sector_size="128"></sector>
+					<sector sector_id="8" sector_size="128"></sector>
+					<sector sector_id="9" sector_size="128"></sector>
+					<sector sector_id="10" sector_size="128"></sector>
+					<sector sector_id="11" sector_size="128"></sector>
+					<sector sector_id="12" sector_size="128"></sector>
+					<sector sector_id="13" sector_size="128"></sector>
+					<sector sector_id="14" sector_size="128"></sector>
+					<sector sector_id="15" sector_size="128"></sector>
+					<sector sector_id="16" sector_size="128"></sector>
+				</sector_list>
+			</track>
+            <track track_number="00" side_number="1">
+				<format>IBM_FM</format>
+				<gap3>26</gap3>
+				<skew>1</skew>
+				<data_offset>0x000800</data_offset>
+				<sector_list>
+					<sector sector_id="1" sector_size="128"></sector>
+					<sector sector_id="2" sector_size="128"></sector>
+					<sector sector_id="3" sector_size="128"></sector>
+					<sector sector_id="4" sector_size="128"></sector>
+					<sector sector_id="5" sector_size="128"></sector>
+					<sector sector_id="6" sector_size="128"></sector>
+					<sector sector_id="7" sector_size="128"></sector>
+					<sector sector_id="8" sector_size="128"></sector>
+					<sector sector_id="9" sector_size="128"></sector>
+					<sector sector_id="10" sector_size="128"></sector>
+					<sector sector_id="11" sector_size="128"></sector>
+					<sector sector_id="12" sector_size="128"></sector>
+					<sector sector_id="13" sector_size="128"></sector>
+					<sector sector_id="14" sector_size="128"></sector>
+					<sector sector_id="15" sector_size="128"></sector>
+					<sector sector_id="16" sector_size="128"></sector>
+				</sector_list>
+			</track>
+		</track_list>
+	</layout>
+</disk_layout>
+
