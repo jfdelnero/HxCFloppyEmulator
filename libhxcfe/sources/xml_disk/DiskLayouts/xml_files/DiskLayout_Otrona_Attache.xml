@@ -7,7 +7,7 @@
 
 <disk_layout>
 	<disk_layout_name>OTRONA_ATTACHE</disk_layout_name>
-	<disk_layout_description>Otrona Attaché Floppy Disk (40 Tracks, 2 Sides, MFM)</disk_layout_description>
+	<disk_layout_description>Otrona Attaché Floppy Disk (40 Tracks, 2 Sides, 10 sectors/trk, MFM)</disk_layout_description>
 	<prefered_file_extension>dsk</prefered_file_extension>
 	<interface_mode>GENERIC_SHUGART_DD_FLOPPYMODE</interface_mode>
 	<file_size>409600</file_size>
@@ -18,11 +18,11 @@
 		<start_sector_id>1</start_sector_id>
 		<sector_per_track>10</sector_per_track>
 		<sector_size>512</sector_size>
-		<interleave>1</interleave>
+		<interleave>2</interleave>
 		<skew_per_side>0</skew_per_side>
 		<skew_per_track>0</skew_per_track>
 		<formatvalue>0xE5</formatvalue>
-		<gap3>54</gap3>
+		<gap3>30</gap3>
 		<bitrate>250000</bitrate>
 		<pregap>0</pregap>
 		<rpm>300</rpm>
