@@ -10,19 +10,19 @@
 	<layout>
 		<number_of_track>40</number_of_track>
 		<number_of_side>2</number_of_side>
-		<format>IBM_MFM</format>
+		<format>ISO_MFM</format>
 		<start_sector_id>0</start_sector_id>
 		<sector_per_track>10</sector_per_track>
 		<sector_size>512</sector_size>
 		<formatvalue>0</formatvalue>
-		<gap3>255</gap3>
+		<gap3>42</gap3>
 		<bitrate>250000</bitrate>
 		<pregap>0</pregap>
 		<rpm>300</rpm>
 		<track_list>
 			<track track_number="00" side_number="0">
 				<data_offset>0x000000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -78,7 +78,7 @@
 			</track>
 			<track track_number="00" side_number="1">
 				<data_offset>0x001400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -144,7 +144,7 @@
 			</track>
 			<track track_number="01" side_number="0">
 				<data_offset>0x002800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -200,7 +200,7 @@
 			</track>
 			<track track_number="01" side_number="1">
 				<data_offset>0x003C00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -266,7 +266,7 @@
 			</track>
 			<track track_number="02" side_number="0">
 				<data_offset>0x005000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -322,7 +322,7 @@
 			</track>
 			<track track_number="02" side_number="1">
 				<data_offset>0x006400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -388,7 +388,7 @@
 			</track>
 			<track track_number="03" side_number="0">
 				<data_offset>0x007800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -444,7 +444,7 @@
 			</track>
 			<track track_number="03" side_number="1">
 				<data_offset>0x008C00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -510,7 +510,7 @@
 			</track>
 			<track track_number="04" side_number="0">
 				<data_offset>0x00A000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -566,7 +566,7 @@
 			</track>
 			<track track_number="04" side_number="1">
 				<data_offset>0x00B400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -632,7 +632,7 @@
 			</track>
 			<track track_number="05" side_number="0">
 				<data_offset>0x00C800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -688,7 +688,7 @@
 			</track>
 			<track track_number="05" side_number="1">
 				<data_offset>0x00DC00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -754,7 +754,7 @@
 			</track>
 			<track track_number="06" side_number="0">
 				<data_offset>0x00F000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -810,7 +810,7 @@
 			</track>
 			<track track_number="06" side_number="1">
 				<data_offset>0x010400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -876,7 +876,7 @@
 			</track>
 			<track track_number="07" side_number="0">
 				<data_offset>0x011800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -932,7 +932,7 @@
 			</track>
 			<track track_number="07" side_number="1">
 				<data_offset>0x012C00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -998,7 +998,7 @@
 			</track>
 			<track track_number="08" side_number="0">
 				<data_offset>0x014000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -1054,7 +1054,7 @@
 			</track>
 			<track track_number="08" side_number="1">
 				<data_offset>0x015400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -1120,7 +1120,7 @@
 			</track>
 			<track track_number="09" side_number="0">
 				<data_offset>0x016800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -1176,7 +1176,7 @@
 			</track>
 			<track track_number="09" side_number="1">
 				<data_offset>0x017C00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -1242,7 +1242,7 @@
 			</track>
 			<track track_number="10" side_number="0">
 				<data_offset>0x019000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -1298,7 +1298,7 @@
 			</track>
 			<track track_number="10" side_number="1">
 				<data_offset>0x01A400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -1364,7 +1364,7 @@
 			</track>
 			<track track_number="11" side_number="0">
 				<data_offset>0x01B800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -1420,7 +1420,7 @@
 			</track>
 			<track track_number="11" side_number="1">
 				<data_offset>0x01CC00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -1486,7 +1486,7 @@
 			</track>
 			<track track_number="12" side_number="0">
 				<data_offset>0x01E000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -1542,7 +1542,7 @@
 			</track>
 			<track track_number="12" side_number="1">
 				<data_offset>0x01F400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -1608,7 +1608,7 @@
 			</track>
 			<track track_number="13" side_number="0">
 				<data_offset>0x020800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -1664,7 +1664,7 @@
 			</track>
 			<track track_number="13" side_number="1">
 				<data_offset>0x021C00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -1730,7 +1730,7 @@
 			</track>
 			<track track_number="14" side_number="0">
 				<data_offset>0x023000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -1786,7 +1786,7 @@
 			</track>
 			<track track_number="14" side_number="1">
 				<data_offset>0x024400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -1852,7 +1852,7 @@
 			</track>
 			<track track_number="15" side_number="0">
 				<data_offset>0x025800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -1908,7 +1908,7 @@
 			</track>
 			<track track_number="15" side_number="1">
 				<data_offset>0x026C00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -1974,7 +1974,7 @@
 			</track>
 			<track track_number="16" side_number="0">
 				<data_offset>0x028000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -2030,7 +2030,7 @@
 			</track>
 			<track track_number="16" side_number="1">
 				<data_offset>0x029400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -2096,7 +2096,7 @@
 			</track>
 			<track track_number="17" side_number="0">
 				<data_offset>0x02A800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -2152,7 +2152,7 @@
 			</track>
 			<track track_number="17" side_number="1">
 				<data_offset>0x02BC00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -2218,7 +2218,7 @@
 			</track>
 			<track track_number="18" side_number="0">
 				<data_offset>0x02D000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -2274,7 +2274,7 @@
 			</track>
 			<track track_number="18" side_number="1">
 				<data_offset>0x02E400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -2340,7 +2340,7 @@
 			</track>
 			<track track_number="19" side_number="0">
 				<data_offset>0x02F800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -2396,7 +2396,7 @@
 			</track>
 			<track track_number="19" side_number="1">
 				<data_offset>0x030C00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -2462,7 +2462,7 @@
 			</track>
 			<track track_number="20" side_number="0">
 				<data_offset>0x032000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -2518,7 +2518,7 @@
 			</track>
 			<track track_number="20" side_number="1">
 				<data_offset>0x033400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -2584,7 +2584,7 @@
 			</track>
 			<track track_number="21" side_number="0">
 				<data_offset>0x034800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -2640,7 +2640,7 @@
 			</track>
 			<track track_number="21" side_number="1">
 				<data_offset>0x035C00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -2706,7 +2706,7 @@
 			</track>
 			<track track_number="22" side_number="0">
 				<data_offset>0x037000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -2762,7 +2762,7 @@
 			</track>
 			<track track_number="22" side_number="1">
 				<data_offset>0x038400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -2828,7 +2828,7 @@
 			</track>
 			<track track_number="23" side_number="0">
 				<data_offset>0x039800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -2884,7 +2884,7 @@
 			</track>
 			<track track_number="23" side_number="1">
 				<data_offset>0x03AC00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -2950,7 +2950,7 @@
 			</track>
 			<track track_number="24" side_number="0">
 				<data_offset>0x03C000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -3006,7 +3006,7 @@
 			</track>
 			<track track_number="24" side_number="1">
 				<data_offset>0x03D400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -3072,7 +3072,7 @@
 			</track>
 			<track track_number="25" side_number="0">
 				<data_offset>0x03E800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -3128,7 +3128,7 @@
 			</track>
 			<track track_number="25" side_number="1">
 				<data_offset>0x03FC00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -3194,7 +3194,7 @@
 			</track>
 			<track track_number="26" side_number="0">
 				<data_offset>0x041000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -3250,7 +3250,7 @@
 			</track>
 			<track track_number="26" side_number="1">
 				<data_offset>0x042400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -3316,7 +3316,7 @@
 			</track>
 			<track track_number="27" side_number="0">
 				<data_offset>0x043800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -3372,7 +3372,7 @@
 			</track>
 			<track track_number="27" side_number="1">
 				<data_offset>0x044C00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -3438,7 +3438,7 @@
 			</track>
 			<track track_number="28" side_number="0">
 				<data_offset>0x046000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -3494,7 +3494,7 @@
 			</track>
 			<track track_number="28" side_number="1">
 				<data_offset>0x047400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -3560,7 +3560,7 @@
 			</track>
 			<track track_number="29" side_number="0">
 				<data_offset>0x048800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -3616,7 +3616,7 @@
 			</track>
 			<track track_number="29" side_number="1">
 				<data_offset>0x049C00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -3682,7 +3682,7 @@
 			</track>
 			<track track_number="30" side_number="0">
 				<data_offset>0x04B000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -3738,7 +3738,7 @@
 			</track>
 			<track track_number="30" side_number="1">
 				<data_offset>0x04C400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -3804,7 +3804,7 @@
 			</track>
 			<track track_number="31" side_number="0">
 				<data_offset>0x04D800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -3860,7 +3860,7 @@
 			</track>
 			<track track_number="31" side_number="1">
 				<data_offset>0x04EC00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -3926,7 +3926,7 @@
 			</track>
 			<track track_number="32" side_number="0">
 				<data_offset>0x050000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -3982,7 +3982,7 @@
 			</track>
 			<track track_number="32" side_number="1">
 				<data_offset>0x051400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -4048,7 +4048,7 @@
 			</track>
 			<track track_number="33" side_number="0">
 				<data_offset>0x052800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -4104,7 +4104,7 @@
 			</track>
 			<track track_number="33" side_number="1">
 				<data_offset>0x053C00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -4170,7 +4170,7 @@
 			</track>
 			<track track_number="34" side_number="0">
 				<data_offset>0x055000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -4226,7 +4226,7 @@
 			</track>
 			<track track_number="34" side_number="1">
 				<data_offset>0x056400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -4292,7 +4292,7 @@
 			</track>
 			<track track_number="35" side_number="0">
 				<data_offset>0x057800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -4348,7 +4348,7 @@
 			</track>
 			<track track_number="35" side_number="1">
 				<data_offset>0x058C00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -4414,7 +4414,7 @@
 			</track>
 			<track track_number="36" side_number="0">
 				<data_offset>0x05A000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -4470,7 +4470,7 @@
 			</track>
 			<track track_number="36" side_number="1">
 				<data_offset>0x05B400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -4536,7 +4536,7 @@
 			</track>
 			<track track_number="37" side_number="0">
 				<data_offset>0x05C800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -4592,7 +4592,7 @@
 			</track>
 			<track track_number="37" side_number="1">
 				<data_offset>0x05DC00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -4658,7 +4658,7 @@
 			</track>
 			<track track_number="38" side_number="0">
 				<data_offset>0x05F000</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -4714,7 +4714,7 @@
 			</track>
 			<track track_number="38" side_number="1">
 				<data_offset>0x060400</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -4780,7 +4780,7 @@
 			</track>
 			<track track_number="39" side_number="0">
 				<data_offset>0x061800</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="0" sector_size="512">
 						<data_fill>0xE5</data_fill>
@@ -4836,7 +4836,7 @@
 			</track>
 			<track track_number="39" side_number="1">
 				<data_offset>0x062C00</data_offset>
-				<format>IBM_MFM</format>
+				<format>ISO_MFM</format>
 				<sector_list>
 					<sector sector_id="10" sector_size="512">
 						<data_fill>0xE5</data_fill>
