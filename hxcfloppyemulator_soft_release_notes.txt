@@ -15,7 +15,7 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
-XX XXXX 2026 : HxCFloppyEmulator beta version (v2.16.15.1)
+XX XXXX 2026 : HxCFloppyEmulator beta version (v2.16.15.2)
 
 -> New loader/writer : H17Disk Heathkit H17 Hard-sectored Disk Image (*.h17)
 
@@ -33,6 +33,8 @@ XX XXXX 2026 : HxCFloppyEmulator beta version (v2.16.15.1)
 -> libexpat updated to v2.7.3
 
 -> FAT/DOS Disk browser : Don't cache fat table -> Fix issues with damaged / protected disks.
+
+-> IMD Loader : Fix inter-tracks variable bitrate support.
 
 *********************************************************/
 
