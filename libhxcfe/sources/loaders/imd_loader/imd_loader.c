@@ -96,6 +96,7 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	HXCFE_CYLINDER* currentcylinder = NULL;
 	HXCFE_SIDE* currentside = NULL;
 	int32_t bitrate;
+	int32_t oldbitrate;
 	int32_t pregap;
 	unsigned char * sectormap = NULL;
 	unsigned char * sectorcylmap = NULL;
@@ -452,8 +453,6 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 					sectorconfig[j].trackencoding=tracktype;
 				}
 
-				floppydisk->floppyBitRate=bitrate;
-
 				if(!floppydisk->tracks[trackcfg.physical_cylinder])
 				{
 					floppydisk->tracks[trackcfg.physical_cylinder] = allocCylinderEntry(rpm,floppydisk->floppyNumberOfSide);
@@ -462,9 +461,23 @@ int IMD_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				currentcylinder = floppydisk->tracks[trackcfg.physical_cylinder];
 
 
-				currentside = tg_generateTrackEx((unsigned short)trackcfg.number_of_sector,sectorconfig,interleave,0,floppydisk->floppyBitRate,rpm,tracktype,pregap,2500 | NO_SECTOR_UNDER_INDEX,-2500);
+				currentside = tg_generateTrackEx((unsigned short)trackcfg.number_of_sector,sectorconfig,interleave,0,bitrate,rpm,tracktype,pregap,2500 | NO_SECTOR_UNDER_INDEX,-2500);
 				currentcylinder->sides[trackcfg.physical_head&0xF] = currentside;
 				currentcylinder->floppyRPM = rpm;
+
+				if( i != 0 )
+				{
+					if ( bitrate != oldbitrate)
+					{
+						floppydisk->floppyBitRate = VARIABLEBITRATE;
+					}
+				}
+				else
+				{
+					floppydisk->floppyBitRate = bitrate;
+				}
+
+				oldbitrate = bitrate;
 
 				for(j=0;j<trackcfg.number_of_sector;j++)
 				{
