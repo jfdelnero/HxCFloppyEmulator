@@ -22,19 +22,19 @@ md5_check () {
 }
 
 if [ $OSTYPE == 'darwin'* ] || [ $1 = "1" ] ; then
-export DOWNLOADURL=https://github.com/fltk/fltk/releases/download/release-1.4.4/fltk-1.4.4-source.tar.gz
-export DOWNLOADHASH="83c567727e61c779f6681b0298226d05"
-export ARCHIVENAMEBASE=fltk-1.4.4-source
+export DOWNLOADURL=https://github.com/fltk/fltk/releases/download/release-1.4.5/fltk-1.4.5-source.tar.gz
+export DOWNLOADHASH="8308c6bb9ebc8580807a3834be4fcf54"
+export ARCHIVENAMEBASE=fltk-1.4.5-source
 export PATCHFILE=
-export FOLDERNAME=fltk-1.4.4
+export FOLDERNAME=fltk-1.4.5
 else
 
 	if [ -z ${EMSDK+x} ]; then
-		export DOWNLOADURL=https://github.com/fltk/fltk/releases/download/release-1.4.4/fltk-1.4.4-source.tar.gz
-		export DOWNLOADHASH="83c567727e61c779f6681b0298226d05"
-		export ARCHIVENAMEBASE=fltk-1.4.4-source
+		export DOWNLOADURL=https://github.com/fltk/fltk/releases/download/release-1.4.5/fltk-1.4.5-source.tar.gz
+		export DOWNLOADHASH="8308c6bb9ebc8580807a3834be4fcf54"
+		export ARCHIVENAMEBASE=fltk-1.4.5-source
 		export PATCHFILE=fltk-1.4.x-vc6.patch
-		export FOLDERNAME=fltk-1.4.4
+		export FOLDERNAME=fltk-1.4.5
 	else
 		# https://github.com/MoAlyousef/fltk_wasm32_emscripten/tree/emscripten
 		# ("emscripten" branch)
