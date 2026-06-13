@@ -67,8 +67,9 @@ Build folder.
 
 ### Linux target
 
-(Linux build environment)
+(Linux build environment like Ubuntu)
 ```
+sudo apt-get install libxft-dev libfreetype6-dev pkg-config
 cd hxc_floppy_emulator_sources_path/build
 make
 ```
