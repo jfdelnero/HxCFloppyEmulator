@@ -65,20 +65,12 @@ typedef void* HMODULE;
 #include "thirdpartylibs/capslib/Comtype.h"
 #include "thirdpartylibs/capslib/CapsAPI.h"
 
-typedef SDWORD (* CAPSINIT)(void);
-typedef SDWORD (* CAPSADDIMAGE)(void);
-typedef SDWORD (* CAPSLOCKIMAGEMEMORY)(SDWORD,PUBYTE,UDWORD,UDWORD);
-typedef SDWORD (* CAPSUNLOCKIMAGE)(SDWORD);
-typedef SDWORD (* CAPSLOADIMAGE)(SDWORD,UDWORD);
-typedef SDWORD (* CAPSGETIMAGEINFO)(PCAPSIMAGEINFO,SDWORD);
-typedef SDWORD (* CAPSLOCKTRACK)(PCAPSTRACKINFO,SDWORD,UDWORD,UDWORD,UDWORD);
-typedef SDWORD (* CAPSUNLOCKTRACK)(SDWORD id, UDWORD cylinder, UDWORD head);
-typedef SDWORD (* CAPSUNLOCKALLTRACKS)(SDWORD);
-typedef SDWORD (* CAPSGETVERSIONINFO)(PCAPSVERSIONINFO,UDWORD);
-typedef SDWORD (* CAPSREMIMAGE)(SDWORD id);
+#include "capslibloader.h"
 
 CAPSINIT pCAPSInit = 0;
 CAPSADDIMAGE pCAPSAddImage = 0;
+CAPSLOCKIMAGE pCAPSLockImage = 0;
+CAPSGETIMAGETYPEMEMORY pCAPSGetImageTypeMemory = 0;
 CAPSLOCKIMAGEMEMORY pCAPSLockImageMemory = 0;
 CAPSUNLOCKIMAGE pCAPSUnlockImage = 0;
 CAPSLOADIMAGE pCAPSLoadImage = 0;
@@ -99,17 +91,19 @@ typedef struct _lib_funcs_def
 
 lib_funcs_def capslib_lib_funcs_def[]=
 {
-	{"CAPSInit",            (func_ptr *)&pCAPSInit},
-	{"CAPSAddImage",        (func_ptr *)&pCAPSAddImage},
-	{"CAPSLockImageMemory", (func_ptr *)&pCAPSLockImageMemory},
-	{"CAPSUnlockImage",     (func_ptr *)&pCAPSUnlockImage},
-	{"CAPSLoadImage",       (func_ptr *)&pCAPSLoadImage},
-	{"CAPSGetImageInfo",    (func_ptr *)&pCAPSGetImageInfo},
-	{"CAPSLockTrack",       (func_ptr *)&pCAPSLockTrack},
-	{"CAPSUnlockTrack",     (func_ptr *)&pCAPSUnlockTrack},
-	{"CAPSUnlockAllTracks", (func_ptr *)&pCAPSUnlockAllTracks},
-	{"CAPSGetVersionInfo",  (func_ptr *)&pCAPSGetVersionInfo},
-	{"CAPSRemImage",        (func_ptr *)&pCAPSRemImage},
+	{"CAPSInit",               (func_ptr *)&pCAPSInit},
+	{"CAPSAddImage",           (func_ptr *)&pCAPSAddImage},
+	{"CAPSLockImage",          (func_ptr *)&pCAPSLockImage},
+	{"CAPSLockImageMemory",    (func_ptr *)&pCAPSLockImageMemory},
+	{"CAPSGetImageTypeMemory", (func_ptr *)&pCAPSGetImageTypeMemory},
+	{"CAPSUnlockImage",        (func_ptr *)&pCAPSUnlockImage},
+	{"CAPSLoadImage",          (func_ptr *)&pCAPSLoadImage},
+	{"CAPSGetImageInfo",       (func_ptr *)&pCAPSGetImageInfo},
+	{"CAPSLockTrack",          (func_ptr *)&pCAPSLockTrack},
+	{"CAPSUnlockTrack",        (func_ptr *)&pCAPSUnlockTrack},
+	{"CAPSUnlockAllTracks",    (func_ptr *)&pCAPSUnlockAllTracks},
+	{"CAPSGetVersionInfo",     (func_ptr *)&pCAPSGetVersionInfo},
+	{"CAPSRemImage",           (func_ptr *)&pCAPSRemImage},
 	{ 0, 0 }
 };
 

@@ -60,6 +60,8 @@
 
 #include "libhxcadaptor.h"
 
+#include "../../tracks/std_crc32.h"
+
 #define BYTE  int8_t
 #define WORD  int16_t
 #define DWORD int32_t
@@ -67,36 +69,13 @@
 #define LIB_USER 1
 #include "./thirdpartylibs/capslib/Comtype.h"
 #include "./thirdpartylibs/capslib/CapsAPI.h"
+#include "./thirdpartylibs/capslib/CapsAPI.h"
 
-#include "capslibloader.h"
+#include "../../misc/capslib_loader/capslibloader.h"
 
 #ifndef WIN32
 #define __cdecl
 #endif
-
-typedef SDWORD (__cdecl* CAPSINIT)(void);
-typedef SDWORD (__cdecl* CAPSADDIMAGE)(void);
-typedef SDWORD (__cdecl* CAPSLOCKIMAGEMEMORY)(SDWORD,PUBYTE,UDWORD,UDWORD);
-typedef SDWORD (__cdecl* CAPSUNLOCKIMAGE)(SDWORD);
-typedef SDWORD (__cdecl* CAPSLOADIMAGE)(SDWORD,UDWORD);
-typedef SDWORD (__cdecl* CAPSGETIMAGEINFO)(PCAPSIMAGEINFO,SDWORD);
-typedef SDWORD (__cdecl* CAPSLOCKTRACK)(PCAPSTRACKINFO,SDWORD,UDWORD,UDWORD,UDWORD);
-typedef SDWORD (__cdecl* CAPSUNLOCKTRACK)(SDWORD id, UDWORD cylinder, UDWORD head);
-typedef SDWORD (__cdecl* CAPSUNLOCKALLTRACKS)(SDWORD);
-typedef SDWORD (__cdecl* CAPSGETVERSIONINFO)(PCAPSVERSIONINFO,UDWORD);
-typedef SDWORD (__cdecl* CAPSREMIMAGE)(SDWORD id);
-
-extern  CAPSINIT pCAPSInit;
-extern  CAPSADDIMAGE pCAPSAddImage;
-extern  CAPSLOCKIMAGEMEMORY pCAPSLockImageMemory;
-extern  CAPSUNLOCKIMAGE pCAPSUnlockImage;
-extern  CAPSLOADIMAGE pCAPSLoadImage;
-extern  CAPSGETIMAGEINFO pCAPSGetImageInfo;
-extern  CAPSLOCKTRACK pCAPSLockTrack;
-extern  CAPSUNLOCKTRACK pCAPSUnlockTrack;
-extern  CAPSUNLOCKALLTRACKS pCAPSUnlockAllTracks;
-extern  CAPSGETVERSIONINFO pCAPSGetVersionInfo;
-extern  CAPSREMIMAGE pCAPSRemImage;
 
 #define INDEX_POSITION  0
 #define INDEX_DURATION  2000
@@ -213,6 +192,7 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	FILE * f;
 	int img;
 	int ret;
+	int block_sz;
 	int progresscnt;
 	int overlap;
 	int intrackflakeybit;
@@ -230,6 +210,13 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	temptrack = NULL;
 	progresscnt = 0;
 
+	ret = pCAPSInit();
+	if( ret != 0 )
+	{
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"CAPSInit failure ! (Code %d) ",ret);
+		return HXCFE_INTERNALERROR;
+	}
+
 	f = hxc_fopen(imgfile,"rb");
 	if( f == NULL )
 	{
@@ -241,17 +228,35 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	if( filesize )
 	{
-		fileimg = (unsigned char*)malloc(filesize);
-
+		fileimg = (unsigned char*)calloc(1,filesize);
 		if(fileimg!=NULL)
 		{
-			i=0;
-			do
-			{
-				hxc_fread(fileimg+(i*1024),1024,f);
-				i++;
-			}while(i<((filesize/1024)+1));
+			#define LOAD_BLOCKSIZE 8192
+			unsigned char *fileimg_ptr = fileimg;
 
+			ret = 1;
+			while( fileimg_ptr < (fileimg + filesize) && ret > 0 )
+			{
+				if( filesize - (fileimg_ptr - fileimg) >= LOAD_BLOCKSIZE)
+					block_sz = LOAD_BLOCKSIZE;
+				else
+					block_sz = filesize - (fileimg_ptr - fileimg);
+
+				ret = hxc_fread(fileimg_ptr,block_sz,f);
+
+				fileimg_ptr += block_sz;
+			}
+
+			if( fileimg_ptr != (fileimg + filesize) )
+			{
+				imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"Error while loading %s !", imgfile);
+				hxc_fclose(f);
+				return HXCFE_ACCESSERROR;
+			}
+			else
+			{
+				imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"IPF File loaded (%d bytes, CRC32: 0x%.8X)", filesize, std_crc32(0x00000000, fileimg, filesize) );
+			}
 		}
 		else
 		{
@@ -294,10 +299,19 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	img = pCAPSAddImage();
 
-	if(img != -1)
+	if(img >= 0 )
 	{
-		if(pCAPSLockImageMemory(img, fileimg,filesize,0)!=imgeUnsupported )
+		ret = pCAPSGetImageTypeMemory(fileimg,filesize);
+
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"pCAPSGetImageTypeMemory return code : %d",ret);
+
+		ret = pCAPSLockImageMemory(img, fileimg,filesize,DI_LOCK_MEMREF);
+
+		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"pCAPSLockImageMemory return code : %d",ret);
+
+		if(ret != imgeUnsupported )
 		{
+
 			pCAPSLoadImage(img, flag);
 			pCAPSGetImageInfo(&ci2, img);
 
@@ -627,18 +641,26 @@ int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			}
 
 			pCAPSUnlockAllTracks(img);
+
+			imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"IPF Loader : tracks file successfully loaded and encoded!");
+
+			ret = HXCFE_NOERROR;
+		}
+		else
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"IPF Loader : CAPSLib has rejected the image !");
+
+			ret = HXCFE_BADFILE;
 		}
 
 		pCAPSUnlockImage(img);
-
 
 		pCAPSRemImage(img);
 
 		free(fileimg);
 		fileimg = NULL;
 
-		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"IPF Loader : tracks file successfully loaded and encoded!");
-		return HXCFE_NOERROR;
+		return ret;
 	}
 
 	return HXCFE_INTERNALERROR;
