@@ -123,14 +123,15 @@ static void quickSort(sect_offset ** table, int start, int end)
 
 int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * filename)
 {
-	int i,j,k,s;
+	int i,j,k,s,vs;
 	FILE * xmlfile;
 	int fileoffset;
-	int32_t nb_sectorfound;
+	int32_t nb_sectorfound,nb_validsectorfound;
 	int nbsect,firstsectid,sectorsize,imagesize;
 	char trackformat[32];
 	HXCFE_SECTORACCESS* ss;
 	HXCFE_SECTCFG** sca;
+	HXCFE_SECTCFG*  sectp;
 	sect_offset ** sorted_sectoffset,**sectoffset;
 	uint32_t crc32;
 	int trackformatid;
@@ -219,6 +220,7 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 					fprintf(xmlfile,"\t\t\t\t<format>%s</format>\n",trackformat);
 
 					nb_sectorfound = 0;
+					nb_validsectorfound = 0;
 
 					sca = hxcfe_getAllTrackISOSectors(ss,j,i,&nb_sectorfound);
 					fprintf(xmlfile,"\t\t\t\t<sector_list>\n");
@@ -238,103 +240,139 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 						if(sorted_sectoffset && sectoffset)
 						{
+							// Filter and sort the sectors file offsets.
 							for(s=0;s<nb_sectorfound;s++)
 							{
-								sorted_sectoffset[s] = malloc(sizeof(sect_offset));
-								if( !sorted_sectoffset[s] )
-									goto alloc_error;
-								sorted_sectoffset[s]->ss = sca[s];
-								sorted_sectoffset[s]->offset = 0;
+								if( sca[s]->sectorsize )
+								{
+									sorted_sectoffset[nb_validsectorfound] = malloc(sizeof(sect_offset));
+									if( !sorted_sectoffset[nb_validsectorfound] )
+										goto alloc_error;
+
+									sorted_sectoffset[nb_validsectorfound]->ss = sca[s];
+									sorted_sectoffset[nb_validsectorfound]->offset = 0;
+									nb_validsectorfound++;
+								}
+								else
+								{
+									hxcfe_freeSectorConfig  (ss,sca[s]);
+								}
 							}
 
-							memcpy(sectoffset,sorted_sectoffset,sizeof(sect_offset*) * (int)nb_sectorfound);
+							memcpy(sectoffset,sorted_sectoffset,sizeof(sect_offset*) * (int)nb_validsectorfound);
 
-							quickSort(sorted_sectoffset, 0, nb_sectorfound - 1);
+							if(nb_validsectorfound)
+								quickSort(sorted_sectoffset, 0, nb_validsectorfound - 1);
 
-							for(s=0;s<nb_sectorfound;s++)
+							for(s=0;s<nb_validsectorfound;s++)
 							{
 								sorted_sectoffset[s]->offset = fileoffset;
-								fileoffset += sca[s]->sectorsize;
+								fileoffset += sorted_sectoffset[s]->ss->sectorsize;
 							}
 
 							free(sorted_sectoffset);
 							sorted_sectoffset = NULL;
 
-							for(s=0;s<nb_sectorfound;s++)
+							vs = 0;
+							for( s = 0; s < nb_validsectorfound; s++ )
 							{
-
-								fprintf(xmlfile,"\t\t\t\t\t<sector sector_id=\"%d\" sector_size=\"%d\">\n",sca[s]->sector,sca[s]->sectorsize);
-
-								if( ( trackformatid != IBMFORMAT_SD ) &&
-									(
-										( sca[s]->trackencoding == IBMFORMAT_SD ) ||
-										( sca[s]->trackencoding == ISOFORMAT_SD )
-									)
-								)
+								sectp = sectoffset[s]->ss;
+								if( sectp->sectorsize )
 								{
-									fprintf(xmlfile,"\t\t\t\t\t\t<format>IBM_FM</format>\n");
-								}
-								else
-								{
-									if( ( trackformatid != IBMFORMAT_DD ) &&
+									fprintf(xmlfile,"\t\t\t\t\t<sector sector_id=\"%d\" sector_size=\"%d\">\n",sectp->sector,sectp->sectorsize);
+
+									if( ( trackformatid != IBMFORMAT_SD ) &&
 										(
-											( sca[s]->trackencoding == IBMFORMAT_DD ) ||
-											( sca[s]->trackencoding == ISOFORMAT_DD )
+											( sectp->trackencoding == IBMFORMAT_SD ) ||
+											( sectp->trackencoding == ISOFORMAT_SD )
 										)
 									)
 									{
-										fprintf(xmlfile,"\t\t\t\t\t\t<format>IBM_MFM</format>\n");
+										fprintf(xmlfile,"\t\t\t\t\t\t<format>IBM_FM</format>\n");
 									}
-								}
+									else
+									{
+										if( ( trackformatid != IBMFORMAT_DD ) &&
+											(
+												( sectp->trackencoding == IBMFORMAT_DD ) ||
+												( sectp->trackencoding == ISOFORMAT_DD )
+											)
+										)
+										{
+											fprintf(xmlfile,"\t\t\t\t\t\t<format>IBM_MFM</format>\n");
+										}
+									}
 
-								if(sca[s]->fill_byte_used)
-								{
-									fprintf(xmlfile,"\t\t\t\t\t\t<data_fill>0x%.2X</data_fill>\n",sca[s]->fill_byte);
+									if(sectp->fill_byte_used)
+									{
+										fprintf(xmlfile,"\t\t\t\t\t\t<data_fill>0x%.2X</data_fill>\n",sectp->fill_byte);
+									}
+									else
+									{
+										if(sectp->input_data)
+										{
+											fprintf(xmlfile,"\t\t\t\t\t\t<sector_data>");
+											k=0;
+											do
+											{
+												fprintf(xmlfile,"%.2X",sectp->input_data[k]);
+												k++;
+											}while(k<(int)sectp->sectorsize);
+
+											fprintf(xmlfile,"</sector_data>\n");
+										}
+									}
+
+									if(sectp->head != i)
+									{
+										fprintf(xmlfile,"\t\t\t\t\t\t<side_id>0x%.2X</side_id>\n",sectp->head);
+									}
+
+									if(sectp->cylinder != j)
+									{
+										fprintf(xmlfile,"\t\t\t\t\t\t<track_id>0x%.2X</track_id>\n",sectp->cylinder);
+									}
+
+									if(sectp->use_alternate_datamark)
+									{
+										fprintf(xmlfile,"\t\t\t\t\t\t<datamark>0x%.2X</datamark>\n",sectp->alternate_datamark);
+									}
+
+									fprintf(xmlfile,"\t\t\t\t\t\t<data_offset>0x%.6X</data_offset>\n",(unsigned int)sectoffset[vs]->offset);
+
+									if(sectp->use_alternate_header_crc)
+									{
+										if(sectp->use_alternate_header_crc & 1)
+											fprintf(xmlfile,"\t\t\t\t\t\t<header_crc>0x%.4X</header_crc><!-- Bad Header CRC status -->\n",(unsigned int)sectp->header_crc);
+										else
+											fprintf(xmlfile,"\t\t\t\t\t\t<header_crc>0x%.4X</header_crc>\n",(unsigned int)sectp->data_crc);
+									}
+
+									if(sectp->use_alternate_data_crc)
+									{
+										if(sectp->use_alternate_data_crc & 1)
+											fprintf(xmlfile,"\t\t\t\t\t\t<data_crc>0x%.4X</data_crc><!-- Bad Data CRC status -->\n",(unsigned int)sectp->data_crc);
+										else
+											fprintf(xmlfile,"\t\t\t\t\t\t<data_crc>0x%.4X</data_crc>\n",(unsigned int)sectp->data_crc);
+									}
+
+									fprintf(xmlfile,"\t\t\t\t\t</sector>\n");
+									vs++;
 								}
 								else
 								{
-									if(sca[s]->input_data)
-									{
-										fprintf(xmlfile,"\t\t\t\t\t\t<sector_data>");
-										k=0;
-										do
-										{
-											fprintf(xmlfile,"%.2X",sca[s]->input_data[k]);
-											k++;
-										}while(k<(int)sca[s]->sectorsize);
-
-										fprintf(xmlfile,"</sector_data>\n");
-									}
+									fprintf(xmlfile,"\t\t\t\t\t<!-- Invalid sector --/>\n");
 								}
 
-								if(sca[s]->head != i)
-								{
-									fprintf(xmlfile,"\t\t\t\t\t\t<side_id>0x%.2X</side_id>\n",sca[s]->head);
-								}
-
-								if(sca[s]->cylinder != j)
-								{
-									fprintf(xmlfile,"\t\t\t\t\t\t<track_id>0x%.2X</track_id>\n",sca[s]->cylinder);
-								}
-
-								if(sca[s]->use_alternate_datamark)
-								{
-									fprintf(xmlfile,"\t\t\t\t\t\t<datamark>0x%.2X</datamark>\n",sca[s]->alternate_datamark);
-								}
-
-								fprintf(xmlfile,"\t\t\t\t\t\t<data_offset>0x%.6X</data_offset>\n",(unsigned int)sectoffset[s]->offset);
-								fprintf(xmlfile,"\t\t\t\t\t</sector>\n");
-
-								hxcfe_freeSectorConfig  (ss,sca[s]);
+								hxcfe_freeSectorConfig  (ss,sectp);
 							}
 
-							for(s=0;s<nb_sectorfound;s++)
+							for(s=0;s<nb_validsectorfound;s++)
 							{
 								free(sectoffset[s]);
 							}
 							free(sectoffset);
 							sectoffset = NULL;
-
 						}
 
 						free(sca);
