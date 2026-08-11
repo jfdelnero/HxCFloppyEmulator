@@ -169,6 +169,12 @@ void patchtrack(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char *
 	i=0;
 	while(i<(buffersize-4))
 	{
+		// Each match advances lastindex by 2 on top of the per-iteration step, so
+		// it runs past buffersize while i is still in range. Every other access
+		// below is masked; wrap it here so the unmasked reads/writes stay in the
+		// track buffer.
+		lastindex %= buffersize;
+
 		if( ( (trackbuffer[lastindex]==0xE1) || (trackbuffer[lastindex%buffersize]==0x0A) || (trackbuffer[lastindex%buffersize]==0x14) || (trackbuffer[(lastindex)%buffersize]==0xC2) ) && trackbuffer[(lastindex+1)%buffersize]==0xA1 && trackbuffer[(lastindex+2)%buffersize]==0xA1)
 		{
 			doff=lastindex;
@@ -199,21 +205,40 @@ void patchtrack(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char *
 
 }
 
+/////////////////////////////////////////////////////////////////
+// Sector header offsets may be negative : getSectorHeaderOffset
+// stores i-1 (so -1 for a mark found at index 0) and 0xFFFFFFFF as
+// the "not found" sentinel, and addsector further subtracts from it.
+// C's % keeps the sign of the dividend, so a plain index%buffersize
+// leaves the index negative and accesses just before the buffer.
+/////////////////////////////////////////////////////////////////
+static int wrapindex(int index,int buffersize)
+{
+	if(buffersize<=0)
+		return 0;
+
+	index %= buffersize;
+	if(index<0)
+		index += buffersize;
+
+	return index;
+}
+
 unsigned char patchbyte(unsigned char * buffer,unsigned char * maskbuffer,int buffersize,int index,unsigned char byte)
 {
 	if(maskbuffer && (index>=buffersize))
 	{
 
-		if(maskbuffer[index%buffersize])
+		if(maskbuffer[wrapindex(index,buffersize)])
 		{
-			buffer[index%buffersize]=byte;
-			maskbuffer[index%buffersize]=0x00;
+			buffer[wrapindex(index,buffersize)]=byte;
+			maskbuffer[wrapindex(index,buffersize)]=0x00;
 		}
 		else
 			return 0xFF;
 	}
 	else
-		buffer[index%buffersize]=byte;
+		buffer[wrapindex(index,buffersize)]=byte;
 
 	return 0x00;
 }
@@ -230,7 +255,7 @@ void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * 
 
 	if(!numsector)
 	{
-		lastindex = offsetlist[numsector] % buffersize;
+		lastindex = wrapindex(offsetlist[numsector],buffersize);
 
 		shoff = lastindex;
 
@@ -255,7 +280,7 @@ void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * 
 		if(sector[numsector].input_data)
 		{
 			i=0;
-			while((trackbuffer[lastindex%buffersize]!=0xA1 || trackbuffer[(lastindex+1)%buffersize]!=0xA1 || trackbuffer[(lastindex+2)%buffersize]!=0xFB) && i<64)
+			while((trackbuffer[wrapindex(lastindex,buffersize)]!=0xA1 || trackbuffer[wrapindex(lastindex+1,buffersize)]!=0xA1 || trackbuffer[wrapindex(lastindex+2,buffersize)]!=0xFB) && i<64)
 			{
 				i++;
 				lastindex++;
@@ -265,7 +290,7 @@ void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * 
 			{
 				lastindex--;
 
-				doff=lastindex%buffersize;
+				doff=wrapindex(lastindex,buffersize);
 
 				patchbyte(trackbuffer,trackmask,buffersize,lastindex,0xA1);
 				patchbyte(trackclock ,0        ,buffersize,lastindex++,0x0A);
@@ -275,7 +300,7 @@ void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * 
 				patchbyte(trackclock ,0        ,buffersize,lastindex++,0x0A);
 				patchbyte(trackbuffer,trackmask,buffersize,lastindex++,0xFB);
 
-				sector[numsector].startdataindex=(lastindex%buffersize)*2;
+				sector[numsector].startdataindex=wrapindex(lastindex,buffersize)*2;
 
 				for(i=0;i<sector[numsector].sectorsize;i++)
 				{
@@ -301,7 +326,7 @@ void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * 
 		}
 
 		i=0;
-		while((trackbuffer[lastindex%buffersize]!=0xA1 || trackbuffer[(lastindex+1)%buffersize]!=0xA1 || ( (trackbuffer[(lastindex+2)%buffersize]!=0xFE) && (trackbuffer[(lastindex+2)%buffersize]!=0xFF) ) ) && i<(sector[numsector-1].sectorsize+64))
+		while((trackbuffer[wrapindex(lastindex,buffersize)]!=0xA1 || trackbuffer[wrapindex(lastindex+1,buffersize)]!=0xA1 || ( (trackbuffer[wrapindex(lastindex+2,buffersize)]!=0xFE) && (trackbuffer[wrapindex(lastindex+2,buffersize)]!=0xFF) ) ) && i<(sector[numsector-1].sectorsize+64))
 		{
 			i++;
 			lastindex++;
@@ -320,7 +345,7 @@ void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * 
 
 		if(lastindex!=0xFFFFFFFF)
 		{
-			sector[numsector].startsectorindex=(lastindex%buffersize)*2;
+			sector[numsector].startsectorindex=wrapindex(lastindex,buffersize)*2;
 
 			//trackbuffer[lastindex-1]=0x00;
 			patchbyte(trackbuffer,trackmask,buffersize,lastindex,0xA1);
@@ -341,7 +366,7 @@ void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * 
 			if(sector[numsector].input_data)
 			{
 				i=0;
-				while((trackbuffer[lastindex%buffersize]!=0xA1 || trackbuffer[(lastindex+1)%buffersize]!=0xA1 || trackbuffer[(lastindex+2)%buffersize]!=0xFB) && i<64)
+				while((trackbuffer[wrapindex(lastindex,buffersize)]!=0xA1 || trackbuffer[wrapindex(lastindex+1,buffersize)]!=0xA1 || trackbuffer[wrapindex(lastindex+2,buffersize)]!=0xFB) && i<64)
 				{
 					i++;
 					lastindex++;
@@ -349,7 +374,7 @@ void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * 
 
 				lastindex--;
 
-				doff=lastindex%buffersize;
+				doff=wrapindex(lastindex,buffersize);
 
 				patchbyte(trackbuffer,trackmask,buffersize,lastindex,0xA1);
 				patchbyte(trackclock ,0        ,buffersize,lastindex++,0x0A);
@@ -362,7 +387,7 @@ void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * 
 
 				patchbyte(trackbuffer,trackmask,buffersize,lastindex++,0xFB);
 
-				sector[numsector].startdataindex=(lastindex%buffersize)*2;
+				sector[numsector].startdataindex=wrapindex(lastindex,buffersize)*2;
 
 				for(i=0;i<sector[numsector].sectorsize;i++)
 				{
