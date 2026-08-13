@@ -55,6 +55,7 @@
 #include "fdc_ctrl.h"
 #include "fs_manager/fs_manager.h"
 #include "libhxcfe.h"
+#include "fs_manager/fs_manager_access.h"
 
 #include "floppy_loader.h"
 #include "floppy_utils.h"
@@ -414,3 +415,47 @@ int32_t cpm_fseek( HXCFE_FSMNG * fsmng,int32_t filehandle,int32_t offset,int32_t
 
 	return HXCFE_ACCESSERROR;
 }
+
+int cpm_libGetPluginInfo(HXCFE_FSMNG * fsmng_ctx, uint32_t infotype, void * returnvalue)
+{
+	static const char fs_plug_id[] = "FS_CPM";
+	static const char fs_plug_desc[] = "CPM";
+
+	fs_plugins_ptr fs_plug_funcs=
+	{
+		.fsmng_init              = (fn_fsmng_init)            init_cpm,
+
+		.fsmng_mountImage        = (fn_fsmng_mountImage)      cpm_mountImage,
+		.fsmng_umountImage       = (fn_fsmng_umountImage)     cpm_umountImage,
+
+		.fsmng_getFreeSpace      = (fn_fsmng_getFreeSpace)    cpm_getFreeSpace,
+		.fsmng_getTotalSpace     = (fn_fsmng_getTotalSpace)   cpm_getTotalSpace,
+		.fsmng_deleteFile        = (fn_fsmng_deleteFile)      cpm_deleteFile,
+
+		.fsmng_openFile          = (fn_fsmng_openFile)        cpm_openFile,
+		.fsmng_closeFile         = (fn_fsmng_closeFile)       cpm_closeFile,
+
+		.fsmng_createFile        = (fn_fsmng_createFile)      cpm_createFile,
+		.fsmng_writeFile         = (fn_fsmng_writeFile)       cpm_writeFile,
+		.fsmng_readFile          = (fn_fsmng_readFile)        cpm_readFile,
+		.fsmng_ftell             = (fn_fsmng_ftell)           cpm_ftell,
+		.fsmng_fseek             = (fn_fsmng_fseek)           cpm_fseek,
+		.fsmng_createDir         = (fn_fsmng_createDir)       cpm_createDir,
+		.fsmng_removeDir         = (fn_fsmng_removeDir)       cpm_removeDir,
+		.fsmng_openDir           = (fn_fsmng_openDir)         cpm_openDir,
+		.fsmng_readDir           = (fn_fsmng_readDir)         cpm_readDir,
+		.fsmng_closeDir          = (fn_fsmng_closeDir)        cpm_closeDir,
+
+		.fsmng_getplugininfos    = (fn_fsmng_getplugininfos)  cpm_libGetPluginInfo
+	};
+
+	return libGetFSPluginInfo(
+			fsmng_ctx,
+			infotype,
+			returnvalue,
+			fs_plug_id,
+			fs_plug_desc,
+			&fs_plug_funcs
+			);
+}
+

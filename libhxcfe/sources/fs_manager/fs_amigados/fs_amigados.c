@@ -55,6 +55,7 @@
 #include "fdc_ctrl.h"
 #include "fs_manager/fs_manager.h"
 #include "libhxcfe.h"
+#include "fs_manager/fs_manager_access.h"
 
 #include "libhxcadaptor.h"
 #include "floppy_loader.h"
@@ -843,4 +844,47 @@ int32_t amigados_fseek( HXCFE_FSMNG * fsmng,int32_t filehandle,int32_t offset,in
 	}
 
 	return HXCFE_ACCESSERROR;
+}
+
+int amigados_libGetPluginInfo(HXCFE_FSMNG * fsmng_ctx, uint32_t infotype, void * returnvalue)
+{
+	static const char fs_plug_id[] = "FS_AMIGADOS";
+	static const char fs_plug_desc[] = "AMIGADOS";
+
+	fs_plugins_ptr fs_plug_funcs=
+	{
+		.fsmng_init              = (fn_fsmng_init)            init_amigados,
+
+		.fsmng_mountImage        = (fn_fsmng_mountImage)      amigados_mountImage,
+		.fsmng_umountImage       = (fn_fsmng_umountImage)     amigados_umountImage,
+
+		.fsmng_getFreeSpace      = (fn_fsmng_getFreeSpace)    amigados_getFreeSpace,
+		.fsmng_getTotalSpace     = (fn_fsmng_getTotalSpace)   amigados_getTotalSpace,
+		.fsmng_deleteFile        = (fn_fsmng_deleteFile)      amigados_deleteFile,
+
+		.fsmng_openFile          = (fn_fsmng_openFile)        amigados_openFile,
+		.fsmng_closeFile         = (fn_fsmng_closeFile)       amigados_closeFile,
+
+		.fsmng_createFile        = (fn_fsmng_createFile)      amigados_createFile,
+		.fsmng_writeFile         = (fn_fsmng_writeFile)       amigados_writeFile,
+		.fsmng_readFile          = (fn_fsmng_readFile)        amigados_readFile,
+		.fsmng_ftell             = (fn_fsmng_ftell)           amigados_ftell,
+		.fsmng_fseek             = (fn_fsmng_fseek)           amigados_fseek,
+		.fsmng_createDir         = (fn_fsmng_createDir)       amigados_createDir,
+		.fsmng_removeDir         = (fn_fsmng_removeDir)       amigados_removeDir,
+		.fsmng_openDir           = (fn_fsmng_openDir)         amigados_openDir,
+		.fsmng_readDir           = (fn_fsmng_readDir)         amigados_readDir,
+		.fsmng_closeDir          = (fn_fsmng_closeDir)        amigados_closeDir,
+
+		.fsmng_getplugininfos    = (fn_fsmng_getplugininfos)  amigados_libGetPluginInfo
+	};
+
+	return libGetFSPluginInfo(
+			fsmng_ctx,
+			infotype,
+			returnvalue,
+			fs_plug_id,
+			fs_plug_desc,
+			&fs_plug_funcs
+			);
 }

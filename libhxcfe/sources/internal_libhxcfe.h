@@ -207,15 +207,4 @@ typedef struct _HXCFE_FXSA
 
 #define _HXCFE_FXSA_
 
-
-typedef struct _fs_config
-{
-	char * name;
-	char * desc;
-	int32_t    fsID;
-	int32_t    type;
-}fs_config;
-
-extern fs_config fs_config_table[];
-
 int32_t hxcfe_imgCallProgressCallback( HXCFE_IMGLDR * imgldr_ctx, int32_t cur, int32_t max );

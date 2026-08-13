@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2026 Jean-FranÃ§ois DEL NERO
+// Copyright (C) 2006-2026 Jean-François DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
@@ -25,35 +25,13 @@
 //
 */
 
-#ifndef _HXCFE_FSMNG_
+#define FS_MANAGER_DISABLED 0x00000001
 
-typedef struct _HXCFE_FSMNG
+typedef struct fs_plugin_
 {
-	HXCFE * hxcfe;
-	int32_t fs_selected;
-	void * fn;
+	fn_fsmng_getplugininfos infos_handler;
+	int sub_id;
+	unsigned int flags;
+}fs_plugin;
 
-	// Mounted Floppy disk
-	HXCFE_FLOPPY *fp;
-
-	HXCFE_FDCCTRL * fdc;
-
-	// mounted disk image geometry
-	int32_t sectorpertrack;
-	int32_t sidepertrack;
-	int32_t trackperdisk;
-	int32_t sectorsize;
-
-	void * handletable[128];
-	void * dirhandletable[128];
-	int32_t    dirindex[128];
-
-	void  * device;
-	void  * volume;
-	void  * internal;
-
-}HXCFE_FSMNG;
-
-#define _HXCFE_FSMNG_
-
-#endif
+extern const fn_fsmng_getplugininfos staticfsplugins[];

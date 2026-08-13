@@ -147,7 +147,7 @@ TRACK_FORMATS_SUPPORT = luts.o track_types_defs.o aed6200p_track.o amiga_mfm_tra
 
 ENCODING_SUPPORT = fm_encoding.o mfm_encoding.o dec_m2fm_encoding.o
 
-FS_SUPPORT = fs_manager.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o
+FS_SUPPORT = fs_manager.o fs_manager_list.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o
 
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
@@ -296,6 +296,9 @@ streamConvert.o : $(BASEDIR)/stream_analyzer/streamConvert.c $(BASEDIR)/stream_a
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 fs_manager.o : $(BASEDIR)/fs_manager/fs_manager.c $(BASEDIR)/fs_manager/fs_manager.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+fs_manager_list.o : $(BASEDIR)/fs_manager/fs_manager_list.c $(BASEDIR)/fs_manager/fs_manager_list.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 fs_fat12.o : $(BASEDIR)/fs_manager/fs_fat12/fs_fat12.c $(BASEDIR)/fs_manager/fs_fat12/fs_fat12.h

@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2026 Jean-FranÃ§ois DEL NERO
+// Copyright (C) 2006-2026 Jean-François DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
@@ -25,35 +25,30 @@
 //
 */
 
-#ifndef _HXCFE_FSMNG_
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
-typedef struct _HXCFE_FSMNG
+#include "types.h"
+
+#include "internal_libhxcfe.h"
+#include "tracks/track_generator.h"
+#include "sector_search.h"
+#include "fdc_ctrl.h"
+#include "fs_manager.h"
+#include "libhxcfe.h"
+#include "fs_manager_access.h"
+#include "fs_manager_list.h"
+
+#include "fs_fat12/fs_fat12.h"
+#include "fs_amigados/fs_amigados.h"
+#include "fs_cpm/fs_cpm.h"
+
+const fn_fsmng_getplugininfos staticfsplugins[]=
 {
-	HXCFE * hxcfe;
-	int32_t fs_selected;
-	void * fn;
+	(fn_fsmng_getplugininfos)fat12_libGetPluginInfo,
+	(fn_fsmng_getplugininfos)amigados_libGetPluginInfo,
+	(fn_fsmng_getplugininfos)cpm_libGetPluginInfo,
+	0
+};
 
-	// Mounted Floppy disk
-	HXCFE_FLOPPY *fp;
-
-	HXCFE_FDCCTRL * fdc;
-
-	// mounted disk image geometry
-	int32_t sectorpertrack;
-	int32_t sidepertrack;
-	int32_t trackperdisk;
-	int32_t sectorsize;
-
-	void * handletable[128];
-	void * dirhandletable[128];
-	int32_t    dirindex[128];
-
-	void  * device;
-	void  * volume;
-	void  * internal;
-
-}HXCFE_FSMNG;
-
-#define _HXCFE_FSMNG_
-
-#endif

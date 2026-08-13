@@ -55,6 +55,7 @@
 #include "fdc_ctrl.h"
 #include "fs_manager/fs_manager.h"
 #include "libhxcfe.h"
+#include "fs_manager/fs_manager_access.h"
 
 #include "floppy_loader.h"
 #include "floppy_utils.h"
@@ -521,4 +522,47 @@ int32_t fat12_fseek( HXCFE_FSMNG * fsmng,int32_t filehandle,int32_t offset,int32
 	}
 
 	return HXCFE_ACCESSERROR;
+}
+
+int fat12_libGetPluginInfo(HXCFE_FSMNG * fsmng_ctx, uint32_t infotype,void * returnvalue)
+{
+	static const char fs_plug_id[] = "FS_FAT12";
+	static const char fs_plug_desc[] = "FAT12";
+
+	fs_plugins_ptr fs_plug_funcs=
+	{
+		.fsmng_init              = (fn_fsmng_init)            init_fat12,
+
+		.fsmng_mountImage        = (fn_fsmng_mountImage)      fat12_mountImage,
+		.fsmng_umountImage       = (fn_fsmng_umountImage)     fat12_umountImage,
+
+		.fsmng_getFreeSpace      = (fn_fsmng_getFreeSpace)    fat12_getFreeSpace,
+		.fsmng_getTotalSpace     = (fn_fsmng_getTotalSpace)   fat12_getTotalSpace,
+		.fsmng_deleteFile        = (fn_fsmng_deleteFile)      fat12_deleteFile,
+
+		.fsmng_openFile          = (fn_fsmng_openFile)        fat12_openFile,
+		.fsmng_closeFile         = (fn_fsmng_closeFile)       fat12_closeFile,
+
+		.fsmng_createFile        = (fn_fsmng_createFile)      fat12_createFile,
+		.fsmng_writeFile         = (fn_fsmng_writeFile)       fat12_writeFile,
+		.fsmng_readFile          = (fn_fsmng_readFile)        fat12_readFile,
+		.fsmng_ftell             = (fn_fsmng_ftell)           fat12_ftell,
+		.fsmng_fseek             = (fn_fsmng_fseek)           fat12_fseek,
+		.fsmng_createDir         = (fn_fsmng_createDir)       fat12_createDir,
+		.fsmng_removeDir         = (fn_fsmng_removeDir)       fat12_removeDir,
+		.fsmng_openDir           = (fn_fsmng_openDir)         fat12_openDir,
+		.fsmng_readDir           = (fn_fsmng_readDir)         fat12_readDir,
+		.fsmng_closeDir          = (fn_fsmng_closeDir)        fat12_closeDir,
+
+		.fsmng_getplugininfos    = (fn_fsmng_getplugininfos)  fat12_libGetPluginInfo
+	};
+
+	return libGetFSPluginInfo(
+			fsmng_ctx,
+			infotype,
+			returnvalue,
+			fs_plug_id,
+			fs_plug_desc,
+			&fs_plug_funcs
+			);
 }
