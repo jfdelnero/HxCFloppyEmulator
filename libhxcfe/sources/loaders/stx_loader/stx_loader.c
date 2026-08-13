@@ -97,6 +97,29 @@ int STX_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 	}
 }
 
+static int inc_idx(int idx, int size)
+{
+	return (++idx >= size? 0 : idx); // idx++ and modulo
+}
+
+static int off(int idx, int ofs, int size)
+{
+	idx = (idx + ofs);
+
+	if( idx >= size)
+		return idx % size;
+
+	if( idx < 0)
+		return (size - (-idx % size) ) % size;
+
+	return idx;
+}
+
+static int dec_idx(int idx, int size)
+{
+	return (--idx < 0? (size-1) : idx); // idx--
+}
+
 unsigned char getchunk(unsigned char c)
 {
 	int i;
@@ -114,11 +137,10 @@ unsigned char getchunk(unsigned char c)
 	return r;
 }
 
-
 ////////////////////////////////////////////////////
 // Scan a track and make an sectors position list
 ////////////////////////////////////////////////////
-int * getSectorHeaderOffset(HXCFE* floppycontext,unsigned char * trackbuffer,int buffersize,int numsector)
+int * getSectorHeaderOffset(HXCFE* floppycontext,unsigned char * trackbuffer,int size,int numsector)
 {
 	int * offsetlist;
 	int i,t;
@@ -132,17 +154,21 @@ int * getSectorHeaderOffset(HXCFE* floppycontext,unsigned char * trackbuffer,int
 			return NULL;
 
 		for(i=0;i<numsector;i++)
-			offsetlist[i] = 0xFFFFFFFF;
+			offsetlist[i] = -1;
 
 		t=0;
 		i=0;
-		while( i<buffersize && (t<numsector) )
+		while( i<size && (t<numsector) )
 		{
-			if( (trackbuffer[i%buffersize]==0xA1) && (trackbuffer[(i+1)%buffersize]==0xA1) && ((trackbuffer[(i+2)%buffersize]==0xFE) || (trackbuffer[(i+2)%buffersize]==0xFF)) )
+			if( 
+				( trackbuffer[off(i, 0, size)] == 0xA1 ) && 
+				( trackbuffer[off(i, 1, size)] == 0xA1 ) && 
+				( ( trackbuffer[off(i, 2, size)] == 0xFE ) || ( trackbuffer[off(i, 2, size)] == 0xFF ) ) 
+			)
 			{
 				if(1)//trackbuffer[i-1]!=0xA1)
 				{
-					offsetlist[t]=i-1;
+					offsetlist[t] = dec_idx(i, size);
 					floppycontext->hxc_printf(MSG_DEBUG,"[0x%X] header",offsetlist[t]);
 					t++;
 				}
@@ -160,130 +186,170 @@ int * getSectorHeaderOffset(HXCFE* floppycontext,unsigned char * trackbuffer,int
 // This function try to found index/data mark and patch them.
 // Used on tracks without sector.
 /////////////////////////////////////////////////////////////////
-void patchtrack(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * trackclock,int buffersize,int tracknum)
+void patchtrack(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * trackclock,int size,int tracknum)
 {
-	int lastindex;
+	int idx;
 	int i,doff;
+	unsigned char c,m1,m2;
 
-	lastindex=1;
+	idx=1;
 	i=0;
-	while(i<(buffersize-4))
+	while(i<(size-4))
 	{
-		if( ( (trackbuffer[lastindex]==0xE1) || (trackbuffer[lastindex%buffersize]==0x0A) || (trackbuffer[lastindex%buffersize]==0x14) || (trackbuffer[(lastindex)%buffersize]==0xC2) ) && trackbuffer[(lastindex+1)%buffersize]==0xA1 && trackbuffer[(lastindex+2)%buffersize]==0xA1)
+		c =  trackbuffer[off(idx, 0, size)];
+		m1 = trackbuffer[off(idx, 1, size)];
+		m2 = trackbuffer[off(idx, 2, size)];
+		if( ( (c==0xE1) || (c==0x0A) || (c==0x14) || (c==0xC2) ) && (m1==0xA1) && (m2==0xA1) )
 		{
-			doff=lastindex;
-			//trackbuffer[lastindex-1]=0x00;
-			trackbuffer[lastindex]=0xA1;
-			trackclock [lastindex]=0x0A;
-			lastindex=(lastindex+1)%buffersize;
-			trackbuffer[lastindex]=0xA1;
-			trackclock [lastindex]=0x0A;
-			lastindex=(lastindex+1)%buffersize;
-			trackbuffer[lastindex]=0xA1;
-			trackclock [lastindex]=0x0A;
+			doff=idx;
+
+			trackbuffer[idx]=0xA1;
+			trackclock [idx]=0x0A;
+			idx = inc_idx(idx, size);
+
+			trackbuffer[idx]=0xA1;
+			trackclock [idx]=0x0A;
+			idx = inc_idx(idx, size);
+
+			trackbuffer[idx]=0xA1;
+			trackclock [idx]=0x0A;
 
 		floppycontext->hxc_printf(MSG_DEBUG,"Patch track 0x%.2X - Offset :0x%.8X Data:%.2X %.2X %.2X %.2X",
 			tracknum,
 			doff,
-			trackbuffer[doff%buffersize],
-			trackbuffer[(doff+1)%buffersize],
-			trackbuffer[(doff+2)%buffersize],
-			trackbuffer[(doff+3)%buffersize]
+			trackbuffer[off(doff, 0, size)],
+			trackbuffer[off(doff, 1, size)],
+			trackbuffer[off(doff, 2, size)],
+			trackbuffer[off(doff, 3, size)]
 			);
-
 		}
+
 		i++;
-		lastindex++;
+		idx = inc_idx(idx, size);
 	};
-
-
 }
 
-unsigned char patchbyte(unsigned char * buffer,unsigned char * maskbuffer,int buffersize,int index,unsigned char byte)
+unsigned char patchbyte(unsigned char * buffer,unsigned char * maskbuffer,int size,int index,unsigned char byte)
 {
-	if(maskbuffer && (index>=buffersize))
-	{
+	int ofs;
 
-		if(maskbuffer[index%buffersize])
+	ofs = off(index, 0, size);
+
+	if(maskbuffer && (index>=size))
+	{
+		if(maskbuffer[ofs])
 		{
-			buffer[index%buffersize]=byte;
-			maskbuffer[index%buffersize]=0x00;
+			buffer[ofs]=byte;
+			maskbuffer[ofs]=0x00;
 		}
 		else
 			return 0xFF;
 	}
 	else
-		buffer[index%buffersize]=byte;
+		buffer[ofs] = byte;
 
 	return 0x00;
 }
 /////////////////////////////////////////////////////////////////
 // This function patch the track with a sector header and data
 /////////////////////////////////////////////////////////////////
-void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * trackclock,unsigned char * trackmask,int buffersize,int * offsetlist,int numsector,HXCFE_SECTCFG * sector)
+void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * trackclock,unsigned char * trackmask,int size,int * offsetlist,int numsector,HXCFE_SECTCFG * sector)
 {
-	int lastindex,shoff,doff;
+	int idx,shoff,doff;
 	int i;
 
 	shoff=-1;
 	doff=-1;
 
+	if( offsetlist[numsector] < 0 )
+	{
+		floppycontext->hxc_printf(MSG_WARNING,"Patch track - sector %d : Invalid track offset !", offsetlist[numsector]);
+		return;
+	}
+
 	if(!numsector)
 	{
-		lastindex = offsetlist[numsector] % buffersize;
+		idx = offsetlist[numsector];
+		shoff = idx;
 
-		shoff = lastindex;
+		sector[numsector].startsectorindex = idx*2;
 
-		sector[numsector].startsectorindex = lastindex*2;
+		//trackbuffer[idx-1]=0x00;
+		patchbyte(trackbuffer,trackmask,size,idx,0xA1);
+		patchbyte(trackclock ,0        ,size,idx,0x0A);
+		idx = inc_idx(idx, size);
 
-		//trackbuffer[lastindex-1]=0x00;
-		patchbyte(trackbuffer,trackmask,buffersize,lastindex,0xA1);
-		patchbyte(trackclock ,0        ,buffersize,lastindex++,0x0A);
-		patchbyte(trackbuffer,trackmask,buffersize,lastindex,0xA1);
-		patchbyte(trackclock ,0        ,buffersize,lastindex++,0x0A);
-		patchbyte(trackbuffer,trackmask,buffersize,lastindex,0xA1);
-		patchbyte(trackclock ,0        ,buffersize,lastindex++,0x0A);
-		//patchbyte(trackbuffer,trackmask,buffersize,lastindex,0xFE);
-		lastindex++;
-		patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)sector[numsector].cylinder);
-		patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)sector[numsector].head);
-		patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)sector[numsector].sector);
-		patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)sector[numsector].alternate_sector_size_id);
-		patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)(sector[numsector].header_crc&0xff));
-		patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)((sector[numsector].header_crc>>8)&0xff));
+		patchbyte(trackbuffer,trackmask,size,idx,0xA1);
+		patchbyte(trackclock ,0        ,size,idx,0x0A);
+		idx = inc_idx(idx, size);
+
+		patchbyte(trackbuffer,trackmask,size,idx,0xA1);
+		patchbyte(trackclock ,0        ,size,idx,0x0A);
+		idx = inc_idx(idx, size);
+
+		//patchbyte(trackbuffer,trackmask,size,idx,0xFE);
+		idx = inc_idx(idx, size);
+
+		patchbyte(trackbuffer,trackmask,size,idx,(unsigned char)sector[numsector].cylinder);
+		idx = inc_idx(idx, size);
+
+		patchbyte(trackbuffer,trackmask,size,idx,(unsigned char)sector[numsector].head);
+		idx = inc_idx(idx, size);
+
+		patchbyte(trackbuffer,trackmask,size,idx,(unsigned char)sector[numsector].sector);
+		idx = inc_idx(idx, size);
+
+		patchbyte(trackbuffer,trackmask,size,idx,(unsigned char)sector[numsector].alternate_sector_size_id);
+		idx = inc_idx(idx, size);
+
+		patchbyte(trackbuffer,trackmask,size,idx,(unsigned char)(sector[numsector].header_crc&0xff));
+		idx = inc_idx(idx, size);
+
+		patchbyte(trackbuffer,trackmask,size,idx,(unsigned char)((sector[numsector].header_crc>>8)&0xff));
+		idx = inc_idx(idx, size);
 
 		if(sector[numsector].input_data)
 		{
 			i=0;
-			while((trackbuffer[lastindex%buffersize]!=0xA1 || trackbuffer[(lastindex+1)%buffersize]!=0xA1 || trackbuffer[(lastindex+2)%buffersize]!=0xFB) && i<64)
+			while(
+				( trackbuffer[off(idx, 0, size)]!=0xA1 || 
+				  trackbuffer[off(idx, 1, size)]!=0xA1 || 
+				  trackbuffer[off(idx, 2, size)]!=0xFB) && i<64 )
 			{
 				i++;
-				lastindex++;
+				idx = inc_idx(idx, size);
 			};
 
 			if(i<64)
 			{
-				lastindex--;
+				idx = dec_idx(idx, size);
 
-				doff=lastindex%buffersize;
+				doff=idx;
 
-				patchbyte(trackbuffer,trackmask,buffersize,lastindex,0xA1);
-				patchbyte(trackclock ,0        ,buffersize,lastindex++,0x0A);
-				patchbyte(trackbuffer,trackmask,buffersize,lastindex,0xA1);
-				patchbyte(trackclock ,0        ,buffersize,lastindex++,0x0A);
-				patchbyte(trackbuffer,trackmask,buffersize,lastindex,0xA1);
-				patchbyte(trackclock ,0        ,buffersize,lastindex++,0x0A);
-				patchbyte(trackbuffer,trackmask,buffersize,lastindex++,0xFB);
+				patchbyte(trackbuffer,trackmask,size,idx,0xA1);
+				patchbyte(trackclock ,0        ,size,idx,0x0A);
+				idx = inc_idx(idx, size);
 
-				sector[numsector].startdataindex=(lastindex%buffersize)*2;
+				patchbyte(trackbuffer,trackmask,size,idx,0xA1);
+				patchbyte(trackclock ,0        ,size,idx,0x0A);
+				idx = inc_idx(idx, size);
+
+				patchbyte(trackbuffer,trackmask,size,idx,0xA1);
+				patchbyte(trackclock ,0        ,size,idx,0x0A);
+				idx = inc_idx(idx, size);
+
+				patchbyte(trackbuffer,trackmask,size,idx,0xFB);
+				idx = inc_idx(idx, size);
+
+				sector[numsector].startdataindex=(idx)*2;
 
 				for(i=0;i<sector[numsector].sectorsize;i++)
 				{
-					if(patchbyte(trackbuffer,trackmask,buffersize,lastindex,sector[numsector].input_data[i]))
+					if(patchbyte(trackbuffer,trackmask,size,idx,sector[numsector].input_data[i]))
 					{
 						i=sector[numsector].sectorsize;
 					}
-					lastindex++;
+					idx = inc_idx(idx, size);
 				}
 			}
 		}
@@ -293,84 +359,111 @@ void addsector(HXCFE* floppycontext,unsigned char * trackbuffer,unsigned char * 
 
 		if(offsetlist[numsector] > ((sector[numsector-1].startdataindex/2)+sector[numsector-1].sectorsize))
 		{
-			lastindex = offsetlist[numsector]-2;
+			idx = offsetlist[numsector]-2;
 		}
 		else
 		{
-			lastindex = (sector[numsector-1].startsectorindex/2)+3;
+			idx = (sector[numsector-1].startsectorindex/2)+3;
 		}
 
 		i=0;
-		while((trackbuffer[lastindex%buffersize]!=0xA1 || trackbuffer[(lastindex+1)%buffersize]!=0xA1 || ( (trackbuffer[(lastindex+2)%buffersize]!=0xFE) && (trackbuffer[(lastindex+2)%buffersize]!=0xFF) ) ) && i<(sector[numsector-1].sectorsize+64))
+		while(
+				(
+					( trackbuffer[off(idx, 0, size)]  != 0xA1 ) ||
+					( trackbuffer[off(idx, 1, size)]  != 0xA1 ) ||
+					( ( trackbuffer[off(idx, 2, size)] != 0xFE ) && ( trackbuffer[off(idx, 2, size)] != 0xFF ) )
+				)
+				&& i<(sector[numsector-1].sectorsize+64)
+			 )
 		{
 			i++;
-			lastindex++;
+			idx = inc_idx(idx, size);
 		};
 
 		if(i==(sector[numsector-1].sectorsize+64))
 		{
-			lastindex = offsetlist[numsector];
+			idx = offsetlist[numsector];
 		}
 		else
 		{
-			lastindex--;
+			idx = dec_idx(idx, size);
 		}
 
-		shoff = lastindex;
+		shoff = idx;
 
-		if(lastindex!=0xFFFFFFFF)
+		if(idx >= 0)
 		{
-			sector[numsector].startsectorindex=(lastindex%buffersize)*2;
+			sector[numsector].startsectorindex=(idx)*2;
 
-			//trackbuffer[lastindex-1]=0x00;
-			patchbyte(trackbuffer,trackmask,buffersize,lastindex,0xA1);
-			patchbyte(trackclock ,0        ,buffersize,lastindex++,0x0A);
-			patchbyte(trackbuffer,trackmask,buffersize,lastindex,0xA1);
-			patchbyte(trackclock ,0        ,buffersize,lastindex++,0x0A);
-			patchbyte(trackbuffer,trackmask,buffersize,lastindex,0xA1);
-			patchbyte(trackclock ,0        ,buffersize,lastindex++,0x0A);
-			//patchbyte(trackbuffer,trackmask,buffersize,lastindex++,0xFE);
-			lastindex++;
-			patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)sector[numsector].cylinder);
-			patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)sector[numsector].head);
-			patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)sector[numsector].sector);
-			patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)sector[numsector].alternate_sector_size_id);
-			patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)(sector[numsector].header_crc&0xff));
-			patchbyte(trackbuffer,trackmask,buffersize,lastindex++,(unsigned char)((sector[numsector].header_crc>>8)&0xff));
+			//trackbuffer[idx-1]=0x00;
+			patchbyte(trackbuffer,trackmask,size,idx,0xA1);
+			patchbyte(trackclock ,0        ,size,idx,0x0A);
+			idx = inc_idx(idx, size);
+
+			patchbyte(trackbuffer,trackmask,size,idx,0xA1);
+			patchbyte(trackclock ,0        ,size,idx,0x0A);
+			idx = inc_idx(idx, size);
+
+			patchbyte(trackbuffer,trackmask,size,idx,0xA1);
+			patchbyte(trackclock ,0        ,size,idx,0x0A);
+			idx = inc_idx(idx, size);
+
+			//patchbyte(trackbuffer,trackmask,size,idx,0xFE);
+			idx = inc_idx(idx, size);
+
+			patchbyte(trackbuffer,trackmask,size,idx,(unsigned char)sector[numsector].cylinder);
+			idx = inc_idx(idx, size);
+			patchbyte(trackbuffer,trackmask,size,idx,(unsigned char)sector[numsector].head);
+			idx = inc_idx(idx, size);
+			patchbyte(trackbuffer,trackmask,size,idx,(unsigned char)sector[numsector].sector);
+			idx = inc_idx(idx, size);
+			patchbyte(trackbuffer,trackmask,size,idx,(unsigned char)sector[numsector].alternate_sector_size_id);
+			idx = inc_idx(idx, size);
+			patchbyte(trackbuffer,trackmask,size,idx,(unsigned char)(sector[numsector].header_crc&0xff));
+			idx = inc_idx(idx, size);
+			patchbyte(trackbuffer,trackmask,size,idx,(unsigned char)((sector[numsector].header_crc>>8)&0xff));
+			idx = inc_idx(idx, size);
 
 			if(sector[numsector].input_data)
 			{
 				i=0;
-				while((trackbuffer[lastindex%buffersize]!=0xA1 || trackbuffer[(lastindex+1)%buffersize]!=0xA1 || trackbuffer[(lastindex+2)%buffersize]!=0xFB) && i<64)
+
+				while( ( trackbuffer[off(idx, 0, size)]!=0xA1 ||
+						 trackbuffer[off(idx, 1, size)]!=0xA1 || 
+						 trackbuffer[off(idx, 2, size)]!=0xFB ) && i<64 )
 				{
 					i++;
-					lastindex++;
+					idx = inc_idx(idx, size);
 				};
 
-				lastindex--;
+				idx = dec_idx(idx, size);
 
-				doff=lastindex%buffersize;
+				doff = idx;
 
-				patchbyte(trackbuffer,trackmask,buffersize,lastindex,0xA1);
-				patchbyte(trackclock ,0        ,buffersize,lastindex++,0x0A);
+				patchbyte(trackbuffer,trackmask,size,idx,0xA1);
+				patchbyte(trackclock ,0        ,size,idx,0x0A);
+				idx = inc_idx(idx, size);
 
-				patchbyte(trackbuffer,trackmask,buffersize,lastindex,0xA1);
-				patchbyte(trackclock ,0        ,buffersize,lastindex++,0x0A);
+				patchbyte(trackbuffer,trackmask,size,idx,0xA1);
+				patchbyte(trackclock ,0        ,size,idx,0x0A);
+				idx = inc_idx(idx, size);
 
-				patchbyte(trackbuffer,trackmask,buffersize,lastindex,0xA1);
-				patchbyte(trackclock ,0        ,buffersize,lastindex++,0x0A);
+				patchbyte(trackbuffer,trackmask,size,idx,0xA1);
+				patchbyte(trackclock ,0        ,size,idx,0x0A);
+				idx = inc_idx(idx, size);
 
-				patchbyte(trackbuffer,trackmask,buffersize,lastindex++,0xFB);
+				patchbyte(trackbuffer,trackmask,size,idx,0xFB);
+				idx = inc_idx(idx, size);
 
-				sector[numsector].startdataindex=(lastindex%buffersize)*2;
+				sector[numsector].startdataindex = idx*2;
 
 				for(i=0;i<sector[numsector].sectorsize;i++)
 				{
-					if(patchbyte(trackbuffer,trackmask,buffersize,lastindex,sector[numsector].input_data[i]))
+					if(patchbyte(trackbuffer,trackmask,size,idx,sector[numsector].input_data[i]))
 					{
 						i=sector[numsector].sectorsize;
 					}
-					lastindex++;
+					idx = inc_idx(idx, size);
 				}
 			}
 		}
@@ -415,7 +508,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int trackpos,trackheaderpos;
 	int tracksize;
 	int presenceside[2];
-	unsigned int lastindex;
+	unsigned int idx;
 	int weaksectortotalsize;
 	int tracklen;
 	unsigned char crctable[32];
@@ -779,8 +872,8 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 									for(k=0;(k<(128<<sector[j].sector_size)*2);k=k+2)
 									{
-										currentside->flakybitsbuffer[(sectorconfig[j].startdataindex+k+0)%(currentside->tracklen/8)]=getchunk((unsigned char)((~weaksectorbuffer[k/2])>>4));
-										currentside->flakybitsbuffer[(sectorconfig[j].startdataindex+k+1)%(currentside->tracklen/8)]=getchunk((unsigned char)(~weaksectorbuffer[k/2]));
+										currentside->flakybitsbuffer[off(sectorconfig[j].startdataindex, k,   (currentside->tracklen/8))] = getchunk((unsigned char)((~weaksectorbuffer[k/2])>>4));
+										currentside->flakybitsbuffer[off(sectorconfig[j].startdataindex, k+1, (currentside->tracklen/8))] = getchunk((unsigned char)(~weaksectorbuffer[k/2]));
 									}
 
 									free(weaksectorbuffer);
@@ -797,9 +890,9 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							for(l=(sectorconfig[j].startdataindex);l<((sectorconfig[j].startdataindex)+(sectorconfig[j].sectorsize*2));l++)
 							{
 								if(sector[j].sector_speed_timing)
-									currentside->timingbuffer[l%(currentside->tracklen/8)]=(uint32_t)(((float)(sectorconfig[j].sectorsize*8)/(float)sector[j].sector_speed_timing)*(float)1000000);
+									currentside->timingbuffer[off(l, 0,   (currentside->tracklen/8))] = (uint32_t)(((float)(sectorconfig[j].sectorsize*8)/(float)sector[j].sector_speed_timing)*(float)1000000);
 								else
-									currentside->timingbuffer[l%(currentside->tracklen/8)]=floppydisk->floppyBitRate;
+									currentside->timingbuffer[off(l, 0,   (currentside->tracklen/8))] = floppydisk->floppyBitRate;
 							}
 						}
 
@@ -978,7 +1071,7 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 							sectordata_index=getSectorHeaderOffset(imgldr_ctx->hxcfe,temptrack,tracklen,trackheader.numberofsector);
 
-							lastindex=0;
+							idx=0;
 
 							for(j=0;j<(trackheader.numberofsector);j++)
 							{
@@ -1008,36 +1101,35 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							{
 								if(sectorconfig[j].startdataindex!=-1 && sectorconfig[j].sectorsize)
 								{
-									lastindex=(sectorconfig[j].startdataindex/2)-4;
+									idx=(sectorconfig[j].startdataindex/2)-4;
 
-									if(temptrack[(lastindex+3)%tracklen]==0xFB)
+									if(temptrack[off(idx, 3, tracklen)]==0xFB)
 									{
 										//02 CRC The CRC of the data
 										CRC16_Init(&CRC16_High,&CRC16_Low,(unsigned char*)&crctable,0x1021,0xFFFF);
 
 										for(t=0;t<(int)(sectorconfig[j].sectorsize+4);t++)
 										{
-												CRC16_Update(&CRC16_High,&CRC16_Low, temptrack[(lastindex+t)%tracklen],(unsigned char*)&crctable);
+												CRC16_Update(&CRC16_High,&CRC16_Low, temptrack[off(idx, t, tracklen)],(unsigned char*)&crctable);
 										}
 
-										lastindex=(lastindex+sectorconfig[j].sectorsize+4)%tracklen;
+										idx = off(idx, sectorconfig[j].sectorsize + 4, tracklen);
 
 										if(!((sector[j].FDC_status&0x8)==0x8))
 										{
-											temptrack[lastindex]=CRC16_High;
-											lastindex=(lastindex+1)%tracklen;
+											temptrack[idx]=CRC16_High;
+											idx = inc_idx( idx, tracklen );
 
-											temptrack[lastindex]=CRC16_Low;
-											lastindex=(lastindex+1)%tracklen;
+											temptrack[idx]=CRC16_Low;
+											idx = inc_idx( idx, tracklen );
 										}
 										else
 										{
-											CRC16_High=temptrack[lastindex];
-											lastindex=(lastindex+1)%tracklen;
+											CRC16_High = temptrack[idx];
+											idx = inc_idx( idx, tracklen );
 
-											CRC16_Low =temptrack[lastindex];
-											lastindex=(lastindex+1)%tracklen;
-
+											CRC16_Low = temptrack[idx];
+											idx = inc_idx( idx, tracklen );
 										}
 
 										imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG," - sectordata_index[0x%.4X]=0x%.8X , data crc result: %.2X%.2X  %d bytes",j,sectorconfig[j].startsectorindex,CRC16_High,CRC16_Low,sectorconfig[j].sectorsize+4);
@@ -1058,8 +1150,8 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 							{
 								if(index_sync<tracklen)
 								{
-									tempclock[index_sync]=0x14;
-									temptrack[index_sync]=0xc2;
+									tempclock[index_sync] = 0x14;
+									temptrack[index_sync] = 0xc2;
 								}
 							}
 
@@ -1090,8 +1182,8 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 										for(k=0;(k<(128<<sector[j].sector_size)*2);k=k+2)
 										{
-											currentside->flakybitsbuffer[((sectorconfig[j].startdataindex)+k+0)%(currentside->tracklen/8)]=getchunk((unsigned char)((~weaksectorbuffer[k/2])>>4));
-											currentside->flakybitsbuffer[((sectorconfig[j].startdataindex)+k+1)%(currentside->tracklen/8)]=getchunk((unsigned char)(~weaksectorbuffer[k/2]));
+											currentside->flakybitsbuffer[off(sectorconfig[j].startdataindex, k    , (currentside->tracklen/8))] = getchunk((unsigned char)((~weaksectorbuffer[k/2])>>4));
+											currentside->flakybitsbuffer[off(sectorconfig[j].startdataindex, k + 1, (currentside->tracklen/8))] = getchunk((unsigned char)(~weaksectorbuffer[k/2]));
 										}
 
 										free(weaksectorbuffer);
@@ -1107,9 +1199,9 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 								for(l=(sectorconfig[j].startdataindex);l<((sectorconfig[j].startdataindex)+(sectorconfig[j].sectorsize*2));l++)
 								{
 									if(sector[j].sector_speed_timing)
-										currentside->timingbuffer[l%(currentside->tracklen/8)]=(uint32_t)(((float)(sectorconfig[j].sectorsize*8)/(float)sector[j].sector_speed_timing)*(float)1000000);
+										currentside->timingbuffer[off(l, 0, (currentside->tracklen/8))]=(uint32_t)(((float)(sectorconfig[j].sectorsize*8)/(float)sector[j].sector_speed_timing)*(float)1000000);
 									else
-										currentside->timingbuffer[l%(currentside->tracklen/8)]=250000;
+										currentside->timingbuffer[off(l, 0, (currentside->tracklen/8))]=250000;
 								}
 							}
 
