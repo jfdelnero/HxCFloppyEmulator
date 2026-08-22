@@ -108,7 +108,8 @@ int ADL_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 		rawcfg.number_of_tracks = 80;
 		rawcfg.number_of_sides = 2;
 		rawcfg.number_of_sectors_per_track = 16;
-		rawcfg.gap3 = 255;
+		rawcfg.gap3 = 44;
+		rawcfg.start_sector_id = 0;
 		rawcfg.interleave = 1;
 		rawcfg.skew_per_track = 7;
 		rawcfg.rpm = 300; // normal rpm
