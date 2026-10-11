@@ -344,7 +344,7 @@ int generateDisk(AppData *ad,unsigned char * diskdata,int buffersize)
 					}
 					else
 					{
-						partialbuf = malloc(sectorsize * numberofsector);
+						partialbuf = malloc((size_t)sectorsize * (size_t)numberofsector);
 						if(partialbuf)
 						{
 							memset(partialbuf,ad->fill_value,sectorsize * numberofsector);
@@ -425,7 +425,7 @@ int dumpDisk(AppData *ad,unsigned char * diskdata,int buffersize,HXCFE_FLOPPY * 
 					}
 					else
 					{
-						partialbuf = malloc(sectorsize * numberofsector);
+						partialbuf = malloc((size_t)sectorsize * (size_t)numberofsector);
 						if(partialbuf)
 						{
 							memset(partialbuf,ad->fill_value,sectorsize * numberofsector);
