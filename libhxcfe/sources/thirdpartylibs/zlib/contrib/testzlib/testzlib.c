@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
         dwGetTick=GetTickCount()-dwGetTick;
         dwMsecQP=GetMsecSincePerfCounter(li_qp,TRUE);
         dwResRdtsc=GetResRdtsc(li_rdtsc,TRUE);
-        printf("total compress size = %u, in %u step\n",lSizeCpr,step);
+        printf("total compress size = %ld, in %d step\n",lSizeCpr,step);
         printf("time = %u msec = %f sec\n",dwGetTick,dwGetTick/(double)1000.);
         printf("defcpr time QP = %u msec = %f sec\n",dwMsecQP,dwMsecQP/(double)1000.);
         printf("defcpr result rdtsc = %I64x\n\n",dwResRdtsc.QuadPart);
