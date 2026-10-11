@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2026 Jean-François DEL NERO
+// Copyright (C) 2006-2026 Jean-FranÃ§ois DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
@@ -37,7 +37,7 @@
 // File : track_generator.c
 // Contains: ISO/IBM/Amiga track builder/encoder
 //
-// Written by: Jean-François DEL NERO
+// Written by: Jean-FranÃ§ois DEL NERO
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -1518,7 +1518,7 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 
 HXCFE_SIDE * tg_generateTrack(unsigned char * sectors_data,int32_t sector_size,int32_t number_of_sector,int32_t track,int32_t side,int32_t sectorid,int32_t interleave,int32_t skew,int32_t bitrate,int32_t rpm,int32_t trackencoding,int32_t gap3,int32_t pregap, int32_t indexlen,int32_t indexpos)
 {
-	unsigned short i;
+	int32_t i;
 	HXCFE_SIDE * currentside;
 	HXCFE_SECTCFG * sectorconfigtab;
 
