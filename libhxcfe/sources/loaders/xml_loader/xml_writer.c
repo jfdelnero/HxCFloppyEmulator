@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2026 Jean-François DEL NERO
+// Copyright (C) 2006-2026 Jean-FranÃ§ois DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
@@ -241,7 +241,7 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 						size = floppy->tracks[j]->sides[i]->tracklen;
 
 						fprintf(xmlfile,"\t\t\t\t<track_length_cells>%d</track_length_cells>\n",size);
-						fprintf(xmlfile,"\t\t\t\t<track_length_us>%.2f</track_length_us>\n",GetTrackPeriod(imgldr_ctx->hxcfe,floppy->tracks[j]->sides[i])*1000*1000);
+						fprintf(xmlfile,"\t\t\t\t<track_length_us>%.2f</track_length_us>\n",(double)(GetTrackPeriod(imgldr_ctx->hxcfe,floppy->tracks[j]->sides[i])*1000*1000));
 
 						t = 0;
 						cnt = 0;
