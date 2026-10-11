@@ -161,7 +161,7 @@ void convert8b16b(bmaptype * img,unsigned short transcolor)
 	switch(img->type)
 	{
 		case 9:
-			newbuffer = malloc(img->Ysize*img->Xsize*sizeof(unsigned int ));
+			newbuffer = malloc((size_t)img->Ysize*(size_t)img->Xsize*sizeof(unsigned int ));
 			if(!newbuffer)
 				return;
 
@@ -184,7 +184,7 @@ void convert8b16b(bmaptype * img,unsigned short transcolor)
 			img->unpacked_data=(unsigned char*)newbuffer;
 		break;
 		case 1:
-			newbuffer=malloc(img->Ysize*img->Xsize*sizeof(unsigned int ));
+			newbuffer=malloc((size_t)img->Ysize*(size_t)img->Xsize*sizeof(unsigned int ));
 			if(!newbuffer)
 				return;
 
@@ -215,7 +215,7 @@ void convert8b24b(bmaptype * img,unsigned short transcolor)
 	switch(img->type)
 	{
 	case 9:
-		newbuffer=malloc(img->Ysize*img->Xsize*3);
+		newbuffer=malloc((size_t)img->Ysize*(size_t)img->Xsize*3);
 		if(!newbuffer)
 			return;
 
@@ -241,7 +241,7 @@ void convert8b24b(bmaptype * img,unsigned short transcolor)
 
 		break;
 	case 1:
-		newbuffer=malloc(img->Ysize*img->Xsize*3);
+		newbuffer=malloc((size_t)img->Ysize*(size_t)img->Xsize*3);
 		if(!newbuffer)
 			return;
 

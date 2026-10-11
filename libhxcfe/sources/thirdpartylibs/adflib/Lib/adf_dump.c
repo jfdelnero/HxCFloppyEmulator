@@ -317,7 +317,7 @@ adfCreateMemoryDumpDevice(int32_t cylinders, int32_t heads, int32_t sectors,unsi
     dev->nativeDev = nDev;
 	
 	nDev->fd=0;
-	nDev->memory_buffer=(unsigned char *) calloc(1,((cylinders*heads*sectors))*LOGICAL_BLOCK_SIZE);
+	nDev->memory_buffer=(unsigned char *) calloc(1,(((size_t)cylinders*(size_t)heads*(size_t)sectors))*LOGICAL_BLOCK_SIZE);
     if (!nDev->memory_buffer) {
         free(nDev); free(dev);
         (*adfEnv.eFct)("adfCreateMemoryDumpDevice : malloc");
