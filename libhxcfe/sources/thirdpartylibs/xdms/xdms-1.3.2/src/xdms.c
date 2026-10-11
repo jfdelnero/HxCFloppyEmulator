@@ -36,7 +36,8 @@ static void ErrMsg(USHORT, char *, char *);
 
 
 int main(int argc, char **argv){
-	USHORT i, cmd=0, opt=0, ret, PCRC=0, pwd=0;
+	int i;
+	USHORT cmd=0, opt=0, ret, PCRC=0, pwd=0;
 	int ext;
 	char iname[FNAME_MAXC+1], oname[FNAME_MAXC+1], cmdstr[FNAME_MAXC+20], *inm, *onm, *p, *q, *destdir=NULL;
 	char tname[FNAME_MAXC];
