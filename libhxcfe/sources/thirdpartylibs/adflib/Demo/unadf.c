@@ -273,7 +273,7 @@ void printVol(struct Volume* vol, int volNum)
     if (vol->volName!=NULL)
         printf(" \"%s\"", vol->volName);
 
-    printf(" between sectors [%ld-%ld].",vol->firstBlock, vol->lastBlock);
+    printf(" between sectors [%d-%d].",vol->firstBlock, vol->lastBlock);
 
     printf(" %s ",isFFS(vol->dosType) ? "FFS" : "OFS");
     if (isINTL(vol->dosType))
