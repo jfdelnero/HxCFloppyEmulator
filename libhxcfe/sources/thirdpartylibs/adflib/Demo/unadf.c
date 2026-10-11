@@ -74,7 +74,7 @@ void printEnt(struct Volume *vol, struct Entry* entry, char *path, BOOL sect)
     if (entry->type==ST_DIR)
         printf("         ");
     else
-        printf("%7ld  ",entry->size);
+        printf("%7u  ",entry->size);
 
 	printf("%4d/%02d/%02d  %2d:%02d:%02d ",entry->year, entry->month, entry->days,
         entry->hour, entry->mins, entry->secs);
