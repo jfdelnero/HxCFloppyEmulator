@@ -79,7 +79,7 @@ void printEnt(struct Volume *vol, struct Entry* entry, char *path, BOOL sect)
 	printf("%4d/%02d/%02d  %2d:%02d:%02d ",entry->year, entry->month, entry->days,
         entry->hour, entry->mins, entry->secs);
     if (sect)
-        printf(" %06ld ",entry->sector);
+        printf(" %06d ",entry->sector);
 
     if (strlen(path)>0)
         printf(" %s/",path);
