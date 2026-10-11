@@ -1425,7 +1425,7 @@ HXCFE_SIDE * tg_generateTrackEx(int32_t number_of_sector,HXCFE_SECTCFG * sectorc
 			if(sectorconfigtab[i].gap3==0xFF)
 			{
 				// TODO: make integer this...
-				computedgap3=(uint32_t)floor((float)gap3period*(float)((float)sectorconfigtab[i].bitrate/(float)100000));
+				computedgap3=(uint32_t)floor(((double)gap3period) * (((double)sectorconfigtab[i].bitrate) / 100000.0));
 
 				switch(sectorconfigtab[i].trackencoding)
 				{
