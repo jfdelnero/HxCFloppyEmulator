@@ -320,13 +320,17 @@ RETCODE adfCreateBitmap(struct Volume *vol)
 	vol->bitmapBlocksChg = (BOOL*) calloc(1,sizeof(BOOL)*mapSize);
     if (!vol->bitmapBlocksChg) {
         free(vol->bitmapTable);
+		vol->bitmapTable = NULL;
         (*adfEnv.eFct)("adfCreateBitmap : malloc, vol->bitmapBlocksChg");
         return RC_MALLOC;
     }
 
 	vol->bitmapBlocks = (SECTNUM*) calloc(1,sizeof(SECTNUM)*mapSize);
     if (!vol->bitmapBlocks) {
-        free(vol->bitmapTable); free(vol->bitmapBlocksChg);
+        free(vol->bitmapTable);
+		vol->bitmapTable = NULL;
+		free(vol->bitmapBlocksChg);
+		vol->bitmapBlocksChg = NULL;
         (*adfEnv.eFct)("adfCreateBitmap : malloc, vol->bitmapBlocks");
         return RC_MALLOC;
     }
@@ -334,10 +338,12 @@ RETCODE adfCreateBitmap(struct Volume *vol)
     for(i=0; i<mapSize; i++) {
         vol->bitmapTable[i] = (struct bBitmapBlock*)calloc(1,sizeof(struct bBitmapBlock));
         if (!vol->bitmapTable[i]) {
-            free(vol->bitmapTable); free(vol->bitmapBlocksChg);
+            free(vol->bitmapBlocksChg);
+			vol->bitmapBlocksChg = NULL;
             for(j=0; j<i; j++) 
                 free(vol->bitmapTable[j]);
             free(vol->bitmapTable);
+			vol->bitmapTable = NULL;
 			(*adfEnv.eFct)("adfCreateBitmap : malloc");
             return RC_MALLOC;
         }

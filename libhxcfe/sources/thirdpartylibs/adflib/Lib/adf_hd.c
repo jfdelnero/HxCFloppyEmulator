@@ -638,8 +638,14 @@ RETCODE adfCreateHd(struct Device* dev, int n, struct Partition** partList )
 /* pas fini */
            }
            free(dev->volList);
+           dev->volList = NULL;
+           dev->nVol = 0;
+
            (*adfEnv.eFct)("adfCreateHd : adfCreateVol() fails");
+
+           return RC_ERROR;
         }
+
         dev->volList[i]->blockSize = 512;
     }
     dev->nVol = n;
@@ -651,6 +657,7 @@ printf("0first=%ld last=%ld root=%ld\n",vol->firstBlock,
 
     if (adfCreateHdHeader(dev, n, partList )!=RC_OK)
         return RC_ERROR;
+
     return RC_OK;
 }
 
