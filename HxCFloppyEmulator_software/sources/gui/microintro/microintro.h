@@ -3,11 +3,11 @@
 
 typedef struct uintro_context_
 {
-	unsigned short xsize;
-	unsigned short ysize;
+	size_t xsize;
+	size_t ysize;
 
-	unsigned short sprite_xsize;
-	unsigned short sprite_ysize;
+	size_t sprite_xsize;
+	size_t sprite_ysize;
 
 	unsigned int * framebuffer;
 	unsigned int * background;
