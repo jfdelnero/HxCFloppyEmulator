@@ -1,6 +1,6 @@
 /*
 //
-// Copyright (C) 2006-2026 Jean-François DEL NERO
+// Copyright (C) 2006-2026 Jean-FranÃ§ois DEL NERO
 //
 // This file is part of the HxCFloppyEmulator library
 //
@@ -512,7 +512,7 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 										fprintf(xmlfile,"\t\t\t\t\t\t<start_datasector_cell>%d</start_datasector_cell>\n",sectp->startdataindex);
 										fprintf(xmlfile,"\t\t\t\t\t\t<end_sector_cell>%d</end_sector_cell>\n",sectp->endsectorindex);
 										fprintf(xmlfile,"\t\t\t\t\t\t<start_sector_us>%.2f</start_sector_us>\n",MeasureTrackTiming(imgldr_ctx->hxcfe,floppy->tracks[j]->sides[i],0,sectp->startsectorindex) * 1000 * 1000);
-										fprintf(xmlfile,"\t\t\t\t\t\t<sector_duration_us>%.2f</sector_duration_us>\n",MeasureTrackTiming(imgldr_ctx->hxcfe,floppy->tracks[j]->sides[i],sectp->startsectorindex,sectp->endsectorindex) * 1000 * 1000);
+										fprintf(xmlfile,"\t\t\t\t\t\t<sector_duration_us>%.2f</sector_duration_us>\n",((double)MeasureTrackTiming(imgldr_ctx->hxcfe,floppy->tracks[j]->sides[i],sectp->startsectorindex,sectp->endsectorindex)) * 1000.0 * 1000.0);
 									}
 
 									if(export_mode > 0)
