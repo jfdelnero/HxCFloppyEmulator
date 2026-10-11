@@ -243,7 +243,7 @@ void printDev(struct Device* dev)
         printf("???"); break;
     }
 
-    printf(". Cylinders = %ld, Heads = %ld, Sectors = %ld",dev->cylinders,dev->heads,dev->sectors);
+    printf(". Cylinders = %ld, Heads = %d, Sectors = %ld",dev->cylinders,dev->heads,dev->sectors);
 
     printf(". Volumes = %d\n",dev->nVol);
 }
