@@ -108,7 +108,7 @@ int SDU_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	hxc_fread(&sduh,sizeof(sduh),f_img);
 
-	if( strncmp((const char*)&sduh.signature,"SAB ",4))
+	if( strncmp((char*)&sduh.signature,"SAB ",4))
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"SDU_libLoad_DiskFile : Bad file !");
 		return HXCFE_BADFILE;

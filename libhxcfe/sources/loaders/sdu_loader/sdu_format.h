@@ -47,7 +47,7 @@
 
 typedef struct _sdu_header
 {
-	const uint8_t signature[21];    // SAB Diskette Utility\0
+	uint8_t  signature[21];    // SAB Diskette Utility\0
 	uint8_t  version[5];            // X.XX\0
 	uint16_t flags;
 	uint16_t type;
