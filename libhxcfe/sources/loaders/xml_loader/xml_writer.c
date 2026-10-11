@@ -44,6 +44,10 @@
 
 #include "version.h"
 
+#include "misc/env.h"
+
+#include "stream_analyzer/fluxStreamAnalyzer.h"
+
 void gettracktype(HXCFE_SECTORACCESS* ss,int track,int side,int * nbsect,int *firstsectid,char * format,int * format_id, int *sectorsize)
 {
 	int i;
@@ -143,6 +147,7 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	int t,size;
 	#define HISTOSIZE 32
 	unsigned int mini_histo[HISTOSIZE];
+	streamconv * strconv;
 
 	sectoffset = NULL;
 	sorted_sectoffset = NULL;
@@ -289,6 +294,86 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 							fprintf(xmlfile,"\t\t\t\t<track_weakbits_cells>%d</track_weakbits_cells>\n",cnt);
 							fprintf(xmlfile,"\t\t\t\t<track_weakbits_percent>%.4f</track_weakbits_percent>\n",((double)cnt/(double)size) * 100.0);
+						}
+
+						if( floppy->tracks[j]->sides[i]->stream_dump )
+						{
+							strconv = initStreamConvert(imgldr_ctx->hxcfe,floppy->tracks[j]->sides[i], 10000, (10000/1000)*65536,-1,-1,64+1,5000000);
+
+							if(strconv)
+							{
+								int indexcnt,roti,i_rot;
+								int64_t p_tmp;
+								int64_t cumul_t;
+								int64_t cumul_r;
+								int64_t cumul_rot[256];
+								int64_t pulses_cnt_rot[256];
+								int64_t pulses_cnt,pulses_cnt_t;
+								fprintf(xmlfile,"\t\t\t\t<stream_source>no</stream_source>\n");
+
+								roti = 0;
+								cumul_t = 0;
+								cumul_r = 0;
+								indexcnt = 0;
+								pulses_cnt = 0;
+								pulses_cnt_t = 0;
+								memset(cumul_rot,0,sizeof(cumul_rot));
+								memset(pulses_cnt_rot,0,sizeof(pulses_cnt_rot));
+								while(!strconv->stream_end_event)
+								{
+									p_tmp = StreamConvert_getNextPulse(strconv);
+									pulses_cnt++;
+									pulses_cnt_t++;
+									cumul_t += p_tmp;
+									cumul_r += p_tmp;
+
+									if(strconv->index_event && indexcnt < 256)
+									{
+										cumul_rot[roti] = cumul_r;
+										pulses_cnt_rot[roti] = pulses_cnt;
+										roti++;
+										cumul_r = 0;
+										pulses_cnt = 0;
+										indexcnt++;
+									}
+								}
+
+								cumul_rot[roti] = cumul_r;
+								pulses_cnt_rot[roti] = pulses_cnt;
+								roti++;
+
+								fprintf(xmlfile,"\t\t\t\t<stream_index_cnt>%d</stream_index_cnt>\n",indexcnt);
+								fprintf(xmlfile,"\t\t\t\t<stream_total_duration>%ld</stream_total_duration>\n",cumul_t);
+								fprintf(xmlfile,"\t\t\t\t<stream_total_pulses>%ld</stream_total_pulses>\n",pulses_cnt_t);
+
+								fprintf(xmlfile,"\t\t\t\t<stream_interindex_pulses>");
+								i_rot = 0;
+								fprintf(xmlfile,"%ld",pulses_cnt_rot[i_rot]);
+								i_rot++;
+								while(i_rot<roti)
+								{
+									fprintf(xmlfile,",%ld",pulses_cnt_rot[i_rot]);
+									i_rot++;
+								};
+								fprintf(xmlfile,"</stream_interindex_pulses>\n");
+
+								fprintf(xmlfile,"\t\t\t\t<stream_interindex_duration>");
+								i_rot = 0;
+								fprintf(xmlfile,"%ld",cumul_rot[i_rot]);
+								i_rot++;
+								while(i_rot<roti)
+								{
+									fprintf(xmlfile,",%ld",cumul_rot[i_rot]);
+									i_rot++;
+								};
+								fprintf(xmlfile,"</stream_interindex_duration>\n");
+
+								deinitStreamConvert(strconv);
+							}
+						}
+						else
+						{
+							fprintf(xmlfile,"\t\t\t\t<stream_source>no</stream_source>\n");
 						}
 					}
 
