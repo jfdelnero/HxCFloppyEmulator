@@ -70,7 +70,6 @@ uint8_t * write_mfi_track(HXCFE_IMGLDR* imgldr_ctx,FILE *f,HXCFE_SIDE * track,mf
 	uint32_t totalsize;
 	uint32_t * trackbuffer;
 	unsigned int i,index;
-	uint32_t total_time;
 	streamconv * strconv;
 	uLongf packedsize;
 	uint8_t * pack;
@@ -84,7 +83,6 @@ uint8_t * write_mfi_track(HXCFE_IMGLDR* imgldr_ctx,FILE *f,HXCFE_SIDE * track,mf
 		return 0;
 	}
 
-	total_time = 0;
 	totalsize = 0;
 
 	// Need to start at the first index...
@@ -108,7 +106,6 @@ uint8_t * write_mfi_track(HXCFE_IMGLDR* imgldr_ctx,FILE *f,HXCFE_SIDE * track,mf
 	}
 
 	index = 0;
-	total_time = 0;
 
 	while( (!strconv->stream_end_event) && index < nb_of_revs && trackbuffer)
 	{
@@ -116,8 +113,6 @@ uint8_t * write_mfi_track(HXCFE_IMGLDR* imgldr_ctx,FILE *f,HXCFE_SIDE * track,mf
 		do
 		{
 			trackbuffer[i] = StreamConvert_getNextPulse(strconv);
-
-			total_time += trackbuffer[i];
 
 			i++;
 
