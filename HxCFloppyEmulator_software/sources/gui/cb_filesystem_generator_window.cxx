@@ -969,11 +969,11 @@ int write_back_fileimage()
 			{
 				if( strstr(guicontext->last_loaded_image_path, ".img") || strstr(guicontext->last_loaded_image_path, ".IMG" ) )
 				{
-					hxcfe_imgExport( imgldr_ctx, guicontext->loadedfloppy, guicontext->last_loaded_image_path, hxcfe_imgGetLoaderID(imgldr_ctx,"RAW_LOADER") );
+					hxcfe_imgExport( imgldr_ctx, guicontext->loadedfloppy, guicontext->last_loaded_image_path, hxcfe_imgGetLoaderID(imgldr_ctx,(char*)"RAW_LOADER") );
 				}
 				else
 				{
-					hxcfe_imgExport( imgldr_ctx, guicontext->loadedfloppy, guicontext->last_loaded_image_path, hxcfe_imgGetLoaderID(imgldr_ctx,"HXC_HFE") );
+					hxcfe_imgExport( imgldr_ctx, guicontext->loadedfloppy, guicontext->last_loaded_image_path, hxcfe_imgGetLoaderID(imgldr_ctx,(char*)"HXC_HFE") );
 				}
 
 				hxcfe_imgDeInitLoader(imgldr_ctx);
@@ -1079,14 +1079,14 @@ int load_indexed_fileimage(int index)
 
 		hxc_getcurrentdirectory(cur_directory,sizeof(cur_directory));
 
-		findfile_handle = hxc_find_first_file(cur_directory,"*.hfe",&fi);
+		findfile_handle = hxc_find_first_file(cur_directory,(char*)"*.hfe",&fi);
 		if(findfile_handle)
 		{
 			ret = 1;
 			i = 0;
 			while( i < cur_index && ret)
 			{
-				ret = hxc_find_next_file(findfile_handle,cur_directory,"*.hfe",&fi);
+				ret = hxc_find_next_file(findfile_handle,cur_directory,(char*)"*.hfe",&fi);
 				i++;
 			}
 
@@ -1095,7 +1095,7 @@ int load_indexed_fileimage(int index)
 				hxc_find_close(findfile_handle);
 				cur_index = 0;
 
-				findfile_handle = hxc_find_first_file(cur_directory,"*.hfe",&fi);
+				findfile_handle = hxc_find_first_file(cur_directory,(char*)"*.hfe",&fi);
 				if(findfile_handle)
 				{
 					strncpy(filename,fi.filename,sizeof(filename)-1);

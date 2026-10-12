@@ -973,7 +973,9 @@ Main_Window::Main_Window(int argc, char **argv)
 	infothread * infoth;
 #endif
 	streamthread * streamth;
+#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
 	USBStats stats;
+#endif
 	intptr_t tmp_intptr;
 
 	txtindex=0;

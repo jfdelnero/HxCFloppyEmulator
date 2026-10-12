@@ -63,6 +63,7 @@ extern "C"
 extern s_gui_context * guicontext;
 
 void tick_usb(void *v) {
+#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
 	char tempstr[512];
 	unsigned long datathroughput;
 	unsigned long period;
@@ -73,7 +74,6 @@ void tick_usb(void *v) {
 
 	window=(usbhxcfecfg_window *)v;
 
-#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
 	status=libusbhxcfe_getStats(guicontext->hxcfe,guicontext->usbhxcfe,&stats,0);
 
 	snprintf(tempstr,sizeof(tempstr),"%d (%d p/s)",(int)stats.totalpacketsent,(int)stats.packetsent);
@@ -151,9 +151,10 @@ void tick_usb(void *v) {
 
 void usbifcfg_window_datachanged(Fl_Widget * w,void *)
 {
+#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
 	usbhxcfecfg_window *usbcfgw;
 	Fl_Widget* tw;
-#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
+
 	tw=w;
 	do
 	{
@@ -196,9 +197,10 @@ void usbifcfg_window_datachanged(Fl_Widget * w,void *)
 
 void ifcfg2_window_datachanged(Fl_Widget * w,void *)
 {
+#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
 	usbhxcfecfg_window *usbcfgw;
 	Fl_Widget* tw;
-#if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
+
 	tw=w;
 	do
 	{
@@ -228,8 +230,8 @@ void ifcfg2_window_datachanged(Fl_Widget * w,void *)
 
 void resetusbstat_bt(Fl_Button *w,void *)
 {
-	USBStats stats;
 #if !defined(STANDALONEFSBROWSER) && !defined(HXC_STREAMER_MODE)
+	USBStats stats;
 	libusbhxcfe_getStats(guicontext->hxcfe,guicontext->usbhxcfe,&stats,1);
 #endif
 }

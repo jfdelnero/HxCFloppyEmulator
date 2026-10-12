@@ -146,12 +146,11 @@ void CALLBACK SoundHandlerProc(HWAVEOUT hwo,UINT uMsg,DWORD * dwInstance,DWORD *
 
 	void callback (void *ptr, AudioQueueRef queue, AudioQueueBufferRef buf_ref)
 	{
-		OSStatus status;
 		AudioQueueBuffer *buf = buf_ref;
 
 		uintro_getnext_soundsample(gb_ui_context,(short*)buf->mAudioData, buf->mAudioDataByteSize / 2);
 
-		status = AudioQueueEnqueueBuffer (queue, buf_ref, 0, NULL);
+		AudioQueueEnqueueBuffer (queue, buf_ref, 0, NULL);
 	}
 
 	#endif
