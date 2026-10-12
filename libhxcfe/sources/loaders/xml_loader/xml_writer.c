@@ -27,6 +27,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 #include "types.h"
 
@@ -343,27 +344,27 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 								roti++;
 
 								fprintf(xmlfile,"\t\t\t\t<stream_index_cnt>%d</stream_index_cnt>\n",indexcnt);
-								fprintf(xmlfile,"\t\t\t\t<stream_total_duration>%ld</stream_total_duration>\n",cumul_t);
-								fprintf(xmlfile,"\t\t\t\t<stream_total_pulses>%ld</stream_total_pulses>\n",pulses_cnt_t);
+								fprintf(xmlfile,"\t\t\t\t<stream_total_duration>%"PRId64"</stream_total_duration>\n",cumul_t);
+								fprintf(xmlfile,"\t\t\t\t<stream_total_pulses>%"PRId64"</stream_total_pulses>\n",pulses_cnt_t);
 
 								fprintf(xmlfile,"\t\t\t\t<stream_interindex_pulses>");
 								i_rot = 0;
-								fprintf(xmlfile,"%ld",pulses_cnt_rot[i_rot]);
+								fprintf(xmlfile,"%"PRId64,pulses_cnt_rot[i_rot]);
 								i_rot++;
 								while(i_rot<roti)
 								{
-									fprintf(xmlfile,",%ld",pulses_cnt_rot[i_rot]);
+									fprintf(xmlfile,",%"PRId64,pulses_cnt_rot[i_rot]);
 									i_rot++;
 								};
 								fprintf(xmlfile,"</stream_interindex_pulses>\n");
 
 								fprintf(xmlfile,"\t\t\t\t<stream_interindex_duration>");
 								i_rot = 0;
-								fprintf(xmlfile,"%ld",cumul_rot[i_rot]);
+								fprintf(xmlfile,"%"PRId64,cumul_rot[i_rot]);
 								i_rot++;
 								while(i_rot<roti)
 								{
-									fprintf(xmlfile,",%ld",cumul_rot[i_rot]);
+									fprintf(xmlfile,",%"PRId64,cumul_rot[i_rot]);
 									i_rot++;
 								};
 								fprintf(xmlfile,"</stream_interindex_duration>\n");
@@ -611,12 +612,10 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 									if(export_mode > 0)
 									{
-										int sect_size;
 										int cnt = 0;
 										int spacecnt = 0;
 										int size = floppy->tracks[j]->sides[i]->tracklen;
 
-										sect_size++;
 										t = sectp->startsectorindex;
 										memset(mini_histo,0,sizeof(mini_histo));
 
