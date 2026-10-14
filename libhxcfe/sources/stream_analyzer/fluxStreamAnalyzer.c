@@ -513,9 +513,12 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 	uint32_t leftbit;
 #endif
 	uint32_t nextindex_pos;
+	uint32_t nextindex_pos_end;
+
 	uint32_t nextindex;
 	uint32_t tickoffset;
 	int lastbitisflakey;
+	int last_idx_bitoffset;
 
 	HXCFE_SIDE* hxcfe_track;
 
@@ -634,7 +637,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 
 		if(pl)
 		{
-			while ( ( i < (int)track->nb_of_index ) && ( track->index_evt_tab[i].dump_offset < start_index ) )
+			while ( ( i < (int)track->nb_of_index ) && ( track->index_evt_tab[i].dump_offset < start_index ) && ( track->index_evt_tab[i].dump_offset_end < start_index ) )
 			{
 				i++;
 			}
@@ -642,10 +645,12 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 
 		nextindex = i;
 		nextindex_pos = track->index_evt_tab[i].dump_offset;
+		nextindex_pos_end = track->index_evt_tab[i].dump_offset_end;
 
 		lastbitisflakey = 0;
 		tickoffset = 0;
 		bitoffset = 0;
+		last_idx_bitoffset = -1;
 		for(i=0;i<size;i++)
 		{
 
@@ -684,19 +689,34 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 
 			settrackbit(outtrack,TEMPBUFSIZE,0xFF,bitoffset,1);
 
-			if( nextindex_pos == (start_index + i) )
+			if( (start_index + i) >= nextindex_pos && (start_index + i) <= nextindex_pos_end )
 			{
 				#ifdef FLUXSTREAMDBG
 				floppycontext->hxc_printf(MSG_DEBUG,"Index reached : Position %d",nextindex_pos);
 				#endif
 
 				// Generate index signal
-				settrackbit(indextrack,TEMPBUFSIZE,0xFF,bitoffset,1);
 
-				nextindex++;
-				if( nextindex < track->nb_of_index )
+				if(last_idx_bitoffset < 0)
+					last_idx_bitoffset = bitoffset;
+
+				// Fill index status between data pulses.
+				for(;last_idx_bitoffset<=bitoffset;last_idx_bitoffset++)
+					settrackbit(indextrack,TEMPBUFSIZE,0xFF,last_idx_bitoffset,1);
+
+			}
+			else
+			{
+				// Not under an index : Go to the next index window if the previous one was passed.
+				last_idx_bitoffset = -1; 
+				if( (start_index + i) > nextindex_pos_end )
 				{
-					nextindex_pos = track->index_evt_tab[nextindex].dump_offset;
+					nextindex++;
+					if( nextindex < track->nb_of_index )
+					{
+						nextindex_pos = track->index_evt_tab[nextindex].dump_offset;
+						nextindex_pos_end = track->index_evt_tab[nextindex].dump_offset_end;
+					}
 				}
 			}
 
@@ -943,7 +963,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 			{
 				if(getbit(indextrack,i))
 				{
-					us2index(i % bitoffset,hxcfe_track,fxs->out_index_length_us,1,0);
+					hxcfe_track->indexbuffer[(i % bitoffset)>>3] = 0xFF;
 				}
 			}
 
@@ -3742,6 +3762,22 @@ void hxcfe_FxStream_AddIndex( HXCFE_FXSA * fxs, HXCFE_TRKSTREAM * std, uint32_t 
 				{
 					std->index_evt_tab[std->nb_of_index].flags = flags;
 					std->index_evt_tab[std->nb_of_index].dump_offset = streamposition;
+
+					cellpos = 0;
+					int ticks = time_to_tick(fxs, fxs->out_index_length_us*100 );
+
+					// Set the index window
+					i = streamposition;
+					while( cellpos < ticks && i < std->channels[0].nb_of_pulses )
+					{
+						cellpos = cellpos + std->channels[0].stream[i];
+						i++;
+					}
+
+					if( i >= std->channels[0].nb_of_pulses)
+						std->index_evt_tab[std->nb_of_index].dump_offset_end = std->channels[0].nb_of_pulses - 1;
+					else
+						std->index_evt_tab[std->nb_of_index].dump_offset_end = i;
 
 					cellpos = 0;
 
