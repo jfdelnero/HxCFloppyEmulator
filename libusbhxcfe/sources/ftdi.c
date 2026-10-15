@@ -420,7 +420,12 @@ int32_t open_ftdichip(void ** ftdihandle)
 
 #if defined(FTDILIB)
 
-	if( p_ftdi_usb_open(ftdic, 0x0403, 0x6001) < 0 )
+	static const int ftdi_pids[] = { 0x6001, 0x6015, 0x6014, 0x6010, 0x6011 };
+	int ftdi_i, ftdi_ret = -1;
+	for( ftdi_i = 0; ftdi_i < (int)(sizeof(ftdi_pids)/sizeof(ftdi_pids[0])) && ftdi_ret < 0; ftdi_i++ )
+		ftdi_ret = p_ftdi_usb_open(ftdic, 0x0403, ftdi_pids[ftdi_i]);
+
+	if( ftdi_ret < 0 )
 	{
 		*ftdihandle=0;
 		return -1;
