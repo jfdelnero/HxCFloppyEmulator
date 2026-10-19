@@ -71,6 +71,7 @@ static int IMAGE_Disk_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * 
 
 	td = hxcfe_td_init(imgldr_ctx->hxcfe,hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPDISKEXPORT_DEFAULT_XSIZE" ), \
 										hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "BMPDISKEXPORT_DEFAULT_YSIZE" ));
+	hxcfe_td_select_view_type(td, hxcfe_getEnvVarValue(imgldr_ctx->hxcfe, "BMPDISKEXPORT_DEFAULT_DISKTYPE"));
 	if(td)
 	{
 		hxcfe_td_setProgressCallback(td,&progress_callback,(void*)imgldr_ctx);

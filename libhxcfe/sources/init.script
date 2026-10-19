@@ -282,6 +282,7 @@ set BMPEXPORT_DEFAULT_XSIZE 1024                     # BMP X size
 set BMPEXPORT_DEFAULT_YSIZE 480                      # BMP Y size
 set BMPEXPORT_DEFAULT_XTOTALTIME 240000              # 240ms
 set BMPEXPORT_DEFAULT_YTOTALTIME 16                  # 16us
+set BMPDISKEXPORT_DEFAULT_DISKTYPE 0                 # See libhxcfe/sources/tracks/display_track.c in physical_floppy_dim
 
 #
 # Disk BMP writer parameters
