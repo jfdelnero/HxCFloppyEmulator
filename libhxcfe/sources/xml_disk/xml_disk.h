@@ -89,7 +89,13 @@ enum
 	TRACK_PULSES_PERCENT,
 	TRACK_PULSES_HISTO_PERCENT,
 	SECTORD_PULSES,
-	SECTORD_PULSES_HISTO_PERCENT
+	SECTORD_PULSES_HISTO_PERCENT,
+	TRACK_STREAM_SOURCE,
+	TRACK_STREAM_INDEX_CNT,
+	TRACK_STREAM_TOTAL_DURATION,
+	TRACK_STREAM_TOTAL_PULSES,
+	TRACK_STREAM_INTERINDEX_PULSES,
+	TRACK_STREAM_INTERINDEX_DURATION
 };
 
 keyword keyword_list[]=
@@ -148,6 +154,12 @@ keyword keyword_list[]=
 	{"track_pulses",                TRACK_PULSES,               TRACK},
 	{"track_pulses_percent",        TRACK_PULSES_PERCENT,       TRACK},
 	{"track_pulses_histo_percent",  TRACK_PULSES_HISTO_PERCENT, TRACK},
+	{"stream_source",               TRACK_STREAM_SOURCE,        TRACK},
+	{"stream_index_cnt",            TRACK_STREAM_INDEX_CNT,           TRACK},
+	{"stream_total_duration",       TRACK_STREAM_TOTAL_DURATION,      TRACK},
+	{"stream_total_pulses",         TRACK_STREAM_TOTAL_PULSES,        TRACK},
+	{"stream_interindex_pulses",    TRACK_STREAM_INTERINDEX_PULSES,   TRACK},
+	{"stream_interindex_duration",  TRACK_STREAM_INTERINDEX_DURATION, TRACK},
 	{"sector",                      SECTOR,                     SECTORLIST},
 	{"track_id",                    TRACKID_SECTOR,             SECTOR},
 	{"side_id",                     SIDEID_SECTOR,              SECTOR},

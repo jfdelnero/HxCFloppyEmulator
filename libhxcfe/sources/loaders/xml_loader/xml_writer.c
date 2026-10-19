@@ -310,7 +310,7 @@ int XML_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 								int64_t cumul_rot[256];
 								int64_t pulses_cnt_rot[256];
 								int64_t pulses_cnt,pulses_cnt_t;
-								fprintf(xmlfile,"\t\t\t\t<stream_source>no</stream_source>\n");
+								fprintf(xmlfile,"\t\t\t\t<stream_source>yes</stream_source>\n");
 
 								roti = 0;
 								cumul_t = 0;
