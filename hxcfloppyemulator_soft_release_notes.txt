@@ -15,14 +15,22 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
-XX XXXX 2026 : HxCFloppyEmulator beta version (v2.16.15.2)
+XX XXXX 2026 : HxCFloppyEmulator beta version (v2.16.21.1)
 
 -> New loader/writer : H17Disk Heathkit H17 Hard-sectored Disk Image (*.h17)
 
 -> Oric DSK loader : Set the tracks size to the 6400 bytes default value
                      with malformed/bad sized images
 
--> FLTK updated to v1.4.4
+-> STX Writer : Fix out-of-bounds accesses in patchtrack() and addsector() + code clean up.
+
+-> ADL loader : Fix the start id sector to 0.
+
+-> File system manager : Complete the plug-in interface.
+
+-> FLTK updated to v1.4.5
+
+-> zlib updated to v1.3.2
 
 -> adflib : gcc 15.x build fixed
 
@@ -35,6 +43,40 @@ XX XXXX 2026 : HxCFloppyEmulator beta version (v2.16.15.2)
 -> FAT/DOS Disk browser : Don't cache fat table -> Fix issues with damaged / protected disks.
 
 -> IMD Loader : Fix inter-tracks variable bitrate support.
+
+-> STX Loader : Fix out-of-bounds accesses and code clean up.
+
+-> File system manager : Plug-in interface completed.
+
+-> Stream import (scp,kf,pauline...) : Fix random issue with index signal generation
+                                       when weakbits are under the index start position.
+
+-> XML export : Added informations :
+	- libhxcfe version, release date and build date. (libhxcfe_version)
+	if "XMLEXPORT_MODE" is set to 1 :
+	- track cells count (track_length_cells)
+	- track duration (us) (track_length_us)
+	- track pulses count (track_pulses)
+	- track pulses percent (track_pulses_percent)
+	- track pulses histogram percent (track_pulses_histo_percent)
+	- track weakbits cells count (track_weakbits_cells)
+	- track weakbits percent (track_weakbits_percent)
+	- stream source availabity (stream_source)
+	- stream index count (stream_index_cnt)
+	- stream total duration (stream_total_duration)
+	- stream total pulses (stream_total_pulses)
+	- stream inter-index pulses (stream_interindex_pulses)
+	- stream inter-index duration (stream_interindex_duration)
+	- Sectors duration and position.
+	- Track/sectors pulses count and histograms.
+	- Custom address mark (import+export).
+	- Numbers : support hexadecimal,decimal and binary formats,
+	- Fix custom crc.
+
+-> Disk BMP/PNG export : Add variable to control disk type
+                         (BMPDISKEXPORT_DEFAULT_DISKTYPE)
+
+-> CodeQL reports fixed.
 
 *********************************************************/
 
