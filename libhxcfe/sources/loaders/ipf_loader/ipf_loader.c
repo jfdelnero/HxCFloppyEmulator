@@ -83,15 +83,18 @@
 #define INDEX_DURATION  2000
 
 // IPF decoder selection (LOADER_IPF_DECODER) :
-// 0 -> Built-in decoder for .ipf files (CT Raw .ct/.ctr files need the SPS CAPS library)
-// 1 -> SPS CAPS library
+// 0 -> Auto -> SPS CAPS library if available or Built-in decoder for .ipf files
+// 1 -> Built-in decoder for .ipf files (CT Raw .ct/.ctr files need the SPS CAPS library)
+// 2 -> SPS CAPS library
 static int IPF_useCapsLib(HXCFE * hxcfe, char * path)
 {
-	if( !hxc_checkfileext(path,"ipf",SYS_PATH_TYPE) )
-		return 1;
+	int capslib = init_caps_lib(hxcfe);
+	int libcfg = hxcfe_getEnvVarValue( hxcfe, "LOADER_IPF_DECODER" );
 
-	if( hxcfe_getEnvVarValue( hxcfe, "LOADER_IPF_DECODER" ) == 1 )
+	if( capslib && ( libcfg == 0 || libcfg == 2 ) && hxc_checkfileext(path,"ipf",SYS_PATH_TYPE) )
+	{
 		return 1;
+	}
 
 	return 0;
 }
