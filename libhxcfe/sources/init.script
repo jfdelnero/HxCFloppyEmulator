@@ -345,6 +345,16 @@ set KFRAWEXPORT_SAMPLE_FREQUENCY 24027428.57142857   # KF raw sample frequency
 #set SCPEXPORT_DISK_96TPI   1                        # Uncomment one of the following lines to force the
 #set SCPEXPORT_DISK_48TPI   1                        # TPI flag
 
+set F86EXPORT_THICK_TRACKS 0                         # 86F writer tracks geometry (86F images are in thin tracks geometry) :
+                                                     # 0 -> Auto : 40 cylinders disks (<= 43 cylinders) have each track written twice.
+                                                     # 1 -> Always write each track twice (48 tpi disk).
+                                                     # 2 -> Never write each track twice (96/135 tpi disk).
+
+set F86LOADER_THICK_TRACKS 0                         # 86F loader tracks geometry :
+                                                     # 0 -> Auto : keep one track out of two if all the tracks pairs are identical.
+                                                     # 1 -> Always keep one track out of two (48 tpi disk).
+                                                     # 2 -> Load all the tracks (96/135 tpi disk).
+
 #
 # IPF Loader flags/parameters
 #
