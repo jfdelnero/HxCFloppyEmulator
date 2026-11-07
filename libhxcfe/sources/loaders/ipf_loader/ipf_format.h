@@ -101,3 +101,44 @@ enum dentype
 };
 
 #pragma pack()
+
+// Records sizes (big endian 32-bit fields)
+#define IPF_RECORD_HEADER_SIZE        12
+#define IPF_INFO_BLOCK_SIZE           84
+#define IPF_IMGE_BLOCK_SIZE           68
+#define IPF_DATA_BLOCK_SIZE           16
+#define IPF_BLOCK_DESCRIPTOR_SIZE     32
+
+// INFO record
+#define IPF_MEDIA_FLOPPY              1
+
+#define IPF_PLATFORM_NONE             0
+#define IPF_PLATFORM_AMIGA            1
+#define IPF_PLATFORM_ATARI_ST         2
+#define IPF_PLATFORM_PC               3
+#define IPF_PLATFORM_AMSTRAD_CPC      4
+#define IPF_PLATFORM_SPECTRUM         5
+#define IPF_PLATFORM_SAM_COUPE        6
+#define IPF_PLATFORM_ARCHIMEDES       7
+#define IPF_PLATFORM_C64              8
+#define IPF_PLATFORM_ATARI_8BIT       9
+
+// IMGE record
+#define IPF_SIGNAL_2US                1
+#define IPF_IMGE_FLAG_FUZZY           0x00000001
+
+// Block descriptor
+#define IPF_CELL_TYPE_2US             1
+#define IPF_BLOCK_ENC_MFM             1
+#define IPF_BLOCK_ENC_RAW             2
+#define IPF_BLOCK_FLAG_FORWARD_GAP    0x00000001
+#define IPF_BLOCK_FLAG_BACKWARD_GAP   0x00000002
+#define IPF_BLOCK_FLAG_DATA_IN_BITS   0x00000004
+
+// Data/Gap stream elements header : size width (bits 7-5) | type (bits 4-0)
+#define IPF_STREAM_SIZE_WIDTH_SHIFT   5
+#define IPF_STREAM_TYPE_MASK          0x1F
+
+// Writer internal track flags
+#define IPF_TRACK_NOISE               0x01
+#define IPF_TRACK_WEAK                0x02
