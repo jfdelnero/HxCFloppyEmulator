@@ -264,6 +264,14 @@ set A2RLOADER_SINGLE_SIDE 0                          # Skip the side 1.
 set A2RLOADER_BITRATE 0                              # Force the bitrate. (no auto-detection)
 set A2RLOADER_BMPEXPORT 0                            # Export/plot the inputs stream tracks to BMP images.
 set A2RLOADER_SKIP_INTER_TRACKS 1                    # Skip inter tracks. Just process the normal tracks.
+set A2RLOADER_IGNORE_SOLVED_TRACKS 0                 # 1 -> Ignore the A2R 3.x solved tracks (SLVD) and use the raw captures.
+set A2RLOADER_DOUBLE_STEP 0                          # 0 -> Auto (only even cylinders present : 40 tracks disk in a 80 tracks drive)
+                                                     # 1 -> Force (keep the even cylinders), 2 -> Never
+
+set A2REXPORT_NUMBER_OF_REVOLUTIONS 2                # A2R writer : revolutions per raw capture (+ 1/4 revolution)
+set A2REXPORT_DRIVE_TYPE 0                           # A2R writer : drive type (0 = auto, 1-8 = A2R 3.x drive types)
+set A2REXPORT_NO_RAW_CAPTURES 0                      # A2R writer : 1 -> Don't write the raw captures (RWCP)
+set A2REXPORT_NO_SOLVED_TRACKS 0                     # A2R writer : 1 -> Don't write the solved tracks (SLVD)
 
 #
 # WOZ loader parameters
