@@ -130,7 +130,7 @@ DISKLOADERPLUGINS = raw_amiga.o raw_iso.o copyqm_loader.o crctable.o adf_loader.
 					system24_loader.o kryofluxstream_loader.o kryofluxstream.o fzf_loader.o apple2_nib_loader.o apple2_do_loader.o \
 					sdd_speccydos_loader.o arburg_raw_loader.o scp_loader.o bmp_loader.o northstar_loader.o  xml_loader.o flppcm_loader.o stw_loader.o \
 					vfddat_loader.o ana_loader.o atr_loader.o hfev3_loader.o hfev3_trackgen.o heathkit_loader.o h17_loader.o sdu_loader.o xml_db_loader.o \
-					streamhfe_loader.o qd_loader.o ipf_loader.o capslibloader.o hxcstream_loader.o hxcstream.o dfi_loader.o a2r_loader.o \
+					streamhfe_loader.o qd_loader.o ipf_loader.o ipf_decoder.o capslibloader.o hxcstream_loader.o hxcstream.o dfi_loader.o a2r_loader.o \
 					micraln_loader.o fdx_loader.o 86f_loader.o logicanalyzer_loader.o apple2_2mg_loader.o dim_x68k_loader.o woz_loader.o \
 					mfi_loader.o pri_loader.o
 
@@ -593,6 +593,9 @@ ipf_loader.o : $(BASEDIR)/loaders/ipf_loader/ipf_loader.c $(BASEDIR)/loaders/ipf
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 ipf_writer.o : $(BASEDIR)/loaders/ipf_loader/ipf_writer.c $(BASEDIR)/loaders/ipf_loader/ipf_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+ipf_decoder.o : $(BASEDIR)/loaders/ipf_loader/ipf_decoder.c $(BASEDIR)/loaders/ipf_loader/ipf_decoder.h $(BASEDIR)/loaders/ipf_loader/ipf_format.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 capslibloader.o : $(BASEDIR)/misc/capslib_loader/capslibloader.c

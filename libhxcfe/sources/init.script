@@ -367,7 +367,12 @@ set F86LOADER_THICK_TRACKS 0                         # 86F loader tracks geometr
 # IPF Loader flags/parameters
 #
 
-set LOADER_IPF_CAPS_DI_LOCK_INDEX 0
+set LOADER_IPF_DECODER 0                             # IPF files decoder :
+                                                     # 0 -> Built-in IPF decoder (no external library needed).
+                                                     # 1 -> SPS CAPS library (CAPSImg / libcapsimage).
+                                                     # Note : CT Raw files (.ct/.ctr) always use the SPS CAPS library.
+
+set LOADER_IPF_CAPS_DI_LOCK_INDEX 0                  # 1 -> First block at the index (non variable density tracks).
 #set SPSCAPS_LIB_NAME CAPSImg.dll
 
 #

@@ -39,6 +39,7 @@
 // Contains: IPF floppy image loader
 //
 // Written by: Jean-François DEL NERO
+// Assisted-by: Claude Opus 5.5
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -57,6 +58,7 @@
 
 #include "ipf_loader.h"
 #include "ipf_writer.h"
+#include "ipf_decoder.h"
 
 #include "libhxcadaptor.h"
 
@@ -80,6 +82,20 @@
 #define INDEX_POSITION  0
 #define INDEX_DURATION  2000
 
+// IPF decoder selection (LOADER_IPF_DECODER) :
+// 0 -> Built-in decoder for .ipf files (CT Raw .ct/.ctr files need the SPS CAPS library)
+// 1 -> SPS CAPS library
+static int IPF_useCapsLib(HXCFE * hxcfe, char * path)
+{
+	if( !hxc_checkfileext(path,"ipf",SYS_PATH_TYPE) )
+		return 1;
+
+	if( hxcfe_getEnvVarValue( hxcfe, "LOADER_IPF_DECODER" ) == 1 )
+		return 1;
+
+	return 0;
+}
+
 int IPF_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * imgfile )
 {
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IPF_libIsValidDiskFile");
@@ -87,6 +103,12 @@ int IPF_libIsValidDiskFile( HXCFE_IMGLDR * imgldr_ctx, HXCFE_IMGLDR_FILEINFOS * 
 	if(hxc_checkfileext(imgfile->path,"ipf",SYS_PATH_TYPE) || hxc_checkfileext(imgfile->path,"ct",SYS_PATH_TYPE) || hxc_checkfileext(imgfile->path,"ctr",SYS_PATH_TYPE))
 	{
 		imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"IPF_libIsValidDiskFile : IPF file !");
+
+		if( !IPF_useCapsLib(imgldr_ctx->hxcfe, imgfile->path) )
+		{
+			return IPF_decoder_IsValidFile(imgldr_ctx, imgfile->path);
+		}
+
 		if(init_caps_lib(imgldr_ctx->hxcfe))
 		{
 			return HXCFE_VALIDFILE;
@@ -176,7 +198,7 @@ uint32_t trackcopy(unsigned char * dest,unsigned char * src,uint32_t overlap,uin
 	return dest_tracklen;
 }
 
-int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
+static int IPF_capsLibLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile)
 {
 	unsigned int filesize;
 	unsigned int i,j,k,l,m,len;
@@ -676,10 +698,22 @@ alloc_error:
 	return HXCFE_INTERNALERROR;
 }
 
+int IPF_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,char * imgfile,void * parameters)
+{
+	if( IPF_useCapsLib(imgldr_ctx->hxcfe, imgfile) )
+	{
+		imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"IPF Loader : SPS CAPS library decoder");
+		return IPF_capsLibLoad_DiskFile(imgldr_ctx, floppydisk, imgfile);
+	}
+
+	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"IPF Loader : Built-in decoder");
+	return IPF_decoder_Load_DiskFile(imgldr_ctx, floppydisk, imgfile);
+}
+
 int IPF_libGetPluginInfo(HXCFE_IMGLDR * imgldr_ctx,uint32_t infotype,void * returnvalue)
 {
 	static const char plug_id[]="SPS_IPF";
-	static const char plug_desc[]="SPS IPF Loader";
+	static const char plug_desc[]="IPF Loader/Writer";
 	static const char plug_ext[]="ipf";
 
 	plugins_ptr plug_funcs=
