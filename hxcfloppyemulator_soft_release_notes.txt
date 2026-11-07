@@ -15,7 +15,7 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
-XX XXXX 2026 : HxCFloppyEmulator beta version (v2.16.21.1)
+XX XXXX 2026 : HxCFloppyEmulator beta version (v2.17.1.1)
 
 -> New loader/writer : H17Disk Heathkit H17 Hard-sectored Disk Image (*.h17)
 
@@ -77,6 +77,8 @@ XX XXXX 2026 : HxCFloppyEmulator beta version (v2.16.21.1)
                          (BMPDISKEXPORT_DEFAULT_DISKTYPE)
 
 -> CodeQL reports fixed.
+
+AI Assisted modifications :
 
 -> New writer : 86Box 86F files (*.86f).
                 (F86EXPORT_THICK_TRACKS : 40 cylinders disks tracks doubling)
