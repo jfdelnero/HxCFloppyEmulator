@@ -179,8 +179,10 @@ void printhelp(char* argv[])
 	printf("  -usb:[DRIVE] \t\t\t: start the usb floppy emulator\n");
 	printf("  -infos\t\t\t: Print informations about the input file\n");
 	printf("  -ifmode:[INTERFACE_MODE]\t: Select the floppy interface mode\n");
-	printf("  -singlestep\t\t\t: Force the single step mode\n");
-	printf("  -doublestep\t\t\t: Force the double step mode\n");
+	printf("  -singlestep\t\t\t: Force the single step mode (USB emulator) / Load all the tracks of the flux stream dumps\n");
+	printf("  -doublestep\t\t\t: Force the double step mode (USB emulator) / Load only the even tracks of the flux stream dumps\n");
+	printf("\t\t\t\t  (40 tracks disk dumped with a 80 tracks drive)\n");
+	printf("  -hfedoublestep\t\t: Set the double step flag in the exported HFE files\n");
 	printf("  -list\t\t\t\t: List the content of the floppy image\n");
 	printf("  -getfile:[FILE]\t\t: Get a file from the floppy image\n");
 	printf("  -putfile:[FILE]\t\t: Put a file to the floppy image\n");
@@ -375,6 +377,17 @@ HXCFE_FLOPPY * unloadfile(HXCFE* hxcfe, HXCFE_FLOPPY * image)
 	}
 
 	return NULL;
+}
+
+// Flux stream loaders tracks step : 1 -> skip the odd tracks (40 tracks disk dumped with a 80 tracks drive), 0 -> load all the tracks.
+void set_stream_loaders_double_step(HXCFE* hxcfe, int doublestep)
+{
+	hxcfe_setEnvVarValue( hxcfe, "HXCSTREAMLOADER_DOUBLE_STEP", doublestep ? 1 : 0 );
+	hxcfe_setEnvVarValue( hxcfe, "KFRAWLOADER_DOUBLE_STEP", doublestep ? 1 : 0 );
+	hxcfe_setEnvVarValue( hxcfe, "SCPLOADER_DOUBLE_STEP", doublestep ? 1 : 0 );
+	hxcfe_setEnvVarValue( hxcfe, "DFILOADER_DOUBLE_STEP", doublestep ? 1 : 0 );
+	hxcfe_setEnvVarValue( hxcfe, "LOGICANALYZER_DOUBLE_STEP", doublestep ? 1 : 0 );
+	hxcfe_setEnvVarValue( hxcfe, "A2RLOADER_DOUBLE_STEP", doublestep ? 1 : 2 ); // 1 : Force, 2 : Never
 }
 
 int convertfile(HXCFE* hxcfe, HXCFE_FLOPPY * floppydisk, char * infile,char * outfile,char * outformat,int ifmode)
@@ -1200,6 +1213,25 @@ int main(int argc, char* argv[])
 		printdisklayout(hxcfe);
 	}
 
+	// Single/Double step options.
+	// USB emulator : step mode. Image loading : flux stream dumps tracks step.
+	if(isOption(argc,argv,"singlestep",0,NULL)>0)
+	{
+		doublestep=0;
+	}
+
+	if(isOption(argc,argv,"doublestep",0,NULL)>0)
+	{
+		doublestep=0xFF;
+	}
+
+	if( doublestep >= 0 && isOption(argc,argv,"usb",0,NULL)<=0 )
+	{
+		set_stream_loaders_double_step(hxcfe, doublestep);
+		if(doublestep)
+			printf("Double step : only the even tracks of the flux stream dumps are loaded.\n");
+	}
+
 	// Interface mode option
 	interfacemode=-1;
 	if(isOption(argc,argv,"ifmode",(char*)&temp,NULL)>0)
@@ -1238,6 +1270,13 @@ int main(int argc, char* argv[])
 		{
 			printf("Can't open/load source image\n");
 			return -1;
+		}
+
+		// HFE double step flag
+		if(isOption(argc,argv,"hfedoublestep",0,NULL)>0)
+		{
+			printf("HFE double step flag set.\n");
+			hxcfe_floppySetDoubleStep(hxcfe,image,0xFF);
 		}
 	}
 
@@ -1319,16 +1358,6 @@ int main(int argc, char* argv[])
 	}
 
 	unloadfile(hxcfe, image);
-
-	if(isOption(argc,argv,"singlestep",0,NULL)>0)
-	{
-		doublestep=0;
-	}
-
-	if(isOption(argc,argv,"doublestep",0,NULL)>0)
-	{
-		doublestep=0xFF;
-	}
 
 	if(isOption(argc,argv,"list",0,NULL)>0)
 	{
