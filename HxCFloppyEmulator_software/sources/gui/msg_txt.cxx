@@ -169,7 +169,7 @@ Fl_Menu_Item format_choices[]=
 	{ "HFE - Stream - Experimental",0,format_choice_cb,(void*)PLUGIN_HXC_HFESTREAM},
 	{ "Arburg - Arburg RAW sectors file format",0,format_choice_cb,(void*)PLUGIN_ARBURG},
 	{ "Raw - Stream Kryoflux file format",0,format_choice_cb,(void*)PLUGIN_SKF},
-	{ "IPF - SPS IPF file format (W.I.P)",0,format_choice_cb,(void*)PLUGIN_IPF},
+	{ "IPF - SPS IPF file format",0,format_choice_cb,(void*)PLUGIN_IPF},
 	{ "SCP - SCP stream file format",0,format_choice_cb,(void*)PLUGIN_SCP},
 	{ "BMP - Tracks BMP file image",0,format_choice_cb,(void*)PLUGIN_BMP},
 	{ "PNG - Tracks PNG file image",0,format_choice_cb,(void*)PLUGIN_PNG},
@@ -185,6 +185,8 @@ Fl_Menu_Item format_choices[]=
 	{ "DO - Apple II file image (Dos 3.3)",0,format_choice_cb,(void*)PLUGIN_APPLE2_DO},
 	{ "PO - Apple II file image (ProDos)",0,format_choice_cb,(void*)PLUGIN_APPLE2_PO},
 	{ "FDX - FDX68 raw file image (ProDos)",0,format_choice_cb,(void*)PLUGIN_FDX68_FDX},
+	{ "A2R - AppleSauce A2R",0,format_choice_cb,(void*)PLUGIN_APPLESAUCE_A2R},
+	{ "86F - 86Box 86F",0,format_choice_cb,(void*)PLUGIN_86BOX_86F},
 	{0}
 };
 

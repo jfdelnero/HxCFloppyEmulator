@@ -91,3 +91,5 @@
 #define PLUGIN_APPLE2_PO            "APPLE2_PO"
 #define PLUGIN_FDX68_FDX            "FDX68_FDX"
 #define PLUGIN_MAME_MFI             "MAME_MFI"
+#define PLUGIN_86BOX_86F            "PC_86F"
+#define PLUGIN_APPLESAUCE_A2R       "A2R_FLUX_STREAM"

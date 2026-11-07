@@ -264,6 +264,14 @@ set A2RLOADER_SINGLE_SIDE 0                          # Skip the side 1.
 set A2RLOADER_BITRATE 0                              # Force the bitrate. (no auto-detection)
 set A2RLOADER_BMPEXPORT 0                            # Export/plot the inputs stream tracks to BMP images.
 set A2RLOADER_SKIP_INTER_TRACKS 1                    # Skip inter tracks. Just process the normal tracks.
+set A2RLOADER_IGNORE_SOLVED_TRACKS 0                 # 1 -> Ignore the A2R 3.x solved tracks (SLVD) and use the raw captures.
+set A2RLOADER_DOUBLE_STEP 0                          # 0 -> Auto (only even cylinders present : 40 tracks disk in a 80 tracks drive)
+                                                     # 1 -> Force (keep the even cylinders), 2 -> Never
+
+set A2REXPORT_NUMBER_OF_REVOLUTIONS 2                # A2R writer : revolutions per raw capture (+ 1/4 revolution)
+set A2REXPORT_DRIVE_TYPE 0                           # A2R writer : drive type (0 = auto, 1-8 = A2R 3.x drive types)
+set A2REXPORT_NO_RAW_CAPTURES 0                      # A2R writer : 1 -> Don't write the raw captures (RWCP)
+set A2REXPORT_NO_SOLVED_TRACKS 0                     # A2R writer : 1 -> Don't write the solved tracks (SLVD)
 
 #
 # WOZ loader parameters
@@ -345,11 +353,27 @@ set KFRAWEXPORT_SAMPLE_FREQUENCY 24027428.57142857   # KF raw sample frequency
 #set SCPEXPORT_DISK_96TPI   1                        # Uncomment one of the following lines to force the
 #set SCPEXPORT_DISK_48TPI   1                        # TPI flag
 
+set F86EXPORT_THICK_TRACKS 0                         # 86F writer tracks geometry (86F images are in thin tracks geometry) :
+                                                     # 0 -> Auto : 40 cylinders disks (<= 43 cylinders) have each track written twice.
+                                                     # 1 -> Always write each track twice (48 tpi disk).
+                                                     # 2 -> Never write each track twice (96/135 tpi disk).
+
+set F86LOADER_THICK_TRACKS 0                         # 86F loader tracks geometry :
+                                                     # 0 -> Auto : keep one track out of two if all the tracks pairs are identical.
+                                                     # 1 -> Always keep one track out of two (48 tpi disk).
+                                                     # 2 -> Load all the tracks (96/135 tpi disk).
+
 #
 # IPF Loader flags/parameters
 #
 
-set LOADER_IPF_CAPS_DI_LOCK_INDEX 0
+set LOADER_IPF_DECODER 0                             # IPF files decoder :
+                                                     # 0 -> Auto selection : SPS CAPS library if available or Built-in IPF decoder fallback if CAPS library not available.
+                                                     # 1 -> Built-in IPF decoder (no external library needed).
+                                                     # 2 -> SPS CAPS library (CAPSImg / libcapsimage).
+                                                     # Note : CT Raw files (.ct/.ctr) always use the SPS CAPS library.
+
+set LOADER_IPF_CAPS_DI_LOCK_INDEX 0                  # 1 -> First block at the index (non variable density tracks).
 #set SPSCAPS_LIB_NAME CAPSImg.dll
 
 #

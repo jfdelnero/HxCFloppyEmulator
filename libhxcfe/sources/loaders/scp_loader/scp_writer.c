@@ -39,6 +39,7 @@
 // Contains: SCP Stream floppy image writer
 //
 // Written by: Jean-François DEL NERO
+// Assisted-by: Claude Opus 5.5
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -238,6 +239,13 @@ int SCP_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		{
 			imgldr_ctx->hxcfe->hxc_printf(MSG_WARNING,"SCP_libWrite_DiskFile : Track number limited to 164 !");
 			tracknumber = 83*2;
+		}
+
+		// Single sided disk : the tracks are stored at the even entries of the tracks list.
+		if( floppy->floppyNumberOfSide != 2 && tracknumber > 83 )
+		{
+			imgldr_ctx->hxcfe->hxc_printf(MSG_WARNING,"SCP_libWrite_DiskFile : Single sided disk : Track number limited to 83 !");
+			tracknumber = 83;
 		}
 
 		scph.number_of_revolution = hxcfe_getEnvVarValue( imgldr_ctx->hxcfe, "SCPEXPORT_NUMBER_OF_REVOLUTIONS" );

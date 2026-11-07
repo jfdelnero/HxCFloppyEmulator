@@ -169,7 +169,9 @@ const char * plugid_lst[]=
 	PLUGIN_HXC_QD,
 	PLUGIN_APPLE2_DO,
 	PLUGIN_APPLE2_PO,
-	PLUGIN_FDX68_FDX
+	PLUGIN_FDX68_FDX,
+	PLUGIN_APPLESAUCE_A2R,
+	PLUGIN_86BOX_86F
 };
 
 #ifdef GUI_DEBUG
@@ -623,8 +625,9 @@ void save_file_image(Fl_Widget * w, void * fc_ptr)
 					"Apple II DO (Dos 3.3) file\t*.do\n"
 					"Apple II PO (ProDos) file\t*.po\n"
 					"FDX68 file (raw)\t*.fdx\n"
+					"AppleSauce A2R file (a2r)\t*.a2r\n"
+					"86Box 86F file\t*.86f\n"
 					);
-
 
 		//fnfc.directory("/var/tmp"); // default directory to use
 

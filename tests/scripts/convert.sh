@@ -56,7 +56,7 @@ export success_cnt=`cat convert_res.txt | grep "identical" | wc -l`
 echo "4292a3cb2f6a6466a39583271334f8ce  C001.IMG" | md5sum -c - >> convert2_res.txt
 
 ./hxcfe -finput:disk1.86f -foutput:C002.IMG -conv:RAW_LOADER
-echo "73bec3e0512925c955c706a9d742967d  C002.IMG" | md5sum -c - >> convert2_res.txt
+echo "873b5803abdca8ec4f872510d433f499  C002.IMG" | md5sum -c - >> convert2_res.txt
 
 ./hxcfe -finput:Acorn_Horizon.adf -foutput:C003.IMG -conv:RAW_LOADER
 echo "05f58f4fa3b96017d4ea0c1c80f24c0b  C003.IMG" | md5sum -c - >> convert2_res.txt

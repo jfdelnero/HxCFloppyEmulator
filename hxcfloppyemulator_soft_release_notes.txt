@@ -15,7 +15,7 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
-XX XXXX 2026 : HxCFloppyEmulator beta version (v2.16.21.1)
+XX XXXX 2026 : HxCFloppyEmulator beta version (v2.17.1.1)
 
 -> New loader/writer : H17Disk Heathkit H17 Hard-sectored Disk Image (*.h17)
 
@@ -77,6 +77,44 @@ XX XXXX 2026 : HxCFloppyEmulator beta version (v2.16.21.1)
                          (BMPDISKEXPORT_DEFAULT_DISKTYPE)
 
 -> CodeQL reports fixed.
+
+AI Assisted modifications :
+
+-> New writer : 86Box 86F files (*.86f).
+                (F86EXPORT_THICK_TRACKS : 40 cylinders disks tracks doubling)
+
+-> 86F loader : Reworked. Bounds checks, FM tracks, reversed endianness
+                and surface data (weak bits) support. 40 cylinders disks
+                automatic detection (F86LOADER_THICK_TRACKS).
+
+-> IPF writer : Completed (SPS encoder) : Data, mark and fuzzy (weak bits)
+                elements, unformatted tracks.
+
+-> IPF loader : New built-in IPF decoder. The SPS CAPS library is no longer
+                needed to load the IPF files.
+                LOADER_IPF_DECODER : 0 -> built-in decoder (default)
+                                     1 -> SPS CAPS library
+                CT Raw files (*.ct/*.ctr) still use the SPS CAPS library.
+
+-> A2R loader : A2R 2.x and 3.x support completed : raw captures (STRM/RWCP),
+                solved tracks (SLVD), hard sectored disks, all drives types,
+                double step support (A2RLOADER_DOUBLE_STEP,
+                A2RLOADER_IGNORE_SOLVED_TRACKS).
+
+-> New writer : Applesauce A2R 3.x files (*.a2r).
+                (A2REXPORT_NUMBER_OF_REVOLUTIONS, A2REXPORT_DRIVE_TYPE,
+                 A2REXPORT_NO_RAW_CAPTURES, A2REXPORT_NO_SOLVED_TRACKS)
+
+-> SCP loader : Fix the double step mode (out-of-bounds access, bad tracks
+                count).
+
+-> SCP writer : Fix a stack overflow with the single sided disks having more
+                than 83 tracks.
+
+-> Command line tool (hxcfe) : -doublestep / -singlestep now apply to the
+                               flux stream loaders for the conversions (issue #31).
+                               New -hfedoublestep option to set the HFE files
+                               double step flag.
 
 *********************************************************/
 

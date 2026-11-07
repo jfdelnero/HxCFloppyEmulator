@@ -39,6 +39,7 @@
 // Contains: SCP Stream floppy image loader
 //
 // Written by: Jean-François DEL NERO
+// Assisted-by: Claude Opus 5.5
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
@@ -380,6 +381,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	unsigned short i,j;
 	int k,l,len;
 	int trackstep,singleside;
+	int file_cylinders;
 	HXCFE_CYLINDER* currentcylinder;
 	HXCFE_SIDE * curside;
 	int nbtrack,nbside;
@@ -562,11 +564,6 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			hxc_fread(tracksoffset,sizeof(tracksoffset),f);
 
-			if( floppydisk->floppyNumberOfTrack*trackstep > MAX_NUMBER_OF_TRACKS )
-			{
-				floppydisk->floppyNumberOfTrack = MAX_NUMBER_OF_TRACKS / trackstep;
-			}
-
 
 			if( floppydisk->floppyNumberOfSide == 1)
 			{
@@ -577,8 +574,16 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 				}
 			}
 
+			// Cylinders present in the file (limited to the tracks list size)
+			file_cylinders = floppydisk->floppyNumberOfTrack;
+			while( file_cylinders && ( (track_offset_cyl_step * (file_cylinders - 1)) + (track_offset_head_step * (floppydisk->floppyNumberOfSide - 1)) ) >= MAX_NUMBER_OF_TRACKS )
+			{
+				file_cylinders--;
+			}
+
+			// Last track present. (Double step : only the even cylinders are used)
 			k = 0;
-			for(j=0;j<floppydisk->floppyNumberOfTrack*trackstep;j=j+trackstep)
+			for(j=0;j<file_cylinders;j=j+trackstep)
 			{
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
@@ -592,7 +597,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 			if(singleside)
 				floppydisk->floppyNumberOfSide = 1;
 
-			floppydisk->floppyNumberOfTrack = ((k >> 1) + 1) / trackstep;
+			floppydisk->floppyNumberOfTrack = ((k >> 1) / trackstep) + 1;
 
 			floppydisk->tracks = (HXCFE_CYLINDER**)malloc(sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 			if(!floppydisk->tracks)
@@ -603,7 +608,7 @@ int SCP_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 			memset(floppydisk->tracks,0,sizeof(HXCFE_CYLINDER*)*floppydisk->floppyNumberOfTrack);
 
-			for(j=0;j<floppydisk->floppyNumberOfTrack*trackstep;j=j+trackstep)
+			for(j=0;j<floppydisk->floppyNumberOfTrack*trackstep && j<file_cylinders;j=j+trackstep)
 			{
 				for(i=0;i<floppydisk->floppyNumberOfSide;i++)
 				{
