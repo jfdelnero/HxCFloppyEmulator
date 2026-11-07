@@ -125,7 +125,7 @@ ff_type ff_type_list[]=
 	{ FF_HFESTREAM," Stream HFE - Rev 0 - Experimental",PLUGIN_HXC_HFESTREAM,".hfe"},
 	{ FF_ARBG,"Arburg - Arburg RAW sectors file format",PLUGIN_ARBURG,".arburgfd"},
 	{ FF_SKF,"Raw - Stream Kryoflux file format",PLUGIN_SKF,".raw"},
-	{ FF_IPF,"IPF - IPF file format (W.I.P)",PLUGIN_IPF,".ipf"},
+	{ FF_IPF,"IPF - IPF file format",PLUGIN_IPF,".ipf"},
 	{ FF_SCP,"SCP - SCP file format",PLUGIN_SCP,".scp"},
 	{ FF_BMP,"Tracks BMP - BMP file image",PLUGIN_BMP,".bmp"},
 	{ FF_PNG,"Tracks PNG - PNG file image",PLUGIN_PNG,".png"},
@@ -141,6 +141,8 @@ ff_type ff_type_list[]=
 	{ FF_APPLEII_DO,"DO - Apple II file image (Dos 3.3)",PLUGIN_APPLE2_DO,".do"},
 	{ FF_APPLEII_PO,"PO - Apple II file image (ProDos)",PLUGIN_APPLE2_PO,".po"},
 	{ FF_FDX68_RAWFDX,"FDX - FDX68 raw file image (ProDos)",PLUGIN_FDX68_FDX,".fdx"},
+	{ FF_A2R,"A2R - AppleSauce A2R",PLUGIN_APPLESAUCE_A2R,".a2r"},
+	{ FF_86F,"86F - 86Box 86F",PLUGIN_86BOX_86F,".86f"},
 	{ -1,"",0,0}
 };
 
