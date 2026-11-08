@@ -221,12 +221,48 @@ static double f86_get_cell_duration(HXCFE_SIDE * side, int32_t cell)
 	return 1.0 / ( 2.0 * (double)bitrate );
 }
 
+static double f86_get_track_duration(HXCFE_SIDE * side)
+{
+	int32_t i;
+	double total_time;
+
+	total_time = 0;
+	for(i=0;i<side->tracklen;i++)
+	{
+		total_time += f86_get_cell_duration(side, i);
+	}
+
+	return total_time;
+}
+
+// Nearest 86F rate of a side (average bitrate)
+static const f86_rate_t * f86_get_side_rate(HXCFE_SIDE * side)
+{
+	double total_time;
+
+	total_time = f86_get_track_duration(side);
+	if( side->tracklen <= 0 || total_time <= 0 )
+		return &f86_rates[0];
+
+	return f86_get_nearest_rate( (double)side->tracklen / ( 2.0 * total_time ) );
+}
+
 // Convert an HxC side to a 86F track (data/surface arrays + header fields).
-static int f86_convert_side(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side, int cyl, int head, f86_track_t * trk)
+//
+// Encoded tracks (known encoding) : the bit cells are copied 1:1 (FM : 2 HxC
+// cells -> 1 86F cell). The 86F track bit cells count is the HxC track one.
+// The cells must not be resampled to the 86Box fixed cell period : the flux
+// stream based tracks have variable bitrates (drive speed variations) and any
+// resampling to a fixed period drops / inserts cells in the bitstream, which
+// breaks the MFM/FM data.
+//
+// Unknown encoding tracks (unformatted / noise) : the cells are resampled by
+// time at the disk rate (default_rate) to keep the track duration.
+static int f86_convert_side(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side, int cyl, int head, const f86_rate_t * default_rate, f86_track_t * trk)
 {
 	int32_t i,tracklen;
 	uint32_t o;
-	int encoding,hxc_encoding;
+	int encoding,hxc_encoding,resample,step;
 	const f86_rate_t * rate;
 	double total_time,t,d,out_period,rpm;
 	int index_prev,index_cur,index_found;
@@ -241,21 +277,33 @@ static int f86_convert_side(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side, int cy
 	encoding = f86_hxc_to_86f_encoding(hxc_encoding);
 
 	// Track duration and average bitrate
-	total_time = 0;
-	for(i=0;i<tracklen;i++)
-	{
-		total_time += f86_get_cell_duration(side, i);
-	}
+	total_time = f86_get_track_duration(side);
 
-	rate = f86_get_nearest_rate( (double)tracklen / ( 2.0 * total_time ) );
+	resample = 0;
+	if( hxc_encoding == UNKNOWN_ENCODING && default_rate )
+	{
+		rate = default_rate;
+		resample = 1;
+	}
+	else
+	{
+		rate = f86_get_nearest_rate( (double)tracklen / ( 2.0 * total_time ) );
+	}
 
 	// 86Box cell period. The FM cells are twice longer than the MFM ones
 	// for the same rate code. (HxC internal FM cells are MFM sized : 0C0D)
 	out_period = 1.0 / ( 2.0 * (double)rate->bitrate );
+	step = 1;
 	if( encoding == F86_TRK_ENC_FM )
+	{
 		out_period *= 2.0;
+		step = 2;
+	}
 
-	trk->nb_of_cells = (uint32_t)( ( total_time / out_period ) + 0.5 );
+	if( resample )
+		trk->nb_of_cells = (uint32_t)( ( total_time / out_period ) + 0.5 );
+	else
+		trk->nb_of_cells = (uint32_t)( ( tracklen + (step - 1) ) / step );
 
 	if( !trk->nb_of_cells )
 		trk->nb_of_cells = 1;
@@ -277,8 +325,8 @@ static int f86_convert_side(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side, int cy
 		return HXCFE_INTERNALERROR;
 	}
 
-	// Resample the cells : each input cell goes to the output cell
-	// containing its center time.
+	// Copy (or resample) the cells. Resampling : each input cell goes to the
+	// output cell containing its center time.
 	index_found = 0;
 	index_prev = 0;
 	if( side->indexbuffer )
@@ -289,7 +337,11 @@ static int f86_convert_side(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side, int cy
 	{
 		d = f86_get_cell_duration(side, i);
 
-		o = (uint32_t)( ( t + (d / 2.0) ) / out_period );
+		if( resample )
+			o = (uint32_t)( ( t + (d / 2.0) ) / out_period );
+		else
+			o = (uint32_t)( i / step );
+
 		if( o >= trk->nb_of_cells )
 			o = trk->nb_of_cells - 1;
 
@@ -329,7 +381,8 @@ static int f86_convert_side(HXCFE_IMGLDR * imgldr_ctx, HXCFE_SIDE * side, int cy
 	if( rpm > 330.0 )
 		trk->flags |= F86_TRKFLAG_RPM_360;
 
-	trk->hole = rate->hole;
+	// Unformatted tracks don't select the disk hole type.
+	trk->hole = resample ? 0 : rate->hole;
 
 #ifdef F86_WRITER_DBG
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"86F writer : Track %d:%d - HxC encoding: %d, HxC cells: %d -> 86F flags: 0x%.4X (%s %d kbps, %d RPM), cells: %d, index: %d",
@@ -386,6 +439,8 @@ int F86_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	HXCFE_SIDE * side;
 	long file_size;
 	uint8_t zero;
+	int rate_count[sizeof(f86_rates)/sizeof(f86_rate_t)];
+	const f86_rate_t * default_rate;
 
 	f = NULL;
 	tracks = NULL;
@@ -436,6 +491,31 @@ int F86_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		goto error;
 	}
 
+	// Disk rate : the most common rate of the encoded tracks.
+	// (Used for the unformatted tracks)
+	memset(rate_count,0,sizeof(rate_count));
+	for(cyl=0;cyl<nb_cyl;cyl++)
+	{
+		for(head=0;head<nb_sides;head++)
+		{
+			if( floppy->tracks[cyl] && floppy->tracks[cyl]->sides && head < floppy->tracks[cyl]->number_of_side )
+			{
+				side = floppy->tracks[cyl]->sides[head];
+				if( side && side->tracklen > 0 && f86_get_track_encoding(side) != UNKNOWN_ENCODING )
+				{
+					rate_count[ f86_get_side_rate(side) - f86_rates ]++;
+				}
+			}
+		}
+	}
+
+	default_rate = &f86_rates[0];
+	for(entry=0;entry<(int)(sizeof(f86_rates)/sizeof(f86_rate_t));entry++)
+	{
+		if( rate_count[entry] > rate_count[default_rate - f86_rates] )
+			default_rate = &f86_rates[entry];
+	}
+
 	// Convert all the tracks first : the disk flags depend on their content.
 	hole = 0;
 	has_weak_bits = 0;
@@ -456,7 +536,7 @@ int F86_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 				continue;
 			}
 
-			ret = f86_convert_side(imgldr_ctx, side, cyl, head, &tracks[(cyl*nb_sides)+head]);
+			ret = f86_convert_side(imgldr_ctx, side, cyl, head, default_rate, &tracks[(cyl*nb_sides)+head]);
 			if( ret == HXCFE_INTERNALERROR )
 				goto error;
 
