@@ -65,3 +65,38 @@ typedef struct pasti_sector_
 }pasti_sector;
 
 #pragma pack()
+
+// File descriptor
+#define PASTI_FILE_VERSION         3      // codeversion1
+#define PASTI_FILE_REVISION_OLD    0x00   // unknowvalue (revision) : old format (Macrodos/Speedlock fixed timing table)
+#define PASTI_FILE_REVISION_NEW    0x02   // unknowvalue (revision) : new format (per sector timing records)
+
+// Track descriptor flags
+#define PASTI_TRK_SYNC             0x0080 // Track image header contains the first sync offset
+#define PASTI_TRK_IMAGE            0x0040 // Track record contains a track image (WD1772 "Read track" dump)
+#define PASTI_TRK_PROT             0x0020 // Track contains protections (always set with PASTI_TRK_SECT)
+#define PASTI_TRK_SECT             0x0001 // Track record contains sector descriptors
+
+// Sector descriptor FDC status / flags
+#define PASTI_SECT_FUZZY           0x80   // Sector contains fuzzy bits (fuzzy mask present)
+#define PASTI_SECT_RECORD_TYPE     0x20   // Deleted data mark
+#define PASTI_SECT_RNF             0x10   // Record not found (no data block)
+#define PASTI_SECT_CRC             0x08   // CRC error (data if RNF=0, address field if RNF=1)
+#define PASTI_SECT_VARIABLE_TIME   0x01   // Intra sector bit width variation (timing record with revision 2)
+
+// Timing record (revision 2) : header followed by one big endian 16 bits value per 16 bytes block.
+// Each value is the 16 bytes block read time in units of 32 FDC cycles @ 8MHz (+28 cycles per block).
+// The nominal value is 127 (~512us).
+#define PASTI_TIMING_FLAGS         0x0005
+#define PASTI_TIMING_BLOCK_SIZE    16
+#define PASTI_TIMING_NOMINAL       127
+
+#pragma pack(1)
+
+typedef struct pasti_timingheader_
+{
+ uint16_t  flags;      // Always 5 ?
+ uint16_t  size;       // Total size of the timing record (header included)
+}pasti_timingheader;
+
+#pragma pack()

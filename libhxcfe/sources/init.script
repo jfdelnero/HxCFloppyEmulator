@@ -363,6 +363,14 @@ set F86LOADER_THICK_TRACKS 0                         # 86F loader tracks geometr
                                                      # 1 -> Always keep one track out of two (48 tpi disk).
                                                      # 2 -> Load all the tracks (96/135 tpi disk).
 
+set STXEXPORT_TRACK_IMAGE 1                          # STX/Pasti writer : 1 -> Add the WD1772 "Read Track" image of each track (needed by
+                                                     #                        the protections reading the tracks and by the emulators).
+                                                     #                   0 -> Sector data only (smaller files).
+set STXEXPORT_VARIABLE_TIMING_THRESHOLD 3            # STX/Pasti writer : Intra-sector bit rate variation detection threshold (in %).
+                                                     # A timing record is added to the sectors with 16 bytes blocks faster AND slower
+                                                     # than the sector average by more than this value (Macrodos/Speedlock like protections).
+                                                     # 0 -> Disabled.
+
 #
 # IPF Loader flags/parameters
 #
