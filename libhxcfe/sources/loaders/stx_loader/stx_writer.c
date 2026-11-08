@@ -39,6 +39,7 @@
 // Contains: STX floppy image writer
 //
 // Written by: Jean-François DEL NERO
+// Assisted-by: Claude Opus 5.5
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////

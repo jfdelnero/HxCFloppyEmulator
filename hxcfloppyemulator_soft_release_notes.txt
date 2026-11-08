@@ -15,34 +15,16 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 -------------------------------------------------------------------------------
 
 /*********************************************************
-XX XXXX 2026 : HxCFloppyEmulator beta version (v2.17.1.2)
+XX XXXX 2026 : HxCFloppyEmulator beta version (v2.18.1.1)
 
 -> New loader/writer : H17Disk Heathkit H17 Hard-sectored Disk Image (*.h17)
 
--> Oric DSK loader : Set the tracks size to the 6400 bytes default value
+-> Oric DSK Loader : Set the tracks size to the 6400 bytes default value
                      with malformed/bad sized images
 
 -> STX Writer : Fix out-of-bounds accesses in patchtrack() and addsector() + code clean up.
 
--> STX Writer : The WD1772 "Read Track" image of each track is now exported (Issue #14).
-                The track images are generated with a WD1772 read track emulation
-                (A1/C2 sync behavior) on the track resampled at the nominal bitrate.
-                Sector data matching the track image are stored inside the track image.
-                Add the deleted data mark flag, the bad ID CRC sectors (RNF+CRC),
-                the sector bit positions, intra-sector timing records (revision 2)
-                and single sided disks detection. Fix the read time of the sectors
-                crossing the index.
-                New variables : STXEXPORT_TRACK_IMAGE and STXEXPORT_VARIABLE_TIMING_THRESHOLD.
-
--> STX Loader : Read track images based tracks rebuilt from the ID fields positions
-                (fix missing sectors with "sector within sector" protections, sectors
-                over the index and garbled ID fields). Timing records (revision 2) and
-                Macrodos/Speedlock default timing table (revision 0) support.
-                Fix the ID field CRC of the tracks without track image, sides
-                association with side-ordered files, the 11 sectors tracks format,
-                and add bounds checks.
-
--> ADL loader : Fix the start id sector to 0.
+-> ADL Loader : Fix the start id sector to 0.
 
 -> File system manager : Complete the plug-in interface.
 
@@ -98,36 +80,54 @@ XX XXXX 2026 : HxCFloppyEmulator beta version (v2.17.1.2)
 
 AI Assisted modifications :
 
--> New writer : 86Box 86F files (*.86f).
+-> New Writer : 86Box 86F files (*.86f).
                 (F86EXPORT_THICK_TRACKS : 40 cylinders disks tracks doubling)
 
--> 86F loader : Reworked. Bounds checks, FM tracks, reversed endianness
+-> 86F Loader : Reworked. Bounds checks, FM tracks, reversed endianness
                 and surface data (weak bits) support. 40 cylinders disks
                 automatic detection (F86LOADER_THICK_TRACKS).
 
--> IPF writer : Completed (SPS encoder) : Data, mark and fuzzy (weak bits)
+-> IPF Writer : Completed (SPS encoder) : Data, mark and fuzzy (weak bits)
                 elements, unformatted tracks.
 
--> IPF loader : New built-in IPF decoder. The SPS CAPS library is no longer
+-> IPF Loader : New built-in IPF decoder. The SPS CAPS library is no longer
                 needed to load the IPF files.
                 LOADER_IPF_DECODER : 0 -> built-in decoder (default)
                                      1 -> SPS CAPS library
                 CT Raw files (*.ct/*.ctr) still use the SPS CAPS library.
 
--> A2R loader : A2R 2.x and 3.x support completed : raw captures (STRM/RWCP),
+-> A2R Loader : A2R 2.x and 3.x support completed : raw captures (STRM/RWCP),
                 solved tracks (SLVD), hard sectored disks, all drives types,
                 double step support (A2RLOADER_DOUBLE_STEP,
                 A2RLOADER_IGNORE_SOLVED_TRACKS).
 
--> New writer : Applesauce A2R 3.x files (*.a2r).
+-> New Writer : Applesauce A2R 3.x files (*.a2r).
                 (A2REXPORT_NUMBER_OF_REVOLUTIONS, A2REXPORT_DRIVE_TYPE,
                  A2REXPORT_NO_RAW_CAPTURES, A2REXPORT_NO_SOLVED_TRACKS)
 
--> SCP loader : Fix the double step mode (out-of-bounds access, bad tracks
+-> SCP Loader : Fix the double step mode (out-of-bounds access, bad tracks
                 count).
 
--> SCP writer : Fix a stack overflow with the single sided disks having more
+-> SCP Writer : Fix a stack overflow with the single sided disks having more
                 than 83 tracks.
+
+-> STX Writer : The WD1772 "Read Track" image of each track is now exported (Issue #14).
+                The track images are generated with a WD1772 read track emulation
+                (A1/C2 sync behavior) on the track resampled at the nominal bitrate.
+                Sector data matching the track image are stored inside the track image.
+                Add the deleted data mark flag, the bad ID CRC sectors (RNF+CRC),
+                the sector bit positions, intra-sector timing records (revision 2)
+                and single sided disks detection. Fix the read time of the sectors
+                crossing the index.
+                New variables : STXEXPORT_TRACK_IMAGE and STXEXPORT_VARIABLE_TIMING_THRESHOLD.
+
+-> STX Loader : Read track images based tracks rebuilt from the ID fields positions
+                (fix missing sectors with "sector within sector" protections, sectors
+                over the index and garbled ID fields). Timing records (revision 2) and
+                Macrodos/Speedlock default timing table (revision 0) support.
+                Fix the ID field CRC of the tracks without track image, sides
+                association with side-ordered files, the 11 sectors tracks format,
+                and add bounds checks.
 
 -> Command line tool (hxcfe) : -doublestep / -singlestep now apply to the
                                flux stream loaders for the conversions (issue #31).
