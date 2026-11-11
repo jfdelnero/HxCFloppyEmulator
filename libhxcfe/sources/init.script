@@ -189,10 +189,16 @@ set FLUXSTREAM_BITRATE_FILTER_WINDOW 24              # Filter window size.
 set FLUXSTREAM_ANALYSIS_OUT_INDEX_LENGTH -1          # -1 : Auto, > 0 index length in uS
 
 #
-# Weakbits cells threshold
+# Weakbits cells threshold (0 -> disabled)
 #
 
-set FLUXSTREAM_PLL_WEAKBITS_CELLCNT_THRESHOLD 6
+set FLUXSTREAM_PLL_WEAKBITS_CELLCNT_THRESHOLD 0
+
+#
+# Inter-weakbits filling : Max cell distance between 2 weakbits
+#
+
+set FLUXSTREAM_PLL_WEAKBITS_FILLING_MAX_DISTANCE 32
 
 #
 # Victor 9000 Bands mode pll

@@ -478,6 +478,74 @@ static void quickSort(s_match * table, int start, int end)
 	quickSort(table, right+1, end);
 }
 
+void normalize_weakbits( HXCFE* floppycontext, HXCFE_SIDE* side, int weak_cells_filling_maxdistance, int weak_cell_threshold )
+{
+	int lastpulsebitoffset;
+	int i;
+	int size;
+	unsigned char *flakeytrack;
+	unsigned char *datatrack;
+
+	if( floppycontext && side )
+	{
+		// If two adjacent bits are flakey, set all in between cells flakey
+		size = side->tracklen;
+		lastpulsebitoffset = -1;
+		flakeytrack = side->flakybitsbuffer;
+		datatrack =  side->databuffer;
+
+		if(!flakeytrack)
+			return;
+
+		if( weak_cell_threshold > 0 )
+		{
+			int cellcode = 0;
+
+			for(i=0;i<size;i++)
+			{
+				if(gettrackbit(datatrack,size,i))
+				{
+					cellcode = 0;
+				}
+
+				// If bit timing is above the standard spacing, set all cells above the standard as flakey bits
+				if(cellcode > weak_cell_threshold )
+				{
+					settrackbit(flakeytrack,size,0xFF,i,1);
+				}
+
+				cellcode++;
+			}
+		}
+
+		if ( weak_cells_filling_maxdistance > 1 )
+		{
+			for(i=0;i<size;i++)
+			{
+				if(gettrackbit(flakeytrack,size,i))
+				{
+					if(lastpulsebitoffset!=-1)
+					{
+						// Take care to not set as weakbits an NFA area.
+						int dist = calcbitptrdist(size, lastpulsebitoffset, i);
+						if( dist > 1 && dist < weak_cells_filling_maxdistance )
+						{
+							settrackbit(flakeytrack,size,0xFF,lastpulsebitoffset,dist);
+						}
+
+						lastpulsebitoffset = i;
+					}
+					else
+					{
+						lastpulsebitoffset = i;
+					}
+				}
+			}
+		}
+
+	}
+}
+
 //#define USE_PLL_BITRATE 1
 
 HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initialvalue,HXCFE_TRKSTREAM * track,pulses_link * pl,uint32_t start_index, short rpm,int phasecorrection,int flags)
@@ -493,7 +561,6 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 	int bitoffset;
 	int old_bitoffset;
 	int tracksize;
-	int lastpulsebitoffset;
 
 	unsigned char *outtrack;
 	unsigned char *flakeytrack;
@@ -517,7 +584,6 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 
 	uint32_t nextindex;
 	uint32_t tickoffset;
-	int lastbitisflakey;
 	int last_idx_bitoffset;
 
 	HXCFE_SIDE* hxcfe_track;
@@ -647,7 +713,6 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 		nextindex_pos = track->index_evt_tab[i].dump_offset;
 		nextindex_pos_end = track->index_evt_tab[i].dump_offset_end;
 
-		lastbitisflakey = 0;
 		tickoffset = 0;
 		bitoffset = 0;
 		last_idx_bitoffset = -1;
@@ -663,27 +728,6 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 			else
 				cellcode = getCellTiming(&fxs->pll,value,0,pl->forward_link[start_index + i],phasecorrection);
 
-			// If bit timing is above the standard spacing, set all cells above the standard as flakey bits
-			if( fxs->weak_cell_threshold > 0)
-			{
-				if(cellcode > fxs->weak_cell_threshold )
-				{
-					if(lastbitisflakey)
-					{
-						for(j=0;j<cellcode;j++)
-						{
-							settrackbit(flakeytrack,TEMPBUFSIZE,0xFF,bitoffset+j,1);
-						}
-					}
-					else
-					{
-						for(j=fxs->weak_cell_threshold;j<cellcode;j++)
-						{
-							settrackbit(flakeytrack,TEMPBUFSIZE,0xFF,bitoffset+j,1);
-						}
-					}
-				}
-			}
 
 			bitoffset = bitoffset + cellcode;
 
@@ -708,7 +752,7 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 			else
 			{
 				// Not under an index : Go to the next index window if the previous one was passed.
-				last_idx_bitoffset = -1; 
+				last_idx_bitoffset = -1;
 				if( (start_index + i) > nextindex_pos_end )
 				{
 					nextindex++;
@@ -725,11 +769,6 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 				if( ( fxs->pll.last_error > (fxs->pll.max_pll_error_ticks * 16) ) || ( fxs->pll.last_error < -( fxs->pll.max_pll_error_ticks * 16) ) )
 				{   // flakey bits or invalid bit...
 					settrackbit(flakeytrack,TEMPBUFSIZE,0xFF,bitoffset,1);
-					lastbitisflakey = 1;
-				}
-				else
-				{
-					lastbitisflakey = 0;
 				}
 			}
 			else
@@ -737,11 +776,6 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 				if((pl->forward_link[start_index + i]<0 && pl->backward_link[start_index + i]<0) || ( ( fxs->pll.last_error > ( fxs->pll.max_pll_error_ticks *16) ) || ( fxs->pll.last_error < -( fxs->pll.max_pll_error_ticks * 16) )))
 				{   // flakey bits or invalid bit...
 					settrackbit(flakeytrack,TEMPBUFSIZE,0xFF,bitoffset,1);
-					lastbitisflakey = 1;
-				}
-				else
-				{
-					lastbitisflakey = 0;
 				}
 			}
 
@@ -796,70 +830,6 @@ HXCFE_SIDE* ScanAndDecodeStream(HXCFE* floppycontext,HXCFE_FXSA * fxs, int initi
 				}
 			};
 #endif
-		}
-
-		// If two adjacent bits are flakey, set all in between cells flakey
-		lastpulsebitoffset = -1;
-		for(i=0;i<size;i++)
-		{
-			if(gettrackbit(outtrack,TEMPBUFSIZE,i))
-			{
-				if(gettrackbit(flakeytrack,TEMPBUFSIZE,i))
-				{
-					if(lastpulsebitoffset!=-1)
-					{
-						//set loop
-						for(j=lastpulsebitoffset;j<i;j++)
-						{
-							settrackbit(flakeytrack,TEMPBUFSIZE,0xFF,j,1);
-						}
-
-						lastpulsebitoffset = i;
-					}
-					else
-					{
-						lastpulsebitoffset = i;
-					}
-				}
-				else
-				{
-					lastpulsebitoffset = -1;
-				}
-			}
-		}
-
-		// If two adjacent cells are flakey, set all in between cells flakey
-		lastpulsebitoffset = -1;
-		for(i=0;i<size;i++)
-		{
-			if(!gettrackbit(outtrack,TEMPBUFSIZE,i))
-			{
-				if(gettrackbit(flakeytrack,TEMPBUFSIZE,i))
-				{
-					if(lastpulsebitoffset!=-1)
-					{
-						//set loop
-						for(j=lastpulsebitoffset;j<i;j++)
-						{
-							settrackbit(flakeytrack,TEMPBUFSIZE,0xFF,j,1);
-						}
-
-						lastpulsebitoffset = i;
-					}
-					else
-					{
-						lastpulsebitoffset = i;
-					}
-				}
-				else
-				{
-					lastpulsebitoffset = -1;
-				}
-			}
-			else
-			{
-				lastpulsebitoffset = -1;
-			}
 		}
 
 #ifndef USE_PLL_BITRATE
@@ -3525,6 +3495,7 @@ HXCFE_FXSA * hxcfe_initFxStream(HXCFE * hxcfe)
 			fxs->analysis_rev2rev_max_pulses_jitter = DEFAULT_MAXPULSESKEW;
 			fxs->out_index_length_us = 2000;
 			fxs->weak_cell_threshold = -1;
+			fxs->weak_cells_filling_maxdistance = 32;
 
 			v = hxcfe_getEnvVarValue( hxcfe, "FLUXSTREAM_PLL_FAST_CORRECTION_RATIO_N" );
 			if(v)
@@ -3586,6 +3557,10 @@ HXCFE_FXSA * hxcfe_initFxStream(HXCFE * hxcfe)
 			v = hxcfe_getEnvVarValue( hxcfe, "FLUXSTREAM_PLL_WEAKBITS_CELLCNT_THRESHOLD" );
 			if(v)
 				fxs->weak_cell_threshold = v;
+
+			v = hxcfe_getEnvVarValue( hxcfe, "FLUXSTREAM_PLL_WEAKBITS_FILLING_MAX_DISTANCE" );
+			if(v)
+				fxs->weak_cells_filling_maxdistance = v;
 
 			fxs->sector_recovery = hxcfe_getEnvVarValue( hxcfe, "FLUXSTREAM_SECTORS_RECOVERY" );
 
@@ -4710,7 +4685,10 @@ HXCFE_SIDE * hxcfe_FxStream_AnalyzeAndGetTrack(HXCFE_FXSA * fxs,HXCFE_TRKSTREAM 
 				}
 
 				if( currentside )
+				{
+					normalize_weakbits( fxs->hxcfe, currentside, fxs->weak_cells_filling_maxdistance, fxs->weak_cell_threshold);
 					hxcfe_shiftTrackData( fxs->hxcfe, currentside, us2index(0,currentside,(uint32_t)((std->index_evt_tab[hxcfe_FxStream_GetRevolutionIndex( fxs, std, revolution )].tick_offset)*(double)((double)1000000/(double)fxs->pll.tick_freq))& (~0x00000007),0,0) );
+				}
 
 				for(revolution = 0; revolution < nb_of_revolutions; revolution++)
 				{

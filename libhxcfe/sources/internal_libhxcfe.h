@@ -201,6 +201,7 @@ typedef struct _HXCFE_FXSA
 	int     out_index_length_us;
 
 	int     weak_cell_threshold;
+	int     weak_cells_filling_maxdistance;
 
 	int32_t sector_recovery;
 }HXCFE_FXSA;
