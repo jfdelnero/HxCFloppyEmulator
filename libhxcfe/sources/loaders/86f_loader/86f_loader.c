@@ -269,7 +269,9 @@ static HXCFE_SIDE * f86_build_side(HXCFE_IMGLDR * imgldr_ctx, f86_trkinfo_t * tr
 	HXCFE_SIDE * side;
 	int32_t bitrate,rpm;
 	uint32_t j,k,o,hxc_cells,step;
-	int is_fm,data_bit,surface_bit;
+	int is_fm,data_bit,surface_bit,last_data_bit;
+
+	last_data_bit = 0;
 
 	is_fm = ( F86_TRKFLAG_GET_ENC(trk->flags) == F86_TRK_ENC_FM );
 
@@ -285,16 +287,16 @@ static HXCFE_SIDE * f86_build_side(HXCFE_IMGLDR * imgldr_ctx, f86_trkinfo_t * tr
 	if( !side )
 		return NULL;
 
+	data_bit = 0;
+
 	// Rotate the track : the index hole position becomes the first bit cell.
 	k = trk->index_position % trk->nb_of_cells;
 	for( j = 0; j < trk->nb_of_cells; j++ )
 	{
 		o = ( j * step ) + ( step - 1 );
 
+		last_data_bit = data_bit;
 		data_bit = f86_get_bit( trk->data, k, reversed );
-
-		if( data_bit )
-			side->databuffer[o>>3] |= ( 0x80 >> (o & 7) );
 
 		if( trk->surface )
 		{
@@ -303,8 +305,13 @@ static HXCFE_SIDE * f86_build_side(HXCFE_IMGLDR * imgldr_ctx, f86_trkinfo_t * tr
 			{
 				// Weak bit (data bit = 1) or hole (data bit = 0) : noise on read.
 				side->flakybitsbuffer[o>>3] |= ( 0x80 >> (o & 7) );
+				if( last_data_bit & data_bit )
+					data_bit = 0;
 			}
 		}
+
+		if( data_bit )
+			side->databuffer[o>>3] |= ( 0x80 >> (o & 7) );
 
 		k++;
 		if( k >= trk->nb_of_cells )
