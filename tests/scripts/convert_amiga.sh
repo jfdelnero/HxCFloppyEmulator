@@ -8,6 +8,8 @@ rm *_T.ADF
 ./hxcfe -finput:$1 -foutput:I006.SCP -conv:SCP_FLUX_STREAM
 ./hxcfe -finput:$1 -foutput:I007.HFE -conv:HXC_STREAMHFE
 ./hxcfe -finput:$1 -foutput:I008.MFM -conv:HXCMFM_IMG
+./hxcfe -finput:$1 -foutput:I009.IPF -conv:SPS_IPF
+
 #./hxcfe -finput:$1 -foutput:I009.XML -conv:GENERIC_XML
 
 ./hxcfe -finput:I001.ADF -foutput:I001_T.ADF -conv:RAW_LOADER
@@ -18,7 +20,7 @@ rm *_T.ADF
 ./hxcfe -finput:I006.SCP -foutput:I006_T.ADF -conv:RAW_LOADER
 ./hxcfe -finput:I007.HFE -foutput:I007_T.ADF -conv:RAW_LOADER
 ./hxcfe -finput:I008.MFM -foutput:I008_T.ADF -conv:RAW_LOADER
-#./hxcfe -finput:I009.XML -foutput:I009_T.ADF -conv:RAW_LOADER
+./hxcfe -finput:I009.IPF -foutput:I009_T.ADF -conv:RAW_LOADER
 
 echo > convert_amiga_res.txt
 echo > convert2_amiga_res.txt
@@ -37,7 +39,7 @@ export success_cnt2=`cat convert2_amiga_res.txt | grep ": OK" | wc -l`
 export total_success=$(echo $(( $success_cnt + $success_cnt2 )))
 echo Convert success count : $total_success
 
-if [ "$total_success" -ne "9" ]
+if [ "$total_success" -ne "10" ]
 then
 	echo "CONVERT $1 : FAILED" >> tests_results.txt
   echo "One or more tests have failed !";
