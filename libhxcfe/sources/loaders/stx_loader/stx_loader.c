@@ -608,6 +608,8 @@ static HXCFE_SIDE * load_track_record(HXCFE* hxcfe, unsigned char * rec, uint32_
 	unsigned char * timing_ptr;
 	unsigned char * timing_end;
 	unsigned char * ptr;
+	pasti_sector * sect_ptr;
+	pasti_trackheader * track_ptr;
 #ifdef PASTI_DBG
 	char tempstring[512];
 	int debug_i;
@@ -619,14 +621,16 @@ static HXCFE_SIDE * load_track_record(HXCFE* hxcfe, unsigned char * rec, uint32_
 	image_size = 0;
 	sync_offset = 0;
 
-	fuzzy_size = get32le(&rec[4]);
-	nb_sectors = get16le(&rec[8]);
-	flags      = get16le(&rec[10]);
-	tracknum   = rec[14] & 0x7F;
-	sidenum    = rec[14] >> 7;
+	track_ptr = (pasti_trackheader *)rec;
+
+	fuzzy_size = get32le((unsigned char*)&track_ptr->flakey_mask_size);
+	nb_sectors = get16le((unsigned char*)&track_ptr->numberofsector);
+	flags      = get16le((unsigned char*)&track_ptr->flags);
+	tracknum   = track_ptr->track_code & 0x7F;
+	sidenum    = track_ptr->track_code >> 7;
 
 	hxcfe->hxc_printf(MSG_DEBUG,"STX : Track %.2d Side %d - Record size : %d, Sectors : %d, Flags : 0x%.4X, Track length : %d, Fuzzy size : %d, Type : 0x%.2X",
-							tracknum, sidenum, rec_size, nb_sectors, flags, get16le(&rec[12]), fuzzy_size, rec[15]);
+							tracknum, sidenum, rec_size, nb_sectors, flags, get16le((unsigned char*)&track_ptr->track_size), fuzzy_size, track_ptr->track_type);
 
 	if( nb_sectors )
 	{
@@ -712,16 +716,17 @@ static HXCFE_SIDE * load_track_record(HXCFE* hxcfe, unsigned char * rec, uint32_
 
 	for( j = 0 ; j < nb_sectors ; j++ )
 	{
-		sectors[j].desc.sector_pos          = get32le(&ptr[0]);
-		sectors[j].desc.sector_pos_timing   = get16le(&ptr[4]);
-		sectors[j].desc.sector_speed_timing = get16le(&ptr[6]);
-		sectors[j].desc.track_num   = ptr[8];
-		sectors[j].desc.side_num    = ptr[9];
-		sectors[j].desc.sector_num  = ptr[10];
-		sectors[j].desc.sector_size = ptr[11];
-		sectors[j].desc.header_crc  = (uint16_t)( ptr[12] | (ptr[13] << 8) ); // Stored high byte first.
-		sectors[j].desc.FDC_status  = ptr[14];
-		sectors[j].desc.sector_flags= ptr[15];
+		sect_ptr = (pasti_sector*)ptr;
+		sectors[j].desc.sector_pos          = get32le((unsigned char *)&(sect_ptr->sector_pos));
+		sectors[j].desc.sector_pos_timing   = get16le((unsigned char *)&(sect_ptr->sector_pos_timing));
+		sectors[j].desc.sector_speed_timing = get16le((unsigned char *)&(sect_ptr->sector_speed_timing));
+		sectors[j].desc.track_num   = sect_ptr->track_num;
+		sectors[j].desc.side_num    = sect_ptr->side_num;
+		sectors[j].desc.sector_num  = sect_ptr->sector_num;
+		sectors[j].desc.sector_size = sect_ptr->sector_size;
+		sectors[j].desc.header_crc  = get16le((unsigned char *)&(sect_ptr->header_crc));
+		sectors[j].desc.FDC_status  = sect_ptr->FDC_status;
+		sectors[j].desc.sector_flags= sect_ptr->sector_flags;
 		sectors[j].keep_header_crc = 1;
 		ptr += sizeof(pasti_sector);
 
@@ -833,7 +838,9 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 	int tracknumber, sidenumber;
 	int numberoftrack, numberoftrackperside, numberofside;
 	int revision;
-	unsigned char fileheader[sizeof(pasti_fileheader)];
+	pasti_fileheader fileheader;
+
+//  unsigned char fileheader[sizeof(pasti_fileheader)];
 	unsigned char trackheader[sizeof(pasti_trackheader)];
 	unsigned char * record;
 	uint32_t record_size;
@@ -853,24 +860,28 @@ int STX_libLoad_DiskFile(HXCFE_IMGLDR * imgldr_ctx,HXCFE_FLOPPY * floppydisk,cha
 
 	filesize = hxc_fgetsize(f);
 
-	memset(fileheader, 0, sizeof(fileheader));
-	hxc_fread( fileheader, sizeof(fileheader), f );
+	memset((char*)&fileheader, 0, sizeof(pasti_fileheader));
+	if( hxc_fread( (char*)&fileheader, sizeof(pasti_fileheader), f ) != 1 )
+	{
+		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"STX/pasti header access error");
+		return HXCFE_BADFILE;
+	}
 
-	if( memcmp(fileheader, "RSY\0", 4) )
+	if( memcmp((char*)&fileheader.headertag, "RSY\0", 4) )
 	{
 		hxc_fclose(f);
 		imgldr_ctx->hxcfe->hxc_printf(MSG_ERROR,"non STX/pasti image (bad header)");
 		return HXCFE_BADFILE;
 	}
 
-	if( get16le(&fileheader[4]) != PASTI_FILE_VERSION )
-		imgldr_ctx->hxcfe->hxc_printf(MSG_WARNING,"STX : Unsupported file version (%d) !",get16le(&fileheader[4]));
+	if( get16le((unsigned char *)&fileheader.version) != PASTI_FILE_VERSION )
+		imgldr_ctx->hxcfe->hxc_printf(MSG_WARNING,"STX : Unsupported file version (%d) !",get16le((unsigned char *)&fileheader.version));
 
-	numberoftrack = fileheader[10];
-	revision = fileheader[11];
+	numberoftrack = fileheader.number_of_track;
+	revision = fileheader.revision;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_DEBUG,"STX : Version : %d, Tool : 0x%.4X, Track records : %d, Revision : 0x%.2X",
-						get16le(&fileheader[4]), get16le(&fileheader[6]), numberoftrack, revision);
+						get16le((unsigned char *)&fileheader.version), get16le((unsigned char *)&fileheader.tool), numberoftrack, revision);
 
 	// First pass : Count the tracks and sides
 	presenceside[0] = 0;

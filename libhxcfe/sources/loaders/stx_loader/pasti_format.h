@@ -29,14 +29,13 @@
 typedef struct pasti_fileheader_
 {
  uint8_t   headertag[4]; // "RSY\0"
- uint16_t  codeversion1;
- uint16_t  codeversion2;
- uint16_t  unused1;
+ uint16_t  version;
+ uint16_t  tool;
+ uint16_t  reserved_1;
  uint8_t   number_of_track; //valide si <= 0xA8
- uint8_t   unknowvalue;
- uint32_t  unused2;
+ uint8_t   revision;
+ uint32_t  reserved_2;
 }pasti_fileheader;
-
 
 typedef struct pasti_trackheader_
 {
@@ -46,8 +45,7 @@ typedef struct pasti_trackheader_
  uint16_t  flags;
  uint16_t  track_size;
  uint8_t   track_code;
- uint8_t   unused2;
-
+ uint8_t   track_type; // Not used ?
 }pasti_trackheader;
 
 typedef struct pasti_sector_
