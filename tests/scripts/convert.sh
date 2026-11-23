@@ -18,6 +18,11 @@ rm *_T.IMG
 ./hxcfe -finput:$1 -foutput:I016.D88 -conv:NEC_D88
 ./hxcfe -finput:$1 -foutput:I017.MFM -conv:HXCMFM_IMG
 ./hxcfe -finput:$1 -foutput:I018.MSA -conv:ATARIST_MSA
+./hxcfe -finput:$1 -foutput:I019.IPF -conv:SPS_IPF
+./hxcfe -finput:$1 -foutput:I020.A2R -conv:A2R_FLUX_STREAM
+./hxcfe -finput:$1 -foutput:I021.86F -conv:PC_86F
+./hxcfe -finput:$1 -foutput:I022.MFI -conv:MAME_MFI
+
 #./hxcfe -finput:$1 -foutput:I019.DIM -conv:ATARIST_DIM
 #./hxcfe -finput:$1 -foutput:I020.TRD -conv:ZXSPECTRUM_TRD
 
@@ -40,8 +45,10 @@ rm *_T.IMG
 ./hxcfe -finput:I016.D88 -foutput:I016_T.IMG -conv:RAW_LOADER
 ./hxcfe -finput:I017.MFM -foutput:I017_T.IMG -conv:RAW_LOADER
 ./hxcfe -finput:I018.MSA -foutput:I018_T.IMG -conv:RAW_LOADER
-#./hxcfe -finput:I019.DIM -foutput:I019_T.IMG -conv:RAW_LOADER
-#./hxcfe -finput:I020.TRD -foutput:I020_T.IMG -conv:RAW_LOADER
+./hxcfe -finput:I019.IPF -foutput:I019_T.IMG -conv:RAW_LOADER
+./hxcfe -finput:I020.A2R -foutput:I020_T.IMG -conv:RAW_LOADER
+./hxcfe -finput:I021.86F -foutput:I021_T.IMG -conv:RAW_LOADER
+./hxcfe -finput:I022.MFI -foutput:I022_T.IMG -conv:RAW_LOADER
 
 echo > convert_res.txt
 echo > convert2_res.txt
@@ -84,7 +91,7 @@ export success_cnt2=`cat convert2_res.txt | grep ": OK" | wc -l`
 export total_success=$(echo $(( $success_cnt + $success_cnt2 )))
 echo Convert success count : $total_success
 
-if [ "$total_success" -ne "27" ]
+if [ "$total_success" -ne "31" ]
 then
 	echo "CONVERT $1 : FAILED" >> tests_results.txt
   echo "One or more tests have failed !";
