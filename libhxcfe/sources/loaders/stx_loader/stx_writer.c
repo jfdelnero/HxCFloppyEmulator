@@ -509,6 +509,8 @@ static int write_track_record(HXCFE_IMGLDR* imgldr_ctx, HXCFE_FLOPPY * floppy, H
 	int * cells_map;
 	int * bytes_pos;
 	int nb_cells;
+	pasti_trackheader * trkh;
+	pasti_sector      * secth;
 
 	hxcfe = imgldr_ctx->hxcfe;
 
@@ -682,30 +684,32 @@ static int write_track_record(HXCFE_IMGLDR* imgldr_ctx, HXCFE_FLOPPY * floppy, H
 		flags |= PASTI_TRK_IMAGE;
 
 	// Track descriptor
+
 	ptr = record;
-	put32le(&ptr[0], record_size);
-	put32le(&ptr[4], fuzzy_size);
-	put16le(&ptr[8], (unsigned short)nb_sectors);
-	put16le(&ptr[10], flags);
-	put16le(&ptr[12], (unsigned short)track_length);
-	ptr[14] = (unsigned char)( ((side & 1) << 7) | (track & 0x7F) );
-	ptr[15] = 0x00;
+	trkh = (pasti_trackheader *)ptr;
+	put32le((unsigned char*)&trkh->track_block_size, record_size);
+	put32le((unsigned char*)&trkh->flakey_mask_size, fuzzy_size);
+	put16le((unsigned char*)&trkh->numberofsector, (unsigned short)nb_sectors);
+	put16le((unsigned char*)&trkh->flags, flags);
+	put16le((unsigned char*)&trkh->track_size, (unsigned short)track_length);
+	trkh->track_code = (unsigned char)( ((side & 1) << 7) | (track & 0x7F) );
+	trkh->track_type = 0x00;
 	ptr += sizeof(pasti_trackheader);
 
 	// Sector descriptors
 	for( i = 0 ; i < nb_sectors ; i++ )
 	{
-		put32le(&ptr[0], ws[i].data ? ws[i].data_offset : 0);
-		put16le(&ptr[4], ws[i].desc.sector_pos_timing);
-		put16le(&ptr[6], ws[i].desc.sector_speed_timing);
-		ptr[8]  = ws[i].desc.track_num;
-		ptr[9]  = ws[i].desc.side_num;
-		ptr[10] = ws[i].desc.sector_num;
-		ptr[11] = ws[i].desc.sector_size;
-		ptr[12] = ws[i].desc.header_crc & 0xFF;        // CRC high byte
-		ptr[13] = (ws[i].desc.header_crc >> 8) & 0xFF; // CRC low byte
-		ptr[14] = ws[i].desc.FDC_status;
-		ptr[15] = ws[i].desc.sector_flags;
+		secth = (pasti_sector*)ptr;
+		put32le((unsigned char*)&secth->sector_pos, ws[i].data ? ws[i].data_offset : 0);
+		put16le((unsigned char*)&secth->sector_pos_timing, ws[i].desc.sector_pos_timing);
+		put16le((unsigned char*)&secth->sector_speed_timing, ws[i].desc.sector_speed_timing);
+		secth->track_num = ws[i].desc.track_num;
+		secth->side_num = ws[i].desc.side_num;
+		secth->sector_num = ws[i].desc.sector_num;
+		secth->sector_size = ws[i].desc.sector_size;
+		put16le((unsigned char*)&secth->header_crc, ws[i].desc.header_crc); // CRC
+		secth->FDC_status = ws[i].desc.FDC_status;
+		secth->sector_flags = ws[i].desc.sector_flags;
 		ptr += sizeof(pasti_sector);
 	}
 
@@ -825,7 +829,7 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 	int number_of_track;
 	int track_image;
 	int variable_timing_threshold;
-	unsigned char header[sizeof(pasti_fileheader)];
+	pasti_fileheader stxh;
 
 	imgldr_ctx->hxcfe->hxc_printf(MSG_INFO_1,"Write STX file %s...",filename);
 
@@ -854,17 +858,12 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 		number_of_track = STX_MAX_TRACK_RECORDS / number_of_side;
 
 	// File descriptor
-	memset(header, 0, sizeof(header));
-	header[0] = 'R';
-	header[1] = 'S';
-	header[2] = 'Y';
-	header[3] = 0;
-	put16le(&header[4], PASTI_FILE_VERSION);           // Version
-	put16le(&header[6], 0x0001);                       // Imaging tool
-	put16le(&header[8], 0x0000);                       // Reserved
-	header[10] = (unsigned char)(number_of_track * number_of_side); // Number of track records
-	header[11] = PASTI_FILE_REVISION_NEW;              // Revision
-	put32le(&header[12], 0x00000000);                  // Reserved
+	memset((unsigned char *)&stxh, 0, sizeof(pasti_fileheader));
+	memcpy(&stxh.headertag,"RSY",4);                                          // Signature
+	put16le((unsigned char *)&stxh.version, PASTI_FILE_VERSION);              // Version
+	put16le((unsigned char *)&stxh.tool, 0x0001);                             // Imaging tool
+	stxh.number_of_track = (unsigned char)(number_of_track * number_of_side); // Number of track records
+	stxh.revision = PASTI_FILE_REVISION_NEW;                                  // Revision
 
 	stxdskfile = hxc_fopen(filename,"wb");
 	if( !stxdskfile )
@@ -875,7 +874,7 @@ int STX_libWrite_DiskFile(HXCFE_IMGLDR* imgldr_ctx,HXCFE_FLOPPY * floppy,char * 
 
 	ret = HXCFE_NOERROR;
 
-	if( fwrite(header, sizeof(header), 1, stxdskfile) != 1 )
+	if( fwrite(&stxh, sizeof(pasti_fileheader), 1, stxdskfile) != 1 )
 		ret = HXCFE_ACCESSERROR;
 
 	for( i = 0 ; i < number_of_track && ret == HXCFE_NOERROR ; i++ )
