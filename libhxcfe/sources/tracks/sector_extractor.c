@@ -227,6 +227,16 @@ HXCFE_SECTCFG* hxcfe_getNextSector( HXCFE_SECTORACCESS* ss_ctx, int32_t track, i
 		break;
 		case NORTHSTAR_HS_MFM_ENCODING:
 			bitoffset = get_next_MFM_Northstar_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
+
+			if( ( sc->cylinder >> 2 ) != (track & 3) )
+			{
+				ss_ctx->hxcfe->hxc_printf(MSG_WARNING,"Northstar cylinder id not matching with the physical position (Cyl ID:%d - %d)",sc->cylinder,track);
+			}
+			else
+			{
+				sc->cylinder = track; // Workaround : Northstar sectors don't store a complete track id - force it to the physical track position.
+			}
+
 		break;
 		case HEATHKIT_HS_FM_ENCODING:
 			bitoffset = get_next_FM_Heathkit_sector(ss_ctx->hxcfe,ss_ctx->fp->tracks[track]->sides[side],sc,bitoffset);
