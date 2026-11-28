@@ -137,6 +137,21 @@ AI Assisted modifications :
                                New -hfedoublestep option to set the HFE files
                                double step flag.
 
+-> New file system manager : Amstrad CPC AMSDOS file system support (fs_cpc).
+    - DATA (178KB) and SYSTEM (169KB) disk formats auto-detection.
+    - Browse, read, write and delete files.
+    - CP/M user areas 1-15 available as virtual "USERx" folders.
+
+-> New loader : Amstrad CPC AMSDOS file system loader (*.cpcfs / *.cpcsysfs folders).
+    Create an AMSDOS DATA (*.cpcfs) or SYSTEM (*.cpcsysfs) virtual disk
+    with the files present in the host folder ("USERx" sub folders files
+    are added to the user area x).
+
+-> Disk browser / File system generator : Amstrad CPC AMSDOS DATA and SYSTEM
+   formats added.
+
+-> File system manager : Fix a memory leak at the file system manager deinit.
+
 *********************************************************/
 
 /*********************************************************

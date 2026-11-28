@@ -118,7 +118,7 @@ MINIZIPOBJ = ioapi.o mztools.o unzip.o zip.o
 
 FATIOLIB = fat_access.o fat_cache.o fat_filelib.o fat_format.o fat_misc.o fat_string.o fat_table.o fat_write.o fat_list.o
 
-DISKLOADERPLUGINS = raw_amiga.o raw_iso.o copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosfs_loader.o vfile.o cpcdsk_loader.o \
+DISKLOADERPLUGINS = raw_amiga.o raw_iso.o copyqm_loader.o crctable.o adf_loader.o adz_loader.o amigadosfs_loader.o cpcfs_loader.o vfile.o cpcdsk_loader.o \
 					msa_loader.o msx_loader.o smc_loader.o st_loader.o stx_loader.o img_loader.o dms_loader.o mfm_loader.o \
 					oricdsk_loader.o d64_loader.o trd_loader.o scl_loader.o fat12floppy_loader.o fat12.o \
 					hfe_loader.o imd_loader.o afi_loader.o sap_loader.o libsap.o jv1_loader.o vtr_loader.o d88_loader.o hdm_loader.o \
@@ -147,7 +147,7 @@ TRACK_FORMATS_SUPPORT = luts.o track_types_defs.o aed6200p_track.o amiga_mfm_tra
 
 ENCODING_SUPPORT = fm_encoding.o mfm_encoding.o dec_m2fm_encoding.o
 
-FS_SUPPORT = fs_manager.o fs_manager_list.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o
+FS_SUPPORT = fs_manager.o fs_manager_list.o fs_amigados.o fs_fat12.o fs_cpm.o libcpmfs.o fs_cpc.o
 
 XML_DISK = xml_disk.o lzw.o pack.o rle.o
 XML_PARSER_EXPAT = xmlparse.o xmlrole.o xmltok.o
@@ -311,6 +311,9 @@ fs_cpm.o : $(BASEDIR)/fs_manager/fs_cpm/fs_cpm.c $(BASEDIR)/fs_manager/fs_cpm/fs
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 libcpmfs.o : $(BASEDIR)/fs_manager/fs_cpm/libcpmfs/libcpmfs.c $(BASEDIR)/fs_manager/fs_cpm/libcpmfs/libcpmfs.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+fs_cpc.o : $(BASEDIR)/fs_manager/fs_cpc/fs_cpc.c $(BASEDIR)/fs_manager/fs_cpc/fs_cpc.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 crc.o: $(BASEDIR)/tracks/crc.c $(BASEDIR)/tracks/crc.h
@@ -631,6 +634,9 @@ afi_writer.o : $(BASEDIR)/loaders/afi_loader/afi_writer.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 amigadosfs_loader.o : $(BASEDIR)/loaders/amigadosfs_loader/amigadosfs_loader.c $(BASEDIR)/loaders/amigadosfs_loader/amigadosfs_loader.h
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+cpcfs_loader.o : $(BASEDIR)/loaders/cpcfs_loader/cpcfs_loader.c $(BASEDIR)/loaders/cpcfs_loader/cpcfs_loader.h
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 dms_loader.o : $(BASEDIR)/loaders/dms_loader/dms_loader.c $(BASEDIR)/loaders/dms_loader/dms_loader.h

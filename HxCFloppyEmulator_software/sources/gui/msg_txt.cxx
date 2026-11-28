@@ -248,6 +248,9 @@ Fl_Menu_Item fs_choices[]=
 	{ "3\"5        880KB DSDD AmigaDOS",0,fs_choice_cb,(void*)FS_880KB_AMIGADOS},
 	{ "3\"5        1760KB DSHD AmigaDOS",0,fs_choice_cb,(void*)FS_1760KB_AMIGADOS},
 
+	{ "3\"         178KB SSDD Amstrad CPC AMSDOS",0,fs_choice_cb,(void*)FS_CPC_AMSDOS},
+	{ "3\"         169KB SSDD Amstrad CPC AMSDOS (System)",0,fs_choice_cb,(void*)FS_CPC_AMSDOS_SYSTEM},
+
 	{0}
 };
 
