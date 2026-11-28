@@ -2368,6 +2368,8 @@ HXCFE_FLOPPY * hxcfe_generateFloppy( HXCFE* floppycontext, char* path, int32_t f
 	{
 		if( fsID == FS_880KB_AMIGADOS || fsID == FS_1760KB_AMIGADOS )
 			moduleID = hxcfe_imgGetLoaderID (imgldr_ctx,PLUGIN_AMIGA_FS);
+		else if( fsID == FS_CPC_AMSDOS || fsID == FS_CPC_AMSDOS_SYSTEM )
+			moduleID = hxcfe_imgGetLoaderID (imgldr_ctx,PLUGIN_CPC_FS);
 		else
 			moduleID = hxcfe_imgGetLoaderID (imgldr_ctx,PLUGIN_FAT12FLOPPY);
 

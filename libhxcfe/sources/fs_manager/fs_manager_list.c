@@ -43,12 +43,14 @@
 #include "fs_fat12/fs_fat12.h"
 #include "fs_amigados/fs_amigados.h"
 #include "fs_cpm/fs_cpm.h"
+#include "fs_cpc/fs_cpc.h"
 
 const fn_fsmng_getplugininfos staticfsplugins[]=
 {
 	(fn_fsmng_getplugininfos)fat12_libGetPluginInfo,
 	(fn_fsmng_getplugininfos)amigados_libGetPluginInfo,
 	(fn_fsmng_getplugininfos)cpm_libGetPluginInfo,
+	(fn_fsmng_getplugininfos)cpc_libGetPluginInfo,
 	0
 };
 

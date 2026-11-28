@@ -21,6 +21,7 @@
 #define PLUGIN_ROLAND_W30           "ROLAND_W30"
 #define PLUGIN_TI994A_V9T9          "TI994A_V9T9"
 #define PLUGIN_AMIGA_FS             "AMIGA_FS"
+#define PLUGIN_CPC_FS               "CPC_FS"
 #define PLUGIN_PROPHET2000          "PROPHET2000"
 #define PLUGIN_RAW_IMG              "RAW_IMG"
 #define PLUGIN_RAW_LOADER           "RAW_LOADER"

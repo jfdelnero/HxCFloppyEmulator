@@ -60,6 +60,7 @@
 #include "fs_fat12/fs_fat12.h"
 #include "fs_amigados/fs_amigados.h"
 #include "fs_cpm/fs_cpm.h"
+#include "fs_cpc/fs_cpc.h"
 
 fs_config fs_config_table[]=
 {
@@ -119,6 +120,9 @@ fs_config fs_config_table[]=
 	{"fat6789",     "3\"5        6.78MB DSHD FAT12",FS_6_78MB_MSDOS_FAT12,0,                          (fn_fsmng_getplugininfos)fat12_libGetPluginInfo},
 	{"fatbig",      "",FS_16MB_MSDOS_FAT12,0,                                                         (fn_fsmng_getplugininfos)fat12_libGetPluginInfo},
 	{"fat4572",     "3\"5        4.50MB DSHD FAT12",FS_4_50MB_MSDOS_FAT12,0,                          (fn_fsmng_getplugininfos)fat12_libGetPluginInfo},
+
+	{"amsdos",      "3\"         178KB SSDD Amstrad CPC AMSDOS",FS_CPC_AMSDOS,0,                     (fn_fsmng_getplugininfos)cpc_libGetPluginInfo},
+	{"amsdossys",   "3\"         169KB SSDD Amstrad CPC AMSDOS (System)",FS_CPC_AMSDOS_SYSTEM,0,     (fn_fsmng_getplugininfos)cpc_libGetPluginInfo},
 
 	{0,0,0,0, NULL}
 };
@@ -287,6 +291,7 @@ void hxcfe_deinitFsManager(HXCFE_FSMNG * fsmng)
 {
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_deinitFsManager");
 
+	free(fsmng->fn);
 	free(fsmng);
 }
 
@@ -294,7 +299,7 @@ int32_t hxcfe_mountImage(HXCFE_FSMNG * fsmng, HXCFE_FLOPPY *floppy)
 {
 	int i;
 	int32_t ret;
-	int fs_list[]={FS_720KB_MSDOS_FAT12,FS_880KB_AMIGADOS,FS_1760KB_AMIGADOS, -1};
+	int fs_list[]={FS_720KB_MSDOS_FAT12,FS_880KB_AMIGADOS,FS_1760KB_AMIGADOS,FS_CPC_AMSDOS, -1};
 
 	fsmng->hxcfe->hxc_printf(MSG_DEBUG,"hxcfe_mountImage");
 

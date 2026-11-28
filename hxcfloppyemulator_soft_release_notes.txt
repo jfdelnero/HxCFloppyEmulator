@@ -17,6 +17,21 @@ Sources  : https://github.com/jfdelnero/HxCFloppyEmulator
 /*********************************************************
 XX XXXX 2026 : HxCFloppyEmulator beta version (v2.18.2.1)
 
+-> New file system manager : Amstrad CPC AMSDOS file system support (fs_cpc).
+    - DATA (178KB) and SYSTEM (169KB) disk formats auto-detection.
+    - Browse, read, write and delete files.
+    - CP/M user areas 1-15 available as virtual "USERx" folders.
+
+-> New loader : Amstrad CPC AMSDOS file system loader (*.cpcfs / *.cpcsysfs folders).
+    Create an AMSDOS DATA (*.cpcfs) or SYSTEM (*.cpcsysfs) virtual disk
+    with the files present in the host folder ("USERx" sub folders files
+    are added to the user area x).
+
+-> Disk browser / File system generator : Amstrad CPC AMSDOS DATA and SYSTEM
+   formats added.
+
+-> File system manager : Fix a memory leak at the file system manager deinit.
+
 -> New loader/writer : H17Disk Heathkit H17 Hard-sectored Disk Image (*.h17)
 
 -> Oric DSK Loader : Set the tracks size to the 6400 bytes default value
