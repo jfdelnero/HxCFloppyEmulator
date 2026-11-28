@@ -39,6 +39,7 @@
 // Contains: Amstrad CPC (AMSDOS) File system manager functions
 //
 // Written by: Jean-François DEL NERO
+// Assisted-by: Claude Opus 5.5
 //
 // Change History (most recent first):
 ///////////////////////////////////////////////////////////////////////////////////
